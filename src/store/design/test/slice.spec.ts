@@ -1,0 +1,179 @@
+// store
+import slice, {
+  addNode,
+  setActiveTool,
+  setSelection,
+  setViewport,
+  startTextEdit,
+  stopTextEdit,
+  updateNode,
+  updateTextEditContent,
+} from '../slice';
+
+// types
+import { NodeType, ToolName } from 'types/design/enums';
+import { TFrameNode } from 'types/design/types';
+
+const frameNodePayload: Omit<TFrameNode, 'id'> = {
+  fill: '#ff0000',
+  height: 100,
+  name: 'Frame 1',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.frame,
+  width: 200,
+  x: 0,
+  y: 0,
+};
+
+describe('design slice', () => {
+  it('should return the initial state', () => {
+    // result
+    expect(slice(undefined, { type: 'unknown' })).toEqual({
+      activeTool: ToolName.default,
+      editingTextBox: null,
+      editingTextContent: '',
+      lastMouseTool: ToolName.default,
+      lastShapeTool: ToolName.rectangle,
+      nodes: {},
+      rootOrder: [],
+      selectedIds: [],
+      viewport: { x: 0, y: 0, zoom: 1 },
+    });
+  });
+
+  it('should set the active tool', () => {
+    // before
+    const state = slice(undefined, setActiveTool(ToolName.frame));
+
+    // result
+    expect(state.activeTool).toBe(ToolName.frame);
+  });
+
+  it('should remember the last shape tool when switching to a shape tool', () => {
+    // before
+    const state = slice(undefined, setActiveTool(ToolName.ellipse));
+
+    // result
+    expect(state.lastShapeTool).toBe(ToolName.ellipse);
+  });
+
+  it('should keep the last shape tool when switching to a non-shape tool', () => {
+    // before
+    const withEllipse = slice(undefined, setActiveTool(ToolName.ellipse));
+
+    // action
+    const state = slice(withEllipse, setActiveTool(ToolName.default));
+
+    // result
+    expect(state.lastShapeTool).toBe(ToolName.ellipse);
+  });
+
+  it('should remember the last mouse tool when switching to the hand tool', () => {
+    // before
+    const state = slice(undefined, setActiveTool(ToolName.hand));
+
+    // result
+    expect(state.lastMouseTool).toBe(ToolName.hand);
+  });
+
+  it('should keep the last mouse tool when switching to a non-mouse tool', () => {
+    // before
+    const withHand = slice(undefined, setActiveTool(ToolName.hand));
+
+    // action
+    const state = slice(withHand, setActiveTool(ToolName.frame));
+
+    // result
+    expect(state.lastMouseTool).toBe(ToolName.hand);
+  });
+
+  it('should add a node with a generated id', () => {
+    // before
+    const state = slice(undefined, addNode(frameNodePayload));
+    const [id] = state.rootOrder;
+
+    // result
+    expect(state.rootOrder).toHaveLength(1);
+    expect(state.nodes[id]).toEqual({ ...frameNodePayload, id });
+  });
+
+  it('should update an existing node', () => {
+    // before
+    const withNode = slice(undefined, addNode(frameNodePayload));
+    const [id] = withNode.rootOrder;
+
+    // action
+    const state = slice(withNode, updateNode({ changes: { width: 300 }, id }));
+
+    // result
+    expect((state.nodes[id] as TFrameNode).width).toBe(300);
+  });
+
+  it('should do nothing when updating a node that does not exist', () => {
+    // before
+    const state = slice(undefined, updateNode({ changes: { width: 300 }, id: 'missing' }));
+
+    // result
+    expect(state.nodes).toEqual({});
+  });
+
+  it('should set the viewport', () => {
+    // before
+    const state = slice(undefined, setViewport({ x: 10, y: 20, zoom: 2 }));
+
+    // result
+    expect(state.viewport).toEqual({ x: 10, y: 20, zoom: 2 });
+  });
+
+  it('should set the selection', () => {
+    // before
+    const state = slice(undefined, setSelection(['a', 'b']));
+
+    // result
+    expect(state.selectedIds).toEqual(['a', 'b']);
+  });
+
+  it('should start editing a text box', () => {
+    // before
+    const state = slice(undefined, startTextEdit({ height: 20, width: 100, x: 10, y: 10 }));
+
+    // result
+    expect(state.editingTextBox).toEqual({ height: 20, width: 100, x: 10, y: 10 });
+  });
+
+  it('should reset the editing content when starting to edit a text box', () => {
+    // before
+    const withContent = slice(undefined, startTextEdit({ height: 20, width: 100, x: 10, y: 10 }));
+    const typed = slice(withContent, updateTextEditContent('hello'));
+
+    // action
+    const state = slice(typed, startTextEdit({ height: 30, width: 200, x: 0, y: 0 }));
+
+    // result
+    expect(state.editingTextContent).toBe('');
+  });
+
+  it('should stop editing a text box', () => {
+    // before
+    const editing = slice(undefined, startTextEdit({ height: 20, width: 100, x: 10, y: 10 }));
+
+    // action
+    const state = slice(editing, stopTextEdit());
+
+    // result
+    expect(state.editingTextBox).toBeNull();
+    expect(state.editingTextContent).toBe('');
+  });
+
+  it('should update the live text edit content', () => {
+    // before
+    const editing = slice(undefined, startTextEdit({ height: 20, width: 100, x: 10, y: 10 }));
+
+    // action
+    const state = slice(editing, updateTextEditContent('hello'));
+
+    // result
+    expect(state.editingTextContent).toBe('hello');
+  });
+});

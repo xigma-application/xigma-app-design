@@ -1,0 +1,13 @@
+export const BACKGROUND_COLOR = '#444444';
+export const BACKGROUND_ALPHA = 1;
+export const CORNER_HANDLE_SIZE = 6;
+export const CORNER_HANDLE_FILL = '#ffffff';
+export const DRAFT_FRAME_STROKE = '#0d99ff';
+export const ELLIPSE_SEGMENTS = 64;
+export const MARQUEE_FILL_ALPHA = 0.2;
+export const HOVER_OUTLINE_WIDTH = 2;
+export const LINE_ENDPOINT_HANDLE_HIT_RADIUS_PX = 6;
+export const LINE_HIT_TOLERANCE_PX = 4;
+export const LINE_HOVER_STROKE_WIDTH = 0.3;
+export const LINE_RENDER_STROKE_WIDTH = 1;
+export const LINE_SELECTED_STROKE_WIDTH = 0.1;

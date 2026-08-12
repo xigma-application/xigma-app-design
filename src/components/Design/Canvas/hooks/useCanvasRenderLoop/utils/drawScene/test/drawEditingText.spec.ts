@@ -1,0 +1,88 @@
+// types
+import { TImageRenderContext } from '../../../types';
+
+// utils
+import { drawEditingText } from '../drawEditingText';
+
+const createGlMock = (): WebGL2RenderingContext =>
+  ({
+    ARRAY_BUFFER: 34962,
+    FLOAT: 5126,
+    LINE_LOOP: 2,
+    RGBA: 6408,
+    STATIC_DRAW: 35044,
+    TEXTURE0: 33984,
+    TEXTURE_2D: 3553,
+    TRIANGLES: 4,
+    UNSIGNED_BYTE: 5121,
+    activeTexture: vi.fn(),
+    bindBuffer: vi.fn(),
+    bindTexture: vi.fn(),
+    bufferData: vi.fn(),
+    createTexture: vi.fn(() => ({})),
+    drawArrays: vi.fn(),
+    enableVertexAttribArray: vi.fn(),
+    getAttribLocation: vi.fn(() => 0),
+    getUniformLocation: vi.fn(() => ({})),
+    texImage2D: vi.fn(),
+    texParameteri: vi.fn(),
+    uniform1f: vi.fn(),
+    uniform1i: vi.fn(),
+    uniform2f: vi.fn(),
+    uniform4fv: vi.fn(),
+    useProgram: vi.fn(),
+    vertexAttribPointer: vi.fn(),
+  }) as unknown as WebGL2RenderingContext;
+
+const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
+const IMAGE_CONTEXT: TImageRenderContext = {
+  buffer: {} as WebGLBuffer,
+  cache: new Map(),
+  msdfBuffer: {} as WebGLBuffer,
+  msdfProgram: {} as WebGLProgram,
+  program: {} as WebGLProgram,
+  textGeometryCache: new Map(),
+};
+
+describe('drawEditingText', () => {
+  it('should draw nothing when no text box is being edited', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawEditingText(gl, program, buffer, IMAGE_CONTEXT, null, 'hello', 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+  });
+
+  it('should draw an outline around the box being edited', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const box = { height: 20, width: 100, x: 0, y: 0 };
+
+    // before
+    drawEditingText(gl, program, buffer, IMAGE_CONTEXT, box, 'hello', 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINE_LOOP, 0, 4);
+  });
+
+  it('should draw the live typed content through the same MSDF pipeline as committed text', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const box = { height: 20, width: 100, x: 0, y: 0 };
+
+    // before
+    drawEditingText(gl, program, buffer, IMAGE_CONTEXT, box, 'hello', 100, 100, IDENTITY_VIEWPORT);
+
+    // result — "hello" is 5 known glyphs in the real MSDF atlas, 6 vertices each
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 30);
+  });
+});

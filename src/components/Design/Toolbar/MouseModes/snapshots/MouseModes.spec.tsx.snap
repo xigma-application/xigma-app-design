@@ -1,0 +1,270 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`MouseModes snapshots > should render MouseModes 1`] = `
+<DocumentFragment>
+  <div
+    class="_MouseModes_be7a0d"
+    dir="ltr"
+    role="radiogroup"
+    style="outline: none;"
+    tabindex="0"
+  >
+    <div
+      class="_MouseModes__tool-group_be7a0d"
+    >
+      <span
+        class="_MouseModes__trigger_be7a0d"
+        data-state="closed"
+      >
+        <button
+          aria-checked="true"
+          aria-label="default"
+          class="_MouseModes__button_be7a0d"
+          data-radix-collection-item=""
+          data-state="on"
+          role="radio"
+          tabindex="-1"
+          type="button"
+        >
+          <svg
+            class="_Icon_49a9ec"
+            fill="none"
+            height="16"
+            style="color: var(--color-on-blue-1);"
+            viewBox="0 0 14 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12.8597 7.71711L1.11933 0.619125L0.0944214 0L0.336006 1.17236L3.14194 14.768L3.39608 16L4.0905 14.951L7.2677 10.1507L12.7269 8.6688L13.9055 8.34878L12.8597 7.71711ZM1.60249 2.13347L11.2732 7.97961L6.80336 9.19276L6.61302 9.24505L6.50425 9.4082L3.91166 13.3258L1.60249 2.13347Z"
+              data-svg-property="fill"
+              fill="white"
+            />
+          </svg>
+        </button>
+      </span>
+      <button
+        aria-expanded="false"
+        aria-haspopup="dialog"
+        aria-label="default options"
+        class="_ToolDropdown_4435b8"
+        data-state="closed"
+        type="button"
+      >
+        <svg
+          class="_Icon_49a9ec"
+          fill="none"
+          height="5"
+          style="color: var(--color-neutral-1);"
+          viewBox="0 0 5 3"
+          width="5"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            clip-rule="evenodd"
+            d="M0.146894 0.146894C0.193339 0.10033 0.248515 0.0633878 0.30926 0.0381813C0.370006 0.0129749 0.435126 0 0.500894 0C0.566661 0 0.631782 0.0129749 0.692527 0.0381813C0.753272 0.0633878 0.808448 0.10033 0.854894 0.146894L2.50089 1.79389L4.14689 0.146894C4.19338 0.100406 4.24857 0.0635292 4.30931 0.0383701C4.37005 0.013211 4.43515 0.00026226 4.50089 0.00026226C4.56664 0.00026226 4.63174 0.013211 4.69248 0.0383701C4.75322 0.0635292 4.80841 0.100406 4.85489 0.146894C4.90138 0.193381 4.93826 0.248571 4.96342 0.30931C4.98858 0.370049 5.00152 0.43515 5.00152 0.500894C5.00152 0.566637 4.98858 0.631738 4.96342 0.692477C4.93826 0.753217 4.90138 0.808406 4.85489 0.854894L2.85489 2.85489C2.80845 2.90146 2.75327 2.9384 2.69253 2.96361C2.63178 2.98881 2.56666 3.00179 2.50089 3.00179C2.43513 3.00179 2.37001 2.98881 2.30926 2.96361C2.24852 2.9384 2.19334 2.90146 2.14689 2.85489L0.146894 0.854894C0.10033 0.808448 0.0633878 0.753272 0.0381813 0.692527C0.0129749 0.631782 0 0.566661 0 0.500894C0 0.435126 0.0129749 0.370006 0.0381813 0.30926C0.0633878 0.248515 0.10033 0.193339 0.146894 0.146894Z"
+            data-svg-property="fill"
+            fill="white"
+            fill-rule="evenodd"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      class="_MouseModes__tool-group_be7a0d"
+    >
+      <span
+        class="_MouseModes__trigger_be7a0d"
+        data-state="closed"
+      >
+        <button
+          aria-checked="false"
+          aria-label="frame"
+          class="_MouseModes__button_be7a0d"
+          data-radix-collection-item=""
+          data-state="off"
+          role="radio"
+          tabindex="-1"
+          type="button"
+        >
+          <svg
+            class="_Icon_49a9ec"
+            fill="none"
+            height="16"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M3.5 0C3.36739 0 3.24021 0.0526785 3.14645 0.146447C3.05268 0.240215 3 0.367392 3 0.5V3H0.5C0.367392 3 0.240215 3.05268 0.146447 3.14645C0.0526785 3.24021 0 3.36739 0 3.5C0 3.63261 0.0526785 3.75979 0.146447 3.85355C0.240215 3.94732 0.367392 4 0.5 4H3V12H0.5C0.367392 12 0.240215 12.0527 0.146447 12.1464C0.0526785 12.2402 0 12.3674 0 12.5C0 12.6326 0.0526785 12.7598 0.146447 12.8536C0.240215 12.9473 0.367392 13 0.5 13H3V15.5C3 15.6326 3.05268 15.7598 3.14645 15.8536C3.24021 15.9473 3.36739 16 3.5 16C3.63261 16 3.75979 15.9473 3.85355 15.8536C3.94732 15.7598 4 15.6326 4 15.5V13H12V15.5C12 15.6326 12.0527 15.7598 12.1464 15.8536C12.2402 15.9473 12.3674 16 12.5 16C12.6326 16 12.7598 15.9473 12.8536 15.8536C12.9473 15.7598 13 15.6326 13 15.5V13H15.5C15.6326 13 15.7598 12.9473 15.8536 12.8536C15.9473 12.7598 16 12.6326 16 12.5C16 12.3674 15.9473 12.2402 15.8536 12.1464C15.7598 12.0527 15.6326 12 15.5 12H13V4H15.5C15.6326 4 15.7598 3.94732 15.8536 3.85355C15.9473 3.75979 16 3.63261 16 3.5C16 3.36739 15.9473 3.24021 15.8536 3.14645C15.7598 3.05268 15.6326 3 15.5 3H13V0.5C13 0.367392 12.9473 0.240215 12.8536 0.146447C12.7598 0.0526785 12.6326 0 12.5 0C12.3674 0 12.2402 0.0526785 12.1464 0.146447C12.0527 0.240215 12 0.367392 12 0.5V3H4V0.5C4 0.367392 3.94732 0.240215 3.85355 0.146447C3.75979 0.0526785 3.63261 0 3.5 0ZM12 4H4V12H12V4Z"
+              data-svg-property="fill"
+              fill="white"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </span>
+      <button
+        aria-expanded="false"
+        aria-haspopup="dialog"
+        aria-label="frame options"
+        class="_ToolDropdown_4435b8"
+        data-state="closed"
+        type="button"
+      >
+        <svg
+          class="_Icon_49a9ec"
+          fill="none"
+          height="5"
+          style="color: var(--color-neutral-1);"
+          viewBox="0 0 5 3"
+          width="5"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            clip-rule="evenodd"
+            d="M0.146894 0.146894C0.193339 0.10033 0.248515 0.0633878 0.30926 0.0381813C0.370006 0.0129749 0.435126 0 0.500894 0C0.566661 0 0.631782 0.0129749 0.692527 0.0381813C0.753272 0.0633878 0.808448 0.10033 0.854894 0.146894L2.50089 1.79389L4.14689 0.146894C4.19338 0.100406 4.24857 0.0635292 4.30931 0.0383701C4.37005 0.013211 4.43515 0.00026226 4.50089 0.00026226C4.56664 0.00026226 4.63174 0.013211 4.69248 0.0383701C4.75322 0.0635292 4.80841 0.100406 4.85489 0.146894C4.90138 0.193381 4.93826 0.248571 4.96342 0.30931C4.98858 0.370049 5.00152 0.43515 5.00152 0.500894C5.00152 0.566637 4.98858 0.631738 4.96342 0.692477C4.93826 0.753217 4.90138 0.808406 4.85489 0.854894L2.85489 2.85489C2.80845 2.90146 2.75327 2.9384 2.69253 2.96361C2.63178 2.98881 2.56666 3.00179 2.50089 3.00179C2.43513 3.00179 2.37001 2.98881 2.30926 2.96361C2.24852 2.9384 2.19334 2.90146 2.14689 2.85489L0.146894 0.854894C0.10033 0.808448 0.0633878 0.753272 0.0381813 0.692527C0.0129749 0.631782 0 0.566661 0 0.500894C0 0.435126 0.0129749 0.370006 0.0381813 0.30926C0.0633878 0.248515 0.10033 0.193339 0.146894 0.146894Z"
+            data-svg-property="fill"
+            fill="white"
+            fill-rule="evenodd"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      class="_MouseModes__tool-group_be7a0d"
+    >
+      <span
+        class="_MouseModes__trigger_be7a0d"
+        data-state="closed"
+      >
+        <button
+          aria-checked="false"
+          aria-label="rectangle"
+          class="_MouseModes__button_be7a0d"
+          data-radix-collection-item=""
+          data-state="off"
+          role="radio"
+          tabindex="-1"
+          type="button"
+        >
+          <svg
+            class="_Icon_49a9ec"
+            fill="none"
+            height="16"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 16 16"
+            width="16"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M14 1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"
+              data-svg-property="fill"
+              fill="white"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </span>
+      <button
+        aria-expanded="false"
+        aria-haspopup="dialog"
+        aria-label="rectangle options"
+        class="_ToolDropdown_4435b8"
+        data-state="closed"
+        type="button"
+      >
+        <svg
+          class="_Icon_49a9ec"
+          fill="none"
+          height="5"
+          style="color: var(--color-neutral-1);"
+          viewBox="0 0 5 3"
+          width="5"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            clip-rule="evenodd"
+            d="M0.146894 0.146894C0.193339 0.10033 0.248515 0.0633878 0.30926 0.0381813C0.370006 0.0129749 0.435126 0 0.500894 0C0.566661 0 0.631782 0.0129749 0.692527 0.0381813C0.753272 0.0633878 0.808448 0.10033 0.854894 0.146894L2.50089 1.79389L4.14689 0.146894C4.19338 0.100406 4.24857 0.0635292 4.30931 0.0383701C4.37005 0.013211 4.43515 0.00026226 4.50089 0.00026226C4.56664 0.00026226 4.63174 0.013211 4.69248 0.0383701C4.75322 0.0635292 4.80841 0.100406 4.85489 0.146894C4.90138 0.193381 4.93826 0.248571 4.96342 0.30931C4.98858 0.370049 5.00152 0.43515 5.00152 0.500894C5.00152 0.566637 4.98858 0.631738 4.96342 0.692477C4.93826 0.753217 4.90138 0.808406 4.85489 0.854894L2.85489 2.85489C2.80845 2.90146 2.75327 2.9384 2.69253 2.96361C2.63178 2.98881 2.56666 3.00179 2.50089 3.00179C2.43513 3.00179 2.37001 2.98881 2.30926 2.96361C2.24852 2.9384 2.19334 2.90146 2.14689 2.85489L0.146894 0.854894C0.10033 0.808448 0.0633878 0.753272 0.0381813 0.692527C0.0129749 0.631782 0 0.566661 0 0.500894C0 0.435126 0.0129749 0.370006 0.0381813 0.30926C0.0633878 0.248515 0.10033 0.193339 0.146894 0.146894Z"
+            data-svg-property="fill"
+            fill="white"
+            fill-rule="evenodd"
+          />
+        </svg>
+      </button>
+    </div>
+    <div
+      class="_MouseModes__tool-group_be7a0d"
+    >
+      <span
+        class="_MouseModes__trigger_be7a0d"
+        data-state="closed"
+      >
+        <button
+          aria-checked="false"
+          aria-label="text"
+          class="_MouseModes__button_be7a0d"
+          data-radix-collection-item=""
+          data-state="off"
+          role="radio"
+          tabindex="-1"
+          type="button"
+        >
+          <svg
+            class="_Icon_49a9ec"
+            data-fpl-icon-size="24L"
+            fill="none"
+            height="16"
+            style="color: var(--color-neutral-1);"
+            viewBox="4 4 16 16"
+            width="16"
+          >
+            <path
+              d="M19.5 4a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0V5h-6.5v14H15a.5.5 0 0 1 0 1H9a.5.5 0 0 1 0-1h2.5V5H5v2.5a.5.5 0 0 1-1 0v-3a.5.5 0 0 1 .5-.5z"
+              data-svg-property="fill"
+              fill="white"
+            />
+          </svg>
+        </button>
+      </span>
+    </div>
+    <div
+      class="_MouseModes__tool-group_be7a0d"
+    >
+      <span
+        class="_MouseModes__trigger_be7a0d"
+        data-state="closed"
+      >
+        <button
+          aria-checked="false"
+          aria-label="comment"
+          class="_MouseModes__button_be7a0d"
+          data-radix-collection-item=""
+          data-state="off"
+          role="radio"
+          tabindex="-1"
+          type="button"
+        >
+          <svg
+            class="_Icon_49a9ec"
+            fill="none"
+            height="16"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 18 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M1.944 14.75L3.64 11.992L3.927 11.527L3.69 11.034C3.225 10.083 2.993 9.124 3 8C3 4.134 6.134 1 10 1C13.866 1 17 4.134 17 8C17 11.866 13.866 15 10 15C8.86 15.007 7.888 14.768 6.926 14.291L6.658 14.16L6.362 14.197L1.944 14.75ZM6.487 15.19C7.547 15.708 8.74 16 10 16C14.418 16 18 12.418 18 8C18 3.582 14.418 0 10 0C5.582 0 2 3.582 2 8C2 9.243 2.283 10.419 2.789 11.468L0.672 14.908L0 16L1.272 15.841L6.487 15.189V15.19Z"
+              data-svg-property="fill"
+              fill="white"
+            />
+          </svg>
+        </button>
+      </span>
+    </div>
+  </div>
+</DocumentFragment>
+`;

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 260" width="900" height="260">
+  <defs>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#18A8FF"/>
+      <stop offset="1" stop-color="#4B55FF"/>
+    </linearGradient>
+    <linearGradient id="purple" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7B35FF"/>
+      <stop offset="1" stop-color="#A33CFF"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#12D58B"/>
+      <stop offset="1" stop-color="#08B968"/>
+    </linearGradient>
+    <linearGradient id="orange" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFB21A"/>
+      <stop offset="1" stop-color="#FF6B12"/>
+    </linearGradient>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF4545"/>
+      <stop offset="1" stop-color="#FF1744"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(30 20)">
+    <rect x="45" y="0" width="78" height="112" rx="39" fill="url(#blue)"
+          transform="rotate(-45 84 56)"/>
+    <rect x="85" y="0" width="78" height="112" rx="39" fill="url(#purple)"
+          transform="rotate(45 124 56)"/>
+    <rect x="45" y="78" width="78" height="112" rx="39" fill="url(#orange)"
+          transform="rotate(45 84 134)"/>
+    <rect x="85" y="78" width="78" height="112" rx="39" fill="url(#red)"
+          transform="rotate(-45 124 134)"/>
+    <circle cx="104" cy="95" r="43" fill="url(#green)"/>
+  </g>
+  <text x="255" y="174"
+        font-family="Inter, Arial, Helvetica, sans-serif"
+        font-size="116"
+        font-weight="600"
+        letter-spacing="-6"
+        fill="#111111">Xigma</text>
+</svg>

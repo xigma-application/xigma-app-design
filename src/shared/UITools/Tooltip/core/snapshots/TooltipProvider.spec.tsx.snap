@@ -1,0 +1,9 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`TooltipProvider snapshots > should render TooltipProvider 1`] = `
+<DocumentFragment>
+  <span>
+    content
+  </span>
+</DocumentFragment>
+`;

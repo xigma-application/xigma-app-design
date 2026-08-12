@@ -1,0 +1,129 @@
+import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
+import { FocusEvent } from 'react';
+import { Provider } from 'react-redux';
+import { renderHook } from '@testing-library/react';
+
+// hooks
+import { useCommitTextEdit } from '../useCommitTextEdit';
+
+// store
+import designReducer from 'store/design/slice';
+import { TDesignState } from 'store/design/types';
+
+// types
+import { NodeType } from 'types/design/enums';
+
+const createTestStore = (): EnhancedStore<{ design: TDesignState }> => configureStore({ reducer: { design: designReducer } });
+
+const createBlurEvent = (html: string): FocusEvent<HTMLDivElement> => {
+  const currentTarget = document.createElement('div');
+
+  currentTarget.innerHTML = html;
+
+  return { currentTarget } as FocusEvent<HTMLDivElement>;
+};
+
+describe('useCommitTextEdit behaviors', () => {
+  it('should do nothing when there is no box being edited', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    const { result } = renderHook(() => useCommitTextEdit(null), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    result.current(createBlurEvent('hello'));
+
+    // result
+    expect(store.getState().design.rootOrder).toHaveLength(0);
+  });
+
+  it('should add a text node with the fixed box size, not the rendered content size, when blurred with content', () => {
+    // mock
+    const store = createTestStore();
+    const box = { height: 20, width: 100, x: 10, y: 10 };
+
+    // before
+    const { result } = renderHook(() => useCommitTextEdit(box), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    result.current(createBlurEvent('hello world'));
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.rootOrder).toHaveLength(1);
+    expect(design.nodes[design.rootOrder[0]]).toMatchObject({
+      content: 'hello world',
+      height: 20,
+      type: NodeType.text,
+      width: 100,
+      x: 10,
+      y: 10,
+    });
+    expect(design.editingTextBox).toBeNull();
+  });
+
+  it('should collapse a blank line (Enter twice) to a single newline, not the browser doubled one', () => {
+    // mock
+    const store = createTestStore();
+    const box = { height: 20, width: 100, x: 10, y: 10 };
+
+    // before
+    const { result } = renderHook(() => useCommitTextEdit(box), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action — chrome represents the blank line as a <div> containing only a <br>
+    result.current(createBlurEvent('first<div><br></div><div>second</div>'));
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ content: 'first\n\nsecond' });
+  });
+
+  it('should keep a whitespace-only value as valid content, not treat it as empty', () => {
+    // mock
+    const store = createTestStore();
+    const box = { height: 20, width: 100, x: 10, y: 10 };
+
+    // before
+    const { result } = renderHook(() => useCommitTextEdit(box), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    result.current(createBlurEvent(' '));
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.rootOrder).toHaveLength(1);
+    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ content: ' ' });
+  });
+
+  it('should discard the box without adding a node when blurred with no content', () => {
+    // mock
+    const store = createTestStore();
+    const box = { height: 20, width: 100, x: 10, y: 10 };
+
+    // before
+    const { result } = renderHook(() => useCommitTextEdit(box), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    result.current(createBlurEvent(''));
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.rootOrder).toHaveLength(0);
+    expect(design.editingTextBox).toBeNull();
+  });
+});

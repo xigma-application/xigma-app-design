@@ -1,0 +1,12 @@
+.Icon {
+  display: inline-block;
+  flex-shrink: 0;
+
+  :global([data-svg-property='fill']) {
+    fill: currentcolor;
+  }
+
+  :global([data-svg-property='stroke']) {
+    stroke: currentcolor;
+  }
+}

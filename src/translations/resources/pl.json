@@ -1,0 +1,22 @@
+{
+  "app.themeToggle.switchToDark": "Przełącz na ciemny motyw",
+  "app.themeToggle.switchToLight": "Przełącz na jasny motyw",
+  "design.toolbar.tool.comment": "Komentarz",
+  "design.toolbar.tool.default": "Przesuń",
+  "design.toolbar.tool.ellipse": "Elipsa",
+  "design.toolbar.tool.frame": "Ramka",
+  "design.toolbar.tool.hand": "Narzędzie ręka",
+  "design.toolbar.tool.line": "Linia",
+  "design.toolbar.tool.media": "Obraz/wideo...",
+  "design.toolbar.tool.polygon": "Wielokąt",
+  "design.toolbar.tool.rectangle": "Prostokąt",
+  "design.toolbar.tool.star": "Gwiazda",
+  "design.toolbar.tool.text": "Tekst",
+  "home.description": "Minimalny szablon startowy.",
+  "home.subtitle": "Vite + React + TypeScript",
+  "notFound.description": "Nie znaleziono strony.",
+  "notFound.title": "404",
+  "routing.title.design": "Projekt",
+  "routing.title.home": "Strona główna",
+  "routing.title.notFound": "404"
+}

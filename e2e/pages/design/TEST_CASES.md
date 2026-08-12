@@ -1,0 +1,293 @@
+# Design page — test case catalog
+
+Reference list of interaction scenarios for the Design page, kept alongside `DesignPage.ts` so
+new e2e specs (or a reviewer checking coverage) can see what's expected without re-deriving it
+from the implementation. "Unit" coverage refers to
+`src/components/Design/Canvas/hooks/useSelectionTool/useSelectionTool.spec.tsx` (asserts
+`store.getState()` directly, can express every branch precisely). "E2E" coverage can only assert
+what's observable in the browser — DOM state (`aria-checked`) or canvas pixels (screenshot
+diff/equality) — so it targets the highest-value real-integration paths, not every unit-level
+branch.
+
+## Frame drawing (Etap 3/4)
+
+| #   | Scenario                                                                                | Unit |            E2E            |
+| --- | --------------------------------------------------------------------------------------- | :--: | :-----------------------: |
+| 1   | Drawing a frame with the Frame tool renders it and reverts the active tool to `default` |  —   | ✅ `create-frame.spec.ts` |
+
+## Rectangle drawing (Etap 6)
+
+| #   | Scenario                                                                                                     | Unit |              E2E              |
+| --- | ------------------------------------------------------------------------------------------------------------ | :--: | :---------------------------: |
+| 1   | Drawing a rectangle with the Rectangle tool renders it and reverts the active tool to `default`              |  —   | ✅ `create-rectangle.spec.ts` |
+| 2   | Pressing "R" activates the Rectangle tool, then dragging draws a rectangle                                   |  —   | ✅ `create-rectangle.spec.ts` |
+| 3   | While dragging (before release), the rectangle's own fill is already visible, unlike Frame's fill-less draft |  ✅  | ✅ `create-rectangle.spec.ts` |
+
+## Ellipse drawing (Etap 6)
+
+Ellipse shares its toolbar button with Rectangle (`TOOL_GROUP_ITEMS`, `MouseModes.tsx`) — the
+button shows whichever of the two was picked last (`lastShapeTool` in `store/design`), and reverts
+to unchecked (but keeps showing that icon) once a shape finishes drawing, same as Frame/Rectangle.
+
+| #   | Scenario                                                                                                                           | Unit |             E2E             |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------- | :--: | :-------------------------: |
+| 1   | Picking "Ellipse" from the Rectangle dropdown draws an ellipse, and the shared button stays showing Ellipse (unchecked) afterwards |  —   | ✅ `create-ellipse.spec.ts` |
+| 2   | Pressing "O" activates the Ellipse tool, then dragging draws an ellipse                                                            |  —   | ✅ `create-ellipse.spec.ts` |
+| 3   | While dragging (before release), the ellipse's own fill is already visible, unlike Frame's fill-less draft                         |  ✅  | ✅ `create-ellipse.spec.ts` |
+
+## Polygon drawing
+
+Polygon shares its toolbar button with Rectangle/Ellipse/Line (`TOOL_GROUP_ITEMS[rectangle] =
+[rectangle, line, ellipse, polygon]`), same sharing pattern as Ellipse/Line, but unlike every other
+shape tool it has **no keyboard shortcut** (`KEYBOARD_SHORTCUTS[polygon] = []`) — it's reachable
+only from the dropdown. Its geometry is an N-gon inscribed in the bounding box (`getPolygonPoints`,
+apex pointing up), with `sides` defaulting to 3 (triangle) until a properties panel exists to change
+it (planned: min 3, max 60). Hit-testing/hover/rendering follow the same non-bbox pattern as Ellipse
+(`isPointInPolygon`, `drawThickPolygonOutline`, `drawPolygon`).
+
+| #   | Scenario                                                                                                                          | Unit |             E2E             |
+| --- | --------------------------------------------------------------------------------------------------------------------------------- | :--: | :-------------------------: |
+| 29  | Picking "Polygon" from the Rectangle dropdown draws a polygon, and the shared button stays showing Polygon (unchecked) afterwards |  —   | ✅ `create-polygon.spec.ts` |
+| 30  | Polygon has no keyboard shortcut — pressing an unbound key leaves the default tool active and no polygon button rendered          |  —   | ✅ `create-polygon.spec.ts` |
+| 31  | While dragging (before release), the polygon's own fill is already visible, unlike Frame's fill-less draft                        |  ✅  | ✅ `create-polygon.spec.ts` |
+| 32  | Hit-testing/hovering a polygon follows its actual N-gon shape, not its bounding box                                               |  ✅  | ✅ `create-polygon.spec.ts` |
+
+## Line drawing
+
+A line is not box-shaped like Frame/Rectangle/Ellipse — it's defined by two endpoints
+(`TLineNode.x1,y1,x2,y2`), created via a dedicated `useDrawLineTool` hook (not the shared
+`useDrawShapeTool`, since `toDraftRect` would normalize the two drawn points into a min-corner box
+and lose the drawn direction). It shares its toolbar button with Rectangle/Ellipse
+(`TOOL_GROUP_ITEMS[rectangle] = [rectangle, line, ellipse]`), same sharing pattern as Ellipse.
+
+| #   | Scenario                                                                                         | Unit |           E2E            |
+| --- | ------------------------------------------------------------------------------------------------ | :--: | :----------------------: |
+| 22  | Picking "Line" from the Rectangle dropdown draws a line and reverts the active tool to `default` |  —   | ✅ `create-line.spec.ts` |
+| 23  | Pressing "L" activates the Line tool, then dragging draws a line                                 |  —   | ✅ `create-line.spec.ts` |
+
+Line has no fill, so there's no fill-vs-frame-draft comparison analogous to Rectangle/Ellipse's
+scenario #3 — a line's live draft is just the segment itself plus its two endpoint handles
+(`drawFrame.ts`'s `NodeType.line` branch), nothing to distinguish from a "fill-less" state.
+
+## Line selection & dragging
+
+Per the product spec (a line behaves like Figma's Line tool): selecting a line shows **no**
+bounding-box outline (unlike every other node type) — just a thin highlight along the segment
+itself plus two small endpoint handles (`drawPerNodeSelectionOutlines.ts`'s `NodeType.line`
+branch). Dragging the line's **body** (away from either handle) moves both endpoints together,
+exactly like moving any other node. Dragging an **endpoint handle** instead moves only that one
+point, leaving the other fixed — genuinely new interaction code, since no resize/handle-drag
+existed anywhere in the app before this (`getLineEndpointAtPoint.ts` + `armLineEndpointDrag.ts`,
+checked in `handlePointerDown.ts` _before_ the generic whole-node hit-test, since a selected
+line's handles must take priority over a body-drag once the pointer is close enough to one).
+
+| #   | Scenario                                                                                                        | Unit |          E2E           |
+| --- | --------------------------------------------------------------------------------------------------------------- | :--: | :--------------------: |
+| 24  | Dragging a selected line's body (away from both endpoints) translates both endpoints by the same delta          |  ✅  | ✅ `line-drag.spec.ts` |
+| 25  | Dragging endpoint A moves only A; endpoint B stays exactly where it was                                         |  ✅  | ✅ `line-drag.spec.ts` |
+| 26  | Dragging endpoint B moves only B; endpoint A stays exactly where it was                                         |  ✅  | ✅ `line-drag.spec.ts` |
+| 27  | Hit-testing a line follows its actual angled path (perpendicular distance to the segment), not its bounding box |  ✅  |           —            |
+| 28  | A selected line renders no rectangular bounding-box outline — only a thin highlight along its own path          |  ✅  |           —            |
+
+#27/#28 stay unit-only: `isPointNearLine.spec.ts` and `getNodeAtPoint.spec.ts` already assert the
+exact geometry precisely (a point inside the diagonal's bounding box but off the line itself must
+miss), and `drawPerNodeSelectionOutlines.spec.ts` counts the exact WebGL draw calls to prove no
+`drawRect` bounding-box stroke happens for a line — neither claim involves real-browser timing or
+paint behavior a screenshot diff could catch that the unit suite can't; see "Why so few scenarios
+get e2e coverage" below.
+
+## Selection (Etap 5)
+
+Setup shorthand: **A**, **B**, **C** are frames drawn left-to-right with a gap between each, all
+with `parentId: null` (today, every frame shares the same parent — multi-selection is always a
+"group selection", see [[xigma roadmap Etap 5]]).
+
+| #   | Scenario                                                                                                                                                                                                                                | Unit |          E2E           |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :--------------------: |
+| 1   | Plain click on an unselected node selects just that node                                                                                                                                                                                |  ✅  |           —            |
+| 2   | Shift-click on an unselected node adds it to the selection                                                                                                                                                                              |  ✅  | ✅ `selection.spec.ts` |
+| 3   | Shift-click on an already-selected node removes it                                                                                                                                                                                      |  ✅  |           —            |
+| 4   | Plain click on a node that's part of an existing multi-selection, released **without moving**, collapses the selection to just that node                                                                                                |  ✅  |           —            |
+| 5   | Plain click **+ drag** on a node that's part of an existing multi-selection moves the whole selection together; selection stays multi                                                                                                   |  ✅  |           —            |
+| 6   | Plain click on a new, never-selected node while 2+ others are selected replaces the selection with just the new node                                                                                                                    |  ✅  |           —            |
+| 7   | Plain click on empty canvas clears the selection                                                                                                                                                                                        |  ✅  |           —            |
+| 8   | 2+ selected nodes sharing a parent render **one shared outline** spanning their combined bounds, not per-node outlines                                                                                                                  |  ✅  | ✅ `selection.spec.ts` |
+| 9   | Click in the gap inside a shared multi-selection's bounds (no node there), released without moving, **deselects everything** — same as clicking empty canvas                                                                            |  ✅  |           —            |
+| 10  | Click in the gap **+ drag** moves the whole multi-selection together (same as #5, entered via the gap instead of a node)                                                                                                                |  ✅  |           —            |
+| 11  | Click on an **unselected node that happens to sit inside** a multi-selection's shared bounds does **not** replace the selection while the button is still held — the shared outline must stay visible for as long as the button is down |  ✅  | ✅ `selection.spec.ts` |
+| 12  | Same as #11, released without moving: selection replaces to just that node (not deselected, unlike #9 — the difference is a real node was hit)                                                                                          |  ✅  | ✅ `selection.spec.ts` |
+| 13  | Same setup as #11, but **dragged** instead of released in place: the original multi-selection (not the hit node) moves together, mirroring #10                                                                                          |  ✅  |           —            |
+
+Scenarios 11–13 are today's fix — see `useSelectionTool/utils/handlePointerDown/armHitDrag.ts`.
+The bug it corrected: the selection used to replace immediately on `pointerdown`, before the user
+had released the button, which visibly flickered the outline away from the multi-selection the
+instant the button went down on a node inside its bounds — even if the user only meant to drag the
+whole group through the gap. `selection.spec.ts`'s coverage for #11/#12 asserts exactly this
+timing: a screenshot taken while the button is still held must be pixel-identical to the
+pre-press screenshot, and only the post-release screenshot may differ.
+
+## Selection under a moved viewport (Etap 4 × Etap 5)
+
+Hit-testing (`getNodeAtPoint`) runs on `screenToWorld(clickPoint, viewport)`, so a wrong or stale
+`viewport` read is exactly the kind of bug the unit suite is weakest at catching:
+`useSelectionTool.spec.tsx` never sets a non-default viewport, so every unit test for scenarios
+1–13 above runs at the identity viewport (`{x: 0, y: 0, zoom: 1}`) and would still pass even if
+selection silently ignored pan/zoom entirely. This is real browser + coordinate-math integration
+territory, so it's e2e-only.
+
+| #   | Scenario                                                                                                      | Unit |          E2E           |
+| --- | ------------------------------------------------------------------------------------------------------------- | :--: | :--------------------: |
+| 14  | After panning the canvas (middle-mouse drag), clicking a frame at its new on-screen position still selects it |  —   | ✅ `selection.spec.ts` |
+| 15  | After zooming the canvas (Ctrl/Cmd + wheel), clicking a frame at its new on-screen position still selects it  |  —   | ✅ `selection.spec.ts` |
+
+Both tests sidestep re-deriving the app's exact pan/zoom math inside the test: #14 pans by a known
+screen-pixel delta and clicks at `originalPoint + delta` (panning is a pure offset, so this is
+exact); #15 zooms with the anchor point set to the frame's own on-screen center — `applyZoom`
+guarantees the anchor point maps to the same world point before and after, so clicking that exact
+same screen coordinate again is guaranteed to still hit the frame regardless of the resulting zoom
+factor, without the test needing to know `ZOOM_STEP_WHEEL`/`ZOOM_MIN`/`ZOOM_MAX` or do any
+multiplication itself.
+
+There is no "reset view" action anywhere in the app (checked: no keyboard shortcut, no toolbar
+button — `useToolbarShortcuts.ts` only has tool-switching keys) — nothing exists yet to write a
+test case for. If that's wanted, it's a product feature to build first, not a test gap.
+
+## Marquee selection (Etap 5, drag-select)
+
+Dragging on empty canvas (no node hit, not inside an existing multi-selection's shared bounds)
+arms a marquee instead of immediately clearing the selection — see
+`useSelectionTool/utils/handlePointerDown/armMarqueeDrag.ts` and
+`Canvas/utils/getCollidedNodes.ts`. Pattern ported from x-design's
+`ViewBox/utils/getCollidedElements.ts` + `SelectableArea`.
+
+| #   | Scenario                                                                                                    | Unit |          E2E           |
+| --- | ----------------------------------------------------------------------------------------------------------- | :--: | :--------------------: |
+| 16  | Dragging a marquee live-updates the selection (and its rendered overlay) on every move, before release      |  ✅  | ✅ `selection.spec.ts` |
+| 17  | A frame the marquee only **touches** (partial overlap) gets selected in the default (no-modifier) mode      |  ✅  | ✅ `selection.spec.ts` |
+| 18  | The same partially-overlapped frame is **excluded** when Control/Cmd is held — full containment is required |  ✅  | ✅ `selection.spec.ts` |
+
+This is the one marquee scenario where e2e earns its keep the same way scenarios 14/15 do: the
+default-vs-Control distinction is a live `event.ctrlKey`/`metaKey` read inside a browser pointer
+event (`isControlPressed`, widened this session from `WheelEvent` to `MouseEvent` specifically so
+`useSelectionTool` could reuse it for `PointerEvent`), not just branch logic — worth proving against
+a real browser event, not only a synthetic `PointerEvent` in jsdom. `selection.spec.ts`'s Control
+test sidesteps computing which exact pixels differ: it drags the identical marquee box twice (once
+without, once with Control) and asserts the two resulting screenshots simply differ — proof enough
+that the partially-overlapped frame's selection state flipped between the two runs.
+
+## Hover highlight (Etap 5)
+
+Moving the pointer over a frame with no button held shows a plain outline (no corner handles) —
+see `useHoverHighlight/useHoverHighlight.ts` and
+`useCanvasRenderLoop/utils/drawScene/drawHoverOutline.ts`. Hover state lives in a ref
+(`hoverRef`, threaded through `drawScene` exactly like `draftRef`/`marqueeRef`), not Redux — it's
+a pure rendering concern, updated every `pointermove`, with no other part of the app reacting to
+it (no layers panel/inspector exists — verified absent, see [[xigma-playwright-mcp-testing]]).
+
+| #   | Scenario                                                                                                                                                     | Unit |        E2E         |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | :--: | :----------------: |
+| 19  | Moving the pointer onto a frame (no button held) shows its outline; moving off clears it                                                                     |  ✅  | ✅ `hover.spec.ts` |
+| 20  | The hover outline never updates while any button is held (`event.buttons !== 0`), so it can't flicker mid-drag onto whatever the cursor happens to pass over |  ✅  |         —          |
+| 21  | Hit-testing an ellipse uses its actual curve (`isPointInEllipse`), not its bounding box — resting inside the box but outside the curve does not hover it     |  ✅  | ✅ `hover.spec.ts` |
+
+#20 is unit-only on purpose: proving "the ref was never written" is a one-line
+`expect(hoverRef.current).toBeNull()` in `useHoverHighlight.spec.tsx`, but not cleanly provable via
+screenshot diff in e2e — during an actual drag something else on screen is usually changing too
+(a dragged node moving, a marquee's live selection), so a screenshot difference can't isolate
+"did hover specifically fire" from "did the thing actually being dragged change". #19 stays e2e
+because it's the same kind of real-paint-timing claim as the pan/zoom scenarios above: the unit
+test can assert the ref value in jsdom, but only a real browser proves the WebGL canvas actually
+repaints in response.
+
+**Gotcha for other e2e tests**: hover highlight is active by default whenever the pointer rests
+over a frame with `activeTool === default`, so `page.mouse.move`/`pointerDown` calls elsewhere can
+now change what a screenshot looks like _just by resting on a different frame_, independent of
+whatever that test is actually checking. `selection.spec.ts`'s gap-click test hit this: it used to
+assert a held-button screenshot was byte-identical to the pre-press one, but `pointerDown`'s own
+internal `mouse.move` (which happens before `mouse.down`, so `buttons === 0` at that instant) now
+shifts the hover target to the node about to be pressed. Fix: explicitly `pointerMove` onto that
+same point _before_ capturing the "before" screenshot too, so hover state matches in both
+captures and the comparison isolates the thing actually under test.
+
+## Hand tool (pan-only tool)
+
+Mirrors Figma's Hand tool: shares its toolbar slot with the default (Move) tool
+(`TOOL_GROUP_ITEMS[default] = [default, hand]`, `lastMouseTool` remembers which of the two was
+picked last, same mechanism as `lastShapeTool` for the Rectangle group), and has its own keyboard
+shortcut ("H", `useToolbarShortcuts.ts`). While active, holding the primary (left) mouse button and
+dragging pans the viewport exactly like the existing middle-mouse-button drag-pan
+(`useCanvasDragPan`) — reusing the same `applyDragPan` math — but every other tool's own
+`activeTool === <its own ToolName>` guard means no other tool's pointer listeners are attached while
+hand is active, so nothing on the canvas can be selected or moved. Cursor is `hand.png` while idle
+and swaps to the existing `pressing.png` class while actively dragging (`useHandTool.ts`).
+
+| #   | Scenario                                                                                                                                                                                              | Unit |          E2E           |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :--------------------: |
+| 33  | Pressing "H" activates the Hand tool, then dragging with the primary button pans the viewport (a frame remains selectable at its new on-screen position afterwards, same proof shape as scenario #14) |  ✅  | ✅ `hand-tool.spec.ts` |
+| 34  | Dragging directly over an existing frame with the Hand tool pans the canvas without selecting or moving that frame                                                                                    |  ✅  | ✅ `hand-tool.spec.ts` |
+
+Both are real browser + pointer-event-ordering claims (`event.button` read inside a live
+`PointerEvent`, `setPointerCapture` during the drag), the same category of "worth proving against a
+real browser" as scenarios #14/#15 and the marquee Control test above — `useHandTool.spec.tsx`
+already asserts the `setViewport` dispatch and cursor-class toggling precisely in jsdom, but only a
+real browser proves a `pointerdown` on top of an actual rendered frame doesn't leak into the
+selection tool.
+
+## Text tool (Etap 6 + the create/edit slice of Etap 7)
+
+Unlike every other draw tool, Text never commits to Redux on `pointerup` — dragging out a box
+dispatches `startTextEdit` instead of `addNode` (`useDrawTextTool.ts`), which mounts a
+`contentEditable` overlay (`TextEditOverlay.tsx`) positioned over the dragged box. The node is only
+actually created on blur, and only if the typed content is non-empty (`useCommitTextEdit.ts`) — an
+empty text box is discarded entirely, never added and never needing deletion.
+
+| #   | Scenario                                                                                                  | Unit |           E2E            |
+| --- | --------------------------------------------------------------------------------------------------------- | :--: | :----------------------: |
+| 35  | Drawing a text box, typing content, then clicking away commits a rendered text node                       |  —   | ✅ `create-text.spec.ts` |
+| 36  | Drawing a text box and clicking away with no content typed discards it — nothing is created               |  —   | ✅ `create-text.spec.ts` |
+| 37  | A single whitespace character (e.g. a space) counts as valid content and is kept, not discarded           |  ✅  |            —             |
+| 38  | Typing a tool-shortcut letter (e.g. "r", "t") while editing text does not switch the active tool          |  ✅  | ✅ `create-text.spec.ts` |
+| 39  | Hovering a committed text node only highlights its rendered content, not the empty space in its fixed box |  —   |    ✅ `hover.spec.ts`    |
+| 40  | Clicking a text node inside its fixed box but past its rendered content does not select it                |  ✅  |  ✅ `selection.spec.ts`  |
+| 41  | A selected text node can be dragged from anywhere in its fixed box, even past its rendered content        |  ✅  |  ✅ `selection.spec.ts`  |
+| 42  | A run of text with no spaces wraps mid-word once it overflows the box, instead of overflowing on one line |  ✅  | ✅ `create-text.spec.ts` |
+
+#37 stays unit-only: `useCommitTextEdit.spec.tsx` asserts `store.getState()` directly (the node was
+added, `content: ' '`), which is exact. A screenshot diff can't reliably stand in for this claim —
+`fillText(' ', ...)` renders no visible glyph, so the "kept" and "discarded" outcomes can look
+pixel-identical on canvas, making this exactly the kind of branch the e2e layer is the wrong tool
+for (see "Why so few scenarios get e2e coverage" below).
+
+#38-#41 all came from real user reports during manual testing, not from the original spec — the
+text box became a fixed size independent of its rendered content (`useCommitTextEdit.ts` uses
+`box.height`, not the DOM's measured height), and both hit-testing (`isPointInText.ts`, replacing
+`isPointInRect` for text) and the hover underline (`drawTextHoverUnderline.ts`) had to follow that
+same "content, not box" distinction, while dragging an _already-selected_ text node still needs the
+full box to stay grabbable (`isPointInSelectedTextBounds.ts`). Each of these has a precise
+`store.getState()`/mocked-`gl` unit assertion already, but the actual claim — a real `pointerdown`
+at real screen coordinates against the real rendered MSDF glyphs does/doesn't hit — is exactly the
+"real browser + rendering + timing" category this file exists for, so each also gets an e2e
+scenario. #38 is the exception with real jsdom coverage too
+(`TextEditOverlay.spec.tsx`'s stopPropagation test): `fireEvent` bubbling is standards-accurate in
+jsdom, so the _mechanism_ is unit-provable, but the e2e version proves the actual toolbar's
+`aria-checked` state end-to-end through the real `useToolbarShortcuts` wiring, which is worth
+keeping too since a regression could sneak in between the two layers (e.g. a capture-phase listener
+added elsewhere).
+
+#42 is the same category again: the html overlay wraps via real CSS (`overflow-wrap: break-word`
+in `TextEditOverlay.module.scss`), which breaks a run with no spaces mid-word once it doesn't fit —
+`wrapText.ts` used to only ever break at a space, so a single long unbroken run stayed on one
+(overflowing) canvas line while the html overlay wrapped it, a real divergence caught by manual
+testing, not the unit suite (which already covers the new char-level breaking precisely in
+`wrapText.spec.ts`). The e2e version proves the same narrow box actually produces a visibly
+different (wrapped) render than a wide one for the identical input — the width comparison that
+matters is against the live rendered MSDF glyphs, not a mocked `measureWidth`.
+
+## Why so few scenarios get e2e coverage
+
+Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e
+equivalent would need a screenshot diff standing in for `expect(selectedIds).toEqual(...)`, which
+is slower and less precise (a screenshot proves _something_ changed, not _what_). E2E here is
+reserved for the paths where the interesting part is the real browser + canvas + timing
+interaction itself (paint timing, `pointerdown`/`pointerup` ordering) rather than the selection
+algorithm's branch logic, which the unit suite already pins down exhaustively.

@@ -1,0 +1,35 @@
+.ToolDropdown {
+  align-items: center;
+  background-color: transparent;
+  border: none;
+  border-radius: 5px;
+  color: var(--color-neutral-1);
+  cursor: pointer;
+  display: flex;
+  height: 32px;
+  justify-content: center;
+  width: 16px;
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--color-neutral-3) 50%, transparent);
+  }
+
+  &[data-state='open'] {
+    background-color: var(--color-neutral-3);
+  }
+
+  // the class is repeated so this reliably beats the shared PopoverItem's own base rules
+  // regardless of stylesheet order, without adding any theme/hover logic to that shared component
+
+  &__item.ToolDropdown__item:hover {
+    color: var(--color-on-blue-1);
+
+    :global([data-svg-property='fill']) {
+      fill: var(--color-on-blue-1);
+    }
+  }
+
+  &__item.ToolDropdown__item:hover &__shortcut {
+    color: var(--color-on-blue-1);
+  }
+}

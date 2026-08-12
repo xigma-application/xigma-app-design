@@ -1,0 +1,75 @@
+.Canvas {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+
+  * {
+    -webkit-user-drag: none;
+  }
+
+  &__texture {
+    background-color: #000000;
+    background-image: url('../../../assets/images/texture--dark.svg');
+    background-repeat: repeat;
+    background-size: 20px 20px;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+
+    @media (prefers-color-scheme: light) {
+      background-color: #ffffff;
+      background-image: url('../../../assets/images/texture--light.svg');
+    }
+
+    :root[data-theme='light'] & {
+      background-color: #ffffff;
+      background-image: url('../../../assets/images/texture--light.svg');
+    }
+
+    :root[data-theme='dark'] & {
+      background-color: #000000;
+      background-image: url('../../../assets/images/texture--dark.svg');
+    }
+  }
+
+  &__canvas-element {
+    cursor: url('../../../assets/icons/cursors/default.png'), auto;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+
+    &--hand {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/hand.png') 8x) 16 16,
+        auto;
+    }
+
+    &--pressing {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/pressing.png') 8x) 16 16,
+        auto;
+    }
+
+    &--positioning {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/positioner.png') 8x) 16 16,
+        auto;
+    }
+
+    &--drawing {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/pointer.png') 8x) 16 16,
+        auto;
+    }
+  }
+}

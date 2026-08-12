@@ -1,0 +1,58 @@
+import { createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit';
+
+// others
+import { DEFAULT_MOUSE_TOOL, DEFAULT_SHAPE_TOOL, DEFAULT_TOOL, DEFAULT_VIEWPORT } from './constants';
+
+// types
+import { TDesignState } from './types';
+import { TEditingTextBox } from 'types/canvas';
+import { ToolName } from 'types/design/enums';
+import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/design/types';
+
+// utils
+import { handleAddNode } from './utils/handleAddNode';
+import { handleSetActiveTool } from './utils/handleSetActiveTool';
+import { handleStartTextEdit } from './utils/handleStartTextEdit';
+import { handleStopTextEdit } from './utils/handleStopTextEdit';
+import { handleUpdateNode } from './utils/handleUpdateNode';
+
+const initialState: TDesignState = {
+  activeTool: DEFAULT_TOOL,
+  editingTextBox: null,
+  editingTextContent: '',
+  lastMouseTool: DEFAULT_MOUSE_TOOL,
+  lastShapeTool: DEFAULT_SHAPE_TOOL,
+  nodes: {},
+  rootOrder: [],
+  selectedIds: [],
+  viewport: DEFAULT_VIEWPORT,
+};
+
+const designSlice = createSlice({
+  initialState,
+  name: 'design',
+  reducers: {
+    addNode: {
+      prepare: (node: TNewSceneNode) => ({ payload: { ...node, id: nanoid() } as TSceneNode }),
+      reducer: (state, action: PayloadAction<TSceneNode>) => handleAddNode(state, action.payload),
+    },
+    setActiveTool: (state, action: PayloadAction<ToolName>) => handleSetActiveTool(state, action.payload),
+    setSelection: (state, action: PayloadAction<string[]>) => {
+      state.selectedIds = action.payload;
+    },
+    setViewport: (state, action: PayloadAction<TViewport>) => {
+      state.viewport = action.payload;
+    },
+    startTextEdit: (state, action: PayloadAction<TEditingTextBox>) => handleStartTextEdit(state, action.payload),
+    stopTextEdit: (state) => handleStopTextEdit(state),
+    updateNode: (state, action: PayloadAction<{ changes: TSceneNodeChanges; id: string }>) => handleUpdateNode(state, action.payload),
+    updateTextEditContent: (state, action: PayloadAction<string>) => {
+      state.editingTextContent = action.payload;
+    },
+  },
+});
+
+export const { addNode, setActiveTool, setSelection, setViewport, startTextEdit, stopTextEdit, updateNode, updateTextEditContent } =
+  designSlice.actions;
+
+export default designSlice.reducer;
