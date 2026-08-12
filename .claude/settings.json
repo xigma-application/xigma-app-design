@@ -1,13 +1,4 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(*)",
-      "Read(*)",
-      "mcp__playwright__browser_navigate",
-      "mcp__playwright__browser_take_screenshot"
-    ],
-    "defaultMode": "bypassPermissions"
-  },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "playwright"
