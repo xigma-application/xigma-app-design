@@ -60,7 +60,6 @@ import MarginT from './svg/margin-t.svg?react';
 import MarginTB from './svg/margin-tb.svg?react';
 import MaxHeight from './svg/max-height.svg?react';
 import MaxWidth from './svg/max-width.svg?react';
-import Menu from './svg/menu.svg?react';
 import MinHeight from './svg/min-height.svg?react';
 import MinWidth from './svg/min-width.svg?react';
 import Minus from './svg/minus.svg?react';
@@ -80,6 +79,7 @@ import PositionSwitcher from './svg/position-switcher.svg?react';
 import Properties from './svg/properties.svg?react';
 import Protractor from './svg/protractor.svg?react';
 import RectangleTool from './svg/rectangle-tool.svg?react';
+import RowGrabber from './svg/row-grabber.svg?react';
 import Rows from './svg/rows.svg?react';
 import Sample from './svg/sample.svg?react';
 import StarTool from './svg/star-tool.svg?react';
@@ -153,7 +153,6 @@ export const Icons = {
   MarginTB,
   MaxHeight,
   MaxWidth,
-  Menu,
   MinHeight,
   MinWidth,
   Minus,
@@ -173,6 +172,7 @@ export const Icons = {
   Properties,
   Protractor,
   RectangleTool,
+  RowGrabber,
   Rows,
   Sample,
   StarTool,
