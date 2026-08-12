@@ -384,8 +384,18 @@ comment / shapes, potem osobno: draw / scale / actions / dev mode).
 
 ## Etap 8 — Panele boczne
 
-- [ ] panel warstw (drzewo node'ów, zawsze zwykły DOM/React)
-- [ ] panel właściwości zaznaczonego node'a (x/y/w/h, fill, itd.)
+- [ ] panel warstw (drzewo node'ów, zawsze zwykły DOM/React) — lista `rootOrder` + nazwa + ikona
+      typu; reorder drag&drop (zmiana `rootOrder`), zmiana nazwy (`updateNode` na `name`), toggle
+      widoczności/blokady wymaga nowych pól na `TBaseNode` (`visible`/`locked`), które dziś nie
+      istnieją
+- [ ] panel właściwości zaznaczonego node'a — sekcja X/Y/W/H (numeryczne inputy, dwukierunkowo
+      zsynchronizowane z `updateNode`/canvasem), sekcja Fill (dziś każdy typ kształtu ma jeden
+      stały kolor z `Canvas/constants.ts` — realny color picker to pierwszy krok do tego, żeby fill
+      w ogóle był edytowalny), sekcja Stroke (dziś nie istnieje w żadnym typie węzła poza
+      `TLineNode.stroke`), Opacity/blend mode
+- [ ] sekcja właściwości tekstu w panelu (rozmiar/waga/wyrównanie/line-height/letter-spacing) — dziś
+      `TTextNode.fontSize`/`fontFamily` są ustawiane raz przy tworzeniu i nieedytowalne później;
+      naturalnie łączy się z wyborem fontu z Etapu 9
 
 ## Etap 9 — Wiele fontów, atlas per font ładowany z serwera
 
@@ -412,7 +422,97 @@ nawet jeśli user nigdy go nie użyje:
       ściąga TTF **na żądanie** z publicznego źródła (np. Google Fonts) zamiast trzymać binarki
       fontów w gicie na stałe
 
+## Etap 10 — Dokończenie manipulacji node'ami
+
+Kilka rzeczy świadomie odłożonych po drodze (Etap 5 i dalej), które dziś są jedyną realną
+przeszkodą, żeby edycja pojedynczego node'a czuła się skończona, nie tylko "da się narysować":
+
+- [ ] **resize uchwytami** — uchwyty narożne (i boczne) są rysowane od Etapu 5, ale przeciąganie
+      ich nic nie robi. Matematyka w 8 kierunkach, z Shift = zachowanie proporcji (jak Line ma już
+      swoje endpointy do przeciągania — ten sam wzorzec `armEndpointDrag`, tylko dla bboxa zamiast
+      dwóch punktów)
+- [ ] **rotacja** — `rotation` siedzi w `TBaseNode` od Etapu 2, ale nic go nigdy nie ustawia ani
+      nie uwzględnia w renderingu/hit-testingu (`drawEditingText.ts` nawet hardcode'uje `rotation: 0`
+      dla nowego node'a). Potrzebny: uchwyt rotacji tuż za rogiem bboxa + `rotation` uwzględniony w
+      shaderze/hit-teście, nie tylko przechowywany
+- [ ] **corner radius dla Rectangle** — przeciągany uchwyt na rogu prostokąta (jak w Figmie), na
+      razie żadnego pola na to w `TRectangleNode`
+- [ ] **klawiszowe skróty edycji**: Delete/Backspace (usuń zaznaczenie), Cmd/Ctrl+D (duplikuj),
+      Cmd/Ctrl+C/V (kopiuj/wklej), strzałki (nudge o 1px, Shift+strzałka o 10px), Cmd/Ctrl+A
+      (zaznacz wszystko) — dziś żadne z nich nie istnieje, mimo że infrastruktura klawiszowa
+      (`useKeyboardHandler`) już jest używana w toolbarze
+- [ ] **zoom ze skrótów klawiszowych** — Cmd/Ctrl +/− (zoom in/out o krok), Shift+0 (zoom to 100%),
+      Shift+1 (zoom to fit), Shift+2 (zoom to selection) — dziś zoom działa tylko przez
+      scroll/pinch (Etap 4)
+
+## Etap 11 — Undo / redo
+
+Brakuje w całej apce — żadna z dotychczasowych zmian w `store/design` (dodanie node'a, przesunięcie,
+resize, zmiana treści tekstu) nie da się cofnąć. Warto zrobić to zanim przybędzie więcej rodzajów
+akcji (grupy, panele właściwości) - im więcej typów mutacji, tym drożej dorabiać historię wstecznie.
+
+- [ ] wybór podejścia: command/history stack nad istniejącymi akcjami `store/design` (undo = odwrotna
+      akcja) vs. snapshoty całego `TDesignState` per krok — do zdecydowania przy starcie tego etapu
+- [ ] Cmd/Ctrl+Z / Cmd/Ctrl+Shift+Z (lub Cmd/Ctrl+Y) skróty klawiszowe
+- [ ] historia nie powinna zapisywać **każdej** klatki drag'a (przesuwanie/resize w trakcie
+      przeciągania) — tylko stan po puszczeniu, tak jak `addNode` już dziś dispatchuje dopiero na
+      pointerup, nie co pixel
+
+## Etap 12 — Grupy i zagnieżdżone frame'y
+
+Wielokrotnie odnotowane w dokumencie jako "wraca przy grupach/nested frames" (hit-testing w Etapie 5,
+`parentId` zawsze `null` od Etapu 2, wspólny outline zaznaczenia w Etapie 5) — to teraz największa
+pojedyncza strukturalna luka względem realnej Figmy:
+
+- [ ] grupowanie (Cmd/Ctrl+G) / rozgrupowanie (Cmd/Ctrl+Shift+G) — nowy węzeł-kontener bez własnego
+      renderingu (czysto organizacyjny, jak w Figmie), reszta zaznaczonych node'ów dostaje jego `id`
+      jako `parentId`
+- [ ] realne zagnieżdżanie w `TFrameNode` — przeciągnięcie node'a na/do frame'a zmienia `parentId`,
+      nie tylko wizualne nachodzenie
+- [ ] hit-testing i selekcja z uwzględnieniem hierarchii (`getNodeAtPoint` dziś operuje na płaskiej
+      liście) — klik wybiera najgłębiej zagnieżdżony trafiony node, podwójny klik "wchodzi" głębiej
+      (jak w Figmie)
+- [ ] przesuwanie/resize rodzica przesuwa/skaluje dzieci
+
+## Etap 13 — Prowadnice i przyciąganie (smart guides)
+
+Rdzeń tego, co sprawia, że układanie elementów w Figmie "czuje się" precyzyjnie — dziś position/size
+to czysto swobodny drag, zero pomocy:
+
+- [ ] linijki (rulery) na górze/z lewej krawędzi canvasu, skalujące się z zoomem
+- [ ] snap do siatki pikseli (`Math.round` pozycji/rozmiaru w world space)
+- [ ] smart guides: czerwone linie przyciągania do krawędzi/środków innych node'ów podczas
+      przeciągania/resize, z wyświetlaną odległością (jak dystanse w Figmie)
+- [ ] snap do viewportu/frame'a rodzica
+
+## Etap 14 — Persystencja sceny
+
+Dziś cały `store/design` żyje tylko w pamięci — odświeżenie strony kasuje wszystko. Na start
+najmniejszy możliwy krok, później realne zapisywanie:
+
+- [ ] zapis/odczyt `nodes`/`rootOrder`/`viewport` do `localStorage` (autosave po zmianach,
+      debounced tak jak resize z Etapu 0) — najmniejszy krok, zero backendu
+- [ ] docelowo: zapis po stronie serwera (per plik/projekt), poza scope na razie — dopiszemy jak
+      dojdziemy
+
+## Etap 15 — Detale UX toolbara i canvasu
+
+Drobniejsze, ale zauważalne różnice względem Figmy, niepowiązane z żadnym z etapów wyżej:
+
+- [ ] **Comment tool bez logiki** — wybieralny w toolbarze i ma skrót `C` od Etapu 1, ale po
+      wybraniu nic się nie dzieje na canvasie (brak `useCommentTool`, brak węzła/UI komentarza)
+- [ ] menu kontekstowe (prawy klik) na node'ach i na pustym canvasie — Copy/Paste, Duplicate,
+      Bring to front/Send to back, Delete itd. — dziś nie istnieje w ogóle
+- [ ] kontrolka zoomu w rogu canvasu (aktualny % + dropdown: Zoom to fit / Zoom to selection /
+      100%), sprzężona z tym samym `store/design.viewport` co scroll/pinch z Etapu 4
+- [ ] z-order z UI — Bring to front / Send to back / Forward / Backward (dziś kolejność w
+      `rootOrder` zmienia się tylko przez kolejność tworzenia)
+- [ ] prawa grupa toolbara (draw / scale / actions / dev mode) — pozostałość z Etapu 1, wciąż
+      niezrobiona
+- [ ] preset rozmiarów we Frame tool (np. "Desktop", "iPhone 15" — Figma pokazuje listę w panelu
+      po lewej przy aktywnym narzędziu Frame)
+
 ---
 
-Etapy dalej w przyszłości (grupy, komponenty/instancje, auto-layout, itd.) —
-dopiszemy jak dojdziemy do tego miejsca, żeby nie planować na zapas.
+Etapy dalej w przyszłości (komponenty/instancje, auto-layout, warstwy efektów typu blur/shadow,
+multiplayer, itd.) — dopiszemy jak dojdziemy do tego miejsca, żeby nie planować na zapas.
