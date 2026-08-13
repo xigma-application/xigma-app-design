@@ -24,6 +24,7 @@ describe('handleAddNode', () => {
     // mock
     const state: TDesignState = {
       activeTool: ToolName.default,
+      editingNodeId: null,
       editingTextBox: null,
       editingTextContent: '',
       lastMouseTool: ToolName.default,
@@ -46,6 +47,7 @@ describe('handleAddNode', () => {
     // mock
     const state: TDesignState = {
       activeTool: ToolName.default,
+      editingNodeId: null,
       editingTextBox: null,
       editingTextContent: '',
       lastMouseTool: ToolName.default,

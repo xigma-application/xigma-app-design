@@ -1,8 +1,8 @@
 // types
-import { TDesignState } from '../types';
-import { TEditingTextBox } from 'types/canvas';
+import { TDesignState, TStartTextEditPayload } from '../types';
 
-export const handleStartTextEdit = (state: TDesignState, box: TEditingTextBox): void => {
-  state.editingTextBox = box;
-  state.editingTextContent = '';
+export const handleStartTextEdit = (state: TDesignState, payload: TStartTextEditPayload): void => {
+  state.editingTextBox = payload.box;
+  state.editingTextContent = payload.content ?? '';
+  state.editingNodeId = payload.id ?? null;
 };

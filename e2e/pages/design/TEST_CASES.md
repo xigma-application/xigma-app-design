@@ -283,6 +283,51 @@ testing, not the unit suite (which already covers the new char-level breaking pr
 different (wrapped) render than a wide one for the identical input — the width comparison that
 matters is against the live rendered MSDF glyphs, not a mocked `measureWidth`.
 
+## Double-click to edit an existing text node (Etap 10)
+
+Editing was previously only reachable while a text box was being freshly drawn — there was no path
+from an already-placed `TTextNode` back into `contentEditable` edit mode at all (`editingTextBox`
+carried no node identity, so `useCommitTextEdit.ts` always called `addNode`, never `updateNode`).
+Figma's own behavior: double-clicking a text node — selected or not — enters edit mode with its
+entire existing content selected, so typing immediately replaces it. `editingTextBox`/
+`editingTextContent` gained a sibling `editingNodeId` (`store/design/types.ts`), set by a new
+`useTextEditOnDoubleClick.ts` hook (a plain `dblclick` listener, gated on the default tool) that
+hit-tests via the same "precise glyph hit, or full box if already the sole selection" layering
+`handlePointerDown.ts` already uses (`getDoubleClickedTextNode.ts`, reusing `getNodeAtPoint.ts` and
+`isPointInSelectedTextBounds.ts` unchanged). `TextEditOverlay.tsx` seeds the `contentEditable` div's
+initial DOM content from the node's existing `content` (`setEditableTextContent.ts`, the inverse of
+the existing `getEditableTextContent.ts`) and selects all of it via `window.getSelection()`/`Range`
+(`selectEditableTextContent.ts`) — both only run once per edit session, gated on `box`/
+`editingNodeId` identity via a ref snapshot, not on every keystroke's `editingTextContent` update
+(`useSeedEditableTextOnEntry.ts`). `useCommitTextEdit.ts` now branches on `editingNodeId`:
+`updateNode({ changes: { content } })` for an existing node instead of `addNode`, and — since there's
+no delete-node action in this codebase yet — clearing all content and blurring simply discards the
+edit (leaves the node's original content untouched) rather than creating an empty/orphaned node.
+While a node is being edited, `drawScene.ts` filters it out of the normal fill/selection/hover
+render passes by id, so the live `contentEditable` overlay and its own `drawEditingText.ts` outline
+are the only representation on screen — otherwise the stale static glyphs would render underneath
+the live-typed ones.
+
+| #   | Scenario                                                                                                                                       | Unit |          E2E           |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :--------------------: |
+| 58  | Double-clicking an unselected text node enters edit mode with all its content selected, so typing replaces it instead of appending             |  ✅  | ✅ `edit-text.spec.ts` |
+| 59  | Double-clicking a selected text node past its rendered content (but inside its fixed box) still enters edit mode                               |  ✅  | ✅ `edit-text.spec.ts` |
+| 60  | Blurring an existing-node edit updates that node's content in place, never adds a duplicate node                                               |  ✅  |           —            |
+| 61  | Clearing all content on an existing node and blurring discards the edit, leaving the original content untouched (no delete-node action exists) |  ✅  |           —            |
+| 62  | The node currently being edited is excluded from normal fill, selection-outline, and hover-outline rendering                                   |  ✅  |           —            |
+
+#58/#59 are the two distinct hit-test branches (`getDoubleClickedTextNode.ts` already pins both
+precisely via `store.getState()`), but the actual claim worth an e2e proof is a real native
+`dblclick`, a real `window.getSelection()`/`Range` call against a real `contentEditable` div, and a
+real subsequent `page.keyboard.type` — proving the browser's own selection/typing behavior
+(replace-selected-text) actually fires, not just that the app _asked_ it to. Both assert by
+comparing against a from-scratch reference render of the final text at the same position/box:
+pixel equality can only hold if the edit both replaced (not appended) and updated in place (not
+duplicated), so this single screenshot comparison covers #58-#60 together without a separate
+mechanism for #60. #60-#62 stay unit-only — each is a precise `store.getState()`/mocked-`gl` call-count
+assertion (`useCommitTextEdit.spec.tsx`, `drawScene.spec.ts`) that a screenshot diff wouldn't
+meaningfully improve on, per the "why so few scenarios get e2e coverage" rationale below.
+
 ## Resize (Etap 10)
 
 Corner handles have been rendered since Etap 5 (`drawCornerHandles`), but dragging them did nothing.

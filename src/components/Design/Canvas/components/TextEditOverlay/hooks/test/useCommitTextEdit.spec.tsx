@@ -7,7 +7,7 @@ import { renderHook } from '@testing-library/react';
 import { useCommitTextEdit } from '../useCommitTextEdit';
 
 // store
-import designReducer from 'store/design/slice';
+import designReducer, { addNode } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
 
 // types
@@ -29,7 +29,7 @@ describe('useCommitTextEdit behaviors', () => {
     const store = createTestStore();
 
     // before
-    const { result } = renderHook(() => useCommitTextEdit(null), {
+    const { result } = renderHook(() => useCommitTextEdit(null, null), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -46,7 +46,7 @@ describe('useCommitTextEdit behaviors', () => {
     const box = { height: 20, width: 100, x: 10, y: 10 };
 
     // before
-    const { result } = renderHook(() => useCommitTextEdit(box), {
+    const { result } = renderHook(() => useCommitTextEdit(box, null), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -74,7 +74,7 @@ describe('useCommitTextEdit behaviors', () => {
     const box = { height: 20, width: 100, x: 10, y: 10 };
 
     // before
-    const { result } = renderHook(() => useCommitTextEdit(box), {
+    const { result } = renderHook(() => useCommitTextEdit(box, null), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -93,7 +93,7 @@ describe('useCommitTextEdit behaviors', () => {
     const box = { height: 20, width: 100, x: 10, y: 10 };
 
     // before
-    const { result } = renderHook(() => useCommitTextEdit(box), {
+    const { result } = renderHook(() => useCommitTextEdit(box, null), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -113,7 +113,7 @@ describe('useCommitTextEdit behaviors', () => {
     const box = { height: 20, width: 100, x: 10, y: 10 };
 
     // before
-    const { result } = renderHook(() => useCommitTextEdit(box), {
+    const { result } = renderHook(() => useCommitTextEdit(box, null), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -124,6 +124,89 @@ describe('useCommitTextEdit behaviors', () => {
     const { design } = store.getState();
 
     expect(design.rootOrder).toHaveLength(0);
+    expect(design.editingTextBox).toBeNull();
+  });
+
+  it('should update the existing node in place, not add a new one, when editing an existing node', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(
+      addNode({
+        content: 'original',
+        fill: '#ffffff',
+        flipX: false,
+        flipY: false,
+        fontFamily: 'Inter',
+        fontSize: 14,
+        height: 20,
+        name: 'Text',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.text,
+        width: 100,
+        x: 10,
+        y: 10,
+      }),
+    );
+
+    const [existingId] = store.getState().design.rootOrder;
+    const box = { height: 20, width: 100, x: 10, y: 10 };
+
+    // before
+    const { result } = renderHook(() => useCommitTextEdit(box, existingId), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    result.current(createBlurEvent('replaced'));
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.rootOrder).toEqual([existingId]);
+    expect(design.nodes[existingId]).toMatchObject({ content: 'replaced', height: 20, width: 100, x: 10, y: 10 });
+    expect(design.editingTextBox).toBeNull();
+  });
+
+  it('should leave the existing node untouched when blurred with no content, instead of clearing it', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(
+      addNode({
+        content: 'original',
+        fill: '#ffffff',
+        flipX: false,
+        flipY: false,
+        fontFamily: 'Inter',
+        fontSize: 14,
+        height: 20,
+        name: 'Text',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.text,
+        width: 100,
+        x: 10,
+        y: 10,
+      }),
+    );
+
+    const [existingId] = store.getState().design.rootOrder;
+    const box = { height: 20, width: 100, x: 10, y: 10 };
+
+    // before
+    const { result } = renderHook(() => useCommitTextEdit(box, existingId), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    result.current(createBlurEvent(''));
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.nodes[existingId]).toMatchObject({ content: 'original' });
     expect(design.editingTextBox).toBeNull();
   });
 });

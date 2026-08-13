@@ -4,8 +4,7 @@ import { createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit';
 import { DEFAULT_MOUSE_TOOL, DEFAULT_SHAPE_TOOL, DEFAULT_TOOL, DEFAULT_VIEWPORT } from './constants';
 
 // types
-import { TDesignState } from './types';
-import { TEditingTextBox } from 'types/canvas';
+import { TDesignState, TStartTextEditPayload } from './types';
 import { ToolName } from 'types/design/enums';
 import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/design/types';
 
@@ -18,6 +17,7 @@ import { handleUpdateNode } from './utils/handleUpdateNode';
 
 const initialState: TDesignState = {
   activeTool: DEFAULT_TOOL,
+  editingNodeId: null,
   editingTextBox: null,
   editingTextContent: '',
   lastMouseTool: DEFAULT_MOUSE_TOOL,
@@ -43,7 +43,7 @@ const designSlice = createSlice({
     setViewport: (state, action: PayloadAction<TViewport>) => {
       state.viewport = action.payload;
     },
-    startTextEdit: (state, action: PayloadAction<TEditingTextBox>) => handleStartTextEdit(state, action.payload),
+    startTextEdit: (state, action: PayloadAction<TStartTextEditPayload>) => handleStartTextEdit(state, action.payload),
     stopTextEdit: (state) => handleStopTextEdit(state),
     updateNode: (state, action: PayloadAction<{ changes: TSceneNodeChanges; id: string }>) => handleUpdateNode(state, action.payload),
     updateTextEditContent: (state, action: PayloadAction<string>) => {

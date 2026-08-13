@@ -528,6 +528,33 @@ przeszkodą, żeby edycja pojedynczego node'a czuła się skończona, nie tylko 
               nieobróconym bboxem) trafia poprawnie, a rotacja grupy dwóch node'ów pokazuje każdy człon
               okrążający wspólny środek i obracający się indywidualnie
 
+- [x] **dwuklik, żeby wejść w edycję istniejącego tekstu** — do tej pory edycja była osiągalna
+      tylko przy świeżo rysowanym tekstem; nie było ścieżki z powrotem z gotowego `TTextNode` do
+      trybu `contentEditable` (`editingTextBox` nie niosło tożsamości node'a, więc
+      `useCommitTextEdit.ts` zawsze wołał `addNode`, nigdy `updateNode`). Zachowanie z Figmy: dwuklik
+      w node tekstowy — zaznaczony albo nie — wchodzi w edycję z całą istniejącą treścią zaznaczoną,
+      więc pisanie od razu ją zastępuje. `editingTextBox`/`editingTextContent` dostały siostrzane pole
+      `editingNodeId` (`store/design/types.ts`), ustawiane przez nowy `useTextEditOnDoubleClick.ts`
+      (zwykły listener `dblclick`, aktywny tylko przy domyślnym narzędziu), który hit-testuje przez tę
+      samą warstwę "precyzyjny hit w glif, albo cały box gdy to już jedyne zaznaczenie", co istniejący
+      `handlePointerDown.ts` (`getDoubleClickedTextNode.ts`, reużywa bez zmian `getNodeAtPoint.ts` i
+      `isPointInSelectedTextBounds.ts`). `TextEditOverlay.tsx` zasiewa początkową treść DOM-u
+      `contentEditable` z istniejącego `content` node'a (`setEditableTextContent.ts`, odwrotność
+      istniejącego `getEditableTextContent.ts`) i zaznacza całość przez `window.getSelection()`/`Range`
+      (`selectEditableTextContent.ts`) — obie operacje odpalają się raz na sesję edycji, bramkowane
+      tożsamością `box`/`editingNodeId` przez snapshot w refie, nie na każdą aktualizację
+      `editingTextContent` przy wpisywaniu (`useSeedEditableTextOnEntry.ts`). `useCommitTextEdit.ts`
+      teraz rozgałęzia się po `editingNodeId`: `updateNode({ changes: { content } })` dla istniejącego
+      node'a zamiast `addNode` — a że w tym kodzie nie ma jeszcze akcji usuwania node'a, wyczyszczenie
+      całej treści i blur po prostu porzuca edycję (oryginalna treść node'a zostaje nietknięta) zamiast
+      tworzyć pusty/osierocony node. Podczas edycji `drawScene.ts` filtruje edytowany node z normalnych
+      przebiegów renderujących (fill/selekcja/hover) po id, więc żywy overlay `contentEditable` i jego
+      własny outline z `drawEditingText.ts` są jedyną reprezentacją na ekranie — inaczej pod spodem
+      renderowałyby się nieaktualne, statyczne glify. Zweryfikowane w e2e (`edit-text.spec.ts`) przez
+      porównanie pikseli ze zbudowanym od zera referencyjnym renderem tej samej treści — zgodność
+      pikseli trzyma się tylko, jeśli edycja realnie zastąpiła (nie dopisała) i zaktualizowała w
+      miejscu (nie zduplikowała)
+
 - [ ] **corner radius dla Rectangle** — przeciągany uchwyt na rogu prostokąta (jak w Figmie), na
       razie żadnego pola na to w `TRectangleNode`
 - [ ] **klawiszowe skróty edycji**: Delete/Backspace (usuń zaznaczenie), Cmd/Ctrl+D (duplikuj),

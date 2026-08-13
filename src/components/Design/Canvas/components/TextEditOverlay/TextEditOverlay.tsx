@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef } from 'react';
+import { FC, useRef } from 'react';
 
 // others
 import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
@@ -7,10 +7,11 @@ import { TEXT_FILL, TEXT_FONT_FAMILY, TEXT_FONT_SIZE } from '../../constants';
 // hooks
 import { useBlockShortcutPropagation } from './hooks/useBlockShortcutPropagation';
 import { useCommitTextEdit } from './hooks/useCommitTextEdit';
+import { useSeedEditableTextOnEntry } from './hooks/useSeedEditableTextOnEntry';
 import { useTextEditInput } from './hooks/useTextEditInput';
 
 // store
-import { selectEditingTextBox, selectViewport } from 'store/design/selectors';
+import { selectEditingNodeId, selectEditingTextBox, selectEditingTextContent, selectViewport } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // styles
@@ -21,17 +22,15 @@ import { worldToScreen } from '../../utils/worldToScreen';
 
 const TextEditOverlay: FC = () => {
   const box = useAppSelector(selectEditingTextBox);
+  const editingNodeId = useAppSelector(selectEditingNodeId);
+  const editingTextContent = useAppSelector(selectEditingTextContent);
   const elementRef = useRef<HTMLDivElement>(null);
-  const handleBlur = useCommitTextEdit(box);
+  const handleBlur = useCommitTextEdit(box, editingNodeId);
   const handleInput = useTextEditInput();
   const handleKeyDown = useBlockShortcutPropagation();
   const viewport = useAppSelector(selectViewport);
 
-  useEffect(() => {
-    if (box) {
-      elementRef.current?.focus();
-    }
-  }, [box]);
+  useSeedEditableTextOnEntry(elementRef, box, editingNodeId, editingTextContent);
 
   if (box) {
     const screen = worldToScreen(box, viewport);

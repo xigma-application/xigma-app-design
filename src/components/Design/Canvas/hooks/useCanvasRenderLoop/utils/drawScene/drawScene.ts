@@ -1,5 +1,6 @@
 // store
 import {
+  selectEditingNodeId,
   selectEditingTextBox,
   selectEditingTextContent,
   selectNodes,
@@ -36,11 +37,15 @@ export const drawScene = (
   const state = store.getState();
   const viewport = selectViewport(state);
   const { clientHeight, clientWidth } = canvas;
+  const editingNodeId = selectEditingNodeId(state);
+  const sceneNodes = selectOrderedNodes(state).filter((node) => node.id !== editingNodeId);
+  const selectedNodes = selectSelectedNodes(state).filter((node) => node.id !== editingNodeId);
+  const hoveredNode = hoveredNodeId && hoveredNodeId !== editingNodeId ? selectNodes(state)[hoveredNodeId] : null;
 
   drawSceneBackground(gl);
-  drawSceneNodes(gl, program, buffer, imageContext, selectOrderedNodes(state), clientWidth, clientHeight, viewport);
-  drawHoverOutline(gl, program, buffer, hoveredNodeId ? selectNodes(state)[hoveredNodeId] : null, clientWidth, clientHeight, viewport);
-  drawSelectionOutline(gl, program, buffer, selectSelectedNodes(state), clientWidth, clientHeight, viewport);
+  drawSceneNodes(gl, program, buffer, imageContext, sceneNodes, clientWidth, clientHeight, viewport);
+  drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport);
+  drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport);
   drawFrame(gl, program, buffer, imageContext, draftShape, clientWidth, clientHeight, viewport);
   drawEditingText(
     gl,

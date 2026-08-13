@@ -31,6 +31,7 @@ describe('design slice', () => {
     // result
     expect(slice(undefined, { type: 'unknown' })).toEqual({
       activeTool: ToolName.default,
+      editingNodeId: null,
       editingTextBox: null,
       editingTextContent: '',
       lastMouseTool: ToolName.default,
@@ -136,7 +137,7 @@ describe('design slice', () => {
 
   it('should start editing a text box', () => {
     // before
-    const state = slice(undefined, startTextEdit({ height: 20, width: 100, x: 10, y: 10 }));
+    const state = slice(undefined, startTextEdit({ box: { height: 20, width: 100, x: 10, y: 10 } }));
 
     // result
     expect(state.editingTextBox).toEqual({ height: 20, width: 100, x: 10, y: 10 });
@@ -144,11 +145,11 @@ describe('design slice', () => {
 
   it('should reset the editing content when starting to edit a text box', () => {
     // before
-    const withContent = slice(undefined, startTextEdit({ height: 20, width: 100, x: 10, y: 10 }));
+    const withContent = slice(undefined, startTextEdit({ box: { height: 20, width: 100, x: 10, y: 10 } }));
     const typed = slice(withContent, updateTextEditContent('hello'));
 
     // action
-    const state = slice(typed, startTextEdit({ height: 30, width: 200, x: 0, y: 0 }));
+    const state = slice(typed, startTextEdit({ box: { height: 30, width: 200, x: 0, y: 0 } }));
 
     // result
     expect(state.editingTextContent).toBe('');
@@ -156,7 +157,7 @@ describe('design slice', () => {
 
   it('should stop editing a text box', () => {
     // before
-    const editing = slice(undefined, startTextEdit({ height: 20, width: 100, x: 10, y: 10 }));
+    const editing = slice(undefined, startTextEdit({ box: { height: 20, width: 100, x: 10, y: 10 } }));
 
     // action
     const state = slice(editing, stopTextEdit());
@@ -168,12 +169,21 @@ describe('design slice', () => {
 
   it('should update the live text edit content', () => {
     // before
-    const editing = slice(undefined, startTextEdit({ height: 20, width: 100, x: 10, y: 10 }));
+    const editing = slice(undefined, startTextEdit({ box: { height: 20, width: 100, x: 10, y: 10 } }));
 
     // action
     const state = slice(editing, updateTextEditContent('hello'));
 
     // result
+    expect(state.editingTextContent).toBe('hello');
+  });
+
+  it('should record the node id and seed its content when starting to edit an existing text node', () => {
+    // before
+    const state = slice(undefined, startTextEdit({ box: { height: 20, width: 100, x: 10, y: 10 }, content: 'hello', id: 'node-1' }));
+
+    // result
+    expect(state.editingNodeId).toBe('node-1');
     expect(state.editingTextContent).toBe('hello');
   });
 });

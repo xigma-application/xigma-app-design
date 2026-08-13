@@ -7,6 +7,7 @@ import { handleStopTextEdit } from '../handleStopTextEdit';
 
 const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   activeTool: ToolName.default,
+  editingNodeId: 'node-1',
   editingTextBox: { height: 20, width: 100, x: 10, y: 10 },
   editingTextContent: 'hello',
   lastMouseTool: ToolName.default,
@@ -39,5 +40,16 @@ describe('handleStopTextEdit', () => {
 
     // result
     expect(state.editingTextContent).toBe('');
+  });
+
+  it('should clear the editing node id', () => {
+    // mock
+    const state = buildState();
+
+    // before
+    handleStopTextEdit(state);
+
+    // result
+    expect(state.editingNodeId).toBeNull();
   });
 });

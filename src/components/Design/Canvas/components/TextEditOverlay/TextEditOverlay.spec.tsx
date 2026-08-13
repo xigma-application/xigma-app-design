@@ -33,7 +33,7 @@ describe('TextEditOverlay behaviors', () => {
     // mock
     const store = createTestStore();
 
-    store.dispatch(startTextEdit({ height: 20, width: 100, x: 10, y: 10 }));
+    store.dispatch(startTextEdit({ box: { height: 20, width: 100, x: 10, y: 10 } }));
 
     // before
     const { container } = renderWithStore(store);
@@ -50,7 +50,7 @@ describe('TextEditOverlay behaviors', () => {
     // mock
     const store = createTestStore();
 
-    store.dispatch(startTextEdit({ height: 20, width: 100, x: 10, y: 10 }));
+    store.dispatch(startTextEdit({ box: { height: 20, width: 100, x: 10, y: 10 } }));
 
     const { container } = renderWithStore(store);
     const element = container.querySelector('[contenteditable="true"]') as HTMLDivElement;
@@ -68,7 +68,7 @@ describe('TextEditOverlay behaviors', () => {
     // mock
     const store = createTestStore();
 
-    store.dispatch(startTextEdit({ height: 20, width: 100, x: 10, y: 10 }));
+    store.dispatch(startTextEdit({ box: { height: 20, width: 100, x: 10, y: 10 } }));
 
     const { container } = renderWithStore(store);
     const element = container.querySelector('[contenteditable="true"]') as HTMLDivElement;
@@ -90,7 +90,7 @@ describe('TextEditOverlay behaviors', () => {
     // mock
     const store = createTestStore();
 
-    store.dispatch(startTextEdit({ height: 20, width: 100, x: 10, y: 10 }));
+    store.dispatch(startTextEdit({ box: { height: 20, width: 100, x: 10, y: 10 } }));
 
     const { container } = renderWithStore(store);
     const element = container.querySelector('[contenteditable="true"]') as HTMLDivElement;
@@ -101,6 +101,40 @@ describe('TextEditOverlay behaviors', () => {
     fireEvent.blur(element);
 
     // result
+    expect(store.getState().design.editingTextBox).toBeNull();
+  });
+
+  it('should pre-populate and select all the existing content when editing an existing node', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(startTextEdit({ box: { height: 20, width: 100, x: 10, y: 10 }, content: 'hello world', id: 'node-1' }));
+
+    // before
+    const { container } = renderWithStore(store);
+    const element = container.querySelector('[contenteditable="true"]') as HTMLDivElement;
+
+    // result
+    expect(element.textContent).toBe('hello world');
+    expect(window.getSelection()?.toString()).toBe('hello world');
+  });
+
+  it('should update the existing node in place on blur, instead of adding a new one', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(startTextEdit({ box: { height: 20, width: 100, x: 10, y: 10 }, content: 'hello', id: 'node-1' }));
+
+    const { container } = renderWithStore(store);
+    const element = container.querySelector('[contenteditable="true"]') as HTMLDivElement;
+
+    element.textContent = 'goodbye';
+
+    // action
+    fireEvent.blur(element);
+
+    // result
+    expect(store.getState().design.rootOrder).toHaveLength(0);
     expect(store.getState().design.editingTextBox).toBeNull();
   });
 });

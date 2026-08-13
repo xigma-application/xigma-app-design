@@ -117,6 +117,10 @@ export class DesignPage {
     }
   }
 
+  async doubleClick(x: number, y: number): Promise<void> {
+    await this.page.mouse.dblclick(x, y);
+  }
+
   async pointerDown(x: number, y: number): Promise<void> {
     await this.page.mouse.move(x, y);
     await this.page.mouse.down();

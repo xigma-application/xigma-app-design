@@ -46,7 +46,7 @@ export const useDrawTextTool = (canvasRef: RefObject<HTMLCanvasElement | null>, 
       const rect = toDraftRect(startRef.current, screenToWorld(getPointerPosition(canvas, event), viewport));
 
       if (rect.width >= MIN_SHAPE_SIZE && rect.height >= MIN_SHAPE_SIZE) {
-        dispatch(startTextEdit(rect));
+        dispatch(startTextEdit({ box: rect }));
       }
 
       startRef.current = null;

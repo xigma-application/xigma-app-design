@@ -1,0 +1,49 @@
+import { RefObject, useEffect } from 'react';
+
+// store
+import { selectActiveTool, selectOrderedNodes, selectSelectedNodes, selectViewport } from 'store/design/selectors';
+import { setSelection, startTextEdit } from 'store/design/slice';
+import { store, useAppDispatch, useAppSelector } from 'store';
+
+// types
+import { ToolName } from 'types/design/enums';
+
+// utils
+import { getDoubleClickedTextNode } from './utils/getDoubleClickedTextNode';
+import { getPointerPosition } from '../../utils/getPointerPosition';
+import { screenToWorld } from '../../utils/screenToWorld';
+
+export const useTextEditOnDoubleClick = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
+  const activeTool = useAppSelector(selectActiveTool);
+  const dispatch = useAppDispatch();
+
+  const handleDoubleClick = (canvas: HTMLCanvasElement, event: MouseEvent): void => {
+    const state = store.getState();
+    const viewport = selectViewport(state);
+    const point = screenToWorld(getPointerPosition(canvas, event), viewport);
+    const target = getDoubleClickedTextNode(point, selectOrderedNodes(state), selectSelectedNodes(state), viewport);
+
+    if (target) {
+      dispatch(setSelection([target.id]));
+      dispatch(
+        startTextEdit({
+          box: { height: target.height, width: target.width, x: target.x, y: target.y },
+          content: target.content,
+          id: target.id,
+        }),
+      );
+    }
+  };
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+
+    if (canvas && activeTool === ToolName.default) {
+      const onDoubleClick = (event: MouseEvent): void => handleDoubleClick(canvas, event);
+
+      canvas.addEventListener('dblclick', onDoubleClick);
+
+      return (): void => canvas.removeEventListener('dblclick', onDoubleClick);
+    }
+  }, [activeTool, canvasRef, dispatch]);
+};

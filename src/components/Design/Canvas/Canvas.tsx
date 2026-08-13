@@ -18,6 +18,7 @@ import { useDrawTextTool } from './hooks/useDrawTextTool/useDrawTextTool';
 import { useHandTool } from './hooks/useHandTool/useHandTool';
 import { useHoverHighlight } from './hooks/useHoverHighlight/useHoverHighlight';
 import { useSelectionTool } from './hooks/useSelectionTool/useSelectionTool';
+import { useTextEditOnDoubleClick } from './hooks/useTextEditOnDoubleClick/useTextEditOnDoubleClick';
 
 // others
 import {
@@ -56,6 +57,7 @@ const Canvas: FC = () => {
   useDrawMediaTool(canvasRef, draftRef, MEDIA_TOOL_SETTINGS);
   useDrawTextTool(canvasRef, draftRef);
   useSelectionTool(canvasRef, marqueeRef);
+  useTextEditOnDoubleClick(canvasRef);
   useHoverHighlight(canvasRef, hoverRef);
   useDrawingCursor(canvasRef);
   useCanvasRenderLoop(canvasRef, draftRef, marqueeRef, hoverRef);
