@@ -36,6 +36,7 @@ export const drawLineEndpointHandles = (
       canvasWidth,
       canvasHeight,
       viewport,
+      0,
     );
   });
 };

@@ -5,6 +5,7 @@ import { TViewport } from 'types/design/types';
 // utils
 import { getPolygonPoints } from './getPolygonPoints';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
+import { rotatePoint } from 'utils/math/rotatePoint';
 
 export type TDrawablePolygon = TDraftRect & {
   fill?: string;
@@ -23,6 +24,7 @@ export const drawPolygon = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  rotation: number,
 ): void => {
   const positionLocation = gl.getAttribLocation(program, 'a_position');
   const colorLocation = gl.getUniformLocation(program, 'u_color');
@@ -30,8 +32,8 @@ export const drawPolygon = (
   const zoomLocation = gl.getUniformLocation(program, 'u_zoom');
   const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
 
-  const points = getPolygonPoints(polygon, polygon.sides);
   const center: TPoint = { x: polygon.x + polygon.width / 2, y: polygon.y + polygon.height / 2 };
+  const points = getPolygonPoints(polygon, polygon.sides).map((point) => rotatePoint(point, center, rotation));
 
   gl.useProgram(program);
   gl.uniform2f(viewportOffsetLocation, viewport.x, viewport.y);

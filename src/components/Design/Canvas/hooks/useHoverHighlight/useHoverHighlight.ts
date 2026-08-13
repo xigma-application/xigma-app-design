@@ -16,7 +16,10 @@ import { getNodeAtPoint } from '../../utils/getNodeAtPoint';
 import { getPointerPosition } from '../../utils/getPointerPosition';
 import { getResizeCursorAngle } from 'utils/math/getResizeCursorAngle';
 import { getResizeHandleAtPoint } from '../../utils/getResizeHandleAtPoint';
+import { getRotateCursorAngle } from 'utils/math/getRotateCursorAngle';
+import { getRotateHandleAtPoint } from '../../utils/getRotateHandleAtPoint';
 import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
+import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
 import { screenToWorld } from '../../utils/screenToWorld';
 
 const POSITIONING_CURSOR_CLASS = styles['Canvas__canvas-element--positioning'];
@@ -33,6 +36,7 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
       const [selectedNode] = selectedNodes;
       const lineEndpointHit = getLineEndpointAtPoint(point, selectedNodes, viewport);
       const resizeHandleHit = getResizeHandleAtPoint(point, selectedNodes, viewport);
+      const rotateHandleHit = getRotateHandleAtPoint(point, selectedNodes, viewport);
 
       switch (true) {
         case Boolean(lineEndpointHit) && selectedNode.type === NodeType.line:
@@ -43,6 +47,12 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
         case Boolean(resizeHandleHit):
           canvas.classList.remove(POSITIONING_CURSOR_CLASS);
           canvas.style.cursor = getRotatedResizeCursorUrl(getResizeCursorAngle(resizeHandleHit!.handle, resizeHandleHit!.rotation)) ?? '';
+          hoverRef.current = null;
+          break;
+        case Boolean(rotateHandleHit):
+          canvas.classList.remove(POSITIONING_CURSOR_CLASS);
+          canvas.style.cursor =
+            getRotatedRotateCursorUrl(getRotateCursorAngle(point, rotateHandleHit!.bounds, rotateHandleHit!.rotation)) ?? '';
           hoverRef.current = null;
           break;
         default: {

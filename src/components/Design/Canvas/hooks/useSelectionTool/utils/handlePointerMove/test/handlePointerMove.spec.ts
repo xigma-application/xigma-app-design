@@ -6,7 +6,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TDragState, TEndpointDragState, TResizeDragState } from '../../../types';
+import { TDragState, TEndpointDragState, TResizeDragState, TRotateDragState } from '../../../types';
 import { TDraftRect, TPoint } from 'types/canvas';
 
 // utils
@@ -28,6 +28,9 @@ const createEndpointDragRef = (endpointDragState: TEndpointDragState | null = nu
 });
 const createResizeDragRef = (resizeDragState: TResizeDragState | null = null): RefObject<TResizeDragState | null> => ({
   current: resizeDragState,
+});
+const createRotateDragRef = (rotateDragState: TRotateDragState | null = null): RefObject<TRotateDragState | null> => ({
+  current: rotateDragState,
 });
 const createMarqueeStartRef = (point: TPoint | null = null): RefObject<TPoint | null> => ({ current: point });
 const createMarqueeRef = (rect: TDraftRect | null = null): RefObject<TDraftRect | null> => ({ current: rect });
@@ -67,6 +70,7 @@ describe('handlePointerMove', () => {
       createDragStateRef(),
       createEndpointDragRef(),
       createResizeDragRef(),
+      createRotateDragRef(),
       createMarqueeStartRef(),
       createMarqueeRef(),
     );
@@ -94,6 +98,7 @@ describe('handlePointerMove', () => {
       dragStateRef,
       createEndpointDragRef(),
       createResizeDragRef(),
+      createRotateDragRef(),
       createMarqueeStartRef(),
       createMarqueeRef(),
     );
@@ -116,6 +121,7 @@ describe('handlePointerMove', () => {
       createDragStateRef(),
       endpointDragRef,
       createResizeDragRef(),
+      createRotateDragRef(),
       createMarqueeStartRef(),
       createMarqueeRef(),
     );
@@ -139,6 +145,7 @@ describe('handlePointerMove', () => {
       createDragStateRef(),
       createEndpointDragRef(),
       createResizeDragRef(),
+      createRotateDragRef(),
       marqueeStartRef,
       marqueeRef,
     );

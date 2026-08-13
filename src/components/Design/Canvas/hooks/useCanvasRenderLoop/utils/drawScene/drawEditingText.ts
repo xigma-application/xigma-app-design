@@ -26,7 +26,7 @@ export const drawEditingText = (
   viewport: TViewport,
 ): void => {
   if (editingTextBox) {
-    drawRect(gl, program, buffer, { ...editingTextBox, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport);
+    drawRect(gl, program, buffer, { ...editingTextBox, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport, 0);
     drawMsdfText(
       gl,
       imageContext.msdfProgram,

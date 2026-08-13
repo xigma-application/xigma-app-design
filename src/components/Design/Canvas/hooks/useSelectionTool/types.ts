@@ -29,3 +29,13 @@ export type TResizeDragState = {
   handle: TResizeHandle;
   nodeOrigins: Record<string, TResizeNodeOrigin>;
 };
+
+export type TRotateNodeOrigin =
+  { x1: number; x2: number; y1: number; y2: number } | { height: number; rotation: number; width: number; x: number; y: number };
+
+export type TRotateDragState = {
+  cursorAngle: number;
+  nodeOrigins: Record<string, TRotateNodeOrigin>;
+  pivot: TPoint;
+  startAngle: number;
+};

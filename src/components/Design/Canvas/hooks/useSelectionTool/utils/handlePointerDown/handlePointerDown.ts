@@ -6,7 +6,7 @@ import { selectOrderedNodes, selectSelectedIds, selectSelectedNodes, selectViewp
 import { AppDispatch, store } from 'store';
 
 // types
-import { TDragState, TEndpointDragState, TResizeDragState } from '../../types';
+import { TDragState, TEndpointDragState, TResizeDragState, TRotateDragState } from '../../types';
 import { MouseButton } from 'types/enums';
 import { TPoint } from 'types/canvas';
 
@@ -16,10 +16,12 @@ import { armHitDrag } from './armHitDrag';
 import { armLineEndpointDrag } from './armLineEndpointDrag';
 import { armMarqueeDrag } from './armMarqueeDrag';
 import { armResizeDrag } from './armResizeDrag';
+import { armRotateDrag } from './armRotateDrag';
 import { getLineEndpointAtPoint } from '../../../../utils/getLineEndpointAtPoint';
 import { getNodeAtPoint } from '../../../../utils/getNodeAtPoint';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getResizeHandleAtPoint } from '../../../../utils/getResizeHandleAtPoint';
+import { getRotateHandleAtPoint } from '../../../../utils/getRotateHandleAtPoint';
 import { isPointInGroupBounds } from '../isPointInGroupBounds';
 import { isPointInSelectedTextBounds } from '../isPointInSelectedTextBounds';
 import { screenToWorld } from '../../../../utils/screenToWorld';
@@ -32,6 +34,7 @@ export const handlePointerDown = (
   dragStateRef: RefObject<TDragState | null>,
   endpointDragRef: RefObject<TEndpointDragState | null>,
   resizeDragRef: RefObject<TResizeDragState | null>,
+  rotateDragRef: RefObject<TRotateDragState | null>,
   marqueeStartRef: RefObject<TPoint | null>,
 ): void => {
   if (event.button === MouseButton.primary) {
@@ -43,10 +46,14 @@ export const handlePointerDown = (
     const selectedNodes = selectSelectedNodes(state);
     const lineEndpointHit = getLineEndpointAtPoint(point, selectedNodes, viewport);
     const resizeHandleHit = getResizeHandleAtPoint(point, selectedNodes, viewport);
+    const rotateHandleHit = getRotateHandleAtPoint(point, selectedNodes, viewport);
 
     switch (true) {
       case Boolean(resizeHandleHit):
         armResizeDrag(canvas, event, resizeDragRef, selectedNodes, resizeHandleHit!.handle, resizeHandleHit!.bounds);
+        break;
+      case Boolean(rotateHandleHit):
+        armRotateDrag(canvas, event, rotateDragRef, selectedNodes, rotateHandleHit!.bounds, rotateHandleHit!.rotation, point);
         break;
       case Boolean(lineEndpointHit) && !event.shiftKey:
         armLineEndpointDrag(canvas, event, endpointDragRef, lineEndpointHit!.nodeId, lineEndpointHit!.endpoint);

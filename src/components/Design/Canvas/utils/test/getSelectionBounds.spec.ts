@@ -48,6 +48,20 @@ describe('getSelectionBounds', () => {
     expect(getSelectionBounds([a, b])).toEqual({ height: 50, width: 50, x: 0, y: 0 });
   });
 
+  it('should widen the bounds of a rotated node to its true axis-aligned extent', () => {
+    // mock — a 10x10 square rotated 45deg around its center (5, 5) has an axis-aligned bbox of
+    const node = buildNode({ height: 10, rotation: 45, width: 10, x: 0, y: 0 });
+    const expectedSide = 10 * Math.sqrt(2);
+
+    // result
+    const bounds = getSelectionBounds([node]);
+
+    expect(bounds.width).toBeCloseTo(expectedSide);
+    expect(bounds.height).toBeCloseTo(expectedSide);
+    expect(bounds.x).toBeCloseTo(5 - expectedSide / 2);
+    expect(bounds.y).toBeCloseTo(5 - expectedSide / 2);
+  });
+
   it('should include a line node by deriving its bounds from its two endpoints', () => {
     // mock
     const box = buildNode({ height: 10, width: 10, x: 0, y: 0 });

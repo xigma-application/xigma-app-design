@@ -1,11 +1,12 @@
 // types
-import { TDraftRect } from 'types/canvas';
+import { TDraftRect, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
 import { getQuadVertices } from '../drawThickOutline';
 import { getStarPoints } from './getStarPoints';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
+import { rotatePoint } from 'utils/math/rotatePoint';
 
 export const drawThickStarOutline = (
   gl: WebGL2RenderingContext,
@@ -17,6 +18,7 @@ export const drawThickStarOutline = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  rotation: number,
 ): void => {
   const positionLocation = gl.getAttribLocation(program, 'a_position');
   const colorLocation = gl.getUniformLocation(program, 'u_color');
@@ -26,17 +28,19 @@ export const drawThickStarOutline = (
   const halfWidth = strokeWidth / viewport.zoom / 2;
   const { points, ratio } = star;
   const vertexCount = points * 2;
+  const center: TPoint = { x: star.x + star.width / 2, y: star.y + star.height / 2 };
 
   const outerPoints = getStarPoints(
     { height: star.height + halfWidth * 2, width: star.width + halfWidth * 2, x: star.x - halfWidth, y: star.y - halfWidth },
     points,
     ratio,
-  );
+  ).map((point) => rotatePoint(point, center, rotation));
+
   const innerPoints = getStarPoints(
     { height: star.height - halfWidth * 2, width: star.width - halfWidth * 2, x: star.x + halfWidth, y: star.y + halfWidth },
     points,
     ratio,
-  );
+  ).map((point) => rotatePoint(point, center, rotation));
 
   const vertices = outerPoints.flatMap((outerPoint, index) => {
     const nextIndex = (index + 1) % vertexCount;

@@ -31,13 +31,13 @@ export const drawSceneNodes = (
   nodes.forEach((node) => {
     switch (node.type) {
       case NodeType.ellipse:
-        drawEllipse(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
+        drawEllipse(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, node.rotation);
         break;
       case NodeType.polygon:
-        drawPolygon(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
+        drawPolygon(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, node.rotation);
         break;
       case NodeType.star:
-        drawStar(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
+        drawStar(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, node.rotation);
         break;
       case NodeType.media:
         drawImage(
@@ -51,6 +51,7 @@ export const drawSceneNodes = (
           viewport,
           node.flipX,
           node.flipY,
+          node.rotation,
         );
         break;
       case NodeType.line:
@@ -71,7 +72,7 @@ export const drawSceneNodes = (
         );
         break;
       default:
-        drawRect(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
+        drawRect(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, node.rotation);
     }
   });
 };

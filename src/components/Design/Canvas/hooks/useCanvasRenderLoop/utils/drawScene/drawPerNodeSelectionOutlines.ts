@@ -49,10 +49,10 @@ export const drawPerNodeSelectionOutlines = (
     if (node.type === NodeType.line) {
       drawLineSelectionOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
     } else {
-      const { height, width, x, y } = node;
+      const { height, rotation, width, x, y } = node;
 
-      drawRect(gl, program, buffer, { height, stroke: DRAFT_FRAME_STROKE, width, x, y }, canvasWidth, canvasHeight, viewport);
-      drawCornerHandles(gl, program, buffer, node, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport);
+      drawRect(gl, program, buffer, { height, stroke: DRAFT_FRAME_STROKE, width, x, y }, canvasWidth, canvasHeight, viewport, rotation);
+      drawCornerHandles(gl, program, buffer, node, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport, rotation);
     }
   });
 };

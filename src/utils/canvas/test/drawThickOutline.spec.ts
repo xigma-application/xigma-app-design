@@ -29,7 +29,7 @@ describe('drawThickOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawThickOutline(gl, program, buffer, { height: 20, width: 10, x: 0, y: 0 }, '#0d99ff', 2, 100, 100, IDENTITY_VIEWPORT);
+    drawThickOutline(gl, program, buffer, { height: 20, width: 10, x: 0, y: 0 }, '#0d99ff', 2, 100, 100, IDENTITY_VIEWPORT, 0);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -43,17 +43,26 @@ describe('drawThickOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawThickOutline(gl, program, buffer, { height: 20, width: 10, x: 0, y: 0 }, '#0d99ff', 4, 100, 100, {
-      x: 0,
-      y: 0,
-      zoom: 2,
-    });
+    drawThickOutline(
+      gl,
+      program,
+      buffer,
+      { height: 20, width: 10, x: 0, y: 0 },
+      '#0d99ff',
+      4,
+      100,
+      100,
+      {
+        x: 0,
+        y: 0,
+        zoom: 2,
+      },
+      0,
+    );
 
     // result
     const [firstCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
     const vertices: Float32Array = firstCall[1];
-    // top strip's outer-left vertex is (x - halfWidth, y - halfWidth); at zoom 2 with a 4px
-    // border, halfWidth in world space is (4 / 2) / 2 = 1
     const worldHalfWidth = Math.abs(vertices[0]);
 
     expect(worldHalfWidth).toBeCloseTo(1);
@@ -67,16 +76,31 @@ describe('drawThickOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawThickOutline(gl, program, buffer, { height: 20, width: 10, x: 0, y: 0 }, '#0d99ff', 2, 100, 100, IDENTITY_VIEWPORT);
+    drawThickOutline(gl, program, buffer, { height: 20, width: 10, x: 0, y: 0 }, '#0d99ff', 2, 100, 100, IDENTITY_VIEWPORT, 0);
 
     // result
     const [firstCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
     const vertices: Float32Array = firstCall[1];
     const yValues = Array.from(vertices).filter((_, i) => i % 2 === 1);
 
-    // a filled rect would only ever touch y=0 and y=20 (the rect's own bounds); a hollow border
-    // additionally has vertices at the inset inner edge, y=1 and y=19 (half the 2px stroke width)
     expect(yValues).toContain(1);
     expect(yValues).toContain(19);
+  });
+
+  it('should rotate all outline vertices around the center when rotation is given', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawThickOutline(gl, program, buffer, { height: 20, width: 10, x: 0, y: 0 }, '#0d99ff', 2, 100, 100, IDENTITY_VIEWPORT, 90);
+
+    // result
+    const [firstCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = firstCall[1];
+
+    expect(vertices[0]).toBeCloseTo(16);
+    expect(vertices[1]).toBeCloseTo(4);
   });
 });

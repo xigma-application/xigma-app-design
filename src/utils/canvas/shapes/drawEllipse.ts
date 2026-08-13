@@ -8,6 +8,7 @@ import { TViewport } from 'types/design/types';
 // utils
 import { getEllipsePoints } from './getEllipsePoints';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
+import { rotatePoint } from 'utils/math/rotatePoint';
 
 export type TDrawableEllipse = TDraftRect & {
   fill?: string;
@@ -25,6 +26,7 @@ export const drawEllipse = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  rotation: number,
 ): void => {
   const positionLocation = gl.getAttribLocation(program, 'a_position');
   const colorLocation = gl.getUniformLocation(program, 'u_color');
@@ -32,8 +34,8 @@ export const drawEllipse = (
   const zoomLocation = gl.getUniformLocation(program, 'u_zoom');
   const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
 
-  const points = getEllipsePoints(ellipse, ELLIPSE_SEGMENTS);
   const center: TPoint = { x: ellipse.x + ellipse.width / 2, y: ellipse.y + ellipse.height / 2 };
+  const points = getEllipsePoints(ellipse, ELLIPSE_SEGMENTS).map((point) => rotatePoint(point, center, rotation));
 
   gl.useProgram(program);
   gl.uniform2f(viewportOffsetLocation, viewport.x, viewport.y);

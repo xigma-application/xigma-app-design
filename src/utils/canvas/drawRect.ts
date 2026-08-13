@@ -1,9 +1,10 @@
 // types
-import { TDraftRect } from 'types/canvas';
+import { TDraftRect, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
 import { hexToRgbaFloat } from './hexToRgbaFloat';
+import { rotatePoint } from 'utils/math/rotatePoint';
 
 export type TDrawableRect = TDraftRect & {
   fill?: string;
@@ -19,21 +20,19 @@ export const drawRect = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  rotation: number,
 ): void => {
   const positionLocation = gl.getAttribLocation(program, 'a_position');
   const colorLocation = gl.getUniformLocation(program, 'u_color');
   const viewportOffsetLocation = gl.getUniformLocation(program, 'u_viewportOffset');
   const zoomLocation = gl.getUniformLocation(program, 'u_zoom');
   const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
+  const center: TPoint = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
 
-  const x1 = rect.x;
-  const y1 = rect.y;
-  const x2 = rect.x + rect.width;
-  const y2 = rect.y;
-  const x3 = rect.x + rect.width;
-  const y3 = rect.y + rect.height;
-  const x4 = rect.x;
-  const y4 = rect.y + rect.height;
+  const { x: x1, y: y1 } = rotatePoint({ x: rect.x, y: rect.y }, center, rotation);
+  const { x: x2, y: y2 } = rotatePoint({ x: rect.x + rect.width, y: rect.y }, center, rotation);
+  const { x: x3, y: y3 } = rotatePoint({ x: rect.x + rect.width, y: rect.y + rect.height }, center, rotation);
+  const { x: x4, y: y4 } = rotatePoint({ x: rect.x, y: rect.y + rect.height }, center, rotation);
 
   gl.useProgram(program);
   gl.uniform2f(viewportOffsetLocation, viewport.x, viewport.y);

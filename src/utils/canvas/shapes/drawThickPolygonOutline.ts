@@ -1,11 +1,12 @@
 // types
-import { TDraftRect } from 'types/canvas';
+import { TDraftRect, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
 import { getPolygonPoints } from './getPolygonPoints';
 import { getQuadVertices } from '../drawThickOutline';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
+import { rotatePoint } from 'utils/math/rotatePoint';
 
 export const drawThickPolygonOutline = (
   gl: WebGL2RenderingContext,
@@ -17,6 +18,7 @@ export const drawThickPolygonOutline = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  rotation: number,
 ): void => {
   const positionLocation = gl.getAttribLocation(program, 'a_position');
   const colorLocation = gl.getUniformLocation(program, 'u_color');
@@ -25,15 +27,16 @@ export const drawThickPolygonOutline = (
   const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
   const halfWidth = strokeWidth / viewport.zoom / 2;
   const { sides } = polygon;
+  const center: TPoint = { x: polygon.x + polygon.width / 2, y: polygon.y + polygon.height / 2 };
 
   const outerPoints = getPolygonPoints(
     { height: polygon.height + halfWidth * 2, width: polygon.width + halfWidth * 2, x: polygon.x - halfWidth, y: polygon.y - halfWidth },
     sides,
-  );
+  ).map((point) => rotatePoint(point, center, rotation));
   const innerPoints = getPolygonPoints(
     { height: polygon.height - halfWidth * 2, width: polygon.width - halfWidth * 2, x: polygon.x + halfWidth, y: polygon.y + halfWidth },
     sides,
-  );
+  ).map((point) => rotatePoint(point, center, rotation));
 
   const vertices = outerPoints.flatMap((outerPoint, index) => {
     const nextIndex = (index + 1) % sides;

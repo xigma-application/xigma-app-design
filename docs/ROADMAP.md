@@ -466,10 +466,52 @@ przeszkodą, żeby edycja pojedynczego node'a czuła się skończona, nie tylko 
       manualnie w przeglądarce (Playwright MCP + własnoręcznie przez użytkownika): box faktycznie
       rośnie po drugiej stronie anchora zamiast utykać, umieszczony obrazek faktycznie się odbija
       (nie tylko jego bbox), a tekst renderuje się lustrzanie
-- [ ] **rotacja** — `rotation` siedzi w `TBaseNode` od Etapu 2, ale nic go nigdy nie ustawia ani
-      nie uwzględnia w renderingu/hit-testingu (`drawEditingText.ts` nawet hardcode'uje `rotation: 0`
-      dla nowego node'a). Potrzebny: uchwyt rotacji tuż za rogiem bboxa + `rotation` uwzględniony w
-      shaderze/hit-teście, nie tylko przechowywany
+- [x] **rotacja** — `rotation` siedział w `TBaseNode` od Etapu 2, ale nic go nigdy nie ustawiało ani
+      nie uwzględniało w renderingu/hit-testingu. Rotacja jest CPU-side post-processingiem już
+      policzonych punktów (ten sam wzorzec co świeżo wdrożony mirror/flip, `flipGlyphVertices.ts`),
+      **nie** shaderowa — bo jest statyczna dopóki użytkownik jej nie zmieni, w przeciwieństwie do
+      pan/zoom (Etap 4, świadomie GPU-side, bo leci co klatkę). Wspólny prymityw
+      `rotatePoint(point, center, degrees)` (`utils/math/rotatePoint.ts`) aplikowany jako ostatni krok
+      w każdym `draw*.ts` (rogi `drawRect`/`drawCornerHandles`, punkty generatorów kształtów
+      `drawEllipse`/`drawPolygon`/`drawStar` — rotacja musi być post-transformem na gotowym `(x, y)`,
+      nie modyfikacją `angle` w generatorach, bo przy `radiusX !== radiusY` dałoby to inny kształt).
+      Dla Media/Text (stride-4 `[x, y, u, v]` bufory) nowy `utils/canvas/rotateVertices.ts`; dla Text
+      komponuje się z istniejącym flipem (`rotateVertices(flipGlyphVertices(...), center,
+      node.rotation)` w `drawMsdfText.ts`).
+
+      **Hit-testing**: zamiast dotykać `isPointInRect/Ellipse/Polygon/Star/Text`, `getNodeAtPoint.ts`
+      raz odwrotnie obraca punkt kliknięcia wokół środka node'a przed dispatchem do niezmienionych
+      funkcji testujących — ten sam trik co przy flipie w `isPointInText.ts`. Ta sama zasada dla
+      uchwytów resize (`getResizeHandleAtPoint.ts`) i dla drag zaznaczonego, obróconego tekstu
+      (`isPointInSelectedTextBounds.ts`). Marquee i wspólny bbox grupy (`getCollidedNodes.ts`,
+      `getSelectionBounds.ts`) przeszły z surowego `getNodeBounds.ts` na nowy
+      `getRotatedNodeBounds.ts` (axis-aligned bbox obróconych rogów) — bo dla obróconego node'a
+      surowy bbox przestaje być jego prawdziwym, widocznym zasięgiem.
+
+      **Uchwyty resize też się obracają** — pozycja i orientacja nadążają za `rotation` pojedynczego
+      zaznaczonego node'a (samo przeciąganie resize zostaje w world space, świadomy kompromis). Nowy
+      uchwyt rotacji to pierścień tuż poza promieniem resize (`ROTATE_HANDLE_OUTER_RADIUS_PX`,
+      `getRotateHandleAtPoint.ts`), jawnie wykluczający punkty wewnątrz bboxa node'a, żeby zwykły
+      klik/drag blisko rogu nie został przechwycony przez rotację. Kursor `rotate.png` obraca się tym
+      samym mechanizmem co `resize.png`, wydzielonym do współdzielonej fabryki
+      `createCursorRotator.ts` (`getRotateCursorAngle.ts` liczy kąt na podstawie ćwiartki lokalnej
+      przestrzeni node'a, skalibrowany tak, że róg "ne" nieobróconego node'a odpowiada 0°, każdy
+      kolejny róg zgodnie z ruchem wskazówek zegara +90°). Kąt kursora nie jest liczony tylko raz przy
+      złapaniu uchwytu — `continueRotateDrag.ts` przelicza go na każdy `pointermove`
+      (`cursorAngle + deltaDegrees`, oba zapamiętane w `TRotateDragState` przy arm) i na bieżąco
+      podmienia `canvas.style.cursor`, więc ikona wizualnie obraca się razem z node'em przez cały
+      czas trwania przeciągnięcia, nie tylko na starcie i końcu.
+
+      **Rotacja działa dla pojedynczego node'a i dla grupy** — grupa nie ma własnego, persystowanego
+      `rotation`; to transient operacja per-drag: każdy człon dostaje `+= deltaDegrees` do własnej
+      `rotation`, a jego środek okrąża wspólny środek grupy o ten sam kąt (`continueRotateDrag.ts`).
+      Dla pojedynczego node'a pivot === środek node'a, więc formuła automatycznie kolapsuje do
+      "pozycja bez zmian, tylko `rotation`" — bez osobnej ścieżki kodu, ten sam trik co przy resize.
+      `line` (bez pola `rotation`) rotuje tylko jako część grupy, przez własne punkty `x1/y1/x2/y2`.
+      Zweryfikowane manualnie w przeglądarce (Playwright MCP): pojedynczy kwadrat wizualnie się
+      obraca wraz z uchwytami, kliknięcie w róg obróconego kształtu (poza jego oryginalnym,
+      nieobróconym bboxem) trafia poprawnie, a rotacja grupy dwóch node'ów pokazuje każdy człon
+      okrążający wspólny środek i obracający się indywidualnie
 - [ ] **corner radius dla Rectangle** — przeciągany uchwyt na rogu prostokąta (jak w Figmie), na
       razie żadnego pola na to w `TRectangleNode`
 - [ ] **klawiszowe skróty edycji**: Delete/Backspace (usuń zaznaczenie), Cmd/Ctrl+D (duplikuj),

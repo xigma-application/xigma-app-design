@@ -26,6 +26,7 @@ export const drawMarquee = (
       canvasWidth,
       canvasHeight,
       viewport,
+      0,
     );
   }
 };

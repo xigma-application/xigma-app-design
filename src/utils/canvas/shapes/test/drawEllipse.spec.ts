@@ -30,7 +30,7 @@ describe('drawEllipse', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawEllipse(gl, program, buffer, { fill: '#ffffff', height: 10, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT);
+    drawEllipse(gl, program, buffer, { fill: '#ffffff', height: 10, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, 0);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLE_FAN, 0, expect.any(Number));
@@ -43,7 +43,7 @@ describe('drawEllipse', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawEllipse(gl, program, buffer, { height: 10, stroke: '#ffffff', width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT);
+    drawEllipse(gl, program, buffer, { height: 10, stroke: '#ffffff', width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, 0);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINE_LOOP, 0, expect.any(Number));
@@ -56,7 +56,7 @@ describe('drawEllipse', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawEllipse(gl, program, buffer, { height: 10, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT);
+    drawEllipse(gl, program, buffer, { height: 10, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, 0);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -69,11 +69,20 @@ describe('drawEllipse', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawEllipse(gl, program, buffer, { fill: '#ffffff', height: 10, width: 10, x: 0, y: 0 }, 100, 200, {
-      x: 5,
-      y: 15,
-      zoom: 2,
-    });
+    drawEllipse(
+      gl,
+      program,
+      buffer,
+      { fill: '#ffffff', height: 10, width: 10, x: 0, y: 0 },
+      100,
+      200,
+      {
+        x: 5,
+        y: 15,
+        zoom: 2,
+      },
+      0,
+    );
 
     // result
     expect(gl.uniform2f).toHaveBeenCalledWith(expect.anything(), 5, 15);
@@ -88,7 +97,7 @@ describe('drawEllipse', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawEllipse(gl, program, buffer, { fill: '#ffffff', height: 20, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT);
+    drawEllipse(gl, program, buffer, { fill: '#ffffff', height: 20, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, 0);
 
     // result
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -96,5 +105,22 @@ describe('drawEllipse', () => {
 
     expect(vertices[0]).toBe(5);
     expect(vertices[1]).toBe(10);
+  });
+
+  it('should rotate the fan points around the center when rotation is given', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawEllipse(gl, program, buffer, { fill: '#ffffff', height: 20, width: 20, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, 90);
+
+    // result
+    const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = firstFillCall[1];
+
+    expect(vertices[2]).toBeCloseTo(10);
+    expect(vertices[3]).toBeCloseTo(20);
   });
 });

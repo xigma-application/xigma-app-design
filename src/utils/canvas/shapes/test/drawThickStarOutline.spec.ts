@@ -39,6 +39,7 @@ describe('drawThickStarOutline', () => {
       100,
       100,
       IDENTITY_VIEWPORT,
+      0,
     );
 
     // result
@@ -65,19 +66,17 @@ describe('drawThickStarOutline', () => {
       100,
       100,
       IDENTITY_VIEWPORT,
+      0,
     );
 
     // result
     const [firstCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
     const vertices: Float32Array = firstCall[1];
 
-    // the first quad's vertex layout is [outer0, outer1, inner1, outer0, inner1, inner0]
     const outerRightEdge = vertices[2];
     const innerRightEdge = vertices[8];
 
-    // the outer ring reaches past the diamond's own right vertex (cx + rx = 10); a filled shape never would
     expect(outerRightEdge).toBeCloseTo(11);
-    // the inner ring stops short of the full radius (cx + rx = 10); a filled shape would reach all the way there
     expect(innerRightEdge).toBeCloseTo(9);
   });
 
@@ -88,19 +87,56 @@ describe('drawThickStarOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawThickStarOutline(gl, program, buffer, { height: 20, points: 2, ratio: 1, width: 10, x: 0, y: 0 }, '#0d99ff', 8, 100, 100, {
-      x: 0,
-      y: 0,
-      zoom: 2,
-    });
+    drawThickStarOutline(
+      gl,
+      program,
+      buffer,
+      { height: 20, points: 2, ratio: 1, width: 10, x: 0, y: 0 },
+      '#0d99ff',
+      8,
+      100,
+      100,
+      {
+        x: 0,
+        y: 0,
+        zoom: 2,
+      },
+      0,
+    );
 
     // result
     const [firstCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
     const vertices: Float32Array = firstCall[1];
-    // the outer ring's rightmost point sits at (cx + rx + halfWidth); at zoom 2 with an 8px border,
-    // halfWidth in world space is (8 / 2) / 2 = 2, so it reaches 5 (cx) + 5 (rx) + 2 = 12
     const worldMaxX = Math.max(...Array.from(vertices).filter((_, index) => index % 2 === 0));
 
     expect(worldMaxX).toBeCloseTo(12);
+  });
+
+  it('should rotate the outer ring points around the center when rotation is given', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawThickStarOutline(
+      gl,
+      program,
+      buffer,
+      { height: 10, points: 2, ratio: 1, width: 10, x: 0, y: 0 },
+      '#0d99ff',
+      2,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      90,
+    );
+
+    // result
+    const [firstCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = firstCall[1];
+
+    expect(vertices[2]).toBeCloseTo(5);
+    expect(vertices[3]).toBeCloseTo(11);
   });
 });

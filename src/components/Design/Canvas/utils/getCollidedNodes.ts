@@ -3,7 +3,7 @@ import { TDraftRect } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { getNodeBounds } from './getNodeBounds';
+import { getRotatedNodeBounds } from './getRotatedNodeBounds';
 
 export const getCollidedNodes = (nodes: TSceneNode[], area: TDraftRect, requireFullyInside: boolean): TSceneNode[] => {
   const x1 = area.x;
@@ -12,7 +12,7 @@ export const getCollidedNodes = (nodes: TSceneNode[], area: TDraftRect, requireF
   const y2 = area.y + area.height;
 
   return nodes.filter((node) => {
-    const bounds = getNodeBounds(node);
+    const bounds = getRotatedNodeBounds(node);
     const nodeX2 = bounds.x + bounds.width;
     const nodeY2 = bounds.y + bounds.height;
 

@@ -6,7 +6,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TDragState, TEndpointDragState, TResizeDragState } from '../../../types';
+import { TDragState, TEndpointDragState, TResizeDragState, TRotateDragState } from '../../../types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -27,6 +27,7 @@ const pointerEvent = (x: number, y: number, options: Partial<PointerEventInit> =
 const createDragStateRef = (): RefObject<TDragState | null> => ({ current: null });
 const createEndpointDragRef = (): RefObject<TEndpointDragState | null> => ({ current: null });
 const createResizeDragRef = (): RefObject<TResizeDragState | null> => ({ current: null });
+const createRotateDragRef = (): RefObject<TRotateDragState | null> => ({ current: null });
 const createMarqueeStartRef = (): RefObject<TPoint | null> => ({ current: null });
 
 const addFrameNode = (x: number, y: number, size = 20): string => {
@@ -101,6 +102,7 @@ describe('handlePointerDown', () => {
       dragStateRef,
       createEndpointDragRef(),
       createResizeDragRef(),
+      createRotateDragRef(),
       marqueeStartRef,
     );
 
@@ -124,6 +126,7 @@ describe('handlePointerDown', () => {
       dragStateRef,
       createEndpointDragRef(),
       createResizeDragRef(),
+      createRotateDragRef(),
       marqueeStartRef,
     );
 
@@ -147,6 +150,7 @@ describe('handlePointerDown', () => {
       dragStateRef,
       createEndpointDragRef(),
       createResizeDragRef(),
+      createRotateDragRef(),
       marqueeStartRef,
     );
 
@@ -174,6 +178,7 @@ describe('handlePointerDown', () => {
       dragStateRef,
       createEndpointDragRef(),
       createResizeDragRef(),
+      createRotateDragRef(),
       marqueeStartRef,
     );
 
@@ -199,6 +204,7 @@ describe('handlePointerDown', () => {
       dragStateRef,
       createEndpointDragRef(),
       createResizeDragRef(),
+      createRotateDragRef(),
       marqueeStartRef,
     );
 
@@ -227,6 +233,7 @@ describe('handlePointerDown', () => {
       dragStateRef,
       createEndpointDragRef(),
       createResizeDragRef(),
+      createRotateDragRef(),
       marqueeStartRef,
     );
 
@@ -251,6 +258,7 @@ describe('handlePointerDown', () => {
       dragStateRef,
       createEndpointDragRef(),
       createResizeDragRef(),
+      createRotateDragRef(),
       marqueeStartRef,
     );
 
@@ -279,6 +287,7 @@ describe('handlePointerDown', () => {
       dragStateRef,
       endpointDragRef,
       createResizeDragRef(),
+      createRotateDragRef(),
       marqueeStartRef,
     );
 
@@ -306,6 +315,7 @@ describe('handlePointerDown', () => {
       dragStateRef,
       endpointDragRef,
       createResizeDragRef(),
+      createRotateDragRef(),
       marqueeStartRef,
     );
 
@@ -333,11 +343,41 @@ describe('handlePointerDown', () => {
       dragStateRef,
       createEndpointDragRef(),
       resizeDragRef,
+      createRotateDragRef(),
       marqueeStartRef,
     );
 
     // result
     expect(resizeDragRef.current).toMatchObject({ handle: 'nw' });
+    expect(dragStateRef.current).toBeNull();
+    expect(canvas.setPointerCapture).toHaveBeenCalled();
+  });
+
+  it('should delegate to armRotateDrag when the ring just outside a resize handle is hit', () => {
+    // mock — the "nw" corner sits at (2500, 2500)
+    const idA = addFrameNode(2500, 2500, 100);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvas = createCanvas();
+    const dragStateRef = createDragStateRef();
+    const rotateDragRef = createRotateDragRef();
+    const marqueeStartRef = createMarqueeStartRef();
+
+    // before — 10 world units above the corner, inside the rotate ring but outside the resize radius
+    handlePointerDown(
+      canvas,
+      pointerEvent(2500, 2490),
+      store.dispatch,
+      dragStateRef,
+      createEndpointDragRef(),
+      createResizeDragRef(),
+      rotateDragRef,
+      marqueeStartRef,
+    );
+
+    // result
+    expect(rotateDragRef.current).not.toBeNull();
     expect(dragStateRef.current).toBeNull();
     expect(canvas.setPointerCapture).toHaveBeenCalled();
   });

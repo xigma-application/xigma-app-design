@@ -3,10 +3,10 @@ import { TDraftRect } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { getNodeBounds } from './getNodeBounds';
+import { getRotatedNodeBounds } from './getRotatedNodeBounds';
 
 export const getSelectionBounds = (nodes: TSceneNode[]): TDraftRect => {
-  const bounds = nodes.map(getNodeBounds);
+  const bounds = nodes.map(getRotatedNodeBounds);
   const minX = Math.min(...bounds.map((bound) => bound.x));
   const minY = Math.min(...bounds.map((bound) => bound.y));
   const maxX = Math.max(...bounds.map((bound) => bound.x + bound.width));

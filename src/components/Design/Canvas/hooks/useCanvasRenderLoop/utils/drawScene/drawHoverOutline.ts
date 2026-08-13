@@ -35,6 +35,7 @@ export const drawHoverOutline = (
           canvasWidth,
           canvasHeight,
           viewport,
+          hoveredNode.rotation,
         );
         break;
       case NodeType.polygon:
@@ -48,6 +49,7 @@ export const drawHoverOutline = (
           canvasWidth,
           canvasHeight,
           viewport,
+          hoveredNode.rotation,
         );
         break;
       case NodeType.star:
@@ -61,6 +63,7 @@ export const drawHoverOutline = (
           canvasWidth,
           canvasHeight,
           viewport,
+          hoveredNode.rotation,
         );
         break;
       case NodeType.line:
@@ -80,7 +83,18 @@ export const drawHoverOutline = (
         drawTextHoverUnderline(gl, program, buffer, hoveredNode, canvasWidth, canvasHeight, viewport);
         break;
       default:
-        drawThickOutline(gl, program, buffer, hoveredNode, DRAFT_FRAME_STROKE, HOVER_OUTLINE_WIDTH, canvasWidth, canvasHeight, viewport);
+        drawThickOutline(
+          gl,
+          program,
+          buffer,
+          hoveredNode,
+          DRAFT_FRAME_STROKE,
+          HOVER_OUTLINE_WIDTH,
+          canvasWidth,
+          canvasHeight,
+          viewport,
+          hoveredNode.rotation,
+        );
     }
   }
 };

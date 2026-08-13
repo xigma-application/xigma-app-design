@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from 'store';
 
 // types
 import { ToolName } from 'types/design/enums';
-import { TDragState, TEndpointDragState, TResizeDragState } from './types';
+import { TDragState, TEndpointDragState, TResizeDragState, TRotateDragState } from './types';
 import { TDraftRect, TPoint } from 'types/canvas';
 
 // utils
@@ -20,6 +20,7 @@ export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>,
   const dragStateRef = useRef<TDragState | null>(null);
   const endpointDragRef = useRef<TEndpointDragState | null>(null);
   const resizeDragRef = useRef<TResizeDragState | null>(null);
+  const rotateDragRef = useRef<TRotateDragState | null>(null);
   const marqueeStartRef = useRef<TPoint | null>(null);
 
   useEffect(() => {
@@ -27,13 +28,23 @@ export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>,
 
     if (canvas && activeTool === ToolName.default) {
       const onPointerDown = (event: PointerEvent): void =>
-        handlePointerDown(canvas, event, dispatch, dragStateRef, endpointDragRef, resizeDragRef, marqueeStartRef);
+        handlePointerDown(canvas, event, dispatch, dragStateRef, endpointDragRef, resizeDragRef, rotateDragRef, marqueeStartRef);
 
       const onPointerMove = (event: PointerEvent): void =>
-        handlePointerMove(canvas, event, dispatch, dragStateRef, endpointDragRef, resizeDragRef, marqueeStartRef, marqueeRef);
+        handlePointerMove(
+          canvas,
+          event,
+          dispatch,
+          dragStateRef,
+          endpointDragRef,
+          resizeDragRef,
+          rotateDragRef,
+          marqueeStartRef,
+          marqueeRef,
+        );
 
       const onPointerUp = (event: PointerEvent): void =>
-        handlePointerUp(canvas, event, dispatch, dragStateRef, endpointDragRef, resizeDragRef, marqueeStartRef, marqueeRef);
+        handlePointerUp(canvas, event, dispatch, dragStateRef, endpointDragRef, resizeDragRef, rotateDragRef, marqueeStartRef, marqueeRef);
 
       canvas.addEventListener('pointerdown', onPointerDown);
       canvas.addEventListener('pointermove', onPointerMove);

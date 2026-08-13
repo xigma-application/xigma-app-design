@@ -1,6 +1,9 @@
 // types
-import { TDraftRect } from 'types/canvas';
+import { TDraftRect, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
+
+// utils
+import { rotateVertices } from './rotateVertices';
 
 export const drawImage = (
   gl: WebGL2RenderingContext,
@@ -13,6 +16,7 @@ export const drawImage = (
   viewport: TViewport,
   flipX: boolean,
   flipY: boolean,
+  rotation: number,
 ): void => {
   if (texture) {
     const positionLocation = gl.getAttribLocation(program, 'a_position');
@@ -36,32 +40,37 @@ export const drawImage = (
     const vMin = flipY ? 1 : 0;
     const vMax = flipY ? 0 : 1;
 
-    const vertices = new Float32Array([
-      x1,
-      y1,
-      uMin,
-      vMin,
-      x2,
-      y2,
-      uMax,
-      vMin,
-      x3,
-      y3,
-      uMax,
-      vMax,
-      x1,
-      y1,
-      uMin,
-      vMin,
-      x3,
-      y3,
-      uMax,
-      vMax,
-      x4,
-      y4,
-      uMin,
-      vMax,
-    ]);
+    const center: TPoint = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+    const vertices = rotateVertices(
+      new Float32Array([
+        x1,
+        y1,
+        uMin,
+        vMin,
+        x2,
+        y2,
+        uMax,
+        vMin,
+        x3,
+        y3,
+        uMax,
+        vMax,
+        x1,
+        y1,
+        uMin,
+        vMin,
+        x3,
+        y3,
+        uMax,
+        vMax,
+        x4,
+        y4,
+        uMin,
+        vMax,
+      ]),
+      center,
+      rotation,
+    );
     const stride = 4 * Float32Array.BYTES_PER_ELEMENT;
 
     gl.useProgram(program);

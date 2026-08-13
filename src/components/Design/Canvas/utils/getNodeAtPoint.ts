@@ -7,30 +7,45 @@ import { TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
+import { getNodeBounds } from './getNodeBounds';
 import { isPointInEllipse } from './isPointInEllipse';
 import { isPointInPolygon } from './isPointInPolygon';
 import { isPointInRect } from './isPointInRect';
 import { isPointInStar } from './isPointInStar';
 import { isPointInText } from './isPointInText';
 import { isPointNearLine } from './isPointNearLine';
+import { rotatePoint } from 'utils/math/rotatePoint';
+
+const getUnrotatedQueryPoint = (point: TPoint, node: TSceneNode): TPoint => {
+  if (node.type === NodeType.line || node.rotation === 0) {
+    return point;
+  }
+
+  const bounds = getNodeBounds(node);
+  const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+
+  return rotatePoint(point, center, -node.rotation);
+};
 
 export const getNodeAtPoint = (point: TPoint, nodes: TSceneNode[], viewport: TViewport): TSceneNode | null => {
   const lineTolerance = LINE_HIT_TOLERANCE_PX / viewport.zoom;
 
   const hit = [...nodes].reverse().find((node) => {
+    const testPoint = getUnrotatedQueryPoint(point, node);
+
     switch (node.type) {
       case NodeType.ellipse:
-        return isPointInEllipse(point, node);
+        return isPointInEllipse(testPoint, node);
       case NodeType.polygon:
-        return isPointInPolygon(point, node);
+        return isPointInPolygon(testPoint, node);
       case NodeType.star:
-        return isPointInStar(point, node);
+        return isPointInStar(testPoint, node);
       case NodeType.line:
-        return isPointNearLine(point, node, lineTolerance);
+        return isPointNearLine(testPoint, node, lineTolerance);
       case NodeType.text:
-        return isPointInText(point, node);
+        return isPointInText(testPoint, node);
       default:
-        return isPointInRect(point, node);
+        return isPointInRect(testPoint, node);
     }
   });
 

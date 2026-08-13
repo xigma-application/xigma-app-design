@@ -20,6 +20,6 @@ export const drawGroupSelectionOutline = (
 ): void => {
   const bounds = getSelectionBounds(selectedNodes);
 
-  drawRect(gl, program, buffer, { ...bounds, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport);
-  drawCornerHandles(gl, program, buffer, bounds, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport);
+  drawRect(gl, program, buffer, { ...bounds, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport, 0);
+  drawCornerHandles(gl, program, buffer, bounds, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport, 0);
 };

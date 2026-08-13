@@ -38,6 +38,7 @@ describe('drawStar', () => {
       100,
       100,
       IDENTITY_VIEWPORT,
+      0,
     );
 
     // result
@@ -59,6 +60,7 @@ describe('drawStar', () => {
       100,
       100,
       IDENTITY_VIEWPORT,
+      0,
     );
 
     // result
@@ -72,7 +74,7 @@ describe('drawStar', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawStar(gl, program, buffer, { height: 10, points: 5, ratio: 0.382, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT);
+    drawStar(gl, program, buffer, { height: 10, points: 5, ratio: 0.382, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, 0);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -85,11 +87,20 @@ describe('drawStar', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawStar(gl, program, buffer, { fill: '#ffffff', height: 10, points: 5, ratio: 0.382, width: 10, x: 0, y: 0 }, 100, 200, {
-      x: 5,
-      y: 15,
-      zoom: 2,
-    });
+    drawStar(
+      gl,
+      program,
+      buffer,
+      { fill: '#ffffff', height: 10, points: 5, ratio: 0.382, width: 10, x: 0, y: 0 },
+      100,
+      200,
+      {
+        x: 5,
+        y: 15,
+        zoom: 2,
+      },
+      0,
+    );
 
     // result
     expect(gl.uniform2f).toHaveBeenCalledWith(expect.anything(), 5, 15);
@@ -112,6 +123,7 @@ describe('drawStar', () => {
       100,
       100,
       IDENTITY_VIEWPORT,
+      0,
     );
 
     // result
@@ -120,5 +132,31 @@ describe('drawStar', () => {
 
     expect(vertices[0]).toBe(5);
     expect(vertices[1]).toBe(10);
+  });
+
+  it('should rotate the fan points around the center when rotation is given', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawStar(
+      gl,
+      program,
+      buffer,
+      { fill: '#ffffff', height: 20, points: 4, ratio: 0.5, width: 20, x: 0, y: 0 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      90,
+    );
+
+    // result
+    const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = firstFillCall[1];
+
+    expect(vertices[2]).toBeCloseTo(20);
+    expect(vertices[3]).toBeCloseTo(10);
   });
 });

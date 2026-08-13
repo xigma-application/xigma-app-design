@@ -4,6 +4,7 @@ import { TFrameNode, TLineNode } from 'types/design/types';
 
 // utils
 import { getResizeHandleAtPoint } from '../getResizeHandleAtPoint';
+import { rotatePoint } from 'utils/math/rotatePoint';
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
@@ -60,19 +61,29 @@ describe('getResizeHandleAtPoint', () => {
     expect(getResizeHandleAtPoint({ x: 0, y: 0 }, [nodeA, nodeB], IDENTITY_VIEWPORT)).toBeNull();
   });
 
-  it('should detect each corner handle on a single selected node, with its own rotation', () => {
-    // mock
+  it('should detect each corner handle on a single selected node, at its actual rotated position', () => {
+    // mock — the bounds stay the raw, unrotated x/y/width/height, but the handles themselves are
     const node = frame('a', 0, 0, 100, 100, null, 30);
+    const center = { x: 50, y: 50 };
 
     // result
-    expect(getResizeHandleAtPoint({ x: 0, y: 0 }, [node], IDENTITY_VIEWPORT)).toEqual({
+    expect(getResizeHandleAtPoint(rotatePoint({ x: 0, y: 0 }, center, 30), [node], IDENTITY_VIEWPORT)).toEqual({
       bounds: { height: 100, width: 100, x: 0, y: 0 },
       handle: 'nw',
       rotation: 30,
     });
-    expect(getResizeHandleAtPoint({ x: 100, y: 0 }, [node], IDENTITY_VIEWPORT)).toMatchObject({ handle: 'ne' });
-    expect(getResizeHandleAtPoint({ x: 100, y: 100 }, [node], IDENTITY_VIEWPORT)).toMatchObject({ handle: 'se' });
-    expect(getResizeHandleAtPoint({ x: 0, y: 100 }, [node], IDENTITY_VIEWPORT)).toMatchObject({ handle: 'sw' });
+    expect(getResizeHandleAtPoint(rotatePoint({ x: 100, y: 0 }, center, 30), [node], IDENTITY_VIEWPORT)).toMatchObject({ handle: 'ne' });
+    expect(getResizeHandleAtPoint(rotatePoint({ x: 100, y: 100 }, center, 30), [node], IDENTITY_VIEWPORT)).toMatchObject({ handle: 'se' });
+    expect(getResizeHandleAtPoint(rotatePoint({ x: 0, y: 100 }, center, 30), [node], IDENTITY_VIEWPORT)).toMatchObject({ handle: 'sw' });
+  });
+
+  it('should identify the handle by its physically rotated position, not its raw corner label', () => {
+    // mock — rotating the node 90deg around its center (50, 50) swings the raw "nw" corner over to
+    const node = frame('a', 0, 0, 100, 100, null, 90);
+
+    // result
+    expect(getResizeHandleAtPoint({ x: 0, y: 0 }, [node], IDENTITY_VIEWPORT)).toMatchObject({ handle: 'sw' });
+    expect(getResizeHandleAtPoint({ x: 100, y: 0 }, [node], IDENTITY_VIEWPORT)).toMatchObject({ handle: 'nw' });
   });
 
   it('should detect each edge handle on a single selected node', () => {
@@ -109,7 +120,6 @@ describe('getResizeHandleAtPoint', () => {
     const node = frame('a', 0, 0, 100, 100);
 
     // result — CORNER_HANDLE_SIZE is 6, so 10 world units off the "nw" corner misses at zoom 1
-    // but hits at zoom 0.5 (12px radius covers more world space)
     expect(getResizeHandleAtPoint({ x: -10, y: 0 }, [node], IDENTITY_VIEWPORT)).toBeNull();
     expect(getResizeHandleAtPoint({ x: -10, y: 0 }, [node], { x: 0, y: 0, zoom: 0.5 })).toMatchObject({ handle: 'nw' });
   });

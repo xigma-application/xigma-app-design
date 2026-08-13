@@ -27,16 +27,16 @@ export const drawDraftShape = (
 ): void => {
   switch (draftShape.type) {
     case NodeType.ellipse:
-      drawEllipse(gl, program, buffer, draftShape, canvasWidth, canvasHeight, viewport);
-      drawRect(gl, program, buffer, { ...draftShape, fill: undefined, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport);
+      drawEllipse(gl, program, buffer, draftShape, canvasWidth, canvasHeight, viewport, 0);
+      drawRect(gl, program, buffer, { ...draftShape, fill: undefined, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport, 0);
       break;
     case NodeType.polygon:
-      drawPolygon(gl, program, buffer, draftShape, canvasWidth, canvasHeight, viewport);
-      drawRect(gl, program, buffer, { ...draftShape, fill: undefined, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport);
+      drawPolygon(gl, program, buffer, draftShape, canvasWidth, canvasHeight, viewport, 0);
+      drawRect(gl, program, buffer, { ...draftShape, fill: undefined, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport, 0);
       break;
     case NodeType.star:
-      drawStar(gl, program, buffer, draftShape, canvasWidth, canvasHeight, viewport);
-      drawRect(gl, program, buffer, { ...draftShape, fill: undefined, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport);
+      drawStar(gl, program, buffer, draftShape, canvasWidth, canvasHeight, viewport, 0);
+      drawRect(gl, program, buffer, { ...draftShape, fill: undefined, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport, 0);
       break;
     case NodeType.media:
       drawImage(
@@ -50,11 +50,12 @@ export const drawDraftShape = (
         viewport,
         false,
         false,
+        0,
       );
-      drawRect(gl, program, buffer, { ...draftShape, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport);
+      drawRect(gl, program, buffer, { ...draftShape, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport, 0);
       break;
     case NodeType.text:
-      drawRect(gl, program, buffer, { ...draftShape, fill: undefined, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport);
+      drawRect(gl, program, buffer, { ...draftShape, fill: undefined, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport, 0);
       break;
     default:
       drawRect(
@@ -65,8 +66,9 @@ export const drawDraftShape = (
         canvasWidth,
         canvasHeight,
         viewport,
+        0,
       );
   }
 
-  drawCornerHandles(gl, program, buffer, draftShape, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport);
+  drawCornerHandles(gl, program, buffer, draftShape, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport, 0);
 };

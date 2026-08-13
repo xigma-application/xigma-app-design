@@ -33,7 +33,7 @@ describe('drawCornerHandles', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawCornerHandles(gl, program, buffer, { height: 20, width: 10, x: 0, y: 0 }, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawCornerHandles(gl, program, buffer, { height: 20, width: 10, x: 0, y: 0 }, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(8);
@@ -48,7 +48,7 @@ describe('drawCornerHandles', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawCornerHandles(gl, program, buffer, { height: 20, width: 10, x: 0, y: 0 }, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawCornerHandles(gl, program, buffer, { height: 20, width: 10, x: 0, y: 0 }, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
 
     // result
     const bufferDataCalls = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -66,11 +66,21 @@ describe('drawCornerHandles', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawCornerHandles(gl, program, buffer, { height: 20, width: 10, x: 0, y: 0 }, '#0d99ff', 100, 100, {
-      x: 0,
-      y: 0,
-      zoom: 4,
-    });
+    drawCornerHandles(
+      gl,
+      program,
+      buffer,
+      { height: 20, width: 10, x: 0, y: 0 },
+      '#0d99ff',
+      100,
+      100,
+      {
+        x: 0,
+        y: 0,
+        zoom: 4,
+      },
+      0,
+    );
 
     // result
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -80,5 +90,24 @@ describe('drawCornerHandles', () => {
 
     expect(worldWidth).toBeCloseTo(CORNER_HANDLE_SIZE / 4);
     expect(screenWidth).toBeCloseTo(CORNER_HANDLE_SIZE);
+  });
+
+  it('should rotate each handle position around the rect center when rotation is given', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCornerHandles(gl, program, buffer, { height: 20, width: 20, x: 0, y: 0 }, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 90);
+
+    // result
+    const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = firstFillCall[1];
+    const handleCenterX = (vertices[0] + vertices[4]) / 2;
+    const handleCenterY = (vertices[1] + vertices[5]) / 2;
+
+    expect(handleCenterX).toBeCloseTo(20);
+    expect(handleCenterY).toBeCloseTo(0);
   });
 });

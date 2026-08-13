@@ -156,12 +156,20 @@ describe('getNodeAtPoint', () => {
     expect(getNodeAtPoint({ x: 2, y: 2 }, [node], IDENTITY_VIEWPORT)).toEqual(node);
   });
 
+  it('should hit-test against the rotated shape, not the unrotated bounding box', () => {
+    // mock
+    const node = buildNode({ height: 10, rotation: 90, width: 20, x: 0, y: 0 });
+
+    // result — (10, -3) sits inside the box once rotated 90deg around its center (10, 5), even
+    expect(getNodeAtPoint({ x: 10, y: -3 }, [node], IDENTITY_VIEWPORT)).toEqual(node);
+    expect(getNodeAtPoint({ x: 19, y: 9 }, [node], IDENTITY_VIEWPORT)).toBeNull();
+  });
+
   it('should widen the line hit-test tolerance in world units as the viewport zooms out', () => {
     // mock
     const line: TSceneNode = { id: 'a', name: 'Line', parentId: null, stroke: '#000000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 0 };
 
     // result — 6 world units off the segment misses at zoom 1 (4px tolerance) but hits at zoom
-    // 0.5 (8px tolerance covers more world space)
     expect(getNodeAtPoint({ x: 5, y: 6 }, [line], IDENTITY_VIEWPORT)).toBeNull();
     expect(getNodeAtPoint({ x: 5, y: 6 }, [line], { x: 0, y: 0, zoom: 0.5 })).toEqual(line);
   });

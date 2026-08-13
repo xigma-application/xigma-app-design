@@ -1,11 +1,11 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TSceneNode } from 'types/design/types';
+import { TSceneNode, TTextNode } from 'types/design/types';
 
 // utils
 import { isPointInSelectedTextBounds } from '../isPointInSelectedTextBounds';
 
-const buildTextNode = (id = 'a'): TSceneNode => ({
+const buildTextNode = (id = 'a'): TTextNode => ({
   content: 'Hi',
   fill: '#ffffff',
   flipX: false,
@@ -55,5 +55,14 @@ describe('isPointInSelectedTextBounds', () => {
 
   it('should return false when the point falls outside the box entirely', () => {
     expect(isPointInSelectedTextBounds({ x: 900, y: 900 }, [buildTextNode()])).toBe(false);
+  });
+
+  it('should test against the box in its actual rotated orientation, not the raw unrotated one', () => {
+    // mock — a 500x200 box rotated 90deg around its center (250, 100) physically occupies
+    const node: TSceneNode = { ...buildTextNode(), height: 200, rotation: 90, width: 500 };
+
+    // result — (200, -100) sits outside the raw box's y-range but inside the physically rotated
+    expect(isPointInSelectedTextBounds({ x: 200, y: -100 }, [node])).toBe(true);
+    expect(isPointInSelectedTextBounds({ x: 450, y: 50 }, [node])).toBe(false);
   });
 });

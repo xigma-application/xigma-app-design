@@ -10,6 +10,17 @@ import { TSceneNode, TViewport } from 'types/design/types';
 import { getNodeBounds } from './getNodeBounds';
 import { getSelectionBounds } from './getSelectionBounds';
 import { isGroupSelection } from './isGroupSelection';
+import { rotatePoint } from 'utils/math/rotatePoint';
+
+const getUnrotatedQueryPoint = (point: TPoint, bounds: TDraftRect, rotation: number): TPoint => {
+  if (rotation === 0) {
+    return point;
+  }
+
+  const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+
+  return rotatePoint(point, center, -rotation);
+};
 
 const getHandleAtBounds = (point: TPoint, bounds: TDraftRect, viewport: TViewport): TResizeHandle | null => {
   const { height, width, x, y } = bounds;
@@ -53,7 +64,8 @@ export const getResizeHandleAtPoint = (
 
   if (selectedNodes.length === 1 && singleNode.type !== NodeType.line) {
     const bounds = getNodeBounds(singleNode);
-    const handle = getHandleAtBounds(point, bounds, viewport);
+    const testPoint = getUnrotatedQueryPoint(point, bounds, singleNode.rotation);
+    const handle = getHandleAtBounds(testPoint, bounds, viewport);
 
     return handle ? { bounds, handle, rotation: singleNode.rotation } : null;
   }

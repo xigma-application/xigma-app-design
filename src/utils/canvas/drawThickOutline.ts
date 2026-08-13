@@ -1,9 +1,10 @@
 // types
-import { TDraftRect } from 'types/canvas';
+import { TDraftRect, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
 import { hexToRgbaFloat } from './hexToRgbaFloat';
+import { rotatePoint } from 'utils/math/rotatePoint';
 
 export const getQuadVertices = (
   x1: number,
@@ -16,6 +17,11 @@ export const getQuadVertices = (
   y4: number,
 ): number[] => [x1, y1, x2, y2, x3, y3, x1, y1, x3, y3, x4, y4];
 
+const rotateFlatVertices = (flat: number[], center: TPoint, rotation: number): number[] =>
+  Array.from({ length: flat.length / 2 }, (_, index) =>
+    rotatePoint({ x: flat[index * 2], y: flat[index * 2 + 1] }, center, rotation),
+  ).flatMap((point) => [point.x, point.y]);
+
 export const drawThickOutline = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
@@ -26,6 +32,7 @@ export const drawThickOutline = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  rotation: number,
 ): void => {
   const positionLocation = gl.getAttribLocation(program, 'a_position');
   const colorLocation = gl.getUniformLocation(program, 'u_color');
@@ -42,12 +49,14 @@ export const drawThickOutline = (
   const innerX2 = rect.x + rect.width - halfWidth;
   const innerY2 = rect.y + rect.height - halfWidth;
 
-  const vertices = [
+  const rawVertices = [
     ...getQuadVertices(outerX1, outerY1, outerX2, outerY1, outerX2, innerY1, outerX1, innerY1), // top
     ...getQuadVertices(outerX1, innerY2, outerX2, innerY2, outerX2, outerY2, outerX1, outerY2), // bottom
     ...getQuadVertices(outerX1, innerY1, innerX1, innerY1, innerX1, innerY2, outerX1, innerY2), // left
     ...getQuadVertices(innerX2, innerY1, outerX2, innerY1, outerX2, innerY2, innerX2, innerY2), // right
   ];
+  const center: TPoint = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+  const vertices = rotateFlatVertices(rawVertices, center, rotation);
 
   gl.useProgram(program);
   gl.uniform2f(viewportOffsetLocation, viewport.x, viewport.y);

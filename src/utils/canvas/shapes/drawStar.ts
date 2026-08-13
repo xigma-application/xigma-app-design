@@ -5,6 +5,7 @@ import { TViewport } from 'types/design/types';
 // utils
 import { getStarPoints } from './getStarPoints';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
+import { rotatePoint } from 'utils/math/rotatePoint';
 
 export type TDrawableStar = TDraftRect & {
   fill?: string;
@@ -24,6 +25,7 @@ export const drawStar = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  rotation: number,
 ): void => {
   const positionLocation = gl.getAttribLocation(program, 'a_position');
   const colorLocation = gl.getUniformLocation(program, 'u_color');
@@ -31,8 +33,8 @@ export const drawStar = (
   const zoomLocation = gl.getUniformLocation(program, 'u_zoom');
   const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
 
-  const points = getStarPoints(star, star.points, star.ratio);
   const center: TPoint = { x: star.x + star.width / 2, y: star.y + star.height / 2 };
+  const points = getStarPoints(star, star.points, star.ratio).map((point) => rotatePoint(point, center, rotation));
 
   gl.useProgram(program);
   gl.uniform2f(viewportOffsetLocation, viewport.x, viewport.y);

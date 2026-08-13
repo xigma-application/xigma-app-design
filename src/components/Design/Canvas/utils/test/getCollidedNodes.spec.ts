@@ -65,6 +65,15 @@ describe('getCollidedNodes', () => {
     expect(getCollidedNodes([node], area, false)).toEqual([node]);
   });
 
+  it('should collide against the rotated bounding box, not the unrotated one', () => {
+    // mock — a 20x10 rect rotated 90deg around its center (10, 5) occupies x:[5,15], y:[-5,15];
+    const node = buildNode({ height: 10, rotation: 90, width: 20, x: 0, y: 0 });
+    const area = { height: 2, width: 2, x: 12, y: -4 };
+
+    // result
+    expect(getCollidedNodes([node], area, false)).toEqual([node]);
+  });
+
   it('should collide a line node using the bounding box derived from its endpoints', () => {
     // mock
     const line: TSceneNode = {

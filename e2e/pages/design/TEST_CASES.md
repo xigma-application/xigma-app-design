@@ -349,6 +349,54 @@ not from position or size differing (`resize.spec.ts` picks a visibly asymmetric
 existing `hand.png` cursor asset — since the `create-media.spec.ts` fixtures are near-symmetric and
 wouldn't show a flip in a screenshot diff).
 
+## Rotation (Etap 10)
+
+`rotation` has sat unused on `TBaseNode` since Etap 2; nothing ever set it or rendered it. This adds
+real rotation for a single selected non-line node **or** a group selection, sharing the same
+single-node-is-a-degenerate-group formula as resize (`continueRotateDrag.ts`: a lone node's own
+center equals the pivot, so `rotatePoint` naturally leaves its position untouched and only spins its
+`rotation`). Every `draw*.ts` function now takes a trailing `rotation` and rotates its already-computed
+(unrotated) points as a final CPU-side step, the same pattern established for Media/Text mirroring
+(`flipGlyphVertices.ts`) — deliberately not shader-based, since rotation is static-per-node rather than
+per-frame. Hit-testing follows the same "rotate the query point, not the test" trick used for flip:
+`getNodeAtPoint.ts`, `getResizeHandleAtPoint.ts`, and the new `getRotateHandleAtPoint.ts` all inverse-
+rotate the incoming point once, then hand it to unchanged axis-aligned tests. Marquee/group-bbox
+collision (`getCollidedNodes.ts`, `getSelectionBounds.ts`) moved from the raw, unrotated
+`getNodeBounds.ts` to a new `getRotatedNodeBounds.ts`, so a rotated node's true on-screen extent is
+what's actually tested, not its stale axis-aligned box. The rotate handle itself is a ring just
+outside each resize corner's own radius (`ROTATE_HANDLE_OUTER_RADIUS_PX`), explicitly excluding any
+point still inside the shape's own bounds so an ordinary interior drag/select near a corner isn't
+hijacked into a rotate. The cursor reuses the `resize.png` rotation mechanism via a new shared
+`createCursorRotator` factory, instantiated a second time for `rotate.png`
+(`getRotatedRotateCursorUrl.ts`), with its own angle calculation (`getRotateCursorAngle.ts`) based on
+which quadrant of the node's local (unrotated) space the cursor falls in — calibrated so the "ne"
+corner of an unrotated node reads as 0deg, each other corner +90deg clockwise from there. That angle
+also isn't just set once at arm time: `continueRotateDrag.ts` recomputes it every move
+(`cursorAngle + deltaDegrees`, both stashed on `TRotateDragState` at arm time) and re-applies
+`canvas.style.cursor` on every step, so the icon keeps spinning in sync with the node itself for the
+whole drag, not just its start and end.
+
+| #   | Scenario                                                                                     | Unit |         E2E         |
+| --- | --------------------------------------------------------------------------------------------- | :--: | :-----------------: |
+| 51  | Hovering the ring just outside a resize handle applies a distinct rotate cursor               |  —   | ✅ `rotate.spec.ts` |
+| 52  | Dragging the rotate ring visibly spins the node                                               |  —   | ✅ `rotate.spec.ts` |
+| 53  | A rotated node is hit-tested (and its resize handles found) at its actual rotated position    |  ✅  | ✅ `rotate.spec.ts` |
+| 54  | Rotating a group selection spins every member around their shared center                      |  ✅  | ✅ `rotate.spec.ts` |
+| 55  | An interior click near a corner (within resize+rotate ring distance) is never hijacked into a rotate | ✅ | — |
+| 56  | Marquee selection tests a rotated node's true rotated bounds, not its stale axis-aligned box   |  ✅  |          —          |
+| 57  | The rotate cursor updates live as the drag angle changes, not just once at the start           |  —   | ✅ `rotate.spec.ts` |
+
+#51/#52/#57 are e2e-only for the same reason as resize's #43: a live `Image`/canvas-rotate cursor and
+an actual WebGL repaint aren't things a jsdom unit test can observe — #57 specifically needs a real
+mid-drag `pointermove` to prove the cursor is re-applied continuously, not frozen at its arm-time
+value. #53/#54 get both: the unit suite (`getResizeHandleAtPoint.spec.ts`, `getRotateHandleAtPoint.
+spec.ts`, `continueRotateDrag.spec.ts`) already pins the exact rotated-corner and rotated-position
+math precisely, but the e2e versions prove the same math holds up through a real pointer-drag
+sequence and a real subsequent hover, not just a direct function call with hand-constructed state.
+#55/#56 stay unit-only — both are precise boundary assertions (`getRotateHandleAtPoint.spec.ts`'s
+interior-point test, `getCollidedNodes.spec.ts`'s rotated-bounds test) that a screenshot diff
+couldn't meaningfully improve on.
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e
