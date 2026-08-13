@@ -98,7 +98,7 @@ describe('useDrawTextTool behaviors', () => {
     const { design } = store.getState();
 
     expect(design.rootOrder).toHaveLength(0);
-    expect(design.editingTextBox).toEqual({ height: 30, width: 50, x: 10, y: 10 });
+    expect(design.editingTextBox).toEqual({ flipX: false, flipY: false, height: 30, rotation: 0, width: 50, x: 10, y: 10 });
     expect(design.activeTool).toBe(ToolName.default);
     expect(draftRef.current).toBeNull();
   });

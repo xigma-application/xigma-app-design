@@ -25,10 +25,21 @@ describe('handleStartTextEdit', () => {
     const state = buildState();
 
     // before
-    handleStartTextEdit(state, { box: { height: 20, width: 100, x: 10, y: 10 } });
+    handleStartTextEdit(state, { box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 } });
 
     // result
-    expect(state.editingTextBox).toEqual({ height: 20, width: 100, x: 10, y: 10 });
+    expect(state.editingTextBox).toEqual({ flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 });
+  });
+
+  it("should carry the box's rotation and mirror through as given, not just the zero defaults", () => {
+    // mock
+    const state = buildState();
+
+    // before
+    handleStartTextEdit(state, { box: { flipX: true, flipY: true, height: 20, rotation: 30, width: 100, x: 10, y: 10 } });
+
+    // result
+    expect(state.editingTextBox).toMatchObject({ flipX: true, flipY: true, rotation: 30 });
   });
 
   it('should reset any leftover editing text content when starting a brand-new (contentless) edit', () => {
@@ -36,7 +47,7 @@ describe('handleStartTextEdit', () => {
     const state = buildState({ editingTextContent: 'leftover' });
 
     // before
-    handleStartTextEdit(state, { box: { height: 20, width: 100, x: 10, y: 10 } });
+    handleStartTextEdit(state, { box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 } });
 
     // result
     expect(state.editingTextContent).toBe('');
@@ -47,7 +58,7 @@ describe('handleStartTextEdit', () => {
     const state = buildState({ editingNodeId: 'leftover-id' });
 
     // before
-    handleStartTextEdit(state, { box: { height: 20, width: 100, x: 10, y: 10 } });
+    handleStartTextEdit(state, { box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 } });
 
     // result
     expect(state.editingNodeId).toBeNull();
@@ -58,7 +69,11 @@ describe('handleStartTextEdit', () => {
     const state = buildState();
 
     // before
-    handleStartTextEdit(state, { box: { height: 20, width: 100, x: 10, y: 10 }, content: 'hello', id: 'node-1' });
+    handleStartTextEdit(state, {
+      box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 },
+      content: 'hello',
+      id: 'node-1',
+    });
 
     // result
     expect(state.editingNodeId).toBe('node-1');

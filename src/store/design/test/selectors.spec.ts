@@ -34,7 +34,7 @@ const state = {
   design: {
     activeTool: ToolName.frame,
     editingNodeId: 'node-2',
-    editingTextBox: { height: 20, width: 100, x: 10, y: 10 },
+    editingTextBox: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 },
     editingTextContent: 'hello',
     lastMouseTool: ToolName.hand,
     lastShapeTool: ToolName.ellipse,
@@ -58,7 +58,7 @@ describe('design selectors', () => {
 
   it('should select the editing text box', () => {
     // result
-    expect(selectEditingTextBox(state)).toEqual({ height: 20, width: 100, x: 10, y: 10 });
+    expect(selectEditingTextBox(state)).toEqual({ flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 });
   });
 
   it('should select the editing text content', () => {

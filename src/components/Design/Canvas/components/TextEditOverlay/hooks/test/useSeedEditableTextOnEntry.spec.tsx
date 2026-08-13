@@ -29,7 +29,7 @@ describe('useSeedEditableTextOnEntry behaviors', () => {
   it('should just focus the element for a brand-new (non-existing-node) edit session', () => {
     // mock
     const elementRef = createElementRef();
-    const box = { height: 20, width: 100, x: 0, y: 0 };
+    const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 0, y: 0 };
 
     // before
     renderHook(() => useSeedEditableTextOnEntry(elementRef, box, null, ''));
@@ -42,7 +42,7 @@ describe('useSeedEditableTextOnEntry behaviors', () => {
   it('should seed the existing content and select all of it when editing an existing node', () => {
     // mock
     const elementRef = createElementRef();
-    const box = { height: 20, width: 100, x: 0, y: 0 };
+    const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 0, y: 0 };
 
     // before
     renderHook(() => useSeedEditableTextOnEntry(elementRef, box, 'node-1', 'hello'));
@@ -56,7 +56,7 @@ describe('useSeedEditableTextOnEntry behaviors', () => {
   it('should not re-seed, re-focus, or re-select on a later render with the same box, even as content changes', () => {
     // mock
     const elementRef = createElementRef();
-    const box = { height: 20, width: 100, x: 0, y: 0 };
+    const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 0, y: 0 };
 
     const { rerender } = renderHook(({ content }) => useSeedEditableTextOnEntry(elementRef, box, 'node-1', content), {
       initialProps: { content: 'hello' },
@@ -73,8 +73,8 @@ describe('useSeedEditableTextOnEntry behaviors', () => {
   it('should re-seed and re-select when a new edit session starts on a different box', () => {
     // mock
     const elementRef = createElementRef();
-    const firstBox = { height: 20, width: 100, x: 0, y: 0 };
-    const secondBox = { height: 30, width: 200, x: 10, y: 10 };
+    const firstBox = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 0, y: 0 };
+    const secondBox = { flipX: false, flipY: false, height: 30, rotation: 0, width: 200, x: 10, y: 10 };
 
     const { rerender } = renderHook(({ box, content }) => useSeedEditableTextOnEntry(elementRef, box, 'node-1', content), {
       initialProps: { box: firstBox, content: 'first' },

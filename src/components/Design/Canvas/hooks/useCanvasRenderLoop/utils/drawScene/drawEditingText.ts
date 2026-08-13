@@ -26,7 +26,16 @@ export const drawEditingText = (
   viewport: TViewport,
 ): void => {
   if (editingTextBox) {
-    drawRect(gl, program, buffer, { ...editingTextBox, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport, 0);
+    drawRect(
+      gl,
+      program,
+      buffer,
+      { ...editingTextBox, stroke: DRAFT_FRAME_STROKE },
+      canvasWidth,
+      canvasHeight,
+      viewport,
+      editingTextBox.rotation,
+    );
     drawMsdfText(
       gl,
       imageContext.msdfProgram,
@@ -37,15 +46,15 @@ export const drawEditingText = (
       {
         content: editingTextContent,
         fill: TEXT_FILL,
-        flipX: false,
-        flipY: false,
+        flipX: editingTextBox.flipX,
+        flipY: editingTextBox.flipY,
         fontFamily: TEXT_FONT_FAMILY,
         fontSize: TEXT_FONT_SIZE,
         height: editingTextBox.height,
         id: '__editing-text__',
         name: TEXT_NAME,
         parentId: null,
-        rotation: 0,
+        rotation: editingTextBox.rotation,
         type: NodeType.text,
         width: editingTextBox.width,
         x: editingTextBox.x,

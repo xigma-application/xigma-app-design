@@ -22,19 +22,19 @@ const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
 
 const doubleClickEvent = (x: number, y: number): MouseEvent => new MouseEvent('dblclick', { clientX: x, clientY: y });
 
-const addTextNode = (x: number, y: number, content = 'Hi', size = 500): string => {
+const addTextNode = (x: number, y: number, content = 'Hi', size = 500, flipX = false, flipY = false, rotation = 0): string => {
   store.dispatch(
     addNode({
       content,
       fill: '#ffffff',
-      flipX: false,
-      flipY: false,
+      flipX,
+      flipY,
       fontFamily: 'Inter',
       fontSize: 14,
       height: size,
       name: 'Text',
       parentId: null,
-      rotation: 0,
+      rotation,
       type: NodeType.text,
       width: size,
       x,
@@ -95,9 +95,30 @@ describe('useTextEditOnDoubleClick behaviors', () => {
     const { design } = store.getState();
 
     expect(design.editingNodeId).toBe(idA);
-    expect(design.editingTextBox).toEqual({ height: 500, width: 500, x: 2000, y: 2000 });
+    expect(design.editingTextBox).toEqual({ flipX: false, flipY: false, height: 500, rotation: 0, width: 500, x: 2000, y: 2000 });
     expect(design.editingTextContent).toBe('Hi');
     expect(design.selectedIds).toEqual([idA]);
+  });
+
+  it("should carry a rotated, mirrored node's rotation and flip into the editing box, not reset them to zero", () => {
+    // mock — select first, then double-click the node's own center (invariant under its own rotation)
+    const idA = addTextNode(2500, 2500, 'Hi', 500, true, true, 45);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    renderDoubleClickTool(canvasRef);
+
+    // action
+    canvasRef.current?.dispatchEvent(doubleClickEvent(2750, 2750));
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.editingNodeId).toBe(idA);
+    expect(design.editingTextBox).toMatchObject({ flipX: true, flipY: true, rotation: 45 });
   });
 
   it('should start editing an already-selected text node when double-clicked past its rendered content', () => {

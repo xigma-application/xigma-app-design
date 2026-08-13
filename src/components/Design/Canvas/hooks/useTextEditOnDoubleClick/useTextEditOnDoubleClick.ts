@@ -27,7 +27,15 @@ export const useTextEditOnDoubleClick = (canvasRef: RefObject<HTMLCanvasElement 
       dispatch(setSelection([target.id]));
       dispatch(
         startTextEdit({
-          box: { height: target.height, width: target.width, x: target.x, y: target.y },
+          box: {
+            flipX: target.flipX,
+            flipY: target.flipY,
+            height: target.height,
+            rotation: target.rotation,
+            width: target.width,
+            x: target.x,
+            y: target.y,
+          },
           content: target.content,
           id: target.id,
         }),

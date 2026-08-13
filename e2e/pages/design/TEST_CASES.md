@@ -315,6 +315,7 @@ the live-typed ones.
 | 60  | Blurring an existing-node edit updates that node's content in place, never adds a duplicate node                                               |  ✅  |           —            |
 | 61  | Clearing all content on an existing node and blurring discards the edit, leaving the original content untouched (no delete-node action exists) |  ✅  |           —            |
 | 62  | The node currently being edited is excluded from normal fill, selection-outline, and hover-outline rendering                                   |  ✅  |           —            |
+| 63  | A rotated, mirrored node being edited keeps rendering (DOM overlay transform + `drawEditingText.ts` outline/text) at its own rotation/flip     |  ✅  | ✅ `edit-text.spec.ts` |
 
 #58/#59 are the two distinct hit-test branches (`getDoubleClickedTextNode.ts` already pins both
 precisely via `store.getState()`), but the actual claim worth an e2e proof is a real native
@@ -327,6 +328,15 @@ duplicated), so this single screenshot comparison covers #58-#60 together withou
 mechanism for #60. #60-#62 stay unit-only — each is a precise `store.getState()`/mocked-`gl` call-count
 assertion (`useCommitTextEdit.spec.tsx`, `drawScene.spec.ts`) that a screenshot diff wouldn't
 meaningfully improve on, per the "why so few scenarios get e2e coverage" rationale below.
+
+#63 is exactly the bug a `jsdom` unit test can paper over: `TextEditOverlay.spec.tsx`'s
+`toHaveStyle({ transform: '...' })` only proves the CSS string was set, not that a rotated node
+being edited actually _paints_ differently from an unrotated one once the browser composites the
+canvas and the DOM overlay together. The e2e version rotates a real node via a real rotate-ring
+drag (the same interaction as `rotate.spec.ts`), enters edit mode, and asserts the resulting
+canvas screenshot differs from editing an otherwise-identical unrotated node — pre-fix,
+`drawEditingText.ts` hardcoded `rotation: 0` and the overlay had no `transform` at all, so the two
+would have rendered indistinguishably.
 
 ## Resize (Etap 10)
 

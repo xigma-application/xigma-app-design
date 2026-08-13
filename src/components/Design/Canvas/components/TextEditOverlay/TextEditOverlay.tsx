@@ -51,6 +51,8 @@ const TextEditOverlay: FC = () => {
           left: screen.x,
           lineHeight: MSDF_ATLAS_JSON.common.lineHeight / MSDF_ATLAS_JSON.info.size,
           top: screen.y,
+          transform: `rotate(${box.rotation}deg) scaleX(${box.flipX ? -1 : 1}) scaleY(${box.flipY ? -1 : 1})`,
+          transformOrigin: 'center',
           width: box.width * viewport.zoom,
         }}
       />

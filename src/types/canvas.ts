@@ -5,7 +5,11 @@ export type TDraftRect = {
   y: number;
 };
 
-export type TEditingTextBox = TDraftRect;
+export type TEditingTextBox = TDraftRect & {
+  flipX: boolean;
+  flipY: boolean;
+  rotation: number;
+};
 
 export type TPoint = {
   x: number;

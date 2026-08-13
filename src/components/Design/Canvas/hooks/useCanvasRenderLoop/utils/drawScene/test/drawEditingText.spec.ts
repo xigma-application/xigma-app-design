@@ -63,7 +63,7 @@ describe('drawEditingText', () => {
     const gl = createGlMock();
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
-    const box = { height: 20, width: 100, x: 0, y: 0 };
+    const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 0, y: 0 };
 
     // before
     drawEditingText(gl, program, buffer, IMAGE_CONTEXT, box, 'hello', 100, 100, IDENTITY_VIEWPORT);
@@ -77,12 +77,30 @@ describe('drawEditingText', () => {
     const gl = createGlMock();
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
-    const box = { height: 20, width: 100, x: 0, y: 0 };
+    const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 0, y: 0 };
 
     // before
     drawEditingText(gl, program, buffer, IMAGE_CONTEXT, box, 'hello', 100, 100, IDENTITY_VIEWPORT);
 
     // result — "hello" is 5 known glyphs in the real MSDF atlas, 6 vertices each
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 30);
+  });
+
+  it("should rotate the outline around the box's own center, not the world origin, using the box's own rotation", () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const box = { flipX: false, flipY: false, height: 10, rotation: 90, width: 10, x: 0, y: 0 };
+
+    // before
+    drawEditingText(gl, program, buffer, IMAGE_CONTEXT, box, 'hello', 100, 100, IDENTITY_VIEWPORT);
+
+    // result — a 90deg rotation around the box's own center maps its top-left corner to its top-right
+    const [outlineCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = outlineCall[1];
+
+    expect(vertices[0]).toBeCloseTo(10);
+    expect(vertices[1]).toBeCloseTo(0);
   });
 });

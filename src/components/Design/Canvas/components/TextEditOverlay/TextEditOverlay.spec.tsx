@@ -33,7 +33,7 @@ describe('TextEditOverlay behaviors', () => {
     // mock
     const store = createTestStore();
 
-    store.dispatch(startTextEdit({ box: { height: 20, width: 100, x: 10, y: 10 } }));
+    store.dispatch(startTextEdit({ box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 } }));
 
     // before
     const { container } = renderWithStore(store);
@@ -46,11 +46,27 @@ describe('TextEditOverlay behaviors', () => {
     expect(element).toHaveFocus();
   });
 
+  it('should rotate and mirror the editable box around its own center to match a rotated, flipped node', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(startTextEdit({ box: { flipX: true, flipY: true, height: 20, rotation: 30, width: 100, x: 10, y: 10 }, id: 'node-1' }));
+
+    // before
+    const { container } = renderWithStore(store);
+
+    // find
+    const element = container.querySelector('[contenteditable="true"]');
+
+    // result
+    expect(element).toHaveStyle({ transform: 'rotate(30deg) scaleX(-1) scaleY(-1)', transformOrigin: 'center' });
+  });
+
   it('should dispatch the live typed content while editing', () => {
     // mock
     const store = createTestStore();
 
-    store.dispatch(startTextEdit({ box: { height: 20, width: 100, x: 10, y: 10 } }));
+    store.dispatch(startTextEdit({ box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 } }));
 
     const { container } = renderWithStore(store);
     const element = container.querySelector('[contenteditable="true"]') as HTMLDivElement;
@@ -68,7 +84,7 @@ describe('TextEditOverlay behaviors', () => {
     // mock
     const store = createTestStore();
 
-    store.dispatch(startTextEdit({ box: { height: 20, width: 100, x: 10, y: 10 } }));
+    store.dispatch(startTextEdit({ box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 } }));
 
     const { container } = renderWithStore(store);
     const element = container.querySelector('[contenteditable="true"]') as HTMLDivElement;
@@ -90,7 +106,7 @@ describe('TextEditOverlay behaviors', () => {
     // mock
     const store = createTestStore();
 
-    store.dispatch(startTextEdit({ box: { height: 20, width: 100, x: 10, y: 10 } }));
+    store.dispatch(startTextEdit({ box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 } }));
 
     const { container } = renderWithStore(store);
     const element = container.querySelector('[contenteditable="true"]') as HTMLDivElement;
@@ -108,7 +124,13 @@ describe('TextEditOverlay behaviors', () => {
     // mock
     const store = createTestStore();
 
-    store.dispatch(startTextEdit({ box: { height: 20, width: 100, x: 10, y: 10 }, content: 'hello world', id: 'node-1' }));
+    store.dispatch(
+      startTextEdit({
+        box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 },
+        content: 'hello world',
+        id: 'node-1',
+      }),
+    );
 
     // before
     const { container } = renderWithStore(store);
@@ -123,7 +145,13 @@ describe('TextEditOverlay behaviors', () => {
     // mock
     const store = createTestStore();
 
-    store.dispatch(startTextEdit({ box: { height: 20, width: 100, x: 10, y: 10 }, content: 'hello', id: 'node-1' }));
+    store.dispatch(
+      startTextEdit({
+        box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 },
+        content: 'hello',
+        id: 'node-1',
+      }),
+    );
 
     const { container } = renderWithStore(store);
     const element = container.querySelector('[contenteditable="true"]') as HTMLDivElement;

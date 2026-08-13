@@ -8,7 +8,7 @@ import { handleStopTextEdit } from '../handleStopTextEdit';
 const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   activeTool: ToolName.default,
   editingNodeId: 'node-1',
-  editingTextBox: { height: 20, width: 100, x: 10, y: 10 },
+  editingTextBox: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 },
   editingTextContent: 'hello',
   lastMouseTool: ToolName.default,
   lastShapeTool: ToolName.rectangle,

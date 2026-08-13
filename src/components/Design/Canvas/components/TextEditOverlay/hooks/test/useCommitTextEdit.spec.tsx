@@ -43,7 +43,7 @@ describe('useCommitTextEdit behaviors', () => {
   it('should add a text node with the fixed box size, not the rendered content size, when blurred with content', () => {
     // mock
     const store = createTestStore();
-    const box = { height: 20, width: 100, x: 10, y: 10 };
+    const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
 
     // before
     const { result } = renderHook(() => useCommitTextEdit(box, null), {
@@ -65,13 +65,32 @@ describe('useCommitTextEdit behaviors', () => {
       x: 10,
       y: 10,
     });
+  });
+
+  it("should carry the editing box's rotation and mirror into the new node, not hardcode them to zero", () => {
+    // mock
+    const store = createTestStore();
+    const box = { flipX: true, flipY: true, height: 20, rotation: 30, width: 100, x: 10, y: 10 };
+
+    // before
+    const { result } = renderHook(() => useCommitTextEdit(box, null), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    result.current(createBlurEvent('hello world'));
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ flipX: true, flipY: true, rotation: 30 });
     expect(design.editingTextBox).toBeNull();
   });
 
   it('should collapse a blank line (Enter twice) to a single newline, not the browser doubled one', () => {
     // mock
     const store = createTestStore();
-    const box = { height: 20, width: 100, x: 10, y: 10 };
+    const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
 
     // before
     const { result } = renderHook(() => useCommitTextEdit(box, null), {
@@ -90,7 +109,7 @@ describe('useCommitTextEdit behaviors', () => {
   it('should keep a whitespace-only value as valid content, not treat it as empty', () => {
     // mock
     const store = createTestStore();
-    const box = { height: 20, width: 100, x: 10, y: 10 };
+    const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
 
     // before
     const { result } = renderHook(() => useCommitTextEdit(box, null), {
@@ -110,7 +129,7 @@ describe('useCommitTextEdit behaviors', () => {
   it('should discard the box without adding a node when blurred with no content', () => {
     // mock
     const store = createTestStore();
-    const box = { height: 20, width: 100, x: 10, y: 10 };
+    const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
 
     // before
     const { result } = renderHook(() => useCommitTextEdit(box, null), {
@@ -151,7 +170,7 @@ describe('useCommitTextEdit behaviors', () => {
     );
 
     const [existingId] = store.getState().design.rootOrder;
-    const box = { height: 20, width: 100, x: 10, y: 10 };
+    const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
 
     // before
     const { result } = renderHook(() => useCommitTextEdit(box, existingId), {
@@ -193,7 +212,7 @@ describe('useCommitTextEdit behaviors', () => {
     );
 
     const [existingId] = store.getState().design.rootOrder;
-    const box = { height: 20, width: 100, x: 10, y: 10 };
+    const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
 
     // before
     const { result } = renderHook(() => useCommitTextEdit(box, existingId), {

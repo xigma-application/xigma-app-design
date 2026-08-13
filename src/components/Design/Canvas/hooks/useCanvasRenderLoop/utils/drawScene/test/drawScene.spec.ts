@@ -331,7 +331,7 @@ describe('drawScene', () => {
     const baselineCount = countFillDraws();
 
     // action
-    store.dispatch(startTextEdit({ box: { height: 20, width: 10, x: 0, y: 0 }, id: editingId }));
+    store.dispatch(startTextEdit({ box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 10, x: 0, y: 0 }, id: editingId }));
 
     // result — the node's own fill triangle-fan draw is suppressed while it's being text-edited
     expect(countFillDraws()).toBe(baselineCount - 1);
@@ -377,7 +377,7 @@ describe('drawScene', () => {
     const baselineCount = countHoverOutlineDraws();
 
     // action
-    store.dispatch(startTextEdit({ box: { height: 20, width: 10, x: 0, y: 0 }, id: editingId }));
+    store.dispatch(startTextEdit({ box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 10, x: 0, y: 0 }, id: editingId }));
 
     // result — hovering it while it's also being edited must not add the thick-outline draw
     expect(countHoverOutlineDraws()).toBe(baselineCount - 1);
