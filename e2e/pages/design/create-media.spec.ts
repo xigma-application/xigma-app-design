@@ -1,7 +1,7 @@
 import path from 'path';
 import { test, expect } from '@playwright/test';
 
-// pages
+// components
 import { DesignPage } from './DesignPage';
 
 // the fixtures are existing repo assets rather than new binary test files

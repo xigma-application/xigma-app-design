@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-// pages
+// components
 import { DesignPage } from './DesignPage';
 
 test('hovering a frame shows an outline highlight, which clears once the pointer leaves it', async ({ page }) => {

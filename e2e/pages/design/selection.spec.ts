@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-// pages
+// components
 import { DesignPage } from './DesignPage';
 
 test('shift-click adds a second frame to the selection and draws the shared group outline', async ({ page }) => {

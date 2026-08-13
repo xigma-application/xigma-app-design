@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-// pages
+// components
 import { DesignPage } from './DesignPage';
 
 test('draws a new line on the canvas using the Line option from the Rectangle dropdown', async ({ page }) => {
