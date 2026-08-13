@@ -6,7 +6,7 @@ import { selectOrderedNodes, selectSelectedIds, selectSelectedNodes, selectViewp
 import { AppDispatch, store } from 'store';
 
 // types
-import { TDragState, TEndpointDragState } from '../../types';
+import { TDragState, TEndpointDragState, TResizeDragState } from '../../types';
 import { MouseButton } from 'types/enums';
 import { TPoint } from 'types/canvas';
 
@@ -15,9 +15,11 @@ import { armGroupBoundsDrag } from './armGroupBoundsDrag';
 import { armHitDrag } from './armHitDrag';
 import { armLineEndpointDrag } from './armLineEndpointDrag';
 import { armMarqueeDrag } from './armMarqueeDrag';
+import { armResizeDrag } from './armResizeDrag';
 import { getLineEndpointAtPoint } from '../../../../utils/getLineEndpointAtPoint';
 import { getNodeAtPoint } from '../../../../utils/getNodeAtPoint';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getResizeHandleAtPoint } from '../../../../utils/getResizeHandleAtPoint';
 import { isPointInGroupBounds } from '../isPointInGroupBounds';
 import { isPointInSelectedTextBounds } from '../isPointInSelectedTextBounds';
 import { screenToWorld } from '../../../../utils/screenToWorld';
@@ -29,6 +31,7 @@ export const handlePointerDown = (
   dispatch: AppDispatch,
   dragStateRef: RefObject<TDragState | null>,
   endpointDragRef: RefObject<TEndpointDragState | null>,
+  resizeDragRef: RefObject<TResizeDragState | null>,
   marqueeStartRef: RefObject<TPoint | null>,
 ): void => {
   if (event.button === MouseButton.primary) {
@@ -39,8 +42,12 @@ export const handlePointerDown = (
     const currentSelection = selectSelectedIds(state);
     const selectedNodes = selectSelectedNodes(state);
     const lineEndpointHit = getLineEndpointAtPoint(point, selectedNodes, viewport);
+    const resizeHandleHit = getResizeHandleAtPoint(point, selectedNodes, viewport);
 
     switch (true) {
+      case Boolean(resizeHandleHit):
+        armResizeDrag(canvas, event, resizeDragRef, selectedNodes, resizeHandleHit!.handle, resizeHandleHit!.bounds);
+        break;
       case Boolean(lineEndpointHit) && !event.shiftKey:
         armLineEndpointDrag(canvas, event, endpointDragRef, lineEndpointHit!.nodeId, lineEndpointHit!.endpoint);
         break;

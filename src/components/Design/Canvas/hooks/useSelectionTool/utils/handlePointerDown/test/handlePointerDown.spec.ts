@@ -6,7 +6,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TDragState, TEndpointDragState } from '../../../types';
+import { TDragState, TEndpointDragState, TResizeDragState } from '../../../types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -26,6 +26,7 @@ const pointerEvent = (x: number, y: number, options: Partial<PointerEventInit> =
 
 const createDragStateRef = (): RefObject<TDragState | null> => ({ current: null });
 const createEndpointDragRef = (): RefObject<TEndpointDragState | null> => ({ current: null });
+const createResizeDragRef = (): RefObject<TResizeDragState | null> => ({ current: null });
 const createMarqueeStartRef = (): RefObject<TPoint | null> => ({ current: null });
 
 const addFrameNode = (x: number, y: number, size = 20): string => {
@@ -91,7 +92,15 @@ describe('handlePointerDown', () => {
     const marqueeStartRef = createMarqueeStartRef();
 
     // before
-    handlePointerDown(canvas, pointerEvent(10, 10, { button: 1 }), store.dispatch, dragStateRef, createEndpointDragRef(), marqueeStartRef);
+    handlePointerDown(
+      canvas,
+      pointerEvent(10, 10, { button: 1 }),
+      store.dispatch,
+      dragStateRef,
+      createEndpointDragRef(),
+      createResizeDragRef(),
+      marqueeStartRef,
+    );
 
     // result
     expect(dragStateRef.current).toBeNull();
@@ -112,6 +121,7 @@ describe('handlePointerDown', () => {
       store.dispatch,
       dragStateRef,
       createEndpointDragRef(),
+      createResizeDragRef(),
       marqueeStartRef,
     );
 
@@ -128,7 +138,15 @@ describe('handlePointerDown', () => {
     const marqueeStartRef = createMarqueeStartRef();
 
     // before
-    handlePointerDown(canvas, pointerEvent(205, 205), store.dispatch, dragStateRef, createEndpointDragRef(), marqueeStartRef);
+    handlePointerDown(
+      canvas,
+      pointerEvent(205, 205),
+      store.dispatch,
+      dragStateRef,
+      createEndpointDragRef(),
+      createResizeDragRef(),
+      marqueeStartRef,
+    );
 
     // result
     expect(store.getState().design.selectedIds).toEqual([idA]);
@@ -147,7 +165,15 @@ describe('handlePointerDown', () => {
     const marqueeStartRef = createMarqueeStartRef();
 
     // before
-    handlePointerDown(canvas, pointerEvent(340, 310), store.dispatch, dragStateRef, createEndpointDragRef(), marqueeStartRef);
+    handlePointerDown(
+      canvas,
+      pointerEvent(340, 310),
+      store.dispatch,
+      dragStateRef,
+      createEndpointDragRef(),
+      createResizeDragRef(),
+      marqueeStartRef,
+    );
 
     // result
     expect(dragStateRef.current).toMatchObject({ pendingClickAction: { kind: 'deselect' } });
@@ -164,7 +190,15 @@ describe('handlePointerDown', () => {
     const marqueeStartRef = createMarqueeStartRef();
 
     // before
-    handlePointerDown(canvas, pointerEvent(900, 900), store.dispatch, dragStateRef, createEndpointDragRef(), marqueeStartRef);
+    handlePointerDown(
+      canvas,
+      pointerEvent(900, 900),
+      store.dispatch,
+      dragStateRef,
+      createEndpointDragRef(),
+      createResizeDragRef(),
+      marqueeStartRef,
+    );
 
     // result
     expect(store.getState().design.selectedIds).toEqual([]);
@@ -184,7 +218,15 @@ describe('handlePointerDown', () => {
     const marqueeStartRef = createMarqueeStartRef();
 
     // before — click far from the actual "Hi" glyphs but still inside the 500x500 box
-    handlePointerDown(canvas, pointerEvent(1300, 1300), store.dispatch, dragStateRef, createEndpointDragRef(), marqueeStartRef);
+    handlePointerDown(
+      canvas,
+      pointerEvent(1300, 1300),
+      store.dispatch,
+      dragStateRef,
+      createEndpointDragRef(),
+      createResizeDragRef(),
+      marqueeStartRef,
+    );
 
     // result
     expect(dragStateRef.current).toMatchObject({ pendingClickAction: null });
@@ -200,7 +242,15 @@ describe('handlePointerDown', () => {
     const marqueeStartRef = createMarqueeStartRef();
 
     // before
-    handlePointerDown(canvas, pointerEvent(1800, 1800), store.dispatch, dragStateRef, createEndpointDragRef(), marqueeStartRef);
+    handlePointerDown(
+      canvas,
+      pointerEvent(1800, 1800),
+      store.dispatch,
+      dragStateRef,
+      createEndpointDragRef(),
+      createResizeDragRef(),
+      marqueeStartRef,
+    );
 
     // result — falls through to marquee instead of grabbing the text
     expect(store.getState().design.selectedIds).not.toContain(idA);
@@ -220,7 +270,15 @@ describe('handlePointerDown', () => {
     const marqueeStartRef = createMarqueeStartRef();
 
     // before
-    handlePointerDown(canvas, pointerEvent(500, 500), store.dispatch, dragStateRef, endpointDragRef, marqueeStartRef);
+    handlePointerDown(
+      canvas,
+      pointerEvent(500, 500),
+      store.dispatch,
+      dragStateRef,
+      endpointDragRef,
+      createResizeDragRef(),
+      marqueeStartRef,
+    );
 
     // result
     expect(endpointDragRef.current).toEqual({ endpoint: 'a', nodeId: idA });
@@ -239,10 +297,46 @@ describe('handlePointerDown', () => {
     const marqueeStartRef = createMarqueeStartRef();
 
     // before
-    handlePointerDown(canvas, pointerEvent(750, 700), store.dispatch, dragStateRef, endpointDragRef, marqueeStartRef);
+    handlePointerDown(
+      canvas,
+      pointerEvent(750, 700),
+      store.dispatch,
+      dragStateRef,
+      endpointDragRef,
+      createResizeDragRef(),
+      marqueeStartRef,
+    );
 
     // result
     expect(endpointDragRef.current).toBeNull();
     expect(dragStateRef.current).toMatchObject({ pendingClickAction: null });
+  });
+
+  it('should delegate to armResizeDrag when a resize handle on a selected node is hit, instead of moving the node', () => {
+    // mock
+    const idA = addFrameNode(2000, 2000, 100);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvas = createCanvas();
+    const dragStateRef = createDragStateRef();
+    const resizeDragRef = createResizeDragRef();
+    const marqueeStartRef = createMarqueeStartRef();
+
+    // before — exactly on the "nw" corner handle
+    handlePointerDown(
+      canvas,
+      pointerEvent(2000, 2000),
+      store.dispatch,
+      dragStateRef,
+      createEndpointDragRef(),
+      resizeDragRef,
+      marqueeStartRef,
+    );
+
+    // result
+    expect(resizeDragRef.current).toMatchObject({ handle: 'nw' });
+    expect(dragStateRef.current).toBeNull();
+    expect(canvas.setPointerCapture).toHaveBeenCalled();
   });
 });

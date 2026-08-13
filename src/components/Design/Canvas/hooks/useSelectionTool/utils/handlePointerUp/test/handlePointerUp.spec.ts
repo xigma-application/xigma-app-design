@@ -5,7 +5,7 @@ import { setSelection } from 'store/design/slice';
 import { store } from 'store';
 
 // types
-import { TDragState, TEndpointDragState } from '../../../types';
+import { TDragState, TEndpointDragState, TResizeDragState } from '../../../types';
 import { TDraftRect, TPoint } from 'types/canvas';
 
 // utils
@@ -24,6 +24,9 @@ const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointeru
 const createDragStateRef = (dragState: TDragState | null = null): RefObject<TDragState | null> => ({ current: dragState });
 const createEndpointDragRef = (endpointDragState: TEndpointDragState | null = null): RefObject<TEndpointDragState | null> => ({
   current: endpointDragState,
+});
+const createResizeDragRef = (resizeDragState: TResizeDragState | null = null): RefObject<TResizeDragState | null> => ({
+  current: resizeDragState,
 });
 const createMarqueeStartRef = (point: TPoint | null = null): RefObject<TPoint | null> => ({ current: point });
 const createMarqueeRef = (rect: TDraftRect | null = null): RefObject<TDraftRect | null> => ({ current: rect });
@@ -44,6 +47,7 @@ describe('handlePointerUp', () => {
       store.dispatch,
       createDragStateRef(),
       createEndpointDragRef(),
+      createResizeDragRef(),
       createMarqueeStartRef(),
       createMarqueeRef(),
     );
@@ -69,6 +73,7 @@ describe('handlePointerUp', () => {
       store.dispatch,
       dragStateRef,
       createEndpointDragRef(),
+      createResizeDragRef(),
       createMarqueeStartRef(),
       createMarqueeRef(),
     );
@@ -90,6 +95,7 @@ describe('handlePointerUp', () => {
       store.dispatch,
       createDragStateRef(),
       endpointDragRef,
+      createResizeDragRef(),
       createMarqueeStartRef(),
       createMarqueeRef(),
     );
@@ -105,7 +111,16 @@ describe('handlePointerUp', () => {
     const marqueeRef = createMarqueeRef({ height: 5, width: 5, x: 10, y: 10 });
 
     // before
-    handlePointerUp(canvas, pointerEvent(), store.dispatch, createDragStateRef(), createEndpointDragRef(), marqueeStartRef, marqueeRef);
+    handlePointerUp(
+      canvas,
+      pointerEvent(),
+      store.dispatch,
+      createDragStateRef(),
+      createEndpointDragRef(),
+      createResizeDragRef(),
+      marqueeStartRef,
+      marqueeRef,
+    );
 
     // result
     expect(marqueeStartRef.current).toBeNull();

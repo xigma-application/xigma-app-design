@@ -146,4 +146,8 @@ export class DesignPage {
     await this.page.mouse.wheel(0, deltaY);
     await this.page.keyboard.up('Control');
   }
+
+  async cursorStyle(): Promise<string> {
+    return this.canvas.evaluate((el) => (el as HTMLCanvasElement).style.cursor);
+  }
 }

@@ -18,3 +18,5 @@ export type TLineSegment = {
   y1: number;
   y2: number;
 };
+
+export type TResizeHandle = 'e' | 'n' | 'ne' | 'nw' | 's' | 'se' | 'sw' | 'w';

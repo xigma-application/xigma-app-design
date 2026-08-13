@@ -1,11 +1,14 @@
 // types
-import { TPoint } from 'types/canvas';
+import { TDraftRect, TPoint, TResizeHandle } from 'types/canvas';
 
 export type TPendingClickAction = { id: string; kind: 'collapse' } | { kind: 'deselect' };
 
 export type TLineEndpoint = 'a' | 'b';
 
 export type TNodeOrigin = { x1: number; x2: number; y1: number; y2: number } | { x: number; y: number };
+
+export type TResizeNodeOrigin =
+  { x1: number; x2: number; y1: number; y2: number } | { height: number; width: number; x: number; y: number };
 
 export type TDragState = {
   hasMoved: boolean;
@@ -17,4 +20,11 @@ export type TDragState = {
 export type TEndpointDragState = {
   endpoint: TLineEndpoint;
   nodeId: string;
+};
+
+export type TResizeDragState = {
+  aspectRatio: number;
+  bounds: TDraftRect;
+  handle: TResizeHandle;
+  nodeOrigins: Record<string, TResizeNodeOrigin>;
 };

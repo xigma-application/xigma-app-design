@@ -11,3 +11,4 @@ export const LINE_HIT_TOLERANCE_PX = 4;
 export const LINE_HOVER_STROKE_WIDTH = 0.3;
 export const LINE_RENDER_STROKE_WIDTH = 1;
 export const LINE_SELECTED_STROKE_WIDTH = 0.1;
+export const RESIZE_EDGE_HIT_TOLERANCE_PX = 4;

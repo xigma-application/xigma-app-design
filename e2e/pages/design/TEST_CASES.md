@@ -283,6 +283,45 @@ testing, not the unit suite (which already covers the new char-level breaking pr
 different (wrapped) render than a wide one for the identical input — the width comparison that
 matters is against the live rendered MSDF glyphs, not a mocked `measureWidth`.
 
+## Resize (Etap 10)
+
+Corner handles have been rendered since Etap 5 (`drawCornerHandles`), but dragging them did nothing.
+This adds real 8-direction resize (4 corners + 4 edges, edges hit-tested against the outline itself,
+no new visual handles) for a single selected non-line node **or** a group selection (2+ nodes
+sharing a parent) — both scale relative to an origin bbox via one shared formula, so a single node is
+just the degenerate case of a "group" of one (`continueResizeDrag.ts`). Line nodes keep their
+existing endpoint-drag (`armEndpointDrag.ts`); a line inside a resized **group** still scales its
+`x1/y1/x2/y2` proportionally. Shift on a corner locks the aspect ratio, reusing
+`getAspectRatioLockedRect` (already used for Media's aspect-locked placement) anchored at the
+opposite corner (`getResizeAnchorPoint.ts`); edges intentionally don't lock (only corners do, per
+the roadmap wording). The resize cursor rotates per handle direction on an offscreen `<canvas>`
+(`getRotatedResizeCursorUrl.ts`, mirroring `x-design`'s `useChangeCursor/utils.ts` and xigma's own
+`createArmedCursor.ts`) instead of static pre-rotated PNGs, specifically so it keeps working once
+node `rotation` becomes editable later (`getResizeCursorAngle.ts` already adds `node.rotation` into
+the angle for the single-node case).
+
+| #   | Scenario                                                                                           | Unit |         E2E         |
+| --- | -------------------------------------------------------------------------------------------------- | :--: | :-----------------: |
+| 43  | Hovering each of the 8 resize handles applies a distinctly rotated cursor                          |  —   | ✅ `resize.spec.ts` |
+| 44  | Dragging a corner handle resizes the node while the opposite corner stays anchored in place        |  ✅  | ✅ `resize.spec.ts` |
+| 45  | Holding Shift while dragging a corner locks the aspect ratio, unlike a free drag of the same delta |  ✅  | ✅ `resize.spec.ts` |
+| 46  | Resizing a group selection scales every member (including a line's endpoints) proportionally       |  ✅  |          —          |
+| 47  | Edge handles resize only their own axis; Shift has no aspect-lock effect on them                   |  ✅  |          —          |
+
+#43 is e2e-only: the actual claim is a real `Image` decode plus the browser accepting a rotated
+data-URL as a live CSS `cursor` value — nothing a jsdom unit test can assert (`getResizeCursorAngle`
+and `getRotatedResizeCursorUrl` are both unit-tested for their own pure logic, with `Image`/canvas
+stubbed out entirely). It was also the one genuinely surprising integration bug found while writing
+this suite: the very first hover in a cold page can take close to a second for the lazily-created
+cursor image to finish decoding, and nothing re-applies the cursor without a further `pointermove` —
+so the test has to nudge the pointer repeatedly until it lands (`waitForResizeCursor` in
+`resize.spec.ts`), the same way a real user's mouse jitter would, instead of a single fixed wait.
+
+#46/#47 stay unit-only: `continueResizeDrag.spec.ts` already asserts the exact scaled
+`x/y/width/height` (and line `x1/y1/x2/y2`) via `store.getState()`, precisely the kind of two-line
+Redux assertion the "why so few scenarios get e2e coverage" section below argues a screenshot diff
+can't improve on.
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

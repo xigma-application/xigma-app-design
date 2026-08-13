@@ -228,4 +228,23 @@ describe('useHoverHighlight behaviors', () => {
     // result
     expect(canvasRef.current?.className).not.toContain('positioning');
   });
+
+  it("should clear the hovered node id and the positioning class when hovering a selected node's resize handle", () => {
+    // mock
+    const idA = addFrameNode(2000, 2000, 100);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const hoverRef = renderHoverHighlight(canvasRef);
+
+    // action — exactly on the "nw" corner handle of the selected node
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2000, 2000));
+
+    // result
+    expect(hoverRef.current).toBeNull();
+    expect(canvasRef.current?.className).not.toContain('positioning');
+  });
 });

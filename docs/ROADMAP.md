@@ -427,10 +427,21 @@ nawet jeśli user nigdy go nie użyje:
 Kilka rzeczy świadomie odłożonych po drodze (Etap 5 i dalej), które dziś są jedyną realną
 przeszkodą, żeby edycja pojedynczego node'a czuła się skończona, nie tylko "da się narysować":
 
-- [ ] **resize uchwytami** — uchwyty narożne (i boczne) są rysowane od Etapu 5, ale przeciąganie
-      ich nic nie robi. Matematyka w 8 kierunkach, z Shift = zachowanie proporcji (jak Line ma już
-      swoje endpointy do przeciągania — ten sam wzorzec `armEndpointDrag`, tylko dla bboxa zamiast
-      dwóch punktów)
+- [x] **resize uchwytami** — 8 kierunków (4 rogi + 4 krawędzie, krawędzie tylko jako hit-test na
+      linii obrysu, bez nowej grafiki), dla pojedynczego zaznaczonego node'a **i** dla grupy (2+,
+      wspólny rodzic) — jeden wspólny wzorzec: resize zawsze liczy się względem origin bboxa
+      (`getSelectionBounds` dla grupy, własne bounds node'a dla pojedynczego przypadku — kolapsuje
+      do tego samego wzoru), każdy zaznaczony node (łącznie z `line` przez `x1/y1/x2/y2`) skaluje się
+      proporcjonalnie do zmiany bboxa (`continueResizeDrag.ts`). Line pozostaje przy swoim
+      istniejącym `armEndpointDrag`, gdy jest zaznaczony pojedynczo — resize nie nadpisuje tego
+      mechanizmu. Shift na rogu = zachowanie proporcji (`getAspectRatioLockedRect`, ten sam
+      mechanizm co aspect-lock w Media tool), świadomie **bez** locka na krawędziach.
+      **Kursor resize.png musi się obracać** zależnie od kierunku uchwytu — pierwsze podejście
+      (4 pre-zrotowane PNG-i) odrzucone na rzecz runtime canvas-rotation
+      (`getRotatedResizeCursorUrl.ts`, mirror `x-design`'s `useChangeCursor/utils.ts` i xigmowego
+      `createArmedCursor.ts`), właśnie po to, żeby nie rozsypać się, gdy `rotation` node'a (patrz
+      niżej) stanie się kiedyś edytowalny — `getResizeCursorAngle.ts` już dziś dolicza
+      `node.rotation` do kąta kursora dla pojedynczego node'a
 - [ ] **rotacja** — `rotation` siedzi w `TBaseNode` od Etapu 2, ale nic go nigdy nie ustawia ani
       nie uwzględnia w renderingu/hit-testingu (`drawEditingText.ts` nawet hardcode'uje `rotation: 0`
       dla nowego node'a). Potrzebny: uchwyt rotacji tuż za rogiem bboxa + `rotation` uwzględniony w

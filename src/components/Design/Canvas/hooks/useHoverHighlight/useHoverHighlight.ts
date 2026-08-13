@@ -14,6 +14,9 @@ import { NodeType, ToolName } from 'types/design/enums';
 import { getLineEndpointAtPoint } from '../../utils/getLineEndpointAtPoint';
 import { getNodeAtPoint } from '../../utils/getNodeAtPoint';
 import { getPointerPosition } from '../../utils/getPointerPosition';
+import { getResizeCursorAngle } from 'utils/math/getResizeCursorAngle';
+import { getResizeHandleAtPoint } from '../../utils/getResizeHandleAtPoint';
+import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
 import { screenToWorld } from '../../utils/screenToWorld';
 
 const POSITIONING_CURSOR_CLASS = styles['Canvas__canvas-element--positioning'];
@@ -29,21 +32,33 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
       const selectedNodes = selectSelectedNodes(state);
       const [selectedNode] = selectedNodes;
       const lineEndpointHit = getLineEndpointAtPoint(point, selectedNodes, viewport);
+      const resizeHandleHit = getResizeHandleAtPoint(point, selectedNodes, viewport);
 
-      if (lineEndpointHit && selectedNode.type === NodeType.line) {
-        canvas.classList.add(POSITIONING_CURSOR_CLASS);
-        hoverRef.current = lineEndpointHit.nodeId;
-      } else {
-        const hit = getNodeAtPoint(point, selectOrderedNodes(state), viewport);
+      switch (true) {
+        case Boolean(lineEndpointHit) && selectedNode.type === NodeType.line:
+          canvas.classList.add(POSITIONING_CURSOR_CLASS);
+          canvas.style.cursor = '';
+          hoverRef.current = lineEndpointHit!.nodeId;
+          break;
+        case Boolean(resizeHandleHit):
+          canvas.classList.remove(POSITIONING_CURSOR_CLASS);
+          canvas.style.cursor = getRotatedResizeCursorUrl(getResizeCursorAngle(resizeHandleHit!.handle, resizeHandleHit!.rotation)) ?? '';
+          hoverRef.current = null;
+          break;
+        default: {
+          const hit = getNodeAtPoint(point, selectOrderedNodes(state), viewport);
 
-        canvas.classList.remove(POSITIONING_CURSOR_CLASS);
-        hoverRef.current = hit?.id ?? null;
+          canvas.classList.remove(POSITIONING_CURSOR_CLASS);
+          canvas.style.cursor = '';
+          hoverRef.current = hit?.id ?? null;
+        }
       }
     }
   };
 
   const handlePointerLeave = (canvas: HTMLCanvasElement): void => {
     canvas.classList.remove(POSITIONING_CURSOR_CLASS);
+    canvas.style.cursor = '';
     hoverRef.current = null;
   };
 
@@ -61,6 +76,7 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
         canvas.removeEventListener('pointermove', onPointerMove);
         canvas.removeEventListener('pointerleave', onPointerLeave);
         canvas.classList.remove(POSITIONING_CURSOR_CLASS);
+        canvas.style.cursor = '';
         hoverRef.current = null;
       };
     }
