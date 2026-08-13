@@ -7,6 +7,7 @@ import { TTextNode, TViewport } from 'types/design/types';
 
 // utils
 import { drawLine } from 'utils/canvas/drawLine';
+import { flipTextPoint } from 'utils/canvas/text/flipTextPoint';
 import { getTextLineWidths } from 'utils/canvas/text/getTextLineWidths';
 
 export const drawTextHoverUnderline = (
@@ -24,12 +25,14 @@ export const drawTextHoverUnderline = (
 
   lineWidths.forEach((width, index) => {
     const y = node.y + (index + 1) * lineHeight;
+    const start = flipTextPoint({ x: node.x, y }, node);
+    const end = flipTextPoint({ x: node.x + width, y }, node);
 
     drawLine(
       gl,
       program,
       buffer,
-      { x1: node.x, x2: node.x + width, y1: y, y2: y },
+      { x1: start.x, x2: end.x, y1: start.y, y2: end.y },
       DRAFT_FRAME_STROKE,
       HOVER_OUTLINE_WIDTH / viewport.zoom,
       canvasWidth,

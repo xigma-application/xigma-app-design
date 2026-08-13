@@ -6,9 +6,11 @@ import { TPoint } from 'types/canvas';
 import { TTextNode } from 'types/design/types';
 
 // utils
+import { flipTextPoint } from 'utils/canvas/text/flipTextPoint';
 import { getTextLineWidths } from 'utils/canvas/text/getTextLineWidths';
 
 export const isPointInText = (point: TPoint, node: TTextNode): boolean => {
+  const testPoint = flipTextPoint(point, node);
   const lineWidths = getTextLineWidths(MSDF_ATLAS_JSON, node.content, node.width, node.fontSize);
   const scale = node.fontSize / MSDF_ATLAS_JSON.info.size;
   const lineHeight = MSDF_ATLAS_JSON.common.lineHeight * scale;
@@ -17,6 +19,6 @@ export const isPointInText = (point: TPoint, node: TTextNode): boolean => {
     const top = node.y + index * lineHeight;
     const bottom = node.y + (index + 1) * lineHeight;
 
-    return width > 0 && point.x >= node.x && point.x <= node.x + width && point.y >= top && point.y <= bottom;
+    return width > 0 && testPoint.x >= node.x && testPoint.x <= node.x + width && testPoint.y >= top && testPoint.y <= bottom;
   });
 };

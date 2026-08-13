@@ -77,4 +77,21 @@ describe('drawTextHoverUnderline', () => {
 
     expect(firstCallVertices).not.toEqual(secondCallVertices);
   });
+
+  it('should mirror the underline position when the node is flipped, matching the mirrored glyphs', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawTextHoverUnderline(gl, program, buffer, buildNode(), 100, 100, IDENTITY_VIEWPORT);
+    const unflippedVertices = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls[0][1];
+
+    drawTextHoverUnderline(gl, program, buffer, buildNode({ flipX: true }), 100, 100, IDENTITY_VIEWPORT);
+    const flippedVertices = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls[1][1];
+
+    // result — same content, same box, but the underline moved because flipX mirrored it
+    expect(flippedVertices).not.toEqual(unflippedVertices);
+  });
 });

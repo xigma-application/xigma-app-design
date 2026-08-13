@@ -40,4 +40,13 @@ describe('isPointInText', () => {
     // result — y sits in the second (blank) line's row
     expect(isPointInText({ x: 2, y: 20 }, node)).toBe(false);
   });
+
+  it('should account for flipX when locating the rendered text', () => {
+    // mock — "Hi" now renders mirrored near the box's right edge instead of its left
+    const node = buildNode({ flipX: true });
+
+    // result
+    expect(isPointInText({ x: 2, y: 2 }, node)).toBe(false);
+    expect(isPointInText({ x: 498, y: 2 }, node)).toBe(true);
+  });
 });
