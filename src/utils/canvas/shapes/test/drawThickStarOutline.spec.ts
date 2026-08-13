@@ -39,6 +39,8 @@ describe('drawThickStarOutline', () => {
       100,
       100,
       IDENTITY_VIEWPORT,
+      false,
+      false,
       0,
     );
 
@@ -54,8 +56,6 @@ describe('drawThickStarOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    // ratio 1 collapses the star to a diamond (points=2); 2px stroke at zoom 1 => halfWidth = 1;
-    // rx = 5, so outer rx = 6, inner rx = 4
     drawThickStarOutline(
       gl,
       program,
@@ -66,6 +66,8 @@ describe('drawThickStarOutline', () => {
       100,
       100,
       IDENTITY_VIEWPORT,
+      false,
+      false,
       0,
     );
 
@@ -101,6 +103,8 @@ describe('drawThickStarOutline', () => {
         y: 0,
         zoom: 2,
       },
+      false,
+      false,
       0,
     );
 
@@ -129,6 +133,8 @@ describe('drawThickStarOutline', () => {
       100,
       100,
       IDENTITY_VIEWPORT,
+      false,
+      false,
       90,
     );
 
@@ -138,5 +144,35 @@ describe('drawThickStarOutline', () => {
 
     expect(vertices[2]).toBeCloseTo(5);
     expect(vertices[3]).toBeCloseTo(11);
+  });
+
+  it('should mirror the outer ring points around the center when flipX/flipY are given', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before — diamond rx = ry = 5, halfWidth = 1 => outer radius 6; unrotated outer1 (right edge)
+    drawThickStarOutline(
+      gl,
+      program,
+      buffer,
+      { height: 10, points: 2, ratio: 1, width: 10, x: 0, y: 0 },
+      '#0d99ff',
+      2,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      true,
+      false,
+      0,
+    );
+
+    // result
+    const [firstCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = firstCall[1];
+
+    expect(vertices[2]).toBeCloseTo(-1);
+    expect(vertices[3]).toBeCloseTo(5);
   });
 });

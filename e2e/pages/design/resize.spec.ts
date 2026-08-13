@@ -174,3 +174,59 @@ test('resizing a text node past its anchor renders the text mirrored, not just r
 
   expect(flipped.equals(reference)).toBe(false);
 });
+
+test('resizing a polygon past its anchor renders the shape mirrored, not just repositioned', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  // resulting box lands at exactly the rect an unflipped box would use
+  await designPage.goto('e2e-test-resize-mirror-polygon-flipped');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawPolygon(300, 300, 400, 400); // box: (300, 300) -> (400, 400), 100x100 triangle
+  await designPage.click(350, 350); // select it, on the central axis between the apex and base
+
+  await designPage.pointerDown(400, 400); // "se" handle
+  await designPage.pointerMove(200, 200); // crosses both anchors by exactly 100x100
+  await designPage.pointerUp();
+  await designPage.click(900, 900); // deselect
+
+  const flipped = await page.screenshot({ clip: { height: 100, width: 100, x: 200, y: 200 } });
+
+  await designPage.goto('e2e-test-resize-mirror-polygon-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawPolygon(200, 200, 300, 300);
+  await designPage.click(900, 900);
+
+  const reference = await page.screenshot({ clip: { height: 100, width: 100, x: 200, y: 200 } });
+
+  expect(flipped.equals(reference)).toBe(false);
+});
+
+test('resizing a star past its anchor renders the shape mirrored, not just repositioned', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  // resulting box lands at exactly the rect an unflipped box would use
+  await designPage.goto('e2e-test-resize-mirror-star-flipped');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawStar(300, 300, 400, 400); // box: (300, 300) -> (400, 400), 100x100 star
+  await designPage.click(350, 350); // select it, at the center
+
+  await designPage.pointerDown(400, 400); // "se" handle
+  await designPage.pointerMove(200, 200); // crosses both anchors by exactly 100x100
+  await designPage.pointerUp();
+  await designPage.click(900, 900); // deselect
+
+  const flipped = await page.screenshot({ clip: { height: 100, width: 100, x: 200, y: 200 } });
+
+  await designPage.goto('e2e-test-resize-mirror-star-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawStar(200, 200, 300, 300);
+  await designPage.click(900, 900);
+
+  const reference = await page.screenshot({ clip: { height: 100, width: 100, x: 200, y: 200 } });
+
+  expect(flipped.equals(reference)).toBe(false);
+});

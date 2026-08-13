@@ -57,7 +57,7 @@ export const useDrawPolygonTool = (
       const rect = toDraftRect(startRef.current, screenToWorld(getPointerPosition(canvas, event), viewport));
 
       if (rect.width >= MIN_SHAPE_SIZE && rect.height >= MIN_SHAPE_SIZE) {
-        dispatch(addNode({ ...rect, fill, name, parentId: null, rotation: 0, sides, type: NodeType.polygon }));
+        dispatch(addNode({ ...rect, fill, flipX: false, flipY: false, name, parentId: null, rotation: 0, sides, type: NodeType.polygon }));
       }
 
       startRef.current = null;

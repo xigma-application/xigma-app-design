@@ -39,6 +39,8 @@ describe('drawThickPolygonOutline', () => {
       100,
       100,
       IDENTITY_VIEWPORT,
+      false,
+      false,
       0,
     );
 
@@ -54,7 +56,6 @@ describe('drawThickPolygonOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    // 2px stroke at zoom 1 => halfWidth = 1; polygon rx = 5, so outer rx = 6, inner rx = 4
     drawThickPolygonOutline(
       gl,
       program,
@@ -65,6 +66,8 @@ describe('drawThickPolygonOutline', () => {
       100,
       100,
       IDENTITY_VIEWPORT,
+      false,
+      false,
       0,
     );
 
@@ -100,14 +103,14 @@ describe('drawThickPolygonOutline', () => {
         y: 0,
         zoom: 2,
       },
+      false,
+      false,
       0,
     );
 
     // result
     const [firstCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
     const vertices: Float32Array = firstCall[1];
-    // the outer ring's rightmost point sits at (cx + rx + halfWidth); at zoom 2 with an 8px border,
-    // halfWidth in world space is (8 / 2) / 2 = 2, so it reaches 5 (cx) + 5 (rx) + 2 = 12
     const worldMaxX = Math.max(...Array.from(vertices).filter((_, index) => index % 2 === 0));
 
     expect(worldMaxX).toBeCloseTo(12);
@@ -120,7 +123,6 @@ describe('drawThickPolygonOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    // square rx = ry = 5, halfWidth = 1 => outer radius 6; unrotated outer1 (right edge) would be (11, 5)
     drawThickPolygonOutline(
       gl,
       program,
@@ -131,6 +133,8 @@ describe('drawThickPolygonOutline', () => {
       100,
       100,
       IDENTITY_VIEWPORT,
+      false,
+      false,
       90,
     );
 
@@ -140,5 +144,35 @@ describe('drawThickPolygonOutline', () => {
 
     expect(vertices[2]).toBeCloseTo(5);
     expect(vertices[3]).toBeCloseTo(11);
+  });
+
+  it('should mirror the outer ring points around the center when flipX/flipY are given', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before — square rx = ry = 5, halfWidth = 1 => outer radius 6; unrotated outer1 (right edge)
+    drawThickPolygonOutline(
+      gl,
+      program,
+      buffer,
+      { height: 10, sides: 4, width: 10, x: 0, y: 0 },
+      '#0d99ff',
+      2,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      true,
+      false,
+      0,
+    );
+
+    // result
+    const [firstCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = firstCall[1];
+
+    expect(vertices[2]).toBeCloseTo(-1);
+    expect(vertices[3]).toBeCloseTo(5);
   });
 });

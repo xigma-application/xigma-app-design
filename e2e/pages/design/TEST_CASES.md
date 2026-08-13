@@ -376,15 +376,15 @@ also isn't just set once at arm time: `continueRotateDrag.ts` recomputes it ever
 `canvas.style.cursor` on every step, so the icon keeps spinning in sync with the node itself for the
 whole drag, not just its start and end.
 
-| #   | Scenario                                                                                     | Unit |         E2E         |
-| --- | --------------------------------------------------------------------------------------------- | :--: | :-----------------: |
-| 51  | Hovering the ring just outside a resize handle applies a distinct rotate cursor               |  —   | ✅ `rotate.spec.ts` |
-| 52  | Dragging the rotate ring visibly spins the node                                               |  —   | ✅ `rotate.spec.ts` |
-| 53  | A rotated node is hit-tested (and its resize handles found) at its actual rotated position    |  ✅  | ✅ `rotate.spec.ts` |
-| 54  | Rotating a group selection spins every member around their shared center                      |  ✅  | ✅ `rotate.spec.ts` |
-| 55  | An interior click near a corner (within resize+rotate ring distance) is never hijacked into a rotate | ✅ | — |
-| 56  | Marquee selection tests a rotated node's true rotated bounds, not its stale axis-aligned box   |  ✅  |          —          |
-| 57  | The rotate cursor updates live as the drag angle changes, not just once at the start           |  —   | ✅ `rotate.spec.ts` |
+| #   | Scenario                                                                                             | Unit |         E2E         |
+| --- | ---------------------------------------------------------------------------------------------------- | :--: | :-----------------: |
+| 51  | Hovering the ring just outside a resize handle applies a distinct rotate cursor                      |  —   | ✅ `rotate.spec.ts` |
+| 52  | Dragging the rotate ring visibly spins the node                                                      |  —   | ✅ `rotate.spec.ts` |
+| 53  | A rotated node is hit-tested (and its resize handles found) at its actual rotated position           |  ✅  | ✅ `rotate.spec.ts` |
+| 54  | Rotating a group selection spins every member around their shared center                             |  ✅  | ✅ `rotate.spec.ts` |
+| 55  | An interior click near a corner (within resize+rotate ring distance) is never hijacked into a rotate |  ✅  |          —          |
+| 56  | Marquee selection tests a rotated node's true rotated bounds, not its stale axis-aligned box         |  ✅  |          —          |
+| 57  | The rotate cursor updates live as the drag angle changes, not just once at the start                 |  —   | ✅ `rotate.spec.ts` |
 
 #51/#52/#57 are e2e-only for the same reason as resize's #43: a live `Image`/canvas-rotate cursor and
 an actual WebGL repaint aren't things a jsdom unit test can observe — #57 specifically needs a real

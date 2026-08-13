@@ -38,6 +38,8 @@ describe('drawStar', () => {
       100,
       100,
       IDENTITY_VIEWPORT,
+      false,
+      false,
       0,
     );
 
@@ -60,6 +62,8 @@ describe('drawStar', () => {
       100,
       100,
       IDENTITY_VIEWPORT,
+      false,
+      false,
       0,
     );
 
@@ -74,7 +78,18 @@ describe('drawStar', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawStar(gl, program, buffer, { height: 10, points: 5, ratio: 0.382, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, 0);
+    drawStar(
+      gl,
+      program,
+      buffer,
+      { height: 10, points: 5, ratio: 0.382, width: 10, x: 0, y: 0 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      false,
+      0,
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -99,6 +114,8 @@ describe('drawStar', () => {
         y: 15,
         zoom: 2,
       },
+      false,
+      false,
       0,
     );
 
@@ -123,6 +140,8 @@ describe('drawStar', () => {
       100,
       100,
       IDENTITY_VIEWPORT,
+      false,
+      false,
       0,
     );
 
@@ -149,6 +168,8 @@ describe('drawStar', () => {
       100,
       100,
       IDENTITY_VIEWPORT,
+      false,
+      false,
       90,
     );
 
@@ -158,5 +179,33 @@ describe('drawStar', () => {
 
     expect(vertices[2]).toBeCloseTo(20);
     expect(vertices[3]).toBeCloseTo(10);
+  });
+
+  it('should mirror the fan points around the center when flipX/flipY are given', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before — center (10, 10); the first raw outer point (top, angle -90) sits at (10, 0);
+    drawStar(
+      gl,
+      program,
+      buffer,
+      { fill: '#ffffff', height: 20, points: 4, ratio: 0.5, width: 20, x: 0, y: 0 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      true,
+      true,
+      0,
+    );
+
+    // result
+    const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = firstFillCall[1];
+
+    expect(vertices[2]).toBeCloseTo(10);
+    expect(vertices[3]).toBeCloseTo(20);
   });
 });

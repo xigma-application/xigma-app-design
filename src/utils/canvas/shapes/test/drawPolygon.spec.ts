@@ -30,7 +30,18 @@ describe('drawPolygon', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawPolygon(gl, program, buffer, { fill: '#ffffff', height: 10, sides: 5, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, 0);
+    drawPolygon(
+      gl,
+      program,
+      buffer,
+      { fill: '#ffffff', height: 10, sides: 5, width: 10, x: 0, y: 0 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      false,
+      0,
+    );
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLE_FAN, 0, expect.any(Number));
@@ -43,7 +54,18 @@ describe('drawPolygon', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawPolygon(gl, program, buffer, { height: 10, sides: 5, stroke: '#ffffff', width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, 0);
+    drawPolygon(
+      gl,
+      program,
+      buffer,
+      { height: 10, sides: 5, stroke: '#ffffff', width: 10, x: 0, y: 0 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      false,
+      0,
+    );
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINE_LOOP, 0, expect.any(Number));
@@ -56,7 +78,7 @@ describe('drawPolygon', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawPolygon(gl, program, buffer, { height: 10, sides: 5, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, 0);
+    drawPolygon(gl, program, buffer, { height: 10, sides: 5, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, false, false, 0);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -81,6 +103,8 @@ describe('drawPolygon', () => {
         y: 15,
         zoom: 2,
       },
+      false,
+      false,
       0,
     );
 
@@ -97,7 +121,18 @@ describe('drawPolygon', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawPolygon(gl, program, buffer, { fill: '#ffffff', height: 20, sides: 4, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, 0);
+    drawPolygon(
+      gl,
+      program,
+      buffer,
+      { fill: '#ffffff', height: 20, sides: 4, width: 10, x: 0, y: 0 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      false,
+      0,
+    );
 
     // result
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -114,7 +149,18 @@ describe('drawPolygon', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawPolygon(gl, program, buffer, { fill: '#ffffff', height: 20, sides: 4, width: 20, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, 90);
+    drawPolygon(
+      gl,
+      program,
+      buffer,
+      { fill: '#ffffff', height: 20, sides: 4, width: 20, x: 0, y: 0 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      false,
+      90,
+    );
 
     // result
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -122,5 +168,33 @@ describe('drawPolygon', () => {
 
     expect(vertices[2]).toBeCloseTo(20);
     expect(vertices[3]).toBeCloseTo(10);
+  });
+
+  it('should mirror the fan points around the center when flipX/flipY are given', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before — triangle (sides=3), center (10, 10); the first raw point (top, angle -90) sits at
+    drawPolygon(
+      gl,
+      program,
+      buffer,
+      { fill: '#ffffff', height: 20, sides: 3, width: 20, x: 0, y: 0 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      true,
+      true,
+      0,
+    );
+
+    // result
+    const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = firstFillCall[1];
+
+    expect(vertices[2]).toBeCloseTo(10);
+    expect(vertices[3]).toBeCloseTo(20);
   });
 });

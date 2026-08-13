@@ -3,6 +3,7 @@ import { TDraftRect, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
+import { flipPoint } from 'utils/math/flipPoint';
 import { getQuadVertices } from '../drawThickOutline';
 import { getStarPoints } from './getStarPoints';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
@@ -18,6 +19,8 @@ export const drawThickStarOutline = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  flipX: boolean,
+  flipY: boolean,
   rotation: number,
 ): void => {
   const positionLocation = gl.getAttribLocation(program, 'a_position');
@@ -34,13 +37,17 @@ export const drawThickStarOutline = (
     { height: star.height + halfWidth * 2, width: star.width + halfWidth * 2, x: star.x - halfWidth, y: star.y - halfWidth },
     points,
     ratio,
-  ).map((point) => rotatePoint(point, center, rotation));
+  )
+    .map((point) => flipPoint(point, center, flipX, flipY))
+    .map((point) => rotatePoint(point, center, rotation));
 
   const innerPoints = getStarPoints(
     { height: star.height - halfWidth * 2, width: star.width - halfWidth * 2, x: star.x + halfWidth, y: star.y + halfWidth },
     points,
     ratio,
-  ).map((point) => rotatePoint(point, center, rotation));
+  )
+    .map((point) => flipPoint(point, center, flipX, flipY))
+    .map((point) => rotatePoint(point, center, rotation));
 
   const vertices = outerPoints.flatMap((outerPoint, index) => {
     const nextIndex = (index + 1) % vertexCount;

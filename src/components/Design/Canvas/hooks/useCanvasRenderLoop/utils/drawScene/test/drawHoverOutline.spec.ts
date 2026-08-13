@@ -91,6 +91,8 @@ describe('drawHoverOutline', () => {
     const buffer = {} as WebGLBuffer;
     const polygon: TSceneNode = {
       fill: '#ff0000',
+      flipX: false,
+      flipY: false,
       height: 20,
       id: 'a',
       name: 'Polygon',
@@ -118,6 +120,8 @@ describe('drawHoverOutline', () => {
     const buffer = {} as WebGLBuffer;
     const star: TSceneNode = {
       fill: '#ff0000',
+      flipX: false,
+      flipY: false,
       height: 20,
       id: 'a',
       name: 'Star',

@@ -111,6 +111,8 @@ describe('drawSceneNodes', () => {
     const buffer = {} as WebGLBuffer;
     const polygon: TSceneNode = {
       fill: '#ff0000',
+      flipX: false,
+      flipY: false,
       height: 10,
       id: 'a',
       name: 'Polygon',
@@ -137,6 +139,8 @@ describe('drawSceneNodes', () => {
     const buffer = {} as WebGLBuffer;
     const star: TSceneNode = {
       fill: '#ff0000',
+      flipX: false,
+      flipY: false,
       height: 10,
       id: 'a',
       name: 'Star',

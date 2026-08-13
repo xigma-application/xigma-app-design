@@ -3,8 +3,11 @@ import { RefObject } from 'react';
 // types
 import { NodeType } from 'types/design/enums';
 import { TDraftRect, TResizeHandle } from 'types/canvas';
+import { TMediaNode, TPolygonNode, TSceneNode, TStarNode, TTextNode } from 'types/design/types';
 import { TResizeDragState, TResizeNodeOrigin } from '../../types';
-import { TSceneNode } from 'types/design/types';
+
+const isFlippableNode = (node: TSceneNode): node is TMediaNode | TPolygonNode | TStarNode | TTextNode =>
+  node.type === NodeType.media || node.type === NodeType.text || node.type === NodeType.polygon || node.type === NodeType.star;
 
 export const armResizeDrag = (
   canvas: HTMLCanvasElement,
@@ -21,7 +24,7 @@ export const armResizeDrag = (
       node.type === NodeType.line
         ? { x1: node.x1, x2: node.x2, y1: node.y1, y2: node.y2 }
         : {
-            flip: node.type === NodeType.media || node.type === NodeType.text ? { x: node.flipX, y: node.flipY } : null,
+            flip: isFlippableNode(node) ? { x: node.flipX, y: node.flipY } : null,
             height: node.height,
             width: node.width,
             x: node.x,

@@ -59,6 +59,8 @@ export type TMediaNode = TBaseNode & {
 
 export type TPolygonNode = TBaseNode & {
   fill: string;
+  flipX: boolean;
+  flipY: boolean;
   sides: number;
   type: NodeType.polygon;
 };
@@ -70,6 +72,8 @@ export type TRectangleNode = TBaseNode & {
 
 export type TStarNode = TBaseNode & {
   fill: string;
+  flipX: boolean;
+  flipY: boolean;
   points: number;
   ratio: number;
   type: NodeType.star;

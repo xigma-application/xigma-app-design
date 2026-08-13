@@ -34,10 +34,10 @@ export const drawSceneNodes = (
         drawEllipse(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, node.rotation);
         break;
       case NodeType.polygon:
-        drawPolygon(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, node.rotation);
+        drawPolygon(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, node.flipX, node.flipY, node.rotation);
         break;
       case NodeType.star:
-        drawStar(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, node.rotation);
+        drawStar(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, node.flipX, node.flipY, node.rotation);
         break;
       case NodeType.media:
         drawImage(

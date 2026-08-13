@@ -49,6 +49,8 @@ export const drawHoverOutline = (
           canvasWidth,
           canvasHeight,
           viewport,
+          hoveredNode.flipX,
+          hoveredNode.flipY,
           hoveredNode.rotation,
         );
         break;
@@ -63,6 +65,8 @@ export const drawHoverOutline = (
           canvasWidth,
           canvasHeight,
           viewport,
+          hoveredNode.flipX,
+          hoveredNode.flipY,
           hoveredNode.rotation,
         );
         break;

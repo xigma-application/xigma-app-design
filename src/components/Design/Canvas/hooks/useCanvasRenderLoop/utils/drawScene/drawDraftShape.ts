@@ -31,11 +31,11 @@ export const drawDraftShape = (
       drawRect(gl, program, buffer, { ...draftShape, fill: undefined, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport, 0);
       break;
     case NodeType.polygon:
-      drawPolygon(gl, program, buffer, draftShape, canvasWidth, canvasHeight, viewport, 0);
+      drawPolygon(gl, program, buffer, draftShape, canvasWidth, canvasHeight, viewport, false, false, 0);
       drawRect(gl, program, buffer, { ...draftShape, fill: undefined, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport, 0);
       break;
     case NodeType.star:
-      drawStar(gl, program, buffer, draftShape, canvasWidth, canvasHeight, viewport, 0);
+      drawStar(gl, program, buffer, draftShape, canvasWidth, canvasHeight, viewport, false, false, 0);
       drawRect(gl, program, buffer, { ...draftShape, fill: undefined, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport, 0);
       break;
     case NodeType.media:

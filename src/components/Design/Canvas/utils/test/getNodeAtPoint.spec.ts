@@ -73,6 +73,8 @@ describe('getNodeAtPoint', () => {
     // mock
     const node: TSceneNode = {
       fill: '#ff0000',
+      flipX: false,
+      flipY: false,
       height: 10,
       id: 'a',
       name: 'Polygon',
@@ -94,6 +96,8 @@ describe('getNodeAtPoint', () => {
     // mock
     const node: TSceneNode = {
       fill: '#ff0000',
+      flipX: false,
+      flipY: false,
       height: 100,
       id: 'a',
       name: 'Star',

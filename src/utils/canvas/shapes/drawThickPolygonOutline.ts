@@ -3,6 +3,7 @@ import { TDraftRect, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
+import { flipPoint } from 'utils/math/flipPoint';
 import { getPolygonPoints } from './getPolygonPoints';
 import { getQuadVertices } from '../drawThickOutline';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
@@ -18,6 +19,8 @@ export const drawThickPolygonOutline = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  flipX: boolean,
+  flipY: boolean,
   rotation: number,
 ): void => {
   const positionLocation = gl.getAttribLocation(program, 'a_position');
@@ -32,11 +35,16 @@ export const drawThickPolygonOutline = (
   const outerPoints = getPolygonPoints(
     { height: polygon.height + halfWidth * 2, width: polygon.width + halfWidth * 2, x: polygon.x - halfWidth, y: polygon.y - halfWidth },
     sides,
-  ).map((point) => rotatePoint(point, center, rotation));
+  )
+    .map((point) => flipPoint(point, center, flipX, flipY))
+    .map((point) => rotatePoint(point, center, rotation));
+
   const innerPoints = getPolygonPoints(
     { height: polygon.height - halfWidth * 2, width: polygon.width - halfWidth * 2, x: polygon.x + halfWidth, y: polygon.y + halfWidth },
     sides,
-  ).map((point) => rotatePoint(point, center, rotation));
+  )
+    .map((point) => flipPoint(point, center, flipX, flipY))
+    .map((point) => rotatePoint(point, center, rotation));
 
   const vertices = outerPoints.flatMap((outerPoint, index) => {
     const nextIndex = (index + 1) % sides;

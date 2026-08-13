@@ -3,6 +3,7 @@ import { TDraftRect, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
+import { flipPoint } from 'utils/math/flipPoint';
 import { getPolygonPoints } from './getPolygonPoints';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
 import { rotatePoint } from 'utils/math/rotatePoint';
@@ -24,6 +25,8 @@ export const drawPolygon = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  flipX: boolean,
+  flipY: boolean,
   rotation: number,
 ): void => {
   const positionLocation = gl.getAttribLocation(program, 'a_position');
@@ -33,7 +36,9 @@ export const drawPolygon = (
   const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
 
   const center: TPoint = { x: polygon.x + polygon.width / 2, y: polygon.y + polygon.height / 2 };
-  const points = getPolygonPoints(polygon, polygon.sides).map((point) => rotatePoint(point, center, rotation));
+  const points = getPolygonPoints(polygon, polygon.sides)
+    .map((point) => flipPoint(point, center, flipX, flipY))
+    .map((point) => rotatePoint(point, center, rotation));
 
   gl.useProgram(program);
   gl.uniform2f(viewportOffsetLocation, viewport.x, viewport.y);

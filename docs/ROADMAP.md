@@ -451,21 +451,36 @@ przeszkodą, żeby edycja pojedynczego node'a czuła się skończona, nie tylko 
       grupy od zwykłego skalowania: node'y w grupie **zamieniają się kolejnością** wokół anchora, nie
       tylko skalują się w miejscu. Przy resize po skosie mirror X i Y liczone są niezależnie per oś
       (`getResizeAxisAnchors.ts`, wspólne źródło prawdy dla anchora per oś, reużyte też przez
-      uproszczony `getResizeAnchorPoint.ts`). Dla jednolitego fill (Rectangle/Ellipse/Frame/Polygon/
-      Star) mirror jest wizualnie tożsamy ze zwykłą normalizacją bboxa (kształt symetryczny) — samo
-      to już wystarcza. **Media i Text dostały realny flip treści**: `TMediaNode`/`TTextNode` mają
-      teraz `flipX`/`flipY` (required, jak `rotation`), przełączane w `continueResizeDrag.ts` jako
-      XOR względem stanu z początku przeciągnięcia (`origin.flip.x !== (scaleX < 0)`), więc cofnięcie
-      kursora z powrotem przez anchor w tym samym drag'u poprawnie przywraca stan sprzed
-      przeciągnięcia. Media: UV flip w `drawImage.ts` (zamiana u/v zamiast pozycji quada — dla
-      jednego prostokąta to identyczny wynik wizualny, prościej niż ruszanie geometrii). Text:
-      geometryczny mirror całej złożonej siatki glifów wokół środka node'a (`flipGlyphVertices.ts`,
-      pozycje odbite, UV bez zmian) — sztywna geometria po odbiciu automatycznie mirror'uje i kształt
-      liter, i ich kolejność (efekt trzymania tekstu przy lustrze), stosowane **po**
-      `getOrBuildTextGeometry` więc cache geometrii zostaje kanoniczny/nieodbity. Zweryfikowane
-      manualnie w przeglądarce (Playwright MCP + własnoręcznie przez użytkownika): box faktycznie
-      rośnie po drugiej stronie anchora zamiast utykać, umieszczony obrazek faktycznie się odbija
-      (nie tylko jego bbox), a tekst renderuje się lustrzanie
+      uproszczony `getResizeAnchorPoint.ts`). Dla Rectangle/Ellipse/Frame mirror jest wizualnie
+      tożsamy ze zwykłą normalizacją bboxa (kształt symetryczny) — samo to już wystarcza. **Media,
+      Text, Polygon i Star dostały realny flip treści**: odpowiednie node'y mają `flipX`/`flipY`
+      (required, jak `rotation`), przełączane w `continueResizeDrag.ts` jako XOR względem stanu z
+      początku przeciągnięcia (`origin.flip.x !== (scaleX < 0)`), więc cofnięcie kursora z powrotem
+      przez anchor w tym samym drag'u poprawnie przywraca stan sprzed przeciągnięcia. Media: UV flip
+      w `drawImage.ts` (zamiana u/v zamiast pozycji quada — dla jednego prostokąta to identyczny
+      wynik wizualny, prościej niż ruszanie geometrii). Text: geometryczny mirror całej złożonej
+      siatki glifów wokół środka node'a (`flipGlyphVertices.ts`, pozycje odbite, UV bez zmian) —
+      sztywna geometria po odbiciu automatycznie mirror'uje i kształt liter, i ich kolejność (efekt
+      trzymania tekstu przy lustrze), stosowane **po** `getOrBuildTextGeometry` więc cache geometrii
+      zostaje kanoniczny/nieodbity. Zweryfikowane manualnie w przeglądarce (Playwright MCP +
+      własnoręcznie przez użytkownika): box faktycznie rośnie po drugiej stronie anchora zamiast
+      utykać, umieszczony obrazek faktycznie się odbija (nie tylko jego bbox), a tekst renderuje się
+      lustrzanie.
+
+      **Poprawka (Etap 10, po zgłoszeniu przez użytkownika)**: pierwotne założenie "Polygon/Star są
+          wystarczająco symetryczne" okazało się błędne — trójkąt (domyślne 3 boki) i domyślna 5-ramienna
+          gwiazda **nie** mają symetrii odbicia względem osi poziomej (nieparzysta liczba boków/ramion),
+          więc renderowanie zawsze tego samego, kanonicznego układu wierzchołków z `getPolygonPoints`/
+          `getStarPoints` (niezależnego od kierunku przeciągnięcia) dawało wizualnie identyczny kształt
+          mimo "zmirrorowanego" bboxa. Naprawione tym samym mechanizmem co Media/Text: `TPolygonNode`/
+          `TStarNode` też dostały `flipX`/`flipY`, nowy współdzielony prymityw `utils/math/flipPoint.ts`
+          (odbicie punktu względem środka) aplikowany jako krok **przed** rotacją w `drawPolygon.ts`/
+          `drawStar.ts`/`drawThickPolygonOutline.ts`/`drawThickStarOutline.ts` (ten sam porządek co Text:
+          flip, potem rotate), hit-testing (`isPointInPolygon.ts`/`isPointInStar.ts`) odwrotnie odbija
+          punkt zapytania przed testem, tym samym trikiem co `isPointInText.ts`. Zweryfikowane manualnie:
+          trójkąt faktycznie odwraca się z wierzchołkiem w górę na wierzchołek w dół, a gwiazda zmienia
+          orientację ramion (nie tylko pozycję bboxa)
+
 - [x] **rotacja** — `rotation` siedział w `TBaseNode` od Etapu 2, ale nic go nigdy nie ustawiało ani
       nie uwzględniało w renderingu/hit-testingu. Rotacja jest CPU-side post-processingiem już
       policzonych punktów (ten sam wzorzec co świeżo wdrożony mirror/flip, `flipGlyphVertices.ts`),
@@ -477,41 +492,42 @@ przeszkodą, żeby edycja pojedynczego node'a czuła się skończona, nie tylko 
       nie modyfikacją `angle` w generatorach, bo przy `radiusX !== radiusY` dałoby to inny kształt).
       Dla Media/Text (stride-4 `[x, y, u, v]` bufory) nowy `utils/canvas/rotateVertices.ts`; dla Text
       komponuje się z istniejącym flipem (`rotateVertices(flipGlyphVertices(...), center,
-      node.rotation)` w `drawMsdfText.ts`).
+  node.rotation)` w `drawMsdfText.ts`).
 
       **Hit-testing**: zamiast dotykać `isPointInRect/Ellipse/Polygon/Star/Text`, `getNodeAtPoint.ts`
-      raz odwrotnie obraca punkt kliknięcia wokół środka node'a przed dispatchem do niezmienionych
-      funkcji testujących — ten sam trik co przy flipie w `isPointInText.ts`. Ta sama zasada dla
-      uchwytów resize (`getResizeHandleAtPoint.ts`) i dla drag zaznaczonego, obróconego tekstu
-      (`isPointInSelectedTextBounds.ts`). Marquee i wspólny bbox grupy (`getCollidedNodes.ts`,
-      `getSelectionBounds.ts`) przeszły z surowego `getNodeBounds.ts` na nowy
-      `getRotatedNodeBounds.ts` (axis-aligned bbox obróconych rogów) — bo dla obróconego node'a
-      surowy bbox przestaje być jego prawdziwym, widocznym zasięgiem.
+              raz odwrotnie obraca punkt kliknięcia wokół środka node'a przed dispatchem do niezmienionych
+              funkcji testujących — ten sam trik co przy flipie w `isPointInText.ts`. Ta sama zasada dla
+              uchwytów resize (`getResizeHandleAtPoint.ts`) i dla drag zaznaczonego, obróconego tekstu
+              (`isPointInSelectedTextBounds.ts`). Marquee i wspólny bbox grupy (`getCollidedNodes.ts`,
+              `getSelectionBounds.ts`) przeszły z surowego `getNodeBounds.ts` na nowy
+              `getRotatedNodeBounds.ts` (axis-aligned bbox obróconych rogów) — bo dla obróconego node'a
+              surowy bbox przestaje być jego prawdziwym, widocznym zasięgiem.
 
-      **Uchwyty resize też się obracają** — pozycja i orientacja nadążają za `rotation` pojedynczego
-      zaznaczonego node'a (samo przeciąganie resize zostaje w world space, świadomy kompromis). Nowy
-      uchwyt rotacji to pierścień tuż poza promieniem resize (`ROTATE_HANDLE_OUTER_RADIUS_PX`,
-      `getRotateHandleAtPoint.ts`), jawnie wykluczający punkty wewnątrz bboxa node'a, żeby zwykły
-      klik/drag blisko rogu nie został przechwycony przez rotację. Kursor `rotate.png` obraca się tym
-      samym mechanizmem co `resize.png`, wydzielonym do współdzielonej fabryki
-      `createCursorRotator.ts` (`getRotateCursorAngle.ts` liczy kąt na podstawie ćwiartki lokalnej
-      przestrzeni node'a, skalibrowany tak, że róg "ne" nieobróconego node'a odpowiada 0°, każdy
-      kolejny róg zgodnie z ruchem wskazówek zegara +90°). Kąt kursora nie jest liczony tylko raz przy
-      złapaniu uchwytu — `continueRotateDrag.ts` przelicza go na każdy `pointermove`
-      (`cursorAngle + deltaDegrees`, oba zapamiętane w `TRotateDragState` przy arm) i na bieżąco
-      podmienia `canvas.style.cursor`, więc ikona wizualnie obraca się razem z node'em przez cały
-      czas trwania przeciągnięcia, nie tylko na starcie i końcu.
+              **Uchwyty resize też się obracają** — pozycja i orientacja nadążają za `rotation` pojedynczego
+              zaznaczonego node'a (samo przeciąganie resize zostaje w world space, świadomy kompromis). Nowy
+              uchwyt rotacji to pierścień tuż poza promieniem resize (`ROTATE_HANDLE_OUTER_RADIUS_PX`,
+              `getRotateHandleAtPoint.ts`), jawnie wykluczający punkty wewnątrz bboxa node'a, żeby zwykły
+              klik/drag blisko rogu nie został przechwycony przez rotację. Kursor `rotate.png` obraca się tym
+              samym mechanizmem co `resize.png`, wydzielonym do współdzielonej fabryki
+              `createCursorRotator.ts` (`getRotateCursorAngle.ts` liczy kąt na podstawie ćwiartki lokalnej
+              przestrzeni node'a, skalibrowany tak, że róg "ne" nieobróconego node'a odpowiada 0°, każdy
+              kolejny róg zgodnie z ruchem wskazówek zegara +90°). Kąt kursora nie jest liczony tylko raz przy
+              złapaniu uchwytu — `continueRotateDrag.ts` przelicza go na każdy `pointermove`
+              (`cursorAngle + deltaDegrees`, oba zapamiętane w `TRotateDragState` przy arm) i na bieżąco
+              podmienia `canvas.style.cursor`, więc ikona wizualnie obraca się razem z node'em przez cały
+              czas trwania przeciągnięcia, nie tylko na starcie i końcu.
 
-      **Rotacja działa dla pojedynczego node'a i dla grupy** — grupa nie ma własnego, persystowanego
-      `rotation`; to transient operacja per-drag: każdy człon dostaje `+= deltaDegrees` do własnej
-      `rotation`, a jego środek okrąża wspólny środek grupy o ten sam kąt (`continueRotateDrag.ts`).
-      Dla pojedynczego node'a pivot === środek node'a, więc formuła automatycznie kolapsuje do
-      "pozycja bez zmian, tylko `rotation`" — bez osobnej ścieżki kodu, ten sam trik co przy resize.
-      `line` (bez pola `rotation`) rotuje tylko jako część grupy, przez własne punkty `x1/y1/x2/y2`.
-      Zweryfikowane manualnie w przeglądarce (Playwright MCP): pojedynczy kwadrat wizualnie się
-      obraca wraz z uchwytami, kliknięcie w róg obróconego kształtu (poza jego oryginalnym,
-      nieobróconym bboxem) trafia poprawnie, a rotacja grupy dwóch node'ów pokazuje każdy człon
-      okrążający wspólny środek i obracający się indywidualnie
+              **Rotacja działa dla pojedynczego node'a i dla grupy** — grupa nie ma własnego, persystowanego
+              `rotation`; to transient operacja per-drag: każdy człon dostaje `+= deltaDegrees` do własnej
+              `rotation`, a jego środek okrąża wspólny środek grupy o ten sam kąt (`continueRotateDrag.ts`).
+              Dla pojedynczego node'a pivot === środek node'a, więc formuła automatycznie kolapsuje do
+              "pozycja bez zmian, tylko `rotation`" — bez osobnej ścieżki kodu, ten sam trik co przy resize.
+              `line` (bez pola `rotation`) rotuje tylko jako część grupy, przez własne punkty `x1/y1/x2/y2`.
+              Zweryfikowane manualnie w przeglądarce (Playwright MCP): pojedynczy kwadrat wizualnie się
+              obraca wraz z uchwytami, kliknięcie w róg obróconego kształtu (poza jego oryginalnym,
+              nieobróconym bboxem) trafia poprawnie, a rotacja grupy dwóch node'ów pokazuje każdy człon
+              okrążający wspólny środek i obracający się indywidualnie
+
 - [ ] **corner radius dla Rectangle** — przeciągany uchwyt na rogu prostokąta (jak w Figmie), na
       razie żadnego pola na to w `TRectangleNode`
 - [ ] **klawiszowe skróty edycji**: Delete/Backspace (usuń zaznaczenie), Cmd/Ctrl+D (duplikuj),

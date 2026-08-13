@@ -58,7 +58,9 @@ export const useDrawStarTool = (
       const rect = toDraftRect(startRef.current, screenToWorld(getPointerPosition(canvas, event), viewport));
 
       if (rect.width >= MIN_SHAPE_SIZE && rect.height >= MIN_SHAPE_SIZE) {
-        dispatch(addNode({ ...rect, fill, name, parentId: null, points, ratio, rotation: 0, type: NodeType.star }));
+        dispatch(
+          addNode({ ...rect, fill, flipX: false, flipY: false, name, parentId: null, points, ratio, rotation: 0, type: NodeType.star }),
+        );
       }
 
       startRef.current = null;
