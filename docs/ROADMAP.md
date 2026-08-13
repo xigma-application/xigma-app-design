@@ -442,6 +442,30 @@ przeszkodą, żeby edycja pojedynczego node'a czuła się skończona, nie tylko 
       `createArmedCursor.ts`), właśnie po to, żeby nie rozsypać się, gdy `rotation` node'a (patrz
       niżej) stanie się kiedyś edytowalny — `getResizeCursorAngle.ts` już dziś dolicza
       `node.rotation` do kąta kursora dla pojedynczego node'a
+- [x] **mirror/flip przy przejściu przez zero podczas resize** — `computeResizedRect.ts` przestał
+      clampować asymetrycznie do `MIN_SHAPE_SIZE`; przeciągnięcie uchwytu "przez" przeciwległy
+      róg/krawędź teraz mirror'uje bbox zamiast utykać na minimalnym rozmiarze (punkt zakotwiczenia
+      zostaje na miejscu, kształt rośnie po drugiej stronie). `continueResizeDrag.ts` liczy **signed
+      scale** względem anchora (środek origin-bboxa vs środek nowego bboxa po tej samej stronie
+      anchora = dodatni scale, po przeciwnej = ujemny) — to jest to, co odróżnia prawdziwy mirror
+      grupy od zwykłego skalowania: node'y w grupie **zamieniają się kolejnością** wokół anchora, nie
+      tylko skalują się w miejscu. Przy resize po skosie mirror X i Y liczone są niezależnie per oś
+      (`getResizeAxisAnchors.ts`, wspólne źródło prawdy dla anchora per oś, reużyte też przez
+      uproszczony `getResizeAnchorPoint.ts`). Dla jednolitego fill (Rectangle/Ellipse/Frame/Polygon/
+      Star) mirror jest wizualnie tożsamy ze zwykłą normalizacją bboxa (kształt symetryczny) — samo
+      to już wystarcza. **Media i Text dostały realny flip treści**: `TMediaNode`/`TTextNode` mają
+      teraz `flipX`/`flipY` (required, jak `rotation`), przełączane w `continueResizeDrag.ts` jako
+      XOR względem stanu z początku przeciągnięcia (`origin.flip.x !== (scaleX < 0)`), więc cofnięcie
+      kursora z powrotem przez anchor w tym samym drag'u poprawnie przywraca stan sprzed
+      przeciągnięcia. Media: UV flip w `drawImage.ts` (zamiana u/v zamiast pozycji quada — dla
+      jednego prostokąta to identyczny wynik wizualny, prościej niż ruszanie geometrii). Text:
+      geometryczny mirror całej złożonej siatki glifów wokół środka node'a (`flipGlyphVertices.ts`,
+      pozycje odbite, UV bez zmian) — sztywna geometria po odbiciu automatycznie mirror'uje i kształt
+      liter, i ich kolejność (efekt trzymania tekstu przy lustrze), stosowane **po**
+      `getOrBuildTextGeometry` więc cache geometrii zostaje kanoniczny/nieodbity. Zweryfikowane
+      manualnie w przeglądarce (Playwright MCP + własnoręcznie przez użytkownika): box faktycznie
+      rośnie po drugiej stronie anchora zamiast utykać, umieszczony obrazek faktycznie się odbija
+      (nie tylko jego bbox), a tekst renderuje się lustrzanie
 - [ ] **rotacja** — `rotation` siedzi w `TBaseNode` od Etapu 2, ale nic go nigdy nie ustawia ani
       nie uwzględnia w renderingu/hit-testingu (`drawEditingText.ts` nawet hardcode'uje `rotation: 0`
       dla nowego node'a). Potrzebny: uchwyt rotacji tuż za rogiem bboxa + `rotation` uwzględniony w

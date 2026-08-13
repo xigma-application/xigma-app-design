@@ -20,7 +20,13 @@ export const armResizeDrag = (
     nodeOrigins[node.id] =
       node.type === NodeType.line
         ? { x1: node.x1, x2: node.x2, y1: node.y1, y2: node.y2 }
-        : { height: node.height, width: node.width, x: node.x, y: node.y };
+        : {
+            flip: node.type === NodeType.media || node.type === NodeType.text ? { x: node.flipX, y: node.flipY } : null,
+            height: node.height,
+            width: node.width,
+            x: node.x,
+            y: node.y,
+          };
   });
 
   resizeDragRef.current = { aspectRatio: bounds.width / bounds.height, bounds, handle, nodeOrigins };

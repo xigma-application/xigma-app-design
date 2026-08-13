@@ -48,6 +48,8 @@ export const drawDraftShape = (
         canvasWidth,
         canvasHeight,
         viewport,
+        false,
+        false,
       );
       drawRect(gl, program, buffer, { ...draftShape, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport);
       break;

@@ -36,7 +36,7 @@ describe('drawImage', () => {
     const texture = {} as WebGLTexture;
 
     // before
-    drawImage(gl, program, buffer, texture, { height: 20, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT);
+    drawImage(gl, program, buffer, texture, { height: 20, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, false, false);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
@@ -51,7 +51,7 @@ describe('drawImage', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawImage(gl, program, buffer, null, { height: 20, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT);
+    drawImage(gl, program, buffer, null, { height: 20, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, false, false);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -65,7 +65,7 @@ describe('drawImage', () => {
     const texture = {} as WebGLTexture;
 
     // before
-    drawImage(gl, program, buffer, texture, { height: 20, width: 10, x: 0, y: 0 }, 100, 200, { x: 5, y: 15, zoom: 2 });
+    drawImage(gl, program, buffer, texture, { height: 20, width: 10, x: 0, y: 0 }, 100, 200, { x: 5, y: 15, zoom: 2 }, false, false);
 
     // result
     expect(gl.uniform2f).toHaveBeenCalledWith(expect.anything(), 5, 15);
@@ -81,7 +81,7 @@ describe('drawImage', () => {
     const texture = {} as WebGLTexture;
 
     // before
-    drawImage(gl, program, buffer, texture, { height: 20, width: 10, x: 5, y: 5 }, 100, 100, IDENTITY_VIEWPORT);
+    drawImage(gl, program, buffer, texture, { height: 20, width: 10, x: 5, y: 5 }, 100, 100, IDENTITY_VIEWPORT, false, false);
 
     // result
     const [firstCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -91,5 +91,25 @@ describe('drawImage', () => {
     expect(Array.from(vertices.slice(0, 4))).toEqual([5, 5, 0, 0]);
     // third vertex: position (15, 25), texCoord (1, 1)
     expect(Array.from(vertices.slice(8, 12))).toEqual([15, 25, 1, 1]);
+  });
+
+  it('should swap the u/v texCoords instead of the positions when flipX/flipY are set', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const texture = {} as WebGLTexture;
+
+    // before
+    drawImage(gl, program, buffer, texture, { height: 20, width: 10, x: 5, y: 5 }, 100, 100, IDENTITY_VIEWPORT, true, true);
+
+    // result
+    const [firstCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = firstCall[1];
+
+    // first vertex: position unchanged (5, 5), texCoord flipped from (0, 0) to (1, 1)
+    expect(Array.from(vertices.slice(0, 4))).toEqual([5, 5, 1, 1]);
+    // third vertex: position unchanged (15, 25), texCoord flipped from (1, 1) to (0, 0)
+    expect(Array.from(vertices.slice(8, 12))).toEqual([15, 25, 0, 0]);
   });
 });

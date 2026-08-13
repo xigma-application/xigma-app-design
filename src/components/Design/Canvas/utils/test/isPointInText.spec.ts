@@ -8,6 +8,8 @@ import { isPointInText } from '../isPointInText';
 const buildNode = (overrides: Partial<TTextNode> = {}): TTextNode => ({
   content: 'Hi',
   fill: '#ffffff',
+  flipX: false,
+  flipY: false,
   fontFamily: 'Inter',
   fontSize: 14,
   height: 500,

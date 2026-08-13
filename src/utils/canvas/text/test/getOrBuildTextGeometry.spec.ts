@@ -21,6 +21,8 @@ const ATLAS: TGlyphAtlasJson = {
 const createNode = (overrides: Partial<TTextNode> = {}): TTextNode => ({
   content: 'AB',
   fill: '#ffffff',
+  flipX: false,
+  flipY: false,
   fontFamily: 'Inter',
   fontSize: 20,
   height: 20,

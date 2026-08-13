@@ -51,6 +51,8 @@ export type TFrameNode = TBaseNode & {
 };
 
 export type TMediaNode = TBaseNode & {
+  flipX: boolean;
+  flipY: boolean;
   src: string;
   type: NodeType.media;
 };
@@ -76,6 +78,8 @@ export type TStarNode = TBaseNode & {
 export type TTextNode = TBaseNode & {
   content: string;
   fill: string;
+  flipX: boolean;
+  flipY: boolean;
   fontFamily: string;
   fontSize: number;
   type: NodeType.text;

@@ -49,6 +49,8 @@ export const drawSceneNodes = (
           canvasWidth,
           canvasHeight,
           viewport,
+          node.flipX,
+          node.flipY,
         );
         break;
       case NodeType.line:

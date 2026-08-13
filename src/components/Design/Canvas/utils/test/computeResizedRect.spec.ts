@@ -49,4 +49,22 @@ describe('computeResizedRect', () => {
     expect(computeResizedRect('e', ORIGIN, { x: 1, y: 0 })).toEqual({ height: 100, width: 2, x: 0, y: 0 });
     expect(computeResizedRect('w', ORIGIN, { x: 99, y: 0 })).toEqual({ height: 100, width: 2, x: 98, y: 0 });
   });
+
+  it('should mirror past the anchor on an edge handle instead of sticking at MIN_SHAPE_SIZE', () => {
+    // result — dragging the east edge past the west anchor (x=0) grows the box westward instead
+    expect(computeResizedRect('e', ORIGIN, { x: -30, y: 500 })).toEqual({ height: 100, width: 30, x: -30, y: 0 });
+    // dragging the west edge past the east anchor (x=100) grows the box eastward instead
+    expect(computeResizedRect('w', ORIGIN, { x: 130, y: 500 })).toEqual({ height: 100, width: 30, x: 100, y: 0 });
+  });
+
+  it('should mirror both axes on a corner handle when the drag crosses both anchors', () => {
+    // result — se handle dragged past both the west (x=0) and north (y=0) anchors
+    expect(computeResizedRect('se', ORIGIN, { x: -20, y: -10 })).toEqual({ height: 10, width: 20, x: -20, y: -10 });
+  });
+
+  it('should mirror X and Y independently on a diagonal drag', () => {
+    // result — se handle: X crosses its anchor (x=0), Y does not (y stays positive) — only the
+    // horizontal axis should mirror, the vertical one resizes normally
+    expect(computeResizedRect('se', ORIGIN, { x: -20, y: 50 })).toEqual({ height: 50, width: 20, x: -20, y: 0 });
+  });
 });

@@ -41,7 +41,7 @@ export const handlePointerUp = (
       ? { height: armed.naturalHeight, width: armed.naturalWidth, x: startRef.current.x, y: startRef.current.y }
       : getAspectRatioLockedRect(startRef.current, current, armed.naturalWidth / armed.naturalHeight);
 
-    dispatch(addNode({ ...rect, name, parentId: null, rotation: 0, src: armed.src, type: NodeType.media }));
+    dispatch(addNode({ ...rect, flipX: false, flipY: false, name, parentId: null, rotation: 0, src: armed.src, type: NodeType.media }));
 
     startRef.current = null;
     draftRef.current = null;

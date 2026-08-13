@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TFrameNode, TLineNode } from 'types/design/types';
+import { TFrameNode, TLineNode, TMediaNode } from 'types/design/types';
 import { TResizeDragState } from '../../../types';
 
 // utils
@@ -60,7 +60,7 @@ describe('armResizeDrag', () => {
       aspectRatio: 2,
       bounds: { height: 50, width: 100, x: 0, y: 0 },
       handle: 'se',
-      nodeOrigins: { a: { height: 50, width: 100, x: 0, y: 0 } },
+      nodeOrigins: { a: { flip: null, height: 50, width: 100, x: 0, y: 0 } },
     });
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(3);
   });
@@ -75,5 +75,33 @@ describe('armResizeDrag', () => {
 
     // result
     expect(resizeDragRef.current?.nodeOrigins).toEqual({ 'line-1': { x1: 10, x2: 20, y1: 30, y2: 40 } });
+  });
+
+  it('should record the current flipX/flipY as the origin snapshot for a media node', () => {
+    // mock
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef();
+    const media: TMediaNode = {
+      flipX: true,
+      flipY: false,
+      height: 50,
+      id: 'media-1',
+      name: 'Image',
+      parentId: null,
+      rotation: 0,
+      src: 'a.png',
+      type: NodeType.media,
+      width: 100,
+      x: 0,
+      y: 0,
+    };
+
+    // before
+    armResizeDrag(canvas, pointerEvent(), resizeDragRef, [media], 'se', { height: 50, width: 100, x: 0, y: 0 });
+
+    // result
+    expect(resizeDragRef.current?.nodeOrigins).toEqual({
+      'media-1': { flip: { x: true, y: false }, height: 50, width: 100, x: 0, y: 0 },
+    });
   });
 });

@@ -8,6 +8,8 @@ import { isPointInSelectedTextBounds } from '../isPointInSelectedTextBounds';
 const buildTextNode = (id = 'a'): TSceneNode => ({
   content: 'Hi',
   fill: '#ffffff',
+  flipX: false,
+  flipY: false,
   fontFamily: 'Inter',
   fontSize: 14,
   height: 500,

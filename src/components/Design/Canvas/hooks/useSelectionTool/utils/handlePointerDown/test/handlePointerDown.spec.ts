@@ -54,6 +54,8 @@ const addTextNode = (x: number, y: number, size = 500): string => {
     addNode({
       content: 'Hi',
       fill: '#ffffff',
+      flipX: false,
+      flipY: false,
       fontFamily: 'Inter',
       fontSize: 14,
       height: size,

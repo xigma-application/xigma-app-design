@@ -11,6 +11,8 @@ export const drawImage = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  flipX: boolean,
+  flipY: boolean,
 ): void => {
   if (texture) {
     const positionLocation = gl.getAttribLocation(program, 'a_position');
@@ -29,8 +31,37 @@ export const drawImage = (
     const x4 = rect.x;
     const y4 = rect.y + rect.height;
 
-    // interleaved [x, y, u, v] per vertex, 2 triangles covering the rect
-    const vertices = new Float32Array([x1, y1, 0, 0, x2, y2, 1, 0, x3, y3, 1, 1, x1, y1, 0, 0, x3, y3, 1, 1, x4, y4, 0, 1]);
+    const uMin = flipX ? 1 : 0;
+    const uMax = flipX ? 0 : 1;
+    const vMin = flipY ? 1 : 0;
+    const vMax = flipY ? 0 : 1;
+
+    const vertices = new Float32Array([
+      x1,
+      y1,
+      uMin,
+      vMin,
+      x2,
+      y2,
+      uMax,
+      vMin,
+      x3,
+      y3,
+      uMax,
+      vMax,
+      x1,
+      y1,
+      uMin,
+      vMin,
+      x3,
+      y3,
+      uMax,
+      vMax,
+      x4,
+      y4,
+      uMin,
+      vMax,
+    ]);
     const stride = 4 * Float32Array.BYTES_PER_ELEMENT;
 
     gl.useProgram(program);

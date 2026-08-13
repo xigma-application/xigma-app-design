@@ -37,6 +37,8 @@ export const drawEditingText = (
       {
         content: editingTextContent,
         fill: TEXT_FILL,
+        flipX: false,
+        flipY: false,
         fontFamily: TEXT_FONT_FAMILY,
         fontSize: TEXT_FONT_SIZE,
         height: editingTextBox.height,

@@ -1,12 +1,13 @@
+import path from 'path';
 import { test, expect } from '@playwright/test';
 
-// pages
+// components
 import { DesignPage } from './DesignPage';
 
-// the base cursor image used for rotation is lazily constructed and decoded on first use, which
-// can take close to a second on a cold page — nothing re-applies the cursor without a further
-// pointermove, so (unlike expect.poll) this actually re-issues tiny moves on the same handle until
-// the image is ready, exactly like the mouse jitter a real user produces while hovering
+const HAND_FIXTURE_PATH = path.join(import.meta.dirname, '../../../src/assets/icons/cursors/hand.png');
+
+test.describe.configure({ mode: 'serial' });
+
 const waitForResizeCursor = async (designPage: DesignPage, x: number, y: number): Promise<string> => {
   for (let attempt = 0; attempt < 20; attempt++) {
     await designPage.pointerMove(x + (attempt % 2), y);
@@ -41,8 +42,6 @@ test('hovering different resize handle directions applies distinctly rotated cur
   await designPage.pointerMove(450, 300); // "ne" corner
   const neCursor = await designPage.cursorStyle();
 
-  // the base resize.png cursor is rotated on an offscreen <canvas> per handle direction — real
-  // Image decode + real CSS custom-cursor application, nothing a jsdom unit test can prove
   expect(new Set([seCursor, eCursor, nCursor, neCursor]).size).toBe(4);
 });
 
@@ -98,4 +97,80 @@ test('holding Shift while dragging a corner locks the aspect ratio, producing a 
   const lockedResize = await designPage.canvas.screenshot();
 
   expect(lockedResize.equals(freeResize)).toBe(false);
+});
+
+test('dragging a corner past the opposite anchor mirrors the node instead of sticking at the minimum size', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-resize-mirror-box');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(300, 300, 450, 450);
+  await designPage.click(375, 375);
+
+  await designPage.pointerDown(450, 450); // "se" handle
+  await designPage.pointerMove(150, 150); // past the "nw" anchor at (300, 300)
+  await designPage.pointerUp();
+
+  expect(await waitForResizeCursor(designPage, 300, 300)).not.toBe('');
+  expect(await waitForResizeCursor(designPage, 150, 150)).not.toBe('');
+});
+
+test('resizing a media node past its anchor mirrors the rendered image, not just its bounding box', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-resize-mirror-media-flipped');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.pickMediaFile(HAND_FIXTURE_PATH);
+  await designPage.placeMediaAtNaturalSize(300, 300); // box: (300, 300) -> (556, 556)
+  await designPage.click(400, 400); // select it
+
+  await designPage.pointerDown(556, 556);
+  await designPage.pointerMove(44, 44); // crosses both anchors by exactly 256px
+  await designPage.pointerUp();
+  await designPage.click(900, 900); // deselect, so the selection outline doesn't affect the pixels
+
+  const flipped = await page.screenshot({ clip: { height: 256, width: 256, x: 44, y: 44 } });
+
+  await designPage.goto('e2e-test-resize-mirror-media-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.pickMediaFile(HAND_FIXTURE_PATH);
+  await designPage.dragMedia(44, 44, 300, 300);
+
+  const reference = await page.screenshot({ clip: { height: 256, width: 256, x: 44, y: 44 } });
+
+  expect(flipped.equals(reference)).toBe(false);
+});
+
+test('resizing a text node past its anchor renders the text mirrored, not just repositioned', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  // resulting box lands at exactly the rect an unflipped box would use
+  await designPage.goto('e2e-test-resize-mirror-text-flipped');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawTextBox(300, 300, 500, 400); // box: (300, 300) -> (500, 400), 200x100
+  await designPage.typeText('MIRROR');
+  await designPage.click(900, 900); // click away to commit
+  await designPage.click(305, 308); // select it, on the rendered glyphs
+
+  await designPage.pointerDown(500, 400);
+  await designPage.pointerMove(100, 200); // crosses both anchors by exactly 200x100
+  await designPage.pointerUp();
+  await designPage.click(900, 900); // deselect
+
+  const flipped = await page.screenshot({ clip: { height: 100, width: 200, x: 100, y: 200 } });
+
+  await designPage.goto('e2e-test-resize-mirror-text-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawTextBox(100, 200, 300, 300);
+  await designPage.typeText('MIRROR');
+  await designPage.click(900, 900);
+
+  const reference = await page.screenshot({ clip: { height: 100, width: 200, x: 100, y: 200 } });
+
+  expect(flipped.equals(reference)).toBe(false);
 });

@@ -47,6 +47,8 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const createNode = (overrides: Partial<TTextNode> = {}): TTextNode => ({
   content: 'AB',
   fill: '#ffffff',
+  flipX: false,
+  flipY: false,
   fontFamily: 'Inter',
   fontSize: 20,
   height: 20,

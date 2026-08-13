@@ -3,6 +3,7 @@ import { TGlyphAtlasJson } from 'types/msdf';
 import { TTextNode, TViewport } from 'types/design/types';
 
 // utils
+import { flipGlyphVertices } from './flipGlyphVertices';
 import { getOrBuildTextGeometry } from './getOrBuildTextGeometry';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
 
@@ -19,7 +20,7 @@ export const drawMsdfText = (
   viewport: TViewport,
 ): void => {
   if (texture) {
-    const vertices = getOrBuildTextGeometry(atlas, cache, node);
+    const vertices = flipGlyphVertices(getOrBuildTextGeometry(atlas, cache, node), node);
 
     if (vertices.length > 0) {
       const positionLocation = gl.getAttribLocation(program, 'a_position');

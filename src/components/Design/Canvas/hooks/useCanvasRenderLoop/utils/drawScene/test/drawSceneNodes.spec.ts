@@ -163,6 +163,8 @@ describe('drawSceneNodes', () => {
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
     const media: TSceneNode = {
+      flipX: false,
+      flipY: false,
       height: 10,
       id: 'a',
       name: 'Image',
@@ -190,6 +192,8 @@ describe('drawSceneNodes', () => {
     const text: TSceneNode = {
       content: 'hello',
       fill: '#ffffff',
+      flipX: false,
+      flipY: false,
       fontFamily: 'Inter',
       fontSize: 14,
       height: 10,

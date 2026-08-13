@@ -8,7 +8,8 @@ export type TLineEndpoint = 'a' | 'b';
 export type TNodeOrigin = { x1: number; x2: number; y1: number; y2: number } | { x: number; y: number };
 
 export type TResizeNodeOrigin =
-  { x1: number; x2: number; y1: number; y2: number } | { height: number; width: number; x: number; y: number };
+  | { x1: number; x2: number; y1: number; y2: number }
+  | { flip: { x: boolean; y: boolean } | null; height: number; width: number; x: number; y: number };
 
 export type TDragState = {
   hasMoved: boolean;

@@ -147,6 +147,8 @@ describe('drawHoverOutline', () => {
     const text: TSceneNode = {
       content: 'hello',
       fill: '#ffffff',
+      flipX: false,
+      flipY: false,
       fontFamily: 'Inter',
       fontSize: 14,
       height: 200,

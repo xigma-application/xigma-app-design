@@ -322,6 +322,33 @@ so the test has to nudge the pointer repeatedly until it lands (`waitForResizeCu
 Redux assertion the "why so few scenarios get e2e coverage" section below argues a screenshot diff
 can't improve on.
 
+## Mirror/flip on resize crossing (Etap 10)
+
+Dragging a handle "through" the opposite anchor used to stick at `MIN_SHAPE_SIZE`
+(`computeResizedRect.ts`); it now mirrors instead — the anchor stays put, the box grows on the other
+side, and Media/Text also get real content-level `flipX`/`flipY` (UV swap in `drawImage.ts`, a
+geometric mirror of the whole glyph mesh in `flipGlyphVertices.ts`), not just a repositioned bbox.
+This is squarely "real browser + rendering" territory per the section below — a mocked `gl` context
+in a unit test can assert the UV/vertex math is correct, but can't prove the actual WebGL rasterizer
+paints a genuinely mirrored image or a genuinely mirrored glyph on screen.
+
+| #   | Scenario                                                                                         | Unit |         E2E         |
+| --- | ------------------------------------------------------------------------------------------------ | :--: | :-----------------: |
+| 48  | Dragging a corner past the opposite anchor mirrors the box instead of sticking at MIN_SHAPE_SIZE |  ✅  | ✅ `resize.spec.ts` |
+| 49  | Resizing a Media node past its anchor mirrors the rendered image, not just its bounding box      |  —   | ✅ `resize.spec.ts` |
+| 50  | Resizing a Text node past its anchor renders the text mirrored, not just repositioned            |  —   | ✅ `resize.spec.ts` |
+
+#49/#50 have no unit equivalent at all: `drawImage.spec.ts` and `flipGlyphVertices.spec.ts` assert
+the vertex/UV math against a mocked `gl` context, which proves the math but not that the real
+rasterizer produces a visually mirrored result. Both e2e tests sidestep computing expected pixels
+by construction instead: resize a node across its anchor by exactly its own size, so the resulting
+box lands at the _exact same on-screen rect_ an unflipped placement at that rect would use — then
+compare against a second page where the same content is placed there directly, never crossing an
+anchor. Any pixel difference between the two can only come from the content itself being mirrored,
+not from position or size differing (`resize.spec.ts` picks a visibly asymmetric fixture — the
+existing `hand.png` cursor asset — since the `create-media.spec.ts` fixtures are near-symmetric and
+wouldn't show a flip in a screenshot diff).
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e
