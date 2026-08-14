@@ -11,7 +11,7 @@ import { TDraftRect, TPoint } from 'types/canvas';
 import { continueDrag } from './continueDrag';
 import { continueEndpointDrag } from './continueEndpointDrag';
 import { continueMarqueeDrag } from './continueMarqueeDrag';
-import { continueResizeDrag } from './continueResizeDrag';
+import { continueResizeDrag } from './continueResizeDrag/continueResizeDrag';
 import { continueRotateDrag } from './continueRotateDrag';
 
 export const handlePointerMove = (

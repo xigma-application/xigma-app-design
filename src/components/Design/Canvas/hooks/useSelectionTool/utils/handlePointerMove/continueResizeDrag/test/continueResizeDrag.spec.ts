@@ -7,7 +7,7 @@ import { store } from 'store';
 // types
 import { NodeType } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
-import { TResizeDragState } from '../../../types';
+import { TResizeDragState } from '../../../../types';
 
 // utils
 import { continueResizeDrag } from '../continueResizeDrag';
