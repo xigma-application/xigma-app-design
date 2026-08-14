@@ -9,7 +9,7 @@ export type TNodeOrigin = { x1: number; x2: number; y1: number; y2: number } | {
 
 export type TResizeNodeOrigin =
   | { x1: number; x2: number; y1: number; y2: number }
-  | { flip: { x: boolean; y: boolean } | null; height: number; width: number; x: number; y: number };
+  | { flip: { x: boolean; y: boolean } | null; height: number; rotation: number; width: number; x: number; y: number };
 
 export type TDragState = {
   hasMoved: boolean;

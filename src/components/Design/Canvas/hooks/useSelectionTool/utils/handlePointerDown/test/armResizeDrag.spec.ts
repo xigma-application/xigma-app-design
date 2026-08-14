@@ -20,13 +20,13 @@ const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointerd
 
 const createResizeDragRef = (): RefObject<TResizeDragState | null> => ({ current: null });
 
-const frame = (id: string, x: number, y: number, width: number, height: number): TFrameNode => ({
+const frame = (id: string, x: number, y: number, width: number, height: number, rotation = 0): TFrameNode => ({
   fill: '#ff0000',
   height,
   id,
   name: 'Frame',
   parentId: null,
-  rotation: 0,
+  rotation,
   type: NodeType.frame,
   width,
   x,
@@ -60,7 +60,7 @@ describe('armResizeDrag', () => {
       aspectRatio: 2,
       bounds: { height: 50, width: 100, x: 0, y: 0 },
       handle: 'se',
-      nodeOrigins: { a: { flip: null, height: 50, width: 100, x: 0, y: 0 } },
+      nodeOrigins: { a: { flip: null, height: 50, rotation: 0, width: 100, x: 0, y: 0 } },
     });
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(3);
   });
@@ -101,7 +101,20 @@ describe('armResizeDrag', () => {
 
     // result
     expect(resizeDragRef.current?.nodeOrigins).toEqual({
-      'media-1': { flip: { x: true, y: false }, height: 50, width: 100, x: 0, y: 0 },
+      'media-1': { flip: { x: true, y: false }, height: 50, rotation: 0, width: 100, x: 0, y: 0 },
     });
+  });
+
+  it("should snapshot a rotated node's rotation, not just its axis-aligned box", () => {
+    // mock
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef();
+    const node = frame('a', 0, 0, 100, 50, 30);
+
+    // before
+    armResizeDrag(canvas, pointerEvent(), resizeDragRef, [node], 'se', { height: 50, width: 100, x: 0, y: 0 });
+
+    // result
+    expect(resizeDragRef.current?.nodeOrigins).toEqual({ a: { flip: null, height: 50, rotation: 30, width: 100, x: 0, y: 0 } });
   });
 });

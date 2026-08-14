@@ -26,6 +26,7 @@ export const armResizeDrag = (
         : {
             flip: isFlippableNode(node) ? { x: node.flipX, y: node.flipY } : null,
             height: node.height,
+            rotation: node.rotation,
             width: node.width,
             x: node.x,
             y: node.y,

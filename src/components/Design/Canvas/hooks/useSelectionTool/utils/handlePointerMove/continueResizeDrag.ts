@@ -34,6 +34,17 @@ const getSignedScale = (newStart: number, newSize: number, originStart: number, 
 const transformCoord = (coord: number, anchor: number | null, scale: number): number =>
   anchor === null ? coord : anchor + (coord - anchor) * scale;
 
+const getRotatedAxisScales = (scaleX: number, scaleY: number, rotation: number): { x: number; y: number } => {
+  const radians = (rotation * Math.PI) / 180;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+
+  return {
+    x: Math.sqrt((scaleX * cos) ** 2 + (scaleY * sin) ** 2),
+    y: Math.sqrt((scaleX * sin) ** 2 + (scaleY * cos) ** 2),
+  };
+};
+
 export const continueResizeDrag = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
@@ -71,14 +82,13 @@ export const continueResizeDrag = (
         return;
       }
 
-      const x1 = transformCoord(origin.x, anchors.x, scaleX);
-      const x2 = transformCoord(origin.x + origin.width, anchors.x, scaleX);
-      const y1 = transformCoord(origin.y, anchors.y, scaleY);
-      const y2 = transformCoord(origin.y + origin.height, anchors.y, scaleY);
-      const height = Math.abs(y2 - y1);
-      const width = Math.abs(x2 - x1);
-      const x = Math.min(x1, x2);
-      const y = Math.min(y1, y2);
+      const newCenterX = transformCoord(origin.x + origin.width / 2, anchors.x, scaleX);
+      const newCenterY = transformCoord(origin.y + origin.height / 2, anchors.y, scaleY);
+      const axisScale = getRotatedAxisScales(scaleX, scaleY, origin.rotation);
+      const height = origin.height * axisScale.y;
+      const width = origin.width * axisScale.x;
+      const x = newCenterX - width / 2;
+      const y = newCenterY - height / 2;
       const changes: TSceneNodeChanges = origin.flip
         ? { flipX: origin.flip.x !== scaleX < 0, flipY: origin.flip.y !== scaleY < 0, height, width, x, y }
         : { height, width, x, y };

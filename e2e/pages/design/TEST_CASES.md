@@ -369,6 +369,7 @@ the angle for the single-node case).
 | 45  | Holding Shift while dragging a corner locks the aspect ratio, unlike a free drag of the same delta |  ✅  | ✅ `resize.spec.ts` |
 | 46  | Resizing a group selection scales every member (including a line's endpoints) proportionally       |  ✅  |          —          |
 | 47  | Edge handles resize only their own axis; Shift has no aspect-lock effect on them                   |  ✅  |          —          |
+| 65  | Resizing anisotropically (scaleX≠scaleY) projects the scale onto a rotated member's own local axes |  ✅  |          —          |
 
 #43 is e2e-only: the actual claim is a real `Image` decode plus the browser accepting a rotated
 data-URL as a live CSS `cursor` value — nothing a jsdom unit test can assert (`getResizeCursorAngle`
@@ -383,6 +384,17 @@ so the test has to nudge the pointer repeatedly until it lands (`waitForResizeCu
 `x/y/width/height` (and line `x1/y1/x2/y2`) via `store.getState()`, precisely the kind of two-line
 Redux assertion the "why so few scenarios get e2e coverage" section below argues a screenshot diff
 can't improve on.
+
+#65 is unit-only for a different reason than #46/#47: `continueResizeDrag.spec.ts` asserts the exact
+`√((scaleX·cosθ)²+(scaleY·sinθ)²)`-projected width/height to 2 decimal places (a level of precision
+a screenshot comparison can't express at all), and the only way to prove the _rendered_ pixels match
+would be either exact pixel-position decoding (this suite has no PNG-pixel-inspection dependency —
+every existing e2e assertion is whole-screenshot `.equals()`/`.not.equals()`, not per-pixel reads) or
+reproducing the exact rotated reference shape via a second, imprecise rotate-drag (unlike the
+axis-aligned Media/Text mirror references in #49/#50 below, which need no rotation step and so land
+on exact pixels by construction). Verified manually in the browser instead (Playwright MCP): a
+two-rectangle group with one member rotated, stretched horizontally only, now keeps the rotated
+member fully inside the shared bbox instead of spilling past its right/bottom edges.
 
 ## Mirror/flip on resize crossing (Etap 10)
 

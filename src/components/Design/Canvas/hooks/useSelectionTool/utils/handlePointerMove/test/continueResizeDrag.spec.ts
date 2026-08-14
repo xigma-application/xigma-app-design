@@ -26,8 +26,8 @@ const createResizeDragRef = (resizeDragState: TResizeDragState | null = null): R
   current: resizeDragState,
 });
 
-const addFrameNode = (x: number, y: number, width: number, height: number, parentId: string | null = null): string => {
-  store.dispatch(addNode({ fill: '#ff0000', height, name: 'Frame', parentId, rotation: 0, type: NodeType.frame, width, x, y }));
+const addFrameNode = (x: number, y: number, width: number, height: number, parentId: string | null = null, rotation = 0): string => {
+  store.dispatch(addNode({ fill: '#ff0000', height, name: 'Frame', parentId, rotation, type: NodeType.frame, width, x, y }));
 
   const { rootOrder } = store.getState().design;
 
@@ -76,7 +76,7 @@ describe('continueResizeDrag', () => {
       aspectRatio: 2,
       bounds: { height: 50, width: 100, x: 0, y: 0 },
       handle: 'se',
-      nodeOrigins: { [idA]: { flip: null, height: 50, width: 100, x: 0, y: 0 } },
+      nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 0, width: 100, x: 0, y: 0 } },
     });
 
     // before
@@ -94,7 +94,7 @@ describe('continueResizeDrag', () => {
       aspectRatio: 2,
       bounds: { height: 50, width: 100, x: 0, y: 0 },
       handle: 'se',
-      nodeOrigins: { [idA]: { flip: null, height: 50, width: 100, x: 0, y: 0 } },
+      nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 0, width: 100, x: 0, y: 0 } },
     });
 
     // before
@@ -112,7 +112,7 @@ describe('continueResizeDrag', () => {
       aspectRatio: 2,
       bounds: { height: 50, width: 100, x: 0, y: 0 },
       handle: 'e',
-      nodeOrigins: { [idA]: { flip: null, height: 50, width: 100, x: 0, y: 0 } },
+      nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 0, width: 100, x: 0, y: 0 } },
     });
 
     // before
@@ -132,7 +132,7 @@ describe('continueResizeDrag', () => {
       bounds: { height: 100, width: 100, x: 0, y: 0 },
       handle: 'se',
       nodeOrigins: {
-        [idA]: { flip: null, height: 100, width: 100, x: 0, y: 0 },
+        [idA]: { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 },
         [idLine]: { x1: 20, x2: 80, y1: 20, y2: 80 },
       },
     });
@@ -153,7 +153,7 @@ describe('continueResizeDrag', () => {
       aspectRatio: 1,
       bounds: { height: 0, width: 0, x: 5, y: 5 },
       handle: 'se',
-      nodeOrigins: { [idA]: { flip: null, height: 0, width: 0, x: 5, y: 5 } },
+      nodeOrigins: { [idA]: { flip: null, height: 0, rotation: 0, width: 0, x: 5, y: 5 } },
     });
 
     // before
@@ -171,7 +171,7 @@ describe('continueResizeDrag', () => {
       aspectRatio: 1,
       bounds: { height: 100, width: 100, x: 0, y: 0 },
       handle: 'e',
-      nodeOrigins: { [idA]: { flip: null, height: 100, width: 100, x: 0, y: 0 } },
+      nodeOrigins: { [idA]: { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 } },
     });
 
     // before — dragging the east edge 30 units past the west anchor (x=0)
@@ -191,8 +191,8 @@ describe('continueResizeDrag', () => {
       bounds: { height: 20, width: 100, x: 0, y: 0 },
       handle: 'e',
       nodeOrigins: {
-        [idA]: { flip: null, height: 20, width: 50, x: 0, y: 0 },
-        [idB]: { flip: null, height: 20, width: 50, x: 50, y: 0 },
+        [idA]: { flip: null, height: 20, rotation: 0, width: 50, x: 0, y: 0 },
+        [idB]: { flip: null, height: 20, rotation: 0, width: 50, x: 50, y: 0 },
       },
     });
 
@@ -212,7 +212,7 @@ describe('continueResizeDrag', () => {
       aspectRatio: 1,
       bounds: { height: 100, width: 100, x: 0, y: 0 },
       handle: 'se',
-      nodeOrigins: { [idA]: { flip: null, height: 100, width: 100, x: 0, y: 0 } },
+      nodeOrigins: { [idA]: { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 } },
     });
 
     // before — X crosses the anchor (point.x < 0), Y does not (point.y > 0)
@@ -232,8 +232,8 @@ describe('continueResizeDrag', () => {
       bounds: { height: 100, width: 100, x: 0, y: 0 },
       handle: 'e',
       nodeOrigins: {
-        [idMedia]: { flip: { x: false, y: false }, height: 100, width: 100, x: 0, y: 0 },
-        [idRect]: { flip: null, height: 100, width: 100, x: 200, y: 0 },
+        [idMedia]: { flip: { x: false, y: false }, height: 100, rotation: 0, width: 100, x: 0, y: 0 },
+        [idRect]: { flip: null, height: 100, rotation: 0, width: 100, x: 200, y: 0 },
       },
     });
 
@@ -253,7 +253,7 @@ describe('continueResizeDrag', () => {
       aspectRatio: 1,
       bounds: { height: 100, width: 100, x: 0, y: 0 },
       handle: 'e',
-      nodeOrigins: { [idMedia]: { flip: { x: true, y: false }, height: 100, width: 100, x: 0, y: 0 } },
+      nodeOrigins: { [idMedia]: { flip: { x: true, y: false }, height: 100, rotation: 0, width: 100, x: 0, y: 0 } },
     });
 
     // before — cross the anchor once (flips relative to origin), then move back to the normal side
@@ -264,5 +264,47 @@ describe('continueResizeDrag', () => {
 
     // result — back on the original side, flip state matches what it was before this drag began
     expect(store.getState().design.nodes[idMedia]).toMatchObject({ flipX: true });
+  });
+
+  it("should grow a rotated node along its own local axes, not the group's world axes, on an anisotropic resize", () => {
+    // mock — a 90deg-rotated node's local x-axis lies along the world y-axis and vice versa, so a
+    const idA = addFrameNode(0, 0, 100, 50, null, 90);
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 1,
+      bounds: { height: 100, width: 100, x: 0, y: 0 },
+      handle: 'e',
+      nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 90, width: 100, x: 0, y: 0 } },
+    });
+
+    // before — east edge dragged from x=100 to x=200 (world), anchored at x=0: scaleX=2, scaleY=1
+    continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef);
+
+    // result — local width unchanged (scaleY=1 projects onto it at 90deg), local height doubled
+    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 100, rotation: 90, width: 100, x: 50, y: -25 });
+  });
+
+  it('should smoothly blend both axis scales for a non-axis-aligned rotation, keeping a true (unsheared) rectangle', () => {
+    // mock — same horizontal-only group resize (scaleX 2, scaleY 1), but at 30deg neither local axis
+    const idA = addFrameNode(0, 0, 100, 50, null, 30);
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 1,
+      bounds: { height: 100, width: 100, x: 0, y: 0 },
+      handle: 'e',
+      nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 30, width: 100, x: 0, y: 0 } },
+    });
+
+    // before
+    continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef);
+
+    // result — width = 100·√((2·cos30)²+sin30²) ≈ 180.28, height = 50·√((2·sin30)²+cos30²) ≈ 66.14,
+    const node = store.getState().design.nodes[idA];
+
+    expect(node).toMatchObject({ rotation: 30 });
+    expect((node as { height: number }).height).toBeCloseTo(66.144, 2);
+    expect((node as { width: number }).width).toBeCloseTo(180.278, 2);
+    expect((node as { x: number }).x).toBeCloseTo(9.861, 2);
+    expect((node as { y: number }).y).toBeCloseTo(-8.072, 2);
   });
 });
