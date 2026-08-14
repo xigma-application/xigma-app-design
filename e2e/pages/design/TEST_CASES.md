@@ -549,6 +549,42 @@ sequence and a real subsequent hover, not just a direct function call with hand-
 interior-point test, `getCollidedNodes.spec.ts`'s rotated-bounds test) that a screenshot diff
 couldn't meaningfully improve on.
 
+## Text on Path (ellipse-only v1)
+
+A self-contained sibling feature to the plain Text tool — not "Text drawn on top of an Ellipse
+node that just looks connected." The Text on Path tool (`useDrawTextOnPathTool.ts`) draws its own
+`NodeType.path` node (an ellipse-shaped curve for v1, `PathType.ellipse` — a new node type kept
+deliberately separate from `NodeType.ellipse`/the Ellipse tool, never created or touched by it) the
+same way `useDrawShapeTool` drags out a box, then immediately dispatches `startTextEdit` on it,
+same "drop into edit mode right after drawing" convention as the plain Text tool. On commit, the
+`TTextNode` gets `pathId = PathNode.id` — a real, separate node, genuinely bound, not merely
+positioned to look connected. `handleUpdateNode.ts` runs a bidirectional sync cascade
+(`syncPathTextNodes.ts`/`syncPathNodeFromText.ts`): resizing/rotating/moving either the path or its
+bound text propagates to the other on every update (live during a drag, not just on release), so
+the text always follows the path's actual current shape. The path node itself renders as a
+stroke-only ellipse outline with no fill (`drawSceneNodes.ts`/`drawDraftShape.ts`'s `NodeType.path`
+branches, reusing the generic `drawEllipse` primitive — not Ellipse-tool code). Glyph curving,
+auto-shrink-to-fit, and the draggable start-offset handle were built in an earlier pass and are
+unaffected by this node-model rework, since they always read the text node's own denormalized
+box, never a separate node lookup.
+
+| #   | Scenario                                                                                                                                                                                                                                               | Unit |            E2E            |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :--: | :-----------------------: |
+| 74  | Drawing a path with the Text on Path tool, typing content, then clicking away commits a rendered curved text node bound to a real, separate path node                                                                                                  |  —   | ✅ `text-on-path.spec.ts` |
+| 75  | Typing a tool-shortcut letter while editing text on a path does not switch the active tool (the focus-timing bug this feature originally shipped with — `useSeedEditableTextOnEntry.ts` grabs focus via `useLayoutEffect`, not a deferred `useEffect`) |  —   | ✅ `text-on-path.spec.ts` |
+| 76  | Resizing the source path node updates the attached text's curve live, proving the two are a real bidirectional relation, not independently-positioned nodes                                                                                            |  ✅  | ✅ `text-on-path.spec.ts` |
+| 77  | Auto-shrinking the font so text never overlaps itself when longer than the path's circumference                                                                                                                                                        |  ✅  |             —             |
+| 78  | Dragging the blue start-offset handle moves where the text begins along the path                                                                                                                                                                       |  ✅  |             —             |
+
+#77/#78 stay unit-only: `getFittedPathFontSize.spec.ts` and `continuePathOffsetDrag.spec.ts` already
+assert the exact resulting font size / offset value via direct function calls and
+`store.getState()`, which a screenshot diff can't improve on precisely — see "why so few scenarios
+get e2e coverage" below. #76 gets e2e coverage despite having exact unit coverage too
+(`handleUpdateNode.spec.ts`'s cascade tests) because the interesting failure mode is specifically a
+real `pointerdown`→`pointermove`→`pointerup` resize-handle drag on a _live-rendered_ curved-text
+node actually repainting in sync — the same "real browser + rendering + timing" category as the
+Resize section's #66 above, not just the reducer math in isolation.
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

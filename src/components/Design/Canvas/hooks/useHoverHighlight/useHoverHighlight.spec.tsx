@@ -51,6 +51,34 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => 
   return rootOrder[rootOrder.length - 1];
 };
 
+const addPathTextNode = (x: number, y: number, size = 200): string => {
+  store.dispatch(
+    addNode({
+      content: 'Hi',
+      fill: '#ffffff',
+      flipX: false,
+      flipY: false,
+      fontFamily: 'Inter',
+      fontSize: 14,
+      height: size,
+      name: 'Text',
+      parentId: null,
+      pathFlip: false,
+      pathId: 'ellipse-1',
+      pathStartOffset: 0,
+      rotation: 0,
+      type: NodeType.text,
+      width: size,
+      x,
+      y,
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 const renderHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>): RefObject<string | null> => {
   const hoverRef: RefObject<string | null> = { current: null };
 
@@ -285,5 +313,24 @@ describe('useHoverHighlight behaviors', () => {
     // result
     expect(hoverRef.current).toBeNull();
     expect(canvasRef.current?.className).not.toContain('positioning');
+  });
+
+  it("should apply the positioning cursor class when hovering a selected path-text node's start-offset handle", () => {
+    // mock — a 200x200 path-text box at (4000, 4000); the offset-0 handle sits at its rightmost edge (4200, 4100)
+    const idA = addPathTextNode(4000, 4000, 200);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const hoverRef = renderHoverHighlight(canvasRef);
+
+    // action
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 4200, 4100));
+
+    // result
+    expect(canvasRef.current?.className).toContain('positioning');
+    expect(hoverRef.current).toBe(idA);
   });
 });

@@ -15,6 +15,7 @@ const cancelAnimationFrameMock = vi.fn();
 const IMAGE_CONTEXT: TImageRenderContext = {
   buffer: {} as WebGLBuffer,
   cache: new Map(),
+  ellipseArcLengthCache: new Map(),
   msdfBuffer: {} as WebGLBuffer,
   msdfProgram: {} as WebGLProgram,
   program: {} as WebGLProgram,

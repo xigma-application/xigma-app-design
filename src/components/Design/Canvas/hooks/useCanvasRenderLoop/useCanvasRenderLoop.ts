@@ -40,6 +40,7 @@ export const useCanvasRenderLoop = (
       const imageContext: TImageRenderContext = {
         buffer: imageBuffer,
         cache: new Map(),
+        ellipseArcLengthCache: new Map(),
         msdfBuffer,
         msdfProgram,
         program: imageProgram,

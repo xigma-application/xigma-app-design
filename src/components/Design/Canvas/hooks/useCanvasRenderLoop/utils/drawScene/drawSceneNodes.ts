@@ -1,6 +1,7 @@
 // others
 import { LINE_RENDER_STROKE_WIDTH } from 'constant/canvas';
 import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
+import { PATH_STROKE } from '../../../../constants';
 
 // types
 import { NodeType } from 'types/design/enums';
@@ -57,6 +58,9 @@ export const drawSceneNodes = (
       case NodeType.line:
         drawLine(gl, program, buffer, node, node.stroke, LINE_RENDER_STROKE_WIDTH, canvasWidth, canvasHeight, viewport);
         break;
+      case NodeType.path:
+        drawEllipse(gl, program, buffer, { ...node, stroke: PATH_STROKE }, canvasWidth, canvasHeight, viewport, node.rotation);
+        break;
       case NodeType.text:
         drawMsdfText(
           gl,
@@ -65,6 +69,7 @@ export const drawSceneNodes = (
           getMsdfAtlasTexture(gl, imageContext.cache),
           MSDF_ATLAS_JSON,
           imageContext.textGeometryCache,
+          imageContext.ellipseArcLengthCache,
           node,
           canvasWidth,
           canvasHeight,

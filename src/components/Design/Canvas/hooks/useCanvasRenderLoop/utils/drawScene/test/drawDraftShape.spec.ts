@@ -1,5 +1,5 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, PathType } from 'types/design/enums';
 import { TImageRenderContext } from '../../../types';
 
 // utils
@@ -39,6 +39,7 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const IMAGE_CONTEXT: TImageRenderContext = {
   buffer: {} as WebGLBuffer,
   cache: new Map(),
+  ellipseArcLengthCache: new Map(),
   msdfBuffer: {} as WebGLBuffer,
   msdfProgram: {} as WebGLProgram,
   program: {} as WebGLProgram,
@@ -345,6 +346,37 @@ describe('drawDraftShape', () => {
     const trianglesDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLES);
 
     expect(trianglesDraws).toHaveLength(4);
+  });
+
+  it('should show a stroke-only ellipse outline for a path draft, with no fill at all', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawDraftShape(
+      gl,
+      program,
+      buffer,
+      IMAGE_CONTEXT,
+      { height: 20, pathType: PathType.ellipse, type: NodeType.path, width: 10, x: 0, y: 0 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+    );
+
+    // result — no TRIANGLE_FAN fill for the path shape itself, only the 4 corner-handle fills
+    expect(gl.drawArrays).not.toHaveBeenCalledWith(gl.TRIANGLE_FAN, 0, expect.any(Number));
+
+    const trianglesDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLES);
+
+    expect(trianglesDraws).toHaveLength(4);
+
+    // result — ellipse stroke outline + 4 corner handles = 5 LINE_LOOP draws
+    const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
+
+    expect(lineLoopDraws).toHaveLength(5);
   });
 
   it('should keep a text draft fill-less, showing only its outline', () => {

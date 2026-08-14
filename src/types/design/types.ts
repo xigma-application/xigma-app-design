@@ -1,10 +1,15 @@
 // types
-import { NodeType } from './enums';
+import { NodeType, PathType } from './enums';
 import { TDraftRect } from 'types/canvas';
 
 export type TDraftShape = TDraftRect & {
   fill: string;
   type: NodeType.ellipse | NodeType.frame | NodeType.rectangle | NodeType.section;
+};
+
+export type TDraftPath = TDraftRect & {
+  pathType: PathType;
+  type: NodeType.path;
 };
 
 export type TDraftPolygon = TDraftRect & {
@@ -57,6 +62,11 @@ export type TMediaNode = TBaseNode & {
   type: NodeType.media;
 };
 
+export type TPathNode = TBaseNode & {
+  pathType: PathType;
+  type: NodeType.path;
+};
+
 export type TPolygonNode = TBaseNode & {
   fill: string;
   flipX: boolean;
@@ -91,6 +101,9 @@ export type TTextNode = TBaseNode & {
   flipY: boolean;
   fontFamily: string;
   fontSize: number;
+  pathFlip?: boolean;
+  pathId?: string | null;
+  pathStartOffset?: number;
   type: NodeType.text;
 };
 
@@ -108,9 +121,10 @@ export type TLineNode = {
 
 export type TDraftLine = Omit<TLineNode, 'id' | 'name' | 'parentId'>;
 
-export type TDraftEntity = TDraftShape | TDraftLine | TDraftPolygon | TDraftStar | TDraftMedia | TDraftText;
+export type TDraftEntity = TDraftShape | TDraftLine | TDraftPath | TDraftPolygon | TDraftStar | TDraftMedia | TDraftText;
 
-export type TBoxSceneNode = TEllipseNode | TFrameNode | TMediaNode | TPolygonNode | TRectangleNode | TSectionNode | TStarNode | TTextNode;
+export type TBoxSceneNode =
+  TEllipseNode | TFrameNode | TMediaNode | TPathNode | TPolygonNode | TRectangleNode | TSectionNode | TStarNode | TTextNode;
 
 export type TSceneNode = TBoxSceneNode | TLineNode;
 
@@ -118,6 +132,7 @@ export type TNewSceneNode =
   | Omit<TEllipseNode, 'id'>
   | Omit<TFrameNode, 'id'>
   | Omit<TMediaNode, 'id'>
+  | Omit<TPathNode, 'id'>
   | Omit<TPolygonNode, 'id'>
   | Omit<TRectangleNode, 'id'>
   | Omit<TSectionNode, 'id'>
@@ -129,6 +144,7 @@ export type TSceneNodeChanges =
   | Partial<TEllipseNode>
   | Partial<TFrameNode>
   | Partial<TMediaNode>
+  | Partial<TPathNode>
   | Partial<TPolygonNode>
   | Partial<TRectangleNode>
   | Partial<TSectionNode>

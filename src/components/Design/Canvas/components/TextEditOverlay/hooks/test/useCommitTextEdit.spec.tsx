@@ -87,6 +87,36 @@ describe('useCommitTextEdit behaviors', () => {
     expect(design.editingTextBox).toBeNull();
   });
 
+  it('should carry the path binding into the new node when the box is attached to a path', () => {
+    // mock
+    const store = createTestStore();
+    const box = {
+      flipX: false,
+      flipY: false,
+      height: 200,
+      pathFlip: true,
+      pathId: 'ellipse-1',
+      pathStartOffset: 0.25,
+      rotation: 0,
+      width: 200,
+      x: 0,
+      y: 0,
+    };
+
+    // before
+    const { result } = renderHook(() => useCommitTextEdit(box, null), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    result.current(createBlurEvent('curved'));
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ pathFlip: true, pathId: 'ellipse-1', pathStartOffset: 0.25 });
+  });
+
   it('should collapse a blank line (Enter twice) to a single newline, not the browser doubled one', () => {
     // mock
     const store = createTestStore();

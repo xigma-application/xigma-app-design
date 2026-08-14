@@ -6,7 +6,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TDragState, TEndpointDragState, TResizeDragState, TRotateDragState } from '../../../types';
+import { TDragState, TEndpointDragState, TPathOffsetDragState, TResizeDragState, TRotateDragState } from '../../../types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -26,6 +26,7 @@ const pointerEvent = (x: number, y: number, options: Partial<PointerEventInit> =
 
 const createDragStateRef = (): RefObject<TDragState | null> => ({ current: null });
 const createEndpointDragRef = (): RefObject<TEndpointDragState | null> => ({ current: null });
+const createPathOffsetDragRef = (): RefObject<TPathOffsetDragState | null> => ({ current: null });
 const createResizeDragRef = (): RefObject<TResizeDragState | null> => ({ current: null });
 const createRotateDragRef = (): RefObject<TRotateDragState | null> => ({ current: null });
 const createMarqueeStartRef = (): RefObject<TPoint | null> => ({ current: null });
@@ -83,6 +84,34 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => 
   return rootOrder[rootOrder.length - 1];
 };
 
+const addPathTextNode = (x: number, y: number, size = 200): string => {
+  store.dispatch(
+    addNode({
+      content: 'Hi',
+      fill: '#ffffff',
+      flipX: false,
+      flipY: false,
+      fontFamily: 'Inter',
+      fontSize: 14,
+      height: size,
+      name: 'Text',
+      parentId: null,
+      pathFlip: false,
+      pathId: 'ellipse-1',
+      pathStartOffset: 0,
+      rotation: 0,
+      type: NodeType.text,
+      width: size,
+      x,
+      y,
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 describe('handlePointerDown', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
@@ -101,6 +130,7 @@ describe('handlePointerDown', () => {
       store.dispatch,
       dragStateRef,
       createEndpointDragRef(),
+      createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
@@ -125,6 +155,7 @@ describe('handlePointerDown', () => {
       store.dispatch,
       dragStateRef,
       createEndpointDragRef(),
+      createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
@@ -149,6 +180,7 @@ describe('handlePointerDown', () => {
       store.dispatch,
       dragStateRef,
       createEndpointDragRef(),
+      createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
@@ -177,6 +209,7 @@ describe('handlePointerDown', () => {
       store.dispatch,
       dragStateRef,
       createEndpointDragRef(),
+      createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
@@ -203,6 +236,7 @@ describe('handlePointerDown', () => {
       store.dispatch,
       dragStateRef,
       createEndpointDragRef(),
+      createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
@@ -232,6 +266,7 @@ describe('handlePointerDown', () => {
       store.dispatch,
       dragStateRef,
       createEndpointDragRef(),
+      createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
@@ -257,6 +292,7 @@ describe('handlePointerDown', () => {
       store.dispatch,
       dragStateRef,
       createEndpointDragRef(),
+      createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
@@ -286,6 +322,7 @@ describe('handlePointerDown', () => {
       store.dispatch,
       dragStateRef,
       endpointDragRef,
+      createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
@@ -314,6 +351,7 @@ describe('handlePointerDown', () => {
       store.dispatch,
       dragStateRef,
       endpointDragRef,
+      createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
@@ -342,6 +380,7 @@ describe('handlePointerDown', () => {
       store.dispatch,
       dragStateRef,
       createEndpointDragRef(),
+      createPathOffsetDragRef(),
       resizeDragRef,
       createRotateDragRef(),
       marqueeStartRef,
@@ -371,6 +410,7 @@ describe('handlePointerDown', () => {
       store.dispatch,
       dragStateRef,
       createEndpointDragRef(),
+      createPathOffsetDragRef(),
       createResizeDragRef(),
       rotateDragRef,
       marqueeStartRef,
@@ -378,6 +418,36 @@ describe('handlePointerDown', () => {
 
     // result
     expect(rotateDragRef.current).not.toBeNull();
+    expect(dragStateRef.current).toBeNull();
+    expect(canvas.setPointerCapture).toHaveBeenCalled();
+  });
+
+  it("should delegate to armPathOffsetDrag when a path-text node's offset handle is hit, instead of moving the whole node", () => {
+    // mock — a 200x200 path-text box centered at (3100, 3100), handle at offset 0 sits at the rightmost edge
+    const idA = addPathTextNode(3000, 3000, 200);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvas = createCanvas();
+    const dragStateRef = createDragStateRef();
+    const pathOffsetDragRef = createPathOffsetDragRef();
+    const marqueeStartRef = createMarqueeStartRef();
+
+    // before
+    handlePointerDown(
+      canvas,
+      pointerEvent(3200, 3100),
+      store.dispatch,
+      dragStateRef,
+      createEndpointDragRef(),
+      pathOffsetDragRef,
+      createResizeDragRef(),
+      createRotateDragRef(),
+      marqueeStartRef,
+    );
+
+    // result
+    expect(pathOffsetDragRef.current).toEqual({ nodeId: idA });
     expect(dragStateRef.current).toBeNull();
     expect(canvas.setPointerCapture).toHaveBeenCalled();
   });

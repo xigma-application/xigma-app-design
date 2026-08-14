@@ -41,6 +41,7 @@ describe('design slice', () => {
       lastFrameTool: ToolName.frame,
       lastMouseTool: ToolName.default,
       lastShapeTool: ToolName.rectangle,
+      lastTextTool: ToolName.text,
       nodes: {},
       rootOrder: [],
       selectedIds: [],

@@ -5,6 +5,7 @@ import { TTextNode } from 'types/design/types';
 
 // utils
 import { drawMsdfText } from '../drawMsdfText';
+import { TTextGeometry } from '../getOrBuildTextGeometry';
 
 const createGlMock = (): WebGL2RenderingContext =>
   ({
@@ -72,7 +73,7 @@ describe('drawMsdfText', () => {
     const texture = {} as WebGLTexture;
 
     // before
-    drawMsdfText(gl, program, buffer, texture, ATLAS, new Map(), createNode(), 100, 100, IDENTITY_VIEWPORT);
+    drawMsdfText(gl, program, buffer, texture, ATLAS, new Map(), new Map(), createNode(), 100, 100, IDENTITY_VIEWPORT);
 
     // result — "AB" is two known glyphs, 6 vertices each
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 12);
@@ -86,7 +87,7 @@ describe('drawMsdfText', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawMsdfText(gl, program, buffer, null, ATLAS, new Map(), createNode(), 100, 100, IDENTITY_VIEWPORT);
+    drawMsdfText(gl, program, buffer, null, ATLAS, new Map(), new Map(), createNode(), 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -100,7 +101,7 @@ describe('drawMsdfText', () => {
     const texture = {} as WebGLTexture;
 
     // before
-    drawMsdfText(gl, program, buffer, texture, ATLAS, new Map(), createNode({ content: '' }), 100, 100, IDENTITY_VIEWPORT);
+    drawMsdfText(gl, program, buffer, texture, ATLAS, new Map(), new Map(), createNode({ content: '' }), 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -114,7 +115,7 @@ describe('drawMsdfText', () => {
     const texture = {} as WebGLTexture;
 
     // before
-    drawMsdfText(gl, program, buffer, texture, ATLAS, new Map(), createNode({ fill: '#ff0000' }), 100, 100, IDENTITY_VIEWPORT);
+    drawMsdfText(gl, program, buffer, texture, ATLAS, new Map(), new Map(), createNode({ fill: '#ff0000' }), 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), [1, 0, 0, 1]);
@@ -128,10 +129,45 @@ describe('drawMsdfText', () => {
     const texture = {} as WebGLTexture;
 
     // before — distanceRange (4) * fontSize (20) * zoom (2) / atlas size (20) = 8
-    drawMsdfText(gl, program, buffer, texture, ATLAS, new Map(), createNode({ fontSize: 20 }), 100, 100, { x: 0, y: 0, zoom: 2 });
+    drawMsdfText(gl, program, buffer, texture, ATLAS, new Map(), new Map(), createNode({ fontSize: 20 }), 100, 100, {
+      x: 0,
+      y: 0,
+      zoom: 2,
+    });
 
     // result
     expect(gl.uniform1f).toHaveBeenCalledWith(expect.anything(), 8);
+  });
+
+  it('should draw glyphs curved along a path and shrink the effective font size uniform when content overflows', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const texture = {} as WebGLTexture;
+    const overflowingContent = 'ABABABABABABABABABABABABABABABABAB';
+
+    // before
+    drawMsdfText(
+      gl,
+      program,
+      buffer,
+      texture,
+      ATLAS,
+      new Map(),
+      new Map(),
+      createNode({ content: overflowingContent, height: 10, pathId: 'ellipse-1', width: 10 }),
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+    );
+
+    // result
+    expect(gl.drawArrays).toHaveBeenCalled();
+
+    const [, effectiveFontSize] = vi.mocked(gl.uniform1f).mock.calls[0];
+
+    expect(effectiveFontSize).toBeLessThan((ATLAS.distanceField.distanceRange * 20) / ATLAS.info.size);
   });
 
   it('should reuse cached geometry across calls for the same node, without rebuilding it', () => {
@@ -140,12 +176,12 @@ describe('drawMsdfText', () => {
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
     const texture = {} as WebGLTexture;
-    const cache = new Map<string, Float32Array>();
+    const cache = new Map<string, TTextGeometry>();
     const node = createNode();
 
     // before
-    drawMsdfText(gl, program, buffer, texture, ATLAS, cache, node, 100, 100, IDENTITY_VIEWPORT);
-    drawMsdfText(gl, program, buffer, texture, ATLAS, cache, node, 100, 100, IDENTITY_VIEWPORT);
+    drawMsdfText(gl, program, buffer, texture, ATLAS, cache, new Map(), node, 100, 100, IDENTITY_VIEWPORT);
+    drawMsdfText(gl, program, buffer, texture, ATLAS, cache, new Map(), node, 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(cache.size).toBe(1);

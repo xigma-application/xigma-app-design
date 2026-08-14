@@ -1,7 +1,7 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, PathType } from 'types/design/enums';
 import { TImageRenderContext } from '../../../types';
-import { TBoxSceneNode, TMediaNode, TPolygonNode, TSceneNode, TStarNode, TTextNode } from 'types/design/types';
+import { TBoxSceneNode, TMediaNode, TPathNode, TPolygonNode, TSceneNode, TStarNode, TTextNode } from 'types/design/types';
 
 // utils
 import { drawSceneNodes } from '../drawSceneNodes';
@@ -41,13 +41,16 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const IMAGE_CONTEXT: TImageRenderContext = {
   buffer: {} as WebGLBuffer,
   cache: new Map(),
+  ellipseArcLengthCache: new Map(),
   msdfBuffer: {} as WebGLBuffer,
   msdfProgram: {} as WebGLProgram,
   program: {} as WebGLProgram,
   textGeometryCache: new Map(),
 };
 
-const buildNode = (overrides: Partial<Exclude<TBoxSceneNode, TPolygonNode | TStarNode | TMediaNode | TTextNode>>): TSceneNode => ({
+const buildNode = (
+  overrides: Partial<Exclude<TBoxSceneNode, TPathNode | TPolygonNode | TStarNode | TMediaNode | TTextNode>>,
+): TSceneNode => ({
   fill: '#ff0000',
   height: 10,
   id: 'node',
@@ -216,6 +219,32 @@ describe('drawSceneNodes', () => {
 
     // result — "hello" is 5 known glyphs in the real MSDF atlas, 6 vertices each
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 30);
+  });
+
+  it('should draw a stroke-only ellipse outline for a path node, not a filled shape', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const path: TPathNode = {
+      height: 10,
+      id: 'a',
+      name: 'Path',
+      parentId: null,
+      pathType: PathType.ellipse,
+      rotation: 0,
+      type: NodeType.path,
+      width: 10,
+      x: 0,
+      y: 0,
+    };
+
+    // before
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [path], 100, 100, IDENTITY_VIEWPORT);
+
+    // result — a stroke-only ellipse draws a LINE_LOOP, no filled TRIANGLE_FAN
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINE_LOOP, 0, expect.any(Number));
   });
 
   it('should draw a thin segment for a line node instead of a filled rect', () => {

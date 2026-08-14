@@ -1,7 +1,7 @@
 import { createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit';
 
 // others
-import { DEFAULT_FRAME_TOOL, DEFAULT_MOUSE_TOOL, DEFAULT_SHAPE_TOOL, DEFAULT_TOOL, DEFAULT_VIEWPORT } from './constants';
+import { DEFAULT_FRAME_TOOL, DEFAULT_MOUSE_TOOL, DEFAULT_SHAPE_TOOL, DEFAULT_TEXT_TOOL, DEFAULT_TOOL, DEFAULT_VIEWPORT } from './constants';
 
 // types
 import { TDesignState, TStartTextEditPayload, TTextEditSelection } from './types';
@@ -27,6 +27,7 @@ const initialState: TDesignState = {
   lastFrameTool: DEFAULT_FRAME_TOOL,
   lastMouseTool: DEFAULT_MOUSE_TOOL,
   lastShapeTool: DEFAULT_SHAPE_TOOL,
+  lastTextTool: DEFAULT_TEXT_TOOL,
   nodes: {},
   rootOrder: [],
   selectedIds: [],

@@ -10,7 +10,7 @@ import { TImageRenderContext } from '../../types';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { drawEditingCaretAndSelection } from './drawEditingCaretAndSelection';
+import { drawEditingCaretAndSelection } from './drawEditingCaretAndSelection/drawEditingCaretAndSelection';
 import { drawMsdfText } from 'utils/canvas/text/drawMsdfText';
 import { drawRect } from 'utils/canvas/drawRect';
 import { getMsdfAtlasTexture } from 'utils/canvas/text/getMsdfAtlasTexture';
@@ -47,6 +47,7 @@ export const drawEditingText = (
       getMsdfAtlasTexture(gl, imageContext.cache),
       MSDF_ATLAS_JSON,
       imageContext.textGeometryCache,
+      imageContext.ellipseArcLengthCache,
       {
         content: editingTextContent,
         fill: TEXT_FILL,
@@ -58,6 +59,9 @@ export const drawEditingText = (
         id: '__editing-text__',
         name: TEXT_NAME,
         parentId: null,
+        pathFlip: editingTextBox.pathFlip,
+        pathId: editingTextBox.pathId,
+        pathStartOffset: editingTextBox.pathStartOffset,
         rotation: editingTextBox.rotation,
         type: NodeType.text,
         width: editingTextBox.width,

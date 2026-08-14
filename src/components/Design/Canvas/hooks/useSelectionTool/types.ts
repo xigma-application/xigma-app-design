@@ -23,6 +23,10 @@ export type TEndpointDragState = {
   nodeId: string;
 };
 
+export type TPathOffsetDragState = {
+  nodeId: string;
+};
+
 export type TResizeDragState = {
   aspectRatio: number;
   bounds: TDraftRect;

@@ -6,6 +6,7 @@ import {
   selectEditingTextContent,
   selectLastMouseTool,
   selectLastShapeTool,
+  selectLastTextTool,
   selectNodes,
   selectOrderedNodes,
   selectSelectedIds,
@@ -38,6 +39,7 @@ const state = {
     editingTextContent: 'hello',
     lastMouseTool: ToolName.hand,
     lastShapeTool: ToolName.ellipse,
+    lastTextTool: ToolName.textOnPath,
     nodes: { [node.id]: node },
     rootOrder: [node.id],
     selectedIds: [node.id],
@@ -74,6 +76,11 @@ describe('design selectors', () => {
   it('should select the last mouse tool', () => {
     // result
     expect(selectLastMouseTool(state)).toBe(ToolName.hand);
+  });
+
+  it('should select the last text tool', () => {
+    // result
+    expect(selectLastTextTool(state)).toBe(ToolName.textOnPath);
   });
 
   it('should select the nodes record', () => {

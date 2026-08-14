@@ -8,12 +8,30 @@ export type TDraftRect = {
 export type TEditingTextBox = TDraftRect & {
   flipX: boolean;
   flipY: boolean;
+  pathFlip?: boolean;
+  pathId?: string | null;
+  pathStartOffset?: number;
   rotation: number;
 };
 
 export type TPoint = {
   x: number;
   y: number;
+};
+
+export type TEllipseArcLengthSample = {
+  angle: number;
+  cumulativeLength: number;
+};
+
+export type TEllipsePathSample = TPoint & {
+  angleDegrees: number;
+};
+
+export type TNearestEllipsePathOffset = {
+  distance: number;
+  offset: number;
+  point: TPoint;
 };
 
 export type TLineSegment = {

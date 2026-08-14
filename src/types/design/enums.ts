@@ -3,11 +3,16 @@ export enum NodeType {
   frame = 'frame',
   line = 'line',
   media = 'media',
+  path = 'path',
   polygon = 'polygon',
   rectangle = 'rectangle',
   section = 'section',
   star = 'star',
   text = 'text',
+}
+
+export enum PathType {
+  ellipse = 'ellipse',
 }
 
 export enum ToolName {
@@ -24,4 +29,5 @@ export enum ToolName {
   section = 'section',
   star = 'star',
   text = 'text',
+  textOnPath = 'textOnPath',
 }

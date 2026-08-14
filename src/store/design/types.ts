@@ -14,6 +14,7 @@ export type TDesignState = {
   lastFrameTool: ToolName;
   lastMouseTool: ToolName;
   lastShapeTool: ToolName;
+  lastTextTool: ToolName;
   nodes: Record<string, TSceneNode>;
   rootOrder: string[];
   selectedIds: string[];

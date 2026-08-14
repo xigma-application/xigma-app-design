@@ -14,6 +14,7 @@ import { useDrawMediaTool } from './hooks/useDrawMediaTool/useDrawMediaTool';
 import { useDrawPolygonTool } from './hooks/useDrawPolygonTool/useDrawPolygonTool';
 import { useDrawShapeTool } from './hooks/useDrawShapeTool/useDrawShapeTool';
 import { useDrawStarTool } from './hooks/useDrawStarTool/useDrawStarTool';
+import { useDrawTextOnPathTool } from './hooks/useDrawTextOnPathTool/useDrawTextOnPathTool';
 import { useDrawTextTool } from './hooks/useDrawTextTool/useDrawTextTool';
 import { useHandTool } from './hooks/useHandTool/useHandTool';
 import { useHoverHighlight } from './hooks/useHoverHighlight/useHoverHighlight';
@@ -58,6 +59,7 @@ const Canvas: FC = () => {
   useDrawLineTool(canvasRef, draftRef, LINE_TOOL_SETTINGS);
   useDrawMediaTool(canvasRef, draftRef, MEDIA_TOOL_SETTINGS);
   useDrawTextTool(canvasRef, draftRef);
+  useDrawTextOnPathTool(canvasRef, draftRef);
   useSelectionTool(canvasRef, marqueeRef);
   useTextEditOnDoubleClick(canvasRef);
   useHoverHighlight(canvasRef, hoverRef);

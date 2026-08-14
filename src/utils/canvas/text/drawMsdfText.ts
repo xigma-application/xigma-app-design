@@ -1,11 +1,11 @@
 // types
+import { TEllipseArcLengthSample, TPoint } from 'types/canvas';
 import { TGlyphAtlasJson } from 'types/msdf';
-import { TPoint } from 'types/canvas';
 import { TTextNode, TViewport } from 'types/design/types';
 
 // utils
 import { flipGlyphVertices } from './flipGlyphVertices';
-import { getOrBuildTextGeometry } from './getOrBuildTextGeometry';
+import { getOrBuildTextGeometry, TTextGeometry } from './getOrBuildTextGeometry';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
 import { rotateVertices } from '../rotateVertices';
 
@@ -15,7 +15,8 @@ export const drawMsdfText = (
   buffer: WebGLBuffer,
   texture: WebGLTexture | null,
   atlas: TGlyphAtlasJson,
-  cache: Map<string, Float32Array>,
+  cache: Map<string, TTextGeometry>,
+  ellipseArcLengthCache: Map<string, TEllipseArcLengthSample[]>,
   node: TTextNode,
   canvasWidth: number,
   canvasHeight: number,
@@ -23,7 +24,8 @@ export const drawMsdfText = (
 ): void => {
   if (texture) {
     const center: TPoint = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
-    const vertices = rotateVertices(flipGlyphVertices(getOrBuildTextGeometry(atlas, cache, node), node), center, node.rotation);
+    const geometry = getOrBuildTextGeometry(atlas, cache, node, ellipseArcLengthCache);
+    const vertices = rotateVertices(flipGlyphVertices(geometry.vertices, node), center, node.rotation);
 
     if (vertices.length > 0) {
       const positionLocation = gl.getAttribLocation(program, 'a_position');
@@ -35,7 +37,7 @@ export const drawMsdfText = (
       const zoomLocation = gl.getUniformLocation(program, 'u_zoom');
       const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
       const stride = 4 * Float32Array.BYTES_PER_ELEMENT;
-      const screenPxRange = (atlas.distanceField.distanceRange * node.fontSize * viewport.zoom) / atlas.info.size;
+      const screenPxRange = (atlas.distanceField.distanceRange * geometry.effectiveFontSize * viewport.zoom) / atlas.info.size;
 
       gl.useProgram(program);
       gl.activeTexture(gl.TEXTURE0);

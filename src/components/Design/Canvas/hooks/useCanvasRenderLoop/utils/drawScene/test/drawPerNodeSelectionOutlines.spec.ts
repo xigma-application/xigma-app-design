@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TBoxSceneNode, TMediaNode, TPolygonNode, TSceneNode, TStarNode, TTextNode } from 'types/design/types';
+import { TBoxSceneNode, TMediaNode, TPathNode, TPolygonNode, TSceneNode, TStarNode, TTextNode } from 'types/design/types';
 
 // utils
 import { drawPerNodeSelectionOutlines } from '../drawPerNodeSelectionOutlines';
@@ -10,6 +10,7 @@ const createGlMock = (): WebGL2RenderingContext =>
     LINE_LOOP: 2,
     STATIC_DRAW: 35044,
     TRIANGLES: 4,
+    TRIANGLE_FAN: 6,
     bindBuffer: vi.fn(),
     bufferData: vi.fn(),
     createBuffer: vi.fn(() => ({})),
@@ -26,7 +27,9 @@ const createGlMock = (): WebGL2RenderingContext =>
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
-const buildNode = (overrides: Partial<Exclude<TBoxSceneNode, TPolygonNode | TStarNode | TMediaNode | TTextNode>>): TSceneNode => ({
+const buildNode = (
+  overrides: Partial<Exclude<TBoxSceneNode, TPathNode | TPolygonNode | TStarNode | TMediaNode | TTextNode>>,
+): TSceneNode => ({
   fill: '#ff0000',
   height: 10,
   id: 'node',
@@ -78,11 +81,76 @@ describe('drawPerNodeSelectionOutlines', () => {
     drawPerNodeSelectionOutlines(gl, program, buffer, [line], 100, 100, IDENTITY_VIEWPORT);
 
     // result — 1 segment fill + 2 endpoint-handle fills = 3 TRIANGLES draws, 2 endpoint-handle
-    // strokes = 2 LINE_LOOP draws (no rectangular bounding-box outline)
     const trianglesDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLES);
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
 
     expect(trianglesDraws).toHaveLength(3);
     expect(lineLoopDraws).toHaveLength(2);
+  });
+
+  it('should additionally draw the start-offset handle for a selected path-text node', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const pathText: TTextNode = {
+      content: 'Hi',
+      fill: '#ffffff',
+      flipX: false,
+      flipY: false,
+      fontFamily: 'Inter',
+      fontSize: 14,
+      height: 200,
+      id: 'a',
+      name: 'Text',
+      parentId: null,
+      pathId: 'ellipse-1',
+      pathStartOffset: 0,
+      rotation: 0,
+      type: NodeType.text,
+      width: 200,
+      x: 0,
+      y: 0,
+    };
+
+    // before
+    drawPerNodeSelectionOutlines(gl, program, buffer, [pathText], 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    const fanDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLE_FAN);
+
+    expect(fanDraws).toHaveLength(1);
+  });
+
+  it('should not draw the start-offset handle for an ordinary (non-path) text node', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const straightText: TTextNode = {
+      content: 'Hi',
+      fill: '#ffffff',
+      flipX: false,
+      flipY: false,
+      fontFamily: 'Inter',
+      fontSize: 14,
+      height: 200,
+      id: 'a',
+      name: 'Text',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.text,
+      width: 200,
+      x: 0,
+      y: 0,
+    };
+
+    // before
+    drawPerNodeSelectionOutlines(gl, program, buffer, [straightText], 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    const fanDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLE_FAN);
+
+    expect(fanDraws).toHaveLength(0);
   });
 });

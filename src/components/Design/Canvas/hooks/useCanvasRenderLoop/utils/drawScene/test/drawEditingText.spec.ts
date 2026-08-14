@@ -38,6 +38,7 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const IMAGE_CONTEXT: TImageRenderContext = {
   buffer: {} as WebGLBuffer,
   cache: new Map(),
+  ellipseArcLengthCache: new Map(),
   msdfBuffer: {} as WebGLBuffer,
   msdfProgram: {} as WebGLProgram,
   program: {} as WebGLProgram,

@@ -13,6 +13,7 @@ import { NodeType, ToolName } from 'types/design/enums';
 // utils
 import { getLineEndpointAtPoint } from '../../utils/getLineEndpointAtPoint';
 import { getNodeAtPoint } from '../../utils/getNodeAtPoint';
+import { getPathTextOffsetHandleAtPoint } from '../../utils/getPathTextOffsetHandleAtPoint';
 import { getPointerPosition } from '../../utils/getPointerPosition';
 import { getResizeCursorAngle } from 'utils/math/getResizeCursorAngle';
 import { getResizeHandleAtPoint } from '../../utils/getResizeHandleAtPoint';
@@ -36,6 +37,7 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
       const selectedNodes = selectSelectedNodes(state);
       const [selectedNode] = selectedNodes;
       const lineEndpointHit = getLineEndpointAtPoint(point, selectedNodes, viewport);
+      const pathOffsetHandleHit = getPathTextOffsetHandleAtPoint(point, selectedNodes, viewport);
       const resizeHandleHit = getResizeHandleAtPoint(point, selectedNodes, viewport);
       const rotateHandleHit = getRotateHandleAtPoint(point, selectedNodes, viewport);
 
@@ -44,6 +46,11 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
           canvas.classList.add(POSITIONING_CURSOR_CLASS);
           canvas.style.cursor = '';
           hoverRef.current = lineEndpointHit!.nodeId;
+          break;
+        case Boolean(pathOffsetHandleHit):
+          canvas.classList.add(POSITIONING_CURSOR_CLASS);
+          canvas.style.cursor = '';
+          hoverRef.current = pathOffsetHandleHit!.nodeId;
           break;
         case Boolean(resizeHandleHit): {
           const getCursorUrl = activeTool === ToolName.scale ? getRotatedScaleCursorUrl : getRotatedResizeCursorUrl;

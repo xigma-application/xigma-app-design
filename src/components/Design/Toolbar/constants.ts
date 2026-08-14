@@ -22,6 +22,7 @@ export const TOOL_ICON: Record<ToolName, keyof typeof Icons> = {
   [ToolName.section]: 'SectionTool',
   [ToolName.star]: 'StarTool',
   [ToolName.text]: 'TextTool',
+  [ToolName.textOnPath]: 'TextOnPathTool',
   [ToolName.comment]: 'Comment',
 };
 
@@ -39,17 +40,20 @@ export const TOOL_LABEL: Record<ToolName, string> = {
   [ToolName.section]: `${translationNameSpace}.tool.section`,
   [ToolName.star]: `${translationNameSpace}.tool.star`,
   [ToolName.text]: `${translationNameSpace}.tool.text`,
+  [ToolName.textOnPath]: `${translationNameSpace}.tool.textOnPath`,
 };
 
 export const TOOL_GROUP_ITEMS: Partial<Record<ToolName, ToolName[]>> = {
   [ToolName.default]: [ToolName.default, ToolName.hand, ToolName.scale],
   [ToolName.frame]: [ToolName.frame, ToolName.section],
   [ToolName.rectangle]: [ToolName.rectangle, ToolName.line, ToolName.ellipse, ToolName.polygon, ToolName.star, ToolName.media],
+  [ToolName.text]: [ToolName.text, ToolName.textOnPath],
 };
 
 export const TOOL_ICON_SIZE: Partial<Record<ToolName, number>> = {
   [ToolName.line]: 14,
+  [ToolName.textOnPath]: 18,
 };
 
-export const TOOLS_WITH_DROPDOWN: ToolName[] = [ToolName.default, ToolName.frame, ToolName.rectangle];
+export const TOOLS_WITH_DROPDOWN: ToolName[] = [ToolName.default, ToolName.frame, ToolName.rectangle, ToolName.text];
 export const TOOLBAR_ORDER: ToolName[] = [ToolName.default, ToolName.frame, ToolName.rectangle, ToolName.text, ToolName.comment];

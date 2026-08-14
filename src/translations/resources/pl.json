@@ -14,6 +14,7 @@
   "design.toolbar.tool.section": "Sekcja",
   "design.toolbar.tool.star": "Gwiazda",
   "design.toolbar.tool.text": "Tekst",
+  "design.toolbar.tool.textOnPath": "Tekst na ścieżce",
   "home.description": "Minimalny szablon startowy.",
   "home.subtitle": "Vite + React + TypeScript",
   "notFound.description": "Nie znaleziono strony.",

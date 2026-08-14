@@ -4,7 +4,7 @@ import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 // types
 import { NodeType } from 'types/design/enums';
 import { TImageRenderContext } from '../../types';
-import { TDraftMedia, TDraftPolygon, TDraftShape, TDraftStar, TDraftText, TViewport } from 'types/design/types';
+import { TDraftMedia, TDraftPath, TDraftPolygon, TDraftShape, TDraftStar, TDraftText, TViewport } from 'types/design/types';
 
 // utils
 import { drawCornerHandles } from 'utils/canvas/drawCornerHandles';
@@ -20,7 +20,7 @@ export const drawDraftShape = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   imageContext: TImageRenderContext,
-  draftShape: TDraftShape | TDraftPolygon | TDraftStar | TDraftMedia | TDraftText,
+  draftShape: TDraftShape | TDraftPath | TDraftPolygon | TDraftStar | TDraftMedia | TDraftText,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
@@ -56,6 +56,9 @@ export const drawDraftShape = (
       break;
     case NodeType.text:
       drawRect(gl, program, buffer, { ...draftShape, fill: undefined, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport, 0);
+      break;
+    case NodeType.path:
+      drawEllipse(gl, program, buffer, { ...draftShape, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport, 0);
       break;
     default:
       drawRect(

@@ -6,6 +6,7 @@ export const getGroupDisplayedTool = (
   lastShapeTool: ToolName,
   lastMouseTool: ToolName,
   lastFrameTool: ToolName,
+  lastTextTool: ToolName,
 ): ToolName => {
   switch (tool) {
     case ToolName.rectangle:
@@ -14,6 +15,8 @@ export const getGroupDisplayedTool = (
       return lastMouseTool;
     case ToolName.frame:
       return lastFrameTool;
+    case ToolName.text:
+      return lastTextTool;
     default:
       return tool;
   }

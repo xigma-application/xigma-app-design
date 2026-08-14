@@ -1,9 +1,9 @@
 // others
 import { CARET_BLINK_INTERVAL_MS } from 'constant/canvas';
-import { TEXT_FILL } from '../../../../../constants';
+import { TEXT_FILL } from '../../../../../../constants';
 
 // utils
-import { drawEditingCaretAndSelection } from '../drawEditingCaretAndSelection';
+import { drawStraightEditingCaretAndSelection } from '../drawStraightEditingCaretAndSelection';
 import { hexToRgbaFloat } from 'utils/canvas/hexToRgbaFloat';
 
 const createGlMock = (): WebGL2RenderingContext =>
@@ -34,7 +34,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('drawEditingCaretAndSelection', () => {
+describe('drawStraightEditingCaretAndSelection', () => {
   it('should draw nothing for a collapsed selection while the caret is blinked off', () => {
     // mock
     const gl = createGlMock();
@@ -44,7 +44,7 @@ describe('drawEditingCaretAndSelection', () => {
     vi.spyOn(Date, 'now').mockReturnValue(BLINK_OFF_TIME);
 
     // before
-    drawEditingCaretAndSelection(gl, program, buffer, AXIS_ALIGNED_BOX, 'hello', 3, 3, 0, 100, 100, IDENTITY_VIEWPORT);
+    drawStraightEditingCaretAndSelection(gl, program, buffer, AXIS_ALIGNED_BOX, 'hello', 3, 3, 0, 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -59,7 +59,7 @@ describe('drawEditingCaretAndSelection', () => {
     vi.spyOn(Date, 'now').mockReturnValue(BLINK_ON_TIME);
 
     // before
-    drawEditingCaretAndSelection(gl, program, buffer, AXIS_ALIGNED_BOX, 'hello', 3, 3, 0, 100, 100, IDENTITY_VIEWPORT);
+    drawStraightEditingCaretAndSelection(gl, program, buffer, AXIS_ALIGNED_BOX, 'hello', 3, 3, 0, 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -75,7 +75,7 @@ describe('drawEditingCaretAndSelection', () => {
     vi.spyOn(Date, 'now').mockReturnValue(BLINK_OFF_TIME);
 
     // before — "hello world" on one unwrapped line, selecting offsets 0-5 ("hello")
-    drawEditingCaretAndSelection(gl, program, buffer, AXIS_ALIGNED_BOX, 'hello world', 0, 5, 0, 100, 100, IDENTITY_VIEWPORT);
+    drawStraightEditingCaretAndSelection(gl, program, buffer, AXIS_ALIGNED_BOX, 'hello world', 0, 5, 0, 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -92,7 +92,7 @@ describe('drawEditingCaretAndSelection', () => {
     vi.spyOn(Date, 'now').mockReturnValue(BLINK_ON_TIME);
 
     // before — empty content, caret at offset 0 sits at the box's local origin (0, 0)
-    drawEditingCaretAndSelection(gl, program, buffer, rotatedBox, '', 0, 0, 0, 100, 100, IDENTITY_VIEWPORT);
+    drawStraightEditingCaretAndSelection(gl, program, buffer, rotatedBox, '', 0, 0, 0, 100, 100, IDENTITY_VIEWPORT);
 
     // result — a 90deg rotation around the box's center (50, 10), not the caret's own tiny center,
     const [caretCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -111,7 +111,7 @@ describe('drawEditingCaretAndSelection', () => {
     vi.spyOn(Date, 'now').mockReturnValue(BLINK_ON_TIME);
 
     // before
-    drawEditingCaretAndSelection(gl, program, buffer, AXIS_ALIGNED_BOX, 'hello', 3, 3, 0, 100, 100, IDENTITY_VIEWPORT);
+    drawStraightEditingCaretAndSelection(gl, program, buffer, AXIS_ALIGNED_BOX, 'hello', 3, 3, 0, 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), hexToRgbaFloat(TEXT_FILL));
@@ -127,7 +127,7 @@ describe('drawEditingCaretAndSelection', () => {
     vi.spyOn(Date, 'now').mockReturnValue(changedAt + 100);
 
     // before
-    drawEditingCaretAndSelection(gl, program, buffer, AXIS_ALIGNED_BOX, 'hello', 3, 3, changedAt, 100, 100, IDENTITY_VIEWPORT);
+    drawStraightEditingCaretAndSelection(gl, program, buffer, AXIS_ALIGNED_BOX, 'hello', 3, 3, changedAt, 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
@@ -143,7 +143,7 @@ describe('drawEditingCaretAndSelection', () => {
     vi.spyOn(Date, 'now').mockReturnValue(changedAt + CARET_BLINK_INTERVAL_MS);
 
     // before
-    drawEditingCaretAndSelection(gl, program, buffer, AXIS_ALIGNED_BOX, 'hello', 3, 3, changedAt, 100, 100, IDENTITY_VIEWPORT);
+    drawStraightEditingCaretAndSelection(gl, program, buffer, AXIS_ALIGNED_BOX, 'hello', 3, 3, changedAt, 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();

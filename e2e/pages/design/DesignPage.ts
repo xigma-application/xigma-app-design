@@ -1,7 +1,20 @@
 import { Locator, Page } from '@playwright/test';
 
 export type TToolName =
-  'comment' | 'default' | 'ellipse' | 'frame' | 'hand' | 'line' | 'media' | 'polygon' | 'rectangle' | 'scale' | 'section' | 'star' | 'text';
+  | 'comment'
+  | 'default'
+  | 'ellipse'
+  | 'frame'
+  | 'hand'
+  | 'line'
+  | 'media'
+  | 'polygon'
+  | 'rectangle'
+  | 'scale'
+  | 'section'
+  | 'star'
+  | 'text'
+  | 'textOnPath';
 
 export class DesignPage {
   readonly page: Page;
@@ -80,6 +93,13 @@ export class DesignPage {
 
   async drawTextBox(x1: number, y1: number, x2: number, y2: number): Promise<void> {
     await this.selectTool('text');
+    await this.pointerDown(x1, y1);
+    await this.page.mouse.move(x2, y2, { steps: 5 });
+    await this.pointerUp();
+  }
+
+  async drawTextOnPath(x1: number, y1: number, x2: number, y2: number): Promise<void> {
+    await this.selectToolFromDropdown('text', 'Text on path');
     await this.pointerDown(x1, y1);
     await this.page.mouse.move(x2, y2, { steps: 5 });
     await this.pointerUp();

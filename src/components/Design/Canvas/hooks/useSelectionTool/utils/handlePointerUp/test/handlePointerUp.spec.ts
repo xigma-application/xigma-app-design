@@ -5,7 +5,7 @@ import { setSelection } from 'store/design/slice';
 import { store } from 'store';
 
 // types
-import { TDragState, TEndpointDragState, TResizeDragState, TRotateDragState } from '../../../types';
+import { TDragState, TEndpointDragState, TPathOffsetDragState, TResizeDragState, TRotateDragState } from '../../../types';
 import { TDraftRect, TPoint } from 'types/canvas';
 
 // utils
@@ -24,6 +24,9 @@ const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointeru
 const createDragStateRef = (dragState: TDragState | null = null): RefObject<TDragState | null> => ({ current: dragState });
 const createEndpointDragRef = (endpointDragState: TEndpointDragState | null = null): RefObject<TEndpointDragState | null> => ({
   current: endpointDragState,
+});
+const createPathOffsetDragRef = (pathOffsetDragState: TPathOffsetDragState | null = null): RefObject<TPathOffsetDragState | null> => ({
+  current: pathOffsetDragState,
 });
 const createResizeDragRef = (resizeDragState: TResizeDragState | null = null): RefObject<TResizeDragState | null> => ({
   current: resizeDragState,
@@ -50,6 +53,7 @@ describe('handlePointerUp', () => {
       store.dispatch,
       createDragStateRef(),
       createEndpointDragRef(),
+      createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
       createMarqueeStartRef(),
@@ -77,6 +81,7 @@ describe('handlePointerUp', () => {
       store.dispatch,
       dragStateRef,
       createEndpointDragRef(),
+      createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
       createMarqueeStartRef(),
@@ -100,6 +105,7 @@ describe('handlePointerUp', () => {
       store.dispatch,
       createDragStateRef(),
       endpointDragRef,
+      createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
       createMarqueeStartRef(),
@@ -123,6 +129,7 @@ describe('handlePointerUp', () => {
       store.dispatch,
       createDragStateRef(),
       createEndpointDragRef(),
+      createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,

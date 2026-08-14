@@ -47,6 +47,34 @@ const addTextNode = (x: number, y: number, content = 'Hi', size = 500, flipX = f
   return rootOrder[rootOrder.length - 1];
 };
 
+const addPathTextNode = (x: number, y: number, size = 500): string => {
+  store.dispatch(
+    addNode({
+      content: 'Hi',
+      fill: '#ffffff',
+      flipX: false,
+      flipY: false,
+      fontFamily: 'Inter',
+      fontSize: 14,
+      height: size,
+      name: 'Text',
+      parentId: null,
+      pathFlip: true,
+      pathId: 'ellipse-1',
+      pathStartOffset: 0.25,
+      rotation: 0,
+      type: NodeType.text,
+      width: size,
+      x,
+      y,
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 const addFrameNode = (x: number, y: number, size = 20): string => {
   store.dispatch(
     addNode({
@@ -119,6 +147,25 @@ describe('useTextEditOnDoubleClick behaviors', () => {
 
     expect(design.editingNodeId).toBe(idA);
     expect(design.editingTextBox).toMatchObject({ flipX: true, flipY: true, rotation: 45 });
+  });
+
+  it('should carry the path binding back into the editing box when re-editing a path-text node', () => {
+    // mock
+    const idA = addPathTextNode(2600, 2600);
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    renderDoubleClickTool(canvasRef);
+
+    // action
+    canvasRef.current?.dispatchEvent(doubleClickEvent(2602, 2602));
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.editingNodeId).toBe(idA);
+    expect(design.editingTextBox).toMatchObject({ pathFlip: true, pathId: 'ellipse-1', pathStartOffset: 0.25 });
   });
 
   it('should start editing an already-selected text node when double-clicked past its rendered content', () => {
