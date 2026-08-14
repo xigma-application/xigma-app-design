@@ -1,7 +1,7 @@
 import { RefObject, useEffect, useRef } from 'react';
 
 // store
-import { selectActiveTool } from 'store/design/selectors';
+import { selectActiveTool, selectEditingTextBox } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
@@ -16,6 +16,7 @@ import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 
 export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>, marqueeRef: RefObject<TDraftRect | null>): void => {
   const activeTool = useAppSelector(selectActiveTool);
+  const editingPathId = useAppSelector(selectEditingTextBox)?.pathId;
   const dispatch = useAppDispatch();
   const dragStateRef = useRef<TDragState | null>(null);
   const endpointDragRef = useRef<TEndpointDragState | null>(null);
@@ -27,7 +28,7 @@ export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>,
   useEffect(() => {
     const canvas = canvasRef.current;
 
-    if (canvas && (activeTool === ToolName.default || activeTool === ToolName.scale)) {
+    if (canvas && (activeTool === ToolName.default || activeTool === ToolName.scale) && !editingPathId) {
       const onPointerDown = (event: PointerEvent): void =>
         handlePointerDown(
           canvas,
@@ -79,5 +80,5 @@ export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>,
         canvas.removeEventListener('pointerup', onPointerUp);
       };
     }
-  }, [activeTool, canvasRef, dispatch, marqueeRef]);
+  }, [activeTool, canvasRef, dispatch, editingPathId, marqueeRef]);
 };

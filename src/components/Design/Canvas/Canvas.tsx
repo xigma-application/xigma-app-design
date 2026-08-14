@@ -8,6 +8,7 @@ import { useCanvasDragPan } from './hooks/useCanvasDragPan/useCanvasDragPan';
 import { useCanvasPanZoom } from './hooks/useCanvasPanZoom/useCanvasPanZoom';
 import { useCanvasRenderLoop } from './hooks/useCanvasRenderLoop/useCanvasRenderLoop';
 import { useCanvasResize } from './hooks/useCanvasResize/useCanvasResize';
+import { useCurvedCaretEditing } from './hooks/useCurvedCaretEditing/useCurvedCaretEditing';
 import { useDrawingCursor } from './hooks/useDrawingCursor/useDrawingCursor';
 import { useDrawLineTool } from './hooks/useDrawLineTool/useDrawLineTool';
 import { useDrawMediaTool } from './hooks/useDrawMediaTool/useDrawMediaTool';
@@ -63,6 +64,7 @@ const Canvas: FC = () => {
   useSelectionTool(canvasRef, marqueeRef);
   useTextEditOnDoubleClick(canvasRef);
   useHoverHighlight(canvasRef, hoverRef);
+  useCurvedCaretEditing(canvasRef);
   useDrawingCursor(canvasRef);
   useCanvasRenderLoop(canvasRef, draftRef, marqueeRef, hoverRef);
 

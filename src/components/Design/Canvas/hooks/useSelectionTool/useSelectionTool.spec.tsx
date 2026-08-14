@@ -1,17 +1,17 @@
+import { act, renderHook } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { renderHook } from '@testing-library/react';
 import { RefObject } from 'react';
 
 // hooks
 import { useSelectionTool } from './useSelectionTool';
 
 // store
-import { addNode, setActiveTool, setSelection } from 'store/design/slice';
+import { addNode, setActiveTool, setSelection, startTextEdit, stopTextEdit } from 'store/design/slice';
 import { store } from 'store';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import { TDraftRect } from 'types/canvas';
+import { TDraftRect, TEditingTextBox } from 'types/canvas';
 
 const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
   const canvas = document.createElement('canvas');
@@ -70,6 +70,7 @@ describe('useSelectionTool behaviors', () => {
   beforeEach(() => {
     store.dispatch(setActiveTool(ToolName.default));
     store.dispatch(setSelection([]));
+    store.dispatch(stopTextEdit());
   });
 
   it('should not react to pointer events when the default tool is not active', () => {
@@ -563,5 +564,45 @@ describe('useSelectionTool behaviors', () => {
 
     // result
     expect(store.getState().design.nodes[idA]).toMatchObject({ x1: 2820, x2: 2900, y1: 760, y2: 700 });
+  });
+
+  it('should not react to pointer events while a path-text node is being edited', () => {
+    // mock
+    const idA = addFrameNode(3000, 700);
+    const box: TEditingTextBox = { flipX: false, flipY: false, height: 20, pathId: 'ellipse-1', rotation: 0, width: 20, x: 3000, y: 700 };
+
+    store.dispatch(startTextEdit({ box, content: 'Hi' }));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    renderSelectionTool(canvasRef);
+
+    // action
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 3005, 705));
+
+    // result
+    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(idA).toBeTruthy();
+  });
+
+  it('should resume reacting to pointer events once path-text editing ends', () => {
+    // mock
+    const idA = addFrameNode(3100, 700);
+    const box: TEditingTextBox = { flipX: false, flipY: false, height: 20, pathId: 'ellipse-1', rotation: 0, width: 20, x: 3100, y: 700 };
+
+    store.dispatch(startTextEdit({ box, content: 'Hi' }));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    renderSelectionTool(canvasRef);
+    act(() => store.dispatch(stopTextEdit()));
+
+    // action
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 3105, 705));
+
+    // result
+    expect(store.getState().design.selectedIds).toEqual([idA]);
   });
 });

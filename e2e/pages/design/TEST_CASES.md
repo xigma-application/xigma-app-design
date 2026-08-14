@@ -575,6 +575,8 @@ box, never a separate node lookup.
 | 76  | Resizing the source path node updates the attached text's curve live, proving the two are a real bidirectional relation, not independently-positioned nodes                                                                                            |  ✅  | ✅ `text-on-path.spec.ts` |
 | 77  | Auto-shrinking the font so text never overlaps itself when longer than the path's circumference                                                                                                                                                        |  ✅  |             —             |
 | 78  | Dragging the blue start-offset handle moves where the text begins along the path                                                                                                                                                                       |  ✅  |             —             |
+| 84  | Clicking a point along curved text (re-entered via double-click) places the caret at the nearest character index on the curve, so a typed character inserts there instead of always landing at the end                                                 |  ✅  | ✅ `text-on-path.spec.ts` |
+| 85  | Dragging along the curve from one character to another selects that range; typing replaces the selection instead of inserting alongside it                                                                                                             |  ✅  | ✅ `text-on-path.spec.ts` |
 
 #77/#78 stay unit-only: `getFittedPathFontSize.spec.ts` and `continuePathOffsetDrag.spec.ts` already
 assert the exact resulting font size / offset value via direct function calls and
@@ -584,6 +586,23 @@ get e2e coverage" below. #76 gets e2e coverage despite having exact unit coverag
 real `pointerdown`→`pointermove`→`pointerup` resize-handle drag on a _live-rendered_ curved-text
 node actually repainting in sync — the same "real browser + rendering + timing" category as the
 Resize section's #66 above, not just the reducer math in isolation.
+
+#84/#85 are `useCurvedCaretEditing.ts`: a real `document`-level `pointerdown`/`pointermove`/
+`pointerup` listener that hit-tests the click against the curve's own per-character arc-length
+boundaries (`getCurvedCaretIndexAtPoint.ts`, reusing the same boundary/offset math `#77`'s
+auto-shrink and `isPointInCurvedText.ts` already use), then moves the real DOM selection inside the
+`contentEditable` overlay via `setEditableSelectionRange.ts` — a plain range/offset calculation in
+jsdom for the unit suite (`useCurvedCaretEditing.spec.tsx`, `getCurvedCaretIndexAtPoint.spec.ts`,
+`setEditableSelectionRange.spec.ts` all assert the exact index/distance/selection precisely), but
+the actual claim worth proving in a real browser is that clicking/dragging at real screen
+coordinates against the real rendered MSDF glyphs on an ellipse produces the correct caret
+position/selection, and that a subsequent real `page.keyboard.type` inserts/replaces at that exact
+spot — not just that the app _asked_ the DOM to do so. Both tests sidestep needing an accessibility
+tree or `store.getState()` (unavailable/unreachable from e2e, same constraint as every other
+screenshot-based scenario here): #84 compares two independently-drawn pages where the only
+difference is which point on the curve was clicked before typing the same character, and #85
+compares the pre-edit "Hi" render against the post-drag-select-and-retype render, so any pixel
+difference can only come from the caret/selection actually landing where the interaction implies.
 
 ## Text on Path outline visibility (hidden / hover / selected)
 
