@@ -60,10 +60,17 @@ describe('getPathOutlineStyles', () => {
     expect(styles.get('path-1')).toBe('hover');
   });
 
-  it('should mark the linked path as selected when its text node is being edited, even if not selected', () => {
+  it('should mark the linked path as editing when its text node is being edited, even if not selected', () => {
     const styles = getPathOutlineStyles([buildTextNode()], new Set(), 'text-1', null);
 
-    expect(styles.get('path-1')).toBe('selected');
+    expect(styles.get('path-1')).toBe('editing');
+  });
+
+  it('should mark the linked path as editing rather than hovered, even while the pointer rests on it', () => {
+    // mock — the dashed editing outline is the whole point while actively typing; hover must not
+    const styles = getPathOutlineStyles([buildTextNode()], new Set(), 'text-1', 'text-1');
+
+    expect(styles.get('path-1')).toBe('editing');
   });
 
   it('should mark the linked path as hovered when its text node is hovered but not selected or editing', () => {
@@ -78,12 +85,12 @@ describe('getPathOutlineStyles', () => {
     expect(styles.has('path-1')).toBe(false);
   });
 
-  it('should mark the path as selected while typing brand-new content, before any text node exists yet', () => {
+  it('should mark the path as editing while typing brand-new content, before any text node exists yet', () => {
     // mock — a fresh text-on-path draft has only the path node in the store; the text node isn't
     // created until the editor commits, so the outline has to key off the editing box's pathId
     const styles = getPathOutlineStyles([buildPathNode()], new Set(), null, null, 'path-1');
 
-    expect(styles.get('path-1')).toBe('selected');
+    expect(styles.get('path-1')).toBe('editing');
   });
 
   it('should leave the path unset when nothing is being edited', () => {

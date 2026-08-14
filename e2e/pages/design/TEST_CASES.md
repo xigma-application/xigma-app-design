@@ -688,6 +688,7 @@ commit — only the editing box).
 | 81  | Selecting the text via a real click on its rendered glyphs shows the outline in its thin "selected" style                                                                |  ✅  | ✅ `text-on-path.spec.ts` |
 | 82  | Hovering the text while it's already selected switches the outline to the thicker hover style, instead of staying on the thin selected style                             |  ✅  | ✅ `text-on-path.spec.ts` |
 | 83  | Neither the drag-to-create draft nor the live-typing phase (first creation or re-edit) shows a rectangular box/corner-handles outline for the path — only the bare curve |  ✅  |             —             |
+| 88  | The bare curve renders dashed while actively drawing or editing the path (first creation or re-edit), instead of the solid outline used once just selected/hovered       |  ✅  | ✅ `text-on-path.spec.ts` |
 
 #79-#82 all live in one e2e test, since they're really one continuous state-machine walk (hidden →
 hover → back to hidden → selected → selected+hover) and splitting it into separate tests would just
@@ -701,6 +702,35 @@ unit-only: `drawDraftShape.spec.ts`, `drawPerNodeSelectionOutlines.spec.ts`, and
 `drawEditingTextBoxOutline.spec.ts` already count the exact WebGL draw calls (or their absence) for
 every phase precisely — the claim is "this specific draw call never happens," which a screenshot
 diff can't express any more precisely than the call-count assertion already does.
+
+#88 gave the "editing" state its own `TPathOutlineStyle` (previously `getPathOutlineStyles.ts`
+folded active editing into the same `'selected'` bucket as a plain, non-editing selection, so both
+rendered identically via `drawEllipse`'s solid `LINE_LOOP` stroke) so a user can tell "I'm actively
+drawing/typing this path" apart from "I've just selected an already-committed one" at a glance —
+reported live: a plain-selected path and an actively-edited one looked indistinguishable. Editing
+now routes through a new `drawDashedEllipseOutline.ts`, which walks the curve by real arc length
+(`buildEllipseArcLengthTable`/`getEllipsePathSample`, the same machinery the path-text caret/offset
+math already uses, not a fixed angle-step sample) so the dash/gap pattern tiles evenly regardless of
+the ellipse's aspect ratio, and draws each dash as a disconnected `gl.LINES` pair instead of a closed
+`gl.LINE_LOOP`, so real gaps show between dashes. It takes priority over hover too — the point of the
+dashed state is knowing you're mid-edit, so resting the pointer on your own curve while typing must
+not flash it over to the thicker hover style. The dash/gap lengths (`DASH_LENGTH_PX`/`DASH_GAP_PX`,
+`constant/canvas.ts`) are defined in screen pixels and divided by `viewport.zoom` before being
+converted to a world-space dash count every frame, so the pattern re-tiles denser while zoomed in and
+sparser while zoomed out, live, the same "constant on-screen size regardless of zoom" convention
+`CARET_WIDTH_PX`/`HOVER_OUTLINE_WIDTH` already use elsewhere — first shipped as a fixed
+angle-based sample (a constant dash count regardless of zoom or circle size), corrected after
+live feedback that it needed to scale with zoom instead. Used from both `drawDraftShape.ts`'s
+`NodeType.path` case (the initial drag-to-create phase, before any text node exists) and
+`drawPathOutline.ts`'s `'editing'` branch (re-editing an existing path-text node). The unit suite
+(`drawDashedEllipseOutline.spec.ts`, `getPathOutlineStyles.spec.ts`, `drawPathOutline.spec.ts`,
+`drawDraftShape.spec.ts`) already asserts the exact zoom-scaled dash count and `gl.LINES`-vs-
+`gl.LINE_LOOP` draw calls precisely — including that doubling/halving the zoom doubles/halves the
+dash count — which a screenshot diff can't improve on for the zoom-scaling claim specifically (per
+the "why so few scenarios get e2e coverage" rationale below), so #88's e2e version sticks to the
+same "real browser repaints in response" claim as #79-82: it draws a fresh path, types into it
+(still mid-edit, dashed), then commits and re-selects it (solid) and asserts the two screenshots
+differ.
 
 ## Why so few scenarios get e2e coverage
 

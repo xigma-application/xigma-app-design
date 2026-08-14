@@ -7,6 +7,7 @@ import { drawDraftShape } from '../drawDraftShape';
 
 const createGlMock = (): WebGL2RenderingContext =>
   ({
+    LINES: 1,
     LINE_LOOP: 2,
     RGBA: 6408,
     STATIC_DRAW: 35044,
@@ -348,7 +349,7 @@ describe('drawDraftShape', () => {
     expect(trianglesDraws).toHaveLength(4);
   });
 
-  it('should show only a stroke-only ellipse outline for a path draft, with no fill and no corner handles', () => {
+  it('should show only a dashed ellipse outline for a path draft, with no fill and no corner handles', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
@@ -367,14 +368,16 @@ describe('drawDraftShape', () => {
     );
 
     // result — no TRIANGLE_FAN fill and no TRIANGLES corner-handle fills, since the path draft
-    // shows only the bare ellipse curve, not a bounding box with corner handles
     expect(gl.drawArrays).not.toHaveBeenCalledWith(gl.TRIANGLE_FAN, 0, expect.any(Number));
     expect(gl.drawArrays).not.toHaveBeenCalledWith(gl.TRIANGLES, 0, expect.any(Number));
 
-    // result — just the single ellipse stroke outline, no corner-handle rings either
-    const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
+    // result — no closed LINE_LOOP ring either, since a dashed outline draws disconnected segments
+    expect(gl.drawArrays).not.toHaveBeenCalledWith(gl.LINE_LOOP, 0, expect.any(Number));
 
-    expect(lineLoopDraws).toHaveLength(1);
+    // result — just the single dashed ellipse outline draw
+    const linesDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINES);
+
+    expect(linesDraws).toHaveLength(1);
   });
 
   it('should keep a text draft fill-less, showing only its outline', () => {

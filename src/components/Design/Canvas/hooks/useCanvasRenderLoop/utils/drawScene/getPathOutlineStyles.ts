@@ -2,7 +2,7 @@
 import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
-export type TPathOutlineStyle = 'hover' | 'selected';
+export type TPathOutlineStyle = 'editing' | 'hover' | 'selected';
 
 export const getPathOutlineStyles = (
   nodes: TSceneNode[],
@@ -15,9 +15,10 @@ export const getPathOutlineStyles = (
 
   nodes.forEach((node) => {
     if (node.type === NodeType.text && node.pathId) {
-      const isSelectedOrEditing = selectedIds.has(node.id) || node.id === editingNodeId;
+      const isEditing = node.id === editingNodeId;
+      const isSelected = selectedIds.has(node.id);
       const isHovered = node.id === hoveredNodeId;
-      const style: TPathOutlineStyle | undefined = isHovered ? 'hover' : isSelectedOrEditing ? 'selected' : undefined;
+      const style: TPathOutlineStyle | undefined = isEditing ? 'editing' : isHovered ? 'hover' : isSelected ? 'selected' : undefined;
 
       if (style) {
         styles.set(node.pathId, style);
@@ -26,7 +27,7 @@ export const getPathOutlineStyles = (
   });
 
   if (editingPathId) {
-    styles.set(editingPathId, 'selected');
+    styles.set(editingPathId, 'editing');
   }
 
   return styles;

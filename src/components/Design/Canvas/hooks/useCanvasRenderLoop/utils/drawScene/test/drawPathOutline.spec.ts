@@ -7,6 +7,7 @@ import { drawPathOutline } from '../drawPathOutline';
 
 const createGlMock = (): WebGL2RenderingContext =>
   ({
+    LINES: 1,
     LINE_LOOP: 2,
     STATIC_DRAW: 35044,
     TRIANGLES: 4,
@@ -79,5 +80,19 @@ describe('drawPathOutline', () => {
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, expect.any(Number));
+  });
+
+  it('should draw a dashed ellipse when editing', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawPathOutline(gl, program, buffer, buildNode(), 'editing', 100, 100, IDENTITY_VIEWPORT);
+
+    // result — a dashed outline draws disconnected line segments, not a closed LINE_LOOP or a thick ring
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINES, 0, expect.any(Number));
   });
 });

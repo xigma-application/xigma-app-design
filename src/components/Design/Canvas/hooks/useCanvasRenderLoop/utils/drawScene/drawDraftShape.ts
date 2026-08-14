@@ -8,6 +8,7 @@ import { TDraftMedia, TDraftPath, TDraftPolygon, TDraftShape, TDraftStar, TDraft
 
 // utils
 import { drawCornerHandles } from 'utils/canvas/drawCornerHandles';
+import { drawDashedEllipseOutline } from 'utils/canvas/shapes/drawDashedEllipseOutline';
 import { drawEllipse } from 'utils/canvas/shapes/drawEllipse';
 import { drawImage } from 'utils/canvas/drawImage';
 import { drawPolygon } from 'utils/canvas/shapes/drawPolygon';
@@ -58,7 +59,7 @@ export const drawDraftShape = (
       drawRect(gl, program, buffer, { ...draftShape, fill: undefined, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport, 0);
       break;
     case NodeType.path:
-      drawEllipse(gl, program, buffer, { ...draftShape, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport, 0);
+      drawDashedEllipseOutline(gl, program, buffer, draftShape, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport, 0);
       return;
     default:
       drawRect(

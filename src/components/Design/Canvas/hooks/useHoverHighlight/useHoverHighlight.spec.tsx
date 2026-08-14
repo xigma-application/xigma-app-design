@@ -393,7 +393,17 @@ describe('useHoverHighlight behaviors', () => {
     store.dispatch(setSelection([idA]));
     store.dispatch(
       startTextEdit({
-        box: { flipX: false, flipY: false, height: 200, pathId: 'ellipse-1', pathStartOffset: 0, rotation: 0, width: 200, x: 4300, y: 4300 },
+        box: {
+          flipX: false,
+          flipY: false,
+          height: 200,
+          pathId: 'ellipse-1',
+          pathStartOffset: 0,
+          rotation: 0,
+          width: 200,
+          x: 4300,
+          y: 4300,
+        },
         content: 'Hi',
         id: idA,
       }),

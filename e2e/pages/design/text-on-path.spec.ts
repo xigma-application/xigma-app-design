@@ -229,3 +229,22 @@ test('dragging the path-text offset handle on a mirrored path-text node grabs it
   // can only come from the drag actually grabbing the handle and moving pathStartOffset
   expect(grabbed.equals(hoveredOnly)).toBe(false);
 });
+
+test('the path outline renders dashed while actively drawing or editing it, unlike the solid outline once just selected', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-path-outline-dashed-while-editing');
+  await designPage.drawTextOnPath(300, 300, 500, 500);
+  await designPage.typeText('Hi');
+
+  const whileEditing = await designPage.canvas.screenshot(); // still typing -> dashed outline
+
+  await designPage.click(900, 600); // commit, deselecting
+  await designPage.click(500, 400); // select it (not editing) -> solid outline
+
+  const whileSelected = await designPage.canvas.screenshot();
+
+  expect(whileEditing.equals(whileSelected)).toBe(false);
+});
