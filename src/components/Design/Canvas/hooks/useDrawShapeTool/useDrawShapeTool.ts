@@ -23,7 +23,7 @@ export type TShapeToolConfig = {
   fill: string;
   name: string;
   tool: ToolName;
-  type: NodeType.ellipse | NodeType.frame | NodeType.rectangle;
+  type: NodeType.ellipse | NodeType.frame | NodeType.rectangle | NodeType.section;
 };
 
 export const useDrawShapeTool = (

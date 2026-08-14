@@ -63,6 +63,34 @@ describe('useToolbarShortcuts behaviors', () => {
     expect(store.getState().design.activeTool).toBe(ToolName.rectangle);
   });
 
+  it('should switch to the section tool on "Shift+S"', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyS', shiftKey: true });
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.section);
+  });
+
+  it('should not switch to the section tool on a plain "S" without the shift modifier', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyS' });
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.default);
+  });
+
   it('should switch to the line tool on "L"', () => {
     // mock
     const store = createTestStore();

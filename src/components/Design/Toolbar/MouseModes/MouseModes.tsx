@@ -11,7 +11,7 @@ import { KEYBOARD_SHORTCUTS } from '../../keys';
 import { TOOL_ICON, TOOL_ICON_SIZE, TOOL_LABEL, TOOLBAR_ORDER, TOOLS_WITH_DROPDOWN } from '../constants';
 
 // store
-import { selectActiveTool, selectLastMouseTool, selectLastShapeTool } from 'store/design/selectors';
+import { selectActiveTool, selectLastFrameTool, selectLastMouseTool, selectLastShapeTool } from 'store/design/selectors';
 import { setActiveTool } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
@@ -27,6 +27,7 @@ import { getGroupDisplayedTool } from '../utils/getGroupDisplayedTool';
 const MouseModes: FC = () => {
   const { t } = useTranslation();
   const activeTool = useAppSelector(selectActiveTool);
+  const lastFrameTool = useAppSelector(selectLastFrameTool);
   const lastMouseTool = useAppSelector(selectLastMouseTool);
   const lastShapeTool = useAppSelector(selectLastShapeTool);
   const dispatch = useAppDispatch();
@@ -39,7 +40,7 @@ const MouseModes: FC = () => {
       value={activeTool}
     >
       {TOOLBAR_ORDER.map((name) => {
-        const displayedTool = getGroupDisplayedTool(name, lastShapeTool, lastMouseTool);
+        const displayedTool = getGroupDisplayedTool(name, lastShapeTool, lastMouseTool, lastFrameTool);
         const isActive = displayedTool === activeTool;
         const shortcut = KEYBOARD_SHORTCUTS[displayedTool].join('');
 

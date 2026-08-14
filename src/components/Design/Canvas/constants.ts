@@ -1,8 +1,12 @@
+// others
+import { BACKGROUND_COLOR } from 'constant/canvas';
+
 // types
 import { ToolName } from 'types/design/enums';
 
 export const DRAWING_TOOLS: ToolName[] = [
   ToolName.frame,
+  ToolName.section,
   ToolName.rectangle,
   ToolName.line,
   ToolName.ellipse,
@@ -15,6 +19,7 @@ export const ELLIPSE_FILL = '#D9D9D9';
 export const FRAME_FILL = '#FFFFFF';
 export const LINE_STROKE = '#ffffff';
 export const RECTANGLE_FILL = '#D9D9D9';
+export const SECTION_FILL = BACKGROUND_COLOR;
 export const RESIZE_DEBOUNCE_MS = 500;
 export const MIN_SHAPE_SIZE = 2;
 export const POLYGON_DEFAULT_SIDES = 3;

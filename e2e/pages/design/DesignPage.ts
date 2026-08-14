@@ -1,6 +1,7 @@
 import { Locator, Page } from '@playwright/test';
 
-export type TToolName = 'comment' | 'default' | 'ellipse' | 'frame' | 'hand' | 'line' | 'media' | 'polygon' | 'rectangle' | 'star' | 'text';
+export type TToolName =
+  'comment' | 'default' | 'ellipse' | 'frame' | 'hand' | 'line' | 'media' | 'polygon' | 'rectangle' | 'section' | 'star' | 'text';
 
 export class DesignPage {
   readonly page: Page;
@@ -30,6 +31,13 @@ export class DesignPage {
 
   async drawFrame(x1: number, y1: number, x2: number, y2: number): Promise<void> {
     await this.selectTool('frame');
+    await this.pointerDown(x1, y1);
+    await this.page.mouse.move(x2, y2, { steps: 5 });
+    await this.pointerUp();
+  }
+
+  async drawSection(x1: number, y1: number, x2: number, y2: number): Promise<void> {
+    await this.selectToolFromDropdown('frame', 'Section');
     await this.pointerDown(x1, y1);
     await this.page.mouse.move(x2, y2, { steps: 5 });
     await this.pointerUp();

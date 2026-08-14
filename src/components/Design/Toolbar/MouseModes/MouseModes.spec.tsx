@@ -130,4 +130,27 @@ describe('MouseModes behaviors', () => {
     expect(await screen.findByText('Polygon')).toBeInTheDocument();
     expect(document.querySelector('[class*="MouseModes__shortcut"]')).not.toBeInTheDocument();
   });
+
+  it('should show the last selected frame tool on the shared frame/section button', () => {
+    // before
+    renderMouseModes();
+
+    // action
+    act(() => store.dispatch(setActiveTool(ToolName.section)));
+
+    // result
+    expect(screen.getByRole('radio', { name: ToolName.section })).toBeChecked();
+  });
+
+  it('should keep showing the last frame tool but unchecked once the tool resets to default', () => {
+    // before
+    renderMouseModes();
+
+    // action
+    act(() => store.dispatch(setActiveTool(ToolName.section)));
+    act(() => store.dispatch(setActiveTool(ToolName.default)));
+
+    // result
+    expect(screen.getByRole('radio', { name: ToolName.section })).not.toBeChecked();
+  });
 });

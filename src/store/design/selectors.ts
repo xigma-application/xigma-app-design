@@ -20,6 +20,8 @@ export const selectEditingTextBox = (state: RootState): TEditingTextBox | null =
 
 export const selectEditingTextContent = (state: RootState): string => state.design.editingTextContent;
 
+export const selectLastFrameTool = (state: RootState): ToolName => state.design.lastFrameTool;
+
 export const selectLastMouseTool = (state: RootState): ToolName => state.design.lastMouseTool;
 
 export const selectLastShapeTool = (state: RootState): ToolName => state.design.lastShapeTool;

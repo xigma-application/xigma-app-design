@@ -62,7 +62,11 @@ export const drawDraftShape = (
         gl,
         program,
         buffer,
-        { ...draftShape, fill: draftShape.type === NodeType.frame ? undefined : draftShape.fill, stroke: DRAFT_FRAME_STROKE },
+        {
+          ...draftShape,
+          fill: draftShape.type === NodeType.frame || draftShape.type === NodeType.section ? undefined : draftShape.fill,
+          stroke: DRAFT_FRAME_STROKE,
+        },
         canvasWidth,
         canvasHeight,
         viewport,

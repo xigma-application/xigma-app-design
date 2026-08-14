@@ -15,6 +15,23 @@ branch.
 | --- | --------------------------------------------------------------------------------------- | :--: | :-----------------------: |
 | 1   | Drawing a frame with the Frame tool renders it and reverts the active tool to `default` |  —   | ✅ `create-frame.spec.ts` |
 
+## Section drawing
+
+Section is a Frame-like container node: a plain box node (`NodeType.section`) rendered through the
+same generic `useDrawShapeTool`/`drawDraftShape`/`drawSceneNodes` paths as Frame, defaulting to a
+fill equal to the canvas background color (`#444444`) so it's invisible until drawn, same
+fill-less-draft behavior as Frame (`drawDraftShape.ts`'s default case treats `NodeType.frame` and
+`NodeType.section` identically). Section shares Frame's toolbar button/dropdown panel
+(`TOOL_GROUP_ITEMS[frame] = [frame, section]`) instead of getting its own top-level icon — same
+"shared button shows whichever tool was last picked" mechanic as the Rectangle group, backed by its
+own `lastFrameTool` store field (mirroring `lastShapeTool`/`lastMouseTool`).
+
+| #   | Scenario                                                                                                                      | Unit |             E2E             |
+| --- | ----------------------------------------------------------------------------------------------------------------------------- | :--: | :-------------------------: |
+| 1   | Picking "Section" from the Frame dropdown draws a section, and the shared button stays showing Section (unchecked) afterwards |  —   | ✅ `create-section.spec.ts` |
+| 2   | Pressing "Shift+S" activates the Section tool, then dragging draws a section                                                  |  —   | ✅ `create-section.spec.ts` |
+| 3   | While dragging (before release), a section draft stays fill-less, same as Frame's draft                                       |  ✅  | ✅ `drawDraftShape.spec.ts` |
+
 ## Rectangle drawing (Etap 6)
 
 | #   | Scenario                                                                                                     | Unit |              E2E              |

@@ -323,6 +323,30 @@ describe('drawDraftShape', () => {
     expect(trianglesDraws).toHaveLength(4);
   });
 
+  it('should keep a section draft fill-less, showing only its outline', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawDraftShape(
+      gl,
+      program,
+      buffer,
+      IMAGE_CONTEXT,
+      { fill: '#444444', height: 20, type: NodeType.section, width: 10, x: 0, y: 0 },
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+    );
+
+    // result — only the 4 corner handles, no fill for the section shape itself
+    const trianglesDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLES);
+
+    expect(trianglesDraws).toHaveLength(4);
+  });
+
   it('should keep a text draft fill-less, showing only its outline', () => {
     // mock
     const gl = createGlMock();

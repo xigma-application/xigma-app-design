@@ -9,7 +9,7 @@ import { KEYBOARD_SHORTCUTS } from '../../../keys';
 import { TOOL_GROUP_ITEMS, TOOL_ICON, TOOL_LABEL } from '../../constants';
 
 // store
-import { selectLastMouseTool, selectLastShapeTool } from 'store/design/selectors';
+import { selectLastFrameTool, selectLastMouseTool, selectLastShapeTool } from 'store/design/selectors';
 import { setActiveTool } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
@@ -31,10 +31,11 @@ export type TToolDropdownProps = {
 const ToolDropdown: FC<TToolDropdownProps> = ({ tool }) => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
+  const lastFrameTool = useAppSelector(selectLastFrameTool);
   const lastMouseTool = useAppSelector(selectLastMouseTool);
   const lastShapeTool = useAppSelector(selectLastShapeTool);
   const groupItems = TOOL_GROUP_ITEMS[tool];
-  const selectedTool = getGroupDisplayedTool(tool, lastShapeTool, lastMouseTool);
+  const selectedTool = getGroupDisplayedTool(tool, lastShapeTool, lastMouseTool, lastFrameTool);
 
   return (
     <Popover trigger={<Icon name="ChevronDown" size={5} />} triggerAriaLabel={`${tool} options`} triggerClassName={styles.ToolDropdown}>

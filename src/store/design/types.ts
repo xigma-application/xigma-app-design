@@ -11,6 +11,7 @@ export type TDesignState = {
   editingSelectionStart: number;
   editingTextBox: TEditingTextBox | null;
   editingTextContent: string;
+  lastFrameTool: ToolName;
   lastMouseTool: ToolName;
   lastShapeTool: ToolName;
   nodes: Record<string, TSceneNode>;

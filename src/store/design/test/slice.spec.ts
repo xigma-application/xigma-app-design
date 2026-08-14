@@ -38,6 +38,7 @@ describe('design slice', () => {
       editingSelectionStart: 0,
       editingTextBox: null,
       editingTextContent: '',
+      lastFrameTool: ToolName.frame,
       lastMouseTool: ToolName.default,
       lastShapeTool: ToolName.rectangle,
       nodes: {},

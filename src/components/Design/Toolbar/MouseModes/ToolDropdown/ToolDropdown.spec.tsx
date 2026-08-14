@@ -84,6 +84,45 @@ describe('ToolDropdown behaviors', () => {
     expect(store.getState().design.lastShapeTool).toBe(ToolName.ellipse);
   });
 
+  it('should list every tool in the frame group and select the last frame tool used', async () => {
+    // mock
+    const user = userEvent.setup();
+
+    // before
+    render(
+      <Provider store={store}>
+        <ToolDropdown tool={ToolName.frame} />
+      </Provider>,
+    );
+
+    // action
+    await user.click(screen.getByRole('button', { name: 'frame options' }));
+    await user.click(screen.getByText('Section'));
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.section);
+    expect(store.getState().design.lastFrameTool).toBe(ToolName.section);
+  });
+
+  it('should list only the tool itself when it has no configured group', async () => {
+    // mock
+    const user = userEvent.setup();
+
+    // before
+    render(
+      <Provider store={store}>
+        <ToolDropdown tool={ToolName.line} />
+      </Provider>,
+    );
+
+    // action
+    await user.click(screen.getByRole('button', { name: 'line options' }));
+
+    // result
+    expect(screen.getByText('Line')).toBeInTheDocument();
+    expect(screen.queryByText('Frame')).not.toBeInTheDocument();
+  });
+
   it('should list every tool in the default group and select the last mouse tool used', async () => {
     // mock
     const user = userEvent.setup();

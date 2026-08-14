@@ -12,6 +12,7 @@ import {
   LINE_STROKE,
   POLYGON_DEFAULT_SIDES,
   RECTANGLE_FILL,
+  SECTION_FILL,
   STAR_DEFAULT_POINTS,
   STAR_DEFAULT_RATIO,
 } from './constants';
@@ -39,6 +40,12 @@ export const RECTANGLE_TOOL_SETTINGS: TShapeToolConfig = {
   name: 'Rectangle',
   tool: ToolName.rectangle,
   type: NodeType.rectangle,
+};
+export const SECTION_TOOL_SETTINGS: TShapeToolConfig = {
+  fill: SECTION_FILL,
+  name: 'Section',
+  tool: ToolName.section,
+  type: NodeType.section,
 };
 export const STAR_TOOL_SETTINGS: TStarToolConfig = {
   fill: ELLIPSE_FILL,

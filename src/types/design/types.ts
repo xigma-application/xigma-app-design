@@ -4,7 +4,7 @@ import { TDraftRect } from 'types/canvas';
 
 export type TDraftShape = TDraftRect & {
   fill: string;
-  type: NodeType.ellipse | NodeType.frame | NodeType.rectangle;
+  type: NodeType.ellipse | NodeType.frame | NodeType.rectangle | NodeType.section;
 };
 
 export type TDraftPolygon = TDraftRect & {
@@ -70,6 +70,11 @@ export type TRectangleNode = TBaseNode & {
   type: NodeType.rectangle;
 };
 
+export type TSectionNode = TBaseNode & {
+  fill: string;
+  type: NodeType.section;
+};
+
 export type TStarNode = TBaseNode & {
   fill: string;
   flipX: boolean;
@@ -105,7 +110,7 @@ export type TDraftLine = Omit<TLineNode, 'id' | 'name' | 'parentId'>;
 
 export type TDraftEntity = TDraftShape | TDraftLine | TDraftPolygon | TDraftStar | TDraftMedia | TDraftText;
 
-export type TBoxSceneNode = TEllipseNode | TFrameNode | TMediaNode | TPolygonNode | TRectangleNode | TStarNode | TTextNode;
+export type TBoxSceneNode = TEllipseNode | TFrameNode | TMediaNode | TPolygonNode | TRectangleNode | TSectionNode | TStarNode | TTextNode;
 
 export type TSceneNode = TBoxSceneNode | TLineNode;
 
@@ -115,6 +120,7 @@ export type TNewSceneNode =
   | Omit<TMediaNode, 'id'>
   | Omit<TPolygonNode, 'id'>
   | Omit<TRectangleNode, 'id'>
+  | Omit<TSectionNode, 'id'>
   | Omit<TStarNode, 'id'>
   | Omit<TTextNode, 'id'>
   | Omit<TLineNode, 'id'>;
@@ -125,6 +131,7 @@ export type TSceneNodeChanges =
   | Partial<TMediaNode>
   | Partial<TPolygonNode>
   | Partial<TRectangleNode>
+  | Partial<TSectionNode>
   | Partial<TStarNode>
   | Partial<TTextNode>
   | Partial<TLineNode>;

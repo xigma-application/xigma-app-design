@@ -5,6 +5,7 @@ export enum NodeType {
   media = 'media',
   polygon = 'polygon',
   rectangle = 'rectangle',
+  section = 'section',
   star = 'star',
   text = 'text',
 }
@@ -19,6 +20,7 @@ export enum ToolName {
   media = 'media',
   polygon = 'polygon',
   rectangle = 'rectangle',
+  section = 'section',
   star = 'star',
   text = 'text',
 }

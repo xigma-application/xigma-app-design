@@ -13,6 +13,7 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   editingSelectionStart: 0,
   editingTextBox: null,
   editingTextContent: '',
+  lastFrameTool: ToolName.frame,
   lastMouseTool: ToolName.default,
   lastShapeTool: ToolName.rectangle,
   nodes: {},
@@ -76,6 +77,28 @@ describe('handleSetActiveTool', () => {
 
     // result
     expect(state.lastShapeTool).toBe(ToolName.ellipse);
+  });
+
+  it('should remember the last frame tool when switching to the section tool', () => {
+    // mock
+    const state = buildState();
+
+    // before
+    handleSetActiveTool(state, ToolName.section);
+
+    // result
+    expect(state.lastFrameTool).toBe(ToolName.section);
+  });
+
+  it('should keep the last frame tool when switching to a non-frame-group tool', () => {
+    // mock
+    const state = buildState({ lastFrameTool: ToolName.section });
+
+    // before
+    handleSetActiveTool(state, ToolName.comment);
+
+    // result
+    expect(state.lastFrameTool).toBe(ToolName.section);
   });
 
   it('should remember the last mouse tool when switching to the hand tool', () => {

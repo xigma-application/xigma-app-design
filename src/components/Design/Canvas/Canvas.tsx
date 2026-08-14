@@ -28,6 +28,7 @@ import {
   MEDIA_TOOL_SETTINGS,
   POLYGON_TOOL_SETTINGS,
   RECTANGLE_TOOL_SETTINGS,
+  SECTION_TOOL_SETTINGS,
   STAR_TOOL_SETTINGS,
 } from './toolSettings';
 
@@ -49,6 +50,7 @@ const Canvas: FC = () => {
   useCanvasDragPan(canvasRef);
   useHandTool(canvasRef);
   useDrawShapeTool(canvasRef, draftRef, FRAME_TOOL_SETTINGS);
+  useDrawShapeTool(canvasRef, draftRef, SECTION_TOOL_SETTINGS);
   useDrawShapeTool(canvasRef, draftRef, RECTANGLE_TOOL_SETTINGS);
   useDrawShapeTool(canvasRef, draftRef, ELLIPSE_TOOL_SETTINGS);
   useDrawPolygonTool(canvasRef, draftRef, POLYGON_TOOL_SETTINGS);
