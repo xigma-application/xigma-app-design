@@ -145,3 +145,41 @@ test('dragging along curved text selects a range that typing then replaces', asy
   const withBye = await designPage.canvas.screenshot();
   expect(withBye.equals(withHi)).toBe(false);
 });
+
+test('clicking a point on a rotated text-on-path circle places the caret there, following the rotation', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  // a 200x200 circle centered at (400,400); "Hi" starts at the rightmost point (500,400). Once
+  // rotated 180 degrees around that same center, the rendered "H" now sits at the leftmost point
+  // (300,400) instead — the opposite side of where it started
+  await designPage.goto('e2e-test-rotated-path-caret-mid');
+  await designPage.drawTextOnPath(300, 300, 500, 500);
+  await designPage.typeText('Hi');
+  await designPage.click(900, 600); // commit
+
+  await designPage.click(500, 400); // select it, on the rendered "H"
+  await designPage.pointerDown(290, 290); // rotate ring just outside the "nw" handle
+  await designPage.pointerMove(510, 510); // the reflection of (290,290) through the circle's own center -> exactly 180 degrees
+  await designPage.pointerUp();
+
+  await designPage.doubleClick(400, 400); // re-enter editing at the circle's own (rotation-invariant) center
+  await designPage.click(300, 400); // the "H" boundary, now on the opposite side after rotating
+  await designPage.typeText('X');
+  await designPage.click(900, 600); // commit
+  const rotatedInsertion = await designPage.canvas.screenshot();
+
+  // same circle/content, but never rotated — the same screen point (300,400) now sits nowhere
+  // near the content (the far side of the circle), so the caret hit-test clamps to the end instead
+  await designPage.goto('e2e-test-rotated-path-caret-reference');
+  await designPage.drawTextOnPath(300, 300, 500, 500);
+  await designPage.typeText('Hi');
+  await designPage.click(900, 600);
+
+  await designPage.doubleClick(500, 400);
+  await designPage.click(300, 400);
+  await designPage.typeText('X');
+  await designPage.click(900, 600);
+  const unrotatedInsertion = await designPage.canvas.screenshot();
+
+  expect(rotatedInsertion.equals(unrotatedInsertion)).toBe(false);
+});

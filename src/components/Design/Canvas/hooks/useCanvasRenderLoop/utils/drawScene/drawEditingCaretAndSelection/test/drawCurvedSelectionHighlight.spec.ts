@@ -66,4 +66,44 @@ describe('drawCurvedSelectionHighlight', () => {
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
   });
+
+  it("should follow the path's own rotation instead of always drawing as if unrotated", () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCurvedSelectionHighlight(gl, program, buffer, PATH_BOX, 'hi', 0, 2, 100, 100, IDENTITY_VIEWPORT);
+
+    const [unrotatedCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+
+    (gl.bufferData as ReturnType<typeof vi.fn>).mockClear();
+    drawCurvedSelectionHighlight(gl, program, buffer, { ...PATH_BOX, rotation: 180 }, 'hi', 0, 2, 100, 100, IDENTITY_VIEWPORT);
+
+    const [rotatedCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+
+    // result
+    expect(rotatedCall[1]).not.toEqual(unrotatedCall[1]);
+  });
+
+  it("should follow the path's own horizontal flip instead of always drawing as if unflipped", () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCurvedSelectionHighlight(gl, program, buffer, PATH_BOX, 'hi', 0, 2, 100, 100, IDENTITY_VIEWPORT);
+
+    const [unflippedCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+
+    (gl.bufferData as ReturnType<typeof vi.fn>).mockClear();
+    drawCurvedSelectionHighlight(gl, program, buffer, { ...PATH_BOX, flipX: true }, 'hi', 0, 2, 100, 100, IDENTITY_VIEWPORT);
+
+    const [flippedCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+
+    // result
+    expect(flippedCall[1]).not.toEqual(unflippedCall[1]);
+  });
 });

@@ -4,10 +4,12 @@ import { TGlyphAtlasJson } from 'types/msdf';
 
 // utils
 import { buildEllipseArcLengthTable } from '../shapes/buildEllipseArcLengthTable';
+import { flipTextPoint } from './flipTextPoint';
 import { getCurvedGlyphBoundaries } from './getCurvedGlyphBoundaries';
 import { getEllipseCircumference } from '../shapes/getEllipseCircumference';
 import { getFittedPathFontSize } from './getFittedPathFontSize';
 import { getNearestEllipsePathOffset } from '../shapes/getNearestEllipsePathOffset/getNearestEllipsePathOffset';
+import { rotatePoint } from 'utils/math/rotatePoint';
 
 export type TCurvedCaretHit = {
   distance: number;
@@ -34,7 +36,10 @@ export const getCurvedCaretIndexAtPoint = (
   );
   const minBoundary = Math.min(boundaries[0], boundaries[boundaries.length - 1]);
   const maxBoundary = Math.max(boundaries[0], boundaries[boundaries.length - 1]);
-  const nearest = getNearestEllipsePathOffset(point, box, table);
+  const center: TPoint = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  const unrotated = rotatePoint(point, center, -box.rotation);
+  const localPoint = flipTextPoint(unrotated, box);
+  const nearest = getNearestEllipsePathOffset(localPoint, { ...box, rotation: 0 }, table);
   const rawLength = nearest.offset * circumference;
 
   const distanceToRange = (length: number): number => (length < minBoundary ? minBoundary - length : Math.max(length - maxBoundary, 0));

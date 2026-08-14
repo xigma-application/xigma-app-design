@@ -11,6 +11,7 @@ import { TViewport } from 'types/design/types';
 import { buildEllipseArcLengthTable } from 'utils/canvas/shapes/buildEllipseArcLengthTable';
 import { drawRect } from 'utils/canvas/drawRect';
 import { getCurvedSelectionRects } from 'utils/canvas/text/getCurvedSelectionRects';
+import { transformCurvedPoint } from './transformCurvedPoint';
 
 export const drawCurvedSelectionHighlight = (
   gl: WebGL2RenderingContext,
@@ -27,7 +28,7 @@ export const drawCurvedSelectionHighlight = (
   const center: TPoint = { x: editingTextBox.x + editingTextBox.width / 2, y: editingTextBox.y + editingTextBox.height / 2 };
   const lineHeight = (MSDF_ATLAS_JSON.common.lineHeight * TEXT_FONT_SIZE) / MSDF_ATLAS_JSON.info.size;
   const table = buildEllipseArcLengthTable(editingTextBox.width, editingTextBox.height);
-  const rects = getCurvedSelectionRects(
+  const localRects = getCurvedSelectionRects(
     MSDF_ATLAS_JSON,
     editingTextContent,
     TEXT_FONT_SIZE,
@@ -42,24 +43,26 @@ export const drawCurvedSelectionHighlight = (
     selectionEnd,
   );
 
-  rects.forEach((rect) => {
-    drawRect(
-      gl,
-      program,
-      buffer,
-      {
-        fill: DRAFT_FRAME_STROKE,
-        fillAlpha: TEXT_SELECTION_FILL_ALPHA,
-        height: rect.height,
-        width: rect.width,
-        x: rect.x - rect.width / 2,
-        y: rect.y - rect.height / 2,
-      },
-      canvasWidth,
-      canvasHeight,
-      viewport,
-      rect.angleDegrees,
-      rect,
-    );
-  });
+  localRects
+    .map((rect) => transformCurvedPoint(rect, editingTextBox))
+    .forEach((rect) => {
+      drawRect(
+        gl,
+        program,
+        buffer,
+        {
+          fill: DRAFT_FRAME_STROKE,
+          fillAlpha: TEXT_SELECTION_FILL_ALPHA,
+          height: rect.height,
+          width: rect.width,
+          x: rect.x - rect.width / 2,
+          y: rect.y - rect.height / 2,
+        },
+        canvasWidth,
+        canvasHeight,
+        viewport,
+        rect.angleDegrees,
+        rect,
+      );
+    });
 };

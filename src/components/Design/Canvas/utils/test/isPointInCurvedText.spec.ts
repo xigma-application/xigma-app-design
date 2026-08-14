@@ -49,4 +49,22 @@ describe('isPointInCurvedText', () => {
     // result
     expect(isPointInCurvedText({ x: 0, y: 100 }, node, 5)).toBe(false);
   });
+
+  it('should follow the content to its rotated position when the node is rotated 180 degrees', () => {
+    // mock — rotating 180 degrees around the circle's own center moves the start from the
+    const node = buildNode({ rotation: 180 });
+
+    // result
+    expect(isPointInCurvedText({ x: 0, y: 100 }, node, 5)).toBe(true);
+    expect(isPointInCurvedText({ x: 200, y: 100 }, node, 5)).toBe(false);
+  });
+
+  it('should follow the content to its mirrored position when the node is flipped horizontally', () => {
+    // mock — flipping across the box's own vertical center line also moves the start from the
+    const node = buildNode({ flipX: true });
+
+    // result
+    expect(isPointInCurvedText({ x: 0, y: 100 }, node, 5)).toBe(true);
+    expect(isPointInCurvedText({ x: 200, y: 100 }, node, 5)).toBe(false);
+  });
 });

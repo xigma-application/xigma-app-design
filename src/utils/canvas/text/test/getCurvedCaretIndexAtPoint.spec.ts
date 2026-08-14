@@ -14,9 +14,9 @@ const ATLAS: TGlyphAtlasJson = {
   pages: ['atlas.png'],
 };
 
-// a 200x200 circle centered at (100, 100) — its rightmost point is offset 0, its bottom is offset 0.25
 const BOX: TEditingTextBox = { flipX: false, flipY: false, height: 200, rotation: 0, width: 200, x: 0, y: 0 };
 const RIGHT = { x: 200, y: 100 };
+const LEFT = { x: 0, y: 100 };
 const BOTTOM = { x: 100, y: 200 };
 
 describe('getCurvedCaretIndexAtPoint', () => {
@@ -69,5 +69,25 @@ describe('getCurvedCaretIndexAtPoint', () => {
       distance: expect.closeTo(0, 5),
       index: 1,
     });
+  });
+
+  it('should follow the content to its rotated position when the box is rotated 180 degrees', () => {
+    // before — 180 degrees around the circle's own center moves the start from the rightmost
+    const atLeft = getCurvedCaretIndexAtPoint(ATLAS, 'AAAAAAAA', 20, { ...BOX, rotation: 180 }, LEFT);
+    const atRight = getCurvedCaretIndexAtPoint(ATLAS, 'AAAAAAAA', 20, { ...BOX, rotation: 180 }, RIGHT);
+
+    // result
+    expect(atLeft).toEqual({ distance: expect.closeTo(0, 5), index: 0 });
+    expect(atRight.distance).toBeGreaterThan(50);
+  });
+
+  it('should follow the content to its mirrored position when the box is flipped horizontally', () => {
+    // before — flipping across the box's own vertical center line also moves the start from the
+    const atLeft = getCurvedCaretIndexAtPoint(ATLAS, 'AAAAAAAA', 20, { ...BOX, flipX: true }, LEFT);
+    const atRight = getCurvedCaretIndexAtPoint(ATLAS, 'AAAAAAAA', 20, { ...BOX, flipX: true }, RIGHT);
+
+    // result
+    expect(atLeft).toEqual({ distance: expect.closeTo(0, 5), index: 0 });
+    expect(atRight.distance).toBeGreaterThan(50);
   });
 });

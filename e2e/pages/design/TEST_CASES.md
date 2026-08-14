@@ -604,6 +604,7 @@ box, never a separate node lookup.
 | 78  | Dragging the blue start-offset handle moves where the text begins along the path                                                                                                                                                                       |  ✅  |             —             |
 | 84  | Clicking a point along curved text (re-entered via double-click) places the caret at the nearest character index on the curve, so a typed character inserts there instead of always landing at the end                                                 |  ✅  | ✅ `text-on-path.spec.ts` |
 | 85  | Dragging along the curve from one character to another selects that range; typing replaces the selection instead of inserting alongside it                                                                                                             |  ✅  | ✅ `text-on-path.spec.ts` |
+| 87  | Clicking a point on a rotated (or flipped) path-text circle places the caret at its actual rotated/flipped screen position, not the position it would occupy at rotation 0                                                                             |  ✅  | ✅ `text-on-path.spec.ts` |
 
 #77/#78 stay unit-only: `getFittedPathFontSize.spec.ts` and `continuePathOffsetDrag.spec.ts` already
 assert the exact resulting font size / offset value via direct function calls and
@@ -630,6 +631,32 @@ screenshot-based scenario here): #84 compares two independently-drawn pages wher
 difference is which point on the curve was clicked before typing the same character, and #85
 compares the pre-edit "Hi" render against the post-drag-select-and-retype render, so any pixel
 difference can only come from the caret/selection actually landing where the interaction implies.
+
+#87 was a real, reported regression found right after #84/#85 shipped: `getCurvedCaretIndexAtPoint.ts`
+and `isPointInCurvedText.ts` already unrotated the query point via `getNearestEllipsePathOffset`'s
+own `rotation` handling, so a rotated path's hit-testing happened to already be correct — but neither
+util accounted for the box's own `flipX`/`flipY` (mirroring the query point back before running the
+curve math, the same `flipTextPoint` step `getStraightCaretIndexAtPoint.ts` already does for straight
+text), so a _flipped_ path-text node's clicks were silently wrong. Separately, and worse: the
+_rendered_ caret/selection-highlight during an active edit session (`drawCurvedCaret.ts`,
+`drawCurvedSelectionHighlight.ts`, via `getCurvedCaretPoint.ts`/`getCurvedSelectionRects.ts`) never
+took `rotation` **or** `flipX`/`flipY` into account at all — it always computed the caret's local,
+unrotated/unflipped position on the ellipse and drew it there directly, so a rotated or flipped
+path-text node's caret/highlight rendered as if `rotation: 0` regardless of the click landing on the
+correct character underneath. Fixed with a new shared `transformCurvedPoint.ts` (mirroring the
+already-established `flipTextPoint`-then-`rotatePoint` order used everywhere else in this codebase
+for rotated/flipped hit-testing and rendering) applied to both the caret point and every selection
+rect before they're drawn. The unit suite (`transformCurvedPoint.spec.ts`,
+`getCurvedCaretIndexAtPoint.spec.ts`, `isPointInCurvedText.spec.ts`, `drawCurvedCaret.spec.ts`,
+`drawCurvedSelectionHighlight.spec.ts`) pins the exact position/angle math and proves each rendered
+buffer actually changes for a rotated/flipped box, but #87's e2e version is the same
+"real screen coordinates against real rendered glyphs" category as #84/#85: it rotates a real
+path-text node exactly 180 degrees (dragging the rotate ring to the reflection of the arm point
+through the node's own center, guaranteeing the delta precisely, same trick `edit-text.spec.ts`'s
+equivalent straight-text scenario uses), clicks the screen point where "H" now actually renders, and
+compares against clicking that identical screen point on an unrotated reference — any pixel
+difference can only come from the caret genuinely landing on the rotated content, not the pre-fix
+rotation-0 assumption.
 
 ## Text on Path outline visibility (hidden / hover / selected)
 

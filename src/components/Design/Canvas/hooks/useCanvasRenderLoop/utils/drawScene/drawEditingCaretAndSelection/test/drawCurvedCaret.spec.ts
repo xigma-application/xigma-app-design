@@ -73,4 +73,44 @@ describe('drawCurvedCaret', () => {
     // result
     expect(secondCall[1]).not.toEqual(firstCall[1]);
   });
+
+  it("should follow the path's own rotation instead of always drawing as if unrotated", () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCurvedCaret(gl, program, buffer, PATH_BOX, 'hi', 0, 100, 100, IDENTITY_VIEWPORT);
+
+    const [unrotatedCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+
+    (gl.bufferData as ReturnType<typeof vi.fn>).mockClear();
+    drawCurvedCaret(gl, program, buffer, { ...PATH_BOX, rotation: 180 }, 'hi', 0, 100, 100, IDENTITY_VIEWPORT);
+
+    const [rotatedCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+
+    // result
+    expect(rotatedCall[1]).not.toEqual(unrotatedCall[1]);
+  });
+
+  it("should follow the path's own horizontal flip instead of always drawing as if unflipped", () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCurvedCaret(gl, program, buffer, PATH_BOX, 'hi', 0, 100, 100, IDENTITY_VIEWPORT);
+
+    const [unflippedCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+
+    (gl.bufferData as ReturnType<typeof vi.fn>).mockClear();
+    drawCurvedCaret(gl, program, buffer, { ...PATH_BOX, flipX: true }, 'hi', 0, 100, 100, IDENTITY_VIEWPORT);
+
+    const [flippedCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+
+    // result
+    expect(flippedCall[1]).not.toEqual(unflippedCall[1]);
+  });
 });
