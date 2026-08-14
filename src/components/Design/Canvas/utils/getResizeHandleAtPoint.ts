@@ -9,18 +9,8 @@ import { TSceneNode, TViewport } from 'types/design/types';
 // utils
 import { getNodeBounds } from './getNodeBounds';
 import { getSelectionBounds } from './getSelectionBounds';
+import { getUnrotatedQueryPoint } from './getUnrotatedQueryPoint';
 import { isGroupSelection } from './isGroupSelection';
-import { rotatePoint } from 'utils/math/rotatePoint';
-
-const getUnrotatedQueryPoint = (point: TPoint, bounds: TDraftRect, rotation: number): TPoint => {
-  if (rotation === 0) {
-    return point;
-  }
-
-  const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
-
-  return rotatePoint(point, center, -rotation);
-};
 
 const getHandleAtBounds = (point: TPoint, bounds: TDraftRect, viewport: TViewport): TResizeHandle | null => {
   const { height, width, x, y } = bounds;

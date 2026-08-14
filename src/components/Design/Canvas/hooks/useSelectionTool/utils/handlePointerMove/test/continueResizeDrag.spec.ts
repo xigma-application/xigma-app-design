@@ -6,10 +6,12 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TFrameNode } from 'types/design/types';
 import { TResizeDragState } from '../../../types';
 
 // utils
 import { continueResizeDrag } from '../continueResizeDrag';
+import { rotatePoint } from 'utils/math/rotatePoint';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -266,15 +268,18 @@ describe('continueResizeDrag', () => {
     expect(store.getState().design.nodes[idMedia]).toMatchObject({ flipX: true });
   });
 
-  it("should grow a rotated node along its own local axes, not the group's world axes, on an anisotropic resize", () => {
+  it("should grow a rotated GROUP MEMBER along its own local axes, not the group's world axes, on an anisotropic resize", () => {
     // mock — a 90deg-rotated node's local x-axis lies along the world y-axis and vice versa, so a
-    const idA = addFrameNode(0, 0, 100, 50, null, 90);
+    const idA = addFrameNode(0, 0, 100, 50, 'parent-1', 90);
     const canvas = createCanvas();
     const resizeDragRef = createResizeDragRef({
       aspectRatio: 1,
       bounds: { height: 100, width: 100, x: 0, y: 0 },
       handle: 'e',
-      nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 90, width: 100, x: 0, y: 0 } },
+      nodeOrigins: {
+        [idA]: { flip: null, height: 50, rotation: 90, width: 100, x: 0, y: 0 },
+        'sibling-1': { flip: null, height: 50, rotation: 0, width: 50, x: 50, y: 50 },
+      },
     });
 
     // before — east edge dragged from x=100 to x=200 (world), anchored at x=0: scaleX=2, scaleY=1
@@ -286,19 +291,23 @@ describe('continueResizeDrag', () => {
 
   it('should smoothly blend both axis scales for a non-axis-aligned rotation, keeping a true (unsheared) rectangle', () => {
     // mock — same horizontal-only group resize (scaleX 2, scaleY 1), but at 30deg neither local axis
-    const idA = addFrameNode(0, 0, 100, 50, null, 30);
+    const idA = addFrameNode(0, 0, 100, 50, 'parent-1', 30);
     const canvas = createCanvas();
     const resizeDragRef = createResizeDragRef({
       aspectRatio: 1,
       bounds: { height: 100, width: 100, x: 0, y: 0 },
       handle: 'e',
-      nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 30, width: 100, x: 0, y: 0 } },
+      nodeOrigins: {
+        [idA]: { flip: null, height: 50, rotation: 30, width: 100, x: 0, y: 0 },
+        'sibling-1': { flip: null, height: 50, rotation: 0, width: 50, x: 50, y: 50 },
+      },
     });
 
     // before
     continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef);
 
     // result — width = 100·√((2·cos30)²+sin30²) ≈ 180.28, height = 50·√((2·sin30)²+cos30²) ≈ 66.14,
+    // both between the pure scaleX=2 and scaleY=1 cases (never sheared into a non-rectangle)
     const node = store.getState().design.nodes[idA];
 
     expect(node).toMatchObject({ rotation: 30 });
@@ -306,5 +315,93 @@ describe('continueResizeDrag', () => {
     expect((node as { width: number }).width).toBeCloseTo(180.278, 2);
     expect((node as { x: number }).x).toBeCloseTo(9.861, 2);
     expect((node as { y: number }).y).toBeCloseTo(-8.072, 2);
+  });
+
+  it('should resize a single, lone-selected rotated node by rotating the pointer back into its own local frame', () => {
+    // mock — a single 90deg-rotated node's own bounds ARE its local, unrotated frame (unlike a
+    const idA = addFrameNode(0, 0, 100, 50, null, 90);
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 1,
+      bounds: { height: 50, width: 100, x: 0, y: 0 },
+      handle: 'e',
+      nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 90, width: 100, x: 0, y: 0 } },
+    });
+
+    // before
+    continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef);
+
+    // result — local height untouched, local width grown ×5.25 (the raw world-space drag distance,
+    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 50, rotation: 90, width: 525, x: -212.5, y: 212.5 });
+  });
+
+  it('should keep the anchor edge fixed in WORLD space when resizing a single rotated node, not just at the same local coordinate', () => {
+    // mock — the "e" handle anchors the west edge; a 90deg rotation means that edge's world position
+    const idA = addFrameNode(0, 0, 100, 50, null, 90);
+    const canvas = createCanvas();
+    const bounds = { height: 50, width: 100, x: 0, y: 0 };
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 1,
+      bounds,
+      handle: 'e',
+      nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 90, width: 100, x: 0, y: 0 } },
+    });
+    const oldCenter = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+    const anchorWorldBefore = rotatePoint({ x: bounds.x, y: oldCenter.y }, oldCenter, 90);
+
+    // before
+    continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef);
+
+    // result
+    const node = store.getState().design.nodes[idA] as TFrameNode;
+    const newCenter = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
+    const anchorWorldAfter = rotatePoint({ x: node.x, y: newCenter.y }, newCenter, 90);
+
+    expect(anchorWorldAfter.x).toBeCloseTo(anchorWorldBefore.x);
+    expect(anchorWorldAfter.y).toBeCloseTo(anchorWorldBefore.y);
+  });
+
+  it('should keep the anchor CORNER fixed in world space for a "min"-side handle (e.g. "nw") too, at a non-right-angle rotation', () => {
+    // mock — the "e" tests above only ever anchor a "max"-side axis; "nw" anchors its opposite (se)
+    const idA = addFrameNode(0, 0, 100, 50, null, 45);
+    const canvas = createCanvas();
+    const bounds = { height: 50, width: 100, x: 0, y: 0 };
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 2,
+      bounds,
+      handle: 'nw',
+      nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 45, width: 100, x: 0, y: 0 } },
+    });
+    const oldCenter = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+    const anchorWorldBefore = rotatePoint({ x: bounds.x + bounds.width, y: bounds.y + bounds.height }, oldCenter, 45);
+
+    // before — drag the nw handle further up and to the left
+    continueResizeDrag(canvas, pointerEvent(-80, -60), store.dispatch, resizeDragRef);
+
+    // result
+    const node = store.getState().design.nodes[idA] as TFrameNode;
+    const newCenter = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
+    const anchorWorldAfter = rotatePoint({ x: node.x + node.width, y: node.y + node.height }, newCenter, 45);
+
+    expect(anchorWorldAfter.x).toBeCloseTo(anchorWorldBefore.x);
+    expect(anchorWorldAfter.y).toBeCloseTo(anchorWorldBefore.y);
+  });
+
+  it('should leave a single unrotated node exactly as before (no behavior change from the local-frame fix)', () => {
+    // mock
+    const idA = addFrameNode(0, 0, 100, 50);
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 2,
+      bounds: { height: 50, width: 100, x: 0, y: 0 },
+      handle: 'se',
+      nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 0, width: 100, x: 0, y: 0 } },
+    });
+
+    // before
+    continueResizeDrag(canvas, pointerEvent(150, 80), store.dispatch, resizeDragRef);
+
+    // result — identical to the very first "resize a single node from a corner handle" test above
+    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 80, width: 150, x: 0, y: 0 });
   });
 });

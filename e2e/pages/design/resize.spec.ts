@@ -203,6 +203,31 @@ test('resizing a polygon past its anchor renders the shape mirrored, not just re
   expect(flipped.equals(reference)).toBe(false);
 });
 
+test('resizing a rotated single node via an edge handle scales along its own local axis, not the raw screen axis', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-resize-rotated-local-axis');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(300, 300, 400, 400); // 100x100 square, center (350, 350)
+  await designPage.click(350, 350);
+
+  await designPage.pointerDown(290, 290);
+  await designPage.pointerMove(410, 290);
+  await designPage.pointerUp();
+
+  expect(await waitForResizeCursor(designPage, 350, 400)).not.toBe('');
+
+  await designPage.pointerDown(350, 400);
+  await designPage.pointerMove(350, 450);
+  await designPage.pointerUp();
+
+  expect(await waitForResizeCursor(designPage, 350, 300)).not.toBe('');
+
+  await designPage.pointerMove(900, 900); // clear lingering cursor state
+  expect(await waitForResizeCursor(designPage, 350, 450)).not.toBe('');
+});
+
 test('resizing a star past its anchor renders the shape mirrored, not just repositioned', async ({ page }) => {
   const designPage = new DesignPage(page);
 
