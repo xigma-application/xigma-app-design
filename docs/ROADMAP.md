@@ -317,6 +317,49 @@ comment / shapes, potem osobno: draw / scale / actions / dev mode).
 - [x] **Text** — tworzenie node'a łączone od razu z edycją treści (jedyne narzędzie, które **nie**
       dispatchuje `addNode` od razu po puszczeniu myszy jak reszta) — pełny opis flow i renderingu
       w Etapie 7 niżej
+- [x] **Text on Path** — tekst układany wzdłuż krzywej zamiast zwykłego prostokątnego boxa. Własny
+      hook (`useDrawTextOnPathTool.ts`, `ToolName.textOnPath`) rysuje elipsę (`PathType.ellipse`)
+      tym samym gestem drag co Ellipse, po puszczeniu myszy dispatchuje `addNode` dla samej ścieżki
+      i od razu wchodzi w edycję tekstu (`startTextEdit`) z `pathId` wskazującym na nowo utworzony
+      węzeł — bez czekania na osobny klik, tak samo jak zwykły Text tool. Layout liter wzdłuż łuku
+      liczony jest z tabeli długości łuku elipsy (`buildEllipseArcLengthTable.ts`,
+      `getEllipsePathSample.ts`), nie z prostej interpolacji kąta, żeby odstępy między literami
+      zostawały wizualnie równe niezależnie od proporcji elipsy. Punkt startowy tekstu na krzywej
+      (`pathStartOffset`, ułamek 0–1 obwodu) przesuwany jest osobnym **uchwytem offsetu**
+      (`drawPathTextOffsetHandle.ts`) — przeciąganie przelicza najbliższy punkt na łuku pod
+      kursorem (`getNearestPathOffsetAtPoint.ts`). `flipX`/`flipY` (mirror) i `pathFlip` (kierunek
+      czytania wzdłuż krzywej) respektowane osobno w geometrii glifów (`flipTextPoint.ts`) i w
+      pozycji samego uchwytu, żeby przeciąganie na zmirrorowanym tekście trafiało w jego
+      rzeczywistą, nieodbitą pozycję. Obrys samej ścieżki (elipsy) jest ukryty domyślnie
+      (`getPathOutlineStyles.ts`) i pokazuje się dopiero przy hover/selekcji/edycji —
+      **przerywaną** kreską (`drawDashedEllipseOutline.ts`) podczas aktywnego rysowania/edycji,
+      **ciągłą** po samym zaznaczeniu bez edycji — żeby stan "w trakcie pracy" był wizualnie
+      odróżnialny od "gotowe, tylko zaznaczone".
+
+      **Poprawka (po zgłoszeniu, że uchwyt offsetu nie reaguje od razu po narysowaniu)**: po
+      puszczeniu myszy `useDrawTextOnPathTool.ts` wchodzi w edycję tekstu **bez `id`** — węzeł
+      tekstowy nie istnieje jeszcze w Reduxie, bo Text (i Text on Path) commituje się dopiero na
+      `blur` (Etap 7), nie od razu jak reszta narzędzi. Trzy miejsca liczące pozycję/hit-test
+      uchwytu offsetu opierały się jednak wyłącznie na **zacommitowanym** node'ie: `drawScene.ts`
+      rysował uchwyt tylko dla node'a znalezionego w `nodesById`, a `useHoverHighlight.ts` i
+      `useCurvedCaretEditing.ts` hit-testowały tylko `selectedNodes` — w efekcie podczas
+      pierwszego rysowania uchwyt był niewidoczny, kursor przy najechaniu się nie zmieniał, a
+      kliknięcie/przeciągnięcie w ogóle nie łapało uchwytu, mimo że dokładnie ten sam gest
+      działał już poprawnie dla wcześniej zapisanego tekstu na ścieżce. Naprawione przestawieniem
+      wszystkich trzech miejsc na **`editingTextBox`** (stan aktywnej edycji w Reduxie, istnieje
+      od razu, niezależnie od tego czy węzeł już jest zacommitowany) jako jedyne źródło prawdy
+      podczas edycji — `getPathTextHandlePoint.ts` już wcześniej przyjmował ten typ zamiennie z
+      prawdziwym node'em, więc rysowanie/hit-test/drag przestawiły się bez zmiany matematyki,
+      tylko zmieniając *skąd* biorą dane. Przeciąganie w trakcie tworzenia aktualizuje
+      `editingTextBox.pathStartOffset` bezpośrednio (`updateEditingTextBoxPathStartOffset`, nowy
+      reducer) i dopiero komit zapisuje tę wartość na właściwym node'ie; gdy węzeł już istnieje
+      (ponowna edycja zapisanego tekstu), przeciąganie nadal aktualizuje też node'a na żywo, jak
+      wcześniej. Przy okazji: `useCurvedCaretEditing.ts` (hit-test kliknięcia w tekst na krzywej)
+      rozbity na osobne pliki per handler pointerowy (`utils/handlePointerDown/`,
+      `utils/handlePointerMove/`, `utils/handlePointerUp/`), analogicznie do istniejącej
+      struktury `useSelectionTool`. Zweryfikowane e2e (Playwright): narysowanie ścieżki,
+      wpisanie tekstu i przeciągnięcie uchwytu offsetu w tej samej, nieprzerwanej sesji edycji —
+      bez klikania gdziekolwiek indziej po drodze
 - [ ] Pen / vector (najbardziej złożony, na później)
 
 ## Etap 7 — Edycja tekstu (DOM overlay) + rendering tekstu w WebGL
