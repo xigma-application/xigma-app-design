@@ -30,8 +30,13 @@ export const continueDrag = (
     Object.entries(dragState.nodeOrigins).forEach(([id, origin]) => {
       const changes: TSceneNodeChanges =
         'x1' in origin
-          ? { x1: origin.x1 + deltaX, x2: origin.x2 + deltaX, y1: origin.y1 + deltaY, y2: origin.y2 + deltaY }
-          : { x: origin.x + deltaX, y: origin.y + deltaY };
+          ? {
+              x1: Math.round(origin.x1 + deltaX),
+              x2: Math.round(origin.x2 + deltaX),
+              y1: Math.round(origin.y1 + deltaY),
+              y2: Math.round(origin.y2 + deltaY),
+            }
+          : { x: Math.round(origin.x + deltaX), y: Math.round(origin.y + deltaY) };
 
       dispatch(updateNode({ changes, id }));
     });

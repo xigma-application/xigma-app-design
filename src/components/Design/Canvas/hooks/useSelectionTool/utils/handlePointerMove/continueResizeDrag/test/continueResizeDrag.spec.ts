@@ -349,13 +349,8 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef);
 
     // result — width = 100·√((2·cos30)²+sin30²) ≈ 180.28, height = 50·√((2·sin30)²+cos30²) ≈ 66.14,
-    const node = store.getState().design.nodes[idA];
-
-    expect(node).toMatchObject({ rotation: 30 });
-    expect((node as { height: number }).height).toBeCloseTo(66.144, 2);
-    expect((node as { width: number }).width).toBeCloseTo(180.278, 2);
-    expect((node as { x: number }).x).toBeCloseTo(9.861, 2);
-    expect((node as { y: number }).y).toBeCloseTo(-8.072, 2);
+    // rounded to whole pixels on dispatch
+    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 66, rotation: 30, width: 180, x: 10, y: -8 });
   });
 
   it('should resize a single, lone-selected rotated node by rotating the pointer back into its own local frame', () => {
@@ -373,7 +368,8 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef);
 
     // result — local height untouched, local width grown ×5.25 (the raw world-space drag distance,
-    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 50, rotation: 90, width: 525, x: -212.5, y: 212.5 });
+    // rounded to whole pixels on dispatch)
+    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 50, rotation: 90, width: 525, x: -212, y: 213 });
   });
 
   it('should keep the anchor edge fixed in WORLD space when resizing a single rotated node, not just at the same local coordinate', () => {
@@ -398,8 +394,10 @@ describe('continueResizeDrag', () => {
     const newCenter = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
     const anchorWorldAfter = rotatePoint({ x: node.x, y: newCenter.y }, newCenter, 90);
 
-    expect(anchorWorldAfter.x).toBeCloseTo(anchorWorldBefore.x);
-    expect(anchorWorldAfter.y).toBeCloseTo(anchorWorldBefore.y);
+    // rounding x/y/width/height to whole pixels means the anchor is only APPROXIMATELY fixed now,
+    // within the rounding error, not pixel-perfectly exact
+    expect(Math.abs(anchorWorldAfter.x - anchorWorldBefore.x)).toBeLessThan(1);
+    expect(Math.abs(anchorWorldAfter.y - anchorWorldBefore.y)).toBeLessThan(1);
   });
 
   it('should keep the anchor CORNER fixed in world space for a "min"-side handle (e.g. "nw") too, at a non-right-angle rotation', () => {
@@ -424,8 +422,8 @@ describe('continueResizeDrag', () => {
     const newCenter = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
     const anchorWorldAfter = rotatePoint({ x: node.x + node.width, y: node.y + node.height }, newCenter, 45);
 
-    expect(anchorWorldAfter.x).toBeCloseTo(anchorWorldBefore.x);
-    expect(anchorWorldAfter.y).toBeCloseTo(anchorWorldBefore.y);
+    expect(Math.abs(anchorWorldAfter.x - anchorWorldBefore.x)).toBeLessThan(1);
+    expect(Math.abs(anchorWorldAfter.y - anchorWorldBefore.y)).toBeLessThan(1);
   });
 
   it('should mirror a single rotated node when the drag crosses the anchor, instead of collapsing back to the original box', () => {

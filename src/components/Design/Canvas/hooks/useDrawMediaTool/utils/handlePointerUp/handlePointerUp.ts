@@ -18,6 +18,7 @@ import { TPoint } from 'types/canvas';
 import { armNextFile } from '../armNextFile';
 import { getAspectRatioLockedRect } from 'utils/math/getAspectRatioLockedRect';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { roundRect } from 'utils/math/roundRect';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 
 export const handlePointerUp = (
@@ -38,8 +39,8 @@ export const handlePointerUp = (
     const current = screenToWorld(getPointerPosition(canvas, event), selectViewport(appStore.getState()));
     const isClick = Math.abs(current.x - startRef.current.x) < MIN_SHAPE_SIZE && Math.abs(current.y - startRef.current.y) < MIN_SHAPE_SIZE;
     const rect = isClick
-      ? { height: armed.naturalHeight, width: armed.naturalWidth, x: startRef.current.x, y: startRef.current.y }
-      : getAspectRatioLockedRect(startRef.current, current, armed.naturalWidth / armed.naturalHeight);
+      ? roundRect({ height: armed.naturalHeight, width: armed.naturalWidth, x: startRef.current.x, y: startRef.current.y })
+      : roundRect(getAspectRatioLockedRect(startRef.current, current, armed.naturalWidth / armed.naturalHeight));
 
     dispatch(addNode({ ...rect, flipX: false, flipY: false, name, parentId: null, rotation: 0, src: armed.src, type: NodeType.media }));
 

@@ -46,7 +46,14 @@ export const useDrawLineTool = (
     if (startRef.current) {
       const current = screenToWorld(getPointerPosition(canvas, event), viewport);
 
-      draftRef.current = { stroke, type: NodeType.line, x1: startRef.current.x, x2: current.x, y1: startRef.current.y, y2: current.y };
+      draftRef.current = {
+        stroke,
+        type: NodeType.line,
+        x1: Math.round(startRef.current.x),
+        x2: Math.round(current.x),
+        y1: Math.round(startRef.current.y),
+        y2: Math.round(current.y),
+      };
     }
   };
 
@@ -62,10 +69,10 @@ export const useDrawLineTool = (
             parentId: null,
             stroke,
             type: NodeType.line,
-            x1: startRef.current.x,
-            x2: current.x,
-            y1: startRef.current.y,
-            y2: current.y,
+            x1: Math.round(startRef.current.x),
+            x2: Math.round(current.x),
+            y1: Math.round(startRef.current.y),
+            y2: Math.round(current.y),
           }),
         );
       }

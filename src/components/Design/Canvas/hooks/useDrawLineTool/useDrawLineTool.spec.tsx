@@ -75,6 +75,28 @@ describe('useDrawLineTool behaviors', () => {
     expect(draftRef.current).toEqual({ stroke: CONFIG.stroke, type: NodeType.line, x1: 60, x2: 10, y1: 40, y2: 10 });
   });
 
+  it('should round fractional pointer positions to whole pixels', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(setActiveTool(CONFIG.tool));
+
+    const canvasRef = createCanvasRef();
+    const draftRef: RefObject<TDraftEntity | null> = { current: null };
+
+    // before
+    renderHook(() => useDrawLineTool(canvasRef, draftRef, CONFIG), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 60.4, 40.6));
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 10.2, 10.8));
+
+    // result
+    expect(draftRef.current).toEqual({ stroke: CONFIG.stroke, type: NodeType.line, x1: 60, x2: 10, y1: 41, y2: 11 });
+  });
+
   it('should commit a line node with the configured stroke and switch back to the default tool on pointer up', () => {
     // mock
     const store = createTestStore();

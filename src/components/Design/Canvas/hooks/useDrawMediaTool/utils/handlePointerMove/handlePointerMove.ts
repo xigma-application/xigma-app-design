@@ -13,6 +13,7 @@ import { TPoint } from 'types/canvas';
 // utils
 import { getAspectRatioLockedRect } from 'utils/math/getAspectRatioLockedRect';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { roundRect } from 'utils/math/roundRect';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 
 export const handlePointerMove = (
@@ -27,7 +28,7 @@ export const handlePointerMove = (
 
   if (armed && startRef.current) {
     const current = screenToWorld(getPointerPosition(canvas, event), selectViewport(appStore.getState()));
-    const rect = getAspectRatioLockedRect(startRef.current, current, armed.naturalWidth / armed.naturalHeight);
+    const rect = roundRect(getAspectRatioLockedRect(startRef.current, current, armed.naturalWidth / armed.naturalHeight));
 
     draftRef.current = { ...rect, src: armed.src, type: NodeType.media };
   }

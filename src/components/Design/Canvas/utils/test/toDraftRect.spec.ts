@@ -17,4 +17,12 @@ describe('toDraftRect', () => {
     // result
     expect(rect).toEqual({ height: 30, width: 50, x: 10, y: 10 });
   });
+
+  it('should round a fractional pointer position to whole pixels', () => {
+    // before
+    const rect = toDraftRect({ x: 10.2, y: 10.6 }, { x: 60.4, y: 40.5 });
+
+    // result
+    expect(rect).toEqual({ height: 30, width: 50, x: 10, y: 11 });
+  });
 });

@@ -35,7 +35,12 @@ export const continueRotateDrag = (
         const { x: x1, y: y1 } = rotatePoint({ x: origin.x1, y: origin.y1 }, pivot, deltaDegrees);
         const { x: x2, y: y2 } = rotatePoint({ x: origin.x2, y: origin.y2 }, pivot, deltaDegrees);
 
-        dispatch(updateNode({ changes: { x1, x2, y1, y2 }, id }));
+        dispatch(
+          updateNode({
+            changes: { x1: Math.round(x1), x2: Math.round(x2), y1: Math.round(y1), y2: Math.round(y2) },
+            id,
+          }),
+        );
 
         return;
       }
@@ -46,9 +51,9 @@ export const continueRotateDrag = (
       dispatch(
         updateNode({
           changes: {
-            rotation: origin.rotation + deltaDegrees,
-            x: newCenter.x - origin.width / 2,
-            y: newCenter.y - origin.height / 2,
+            rotation: Math.round((origin.rotation + deltaDegrees) * 100) / 100,
+            x: Math.round(newCenter.x - origin.width / 2),
+            y: Math.round(newCenter.y - origin.height / 2),
           },
           id,
         }),
