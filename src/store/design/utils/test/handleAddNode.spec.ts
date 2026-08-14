@@ -25,6 +25,9 @@ describe('handleAddNode', () => {
     const state: TDesignState = {
       activeTool: ToolName.default,
       editingNodeId: null,
+      editingSelectionChangedAt: 0,
+      editingSelectionEnd: 0,
+      editingSelectionStart: 0,
       editingTextBox: null,
       editingTextContent: '',
       lastMouseTool: ToolName.default,
@@ -48,6 +51,9 @@ describe('handleAddNode', () => {
     const state: TDesignState = {
       activeTool: ToolName.default,
       editingNodeId: null,
+      editingSelectionChangedAt: 0,
+      editingSelectionEnd: 0,
+      editingSelectionStart: 0,
       editingTextBox: null,
       editingTextContent: '',
       lastMouseTool: ToolName.default,

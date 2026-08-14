@@ -10,6 +10,7 @@ import { TImageRenderContext } from '../../types';
 import { TViewport } from 'types/design/types';
 
 // utils
+import { drawEditingCaretAndSelection } from './drawEditingCaretAndSelection';
 import { drawMsdfText } from 'utils/canvas/text/drawMsdfText';
 import { drawRect } from 'utils/canvas/drawRect';
 import { getMsdfAtlasTexture } from 'utils/canvas/text/getMsdfAtlasTexture';
@@ -21,6 +22,9 @@ export const drawEditingText = (
   imageContext: TImageRenderContext,
   editingTextBox: TEditingTextBox | null,
   editingTextContent: string,
+  selectionStart: number,
+  selectionEnd: number,
+  selectionChangedAt: number,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
@@ -60,6 +64,19 @@ export const drawEditingText = (
         x: editingTextBox.x,
         y: editingTextBox.y,
       },
+      canvasWidth,
+      canvasHeight,
+      viewport,
+    );
+    drawEditingCaretAndSelection(
+      gl,
+      program,
+      buffer,
+      editingTextBox,
+      editingTextContent,
+      selectionStart,
+      selectionEnd,
+      selectionChangedAt,
       canvasWidth,
       canvasHeight,
       viewport,

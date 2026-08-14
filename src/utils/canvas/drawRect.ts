@@ -21,13 +21,14 @@ export const drawRect = (
   canvasHeight: number,
   viewport: TViewport,
   rotation: number,
+  rotationCenter?: TPoint,
 ): void => {
   const positionLocation = gl.getAttribLocation(program, 'a_position');
   const colorLocation = gl.getUniformLocation(program, 'u_color');
   const viewportOffsetLocation = gl.getUniformLocation(program, 'u_viewportOffset');
   const zoomLocation = gl.getUniformLocation(program, 'u_zoom');
   const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
-  const center: TPoint = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+  const center: TPoint = rotationCenter ?? { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
 
   const { x: x1, y: y1 } = rotatePoint({ x: rect.x, y: rect.y }, center, rotation);
   const { x: x2, y: y2 } = rotatePoint({ x: rect.x + rect.width, y: rect.y }, center, rotation);

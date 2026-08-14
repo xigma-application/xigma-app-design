@@ -52,7 +52,7 @@ describe('drawEditingText', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawEditingText(gl, program, buffer, IMAGE_CONTEXT, null, 'hello', 100, 100, IDENTITY_VIEWPORT);
+    drawEditingText(gl, program, buffer, IMAGE_CONTEXT, null, 'hello', 0, 1, 0, 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -66,7 +66,7 @@ describe('drawEditingText', () => {
     const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 0, y: 0 };
 
     // before
-    drawEditingText(gl, program, buffer, IMAGE_CONTEXT, box, 'hello', 100, 100, IDENTITY_VIEWPORT);
+    drawEditingText(gl, program, buffer, IMAGE_CONTEXT, box, 'hello', 0, 1, 0, 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINE_LOOP, 0, 4);
@@ -80,7 +80,7 @@ describe('drawEditingText', () => {
     const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 0, y: 0 };
 
     // before
-    drawEditingText(gl, program, buffer, IMAGE_CONTEXT, box, 'hello', 100, 100, IDENTITY_VIEWPORT);
+    drawEditingText(gl, program, buffer, IMAGE_CONTEXT, box, 'hello', 0, 1, 0, 100, 100, IDENTITY_VIEWPORT);
 
     // result — "hello" is 5 known glyphs in the real MSDF atlas, 6 vertices each
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 30);
@@ -94,7 +94,7 @@ describe('drawEditingText', () => {
     const box = { flipX: false, flipY: false, height: 10, rotation: 90, width: 10, x: 0, y: 0 };
 
     // before
-    drawEditingText(gl, program, buffer, IMAGE_CONTEXT, box, 'hello', 100, 100, IDENTITY_VIEWPORT);
+    drawEditingText(gl, program, buffer, IMAGE_CONTEXT, box, 'hello', 0, 1, 0, 100, 100, IDENTITY_VIEWPORT);
 
     // result — a 90deg rotation around the box's own center maps its top-left corner to its top-right
     const [outlineCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;

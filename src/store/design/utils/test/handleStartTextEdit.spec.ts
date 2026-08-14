@@ -8,6 +8,9 @@ import { handleStartTextEdit } from '../handleStartTextEdit';
 const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   activeTool: ToolName.default,
   editingNodeId: null,
+  editingSelectionChangedAt: 0,
+  editingSelectionEnd: 0,
+  editingSelectionStart: 0,
   editingTextBox: null,
   editingTextContent: '',
   lastMouseTool: ToolName.default,
@@ -78,5 +81,49 @@ describe('handleStartTextEdit', () => {
     // result
     expect(state.editingNodeId).toBe('node-1');
     expect(state.editingTextContent).toBe('hello');
+  });
+
+  it('should select all existing content when editing an existing node', () => {
+    // mock
+    const state = buildState();
+
+    // before
+    handleStartTextEdit(state, {
+      box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 },
+      content: 'hello',
+      id: 'node-1',
+    });
+
+    // result
+    expect(state.editingSelectionStart).toBe(0);
+    expect(state.editingSelectionEnd).toBe(5);
+  });
+
+  it('should start with a collapsed selection when drawing a brand-new (contentless) box', () => {
+    // mock
+    const state = buildState();
+
+    // before
+    handleStartTextEdit(state, { box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 } });
+
+    // result
+    expect(state.editingSelectionStart).toBe(0);
+    expect(state.editingSelectionEnd).toBe(0);
+  });
+
+  it('should stamp when the selection was seeded, so the caret starts solid instead of mid-blink', () => {
+    // mock
+    const state = buildState({ editingSelectionChangedAt: 0 });
+
+    vi.spyOn(Date, 'now').mockReturnValue(12345);
+
+    // before
+    handleStartTextEdit(state, { box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 } });
+
+    // result
+    expect(state.editingSelectionChangedAt).toBe(12345);
+
+    // after
+    vi.restoreAllMocks();
   });
 });

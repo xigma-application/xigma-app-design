@@ -4,7 +4,7 @@ import { createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit';
 import { DEFAULT_MOUSE_TOOL, DEFAULT_SHAPE_TOOL, DEFAULT_TOOL, DEFAULT_VIEWPORT } from './constants';
 
 // types
-import { TDesignState, TStartTextEditPayload } from './types';
+import { TDesignState, TStartTextEditPayload, TTextEditSelection } from './types';
 import { ToolName } from 'types/design/enums';
 import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/design/types';
 
@@ -14,10 +14,14 @@ import { handleSetActiveTool } from './utils/handleSetActiveTool';
 import { handleStartTextEdit } from './utils/handleStartTextEdit';
 import { handleStopTextEdit } from './utils/handleStopTextEdit';
 import { handleUpdateNode } from './utils/handleUpdateNode';
+import { handleUpdateTextEditSelection } from './utils/handleUpdateTextEditSelection';
 
 const initialState: TDesignState = {
   activeTool: DEFAULT_TOOL,
   editingNodeId: null,
+  editingSelectionChangedAt: 0,
+  editingSelectionEnd: 0,
+  editingSelectionStart: 0,
   editingTextBox: null,
   editingTextContent: '',
   lastMouseTool: DEFAULT_MOUSE_TOOL,
@@ -49,10 +53,20 @@ const designSlice = createSlice({
     updateTextEditContent: (state, action: PayloadAction<string>) => {
       state.editingTextContent = action.payload;
     },
+    updateTextEditSelection: (state, action: PayloadAction<TTextEditSelection>) => handleUpdateTextEditSelection(state, action.payload),
   },
 });
 
-export const { addNode, setActiveTool, setSelection, setViewport, startTextEdit, stopTextEdit, updateNode, updateTextEditContent } =
-  designSlice.actions;
+export const {
+  addNode,
+  setActiveTool,
+  setSelection,
+  setViewport,
+  startTextEdit,
+  stopTextEdit,
+  updateNode,
+  updateTextEditContent,
+  updateTextEditSelection,
+} = designSlice.actions;
 
 export default designSlice.reducer;

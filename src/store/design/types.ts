@@ -6,6 +6,9 @@ import { TSceneNode, TViewport } from 'types/design/types';
 export type TDesignState = {
   activeTool: ToolName;
   editingNodeId: string | null;
+  editingSelectionChangedAt: number;
+  editingSelectionEnd: number;
+  editingSelectionStart: number;
   editingTextBox: TEditingTextBox | null;
   editingTextContent: string;
   lastMouseTool: ToolName;
@@ -20,4 +23,9 @@ export type TStartTextEditPayload = {
   box: TEditingTextBox;
   content?: string;
   id?: string | null;
+};
+
+export type TTextEditSelection = {
+  end: number;
+  start: number;
 };

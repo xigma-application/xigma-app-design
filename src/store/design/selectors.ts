@@ -10,6 +10,12 @@ export const selectActiveTool = (state: RootState): ToolName => state.design.act
 
 export const selectEditingNodeId = (state: RootState): string | null => state.design.editingNodeId;
 
+export const selectEditingSelectionChangedAt = (state: RootState): number => state.design.editingSelectionChangedAt;
+
+export const selectEditingSelectionEnd = (state: RootState): number => state.design.editingSelectionEnd;
+
+export const selectEditingSelectionStart = (state: RootState): number => state.design.editingSelectionStart;
+
 export const selectEditingTextBox = (state: RootState): TEditingTextBox | null => state.design.editingTextBox;
 
 export const selectEditingTextContent = (state: RootState): string => state.design.editingTextContent;

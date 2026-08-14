@@ -1,3 +1,6 @@
+// others
+import { CARET_BLINK_INTERVAL_MS } from 'constant/canvas';
+
 // store
 import { addNode, setSelection, startTextEdit, stopTextEdit } from 'store/design/slice';
 import { store } from 'store';
@@ -331,12 +334,16 @@ describe('drawScene', () => {
     const baselineCount = countFillDraws();
 
     // action
+    const dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(0);
+
     store.dispatch(startTextEdit({ box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 10, x: 0, y: 0 }, id: editingId }));
+    dateNowSpy.mockReturnValue(CARET_BLINK_INTERVAL_MS);
 
     // result — the node's own fill triangle-fan draw is suppressed while it's being text-edited
     expect(countFillDraws()).toBe(baselineCount - 1);
 
     // after
+    vi.restoreAllMocks();
     store.dispatch(stopTextEdit());
   });
 

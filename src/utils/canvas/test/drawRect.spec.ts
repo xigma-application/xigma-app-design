@@ -123,4 +123,24 @@ describe('drawRect', () => {
     expect(vertices[0]).toBeCloseTo(10);
     expect(vertices[1]).toBeCloseTo(0);
   });
+
+  it("should rotate around an explicitly given center instead of the rect's own, when one is passed", () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before — the rect's own center is (5, 5); rotating its top-right corner (10, 0) around the
+    drawRect(gl, program, buffer, { fill: '#ffffff', height: 10, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, 90, {
+      x: 0,
+      y: 0,
+    });
+
+    // result
+    const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = firstFillCall[1];
+
+    expect(vertices[2]).toBeCloseTo(0);
+    expect(vertices[3]).toBeCloseTo(10);
+  });
 });

@@ -46,7 +46,7 @@ describe('TextEditOverlay behaviors', () => {
     expect(element).toHaveFocus();
   });
 
-  it('should rotate and mirror the editable box around its own center to match a rotated, flipped node', () => {
+  it('should stay axis-aligned regardless of the node rotation/mirror — the DOM box is an invisible input surface only, not the visible representation', () => {
     // mock
     const store = createTestStore();
 
@@ -56,10 +56,11 @@ describe('TextEditOverlay behaviors', () => {
     const { container } = renderWithStore(store);
 
     // find
-    const element = container.querySelector('[contenteditable="true"]');
+    const element = container.querySelector('[contenteditable="true"]') as HTMLDivElement;
 
-    // result
-    expect(element).toHaveStyle({ transform: 'rotate(30deg) scaleX(-1) scaleY(-1)', transformOrigin: 'center' });
+    // result — canvas-drawn glyphs/caret/selection (drawEditingCaretAndSelection.ts) carry the real
+    expect(element.style.transform).toBe('');
+    expect(element.style.caretColor).toBe('transparent');
   });
 
   it('should dispatch the live typed content while editing', () => {

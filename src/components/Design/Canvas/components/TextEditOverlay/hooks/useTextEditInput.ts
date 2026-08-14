@@ -1,10 +1,11 @@
 import { InputEvent } from 'react';
 
 // store
-import { updateTextEditContent } from 'store/design/slice';
+import { updateTextEditContent, updateTextEditSelection } from 'store/design/slice';
 import { useAppDispatch } from 'store';
 
 // utils
+import { getEditableSelectionOffsets } from '../utils/getEditableSelectionOffsets';
 import { getEditableTextContent } from '../utils/getEditableTextContent';
 
 export const useTextEditInput = (): ((event: InputEvent<HTMLDivElement>) => void) => {
@@ -12,5 +13,6 @@ export const useTextEditInput = (): ((event: InputEvent<HTMLDivElement>) => void
 
   return (event: InputEvent<HTMLDivElement>): void => {
     dispatch(updateTextEditContent(getEditableTextContent(event.currentTarget)));
+    dispatch(updateTextEditSelection(getEditableSelectionOffsets(event.currentTarget)));
   };
 };

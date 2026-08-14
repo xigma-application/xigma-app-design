@@ -468,18 +468,18 @@ przeszkodą, żeby edycja pojedynczego node'a czuła się skończona, nie tylko 
       lustrzanie.
 
       **Poprawka (Etap 10, po zgłoszeniu przez użytkownika)**: pierwotne założenie "Polygon/Star są
-                      wystarczająco symetryczne" okazało się błędne — trójkąt (domyślne 3 boki) i domyślna 5-ramienna
-                      gwiazda **nie** mają symetrii odbicia względem osi poziomej (nieparzysta liczba boków/ramion),
-                      więc renderowanie zawsze tego samego, kanonicznego układu wierzchołków z `getPolygonPoints`/
-                      `getStarPoints` (niezależnego od kierunku przeciągnięcia) dawało wizualnie identyczny kształt
-                      mimo "zmirrorowanego" bboxa. Naprawione tym samym mechanizmem co Media/Text: `TPolygonNode`/
-                      `TStarNode` też dostały `flipX`/`flipY`, nowy współdzielony prymityw `utils/math/flipPoint.ts`
-                      (odbicie punktu względem środka) aplikowany jako krok **przed** rotacją w `drawPolygon.ts`/
-                      `drawStar.ts`/`drawThickPolygonOutline.ts`/`drawThickStarOutline.ts` (ten sam porządek co Text:
-                      flip, potem rotate), hit-testing (`isPointInPolygon.ts`/`isPointInStar.ts`) odwrotnie odbija
-                      punkt zapytania przed testem, tym samym trikiem co `isPointInText.ts`. Zweryfikowane manualnie:
-                      trójkąt faktycznie odwraca się z wierzchołkiem w górę na wierzchołek w dół, a gwiazda zmienia
-                      orientację ramion (nie tylko pozycję bboxa)
+                                  wystarczająco symetryczne" okazało się błędne — trójkąt (domyślne 3 boki) i domyślna 5-ramienna
+                                  gwiazda **nie** mają symetrii odbicia względem osi poziomej (nieparzysta liczba boków/ramion),
+                                  więc renderowanie zawsze tego samego, kanonicznego układu wierzchołków z `getPolygonPoints`/
+                                  `getStarPoints` (niezależnego od kierunku przeciągnięcia) dawało wizualnie identyczny kształt
+                                  mimo "zmirrorowanego" bboxa. Naprawione tym samym mechanizmem co Media/Text: `TPolygonNode`/
+                                  `TStarNode` też dostały `flipX`/`flipY`, nowy współdzielony prymityw `utils/math/flipPoint.ts`
+                                  (odbicie punktu względem środka) aplikowany jako krok **przed** rotacją w `drawPolygon.ts`/
+                                  `drawStar.ts`/`drawThickPolygonOutline.ts`/`drawThickStarOutline.ts` (ten sam porządek co Text:
+                                  flip, potem rotate), hit-testing (`isPointInPolygon.ts`/`isPointInStar.ts`) odwrotnie odbija
+                                  punkt zapytania przed testem, tym samym trikiem co `isPointInText.ts`. Zweryfikowane manualnie:
+                                  trójkąt faktycznie odwraca się z wierzchołkiem w górę na wierzchołek w dół, a gwiazda zmienia
+                                  orientację ramion (nie tylko pozycję bboxa)
 
 - [x] **rotacja** — `rotation` siedział w `TBaseNode` od Etapu 2, ale nic go nigdy nie ustawiało ani
       nie uwzględniało w renderingu/hit-testingu. Rotacja jest CPU-side post-processingiem już
@@ -495,38 +495,38 @@ przeszkodą, żeby edycja pojedynczego node'a czuła się skończona, nie tylko 
 node.rotation)` w `drawMsdfText.ts`).
 
       **Hit-testing**: zamiast dotykać `isPointInRect/Ellipse/Polygon/Star/Text`, `getNodeAtPoint.ts`
-                          raz odwrotnie obraca punkt kliknięcia wokół środka node'a przed dispatchem do niezmienionych
-                          funkcji testujących — ten sam trik co przy flipie w `isPointInText.ts`. Ta sama zasada dla
-                          uchwytów resize (`getResizeHandleAtPoint.ts`) i dla drag zaznaczonego, obróconego tekstu
-                          (`isPointInSelectedTextBounds.ts`). Marquee i wspólny bbox grupy (`getCollidedNodes.ts`,
-                          `getSelectionBounds.ts`) przeszły z surowego `getNodeBounds.ts` na nowy
-                          `getRotatedNodeBounds.ts` (axis-aligned bbox obróconych rogów) — bo dla obróconego node'a
-                          surowy bbox przestaje być jego prawdziwym, widocznym zasięgiem.
+                                      raz odwrotnie obraca punkt kliknięcia wokół środka node'a przed dispatchem do niezmienionych
+                                      funkcji testujących — ten sam trik co przy flipie w `isPointInText.ts`. Ta sama zasada dla
+                                      uchwytów resize (`getResizeHandleAtPoint.ts`) i dla drag zaznaczonego, obróconego tekstu
+                                      (`isPointInSelectedTextBounds.ts`). Marquee i wspólny bbox grupy (`getCollidedNodes.ts`,
+                                      `getSelectionBounds.ts`) przeszły z surowego `getNodeBounds.ts` na nowy
+                                      `getRotatedNodeBounds.ts` (axis-aligned bbox obróconych rogów) — bo dla obróconego node'a
+                                      surowy bbox przestaje być jego prawdziwym, widocznym zasięgiem.
 
-                          **Uchwyty resize też się obracają** — pozycja i orientacja nadążają za `rotation` pojedynczego
-                          zaznaczonego node'a (samo przeciąganie resize zostaje w world space, świadomy kompromis). Nowy
-                          uchwyt rotacji to pierścień tuż poza promieniem resize (`ROTATE_HANDLE_OUTER_RADIUS_PX`,
-                          `getRotateHandleAtPoint.ts`), jawnie wykluczający punkty wewnątrz bboxa node'a, żeby zwykły
-                          klik/drag blisko rogu nie został przechwycony przez rotację. Kursor `rotate.png` obraca się tym
-                          samym mechanizmem co `resize.png`, wydzielonym do współdzielonej fabryki
-                          `createCursorRotator.ts` (`getRotateCursorAngle.ts` liczy kąt na podstawie ćwiartki lokalnej
-                          przestrzeni node'a, skalibrowany tak, że róg "ne" nieobróconego node'a odpowiada 0°, każdy
-                          kolejny róg zgodnie z ruchem wskazówek zegara +90°). Kąt kursora nie jest liczony tylko raz przy
-                          złapaniu uchwytu — `continueRotateDrag.ts` przelicza go na każdy `pointermove`
-                          (`cursorAngle + deltaDegrees`, oba zapamiętane w `TRotateDragState` przy arm) i na bieżąco
-                          podmienia `canvas.style.cursor`, więc ikona wizualnie obraca się razem z node'em przez cały
-                          czas trwania przeciągnięcia, nie tylko na starcie i końcu.
+                                      **Uchwyty resize też się obracają** — pozycja i orientacja nadążają za `rotation` pojedynczego
+                                      zaznaczonego node'a (samo przeciąganie resize zostaje w world space, świadomy kompromis). Nowy
+                                      uchwyt rotacji to pierścień tuż poza promieniem resize (`ROTATE_HANDLE_OUTER_RADIUS_PX`,
+                                      `getRotateHandleAtPoint.ts`), jawnie wykluczający punkty wewnątrz bboxa node'a, żeby zwykły
+                                      klik/drag blisko rogu nie został przechwycony przez rotację. Kursor `rotate.png` obraca się tym
+                                      samym mechanizmem co `resize.png`, wydzielonym do współdzielonej fabryki
+                                      `createCursorRotator.ts` (`getRotateCursorAngle.ts` liczy kąt na podstawie ćwiartki lokalnej
+                                      przestrzeni node'a, skalibrowany tak, że róg "ne" nieobróconego node'a odpowiada 0°, każdy
+                                      kolejny róg zgodnie z ruchem wskazówek zegara +90°). Kąt kursora nie jest liczony tylko raz przy
+                                      złapaniu uchwytu — `continueRotateDrag.ts` przelicza go na każdy `pointermove`
+                                      (`cursorAngle + deltaDegrees`, oba zapamiętane w `TRotateDragState` przy arm) i na bieżąco
+                                      podmienia `canvas.style.cursor`, więc ikona wizualnie obraca się razem z node'em przez cały
+                                      czas trwania przeciągnięcia, nie tylko na starcie i końcu.
 
-                          **Rotacja działa dla pojedynczego node'a i dla grupy** — grupa nie ma własnego, persystowanego
-                          `rotation`; to transient operacja per-drag: każdy człon dostaje `+= deltaDegrees` do własnej
-                          `rotation`, a jego środek okrąża wspólny środek grupy o ten sam kąt (`continueRotateDrag.ts`).
-                          Dla pojedynczego node'a pivot === środek node'a, więc formuła automatycznie kolapsuje do
-                          "pozycja bez zmian, tylko `rotation`" — bez osobnej ścieżki kodu, ten sam trik co przy resize.
-                          `line` (bez pola `rotation`) rotuje tylko jako część grupy, przez własne punkty `x1/y1/x2/y2`.
-                          Zweryfikowane manualnie w przeglądarce (Playwright MCP): pojedynczy kwadrat wizualnie się
-                          obraca wraz z uchwytami, kliknięcie w róg obróconego kształtu (poza jego oryginalnym,
-                          nieobróconym bboxem) trafia poprawnie, a rotacja grupy dwóch node'ów pokazuje każdy człon
-                          okrążający wspólny środek i obracający się indywidualnie
+                                      **Rotacja działa dla pojedynczego node'a i dla grupy** — grupa nie ma własnego, persystowanego
+                                      `rotation`; to transient operacja per-drag: każdy człon dostaje `+= deltaDegrees` do własnej
+                                      `rotation`, a jego środek okrąża wspólny środek grupy o ten sam kąt (`continueRotateDrag.ts`).
+                                      Dla pojedynczego node'a pivot === środek node'a, więc formuła automatycznie kolapsuje do
+                                      "pozycja bez zmian, tylko `rotation`" — bez osobnej ścieżki kodu, ten sam trik co przy resize.
+                                      `line` (bez pola `rotation`) rotuje tylko jako część grupy, przez własne punkty `x1/y1/x2/y2`.
+                                      Zweryfikowane manualnie w przeglądarce (Playwright MCP): pojedynczy kwadrat wizualnie się
+                                      obraca wraz z uchwytami, kliknięcie w róg obróconego kształtu (poza jego oryginalnym,
+                                      nieobróconym bboxem) trafia poprawnie, a rotacja grupy dwóch node'ów pokazuje każdy człon
+                                      okrążający wspólny środek i obracający się indywidualnie
 
 - [x] **dwuklik, żeby wejść w edycję istniejącego tekstu** — do tej pory edycja była osiągalna
       tylko przy świeżo rysowanym tekstem; nie było ścieżki z powrotem z gotowego `TTextNode` do
@@ -556,29 +556,84 @@ node.rotation)` w `drawMsdfText.ts`).
       miejscu (nie zduplikowała)
 
       **Poprawka (po zgłoszeniu przez użytkownika, ze zrzutem ekranu)**: edycja obróconego/zmirrorowanego
-              tekstu renderowała DOM-owy `contentEditable` i canvas'owy `drawEditingText.ts` zawsze przy
-              `rotation: 0`/`flipX/Y: false`, niezależnie od realnej transformacji edytowanego node'a — efekt to
-              widoczny na zrzucie duch nieobróconego, podświetlonego tekstu nałożony na wciąż poprawnie obrócony
-              outline zaznaczenia. `TEditingTextBox` (`types/canvas.ts`) dostał własne `flipX`/`flipY`/`rotation`
-              obok istniejącego `x/y/width/height` — ten sam kształt co geometria node'a — wypełniane realną
-              wartością node'a w `useTextEditOnDoubleClick.ts` (zamiast zer przy zwykłym rysowaniu nowego tekstu
-              w `useDrawTextTool.ts`, gdzie zera są jak najbardziej poprawne, bo nowy tekst na razie zawsze
-              powstaje nieobrócony). `drawEditingText.ts` przekazuje te pola dalej do `drawRect`/`drawMsdfText`
-              zamiast hardkodowanych stałych, więc canvasowy outline/tekst podczas edycji obraca/mirroruje się
-              tym samym mechanizmem co reszta node'ów. DOM-owy `TextEditOverlay.tsx` dostał
-              `transform: rotate(${box.rotation}deg) scaleX(...) scaleY(...)` z `transformOrigin: 'center'` —
-              **flip w środku, potem rotacja na zewnątrz** w liście `transform`, bo CSS aplikuje transformacje od
-              prawej do lewej (ten sam porządek co canvas: `flipGlyphVertices` przed `rotateVertices`). Rotacja
-              wokół `transformOrigin: center` w screen-space jest matematycznie tożsama z obrotem wokół środka w
-              world-space, bo `worldToScreen` to jednorodne skalowanie (zoom) + przesunięcie — obrót komutuje z
-              jednorodnym skalowaniem niezależnie od kolejności. `useCommitTextEdit.ts` przy okazji przestał
-              hardkodować `flipX: false, flipY: false, rotation: 0` dla świeżo tworzonego node'a — bierze je teraz
-              z `box`, gotowe pod przyszły scenariusz "tekst rysowany wewnątrz obróconej ramki" (dziś realne
-              zagnieżdżanie w ramkach jeszcze nie istnieje, patrz Etap 12, więc `box` zawsze niesie zera przy
-              zwykłym rysowaniu — ale ścieżka danych jest już gotowa, nie trzeba będzie jej przerabiać).
-              Zweryfikowane w przeglądarce (Playwright MCP): obrócony o 30° tekst wchodzi w edycję z DOM-owym
-              overlayem wizualnie pokrywającym się z rotowanym outline'em zaznaczenia, zamiast zostawać poziomym
-              duchem, a zamiana treści w trakcie edycji zachowuje tę samą rotację po zatwierdzeniu
+                          tekstu renderowała DOM-owy `contentEditable` i canvas'owy `drawEditingText.ts` zawsze przy
+                          `rotation: 0`/`flipX/Y: false`, niezależnie od realnej transformacji edytowanego node'a — efekt to
+                          widoczny na zrzucie duch nieobróconego, podświetlonego tekstu nałożony na wciąż poprawnie obrócony
+                          outline zaznaczenia. `TEditingTextBox` (`types/canvas.ts`) dostał własne `flipX`/`flipY`/`rotation`
+                          obok istniejącego `x/y/width/height` — ten sam kształt co geometria node'a — wypełniane realną
+                          wartością node'a w `useTextEditOnDoubleClick.ts` (zamiast zer przy zwykłym rysowaniu nowego tekstu
+                          w `useDrawTextTool.ts`, gdzie zera są jak najbardziej poprawne, bo nowy tekst na razie zawsze
+                          powstaje nieobrócony). `drawEditingText.ts` przekazuje te pola dalej do `drawRect`/`drawMsdfText`
+                          zamiast hardkodowanych stałych, więc canvasowy outline/tekst podczas edycji obraca/mirroruje się
+                          tym samym mechanizmem co reszta node'ów. DOM-owy `TextEditOverlay.tsx` dostał
+                          `transform: rotate(${box.rotation}deg) scaleX(...) scaleY(...)` z `transformOrigin: 'center'` —
+                          **flip w środku, potem rotacja na zewnątrz** w liście `transform`, bo CSS aplikuje transformacje od
+                          prawej do lewej (ten sam porządek co canvas: `flipGlyphVertices` przed `rotateVertices`). Rotacja
+                          wokół `transformOrigin: center` w screen-space jest matematycznie tożsama z obrotem wokół środka w
+                          world-space, bo `worldToScreen` to jednorodne skalowanie (zoom) + przesunięcie — obrót komutuje z
+                          jednorodnym skalowaniem niezależnie od kolejności. `useCommitTextEdit.ts` przy okazji przestał
+                          hardkodować `flipX: false, flipY: false, rotation: 0` dla świeżo tworzonego node'a — bierze je teraz
+                          z `box`, gotowe pod przyszły scenariusz "tekst rysowany wewnątrz obróconej ramki" (dziś realne
+                          zagnieżdżanie w ramkach jeszcze nie istnieje, patrz Etap 12, więc `box` zawsze niesie zera przy
+                          zwykłym rysowaniu — ale ścieżka danych jest już gotowa, nie trzeba będzie jej przerabiać).
+                          Zweryfikowane w przeglądarce (Playwright MCP): obrócony o 30° tekst wchodzi w edycję z DOM-owym
+                          overlayem wizualnie pokrywającym się z rotowanym outline'em zaznaczenia, zamiast zostawać poziomym
+                          duchem, a zamiana treści w trakcie edycji zachowuje tę samą rotację po zatwierdzeniu
+
+              **Druga poprawka (po kolejnym zgłoszeniu, z DevTools obu aplikacji)**: powyższy `transform:
+              rotate()` na diva rozwiązywał *widoczny* problem, ale nie prawdziwą przyczynę — CSS `rotate()`
+              to czysto wizualny efekt, który nie wpływa na wewnętrzny layout tekstu przeglądarki (zawijanie
+              linii, kerning). Nasz canvas wylicza layout ręcznie, bez kerningu (`buildGlyphQuads.ts`,
+              `measureGlyphTextWidth.ts` — atlas ma 1345 par kerningu, nigdy nieużywanych), więc natywne
+              zaznaczenie/kursor przeglądarki (pozycjonowane przez jej własny, inny layout) i tak drobno
+              rozjeżdżały się z renderowanymi glifami MSDF — przy rotacji ten drobny rozjazd zamieniał się w
+              widoczny, po skosie zdublowany tekst. Użytkownik znalazł w DevTools, że prawdziwa Figma w ogóle
+              nie obraca swojego ukrytego diva (`<input>` ma nawet `top: -200px`, świadomie zepchnięty poza
+              ekran) — zamiast tego rysuje kursor/zaznaczenie własnym silnikiem, tak samo jak tekst.
+              Przepisane na ten sam wzorzec: `TextEditOverlay.tsx` **stracił** `transform`/`transformOrigin` na
+              zawsze (div zostaje nieobrócony), `caretColor` zmienione z `TEXT_FILL` na `transparent`, i doszło
+              `&::selection { background-color: transparent }` w SCSS — div jest teraz czysto niewidzialną
+              powierzchnią do przechwytywania klawiatury/IME, zero własnej reprezentacji wizualnej. Kursor i
+              zaznaczenie rysowane są teraz na canvasie (`drawEditingCaretAndSelection.ts`, nowy plik wołany z
+              `drawEditingText.ts`) tym samym prymitywem `drawRect.ts` co obrys edycji, przeliczane z
+              dokładnie tej samej matematyki co widoczne glify — nowy `wrapTextWithOffsets.ts` (siostrzana
+              kopia `wrapText.ts`, ale zamiast samych stringów zwraca też offset każdej linii w oryginalnym
+              tekście — świadomy kompromis: duplikacja zamiast refaktoru już przetestowanego `wrapText.ts`,
+              żeby nie ryzykować regresji w kodzie renderującym), `findLineIndexForOffset.ts`, `getCaretPoint.ts`
+              i `getSelectionRects.ts` (offset → world-space punkt/prostokąty, ten sam brak kerningu co
+              `measureGlyphTextWidth`, więc kursor **z definicji** nie może rozjechać się z glifami — liczy je
+              ta sama funkcja). Selekcja śledzona jest teraz w Reduxie jako `editingSelectionStart/End`
+              (offsety znakowe w tym samym stringu co `editingTextContent`), aktualizowane przez nowy hook
+              `useTrackTextEditSelection.ts` (`onSelect`) i przy okazji w `useTextEditInput.ts` (`onInput`) —
+              czytane z natywnego `window.getSelection()` przez nowy `getEditableSelectionOffsets.ts`, który
+              zamiast ręcznie powtarzać chodzenie po `childNodes` (ryzyko rozjazdu z `getEditableTextContent.ts`)
+              klonuje `Range` od początku diva do granicy zaznaczenia i puszcza wynik przez **ten sam**
+              `getEditableTextContent.ts` — offset to po prostu długość sklonowanego tekstu, gwarantowanie
+              spójny z resztą pipeline'u. Ponieważ kursor/zaznaczenie to teraz małe prostokąty *wewnątrz* boxa
+              edytowanego tekstu (nie sam box), `drawRect.ts` dostał opcjonalny param `rotationCenter` (domyślnie
+              środek własny rect'a, jak dotąd) — bez niego obrót działby się wokół środka samego kursora, a nie
+              środka całego node'a, więc kursor obracałby się w miejscu zamiast okrążać razem z tekstem. Flip
+              aplikowany ręcznie (ten sam trik co `flipTextPoint`, wydzielony typ `TFlippableBox` żeby nie
+              wymagać pełnego `TTextNode`) **przed** rotacją, ten sam porządek co `drawMsdfText.ts`. Kursor
+              rysowany jest kolorem `TEXT_FILL` — tym samym co glify, nie akcentowym niebieskim zaznaczenia
+              — więc gdy kiedyś dojdzie edycja koloru tekstu w środku (dziś jeden `fill` na cały node), oba
+              mają wspólne źródło prawdy i nie da się ich rozjechać. Miganie liczone jest z offsetu
+              `editingSelectionChangedAt` (nowe pole w Reduxie, stemplowane `Date.now()` w każdym
+              `startTextEdit`/`updateTextEditSelection`) zamiast surowego `Date.now() % interval` — kursor
+              jest w pełni widoczny (bez migania) przez pierwszy pełny interwał od ostatniej zmiany
+              zaznaczenia/pozycji, dokładnie tak jak w realnych edytorach, gdzie pisanie czy przesuwanie
+              kursora nie miga, tylko migotanie zaczyna się dopiero po chwili bezruchu. Bez dodatkowego stanu
+              w Reakcie — liczone na nowo w każdej klatce render loopa, tylko względem tego jednego
+              znacznika czasu w Reduxie. **Świadomie odłożone**: kliknięcie myszą *wewnątrz*
+              już otwartej edycji obróconego node'a, żeby przestawić kursor w konkretne miejsce, dziś nie
+              działa poprawnie (div jest nieobrócony, więc jego niewidzialny hit-region nie pokrywa się z
+              widocznymi, obróconymi glifami) — strzałki klawiszowe i samo pisanie działają bez zmian (nie
+              zależą od zgodności pikseli), a naprawa kliknięcia wymagałaby osobnego, canvasowego hit-testu
+              offsetu znaku (na wzór `getUnrotatedQueryPoint` z `getNodeAtPoint.ts`) plus programowego
+              ustawienia `Range`/`Selection` — osobny, następny krok. Zweryfikowane w przeglądarce (Playwright
+              MCP): zaznaczenie „select all" na obróconym tekście dokładnie pokrywa renderowane litery bez
+              śladu ducha z poprzedniej wersji, a podmiana treści w trakcie edycji nadal poprawnie zachowuje
+              rotację po zatwierdzeniu
 
 - [ ] **corner radius dla Rectangle** — przeciągany uchwyt na rogu prostokąta (jak w Figmie), na
       razie żadnego pola na to w `TRectangleNode`

@@ -1,5 +1,7 @@
 export const BACKGROUND_COLOR = '#444444';
 export const BACKGROUND_ALPHA = 1;
+export const CARET_BLINK_INTERVAL_MS = 530;
+export const CARET_WIDTH_PX = 1.5;
 export const CORNER_HANDLE_SIZE = 6;
 export const CORNER_HANDLE_FILL = '#ffffff';
 export const DRAFT_FRAME_STROKE = '#0d99ff';
@@ -13,3 +15,4 @@ export const LINE_RENDER_STROKE_WIDTH = 1;
 export const LINE_SELECTED_STROKE_WIDTH = 0.1;
 export const RESIZE_EDGE_HIT_TOLERANCE_PX = 4;
 export const ROTATE_HANDLE_OUTER_RADIUS_PX = 16;
+export const TEXT_SELECTION_FILL_ALPHA = 0.35;

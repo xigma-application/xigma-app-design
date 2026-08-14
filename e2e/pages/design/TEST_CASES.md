@@ -315,7 +315,8 @@ the live-typed ones.
 | 60  | Blurring an existing-node edit updates that node's content in place, never adds a duplicate node                                               |  ✅  |           —            |
 | 61  | Clearing all content on an existing node and blurring discards the edit, leaving the original content untouched (no delete-node action exists) |  ✅  |           —            |
 | 62  | The node currently being edited is excluded from normal fill, selection-outline, and hover-outline rendering                                   |  ✅  |           —            |
-| 63  | A rotated, mirrored node being edited keeps rendering (DOM overlay transform + `drawEditingText.ts` outline/text) at its own rotation/flip     |  ✅  | ✅ `edit-text.spec.ts` |
+| 63  | A rotated, mirrored node being edited keeps rendering its glyphs (`drawEditingText.ts`) at its own rotation/flip                               |  ✅  | ✅ `edit-text.spec.ts` |
+| 64  | The canvas-drawn selection highlight/caret (`drawEditingCaretAndSelection.ts`) reacts to the live selection, even on a rotated node            |  ✅  | ✅ `edit-text.spec.ts` |
 
 #58/#59 are the two distinct hit-test branches (`getDoubleClickedTextNode.ts` already pins both
 precisely via `store.getState()`), but the actual claim worth an e2e proof is a real native
@@ -329,14 +330,20 @@ mechanism for #60. #60-#62 stay unit-only — each is a precise `store.getState(
 assertion (`useCommitTextEdit.spec.tsx`, `drawScene.spec.ts`) that a screenshot diff wouldn't
 meaningfully improve on, per the "why so few scenarios get e2e coverage" rationale below.
 
-#63 is exactly the bug a `jsdom` unit test can paper over: `TextEditOverlay.spec.tsx`'s
-`toHaveStyle({ transform: '...' })` only proves the CSS string was set, not that a rotated node
-being edited actually _paints_ differently from an unrotated one once the browser composites the
-canvas and the DOM overlay together. The e2e version rotates a real node via a real rotate-ring
-drag (the same interaction as `rotate.spec.ts`), enters edit mode, and asserts the resulting
-canvas screenshot differs from editing an otherwise-identical unrotated node — pre-fix,
-`drawEditingText.ts` hardcoded `rotation: 0` and the overlay had no `transform` at all, so the two
-would have rendered indistinguishably.
+#63/#64 are exactly the bug a `jsdom` unit test can paper over: `TextEditOverlay.spec.tsx` can only
+assert the DOM overlay's own inline style (e.g. that no `transform` is set), never that the
+_visible_ glyphs/highlight the browser actually paints on the WebGL canvas stay aligned with a
+rotated node — the DOM overlay is deliberately invisible (`color`/`caretColor`/`::selection` all
+transparent) precisely because its own native text layout doesn't kern-match the MSDF glyph layout,
+so the real proof has to look at rendered canvas pixels. #63's e2e version rotates a real node via a
+real rotate-ring drag (the same interaction as `rotate.spec.ts`), enters edit mode, and asserts the
+resulting canvas screenshot differs from editing an otherwise-identical unrotated node — pre-fix,
+`drawEditingText.ts` hardcoded `rotation: 0`, so the two would have rendered indistinguishably. #64
+goes a step further on the same rotated node: it asserts the canvas-drawn selection highlight
+(`getSelectionRects.ts`) actually disappears once `ArrowRight` collapses the selection to a caret —
+proving the highlight is driven by live selection state, not just a static rotated decoration, and
+that this now works correctly even when rotated (pre-fix, the equivalent native DOM highlight would
+render axis-aligned and visibly detached from the rotated glyphs, per the original bug report).
 
 ## Resize (Etap 10)
 

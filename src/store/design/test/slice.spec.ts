@@ -8,6 +8,7 @@ import slice, {
   stopTextEdit,
   updateNode,
   updateTextEditContent,
+  updateTextEditSelection,
 } from '../slice';
 
 // types
@@ -32,6 +33,9 @@ describe('design slice', () => {
     expect(slice(undefined, { type: 'unknown' })).toEqual({
       activeTool: ToolName.default,
       editingNodeId: null,
+      editingSelectionChangedAt: 0,
+      editingSelectionEnd: 0,
+      editingSelectionStart: 0,
       editingTextBox: null,
       editingTextContent: '',
       lastMouseTool: ToolName.default,
@@ -204,5 +208,21 @@ describe('design slice', () => {
     // result
     expect(state.editingNodeId).toBe('node-1');
     expect(state.editingTextContent).toBe('hello');
+  });
+
+  it('should update the live text edit selection', () => {
+    // mock
+    vi.spyOn(Date, 'now').mockReturnValue(12345);
+
+    // before
+    const state = slice(undefined, updateTextEditSelection({ end: 5, start: 2 }));
+
+    // result
+    expect(state.editingSelectionStart).toBe(2);
+    expect(state.editingSelectionEnd).toBe(5);
+    expect(state.editingSelectionChangedAt).toBe(12345);
+
+    // after
+    vi.restoreAllMocks();
   });
 });

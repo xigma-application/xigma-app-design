@@ -3,4 +3,8 @@
   overflow-wrap: break-word;
   position: absolute;
   white-space: pre-wrap;
+
+  &::selection {
+    background-color: transparent;
+  }
 }

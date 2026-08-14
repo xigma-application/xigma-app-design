@@ -1,6 +1,9 @@
 // store
 import {
   selectEditingNodeId,
+  selectEditingSelectionChangedAt,
+  selectEditingSelectionEnd,
+  selectEditingSelectionStart,
   selectEditingTextBox,
   selectEditingTextContent,
   selectNodes,
@@ -54,6 +57,9 @@ export const drawScene = (
     imageContext,
     selectEditingTextBox(state),
     selectEditingTextContent(state),
+    selectEditingSelectionStart(state),
+    selectEditingSelectionEnd(state),
+    selectEditingSelectionChangedAt(state),
     clientWidth,
     clientHeight,
     viewport,
