@@ -1,6 +1,5 @@
 // types
-import { TPoint } from 'types/canvas';
-import { TTextNode } from 'types/design/types';
+import { TEditingTextBox, TPoint } from 'types/canvas';
 
 // utils
 import { buildEllipseArcLengthTable } from 'utils/canvas/shapes/buildEllipseArcLengthTable';
@@ -9,7 +8,9 @@ import { getEllipseCircumference } from 'utils/canvas/shapes/getEllipseCircumfer
 import { getEllipsePathSample } from 'utils/canvas/shapes/getEllipsePathSample';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
-export const getPathTextHandlePoint = (node: TTextNode): TPoint | null => {
+// accepts either a real, committed path-text node or the live editing box for one that hasn't
+// been committed yet (e.g. still being drawn for the first time) — both carry the same geometry
+export const getPathTextHandlePoint = (node: TEditingTextBox): TPoint | null => {
   let handlePoint: TPoint | null = null;
 
   if (node.pathId) {

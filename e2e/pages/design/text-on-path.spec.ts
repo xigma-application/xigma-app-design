@@ -248,3 +248,29 @@ test('the path outline renders dashed while actively drawing or editing it, unli
 
   expect(whileEditing.equals(whileSelected)).toBe(false);
 });
+
+test('the path-offset handle stays draggable while actively editing the text, without ending the edit session', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  // a 200x200 circle centered at (400,400); pathStartOffset defaults to 0, so both "Hi" and its
+  // offset handle start at the rightmost point (500,400)
+  await designPage.goto('e2e-test-path-offset-handle-during-editing');
+  await designPage.drawTextOnPath(300, 300, 500, 500);
+  await designPage.typeText('Hi');
+
+  const beforeDrag = await designPage.canvas.screenshot(); // still editing -> dashed outline, "Hi" at the right
+
+  await designPage.pointerDown(500, 400); // the offset handle, not a caret click
+  await designPage.pointerMove(400, 300); // drag it toward the top of the circle
+  await designPage.pointerUp();
+
+  const afterDrag = await designPage.canvas.screenshot();
+
+  expect(afterDrag.equals(beforeDrag)).toBe(false); // the text visibly moved along the curve
+
+  await designPage.typeText('!'); // proves the edit session is still live, not interrupted by the drag
+
+  const afterFurtherTyping = await designPage.canvas.screenshot();
+
+  expect(afterFurtherTyping.equals(afterDrag)).toBe(false);
+});

@@ -386,8 +386,8 @@ describe('useHoverHighlight behaviors', () => {
     expect(canvasRef.current?.style.cursor).toBe('');
   });
 
-  it("should not apply the positioning cursor over a path-text node's start-offset handle while it is being edited", () => {
-    // mock — a 200x200 path-text box at (4300, 4300); the offset-0 handle sits at its rightmost edge (4500, 4400)
+  it("should still apply the positioning cursor over a path-text node's start-offset handle while it is being edited", () => {
+    // mock — a 200x200 path-text box at (4300, 4300); the offset-0 handle sits at its rightmost
     const idA = addPathTextNode(4300, 4300, 200);
 
     store.dispatch(setSelection([idA]));
@@ -417,8 +417,8 @@ describe('useHoverHighlight behaviors', () => {
     // action
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 4500, 4400));
 
-    // result — falls through to the plain node-hover branch, same as any other point on the node
-    expect(canvasRef.current?.className).not.toContain('positioning');
+    // result
+    expect(canvasRef.current?.className).toContain('positioning');
     expect(hoverRef.current).toBe(idA);
   });
 });

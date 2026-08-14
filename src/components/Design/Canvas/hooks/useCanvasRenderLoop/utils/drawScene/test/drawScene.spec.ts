@@ -23,6 +23,7 @@ const createGlMock = (): WebGL2RenderingContext =>
     TEXTURE0: 33984,
     TEXTURE_2D: 3553,
     TRIANGLES: 4,
+    TRIANGLE_FAN: 6,
     UNSIGNED_BYTE: 5121,
     activeTexture: vi.fn(),
     bindBuffer: vi.fn(),
@@ -389,6 +390,96 @@ describe('drawScene', () => {
 
     // result — hovering it while it's also being edited must not add the thick-outline draw
     expect(countHoverOutlineDraws()).toBe(baselineCount - 1);
+
+    // after
+    store.dispatch(stopTextEdit());
+  });
+
+  it('should still draw the path-text offset handle for the node currently being text-edited', () => {
+    // mock — unlike its box/corner-handles/hover-outline, the offset handle for a path-text node
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const canvas = document.createElement('canvas');
+
+    store.dispatch(
+      addNode({
+        content: 'Hi',
+        fill: '#ffffff',
+        flipX: false,
+        flipY: false,
+        fontFamily: 'Inter',
+        fontSize: 14,
+        height: 200,
+        name: 'Text',
+        parentId: null,
+        pathFlip: false,
+        pathId: 'ellipse-1',
+        pathStartOffset: 0,
+        rotation: 0,
+        type: NodeType.text,
+        width: 200,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const { rootOrder } = store.getState().design;
+    const editingId = rootOrder[rootOrder.length - 1];
+
+    const countTriangleFanDraws = (): number => {
+      const gl = createGlMock();
+
+      drawScene(gl, program, buffer, IMAGE_CONTEXT, canvas);
+
+      return (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLE_FAN).length;
+    };
+
+    // before — not yet being edited
+    const baselineCount = countTriangleFanDraws();
+
+    // action
+    store.dispatch(
+      startTextEdit({
+        box: { flipX: false, flipY: false, height: 200, pathId: 'ellipse-1', pathStartOffset: 0, rotation: 0, width: 200, x: 0, y: 0 },
+        content: 'Hi',
+        id: editingId,
+      }),
+    );
+
+    // result — the handle's own filled ellipse adds one more TRIANGLE_FAN draw
+    expect(countTriangleFanDraws()).toBe(baselineCount + 1);
+
+    // after
+    store.dispatch(stopTextEdit());
+  });
+
+  it('should draw the path-text offset handle while a path-text node is being created for the first time', () => {
+    // mock — first-time creation (useDrawTextOnPathTool) dispatches startTextEdit without an id,
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const canvas = document.createElement('canvas');
+
+    const countTriangleFanDraws = (): number => {
+      const gl = createGlMock();
+
+      drawScene(gl, program, buffer, IMAGE_CONTEXT, canvas);
+
+      return (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLE_FAN).length;
+    };
+
+    // before — nothing being edited
+    const baselineCount = countTriangleFanDraws();
+
+    // action
+    store.dispatch(
+      startTextEdit({
+        box: { flipX: false, flipY: false, height: 200, pathId: 'ellipse-1', pathStartOffset: 0, rotation: 0, width: 200, x: 0, y: 0 },
+        content: '',
+      }),
+    );
+
+    // result — the handle's own filled ellipse adds one more TRIANGLE_FAN draw
+    expect(countTriangleFanDraws()).toBe(baselineCount + 1);
 
     // after
     store.dispatch(stopTextEdit());

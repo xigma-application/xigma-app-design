@@ -19,6 +19,7 @@ import { TDraftEntity } from 'types/design/types';
 import { TImageRenderContext } from '../../types';
 
 // utils
+import { drawEditingPathTextHandle } from './drawEditingPathTextHandle';
 import { drawEditingText } from './drawEditingText';
 import { drawFrame } from './drawFrame';
 import { drawHoverOutline } from './drawHoverOutline';
@@ -75,5 +76,7 @@ export const drawScene = (
     clientHeight,
     viewport,
   );
+
+  drawEditingPathTextHandle(gl, program, buffer, editingTextBox, clientWidth, clientHeight, viewport);
   drawMarquee(gl, program, buffer, marqueeRect, clientWidth, clientHeight, viewport);
 };

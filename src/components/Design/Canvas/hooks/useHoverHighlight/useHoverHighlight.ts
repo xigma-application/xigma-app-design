@@ -1,7 +1,14 @@
 import { RefObject, useEffect } from 'react';
 
 // store
-import { selectActiveTool, selectEditingTextBox, selectOrderedNodes, selectSelectedNodes, selectViewport } from 'store/design/selectors';
+import {
+  selectActiveTool,
+  selectEditingNodeId,
+  selectEditingTextBox,
+  selectOrderedNodes,
+  selectSelectedNodes,
+  selectViewport,
+} from 'store/design/selectors';
 import { store, useAppSelector } from 'store';
 
 // styles
@@ -22,6 +29,7 @@ import { getRotateHandleAtPoint } from '../../utils/getRotateHandleAtPoint';
 import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
 import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
 import { getRotatedScaleCursorUrl } from 'utils/canvas/getRotatedScaleCursorUrl';
+import { isPointOnPathTextHandle } from '../../utils/isPointOnPathTextHandle';
 import { screenToWorld } from '../../utils/screenToWorld';
 
 const POSITIONING_CURSOR_CLASS = styles['Canvas__canvas-element--positioning'];
@@ -34,13 +42,20 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
       const state = store.getState();
       const viewport = selectViewport(state);
       const point = screenToWorld(getPointerPosition(canvas, event), viewport);
-      const isEditingText = Boolean(selectEditingTextBox(state));
-      const selectedNodes = isEditingText ? [] : selectSelectedNodes(state);
-      const [selectedNode] = selectedNodes;
-      const lineEndpointHit = getLineEndpointAtPoint(point, selectedNodes, viewport);
-      const pathOffsetHandleHit = getPathTextOffsetHandleAtPoint(point, selectedNodes, viewport);
-      const resizeHandleHit = getResizeHandleAtPoint(point, selectedNodes, viewport);
-      const rotateHandleHit = getRotateHandleAtPoint(point, selectedNodes, viewport);
+      const editingTextBox = selectEditingTextBox(state);
+      const isEditingText = Boolean(editingTextBox);
+      const selectedNodes = selectSelectedNodes(state);
+      const resizableSelectedNodes = isEditingText ? [] : selectedNodes;
+      const [selectedNode] = resizableSelectedNodes;
+      const lineEndpointHit = getLineEndpointAtPoint(point, resizableSelectedNodes, viewport);
+      // during an active edit (including a path-text node still being drawn for the first time,
+      // which has no committed node yet), the editing box is the source of truth for the handle
+      const nonEditingHandleHit = getPathTextOffsetHandleAtPoint(point, selectedNodes, viewport);
+      const pathOffsetHandleHit = editingTextBox
+        ? { hit: isPointOnPathTextHandle(point, editingTextBox, viewport), nodeId: selectEditingNodeId(state) }
+        : { hit: Boolean(nonEditingHandleHit), nodeId: nonEditingHandleHit?.nodeId ?? null };
+      const resizeHandleHit = getResizeHandleAtPoint(point, resizableSelectedNodes, viewport);
+      const rotateHandleHit = getRotateHandleAtPoint(point, resizableSelectedNodes, viewport);
 
       switch (true) {
         case Boolean(lineEndpointHit) && selectedNode.type === NodeType.line:
@@ -48,10 +63,10 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
           canvas.style.cursor = '';
           hoverRef.current = lineEndpointHit!.nodeId;
           break;
-        case Boolean(pathOffsetHandleHit):
+        case pathOffsetHandleHit.hit:
           canvas.classList.add(POSITIONING_CURSOR_CLASS);
           canvas.style.cursor = '';
-          hoverRef.current = pathOffsetHandleHit!.nodeId;
+          hoverRef.current = pathOffsetHandleHit.nodeId;
           break;
         case Boolean(resizeHandleHit): {
           const getCursorUrl = activeTool === ToolName.scale ? getRotatedScaleCursorUrl : getRotatedResizeCursorUrl;

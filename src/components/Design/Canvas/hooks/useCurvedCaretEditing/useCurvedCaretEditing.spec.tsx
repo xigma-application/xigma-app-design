@@ -6,10 +6,11 @@ import { RefObject } from 'react';
 import { useCurvedCaretEditing } from './useCurvedCaretEditing';
 
 // store
-import { startTextEdit, stopTextEdit } from 'store/design/slice';
+import { addNode, setSelection, startTextEdit, stopTextEdit } from 'store/design/slice';
 import { store } from 'store';
 
 // types
+import { NodeType } from 'types/design/enums';
 import { TEditingTextBox } from 'types/canvas';
 
 const CIRCLE_BOX: TEditingTextBox = {
@@ -25,11 +26,9 @@ const CIRCLE_BOX: TEditingTextBox = {
   y: 1000,
 };
 
-// the circle's rightmost point sits exactly at pathStartOffset 0 -> index 0, well within hit tolerance
 const RIGHT = { x: 1200, y: 1100 };
-// a quarter-turn away -> "Hi"'s two characters don't reach nearly that far, so the hit clamps to index 2
+const NEAR_RIGHT = { x: 1200, y: 1108 };
 const BOTTOM = { x: 1100, y: 1200 };
-// nowhere near the ellipse at all
 const FAR = { x: 0, y: 0 };
 
 const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
@@ -84,14 +83,14 @@ describe('useCurvedCaretEditing behaviors', () => {
 
     // action
     act(() => {
-      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', RIGHT.x, RIGHT.y));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', NEAR_RIGHT.x, NEAR_RIGHT.y));
     });
 
     // result
     const { design } = store.getState();
 
-    expect(design.editingSelectionStart).toBe(0);
-    expect(design.editingSelectionEnd).toBe(0);
+    expect(design.editingSelectionStart).toBe(1);
+    expect(design.editingSelectionEnd).toBe(1);
     expect(document.activeElement).toBe(overlay);
   });
 
@@ -104,14 +103,14 @@ describe('useCurvedCaretEditing behaviors', () => {
 
     // action
     act(() => {
-      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', RIGHT.x, RIGHT.y));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', NEAR_RIGHT.x, NEAR_RIGHT.y));
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', BOTTOM.x, BOTTOM.y));
     });
 
     // result
     const { design } = store.getState();
 
-    expect(design.editingSelectionStart).toBe(0);
+    expect(design.editingSelectionStart).toBe(1);
     expect(design.editingSelectionEnd).toBe(2);
   });
 
@@ -199,6 +198,135 @@ describe('useCurvedCaretEditing behaviors', () => {
 
     // result
     expect(store.getState().design.editingTextBox).toBeNull();
+  });
+
+  it('should drag the path-offset handle on the live editing box while a path-text node is still being drawn for the first time', () => {
+    // mock — no committed node exists yet, matching startTextEdit called with no id
+    store.dispatch(startTextEdit({ box: CIRCLE_BOX, content: 'Hi' }));
+
+    // before
+    renderCurvedCaretEditing(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', RIGHT.x, RIGHT.y));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', BOTTOM.x, BOTTOM.y));
+    });
+
+    // result — pathStartOffset moved toward BOTTOM (a quarter turn) on the editing box
+    expect(store.getState().design.editingTextBox).toMatchObject({ pathStartOffset: expect.closeTo(0.25, 2) });
+  });
+
+  it('should treat a caret-extend move as a miss once the editing session ends mid-gesture', () => {
+    // mock — the initial click lands away from the offset handle so it arms a caret drag instead
+    store.dispatch(startTextEdit({ box: CIRCLE_BOX, content: 'Hi' }));
+
+    // before
+    renderCurvedCaretEditing(canvasRef);
+
+    // action — the effect's cleanup for the now-stale listener is deferred until this batch commits
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', NEAR_RIGHT.x, NEAR_RIGHT.y));
+      store.dispatch(stopTextEdit());
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', BOTTOM.x, BOTTOM.y));
+    });
+
+    // result
+    expect(store.getState().design.editingTextBox).toBeNull();
+  });
+
+  it('should drag the path-offset handle instead of placing a caret when the click lands on it', () => {
+    // mock — a real, selected path-text node whose committed box matches CIRCLE_BOX, so the
+    store.dispatch(
+      addNode({
+        content: 'Hi',
+        fill: '#ffffff',
+        flipX: false,
+        flipY: false,
+        fontFamily: 'Inter',
+        fontSize: 14,
+        height: CIRCLE_BOX.height,
+        name: 'Text',
+        parentId: null,
+        pathFlip: false,
+        pathId: 'ellipse-1',
+        pathStartOffset: 0,
+        rotation: 0,
+        type: NodeType.text,
+        width: CIRCLE_BOX.width,
+        x: CIRCLE_BOX.x,
+        y: CIRCLE_BOX.y,
+      }),
+    );
+
+    const { rootOrder } = store.getState().design;
+    const nodeId = rootOrder[rootOrder.length - 1];
+
+    store.dispatch(setSelection([nodeId]));
+    store.dispatch(startTextEdit({ box: CIRCLE_BOX, content: 'Hi', id: nodeId }));
+    overlay.focus(); // simulate an already-active edit session, as if the user was mid-typing
+
+    // before
+    renderCurvedCaretEditing(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', RIGHT.x, RIGHT.y));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', BOTTOM.x, BOTTOM.y));
+    });
+
+    // result — pathStartOffset moved toward BOTTOM (a quarter turn), on both the committed node and
+    const { design } = store.getState();
+
+    expect(design.nodes[nodeId]).toMatchObject({ pathStartOffset: expect.closeTo(0.25, 2) });
+    expect(design.editingTextBox).toMatchObject({ pathStartOffset: expect.closeTo(0.25, 2) });
+    expect(design.editingSelectionStart).toBe(0);
+    expect(design.editingSelectionEnd).toBe(2);
+    expect(document.activeElement).toBe(overlay);
+  });
+
+  it('should stop dragging the path-offset handle once the pointer is released', () => {
+    // mock
+    store.dispatch(
+      addNode({
+        content: 'Hi',
+        fill: '#ffffff',
+        flipX: false,
+        flipY: false,
+        fontFamily: 'Inter',
+        fontSize: 14,
+        height: CIRCLE_BOX.height,
+        name: 'Text',
+        parentId: null,
+        pathFlip: false,
+        pathId: 'ellipse-1',
+        pathStartOffset: 0,
+        rotation: 0,
+        type: NodeType.text,
+        width: CIRCLE_BOX.width,
+        x: CIRCLE_BOX.x,
+        y: CIRCLE_BOX.y,
+      }),
+    );
+
+    const { rootOrder } = store.getState().design;
+    const nodeId = rootOrder[rootOrder.length - 1];
+
+    store.dispatch(setSelection([nodeId]));
+    store.dispatch(startTextEdit({ box: CIRCLE_BOX, content: 'Hi', id: nodeId }));
+
+    // before
+    renderCurvedCaretEditing(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', RIGHT.x, RIGHT.y));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', RIGHT.x, RIGHT.y));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', BOTTOM.x, BOTTOM.y));
+    });
+
+    // result — released before the move, so pathStartOffset never left its starting value
+    expect(store.getState().design.nodes[nodeId]).toMatchObject({ pathStartOffset: 0 });
   });
 
   it('should not attach any listeners, and therefore do nothing, when there is no path-text editing session', () => {

@@ -13,6 +13,7 @@ import { handleAddNode } from './utils/handleAddNode';
 import { handleSetActiveTool } from './utils/handleSetActiveTool';
 import { handleStartTextEdit } from './utils/handleStartTextEdit';
 import { handleStopTextEdit } from './utils/handleStopTextEdit';
+import { handleUpdateEditingTextBoxPathStartOffset } from './utils/handleUpdateEditingTextBoxPathStartOffset';
 import { handleUpdateNode } from './utils/handleUpdateNode';
 import { handleUpdateTextEditSelection } from './utils/handleUpdateTextEditSelection';
 
@@ -51,6 +52,8 @@ const designSlice = createSlice({
     },
     startTextEdit: (state, action: PayloadAction<TStartTextEditPayload>) => handleStartTextEdit(state, action.payload),
     stopTextEdit: (state) => handleStopTextEdit(state),
+    updateEditingTextBoxPathStartOffset: (state, action: PayloadAction<number>) =>
+      handleUpdateEditingTextBoxPathStartOffset(state, action.payload),
     updateNode: (state, action: PayloadAction<{ changes: TSceneNodeChanges; id: string }>) => handleUpdateNode(state, action.payload),
     updateTextEditContent: (state, action: PayloadAction<string>) => {
       state.editingTextContent = action.payload;
@@ -66,6 +69,7 @@ export const {
   setViewport,
   startTextEdit,
   stopTextEdit,
+  updateEditingTextBoxPathStartOffset,
   updateNode,
   updateTextEditContent,
   updateTextEditSelection,
