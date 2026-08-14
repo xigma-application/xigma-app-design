@@ -248,9 +248,28 @@ describe('useHoverHighlight behaviors', () => {
     expect(canvasRef.current?.className).not.toContain('positioning');
   });
 
+  it('should use the scale cursor (not the resize cursor) over a resize handle when the Scale tool is active', () => {
+    // mock
+    const idA = addFrameNode(2100, 2100, 100);
+
+    store.dispatch(setSelection([idA]));
+    store.dispatch(setActiveTool(ToolName.scale));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const hoverRef = renderHoverHighlight(canvasRef);
+
+    // action — exactly on the "nw" corner handle of the selected node
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2100, 2100));
+
+    // result — same hover/positioning behavior as the default tool, just via the scale cursor branch
+    expect(hoverRef.current).toBeNull();
+    expect(canvasRef.current?.className).not.toContain('positioning');
+  });
+
   it("should clear the hovered node id and the positioning class in the rotate ring just outside a selected node's resize handle", () => {
     // mock — the "nw" corner sits at (3000, 3000); the rotate ring starts just past the resize
-    // corner's own radius
     const idA = addFrameNode(3000, 3000, 100);
 
     store.dispatch(setSelection([idA]));

@@ -1,7 +1,7 @@
 // types
 import { TDraftRect, TResizeHandle } from 'types/canvas';
 
-type TAxisAnchorSide = 'max' | 'min' | 'none';
+export type TAxisAnchorSide = 'max' | 'min' | 'none';
 
 export const HANDLE_AXES: Record<TResizeHandle, { x: TAxisAnchorSide; y: TAxisAnchorSide }> = {
   e: { x: 'max', y: 'none' },

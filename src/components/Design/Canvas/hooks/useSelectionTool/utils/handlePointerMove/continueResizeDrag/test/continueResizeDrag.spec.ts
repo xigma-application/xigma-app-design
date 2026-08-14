@@ -1,11 +1,11 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setActiveTool, setSelection } from 'store/design/slice';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, ToolName } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 import { TResizeDragState } from '../../../../types';
 
@@ -502,5 +502,67 @@ describe('continueResizeDrag', () => {
 
     // result — identical to the very first "resize a single node from a corner handle" test above
     expect(store.getState().design.nodes[idA]).toMatchObject({ height: 80, width: 150, x: 0, y: 0 });
+  });
+
+  describe('Scale tool', () => {
+    afterEach(() => {
+      store.dispatch(setActiveTool(ToolName.default));
+    });
+
+    it('should pivot at the bottom-center point when grabbing the top edge, growing both dimensions proportionally', () => {
+      // mock — a 100x50 frame; the Scale tool forces proportional scaling with no Shift key needed
+      const idA = addFrameNode(0, 0, 100, 50);
+      const canvas = createCanvas();
+      const resizeDragRef = createResizeDragRef({
+        aspectRatio: 2,
+        bounds: { height: 50, width: 100, x: 0, y: 0 },
+        handle: 'n',
+        nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 0, width: 100, x: 0, y: 0 } },
+      });
+
+      // before
+      store.dispatch(setActiveTool(ToolName.scale));
+      continueResizeDrag(canvas, pointerEvent(50, -50), store.dispatch, resizeDragRef);
+
+      // result — height doubles (50→100) and width doubles too (100→200, unlike a plain resize,
+      expect(store.getState().design.nodes[idA]).toMatchObject({ height: 100, width: 200, x: -50, y: -50 });
+    });
+
+    it('should pivot at the opposite (bottom-right) corner when grabbing the top-left corner, same anchor as a plain resize', () => {
+      // mock — a 100x100 frame; the Scale tool reuses the exact same corner-anchor geometry as a
+      const idA = addFrameNode(0, 0, 100, 100);
+      const canvas = createCanvas();
+      const resizeDragRef = createResizeDragRef({
+        aspectRatio: 1,
+        bounds: { height: 100, width: 100, x: 0, y: 0 },
+        handle: 'nw',
+        nodeOrigins: { [idA]: { flip: null, height: 100, rotation: 0, width: 100, x: 0, y: 0 } },
+      });
+
+      // before
+      store.dispatch(setActiveTool(ToolName.scale));
+      continueResizeDrag(canvas, pointerEvent(-50, -50), store.dispatch, resizeDragRef);
+
+      // result — the bottom-right corner (100, 100) stays fixed while the box grows northwest
+      expect(store.getState().design.nodes[idA]).toMatchObject({ height: 150, width: 150, x: -50, y: -50 });
+    });
+
+    it('should NOT force proportional scaling when the Scale tool is inactive, even on the same edge drag', () => {
+      // mock — same 100x50 frame and "n" handle drag as the first Scale test above, but with the
+      const idA = addFrameNode(0, 0, 100, 50);
+      const canvas = createCanvas();
+      const resizeDragRef = createResizeDragRef({
+        aspectRatio: 2,
+        bounds: { height: 50, width: 100, x: 0, y: 0 },
+        handle: 'n',
+        nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 0, width: 100, x: 0, y: 0 } },
+      });
+
+      // before
+      continueResizeDrag(canvas, pointerEvent(50, -50), store.dispatch, resizeDragRef);
+
+      // result
+      expect(store.getState().design.nodes[idA]).toMatchObject({ height: 100, width: 100, x: 0, y: -50 });
+    });
   });
 });

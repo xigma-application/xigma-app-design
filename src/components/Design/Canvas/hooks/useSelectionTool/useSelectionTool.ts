@@ -26,7 +26,7 @@ export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>,
   useEffect(() => {
     const canvas = canvasRef.current;
 
-    if (canvas && activeTool === ToolName.default) {
+    if (canvas && (activeTool === ToolName.default || activeTool === ToolName.scale)) {
       const onPointerDown = (event: PointerEvent): void =>
         handlePointerDown(canvas, event, dispatch, dragStateRef, endpointDragRef, resizeDragRef, rotateDragRef, marqueeStartRef);
 

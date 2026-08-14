@@ -15,6 +15,7 @@ export const shortcuts = {
   [ToolName.line]: { secondaryKey: KeyboardKeys.l },
   [ToolName.media]: { primaryKeys: [CONTROL_PRIMARY_KEY, 'shift'], secondaryKey: KeyboardKeys.k },
   [ToolName.rectangle]: { secondaryKey: KeyboardKeys.r },
+  [ToolName.scale]: { secondaryKey: KeyboardKeys.k },
   [ToolName.section]: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.s },
   [ToolName.text]: { secondaryKey: KeyboardKeys.t },
   escape: { secondaryKey: KeyboardKeys.escape },

@@ -161,7 +161,7 @@ describe('useToolbarShortcuts behaviors', () => {
     expect(store.getState().design.activeTool).toBe(ToolName.media);
   });
 
-  it('should not switch to the media tool on a plain "K" without the modifiers', () => {
+  it('should switch to the scale tool (not media) on a plain "K" without the modifiers', () => {
     // mock
     const store = createTestStore();
 
@@ -172,7 +172,7 @@ describe('useToolbarShortcuts behaviors', () => {
     fireEvent.keyDown(window, { code: 'KeyK' });
 
     // result
-    expect(store.getState().design.activeTool).toBe(ToolName.default);
+    expect(store.getState().design.activeTool).toBe(ToolName.scale);
   });
 
   it('should switch back to the default tool on "V"', () => {

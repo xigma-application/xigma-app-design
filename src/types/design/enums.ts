@@ -20,6 +20,7 @@ export enum ToolName {
   media = 'media',
   polygon = 'polygon',
   rectangle = 'rectangle',
+  scale = 'scale',
   section = 'section',
   star = 'star',
   text = 'text',

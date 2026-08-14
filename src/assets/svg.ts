@@ -82,6 +82,7 @@ import RectangleTool from './svg/rectangle-tool.svg?react';
 import RowGrabber from './svg/row-grabber.svg?react';
 import Rows from './svg/rows.svg?react';
 import Sample from './svg/sample.svg?react';
+import ScaleTool from './svg/scale-tool.svg?react';
 import SectionTool from './svg/section-tool.svg?react';
 import StarTool from './svg/star-tool.svg?react';
 import StepBackwardOutlined from './svg/step-backward-outlined.svg?react';
@@ -176,6 +177,7 @@ export const Icons = {
   RowGrabber,
   Rows,
   Sample,
+  ScaleTool,
   SectionTool,
   StarTool,
   StepBackwardOutlined,

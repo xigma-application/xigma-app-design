@@ -20,6 +20,7 @@ import { getRotateCursorAngle } from 'utils/math/getRotateCursorAngle';
 import { getRotateHandleAtPoint } from '../../utils/getRotateHandleAtPoint';
 import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
 import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
+import { getRotatedScaleCursorUrl } from 'utils/canvas/getRotatedScaleCursorUrl';
 import { screenToWorld } from '../../utils/screenToWorld';
 
 const POSITIONING_CURSOR_CLASS = styles['Canvas__canvas-element--positioning'];
@@ -44,11 +45,14 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
           canvas.style.cursor = '';
           hoverRef.current = lineEndpointHit!.nodeId;
           break;
-        case Boolean(resizeHandleHit):
+        case Boolean(resizeHandleHit): {
+          const getCursorUrl = activeTool === ToolName.scale ? getRotatedScaleCursorUrl : getRotatedResizeCursorUrl;
+
           canvas.classList.remove(POSITIONING_CURSOR_CLASS);
-          canvas.style.cursor = getRotatedResizeCursorUrl(getResizeCursorAngle(resizeHandleHit!.handle, resizeHandleHit!.rotation)) ?? '';
+          canvas.style.cursor = getCursorUrl(getResizeCursorAngle(resizeHandleHit!.handle, resizeHandleHit!.rotation)) ?? '';
           hoverRef.current = null;
           break;
+        }
         case Boolean(rotateHandleHit):
           canvas.classList.remove(POSITIONING_CURSOR_CLASS);
           canvas.style.cursor =
@@ -75,7 +79,7 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
   useEffect(() => {
     const canvas = canvasRef.current;
 
-    if (canvas && activeTool === ToolName.default) {
+    if (canvas && (activeTool === ToolName.default || activeTool === ToolName.scale)) {
       const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event);
       const onPointerLeave = (): void => handlePointerLeave(canvas);
 

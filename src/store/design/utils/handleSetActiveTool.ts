@@ -16,6 +16,7 @@ export const handleSetActiveTool = (state: TDesignState, tool: ToolName): void =
       break;
     case ToolName.default:
     case ToolName.hand:
+    case ToolName.scale:
       state.lastMouseTool = tool;
       break;
     case ToolName.frame:

@@ -250,6 +250,34 @@ already asserts the `setViewport` dispatch and cursor-class toggling precisely i
 real browser proves a `pointerdown` on top of an actual rendered frame doesn't leak into the
 selection tool.
 
+## Scale tool
+
+Mirrors Figma's Scale tool: shares its toolbar slot with the default (Move) and Hand tools
+(`TOOL_GROUP_ITEMS[default] = [default, hand, scale]`, `lastMouseTool` remembers which of the three
+was picked last), with its own keyboard shortcut ("K", `useToolbarShortcuts.ts`). Unlike a plain
+resize, dragging any resize handle while Scale is active always scales both dimensions
+proportionally — no Shift key needed, and unlike a plain Shift-lock resize (which only aspect-locks
+corner handles), Scale locks edge handles too. The pivot always sits on the side/corner opposite the
+grabbed handle, same convention as a plain resize's corner anchor: grabbing a corner pivots on the
+opposite corner (`getScaleAxisAnchors`'s 'min'/'max' sides, identical to `getResizeAxisAnchors`),
+grabbing an edge pivots on the center of the opposite edge (the edge's untouched axis resolves to
+its own center instead of `null`) — `getScaleBounds`/`getScaleAxisScale` implement the
+center-anchored math a plain resize's `getAspectRatioLockedRect`/`getSignedScale` don't support.
+Cursor swaps from `resize.png` to `scale.png` while hovering a handle (`useHoverHighlight.ts`).
+
+| #   | Scenario                                                                                                                                   | Unit |           E2E           |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------ | :--: | :---------------------: |
+| 69  | Pressing "K" activates the Scale tool, shown checked on the shared default/hand/scale button                                               |  —   | ✅ `scale-tool.spec.ts` |
+| 70  | Hovering a resize handle with Scale active applies a different cursor than the plain resize cursor                                         |  —   | ✅ `scale-tool.spec.ts` |
+| 71  | Grabbing an edge handle scales both dimensions proportionally, unlike a plain resize on the same edge                                      |  ✅  | ✅ `scale-tool.spec.ts` |
+| 72  | Grabbing the top edge pivots at the bottom-center point; grabbing a corner pivots at the opposite corner (same as a plain resize's anchor) |  ✅  |            —            |
+| 73  | With the Scale tool inactive, the same edge drag leaves the untouched axis alone (no forced lock)                                          |  ✅  |            —            |
+
+Scenarios #72/#73 are precise anchor-math claims already expressed exactly by
+`continueResizeDrag.spec.ts`'s "Scale tool" describe block and `getScaleBounds`/`getScaleFactors`
+unit tests — an e2e screenshot diff can only prove "something changed," not the exact pivot
+coordinate, so those stay unit-only per the "why so few scenarios get e2e coverage" rationale below.
+
 ## Text tool (Etap 6 + the create/edit slice of Etap 7)
 
 Unlike every other draw tool, Text never commits to Redux on `pointerup` — dragging out a box
