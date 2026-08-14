@@ -183,3 +183,49 @@ test('clicking a point on a rotated text-on-path circle places the caret there, 
 
   expect(rotatedInsertion.equals(unrotatedInsertion)).toBe(false);
 });
+
+test('dragging the path-text offset handle on a mirrored path-text node grabs it at its actual mirrored position', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  // a 200x200 circle at (300,300)-(500,500); moving the offset handle off the rightmost point
+  // first (to 481,459, ~10% around the curve) avoids the box's own corners/edges, so the later
+  // mirrored handle position can't be confused with a resize handle. Dragging the "nw" corner past
+  // the opposite ("se") anchor on both axes then mirrors the node (flipX and flipY) and moves the
+  // box to (500,500)-(700,700) — the offset handle now belongs at (519,541), not at the unmirrored
+  // position (681,659) an unfixed hit-test would still be looking for
+  const setUpMirroredPathText = async (): Promise<void> => {
+    await designPage.drawTextOnPath(300, 300, 500, 500);
+    await designPage.typeText('Hi');
+    await designPage.click(900, 600); // commit
+
+    await designPage.click(500, 400); // select it, on the rendered "H"
+    await designPage.pointerDown(500, 400); // the offset handle at its initial position
+    await designPage.pointerMove(481, 459); // move it off any box corner/edge
+    await designPage.pointerUp();
+
+    await designPage.pointerDown(300, 300); // "nw" resize handle
+    await designPage.pointerMove(700, 700); // past the opposite anchor on both axes -> mirrors flipX and flipY
+    await designPage.pointerUp();
+  };
+
+  // scenario A: actually try to grab and drag the handle at its real (mirrored) position
+  await designPage.goto('e2e-test-path-offset-handle-mirrored-grab');
+  await setUpMirroredPathText();
+  await designPage.pointerDown(519, 541); // the handle's actual (mirrored) position
+  await designPage.pointerMove(600, 650); // drag it along the curve
+  await designPage.pointerUp();
+  const grabbed = await designPage.canvas.screenshot();
+
+  // scenario B: identical setup, but only hover the same path (no button held) — this only
+  // exercises hover-outline rendering, never an actual offset drag, regardless of hit-test bugs
+  await designPage.goto('e2e-test-path-offset-handle-mirrored-hover-only');
+  await setUpMirroredPathText();
+  await designPage.pointerMove(519, 541);
+  await designPage.pointerMove(600, 650);
+  const hoveredOnly = await designPage.canvas.screenshot();
+
+  // if the handle hit-test were still looking at the unmirrored position, scenario A's pointerdown
+  // would miss it entirely and behave just like scenario B's plain hover — so any difference here
+  // can only come from the drag actually grabbing the handle and moving pathStartOffset
+  expect(grabbed.equals(hoveredOnly)).toBe(false);
+});
