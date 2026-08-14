@@ -117,3 +117,46 @@ test('double-clicking a selected text node past its rendered content (but inside
 
   expect(replaced.equals(reference)).toBe(true);
 });
+
+test('clicking a point on an upside-down (180-degree rotated) text box places the caret there, not always at the end', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  // a 200x40 box at (300,300)-(500,340); once rotated 180 degrees around its own center (400,320),
+  // the rendered "H"/"i" boundary sits at world (489.5, 320) and the end of "i" at world (486, 320) —
+  // reversed from their unrotated positions, since the box now reads right-to-left on screen
+  await designPage.goto('e2e-test-rotated-caret-mid-insert');
+  await designPage.drawTextBox(300, 300, 500, 340);
+  await designPage.typeText('Hi');
+  await designPage.click(950, 600); // commit
+
+  await designPage.click(305, 310); // select it
+  await designPage.pointerDown(290, 290); // rotate ring just outside the "nw" handle
+  await designPage.pointerMove(510, 350); // the reflection of (290,290) through the box's own center -> exactly 180 degrees
+  await designPage.pointerUp();
+
+  await designPage.doubleClick(400, 320); // re-enter editing at the box's own (rotation-invariant) center
+  await designPage.click(489.5, 320); // the boundary between "H" and "i" on the now-upside-down text
+  await designPage.typeText('X');
+  await designPage.click(950, 600); // commit
+  const midInsertion = await designPage.canvas.screenshot();
+
+  // same box/content/rotation, but the click lands just past "i" instead — the caret should land at
+  // the end, producing a visibly different render for the same typed character
+  await designPage.goto('e2e-test-rotated-caret-end-insert');
+  await designPage.drawTextBox(300, 300, 500, 340);
+  await designPage.typeText('Hi');
+  await designPage.click(950, 600);
+
+  await designPage.click(305, 310);
+  await designPage.pointerDown(290, 290);
+  await designPage.pointerMove(510, 350);
+  await designPage.pointerUp();
+
+  await designPage.doubleClick(400, 320);
+  await designPage.click(486, 320); // just past "i" on the now-upside-down text
+  await designPage.typeText('X');
+  await designPage.click(950, 600);
+  const endInsertion = await designPage.canvas.screenshot();
+
+  expect(midInsertion.equals(endInsertion)).toBe(false);
+});

@@ -13,10 +13,12 @@ import { TDraftRect, TPoint } from 'types/canvas';
 import { handlePointerDown } from './utils/handlePointerDown/handlePointerDown';
 import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
+import { shouldUseCanvasCaretEditing } from '../../utils/shouldUseCanvasCaretEditing';
 
 export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>, marqueeRef: RefObject<TDraftRect | null>): void => {
   const activeTool = useAppSelector(selectActiveTool);
-  const editingPathId = useAppSelector(selectEditingTextBox)?.pathId;
+  const editingTextBox = useAppSelector(selectEditingTextBox);
+  const isCanvasCaretEditingActive = shouldUseCanvasCaretEditing(editingTextBox);
   const dispatch = useAppDispatch();
   const dragStateRef = useRef<TDragState | null>(null);
   const endpointDragRef = useRef<TEndpointDragState | null>(null);
@@ -28,7 +30,7 @@ export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>,
   useEffect(() => {
     const canvas = canvasRef.current;
 
-    if (canvas && (activeTool === ToolName.default || activeTool === ToolName.scale) && !editingPathId) {
+    if (canvas && (activeTool === ToolName.default || activeTool === ToolName.scale) && !isCanvasCaretEditingActive) {
       const onPointerDown = (event: PointerEvent): void =>
         handlePointerDown(
           canvas,
@@ -80,5 +82,5 @@ export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>,
         canvas.removeEventListener('pointerup', onPointerUp);
       };
     }
-  }, [activeTool, canvasRef, dispatch, editingPathId, marqueeRef]);
+  }, [activeTool, canvasRef, dispatch, isCanvasCaretEditingActive, marqueeRef]);
 };

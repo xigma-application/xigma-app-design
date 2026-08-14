@@ -19,6 +19,7 @@ import { useDrawTextOnPathTool } from './hooks/useDrawTextOnPathTool/useDrawText
 import { useDrawTextTool } from './hooks/useDrawTextTool/useDrawTextTool';
 import { useHandTool } from './hooks/useHandTool/useHandTool';
 import { useHoverHighlight } from './hooks/useHoverHighlight/useHoverHighlight';
+import { useRotatedCaretEditing } from './hooks/useRotatedCaretEditing/useRotatedCaretEditing';
 import { useSelectionTool } from './hooks/useSelectionTool/useSelectionTool';
 import { useTextEditOnDoubleClick } from './hooks/useTextEditOnDoubleClick/useTextEditOnDoubleClick';
 
@@ -65,6 +66,7 @@ const Canvas: FC = () => {
   useTextEditOnDoubleClick(canvasRef);
   useHoverHighlight(canvasRef, hoverRef);
   useCurvedCaretEditing(canvasRef);
+  useRotatedCaretEditing(canvasRef);
   useDrawingCursor(canvasRef);
   useCanvasRenderLoop(canvasRef, draftRef, marqueeRef, hoverRef);
 

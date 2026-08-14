@@ -605,4 +605,44 @@ describe('useSelectionTool behaviors', () => {
     // result
     expect(store.getState().design.selectedIds).toEqual([idA]);
   });
+
+  it('should not react to pointer events while a rotated straight-text node is being edited', () => {
+    // mock
+    const idA = addFrameNode(3200, 700);
+    const box: TEditingTextBox = { flipX: false, flipY: false, height: 20, rotation: 180, width: 20, x: 3200, y: 700 };
+
+    store.dispatch(startTextEdit({ box, content: 'Hi' }));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    renderSelectionTool(canvasRef);
+
+    // action
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 3205, 705));
+
+    // result
+    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(idA).toBeTruthy();
+  });
+
+  it('should not react to pointer events while a flipped straight-text node is being edited', () => {
+    // mock
+    const idA = addFrameNode(3300, 700);
+    const box: TEditingTextBox = { flipX: true, flipY: false, height: 20, rotation: 0, width: 20, x: 3300, y: 700 };
+
+    store.dispatch(startTextEdit({ box, content: 'Hi' }));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    renderSelectionTool(canvasRef);
+
+    // action
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 3305, 705));
+
+    // result
+    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(idA).toBeTruthy();
+  });
 });

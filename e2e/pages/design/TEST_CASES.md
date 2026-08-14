@@ -362,6 +362,7 @@ the live-typed ones.
 | 62  | The node currently being edited is excluded from normal fill, selection-outline, and hover-outline rendering                                   |  ✅  |           —            |
 | 63  | A rotated, mirrored node being edited keeps rendering its glyphs (`drawEditingText.ts`) at its own rotation/flip                               |  ✅  | ✅ `edit-text.spec.ts` |
 | 64  | The canvas-drawn selection highlight/caret (`drawEditingCaretAndSelection.ts`) reacts to the live selection, even on a rotated node            |  ✅  | ✅ `edit-text.spec.ts` |
+| 86  | Clicking a point on a rotated or flipped straight-text box places the caret there, not wherever native (unrotated) DOM hit-testing would land  |  ✅  | ✅ `edit-text.spec.ts` |
 
 #58/#59 are the two distinct hit-test branches (`getDoubleClickedTextNode.ts` already pins both
 precisely via `store.getState()`), but the actual claim worth an e2e proof is a real native
@@ -389,6 +390,32 @@ goes a step further on the same rotated node: it asserts the canvas-drawn select
 proving the highlight is driven by live selection state, not just a static rotated decoration, and
 that this now works correctly even when rotated (pre-fix, the equivalent native DOM highlight would
 render axis-aligned and visibly detached from the rotated glyphs, per the original bug report).
+
+#86 was a known, previously-deferred gap (`docs/ROADMAP.md`): a click _inside_ an already-open edit
+session used to always fall through to the browser's own native `contentEditable` hit-testing, which
+places the Range against the overlay div's unrotated, unflipped native text layout — correct only
+when the box's own `rotation`/`flipX`/`flipY` are all identity. For a rotated or flipped box, the
+same screen point maps to a different character than the one visually under the cursor (worst case,
+a 180-degree box reads back-to-front, so a click near what looks like the end of the text lands the
+caret near the start instead). `useRotatedCaretEditing.ts` fixes this the same way
+`useCurvedCaretEditing.ts` already fixed the equivalent bug for path text: a real `document`-level
+`pointerdown`/`pointermove`/`pointerup` listener (active only when `shouldUseCanvasCaretEditing.ts`
+says the box actually needs it — plain unrotated/unflipped boxes are untouched, still native)
+computes the clicked character via `getStraightCaretIndexAtPoint.ts` — unrotate then unflip the
+query point (`rotatePoint`/`flipTextPoint`, the same inverse-transform trick `getUnrotatedQueryPoint`
+already uses for hit-testing elsewhere), then walk `wrapTextWithOffsets`/`measureGlyphTextWidth` to
+find the nearest character boundary — and programmatically sets the real DOM `Range`/`Selection` via
+`setEditableSelectionRange.ts`, overriding whatever the native click would have done.
+`useSelectionTool.ts`'s own pointer handling is gated off by the same `shouldUseCanvasCaretEditing.ts`
+check while either canvas-driven caret-editing hook is active, so a click that lands on the bare
+canvas (rather than the overlay) during such a session can't also select/drag some other node
+underneath. The unit suite (`getStraightCaretIndexAtPoint.spec.ts`, `shouldUseCanvasCaretEditing
+.spec.ts`, `useRotatedCaretEditing.spec.tsx`) asserts the exact index/distance/selection precisely
+in jsdom, but the e2e version proves a real rotate-ring drag to an exact 180 degrees (dragging to the
+reflection of the arm point through the box's own center, guaranteeing the delta regardless of the
+arm point's exact position) followed by a real click at two different points on the now-upside-down
+text produces two visibly different results for the same typed character — the same "compare two
+independently-drawn pages" pattern `text-on-path.spec.ts`'s curved-caret tests already use.
 
 ## Resize (Etap 10)
 
