@@ -331,8 +331,8 @@ describe('continueResizeDrag', () => {
     expect(store.getState().design.nodes[idA]).toMatchObject({ height: 100, rotation: 90, width: 100, x: 50, y: -25 });
   });
 
-  it('should smoothly blend both axis scales for a non-axis-aligned rotation, keeping a true (unsheared) rectangle', () => {
-    // mock — same horizontal-only group resize (scaleX 2, scaleY 1), but at 30deg neither local axis
+  it('should scale a non-axis-aligned GROUP MEMBER on its dominant local axis only, like an unrotated node', () => {
+    // mock — same horizontal-only group resize (scaleX 2, scaleY 1); at 30deg the local x-axis is
     const idA = addFrameNode(0, 0, 100, 50, 'parent-1', 30);
     const canvas = createCanvas();
     const resizeDragRef = createResizeDragRef({
@@ -348,9 +348,8 @@ describe('continueResizeDrag', () => {
     // before
     continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef);
 
-    // result — width = 100·√((2·cos30)²+sin30²) ≈ 180.28, height = 50·√((2·sin30)²+cos30²) ≈ 66.14,
-    // rounded to whole pixels on dispatch
-    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 66, rotation: 30, width: 180, x: 10, y: -8 });
+    // result — width doubles with scaleX (and would reach exactly 0 alongside it), height and
+    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 50, rotation: 30, width: 200, x: 0, y: 0 });
   });
 
   it('should resize a single, lone-selected rotated node by rotating the pointer back into its own local frame', () => {
@@ -368,7 +367,6 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef);
 
     // result — local height untouched, local width grown ×5.25 (the raw world-space drag distance,
-    // rounded to whole pixels on dispatch)
     expect(store.getState().design.nodes[idA]).toMatchObject({ height: 50, rotation: 90, width: 525, x: -212, y: 213 });
   });
 

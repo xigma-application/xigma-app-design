@@ -19,11 +19,11 @@ describe('getRotatedAxisSigns', () => {
     expect(result.y).toBeCloseTo(-2);
   });
 
-  it('should blend both world scale signs for a non-axis-aligned rotation', () => {
+  it('should treat an exact 45deg tie as unswapped, matching getRotatedAxisScales', () => {
     // result
     const result = getRotatedAxisSigns(-2, 3, 45);
 
-    expect(result.x).toBeCloseTo(0.5);
-    expect(result.y).toBeCloseTo(0.5);
+    expect(result.x).toBeCloseTo(-2);
+    expect(result.y).toBeCloseTo(3);
   });
 });

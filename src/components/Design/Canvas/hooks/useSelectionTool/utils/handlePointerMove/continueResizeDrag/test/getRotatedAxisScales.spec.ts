@@ -26,12 +26,11 @@ describe('getRotatedAxisScales', () => {
     expect(result.y).toBeCloseTo(3);
   });
 
-  it('should blend both world scales for a non-axis-aligned rotation', () => {
-    // mock — matches the exact blend asserted end-to-end in continueResizeDrag.spec.ts's 30deg test
+  it('should pass the world scales straight through, unblended, below 45deg', () => {
     // result
     const result = getRotatedAxisScales(2, 1, 30);
 
-    expect(result.x).toBeCloseTo(1.8028, 3);
-    expect(result.y).toBeCloseTo(1.3229, 3);
+    expect(result.x).toBeCloseTo(2);
+    expect(result.y).toBeCloseTo(1);
   });
 });

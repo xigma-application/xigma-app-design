@@ -520,6 +520,32 @@ przeszkodą, żeby edycja pojedynczego node'a czuła się skończona, nie tylko 
                                                           prostokątem-referencją w tym samym miejscu; potwierdzone też, że test faktycznie łapie
                                                           regresję (fail bez poprawki, pass z nią)
 
+                                                          **Piąta poprawka (po zgłoszeniu przez użytkownika — resize grupy z obróconym node'em nie
+                                                          ścinał się do zera i dryfował w wolnej osi)**: poprzednie dwie poprawki (wyżej) świadomie
+                                                          zachowywały obrócony node jako prawdziwy, nieścięty prostokąt przez rzut wektora skali na
+                                                          jego lokalne osie (`getRotatedAxisScales`/`getRotatedAxisSigns`, √((scaleX·cosθ)² +
+                                                          (scaleY·sinθ)²)) — matematycznie poprawne dla prawdziwej (ścinającej) transformacji, ale
+                                                          przy resizie tylko jednej osi grupy (np. uchwyt `e`, scaleY zamrożone na 1, bo Y w ogóle nie
+                                                          jest ruszane) ten sam wzór i tak przepuszczał kawałek "zamrożonej" osi w drugą, lokalną
+                                                          wymiarę node'a — przy θ=30° ciągnięcie do scaleX=0.09 dawało lokalną szerokość ×0.51
+                                                          (zamiast ×0.09, więc node nigdy nie dochodził do zera tak jak nieobrócony) i lokalną
+                                                          wysokość ×0.87 mimo że oś Y w ogóle nie była częścią gestu — ta niechciana zmiana wysokości
+                                                          zmuszała kod do przesuwania pozycji Y, mimo że przy czysto poziomym resize nic w Y nie
+                                                          powinno się ruszyć. Naprawione zamianą płynnego trygonometrycznego blendu na twardy próg
+                                                          dominującej osi: nowy `isRotationAxisSwapped.ts` (`|sin θ| > |cos θ|`) decyduje, czy lokalna
+                                                          oś X/Y node'a jest bliżej world-X czy world-Y, a
+                                                          `getRotatedAxisScales`/`getRotatedAxisSigns` na tej podstawie przepuszczają
+                                                          `scaleX`/`scaleY` **wprost**, bez rzutowania — więc na swojej dominującej osi obrócony node
+                                                          skaluje się identycznie jak nieobrócony (w tym do zera), a wolna oś (scale=1) zostaje
+                                                          całkowicie nietknięta, bez żadnego driftu pozycji. Przy dokładnie 90° zachowanie to nadal
+                                                          pełny swap (bez zmian, testy przeszły bez modyfikacji), przy 0° to no-op jak zawsze.
+                                                          Świadomy kompromis: przy rotacjach blisko 45° nie ma już płynnego przejścia (twardy próg
+                                                          zamiast blendu) — zaakceptowane na żądanie użytkownika, bo "ścina się do zera jak
+                                                          nieobrócony" było ważniejsze niż ciągłość na granicy 45°. Zweryfikowane end-to-end w
+                                                          `continueResizeDrag.spec.ts` (30° node w grupowym resize tylko-w-X: szerokość skaluje się z
+                                                          scaleX, wysokość i pozycja zostają dokładnie bez zmian — identycznie jak dla nieobróconego
+                                                          node'a na tej samej ścieżce), 100% pokrycie testów utrzymane
+
 - [x] **mirror/flip przy przejściu przez zero podczas resize** — `computeResizedRect.ts` przestał
       clampować asymetrycznie do `MIN_SHAPE_SIZE`; przeciągnięcie uchwytu "przez" przeciwległy
       róg/krawędź teraz mirror'uje bbox zamiast utykać na minimalnym rozmiarze (punkt zakotwiczenia
