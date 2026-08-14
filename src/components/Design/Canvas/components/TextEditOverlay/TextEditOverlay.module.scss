@@ -3,6 +3,7 @@
   outline: none;
   overflow-wrap: break-word;
   position: absolute;
+  pointer-events: none;
   white-space: pre-wrap;
 
   &::selection {

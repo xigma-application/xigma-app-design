@@ -1,7 +1,7 @@
 import { RefObject, useEffect } from 'react';
 
 // store
-import { selectActiveTool, selectOrderedNodes, selectSelectedNodes, selectViewport } from 'store/design/selectors';
+import { selectActiveTool, selectEditingTextBox, selectOrderedNodes, selectSelectedNodes, selectViewport } from 'store/design/selectors';
 import { store, useAppSelector } from 'store';
 
 // styles
@@ -34,7 +34,8 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
       const state = store.getState();
       const viewport = selectViewport(state);
       const point = screenToWorld(getPointerPosition(canvas, event), viewport);
-      const selectedNodes = selectSelectedNodes(state);
+      const isEditingText = Boolean(selectEditingTextBox(state));
+      const selectedNodes = isEditingText ? [] : selectSelectedNodes(state);
       const [selectedNode] = selectedNodes;
       const lineEndpointHit = getLineEndpointAtPoint(point, selectedNodes, viewport);
       const pathOffsetHandleHit = getPathTextOffsetHandleAtPoint(point, selectedNodes, viewport);

@@ -6,7 +6,7 @@ import { RefObject } from 'react';
 import { useHoverHighlight } from './useHoverHighlight';
 
 // store
-import { addNode, setActiveTool, setSelection } from 'store/design/slice';
+import { addNode, setActiveTool, setSelection, startTextEdit, stopTextEdit } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -93,6 +93,7 @@ describe('useHoverHighlight behaviors', () => {
   beforeEach(() => {
     store.dispatch(setActiveTool(ToolName.default));
     store.dispatch(setSelection([]));
+    store.dispatch(stopTextEdit());
   });
 
   it('should not react to pointer events when the default tool is not active', () => {
@@ -331,6 +332,83 @@ describe('useHoverHighlight behaviors', () => {
 
     // result
     expect(canvasRef.current?.className).toContain('positioning');
+    expect(hoverRef.current).toBe(idA);
+  });
+
+  it("should not show the resize cursor over a selected node's resize handle while it is being edited", () => {
+    // mock — the node stays selected during its own edit session, but its handles must not be live
+    const idA = addFrameNode(2200, 2200, 100);
+
+    store.dispatch(setSelection([idA]));
+    store.dispatch(
+      startTextEdit({
+        box: { flipX: false, flipY: false, height: 100, rotation: 0, width: 100, x: 2200, y: 2200 },
+        content: 'Hi',
+        id: idA,
+      }),
+    );
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    renderHoverHighlight(canvasRef);
+
+    // action — exactly on the "nw" corner handle of the node being edited
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2200, 2200));
+
+    // result — no resize cursor, falls through to the plain node-hover branch instead
+    expect(canvasRef.current?.style.cursor).toBe('');
+    expect(canvasRef.current?.className).not.toContain('positioning');
+  });
+
+  it("should not show the rotate cursor in a selected node's rotate ring while it is being edited", () => {
+    // mock — the "nw" corner sits at (2300, 2300); the rotate ring starts just past the resize
+    const idA = addFrameNode(2300, 2300, 100);
+
+    store.dispatch(setSelection([idA]));
+    store.dispatch(
+      startTextEdit({
+        box: { flipX: false, flipY: false, height: 100, rotation: 0, width: 100, x: 2300, y: 2300 },
+        content: 'Hi',
+        id: idA,
+      }),
+    );
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    renderHoverHighlight(canvasRef);
+
+    // action — inside the rotate ring but outside the resize radius
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2300, 2290));
+
+    // result — no rotate cursor, falls through to the plain node-hover branch instead
+    expect(canvasRef.current?.style.cursor).toBe('');
+  });
+
+  it("should not apply the positioning cursor over a path-text node's start-offset handle while it is being edited", () => {
+    // mock — a 200x200 path-text box at (4300, 4300); the offset-0 handle sits at its rightmost edge (4500, 4400)
+    const idA = addPathTextNode(4300, 4300, 200);
+
+    store.dispatch(setSelection([idA]));
+    store.dispatch(
+      startTextEdit({
+        box: { flipX: false, flipY: false, height: 200, pathId: 'ellipse-1', pathStartOffset: 0, rotation: 0, width: 200, x: 4300, y: 4300 },
+        content: 'Hi',
+        id: idA,
+      }),
+    );
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const hoverRef = renderHoverHighlight(canvasRef);
+
+    // action
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 4500, 4400));
+
+    // result — falls through to the plain node-hover branch, same as any other point on the node
+    expect(canvasRef.current?.className).not.toContain('positioning');
     expect(hoverRef.current).toBe(idA);
   });
 });
