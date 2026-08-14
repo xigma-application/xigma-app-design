@@ -78,6 +78,20 @@ describe('drawTextHoverUnderline', () => {
     expect(firstCallVertices).not.toEqual(secondCallVertices);
   });
 
+  it('should draw nothing for text on a path, since the curved outline replaces the underline', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const node = buildNode({ pathId: 'path-1' });
+
+    // before
+    drawTextHoverUnderline(gl, program, buffer, node, 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+  });
+
   it('should mirror the underline position when the node is flipped, matching the mirrored glyphs', () => {
     // mock
     const gl = createGlMock();

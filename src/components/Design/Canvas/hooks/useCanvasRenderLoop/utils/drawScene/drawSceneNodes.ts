@@ -1,11 +1,11 @@
 // others
 import { LINE_RENDER_STROKE_WIDTH } from 'constant/canvas';
 import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
-import { PATH_STROKE } from '../../../../constants';
 
 // types
 import { NodeType } from 'types/design/enums';
 import { TImageRenderContext } from '../../types';
+import { TPathOutlineStyle } from './getPathOutlineStyles';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
@@ -13,6 +13,7 @@ import { drawEllipse } from 'utils/canvas/shapes/drawEllipse';
 import { drawImage } from 'utils/canvas/drawImage';
 import { drawLine } from 'utils/canvas/drawLine';
 import { drawMsdfText } from 'utils/canvas/text/drawMsdfText';
+import { drawPathOutline } from './drawPathOutline';
 import { drawPolygon } from 'utils/canvas/shapes/drawPolygon';
 import { drawRect } from 'utils/canvas/drawRect';
 import { drawStar } from 'utils/canvas/shapes/drawStar';
@@ -28,6 +29,7 @@ export const drawSceneNodes = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  pathOutlineStyles: Map<string, TPathOutlineStyle>,
 ): void => {
   nodes.forEach((node) => {
     switch (node.type) {
@@ -59,7 +61,7 @@ export const drawSceneNodes = (
         drawLine(gl, program, buffer, node, node.stroke, LINE_RENDER_STROKE_WIDTH, canvasWidth, canvasHeight, viewport);
         break;
       case NodeType.path:
-        drawEllipse(gl, program, buffer, { ...node, stroke: PATH_STROKE }, canvasWidth, canvasHeight, viewport, node.rotation);
+        drawPathOutline(gl, program, buffer, node, pathOutlineStyles.get(node.id), canvasWidth, canvasHeight, viewport);
         break;
       case NodeType.text:
         drawMsdfText(

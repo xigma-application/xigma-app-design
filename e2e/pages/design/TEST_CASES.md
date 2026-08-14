@@ -585,6 +585,50 @@ real `pointerdown`→`pointermove`→`pointerup` resize-handle drag on a _live-r
 node actually repainting in sync — the same "real browser + rendering + timing" category as the
 Resize section's #66 above, not just the reducer math in isolation.
 
+## Text on Path outline visibility (hidden / hover / selected)
+
+The path's own curve used to render unconditionally, every frame, in a plain white stroke — a
+permanent visual artifact of an otherwise-invisible implementation-detail node. It now stays
+hidden until there's a reason to show it (`getPathOutlineStyles.ts` + `drawPathOutline.ts`,
+consumed from `drawSceneNodes.ts`'s `NodeType.path` branch), with a real click/hover surface that
+belongs to the bound text, not the box: `getNodeAtPoint.ts` gained a `NodeType.path → false` branch
+(the bare path node is now never itself hit-testable — every interaction routes through the paired
+text node) and a new `isPointInCurvedText.ts` replaces the old bounding-box fallback for
+path-linked text, testing perpendicular distance to the actual curve _and_ arc-length position
+against the rendered content's real span, not just "inside the box." Style priority is
+hover-first: hovering the rendered text always shows the thicker `DRAFT_FRAME_STROKE` hover
+outline, even while already selected (the "you can grab it right here" affordance); selected-but-
+not-hovered falls back to a thin outline at the same stroke width/mechanism as the ordinary
+box-with-corner-handles outline (both are plain `gl.LINE_LOOP` draws, no thickness parameter).
+While drawing a fresh path or actively typing its text (first creation _or_ re-edit), the box's
+usual rectangular selection outline and corner handles are suppressed entirely for the path node
+(`drawDraftShape.ts`'s `NodeType.path` case skips the shared corner-handles tail;
+`drawPerNodeSelectionOutlines.ts` and `drawEditingTextBoxOutline.ts` both special-case it out) —
+only the bare ellipse curve shows, using `editingTextBox.pathId` to resolve the outline style even
+before the real text node exists in the store yet (first-time creation has no text node until
+commit — only the editing box).
+
+| #   | Scenario                                                                                                                                                                 | Unit |            E2E            |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :--: | :-----------------------: |
+| 79  | The path outline is fully hidden when its text is neither hovered, selected, nor being edited — resting inside the bounding box but off the curve shows nothing          |  ✅  | ✅ `text-on-path.spec.ts` |
+| 80  | Hovering exactly on the rendered curved text (not the bare curve, not the bounding box) shows the thick hover outline; the bare path node is never itself hit-testable   |  ✅  | ✅ `text-on-path.spec.ts` |
+| 81  | Selecting the text via a real click on its rendered glyphs shows the outline in its thin "selected" style                                                                |  ✅  | ✅ `text-on-path.spec.ts` |
+| 82  | Hovering the text while it's already selected switches the outline to the thicker hover style, instead of staying on the thin selected style                             |  ✅  | ✅ `text-on-path.spec.ts` |
+| 83  | Neither the drag-to-create draft nor the live-typing phase (first creation or re-edit) shows a rectangular box/corner-handles outline for the path — only the bare curve |  ✅  |             —             |
+
+#79-#82 all live in one e2e test, since they're really one continuous state-machine walk (hidden →
+hover → back to hidden → selected → selected+hover) and splitting it into separate tests would just
+mean re-drawing the same path four times — the same efficiency reasoning `hover.spec.ts`'s single
+frame-hover test already uses for its own hide/show/hide sequence. Each transition is exactly the
+"real browser + rendering + timing" category this file is for: a real `pointermove` against
+real-rendered curved MSDF glyphs deciding which of three draw calls (`drawEllipse` thin,
+`drawThickEllipseOutline` thick, or nothing) actually paints, which `getPathOutlineStyles.spec.ts`
+can pin down as pure branch logic but can't prove a real browser repaints in response to. #83 stays
+unit-only: `drawDraftShape.spec.ts`, `drawPerNodeSelectionOutlines.spec.ts`, and
+`drawEditingTextBoxOutline.spec.ts` already count the exact WebGL draw calls (or their absence) for
+every phase precisely — the claim is "this specific draw call never happens," which a screenshot
+diff can't express any more precisely than the call-count assertion already does.
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

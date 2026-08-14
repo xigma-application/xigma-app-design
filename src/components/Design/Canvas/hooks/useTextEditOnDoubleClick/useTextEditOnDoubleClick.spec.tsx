@@ -150,7 +150,7 @@ describe('useTextEditOnDoubleClick behaviors', () => {
   });
 
   it('should carry the path binding back into the editing box when re-editing a path-text node', () => {
-    // mock
+    // mock — a 500x500 circle centered at (2850, 2850); pathStartOffset 0.25 puts the content's
     const idA = addPathTextNode(2600, 2600);
 
     const canvasRef = createCanvasRef();
@@ -159,7 +159,7 @@ describe('useTextEditOnDoubleClick behaviors', () => {
     renderDoubleClickTool(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(doubleClickEvent(2602, 2602));
+    canvasRef.current?.dispatchEvent(doubleClickEvent(2850, 3100));
 
     // result
     const { design } = store.getState();

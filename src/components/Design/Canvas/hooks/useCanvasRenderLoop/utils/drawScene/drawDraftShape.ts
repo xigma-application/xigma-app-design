@@ -59,7 +59,7 @@ export const drawDraftShape = (
       break;
     case NodeType.path:
       drawEllipse(gl, program, buffer, { ...draftShape, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport, 0);
-      break;
+      return;
     default:
       drawRect(
         gl,

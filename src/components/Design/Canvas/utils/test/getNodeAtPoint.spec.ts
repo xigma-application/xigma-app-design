@@ -1,5 +1,5 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, PathType } from 'types/design/enums';
 import { TBoxSceneNode, TMediaNode, TPathNode, TPolygonNode, TSceneNode, TStarNode, TTextNode } from 'types/design/types';
 
 // utils
@@ -169,6 +169,72 @@ describe('getNodeAtPoint', () => {
     // result — (10, -3) sits inside the box once rotated 90deg around its center (10, 5), even
     expect(getNodeAtPoint({ x: 10, y: -3 }, [node], IDENTITY_VIEWPORT)).toEqual(node);
     expect(getNodeAtPoint({ x: 19, y: 9 }, [node], IDENTITY_VIEWPORT)).toBeNull();
+  });
+
+  it('should use curved glyph hit-testing for text on a path, not the fixed box or the full curve', () => {
+    // mock — a 200x200 circle centered at (100, 100); "Hi" starts at its rightmost point
+    const node: TSceneNode = {
+      content: 'Hi',
+      fill: '#ffffff',
+      flipX: false,
+      flipY: false,
+      fontFamily: 'Inter',
+      fontSize: 14,
+      height: 200,
+      id: 'a',
+      name: 'Text',
+      parentId: null,
+      pathId: 'path-1',
+      rotation: 0,
+      type: NodeType.text,
+      width: 200,
+      x: 0,
+      y: 0,
+    };
+
+    // result — on the curve, at the content: hit; on the curve, far from the short content: miss
+    expect(getNodeAtPoint({ x: 200, y: 100 }, [node], IDENTITY_VIEWPORT)).toEqual(node);
+    expect(getNodeAtPoint({ x: 0, y: 100 }, [node], IDENTITY_VIEWPORT)).toBeNull();
+  });
+
+  it('should never hit a bare path node, even for a point squarely inside its bounding box', () => {
+    // mock — path nodes are an invisible implementation detail of text-on-path; only the
+    // paired text's rendered content should ever be clickable/hoverable
+    const node: TPathNode = {
+      height: 200,
+      id: 'a',
+      name: 'Path',
+      parentId: null,
+      pathType: PathType.ellipse,
+      rotation: 0,
+      type: NodeType.path,
+      width: 200,
+      x: 0,
+      y: 0,
+    };
+
+    // result
+    expect(getNodeAtPoint({ x: 100, y: 100 }, [node], IDENTITY_VIEWPORT)).toBeNull();
+  });
+
+  it('should fall through a bare path node to the node underneath it', () => {
+    // mock
+    const path: TPathNode = {
+      height: 200,
+      id: 'a',
+      name: 'Path',
+      parentId: null,
+      pathType: PathType.ellipse,
+      rotation: 0,
+      type: NodeType.path,
+      width: 200,
+      x: 0,
+      y: 0,
+    };
+    const frame = buildNode({ height: 200, id: 'b', width: 200, x: 0, y: 0 });
+
+    // result — path is drawn on top in z-order but must be transparent to hit-testing
+    expect(getNodeAtPoint({ x: 100, y: 100 }, [frame, path], IDENTITY_VIEWPORT)?.id).toBe('b');
   });
 
   it('should widen the line hit-test tolerance in world units as the viewport zooms out', () => {

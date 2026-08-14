@@ -44,7 +44,7 @@ export const drawCurvedCaret = (
     gl,
     program,
     buffer,
-    { fill: TEXT_FILL, height: lineHeight, width: caretWidth, x: caret.x - caretWidth / 2, y: caret.y },
+    { fill: TEXT_FILL, height: lineHeight, width: caretWidth, x: caret.x - caretWidth / 2, y: caret.y - lineHeight / 2 },
     canvasWidth,
     canvasHeight,
     viewport,

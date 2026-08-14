@@ -1,5 +1,5 @@
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, PathType } from 'types/design/enums';
 import { TBoxSceneNode, TMediaNode, TPathNode, TPolygonNode, TSceneNode, TStarNode, TTextNode } from 'types/design/types';
 
 // utils
@@ -120,6 +120,32 @@ describe('drawPerNodeSelectionOutlines', () => {
     const fanDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLE_FAN);
 
     expect(fanDraws).toHaveLength(1);
+  });
+
+  it('should draw nothing for a selected bare path node, not a bounding-box outline', () => {
+    // mock — a freshly created text-on-path node selects its path node while the user is still
+    // typing; that path node must stay invisible here, since drawPathOutline already renders it
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const path: TPathNode = {
+      height: 200,
+      id: 'a',
+      name: 'Path',
+      parentId: null,
+      pathType: PathType.ellipse,
+      rotation: 0,
+      type: NodeType.path,
+      width: 200,
+      x: 0,
+      y: 0,
+    };
+
+    // before
+    drawPerNodeSelectionOutlines(gl, program, buffer, [path], 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    expect(gl.drawArrays).not.toHaveBeenCalled();
   });
 
   it('should not draw the start-offset handle for an ordinary (non-path) text node', () => {

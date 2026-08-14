@@ -25,6 +25,7 @@ export const buildCurvedGlyphQuads = (
   const circumference = getEllipseCircumference(arcLengthTable);
   const vertices: number[] = [];
   let cumulativeLength = startOffset * circumference;
+  const penY = -(atlas.common.lineHeight * scale) / 2;
 
   content.split('').forEach((char) => {
     const charCode = char.charCodeAt(0);
@@ -37,7 +38,7 @@ export const buildCurvedGlyphQuads = (
       const anchor: TPoint = { x: ellipseCenter.x + sample.x, y: ellipseCenter.y + sample.y };
       const angleDegrees = sample.angleDegrees + (flip ? 180 : 0);
 
-      vertices.push(...buildGlyphQuad(glyph, 0, 0, scale, atlas.common.scaleW, atlas.common.scaleH, { anchor, angleDegrees }));
+      vertices.push(...buildGlyphQuad(glyph, 0, penY, scale, atlas.common.scaleW, atlas.common.scaleH, { anchor, angleDegrees }));
     }
 
     cumulativeLength += direction * advance;

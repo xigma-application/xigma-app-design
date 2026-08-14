@@ -72,7 +72,7 @@ describe('drawSceneNodes', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [], 100, 100, IDENTITY_VIEWPORT);
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [], 100, 100, IDENTITY_VIEWPORT, new Map());
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -86,7 +86,7 @@ describe('drawSceneNodes', () => {
     const nodes = [buildNode({ id: 'a' }), buildNode({ id: 'b' })];
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, nodes, 100, 100, IDENTITY_VIEWPORT);
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, nodes, 100, 100, IDENTITY_VIEWPORT, new Map());
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
@@ -101,7 +101,7 @@ describe('drawSceneNodes', () => {
     const nodes = [buildNode({ id: 'a', type: NodeType.ellipse })];
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, nodes, 100, 100, IDENTITY_VIEWPORT);
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, nodes, 100, 100, IDENTITY_VIEWPORT, new Map());
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLE_FAN, 0, expect.any(Number));
@@ -129,7 +129,7 @@ describe('drawSceneNodes', () => {
     };
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [polygon], 100, 100, IDENTITY_VIEWPORT);
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [polygon], 100, 100, IDENTITY_VIEWPORT, new Map());
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLE_FAN, 0, expect.any(Number));
@@ -158,7 +158,7 @@ describe('drawSceneNodes', () => {
     };
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [star], 100, 100, IDENTITY_VIEWPORT);
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [star], 100, 100, IDENTITY_VIEWPORT, new Map());
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLE_FAN, 0, expect.any(Number));
@@ -185,7 +185,7 @@ describe('drawSceneNodes', () => {
     };
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [media], 100, 100, IDENTITY_VIEWPORT);
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [media], 100, 100, IDENTITY_VIEWPORT, new Map());
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
@@ -215,13 +215,13 @@ describe('drawSceneNodes', () => {
     };
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [text], 100, 100, IDENTITY_VIEWPORT);
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [text], 100, 100, IDENTITY_VIEWPORT, new Map());
 
     // result — "hello" is 5 known glyphs in the real MSDF atlas, 6 vertices each
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 30);
   });
 
-  it('should draw a stroke-only ellipse outline for a path node, not a filled shape', () => {
+  it('should draw nothing for a path node when it has no outline style', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
@@ -240,11 +240,61 @@ describe('drawSceneNodes', () => {
     };
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [path], 100, 100, IDENTITY_VIEWPORT);
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [path], 100, 100, IDENTITY_VIEWPORT, new Map());
+
+    // result
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+  });
+
+  it('should draw a stroke-only ellipse outline for a selected path node, not a filled shape', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const path: TPathNode = {
+      height: 10,
+      id: 'a',
+      name: 'Path',
+      parentId: null,
+      pathType: PathType.ellipse,
+      rotation: 0,
+      type: NodeType.path,
+      width: 10,
+      x: 0,
+      y: 0,
+    };
+
+    // before
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [path], 100, 100, IDENTITY_VIEWPORT, new Map([['a', 'selected']]));
 
     // result — a stroke-only ellipse draws a LINE_LOOP, no filled TRIANGLE_FAN
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINE_LOOP, 0, expect.any(Number));
+  });
+
+  it('should draw a thick outline for a hovered path node', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const path: TPathNode = {
+      height: 10,
+      id: 'a',
+      name: 'Path',
+      parentId: null,
+      pathType: PathType.ellipse,
+      rotation: 0,
+      type: NodeType.path,
+      width: 10,
+      x: 0,
+      y: 0,
+    };
+
+    // before
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [path], 100, 100, IDENTITY_VIEWPORT, new Map([['a', 'hover']]));
+
+    // result — a thick outline is built from triangle quads, not a hairline loop
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, expect.any(Number));
   });
 
   it('should draw a thin segment for a line node instead of a filled rect', () => {
@@ -265,7 +315,7 @@ describe('drawSceneNodes', () => {
     };
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [line], 100, 100, IDENTITY_VIEWPORT);
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [line], 100, 100, IDENTITY_VIEWPORT, new Map());
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);

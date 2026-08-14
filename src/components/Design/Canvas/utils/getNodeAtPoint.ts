@@ -1,5 +1,5 @@
 // others
-import { LINE_HIT_TOLERANCE_PX } from 'constant/canvas';
+import { LINE_HIT_TOLERANCE_PX, PATH_TEXT_HIT_TOLERANCE_PX } from 'constant/canvas';
 
 // types
 import { NodeType } from 'types/design/enums';
@@ -8,6 +8,7 @@ import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
 import { getNodeBounds } from './getNodeBounds';
+import { isPointInCurvedText } from './isPointInCurvedText';
 import { isPointInEllipse } from './isPointInEllipse';
 import { isPointInPolygon } from './isPointInPolygon';
 import { isPointInRect } from './isPointInRect';
@@ -29,6 +30,7 @@ const getUnrotatedQueryPoint = (point: TPoint, node: TSceneNode): TPoint => {
 
 export const getNodeAtPoint = (point: TPoint, nodes: TSceneNode[], viewport: TViewport): TSceneNode | null => {
   const lineTolerance = LINE_HIT_TOLERANCE_PX / viewport.zoom;
+  const pathTextTolerance = PATH_TEXT_HIT_TOLERANCE_PX / viewport.zoom;
 
   const hit = [...nodes].reverse().find((node) => {
     const testPoint = getUnrotatedQueryPoint(point, node);
@@ -43,7 +45,9 @@ export const getNodeAtPoint = (point: TPoint, nodes: TSceneNode[], viewport: TVi
       case NodeType.line:
         return isPointNearLine(testPoint, node, lineTolerance);
       case NodeType.text:
-        return isPointInText(testPoint, node);
+        return node.pathId ? isPointInCurvedText(point, node, pathTextTolerance) : isPointInText(testPoint, node);
+      case NodeType.path:
+        return false;
       default:
         return isPointInRect(testPoint, node);
     }

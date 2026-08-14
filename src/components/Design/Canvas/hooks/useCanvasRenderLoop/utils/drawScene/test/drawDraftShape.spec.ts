@@ -348,7 +348,7 @@ describe('drawDraftShape', () => {
     expect(trianglesDraws).toHaveLength(4);
   });
 
-  it('should show a stroke-only ellipse outline for a path draft, with no fill at all', () => {
+  it('should show only a stroke-only ellipse outline for a path draft, with no fill and no corner handles', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
@@ -366,17 +366,15 @@ describe('drawDraftShape', () => {
       IDENTITY_VIEWPORT,
     );
 
-    // result — no TRIANGLE_FAN fill for the path shape itself, only the 4 corner-handle fills
+    // result — no TRIANGLE_FAN fill and no TRIANGLES corner-handle fills, since the path draft
+    // shows only the bare ellipse curve, not a bounding box with corner handles
     expect(gl.drawArrays).not.toHaveBeenCalledWith(gl.TRIANGLE_FAN, 0, expect.any(Number));
+    expect(gl.drawArrays).not.toHaveBeenCalledWith(gl.TRIANGLES, 0, expect.any(Number));
 
-    const trianglesDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLES);
-
-    expect(trianglesDraws).toHaveLength(4);
-
-    // result — ellipse stroke outline + 4 corner handles = 5 LINE_LOOP draws
+    // result — just the single ellipse stroke outline, no corner-handle rings either
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
 
-    expect(lineLoopDraws).toHaveLength(5);
+    expect(lineLoopDraws).toHaveLength(1);
   });
 
   it('should keep a text draft fill-less, showing only its outline', () => {

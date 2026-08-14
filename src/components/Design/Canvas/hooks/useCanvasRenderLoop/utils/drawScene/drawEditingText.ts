@@ -1,5 +1,4 @@
 // others
-import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
 import { TEXT_FILL, TEXT_FONT_FAMILY, TEXT_FONT_SIZE, TEXT_NAME } from '../../../../constants';
 
@@ -11,8 +10,8 @@ import { TViewport } from 'types/design/types';
 
 // utils
 import { drawEditingCaretAndSelection } from './drawEditingCaretAndSelection/drawEditingCaretAndSelection';
+import { drawEditingTextBoxOutline } from './drawEditingTextBoxOutline';
 import { drawMsdfText } from 'utils/canvas/text/drawMsdfText';
-import { drawRect } from 'utils/canvas/drawRect';
 import { getMsdfAtlasTexture } from 'utils/canvas/text/getMsdfAtlasTexture';
 
 export const drawEditingText = (
@@ -30,16 +29,7 @@ export const drawEditingText = (
   viewport: TViewport,
 ): void => {
   if (editingTextBox) {
-    drawRect(
-      gl,
-      program,
-      buffer,
-      { ...editingTextBox, stroke: DRAFT_FRAME_STROKE },
-      canvasWidth,
-      canvasHeight,
-      viewport,
-      editingTextBox.rotation,
-    );
+    drawEditingTextBoxOutline(gl, program, buffer, editingTextBox, canvasWidth, canvasHeight, viewport);
     drawMsdfText(
       gl,
       imageContext.msdfProgram,

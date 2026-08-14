@@ -73,6 +73,20 @@ describe('drawEditingText', () => {
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINE_LOOP, 0, 4);
   });
 
+  it('should not draw the box outline while editing text on a path, since the ellipse already shows it', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const box = { flipX: false, flipY: false, height: 20, pathId: 'path-1', rotation: 0, width: 100, x: 0, y: 0 };
+
+    // before
+    drawEditingText(gl, program, buffer, IMAGE_CONTEXT, box, 'hello', 0, 1, 0, 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    expect(gl.drawArrays).not.toHaveBeenCalledWith(gl.LINE_LOOP, 0, 4);
+  });
+
   it('should draw the live typed content through the same MSDF pipeline as committed text', () => {
     // mock
     const gl = createGlMock();

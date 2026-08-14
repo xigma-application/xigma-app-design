@@ -9,9 +9,8 @@ import { TSceneNode, TViewport } from 'types/design/types';
 import { drawCornerHandles } from 'utils/canvas/drawCornerHandles';
 import { drawLine } from 'utils/canvas/drawLine';
 import { drawLineEndpointHandles } from 'utils/canvas/drawLineEndpointHandles';
-import { drawPathTextOffsetHandle } from 'utils/canvas/drawPathTextOffsetHandle';
 import { drawRect } from 'utils/canvas/drawRect';
-import { getPathTextHandlePoint } from '../../../../utils/getPathTextHandlePoint';
+import { drawSelectedPathTextHandle } from './drawSelectedPathTextHandle';
 
 const drawLineSelectionOutline = (
   gl: WebGL2RenderingContext,
@@ -48,20 +47,18 @@ export const drawPerNodeSelectionOutlines = (
   viewport: TViewport,
 ): void => {
   selectedNodes.forEach((node) => {
-    if (node.type === NodeType.line) {
-      drawLineSelectionOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
-    } else {
-      const { height, rotation, width, x, y } = node;
+    switch (node.type) {
+      case NodeType.line:
+        drawLineSelectionOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
+        break;
+      case NodeType.path:
+        break;
+      default: {
+        const { height, rotation, width, x, y } = node;
 
-      drawRect(gl, program, buffer, { height, stroke: DRAFT_FRAME_STROKE, width, x, y }, canvasWidth, canvasHeight, viewport, rotation);
-      drawCornerHandles(gl, program, buffer, node, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport, rotation);
-
-      if (node.type === NodeType.text) {
-        const handlePoint = getPathTextHandlePoint(node);
-
-        if (handlePoint) {
-          drawPathTextOffsetHandle(gl, program, buffer, handlePoint, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport);
-        }
+        drawRect(gl, program, buffer, { height, stroke: DRAFT_FRAME_STROKE, width, x, y }, canvasWidth, canvasHeight, viewport, rotation);
+        drawCornerHandles(gl, program, buffer, node, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport, rotation);
+        drawSelectedPathTextHandle(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
       }
     }
   });

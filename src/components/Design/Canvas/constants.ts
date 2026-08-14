@@ -24,7 +24,6 @@ export const SECTION_FILL = BACKGROUND_COLOR;
 export const RESIZE_DEBOUNCE_MS = 500;
 export const MIN_SHAPE_SIZE = 2;
 export const PATH_NAME = 'Path';
-export const PATH_STROKE = '#ffffff';
 export const POLYGON_DEFAULT_SIDES = 3;
 export const STAR_DEFAULT_POINTS = 5;
 export const STAR_DEFAULT_RATIO = 0.382;
