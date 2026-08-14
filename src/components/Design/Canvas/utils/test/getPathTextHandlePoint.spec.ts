@@ -72,4 +72,13 @@ describe('getPathTextHandlePoint', () => {
     expect(point?.x).toBeCloseTo(100, 1);
     expect(point?.y).toBeCloseTo(200, 1);
   });
+
+  it("should mirror the handle across the node's own center when flipped horizontally", () => {
+    // before — the unflipped handle sits at the rightmost edge (200,100); flipped, it moves to the
+    const point = getPathTextHandlePoint(buildPathText({ flipX: true }));
+
+    // result
+    expect(point?.x).toBeCloseTo(0);
+    expect(point?.y).toBeCloseTo(100);
+  });
 });

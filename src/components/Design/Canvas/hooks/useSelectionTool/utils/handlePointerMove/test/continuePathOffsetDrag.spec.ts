@@ -25,12 +25,12 @@ const createPathOffsetDragRef = (dragState: TPathOffsetDragState | null = null):
   current: dragState,
 });
 
-const addPathTextNode = (x: number, y: number, size: number): string => {
+const addPathTextNode = (x: number, y: number, size: number, flipX = false): string => {
   store.dispatch(
     addNode({
       content: 'Hi',
       fill: '#ffffff',
-      flipX: false,
+      flipX,
       flipY: false,
       fontFamily: 'Inter',
       fontSize: 14,
@@ -80,6 +80,21 @@ describe('continuePathOffsetDrag', () => {
     const node = store.getState().design.nodes[id];
 
     expect(node).toMatchObject({ pathStartOffset: expect.closeTo(0.25, 2) });
+  });
+
+  it('should follow the mirrored curve when dragging a horizontally flipped path-text node', () => {
+    // mock
+    const canvas = createCanvas();
+    const id = addPathTextNode(5600, 5200, 200, true);
+    const pathOffsetDragRef = createPathOffsetDragRef({ nodeId: id });
+
+    // before — flipped, the leftmost point of the ellipse (center 5700,5300, radius 100) is now
+    continuePathOffsetDrag(canvas, pointerEvent(5600, 5300), store.dispatch, pathOffsetDragRef);
+
+    // result
+    const node = store.getState().design.nodes[id];
+
+    expect(node).toMatchObject({ pathStartOffset: expect.closeTo(0, 2) });
   });
 
   it('should do nothing when the dragged node no longer exists', () => {
