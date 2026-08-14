@@ -362,15 +362,17 @@ the roadmap wording). The resize cursor rotates per handle direction on an offsc
 node `rotation` becomes editable later (`getResizeCursorAngle.ts` already adds `node.rotation` into
 the angle for the single-node case).
 
-| #   | Scenario                                                                                                   | Unit |         E2E         |
-| --- | ---------------------------------------------------------------------------------------------------------- | :--: | :-----------------: |
-| 43  | Hovering each of the 8 resize handles applies a distinctly rotated cursor                                  |  —   | ✅ `resize.spec.ts` |
-| 44  | Dragging a corner handle resizes the node while the opposite corner stays anchored in place                |  ✅  | ✅ `resize.spec.ts` |
-| 45  | Holding Shift while dragging a corner locks the aspect ratio, unlike a free drag of the same delta         |  ✅  | ✅ `resize.spec.ts` |
-| 46  | Resizing a group selection scales every member (including a line's endpoints) proportionally               |  ✅  |          —          |
-| 47  | Edge handles resize only their own axis; Shift has no aspect-lock effect on them                           |  ✅  |          —          |
-| 65  | Resizing anisotropically (scaleX≠scaleY) projects the scale onto a rotated member's own local axes         |  ✅  |          —          |
-| 66  | Resizing a single rotated node via a handle scales along the node's own local axis, not the raw world axis |  ✅  | ✅ `resize.spec.ts` |
+| #   | Scenario                                                                                                              | Unit |         E2E         |
+| --- | --------------------------------------------------------------------------------------------------------------------- | :--: | :-----------------: |
+| 43  | Hovering each of the 8 resize handles applies a distinctly rotated cursor                                             |  —   | ✅ `resize.spec.ts` |
+| 44  | Dragging a corner handle resizes the node while the opposite corner stays anchored in place                           |  ✅  | ✅ `resize.spec.ts` |
+| 45  | Holding Shift while dragging a corner locks the aspect ratio, unlike a free drag of the same delta                    |  ✅  | ✅ `resize.spec.ts` |
+| 46  | Resizing a group selection scales every member (including a line's endpoints) proportionally                          |  ✅  |          —          |
+| 47  | Edge handles resize only their own axis; Shift has no aspect-lock effect on them                                      |  ✅  |          —          |
+| 65  | Resizing anisotropically (scaleX≠scaleY) projects the scale onto a rotated member's own local axes                    |  ✅  |          —          |
+| 66  | Resizing a single rotated node via a handle scales along the node's own local axis, not the raw world axis            |  ✅  | ✅ `resize.spec.ts` |
+| 67  | A rotated GROUP MEMBER's flipX/flipY toggles off its own local axis when the drag crosses, not the group's world axis |  ✅  |          —          |
+| 68  | Dragging a single rotated node's handle past its anchor mirrors it, instead of snapping back to the original box      |  ✅  | ✅ `resize.spec.ts` |
 
 #43 is e2e-only: the actual claim is a real `Image` decode plus the browser accepting a rotated
 data-URL as a live CSS `cursor` value — nothing a jsdom unit test can assert (`getResizeCursorAngle`
@@ -406,6 +408,26 @@ anchor edge hasn't moved. Confirmed this actually discriminates the bug by rever
 and re-running the test: it fails with "resize cursor never applied", because the pre-fix code
 compared the raw screen point directly against the node's unrotated local bounds and put the new
 edge ~100px away from the drag destination, right back at the node's original center.
+
+#67/#68 fix a real, user-reported gap the #66 fix didn't cover: neither prior local-axis fix touched
+the **mirror/flip crossing** path specifically. #67 is the group-resize half: `flipX`/`flipY` was
+computed straight off the group's raw world-space `scaleX`/`scaleY` sign, ignoring the member's own
+rotation entirely — the same class of bug `getRotatedAxisScales` already fixed for width/height (#65),
+just never applied to the flip flag. Fixed by projecting the world scale onto the member's own local
+axes (`scaleX·cos²θ + scaleY·sin²θ` for local X, the complementary term for local Y) before reading
+its sign — unit-only for the same reason as #65 (exact signed-projection math, no pixel story).
+
+#68 is the more fundamental single-node bug: `getRotatedAnchorSolver` (added for #66) assumed the
+anchor corner always sits on the same local side of the box, an assumption that breaks the moment a
+drag crosses the anchor — the anchor corner then sits on the box's _opposite_ local side. Left
+unfixed, a full symmetric crossing (same size, mirrored position) resolved to the exact original box,
+i.e. **nothing visibly happened** — precisely the "obrócony element nie robi mirror" behavior
+reported live. Fixed by flipping the anchor-side sign per axis whenever that axis's own scale went
+negative (crossed). Verified against the full real DOM pointerdown→pointermove→pointerup chain (not
+just a direct `continueResizeDrag` call, which would have missed a bug living in the surrounding
+event wiring) via a before/after screenshot diff plus an independently-constructed reference box —
+both before reverting the fix to confirm the test fails without it, and after to confirm the fix
+holds through the real interaction path.
 
 ## Mirror/flip on resize crossing (Etap 10)
 

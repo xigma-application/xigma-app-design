@@ -44,9 +44,9 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number, parentId: s
   return rootOrder[rootOrder.length - 1];
 };
 
-const addMediaNode = (x: number, y: number, width: number, height: number, parentId: string | null = null): string => {
+const addMediaNode = (x: number, y: number, width: number, height: number, parentId: string | null = null, rotation = 0): string => {
   store.dispatch(
-    addNode({ flipX: false, flipY: false, height, name: 'Image', parentId, rotation: 0, src: 'a.png', type: NodeType.media, width, x, y }),
+    addNode({ flipX: false, flipY: false, height, name: 'Image', parentId, rotation, src: 'a.png', type: NodeType.media, width, x, y }),
   );
 
   const { rootOrder } = store.getState().design;
@@ -268,6 +268,48 @@ describe('continueResizeDrag', () => {
     expect(store.getState().design.nodes[idMedia]).toMatchObject({ flipX: true });
   });
 
+  it("should flip a rotated GROUP MEMBER across its own local axis, not the group's world axis, when the drag crosses", () => {
+    // mock — idA is rotated 90deg, so its local x-axis (flipX) lies along the world Y-axis and its
+    const idA = addMediaNode(0, 0, 100, 50, null, 90);
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 1,
+      bounds: { height: 50, width: 220, x: 0, y: 0 },
+      handle: 'e',
+      nodeOrigins: {
+        [idA]: { flip: { x: false, y: false }, height: 50, rotation: 90, width: 100, x: 0, y: 0 },
+        'sibling-1': { flip: null, height: 20, rotation: 0, width: 20, x: 200, y: 0 },
+      },
+    });
+
+    // before — world-X anchor crossed (scaleX < 0), world-Y untouched (scaleY = 1)
+    continueResizeDrag(canvas, pointerEvent(-50, 500), store.dispatch, resizeDragRef);
+
+    // result — a world-X crossing projects onto this 90deg member's local Y axis, so flipY (not
+    expect(store.getState().design.nodes[idA]).toMatchObject({ flipX: false, flipY: true });
+  });
+
+  it("should leave an UNROTATED group member's flip axes unchanged from the pre-projection behavior", () => {
+    // mock — same shape as the rotated-member test above but rotation=0, so local axes equal world
+    const idA = addMediaNode(0, 0, 100, 50);
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 1,
+      bounds: { height: 50, width: 220, x: 0, y: 0 },
+      handle: 'e',
+      nodeOrigins: {
+        [idA]: { flip: { x: false, y: false }, height: 50, rotation: 0, width: 100, x: 0, y: 0 },
+        'sibling-1': { flip: null, height: 20, rotation: 0, width: 20, x: 200, y: 0 },
+      },
+    });
+
+    // before
+    continueResizeDrag(canvas, pointerEvent(-50, 500), store.dispatch, resizeDragRef);
+
+    // result
+    expect(store.getState().design.nodes[idA]).toMatchObject({ flipX: true, flipY: false });
+  });
+
   it("should grow a rotated GROUP MEMBER along its own local axes, not the group's world axes, on an anisotropic resize", () => {
     // mock — a 90deg-rotated node's local x-axis lies along the world y-axis and vice versa, so a
     const idA = addFrameNode(0, 0, 100, 50, 'parent-1', 90);
@@ -307,7 +349,6 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef);
 
     // result — width = 100·√((2·cos30)²+sin30²) ≈ 180.28, height = 50·√((2·sin30)²+cos30²) ≈ 66.14,
-    // both between the pure scaleX=2 and scaleY=1 cases (never sheared into a non-rectangle)
     const node = store.getState().design.nodes[idA];
 
     expect(node).toMatchObject({ rotation: 30 });
@@ -375,13 +416,43 @@ describe('continueResizeDrag', () => {
     const oldCenter = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
     const anchorWorldBefore = rotatePoint({ x: bounds.x + bounds.width, y: bounds.y + bounds.height }, oldCenter, 45);
 
-    // before — drag the nw handle further up and to the left
-    continueResizeDrag(canvas, pointerEvent(-80, -60), store.dispatch, resizeDragRef);
+    // before — drag the nw handle further up and to the left (a screen point whose un-rotated local
+    continueResizeDrag(canvas, pointerEvent(-38.388, -169.454), store.dispatch, resizeDragRef);
 
     // result
     const node = store.getState().design.nodes[idA] as TFrameNode;
     const newCenter = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
     const anchorWorldAfter = rotatePoint({ x: node.x + node.width, y: node.y + node.height }, newCenter, 45);
+
+    expect(anchorWorldAfter.x).toBeCloseTo(anchorWorldBefore.x);
+    expect(anchorWorldAfter.y).toBeCloseTo(anchorWorldBefore.y);
+  });
+
+  it('should mirror a single rotated node when the drag crosses the anchor, instead of collapsing back to the original box', () => {
+    // mock — a 90deg-rotated square; the anchor corner ("nw", opposite the "se" handle) sits at
+    const idA = addFrameNode(300, 300, 100, 100, null, 90);
+    const canvas = createCanvas();
+    const bounds = { height: 100, width: 100, x: 300, y: 300 };
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 1,
+      bounds,
+      handle: 'se',
+      nodeOrigins: { [idA]: { flip: null, height: 100, rotation: 90, width: 100, x: 300, y: 300 } },
+    });
+    const oldCenter = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+    const anchorWorldBefore = rotatePoint({ x: bounds.x, y: bounds.y }, oldCenter, 90);
+
+    // before — symmetric full crossing (world point mirrors the "se" corner through the anchor)
+    continueResizeDrag(canvas, pointerEvent(500, 200), store.dispatch, resizeDragRef);
+
+    // result — same size (a true mirror, not a shrink/grow) and NOT back at the original position
+    const node = store.getState().design.nodes[idA] as TFrameNode;
+
+    expect(node).toMatchObject({ height: 100, rotation: 90, width: 100 });
+    expect(node.x !== 300 || node.y !== 300).toBe(true);
+
+    const newCenter = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
+    const anchorWorldAfter = rotatePoint({ x: node.x + node.width, y: node.y + node.height }, newCenter, 90);
 
     expect(anchorWorldAfter.x).toBeCloseTo(anchorWorldBefore.x);
     expect(anchorWorldAfter.y).toBeCloseTo(anchorWorldBefore.y);

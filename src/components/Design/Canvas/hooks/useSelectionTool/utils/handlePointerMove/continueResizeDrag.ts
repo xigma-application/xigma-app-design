@@ -48,6 +48,17 @@ const getRotatedAxisScales = (scaleX: number, scaleY: number, rotation: number):
   };
 };
 
+const getRotatedAxisSigns = (scaleX: number, scaleY: number, rotation: number): { x: number; y: number } => {
+  const radians = (rotation * Math.PI) / 180;
+  const cos2 = Math.cos(radians) ** 2;
+  const sin2 = Math.sin(radians) ** 2;
+
+  return {
+    x: scaleX * cos2 + scaleY * sin2,
+    y: scaleX * sin2 + scaleY * cos2,
+  };
+};
+
 const getAxisSign = (side: 'max' | 'min' | 'none'): number => {
   switch (side) {
     case 'max':
@@ -63,6 +74,8 @@ const getRotatedAnchorSolver = (
   bounds: TDraftRect,
   handle: TResizeHandle,
   rotation: number,
+  scaleX: number,
+  scaleY: number,
 ): ((width: number, height: number) => TPoint) => {
   const oldCenter: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
   const axes = HANDLE_AXES[handle];
@@ -70,9 +83,11 @@ const getRotatedAnchorSolver = (
   const signY = getAxisSign(axes.y);
   const oldOffset = rotatePoint({ x: (signX * bounds.width) / 2, y: (signY * bounds.height) / 2 }, { x: 0, y: 0 }, rotation);
   const anchorWorldPoint: TPoint = { x: oldCenter.x + oldOffset.x, y: oldCenter.y + oldOffset.y };
+  const crossedSignX = signX * Math.sign(scaleX);
+  const crossedSignY = signY * Math.sign(scaleY);
 
   return (width, height) => {
-    const newOffset = rotatePoint({ x: (signX * width) / 2, y: (signY * height) / 2 }, { x: 0, y: 0 }, rotation);
+    const newOffset = rotatePoint({ x: (crossedSignX * width) / 2, y: (crossedSignY * height) / 2 }, { x: 0, y: 0 }, rotation);
 
     return { x: anchorWorldPoint.x - newOffset.x - width / 2, y: anchorWorldPoint.y - newOffset.y - height / 2 };
   };
@@ -103,7 +118,9 @@ export const continueResizeDrag = (
     const scaleX = getSignedScale(newBounds.x, newBounds.width, bounds.x, bounds.width, anchors.x);
     const scaleY = getSignedScale(newBounds.y, newBounds.height, bounds.y, bounds.height, anchors.y);
     const rotatedAnchorSolver =
-      singleBoxOrigin && singleBoxOrigin.rotation !== 0 ? getRotatedAnchorSolver(bounds, handle, singleBoxOrigin.rotation) : null;
+      singleBoxOrigin && singleBoxOrigin.rotation !== 0
+        ? getRotatedAnchorSolver(bounds, handle, singleBoxOrigin.rotation, scaleX, scaleY)
+        : null;
 
     originEntries.forEach(([id, origin]) => {
       if ('x1' in origin) {
@@ -134,8 +151,9 @@ export const continueResizeDrag = (
             x: transformCoord(origin.x + origin.width / 2, anchors.x, scaleX) - width / 2,
             y: transformCoord(origin.y + origin.height / 2, anchors.y, scaleY) - height / 2,
           };
+      const flipSign = singleBoxOrigin ? { x: scaleX, y: scaleY } : getRotatedAxisSigns(scaleX, scaleY, origin.rotation);
       const changes: TSceneNodeChanges = origin.flip
-        ? { flipX: origin.flip.x !== scaleX < 0, flipY: origin.flip.y !== scaleY < 0, height, width, x, y }
+        ? { flipX: origin.flip.x !== flipSign.x < 0, flipY: origin.flip.y !== flipSign.y < 0, height, width, x, y }
         : { height, width, x, y };
 
       dispatch(updateNode({ changes, id }));

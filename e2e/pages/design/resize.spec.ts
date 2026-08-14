@@ -228,6 +228,45 @@ test('resizing a rotated single node via an edge handle scales along its own loc
   expect(await waitForResizeCursor(designPage, 350, 450)).not.toBe('');
 });
 
+test('dragging a rotated single node past its anchor mirrors it, instead of snapping back to the original box', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-resize-rotated-mirror-crossing');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(300, 300, 400, 400); // 100x100 square, center (350, 350)
+  await designPage.click(350, 350);
+
+  await designPage.pointerDown(290, 290);
+  await designPage.pointerMove(410, 290); // +90deg rotation
+  await designPage.pointerUp();
+  const beforeCross = await designPage.canvas.screenshot();
+
+  // post-rotation, the local "se" corner handle sits at screen (300, 400), anchored at "nw" (400, 300)
+  await designPage.pointerDown(300, 400);
+  await designPage.pointerMove(500, 200); // full symmetric crossing past the anchor
+  await designPage.pointerUp();
+  const afterCross = await designPage.canvas.screenshot();
+
+  // before the fix, the anchor-fixing solver assumed the anchor corner never changes local side,
+  expect(afterCross.equals(beforeCross)).toBe(false);
+
+  await designPage.click(900, 900); // deselect so the selection outline doesn't affect the pixels
+  const crossed = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-resize-rotated-mirror-crossing-reference');
+  await expect(designPage.canvas).toBeVisible();
+  await designPage.drawRectangle(400, 200, 500, 300); // expected mirrored square: screen (400,200)-(500,300)
+  await designPage.click(450, 250);
+  await designPage.pointerDown(390, 190);
+  await designPage.pointerMove(510, 190); // same +90deg rotation
+  await designPage.pointerUp();
+  await designPage.click(900, 900);
+  const reference = await designPage.canvas.screenshot();
+
+  expect(crossed.equals(reference)).toBe(true);
+});
+
 test('resizing a star past its anchor renders the shape mirrored, not just repositioned', async ({ page }) => {
   const designPage = new DesignPage(page);
 
