@@ -22,8 +22,8 @@ export const resizeBoxNode = (
   rotatedAnchorSolver: ((width: number, height: number) => TPoint) | null,
 ): void => {
   const axisScale = getResizeAxisScale(scaleX, scaleY, origin.rotation, isSingleBoxOrigin);
-  const height = origin.height * axisScale.y;
-  const width = origin.width * axisScale.x;
+  const height = Math.round(origin.height * axisScale.y);
+  const width = Math.round(origin.width * axisScale.x);
   const { x, y } = getResizedPosition(origin, anchors, scaleX, scaleY, width, height, rotatedAnchorSolver);
   const changes = getResizeChanges(origin, scaleX, scaleY, isSingleBoxOrigin, height, width, x, y);
 

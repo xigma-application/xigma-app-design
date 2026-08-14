@@ -367,7 +367,7 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef);
 
     // result — local height untouched, local width grown ×5.25 (the raw world-space drag distance,
-    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 50, rotation: 90, width: 525, x: -212, y: 213 });
+    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 50, rotation: 90, width: 525, x: -212.5, y: 212.5 });
   });
 
   it('should keep the anchor edge fixed in WORLD space when resizing a single rotated node, not just at the same local coordinate', () => {
@@ -392,10 +392,8 @@ describe('continueResizeDrag', () => {
     const newCenter = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
     const anchorWorldAfter = rotatePoint({ x: node.x, y: newCenter.y }, newCenter, 90);
 
-    // rounding x/y/width/height to whole pixels means the anchor is only APPROXIMATELY fixed now,
-    // within the rounding error, not pixel-perfectly exact
-    expect(Math.abs(anchorWorldAfter.x - anchorWorldBefore.x)).toBeLessThan(1);
-    expect(Math.abs(anchorWorldAfter.y - anchorWorldBefore.y)).toBeLessThan(1);
+    expect(anchorWorldAfter.x).toBeCloseTo(anchorWorldBefore.x);
+    expect(anchorWorldAfter.y).toBeCloseTo(anchorWorldBefore.y);
   });
 
   it('should keep the anchor CORNER fixed in world space for a "min"-side handle (e.g. "nw") too, at a non-right-angle rotation', () => {
@@ -420,8 +418,42 @@ describe('continueResizeDrag', () => {
     const newCenter = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
     const anchorWorldAfter = rotatePoint({ x: node.x + node.width, y: node.y + node.height }, newCenter, 45);
 
-    expect(Math.abs(anchorWorldAfter.x - anchorWorldBefore.x)).toBeLessThan(1);
-    expect(Math.abs(anchorWorldAfter.y - anchorWorldBefore.y)).toBeLessThan(1);
+    expect(anchorWorldAfter.x).toBeCloseTo(anchorWorldBefore.x);
+    expect(anchorWorldAfter.y).toBeCloseTo(anchorWorldBefore.y);
+  });
+
+  it('should not jump the anchor corner between consecutive frames of a rotated resize drag, even as x/y cross whole-pixel rounding thresholds', () => {
+    // mock — a 30deg-rotated node, dragged through a dense sweep of "e" handle positions; before the
+    const idA = addFrameNode(0, 0, 137, 61, null, 30);
+    const canvas = createCanvas();
+    const bounds = { height: 61, width: 137, x: 0, y: 0 };
+    let previousAnchor: { x: number; y: number } | null = null;
+    let maxFrameJump = 0;
+
+    for (let endX = 140; endX <= 260; endX += 0.15) {
+      const resizeDragRef = createResizeDragRef({
+        aspectRatio: bounds.width / bounds.height,
+        bounds,
+        handle: 'e',
+        nodeOrigins: { [idA]: { flip: null, height: 61, rotation: 30, width: 137, x: 0, y: 0 } },
+      });
+
+      // before
+      continueResizeDrag(canvas, pointerEvent(endX, 500), store.dispatch, resizeDragRef);
+
+      // result
+      const node = store.getState().design.nodes[idA] as TFrameNode;
+      const newCenter = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
+      const anchor = rotatePoint({ x: node.x, y: newCenter.y }, newCenter, 30);
+
+      if (previousAnchor) {
+        maxFrameJump = Math.max(maxFrameJump, Math.hypot(anchor.x - previousAnchor.x, anchor.y - previousAnchor.y));
+      }
+
+      previousAnchor = anchor;
+    }
+
+    expect(maxFrameJump).toBeLessThan(0.01);
   });
 
   it('should mirror a single rotated node when the drag crosses the anchor, instead of collapsing back to the original box', () => {
