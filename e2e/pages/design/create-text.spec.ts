@@ -36,6 +36,37 @@ test('draws a new text node on the canvas using the Text tool', async ({ page })
   expect(after.equals(before)).toBe(false);
 });
 
+test('starts editing with a default 100x100 box, top-left anchored at the click point, when clicked without dragging', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-project');
+  await expect(designPage.canvas).toBeVisible();
+
+  const box = await designPage.canvas.boundingBox();
+  if (!box) {
+    throw new Error('Canvas bounding box unavailable');
+  }
+
+  const before = await designPage.canvas.screenshot();
+
+  await designPage.selectTool('text');
+
+  const clickX = box.x + box.width * 0.3;
+  const clickY = box.y + box.height * 0.3;
+
+  await designPage.click(clickX, clickY);
+
+  const defaultTool = designPage.toolRadio('default');
+  await expect(defaultTool).toHaveAttribute('aria-checked', 'true');
+
+  // still enters edit mode, seeded with the default box, exactly like a drag-created text node
+  await designPage.typeText('Hello world');
+  await designPage.click(box.x + box.width * 0.9, box.y + box.height * 0.9);
+
+  const after = await designPage.canvas.screenshot();
+  expect(after.equals(before)).toBe(false);
+});
+
 test('typing tool-shortcut letters while editing text does not switch the active tool', async ({ page }) => {
   const designPage = new DesignPage(page);
 

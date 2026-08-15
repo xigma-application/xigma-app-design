@@ -61,6 +61,34 @@ test('draws a new slice on the canvas using the plain "S" shortcut, distinct fro
   await expect(sliceTool).toHaveAttribute('aria-checked', 'true');
 });
 
+test('places a default 100x100 slice centered on the click point when released without dragging', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-project');
+  await expect(designPage.canvas).toBeVisible();
+
+  const box = await designPage.canvas.boundingBox();
+  if (!box) {
+    throw new Error('Canvas bounding box unavailable');
+  }
+
+  const before = await designPage.canvas.screenshot();
+
+  await designPage.selectToolFromDropdown('frame', 'Slice');
+
+  const clickX = box.x + box.width * 0.5;
+  const clickY = box.y + box.height * 0.5;
+
+  await designPage.click(clickX, clickY);
+
+  // unlike a discarded too-small draw, a click still places a default box and stays on-tool
+  const sliceTool = designPage.toolRadio('slice');
+  await expect(sliceTool).toHaveAttribute('aria-checked', 'true');
+
+  const after = await designPage.canvas.screenshot();
+  expect(after.equals(before)).toBe(false);
+});
+
 test('resizes the slice box by dragging its corner handle', async ({ page }) => {
   const designPage = new DesignPage(page);
 

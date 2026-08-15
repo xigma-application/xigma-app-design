@@ -68,6 +68,33 @@ test('draws a rectangle with the "R" keyboard shortcut', async ({ page }) => {
   expect(after.equals(before)).toBe(false);
 });
 
+test('places a default 100x100 rectangle centered on the click point when released without dragging', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-project');
+  await expect(designPage.canvas).toBeVisible();
+
+  const box = await designPage.canvas.boundingBox();
+  if (!box) {
+    throw new Error('Canvas bounding box unavailable');
+  }
+
+  const before = await designPage.canvas.screenshot();
+
+  await designPage.selectTool('rectangle');
+
+  const clickX = box.x + box.width * 0.5;
+  const clickY = box.y + box.height * 0.5;
+
+  await designPage.click(clickX, clickY);
+
+  const defaultTool = designPage.toolRadio('default');
+  await expect(defaultTool).toHaveAttribute('aria-checked', 'true');
+
+  const after = await designPage.canvas.screenshot();
+  expect(after.equals(before)).toBe(false);
+});
+
 test("shows the rectangle's fill live while dragging, unlike the fill-less Frame draft", async ({ page }) => {
   const designPage = new DesignPage(page);
 

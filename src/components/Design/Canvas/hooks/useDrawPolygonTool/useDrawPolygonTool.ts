@@ -1,7 +1,7 @@
 import { RefObject, useEffect, useRef } from 'react';
 
 // others
-import { MIN_SHAPE_SIZE } from '../../constants';
+import { DEFAULT_SHAPE_SIZE } from '../../constants';
 
 // store
 import { addNode, setActiveTool, setSelection } from 'store/design/slice';
@@ -18,6 +18,7 @@ import { TPoint } from 'types/canvas';
 import { getPointerPosition } from '../../utils/getPointerPosition';
 import { screenToWorld } from '../../utils/screenToWorld';
 import { toDraftRect } from '../../utils/toDraftRect';
+import { toDraftRectWithDefault } from '../../utils/toDraftRectWithDefault';
 
 export type TPolygonToolConfig = {
   fill: string;
@@ -54,12 +55,14 @@ export const useDrawPolygonTool = (
 
   const handlePointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     if (startRef.current) {
-      const rect = toDraftRect(startRef.current, screenToWorld(getPointerPosition(canvas, event), viewport));
+      const rect = toDraftRectWithDefault(
+        startRef.current,
+        screenToWorld(getPointerPosition(canvas, event), viewport),
+        DEFAULT_SHAPE_SIZE,
+        true,
+      );
 
-      if (rect.width >= MIN_SHAPE_SIZE && rect.height >= MIN_SHAPE_SIZE) {
-        dispatch(addNode({ ...rect, fill, flipX: false, flipY: false, name, parentId: null, rotation: 0, sides, type: NodeType.polygon }));
-      }
-
+      dispatch(addNode({ ...rect, fill, flipX: false, flipY: false, name, parentId: null, rotation: 0, sides, type: NodeType.polygon }));
       startRef.current = null;
       draftRef.current = null;
       canvas.releasePointerCapture(event.pointerId);

@@ -11,9 +11,10 @@ branch.
 
 ## Frame drawing (Etap 3/4)
 
-| #   | Scenario                                                                                | Unit |            E2E            |
-| --- | --------------------------------------------------------------------------------------- | :--: | :-----------------------: |
-| 1   | Drawing a frame with the Frame tool renders it and reverts the active tool to `default` |  —   | ✅ `create-frame.spec.ts` |
+| #   | Scenario                                                                                                     | Unit |            E2E            |
+| --- | ------------------------------------------------------------------------------------------------------------ | :--: | :-----------------------: |
+| 1   | Drawing a frame with the Frame tool renders it and reverts the active tool to `default`                      |  —   | ✅ `create-frame.spec.ts` |
+| 2   | Releasing without dragging (a plain click) still places a default 100×100 frame, centered on the click point |  —   | ✅ `create-frame.spec.ts` |
 
 ## Section drawing
 
@@ -31,6 +32,7 @@ own `lastFrameTool` store field (mirroring `lastShapeTool`/`lastMouseTool`).
 | 1   | Picking "Section" from the Frame dropdown draws a section, and the shared button stays showing Section (unchecked) afterwards |  —   | ✅ `create-section.spec.ts` |
 | 2   | Pressing "Shift+S" activates the Section tool, then dragging draws a section                                                  |  —   | ✅ `create-section.spec.ts` |
 | 3   | While dragging (before release), a section draft stays fill-less, same as Frame's draft                                       |  ✅  | ✅ `drawDraftShape.spec.ts` |
+| 4   | Releasing without dragging (a plain click) still places a default 100×100 section, centered on the click point                |  —   | ✅ `create-section.spec.ts` |
 
 ## Slice drawing
 
@@ -53,14 +55,16 @@ feel despite the different underlying mechanism.
 | 3   | Dragging a corner handle after the initial draw resizes the box in place                                                                                                              |  —   | ✅ `create-slice.spec.ts` |
 | 4   | Clicking outside the drawn box discards it and reverts the active tool to `default`, with the canvas returning to its exact pre-draw pixels (nothing was ever persisted to the store) |  —   | ✅ `create-slice.spec.ts` |
 | 5   | Rotating and moving the box, resize math for a rotated box, and per-handle hover cursors                                                                                              |  ✅  |             —             |
+| 6   | Releasing without dragging (a plain click) still places a default 100×100 slice centered on the click point, staying on the Slice tool                                                |  —   | ✅ `create-slice.spec.ts` |
 
 ## Rectangle drawing (Etap 6)
 
-| #   | Scenario                                                                                                     | Unit |              E2E              |
-| --- | ------------------------------------------------------------------------------------------------------------ | :--: | :---------------------------: |
-| 1   | Drawing a rectangle with the Rectangle tool renders it and reverts the active tool to `default`              |  —   | ✅ `create-rectangle.spec.ts` |
-| 2   | Pressing "R" activates the Rectangle tool, then dragging draws a rectangle                                   |  —   | ✅ `create-rectangle.spec.ts` |
-| 3   | While dragging (before release), the rectangle's own fill is already visible, unlike Frame's fill-less draft |  ✅  | ✅ `create-rectangle.spec.ts` |
+| #   | Scenario                                                                                                         | Unit |              E2E              |
+| --- | ---------------------------------------------------------------------------------------------------------------- | :--: | :---------------------------: |
+| 1   | Drawing a rectangle with the Rectangle tool renders it and reverts the active tool to `default`                  |  —   | ✅ `create-rectangle.spec.ts` |
+| 2   | Pressing "R" activates the Rectangle tool, then dragging draws a rectangle                                       |  —   | ✅ `create-rectangle.spec.ts` |
+| 3   | While dragging (before release), the rectangle's own fill is already visible, unlike Frame's fill-less draft     |  ✅  | ✅ `create-rectangle.spec.ts` |
+| 4   | Releasing without dragging (a plain click) still places a default 100×100 rectangle, centered on the click point |  —   | ✅ `create-rectangle.spec.ts` |
 
 ## Ellipse drawing (Etap 6)
 
@@ -73,6 +77,7 @@ to unchecked (but keeps showing that icon) once a shape finishes drawing, same a
 | 1   | Picking "Ellipse" from the Rectangle dropdown draws an ellipse, and the shared button stays showing Ellipse (unchecked) afterwards |  —   | ✅ `create-ellipse.spec.ts` |
 | 2   | Pressing "O" activates the Ellipse tool, then dragging draws an ellipse                                                            |  —   | ✅ `create-ellipse.spec.ts` |
 | 3   | While dragging (before release), the ellipse's own fill is already visible, unlike Frame's fill-less draft                         |  ✅  | ✅ `create-ellipse.spec.ts` |
+| 4   | Releasing without dragging (a plain click) still places a default 100×100 ellipse, centered on the click point                     |  —   | ✅ `create-ellipse.spec.ts` |
 
 ## Polygon drawing
 
@@ -90,6 +95,7 @@ it (planned: min 3, max 60). Hit-testing/hover/rendering follow the same non-bbo
 | 30  | Polygon has no keyboard shortcut — pressing an unbound key leaves the default tool active and no polygon button rendered          |  —   | ✅ `create-polygon.spec.ts` |
 | 31  | While dragging (before release), the polygon's own fill is already visible, unlike Frame's fill-less draft                        |  ✅  | ✅ `create-polygon.spec.ts` |
 | 32  | Hit-testing/hovering a polygon follows its actual N-gon shape, not its bounding box                                               |  ✅  | ✅ `create-polygon.spec.ts` |
+| 33  | Releasing without dragging (a plain click) still places a default 100×100 polygon, centered on the click point                    |  —   | ✅ `create-polygon.spec.ts` |
 
 ## Line drawing
 
@@ -308,16 +314,17 @@ dispatches `startTextEdit` instead of `addNode` (`useDrawTextTool.ts`), which mo
 actually created on blur, and only if the typed content is non-empty (`useCommitTextEdit.ts`) — an
 empty text box is discarded entirely, never added and never needing deletion.
 
-| #   | Scenario                                                                                                  | Unit |           E2E            |
-| --- | --------------------------------------------------------------------------------------------------------- | :--: | :----------------------: |
-| 35  | Drawing a text box, typing content, then clicking away commits a rendered text node                       |  —   | ✅ `create-text.spec.ts` |
-| 36  | Drawing a text box and clicking away with no content typed discards it — nothing is created               |  —   | ✅ `create-text.spec.ts` |
-| 37  | A single whitespace character (e.g. a space) counts as valid content and is kept, not discarded           |  ✅  |            —             |
-| 38  | Typing a tool-shortcut letter (e.g. "r", "t") while editing text does not switch the active tool          |  ✅  | ✅ `create-text.spec.ts` |
-| 39  | Hovering a committed text node only highlights its rendered content, not the empty space in its fixed box |  —   |    ✅ `hover.spec.ts`    |
-| 40  | Clicking a text node inside its fixed box but past its rendered content does not select it                |  ✅  |  ✅ `selection.spec.ts`  |
-| 41  | A selected text node can be dragged from anywhere in its fixed box, even past its rendered content        |  ✅  |  ✅ `selection.spec.ts`  |
-| 42  | A run of text with no spaces wraps mid-word once it overflows the box, instead of overflowing on one line |  ✅  | ✅ `create-text.spec.ts` |
+| #   | Scenario                                                                                                                                 | Unit |           E2E            |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------- | :--: | :----------------------: |
+| 35  | Drawing a text box, typing content, then clicking away commits a rendered text node                                                      |  —   | ✅ `create-text.spec.ts` |
+| 36  | Drawing a text box and clicking away with no content typed discards it — nothing is created                                              |  —   | ✅ `create-text.spec.ts` |
+| 37  | A single whitespace character (e.g. a space) counts as valid content and is kept, not discarded                                          |  ✅  |            —             |
+| 38  | Typing a tool-shortcut letter (e.g. "r", "t") while editing text does not switch the active tool                                         |  ✅  | ✅ `create-text.spec.ts` |
+| 39  | Hovering a committed text node only highlights its rendered content, not the empty space in its fixed box                                |  —   |    ✅ `hover.spec.ts`    |
+| 40  | Clicking a text node inside its fixed box but past its rendered content does not select it                                               |  ✅  |  ✅ `selection.spec.ts`  |
+| 41  | A selected text node can be dragged from anywhere in its fixed box, even past its rendered content                                       |  ✅  |  ✅ `selection.spec.ts`  |
+| 42  | A run of text with no spaces wraps mid-word once it overflows the box, instead of overflowing on one line                                |  ✅  | ✅ `create-text.spec.ts` |
+| 43  | Releasing without dragging (a plain click) still starts editing, seeded with a default 100×100 box, top-left anchored at the click point |  —   | ✅ `create-text.spec.ts` |
 
 #37 stays unit-only: `useCommitTextEdit.spec.tsx` asserts `store.getState()` directly (the node was
 added, `content: ' '`), which is exact. A screenshot diff can't reliably stand in for this claim —
@@ -699,6 +706,7 @@ box, never a separate node lookup.
 | 90  | Committing a freshly typed path-text node without ever having explicitly selected it does not leave a stale resize-handle hit zone active at the underlying path node's own corner                                                                     |  ✅  | ✅ `text-on-path.spec.ts` |
 | 94  | Double-clicking a word while actively composing path-text selects that word (via `useCurvedCaretEditing.ts`'s own `handleDoubleClick.ts`, sharing `getWordRangeAtIndex.ts` with the straight-text case — see #92 above)                                |  ✅  | ✅ `text-on-path.spec.ts` |
 | 95  | Typing path-text with no active selection shows a fill-less ribbon outline around the whole typed content (`drawCurvedEditingOutline.ts`), not just around an actively-dragged selection                                                               |  —   | ✅ `text-on-path.spec.ts` |
+| 96  | Releasing without dragging (a plain click) still creates a default 100×100 path, top-left anchored at the click point, and starts editing on it                                                                                                        |  —   | ✅ `text-on-path.spec.ts` |
 
 #77/#78 stay unit-only: `getVisibleCurvedContent.spec.ts` and `continuePathOffsetDrag.spec.ts` already
 assert the exact resulting visible content / offset value via direct function calls and

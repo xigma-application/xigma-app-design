@@ -171,7 +171,7 @@ describe('useDrawStarTool behaviors', () => {
     expect(draftRef.current).toBeNull();
   });
 
-  it('should not add a node when only one dimension meets the minimum shape size', () => {
+  it('should add a default-sized node centered on the start point when only one dimension meets the minimum shape size', () => {
     // mock
     const store = createTestStore();
 
@@ -192,10 +192,13 @@ describe('useDrawStarTool behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.rootOrder).toHaveLength(0);
+    const { nodes, rootOrder } = store.getState().design;
+
+    expect(rootOrder).toHaveLength(1);
+    expect(nodes[rootOrder[0]]).toMatchObject({ height: 100, width: 100, x: -40, y: -40 });
   });
 
-  it('should not add a node when only the other dimension meets the minimum shape size', () => {
+  it('should add a default-sized node centered on the start point when only the other dimension meets the minimum shape size', () => {
     // mock
     const store = createTestStore();
 
@@ -216,7 +219,10 @@ describe('useDrawStarTool behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.rootOrder).toHaveLength(0);
+    const { nodes, rootOrder } = store.getState().design;
+
+    expect(rootOrder).toHaveLength(1);
+    expect(nodes[rootOrder[0]]).toMatchObject({ height: 100, width: 100, x: -40, y: -40 });
   });
 
   it('should ignore a pointer-up that was not preceded by a pointer-down', () => {
@@ -240,7 +246,7 @@ describe('useDrawStarTool behaviors', () => {
     expect(store.getState().design.activeTool).toBe(CONFIG.tool);
   });
 
-  it('should switch back to the default tool without adding a node when the drag is too small', () => {
+  it('should add a default 100x100 node centered on the click point and switch back to the default tool on a plain click', () => {
     // mock
     const store = createTestStore();
 
@@ -263,7 +269,8 @@ describe('useDrawStarTool behaviors', () => {
     // result
     const { design } = store.getState();
 
-    expect(design.rootOrder).toHaveLength(0);
+    expect(design.rootOrder).toHaveLength(1);
+    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ height: 100, width: 100, x: -40, y: -40 });
     expect(design.activeTool).toBe(ToolName.default);
   });
 });

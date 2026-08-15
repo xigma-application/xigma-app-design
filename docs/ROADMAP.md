@@ -432,6 +432,36 @@ comment / shapes, potem osobno: draw / scale / actions / dev mode).
       przycięty tak, żeby nie łapał floating toolbara, bo ten realnie zmienia własną ikonkę po użyciu
       Slice'a, `lastFrameTool`), a na końcu ręcznie przez użytkownika na żywo
 
+- [x] **Klik bez przeciągnięcia stawia element domyślnego rozmiaru (100×100)** — do tej pory każde
+      narzędzie rysujące gate'owało commit na `rect.width >= MIN_SHAPE_SIZE && rect.height >=
+      MIN_SHAPE_SIZE` (`MIN_SHAPE_SIZE = 2`), więc zwykły klik (albo przeciągnięcie zbyt małe w
+      choćby jednej osi) nie robił nic — zgłoszone jako niezgodne z Figmą, gdzie klik zawsze stawia
+      element 100×100. Wzorcem był już istniejący mechanizm Media tool
+      (`useDrawMediaTool/utils/handlePointerUp/handlePointerUp.ts`), które już umiało odróżnić klik
+      od przeciągnięcia i postawić plik w jego naturalnym rozmiarze zamiast nic nie robić — nowy,
+      współdzielony `Canvas/utils/toDraftRectWithDefault.ts` uogólnia dokładnie ten wzorzec (ta sama
+      logika "czy to za mały ruch" co dotychczasowy gate, tylko zamiast odrzucać, podstawia domyślny
+      rozmiar), z nowym `DEFAULT_SHAPE_SIZE = 100` (`Canvas/constants.ts`). Dotyczy Frame, Section,
+      Slice, Rectangle, Ellipse, Polygon, Star, Text i Text on Path — Media zostało nietknięte
+      (ma już własną, analogiczną ścieżkę). Dla tekstów (Text, Text on Path) klik nadal wchodzi w
+      tryb edycji dokładnie tak jak przeciągnięcie, tylko z domyślnym boxem zamiast nic nierobienia.
+      **Kotwica różni się per grupa narzędzi** — dla wszystkich figur (Frame/Section/Slice/
+      Rectangle/Ellipse/Polygon/Star) domyślny box jest **wyśrodkowany na punkcie kliknięcia**
+      (`centered: true` w `toDraftRectWithDefault`), ale dla Text/Text on Path lewy-górny róg boxa
+      zostaje **dokładnie w punkcie kliknięcia** (`centered: false`), tak samo jak przy zwykłym
+      przeciągnięciu z tego samego punktu startowego — ta druga zasada nie zmieniła się, tylko
+      przestała wymagać realnego ruchu myszy, żeby zadziałać. `useSliceTool`'s
+      `disarmDrawDrag.ts` dostało przy okazji realną poprawkę: skoro Slice nigdy nie dispatchuje
+      `addNode`, dotychczasowy kod czytał `sliceRef.current` (wypełniany tylko przez `pointermove`),
+      więc czysty klik bez żadnego `pointermove` zostawiał go `null` i trafiał w gałąź odrzucenia —
+      przepisane tak, żeby samo `disarmDrawDrag` przeliczało rect z pozycji `pointerup`, dokładnie
+      jak pozostałe narzędzia, więc gałąź "odrzuć" w ogóle znikła (Slice po prostu zawsze zostaje z
+      jakimś boxem, rzeczywistym albo domyślnym). Zweryfikowane 100% pokryciem testów jednostkowych
+      (każdy dotknięty hook, plus `toDraftRectWithDefault.spec.ts`) oraz e2e per narzędzie
+      (`create-frame.spec.ts`, `create-section.spec.ts`, `create-rectangle.spec.ts`,
+      `create-ellipse.spec.ts`, `create-polygon.spec.ts`, `create-star.spec.ts`,
+      `create-text.spec.ts`, `text-on-path.spec.ts`, `create-slice.spec.ts`).
+
 - [ ] Pen / vector (najbardziej złożony, na później)
 
 ## Etap 7 — Edycja tekstu (DOM overlay) + rendering tekstu w WebGL

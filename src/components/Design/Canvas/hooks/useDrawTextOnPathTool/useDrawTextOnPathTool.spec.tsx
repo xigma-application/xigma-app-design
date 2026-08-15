@@ -119,7 +119,7 @@ describe('useDrawTextOnPathTool behaviors', () => {
     expect(draftRef.current).toBeNull();
   });
 
-  it('should switch back to the default tool without creating a node when the drag is too small', () => {
+  it('should create a default 100x100, top-left-anchored path and start editing on a plain click', () => {
     // mock
     store.dispatch(setActiveTool(ToolName.textOnPath));
 
@@ -136,7 +136,7 @@ describe('useDrawTextOnPathTool behaviors', () => {
     // result
     const { design } = store.getState();
 
-    expect(design.editingTextBox).toBeNull();
+    expect(design.editingTextBox).toMatchObject({ height: 100, width: 100, x: 4400, y: 4400 });
     expect(design.activeTool).toBe(ToolName.default);
   });
 

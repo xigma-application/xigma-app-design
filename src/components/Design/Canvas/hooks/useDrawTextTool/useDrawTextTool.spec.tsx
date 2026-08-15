@@ -150,7 +150,7 @@ describe('useDrawTextTool behaviors', () => {
     expect(draftRef.current).toBeNull();
   });
 
-  it('should not start text editing when only one dimension meets the minimum shape size', () => {
+  it('should start text editing with a default-sized, top-left-anchored box when only one dimension meets the minimum shape size', () => {
     // mock
     const store = createTestStore();
 
@@ -171,10 +171,10 @@ describe('useDrawTextTool behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.editingTextBox).toBeNull();
+    expect(store.getState().design.editingTextBox).toMatchObject({ height: 100, width: 100, x: 10, y: 10 });
   });
 
-  it('should not start text editing when only the other dimension meets the minimum shape size', () => {
+  it('should start text editing with a default-sized, top-left-anchored box when only the other dimension meets the minimum shape size', () => {
     // mock
     const store = createTestStore();
 
@@ -195,7 +195,7 @@ describe('useDrawTextTool behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.editingTextBox).toBeNull();
+    expect(store.getState().design.editingTextBox).toMatchObject({ height: 100, width: 100, x: 10, y: 10 });
   });
 
   it('should ignore a pointer-up that was not preceded by a pointer-down', () => {
@@ -219,7 +219,7 @@ describe('useDrawTextTool behaviors', () => {
     expect(store.getState().design.activeTool).toBe(ToolName.text);
   });
 
-  it('should switch back to the default tool without starting text editing when the drag is too small', () => {
+  it('should start text editing with a default 100x100, top-left-anchored box on a plain click', () => {
     // mock
     const store = createTestStore();
 
@@ -242,7 +242,7 @@ describe('useDrawTextTool behaviors', () => {
     // result
     const { design } = store.getState();
 
-    expect(design.editingTextBox).toBeNull();
+    expect(design.editingTextBox).toMatchObject({ height: 100, width: 100, x: 10, y: 10 });
     expect(design.activeTool).toBe(ToolName.default);
   });
 });

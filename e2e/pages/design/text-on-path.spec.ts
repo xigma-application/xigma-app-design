@@ -51,6 +51,30 @@ test('draws a path with the Text on Path tool and commits a rendered curved text
   expect(after.equals(before)).toBe(false);
 });
 
+test('starts editing with a default 100x100 path, top-left anchored at the click point, when clicked without dragging', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-text-on-path-click-default');
+  await expect(designPage.canvas).toBeVisible();
+
+  const before = await designPage.canvas.screenshot();
+
+  await designPage.selectToolFromDropdown('text', 'Text on path');
+  await designPage.click(300, 300);
+
+  const defaultTool = designPage.toolRadio('default');
+  await expect(defaultTool).toHaveAttribute('aria-checked', 'true');
+
+  // still enters edit mode, seeded with the default path, exactly like a drag-created text-on-path node
+  await designPage.typeText('Hi');
+  await designPage.click(900, 600); // click away to commit
+
+  const after = await designPage.canvas.screenshot();
+  expect(after.equals(before)).toBe(false);
+});
+
 test('typing tool-shortcut letters while editing text on a path does not switch the active tool', async ({ page }) => {
   const designPage = new DesignPage(page);
 

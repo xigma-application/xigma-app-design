@@ -23,6 +23,7 @@ export const LINE_STROKE = '#ffffff';
 export const RECTANGLE_FILL = '#D9D9D9';
 export const SECTION_FILL = BACKGROUND_COLOR;
 export const RESIZE_DEBOUNCE_MS = 500;
+export const DEFAULT_SHAPE_SIZE = 100;
 export const MIN_SHAPE_SIZE = 2;
 export const PATH_NAME = 'Path';
 export const POLYGON_DEFAULT_SIDES = 3;

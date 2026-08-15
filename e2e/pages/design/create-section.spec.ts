@@ -70,3 +70,34 @@ test('draws a new section on the canvas using the Shift+S shortcut', async ({ pa
   const defaultTool = designPage.toolRadio('default');
   await expect(defaultTool).toHaveAttribute('aria-checked', 'true');
 });
+
+test('places a default 100x100 section centered on the click point when released without dragging', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-project');
+  await expect(designPage.canvas).toBeVisible();
+
+  const box = await designPage.canvas.boundingBox();
+  if (!box) {
+    throw new Error('Canvas bounding box unavailable');
+  }
+
+  const before = await designPage.canvas.screenshot();
+
+  await designPage.selectToolFromDropdown('frame', 'Section');
+
+  const clickX = box.x + box.width * 0.5;
+  const clickY = box.y + box.height * 0.5;
+
+  await designPage.click(clickX, clickY);
+
+  const defaultTool = designPage.toolRadio('default');
+  await expect(defaultTool).toHaveAttribute('aria-checked', 'true');
+
+  // Section's own fill matches the canvas background, so hover over the newly-placed box to force
+  // a visible outline — otherwise a purely invisible-fill node could pass this check with nothing drawn
+  await designPage.pointerMove(clickX, clickY);
+
+  const after = await designPage.canvas.screenshot();
+  expect(after.equals(before)).toBe(false);
+});

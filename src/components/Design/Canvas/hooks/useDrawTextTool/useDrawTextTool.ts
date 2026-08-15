@@ -1,7 +1,7 @@
 import { RefObject, useEffect, useRef } from 'react';
 
 // others
-import { MIN_SHAPE_SIZE } from '../../constants';
+import { DEFAULT_SHAPE_SIZE } from '../../constants';
 
 // store
 import { setActiveTool, setSelection, startTextEdit } from 'store/design/slice';
@@ -18,6 +18,7 @@ import { TPoint } from 'types/canvas';
 import { getPointerPosition } from '../../utils/getPointerPosition';
 import { screenToWorld } from '../../utils/screenToWorld';
 import { toDraftRect } from '../../utils/toDraftRect';
+import { toDraftRectWithDefault } from '../../utils/toDraftRectWithDefault';
 
 export const useDrawTextTool = (canvasRef: RefObject<HTMLCanvasElement | null>, draftRef: RefObject<TDraftEntity | null>): void => {
   const activeTool = useAppSelector(selectActiveTool);
@@ -43,12 +44,14 @@ export const useDrawTextTool = (canvasRef: RefObject<HTMLCanvasElement | null>, 
 
   const handlePointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     if (startRef.current) {
-      const rect = toDraftRect(startRef.current, screenToWorld(getPointerPosition(canvas, event), viewport));
+      const rect = toDraftRectWithDefault(
+        startRef.current,
+        screenToWorld(getPointerPosition(canvas, event), viewport),
+        DEFAULT_SHAPE_SIZE,
+        false,
+      );
 
-      if (rect.width >= MIN_SHAPE_SIZE && rect.height >= MIN_SHAPE_SIZE) {
-        dispatch(startTextEdit({ box: { ...rect, flipX: false, flipY: false, rotation: 0 } }));
-      }
-
+      dispatch(startTextEdit({ box: { ...rect, flipX: false, flipY: false, rotation: 0 } }));
       startRef.current = null;
       draftRef.current = null;
       canvas.releasePointerCapture(event.pointerId);

@@ -32,7 +32,7 @@ export const useSliceTool = (canvasRef: RefObject<HTMLCanvasElement | null>, sli
         handlePointerMove(canvas, event, sliceRef, drawDragRef, resizeDragRef, rotateDragRef, moveDragRef);
 
       const onPointerUp = (event: PointerEvent): void =>
-        handlePointerUp(canvas, event, dispatch, sliceRef, drawDragRef, resizeDragRef, rotateDragRef, moveDragRef);
+        handlePointerUp(canvas, event, sliceRef, drawDragRef, resizeDragRef, rotateDragRef, moveDragRef);
 
       canvas.addEventListener('pointerdown', onPointerDown);
       canvas.addEventListener('pointermove', onPointerMove);

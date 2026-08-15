@@ -1,7 +1,7 @@
 import { RefObject, useEffect, useRef } from 'react';
 
 // others
-import { MIN_SHAPE_SIZE, PATH_NAME } from '../../constants';
+import { DEFAULT_SHAPE_SIZE, PATH_NAME } from '../../constants';
 
 // store
 import { addNode, setActiveTool, setSelection, startTextEdit } from 'store/design/slice';
@@ -18,6 +18,7 @@ import { TPoint } from 'types/canvas';
 import { getPointerPosition } from '../../utils/getPointerPosition';
 import { screenToWorld } from '../../utils/screenToWorld';
 import { toDraftRect } from '../../utils/toDraftRect';
+import { toDraftRectWithDefault } from '../../utils/toDraftRectWithDefault';
 
 export const useDrawTextOnPathTool = (canvasRef: RefObject<HTMLCanvasElement | null>, draftRef: RefObject<TDraftEntity | null>): void => {
   const activeTool = useAppSelector(selectActiveTool);
@@ -43,21 +44,24 @@ export const useDrawTextOnPathTool = (canvasRef: RefObject<HTMLCanvasElement | n
 
   const handlePointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     if (startRef.current) {
-      const rect = toDraftRect(startRef.current, screenToWorld(getPointerPosition(canvas, event), viewport));
+      const rect = toDraftRectWithDefault(
+        startRef.current,
+        screenToWorld(getPointerPosition(canvas, event), viewport),
+        DEFAULT_SHAPE_SIZE,
+        false,
+      );
 
-      if (rect.width >= MIN_SHAPE_SIZE && rect.height >= MIN_SHAPE_SIZE) {
-        dispatch(addNode({ ...rect, name: PATH_NAME, parentId: null, pathType: PathType.ellipse, rotation: 0, type: NodeType.path }));
+      dispatch(addNode({ ...rect, name: PATH_NAME, parentId: null, pathType: PathType.ellipse, rotation: 0, type: NodeType.path }));
 
-        const { rootOrder } = store.getState().design;
-        const pathNodeId = rootOrder[rootOrder.length - 1];
+      const { rootOrder } = store.getState().design;
+      const pathNodeId = rootOrder[rootOrder.length - 1];
 
-        dispatch(setSelection([pathNodeId]));
-        dispatch(
-          startTextEdit({
-            box: { ...rect, flipX: false, flipY: false, pathFlip: false, pathId: pathNodeId, pathStartOffset: 0, rotation: 0 },
-          }),
-        );
-      }
+      dispatch(setSelection([pathNodeId]));
+      dispatch(
+        startTextEdit({
+          box: { ...rect, flipX: false, flipY: false, pathFlip: false, pathId: pathNodeId, pathStartOffset: 0, rotation: 0 },
+        }),
+      );
 
       startRef.current = null;
       draftRef.current = null;

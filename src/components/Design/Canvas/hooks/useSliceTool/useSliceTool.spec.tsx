@@ -80,7 +80,7 @@ describe('useSliceTool behaviors', () => {
     expect(canvasRef.current?.style.cursor).toBe(DEFAULT_CURSOR);
   });
 
-  it('should discard a too-small draw and revert to the default tool', () => {
+  it('should place a default 100x100 slice centered on a plain click, staying on the slice tool', () => {
     // mock
     store.dispatch(setActiveTool(ToolName.slice));
 
@@ -94,8 +94,8 @@ describe('useSliceTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 200, 200));
 
     // result
-    expect(sliceRef.current).toBeNull();
-    expect(store.getState().design.activeTool).toBe(ToolName.default);
+    expect(sliceRef.current).toEqual({ height: 100, rotation: 0, width: 100, x: 150, y: 150 });
+    expect(store.getState().design.activeTool).toBe(ToolName.slice);
   });
 
   it('should resize an existing slice box by dragging its corner handle', () => {

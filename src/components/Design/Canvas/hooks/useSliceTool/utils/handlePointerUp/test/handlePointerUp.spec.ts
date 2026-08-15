@@ -36,7 +36,7 @@ describe('handlePointerUp', () => {
     const moveDragRef: RefObject<TSliceMoveDragState | null> = { current: null };
 
     // before
-    handlePointerUp(canvas, pointerEvent(2), store.dispatch, sliceRef, drawDragRef, resizeDragRef, rotateDragRef, moveDragRef);
+    handlePointerUp(canvas, pointerEvent(2), sliceRef, drawDragRef, resizeDragRef, rotateDragRef, moveDragRef);
 
     // result
     expect(drawDragRef.current).toBeNull();
@@ -53,7 +53,7 @@ describe('handlePointerUp', () => {
     const moveDragRef: RefObject<TSliceMoveDragState | null> = { current: null };
 
     // before
-    handlePointerUp(canvas, pointerEvent(2), store.dispatch, sliceRef, drawDragRef, resizeDragRef, rotateDragRef, moveDragRef);
+    handlePointerUp(canvas, pointerEvent(2), sliceRef, drawDragRef, resizeDragRef, rotateDragRef, moveDragRef);
 
     // result
     expect(canvas.releasePointerCapture).not.toHaveBeenCalled();
