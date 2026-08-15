@@ -10,6 +10,7 @@ import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/d
 
 // utils
 import { handleAddNode } from './utils/handleAddNode';
+import { handleDeleteNode } from './utils/handleDeleteNode';
 import { handleSetActiveTool } from './utils/handleSetActiveTool';
 import { handleStartTextEdit } from './utils/handleStartTextEdit';
 import { handleStopTextEdit } from './utils/handleStopTextEdit';
@@ -43,6 +44,7 @@ const designSlice = createSlice({
       prepare: (node: TNewSceneNode) => ({ payload: { ...node, id: nanoid() } as TSceneNode }),
       reducer: (state, action: PayloadAction<TSceneNode>) => handleAddNode(state, action.payload),
     },
+    deleteNode: (state, action: PayloadAction<string>) => handleDeleteNode(state, action.payload),
     setActiveTool: (state, action: PayloadAction<ToolName>) => handleSetActiveTool(state, action.payload),
     setSelection: (state, action: PayloadAction<string[]>) => {
       state.selectedIds = action.payload;
@@ -64,6 +66,7 @@ const designSlice = createSlice({
 
 export const {
   addNode,
+  deleteNode,
   setActiveTool,
   setSelection,
   setViewport,

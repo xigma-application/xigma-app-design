@@ -75,6 +75,44 @@ test('starts editing with a default 100x100 path, top-left anchored at the click
   expect(after.equals(before)).toBe(false);
 });
 
+test('clearing all content on an existing text-on-path node and blurring deletes it, instead of leaving the original content untouched', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-path-text-clear-to-empty');
+  await expect(designPage.canvas).toBeVisible();
+
+  // a 200x200 circle centered at (400,400); "Hi" starts at the top (400,300)
+  await designPage.drawTextOnPath(300, 300, 500, 500);
+  await designPage.typeText('Hi');
+  await designPage.click(900, 600); // commit
+
+  const withText = await designPage.canvas.screenshot();
+
+  await designPage.doubleClick(400, 300); // re-enter edit mode on the rendered "H", all content selected
+  await page.keyboard.press('Backspace'); // clear to empty
+  await designPage.click(900, 600); // blur with no content
+
+  const afterClearing = await designPage.canvas.screenshot();
+
+  // reference: draw a fresh path and click away with no content typed at all — the already-
+  // established "never created" render for a first-time draw. Comparing against a totally
+  // untouched page instead would be misleading here: the toolbar's shared text/text-on-path button
+  // remembers whichever was used last (lastTextTool, same mechanic as lastShapeTool), so a page that
+  // used Text on Path always renders that icon differently from one that never touched the tool at
+  // all, regardless of whether the node itself was deleted
+  await designPage.goto('e2e-test-path-text-clear-to-empty-reference');
+  await expect(designPage.canvas).toBeVisible();
+  await designPage.drawTextOnPath(300, 300, 500, 500);
+  await designPage.click(900, 600);
+
+  const neverCreated = await designPage.canvas.screenshot();
+
+  expect(afterClearing.equals(withText)).toBe(false);
+  expect(afterClearing.equals(neverCreated)).toBe(true);
+});
+
 test('typing tool-shortcut letters while editing text on a path does not switch the active tool', async ({ page }) => {
   const designPage = new DesignPage(page);
 

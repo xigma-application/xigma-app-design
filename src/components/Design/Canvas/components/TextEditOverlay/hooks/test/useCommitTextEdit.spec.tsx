@@ -11,7 +11,7 @@ import designReducer, { addNode, setSelection } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, PathType } from 'types/design/enums';
 
 const createTestStore = (): EnhancedStore<{ design: TDesignState }> => configureStore({ reducer: { design: designReducer } });
 
@@ -242,7 +242,7 @@ describe('useCommitTextEdit behaviors', () => {
     expect(store.getState().design.selectedIds).toEqual([]);
   });
 
-  it('should leave the existing node untouched when blurred with no content, instead of clearing it', () => {
+  it('should delete the existing node when blurred with no content, matching a freshly-drawn box being discarded', () => {
     // mock
     const store = createTestStore();
 
@@ -268,6 +268,8 @@ describe('useCommitTextEdit behaviors', () => {
     const [existingId] = store.getState().design.rootOrder;
     const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
 
+    store.dispatch(setSelection([existingId]));
+
     // before
     const { result } = renderHook(() => useCommitTextEdit(box, existingId), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
@@ -279,8 +281,81 @@ describe('useCommitTextEdit behaviors', () => {
     // result
     const { design } = store.getState();
 
-    expect(design.nodes[existingId]).toMatchObject({ content: 'original' });
+    expect(design.nodes[existingId]).toBeUndefined();
+    expect(design.rootOrder).toHaveLength(0);
     expect(design.editingTextBox).toBeNull();
     expect(design.selectedIds).toEqual([]);
+  });
+
+  it('should also delete the bound path node when an existing path-text node is cleared to empty', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(
+      addNode({
+        height: 200,
+        name: 'Path',
+        parentId: null,
+        pathType: PathType.ellipse,
+        rotation: 0,
+        type: NodeType.path,
+        width: 200,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const [pathId] = store.getState().design.rootOrder;
+
+    store.dispatch(
+      addNode({
+        content: 'original',
+        fill: '#ffffff',
+        flipX: false,
+        flipY: false,
+        fontFamily: 'Inter',
+        fontSize: 14,
+        height: 200,
+        name: 'Text',
+        parentId: null,
+        pathFlip: false,
+        pathId,
+        pathStartOffset: 0,
+        rotation: 0,
+        type: NodeType.text,
+        width: 200,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const textId = store.getState().design.rootOrder[1];
+    const box = {
+      flipX: false,
+      flipY: false,
+      height: 200,
+      pathFlip: false,
+      pathId,
+      pathStartOffset: 0,
+      rotation: 0,
+      width: 200,
+      x: 0,
+      y: 0,
+    };
+
+    // before
+    const { result } = renderHook(() => useCommitTextEdit(box, textId), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    result.current(createBlurEvent(''));
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.nodes[textId]).toBeUndefined();
+    expect(design.nodes[pathId]).toBeUndefined();
+    expect(design.rootOrder).toHaveLength(0);
   });
 });

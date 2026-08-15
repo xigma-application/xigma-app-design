@@ -1,7 +1,7 @@
 import { FocusEvent } from 'react';
 
 // store
-import { setSelection, stopTextEdit } from 'store/design/slice';
+import { deleteNode, setSelection, stopTextEdit } from 'store/design/slice';
 import { useAppDispatch } from 'store';
 
 // types
@@ -23,6 +23,8 @@ export const useCommitTextEdit = (
 
       if (content.length > 0) {
         commitTextNode(dispatch, box, editingNodeId, content);
+      } else if (editingNodeId) {
+        dispatch(deleteNode(editingNodeId));
       }
 
       dispatch(setSelection([]));

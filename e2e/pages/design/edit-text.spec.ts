@@ -31,6 +31,36 @@ test('double-clicking an unselected text node enters edit mode with all its cont
   expect(replaced.equals(reference)).toBe(true);
 });
 
+test('clearing all content on an existing text node and blurring deletes it, instead of leaving the original content untouched', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-edit-text-clear-to-empty');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawTextBox(300, 300, 500, 340);
+  await designPage.typeText('HELLO');
+  await designPage.click(950, 600); // commit
+
+  const withText = await designPage.canvas.screenshot();
+
+  await designPage.doubleClick(305, 310); // re-enter edit mode, all content selected
+  await page.keyboard.press('Backspace'); // clear to empty
+  await designPage.click(950, 600); // blur with no content
+
+  const afterClearing = await designPage.canvas.screenshot();
+
+  // reference: a fresh page where nothing was ever drawn
+  await designPage.goto('e2e-test-edit-text-clear-to-empty-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  const neverDrawn = await designPage.canvas.screenshot();
+
+  expect(afterClearing.equals(withText)).toBe(false);
+  expect(afterClearing.equals(neverDrawn)).toBe(true);
+});
+
 test('double-clicking a word while actively typing new text selects it, so typing replaces just that word', async ({ page }) => {
   const designPage = new DesignPage(page);
 
