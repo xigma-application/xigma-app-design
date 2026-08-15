@@ -395,8 +395,9 @@ describe('useHoverHighlight behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2200, 2200));
     });
 
-    // result — no resize cursor, falls through to the plain node-hover branch instead
-    expect(canvasRef.current?.style.cursor).toBe('');
+    // result — no resize cursor; the point lands on the editing text itself, so it gets the text
+    // (I-beam) cursor instead of a resize handle
+    expect(canvasRef.current?.style.cursor).toBe('text');
     expect(classNameRef.current).not.toBe('positioning');
   });
 
@@ -461,5 +462,62 @@ describe('useHoverHighlight behaviors', () => {
     // result
     expect(classNameRef.current).toBe('hand');
     expect(hoverRef.current).toBe(idA);
+  });
+
+  it('should show the text (I-beam) cursor when hovering the content of a straight-text box currently being edited', () => {
+    // mock — a freshly-drawn, uncommitted straight-text box
+    store.dispatch(
+      startTextEdit({ box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 200, x: 5000, y: 5000 }, content: 'Hello' }),
+    );
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { classNameRef } = renderHoverHighlight(canvasRef);
+
+    // action — over the rendered "H"
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 5005, 5010));
+    });
+
+    // result
+    expect(canvasRef.current?.style.cursor).toBe('text');
+    expect(classNameRef.current).toBeNull();
+  });
+
+  it('should show the text (I-beam) cursor when hovering the content of a path-text box currently being edited', () => {
+    // mock — a 200x200 circle at (4300,4300)-(4500,4500); "Hi" starts at the rightmost point
+    // (4500,4400), with the rendered "H" glyph itself sitting a little inside that point, away
+    // from the start-offset handle's own exact position
+    store.dispatch(
+      startTextEdit({
+        box: {
+          flipX: false,
+          flipY: false,
+          height: 200,
+          pathId: 'ellipse-1',
+          pathStartOffset: 0,
+          rotation: 0,
+          width: 200,
+          x: 4300,
+          y: 4300,
+        },
+        content: 'Hi',
+      }),
+    );
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { classNameRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 4493, 4405));
+    });
+
+    // result
+    expect(canvasRef.current?.style.cursor).toBe('text');
+    expect(classNameRef.current).toBeNull();
   });
 });

@@ -1,6 +1,9 @@
 import { RefObject, useEffect } from 'react';
 
 // others
+import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
+import { PATH_TEXT_HIT_TOLERANCE_PX, STRAIGHT_TEXT_HIT_TOLERANCE_PX } from 'constant/canvas';
+import { TEXT_FONT_SIZE } from '../../constants';
 import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
 
 // store
@@ -8,6 +11,7 @@ import {
   selectActiveTool,
   selectEditingNodeId,
   selectEditingTextBox,
+  selectEditingTextContent,
   selectOrderedNodes,
   selectSelectedNodes,
   selectViewport,
@@ -18,6 +22,7 @@ import { store, useAppSelector } from 'store';
 import { NodeType, ToolName } from 'types/design/enums';
 
 // utils
+import { getCurvedCaretIndexAtPoint } from 'utils/canvas/text/getCurvedCaretIndexAtPoint';
 import { getLineEndpointAtPoint } from '../../utils/getLineEndpointAtPoint';
 import { getNodeAtPoint } from '../../utils/getNodeAtPoint';
 import { getPathTextOffsetHandleAtPoint } from '../../utils/getPathTextOffsetHandleAtPoint';
@@ -29,6 +34,7 @@ import { getRotateHandleAtPoint } from '../../utils/getRotateHandleAtPoint';
 import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
 import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
 import { getRotatedScaleCursorUrl } from 'utils/canvas/getRotatedScaleCursorUrl';
+import { getStraightCaretIndexAtPoint } from 'utils/canvas/text/getStraightCaretIndexAtPoint';
 import { isPointOnPathTextHandle } from '../../utils/isPointOnPathTextHandle';
 import { screenToWorld } from '../../utils/screenToWorld';
 
@@ -53,6 +59,14 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
         : { hit: Boolean(nonEditingHandleHit), nodeId: nonEditingHandleHit?.nodeId ?? null };
       const resizeHandleHit = getResizeHandleAtPoint(point, resizableSelectedNodes, viewport);
       const rotateHandleHit = getRotateHandleAtPoint(point, resizableSelectedNodes, viewport);
+      const editingContent = selectEditingTextContent(state);
+      const editingHit = editingTextBox?.pathId
+        ? getCurvedCaretIndexAtPoint(MSDF_ATLAS_JSON, editingContent, TEXT_FONT_SIZE, editingTextBox, point)
+        : editingTextBox
+          ? getStraightCaretIndexAtPoint(MSDF_ATLAS_JSON, editingContent, TEXT_FONT_SIZE, editingTextBox, point)
+          : null;
+      const editingTolerance = (editingTextBox?.pathId ? PATH_TEXT_HIT_TOLERANCE_PX : STRAIGHT_TEXT_HIT_TOLERANCE_PX) / viewport.zoom;
+      const collidesWithEditingText = Boolean(editingHit && editingHit.distance <= editingTolerance);
 
       switch (true) {
         case Boolean(lineEndpointHit) && selectedNode.type === NodeType.line:
@@ -64,6 +78,11 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
           setClassName('hand');
           canvas.style.cursor = '';
           hoverRef.current = pathOffsetHandleHit.nodeId;
+          break;
+        case collidesWithEditingText:
+          setClassName(null);
+          canvas.style.cursor = 'text';
+          hoverRef.current = null;
           break;
         case Boolean(resizeHandleHit): {
           const getCursorUrl = activeTool === ToolName.scale ? getRotatedScaleCursorUrl : getRotatedResizeCursorUrl;
