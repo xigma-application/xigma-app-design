@@ -224,6 +224,34 @@ queued file still has to round-trip through its own async `Image()` decode befor
 arms it, and four Playwright workers all decoding images at once under a full parallel run slows
 that down further than it appeared when this test ran alone.
 
+## Media click-to-place centers on the cursor
+
+A plain click (no drag) placing Media at its natural size used to top-left anchor that corner at
+the click point — the same "click without dragging" gesture every other draw tool instead centers
+a default-size box on (shape tools center a fixed `DEFAULT_SHAPE_SIZE` square; Text on Path centers
+its own default 100×100 path). Media never got the equivalent treatment because it has no fixed
+default size to center — each file's actual natural width/height varies per image, so centering
+needs the armed file's own dimensions rather than a shared constant. Fixed with a new
+`getCenteredMediaRect.ts` (`useDrawMediaTool/utils/handlePointerUp/utils/`, alongside a sibling
+`getMediaPlacementRect.ts` that now owns the whole `isClick ? centered : aspect-ratio-locked`
+branch `handlePointerUp.ts` used to inline directly): `x`/`y` are the click point minus half the
+armed file's `naturalWidth`/`naturalHeight`, rounded the same way every other rect in this codebase
+already rounds (`roundRect.ts`, applied after the subtraction, not before — an odd natural dimension
+like this repo's own 19px-tall cursor-icon fixture rounds its half-offset up, since `Math.round`
+rounds `.5` towards `+Infinity`).
+
+| #   | Scenario                                                                                                     | Unit |            E2E            |
+| --- | ------------------------------------------------------------------------------------------------------------ | :--: | :-----------------------: |
+| 110 | A plain click (no drag) places Media at its natural size, centered on the click point, not top-left anchored |  ✅  | ✅ `create-media.spec.ts` |
+
+`getCenteredMediaRect.spec.ts`/`getMediaPlacementRect.spec.ts` already assert the exact centered
+(and, for a drag, aspect-locked) rect precisely via direct function calls; the e2e version proves
+the real placed image actually renders at that position, by dragging a second, independently-placed
+image to the exact equivalent centered rect (computed from the same fixture's own known natural
+size) and asserting pixel equality against the click result — the same "compare two
+independently-produced pages" pattern used throughout this file, rather than needing pixel-level
+image inspection this suite has no dependency for.
+
 ## Selection (Etap 5)
 
 Setup shorthand: **A**, **B**, **C** are frames drawn left-to-right with a gap between each, all

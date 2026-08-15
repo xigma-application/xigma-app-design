@@ -325,7 +325,7 @@ describe('useDrawMediaTool behaviors', () => {
     expect(draftRef.current).toEqual({ height: 50, src: 'blob:mock-url', type: NodeType.media, width: 100, x: 0, y: 0 });
   });
 
-  it('should place the image at its natural size on a plain click', () => {
+  it('should place the image at its natural size centered on a plain click', () => {
     // mock
     const store = createTestStore();
     const canvasRef = createCanvasRef();
@@ -343,7 +343,7 @@ describe('useDrawMediaTool behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 10, 10));
     });
 
-    // result
+    // result — the click point (10,10) lands at the center of the 200x100 image, not its corner
     const { design } = store.getState();
 
     expect(design.rootOrder).toHaveLength(1);
@@ -353,8 +353,8 @@ describe('useDrawMediaTool behaviors', () => {
       src: 'blob:mock-url',
       type: NodeType.media,
       width: 200,
-      x: 10,
-      y: 10,
+      x: -90,
+      y: -40,
     });
     expect(design.activeTool).toBe(ToolName.default);
     expect(draftRef.current).toBeNull();
@@ -432,7 +432,7 @@ describe('useDrawMediaTool behaviors', () => {
     const { design } = store.getState();
 
     expect(design.rootOrder).toHaveLength(2);
-    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ height: 100, width: 200, x: 10, y: 10 });
+    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ height: 100, width: 200, x: -90, y: -40 });
     // raw 50x25 drag locked to the second file's 1:2 ratio (twice as tall as wide) — the raw
     // height (25) is far too short for that ratio, so it gets forced up to 100
     expect(design.nodes[design.rootOrder[1]]).toMatchObject({ height: 100, width: 50, x: 40, y: 40 });
@@ -519,7 +519,7 @@ describe('useDrawMediaTool behaviors', () => {
 
     expect(design.rootOrder).toHaveLength(1);
     expect(design.viewport).toEqual({ x: 150, y: 90, zoom: 1 });
-    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ x: -140, y: -80 });
+    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ x: -240, y: -130 });
   });
 
   it('should not place a stale armed file after the tool is deactivated and reactivated without picking a new one', () => {

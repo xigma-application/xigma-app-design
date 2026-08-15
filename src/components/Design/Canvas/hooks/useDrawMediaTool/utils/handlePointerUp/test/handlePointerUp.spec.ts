@@ -82,7 +82,7 @@ describe('handlePointerUp', () => {
     expect(canvas.releasePointerCapture).not.toHaveBeenCalled();
   });
 
-  it('should place the armed file at its natural size on a plain click, reset drag state, and revert to the default tool when the queue is empty', () => {
+  it('should place the armed file at its natural size centered on a plain click, reset drag state, and revert to the default tool when the queue is empty', () => {
     // mock
     const canvas = createCanvas();
     const canvasRef = { current: canvas };
@@ -105,11 +105,11 @@ describe('handlePointerUp', () => {
       'Image',
     );
 
-    // result
+    // result — the click point (10,10) lands at the center of the 200x100 image, not its corner
     const { design } = store.getState();
     const placed = design.nodes[design.rootOrder[design.rootOrder.length - 1]];
 
-    expect(placed).toMatchObject({ height: 100, name: 'Image', src: 'blob:mock-url', type: NodeType.media, width: 200, x: 10, y: 10 });
+    expect(placed).toMatchObject({ height: 100, name: 'Image', src: 'blob:mock-url', type: NodeType.media, width: 200, x: -90, y: -40 });
     expect(startRef.current).toBeNull();
     expect(draftRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
@@ -242,11 +242,11 @@ describe('handlePointerUp', () => {
     );
 
     // result — screen (10,10) under viewport {x:150,y:90} converts to world (-140,-80), exactly
-    // matching the recorded start point (zero delta), so this resolves as a click placed there —
-    // proving the viewport was read fresh at call time, not a stale one
+    // matching the recorded start point (zero delta), so this resolves as a click, centered on
+    // that world point — proving the viewport was read fresh at call time, not a stale one
     const { design } = store.getState();
     const placed = design.nodes[design.rootOrder[design.rootOrder.length - 1]];
 
-    expect(placed).toMatchObject({ x: -140, y: -80 });
+    expect(placed).toMatchObject({ x: -240, y: -130 });
   });
 });

@@ -14,7 +14,7 @@ const SECOND_FIXTURE_PATH = path.join(import.meta.dirname, '../../../src/assets/
 // so this file's tests must not run concurrently with each other
 test.describe.configure({ mode: 'serial' });
 
-test('places the image at its exact natural pixel size on a plain click', async ({ page }) => {
+test('places the image at its exact natural pixel size centered on a plain click', async ({ page }) => {
   const designPage = new DesignPage(page);
 
   await designPage.goto('e2e-test-project');
@@ -32,15 +32,23 @@ test('places the image at its exact natural pixel size on a plain click', async 
 
   const clickPlacement = await designPage.canvas.screenshot();
 
-  // reload and drag out the exact same file to its known natural size, top-left anchored at the same point
+  // reload and drag out the exact same file to its known natural size, anchored so its top-left
+  // corner lands where the click-centered placement's own top-left corner must land: half the
+  // natural size back from the click point, rounded the same way roundRect itself rounds (after
+  // subtracting, not before) — 16/2=8 exactly; 100-19/2=90.5 rounds up to 91, since Math.round
+  // rounds .5 towards +Infinity
+  const expectedX = Math.round(100 - FIXTURE_NATURAL_WIDTH / 2);
+  const expectedY = Math.round(100 - FIXTURE_NATURAL_HEIGHT / 2);
+
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
   await designPage.pickMediaFile(FIXTURE_PATH);
-  await designPage.dragMedia(100, 100, 100 + FIXTURE_NATURAL_WIDTH, 100 + FIXTURE_NATURAL_HEIGHT);
+  await designPage.dragMedia(expectedX, expectedY, expectedX + FIXTURE_NATURAL_WIDTH, expectedY + FIXTURE_NATURAL_HEIGHT);
 
   const exactSizeDragPlacement = await designPage.canvas.screenshot();
 
-  // a plain click (no drag) must produce the identical result as explicitly dragging to the natural size
+  // a plain click (no drag) must produce the identical result as explicitly dragging to the
+  // natural size at the equivalent centered position
   expect(clickPlacement.equals(exactSizeDragPlacement)).toBe(true);
 });
 
@@ -110,11 +118,11 @@ test('selects every placed file together, so a multi-file pick ends with all of 
 
   await designPage.pickMediaFile([FIXTURE_PATH, SECOND_FIXTURE_PATH]);
 
-  // place both files with a plain click (natural size), which always top-left anchors exactly at
-  // the click point regardless of each fixture's own actual natural size (see the "places the image
-  // at its exact natural pixel size on a plain click" test above) — so a point a couple pixels in
-  // from each anchor is guaranteed to land on that image later, without needing to know either
-  // fixture's real dimensions or replicate the aspect-locked-drag math for a second file
+  // place both files with a plain click (natural size), which always centers on the click point
+  // regardless of each fixture's own actual natural size (see the "places the image at its exact
+  // natural pixel size centered on a plain click" test above) — so clicking at (or near) the same
+  // point later is guaranteed to land on that image, without needing to know either fixture's real
+  // dimensions or replicate the aspect-locked-drag math for a second file
   await designPage.placeMediaAtNaturalSize(100, 100);
   // the next queued file still has to round-trip through its own Image() decode before
   // armNextFile arms it (same reason pickMediaFile waits after the initial pick) — clicking again
