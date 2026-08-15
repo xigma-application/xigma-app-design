@@ -132,6 +132,7 @@ describe('useDrawLineTool behaviors', () => {
       y2: 40,
     });
     expect(design.activeTool).toBe(ToolName.default);
+    expect(design.selectedIds).toEqual([design.rootOrder[0]]);
     expect(draftRef.current).toBeNull();
   });
 

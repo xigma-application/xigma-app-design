@@ -6,7 +6,7 @@ import { MIN_SHAPE_SIZE } from '../../constants';
 // store
 import { addNode, setActiveTool, setSelection } from 'store/design/slice';
 import { selectActiveTool, selectViewport } from 'store/design/selectors';
-import { useAppDispatch, useAppSelector } from 'store';
+import { useAppDispatch, useAppSelector, useAppStore } from 'store';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
@@ -17,6 +17,7 @@ import { TPoint } from 'types/canvas';
 // utils
 import { getPointerPosition } from '../../utils/getPointerPosition';
 import { screenToWorld } from '../../utils/screenToWorld';
+import { selectLastCreatedNode } from '../../utils/selectLastCreatedNode';
 
 export type TLineToolConfig = {
   name: string;
@@ -32,6 +33,7 @@ export const useDrawLineTool = (
   const activeTool = useAppSelector(selectActiveTool);
   const viewport = useAppSelector(selectViewport);
   const dispatch = useAppDispatch();
+  const appStore = useAppStore();
   const startRef = useRef<TPoint | null>(null);
 
   const handlePointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
@@ -75,6 +77,7 @@ export const useDrawLineTool = (
             y2: Math.round(current.y),
           }),
         );
+        selectLastCreatedNode(dispatch, appStore);
       }
 
       startRef.current = null;
@@ -102,5 +105,5 @@ export const useDrawLineTool = (
         canvas.removeEventListener('pointerup', onPointerUp);
       };
     }
-  }, [activeTool, canvasRef, dispatch, draftRef, name, stroke, tool, viewport]);
+  }, [activeTool, appStore, canvasRef, dispatch, draftRef, name, stroke, tool, viewport]);
 };

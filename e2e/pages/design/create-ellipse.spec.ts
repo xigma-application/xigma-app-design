@@ -99,6 +99,35 @@ test('places a default 100x100 ellipse centered on the click point when released
   expect(after.equals(before)).toBe(false);
 });
 
+test('starts selected immediately after being drawn, without an extra click', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-project');
+  await expect(designPage.canvas).toBeVisible();
+
+  const box = await designPage.canvas.boundingBox();
+  if (!box) {
+    throw new Error('Canvas bounding box unavailable');
+  }
+
+  const startX = box.x + box.width * 0.3;
+  const startY = box.y + box.height * 0.3;
+  const endX = box.x + box.width * 0.6;
+  const endY = box.y + box.height * 0.6;
+
+  await designPage.selectToolFromDropdown('rectangle', 'Ellipse');
+  await designPage.pointerDown(startX, startY);
+  await designPage.pointerMove(endX, endY);
+  await designPage.pointerUp();
+
+  const selected = await designPage.canvas.screenshot();
+
+  await designPage.click(box.x + box.width * 0.05, box.y + box.height * 0.05); // empty canvas, well outside the ellipse — deselects
+  const deselected = await designPage.canvas.screenshot();
+
+  expect(selected.equals(deselected)).toBe(false);
+});
+
 test("shows the ellipse's fill live while dragging, unlike the fill-less Frame draft", async ({ page }) => {
   const designPage = new DesignPage(page);
 

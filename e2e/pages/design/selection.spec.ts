@@ -103,6 +103,7 @@ test('dragging a marquee live-selects the frames it covers, then keeps the selec
   await expect(designPage.canvas).toBeVisible();
 
   await designPage.drawFrame(100, 100, 140, 140); // P
+  await designPage.click(900, 600); // deselect P — it's auto-selected on creation, but this baseline must be the empty-selection state
   const baseline = await designPage.canvas.screenshot();
 
   // drag a marquee box that fully covers P — selection (and the marquee overlay itself) must

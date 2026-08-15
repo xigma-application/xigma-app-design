@@ -6,7 +6,7 @@ import { DEFAULT_SHAPE_SIZE } from '../../constants';
 // store
 import { addNode, setActiveTool, setSelection } from 'store/design/slice';
 import { selectActiveTool, selectViewport } from 'store/design/selectors';
-import { useAppDispatch, useAppSelector } from 'store';
+import { useAppDispatch, useAppSelector, useAppStore } from 'store';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
@@ -17,6 +17,7 @@ import { TPoint } from 'types/canvas';
 // utils
 import { getPointerPosition } from '../../utils/getPointerPosition';
 import { screenToWorld } from '../../utils/screenToWorld';
+import { selectLastCreatedNode } from '../../utils/selectLastCreatedNode';
 import { toDraftRect } from '../../utils/toDraftRect';
 import { toDraftRectWithDefault } from '../../utils/toDraftRectWithDefault';
 
@@ -36,6 +37,7 @@ export const useDrawStarTool = (
   const activeTool = useAppSelector(selectActiveTool);
   const viewport = useAppSelector(selectViewport);
   const dispatch = useAppDispatch();
+  const appStore = useAppStore();
   const startRef = useRef<TPoint | null>(null);
 
   const handlePointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
@@ -66,6 +68,8 @@ export const useDrawStarTool = (
       dispatch(
         addNode({ ...rect, fill, flipX: false, flipY: false, name, parentId: null, points, ratio, rotation: 0, type: NodeType.star }),
       );
+      selectLastCreatedNode(dispatch, appStore);
+
       startRef.current = null;
       draftRef.current = null;
       canvas.releasePointerCapture(event.pointerId);
@@ -91,5 +95,5 @@ export const useDrawStarTool = (
         canvas.removeEventListener('pointerup', onPointerUp);
       };
     }
-  }, [activeTool, canvasRef, dispatch, draftRef, fill, name, points, ratio, tool, viewport]);
+  }, [activeTool, appStore, canvasRef, dispatch, draftRef, fill, name, points, ratio, tool, viewport]);
 };

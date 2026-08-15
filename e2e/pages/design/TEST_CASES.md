@@ -141,6 +141,53 @@ miss), and `drawPerNodeSelectionOutlines.spec.ts` counts the exact WebGL draw ca
 paint behavior a screenshot diff could catch that the unit suite can't; see "Why so few scenarios
 get e2e coverage" below.
 
+## Select newly created shape nodes on creation
+
+Frame/Section/Rectangle/Ellipse/Polygon/Star/Line previously committed to the store on `pointerup`
+with nothing selected — the user had to click the shape a second time to select it, unlike Text on
+Path's own draft-path node (selected mid-draw purely so its dashed "editing" outline can resolve,
+see #90 above; its own _final_ committed state still ends up unselected, matching Media/Text's
+existing "never auto-selected after creation" convention). Requested explicitly as a UX change: a
+freshly drawn shape should read as selected immediately, for both the drag-to-size and the
+click-to-place-default-size paths (`toDraftRectWithDefault` already unifies both into the same
+`handlePointerUp` code path per tool, so one fix covers both). Four of the seven tools
+(Frame/Section/Rectangle/Ellipse) share one hook (`useDrawShapeTool.ts`); Polygon/Star/Line each
+have their own near-identical hook. All four now call a shared `selectLastCreatedNode.ts` util
+(`Canvas/utils/`) right after `dispatch(addNode(...))`, reading the just-pushed id off
+`appStore.getState().design.rootOrder`'s last entry (the `addNode` reducer's `prepare` callback
+generates the id via `nanoid()`, so the caller can't know it ahead of time — same pattern
+`useDrawTextOnPathTool.ts` already established for its own mid-draw path selection).
+
+| #   | Scenario                                                                                                               | Unit |              E2E              |
+| --- | ---------------------------------------------------------------------------------------------------------------------- | :--: | :---------------------------: |
+| 97  | A freshly drawn Frame is selected immediately on release, with no extra click needed                                   |  ✅  |   ✅ `create-frame.spec.ts`   |
+| 98  | A freshly drawn Section is selected immediately on release (proven via its outline alone, since its fill is invisible) |  ✅  |  ✅ `create-section.spec.ts`  |
+| 99  | A freshly drawn Rectangle is selected immediately on release                                                           |  ✅  | ✅ `create-rectangle.spec.ts` |
+| 100 | A freshly drawn Ellipse is selected immediately on release                                                             |  ✅  |  ✅ `create-ellipse.spec.ts`  |
+| 101 | A freshly drawn Polygon is selected immediately on release                                                             |  ✅  |  ✅ `create-polygon.spec.ts`  |
+| 102 | A freshly drawn Star is selected immediately on release                                                                |  ✅  |   ✅ `create-star.spec.ts`    |
+| 103 | A freshly drawn Line is selected immediately on release (its own no-bounding-box selection style, see #28 above)       |  ✅  |   ✅ `create-line.spec.ts`    |
+
+Each hook's own unit spec (`useDrawShapeTool.spec.tsx`, `useDrawPolygonTool.spec.tsx`,
+`useDrawStarTool.spec.tsx`, `useDrawLineTool.spec.tsx`) already asserts `store.getState().design.
+selectedIds` directly and exactly for both the drag and click-to-place-default paths — but every
+scenario still gets an e2e test too, since the actual claim is that the real per-node selection
+_outline_ paints on screen right after a real `pointerdown`→`pointermove`→`pointerup` sequence, the
+same "real browser + rendering" category the rest of this file reserves e2e for, not just that the
+reducer flipped `selectedIds`. Each test draws the shape, screenshots it immediately (no extra
+interaction), then clicks a point on empty canvas to deselect and screenshots again — any pixel
+difference can only come from the selection outline (or, for Line, its thin highlight + endpoint
+handles) that was already there before the deselect click.
+
+Fixing this surfaced one incidental regression, caught by the existing suite rather than a new
+test: `selection.spec.ts`'s marquee-live-selection test drew a baseline Frame and screenshotted it
+immediately, previously guaranteed unselected — now that baseline showed the frame pre-selected by
+this very fix, making the later "marquee-selected state differs from baseline" assertion trivially
+false (both states were now identical). Fixed by explicitly deselecting before capturing that
+baseline (`designPage.click(900, 600)`) — worth noting because the first fix attempt used `(900,
+800)`, which sits below the default 720px Playwright viewport height and silently never reached the
+canvas at all, so the click was a no-op and the test still failed the same way.
+
 ## Selection (Etap 5)
 
 Setup shorthand: **A**, **B**, **C** are frames drawn left-to-right with a gap between each, all

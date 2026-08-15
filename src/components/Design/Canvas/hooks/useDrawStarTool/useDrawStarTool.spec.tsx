@@ -121,6 +121,7 @@ describe('useDrawStarTool behaviors', () => {
       y: 10,
     });
     expect(design.activeTool).toBe(ToolName.default);
+    expect(design.selectedIds).toEqual([design.rootOrder[0]]);
     expect(draftRef.current).toBeNull();
   });
 
@@ -272,5 +273,6 @@ describe('useDrawStarTool behaviors', () => {
     expect(design.rootOrder).toHaveLength(1);
     expect(design.nodes[design.rootOrder[0]]).toMatchObject({ height: 100, width: 100, x: -40, y: -40 });
     expect(design.activeTool).toBe(ToolName.default);
+    expect(design.selectedIds).toEqual([design.rootOrder[0]]);
   });
 });
