@@ -1,7 +1,6 @@
 // others
-import { DRAFT_FRAME_STROKE, TEXT_SELECTION_FILL_ALPHA } from 'constant/canvas';
 import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
-import { TEXT_FONT_SIZE } from '../../../../../constants';
+import { TEXT_FONT_SIZE } from '../../../../../../constants';
 
 // types
 import { TEditingTextBox, TPoint } from 'types/canvas';
@@ -9,9 +8,13 @@ import { TViewport } from 'types/design/types';
 
 // utils
 import { buildEllipseArcLengthTable } from 'utils/canvas/shapes/buildEllipseArcLengthTable';
-import { drawRect } from 'utils/canvas/drawRect';
-import { getCurvedSelectionRects } from 'utils/canvas/text/getCurvedSelectionRects';
-import { transformCurvedPoint } from './transformCurvedPoint';
+import { drawCurvedSelectionFill } from './drawCurvedSelectionFill';
+import { drawCurvedSelectionOutline } from './drawCurvedSelectionOutline';
+import { getCurvedSelectionOutlinePoints } from 'utils/canvas/text/getCurvedSelectionOutlinePoints';
+import { getCurvedSelectionRibbonVertices } from 'utils/canvas/text/getCurvedSelectionRibbonVertices';
+import { toFlatVertices } from './toFlatVertices';
+import { toPoints } from './toPoints';
+import { transformPoints } from './transformPoints';
 
 export const drawCurvedSelectionHighlight = (
   gl: WebGL2RenderingContext,
@@ -28,7 +31,7 @@ export const drawCurvedSelectionHighlight = (
   const center: TPoint = { x: editingTextBox.x + editingTextBox.width / 2, y: editingTextBox.y + editingTextBox.height / 2 };
   const lineHeight = (MSDF_ATLAS_JSON.common.lineHeight * TEXT_FONT_SIZE) / MSDF_ATLAS_JSON.info.size;
   const table = buildEllipseArcLengthTable(editingTextBox.width, editingTextBox.height);
-  const localRects = getCurvedSelectionRects(
+  const args = [
     MSDF_ATLAS_JSON,
     editingTextContent,
     TEXT_FONT_SIZE,
@@ -41,28 +44,14 @@ export const drawCurvedSelectionHighlight = (
     lineHeight,
     selectionStart,
     selectionEnd,
-  );
+  ] as const;
+  const localVertices = getCurvedSelectionRibbonVertices(...args);
 
-  localRects
-    .map((rect) => transformCurvedPoint(rect, editingTextBox))
-    .forEach((rect) => {
-      drawRect(
-        gl,
-        program,
-        buffer,
-        {
-          fill: DRAFT_FRAME_STROKE,
-          fillAlpha: TEXT_SELECTION_FILL_ALPHA,
-          height: rect.height,
-          width: rect.width,
-          x: rect.x - rect.width / 2,
-          y: rect.y - rect.height / 2,
-        },
-        canvasWidth,
-        canvasHeight,
-        viewport,
-        rect.angleDegrees,
-        rect,
-      );
-    });
+  if (localVertices.length !== 0) {
+    const vertices = toFlatVertices(transformPoints(toPoints(localVertices), editingTextBox, center));
+    const outlinePoints = toFlatVertices(transformPoints(getCurvedSelectionOutlinePoints(...args), editingTextBox, center));
+
+    drawCurvedSelectionFill(gl, program, buffer, vertices, canvasWidth, canvasHeight, viewport);
+    drawCurvedSelectionOutline(gl, program, buffer, outlinePoints, canvasWidth, canvasHeight, viewport);
+  }
 };

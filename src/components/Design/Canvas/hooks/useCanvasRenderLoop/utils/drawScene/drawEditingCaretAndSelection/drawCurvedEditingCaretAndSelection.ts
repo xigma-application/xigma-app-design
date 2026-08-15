@@ -4,7 +4,7 @@ import { TViewport } from 'types/design/types';
 
 // utils
 import { drawCurvedCaret } from './drawCurvedCaret';
-import { drawCurvedSelectionHighlight } from './drawCurvedSelectionHighlight';
+import { drawCurvedSelectionHighlight } from './drawCurvedSelectionHighlight/drawCurvedSelectionHighlight';
 import { isCaretBlinkedOn } from './isCaretBlinkedOn';
 
 export const drawCurvedEditingCaretAndSelection = (

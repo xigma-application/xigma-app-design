@@ -4,6 +4,7 @@ import { drawCurvedEditingCaretAndSelection } from '../drawCurvedEditingCaretAnd
 const createGlMock = (): WebGL2RenderingContext =>
   ({
     ARRAY_BUFFER: 34962,
+    LINE_LOOP: 2,
     STATIC_DRAW: 35044,
     TRIANGLES: 4,
     bindBuffer: vi.fn(),
@@ -61,7 +62,7 @@ describe('drawCurvedEditingCaretAndSelection', () => {
     expect(gl.drawArrays).not.toHaveBeenCalled();
   });
 
-  it('should draw one filled rect per selected character for a range selection', () => {
+  it('should draw the fill ribbon and its outline (two draw calls) for a range selection', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
@@ -72,7 +73,10 @@ describe('drawCurvedEditingCaretAndSelection', () => {
     // before
     drawCurvedEditingCaretAndSelection(gl, program, buffer, PATH_BOX, 'hello', 0, 3, 0, 100, 100, IDENTITY_VIEWPORT);
 
-    // result
-    expect(gl.drawArrays).toHaveBeenCalledTimes(3);
+    // result — 3 selected characters -> 3 quads sharing vertices at their boundaries, plus a
+    // single closed-loop outline stroke around the whole ribbon
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 18);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINE_LOOP, 0, 8);
   });
 });
