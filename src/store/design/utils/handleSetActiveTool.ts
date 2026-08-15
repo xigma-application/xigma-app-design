@@ -6,6 +6,7 @@ export const handleSetActiveTool = (state: TDesignState, tool: ToolName): void =
   state.activeTool = tool;
 
   switch (tool) {
+    case ToolName.arrow:
     case ToolName.ellipse:
     case ToolName.line:
     case ToolName.media:

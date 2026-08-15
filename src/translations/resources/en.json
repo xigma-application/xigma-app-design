@@ -1,6 +1,7 @@
 {
   "app.themeToggle.switchToDark": "Switch to dark theme",
   "app.themeToggle.switchToLight": "Switch to light theme",
+  "design.toolbar.tool.arrow": "Arrow",
   "design.toolbar.tool.comment": "Comment",
   "design.toolbar.tool.default": "Move",
   "design.toolbar.tool.ellipse": "Ellipse",

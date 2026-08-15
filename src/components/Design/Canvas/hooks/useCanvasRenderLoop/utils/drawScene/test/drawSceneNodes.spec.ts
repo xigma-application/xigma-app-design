@@ -321,4 +321,29 @@ describe('drawSceneNodes', () => {
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
   });
+
+  it('should also draw an arrowhead for a line node whose endPoint is set to arrow', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const line: TSceneNode = {
+      endPoint: 'arrow',
+      id: 'a',
+      name: 'Arrow',
+      parentId: null,
+      stroke: '#000000',
+      type: NodeType.line,
+      x1: 0,
+      x2: 10,
+      y1: 0,
+      y2: 10,
+    };
+
+    // before
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [line], 100, 100, IDENTITY_VIEWPORT, new Map());
+
+    // result — 1 segment + (2 wing quads + 3 round-cap fills) for the single arrow endpoint
+    expect(gl.drawArrays).toHaveBeenCalledTimes(6);
+  });
 });

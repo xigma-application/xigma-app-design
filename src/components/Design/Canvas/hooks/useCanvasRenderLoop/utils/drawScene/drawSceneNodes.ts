@@ -12,6 +12,7 @@ import { TSceneNode, TViewport } from 'types/design/types';
 import { drawEllipse } from 'utils/canvas/shapes/drawEllipse';
 import { drawImage } from 'utils/canvas/drawImage';
 import { drawLine } from 'utils/canvas/drawLine';
+import { drawLineEndpointArrowheads } from './drawLineEndpointArrowheads';
 import { drawMsdfText } from 'utils/canvas/text/drawMsdfText';
 import { drawPathOutline } from './drawPathOutline';
 import { drawPolygon } from 'utils/canvas/shapes/drawPolygon';
@@ -59,6 +60,7 @@ export const drawSceneNodes = (
         break;
       case NodeType.line:
         drawLine(gl, program, buffer, node, node.stroke, LINE_RENDER_STROKE_WIDTH, canvasWidth, canvasHeight, viewport);
+        drawLineEndpointArrowheads(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
         break;
       case NodeType.path:
         drawPathOutline(gl, program, buffer, node, pathOutlineStyles.get(node.id), canvasWidth, canvasHeight, viewport);

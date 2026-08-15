@@ -105,6 +105,34 @@ describe('useToolbarShortcuts behaviors', () => {
     expect(store.getState().design.activeTool).toBe(ToolName.line);
   });
 
+  it('should switch to the arrow tool on "Shift+L"', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyL', shiftKey: true });
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.arrow);
+  });
+
+  it('should switch to the line tool (not arrow) on a plain "L" without the shift modifier', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyL' });
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.line);
+  });
+
   it('should switch to the ellipse tool on "O"', () => {
     // mock
     const store = createTestStore();

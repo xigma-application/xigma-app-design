@@ -4,6 +4,7 @@ import AlignHorizontalRight from './svg/align-horizontal-right.svg?react';
 import AlignVerticalBottom from './svg/align-vertical-bottom.svg?react';
 import AlignVerticalCenter from './svg/align-vertical-center.svg?react';
 import AlignVerticalTop from './svg/align-vertical-top.svg?react';
+import ArrowTool from './svg/arrow-tool.svg?react';
 import AspectRatio from './svg/aspect-ratio.svg?react';
 import AutoHeight from './svg/auto-height.svg?react';
 import AutoLayout from './svg/auto-layout.svg?react';
@@ -101,6 +102,7 @@ export const Icons = {
   AlignVerticalBottom,
   AlignVerticalCenter,
   AlignVerticalTop,
+  ArrowTool,
   AspectRatio,
   AutoHeight,
   AutoLayout,

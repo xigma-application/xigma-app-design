@@ -10,6 +10,7 @@ import { ToolName } from 'types/design/enums';
 export const translationNameSpace = `${parentNameSpace}.toolbar`;
 
 export const TOOL_ICON: Record<ToolName, keyof typeof Icons> = {
+  [ToolName.arrow]: 'ArrowTool',
   [ToolName.default]: 'MoveTool',
   [ToolName.ellipse]: 'EllipseTool',
   [ToolName.frame]: 'FrameTool',
@@ -28,6 +29,7 @@ export const TOOL_ICON: Record<ToolName, keyof typeof Icons> = {
 };
 
 export const TOOL_LABEL: Record<ToolName, string> = {
+  [ToolName.arrow]: `${translationNameSpace}.tool.arrow`,
   [ToolName.comment]: `${translationNameSpace}.tool.comment`,
   [ToolName.default]: `${translationNameSpace}.tool.default`,
   [ToolName.ellipse]: `${translationNameSpace}.tool.ellipse`,
@@ -48,11 +50,20 @@ export const TOOL_LABEL: Record<ToolName, string> = {
 export const TOOL_GROUP_ITEMS: Partial<Record<ToolName, ToolName[]>> = {
   [ToolName.default]: [ToolName.default, ToolName.hand, ToolName.scale],
   [ToolName.frame]: [ToolName.frame, ToolName.section, ToolName.slice],
-  [ToolName.rectangle]: [ToolName.rectangle, ToolName.line, ToolName.ellipse, ToolName.polygon, ToolName.star, ToolName.media],
+  [ToolName.rectangle]: [
+    ToolName.rectangle,
+    ToolName.line,
+    ToolName.arrow,
+    ToolName.ellipse,
+    ToolName.polygon,
+    ToolName.star,
+    ToolName.media,
+  ],
   [ToolName.text]: [ToolName.text, ToolName.textOnPath],
 };
 
 export const TOOL_ICON_SIZE: Partial<Record<ToolName, number>> = {
+  [ToolName.arrow]: 24,
   [ToolName.line]: 24,
   [ToolName.slice]: 18,
   [ToolName.textOnPath]: 18,

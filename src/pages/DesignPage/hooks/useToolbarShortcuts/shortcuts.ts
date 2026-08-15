@@ -7,6 +7,7 @@ import { ToolName } from 'types/design/enums';
 import { TShortcut } from './types';
 
 export const shortcuts = {
+  [ToolName.arrow]: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.l },
   [ToolName.comment]: { secondaryKey: KeyboardKeys.c },
   [ToolName.default]: { secondaryKey: KeyboardKeys.v },
   [ToolName.ellipse]: { secondaryKey: KeyboardKeys.o },

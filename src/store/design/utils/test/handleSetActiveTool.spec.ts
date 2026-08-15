@@ -36,6 +36,17 @@ describe('handleSetActiveTool', () => {
     expect(state.activeTool).toBe(ToolName.frame);
   });
 
+  it('should remember the last shape tool when switching to the arrow tool', () => {
+    // mock
+    const state = buildState();
+
+    // before
+    handleSetActiveTool(state, ToolName.arrow);
+
+    // result
+    expect(state.lastShapeTool).toBe(ToolName.arrow);
+  });
+
   it('should remember the last shape tool when switching to a shape tool', () => {
     // mock
     const state = buildState();

@@ -107,10 +107,14 @@ export type TTextNode = TBaseNode & {
   type: NodeType.text;
 };
 
+export type TLineEndpointStyle = 'arrow' | 'default';
+
 export type TLineNode = {
+  endPoint?: TLineEndpointStyle;
   id: string;
   name: string;
   parentId: string | null;
+  startPoint?: TLineEndpointStyle;
   stroke: string;
   type: NodeType.line;
   x1: number;

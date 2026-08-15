@@ -29,6 +29,7 @@ export const useToolbarShortcuts = (): void => {
       { action: (): any => dispatch(setActiveTool(ToolName.section)), ...shortcuts[ToolName.section] },
       { action: (): any => dispatch(setActiveTool(ToolName.slice)), ...shortcuts[ToolName.slice] },
       { action: (): any => dispatch(setActiveTool(ToolName.line)), ...shortcuts[ToolName.line] },
+      { action: (): any => dispatch(setActiveTool(ToolName.arrow)), ...shortcuts[ToolName.arrow] },
       { action: (): any => dispatch(setActiveTool(ToolName.ellipse)), ...shortcuts[ToolName.ellipse] },
       { action: (): any => dispatch(setActiveTool(ToolName.comment)), ...shortcuts[ToolName.comment] },
       { action: (): any => dispatch(setActiveTool(ToolName.media)), ...shortcuts[ToolName.media] },

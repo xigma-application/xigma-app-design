@@ -1,3 +1,6 @@
+export const ARROWHEAD_LENGTH = 6;
+export const ARROWHEAD_STROKE_WIDTH = 1;
+export const ARROWHEAD_WING_ANGLE_DEGREES = 40;
 export const BACKGROUND_COLOR = '#444444';
 export const BACKGROUND_ALPHA = 1;
 export const CARET_BLINK_INTERVAL_MS = 530;

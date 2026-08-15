@@ -1,6 +1,7 @@
 {
   "app.themeToggle.switchToDark": "Przełącz na ciemny motyw",
   "app.themeToggle.switchToLight": "Przełącz na jasny motyw",
+  "design.toolbar.tool.arrow": "Strzałka",
   "design.toolbar.tool.comment": "Komentarz",
   "design.toolbar.tool.default": "Przesuń",
   "design.toolbar.tool.ellipse": "Elipsa",

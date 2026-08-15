@@ -28,6 +28,7 @@ import { useTextEditOnDoubleClick } from './hooks/useTextEditOnDoubleClick/useTe
 
 // others
 import {
+  ARROW_TOOL_SETTINGS,
   ELLIPSE_TOOL_SETTINGS,
   FRAME_TOOL_SETTINGS,
   LINE_TOOL_SETTINGS,
@@ -65,6 +66,7 @@ const Canvas: FC = () => {
   useDrawPolygonTool(canvasRef, draftRef, POLYGON_TOOL_SETTINGS);
   useDrawStarTool(canvasRef, draftRef, STAR_TOOL_SETTINGS);
   useDrawLineTool(canvasRef, draftRef, LINE_TOOL_SETTINGS);
+  useDrawLineTool(canvasRef, draftRef, ARROW_TOOL_SETTINGS);
   useDrawMediaTool(canvasRef, draftRef, MEDIA_TOOL_SETTINGS);
   useDrawTextTool(canvasRef, draftRef);
   useDrawTextOnPathTool(canvasRef, draftRef);

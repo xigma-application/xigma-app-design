@@ -7,6 +7,7 @@ const LEFT_PANEL_WIDTH = 500;
 const RIGHT_PANEL_WIDTH = 240;
 
 export type TToolName =
+  | 'arrow'
   | 'comment'
   | 'default'
   | 'ellipse'

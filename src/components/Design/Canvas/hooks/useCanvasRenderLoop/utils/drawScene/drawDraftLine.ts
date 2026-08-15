@@ -6,6 +6,7 @@ import { TDraftLine, TViewport } from 'types/design/types';
 
 // utils
 import { drawLine } from 'utils/canvas/drawLine';
+import { drawLineEndpointArrowheads } from './drawLineEndpointArrowheads';
 import { drawLineEndpointHandles } from 'utils/canvas/drawLineEndpointHandles';
 
 export const drawDraftLine = (
@@ -18,6 +19,7 @@ export const drawDraftLine = (
   viewport: TViewport,
 ): void => {
   drawLine(gl, program, buffer, draftShape, draftShape.stroke, LINE_RENDER_STROKE_WIDTH, canvasWidth, canvasHeight, viewport);
+  drawLineEndpointArrowheads(gl, program, buffer, draftShape, canvasWidth, canvasHeight, viewport);
   drawLineEndpointHandles(
     gl,
     program,

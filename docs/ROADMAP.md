@@ -462,6 +462,22 @@ comment / shapes, potem osobno: draw / scale / actions / dev mode).
       `create-ellipse.spec.ts`, `create-polygon.spec.ts`, `create-star.spec.ts`,
       `create-text.spec.ts`, `text-on-path.spec.ts`, `create-slice.spec.ts`).
 
+- [x] **Arrow** — nie osobny typ node'a, tylko `TLineNode` z nowymi, opcjonalnymi polami
+      `startPoint`/`endPoint` (`'default' | 'arrow'`, domyślnie `'default'` dla zwykłej Line).
+      Reużywa bez zmian `useDrawLineTool.ts` — drugi callsite w `Canvas.tsx` z osobnym
+      `TLineToolConfig` (`ARROW_TOOL_SETTINGS`, `endPoint: 'arrow'`), więc geometria/hit-testing/
+      resize zostają dokładnie te same co dla Line, zero nowej logiki poza domyślną wartością pola.
+      Dzieli slot w toolbarze z Line w dropdownzie Rectangle (`TOOL_GROUP_ITEMS[rectangle] =
+      [rectangle, line, arrow, ellipse, polygon, star, media]`, zaraz po Line), własny skrót
+      `Shift+L` (w odróżnieniu od samego `L` dla Line, ten sam wzorzec co Section/Slice). Grot to
+      nie wypełniony trójkąt, tylko dwa grube, zaokrąglone "skrzydła" (`drawArrowhead.ts`, nowy
+      prymityw w `utils/canvas/`) — w tym silniku nie ma jeszcze prymitywu do rysowania
+      zaokrąglonej polilinii, więc zaokrąglenie robione jest przez dorysowanie małych wypełnionych
+      kółek (`drawEllipse`) w narożu i na końcu każdego skrzydła. Rysowany przy commitowanym
+      node'ie (`drawSceneNodes.ts`) i przy draft-rekcie w trakcie ciągnięcia (`drawDraftLine.ts`),
+      przez wspólny `drawLineEndpointArrowheads.ts`. **Świadomie bez zmian w hit-testingu/bboxie**
+      (`isPointNearLine.ts`, `getNodeBounds.ts`) — grot jest czysto wizualny, klikalny obszar linii
+      zostaje dokładnie taki jak wcześniej, nawet jeśli grot wizualnie wystaje poza sam odcinek.
 - [ ] Pen / vector (najbardziej złożony, na później)
 
 ## Etap 7 — Edycja tekstu (DOM overlay) + rendering tekstu w WebGL
@@ -541,6 +557,9 @@ comment / shapes, potem osobno: draw / scale / actions / dev mode).
 - [ ] sekcja właściwości tekstu w panelu (rozmiar/waga/wyrównanie/line-height/letter-spacing) — dziś
       `TTextNode.fontSize`/`fontFamily` są ustawiane raz przy tworzeniu i nieedytowalne później;
       naturalnie łączy się z wyborem fontu z Etapu 9
+- [ ] Start point / End point dropdowny dla zaznaczonej Line/Arrow — `TLineNode` ma już pola
+      `startPoint`/`endPoint` (`'default' | 'arrow'`, patrz Etap 6/Arrow) gotowe pod te dwa
+      dropdowny, brakuje tylko samego UI i podpięcia pod `updateNode`
 
 ## Etap 9 — Wiele fontów, atlas per font ładowany z serwera
 

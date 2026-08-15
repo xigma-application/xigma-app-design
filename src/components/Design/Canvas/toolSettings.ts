@@ -20,6 +20,13 @@ import {
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 
+export const ARROW_TOOL_SETTINGS: TLineToolConfig = {
+  endPoint: 'arrow',
+  name: 'Arrow',
+  startPoint: 'default',
+  stroke: LINE_STROKE,
+  tool: ToolName.arrow,
+};
 export const ELLIPSE_TOOL_SETTINGS: TShapeToolConfig = {
   fill: ELLIPSE_FILL,
   name: 'Ellipse',
@@ -27,7 +34,13 @@ export const ELLIPSE_TOOL_SETTINGS: TShapeToolConfig = {
   type: NodeType.ellipse,
 };
 export const FRAME_TOOL_SETTINGS: TShapeToolConfig = { fill: FRAME_FILL, name: 'Frame', tool: ToolName.frame, type: NodeType.frame };
-export const LINE_TOOL_SETTINGS: TLineToolConfig = { name: 'Line', stroke: LINE_STROKE, tool: ToolName.line };
+export const LINE_TOOL_SETTINGS: TLineToolConfig = {
+  endPoint: 'default',
+  name: 'Line',
+  startPoint: 'default',
+  stroke: LINE_STROKE,
+  tool: ToolName.line,
+};
 export const MEDIA_TOOL_SETTINGS: TMediaToolConfig = { name: 'Image', tool: ToolName.media };
 export const POLYGON_TOOL_SETTINGS: TPolygonToolConfig = {
   fill: ELLIPSE_FILL,

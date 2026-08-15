@@ -31,7 +31,8 @@ const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
 const pointerEvent = (type: string, x: number, y: number, button = 0): PointerEvent =>
   new PointerEvent(type, { button, clientX: x, clientY: y, pointerId: 1 });
 
-const CONFIG: TLineToolConfig = { name: 'Line', stroke: '#000000', tool: ToolName.line };
+const CONFIG: TLineToolConfig = { endPoint: 'default', name: 'Line', startPoint: 'default', stroke: '#000000', tool: ToolName.line };
+const ARROW_CONFIG: TLineToolConfig = { endPoint: 'arrow', name: 'Arrow', startPoint: 'default', stroke: '#000000', tool: ToolName.arrow };
 
 describe('useDrawLineTool behaviors', () => {
   it('should not react to pointer events when the tool is not active', () => {
@@ -72,7 +73,16 @@ describe('useDrawLineTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 10, 10));
 
     // result — unlike a box tool, the endpoints keep the exact order they were dragged in
-    expect(draftRef.current).toEqual({ stroke: CONFIG.stroke, type: NodeType.line, x1: 60, x2: 10, y1: 40, y2: 10 });
+    expect(draftRef.current).toEqual({
+      endPoint: CONFIG.endPoint,
+      startPoint: CONFIG.startPoint,
+      stroke: CONFIG.stroke,
+      type: NodeType.line,
+      x1: 60,
+      x2: 10,
+      y1: 40,
+      y2: 10,
+    });
   });
 
   it('should round fractional pointer positions to whole pixels', () => {
@@ -94,7 +104,16 @@ describe('useDrawLineTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 10.2, 10.8));
 
     // result
-    expect(draftRef.current).toEqual({ stroke: CONFIG.stroke, type: NodeType.line, x1: 60, x2: 10, y1: 41, y2: 11 });
+    expect(draftRef.current).toEqual({
+      endPoint: CONFIG.endPoint,
+      startPoint: CONFIG.startPoint,
+      stroke: CONFIG.stroke,
+      type: NodeType.line,
+      x1: 60,
+      x2: 10,
+      y1: 41,
+      y2: 11,
+    });
   });
 
   it('should commit a line node with the configured stroke and switch back to the default tool on pointer up', () => {
@@ -123,7 +142,9 @@ describe('useDrawLineTool behaviors', () => {
 
     expect(design.rootOrder).toHaveLength(1);
     expect(design.nodes[design.rootOrder[0]]).toMatchObject({
+      endPoint: CONFIG.endPoint,
       name: CONFIG.name,
+      startPoint: CONFIG.startPoint,
       stroke: CONFIG.stroke,
       type: NodeType.line,
       x1: 10,
@@ -134,6 +155,33 @@ describe('useDrawLineTool behaviors', () => {
     expect(design.activeTool).toBe(ToolName.default);
     expect(design.selectedIds).toEqual([design.rootOrder[0]]);
     expect(draftRef.current).toBeNull();
+  });
+
+  it('should commit an arrow-configured line with an arrow endPoint but a default startPoint', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(setActiveTool(ARROW_CONFIG.tool));
+
+    const canvasRef = createCanvasRef();
+    const draftRef: RefObject<TDraftEntity | null> = { current: null };
+
+    // before
+    renderHook(() => useDrawLineTool(canvasRef, draftRef, ARROW_CONFIG), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 60, 40));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 60, 40));
+    });
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ endPoint: 'arrow', startPoint: 'default' });
   });
 
   it('should clear any existing selection once drawing actually starts, not just on tool switch', () => {

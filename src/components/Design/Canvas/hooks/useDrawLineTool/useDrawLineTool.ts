@@ -11,7 +11,7 @@ import { useAppDispatch, useAppSelector, useAppStore } from 'store';
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { MouseButton } from 'types/enums';
-import { TDraftEntity } from 'types/design/types';
+import { TDraftEntity, TLineEndpointStyle } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -20,7 +20,9 @@ import { screenToWorld } from '../../utils/screenToWorld';
 import { selectLastCreatedNode } from '../../utils/selectLastCreatedNode';
 
 export type TLineToolConfig = {
+  endPoint: TLineEndpointStyle;
   name: string;
+  startPoint: TLineEndpointStyle;
   stroke: string;
   tool: ToolName;
 };
@@ -28,7 +30,7 @@ export type TLineToolConfig = {
 export const useDrawLineTool = (
   canvasRef: RefObject<HTMLCanvasElement | null>,
   draftRef: RefObject<TDraftEntity | null>,
-  { name, stroke, tool }: TLineToolConfig,
+  { endPoint, name, startPoint, stroke, tool }: TLineToolConfig,
 ): void => {
   const activeTool = useAppSelector(selectActiveTool);
   const viewport = useAppSelector(selectViewport);
@@ -49,6 +51,8 @@ export const useDrawLineTool = (
       const current = screenToWorld(getPointerPosition(canvas, event), viewport);
 
       draftRef.current = {
+        endPoint,
+        startPoint,
         stroke,
         type: NodeType.line,
         x1: Math.round(startRef.current.x),
@@ -67,8 +71,10 @@ export const useDrawLineTool = (
       if (length >= MIN_SHAPE_SIZE) {
         dispatch(
           addNode({
+            endPoint,
             name,
             parentId: null,
+            startPoint,
             stroke,
             type: NodeType.line,
             x1: Math.round(startRef.current.x),
@@ -105,5 +111,5 @@ export const useDrawLineTool = (
         canvas.removeEventListener('pointerup', onPointerUp);
       };
     }
-  }, [activeTool, appStore, canvasRef, dispatch, draftRef, name, stroke, tool, viewport]);
+  }, [activeTool, appStore, canvasRef, dispatch, draftRef, endPoint, name, startPoint, stroke, tool, viewport]);
 };
