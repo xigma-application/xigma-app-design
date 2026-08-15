@@ -303,7 +303,9 @@ test('the path-offset handle stays draggable while actively editing the text, wi
   expect(afterFurtherTyping.equals(afterDrag)).toBe(false);
 });
 
-test('does not apply a resize cursor at the path corner for a freshly typed path-text node that was never explicitly selected', async ({ page }) => {
+test('does not apply a resize cursor at the path corner for a freshly typed path-text node that was never explicitly selected', async ({
+  page,
+}) => {
   const designPage = new DesignPage(page);
 
   await designPage.goto('e2e-test-text-on-path-no-stale-resize-cursor');

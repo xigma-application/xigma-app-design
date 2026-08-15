@@ -7,6 +7,7 @@ import { drawPerNodeSelectionOutlines } from '../drawPerNodeSelectionOutlines';
 
 const createGlMock = (): WebGL2RenderingContext =>
   ({
+    LINES: 1,
     LINE_LOOP: 2,
     STATIC_DRAW: 35044,
     TRIANGLES: 4,
@@ -120,6 +121,40 @@ describe('drawPerNodeSelectionOutlines', () => {
     const fanDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLE_FAN);
 
     expect(fanDraws).toHaveLength(1);
+  });
+
+  it('should additionally draw a dashed font-size guide outline for a selected path-text node', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const pathText: TTextNode = {
+      content: 'Hi',
+      fill: '#ffffff',
+      flipX: false,
+      flipY: false,
+      fontFamily: 'Inter',
+      fontSize: 14,
+      height: 200,
+      id: 'a',
+      name: 'Text',
+      parentId: null,
+      pathId: 'ellipse-1',
+      pathStartOffset: 0,
+      rotation: 0,
+      type: NodeType.text,
+      width: 200,
+      x: 0,
+      y: 0,
+    };
+
+    // before
+    drawPerNodeSelectionOutlines(gl, program, buffer, [pathText], 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    const lineDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINES);
+
+    expect(lineDraws).toHaveLength(1);
   });
 
   it('should draw nothing for a selected bare path node, not a bounding-box outline', () => {

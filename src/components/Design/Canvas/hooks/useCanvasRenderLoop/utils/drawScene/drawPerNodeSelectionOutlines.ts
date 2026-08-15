@@ -9,6 +9,7 @@ import { TSceneNode, TViewport } from 'types/design/types';
 import { drawCornerHandles } from 'utils/canvas/drawCornerHandles';
 import { drawLine } from 'utils/canvas/drawLine';
 import { drawLineEndpointHandles } from 'utils/canvas/drawLineEndpointHandles';
+import { drawPathTextFontSizeGuide } from './drawPathTextFontSizeGuide';
 import { drawRect } from 'utils/canvas/drawRect';
 import { drawSelectedPathTextHandle } from './drawSelectedPathTextHandle';
 
@@ -59,6 +60,7 @@ export const drawPerNodeSelectionOutlines = (
         drawRect(gl, program, buffer, { height, stroke: DRAFT_FRAME_STROKE, width, x, y }, canvasWidth, canvasHeight, viewport, rotation);
         drawCornerHandles(gl, program, buffer, node, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport, rotation);
         drawSelectedPathTextHandle(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
+        drawPathTextFontSizeGuide(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
       }
     }
   });
