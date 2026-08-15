@@ -24,15 +24,28 @@ describe('getCurvedSelectionOutlinePoints', () => {
     expect(getCurvedSelectionOutlinePoints(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, false, TABLE, 40, 1, 1)).toEqual([]);
   });
 
-  it('should return twice as many points as edges — the top row, then the bottom row reversed', () => {
-    // before
+  it('should build the top and bottom curve segments plus start/end caps when the selection ends are far enough apart', () => {
+    // before — 10 selected "A"s (12 units advance each) span ~120 units of a ~628-unit
+    // circumference, far more than the 40-unit lineHeight, so the two caps can't cross
+    const content = 'A'.repeat(20);
+    const edges = getCurvedSelectionEdges(ATLAS, content, 20, 200, 200, CENTER, 0, false, TABLE, 40, 0, 10);
+    const outline = getCurvedSelectionOutlinePoints(ATLAS, content, 20, 200, 200, CENTER, 0, false, TABLE, 40, 0, 10);
+
+    // result — (edges.length - 1) curve segments * 4 points each, plus 4 points for the two caps
+    expect(outline).toHaveLength((edges.length - 1) * 4 + 4);
+    expect(outline.slice(0, 4)).toEqual([edges[0].top, edges[1].top, edges[0].bottom, edges[1].bottom]);
+    expect(outline.slice(-4)).toEqual([edges[0].top, edges[0].bottom, edges[edges.length - 1].top, edges[edges.length - 1].bottom]);
+  });
+
+  it('should omit the start/end caps when the selection ends are close enough that the caps would cross', () => {
+    // before — 2 selected "A"s span only ~24 units, well under the 40-unit lineHeight, standing in
+    // for the real-world case of selecting all of a curved-text node that wraps almost back to its
+    // own start — either way, two perpendicular caps this close together would cross into a stray
+    // zigzag instead of reading as two separate lines
     const edges = getCurvedSelectionEdges(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, false, TABLE, 40, 0, 2);
     const outline = getCurvedSelectionOutlinePoints(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, false, TABLE, 40, 0, 2);
 
-    // result
-    expect(outline).toHaveLength(edges.length * 2);
-    expect(outline[0]).toEqual(edges[0].top);
-    expect(outline[edges.length]).toEqual(edges[edges.length - 1].bottom);
-    expect(outline[outline.length - 1]).toEqual(edges[0].bottom);
+    // result — just the curve segments, no trailing cap points
+    expect(outline).toHaveLength((edges.length - 1) * 4);
   });
 });

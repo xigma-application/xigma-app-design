@@ -8,7 +8,7 @@ import { hexToRgbaFloat } from 'utils/canvas/hexToRgbaFloat';
 const createGlMock = (): WebGL2RenderingContext =>
   ({
     ARRAY_BUFFER: 34962,
-    LINE_LOOP: 2,
+    LINES: 1,
     STATIC_DRAW: 35044,
     bindBuffer: vi.fn(),
     bufferData: vi.fn(),
@@ -27,7 +27,7 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const POINTS = [0, 0, 10, 0, 10, 10, 0, 10];
 
 describe('drawCurvedSelectionOutline', () => {
-  it('should stroke the given points as a single closed loop', () => {
+  it('should stroke the given points as disconnected line segments, not a closed loop', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
@@ -38,7 +38,7 @@ describe('drawCurvedSelectionOutline', () => {
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
-    expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINE_LOOP, 0, POINTS.length / 2);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINES, 0, POINTS.length / 2);
   });
 
   it('should stroke with the draft-frame stroke color at full opacity, unlike the semi-transparent fill', () => {

@@ -4,6 +4,7 @@ import { TViewport } from 'types/design/types';
 
 // utils
 import { drawCurvedCaret } from './drawCurvedCaret';
+import { drawCurvedEditingOutline } from './drawCurvedEditingOutline';
 import { drawCurvedSelectionHighlight } from './drawCurvedSelectionHighlight/drawCurvedSelectionHighlight';
 import { isCaretBlinkedOn } from './isCaretBlinkedOn';
 
@@ -33,7 +34,11 @@ export const drawCurvedEditingCaretAndSelection = (
       canvasHeight,
       viewport,
     );
-  } else if (isCaretBlinkedOn(selectionChangedAt)) {
-    drawCurvedCaret(gl, program, buffer, editingTextBox, editingTextContent, selectionEnd, canvasWidth, canvasHeight, viewport);
+  } else {
+    drawCurvedEditingOutline(gl, program, buffer, editingTextBox, editingTextContent, canvasWidth, canvasHeight, viewport);
+
+    if (isCaretBlinkedOn(selectionChangedAt)) {
+      drawCurvedCaret(gl, program, buffer, editingTextBox, editingTextContent, selectionEnd, canvasWidth, canvasHeight, viewport);
+    }
   }
 };

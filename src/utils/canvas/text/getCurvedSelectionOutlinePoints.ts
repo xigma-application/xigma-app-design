@@ -34,9 +34,22 @@ export const getCurvedSelectionOutlinePoints = (
     end,
   );
 
-  if (edges.length > 0) {
-    return [...edges.map((edge) => edge.top), ...edges.map((edge) => edge.bottom).reverse()];
+  if (edges.length < 2) {
+    return [];
   }
 
-  return [];
+  const first = edges[0];
+  const last = edges[edges.length - 1];
+  const includeCaps = Math.hypot(last.top.x - first.top.x, last.top.y - first.top.y) >= lineHeight;
+  const segments: TPoint[] = [];
+
+  for (let index = 0; index < edges.length - 1; index++) {
+    segments.push(edges[index].top, edges[index + 1].top, edges[index].bottom, edges[index + 1].bottom);
+  }
+
+  if (includeCaps) {
+    segments.push(first.top, first.bottom, last.top, last.bottom);
+  }
+
+  return segments;
 };

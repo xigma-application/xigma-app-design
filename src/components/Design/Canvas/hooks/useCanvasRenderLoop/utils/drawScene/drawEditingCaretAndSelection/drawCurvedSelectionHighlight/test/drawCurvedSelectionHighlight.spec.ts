@@ -8,7 +8,7 @@ import { hexToRgbaFloat } from 'utils/canvas/hexToRgbaFloat';
 const createGlMock = (): WebGL2RenderingContext =>
   ({
     ARRAY_BUFFER: 34962,
-    LINE_LOOP: 2,
+    LINES: 1,
     STATIC_DRAW: 35044,
     TRIANGLES: 4,
     bindBuffer: vi.fn(),
@@ -41,18 +41,20 @@ describe('drawCurvedSelectionHighlight', () => {
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 18);
   });
 
-  it('should also stroke a 1px outline around the whole ribbon as a single closed loop', () => {
+  it('should also stroke a 1px outline around the whole ribbon as disconnected top/bottom curve segments plus end caps', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
-    // before — 3 selected characters -> 4 boundary points, outline = 4 top + 4 bottom = 8 points
+    // before — 3 selected characters -> 4 boundary points -> 3 top + 3 bottom curve segments (4
+    // points each), plus the 2 perpendicular end caps (2 points each) since they're far enough
+    // apart not to cross
     drawCurvedSelectionHighlight(gl, program, buffer, PATH_BOX, 'hello', 0, 3, 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
-    expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINE_LOOP, 0, 8);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINES, 0, 16);
   });
 
   it('should fill the ribbon at the selection alpha, but stroke the outline at full opacity', () => {

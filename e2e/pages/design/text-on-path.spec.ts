@@ -394,3 +394,17 @@ test('hovering the path-offset handle shows the hand cursor, and dragging it sho
   await designPage.pointerUp();
   await waitForCursorClassName(designPage, 450, 490, 'hand');
 });
+
+test('typing path-text with no active selection shows a ribbon outline around the whole typed content', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-curved-editing-outline');
+  await designPage.drawTextOnPath(300, 300, 500, 500);
+
+  const beforeTyping = await designPage.canvas.screenshot(); // empty content -> nothing to outline yet
+
+  await designPage.typeText('Hi');
+  const afterTyping = await designPage.canvas.screenshot(); // the outline now traces the typed content
+
+  expect(afterTyping.equals(beforeTyping)).toBe(false);
+});

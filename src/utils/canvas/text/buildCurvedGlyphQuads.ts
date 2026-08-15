@@ -33,8 +33,7 @@ export const buildCurvedGlyphQuads = (
     const advance = getGlyphAdvance(atlas, charCode, fontSize);
 
     if (glyph) {
-      const sampleLength = cumulativeLength + direction * (advance / 2);
-      const sample = getEllipsePathSample(ellipseWidth, ellipseHeight, arcLengthTable, sampleLength);
+      const sample = getEllipsePathSample(ellipseWidth, ellipseHeight, arcLengthTable, cumulativeLength);
       const anchor: TPoint = { x: ellipseCenter.x + sample.x, y: ellipseCenter.y + sample.y };
       const angleDegrees = sample.angleDegrees + (flip ? 180 : 0);
 

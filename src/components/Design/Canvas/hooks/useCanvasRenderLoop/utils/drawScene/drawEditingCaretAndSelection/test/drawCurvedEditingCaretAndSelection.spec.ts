@@ -4,7 +4,7 @@ import { drawCurvedEditingCaretAndSelection } from '../drawCurvedEditingCaretAnd
 const createGlMock = (): WebGL2RenderingContext =>
   ({
     ARRAY_BUFFER: 34962,
-    LINE_LOOP: 2,
+    LINES: 1,
     STATIC_DRAW: 35044,
     TRIANGLES: 4,
     bindBuffer: vi.fn(),
@@ -31,7 +31,7 @@ afterEach(() => {
 });
 
 describe('drawCurvedEditingCaretAndSelection', () => {
-  it('should draw a single curved caret rect for a collapsed selection while blinked on', () => {
+  it('should draw the full-content editing outline plus a curved caret rect for a collapsed selection while blinked on', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
@@ -42,12 +42,14 @@ describe('drawCurvedEditingCaretAndSelection', () => {
     // before
     drawCurvedEditingCaretAndSelection(gl, program, buffer, PATH_BOX, 'hi', 2, 2, 0, 100, 100, IDENTITY_VIEWPORT);
 
-    // result
-    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    // result — the caret rect, plus the fill-less ribbon outline around the whole typed content,
+    // so there's always a visible "lane" for the text even without an active selection
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINES, 0, expect.any(Number));
   });
 
-  it('should draw nothing for a collapsed selection while the caret is blinked off', () => {
+  it('should draw only the full-content editing outline (no caret) for a collapsed selection while blinked off', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
@@ -58,11 +60,12 @@ describe('drawCurvedEditingCaretAndSelection', () => {
     // before
     drawCurvedEditingCaretAndSelection(gl, program, buffer, PATH_BOX, 'hi', 2, 2, 0, 100, 100, IDENTITY_VIEWPORT);
 
-    // result
-    expect(gl.drawArrays).not.toHaveBeenCalled();
+    // result — the caret itself blinks off, but the outline stays put
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINES, 0, expect.any(Number));
   });
 
-  it('should draw the fill ribbon and its outline (two draw calls) for a range selection', () => {
+  it('should draw only the selection fill and its outline (not the full-content editing outline) for a range selection', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
@@ -73,10 +76,10 @@ describe('drawCurvedEditingCaretAndSelection', () => {
     // before
     drawCurvedEditingCaretAndSelection(gl, program, buffer, PATH_BOX, 'hello', 0, 3, 0, 100, 100, IDENTITY_VIEWPORT);
 
-    // result — 3 selected characters -> 3 quads sharing vertices at their boundaries, plus a
-    // single closed-loop outline stroke around the whole ribbon
+    // result — 3 selected characters -> 3 quads sharing vertices at their boundaries, plus its own
+    // outline stroke around just the selected range (not a separate full-content outline on top)
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 18);
-    expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINE_LOOP, 0, 8);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINES, 0, 16);
   });
 });

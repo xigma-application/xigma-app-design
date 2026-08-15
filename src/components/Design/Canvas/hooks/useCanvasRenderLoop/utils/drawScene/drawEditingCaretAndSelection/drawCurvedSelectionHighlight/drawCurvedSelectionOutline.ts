@@ -32,5 +32,5 @@ export const drawCurvedSelectionOutline = (
 
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(points), gl.STATIC_DRAW);
   gl.uniform4fv(colorLocation, hexToRgbaFloat(DRAFT_FRAME_STROKE));
-  gl.drawArrays(gl.LINE_LOOP, 0, points.length / 2);
+  gl.drawArrays(gl.LINES, 0, points.length / 2);
 };

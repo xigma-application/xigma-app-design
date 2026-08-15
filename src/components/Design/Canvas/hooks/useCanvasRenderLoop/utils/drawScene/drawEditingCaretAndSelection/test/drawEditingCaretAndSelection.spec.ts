@@ -43,7 +43,7 @@ describe('drawEditingCaretAndSelection', () => {
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
   });
 
-  it('should draw a curved caret for a box attached to a path', () => {
+  it('should draw a curved caret plus the full-content editing outline for a box attached to a path', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
@@ -55,7 +55,7 @@ describe('drawEditingCaretAndSelection', () => {
     // before
     drawEditingCaretAndSelection(gl, program, buffer, box, 'hi', 2, 2, 0, 100, 100, IDENTITY_VIEWPORT);
 
-    // result
-    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    // result — the caret rect, plus the fill-less ribbon outline around the whole typed content
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
   });
 });
