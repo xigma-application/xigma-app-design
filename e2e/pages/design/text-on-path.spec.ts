@@ -119,9 +119,9 @@ test('the path outline stays hidden until hovered or selected, and hovering an a
   await designPage.goto('e2e-test-text-on-path-outline-states');
   await expect(designPage.canvas).toBeVisible();
 
-  // a 200x200 circle centered at (400, 400); pathStartOffset defaults to 0, so "Hi" starts at
-  // the circle's rightmost point — the rendered "H" glyph itself sits at (493, 405), not the bare
-  // curve point (500, 400) (hit-testing follows the glyph ink along the curve, not just the curve)
+  // a 200x200 circle centered at (400, 400); pathStartOffset defaults to 0.75, so "Hi" starts at
+  // the circle's top — the rendered "H" glyph itself sits at (405, 300), not the bare
+  // curve point (400, 300) (hit-testing follows the glyph ink along the curve, not just the curve)
   await designPage.drawTextOnPath(300, 300, 500, 500);
   await designPage.typeText('Hi');
   await designPage.click(900, 600); // click away to commit
@@ -129,7 +129,7 @@ test('the path outline stays hidden until hovered or selected, and hovering an a
   await designPage.pointerMove(310, 310); // inside the bounding box, but off the curve entirely
   const hiddenBaseline = await designPage.canvas.screenshot();
 
-  await designPage.pointerMove(493, 405); // directly on the rendered "H"
+  await designPage.pointerMove(405, 300); // directly on the rendered "H"
   const hovered = await designPage.canvas.screenshot();
   expect(hovered.equals(hiddenBaseline)).toBe(false);
 
@@ -137,12 +137,12 @@ test('the path outline stays hidden until hovered or selected, and hovering an a
   const afterLeaving = await designPage.canvas.screenshot();
   expect(afterLeaving.equals(hiddenBaseline)).toBe(true);
 
-  await designPage.click(493, 405); // select it via a real click on the rendered glyph
+  await designPage.click(405, 300); // select it via a real click on the rendered glyph
   await designPage.pointerMove(310, 310); // move off the text, but stay inside the box
   const selectedNotHovered = await designPage.canvas.screenshot();
   expect(selectedNotHovered.equals(hiddenBaseline)).toBe(false);
 
-  await designPage.pointerMove(493, 405); // hover the text again, while still selected
+  await designPage.pointerMove(405, 300); // hover the text again, while still selected
   const selectedAndHovered = await designPage.canvas.screenshot();
   expect(selectedAndHovered.equals(selectedNotHovered)).toBe(false);
 });
@@ -150,26 +150,26 @@ test('the path outline stays hidden until hovered or selected, and hovering an a
 test('clicking a point along curved text places the caret there for insertion, not always at the end', async ({ page }) => {
   const designPage = new DesignPage(page);
 
-  // a 200x200 circle centered at (400, 400); "Hi" starts at the rightmost point (500, 400) and
-  // its "H"/"i" boundary sits at (499, 410) — clicking there inserts between the two characters
+  // a 200x200 circle centered at (400, 400); "Hi" starts at the top (400, 300) and
+  // its "H"/"i" boundary sits at (410, 301) — clicking there inserts between the two characters
   await designPage.goto('e2e-test-curved-caret-mid-insert');
   await designPage.drawTextOnPath(300, 300, 500, 500);
   await designPage.typeText('Hi');
   await designPage.click(900, 600); // commit
-  await designPage.doubleClick(500, 400); // re-enter editing on the rendered "H"
-  await designPage.click(499, 410); // the boundary between "H" and "i" on the curve
+  await designPage.doubleClick(400, 300); // re-enter editing on the rendered "H"
+  await designPage.click(410, 301); // the boundary between "H" and "i" on the curve
   await designPage.typeText('X');
   await designPage.click(900, 600); // commit
   const midInsertion = await designPage.canvas.screenshot();
 
-  // same path/content, but the click lands just past "i" (499, 414) — the caret should land at
+  // same path/content, but the click lands just past "i" (419, 302) — the caret should land at
   // the end instead, producing a visibly different render for the same typed character
   await designPage.goto('e2e-test-curved-caret-end-insert');
   await designPage.drawTextOnPath(300, 300, 500, 500);
   await designPage.typeText('Hi');
   await designPage.click(900, 600);
-  await designPage.doubleClick(500, 400);
-  await designPage.click(499, 414); // the boundary just past "i" on the curve
+  await designPage.doubleClick(400, 300);
+  await designPage.click(419, 302); // the boundary just past "i" on the curve
   await designPage.typeText('X');
   await designPage.click(900, 600);
   const endInsertion = await designPage.canvas.screenshot();
@@ -180,13 +180,13 @@ test('clicking a point along curved text places the caret there for insertion, n
 test('double-clicking a word while actively typing path-text selects it, so typing replaces just that word', async ({ page }) => {
   const designPage = new DesignPage(page);
 
-  // a 200x200 circle centered at (400, 400); "Hi there" starts at the rightmost point (500, 400),
-  // same as the plain "Hi" fixture above — the rendered "H" glyph sits at (493, 405)
+  // a 200x200 circle centered at (400, 400); "Hi there" starts at the top (400, 300),
+  // same as the plain "Hi" fixture above — the rendered "H" glyph sits at (405, 300)
   await designPage.goto('e2e-test-path-word-select');
   await designPage.drawTextOnPath(300, 300, 500, 500);
   await designPage.typeText('Hi there');
 
-  await designPage.doubleClick(493, 405); // select "Hi" on the rendered "H", still actively typing (never committed)
+  await designPage.doubleClick(405, 300); // select "Hi" on the rendered "H", still actively typing (never committed)
   await designPage.typeText('Yo');
   await designPage.click(900, 600); // commit
 
@@ -212,9 +212,9 @@ test('dragging along curved text selects a range that typing then replaces', asy
 
   const withHi = await designPage.canvas.screenshot();
 
-  await designPage.doubleClick(500, 400); // re-enter editing
-  await designPage.pointerDown(500, 400); // caret anchored just before "H"
-  await designPage.pointerMove(499, 414); // drag along the curve to just past "i" -> selects "Hi"
+  await designPage.doubleClick(400, 300); // re-enter editing
+  await designPage.pointerDown(400, 300); // caret anchored just before "H"
+  await designPage.pointerMove(419, 302); // drag along the curve to just past "i" -> selects "Hi"
   await designPage.pointerUp();
   await designPage.typeText('Bye'); // replaces the dragged selection
   await designPage.click(900, 600); // commit
@@ -226,34 +226,34 @@ test('dragging along curved text selects a range that typing then replaces', asy
 test('clicking a point on a rotated text-on-path circle places the caret there, following the rotation', async ({ page }) => {
   const designPage = new DesignPage(page);
 
-  // a 200x200 circle centered at (400,400); "Hi" starts at the rightmost point (500,400). Once
-  // rotated 180 degrees around that same center, the rendered "H" now sits at the leftmost point
-  // (300,400) instead — the opposite side of where it started
+  // a 200x200 circle centered at (400,400); "Hi" starts at the top (400,300). Once
+  // rotated 180 degrees around that same center, the rendered "H" now sits at the bottom
+  // (400,500) instead — the opposite side of where it started
   await designPage.goto('e2e-test-rotated-path-caret-mid');
   await designPage.drawTextOnPath(300, 300, 500, 500);
   await designPage.typeText('Hi');
   await designPage.click(900, 600); // commit
 
-  await designPage.click(500, 400); // select it, on the rendered "H"
+  await designPage.click(400, 300); // select it, on the rendered "H"
   await designPage.pointerDown(290, 290); // rotate ring just outside the "nw" handle
   await designPage.pointerMove(510, 510); // the reflection of (290,290) through the circle's own center -> exactly 180 degrees
   await designPage.pointerUp();
 
   await designPage.doubleClick(400, 400); // re-enter editing at the circle's own (rotation-invariant) center
-  await designPage.click(300, 400); // the "H" boundary, now on the opposite side after rotating
+  await designPage.click(390, 499); // the "H" boundary, now on the opposite side after rotating
   await designPage.typeText('X');
   await designPage.click(900, 600); // commit
   const rotatedInsertion = await designPage.canvas.screenshot();
 
-  // same circle/content, but never rotated — the same screen point (300,400) now sits nowhere
+  // same circle/content, but never rotated — the same screen point (390,499) now sits nowhere
   // near the content (the far side of the circle), so the caret hit-test clamps to the end instead
   await designPage.goto('e2e-test-rotated-path-caret-reference');
   await designPage.drawTextOnPath(300, 300, 500, 500);
   await designPage.typeText('Hi');
   await designPage.click(900, 600);
 
-  await designPage.doubleClick(500, 400);
-  await designPage.click(300, 400);
+  await designPage.doubleClick(400, 300);
+  await designPage.click(390, 499);
   await designPage.typeText('X');
   await designPage.click(900, 600);
   const unrotatedInsertion = await designPage.canvas.screenshot();
@@ -275,8 +275,8 @@ test('dragging the path-text offset handle on a mirrored path-text node grabs it
     await designPage.typeText('Hi');
     await designPage.click(900, 600); // commit
 
-    await designPage.click(500, 400); // select it, on the rendered "H"
-    await designPage.pointerDown(500, 400); // the offset handle at its initial position
+    await designPage.click(400, 300); // select it, on the rendered "H"
+    await designPage.pointerDown(400, 300); // the offset handle at its initial position
     await designPage.pointerMove(481, 459); // move it off any box corner/edge
     await designPage.pointerUp();
 
@@ -319,7 +319,7 @@ test('the path outline renders dashed while actively drawing or editing it, unli
   const whileEditing = await designPage.canvas.screenshot(); // still typing -> dashed outline
 
   await designPage.click(900, 600); // commit, deselecting
-  await designPage.click(500, 400); // select it (not editing) -> solid outline
+  await designPage.click(400, 300); // select it (not editing) -> solid outline
 
   const whileSelected = await designPage.canvas.screenshot();
 
@@ -329,16 +329,16 @@ test('the path outline renders dashed while actively drawing or editing it, unli
 test('the path-offset handle stays draggable while actively editing the text, without ending the edit session', async ({ page }) => {
   const designPage = new DesignPage(page);
 
-  // a 200x200 circle centered at (400,400); pathStartOffset defaults to 0, so both "Hi" and its
-  // offset handle start at the rightmost point (500,400)
+  // a 200x200 circle centered at (400,400); pathStartOffset defaults to 0.75, so both "Hi" and its
+  // offset handle start at the top of the circle (400,300)
   await designPage.goto('e2e-test-path-offset-handle-during-editing');
   await designPage.drawTextOnPath(300, 300, 500, 500);
   await designPage.typeText('Hi');
 
-  const beforeDrag = await designPage.canvas.screenshot(); // still editing -> dashed outline, "Hi" at the right
+  const beforeDrag = await designPage.canvas.screenshot(); // still editing -> dashed outline, "Hi" at the top
 
-  await designPage.pointerDown(500, 400); // the offset handle, not a caret click
-  await designPage.pointerMove(400, 300); // drag it toward the top of the circle
+  await designPage.pointerDown(400, 300); // the offset handle, not a caret click
+  await designPage.pointerMove(500, 400); // drag it toward the right of the circle
   await designPage.pointerUp();
 
   const afterDrag = await designPage.canvas.screenshot();
@@ -370,7 +370,7 @@ test('does not apply a resize cursor at the path corner for a freshly typed path
   await waitForResizeCursor(designPage, 50, 50);
   await designPage.click(900, 800); // deselect the warm-up rectangle
 
-  // a 200x200 circle centered at (400, 400); the rendered "H" glyph sits at (493, 405), same
+  // a 200x200 circle centered at (400, 400); the rendered "H" glyph sits at (405, 300), same
   // fixture as the "path outline stays hidden..." test above. Commit by blurring onto the
   // toolbar's own (already-checked) default-tool button, not a canvas click — clicking empty
   // canvas would itself dispatch setSelection([]) via the ordinary selection tool and mask
@@ -385,7 +385,7 @@ test('does not apply a resize cursor at the path corner for a freshly typed path
 
   expect(await designPage.cursorStyle()).toBe('');
 
-  await designPage.click(493, 405); // now genuinely select it, on the rendered "H"
+  await designPage.click(405, 300); // now genuinely select it, on the rendered "H"
   await designPage.pointerMove(900, 900); // clear cursor state again before re-hovering
 
   const resizeCursorWhileSelected = await waitForResizeCursor(designPage, 300, 300); // proves this point is a real resize handle once actually selected
@@ -404,9 +404,9 @@ test('hovering the path-offset handle shows the hand cursor, and dragging it sho
   await designPage.drawTextOnPath(300, 300, 500, 500);
   await designPage.typeText('Hi');
   await designPage.click(900, 600); // commit
-  await designPage.click(493, 405); // select the text node, on the rendered "H"
+  await designPage.click(405, 300); // select the text node, on the rendered "H"
 
-  await designPage.pointerDown(500, 400); // the offset handle, at the bare curve point
+  await designPage.pointerDown(400, 300); // the offset handle, at the bare curve point
   await designPage.pointerMove(481, 459); // move it off the box's edge/corner ambiguity
   await designPage.pointerUp();
 

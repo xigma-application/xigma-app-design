@@ -96,7 +96,7 @@ describe('useDrawTextOnPathTool behaviors', () => {
 
     expect(design.nodes[pathNodeId]).toMatchObject({ height: 40, pathType: 'ellipse', type: NodeType.path, width: 50, x: 4200, y: 4200 });
     expect(design.selectedIds).toEqual([pathNodeId]);
-    expect(design.editingTextBox).toMatchObject({ height: 40, pathId: pathNodeId, pathStartOffset: 0, width: 50, x: 4200, y: 4200 });
+    expect(design.editingTextBox).toMatchObject({ height: 40, pathId: pathNodeId, pathStartOffset: 0.75, width: 50, x: 4200, y: 4200 });
     expect(design.activeTool).toBe(ToolName.default);
     expect(draftRef.current).toBeNull();
   });
@@ -119,7 +119,7 @@ describe('useDrawTextOnPathTool behaviors', () => {
     expect(draftRef.current).toBeNull();
   });
 
-  it('should create a default 100x100, top-left-anchored path and start editing on a plain click', () => {
+  it('should create a default 100x100 path centered on the click point and start editing on a plain click', () => {
     // mock
     store.dispatch(setActiveTool(ToolName.textOnPath));
 
@@ -136,7 +136,7 @@ describe('useDrawTextOnPathTool behaviors', () => {
     // result
     const { design } = store.getState();
 
-    expect(design.editingTextBox).toMatchObject({ height: 100, width: 100, x: 4400, y: 4400 });
+    expect(design.editingTextBox).toMatchObject({ height: 100, pathStartOffset: 0.75, width: 100, x: 4350, y: 4350 });
     expect(design.activeTool).toBe(ToolName.default);
   });
 

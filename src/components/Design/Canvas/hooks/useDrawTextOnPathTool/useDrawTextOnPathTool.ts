@@ -1,7 +1,7 @@
 import { RefObject, useEffect, useRef } from 'react';
 
 // others
-import { DEFAULT_SHAPE_SIZE, PATH_NAME } from '../../constants';
+import { DEFAULT_SHAPE_SIZE, PATH_NAME, PATH_START_OFFSET_TOP } from '../../constants';
 
 // store
 import { addNode, setActiveTool, setSelection, startTextEdit } from 'store/design/slice';
@@ -48,7 +48,7 @@ export const useDrawTextOnPathTool = (canvasRef: RefObject<HTMLCanvasElement | n
         startRef.current,
         screenToWorld(getPointerPosition(canvas, event), viewport),
         DEFAULT_SHAPE_SIZE,
-        false,
+        true,
       );
 
       dispatch(addNode({ ...rect, name: PATH_NAME, parentId: null, pathType: PathType.ellipse, rotation: 0, type: NodeType.path }));
@@ -59,7 +59,15 @@ export const useDrawTextOnPathTool = (canvasRef: RefObject<HTMLCanvasElement | n
       dispatch(setSelection([pathNodeId]));
       dispatch(
         startTextEdit({
-          box: { ...rect, flipX: false, flipY: false, pathFlip: false, pathId: pathNodeId, pathStartOffset: 0, rotation: 0 },
+          box: {
+            ...rect,
+            flipX: false,
+            flipY: false,
+            pathFlip: false,
+            pathId: pathNodeId,
+            pathStartOffset: PATH_START_OFFSET_TOP,
+            rotation: 0,
+          },
         }),
       );
 

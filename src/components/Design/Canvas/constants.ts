@@ -26,6 +26,7 @@ export const RESIZE_DEBOUNCE_MS = 500;
 export const DEFAULT_SHAPE_SIZE = 100;
 export const MIN_SHAPE_SIZE = 2;
 export const PATH_NAME = 'Path';
+export const PATH_START_OFFSET_TOP = 0.75;
 export const POLYGON_DEFAULT_SIDES = 3;
 export const STAR_DEFAULT_POINTS = 5;
 export const STAR_DEFAULT_RATIO = 0.382;
