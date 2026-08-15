@@ -8,6 +8,9 @@ import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNa
 import { selectActiveTool } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
+// types
+import { ToolName } from 'types/design/enums';
+
 export const useDrawingCursor = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
   const activeTool = useAppSelector(selectActiveTool);
   const { setClassName } = useClassNames();
@@ -15,7 +18,7 @@ export const useDrawingCursor = (canvasRef: RefObject<HTMLCanvasElement | null>)
   useEffect(() => {
     const canvas = canvasRef.current;
 
-    if (canvas) {
+    if (canvas && activeTool !== ToolName.hand) {
       setClassName(DRAWING_TOOLS.includes(activeTool) ? 'drawing' : null);
 
       return (): void => {

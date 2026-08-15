@@ -8,6 +8,7 @@ import ClassNamesProvider from 'components/Design/core/ClassNamesProvider/ClassN
 // hooks
 import { useClassNames } from 'components/Design/core/ClassNamesProvider/hooks/useClassNames';
 import { useDrawingCursor } from './useDrawingCursor';
+import { useHandTool } from '../useHandTool/useHandTool';
 
 // store
 import { setActiveTool } from 'store/design/slice';
@@ -104,5 +105,33 @@ describe('useDrawingCursor behaviors', () => {
 
     // result
     expect(() => renderDrawingCursor(canvasRef)).not.toThrow();
+  });
+
+  it("should not clobber the Hand tool's own cursor class when the Hand tool is active", () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setActiveTool(ToolName.hand));
+
+    const classNameRef: RefObject<string | null> = { current: null };
+
+    // before
+    renderHook(
+      () => {
+        useHandTool(canvasRef);
+        useDrawingCursor(canvasRef);
+        classNameRef.current = useClassNames().className;
+      },
+      {
+        wrapper: ({ children }) => (
+          <Provider store={store}>
+            <ClassNamesProvider>{children}</ClassNamesProvider>
+          </Provider>
+        ),
+      },
+    );
+
+    // result
+    expect(classNameRef.current).toBe('hand');
   });
 });
