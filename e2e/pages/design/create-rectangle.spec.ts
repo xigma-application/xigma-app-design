@@ -9,10 +9,7 @@ test('draws a new rectangle on the canvas using the Rectangle tool', async ({ pa
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const before = await designPage.canvas.screenshot();
 
@@ -43,10 +40,7 @@ test('draws a rectangle with the "R" keyboard shortcut', async ({ page }) => {
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const before = await designPage.canvas.screenshot();
 
@@ -74,10 +68,7 @@ test('places a default 100x100 rectangle centered on the click point when releas
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const before = await designPage.canvas.screenshot();
 
@@ -101,10 +92,7 @@ test('starts selected immediately after being drawn, without an extra click', as
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const startX = box.x + box.width * 0.3;
   const startY = box.y + box.height * 0.3;
@@ -130,10 +118,7 @@ test("shows the rectangle's fill live while dragging, unlike the fill-less Frame
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const startX = box.x + box.width * 0.3;
   const startY = box.y + box.height * 0.3;

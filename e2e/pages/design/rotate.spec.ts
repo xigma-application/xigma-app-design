@@ -25,12 +25,12 @@ test('hovering the ring just outside a resize handle applies a distinct rotate c
   await designPage.goto('e2e-test-rotate-cursor');
   await expect(designPage.canvas).toBeVisible();
 
-  await designPage.drawRectangle(300, 300, 400, 400);
-  await designPage.click(350, 350); // select it
+  await designPage.drawRectangle(900, 300, 1000, 400);
+  await designPage.click(950, 350); // select it
 
-  const resizeCursor = await waitForCursor(designPage, 300, 300); // exactly on the "nw" handle
-  const rotateCursor = await waitForCursor(designPage, 290, 290); // just outside it, in the ring
-  await designPage.pointerMove(900, 900); // far from the node entirely
+  const resizeCursor = await waitForCursor(designPage, 900, 300); // exactly on the "nw" handle
+  const rotateCursor = await waitForCursor(designPage, 890, 290); // just outside it, in the ring
+  await designPage.pointerMove(1500, 900); // far from the node entirely
   const emptyCursor = await designPage.cursorStyle();
 
   expect(new Set([resizeCursor, rotateCursor, emptyCursor]).size).toBe(3);
@@ -43,12 +43,12 @@ test('dragging the rotate ring visibly spins the node', async ({ page }) => {
   await designPage.goto('e2e-test-rotate-single-node');
   await expect(designPage.canvas).toBeVisible();
 
-  await designPage.drawRectangle(300, 300, 400, 400);
-  await designPage.click(350, 350);
+  await designPage.drawRectangle(900, 300, 1000, 400);
+  await designPage.click(950, 350);
   const beforeRotate = await designPage.canvas.screenshot();
 
-  await designPage.pointerDown(290, 290); // ring just outside the "nw" handle
-  await designPage.pointerMove(420, 280); // swing well around the node's center
+  await designPage.pointerDown(890, 290); // ring just outside the "nw" handle
+  await designPage.pointerMove(1020, 280); // swing well around the node's center
   await designPage.pointerUp();
   const afterRotate = await designPage.canvas.screenshot();
 
@@ -61,13 +61,13 @@ test('the rotate cursor updates live as the drag angle changes, not just once at
   await designPage.goto('e2e-test-rotate-live-cursor');
   await expect(designPage.canvas).toBeVisible();
 
-  await designPage.drawRectangle(300, 300, 400, 400);
-  await designPage.click(350, 350);
+  await designPage.drawRectangle(900, 300, 1000, 400);
+  await designPage.click(950, 350);
 
-  const cursorAtArm = await waitForCursor(designPage, 290, 290); // ring just outside the "nw" handle
+  const cursorAtArm = await waitForCursor(designPage, 890, 290); // ring just outside the "nw" handle
 
-  await designPage.pointerDown(290, 290);
-  await designPage.pointerMove(420, 280); // swing far around the center — a large angle change
+  await designPage.pointerDown(890, 290);
+  await designPage.pointerMove(1020, 280); // swing far around the center — a large angle change
   const cursorMidDrag = await designPage.cursorStyle();
   await designPage.pointerUp();
 
@@ -81,20 +81,20 @@ test('a rotated node is hit-tested (and its resize handles found) at its actual 
   await designPage.goto('e2e-test-rotate-hit-test');
   await expect(designPage.canvas).toBeVisible();
 
-  await designPage.drawRectangle(300, 300, 400, 400);
-  await designPage.click(350, 350);
+  await designPage.drawRectangle(900, 300, 1000, 400);
+  await designPage.click(950, 350);
 
-  // arm at (290, 290) — angle -135deg from the center (350, 350) — and swing to due north
-  // (350, 250) — angle -90deg — for a clean, deterministic +45deg rotation
-  await designPage.pointerDown(290, 290);
-  await designPage.pointerMove(350, 250);
+  // arm at (890, 290) — angle -135deg from the center (950, 350) — and swing to due north
+  // (950, 250) — angle -90deg — for a clean, deterministic +45deg rotation
+  await designPage.pointerDown(890, 290);
+  await designPage.pointerMove(950, 250);
   await designPage.pointerUp();
 
-  // the "nw" corner, originally at (300, 300), has physically swung to roughly (350, 279) once
+  // the "nw" corner, originally at (900, 300), has physically swung to roughly (950, 279) once
   // rotated 45deg around the center; the raw unrotated corner position no longer has a handle
-  await designPage.pointerMove(900, 900); // clear any lingering cursor state first
+  await designPage.pointerMove(1500, 900); // clear any lingering cursor state first
   const atOldCorner = await designPage.cursorStyle();
-  const atNewCorner = await waitForCursor(designPage, 350, 279);
+  const atNewCorner = await waitForCursor(designPage, 950, 279);
 
   expect(atOldCorner).toBe('');
   expect(atNewCorner).not.toBe('');
@@ -106,15 +106,15 @@ test('rotating a group selection spins every member around their shared center',
   await designPage.goto('e2e-test-rotate-group');
   await expect(designPage.canvas).toBeVisible();
 
-  await designPage.drawRectangle(300, 300, 350, 350);
-  await designPage.drawRectangle(400, 300, 450, 350);
-  await designPage.click(325, 325);
-  await designPage.click(425, 325, { shift: true });
+  await designPage.drawRectangle(900, 300, 950, 350);
+  await designPage.drawRectangle(1000, 300, 1050, 350);
+  await designPage.click(925, 325);
+  await designPage.click(1025, 325, { shift: true });
   const beforeRotate = await designPage.canvas.screenshot();
 
-  // combined bounds: (300, 300) -> (450, 350); "nw" corner sits at (300, 300)
-  await designPage.pointerDown(290, 290);
-  await designPage.pointerMove(400, 200);
+  // combined bounds: (900, 300) -> (1050, 350); "nw" corner sits at (900, 300)
+  await designPage.pointerDown(890, 290);
+  await designPage.pointerMove(1000, 200);
   await designPage.pointerUp();
   const afterRotate = await designPage.canvas.screenshot();
 

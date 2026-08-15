@@ -1,5 +1,11 @@
 import { Locator, Page } from '@playwright/test';
 
+// LeftPanel/RightPanel are opaque, full-height overlays that sit on top of the canvas (which itself
+// still spans the full viewport underneath them) — any click/drag whose x falls inside either panel's
+// width lands on the panel instead of the canvas. These match the panels' own fixed widths.
+const LEFT_PANEL_WIDTH = 500;
+const RIGHT_PANEL_WIDTH = 240;
+
 export type TToolName =
   | 'comment'
   | 'default'
@@ -24,6 +30,25 @@ export class DesignPage {
   constructor(page: Page) {
     this.page = page;
     this.canvas = page.locator('canvas');
+  }
+
+  // the canvas element itself still reports the full, unclipped viewport as its bounding box, even
+  // though LeftPanel/RightPanel now visually and interactively cover part of it — this returns the
+  // inset region that is actually real, clickable canvas, so fraction-based test coordinates
+  // (box.x + box.width * 0.5, etc.) keep landing on the canvas instead of a panel.
+  async canvasSafeArea(): Promise<{ x: number; y: number; width: number; height: number }> {
+    const box = await this.canvas.boundingBox();
+
+    if (!box) {
+      throw new Error('Canvas bounding box unavailable');
+    }
+
+    return {
+      height: box.height,
+      width: box.width - LEFT_PANEL_WIDTH - RIGHT_PANEL_WIDTH,
+      x: box.x + LEFT_PANEL_WIDTH,
+      y: box.y,
+    };
   }
 
   async goto(projectId: string): Promise<void> {
@@ -171,7 +196,9 @@ export class DesignPage {
   }
 
   async panBy(dx: number, dy: number): Promise<void> {
-    const startX = 500;
+    // clear of both the LeftPanel (0-500) and RightPanel (viewport-width-240 .. viewport-width)
+    // overlays, with room either side for the largest dx/dy any caller currently passes
+    const startX = 1100;
     const startY = 500;
 
     await this.page.mouse.move(startX, startY);

@@ -9,10 +9,7 @@ test('draws a new frame on the canvas using the Frame tool', async ({ page }) =>
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const before = await designPage.canvas.screenshot();
 
@@ -43,10 +40,7 @@ test('starts selected immediately after being drawn, without an extra click', as
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const startX = box.x + box.width * 0.3;
   const startY = box.y + box.height * 0.3;
@@ -72,10 +66,7 @@ test('places a default 100x100 frame centered on the click point when released w
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const before = await designPage.canvas.screenshot();
 

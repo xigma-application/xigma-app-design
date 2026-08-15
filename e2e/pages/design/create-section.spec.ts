@@ -9,10 +9,7 @@ test('draws a new section on the canvas using the Section option from the Frame 
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const before = await designPage.canvas.screenshot();
 
@@ -46,10 +43,7 @@ test('draws a new section on the canvas using the Shift+S shortcut', async ({ pa
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   await page.keyboard.down('Shift');
   await page.keyboard.press('S');
@@ -77,10 +71,7 @@ test('places a default 100x100 section centered on the click point when released
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const before = await designPage.canvas.screenshot();
 
@@ -108,10 +99,7 @@ test('starts selected immediately after being drawn, without an extra click', as
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const startX = box.x + box.width * 0.3;
   const startY = box.y + box.height * 0.3;

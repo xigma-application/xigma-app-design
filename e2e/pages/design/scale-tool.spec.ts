@@ -35,14 +35,14 @@ test('applies a different cursor over a resize handle than the plain resize curs
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  await designPage.drawRectangle(300, 300, 400, 350);
-  await designPage.click(350, 325);
+  await designPage.drawRectangle(900, 300, 1000, 350);
+  await designPage.click(950, 325);
 
-  const resizeCursor = await waitForCursor(designPage, 400, 350); // "se" corner handle, default (resize) tool
+  const resizeCursor = await waitForCursor(designPage, 1000, 350); // "se" corner handle, default (resize) tool
 
   await page.keyboard.press('k');
-  await designPage.pointerMove(400, 300); // move off, then back on, so the cursor style recomputes
-  const scaleCursor = await waitForCursor(designPage, 400, 350); // "se" corner handle, scale tool
+  await designPage.pointerMove(1000, 300); // move off, then back on, so the cursor style recomputes
+  const scaleCursor = await waitForCursor(designPage, 1000, 350); // "se" corner handle, scale tool
 
   expect(scaleCursor).not.toBe(resizeCursor);
 });
@@ -54,11 +54,11 @@ test('grabbing an edge handle scales both dimensions proportionally, unlike a pl
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  await designPage.drawRectangle(300, 300, 400, 350); // 100x50
-  await designPage.click(350, 325);
+  await designPage.drawRectangle(900, 300, 1000, 350); // 100x50
+  await designPage.click(950, 325);
 
-  await designPage.pointerDown(350, 300); // "n" (top) edge handle
-  await designPage.pointerMove(350, 200);
+  await designPage.pointerDown(950, 300); // "n" (top) edge handle
+  await designPage.pointerMove(950, 200);
   await designPage.pointerUp();
 
   const afterPlainResize = await designPage.canvas.screenshot();
@@ -67,12 +67,12 @@ test('grabbing an edge handle scales both dimensions proportionally, unlike a pl
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  await designPage.drawRectangle(300, 300, 400, 350);
-  await designPage.click(350, 325);
+  await designPage.drawRectangle(900, 300, 1000, 350);
+  await designPage.click(950, 325);
   await page.keyboard.press('k');
 
-  await designPage.pointerDown(350, 300); // "n" (top) edge handle
-  await designPage.pointerMove(350, 200);
+  await designPage.pointerDown(950, 300); // "n" (top) edge handle
+  await designPage.pointerMove(950, 200);
   await designPage.pointerUp();
 
   const afterScale = await designPage.canvas.screenshot();

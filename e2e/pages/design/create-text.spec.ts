@@ -9,10 +9,7 @@ test('draws a new text node on the canvas using the Text tool', async ({ page })
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const before = await designPage.canvas.screenshot();
 
@@ -42,10 +39,7 @@ test('starts editing with a default 100x100 box, top-left anchored at the click 
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const before = await designPage.canvas.screenshot();
 
@@ -73,10 +67,7 @@ test('typing tool-shortcut letters while editing text does not switch the active
   await designPage.goto('e2e-test-text-shortcut-block');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const startX = box.x + box.width * 0.3;
   const startY = box.y + box.height * 0.3;
@@ -103,15 +94,15 @@ test('wraps a long run of text with no spaces mid-word once it overflows a narro
   const longRun = 'asdasdasdasdasdasdasdasdasdasdasdasdasd'; // one unbroken run, no spaces
 
   // a wide box: the run fits on a single line, unwrapped
-  await designPage.drawTextBox(500, 100, 900, 140);
+  await designPage.drawTextBox(1100, 100, 1500, 140);
   await designPage.typeText(longRun);
-  await designPage.click(950, 500);
+  await designPage.click(1550, 500);
   const unwrapped = await designPage.canvas.screenshot();
 
   // the same run in a narrow box must wrap mid-word onto several lines instead of overflowing it
-  await designPage.drawTextBox(100, 100, 170, 400);
+  await designPage.drawTextBox(700, 100, 770, 400);
   await designPage.typeText(longRun);
-  await designPage.click(950, 500);
+  await designPage.click(1550, 500);
   const wrapped = await designPage.canvas.screenshot();
 
   expect(wrapped.equals(unwrapped)).toBe(false);
@@ -123,10 +114,7 @@ test('discards the text node when no content is entered before clicking away', a
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const before = await designPage.canvas.screenshot();
 

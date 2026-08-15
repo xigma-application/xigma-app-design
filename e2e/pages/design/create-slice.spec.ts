@@ -11,10 +11,7 @@ test('draws a new slice on the canvas using the Slice option from the Frame drop
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const before = await designPage.canvas.screenshot();
 
@@ -39,10 +36,7 @@ test('draws a new slice on the canvas using the plain "S" shortcut, distinct fro
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   await page.keyboard.press('S');
 
@@ -67,10 +61,7 @@ test('places a default 100x100 slice centered on the click point when released w
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const before = await designPage.canvas.screenshot();
 
@@ -95,10 +86,7 @@ test('resizes the slice box by dragging its corner handle', async ({ page }) => 
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const startX = box.x + box.width * 0.3;
   const startY = box.y + box.height * 0.3;
@@ -128,10 +116,7 @@ test('discards the slice and reverts to the default tool when clicking outside i
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   // clipped to the canvas's upper region, clear of the floating toolbar docked at the bottom —
   // that toolbar's own icon can change (the Frame group button starts showing Slice's icon once

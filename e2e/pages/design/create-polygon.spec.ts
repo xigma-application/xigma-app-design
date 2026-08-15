@@ -9,10 +9,7 @@ test('draws a new polygon on the canvas using the Polygon option from the Rectan
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const before = await designPage.canvas.screenshot();
 
@@ -63,10 +60,7 @@ test('places a default 100x100 polygon centered on the click point when released
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const before = await designPage.canvas.screenshot();
 
@@ -90,10 +84,7 @@ test('starts selected immediately after being drawn, without an extra click', as
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const startX = box.x + box.width * 0.3;
   const startY = box.y + box.height * 0.3;
@@ -119,10 +110,7 @@ test("shows the polygon's fill live while dragging, unlike the fill-less Frame d
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  const box = await designPage.canvas.boundingBox();
-  if (!box) {
-    throw new Error('Canvas bounding box unavailable');
-  }
+  const box = await designPage.canvasSafeArea();
 
   const startX = box.x + box.width * 0.3;
   const startY = box.y + box.height * 0.3;
@@ -155,18 +143,18 @@ test('hovering a polygon only highlights inside its shape, not the corners of it
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  // default polygon is a triangle (3 sides), apex up — bounding box (100,100)-(180,160)
-  await designPage.drawPolygon(100, 100, 180, 160);
+  // default polygon is a triangle (3 sides), apex up — bounding box (700,100)-(780,160)
+  await designPage.drawPolygon(700, 100, 780, 160);
 
-  await designPage.pointerMove(10, 10); // rest away first
+  await designPage.pointerMove(610, 10); // rest away first
   const baseline = await designPage.canvas.screenshot();
 
-  await designPage.pointerMove(105, 105); // inside the bounding box, but outside the triangle (near its top-left corner)
+  await designPage.pointerMove(705, 105); // inside the bounding box, but outside the triangle (near its top-left corner)
   const atCorner = await designPage.canvas.screenshot();
 
   expect(atCorner.equals(baseline)).toBe(true);
 
-  await designPage.pointerMove(140, 130); // the triangle's centroid, well inside its fill
+  await designPage.pointerMove(740, 130); // the triangle's centroid, well inside its fill
   const insideShape = await designPage.canvas.screenshot();
 
   expect(insideShape.equals(baseline)).toBe(false);

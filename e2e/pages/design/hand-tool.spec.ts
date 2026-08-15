@@ -11,23 +11,23 @@ test('panning with the hand tool moves the canvas content, and a frame remains s
   await designPage.goto('e2e-test-hand-tool-pan');
   await expect(designPage.canvas).toBeVisible();
 
-  await designPage.drawFrame(100, 100, 140, 140); // A, center at screen (120, 120)
+  await designPage.drawFrame(700, 100, 740, 140); // A, center at screen (720, 120)
 
   const dx = 150;
   const dy = 90;
 
   await page.keyboard.press('h');
-  await designPage.pointerDown(500, 500);
-  await designPage.pointerMove(500 + dx, 500 + dy);
+  await designPage.pointerDown(1100, 500);
+  await designPage.pointerMove(1100 + dx, 500 + dy);
   await designPage.pointerUp();
 
-  // A rendered at screen (120, 120) before the pan now renders at (120 + dx, 120 + dy) — the world
+  // A rendered at screen (720, 120) before the pan now renders at (720 + dx, 120 + dy) — the world
   // position never changed, only the viewport offset did
   await page.keyboard.press('v');
-  await designPage.click(120 + dx, 120 + dy);
+  await designPage.click(720 + dx, 120 + dy);
   const selected = await designPage.canvas.screenshot();
 
-  await designPage.click(10, 10); // empty canvas, well away from the panned frame — deselects
+  await designPage.click(610, 10); // empty canvas, well away from the panned frame — deselects
   const deselected = await designPage.canvas.screenshot();
 
   expect(selected.equals(deselected)).toBe(false);
@@ -39,14 +39,14 @@ test('dragging over a frame with the hand tool pans the canvas without selecting
   await designPage.goto('e2e-test-hand-tool-no-select');
   await expect(designPage.canvas).toBeVisible();
 
-  await designPage.drawFrame(100, 100, 140, 140); // A, center at screen (120, 120)
+  await designPage.drawFrame(700, 100, 740, 140); // A, center at screen (720, 120)
 
   const dx = 100;
   const dy = 50;
 
   await page.keyboard.press('h');
-  await designPage.pointerDown(120, 120); // press directly on top of A
-  await designPage.pointerMove(120 + dx, 120 + dy);
+  await designPage.pointerDown(720, 120); // press directly on top of A
+  await designPage.pointerMove(720 + dx, 120 + dy);
   await designPage.pointerUp();
 
   const afterHandDrag = await designPage.canvas.screenshot();
@@ -56,7 +56,7 @@ test('dragging over a frame with the hand tool pans the canvas without selecting
   // A at its new (panned) position produces a screenshot that DOES include a selection outline, so
   // the two must differ, proving the hand-tool drag left A unselected
   await page.keyboard.press('v');
-  await designPage.click(120 + dx, 120 + dy);
+  await designPage.click(720 + dx, 120 + dy);
   const withSelectionAtNewPosition = await designPage.canvas.screenshot();
 
   expect(afterHandDrag.equals(withSelectionAtNewPosition)).toBe(false);

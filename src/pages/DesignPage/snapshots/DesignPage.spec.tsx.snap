@@ -6,6 +6,9 @@ exports[`DesignPage snapshots > should render DesignPage 1`] = `
     class="_DesignPage_8d1b83"
   >
     <div
+      class="_LeftPanel_ff9541"
+    />
+    <div
       class="_Canvas_8cb929"
     >
       <div
@@ -17,6 +20,9 @@ exports[`DesignPage snapshots > should render DesignPage 1`] = `
         width="0"
       />
     </div>
+    <div
+      class="_RightPanel_9eb0f1"
+    />
     <div
       class="_Toolbar_0b5712"
     >
