@@ -1,17 +1,14 @@
 import { FocusEvent } from 'react';
 
-// others
-import { TEXT_FILL, TEXT_FONT_FAMILY, TEXT_FONT_SIZE, TEXT_NAME } from '../../../constants';
-
 // store
-import { addNode, stopTextEdit, updateNode } from 'store/design/slice';
+import { setSelection, stopTextEdit } from 'store/design/slice';
 import { useAppDispatch } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
 import { TEditingTextBox } from 'types/canvas';
 
 // utils
+import { commitTextNode } from '../utils/commitTextNode';
 import { getEditableTextContent } from '../utils/getEditableTextContent';
 
 export const useCommitTextEdit = (
@@ -25,31 +22,11 @@ export const useCommitTextEdit = (
       const content = getEditableTextContent(event.currentTarget);
 
       if (content.length > 0) {
-        if (editingNodeId) {
-          dispatch(updateNode({ changes: { content }, id: editingNodeId }));
-        } else {
-          dispatch(
-            addNode({
-              content,
-              fill: TEXT_FILL,
-              flipX: box.flipX,
-              flipY: box.flipY,
-              fontFamily: TEXT_FONT_FAMILY,
-              fontSize: TEXT_FONT_SIZE,
-              height: box.height,
-              name: TEXT_NAME,
-              parentId: null,
-              pathFlip: box.pathFlip,
-              pathId: box.pathId,
-              pathStartOffset: box.pathStartOffset,
-              rotation: box.rotation,
-              type: NodeType.text,
-              width: box.width,
-              x: box.x,
-              y: box.y,
-            }),
-          );
-        }
+        commitTextNode(dispatch, box, editingNodeId, content);
+      }
+
+      if (!editingNodeId && box.pathId) {
+        dispatch(setSelection([]));
       }
 
       dispatch(stopTextEdit());

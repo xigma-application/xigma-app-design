@@ -17,6 +17,20 @@ const waitForCursorClassName = async (designPage: DesignPage, x: number, y: numb
   throw new Error(`"${expected}" cursor class never applied`);
 };
 
+const waitForResizeCursor = async (designPage: DesignPage, x: number, y: number): Promise<string> => {
+  for (let attempt = 0; attempt < 20; attempt++) {
+    await designPage.pointerMove(x + (attempt % 2), y);
+
+    const cursor = await designPage.cursorStyle();
+
+    if (cursor) {
+      return cursor;
+    }
+  }
+
+  throw new Error('resize cursor never applied');
+};
+
 test('draws a path with the Text on Path tool and commits a rendered curved text node', async ({ page }) => {
   const designPage = new DesignPage(page);
 
@@ -287,6 +301,44 @@ test('the path-offset handle stays draggable while actively editing the text, wi
   const afterFurtherTyping = await designPage.canvas.screenshot();
 
   expect(afterFurtherTyping.equals(afterDrag)).toBe(false);
+});
+
+test('does not apply a resize cursor at the path corner for a freshly typed path-text node that was never explicitly selected', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-text-on-path-no-stale-resize-cursor');
+
+  // warm up the lazily-decoded resize-cursor image on an unrelated node first, away from
+  // everywhere else this test looks (same reason resize.spec.ts's own #43 test nudges the pointer
+  // repeatedly: the very first resize-cursor hover in a cold page can take close to a second to
+  // decode, and nothing re-applies it without a further pointermove) — otherwise the "no resize
+  // cursor while unselected" check below could read empty for the wrong reason (image not decoded
+  // yet), not the real one (nothing is actually selected)
+  await designPage.drawRectangle(50, 50, 100, 100);
+  await designPage.click(75, 75);
+  await waitForResizeCursor(designPage, 50, 50);
+  await designPage.click(900, 800); // deselect the warm-up rectangle
+
+  // a 200x200 circle centered at (400, 400); the rendered "H" glyph sits at (493, 405), same
+  // fixture as the "path outline stays hidden..." test above. Commit by blurring onto the
+  // toolbar's own (already-checked) default-tool button, not a canvas click — clicking empty
+  // canvas would itself dispatch setSelection([]) via the ordinary selection tool and mask
+  // whether the commit itself left a stale selection behind
+  await designPage.drawTextOnPath(300, 300, 500, 500);
+  await designPage.typeText('Hi');
+  await designPage.toolRadio('default').click(); // commit, without ever explicitly selecting the node
+
+  await designPage.pointerMove(900, 900); // clear any lingering cursor state first
+  await designPage.pointerMove(300, 300); // where the "nw" resize handle would sit if the node were selected
+  await designPage.pointerMove(301, 300); // one more nudge so a real cursor change has a chance to apply
+
+  expect(await designPage.cursorStyle()).toBe('');
+
+  await designPage.click(493, 405); // now genuinely select it, on the rendered "H"
+  await designPage.pointerMove(900, 900); // clear cursor state again before re-hovering
+
+  const resizeCursorWhileSelected = await waitForResizeCursor(designPage, 300, 300); // proves this point is a real resize handle once actually selected
+  expect(resizeCursorWhileSelected).not.toBe('');
 });
 
 test('hovering the path-offset handle shows the hand cursor, and dragging it shows the pressing cursor', async ({ page }) => {

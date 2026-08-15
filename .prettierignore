@@ -3,3 +3,5 @@ dist
 coverage
 
 .claude
+
+docs/ROADMAP.md

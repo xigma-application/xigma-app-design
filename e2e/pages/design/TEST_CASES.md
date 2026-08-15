@@ -605,6 +605,7 @@ box, never a separate node lookup.
 | 84  | Clicking a point along curved text (re-entered via double-click) places the caret at the nearest character index on the curve, so a typed character inserts there instead of always landing at the end                                                 |  ✅  | ✅ `text-on-path.spec.ts` |
 | 85  | Dragging along the curve from one character to another selects that range; typing replaces the selection instead of inserting alongside it                                                                                                             |  ✅  | ✅ `text-on-path.spec.ts` |
 | 87  | Clicking a point on a rotated (or flipped) path-text circle places the caret at its actual rotated/flipped screen position, not the position it would occupy at rotation 0                                                                             |  ✅  | ✅ `text-on-path.spec.ts` |
+| 90  | Committing a freshly typed path-text node without ever having explicitly selected it does not leave a stale resize-handle hit zone active at the underlying path node's own corner                                                                    |  ✅  | ✅ `text-on-path.spec.ts` |
 
 #77/#78 stay unit-only: `getFittedPathFontSize.spec.ts` and `continuePathOffsetDrag.spec.ts` already
 assert the exact resulting font size / offset value via direct function calls and
@@ -614,6 +615,32 @@ get e2e coverage" below. #76 gets e2e coverage despite having exact unit coverag
 real `pointerdown`→`pointermove`→`pointerup` resize-handle drag on a _live-rendered_ curved-text
 node actually repainting in sync — the same "real browser + rendering + timing" category as the
 Resize section's #66 above, not just the reducer math in isolation.
+
+#90 is a real, reported regression: `useDrawTextOnPathTool.ts` selects the draft path node
+(`setSelection([pathNodeId])`) purely so the dashed "editing" outline (#88 below) can resolve before
+the real text node exists yet — but `useCommitTextEdit.ts` never reconciled `selectedIds` once the
+actual text node was created, so the stale path id stayed selected after commit even though
+`drawPerNodeSelectionOutlines.ts`'s `NodeType.path` branch never draws anything for it (nothing
+visible reads as "selected"). Hit-testing doesn't share that same path-type exclusion though:
+`useHoverHighlight.ts` trusts `selectedIds` directly when computing which resize-handle hit zones
+are active, so the invisible-but-still-selected path kept responding to a resize-cursor hover as if
+genuinely selected. Selecting then deselecting the node "fixed" it only as a side effect, by
+overwriting/clearing that stale id — reported live as "select it once and the problem goes away."
+Fixed in `useCommitTextEdit.ts`: `selectedIds` is now cleared once a new (non-editing) path-bound
+box commits, regardless of whether text was typed or not, matching the plain Text tool's own
+existing "never auto-selected after creation" convention (confirmed against #79 below, which already
+encodes that a freshly committed path-text node reads as fully unselected). The unit suite
+(`commitTextNode.spec.ts`, `useCommitTextEdit.spec.tsx`) asserts `store.getState().design.selectedIds`
+directly and precisely; the e2e version proves the actual observable symptom instead — hovering the
+path's own corner right after committing, without ever having clicked the node, must show no resize
+cursor at all, whereas hovering that exact same point once the node is genuinely selected does. The
+commit step deliberately blurs via a toolbar button click, not a canvas click: clicking empty canvas
+would itself dispatch `setSelection([])` through the ordinary selection tool regardless of this fix,
+which would mask whether the commit itself left anything stale behind. The test also "warms up" the
+resize cursor on an unrelated node first, mirroring the Resize section's #43 rationale — the very
+first resize-cursor hover in a cold page can take close to a second to decode, and skipping this step
+risks the "no cursor" assertion passing for the wrong reason (image not decoded yet) instead of the
+real one (nothing is actually selected).
 
 #84/#85 are `useCurvedCaretEditing.ts`: a real `document`-level `pointerdown`/`pointermove`/
 `pointerup` listener that hit-tests the click against the curve's own per-character arc-length

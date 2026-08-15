@@ -7,7 +7,7 @@ import { renderHook } from '@testing-library/react';
 import { useCommitTextEdit } from '../useCommitTextEdit';
 
 // store
-import designReducer, { addNode } from 'store/design/slice';
+import designReducer, { addNode, setSelection } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
 
 // types
@@ -216,6 +216,70 @@ describe('useCommitTextEdit behaviors', () => {
     expect(design.rootOrder).toEqual([existingId]);
     expect(design.nodes[existingId]).toMatchObject({ content: 'replaced', height: 20, width: 100, x: 10, y: 10 });
     expect(design.editingTextBox).toBeNull();
+  });
+
+  it('should clear the stale path selection, not leave it selected, once a text-on-path box is committed with content', () => {
+    // mock
+    const store = createTestStore();
+    const box = {
+      flipX: false,
+      flipY: false,
+      height: 200,
+      pathFlip: false,
+      pathId: 'ellipse-1',
+      pathStartOffset: 0,
+      rotation: 0,
+      width: 200,
+      x: 0,
+      y: 0,
+    };
+
+    store.dispatch(setSelection(['ellipse-1']));
+
+    // before
+    const { result } = renderHook(() => useCommitTextEdit(box, null), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    result.current(createBlurEvent('curved'));
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.selectedIds).toEqual([]);
+  });
+
+  it('should clear the stale path selection when a text-on-path box is blurred with no content', () => {
+    // mock
+    const store = createTestStore();
+    const box = {
+      flipX: false,
+      flipY: false,
+      height: 200,
+      pathFlip: false,
+      pathId: 'ellipse-1',
+      pathStartOffset: 0,
+      rotation: 0,
+      width: 200,
+      x: 0,
+      y: 0,
+    };
+
+    store.dispatch(setSelection(['ellipse-1']));
+
+    // before
+    const { result } = renderHook(() => useCommitTextEdit(box, null), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    result.current(createBlurEvent(''));
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.selectedIds).toEqual([]);
   });
 
   it('should leave the existing node untouched when blurred with no content, instead of clearing it', () => {
