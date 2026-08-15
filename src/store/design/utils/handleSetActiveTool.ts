@@ -21,6 +21,7 @@ export const handleSetActiveTool = (state: TDesignState, tool: ToolName): void =
       break;
     case ToolName.frame:
     case ToolName.section:
+    case ToolName.slice:
       state.lastFrameTool = tool;
       break;
     case ToolName.text:

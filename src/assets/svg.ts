@@ -84,6 +84,7 @@ import Rows from './svg/rows.svg?react';
 import Sample from './svg/sample.svg?react';
 import ScaleTool from './svg/scale-tool.svg?react';
 import SectionTool from './svg/section-tool.svg?react';
+import SliceTool from './svg/slice-tool.svg?react';
 import StarTool from './svg/star-tool.svg?react';
 import StepBackwardOutlined from './svg/step-backward-outlined.svg?react';
 import TextOnPathTool from './svg/text-on-path-tool.svg?react';
@@ -180,6 +181,7 @@ export const Icons = {
   Sample,
   ScaleTool,
   SectionTool,
+  SliceTool,
   StarTool,
   StepBackwardOutlined,
   TextOnPathTool,

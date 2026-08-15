@@ -12,6 +12,7 @@ export type TToolName =
   | 'rectangle'
   | 'scale'
   | 'section'
+  | 'slice'
   | 'star'
   | 'text'
   | 'textOnPath';
@@ -51,6 +52,13 @@ export class DesignPage {
 
   async drawSection(x1: number, y1: number, x2: number, y2: number): Promise<void> {
     await this.selectToolFromDropdown('frame', 'Section');
+    await this.pointerDown(x1, y1);
+    await this.page.mouse.move(x2, y2, { steps: 5 });
+    await this.pointerUp();
+  }
+
+  async drawSlice(x1: number, y1: number, x2: number, y2: number): Promise<void> {
+    await this.selectToolFromDropdown('frame', 'Slice');
     await this.pointerDown(x1, y1);
     await this.page.mouse.move(x2, y2, { steps: 5 });
     await this.pointerUp();

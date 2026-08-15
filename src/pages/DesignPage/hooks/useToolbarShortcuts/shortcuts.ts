@@ -17,6 +17,7 @@ export const shortcuts = {
   [ToolName.rectangle]: { secondaryKey: KeyboardKeys.r },
   [ToolName.scale]: { secondaryKey: KeyboardKeys.k },
   [ToolName.section]: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.s },
+  [ToolName.slice]: { secondaryKey: KeyboardKeys.s },
   [ToolName.text]: { secondaryKey: KeyboardKeys.t },
   escape: { secondaryKey: KeyboardKeys.escape },
 } satisfies Partial<Record<ToolName, TShortcut>> & { escape: TShortcut };

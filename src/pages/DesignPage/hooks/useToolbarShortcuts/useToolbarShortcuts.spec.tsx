@@ -77,7 +77,7 @@ describe('useToolbarShortcuts behaviors', () => {
     expect(store.getState().design.activeTool).toBe(ToolName.section);
   });
 
-  it('should not switch to the section tool on a plain "S" without the shift modifier', () => {
+  it('should switch to the slice tool (not section) on a plain "S" without the shift modifier', () => {
     // mock
     const store = createTestStore();
 
@@ -88,7 +88,7 @@ describe('useToolbarShortcuts behaviors', () => {
     fireEvent.keyDown(window, { code: 'KeyS' });
 
     // result
-    expect(store.getState().design.activeTool).toBe(ToolName.default);
+    expect(store.getState().design.activeTool).toBe(ToolName.slice);
   });
 
   it('should switch to the line tool on "L"', () => {

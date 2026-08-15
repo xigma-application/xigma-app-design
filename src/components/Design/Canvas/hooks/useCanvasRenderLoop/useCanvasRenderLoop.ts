@@ -22,6 +22,7 @@ export const useCanvasRenderLoop = (
   draftRef?: RefObject<TDraftEntity | null>,
   marqueeRef?: RefObject<TDraftRect | null>,
   hoverRef?: RefObject<string | null>,
+  sliceRef?: RefObject<(TDraftRect & { rotation: number }) | null>,
 ): void => {
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -46,7 +47,7 @@ export const useCanvasRenderLoop = (
         program: imageProgram,
         textGeometryCache: new Map(),
       };
-      const stopRenderLoop = startRenderLoop(gl, program, buffer, imageContext, canvas, draftRef, marqueeRef, hoverRef);
+      const stopRenderLoop = startRenderLoop(gl, program, buffer, imageContext, canvas, draftRef, marqueeRef, hoverRef, sliceRef);
 
       return (): void => {
         stopRenderLoop();
@@ -55,5 +56,5 @@ export const useCanvasRenderLoop = (
         gl.deleteBuffer(msdfBuffer);
       };
     }
-  }, [canvasRef, draftRef, marqueeRef, hoverRef]);
+  }, [canvasRef, draftRef, marqueeRef, hoverRef, sliceRef]);
 };

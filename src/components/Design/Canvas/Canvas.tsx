@@ -22,6 +22,7 @@ import { useDrawTextTool } from './hooks/useDrawTextTool/useDrawTextTool';
 import { useHandTool } from './hooks/useHandTool/useHandTool';
 import { useHoverHighlight } from './hooks/useHoverHighlight/useHoverHighlight';
 import { useSelectionTool } from './hooks/useSelectionTool/useSelectionTool';
+import { useSliceTool } from './hooks/useSliceTool/useSliceTool';
 import { useStraightCaretEditing } from './hooks/useStraightCaretEditing/useStraightCaretEditing';
 import { useTextEditOnDoubleClick } from './hooks/useTextEditOnDoubleClick/useTextEditOnDoubleClick';
 
@@ -43,6 +44,7 @@ import styles from './canvas.module.scss';
 // types
 import { TDraftEntity } from 'types/design/types';
 import { TDraftRect } from 'types/canvas';
+import { TSliceDraft } from './hooks/useSliceTool/types';
 
 const Canvas: FC = () => {
   const { className } = useClassNames();
@@ -50,6 +52,7 @@ const Canvas: FC = () => {
   const draftRef = useRef<TDraftEntity | null>(null);
   const marqueeRef = useRef<TDraftRect | null>(null);
   const hoverRef = useRef<string | null>(null);
+  const sliceRef = useRef<TSliceDraft | null>(null);
 
   useCanvasResize(canvasRef);
   useCanvasPanZoom(canvasRef);
@@ -66,12 +69,13 @@ const Canvas: FC = () => {
   useDrawTextTool(canvasRef, draftRef);
   useDrawTextOnPathTool(canvasRef, draftRef);
   useSelectionTool(canvasRef, marqueeRef);
+  useSliceTool(canvasRef, sliceRef);
   useTextEditOnDoubleClick(canvasRef);
   useHoverHighlight(canvasRef, hoverRef);
   useCurvedCaretEditing(canvasRef);
   useStraightCaretEditing(canvasRef);
   useDrawingCursor(canvasRef);
-  useCanvasRenderLoop(canvasRef, draftRef, marqueeRef, hoverRef);
+  useCanvasRenderLoop(canvasRef, draftRef, marqueeRef, hoverRef, sliceRef);
 
   return (
     <div className={styles.Canvas}>

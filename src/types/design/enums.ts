@@ -27,6 +27,7 @@ export enum ToolName {
   rectangle = 'rectangle',
   scale = 'scale',
   section = 'section',
+  slice = 'slice',
   star = 'star',
   text = 'text',
   textOnPath = 'textOnPath',

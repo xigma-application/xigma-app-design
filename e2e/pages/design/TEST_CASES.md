@@ -32,6 +32,28 @@ own `lastFrameTool` store field (mirroring `lastShapeTool`/`lastMouseTool`).
 | 2   | Pressing "Shift+S" activates the Section tool, then dragging draws a section                                                  |  —   | ✅ `create-section.spec.ts` |
 | 3   | While dragging (before release), a section draft stays fill-less, same as Frame's draft                                       |  ✅  | ✅ `drawDraftShape.spec.ts` |
 
+## Slice drawing
+
+Slice marks an area intended for future export, but there's no side panel/export pipeline yet, so
+it's intentionally never persisted: it lives entirely in a `useSliceTool`-owned ref (`TSliceDraft`),
+never dispatched into the `design` store the way Frame/Section/Rectangle are. It shares Frame's
+dropdown, right after Section (`TOOL_GROUP_ITEMS[frame] = [frame, section, slice]`), with its own
+plain `"S"` shortcut (distinct from Section's `"Shift+S"`). Unlike every other draw tool, finishing
+the initial drag does **not** revert the active tool to `default` — the box stays live and the Slice
+tool stays selected so it can be resized/rotated/moved, all handled by a self-contained gesture state
+machine under `useSliceTool/utils/` (arm/continue/disarm trios mirroring `useSelectionTool`'s style,
+but scoped to a single box with no store dispatch). Clicking anywhere outside the box's bounds
+discards it and reverts to `default`, matching Frame/Section's usual "one shape then back to Move"
+feel despite the different underlying mechanism.
+
+| #   | Scenario                                                                                                                                                                              | Unit |            E2E            |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------: |
+| 1   | Picking "Slice" from the Frame dropdown draws a slice box, and the tool stays selected afterwards                                                                                     |  —   | ✅ `create-slice.spec.ts` |
+| 2   | Pressing the plain "S" shortcut (not "Shift+S") activates the Slice tool, then dragging draws a slice                                                                                 |  —   | ✅ `create-slice.spec.ts` |
+| 3   | Dragging a corner handle after the initial draw resizes the box in place                                                                                                              |  —   | ✅ `create-slice.spec.ts` |
+| 4   | Clicking outside the drawn box discards it and reverts the active tool to `default`, with the canvas returning to its exact pre-draw pixels (nothing was ever persisted to the store) |  —   | ✅ `create-slice.spec.ts` |
+| 5   | Rotating and moving the box, resize math for a rotated box, and per-handle hover cursors                                                                                              |  ✅  |             —             |
+
 ## Rectangle drawing (Etap 6)
 
 | #   | Scenario                                                                                                     | Unit |              E2E              |

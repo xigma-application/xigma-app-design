@@ -27,6 +27,7 @@ import { drawMarquee } from 'utils/canvas/drawMarquee';
 import { drawSceneBackground } from 'utils/canvas/drawSceneBackground';
 import { drawSceneNodes } from './drawSceneNodes';
 import { drawSelectionOutline } from './drawSelectionOutline';
+import { drawSliceDraft } from 'utils/canvas/drawSliceDraft';
 import { getPathOutlineStyles } from './getPathOutlineStyles';
 
 export const drawScene = (
@@ -38,6 +39,7 @@ export const drawScene = (
   draftShape?: TDraftEntity | null,
   marqueeRect?: TDraftRect | null,
   hoveredNodeId?: string | null,
+  sliceRect?: (TDraftRect & { rotation: number }) | null,
 ): void => {
   const state = store.getState();
   const viewport = selectViewport(state);
@@ -79,4 +81,5 @@ export const drawScene = (
 
   drawEditingPathTextHandle(gl, program, buffer, editingTextBox, clientWidth, clientHeight, viewport);
   drawMarquee(gl, program, buffer, marqueeRect, clientWidth, clientHeight, viewport);
+  drawSliceDraft(gl, program, buffer, sliceRect, clientWidth, clientHeight, viewport);
 };

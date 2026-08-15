@@ -17,6 +17,7 @@ export const KEYBOARD_SHORTCUTS: TKeyboardShortcuts = {
   [ToolName.rectangle]: ['R'],
   [ToolName.scale]: ['K'],
   [ToolName.section]: [SHIFT, 'S'],
+  [ToolName.slice]: ['S'],
   [ToolName.star]: [],
   [ToolName.text]: ['T'],
   [ToolName.textOnPath]: [],

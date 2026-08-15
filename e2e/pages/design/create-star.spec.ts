@@ -47,8 +47,8 @@ test('has no keyboard shortcut, unlike Rectangle/Ellipse/Line/Frame', async ({ p
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  // "s" is not bound to anything, so the active tool must stay the default one
-  await page.keyboard.press('s');
+  // "z" is not bound to anything, so the active tool must stay the default one
+  await page.keyboard.press('z');
 
   const defaultTool = designPage.toolRadio('default');
   await expect(defaultTool).toHaveAttribute('aria-checked', 'true');

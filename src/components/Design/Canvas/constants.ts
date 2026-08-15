@@ -7,6 +7,7 @@ import { ToolName } from 'types/design/enums';
 export const DRAWING_TOOLS: ToolName[] = [
   ToolName.frame,
   ToolName.section,
+  ToolName.slice,
   ToolName.rectangle,
   ToolName.line,
   ToolName.ellipse,

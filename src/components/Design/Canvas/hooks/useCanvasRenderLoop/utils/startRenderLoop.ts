@@ -20,10 +20,11 @@ const tick = (
   draftRef?: RefObject<TDraftEntity | null>,
   marqueeRef?: RefObject<TDraftRect | null>,
   hoverRef?: RefObject<string | null>,
+  sliceRef?: RefObject<(TDraftRect & { rotation: number }) | null>,
 ): void => {
-  drawScene(gl, program, buffer, imageContext, canvas, draftRef?.current, marqueeRef?.current, hoverRef?.current);
+  drawScene(gl, program, buffer, imageContext, canvas, draftRef?.current, marqueeRef?.current, hoverRef?.current, sliceRef?.current);
   frameIdRef.current = requestAnimationFrame(() =>
-    tick(gl, program, buffer, imageContext, canvas, frameIdRef, draftRef, marqueeRef, hoverRef),
+    tick(gl, program, buffer, imageContext, canvas, frameIdRef, draftRef, marqueeRef, hoverRef, sliceRef),
   );
 };
 
@@ -36,11 +37,12 @@ export const startRenderLoop = (
   draftRef?: RefObject<TDraftEntity | null>,
   marqueeRef?: RefObject<TDraftRect | null>,
   hoverRef?: RefObject<string | null>,
+  sliceRef?: RefObject<(TDraftRect & { rotation: number }) | null>,
 ): (() => void) => {
   const frameIdRef: TFrameIdRef = { current: 0 };
 
   frameIdRef.current = requestAnimationFrame(() =>
-    tick(gl, program, buffer, imageContext, canvas, frameIdRef, draftRef, marqueeRef, hoverRef),
+    tick(gl, program, buffer, imageContext, canvas, frameIdRef, draftRef, marqueeRef, hoverRef, sliceRef),
   );
 
   return (): void => cancelAnimationFrame(frameIdRef.current);
