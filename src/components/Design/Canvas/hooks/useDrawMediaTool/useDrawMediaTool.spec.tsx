@@ -7,7 +7,7 @@ import { RefObject } from 'react';
 import { useDrawMediaTool, TMediaToolConfig } from './useDrawMediaTool';
 
 // store
-import designReducer, { setActiveTool, setViewport } from 'store/design/slice';
+import designReducer, { setActiveTool, setSelection, setViewport } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
 
 // types
@@ -437,6 +437,59 @@ describe('useDrawMediaTool behaviors', () => {
     // height (25) is far too short for that ratio, so it gets forced up to 100
     expect(design.nodes[design.rootOrder[1]]).toMatchObject({ height: 100, width: 50, x: 40, y: 40 });
     expect(design.activeTool).toBe(ToolName.default);
+    // both files from the same multi-file pick end up selected together, not just the last one
+    expect(design.selectedIds).toEqual([design.rootOrder[0], design.rootOrder[1]]);
+  });
+
+  it('should clear a pre-existing selection once when files are picked, then keep every placed file selected as more are placed', () => {
+    // mock
+    const store = createTestStore();
+    const canvasRef = createCanvasRef();
+    const draftRef: RefObject<TDraftEntity | null> = { current: null };
+    const { getLastImage } = stubImageConstructor();
+    const { getInput } = captureInput();
+
+    store.dispatch(setSelection(['stale-node']));
+    store.dispatch(setActiveTool(CONFIG.tool));
+    renderMediaTool(canvasRef, draftRef, store);
+
+    // before — pick two files at once; picking must clear the stale pre-existing selection
+    selectFile(getInput(), [new File(['a'], 'first.png', { type: 'image/png' }), new File(['b'], 'second.png', { type: 'image/png' })]);
+
+    expect(store.getState().design.selectedIds).toEqual([]);
+
+    const firstImage = getLastImage();
+
+    firstImage.naturalWidth = 200;
+    firstImage.naturalHeight = 100;
+    firstImage.onload?.();
+
+    // action — place the first file
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 10, 10));
+    });
+
+    const { rootOrder: rootOrderAfterFirst, selectedIds: selectedAfterFirst } = store.getState().design;
+
+    expect(selectedAfterFirst).toEqual([rootOrderAfterFirst[0]]);
+
+    const secondImage = getLastImage();
+
+    secondImage.naturalWidth = 200;
+    secondImage.naturalHeight = 100;
+    secondImage.onload?.();
+
+    // action — place the second file
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 40, 40));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 40, 40));
+    });
+
+    // result — the first file's selection is kept, the second is added alongside it
+    const { rootOrder, selectedIds } = store.getState().design;
+
+    expect(selectedIds).toEqual([rootOrder[0], rootOrder[1]]);
   });
 
   it('should not reopen the file picker or lose the armed file when the viewport changes (e.g. panning) while armed', () => {

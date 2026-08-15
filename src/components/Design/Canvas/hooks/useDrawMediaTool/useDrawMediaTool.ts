@@ -1,7 +1,7 @@
 import { RefObject, useEffect, useRef } from 'react';
 
 // store
-import { setActiveTool } from 'store/design/slice';
+import { setActiveTool, setSelection } from 'store/design/slice';
 import { selectActiveTool } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector, useAppStore } from 'store';
 
@@ -35,6 +35,7 @@ export const useDrawMediaTool = (
   const queueRef = useRef<File[]>([]);
 
   const handleFileChange = (event: Event): void => {
+    dispatch(setSelection([]));
     queueRef.current = Array.from((event.target as HTMLInputElement).files ?? []);
     armNextFile(canvasRef, armedRef, queueRef);
   };
@@ -48,7 +49,7 @@ export const useDrawMediaTool = (
 
     if (canvas && activeTool === tool) {
       const input = document.createElement('input');
-      const onPointerDown = (event: PointerEvent): void => handlePointerDown(canvas, event, dispatch, appStore, armedRef, startRef);
+      const onPointerDown = (event: PointerEvent): void => handlePointerDown(canvas, event, appStore, armedRef, startRef);
       const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event, appStore, armedRef, startRef, draftRef);
       const onPointerUp = (event: PointerEvent): void =>
         handlePointerUp(canvas, event, dispatch, appStore, canvasRef, armedRef, startRef, draftRef, queueRef, name);

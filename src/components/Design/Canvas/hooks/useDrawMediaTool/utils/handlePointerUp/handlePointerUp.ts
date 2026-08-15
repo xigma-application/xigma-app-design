@@ -15,6 +15,7 @@ import { TDraftEntity } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
+import { appendLastCreatedNodeToSelection } from '../../../../utils/appendLastCreatedNodeToSelection';
 import { armNextFile } from '../armNextFile';
 import { getAspectRatioLockedRect } from 'utils/math/getAspectRatioLockedRect';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
@@ -43,6 +44,7 @@ export const handlePointerUp = (
       : roundRect(getAspectRatioLockedRect(startRef.current, current, armed.naturalWidth / armed.naturalHeight));
 
     dispatch(addNode({ ...rect, flipX: false, flipY: false, name, parentId: null, rotation: 0, src: armed.src, type: NodeType.media }));
+    appendLastCreatedNodeToSelection(dispatch, appStore);
 
     startRef.current = null;
     draftRef.current = null;

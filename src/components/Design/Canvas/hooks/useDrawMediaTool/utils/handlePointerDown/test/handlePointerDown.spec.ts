@@ -30,7 +30,7 @@ const armed: TArmedMedia = { naturalHeight: 100, naturalWidth: 200, src: 'blob:m
 
 describe('handlePointerDown', () => {
   beforeEach(() => {
-    store.dispatch(setSelection(['stale']));
+    store.dispatch(setSelection(['already-placed']));
     store.dispatch(setViewport({ x: 0, y: 0, zoom: 1 }));
   });
 
@@ -40,12 +40,11 @@ describe('handlePointerDown', () => {
     const startRef = createStartRef();
 
     // before
-    handlePointerDown(canvas, pointerEvent(10, 10, 1), store.dispatch, store, createArmedRef(armed), startRef);
+    handlePointerDown(canvas, pointerEvent(10, 10, 1), store, createArmedRef(armed), startRef);
 
     // result
     expect(startRef.current).toBeNull();
     expect(canvas.setPointerCapture).not.toHaveBeenCalled();
-    expect(store.getState().design.selectedIds).toEqual(['stale']);
   });
 
   it('should do nothing when no file is armed', () => {
@@ -54,24 +53,23 @@ describe('handlePointerDown', () => {
     const startRef = createStartRef();
 
     // before
-    handlePointerDown(canvas, pointerEvent(10, 10), store.dispatch, store, createArmedRef(null), startRef);
+    handlePointerDown(canvas, pointerEvent(10, 10), store, createArmedRef(null), startRef);
 
     // result
     expect(startRef.current).toBeNull();
     expect(canvas.setPointerCapture).not.toHaveBeenCalled();
-    expect(store.getState().design.selectedIds).toEqual(['stale']);
   });
 
-  it('should clear the selection, capture the pointer, and record the world-space start point once armed', () => {
+  it('should capture the pointer and record the world-space start point once armed, without touching the current selection', () => {
     // mock
     const canvas = createCanvas();
     const startRef = createStartRef();
 
     // before
-    handlePointerDown(canvas, pointerEvent(10, 10), store.dispatch, store, createArmedRef(armed), startRef);
+    handlePointerDown(canvas, pointerEvent(10, 10), store, createArmedRef(armed), startRef);
 
-    // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    // result — a prior file placed earlier in the same multi-file queue must stay selected
+    expect(store.getState().design.selectedIds).toEqual(['already-placed']);
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(1);
     expect(startRef.current).toEqual({ x: 10, y: 10 });
   });
@@ -84,7 +82,7 @@ describe('handlePointerDown', () => {
     store.dispatch(setViewport({ x: 150, y: 90, zoom: 1 }));
 
     // before
-    handlePointerDown(canvas, pointerEvent(10, 10), store.dispatch, store, createArmedRef(armed), startRef);
+    handlePointerDown(canvas, pointerEvent(10, 10), store, createArmedRef(armed), startRef);
 
     // result — screen (10,10) under viewport {x:150,y:90} is world (-140,-80)
     expect(startRef.current).toEqual({ x: -140, y: -80 });

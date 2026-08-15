@@ -102,6 +102,51 @@ test('places multiple picked files one after another, staying on the tool until 
   expect(afterSecond.equals(afterFirst)).toBe(false);
 });
 
+test('selects every placed file together, so a multi-file pick ends with all of them selected', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-project');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.pickMediaFile([FIXTURE_PATH, SECOND_FIXTURE_PATH]);
+
+  // place both files with a plain click (natural size), which always top-left anchors exactly at
+  // the click point regardless of each fixture's own actual natural size (see the "places the image
+  // at its exact natural pixel size on a plain click" test above) — so a point a couple pixels in
+  // from each anchor is guaranteed to land on that image later, without needing to know either
+  // fixture's real dimensions or replicate the aspect-locked-drag math for a second file
+  await designPage.placeMediaAtNaturalSize(100, 100);
+  // the next queued file still has to round-trip through its own Image() decode before
+  // armNextFile arms it (same reason pickMediaFile waits after the initial pick) — clicking again
+  // too soon lands on a still-unarmed tool and silently does nothing. Several browser instances
+  // decoding images at once under a full parallel test run slows this down further (same class of
+  // flakiness this file's own serial-mode comment already flags), so this needs more margin than
+  // pickMediaFile's own 200ms
+  await page.waitForTimeout(500);
+  await designPage.placeMediaAtNaturalSize(300, 100);
+
+  // rest the pointer somewhere neutral first — otherwise the hover outline (independent of
+  // selection, see the "Gotcha for other e2e tests" note in TEST_CASES.md) would depend on wherever
+  // the previous gesture happened to leave the pointer, and could differ between this screenshot and
+  // the manually-reconstructed reference below for a reason unrelated to selection
+  await designPage.pointerMove(900, 400);
+  const afterBothPlaced = await designPage.canvas.screenshot();
+
+  // deselect everything, then manually shift-click both images through the ordinary selection
+  // tool to build a known-correct multi-selection — 2+ selected nodes sharing a parent render one
+  // shared group outline (see selection.spec.ts's shift-click test), so this reference render can
+  // only match the placement result above if both files genuinely ended up selected together,
+  // not just the most recently placed one
+  await designPage.click(900, 600);
+  await designPage.click(102, 102);
+  await designPage.click(302, 102, { shift: true });
+  await designPage.pointerMove(900, 400); // same neutral point, so hover state matches
+
+  const manuallyMultiSelected = await designPage.canvas.screenshot();
+
+  expect(afterBothPlaced.equals(manuallyMultiSelected)).toBe(true);
+});
+
 test('opens the file picker via the Ctrl/Cmd+Shift+K shortcut', async ({ page }) => {
   const designPage = new DesignPage(page);
 

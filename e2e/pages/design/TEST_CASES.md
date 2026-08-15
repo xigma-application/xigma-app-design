@@ -188,6 +188,42 @@ baseline (`designPage.click(900, 600)`) — worth noting because the first fix a
 800)`, which sits below the default 720px Playwright viewport height and silently never reached the
 canvas at all, so the click was a no-op and the test still failed the same way.
 
+## Select newly placed Media files on creation
+
+Media needed a variant of the fix above, not a copy of it: a multi-file pick places several nodes
+one after another (one gesture per file, `armNextFile` re-arming the tool between each), and the
+requested behavior is that **all** of them end up selected together once the whole queue is placed,
+not just the most recent one — the same "shared group outline" state a manual multi-select
+(shift-click/marquee) would produce. Two changes were needed together: (1) `handlePointerUp.ts` now
+calls a new `appendLastCreatedNodeToSelection.ts` (`Canvas/utils/`, a sibling of
+`selectLastCreatedNode.ts` above) after each `addNode`, which reads the _current_ `selectedIds` and
+appends the just-placed node instead of replacing the array; (2) the stale-selection clear that used
+to run on every placement's `handlePointerDown` (`dispatch(setSelection([]))`, copied from the
+single-shot shape tools) had to move to `handleFileChange` in `useDrawMediaTool.ts` instead, firing
+once when files are first picked — otherwise it would have wiped out file 1's selection the moment
+file 2's own `pointerdown` fired, undoing the accumulation before it could ever show up.
+
+| #   | Scenario                                                                                                                                 | Unit |            E2E            |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------: |
+| 104 | Placing several files from one multi-file pick, one after another, ends with all of them selected together, not just the last one placed |  ✅  | ✅ `create-media.spec.ts` |
+
+The unit suite (`useDrawMediaTool.spec.tsx`, `handlePointerDown.spec.ts`, `handlePointerUp.spec.ts`,
+`appendLastCreatedNodeToSelection.spec.ts`) already asserts `store.getState().design.selectedIds`
+exactly across a simulated multi-file queue, but the e2e version proves the real per-node/group
+selection _outline_ actually paints correctly for this specific case, the same "real browser +
+rendering" rationale as the shape-tools section above. It sidesteps needing to know either fixture
+image's actual pixel dimensions (`pointer.png` turned out to be 256×256, not the small icon it looks
+like at a glance — discovered via this test failing against a wrongly-guessed drag geometry before
+switching to two natural-size clicks instead) by comparing the real placement result against a
+manually-reconstructed reference: deselect everything, then shift-click both images through the
+ordinary selection tool. Since 2+ selected nodes sharing a parent always render one shared group
+outline regardless of _how_ they got selected (see #8 below), pixel-identical results between the
+two prove the placement flow already left both genuinely selected together. Also needed a longer
+`page.waitForTimeout` between the two placements than `pickMediaFile`'s own 200ms — the second
+queued file still has to round-trip through its own async `Image()` decode before `armNextFile`
+arms it, and four Playwright workers all decoding images at once under a full parallel run slows
+that down further than it appeared when this test ran alone.
+
 ## Selection (Etap 5)
 
 Setup shorthand: **A**, **B**, **C** are frames drawn left-to-right with a gap between each, all

@@ -142,6 +142,55 @@ describe('handlePointerUp', () => {
     expect(placed).toMatchObject({ height: 50, width: 100, x: 0, y: 0 });
   });
 
+  it('should add each newly placed file to the selection, keeping earlier files from the same queue selected too', () => {
+    // mock
+    const canvas = createCanvas();
+    const canvasRef = { current: canvas };
+
+    store.dispatch(setViewport({ x: 0, y: 0, zoom: 1 }));
+
+    const selectedBefore = store.getState().design.selectedIds.length;
+
+    // before — place the first file
+    handlePointerUp(
+      canvas,
+      pointerEvent(10, 10),
+      store.dispatch,
+      store,
+      canvasRef,
+      createArmedRef(armed),
+      createStartRef({ x: 10, y: 10 }),
+      createDraftRef(),
+      createQueueRef(),
+      'Image',
+    );
+
+    const rootOrderAfterFirst = store.getState().design.rootOrder;
+    const firstId = rootOrderAfterFirst[rootOrderAfterFirst.length - 1];
+
+    expect(store.getState().design.selectedIds.slice(selectedBefore)).toEqual([firstId]);
+
+    // action — place a second file from the same queue
+    handlePointerUp(
+      canvas,
+      pointerEvent(40, 40),
+      store.dispatch,
+      store,
+      canvasRef,
+      createArmedRef(armed),
+      createStartRef({ x: 40, y: 40 }),
+      createDraftRef(),
+      createQueueRef(),
+      'Image',
+    );
+
+    const { rootOrder, selectedIds } = store.getState().design;
+    const secondId = rootOrder[rootOrder.length - 1];
+
+    // result — both files end up selected together, not just the most recent one
+    expect(selectedIds.slice(selectedBefore)).toEqual([firstId, secondId]);
+  });
+
   it('should arm the next queued file and stay on the media tool instead of reverting to default', () => {
     // mock
     const canvas = createCanvas();
