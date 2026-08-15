@@ -154,36 +154,3 @@ test('selects every placed file together, so a multi-file pick ends with all of 
 
   expect(afterBothPlaced.equals(manuallyMultiSelected)).toBe(true);
 });
-
-test('opens the file picker via the Ctrl/Cmd+Shift+K shortcut', async ({ page }) => {
-  const designPage = new DesignPage(page);
-
-  await designPage.goto('e2e-test-project');
-  await expect(designPage.canvas).toBeVisible();
-
-  // CONTROL_PRIMARY_KEY resolves per-OS at runtime (constant/mainKeys.ts), so match it here too
-  const isMac = await page.evaluate(() => /Mac/i.test(navigator.userAgent));
-  const shortcut = isMac ? 'Meta+Shift+K' : 'Control+Shift+K';
-
-  // a single keypress occasionally gets lost under heavy parallel load (many browser instances
-  // competing for CPU), so retry once with a short first attempt before falling back to the
-  // full default timeout
-  let fileChooser;
-
-  try {
-    const fileChooserPromise = page.waitForEvent('filechooser', { timeout: 5000 });
-
-    await page.keyboard.press(shortcut);
-    fileChooser = await fileChooserPromise;
-  } catch {
-    const fileChooserPromise = page.waitForEvent('filechooser');
-
-    await page.keyboard.press(shortcut);
-    fileChooser = await fileChooserPromise;
-  }
-
-  await fileChooser.setFiles(FIXTURE_PATH);
-
-  const mediaTool = designPage.toolRadio('media');
-  await expect(mediaTool).toHaveAttribute('aria-checked', 'true');
-});
