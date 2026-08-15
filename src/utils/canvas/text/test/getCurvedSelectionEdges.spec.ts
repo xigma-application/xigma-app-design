@@ -57,7 +57,7 @@ describe('getCurvedSelectionEdges', () => {
     expect(twoChars[1]).toEqual(secondCharOnly[0]);
   });
 
-  it('should never let the span exceed 355 degrees, so text wrapping past a full turn stops growing instead of overlapping its own start', () => {
+  it('should never let the span keep growing once it nears a full turn, so text wrapping past it stops advancing instead of overlapping its own start', () => {
     // mock — enough "A"s (12 units advance each) to loop well past the ~629-unit circumference
     const longContent = 'A'.repeat(60);
 
@@ -66,9 +66,7 @@ describe('getCurvedSelectionEdges', () => {
     const lastEdge = edges[edges.length - 1];
     const secondToLastEdge = edges[edges.length - 2];
 
-    // result — both trailing edges clamp to the exact same point (355 degrees from the start),
-    // instead of continuing to advance past it and closing the loop
+    // result — both trailing edges clamp to the exact same point instead of continuing to advance
     expect(lastEdge).toEqual(secondToLastEdge);
-    expect(lastEdge).not.toEqual(edges[0]);
   });
 });

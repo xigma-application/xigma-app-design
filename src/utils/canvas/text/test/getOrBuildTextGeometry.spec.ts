@@ -94,7 +94,7 @@ describe('getOrBuildTextGeometry', () => {
     expect(cache.size).toBe(2);
   });
 
-  it('should build curved geometry and shrink the font size when a pathId is set and content overflows the circumference', () => {
+  it('should keep the authored font size and drop the overflowing glyphs when a pathId is set and content overflows the circumference', () => {
     // mock
     const cache = new Map<string, TTextGeometry>();
     const ellipseArcLengthCache = new Map<string, TEllipseArcLengthSample[]>();
@@ -103,8 +103,11 @@ describe('getOrBuildTextGeometry', () => {
     // before
     const geometry = getOrBuildTextGeometry(ATLAS, cache, node, ellipseArcLengthCache);
 
-    // result
-    expect(geometry.effectiveFontSize).toBeLessThan(node.fontSize);
+    // result — the font size never shrinks; instead, fewer than the full 36 characters' worth of
+    // glyphs (36 * 6 vertices * 4 floats each) actually get built, since the overflowing tail is
+    // dropped from rendering rather than forced to fit
+    expect(geometry.effectiveFontSize).toBe(node.fontSize);
+    expect(geometry.vertices.length).toBeLessThan(node.content.length * 6 * 4);
     expect(ellipseArcLengthCache.size).toBe(1);
   });
 

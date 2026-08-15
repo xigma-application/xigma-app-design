@@ -10,18 +10,25 @@ import { buildEllipseArcLengthTable } from 'utils/canvas/shapes/buildEllipseArcL
 import { flipTextPoint } from 'utils/canvas/text/flipTextPoint';
 import { getCurvedGlyphBoundaries } from 'utils/canvas/text/getCurvedGlyphBoundaries';
 import { getEllipseCircumference } from 'utils/canvas/shapes/getEllipseCircumference';
-import { getFittedPathFontSize } from 'utils/canvas/text/getFittedPathFontSize';
 import { getNearestEllipsePathOffset } from 'utils/canvas/shapes/getNearestEllipsePathOffset/getNearestEllipsePathOffset';
+import { getVisibleCurvedContent } from 'utils/canvas/text/getVisibleCurvedContent';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
 export const isPointInCurvedText = (point: TPoint, node: TTextNode, tolerance: number): boolean => {
   const table = buildEllipseArcLengthTable(node.width, node.height);
   const circumference = getEllipseCircumference(table);
-  const fontSize = getFittedPathFontSize(MSDF_ATLAS_JSON, node.content, node.fontSize, circumference);
-  const boundaries = getCurvedGlyphBoundaries(
+  const visibleContent = getVisibleCurvedContent(
     MSDF_ATLAS_JSON,
     node.content,
-    fontSize,
+    node.fontSize,
+    node.pathStartOffset ?? 0,
+    node.pathFlip ?? false,
+    circumference,
+  );
+  const boundaries = getCurvedGlyphBoundaries(
+    MSDF_ATLAS_JSON,
+    visibleContent,
+    node.fontSize,
     node.pathStartOffset ?? 0,
     node.pathFlip ?? false,
     circumference,

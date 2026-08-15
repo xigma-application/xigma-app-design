@@ -660,7 +660,7 @@ bound text propagates to the other on every update (live during a drag, not just
 the text always follows the path's actual current shape. The path node itself renders as a
 stroke-only ellipse outline with no fill (`drawSceneNodes.ts`/`drawDraftShape.ts`'s `NodeType.path`
 branches, reusing the generic `drawEllipse` primitive — not Ellipse-tool code). Glyph curving,
-auto-shrink-to-fit, and the draggable start-offset handle were built in an earlier pass and are
+truncate-on-overflow, and the draggable start-offset handle were built in an earlier pass and are
 unaffected by this node-model rework, since they always read the text node's own denormalized
 box, never a separate node lookup.
 
@@ -669,7 +669,7 @@ box, never a separate node lookup.
 | 74  | Drawing a path with the Text on Path tool, typing content, then clicking away commits a rendered curved text node bound to a real, separate path node                                                                                                  |  —   | ✅ `text-on-path.spec.ts` |
 | 75  | Typing a tool-shortcut letter while editing text on a path does not switch the active tool (the focus-timing bug this feature originally shipped with — `useSeedEditableTextOnEntry.ts` grabs focus via `useLayoutEffect`, not a deferred `useEffect`) |  —   | ✅ `text-on-path.spec.ts` |
 | 76  | Resizing the source path node updates the attached text's curve live, proving the two are a real bidirectional relation, not independently-positioned nodes                                                                                            |  ✅  | ✅ `text-on-path.spec.ts` |
-| 77  | Auto-shrinking the font so text never overlaps itself when longer than the path's circumference                                                                                                                                                        |  ✅  |             —             |
+| 77  | Dropping the overflowing tail of the content (instead of shrinking the font) so text never overlaps itself when longer than the path's circumference                                                                                                    |  ✅  |             —             |
 | 78  | Dragging the blue start-offset handle moves where the text begins along the path                                                                                                                                                                       |  ✅  |             —             |
 | 84  | Clicking a point along curved text (re-entered via double-click) places the caret at the nearest character index on the curve, so a typed character inserts there instead of always landing at the end                                                 |  ✅  | ✅ `text-on-path.spec.ts` |
 | 85  | Dragging along the curve from one character to another selects that range; typing replaces the selection instead of inserting alongside it                                                                                                             |  ✅  | ✅ `text-on-path.spec.ts` |
@@ -677,8 +677,8 @@ box, never a separate node lookup.
 | 90  | Committing a freshly typed path-text node without ever having explicitly selected it does not leave a stale resize-handle hit zone active at the underlying path node's own corner                                                                     |  ✅  | ✅ `text-on-path.spec.ts` |
 | 94  | Double-clicking a word while actively composing path-text selects that word (via `useCurvedCaretEditing.ts`'s own `handleDoubleClick.ts`, sharing `getWordRangeAtIndex.ts` with the straight-text case — see #92 above)                                |  ✅  | ✅ `text-on-path.spec.ts` |
 
-#77/#78 stay unit-only: `getFittedPathFontSize.spec.ts` and `continuePathOffsetDrag.spec.ts` already
-assert the exact resulting font size / offset value via direct function calls and
+#77/#78 stay unit-only: `getVisibleCurvedContent.spec.ts` and `continuePathOffsetDrag.spec.ts` already
+assert the exact resulting visible content / offset value via direct function calls and
 `store.getState()`, which a screenshot diff can't improve on precisely — see "why so few scenarios
 get e2e coverage" below. #76 gets e2e coverage despite having exact unit coverage too
 (`handleUpdateNode.spec.ts`'s cascade tests) because the interesting failure mode is specifically a
@@ -715,7 +715,7 @@ real one (nothing is actually selected).
 #84/#85 are `useCurvedCaretEditing.ts`: a real `document`-level `pointerdown`/`pointermove`/
 `pointerup` listener that hit-tests the click against the curve's own per-character arc-length
 boundaries (`getCurvedCaretIndexAtPoint.ts`, reusing the same boundary/offset math `#77`'s
-auto-shrink and `isPointInCurvedText.ts` already use), then moves the real DOM selection inside the
+truncate-on-overflow and `isPointInCurvedText.ts` already use), then moves the real DOM selection inside the
 `contentEditable` overlay via `setEditableSelectionRange.ts` — a plain range/offset calculation in
 jsdom for the unit suite (`useCurvedCaretEditing.spec.tsx`, `getCurvedCaretIndexAtPoint.spec.ts`,
 `setEditableSelectionRange.spec.ts` all assert the exact index/distance/selection precisely), but

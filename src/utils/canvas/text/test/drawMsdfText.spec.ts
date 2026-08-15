@@ -139,7 +139,7 @@ describe('drawMsdfText', () => {
     expect(gl.uniform1f).toHaveBeenCalledWith(expect.anything(), 8);
   });
 
-  it('should draw glyphs curved along a path and shrink the effective font size uniform when content overflows', () => {
+  it('should draw glyphs curved along a path at the authored font size, dropping the overflowing glyphs instead of shrinking', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
@@ -162,12 +162,16 @@ describe('drawMsdfText', () => {
       IDENTITY_VIEWPORT,
     );
 
-    // result
-    expect(gl.drawArrays).toHaveBeenCalled();
+    // result — screenPxRange still reflects the full, unshrunk font size (distanceRange(4) * fontSize(20) / atlas size(20) = 4)
+    const [, screenPxRange] = vi.mocked(gl.uniform1f).mock.calls[0];
 
-    const [, effectiveFontSize] = vi.mocked(gl.uniform1f).mock.calls[0];
+    expect(screenPxRange).toBe((ATLAS.distanceField.distanceRange * 20) / ATLAS.info.size);
 
-    expect(effectiveFontSize).toBeLessThan((ATLAS.distanceField.distanceRange * 20) / ATLAS.info.size);
+    // but fewer than the full 36 characters' worth of glyphs (36 * 6 triangle-vertices) get drawn,
+    // since the overflowing tail is dropped from rendering rather than forced to fit
+    const [, , vertexCount] = vi.mocked(gl.drawArrays).mock.calls[0];
+
+    expect(vertexCount).toBeLessThan(overflowingContent.length * 6);
   });
 
   it('should reuse cached geometry across calls for the same node, without rebuilding it', () => {

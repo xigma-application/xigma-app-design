@@ -7,8 +7,8 @@ import { buildEllipseArcLengthTable } from '../shapes/buildEllipseArcLengthTable
 import { flipTextPoint } from './flipTextPoint';
 import { getCurvedGlyphBoundaries } from './getCurvedGlyphBoundaries';
 import { getEllipseCircumference } from '../shapes/getEllipseCircumference';
-import { getFittedPathFontSize } from './getFittedPathFontSize';
 import { getNearestEllipsePathOffset } from '../shapes/getNearestEllipsePathOffset/getNearestEllipsePathOffset';
+import { getVisibleCurvedContent } from './getVisibleCurvedContent';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
 export type TCurvedCaretHit = {
@@ -25,11 +25,11 @@ export const getCurvedCaretIndexAtPoint = (
 ): TCurvedCaretHit => {
   const table = buildEllipseArcLengthTable(box.width, box.height);
   const circumference = getEllipseCircumference(table);
-  const fittedFontSize = getFittedPathFontSize(atlas, content, fontSize, circumference);
+  const visibleContent = getVisibleCurvedContent(atlas, content, fontSize, box.pathStartOffset ?? 0, box.pathFlip ?? false, circumference);
   const boundaries = getCurvedGlyphBoundaries(
     atlas,
-    content,
-    fittedFontSize,
+    visibleContent,
+    fontSize,
     box.pathStartOffset ?? 0,
     box.pathFlip ?? false,
     circumference,

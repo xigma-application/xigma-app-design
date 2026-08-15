@@ -11,6 +11,8 @@ import { TViewport } from 'types/design/types';
 import { buildEllipseArcLengthTable } from 'utils/canvas/shapes/buildEllipseArcLengthTable';
 import { drawRect } from 'utils/canvas/drawRect';
 import { getCurvedCaretPoint } from 'utils/canvas/text/getCurvedCaretPoint';
+import { getEllipseCircumference } from 'utils/canvas/shapes/getEllipseCircumference';
+import { getVisibleCurvedContent } from 'utils/canvas/text/getVisibleCurvedContent';
 import { transformCurvedPoint } from './transformCurvedPoint';
 
 export const drawCurvedCaret = (
@@ -27,9 +29,17 @@ export const drawCurvedCaret = (
   const center: TPoint = { x: editingTextBox.x + editingTextBox.width / 2, y: editingTextBox.y + editingTextBox.height / 2 };
   const lineHeight = (MSDF_ATLAS_JSON.common.lineHeight * TEXT_FONT_SIZE) / MSDF_ATLAS_JSON.info.size;
   const table = buildEllipseArcLengthTable(editingTextBox.width, editingTextBox.height);
-  const localCaret = getCurvedCaretPoint(
+  const visibleContent = getVisibleCurvedContent(
     MSDF_ATLAS_JSON,
     editingTextContent,
+    TEXT_FONT_SIZE,
+    editingTextBox.pathStartOffset ?? 0,
+    editingTextBox.pathFlip ?? false,
+    getEllipseCircumference(table),
+  );
+  const localCaret = getCurvedCaretPoint(
+    MSDF_ATLAS_JSON,
+    visibleContent,
     TEXT_FONT_SIZE,
     editingTextBox.width,
     editingTextBox.height,

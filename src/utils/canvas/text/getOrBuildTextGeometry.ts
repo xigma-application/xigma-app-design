@@ -8,7 +8,7 @@ import { buildCurvedGlyphQuads } from './buildCurvedGlyphQuads';
 import { buildEllipseArcLengthTable } from '../shapes/buildEllipseArcLengthTable';
 import { buildGlyphQuads } from './buildGlyphQuads';
 import { getEllipseCircumference } from '../shapes/getEllipseCircumference';
-import { getFittedPathFontSize } from './getFittedPathFontSize';
+import { getVisibleCurvedContent } from './getVisibleCurvedContent';
 import { getWrappedTextLines } from './getWrappedTextLines';
 
 export type TTextGeometry = {
@@ -39,13 +39,14 @@ const buildPathTextGeometry = (
 ): TTextGeometry => {
   const { content, fontSize, height, pathFlip, pathStartOffset, width, x, y } = node;
   const table = getOrBuildEllipseArcLengthTable(ellipseArcLengthCache, width, height);
-  const effectiveFontSize = getFittedPathFontSize(atlas, content, fontSize, getEllipseCircumference(table));
+  const circumference = getEllipseCircumference(table);
+  const visibleContent = getVisibleCurvedContent(atlas, content, fontSize, pathStartOffset ?? 0, pathFlip ?? false, circumference);
   const center = { x: x + width / 2, y: y + height / 2 };
   const vertices = new Float32Array(
-    buildCurvedGlyphQuads(atlas, content, effectiveFontSize, width, height, center, pathStartOffset ?? 0, pathFlip ?? false, table),
+    buildCurvedGlyphQuads(atlas, visibleContent, fontSize, width, height, center, pathStartOffset ?? 0, pathFlip ?? false, table),
   );
 
-  return { effectiveFontSize, vertices };
+  return { effectiveFontSize: fontSize, vertices };
 };
 
 const buildStraightTextGeometry = (atlas: TGlyphAtlasJson, node: TTextNode): TTextGeometry => {
