@@ -2,6 +2,9 @@ import { act, renderHook } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { RefObject } from 'react';
 
+// components
+import ClassNamesProvider from 'components/Design/core/ClassNamesProvider/ClassNamesProvider';
+
 // hooks
 import { useSelectionTool } from './useSelectionTool';
 
@@ -60,7 +63,11 @@ const renderSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>): Re
   const marqueeRef: RefObject<TDraftRect | null> = { current: null };
 
   renderHook(() => useSelectionTool(canvasRef, marqueeRef), {
-    wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    wrapper: ({ children }) => (
+      <Provider store={store}>
+        <ClassNamesProvider>{children}</ClassNamesProvider>
+      </Provider>
+    ),
   });
 
   return marqueeRef;

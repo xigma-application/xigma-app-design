@@ -1,5 +1,8 @@
 import { RefObject, useEffect, useRef } from 'react';
 
+// others
+import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
+
 // store
 import { selectEditingTextBox } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
@@ -12,6 +15,7 @@ import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 export const useCurvedCaretEditing = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
   const dispatch = useAppDispatch();
   const editingPathId = useAppSelector(selectEditingTextBox)?.pathId;
+  const { setClassName } = useClassNames();
   const anchorIndexRef = useRef<number | null>(null);
   const isDraggingOffsetRef = useRef<boolean>(false);
 
@@ -19,9 +23,10 @@ export const useCurvedCaretEditing = (canvasRef: RefObject<HTMLCanvasElement | n
     const canvas = canvasRef.current;
 
     if (canvas && editingPathId) {
-      const onPointerDown = (event: PointerEvent): void => handlePointerDown(canvas, event, dispatch, anchorIndexRef, isDraggingOffsetRef);
+      const onPointerDown = (event: PointerEvent): void =>
+        handlePointerDown(canvas, event, dispatch, anchorIndexRef, isDraggingOffsetRef, setClassName);
       const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event, dispatch, anchorIndexRef, isDraggingOffsetRef);
-      const onPointerUp = (): void => handlePointerUp(anchorIndexRef, isDraggingOffsetRef);
+      const onPointerUp = (): void => handlePointerUp(anchorIndexRef, isDraggingOffsetRef, setClassName);
 
       document.addEventListener('pointerdown', onPointerDown);
       document.addEventListener('pointermove', onPointerMove);
@@ -35,5 +40,5 @@ export const useCurvedCaretEditing = (canvasRef: RefObject<HTMLCanvasElement | n
         isDraggingOffsetRef.current = false;
       };
     }
-  }, [canvasRef, dispatch, editingPathId]);
+  }, [canvasRef, dispatch, editingPathId, setClassName]);
 };

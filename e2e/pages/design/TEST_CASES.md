@@ -689,6 +689,7 @@ commit — only the editing box).
 | 82  | Hovering the text while it's already selected switches the outline to the thicker hover style, instead of staying on the thin selected style                             |  ✅  | ✅ `text-on-path.spec.ts` |
 | 83  | Neither the drag-to-create draft nor the live-typing phase (first creation or re-edit) shows a rectangular box/corner-handles outline for the path — only the bare curve |  ✅  |             —             |
 | 88  | The bare curve renders dashed while actively drawing or editing the path (first creation or re-edit), instead of the solid outline used once just selected/hovered       |  ✅  | ✅ `text-on-path.spec.ts` |
+| 89  | Hovering the path-offset handle shows the hand cursor; pressing and dragging it switches to the pressing cursor, reverting to the hand cursor on release                 |  ✅  | ✅ `text-on-path.spec.ts` |
 
 #79-#82 all live in one e2e test, since they're really one continuous state-machine walk (hidden →
 hover → back to hidden → selected → selected+hover) and splitting it into separate tests would just

@@ -1,5 +1,8 @@
 import { RefObject, useEffect } from 'react';
 
+// others
+import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
+
 // store
 import {
   selectActiveTool,
@@ -10,9 +13,6 @@ import {
   selectViewport,
 } from 'store/design/selectors';
 import { store, useAppSelector } from 'store';
-
-// styles
-import styles from '../../canvas.module.scss';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
@@ -32,10 +32,9 @@ import { getRotatedScaleCursorUrl } from 'utils/canvas/getRotatedScaleCursorUrl'
 import { isPointOnPathTextHandle } from '../../utils/isPointOnPathTextHandle';
 import { screenToWorld } from '../../utils/screenToWorld';
 
-const POSITIONING_CURSOR_CLASS = styles['Canvas__canvas-element--positioning'];
-
 export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>, hoverRef: RefObject<string | null>): void => {
   const activeTool = useAppSelector(selectActiveTool);
+  const { setClassName } = useClassNames();
 
   const handlePointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     if (event.buttons === 0) {
@@ -48,8 +47,6 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
       const resizableSelectedNodes = isEditingText ? [] : selectedNodes;
       const [selectedNode] = resizableSelectedNodes;
       const lineEndpointHit = getLineEndpointAtPoint(point, resizableSelectedNodes, viewport);
-      // during an active edit (including a path-text node still being drawn for the first time,
-      // which has no committed node yet), the editing box is the source of truth for the handle
       const nonEditingHandleHit = getPathTextOffsetHandleAtPoint(point, selectedNodes, viewport);
       const pathOffsetHandleHit = editingTextBox
         ? { hit: isPointOnPathTextHandle(point, editingTextBox, viewport), nodeId: selectEditingNodeId(state) }
@@ -59,25 +56,25 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
 
       switch (true) {
         case Boolean(lineEndpointHit) && selectedNode.type === NodeType.line:
-          canvas.classList.add(POSITIONING_CURSOR_CLASS);
+          setClassName('positioning');
           canvas.style.cursor = '';
           hoverRef.current = lineEndpointHit!.nodeId;
           break;
         case pathOffsetHandleHit.hit:
-          canvas.classList.add(POSITIONING_CURSOR_CLASS);
+          setClassName('hand');
           canvas.style.cursor = '';
           hoverRef.current = pathOffsetHandleHit.nodeId;
           break;
         case Boolean(resizeHandleHit): {
           const getCursorUrl = activeTool === ToolName.scale ? getRotatedScaleCursorUrl : getRotatedResizeCursorUrl;
 
-          canvas.classList.remove(POSITIONING_CURSOR_CLASS);
+          setClassName(null);
           canvas.style.cursor = getCursorUrl(getResizeCursorAngle(resizeHandleHit!.handle, resizeHandleHit!.rotation)) ?? '';
           hoverRef.current = null;
           break;
         }
         case Boolean(rotateHandleHit):
-          canvas.classList.remove(POSITIONING_CURSOR_CLASS);
+          setClassName(null);
           canvas.style.cursor =
             getRotatedRotateCursorUrl(getRotateCursorAngle(point, rotateHandleHit!.bounds, rotateHandleHit!.rotation)) ?? '';
           hoverRef.current = null;
@@ -85,7 +82,7 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
         default: {
           const hit = getNodeAtPoint(point, selectOrderedNodes(state), viewport);
 
-          canvas.classList.remove(POSITIONING_CURSOR_CLASS);
+          setClassName(null);
           canvas.style.cursor = '';
           hoverRef.current = hit?.id ?? null;
         }
@@ -94,7 +91,7 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
   };
 
   const handlePointerLeave = (canvas: HTMLCanvasElement): void => {
-    canvas.classList.remove(POSITIONING_CURSOR_CLASS);
+    setClassName(null);
     canvas.style.cursor = '';
     hoverRef.current = null;
   };
@@ -112,10 +109,10 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
       return (): void => {
         canvas.removeEventListener('pointermove', onPointerMove);
         canvas.removeEventListener('pointerleave', onPointerLeave);
-        canvas.classList.remove(POSITIONING_CURSOR_CLASS);
+        setClassName(null);
         canvas.style.cursor = '';
         hoverRef.current = null;
       };
     }
-  }, [activeTool, canvasRef, hoverRef]);
+  }, [activeTool, canvasRef, hoverRef, setClassName]);
 };

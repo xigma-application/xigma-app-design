@@ -2,6 +2,9 @@ import { act, renderHook } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { RefObject } from 'react';
 
+// components
+import ClassNamesProvider from 'components/Design/core/ClassNamesProvider/ClassNamesProvider';
+
 // hooks
 import { useCurvedCaretEditing } from './useCurvedCaretEditing';
 
@@ -55,7 +58,11 @@ const pointerEvent = (type: string, x: number, y: number, options: Partial<Point
 
 const renderCurvedCaretEditing = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
   renderHook(() => useCurvedCaretEditing(canvasRef), {
-    wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    wrapper: ({ children }) => (
+      <Provider store={store}>
+        <ClassNamesProvider>{children}</ClassNamesProvider>
+      </Provider>
+    ),
   });
 };
 

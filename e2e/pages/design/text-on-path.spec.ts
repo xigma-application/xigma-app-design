@@ -3,6 +3,20 @@ import { test, expect } from '@playwright/test';
 // components
 import { DesignPage } from './DesignPage';
 
+const waitForCursorClassName = async (designPage: DesignPage, x: number, y: number, expected: string): Promise<string> => {
+  for (let attempt = 0; attempt < 20; attempt++) {
+    await designPage.pointerMove(x + (attempt % 2), y);
+
+    const className = await designPage.cursorClassName();
+
+    if (className.includes(expected)) {
+      return className;
+    }
+  }
+
+  throw new Error(`"${expected}" cursor class never applied`);
+};
+
 test('draws a path with the Text on Path tool and commits a rendered curved text node', async ({ page }) => {
   const designPage = new DesignPage(page);
 
@@ -273,4 +287,31 @@ test('the path-offset handle stays draggable while actively editing the text, wi
   const afterFurtherTyping = await designPage.canvas.screenshot();
 
   expect(afterFurtherTyping.equals(afterDrag)).toBe(false);
+});
+
+test('hovering the path-offset handle shows the hand cursor, and dragging it shows the pressing cursor', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  // own stroke, so clicking there selects the path, not the text. Select via the rendered "H"
+  // glyph's actual ink at (493,405) instead (hit-testing follows the glyph, not the bare curve —
+  // see the "path outline stays hidden..." test above), then drag the handle off the box's own
+  // edge midpoint (which a resize handle also lives at) to the proven-safe (481,459) used by the
+  // mirrored-drag test above before checking cursor classes there
+  await designPage.goto('e2e-test-path-offset-handle-cursor');
+  await designPage.drawTextOnPath(300, 300, 500, 500);
+  await designPage.typeText('Hi');
+  await designPage.click(900, 600); // commit
+  await designPage.click(493, 405); // select the text node, on the rendered "H"
+
+  await designPage.pointerDown(500, 400); // the offset handle, at the bare curve point
+  await designPage.pointerMove(481, 459); // move it off the box's edge/corner ambiguity
+  await designPage.pointerUp();
+
+  await waitForCursorClassName(designPage, 481, 459, 'hand'); // hover the relocated offset handle
+
+  await designPage.pointerDown(481, 459);
+  await waitForCursorClassName(designPage, 450, 490, 'pressing'); // drag it further along the curve
+
+  await designPage.pointerUp();
+  await waitForCursorClassName(designPage, 450, 490, 'hand');
 });

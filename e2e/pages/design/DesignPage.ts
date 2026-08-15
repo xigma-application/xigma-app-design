@@ -182,4 +182,8 @@ export class DesignPage {
   async cursorStyle(): Promise<string> {
     return this.canvas.evaluate((el) => (el as HTMLCanvasElement).style.cursor);
   }
+
+  async cursorClassName(): Promise<string> {
+    return this.canvas.evaluate((el) => el.className);
+  }
 }

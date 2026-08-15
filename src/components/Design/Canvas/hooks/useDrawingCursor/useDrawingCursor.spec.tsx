@@ -2,7 +2,11 @@ import { Provider } from 'react-redux';
 import { act, renderHook } from '@testing-library/react';
 import { RefObject } from 'react';
 
+// components
+import ClassNamesProvider from 'components/Design/core/ClassNamesProvider/ClassNamesProvider';
+
 // hooks
+import { useClassNames } from 'components/Design/core/ClassNamesProvider/hooks/useClassNames';
 import { useDrawingCursor } from './useDrawingCursor';
 
 // store
@@ -14,15 +18,28 @@ import { ToolName } from 'types/design/enums';
 
 const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => ({ current: document.createElement('canvas') });
 
-const renderDrawingCursor = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
-  renderHook(() => useDrawingCursor(canvasRef), {
-    wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-  });
+const renderDrawingCursor = (canvasRef: RefObject<HTMLCanvasElement | null>): RefObject<string | null> => {
+  const classNameRef: RefObject<string | null> = { current: null };
+
+  renderHook(
+    () => {
+      useDrawingCursor(canvasRef);
+      classNameRef.current = useClassNames().className;
+    },
+    {
+      wrapper: ({ children }) => (
+        <Provider store={store}>
+          <ClassNamesProvider>{children}</ClassNamesProvider>
+        </Provider>
+      ),
+    },
+  );
+
+  return classNameRef;
 };
 
 describe('useDrawingCursor behaviors', () => {
   beforeEach(() => {
-    // reset the singleton store's active tool, since it otherwise leaks between tests in this file
     store.dispatch(setActiveTool(ToolName.default));
   });
 
@@ -33,10 +50,10 @@ describe('useDrawingCursor behaviors', () => {
     store.dispatch(setActiveTool(ToolName.frame));
 
     // before
-    renderDrawingCursor(canvasRef);
+    const classNameRef = renderDrawingCursor(canvasRef);
 
     // result
-    expect(canvasRef.current?.className).toContain('drawing');
+    expect(classNameRef.current).toBe('drawing');
   });
 
   it('should apply the drawing cursor class for every tool in the Rectangle group', () => {
@@ -46,10 +63,10 @@ describe('useDrawingCursor behaviors', () => {
     store.dispatch(setActiveTool(ToolName.star));
 
     // before
-    renderDrawingCursor(canvasRef);
+    const classNameRef = renderDrawingCursor(canvasRef);
 
     // result
-    expect(canvasRef.current?.className).toContain('drawing');
+    expect(classNameRef.current).toBe('drawing');
   });
 
   it('should not apply the drawing cursor class for the default tool', () => {
@@ -57,10 +74,10 @@ describe('useDrawingCursor behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    renderDrawingCursor(canvasRef);
+    const classNameRef = renderDrawingCursor(canvasRef);
 
     // result
-    expect(canvasRef.current?.className).not.toContain('drawing');
+    expect(classNameRef.current).not.toBe('drawing');
   });
 
   it('should remove the drawing cursor class once switching away from a drawing tool', () => {
@@ -70,15 +87,15 @@ describe('useDrawingCursor behaviors', () => {
     store.dispatch(setActiveTool(ToolName.rectangle));
 
     // before
-    renderDrawingCursor(canvasRef);
+    const classNameRef = renderDrawingCursor(canvasRef);
 
-    expect(canvasRef.current?.className).toContain('drawing');
+    expect(classNameRef.current).toBe('drawing');
 
     // action
     act(() => store.dispatch(setActiveTool(ToolName.default)));
 
     // result
-    expect(canvasRef.current?.className).not.toContain('drawing');
+    expect(classNameRef.current).not.toBe('drawing');
   });
 
   it('should do nothing when the canvas has no element yet', () => {

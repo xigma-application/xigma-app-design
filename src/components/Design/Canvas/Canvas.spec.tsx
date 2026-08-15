@@ -3,6 +3,7 @@ import { render } from '@testing-library/react';
 
 // components
 import Canvas from './Canvas';
+import ClassNamesProvider from '../core/ClassNamesProvider/ClassNamesProvider';
 
 // store
 import { store } from 'store';
@@ -12,7 +13,9 @@ describe('Canvas snapshots', () => {
     // before
     const { asFragment } = render(
       <Provider store={store}>
-        <Canvas />
+        <ClassNamesProvider>
+          <Canvas />
+        </ClassNamesProvider>
       </Provider>,
     );
 

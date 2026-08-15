@@ -16,12 +16,14 @@ describe('armPathOffsetDrag', () => {
     const canvas = createCanvasMock();
     const event = { pointerId: 3 } as PointerEvent;
     const pathOffsetDragRef = createPathOffsetDragRef();
+    const setClassName = vi.fn();
 
     // before
-    armPathOffsetDrag(canvas, event, pathOffsetDragRef, 'text-1');
+    armPathOffsetDrag(canvas, event, pathOffsetDragRef, 'text-1', setClassName);
 
     // result
     expect(pathOffsetDragRef.current).toEqual({ nodeId: 'text-1' });
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(3);
+    expect(setClassName).toHaveBeenCalledWith('pressing');
   });
 });

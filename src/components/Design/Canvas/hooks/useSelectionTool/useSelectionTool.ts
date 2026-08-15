@@ -1,5 +1,8 @@
 import { RefObject, useEffect, useRef } from 'react';
 
+// others
+import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
+
 // store
 import { selectActiveTool, selectEditingTextBox } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
@@ -20,6 +23,7 @@ export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>,
   const editingTextBox = useAppSelector(selectEditingTextBox);
   const isCanvasCaretEditingActive = shouldUseCanvasCaretEditing(editingTextBox);
   const dispatch = useAppDispatch();
+  const { setClassName } = useClassNames();
   const dragStateRef = useRef<TDragState | null>(null);
   const endpointDragRef = useRef<TEndpointDragState | null>(null);
   const pathOffsetDragRef = useRef<TPathOffsetDragState | null>(null);
@@ -42,6 +46,7 @@ export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>,
           resizeDragRef,
           rotateDragRef,
           marqueeStartRef,
+          setClassName,
         );
 
       const onPointerMove = (event: PointerEvent): void =>
@@ -70,6 +75,7 @@ export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>,
           rotateDragRef,
           marqueeStartRef,
           marqueeRef,
+          setClassName,
         );
 
       canvas.addEventListener('pointerdown', onPointerDown);
@@ -82,5 +88,5 @@ export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>,
         canvas.removeEventListener('pointerup', onPointerUp);
       };
     }
-  }, [activeTool, canvasRef, dispatch, isCanvasCaretEditingActive, marqueeRef]);
+  }, [activeTool, canvasRef, dispatch, isCanvasCaretEditingActive, marqueeRef, setClassName]);
 };

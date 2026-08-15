@@ -122,6 +122,7 @@ describe('handlePointerDown', () => {
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef();
     const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
 
     // before
     handlePointerDown(
@@ -134,6 +135,7 @@ describe('handlePointerDown', () => {
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
+      setClassName,
     );
 
     // result
@@ -147,6 +149,7 @@ describe('handlePointerDown', () => {
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef();
     const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
 
     // before
     handlePointerDown(
@@ -159,6 +162,7 @@ describe('handlePointerDown', () => {
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
+      setClassName,
     );
 
     // result
@@ -172,6 +176,7 @@ describe('handlePointerDown', () => {
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef();
     const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
 
     // before
     handlePointerDown(
@@ -184,6 +189,7 @@ describe('handlePointerDown', () => {
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
+      setClassName,
     );
 
     // result
@@ -201,6 +207,7 @@ describe('handlePointerDown', () => {
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef();
     const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
 
     // before
     handlePointerDown(
@@ -213,6 +220,7 @@ describe('handlePointerDown', () => {
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
+      setClassName,
     );
 
     // result
@@ -228,6 +236,7 @@ describe('handlePointerDown', () => {
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef();
     const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
 
     // before
     handlePointerDown(
@@ -240,6 +249,7 @@ describe('handlePointerDown', () => {
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
+      setClassName,
     );
 
     // result
@@ -258,6 +268,7 @@ describe('handlePointerDown', () => {
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef();
     const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
 
     // before — click far from the actual "Hi" glyphs but still inside the 500x500 box
     handlePointerDown(
@@ -270,6 +281,7 @@ describe('handlePointerDown', () => {
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
+      setClassName,
     );
 
     // result
@@ -284,6 +296,7 @@ describe('handlePointerDown', () => {
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef();
     const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
 
     // before
     handlePointerDown(
@@ -296,6 +309,7 @@ describe('handlePointerDown', () => {
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
+      setClassName,
     );
 
     // result — falls through to marquee instead of grabbing the text
@@ -314,6 +328,7 @@ describe('handlePointerDown', () => {
     const dragStateRef = createDragStateRef();
     const endpointDragRef = createEndpointDragRef();
     const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
 
     // before
     handlePointerDown(
@@ -326,6 +341,7 @@ describe('handlePointerDown', () => {
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
+      setClassName,
     );
 
     // result
@@ -343,6 +359,7 @@ describe('handlePointerDown', () => {
     const dragStateRef = createDragStateRef();
     const endpointDragRef = createEndpointDragRef();
     const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
 
     // before
     handlePointerDown(
@@ -355,6 +372,7 @@ describe('handlePointerDown', () => {
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
+      setClassName,
     );
 
     // result
@@ -372,6 +390,7 @@ describe('handlePointerDown', () => {
     const dragStateRef = createDragStateRef();
     const resizeDragRef = createResizeDragRef();
     const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
 
     // before — exactly on the "nw" corner handle
     handlePointerDown(
@@ -384,6 +403,7 @@ describe('handlePointerDown', () => {
       resizeDragRef,
       createRotateDragRef(),
       marqueeStartRef,
+      setClassName,
     );
 
     // result
@@ -402,6 +422,7 @@ describe('handlePointerDown', () => {
     const dragStateRef = createDragStateRef();
     const rotateDragRef = createRotateDragRef();
     const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
 
     // before — 10 world units above the corner, inside the rotate ring but outside the resize radius
     handlePointerDown(
@@ -414,6 +435,7 @@ describe('handlePointerDown', () => {
       createResizeDragRef(),
       rotateDragRef,
       marqueeStartRef,
+      setClassName,
     );
 
     // result
@@ -432,6 +454,7 @@ describe('handlePointerDown', () => {
     const dragStateRef = createDragStateRef();
     const pathOffsetDragRef = createPathOffsetDragRef();
     const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
 
     // before
     handlePointerDown(
@@ -444,11 +467,13 @@ describe('handlePointerDown', () => {
       createResizeDragRef(),
       createRotateDragRef(),
       marqueeStartRef,
+      setClassName,
     );
 
     // result
     expect(pathOffsetDragRef.current).toEqual({ nodeId: idA });
     expect(dragStateRef.current).toBeNull();
     expect(canvas.setPointerCapture).toHaveBeenCalled();
+    expect(setClassName).toHaveBeenCalledWith('pressing');
   });
 });

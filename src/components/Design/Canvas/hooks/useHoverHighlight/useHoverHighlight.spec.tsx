@@ -1,8 +1,12 @@
 import { Provider } from 'react-redux';
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { RefObject } from 'react';
 
+// components
+import ClassNamesProvider from 'components/Design/core/ClassNamesProvider/ClassNamesProvider';
+
 // hooks
+import { useClassNames } from 'components/Design/core/ClassNamesProvider/hooks/useClassNames';
 import { useHoverHighlight } from './useHoverHighlight';
 
 // store
@@ -79,14 +83,27 @@ const addPathTextNode = (x: number, y: number, size = 200): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
-const renderHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>): RefObject<string | null> => {
+const renderHoverHighlight = (
+  canvasRef: RefObject<HTMLCanvasElement | null>,
+): { classNameRef: RefObject<string | null>; hoverRef: RefObject<string | null> } => {
   const hoverRef: RefObject<string | null> = { current: null };
+  const classNameRef: RefObject<string | null> = { current: null };
 
-  renderHook(() => useHoverHighlight(canvasRef, hoverRef), {
-    wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-  });
+  renderHook(
+    () => {
+      useHoverHighlight(canvasRef, hoverRef);
+      classNameRef.current = useClassNames().className;
+    },
+    {
+      wrapper: ({ children }) => (
+        <Provider store={store}>
+          <ClassNamesProvider>{children}</ClassNamesProvider>
+        </Provider>
+      ),
+    },
+  );
 
-  return hoverRef;
+  return { classNameRef, hoverRef };
 };
 
 describe('useHoverHighlight behaviors', () => {
@@ -104,7 +121,7 @@ describe('useHoverHighlight behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    const hoverRef = renderHoverHighlight(canvasRef);
+    const { hoverRef } = renderHoverHighlight(canvasRef);
 
     // action
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 5, 5));
@@ -120,7 +137,7 @@ describe('useHoverHighlight behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    const hoverRef = renderHoverHighlight(canvasRef);
+    const { hoverRef } = renderHoverHighlight(canvasRef);
 
     // action
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 110, 110));
@@ -135,7 +152,7 @@ describe('useHoverHighlight behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    const hoverRef = renderHoverHighlight(canvasRef);
+    const { hoverRef } = renderHoverHighlight(canvasRef);
 
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 205, 205));
     expect(hoverRef.current).toBe(idA);
@@ -153,7 +170,7 @@ describe('useHoverHighlight behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    const hoverRef = renderHoverHighlight(canvasRef);
+    const { hoverRef } = renderHoverHighlight(canvasRef);
 
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 305, 305));
     expect(hoverRef.current).toBe(idA);
@@ -172,7 +189,7 @@ describe('useHoverHighlight behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    const hoverRef = renderHoverHighlight(canvasRef);
+    const { hoverRef } = renderHoverHighlight(canvasRef);
 
     // action
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 405, 405, { buttons: 1 }));
@@ -190,13 +207,15 @@ describe('useHoverHighlight behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    const hoverRef = renderHoverHighlight(canvasRef);
+    const { classNameRef, hoverRef } = renderHoverHighlight(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 500, 500));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 500, 500));
+    });
 
     // result
-    expect(canvasRef.current?.className).toContain('positioning');
+    expect(classNameRef.current).toBe('positioning');
     expect(hoverRef.current).toBe(idA);
   });
 
@@ -209,16 +228,20 @@ describe('useHoverHighlight behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    renderHoverHighlight(canvasRef);
+    const { classNameRef } = renderHoverHighlight(canvasRef);
 
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 700, 500));
-    expect(canvasRef.current?.className).toContain('positioning');
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 700, 500));
+    });
+    expect(classNameRef.current).toBe('positioning');
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 900, 900));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 900, 900));
+    });
 
     // result
-    expect(canvasRef.current?.className).not.toContain('positioning');
+    expect(classNameRef.current).not.toBe('positioning');
   });
 
   it('should remove the positioning cursor class when the pointer leaves the canvas', () => {
@@ -230,16 +253,20 @@ describe('useHoverHighlight behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    renderHoverHighlight(canvasRef);
+    const { classNameRef } = renderHoverHighlight(canvasRef);
 
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 1000, 500));
-    expect(canvasRef.current?.className).toContain('positioning');
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 1000, 500));
+    });
+    expect(classNameRef.current).toBe('positioning');
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerleave', 1000, 500));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerleave', 1000, 500));
+    });
 
     // result
-    expect(canvasRef.current?.className).not.toContain('positioning');
+    expect(classNameRef.current).not.toBe('positioning');
   });
 
   it('should not apply the positioning cursor class over a line endpoint that is not selected', () => {
@@ -249,13 +276,15 @@ describe('useHoverHighlight behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    renderHoverHighlight(canvasRef);
+    const { classNameRef } = renderHoverHighlight(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 1200, 500));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 1200, 500));
+    });
 
     // result
-    expect(canvasRef.current?.className).not.toContain('positioning');
+    expect(classNameRef.current).not.toBe('positioning');
   });
 
   it("should clear the hovered node id and the positioning class when hovering a selected node's resize handle", () => {
@@ -267,14 +296,16 @@ describe('useHoverHighlight behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    const hoverRef = renderHoverHighlight(canvasRef);
+    const { classNameRef, hoverRef } = renderHoverHighlight(canvasRef);
 
     // action — exactly on the "nw" corner handle of the selected node
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2000, 2000));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2000, 2000));
+    });
 
     // result
     expect(hoverRef.current).toBeNull();
-    expect(canvasRef.current?.className).not.toContain('positioning');
+    expect(classNameRef.current).not.toBe('positioning');
   });
 
   it('should use the scale cursor (not the resize cursor) over a resize handle when the Scale tool is active', () => {
@@ -287,14 +318,16 @@ describe('useHoverHighlight behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    const hoverRef = renderHoverHighlight(canvasRef);
+    const { classNameRef, hoverRef } = renderHoverHighlight(canvasRef);
 
     // action — exactly on the "nw" corner handle of the selected node
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2100, 2100));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2100, 2100));
+    });
 
     // result — same hover/positioning behavior as the default tool, just via the scale cursor branch
     expect(hoverRef.current).toBeNull();
-    expect(canvasRef.current?.className).not.toContain('positioning');
+    expect(classNameRef.current).not.toBe('positioning');
   });
 
   it("should clear the hovered node id and the positioning class in the rotate ring just outside a selected node's resize handle", () => {
@@ -306,17 +339,19 @@ describe('useHoverHighlight behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    const hoverRef = renderHoverHighlight(canvasRef);
+    const { classNameRef, hoverRef } = renderHoverHighlight(canvasRef);
 
     // action — 10 world units above the corner, inside the rotate ring but outside the resize radius
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 3000, 2990));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 3000, 2990));
+    });
 
     // result
     expect(hoverRef.current).toBeNull();
-    expect(canvasRef.current?.className).not.toContain('positioning');
+    expect(classNameRef.current).not.toBe('positioning');
   });
 
-  it("should apply the positioning cursor class when hovering a selected path-text node's start-offset handle", () => {
+  it("should apply the hand cursor class when hovering a selected path-text node's start-offset handle", () => {
     // mock — a 200x200 path-text box at (4000, 4000); the offset-0 handle sits at its rightmost edge (4200, 4100)
     const idA = addPathTextNode(4000, 4000, 200);
 
@@ -325,13 +360,15 @@ describe('useHoverHighlight behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    const hoverRef = renderHoverHighlight(canvasRef);
+    const { classNameRef, hoverRef } = renderHoverHighlight(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 4200, 4100));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 4200, 4100));
+    });
 
     // result
-    expect(canvasRef.current?.className).toContain('positioning');
+    expect(classNameRef.current).toBe('hand');
     expect(hoverRef.current).toBe(idA);
   });
 
@@ -351,14 +388,16 @@ describe('useHoverHighlight behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    renderHoverHighlight(canvasRef);
+    const { classNameRef } = renderHoverHighlight(canvasRef);
 
     // action — exactly on the "nw" corner handle of the node being edited
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2200, 2200));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2200, 2200));
+    });
 
     // result — no resize cursor, falls through to the plain node-hover branch instead
     expect(canvasRef.current?.style.cursor).toBe('');
-    expect(canvasRef.current?.className).not.toContain('positioning');
+    expect(classNameRef.current).not.toBe('positioning');
   });
 
   it("should not show the rotate cursor in a selected node's rotate ring while it is being edited", () => {
@@ -386,7 +425,7 @@ describe('useHoverHighlight behaviors', () => {
     expect(canvasRef.current?.style.cursor).toBe('');
   });
 
-  it("should still apply the positioning cursor over a path-text node's start-offset handle while it is being edited", () => {
+  it("should still apply the hand cursor over a path-text node's start-offset handle while it is being edited", () => {
     // mock — a 200x200 path-text box at (4300, 4300); the offset-0 handle sits at its rightmost
     const idA = addPathTextNode(4300, 4300, 200);
 
@@ -412,13 +451,15 @@ describe('useHoverHighlight behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    const hoverRef = renderHoverHighlight(canvasRef);
+    const { classNameRef, hoverRef } = renderHoverHighlight(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 4500, 4400));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 4500, 4400));
+    });
 
     // result
-    expect(canvasRef.current?.className).toContain('positioning');
+    expect(classNameRef.current).toBe('hand');
     expect(hoverRef.current).toBe(idA);
   });
 });

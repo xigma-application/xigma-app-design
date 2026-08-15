@@ -26,10 +26,11 @@ export const handlePointerUp = (
   rotateDragRef: RefObject<TRotateDragState | null>,
   marqueeStartRef: RefObject<TPoint | null>,
   marqueeRef: RefObject<TDraftRect | null>,
+  setClassName: (className: string | null) => void,
 ): void => {
   disarmDrag(canvas, event, dispatch, dragStateRef);
   disarmEndpointDrag(canvas, event, endpointDragRef);
-  disarmPathOffsetDrag(canvas, event, pathOffsetDragRef);
+  disarmPathOffsetDrag(canvas, event, pathOffsetDragRef, setClassName);
   disarmResizeDrag(canvas, event, resizeDragRef);
   disarmRotateDrag(canvas, event, rotateDragRef);
   disarmMarqueeDrag(canvas, event, marqueeStartRef, marqueeRef);

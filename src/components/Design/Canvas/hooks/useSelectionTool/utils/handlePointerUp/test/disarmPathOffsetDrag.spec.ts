@@ -24,24 +24,28 @@ describe('disarmPathOffsetDrag', () => {
   it('should do nothing when no path-offset drag is in progress', () => {
     // mock
     const canvas = createCanvas();
+    const setClassName = vi.fn();
 
     // before
-    disarmPathOffsetDrag(canvas, pointerEvent(), createPathOffsetDragRef());
+    disarmPathOffsetDrag(canvas, pointerEvent(), createPathOffsetDragRef(), setClassName);
 
     // result
     expect(canvas.releasePointerCapture).not.toHaveBeenCalled();
+    expect(setClassName).not.toHaveBeenCalled();
   });
 
   it('should clear the path-offset-drag ref and release pointer capture', () => {
     // mock
     const canvas = createCanvas();
     const pathOffsetDragRef = createPathOffsetDragRef({ nodeId: 'text-1' });
+    const setClassName = vi.fn();
 
     // before
-    disarmPathOffsetDrag(canvas, pointerEvent(2), pathOffsetDragRef);
+    disarmPathOffsetDrag(canvas, pointerEvent(2), pathOffsetDragRef, setClassName);
 
     // result
     expect(pathOffsetDragRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
+    expect(setClassName).toHaveBeenCalledWith('hand');
   });
 });

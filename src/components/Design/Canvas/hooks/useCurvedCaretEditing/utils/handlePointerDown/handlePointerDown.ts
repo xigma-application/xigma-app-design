@@ -22,6 +22,7 @@ export const handlePointerDown = (
   dispatch: AppDispatch,
   anchorIndexRef: RefObject<number | null>,
   isDraggingOffsetRef: RefObject<boolean>,
+  setClassName: (className: string | null) => void,
 ): void => {
   const overlay = getEditingOverlay();
   const isOnEditingSurface = event.target === canvas || Boolean(overlay && overlay.contains(event.target as Node));
@@ -37,6 +38,7 @@ export const handlePointerDown = (
     event.preventDefault();
     isDraggingOffsetRef.current = true;
     anchorIndexRef.current = null;
+    setClassName('pressing');
     return;
   }
 

@@ -1,3 +1,4 @@
+import cx from 'classnames';
 import { FC, useRef } from 'react';
 
 // components
@@ -8,6 +9,7 @@ import { useCanvasDragPan } from './hooks/useCanvasDragPan/useCanvasDragPan';
 import { useCanvasPanZoom } from './hooks/useCanvasPanZoom/useCanvasPanZoom';
 import { useCanvasRenderLoop } from './hooks/useCanvasRenderLoop/useCanvasRenderLoop';
 import { useCanvasResize } from './hooks/useCanvasResize/useCanvasResize';
+import { useClassNames } from '../core/ClassNamesProvider/hooks/useClassNames';
 import { useCurvedCaretEditing } from './hooks/useCurvedCaretEditing/useCurvedCaretEditing';
 import { useDrawingCursor } from './hooks/useDrawingCursor/useDrawingCursor';
 import { useDrawLineTool } from './hooks/useDrawLineTool/useDrawLineTool';
@@ -43,6 +45,7 @@ import { TDraftEntity } from 'types/design/types';
 import { TDraftRect } from 'types/canvas';
 
 const Canvas: FC = () => {
+  const { className } = useClassNames();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const draftRef = useRef<TDraftEntity | null>(null);
   const marqueeRef = useRef<TDraftRect | null>(null);
@@ -73,7 +76,12 @@ const Canvas: FC = () => {
   return (
     <div className={styles.Canvas}>
       <div className={styles.Canvas__texture} />
-      <canvas className={styles['Canvas__canvas-element']} ref={canvasRef} />
+      <canvas
+        className={cx(styles['Canvas__canvas-element'], {
+          [styles[`Canvas__canvas-element--${className}`]]: Boolean(className),
+        })}
+        ref={canvasRef}
+      />
       <TextEditOverlay />
     </div>
   );

@@ -2,7 +2,11 @@ import { act, renderHook } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { RefObject } from 'react';
 
+// components
+import ClassNamesProvider from 'components/Design/core/ClassNamesProvider/ClassNamesProvider';
+
 // hooks
+import { useClassNames } from 'components/Design/core/ClassNamesProvider/hooks/useClassNames';
 import { useHandTool } from './useHandTool';
 
 // store
@@ -30,16 +34,28 @@ const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
 const pointerEvent = (type: string, x: number, y: number, button = 0): PointerEvent =>
   new PointerEvent(type, { button, clientX: x, clientY: y, pointerId: 1 });
 
-const renderHandTool = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
-  renderHook(() => useHandTool(canvasRef), {
-    wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-  });
+const renderHandTool = (canvasRef: RefObject<HTMLCanvasElement | null>): RefObject<string | null> => {
+  const classNameRef: RefObject<string | null> = { current: null };
+
+  renderHook(
+    () => {
+      useHandTool(canvasRef);
+      classNameRef.current = useClassNames().className;
+    },
+    {
+      wrapper: ({ children }) => (
+        <Provider store={store}>
+          <ClassNamesProvider>{children}</ClassNamesProvider>
+        </Provider>
+      ),
+    },
+  );
+
+  return classNameRef;
 };
 
 describe('useHandTool behaviors', () => {
   beforeEach(() => {
-    // reset the singleton store's viewport/activeTool, since handlePointerMove reads the viewport
-    // directly and state otherwise leaks between tests in this file
     store.dispatch(setViewport(DEFAULT_VIEWPORT));
     store.dispatch(setActiveTool(ToolName.default));
   });
@@ -83,15 +99,17 @@ describe('useHandTool behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    renderHandTool(canvasRef);
+    const classNameRef = renderHandTool(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 40, 25));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 40, 25));
+    });
 
     // result
     expect(store.getState().design.viewport).toEqual(DEFAULT_VIEWPORT);
-    expect(canvasRef.current?.className).not.toContain('hand');
+    expect(classNameRef.current).not.toBe('hand');
   });
 
   it('should show the idle hand cursor while active, and the pressing cursor while dragging', () => {
@@ -101,25 +119,26 @@ describe('useHandTool behaviors', () => {
     store.dispatch(setActiveTool(ToolName.hand));
 
     // before
-    renderHandTool(canvasRef);
+    const classNameRef = renderHandTool(canvasRef);
 
     // result
-    expect(canvasRef.current?.className).toContain('hand');
-    expect(canvasRef.current?.className).not.toContain('pressing');
+    expect(classNameRef.current).toBe('hand');
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+    });
 
     // result
-    expect(canvasRef.current?.className).toContain('pressing');
-    expect(canvasRef.current?.className).not.toContain('hand');
+    expect(classNameRef.current).toBe('pressing');
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 40, 25));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 40, 25));
+    });
 
     // result
-    expect(canvasRef.current?.className).toContain('hand');
-    expect(canvasRef.current?.className).not.toContain('pressing');
+    expect(classNameRef.current).toBe('hand');
   });
 
   it('should do nothing when the canvas has no element yet', () => {
@@ -173,16 +192,18 @@ describe('useHandTool behaviors', () => {
     store.dispatch(setActiveTool(ToolName.hand));
 
     // before
-    renderHandTool(canvasRef);
+    const classNameRef = renderHandTool(canvasRef);
 
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+    });
 
     // action
     act(() => store.dispatch(setActiveTool(ToolName.default)));
 
     // result
-    expect(canvasRef.current?.className).not.toContain('hand');
-    expect(canvasRef.current?.className).not.toContain('pressing');
+    expect(classNameRef.current).not.toBe('hand');
+    expect(classNameRef.current).not.toBe('pressing');
 
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 999, 999));
     expect(store.getState().design.viewport).toEqual(DEFAULT_VIEWPORT);

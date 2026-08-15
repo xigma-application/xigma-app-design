@@ -39,6 +39,7 @@ export const handlePointerDown = (
   resizeDragRef: RefObject<TResizeDragState | null>,
   rotateDragRef: RefObject<TRotateDragState | null>,
   marqueeStartRef: RefObject<TPoint | null>,
+  setClassName: (className: string | null) => void,
 ): void => {
   if (event.button === MouseButton.primary) {
     const state = store.getState();
@@ -54,7 +55,7 @@ export const handlePointerDown = (
 
     switch (true) {
       case Boolean(pathOffsetHandleHit):
-        armPathOffsetDrag(canvas, event, pathOffsetDragRef, pathOffsetHandleHit!.nodeId);
+        armPathOffsetDrag(canvas, event, pathOffsetDragRef, pathOffsetHandleHit!.nodeId, setClassName);
         break;
       case Boolean(resizeHandleHit):
         armResizeDrag(canvas, event, resizeDragRef, selectedNodes, resizeHandleHit!.handle, resizeHandleHit!.bounds);

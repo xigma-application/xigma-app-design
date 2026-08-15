@@ -2,6 +2,7 @@ import { FC } from 'react';
 
 // components
 import Canvas from 'components/Design/Canvas/Canvas';
+import ClassNamesProvider from 'components/Design/core/ClassNamesProvider/ClassNamesProvider';
 import Toolbar from 'components/Design/Toolbar/Toolbar';
 
 // hooks
@@ -15,7 +16,9 @@ const DesignPage: FC = () => {
 
   return (
     <main className={styles.DesignPage}>
-      <Canvas />
+      <ClassNamesProvider>
+        <Canvas />
+      </ClassNamesProvider>
       <Toolbar />
     </main>
   );

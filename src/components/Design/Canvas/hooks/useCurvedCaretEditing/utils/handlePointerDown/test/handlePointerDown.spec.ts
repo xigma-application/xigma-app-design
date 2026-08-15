@@ -79,12 +79,15 @@ describe('handlePointerDown', () => {
 
     anchorIndexRef.current = 5;
 
+    const setClassName = vi.fn();
+
     // before
-    handlePointerDown(canvas, pointerEvent(RIGHT.x, RIGHT.y, canvas), store.dispatch, anchorIndexRef, isDraggingOffsetRef);
+    handlePointerDown(canvas, pointerEvent(RIGHT.x, RIGHT.y, canvas), store.dispatch, anchorIndexRef, isDraggingOffsetRef, setClassName);
 
     // result
     expect(isDraggingOffsetRef.current).toBe(true);
     expect(anchorIndexRef.current).toBeNull();
+    expect(setClassName).toHaveBeenCalledWith('pressing');
   });
 
   it('should place the caret and arm the anchor when the click lands on the path within tolerance, away from the handle', () => {
@@ -95,7 +98,14 @@ describe('handlePointerDown', () => {
     const { anchorIndexRef, isDraggingOffsetRef } = createRefs();
 
     // before
-    handlePointerDown(canvas, pointerEvent(NEAR_RIGHT.x, NEAR_RIGHT.y, canvas), store.dispatch, anchorIndexRef, isDraggingOffsetRef);
+    handlePointerDown(
+      canvas,
+      pointerEvent(NEAR_RIGHT.x, NEAR_RIGHT.y, canvas),
+      store.dispatch,
+      anchorIndexRef,
+      isDraggingOffsetRef,
+      vi.fn(),
+    );
 
     // result
     expect(isDraggingOffsetRef.current).toBe(false);
@@ -115,7 +125,7 @@ describe('handlePointerDown', () => {
     anchorIndexRef.current = 5;
 
     // before
-    handlePointerDown(canvas, pointerEvent(FAR.x, FAR.y, canvas), store.dispatch, anchorIndexRef, isDraggingOffsetRef);
+    handlePointerDown(canvas, pointerEvent(FAR.x, FAR.y, canvas), store.dispatch, anchorIndexRef, isDraggingOffsetRef, vi.fn());
 
     // result
     expect(isDraggingOffsetRef.current).toBe(false);
@@ -136,7 +146,7 @@ describe('handlePointerDown', () => {
     anchorIndexRef.current = 5;
 
     // before
-    handlePointerDown(canvas, pointerEvent(RIGHT.x, RIGHT.y, outsideElement), store.dispatch, anchorIndexRef, isDraggingOffsetRef);
+    handlePointerDown(canvas, pointerEvent(RIGHT.x, RIGHT.y, outsideElement), store.dispatch, anchorIndexRef, isDraggingOffsetRef, vi.fn());
 
     // result — the miss branch still runs (clearing the stale anchor), just via the tolerance path
     expect(isDraggingOffsetRef.current).toBe(false);

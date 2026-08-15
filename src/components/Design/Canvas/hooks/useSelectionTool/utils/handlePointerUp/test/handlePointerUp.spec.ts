@@ -58,6 +58,7 @@ describe('handlePointerUp', () => {
       createRotateDragRef(),
       createMarqueeStartRef(),
       createMarqueeRef(),
+      vi.fn(),
     );
 
     // result
@@ -86,6 +87,7 @@ describe('handlePointerUp', () => {
       createRotateDragRef(),
       createMarqueeStartRef(),
       createMarqueeRef(),
+      vi.fn(),
     );
 
     // result
@@ -110,6 +112,7 @@ describe('handlePointerUp', () => {
       createRotateDragRef(),
       createMarqueeStartRef(),
       createMarqueeRef(),
+      vi.fn(),
     );
 
     // result
@@ -134,6 +137,7 @@ describe('handlePointerUp', () => {
       createRotateDragRef(),
       marqueeStartRef,
       marqueeRef,
+      vi.fn(),
     );
 
     // result

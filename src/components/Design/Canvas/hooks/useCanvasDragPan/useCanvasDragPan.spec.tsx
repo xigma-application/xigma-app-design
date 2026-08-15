@@ -1,9 +1,13 @@
 import { Provider } from 'react-redux';
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { RefObject } from 'react';
+
+// components
+import ClassNamesProvider from 'components/Design/core/ClassNamesProvider/ClassNamesProvider';
 
 // hooks
 import { useCanvasDragPan } from './useCanvasDragPan';
+import { useClassNames } from 'components/Design/core/ClassNamesProvider/hooks/useClassNames';
 
 // store
 import { setViewport } from 'store/design/slice';
@@ -29,10 +33,24 @@ const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
 const pointerEvent = (type: string, x: number, y: number, button = 1): PointerEvent =>
   new PointerEvent(type, { button, clientX: x, clientY: y, pointerId: 1 });
 
-const renderDragPan = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
-  renderHook(() => useCanvasDragPan(canvasRef), {
-    wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-  });
+const renderDragPan = (canvasRef: RefObject<HTMLCanvasElement | null>): RefObject<string | null> => {
+  const classNameRef: RefObject<string | null> = { current: null };
+
+  renderHook(
+    () => {
+      useCanvasDragPan(canvasRef);
+      classNameRef.current = useClassNames().className;
+    },
+    {
+      wrapper: ({ children }) => (
+        <Provider store={store}>
+          <ClassNamesProvider>{children}</ClassNamesProvider>
+        </Provider>
+      ),
+    },
+  );
+
+  return classNameRef;
 };
 
 describe('useCanvasDragPan behaviors', () => {
@@ -77,19 +95,23 @@ describe('useCanvasDragPan behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    renderDragPan(canvasRef);
+    const classNameRef = renderDragPan(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+    });
 
     // result
-    expect(canvasRef.current?.className).toContain('pressing');
+    expect(classNameRef.current).toBe('pressing');
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 40, 25));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 40, 25));
+    });
 
     // result
-    expect(canvasRef.current?.className).not.toContain('pressing');
+    expect(classNameRef.current).toBeNull();
   });
 
   it('should do nothing when the canvas has no element yet', () => {

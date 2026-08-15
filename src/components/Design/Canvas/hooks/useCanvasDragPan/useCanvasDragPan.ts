@@ -1,12 +1,12 @@
 import { RefObject, useEffect, useRef } from 'react';
 
+// others
+import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
+
 // store
 import { setViewport } from 'store/design/slice';
 import { selectViewport } from 'store/design/selectors';
 import { store, useAppDispatch } from 'store';
-
-// styles
-import styles from '../../canvas.module.scss';
 
 // types
 import { MouseButton } from 'types/enums';
@@ -18,6 +18,7 @@ import { getPointerPosition } from '../../utils/getPointerPosition';
 
 export const useCanvasDragPan = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
   const dispatch = useAppDispatch();
+  const { setClassName } = useClassNames();
   const lastPointRef = useRef<TPoint | null>(null);
 
   const handlePointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
@@ -25,7 +26,7 @@ export const useCanvasDragPan = (canvasRef: RefObject<HTMLCanvasElement | null>)
       event.preventDefault();
       lastPointRef.current = getPointerPosition(canvas, event);
       canvas.setPointerCapture(event.pointerId);
-      canvas.classList.add(styles['Canvas__canvas-element--pressing']);
+      setClassName('pressing');
     }
   };
 
@@ -43,7 +44,7 @@ export const useCanvasDragPan = (canvasRef: RefObject<HTMLCanvasElement | null>)
     if (lastPointRef.current) {
       lastPointRef.current = null;
       canvas.releasePointerCapture(event.pointerId);
-      canvas.classList.remove(styles['Canvas__canvas-element--pressing']);
+      setClassName(null);
     }
   };
 
