@@ -1,6 +1,3 @@
-// others
-import { FONT_SIZE_GUIDE_DASH_GAP_PX, FONT_SIZE_GUIDE_DASH_LENGTH_PX } from 'constant/canvas';
-
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
@@ -20,6 +17,8 @@ export const drawDashedRectOutline = (
   canvasHeight: number,
   viewport: TViewport,
   rotation: number,
+  dashLength: number,
+  dashGap: number,
 ): void => {
   const positionLocation = gl.getAttribLocation(program, 'a_position');
   const colorLocation = gl.getUniformLocation(program, 'u_color');
@@ -29,10 +28,10 @@ export const drawDashedRectOutline = (
 
   const center: TPoint = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
   const perimeter = 2 * (rect.width + rect.height);
-  const patternLength = (FONT_SIZE_GUIDE_DASH_LENGTH_PX + FONT_SIZE_GUIDE_DASH_GAP_PX) / viewport.zoom;
+  const patternLength = (dashLength + dashGap) / viewport.zoom;
   const dashCount = Math.max(1, Math.round(perimeter / patternLength));
   const segmentLength = perimeter / dashCount;
-  const dashRatio = FONT_SIZE_GUIDE_DASH_LENGTH_PX / (FONT_SIZE_GUIDE_DASH_LENGTH_PX + FONT_SIZE_GUIDE_DASH_GAP_PX);
+  const dashRatio = dashLength / (dashLength + dashGap);
 
   const dashVertices = Array.from({ length: dashCount }, (_, index) => {
     const start = index * segmentLength;

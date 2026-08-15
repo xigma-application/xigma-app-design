@@ -39,7 +39,19 @@ describe('drawDashedRectOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawDashedRectOutline(gl, program, buffer, RECT, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
+    drawDashedRectOutline(
+      gl,
+      program,
+      buffer,
+      RECT,
+      '#0d99ff',
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      0,
+      FONT_SIZE_GUIDE_DASH_LENGTH_PX,
+      FONT_SIZE_GUIDE_DASH_GAP_PX,
+    );
 
     // result
     const expectedDashes = expectedDashCount(400, IDENTITY_VIEWPORT.zoom);
@@ -55,7 +67,19 @@ describe('drawDashedRectOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawDashedRectOutline(gl, program, buffer, RECT, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
+    drawDashedRectOutline(
+      gl,
+      program,
+      buffer,
+      RECT,
+      '#0d99ff',
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      0,
+      FONT_SIZE_GUIDE_DASH_LENGTH_PX,
+      FONT_SIZE_GUIDE_DASH_GAP_PX,
+    );
 
     // result
     expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), hexToRgbaFloat('#0d99ff'));
@@ -68,7 +92,19 @@ describe('drawDashedRectOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawDashedRectOutline(gl, program, buffer, RECT, '#0d99ff', 100, 100, { x: 0, y: 0, zoom: 2 }, 0);
+    drawDashedRectOutline(
+      gl,
+      program,
+      buffer,
+      RECT,
+      '#0d99ff',
+      100,
+      100,
+      { x: 0, y: 0, zoom: 2 },
+      0,
+      FONT_SIZE_GUIDE_DASH_LENGTH_PX,
+      FONT_SIZE_GUIDE_DASH_GAP_PX,
+    );
 
     // result
     const expectedDashes = expectedDashCount(400, 2);
@@ -84,17 +120,27 @@ describe('drawDashedRectOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawDashedRectOutline(gl, program, buffer, { height: 10, width: 10, x: 0, y: 0 }, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
+    drawDashedRectOutline(
+      gl,
+      program,
+      buffer,
+      { height: 10, width: 10, x: 0, y: 0 },
+      '#0d99ff',
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      0,
+      FONT_SIZE_GUIDE_DASH_LENGTH_PX,
+      FONT_SIZE_GUIDE_DASH_GAP_PX,
+    );
 
     // result
     const [firstCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
     const vertices: Float32Array = firstCall[1];
 
-    // the first dash starts at the top-left corner
     expect(vertices[0]).toBeCloseTo(0);
     expect(vertices[1]).toBeCloseTo(0);
 
-    // the dash's own end point (index 2/3) must stop short of the next dash's start (index 4/5)
     const dashEnd = { x: vertices[2], y: vertices[3] };
     const nextDashStart = { x: vertices[4], y: vertices[5] };
 
@@ -108,7 +154,19 @@ describe('drawDashedRectOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawDashedRectOutline(gl, program, buffer, { height: 10, width: 10, x: 0, y: 0 }, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 90);
+    drawDashedRectOutline(
+      gl,
+      program,
+      buffer,
+      { height: 10, width: 10, x: 0, y: 0 },
+      '#0d99ff',
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      90,
+      FONT_SIZE_GUIDE_DASH_LENGTH_PX,
+      FONT_SIZE_GUIDE_DASH_GAP_PX,
+    );
 
     // result — the top-left corner (0,0) rotates 90 degrees around the center (5,5) to (10,0)
     const [firstCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;

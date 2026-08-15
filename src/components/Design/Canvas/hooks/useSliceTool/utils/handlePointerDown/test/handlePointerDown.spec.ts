@@ -151,6 +151,27 @@ describe('handlePointerDown', () => {
     expect(refs.moveDragRef.current).toEqual({ origin: refs.sliceRef.current, pointerStart: { x: 50, y: 50 } });
   });
 
+  it('should arm a move drag for a point inside the rotated bounding box but outside the rotated shape itself', () => {
+    // mock — a 100x100 box rotated 45deg around its own center (50, 50); (-15, -15) sits inside
+    const canvas = createCanvas();
+    const refs = createRefs({ height: 100, rotation: 45, width: 100, x: 0, y: 0 });
+
+    // before
+    handlePointerDown(
+      canvas,
+      pointerEvent(-15, -15),
+      store.dispatch,
+      refs.sliceRef,
+      refs.drawDragRef,
+      refs.resizeDragRef,
+      refs.rotateDragRef,
+      refs.moveDragRef,
+    );
+
+    // result
+    expect(refs.moveDragRef.current).toEqual({ origin: refs.sliceRef.current, pointerStart: { x: -15, y: -15 } });
+  });
+
   it('should discard the slice and revert to the default tool when clicking outside it', () => {
     // mock
     const canvas = createCanvas();

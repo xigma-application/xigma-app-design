@@ -16,6 +16,7 @@ import { armResizeDrag } from './armResizeDrag';
 import { armRotateDrag } from './armRotateDrag';
 import { discardSlice } from './discardSlice';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getRotatedBoundingBox } from 'utils/canvas/getRotatedBoundingBox';
 import { getSliceResizeHandleAtPoint } from '../getSliceResizeHandleAtPoint';
 import { getSliceRotateHandleAtPoint } from '../getSliceRotateHandleAtPoint';
 import { isPointInRect } from '../../../../utils/isPointInRect';
@@ -49,7 +50,7 @@ export const handlePointerDown = (
       case rotateHandleHit:
         armRotateDrag(canvas, event, rotateDragRef, slice!, point);
         break;
-      case isPointInRect(point, slice!):
+      case isPointInRect(point, getRotatedBoundingBox(slice!, slice!.rotation)):
         armMoveDrag(canvas, event, moveDragRef, slice!, point);
         break;
       default:

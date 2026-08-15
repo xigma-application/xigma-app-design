@@ -3,6 +3,7 @@ import { drawSliceDraft } from '../drawSliceDraft';
 
 const createGlMock = (): WebGL2RenderingContext =>
   ({
+    LINES: 1,
     LINE_LOOP: 2,
     STATIC_DRAW: 35044,
     TRIANGLES: 4,
@@ -51,5 +52,19 @@ describe('drawSliceDraft', () => {
 
     expect(lineLoopDraws).toHaveLength(5);
     expect(triangleDraws).toHaveLength(4);
+    expect(gl.drawArrays).not.toHaveBeenCalledWith(gl.LINES, expect.anything(), expect.anything());
+  });
+
+  it('should also draw a dashed bounding-box outline when the slice rect is rotated', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawSliceDraft(gl, program, buffer, { height: 20, rotation: 45, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT);
+
+    // result — the dashed outline is drawn with individual LINES segments, unlike the solid LINE_LOOP outline
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINES, 0, expect.any(Number));
   });
 });

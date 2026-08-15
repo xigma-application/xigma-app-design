@@ -361,6 +361,77 @@ comment / shapes, potem osobno: draw / scale / actions / dev mode).
           wpisanie tekstu i przeciągnięcie uchwytu offsetu w tej samej, nieprzerwanej sesji edycji —
           bez klikania gdziekolwiek indziej po drodze
 
+- [x] **Slice** — narzędzie do zaznaczania obszaru canvasu pod przyszły eksport (PNG itd.); realnego
+      panelu/eksportu jeszcze nie ma (patrz Etap 8/15), więc na razie zachowuje się jak rysowanie
+      ramki bez tła. Zapowiedziane już w Etapie 1 ("pozostałe warianty (Scale, Slice...) dojdą
+      later") — dołączyło do dropdownu Frame, zaraz po Section
+      (`TOOL_GROUP_ITEMS[frame] = [frame, section, slice]`), własny skrót **`S`** (bez modyfikatora,
+      w odróżnieniu od Section'owego `Shift+S`). **Świadomie nigdy nie trafia do `store/design`** —
+      user wprost zastrzegł, że to tymczasowy byt na canvasie, nie realny node sceny, więc cała jego
+      geometria (`TSliceDraft { x, y, width, height, rotation }`) żyje w zwykłym `useRef` (`sliceRef`
+      w `Canvas.tsx`, analogicznie do `draftRef`/`marqueeRef`), czytanym bezpośrednio przez render
+      loop — zero dispatchy do Reduxu podczas rysowania/przeciągania. Własny hook
+      `useSliceTool/` mirroruje styl plikowy `useSelectionTool` (osobne `arm*`/`continue*`/`disarm*`
+      pliki per `handlePointerDown/Move/Up`), ale znacznie mniejszy, bo operuje zawsze na dokładnie
+      jednym, nie-grupowym, nie-line'owym boxie — bez całej generalizacji multi-node/flip z Etapu 10.
+      Inaczej niż Frame/Section/Rectangle: po puszczeniu myszy narzędzie **zostaje aktywne** (nie
+      wraca do `default`), żeby świeżo narysowany box dało się od razu resize'ować/obracać/przesuwać
+      — dopiero kliknięcie **poza** jego obszarem kasuje go (`sliceRef.current = null`) i dopiero
+      wtedy wraca do Move, tym samym mechanizmem co dotychczasowe "jeden kształt i powrót do Select".
+      Resize/rotate/move to własna, uproszczona wersja matematyki z Etapu 10 (rotowany resize liczony
+      przez odwrócenie punktu kursora do lokalnej przestrzeni boxa, przeliczenie brzegów, obrót
+      środka z powrotem — `getResizedEdges.ts`/`getResizedSliceBounds.ts`/`continueResizeDrag.ts`),
+      bez shear'u/flip/multi-node, bo Slice zawsze jest dokładnie jednym prostym boxem.
+
+      **Poprawka (po zgłoszeniu na żywo, że kursor cały czas pokazuje `pointer.png`)**: `ToolName.slice`
+      dodane do `DRAWING_TOOLS` (Etap 0/1, klasa `--drawing` = krzyżyk na cały czas trwania aktywnego
+      narzędzia) dawało crosshair-owy kursor przez **cały** czas trwania narzędzia, nie tylko podczas
+      samego rysowania — inaczej niż Frame/Section, które zawsze wracają do `default` zaraz po jednym
+      kształcie, więc dla nich ten sam mechanizm nigdy nie kolidował z fazą "edytuj już narysowany
+      kształt". Naprawione nowym `updateHoverCursor.ts` (odpalane co `pointermove`, gdy
+      `event.buttons === 0`), które jawnie nadpisuje `canvas.style.cursor` wartością konkretnego
+      kursora (resize/rotate nad uchwytem, albo jawny "domyślny" poza nimi) zamiast pustego stringa —
+      pusty string tylko *zdejmuje* inline-style i odsłania z powrotem klasę `--drawing`, która nadal
+      jest aktywna, dopóki `activeTool === slice`. "Domyślny" kursor to nie CSS-owe słowo kluczowe
+      `default`, tylko dokładnie ten sam obrazek co bazowy kursor canvasu
+      (`assets/icons/cursors/default.png`) — wydzielony do nowego, współdzielonego
+      `utils/canvas/defaultCursor.ts` (`DEFAULT_CURSOR`), użytego też przy zakończeniu pierwszego
+      rysowania (`disarmDrawDrag.ts`), żeby kursor przełączał się na "gotowe" natychmiast po puszczeniu
+      myszy, a nie dopiero przy najbliższym `pointermove`.
+
+      **Poprawka (po zgłoszeniu na żywo, ze zrzutem ekranu)**: przy obróconym Slice user chciał
+      dodatkowy, przerywany prostokąt pokazujący **rzeczywisty rozmiar przyszłego eksportu**
+      (axis-aligned bounding box obróconego boxa — to on, nie sam obrócony box, odpowiada realnemu
+      rozmiarowi pikseli, jakie wyjdą z przyszłego eksportu), rysowany pod spodem, plus żeby ten
+      dodatkowy prostokąt też łapał przeciąganie (samo przesuwanie, nie resize/rotate — te zostają
+      wyłącznie na uchwytach właściwego, obróconego boxa). Nowy, generyczny
+      `utils/canvas/getRotatedBoundingBox.ts` (rotuje 4 rogi, bierze AABB) użyty w dwóch miejscach:
+      rysowanie (`drawSliceDraft.ts` woła istniejący `drawDashedRectOutline.ts` na obliczonym bboxie
+      z `rotation=0`, tylko gdy `slice.rotation !== 0` — przy braku obrotu bbox pokrywałby się z
+      właściwym boxem jeden do jednego, więc rysowanie go byłoby czystym marnotrawstwem) i hit-test
+      (`handlePointerDown.ts`: warunek "przesuń" zamieniony z testu przeciw surowym, nieobróconym
+      granicom boxa na test przeciw jego rotowanemu bboxowi) — przy okazji naprawiło to realnego,
+      wcześniej niezauważonego buga: stary test w ogóle nie odwracał punktu kursora przed
+      porównaniem, więc dla dowolnie obróconego Slice'a kliknięcie we właściwy, widoczny obszar boxa
+      czasem w ogóle nie łapało przeciągnięcia. Osobno wypróbowany i **odrzucony** przez usera pomysł
+      na etykietę z wymiarami (`SliceDimensionLabel`, DOM-owy overlay analogiczny do
+      `TextEditOverlay`, z `requestAnimationFrame`-owym mostkiem ref→state, bo `sliceRef` nie
+      wywołuje re-renderów Reacta) — zostawiony tylko przerywany bbox, bez tekstu.
+
+      **Poprawka (po zgłoszeniu na żywo, że przerywana kreska jest za gęsta)**: `drawDashedRectOutline.ts`
+      miał na sztywno wpisane stałe `FONT_SIZE_GUIDE_DASH_LENGTH_PX`/`GAP_PX` (2px/2px — dobre dla
+      wąskiej prowadnicy rozmiaru fontu z Etapu 7, za gęste na duży prostokąt). Sparametryzowany
+      (`dashLength`/`dashGap` jako jawne argumenty), jego jedyny dotychczasowy callsite
+      (`drawPathTextFontSizeGuide.ts`) przekazuje te same stałe co dotąd (zero zmiany zachowania), a
+      Slice dostał własne, wyraźnie rzadsze `SLICE_BOUNDING_BOX_DASH_LENGTH_PX`/`GAP_PX`
+      (`constant/canvas.ts`).
+
+      Zweryfikowane w 100% pokryciem testów jednostkowych oraz e2e (`create-slice.spec.ts`: rysowanie
+      z dropdownu i ze skrótu `S`, resize po narysowaniu, kasowanie po kliknięciu poza obszarem z
+      powrotem do `default` i canvas wracający piksel-w-piksel do stanu sprzed rysowania — screenshot
+      przycięty tak, żeby nie łapał floating toolbara, bo ten realnie zmienia własną ikonkę po użyciu
+      Slice'a, `lastFrameTool`), a na końcu ręcznie przez użytkownika na żywo
+
 - [ ] Pen / vector (najbardziej złożony, na później)
 
 ## Etap 7 — Edycja tekstu (DOM overlay) + rendering tekstu w WebGL
