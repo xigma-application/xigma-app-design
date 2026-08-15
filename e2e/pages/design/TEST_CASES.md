@@ -240,6 +240,7 @@ with `parentId: null` (today, every frame shares the same parent — multi-selec
 | 6   | Plain click on a new, never-selected node while 2+ others are selected replaces the selection with just the new node                                                                                                                    |  ✅  |           —            |
 | 7   | Plain click on empty canvas clears the selection                                                                                                                                                                                        |  ✅  |           —            |
 | 8   | 2+ selected nodes sharing a parent render **one shared outline** spanning their combined bounds, not per-node outlines                                                                                                                  |  ✅  | ✅ `selection.spec.ts` |
+| 106 | Pressing Escape clears the selection, the same as clicking empty canvas — works for any node type, not just text                                                                                                                        |  —   | ✅ `selection.spec.ts` |
 | 9   | Click in the gap inside a shared multi-selection's bounds (no node there), released without moving, **deselects everything** — same as clicking empty canvas                                                                            |  ✅  |           —            |
 | 10  | Click in the gap **+ drag** moves the whole multi-selection together (same as #5, entered via the gap instead of a node)                                                                                                                |  ✅  |           —            |
 | 11  | Click on an **unselected node that happens to sit inside** a multi-selection's shared bounds does **not** replace the selection while the button is still held — the shared outline must stay visible for as long as the button is down |  ✅  | ✅ `selection.spec.ts` |
@@ -253,6 +254,18 @@ instant the button went down on a node inside its bounds — even if the user on
 whole group through the gap. `selection.spec.ts`'s coverage for #11/#12 asserts exactly this
 timing: a screenshot taken while the button is still held must be pixel-identical to the
 pre-press screenshot, and only the post-release screenshot may differ.
+
+#106 is a new, requested-on-the-spot UX gap: Escape had no effect on selection at all before this —
+the existing `useToolbarShortcuts.ts` Escape handler only reset `activeTool` back to `default`,
+regardless of what (if anything) was selected. Fixed with a new `handleLeave.ts` util
+(`useToolbarShortcuts/utils/`) that dispatches both `setActiveTool(default)` and `setSelection([])`
+together, so this is deliberately generic — any selected node type deselects on Escape, not just
+Text/Text-on-Path (those two just happen to be where the request originated, and where the
+two-stage Escape behavior below adds its own extra layer). Since the fix lives in the existing
+global `window`-level Escape listener, it has no unit-testable branch logic worth pinning beyond
+`handleLeave.spec.ts`'s own direct assertion — the e2e version proves the real rendered selection
+outline actually clears on a genuine `keydown`, the same "real browser + rendering" category the
+rest of this file reserves e2e for.
 
 ## Selection under a moved viewport (Etap 4 × Etap 5)
 
@@ -628,6 +641,56 @@ The unit suite (`useTextEditOnDoubleClick.spec.tsx`) asserts the exact store sta
 retypes, and checks the final result against a from-scratch reference — a stale reset would have
 reverted to the original committed text partway through, producing a completely different final
 render than what re-typing the same final content directly would produce.
+
+## Escape while editing Text / Text on Path
+
+Escape previously did nothing while editing at all: `useBlockShortcutPropagation.ts`'s blanket
+`event.stopPropagation()` on every keydown meant the global Escape listener (`useToolbarShortcuts.ts`)
+never even received the event, and nothing inside the overlay handled `Escape` itself. Requested
+explicitly as a two-stage UX flow mirroring most design tools: the _first_ Escape while actively
+editing commits the edit (same add/update/delete branching `useCommitTextEdit.ts` already had for a
+normal blur — see the Double-click section above and the delete-on-empty section further up) and
+leaves the resulting node **selected**, unlike an ordinary blur/click-away commit which always
+deselects; a _second_ Escape (now just selected, not editing) deselects it via #106 above — two
+presses total to go from "actively editing" to "fully deselected." A brand-new (never-before-existing)
+box with content typed behaves like any other commit-and-select; a brand-new box with **no** content
+discards on Escape exactly like it would on blur (nothing is created — matches #36's established
+"empty box never created" behavior). Implemented via a `selectOnCommitRef` (`useRef(false)`, created
+in `TextEditOverlay.tsx`, threaded into both `useBlockShortcutPropagation.ts` and
+`useCommitTextEdit.ts`): pressing Escape sets the ref and calls `event.currentTarget.blur()`, letting
+the _existing_ `onBlur` → `useCommitTextEdit` handler run unchanged, except it now reads the ref to
+decide whether to select the committed node (`selectCommittedNode.ts`, a new util: dispatches
+`setSelection([editingNodeId])` for an existing node, or reuses `selectLastCreatedNode.ts` — the same
+util the shape tools use — to resolve a brand-new node's freshly-`nanoid()`-generated id) instead of
+clearing the selection as a normal blur does. This reuses all the existing commit/delete branching
+logic instead of duplicating it, and avoids any double-commit race: the ref is reset to `false`
+inside the same handler invocation it's read from, so a later _native_ blur (unrelated to Escape)
+never misreads a stale `true`.
+
+| #   | Scenario                                                                                                                                | Unit |          E2E           |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------- | :--: | :--------------------: |
+| 107 | Escape while typing fresh text (or path-text) with content commits it and leaves it selected, unlike a plain blur which deselects       |  ✅  | ✅ `edit-text.spec.ts` |
+| 108 | Escape while drawing a fresh text (or path-text) box with no content discards it, same as blurring it away empty                        |  ✅  | ✅ `edit-text.spec.ts` |
+| 109 | Escape while re-editing an existing text (or path-text) node exits editing and selects it; a second Escape then deselects it (via #106) |  ✅  | ✅ `edit-text.spec.ts` |
+
+All three get both layers of coverage for the same reason as the rest of this file: the unit suite
+(`useCommitTextEdit.spec.tsx`, `useBlockShortcutPropagation.spec.tsx`, `selectCommittedNode.spec.ts`,
+`TextEditOverlay.spec.tsx`) already asserts `store.getState().design.selectedIds`/`nodes`/`rootOrder`
+exactly for every branch, but each also gets an e2e proof that the real rendered selection outline
+actually appears/disappears after a genuine `keydown` — the same "real browser + rendering" category
+the rest of this file is for. #107/#109's e2e versions compare against a manually-reconstructed
+reference (commit via blur, then select via a real plain click) rather than asserting exact pixels
+directly, the same "compare two independently-produced pages" pattern used throughout this file.
+`text-on-path.spec.ts`'s own versions of #107/#108 had to compare against a "drawn, then
+discarded/committed via blur" reference rather than a totally untouched page, for the same
+`lastTextTool` toolbar-memory reason noted in the delete-on-empty section above — a page that
+selected Text on Path always renders that shared toolbar button differently from one that never
+touched the tool at all, regardless of the node's own final state. All of #107–#109's captures also
+explicitly rest the pointer at a shared neutral point before every screenshot: Escape is a pure
+keyboard event and never moves the mouse, so without this the hover outline (a rendering concern
+fully independent of selection) would depend on wherever the previous gesture happened to leave the
+pointer — the exact "Gotcha for other e2e tests" already documented under Hover highlight above,
+re-encountered here for the same underlying reason.
 
 ## Resize (Etap 10)
 

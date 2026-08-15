@@ -26,9 +26,10 @@ const TextEditOverlay: FC = () => {
   const editingNodeId = useAppSelector(selectEditingNodeId);
   const editingTextContent = useAppSelector(selectEditingTextContent);
   const elementRef = useRef<HTMLDivElement>(null);
-  const handleBlur = useCommitTextEdit(box, editingNodeId);
+  const selectOnCommitRef = useRef(false);
+  const handleBlur = useCommitTextEdit(box, editingNodeId, selectOnCommitRef);
   const handleInput = useTextEditInput();
-  const handleKeyDown = useBlockShortcutPropagation(box);
+  const handleKeyDown = useBlockShortcutPropagation(box, selectOnCommitRef);
   const handleSelect = useTrackTextEditSelection();
   const viewport = useAppSelector(selectViewport);
 

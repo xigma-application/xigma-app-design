@@ -1,5 +1,5 @@
 import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
-import { KeyboardEvent } from 'react';
+import { KeyboardEvent, RefObject } from 'react';
 import { Provider } from 'react-redux';
 import { renderHook } from '@testing-library/react';
 
@@ -11,6 +11,8 @@ import designReducer from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
 
 const createTestStore = (): EnhancedStore<{ design: TDesignState }> => configureStore({ reducer: { design: designReducer } });
+
+const createSelectOnCommitRef = (): RefObject<boolean> => ({ current: false });
 
 const createEditableElement = (text: string): HTMLDivElement => {
   const element = document.createElement('div');
@@ -35,8 +37,9 @@ const createEditableElement = (text: string): HTMLDivElement => {
 const renderBlockShortcutPropagation = (
   store: EnhancedStore<{ design: TDesignState }>,
   box: Parameters<typeof useBlockShortcutPropagation>[0],
+  selectOnCommitRef: RefObject<boolean> = createSelectOnCommitRef(),
 ): ((event: KeyboardEvent<HTMLDivElement>) => void) => {
-  const { result } = renderHook(() => useBlockShortcutPropagation(box), {
+  const { result } = renderHook(() => useBlockShortcutPropagation(box, selectOnCommitRef), {
     wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
   });
 
@@ -124,6 +127,35 @@ describe('useBlockShortcutPropagation behaviors', () => {
     // result
     expect(preventDefault).not.toHaveBeenCalled();
     expect(element.textContent).toBe('ab');
+
+    document.body.removeChild(element);
+  });
+
+  it('should mark the edit for select-on-commit and blur the element when Escape is pressed', () => {
+    // mock
+    const preventDefault = vi.fn();
+    const element = createEditableElement('ab');
+    const blur = vi.fn();
+
+    element.blur = blur;
+
+    const event = {
+      currentTarget: element,
+      key: 'Escape',
+      preventDefault,
+      stopPropagation: vi.fn(),
+    } as unknown as KeyboardEvent<HTMLDivElement>;
+    const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 0, y: 0 };
+    const selectOnCommitRef = createSelectOnCommitRef();
+    const handleKeyDown = renderBlockShortcutPropagation(createTestStore(), box, selectOnCommitRef);
+
+    // action
+    handleKeyDown(event);
+
+    // result
+    expect(preventDefault).toHaveBeenCalledTimes(1);
+    expect(selectOnCommitRef.current).toBe(true);
+    expect(blur).toHaveBeenCalledTimes(1);
 
     document.body.removeChild(element);
   });

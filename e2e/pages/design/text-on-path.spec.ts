@@ -113,6 +113,108 @@ test('clearing all content on an existing text-on-path node and blurring deletes
   expect(afterClearing.equals(neverCreated)).toBe(true);
 });
 
+test('pressing Escape while typing fresh path-text with content commits it and leaves it selected, unlike a plain blur which deselects', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-path-text-escape-select-new');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawTextOnPath(300, 300, 500, 500);
+  await designPage.typeText('Hi');
+  await page.keyboard.press('Escape');
+  await designPage.pointerMove(900, 700); // rest the pointer somewhere neutral before capturing —
+  // Escape never moves the mouse, so the hover outline (independent of selection) would otherwise
+  // depend on wherever the previous gesture happened to leave it (see TEST_CASES.md's "Gotcha for
+  // other e2e tests")
+
+  const afterEscape = await designPage.canvas.screenshot();
+
+  // reference: commit the identical path via a normal blur (deselects), then manually click the
+  // rendered "H" to select it the ordinary way — the known-correct "selected" render to compare
+  await designPage.goto('e2e-test-path-text-escape-select-new-reference');
+  await expect(designPage.canvas).toBeVisible();
+  await designPage.drawTextOnPath(300, 300, 500, 500);
+  await designPage.typeText('Hi');
+  await designPage.click(900, 600); // commit via blur, deselecting
+  await designPage.click(405, 300); // select it via a plain click on the rendered "H"
+  await designPage.pointerMove(900, 700);
+
+  const manuallySelected = await designPage.canvas.screenshot();
+
+  expect(afterEscape.equals(manuallySelected)).toBe(true);
+});
+
+test('pressing Escape while drawing a fresh path with no text discards it, same as blurring it away empty', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-path-text-escape-discard-empty');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawTextOnPath(300, 300, 500, 500);
+  await page.keyboard.press('Escape');
+
+  const afterEscape = await designPage.canvas.screenshot();
+
+  // reference: the already-established blur-based discard (draw with no text, then click away) —
+  // comparing against a totally untouched page instead would be misleading here, for the same
+  // lastTextTool toolbar-memory reason noted in the "clearing all content" test above
+  await designPage.goto('e2e-test-path-text-escape-discard-empty-reference');
+  await expect(designPage.canvas).toBeVisible();
+  await designPage.drawTextOnPath(300, 300, 500, 500);
+  await designPage.click(900, 600);
+
+  const afterBlur = await designPage.canvas.screenshot();
+
+  expect(afterEscape.equals(afterBlur)).toBe(true);
+});
+
+test('pressing Escape while re-editing an existing path-text node exits editing and selects it; a second Escape then deselects it', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-path-text-escape-existing');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawTextOnPath(300, 300, 500, 500);
+  await designPage.typeText('Hi');
+  await designPage.click(900, 600); // commit, deselected
+  await designPage.pointerMove(900, 700);
+
+  const committedDeselected = await designPage.canvas.screenshot();
+
+  await designPage.doubleClick(400, 300); // re-enter editing, on the rendered "H"
+  await page.keyboard.press('Escape'); // first Escape: exits editing, stays selected
+  await designPage.pointerMove(900, 700); // Escape never moves the mouse, so rest it back at the
+  // same neutral point before every capture below — see the note in the test above
+
+  const afterFirstEscape = await designPage.canvas.screenshot();
+
+  expect(afterFirstEscape.equals(committedDeselected)).toBe(false);
+
+  await page.keyboard.press('Escape'); // second Escape: deselects
+  await designPage.pointerMove(900, 700);
+
+  const afterSecondEscape = await designPage.canvas.screenshot();
+
+  expect(afterSecondEscape.equals(committedDeselected)).toBe(true);
+
+  // reference: confirm afterFirstEscape genuinely matches a real "selected" render
+  await designPage.goto('e2e-test-path-text-escape-existing-reference');
+  await expect(designPage.canvas).toBeVisible();
+  await designPage.drawTextOnPath(300, 300, 500, 500);
+  await designPage.typeText('Hi');
+  await designPage.click(900, 600);
+  await designPage.click(405, 300);
+  await designPage.pointerMove(900, 700);
+
+  const manuallySelected = await designPage.canvas.screenshot();
+
+  expect(afterFirstEscape.equals(manuallySelected)).toBe(true);
+});
+
 test('typing tool-shortcut letters while editing text on a path does not switch the active tool', async ({ page }) => {
   const designPage = new DesignPage(page);
 

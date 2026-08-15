@@ -21,6 +21,36 @@ test('shift-click adds a second frame to the selection and draws the shared grou
   expect(groupSelection.equals(singleSelection)).toBe(false);
 });
 
+test('pressing Escape deselects the currently selected frame, the same as clicking empty canvas', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-selection-escape-deselect');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(100, 100, 140, 140); // auto-selected on creation
+  await designPage.pointerMove(900, 700); // neutral resting point, avoids hover-outline artifacts
+
+  const selected = await designPage.canvas.screenshot();
+
+  await page.keyboard.press('Escape');
+  await designPage.pointerMove(900, 700);
+
+  const afterEscape = await designPage.canvas.screenshot();
+
+  expect(afterEscape.equals(selected)).toBe(false);
+
+  // reference: the identical frame, deselected the ordinary way by clicking empty canvas
+  await designPage.goto('e2e-test-selection-escape-deselect-reference');
+  await expect(designPage.canvas).toBeVisible();
+  await designPage.drawFrame(100, 100, 140, 140);
+  await designPage.click(900, 600);
+  await designPage.pointerMove(900, 700);
+
+  const deselected = await designPage.canvas.screenshot();
+
+  expect(afterEscape.equals(deselected)).toBe(true);
+});
+
 test('clicking an unselected frame inside a multi-selection does not replace the selection until release', async ({ page }) => {
   const designPage = new DesignPage(page);
 

@@ -9,6 +9,9 @@ import TextEditOverlay from './TextEditOverlay';
 import designReducer, { startTextEdit } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
 
+// types
+import { NodeType } from 'types/design/enums';
+
 const createTestStore = (): EnhancedStore<{ design: TDesignState }> => configureStore({ reducer: { design: designReducer } });
 
 const renderWithStore = (store: EnhancedStore<{ design: TDesignState }>): ReturnType<typeof render> =>
@@ -165,5 +168,71 @@ describe('TextEditOverlay behaviors', () => {
     // result
     expect(store.getState().design.rootOrder).toHaveLength(0);
     expect(store.getState().design.editingTextBox).toBeNull();
+  });
+
+  it('should commit and select the newly created node when Escape is pressed while drawing fresh text, instead of deselecting it', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(startTextEdit({ box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 } }));
+
+    const { container } = renderWithStore(store);
+    const element = container.querySelector('[contenteditable="true"]') as HTMLDivElement;
+
+    element.textContent = 'hello';
+    fireEvent.input(element);
+
+    // action
+    fireEvent.keyDown(element, { key: 'Escape' });
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.editingTextBox).toBeNull();
+    expect(design.rootOrder).toHaveLength(1);
+    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ content: 'hello', type: NodeType.text });
+    expect(design.selectedIds).toEqual([design.rootOrder[0]]);
+  });
+
+  it('should discard a fresh box with no content when Escape is pressed, same as blurring it away empty', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(startTextEdit({ box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 } }));
+
+    const { container } = renderWithStore(store);
+    const element = container.querySelector('[contenteditable="true"]') as HTMLDivElement;
+
+    // action
+    fireEvent.keyDown(element, { key: 'Escape' });
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.editingTextBox).toBeNull();
+    expect(design.rootOrder).toHaveLength(0);
+    expect(design.selectedIds).toEqual([]);
+  });
+
+  it('should keep the existing node selected when Escape is pressed while re-editing it, instead of deselecting it', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(
+      startTextEdit({
+        box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 },
+        content: 'hello',
+        id: 'node-1',
+      }),
+    );
+
+    const { container } = renderWithStore(store);
+    const element = container.querySelector('[contenteditable="true"]') as HTMLDivElement;
+
+    // action
+    fireEvent.keyDown(element, { key: 'Escape' });
+
+    // result
+    expect(store.getState().design.selectedIds).toEqual(['node-1']);
   });
 });

@@ -53,7 +53,7 @@ export const TOOL_GROUP_ITEMS: Partial<Record<ToolName, ToolName[]>> = {
 };
 
 export const TOOL_ICON_SIZE: Partial<Record<ToolName, number>> = {
-  [ToolName.line]: 14,
+  [ToolName.line]: 24,
   [ToolName.slice]: 18,
   [ToolName.textOnPath]: 18,
 };

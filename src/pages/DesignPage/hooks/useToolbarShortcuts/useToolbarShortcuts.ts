@@ -13,6 +13,9 @@ import { useAppDispatch } from 'store';
 // types
 import { ToolName } from 'types/design/enums';
 
+// utils
+import { handleLeave } from './utils/handleLeave';
+
 export const useToolbarShortcuts = (): void => {
   const dispatch = useAppDispatch();
 
@@ -30,7 +33,7 @@ export const useToolbarShortcuts = (): void => {
       { action: (): any => dispatch(setActiveTool(ToolName.comment)), ...shortcuts[ToolName.comment] },
       { action: (): any => dispatch(setActiveTool(ToolName.media)), ...shortcuts[ToolName.media] },
       { action: (): any => dispatch(setActiveTool(ToolName.text)), ...shortcuts[ToolName.text] },
-      { action: (): any => dispatch(setActiveTool(ToolName.default)), ...shortcuts.escape },
+      { action: (): any => handleLeave(dispatch), ...shortcuts.escape },
     ],
     [dispatch],
   );

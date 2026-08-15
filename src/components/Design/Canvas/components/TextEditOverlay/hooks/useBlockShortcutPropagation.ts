@@ -1,4 +1,4 @@
-import { KeyboardEvent } from 'react';
+import { KeyboardEvent, RefObject } from 'react';
 
 // store
 import { updateTextEditContent, updateTextEditSelection } from 'store/design/slice';
@@ -12,7 +12,10 @@ import { getEditableSelectionOffsets } from '../utils/getEditableSelectionOffset
 import { getEditableTextContent } from '../utils/getEditableTextContent';
 import { insertTextAtCaret } from '../utils/insertTextAtCaret';
 
-export const useBlockShortcutPropagation = (box: TEditingTextBox | null): ((event: KeyboardEvent<HTMLDivElement>) => void) => {
+export const useBlockShortcutPropagation = (
+  box: TEditingTextBox | null,
+  selectOnCommitRef: RefObject<boolean>,
+): ((event: KeyboardEvent<HTMLDivElement>) => void) => {
   const dispatch = useAppDispatch();
 
   return (event: KeyboardEvent<HTMLDivElement>): void => {
@@ -23,6 +26,10 @@ export const useBlockShortcutPropagation = (box: TEditingTextBox | null): ((even
       insertTextAtCaret(event.currentTarget, ' ');
       dispatch(updateTextEditContent(getEditableTextContent(event.currentTarget)));
       dispatch(updateTextEditSelection(getEditableSelectionOffsets(event.currentTarget)));
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      selectOnCommitRef.current = true;
+      event.currentTarget.blur();
     }
   };
 };

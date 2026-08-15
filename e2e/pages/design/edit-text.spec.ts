@@ -61,6 +61,103 @@ test('clearing all content on an existing text node and blurring deletes it, ins
   expect(afterClearing.equals(neverDrawn)).toBe(true);
 });
 
+test('pressing Escape while typing fresh text with content commits it and leaves it selected, unlike a plain blur which deselects', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-text-escape-select-new');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawTextBox(300, 300, 500, 340);
+  await designPage.typeText('HELLO');
+  await page.keyboard.press('Escape');
+  await designPage.pointerMove(900, 700); // rest the pointer somewhere neutral before capturing —
+  // Escape never moves the mouse, so the hover outline (independent of selection) would otherwise
+  // depend on wherever the previous gesture happened to leave it, for a reason unrelated to
+  // selection (see TEST_CASES.md's "Gotcha for other e2e tests")
+
+  const afterEscape = await designPage.canvas.screenshot();
+
+  // reference: commit the identical box via a normal blur (deselects), then manually click it to
+  // select it the ordinary way — the known-correct "selected" render to compare against
+  await designPage.goto('e2e-test-text-escape-select-new-reference');
+  await expect(designPage.canvas).toBeVisible();
+  await designPage.drawTextBox(300, 300, 500, 340);
+  await designPage.typeText('HELLO');
+  await designPage.click(950, 600); // commit via blur, deselecting
+  await designPage.click(305, 310); // select it via a plain click on the rendered glyph
+  await designPage.pointerMove(900, 700); // same neutral point, so hover state matches
+
+  const manuallySelected = await designPage.canvas.screenshot();
+
+  expect(afterEscape.equals(manuallySelected)).toBe(true);
+});
+
+test('pressing Escape while drawing fresh text with no content discards it, same as blurring it away empty', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-text-escape-discard-empty');
+  await expect(designPage.canvas).toBeVisible();
+
+  const before = await designPage.canvas.screenshot();
+
+  await designPage.drawTextBox(300, 300, 500, 340);
+  await page.keyboard.press('Escape');
+
+  const afterEscape = await designPage.canvas.screenshot();
+
+  expect(afterEscape.equals(before)).toBe(true);
+});
+
+test('pressing Escape while re-editing an existing text node exits editing and selects it; a second Escape then deselects it', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-text-escape-existing');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawTextBox(300, 300, 500, 340);
+  await designPage.typeText('HELLO');
+  await designPage.click(950, 600); // commit, deselected
+  await designPage.pointerMove(900, 700); // neutral resting point, see the note below
+
+  const committedDeselected = await designPage.canvas.screenshot();
+
+  await designPage.doubleClick(305, 310); // re-enter editing
+  await page.keyboard.press('Escape'); // first Escape: exits editing, stays selected
+  await designPage.pointerMove(900, 700); // Escape never moves the mouse, so rest it back at the
+  // same neutral point before every capture below — otherwise the hover outline (independent of
+  // selection) would depend on wherever the previous gesture left the pointer, for a reason
+  // unrelated to selection (see TEST_CASES.md's "Gotcha for other e2e tests")
+
+  const afterFirstEscape = await designPage.canvas.screenshot();
+
+  expect(afterFirstEscape.equals(committedDeselected)).toBe(false);
+
+  await page.keyboard.press('Escape'); // second Escape: deselects
+  await designPage.pointerMove(900, 700);
+
+  const afterSecondEscape = await designPage.canvas.screenshot();
+
+  expect(afterSecondEscape.equals(committedDeselected)).toBe(true);
+
+  // reference: confirm afterFirstEscape genuinely matches a real "selected" render — select the
+  // same committed text the ordinary way via a plain click
+  await designPage.goto('e2e-test-text-escape-existing-reference');
+  await expect(designPage.canvas).toBeVisible();
+  await designPage.drawTextBox(300, 300, 500, 340);
+  await designPage.typeText('HELLO');
+  await designPage.click(950, 600);
+  await designPage.click(305, 310);
+  await designPage.pointerMove(900, 700);
+
+  const manuallySelected = await designPage.canvas.screenshot();
+
+  expect(afterFirstEscape.equals(manuallySelected)).toBe(true);
+});
+
 test('double-clicking a word while actively typing new text selects it, so typing replaces just that word', async ({ page }) => {
   const designPage = new DesignPage(page);
 

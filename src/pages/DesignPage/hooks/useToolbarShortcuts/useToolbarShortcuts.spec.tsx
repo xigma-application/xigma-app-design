@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import { useToolbarShortcuts } from './useToolbarShortcuts';
 
 // store
-import designReducer, { setActiveTool } from 'store/design/slice';
+import designReducer, { setActiveTool, setSelection } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
 
 // types
@@ -205,6 +205,22 @@ describe('useToolbarShortcuts behaviors', () => {
 
     // result
     expect(store.getState().design.activeTool).toBe(ToolName.default);
+  });
+
+  it('should also clear the current selection on "Escape"', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(setSelection(['node-1']));
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    fireEvent.keyDown(window, { code: 'Escape' });
+
+    // result
+    expect(store.getState().design.selectedIds).toEqual([]);
   });
 
   it('should ignore unrelated keys', () => {

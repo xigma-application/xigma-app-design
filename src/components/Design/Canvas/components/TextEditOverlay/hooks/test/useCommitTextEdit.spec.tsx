@@ -1,5 +1,5 @@
 import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
-import { FocusEvent } from 'react';
+import { FocusEvent, RefObject } from 'react';
 import { Provider } from 'react-redux';
 import { renderHook } from '@testing-library/react';
 
@@ -15,6 +15,8 @@ import { NodeType, PathType } from 'types/design/enums';
 
 const createTestStore = (): EnhancedStore<{ design: TDesignState }> => configureStore({ reducer: { design: designReducer } });
 
+const createSelectOnCommitRef = (selectOnCommit = false): RefObject<boolean> => ({ current: selectOnCommit });
+
 const createBlurEvent = (html: string): FocusEvent<HTMLDivElement> => {
   const currentTarget = document.createElement('div');
 
@@ -29,7 +31,7 @@ describe('useCommitTextEdit behaviors', () => {
     const store = createTestStore();
 
     // before
-    const { result } = renderHook(() => useCommitTextEdit(null, null), {
+    const { result } = renderHook(() => useCommitTextEdit(null, null, createSelectOnCommitRef()), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -46,7 +48,7 @@ describe('useCommitTextEdit behaviors', () => {
     const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
 
     // before
-    const { result } = renderHook(() => useCommitTextEdit(box, null), {
+    const { result } = renderHook(() => useCommitTextEdit(box, null, createSelectOnCommitRef()), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -73,7 +75,7 @@ describe('useCommitTextEdit behaviors', () => {
     const box = { flipX: true, flipY: true, height: 20, rotation: 30, width: 100, x: 10, y: 10 };
 
     // before
-    const { result } = renderHook(() => useCommitTextEdit(box, null), {
+    const { result } = renderHook(() => useCommitTextEdit(box, null, createSelectOnCommitRef()), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -104,7 +106,7 @@ describe('useCommitTextEdit behaviors', () => {
     };
 
     // before
-    const { result } = renderHook(() => useCommitTextEdit(box, null), {
+    const { result } = renderHook(() => useCommitTextEdit(box, null, createSelectOnCommitRef()), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -123,7 +125,7 @@ describe('useCommitTextEdit behaviors', () => {
     const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
 
     // before
-    const { result } = renderHook(() => useCommitTextEdit(box, null), {
+    const { result } = renderHook(() => useCommitTextEdit(box, null, createSelectOnCommitRef()), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -142,7 +144,7 @@ describe('useCommitTextEdit behaviors', () => {
     const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
 
     // before
-    const { result } = renderHook(() => useCommitTextEdit(box, null), {
+    const { result } = renderHook(() => useCommitTextEdit(box, null, createSelectOnCommitRef()), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -162,7 +164,7 @@ describe('useCommitTextEdit behaviors', () => {
     const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
 
     // before
-    const { result } = renderHook(() => useCommitTextEdit(box, null), {
+    const { result } = renderHook(() => useCommitTextEdit(box, null, createSelectOnCommitRef()), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -206,7 +208,7 @@ describe('useCommitTextEdit behaviors', () => {
     store.dispatch(setSelection([existingId]));
 
     // before
-    const { result } = renderHook(() => useCommitTextEdit(box, existingId), {
+    const { result } = renderHook(() => useCommitTextEdit(box, existingId, createSelectOnCommitRef()), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -231,7 +233,7 @@ describe('useCommitTextEdit behaviors', () => {
     const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
 
     // before
-    const { result } = renderHook(() => useCommitTextEdit(box, null), {
+    const { result } = renderHook(() => useCommitTextEdit(box, null, createSelectOnCommitRef()), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -271,7 +273,7 @@ describe('useCommitTextEdit behaviors', () => {
     store.dispatch(setSelection([existingId]));
 
     // before
-    const { result } = renderHook(() => useCommitTextEdit(box, existingId), {
+    const { result } = renderHook(() => useCommitTextEdit(box, existingId, createSelectOnCommitRef()), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -344,7 +346,7 @@ describe('useCommitTextEdit behaviors', () => {
     };
 
     // before
-    const { result } = renderHook(() => useCommitTextEdit(box, textId), {
+    const { result } = renderHook(() => useCommitTextEdit(box, textId, createSelectOnCommitRef()), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -357,5 +359,84 @@ describe('useCommitTextEdit behaviors', () => {
     expect(design.nodes[textId]).toBeUndefined();
     expect(design.nodes[pathId]).toBeUndefined();
     expect(design.rootOrder).toHaveLength(0);
+  });
+
+  it('should select the newly created node instead of clearing selection when selectOnCommitRef is set (Escape path)', () => {
+    // mock
+    const store = createTestStore();
+    const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
+    const selectOnCommitRef = createSelectOnCommitRef(true);
+
+    // before
+    const { result } = renderHook(() => useCommitTextEdit(box, null, selectOnCommitRef), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    result.current(createBlurEvent('hello'));
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.selectedIds).toEqual([design.rootOrder[0]]);
+    expect(selectOnCommitRef.current).toBe(false);
+  });
+
+  it('should select the existing node instead of clearing selection when selectOnCommitRef is set and re-editing an existing node', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(
+      addNode({
+        content: 'original',
+        fill: '#ffffff',
+        flipX: false,
+        flipY: false,
+        fontFamily: 'Inter',
+        fontSize: 14,
+        height: 20,
+        name: 'Text',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.text,
+        width: 100,
+        x: 10,
+        y: 10,
+      }),
+    );
+
+    const [existingId] = store.getState().design.rootOrder;
+    const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
+
+    // before
+    const { result } = renderHook(() => useCommitTextEdit(box, existingId, createSelectOnCommitRef(true)), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    result.current(createBlurEvent('replaced'));
+
+    // result
+    expect(store.getState().design.selectedIds).toEqual([existingId]);
+  });
+
+  it('should still clear selection when selectOnCommitRef is set but the content ends up empty (nothing to select)', () => {
+    // mock
+    const store = createTestStore();
+    const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
+
+    // before
+    const { result } = renderHook(() => useCommitTextEdit(box, null, createSelectOnCommitRef(true)), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    result.current(createBlurEvent(''));
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.rootOrder).toHaveLength(0);
+    expect(design.selectedIds).toEqual([]);
   });
 });
