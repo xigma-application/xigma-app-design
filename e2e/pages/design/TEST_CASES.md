@@ -364,6 +364,8 @@ the live-typed ones.
 | 64  | The canvas-drawn selection highlight/caret (`drawEditingCaretAndSelection.ts`) reacts to the live selection, even on a rotated node            |  ✅  | ✅ `edit-text.spec.ts` |
 | 86  | Clicking a point on a rotated or flipped straight-text box places the caret there, not wherever native (unrotated) DOM hit-testing would land  |  ✅  | ✅ `edit-text.spec.ts` |
 | 91  | Clicking a point on a plain (unrotated, unflipped) straight-text box places the caret there too, instead of exiting edit mode entirely         |  ✅  | ✅ `edit-text.spec.ts` |
+| 92  | Double-clicking a word while actively composing straight text selects that word, so typing replaces it instead of colliding with the caret     |  ✅  | ✅ `edit-text.spec.ts` |
+| 93  | Double-clicking a word inside a live, unsaved re-edit does not fall back to `useTextEditOnDoubleClick.ts`'s stale hit-test and discard it      |  ✅  | ✅ `edit-text.spec.ts` |
 
 #58/#59 are the two distinct hit-test branches (`getDoubleClickedTextNode.ts` already pins both
 precisely via `store.getState()`), but the actual claim worth an e2e proof is a real native
@@ -446,6 +448,43 @@ side effect — caught by two existing screenshot tests (#58/#59 above) that sta
 pattern for a never-rotated box: click a point between two rendered characters vs. just past them,
 type the same character, and assert the two independently-drawn results differ — proving both that
 the click landed inside the edit session (not exiting it) and that it landed at the right character.
+
+#92 is a real, reported regression found right after #91 shipped: the same `handlePointerDown`
+routine that #86/#91 route through to place a collapsed caret always collapsed to a single index,
+with no notion of "this is actually a double-click" — so double-clicking a word to select it (the
+browser's own native gesture) got silently overridden into a plain caret placement, for every
+editing session (straight or curved, any rotation), since `pointer-events: none` means the browser
+never sees the click on the overlay either way and can't run its own native word-select. Fixed with
+a new shared `getWordRangeAtIndex.ts` (pure string-index math — walks outward from the clicked
+boundary while the adjacent characters stay on the same side of a `\S` word/non-word split) plus a
+dedicated `dblclick` listener in both `useStraightCaretEditing.ts` and `useCurvedCaretEditing.ts`
+(`handleDoubleClick.ts` in each hook's own `utils/`, alongside the existing `handlePointerDown`/
+`handlePointerMove`/`handlePointerUp` split — `useStraightCaretEditing.ts` itself got the same
+promotion `useCurvedCaretEditing.ts` already had, since it grew past the "trivial single hook file"
+threshold once double-click joined single-click/drag/release as a fourth listener) — the two
+preceding `pointerdown`s that make up a double-click still each collapse the selection once, but the
+browser's own native `dblclick` recognition fires last and this handler's word-range selection wins.
+`getWordRangeAtIndex.spec.ts` pins the exact boundary math (mid-word, at a word/whitespace edge, past
+the content length, degenerate empty content) precisely; the e2e version proves the same "compare two
+independently-drawn pages" claim as #86/#91 — double-click a word mid-composition, retype it, and
+assert the result matches a reference typed directly, meaning the double-click genuinely replaced
+just that word rather than colliding with (or being silently eaten by) the caret-placement path.
+
+#93 is a second, deeper regression uncovered while verifying #92: `useTextEditOnDoubleClick.ts` (the
+hook that starts an edit session on double-click, #58/#59 above) has always been gated purely on
+`activeTool === default`, never on whether an edit session is already live — so a double-click meant
+to select a word _inside_ an active, unsaved re-edit also reached this hook's own canvas-level
+`dblclick` listener, which hit-tests against the node's stale, already-committed content in the store
+(the live, in-progress content only exists in `editingTextContent`/the DOM overlay, not yet written
+back via `updateNode`) and unconditionally dispatches a fresh `startTextEdit`, silently discarding
+whatever had been typed since re-entering. Unreported until now because double-clicking mid-edit
+previously did nothing useful (before #92) — this behavior existed, it just weren't yet something a
+user had reason to trigger. Fixed by also gating `useTextEditOnDoubleClick.ts` on `!editingTextBox`.
+The unit suite (`useTextEditOnDoubleClick.spec.tsx`) asserts the exact store state (`editingNodeId`/
+`editingTextContent` unchanged) directly; the e2e version types content, re-selects a word inside it,
+retypes, and checks the final result against a from-scratch reference — a stale reset would have
+reverted to the original committed text partway through, producing a completely different final
+render than what re-typing the same final content directly would produce.
 
 ## Resize (Etap 10)
 
@@ -636,6 +675,7 @@ box, never a separate node lookup.
 | 85  | Dragging along the curve from one character to another selects that range; typing replaces the selection instead of inserting alongside it                                                                                                             |  ✅  | ✅ `text-on-path.spec.ts` |
 | 87  | Clicking a point on a rotated (or flipped) path-text circle places the caret at its actual rotated/flipped screen position, not the position it would occupy at rotation 0                                                                             |  ✅  | ✅ `text-on-path.spec.ts` |
 | 90  | Committing a freshly typed path-text node without ever having explicitly selected it does not leave a stale resize-handle hit zone active at the underlying path node's own corner                                                                     |  ✅  | ✅ `text-on-path.spec.ts` |
+| 94  | Double-clicking a word while actively composing path-text selects that word (via `useCurvedCaretEditing.ts`'s own `handleDoubleClick.ts`, sharing `getWordRangeAtIndex.ts` with the straight-text case — see #92 above)                                |  ✅  | ✅ `text-on-path.spec.ts` |
 
 #77/#78 stay unit-only: `getFittedPathFontSize.spec.ts` and `continuePathOffsetDrag.spec.ts` already
 assert the exact resulting font size / offset value via direct function calls and

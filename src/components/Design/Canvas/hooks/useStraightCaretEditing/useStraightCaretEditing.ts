@@ -1,41 +1,19 @@
 import { RefObject, useEffect, useRef } from 'react';
 
-// others
-import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
-import { STRAIGHT_TEXT_HIT_TOLERANCE_PX } from 'constant/canvas';
-import { TEXT_FONT_SIZE } from '../../constants';
-
 // store
-import { selectEditingTextBox, selectEditingTextContent, selectViewport } from 'store/design/selectors';
-import { store, useAppDispatch, useAppSelector } from 'store';
-import { updateTextEditSelection } from 'store/design/slice';
+import { selectEditingTextBox } from 'store/design/selectors';
+import { useAppDispatch, useAppSelector } from 'store';
 
 // types
 import { TEditingTextBox } from 'types/canvas';
 
 // utils
-import { getPointerPosition } from '../../utils/getPointerPosition';
-import { getStraightCaretIndexAtPoint, TStraightCaretHit } from 'utils/canvas/text/getStraightCaretIndexAtPoint';
-import { screenToWorld } from '../../utils/screenToWorld';
-import { setEditableSelectionRange } from '../../components/TextEditOverlay/utils/setEditableSelectionRange';
+import { handleDoubleClick } from './utils/handleDoubleClick/handleDoubleClick';
+import { handlePointerDown } from './utils/handlePointerDown/handlePointerDown';
+import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
+import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 
-const getEditingOverlay = (): HTMLElement | null => document.querySelector('[contenteditable="true"]');
 const isEditingStraightBox = (box: TEditingTextBox | null): boolean => Boolean(box) && !box?.pathId;
-
-const getStraightHitAtEvent = (canvas: HTMLCanvasElement, event: PointerEvent): TStraightCaretHit | null => {
-  const state = store.getState();
-  const box = selectEditingTextBox(state);
-
-  if (!box || box.pathId) {
-    return null;
-  }
-
-  const viewport = selectViewport(state);
-  const content = selectEditingTextContent(state);
-  const point = screenToWorld(getPointerPosition(canvas, event), viewport);
-
-  return getStraightCaretIndexAtPoint(MSDF_ATLAS_JSON, content, TEXT_FONT_SIZE, box, point);
-};
 
 export const useStraightCaretEditing = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
   const dispatch = useAppDispatch();
@@ -43,65 +21,27 @@ export const useStraightCaretEditing = (canvasRef: RefObject<HTMLCanvasElement |
   const isActive = isEditingStraightBox(editingTextBox);
   const anchorIndexRef = useRef<number | null>(null);
 
-  const handlePointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
-    const overlay = getEditingOverlay();
-    const isOnEditingSurface = event.target === canvas || Boolean(overlay && overlay.contains(event.target as Node));
-    const hit = isOnEditingSurface ? getStraightHitAtEvent(canvas, event) : null;
-    const viewport = selectViewport(store.getState());
-    const tolerance = STRAIGHT_TEXT_HIT_TOLERANCE_PX / viewport.zoom;
-
-    if (overlay && hit && hit.distance <= tolerance) {
-      event.preventDefault();
-      overlay.focus();
-      setEditableSelectionRange(overlay, hit.index, hit.index);
-      dispatch(updateTextEditSelection({ end: hit.index, start: hit.index }));
-      anchorIndexRef.current = hit.index;
-    } else {
-      anchorIndexRef.current = null;
-    }
-  };
-
-  const handlePointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
-    const overlay = getEditingOverlay();
-    const anchor = anchorIndexRef.current;
-
-    if (overlay && anchor !== null && event.buttons !== 0) {
-      const hit = getStraightHitAtEvent(canvas, event);
-
-      if (hit) {
-        event.preventDefault();
-
-        const start = Math.min(anchor, hit.index);
-        const end = Math.max(anchor, hit.index);
-
-        setEditableSelectionRange(overlay, start, end);
-        dispatch(updateTextEditSelection({ end, start }));
-      }
-    }
-  };
-
-  const handlePointerUp = (): void => {
-    anchorIndexRef.current = null;
-  };
-
   useEffect(() => {
     const canvas = canvasRef.current;
 
     if (canvas && isActive) {
-      const onPointerDown = (event: PointerEvent): void => handlePointerDown(canvas, event);
-      const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event);
-      const onPointerUp = (): void => handlePointerUp();
+      const onPointerDown = (event: PointerEvent): void => handlePointerDown(canvas, event, dispatch, anchorIndexRef);
+      const onDoubleClick = (event: MouseEvent): void => handleDoubleClick(canvas, event, dispatch, anchorIndexRef);
+      const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event, dispatch, anchorIndexRef);
+      const onPointerUp = (): void => handlePointerUp(anchorIndexRef);
 
       document.addEventListener('pointerdown', onPointerDown);
+      document.addEventListener('dblclick', onDoubleClick);
       document.addEventListener('pointermove', onPointerMove);
       document.addEventListener('pointerup', onPointerUp);
 
       return (): void => {
         document.removeEventListener('pointerdown', onPointerDown);
+        document.removeEventListener('dblclick', onDoubleClick);
         document.removeEventListener('pointermove', onPointerMove);
         document.removeEventListener('pointerup', onPointerUp);
         anchorIndexRef.current = null;
       };
     }
-  }, [canvasRef, isActive]);
+  }, [canvasRef, dispatch, isActive]);
 };

@@ -7,15 +7,15 @@ import { selectEditingTextBox, selectEditingTextContent, selectViewport } from '
 import { store } from 'store';
 
 // utils
-import { getCurvedCaretIndexAtPoint, TCurvedCaretHit } from 'utils/canvas/text/getCurvedCaretIndexAtPoint';
 import { getPointerPosition } from '../../../utils/getPointerPosition';
+import { getStraightCaretIndexAtPoint, TStraightCaretHit } from 'utils/canvas/text/getStraightCaretIndexAtPoint';
 import { screenToWorld } from '../../../utils/screenToWorld';
 
-export const getCurvedHitAtEvent = (canvas: HTMLCanvasElement, event: MouseEvent): TCurvedCaretHit | null => {
+export const getStraightHitAtEvent = (canvas: HTMLCanvasElement, event: MouseEvent): TStraightCaretHit | null => {
   const state = store.getState();
   const box = selectEditingTextBox(state);
 
-  if (!box?.pathId) {
+  if (!box || box.pathId) {
     return null;
   }
 
@@ -23,5 +23,5 @@ export const getCurvedHitAtEvent = (canvas: HTMLCanvasElement, event: MouseEvent
   const content = selectEditingTextContent(state);
   const point = screenToWorld(getPointerPosition(canvas, event), viewport);
 
-  return getCurvedCaretIndexAtPoint(MSDF_ATLAS_JSON, content, TEXT_FONT_SIZE, box, point);
+  return getStraightCaretIndexAtPoint(MSDF_ATLAS_JSON, content, TEXT_FONT_SIZE, box, point);
 };

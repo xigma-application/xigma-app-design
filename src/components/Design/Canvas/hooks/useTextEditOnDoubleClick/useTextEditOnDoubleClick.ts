@@ -1,7 +1,7 @@
 import { RefObject, useEffect } from 'react';
 
 // store
-import { selectActiveTool, selectOrderedNodes, selectSelectedNodes, selectViewport } from 'store/design/selectors';
+import { selectActiveTool, selectEditingTextBox, selectOrderedNodes, selectSelectedNodes, selectViewport } from 'store/design/selectors';
 import { setSelection, startTextEdit } from 'store/design/slice';
 import { store, useAppDispatch, useAppSelector } from 'store';
 
@@ -15,6 +15,7 @@ import { screenToWorld } from '../../utils/screenToWorld';
 
 export const useTextEditOnDoubleClick = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
   const activeTool = useAppSelector(selectActiveTool);
+  const editingTextBox = useAppSelector(selectEditingTextBox);
   const dispatch = useAppDispatch();
 
   const handleDoubleClick = (canvas: HTMLCanvasElement, event: MouseEvent): void => {
@@ -49,12 +50,12 @@ export const useTextEditOnDoubleClick = (canvasRef: RefObject<HTMLCanvasElement 
   useEffect(() => {
     const canvas = canvasRef.current;
 
-    if (canvas && activeTool === ToolName.default) {
+    if (canvas && activeTool === ToolName.default && !editingTextBox) {
       const onDoubleClick = (event: MouseEvent): void => handleDoubleClick(canvas, event);
 
       canvas.addEventListener('dblclick', onDoubleClick);
 
       return (): void => canvas.removeEventListener('dblclick', onDoubleClick);
     }
-  }, [activeTool, canvasRef, dispatch]);
+  }, [activeTool, canvasRef, dispatch, editingTextBox]);
 };

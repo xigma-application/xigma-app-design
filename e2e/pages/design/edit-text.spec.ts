@@ -31,6 +31,58 @@ test('double-clicking an unselected text node enters edit mode with all its cont
   expect(replaced.equals(reference)).toBe(true);
 });
 
+test('double-clicking a word while actively typing new text selects it, so typing replaces just that word', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-word-select-new-text');
+  await designPage.drawTextBox(300, 300, 500, 340);
+  await designPage.typeText('HELLO WORLD');
+
+  await designPage.doubleClick(305, 310); // select "HELLO" on the rendered "H", still actively typing (never committed)
+  await designPage.typeText('BYE');
+  await designPage.click(950, 600); // commit
+
+  const replaced = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-word-select-new-text-reference');
+  await designPage.drawTextBox(300, 300, 500, 340);
+  await designPage.typeText('BYE WORLD');
+  await designPage.click(950, 600);
+
+  const reference = await designPage.canvas.screenshot();
+
+  expect(replaced.equals(reference)).toBe(true);
+});
+
+test('double-clicking to select a word while re-editing existing text does not discard the newly typed content', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  // the second double-click is the regression case: useTextEditOnDoubleClick used to hit-test
+  // against the node's stale, already-committed content ("ORIGINAL") instead of leaving the live,
+  // unsaved edit session alone, silently reverting whatever was typed since re-entering
+  await designPage.goto('e2e-test-word-select-no-reset');
+  await designPage.drawTextBox(300, 300, 500, 340);
+  await designPage.typeText('ORIGINAL');
+  await designPage.click(950, 600); // commit
+
+  await designPage.doubleClick(305, 310); // re-enter, select-all
+  await designPage.typeText('HELLO WORLD'); // replaces the selection with new, unsaved content
+  await designPage.doubleClick(305, 310); // double-click a word within the new (unsaved) content
+  await designPage.typeText('BYE');
+  await designPage.click(950, 600); // commit
+
+  const replaced = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-word-select-no-reset-reference');
+  await designPage.drawTextBox(300, 300, 500, 340);
+  await designPage.typeText('BYE WORLD');
+  await designPage.click(950, 600);
+
+  const reference = await designPage.canvas.screenshot();
+
+  expect(replaced.equals(reference)).toBe(true);
+});
+
 test('a rotated text node keeps rendering at its own rotation while being edited, not axis-aligned', async ({ page }) => {
   const designPage = new DesignPage(page);
 

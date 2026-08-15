@@ -6,7 +6,7 @@ import { RefObject } from 'react';
 import { useTextEditOnDoubleClick } from './useTextEditOnDoubleClick';
 
 // store
-import { addNode, setActiveTool, setSelection, stopTextEdit } from 'store/design/slice';
+import { addNode, setActiveTool, setSelection, startTextEdit, stopTextEdit } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -233,5 +233,34 @@ describe('useTextEditOnDoubleClick behaviors', () => {
     // result
     expect(store.getState().design.editingNodeId).toBeNull();
     expect(idA).toBeTruthy();
+  });
+
+  it('should not react while a text edit session is already active, so a double-click meant to select a word does not reset in-progress content back to the stale committed node', () => {
+    // mock — the node still holds its originally-committed content in the store; a live edit
+    // session has replaced it with unsaved content that a stale re-hit-test must not discard
+    const idA = addTextNode(2900, 2900, 'original');
+
+    store.dispatch(setSelection([idA]));
+    store.dispatch(
+      startTextEdit({
+        box: { flipX: false, flipY: false, height: 500, rotation: 0, width: 500, x: 2900, y: 2900 },
+        content: 'unsaved edit',
+        id: idA,
+      }),
+    );
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    renderDoubleClickTool(canvasRef);
+
+    // action — double-clicking inside the same box while it's actively being edited
+    canvasRef.current?.dispatchEvent(doubleClickEvent(2902, 2902));
+
+    // result — the live session's own (unsaved) content must survive, not reset to 'original'
+    const { design } = store.getState();
+
+    expect(design.editingNodeId).toBe(idA);
+    expect(design.editingTextContent).toBe('unsaved edit');
   });
 });

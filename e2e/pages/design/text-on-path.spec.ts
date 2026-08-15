@@ -153,6 +153,31 @@ test('clicking a point along curved text places the caret there for insertion, n
   expect(midInsertion.equals(endInsertion)).toBe(false);
 });
 
+test('double-clicking a word while actively typing path-text selects it, so typing replaces just that word', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  // a 200x200 circle centered at (400, 400); "Hi there" starts at the rightmost point (500, 400),
+  // same as the plain "Hi" fixture above — the rendered "H" glyph sits at (493, 405)
+  await designPage.goto('e2e-test-path-word-select');
+  await designPage.drawTextOnPath(300, 300, 500, 500);
+  await designPage.typeText('Hi there');
+
+  await designPage.doubleClick(493, 405); // select "Hi" on the rendered "H", still actively typing (never committed)
+  await designPage.typeText('Yo');
+  await designPage.click(900, 600); // commit
+
+  const replaced = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-path-word-select-reference');
+  await designPage.drawTextOnPath(300, 300, 500, 500);
+  await designPage.typeText('Yo there');
+  await designPage.click(900, 600);
+
+  const reference = await designPage.canvas.screenshot();
+
+  expect(replaced.equals(reference)).toBe(true);
+});
+
 test('dragging along curved text selects a range that typing then replaces', async ({ page }) => {
   const designPage = new DesignPage(page);
 

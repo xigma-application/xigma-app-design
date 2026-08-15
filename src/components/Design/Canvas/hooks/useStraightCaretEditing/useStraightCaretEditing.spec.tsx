@@ -41,6 +41,9 @@ const createOverlay = (content: string): HTMLElement => {
 const pointerEvent = (type: string, x: number, y: number, options: Partial<PointerEventInit> = {}): PointerEvent =>
   new PointerEvent(type, { bubbles: true, button: 0, buttons: 1, clientX: x, clientY: y, pointerId: 1, ...options });
 
+const doubleClickEvent = (x: number, y: number): MouseEvent =>
+  new MouseEvent('dblclick', { bubbles: true, button: 0, clientX: x, clientY: y });
+
 const renderStraightCaretEditing = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
   renderHook(() => useStraightCaretEditing(canvasRef), {
     wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
@@ -80,6 +83,46 @@ describe('useStraightCaretEditing behaviors', () => {
     expect(design.editingSelectionStart).toBe(0);
     expect(design.editingSelectionEnd).toBe(0);
     expect(document.activeElement).toBe(overlay);
+  });
+
+  it('should select the whole word (not just a collapsed caret) when double-clicking within tolerance', () => {
+    // mock
+    store.dispatch(startTextEdit({ box: ROTATED_BOX, content: 'Hi' }));
+
+    // before
+    renderStraightCaretEditing(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(doubleClickEvent(START.x, START.y));
+    });
+
+    // result — "Hi" is a single word, so the whole 2-character content is selected
+    const { design } = store.getState();
+
+    expect(design.editingSelectionStart).toBe(0);
+    expect(design.editingSelectionEnd).toBe(2);
+    expect(document.activeElement).toBe(overlay);
+  });
+
+  it('should do nothing when double-clicking outside hit tolerance', () => {
+    // mock
+    store.dispatch(startTextEdit({ box: ROTATED_BOX, content: 'Hi' }));
+
+    // before
+    renderStraightCaretEditing(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(doubleClickEvent(0, 0));
+    });
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.editingSelectionStart).toBe(0);
+    expect(design.editingSelectionEnd).toBe(0);
+    expect(document.activeElement).not.toBe(overlay);
   });
 
   it('should extend the selection from the anchor index while dragging on a rotated box', () => {
@@ -198,6 +241,33 @@ describe('useStraightCaretEditing behaviors', () => {
 
     expect(design.editingSelectionStart).toBe(0);
     expect(design.editingSelectionEnd).toBe(0);
+
+    // after
+    outsideElement.remove();
+  });
+
+  it('should ignore a double-click that lands outside the canvas and the editing overlay', () => {
+    // mock
+    store.dispatch(startTextEdit({ box: ROTATED_BOX, content: 'Hi' }));
+
+    const outsideElement = document.createElement('div');
+
+    document.body.appendChild(outsideElement);
+
+    // before
+    renderStraightCaretEditing(canvasRef);
+
+    // action
+    act(() => {
+      outsideElement.dispatchEvent(doubleClickEvent(START.x, START.y));
+    });
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.editingSelectionStart).toBe(0);
+    expect(design.editingSelectionEnd).toBe(0);
+    expect(document.activeElement).not.toBe(overlay);
 
     // after
     outsideElement.remove();

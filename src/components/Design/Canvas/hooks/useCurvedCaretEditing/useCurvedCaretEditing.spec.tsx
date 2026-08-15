@@ -56,6 +56,9 @@ const createOverlay = (content: string): HTMLElement => {
 const pointerEvent = (type: string, x: number, y: number, options: Partial<PointerEventInit> = {}): PointerEvent =>
   new PointerEvent(type, { bubbles: true, button: 0, buttons: 1, clientX: x, clientY: y, pointerId: 1, ...options });
 
+const doubleClickEvent = (x: number, y: number): MouseEvent =>
+  new MouseEvent('dblclick', { bubbles: true, button: 0, clientX: x, clientY: y });
+
 const renderCurvedCaretEditing = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
   renderHook(() => useCurvedCaretEditing(canvasRef), {
     wrapper: ({ children }) => (
@@ -98,6 +101,26 @@ describe('useCurvedCaretEditing behaviors', () => {
 
     expect(design.editingSelectionStart).toBe(1);
     expect(design.editingSelectionEnd).toBe(1);
+    expect(document.activeElement).toBe(overlay);
+  });
+
+  it('should select the whole word (not just a collapsed caret) when double-clicking on the path within tolerance', () => {
+    // mock
+    store.dispatch(startTextEdit({ box: CIRCLE_BOX, content: 'Hi' }));
+
+    // before
+    renderCurvedCaretEditing(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(doubleClickEvent(NEAR_RIGHT.x, NEAR_RIGHT.y));
+    });
+
+    // result — "Hi" is a single word, so the whole 2-character content is selected
+    const { design } = store.getState();
+
+    expect(design.editingSelectionStart).toBe(0);
+    expect(design.editingSelectionEnd).toBe(2);
     expect(document.activeElement).toBe(overlay);
   });
 
