@@ -363,6 +363,7 @@ the live-typed ones.
 | 63  | A rotated, mirrored node being edited keeps rendering its glyphs (`drawEditingText.ts`) at its own rotation/flip                               |  ✅  | ✅ `edit-text.spec.ts` |
 | 64  | The canvas-drawn selection highlight/caret (`drawEditingCaretAndSelection.ts`) reacts to the live selection, even on a rotated node            |  ✅  | ✅ `edit-text.spec.ts` |
 | 86  | Clicking a point on a rotated or flipped straight-text box places the caret there, not wherever native (unrotated) DOM hit-testing would land  |  ✅  | ✅ `edit-text.spec.ts` |
+| 91  | Clicking a point on a plain (unrotated, unflipped) straight-text box places the caret there too, instead of exiting edit mode entirely         |  ✅  | ✅ `edit-text.spec.ts` |
 
 #58/#59 are the two distinct hit-test branches (`getDoubleClickedTextNode.ts` already pins both
 precisely via `store.getState()`), but the actual claim worth an e2e proof is a real native
@@ -397,25 +398,54 @@ places the Range against the overlay div's unrotated, unflipped native text layo
 when the box's own `rotation`/`flipX`/`flipY` are all identity. For a rotated or flipped box, the
 same screen point maps to a different character than the one visually under the cursor (worst case,
 a 180-degree box reads back-to-front, so a click near what looks like the end of the text lands the
-caret near the start instead). `useRotatedCaretEditing.ts` fixes this the same way
-`useCurvedCaretEditing.ts` already fixed the equivalent bug for path text: a real `document`-level
-`pointerdown`/`pointermove`/`pointerup` listener (active only when `shouldUseCanvasCaretEditing.ts`
-says the box actually needs it — plain unrotated/unflipped boxes are untouched, still native)
-computes the clicked character via `getStraightCaretIndexAtPoint.ts` — unrotate then unflip the
-query point (`rotatePoint`/`flipTextPoint`, the same inverse-transform trick `getUnrotatedQueryPoint`
-already uses for hit-testing elsewhere), then walk `wrapTextWithOffsets`/`measureGlyphTextWidth` to
-find the nearest character boundary — and programmatically sets the real DOM `Range`/`Selection` via
+caret near the start instead). `useStraightCaretEditing.ts` (originally `useRotatedCaretEditing.ts` —
+renamed for #91 below, see that entry for why "rotated" stopped being the right scope) fixes this the
+same way `useCurvedCaretEditing.ts` already fixed the equivalent bug for path text: a real
+`document`-level `pointerdown`/`pointermove`/`pointerup` listener computes the clicked character via
+`getStraightCaretIndexAtPoint.ts` — unrotate then unflip the query point (`rotatePoint`/
+`flipTextPoint`, the same inverse-transform trick `getUnrotatedQueryPoint` already uses for
+hit-testing elsewhere), then walk `wrapTextWithOffsets`/`measureGlyphTextWidth` to find the nearest
+character boundary — and programmatically sets the real DOM `Range`/`Selection` via
 `setEditableSelectionRange.ts`, overriding whatever the native click would have done.
-`useSelectionTool.ts`'s own pointer handling is gated off by the same `shouldUseCanvasCaretEditing.ts`
-check while either canvas-driven caret-editing hook is active, so a click that lands on the bare
-canvas (rather than the overlay) during such a session can't also select/drag some other node
-underneath. The unit suite (`getStraightCaretIndexAtPoint.spec.ts`, `shouldUseCanvasCaretEditing
-.spec.ts`, `useRotatedCaretEditing.spec.tsx`) asserts the exact index/distance/selection precisely
+`useSelectionTool.ts`'s own pointer handling is gated off by `shouldUseCanvasCaretEditing.ts` while
+either canvas-driven caret-editing hook is active, so a click that lands on the bare canvas (rather
+than the overlay) during such a session can't also select/drag some other node underneath. The unit
+suite (`getStraightCaretIndexAtPoint.spec.ts`, `shouldUseCanvasCaretEditing
+.spec.ts`, `useStraightCaretEditing.spec.tsx`) asserts the exact index/distance/selection precisely
 in jsdom, but the e2e version proves a real rotate-ring drag to an exact 180 degrees (dragging to the
 reflection of the arm point through the box's own center, guaranteeing the delta regardless of the
 arm point's exact position) followed by a real click at two different points on the now-upside-down
 text produces two visibly different results for the same typed character — the same "compare two
 independently-drawn pages" pattern `text-on-path.spec.ts`'s curved-caret tests already use.
+
+#91 is a real, reported regression, found right after #86 shipped: `TextEditOverlay.module.scss`
+sets `pointer-events: none` on the editing overlay (added earlier, to stop resize/rotate/path-offset
+hover cursors from bleeding through while text is being edited), which means the overlay itself can
+**never** receive a click at all, rotated or not — every click always falls straight through to the
+`<canvas>` underneath. #86's own fix already accounted for this correctly for rotated/flipped/path
+boxes (routing them through a canvas-level listener instead of relying on native hit-testing), but
+`isBoxRotatedOrFlipped`'s gate deliberately left plain (rotation 0, no flip) boxes out, on the
+stale assumption from before the `pointer-events: none` change that "native still handles the plain
+case" — it never did, once that change landed. So for a plain box specifically, a click meant to
+reposition the caret instead fell through to `useSelectionTool.ts`'s still-active canvas listener,
+which never calls `preventDefault()` — letting the browser's own default mousedown action fire
+unopposed, blurring the overlay and committing/exiting the edit session entirely, exactly the "select
+a cursor position and it immediately kicks you out of the tool" behavior reported live. Renamed
+`useRotatedCaretEditing.ts` → `useStraightCaretEditing.ts` and widened its gate (and
+`shouldUseCanvasCaretEditing.ts`'s) to cover every straight (non-path) box being edited, not just
+rotated/flipped ones — `getStraightCaretIndexAtPoint.ts`'s inverse-transform math already degrades
+correctly to identity at `rotation: 0`/no flip, so no new math was needed, only the activation
+condition. Fixing this exposed a second, previously-hidden bug in the same area: `useSelectionTool.ts`
+being active throughout a plain-text edit was also silently responsible for **deselecting** the node
+once its own empty-canvas-click handler ran on the same click that caused the native blur — with
+`useSelectionTool.ts` now correctly disabled for the whole edit session (any rotation), that dedicated
+deselect-on-commit behavior had to move into `useCommitTextEdit.ts` itself (`dispatch(setSelection([]))`
+unconditionally alongside `stopTextEdit()`), rather than continuing to rely on an unrelated hook's
+side effect — caught by two existing screenshot tests (#58/#59 above) that started failing once
+`useSelectionTool.ts` stopped incidentally doing this. #91's own e2e version mirrors #86's exact
+pattern for a never-rotated box: click a point between two rendered characters vs. just past them,
+type the same character, and assert the two independently-drawn results differ — proving both that
+the click landed inside the edit session (not exiting it) and that it landed at the right character.
 
 ## Resize (Etap 10)
 

@@ -2,7 +2,7 @@ import { RefObject, useEffect, useRef } from 'react';
 
 // others
 import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
-import { ROTATED_TEXT_HIT_TOLERANCE_PX } from 'constant/canvas';
+import { STRAIGHT_TEXT_HIT_TOLERANCE_PX } from 'constant/canvas';
 import { TEXT_FONT_SIZE } from '../../constants';
 
 // store
@@ -20,9 +20,7 @@ import { screenToWorld } from '../../utils/screenToWorld';
 import { setEditableSelectionRange } from '../../components/TextEditOverlay/utils/setEditableSelectionRange';
 
 const getEditingOverlay = (): HTMLElement | null => document.querySelector('[contenteditable="true"]');
-
-const isBoxRotatedOrFlipped = (box: TEditingTextBox | null): boolean =>
-  Boolean(box) && !box?.pathId && (box?.rotation !== 0 || box?.flipX || box?.flipY);
+const isEditingStraightBox = (box: TEditingTextBox | null): boolean => Boolean(box) && !box?.pathId;
 
 const getStraightHitAtEvent = (canvas: HTMLCanvasElement, event: PointerEvent): TStraightCaretHit | null => {
   const state = store.getState();
@@ -39,10 +37,10 @@ const getStraightHitAtEvent = (canvas: HTMLCanvasElement, event: PointerEvent): 
   return getStraightCaretIndexAtPoint(MSDF_ATLAS_JSON, content, TEXT_FONT_SIZE, box, point);
 };
 
-export const useRotatedCaretEditing = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
+export const useStraightCaretEditing = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
   const dispatch = useAppDispatch();
   const editingTextBox = useAppSelector(selectEditingTextBox);
-  const isActive = isBoxRotatedOrFlipped(editingTextBox);
+  const isActive = isEditingStraightBox(editingTextBox);
   const anchorIndexRef = useRef<number | null>(null);
 
   const handlePointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
@@ -50,7 +48,7 @@ export const useRotatedCaretEditing = (canvasRef: RefObject<HTMLCanvasElement | 
     const isOnEditingSurface = event.target === canvas || Boolean(overlay && overlay.contains(event.target as Node));
     const hit = isOnEditingSurface ? getStraightHitAtEvent(canvas, event) : null;
     const viewport = selectViewport(store.getState());
-    const tolerance = ROTATED_TEXT_HIT_TOLERANCE_PX / viewport.zoom;
+    const tolerance = STRAIGHT_TEXT_HIT_TOLERANCE_PX / viewport.zoom;
 
     if (overlay && hit && hit.distance <= tolerance) {
       event.preventDefault();

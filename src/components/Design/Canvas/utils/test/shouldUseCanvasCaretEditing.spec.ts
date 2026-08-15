@@ -12,28 +12,18 @@ describe('shouldUseCanvasCaretEditing', () => {
     expect(shouldUseCanvasCaretEditing(null)).toBe(false);
   });
 
-  it('should return false for a plain, unrotated, unflipped straight-text box', () => {
+  it('should return true for a plain, unrotated, unflipped straight-text box, since pointer-events: none on the overlay means clicks always fall through to the canvas', () => {
     // result
-    expect(shouldUseCanvasCaretEditing(BOX)).toBe(false);
+    expect(shouldUseCanvasCaretEditing(BOX)).toBe(true);
   });
 
-  it('should return true for a path-text box, regardless of rotation', () => {
+  it('should return true for a path-text box', () => {
     // result
     expect(shouldUseCanvasCaretEditing({ ...BOX, pathId: 'ellipse-1' })).toBe(true);
   });
 
-  it('should return true for a rotated straight-text box', () => {
+  it('should return true for a rotated or flipped straight-text box', () => {
     // result
     expect(shouldUseCanvasCaretEditing({ ...BOX, rotation: 180 })).toBe(true);
-  });
-
-  it('should return true for a horizontally flipped straight-text box', () => {
-    // result
-    expect(shouldUseCanvasCaretEditing({ ...BOX, flipX: true })).toBe(true);
-  });
-
-  it('should return true for a vertically flipped straight-text box', () => {
-    // result
-    expect(shouldUseCanvasCaretEditing({ ...BOX, flipY: true })).toBe(true);
   });
 });

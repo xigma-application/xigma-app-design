@@ -3,7 +3,7 @@ import { Provider } from 'react-redux';
 import { RefObject } from 'react';
 
 // hooks
-import { useRotatedCaretEditing } from './useRotatedCaretEditing';
+import { useStraightCaretEditing } from './useStraightCaretEditing';
 
 // store
 import { startTextEdit, stopTextEdit } from 'store/design/slice';
@@ -41,13 +41,13 @@ const createOverlay = (content: string): HTMLElement => {
 const pointerEvent = (type: string, x: number, y: number, options: Partial<PointerEventInit> = {}): PointerEvent =>
   new PointerEvent(type, { bubbles: true, button: 0, buttons: 1, clientX: x, clientY: y, pointerId: 1, ...options });
 
-const renderRotatedCaretEditing = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
-  renderHook(() => useRotatedCaretEditing(canvasRef), {
+const renderStraightCaretEditing = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
+  renderHook(() => useStraightCaretEditing(canvasRef), {
     wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
   });
 };
 
-describe('useRotatedCaretEditing behaviors', () => {
+describe('useStraightCaretEditing behaviors', () => {
   let canvasRef: RefObject<HTMLCanvasElement | null>;
   let overlay: HTMLElement;
 
@@ -67,7 +67,7 @@ describe('useRotatedCaretEditing behaviors', () => {
     store.dispatch(startTextEdit({ box: ROTATED_BOX, content: 'Hi' }));
 
     // before
-    renderRotatedCaretEditing(canvasRef);
+    renderStraightCaretEditing(canvasRef);
 
     // action
     act(() => {
@@ -87,7 +87,7 @@ describe('useRotatedCaretEditing behaviors', () => {
     store.dispatch(startTextEdit({ box: ROTATED_BOX, content: 'Hi' }));
 
     // before
-    renderRotatedCaretEditing(canvasRef);
+    renderStraightCaretEditing(canvasRef);
 
     // action
     act(() => {
@@ -107,7 +107,7 @@ describe('useRotatedCaretEditing behaviors', () => {
     store.dispatch(startTextEdit({ box: FLIPPED_BOX, content: 'Hi' }));
 
     // before
-    renderRotatedCaretEditing(canvasRef);
+    renderStraightCaretEditing(canvasRef);
 
     // action — the box's own left edge is where the flipped content ends
     act(() => {
@@ -118,20 +118,23 @@ describe('useRotatedCaretEditing behaviors', () => {
     expect(store.getState().design.editingSelectionStart).toBe(2);
   });
 
-  it('should not attach any listeners for a plain, unrotated and unflipped box', () => {
+  it('should place the caret correctly on a plain, unrotated and unflipped box, since the overlay itself never receives the click', () => {
     // mock
     store.dispatch(startTextEdit({ box: PLAIN_BOX, content: 'Hi' }));
 
     // before
-    renderRotatedCaretEditing(canvasRef);
+    renderStraightCaretEditing(canvasRef);
 
-    // action
-    expect(() => {
-      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', START.x, START.y));
-    }).not.toThrow();
+    // action — the box's own left edge, same point used for the flipped-box assertion above
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 1002, 1010));
+    });
 
-    // result — native DOM hit-testing owns this box; the hook must never override it
-    expect(document.activeElement).not.toBe(overlay);
+    // result
+    const { design } = store.getState();
+
+    expect(design.editingSelectionStart).toBe(0);
+    expect(document.activeElement).toBe(overlay);
   });
 
   it('should stop extending the selection once the pointer is released', () => {
@@ -139,7 +142,7 @@ describe('useRotatedCaretEditing behaviors', () => {
     store.dispatch(startTextEdit({ box: ROTATED_BOX, content: 'Hi' }));
 
     // before
-    renderRotatedCaretEditing(canvasRef);
+    renderStraightCaretEditing(canvasRef);
 
     // action
     act(() => {
@@ -160,7 +163,7 @@ describe('useRotatedCaretEditing behaviors', () => {
     store.dispatch(startTextEdit({ box: ROTATED_BOX, content: 'Hi' }));
 
     // before
-    renderRotatedCaretEditing(canvasRef);
+    renderStraightCaretEditing(canvasRef);
 
     // action — the effect cleanup for the now-stale listener is deferred until this batch commits,
     act(() => {
@@ -182,7 +185,7 @@ describe('useRotatedCaretEditing behaviors', () => {
     document.body.appendChild(outsideElement);
 
     // before
-    renderRotatedCaretEditing(canvasRef);
+    renderStraightCaretEditing(canvasRef);
 
     // action
     act(() => {

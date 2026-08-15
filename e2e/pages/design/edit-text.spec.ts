@@ -160,3 +160,37 @@ test('clicking a point on an upside-down (180-degree rotated) text box places th
 
   expect(midInsertion.equals(endInsertion)).toBe(false);
 });
+
+test('clicking a point on a plain (unrotated, unflipped) text box places the caret there, not always at the end', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  // a 200x40 box at (300,300)-(500,340); "Hi" renders with the "H"/"i" boundary at world (310.5, 320)
+  // and the end of "i" at world (314, 320) — the same box/content as the rotated variant above, but
+  // never rotated, so pointer-events: none on the editing overlay means every click here also falls
+  // through straight to the canvas underneath, same as the rotated case
+  await designPage.goto('e2e-test-plain-caret-mid-insert');
+  await designPage.drawTextBox(300, 300, 500, 340);
+  await designPage.typeText('Hi');
+  await designPage.click(950, 600); // commit
+
+  await designPage.doubleClick(305, 310); // re-enter editing on the rendered "H"
+  await designPage.click(310.5, 320); // the boundary between "H" and "i"
+  await designPage.typeText('X');
+  await designPage.click(950, 600); // commit
+  const midInsertion = await designPage.canvas.screenshot();
+
+  // same box/content, but the click lands just past "i" instead — the caret should land at the
+  // end, producing a visibly different render for the same typed character
+  await designPage.goto('e2e-test-plain-caret-end-insert');
+  await designPage.drawTextBox(300, 300, 500, 340);
+  await designPage.typeText('Hi');
+  await designPage.click(950, 600);
+
+  await designPage.doubleClick(305, 310);
+  await designPage.click(314, 320); // just past "i"
+  await designPage.typeText('X');
+  await designPage.click(950, 600);
+  const endInsertion = await designPage.canvas.screenshot();
+
+  expect(midInsertion.equals(endInsertion)).toBe(false);
+});

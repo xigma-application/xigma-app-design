@@ -613,6 +613,26 @@ describe('useSelectionTool behaviors', () => {
     expect(store.getState().design.selectedIds).toEqual([idA]);
   });
 
+  it('should not react to pointer events while a plain (unrotated, unflipped) straight-text node is being edited, since the overlay itself is pointer-events: none and every click falls through to the canvas', () => {
+    // mock
+    const idA = addFrameNode(3150, 700);
+    const box: TEditingTextBox = { flipX: false, flipY: false, height: 20, rotation: 0, width: 20, x: 3150, y: 700 };
+
+    store.dispatch(startTextEdit({ box, content: 'Hi' }));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    renderSelectionTool(canvasRef);
+
+    // action
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 3155, 705));
+
+    // result
+    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(idA).toBeTruthy();
+  });
+
   it('should not react to pointer events while a rotated straight-text node is being edited', () => {
     // mock
     const idA = addFrameNode(3200, 700);

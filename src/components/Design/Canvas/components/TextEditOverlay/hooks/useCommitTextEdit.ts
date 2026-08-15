@@ -25,10 +25,7 @@ export const useCommitTextEdit = (
         commitTextNode(dispatch, box, editingNodeId, content);
       }
 
-      if (!editingNodeId && box.pathId) {
-        dispatch(setSelection([]));
-      }
-
+      dispatch(setSelection([]));
       dispatch(stopTextEdit());
     }
   };
