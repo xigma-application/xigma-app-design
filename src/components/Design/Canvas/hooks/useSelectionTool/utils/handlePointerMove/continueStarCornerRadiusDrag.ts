@@ -10,6 +10,7 @@ import { TStarCornerRadiusDragState } from '../../types';
 import { TPoint } from 'types/canvas';
 
 // utils
+import { flipPoint } from 'utils/math/flipPoint';
 import { getCornerRadiusHandleSetbackMultiplier } from 'utils/canvas/cornerRadius/getCornerRadiusHandleSetbackMultiplier';
 import { getMaxStarCornerRadius } from 'utils/canvas/cornerRadius/star/getMaxStarCornerRadius';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
@@ -28,14 +29,15 @@ export const continueStarCornerRadiusDrag = (
   const dragState = starCornerRadiusDragRef.current;
 
   if (dragState) {
-    const { bounds, nodeId, points, ratio, rotation } = dragState;
+    const { bounds, flipX, flipY, nodeId, points, ratio, rotation } = dragState;
 
     dragState.hasMoved = true;
     const rawPoint = screenToWorld(getPointerPosition(canvas, event), selectViewport(store.getState()));
-    const point = getUnrotatedQueryPoint(rawPoint, bounds, rotation);
+    const unrotatedPoint = getUnrotatedQueryPoint(rawPoint, bounds, rotation);
+    const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+    const point = flipPoint(unrotatedPoint, center, flipX, flipY);
     const vertices = getStarPoints(bounds, points, ratio);
     const [topVertex] = vertices;
-    const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
     const towardCenter = normalizeVector({ x: center.x - topVertex.x, y: center.y - topVertex.y });
     const setbackMultiplier = getCornerRadiusHandleSetbackMultiplier(getVertexAngles(vertices)[0]);
     const projectedSetback = (point.x - topVertex.x) * towardCenter.x + (point.y - topVertex.y) * towardCenter.y;

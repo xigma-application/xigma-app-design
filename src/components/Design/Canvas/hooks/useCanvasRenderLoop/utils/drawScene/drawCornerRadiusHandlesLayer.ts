@@ -67,6 +67,8 @@ export const drawCornerRadiusHandlesLayer = (
           canvasHeight,
           viewport,
           selectedNode.rotation,
+          selectedNode.flipX,
+          selectedNode.flipY,
           isDraggingCornerRadius,
         );
         break;
@@ -84,6 +86,8 @@ export const drawCornerRadiusHandlesLayer = (
           canvasHeight,
           viewport,
           selectedNode.rotation,
+          selectedNode.flipX,
+          selectedNode.flipY,
           isDraggingCornerRadius,
         );
         break;

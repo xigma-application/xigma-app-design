@@ -6,6 +6,8 @@ import { TDraftRect, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
+import { flipPoint } from 'utils/math/flipPoint';
+import { getCornerRadiusHandleEffectiveSetback } from 'utils/canvas/cornerRadius/getCornerRadiusHandleEffectiveSetback';
 import { getCornerRadiusHandleSetbackMultiplier } from 'utils/canvas/cornerRadius/getCornerRadiusHandleSetbackMultiplier';
 import { getMaxPolygonCornerRadius } from './getMaxPolygonCornerRadius';
 import { getPolygonPoints } from 'utils/canvas/shapes/getPolygonPoints';
@@ -17,6 +19,8 @@ export const getPolygonCornerRadiusHandlePosition = (
   sides: number,
   cornerRadius: number,
   viewport: TViewport,
+  flipX = false,
+  flipY = false,
   isDragging = false,
 ): TPoint => {
   const vertices = getPolygonPoints(bounds, sides);
@@ -28,10 +32,8 @@ export const getPolygonCornerRadiusHandlePosition = (
   const zeroStateScreenGap = Math.min(Math.max(rawScreenGap, MIN_RADIUS_HANDLE_GAP_PX), ZERO_RADIUS_HANDLE_OFFSET_PX);
   const zeroStateOffset = zeroStateScreenGap / viewport.zoom;
   const maxRadius = getMaxPolygonCornerRadius(bounds, sides);
-  const effectiveSetback =
-    cornerRadius > 0 || isDragging
-      ? Math.min(cornerRadius, maxRadius) * setbackMultiplier
-      : Math.min(zeroStateOffset, maxRadius * setbackMultiplier);
+  const effectiveSetback = getCornerRadiusHandleEffectiveSetback(cornerRadius, maxRadius, setbackMultiplier, zeroStateOffset, isDragging);
+  const localPosition: TPoint = { x: topVertex.x + towardCenter.x * effectiveSetback, y: topVertex.y + towardCenter.y * effectiveSetback };
 
-  return { x: topVertex.x + towardCenter.x * effectiveSetback, y: topVertex.y + towardCenter.y * effectiveSetback };
+  return flipPoint(localPosition, center, flipX, flipY);
 };

@@ -46,6 +46,8 @@ export type TCornerRadiusDragState = {
 
 export type TPolygonCornerRadiusDragState = {
   bounds: TDraftRect;
+  flipX: boolean;
+  flipY: boolean;
   hasMoved: boolean;
   nodeId: string;
   rotation: number;
@@ -54,6 +56,8 @@ export type TPolygonCornerRadiusDragState = {
 
 export type TStarCornerRadiusDragState = {
   bounds: TDraftRect;
+  flipX: boolean;
+  flipY: boolean;
   hasMoved: boolean;
   nodeId: string;
   points: number;

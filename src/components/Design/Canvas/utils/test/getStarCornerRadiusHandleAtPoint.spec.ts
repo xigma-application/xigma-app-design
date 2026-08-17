@@ -76,11 +76,26 @@ describe('getStarCornerRadiusHandleAtPoint', () => {
     // result
     expect(getStarCornerRadiusHandleAtPoint({ x: 50, y: 33.893272 }, [node], IDENTITY_VIEWPORT)).toEqual({
       bounds: { height: 100, width: 100, x: 0, y: 0 },
+      flipX: false,
+      flipY: false,
       nodeId: 'a',
       points: 5,
       ratio: 0.5,
       rotation: 0,
     });
+  });
+
+  it('should detect the handle at its physically flipped position when flipY is set', () => {
+    // mock — top vertex of a 100x100 5-point star sits at (50, 0), center at (50, 50); radius 15
+    const node = star('a', 0, 0, 100, 100, 5, 0.5, 15);
+    const flippedNode = { ...node, flipY: true };
+
+    // result
+    expect(getStarCornerRadiusHandleAtPoint({ x: 50, y: 66.106728 }, [flippedNode], IDENTITY_VIEWPORT)).toMatchObject({
+      flipY: true,
+      nodeId: 'a',
+    });
+    expect(getStarCornerRadiusHandleAtPoint({ x: 50, y: 66.106728 }, [node], IDENTITY_VIEWPORT)).toBeNull();
   });
 
   it('should be grabbable even while the corner radius is still 0, at the zero-state offset position', () => {

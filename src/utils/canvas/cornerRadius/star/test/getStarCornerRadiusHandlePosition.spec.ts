@@ -42,13 +42,23 @@ describe('getStarCornerRadiusHandlePosition', () => {
 
   it('should sit exactly on the top vertex at radius 0 while actively dragging, instead of jumping to the zero-state offset', () => {
     // result
-    expect(getStarCornerRadiusHandlePosition(STAR_BOUNDS, 5, 0.5, 0, IDENTITY_VIEWPORT, true)).toEqual({ x: 50, y: 0 });
+    expect(getStarCornerRadiusHandlePosition(STAR_BOUNDS, 5, 0.5, 0, IDENTITY_VIEWPORT, false, false, true)).toEqual({ x: 50, y: 0 });
   });
 
   it('should still use the literal (positive) radius, scaled by the setback multiplier, while dragging, same as when not dragging', () => {
     // result
-    expect(getStarCornerRadiusHandlePosition(STAR_BOUNDS, 5, 0.5, 10, IDENTITY_VIEWPORT, true)).toEqual(
-      getStarCornerRadiusHandlePosition(STAR_BOUNDS, 5, 0.5, 10, IDENTITY_VIEWPORT, false),
+    expect(getStarCornerRadiusHandlePosition(STAR_BOUNDS, 5, 0.5, 10, IDENTITY_VIEWPORT, false, false, true)).toEqual(
+      getStarCornerRadiusHandlePosition(STAR_BOUNDS, 5, 0.5, 10, IDENTITY_VIEWPORT, false, false, false),
     );
+  });
+
+  it('should flip the handle position across the bounding-box center when flipX/flipY are set', () => {
+    // mock — top vertex of a 100x100 5-point star sits at (50, 0), center at (50, 50); radius 10
+    // moves the unflipped handle to (50, 22.595515) — flipY should mirror that to (50, 77.404485)
+    const position = getStarCornerRadiusHandlePosition(STAR_BOUNDS, 5, 0.5, 10, IDENTITY_VIEWPORT, false, true);
+
+    // result
+    expect(position.x).toBe(50);
+    expect(position.y).toBeCloseTo(77.404485, 5);
   });
 });

@@ -37,6 +37,8 @@ describe('disarmPolygonCornerRadiusDrag', () => {
     const canvas = createCanvas();
     const polygonCornerRadiusDragRef = createPolygonCornerRadiusDragRef({
       bounds: { height: 10, width: 10, x: 0, y: 0 },
+      flipX: false,
+      flipY: false,
       hasMoved: true,
       nodeId: 'node-a',
       rotation: 0,

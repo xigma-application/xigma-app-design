@@ -34,11 +34,15 @@ describe('armStarCornerRadiusDrag', () => {
       30,
       5,
       0.382,
+      true,
+      false,
     );
 
     // result
     expect(starCornerRadiusDragRef.current).toEqual({
       bounds: { height: 100, width: 100, x: 0, y: 0 },
+      flipX: true,
+      flipY: false,
       hasMoved: false,
       nodeId: 'node-a',
       points: 5,

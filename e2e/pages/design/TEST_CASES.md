@@ -1168,18 +1168,25 @@ apothem-based max where adjacent rounded corners just touch and the polygon dege
 inscribed circle — so "toward center increases, away decreases" falls out of the projection itself
 with no direction-resolution step needed.
 
-| #   | Scenario                                                                                                    | Unit |            E2E             |
-| --- | ----------------------------------------------------------------------------------------------------------- | :--: | :------------------------: |
-| 122 | The handle renders only once the triangle is both selected and hovered — selected alone shows nothing extra |  ✅  | ✅ `corner-radius.spec.ts` |
-| 123 | Dragging the handle straight down (toward the center) visibly rounds every corner                           |  ✅  | ✅ `corner-radius.spec.ts` |
-| 124 | Dragging past the center and back doesn't misbehave (stays clamped, keeps tracking the pointer)             |  ✅  | ✅ `corner-radius.spec.ts` |
-| 125 | The dispatched radius clamps to `getMaxPolygonCornerRadius`, matching the confirmed Figma apothem values    |  ✅  |             —              |
-| 126 | The handle vanishes entirely once the shape's on-screen size drops below the visibility threshold           |  ✅  |             —              |
+| #   | Scenario                                                                                                                   | Unit |            E2E             |
+| --- | -------------------------------------------------------------------------------------------------------------------------- | :--: | :------------------------: |
+| 122 | The handle renders only once the triangle is both selected and hovered — selected alone shows nothing extra                |  ✅  | ✅ `corner-radius.spec.ts` |
+| 123 | Dragging the handle straight down (toward the center) visibly rounds every corner                                          |  ✅  | ✅ `corner-radius.spec.ts` |
+| 124 | Dragging past the center and back doesn't misbehave (stays clamped, keeps tracking the pointer)                            |  ✅  | ✅ `corner-radius.spec.ts` |
+| 125 | The dispatched radius clamps to `getMaxPolygonCornerRadius`, matching the confirmed Figma apothem values                   |  ✅  |             —              |
+| 126 | The handle vanishes entirely once the shape's on-screen size drops below the visibility threshold                          |  ✅  |             —              |
+| 132 | After a mirroring resize (flipX/flipY), the handle appears at its physically flipped position, not the local/unflipped one |  ✅  | ✅ `corner-radius.spec.ts` |
 
 #125-#126 stay unit-only for the same reason as Rectangle's #118-#121: each is an exact
 `store.getState()`/direct-function-call assertion (`getMaxPolygonCornerRadius.spec.ts`,
 `continuePolygonCornerRadiusDrag.spec.ts`, `getPolygonCornerRadiusHandleAtPoint.spec.ts`) that
-doesn't turn on real browser paint timing the way #122-#124 do.
+doesn't turn on real browser paint timing the way #122-#124 do. #132 was a real, shipped bug: the
+handle-position math ran entirely in local/unflipped space and never applied `flipPoint` to the
+result, so a flipped polygon's handle rendered at the pre-flip location, floating off the actual
+shape. Fixed by flipping the computed local position forward (`getPolygonCornerRadiusHandlePosition.ts`)
+and, symmetrically, un-flipping the pointer position before projecting it during a drag
+(`continuePolygonCornerRadiusDrag.ts`) — the same forward/inverse pairing `isPointInPolygon.ts`
+already used for hit-testing the shape itself.
 
 ## Corner radius (Star)
 
@@ -1192,15 +1199,17 @@ center, offset from the vertex by `radius / sin(halfAngle)` (`getCornerRadiusHan
 also shared with Polygon and matching how Rectangle's corner handles already behave), not on the
 rounded boundary itself.
 
-| #   | Scenario                                                                                                | Unit |            E2E             |
-| --- | ------------------------------------------------------------------------------------------------------- | :--: | :------------------------: |
-| 127 | The handle renders only once the star is both selected and hovered — selected alone shows nothing extra |  ✅  | ✅ `corner-radius.spec.ts` |
-| 128 | Dragging the handle toward the center visibly rounds both the outer tips and the inner points           |  ✅  | ✅ `corner-radius.spec.ts` |
-| 129 | Dragging past the center and back doesn't misbehave (stays clamped, keeps tracking the pointer)         |  ✅  | ✅ `corner-radius.spec.ts` |
-| 130 | The dispatched radius clamps to `getMaxStarCornerRadius`                                                |  ✅  |             —              |
-| 131 | The handle vanishes entirely once the shape's on-screen size drops below the visibility threshold       |  ✅  |             —              |
+| #   | Scenario                                                                                                                   | Unit |            E2E             |
+| --- | -------------------------------------------------------------------------------------------------------------------------- | :--: | :------------------------: |
+| 127 | The handle renders only once the star is both selected and hovered — selected alone shows nothing extra                    |  ✅  | ✅ `corner-radius.spec.ts` |
+| 128 | Dragging the handle toward the center visibly rounds both the outer tips and the inner points                              |  ✅  | ✅ `corner-radius.spec.ts` |
+| 129 | Dragging past the center and back doesn't misbehave (stays clamped, keeps tracking the pointer)                            |  ✅  | ✅ `corner-radius.spec.ts` |
+| 130 | The dispatched radius clamps to `getMaxStarCornerRadius`                                                                   |  ✅  |             —              |
+| 131 | The handle vanishes entirely once the shape's on-screen size drops below the visibility threshold                          |  ✅  |             —              |
+| 133 | After a mirroring resize (flipX/flipY), the handle appears at its physically flipped position, not the local/unflipped one |  ✅  | ✅ `corner-radius.spec.ts` |
 
-#130-#131 stay unit-only for the same reason as Polygon's #125-#126 above.
+#130-#131 stay unit-only for the same reason as Polygon's #125-#126 above. #133 is the same
+shipped-and-fixed bug as Polygon's #132 — see that entry for the root cause and fix.
 
 ## Why so few scenarios get e2e coverage
 

@@ -37,6 +37,8 @@ describe('disarmStarCornerRadiusDrag', () => {
     const canvas = createCanvas();
     const starCornerRadiusDragRef = createStarCornerRadiusDragRef({
       bounds: { height: 10, width: 10, x: 0, y: 0 },
+      flipX: false,
+      flipY: false,
       hasMoved: true,
       nodeId: 'node-a',
       points: 5,

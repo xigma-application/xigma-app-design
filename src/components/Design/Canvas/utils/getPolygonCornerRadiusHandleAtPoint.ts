@@ -16,7 +16,7 @@ export const getPolygonCornerRadiusHandleAtPoint = (
   point: TPoint,
   selectedNodes: TSceneNode[],
   viewport: TViewport,
-): { bounds: TDraftRect; nodeId: string; rotation: number; sides: number } | null => {
+): { bounds: TDraftRect; flipX: boolean; flipY: boolean; nodeId: string; rotation: number; sides: number } | null => {
   const [node] = selectedNodes;
 
   if (selectedNodes.length !== 1 || !hasPolygonCornerRadius(node)) {
@@ -31,8 +31,10 @@ export const getPolygonCornerRadiusHandleAtPoint = (
 
   const testPoint = getUnrotatedQueryPoint(point, bounds, node.rotation);
   const tolerance = RADIUS_HANDLE_HIT_RADIUS_PX / viewport.zoom;
-  const handlePosition = getPolygonCornerRadiusHandlePosition(bounds, node.sides, node.cornerRadius ?? 0, viewport);
+  const handlePosition = getPolygonCornerRadiusHandlePosition(bounds, node.sides, node.cornerRadius ?? 0, viewport, node.flipX, node.flipY);
   const distance = Math.hypot(testPoint.x - handlePosition.x, testPoint.y - handlePosition.y);
 
-  return distance <= tolerance ? { bounds, nodeId: node.id, rotation: node.rotation, sides: node.sides } : null;
+  return distance <= tolerance
+    ? { bounds, flipX: node.flipX, flipY: node.flipY, nodeId: node.id, rotation: node.rotation, sides: node.sides }
+    : null;
 };

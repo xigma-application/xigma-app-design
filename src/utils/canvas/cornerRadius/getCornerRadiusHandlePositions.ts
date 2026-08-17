@@ -6,6 +6,7 @@ import { TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
+import { getCornerRadiusHandleEffectiveSetback } from './getCornerRadiusHandleEffectiveSetback';
 import { getMaxCornerRadius } from './getMaxCornerRadius';
 
 export const getCornerRadiusHandlePositions = (
@@ -18,7 +19,7 @@ export const getCornerRadiusHandlePositions = (
   const zeroStateScreenGap = Math.min(Math.max(rawScreenGap, MIN_RADIUS_HANDLE_GAP_PX), ZERO_RADIUS_HANDLE_OFFSET_PX);
   const zeroStateOffset = zeroStateScreenGap / viewport.zoom;
   const maxRadius = getMaxCornerRadius(bounds);
-  const effectiveRadius = cornerRadius > 0 || isDragging ? Math.min(cornerRadius, maxRadius) : Math.min(zeroStateOffset, maxRadius);
+  const effectiveRadius = getCornerRadiusHandleEffectiveSetback(cornerRadius, maxRadius, 1, zeroStateOffset, isDragging);
 
   return {
     ne: { x: bounds.x + bounds.width - effectiveRadius, y: bounds.y + effectiveRadius },

@@ -708,6 +708,24 @@ own) handle does. If a future change to either Polygon's or Star's handle-positi
 like it should just use `cornerRadius` directly again, it's almost certainly reintroducing this same
 bug — reread this section first.
 
+## 17. Gotcha — the corner-radius handle math must flip forward, and the drag math must un-flip, or the handle detaches from a mirrored shape entirely
+
+Another shipped-and-fixed bug, same family as §16 but orthogonal to it: `getPolygonCornerRadiusHandlePosition.ts`/`getStarCornerRadiusHandlePosition.ts` compute everything — `topVertex`, `towardCenter`, the setback — in **local/unflipped** space (`getPolygonPoints`/`getStarPoints` never apply `flipX`/`flipY`, same as the fill-rendering point generators before §12's rounding fix). The render path (`drawRoundedPolygon.ts` et al.) always applies `flipPoint(point, center, flipX, flipY)` to its point list before drawing, but the handle-position functions didn't — so a flipped Polygon/Star rendered its actual (correctly flipped) fill in one place while the handle stayed at the pre-flip location, nowhere near the visible shape. Fixed by flipping the *final computed position* forward, mirroring the fill path exactly:
+```ts
+const localPosition = { x: topVertex.x + towardCenter.x * effectiveSetback, y: ... };
+return flipPoint(localPosition, center, flipX, flipY);
+```
+`flipX`/`flipY` are threaded in from the node (`drawCornerRadiusHandlesLayer.ts` passes `selectedNode.flipX/flipY`; `getPolygonCornerRadiusHandleAtPoint.ts`/`getStarCornerRadiusHandleAtPoint.ts` pass `node.flipX/flipY` and also return them in the hit-test result so `armPolygonCornerRadiusDrag.ts`/`armStarCornerRadiusDrag.ts` can store them on `TPolygonCornerRadiusDragState`/`TStarCornerRadiusDragState`, per §1/§13's ref-lifting pattern).
+
+The drag math needs the **inverse** of that same transform, not a copy of the forward one: `continuePolygonCornerRadiusDrag.ts`/`continueStarCornerRadiusDrag.ts` already un-rotate the raw pointer via `getUnrotatedQueryPoint` (physical → un-rotated, still flipped), but must additionally un-flip it — `flipPoint` is self-inverse, so the same call that flips local→physical also un-flips physical→local:
+```ts
+const unrotatedPoint = getUnrotatedQueryPoint(rawPoint, bounds, rotation);
+const point = flipPoint(unrotatedPoint, center, flipX, flipY); // now back in local space
+```
+only then is `point` safe to project onto the (local-space) `towardCenter` vector. This is the exact same forward/inverse pairing `isPointInPolygon.ts`/`isPointInStar.ts` already use for hit-testing the shape itself (flip the *query point* back to local space, test against unflipped vertices) — worth remembering as the general pattern any future flip-aware geometry on Polygon/Star should follow, rather than re-deriving it per feature.
+
+`getCornerRadiusHandleEffectiveSetback.ts` (`utils/canvas/cornerRadius/`) was also extracted in the same change: the `cornerRadius > 0 || isDragging ? ... : ...` branch (§13's zero-state/isDragging logic) was duplicated verbatim across Rectangle's `getCornerRadiusHandlePositions.ts` (with an implicit setback multiplier of 1, since Rectangle's handle inset equals `cornerRadius` directly) and both Polygon/Star's position functions — now all three call the one shared function.
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.

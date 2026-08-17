@@ -102,6 +102,8 @@ export const handlePointerDown = (
           polygonCornerRadiusHandleHit!.nodeId,
           polygonCornerRadiusHandleHit!.rotation,
           polygonCornerRadiusHandleHit!.sides,
+          polygonCornerRadiusHandleHit!.flipX,
+          polygonCornerRadiusHandleHit!.flipY,
         );
         break;
       case Boolean(starCornerRadiusHandleHit):
@@ -114,6 +116,8 @@ export const handlePointerDown = (
           starCornerRadiusHandleHit!.rotation,
           starCornerRadiusHandleHit!.points,
           starCornerRadiusHandleHit!.ratio,
+          starCornerRadiusHandleHit!.flipX,
+          starCornerRadiusHandleHit!.flipY,
         );
         break;
       case Boolean(rotateHandleHit):

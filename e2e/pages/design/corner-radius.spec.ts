@@ -268,3 +268,58 @@ test('dragging the star handle past the center and back does not misbehave', asy
 
   expect(backNearStart.equals(atMax)).toBe(false);
 });
+
+test('the star corner-radius handle appears at its physically flipped position after a mirroring resize, not the unflipped one', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-star-corner-radius-flip');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawStar(900, 300, 1000, 400); // 100x100 star, box (900, 300) -> (1000, 400)
+  await designPage.click(950, 350);
+
+  await designPage.pointerDown(1000, 400); // "se" handle
+  await designPage.pointerMove(800, 200); // crosses both anchors by exactly 100x100, flips both axes
+  await designPage.pointerUp();
+  // final box (800, 200) -> (900, 300); center (850, 250); the top vertex's zero-state handle sits
+  // at unflipped world (850, 230) — flipY mirrors that to (850, 270) (flipX has no visible effect
+  // here, since the top vertex's x already coincides with the box's own center x)
+
+  await designPage.click(850, 250); // select it
+  await designPage.pointerMove(1500, 900); // rest well away from the shape
+  const restingAway = await designPage.canvas.screenshot();
+
+  await designPage.pointerMove(850, 270); // hover the physically flipped handle position
+  const hoveredAtFlippedPosition = await designPage.canvas.screenshot();
+
+  expect(hoveredAtFlippedPosition.equals(restingAway)).toBe(false);
+});
+
+test('the polygon corner-radius handle appears at its physically flipped position after a mirroring resize, not the unflipped one', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-polygon-corner-radius-flip');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawPolygon(900, 300, 1000, 400); // 100x100 triangle, box (900, 300) -> (1000, 400)
+  await designPage.click(950, 350);
+
+  await designPage.pointerDown(1000, 400); // "se" handle
+  await designPage.pointerMove(800, 200); // crosses both anchors by exactly 100x100, flips both axes
+  await designPage.pointerUp();
+  // final box (800, 200) -> (900, 300); center (850, 250); the apex's zero-state handle sits at
+  // unflipped world (850, 230) — flipY mirrors that to (850, 270)
+
+  await designPage.click(850, 250); // select it
+  await designPage.pointerMove(1500, 900); // rest well away from the shape
+  const restingAway = await designPage.canvas.screenshot();
+
+  await designPage.pointerMove(850, 270); // hover the physically flipped handle position
+  const hoveredAtFlippedPosition = await designPage.canvas.screenshot();
+
+  expect(hoveredAtFlippedPosition.equals(restingAway)).toBe(false);
+});

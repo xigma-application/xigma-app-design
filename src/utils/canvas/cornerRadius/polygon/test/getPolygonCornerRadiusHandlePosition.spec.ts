@@ -60,13 +60,23 @@ describe('getPolygonCornerRadiusHandlePosition', () => {
     // mock — mid-drag, the handle must keep tracking the pointer down to radius 0 (right on the
 
     // result
-    expect(getPolygonCornerRadiusHandlePosition(TRIANGLE_BOUNDS, 3, 0, IDENTITY_VIEWPORT, true)).toEqual({ x: 50, y: 0 });
+    expect(getPolygonCornerRadiusHandlePosition(TRIANGLE_BOUNDS, 3, 0, IDENTITY_VIEWPORT, false, false, true)).toEqual({ x: 50, y: 0 });
   });
 
   it('should still use the literal (positive) radius while dragging, same as when not dragging', () => {
     // result
-    expect(getPolygonCornerRadiusHandlePosition(TRIANGLE_BOUNDS, 3, 15, IDENTITY_VIEWPORT, true)).toEqual(
-      getPolygonCornerRadiusHandlePosition(TRIANGLE_BOUNDS, 3, 15, IDENTITY_VIEWPORT, false),
+    expect(getPolygonCornerRadiusHandlePosition(TRIANGLE_BOUNDS, 3, 15, IDENTITY_VIEWPORT, false, false, true)).toEqual(
+      getPolygonCornerRadiusHandlePosition(TRIANGLE_BOUNDS, 3, 15, IDENTITY_VIEWPORT, false, false, false),
     );
+  });
+
+  it('should flip the handle position across the bounding-box center when flipX/flipY are set', () => {
+    // mock — a tall hexagon's top vertex sits at (50, 0), center at (50, 100); radius 10 moves the
+    const tallBounds = { height: 200, width: 100, x: 0, y: 0 };
+    const position = getPolygonCornerRadiusHandlePosition(tallBounds, 6, 10, IDENTITY_VIEWPORT, false, true);
+
+    // result
+    expect(position.x).toBe(50);
+    expect(position.y).toBeCloseTo(184.724748, 5);
   });
 });

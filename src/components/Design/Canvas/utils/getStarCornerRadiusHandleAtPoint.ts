@@ -16,7 +16,7 @@ export const getStarCornerRadiusHandleAtPoint = (
   point: TPoint,
   selectedNodes: TSceneNode[],
   viewport: TViewport,
-): { bounds: TDraftRect; nodeId: string; points: number; ratio: number; rotation: number } | null => {
+): { bounds: TDraftRect; flipX: boolean; flipY: boolean; nodeId: string; points: number; ratio: number; rotation: number } | null => {
   const [node] = selectedNodes;
 
   if (selectedNodes.length !== 1 || !hasStarCornerRadius(node)) {
@@ -31,8 +31,18 @@ export const getStarCornerRadiusHandleAtPoint = (
 
   const testPoint = getUnrotatedQueryPoint(point, bounds, node.rotation);
   const tolerance = RADIUS_HANDLE_HIT_RADIUS_PX / viewport.zoom;
-  const handlePosition = getStarCornerRadiusHandlePosition(bounds, node.points, node.ratio, node.cornerRadius ?? 0, viewport);
+  const handlePosition = getStarCornerRadiusHandlePosition(
+    bounds,
+    node.points,
+    node.ratio,
+    node.cornerRadius ?? 0,
+    viewport,
+    node.flipX,
+    node.flipY,
+  );
   const distance = Math.hypot(testPoint.x - handlePosition.x, testPoint.y - handlePosition.y);
 
-  return distance <= tolerance ? { bounds, nodeId: node.id, points: node.points, ratio: node.ratio, rotation: node.rotation } : null;
+  return distance <= tolerance
+    ? { bounds, flipX: node.flipX, flipY: node.flipY, nodeId: node.id, points: node.points, ratio: node.ratio, rotation: node.rotation }
+    : null;
 };

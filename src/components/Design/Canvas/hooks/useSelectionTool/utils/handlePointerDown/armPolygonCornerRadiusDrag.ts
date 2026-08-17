@@ -12,7 +12,9 @@ export const armPolygonCornerRadiusDrag = (
   nodeId: string,
   rotation: number,
   sides: number,
+  flipX: boolean,
+  flipY: boolean,
 ): void => {
-  polygonCornerRadiusDragRef.current = { bounds, hasMoved: false, nodeId, rotation, sides };
+  polygonCornerRadiusDragRef.current = { bounds, flipX, flipY, hasMoved: false, nodeId, rotation, sides };
   canvas.setPointerCapture(event.pointerId);
 };

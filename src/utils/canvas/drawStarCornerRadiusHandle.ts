@@ -23,11 +23,13 @@ export const drawStarCornerRadiusHandle = (
   canvasHeight: number,
   viewport: TViewport,
   rotation: number,
+  flipX = false,
+  flipY = false,
   isDragging = false,
 ): void => {
   const handleRadius = RADIUS_HANDLE_SIZE / 2 / viewport.zoom;
   const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
-  const position = getStarCornerRadiusHandlePosition(bounds, points, ratio, cornerRadius, viewport, isDragging);
+  const position = getStarCornerRadiusHandlePosition(bounds, points, ratio, cornerRadius, viewport, flipX, flipY, isDragging);
   const rotatedPosition = rotatePoint(position, center, rotation);
 
   drawEllipse(

@@ -232,7 +232,15 @@ describe('startRenderLoop', () => {
     // action
     const draggingGl = createFullGlMock();
     const polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null> = {
-      current: { bounds: { height: 100, width: 100, x: 0, y: 0 }, hasMoved: true, nodeId: 'some-other-polygon', rotation: 0, sides: 3 },
+      current: {
+        bounds: { height: 100, width: 100, x: 0, y: 0 },
+        flipX: false,
+        flipY: false,
+        hasMoved: true,
+        nodeId: 'some-other-polygon',
+        rotation: 0,
+        sides: 3,
+      },
     };
 
     startRenderLoop(

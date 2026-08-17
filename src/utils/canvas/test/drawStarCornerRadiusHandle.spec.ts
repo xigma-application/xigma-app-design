@@ -83,7 +83,7 @@ describe('drawStarCornerRadiusHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawStarCornerRadiusHandle(gl, program, buffer, STAR_BOUNDS, 5, 0.5, 0, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0, true);
+    drawStarCornerRadiusHandle(gl, program, buffer, STAR_BOUNDS, 5, 0.5, 0, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0, false, false, true);
 
     // result — the handle fill sits right on the top vertex (50, 0)
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;

@@ -83,7 +83,22 @@ describe('drawPolygonCornerRadiusHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawPolygonCornerRadiusHandle(gl, program, buffer, TRIANGLE_BOUNDS, 3, 0, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0, true);
+    drawPolygonCornerRadiusHandle(
+      gl,
+      program,
+      buffer,
+      TRIANGLE_BOUNDS,
+      3,
+      0,
+      '#0d99ff',
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      0,
+      false,
+      false,
+      true,
+    );
 
     // result — the handle fill is the first draw call; its fan center sits right on the top vertex (50, 0)
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;

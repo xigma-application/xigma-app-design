@@ -74,10 +74,25 @@ describe('getPolygonCornerRadiusHandleAtPoint', () => {
     // result
     expect(getPolygonCornerRadiusHandleAtPoint({ x: 50, y: 30 }, [node], IDENTITY_VIEWPORT)).toEqual({
       bounds: { height: 100, width: 100, x: 0, y: 0 },
+      flipX: false,
+      flipY: false,
       nodeId: 'a',
       rotation: 0,
       sides: 3,
     });
+  });
+
+  it('should detect the handle at its physically flipped position when flipY is set', () => {
+    // mock — top vertex of a 100x100 triangle sits at (50, 0), center at (50, 50); radius 15 moves
+    const node = polygon('a', 0, 0, 100, 100, 3, 15);
+    const flippedNode = { ...node, flipY: true };
+
+    // result
+    expect(getPolygonCornerRadiusHandleAtPoint({ x: 50, y: 70 }, [flippedNode], IDENTITY_VIEWPORT)).toMatchObject({
+      flipY: true,
+      nodeId: 'a',
+    });
+    expect(getPolygonCornerRadiusHandleAtPoint({ x: 50, y: 70 }, [node], IDENTITY_VIEWPORT)).toBeNull();
   });
 
   it('should be grabbable even while the corner radius is still 0, at the zero-state offset position', () => {
