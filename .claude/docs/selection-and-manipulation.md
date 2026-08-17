@@ -9,9 +9,11 @@ The roadmap's prose (Etap 5) describes an earlier, simpler shape of this code (o
 §3), but the file list has grown substantially since Etap 10 added resize/rotate/line-endpoint/
 path-text-offset handling as siblings, and since then three corner-radius handle drags joined them
 too (Rectangle, §11; Polygon, §12; Star, §15 — the latter two added as *parallel* mechanisms rather
-than sharing Rectangle's, since neither ever has a multi-candidate collision to resolve) — nine
-separate drag-state refs, not one, each with its own `arm*`/`continue*`/`disarm*` files, all funneled
-through three top-level orchestrators.
+than sharing Rectangle's, since neither ever has a multi-candidate collision to resolve), followed by
+two vertex-count handle drags (Polygon/Star, §18 — again parallel mechanisms, not sharing the
+corner-radius ones despite the superficial similarity) — eleven separate drag-state refs, not one,
+each with its own `arm*`/`continue*`/`disarm*` files, all funneled through three top-level
+orchestrators.
 
 ## 1. File structure
 
@@ -25,30 +27,36 @@ through three top-level orchestrators.
   ref-drilled" shape as `marqueeRef`/`hoverRef`/`sliceRef` — see `canvas-rendering-pipeline.md` §2),
   specifically so `useCanvasRenderLoop` can also read them every frame (§13's "mid-drag zero" fix
   needs to know whether a corner-radius drag is *currently* in progress, which only these three
-  refs' own arm/disarm sites can answer).
+  refs' own arm/disarm sites can answer). `polygonVertexCountDragRef`/`starVertexCountDragRef` (§18)
+  stay **private** to this hook instead, like `resizeDragRef`/`rotateDragRef` — they have no
+  zero-state render fallback to suppress mid-drag, so nothing downstream ever needs to know a
+  vertex-count drag is in progress; the handle's rendered position just reads the node's live
+  `sides`/`points` from Redux every frame like anything else.
 - `types.ts` — `TDragState`, `TEndpointDragState`, `TPathOffsetDragState`, `TResizeDragState`,
   `TRotateDragState`, `TCornerRadiusDragState`, `TPolygonCornerRadiusDragState`,
-  `TStarCornerRadiusDragState`, `TPendingClickAction`, `TLineEndpoint`,
-  `TNodeOrigin`/`TResizeNodeOrigin`/`TRotateNodeOrigin`.
+  `TStarCornerRadiusDragState`, `TPolygonVertexCountDragState`, `TStarVertexCountDragState`,
+  `TPendingClickAction`, `TLineEndpoint`, `TNodeOrigin`/`TResizeNodeOrigin`/`TRotateNodeOrigin`.
 
 `utils/handlePointerDown/` — one `arm*.ts` per interaction kind, dispatched by a priority `switch`
-in `handlePointerDown.ts` (full table in §3): `armPathOffsetDrag`, `armResizeDrag`,
-`armCornerRadiusDrag` (§11), `armPolygonCornerRadiusDrag` (§12), `armStarCornerRadiusDrag` (§15),
-`armRotateDrag`, `armLineEndpointDrag` (→ `armEndpointDrag`), `armHitDrag` (→ `armDrag`),
-`armGroupBoundsDrag` (→ `armDrag`), `armMarqueeDrag`.
+in `handlePointerDown.ts` (full table in §3): `armPathOffsetDrag`, `armPolygonVertexCountDrag` (§18),
+`armStarVertexCountDrag` (§18), `armResizeDrag`, `armCornerRadiusDrag` (§11),
+`armPolygonCornerRadiusDrag` (§12), `armStarCornerRadiusDrag` (§15), `armRotateDrag`,
+`armLineEndpointDrag` (→ `armEndpointDrag`), `armHitDrag` (→ `armDrag`), `armGroupBoundsDrag`
+(→ `armDrag`), `armMarqueeDrag`.
 
-`utils/handlePointerMove/` — one `continue*.ts` per kind. **All nine run unconditionally on every
-pointermove** — `handlePointerMove.ts` just calls all nine in sequence; each is a no-op guarded by
+`utils/handlePointerMove/` — one `continue*.ts` per kind. **All eleven run unconditionally on every
+pointermove** — `handlePointerMove.ts` just calls all eleven in sequence; each is a no-op guarded by
 `if (dragState)` on its own ref, so only the one actually armed does anything: `continueDrag`,
 `continueEndpointDrag`, `continuePathOffsetDrag`, `continueResizeDrag/` (its own sub-folder, §5),
 `continueRotateDrag`, `continueCornerRadiusDrag` (§11), `continuePolygonCornerRadiusDrag` (§12),
-`continueStarCornerRadiusDrag` (§15), `continueMarqueeDrag`.
+`continueStarCornerRadiusDrag` (§15), `continuePolygonVertexCountDrag` (§18),
+`continueStarVertexCountDrag` (§18), `continueMarqueeDrag`.
 
 `utils/handlePointerUp/` — mirror image, `disarm*.ts` per kind, each clears its own ref and releases
 pointer capture: `disarmDrag` (**resolves `pendingClickAction`**, see §3), `disarmEndpointDrag`,
 `disarmPathOffsetDrag` (also resets cursor to `'hand'`), `disarmResizeDrag`, `disarmRotateDrag`,
 `disarmCornerRadiusDrag`, `disarmPolygonCornerRadiusDrag`, `disarmStarCornerRadiusDrag`,
-`disarmMarqueeDrag`.
+`disarmPolygonVertexCountDrag` (§18), `disarmStarVertexCountDrag` (§18), `disarmMarqueeDrag`.
 
 Loose files directly under `useSelectionTool/utils/`: `isPointInGroupBounds.ts`,
 `isPointInSelectedTextBounds.ts`, `toggleSelection.ts`.
@@ -127,6 +135,8 @@ member's individual rotation, not just raw bounds.
 ```ts
 switch (true) {
   case Boolean(pathOffsetHandleHit):                          armPathOffsetDrag(...); break;
+  case Boolean(polygonVertexCountHandleHit):                  armPolygonVertexCountDrag(...); break;
+  case Boolean(starVertexCountHandleHit):                     armStarVertexCountDrag(...); break;
   case Boolean(resizeHandleHit):                               armResizeDrag(...); break;
   case Boolean(cornerRadiusHandleHit):                         armCornerRadiusDrag(...); break;
   case Boolean(polygonCornerRadiusHandleHit):                  armPolygonCornerRadiusDrag(...); break;
@@ -141,16 +151,20 @@ switch (true) {
   default: break;
 }
 ```
-**Handle priority**: path-offset → resize → corner-radius (§11) → polygon corner-radius (§12) → star
-corner-radius (§15) → rotate → **line endpoint (only if not shift)** → shift toggle → plain hit →
-text-fixed-bounds fallback → group-gap → marquee. `cornerRadiusHandleHit`, `polygonCornerRadiusHandleHit`,
-and `starCornerRadiusHandleHit` are each computed as `resizeHandleHit ? null : get*CornerRadiusHandleAtPoint(...)`
-right where they're read, so resize wins any tie deterministically rather than relying on switch-case
-ordering alone — a node is never more than one of Rectangle/Polygon/Star at once, so the three
-hit-tests never actually compete with each other, only each independently with resize.
-Line-endpoint hit-testing is checked *before* the generic whole-node `hit` branch, which is why
-grabbing a line's own endpoint always wins over a whole-line drag even when both technically match
-the same point.
+**Handle priority**: path-offset → **polygon/star vertex-count (§18) → resize** → corner-radius (§11)
+→ polygon corner-radius (§12) → star corner-radius (§15) → rotate → **line endpoint (only if not
+shift)** → shift toggle → plain hit → text-fixed-bounds fallback → group-gap → marquee.
+`cornerRadiusHandleHit`, `polygonCornerRadiusHandleHit`, and `starCornerRadiusHandleHit` are each
+computed as `resizeHandleHit ? null : get*CornerRadiusHandleAtPoint(...)` right where they're read,
+so resize wins any tie deterministically rather than relying on switch-case ordering alone — a node
+is never more than one of Rectangle/Polygon/Star at once, so the three hit-tests never actually
+compete with each other, only each independently with resize. `polygonVertexCountHandleHit`/
+`starVertexCountHandleHit` are the one exception to "resize wins any tie": they're computed
+**unconditionally**, not gated behind `resizeHandleHit ? null : ...`, and checked *before* resize in
+the switch — see §18 for why (a real, not just theoretical, exact-pixel collision with a resize
+handle). Line-endpoint hit-testing is checked *before* the generic whole-node `hit` branch, which is
+why grabbing a line's own endpoint always wins over a whole-line drag even when both technically
+match the same point.
 
 `armHitDrag.ts` — the collapse-vs-replace decision:
 ```ts
@@ -465,6 +479,11 @@ e2e (`e2e/pages/design/`):
 - `corner-radius.spec.ts` (§11, §12, §15) — Rectangle handles render only when selected+hovered;
   pure-left and pure-down drags each independently drive the radius to max. Same visibility check
   plus a toward-center drag and an overshoot-then-back drag for both the Polygon and the Star handle.
+- `vertex-count.spec.ts` (§18) — same selected+hovered visibility check for the Polygon/Star
+  vertex-count handle; a drag toward the corner-radius handle's vertex increases `sides`/`points`;
+  crossing the vertical axis resets to the minimum; a flipped shape's handle stays attached at its
+  physically-flipped position (the exact regression class from §17, re-tested here since this handle
+  follows the same forward-flip/un-flip pattern independently).
 
 As noted in §3, the pending-click-action collapse/deselect/gap-drag matrix has **no** e2e coverage —
 that correctness relies entirely on the unit suite; e2e here is weighted toward resize/rotate/mirror
@@ -738,6 +757,121 @@ const point = flipPoint(unrotatedPoint, center, flipX, flipY); // now back in lo
 only then is `point` safe to project onto the (local-space) `towardCenter` vector. This is the exact same forward/inverse pairing `isPointInPolygon.ts`/`isPointInStar.ts` already use for hit-testing the shape itself (flip the *query point* back to local space, test against unflipped vertices) — worth remembering as the general pattern any future flip-aware geometry on Polygon/Star should follow, rather than re-deriving it per feature.
 
 `getCornerRadiusHandleEffectiveSetback.ts` (`utils/canvas/cornerRadius/`) was also extracted in the same change: the `cornerRadius > 0 || isDragging ? ... : ...` branch (§13's zero-state/isDragging logic) was duplicated verbatim across Rectangle's `getCornerRadiusHandlePositions.ts` (with an implicit setback multiplier of 1, since Rectangle's handle inset equals `cornerRadius` directly) and both Polygon/Star's position functions — now all three call the one shared function.
+
+## 18. Vertex-count handles (Polygon, Star)
+
+A second single-handle drag on Polygon/Star, alongside corner-radius (§12/§15) — but a deliberately
+**separate, parallel mechanism**, not a variant of it: it sets `sides`/`points` instead of
+`cornerRadius`, sits at a different vertex with no setback at all, and uses genuinely different
+math (angle-snapping, not a projection onto a fixed axis). Math lives in `utils/canvas/vertexCount/`,
+a sibling to `utils/canvas/cornerRadius/`.
+
+**Which vertex, and why not the literal "next" one for Star**: Polygon's handle sits at
+`getPolygonPoints(bounds, sides)[1]` — literally the vertex right after the corner-radius handle's
+vertex 0. Star's does **not** follow the same "index+1" rule, even though that was the first
+instinct — `getStarPoints` alternates outer (spike tip, convex) / inner (concave notch between
+spikes) vertices, so index 1 is an *inner* vertex. A vertex-count handle sitting on the concave notch
+reads as a completely different control (it looks like a spikiness/ratio handle, not a "how many
+points" handle), so Star's handle is pinned to **index 2** instead — the next *outer* spike tip,
+skipping the notch. Both `getPolygonVertexCountHandlePosition.ts` / `getStarVertexCountHandlePosition.ts`
+apply the same forward-`flipPoint` treatment as the corner-radius position functions (§17) — compute
+in local/unflipped space, flip the final point forward — since this is exactly the same "handle
+must physically track a mirrored shape" problem, independently re-solved for this handle rather than
+shared code, to keep the two mechanisms fully decoupled.
+
+Unlike corner-radius, there is **no setback and no zero-state**: the handle always renders at the
+exact vertex position for whatever `sides`/`points` currently is — "trzyma się czubka wierzchołka"
+was an explicit, deliberate requirement, the opposite of corner-radius's §16 behavior. This is also
+why the drag-state types (`TPolygonVertexCountDragState`/`TStarVertexCountDragState`, both just
+`{ bounds, flipX, flipY, nodeId, rotation }`) carry no `hasMoved` flag, unlike all three corner-radius
+drag states — §13's "mid-drag zero-state relocation" bug has no equivalent here, since there's no
+zero-state position to snap away from. Consequently `polygonVertexCountDragRef`/
+`starVertexCountDragRef` also never needed lifting out to `Canvas.tsx` (§1) — nothing downstream
+needs an `isDragging` flag, so they stay ordinary hook-private refs.
+
+**Visibility/hit-testing**: `shouldShowVertexCountHandle.ts` reuses corner-radius's screen-size floor
+(`MIN_ELEMENT_SCREEN_SIZE_FOR_RADIUS_HANDLES_PX`) but drops the `cornerRadius`/`isDragging`-driven gap
+check entirely (§14) — there's no analogous "radius value" here to collide on. `getPolygonVertexCountHandleAtPoint.ts`/
+`getStarVertexCountHandleAtPoint.ts` (`Canvas/utils/`) guard on `node.type` directly rather than a
+`has*CornerRadius`-style predicate, since `sides`/`points` are required fields on their node types
+(unlike `cornerRadius`, which is optional everywhere) — there's no "does this shape even have the
+property" question to ask.
+
+**The count-selection algorithm — nearest-angle snapping, not a distance/easing curve**:
+`getVertexCountFromLocalPoint.ts` was rewritten twice before landing here (worth knowing if it looks
+like it should have a simpler distance-based shape — it did, twice, and both were wrong):
+
+1. First attempt projected the pointer onto the vertex→center axis and mapped that distance through
+   an easing curve (`sqrt`, then a quadratic ease-out) into a count. Both failed for the same
+   underlying reason: cramming 58 discrete states into one shape's own (usually tens-of-pixels) local
+   geometry makes *any* concave easing curve feel broken near the rest position — a curve step small
+   enough to avoid a huge initial jump was still too fine-grained to feel controllable.
+2. The actual mechanism (confirmed against real Figma behavior) is **nearest-angle snapping**: each
+   candidate count `n ∈ [min, max]` has a fixed target angle `getVertexAngle(n) = 2π/n − π/2` (the
+   same formula `getPolygonPoints`/`getStarPoints` use internally for vertex 1 — for Star, vertex
+   index `2`'s angle reduces to the identical `2π/points − π/2` shape, which is *why* Star's handle
+   math needs no `ratio` at all, see below). Given the pointer's local angle `θ = atan2(localY, localX)`,
+   the function just scans `[min, max]` for the `n` minimizing `|θ − getVertexAngle(n)|`. The switch
+   threshold between `n` and `n+1` falls out for free at the angle-space midpoint between their two
+   target angles — not at `n+1`'s own angle — which is the exact "midpoint of the two positions"
+   behavior real Figma has and a naive "reached the target" implementation would get wrong.
+3. **Reset condition**: `localX <= 0` (pointer crossed the vertical axis through the shape's local
+   center) forces `min`, checked *before* the angle scan. This isn't a special case of the
+   angle-nearest logic — all candidate angles live strictly in `(−90°, 90°)` (since `sides`/`points`
+   is finite, the target angle for `max` never actually reaches the corner-radius handle's own −90°),
+   so a pointer past the axis would otherwise just keep snapping to whichever extreme candidate angle
+   is nearest, never resetting. The explicit guard is what makes "drag past center → back to
+   minimum" a real, sharp reset instead of Just Happening to fall out of the geometry.
+
+**Star doesn't need `ratio` for this at all** — a design detail that had to be *un*-added after the
+fact: the drag-state types originally carried `ratio` (mirroring `TStarCornerRadiusDragState`,
+where it's genuinely load-bearing for the radius math), and `armStarVertexCountDrag`/
+`getStarVertexCountHandleAtPoint`'s hit result threaded it through — until the angle-snapping
+rewrite made it clear the target angle for an *outer* vertex (index 2) never depends on the
+inner-radius ratio at all. `ratio` was then removed from `TStarVertexCountDragState`,
+`armStarVertexCountDrag`, and the hit-test's returned shape — it only remains (correctly) in
+`getStarVertexCountHandlePosition.ts`/`getStarVertexCountHandleAtPoint.ts`/`drawStarVertexCountHandle.ts`,
+which still call `getStarPoints(bounds, points, ratio)` and only read index 2 out of the result — that
+call still needs a `ratio` argument to satisfy `getStarPoints`'s signature even though the specific
+extracted point is provably unaffected by its value, which is why it's still there in those three
+files and *not* vestigial-looking evidence of a missed cleanup.
+
+**Gotcha — this is the one place resize does *not* win a tie**: for a regular 4-sided Polygon,
+`getVertexAngle(4) = 0°`, which puts the vertex-count handle at the bounding box's exact east
+edge-midpoint — precisely where the resize tool's own "e" edge handle sits. Every other overlapping
+handle in this file (§3, §11) resolves in resize's favor via `resizeHandleHit ? null : ...`, but
+doing that here would make the vertex-count handle permanently unclickable at exactly `sides === 4`.
+Fixed by computing `polygonVertexCountHandleHit`/`starVertexCountHandleHit` **unconditionally**
+(no resize gate) and checking them *before* `resizeHandleHit` in both `handlePointerDown.ts`'s
+priority switch and `useHoverHighlight.ts`'s cursor switch (§3, §9) — the vertex-count handle now
+wins any coincidental overlap with resize, the one deliberate exception to "resize wins ties" in this
+whole subsystem. `useHoverHighlight.ts` no longer needs the small `getPolygonVertexCountHandleHit.ts`/
+`getStarVertexCountHandleHit.ts` wrapper files that existed briefly during development purely to keep
+a `resizeHandleHit ? null : ...` gate out of the hook body (§12's convention) — once that gate was
+removed, the wrappers added nothing, so the hook calls `getPolygonVertexCountHandleAtPoint`/
+`getStarVertexCountHandleAtPoint` directly instead.
+
+**Rendering**: `drawPolygonVertexCountHandle.ts`/`drawStarVertexCountHandle.ts` (`utils/canvas/`,
+siblings to the corner-radius draw files) — same white-circle-via-`drawEllipse` shape, same
+`RADIUS_HANDLE_SIZE`/`RADIUS_HANDLE_FILL`/`RADIUS_HANDLE_HIT_RADIUS_PX` constants reused rather than
+duplicated (the two handles are meant to look and feel identical at rest, only their position and
+drag behavior differ). `drawVertexCountHandlesLayer.ts` (`drawScene/`, a sibling to
+`drawCornerRadiusHandlesLayer.ts`, called right after it in `drawScene.ts`) gates on
+`selectedNodes.length === 1 && hoveredNode?.id === selectedNode.id && (type === polygon || star)`,
+then `shouldShowVertexCountHandle`, then dispatches by node type — deliberately a **separate** layer
+function rather than folded into `drawCornerRadiusHandlesLayer.ts`, even though the gating looks
+almost identical, again to keep the two mechanisms decoupled rather than sharing a switch that would
+otherwise need to know about both `cornerRadius` and `sides`/`points` at once.
+
+**Cursor**: `vertices.png` (`assets/icons/cursors/`) — was already present in the repo, unused, before
+this feature; wired up via a new `&--vertices` block in `canvas.module.scss` (`setClassName('vertices')`
+in `useHoverHighlight.ts`), identical in shape to the existing `&--radius` block.
+
+**Constants**: `POLYGON_MIN_SIDES`/`POLYGON_MAX_SIDES` (3/60, `Canvas/constants.ts`) are new; Star
+reuses the pre-existing `STAR_MIN_POINTS`/`STAR_MAX_POINTS` (already 3/60, added earlier but
+previously unenforced anywhere — this feature is the first thing that actually reads them). Both
+pairs are intended for a future side-panel numeric input, not just this drag handle — same "canvas
+drag now, panel later" split as corner-radius (§11).
 
 ## Related
 
