@@ -26,7 +26,12 @@ import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 import { shouldUseCanvasCaretEditing } from '../../utils/shouldUseCanvasCaretEditing';
 
-export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>, marqueeRef: RefObject<TDraftRect | null>): void => {
+export const useSelectionTool = (
+  canvasRef: RefObject<HTMLCanvasElement | null>,
+  marqueeRef: RefObject<TDraftRect | null>,
+  cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>,
+  polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>,
+): void => {
   const { setClassName } = useClassNames();
   const activeTool = useAppSelector(selectActiveTool);
   const editingTextBox = useAppSelector(selectEditingTextBox);
@@ -37,8 +42,6 @@ export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>,
   const pathOffsetDragRef = useRef<TPathOffsetDragState | null>(null);
   const resizeDragRef = useRef<TResizeDragState | null>(null);
   const rotateDragRef = useRef<TRotateDragState | null>(null);
-  const cornerRadiusDragRef = useRef<TCornerRadiusDragState | null>(null);
-  const polygonCornerRadiusDragRef = useRef<TPolygonCornerRadiusDragState | null>(null);
   const marqueeStartRef = useRef<TPoint | null>(null);
 
   useEffect(() => {
@@ -104,5 +107,14 @@ export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>,
         canvas.removeEventListener('pointerup', onPointerUp);
       };
     }
-  }, [activeTool, canvasRef, dispatch, isCanvasCaretEditingActive, marqueeRef, setClassName]);
+  }, [
+    activeTool,
+    canvasRef,
+    cornerRadiusDragRef,
+    dispatch,
+    isCanvasCaretEditingActive,
+    marqueeRef,
+    polygonCornerRadiusDragRef,
+    setClassName,
+  ]);
 };

@@ -500,6 +500,55 @@ describe('drawScene', () => {
     store.dispatch(setSelection([]));
   });
 
+  it('should render the corner-radius handle differently at radius 0 depending on isDraggingCornerRadius', () => {
+    // mock — mid-drag to radius 0, the handle must keep tracking the pointer instead of jumping to
+    // the zero-state offset (verifies the flag threads all the way from drawScene's own signature
+    // down through drawCornerRadiusHandlesLayer/drawCornerRadiusHandles/getCornerRadiusHandlePositions);
+    // compares two renders of the identical scene rather than indexing into a specific draw call,
+    // since other tests in this shared store leave committed nodes behind that shift call order
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const canvas = document.createElement('canvas');
+
+    store.dispatch(
+      addNode({
+        cornerRadius: 0,
+        fill: '#aabbcc',
+        height: 100,
+        name: 'Dragging Rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 100,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const { rootOrder } = store.getState().design;
+    const rectId = rootOrder[rootOrder.length - 1];
+
+    store.dispatch(setSelection([rectId]));
+
+    // before
+    const restingGl = createGlMock();
+
+    drawScene(restingGl, program, buffer, IMAGE_CONTEXT, canvas, null, null, rectId, null, false);
+
+    // action
+    const draggingGl = createGlMock();
+
+    drawScene(draggingGl, program, buffer, IMAGE_CONTEXT, canvas, null, null, rectId, null, true);
+
+    // result
+    expect((draggingGl.bufferData as ReturnType<typeof vi.fn>).mock.calls).not.toEqual(
+      (restingGl.bufferData as ReturnType<typeof vi.fn>).mock.calls,
+    );
+
+    // after
+    store.dispatch(setSelection([]));
+  });
+
   it('should draw the path-text offset handle while a path-text node is being created for the first time', () => {
     // mock — first-time creation (useDrawTextOnPathTool) dispatches startTextEdit without an id,
     const program = {} as WebGLProgram;

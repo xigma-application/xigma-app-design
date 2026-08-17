@@ -49,4 +49,18 @@ describe('getPolygonCornerRadiusHandlePosition', () => {
     // result — top vertex is (50, 0), center is (50, 100), so moving toward it is purely downward
     expect(getPolygonCornerRadiusHandlePosition(tallBounds, 6, 10, IDENTITY_VIEWPORT)).toEqual({ x: 50, y: 10 });
   });
+
+  it('should sit exactly on the top vertex at radius 0 while actively dragging, instead of jumping to the zero-state offset', () => {
+    // mock — mid-drag, the handle must keep tracking the pointer down to radius 0 (right on the
+    // vertex itself) rather than snapping out to the zero-state gap the moment it hits 0
+    // result
+    expect(getPolygonCornerRadiusHandlePosition(TRIANGLE_BOUNDS, 3, 0, IDENTITY_VIEWPORT, true)).toEqual({ x: 50, y: 0 });
+  });
+
+  it('should still use the literal (positive) radius while dragging, same as when not dragging', () => {
+    // result
+    expect(getPolygonCornerRadiusHandlePosition(TRIANGLE_BOUNDS, 3, 15, IDENTITY_VIEWPORT, true)).toEqual(
+      getPolygonCornerRadiusHandlePosition(TRIANGLE_BOUNDS, 3, 15, IDENTITY_VIEWPORT, false),
+    );
+  });
 });

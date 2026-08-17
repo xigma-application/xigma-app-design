@@ -9,6 +9,7 @@ import VERTEX_SHADER_SOURCE from 'constant/webgl/vertexShaderSource';
 import { WEBGL_CONTEXT_ATTRIBUTES, WEBGL_CONTEXT_ID } from '../../constants';
 
 // types
+import { TCornerRadiusDragState, TPolygonCornerRadiusDragState } from '../useSelectionTool/types';
 import { TDraftRect } from 'types/canvas';
 import { TDraftEntity } from 'types/design/types';
 import { TImageRenderContext } from './types';
@@ -23,6 +24,8 @@ export const useCanvasRenderLoop = (
   marqueeRef?: RefObject<TDraftRect | null>,
   hoverRef?: RefObject<string | null>,
   sliceRef?: RefObject<(TDraftRect & { rotation: number }) | null>,
+  cornerRadiusDragRef?: RefObject<TCornerRadiusDragState | null>,
+  polygonCornerRadiusDragRef?: RefObject<TPolygonCornerRadiusDragState | null>,
 ): void => {
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -47,7 +50,19 @@ export const useCanvasRenderLoop = (
         program: imageProgram,
         textGeometryCache: new Map(),
       };
-      const stopRenderLoop = startRenderLoop(gl, program, buffer, imageContext, canvas, draftRef, marqueeRef, hoverRef, sliceRef);
+      const stopRenderLoop = startRenderLoop(
+        gl,
+        program,
+        buffer,
+        imageContext,
+        canvas,
+        draftRef,
+        marqueeRef,
+        hoverRef,
+        sliceRef,
+        cornerRadiusDragRef,
+        polygonCornerRadiusDragRef,
+      );
 
       return (): void => {
         stopRenderLoop();
@@ -56,5 +71,5 @@ export const useCanvasRenderLoop = (
         gl.deleteBuffer(msdfBuffer);
       };
     }
-  }, [canvasRef, draftRef, marqueeRef, hoverRef, sliceRef]);
+  }, [canvasRef, draftRef, marqueeRef, hoverRef, sliceRef, cornerRadiusDragRef, polygonCornerRadiusDragRef]);
 };

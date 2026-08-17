@@ -75,6 +75,35 @@ describe('drawCornerRadiusHandles', () => {
     expect(vertices[1]).toBeCloseTo(15);
   });
 
+  it('should draw the handle exactly on the corner at radius 0 when isDragging is true, instead of the zero-state offset', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCornerRadiusHandles(
+      gl,
+      program,
+      buffer,
+      { height: 100, width: 100, x: 0, y: 0 },
+      0,
+      '#0d99ff',
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      0,
+      true,
+    );
+
+    // result — the ne handle fill is the first draw call; its fan center sits right on the corner (100, 0)
+    const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = firstFillCall[1];
+
+    expect(vertices[0]).toBeCloseTo(100);
+    expect(vertices[1]).toBeCloseTo(0);
+  });
+
   it('should rotate each handle position around the rect center when rotation is given', () => {
     // mock
     const gl = createGlMock();

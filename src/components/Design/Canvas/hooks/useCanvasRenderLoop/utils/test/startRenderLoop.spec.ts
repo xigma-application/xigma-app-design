@@ -1,4 +1,12 @@
+import { RefObject } from 'react';
+
+// store
+import { addNode, setSelection } from 'store/design/slice';
+import { store } from 'store';
+
 // types
+import { NodeType } from 'types/design/enums';
+import { TCornerRadiusDragState, TPolygonCornerRadiusDragState } from '../../../useSelectionTool/types';
 import { TImageRenderContext } from '../../types';
 
 // utils
@@ -29,6 +37,52 @@ const createGlMock = (): WebGL2RenderingContext =>
     clearColor: vi.fn(),
     colorMask: vi.fn(),
   }) as unknown as WebGL2RenderingContext;
+
+const createFullGlMock = (): WebGL2RenderingContext =>
+  ({
+    ARRAY_BUFFER: 34962,
+    COLOR_BUFFER_BIT: 16384,
+    FLOAT: 5126,
+    LINE_LOOP: 2,
+    STATIC_DRAW: 35044,
+    TRIANGLES: 4,
+    TRIANGLE_FAN: 6,
+    bindBuffer: vi.fn(),
+    bufferData: vi.fn(),
+    clear: vi.fn(),
+    clearColor: vi.fn(),
+    colorMask: vi.fn(),
+    drawArrays: vi.fn(),
+    enableVertexAttribArray: vi.fn(),
+    getAttribLocation: vi.fn(() => 0),
+    getUniformLocation: vi.fn(() => ({})),
+    uniform1f: vi.fn(),
+    uniform2f: vi.fn(),
+    uniform4fv: vi.fn(),
+    useProgram: vi.fn(),
+    vertexAttribPointer: vi.fn(),
+  }) as unknown as WebGL2RenderingContext;
+
+const addRectangleNode = (): string => {
+  store.dispatch(
+    addNode({
+      cornerRadius: 0,
+      fill: '#aabbcc',
+      height: 100,
+      name: 'Dragging Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 100,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
 
 describe('startRenderLoop', () => {
   beforeEach(() => {
@@ -110,5 +164,97 @@ describe('startRenderLoop', () => {
 
     // result
     expect(cancelAnimationFrameMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should treat a corner-radius drag as active when the rectangle drag ref has a current value', () => {
+    // mock — mid-drag to radius 0, the handle must keep tracking the pointer instead of jumping to
+    // the zero-state offset; this proves the flag reaches drawScene from this layer's own refs.
+    // Compares two renders of the identical scene rather than indexing into a specific draw call,
+    // since other tests in this shared store leave committed nodes behind that shift call order.
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const canvas = document.createElement('canvas');
+    const rectId = addRectangleNode();
+
+    store.dispatch(setSelection([rectId]));
+
+    const hoverRef: RefObject<string | null> = { current: rectId };
+
+    // before
+    const restingGl = createFullGlMock();
+
+    startRenderLoop(restingGl, program, buffer, IMAGE_CONTEXT, canvas, undefined, undefined, hoverRef);
+    rafCallback?.(0);
+
+    // action
+    const draggingGl = createFullGlMock();
+    const cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null> = {
+      current: {
+        bounds: { height: 100, width: 100, x: 0, y: 0 },
+        candidates: ['ne'],
+        corner: 'ne',
+        nodeId: rectId,
+        pointerStart: { x: 0, y: 0 },
+        rotation: 0,
+      },
+    };
+
+    startRenderLoop(draggingGl, program, buffer, IMAGE_CONTEXT, canvas, undefined, undefined, hoverRef, undefined, cornerRadiusDragRef);
+    rafCallback?.(0);
+
+    // result
+    expect((draggingGl.bufferData as ReturnType<typeof vi.fn>).mock.calls).not.toEqual(
+      (restingGl.bufferData as ReturnType<typeof vi.fn>).mock.calls,
+    );
+
+    // after
+    store.dispatch(setSelection([]));
+  });
+
+  it('should treat a corner-radius drag as active when only the polygon drag ref has a current value', () => {
+    // mock — same as above, but via the polygon ref alone, proving the OR's right-hand side works too
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const canvas = document.createElement('canvas');
+    const rectId = addRectangleNode();
+
+    store.dispatch(setSelection([rectId]));
+
+    const hoverRef: RefObject<string | null> = { current: rectId };
+
+    // before
+    const restingGl = createFullGlMock();
+
+    startRenderLoop(restingGl, program, buffer, IMAGE_CONTEXT, canvas, undefined, undefined, hoverRef);
+    rafCallback?.(0);
+
+    // action
+    const draggingGl = createFullGlMock();
+    const polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null> = {
+      current: { bounds: { height: 100, width: 100, x: 0, y: 0 }, nodeId: 'some-other-polygon', rotation: 0, sides: 3 },
+    };
+
+    startRenderLoop(
+      draggingGl,
+      program,
+      buffer,
+      IMAGE_CONTEXT,
+      canvas,
+      undefined,
+      undefined,
+      hoverRef,
+      undefined,
+      undefined,
+      polygonCornerRadiusDragRef,
+    );
+    rafCallback?.(0);
+
+    // result
+    expect((draggingGl.bufferData as ReturnType<typeof vi.fn>).mock.calls).not.toEqual(
+      (restingGl.bufferData as ReturnType<typeof vi.fn>).mock.calls,
+    );
+
+    // after
+    store.dispatch(setSelection([]));
   });
 });

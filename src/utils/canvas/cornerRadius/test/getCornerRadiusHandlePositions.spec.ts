@@ -62,4 +62,23 @@ describe('getCornerRadiusHandlePositions', () => {
       sw: { x: 5, y: 5 },
     });
   });
+
+  it('should sit exactly on the corner at radius 0 while actively dragging, instead of jumping to the zero-state offset', () => {
+    // mock — mid-drag, the handle must keep tracking the pointer down to radius 0 (right on the
+    // corner itself) rather than snapping out to the 30px zero-state gap the moment it hits 0
+    // result
+    expect(getCornerRadiusHandlePositions(bounds, 0, IDENTITY_VIEWPORT, true)).toEqual({
+      ne: { x: 100, y: 0 },
+      nw: { x: 0, y: 0 },
+      se: { x: 100, y: 100 },
+      sw: { x: 0, y: 100 },
+    });
+  });
+
+  it('should still use the literal (positive) radius while dragging, same as when not dragging', () => {
+    // result
+    expect(getCornerRadiusHandlePositions(bounds, 15, IDENTITY_VIEWPORT, true)).toEqual(
+      getCornerRadiusHandlePositions(bounds, 15, IDENTITY_VIEWPORT, false),
+    );
+  });
 });

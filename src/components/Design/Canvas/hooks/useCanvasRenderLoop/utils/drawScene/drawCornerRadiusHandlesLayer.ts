@@ -21,6 +21,7 @@ export const drawCornerRadiusHandlesLayer = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  isDraggingCornerRadius = false,
 ): void => {
   const [selectedNode] = selectedNodes;
 
@@ -40,6 +41,7 @@ export const drawCornerRadiusHandlesLayer = (
         canvasHeight,
         viewport,
         selectedNode.rotation,
+        isDraggingCornerRadius,
       );
     }
 
@@ -56,6 +58,7 @@ export const drawCornerRadiusHandlesLayer = (
         canvasHeight,
         viewport,
         selectedNode.rotation,
+        isDraggingCornerRadius,
       );
     }
   }

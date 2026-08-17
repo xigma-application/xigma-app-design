@@ -22,10 +22,11 @@ export const drawPolygonCornerRadiusHandle = (
   canvasHeight: number,
   viewport: TViewport,
   rotation: number,
+  isDragging = false,
 ): void => {
   const handleRadius = RADIUS_HANDLE_SIZE / 2 / viewport.zoom;
   const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
-  const position = getPolygonCornerRadiusHandlePosition(bounds, sides, cornerRadius, viewport);
+  const position = getPolygonCornerRadiusHandlePosition(bounds, sides, cornerRadius, viewport, isDragging);
   const rotatedPosition = rotatePoint(position, center, rotation);
 
   drawEllipse(

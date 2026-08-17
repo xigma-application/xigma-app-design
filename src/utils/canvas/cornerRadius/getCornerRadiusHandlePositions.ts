@@ -12,12 +12,13 @@ export const getCornerRadiusHandlePositions = (
   bounds: TDraftRect,
   cornerRadius: number,
   viewport: TViewport,
+  isDragging = false,
 ): Record<TCornerRadiusHandle, TPoint> => {
   const rawScreenGap = ZERO_RADIUS_HANDLE_OFFSET_PX / viewport.zoom;
   const zeroStateScreenGap = Math.min(Math.max(rawScreenGap, MIN_RADIUS_HANDLE_GAP_PX), ZERO_RADIUS_HANDLE_OFFSET_PX);
   const zeroStateOffset = zeroStateScreenGap / viewport.zoom;
   const maxRadius = getMaxCornerRadius(bounds);
-  const effectiveRadius = cornerRadius > 0 ? Math.min(cornerRadius, maxRadius) : Math.min(zeroStateOffset, maxRadius);
+  const effectiveRadius = cornerRadius > 0 || isDragging ? Math.min(cornerRadius, maxRadius) : Math.min(zeroStateOffset, maxRadius);
 
   return {
     ne: { x: bounds.x + bounds.width - effectiveRadius, y: bounds.y + effectiveRadius },

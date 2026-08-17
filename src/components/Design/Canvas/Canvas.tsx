@@ -43,6 +43,7 @@ import {
 import styles from './canvas.module.scss';
 
 // types
+import { TCornerRadiusDragState, TPolygonCornerRadiusDragState } from './hooks/useSelectionTool/types';
 import { TDraftEntity } from 'types/design/types';
 import { TDraftRect } from 'types/canvas';
 import { TSliceDraft } from './hooks/useSliceTool/types';
@@ -54,6 +55,8 @@ const Canvas: FC = () => {
   const marqueeRef = useRef<TDraftRect | null>(null);
   const hoverRef = useRef<string | null>(null);
   const sliceRef = useRef<TSliceDraft | null>(null);
+  const cornerRadiusDragRef = useRef<TCornerRadiusDragState | null>(null);
+  const polygonCornerRadiusDragRef = useRef<TPolygonCornerRadiusDragState | null>(null);
 
   useCanvasResize(canvasRef);
   useCanvasPanZoom(canvasRef);
@@ -70,14 +73,14 @@ const Canvas: FC = () => {
   useDrawMediaTool(canvasRef, draftRef, MEDIA_TOOL_SETTINGS);
   useDrawTextTool(canvasRef, draftRef);
   useDrawTextOnPathTool(canvasRef, draftRef);
-  useSelectionTool(canvasRef, marqueeRef);
+  useSelectionTool(canvasRef, marqueeRef, cornerRadiusDragRef, polygonCornerRadiusDragRef);
   useSliceTool(canvasRef, sliceRef);
   useTextEditOnDoubleClick(canvasRef);
   useHoverHighlight(canvasRef, hoverRef);
   useCurvedCaretEditing(canvasRef);
   useStraightCaretEditing(canvasRef);
   useDrawingCursor(canvasRef);
-  useCanvasRenderLoop(canvasRef, draftRef, marqueeRef, hoverRef, sliceRef);
+  useCanvasRenderLoop(canvasRef, draftRef, marqueeRef, hoverRef, sliceRef, cornerRadiusDragRef, polygonCornerRadiusDragRef);
 
   return (
     <div className={styles.Canvas}>

@@ -18,9 +18,14 @@ orchestrators.
 `Canvas/hooks/useSelectionTool/`:
 - `useSelectionTool.ts` — active only when `activeTool === default || activeTool === scale` (the
   **Scale tool fully reuses this hook** — see §5) and text-caret editing isn't active
-  (`shouldUseCanvasCaretEditing`). Owns eight refs — `dragStateRef`, `endpointDragRef`,
-  `pathOffsetDragRef`, `resizeDragRef`, `rotateDragRef`, `cornerRadiusDragRef`,
-  `polygonCornerRadiusDragRef`, `marqueeStartRef` — and three native `PointerEvent` listeners.
+  (`shouldUseCanvasCaretEditing`). Owns six refs internally — `dragStateRef`, `endpointDragRef`,
+  `pathOffsetDragRef`, `resizeDragRef`, `rotateDragRef`, `marqueeStartRef` — and three native
+  `PointerEvent` listeners. `cornerRadiusDragRef`/`polygonCornerRadiusDragRef` are the odd two out:
+  lifted to `Canvas.tsx` and passed in as parameters (same "parent-owned, ref-drilled" shape as
+  `marqueeRef`/`hoverRef`/`sliceRef` — see `canvas-rendering-pipeline.md` §2), specifically so
+  `useCanvasRenderLoop` can also read them every frame (§11's "mid-drag zero" fix needs to know
+  whether a corner-radius drag is *currently* in progress, which only these two refs' own
+  arm/disarm sites can answer).
 - `types.ts` — `TDragState`, `TEndpointDragState`, `TPathOffsetDragState`, `TResizeDragState`,
   `TRotateDragState`, `TCornerRadiusDragState`, `TPolygonCornerRadiusDragState`,
   `TPendingClickAction`, `TLineEndpoint`, `TNodeOrigin`/`TResizeNodeOrigin`/`TRotateNodeOrigin`.
@@ -560,10 +565,54 @@ by both `handlePointerDown.ts` and `useHoverHighlight.ts` — the latter wraps i
 `resizeHandleHit ? null : ...` gating out of the hook body itself, following this repo's "named
 helper over inline closure" convention.
 
+## 13. Mid-drag render fix — don't snap to the zero-state offset while still dragging
+
+Both §11 and §12's handle-position functions have a **zero-state fallback**: at `cornerRadius === 0`
+the handle renders at a fixed screen-space offset from the corner/vertex, purely so it stays
+grabbable, instead of collapsing onto the corner itself where it'd be nearly impossible to click.
+That fallback is correct *at rest*, but it used to fire mid-drag too — dragging a handle down toward
+`cornerRadius === 0` made it visibly snap out to the zero-state offset the instant the dispatched
+radius hit exactly 0, even though the pointer was still held down right at the corner. Confusing:
+the handle jumps away from the cursor that's still dragging it.
+
+The fix threads an `isDraggingCornerRadius` boolean into the fallback so it's suppressed while a drag
+is actually in progress (radius stays literal, including `0`, tracking the pointer at the corner/
+vertex) and only re-applies once the drag ends. Getting that boolean to the render layer required
+lifting `cornerRadiusDragRef`/`polygonCornerRadiusDragRef` out of `useSelectionTool.ts` (previously
+private `useRef`s, invisible outside the hook) up to `Canvas.tsx`, which now creates them and passes
+the *same* ref objects into both `useSelectionTool` (which still arms/disarms them exactly as
+before — `armCornerRadiusDrag.ts` et al. are unchanged) and `useCanvasRenderLoop` (new trailing
+params) — the same "parent-owned, ref-drilled" shape `Canvas.tsx` already uses for `marqueeRef`/
+`hoverRef`/`sliceRef` (`canvas-rendering-pipeline.md` §2), just applied to two refs that used to be
+selection-tool-private. From there the flag is a plain dereference-and-OR, matching how `hoverRef`
+etc. get dereferenced to plain values before reaching `drawScene`:
+
+```
+Canvas.tsx: creates cornerRadiusDragRef/polygonCornerRadiusDragRef via useRef
+  → useSelectionTool(canvasRef, marqueeRef, cornerRadiusDragRef, polygonCornerRadiusDragRef)
+      (arms/disarms them exactly as before — no behavior change here)
+  → useCanvasRenderLoop(..., cornerRadiusDragRef, polygonCornerRadiusDragRef)
+      → startRenderLoop's tick(): isDraggingCornerRadius =
+          Boolean(cornerRadiusDragRef?.current) || Boolean(polygonCornerRadiusDragRef?.current)
+        → drawScene(..., isDraggingCornerRadius)
+          → drawCornerRadiusHandlesLayer(..., isDraggingCornerRadius)
+            → drawCornerRadiusHandles(..., isDraggingCornerRadius) / drawPolygonCornerRadiusHandle(..., isDraggingCornerRadius)
+              → getCornerRadiusHandlePositions(..., isDragging) / getPolygonCornerRadiusHandlePosition(..., isDragging)
+                  effectiveRadius = cornerRadius > 0 || isDragging ? literalRadius : zeroStateOffset
+```
+
+`isDraggingCornerRadius` defaults to `false`/`undefined` at every layer, so every existing call site
+(hit-testing via `getCornerRadiusHandleAtPoint.ts`/`getPolygonCornerRadiusHandleAtPoint.ts`, which
+must keep seeing the zero-state offset since that's the position a fresh click needs to land on) is
+unaffected — only the render path opts into the new parameter.
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.
 [[design-store-architecture]] — §5's ref-vs-Redux split (this subsystem is its biggest consumer: 8
-separate drag-state refs plus the marquee/drag-move dispatch-per-pointermove nuance).
+separate drag-state refs plus the marquee/drag-move dispatch-per-pointermove nuance; two of those —
+`cornerRadiusDragRef`/`polygonCornerRadiusDragRef` — are now parent-owned like the ephemeral render
+refs rather than hook-private, per §13).
 [[canvas-rendering-pipeline]] — how selection outlines/handles/cursors actually get drawn once this
-subsystem decides what's selected/hovered.
+subsystem decides what's selected/hovered; §2's `marqueeRef`/`hoverRef`/`sliceRef` ref-drilling
+pattern is exactly what §13 extends to the two corner-radius drag refs.

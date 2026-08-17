@@ -1,6 +1,7 @@
 import { RefObject } from 'react';
 
 // types
+import { TCornerRadiusDragState, TPolygonCornerRadiusDragState } from '../../useSelectionTool/types';
 import { TDraftRect } from 'types/canvas';
 import { TDraftEntity } from 'types/design/types';
 import { TImageRenderContext } from '../types';
@@ -21,10 +22,38 @@ const tick = (
   marqueeRef?: RefObject<TDraftRect | null>,
   hoverRef?: RefObject<string | null>,
   sliceRef?: RefObject<(TDraftRect & { rotation: number }) | null>,
+  cornerRadiusDragRef?: RefObject<TCornerRadiusDragState | null>,
+  polygonCornerRadiusDragRef?: RefObject<TPolygonCornerRadiusDragState | null>,
 ): void => {
-  drawScene(gl, program, buffer, imageContext, canvas, draftRef?.current, marqueeRef?.current, hoverRef?.current, sliceRef?.current);
+  const isDraggingCornerRadius = Boolean(cornerRadiusDragRef?.current) || Boolean(polygonCornerRadiusDragRef?.current);
+
+  drawScene(
+    gl,
+    program,
+    buffer,
+    imageContext,
+    canvas,
+    draftRef?.current,
+    marqueeRef?.current,
+    hoverRef?.current,
+    sliceRef?.current,
+    isDraggingCornerRadius,
+  );
   frameIdRef.current = requestAnimationFrame(() =>
-    tick(gl, program, buffer, imageContext, canvas, frameIdRef, draftRef, marqueeRef, hoverRef, sliceRef),
+    tick(
+      gl,
+      program,
+      buffer,
+      imageContext,
+      canvas,
+      frameIdRef,
+      draftRef,
+      marqueeRef,
+      hoverRef,
+      sliceRef,
+      cornerRadiusDragRef,
+      polygonCornerRadiusDragRef,
+    ),
   );
 };
 
@@ -38,11 +67,26 @@ export const startRenderLoop = (
   marqueeRef?: RefObject<TDraftRect | null>,
   hoverRef?: RefObject<string | null>,
   sliceRef?: RefObject<(TDraftRect & { rotation: number }) | null>,
+  cornerRadiusDragRef?: RefObject<TCornerRadiusDragState | null>,
+  polygonCornerRadiusDragRef?: RefObject<TPolygonCornerRadiusDragState | null>,
 ): (() => void) => {
   const frameIdRef: TFrameIdRef = { current: 0 };
 
   frameIdRef.current = requestAnimationFrame(() =>
-    tick(gl, program, buffer, imageContext, canvas, frameIdRef, draftRef, marqueeRef, hoverRef, sliceRef),
+    tick(
+      gl,
+      program,
+      buffer,
+      imageContext,
+      canvas,
+      frameIdRef,
+      draftRef,
+      marqueeRef,
+      hoverRef,
+      sliceRef,
+      cornerRadiusDragRef,
+      polygonCornerRadiusDragRef,
+    ),
   );
 
   return (): void => cancelAnimationFrame(frameIdRef.current);

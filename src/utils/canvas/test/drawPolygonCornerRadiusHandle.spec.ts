@@ -76,6 +76,23 @@ describe('drawPolygonCornerRadiusHandle', () => {
     expect(vertices[1]).toBeCloseTo(15);
   });
 
+  it('should draw the handle exactly on the top vertex at radius 0 when isDragging is true, instead of the zero-state offset', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawPolygonCornerRadiusHandle(gl, program, buffer, TRIANGLE_BOUNDS, 3, 0, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0, true);
+
+    // result — the handle fill is the first draw call; its fan center sits right on the top vertex (50, 0)
+    const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = firstFillCall[1];
+
+    expect(vertices[0]).toBeCloseTo(50);
+    expect(vertices[1]).toBeCloseTo(0);
+  });
+
   it('should rotate the handle position around the bounds center when rotation is given', () => {
     // mock
     const gl = createGlMock();

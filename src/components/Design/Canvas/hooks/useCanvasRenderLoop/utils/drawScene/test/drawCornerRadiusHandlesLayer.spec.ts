@@ -215,4 +215,41 @@ describe('drawCornerRadiusHandlesLayer', () => {
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
   });
+
+  it('should draw the rectangle handle exactly on the corner at radius 0 while isDraggingCornerRadius is true', () => {
+    // mock — mid-drag to radius 0, the handle must keep tracking the pointer instead of jumping to
+    // the zero-state offset
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const zeroRadiusRectangle = { ...rectangle, cornerRadius: 0 };
+
+    // before
+    drawCornerRadiusHandlesLayer(gl, program, buffer, zeroRadiusRectangle, [zeroRadiusRectangle], 100, 100, IDENTITY_VIEWPORT, true);
+
+    // result — the ne handle fill is the first draw call; its fan center sits right on the corner (100, 0)
+    const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = firstFillCall[1];
+
+    expect(vertices[0]).toBeCloseTo(100);
+    expect(vertices[1]).toBeCloseTo(0);
+  });
+
+  it('should draw the polygon handle exactly on the top vertex at radius 0 while isDraggingCornerRadius is true', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const zeroRadiusPolygon = { ...polygon, cornerRadius: 0 };
+
+    // before
+    drawCornerRadiusHandlesLayer(gl, program, buffer, zeroRadiusPolygon, [zeroRadiusPolygon], 100, 100, IDENTITY_VIEWPORT, true);
+
+    // result — the handle fill is the first draw call; its fan center sits right on the top vertex (50, 0)
+    const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = firstFillCall[1];
+
+    expect(vertices[0]).toBeCloseTo(50);
+    expect(vertices[1]).toBeCloseTo(0);
+  });
 });

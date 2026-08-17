@@ -41,6 +41,7 @@ export const drawScene = (
   marqueeRect?: TDraftRect | null,
   hoveredNodeId?: string | null,
   sliceRect?: (TDraftRect & { rotation: number }) | null,
+  isDraggingCornerRadius?: boolean,
 ): void => {
   const state = store.getState();
   const viewport = selectViewport(state);
@@ -64,7 +65,17 @@ export const drawScene = (
   drawSceneNodes(gl, program, buffer, imageContext, sceneNodes, clientWidth, clientHeight, viewport, pathOutlineStyles);
   drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport);
   drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport);
-  drawCornerRadiusHandlesLayer(gl, program, buffer, hoveredNode, selectedNodes, clientWidth, clientHeight, viewport);
+  drawCornerRadiusHandlesLayer(
+    gl,
+    program,
+    buffer,
+    hoveredNode,
+    selectedNodes,
+    clientWidth,
+    clientHeight,
+    viewport,
+    Boolean(isDraggingCornerRadius),
+  );
   drawFrame(gl, program, buffer, imageContext, draftShape, clientWidth, clientHeight, viewport);
   drawEditingText(
     gl,

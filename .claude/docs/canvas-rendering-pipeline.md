@@ -7,9 +7,11 @@ WebGL2.
 
 ## 1. Context setup
 
-- `Canvas/Canvas.tsx` owns the single `<canvas>` element (`canvasRef`) plus four ephemeral
-  `useRef`s (`draftRef`/`marqueeRef`/`hoverRef`/`sliceRef` — see §6) threaded into every tool hook
-  and into `useCanvasRenderLoop`.
+- `Canvas/Canvas.tsx` owns the single `<canvas>` element (`canvasRef`) plus six ephemeral
+  `useRef`s (`draftRef`/`marqueeRef`/`hoverRef`/`sliceRef` — see §6 — plus
+  `cornerRadiusDragRef`/`polygonCornerRadiusDragRef`, which exist so `useCanvasRenderLoop` can tell
+  a corner-radius drag is actively in progress; see `selection-and-manipulation.md` §13) threaded
+  into every tool hook and into `useCanvasRenderLoop`.
 - The context itself is created in `Canvas/hooks/useCanvasRenderLoop/useCanvasRenderLoop.ts`:
   `canvas.getContext(WEBGL_CONTEXT_ID, WEBGL_CONTEXT_ATTRIBUTES)`, both constants in
   `Canvas/constants.ts`: `WEBGL_CONTEXT_ID = 'webgl2'`,
@@ -175,6 +177,7 @@ written directly by native pointer listeners (so dragging never dispatches per p
 | `marqueeRef` (`TDraftRect \| null`) | `useSelectionTool`'s `armMarqueeDrag`/`continueMarqueeDrag`/`disarmMarqueeDrag` | `utils/canvas/drawMarquee.ts` |
 | `hoverRef` (`string \| null`, node id) | `useHoverHighlight.ts` | `drawScene/drawHoverOutline.ts` (per-`NodeType` dispatch) |
 | `sliceRef` (`TSliceDraft \| null`) | `useSliceTool.ts`'s own arm/continue/disarm set | `utils/canvas/drawSliceDraft.ts` |
+| `cornerRadiusDragRef`/`polygonCornerRadiusDragRef` (drag-state `\| null`) | `useSelectionTool.ts`'s `armCornerRadiusDrag`/`armPolygonCornerRadiusDrag`/`disarmCornerRadiusDrag`/`disarmPolygonCornerRadiusDrag` | dereferenced to a single `isDraggingCornerRadius` boolean in `startRenderLoop.ts`'s `tick`, consumed by `drawCornerRadiusHandlesLayer.ts` — not rendered directly, just gates the zero-state-offset fallback (`selection-and-manipulation.md` §13) |
 
 `TDraftEntity` (`types/design/types.ts`) unions one draft variant per geometry
 (`TDraftShape | TDraftLine | TDraftPath | TDraftPolygon | TDraftStar | TDraftMedia | TDraftText`),

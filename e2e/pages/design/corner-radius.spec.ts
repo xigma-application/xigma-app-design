@@ -22,6 +22,33 @@ test('corner-radius handles only render once the rectangle is both selected and 
   expect(selectedAndHovered.equals(selectedOnly)).toBe(false);
 });
 
+test('dragging the ne handle down to radius 0 keeps it tracking the pointer at the corner mid-drag, only snapping to the zero-state offset after release', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-corner-radius-zero-mid-drag');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(900, 300, 1050, 450); // 150x150 square, ne corner at (1050, 300)
+  await designPage.click(975, 375);
+  await designPage.pointerMove(1020, 330); // hover the zero-state handle to reveal it
+  const restingZeroState = await designPage.canvas.screenshot();
+
+  await designPage.pointerDown(1020, 330); // grab the zero-state handle
+  await designPage.pointerMove(1050, 300); // drag exactly onto the corner — radius hits 0 mid-drag
+  const midDragAtCorner = await designPage.canvas.screenshot();
+
+  // mid-drag, the handle must sit right on the corner, not snap back to the zero-state offset
+  expect(midDragAtCorner.equals(restingZeroState)).toBe(false);
+
+  await designPage.pointerUp();
+  const afterRelease = await designPage.canvas.screenshot();
+
+  // once released, the handle returns to the exact same zero-state offset position as before the drag
+  expect(afterRelease.equals(restingZeroState)).toBe(true);
+});
+
 test('dragging the ne handle purely left, with no diagonal movement, visibly rounds the corner', async ({ page }) => {
   const designPage = new DesignPage(page);
 

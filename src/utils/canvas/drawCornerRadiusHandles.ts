@@ -21,11 +21,12 @@ export const drawCornerRadiusHandles = (
   canvasHeight: number,
   viewport: TViewport,
   rotation: number,
+  isDragging = false,
 ): void => {
   const handleRadius = RADIUS_HANDLE_SIZE / 2 / viewport.zoom;
   const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
 
-  Object.values(getCornerRadiusHandlePositions(bounds, cornerRadius, viewport)).forEach((position) => {
+  Object.values(getCornerRadiusHandlePositions(bounds, cornerRadius, viewport, isDragging)).forEach((position) => {
     const rotatedPosition = rotatePoint(position, center, rotation);
 
     drawEllipse(
