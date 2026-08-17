@@ -1124,6 +1124,33 @@ the "why so few scenarios get e2e coverage" rationale below, none of these turn 
 paint timing the way #115-#117 do (a real `pointermove`/`pointerdown` sequence against the real
 rendered handle positions actually reaching the grabbed corner and repainting the rounded fill).
 
+## Corner radius (Polygon)
+
+A single draggable handle, at the polygon's fixed top vertex (`getPolygonPoints` always places
+vertex index 0 at the apex regardless of `sides`/aspect ratio), that rounds every vertex identically
+by one shared `cornerRadius` — unlike Rectangle's 4 independent-looking corners. Same visibility
+gate as Rectangle (`shouldShowCornerRadiusHandles`, selected _and_ hovered), but no
+collision/candidate resolution is possible since there's only ever one handle, so the drag wiring is
+its own small mechanism (`armPolygonCornerRadiusDrag`/`continuePolygonCornerRadiusDrag`/
+`disarmPolygonCornerRadiusDrag`) parallel to Rectangle's rather than sharing it. Dragging projects
+the pointer onto the fixed vertex→center axis and clamps to `[0, getMaxPolygonCornerRadius]` — the
+apothem-based max where adjacent rounded corners just touch and the polygon degenerates into its own
+inscribed circle — so "toward center increases, away decreases" falls out of the projection itself
+with no direction-resolution step needed.
+
+| #   | Scenario                                                                                                    | Unit |            E2E             |
+| --- | ----------------------------------------------------------------------------------------------------------- | :--: | :------------------------: |
+| 122 | The handle renders only once the triangle is both selected and hovered — selected alone shows nothing extra |  ✅  | ✅ `corner-radius.spec.ts` |
+| 123 | Dragging the handle straight down (toward the center) visibly rounds every corner                           |  ✅  | ✅ `corner-radius.spec.ts` |
+| 124 | Dragging past the center and back doesn't misbehave (stays clamped, keeps tracking the pointer)             |  ✅  | ✅ `corner-radius.spec.ts` |
+| 125 | The dispatched radius clamps to `getMaxPolygonCornerRadius`, matching the confirmed Figma apothem values    |  ✅  |             —              |
+| 126 | The handle vanishes entirely once the shape's on-screen size drops below the visibility threshold           |  ✅  |             —              |
+
+#125-#126 stay unit-only for the same reason as Rectangle's #118-#121: each is an exact
+`store.getState()`/direct-function-call assertion (`getMaxPolygonCornerRadius.spec.ts`,
+`continuePolygonCornerRadiusDrag.spec.ts`, `getPolygonCornerRadiusHandleAtPoint.spec.ts`) that
+doesn't turn on real browser paint timing the way #122-#124 do.
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

@@ -9,6 +9,7 @@ import {
   TDragState,
   TEndpointDragState,
   TPathOffsetDragState,
+  TPolygonCornerRadiusDragState,
   TResizeDragState,
   TRotateDragState,
 } from '../../types';
@@ -20,6 +21,7 @@ import { disarmDrag } from './disarmDrag';
 import { disarmEndpointDrag } from './disarmEndpointDrag';
 import { disarmMarqueeDrag } from './disarmMarqueeDrag';
 import { disarmPathOffsetDrag } from './disarmPathOffsetDrag';
+import { disarmPolygonCornerRadiusDrag } from './disarmPolygonCornerRadiusDrag';
 import { disarmResizeDrag } from './disarmResizeDrag';
 import { disarmRotateDrag } from './disarmRotateDrag';
 
@@ -33,6 +35,7 @@ export const handlePointerUp = (
   resizeDragRef: RefObject<TResizeDragState | null>,
   rotateDragRef: RefObject<TRotateDragState | null>,
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>,
+  polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>,
   marqueeStartRef: RefObject<TPoint | null>,
   marqueeRef: RefObject<TDraftRect | null>,
   setClassName: (className: string | null) => void,
@@ -43,5 +46,6 @@ export const handlePointerUp = (
   disarmResizeDrag(canvas, event, resizeDragRef);
   disarmRotateDrag(canvas, event, rotateDragRef);
   disarmCornerRadiusDrag(canvas, event, cornerRadiusDragRef);
+  disarmPolygonCornerRadiusDrag(canvas, event, polygonCornerRadiusDragRef);
   disarmMarqueeDrag(canvas, event, marqueeStartRef, marqueeRef);
 };

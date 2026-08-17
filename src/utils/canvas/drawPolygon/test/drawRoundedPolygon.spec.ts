@@ -1,5 +1,5 @@
 // utils
-import { drawPolygon } from '../drawPolygon';
+import { drawRoundedPolygon } from '../drawRoundedPolygon';
 
 const createGlMock = (): WebGL2RenderingContext =>
   ({
@@ -21,27 +21,17 @@ const createGlMock = (): WebGL2RenderingContext =>
   }) as unknown as WebGL2RenderingContext;
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
+const TRIANGLE = { cornerRadius: 10, height: 100, sides: 3, width: 100, x: 0, y: 0 };
 
-describe('drawPolygon', () => {
-  it('should draw a triangle fan when fill is given', () => {
+describe('drawRoundedPolygon', () => {
+  it('should draw a filled triangle fan when fill is given', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawPolygon(
-      gl,
-      program,
-      buffer,
-      { fill: '#ffffff', height: 10, sides: 5, width: 10, x: 0, y: 0 },
-      100,
-      100,
-      IDENTITY_VIEWPORT,
-      false,
-      false,
-      0,
-    );
+    drawRoundedPolygon(gl, program, buffer, { ...TRIANGLE, fill: '#ffffff' }, 100, 100, IDENTITY_VIEWPORT, false, false, 0);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLE_FAN, 0, expect.any(Number));
@@ -54,18 +44,7 @@ describe('drawPolygon', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawPolygon(
-      gl,
-      program,
-      buffer,
-      { height: 10, sides: 5, stroke: '#ffffff', width: 10, x: 0, y: 0 },
-      100,
-      100,
-      IDENTITY_VIEWPORT,
-      false,
-      false,
-      0,
-    );
+    drawRoundedPolygon(gl, program, buffer, { ...TRIANGLE, stroke: '#ffffff' }, 100, 100, IDENTITY_VIEWPORT, false, false, 0);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINE_LOOP, 0, expect.any(Number));
@@ -78,7 +57,7 @@ describe('drawPolygon', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawPolygon(gl, program, buffer, { height: 10, sides: 5, width: 10, x: 0, y: 0 }, 100, 100, IDENTITY_VIEWPORT, false, false, 0);
+    drawRoundedPolygon(gl, program, buffer, TRIANGLE, 100, 100, IDENTITY_VIEWPORT, false, false, 0);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -91,22 +70,7 @@ describe('drawPolygon', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawPolygon(
-      gl,
-      program,
-      buffer,
-      { fill: '#ffffff', height: 10, sides: 5, width: 10, x: 0, y: 0 },
-      100,
-      200,
-      {
-        x: 5,
-        y: 15,
-        zoom: 2,
-      },
-      false,
-      false,
-      0,
-    );
+    drawRoundedPolygon(gl, program, buffer, { ...TRIANGLE, fill: '#ffffff' }, 100, 200, { x: 5, y: 15, zoom: 2 }, false, false, 0);
 
     // result
     expect(gl.uniform2f).toHaveBeenCalledWith(expect.anything(), 5, 15);
@@ -114,46 +78,18 @@ describe('drawPolygon', () => {
     expect(gl.uniform2f).toHaveBeenCalledWith(expect.anything(), 100, 200);
   });
 
-  it('should center the fan on the bounding rect', () => {
-    // mock
+  it('should rotate every point around the shape center when rotation is given', () => {
+    // mock — a square (sides=4) so the un-rotated top vertex sits at a predictable (50, 0)
     const gl = createGlMock();
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
-    // before
-    drawPolygon(
+    // before — rotating 90deg around the center (50, 50) swings the top vertex (50, 0) to (100, 50)
+    drawRoundedPolygon(
       gl,
       program,
       buffer,
-      { fill: '#ffffff', height: 20, sides: 4, width: 10, x: 0, y: 0 },
-      100,
-      100,
-      IDENTITY_VIEWPORT,
-      false,
-      false,
-      0,
-    );
-
-    // result
-    const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
-    const vertices: Float32Array = firstFillCall[1];
-
-    expect(vertices[0]).toBe(5);
-    expect(vertices[1]).toBe(10);
-  });
-
-  it('should rotate the fan points around the center when rotation is given', () => {
-    // mock
-    const gl = createGlMock();
-    const program = {} as WebGLProgram;
-    const buffer = {} as WebGLBuffer;
-
-    // before
-    drawPolygon(
-      gl,
-      program,
-      buffer,
-      { fill: '#ffffff', height: 20, sides: 4, width: 20, x: 0, y: 0 },
+      { cornerRadius: 0, fill: '#ffffff', height: 100, sides: 4, width: 100, x: 0, y: 0 },
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -162,26 +98,26 @@ describe('drawPolygon', () => {
       90,
     );
 
-    // result
+    // result — vertices[0,1] is the fan center; vertices[2,3] is the first rotated geometry point
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
     const vertices: Float32Array = firstFillCall[1];
 
-    expect(vertices[2]).toBeCloseTo(20);
-    expect(vertices[3]).toBeCloseTo(10);
+    expect(vertices[2]).toBeCloseTo(100);
+    expect(vertices[3]).toBeCloseTo(50);
   });
 
   it('should mirror the fan points around the center when flipX/flipY are given', () => {
-    // mock
+    // mock — a square (sides=4) so the un-rotated top vertex sits at a predictable (50, 0)
     const gl = createGlMock();
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
-    // before — triangle (sides=3), center (10, 10); the first raw point (top, angle -90) sits at
-    drawPolygon(
+    // before — flipping both axes around the center (50, 50) swings the top vertex (50, 0) to (50, 100)
+    drawRoundedPolygon(
       gl,
       program,
       buffer,
-      { fill: '#ffffff', height: 20, sides: 3, width: 20, x: 0, y: 0 },
+      { cornerRadius: 0, fill: '#ffffff', height: 100, sides: 4, width: 100, x: 0, y: 0 },
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -194,7 +130,7 @@ describe('drawPolygon', () => {
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
     const vertices: Float32Array = firstFillCall[1];
 
-    expect(vertices[2]).toBeCloseTo(10);
-    expect(vertices[3]).toBeCloseTo(20);
+    expect(vertices[2]).toBeCloseTo(50);
+    expect(vertices[3]).toBeCloseTo(100);
   });
 });

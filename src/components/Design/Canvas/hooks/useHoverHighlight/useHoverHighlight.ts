@@ -25,6 +25,7 @@ import { getLineEndpointAtPoint } from '../../utils/getLineEndpointAtPoint';
 import { getNodeAtPoint } from '../../utils/getNodeAtPoint';
 import { getPathOffsetHandleHit } from './utils/getPathOffsetHandleHit';
 import { getPointerPosition } from '../../utils/getPointerPosition';
+import { getPolygonCornerRadiusHandleHit } from './utils/getPolygonCornerRadiusHandleHit';
 import { getResizeCursorAngle } from 'utils/math/getResizeCursorAngle';
 import { getResizeHandleAtPoint } from '../../utils/getResizeHandleAtPoint';
 import { getRotateCursorAngle } from 'utils/math/getRotateCursorAngle';
@@ -52,6 +53,7 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
       const pathOffsetHandleHit = getPathOffsetHandleHit(point, editingTextBox, selectEditingNodeId(state), selectedNodes, viewport);
       const resizeHandleHit = getResizeHandleAtPoint(point, resizableSelectedNodes, viewport);
       const cornerRadiusHandleHit = resizeHandleHit ? null : getCornerRadiusHandleAtPoint(point, resizableSelectedNodes, viewport);
+      const polygonCornerRadiusHandleHit = getPolygonCornerRadiusHandleHit(point, resizeHandleHit, resizableSelectedNodes, viewport);
       const rotateHandleHit = getRotateHandleAtPoint(point, resizableSelectedNodes, viewport);
       const collidesWithEditingText = getCollidesWithEditingText(editingTextBox, selectEditingTextContent(state), point, viewport.zoom);
 
@@ -83,6 +85,11 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
           setClassName('radius');
           canvas.style.cursor = '';
           hoverRef.current = cornerRadiusHandleHit!.nodeId;
+          break;
+        case Boolean(polygonCornerRadiusHandleHit):
+          setClassName('radius');
+          canvas.style.cursor = '';
+          hoverRef.current = polygonCornerRadiusHandleHit!.nodeId;
           break;
         case Boolean(rotateHandleHit):
           setClassName(null);

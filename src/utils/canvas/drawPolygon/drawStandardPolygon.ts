@@ -1,34 +1,37 @@
-// others
-import { ROUNDED_RECT_CORNER_SEGMENTS } from 'constant/canvas';
-
 // types
 import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { getRoundedRectPoints } from '../shapes/getRoundedRectPoints';
+import { flipPoint } from 'utils/math/flipPoint';
+import { getPolygonPoints } from '../shapes/getPolygonPoints';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
 import { rotatePoint } from 'utils/math/rotatePoint';
 import { toFanVertices } from '../toFanVertices';
-import { TDrawableRect } from './drawRect';
+import { TDrawablePolygon } from './drawPolygon';
 
-export const drawRoundedRect = (
+export const drawStandardPolygon = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
-  rect: TDrawableRect & { cornerRadius: number },
+  polygon: TDrawablePolygon,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  flipX: boolean,
+  flipY: boolean,
   rotation: number,
-  center: TPoint,
 ): void => {
   const positionLocation = gl.getAttribLocation(program, 'a_position');
   const colorLocation = gl.getUniformLocation(program, 'u_color');
   const viewportOffsetLocation = gl.getUniformLocation(program, 'u_viewportOffset');
   const zoomLocation = gl.getUniformLocation(program, 'u_zoom');
   const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
-  const points = getRoundedRectPoints(rect, ROUNDED_RECT_CORNER_SEGMENTS).map((point) => rotatePoint(point, center, rotation));
+
+  const center: TPoint = { x: polygon.x + polygon.width / 2, y: polygon.y + polygon.height / 2 };
+  const points = getPolygonPoints(polygon, polygon.sides)
+    .map((point) => flipPoint(point, center, flipX, flipY))
+    .map((point) => rotatePoint(point, center, rotation));
 
   gl.useProgram(program);
   gl.uniform2f(viewportOffsetLocation, viewport.x, viewport.y);
@@ -38,15 +41,15 @@ export const drawRoundedRect = (
   gl.enableVertexAttribArray(positionLocation);
   gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-  if (rect.fill) {
+  if (polygon.fill) {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(toFanVertices(center, points)), gl.STATIC_DRAW);
-    gl.uniform4fv(colorLocation, hexToRgbaFloat(rect.fill, rect.fillAlpha));
+    gl.uniform4fv(colorLocation, hexToRgbaFloat(polygon.fill, polygon.fillAlpha));
     gl.drawArrays(gl.TRIANGLE_FAN, 0, points.length + 2);
   }
 
-  if (rect.stroke) {
+  if (polygon.stroke) {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(points.flatMap((point) => [point.x, point.y])), gl.STATIC_DRAW);
-    gl.uniform4fv(colorLocation, hexToRgbaFloat(rect.stroke));
+    gl.uniform4fv(colorLocation, hexToRgbaFloat(polygon.stroke));
     gl.drawArrays(gl.LINE_LOOP, 0, points.length);
   }
 };

@@ -1,27 +1,23 @@
+// others
+import { ROUNDED_POLYGON_CORNER_SEGMENTS } from 'constant/canvas';
+
 // types
-import { TDraftRect, TPoint } from 'types/canvas';
+import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
 import { flipPoint } from 'utils/math/flipPoint';
-import { getPolygonPoints } from './getPolygonPoints';
+import { getRoundedPolygonPoints } from '../shapes/getRoundedPolygonPoints';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
 import { rotatePoint } from 'utils/math/rotatePoint';
+import { toFanVertices } from '../toFanVertices';
+import { TDrawablePolygon } from './drawPolygon';
 
-export type TDrawablePolygon = TDraftRect & {
-  fill?: string;
-  fillAlpha?: number;
-  sides: number;
-  stroke?: string;
-};
-
-const toFanVertices = (center: TPoint, points: TPoint[]): number[] => [center, ...points, points[0]].flatMap((point) => [point.x, point.y]);
-
-export const drawPolygon = (
+export const drawRoundedPolygon = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
-  polygon: TDrawablePolygon,
+  polygon: TDrawablePolygon & { cornerRadius: number },
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
@@ -36,7 +32,7 @@ export const drawPolygon = (
   const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
 
   const center: TPoint = { x: polygon.x + polygon.width / 2, y: polygon.y + polygon.height / 2 };
-  const points = getPolygonPoints(polygon, polygon.sides)
+  const points = getRoundedPolygonPoints(polygon, ROUNDED_POLYGON_CORNER_SEGMENTS)
     .map((point) => flipPoint(point, center, flipX, flipY))
     .map((point) => rotatePoint(point, center, rotation));
 

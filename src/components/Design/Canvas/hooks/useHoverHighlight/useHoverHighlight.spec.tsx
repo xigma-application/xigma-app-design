@@ -76,6 +76,30 @@ const addRectangleNode = (x: number, y: number, size: number, cornerRadius: numb
   return rootOrder[rootOrder.length - 1];
 };
 
+const addPolygonNode = (x: number, y: number, size: number, sides: number, cornerRadius: number): string => {
+  store.dispatch(
+    addNode({
+      cornerRadius,
+      fill: '#ff0000',
+      flipX: false,
+      flipY: false,
+      height: size,
+      name: 'Polygon',
+      parentId: null,
+      rotation: 0,
+      sides,
+      type: NodeType.polygon,
+      width: size,
+      x,
+      y,
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 const addPathTextNode = (x: number, y: number, size = 200): string => {
   store.dispatch(
     addNode({
@@ -386,6 +410,28 @@ describe('useHoverHighlight behaviors', () => {
     // action
     act(() => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 5080, 5020));
+    });
+
+    // result — the handle stays visible (hoverRef keeps the node's own id) while it's being hovered
+    expect(classNameRef.current).toBe('radius');
+    expect(hoverRef.current).toBe(idA);
+  });
+
+  it("should apply the radius cursor class and keep the node's own id hovered over a selected polygon's corner-radius handle", () => {
+    // mock — top vertex of a 100x100 triangle at (5200, 5000) sits at (5250, 5000); radius 15 moves
+    // the handle to (5250, 5015)
+    const idA = addPolygonNode(5200, 5000, 100, 3, 15);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { classNameRef, hoverRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 5250, 5015));
     });
 
     // result — the handle stays visible (hoverRef keeps the node's own id) while it's being hovered

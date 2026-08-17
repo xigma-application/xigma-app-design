@@ -11,7 +11,7 @@ import { drawCornerHandles } from 'utils/canvas/drawCornerHandles';
 import { drawDashedEllipseOutline } from 'utils/canvas/shapes/drawDashedEllipseOutline';
 import { drawEllipse } from 'utils/canvas/shapes/drawEllipse';
 import { drawImage } from 'utils/canvas/drawImage';
-import { drawPolygon } from 'utils/canvas/shapes/drawPolygon';
+import { drawPolygon } from 'utils/canvas/drawPolygon/drawPolygon';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { drawStar } from 'utils/canvas/shapes/drawStar';
 import { getOrLoadTexture } from 'utils/canvas/getOrLoadTexture';

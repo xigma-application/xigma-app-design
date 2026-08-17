@@ -7,6 +7,7 @@ import { flipPoint } from 'utils/math/flipPoint';
 import { getStarPoints } from './getStarPoints';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
 import { rotatePoint } from 'utils/math/rotatePoint';
+import { toFanVertices } from '../toFanVertices';
 
 export type TDrawableStar = TDraftRect & {
   fill?: string;
@@ -15,8 +16,6 @@ export type TDrawableStar = TDraftRect & {
   ratio: number;
   stroke?: string;
 };
-
-const toFanVertices = (center: TPoint, points: TPoint[]): number[] => [center, ...points, points[0]].flatMap((point) => [point.x, point.y]);
 
 export const drawStar = (
   gl: WebGL2RenderingContext,

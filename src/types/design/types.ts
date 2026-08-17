@@ -68,6 +68,7 @@ export type TPathNode = TBaseNode & {
 };
 
 export type TPolygonNode = TBaseNode & {
+  cornerRadius?: number;
   fill: string;
   flipX: boolean;
   flipY: boolean;

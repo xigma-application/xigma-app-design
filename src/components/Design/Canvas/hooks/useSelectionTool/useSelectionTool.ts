@@ -9,7 +9,15 @@ import { useAppDispatch, useAppSelector } from 'store';
 
 // types
 import { ToolName } from 'types/design/enums';
-import { TCornerRadiusDragState, TDragState, TEndpointDragState, TPathOffsetDragState, TResizeDragState, TRotateDragState } from './types';
+import {
+  TCornerRadiusDragState,
+  TDragState,
+  TEndpointDragState,
+  TPathOffsetDragState,
+  TPolygonCornerRadiusDragState,
+  TResizeDragState,
+  TRotateDragState,
+} from './types';
 import { TDraftRect, TPoint } from 'types/canvas';
 
 // utils
@@ -30,6 +38,7 @@ export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>,
   const resizeDragRef = useRef<TResizeDragState | null>(null);
   const rotateDragRef = useRef<TRotateDragState | null>(null);
   const cornerRadiusDragRef = useRef<TCornerRadiusDragState | null>(null);
+  const polygonCornerRadiusDragRef = useRef<TPolygonCornerRadiusDragState | null>(null);
   const marqueeStartRef = useRef<TPoint | null>(null);
 
   useEffect(() => {
@@ -47,6 +56,7 @@ export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>,
           resizeDragRef,
           rotateDragRef,
           cornerRadiusDragRef,
+          polygonCornerRadiusDragRef,
           marqueeStartRef,
           setClassName,
         );
@@ -62,6 +72,7 @@ export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>,
           resizeDragRef,
           rotateDragRef,
           cornerRadiusDragRef,
+          polygonCornerRadiusDragRef,
           marqueeStartRef,
           marqueeRef,
         );
@@ -77,6 +88,7 @@ export const useSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>,
           resizeDragRef,
           rotateDragRef,
           cornerRadiusDragRef,
+          polygonCornerRadiusDragRef,
           marqueeStartRef,
           marqueeRef,
           setClassName,

@@ -9,14 +9,13 @@ import { TViewport } from 'types/design/types';
 import { getEllipsePoints } from './getEllipsePoints';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
 import { rotatePoint } from 'utils/math/rotatePoint';
+import { toFanVertices } from '../toFanVertices';
 
 export type TDrawableEllipse = TDraftRect & {
   fill?: string;
   fillAlpha?: number;
   stroke?: string;
 };
-
-const toFanVertices = (center: TPoint, points: TPoint[]): number[] => [center, ...points, points[0]].flatMap((point) => [point.x, point.y]);
 
 export const drawEllipse = (
   gl: WebGL2RenderingContext,

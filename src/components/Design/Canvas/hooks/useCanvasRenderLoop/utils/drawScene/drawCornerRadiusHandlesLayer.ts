@@ -6,8 +6,10 @@ import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
 import { drawCornerRadiusHandles } from 'utils/canvas/drawCornerRadiusHandles';
+import { drawPolygonCornerRadiusHandle } from 'utils/canvas/drawPolygonCornerRadiusHandle';
 import { getNodeBounds } from '../../../../utils/getNodeBounds';
 import { hasCornerRadius } from 'utils/canvas/cornerRadius/hasCornerRadius';
+import { hasPolygonCornerRadius } from 'utils/canvas/cornerRadius/polygon/hasPolygonCornerRadius';
 import { shouldShowCornerRadiusHandles } from 'utils/canvas/cornerRadius/shouldShowCornerRadiusHandles';
 
 export const drawCornerRadiusHandlesLayer = (
@@ -22,15 +24,32 @@ export const drawCornerRadiusHandlesLayer = (
 ): void => {
   const [selectedNode] = selectedNodes;
 
-  if (selectedNodes.length === 1 && hoveredNode?.id === selectedNode.id && hasCornerRadius(selectedNode)) {
+  if (selectedNodes.length === 1 && hoveredNode?.id === selectedNode.id) {
     const bounds = getNodeBounds(selectedNode);
+    const canShowHandles = shouldShowCornerRadiusHandles(bounds, viewport);
 
-    if (shouldShowCornerRadiusHandles(bounds, viewport)) {
+    if (canShowHandles && hasCornerRadius(selectedNode)) {
       drawCornerRadiusHandles(
         gl,
         program,
         buffer,
         bounds,
+        selectedNode.cornerRadius ?? 0,
+        DRAFT_FRAME_STROKE,
+        canvasWidth,
+        canvasHeight,
+        viewport,
+        selectedNode.rotation,
+      );
+    }
+
+    if (canShowHandles && hasPolygonCornerRadius(selectedNode)) {
+      drawPolygonCornerRadiusHandle(
+        gl,
+        program,
+        buffer,
+        bounds,
+        selectedNode.sides,
         selectedNode.cornerRadius ?? 0,
         DRAFT_FRAME_STROKE,
         canvasWidth,

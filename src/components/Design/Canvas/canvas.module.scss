@@ -38,7 +38,10 @@
   }
 
   &__canvas-element {
-    cursor: url('../../../assets/icons/cursors/default.png'), auto;
+    cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+      -webkit-image-set(url('../../../assets/icons/cursors/default.png') 8x) 4 4,
+      auto;
     height: 100%;
     left: 0;
     position: absolute;

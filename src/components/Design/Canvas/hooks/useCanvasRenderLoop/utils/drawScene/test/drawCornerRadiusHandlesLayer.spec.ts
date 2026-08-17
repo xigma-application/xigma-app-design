@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TEllipseNode, TRectangleNode } from 'types/design/types';
+import { TEllipseNode, TPolygonNode, TRectangleNode } from 'types/design/types';
 
 // utils
 import { drawCornerRadiusHandlesLayer } from '../drawCornerRadiusHandlesLayer';
@@ -35,6 +35,23 @@ const rectangle: TRectangleNode = {
   parentId: null,
   rotation: 0,
   type: NodeType.rectangle,
+  width: 100,
+  x: 0,
+  y: 0,
+};
+
+const polygon: TPolygonNode = {
+  cornerRadius: 15,
+  fill: '#ff0000',
+  flipX: false,
+  flipY: false,
+  height: 100,
+  id: 'polygon-1',
+  name: 'Polygon',
+  parentId: null,
+  rotation: 0,
+  sides: 3,
+  type: NodeType.polygon,
   width: 100,
   x: 0,
   y: 0,
@@ -157,5 +174,45 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(8);
+  });
+
+  it('should draw the single corner-radius handle when a polygon is both selected and hovered', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCornerRadiusHandlesLayer(gl, program, buffer, polygon, [polygon], 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+  });
+
+  it('should draw nothing for a polygon once the shape renders too small on screen', () => {
+    // mock — a 100x100 shape at 90% zoom renders at 90 screen px, below the 100px threshold
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCornerRadiusHandlesLayer(gl, program, buffer, polygon, [polygon], 100, 100, { x: 0, y: 0, zoom: 0.9 });
+
+    // result
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+  });
+
+  it('should default a polygon with no cornerRadius field at all to 0', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const freshPolygon = { ...polygon, cornerRadius: undefined };
+
+    // before
+    drawCornerRadiusHandlesLayer(gl, program, buffer, freshPolygon, [freshPolygon], 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
   });
 });

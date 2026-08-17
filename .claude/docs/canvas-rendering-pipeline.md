@@ -62,9 +62,10 @@ WebGL2.
   ```
   **background → committed nodes → hover outline → selection outline → corner-radius handles →
   in-progress draft → editing-text overlay → path-text offset handle → marquee → slice draft.**
-  `drawCornerRadiusHandlesLayer.ts` self-gates (selected+hovered single rectangle, large enough on
-  screen — see `selection-and-manipulation.md` §11) rather than `drawScene.ts` deciding when to call
-  it, same "thin wrapper decides nothing, the layer decides" shape as `drawHoverOutline.ts`. Nodes
+  `drawCornerRadiusHandlesLayer.ts` self-gates (selected+hovered single rectangle or polygon, large
+  enough on screen — see `selection-and-manipulation.md` §11-12) rather than `drawScene.ts` deciding
+  when to call it, same "thin wrapper decides nothing, the layer decides" shape as
+  `drawHoverOutline.ts`. Nodes
   currently being
   text-edited are filtered out of both `sceneNodes` and `selectedNodes` up front
   (`node.id !== editingNodeId`), so they render exactly once, only through the dedicated editing
@@ -79,7 +80,7 @@ Three GLSL `#version 300 es` programs, all built via `createProgram.ts`/`createS
 
 | Program | Vertex source | Fragment source | Extra attrib | Used by |
 |---|---|---|---|---|
-| plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect`), `drawLine`, `drawEllipse`, `drawPolygon`, `drawStar`, `drawThickOutline`, `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, `drawCornerRadiusHandles`, every outline/handle primitive |
+| plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect`), `drawPolygon` (dispatches to `drawStandardPolygon`/`drawRoundedPolygon`), `drawLine`, `drawEllipse`, `drawStar`, `drawThickOutline`, `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, `drawCornerRadiusHandles`, `drawPolygonCornerRadiusHandle`, every outline/handle primitive |
 | image/texture | `imageVertexShaderSource.ts` | `imageFragmentShaderSource.ts` | `a_texCoord` | `drawImage.ts` (Media nodes + draft media) |
 | MSDF text | **same vertex source as image** (reused, not a 4th file) | `msdfFragmentShaderSource.ts` | `a_texCoord` | `drawMsdfText.ts` |
 
@@ -159,6 +160,10 @@ has no dedicated `case` — it falls through the same `default: drawRect(node, .
 because `drawRect.ts` itself branches on the node's own optional `cornerRadius` field (structural
 typing: passing a `TRectangleNode` through satisfies `TDrawableRect`'s optional `cornerRadius?:
 number` with no cast needed) rather than the dispatcher needing to know a rectangle can be rounded.
+`drawPolygon.ts` (its own `utils/canvas/drawPolygon/` folder, not `shapes/` anymore) branches the
+same way on `TPolygonNode.cornerRadius?: number`, dispatching to `drawStandardPolygon.ts` (the
+original flat fan, byte-for-byte moved) or `drawRoundedPolygon.ts` — the second instance of the
+`drawRect/`-shaped "dispatcher + one file per concrete path" folder (see §8).
 
 **In-progress/ephemeral visuals** never touch Redux — they live in plain `useRef`s on `Canvas.tsx`,
 written directly by native pointer listeners (so dragging never dispatches per pixel), and read by
@@ -266,9 +271,10 @@ Draw modes by primitive:
   verts, a rectangular ring), `drawThickEllipseOutline`/`drawThickPolygonOutline`/
   `drawThickStarOutline` (inner/outer-ring trick — see below).
 - **`TRIANGLE_FAN`**: `drawEllipse`/`drawPolygon`/`drawStar` **fills**
-  (`[center, ...points, points[0]]`) — `drawRoundedRect` (rounded `drawRect`) reuses the exact same
-  fan shape via its own `toFanVertices.ts`, fed from `getRoundedRectPoints.ts` instead of
-  `getEllipsePoints.ts`.
+  (`[center, ...points, points[0]]`) — `drawRoundedRect` (rounded `drawRect`) and `drawRoundedPolygon`
+  (rounded `drawPolygon`) both reuse the exact same fan shape via the shared `toFanVertices.ts`
+  (`utils/canvas/`, one level up from `drawRect/`/`drawPolygon/` since both folders share it), fed
+  from `getRoundedRectPoints.ts`/`getRoundedPolygonPoints.ts` instead of `getEllipsePoints.ts`.
 - **`LINE_LOOP`**: `drawEllipse`/`drawPolygon`/`drawStar` **stroke** outlines — 1px only.
 - `gl.lineWidth()` is capped at 1px in this WebGL implementation (confirmed via
   `gl.getParameter(gl.ALIASED_LINE_WIDTH_RANGE)` → `[1, 1]`), which is *why* the "thick outline"
@@ -284,7 +290,9 @@ verbatim. `drawRect/` is itself the worked example of "one primitive family, one
 dispatcher (`drawRect.ts`) plus one file per concrete rendering path (`drawStandardRect.ts`,
 `drawRoundedRect.ts`) plus a shared tiny helper (`toFanVertices.ts`), each with its own
 `test/*.spec.ts` sibling — same "folder named after its main file" shape as a hook folder like
-`useSelectionTool/useSelectionTool.ts`.
+`useSelectionTool/useSelectionTool.ts`. `drawPolygon/` copies this shape verbatim for its own
+optional-`cornerRadius` split (`drawPolygon.ts` dispatcher, `drawStandardPolygon.ts`,
+`drawRoundedPolygon.ts`) — confirms the pattern generalizes past Rectangle, not a one-off.
 
 ## File index
 
@@ -302,11 +310,15 @@ dispatcher (`drawRect.ts`) plus one file per concrete rendering path (`drawStand
 - Texture pipeline: `utils/canvas/getOrLoadTexture.ts`, `utils/canvas/drawImage.ts`
 - MSDF pipeline: `utils/canvas/text/{drawMsdfText,getMsdfAtlasTexture,buildGlyphQuads,buildGlyphQuad,
   buildCurvedGlyphQuads,getOrBuildTextGeometry}.ts`, `package.json`'s `generate:font-atlas` script
-- Primitives: `src/utils/canvas/*.ts`, `src/utils/canvas/shapes/*.ts` (incl. `getRoundedRectPoints.ts`),
-  and `src/utils/canvas/drawRect/*.ts` (its own folder — see above)
-- Corner-radius handles: `utils/canvas/cornerRadius/*.ts` (math), `utils/canvas/drawCornerRadiusHandles.ts`
-  + `.../drawScene/drawCornerRadiusHandlesLayer.ts` (rendering) — full mechanism in
-  `selection-and-manipulation.md` §11
+- Primitives: `src/utils/canvas/*.ts`, `src/utils/canvas/shapes/*.ts` (incl. `getRoundedRectPoints.ts`,
+  `getRoundedPolygonPoints.ts`), `src/utils/canvas/drawRect/*.ts` and `src/utils/canvas/drawPolygon/*.ts`
+  (each its own folder — see above)
+- Corner-radius handles: `utils/canvas/cornerRadius/*.ts` (Rectangle math) +
+  `utils/canvas/cornerRadius/polygon/*.ts` (Polygon math, separate — the two shapes' geometry doesn't
+  share implementation), `utils/canvas/drawCornerRadiusHandles.ts` +
+  `utils/canvas/drawPolygonCornerRadiusHandle.ts`, both gated by
+  `.../drawScene/drawCornerRadiusHandlesLayer.ts` (rendering) — full mechanism in
+  `selection-and-manipulation.md` §11-12
 - Roadmap corroboration: `docs/ROADMAP.md` Etap 4 (GPU transform migration), Etap 7 (MSDF rationale)
 
 ## Related
