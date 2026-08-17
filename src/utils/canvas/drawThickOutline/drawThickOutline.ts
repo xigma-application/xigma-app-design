@@ -1,21 +1,18 @@
-// others
-import { ELLIPSE_SEGMENTS } from 'constant/canvas';
-
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { getEllipsePoints } from './getEllipsePoints';
-import { getRingVertices } from '../getRingVertices';
+import { getRoundedRingVertices } from './getRoundedRingVertices';
+import { getSharpRingVertices } from './getSharpRingVertices';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
-import { rotatePoint } from 'utils/math/rotatePoint';
+import { rotateFlatVertices } from './rotateFlatVertices';
 
-export const drawThickEllipseOutline = (
+export const drawThickOutline = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
-  ellipse: TDraftRect,
+  rect: TDraftRect & { cornerRadius?: number },
   color: string,
   strokeWidth: number,
   canvasWidth: number,
@@ -29,19 +26,11 @@ export const drawThickEllipseOutline = (
   const zoomLocation = gl.getUniformLocation(program, 'u_zoom');
   const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
   const halfWidth = strokeWidth / viewport.zoom / 2;
-  const center: TPoint = { x: ellipse.x + ellipse.width / 2, y: ellipse.y + ellipse.height / 2 };
+  const cornerRadius = rect.cornerRadius ?? 0;
 
-  const outerPoints = getEllipsePoints(
-    { height: ellipse.height + halfWidth * 2, width: ellipse.width + halfWidth * 2, x: ellipse.x - halfWidth, y: ellipse.y - halfWidth },
-    ELLIPSE_SEGMENTS,
-  ).map((point) => rotatePoint(point, center, rotation));
-
-  const innerPoints = getEllipsePoints(
-    { height: ellipse.height - halfWidth * 2, width: ellipse.width - halfWidth * 2, x: ellipse.x + halfWidth, y: ellipse.y + halfWidth },
-    ELLIPSE_SEGMENTS,
-  ).map((point) => rotatePoint(point, center, rotation));
-
-  const vertices = getRingVertices(outerPoints, innerPoints);
+  const rawVertices = cornerRadius > 0 ? getRoundedRingVertices(rect, halfWidth, cornerRadius) : getSharpRingVertices(rect, halfWidth);
+  const center: TPoint = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+  const vertices = rotateFlatVertices(rawVertices, center, rotation);
 
   gl.useProgram(program);
   gl.uniform2f(viewportOffsetLocation, viewport.x, viewport.y);

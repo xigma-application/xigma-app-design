@@ -1,3 +1,6 @@
+// others
+import { ROUNDED_POLYGON_CORNER_SEGMENTS } from 'constant/canvas';
+
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
@@ -5,15 +8,21 @@ import { TViewport } from 'types/design/types';
 // utils
 import { flipPoint } from 'utils/math/flipPoint';
 import { getPolygonPoints } from './getPolygonPoints';
-import { getQuadVertices } from '../drawThickOutline';
+import { getRingVertices } from '../getRingVertices';
+import { getRoundedPolygonPoints } from './getRoundedPolygonPoints';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
 import { rotatePoint } from 'utils/math/rotatePoint';
+
+const getOutlinePoints = (bounds: TDraftRect, sides: number, cornerRadius: number): TPoint[] =>
+  cornerRadius > 0
+    ? getRoundedPolygonPoints({ ...bounds, cornerRadius, sides }, ROUNDED_POLYGON_CORNER_SEGMENTS)
+    : getPolygonPoints(bounds, sides);
 
 export const drawThickPolygonOutline = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
-  polygon: TDraftRect & { sides: number },
+  polygon: TDraftRect & { cornerRadius?: number; sides: number },
   color: string,
   strokeWidth: number,
   canvasWidth: number,
@@ -30,36 +39,26 @@ export const drawThickPolygonOutline = (
   const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
   const halfWidth = strokeWidth / viewport.zoom / 2;
   const { sides } = polygon;
+  const cornerRadius = polygon.cornerRadius ?? 0;
   const center: TPoint = { x: polygon.x + polygon.width / 2, y: polygon.y + polygon.height / 2 };
 
-  const outerPoints = getPolygonPoints(
+  const outerPoints = getOutlinePoints(
     { height: polygon.height + halfWidth * 2, width: polygon.width + halfWidth * 2, x: polygon.x - halfWidth, y: polygon.y - halfWidth },
     sides,
+    cornerRadius,
   )
     .map((point) => flipPoint(point, center, flipX, flipY))
     .map((point) => rotatePoint(point, center, rotation));
 
-  const innerPoints = getPolygonPoints(
+  const innerPoints = getOutlinePoints(
     { height: polygon.height - halfWidth * 2, width: polygon.width - halfWidth * 2, x: polygon.x + halfWidth, y: polygon.y + halfWidth },
     sides,
+    cornerRadius,
   )
     .map((point) => flipPoint(point, center, flipX, flipY))
     .map((point) => rotatePoint(point, center, rotation));
 
-  const vertices = outerPoints.flatMap((outerPoint, index) => {
-    const nextIndex = (index + 1) % sides;
-
-    return getQuadVertices(
-      outerPoint.x,
-      outerPoint.y,
-      outerPoints[nextIndex].x,
-      outerPoints[nextIndex].y,
-      innerPoints[nextIndex].x,
-      innerPoints[nextIndex].y,
-      innerPoints[index].x,
-      innerPoints[index].y,
-    );
-  });
+  const vertices = getRingVertices(outerPoints, innerPoints);
 
   gl.useProgram(program);
   gl.uniform2f(viewportOffsetLocation, viewport.x, viewport.y);
@@ -70,5 +69,5 @@ export const drawThickPolygonOutline = (
   gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
   gl.uniform4fv(colorLocation, hexToRgbaFloat(color));
-  gl.drawArrays(gl.TRIANGLES, 0, sides * 6);
+  gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
 };

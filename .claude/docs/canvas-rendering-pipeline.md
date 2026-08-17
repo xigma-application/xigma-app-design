@@ -272,9 +272,20 @@ Every `src/utils/canvas/draw*.ts` (and `shapes/draw*.ts`) follows the same shape
 
 Draw modes by primitive:
 - **`TRIANGLES`**: `drawStandardRect` (unrounded `drawRect`, 6 verts), `drawLine`
-  (perpendicular-offset quad, 6 verts), `drawImage`, `drawMsdfText`, `drawThickOutline` (4 quads = 24
-  verts, a rectangular ring), `drawThickEllipseOutline`/`drawThickPolygonOutline`/
-  `drawThickStarOutline` (inner/outer-ring trick — see below).
+  (perpendicular-offset quad, 6 verts), `drawImage`, `drawMsdfText`, `drawThickOutline` (its own
+  `utils/canvas/drawThickOutline/` folder, same "dispatcher + one file per concrete path" shape as
+  `drawRect/`: `drawThickOutline.ts` picks `getSharpRingVertices.ts` (4 quads = 24 verts, a
+  rectangular ring) or `getRoundedRingVertices.ts` (same inner/outer-ring trick as
+  `getRoundedRectPoints` once `cornerRadius > 0`, so the hover/selection outline for a rounded
+  Rectangle actually traces the rounded boundary instead of a sharp one) then rotates the result via
+  `rotateFlatVertices.ts`), `drawThickEllipseOutline`/`drawThickPolygonOutline`/
+  `drawThickStarOutline` (inner/outer-ring trick — see below; also `cornerRadius`-aware the same way,
+  swapping in `getRoundedPolygonPoints`/`getRoundedStarPoints`). All four "thick outline" primitives
+  (`getRoundedRingVertices` included) share `getRingVertices.ts` (`utils/canvas/`, same
+  shared-utility placement as `toFanVertices.ts`) — takes the outer/inner point lists and does the
+  whole "quad per point pair, wrapping the last back to the first" loop, itself built on the even
+  smaller `getQuadVertices.ts` (one point pair → two triangles). `getSharpRingVertices.ts` is the one
+  exception, since its 4 named edges (top/bottom/left/right) aren't a uniform point ring.
 - **`TRIANGLE_FAN`**: `drawEllipse`/`drawPolygon`/`drawStar` **fills**
   (`[center, ...points, points[0]]`) — `drawRoundedRect` (rounded `drawRect`) and `drawRoundedPolygon`
   (rounded `drawPolygon`) both reuse the exact same fan shape via the shared `toFanVertices.ts`

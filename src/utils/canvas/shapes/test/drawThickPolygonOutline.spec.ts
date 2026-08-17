@@ -175,4 +175,31 @@ describe('drawThickPolygonOutline', () => {
     expect(vertices[2]).toBeCloseTo(-1);
     expect(vertices[3]).toBeCloseTo(5);
   });
+
+  it('should trace the rounded boundary, not the sharp one, once cornerRadius is set', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before — a hexagon's rounded ring has 6 * (ROUNDED_POLYGON_CORNER_SEGMENTS + 1) = 54 points
+    // per edge (outer/inner), instead of the sharp shape's plain 6
+    drawThickPolygonOutline(
+      gl,
+      program,
+      buffer,
+      { cornerRadius: 2, height: 20, sides: 6, width: 20, x: 0, y: 0 },
+      '#0d99ff',
+      2,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      false,
+      0,
+    );
+
+    // result
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 54 * 6);
+  });
 });

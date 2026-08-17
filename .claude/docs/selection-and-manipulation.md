@@ -90,10 +90,21 @@ test function. The test functions themselves never know about rotation. The same
 `continueResizeDrag/getResizeQueryPoint.ts` — one rotation-inversion helper, four call sites.
 
 Per-`NodeType` tests (all `Canvas/utils/`):
-- `isPointInRect.ts` — plain AABB (rectangle/frame/media/default).
+- `isPointInRect.ts` — AABB, **rounded-corner-aware**: excludes a point that falls inside the
+  bounding box but outside a nonzero `cornerRadius`'s rounded corner (analytic circle test against
+  each corner's own arc center, `getMaxCornerRadius`-clamped — no point-list approximation needed
+  since a rect corner is always a plain quarter-circle). Used for rectangle/frame/media/default *and*
+  reused verbatim by `isPointInGroupBounds.ts`/`isPointInSelectedTextBounds.ts`/the Slice tool's own
+  hit-test — safe, since none of those ever pass an object with a `cornerRadius` field, so the
+  rounding branch is simply never taken there.
 - `isPointInEllipse.ts` — normalized `(x/rx)² + (y/ry)² ≤ 1`.
 - `isPointInPolygon.ts` / `isPointInStar.ts` — ray-casting over generated vertices, **flip-aware**:
-  calls `flipPoint(point, center, flipX, flipY)` before testing (see §8).
+  calls `flipPoint(point, center, flipX, flipY)` before testing (see §8). Also
+  **rounded-corner-aware**: swaps in `getRoundedPolygonPoints`/`getRoundedStarPoints` (the same
+  point generators the fill rendering itself uses, §15/§16) instead of the sharp
+  `getPolygonPoints`/`getStarPoints` whenever `cornerRadius > 0`, so a click just outside a rounded
+  tip correctly misses and a click in a now-filled-in rounded concave notch correctly hits — the
+  ray-casting algorithm itself needs no changes, it just needs the right point list fed in.
 - `isPointNearLine.ts` — point-to-segment distance ≤ `LINE_HIT_TOLERANCE_PX / zoom`, clamped
   projection.
 - `isPointInText.ts` — per-line width/height rect test, flip-aware (`flipTextPoint`).

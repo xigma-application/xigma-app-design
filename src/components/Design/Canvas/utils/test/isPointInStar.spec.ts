@@ -34,4 +34,13 @@ describe('isPointInStar', () => {
     expect(isPointInStar({ x: 50, y: 95 }, star)).toBe(false);
     expect(isPointInStar({ x: 50, y: 95 }, flippedStar)).toBe(true);
   });
+
+  it('should return true near a concave vertex once cornerRadius rounds it, even though the sharp shape excludes that point', () => {
+    // mock — rounding a concave (inner) vertex at (61.23, 34.55) bulges the boundary outward into
+    const roundedStar = { ...star, cornerRadius: 9.5 };
+
+    // result
+    expect(isPointInStar({ x: 62.15, y: 33.28 }, star)).toBe(false);
+    expect(isPointInStar({ x: 62.15, y: 33.28 }, roundedStar)).toBe(true);
+  });
 });

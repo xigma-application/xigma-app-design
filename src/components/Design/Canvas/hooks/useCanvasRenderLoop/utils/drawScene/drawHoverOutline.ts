@@ -9,7 +9,7 @@ import { TSceneNode, TViewport } from 'types/design/types';
 import { drawLine } from 'utils/canvas/drawLine';
 import { drawTextHoverUnderline } from './drawTextHoverUnderline';
 import { drawThickEllipseOutline } from 'utils/canvas/shapes/drawThickEllipseOutline';
-import { drawThickOutline } from 'utils/canvas/drawThickOutline';
+import { drawThickOutline } from 'utils/canvas/drawThickOutline/drawThickOutline';
 import { drawThickPolygonOutline } from 'utils/canvas/shapes/drawThickPolygonOutline';
 import { drawThickStarOutline } from 'utils/canvas/shapes/drawThickStarOutline';
 

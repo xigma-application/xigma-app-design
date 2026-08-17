@@ -1,19 +1,28 @@
+// others
+import { ROUNDED_STAR_CORNER_SEGMENTS } from 'constant/canvas';
+
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
 import { flipPoint } from 'utils/math/flipPoint';
-import { getQuadVertices } from '../drawThickOutline';
+import { getRingVertices } from '../getRingVertices';
+import { getRoundedStarPoints } from './getRoundedStarPoints';
 import { getStarPoints } from './getStarPoints';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
 import { rotatePoint } from 'utils/math/rotatePoint';
+
+const getOutlinePoints = (bounds: TDraftRect, points: number, ratio: number, cornerRadius: number): TPoint[] =>
+  cornerRadius > 0
+    ? getRoundedStarPoints({ ...bounds, cornerRadius, points, ratio }, ROUNDED_STAR_CORNER_SEGMENTS)
+    : getStarPoints(bounds, points, ratio);
 
 export const drawThickStarOutline = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
-  star: TDraftRect & { points: number; ratio: number },
+  star: TDraftRect & { cornerRadius?: number; points: number; ratio: number },
   color: string,
   strokeWidth: number,
   canvasWidth: number,
@@ -30,39 +39,28 @@ export const drawThickStarOutline = (
   const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
   const halfWidth = strokeWidth / viewport.zoom / 2;
   const { points, ratio } = star;
-  const vertexCount = points * 2;
+  const cornerRadius = star.cornerRadius ?? 0;
   const center: TPoint = { x: star.x + star.width / 2, y: star.y + star.height / 2 };
 
-  const outerPoints = getStarPoints(
+  const outerPoints = getOutlinePoints(
     { height: star.height + halfWidth * 2, width: star.width + halfWidth * 2, x: star.x - halfWidth, y: star.y - halfWidth },
     points,
     ratio,
+    cornerRadius,
   )
     .map((point) => flipPoint(point, center, flipX, flipY))
     .map((point) => rotatePoint(point, center, rotation));
 
-  const innerPoints = getStarPoints(
+  const innerPoints = getOutlinePoints(
     { height: star.height - halfWidth * 2, width: star.width - halfWidth * 2, x: star.x + halfWidth, y: star.y + halfWidth },
     points,
     ratio,
+    cornerRadius,
   )
     .map((point) => flipPoint(point, center, flipX, flipY))
     .map((point) => rotatePoint(point, center, rotation));
 
-  const vertices = outerPoints.flatMap((outerPoint, index) => {
-    const nextIndex = (index + 1) % vertexCount;
-
-    return getQuadVertices(
-      outerPoint.x,
-      outerPoint.y,
-      outerPoints[nextIndex].x,
-      outerPoints[nextIndex].y,
-      innerPoints[nextIndex].x,
-      innerPoints[nextIndex].y,
-      innerPoints[index].x,
-      innerPoints[index].y,
-    );
-  });
+  const vertices = getRingVertices(outerPoints, innerPoints);
 
   gl.useProgram(program);
   gl.uniform2f(viewportOffsetLocation, viewport.x, viewport.y);
@@ -73,5 +71,5 @@ export const drawThickStarOutline = (
   gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
   gl.uniform4fv(colorLocation, hexToRgbaFloat(color));
-  gl.drawArrays(gl.TRIANGLES, 0, vertexCount * 6);
+  gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
 };

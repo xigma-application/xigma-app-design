@@ -35,4 +35,22 @@ describe('isPointInPolygon', () => {
     expect(isPointInPolygon({ x: 5, y: 9.5 }, triangle)).toBe(false);
     expect(isPointInPolygon({ x: 5, y: 9.5 }, flippedTriangle)).toBe(true);
   });
+
+  it('should return false near a tip once cornerRadius cuts it off, even though the sharp shape includes that point', () => {
+    // mock — the diamond's top vertex (5, 0) has a 90deg angle; radius 2's cutoff along the
+    // bisector is 2*(sqrt(2)-1) =~ 0.83, so (5, 0.5) sits inside that cut-off zone
+    const roundedDiamond = { ...diamond, cornerRadius: 2 };
+
+    // result
+    expect(isPointInPolygon({ x: 5, y: 0.5 }, diamond)).toBe(true);
+    expect(isPointInPolygon({ x: 5, y: 0.5 }, roundedDiamond)).toBe(false);
+  });
+
+  it('should return true further from the tip, past the rounded cutoff', () => {
+    // mock — (5, 1.5) is 1.5 from the vertex, beyond the ~0.83 cutoff for radius 2
+    const roundedDiamond = { ...diamond, cornerRadius: 2 };
+
+    // result
+    expect(isPointInPolygon({ x: 5, y: 1.5 }, roundedDiamond)).toBe(true);
+  });
 });

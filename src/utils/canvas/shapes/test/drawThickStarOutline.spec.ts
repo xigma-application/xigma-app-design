@@ -175,4 +175,31 @@ describe('drawThickStarOutline', () => {
     expect(vertices[2]).toBeCloseTo(-1);
     expect(vertices[3]).toBeCloseTo(5);
   });
+
+  it('should trace the rounded boundary, not the sharp one, once cornerRadius is set', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before — a 5-point star has 10 vertices; the rounded ring has 10 * (ROUNDED_STAR_CORNER_SEGMENTS
+    // + 1) = 90 points per edge, instead of the sharp shape's plain 10
+    drawThickStarOutline(
+      gl,
+      program,
+      buffer,
+      { cornerRadius: 5, height: 100, points: 5, ratio: 0.382, width: 100, x: 0, y: 0 },
+      '#0d99ff',
+      2,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      false,
+      false,
+      0,
+    );
+
+    // result
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 90 * 6);
+  });
 });

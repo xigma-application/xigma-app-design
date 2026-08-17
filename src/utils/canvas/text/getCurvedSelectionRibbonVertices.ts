@@ -4,7 +4,7 @@ import { TGlyphAtlasJson } from 'types/msdf';
 
 // utils
 import { getCurvedSelectionEdges } from './getCurvedSelectionEdges';
-import { getQuadVertices } from '../drawThickOutline';
+import { getQuadVertices } from '../getQuadVertices';
 
 export const getCurvedSelectionRibbonVertices = (
   atlas: TGlyphAtlasJson,

@@ -103,4 +103,29 @@ describe('drawThickOutline', () => {
     expect(vertices[0]).toBeCloseTo(16);
     expect(vertices[1]).toBeCloseTo(4);
   });
+
+  it('should trace the rounded boundary, not the sharp one, once cornerRadius is set', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before — 4 corners * (ROUNDED_RECT_CORNER_SEGMENTS + 1) = 36 points per ring edge, instead of
+    // the sharp rect's plain 4 corners
+    drawThickOutline(
+      gl,
+      program,
+      buffer,
+      { cornerRadius: 5, height: 100, width: 100, x: 0, y: 0 },
+      '#0d99ff',
+      2,
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      0,
+    );
+
+    // result
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 36 * 6);
+  });
 });
