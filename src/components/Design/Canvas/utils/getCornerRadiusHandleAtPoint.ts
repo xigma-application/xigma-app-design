@@ -25,7 +25,7 @@ export const getCornerRadiusHandleAtPoint = (
 
   const bounds = getNodeBounds(node);
 
-  if (!shouldShowCornerRadiusHandles(bounds, viewport)) {
+  if (!shouldShowCornerRadiusHandles(bounds, viewport, node.cornerRadius ?? 0)) {
     return null;
   }
 

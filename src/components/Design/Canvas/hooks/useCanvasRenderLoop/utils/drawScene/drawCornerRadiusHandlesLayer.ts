@@ -27,39 +27,46 @@ export const drawCornerRadiusHandlesLayer = (
 
   if (selectedNodes.length === 1 && hoveredNode?.id === selectedNode.id) {
     const bounds = getNodeBounds(selectedNode);
-    const canShowHandles = shouldShowCornerRadiusHandles(bounds, viewport);
 
-    if (canShowHandles && hasCornerRadius(selectedNode)) {
-      drawCornerRadiusHandles(
-        gl,
-        program,
-        buffer,
-        bounds,
-        selectedNode.cornerRadius ?? 0,
-        DRAFT_FRAME_STROKE,
-        canvasWidth,
-        canvasHeight,
-        viewport,
-        selectedNode.rotation,
-        isDraggingCornerRadius,
-      );
+    if (hasCornerRadius(selectedNode)) {
+      const cornerRadius = selectedNode.cornerRadius ?? 0;
+
+      if (shouldShowCornerRadiusHandles(bounds, viewport, cornerRadius, isDraggingCornerRadius)) {
+        drawCornerRadiusHandles(
+          gl,
+          program,
+          buffer,
+          bounds,
+          cornerRadius,
+          DRAFT_FRAME_STROKE,
+          canvasWidth,
+          canvasHeight,
+          viewport,
+          selectedNode.rotation,
+          isDraggingCornerRadius,
+        );
+      }
     }
 
-    if (canShowHandles && hasPolygonCornerRadius(selectedNode)) {
-      drawPolygonCornerRadiusHandle(
-        gl,
-        program,
-        buffer,
-        bounds,
-        selectedNode.sides,
-        selectedNode.cornerRadius ?? 0,
-        DRAFT_FRAME_STROKE,
-        canvasWidth,
-        canvasHeight,
-        viewport,
-        selectedNode.rotation,
-        isDraggingCornerRadius,
-      );
+    if (hasPolygonCornerRadius(selectedNode)) {
+      const cornerRadius = selectedNode.cornerRadius ?? 0;
+
+      if (shouldShowCornerRadiusHandles(bounds, viewport, cornerRadius, isDraggingCornerRadius)) {
+        drawPolygonCornerRadiusHandle(
+          gl,
+          program,
+          buffer,
+          bounds,
+          selectedNode.sides,
+          cornerRadius,
+          DRAFT_FRAME_STROKE,
+          canvasWidth,
+          canvasHeight,
+          viewport,
+          selectedNode.rotation,
+          isDraggingCornerRadius,
+        );
+      }
     }
   }
 };

@@ -1119,18 +1119,35 @@ corner/vertex) instead of the zero-state fallback while a drag is actually in pr
 zero-state offset only re-applies once `disarmCornerRadiusDrag.ts`/`disarmPolygonCornerRadiusDrag.ts`
 clear the ref on pointer release.
 
-| #   | Scenario                                                                                                                                               | Unit |            E2E             |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | :--: | :------------------------: |
-| 115 | Handles render only once the rectangle is both selected and hovered — selected alone shows nothing extra                                               |  ✅  | ✅ `corner-radius.spec.ts` |
-| 116 | Dragging the ne handle purely left (no diagonal movement) alone drives the radius to max                                                               |  ✅  | ✅ `corner-radius.spec.ts` |
-| 117 | Dragging the ne handle purely down (no diagonal movement) alone also drives the radius to max                                                          |  ✅  | ✅ `corner-radius.spec.ts` |
-| 118 | Clicking exactly on the corner still arms the resize handle, not the radius handle, even once cornerRadius is nonzero                                  |  ✅  |             —              |
-| 119 | Once several handles coincide near max radius, the drag's first-movement direction picks which corner applies                                          |  ✅  |             —              |
-| 120 | A rounding stored via drag never overshoots a fractional max (e.g. 50.5 on a 101px side) after rounding to the nearest px                              |  ✅  |             —              |
-| 121 | Handles vanish entirely once the shape's on-screen size drops below the visibility threshold, regardless of radius                                     |  ✅  |             —              |
-| 127 | Dragging to radius 0 keeps the handle tracking the pointer at the corner mid-drag, only snapping to the zero-state offset once the pointer is released |  ✅  | ✅ `corner-radius.spec.ts` |
+A small but _nonzero_ radius has its own visibility edge case: at rest, `cornerRadius > 0` renders
+the handle at its literal position (`radius` world units from the corner/vertex), inset by a fixed
+**world** amount that doesn't change with zoom — but the handle's own rendered screen size does stay
+constant regardless of zoom, so as you zoom out, the screen-space gap between the handle and the
+corner/vertex it sits next to keeps shrinking until the handle visually overlaps that corner (or the
+resize handle sitting on it). `shouldShowCornerRadiusHandles.ts` now takes the live `cornerRadius`
+and `isDragging` too, gating on **both** the existing shape-size check and a new
+`cornerRadius * viewport.zoom >= MIN_RADIUS_HANDLE_GAP_PX` check (reusing the same floor the
+zero-state offset already clamps to) — `cornerRadius === 0` is exempt (the zero-state offset already
+guarantees a visible gap by construction) and `isDragging` is exempt (mid-drag always tracks the
+literal position per the fix above; hiding it while the user is actively holding it would be worse).
+Both hit-testing (`getCornerRadiusHandleAtPoint.ts`/`getPolygonCornerRadiusHandleAtPoint.ts`) and
+rendering (`drawCornerRadiusHandlesLayer.ts`) read the same gate, so a hidden handle is also
+ungrabbable, not just invisible.
 
-#118-#121 stay unit-only: each is a precise, already-exact `store.getState()`/direct-function-call
+| #   | Scenario                                                                                                                                                       | Unit |            E2E             |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :------------------------: |
+| 115 | Handles render only once the rectangle is both selected and hovered — selected alone shows nothing extra                                                       |  ✅  | ✅ `corner-radius.spec.ts` |
+| 116 | Dragging the ne handle purely left (no diagonal movement) alone drives the radius to max                                                                       |  ✅  | ✅ `corner-radius.spec.ts` |
+| 117 | Dragging the ne handle purely down (no diagonal movement) alone also drives the radius to max                                                                  |  ✅  | ✅ `corner-radius.spec.ts` |
+| 118 | Clicking exactly on the corner still arms the resize handle, not the radius handle, even once cornerRadius is nonzero                                          |  ✅  |             —              |
+| 119 | Once several handles coincide near max radius, the drag's first-movement direction picks which corner applies                                                  |  ✅  |             —              |
+| 120 | A rounding stored via drag never overshoots a fractional max (e.g. 50.5 on a 101px side) after rounding to the nearest px                                      |  ✅  |             —              |
+| 121 | Handles vanish entirely once the shape's on-screen size drops below the visibility threshold, regardless of radius                                             |  ✅  |             —              |
+| 127 | Dragging to radius 0 keeps the handle tracking the pointer at the corner mid-drag, only snapping to the zero-state offset once the pointer is released         |  ✅  | ✅ `corner-radius.spec.ts` |
+| 128 | A small nonzero radius hides its handle once zooming out shrinks its screen-space gap below the minimum, instead of letting it overlap the corner              |  ✅  | ✅ `corner-radius.spec.ts` |
+| 129 | A radius that clears the minimum screen gap keeps showing its handle even when small, and `cornerRadius === 0` is never hidden by this rule regardless of zoom |  ✅  |             —              |
+
+#118-#121, #129 stay unit-only: each is a precise, already-exact `store.getState()`/direct-function-call
 assertion (`handlePointerDown.spec.ts`, `resolveCornerFromDirection.spec.ts`,
 `continueCornerRadiusDrag.spec.ts`, `shouldShowCornerRadiusHandles.spec.ts`/
 `getCornerRadiusHandleAtPoint.spec.ts`) that a screenshot diff can't meaningfully improve on — per

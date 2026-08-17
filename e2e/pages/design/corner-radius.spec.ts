@@ -49,6 +49,48 @@ test('dragging the ne handle down to radius 0 keeps it tracking the pointer at t
   expect(afterRelease.equals(restingZeroState)).toBe(true);
 });
 
+test('the handle hides itself once a small radius renders below the minimum screen gap while zoomed out, instead of overlapping the corner', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+  const zoomOutSteps = 8;
+
+  // draws the same 400x400 square, drags its ne handle to a given target, then zooms out through
+  // the identical deterministic step sequence from a fresh 100% zoom — two independent runs of this
+  // (one per project id) land on the exact same final shape/viewport geometry, so a screenshot diff
+  // between them isolates the handle's own presence instead of being confounded by the hover
+  // outline (which renders regardless of whether the corner-radius handle itself is shown)
+  const captureHoveredAtLowZoom = async (projectId: string, dragTarget: { x: number; y: number }): Promise<Buffer> => {
+    await designPage.goto(projectId);
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(900, 300, 1300, 700); // ne corner at (1300, 300)
+    await designPage.click(1100, 500);
+    await designPage.pointerMove(1270, 330); // hover the zero-state handle to reveal it
+
+    await designPage.pointerDown(1270, 330);
+    await designPage.pointerMove(dragTarget.x, dragTarget.y);
+    await designPage.pointerUp();
+
+    // MIN_RADIUS_HANDLE_GAP_PX is 12; each wheel step multiplies zoom by ~0.92, so a 20px radius
+    // drops below the gap after about 7 steps, while the 400x400 shape itself stays comfortably
+    // above the 100px shape-size cutoff throughout
+    for (let step = 0; step < zoomOutSteps; step += 1) {
+      await designPage.zoomAt(1100, 500, 100);
+    }
+
+    await designPage.pointerMove(1100, 500); // re-hover after the viewport shifted under the cursor
+
+    return designPage.canvas.screenshot();
+  };
+
+  const smallRadiusAtLowZoom = await captureHoveredAtLowZoom('e2e-test-corner-radius-hide-small', { x: 1280, y: 320 }); // cornerRadius 20
+  const largeRadiusAtLowZoom = await captureHoveredAtLowZoom('e2e-test-corner-radius-hide-large', { x: 1150, y: 330 }); // cornerRadius 150
+
+  // a big-enough radius still shows its handle at the same zoom where the tiny radius hid it
+  expect(largeRadiusAtLowZoom.equals(smallRadiusAtLowZoom)).toBe(false);
+});
+
 test('dragging the ne handle purely left, with no diagonal movement, visibly rounds the corner', async ({ page }) => {
   const designPage = new DesignPage(page);
 

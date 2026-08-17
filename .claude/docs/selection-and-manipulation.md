@@ -606,6 +606,38 @@ Canvas.tsx: creates cornerRadiusDragRef/polygonCornerRadiusDragRef via useRef
 must keep seeing the zero-state offset since that's the position a fresh click needs to land on) is
 unaffected — only the render path opts into the new parameter.
 
+## 14. Hiding the handle when a small radius collides with the corner on screen
+
+A *nonzero* radius has an edge case the zero-state fallback doesn't cover: at rest, `cornerRadius >
+0` renders the handle at `radius` **world** units from the corner/vertex — a fixed world-space
+offset that doesn't shrink or grow with zoom — while the handle's own rendered circle stays a
+constant **screen**-space size regardless of zoom (by design, so it's always equally easy to grab).
+Zooming out shrinks the *screen-space gap* between those two fixed points (world offset × shrinking
+zoom) without ever shrinking the handle's own on-screen size, so at a small enough radius and a far
+enough zoom-out, the handle visually overlaps the corner (and whatever resize handle sits there)
+even though the shape itself may still be comfortably above `shouldShowCornerRadiusHandles.ts`'s
+existing shape-size cutoff.
+
+`shouldShowCornerRadiusHandles.ts` now takes `cornerRadius` and `isDragging` too, and gates on
+**both** the existing shape-size check and a new
+`cornerRadius * viewport.zoom >= MIN_RADIUS_HANDLE_GAP_PX` check — reusing the exact same floor
+`getCornerRadiusHandlePositions.ts`'s zero-state offset already clamps to, since it's the same
+"minimum usable screen gap" concept. Two deliberate exemptions: `cornerRadius === 0` always passes
+(the zero-state offset already guarantees a visible gap by construction — this rule only needs to
+catch the *nonzero-but-tiny* case the zero-state path doesn't cover), and `isDragging` always passes
+(per §13, a drag in progress always tracks the literal position; hiding the handle out from under an
+actively-dragging pointer would be worse than the overlap it prevents at rest). Both hit-testing and
+rendering read the same gate — `getCornerRadiusHandleAtPoint.ts`/`getPolygonCornerRadiusHandleAtPoint.ts`
+pass `isDragging` implicitly `false` (hit-testing never runs mid-drag), so a hidden handle is also
+ungrabbable, not just invisible; a fresh click in that state falls through to whatever's underneath
+(resize handle, plain node hit) exactly as if the shape had no corner radius at all.
+
+`drawCornerRadiusHandlesLayer.ts` calls `shouldShowCornerRadiusHandles(bounds, viewport, cornerRadius,
+isDraggingCornerRadius)` separately inside each of its two `hasCornerRadius`/`hasPolygonCornerRadius`
+branches now (rather than once, shared, the way the shape-size-only check used to be) — the value
+differs by node type, and TypeScript can't narrow `selectedNode.cornerRadius` before the type guard
+has run, so each branch reads its own narrowed `selectedNode.cornerRadius ?? 0` independently.
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.
