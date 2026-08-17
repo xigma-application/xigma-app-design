@@ -49,6 +49,28 @@ test('dragging the ne handle down to radius 0 keeps it tracking the pointer at t
   expect(afterRelease.equals(restingZeroState)).toBe(true);
 });
 
+test('grabbing the zero-state handle without moving the pointer leaves it exactly where it was, instead of jumping to the corner on click alone', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-corner-radius-zero-no-move');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(900, 300, 1050, 450); // 150x150 square, ne corner at (1050, 300)
+  await designPage.click(975, 375);
+  await designPage.pointerMove(1020, 330); // hover the zero-state handle to reveal it
+  const restingZeroState = await designPage.canvas.screenshot();
+
+  await designPage.pointerDown(1020, 330); // grab it, but never move the pointer
+  const justGrabbed = await designPage.canvas.screenshot();
+
+  // grabbing alone (armed, but no real movement yet) must not relocate the handle
+  expect(justGrabbed.equals(restingZeroState)).toBe(true);
+
+  await designPage.pointerUp();
+});
+
 test('the handle hides itself once a small radius renders below the minimum screen gap while zoomed out, instead of overlapping the corner', async ({
   page,
 }) => {

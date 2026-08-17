@@ -38,6 +38,7 @@ export type TCornerRadiusDragState = {
   bounds: TDraftRect;
   candidates: TCornerRadiusHandle[];
   corner: TCornerRadiusHandle | null;
+  hasMoved: boolean;
   nodeId: string;
   pointerStart: TPoint;
   rotation: number;
@@ -45,6 +46,7 @@ export type TCornerRadiusDragState = {
 
 export type TPolygonCornerRadiusDragState = {
   bounds: TDraftRect;
+  hasMoved: boolean;
   nodeId: string;
   rotation: number;
   sides: number;
@@ -52,6 +54,7 @@ export type TPolygonCornerRadiusDragState = {
 
 export type TStarCornerRadiusDragState = {
   bounds: TDraftRect;
+  hasMoved: boolean;
   nodeId: string;
   points: number;
   ratio: number;

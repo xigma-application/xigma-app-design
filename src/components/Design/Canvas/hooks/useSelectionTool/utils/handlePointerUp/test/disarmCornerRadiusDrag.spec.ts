@@ -41,6 +41,7 @@ describe('disarmCornerRadiusDrag', () => {
       bounds: { height: 10, width: 10, x: 0, y: 0 },
       candidates: ['se'],
       corner: 'se',
+      hasMoved: true,
       nodeId: 'node-a',
       pointerStart: { x: 10, y: 10 },
       rotation: 0,

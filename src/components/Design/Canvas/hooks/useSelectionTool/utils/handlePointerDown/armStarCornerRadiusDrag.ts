@@ -14,6 +14,6 @@ export const armStarCornerRadiusDrag = (
   points: number,
   ratio: number,
 ): void => {
-  starCornerRadiusDragRef.current = { bounds, nodeId, points, ratio, rotation };
+  starCornerRadiusDragRef.current = { bounds, hasMoved: false, nodeId, points, ratio, rotation };
   canvas.setPointerCapture(event.pointerId);
 };

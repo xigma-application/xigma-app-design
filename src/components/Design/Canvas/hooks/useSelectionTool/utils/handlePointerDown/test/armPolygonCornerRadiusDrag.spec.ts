@@ -38,6 +38,7 @@ describe('armPolygonCornerRadiusDrag', () => {
     // result
     expect(polygonCornerRadiusDragRef.current).toEqual({
       bounds: { height: 100, width: 100, x: 0, y: 0 },
+      hasMoved: false,
       nodeId: 'node-a',
       rotation: 30,
       sides: 3,

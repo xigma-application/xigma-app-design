@@ -72,6 +72,7 @@ describe('continueStarCornerRadiusDrag', () => {
     const canvas = createCanvas();
     const dragRef = createStarCornerRadiusDragRef({
       bounds: { height: 100, width: 100, x: 0, y: 0 },
+      hasMoved: false,
       nodeId: idA,
       points: 5,
       ratio: 0.5,
@@ -91,6 +92,7 @@ describe('continueStarCornerRadiusDrag', () => {
     const canvas = createCanvas();
     const dragRef = createStarCornerRadiusDragRef({
       bounds: { height: 100, width: 100, x: 0, y: 0 },
+      hasMoved: false,
       nodeId: idA,
       points: 5,
       ratio: 0.5,
@@ -110,6 +112,7 @@ describe('continueStarCornerRadiusDrag', () => {
     const canvas = createCanvas();
     const dragRef = createStarCornerRadiusDragRef({
       bounds: { height: 100, width: 100, x: 0, y: 0 },
+      hasMoved: false,
       nodeId: idA,
       points: 5,
       ratio: 0.5,
@@ -130,6 +133,7 @@ describe('continueStarCornerRadiusDrag', () => {
     const canvas = createCanvas();
     const dragRef = createStarCornerRadiusDragRef({
       bounds: { height: 100, width: 100, x: 0, y: 0 },
+      hasMoved: false,
       nodeId: idA,
       points: 5,
       ratio: 0.5,

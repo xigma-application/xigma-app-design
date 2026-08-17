@@ -35,6 +35,7 @@ describe('armCornerRadiusDrag', () => {
       bounds: { height: 50, width: 100, x: 0, y: 0 },
       candidates: ['ne'],
       corner: 'ne',
+      hasMoved: false,
       nodeId: 'node-a',
       pointerStart: { x: 80, y: 10 },
       rotation: 30,

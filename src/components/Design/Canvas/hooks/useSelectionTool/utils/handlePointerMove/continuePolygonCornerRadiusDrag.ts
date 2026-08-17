@@ -29,6 +29,8 @@ export const continuePolygonCornerRadiusDrag = (
 
   if (dragState) {
     const { bounds, nodeId, rotation, sides } = dragState;
+
+    dragState.hasMoved = true;
     const rawPoint = screenToWorld(getPointerPosition(canvas, event), selectViewport(store.getState()));
     const point = getUnrotatedQueryPoint(rawPoint, bounds, rotation);
     const vertices = getPolygonPoints(bounds, sides);

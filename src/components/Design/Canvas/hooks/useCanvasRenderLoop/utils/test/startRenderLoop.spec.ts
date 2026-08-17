@@ -193,6 +193,7 @@ describe('startRenderLoop', () => {
         bounds: { height: 100, width: 100, x: 0, y: 0 },
         candidates: ['ne'],
         corner: 'ne',
+        hasMoved: true,
         nodeId: rectId,
         pointerStart: { x: 0, y: 0 },
         rotation: 0,
@@ -231,7 +232,7 @@ describe('startRenderLoop', () => {
     // action
     const draggingGl = createFullGlMock();
     const polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null> = {
-      current: { bounds: { height: 100, width: 100, x: 0, y: 0 }, nodeId: 'some-other-polygon', rotation: 0, sides: 3 },
+      current: { bounds: { height: 100, width: 100, x: 0, y: 0 }, hasMoved: true, nodeId: 'some-other-polygon', rotation: 0, sides: 3 },
     };
 
     startRenderLoop(
@@ -251,6 +252,51 @@ describe('startRenderLoop', () => {
 
     // result
     expect((draggingGl.bufferData as ReturnType<typeof vi.fn>).mock.calls).not.toEqual(
+      (restingGl.bufferData as ReturnType<typeof vi.fn>).mock.calls,
+    );
+
+    // after
+    store.dispatch(setSelection([]));
+  });
+
+  it('should NOT treat a corner-radius drag as active immediately after arming, before the pointer has actually moved', () => {
+    // mock — grabbing the zero-state handle (pointerdown) must not itself relocate it; only a real
+    // pointermove (which flips hasMoved via continueCornerRadiusDrag) should switch it to the literal
+    // radius, otherwise the handle visibly jumps out from under the cursor on a plain click
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const canvas = document.createElement('canvas');
+    const rectId = addRectangleNode();
+
+    store.dispatch(setSelection([rectId]));
+
+    const hoverRef: RefObject<string | null> = { current: rectId };
+
+    // before
+    const restingGl = createFullGlMock();
+
+    startRenderLoop(restingGl, program, buffer, IMAGE_CONTEXT, canvas, undefined, undefined, hoverRef);
+    rafCallback?.(0);
+
+    // action — armed (ref has a current value) but hasMoved is still false, as armCornerRadiusDrag leaves it
+    const justArmedGl = createFullGlMock();
+    const cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null> = {
+      current: {
+        bounds: { height: 100, width: 100, x: 0, y: 0 },
+        candidates: ['ne'],
+        corner: 'ne',
+        hasMoved: false,
+        nodeId: rectId,
+        pointerStart: { x: 0, y: 0 },
+        rotation: 0,
+      },
+    };
+
+    startRenderLoop(justArmedGl, program, buffer, IMAGE_CONTEXT, canvas, undefined, undefined, hoverRef, undefined, cornerRadiusDragRef);
+    rafCallback?.(0);
+
+    // result — same render as resting, since the drag isn't treated as active yet
+    expect((justArmedGl.bufferData as ReturnType<typeof vi.fn>).mock.calls).toEqual(
       (restingGl.bufferData as ReturnType<typeof vi.fn>).mock.calls,
     );
 

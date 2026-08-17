@@ -72,6 +72,7 @@ describe('continuePolygonCornerRadiusDrag', () => {
     const canvas = createCanvas();
     const dragRef = createPolygonCornerRadiusDragRef({
       bounds: { height: 100, width: 100, x: 0, y: 0 },
+      hasMoved: false,
       nodeId: idA,
       rotation: 0,
       sides: 3,
@@ -90,6 +91,7 @@ describe('continuePolygonCornerRadiusDrag', () => {
     const canvas = createCanvas();
     const dragRef = createPolygonCornerRadiusDragRef({
       bounds: { height: 100, width: 100, x: 0, y: 0 },
+      hasMoved: false,
       nodeId: idA,
       rotation: 0,
       sides: 3,
@@ -109,6 +111,7 @@ describe('continuePolygonCornerRadiusDrag', () => {
     const canvas = createCanvas();
     const dragRef = createPolygonCornerRadiusDragRef({
       bounds: { height: 100, width: 100, x: 0, y: 0 },
+      hasMoved: false,
       nodeId: idA,
       rotation: 0,
       sides: 3,
@@ -127,6 +130,7 @@ describe('continuePolygonCornerRadiusDrag', () => {
     const canvas = createCanvas();
     const dragRef = createPolygonCornerRadiusDragRef({
       bounds: { height: 100, width: 100, x: 0, y: 0 },
+      hasMoved: false,
       nodeId: idA,
       rotation: 90,
       sides: 3,

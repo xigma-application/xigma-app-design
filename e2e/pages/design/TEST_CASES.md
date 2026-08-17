@@ -262,17 +262,16 @@ already rounds (`roundRect.ts`, applied after the subtraction, not before — an
 like this repo's own 19px-tall cursor-icon fixture rounds its half-offset up, since `Math.round`
 rounds `.5` towards `+Infinity`).
 
-| #   | Scenario                                                                                                     | Unit |            E2E            |
-| --- | ------------------------------------------------------------------------------------------------------------ | :--: | :-----------------------: |
-| 110 | A plain click (no drag) places Media at its natural size, centered on the click point, not top-left anchored |  ✅  | ✅ `create-media.spec.ts` |
+| #   | Scenario                                                                                                     | Unit | E2E |
+| --- | ------------------------------------------------------------------------------------------------------------ | :--: | :-: |
+| 110 | A plain click (no drag) places Media at its natural size, centered on the click point, not top-left anchored |  ✅  |  —  |
 
 `getCenteredMediaRect.spec.ts`/`getMediaPlacementRect.spec.ts` already assert the exact centered
-(and, for a drag, aspect-locked) rect precisely via direct function calls; the e2e version proves
-the real placed image actually renders at that position, by dragging a second, independently-placed
-image to the exact equivalent centered rect (computed from the same fixture's own known natural
-size) and asserting pixel equality against the click result — the same "compare two
-independently-produced pages" pattern used throughout this file, rather than needing pixel-level
-image inspection this suite has no dependency for.
+(and, for a drag, aspect-locked) rect precisely via direct function calls. An e2e version once
+existed alongside these (dragging a second, independently-placed image to the exact equivalent
+centered rect and asserting pixel equality against the click result), but it flaked persistently
+with no code-side cause found and was removed rather than kept as permanent noise — the unit
+coverage above is exact and sufficient on its own.
 
 ## Selection (Etap 5)
 

@@ -27,7 +27,9 @@ const tick = (
   starCornerRadiusDragRef?: RefObject<TStarCornerRadiusDragState | null>,
 ): void => {
   const isDraggingCornerRadius =
-    Boolean(cornerRadiusDragRef?.current) || Boolean(polygonCornerRadiusDragRef?.current) || Boolean(starCornerRadiusDragRef?.current);
+    Boolean(cornerRadiusDragRef?.current?.hasMoved) ||
+    Boolean(polygonCornerRadiusDragRef?.current?.hasMoved) ||
+    Boolean(starCornerRadiusDragRef?.current?.hasMoved);
 
   drawScene(
     gl,

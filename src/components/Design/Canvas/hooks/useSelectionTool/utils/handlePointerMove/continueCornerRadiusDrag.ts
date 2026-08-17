@@ -26,6 +26,8 @@ export const continueCornerRadiusDrag = (
 
   if (cornerRadiusDragState) {
     const { bounds, candidates, corner, nodeId, pointerStart, rotation } = cornerRadiusDragState;
+
+    cornerRadiusDragState.hasMoved = true;
     const rawPoint = screenToWorld(getPointerPosition(canvas, event), selectViewport(store.getState()));
     const point = getUnrotatedQueryPoint(rawPoint, bounds, rotation);
     const startPoint = getUnrotatedQueryPoint(pointerStart, bounds, rotation);

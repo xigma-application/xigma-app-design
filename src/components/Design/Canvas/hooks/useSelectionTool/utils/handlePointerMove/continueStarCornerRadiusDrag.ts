@@ -29,6 +29,8 @@ export const continueStarCornerRadiusDrag = (
 
   if (dragState) {
     const { bounds, nodeId, points, ratio, rotation } = dragState;
+
+    dragState.hasMoved = true;
     const rawPoint = screenToWorld(getPointerPosition(canvas, event), selectViewport(store.getState()));
     const point = getUnrotatedQueryPoint(rawPoint, bounds, rotation);
     const vertices = getStarPoints(bounds, points, ratio);

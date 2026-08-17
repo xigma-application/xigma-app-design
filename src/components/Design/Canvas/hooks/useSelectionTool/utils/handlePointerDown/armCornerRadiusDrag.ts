@@ -18,6 +18,7 @@ export const armCornerRadiusDrag = (
     bounds,
     candidates,
     corner: candidates.length === 1 ? candidates[0] : null,
+    hasMoved: false,
     nodeId,
     pointerStart,
     rotation,
