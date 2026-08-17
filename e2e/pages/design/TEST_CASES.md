@@ -1088,6 +1088,42 @@ same "real browser repaints in response" claim as #79-82: it draws a fresh path,
 (still mid-edit, dashed), then commits and re-selects it (solid) and asserts the two screenshots
 differ.
 
+## Corner radius (Rectangle)
+
+Four draggable handles, one per corner, that round a Rectangle's corners — canvas-only for now, no
+side-panel numeric input yet (a separate, later feature). Handles render only while the node is both
+selected _and_ hovered (`drawCornerRadiusHandlesLayer.ts`), unlike the resize corner squares which
+show on selection alone — and only once the shape's own on-screen size clears
+`MIN_ELEMENT_SCREEN_SIZE_FOR_RADIUS_HANDLES_PX` (`shouldShowCornerRadiusHandles.ts`), matching
+Figma's own "too small to bother" cutoff. Dragging works absolute-position-based off the grabbed
+corner (`getCornerRadiusFromPoint.ts`, mirroring `continueEndpointDrag.ts`'s "write the raw point,
+don't accumulate deltas" convention), with `radius = max(leftward/rightward inset, up/down inset)` —
+deliberately not requiring diagonal movement, so either axis alone can drive it to max. Once several
+corners' handles coincide (radius near/at `getMaxCornerRadius` = half the shorter side), a single
+click can't disambiguate which corner was meant; resolution defers to the drag's own first-movement
+direction against each candidate's quadrant position (`resolveCornerFromDirection.ts`), settling
+once and reusing that pick for the rest of the gesture. At `cornerRadius === 0` the existing resize
+corner-handle still wins any hit-test tie (`handlePointerDown.ts`'s
+`resizeHandleHit ? null : getCornerRadiusHandleAtPoint(...)` short-circuit).
+
+| #   | Scenario                                                                                                                  | Unit |            E2E             |
+| --- | ------------------------------------------------------------------------------------------------------------------------- | :--: | :------------------------: |
+| 115 | Handles render only once the rectangle is both selected and hovered — selected alone shows nothing extra                  |  ✅  | ✅ `corner-radius.spec.ts` |
+| 116 | Dragging the ne handle purely left (no diagonal movement) alone drives the radius to max                                  |  ✅  | ✅ `corner-radius.spec.ts` |
+| 117 | Dragging the ne handle purely down (no diagonal movement) alone also drives the radius to max                             |  ✅  | ✅ `corner-radius.spec.ts` |
+| 118 | Clicking exactly on the corner still arms the resize handle, not the radius handle, even once cornerRadius is nonzero     |  ✅  |             —              |
+| 119 | Once several handles coincide near max radius, the drag's first-movement direction picks which corner applies             |  ✅  |             —              |
+| 120 | A rounding stored via drag never overshoots a fractional max (e.g. 50.5 on a 101px side) after rounding to the nearest px |  ✅  |             —              |
+| 121 | Handles vanish entirely once the shape's on-screen size drops below the visibility threshold, regardless of radius        |  ✅  |             —              |
+
+#118-#121 stay unit-only: each is a precise, already-exact `store.getState()`/direct-function-call
+assertion (`handlePointerDown.spec.ts`, `resolveCornerFromDirection.spec.ts`,
+`continueCornerRadiusDrag.spec.ts`, `shouldShowCornerRadiusHandles.spec.ts`/
+`getCornerRadiusHandleAtPoint.spec.ts`) that a screenshot diff can't meaningfully improve on — per
+the "why so few scenarios get e2e coverage" rationale below, none of these turn on real browser
+paint timing the way #115-#117 do (a real `pointermove`/`pointerdown` sequence against the real
+rendered handle positions actually reaching the grabbed corner and repainting the rounded fill).
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

@@ -53,14 +53,19 @@ WebGL2.
   drawSceneNodes(gl, program, buffer, imageContext, sceneNodes, w, h, viewport, pathOutlineStyles);
   drawHoverOutline(gl, program, buffer, hoveredNode, w, h, viewport);
   drawSelectionOutline(gl, program, buffer, selectedNodes, w, h, viewport);
+  drawCornerRadiusHandlesLayer(gl, program, buffer, hoveredNode, selectedNodes, w, h, viewport);
   drawFrame(gl, program, buffer, imageContext, draftShape, w, h, viewport);       // dispatcher, despite the name
   drawEditingText(gl, program, buffer, imageContext, editingTextBox, ...);
   drawEditingPathTextHandle(gl, program, buffer, editingTextBox, w, h, viewport);
   drawMarquee(gl, program, buffer, marqueeRect, w, h, viewport);
   drawSliceDraft(gl, program, buffer, sliceRect, w, h, viewport);
   ```
-  **background → committed nodes → hover outline → selection outline → in-progress draft →
-  editing-text overlay → path-text offset handle → marquee → slice draft.** Nodes currently being
+  **background → committed nodes → hover outline → selection outline → corner-radius handles →
+  in-progress draft → editing-text overlay → path-text offset handle → marquee → slice draft.**
+  `drawCornerRadiusHandlesLayer.ts` self-gates (selected+hovered single rectangle, large enough on
+  screen — see `selection-and-manipulation.md` §11) rather than `drawScene.ts` deciding when to call
+  it, same "thin wrapper decides nothing, the layer decides" shape as `drawHoverOutline.ts`. Nodes
+  currently being
   text-edited are filtered out of both `sceneNodes` and `selectedNodes` up front
   (`node.id !== editingNodeId`), so they render exactly once, only through the dedicated editing
   path.
@@ -74,7 +79,7 @@ Three GLSL `#version 300 es` programs, all built via `createProgram.ts`/`createS
 
 | Program | Vertex source | Fragment source | Extra attrib | Used by |
 |---|---|---|---|---|
-| plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect`, `drawLine`, `drawEllipse`, `drawPolygon`, `drawStar`, `drawThickOutline`, `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, every outline/handle primitive |
+| plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect`), `drawLine`, `drawEllipse`, `drawPolygon`, `drawStar`, `drawThickOutline`, `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, `drawCornerRadiusHandles`, every outline/handle primitive |
 | image/texture | `imageVertexShaderSource.ts` | `imageFragmentShaderSource.ts` | `a_texCoord` | `drawImage.ts` (Media nodes + draft media) |
 | MSDF text | **same vertex source as image** (reused, not a 4th file) | `msdfFragmentShaderSource.ts` | `a_texCoord` | `drawMsdfText.ts` |
 
@@ -149,7 +154,11 @@ per draw call; draw order is simply whatever `drawScene` calls in sequence.
 
 **Committed nodes** (`store.design.nodes`, read via `selectOrderedNodes`) render through
 `drawSceneNodes.ts` — one `switch (node.type)` dispatching to `drawEllipse`/`drawPolygon`/`drawStar`/
-`drawImage`/`drawLine` (+arrowheads)/`drawPathOutline`/`drawMsdfText`/default `drawRect`.
+`drawImage`/`drawLine` (+arrowheads)/`drawPathOutline`/`drawMsdfText`/default `drawRect`. Rectangle
+has no dedicated `case` — it falls through the same `default: drawRect(node, ...)` as Frame/Section,
+because `drawRect.ts` itself branches on the node's own optional `cornerRadius` field (structural
+typing: passing a `TRectangleNode` through satisfies `TDrawableRect`'s optional `cornerRadius?:
+number` with no cast needed) rather than the dispatcher needing to know a rectangle can be rounded.
 
 **In-progress/ephemeral visuals** never touch Redux — they live in plain `useRef`s on `Canvas.tsx`,
 written directly by native pointer listeners (so dragging never dispatches per pixel), and read by
@@ -252,10 +261,14 @@ Every `src/utils/canvas/draw*.ts` (and `shapes/draw*.ts`) follows the same shape
 8. `gl.drawArrays(<mode>, 0, <count>)`.
 
 Draw modes by primitive:
-- **`TRIANGLES`**: `drawRect` (6 verts), `drawLine` (perpendicular-offset quad, 6 verts), `drawImage`,
-  `drawMsdfText`, `drawThickOutline` (4 quads = 24 verts, a rectangular ring), `drawThickEllipseOutline`/
-  `drawThickPolygonOutline`/`drawThickStarOutline` (inner/outer-ring trick — see below).
-- **`TRIANGLE_FAN`**: `drawEllipse`/`drawPolygon`/`drawStar` **fills** (`[center, ...points, points[0]]`).
+- **`TRIANGLES`**: `drawStandardRect` (unrounded `drawRect`, 6 verts), `drawLine`
+  (perpendicular-offset quad, 6 verts), `drawImage`, `drawMsdfText`, `drawThickOutline` (4 quads = 24
+  verts, a rectangular ring), `drawThickEllipseOutline`/`drawThickPolygonOutline`/
+  `drawThickStarOutline` (inner/outer-ring trick — see below).
+- **`TRIANGLE_FAN`**: `drawEllipse`/`drawPolygon`/`drawStar` **fills**
+  (`[center, ...points, points[0]]`) — `drawRoundedRect` (rounded `drawRect`) reuses the exact same
+  fan shape via its own `toFanVertices.ts`, fed from `getRoundedRectPoints.ts` instead of
+  `getEllipsePoints.ts`.
 - **`LINE_LOOP`**: `drawEllipse`/`drawPolygon`/`drawStar` **stroke** outlines — 1px only.
 - `gl.lineWidth()` is capped at 1px in this WebGL implementation (confirmed via
   `gl.getParameter(gl.ALIASED_LINE_WIDTH_RANGE)` → `[1, 1]`), which is *why* the "thick outline"
@@ -264,9 +277,14 @@ Draw modes by primitive:
   `drawArrowhead.ts` is two `drawLine` calls (the wings) plus three `drawEllipse` fill calls
   (tip + wing-end round caps, since there's no dedicated rounded-polyline primitive).
 
-**To add a new primitive**: copy the shape of the closest existing one (rect-like → `drawRect.ts`;
-curve-like → `drawEllipse.ts`; composite → `drawArrowhead.ts`) and change only the vertex-generation
-math (step 2) and the `drawArrays` mode/count (step 8) — copy steps 1, 3-7 verbatim.
+**To add a new primitive**: copy the shape of the closest existing one (rect-like → `drawRect/`
+folder; curve-like → `drawEllipse.ts`; composite → `drawArrowhead.ts`) and change only the
+vertex-generation math (step 2) and the `drawArrays` mode/count (step 8) — copy steps 1, 3-7
+verbatim. `drawRect/` is itself the worked example of "one primitive family, one folder": a plain
+dispatcher (`drawRect.ts`) plus one file per concrete rendering path (`drawStandardRect.ts`,
+`drawRoundedRect.ts`) plus a shared tiny helper (`toFanVertices.ts`), each with its own
+`test/*.spec.ts` sibling — same "folder named after its main file" shape as a hook folder like
+`useSelectionTool/useSelectionTool.ts`.
 
 ## File index
 
@@ -284,7 +302,11 @@ math (step 2) and the `drawArrays` mode/count (step 8) — copy steps 1, 3-7 ver
 - Texture pipeline: `utils/canvas/getOrLoadTexture.ts`, `utils/canvas/drawImage.ts`
 - MSDF pipeline: `utils/canvas/text/{drawMsdfText,getMsdfAtlasTexture,buildGlyphQuads,buildGlyphQuad,
   buildCurvedGlyphQuads,getOrBuildTextGeometry}.ts`, `package.json`'s `generate:font-atlas` script
-- Primitives: `src/utils/canvas/*.ts` and `src/utils/canvas/shapes/*.ts`
+- Primitives: `src/utils/canvas/*.ts`, `src/utils/canvas/shapes/*.ts` (incl. `getRoundedRectPoints.ts`),
+  and `src/utils/canvas/drawRect/*.ts` (its own folder — see above)
+- Corner-radius handles: `utils/canvas/cornerRadius/*.ts` (math), `utils/canvas/drawCornerRadiusHandles.ts`
+  + `.../drawScene/drawCornerRadiusHandlesLayer.ts` (rendering) — full mechanism in
+  `selection-and-manipulation.md` §11
 - Roadmap corroboration: `docs/ROADMAP.md` Etap 4 (GPU transform migration), Etap 7 (MSDF rationale)
 
 ## Related

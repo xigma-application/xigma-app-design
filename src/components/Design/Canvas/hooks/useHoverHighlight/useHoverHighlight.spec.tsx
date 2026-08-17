@@ -55,6 +55,27 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => 
   return rootOrder[rootOrder.length - 1];
 };
 
+const addRectangleNode = (x: number, y: number, size: number, cornerRadius: number): string => {
+  store.dispatch(
+    addNode({
+      cornerRadius,
+      fill: '#ff0000',
+      height: size,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: size,
+      x,
+      y,
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 const addPathTextNode = (x: number, y: number, size = 200): string => {
   store.dispatch(
     addNode({
@@ -349,6 +370,27 @@ describe('useHoverHighlight behaviors', () => {
     // result
     expect(hoverRef.current).toBeNull();
     expect(classNameRef.current).not.toBe('positioning');
+  });
+
+  it("should apply the radius cursor class and keep the node's own id hovered over a selected rectangle's corner-radius handle", () => {
+    // mock — a 100x100 rectangle with cornerRadius 20 has its ne handle at (5100, 5020)
+    const idA = addRectangleNode(5000, 5000, 100, 20);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { classNameRef, hoverRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 5080, 5020));
+    });
+
+    // result — the handle stays visible (hoverRef keeps the node's own id) while it's being hovered
+    expect(classNameRef.current).toBe('radius');
+    expect(hoverRef.current).toBe(idA);
   });
 
   it("should apply the hand cursor class when hovering a selected path-text node's start-offset handle", () => {

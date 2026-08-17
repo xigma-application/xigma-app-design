@@ -7,36 +7,37 @@ rotating it. The single most complex interactive subsystem in this app — compa
 The roadmap's prose (Etap 5) describes an earlier, simpler shape of this code (one shared
 `dragStateRef` with a `pendingClickAction`). That core state machine is still exactly accurate (see
 §3), but the file list has grown substantially since Etap 10 added resize/rotate/line-endpoint/
-path-text-offset handling as siblings — six separate drag-state refs, not one, each with its own
-`arm*`/`continue*`/`disarm*` files, all funneled through three top-level orchestrators.
+path-text-offset handling as siblings, and since then a corner-radius handle drag joined them too
+(see §11) — seven separate drag-state refs, not one, each with its own `arm*`/`continue*`/`disarm*`
+files, all funneled through three top-level orchestrators.
 
 ## 1. File structure
 
 `Canvas/hooks/useSelectionTool/`:
 - `useSelectionTool.ts` — active only when `activeTool === default || activeTool === scale` (the
   **Scale tool fully reuses this hook** — see §5) and text-caret editing isn't active
-  (`shouldUseCanvasCaretEditing`). Owns six refs — `dragStateRef`, `endpointDragRef`,
-  `pathOffsetDragRef`, `resizeDragRef`, `rotateDragRef`, `marqueeStartRef` — and three native
-  `PointerEvent` listeners.
+  (`shouldUseCanvasCaretEditing`). Owns seven refs — `dragStateRef`, `endpointDragRef`,
+  `pathOffsetDragRef`, `resizeDragRef`, `rotateDragRef`, `cornerRadiusDragRef`, `marqueeStartRef` —
+  and three native `PointerEvent` listeners.
 - `types.ts` — `TDragState`, `TEndpointDragState`, `TPathOffsetDragState`, `TResizeDragState`,
-  `TRotateDragState`, `TPendingClickAction`, `TLineEndpoint`, `TNodeOrigin`/`TResizeNodeOrigin`/
-  `TRotateNodeOrigin`.
+  `TRotateDragState`, `TCornerRadiusDragState`, `TPendingClickAction`, `TLineEndpoint`,
+  `TNodeOrigin`/`TResizeNodeOrigin`/`TRotateNodeOrigin`.
 
 `utils/handlePointerDown/` — one `arm*.ts` per interaction kind, dispatched by a priority `switch`
-in `handlePointerDown.ts` (full table in §3): `armPathOffsetDrag`, `armResizeDrag`, `armRotateDrag`,
-`armLineEndpointDrag` (→ `armEndpointDrag`), `armHitDrag` (→ `armDrag`), `armGroupBoundsDrag`
-(→ `armDrag`), `armMarqueeDrag`.
+in `handlePointerDown.ts` (full table in §3): `armPathOffsetDrag`, `armResizeDrag`,
+`armCornerRadiusDrag` (§11), `armRotateDrag`, `armLineEndpointDrag` (→ `armEndpointDrag`),
+`armHitDrag` (→ `armDrag`), `armGroupBoundsDrag` (→ `armDrag`), `armMarqueeDrag`.
 
-`utils/handlePointerMove/` — one `continue*.ts` per kind. **All six run unconditionally on every
-pointermove** — `handlePointerMove.ts` just calls all six in sequence; each is a no-op guarded by
+`utils/handlePointerMove/` — one `continue*.ts` per kind. **All seven run unconditionally on every
+pointermove** — `handlePointerMove.ts` just calls all seven in sequence; each is a no-op guarded by
 `if (dragState)` on its own ref, so only the one actually armed does anything: `continueDrag`,
 `continueEndpointDrag`, `continuePathOffsetDrag`, `continueResizeDrag/` (its own sub-folder, §5),
-`continueRotateDrag`, `continueMarqueeDrag`.
+`continueRotateDrag`, `continueCornerRadiusDrag` (§11), `continueMarqueeDrag`.
 
 `utils/handlePointerUp/` — mirror image, `disarm*.ts` per kind, each clears its own ref and releases
 pointer capture: `disarmDrag` (**resolves `pendingClickAction`**, see §3), `disarmEndpointDrag`,
 `disarmPathOffsetDrag` (also resets cursor to `'hand'`), `disarmResizeDrag`, `disarmRotateDrag`,
-`disarmMarqueeDrag`.
+`disarmCornerRadiusDrag`, `disarmMarqueeDrag`.
 
 Loose files directly under `useSelectionTool/utils/`: `isPointInGroupBounds.ts`,
 `isPointInSelectedTextBounds.ts`, `toggleSelection.ts`.
@@ -105,6 +106,7 @@ member's individual rotation, not just raw bounds.
 switch (true) {
   case Boolean(pathOffsetHandleHit):                          armPathOffsetDrag(...); break;
   case Boolean(resizeHandleHit):                               armResizeDrag(...); break;
+  case Boolean(cornerRadiusHandleHit):                         armCornerRadiusDrag(...); break;
   case Boolean(rotateHandleHit):                               armRotateDrag(...); break;
   case Boolean(lineEndpointHit) && !event.shiftKey:            armLineEndpointDrag(...); break;
   case Boolean(hit) && event.shiftKey:                         dispatch(setSelection(toggleSelection(currentSelection, hit.id))); break;
@@ -115,9 +117,12 @@ switch (true) {
   default: break;
 }
 ```
-**Handle priority**: path-offset → resize → rotate → **line endpoint (only if not shift)** → shift
-toggle → plain hit → text-fixed-bounds fallback → group-gap → marquee. Line-endpoint hit-testing is
-checked *before* the generic whole-node `hit` branch, which is why grabbing a line's own endpoint
+**Handle priority**: path-offset → resize → corner-radius (§11) → rotate → **line endpoint (only if
+not shift)** → shift toggle → plain hit → text-fixed-bounds fallback → group-gap → marquee.
+`cornerRadiusHandleHit` is computed as `resizeHandleHit ? null : getCornerRadiusHandleAtPoint(...)`
+right where it's read, so resize wins any tie deterministically rather than relying on switch-case
+ordering alone. Line-endpoint hit-testing is checked *before* the generic whole-node `hit` branch,
+which is why grabbing a line's own endpoint
 always wins over a whole-line drag even when both technically match the same point.
 
 `armHitDrag.ts` — the collapse-vs-replace decision:
@@ -417,15 +422,74 @@ e2e (`e2e/pages/design/`):
 - `scale-tool.spec.ts` — `K` activates Scale (shared button state with default/hand), distinct cursor
   vs. plain resize, edge handle scales both dimensions proportionally (unlike plain resize).
 - `line-drag.spec.ts` — whole-line drag moves both endpoints; endpoint A/B independence.
+- `corner-radius.spec.ts` (§11) — handles render only when selected+hovered; pure-left and pure-down
+  drags each independently drive the radius to max.
 
 As noted in §3, the pending-click-action collapse/deselect/gap-drag matrix has **no** e2e coverage —
 that correctness relies entirely on the unit suite; e2e here is weighted toward resize/rotate/mirror
 pixel-correctness instead.
 
+## 11. Corner-radius handles (Rectangle)
+
+Four handles, one per corner, that round a Rectangle's corners (`TRectangleNode.cornerRadius?:
+number`, optional — same "add a field, default `?? 0` at every read site" pattern as the Arrow
+tool's `startPoint`/`endPoint`). Canvas-drag-only for now; a side-panel numeric input is a deliberately
+separate, later feature. Math lives in `utils/canvas/cornerRadius/`, generic over `bounds`/`corner`
+rather than `NodeType.rectangle` specifically, so wiring up a second shape later is "widen
+`hasCornerRadius.ts` + add a render/hit-test case," not new mechanism:
+- `getMaxCornerRadius.ts` — `min(width, height) / 2`.
+- `getCornerRadiusFromPoint.ts` — absolute-position-based (like `continueEndpointDrag.ts`, not
+  delta-accumulated): `radius = max(leftward/rightward inset, up/down inset)` per corner, so either
+  axis alone can drive it to max without diagonal movement.
+- `getCornerRadiusHandlePositions.ts` — at `cornerRadius > 0`, insets by the radius itself (clamped
+  defensively to `getMaxCornerRadius`, in case a stored value ever overshoots). At `cornerRadius ===
+  0`, uses a "zero-state" screen-space gap that shrinks as you zoom in past 100% (floor
+  `MIN_RADIUS_HANDLE_GAP_PX`, so it never re-collides with the resize handle's own hit circle) and
+  is pinned flat at `ZERO_RADIUS_HANDLE_OFFSET_PX` as you zoom out past 100% (so it never grows
+  unboundedly toward the shape's center at extreme zoom-out either).
+- `shouldShowCornerRadiusHandles.ts` — hides the handles entirely (render **and** hit-test) once
+  `min(width, height) * zoom` drops below `MIN_ELEMENT_SCREEN_SIZE_FOR_RADIUS_HANDLES_PX`,
+  independent of the current `cornerRadius` value — matches Figma's own "too small on screen, not
+  worth showing" cutoff.
+- `resolveCornerFromDirection.ts` — see the collision case below.
+
+**Rendering**: `drawRect/` (its own folder, mirroring `useSelectionTool/useSelectionTool.ts`'s
+"folder named after its main file" convention) — `drawRect.ts` is a pure dispatcher
+(`if (cornerRadius) drawRoundedRect(...) else drawStandardRect(...)`), `drawRoundedRect.ts` fans a
+`getRoundedRectPoints.ts`-generated perimeter (quarter-circle arcs per corner, `shapes/` folder,
+same shape as `getEllipsePoints.ts`) the same way `drawEllipse.ts` fans its own points, and
+`drawStandardRect.ts` is the original flat 2-triangle quad, byte-for-byte unchanged so the
+long-established plain-rect rendering path (used by ~15 unrelated callers — marquee, resize
+handles, hover/selection outlines, draft shapes...) never even sees the `cornerRadius` field.
+`drawCornerRadiusHandlesLayer.ts` (in `drawScene/`, alongside `drawHoverOutline.ts`) gates the 4
+small-circle handles on `selectedNodes.length === 1 && hoveredNode?.id === selectedNode.id &&
+hasCornerRadius(...) && shouldShowCornerRadiusHandles(...)` — unlike the resize corner *squares*,
+which render on selection alone regardless of hover.
+
+**Handle collision** (several corners' handles landing on/near the same point once `cornerRadius`
+nears `getMaxCornerRadius` — guaranteed exact convergence for a square, a coincident *pair* for a
+non-square rect since the shorter dimension's insets meet first): `getCornerRadiusHandleAtPoint.ts`
+returns every corner within hit tolerance as a `corners: TCornerRadiusHandle[]` candidate list, not
+just the first match. `armCornerRadiusDrag.ts` leaves `TCornerRadiusDragState.corner` as `null` when
+there's more than one candidate; `continueCornerRadiusDrag.ts` resolves it on the drag's first real
+movement via `resolveCornerFromDirection.ts` — each corner's own *quadrant* direction relative to
+the shape center (nw = up-left, se = down-right, etc. — the exact **opposite** sign of the direction
+that would grow that corner's own radius in `getCornerRadiusFromPoint.ts`; moving toward a corner's
+own resting position shrinks it, moving away grows it), scored via dot product against the move
+delta, highest score wins. A tie (e.g. a purely-horizontal move against a pair that only differs
+vertically) intentionally resolves to `null` again — stays unresolved until a more decisive move
+comes in, rather than guessing. Once resolved, `corner` is written back onto the live drag-state
+object and reused for the rest of the gesture, never re-resolved.
+
+`continueCornerRadiusDrag.ts` also re-clamps *after* `Math.round`, not just before
+(`Math.min(Math.round(radius), getMaxCornerRadius(bounds))`) — rounding a value already clamped to
+a fractional max (e.g. `50.5` on a 101px side) can round it up past that max (`51`); re-clamping
+after lands exactly on the fractional max instead, matching Figma.
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.
-[[design-store-architecture]] — §5's ref-vs-Redux split (this subsystem is its biggest consumer: 6
+[[design-store-architecture]] — §5's ref-vs-Redux split (this subsystem is its biggest consumer: 7
 separate drag-state refs plus the marquee/drag-move dispatch-per-pointermove nuance).
 [[canvas-rendering-pipeline]] — how selection outlines/handles/cursors actually get drawn once this
 subsystem decides what's selected/hovered.

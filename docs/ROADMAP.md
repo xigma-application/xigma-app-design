@@ -903,8 +903,31 @@ node.rotation)` w `drawMsdfText.ts`).
                                                                                                               śladu ducha z poprzedniej wersji, a podmiana treści w trakcie edycji nadal poprawnie zachowuje
                                                                                                               rotację po zatwierdzeniu
 
-- [ ] **corner radius dla Rectangle** — przeciągany uchwyt na rogu prostokąta (jak w Figmie), na
-      razie żadnego pola na to w `TRectangleNode`
+- [x] **corner radius dla Rectangle** — `TRectangleNode.cornerRadius?: number` (opcjonalne, ten sam
+      wzorzec co `TLineNode.startPoint/endPoint` z Arrow), ustawiane wyłącznie przez 4 przeciągane
+      uchwyty na rogach — panel boczny z polem liczbowym to świadomie osobny, późniejszy krok.
+      Uchwyty pokazują się tylko gdy node jest **jednocześnie** zaznaczony i pod kursorem (inaczej
+      niż stałe kwadraciki resize, które pokazują się na samym zaznaczeniu), i tylko gdy kształt
+      renderuje się na tyle duży na ekranie, żeby miało to sens
+      (`shouldShowCornerRadiusHandles.ts`, próg `MIN_ELEMENT_SCREEN_SIZE_FOR_RADIUS_HANDLES_PX`,
+      figmowe "za mały, nie pokazujemy"). Przeciąganie liczy promień z bezwzględnej pozycji kursora
+      względem złapanego rogu (`max(inset poziomy, inset pionowy)`), świadomie **bez** wymogu ruchu
+      po skosie — sama oś pozioma albo sama pionowa wystarczy, żeby dojść do maksimum
+      (`min(width, height) / 2`). Najtrudniejszy przypadek: gdy promień zbliża się do maksimum,
+      uchwyty kilku rogów zbiegają się w jednym (albo tym samym) punkcie (dokładnie w jednym dla
+      kwadratu, parami dla prostokąta) — które trafienie wybrać, rozstrzyga dopiero **kierunek
+      pierwszego realnego ruchu** myszką po złapaniu, licząc iloczyn skalarny względem własnego
+      kierunku "do rogu" każdego kandydata (`resolveCornerFromDirection.ts`); remis (np. ruch czysto
+      poziomy dla pary różniącej się tylko pionowo) świadomie zostaje nierozstrzygnięty, czeka na
+      bardziej jednoznaczny ruch zamiast zgadywać. Przy `cornerRadius === 0` uchwyt resize zawsze
+      wygrywa remis trafienia w ten sam punkt (priorytet w `handlePointerDown.ts`). Zaokrąglanie
+      przy renderze (`drawRect/drawRoundedRect.ts`, wachlarz trójkątów z `getRoundedRectPoints.ts`,
+      ten sam kształt co `drawEllipse.ts`) i sam `drawRect.ts` zostały rozbite na osobny folder
+      (`utils/canvas/drawRect/`) z dyspozytorem plus jednym plikiem na ścieżkę renderowania —
+      oryginalna, płaska ścieżka rysowania (`drawStandardRect.ts`) zostaje bit-identyczna, więc
+      ~15 niepowiązanych wywołujących (marquee, uchwyty resize, obrysy hover/selekcji, draft
+      shape'y...) nigdy nie widzi pola `cornerRadius`. Pełny opis mechanizmu:
+      `.claude/docs/selection-and-manipulation.md` §11
 - [ ] **klawiszowe skróty edycji**: Delete/Backspace (usuń zaznaczenie), Cmd/Ctrl+D (duplikuj),
       Cmd/Ctrl+C/V (kopiuj/wklej), strzałki (nudge o 1px, Shift+strzałka o 10px), Cmd/Ctrl+A
       (zaznacz wszystko) — dziś żadne z nich nie istnieje, mimo że infrastruktura klawiszowa

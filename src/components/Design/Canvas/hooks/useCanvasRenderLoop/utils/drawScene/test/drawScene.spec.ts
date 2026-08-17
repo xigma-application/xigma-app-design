@@ -453,6 +453,53 @@ describe('drawScene', () => {
     store.dispatch(stopTextEdit());
   });
 
+  it('should draw the 4 corner-radius handles for a rounded rectangle only when it is both selected and hovered', () => {
+    // mock
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const canvas = document.createElement('canvas');
+
+    store.dispatch(
+      addNode({
+        cornerRadius: 15,
+        fill: '#aabbcc',
+        height: 100,
+        name: 'Rounded Rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 100,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const { rootOrder } = store.getState().design;
+    const rectId = rootOrder[rootOrder.length - 1];
+
+    store.dispatch(setSelection([rectId]));
+
+    const countTriangleFanDraws = (hoveredNodeId: string | null): number => {
+      const gl = createGlMock();
+
+      drawScene(gl, program, buffer, IMAGE_CONTEXT, canvas, null, null, hoveredNodeId);
+
+      return (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLE_FAN).length;
+    };
+
+    // before — selected but not hovered: only the rounded rect's own fill uses TRIANGLE_FAN
+    const selectedOnlyCount = countTriangleFanDraws(null);
+
+    // action
+    const hoveredCount = countTriangleFanDraws(rectId);
+
+    // result — hovering adds exactly the 4 corner-radius handle fills
+    expect(hoveredCount).toBe(selectedOnlyCount + 4);
+
+    // after
+    store.dispatch(setSelection([]));
+  });
+
   it('should draw the path-text offset handle while a path-text node is being created for the first time', () => {
     // mock — first-time creation (useDrawTextOnPathTool) dispatches startTextEdit without an id,
     const program = {} as WebGLProgram;

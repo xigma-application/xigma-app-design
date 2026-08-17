@@ -16,7 +16,7 @@ import { drawLineEndpointArrowheads } from './drawLineEndpointArrowheads';
 import { drawMsdfText } from 'utils/canvas/text/drawMsdfText';
 import { drawPathOutline } from './drawPathOutline';
 import { drawPolygon } from 'utils/canvas/shapes/drawPolygon';
-import { drawRect } from 'utils/canvas/drawRect';
+import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { drawStar } from 'utils/canvas/shapes/drawStar';
 import { getMsdfAtlasTexture } from 'utils/canvas/text/getMsdfAtlasTexture';
 import { getOrLoadTexture } from 'utils/canvas/getOrLoadTexture';

@@ -6,7 +6,7 @@ import { TDraftRect, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { drawRect } from './drawRect';
+import { drawRect } from './drawRect/drawRect';
 import { getRectCorners } from './getRectCorners';
 import { rotatePoint } from 'utils/math/rotatePoint';
 

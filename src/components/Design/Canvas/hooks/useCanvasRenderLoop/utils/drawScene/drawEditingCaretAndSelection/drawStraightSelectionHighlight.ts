@@ -8,7 +8,7 @@ import { TEditingTextBox, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { drawRect } from 'utils/canvas/drawRect';
+import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { flipRect } from './flipRect';
 import { getSelectionRects } from 'utils/canvas/text/getSelectionRects';
 

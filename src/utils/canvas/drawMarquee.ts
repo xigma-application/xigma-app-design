@@ -6,7 +6,7 @@ import { TDraftRect } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { drawRect } from './drawRect';
+import { drawRect } from './drawRect/drawRect';
 
 export const drawMarquee = (
   gl: WebGL2RenderingContext,

@@ -6,7 +6,7 @@ import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { drawRect } from './drawRect';
+import { drawRect } from './drawRect/drawRect';
 
 export const drawLineEndpointHandles = (
   gl: WebGL2RenderingContext,

@@ -12,7 +12,7 @@ import { drawDashedEllipseOutline } from 'utils/canvas/shapes/drawDashedEllipseO
 import { drawEllipse } from 'utils/canvas/shapes/drawEllipse';
 import { drawImage } from 'utils/canvas/drawImage';
 import { drawPolygon } from 'utils/canvas/shapes/drawPolygon';
-import { drawRect } from 'utils/canvas/drawRect';
+import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { drawStar } from 'utils/canvas/shapes/drawStar';
 import { getOrLoadTexture } from 'utils/canvas/getOrLoadTexture';
 

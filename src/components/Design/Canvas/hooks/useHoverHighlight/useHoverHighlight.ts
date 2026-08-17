@@ -1,9 +1,6 @@
 import { RefObject, useEffect } from 'react';
 
 // others
-import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
-import { PATH_TEXT_HIT_TOLERANCE_PX, STRAIGHT_TEXT_HIT_TOLERANCE_PX } from 'constant/canvas';
-import { TEXT_FONT_SIZE } from '../../constants';
 import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
 
 // store
@@ -22,10 +19,11 @@ import { store, useAppSelector } from 'store';
 import { NodeType, ToolName } from 'types/design/enums';
 
 // utils
-import { getCurvedCaretIndexAtPoint } from 'utils/canvas/text/getCurvedCaretIndexAtPoint';
+import { getCollidesWithEditingText } from './utils/getCollidesWithEditingText';
+import { getCornerRadiusHandleAtPoint } from '../../utils/getCornerRadiusHandleAtPoint';
 import { getLineEndpointAtPoint } from '../../utils/getLineEndpointAtPoint';
 import { getNodeAtPoint } from '../../utils/getNodeAtPoint';
-import { getPathTextOffsetHandleAtPoint } from '../../utils/getPathTextOffsetHandleAtPoint';
+import { getPathOffsetHandleHit } from './utils/getPathOffsetHandleHit';
 import { getPointerPosition } from '../../utils/getPointerPosition';
 import { getResizeCursorAngle } from 'utils/math/getResizeCursorAngle';
 import { getResizeHandleAtPoint } from '../../utils/getResizeHandleAtPoint';
@@ -34,8 +32,6 @@ import { getRotateHandleAtPoint } from '../../utils/getRotateHandleAtPoint';
 import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
 import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
 import { getRotatedScaleCursorUrl } from 'utils/canvas/getRotatedScaleCursorUrl';
-import { getStraightCaretIndexAtPoint } from 'utils/canvas/text/getStraightCaretIndexAtPoint';
-import { isPointOnPathTextHandle } from '../../utils/isPointOnPathTextHandle';
 import { screenToWorld } from '../../utils/screenToWorld';
 
 export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>, hoverRef: RefObject<string | null>): void => {
@@ -53,20 +49,11 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
       const resizableSelectedNodes = isEditingText ? [] : selectedNodes;
       const [selectedNode] = resizableSelectedNodes;
       const lineEndpointHit = getLineEndpointAtPoint(point, resizableSelectedNodes, viewport);
-      const nonEditingHandleHit = getPathTextOffsetHandleAtPoint(point, selectedNodes, viewport);
-      const pathOffsetHandleHit = editingTextBox
-        ? { hit: isPointOnPathTextHandle(point, editingTextBox, viewport), nodeId: selectEditingNodeId(state) }
-        : { hit: Boolean(nonEditingHandleHit), nodeId: nonEditingHandleHit?.nodeId ?? null };
+      const pathOffsetHandleHit = getPathOffsetHandleHit(point, editingTextBox, selectEditingNodeId(state), selectedNodes, viewport);
       const resizeHandleHit = getResizeHandleAtPoint(point, resizableSelectedNodes, viewport);
+      const cornerRadiusHandleHit = resizeHandleHit ? null : getCornerRadiusHandleAtPoint(point, resizableSelectedNodes, viewport);
       const rotateHandleHit = getRotateHandleAtPoint(point, resizableSelectedNodes, viewport);
-      const editingContent = selectEditingTextContent(state);
-      const editingHit = editingTextBox?.pathId
-        ? getCurvedCaretIndexAtPoint(MSDF_ATLAS_JSON, editingContent, TEXT_FONT_SIZE, editingTextBox, point)
-        : editingTextBox
-          ? getStraightCaretIndexAtPoint(MSDF_ATLAS_JSON, editingContent, TEXT_FONT_SIZE, editingTextBox, point)
-          : null;
-      const editingTolerance = (editingTextBox?.pathId ? PATH_TEXT_HIT_TOLERANCE_PX : STRAIGHT_TEXT_HIT_TOLERANCE_PX) / viewport.zoom;
-      const collidesWithEditingText = Boolean(editingHit && editingHit.distance <= editingTolerance);
+      const collidesWithEditingText = getCollidesWithEditingText(editingTextBox, selectEditingTextContent(state), point, viewport.zoom);
 
       switch (true) {
         case Boolean(lineEndpointHit) && selectedNode.type === NodeType.line:
@@ -92,6 +79,11 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
           hoverRef.current = null;
           break;
         }
+        case Boolean(cornerRadiusHandleHit):
+          setClassName('radius');
+          canvas.style.cursor = '';
+          hoverRef.current = cornerRadiusHandleHit!.nodeId;
+          break;
         case Boolean(rotateHandleHit):
           setClassName(null);
           canvas.style.cursor =

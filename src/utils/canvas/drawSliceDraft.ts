@@ -8,7 +8,7 @@ import { TViewport } from 'types/design/types';
 // utils
 import { drawCornerHandles } from './drawCornerHandles';
 import { drawDashedRectOutline } from './drawDashedRectOutline';
-import { drawRect } from './drawRect';
+import { drawRect } from './drawRect/drawRect';
 import { getRotatedBoundingBox } from './getRotatedBoundingBox';
 
 export const drawSliceDraft = (

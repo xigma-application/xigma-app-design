@@ -76,6 +76,7 @@ export type TPolygonNode = TBaseNode & {
 };
 
 export type TRectangleNode = TBaseNode & {
+  cornerRadius?: number;
   fill: string;
   type: NodeType.rectangle;
 };

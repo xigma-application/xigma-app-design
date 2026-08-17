@@ -6,7 +6,7 @@ import { TEditingTextBox } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { drawRect } from 'utils/canvas/drawRect';
+import { drawRect } from 'utils/canvas/drawRect/drawRect';
 
 export const drawEditingTextBoxOutline = (
   gl: WebGL2RenderingContext,

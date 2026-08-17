@@ -6,7 +6,14 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TDragState, TEndpointDragState, TPathOffsetDragState, TResizeDragState, TRotateDragState } from '../../../types';
+import {
+  TCornerRadiusDragState,
+  TDragState,
+  TEndpointDragState,
+  TPathOffsetDragState,
+  TResizeDragState,
+  TRotateDragState,
+} from '../../../types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -29,6 +36,7 @@ const createEndpointDragRef = (): RefObject<TEndpointDragState | null> => ({ cur
 const createPathOffsetDragRef = (): RefObject<TPathOffsetDragState | null> => ({ current: null });
 const createResizeDragRef = (): RefObject<TResizeDragState | null> => ({ current: null });
 const createRotateDragRef = (): RefObject<TRotateDragState | null> => ({ current: null });
+const createCornerRadiusDragRef = (): RefObject<TCornerRadiusDragState | null> => ({ current: null });
 const createMarqueeStartRef = (): RefObject<TPoint | null> => ({ current: null });
 
 const addFrameNode = (x: number, y: number, size = 20): string => {
@@ -40,6 +48,27 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
       parentId: null,
       rotation: 0,
       type: NodeType.frame,
+      width: size,
+      x,
+      y,
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addRectangleNode = (x: number, y: number, size: number, cornerRadius: number): string => {
+  store.dispatch(
+    addNode({
+      cornerRadius,
+      fill: '#ff0000',
+      height: size,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
       width: size,
       x,
       y,
@@ -134,6 +163,7 @@ describe('handlePointerDown', () => {
       createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
+      createCornerRadiusDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -161,6 +191,7 @@ describe('handlePointerDown', () => {
       createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
+      createCornerRadiusDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -188,6 +219,7 @@ describe('handlePointerDown', () => {
       createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
+      createCornerRadiusDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -219,6 +251,7 @@ describe('handlePointerDown', () => {
       createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
+      createCornerRadiusDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -248,6 +281,7 @@ describe('handlePointerDown', () => {
       createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
+      createCornerRadiusDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -280,6 +314,7 @@ describe('handlePointerDown', () => {
       createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
+      createCornerRadiusDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -308,6 +343,7 @@ describe('handlePointerDown', () => {
       createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
+      createCornerRadiusDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -340,6 +376,7 @@ describe('handlePointerDown', () => {
       createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
+      createCornerRadiusDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -371,6 +408,7 @@ describe('handlePointerDown', () => {
       createPathOffsetDragRef(),
       createResizeDragRef(),
       createRotateDragRef(),
+      createCornerRadiusDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -402,6 +440,7 @@ describe('handlePointerDown', () => {
       createPathOffsetDragRef(),
       resizeDragRef,
       createRotateDragRef(),
+      createCornerRadiusDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -434,6 +473,7 @@ describe('handlePointerDown', () => {
       createPathOffsetDragRef(),
       createResizeDragRef(),
       rotateDragRef,
+      createCornerRadiusDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -442,6 +482,72 @@ describe('handlePointerDown', () => {
     expect(rotateDragRef.current).not.toBeNull();
     expect(dragStateRef.current).toBeNull();
     expect(canvas.setPointerCapture).toHaveBeenCalled();
+  });
+
+  it('should delegate to armCornerRadiusDrag when a corner-radius handle on a selected rectangle is hit', () => {
+    // mock — a 100x100 rectangle with cornerRadius 20 has its ne handle at (4080, 4020)
+    const idA = addRectangleNode(4000, 4000, 100, 20);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvas = createCanvas();
+    const dragStateRef = createDragStateRef();
+    const cornerRadiusDragRef = createCornerRadiusDragRef();
+    const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
+
+    // before
+    handlePointerDown(
+      canvas,
+      pointerEvent(4080, 4020),
+      store.dispatch,
+      dragStateRef,
+      createEndpointDragRef(),
+      createPathOffsetDragRef(),
+      createResizeDragRef(),
+      createRotateDragRef(),
+      cornerRadiusDragRef,
+      marqueeStartRef,
+      setClassName,
+    );
+
+    // result
+    expect(cornerRadiusDragRef.current).toMatchObject({ corner: 'ne', nodeId: idA });
+    expect(dragStateRef.current).toBeNull();
+    expect(canvas.setPointerCapture).toHaveBeenCalled();
+  });
+
+  it('should delegate to armResizeDrag, not armCornerRadiusDrag, when clicking exactly on the corner even with a nonzero cornerRadius', () => {
+    // mock — a 100x100 rectangle with cornerRadius 20; the resize handle still sits exactly at the
+    // raw "ne" corner (4180, 4100), which the radius handle's own inset position never touches
+    const idA = addRectangleNode(4100, 4100, 100, 20);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef();
+    const cornerRadiusDragRef = createCornerRadiusDragRef();
+    const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
+
+    // before
+    handlePointerDown(
+      canvas,
+      pointerEvent(4200, 4100),
+      store.dispatch,
+      createDragStateRef(),
+      createEndpointDragRef(),
+      createPathOffsetDragRef(),
+      resizeDragRef,
+      createRotateDragRef(),
+      cornerRadiusDragRef,
+      marqueeStartRef,
+      setClassName,
+    );
+
+    // result
+    expect(resizeDragRef.current).toMatchObject({ handle: 'ne' });
+    expect(cornerRadiusDragRef.current).toBeNull();
   });
 
   it("should delegate to armPathOffsetDrag when a path-text node's offset handle is hit, instead of moving the whole node", () => {
@@ -466,6 +572,7 @@ describe('handlePointerDown', () => {
       pathOffsetDragRef,
       createResizeDragRef(),
       createRotateDragRef(),
+      createCornerRadiusDragRef(),
       marqueeStartRef,
       setClassName,
     );

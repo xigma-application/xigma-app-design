@@ -6,7 +6,7 @@ import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
 import { drawCornerHandles } from 'utils/canvas/drawCornerHandles';
-import { drawRect } from 'utils/canvas/drawRect';
+import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { getSelectionBounds } from '../../../../utils/getSelectionBounds';
 
 export const drawGroupSelectionOutline = (

@@ -9,7 +9,7 @@ import { TViewport } from 'types/design/types';
 
 // utils
 import { buildEllipseArcLengthTable } from 'utils/canvas/shapes/buildEllipseArcLengthTable';
-import { drawRect } from 'utils/canvas/drawRect';
+import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { getCurvedCaretPoint } from 'utils/canvas/text/getCurvedCaretPoint';
 import { getEllipseCircumference } from 'utils/canvas/shapes/getEllipseCircumference';
 import { getVisibleCurvedContent } from 'utils/canvas/text/getVisibleCurvedContent';

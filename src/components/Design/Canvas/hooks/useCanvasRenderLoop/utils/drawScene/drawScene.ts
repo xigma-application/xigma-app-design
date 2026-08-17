@@ -19,6 +19,7 @@ import { TDraftEntity } from 'types/design/types';
 import { TImageRenderContext } from '../../types';
 
 // utils
+import { drawCornerRadiusHandlesLayer } from './drawCornerRadiusHandlesLayer';
 import { drawEditingPathTextHandle } from './drawEditingPathTextHandle';
 import { drawEditingText } from './drawEditingText';
 import { drawFrame } from './drawFrame';
@@ -63,6 +64,7 @@ export const drawScene = (
   drawSceneNodes(gl, program, buffer, imageContext, sceneNodes, clientWidth, clientHeight, viewport, pathOutlineStyles);
   drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport);
   drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport);
+  drawCornerRadiusHandlesLayer(gl, program, buffer, hoveredNode, selectedNodes, clientWidth, clientHeight, viewport);
   drawFrame(gl, program, buffer, imageContext, draftShape, clientWidth, clientHeight, viewport);
   drawEditingText(
     gl,
@@ -78,7 +80,6 @@ export const drawScene = (
     clientHeight,
     viewport,
   );
-
   drawEditingPathTextHandle(gl, program, buffer, editingTextBox, clientWidth, clientHeight, viewport);
   drawMarquee(gl, program, buffer, marqueeRect, clientWidth, clientHeight, viewport);
   drawSliceDraft(gl, program, buffer, sliceRect, clientWidth, clientHeight, viewport);

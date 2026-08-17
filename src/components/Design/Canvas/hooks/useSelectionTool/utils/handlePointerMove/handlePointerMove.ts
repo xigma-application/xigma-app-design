@@ -4,10 +4,18 @@ import { RefObject } from 'react';
 import { AppDispatch } from 'store';
 
 // types
-import { TDragState, TEndpointDragState, TPathOffsetDragState, TResizeDragState, TRotateDragState } from '../../types';
+import {
+  TCornerRadiusDragState,
+  TDragState,
+  TEndpointDragState,
+  TPathOffsetDragState,
+  TResizeDragState,
+  TRotateDragState,
+} from '../../types';
 import { TDraftRect, TPoint } from 'types/canvas';
 
 // utils
+import { continueCornerRadiusDrag } from './continueCornerRadiusDrag';
 import { continueDrag } from './continueDrag';
 import { continueEndpointDrag } from './continueEndpointDrag';
 import { continueMarqueeDrag } from './continueMarqueeDrag';
@@ -24,6 +32,7 @@ export const handlePointerMove = (
   pathOffsetDragRef: RefObject<TPathOffsetDragState | null>,
   resizeDragRef: RefObject<TResizeDragState | null>,
   rotateDragRef: RefObject<TRotateDragState | null>,
+  cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>,
   marqueeStartRef: RefObject<TPoint | null>,
   marqueeRef: RefObject<TDraftRect | null>,
 ): void => {
@@ -32,5 +41,6 @@ export const handlePointerMove = (
   continuePathOffsetDrag(canvas, event, dispatch, pathOffsetDragRef);
   continueResizeDrag(canvas, event, dispatch, resizeDragRef);
   continueRotateDrag(canvas, event, dispatch, rotateDragRef);
+  continueCornerRadiusDrag(canvas, event, dispatch, cornerRadiusDragRef);
   continueMarqueeDrag(canvas, event, dispatch, marqueeStartRef, marqueeRef);
 };

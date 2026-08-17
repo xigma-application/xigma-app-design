@@ -1,5 +1,5 @@
 // types
-import { TDraftRect, TPoint, TResizeHandle } from 'types/canvas';
+import { TCornerRadiusHandle, TDraftRect, TPoint, TResizeHandle } from 'types/canvas';
 
 export type TPendingClickAction = { id: string; kind: 'collapse' } | { kind: 'deselect' };
 
@@ -32,6 +32,15 @@ export type TResizeDragState = {
   bounds: TDraftRect;
   handle: TResizeHandle;
   nodeOrigins: Record<string, TResizeNodeOrigin>;
+};
+
+export type TCornerRadiusDragState = {
+  bounds: TDraftRect;
+  candidates: TCornerRadiusHandle[];
+  corner: TCornerRadiusHandle | null;
+  nodeId: string;
+  pointerStart: TPoint;
+  rotation: number;
 };
 
 export type TRotateNodeOrigin =

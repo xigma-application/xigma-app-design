@@ -10,7 +10,7 @@ import { drawCornerHandles } from 'utils/canvas/drawCornerHandles';
 import { drawLine } from 'utils/canvas/drawLine';
 import { drawLineEndpointHandles } from 'utils/canvas/drawLineEndpointHandles';
 import { drawPathTextFontSizeGuide } from './drawPathTextFontSizeGuide';
-import { drawRect } from 'utils/canvas/drawRect';
+import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { drawSelectedPathTextHandle } from './drawSelectedPathTextHandle';
 
 const drawLineSelectionOutline = (
