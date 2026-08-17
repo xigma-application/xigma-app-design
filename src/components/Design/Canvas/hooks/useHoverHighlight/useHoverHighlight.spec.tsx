@@ -268,6 +268,27 @@ describe('useHoverHighlight behaviors', () => {
     expect(hoverRef.current).toBeNull();
   });
 
+  it('should re-evaluate hover on pointerup at the current position, even without a following pointermove', () => {
+    // mock — a drag (e.g. dragging a corner-radius handle) ends away from the shape that was
+    // hovered before the drag started; without moving the mouse again afterward, hover must not
+    // stay stuck on that shape
+    const idA = addFrameNode(400, 400);
+    const canvasRef = createCanvasRef();
+    const { hoverRef } = renderHoverHighlight(canvasRef);
+
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 405, 405));
+    expect(hoverRef.current).toBe(idA);
+
+    // action — dragging away (ignored, button held), then releasing at that same far position
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 900, 900, { buttons: 1 }));
+    expect(hoverRef.current).toBe(idA); // still frozen mid-drag
+
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 900, 900));
+
+    // result
+    expect(hoverRef.current).toBeNull();
+  });
+
   it("should apply the positioning cursor class when hovering a selected line's endpoint", () => {
     // mock
     const idA = addLineNode(500, 500, 600, 500);

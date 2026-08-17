@@ -129,10 +129,12 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
       const onPointerLeave = (): void => handlePointerLeave(canvas);
 
       canvas.addEventListener('pointermove', onPointerMove);
+      canvas.addEventListener('pointerup', onPointerMove);
       canvas.addEventListener('pointerleave', onPointerLeave);
 
       return (): void => {
         canvas.removeEventListener('pointermove', onPointerMove);
+        canvas.removeEventListener('pointerup', onPointerMove);
         canvas.removeEventListener('pointerleave', onPointerLeave);
         setClassName(null);
         canvas.style.cursor = '';

@@ -1145,6 +1145,7 @@ ungrabbable, not just invisible.
 | 127 | Dragging to radius 0 keeps the handle tracking the pointer at the corner mid-drag, only snapping to the zero-state offset once the pointer is released         |  ✅  | ✅ `corner-radius.spec.ts` |
 | 128 | A small nonzero radius hides its handle once zooming out shrinks its screen-space gap below the minimum, instead of letting it overlap the corner              |  ✅  | ✅ `corner-radius.spec.ts` |
 | 129 | A radius that clears the minimum screen gap keeps showing its handle even when small, and `cornerRadius === 0` is never hidden by this rule regardless of zoom |  ✅  |             —              |
+| 134 | Releasing any drag (corner-radius or otherwise) outside the shape, with no further pointer movement, hides its hover outline/handles immediately               |  ✅  | ✅ `corner-radius.spec.ts` |
 
 #118-#121, #129 stay unit-only: each is a precise, already-exact `store.getState()`/direct-function-call
 assertion (`handlePointerDown.spec.ts`, `resolveCornerFromDirection.spec.ts`,
@@ -1153,6 +1154,21 @@ assertion (`handlePointerDown.spec.ts`, `resolveCornerFromDirection.spec.ts`,
 the "why so few scenarios get e2e coverage" rationale below, none of these turn on real browser
 paint timing the way #115-#117 do (a real `pointermove`/`pointerdown` sequence against the real
 rendered handle positions actually reaching the grabbed corner and repainting the rounded fill).
+
+#134 was a real, shipped bug in `useHoverHighlight.ts`, not specific to corner radius: its
+`handlePointerMove` early-returns unless `event.buttons === 0`, deliberately ignoring pointer moves
+while any button is held (so hover doesn't flicker onto other nodes mid-drag) — but nothing ever
+re-evaluated hover once a drag ended without a _further_ `pointermove`, so releasing outside a shape
+(e.g. dragging a corner-radius handle past the shape's own edge) left the hover outline/handle stuck
+showing the pre-drag hover state indefinitely, as if the cursor were still over the shape. Fixed by
+also listening for `pointerup` with the exact same handler — pointer capture (`setPointerCapture` on
+arm) guarantees `pointerup` still fires on the canvas even with the cursor physically outside the
+shape's bounds, and by the time a primary-button `pointerup` fires `event.buttons` is already back to
+0, so the existing gate lets it through unmodified. Caught one existing e2e test relying on the
+previously-stale behavior incidentally: releasing a corner-radius drag exactly on the resize handle's
+own corner point now correctly nulls hover (matching what a plain, undragged hover at that exact spot
+already did) rather than keeping the prior corner-radius-handle hover state — fixed by re-hovering the
+comparison position explicitly before that test's final screenshot.
 
 ## Corner radius (Polygon)
 

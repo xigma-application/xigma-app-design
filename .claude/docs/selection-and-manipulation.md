@@ -426,6 +426,19 @@ case Boolean(resizeHandleHit): {
 handle); `drawHoverOutline.ts` reads it to draw the hover outline without corner handles, separately
 from `drawSelectionOutline.ts`.
 
+**Gotcha — stale hover after a drag ends without a further `pointermove`**: the `event.buttons === 0`
+guard above is correct for its own purpose (don't flicker hover onto other nodes while, say, dragging
+a node across them), but it means hover is *frozen* at whatever it was when the drag started for the
+drag's entire duration. Nothing re-evaluated it once the drag ended — releasing outside the hovered
+shape (e.g. a corner-radius handle dragged past the shape's own edge, per §16/§17's handles) left the
+hover outline/handle showing the stale pre-drag state indefinitely if the pointer didn't move again
+afterward. Fixed by also registering the exact same handler on `pointerup`, not just `pointermove`:
+pointer capture (`setPointerCapture` on every `arm*Drag`) guarantees `pointerup` still fires on the
+canvas even with the cursor now physically outside the shape, and a primary-button `pointerup` always
+carries `event.buttons === 0`, so the existing guard lets it through with no other change needed. This
+is general — it fixes stale hover after *any* drag (resize, rotate, move, corner-radius), not just the
+corner-radius case that surfaced it.
+
 ## 10. Test conventions
 
 Unit: a real `<canvas>` (`getBoundingClientRect` stubbed, `setPointerCapture` stubbed with

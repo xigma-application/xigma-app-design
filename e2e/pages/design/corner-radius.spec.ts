@@ -43,6 +43,10 @@ test('dragging the ne handle down to radius 0 keeps it tracking the pointer at t
   expect(midDragAtCorner.equals(restingZeroState)).toBe(false);
 
   await designPage.pointerUp();
+  // releasing sits exactly on the resize handle's own corner, so hover now correctly resolves to
+  // that resize handle (nulling the shape hover, same as a plain non-drag hover there would) — move
+  // back to the corner-radius handle's own resting spot to compare like-for-like
+  await designPage.pointerMove(1020, 330);
   const afterRelease = await designPage.canvas.screenshot();
 
   // once released, the handle returns to the exact same zero-state offset position as before the drag
@@ -322,4 +326,27 @@ test('the polygon corner-radius handle appears at its physically flipped positio
   const hoveredAtFlippedPosition = await designPage.canvas.screenshot();
 
   expect(hoveredAtFlippedPosition.equals(restingAway)).toBe(false);
+});
+
+test('releasing the corner-radius handle drag outside the shape, with no further mouse movement, hides the outline and handle immediately', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-corner-radius-release-outside');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(900, 300, 1050, 450); // 150x150 square
+  await designPage.click(975, 375);
+  await designPage.pointerMove(1020, 330); // hover the zero-state handle to reveal it
+
+  await designPage.pointerDown(1020, 330); // grab the handle
+  await designPage.pointerMove(1400, 700); // drag far outside the shape's own bounds
+  const midDrag = await designPage.canvas.screenshot(); // hover is frozen mid-drag, so this still shows the outline/handle
+
+  await designPage.pointerUp(); // release with no further pointermove afterward
+  const afterRelease = await designPage.canvas.screenshot();
+
+  // the pointer's actual (outside) position must now win, hiding the outline/handle immediately
+  expect(afterRelease.equals(midDrag)).toBe(false);
 });
