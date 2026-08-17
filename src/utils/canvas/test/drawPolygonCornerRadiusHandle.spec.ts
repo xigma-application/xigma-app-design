@@ -65,7 +65,7 @@ describe('drawPolygonCornerRadiusHandle', () => {
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
-    // before — top vertex of a 100x100 triangle sits at (50, 0); radius 15 moves it to (50, 15)
+    // before — top vertex of a 100x100 triangle sits at (50, 0); radius 15, scaled by the tip's 60deg
     drawPolygonCornerRadiusHandle(gl, program, buffer, TRIANGLE_BOUNDS, 3, 15, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
 
     // result — the handle fill is the first draw call; its fan center is the handle's own position
@@ -73,7 +73,7 @@ describe('drawPolygonCornerRadiusHandle', () => {
     const vertices: Float32Array = firstFillCall[1];
 
     expect(vertices[0]).toBeCloseTo(50);
-    expect(vertices[1]).toBeCloseTo(15);
+    expect(vertices[1]).toBeCloseTo(30);
   });
 
   it('should draw the handle exactly on the top vertex at radius 0 when isDragging is true, instead of the zero-state offset', () => {
@@ -102,11 +102,11 @@ describe('drawPolygonCornerRadiusHandle', () => {
     // before
     drawPolygonCornerRadiusHandle(gl, program, buffer, TRIANGLE_BOUNDS, 3, 15, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 90);
 
-    // result — the handle (50, 15) rotated 90deg around the center (50, 50) swings to (85, 50)
+    // result — the handle (50, 30) rotated 90deg around the center (50, 50) swings to (70, 50)
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
     const vertices: Float32Array = firstFillCall[1];
 
-    expect(vertices[0]).toBeCloseTo(85);
+    expect(vertices[0]).toBeCloseTo(70);
     expect(vertices[1]).toBeCloseTo(50);
   });
 });

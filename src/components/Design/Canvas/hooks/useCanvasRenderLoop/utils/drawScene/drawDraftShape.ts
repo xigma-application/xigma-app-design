@@ -13,7 +13,7 @@ import { drawEllipse } from 'utils/canvas/shapes/drawEllipse';
 import { drawImage } from 'utils/canvas/drawImage';
 import { drawPolygon } from 'utils/canvas/drawPolygon/drawPolygon';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
-import { drawStar } from 'utils/canvas/shapes/drawStar';
+import { drawStar } from 'utils/canvas/drawStar/drawStar';
 import { getOrLoadTexture } from 'utils/canvas/getOrLoadTexture';
 
 export const drawDraftShape = (

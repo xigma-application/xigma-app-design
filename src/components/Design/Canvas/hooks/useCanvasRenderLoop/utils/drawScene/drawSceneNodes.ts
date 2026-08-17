@@ -17,7 +17,7 @@ import { drawMsdfText } from 'utils/canvas/text/drawMsdfText';
 import { drawPathOutline } from './drawPathOutline';
 import { drawPolygon } from 'utils/canvas/drawPolygon/drawPolygon';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
-import { drawStar } from 'utils/canvas/shapes/drawStar';
+import { drawStar } from 'utils/canvas/drawStar/drawStar';
 import { getMsdfAtlasTexture } from 'utils/canvas/text/getMsdfAtlasTexture';
 import { getOrLoadTexture } from 'utils/canvas/getOrLoadTexture';
 

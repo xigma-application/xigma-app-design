@@ -188,3 +188,61 @@ test('dragging the polygon handle past the center and back does not misbehave', 
 
   expect(backNearStart.equals(atMax)).toBe(false);
 });
+
+test('the star corner-radius handle only renders once the star is both selected and hovered, not just selected', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-star-corner-radius-visibility');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawStar(900, 300, 1050, 450); // a 150x150 star, top vertex at (975, 300)
+  await designPage.click(975, 375); // select it
+  await designPage.pointerMove(1400, 700); // rest well away from the shape
+  const selectedOnly = await designPage.canvas.screenshot();
+
+  await designPage.pointerMove(975, 375); // move onto the shape itself
+  const selectedAndHovered = await designPage.canvas.screenshot();
+
+  expect(selectedAndHovered.equals(selectedOnly)).toBe(false);
+});
+
+test('dragging the star handle toward the center visibly rounds both the outer tips and the inner points', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-star-corner-radius-drag');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawStar(900, 300, 1050, 450); // a 150x150 star, top vertex at (975, 300)
+  await designPage.click(975, 375);
+  await designPage.pointerMove(975, 340); // hover to reveal the handle
+  const beforeDrag = await designPage.canvas.screenshot();
+
+  await designPage.pointerDown(975, 330); // the zero-state handle, offset in from the top vertex
+  await designPage.pointerMove(975, 360); // straight down, toward the center
+  await designPage.pointerUp();
+  const afterDrag = await designPage.canvas.screenshot();
+
+  expect(afterDrag.equals(beforeDrag)).toBe(false);
+});
+
+test('dragging the star handle past the center and back does not misbehave', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-star-corner-radius-overshoot');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawStar(900, 300, 1050, 450);
+  await designPage.click(975, 375);
+  await designPage.pointerMove(975, 340);
+
+  await designPage.pointerDown(975, 330); // the zero-state handle
+  await designPage.pointerMove(975, 500); // well past the center, deep into clamp territory
+  const atMax = await designPage.canvas.screenshot();
+
+  await designPage.pointerMove(975, 330); // back up near the start, past the center on the way
+  const backNearStart = await designPage.canvas.screenshot();
+
+  await designPage.pointerUp();
+
+  expect(backNearStart.equals(atMax)).toBe(false);
+});

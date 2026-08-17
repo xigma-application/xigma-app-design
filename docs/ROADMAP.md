@@ -928,6 +928,24 @@ node.rotation)` w `drawMsdfText.ts`).
       ~15 niepowiązanych wywołujących (marquee, uchwyty resize, obrysy hover/selekcji, draft
       shape'y...) nigdy nie widzi pola `cornerRadius`. Pełny opis mechanizmu:
       `.claude/docs/selection-and-manipulation.md` §11
+- [x] **corner radius dla Polygon i Star** — jeden wspólny promień (`TPolygonNode.cornerRadius?:
+      number` / `TStarNode.cornerRadius?: number`, ten sam opcjonalny wzorzec co Rectangle)
+      zaokrąglający **każdy** wierzchołek jednakowo, w przeciwieństwie do 4 niezależnych rogów
+      Rectangle — stąd jeden przeciągany uchwyt na stałym "górnym" wierzchołku
+      (`getPolygonPoints`/`getStarPoints`'a indeks 0), nie cztery. Star dodatkowo zaokrągla
+      wierzchołki wklęsłe (doliny między ramionami), nie tylko wypukłe czubki — ta sama funkcja
+      stycznego łuku (`getRoundedVertexPoints.ts`) działa na obu bez rozróżnienia convex/concave,
+      bo kierunek dwusiecznej wynika sam z geometrii wektorów, bez żadnej gałęzi warunkowej.
+      Matematyka kątów wierzchołków (`getVertexAngles.ts`) i maksymalnego promienia
+      (`getMaxCornerRadiusForVertices.ts`) jest teraz współdzielona między Polygon i Star (Rectangle
+      zostaje osobno — przypadek 90° jest prostszy, nie warto uogólniać). Najtrudniejszy błąd po
+      drodze: pozycja uchwytu **nie** jest przesunięciem o `cornerRadius` wprost — to działa
+      przypadkiem tylko dla Rectangle, bo kąt tam zawsze wynosi 90°. Dla dowolnego kąta trzeba
+      przeskalować promień mnożnikiem `1/sin(kąt/2)` (`getCornerRadiusHandleSetbackMultiplier.ts`),
+      żeby uchwyt trafiał w środek łuku zaokrąglenia (dokładnie tam, gdzie siedzi uchwyt Rectangle),
+      a nie w najbliższy punkt na samym obrysie — bez tego uchwyt wizualnie "lgnie" do kształtu
+      zamiast być od niego odsunięty jak w Figmie, tym bardziej przy małym promieniu. Pełny opis
+      mechanizmu i tej pułapki: `.claude/docs/selection-and-manipulation.md` §12, §15-16
 - [ ] **klawiszowe skróty edycji**: Delete/Backspace (usuń zaznaczenie), Cmd/Ctrl+D (duplikuj),
       Cmd/Ctrl+C/V (kopiuj/wklej), strzałki (nudge o 1px, Shift+strzałka o 10px), Cmd/Ctrl+A
       (zaznacz wszystko) — dziś żadne z nich nie istnieje, mimo że infrastruktura klawiszowa

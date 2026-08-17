@@ -12,6 +12,7 @@ import {
   TPolygonCornerRadiusDragState,
   TResizeDragState,
   TRotateDragState,
+  TStarCornerRadiusDragState,
 } from '../../types';
 import { TDraftRect, TPoint } from 'types/canvas';
 
@@ -24,6 +25,7 @@ import { disarmPathOffsetDrag } from './disarmPathOffsetDrag';
 import { disarmPolygonCornerRadiusDrag } from './disarmPolygonCornerRadiusDrag';
 import { disarmResizeDrag } from './disarmResizeDrag';
 import { disarmRotateDrag } from './disarmRotateDrag';
+import { disarmStarCornerRadiusDrag } from './disarmStarCornerRadiusDrag';
 
 export const handlePointerUp = (
   canvas: HTMLCanvasElement,
@@ -36,6 +38,7 @@ export const handlePointerUp = (
   rotateDragRef: RefObject<TRotateDragState | null>,
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>,
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>,
+  starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>,
   marqueeStartRef: RefObject<TPoint | null>,
   marqueeRef: RefObject<TDraftRect | null>,
   setClassName: (className: string | null) => void,
@@ -47,5 +50,6 @@ export const handlePointerUp = (
   disarmRotateDrag(canvas, event, rotateDragRef);
   disarmCornerRadiusDrag(canvas, event, cornerRadiusDragRef);
   disarmPolygonCornerRadiusDrag(canvas, event, polygonCornerRadiusDragRef);
+  disarmStarCornerRadiusDrag(canvas, event, starCornerRadiusDragRef);
   disarmMarqueeDrag(canvas, event, marqueeStartRef, marqueeRef);
 };

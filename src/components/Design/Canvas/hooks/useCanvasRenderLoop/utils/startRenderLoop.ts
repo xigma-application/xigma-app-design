@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // types
-import { TCornerRadiusDragState, TPolygonCornerRadiusDragState } from '../../useSelectionTool/types';
+import { TCornerRadiusDragState, TPolygonCornerRadiusDragState, TStarCornerRadiusDragState } from '../../useSelectionTool/types';
 import { TDraftRect } from 'types/canvas';
 import { TDraftEntity } from 'types/design/types';
 import { TImageRenderContext } from '../types';
@@ -24,8 +24,10 @@ const tick = (
   sliceRef?: RefObject<(TDraftRect & { rotation: number }) | null>,
   cornerRadiusDragRef?: RefObject<TCornerRadiusDragState | null>,
   polygonCornerRadiusDragRef?: RefObject<TPolygonCornerRadiusDragState | null>,
+  starCornerRadiusDragRef?: RefObject<TStarCornerRadiusDragState | null>,
 ): void => {
-  const isDraggingCornerRadius = Boolean(cornerRadiusDragRef?.current) || Boolean(polygonCornerRadiusDragRef?.current);
+  const isDraggingCornerRadius =
+    Boolean(cornerRadiusDragRef?.current) || Boolean(polygonCornerRadiusDragRef?.current) || Boolean(starCornerRadiusDragRef?.current);
 
   drawScene(
     gl,
@@ -53,6 +55,7 @@ const tick = (
       sliceRef,
       cornerRadiusDragRef,
       polygonCornerRadiusDragRef,
+      starCornerRadiusDragRef,
     ),
   );
 };
@@ -69,6 +72,7 @@ export const startRenderLoop = (
   sliceRef?: RefObject<(TDraftRect & { rotation: number }) | null>,
   cornerRadiusDragRef?: RefObject<TCornerRadiusDragState | null>,
   polygonCornerRadiusDragRef?: RefObject<TPolygonCornerRadiusDragState | null>,
+  starCornerRadiusDragRef?: RefObject<TStarCornerRadiusDragState | null>,
 ): (() => void) => {
   const frameIdRef: TFrameIdRef = { current: 0 };
 
@@ -86,6 +90,7 @@ export const startRenderLoop = (
       sliceRef,
       cornerRadiusDragRef,
       polygonCornerRadiusDragRef,
+      starCornerRadiusDragRef,
     ),
   );
 

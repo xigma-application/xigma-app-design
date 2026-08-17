@@ -1,7 +1,7 @@
 // types
 import { TPoint } from 'types/canvas';
 
-export const getPolygonVertexAngles = (vertices: TPoint[]): number[] =>
+export const getVertexAngles = (vertices: TPoint[]): number[] =>
   vertices.map((vertex, index) => {
     const previous = vertices[(index - 1 + vertices.length) % vertices.length];
     const next = vertices[(index + 1) % vertices.length];

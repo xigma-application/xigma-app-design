@@ -100,6 +100,31 @@ const addPolygonNode = (x: number, y: number, size: number, sides: number, corne
   return rootOrder[rootOrder.length - 1];
 };
 
+const addStarNode = (x: number, y: number, size: number, points: number, ratio: number, cornerRadius: number): string => {
+  store.dispatch(
+    addNode({
+      cornerRadius,
+      fill: '#ff0000',
+      flipX: false,
+      flipY: false,
+      height: size,
+      name: 'Star',
+      parentId: null,
+      points,
+      ratio,
+      rotation: 0,
+      type: NodeType.star,
+      width: size,
+      x,
+      y,
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 const addPathTextNode = (x: number, y: number, size = 200): string => {
   store.dispatch(
     addNode({
@@ -419,7 +444,6 @@ describe('useHoverHighlight behaviors', () => {
 
   it("should apply the radius cursor class and keep the node's own id hovered over a selected polygon's corner-radius handle", () => {
     // mock — top vertex of a 100x100 triangle at (5200, 5000) sits at (5250, 5000); radius 15 moves
-    // the handle to (5250, 5015)
     const idA = addPolygonNode(5200, 5000, 100, 3, 15);
 
     store.dispatch(setSelection([idA]));
@@ -431,7 +455,28 @@ describe('useHoverHighlight behaviors', () => {
 
     // action
     act(() => {
-      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 5250, 5015));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 5250, 5030));
+    });
+
+    // result — the handle stays visible (hoverRef keeps the node's own id) while it's being hovered
+    expect(classNameRef.current).toBe('radius');
+    expect(hoverRef.current).toBe(idA);
+  });
+
+  it("should apply the radius cursor class and keep the node's own id hovered over a selected star's corner-radius handle", () => {
+    // mock — top vertex of a 100x100 5-point star at (5300, 5000) sits at (5350, 5000); radius 15
+    const idA = addStarNode(5300, 5000, 100, 5, 0.5, 15);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { classNameRef, hoverRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 5350, 5033.893272));
     });
 
     // result — the handle stays visible (hoverRef keeps the node's own id) while it's being hovered
@@ -484,7 +529,6 @@ describe('useHoverHighlight behaviors', () => {
     });
 
     // result — no resize cursor; the point lands on the editing text itself, so it gets the text
-    // (I-beam) cursor instead of a resize handle
     expect(canvasRef.current?.style.cursor).toBe('text');
     expect(classNameRef.current).not.toBe('positioning');
   });
@@ -575,8 +619,6 @@ describe('useHoverHighlight behaviors', () => {
 
   it('should show the text (I-beam) cursor when hovering the content of a path-text box currently being edited', () => {
     // mock — a 200x200 circle at (4300,4300)-(4500,4500); "Hi" starts at the rightmost point
-    // (4500,4400), with the rendered "H" glyph itself sitting a little inside that point, away
-    // from the start-offset handle's own exact position
     store.dispatch(
       startTextEdit({
         box: {

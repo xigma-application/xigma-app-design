@@ -33,6 +33,7 @@ import { getRotateHandleAtPoint } from '../../utils/getRotateHandleAtPoint';
 import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
 import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
 import { getRotatedScaleCursorUrl } from 'utils/canvas/getRotatedScaleCursorUrl';
+import { getStarCornerRadiusHandleHit } from './utils/getStarCornerRadiusHandleHit';
 import { screenToWorld } from '../../utils/screenToWorld';
 
 export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>, hoverRef: RefObject<string | null>): void => {
@@ -54,6 +55,7 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
       const resizeHandleHit = getResizeHandleAtPoint(point, resizableSelectedNodes, viewport);
       const cornerRadiusHandleHit = resizeHandleHit ? null : getCornerRadiusHandleAtPoint(point, resizableSelectedNodes, viewport);
       const polygonCornerRadiusHandleHit = getPolygonCornerRadiusHandleHit(point, resizeHandleHit, resizableSelectedNodes, viewport);
+      const starCornerRadiusHandleHit = getStarCornerRadiusHandleHit(point, resizeHandleHit, resizableSelectedNodes, viewport);
       const rotateHandleHit = getRotateHandleAtPoint(point, resizableSelectedNodes, viewport);
       const collidesWithEditingText = getCollidesWithEditingText(editingTextBox, selectEditingTextContent(state), point, viewport.zoom);
 
@@ -90,6 +92,11 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
           setClassName('radius');
           canvas.style.cursor = '';
           hoverRef.current = polygonCornerRadiusHandleHit!.nodeId;
+          break;
+        case Boolean(starCornerRadiusHandleHit):
+          setClassName('radius');
+          canvas.style.cursor = '';
+          hoverRef.current = starCornerRadiusHandleHit!.nodeId;
           break;
         case Boolean(rotateHandleHit):
           setClassName(null);

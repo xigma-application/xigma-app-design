@@ -14,7 +14,7 @@ import { store } from 'store';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import { TCornerRadiusDragState, TPolygonCornerRadiusDragState } from './types';
+import { TCornerRadiusDragState, TPolygonCornerRadiusDragState, TStarCornerRadiusDragState } from './types';
 import { TDraftRect, TEditingTextBox } from 'types/canvas';
 
 const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
@@ -64,8 +64,9 @@ const renderSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>): Re
   const marqueeRef: RefObject<TDraftRect | null> = { current: null };
   const cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null> = { current: null };
   const polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null> = { current: null };
+  const starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null> = { current: null };
 
-  renderHook(() => useSelectionTool(canvasRef, marqueeRef, cornerRadiusDragRef, polygonCornerRadiusDragRef), {
+  renderHook(() => useSelectionTool(canvasRef, marqueeRef, cornerRadiusDragRef, polygonCornerRadiusDragRef, starCornerRadiusDragRef), {
     wrapper: ({ children }) => (
       <Provider store={store}>
         <ClassNamesProvider>{children}</ClassNamesProvider>

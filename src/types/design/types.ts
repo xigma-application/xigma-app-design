@@ -88,6 +88,7 @@ export type TSectionNode = TBaseNode & {
 };
 
 export type TStarNode = TBaseNode & {
+  cornerRadius?: number;
   fill: string;
   flipX: boolean;
   flipY: boolean;

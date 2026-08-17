@@ -12,6 +12,7 @@ import {
   TPolygonCornerRadiusDragState,
   TResizeDragState,
   TRotateDragState,
+  TStarCornerRadiusDragState,
 } from '../../types';
 import { TDraftRect, TPoint } from 'types/canvas';
 
@@ -24,6 +25,7 @@ import { continuePathOffsetDrag } from './continuePathOffsetDrag';
 import { continuePolygonCornerRadiusDrag } from './continuePolygonCornerRadiusDrag';
 import { continueResizeDrag } from './continueResizeDrag/continueResizeDrag';
 import { continueRotateDrag } from './continueRotateDrag';
+import { continueStarCornerRadiusDrag } from './continueStarCornerRadiusDrag';
 
 export const handlePointerMove = (
   canvas: HTMLCanvasElement,
@@ -36,6 +38,7 @@ export const handlePointerMove = (
   rotateDragRef: RefObject<TRotateDragState | null>,
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>,
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>,
+  starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>,
   marqueeStartRef: RefObject<TPoint | null>,
   marqueeRef: RefObject<TDraftRect | null>,
 ): void => {
@@ -46,5 +49,6 @@ export const handlePointerMove = (
   continueRotateDrag(canvas, event, dispatch, rotateDragRef);
   continueCornerRadiusDrag(canvas, event, dispatch, cornerRadiusDragRef);
   continuePolygonCornerRadiusDrag(canvas, event, dispatch, polygonCornerRadiusDragRef);
+  continueStarCornerRadiusDrag(canvas, event, dispatch, starCornerRadiusDragRef);
   continueMarqueeDrag(canvas, event, dispatch, marqueeStartRef, marqueeRef);
 };

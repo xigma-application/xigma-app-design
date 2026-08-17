@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TEllipseNode, TPolygonNode, TRectangleNode } from 'types/design/types';
+import { TEllipseNode, TPolygonNode, TRectangleNode, TStarNode } from 'types/design/types';
 
 // utils
 import { drawCornerRadiusHandlesLayer } from '../drawCornerRadiusHandlesLayer';
@@ -52,6 +52,24 @@ const polygon: TPolygonNode = {
   rotation: 0,
   sides: 3,
   type: NodeType.polygon,
+  width: 100,
+  x: 0,
+  y: 0,
+};
+
+const star: TStarNode = {
+  cornerRadius: 15,
+  fill: '#ff0000',
+  flipX: false,
+  flipY: false,
+  height: 100,
+  id: 'star-1',
+  name: 'Star',
+  parentId: null,
+  points: 5,
+  ratio: 0.382,
+  rotation: 0,
+  type: NodeType.star,
   width: 100,
   x: 0,
   y: 0,
@@ -244,6 +262,64 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(gl, program, buffer, zeroRadiusPolygon, [zeroRadiusPolygon], 100, 100, IDENTITY_VIEWPORT, true);
+
+    // result — the handle fill is the first draw call; its fan center sits right on the top vertex (50, 0)
+    const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const vertices: Float32Array = firstFillCall[1];
+
+    expect(vertices[0]).toBeCloseTo(50);
+    expect(vertices[1]).toBeCloseTo(0);
+  });
+
+  it('should draw the single corner-radius handle when a star is both selected and hovered', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCornerRadiusHandlesLayer(gl, program, buffer, star, [star], 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+  });
+
+  it('should draw nothing for a star once the shape renders too small on screen', () => {
+    // mock — a 100x100 shape at 90% zoom renders at 90 screen px, below the 100px threshold
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCornerRadiusHandlesLayer(gl, program, buffer, star, [star], 100, 100, { x: 0, y: 0, zoom: 0.9 });
+
+    // result
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+  });
+
+  it('should default a star with no cornerRadius field at all to 0', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const freshStar = { ...star, cornerRadius: undefined };
+
+    // before
+    drawCornerRadiusHandlesLayer(gl, program, buffer, freshStar, [freshStar], 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+  });
+
+  it('should draw the star handle exactly on the top vertex at radius 0 while isDraggingCornerRadius is true', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const zeroRadiusStar = { ...star, cornerRadius: 0 };
+
+    // before
+    drawCornerRadiusHandlesLayer(gl, program, buffer, zeroRadiusStar, [zeroRadiusStar], 100, 100, IDENTITY_VIEWPORT, true);
 
     // result — the handle fill is the first draw call; its fan center sits right on the top vertex (50, 0)
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;

@@ -13,6 +13,7 @@ import {
   TPolygonCornerRadiusDragState,
   TResizeDragState,
   TRotateDragState,
+  TStarCornerRadiusDragState,
 } from '../../../types';
 import { TDraftRect, TPoint } from 'types/canvas';
 
@@ -48,6 +49,9 @@ const createCornerRadiusDragRef = (
 const createPolygonCornerRadiusDragRef = (
   polygonCornerRadiusDragState: TPolygonCornerRadiusDragState | null = null,
 ): RefObject<TPolygonCornerRadiusDragState | null> => ({ current: polygonCornerRadiusDragState });
+const createStarCornerRadiusDragRef = (
+  starCornerRadiusDragState: TStarCornerRadiusDragState | null = null,
+): RefObject<TStarCornerRadiusDragState | null> => ({ current: starCornerRadiusDragState });
 const createMarqueeStartRef = (point: TPoint | null = null): RefObject<TPoint | null> => ({ current: point });
 const createMarqueeRef = (rect: TDraftRect | null = null): RefObject<TDraftRect | null> => ({ current: rect });
 
@@ -72,6 +76,7 @@ describe('handlePointerUp', () => {
       createRotateDragRef(),
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
+      createStarCornerRadiusDragRef(),
       createMarqueeStartRef(),
       createMarqueeRef(),
       vi.fn(),
@@ -103,6 +108,7 @@ describe('handlePointerUp', () => {
       createRotateDragRef(),
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
+      createStarCornerRadiusDragRef(),
       createMarqueeStartRef(),
       createMarqueeRef(),
       vi.fn(),
@@ -130,6 +136,7 @@ describe('handlePointerUp', () => {
       createRotateDragRef(),
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
+      createStarCornerRadiusDragRef(),
       createMarqueeStartRef(),
       createMarqueeRef(),
       vi.fn(),
@@ -157,6 +164,7 @@ describe('handlePointerUp', () => {
       createRotateDragRef(),
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
+      createStarCornerRadiusDragRef(),
       marqueeStartRef,
       marqueeRef,
       vi.fn(),

@@ -1182,6 +1182,27 @@ with no direction-resolution step needed.
 `continuePolygonCornerRadiusDrag.spec.ts`, `getPolygonCornerRadiusHandleAtPoint.spec.ts`) that
 doesn't turn on real browser paint timing the way #122-#124 do.
 
+## Corner radius (Star)
+
+Same single-handle mechanism as Polygon (`armStarCornerRadiusDrag`/`continueStarCornerRadiusDrag`/
+`disarmStarCornerRadiusDrag`, one shared `cornerRadius` applied to every vertex), but the tangent-arc
+rounding math (`getRoundedVertexPoints`, shared with Polygon) rounds a star's concave inner vertices
+the same way it rounds the convex outer tips — the arc's bisector direction falls out of the vertex
+geometry itself, so no convex/concave branch is needed. The handle sits at the rounding arc's own
+center, offset from the vertex by `radius / sin(halfAngle)` (`getCornerRadiusHandleSetbackMultiplier`,
+also shared with Polygon and matching how Rectangle's corner handles already behave), not on the
+rounded boundary itself.
+
+| #   | Scenario                                                                                                | Unit |            E2E             |
+| --- | ------------------------------------------------------------------------------------------------------- | :--: | :------------------------: |
+| 127 | The handle renders only once the star is both selected and hovered — selected alone shows nothing extra |  ✅  | ✅ `corner-radius.spec.ts` |
+| 128 | Dragging the handle toward the center visibly rounds both the outer tips and the inner points           |  ✅  | ✅ `corner-radius.spec.ts` |
+| 129 | Dragging past the center and back doesn't misbehave (stays clamped, keeps tracking the pointer)         |  ✅  | ✅ `corner-radius.spec.ts` |
+| 130 | The dispatched radius clamps to `getMaxStarCornerRadius`                                                |  ✅  |             —              |
+| 131 | The handle vanishes entirely once the shape's on-screen size drops below the visibility threshold       |  ✅  |             —              |
+
+#130-#131 stay unit-only for the same reason as Polygon's #125-#126 above.
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

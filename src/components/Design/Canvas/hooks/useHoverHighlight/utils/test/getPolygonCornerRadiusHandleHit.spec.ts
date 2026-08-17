@@ -34,8 +34,8 @@ describe('getPolygonCornerRadiusHandleHit', () => {
   });
 
   it('should detect the polygon corner-radius handle when no resize handle is hit', () => {
-    // result — top vertex of a 100x100 triangle sits at (50, 0); radius 15 moves the handle to (50, 15)
-    expect(getPolygonCornerRadiusHandleHit({ x: 50, y: 15 }, null, [polygon], IDENTITY_VIEWPORT)).toMatchObject({ nodeId: 'polygon-1' });
+    // result — top vertex of a 100x100 triangle sits at (50, 0); radius 15, scaled by the tip's 60deg
+    expect(getPolygonCornerRadiusHandleHit({ x: 50, y: 30 }, null, [polygon], IDENTITY_VIEWPORT)).toMatchObject({ nodeId: 'polygon-1' });
   });
 
   it('should return null when the point misses the polygon handle', () => {

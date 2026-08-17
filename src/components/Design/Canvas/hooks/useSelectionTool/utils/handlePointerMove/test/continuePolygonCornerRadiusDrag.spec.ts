@@ -66,8 +66,8 @@ describe('continuePolygonCornerRadiusDrag', () => {
     expect(store.getState().design.nodes).toEqual({});
   });
 
-  it('should dispatch a rounded cornerRadius derived from the projected pointer position', () => {
-    // mock — top vertex of a 100x100 triangle sits at (50, 0); moving 20 straight down is 20 toward center
+  it('should dispatch a rounded cornerRadius derived from the projected pointer position, converted through the setback multiplier', () => {
+    // mock — top vertex of a 100x100 triangle sits at (50, 0); a 20 setback / the tip's multiplier of 2 gives radius 10
     const idA = addPolygonNode(0, 0, 100, 100, 3);
     const canvas = createCanvas();
     const dragRef = createPolygonCornerRadiusDragRef({
@@ -81,7 +81,7 @@ describe('continuePolygonCornerRadiusDrag', () => {
     continuePolygonCornerRadiusDrag(canvas, pointerEvent(50, 20), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TPolygonNode).cornerRadius).toBe(20);
+    expect((store.getState().design.nodes[idA] as TPolygonNode).cornerRadius).toBe(10);
   });
 
   it('should clamp the dispatched radius to the polygon max instead of overshooting toward the center', () => {
@@ -123,7 +123,6 @@ describe('continuePolygonCornerRadiusDrag', () => {
 
   it('should un-rotate the query point before computing the radius on a rotated node', () => {
     // mock — a 100x100 triangle rotated 90deg around its center (50, 50); the top vertex (50, 0)
-    // swings to world (100, 50)
     const idA = addPolygonNode(0, 0, 100, 100, 3);
     const canvas = createCanvas();
     const dragRef = createPolygonCornerRadiusDragRef({

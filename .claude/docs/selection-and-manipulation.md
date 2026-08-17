@@ -7,11 +7,11 @@ rotating it. The single most complex interactive subsystem in this app — compa
 The roadmap's prose (Etap 5) describes an earlier, simpler shape of this code (one shared
 `dragStateRef` with a `pendingClickAction`). That core state machine is still exactly accurate (see
 §3), but the file list has grown substantially since Etap 10 added resize/rotate/line-endpoint/
-path-text-offset handling as siblings, and since then two corner-radius handle drags joined them too
-(Rectangle, §11; Polygon, §12, added as a *parallel* mechanism rather than sharing Rectangle's,
-since Polygon never has a multi-candidate collision to resolve) — eight separate drag-state refs, not
-one, each with its own `arm*`/`continue*`/`disarm*` files, all funneled through three top-level
-orchestrators.
+path-text-offset handling as siblings, and since then three corner-radius handle drags joined them
+too (Rectangle, §11; Polygon, §12; Star, §15 — the latter two added as *parallel* mechanisms rather
+than sharing Rectangle's, since neither ever has a multi-candidate collision to resolve) — nine
+separate drag-state refs, not one, each with its own `arm*`/`continue*`/`disarm*` files, all funneled
+through three top-level orchestrators.
 
 ## 1. File structure
 
@@ -20,33 +20,35 @@ orchestrators.
   **Scale tool fully reuses this hook** — see §5) and text-caret editing isn't active
   (`shouldUseCanvasCaretEditing`). Owns six refs internally — `dragStateRef`, `endpointDragRef`,
   `pathOffsetDragRef`, `resizeDragRef`, `rotateDragRef`, `marqueeStartRef` — and three native
-  `PointerEvent` listeners. `cornerRadiusDragRef`/`polygonCornerRadiusDragRef` are the odd two out:
-  lifted to `Canvas.tsx` and passed in as parameters (same "parent-owned, ref-drilled" shape as
-  `marqueeRef`/`hoverRef`/`sliceRef` — see `canvas-rendering-pipeline.md` §2), specifically so
-  `useCanvasRenderLoop` can also read them every frame (§11's "mid-drag zero" fix needs to know
-  whether a corner-radius drag is *currently* in progress, which only these two refs' own
-  arm/disarm sites can answer).
+  `PointerEvent` listeners. `cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef`
+  are the odd three out: lifted to `Canvas.tsx` and passed in as parameters (same "parent-owned,
+  ref-drilled" shape as `marqueeRef`/`hoverRef`/`sliceRef` — see `canvas-rendering-pipeline.md` §2),
+  specifically so `useCanvasRenderLoop` can also read them every frame (§13's "mid-drag zero" fix
+  needs to know whether a corner-radius drag is *currently* in progress, which only these three
+  refs' own arm/disarm sites can answer).
 - `types.ts` — `TDragState`, `TEndpointDragState`, `TPathOffsetDragState`, `TResizeDragState`,
   `TRotateDragState`, `TCornerRadiusDragState`, `TPolygonCornerRadiusDragState`,
-  `TPendingClickAction`, `TLineEndpoint`, `TNodeOrigin`/`TResizeNodeOrigin`/`TRotateNodeOrigin`.
+  `TStarCornerRadiusDragState`, `TPendingClickAction`, `TLineEndpoint`,
+  `TNodeOrigin`/`TResizeNodeOrigin`/`TRotateNodeOrigin`.
 
 `utils/handlePointerDown/` — one `arm*.ts` per interaction kind, dispatched by a priority `switch`
 in `handlePointerDown.ts` (full table in §3): `armPathOffsetDrag`, `armResizeDrag`,
-`armCornerRadiusDrag` (§11), `armPolygonCornerRadiusDrag` (§12), `armRotateDrag`,
-`armLineEndpointDrag` (→ `armEndpointDrag`), `armHitDrag` (→ `armDrag`),
+`armCornerRadiusDrag` (§11), `armPolygonCornerRadiusDrag` (§12), `armStarCornerRadiusDrag` (§15),
+`armRotateDrag`, `armLineEndpointDrag` (→ `armEndpointDrag`), `armHitDrag` (→ `armDrag`),
 `armGroupBoundsDrag` (→ `armDrag`), `armMarqueeDrag`.
 
-`utils/handlePointerMove/` — one `continue*.ts` per kind. **All eight run unconditionally on every
-pointermove** — `handlePointerMove.ts` just calls all eight in sequence; each is a no-op guarded by
+`utils/handlePointerMove/` — one `continue*.ts` per kind. **All nine run unconditionally on every
+pointermove** — `handlePointerMove.ts` just calls all nine in sequence; each is a no-op guarded by
 `if (dragState)` on its own ref, so only the one actually armed does anything: `continueDrag`,
 `continueEndpointDrag`, `continuePathOffsetDrag`, `continueResizeDrag/` (its own sub-folder, §5),
 `continueRotateDrag`, `continueCornerRadiusDrag` (§11), `continuePolygonCornerRadiusDrag` (§12),
-`continueMarqueeDrag`.
+`continueStarCornerRadiusDrag` (§15), `continueMarqueeDrag`.
 
 `utils/handlePointerUp/` — mirror image, `disarm*.ts` per kind, each clears its own ref and releases
 pointer capture: `disarmDrag` (**resolves `pendingClickAction`**, see §3), `disarmEndpointDrag`,
 `disarmPathOffsetDrag` (also resets cursor to `'hand'`), `disarmResizeDrag`, `disarmRotateDrag`,
-`disarmCornerRadiusDrag`, `disarmPolygonCornerRadiusDrag`, `disarmMarqueeDrag`.
+`disarmCornerRadiusDrag`, `disarmPolygonCornerRadiusDrag`, `disarmStarCornerRadiusDrag`,
+`disarmMarqueeDrag`.
 
 Loose files directly under `useSelectionTool/utils/`: `isPointInGroupBounds.ts`,
 `isPointInSelectedTextBounds.ts`, `toggleSelection.ts`.
@@ -117,6 +119,7 @@ switch (true) {
   case Boolean(resizeHandleHit):                               armResizeDrag(...); break;
   case Boolean(cornerRadiusHandleHit):                         armCornerRadiusDrag(...); break;
   case Boolean(polygonCornerRadiusHandleHit):                  armPolygonCornerRadiusDrag(...); break;
+  case Boolean(starCornerRadiusHandleHit):                     armStarCornerRadiusDrag(...); break;
   case Boolean(rotateHandleHit):                               armRotateDrag(...); break;
   case Boolean(lineEndpointHit) && !event.shiftKey:            armLineEndpointDrag(...); break;
   case Boolean(hit) && event.shiftKey:                         dispatch(setSelection(toggleSelection(currentSelection, hit.id))); break;
@@ -127,15 +130,16 @@ switch (true) {
   default: break;
 }
 ```
-**Handle priority**: path-offset → resize → corner-radius (§11) → polygon corner-radius (§12) →
-rotate → **line endpoint (only if not shift)** → shift toggle → plain hit → text-fixed-bounds
-fallback → group-gap → marquee. Both `cornerRadiusHandleHit` and `polygonCornerRadiusHandleHit` are
-computed as `resizeHandleHit ? null : get*CornerRadiusHandleAtPoint(...)` right where they're read,
-so resize wins any tie deterministically rather than relying on switch-case ordering alone — a node
-is never both a Rectangle and a Polygon, so the two hit-tests never actually compete with each other,
-only each independently with resize. Line-endpoint hit-testing is checked *before* the generic
-whole-node `hit` branch, which is why grabbing a line's own endpoint always wins over a whole-line
-drag even when both technically match the same point.
+**Handle priority**: path-offset → resize → corner-radius (§11) → polygon corner-radius (§12) → star
+corner-radius (§15) → rotate → **line endpoint (only if not shift)** → shift toggle → plain hit →
+text-fixed-bounds fallback → group-gap → marquee. `cornerRadiusHandleHit`, `polygonCornerRadiusHandleHit`,
+and `starCornerRadiusHandleHit` are each computed as `resizeHandleHit ? null : get*CornerRadiusHandleAtPoint(...)`
+right where they're read, so resize wins any tie deterministically rather than relying on switch-case
+ordering alone — a node is never more than one of Rectangle/Polygon/Star at once, so the three
+hit-tests never actually compete with each other, only each independently with resize.
+Line-endpoint hit-testing is checked *before* the generic whole-node `hit` branch, which is why
+grabbing a line's own endpoint always wins over a whole-line drag even when both technically match
+the same point.
 
 `armHitDrag.ts` — the collapse-vs-replace decision:
 ```ts
@@ -434,9 +438,9 @@ e2e (`e2e/pages/design/`):
 - `scale-tool.spec.ts` — `K` activates Scale (shared button state with default/hand), distinct cursor
   vs. plain resize, edge handle scales both dimensions proportionally (unlike plain resize).
 - `line-drag.spec.ts` — whole-line drag moves both endpoints; endpoint A/B independence.
-- `corner-radius.spec.ts` (§11-12) — Rectangle handles render only when selected+hovered; pure-left
-  and pure-down drags each independently drive the radius to max. Same visibility check plus a
-  toward-center drag and an overshoot-then-back drag for the Polygon handle.
+- `corner-radius.spec.ts` (§11, §12, §15) — Rectangle handles render only when selected+hovered;
+  pure-left and pure-down drags each independently drive the radius to max. Same visibility check
+  plus a toward-center drag and an overshoot-then-back drag for both the Polygon and the Star handle.
 
 As noted in §3, the pending-click-action collapse/deselect/gap-drag matrix has **no** e2e coverage —
 that correctness relies entirely on the unit suite; e2e here is weighted toward resize/rotate/mirror
@@ -511,30 +515,35 @@ instead of shoehorned into resize) — its own drag-state shape
 (`TPolygonCornerRadiusDragState = { bounds, nodeId, rotation, sides }`, no `corner`/`candidates`
 field since there's nothing to disambiguate) and its own `arm*`/`continue*`/`disarm*` trio.
 
-Math lives in `utils/canvas/cornerRadius/polygon/`, a sibling to the Rectangle math folder, not
-merged into it — the two shapes' geometry doesn't share implementation, only the high-level "drag a
-shared radius" concept:
-- `getPolygonVertexAngles.ts` — interior angle at each vertex (law-of-cosines via the two adjacent
-  edge vectors), shared by both the max-radius calc below and `getRoundedPolygonPoints.ts`'s point
-  generator, so it's computed once per call rather than twice.
-- `getMaxPolygonCornerRadius.ts` — at a vertex with interior angle `θ`, a tangent arc of radius `r`
-  touches each adjacent edge at distance `r / tan(θ/2)` from the vertex; for a shared edge between
-  vertex `i` and `i+1`, the max radius before their two tangent points cross is
-  `edgeLength / (cot(θᵢ/2) + cot(θᵢ₊₁/2))`. The polygon's true max is the minimum of that across
-  every edge — verified against Figma's own reference numbers (100×100 triangle caps at 25, 100×100
-  hexagon caps at 43.3), and collapses to the exact apothem formula `R·cos(π/sides)` for a regular
-  polygon in a square bounding box, generalizing correctly to non-square boxes too (where
-  `getPolygonPoints`'s elliptical `radiusX`/`radiusY` parametrization means edge lengths/angles
-  aren't perfectly uniform).
+Polygon-specific math lives in `utils/canvas/cornerRadius/polygon/`, a sibling to the Rectangle math
+folder — but as of the Star feature (§15), the actual vertex-angle/tangent-arc/handle-setback math
+underneath it moved out to shape-agnostic locations shared by *both* Polygon and Star (Rectangle
+still doesn't share, since its 90°-corner math is a simpler special case not worth generalizing):
+- `utils/math/getVertexAngles.ts` (moved from this folder's old `getPolygonVertexAngles.ts`) — the
+  *unsigned* interior angle at each vertex (`Math.acos(dot/mags)` of the two adjacent edge vectors,
+  always in `[0, π]`). Works unmodified for concave/reflex vertices too (a star's inner points, §15)
+  because the angle-bisector direction — computed downstream, not here — flips on its own from the
+  vertex geometry; no convex/concave branch needed anywhere in this chain.
+- `utils/canvas/cornerRadius/getMaxCornerRadiusForVertices.ts` — at a vertex with (unsigned) angle
+  `θ`, a tangent arc of radius `r` touches each adjacent edge at distance `r / tan(θ/2)` from the
+  vertex; for a shared edge between vertex `i` and `i+1`, the max radius before their two tangent
+  points cross is `edgeLength / (cot(θᵢ/2) + cot(θᵢ₊₁/2))`. The shape's true max is the minimum of
+  that across every edge — verified against Figma's own reference numbers for Polygon (100×100
+  triangle caps at 25, 100×100 hexagon caps at 43.3), and collapses to the exact apothem formula
+  `R·cos(π/sides)` for a regular polygon in a square bounding box. `getMaxPolygonCornerRadius.ts` /
+  `getMaxStarCornerRadius.ts` are thin per-shape wrappers that just supply the vertex list.
+- `utils/canvas/cornerRadius/getCornerRadiusHandleSetbackMultiplier.ts` —
+  `1 / sin(vertexAngle / 2)`. **This is not the radius itself** — see the dedicated gotcha in §16;
+  do not "simplify" a handle-position formula back to using `cornerRadius` directly without reading
+  that section first.
 - `getPolygonCornerRadiusHandlePosition.ts` — from the top vertex (local/unflipped/unrotated space),
-  moved toward the bounding-box center by `effectiveRadius` world units — the radius itself, *not*
-  tangent-length-transformed, keeping "drag toward center" literal (mirrors Rectangle's own handle
-  inset directly equaling its `cornerRadius`). Same zero-state zoom-aware offset formula as
-  Rectangle's `getCornerRadiusHandlePositions.ts` (`ZERO_RADIUS_HANDLE_OFFSET_PX`/
-  `MIN_RADIUS_HANDLE_GAP_PX`), clamped to `getMaxPolygonCornerRadius`. Deliberately ignores
-  `flipX`/`flipY` — local/unflipped space only, kept simple; the render layer stays consistent by
-  not un-flipping either, so hit-test and drawn position never disagree with each other even though
-  neither accounts for flip.
+  moved toward the bounding-box center by `cornerRadius * setbackMultiplier` world units (§16). Same
+  zero-state zoom-aware offset formula as Rectangle's `getCornerRadiusHandlePositions.ts`
+  (`ZERO_RADIUS_HANDLE_OFFSET_PX`/`MIN_RADIUS_HANDLE_GAP_PX`), but the zero-state ceiling is
+  `maxRadius * setbackMultiplier`, not `maxRadius` alone, since it's being compared against a setback
+  distance, not a raw radius. Deliberately ignores `flipX`/`flipY` — local/unflipped space only, kept
+  simple; the render layer stays consistent by not un-flipping either, so hit-test and drawn position
+  never disagree with each other even though neither accounts for flip.
 - `hasPolygonCornerRadius.ts` — `node.type === NodeType.polygon`, its own guard rather than widening
   `hasCornerRadius.ts` — the two shapes' render/handle-position functions are entirely different
   downstream, and a shared guard would just invite a caller to (wrongly) treat them interchangeably.
@@ -583,22 +592,23 @@ private `useRef`s, invisible outside the hook) up to `Canvas.tsx`, which now cre
 the *same* ref objects into both `useSelectionTool` (which still arms/disarms them exactly as
 before — `armCornerRadiusDrag.ts` et al. are unchanged) and `useCanvasRenderLoop` (new trailing
 params) — the same "parent-owned, ref-drilled" shape `Canvas.tsx` already uses for `marqueeRef`/
-`hoverRef`/`sliceRef` (`canvas-rendering-pipeline.md` §2), just applied to two refs that used to be
-selection-tool-private. From there the flag is a plain dereference-and-OR, matching how `hoverRef`
-etc. get dereferenced to plain values before reaching `drawScene`:
+`hoverRef`/`sliceRef` (`canvas-rendering-pipeline.md` §2), just applied to refs that used to be
+selection-tool-private (a third, `starCornerRadiusDragRef`, joined the same way once Star's handle
+was added, §15). From there the flag is a plain dereference-and-OR, matching how `hoverRef` etc. get
+dereferenced to plain values before reaching `drawScene`:
 
 ```
-Canvas.tsx: creates cornerRadiusDragRef/polygonCornerRadiusDragRef via useRef
-  → useSelectionTool(canvasRef, marqueeRef, cornerRadiusDragRef, polygonCornerRadiusDragRef)
+Canvas.tsx: creates cornerRadiusDragRef/polygonCornerRadiusDragRef/starCornerRadiusDragRef via useRef
+  → useSelectionTool(canvasRef, marqueeRef, cornerRadiusDragRef, polygonCornerRadiusDragRef, starCornerRadiusDragRef)
       (arms/disarms them exactly as before — no behavior change here)
-  → useCanvasRenderLoop(..., cornerRadiusDragRef, polygonCornerRadiusDragRef)
+  → useCanvasRenderLoop(..., cornerRadiusDragRef, polygonCornerRadiusDragRef, starCornerRadiusDragRef)
       → startRenderLoop's tick(): isDraggingCornerRadius =
-          Boolean(cornerRadiusDragRef?.current) || Boolean(polygonCornerRadiusDragRef?.current)
+          Boolean(cornerRadiusDragRef?.current) || Boolean(polygonCornerRadiusDragRef?.current) || Boolean(starCornerRadiusDragRef?.current)
         → drawScene(..., isDraggingCornerRadius)
           → drawCornerRadiusHandlesLayer(..., isDraggingCornerRadius)
-            → drawCornerRadiusHandles(..., isDraggingCornerRadius) / drawPolygonCornerRadiusHandle(..., isDraggingCornerRadius)
-              → getCornerRadiusHandlePositions(..., isDragging) / getPolygonCornerRadiusHandlePosition(..., isDragging)
-                  effectiveRadius = cornerRadius > 0 || isDragging ? literalRadius : zeroStateOffset
+            → drawCornerRadiusHandles(...) / drawPolygonCornerRadiusHandle(...) / drawStarCornerRadiusHandle(...) (each also given isDraggingCornerRadius)
+              → getCornerRadiusHandlePositions(..., isDragging) / getPolygonCornerRadiusHandlePosition(..., isDragging) / getStarCornerRadiusHandlePosition(..., isDragging)
+                  effectiveSetback = cornerRadius > 0 || isDragging ? literalRadius(·setbackMultiplier for Polygon/Star, §16) : zeroStateOffset
 ```
 
 `isDraggingCornerRadius` defaults to `false`/`undefined` at every layer, so every existing call site
@@ -632,19 +642,68 @@ pass `isDragging` implicitly `false` (hit-testing never runs mid-drag), so a hid
 ungrabbable, not just invisible; a fresh click in that state falls through to whatever's underneath
 (resize handle, plain node hit) exactly as if the shape had no corner radius at all.
 
-`drawCornerRadiusHandlesLayer.ts` calls `shouldShowCornerRadiusHandles(bounds, viewport, cornerRadius,
-isDraggingCornerRadius)` separately inside each of its two `hasCornerRadius`/`hasPolygonCornerRadius`
-branches now (rather than once, shared, the way the shape-size-only check used to be) — the value
-differs by node type, and TypeScript can't narrow `selectedNode.cornerRadius` before the type guard
-has run, so each branch reads its own narrowed `selectedNode.cornerRadius ?? 0` independently.
+`drawCornerRadiusHandlesLayer.ts` computes `bounds`/`cornerRadius`/`canShowHandles` **once**, before
+branching, then dispatches on shape type via `switch (true) { case !canShowHandles: ...; case
+hasCornerRadius(selectedNode): ...; case hasPolygonCornerRadius(selectedNode): ...; case
+hasStarCornerRadius(selectedNode): ... }` — a `hasAnyCornerRadius` type guard (the `||` of all three
+`has*CornerRadius` checks) narrows `selectedNode` up front so `selectedNode.cornerRadius` is valid
+in every branch without each one re-narrowing independently. There's deliberately **no `default`
+arm**: `hasAnyCornerRadius` already guarantees one of the three shape cases matches, so a `default`
+would be dead code no test could ever reach — v8's 100%-coverage gate treats an unreachable `default:
+break` as a real uncovered line, and ESLint's `default-case` rule wants one anyway, so the switch
+carries a targeted `// eslint-disable-next-line default-case` immediately above it explaining why.
+
+## 15. Corner-radius handle (Star)
+
+Structurally identical to §12's Polygon mechanism — same single top-vertex handle
+(`getStarPoints`'s vertex index 0 is always the top outer tip, `-90°`), same one shared
+`cornerRadius` (`TStarNode.cornerRadius?: number`) applied to every vertex, same parallel
+`armStarCornerRadiusDrag`/`continueStarCornerRadiusDrag`/`disarmStarCornerRadiusDrag` trio and
+`TStarCornerRadiusDragState = { bounds, nodeId, points, ratio, rotation }` drag-state shape, same
+`hasStarCornerRadius.ts` guard, same `getStarCornerRadiusHandleAtPoint.ts` (`Canvas/utils/`) +
+`getStarCornerRadiusHandleHit.ts` (`useHoverHighlight/utils/`) split. The one substantive difference
+from Polygon is geometric, not mechanical: a star's vertices alternate outer (convex, sharp tips) and
+inner (concave, the notches between points) — and this is the case that proves §12's shared math
+(`utils/math/getVertexAngles.ts`, `getMaxCornerRadiusForVertices.ts`, `getRoundedVertexPoints.ts`,
+`getCornerRadiusHandleSetbackMultiplier.ts`) is genuinely shape-agnostic rather than
+Polygon-specific-with-Star-reusing-it-by-luck: every one of those functions works on inner vertices
+completely unmodified, because they only ever consume the *unsigned* angle between the two adjacent
+edge vectors and let the tangent-arc bisector direction fall out of that vector math on its own — at
+a concave vertex the bisector naturally points *outward* (away from center, into the notch) instead
+of inward, which is exactly the direction a concave corner needs to round correctly, with zero
+convex/concave branching anywhere in the chain. `getRoundedStarPoints.ts` (thin wrapper around
+`getRoundedVertexPoints`, mirroring `getRoundedPolygonPoints.ts`) and `utils/canvas/drawStar/`
+(dispatcher + `drawStandardStar.ts` + `drawRoundedStar.ts`, same split as `drawPolygon/`/`drawRect/`)
+are the only genuinely star-specific files in the render path.
+
+## 16. Gotcha — the corner-radius handle sits at the rounding arc's *center*, not the vertex offset by `cornerRadius`
+
+Easy mistake, made twice in this codebase's history before being caught: it's tempting to move the
+Polygon/Star handle toward center by the literal `cornerRadius` value (as §12 used to claim, and as a
+since-corrected first attempt at generalizing it to non-90° vertices did too) — but that is *not*
+where Rectangle's own handle sits, and Rectangle is the reference behavior every other shape's handle
+is supposed to match. Rectangle's `getCornerRadiusHandlePositions.ts` places each handle at
+`bounds.corner ± effectiveRadius` on **both** axes — i.e. at distance `radius·√2` from the actual
+90° corner, which is the rounding arc's own **center**, not a point on the arc's boundary and not the
+raw radius distance either. Generalized to an arbitrary vertex angle `θ`, that center sits
+`radius / sin(θ/2)` from the vertex along the bisector — for a 90° corner, `sin(45°) = 1/√2`, so
+`radius / sin(45°) = radius·√2`, confirming the two formulas agree exactly at the case that's easiest
+to eyeball. `getCornerRadiusHandleSetbackMultiplier.ts` is that `1 / sin(θ/2)` factor; a first attempt
+at this fix used `1/sin(θ/2) − 1` instead (the distance from the vertex to the arc's *nearest
+boundary point*, not its center) — visually near-indistinguishable from "no offset at all" at small
+radii, which is exactly the bug report that prompted rediscovering the correct formula: the handle
+looked stuck on the shape's outline instead of floating clear of it the way Figma's (and Rectangle's
+own) handle does. If a future change to either Polygon's or Star's handle-position math ever looks
+like it should just use `cornerRadius` directly again, it's almost certainly reintroducing this same
+bug — reread this section first.
 
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.
-[[design-store-architecture]] — §5's ref-vs-Redux split (this subsystem is its biggest consumer: 8
-separate drag-state refs plus the marquee/drag-move dispatch-per-pointermove nuance; two of those —
-`cornerRadiusDragRef`/`polygonCornerRadiusDragRef` — are now parent-owned like the ephemeral render
-refs rather than hook-private, per §13).
+[[design-store-architecture]] — §5's ref-vs-Redux split (this subsystem is its biggest consumer: 9
+separate drag-state refs plus the marquee/drag-move dispatch-per-pointermove nuance; three of those —
+`cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef` — are now parent-owned
+like the ephemeral render refs rather than hook-private, per §13).
 [[canvas-rendering-pipeline]] — how selection outlines/handles/cursors actually get drawn once this
 subsystem decides what's selected/hovered; §2's `marqueeRef`/`hoverRef`/`sliceRef` ref-drilling
-pattern is exactly what §13 extends to the two corner-radius drag refs.
+pattern is exactly what §13 extends to the three corner-radius drag refs.

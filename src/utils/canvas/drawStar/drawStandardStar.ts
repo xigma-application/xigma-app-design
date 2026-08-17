@@ -1,23 +1,16 @@
 // types
-import { TDraftRect, TPoint } from 'types/canvas';
+import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
 import { flipPoint } from 'utils/math/flipPoint';
-import { getStarPoints } from './getStarPoints';
+import { getStarPoints } from '../shapes/getStarPoints';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
 import { rotatePoint } from 'utils/math/rotatePoint';
 import { toFanVertices } from '../toFanVertices';
+import { TDrawableStar } from './drawStar';
 
-export type TDrawableStar = TDraftRect & {
-  fill?: string;
-  fillAlpha?: number;
-  points: number;
-  ratio: number;
-  stroke?: string;
-};
-
-export const drawStar = (
+export const drawStandardStar = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,

@@ -14,6 +14,7 @@ import {
   TPolygonCornerRadiusDragState,
   TResizeDragState,
   TRotateDragState,
+  TStarCornerRadiusDragState,
 } from '../../types';
 import { MouseButton } from 'types/enums';
 import { TPoint } from 'types/canvas';
@@ -28,6 +29,7 @@ import { armPathOffsetDrag } from './armPathOffsetDrag';
 import { armPolygonCornerRadiusDrag } from './armPolygonCornerRadiusDrag';
 import { armResizeDrag } from './armResizeDrag';
 import { armRotateDrag } from './armRotateDrag';
+import { armStarCornerRadiusDrag } from './armStarCornerRadiusDrag';
 import { getCornerRadiusHandleAtPoint } from '../../../../utils/getCornerRadiusHandleAtPoint';
 import { getLineEndpointAtPoint } from '../../../../utils/getLineEndpointAtPoint';
 import { getNodeAtPoint } from '../../../../utils/getNodeAtPoint';
@@ -36,6 +38,7 @@ import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getPolygonCornerRadiusHandleAtPoint } from '../../../../utils/getPolygonCornerRadiusHandleAtPoint';
 import { getResizeHandleAtPoint } from '../../../../utils/getResizeHandleAtPoint';
 import { getRotateHandleAtPoint } from '../../../../utils/getRotateHandleAtPoint';
+import { getStarCornerRadiusHandleAtPoint } from '../../../../utils/getStarCornerRadiusHandleAtPoint';
 import { isPointInGroupBounds } from '../isPointInGroupBounds';
 import { isPointInSelectedTextBounds } from '../isPointInSelectedTextBounds';
 import { screenToWorld } from '../../../../utils/screenToWorld';
@@ -52,6 +55,7 @@ export const handlePointerDown = (
   rotateDragRef: RefObject<TRotateDragState | null>,
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>,
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>,
+  starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>,
   marqueeStartRef: RefObject<TPoint | null>,
   setClassName: (className: string | null) => void,
 ): void => {
@@ -68,6 +72,7 @@ export const handlePointerDown = (
     const rotateHandleHit = getRotateHandleAtPoint(point, selectedNodes, viewport);
     const cornerRadiusHandleHit = resizeHandleHit ? null : getCornerRadiusHandleAtPoint(point, selectedNodes, viewport);
     const polygonCornerRadiusHandleHit = resizeHandleHit ? null : getPolygonCornerRadiusHandleAtPoint(point, selectedNodes, viewport);
+    const starCornerRadiusHandleHit = resizeHandleHit ? null : getStarCornerRadiusHandleAtPoint(point, selectedNodes, viewport);
 
     switch (true) {
       case Boolean(pathOffsetHandleHit):
@@ -97,6 +102,18 @@ export const handlePointerDown = (
           polygonCornerRadiusHandleHit!.nodeId,
           polygonCornerRadiusHandleHit!.rotation,
           polygonCornerRadiusHandleHit!.sides,
+        );
+        break;
+      case Boolean(starCornerRadiusHandleHit):
+        armStarCornerRadiusDrag(
+          canvas,
+          event,
+          starCornerRadiusDragRef,
+          starCornerRadiusHandleHit!.bounds,
+          starCornerRadiusHandleHit!.nodeId,
+          starCornerRadiusHandleHit!.rotation,
+          starCornerRadiusHandleHit!.points,
+          starCornerRadiusHandleHit!.ratio,
         );
         break;
       case Boolean(rotateHandleHit):

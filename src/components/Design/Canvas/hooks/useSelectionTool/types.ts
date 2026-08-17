@@ -50,6 +50,14 @@ export type TPolygonCornerRadiusDragState = {
   sides: number;
 };
 
+export type TStarCornerRadiusDragState = {
+  bounds: TDraftRect;
+  nodeId: string;
+  points: number;
+  ratio: number;
+  rotation: number;
+};
+
 export type TRotateNodeOrigin =
   { x1: number; x2: number; y1: number; y2: number } | { height: number; rotation: number; width: number; x: number; y: number };
 

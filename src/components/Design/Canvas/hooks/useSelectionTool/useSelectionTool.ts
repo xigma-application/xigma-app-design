@@ -17,6 +17,7 @@ import {
   TPolygonCornerRadiusDragState,
   TResizeDragState,
   TRotateDragState,
+  TStarCornerRadiusDragState,
 } from './types';
 import { TDraftRect, TPoint } from 'types/canvas';
 
@@ -31,6 +32,7 @@ export const useSelectionTool = (
   marqueeRef: RefObject<TDraftRect | null>,
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>,
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>,
+  starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>,
 ): void => {
   const { setClassName } = useClassNames();
   const activeTool = useAppSelector(selectActiveTool);
@@ -60,6 +62,7 @@ export const useSelectionTool = (
           rotateDragRef,
           cornerRadiusDragRef,
           polygonCornerRadiusDragRef,
+          starCornerRadiusDragRef,
           marqueeStartRef,
           setClassName,
         );
@@ -76,6 +79,7 @@ export const useSelectionTool = (
           rotateDragRef,
           cornerRadiusDragRef,
           polygonCornerRadiusDragRef,
+          starCornerRadiusDragRef,
           marqueeStartRef,
           marqueeRef,
         );
@@ -92,6 +96,7 @@ export const useSelectionTool = (
           rotateDragRef,
           cornerRadiusDragRef,
           polygonCornerRadiusDragRef,
+          starCornerRadiusDragRef,
           marqueeStartRef,
           marqueeRef,
           setClassName,
@@ -116,5 +121,6 @@ export const useSelectionTool = (
     marqueeRef,
     polygonCornerRadiusDragRef,
     setClassName,
+    starCornerRadiusDragRef,
   ]);
 };

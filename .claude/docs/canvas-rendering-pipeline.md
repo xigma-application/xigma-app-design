@@ -7,11 +7,11 @@ WebGL2.
 
 ## 1. Context setup
 
-- `Canvas/Canvas.tsx` owns the single `<canvas>` element (`canvasRef`) plus six ephemeral
+- `Canvas/Canvas.tsx` owns the single `<canvas>` element (`canvasRef`) plus seven ephemeral
   `useRef`s (`draftRef`/`marqueeRef`/`hoverRef`/`sliceRef` — see §6 — plus
-  `cornerRadiusDragRef`/`polygonCornerRadiusDragRef`, which exist so `useCanvasRenderLoop` can tell
-  a corner-radius drag is actively in progress; see `selection-and-manipulation.md` §13) threaded
-  into every tool hook and into `useCanvasRenderLoop`.
+  `cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef`, which exist so
+  `useCanvasRenderLoop` can tell a corner-radius drag is actively in progress; see
+  `selection-and-manipulation.md` §13) threaded into every tool hook and into `useCanvasRenderLoop`.
 - The context itself is created in `Canvas/hooks/useCanvasRenderLoop/useCanvasRenderLoop.ts`:
   `canvas.getContext(WEBGL_CONTEXT_ID, WEBGL_CONTEXT_ATTRIBUTES)`, both constants in
   `Canvas/constants.ts`: `WEBGL_CONTEXT_ID = 'webgl2'`,
@@ -64,10 +64,10 @@ WebGL2.
   ```
   **background → committed nodes → hover outline → selection outline → corner-radius handles →
   in-progress draft → editing-text overlay → path-text offset handle → marquee → slice draft.**
-  `drawCornerRadiusHandlesLayer.ts` self-gates (selected+hovered single rectangle or polygon, large
-  enough on screen — see `selection-and-manipulation.md` §11-12) rather than `drawScene.ts` deciding
-  when to call it, same "thin wrapper decides nothing, the layer decides" shape as
-  `drawHoverOutline.ts`. Nodes
+  `drawCornerRadiusHandlesLayer.ts` self-gates (selected+hovered single rectangle, polygon, or star,
+  large enough on screen — see `selection-and-manipulation.md` §11, §12, §15) rather than
+  `drawScene.ts` deciding when to call it, same "thin wrapper decides nothing, the layer decides"
+  shape as `drawHoverOutline.ts`. Nodes
   currently being
   text-edited are filtered out of both `sceneNodes` and `selectedNodes` up front
   (`node.id !== editingNodeId`), so they render exactly once, only through the dedicated editing
@@ -82,7 +82,7 @@ Three GLSL `#version 300 es` programs, all built via `createProgram.ts`/`createS
 
 | Program | Vertex source | Fragment source | Extra attrib | Used by |
 |---|---|---|---|---|
-| plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect`), `drawPolygon` (dispatches to `drawStandardPolygon`/`drawRoundedPolygon`), `drawLine`, `drawEllipse`, `drawStar`, `drawThickOutline`, `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, `drawCornerRadiusHandles`, `drawPolygonCornerRadiusHandle`, every outline/handle primitive |
+| plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect`), `drawPolygon` (dispatches to `drawStandardPolygon`/`drawRoundedPolygon`), `drawStar` (dispatches to `drawStandardStar`/`drawRoundedStar`), `drawLine`, `drawEllipse`, `drawThickOutline`, `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, `drawCornerRadiusHandles`, `drawPolygonCornerRadiusHandle`, `drawStarCornerRadiusHandle`, every outline/handle primitive |
 | image/texture | `imageVertexShaderSource.ts` | `imageFragmentShaderSource.ts` | `a_texCoord` | `drawImage.ts` (Media nodes + draft media) |
 | MSDF text | **same vertex source as image** (reused, not a 4th file) | `msdfFragmentShaderSource.ts` | `a_texCoord` | `drawMsdfText.ts` |
 
@@ -165,7 +165,9 @@ number` with no cast needed) rather than the dispatcher needing to know a rectan
 `drawPolygon.ts` (its own `utils/canvas/drawPolygon/` folder, not `shapes/` anymore) branches the
 same way on `TPolygonNode.cornerRadius?: number`, dispatching to `drawStandardPolygon.ts` (the
 original flat fan, byte-for-byte moved) or `drawRoundedPolygon.ts` — the second instance of the
-`drawRect/`-shaped "dispatcher + one file per concrete path" folder (see §8).
+`drawRect/`-shaped "dispatcher + one file per concrete path" folder (see §8). `drawStar.ts`
+(`utils/canvas/drawStar/`) is the third instance, same shape: dispatches on `TStarNode.cornerRadius?:
+number` to `drawStandardStar.ts` or `drawRoundedStar.ts`.
 
 **In-progress/ephemeral visuals** never touch Redux — they live in plain `useRef`s on `Canvas.tsx`,
 written directly by native pointer listeners (so dragging never dispatches per pixel), and read by
@@ -177,7 +179,7 @@ written directly by native pointer listeners (so dragging never dispatches per p
 | `marqueeRef` (`TDraftRect \| null`) | `useSelectionTool`'s `armMarqueeDrag`/`continueMarqueeDrag`/`disarmMarqueeDrag` | `utils/canvas/drawMarquee.ts` |
 | `hoverRef` (`string \| null`, node id) | `useHoverHighlight.ts` | `drawScene/drawHoverOutline.ts` (per-`NodeType` dispatch) |
 | `sliceRef` (`TSliceDraft \| null`) | `useSliceTool.ts`'s own arm/continue/disarm set | `utils/canvas/drawSliceDraft.ts` |
-| `cornerRadiusDragRef`/`polygonCornerRadiusDragRef` (drag-state `\| null`) | `useSelectionTool.ts`'s `armCornerRadiusDrag`/`armPolygonCornerRadiusDrag`/`disarmCornerRadiusDrag`/`disarmPolygonCornerRadiusDrag` | dereferenced to a single `isDraggingCornerRadius` boolean in `startRenderLoop.ts`'s `tick`, consumed by `drawCornerRadiusHandlesLayer.ts` — not rendered directly, just gates the zero-state-offset fallback (`selection-and-manipulation.md` §13) |
+| `cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef` (drag-state `\| null`) | `useSelectionTool.ts`'s `arm*CornerRadiusDrag`/`disarm*CornerRadiusDrag` trio per shape | dereferenced to a single `isDraggingCornerRadius` boolean (OR of all three) in `startRenderLoop.ts`'s `tick`, consumed by `drawCornerRadiusHandlesLayer.ts` — not rendered directly, just gates the zero-state-offset fallback (`selection-and-manipulation.md` §13) |
 
 `TDraftEntity` (`types/design/types.ts`) unions one draft variant per geometry
 (`TDraftShape | TDraftLine | TDraftPath | TDraftPolygon | TDraftStar | TDraftMedia | TDraftText`),
@@ -293,9 +295,10 @@ verbatim. `drawRect/` is itself the worked example of "one primitive family, one
 dispatcher (`drawRect.ts`) plus one file per concrete rendering path (`drawStandardRect.ts`,
 `drawRoundedRect.ts`) plus a shared tiny helper (`toFanVertices.ts`), each with its own
 `test/*.spec.ts` sibling — same "folder named after its main file" shape as a hook folder like
-`useSelectionTool/useSelectionTool.ts`. `drawPolygon/` copies this shape verbatim for its own
-optional-`cornerRadius` split (`drawPolygon.ts` dispatcher, `drawStandardPolygon.ts`,
-`drawRoundedPolygon.ts`) — confirms the pattern generalizes past Rectangle, not a one-off.
+`useSelectionTool/useSelectionTool.ts`. `drawPolygon/` and `drawStar/` both copy this shape verbatim
+for their own optional-`cornerRadius` split (`drawPolygon.ts`/`drawStar.ts` dispatcher,
+`drawStandardPolygon.ts`/`drawStandardStar.ts`, `drawRoundedPolygon.ts`/`drawRoundedStar.ts`) —
+confirms the pattern generalizes past Rectangle, not a one-off.
 
 ## File index
 
@@ -314,14 +317,18 @@ optional-`cornerRadius` split (`drawPolygon.ts` dispatcher, `drawStandardPolygon
 - MSDF pipeline: `utils/canvas/text/{drawMsdfText,getMsdfAtlasTexture,buildGlyphQuads,buildGlyphQuad,
   buildCurvedGlyphQuads,getOrBuildTextGeometry}.ts`, `package.json`'s `generate:font-atlas` script
 - Primitives: `src/utils/canvas/*.ts`, `src/utils/canvas/shapes/*.ts` (incl. `getRoundedRectPoints.ts`,
-  `getRoundedPolygonPoints.ts`), `src/utils/canvas/drawRect/*.ts` and `src/utils/canvas/drawPolygon/*.ts`
-  (each its own folder — see above)
-- Corner-radius handles: `utils/canvas/cornerRadius/*.ts` (Rectangle math) +
-  `utils/canvas/cornerRadius/polygon/*.ts` (Polygon math, separate — the two shapes' geometry doesn't
-  share implementation), `utils/canvas/drawCornerRadiusHandles.ts` +
-  `utils/canvas/drawPolygonCornerRadiusHandle.ts`, both gated by
+  `getRoundedPolygonPoints.ts`, `getRoundedStarPoints.ts`, and the shape-agnostic
+  `getRoundedVertexPoints.ts` both of those wrap), `src/utils/canvas/drawRect/*.ts`,
+  `src/utils/canvas/drawPolygon/*.ts`, and `src/utils/canvas/drawStar/*.ts` (each its own folder —
+  see above)
+- Corner-radius handles: `utils/canvas/cornerRadius/*.ts` (Rectangle math, still its own — the 90°
+  case is simple enough not to generalize) + `utils/canvas/cornerRadius/{getMaxCornerRadiusForVertices,
+  getCornerRadiusHandleSetbackMultiplier}.ts` and `utils/math/getVertexAngles.ts` (shape-agnostic math
+  shared by Polygon and Star, wrapped by thin `utils/canvas/cornerRadius/{polygon,star}/*.ts` per-shape
+  files), `utils/canvas/drawCornerRadiusHandles.ts` + `utils/canvas/drawPolygonCornerRadiusHandle.ts` +
+  `utils/canvas/drawStarCornerRadiusHandle.ts`, all gated by
   `.../drawScene/drawCornerRadiusHandlesLayer.ts` (rendering) — full mechanism in
-  `selection-and-manipulation.md` §11-12
+  `selection-and-manipulation.md` §11, §12, §15-16
 - Roadmap corroboration: `docs/ROADMAP.md` Etap 4 (GPU transform migration), Etap 7 (MSDF rationale)
 
 ## Related
