@@ -10,9 +10,11 @@ import {
   TEndpointDragState,
   TPathOffsetDragState,
   TPolygonCornerRadiusDragState,
+  TPolygonVertexCountDragState,
   TResizeDragState,
   TRotateDragState,
   TStarCornerRadiusDragState,
+  TStarVertexCountDragState,
 } from '../../types';
 import { TDraftRect, TPoint } from 'types/canvas';
 
@@ -23,9 +25,11 @@ import { continueEndpointDrag } from './continueEndpointDrag';
 import { continueMarqueeDrag } from './continueMarqueeDrag';
 import { continuePathOffsetDrag } from './continuePathOffsetDrag';
 import { continuePolygonCornerRadiusDrag } from './continuePolygonCornerRadiusDrag';
+import { continuePolygonVertexCountDrag } from './continuePolygonVertexCountDrag';
 import { continueResizeDrag } from './continueResizeDrag/continueResizeDrag';
 import { continueRotateDrag } from './continueRotateDrag';
 import { continueStarCornerRadiusDrag } from './continueStarCornerRadiusDrag';
+import { continueStarVertexCountDrag } from './continueStarVertexCountDrag';
 
 export const handlePointerMove = (
   canvas: HTMLCanvasElement,
@@ -39,6 +43,8 @@ export const handlePointerMove = (
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>,
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>,
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>,
+  polygonVertexCountDragRef: RefObject<TPolygonVertexCountDragState | null>,
+  starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>,
   marqueeStartRef: RefObject<TPoint | null>,
   marqueeRef: RefObject<TDraftRect | null>,
 ): void => {
@@ -50,5 +56,7 @@ export const handlePointerMove = (
   continueCornerRadiusDrag(canvas, event, dispatch, cornerRadiusDragRef);
   continuePolygonCornerRadiusDrag(canvas, event, dispatch, polygonCornerRadiusDragRef);
   continueStarCornerRadiusDrag(canvas, event, dispatch, starCornerRadiusDragRef);
+  continuePolygonVertexCountDrag(canvas, event, dispatch, polygonVertexCountDragRef);
+  continueStarVertexCountDrag(canvas, event, dispatch, starVertexCountDragRef);
   continueMarqueeDrag(canvas, event, dispatch, marqueeStartRef, marqueeRef);
 };

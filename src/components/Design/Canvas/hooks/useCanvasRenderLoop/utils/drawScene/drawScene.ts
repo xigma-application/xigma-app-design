@@ -29,6 +29,7 @@ import { drawSceneBackground } from 'utils/canvas/drawSceneBackground';
 import { drawSceneNodes } from './drawSceneNodes';
 import { drawSelectionOutline } from './drawSelectionOutline';
 import { drawSliceDraft } from 'utils/canvas/drawSliceDraft';
+import { drawVertexCountHandlesLayer } from './drawVertexCountHandlesLayer';
 import { getPathOutlineStyles } from './getPathOutlineStyles';
 
 export const drawScene = (
@@ -76,6 +77,7 @@ export const drawScene = (
     viewport,
     Boolean(isDraggingCornerRadius),
   );
+  drawVertexCountHandlesLayer(gl, program, buffer, hoveredNode, selectedNodes, clientWidth, clientHeight, viewport);
   drawFrame(gl, program, buffer, imageContext, draftShape, clientWidth, clientHeight, viewport);
   drawEditingText(
     gl,

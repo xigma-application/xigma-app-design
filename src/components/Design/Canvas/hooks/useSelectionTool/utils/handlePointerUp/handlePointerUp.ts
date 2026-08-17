@@ -10,9 +10,11 @@ import {
   TEndpointDragState,
   TPathOffsetDragState,
   TPolygonCornerRadiusDragState,
+  TPolygonVertexCountDragState,
   TResizeDragState,
   TRotateDragState,
   TStarCornerRadiusDragState,
+  TStarVertexCountDragState,
 } from '../../types';
 import { TDraftRect, TPoint } from 'types/canvas';
 
@@ -23,9 +25,11 @@ import { disarmEndpointDrag } from './disarmEndpointDrag';
 import { disarmMarqueeDrag } from './disarmMarqueeDrag';
 import { disarmPathOffsetDrag } from './disarmPathOffsetDrag';
 import { disarmPolygonCornerRadiusDrag } from './disarmPolygonCornerRadiusDrag';
+import { disarmPolygonVertexCountDrag } from './disarmPolygonVertexCountDrag';
 import { disarmResizeDrag } from './disarmResizeDrag';
 import { disarmRotateDrag } from './disarmRotateDrag';
 import { disarmStarCornerRadiusDrag } from './disarmStarCornerRadiusDrag';
+import { disarmStarVertexCountDrag } from './disarmStarVertexCountDrag';
 
 export const handlePointerUp = (
   canvas: HTMLCanvasElement,
@@ -39,6 +43,8 @@ export const handlePointerUp = (
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>,
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>,
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>,
+  polygonVertexCountDragRef: RefObject<TPolygonVertexCountDragState | null>,
+  starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>,
   marqueeStartRef: RefObject<TPoint | null>,
   marqueeRef: RefObject<TDraftRect | null>,
   setClassName: (className: string | null) => void,
@@ -51,5 +57,7 @@ export const handlePointerUp = (
   disarmCornerRadiusDrag(canvas, event, cornerRadiusDragRef);
   disarmPolygonCornerRadiusDrag(canvas, event, polygonCornerRadiusDragRef);
   disarmStarCornerRadiusDrag(canvas, event, starCornerRadiusDragRef);
+  disarmPolygonVertexCountDrag(canvas, event, polygonVertexCountDragRef);
+  disarmStarVertexCountDrag(canvas, event, starVertexCountDragRef);
   disarmMarqueeDrag(canvas, event, marqueeStartRef, marqueeRef);
 };

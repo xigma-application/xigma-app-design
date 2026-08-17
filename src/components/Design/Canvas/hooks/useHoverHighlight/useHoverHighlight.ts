@@ -26,6 +26,7 @@ import { getNodeAtPoint } from '../../utils/getNodeAtPoint';
 import { getPathOffsetHandleHit } from './utils/getPathOffsetHandleHit';
 import { getPointerPosition } from '../../utils/getPointerPosition';
 import { getPolygonCornerRadiusHandleHit } from './utils/getPolygonCornerRadiusHandleHit';
+import { getPolygonVertexCountHandleAtPoint } from '../../utils/getPolygonVertexCountHandleAtPoint';
 import { getResizeCursorAngle } from 'utils/math/getResizeCursorAngle';
 import { getResizeHandleAtPoint } from '../../utils/getResizeHandleAtPoint';
 import { getRotateCursorAngle } from 'utils/math/getRotateCursorAngle';
@@ -34,6 +35,7 @@ import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUr
 import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
 import { getRotatedScaleCursorUrl } from 'utils/canvas/getRotatedScaleCursorUrl';
 import { getStarCornerRadiusHandleHit } from './utils/getStarCornerRadiusHandleHit';
+import { getStarVertexCountHandleAtPoint } from '../../utils/getStarVertexCountHandleAtPoint';
 import { screenToWorld } from '../../utils/screenToWorld';
 
 export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>, hoverRef: RefObject<string | null>): void => {
@@ -53,6 +55,8 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
       const lineEndpointHit = getLineEndpointAtPoint(point, resizableSelectedNodes, viewport);
       const pathOffsetHandleHit = getPathOffsetHandleHit(point, editingTextBox, selectEditingNodeId(state), selectedNodes, viewport);
       const resizeHandleHit = getResizeHandleAtPoint(point, resizableSelectedNodes, viewport);
+      const polygonVertexCountHandleHit = getPolygonVertexCountHandleAtPoint(point, resizableSelectedNodes, viewport);
+      const starVertexCountHandleHit = getStarVertexCountHandleAtPoint(point, resizableSelectedNodes, viewport);
       const cornerRadiusHandleHit = resizeHandleHit ? null : getCornerRadiusHandleAtPoint(point, resizableSelectedNodes, viewport);
       const polygonCornerRadiusHandleHit = getPolygonCornerRadiusHandleHit(point, resizeHandleHit, resizableSelectedNodes, viewport);
       const starCornerRadiusHandleHit = getStarCornerRadiusHandleHit(point, resizeHandleHit, resizableSelectedNodes, viewport);
@@ -74,6 +78,16 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
           setClassName(null);
           canvas.style.cursor = 'text';
           hoverRef.current = null;
+          break;
+        case Boolean(polygonVertexCountHandleHit):
+          setClassName('vertices');
+          canvas.style.cursor = '';
+          hoverRef.current = polygonVertexCountHandleHit!.nodeId;
+          break;
+        case Boolean(starVertexCountHandleHit):
+          setClassName('vertices');
+          canvas.style.cursor = '';
+          hoverRef.current = starVertexCountHandleHit!.nodeId;
           break;
         case Boolean(resizeHandleHit): {
           const getCursorUrl = activeTool === ToolName.scale ? getRotatedScaleCursorUrl : getRotatedResizeCursorUrl;

@@ -65,6 +65,22 @@ export type TStarCornerRadiusDragState = {
   rotation: number;
 };
 
+export type TPolygonVertexCountDragState = {
+  bounds: TDraftRect;
+  flipX: boolean;
+  flipY: boolean;
+  nodeId: string;
+  rotation: number;
+};
+
+export type TStarVertexCountDragState = {
+  bounds: TDraftRect;
+  flipX: boolean;
+  flipY: boolean;
+  nodeId: string;
+  rotation: number;
+};
+
 export type TRotateNodeOrigin =
   { x1: number; x2: number; y1: number; y2: number } | { height: number; rotation: number; width: number; x: number; y: number };
 

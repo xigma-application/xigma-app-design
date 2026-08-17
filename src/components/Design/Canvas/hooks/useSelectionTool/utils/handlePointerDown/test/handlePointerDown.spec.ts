@@ -12,9 +12,11 @@ import {
   TEndpointDragState,
   TPathOffsetDragState,
   TPolygonCornerRadiusDragState,
+  TPolygonVertexCountDragState,
   TResizeDragState,
   TRotateDragState,
   TStarCornerRadiusDragState,
+  TStarVertexCountDragState,
 } from '../../../types';
 import { TPoint } from 'types/canvas';
 
@@ -41,6 +43,8 @@ const createRotateDragRef = (): RefObject<TRotateDragState | null> => ({ current
 const createCornerRadiusDragRef = (): RefObject<TCornerRadiusDragState | null> => ({ current: null });
 const createPolygonCornerRadiusDragRef = (): RefObject<TPolygonCornerRadiusDragState | null> => ({ current: null });
 const createStarCornerRadiusDragRef = (): RefObject<TStarCornerRadiusDragState | null> => ({ current: null });
+const createPolygonVertexCountDragRef = (): RefObject<TPolygonVertexCountDragState | null> => ({ current: null });
+const createStarVertexCountDragRef = (): RefObject<TStarVertexCountDragState | null> => ({ current: null });
 const createMarqueeStartRef = (): RefObject<TPoint | null> => ({ current: null });
 
 const addFrameNode = (x: number, y: number, size = 20): string => {
@@ -219,6 +223,8 @@ describe('handlePointerDown', () => {
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -249,6 +255,8 @@ describe('handlePointerDown', () => {
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -279,6 +287,8 @@ describe('handlePointerDown', () => {
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -313,6 +323,8 @@ describe('handlePointerDown', () => {
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -345,6 +357,8 @@ describe('handlePointerDown', () => {
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -380,6 +394,8 @@ describe('handlePointerDown', () => {
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -411,6 +427,8 @@ describe('handlePointerDown', () => {
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -446,6 +464,8 @@ describe('handlePointerDown', () => {
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -480,6 +500,8 @@ describe('handlePointerDown', () => {
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -514,6 +536,8 @@ describe('handlePointerDown', () => {
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -549,6 +573,8 @@ describe('handlePointerDown', () => {
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -584,6 +610,8 @@ describe('handlePointerDown', () => {
       cornerRadiusDragRef,
       createPolygonCornerRadiusDragRef(),
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -619,6 +647,8 @@ describe('handlePointerDown', () => {
       createCornerRadiusDragRef(),
       polygonCornerRadiusDragRef,
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -654,6 +684,8 @@ describe('handlePointerDown', () => {
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
       starCornerRadiusDragRef,
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -690,6 +722,8 @@ describe('handlePointerDown', () => {
       cornerRadiusDragRef,
       createPolygonCornerRadiusDragRef(),
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -724,6 +758,8 @@ describe('handlePointerDown', () => {
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -733,5 +769,118 @@ describe('handlePointerDown', () => {
     expect(dragStateRef.current).toBeNull();
     expect(canvas.setPointerCapture).toHaveBeenCalled();
     expect(setClassName).toHaveBeenCalledWith('pressing');
+  });
+
+  it('should delegate to armPolygonVertexCountDrag when the vertex-count handle on a selected polygon is hit', () => {
+    // mock — vertex index 1 of a 100x100 triangle at (5400, 5000) sits at (5493.301270, 5075)
+    const idA = addPolygonNode(5400, 5000, 100, 3);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvas = createCanvas();
+    const dragStateRef = createDragStateRef();
+    const polygonVertexCountDragRef = createPolygonVertexCountDragRef();
+    const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
+
+    // before
+    handlePointerDown(
+      canvas,
+      pointerEvent(5493.30127, 5075),
+      store.dispatch,
+      dragStateRef,
+      createEndpointDragRef(),
+      createPathOffsetDragRef(),
+      createResizeDragRef(),
+      createRotateDragRef(),
+      createCornerRadiusDragRef(),
+      createPolygonCornerRadiusDragRef(),
+      createStarCornerRadiusDragRef(),
+      polygonVertexCountDragRef,
+      createStarVertexCountDragRef(),
+      marqueeStartRef,
+      setClassName,
+    );
+
+    // result
+    expect(polygonVertexCountDragRef.current).toMatchObject({ nodeId: idA, rotation: 0 });
+    expect(dragStateRef.current).toBeNull();
+    expect(canvas.setPointerCapture).toHaveBeenCalled();
+  });
+
+  it('should give a 4-sided polygon vertex-count handle priority over the coincident resize handle at the same point', () => {
+    // mock — vertex index 1 of a 100x100 4-sided polygon at (5600, 5000) sits at (5700, 5050),
+    // exactly the same point as the bounding box's own "e" (east edge midpoint) resize handle
+    const idA = addPolygonNode(5600, 5000, 100, 4);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvas = createCanvas();
+    const dragStateRef = createDragStateRef();
+    const resizeDragRef = createResizeDragRef();
+    const polygonVertexCountDragRef = createPolygonVertexCountDragRef();
+    const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
+
+    // before
+    handlePointerDown(
+      canvas,
+      pointerEvent(5700, 5050),
+      store.dispatch,
+      dragStateRef,
+      createEndpointDragRef(),
+      createPathOffsetDragRef(),
+      resizeDragRef,
+      createRotateDragRef(),
+      createCornerRadiusDragRef(),
+      createPolygonCornerRadiusDragRef(),
+      createStarCornerRadiusDragRef(),
+      polygonVertexCountDragRef,
+      createStarVertexCountDragRef(),
+      marqueeStartRef,
+      setClassName,
+    );
+
+    // result
+    expect(polygonVertexCountDragRef.current).toMatchObject({ nodeId: idA });
+    expect(resizeDragRef.current).toBeNull();
+    expect(dragStateRef.current).toBeNull();
+  });
+
+  it('should delegate to armStarVertexCountDrag when the vertex-count handle on a selected star is hit', () => {
+    // mock — vertex index 2 of a 100x100 5-point star at (5500, 5000) sits at (5597.552826, 5034.549150)
+    const idA = addStarNode(5500, 5000, 100, 5, 0.5);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvas = createCanvas();
+    const dragStateRef = createDragStateRef();
+    const starVertexCountDragRef = createStarVertexCountDragRef();
+    const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
+
+    // before
+    handlePointerDown(
+      canvas,
+      pointerEvent(5597.552826, 5034.54915),
+      store.dispatch,
+      dragStateRef,
+      createEndpointDragRef(),
+      createPathOffsetDragRef(),
+      createResizeDragRef(),
+      createRotateDragRef(),
+      createCornerRadiusDragRef(),
+      createPolygonCornerRadiusDragRef(),
+      createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      starVertexCountDragRef,
+      marqueeStartRef,
+      setClassName,
+    );
+
+    // result
+    expect(starVertexCountDragRef.current).toMatchObject({ nodeId: idA, rotation: 0 });
+    expect(dragStateRef.current).toBeNull();
+    expect(canvas.setPointerCapture).toHaveBeenCalled();
   });
 });

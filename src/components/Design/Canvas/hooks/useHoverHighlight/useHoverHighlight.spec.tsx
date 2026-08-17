@@ -505,6 +505,70 @@ describe('useHoverHighlight behaviors', () => {
     expect(hoverRef.current).toBe(idA);
   });
 
+  it("should apply the vertices cursor class and keep the node's own id hovered over a selected polygon's vertex-count handle", () => {
+    // mock — vertex index 1 of a 100x100 triangle at (5400, 5000) sits at (5493.301270, 5075)
+    const idA = addPolygonNode(5400, 5000, 100, 3, 0);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { classNameRef, hoverRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 5493.30127, 5075));
+    });
+
+    // result — the handle stays visible (hoverRef keeps the node's own id) while it's being hovered
+    expect(classNameRef.current).toBe('vertices');
+    expect(hoverRef.current).toBe(idA);
+  });
+
+  it("should apply the vertices cursor class and keep the node's own id hovered over a selected star's vertex-count handle", () => {
+    // mock — vertex index 2 of a 100x100 5-point star at (5500, 5000) sits at (5597.552826, 5034.549150)
+    const idA = addStarNode(5500, 5000, 100, 5, 0.5, 0);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { classNameRef, hoverRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 5597.552826, 5034.54915));
+    });
+
+    // result — the handle stays visible (hoverRef keeps the node's own id) while it's being hovered
+    expect(classNameRef.current).toBe('vertices');
+    expect(hoverRef.current).toBe(idA);
+  });
+
+  it('should give a 4-sided polygon vertex-count handle priority over the coincident resize handle at the same point', () => {
+    // mock — vertex index 1 of a 100x100 4-sided polygon at (5600, 5000) sits at (5700, 5050), exactly
+    // the same point as the bounding box's own "e" (east edge midpoint) resize handle
+    const idA = addPolygonNode(5600, 5000, 100, 4, 0);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { classNameRef, hoverRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 5700, 5050));
+    });
+
+    // result — the vertex-count handle wins over the resize cursor/hover-clearing behavior
+    expect(classNameRef.current).toBe('vertices');
+    expect(hoverRef.current).toBe(idA);
+  });
+
   it("should apply the hand cursor class when hovering a selected path-text node's start-offset handle", () => {
     // mock — a 200x200 path-text box at (4000, 4000); the offset-0 handle sits at its rightmost edge (4200, 4100)
     const idA = addPathTextNode(4000, 4000, 200);

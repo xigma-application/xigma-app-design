@@ -15,9 +15,11 @@ import {
   TEndpointDragState,
   TPathOffsetDragState,
   TPolygonCornerRadiusDragState,
+  TPolygonVertexCountDragState,
   TResizeDragState,
   TRotateDragState,
   TStarCornerRadiusDragState,
+  TStarVertexCountDragState,
 } from './types';
 import { TDraftRect, TPoint } from 'types/canvas';
 
@@ -44,6 +46,8 @@ export const useSelectionTool = (
   const pathOffsetDragRef = useRef<TPathOffsetDragState | null>(null);
   const resizeDragRef = useRef<TResizeDragState | null>(null);
   const rotateDragRef = useRef<TRotateDragState | null>(null);
+  const polygonVertexCountDragRef = useRef<TPolygonVertexCountDragState | null>(null);
+  const starVertexCountDragRef = useRef<TStarVertexCountDragState | null>(null);
   const marqueeStartRef = useRef<TPoint | null>(null);
 
   useEffect(() => {
@@ -63,6 +67,8 @@ export const useSelectionTool = (
           cornerRadiusDragRef,
           polygonCornerRadiusDragRef,
           starCornerRadiusDragRef,
+          polygonVertexCountDragRef,
+          starVertexCountDragRef,
           marqueeStartRef,
           setClassName,
         );
@@ -80,6 +86,8 @@ export const useSelectionTool = (
           cornerRadiusDragRef,
           polygonCornerRadiusDragRef,
           starCornerRadiusDragRef,
+          polygonVertexCountDragRef,
+          starVertexCountDragRef,
           marqueeStartRef,
           marqueeRef,
         );
@@ -97,6 +105,8 @@ export const useSelectionTool = (
           cornerRadiusDragRef,
           polygonCornerRadiusDragRef,
           starCornerRadiusDragRef,
+          polygonVertexCountDragRef,
+          starVertexCountDragRef,
           marqueeStartRef,
           marqueeRef,
           setClassName,

@@ -11,9 +11,11 @@ import {
   TEndpointDragState,
   TPathOffsetDragState,
   TPolygonCornerRadiusDragState,
+  TPolygonVertexCountDragState,
   TResizeDragState,
   TRotateDragState,
   TStarCornerRadiusDragState,
+  TStarVertexCountDragState,
 } from '../../../types';
 import { TDraftRect, TPoint } from 'types/canvas';
 
@@ -52,6 +54,12 @@ const createPolygonCornerRadiusDragRef = (
 const createStarCornerRadiusDragRef = (
   starCornerRadiusDragState: TStarCornerRadiusDragState | null = null,
 ): RefObject<TStarCornerRadiusDragState | null> => ({ current: starCornerRadiusDragState });
+const createPolygonVertexCountDragRef = (
+  polygonVertexCountDragState: TPolygonVertexCountDragState | null = null,
+): RefObject<TPolygonVertexCountDragState | null> => ({ current: polygonVertexCountDragState });
+const createStarVertexCountDragRef = (
+  starVertexCountDragState: TStarVertexCountDragState | null = null,
+): RefObject<TStarVertexCountDragState | null> => ({ current: starVertexCountDragState });
 const createMarqueeStartRef = (point: TPoint | null = null): RefObject<TPoint | null> => ({ current: point });
 const createMarqueeRef = (rect: TDraftRect | null = null): RefObject<TDraftRect | null> => ({ current: rect });
 
@@ -77,6 +85,8 @@ describe('handlePointerUp', () => {
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       createMarqueeStartRef(),
       createMarqueeRef(),
       vi.fn(),
@@ -109,6 +119,8 @@ describe('handlePointerUp', () => {
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       createMarqueeStartRef(),
       createMarqueeRef(),
       vi.fn(),
@@ -137,6 +149,8 @@ describe('handlePointerUp', () => {
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       createMarqueeStartRef(),
       createMarqueeRef(),
       vi.fn(),
@@ -165,6 +179,8 @@ describe('handlePointerUp', () => {
       createCornerRadiusDragRef(),
       createPolygonCornerRadiusDragRef(),
       createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
       marqueeStartRef,
       marqueeRef,
       vi.fn(),

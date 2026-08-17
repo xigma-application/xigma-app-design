@@ -82,5 +82,12 @@
         -webkit-image-set(url('../../../assets/icons/cursors/radius.png') 8x) 4 4,
         auto;
     }
+
+    &--vertices {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/vertices.png') 8x) 4 4,
+        auto;
+    }
   }
 }

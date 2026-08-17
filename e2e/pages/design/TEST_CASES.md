@@ -1227,6 +1227,60 @@ rounded boundary itself.
 #130-#131 stay unit-only for the same reason as Polygon's #125-#126 above. #133 is the same
 shipped-and-fixed bug as Polygon's #132 — see that entry for the root cause and fix.
 
+## Vertex count (Polygon)
+
+A single draggable handle, at the polygon's `sides`-dependent vertex index 1 (the vertex adjacent to
+the fixed apex used by the corner-radius handle), that changes the polygon's own `sides` count.
+Same visibility gate as corner radius (`shouldShowVertexCountHandle`, selected _and_ hovered, no
+`cornerRadius`/`isDragging` params since there's nothing to fade in/out). Unlike corner radius's
+distance-based projection, the drag itself (`getVertexCountFromLocalPoint.ts`) snaps to the nearest
+of `[POLYGON_MIN_SIDES, POLYGON_MAX_SIDES]` by comparing the pointer's angle from the shape's center
+against each candidate count's own target angle (`(2π/count) - π/2`) — the same "toward the fixed
+apex increases, past the vertical axis resets to the minimum" feel as corner radius, but angle-based
+rather than distance-based, matching how Figma's own tool behaves. Same arm/continue/disarm wiring
+shape as corner radius (`armPolygonVertexCountDrag`/`continuePolygonVertexCountDrag`/
+`disarmPolygonVertexCountDrag`), and the same forward-flip/un-flip pairing for
+`getPolygonVertexCountHandlePosition`/`continuePolygonVertexCountDrag` that corner radius already
+uses (see #132 above) — since it's the identical class of bug, mirrored here in unit tests but not
+re-verified in e2e beyond the flip case below.
+
+| #   | Scenario                                                                                                                   | Unit |            E2E            |
+| --- | -------------------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------: |
+| 135 | The handle renders only once the triangle is both selected and hovered — selected alone shows nothing extra                |  ✅  | ✅ `vertex-count.spec.ts` |
+| 136 | Dragging the handle straight up, toward the apex used by the corner-radius handle, increases `sides`                       |  ✅  | ✅ `vertex-count.spec.ts` |
+| 137 | Dragging past the vertical axis through the center resets `sides` to `POLYGON_MIN_SIDES` (3)                               |  ✅  | ✅ `vertex-count.spec.ts` |
+| 138 | The dispatched count snaps to the candidate whose own target angle is nearest the pointer's angle from the center          |  ✅  |             —             |
+| 139 | The handle vanishes entirely once the shape's on-screen size drops below the visibility threshold                          |  ✅  |             —             |
+| 140 | After a mirroring resize (flipX/flipY), the handle appears at its physically flipped position, not the local/unflipped one |  ✅  | ✅ `vertex-count.spec.ts` |
+
+#138-#139 stay unit-only for the same reason as corner radius's analogous rows above — exact
+`store.getState()`/direct-function-call assertions, not real-browser-timing paths.
+
+## Vertex count (Star)
+
+Same single-handle mechanism as Polygon, but the target handle is `points`-dependent vertex index 2
+(the next spike's outer tip — vertex index 1 is the concave inner vertex between spikes, which would
+be the wrong reference point) and the changed field is `points` instead of `sides`. The angle-based
+snapping (`getVertexAngle`/`getVertexCountFromLocalPoint`) doesn't depend on the star's `ratio` at
+all — only the outer-vertex geometry matters — so `TStarVertexCountDragState` carries no `ratio`
+field, unlike `TStarCornerRadiusDragState`.
+
+| #   | Scenario                                                                                                                   | Unit |            E2E            |
+| --- | -------------------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------: |
+| 141 | The handle renders only once the star is both selected and hovered — selected alone shows nothing extra                    |  ✅  | ✅ `vertex-count.spec.ts` |
+| 142 | Dragging the handle straight up, toward the apex used by the corner-radius handle, increases `points`                      |  ✅  | ✅ `vertex-count.spec.ts` |
+| 143 | Dragging past the vertical axis through the center resets `points` to `STAR_MIN_POINTS` (3)                                |  ✅  | ✅ `vertex-count.spec.ts` |
+| 144 | The dispatched count snaps to the candidate whose own target angle is nearest the pointer's angle from the center          |  ✅  |             —             |
+| 145 | The handle vanishes entirely once the shape's on-screen size drops below the visibility threshold                          |  ✅  |             —             |
+| 146 | After a mirroring resize (flipX/flipY), the handle appears at its physically flipped position, not the local/unflipped one |  ✅  | ✅ `vertex-count.spec.ts` |
+
+#144-#145 stay unit-only for the same reason as Polygon's #138-#139 above. Also worth noting: a
+4-sided polygon's vertex-count handle (target angle 0°) lands exactly on the resize tool's own east
+edge-midpoint handle, so both `handlePointerDown.ts` and `useHoverHighlight.ts` give the
+vertex-count handles priority over resize at that coincident point (unit-covered in
+`handlePointerDown.spec.ts`/`useHoverHighlight.spec.tsx`; not e2e — no visual difference exists to
+screenshot between "resize armed" and "vertex-count armed" until a drag actually starts).
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

@@ -12,9 +12,11 @@ import {
   TEndpointDragState,
   TPathOffsetDragState,
   TPolygonCornerRadiusDragState,
+  TPolygonVertexCountDragState,
   TResizeDragState,
   TRotateDragState,
   TStarCornerRadiusDragState,
+  TStarVertexCountDragState,
 } from '../../types';
 import { MouseButton } from 'types/enums';
 import { TPoint } from 'types/canvas';
@@ -27,18 +29,22 @@ import { armLineEndpointDrag } from './armLineEndpointDrag';
 import { armMarqueeDrag } from './armMarqueeDrag';
 import { armPathOffsetDrag } from './armPathOffsetDrag';
 import { armPolygonCornerRadiusDrag } from './armPolygonCornerRadiusDrag';
+import { armPolygonVertexCountDrag } from './armPolygonVertexCountDrag';
 import { armResizeDrag } from './armResizeDrag';
 import { armRotateDrag } from './armRotateDrag';
 import { armStarCornerRadiusDrag } from './armStarCornerRadiusDrag';
+import { armStarVertexCountDrag } from './armStarVertexCountDrag';
 import { getCornerRadiusHandleAtPoint } from '../../../../utils/getCornerRadiusHandleAtPoint';
 import { getLineEndpointAtPoint } from '../../../../utils/getLineEndpointAtPoint';
 import { getNodeAtPoint } from '../../../../utils/getNodeAtPoint';
 import { getPathTextOffsetHandleAtPoint } from '../../../../utils/getPathTextOffsetHandleAtPoint';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getPolygonCornerRadiusHandleAtPoint } from '../../../../utils/getPolygonCornerRadiusHandleAtPoint';
+import { getPolygonVertexCountHandleAtPoint } from '../../../../utils/getPolygonVertexCountHandleAtPoint';
 import { getResizeHandleAtPoint } from '../../../../utils/getResizeHandleAtPoint';
 import { getRotateHandleAtPoint } from '../../../../utils/getRotateHandleAtPoint';
 import { getStarCornerRadiusHandleAtPoint } from '../../../../utils/getStarCornerRadiusHandleAtPoint';
+import { getStarVertexCountHandleAtPoint } from '../../../../utils/getStarVertexCountHandleAtPoint';
 import { isPointInGroupBounds } from '../isPointInGroupBounds';
 import { isPointInSelectedTextBounds } from '../isPointInSelectedTextBounds';
 import { screenToWorld } from '../../../../utils/screenToWorld';
@@ -56,6 +62,8 @@ export const handlePointerDown = (
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>,
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>,
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>,
+  polygonVertexCountDragRef: RefObject<TPolygonVertexCountDragState | null>,
+  starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>,
   marqueeStartRef: RefObject<TPoint | null>,
   setClassName: (className: string | null) => void,
 ): void => {
@@ -70,6 +78,8 @@ export const handlePointerDown = (
     const pathOffsetHandleHit = getPathTextOffsetHandleAtPoint(point, selectedNodes, viewport);
     const resizeHandleHit = getResizeHandleAtPoint(point, selectedNodes, viewport);
     const rotateHandleHit = getRotateHandleAtPoint(point, selectedNodes, viewport);
+    const polygonVertexCountHandleHit = getPolygonVertexCountHandleAtPoint(point, selectedNodes, viewport);
+    const starVertexCountHandleHit = getStarVertexCountHandleAtPoint(point, selectedNodes, viewport);
     const cornerRadiusHandleHit = resizeHandleHit ? null : getCornerRadiusHandleAtPoint(point, selectedNodes, viewport);
     const polygonCornerRadiusHandleHit = resizeHandleHit ? null : getPolygonCornerRadiusHandleAtPoint(point, selectedNodes, viewport);
     const starCornerRadiusHandleHit = resizeHandleHit ? null : getStarCornerRadiusHandleAtPoint(point, selectedNodes, viewport);
@@ -77,6 +87,30 @@ export const handlePointerDown = (
     switch (true) {
       case Boolean(pathOffsetHandleHit):
         armPathOffsetDrag(canvas, event, pathOffsetDragRef, pathOffsetHandleHit!.nodeId, setClassName);
+        break;
+      case Boolean(polygonVertexCountHandleHit):
+        armPolygonVertexCountDrag(
+          canvas,
+          event,
+          polygonVertexCountDragRef,
+          polygonVertexCountHandleHit!.bounds,
+          polygonVertexCountHandleHit!.nodeId,
+          polygonVertexCountHandleHit!.rotation,
+          polygonVertexCountHandleHit!.flipX,
+          polygonVertexCountHandleHit!.flipY,
+        );
+        break;
+      case Boolean(starVertexCountHandleHit):
+        armStarVertexCountDrag(
+          canvas,
+          event,
+          starVertexCountDragRef,
+          starVertexCountHandleHit!.bounds,
+          starVertexCountHandleHit!.nodeId,
+          starVertexCountHandleHit!.rotation,
+          starVertexCountHandleHit!.flipX,
+          starVertexCountHandleHit!.flipY,
+        );
         break;
       case Boolean(resizeHandleHit):
         armResizeDrag(canvas, event, resizeDragRef, selectedNodes, resizeHandleHit!.handle, resizeHandleHit!.bounds);

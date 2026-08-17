@@ -500,12 +500,57 @@ describe('drawScene', () => {
     store.dispatch(setSelection([]));
   });
 
+  it('should draw the vertex-count handle for a polygon only when it is both selected and hovered', () => {
+    // mock
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const canvas = document.createElement('canvas');
+
+    store.dispatch(
+      addNode({
+        fill: '#aabbcc',
+        flipX: false,
+        flipY: false,
+        height: 100,
+        name: 'Vertex Count Polygon',
+        parentId: null,
+        rotation: 0,
+        sides: 3,
+        type: NodeType.polygon,
+        width: 100,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const { rootOrder } = store.getState().design;
+    const polygonId = rootOrder[rootOrder.length - 1];
+
+    store.dispatch(setSelection([polygonId]));
+
+    const countTriangleFanDraws = (hoveredNodeId: string | null): number => {
+      const gl = createGlMock();
+
+      drawScene(gl, program, buffer, IMAGE_CONTEXT, canvas, null, null, hoveredNodeId);
+
+      return (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLE_FAN).length;
+    };
+
+    // before — selected but not hovered: only the polygon's own fill uses TRIANGLE_FAN
+    const selectedOnlyCount = countTriangleFanDraws(null);
+
+    // action
+    const hoveredCount = countTriangleFanDraws(polygonId);
+
+    // result — hovering adds both the polygon's own corner-radius handle fill and its vertex-count handle fill
+    expect(hoveredCount).toBe(selectedOnlyCount + 2);
+
+    // after
+    store.dispatch(setSelection([]));
+  });
+
   it('should render the corner-radius handle differently at radius 0 depending on isDraggingCornerRadius', () => {
     // mock — mid-drag to radius 0, the handle must keep tracking the pointer instead of jumping to
-    // the zero-state offset (verifies the flag threads all the way from drawScene's own signature
-    // down through drawCornerRadiusHandlesLayer/drawCornerRadiusHandles/getCornerRadiusHandlePositions);
-    // compares two renders of the identical scene rather than indexing into a specific draw call,
-    // since other tests in this shared store leave committed nodes behind that shift call order
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
     const canvas = document.createElement('canvas');
