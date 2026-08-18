@@ -20,6 +20,7 @@ import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUr
 import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
 import { getRotatedScaleCursorUrl } from 'utils/canvas/getRotatedScaleCursorUrl';
 import { getStarCornerRadiusHandleHit } from '../getStarCornerRadiusHandleHit';
+import { getStarRatioHandleAtPoint } from '../../../../utils/getStarRatioHandleAtPoint';
 import { getStarVertexCountHandleAtPoint } from '../../../../utils/getStarVertexCountHandleAtPoint';
 
 export const resolveLineEndpointHover = ({ point, resizableSelectedNodes, viewport }: THoverResolverContext): THoverResult | undefined => {
@@ -69,6 +70,14 @@ export const resolveStarVertexHover = ({ point, resizableSelectedNodes, viewport
 
   if (starVertexCountHandleHit) {
     return { className: 'vertices', cursor: '', nodeId: starVertexCountHandleHit.nodeId };
+  }
+};
+
+export const resolveStarRatioHover = ({ point, resizableSelectedNodes, viewport }: THoverResolverContext): THoverResult | undefined => {
+  const starRatioHandleHit = getStarRatioHandleAtPoint(point, resizableSelectedNodes, viewport);
+
+  if (starRatioHandleHit) {
+    return { className: 'ratio', cursor: '', nodeId: starRatioHandleHit.nodeId };
   }
 };
 

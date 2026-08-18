@@ -141,6 +141,30 @@ test('dragging the star vertex-count handle past the vertical axis through the c
   expect(viaHighIncrease.equals(viaLowIncrease)).toBe(true);
 });
 
+test('dragging the star ratio handle toward its anchor rounds out the points, changing the shape', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-star-ratio-drag');
+  await expect(designPage.canvas).toBeVisible();
+
+  // a 150x150 5-point star, box (900, 300) -> (1050, 450), center (975, 375); at the default ratio
+  // (0.382) the ratio handle (vertex index 1, between the tip and the next spike) sits at
+  // (991.840047, 351.821663); its own fixed anchor (ratio 1, fully rounded out) sits at
+  // (1019.083894, 314.323725)
+  await designPage.drawStar(900, 300, 1050, 450);
+  await designPage.click(975, 375);
+  await designPage.pointerMove(991.84, 351.82); // hover the handle to reveal it
+  const beforeDrag = await designPage.canvas.screenshot();
+
+  await designPage.pointerDown(991.84, 351.82); // grab the handle
+  await designPage.pointerMove(1019.08, 314.32); // drag toward its own anchor — increases the ratio
+  await designPage.pointerUp();
+  await designPage.pointerMove(991.84, 351.82); // return to the same screen spot for comparison
+  const afterDrag = await designPage.canvas.screenshot();
+
+  expect(afterDrag.equals(beforeDrag)).toBe(false);
+});
+
 test('the polygon vertex-count handle appears at its physically flipped position after a mirroring resize, not the unflipped one', async ({
   page,
 }) => {

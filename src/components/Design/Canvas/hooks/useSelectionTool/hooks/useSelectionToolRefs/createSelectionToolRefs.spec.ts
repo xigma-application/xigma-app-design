@@ -15,6 +15,7 @@ describe('createSelectionToolRefs behaviors', () => {
       polygonVertexCountDragRef: { current: null },
       resizeDragRef: { current: null },
       rotateDragRef: { current: null },
+      starRatioDragRef: { current: null },
       starVertexCountDragRef: { current: null },
     });
   });

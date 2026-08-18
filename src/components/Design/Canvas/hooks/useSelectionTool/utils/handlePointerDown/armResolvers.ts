@@ -19,6 +19,7 @@ import { armPolygonVertexCountDrag } from './armPolygonVertexCountDrag';
 import { armResizeDrag } from './armResizeDrag';
 import { armRotateDrag } from './armRotateDrag';
 import { armStarCornerRadiusDrag } from './armStarCornerRadiusDrag';
+import { armStarRatioDrag } from './armStarRatioDrag';
 import { armStarVertexCountDrag } from './armStarVertexCountDrag';
 import { getCornerRadiusHandleAtPoint } from '../../../../utils/getCornerRadiusHandleAtPoint';
 import { getEllipseArcHandleAtPoint } from '../../../../utils/getEllipseArcHandleAtPoint';
@@ -31,6 +32,7 @@ import { getPolygonVertexCountHandleAtPoint } from '../../../../utils/getPolygon
 import { getResizeHandleAtPoint } from '../../../../utils/getResizeHandleAtPoint';
 import { getRotateHandleAtPoint } from '../../../../utils/getRotateHandleAtPoint';
 import { getStarCornerRadiusHandleAtPoint } from '../../../../utils/getStarCornerRadiusHandleAtPoint';
+import { getStarRatioHandleAtPoint } from '../../../../utils/getStarRatioHandleAtPoint';
 import { getStarVertexCountHandleAtPoint } from '../../../../utils/getStarVertexCountHandleAtPoint';
 import { isPointInGroupBounds } from '../isPointInGroupBounds';
 import { isPointInSelectedTextBounds } from '../isPointInSelectedTextBounds';
@@ -100,6 +102,33 @@ export const armStarVertexCountOnPointerDown = ({
       starVertexCountHandleHit.rotation,
       starVertexCountHandleHit.flipX,
       starVertexCountHandleHit.flipY,
+    );
+
+    return true;
+  }
+};
+
+export const armStarRatioOnPointerDown = ({
+  canvas,
+  event,
+  point,
+  selectedNodes,
+  selectionRefs,
+  viewport,
+}: TArmContext): true | undefined => {
+  const starRatioHandleHit = getStarRatioHandleAtPoint(point, selectedNodes, viewport);
+
+  if (starRatioHandleHit) {
+    armStarRatioDrag(
+      canvas,
+      event,
+      selectionRefs.starRatioDragRef,
+      starRatioHandleHit.bounds,
+      starRatioHandleHit.nodeId,
+      starRatioHandleHit.rotation,
+      starRatioHandleHit.points,
+      starRatioHandleHit.flipX,
+      starRatioHandleHit.flipY,
     );
 
     return true;

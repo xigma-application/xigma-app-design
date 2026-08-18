@@ -29,6 +29,7 @@ import { drawSceneBackground } from 'utils/canvas/drawSceneBackground';
 import { drawSceneNodes } from './drawSceneNodes';
 import { drawSelectionOutline } from './drawSelectionOutline';
 import { drawSliceDraft } from 'utils/canvas/drawSliceDraft';
+import { drawStarRatioHandleLayer } from './drawStarRatioHandleLayer';
 import { drawVertexCountHandlesLayer } from './drawVertexCountHandlesLayer';
 import { getPathOutlineStyles } from './getPathOutlineStyles';
 import { hasCornerRadiusDragMoved } from './hasCornerRadiusDragMoved';
@@ -84,6 +85,7 @@ export const drawScene = (
     isDraggingCornerRadius,
   );
   drawVertexCountHandlesLayer(gl, program, buffer, hoveredNode, selectedNodes, clientWidth, clientHeight, viewport);
+  drawStarRatioHandleLayer(gl, program, buffer, hoveredNode, selectedNodes, clientWidth, clientHeight, viewport);
   drawEllipseArcHandleLayer(
     gl,
     program,

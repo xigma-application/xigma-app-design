@@ -14,6 +14,7 @@ import {
   resolvePolygonVertexHover,
   resolveResizeHover,
   resolveRotateHover,
+  resolveStarRatioHover,
   resolveStarVertexHover,
 } from '../hoverResolvers';
 
@@ -211,6 +212,23 @@ describe('resolveStarVertexHover', () => {
   it('should return undefined when the point misses the star vertex-count handle', () => {
     // result
     expect(resolveStarVertexHover(createContext({ point: { x: 90, y: 90 }, resizableSelectedNodes: [star] }))).toBeUndefined();
+  });
+});
+
+describe('resolveStarRatioHover', () => {
+  it('should return a hover result over a selected star ratio handle', () => {
+    // mock — vertex index 1 of a 100x100 5-point star at ratio 0.5 sits at (64.694631, 29.774575)
+    // result
+    expect(resolveStarRatioHover(createContext({ point: { x: 64.694631, y: 29.774575 }, resizableSelectedNodes: [star] }))).toEqual({
+      className: 'ratio',
+      cursor: '',
+      nodeId: 'star-1',
+    });
+  });
+
+  it('should return undefined when the point misses the star ratio handle', () => {
+    // result
+    expect(resolveStarRatioHover(createContext({ point: { x: 90, y: 90 }, resizableSelectedNodes: [star] }))).toBeUndefined();
   });
 });
 

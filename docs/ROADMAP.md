@@ -970,6 +970,21 @@ node.rotation)` w `drawMsdfText.ts`).
       są teraz ograniczone do pasma pierścienia (wewnętrzny promień → zewnętrzny), zamiast ślizgać się od
       samego środka, gdy `arcRatio > 0`. Pełny opis mechanizmu: `.claude/docs/selection-and-manipulation.md`
       §19
+- [x] **uchwyt Ratio dla Star** — trzeci i ostatni uchwyt Star, obok corner radius (wierzchołek 0) i
+      vertex-count (wierzchołek 2): siedzi na wierzchołku 1, wklęsłym punkcie fizycznie pomiędzy tamtymi
+      dwoma na obrysie, i przeciąga pole `ratio` (ułamek promienia wewnętrznego do zewnętrznego,
+      `STAR_MIN_RATIO`–`STAR_MAX_RATIO` = 0.001–1), które `getStarPoints` znało od zawsze, ale nic go
+      dotąd nie zmieniało po utworzeniu node'a (ustawiane raz, na stałe, przy rysowaniu). Pozycja
+      spoczynkowa to dosłownie ten sam współdzielony `getVertexCountHandlePositionFromVertices` co
+      uchwyt vertex-count, tylko dla indeksu 1 zamiast 2 — więc od razu dziedziczy poprawkę "trzyma się
+      punktu" po zaokrągleniu rogów, bez powtarzania jej. Samo przeciąganie to jednak inna matematyka niż
+      snapowanie kątowe vertex-count: rzut skalarny na stałą oś od środka do własnej "kotwicy" wierzchołka
+      1 przy `ratio = 1` (pełne rozwinięcie, bez wcięcia) — kąt tej kotwicy zależy tylko od `points`, nigdy
+      od `ratio`, więc oś jest stabilna przez cały drag, a `t = rzut / |kotwica|` po prostu przycięty do
+      zakresu min/max (`getRatioFromLocalPoint.ts`), bez zaokrąglania do liczby całkowitej — `ratio` to
+      ciągły ułamek, nie dyskretna wartość jak `points`/`cornerRadius`. Nowy kursor `ratio.png` (nie
+      recykling `radius.png`, którego używa Ratio na Ellipse). Pełny opis mechanizmu:
+      `.claude/docs/selection-and-manipulation.md` §20
 - [ ] **klawiszowe skróty edycji**: Delete/Backspace (usuń zaznaczenie), Cmd/Ctrl+D (duplikuj),
       Cmd/Ctrl+C/V (kopiuj/wklej), strzałki (nudge o 1px, Shift+strzałka o 10px), Cmd/Ctrl+A
       (zaznacz wszystko) — dziś żadne z nich nie istnieje, mimo że infrastruktura klawiszowa

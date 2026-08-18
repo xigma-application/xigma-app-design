@@ -52,6 +52,15 @@ export type TStarVertexCountDragState = {
   rotation: number;
 };
 
+export type TStarRatioDragState = {
+  bounds: TDraftRect;
+  flipX: boolean;
+  flipY: boolean;
+  nodeId: string;
+  points: number;
+  rotation: number;
+};
+
 export type TRotateNodeOrigin =
   { x1: number; x2: number; y1: number; y2: number } | { height: number; rotation: number; width: number; x: number; y: number };
 
@@ -70,5 +79,6 @@ export type TSelectionToolRefs = {
   polygonVertexCountDragRef: RefObject<TPolygonVertexCountDragState | null>;
   resizeDragRef: RefObject<TResizeDragState | null>;
   rotateDragRef: RefObject<TRotateDragState | null>;
+  starRatioDragRef: RefObject<TStarRatioDragState | null>;
   starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>;
 };

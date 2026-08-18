@@ -19,6 +19,7 @@ import { continuePolygonVertexCountDrag } from './continuePolygonVertexCountDrag
 import { continueResizeDrag } from './continueResizeDrag/continueResizeDrag';
 import { continueRotateDrag } from './continueRotateDrag';
 import { continueStarCornerRadiusDrag } from './continueStarCornerRadiusDrag';
+import { continueStarRatioDrag } from './continueStarRatioDrag';
 import { continueStarVertexCountDrag } from './continueStarVertexCountDrag';
 
 export const handlePointerMove = (
@@ -38,6 +39,7 @@ export const handlePointerMove = (
   continueStarCornerRadiusDrag(canvas, event, dispatch, canvasRefs.starCornerRadiusDragRef);
   continuePolygonVertexCountDrag(canvas, event, dispatch, selectionRefs.polygonVertexCountDragRef);
   continueStarVertexCountDrag(canvas, event, dispatch, selectionRefs.starVertexCountDragRef);
+  continueStarRatioDrag(canvas, event, dispatch, selectionRefs.starRatioDragRef);
   continueEllipseArcDrag(canvas, event, dispatch, canvasRefs.ellipseArcDragRef);
   continueEllipseArcRotateDrag(canvas, event, dispatch, canvasRefs.ellipseArcRotateDragRef);
   continueEllipseArcRatioDrag(canvas, event, dispatch, canvasRefs.ellipseArcRatioDragRef);

@@ -8,6 +8,7 @@ import {
   resolvePolygonVertexHover,
   resolveResizeHover,
   resolveRotateHover,
+  resolveStarRatioHover,
   resolveStarVertexHover,
 } from './hoverResolvers';
 
@@ -17,6 +18,7 @@ export const HOVER_RESOLVERS = [
   resolveEditingTextHover,
   resolvePolygonVertexHover,
   resolveStarVertexHover,
+  resolveStarRatioHover,
   resolveEllipseArcHover,
   resolveResizeHover,
   resolveCornerRadiusHover,

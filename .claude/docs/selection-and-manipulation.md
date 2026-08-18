@@ -1152,6 +1152,75 @@ own `RADIUS_HANDLE_SIZE`, reusing that constant rather than introducing a second
 `ELLIPSE_ARC_LAP_SNAP_DEGREES` (`Canvas/constants.ts`, predates this session) is the existing
 full-lap-snap tolerance for Sweep, unrelated to Ratio/Start.
 
+## 20. Ratio handle (Star)
+
+A third single-handle drag on Star, alongside corner-radius (index 0, §15) and vertex-count (index 2,
+§18) — sitting on **vertex index 1**, the concave inner vertex physically between the other two on the
+outline, and dragging the `ratio` field (inner/outer radius fraction, `STAR_MIN_RATIO`–`STAR_MAX_RATIO`
+= 0.001–1) that `getStarPoints`/`getRoundedStarPoints` already consumed but nothing had ever written
+post-creation (`ratio` was previously fixed at `STAR_DEFAULT_RATIO` for the node's whole lifetime,
+set once by `useDrawStarTool`). Math lives in `utils/canvas/ratio/`, a sibling to `cornerRadius/` and
+`vertexCount/`.
+
+**Rest position reuses §18's fix, doesn't repeat it**: `getStarRatioHandlePosition.ts` is a near-copy
+of `getStarVertexCountHandlePosition.ts` — same `getVertexCountHandlePositionFromVertices(vertices, 1,
+center, cornerRadius, maxRadius, flipX, flipY)` call, just `handleIndex: 1` instead of `2`. Despite the
+function's name, its bisector-plus-corner-radius-setback math is fully generic (nothing in its body is
+vertex-count-specific), so reusing it directly for a third, unrelated handle kind was preferred over
+either renaming the shared file or duplicating its logic — the rename was considered and rejected as
+scope creep for this change. This gets the identical "stick to the point" correctness §18 fixed for
+free: since `getMaxStarCornerRadius(bounds, points, ratio)` also shrinks/grows with `points`/`ratio`,
+a stored `cornerRadius` is re-clamped against the *current* shape every time this handle's position is
+computed, exactly like the vertex-count handle.
+
+**The drag itself is a continuous scalar projection, not angle-snapping** (§18's algorithm doesn't
+apply — `ratio` isn't a discrete candidate set). `getRatioFromLocalPoint.ts` projects the pointer onto
+a fixed axis: the direction from the shape's center to vertex index 1's own **ratio-1 anchor** —
+`getStarPoints(bounds, points, 1)[1]`, i.e. where that vertex would sit if the star were fully "rounded
+out" (no concave notch at all). This axis is provably stable across the whole drag: vertex 1's angle
+(`π/points − π/2`) depends only on `points`, never on `ratio` itself, and because both `x`/`y` scale by
+the *same* `ratio` factor along that axis, `vertex1(ratio) = center + ratio · (anchor − center)`
+exactly — so the drag math is a single scalar `t` solved by `dot(point − center, anchor − center) /
+dot(anchor − center, anchor − center)`, then clamped to `[STAR_MIN_RATIO, STAR_MAX_RATIO]`. No rounding
+to an integer (unlike corner-radius's pixel value or vertex-count's discrete counts) — `ratio` is a
+continuous `0–1` fraction. Like §18's `continueVertexCountDrag`, this deliberately does **not**
+correct for corner-radius setback in the drag computation itself, only in the rest-position render —
+matching the established precedent that the value math always operates on the raw, unrounded vertex.
+
+**Drag state**: `TStarRatioDragState` (`types/design/selectionTool/types.ts`) is
+`{ bounds, flipX, flipY, nodeId, points, rotation }` — `points` is carried (unlike
+`TStarVertexCountDragState`, which needs none of Star's own shape fields) because it's the one value
+`continueStarRatioDrag` needs to recompute the fixed ratio-1 anchor at every pointermove; `ratio` itself
+is deliberately absent, since it's exactly what's being solved for. Stays an ordinary hook-private ref
+(`starRatioDragRef`, `TSelectionToolRefs`) — no `hasMoved` flag, no lift to `Canvas.tsx`'s `TCanvasRefs`
+— nothing downstream needs a live "is dragging" feed the way §13's corner-radius zero-state offset did.
+
+**Wiring**: `armStarRatioDrag.ts`/`disarmStarRatioDrag.ts` are one-line calls into the existing generic
+`armSimpleDrag.ts`/`disarmSimpleDrag.ts` (no new generic wrapper introduced, since Star is `ratio`'s
+only consumer — unlike corner-radius/vertex-count, which share their generic drag helpers across
+Polygon and Star). `armStarRatioOnPointerDown`/`resolveStarRatioHover` sit in `ARM_RESOLVERS`/
+`HOVER_RESOLVERS` (§3, §9) directly after the vertex-count entries and before Ellipse-arc/resize —
+grouped with the other two Star-specific handles, consistent with §18's own placement reasoning (ahead
+of resize, in case a low-`points` star's ratio handle ever coincides with a resize handle).
+
+**Rendering**: `drawStarRatioHandle.ts` (`utils/canvas/`) is a near-copy of `drawStarVertexCountHandle.ts`
+— same `drawEllipse`/`RADIUS_HANDLE_SIZE`/`RADIUS_HANDLE_FILL` shape. `drawStarRatioHandleLayer.ts`
+(`drawScene/`) is a **separate** layer, not folded into `drawVertexCountHandlesLayer.ts`'s existing
+Star `case`, even though the gating (`selectedNodes.length === 1 && hoveredNode?.id === selectedNode.id
+&& type === star && shouldShowVertexCountHandle`) is nearly identical — same "keep independently-added
+handle mechanisms decoupled" reasoning as §18's separate-from-corner-radius layer split. Called from
+`drawScene.ts` right after `drawVertexCountHandlesLayer`.
+
+**Cursor**: a new `ratio.png` (`assets/icons/cursors/`), *not* a reuse of `radius.png` (the Ellipse
+arc-ratio handle's choice, §19) or `vertices.png` — wired via a new `&--ratio` block in
+`canvas.module.scss` (`setClassName`-equivalent `className: 'ratio'` in `resolveStarRatioHover`),
+identical in shape to the existing `&--radius`/`&--vertices` blocks.
+
+**Constants**: `STAR_MIN_RATIO`/`STAR_MAX_RATIO` (0.001/1, `Canvas/constants.ts`) predate this feature
+— defined alongside `STAR_DEFAULT_RATIO` when Star was first drawable, but unenforced by any clamp
+until this handle became the first thing to actually read them, the identical "canvas drag now, panel
+later" pattern §18 notes for `STAR_MIN_POINTS`/`STAR_MAX_POINTS`.
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.

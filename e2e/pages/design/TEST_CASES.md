@@ -1318,6 +1318,29 @@ they're live regression guards regardless. #151-#153 are precise single-formula/
 checks (`getEllipseArcRotateHandlePosition`'s radius formula, the guide-arc trigger condition) better
 suited to a future unit test than a screenshot diff, once that unit coverage lands.
 
+## Ratio (Star)
+
+A third Star handle, alongside corner radius (vertex index 0) and vertex count (vertex index 2):
+**Ratio** sits on vertex index 1 — the concave inner vertex between the tip and the next spike,
+physically between the other two handles on the outline — and drags `ratio` (the inner/outer radius
+fraction) between `STAR_MIN_RATIO` (0.001) and `STAR_MAX_RATIO` (1). Its rest position reuses the
+same shared `getVertexCountHandlePositionFromVertices` bisector-plus-corner-radius-setback helper the
+vertex-count handle uses (just at handle index 1 instead of 2), so it stays pinned to the true vertex
+even once a corner radius rounds it — the same "stick to the point" fix `getStarVertexCountHandlePosition`
+needed after a stored `cornerRadius` valid for one `points` count went unclamped for another. Unlike
+vertex count's angle-snapping, the drag itself is a continuous scalar: `getRatioFromLocalPoint`
+projects the pointer onto the fixed axis from center to vertex index 1's own ratio-1 anchor point (an
+axis whose direction depends only on `points`, never on the ratio being dragged), then clamps.
+
+| #   | Scenario                                                                                                | Unit |            E2E            |
+| --- | ------------------------------------------------------------------------------------------------------- | :--: | :-----------------------: |
+| 154 | Dragging the Ratio handle toward its own fixed anchor rounds out the points, changing the shape         |  ✅  | ✅ `vertex-count.spec.ts` |
+| 155 | The dispatched ratio is clamped to `[STAR_MIN_RATIO, STAR_MAX_RATIO]` once the pointer over/undershoots |  ✅  |             —             |
+| 156 | The handle vanishes entirely once the shape's on-screen size drops below the visibility threshold       |  ✅  |             —             |
+
+#155-#156 stay unit-only for the same reason as the vertex-count handle's analogous rows above —
+exact `store.getState()`/direct-function-call assertions, not real-browser-timing paths.
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

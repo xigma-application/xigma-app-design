@@ -24,6 +24,7 @@ import {
   armRotateOnPointerDown,
   armSelectedTextBoundsOnPointerDown,
   armStarCornerRadiusOnPointerDown,
+  armStarRatioOnPointerDown,
   armStarVertexCountOnPointerDown,
   toggleSelectionOnPointerDown,
 } from '../armResolvers';
@@ -251,6 +252,29 @@ describe('armStarVertexCountOnPointerDown', () => {
     // result
     expect(armStarVertexCountOnPointerDown(ctx)).toBeUndefined();
     expect(ctx.selectionRefs.starVertexCountDragRef.current).toBeNull();
+  });
+});
+
+describe('armStarRatioOnPointerDown', () => {
+  it('should arm the star ratio drag and return true when its handle is hit', () => {
+    // mock — vertex index 1 sits at (64.694631, 29.774575); this star's own max corner radius is
+    // ~13.011, well under the raw cornerRadius of 15, so it clamps there before pulling the handle
+    // toward center, to (65.687108, 28.408548)
+    // before
+    const ctx = createContext({ point: { x: 65.687108, y: 28.408548 }, selectedNodes: [star] });
+
+    // result
+    expect(armStarRatioOnPointerDown(ctx)).toBe(true);
+    expect(ctx.selectionRefs.starRatioDragRef.current).toMatchObject({ nodeId: 'star-1' });
+  });
+
+  it('should return undefined when the point misses the handle', () => {
+    // before
+    const ctx = createContext({ point: { x: 90, y: 90 }, selectedNodes: [star] });
+
+    // result
+    expect(armStarRatioOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.selectionRefs.starRatioDragRef.current).toBeNull();
   });
 });
 

@@ -9,6 +9,7 @@ export const createSelectionToolRefs = (overrides: Partial<TSelectionToolRefs> =
   polygonVertexCountDragRef: { current: null },
   resizeDragRef: { current: null },
   rotateDragRef: { current: null },
+  starRatioDragRef: { current: null },
   starVertexCountDragRef: { current: null },
   ...overrides,
 });

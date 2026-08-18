@@ -9,6 +9,7 @@ import {
   TResizeDragState,
   TRotateDragState,
   TSelectionToolRefs,
+  TStarRatioDragState,
   TStarVertexCountDragState,
 } from 'types/design/selectionTool/types';
 import { TPoint } from 'types/canvas';
@@ -21,6 +22,7 @@ export const useSelectionToolRefs = (): TSelectionToolRefs => {
   const polygonVertexCountDragRef = useRef<TPolygonVertexCountDragState | null>(null);
   const resizeDragRef = useRef<TResizeDragState | null>(null);
   const rotateDragRef = useRef<TRotateDragState | null>(null);
+  const starRatioDragRef = useRef<TStarRatioDragState | null>(null);
   const starVertexCountDragRef = useRef<TStarVertexCountDragState | null>(null);
   const selectionRefsRef = useRef<TSelectionToolRefs | null>(null);
 
@@ -33,6 +35,7 @@ export const useSelectionToolRefs = (): TSelectionToolRefs => {
       polygonVertexCountDragRef,
       resizeDragRef,
       rotateDragRef,
+      starRatioDragRef,
       starVertexCountDragRef,
     };
   }

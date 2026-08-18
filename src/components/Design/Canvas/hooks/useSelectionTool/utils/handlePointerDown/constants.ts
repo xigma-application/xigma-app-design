@@ -14,6 +14,7 @@ import {
   armRotateOnPointerDown,
   armSelectedTextBoundsOnPointerDown,
   armStarCornerRadiusOnPointerDown,
+  armStarRatioOnPointerDown,
   armStarVertexCountOnPointerDown,
   toggleSelectionOnPointerDown,
 } from './armResolvers';
@@ -22,6 +23,7 @@ export const ARM_RESOLVERS = [
   armPathOffsetOnPointerDown,
   armPolygonVertexCountOnPointerDown,
   armStarVertexCountOnPointerDown,
+  armStarRatioOnPointerDown,
   armEllipseArcOnPointerDown,
   armEllipseArcRotateOnPointerDown,
   armEllipseArcRatioOnPointerDown,
