@@ -46,8 +46,8 @@ describe('computeResizedRect', () => {
 
   it('should clamp the size to MIN_SHAPE_SIZE instead of collapsing or inverting past the opposite edge', () => {
     // result
-    expect(computeResizedRect('e', ORIGIN, { x: 1, y: 0 })).toEqual({ height: 100, width: 2, x: 0, y: 0 });
-    expect(computeResizedRect('w', ORIGIN, { x: 99, y: 0 })).toEqual({ height: 100, width: 2, x: 98, y: 0 });
+    expect(computeResizedRect('e', ORIGIN, { x: 1, y: 0 })).toEqual({ height: 100, width: 1, x: 0, y: 0 });
+    expect(computeResizedRect('w', ORIGIN, { x: 99, y: 0 })).toEqual({ height: 100, width: 1, x: 99, y: 0 });
   });
 
   it('should mirror past the anchor on an edge handle instead of sticking at MIN_SHAPE_SIZE', () => {

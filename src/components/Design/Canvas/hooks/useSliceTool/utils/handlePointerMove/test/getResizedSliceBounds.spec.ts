@@ -1,3 +1,6 @@
+// others
+import { MIN_SHAPE_SIZE } from '../../../../../constants';
+
 // types
 import { TSliceDraft } from 'types/design/canvas/types';
 
@@ -16,7 +19,7 @@ describe('getResizedSliceBounds', () => {
     // result
     const bounds = getResizedSliceBounds(origin, 'se', { x: 0, y: 0 });
 
-    expect(bounds.width).toBeGreaterThanOrEqual(2);
-    expect(bounds.height).toBeGreaterThanOrEqual(2);
+    expect(bounds.width).toBeGreaterThanOrEqual(MIN_SHAPE_SIZE);
+    expect(bounds.height).toBeGreaterThanOrEqual(MIN_SHAPE_SIZE);
   });
 });
