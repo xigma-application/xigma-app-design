@@ -43,8 +43,6 @@ export const getCurvedSelectionEdges = (
     const maxSpan = (MAX_CURVED_SELECTION_SPAN_DEGREES / 360) * circumference;
 
     return boundaries.slice(clampedStart, clampedEnd + 1).map((length) => {
-      // never let the ribbon span more than a full turn, otherwise it wraps back over its own
-      // start and the fill/outline start overlapping themselves
       const clampedLength = direction > 0 ? Math.min(length, startLength + maxSpan) : Math.max(length, startLength - maxSpan);
       const sample = getEllipsePathSample(ellipseWidth, ellipseHeight, arcLengthTable, clampedLength);
       const angleDegrees = sample.angleDegrees + (flip ? 180 : 0);

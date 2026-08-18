@@ -26,7 +26,6 @@ export const buildGlyphQuad = (
   const right = left + glyph.width * scale;
   const bottom = top + glyph.height * scale;
 
-  // 2 triangles covering the glyph's quad
   const corners: TPoint[] = [
     { x: left, y: top },
     { x: right, y: top },
@@ -57,6 +56,5 @@ export const buildGlyphQuad = (
     [u0, v1],
   ];
 
-  // interleaved [x, y, u, v] per vertex
   return positionedCorners.flatMap((corner, index) => [corner.x, corner.y, uvs[index][0], uvs[index][1]]);
 };

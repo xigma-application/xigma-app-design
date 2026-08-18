@@ -1,10 +1,6 @@
 // others
 import { MSDF_ATLAS_PNG_URL } from 'constant/webgl/msdfAtlas';
 
-// unlike getOrLoadTexture (used for Media images), this regenerates mipmaps once the real image
-// loads — without them, minifying the distance field at zoom-out produces corrupted
-// median-threshold results (text visually fades toward the background color instead of staying
-// solid), a defect ordinary photo textures don't show as noticeably
 const loadAtlasImage = (gl: WebGL2RenderingContext, texture: WebGLTexture): void => {
   const image = new Image();
 
