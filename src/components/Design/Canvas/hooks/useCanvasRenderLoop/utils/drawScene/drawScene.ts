@@ -25,6 +25,7 @@ import { drawEllipseArcHandleLayer } from './drawEllipseArcHandleLayer/drawEllip
 import { drawFrame } from './drawFrame';
 import { drawHoverOutline } from './drawHoverOutline';
 import { drawMarquee } from 'utils/canvas/drawMarquee';
+import { drawPixelGrid } from 'utils/canvas/drawPixelGrid';
 import { drawSceneBackground } from 'utils/canvas/drawSceneBackground';
 import { drawSceneNodes } from './drawSceneNodes';
 import { drawSelectionOutline } from './drawSelectionOutline';
@@ -70,6 +71,7 @@ export const drawScene = (
   );
 
   drawSceneBackground(gl);
+  drawPixelGrid(gl, imageContext.gridProgram, imageContext.gridBuffer, clientWidth, clientHeight, viewport);
   drawSceneNodes(gl, program, buffer, imageContext, sceneNodes, clientWidth, clientHeight, viewport, pathOutlineStyles);
   drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport);
   drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport);

@@ -46,10 +46,24 @@ describe('setupRenderLoop', () => {
     const imageBuffer = {} as WebGLBuffer;
     const msdfProgram = {} as WebGLProgram;
     const msdfBuffer = {} as WebGLBuffer;
+    const gridProgram = {} as WebGLProgram;
+    const gridBuffer = {} as WebGLBuffer;
     const canvas = document.createElement('canvas');
 
     // before
-    setupRenderLoop(gl, program, buffer, imageProgram, imageBuffer, msdfProgram, msdfBuffer, canvas, createCanvasRefs());
+    setupRenderLoop(
+      gl,
+      program,
+      buffer,
+      imageProgram,
+      imageBuffer,
+      msdfProgram,
+      msdfBuffer,
+      gridProgram,
+      gridBuffer,
+      canvas,
+      createCanvasRefs(),
+    );
 
     // result
     expect(gl.enable).toHaveBeenCalledWith(gl.BLEND);
@@ -65,6 +79,8 @@ describe('setupRenderLoop', () => {
     const imageBuffer = {} as WebGLBuffer;
     const msdfProgram = {} as WebGLProgram;
     const msdfBuffer = {} as WebGLBuffer;
+    const gridProgram = {} as WebGLProgram;
+    const gridBuffer = {} as WebGLBuffer;
     const canvas = document.createElement('canvas');
 
     // before
@@ -76,6 +92,8 @@ describe('setupRenderLoop', () => {
       imageBuffer,
       msdfProgram,
       msdfBuffer,
+      gridProgram,
+      gridBuffer,
       canvas,
       createCanvasRefs(),
     );

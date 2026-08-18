@@ -1,8 +1,9 @@
 // others
-import { CARET_BLINK_INTERVAL_MS } from 'constant/canvas';
+import { CARET_BLINK_INTERVAL_MS, GRID_MIN_ZOOM } from 'constant/canvas';
 
 // store
-import { addNode, setSelection, startTextEdit, stopTextEdit } from 'store/design/slice';
+import { addNode, setSelection, setViewport, startTextEdit, stopTextEdit } from 'store/design/slice';
+import { DEFAULT_VIEWPORT } from 'store/design/constants';
 import { store } from 'store';
 
 // types
@@ -53,6 +54,8 @@ const IMAGE_CONTEXT: TImageRenderContext = {
   buffer: {} as WebGLBuffer,
   cache: new Map(),
   ellipseArcLengthCache: new Map(),
+  gridBuffer: {} as WebGLBuffer,
+  gridProgram: {} as WebGLProgram,
   msdfBuffer: {} as WebGLBuffer,
   msdfProgram: {} as WebGLProgram,
   program: {} as WebGLProgram,
@@ -76,6 +79,39 @@ describe('drawScene', () => {
       [true, true, true, false],
     ]);
     expect(gl.clear).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not draw the pixel grid below the minimum zoom threshold', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const canvas = document.createElement('canvas');
+
+    // before
+    drawScene(gl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs());
+
+    // result
+    expect(gl.drawArrays).not.toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
+  });
+
+  it('should draw the pixel grid once zoomed in to the minimum threshold', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const canvas = document.createElement('canvas');
+
+    store.dispatch(setViewport({ x: 0, y: 0, zoom: GRID_MIN_ZOOM }));
+
+    // before
+    drawScene(gl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs());
+
+    // result
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
+
+    // after
+    store.dispatch(setViewport(DEFAULT_VIEWPORT));
   });
 
   it('should not draw a draft rect when none is given', () => {

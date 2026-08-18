@@ -13,6 +13,8 @@ export const setupRenderLoop = (
   imageBuffer: WebGLBuffer,
   msdfProgram: WebGLProgram,
   msdfBuffer: WebGLBuffer,
+  gridProgram: WebGLProgram,
+  gridBuffer: WebGLBuffer,
   canvas: HTMLCanvasElement,
   refs: TCanvasRefs,
 ): (() => void) => {
@@ -23,6 +25,8 @@ export const setupRenderLoop = (
     buffer: imageBuffer,
     cache: new Map(),
     ellipseArcLengthCache: new Map(),
+    gridBuffer,
+    gridProgram,
     msdfBuffer,
     msdfProgram,
     program: imageProgram,

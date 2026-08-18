@@ -116,13 +116,14 @@ WebGL2.
 
 ## 3. Shader programs
 
-Three GLSL `#version 300 es` programs, all built via `createProgram.ts`/`createShader.ts`:
+Four GLSL `#version 300 es` programs, all built via `createProgram.ts`/`createShader.ts`:
 
 | Program | Vertex source | Fragment source | Extra attrib | Used by |
 |---|---|---|---|---|
 | plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect`), `drawPolygon` (dispatches to `drawStandardPolygon`/`drawRoundedPolygon`), `drawStar` (dispatches to `drawStandardStar`/`drawRoundedStar`), `drawLine`, `drawEllipse`, `drawEllipseNode` (dispatches to `drawEllipse`/`drawEllipseArc`, `selection-and-manipulation.md` §19), `drawThickOutline`, `drawThickEllipseNodeOutline` (dispatches to `drawThickEllipseOutline`/`drawThickEllipseArcOutline`), `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, `drawCornerRadiusHandles`, `drawPolygonCornerRadiusHandle`, `drawStarCornerRadiusHandle`, `drawPolygonVertexCountHandle`/`drawStarVertexCountHandle`, `drawEllipseArcHandle`/`drawEllipseArcGuideLine`/`drawEllipseArcRatioGuideArc`, every outline/handle primitive |
 | image/texture | `imageVertexShaderSource.ts` | `imageFragmentShaderSource.ts` | `a_texCoord` | `drawImage.ts` (Media nodes + draft media) |
 | MSDF text | **same vertex source as image** (reused, not a 4th file) | `msdfFragmentShaderSource.ts` | `a_texCoord` | `drawMsdfText.ts` |
+| pixel grid | `gridVertexShaderSource.ts` (not world-space like the other three — see §10) | `gridFragmentShaderSource.ts` | — | `drawPixelGrid.ts` |
 
 Plain-color vertex shader (every program's transform math is identical, only the fragment stage
 differs per program):
@@ -160,11 +161,14 @@ void main() {
 }
 ```
 
-**Why three, not one**: plain-color needs no texture unit at all. Image needs a second attribute
+**Why four, not one**: plain-color needs no texture unit at all. Image needs a second attribute
 (`a_texCoord`) and a sampler. MSDF needs the *same* attributes/uniforms as image (hence sharing its
 vertex shader) but a fragment stage doing median-of-3-channel distance-field sampling plus
 `fwidth`-based antialiasing — impossible to express in the plain image fragment shader without the
-extra `u_color`/`u_screenPxRange` uniforms it doesn't need. No location caching, no program
+extra `u_color`/`u_screenPxRange` uniforms it doesn't need. The grid program's vertex stage is
+different in kind, not just degree, from the other three (§10) — its `a_position` skips the
+world→clip transform entirely, so it couldn't share any existing vertex source even though its
+fragment stage is a plain `u_color` fill like the first program. No location caching, no program
 manager/batching — every primitive calls `getAttribLocation`/`getUniformLocation`/`useProgram` fresh
 per draw call; draw order is simply whatever `drawScene` calls in sequence.
 
@@ -398,6 +402,45 @@ whichever word/line sat under the pointer, before the user ever sees the full se
 `preventDefault()`) — the entry-into-edit-mode double-click never reaches the still-editing
 double-click handler at all, regardless of teardown timing.
 
+## 10. Pixel grid — a zoom-gated, shader-only full-viewport overlay
+
+`drawPixelGrid.ts` (`utils/canvas/`) draws a helper grid at every integer world coordinate — visible
+only once `viewport.zoom >= GRID_MIN_ZOOM` (4, i.e. 400%, matching Figma's own threshold) —
+`drawScene.ts` calls it unconditionally every frame and the gate lives inside the function itself
+(same "no branch in the orchestrator" shape as every other optional layer here). Since world space is
+already "1 unit = 1px" (§4; nodes snap to whole pixels), a grid line drawn at every integer world
+coordinate makes a 1×1 node's edges land exactly on the grid with no separate snapping logic needed.
+
+**Why a shader, not `GL_LINES`**: at 400%+ zoom the visible world spans hundreds of grid cells;
+drawing one vertex pair per row/column would mean regenerating and re-clipping thousands of line
+vertices every frame, plus every visible cell recomputed on every pan. Instead the grid is a single
+static 6-vertex full-viewport quad (`FULL_VIEWPORT_QUAD`, drawn once, `STATIC_DRAW`), and the actual
+line pattern is computed **per fragment**: `gridFragmentShaderSource.ts` reconstructs world position
+from the quad's screen position, takes `fract(worldPos - 0.5) - 0.5` to get distance to the nearest
+integer coordinate on each axis, and divides by `fwidth(worldPos)` (the screen-space derivative) to
+get a coverage value that's ~1 right on a line and 0 a pixel or two away — the standard
+constant-screen-width-regardless-of-zoom procedural grid technique, same `fwidth`-based antialiasing
+idea §3's MSDF text fragment shader already uses for a different purpose.
+
+**Why the vertex shader is the odd one out**: every other vertex shader here takes `a_position` in
+*world* space and transforms it to clip space via `u_viewportOffset`/`u_zoom`/`u_resolution` (§3's
+plain-color vertex shader). The grid's `gridVertexShaderSource.ts` does the opposite split: its
+`a_position` **is already** a clip-space quad corner (`-1..1`), passed straight to `gl_Position` with
+no transform at all, so the quad always exactly covers the viewport at every zoom/pan. Pan/zoom is
+applied in the *fragment* shader instead, reconstructing world position from a screen-space varying
+(`v_screenPos`, computed once per vertex from `a_position`/`u_resolution`) — the inverse of the usual
+`worldPos → screenPos` transform. This split (transform-free vertex stage, all the real math in the
+fragment stage) is what makes "cover the whole screen regardless of pan/zoom" trivial without needing
+to compute a world-space rect big enough to cover the visible area at the current zoom.
+
+**Draw order**: right after `drawSceneBackground`, before `drawSceneNodes` — the grid sits behind
+node fills, same layer relationship as the canvas background itself. This is a pure paint-order
+choice with no hit-testing consequence either way: nothing in this app hit-tests by DOM/paint
+layering (§4's own note on `TextEditOverlay` being paint-invisible makes the same point from the
+opposite direction) — every pointer interaction resolves via math against node geometry
+(`getNodeAtPoint.ts` and friends), so the grid can never intercept or shadow a click regardless of
+where it sits in the paint order.
+
 ## File index
 
 - Context/setup: `Canvas/Canvas.tsx`, `Canvas/constants.ts`,
@@ -407,7 +450,9 @@ double-click handler at all, regardless of teardown timing.
   createShader}.ts`, `.../utils/drawScene/{drawScene,hasCornerRadiusDragMoved}.ts`, `.../types.ts`
   (`TImageRenderContext`)
 - Shaders: `constant/webgl/{vertexShaderSource,fragmentShaderSource,imageVertexShaderSource,
-  imageFragmentShaderSource,msdfFragmentShaderSource,msdfAtlas}.ts`
+  imageFragmentShaderSource,msdfFragmentShaderSource,msdfAtlas,gridVertexShaderSource,
+  gridFragmentShaderSource}.ts`
+- Pixel grid: `utils/canvas/drawPixelGrid.ts`, `constant/canvas.ts`'s `GRID_COLOR`/`GRID_MIN_ZOOM`
 - Coordinate systems: `Canvas/utils/{screenToWorld,worldToScreen}.ts`
 - Draft/committed split: `.../drawScene/{drawSceneNodes,drawFrame,drawDraftShape,drawDraftLine}.ts`;
   ephemeral-ref targets: `utils/canvas/drawMarquee.ts`, `.../drawScene/drawHoverOutline.ts`,

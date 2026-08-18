@@ -1043,6 +1043,20 @@ to czysto swobodny drag, zero pomocy:
 - [ ] smart guides: czerwone linie przyciągania do krawędzi/środków innych node'ów podczas
       przeciągania/resize, z wyświetlaną odległością (jak dystanse w Figmie)
 - [ ] snap do viewportu/frame'a rodzica
+- [x] **siatka pikseli (pixel grid) na canvasie** — pomocnicza siatka na każdej całkowitej
+      współrzędnej world (world space to już "1 unit = 1px", więc kwadrat 1x1 domyślnie trafia w jedną
+      kratkę, bez osobnej logiki przyciągania), widoczna dopiero od zoomu 400% (`GRID_MIN_ZOOM`), tak
+      jak w Figmie. Renderowana jako pojedynczy statyczny quad na cały viewport (`drawPixelGrid.ts`,
+      czwarty program GL obok plain-color/image/MSDF) — linie liczone proceduralnie we fragment
+      shaderze (`fract` odległości do najbliższej całkowitej współrzędnej world, dzielone przez
+      `fwidth` dla stałej ~1px grubości linii niezależnie od zoomu), zamiast tysięcy wierzchołków
+      `GL_LINES` na wiersz/kolumnę przy dużym zoomie. Vertex shader siatki jest odwrotny do reszty
+      (`a_position` to już współrzędne clip-space, transform pan/zoom przeniesiony do fragment
+      shadera) — dzięki temu quad zawsze pokrywa cały ekran bez liczenia world-space rect
+      dopasowanego do aktualnego zoomu. Siatka rysowana zaraz po tle, pod węzłami (jak samo tło) —
+      czysto kwestia kolejności rysowania, bez wpływu na hit-testing, bo w tej appce nic nie jest
+      hit-testowane po warstwie/kolejności rysowania, tylko matematycznie po geometrii node'ów.
+      Pełny opis mechanizmu: `.claude/docs/canvas-rendering-pipeline.md` §3, §10
 
 ## Etap 14 — Persystencja sceny
 

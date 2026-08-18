@@ -30,6 +30,8 @@ const IMAGE_CONTEXT: TImageRenderContext = {
   buffer: {} as WebGLBuffer,
   cache: new Map(),
   ellipseArcLengthCache: new Map(),
+  gridBuffer: {} as WebGLBuffer,
+  gridProgram: {} as WebGLProgram,
   msdfBuffer: {} as WebGLBuffer,
   msdfProgram: {} as WebGLProgram,
   program: {} as WebGLProgram,
