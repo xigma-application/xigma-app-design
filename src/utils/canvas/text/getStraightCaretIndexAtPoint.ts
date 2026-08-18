@@ -6,7 +6,7 @@ import { TGlyphAtlasJson } from 'types/msdf';
 import { flipTextPoint } from './flipTextPoint';
 import { measureGlyphTextWidth } from './measureGlyphTextWidth';
 import { rotatePoint } from 'utils/math/rotatePoint';
-import { wrapTextWithOffsets } from './wrapTextWithOffsets';
+import { wrapTextWithOffsets } from './wrapTextWithOffsets/wrapTextWithOffsets';
 
 export type TStraightCaretHit = {
   distance: number;

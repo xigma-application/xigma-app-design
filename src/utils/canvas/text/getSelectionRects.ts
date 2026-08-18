@@ -5,7 +5,7 @@ import { TGlyphAtlasJson } from 'types/msdf';
 // utils
 import { findLineIndexForOffset } from './findLineIndexForOffset';
 import { measureGlyphTextWidth } from './measureGlyphTextWidth';
-import { wrapTextWithOffsets } from './wrapTextWithOffsets';
+import { wrapTextWithOffsets } from './wrapTextWithOffsets/wrapTextWithOffsets';
 
 export const getSelectionRects = (
   atlas: TGlyphAtlasJson,

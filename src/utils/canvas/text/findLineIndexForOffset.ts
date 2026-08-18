@@ -1,5 +1,5 @@
 // types
-import { TWrappedLine } from './wrapTextWithOffsets';
+import { TWrappedLine } from './wrapTextWithOffsets/wrapTextWithOffsets';
 
 export const findLineIndexForOffset = (lines: TWrappedLine[], offset: number): number => {
   let lineIndex = 0;

@@ -1,8 +1,6 @@
 // utils
 import { wrapTextWithOffsets } from '../wrapTextWithOffsets';
 
-// each character measures 10 units wide, so width thresholds are easy to reason about — mirrors
-// wrapText.spec.ts's fixture exactly, since both functions must make identical wrap decisions
 const measureWidth = (text: string): number => text.length * 10;
 
 describe('wrapTextWithOffsets', () => {

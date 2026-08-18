@@ -3,7 +3,7 @@ import { TDraftRect } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { drawThickEllipseArcOutline } from './drawThickEllipseArcOutline';
+import { drawThickEllipseArcOutline } from '../drawThickEllipseArcOutline/drawThickEllipseArcOutline';
 import { drawThickEllipseOutline } from './drawThickEllipseOutline';
 import { hasEllipseArc } from '../ellipseArc/hasEllipseArc';
 

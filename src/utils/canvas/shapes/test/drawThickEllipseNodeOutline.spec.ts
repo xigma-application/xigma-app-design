@@ -4,7 +4,7 @@ import { drawThickEllipseNodeOutline } from '../drawThickEllipseNodeOutline';
 const drawThickEllipseArcOutlineMock = vi.fn();
 const drawThickEllipseOutlineMock = vi.fn();
 
-vi.mock('../drawThickEllipseArcOutline', () => ({
+vi.mock('../../drawThickEllipseArcOutline/drawThickEllipseArcOutline', () => ({
   drawThickEllipseArcOutline: (...args: unknown[]): void => drawThickEllipseArcOutlineMock(...args),
 }));
 vi.mock('../drawThickEllipseOutline', () => ({

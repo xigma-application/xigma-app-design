@@ -5,7 +5,7 @@ import { TPoint } from 'types/canvas';
 // utils
 import { findLineIndexForOffset } from './findLineIndexForOffset';
 import { measureGlyphTextWidth } from './measureGlyphTextWidth';
-import { wrapTextWithOffsets } from './wrapTextWithOffsets';
+import { wrapTextWithOffsets } from './wrapTextWithOffsets/wrapTextWithOffsets';
 
 export const getCaretPoint = (
   atlas: TGlyphAtlasJson,
