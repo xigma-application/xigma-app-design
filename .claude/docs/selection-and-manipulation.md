@@ -889,15 +889,53 @@ in local/unflipped space, flip the final point forward — since this is exactly
 must physically track a mirrored shape" problem, independently re-solved for this handle rather than
 shared code, to keep the two mechanisms fully decoupled.
 
-Unlike corner-radius, there is **no setback and no zero-state**: the handle always renders at the
-exact vertex position for whatever `sides`/`points` currently is — "trzyma się czubka wierzchołka"
-was an explicit, deliberate requirement, the opposite of corner-radius's §16 behavior. This is also
-why the drag-state types (`TPolygonVertexCountDragState`/`TStarVertexCountDragState`, both just
+Unlike corner-radius, there is **no zero-state**: at `cornerRadius === 0` the handle sits exactly at
+the raw vertex, no `ZERO_RADIUS_HANDLE_OFFSET_PX`-style minimum gap logic — "trzyma się czubka
+wierzchołka" was an explicit, deliberate requirement for the un-rounded case. This is also why the
+drag-state types (`TPolygonVertexCountDragState`/`TStarVertexCountDragState`, both just
 `{ bounds, flipX, flipY, nodeId, rotation }`) carry no `hasMoved` flag, unlike all three corner-radius
 drag states — §13's "mid-drag zero-state relocation" bug has no equivalent here, since there's no
 zero-state position to snap away from. Consequently `polygonVertexCountDragRef`/
 `starVertexCountDragRef` also never needed lifting out to `Canvas.tsx` (§1) — nothing downstream
 needs an `isDragging` flag, so they stay ordinary hook-private refs.
+
+**Gotcha, shipped-and-fixed — the handle must track corner-radius rounding too, and *not* via §16's
+`towardCenter` shortcut**: originally believed to need "no setback at all" (the claim this section
+used to make), but a rounded Polygon/Star visibly detaches its vertex-count handle from the now-curved
+outline if the handle stays pinned to the pre-rounding sharp vertex. Fixed via a shared
+`getVertexCountHandlePositionFromVertices.ts` (`utils/canvas/vertexCount/`, called by both
+`getPolygonVertexCountHandlePosition.ts`/`getStarVertexCountHandlePosition.ts`) using the *same*
+`radius * (setbackMultiplier - 1)` distance as §16/§17's corner-radius handle (one radius closer to
+the vertex than the arc's own center, since this handle should sit *on* the rounded silhouette, not
+at the arc's center) — but two details that don't carry over from §16/§17 without breaking:
+- **Direction must be the true two-edge bisector, not `towardCenter`.** §16/§17's corner-radius
+  handle only ever sits at vertex 0, which is always on the shape's own vertical symmetry axis by
+  construction (`getPolygonPoints`/`getStarPoints`'s angle formula) — so "vertex-to-shape-center" and
+  "true bisector of the two adjacent edges" coincide there, hiding the fact that they're different
+  approximations. The vertex-count handle sits off-axis (index 1 / index 2), where they don't
+  coincide — using `towardCenter` there sends the handle to a visibly wrong spot once cornerRadius is
+  applied. Fix: compute the bisector from the handle vertex's own immediate array neighbors
+  (`normalize(toPrevious) + normalize(toNext)`, then re-normalized), exactly mirroring
+  `getRoundedVertexPoints.ts`'s own tangent-arc bisector — verified to land bit-identical to that
+  render function's own near-vertex arc point.
+- **For Star specifically, "immediate array neighbors" means the two adjacent *inner* (concave)
+  vertices, not the neighboring outer tips.** A tempting-looking alternative — treat the star's outer
+  tips as their own virtual `getPolygonPoints(bounds, points)` N-gon (numerically identical vertex
+  positions to the star's own outer subsequence) and take index±1 within *that* — computes a much
+  wider, gentler angle than the tip's true two-edge angle, so it barely offsets the handle at all for
+  a many-point star, again detaching it from the actual (more tightly rounded) rendered silhouette.
+  The star's own `getStarPoints` array (immediate index±1, landing on the concave inner vertices) is
+  the only one that reproduces the true render.
+- **Must clamp to this vertex's own `getMaxPolygonCornerRadius`/`getMaxStarCornerRadius`, exactly
+  like the corner-radius handle's `Math.min(cornerRadius, maxRadius)`.** Without it, a `cornerRadius`
+  that's valid for the shape's *current* `sides`/`points` becomes progressively over-max as the
+  vertex-count handle itself is dragged to a higher count — a star's own max radius shrinks with more
+  points (tighter concave notches) while the same fixed radius's implied offset simultaneously *grows*
+  (sharper tip angle), so an un-clamped offset overshoots further at every step, eventually sending
+  the handle flying toward or past the shape's own center. The corner-radius handle itself never hits
+  this, since it only reads whatever `cornerRadius` the *current* shape already has — this handle
+  uniquely needs to stay correct across a `sides`/`points` value the stored `cornerRadius` was never
+  re-validated against.
 
 Same de-duplication as §12's corner-radius trio: `armPolygonVertexCountDrag.ts`/`armStarVertexCountDrag.ts`
 are one-line calls into a generic `armVertexCountDrag.ts` (`handlePointerDown/`, takes

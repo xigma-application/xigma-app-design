@@ -181,9 +181,10 @@ describe('resolveEditingTextHover', () => {
 
 describe('resolvePolygonVertexHover', () => {
   it('should return a hover result over a selected polygon vertex-count handle', () => {
-    // mock — vertex index 1 of a 100x100 triangle sits at (93.301270, 75)
+    // mock — vertex index 1 sits at (93.301270, 75); cornerRadius 15 pulls it toward center by
+    // 15 * (setback 2 - 1) to (80.310889, 67.5)
     // result
-    expect(resolvePolygonVertexHover(createContext({ point: { x: 93.30127, y: 75 }, resizableSelectedNodes: [polygon] }))).toEqual({
+    expect(resolvePolygonVertexHover(createContext({ point: { x: 80.310889, y: 67.5 }, resizableSelectedNodes: [polygon] }))).toEqual({
       className: 'vertices',
       cursor: '',
       nodeId: 'polygon-1',

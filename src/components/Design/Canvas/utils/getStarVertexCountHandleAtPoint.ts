@@ -18,21 +18,25 @@ export const getStarVertexCountHandleAtPoint = (
   viewport: TViewport,
 ): { bounds: TDraftRect; flipX: boolean; flipY: boolean; nodeId: string; rotation: number } | null => {
   const [node] = selectedNodes;
+  const isStar = selectedNodes.length === 1 && node.type === NodeType.star;
+  const bounds = isStar ? getNodeBounds(node) : null;
 
-  if (selectedNodes.length !== 1 || node.type !== NodeType.star) {
-    return null;
+  if (isStar && bounds && shouldShowVertexCountHandle(bounds, viewport)) {
+    const testPoint = getUnrotatedQueryPoint(point, bounds, node.rotation);
+    const tolerance = RADIUS_HANDLE_HIT_RADIUS_PX / viewport.zoom;
+    const handlePosition = getStarVertexCountHandlePosition(
+      bounds,
+      node.points,
+      node.ratio,
+      node.cornerRadius ?? 0,
+      node.flipX,
+      node.flipY,
+    );
+
+    return Math.hypot(testPoint.x - handlePosition.x, testPoint.y - handlePosition.y) <= tolerance
+      ? { bounds, flipX: node.flipX, flipY: node.flipY, nodeId: node.id, rotation: node.rotation }
+      : null;
   }
 
-  const bounds = getNodeBounds(node);
-
-  if (!shouldShowVertexCountHandle(bounds, viewport)) {
-    return null;
-  }
-
-  const testPoint = getUnrotatedQueryPoint(point, bounds, node.rotation);
-  const tolerance = RADIUS_HANDLE_HIT_RADIUS_PX / viewport.zoom;
-  const handlePosition = getStarVertexCountHandlePosition(bounds, node.points, node.ratio, node.flipX, node.flipY);
-  const distance = Math.hypot(testPoint.x - handlePosition.x, testPoint.y - handlePosition.y);
-
-  return distance <= tolerance ? { bounds, flipX: node.flipX, flipY: node.flipY, nodeId: node.id, rotation: node.rotation } : null;
+  return null;
 };

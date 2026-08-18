@@ -2,19 +2,21 @@
 import { TDraftRect, TPoint } from 'types/canvas';
 
 // utils
-import { flipPoint } from 'utils/math/flipPoint';
+import { getMaxStarCornerRadius } from 'utils/canvas/cornerRadius/star/getMaxStarCornerRadius';
 import { getStarPoints } from 'utils/canvas/shapes/getStarPoints';
+import { getVertexCountHandlePositionFromVertices } from 'utils/canvas/vertexCount/getVertexCountHandlePositionFromVertices';
 
 export const getStarVertexCountHandlePosition = (
   bounds: TDraftRect,
   points: number,
   ratio: number,
+  cornerRadius: number,
   flipX = false,
   flipY = false,
 ): TPoint => {
   const vertices = getStarPoints(bounds, points, ratio);
-  const handleVertex = vertices[2];
   const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+  const maxRadius = getMaxStarCornerRadius(bounds, points, ratio);
 
-  return flipPoint(handleVertex, center, flipX, flipY);
+  return getVertexCountHandlePositionFromVertices(vertices, 2, center, cornerRadius, maxRadius, flipX, flipY);
 };

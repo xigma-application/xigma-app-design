@@ -34,7 +34,7 @@ describe('drawStarVertexCountHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawStarVertexCountHandle(gl, program, buffer, STAR_BOUNDS, 5, 0.5, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
+    drawStarVertexCountHandle(gl, program, buffer, STAR_BOUNDS, 5, 0.5, 0, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
@@ -49,7 +49,7 @@ describe('drawStarVertexCountHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawStarVertexCountHandle(gl, program, buffer, STAR_BOUNDS, 5, 0.5, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
+    drawStarVertexCountHandle(gl, program, buffer, STAR_BOUNDS, 5, 0.5, 0, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
 
     // result
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -66,7 +66,7 @@ describe('drawStarVertexCountHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before — vertex index 2 of a 100x100 5-point star sits at (97.552826, 34.549150)
-    drawStarVertexCountHandle(gl, program, buffer, STAR_BOUNDS, 5, 0.5, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
+    drawStarVertexCountHandle(gl, program, buffer, STAR_BOUNDS, 5, 0.5, 0, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
 
     // result — the handle fill is the first draw call; its fan center is the handle's own position
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -83,7 +83,7 @@ describe('drawStarVertexCountHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawStarVertexCountHandle(gl, program, buffer, STAR_BOUNDS, 5, 0.5, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 90);
+    drawStarVertexCountHandle(gl, program, buffer, STAR_BOUNDS, 5, 0.5, 0, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 90);
 
     // result — the handle (97.552826, 34.549150) rotated 90deg around the center (50, 50) swings to (65.450850, 97.552826)
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -100,7 +100,7 @@ describe('drawStarVertexCountHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before — vertex index 2 (97.552826, 34.549150) mirrored across center (50, 50) is (2.447174, 65.450850)
-    drawStarVertexCountHandle(gl, program, buffer, STAR_BOUNDS, 5, 0.5, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0, true, true);
+    drawStarVertexCountHandle(gl, program, buffer, STAR_BOUNDS, 5, 0.5, 0, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0, true, true);
 
     // result
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;

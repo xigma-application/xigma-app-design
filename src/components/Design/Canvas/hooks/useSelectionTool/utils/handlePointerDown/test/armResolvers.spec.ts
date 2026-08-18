@@ -212,9 +212,10 @@ describe('armPathOffsetOnPointerDown', () => {
 
 describe('armPolygonVertexCountOnPointerDown', () => {
   it('should arm the polygon vertex-count drag and return true when its handle is hit', () => {
-    // mock — vertex index 1 of a 100x100 triangle sits at (93.301270, 75)
+    // mock — vertex index 1 of a 100x100 triangle sits at (93.301270, 75); cornerRadius 15 pulls it
+    // toward center by 15 * (setback 2 - 1) to (80.310889, 67.5)
     // before
-    const ctx = createContext({ point: { x: 93.30127, y: 75 }, selectedNodes: [polygon] });
+    const ctx = createContext({ point: { x: 80.310889, y: 67.5 }, selectedNodes: [polygon] });
 
     // result
     expect(armPolygonVertexCountOnPointerDown(ctx)).toBe(true);
@@ -233,9 +234,10 @@ describe('armPolygonVertexCountOnPointerDown', () => {
 
 describe('armStarVertexCountOnPointerDown', () => {
   it('should arm the star vertex-count drag and return true when its handle is hit', () => {
-    // mock — vertex index 2 of a 100x100 5-point star sits at (97.552826, 34.549150)
+    // mock — vertex index 2 sits at (97.552826, 34.549150); cornerRadius 15 exceeds this star's own
+    // max (~13.011), so it clamps there before pulling the handle toward center, to (81.966972, 39.613301)
     // before
-    const ctx = createContext({ point: { x: 97.552826, y: 34.54915 }, selectedNodes: [star] });
+    const ctx = createContext({ point: { x: 81.966972, y: 39.613301 }, selectedNodes: [star] });
 
     // result
     expect(armStarVertexCountOnPointerDown(ctx)).toBe(true);

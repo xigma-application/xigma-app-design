@@ -34,7 +34,7 @@ describe('drawPolygonVertexCountHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawPolygonVertexCountHandle(gl, program, buffer, TRIANGLE_BOUNDS, 3, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
+    drawPolygonVertexCountHandle(gl, program, buffer, TRIANGLE_BOUNDS, 3, 0, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
@@ -49,7 +49,7 @@ describe('drawPolygonVertexCountHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawPolygonVertexCountHandle(gl, program, buffer, TRIANGLE_BOUNDS, 3, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
+    drawPolygonVertexCountHandle(gl, program, buffer, TRIANGLE_BOUNDS, 3, 0, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
 
     // result
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -66,7 +66,7 @@ describe('drawPolygonVertexCountHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before — vertex index 1 of a 100x100 triangle sits at (93.301270, 75)
-    drawPolygonVertexCountHandle(gl, program, buffer, TRIANGLE_BOUNDS, 3, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
+    drawPolygonVertexCountHandle(gl, program, buffer, TRIANGLE_BOUNDS, 3, 0, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
 
     // result — the handle fill is the first draw call; its fan center is the handle's own position
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -83,7 +83,7 @@ describe('drawPolygonVertexCountHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawPolygonVertexCountHandle(gl, program, buffer, TRIANGLE_BOUNDS, 3, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 90);
+    drawPolygonVertexCountHandle(gl, program, buffer, TRIANGLE_BOUNDS, 3, 0, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 90);
 
     // result — the handle (93.301270, 75) rotated 90deg around the center (50, 50) swings to (25, 93.301270)
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -100,7 +100,7 @@ describe('drawPolygonVertexCountHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before — vertex index 1 (93.301270, 75) mirrored across center (50, 50) is (6.698730, 25)
-    drawPolygonVertexCountHandle(gl, program, buffer, TRIANGLE_BOUNDS, 3, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0, true, true);
+    drawPolygonVertexCountHandle(gl, program, buffer, TRIANGLE_BOUNDS, 3, 0, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0, true, true);
 
     // result
     const [firstFillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;

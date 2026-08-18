@@ -16,6 +16,7 @@ export const drawPolygonVertexCountHandle = (
   buffer: WebGLBuffer,
   bounds: TDraftRect,
   sides: number,
+  cornerRadius: number,
   strokeColor: string,
   canvasWidth: number,
   canvasHeight: number,
@@ -26,7 +27,7 @@ export const drawPolygonVertexCountHandle = (
 ): void => {
   const handleRadius = RADIUS_HANDLE_SIZE / 2 / viewport.zoom;
   const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
-  const position = getPolygonVertexCountHandlePosition(bounds, sides, flipX, flipY);
+  const position = getPolygonVertexCountHandlePosition(bounds, sides, cornerRadius, flipX, flipY);
   const rotatedPosition = rotatePoint(position, center, rotation);
 
   drawEllipse(
