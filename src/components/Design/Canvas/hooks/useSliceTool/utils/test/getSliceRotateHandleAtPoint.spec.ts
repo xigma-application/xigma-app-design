@@ -1,5 +1,5 @@
 // types
-import { TSliceDraft } from '../../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { getSliceRotateHandleAtPoint } from '../getSliceRotateHandleAtPoint';

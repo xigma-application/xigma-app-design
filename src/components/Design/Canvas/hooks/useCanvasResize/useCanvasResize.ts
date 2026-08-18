@@ -1,5 +1,8 @@
 import debounce from 'lodash/debounce';
-import { RefObject, useEffect } from 'react';
+import { useEffect } from 'react';
+
+// types
+import { TCanvasRefs } from 'types/design/canvas/types';
 
 // others
 import { RESIZE_DEBOUNCE_MS } from '../../constants';
@@ -7,7 +10,8 @@ import { RESIZE_DEBOUNCE_MS } from '../../constants';
 // utils
 import { resizeCanvas } from './utils/resizeCanvas';
 
-export const useCanvasResize = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
+export const useCanvasResize = (refs: TCanvasRefs): void => {
+  const { canvasRef } = refs;
   useEffect(() => {
     const canvas = canvasRef.current;
 

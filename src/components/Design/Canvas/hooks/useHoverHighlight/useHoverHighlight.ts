@@ -1,4 +1,4 @@
-import { RefObject, useEffect } from 'react';
+import { useEffect } from 'react';
 
 // others
 import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
@@ -17,6 +17,7 @@ import { store, useAppSelector } from 'store';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
 import { getCollidesWithEditingText } from './utils/getCollidesWithEditingText';
@@ -41,7 +42,8 @@ import { getStarCornerRadiusHandleHit } from './utils/getStarCornerRadiusHandleH
 import { getStarVertexCountHandleAtPoint } from '../../utils/getStarVertexCountHandleAtPoint';
 import { screenToWorld } from '../../utils/screenToWorld';
 
-export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>, hoverRef: RefObject<string | null>): void => {
+export const useHoverHighlight = (refs: TCanvasRefs): void => {
+  const { canvasRef, hoverRef } = refs;
   const activeTool = useAppSelector(selectActiveTool);
   const { setClassName } = useClassNames();
 

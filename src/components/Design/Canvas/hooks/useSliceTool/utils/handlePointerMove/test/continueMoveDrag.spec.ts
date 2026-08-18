@@ -1,7 +1,8 @@
 import { RefObject } from 'react';
 
 // types
-import { TSliceDraft, TSliceMoveDragState } from '../../../types';
+import { TSliceMoveDragState } from '../../../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { continueMoveDrag } from '../continueMoveDrag';

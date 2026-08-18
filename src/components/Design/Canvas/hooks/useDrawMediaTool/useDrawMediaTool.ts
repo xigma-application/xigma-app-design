@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 // store
 import { setActiveTool, setSelection } from 'store/design/slice';
@@ -6,8 +6,8 @@ import { selectActiveTool } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector, useAppStore } from 'store';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TArmedMedia } from './utils/loadArmedMedia';
-import { TDraftEntity } from 'types/design/types';
 import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 
@@ -22,11 +22,8 @@ export type TMediaToolConfig = {
   tool: ToolName;
 };
 
-export const useDrawMediaTool = (
-  canvasRef: RefObject<HTMLCanvasElement | null>,
-  draftRef: RefObject<TDraftEntity | null>,
-  { name, tool }: TMediaToolConfig,
-): void => {
+export const useDrawMediaTool = (refs: TCanvasRefs, { name, tool }: TMediaToolConfig): void => {
+  const { canvasRef, draftRef } = refs;
   const activeTool = useAppSelector(selectActiveTool);
   const dispatch = useAppDispatch();
   const appStore = useAppStore();

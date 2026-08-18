@@ -1,10 +1,10 @@
 import { RefObject } from 'react';
 
 // types
-import { TEllipseArcRatioDragState } from '../../../types';
 
 // utils
 import { armEllipseArcRatioDrag } from '../armEllipseArcRatioDrag';
+import { TEllipseArcRatioDragState } from 'types/design/canvas/types';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');

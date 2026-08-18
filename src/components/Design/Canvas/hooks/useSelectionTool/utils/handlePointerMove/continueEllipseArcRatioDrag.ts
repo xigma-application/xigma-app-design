@@ -10,7 +10,6 @@ import { AppDispatch, store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TEllipseArcRatioDragState } from '../../types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -20,6 +19,7 @@ import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getUnrotatedQueryPoint } from '../../../../utils/getUnrotatedQueryPoint';
 import { isAngleWithinArc } from 'utils/canvas/ellipseArc/isAngleWithinArc';
 import { screenToWorld } from '../../../../utils/screenToWorld';
+import { TEllipseArcRatioDragState } from 'types/design/canvas/types';
 
 const normalizeAngle = (angle: number): number => ((angle % 360) + 360) % 360;
 

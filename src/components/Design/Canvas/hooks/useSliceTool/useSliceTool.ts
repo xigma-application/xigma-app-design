@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 // store
 import { selectActiveTool } from 'store/design/selectors';
@@ -6,14 +6,16 @@ import { useAppDispatch, useAppSelector } from 'store';
 
 // types
 import { ToolName } from 'types/design/enums';
-import { TSliceDraft, TSliceDrawDragState, TSliceMoveDragState, TSliceResizeDragState, TSliceRotateDragState } from './types';
+import { TSliceDrawDragState, TSliceMoveDragState, TSliceResizeDragState, TSliceRotateDragState } from './types';
+import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
 import { handlePointerDown } from './utils/handlePointerDown/handlePointerDown';
 import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 
-export const useSliceTool = (canvasRef: RefObject<HTMLCanvasElement | null>, sliceRef: RefObject<TSliceDraft | null>): void => {
+export const useSliceTool = (refs: TCanvasRefs): void => {
+  const { canvasRef, sliceRef } = refs;
   const activeTool = useAppSelector(selectActiveTool);
   const dispatch = useAppDispatch();
   const drawDragRef = useRef<TSliceDrawDragState | null>(null);

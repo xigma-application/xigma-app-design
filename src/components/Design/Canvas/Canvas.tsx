@@ -1,5 +1,5 @@
 import cx from 'classnames';
-import { FC, useRef } from 'react';
+import { FC } from 'react';
 
 // components
 import TextEditOverlay from './components/TextEditOverlay/TextEditOverlay';
@@ -7,6 +7,7 @@ import TextEditOverlay from './components/TextEditOverlay/TextEditOverlay';
 // hooks
 import { useCanvasDragPan } from './hooks/useCanvasDragPan/useCanvasDragPan';
 import { useCanvasPanZoom } from './hooks/useCanvasPanZoom/useCanvasPanZoom';
+import { useCanvasRefs } from './hooks/useCanvasRefs/useCanvasRefs';
 import { useCanvasRenderLoop } from './hooks/useCanvasRenderLoop/useCanvasRenderLoop';
 import { useCanvasResize } from './hooks/useCanvasResize/useCanvasResize';
 import { useClassNames } from '../core/ClassNamesProvider/hooks/useClassNames';
@@ -42,77 +43,33 @@ import {
 // styles
 import styles from './canvas.module.scss';
 
-// types
-import {
-  TCornerRadiusDragState,
-  TEllipseArcDragState,
-  TEllipseArcRatioDragState,
-  TEllipseArcRotateDragState,
-  TPolygonCornerRadiusDragState,
-  TStarCornerRadiusDragState,
-} from './hooks/useSelectionTool/types';
-import { TDraftEntity } from 'types/design/types';
-import { TDraftRect } from 'types/canvas';
-import { TSliceDraft } from './hooks/useSliceTool/types';
-
 const Canvas: FC = () => {
   const { className } = useClassNames();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const draftRef = useRef<TDraftEntity | null>(null);
-  const marqueeRef = useRef<TDraftRect | null>(null);
-  const hoverRef = useRef<string | null>(null);
-  const sliceRef = useRef<TSliceDraft | null>(null);
-  const cornerRadiusDragRef = useRef<TCornerRadiusDragState | null>(null);
-  const polygonCornerRadiusDragRef = useRef<TPolygonCornerRadiusDragState | null>(null);
-  const starCornerRadiusDragRef = useRef<TStarCornerRadiusDragState | null>(null);
-  const ellipseArcDragRef = useRef<TEllipseArcDragState | null>(null);
-  const ellipseArcRotateDragRef = useRef<TEllipseArcRotateDragState | null>(null);
-  const ellipseArcRatioDragRef = useRef<TEllipseArcRatioDragState | null>(null);
+  const refs = useCanvasRefs();
 
-  useCanvasResize(canvasRef);
-  useCanvasPanZoom(canvasRef);
-  useCanvasDragPan(canvasRef);
-  useHandTool(canvasRef);
-  useDrawShapeTool(canvasRef, draftRef, FRAME_TOOL_SETTINGS);
-  useDrawShapeTool(canvasRef, draftRef, SECTION_TOOL_SETTINGS);
-  useDrawShapeTool(canvasRef, draftRef, RECTANGLE_TOOL_SETTINGS);
-  useDrawShapeTool(canvasRef, draftRef, ELLIPSE_TOOL_SETTINGS);
-  useDrawPolygonTool(canvasRef, draftRef, POLYGON_TOOL_SETTINGS);
-  useDrawStarTool(canvasRef, draftRef, STAR_TOOL_SETTINGS);
-  useDrawLineTool(canvasRef, draftRef, LINE_TOOL_SETTINGS);
-  useDrawLineTool(canvasRef, draftRef, ARROW_TOOL_SETTINGS);
-  useDrawMediaTool(canvasRef, draftRef, MEDIA_TOOL_SETTINGS);
-  useDrawTextTool(canvasRef, draftRef);
-  useDrawTextOnPathTool(canvasRef, draftRef);
-  useSelectionTool(
-    canvasRef,
-    marqueeRef,
-    cornerRadiusDragRef,
-    polygonCornerRadiusDragRef,
-    starCornerRadiusDragRef,
-    ellipseArcDragRef,
-    ellipseArcRotateDragRef,
-    ellipseArcRatioDragRef,
-  );
-  useSliceTool(canvasRef, sliceRef);
-  useTextEditOnDoubleClick(canvasRef);
-  useHoverHighlight(canvasRef, hoverRef);
-  useCurvedCaretEditing(canvasRef);
-  useStraightCaretEditing(canvasRef);
-  useDrawingCursor(canvasRef);
-  useCanvasRenderLoop(
-    canvasRef,
-    draftRef,
-    marqueeRef,
-    hoverRef,
-    sliceRef,
-    cornerRadiusDragRef,
-    polygonCornerRadiusDragRef,
-    starCornerRadiusDragRef,
-    ellipseArcDragRef,
-    ellipseArcRotateDragRef,
-    ellipseArcRatioDragRef,
-  );
+  useCanvasResize(refs);
+  useCanvasPanZoom(refs);
+  useCanvasDragPan(refs);
+  useHandTool(refs);
+  useDrawShapeTool(refs, FRAME_TOOL_SETTINGS);
+  useDrawShapeTool(refs, SECTION_TOOL_SETTINGS);
+  useDrawShapeTool(refs, RECTANGLE_TOOL_SETTINGS);
+  useDrawShapeTool(refs, ELLIPSE_TOOL_SETTINGS);
+  useDrawPolygonTool(refs, POLYGON_TOOL_SETTINGS);
+  useDrawStarTool(refs, STAR_TOOL_SETTINGS);
+  useDrawLineTool(refs, LINE_TOOL_SETTINGS);
+  useDrawLineTool(refs, ARROW_TOOL_SETTINGS);
+  useDrawMediaTool(refs, MEDIA_TOOL_SETTINGS);
+  useDrawTextTool(refs);
+  useDrawTextOnPathTool(refs);
+  useSelectionTool(refs);
+  useSliceTool(refs);
+  useTextEditOnDoubleClick(refs);
+  useHoverHighlight(refs);
+  useCurvedCaretEditing(refs);
+  useStraightCaretEditing(refs);
+  useDrawingCursor(refs);
+  useCanvasRenderLoop(refs);
 
   return (
     <div className={styles.Canvas}>
@@ -121,7 +78,7 @@ const Canvas: FC = () => {
         className={cx(styles['Canvas__canvas-element'], {
           [styles[`Canvas__canvas-element--${className}`]]: Boolean(className),
         })}
-        ref={canvasRef}
+        ref={refs.canvasRef}
       />
       <TextEditOverlay />
     </div>

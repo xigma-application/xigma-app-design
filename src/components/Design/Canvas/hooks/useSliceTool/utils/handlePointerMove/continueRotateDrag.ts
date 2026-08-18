@@ -5,7 +5,8 @@ import { selectViewport } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { TSliceDraft, TSliceRotateDragState } from '../../types';
+import { TSliceRotateDragState } from '../../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';

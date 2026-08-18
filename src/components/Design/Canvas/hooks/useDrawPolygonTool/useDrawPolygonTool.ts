@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 // others
 import { DEFAULT_SHAPE_SIZE } from '../../constants';
@@ -9,9 +9,9 @@ import { selectActiveTool, selectViewport } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector, useAppStore } from 'store';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { NodeType, ToolName } from 'types/design/enums';
 import { MouseButton } from 'types/enums';
-import { TDraftEntity } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -28,11 +28,8 @@ export type TPolygonToolConfig = {
   tool: ToolName;
 };
 
-export const useDrawPolygonTool = (
-  canvasRef: RefObject<HTMLCanvasElement | null>,
-  draftRef: RefObject<TDraftEntity | null>,
-  { fill, name, sides, tool }: TPolygonToolConfig,
-): void => {
+export const useDrawPolygonTool = (refs: TCanvasRefs, { fill, name, sides, tool }: TPolygonToolConfig): void => {
+  const { canvasRef, draftRef } = refs;
   const activeTool = useAppSelector(selectActiveTool);
   const viewport = useAppSelector(selectViewport);
   const dispatch = useAppDispatch();

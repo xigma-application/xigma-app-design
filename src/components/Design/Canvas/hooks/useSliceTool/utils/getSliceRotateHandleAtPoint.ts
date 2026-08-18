@@ -4,7 +4,7 @@ import { CORNER_HANDLE_SIZE, ROTATE_HANDLE_OUTER_RADIUS_PX } from 'constant/canv
 // types
 import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
-import { TSliceDraft } from '../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { getRectCorners } from 'utils/canvas/getRectCorners';

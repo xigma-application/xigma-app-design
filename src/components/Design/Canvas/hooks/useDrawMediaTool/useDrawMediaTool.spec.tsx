@@ -4,6 +4,7 @@ import { act, renderHook } from '@testing-library/react';
 import { RefObject } from 'react';
 
 // hooks
+import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useDrawMediaTool, TMediaToolConfig } from './useDrawMediaTool';
 
 // store
@@ -98,7 +99,7 @@ const renderMediaTool = (
   draftRef: RefObject<TDraftEntity | null>,
   store: EnhancedStore<{ design: TDesignState }>,
 ): void => {
-  renderHook(() => useDrawMediaTool(canvasRef, draftRef, CONFIG), {
+  renderHook(() => useDrawMediaTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
     wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
   });
 };

@@ -7,7 +7,8 @@ import { AppDispatch, store } from 'store';
 
 // types
 import { MouseButton } from 'types/enums';
-import { TSliceDraft, TSliceDrawDragState, TSliceMoveDragState, TSliceResizeDragState, TSliceRotateDragState } from '../../types';
+import { TSliceDrawDragState, TSliceMoveDragState, TSliceResizeDragState, TSliceRotateDragState } from '../../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { armDrawDrag } from './armDrawDrag';

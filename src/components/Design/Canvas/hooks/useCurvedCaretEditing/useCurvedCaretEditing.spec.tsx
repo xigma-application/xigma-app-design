@@ -6,6 +6,7 @@ import { RefObject } from 'react';
 import ClassNamesProvider from 'components/Design/core/ClassNamesProvider/ClassNamesProvider';
 
 // hooks
+import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useCurvedCaretEditing } from './useCurvedCaretEditing';
 
 // store
@@ -60,7 +61,7 @@ const doubleClickEvent = (x: number, y: number): MouseEvent =>
   new MouseEvent('dblclick', { bubbles: true, button: 0, clientX: x, clientY: y });
 
 const renderCurvedCaretEditing = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
-  renderHook(() => useCurvedCaretEditing(canvasRef), {
+  renderHook(() => useCurvedCaretEditing(createCanvasRefs({ canvasRef })), {
     wrapper: ({ children }) => (
       <Provider store={store}>
         <ClassNamesProvider>{children}</ClassNamesProvider>

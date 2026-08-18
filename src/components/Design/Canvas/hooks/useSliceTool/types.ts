@@ -1,7 +1,6 @@
 // types
-import { TDraftRect, TPoint, TResizeHandle } from 'types/canvas';
-
-export type TSliceDraft = TDraftRect & { rotation: number };
+import { TPoint, TResizeHandle } from 'types/canvas';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 export type TSliceDrawDragState = { start: TPoint };
 

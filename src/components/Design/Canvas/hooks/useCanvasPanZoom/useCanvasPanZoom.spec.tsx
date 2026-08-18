@@ -3,6 +3,7 @@ import { renderHook } from '@testing-library/react';
 import { RefObject } from 'react';
 
 // hooks
+import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useCanvasPanZoom } from './useCanvasPanZoom';
 
 // store
@@ -37,7 +38,7 @@ describe('useCanvasPanZoom behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    renderHook(() => useCanvasPanZoom(canvasRef), {
+    renderHook(() => useCanvasPanZoom(createCanvasRefs({ canvasRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -53,7 +54,7 @@ describe('useCanvasPanZoom behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    renderHook(() => useCanvasPanZoom(canvasRef), {
+    renderHook(() => useCanvasPanZoom(createCanvasRefs({ canvasRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -69,7 +70,7 @@ describe('useCanvasPanZoom behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    renderHook(() => useCanvasPanZoom(canvasRef), {
+    renderHook(() => useCanvasPanZoom(createCanvasRefs({ canvasRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -86,7 +87,7 @@ describe('useCanvasPanZoom behaviors', () => {
 
     // result
     expect(() =>
-      renderHook(() => useCanvasPanZoom(canvasRef), {
+      renderHook(() => useCanvasPanZoom(createCanvasRefs({ canvasRef })), {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
       }),
     ).not.toThrow();
@@ -96,7 +97,7 @@ describe('useCanvasPanZoom behaviors', () => {
     // mock
     const canvasRef = createCanvasRef();
 
-    renderHook(() => useCanvasPanZoom(canvasRef), {
+    renderHook(() => useCanvasPanZoom(createCanvasRefs({ canvasRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 

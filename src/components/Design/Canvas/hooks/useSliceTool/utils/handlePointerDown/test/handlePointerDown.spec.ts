@@ -6,7 +6,8 @@ import { store } from 'store';
 
 // types
 import { ToolName } from 'types/design/enums';
-import { TSliceDraft, TSliceDrawDragState, TSliceMoveDragState, TSliceResizeDragState, TSliceRotateDragState } from '../../../types';
+import { TSliceDrawDragState, TSliceMoveDragState, TSliceResizeDragState, TSliceRotateDragState } from '../../../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { handlePointerDown } from '../handlePointerDown';

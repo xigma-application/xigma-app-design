@@ -4,7 +4,7 @@ import { CORNER_HANDLE_SIZE, RESIZE_EDGE_HIT_TOLERANCE_PX } from 'constant/canva
 // types
 import { TPoint, TResizeHandle } from 'types/canvas';
 import { TViewport } from 'types/design/types';
-import { TSliceDraft } from '../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { getUnrotatedQueryPoint } from '../../../utils/getUnrotatedQueryPoint';

@@ -6,6 +6,7 @@ import { RefObject } from 'react';
 import ClassNamesProvider from 'components/Design/core/ClassNamesProvider/ClassNamesProvider';
 
 // hooks
+import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useClassNames } from 'components/Design/core/ClassNamesProvider/hooks/useClassNames';
 import { useDrawingCursor } from './useDrawingCursor';
 import { useHandTool } from '../useHandTool/useHandTool';
@@ -24,7 +25,7 @@ const renderDrawingCursor = (canvasRef: RefObject<HTMLCanvasElement | null>): Re
 
   renderHook(
     () => {
-      useDrawingCursor(canvasRef);
+      useDrawingCursor(createCanvasRefs({ canvasRef }));
       classNameRef.current = useClassNames().className;
     },
     {
@@ -118,8 +119,8 @@ describe('useDrawingCursor behaviors', () => {
     // before
     renderHook(
       () => {
-        useHandTool(canvasRef);
-        useDrawingCursor(canvasRef);
+        useHandTool(createCanvasRefs({ canvasRef }));
+        useDrawingCursor(createCanvasRefs({ canvasRef }));
         classNameRef.current = useClassNames().className;
       },
       {

@@ -3,6 +3,7 @@ import { Provider } from 'react-redux';
 import { RefObject } from 'react';
 
 // hooks
+import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useSliceTool } from './useSliceTool';
 
 // store
@@ -11,7 +12,7 @@ import { store } from 'store';
 
 // types
 import { ToolName } from 'types/design/enums';
-import { TSliceDraft } from './types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { DEFAULT_CURSOR } from 'utils/canvas/defaultCursor';
@@ -32,7 +33,7 @@ const pointerEvent = (type: string, x: number, y: number, options: Partial<Point
 const renderSliceTool = (canvasRef: RefObject<HTMLCanvasElement | null>): RefObject<TSliceDraft | null> => {
   const sliceRef: RefObject<TSliceDraft | null> = { current: null };
 
-  renderHook(() => useSliceTool(canvasRef, sliceRef), {
+  renderHook(() => useSliceTool(createCanvasRefs({ canvasRef, sliceRef })), {
     wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
   });
 

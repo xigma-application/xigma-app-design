@@ -6,6 +6,7 @@ import { RefObject } from 'react';
 import ClassNamesProvider from 'components/Design/core/ClassNamesProvider/ClassNamesProvider';
 
 // hooks
+import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useSelectionTool } from './useSelectionTool';
 
 // store
@@ -14,14 +15,6 @@ import { store } from 'store';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import {
-  TCornerRadiusDragState,
-  TEllipseArcDragState,
-  TEllipseArcRatioDragState,
-  TEllipseArcRotateDragState,
-  TPolygonCornerRadiusDragState,
-  TStarCornerRadiusDragState,
-} from './types';
 import { TDraftRect, TEditingTextBox } from 'types/canvas';
 
 const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
@@ -68,36 +61,17 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => 
 };
 
 const renderSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>): RefObject<TDraftRect | null> => {
-  const marqueeRef: RefObject<TDraftRect | null> = { current: null };
-  const cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null> = { current: null };
-  const polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null> = { current: null };
-  const starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null> = { current: null };
-  const ellipseArcDragRef: RefObject<TEllipseArcDragState | null> = { current: null };
-  const ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null> = { current: null };
-  const ellipseArcRatioDragRef: RefObject<TEllipseArcRatioDragState | null> = { current: null };
+  const refs = createCanvasRefs({ canvasRef });
 
-  renderHook(
-    () =>
-      useSelectionTool(
-        canvasRef,
-        marqueeRef,
-        cornerRadiusDragRef,
-        polygonCornerRadiusDragRef,
-        starCornerRadiusDragRef,
-        ellipseArcDragRef,
-        ellipseArcRotateDragRef,
-        ellipseArcRatioDragRef,
-      ),
-    {
-      wrapper: ({ children }) => (
-        <Provider store={store}>
-          <ClassNamesProvider>{children}</ClassNamesProvider>
-        </Provider>
-      ),
-    },
-  );
+  renderHook(() => useSelectionTool(refs), {
+    wrapper: ({ children }) => (
+      <Provider store={store}>
+        <ClassNamesProvider>{children}</ClassNamesProvider>
+      </Provider>
+    ),
+  });
 
-  return marqueeRef;
+  return refs.marqueeRef;
 };
 
 describe('useSelectionTool behaviors', () => {

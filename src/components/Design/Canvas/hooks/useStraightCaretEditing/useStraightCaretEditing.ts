@@ -1,10 +1,11 @@
-import { RefObject, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 // store
 import { selectEditingTextBox } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TEditingTextBox } from 'types/canvas';
 
 // utils
@@ -15,7 +16,8 @@ import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 
 const isEditingStraightBox = (box: TEditingTextBox | null): boolean => Boolean(box) && !box?.pathId;
 
-export const useStraightCaretEditing = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
+export const useStraightCaretEditing = (refs: TCanvasRefs): void => {
+  const { canvasRef } = refs;
   const dispatch = useAppDispatch();
   const editingTextBox = useAppSelector(selectEditingTextBox);
   const isActive = isEditingStraightBox(editingTextBox);

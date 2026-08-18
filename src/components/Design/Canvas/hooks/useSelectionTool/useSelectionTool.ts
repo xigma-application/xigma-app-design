@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 // others
 import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
@@ -9,22 +9,17 @@ import { useAppDispatch, useAppSelector } from 'store';
 
 // types
 import { ToolName } from 'types/design/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import {
-  TCornerRadiusDragState,
   TDragState,
-  TEllipseArcDragState,
-  TEllipseArcRatioDragState,
-  TEllipseArcRotateDragState,
   TEndpointDragState,
   TPathOffsetDragState,
-  TPolygonCornerRadiusDragState,
   TPolygonVertexCountDragState,
   TResizeDragState,
   TRotateDragState,
-  TStarCornerRadiusDragState,
   TStarVertexCountDragState,
 } from './types';
-import { TDraftRect, TPoint } from 'types/canvas';
+import { TPoint } from 'types/canvas';
 
 // utils
 import { handlePointerDown } from './utils/handlePointerDown/handlePointerDown';
@@ -32,16 +27,17 @@ import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 import { shouldUseCanvasCaretEditing } from '../../utils/shouldUseCanvasCaretEditing';
 
-export const useSelectionTool = (
-  canvasRef: RefObject<HTMLCanvasElement | null>,
-  marqueeRef: RefObject<TDraftRect | null>,
-  cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>,
-  polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>,
-  starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>,
-  ellipseArcDragRef: RefObject<TEllipseArcDragState | null>,
-  ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null>,
-  ellipseArcRatioDragRef: RefObject<TEllipseArcRatioDragState | null>,
-): void => {
+export const useSelectionTool = (refs: TCanvasRefs): void => {
+  const {
+    canvasRef,
+    cornerRadiusDragRef,
+    ellipseArcDragRef,
+    ellipseArcRatioDragRef,
+    ellipseArcRotateDragRef,
+    marqueeRef,
+    polygonCornerRadiusDragRef,
+    starCornerRadiusDragRef,
+  } = refs;
   const { setClassName } = useClassNames();
   const activeTool = useAppSelector(selectActiveTool);
   const editingTextBox = useAppSelector(selectEditingTextBox);

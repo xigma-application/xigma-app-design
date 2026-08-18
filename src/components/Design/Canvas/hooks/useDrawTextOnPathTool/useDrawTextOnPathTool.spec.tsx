@@ -3,6 +3,7 @@ import { RefObject } from 'react';
 import { renderHook } from '@testing-library/react';
 
 // hooks
+import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useDrawTextOnPathTool } from './useDrawTextOnPathTool';
 
 // store
@@ -29,7 +30,7 @@ const pointerEvent = (type: string, x: number, y: number, button = 0): PointerEv
   new PointerEvent(type, { button, clientX: x, clientY: y, pointerId: 1 });
 
 const renderTextOnPathTool = (canvasRef: RefObject<HTMLCanvasElement | null>, draftRef: RefObject<TDraftEntity | null>): void => {
-  renderHook(() => useDrawTextOnPathTool(canvasRef, draftRef), {
+  renderHook(() => useDrawTextOnPathTool(createCanvasRefs({ canvasRef, draftRef })), {
     wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
   });
 };

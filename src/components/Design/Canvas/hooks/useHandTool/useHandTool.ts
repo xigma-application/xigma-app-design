@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 // others
 import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
@@ -9,6 +9,7 @@ import { setViewport } from 'store/design/slice';
 import { store, useAppDispatch, useAppSelector } from 'store';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { MouseButton } from 'types/enums';
 import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
@@ -17,7 +18,8 @@ import { TPoint } from 'types/canvas';
 import { applyDragPan } from '../useCanvasDragPan/utils/applyDragPan';
 import { getPointerPosition } from '../../utils/getPointerPosition';
 
-export const useHandTool = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
+export const useHandTool = (refs: TCanvasRefs): void => {
+  const { canvasRef } = refs;
   const activeTool = useAppSelector(selectActiveTool);
   const dispatch = useAppDispatch();
   const { setClassName } = useClassNames();

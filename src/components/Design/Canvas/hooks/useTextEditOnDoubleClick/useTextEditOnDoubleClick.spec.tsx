@@ -3,6 +3,7 @@ import { renderHook } from '@testing-library/react';
 import { RefObject } from 'react';
 
 // hooks
+import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useTextEditOnDoubleClick } from './useTextEditOnDoubleClick';
 
 // store
@@ -96,7 +97,7 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
 };
 
 const renderDoubleClickTool = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
-  renderHook(() => useTextEditOnDoubleClick(canvasRef), {
+  renderHook(() => useTextEditOnDoubleClick(createCanvasRefs({ canvasRef })), {
     wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
   });
 };

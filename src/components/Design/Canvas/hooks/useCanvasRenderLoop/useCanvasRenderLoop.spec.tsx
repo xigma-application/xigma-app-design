@@ -2,6 +2,7 @@ import { renderHook } from '@testing-library/react';
 import { RefObject } from 'react';
 
 // hooks
+import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useCanvasRenderLoop } from './useCanvasRenderLoop';
 
 let rafCallback: FrameRequestCallback | undefined;
@@ -70,7 +71,7 @@ describe('useCanvasRenderLoop behaviors', () => {
     const canvasRef: RefObject<HTMLCanvasElement | null> = { current: document.createElement('canvas') };
 
     // result
-    expect(() => renderHook(() => useCanvasRenderLoop(canvasRef))).not.toThrow();
+    expect(() => renderHook(() => useCanvasRenderLoop(createCanvasRefs({ canvasRef })))).not.toThrow();
     expect(requestAnimationFrameMock).not.toHaveBeenCalled();
   });
 
@@ -79,7 +80,7 @@ describe('useCanvasRenderLoop behaviors', () => {
     const { canvasRef, clear, clearColor } = createGlCanvasRef();
 
     // before
-    renderHook(() => useCanvasRenderLoop(canvasRef));
+    renderHook(() => useCanvasRenderLoop(createCanvasRefs({ canvasRef })));
 
     // action
     rafCallback?.(0);
@@ -94,7 +95,7 @@ describe('useCanvasRenderLoop behaviors', () => {
     const { canvasRef, colorMask } = createGlCanvasRef();
 
     // before
-    renderHook(() => useCanvasRenderLoop(canvasRef));
+    renderHook(() => useCanvasRenderLoop(createCanvasRefs({ canvasRef })));
 
     // action
     rafCallback?.(0);
@@ -111,7 +112,7 @@ describe('useCanvasRenderLoop behaviors', () => {
     const { canvasRef } = createGlCanvasRef();
 
     // before
-    renderHook(() => useCanvasRenderLoop(canvasRef));
+    renderHook(() => useCanvasRenderLoop(createCanvasRefs({ canvasRef })));
 
     // action
     rafCallback?.(0);
@@ -125,7 +126,7 @@ describe('useCanvasRenderLoop behaviors', () => {
     const { canvasRef } = createGlCanvasRef();
 
     // before
-    const { unmount } = renderHook(() => useCanvasRenderLoop(canvasRef));
+    const { unmount } = renderHook(() => useCanvasRenderLoop(createCanvasRefs({ canvasRef })));
 
     // action
     unmount();

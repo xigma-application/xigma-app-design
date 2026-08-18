@@ -1,4 +1,4 @@
-import { RefObject, useEffect } from 'react';
+import { useEffect } from 'react';
 
 // others
 import FRAGMENT_SHADER_SOURCE from 'constant/webgl/fragmentShaderSource';
@@ -9,35 +9,28 @@ import VERTEX_SHADER_SOURCE from 'constant/webgl/vertexShaderSource';
 import { WEBGL_CONTEXT_ATTRIBUTES, WEBGL_CONTEXT_ID } from '../../constants';
 
 // types
-import {
-  TCornerRadiusDragState,
-  TEllipseArcDragState,
-  TEllipseArcRatioDragState,
-  TEllipseArcRotateDragState,
-  TPolygonCornerRadiusDragState,
-  TStarCornerRadiusDragState,
-} from '../useSelectionTool/types';
-import { TDraftRect } from 'types/canvas';
-import { TDraftEntity } from 'types/design/types';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TImageRenderContext } from './types';
 
 // utils
 import { createProgram } from './utils/createProgram';
 import { startRenderLoop } from './utils/startRenderLoop';
 
-export const useCanvasRenderLoop = (
-  canvasRef: RefObject<HTMLCanvasElement | null>,
-  draftRef?: RefObject<TDraftEntity | null>,
-  marqueeRef?: RefObject<TDraftRect | null>,
-  hoverRef?: RefObject<string | null>,
-  sliceRef?: RefObject<(TDraftRect & { rotation: number }) | null>,
-  cornerRadiusDragRef?: RefObject<TCornerRadiusDragState | null>,
-  polygonCornerRadiusDragRef?: RefObject<TPolygonCornerRadiusDragState | null>,
-  starCornerRadiusDragRef?: RefObject<TStarCornerRadiusDragState | null>,
-  ellipseArcDragRef?: RefObject<TEllipseArcDragState | null>,
-  ellipseArcRotateDragRef?: RefObject<TEllipseArcRotateDragState | null>,
-  ellipseArcRatioDragRef?: RefObject<TEllipseArcRatioDragState | null>,
-): void => {
+export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
+  const {
+    canvasRef,
+    cornerRadiusDragRef,
+    draftRef,
+    ellipseArcDragRef,
+    ellipseArcRatioDragRef,
+    ellipseArcRotateDragRef,
+    hoverRef,
+    marqueeRef,
+    polygonCornerRadiusDragRef,
+    sliceRef,
+    starCornerRadiusDragRef,
+  } = refs;
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const gl = canvas?.getContext(WEBGL_CONTEXT_ID, WEBGL_CONTEXT_ATTRIBUTES);

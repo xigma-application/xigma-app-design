@@ -5,7 +5,8 @@ import { selectViewport } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { TSliceDraft, TSliceMoveDragState } from '../../types';
+import { TSliceMoveDragState } from '../../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { getPointerPosition } from '../../../../utils/getPointerPosition';

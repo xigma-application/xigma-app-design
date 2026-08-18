@@ -1,10 +1,10 @@
 import { RefObject } from 'react';
 
 // types
-import { TStarCornerRadiusDragState } from '../../../types';
 
 // utils
 import { armStarCornerRadiusDrag } from '../armStarCornerRadiusDrag';
+import { TStarCornerRadiusDragState } from 'types/design/canvas/types';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');

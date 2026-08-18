@@ -3,6 +3,7 @@ import { Provider } from 'react-redux';
 import { RefObject } from 'react';
 
 // hooks
+import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useStraightCaretEditing } from './useStraightCaretEditing';
 
 // store
@@ -45,7 +46,7 @@ const doubleClickEvent = (x: number, y: number): MouseEvent =>
   new MouseEvent('dblclick', { bubbles: true, button: 0, clientX: x, clientY: y });
 
 const renderStraightCaretEditing = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
-  renderHook(() => useStraightCaretEditing(canvasRef), {
+  renderHook(() => useStraightCaretEditing(createCanvasRefs({ canvasRef })), {
     wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
   });
 };

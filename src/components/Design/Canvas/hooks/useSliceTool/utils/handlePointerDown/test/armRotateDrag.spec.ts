@@ -1,7 +1,8 @@
 import { RefObject } from 'react';
 
 // types
-import { TSliceDraft, TSliceRotateDragState } from '../../../types';
+import { TSliceRotateDragState } from '../../../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { armRotateDrag } from '../armRotateDrag';

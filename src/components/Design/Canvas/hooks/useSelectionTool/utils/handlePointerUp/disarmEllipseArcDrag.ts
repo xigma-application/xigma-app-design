@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
+import { TEllipseArcDragState } from 'types/design/canvas/types';
 
 // types
-import { TEllipseArcDragState } from '../../types';
 
 export const disarmEllipseArcDrag = (
   canvas: HTMLCanvasElement,

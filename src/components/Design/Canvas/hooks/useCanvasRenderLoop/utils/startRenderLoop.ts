@@ -1,6 +1,12 @@
 import { RefObject } from 'react';
 
 // types
+import { TDraftRect } from 'types/canvas';
+import { TDraftEntity } from 'types/design/types';
+import { TImageRenderContext } from '../types';
+
+// utils
+import { drawScene } from './drawScene/drawScene';
 import {
   TCornerRadiusDragState,
   TEllipseArcDragState,
@@ -8,13 +14,7 @@ import {
   TEllipseArcRotateDragState,
   TPolygonCornerRadiusDragState,
   TStarCornerRadiusDragState,
-} from '../../useSelectionTool/types';
-import { TDraftRect } from 'types/canvas';
-import { TDraftEntity } from 'types/design/types';
-import { TImageRenderContext } from '../types';
-
-// utils
-import { drawScene } from './drawScene/drawScene';
+} from 'types/design/canvas/types';
 
 type TFrameIdRef = { current: number };
 

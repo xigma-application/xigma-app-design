@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 // others
 import { DEFAULT_SHAPE_SIZE, PATH_NAME, PATH_START_OFFSET_TOP } from '../../constants';
@@ -9,9 +9,9 @@ import { selectActiveTool, selectViewport } from 'store/design/selectors';
 import { store, useAppDispatch, useAppSelector } from 'store';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { NodeType, PathType, ToolName } from 'types/design/enums';
 import { MouseButton } from 'types/enums';
-import { TDraftEntity } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -20,7 +20,8 @@ import { screenToWorld } from '../../utils/screenToWorld';
 import { toDraftRect } from '../../utils/toDraftRect';
 import { toDraftRectWithDefault } from '../../utils/toDraftRectWithDefault';
 
-export const useDrawTextOnPathTool = (canvasRef: RefObject<HTMLCanvasElement | null>, draftRef: RefObject<TDraftEntity | null>): void => {
+export const useDrawTextOnPathTool = (refs: TCanvasRefs): void => {
+  const { canvasRef, draftRef } = refs;
   const activeTool = useAppSelector(selectActiveTool);
   const viewport = useAppSelector(selectViewport);
   const dispatch = useAppDispatch();

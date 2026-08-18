@@ -24,8 +24,9 @@ orchestrators.
   `pathOffsetDragRef`, `resizeDragRef`, `rotateDragRef`, `marqueeStartRef` — and three native
   `PointerEvent` listeners. `cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef`/
   `ellipseArcDragRef`/`ellipseArcRotateDragRef`/`ellipseArcRatioDragRef` (§19) are the odd six out:
-  lifted to `Canvas.tsx` and passed in as parameters (same "parent-owned, ref-drilled" shape as
-  `marqueeRef`/`hoverRef`/`sliceRef` — see `canvas-rendering-pipeline.md` §2), specifically so
+  lifted to `useCanvasRefs()` and destructured off the shared `refs: TCanvasRefs` object the hook
+  receives (same "parent-owned, ref-drilled" shape as `marqueeRef`/`hoverRef`/`sliceRef` — see
+  `canvas-rendering-pipeline.md` §2), specifically so
   `useCanvasRenderLoop` can also read them every frame. For the corner-radius three that's §13's
   "mid-drag zero" fix (needs to know whether a drag is *currently* in progress); for the ellipse-arc
   three it's simpler — `drawEllipseArcHandleLayer` reads `draggedHandlePosition` off each ref every
@@ -654,20 +655,25 @@ The fix threads an `isDraggingCornerRadius` boolean into the fallback so it's su
 is actually in progress (radius stays literal, including `0`, tracking the pointer at the corner/
 vertex) and only re-applies once the drag ends. Getting that boolean to the render layer required
 lifting `cornerRadiusDragRef`/`polygonCornerRadiusDragRef` out of `useSelectionTool.ts` (previously
-private `useRef`s, invisible outside the hook) up to `Canvas.tsx`, which now creates them and passes
-the *same* ref objects into both `useSelectionTool` (which still arms/disarms them exactly as
-before — `armCornerRadiusDrag.ts` et al. are unchanged) and `useCanvasRenderLoop` (new trailing
-params) — the same "parent-owned, ref-drilled" shape `Canvas.tsx` already uses for `marqueeRef`/
-`hoverRef`/`sliceRef` (`canvas-rendering-pipeline.md` §2), just applied to refs that used to be
-selection-tool-private (a third, `starCornerRadiusDragRef`, joined the same way once Star's handle
-was added, §15). From there the flag is a plain dereference-and-OR, matching how `hoverRef` etc. get
-dereferenced to plain values before reaching `drawScene`:
+private `useRef`s, invisible outside the hook) up to parent ownership, so the *same* ref objects
+reach both `useSelectionTool` (which still arms/disarms them exactly as before —
+`armCornerRadiusDrag.ts` et al. are unchanged) and `useCanvasRenderLoop` — the same "parent-owned,
+ref-drilled" shape already used for `marqueeRef`/`hoverRef`/`sliceRef` (`canvas-rendering-pipeline.md`
+§2), just applied to refs that used to be selection-tool-private (a third, `starCornerRadiusDragRef`,
+joined the same way once Star's handle was added, §15). Parent ownership now means
+`Canvas/hooks/useCanvasRefs/useCanvasRefs.ts` — it creates all of these refs and returns them as one
+`TCanvasRefs` object; `Canvas.tsx` calls it once and passes the resulting `refs` object into every
+hook, so `useSelectionTool`/`useCanvasRenderLoop` each destructure just the refs they need off it
+rather than receiving them as separate positional params. From there the flag is a plain
+dereference-and-OR, matching how `hoverRef` etc. get dereferenced to plain values before reaching
+`drawScene`:
 
 ```
-Canvas.tsx: creates cornerRadiusDragRef/polygonCornerRadiusDragRef/starCornerRadiusDragRef via useRef
-  → useSelectionTool(canvasRef, marqueeRef, cornerRadiusDragRef, polygonCornerRadiusDragRef, starCornerRadiusDragRef)
+useCanvasRefs(): creates cornerRadiusDragRef/polygonCornerRadiusDragRef/starCornerRadiusDragRef (+ the rest of TCanvasRefs)
+Canvas.tsx: const refs = useCanvasRefs()
+  → useSelectionTool(refs)  // destructures cornerRadiusDragRef/polygonCornerRadiusDragRef/starCornerRadiusDragRef off refs
       (arms/disarms them exactly as before — no behavior change here)
-  → useCanvasRenderLoop(..., cornerRadiusDragRef, polygonCornerRadiusDragRef, starCornerRadiusDragRef)
+  → useCanvasRenderLoop(refs)  // destructures the same refs off refs
       → startRenderLoop's tick(): isDraggingCornerRadius =
           Boolean(cornerRadiusDragRef?.current) || Boolean(polygonCornerRadiusDragRef?.current) || Boolean(starCornerRadiusDragRef?.current)
         → drawScene(..., isDraggingCornerRadius)

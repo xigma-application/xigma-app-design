@@ -6,6 +6,7 @@ import { RefObject } from 'react';
 import ClassNamesProvider from 'components/Design/core/ClassNamesProvider/ClassNamesProvider';
 
 // hooks
+import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useCanvasDragPan } from './useCanvasDragPan';
 import { useClassNames } from 'components/Design/core/ClassNamesProvider/hooks/useClassNames';
 
@@ -38,7 +39,7 @@ const renderDragPan = (canvasRef: RefObject<HTMLCanvasElement | null>): RefObjec
 
   renderHook(
     () => {
-      useCanvasDragPan(canvasRef);
+      useCanvasDragPan(createCanvasRefs({ canvasRef }));
       classNameRef.current = useClassNames().className;
     },
     {

@@ -6,11 +6,11 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TCornerRadiusDragState, TPolygonCornerRadiusDragState } from '../../../useSelectionTool/types';
 import { TImageRenderContext } from '../../types';
 
 // utils
 import { startRenderLoop } from '../startRenderLoop';
+import { TCornerRadiusDragState, TPolygonCornerRadiusDragState } from 'types/design/canvas/types';
 
 let rafCallback: FrameRequestCallback | undefined;
 

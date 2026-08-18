@@ -4,6 +4,7 @@ import { act, renderHook } from '@testing-library/react';
 import { RefObject } from 'react';
 
 // hooks
+import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useDrawShapeTool, TShapeToolConfig } from './useDrawShapeTool';
 
 // store
@@ -47,7 +48,7 @@ describe.each(CONFIGS)('useDrawShapeTool behaviors ($label)', ({ config }) => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawShapeTool(canvasRef, draftRef, config), {
+    renderHook(() => useDrawShapeTool(createCanvasRefs({ canvasRef, draftRef }), config), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -69,7 +70,7 @@ describe.each(CONFIGS)('useDrawShapeTool behaviors ($label)', ({ config }) => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawShapeTool(canvasRef, draftRef, config), {
+    renderHook(() => useDrawShapeTool(createCanvasRefs({ canvasRef, draftRef }), config), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -91,7 +92,7 @@ describe.each(CONFIGS)('useDrawShapeTool behaviors ($label)', ({ config }) => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawShapeTool(canvasRef, draftRef, config), {
+    renderHook(() => useDrawShapeTool(createCanvasRefs({ canvasRef, draftRef }), config), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -131,7 +132,7 @@ describe.each(CONFIGS)('useDrawShapeTool behaviors ($label)', ({ config }) => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawShapeTool(canvasRef, draftRef, config), {
+    renderHook(() => useDrawShapeTool(createCanvasRefs({ canvasRef, draftRef }), config), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -155,7 +156,7 @@ describe.each(CONFIGS)('useDrawShapeTool behaviors ($label)', ({ config }) => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawShapeTool(canvasRef, draftRef, config), {
+    renderHook(() => useDrawShapeTool(createCanvasRefs({ canvasRef, draftRef }), config), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -177,7 +178,7 @@ describe.each(CONFIGS)('useDrawShapeTool behaviors ($label)', ({ config }) => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawShapeTool(canvasRef, draftRef, config), {
+    renderHook(() => useDrawShapeTool(createCanvasRefs({ canvasRef, draftRef }), config), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -204,7 +205,7 @@ describe.each(CONFIGS)('useDrawShapeTool behaviors ($label)', ({ config }) => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawShapeTool(canvasRef, draftRef, config), {
+    renderHook(() => useDrawShapeTool(createCanvasRefs({ canvasRef, draftRef }), config), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -231,7 +232,7 @@ describe.each(CONFIGS)('useDrawShapeTool behaviors ($label)', ({ config }) => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawShapeTool(canvasRef, draftRef, config), {
+    renderHook(() => useDrawShapeTool(createCanvasRefs({ canvasRef, draftRef }), config), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -252,7 +253,7 @@ describe.each(CONFIGS)('useDrawShapeTool behaviors ($label)', ({ config }) => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawShapeTool(canvasRef, draftRef, config), {
+    renderHook(() => useDrawShapeTool(createCanvasRefs({ canvasRef, draftRef }), config), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 

@@ -6,6 +6,7 @@ import { RefObject } from 'react';
 import ClassNamesProvider from 'components/Design/core/ClassNamesProvider/ClassNamesProvider';
 
 // hooks
+import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useClassNames } from 'components/Design/core/ClassNamesProvider/hooks/useClassNames';
 import { useHoverHighlight } from './useHoverHighlight';
 
@@ -184,7 +185,7 @@ const renderHoverHighlight = (
 
   renderHook(
     () => {
-      useHoverHighlight(canvasRef, hoverRef);
+      useHoverHighlight(createCanvasRefs({ canvasRef, hoverRef }));
       classNameRef.current = useClassNames().className;
     },
     {

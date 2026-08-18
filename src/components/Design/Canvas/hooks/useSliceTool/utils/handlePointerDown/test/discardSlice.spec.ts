@@ -6,7 +6,7 @@ import { store } from 'store';
 
 // types
 import { ToolName } from 'types/design/enums';
-import { TSliceDraft } from '../../../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { discardSlice } from '../discardSlice';

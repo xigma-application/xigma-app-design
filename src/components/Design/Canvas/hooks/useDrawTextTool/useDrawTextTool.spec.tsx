@@ -4,6 +4,7 @@ import { act, renderHook } from '@testing-library/react';
 import { RefObject } from 'react';
 
 // hooks
+import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useDrawTextTool } from './useDrawTextTool';
 
 // store
@@ -39,7 +40,7 @@ describe('useDrawTextTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawTextTool(canvasRef, draftRef), {
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef, draftRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -61,7 +62,7 @@ describe('useDrawTextTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawTextTool(canvasRef, draftRef), {
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef, draftRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -83,7 +84,7 @@ describe('useDrawTextTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawTextTool(canvasRef, draftRef), {
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef, draftRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -114,7 +115,7 @@ describe('useDrawTextTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawTextTool(canvasRef, draftRef), {
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef, draftRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -138,7 +139,7 @@ describe('useDrawTextTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawTextTool(canvasRef, draftRef), {
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef, draftRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -160,7 +161,7 @@ describe('useDrawTextTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawTextTool(canvasRef, draftRef), {
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef, draftRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -184,7 +185,7 @@ describe('useDrawTextTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawTextTool(canvasRef, draftRef), {
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef, draftRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -208,7 +209,7 @@ describe('useDrawTextTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawTextTool(canvasRef, draftRef), {
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef, draftRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -229,7 +230,7 @@ describe('useDrawTextTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawTextTool(canvasRef, draftRef), {
+    renderHook(() => useDrawTextTool(createCanvasRefs({ canvasRef, draftRef })), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 

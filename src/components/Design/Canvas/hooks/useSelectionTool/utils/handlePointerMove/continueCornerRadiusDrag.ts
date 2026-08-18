@@ -6,7 +6,6 @@ import { updateNode } from 'store/design/slice';
 import { AppDispatch, store } from 'store';
 
 // types
-import { TCornerRadiusDragState } from '../../types';
 
 // utils
 import { getCornerRadiusFromPoint } from 'utils/canvas/cornerRadius/getCornerRadiusFromPoint';
@@ -15,6 +14,7 @@ import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getUnrotatedQueryPoint } from '../../../../utils/getUnrotatedQueryPoint';
 import { resolveCornerFromDirection } from 'utils/canvas/cornerRadius/resolveCornerFromDirection';
 import { screenToWorld } from '../../../../utils/screenToWorld';
+import { TCornerRadiusDragState } from 'types/design/canvas/types';
 
 export const continueCornerRadiusDrag = (
   canvas: HTMLCanvasElement,

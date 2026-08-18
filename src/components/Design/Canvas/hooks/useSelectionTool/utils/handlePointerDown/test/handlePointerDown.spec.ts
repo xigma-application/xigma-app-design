@@ -7,24 +7,26 @@ import { store } from 'store';
 // types
 import { NodeType } from 'types/design/enums';
 import {
-  TCornerRadiusDragState,
   TDragState,
-  TEllipseArcDragState,
-  TEllipseArcRatioDragState,
-  TEllipseArcRotateDragState,
   TEndpointDragState,
   TPathOffsetDragState,
-  TPolygonCornerRadiusDragState,
   TPolygonVertexCountDragState,
   TResizeDragState,
   TRotateDragState,
-  TStarCornerRadiusDragState,
   TStarVertexCountDragState,
 } from '../../../types';
 import { TPoint } from 'types/canvas';
 
 // utils
 import { handlePointerDown } from '../handlePointerDown';
+import {
+  TCornerRadiusDragState,
+  TEllipseArcDragState,
+  TEllipseArcRatioDragState,
+  TEllipseArcRotateDragState,
+  TPolygonCornerRadiusDragState,
+  TStarCornerRadiusDragState,
+} from 'types/design/canvas/types';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');

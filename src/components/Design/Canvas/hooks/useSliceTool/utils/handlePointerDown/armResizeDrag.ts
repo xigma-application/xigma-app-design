@@ -2,7 +2,8 @@ import { RefObject } from 'react';
 
 // types
 import { TResizeHandle } from 'types/canvas';
-import { TSliceDraft, TSliceResizeDragState } from '../../types';
+import { TSliceResizeDragState } from '../../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 export const armResizeDrag = (
   canvas: HTMLCanvasElement,

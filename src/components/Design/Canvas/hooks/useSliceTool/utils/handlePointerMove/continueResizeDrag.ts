@@ -6,7 +6,8 @@ import { store } from 'store';
 
 // types
 import { TPoint } from 'types/canvas';
-import { TSliceDraft, TSliceResizeDragState } from '../../types';
+import { TSliceResizeDragState } from '../../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { getPointerPosition } from '../../../../utils/getPointerPosition';

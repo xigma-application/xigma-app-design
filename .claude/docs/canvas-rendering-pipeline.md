@@ -13,8 +13,14 @@ WebGL2.
   `useCanvasRenderLoop` can tell a corner-radius drag is actively in progress (see
   `selection-and-manipulation.md` §13), plus `ellipseArcDragRef`/`ellipseArcRotateDragRef`/
   `ellipseArcRatioDragRef`, which exist so the Sweep/Start/Ratio handles can render mid-drag at their
-  live pointer-projected position instead of jumping (§19)) threaded into every tool hook and into
-  `useCanvasRenderLoop`.
+  live pointer-projected position instead of jumping (§19)). All eleven refs (the ten above plus
+  `canvasRef` itself) are created in one place, `Canvas/hooks/useCanvasRefs/useCanvasRefs.ts`, which
+  returns them as a single `TCanvasRefs` object (`types/design/canvas/types.ts` — the drag-state
+  types themselves, e.g. `TCornerRadiusDragState`/`TEllipseArcDragState`, live there too, not under
+  `components/`, since a type consumed from the global `types/` layer can't reach back into a
+  feature folder). `Canvas.tsx` calls `const refs = useCanvasRefs()` once and passes that single
+  `refs` object into every tool hook and into `useCanvasRenderLoop`, instead of threading each ref
+  through as its own positional argument.
 - The context itself is created in `Canvas/hooks/useCanvasRenderLoop/useCanvasRenderLoop.ts`:
   `canvas.getContext(WEBGL_CONTEXT_ID, WEBGL_CONTEXT_ATTRIBUTES)`, both constants in
   `Canvas/constants.ts`: `WEBGL_CONTEXT_ID = 'webgl2'`,
@@ -183,9 +189,10 @@ original flat fan, byte-for-byte moved) or `drawRoundedPolygon.ts` — the secon
 (`utils/canvas/drawStar/`) is the third instance, same shape: dispatches on `TStarNode.cornerRadius?:
 number` to `drawStandardStar.ts` or `drawRoundedStar.ts`.
 
-**In-progress/ephemeral visuals** never touch Redux — they live in plain `useRef`s on `Canvas.tsx`,
-written directly by native pointer listeners (so dragging never dispatches per pixel), and read by
-`drawScene` via `.current` every frame:
+**In-progress/ephemeral visuals** never touch Redux — they live in plain `useRef`s created by
+`useCanvasRefs()` (§1) and held on `Canvas.tsx`'s `refs` object, written directly by native pointer
+listeners (so dragging never dispatches per pixel), and read by `drawScene` via `.current` every
+frame:
 
 | Ref | Set by | Rendered by |
 |---|---|---|

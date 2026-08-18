@@ -1,7 +1,8 @@
 import { RefObject } from 'react';
 
 // types
-import { TSliceDraft, TSliceDrawDragState, TSliceMoveDragState, TSliceResizeDragState, TSliceRotateDragState } from '../../../types';
+import { TSliceDrawDragState, TSliceMoveDragState, TSliceResizeDragState, TSliceRotateDragState } from '../../../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { handlePointerMove } from '../handlePointerMove';

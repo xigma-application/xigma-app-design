@@ -2,6 +2,7 @@ import { renderHook } from '@testing-library/react';
 import { RefObject } from 'react';
 
 // hooks
+import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useCanvasResize } from './useCanvasResize';
 
 // others
@@ -46,7 +47,7 @@ describe('useCanvasResize behaviors', () => {
     const canvasRef = createCanvasRef(100, 50);
 
     // before
-    renderHook(() => useCanvasResize(canvasRef));
+    renderHook(() => useCanvasResize(createCanvasRefs({ canvasRef })));
 
     // result
     expect(canvasRef.current?.width).toBe(200);
@@ -58,7 +59,7 @@ describe('useCanvasResize behaviors', () => {
     const canvasRef: RefObject<HTMLCanvasElement | null> = { current: null };
 
     // result
-    expect(() => renderHook(() => useCanvasResize(canvasRef))).not.toThrow();
+    expect(() => renderHook(() => useCanvasResize(createCanvasRefs({ canvasRef })))).not.toThrow();
   });
 
   it('should resize again when the observed element resizes', () => {
@@ -73,7 +74,7 @@ describe('useCanvasResize behaviors', () => {
     const rectSpy = vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({ height: 50, width: 100 } as DOMRect);
 
     // before
-    renderHook(() => useCanvasResize(canvasRef));
+    renderHook(() => useCanvasResize(createCanvasRefs({ canvasRef })));
 
     // action
     rectSpy.mockReturnValue({ height: 80, width: 200 } as DOMRect);
@@ -99,7 +100,7 @@ describe('useCanvasResize behaviors', () => {
     const rectSpy = vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({ height: 50, width: 100 } as DOMRect);
 
     // before
-    renderHook(() => useCanvasResize(canvasRef));
+    renderHook(() => useCanvasResize(createCanvasRefs({ canvasRef })));
 
     // action
     rectSpy.mockReturnValue({ height: 60, width: 120 } as DOMRect);
@@ -124,7 +125,7 @@ describe('useCanvasResize behaviors', () => {
 
     // before
     const canvasRef = createCanvasRef(10, 10);
-    const { unmount } = renderHook(() => useCanvasResize(canvasRef));
+    const { unmount } = renderHook(() => useCanvasResize(createCanvasRefs({ canvasRef })));
 
     // action
     unmount();

@@ -102,10 +102,12 @@ key. You should never need to edit either component file; only `constants.ts`:
 
 ## 7. Canvas interaction (the actual drag gesture)
 
-- `Canvas/Canvas.tsx` — one `useDraw*Tool(canvasRef, draftRef, <TOOL>_SETTINGS)` call per tool.
-  Multiple tools can share the **same hook** with different config objects (Arrow and Line both call
-  `useDrawLineTool`, each gated internally on its own `config.tool === activeTool`) — check whether
-  an existing hook's geometry already matches the new tool before writing a new one.
+- `Canvas/Canvas.tsx` — one `useDraw*Tool(refs, <TOOL>_SETTINGS)` call per tool, where `refs` is the
+  single `TCanvasRefs` object from `useCanvasRefs()` (`canvas-rendering-pipeline.md` §1) — the hook
+  destructures just the `canvasRef`/`draftRef` pair it needs off it. Multiple tools can share the
+  **same hook** with different config objects (Arrow and Line both call `useDrawLineTool`, each
+  gated internally on its own `config.tool === activeTool`) — check whether an existing hook's
+  geometry already matches the new tool before writing a new one.
 - `Canvas/toolSettings.ts` — the `<TOOL>_TOOL_SETTINGS` config objects consumed above.
 - `Canvas/hooks/useDraw<X>Tool/` — the actual `pointerdown`/`pointermove`/`pointerup` native
   listeners (attached only while `activeTool === tool`), building the live draft object into a

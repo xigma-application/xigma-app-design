@@ -5,7 +5,7 @@ import { selectViewport } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { TSliceDraft } from '../../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { DEFAULT_CURSOR } from 'utils/canvas/defaultCursor';

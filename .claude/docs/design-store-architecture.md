@@ -187,8 +187,9 @@ from a frequently-rendering component.
 
 ## 5. The ref-vs-Redux split for ephemeral interaction state
 
-`Canvas.tsx` holds four `useRef`s read directly by the render loop each frame instead of going
-through Redux+re-render — see `canvas-rendering-pipeline.md` §5 for the full table and reasoning
+`Canvas.tsx` (via `useCanvasRefs()`, `canvas-rendering-pipeline.md` §1) holds four `useRef`s read
+directly by the render loop each frame instead of going through Redux+re-render — see
+`canvas-rendering-pipeline.md` §5 for the full table and reasoning
 (verbatim roadmap quote: "żeby przeciąganie nie dispatchowało do store'u przy każdym pixelu" — so
 dragging doesn't dispatch to the store every pixel).
 

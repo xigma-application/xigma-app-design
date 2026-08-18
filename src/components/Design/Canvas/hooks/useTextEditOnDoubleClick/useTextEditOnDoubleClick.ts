@@ -1,4 +1,4 @@
-import { RefObject, useEffect } from 'react';
+import { useEffect } from 'react';
 
 // store
 import { selectActiveTool, selectEditingTextBox, selectOrderedNodes, selectSelectedNodes, selectViewport } from 'store/design/selectors';
@@ -6,6 +6,7 @@ import { setSelection, startTextEdit } from 'store/design/slice';
 import { store, useAppDispatch, useAppSelector } from 'store';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { ToolName } from 'types/design/enums';
 
 // utils
@@ -13,7 +14,8 @@ import { getDoubleClickedTextNode } from './utils/getDoubleClickedTextNode';
 import { getPointerPosition } from '../../utils/getPointerPosition';
 import { screenToWorld } from '../../utils/screenToWorld';
 
-export const useTextEditOnDoubleClick = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
+export const useTextEditOnDoubleClick = (refs: TCanvasRefs): void => {
+  const { canvasRef } = refs;
   const activeTool = useAppSelector(selectActiveTool);
   const editingTextBox = useAppSelector(selectEditingTextBox);
   const dispatch = useAppDispatch();

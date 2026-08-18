@@ -4,6 +4,7 @@ import { act, renderHook } from '@testing-library/react';
 import { RefObject } from 'react';
 
 // hooks
+import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useDrawPolygonTool, TPolygonToolConfig } from './useDrawPolygonTool';
 
 // store
@@ -41,7 +42,7 @@ describe('useDrawPolygonTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawPolygonTool(canvasRef, draftRef, CONFIG), {
+    renderHook(() => useDrawPolygonTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -63,7 +64,7 @@ describe('useDrawPolygonTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawPolygonTool(canvasRef, draftRef, CONFIG), {
+    renderHook(() => useDrawPolygonTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -93,7 +94,7 @@ describe('useDrawPolygonTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawPolygonTool(canvasRef, draftRef, CONFIG), {
+    renderHook(() => useDrawPolygonTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -134,7 +135,7 @@ describe('useDrawPolygonTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawPolygonTool(canvasRef, draftRef, CONFIG), {
+    renderHook(() => useDrawPolygonTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -158,7 +159,7 @@ describe('useDrawPolygonTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawPolygonTool(canvasRef, draftRef, CONFIG), {
+    renderHook(() => useDrawPolygonTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -180,7 +181,7 @@ describe('useDrawPolygonTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawPolygonTool(canvasRef, draftRef, CONFIG), {
+    renderHook(() => useDrawPolygonTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -207,7 +208,7 @@ describe('useDrawPolygonTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawPolygonTool(canvasRef, draftRef, CONFIG), {
+    renderHook(() => useDrawPolygonTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -234,7 +235,7 @@ describe('useDrawPolygonTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawPolygonTool(canvasRef, draftRef, CONFIG), {
+    renderHook(() => useDrawPolygonTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -255,7 +256,7 @@ describe('useDrawPolygonTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawPolygonTool(canvasRef, draftRef, CONFIG), {
+    renderHook(() => useDrawPolygonTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 

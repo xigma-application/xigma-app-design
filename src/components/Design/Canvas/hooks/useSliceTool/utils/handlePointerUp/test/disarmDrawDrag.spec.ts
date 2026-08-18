@@ -4,7 +4,8 @@ import { RefObject } from 'react';
 import { DEFAULT_SHAPE_SIZE } from '../../../../../constants';
 
 // types
-import { TSliceDraft, TSliceDrawDragState } from '../../../types';
+import { TSliceDrawDragState } from '../../../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { DEFAULT_CURSOR } from 'utils/canvas/defaultCursor';

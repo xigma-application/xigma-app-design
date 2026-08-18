@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // types
-import { TSliceDraft } from '../../../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { DEFAULT_CURSOR } from 'utils/canvas/defaultCursor';

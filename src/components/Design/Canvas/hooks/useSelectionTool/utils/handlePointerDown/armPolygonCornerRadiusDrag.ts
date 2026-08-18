@@ -1,8 +1,8 @@
 import { RefObject } from 'react';
 
 // types
-import { TPolygonCornerRadiusDragState } from '../../types';
 import { TDraftRect } from 'types/canvas';
+import { TPolygonCornerRadiusDragState } from 'types/design/canvas/types';
 
 export const armPolygonCornerRadiusDrag = (
   canvas: HTMLCanvasElement,

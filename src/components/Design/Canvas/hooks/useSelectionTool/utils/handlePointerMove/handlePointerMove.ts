@@ -5,18 +5,12 @@ import { AppDispatch } from 'store';
 
 // types
 import {
-  TCornerRadiusDragState,
   TDragState,
-  TEllipseArcDragState,
-  TEllipseArcRatioDragState,
-  TEllipseArcRotateDragState,
   TEndpointDragState,
   TPathOffsetDragState,
-  TPolygonCornerRadiusDragState,
   TPolygonVertexCountDragState,
   TResizeDragState,
   TRotateDragState,
-  TStarCornerRadiusDragState,
   TStarVertexCountDragState,
 } from '../../types';
 import { TDraftRect, TPoint } from 'types/canvas';
@@ -36,6 +30,14 @@ import { continueResizeDrag } from './continueResizeDrag/continueResizeDrag';
 import { continueRotateDrag } from './continueRotateDrag';
 import { continueStarCornerRadiusDrag } from './continueStarCornerRadiusDrag';
 import { continueStarVertexCountDrag } from './continueStarVertexCountDrag';
+import {
+  TCornerRadiusDragState,
+  TEllipseArcDragState,
+  TEllipseArcRatioDragState,
+  TEllipseArcRotateDragState,
+  TPolygonCornerRadiusDragState,
+  TStarCornerRadiusDragState,
+} from 'types/design/canvas/types';
 
 export const handlePointerMove = (
   canvas: HTMLCanvasElement,

@@ -7,18 +7,12 @@ import { AppDispatch, store } from 'store';
 
 // types
 import {
-  TCornerRadiusDragState,
   TDragState,
-  TEllipseArcDragState,
-  TEllipseArcRatioDragState,
-  TEllipseArcRotateDragState,
   TEndpointDragState,
   TPathOffsetDragState,
-  TPolygonCornerRadiusDragState,
   TPolygonVertexCountDragState,
   TResizeDragState,
   TRotateDragState,
-  TStarCornerRadiusDragState,
   TStarVertexCountDragState,
 } from '../../types';
 import { MouseButton } from 'types/enums';
@@ -58,6 +52,14 @@ import { isPointInGroupBounds } from '../isPointInGroupBounds';
 import { isPointInSelectedTextBounds } from '../isPointInSelectedTextBounds';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 import { toggleSelection } from '../toggleSelection';
+import {
+  TCornerRadiusDragState,
+  TEllipseArcDragState,
+  TEllipseArcRatioDragState,
+  TEllipseArcRotateDragState,
+  TPolygonCornerRadiusDragState,
+  TStarCornerRadiusDragState,
+} from 'types/design/canvas/types';
 
 export const handlePointerDown = (
   canvas: HTMLCanvasElement,

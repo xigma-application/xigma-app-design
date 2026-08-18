@@ -3,7 +3,7 @@ import { MIN_SHAPE_SIZE } from '../../../../constants';
 
 // types
 import { TPoint, TResizeHandle } from 'types/canvas';
-import { TSliceDraft } from '../../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { getResizedEdges } from './getResizedEdges';

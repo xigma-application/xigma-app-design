@@ -1,4 +1,7 @@
-import { RefObject, useEffect } from 'react';
+import { useEffect } from 'react';
+
+// types
+import { TCanvasRefs } from 'types/design/canvas/types';
 
 // store
 import { setViewport } from 'store/design/slice';
@@ -11,7 +14,8 @@ import { applyZoom } from './utils/applyZoom';
 import { getPointerPosition } from '../../utils/getPointerPosition';
 import { isControlPressed } from 'utils/isControlPressed';
 
-export const useCanvasPanZoom = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
+export const useCanvasPanZoom = (refs: TCanvasRefs): void => {
+  const { canvasRef } = refs;
   const dispatch = useAppDispatch();
 
   const handleWheel = (canvas: HTMLCanvasElement, event: WheelEvent): void => {

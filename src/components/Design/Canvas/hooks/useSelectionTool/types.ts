@@ -1,5 +1,5 @@
 // types
-import { TCornerRadiusHandle, TDraftRect, TPoint, TResizeHandle } from 'types/canvas';
+import { TDraftRect, TPoint, TResizeHandle } from 'types/canvas';
 
 export type TPendingClickAction = { id: string; kind: 'collapse' } | { kind: 'deselect' };
 
@@ -34,37 +34,6 @@ export type TResizeDragState = {
   nodeOrigins: Record<string, TResizeNodeOrigin>;
 };
 
-export type TCornerRadiusDragState = {
-  bounds: TDraftRect;
-  candidates: TCornerRadiusHandle[];
-  corner: TCornerRadiusHandle | null;
-  hasMoved: boolean;
-  nodeId: string;
-  pointerStart: TPoint;
-  rotation: number;
-};
-
-export type TPolygonCornerRadiusDragState = {
-  bounds: TDraftRect;
-  flipX: boolean;
-  flipY: boolean;
-  hasMoved: boolean;
-  nodeId: string;
-  rotation: number;
-  sides: number;
-};
-
-export type TStarCornerRadiusDragState = {
-  bounds: TDraftRect;
-  flipX: boolean;
-  flipY: boolean;
-  hasMoved: boolean;
-  nodeId: string;
-  points: number;
-  ratio: number;
-  rotation: number;
-};
-
 export type TPolygonVertexCountDragState = {
   bounds: TDraftRect;
   flipX: boolean;
@@ -75,33 +44,6 @@ export type TPolygonVertexCountDragState = {
 
 export type TStarVertexCountDragState = {
   bounds: TDraftRect;
-  flipX: boolean;
-  flipY: boolean;
-  nodeId: string;
-  rotation: number;
-};
-
-export type TEllipseArcDragState = {
-  bounds: TDraftRect;
-  draggedHandlePosition: TPoint | null;
-  flipX: boolean;
-  flipY: boolean;
-  nodeId: string;
-  rotation: number;
-};
-
-export type TEllipseArcRotateDragState = {
-  bounds: TDraftRect;
-  draggedHandlePosition: TPoint | null;
-  flipX: boolean;
-  flipY: boolean;
-  nodeId: string;
-  rotation: number;
-};
-
-export type TEllipseArcRatioDragState = {
-  bounds: TDraftRect;
-  draggedHandlePosition: TPoint | null;
   flipX: boolean;
   flipY: boolean;
   nodeId: string;

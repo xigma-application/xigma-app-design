@@ -6,7 +6,7 @@ import { AppDispatch } from 'store';
 
 // types
 import { ToolName } from 'types/design/enums';
-import { TSliceDraft } from '../../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 export const discardSlice = (dispatch: AppDispatch, sliceRef: RefObject<TSliceDraft | null>): void => {
   sliceRef.current = null;

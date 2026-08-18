@@ -1,4 +1,4 @@
-import { RefObject, useEffect } from 'react';
+import { useEffect } from 'react';
 
 // others
 import { DRAWING_TOOLS } from '../../constants';
@@ -9,9 +9,11 @@ import { selectActiveTool } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { ToolName } from 'types/design/enums';
 
-export const useDrawingCursor = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
+export const useDrawingCursor = (refs: TCanvasRefs): void => {
+  const { canvasRef } = refs;
   const activeTool = useAppSelector(selectActiveTool);
   const { setClassName } = useClassNames();
 

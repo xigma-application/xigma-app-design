@@ -10,7 +10,6 @@ import { AppDispatch, store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TEllipseArcRotateDragState } from '../../types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -18,6 +17,7 @@ import { flipPoint } from 'utils/math/flipPoint';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getUnrotatedQueryPoint } from '../../../../utils/getUnrotatedQueryPoint';
 import { screenToWorld } from '../../../../utils/screenToWorld';
+import { TEllipseArcRotateDragState } from 'types/design/canvas/types';
 
 const normalizeAngle = (angle: number): number => ((angle % 360) + 360) % 360;
 

@@ -1,4 +1,7 @@
-import { RefObject, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
+
+// types
+import { TCanvasRefs } from 'types/design/canvas/types';
 
 // others
 import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
@@ -13,7 +16,8 @@ import { handlePointerDown } from './utils/handlePointerDown/handlePointerDown';
 import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 
-export const useCurvedCaretEditing = (canvasRef: RefObject<HTMLCanvasElement | null>): void => {
+export const useCurvedCaretEditing = (refs: TCanvasRefs): void => {
+  const { canvasRef } = refs;
   const dispatch = useAppDispatch();
   const editingPathId = useAppSelector(selectEditingTextBox)?.pathId;
   const { setClassName } = useClassNames();

@@ -2,7 +2,8 @@ import { RefObject } from 'react';
 
 // types
 import { TPoint } from 'types/canvas';
-import { TSliceDraft, TSliceMoveDragState } from '../../types';
+import { TSliceMoveDragState } from '../../types';
+import { TSliceDraft } from 'types/design/canvas/types';
 
 export const armMoveDrag = (
   canvas: HTMLCanvasElement,

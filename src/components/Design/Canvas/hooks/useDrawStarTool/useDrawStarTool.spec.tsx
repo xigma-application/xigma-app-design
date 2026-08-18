@@ -4,6 +4,7 @@ import { act, renderHook } from '@testing-library/react';
 import { RefObject } from 'react';
 
 // hooks
+import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useDrawStarTool, TStarToolConfig } from './useDrawStarTool';
 
 // store
@@ -41,7 +42,7 @@ describe('useDrawStarTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawStarTool(canvasRef, draftRef, CONFIG), {
+    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -63,7 +64,7 @@ describe('useDrawStarTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawStarTool(canvasRef, draftRef, CONFIG), {
+    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -94,7 +95,7 @@ describe('useDrawStarTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawStarTool(canvasRef, draftRef, CONFIG), {
+    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -136,7 +137,7 @@ describe('useDrawStarTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawStarTool(canvasRef, draftRef, CONFIG), {
+    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -160,7 +161,7 @@ describe('useDrawStarTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawStarTool(canvasRef, draftRef, CONFIG), {
+    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -182,7 +183,7 @@ describe('useDrawStarTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawStarTool(canvasRef, draftRef, CONFIG), {
+    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -209,7 +210,7 @@ describe('useDrawStarTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawStarTool(canvasRef, draftRef, CONFIG), {
+    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -236,7 +237,7 @@ describe('useDrawStarTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawStarTool(canvasRef, draftRef, CONFIG), {
+    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
@@ -257,7 +258,7 @@ describe('useDrawStarTool behaviors', () => {
     const draftRef: RefObject<TDraftEntity | null> = { current: null };
 
     // before
-    renderHook(() => useDrawStarTool(canvasRef, draftRef, CONFIG), {
+    renderHook(() => useDrawStarTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
       wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
     });
 
