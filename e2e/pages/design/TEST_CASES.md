@@ -540,6 +540,7 @@ the live-typed ones.
 | #   | Scenario                                                                                                                                      | Unit |            E2E            |
 | --- | --------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------: |
 | 58  | Double-clicking an unselected text node enters edit mode with all its content selected, so typing replaces it instead of appending            |  ✅  |  ✅ `edit-text.spec.ts`   |
+| 157 | Re-entering edit mode on a multi-line text node selects all of its content, not just the line/word under the double-click point               |  ✅  |  ✅ `edit-text.spec.ts`   |
 | 59  | Double-clicking a selected text node past its rendered content (but inside its fixed box) still enters edit mode                              |  ✅  |  ✅ `edit-text.spec.ts`   |
 | 60  | Blurring an existing-node edit updates that node's content in place, never adds a duplicate node                                              |  ✅  |             —             |
 | 61  | Clearing all content on an existing node and blurring deletes that node, matching a freshly-drawn empty box never being created               |  ✅  |  ✅ `edit-text.spec.ts`   |

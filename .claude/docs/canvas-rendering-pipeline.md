@@ -351,6 +351,53 @@ for their own optional-`cornerRadius` split (`drawPolygon.ts`/`drawStar.ts` disp
 `drawStandardPolygon.ts`/`drawStandardStar.ts`, `drawRoundedPolygon.ts`/`drawRoundedStar.ts`) —
 confirms the pattern generalizes past Rectangle, not a one-off.
 
+## 9. Text-edit overlay — the invisible contentEditable input surface
+
+`TextEditOverlay.tsx` is a real `contentEditable` `<div>` positioned over the canvas (`caretColor:
+transparent`, `color: transparent`) — it exists purely to capture native browser text-input/IME/
+selection behavior; nothing it renders is ever seen, since the actual glyphs/caret/selection
+highlight are canvas-drawn from Redux (§5's "one deliberate exception"). This means every DOM↔Redux
+conversion the overlay does has to independently reconstruct the same "what line is this character
+on" model a real browser's `Enter` key produces, which is genuinely two different shapes depending on
+*how* the content got there:
+
+- **Freshly typed** (a new node, or continuing to type in an existing session): pressing `Enter`
+  natively is never intercepted for plain Text (only for text-on-path, where `useBlockShortcutPropagation`
+  substitutes a space) — Chrome's own default contentEditable behavior wraps every line after the
+  first in its own `<div>` (`hi<div>there</div><div>you</div>`), not `<br>`.
+- **Re-seeded on entry** (`setEditableTextContent.ts`, called by `useSeedEditableTextOnEntry` only
+  when re-editing an existing node): deliberately flat, `text<br>text<br>text` — no `<div>` at all.
+
+Both shapes (plus the empty-line case, `<div><br></div>`, and any mix of the two once a user edits
+further) have to resolve to the *identical* logical character index a plain `\n`-joined string would
+use. `getEditableLines.ts` (`TextEditOverlay/utils/`) is the single BR/DIV/text state machine both
+directions share — `getEditableTextContent.ts` (DOM → string, for `onInput`) maps each line's text
+nodes to a string and joins with `\n`; `setEditableSelectionRange.ts` (index → DOM node/offset, for
+click-to-position-caret and select-all-on-entry) walks the same lines to locate the exact `Text` node
+and in-node offset. This used to be two independently hand-rolled implementations of the same
+BR/DIV bookkeeping (`hasPendingLine` state machine included) that quietly drifted apart — the "read"
+direction handled `<div>`-wrapped lines correctly from early on, but the "write" direction
+(`setEditableSelectionRange`'s original `getPositionForCharacterIndex`) walked a plain
+`document.createTreeWalker(element, NodeFilter.SHOW_TEXT)` that skipped every `<br>` and mishandled
+every `<div>` entirely, undercounting the index by exactly the number of line breaks before the
+target line (line 2 off by 1, line 3 off by 2 — worse the more lines involved, and only masked on a
+freshly-seeded re-edit session because that flat structure happens to have no `<div>`s to trip over).
+Extracting `getEditableLines` as the one shared source of truth is what keeps the two directions from
+being able to drift apart again, rather than re-fixing each hand-rolled copy in turn.
+
+**Gotcha — the "select all on entry" double-click races its own word-select handler.**
+`useSeedEditableTextOnEntry` seeds content, focuses the overlay, then calls
+`selectEditableTextContent` (`range.selectNodeContents`) to select everything — correct on its own.
+But the *same* native `dblclick` that triggers entry (`useTextEditOnDoubleClick`, listening on the
+canvas) still bubbles on up to `document`, where `useStraightCaretEditing`'s own `handleDoubleClick`
+listens for "double-click a word/line **while already editing**" (`getWordRangeAtIndex`) — a listener
+that can still be attached from a text-edit session that hasn't finished tearing down yet. If it
+catches this same originating event, it immediately re-narrows the just-set "select all" down to
+whichever word/line sat under the pointer, before the user ever sees the full selection. Fixed with
+`event.stopPropagation()` in `useTextEditOnDoubleClick`'s handler (alongside the pre-existing
+`preventDefault()`) — the entry-into-edit-mode double-click never reaches the still-editing
+double-click handler at all, regardless of teardown timing.
+
 ## File index
 
 - Context/setup: `Canvas/Canvas.tsx`, `Canvas/constants.ts`,

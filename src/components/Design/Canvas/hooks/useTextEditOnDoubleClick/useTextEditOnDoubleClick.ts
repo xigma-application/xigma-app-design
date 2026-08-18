@@ -27,6 +27,8 @@ export const useTextEditOnDoubleClick = (refs: TCanvasRefs): void => {
     const target = getDoubleClickedTextNode(point, selectOrderedNodes(state), selectSelectedNodes(state), viewport);
 
     if (target) {
+      event.preventDefault();
+      event.stopPropagation();
       dispatch(setSelection([target.id]));
       dispatch(
         startTextEdit({

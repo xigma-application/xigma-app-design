@@ -51,8 +51,8 @@ describe('setEditableSelectionRange', () => {
     element.appendChild(secondLine);
     document.body.appendChild(element);
 
-    // before — index 2 into "first", index 8 (5 for "first" + 3 into "second")
-    setEditableSelectionRange(element, 2, 8);
+    // before — index 2 into "first", index 9 (5 for "first" + 1 for the <br>'s own \n + 3 into "second")
+    setEditableSelectionRange(element, 2, 9);
 
     // result
     const selection = window.getSelection();
@@ -61,6 +61,68 @@ describe('setEditableSelectionRange', () => {
     expect(selection?.anchorOffset).toBe(2);
     expect(selection?.focusNode).toBe(secondLine);
     expect(selection?.focusOffset).toBe(3);
+
+    // after
+    document.body.removeChild(element);
+  });
+
+  it('should land in the right <div>-wrapped line, matching how a real browser structures content typed with Enter (not the flat <br> seeding structure)', () => {
+    // mock — "hi\nthere\nyou": a loose first line followed by two consecutive <div>-wrapped lines,
+    // with no <br> between the divs — this is how Chrome's own contentEditable represents Enter
+    // presses during live typing, as opposed to the flat text/<br>/text structure setEditableTextContent seeds
+    const element = document.createElement('div');
+    const firstLine = document.createTextNode('hi');
+    const secondDiv = document.createElement('div');
+    const secondLine = document.createTextNode('there');
+    const thirdDiv = document.createElement('div');
+    const thirdLine = document.createTextNode('you');
+
+    secondDiv.appendChild(secondLine);
+    thirdDiv.appendChild(thirdLine);
+    element.appendChild(firstLine);
+    element.appendChild(secondDiv);
+    element.appendChild(thirdDiv);
+    document.body.appendChild(element);
+
+    // before — index 3 (start of "there"), index 9 (start of "you", across the second div boundary)
+    setEditableSelectionRange(element, 3, 9);
+
+    // result
+    const selection = window.getSelection();
+
+    expect(selection?.anchorNode).toBe(secondLine);
+    expect(selection?.anchorOffset).toBe(0);
+    expect(selection?.focusNode).toBe(thirdLine);
+    expect(selection?.focusOffset).toBe(0);
+
+    // after
+    document.body.removeChild(element);
+  });
+
+  it('should collapse at the start of an empty <div><br></div> line', () => {
+    // mock — "a\n\nb": an empty middle line represented the way Chrome collapses one, as a <div>
+    // wrapping a lone <br> with no text node inside it at all
+    const element = document.createElement('div');
+    const firstLine = document.createTextNode('a');
+    const emptyDiv = document.createElement('div');
+    const thirdDiv = document.createElement('div');
+    const thirdLine = document.createTextNode('b');
+
+    emptyDiv.appendChild(document.createElement('br'));
+    thirdDiv.appendChild(thirdLine);
+    element.appendChild(firstLine);
+    element.appendChild(emptyDiv);
+    element.appendChild(thirdDiv);
+    document.body.appendChild(element);
+
+    // before — index 2 is the start of the empty line, between "a"'s newline and "b"'s newline
+    setEditableSelectionRange(element, 2, 2);
+
+    // result
+    const selection = window.getSelection();
+
+    expect(selection?.anchorNode).toBe(emptyDiv);
+    expect(selection?.anchorOffset).toBe(0);
 
     // after
     document.body.removeChild(element);

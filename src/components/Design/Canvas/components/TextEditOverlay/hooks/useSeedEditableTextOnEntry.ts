@@ -1,5 +1,9 @@
 import { RefObject, useEffect, useRef } from 'react';
 
+// store
+import { updateTextEditSelection } from 'store/design/slice';
+import { useAppDispatch } from 'store';
+
 // types
 import { TEditingTextBox } from 'types/canvas';
 
@@ -15,6 +19,7 @@ export const useSeedEditableTextOnEntry = (
 ): void => {
   const editingTextContentRef = useRef(editingTextContent);
   editingTextContentRef.current = editingTextContent;
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (box && elementRef.current) {
@@ -28,7 +33,8 @@ export const useSeedEditableTextOnEntry = (
 
       if (editingNodeId) {
         selectEditableTextContent(element);
+        dispatch(updateTextEditSelection({ end: editingTextContentRef.current.length, start: 0 }));
       }
     }
-  }, [box, editingNodeId, elementRef]);
+  }, [box, dispatch, editingNodeId, elementRef]);
 };

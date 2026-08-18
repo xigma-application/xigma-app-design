@@ -129,6 +129,28 @@ describe('useTextEditOnDoubleClick behaviors', () => {
     expect(design.selectedIds).toEqual([idA]);
   });
 
+  it('should stop the event from bubbling to document, so a stale document-level dblclick listener (e.g. useStraightCaretEditing selecting a word) cannot immediately narrow the "select all" this same double-click just triggered', () => {
+    // mock
+    const idA = addTextNode(2000, 2000);
+    const canvasRef = createCanvasRef();
+
+    renderDoubleClickTool(canvasRef);
+
+    const event = doubleClickEvent(2002, 2002);
+
+    // spy
+    const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+    const stopPropagationSpy = vi.spyOn(event, 'stopPropagation');
+
+    // action
+    canvasRef.current?.dispatchEvent(event);
+
+    // result
+    expect(preventDefaultSpy).toHaveBeenCalled();
+    expect(stopPropagationSpy).toHaveBeenCalled();
+    expect(store.getState().design.editingNodeId).toBe(idA);
+  });
+
   it("should carry a rotated, mirrored node's rotation and flip into the editing box, not reset them to zero", () => {
     // mock — select first, then double-click the node's own center (invariant under its own rotation)
     const idA = addTextNode(2500, 2500, 'Hi', 500, true, true, 45);

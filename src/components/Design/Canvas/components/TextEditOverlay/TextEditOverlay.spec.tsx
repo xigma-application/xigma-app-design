@@ -145,6 +145,28 @@ describe('TextEditOverlay behaviors', () => {
     expect(window.getSelection()?.toString()).toBe('hello world');
   });
 
+  it('should select the whole multi-line content when re-entering edit on an existing node, not just the first line', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(
+      startTextEdit({
+        box: { flipX: false, flipY: false, height: 60, rotation: 0, width: 100, x: 10, y: 10 },
+        content: 'hi\nthere\nyou',
+        id: 'node-1',
+      }),
+    );
+
+    // before — this drives the canvas-rendered highlight the user actually sees, since the overlay's
+    // own text/caret are styled transparent; jsdom's Selection.toString() doesn't serialize <br> as
+    // \n the way a real browser's does, so the redux selection is the meaningful assertion here
+    renderWithStore(store);
+
+    // result
+    expect(store.getState().design.editingSelectionStart).toBe(0);
+    expect(store.getState().design.editingSelectionEnd).toBe('hi\nthere\nyou'.length);
+  });
+
   it('should update the existing node in place on blur, instead of adding a new one', () => {
     // mock
     const store = createTestStore();

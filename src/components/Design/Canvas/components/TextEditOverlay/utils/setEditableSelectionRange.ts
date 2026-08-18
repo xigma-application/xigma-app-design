@@ -1,25 +1,44 @@
-const getPositionForCharacterIndex = (element: HTMLElement, index: number): { node: Node; offset: number } => {
-  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
-  let node: Node = element;
-  let offset = 0;
-  let remaining = index;
-  let currentNode = walker.nextNode() as Text | null;
+// utils
+import { getEditableLines, TEditableLine } from './getEditableLines';
 
-  while (currentNode) {
-    const length = currentNode.data.length;
+const getPositionInLine = (line: TEditableLine, offset: number): { node: Node; offset: number } => {
+  let node: Node = line.container;
+  let resultOffset = 0;
+  let remaining = offset;
 
-    node = currentNode;
-    offset = Math.min(remaining, length);
+  for (const textNode of line.nodes) {
+    const length = textNode.data.length;
+
+    node = textNode;
+    resultOffset = Math.min(remaining, length);
 
     if (remaining <= length) {
       break;
     }
 
     remaining -= length;
-    currentNode = walker.nextNode() as Text | null;
   }
 
-  return { node, offset };
+  return { node, offset: resultOffset };
+};
+
+const getPositionForCharacterIndex = (element: HTMLElement, index: number): { node: Node; offset: number } => {
+  const lines = getEditableLines(element);
+  const lastLineIndex = lines.length - 1;
+  let remaining = index;
+
+  for (let lineIndex = 0; lineIndex < lastLineIndex; lineIndex += 1) {
+    const line = lines[lineIndex];
+    const lineLength = line.nodes.reduce((sum, textNode) => sum + textNode.data.length, 0);
+
+    if (remaining <= lineLength) {
+      return getPositionInLine(line, remaining);
+    }
+
+    remaining -= lineLength + 1; // +1 for the newline separating this line from the next
+  }
+
+  return getPositionInLine(lines[lastLineIndex], remaining);
 };
 
 export const setEditableSelectionRange = (element: HTMLElement, start: number, end: number): void => {

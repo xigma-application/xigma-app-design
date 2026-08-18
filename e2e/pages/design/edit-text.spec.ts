@@ -31,6 +31,38 @@ test('double-clicking an unselected text node enters edit mode with all its cont
   expect(replaced.equals(reference)).toBe(true);
 });
 
+test('re-entering edit mode on a multi-line text node selects all of its content, not just the first line', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  // typing \n presses Enter, producing real browser-typed multi-line content (a loose first line
+  // followed by <div>-wrapped lines) — the same structure useStraightCaretEditing's own document-level
+  // dblclick listener (word-select-while-already-editing) used to race against, narrowing the "select
+  // all" this same double-click just triggered down to whichever line/word sat under the pointer
+  await designPage.goto('e2e-test-edit-text-multiline-select-all');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawTextBox(900, 300, 1100, 400);
+  await designPage.typeText('hi\nthere\nyou');
+  await designPage.click(1550, 600); // commit; the node is not selected afterward
+
+  await designPage.doubleClick(905, 310); // re-enter editing on the rendered "h" of the first line
+  await designPage.typeText('BYE'); // replaces the selection — must replace all 3 lines, not just one
+  await designPage.click(1550, 600); // commit the edit, deselecting it
+
+  const replaced = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-edit-text-multiline-select-all-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawTextBox(900, 300, 1100, 400);
+  await designPage.typeText('BYE');
+  await designPage.click(1550, 600);
+
+  const reference = await designPage.canvas.screenshot();
+
+  expect(replaced.equals(reference)).toBe(true);
+});
+
 test('clearing all content on an existing text node and blurring deletes it, instead of leaving the original content untouched', async ({
   page,
 }) => {

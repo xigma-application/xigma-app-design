@@ -1,8 +1,16 @@
+import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
+import { Provider } from 'react-redux';
 import { RefObject } from 'react';
 import { renderHook } from '@testing-library/react';
 
 // hooks
 import { useSeedEditableTextOnEntry } from '../useSeedEditableTextOnEntry';
+
+// store
+import designReducer from 'store/design/slice';
+import { TDesignState } from 'store/design/types';
+
+const createTestStore = (): EnhancedStore<{ design: TDesignState }> => configureStore({ reducer: { design: designReducer } });
 
 const createElementRef = (): RefObject<HTMLDivElement | null> => {
   const element = document.createElement('div');
@@ -14,13 +22,19 @@ const createElementRef = (): RefObject<HTMLDivElement | null> => {
   return { current: element };
 };
 
+const renderWithStore = (
+  store: EnhancedStore<{ design: TDesignState }>,
+  ...args: Parameters<typeof useSeedEditableTextOnEntry>
+): ReturnType<typeof renderHook> =>
+  renderHook(() => useSeedEditableTextOnEntry(...args), { wrapper: ({ children }) => <Provider store={store}>{children}</Provider> });
+
 describe('useSeedEditableTextOnEntry behaviors', () => {
   it('should do nothing when there is no box being edited', () => {
     // mock
     const elementRef = createElementRef();
 
     // before
-    renderHook(() => useSeedEditableTextOnEntry(elementRef, null, null, ''));
+    renderWithStore(createTestStore(), elementRef, null, null, '');
 
     // result
     expect(elementRef.current).not.toHaveFocus();
@@ -32,7 +46,7 @@ describe('useSeedEditableTextOnEntry behaviors', () => {
     const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 0, y: 0 };
 
     // before
-    renderHook(() => useSeedEditableTextOnEntry(elementRef, box, null, ''));
+    renderWithStore(createTestStore(), elementRef, box, null, '');
 
     // result
     expect(elementRef.current).toHaveFocus();
@@ -41,16 +55,19 @@ describe('useSeedEditableTextOnEntry behaviors', () => {
 
   it('should seed the existing content and select all of it when editing an existing node', () => {
     // mock
+    const store = createTestStore();
     const elementRef = createElementRef();
     const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 0, y: 0 };
 
     // before
-    renderHook(() => useSeedEditableTextOnEntry(elementRef, box, 'node-1', 'hello'));
+    renderWithStore(store, elementRef, box, 'node-1', 'hello');
 
     // result
     expect(elementRef.current?.textContent).toBe('hello');
     expect(elementRef.current).toHaveFocus();
     expect(window.getSelection()?.toString()).toBe('hello');
+    expect(store.getState().design.editingSelectionStart).toBe(0);
+    expect(store.getState().design.editingSelectionEnd).toBe(5);
   });
 
   it('should not re-seed, re-focus, or re-select on a later render with the same box, even as content changes', () => {
@@ -60,6 +77,7 @@ describe('useSeedEditableTextOnEntry behaviors', () => {
 
     const { rerender } = renderHook(({ content }) => useSeedEditableTextOnEntry(elementRef, box, 'node-1', content), {
       initialProps: { content: 'hello' },
+      wrapper: ({ children }) => <Provider store={createTestStore()}>{children}</Provider>,
     });
 
     // action — simulate further typing: DOM content now diverges from the originally seeded value
@@ -78,6 +96,7 @@ describe('useSeedEditableTextOnEntry behaviors', () => {
 
     const { rerender } = renderHook(({ box, content }) => useSeedEditableTextOnEntry(elementRef, box, 'node-1', content), {
       initialProps: { box: firstBox, content: 'first' },
+      wrapper: ({ children }) => <Provider store={createTestStore()}>{children}</Provider>,
     });
 
     // action
