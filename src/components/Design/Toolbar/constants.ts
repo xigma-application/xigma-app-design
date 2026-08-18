@@ -63,12 +63,9 @@ export const TOOL_GROUP_ITEMS: Partial<Record<ToolName, ToolName[]>> = {
 };
 
 export const TOOL_ICON_SIZE: Partial<Record<ToolName, number>> = {
-  [ToolName.arrow]: 24,
-  [ToolName.line]: 24,
   [ToolName.polygon]: 17,
   [ToolName.slice]: 18,
-  [ToolName.star]: 24,
-  [ToolName.textOnPath]: 18,
+  [ToolName.star]: 20,
 };
 
 export const TOOLS_WITH_DROPDOWN: ToolName[] = [ToolName.default, ToolName.frame, ToolName.rectangle, ToolName.text];
