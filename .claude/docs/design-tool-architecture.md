@@ -191,6 +191,18 @@ above: `ToolName.arrow`, `TLineNode.startPoint`/`endPoint` (optional, `'default'
 changes to hit-testing, and `e2e/pages/design/create-arrow.spec.ts`. Read that commit's diff
 alongside this doc for the concrete shape of every piece described here.
 
+## A one-shot tool that doesn't fit this checklist: Comment
+
+Not every `ToolName` is a draw tool in the sense above. The Comment tool (`ToolName.comment`) never
+produces a `NodeType` — clicking the canvas opens a `CommentDraftInput`, and submitting dispatches
+`addComment` into its own `comments`/`commentDraftPosition` state (§2/§3 don't apply). Comments render
+as plain DOM overlay `<div>`s positioned via `worldToScreen`, not WebGL scene nodes — no draft-fill
+step (§7), no shader/draw call (§8), no hit-testing entry (§9). Its pointer-listener shape does mirror
+§7's "attach only while this tool is active" pattern (`useCommentTool.ts`, same style as
+`useHandTool.ts`), and it does get a normal toolbar radio + `KEYBOARD_SHORTCUTS` entry (§3/§6), but
+stop here if you came looking for how its "shape" is drawn — there isn't one. See
+`design-store-architecture.md`'s "Comment state" note for the actual state/reducer shape.
+
 ## Related
 
 [[canvas-rendering-pipeline]] — one level deeper: the actual WebGL mechanics underneath §8/§9 here

@@ -1,0 +1,112 @@
+@use '../../../../../../../styles/mixins/elevation';
+
+.CommentPin__anchor {
+  position: absolute;
+}
+
+.CommentPin {
+  align-items: center;
+  align-self: flex-start;
+  background-color: var(--color-neutral-5);
+  border-radius: 16px 16px 16px 0px;
+  bottom: 0;
+  box-shadow: elevation.$elevation-200-canvas;
+  box-sizing: border-box;
+  color: var(--color-neutral-1);
+  display: flex;
+  flex-direction: row;
+  font-size: 11px;
+  height: 32px;
+  justify-self: flex-start;
+  left: 0;
+  line-height: 16px;
+  max-width: 240px;
+  min-width: 26px;
+  padding: 3px;
+  position: absolute;
+  transform-origin: bottom left;
+  transition:
+    height 0.1s ease-in-out,
+    max-width 0.1s ease-in-out,
+    max-height 0.1s ease-in-out,
+    padding 0.1s ease-in-out,
+    min-width 0.1s ease-in-out;
+
+  &--visible {
+    background-color: var(--color-neutral-5);
+    column-gap: 8px;
+    height: 56px;
+    min-width: 240px;
+    padding: 12px;
+    z-index: 1;
+  }
+
+  &--visible &__content {
+    max-width: none;
+    opacity: 1;
+    visibility: visible;
+  }
+
+  &__icon-wrapper {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    height: 26px;
+    justify-content: center;
+    position: relative;
+    width: 26px;
+  }
+
+  &__author {
+    align-items: center;
+    background-color: rgb(255, 205, 41);
+    border-radius: 50%;
+    color: var(--color-neutral-5);
+    display: flex;
+    font-size: 11px;
+    font-weight: 500;
+    height: 100%;
+    justify-content: center;
+    position: absolute;
+    width: 100%;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    justify-content: center;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: 200ms;
+    visibility: hidden;
+  }
+
+  &__last-date {
+    color: var(--color-neutral-2);
+    font-size: 11px;
+    font-weight: 400;
+    margin-left: 4px;
+  }
+
+  &__content-header {
+    display: flex;
+    gap: 4px;
+  }
+
+  &__content-text {
+    color: var(--color-neutral-1);
+    cursor: text;
+    font-size: 11px;
+    font-weight: 400;
+    outline: none;
+    white-space: pre;
+    overflow: hidden;
+    min-width: 180px;
+    max-width: 180px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+}

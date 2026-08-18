@@ -7,6 +7,8 @@ import { handleStopTextEdit } from '../handleStopTextEdit';
 
 const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   activeTool: ToolName.default,
+  commentDraftPosition: null,
+  comments: {},
   editingNodeId: 'node-1',
   editingSelectionChangedAt: 999,
   editingSelectionEnd: 5,

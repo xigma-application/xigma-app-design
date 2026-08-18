@@ -7,6 +7,8 @@ import { handleStartTextEdit } from '../handleStartTextEdit';
 
 const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   activeTool: ToolName.default,
+  commentDraftPosition: null,
+  comments: {},
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,

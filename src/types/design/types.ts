@@ -1,6 +1,13 @@
 // types
 import { NodeType, PathType } from './enums';
-import { TDraftRect } from 'types/canvas';
+import { TDraftRect, TPoint } from 'types/canvas';
+
+export type TComment = TPoint & {
+  author: string;
+  content: string;
+  createdAt: number;
+  id: string;
+};
 
 export type TDraftShape = TDraftRect & {
   fill: string;

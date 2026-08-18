@@ -25,7 +25,7 @@ export const TOOL_ICON: Record<ToolName, keyof typeof Icons> = {
   [ToolName.star]: 'StarTool',
   [ToolName.text]: 'TextTool',
   [ToolName.textOnPath]: 'TextOnPathTool',
-  [ToolName.comment]: 'Comment',
+  [ToolName.comment]: 'CommentTool',
 };
 
 export const TOOL_LABEL: Record<ToolName, string> = {
@@ -66,6 +66,7 @@ export const TOOL_ICON_SIZE: Partial<Record<ToolName, number>> = {
   [ToolName.polygon]: 17,
   [ToolName.slice]: 18,
   [ToolName.star]: 20,
+  [ToolName.comment]: 17,
 };
 
 export const TOOLS_WITH_DROPDOWN: ToolName[] = [ToolName.default, ToolName.frame, ToolName.rectangle, ToolName.text];

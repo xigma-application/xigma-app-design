@@ -1,11 +1,16 @@
 // store
 import slice, {
+  addComment,
   addNode,
+  cancelCommentDraft,
+  deleteComment,
   setActiveTool,
   setSelection,
   setViewport,
+  startCommentDraft,
   startTextEdit,
   stopTextEdit,
+  updateCommentContent,
   updateNode,
   updateTextEditContent,
   updateTextEditSelection,
@@ -32,6 +37,8 @@ describe('design slice', () => {
     // result
     expect(slice(undefined, { type: 'unknown' })).toEqual({
       activeTool: ToolName.default,
+      commentDraftPosition: null,
+      comments: {},
       editingNodeId: null,
       editingSelectionChangedAt: 0,
       editingSelectionEnd: 0,
@@ -226,5 +233,79 @@ describe('design slice', () => {
 
     // after
     vi.restoreAllMocks();
+  });
+
+  it('should start a comment draft at a given position', () => {
+    // before
+    const state = slice(undefined, startCommentDraft({ x: 10, y: 20 }));
+
+    // result
+    expect(state.commentDraftPosition).toEqual({ x: 10, y: 20 });
+  });
+
+  it('should cancel a comment draft', () => {
+    // before
+    const withDraft = slice(undefined, startCommentDraft({ x: 10, y: 20 }));
+
+    // action
+    const state = slice(withDraft, cancelCommentDraft());
+
+    // result
+    expect(state.commentDraftPosition).toBeNull();
+  });
+
+  it('should add a comment at the draft position with a generated id, then clear the draft', () => {
+    // before
+    const withDraft = slice(undefined, startCommentDraft({ x: 10, y: 20 }));
+
+    // action
+    const state = slice(withDraft, addComment('hello'));
+    const [id] = Object.keys(state.comments);
+
+    // result
+    expect(state.comments[id]).toMatchObject({ content: 'hello', id, x: 10, y: 20 });
+    expect(state.commentDraftPosition).toBeNull();
+  });
+
+  it('should do nothing when adding a comment without an open draft', () => {
+    // before
+    const state = slice(undefined, addComment('hello'));
+
+    // result
+    expect(state.comments).toEqual({});
+  });
+
+  it('should update an existing comment content', () => {
+    // before
+    const withDraft = slice(undefined, startCommentDraft({ x: 10, y: 20 }));
+    const withComment = slice(withDraft, addComment('hello'));
+    const [id] = Object.keys(withComment.comments);
+
+    // action
+    const state = slice(withComment, updateCommentContent({ content: 'updated', id }));
+
+    // result
+    expect(state.comments[id].content).toBe('updated');
+  });
+
+  it('should do nothing when updating a comment that does not exist', () => {
+    // before
+    const state = slice(undefined, updateCommentContent({ content: 'updated', id: 'missing' }));
+
+    // result
+    expect(state.comments).toEqual({});
+  });
+
+  it('should delete a comment', () => {
+    // before
+    const withDraft = slice(undefined, startCommentDraft({ x: 10, y: 20 }));
+    const withComment = slice(withDraft, addComment('hello'));
+    const [id] = Object.keys(withComment.comments);
+
+    // action
+    const state = slice(withComment, deleteComment(id));
+
+    // result
+    expect(state.comments).toEqual({});
   });
 });

@@ -26,12 +26,13 @@ export const useHoverHighlight = (refs: TCanvasRefs): void => {
     }
   };
 
-  const handlePointerLeave = (canvas: HTMLCanvasElement): void => setHoverState(canvas, hoverRef, setClassName, null, '', null);
+  const handlePointerLeave = (canvas: HTMLCanvasElement): void =>
+    setHoverState(canvas, hoverRef, setClassName, activeTool === ToolName.comment ? 'comment' : null, '', null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
 
-    if (canvas && (activeTool === ToolName.default || activeTool === ToolName.scale)) {
+    if (canvas && (activeTool === ToolName.default || activeTool === ToolName.scale || activeTool === ToolName.comment)) {
       const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event);
       const onPointerLeave = (): void => handlePointerLeave(canvas);
 

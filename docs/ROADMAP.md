@@ -1102,8 +1102,17 @@ najmniejszy możliwy krok, później realne zapisywanie:
 
 Drobniejsze, ale zauważalne różnice względem Figmy, niepowiązane z żadnym z etapów wyżej:
 
-- [ ] **Comment tool bez logiki** — wybieralny w toolbarze i ma skrót `C` od Etapu 1, ale po
-      wybraniu nic się nie dzieje na canvasie (brak `useCommentTool`, brak węzła/UI komentarza)
+- [x] **Comment tool** — kliknięcie canvasu otwiera `CommentDraftInput` (fokus dopiero po
+      zakończeniu animacji wejścia, nie natywny `autoFocus`, bo ten odpalał się w trakcie
+      `scale(0)` z animacji i gubił fokus), Ctrl/Cmd+Enter zapisuje `CommentPin` w tym miejscu.
+      Klik poza draftem: pierwszy (z treścią) tylko "wiggle'uje" ostrzegawczo, dopiero drugi
+      zamyka; pusty draft zamyka się od razu; środkowy przycisk myszy (panning) nigdy nie liczy
+      się jako klik na zewnątrz. Piny/drafty to zwykłe DOM-owe divy pozycjonowane przez
+      `worldToScreen` (nie węzły WebGL) — dzięki temu mają stały rozmiar na ekranie niezależnie
+      od zoomu, bez żadnego kompensującego `scale()`. Usuwanie/edycja treści istniejącego
+      komentarza celowo wyłączone na razie (hook/reducer zostały, ale nic ich nie wywołuje).
+      Pełny opis: `.claude/docs/design-tool-architecture.md`, `.claude/docs/design-store-architecture.md`
+      ("Comment state"), testy: `e2e/pages/design/comment.spec.ts`
 - [ ] menu kontekstowe (prawy klik) na node'ach i na pustym canvasie — Copy/Paste, Duplicate,
       Bring to front/Send to back, Delete itd. — dziś nie istnieje w ogóle
 - [ ] kontrolka zoomu w rogu canvasu (aktualny % + dropdown: Zoom to fit / Zoom to selection /

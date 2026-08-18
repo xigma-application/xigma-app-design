@@ -423,6 +423,38 @@ already asserts the `setViewport` dispatch and cursor-class toggling precisely i
 real browser proves a `pointerdown` on top of an actual rendered frame doesn't leak into the
 selection tool.
 
+## Comment
+
+Clicking the canvas with the Comment tool opens a `CommentDraftInput` — a plain DOM overlay (not
+canvas-drawn) positioned via `worldToScreen`, so its `x`/`y` are already final screen pixels; neither
+it nor a placed `CommentPin` apply any zoom-compensating `scale()` of their own, since nothing
+upstream scales them down in the first place (fixed 2026-08-19 — see `getLastDateLabel`/`CommentPin`
+history). Submitting (Ctrl/Cmd+Enter, or the footer button) dispatches `addComment`, persisting a
+`CommentPin` at the draft's position and clearing `commentDraftPosition`. Clicking outside the open
+draft is a two-step dismissal (`useCommentDraftOutsideDismissal`): the first outside click while the
+draft has content just "wiggles" (`--animation` class) as a warning, a second outside click actually
+cancels it; an empty draft cancels on the very first outside click. That outside-click listener only
+counts the primary (left) mouse button, so panning with the middle button never closes an open draft
+(regression fixed 2026-08-19 — it originally reacted to every button). The listener is registered once
+at mount (after a same-tick guard so the click that opened the draft doesn't immediately close it) and
+reads current value/warned state through refs rather than re-subscribing on every keystroke — an
+earlier version re-subscribed via a `setTimeout(0)` on every `value`/`warned` change, which raced two
+fast real outside-clicks in a live browser (a jsdom-with-fake-timers unit test can't reproduce that
+race, since it advances the timer deterministically between clicks).
+
+| #   | Scenario                                                                                                                           | Unit |         E2E          |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------- | :--: | :------------------: |
+| 1   | Clicking the canvas with the Comment tool opens a draft input at the click position, auto-focused once its entrance animation ends |  ✅  | ✅ `comment.spec.ts` |
+| 2   | Typing content and submitting with Ctrl/Cmd+Enter creates a persisted comment pin at that position and closes the draft            |  ✅  | ✅ `comment.spec.ts` |
+| 3   | Clicking away from an empty draft cancels it immediately, without creating a pin                                                   |  ✅  | ✅ `comment.spec.ts` |
+| 4   | Clicking away from a non-empty draft only wiggles it once as a warning; a second outside click then actually dismisses it          |  ✅  | ✅ `comment.spec.ts` |
+| 5   | Panning with the middle mouse button never counts as an outside click, so it never dismisses an open draft                         |  ✅  | ✅ `comment.spec.ts` |
+| 6   | The draft input and a placed pin keep a constant on-screen pixel size regardless of canvas zoom, in both directions                |  ✅  |          —           |
+
+Scenario 6 is a pure CSS/inline-style sizing claim (`style.transform` stays `''` at any zoom) with no
+browser-timing stakes beyond what `CommentPin.spec.tsx`/`CommentDraftInput.spec.tsx` already assert
+precisely — no e2e needed per the standing rationale below.
+
 ## Scale tool
 
 Mirrors Figma's Scale tool: shares its toolbar slot with the default (Move) and Hand tools

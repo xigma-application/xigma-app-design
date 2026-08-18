@@ -1,7 +1,7 @@
 import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
 
 // store
-import designReducer, { setActiveTool, setSelection } from 'store/design/slice';
+import designReducer, { setActiveTool, setSelection, startCommentDraft } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
 
 // types
@@ -26,5 +26,18 @@ describe('handleLeave', () => {
     // result
     expect(store.getState().design.activeTool).toBe(ToolName.default);
     expect(store.getState().design.selectedIds).toEqual([]);
+  });
+
+  it('should cancel an open comment draft', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(startCommentDraft({ x: 10, y: 20 }));
+
+    // action
+    handleLeave(store.dispatch);
+
+    // result
+    expect(store.getState().design.commentDraftPosition).toBeNull();
   });
 });

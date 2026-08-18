@@ -5,6 +5,7 @@ import AlignVerticalBottom from './svg/align-vertical-bottom.svg?react';
 import AlignVerticalCenter from './svg/align-vertical-center.svg?react';
 import AlignVerticalTop from './svg/align-vertical-top.svg?react';
 import ArrowTool from './svg/arrow-tool.svg?react';
+import ArrowUp from './svg/arrow-up.svg?react';
 import AspectRatio from './svg/aspect-ratio.svg?react';
 import AutoHeight from './svg/auto-height.svg?react';
 import AutoLayout from './svg/auto-layout.svg?react';
@@ -23,7 +24,7 @@ import ChevronRight from './svg/chevron-right.svg?react';
 import ChevronUp from './svg/chevron-up.svg?react';
 import Close from './svg/close.svg?react';
 import Columns from './svg/columns.svg?react';
-import Comment from './svg/comment.svg?react';
+import CommentTool from './svg/comment-tool.svg?react';
 import Component from './svg/component.svg?react';
 import Corners from './svg/corners.svg?react';
 import Detached from './svg/detached.svg?react';
@@ -64,6 +65,7 @@ import MaxWidth from './svg/max-width.svg?react';
 import MinHeight from './svg/min-height.svg?react';
 import MinWidth from './svg/min-width.svg?react';
 import Minus from './svg/minus.svg?react';
+import MoreOptions from './svg/more-options.svg?react';
 import MoveHand from './svg/move-hand.svg?react';
 import MoveTool from './svg/move-tool.svg?react';
 import Opacity from './svg/opacity.svg?react';
@@ -103,6 +105,7 @@ export const Icons = {
   AlignVerticalCenter,
   AlignVerticalTop,
   ArrowTool,
+  ArrowUp,
   AspectRatio,
   AutoHeight,
   AutoLayout,
@@ -121,7 +124,7 @@ export const Icons = {
   ChevronUp,
   Close,
   Columns,
-  Comment,
+  CommentTool,
   Component,
   Corners,
   Detached,
@@ -162,6 +165,7 @@ export const Icons = {
   MinHeight,
   MinWidth,
   Minus,
+  MoreOptions,
   MoveHand,
   MoveTool,
   Opacity,

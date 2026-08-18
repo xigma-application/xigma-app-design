@@ -8,6 +8,8 @@ import { handleSetSelection } from '../handleSetSelection';
 
 const buildState = (nodes: TDesignState['nodes'], selectedIds: string[]): TDesignState => ({
   activeTool: ToolName.default,
+  commentDraftPosition: null,
+  comments: {},
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,

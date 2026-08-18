@@ -1,6 +1,8 @@
 // selectors
 import {
   selectActiveTool,
+  selectCommentDraftPosition,
+  selectComments,
   selectEditingNodeId,
   selectEditingTextBox,
   selectEditingTextContent,
@@ -31,9 +33,13 @@ const node: TSceneNode = {
   y: 0,
 };
 
+const comment = { author: 'Xigma', content: 'hello', id: 'comment-1', x: 3, y: 4 };
+
 const state = {
   design: {
     activeTool: ToolName.frame,
+    commentDraftPosition: { x: 1, y: 2 },
+    comments: { [comment.id]: comment },
     editingNodeId: 'node-2',
     editingTextBox: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 },
     editingTextContent: 'hello',
@@ -51,6 +57,21 @@ describe('design selectors', () => {
   it('should select the active tool', () => {
     // result
     expect(selectActiveTool(state)).toBe(ToolName.frame);
+  });
+
+  it('should select the comment draft position', () => {
+    // result
+    expect(selectCommentDraftPosition(state)).toEqual({ x: 1, y: 2 });
+  });
+
+  it('should select the comments as an array', () => {
+    // result
+    expect(selectComments(state)).toEqual([comment]);
+  });
+
+  it('should return the same array reference for selectComments when called again on the same state', () => {
+    // result
+    expect(selectComments(state)).toBe(selectComments(state));
   });
 
   it('should select the editing node id', () => {

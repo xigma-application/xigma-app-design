@@ -86,4 +86,39 @@ describe('resolveHover', () => {
     expect(hoverRef.current).toBeNull();
     expect(setClassName).toHaveBeenCalledWith(null);
   });
+
+  it('should keep the comment cursor class (not reset it) while hovering a node under the Comment tool', () => {
+    // mock — a selected node's resize handle sits exactly here, which would win under the default
+    // tool; the Comment tool must skip all handle/resize resolvers and never touch the selection
+    const idA = addFrameNode(3000, 3000);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvas = createCanvas();
+    const hoverRef: RefObject<string | null> = { current: null };
+    const setClassName = vi.fn();
+
+    // before
+    resolveHover(canvas, pointerEvent(3000, 3000), hoverRef, setClassName, ToolName.comment);
+
+    // result — still hovers the node (for the outline) but the cursor class stays 'comment'
+    expect(hoverRef.current).toBe(idA);
+    expect(setClassName).toHaveBeenCalledWith('comment');
+  });
+
+  it('should keep the comment cursor class over empty canvas under the Comment tool', () => {
+    // mock
+    addFrameNode(3100, 3100);
+
+    const canvas = createCanvas();
+    const hoverRef: RefObject<string | null> = { current: null };
+    const setClassName = vi.fn();
+
+    // before
+    resolveHover(canvas, pointerEvent(9000, 9000), hoverRef, setClassName, ToolName.comment);
+
+    // result
+    expect(hoverRef.current).toBeNull();
+    expect(setClassName).toHaveBeenCalledWith('comment');
+  });
 });

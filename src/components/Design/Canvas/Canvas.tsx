@@ -2,6 +2,7 @@ import cx from 'classnames';
 import { FC } from 'react';
 
 // components
+import Comment from './components/Comment/Comment';
 import TextEditOverlay from './components/TextEditOverlay/TextEditOverlay';
 
 // hooks
@@ -11,6 +12,7 @@ import { useCanvasRefs } from './hooks/useCanvasRefs/useCanvasRefs';
 import { useCanvasRenderLoop } from './hooks/useCanvasRenderLoop/useCanvasRenderLoop';
 import { useCanvasResize } from './hooks/useCanvasResize/useCanvasResize';
 import { useClassNames } from '../core/ClassNamesProvider/hooks/useClassNames';
+import { useCommentTool } from './hooks/useCommentTool/useCommentTool';
 import { useCurvedCaretEditing } from './hooks/useCurvedCaretEditing/useCurvedCaretEditing';
 import { useDrawingCursor } from './hooks/useDrawingCursor/useDrawingCursor';
 import { useDrawLineTool } from './hooks/useDrawLineTool/useDrawLineTool';
@@ -62,6 +64,7 @@ const Canvas: FC = () => {
   useDrawMediaTool(refs, MEDIA_TOOL_SETTINGS);
   useDrawTextTool(refs);
   useDrawTextOnPathTool(refs);
+  useCommentTool(refs);
   useSelectionTool(refs);
   useSliceTool(refs);
   useTextEditOnDoubleClick(refs);
@@ -81,6 +84,7 @@ const Canvas: FC = () => {
         ref={refs.canvasRef}
       />
       <TextEditOverlay />
+      <Comment />
     </div>
   );
 };

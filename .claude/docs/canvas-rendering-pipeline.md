@@ -3,7 +3,9 @@
 How the Design canvas actually renders, frame by frame — one level deeper than
 `design-tool-architecture.md` (which covers how a tool is *assembled*; this covers what happens
 underneath when anything gets drawn). No canvas library is used — every primitive here is hand-rolled
-WebGL2.
+WebGL2. One deliberate exception: Comment pins/drafts (`Comment/CommentPin`, `Comment/CommentDraftInput`)
+are plain absolutely-positioned DOM `<div>`s laid over the canvas via `worldToScreen`, not drawn through
+any of the machinery below — see `design-store-architecture.md`'s "Comment state" note.
 
 ## 1. Context setup
 

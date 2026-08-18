@@ -43,6 +43,8 @@ const buildPathText = (overrides: Partial<TTextNode> = {}): TTextNode => ({
 
 const buildState = (nodes: TDesignState['nodes']): TDesignState => ({
   activeTool: ToolName.default,
+  commentDraftPosition: null,
+  comments: {},
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,

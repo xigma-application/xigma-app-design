@@ -1,0 +1,25 @@
+@keyframes animation-wiggle {
+  0% {
+    transform: translate(0);
+  }
+
+  20% {
+    transform: translate(-24px) rotate(-1deg);
+  }
+
+  40% {
+    transform: translate(24px) rotate(1deg);
+  }
+
+  60% {
+    transform: translate(-24px) rotate(-1deg);
+  }
+
+  80% {
+    transform: translate(24px) rotate(1deg);
+  }
+
+  100% {
+    transform: translate(0);
+  }
+}

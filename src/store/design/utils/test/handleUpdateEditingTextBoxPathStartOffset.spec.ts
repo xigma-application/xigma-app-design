@@ -7,6 +7,8 @@ import { handleUpdateEditingTextBoxPathStartOffset } from '../handleUpdateEditin
 
 const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   activeTool: ToolName.default,
+  commentDraftPosition: null,
+  comments: {},
   editingNodeId: 'node-1',
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 2,

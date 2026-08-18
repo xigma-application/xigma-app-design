@@ -225,6 +225,67 @@ describe('useHoverHighlight behaviors', () => {
     expect(idA).toBeTruthy();
   });
 
+  it('should still show a hover outline over a node while the Comment tool is active', () => {
+    // mock
+    const idA = addFrameNode(150, 150);
+
+    store.dispatch(setActiveTool(ToolName.comment));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { hoverRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 160, 160));
+
+    // result
+    expect(hoverRef.current).toBe(idA);
+  });
+
+  it('should not reset the comment cursor class when hovering over a node under the Comment tool', () => {
+    // mock — the plain-node-hover fallback would normally null the cursor class out
+    addFrameNode(170, 170);
+
+    store.dispatch(setActiveTool(ToolName.comment));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { classNameRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 175, 175));
+    });
+
+    // result
+    expect(classNameRef.current).toBe('comment');
+  });
+
+  it('should keep the comment cursor class when the pointer leaves the canvas under the Comment tool', () => {
+    // mock
+    store.dispatch(setActiveTool(ToolName.comment));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { classNameRef } = renderHoverHighlight(canvasRef);
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 5, 5));
+    });
+    expect(classNameRef.current).toBe('comment');
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerleave', 5, 5));
+    });
+
+    // result
+    expect(classNameRef.current).toBe('comment');
+  });
+
   it('should set the hovered node id when the pointer moves over a node', () => {
     // mock
     const idA = addFrameNode(100, 100);

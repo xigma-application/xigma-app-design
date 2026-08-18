@@ -22,6 +22,8 @@ $themes: (
 );
 
 @mixin theme-variables($name) {
+  color-scheme: $name;
+
   @each $token, $value in map.get($themes, $name) {
     --color-#{$token}: #{$value};
   }

@@ -1,10 +1,12 @@
 // types
 import { ToolName } from 'types/design/enums';
-import { TEditingTextBox } from 'types/canvas';
-import { TSceneNode, TViewport } from 'types/design/types';
+import { TEditingTextBox, TPoint } from 'types/canvas';
+import { TComment, TSceneNode, TViewport } from 'types/design/types';
 
 export type TDesignState = {
   activeTool: ToolName;
+  commentDraftPosition: TPoint | null;
+  comments: Record<string, TComment>;
   editingNodeId: string | null;
   editingSelectionChangedAt: number;
   editingSelectionEnd: number;

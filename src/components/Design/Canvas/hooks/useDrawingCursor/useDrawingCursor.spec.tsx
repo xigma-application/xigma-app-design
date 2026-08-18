@@ -71,6 +71,19 @@ describe('useDrawingCursor behaviors', () => {
     expect(classNameRef.current).toBe('drawing');
   });
 
+  it('should apply the comment cursor class when the Comment tool is active', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setActiveTool(ToolName.comment));
+
+    // before
+    const classNameRef = renderDrawingCursor(canvasRef);
+
+    // result
+    expect(classNameRef.current).toBe('comment');
+  });
+
   it('should not apply the drawing cursor class for the default tool', () => {
     // mock
     const canvasRef = createCanvasRef();

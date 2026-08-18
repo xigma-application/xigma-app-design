@@ -1,8 +1,11 @@
 // others
 import { BACKGROUND_COLOR } from 'constant/canvas';
+import { translationNameSpace as parentNameSpace } from '../constants';
 
 // types
 import { ToolName } from 'types/design/enums';
+
+export const translationNameSpace = `${parentNameSpace}.canvas`;
 
 export const DRAWING_TOOLS: ToolName[] = [
   ToolName.frame,

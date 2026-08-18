@@ -43,6 +43,10 @@ type TDesignState = {
   nodes: Record<string, TSceneNode>;
   rootOrder: string[];
 
+  // comments
+  commentDraftPosition: TPoint | null;
+  comments: Record<string, TComment>;
+
   // selection
   selectedIds: string[];
 
@@ -91,13 +95,18 @@ bodies delegate to `utils/handle<ReducerName>.ts`):
 
 | Reducer | Inline / delegated | What it does |
 |---|---|---|
+| `addComment` | delegated → `handleAddComment.ts` | id via `nanoid()` in `prepare` (same pattern as `addNode`) — see below |
 | `addNode` | delegated → `handleAddNode.ts` | id via `nanoid()` in `prepare`, not the reducer body — see below |
+| `cancelCommentDraft` | inline (`state.commentDraftPosition = null`) | |
+| `deleteComment` | inline (`delete state.comments[action.payload]`) | wired to a store action, but no UI dispatches it today — comment deletion is intentionally disabled in `CommentPin` for now |
 | `deleteNode` | delegated → `handleDeleteNode.ts` | path+text cascade — see below |
 | `setActiveTool` | delegated → `handleSetActiveTool.ts` | `lastXTool` bucket switch — see below |
 | `setSelection` | inline (`state.selectedIds = action.payload`) | |
 | `setViewport` | inline (`state.viewport = action.payload`) | |
+| `startCommentDraft` | inline (`state.commentDraftPosition = action.payload`) | |
 | `startTextEdit` | delegated → `handleStartTextEdit.ts` | seeds editing fields, selects all existing content |
 | `stopTextEdit` | delegated → `handleStopTextEdit.ts` | resets all 6 editing fields |
+| `updateCommentContent` | delegated → `handleUpdateCommentContent.ts` | patch by id (no-op on unknown id) — wired to a store action, but no UI dispatches it today, same as `deleteComment` |
 | `updateEditingTextBoxPathStartOffset` | delegated → `handleUpdateEditingTextBoxPathStartOffset.ts` | guarded single-field mutation on nested `editingTextBox` |
 | `updateNode` | delegated → `handleUpdateNode.ts` | patch + path/text sync — see below |
 | `updateTextEditContent` | inline | |
@@ -171,19 +180,49 @@ existing content when re-editing, else an empty caret), stamps `editingSelection
 that same timestamp on every call — it exists purely so consumers can detect "selection changed
 externally" even when `start`/`end` values happen to repeat (re-selecting the same range).
 
+**Comment state**: `addComment`'s `prepare` mirrors `addNode`'s id-generation pattern, but the reducer
+itself (`handleAddComment.ts`) reads the actual `x`/`y` from `commentDraftPosition` rather than the
+action payload, and no-ops entirely if no draft is open:
+```ts
+export const handleAddComment = (state, payload) => {
+  if (state.commentDraftPosition) {
+    state.comments[payload.id] = {
+      author: MOCK_COMMENT_AUTHOR,
+      content: payload.content,
+      createdAt: Date.now(),
+      id: payload.id,
+      x: state.commentDraftPosition.x,
+      y: state.commentDraftPosition.y,
+    };
+    state.commentDraftPosition = null;
+  }
+};
+```
+`author` is a hardcoded `MOCK_COMMENT_AUTHOR` (`store/design/constants.ts`) — there's no user/auth
+system wired in yet. Comments render as plain DOM overlay elements (`Comment.tsx`/`CommentPin.tsx`),
+not WebGL scene nodes, so they never touch `nodes`/`rootOrder` and aren't part of hit-testing,
+selection, or the rendering pipeline described in `canvas-rendering-pipeline.md`. `setActiveTool`'s
+`lastXTool` bucket switch (above) intentionally has no case for `ToolName.comment` — it's a one-shot
+tool, not part of any dropdown group that needs to remember its last pick.
+
 ## 4. Selectors — `store/design/selectors.ts`
 
-All 13 selectors are plain `(state: RootState) => ...` — **no memoization anywhere** (no
-`reselect`/`createSelector`, despite RTK shipping it). Two do real computation on every call:
+18 exported selectors. Most are plain `(state: RootState) => ...` field reads with no memoization,
+but three now go through RTK's `createSelector` (`selectOrderedNodes`, `selectSelectedNodes`,
+`selectComments`) — each derives a fresh array from a record/ordering, and memoizing avoids
+re-materializing that array (and re-rendering every consumer) unless the actual inputs changed:
 ```ts
-export const selectOrderedNodes = (state) => state.design.rootOrder.map((id) => state.design.nodes[id]);
-export const selectSelectedNodes = (state) => state.design.selectedIds.map((id) => state.design.nodes[id]);
+export const selectOrderedNodes = createSelector([selectRootOrder, selectNodes], (rootOrder, nodes) => rootOrder.map((id) => nodes[id]));
+export const selectSelectedNodes = createSelector([selectSelectedIds, selectNodes], (selectedIds, nodes) =>
+  selectedIds.map((id) => nodes[id]),
+);
+export const selectComments = createSelector([selectCommentsRecord], (comments) => Object.values(comments));
 ```
-Both re-materialize a new array reference every call, so any `useAppSelector` consumer re-renders
-whenever *any* part of `design` changes reference equality on `nodes`/`rootOrder`/`selectedIds`, not
-just when the derived output actually differs. This is an as-is observation (no evidence it was ever
-flagged/fixed), not a documented trade-off — worth knowing before assuming these are cheap to call
-from a frequently-rendering component.
+`selectRootOrder`/`selectCommentsRecord` are unexported helper selectors that only exist to give
+`createSelector` a stable input reference. Every other selector (including `selectNodes`,
+`selectCommentDraftPosition`, all the `lastXTool`/editing-field reads) is still a plain unmemoized
+field access — the memoization here is specifically for the "derive an array from a record" shape,
+not a blanket policy.
 
 ## 5. The ref-vs-Redux split for ephemeral interaction state
 

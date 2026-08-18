@@ -1,0 +1,28 @@
+.CommentDraftFooter {
+  align-items: center;
+  display: flex;
+  justify-content: flex-end;
+  margin-left: auto;
+  padding: 4px;
+  padding-right: 0;
+
+  &__button {
+    align-items: center;
+    background: none;
+    background-color: var(--color-neutral-3);
+    border: none;
+    border-radius: 50%;
+    cursor: default;
+    display: flex;
+    height: 24px;
+    justify-content: center;
+    pointer-events: none;
+    width: 24px;
+
+    &--active {
+      background-color: var(--color-blue-1);
+      cursor: pointer;
+      pointer-events: auto;
+    }
+  }
+}

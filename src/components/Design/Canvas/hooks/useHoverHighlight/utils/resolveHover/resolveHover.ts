@@ -19,6 +19,7 @@ import { ToolName } from 'types/design/enums';
 import { THoverResolverContext } from './types';
 
 // utils
+import { getNodeAtPoint } from '../../../../utils/getNodeAtPoint';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getResizeHandleAtPoint } from '../../../../utils/getResizeHandleAtPoint';
 import { screenToWorld } from '../../../../utils/screenToWorld';
@@ -34,6 +35,15 @@ export const resolveHover = (
   const state = store.getState();
   const viewport = selectViewport(state);
   const point = screenToWorld(getPointerPosition(canvas, event), viewport);
+
+  if (activeTool === ToolName.comment) {
+    const hit = getNodeAtPoint(point, selectOrderedNodes(state), viewport);
+
+    setHoverState(canvas, hoverRef, setClassName, 'comment', '', hit?.id ?? null);
+
+    return;
+  }
+
   const editingTextBox = selectEditingTextBox(state);
   const isEditingText = Boolean(editingTextBox);
   const selectedNodes = selectSelectedNodes(state);

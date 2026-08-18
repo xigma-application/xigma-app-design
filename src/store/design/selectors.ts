@@ -5,10 +5,16 @@ import { RootState } from 'store';
 
 // types
 import { ToolName } from 'types/design/enums';
-import { TEditingTextBox } from 'types/canvas';
-import { TSceneNode, TViewport } from 'types/design/types';
+import { TEditingTextBox, TPoint } from 'types/canvas';
+import { TComment, TSceneNode, TViewport } from 'types/design/types';
 
 export const selectActiveTool = (state: RootState): ToolName => state.design.activeTool;
+
+export const selectCommentDraftPosition = (state: RootState): TPoint | null => state.design.commentDraftPosition;
+
+const selectCommentsRecord = (state: RootState): Record<string, TComment> => state.design.comments;
+
+export const selectComments = createSelector([selectCommentsRecord], (comments) => Object.values(comments));
 
 export const selectEditingNodeId = (state: RootState): string | null => state.design.editingNodeId;
 

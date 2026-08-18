@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 
 // others
-import { DRAWING_TOOLS } from '../../constants';
 import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
 
 // store
@@ -12,6 +11,9 @@ import { useAppSelector } from 'store';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { ToolName } from 'types/design/enums';
 
+// utils
+import { getCursorClassName } from './utils/getCursorClassName';
+
 export const useDrawingCursor = (refs: TCanvasRefs): void => {
   const { canvasRef } = refs;
   const activeTool = useAppSelector(selectActiveTool);
@@ -21,7 +23,7 @@ export const useDrawingCursor = (refs: TCanvasRefs): void => {
     const canvas = canvasRef.current;
 
     if (canvas && activeTool !== ToolName.hand) {
-      setClassName(DRAWING_TOOLS.includes(activeTool) ? 'drawing' : null);
+      setClassName(getCursorClassName(activeTool));
 
       return (): void => {
         setClassName(null);

@@ -76,6 +76,13 @@
         auto;
     }
 
+    &--comment {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/comment.png') 8x) 8 24,
+        auto;
+    }
+
     &--radius {
       cursor:
         /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
