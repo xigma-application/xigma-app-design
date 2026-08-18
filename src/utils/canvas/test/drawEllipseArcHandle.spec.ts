@@ -28,7 +28,7 @@ describe('drawEllipseArcHandle', () => {
     const gl = createGlMock();
 
     // before
-    drawEllipseArcHandle(gl, {} as WebGLProgram, {} as WebGLBuffer, BOUNDS, 90, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
+    drawEllipseArcHandle(gl, {} as WebGLProgram, {} as WebGLBuffer, BOUNDS, 90, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, { rotation: 0 });
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
@@ -49,9 +49,7 @@ describe('drawEllipseArcHandle', () => {
       100,
       100,
       IDENTITY_VIEWPORT,
-      0,
-      false,
-      false,
+      { rotation: 0 },
       null,
       true,
     );
@@ -65,7 +63,7 @@ describe('drawEllipseArcHandle', () => {
     const gl = createGlMock();
 
     // before — arcEndAngle 90° (east rim) sits at (100, 50)
-    drawEllipseArcHandle(gl, {} as WebGLProgram, {} as WebGLBuffer, BOUNDS, 90, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0);
+    drawEllipseArcHandle(gl, {} as WebGLProgram, {} as WebGLBuffer, BOUNDS, 90, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, { rotation: 0 });
 
     // result — the fill fan's center vertex is the handle's own position
     const [fillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -80,10 +78,22 @@ describe('drawEllipseArcHandle', () => {
     const gl = createGlMock();
 
     // before
-    drawEllipseArcHandle(gl, {} as WebGLProgram, {} as WebGLBuffer, BOUNDS, 90, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0, false, false, {
-      x: 20,
-      y: 30,
-    });
+    drawEllipseArcHandle(
+      gl,
+      {} as WebGLProgram,
+      {} as WebGLBuffer,
+      BOUNDS,
+      90,
+      '#0d99ff',
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      { rotation: 0 },
+      {
+        x: 20,
+        y: 30,
+      },
+    );
 
     // result
     const [fillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
@@ -98,7 +108,7 @@ describe('drawEllipseArcHandle', () => {
     const gl = createGlMock();
 
     // before — (100, 50) rotated 90deg around center (50, 50) swings to (50, 100)
-    drawEllipseArcHandle(gl, {} as WebGLProgram, {} as WebGLBuffer, BOUNDS, 90, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 90);
+    drawEllipseArcHandle(gl, {} as WebGLProgram, {} as WebGLBuffer, BOUNDS, 90, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, { rotation: 90 });
 
     // result
     const [fillCall] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;

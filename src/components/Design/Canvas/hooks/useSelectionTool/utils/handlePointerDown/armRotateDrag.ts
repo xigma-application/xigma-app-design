@@ -3,7 +3,7 @@ import { RefObject } from 'react';
 // types
 import { NodeType } from 'types/design/enums';
 import { TDraftRect, TPoint } from 'types/canvas';
-import { TRotateDragState, TRotateNodeOrigin } from '../../types';
+import { TRotateDragState, TRotateNodeOrigin } from 'types/design/selectionTool/types';
 import { TSceneNode } from 'types/design/types';
 
 // utils

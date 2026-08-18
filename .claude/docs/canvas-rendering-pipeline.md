@@ -51,14 +51,27 @@ WebGL2.
 
 ## 2. The render loop
 
+- `useCanvasRenderLoop/utils/setupRenderLoop.ts` — enables straight-alpha blending once, builds the
+  `TImageRenderContext` from the compiled programs/buffers, and calls `startRenderLoop`, returning
+  its stop callback straight through. This is the piece pulled out of
+  `useCanvasRenderLoop.ts`'s own `useEffect` body so the effect itself stays a thin
+  "is everything ready → wire it up" check with no drawing logic inline (`xigma-function-style`'s
+  "don't nest non-trivial logic in an effect" rule).
 - `useCanvasRenderLoop/utils/startRenderLoop.ts` — a recursive `requestAnimationFrame` `tick`
-  calling `drawScene(...)` every frame, then scheduling itself again. Returns a `stop` closure
-  (`cancelAnimationFrame`) used as the `useEffect` cleanup.
+  calling `drawScene(gl, program, buffer, imageContext, canvas, refs)` every frame (the whole
+  `TCanvasRefs` object forwarded straight through, no per-ref unpacking at this layer), then
+  scheduling itself again. Returns a `stop` closure (`cancelAnimationFrame`) used as the `useEffect`
+  cleanup.
 - **No dirty-checking anywhere** — every frame redraws unconditionally. `drawScene` is not a
-  React-subscribed component; it reads Redux fresh via `store.getState()` on every call, plus the
-  four ephemeral refs' `.current`. This is a deliberate simplicity trade-off (see roadmap Etap 4/10),
-  not an oversight — there's no dirty-flag/requestIdleCallback layer.
-- `drawScene.ts` — the exact per-frame sequence, in order:
+  React-subscribed component; it reads Redux fresh via `store.getState()` on every call, plus every
+  ephemeral ref's `.current` off the `refs` object it's given. This is a deliberate simplicity
+  trade-off (see roadmap Etap 4/10), not an oversight — there's no dirty-flag/requestIdleCallback
+  layer.
+- `drawScene.ts` — first derives its own locals straight off `refs` (`draftShape`, `marqueeRect`,
+  `hoveredNodeId`, `sliceRect`, the three `*DraggedHandlePosition ?? null` ellipse-arc values, and
+  `isDraggingCornerRadius` via the sibling `hasCornerRadiusDragMoved(refs)` — its own file, since
+  it's an OR across three separate drag refs, not a one-liner), then runs the exact per-frame
+  sequence, in order:
   ```ts
   drawSceneBackground(gl);
   drawSceneNodes(gl, program, buffer, imageContext, sceneNodes, w, h, viewport, pathOutlineStyles);
@@ -76,19 +89,24 @@ WebGL2.
   **background → committed nodes → hover outline → selection outline → corner-radius handles →
   vertex-count handles → ellipse arc-cutting handles → in-progress draft → editing-text overlay →
   path-text offset handle → marquee → slice draft.** `drawCornerRadiusHandlesLayer.ts`/
-  `drawVertexCountHandlesLayer.ts`/`drawEllipseArcHandleLayer.ts` (`selection-and-manipulation.md`
-  §11/§12/§15, §18, §19) each self-gate (selected+hovered single node of the relevant type, large
-  enough on screen) rather than `drawScene.ts` deciding when to call them, same "thin wrapper decides
-  nothing, the layer decides" shape as `drawHoverOutline.ts` — three separate, deliberately
-  non-unified layer functions even though their gating logic looks almost identical, so each
-  mechanism (`cornerRadius`, `sides`/`points`, `arcStartAngle`/`arcEndAngle`/`arcRatio`) stays fully
-  decoupled from the others rather than sharing a switch that would need to know about all three at
-  once. `drawEllipseArcHandleLayer.ts` additionally takes three `...draggedPositions` (one per
-  Sweep/Start/Ratio handle, `TPoint | null`) sourced from `ellipseArcDragRef`/`ellipseArcRotateDragRef`/
-  `ellipseArcRatioDragRef.current?.draggedHandlePosition` in `startRenderLoop.ts`'s `tick` — same
-  ref-drilling shape the `cornerRadiusDragRef`-trio row below already uses, just three refs feeding
-  three independent optional params instead of one boolean OR. Nodes
-  currently being
+  `drawVertexCountHandlesLayer.ts`/`drawEllipseArcHandleLayer/drawEllipseArcHandleLayer.ts`
+  (`selection-and-manipulation.md` §11/§12/§15, §18, §19) each self-gate (selected+hovered single
+  node of the relevant type, large enough on screen) rather than `drawScene.ts` deciding when to call
+  them, same "thin wrapper decides nothing, the layer decides" shape as `drawHoverOutline.ts` — three
+  separate, deliberately non-unified layer functions even though their gating logic looks almost
+  identical, so each mechanism (`cornerRadius`, `sides`/`points`, `arcStartAngle`/`arcEndAngle`/
+  `arcRatio`) stays fully decoupled from the others rather than sharing a switch that would need to
+  know about all three at once. `drawEllipseArcHandleLayer` itself moved from a single flat file into
+  its own folder, split by the same "ifologia" rule as `drawScene.ts` was: the orchestrator
+  (`drawEllipseArcHandleLayer.ts`) just sequences three siblings that each own their own guard as
+  their entire body — `drawFullyCutAwayGuideLine.ts` (the `isFullyCutAway` guide line),
+  `drawArcRatioGuide.ts` (the `arcRatio >= 1 && hasEllipseArc(...)` guide arc), and
+  `drawHoveredArcHandles.ts` (the `isHovered` Sweep/Start/Ratio handles). It additionally takes three
+  `...draggedPositions` (one per Sweep/Start/Ratio handle, `TPoint | null`) sourced from
+  `ellipseArcDragRef`/`ellipseArcRotateDragRef`/`ellipseArcRatioDragRef.current?.draggedHandlePosition`
+  directly inside `drawScene.ts` — same ref-drilling shape the `cornerRadiusDragRef`-trio row below
+  already uses, just three refs feeding three independent optional params instead of one boolean OR.
+  Nodes currently being
   text-edited are filtered out of both `sceneNodes` and `selectedNodes` up front
   (`node.id !== editingNodeId`), so they render exactly once, only through the dedicated editing
   path.
@@ -200,8 +218,8 @@ frame:
 | `marqueeRef` (`TDraftRect \| null`) | `useSelectionTool`'s `armMarqueeDrag`/`continueMarqueeDrag`/`disarmMarqueeDrag` | `utils/canvas/drawMarquee.ts` |
 | `hoverRef` (`string \| null`, node id) | `useHoverHighlight.ts` | `drawScene/drawHoverOutline.ts` (per-`NodeType` dispatch) |
 | `sliceRef` (`TSliceDraft \| null`) | `useSliceTool.ts`'s own arm/continue/disarm set | `utils/canvas/drawSliceDraft.ts` |
-| `cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef` (drag-state `\| null`) | `useSelectionTool.ts`'s `arm*CornerRadiusDrag`/`disarm*CornerRadiusDrag` trio per shape | dereferenced to a single `isDraggingCornerRadius` boolean (OR of all three) in `startRenderLoop.ts`'s `tick`, consumed by `drawCornerRadiusHandlesLayer.ts` — not rendered directly, just gates the zero-state-offset fallback (`selection-and-manipulation.md` §13) |
-| `ellipseArcDragRef`/`ellipseArcRotateDragRef`/`ellipseArcRatioDragRef` (drag-state `\| null`) | `useSelectionTool.ts`'s `armEllipseArc*Drag`/`disarmEllipseArc*Drag` trio per handle | each dereferenced to its own `.current?.draggedHandlePosition ?? null` in `startRenderLoop.ts`'s `tick`, passed straight through as one of `drawEllipseArcHandleLayer.ts`'s three optional position params — rendered directly (unlike the corner-radius boolean), since this is the live pointer-projected handle position itself, not just an in-progress flag (`selection-and-manipulation.md` §19) |
+| `cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef` (drag-state `\| null`) | `useSelectionTool.ts`'s `arm*CornerRadiusDrag`/`disarm*CornerRadiusDrag` trio per shape | dereferenced to a single `isDraggingCornerRadius` boolean (OR of all three) by `drawScene/hasCornerRadiusDragMoved.ts`, called from `drawScene.ts` itself (not `startRenderLoop.ts`'s `tick`, which just forwards the whole `refs` object through unchanged), consumed by `drawCornerRadiusHandlesLayer.ts` — not rendered directly, just gates the zero-state-offset fallback (`selection-and-manipulation.md` §13) |
+| `ellipseArcDragRef`/`ellipseArcRotateDragRef`/`ellipseArcRatioDragRef` (drag-state `\| null`) | `useSelectionTool.ts`'s `armEllipseArc*Drag`/`disarmEllipseArc*Drag` trio per handle | each dereferenced to its own `.current?.draggedHandlePosition ?? null` directly inside `drawScene.ts`, passed straight through as one of `drawEllipseArcHandleLayer.ts`'s three optional position params — rendered directly (unlike the corner-radius boolean), since this is the live pointer-projected handle position itself, not just an in-progress flag (`selection-and-manipulation.md` §19) |
 
 `TDraftEntity` (`types/design/types.ts`) unions one draft variant per geometry
 (`TDraftShape | TDraftLine | TDraftPath | TDraftPolygon | TDraftStar | TDraftMedia | TDraftText`),
@@ -338,8 +356,9 @@ confirms the pattern generalizes past Rectangle, not a one-off.
 - Context/setup: `Canvas/Canvas.tsx`, `Canvas/constants.ts`,
   `Canvas/hooks/useCanvasRenderLoop/useCanvasRenderLoop.ts`,
   `Canvas/hooks/useCanvasResize/{useCanvasResize,utils/resizeCanvas}.ts`
-- Render loop: `useCanvasRenderLoop/utils/{startRenderLoop,createProgram,createShader}.ts`,
-  `.../utils/drawScene/drawScene.ts`, `.../types.ts` (`TImageRenderContext`)
+- Render loop: `useCanvasRenderLoop/utils/{setupRenderLoop,startRenderLoop,createProgram,
+  createShader}.ts`, `.../utils/drawScene/{drawScene,hasCornerRadiusDragMoved}.ts`, `.../types.ts`
+  (`TImageRenderContext`)
 - Shaders: `constant/webgl/{vertexShaderSource,fragmentShaderSource,imageVertexShaderSource,
   imageFragmentShaderSource,msdfFragmentShaderSource,msdfAtlas}.ts`
 - Coordinate systems: `Canvas/utils/{screenToWorld,worldToScreen}.ts`

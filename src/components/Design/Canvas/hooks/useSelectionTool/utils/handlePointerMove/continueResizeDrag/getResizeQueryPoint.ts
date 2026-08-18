@@ -1,6 +1,6 @@
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
-import { TResizeNodeOrigin } from '../../../types';
+import { TResizeNodeOrigin } from 'types/design/selectionTool/types';
 
 // utils
 import { getUnrotatedQueryPoint } from '../../../../../utils/getUnrotatedQueryPoint';

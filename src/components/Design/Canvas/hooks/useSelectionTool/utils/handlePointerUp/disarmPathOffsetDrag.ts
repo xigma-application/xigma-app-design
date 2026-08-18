@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
+import { TPathOffsetDragState } from 'types/design/selectionTool/types';
 
 // types
-import { TPathOffsetDragState } from '../../types';
 
 export const disarmPathOffsetDrag = (
   canvas: HTMLCanvasElement,

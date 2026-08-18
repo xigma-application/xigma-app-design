@@ -10,29 +10,14 @@ import { WEBGL_CONTEXT_ATTRIBUTES, WEBGL_CONTEXT_ID } from '../../constants';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TImageRenderContext } from './types';
 
 // utils
 import { createProgram } from './utils/createProgram';
-import { startRenderLoop } from './utils/startRenderLoop';
+import { setupRenderLoop } from './utils/setupRenderLoop';
 
 export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
-  const {
-    canvasRef,
-    cornerRadiusDragRef,
-    draftRef,
-    ellipseArcDragRef,
-    ellipseArcRatioDragRef,
-    ellipseArcRotateDragRef,
-    hoverRef,
-    marqueeRef,
-    polygonCornerRadiusDragRef,
-    sliceRef,
-    starCornerRadiusDragRef,
-  } = refs;
-
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const canvas = refs.canvasRef.current;
     const gl = canvas?.getContext(WEBGL_CONTEXT_ID, WEBGL_CONTEXT_ATTRIBUTES);
     const program = gl && createProgram(gl, VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
     const buffer = gl && gl.createBuffer();
@@ -42,35 +27,7 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
     const msdfBuffer = gl && gl.createBuffer();
 
     if (canvas && gl && program && buffer && imageProgram && imageBuffer && msdfProgram && msdfBuffer) {
-      gl.enable(gl.BLEND);
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-      const imageContext: TImageRenderContext = {
-        buffer: imageBuffer,
-        cache: new Map(),
-        ellipseArcLengthCache: new Map(),
-        msdfBuffer,
-        msdfProgram,
-        program: imageProgram,
-        textGeometryCache: new Map(),
-      };
-      const stopRenderLoop = startRenderLoop(
-        gl,
-        program,
-        buffer,
-        imageContext,
-        canvas,
-        draftRef,
-        marqueeRef,
-        hoverRef,
-        sliceRef,
-        cornerRadiusDragRef,
-        polygonCornerRadiusDragRef,
-        starCornerRadiusDragRef,
-        ellipseArcDragRef,
-        ellipseArcRotateDragRef,
-        ellipseArcRatioDragRef,
-      );
+      const stopRenderLoop = setupRenderLoop(gl, program, buffer, imageProgram, imageBuffer, msdfProgram, msdfBuffer, canvas, refs);
 
       return (): void => {
         stopRenderLoop();
@@ -79,17 +36,5 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
         gl.deleteBuffer(msdfBuffer);
       };
     }
-  }, [
-    canvasRef,
-    draftRef,
-    marqueeRef,
-    hoverRef,
-    sliceRef,
-    cornerRadiusDragRef,
-    polygonCornerRadiusDragRef,
-    starCornerRadiusDragRef,
-    ellipseArcDragRef,
-    ellipseArcRotateDragRef,
-    ellipseArcRatioDragRef,
-  ]);
+  }, [refs]);
 };

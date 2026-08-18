@@ -6,11 +6,11 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TEllipseArcRatioDragState } from 'types/design/canvas/types';
 import { TEllipseNode } from 'types/design/types';
 
 // utils
 import { continueEllipseArcRatioDrag } from '../continueEllipseArcRatioDrag';
-import { TEllipseArcRatioDragState } from 'types/design/canvas/types';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');

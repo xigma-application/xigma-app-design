@@ -4,7 +4,7 @@ import { RefObject } from 'react';
 import { NodeType } from 'types/design/enums';
 import { TDraftRect, TResizeHandle } from 'types/canvas';
 import { TEllipseNode, TMediaNode, TPolygonNode, TSceneNode, TStarNode, TTextNode } from 'types/design/types';
-import { TResizeDragState, TResizeNodeOrigin } from '../../types';
+import { TResizeDragState, TResizeNodeOrigin } from 'types/design/selectionTool/types';
 
 const isFlippableNode = (node: TSceneNode): node is TEllipseNode | TMediaNode | TPolygonNode | TStarNode | TTextNode =>
   node.type === NodeType.ellipse ||

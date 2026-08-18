@@ -6,7 +6,7 @@ import { selectViewport } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
-import { TRotateDragState } from '../../types';
+import { TRotateDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';

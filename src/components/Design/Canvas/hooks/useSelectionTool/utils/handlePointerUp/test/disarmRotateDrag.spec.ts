@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // types
-import { TRotateDragState } from '../../../types';
+import { TRotateDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { disarmRotateDrag } from '../disarmRotateDrag';

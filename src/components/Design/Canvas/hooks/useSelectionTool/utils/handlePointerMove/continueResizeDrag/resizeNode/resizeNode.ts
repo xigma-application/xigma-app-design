@@ -3,7 +3,7 @@ import { AppDispatch } from 'store';
 
 // types
 import { TPoint } from 'types/canvas';
-import { TResizeNodeOrigin } from '../../../../types';
+import { TResizeNodeOrigin } from 'types/design/selectionTool/types';
 
 // utils
 import { resizeBoxNode } from './resizeBoxNode';

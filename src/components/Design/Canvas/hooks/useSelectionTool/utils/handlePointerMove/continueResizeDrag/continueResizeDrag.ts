@@ -6,7 +6,7 @@ import { AppDispatch, store } from 'store';
 
 // types
 import { ToolName } from 'types/design/enums';
-import { TResizeDragState } from '../../../types';
+import { TResizeDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { getPointerPosition } from '../../../../../utils/getPointerPosition';

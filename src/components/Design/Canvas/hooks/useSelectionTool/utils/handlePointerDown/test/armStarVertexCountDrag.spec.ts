@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // types
-import { TStarVertexCountDragState } from '../../../types';
+import { TStarVertexCountDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { armStarVertexCountDrag } from '../armStarVertexCountDrag';

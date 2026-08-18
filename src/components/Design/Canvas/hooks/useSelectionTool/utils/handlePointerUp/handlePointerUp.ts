@@ -1,19 +1,9 @@
-import { RefObject } from 'react';
-
 // store
 import { AppDispatch } from 'store';
 
 // types
-import {
-  TDragState,
-  TEndpointDragState,
-  TPathOffsetDragState,
-  TPolygonVertexCountDragState,
-  TResizeDragState,
-  TRotateDragState,
-  TStarVertexCountDragState,
-} from '../../types';
-import { TDraftRect, TPoint } from 'types/canvas';
+import { TCanvasRefs } from 'types/design/canvas/types';
+import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 // utils
 import { disarmCornerRadiusDrag } from './disarmCornerRadiusDrag';
@@ -30,48 +20,27 @@ import { disarmResizeDrag } from './disarmResizeDrag';
 import { disarmRotateDrag } from './disarmRotateDrag';
 import { disarmStarCornerRadiusDrag } from './disarmStarCornerRadiusDrag';
 import { disarmStarVertexCountDrag } from './disarmStarVertexCountDrag';
-import {
-  TCornerRadiusDragState,
-  TEllipseArcDragState,
-  TEllipseArcRatioDragState,
-  TEllipseArcRotateDragState,
-  TPolygonCornerRadiusDragState,
-  TStarCornerRadiusDragState,
-} from 'types/design/canvas/types';
 
 export const handlePointerUp = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
   dispatch: AppDispatch,
-  dragStateRef: RefObject<TDragState | null>,
-  endpointDragRef: RefObject<TEndpointDragState | null>,
-  pathOffsetDragRef: RefObject<TPathOffsetDragState | null>,
-  resizeDragRef: RefObject<TResizeDragState | null>,
-  rotateDragRef: RefObject<TRotateDragState | null>,
-  cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>,
-  polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>,
-  starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>,
-  polygonVertexCountDragRef: RefObject<TPolygonVertexCountDragState | null>,
-  starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>,
-  ellipseArcDragRef: RefObject<TEllipseArcDragState | null>,
-  ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null>,
-  ellipseArcRatioDragRef: RefObject<TEllipseArcRatioDragState | null>,
-  marqueeStartRef: RefObject<TPoint | null>,
-  marqueeRef: RefObject<TDraftRect | null>,
+  canvasRefs: TCanvasRefs,
+  selectionRefs: TSelectionToolRefs,
   setClassName: (className: string | null) => void,
 ): void => {
-  disarmDrag(canvas, event, dispatch, dragStateRef);
-  disarmEndpointDrag(canvas, event, endpointDragRef);
-  disarmPathOffsetDrag(canvas, event, pathOffsetDragRef, setClassName);
-  disarmResizeDrag(canvas, event, resizeDragRef);
-  disarmRotateDrag(canvas, event, rotateDragRef);
-  disarmCornerRadiusDrag(canvas, event, cornerRadiusDragRef);
-  disarmPolygonCornerRadiusDrag(canvas, event, polygonCornerRadiusDragRef);
-  disarmStarCornerRadiusDrag(canvas, event, starCornerRadiusDragRef);
-  disarmPolygonVertexCountDrag(canvas, event, polygonVertexCountDragRef);
-  disarmStarVertexCountDrag(canvas, event, starVertexCountDragRef);
-  disarmEllipseArcDrag(canvas, event, ellipseArcDragRef);
-  disarmEllipseArcRotateDrag(canvas, event, ellipseArcRotateDragRef);
-  disarmEllipseArcRatioDrag(canvas, event, ellipseArcRatioDragRef);
-  disarmMarqueeDrag(canvas, event, marqueeStartRef, marqueeRef);
+  disarmDrag(canvas, event, dispatch, selectionRefs.dragStateRef);
+  disarmEndpointDrag(canvas, event, selectionRefs.endpointDragRef);
+  disarmPathOffsetDrag(canvas, event, selectionRefs.pathOffsetDragRef, setClassName);
+  disarmResizeDrag(canvas, event, selectionRefs.resizeDragRef);
+  disarmRotateDrag(canvas, event, selectionRefs.rotateDragRef);
+  disarmCornerRadiusDrag(canvas, event, canvasRefs.cornerRadiusDragRef);
+  disarmPolygonCornerRadiusDrag(canvas, event, canvasRefs.polygonCornerRadiusDragRef);
+  disarmStarCornerRadiusDrag(canvas, event, canvasRefs.starCornerRadiusDragRef);
+  disarmPolygonVertexCountDrag(canvas, event, selectionRefs.polygonVertexCountDragRef);
+  disarmStarVertexCountDrag(canvas, event, selectionRefs.starVertexCountDragRef);
+  disarmEllipseArcDrag(canvas, event, canvasRefs.ellipseArcDragRef);
+  disarmEllipseArcRotateDrag(canvas, event, canvasRefs.ellipseArcRotateDragRef);
+  disarmEllipseArcRatioDrag(canvas, event, canvasRefs.ellipseArcRatioDragRef);
+  disarmMarqueeDrag(canvas, event, selectionRefs.marqueeStartRef, canvasRefs.marqueeRef);
 };

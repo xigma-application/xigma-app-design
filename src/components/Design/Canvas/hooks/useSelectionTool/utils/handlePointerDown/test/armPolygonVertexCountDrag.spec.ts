@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // types
-import { TPolygonVertexCountDragState } from '../../../types';
+import { TPolygonVertexCountDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { armPolygonVertexCountDrag } from '../armPolygonVertexCountDrag';

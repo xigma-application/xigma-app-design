@@ -1,0 +1,14 @@
+// types
+import { TSelectionToolRefs } from 'types/design/selectionTool/types';
+
+export const createSelectionToolRefs = (overrides: Partial<TSelectionToolRefs> = {}): TSelectionToolRefs => ({
+  dragStateRef: { current: null },
+  endpointDragRef: { current: null },
+  marqueeStartRef: { current: null },
+  pathOffsetDragRef: { current: null },
+  polygonVertexCountDragRef: { current: null },
+  resizeDragRef: { current: null },
+  rotateDragRef: { current: null },
+  starVertexCountDragRef: { current: null },
+  ...overrides,
+});

@@ -12,6 +12,7 @@ import { resizeCanvas } from './utils/resizeCanvas';
 
 export const useCanvasResize = (refs: TCanvasRefs): void => {
   const { canvasRef } = refs;
+
   useEffect(() => {
     const canvas = canvasRef.current;
 

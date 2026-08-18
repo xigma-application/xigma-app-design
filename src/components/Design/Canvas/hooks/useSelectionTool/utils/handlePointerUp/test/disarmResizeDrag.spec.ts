@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // types
-import { TResizeDragState } from '../../../types';
+import { TResizeDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { disarmResizeDrag } from '../disarmResizeDrag';

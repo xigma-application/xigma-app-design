@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // types
-import { TDragState } from '../../types';
+import { TDragState } from 'types/design/selectionTool/types';
 import { TPoint } from 'types/canvas';
 
 // utils

@@ -5,7 +5,7 @@ import { setSelection } from 'store/design/slice';
 import { store } from 'store';
 
 // types
-import { TDragState } from '../../../types';
+import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { disarmDrag } from '../disarmDrag';

@@ -3,7 +3,7 @@ import { RefObject } from 'react';
 // types
 import { NodeType } from 'types/design/enums';
 import { TEllipseNode, TFrameNode, TLineNode, TMediaNode } from 'types/design/types';
-import { TResizeDragState } from '../../../types';
+import { TResizeDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { armResizeDrag } from '../armResizeDrag';

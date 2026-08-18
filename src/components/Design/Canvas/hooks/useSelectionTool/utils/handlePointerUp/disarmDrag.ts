@@ -5,7 +5,7 @@ import { setSelection } from 'store/design/slice';
 import { AppDispatch } from 'store';
 
 // types
-import { TDragState } from '../../types';
+import { TDragState } from 'types/design/selectionTool/types';
 
 export const disarmDrag = (
   canvas: HTMLCanvasElement,

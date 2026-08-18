@@ -7,7 +7,7 @@ import { AppDispatch, store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TPathOffsetDragState } from '../../types';
+import { TPathOffsetDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { getNearestPathOffsetAtPoint } from 'utils/canvas/shapes/getNearestPathOffsetAtPoint';

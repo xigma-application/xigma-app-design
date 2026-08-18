@@ -13,35 +13,34 @@ export const createCursorRotator = (imageSrc: string): ((angle: number) => strin
 
     const image = cursorImage;
 
-    if (!image.complete) {
-      return null;
-    }
+    if (image.complete) {
+      const cached = cursorUrlByAngle.get(angle);
 
-    const cached = cursorUrlByAngle.get(angle);
+      if (!cached) {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
 
-    if (cached) {
+        canvas.width = CURSOR_SIZE_PX;
+        canvas.height = CURSOR_SIZE_PX;
+
+        if (context) {
+          context.translate(HALF_CURSOR_SIZE_PX, HALF_CURSOR_SIZE_PX);
+          context.rotate((angle * Math.PI) / 180);
+          context.drawImage(image, -HALF_CURSOR_SIZE_PX, -HALF_CURSOR_SIZE_PX, CURSOR_SIZE_PX, CURSOR_SIZE_PX);
+
+          const url = `url(${canvas.toDataURL()}) 16 16, auto`;
+
+          cursorUrlByAngle.set(angle, url);
+
+          return url;
+        }
+
+        return null;
+      }
+
       return cached;
     }
 
-    const canvas = document.createElement('canvas');
-
-    canvas.width = CURSOR_SIZE_PX;
-    canvas.height = CURSOR_SIZE_PX;
-
-    const context = canvas.getContext('2d');
-
-    if (!context) {
-      return null;
-    }
-
-    context.translate(HALF_CURSOR_SIZE_PX, HALF_CURSOR_SIZE_PX);
-    context.rotate((angle * Math.PI) / 180);
-    context.drawImage(image, -HALF_CURSOR_SIZE_PX, -HALF_CURSOR_SIZE_PX, CURSOR_SIZE_PX, CURSOR_SIZE_PX);
-
-    const url = `url(${canvas.toDataURL()}) 16 16, auto`;
-
-    cursorUrlByAngle.set(angle, url);
-
-    return url;
+    return null;
   };
 };

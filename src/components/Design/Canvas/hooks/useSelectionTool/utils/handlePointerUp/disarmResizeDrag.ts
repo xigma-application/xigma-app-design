@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
+import { TResizeDragState } from 'types/design/selectionTool/types';
 
 // types
-import { TResizeDragState } from '../../types';
 
 export const disarmResizeDrag = (
   canvas: HTMLCanvasElement,

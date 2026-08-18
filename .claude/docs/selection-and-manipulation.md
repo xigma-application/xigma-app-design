@@ -20,28 +20,55 @@ orchestrators.
 `Canvas/hooks/useSelectionTool/`:
 - `useSelectionTool.ts` — active only when `activeTool === default || activeTool === scale` (the
   **Scale tool fully reuses this hook** — see §5) and text-caret editing isn't active
-  (`shouldUseCanvasCaretEditing`). Owns six refs internally — `dragStateRef`, `endpointDragRef`,
-  `pathOffsetDragRef`, `resizeDragRef`, `rotateDragRef`, `marqueeStartRef` — and three native
-  `PointerEvent` listeners. `cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef`/
+  (`shouldUseCanvasCaretEditing`). Its own eight refs — `dragStateRef`, `endpointDragRef`,
+  `pathOffsetDragRef`, `resizeDragRef`, `rotateDragRef`, `polygonVertexCountDragRef`,
+  `starVertexCountDragRef`, `marqueeStartRef` — come from a dedicated
+  `hooks/useSelectionToolRefs/useSelectionToolRefs.ts` (mirroring `Canvas`'s own `useCanvasRefs()`,
+  `canvas-rendering-pipeline.md` §1: a lazily-initialized `useRef` holding the whole returned object
+  so its identity stays stable across renders), typed `TSelectionToolRefs`
+  (`types/design/selectionTool/types.ts`, alongside every other selection-tool-local drag-state type
+  that file needs — since a type reachable from the global `types/` layer can't reach back into
+  `components/`, everything `TSelectionToolRefs` is built from lives there too, not in the feature
+  folder). `cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef`/
   `ellipseArcDragRef`/`ellipseArcRotateDragRef`/`ellipseArcRatioDragRef` (§19) are the odd six out:
-  lifted to `useCanvasRefs()` and destructured off the shared `refs: TCanvasRefs` object the hook
-  receives (same "parent-owned, ref-drilled" shape as `marqueeRef`/`hoverRef`/`sliceRef` — see
-  `canvas-rendering-pipeline.md` §2), specifically so
+  lifted to `useCanvasRefs()` instead and destructured off the shared `refs: TCanvasRefs` object the
+  hook receives as its one parameter (same "parent-owned, ref-drilled" shape as
+  `marqueeRef`/`hoverRef`/`sliceRef` — see `canvas-rendering-pipeline.md` §2), specifically so
   `useCanvasRenderLoop` can also read them every frame. For the corner-radius three that's §13's
   "mid-drag zero" fix (needs to know whether a drag is *currently* in progress); for the ellipse-arc
   three it's simpler — `drawEllipseArcHandleLayer` reads `draggedHandlePosition` off each ref every
   frame purely so the dragged handle visually follows the live pointer projection instead of jumping
   to wherever the node's Redux state alone would place it (§19). `polygonVertexCountDragRef`/
-  `starVertexCountDragRef` (§18) stay **private** to this hook instead, like
+  `starVertexCountDragRef` (§18) stay in `TSelectionToolRefs` instead, like
   `resizeDragRef`/`rotateDragRef` — they have no such render-time dependency, so nothing downstream
   ever needs to know a vertex-count drag is in progress; the handle's rendered position just reads
-  the node's live `sides`/`points` from Redux every frame like anything else.
-- `types.ts` — `TDragState`, `TEndpointDragState`, `TPathOffsetDragState`, `TResizeDragState`,
-  `TRotateDragState`, `TCornerRadiusDragState`, `TPolygonCornerRadiusDragState`,
-  `TStarCornerRadiusDragState`, `TPolygonVertexCountDragState`, `TStarVertexCountDragState`,
-  `TEllipseArcDragState`, `TEllipseArcRotateDragState`, `TEllipseArcRatioDragState` (§19, all three
-  an identical `{ bounds, draggedHandlePosition, flipX, flipY, nodeId, rotation }` shape),
-  `TPendingClickAction`, `TLineEndpoint`, `TNodeOrigin`/`TResizeNodeOrigin`/`TRotateNodeOrigin`.
+  the node's live `sides`/`points` from Redux every frame like anything else. The three native
+  `PointerEvent` listeners' own handlers (`onPointerDown`/`onPointerMove`/`onPointerUp`) are hoisted
+  out of the `useEffect` body to the hook's own top level, taking `canvas: HTMLCanvasElement` as an
+  explicit parameter alongside the two refs objects — only trivial one-line forwarding closures
+  (`(event) => onPointerDown(canvas, event, refs, selectionRefs)`) stay inside the effect to bind
+  `canvas`, matching the shape every other `Canvas/hooks/*` listener hook already uses
+  (`xigma-function-style`'s "don't nest non-trivial logic inside an effect" rule).
+- `types.ts` — gone entirely: every type it held (`TDragState`, `TEndpointDragState`,
+  `TPathOffsetDragState`, `TResizeDragState`, `TRotateDragState`, `TPolygonVertexCountDragState`,
+  `TStarVertexCountDragState`, `TPendingClickAction`, `TLineEndpoint`,
+  `TNodeOrigin`/`TResizeNodeOrigin`/`TRotateNodeOrigin`) turned out to be needed by the new
+  `TSelectionToolRefs`, directly or transitively, so the whole file moved wholesale to
+  `types/design/selectionTool/types.ts`, alongside `TSelectionToolRefs` itself. `TCornerRadiusDragState`,
+  `TPolygonCornerRadiusDragState`, `TStarCornerRadiusDragState`, `TEllipseArcDragState`,
+  `TEllipseArcRotateDragState`, `TEllipseArcRatioDragState` (§19, all three an identical
+  `{ bounds, draggedHandlePosition, flipX, flipY, nodeId, rotation }` shape) live in
+  `types/design/canvas/types.ts` instead, alongside `TCanvasRefs`, per the same "grouped with the refs
+  object that composes them" rule.
+- `handlePointerDown.ts`/`handlePointerMove.ts`/`handlePointerUp.ts` (the three top-level
+  orchestrators dispatched to from the hook) take `(canvas, event, dispatch, canvasRefs,
+  selectionRefs, setClassName)` — six params total, down from the sprawling one-positional-arg-per-ref
+  lists these used to take. Internally they reach into whichever of the two ref objects each `arm*`/
+  `continue*`/`disarm*` call actually needs (e.g. `armCornerRadiusDrag(..., canvasRefs.cornerRadiusDragRef,
+  ...)`, `armPathOffsetDrag(..., selectionRefs.pathOffsetDragRef, ...)`) — the deeper `arm*`/`continue*`/
+  `disarm*` files themselves are untouched, still taking their one specific ref as an explicit
+  parameter exactly as before; only the three dispatchers' own boundary absorbed the two grouped
+  objects.
 
 `utils/handlePointerDown/` — one `arm*.ts` per interaction kind, dispatched by a priority `switch`
 in `handlePointerDown.ts` (full table in §3): `armPathOffsetDrag`, `armPolygonVertexCountDrag` (§18),
@@ -663,20 +690,22 @@ ref-drilled" shape already used for `marqueeRef`/`hoverRef`/`sliceRef` (`canvas-
 joined the same way once Star's handle was added, §15). Parent ownership now means
 `Canvas/hooks/useCanvasRefs/useCanvasRefs.ts` — it creates all of these refs and returns them as one
 `TCanvasRefs` object; `Canvas.tsx` calls it once and passes the resulting `refs` object into every
-hook, so `useSelectionTool`/`useCanvasRenderLoop` each destructure just the refs they need off it
-rather than receiving them as separate positional params. From there the flag is a plain
-dereference-and-OR, matching how `hoverRef` etc. get dereferenced to plain values before reaching
-`drawScene`:
+hook, so `useSelectionTool`/`useCanvasRenderLoop` each receive it as their one shared parameter
+rather than as separate positional refs (`useSelectionTool` additionally gets its own
+`useSelectionToolRefs()`-sourced `selectionRefs` for the refs private to it, §1 — the corner-radius
+trio lives in `TCanvasRefs`, not there, precisely because the render loop needs to see it too). From
+there the flag is a plain dereference-and-OR, computed once inside `drawScene.ts` itself rather than
+in `startRenderLoop.ts`'s `tick` (its own file, `drawScene/hasCornerRadiusDragMoved.ts`, since it's a
+three-ref OR rather than a one-line dereference like `hoverRef`'s):
 
 ```
 useCanvasRefs(): creates cornerRadiusDragRef/polygonCornerRadiusDragRef/starCornerRadiusDragRef (+ the rest of TCanvasRefs)
 Canvas.tsx: const refs = useCanvasRefs()
-  → useSelectionTool(refs)  // destructures cornerRadiusDragRef/polygonCornerRadiusDragRef/starCornerRadiusDragRef off refs
-      (arms/disarms them exactly as before — no behavior change here)
-  → useCanvasRenderLoop(refs)  // destructures the same refs off refs
-      → startRenderLoop's tick(): isDraggingCornerRadius =
-          Boolean(cornerRadiusDragRef?.current) || Boolean(polygonCornerRadiusDragRef?.current) || Boolean(starCornerRadiusDragRef?.current)
-        → drawScene(..., isDraggingCornerRadius)
+  → useSelectionTool(refs)  // arms/disarms cornerRadiusDragRef/polygonCornerRadiusDragRef/starCornerRadiusDragRef off refs, exactly as before — no behavior change here
+  → useCanvasRenderLoop(refs)  // forwards refs, untouched, all the way down to drawScene
+      → startRenderLoop's tick(gl, program, buffer, imageContext, canvas, frameIdRef, refs) → drawScene(gl, program, buffer, imageContext, canvas, refs)
+          isDraggingCornerRadius = hasCornerRadiusDragMoved(refs) =
+            Boolean(refs.cornerRadiusDragRef.current?.hasMoved) || Boolean(refs.polygonCornerRadiusDragRef.current?.hasMoved) || Boolean(refs.starCornerRadiusDragRef.current?.hasMoved)
           → drawCornerRadiusHandlesLayer(..., isDraggingCornerRadius)
             → drawCornerRadiusHandles(...) / drawPolygonCornerRadiusHandle(...) / drawStarCornerRadiusHandle(...) (each also given isDraggingCornerRadius)
               → getCornerRadiusHandlePositions(..., isDragging) / getPolygonCornerRadiusHandlePosition(..., isDragging) / getStarCornerRadiusHandlePosition(..., isDragging)

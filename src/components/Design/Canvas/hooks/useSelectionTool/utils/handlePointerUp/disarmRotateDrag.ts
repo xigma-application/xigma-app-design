@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
+import { TRotateDragState } from 'types/design/selectionTool/types';
 
 // types
-import { TRotateDragState } from '../../types';
 
 export const disarmRotateDrag = (
   canvas: HTMLCanvasElement,

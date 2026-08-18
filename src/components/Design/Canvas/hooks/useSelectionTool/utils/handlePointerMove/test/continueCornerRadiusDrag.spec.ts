@@ -6,11 +6,11 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TCornerRadiusDragState } from 'types/design/canvas/types';
 import { TRectangleNode } from 'types/design/types';
 
 // utils
 import { continueCornerRadiusDrag } from '../continueCornerRadiusDrag';
-import { TCornerRadiusDragState } from 'types/design/canvas/types';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');

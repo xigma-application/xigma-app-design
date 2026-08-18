@@ -7,6 +7,7 @@ import { AppDispatch, store } from 'store';
 
 // types
 import { TPoint } from 'types/canvas';
+import { TStarCornerRadiusDragState } from 'types/design/canvas/types';
 
 // utils
 import { flipPoint } from 'utils/math/flipPoint';
@@ -18,7 +19,6 @@ import { getUnrotatedQueryPoint } from '../../../../utils/getUnrotatedQueryPoint
 import { getVertexAngles } from 'utils/math/getVertexAngles';
 import { normalizeVector } from 'utils/math/normalizeVector';
 import { screenToWorld } from '../../../../utils/screenToWorld';
-import { TStarCornerRadiusDragState } from 'types/design/canvas/types';
 
 export const continueStarCornerRadiusDrag = (
   canvas: HTMLCanvasElement,

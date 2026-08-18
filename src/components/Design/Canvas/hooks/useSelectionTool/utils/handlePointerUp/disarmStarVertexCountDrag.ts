@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
+import { TStarVertexCountDragState } from 'types/design/selectionTool/types';
 
 // types
-import { TStarVertexCountDragState } from '../../types';
 
 export const disarmStarVertexCountDrag = (
   canvas: HTMLCanvasElement,

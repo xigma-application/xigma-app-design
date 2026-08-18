@@ -6,7 +6,7 @@ import { selectViewport } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
-import { TDragState } from '../../types';
+import { TDragState } from 'types/design/selectionTool/types';
 import { TSceneNodeChanges } from 'types/design/types';
 
 // utils

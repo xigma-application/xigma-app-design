@@ -1,3 +1,5 @@
+import { RefObject } from 'react';
+
 // types
 import { TDraftRect, TPoint, TResizeHandle } from 'types/canvas';
 
@@ -58,4 +60,15 @@ export type TRotateDragState = {
   nodeOrigins: Record<string, TRotateNodeOrigin>;
   pivot: TPoint;
   startAngle: number;
+};
+
+export type TSelectionToolRefs = {
+  dragStateRef: RefObject<TDragState | null>;
+  endpointDragRef: RefObject<TEndpointDragState | null>;
+  marqueeStartRef: RefObject<TPoint | null>;
+  pathOffsetDragRef: RefObject<TPathOffsetDragState | null>;
+  polygonVertexCountDragRef: RefObject<TPolygonVertexCountDragState | null>;
+  resizeDragRef: RefObject<TResizeDragState | null>;
+  rotateDragRef: RefObject<TRotateDragState | null>;
+  starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>;
 };

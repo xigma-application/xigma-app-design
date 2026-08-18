@@ -19,7 +19,7 @@ describe('getEllipseArcRatioHandlePosition', () => {
 
   it('should sit on the bisector of the complementary (gap) arc when inverted', () => {
     // result — the mirror-opposite point from the non-inverted case above
-    const position = getEllipseArcRatioHandlePosition(BOUNDS, 0, 90, 1, false, false, true);
+    const position = getEllipseArcRatioHandlePosition(BOUNDS, 0, 90, 1, {}, true);
 
     expect(position.x).toBeCloseTo(85.355339, 4);
     expect(position.y).toBeCloseTo(14.644661, 4);
@@ -30,7 +30,7 @@ describe('getEllipseArcRatioHandlePosition', () => {
     const unflipped = getEllipseArcRatioHandlePosition(BOUNDS, 0, 90, 1);
 
     // result
-    const flipped = getEllipseArcRatioHandlePosition(BOUNDS, 0, 90, 1, true, true);
+    const flipped = getEllipseArcRatioHandlePosition(BOUNDS, 0, 90, 1, { flipX: true, flipY: true });
 
     expect(flipped.x).toBeCloseTo(100 - unflipped.x, 4);
     expect(flipped.y).toBeCloseTo(100 - unflipped.y, 4);

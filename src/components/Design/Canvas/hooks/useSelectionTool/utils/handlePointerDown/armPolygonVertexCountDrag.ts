@@ -1,8 +1,8 @@
 import { RefObject } from 'react';
 
 // types
-import { TPolygonVertexCountDragState } from '../../types';
 import { TDraftRect } from 'types/canvas';
+import { TPolygonVertexCountDragState } from 'types/design/selectionTool/types';
 
 export const armPolygonVertexCountDrag = (
   canvas: HTMLCanvasElement,

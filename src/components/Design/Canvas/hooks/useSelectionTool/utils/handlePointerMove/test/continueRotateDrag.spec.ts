@@ -6,7 +6,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TRotateDragState } from '../../../types';
+import { TRotateDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { continueRotateDrag } from '../continueRotateDrag';

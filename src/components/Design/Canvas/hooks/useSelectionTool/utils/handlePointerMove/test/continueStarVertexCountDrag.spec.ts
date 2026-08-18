@@ -6,8 +6,8 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TStarVertexCountDragState } from '../../../types';
 import { TStarNode } from 'types/design/types';
+import { TStarVertexCountDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { continueStarVertexCountDrag } from '../continueStarVertexCountDrag';

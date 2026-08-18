@@ -6,7 +6,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TEndpointDragState } from '../../../types';
+import { TEndpointDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { continueEndpointDrag } from '../continueEndpointDrag';

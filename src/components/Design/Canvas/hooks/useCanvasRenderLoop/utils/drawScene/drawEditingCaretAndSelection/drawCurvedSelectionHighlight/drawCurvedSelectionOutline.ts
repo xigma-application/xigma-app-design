@@ -29,7 +29,6 @@ export const drawCurvedSelectionOutline = (
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   gl.enableVertexAttribArray(positionLocation);
   gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(points), gl.STATIC_DRAW);
   gl.uniform4fv(colorLocation, hexToRgbaFloat(DRAFT_FRAME_STROKE));
   gl.drawArrays(gl.LINES, 0, points.length / 2);

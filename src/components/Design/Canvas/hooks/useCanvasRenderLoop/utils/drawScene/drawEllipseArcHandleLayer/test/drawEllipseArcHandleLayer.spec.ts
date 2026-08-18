@@ -279,7 +279,7 @@ describe('drawEllipseArcHandleLayer', () => {
     );
 
     // result
-    const positions = drawEllipseArcHandleMock.mock.calls.map((call) => call[12]);
+    const positions = drawEllipseArcHandleMock.mock.calls.map((call) => call[10]);
 
     expect(positions).toContainEqual({ x: 1, y: 2 });
     expect(positions).toContainEqual({ x: 3, y: 4 });

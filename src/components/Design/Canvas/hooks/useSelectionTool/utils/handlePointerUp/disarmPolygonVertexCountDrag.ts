@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
+import { TPolygonVertexCountDragState } from 'types/design/selectionTool/types';
 
 // types
-import { TPolygonVertexCountDragState } from '../../types';
 
 export const disarmPolygonVertexCountDrag = (
   canvas: HTMLCanvasElement,

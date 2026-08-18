@@ -6,7 +6,7 @@ import { selectViewport } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
-import { TEndpointDragState } from '../../types';
+import { TEndpointDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { getPointerPosition } from '../../../../utils/getPointerPosition';

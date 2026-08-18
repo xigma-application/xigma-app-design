@@ -1,19 +1,9 @@
-import { RefObject } from 'react';
-
 // store
 import { AppDispatch } from 'store';
 
 // types
-import {
-  TDragState,
-  TEndpointDragState,
-  TPathOffsetDragState,
-  TPolygonVertexCountDragState,
-  TResizeDragState,
-  TRotateDragState,
-  TStarVertexCountDragState,
-} from '../../types';
-import { TDraftRect, TPoint } from 'types/canvas';
+import { TCanvasRefs } from 'types/design/canvas/types';
+import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 // utils
 import { continueCornerRadiusDrag } from './continueCornerRadiusDrag';
@@ -30,47 +20,26 @@ import { continueResizeDrag } from './continueResizeDrag/continueResizeDrag';
 import { continueRotateDrag } from './continueRotateDrag';
 import { continueStarCornerRadiusDrag } from './continueStarCornerRadiusDrag';
 import { continueStarVertexCountDrag } from './continueStarVertexCountDrag';
-import {
-  TCornerRadiusDragState,
-  TEllipseArcDragState,
-  TEllipseArcRatioDragState,
-  TEllipseArcRotateDragState,
-  TPolygonCornerRadiusDragState,
-  TStarCornerRadiusDragState,
-} from 'types/design/canvas/types';
 
 export const handlePointerMove = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
   dispatch: AppDispatch,
-  dragStateRef: RefObject<TDragState | null>,
-  endpointDragRef: RefObject<TEndpointDragState | null>,
-  pathOffsetDragRef: RefObject<TPathOffsetDragState | null>,
-  resizeDragRef: RefObject<TResizeDragState | null>,
-  rotateDragRef: RefObject<TRotateDragState | null>,
-  cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>,
-  polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>,
-  starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>,
-  polygonVertexCountDragRef: RefObject<TPolygonVertexCountDragState | null>,
-  starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>,
-  ellipseArcDragRef: RefObject<TEllipseArcDragState | null>,
-  ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null>,
-  ellipseArcRatioDragRef: RefObject<TEllipseArcRatioDragState | null>,
-  marqueeStartRef: RefObject<TPoint | null>,
-  marqueeRef: RefObject<TDraftRect | null>,
+  canvasRefs: TCanvasRefs,
+  selectionRefs: TSelectionToolRefs,
 ): void => {
-  continueDrag(canvas, event, dispatch, dragStateRef);
-  continueEndpointDrag(canvas, event, dispatch, endpointDragRef);
-  continuePathOffsetDrag(canvas, event, dispatch, pathOffsetDragRef);
-  continueResizeDrag(canvas, event, dispatch, resizeDragRef);
-  continueRotateDrag(canvas, event, dispatch, rotateDragRef);
-  continueCornerRadiusDrag(canvas, event, dispatch, cornerRadiusDragRef);
-  continuePolygonCornerRadiusDrag(canvas, event, dispatch, polygonCornerRadiusDragRef);
-  continueStarCornerRadiusDrag(canvas, event, dispatch, starCornerRadiusDragRef);
-  continuePolygonVertexCountDrag(canvas, event, dispatch, polygonVertexCountDragRef);
-  continueStarVertexCountDrag(canvas, event, dispatch, starVertexCountDragRef);
-  continueEllipseArcDrag(canvas, event, dispatch, ellipseArcDragRef);
-  continueEllipseArcRotateDrag(canvas, event, dispatch, ellipseArcRotateDragRef);
-  continueEllipseArcRatioDrag(canvas, event, dispatch, ellipseArcRatioDragRef);
-  continueMarqueeDrag(canvas, event, dispatch, marqueeStartRef, marqueeRef);
+  continueDrag(canvas, event, dispatch, selectionRefs.dragStateRef);
+  continueEndpointDrag(canvas, event, dispatch, selectionRefs.endpointDragRef);
+  continuePathOffsetDrag(canvas, event, dispatch, selectionRefs.pathOffsetDragRef);
+  continueResizeDrag(canvas, event, dispatch, selectionRefs.resizeDragRef);
+  continueRotateDrag(canvas, event, dispatch, selectionRefs.rotateDragRef);
+  continueCornerRadiusDrag(canvas, event, dispatch, canvasRefs.cornerRadiusDragRef);
+  continuePolygonCornerRadiusDrag(canvas, event, dispatch, canvasRefs.polygonCornerRadiusDragRef);
+  continueStarCornerRadiusDrag(canvas, event, dispatch, canvasRefs.starCornerRadiusDragRef);
+  continuePolygonVertexCountDrag(canvas, event, dispatch, selectionRefs.polygonVertexCountDragRef);
+  continueStarVertexCountDrag(canvas, event, dispatch, selectionRefs.starVertexCountDragRef);
+  continueEllipseArcDrag(canvas, event, dispatch, canvasRefs.ellipseArcDragRef);
+  continueEllipseArcRotateDrag(canvas, event, dispatch, canvasRefs.ellipseArcRotateDragRef);
+  continueEllipseArcRatioDrag(canvas, event, dispatch, canvasRefs.ellipseArcRatioDragRef);
+  continueMarqueeDrag(canvas, event, dispatch, selectionRefs.marqueeStartRef, canvasRefs.marqueeRef);
 };

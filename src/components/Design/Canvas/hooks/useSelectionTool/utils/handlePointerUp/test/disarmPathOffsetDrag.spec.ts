@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // types
-import { TPathOffsetDragState } from '../../../types';
+import { TPathOffsetDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { disarmPathOffsetDrag } from '../disarmPathOffsetDrag';

@@ -14,15 +14,14 @@ import {
 import { store } from 'store';
 
 // types
-import { TDraftRect, TPoint } from 'types/canvas';
-import { TDraftEntity } from 'types/design/types';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TImageRenderContext } from '../../types';
 
 // utils
 import { drawCornerRadiusHandlesLayer } from './drawCornerRadiusHandlesLayer';
 import { drawEditingPathTextHandle } from './drawEditingPathTextHandle';
 import { drawEditingText } from './drawEditingText';
-import { drawEllipseArcHandleLayer } from './drawEllipseArcHandleLayer';
+import { drawEllipseArcHandleLayer } from './drawEllipseArcHandleLayer/drawEllipseArcHandleLayer';
 import { drawFrame } from './drawFrame';
 import { drawHoverOutline } from './drawHoverOutline';
 import { drawMarquee } from 'utils/canvas/drawMarquee';
@@ -32,6 +31,7 @@ import { drawSelectionOutline } from './drawSelectionOutline';
 import { drawSliceDraft } from 'utils/canvas/drawSliceDraft';
 import { drawVertexCountHandlesLayer } from './drawVertexCountHandlesLayer';
 import { getPathOutlineStyles } from './getPathOutlineStyles';
+import { hasCornerRadiusDragMoved } from './hasCornerRadiusDragMoved';
 
 export const drawScene = (
   gl: WebGL2RenderingContext,
@@ -39,15 +39,16 @@ export const drawScene = (
   buffer: WebGLBuffer,
   imageContext: TImageRenderContext,
   canvas: HTMLCanvasElement,
-  draftShape?: TDraftEntity | null,
-  marqueeRect?: TDraftRect | null,
-  hoveredNodeId?: string | null,
-  sliceRect?: (TDraftRect & { rotation: number }) | null,
-  isDraggingCornerRadius?: boolean,
-  ellipseArcDraggedHandlePosition?: TPoint | null,
-  ellipseArcRotateDraggedHandlePosition?: TPoint | null,
-  ellipseArcRatioDraggedHandlePosition?: TPoint | null,
+  refs: TCanvasRefs,
 ): void => {
+  const draftShape = refs.draftRef.current;
+  const marqueeRect = refs.marqueeRef.current;
+  const hoveredNodeId = refs.hoverRef.current;
+  const sliceRect = refs.sliceRef.current;
+  const isDraggingCornerRadius = hasCornerRadiusDragMoved(refs);
+  const ellipseArcDraggedHandlePosition = refs.ellipseArcDragRef.current?.draggedHandlePosition ?? null;
+  const ellipseArcRotateDraggedHandlePosition = refs.ellipseArcRotateDragRef.current?.draggedHandlePosition ?? null;
+  const ellipseArcRatioDraggedHandlePosition = refs.ellipseArcRatioDragRef.current?.draggedHandlePosition ?? null;
   const state = store.getState();
   const viewport = selectViewport(state);
   const { clientHeight, clientWidth } = canvas;
@@ -79,7 +80,7 @@ export const drawScene = (
     clientWidth,
     clientHeight,
     viewport,
-    Boolean(isDraggingCornerRadius),
+    isDraggingCornerRadius,
   );
   drawVertexCountHandlesLayer(gl, program, buffer, hoveredNode, selectedNodes, clientWidth, clientHeight, viewport);
   drawEllipseArcHandleLayer(
@@ -91,9 +92,9 @@ export const drawScene = (
     clientWidth,
     clientHeight,
     viewport,
-    ellipseArcDraggedHandlePosition ?? null,
-    ellipseArcRotateDraggedHandlePosition ?? null,
-    ellipseArcRatioDraggedHandlePosition ?? null,
+    ellipseArcDraggedHandlePosition,
+    ellipseArcRotateDraggedHandlePosition,
+    ellipseArcRatioDraggedHandlePosition,
   );
   drawFrame(gl, program, buffer, imageContext, draftShape, clientWidth, clientHeight, viewport);
   drawEditingText(

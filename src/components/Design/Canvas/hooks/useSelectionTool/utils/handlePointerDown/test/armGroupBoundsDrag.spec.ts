@@ -6,7 +6,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TDragState } from '../../../types';
+import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { armGroupBoundsDrag } from '../armGroupBoundsDrag';

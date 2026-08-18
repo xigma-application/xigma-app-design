@@ -23,7 +23,7 @@ export const drawEllipseArcGuideLine = (
   flipY = false,
 ): void => {
   const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
-  const handlePosition = getEllipseArcHandlePosition(bounds, arcEndAngle, flipX, flipY);
+  const handlePosition = getEllipseArcHandlePosition(bounds, arcEndAngle, { flipX, flipY });
   const rotatedHandlePosition = rotatePoint(handlePosition, center, rotation);
 
   drawLine(

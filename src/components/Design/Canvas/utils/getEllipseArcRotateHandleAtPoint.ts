@@ -40,7 +40,7 @@ export const getEllipseArcRotateHandleAtPoint = (
   const testPoint = getUnrotatedQueryPoint(point, bounds, node.rotation);
   const tolerance = RADIUS_HANDLE_HIT_RADIUS_PX / viewport.zoom;
   const arcRatio = Math.min(Math.max(node.arcRatio ?? 0, 0), ELLIPSE_ARC_MAX_RATIO);
-  const handlePosition = getEllipseArcRotateHandlePosition(bounds, arcStartAngle, node.flipX, node.flipY, arcRatio);
+  const handlePosition = getEllipseArcRotateHandlePosition(bounds, arcStartAngle, node, arcRatio);
   const distance = Math.hypot(testPoint.x - handlePosition.x, testPoint.y - handlePosition.y);
 
   return distance <= tolerance

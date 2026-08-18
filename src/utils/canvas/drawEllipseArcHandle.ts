@@ -10,6 +10,12 @@ import { drawEllipse } from './shapes/drawEllipse';
 import { getEllipseArcHandlePosition } from './ellipseArc/getEllipseArcHandlePosition';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
+export type TArcHandleTransform = {
+  flipX?: boolean;
+  flipY?: boolean;
+  rotation: number;
+};
+
 export const drawEllipseArcHandle = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
@@ -20,15 +26,14 @@ export const drawEllipseArcHandle = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
-  rotation: number,
-  flipX = false,
-  flipY = false,
+  transform: TArcHandleTransform,
   overridePosition?: TPoint | null,
   withDot = false,
 ): void => {
+  const { rotation } = transform;
   const handleRadius = RADIUS_HANDLE_SIZE / 2 / viewport.zoom;
   const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
-  const position = overridePosition ?? getEllipseArcHandlePosition(bounds, arcEndAngle, flipX, flipY);
+  const position = overridePosition ?? getEllipseArcHandlePosition(bounds, arcEndAngle, transform);
   const rotatedPosition = rotatePoint(position, center, rotation);
 
   drawEllipse(

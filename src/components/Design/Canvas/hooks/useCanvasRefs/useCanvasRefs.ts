@@ -26,18 +26,23 @@ export const useCanvasRefs = (): TCanvasRefs => {
   const polygonCornerRadiusDragRef = useRef<TPolygonCornerRadiusDragState | null>(null);
   const sliceRef = useRef<TSliceDraft | null>(null);
   const starCornerRadiusDragRef = useRef<TStarCornerRadiusDragState | null>(null);
+  const refsRef = useRef<TCanvasRefs | null>(null);
 
-  return {
-    canvasRef,
-    cornerRadiusDragRef,
-    draftRef,
-    ellipseArcDragRef,
-    ellipseArcRatioDragRef,
-    ellipseArcRotateDragRef,
-    hoverRef,
-    marqueeRef,
-    polygonCornerRadiusDragRef,
-    sliceRef,
-    starCornerRadiusDragRef,
-  };
+  if (refsRef.current === null) {
+    refsRef.current = {
+      canvasRef,
+      cornerRadiusDragRef,
+      draftRef,
+      ellipseArcDragRef,
+      ellipseArcRatioDragRef,
+      ellipseArcRotateDragRef,
+      hoverRef,
+      marqueeRef,
+      polygonCornerRadiusDragRef,
+      sliceRef,
+      starCornerRadiusDragRef,
+    };
+  }
+
+  return refsRef.current;
 };

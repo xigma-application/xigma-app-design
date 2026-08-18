@@ -3,7 +3,7 @@ import { RefObject } from 'react';
 // types
 import { NodeType } from 'types/design/enums';
 import { TFrameNode, TLineNode } from 'types/design/types';
-import { TRotateDragState } from '../../../types';
+import { TRotateDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { armRotateDrag } from '../armRotateDrag';

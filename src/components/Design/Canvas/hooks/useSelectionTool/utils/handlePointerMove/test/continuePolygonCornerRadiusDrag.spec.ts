@@ -6,12 +6,12 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TPolygonCornerRadiusDragState } from 'types/design/canvas/types';
 import { TPolygonNode } from 'types/design/types';
 
 // utils
 import { continuePolygonCornerRadiusDrag } from '../continuePolygonCornerRadiusDrag';
 import { getMaxPolygonCornerRadius } from 'utils/canvas/cornerRadius/polygon/getMaxPolygonCornerRadius';
-import { TPolygonCornerRadiusDragState } from 'types/design/canvas/types';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');

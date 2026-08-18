@@ -23,24 +23,33 @@ export const useStraightCaretEditing = (refs: TCanvasRefs): void => {
   const isActive = isEditingStraightBox(editingTextBox);
   const anchorIndexRef = useRef<number | null>(null);
 
+  const onPointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
+    handlePointerDown(canvas, event, dispatch, anchorIndexRef);
+
+  const onDoubleClick = (canvas: HTMLCanvasElement, event: MouseEvent): void => handleDoubleClick(canvas, event, dispatch, anchorIndexRef);
+
+  const onPointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void =>
+    handlePointerMove(canvas, event, dispatch, anchorIndexRef);
+
+  const onPointerUp = (): void => handlePointerUp(anchorIndexRef);
+
   useEffect(() => {
     const canvas = canvasRef.current;
 
     if (canvas && isActive) {
-      const onPointerDown = (event: PointerEvent): void => handlePointerDown(canvas, event, dispatch, anchorIndexRef);
-      const onDoubleClick = (event: MouseEvent): void => handleDoubleClick(canvas, event, dispatch, anchorIndexRef);
-      const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event, dispatch, anchorIndexRef);
-      const onPointerUp = (): void => handlePointerUp(anchorIndexRef);
+      const pointerDownListener = (event: PointerEvent): void => onPointerDown(canvas, event);
+      const doubleClickListener = (event: MouseEvent): void => onDoubleClick(canvas, event);
+      const pointerMoveListener = (event: PointerEvent): void => onPointerMove(canvas, event);
 
-      document.addEventListener('pointerdown', onPointerDown);
-      document.addEventListener('dblclick', onDoubleClick);
-      document.addEventListener('pointermove', onPointerMove);
+      document.addEventListener('pointerdown', pointerDownListener);
+      document.addEventListener('dblclick', doubleClickListener);
+      document.addEventListener('pointermove', pointerMoveListener);
       document.addEventListener('pointerup', onPointerUp);
 
       return (): void => {
-        document.removeEventListener('pointerdown', onPointerDown);
-        document.removeEventListener('dblclick', onDoubleClick);
-        document.removeEventListener('pointermove', onPointerMove);
+        document.removeEventListener('pointerdown', pointerDownListener);
+        document.removeEventListener('dblclick', doubleClickListener);
+        document.removeEventListener('pointermove', pointerMoveListener);
         document.removeEventListener('pointerup', onPointerUp);
         anchorIndexRef.current = null;
       };

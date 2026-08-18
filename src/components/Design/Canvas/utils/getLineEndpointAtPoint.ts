@@ -3,9 +3,9 @@ import { LINE_ENDPOINT_HANDLE_HIT_RADIUS_PX } from 'constant/canvas';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TLineEndpoint } from '../hooks/useSelectionTool/types';
 import { TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
+import { TLineEndpoint } from 'types/design/selectionTool/types';
 
 export const getLineEndpointAtPoint = (
   point: TPoint,

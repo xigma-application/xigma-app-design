@@ -6,8 +6,8 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TPolygonVertexCountDragState } from '../../../types';
 import { TPolygonNode } from 'types/design/types';
+import { TPolygonVertexCountDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { continuePolygonVertexCountDrag } from '../continuePolygonVertexCountDrag';

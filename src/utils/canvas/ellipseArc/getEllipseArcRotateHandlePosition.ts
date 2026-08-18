@@ -1,5 +1,6 @@
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
+import { TEllipseArcFlip } from './types';
 
 // utils
 import { getEllipseArcHandlePosition } from './getEllipseArcHandlePosition';
@@ -7,7 +8,6 @@ import { getEllipseArcHandlePosition } from './getEllipseArcHandlePosition';
 export const getEllipseArcRotateHandlePosition = (
   bounds: TDraftRect,
   arcStartAngle: number,
-  flipX = false,
-  flipY = false,
+  flip: TEllipseArcFlip = {},
   arcRatio = 0,
-): TPoint => getEllipseArcHandlePosition(bounds, arcStartAngle, flipX, flipY, arcRatio);
+): TPoint => getEllipseArcHandlePosition(bounds, arcStartAngle, flip, arcRatio);

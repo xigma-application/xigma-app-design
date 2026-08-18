@@ -6,19 +6,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import {
-  TDragState,
-  TEndpointDragState,
-  TPathOffsetDragState,
-  TPolygonVertexCountDragState,
-  TResizeDragState,
-  TRotateDragState,
-  TStarVertexCountDragState,
-} from '../../../types';
 import { TDraftRect, TPoint } from 'types/canvas';
-
-// utils
-import { handlePointerMove } from '../handlePointerMove';
 import {
   TCornerRadiusDragState,
   TEllipseArcDragState,
@@ -27,6 +15,20 @@ import {
   TPolygonCornerRadiusDragState,
   TStarCornerRadiusDragState,
 } from 'types/design/canvas/types';
+import {
+  TDragState,
+  TEndpointDragState,
+  TPathOffsetDragState,
+  TPolygonVertexCountDragState,
+  TResizeDragState,
+  TRotateDragState,
+  TStarVertexCountDragState,
+} from 'types/design/selectionTool/types';
+
+// utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
+import { handlePointerMove } from '../handlePointerMove';
+import { createSelectionToolRefs } from '../../../hooks/useSelectionToolRefs/createSelectionToolRefs';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -104,21 +106,25 @@ describe('handlePointerMove', () => {
       canvas,
       pointerEvent(10, 10),
       store.dispatch,
-      createDragStateRef(),
-      createEndpointDragRef(),
-      createPathOffsetDragRef(),
-      createResizeDragRef(),
-      createRotateDragRef(),
-      createCornerRadiusDragRef(),
-      createPolygonCornerRadiusDragRef(),
-      createStarCornerRadiusDragRef(),
-      createPolygonVertexCountDragRef(),
-      createStarVertexCountDragRef(),
-      createEllipseArcDragRef(),
-      createEllipseArcRotateDragRef(),
-      createEllipseArcRatioDragRef(),
-      createMarqueeStartRef(),
-      createMarqueeRef(),
+      createCanvasRefs({
+        cornerRadiusDragRef: createCornerRadiusDragRef(),
+        ellipseArcDragRef: createEllipseArcDragRef(),
+        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        marqueeRef: createMarqueeRef(),
+        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+      }),
+      createSelectionToolRefs({
+        dragStateRef: createDragStateRef(),
+        endpointDragRef: createEndpointDragRef(),
+        marqueeStartRef: createMarqueeStartRef(),
+        pathOffsetDragRef: createPathOffsetDragRef(),
+        polygonVertexCountDragRef: createPolygonVertexCountDragRef(),
+        resizeDragRef: createResizeDragRef(),
+        rotateDragRef: createRotateDragRef(),
+        starVertexCountDragRef: createStarVertexCountDragRef(),
+      }),
     );
 
     // result
@@ -141,21 +147,25 @@ describe('handlePointerMove', () => {
       canvas,
       pointerEvent(10, 20),
       store.dispatch,
-      dragStateRef,
-      createEndpointDragRef(),
-      createPathOffsetDragRef(),
-      createResizeDragRef(),
-      createRotateDragRef(),
-      createCornerRadiusDragRef(),
-      createPolygonCornerRadiusDragRef(),
-      createStarCornerRadiusDragRef(),
-      createPolygonVertexCountDragRef(),
-      createStarVertexCountDragRef(),
-      createEllipseArcDragRef(),
-      createEllipseArcRotateDragRef(),
-      createEllipseArcRatioDragRef(),
-      createMarqueeStartRef(),
-      createMarqueeRef(),
+      createCanvasRefs({
+        cornerRadiusDragRef: createCornerRadiusDragRef(),
+        ellipseArcDragRef: createEllipseArcDragRef(),
+        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        marqueeRef: createMarqueeRef(),
+        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+      }),
+      createSelectionToolRefs({
+        dragStateRef,
+        endpointDragRef: createEndpointDragRef(),
+        marqueeStartRef: createMarqueeStartRef(),
+        pathOffsetDragRef: createPathOffsetDragRef(),
+        polygonVertexCountDragRef: createPolygonVertexCountDragRef(),
+        resizeDragRef: createResizeDragRef(),
+        rotateDragRef: createRotateDragRef(),
+        starVertexCountDragRef: createStarVertexCountDragRef(),
+      }),
     );
 
     // result
@@ -173,21 +183,25 @@ describe('handlePointerMove', () => {
       canvas,
       pointerEvent(650, 660),
       store.dispatch,
-      createDragStateRef(),
-      endpointDragRef,
-      createPathOffsetDragRef(),
-      createResizeDragRef(),
-      createRotateDragRef(),
-      createCornerRadiusDragRef(),
-      createPolygonCornerRadiusDragRef(),
-      createStarCornerRadiusDragRef(),
-      createPolygonVertexCountDragRef(),
-      createStarVertexCountDragRef(),
-      createEllipseArcDragRef(),
-      createEllipseArcRotateDragRef(),
-      createEllipseArcRatioDragRef(),
-      createMarqueeStartRef(),
-      createMarqueeRef(),
+      createCanvasRefs({
+        cornerRadiusDragRef: createCornerRadiusDragRef(),
+        ellipseArcDragRef: createEllipseArcDragRef(),
+        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        marqueeRef: createMarqueeRef(),
+        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+      }),
+      createSelectionToolRefs({
+        dragStateRef: createDragStateRef(),
+        endpointDragRef,
+        marqueeStartRef: createMarqueeStartRef(),
+        pathOffsetDragRef: createPathOffsetDragRef(),
+        polygonVertexCountDragRef: createPolygonVertexCountDragRef(),
+        resizeDragRef: createResizeDragRef(),
+        rotateDragRef: createRotateDragRef(),
+        starVertexCountDragRef: createStarVertexCountDragRef(),
+      }),
     );
 
     // result
@@ -206,21 +220,25 @@ describe('handlePointerMove', () => {
       canvas,
       pointerEvent(110, 110),
       store.dispatch,
-      createDragStateRef(),
-      createEndpointDragRef(),
-      createPathOffsetDragRef(),
-      createResizeDragRef(),
-      createRotateDragRef(),
-      createCornerRadiusDragRef(),
-      createPolygonCornerRadiusDragRef(),
-      createStarCornerRadiusDragRef(),
-      createPolygonVertexCountDragRef(),
-      createStarVertexCountDragRef(),
-      createEllipseArcDragRef(),
-      createEllipseArcRotateDragRef(),
-      createEllipseArcRatioDragRef(),
-      marqueeStartRef,
-      marqueeRef,
+      createCanvasRefs({
+        cornerRadiusDragRef: createCornerRadiusDragRef(),
+        ellipseArcDragRef: createEllipseArcDragRef(),
+        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        marqueeRef: marqueeRef,
+        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+      }),
+      createSelectionToolRefs({
+        dragStateRef: createDragStateRef(),
+        endpointDragRef: createEndpointDragRef(),
+        marqueeStartRef,
+        pathOffsetDragRef: createPathOffsetDragRef(),
+        polygonVertexCountDragRef: createPolygonVertexCountDragRef(),
+        resizeDragRef: createResizeDragRef(),
+        rotateDragRef: createRotateDragRef(),
+        starVertexCountDragRef: createStarVertexCountDragRef(),
+      }),
     );
 
     // result

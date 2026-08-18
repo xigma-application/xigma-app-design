@@ -39,8 +39,7 @@ export const getEllipseArcRatioHandleAtPoint = (
     arcStartAngle,
     arcEndAngle,
     arcRatio,
-    node.flipX,
-    node.flipY,
+    node,
     node.arcRatioInverted ?? false,
   );
   const distance = Math.hypot(testPoint.x - handlePosition.x, testPoint.y - handlePosition.y);

@@ -9,8 +9,8 @@ import { updateNode } from 'store/design/slice';
 import { AppDispatch, store } from 'store';
 
 // types
-import { TStarVertexCountDragState } from '../../types';
 import { TPoint } from 'types/canvas';
+import { TStarVertexCountDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { flipPoint } from 'utils/math/flipPoint';

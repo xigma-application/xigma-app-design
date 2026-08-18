@@ -1,7 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 // others
 import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
+
+// hooks
+import { useSelectionToolRefs } from './hooks/useSelectionToolRefs/useSelectionToolRefs';
 
 // store
 import { selectActiveTool, selectEditingTextBox } from 'store/design/selectors';
@@ -10,16 +13,7 @@ import { useAppDispatch, useAppSelector } from 'store';
 // types
 import { ToolName } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import {
-  TDragState,
-  TEndpointDragState,
-  TPathOffsetDragState,
-  TPolygonVertexCountDragState,
-  TResizeDragState,
-  TRotateDragState,
-  TStarVertexCountDragState,
-} from './types';
-import { TPoint } from 'types/canvas';
+import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 // utils
 import { handlePointerDown } from './utils/handlePointerDown/handlePointerDown';
@@ -28,123 +22,39 @@ import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 import { shouldUseCanvasCaretEditing } from '../../utils/shouldUseCanvasCaretEditing';
 
 export const useSelectionTool = (refs: TCanvasRefs): void => {
-  const {
-    canvasRef,
-    cornerRadiusDragRef,
-    ellipseArcDragRef,
-    ellipseArcRatioDragRef,
-    ellipseArcRotateDragRef,
-    marqueeRef,
-    polygonCornerRadiusDragRef,
-    starCornerRadiusDragRef,
-  } = refs;
   const { setClassName } = useClassNames();
   const activeTool = useAppSelector(selectActiveTool);
   const editingTextBox = useAppSelector(selectEditingTextBox);
   const isCanvasCaretEditingActive = shouldUseCanvasCaretEditing(editingTextBox);
   const dispatch = useAppDispatch();
-  const dragStateRef = useRef<TDragState | null>(null);
-  const endpointDragRef = useRef<TEndpointDragState | null>(null);
-  const pathOffsetDragRef = useRef<TPathOffsetDragState | null>(null);
-  const resizeDragRef = useRef<TResizeDragState | null>(null);
-  const rotateDragRef = useRef<TRotateDragState | null>(null);
-  const polygonVertexCountDragRef = useRef<TPolygonVertexCountDragState | null>(null);
-  const starVertexCountDragRef = useRef<TStarVertexCountDragState | null>(null);
-  const marqueeStartRef = useRef<TPoint | null>(null);
+  const selectionRefs = useSelectionToolRefs();
+
+  const onPointerDown = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs, selectRefs: TSelectionToolRefs): void =>
+    handlePointerDown(canvas, event, dispatch, canvasRefs, selectRefs, setClassName);
+
+  const onPointerMove = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs, selectRefs: TSelectionToolRefs): void =>
+    handlePointerMove(canvas, event, dispatch, canvasRefs, selectRefs);
+
+  const onPointerUp = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs, selectRefs: TSelectionToolRefs): void =>
+    handlePointerUp(canvas, event, dispatch, canvasRefs, selectRefs, setClassName);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const canvas = refs.canvasRef.current;
 
     if (canvas && (activeTool === ToolName.default || activeTool === ToolName.scale) && !isCanvasCaretEditingActive) {
-      const onPointerDown = (event: PointerEvent): void =>
-        handlePointerDown(
-          canvas,
-          event,
-          dispatch,
-          dragStateRef,
-          endpointDragRef,
-          pathOffsetDragRef,
-          resizeDragRef,
-          rotateDragRef,
-          cornerRadiusDragRef,
-          polygonCornerRadiusDragRef,
-          starCornerRadiusDragRef,
-          polygonVertexCountDragRef,
-          starVertexCountDragRef,
-          ellipseArcDragRef,
-          ellipseArcRotateDragRef,
-          ellipseArcRatioDragRef,
-          marqueeStartRef,
-          setClassName,
-        );
+      const pointerDownListener = (event: PointerEvent): void => onPointerDown(canvas, event, refs, selectionRefs);
+      const pointerMoveListener = (event: PointerEvent): void => onPointerMove(canvas, event, refs, selectionRefs);
+      const pointerUpListener = (event: PointerEvent): void => onPointerUp(canvas, event, refs, selectionRefs);
 
-      const onPointerMove = (event: PointerEvent): void =>
-        handlePointerMove(
-          canvas,
-          event,
-          dispatch,
-          dragStateRef,
-          endpointDragRef,
-          pathOffsetDragRef,
-          resizeDragRef,
-          rotateDragRef,
-          cornerRadiusDragRef,
-          polygonCornerRadiusDragRef,
-          starCornerRadiusDragRef,
-          polygonVertexCountDragRef,
-          starVertexCountDragRef,
-          ellipseArcDragRef,
-          ellipseArcRotateDragRef,
-          ellipseArcRatioDragRef,
-          marqueeStartRef,
-          marqueeRef,
-        );
-
-      const onPointerUp = (event: PointerEvent): void =>
-        handlePointerUp(
-          canvas,
-          event,
-          dispatch,
-          dragStateRef,
-          endpointDragRef,
-          pathOffsetDragRef,
-          resizeDragRef,
-          rotateDragRef,
-          cornerRadiusDragRef,
-          polygonCornerRadiusDragRef,
-          starCornerRadiusDragRef,
-          polygonVertexCountDragRef,
-          starVertexCountDragRef,
-          ellipseArcDragRef,
-          ellipseArcRotateDragRef,
-          ellipseArcRatioDragRef,
-          marqueeStartRef,
-          marqueeRef,
-          setClassName,
-        );
-
-      canvas.addEventListener('pointerdown', onPointerDown);
-      canvas.addEventListener('pointermove', onPointerMove);
-      canvas.addEventListener('pointerup', onPointerUp);
+      canvas.addEventListener('pointerdown', pointerDownListener);
+      canvas.addEventListener('pointermove', pointerMoveListener);
+      canvas.addEventListener('pointerup', pointerUpListener);
 
       return (): void => {
-        canvas.removeEventListener('pointerdown', onPointerDown);
-        canvas.removeEventListener('pointermove', onPointerMove);
-        canvas.removeEventListener('pointerup', onPointerUp);
+        canvas.removeEventListener('pointerdown', pointerDownListener);
+        canvas.removeEventListener('pointermove', pointerMoveListener);
+        canvas.removeEventListener('pointerup', pointerUpListener);
       };
     }
-  }, [
-    activeTool,
-    canvasRef,
-    cornerRadiusDragRef,
-    dispatch,
-    ellipseArcDragRef,
-    ellipseArcRatioDragRef,
-    ellipseArcRotateDragRef,
-    isCanvasCaretEditingActive,
-    marqueeRef,
-    polygonCornerRadiusDragRef,
-    setClassName,
-    starCornerRadiusDragRef,
-  ]);
+  }, [activeTool, dispatch, isCanvasCaretEditingActive, refs, selectionRefs, setClassName]);
 };

@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // types
-import { TEndpointDragState, TLineEndpoint } from '../../types';
+import { TEndpointDragState, TLineEndpoint } from 'types/design/selectionTool/types';
 
 // utils
 import { armEndpointDrag } from './armEndpointDrag';

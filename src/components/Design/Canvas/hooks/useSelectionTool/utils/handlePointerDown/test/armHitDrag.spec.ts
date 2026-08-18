@@ -7,7 +7,7 @@ import { store } from 'store';
 // types
 import { NodeType } from 'types/design/enums';
 import { TBoxSceneNode, TMediaNode, TPathNode, TPolygonNode, TSceneNode, TStarNode, TTextNode } from 'types/design/types';
-import { TDragState } from '../../../types';
+import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { armHitDrag } from '../armHitDrag';

@@ -3,7 +3,7 @@ import { updateNode } from 'store/design/slice';
 import { AppDispatch } from 'store';
 
 // types
-import { TResizeNodeOrigin } from '../../../../types';
+import { TResizeNodeOrigin } from 'types/design/selectionTool/types';
 
 // utils
 import { transformCoord } from '../transformCoord';

@@ -5,8 +5,8 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TDragState, TPendingClickAction } from '../../types';
 import { TPoint } from 'types/canvas';
+import { TDragState, TPendingClickAction } from 'types/design/selectionTool/types';
 
 export const armDrag = (
   armIds: string[],
