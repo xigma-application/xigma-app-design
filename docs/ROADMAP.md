@@ -1055,6 +1055,21 @@ to czysto swobodny drag, zero pomocy:
       wielocyfrowe wartości z `Math.atan2`. Świadomie **nie** ogranicza to ręcznego wpisania wartości
       ułamkowej w przyszłym panelu właściwości (Etap 8) — dotyczy tylko wyniku samego dragowania.
       Reszta punktów tego etapu (linijki/smart guides/snap do frame'a) wciąż do zrobienia.
+- [x] **Poprawka: `toDraftRect.ts` przestał zaokrąglać `x`/`width` (i `y`/`height`) niezależnie od
+      siebie** — zgłoszony bug: rysowanie kształtu (Rectangle i in.) przeciągnięciem w stronę ujemną
+      (w lewo/w górę od punktu startu) przy dużym zoomie dawało widoczny "efekt skoku" — szerokość
+      rosła płynnie, po czym `x` nagle "odskakiwało". Przyczyna: `x = Math.round(Math.min(start,
+      current))` i `width = Math.round(Math.abs(current - start))` to dwa **niezależne** zaokrąglenia
+      dwóch powiązanych, ale różnych wielkości ciągłych — ich suma (`x + width`, czyli krawędź
+      zakotwiczona w punkcie startowym przy przeciąganiu w stronę ujemną) nie musi równać się
+      zaokrągleniu tej krawędzi wprost, więc migotała o ±1 world unit w zależności od części ułamkowej
+      bieżącej pozycji kursora — niezauważalne przy zoomie 100% (1px), ale przy 256x to aż 256px
+      widocznego skoku. Naprawione zaokrąglaniem **krawędzi najpierw** (`Math.round` na obu końcach
+      przedziału z osobna), a `width`/`height` liczone jako różnica już zaokrąglonych krawędzi — dzięki
+      temu `x + width` zawsze dokładnie równa się zaokrągleniu krawędzi zakotwiczonej w starcie,
+      niezależnie od tego, jak zmienia się część ułamkowa bieżącej pozycji. Współdzielone przez
+      wszystkie narzędzia rysujące, `continueMarqueeDrag.ts` (zaznaczenie prostokątem) i
+      `continueDrawDrag.ts` (Slice) — jedna funkcja, jedna naprawa.
 - [ ] smart guides: czerwone linie przyciągania do krawędzi/środków innych node'ów podczas
       przeciągania/resize, z wyświetlaną odległością (jak dystanse w Figmie)
 - [ ] snap do viewportu/frame'a rodzica

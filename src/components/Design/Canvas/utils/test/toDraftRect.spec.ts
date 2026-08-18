@@ -25,4 +25,28 @@ describe('toDraftRect', () => {
     // result
     expect(rect).toEqual({ height: 30, width: 50, x: 10, y: 11 });
   });
+
+  it('should keep the edge anchored at a fractional start point perfectly stable while dragging toward it, instead of letting x and width drift apart by a whole unit as they round independently', () => {
+    // mock — start.x (523.437) rounds to 523; every current.x below must keep x + width === 523
+    // exactly, not oscillate to 524 depending on current.x's own fractional part
+    const start = { x: 523.437, y: 300 };
+
+    // result
+    [523.437, 523.137, 522.837, 522.537, 522.237, 521.937, 521.637, 521.337, 521.037, 520.737, 520.437, 520.137].forEach((x) => {
+      const rect = toDraftRect(start, { x, y: 300 });
+
+      expect(rect.x + rect.width).toBe(523);
+    });
+  });
+
+  it('should keep the edge anchored at a fractional start point stable while dragging up/left simultaneously, on both axes', () => {
+    // mock — start (523.437, 300.687) rounds to (523, 301); dragging up-left must keep the bottom-right
+    // corner at exactly (523, 301) regardless of current's own fractional part
+    const start = { x: 523.437, y: 300.687 };
+    const rect = toDraftRect(start, { x: 520.937, y: 297.937 });
+
+    // result
+    expect(rect.x + rect.width).toBe(523);
+    expect(rect.y + rect.height).toBe(301);
+  });
 });
