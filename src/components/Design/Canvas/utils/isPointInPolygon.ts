@@ -8,6 +8,7 @@ import { TDraftRect, TPoint } from 'types/canvas';
 import { flipPoint } from 'utils/math/flipPoint';
 import { getPolygonPoints } from 'utils/canvas/shapes/getPolygonPoints';
 import { getRoundedPolygonPoints } from 'utils/canvas/shapes/getRoundedPolygonPoints';
+import { isPointInPolygonVertices } from './isPointInPolygonVertices';
 
 export const isPointInPolygon = (
   point: TPoint,
@@ -21,15 +22,5 @@ export const isPointInPolygon = (
       ? getRoundedPolygonPoints({ ...polygon, cornerRadius }, ROUNDED_POLYGON_CORNER_SEGMENTS)
       : getPolygonPoints(polygon, polygon.sides);
 
-  return vertices.reduce((isInside, vertex, index) => {
-    const previousVertex = vertices[(index - 1 + vertices.length) % vertices.length];
-    const crossesRay = vertex.y > testPoint.y !== previousVertex.y > testPoint.y;
-
-    if (crossesRay) {
-      const intersectionX = ((previousVertex.x - vertex.x) * (testPoint.y - vertex.y)) / (previousVertex.y - vertex.y) + vertex.x;
-      return testPoint.x < intersectionX ? !isInside : isInside;
-    }
-
-    return isInside;
-  }, false);
+  return isPointInPolygonVertices(testPoint, vertices);
 };

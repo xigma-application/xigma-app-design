@@ -7,6 +7,9 @@ import { AppDispatch } from 'store';
 import {
   TCornerRadiusDragState,
   TDragState,
+  TEllipseArcDragState,
+  TEllipseArcRatioDragState,
+  TEllipseArcRotateDragState,
   TEndpointDragState,
   TPathOffsetDragState,
   TPolygonCornerRadiusDragState,
@@ -21,6 +24,9 @@ import { TDraftRect, TPoint } from 'types/canvas';
 // utils
 import { continueCornerRadiusDrag } from './continueCornerRadiusDrag';
 import { continueDrag } from './continueDrag';
+import { continueEllipseArcDrag } from './continueEllipseArcDrag';
+import { continueEllipseArcRatioDrag } from './continueEllipseArcRatioDrag';
+import { continueEllipseArcRotateDrag } from './continueEllipseArcRotateDrag';
 import { continueEndpointDrag } from './continueEndpointDrag';
 import { continueMarqueeDrag } from './continueMarqueeDrag';
 import { continuePathOffsetDrag } from './continuePathOffsetDrag';
@@ -45,6 +51,9 @@ export const handlePointerMove = (
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>,
   polygonVertexCountDragRef: RefObject<TPolygonVertexCountDragState | null>,
   starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>,
+  ellipseArcDragRef: RefObject<TEllipseArcDragState | null>,
+  ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null>,
+  ellipseArcRatioDragRef: RefObject<TEllipseArcRatioDragState | null>,
   marqueeStartRef: RefObject<TPoint | null>,
   marqueeRef: RefObject<TDraftRect | null>,
 ): void => {
@@ -58,5 +67,8 @@ export const handlePointerMove = (
   continueStarCornerRadiusDrag(canvas, event, dispatch, starCornerRadiusDragRef);
   continuePolygonVertexCountDrag(canvas, event, dispatch, polygonVertexCountDragRef);
   continueStarVertexCountDrag(canvas, event, dispatch, starVertexCountDragRef);
+  continueEllipseArcDrag(canvas, event, dispatch, ellipseArcDragRef);
+  continueEllipseArcRotateDrag(canvas, event, dispatch, ellipseArcRotateDragRef);
+  continueEllipseArcRatioDrag(canvas, event, dispatch, ellipseArcRatioDragRef);
   continueMarqueeDrag(canvas, event, dispatch, marqueeStartRef, marqueeRef);
 };

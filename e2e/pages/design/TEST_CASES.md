@@ -1281,6 +1281,43 @@ vertex-count handles priority over resize at that coincident point (unit-covered
 `handlePointerDown.spec.ts`/`useHoverHighlight.spec.tsx`; not e2e — no visual difference exists to
 screenshot between "resize armed" and "vertex-count armed" until a drag actually starts).
 
+## Ellipse arc / ring (Sweep, Start, Ratio handles)
+
+Three handles on a selected+hovered Ellipse. **Sweep** (`arcEndAngle`, on the perimeter) drags a cut
+into the shape. **Start** (`arcStartAngle`, on the perimeter, distinguished from Sweep only by a dot
+drawn inside it — Figma calls this the same "Start handle") rotates the whole cut, preserving its
+sweep width; it existed as arm/continue/disarm files but was never wired into
+`handlePointerDown`/`handlePointerMove`/`handlePointerUp`/`useHoverHighlight`, so dragging it did
+nothing and no cursor ever showed — fixed in this pass. **Ratio** (`arcRatio`, rests at dead center
+when 0) hollows the shape into a ring; when dragged past the shape's own angular boundary into the
+cut-away gap, `arcRatioInverted` flips which of the two wedges is treated as filled (matches Figma:
+"drag the Ratio handle into the gap to swap which segment is shown") — `getEffectiveArcAngles`
+resolves this by feeding the already-resolved major arc's own `(majorStart, majorStart+majorSweep)`
+back through `getEllipseArcMajorArc`, which is the one raw pair whose own resolution is exactly the
+complementary arc. Once `arcRatio` reaches its max (1), the ring's inner and outer edges coincide and
+the fill has zero area, so `drawEllipseArcRatioGuideArc` traces that collapsed boundary as a curve —
+the same role `drawEllipseArcGuideLine`'s straight line plays for a fully cut-away (`majorSweep`
+`=== 0`) shape, just curved instead of straight since here the radius is real, only the band's
+thickness has collapsed. Sweep/Start's own rest position also shifts to the midpoint of the ring
+band (not the outer tip) once `arcRatio > 0`, and their live drag is clamped to that same band
+(inner rim to outer rim) instead of sliding from dead center.
+
+| #   | Scenario                                                                                                                  | Unit |           E2E            |
+| --- | ------------------------------------------------------------------------------------------------------------------------- | :--: | :----------------------: |
+| 147 | Dragging the Sweep handle cuts a wedge out of the ellipse                                                                 |  —   | ✅ `ellipse-arc.spec.ts` |
+| 148 | The Start handle shows the `radius` cursor once a cut exists, and dragging it rotates the whole cut                       |  —   | ✅ `ellipse-arc.spec.ts` |
+| 149 | Dragging the Ratio handle hollows a ring out of the (even uncut) ellipse                                                  |  —   | ✅ `ellipse-arc.spec.ts` |
+| 150 | Dragging the Ratio handle into the cut-away gap swaps which side is filled, versus the same drag distance into the fill   |  —   | ✅ `ellipse-arc.spec.ts` |
+| 151 | The rotate handle is hidden for both extremes — a full circle (`majorSweep === 360`) and a fully cut-away shape (`=== 0`) |  —   |            —             |
+| 152 | Sweep/Start rest at the ring band's midpoint once `arcRatio > 0`, instead of the outer tip                                |  —   |            —             |
+| 153 | The Ratio guide arc appears only once `arcRatio` reaches 1 on a genuinely cut (not full-circle) shape                     |  —   |            —             |
+
+Unit coverage for this whole section is a known gap as of this pass (tracked separately, not part of
+this change) — all four e2e specs above were written and run against the real implementation, so
+they're live regression guards regardless. #151-#153 are precise single-formula/single-branch
+checks (`getEllipseArcRotateHandlePosition`'s radius formula, the guide-arc trigger condition) better
+suited to a future unit test than a screenshot diff, once that unit coverage lands.
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

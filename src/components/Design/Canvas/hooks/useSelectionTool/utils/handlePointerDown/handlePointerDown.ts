@@ -9,6 +9,9 @@ import { AppDispatch, store } from 'store';
 import {
   TCornerRadiusDragState,
   TDragState,
+  TEllipseArcDragState,
+  TEllipseArcRatioDragState,
+  TEllipseArcRotateDragState,
   TEndpointDragState,
   TPathOffsetDragState,
   TPolygonCornerRadiusDragState,
@@ -23,6 +26,9 @@ import { TPoint } from 'types/canvas';
 
 // utils
 import { armCornerRadiusDrag } from './armCornerRadiusDrag';
+import { armEllipseArcDrag } from './armEllipseArcDrag';
+import { armEllipseArcRatioDrag } from './armEllipseArcRatioDrag';
+import { armEllipseArcRotateDrag } from './armEllipseArcRotateDrag';
 import { armGroupBoundsDrag } from './armGroupBoundsDrag';
 import { armHitDrag } from './armHitDrag';
 import { armLineEndpointDrag } from './armLineEndpointDrag';
@@ -35,6 +41,9 @@ import { armRotateDrag } from './armRotateDrag';
 import { armStarCornerRadiusDrag } from './armStarCornerRadiusDrag';
 import { armStarVertexCountDrag } from './armStarVertexCountDrag';
 import { getCornerRadiusHandleAtPoint } from '../../../../utils/getCornerRadiusHandleAtPoint';
+import { getEllipseArcHandleAtPoint } from '../../../../utils/getEllipseArcHandleAtPoint';
+import { getEllipseArcRatioHandleAtPoint } from '../../../../utils/getEllipseArcRatioHandleAtPoint';
+import { getEllipseArcRotateHandleAtPoint } from '../../../../utils/getEllipseArcRotateHandleAtPoint';
 import { getLineEndpointAtPoint } from '../../../../utils/getLineEndpointAtPoint';
 import { getNodeAtPoint } from '../../../../utils/getNodeAtPoint';
 import { getPathTextOffsetHandleAtPoint } from '../../../../utils/getPathTextOffsetHandleAtPoint';
@@ -64,6 +73,9 @@ export const handlePointerDown = (
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>,
   polygonVertexCountDragRef: RefObject<TPolygonVertexCountDragState | null>,
   starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>,
+  ellipseArcDragRef: RefObject<TEllipseArcDragState | null>,
+  ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null>,
+  ellipseArcRatioDragRef: RefObject<TEllipseArcRatioDragState | null>,
   marqueeStartRef: RefObject<TPoint | null>,
   setClassName: (className: string | null) => void,
 ): void => {
@@ -80,6 +92,9 @@ export const handlePointerDown = (
     const rotateHandleHit = getRotateHandleAtPoint(point, selectedNodes, viewport);
     const polygonVertexCountHandleHit = getPolygonVertexCountHandleAtPoint(point, selectedNodes, viewport);
     const starVertexCountHandleHit = getStarVertexCountHandleAtPoint(point, selectedNodes, viewport);
+    const ellipseArcHandleHit = getEllipseArcHandleAtPoint(point, selectedNodes, viewport);
+    const ellipseArcRotateHandleHit = getEllipseArcRotateHandleAtPoint(point, selectedNodes, viewport);
+    const ellipseArcRatioHandleHit = getEllipseArcRatioHandleAtPoint(point, selectedNodes, viewport);
     const cornerRadiusHandleHit = resizeHandleHit ? null : getCornerRadiusHandleAtPoint(point, selectedNodes, viewport);
     const polygonCornerRadiusHandleHit = resizeHandleHit ? null : getPolygonCornerRadiusHandleAtPoint(point, selectedNodes, viewport);
     const starCornerRadiusHandleHit = resizeHandleHit ? null : getStarCornerRadiusHandleAtPoint(point, selectedNodes, viewport);
@@ -110,6 +125,42 @@ export const handlePointerDown = (
           starVertexCountHandleHit!.rotation,
           starVertexCountHandleHit!.flipX,
           starVertexCountHandleHit!.flipY,
+        );
+        break;
+      case Boolean(ellipseArcHandleHit):
+        armEllipseArcDrag(
+          canvas,
+          event,
+          ellipseArcDragRef,
+          ellipseArcHandleHit!.bounds,
+          ellipseArcHandleHit!.nodeId,
+          ellipseArcHandleHit!.rotation,
+          ellipseArcHandleHit!.flipX,
+          ellipseArcHandleHit!.flipY,
+        );
+        break;
+      case Boolean(ellipseArcRotateHandleHit):
+        armEllipseArcRotateDrag(
+          canvas,
+          event,
+          ellipseArcRotateDragRef,
+          ellipseArcRotateHandleHit!.bounds,
+          ellipseArcRotateHandleHit!.nodeId,
+          ellipseArcRotateHandleHit!.rotation,
+          ellipseArcRotateHandleHit!.flipX,
+          ellipseArcRotateHandleHit!.flipY,
+        );
+        break;
+      case Boolean(ellipseArcRatioHandleHit):
+        armEllipseArcRatioDrag(
+          canvas,
+          event,
+          ellipseArcRatioDragRef,
+          ellipseArcRatioHandleHit!.bounds,
+          ellipseArcRatioHandleHit!.nodeId,
+          ellipseArcRatioHandleHit!.rotation,
+          ellipseArcRatioHandleHit!.flipX,
+          ellipseArcRatioHandleHit!.flipY,
         );
         break;
       case Boolean(resizeHandleHit):

@@ -1,5 +1,5 @@
 // others
-import { LINE_RENDER_STROKE_WIDTH } from 'constant/canvas';
+import { ELLIPSE_DEFAULT_ARC_ANGLE, LINE_RENDER_STROKE_WIDTH } from 'constant/canvas';
 import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
 
 // types
@@ -9,7 +9,7 @@ import { TPathOutlineStyle } from './getPathOutlineStyles';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
-import { drawEllipse } from 'utils/canvas/shapes/drawEllipse';
+import { drawEllipseNode } from 'utils/canvas/drawEllipseNode';
 import { drawImage } from 'utils/canvas/drawImage';
 import { drawLine } from 'utils/canvas/drawLine';
 import { drawLineEndpointArrowheads } from './drawLineEndpointArrowheads';
@@ -35,7 +35,22 @@ export const drawSceneNodes = (
   nodes.forEach((node) => {
     switch (node.type) {
       case NodeType.ellipse:
-        drawEllipse(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, node.rotation);
+        drawEllipseNode(
+          gl,
+          program,
+          buffer,
+          {
+            ...node,
+            arcEndAngle: node.arcEndAngle ?? ELLIPSE_DEFAULT_ARC_ANGLE,
+            arcStartAngle: node.arcStartAngle ?? ELLIPSE_DEFAULT_ARC_ANGLE,
+          },
+          canvasWidth,
+          canvasHeight,
+          viewport,
+          node.flipX ?? false,
+          node.flipY ?? false,
+          node.rotation,
+        );
         break;
       case NodeType.polygon:
         drawPolygon(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, node.flipX, node.flipY, node.rotation);

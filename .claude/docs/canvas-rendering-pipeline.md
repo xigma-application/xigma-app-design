@@ -7,11 +7,14 @@ WebGL2.
 
 ## 1. Context setup
 
-- `Canvas/Canvas.tsx` owns the single `<canvas>` element (`canvasRef`) plus seven ephemeral
+- `Canvas/Canvas.tsx` owns the single `<canvas>` element (`canvasRef`) plus ten ephemeral
   `useRef`s (`draftRef`/`marqueeRef`/`hoverRef`/`sliceRef` — see §6 — plus
   `cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef`, which exist so
-  `useCanvasRenderLoop` can tell a corner-radius drag is actively in progress; see
-  `selection-and-manipulation.md` §13) threaded into every tool hook and into `useCanvasRenderLoop`.
+  `useCanvasRenderLoop` can tell a corner-radius drag is actively in progress (see
+  `selection-and-manipulation.md` §13), plus `ellipseArcDragRef`/`ellipseArcRotateDragRef`/
+  `ellipseArcRatioDragRef`, which exist so the Sweep/Start/Ratio handles can render mid-drag at their
+  live pointer-projected position instead of jumping (§19)) threaded into every tool hook and into
+  `useCanvasRenderLoop`.
 - The context itself is created in `Canvas/hooks/useCanvasRenderLoop/useCanvasRenderLoop.ts`:
   `canvas.getContext(WEBGL_CONTEXT_ID, WEBGL_CONTEXT_ATTRIBUTES)`, both constants in
   `Canvas/constants.ts`: `WEBGL_CONTEXT_ID = 'webgl2'`,
@@ -55,7 +58,9 @@ WebGL2.
   drawSceneNodes(gl, program, buffer, imageContext, sceneNodes, w, h, viewport, pathOutlineStyles);
   drawHoverOutline(gl, program, buffer, hoveredNode, w, h, viewport);
   drawSelectionOutline(gl, program, buffer, selectedNodes, w, h, viewport);
-  drawCornerRadiusHandlesLayer(gl, program, buffer, hoveredNode, selectedNodes, w, h, viewport);
+  drawCornerRadiusHandlesLayer(gl, program, buffer, hoveredNode, selectedNodes, w, h, viewport, isDraggingCornerRadius);
+  drawVertexCountHandlesLayer(gl, program, buffer, hoveredNode, selectedNodes, w, h, viewport);
+  drawEllipseArcHandleLayer(gl, program, buffer, hoveredNode, selectedNodes, w, h, viewport, ...draggedPositions);
   drawFrame(gl, program, buffer, imageContext, draftShape, w, h, viewport);       // dispatcher, despite the name
   drawEditingText(gl, program, buffer, imageContext, editingTextBox, ...);
   drawEditingPathTextHandle(gl, program, buffer, editingTextBox, w, h, viewport);
@@ -63,11 +68,20 @@ WebGL2.
   drawSliceDraft(gl, program, buffer, sliceRect, w, h, viewport);
   ```
   **background → committed nodes → hover outline → selection outline → corner-radius handles →
-  in-progress draft → editing-text overlay → path-text offset handle → marquee → slice draft.**
-  `drawCornerRadiusHandlesLayer.ts` self-gates (selected+hovered single rectangle, polygon, or star,
-  large enough on screen — see `selection-and-manipulation.md` §11, §12, §15) rather than
-  `drawScene.ts` deciding when to call it, same "thin wrapper decides nothing, the layer decides"
-  shape as `drawHoverOutline.ts`. Nodes
+  vertex-count handles → ellipse arc-cutting handles → in-progress draft → editing-text overlay →
+  path-text offset handle → marquee → slice draft.** `drawCornerRadiusHandlesLayer.ts`/
+  `drawVertexCountHandlesLayer.ts`/`drawEllipseArcHandleLayer.ts` (`selection-and-manipulation.md`
+  §11/§12/§15, §18, §19) each self-gate (selected+hovered single node of the relevant type, large
+  enough on screen) rather than `drawScene.ts` deciding when to call them, same "thin wrapper decides
+  nothing, the layer decides" shape as `drawHoverOutline.ts` — three separate, deliberately
+  non-unified layer functions even though their gating logic looks almost identical, so each
+  mechanism (`cornerRadius`, `sides`/`points`, `arcStartAngle`/`arcEndAngle`/`arcRatio`) stays fully
+  decoupled from the others rather than sharing a switch that would need to know about all three at
+  once. `drawEllipseArcHandleLayer.ts` additionally takes three `...draggedPositions` (one per
+  Sweep/Start/Ratio handle, `TPoint | null`) sourced from `ellipseArcDragRef`/`ellipseArcRotateDragRef`/
+  `ellipseArcRatioDragRef.current?.draggedHandlePosition` in `startRenderLoop.ts`'s `tick` — same
+  ref-drilling shape the `cornerRadiusDragRef`-trio row below already uses, just three refs feeding
+  three independent optional params instead of one boolean OR. Nodes
   currently being
   text-edited are filtered out of both `sceneNodes` and `selectedNodes` up front
   (`node.id !== editingNodeId`), so they render exactly once, only through the dedicated editing
@@ -82,7 +96,7 @@ Three GLSL `#version 300 es` programs, all built via `createProgram.ts`/`createS
 
 | Program | Vertex source | Fragment source | Extra attrib | Used by |
 |---|---|---|---|---|
-| plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect`), `drawPolygon` (dispatches to `drawStandardPolygon`/`drawRoundedPolygon`), `drawStar` (dispatches to `drawStandardStar`/`drawRoundedStar`), `drawLine`, `drawEllipse`, `drawThickOutline`, `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, `drawCornerRadiusHandles`, `drawPolygonCornerRadiusHandle`, `drawStarCornerRadiusHandle`, every outline/handle primitive |
+| plain-color | `constant/webgl/vertexShaderSource.ts` | `fragmentShaderSource.ts` | — | `drawRect` (dispatches to `drawStandardRect`/`drawRoundedRect`), `drawPolygon` (dispatches to `drawStandardPolygon`/`drawRoundedPolygon`), `drawStar` (dispatches to `drawStandardStar`/`drawRoundedStar`), `drawLine`, `drawEllipse`, `drawEllipseNode` (dispatches to `drawEllipse`/`drawEllipseArc`, `selection-and-manipulation.md` §19), `drawThickOutline`, `drawThickEllipseNodeOutline` (dispatches to `drawThickEllipseOutline`/`drawThickEllipseArcOutline`), `drawArrowhead`, `drawMarquee`, `drawSliceDraft`, `drawCornerHandles`, `drawCornerRadiusHandles`, `drawPolygonCornerRadiusHandle`, `drawStarCornerRadiusHandle`, `drawPolygonVertexCountHandle`/`drawStarVertexCountHandle`, `drawEllipseArcHandle`/`drawEllipseArcGuideLine`/`drawEllipseArcRatioGuideArc`, every outline/handle primitive |
 | image/texture | `imageVertexShaderSource.ts` | `imageFragmentShaderSource.ts` | `a_texCoord` | `drawImage.ts` (Media nodes + draft media) |
 | MSDF text | **same vertex source as image** (reused, not a 4th file) | `msdfFragmentShaderSource.ts` | `a_texCoord` | `drawMsdfText.ts` |
 
@@ -180,6 +194,7 @@ written directly by native pointer listeners (so dragging never dispatches per p
 | `hoverRef` (`string \| null`, node id) | `useHoverHighlight.ts` | `drawScene/drawHoverOutline.ts` (per-`NodeType` dispatch) |
 | `sliceRef` (`TSliceDraft \| null`) | `useSliceTool.ts`'s own arm/continue/disarm set | `utils/canvas/drawSliceDraft.ts` |
 | `cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef` (drag-state `\| null`) | `useSelectionTool.ts`'s `arm*CornerRadiusDrag`/`disarm*CornerRadiusDrag` trio per shape | dereferenced to a single `isDraggingCornerRadius` boolean (OR of all three) in `startRenderLoop.ts`'s `tick`, consumed by `drawCornerRadiusHandlesLayer.ts` — not rendered directly, just gates the zero-state-offset fallback (`selection-and-manipulation.md` §13) |
+| `ellipseArcDragRef`/`ellipseArcRotateDragRef`/`ellipseArcRatioDragRef` (drag-state `\| null`) | `useSelectionTool.ts`'s `armEllipseArc*Drag`/`disarmEllipseArc*Drag` trio per handle | each dereferenced to its own `.current?.draggedHandlePosition ?? null` in `startRenderLoop.ts`'s `tick`, passed straight through as one of `drawEllipseArcHandleLayer.ts`'s three optional position params — rendered directly (unlike the corner-radius boolean), since this is the live pointer-projected handle position itself, not just an in-progress flag (`selection-and-manipulation.md` §19) |
 
 `TDraftEntity` (`types/design/types.ts`) unions one draft variant per geometry
 (`TDraftShape | TDraftLine | TDraftPath | TDraftPolygon | TDraftStar | TDraftMedia | TDraftText`),

@@ -46,7 +46,13 @@ export type TBaseNode = {
 };
 
 export type TEllipseNode = TBaseNode & {
+  arcEndAngle?: number;
+  arcRatio?: number;
+  arcRatioInverted?: boolean;
+  arcStartAngle?: number;
   fill: string;
+  flipX?: boolean;
+  flipY?: boolean;
   type: NodeType.ellipse;
 };
 

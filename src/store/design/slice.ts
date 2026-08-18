@@ -12,6 +12,7 @@ import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/d
 import { handleAddNode } from './utils/handleAddNode';
 import { handleDeleteNode } from './utils/handleDeleteNode';
 import { handleSetActiveTool } from './utils/handleSetActiveTool';
+import { handleSetSelection } from './utils/handleSetSelection';
 import { handleStartTextEdit } from './utils/handleStartTextEdit';
 import { handleStopTextEdit } from './utils/handleStopTextEdit';
 import { handleUpdateEditingTextBoxPathStartOffset } from './utils/handleUpdateEditingTextBoxPathStartOffset';
@@ -46,9 +47,7 @@ const designSlice = createSlice({
     },
     deleteNode: (state, action: PayloadAction<string>) => handleDeleteNode(state, action.payload),
     setActiveTool: (state, action: PayloadAction<ToolName>) => handleSetActiveTool(state, action.payload),
-    setSelection: (state, action: PayloadAction<string[]>) => {
-      state.selectedIds = action.payload;
-    },
+    setSelection: (state, action: PayloadAction<string[]>) => handleSetSelection(state, action.payload),
     setViewport: (state, action: PayloadAction<TViewport>) => {
       state.viewport = action.payload;
     },

@@ -7,6 +7,9 @@ import { AppDispatch } from 'store';
 import {
   TCornerRadiusDragState,
   TDragState,
+  TEllipseArcDragState,
+  TEllipseArcRatioDragState,
+  TEllipseArcRotateDragState,
   TEndpointDragState,
   TPathOffsetDragState,
   TPolygonCornerRadiusDragState,
@@ -21,6 +24,9 @@ import { TDraftRect, TPoint } from 'types/canvas';
 // utils
 import { disarmCornerRadiusDrag } from './disarmCornerRadiusDrag';
 import { disarmDrag } from './disarmDrag';
+import { disarmEllipseArcDrag } from './disarmEllipseArcDrag';
+import { disarmEllipseArcRatioDrag } from './disarmEllipseArcRatioDrag';
+import { disarmEllipseArcRotateDrag } from './disarmEllipseArcRotateDrag';
 import { disarmEndpointDrag } from './disarmEndpointDrag';
 import { disarmMarqueeDrag } from './disarmMarqueeDrag';
 import { disarmPathOffsetDrag } from './disarmPathOffsetDrag';
@@ -45,6 +51,9 @@ export const handlePointerUp = (
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>,
   polygonVertexCountDragRef: RefObject<TPolygonVertexCountDragState | null>,
   starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>,
+  ellipseArcDragRef: RefObject<TEllipseArcDragState | null>,
+  ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null>,
+  ellipseArcRatioDragRef: RefObject<TEllipseArcRatioDragState | null>,
   marqueeStartRef: RefObject<TPoint | null>,
   marqueeRef: RefObject<TDraftRect | null>,
   setClassName: (className: string | null) => void,
@@ -59,5 +68,8 @@ export const handlePointerUp = (
   disarmStarCornerRadiusDrag(canvas, event, starCornerRadiusDragRef);
   disarmPolygonVertexCountDrag(canvas, event, polygonVertexCountDragRef);
   disarmStarVertexCountDrag(canvas, event, starVertexCountDragRef);
+  disarmEllipseArcDrag(canvas, event, ellipseArcDragRef);
+  disarmEllipseArcRotateDrag(canvas, event, ellipseArcRotateDragRef);
+  disarmEllipseArcRatioDrag(canvas, event, ellipseArcRatioDragRef);
   disarmMarqueeDrag(canvas, event, marqueeStartRef, marqueeRef);
 };

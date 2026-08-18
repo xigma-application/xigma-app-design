@@ -14,7 +14,14 @@ import { store } from 'store';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import { TCornerRadiusDragState, TPolygonCornerRadiusDragState, TStarCornerRadiusDragState } from './types';
+import {
+  TCornerRadiusDragState,
+  TEllipseArcDragState,
+  TEllipseArcRatioDragState,
+  TEllipseArcRotateDragState,
+  TPolygonCornerRadiusDragState,
+  TStarCornerRadiusDragState,
+} from './types';
 import { TDraftRect, TEditingTextBox } from 'types/canvas';
 
 const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
@@ -65,14 +72,30 @@ const renderSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>): Re
   const cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null> = { current: null };
   const polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null> = { current: null };
   const starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null> = { current: null };
+  const ellipseArcDragRef: RefObject<TEllipseArcDragState | null> = { current: null };
+  const ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null> = { current: null };
+  const ellipseArcRatioDragRef: RefObject<TEllipseArcRatioDragState | null> = { current: null };
 
-  renderHook(() => useSelectionTool(canvasRef, marqueeRef, cornerRadiusDragRef, polygonCornerRadiusDragRef, starCornerRadiusDragRef), {
-    wrapper: ({ children }) => (
-      <Provider store={store}>
-        <ClassNamesProvider>{children}</ClassNamesProvider>
-      </Provider>
-    ),
-  });
+  renderHook(
+    () =>
+      useSelectionTool(
+        canvasRef,
+        marqueeRef,
+        cornerRadiusDragRef,
+        polygonCornerRadiusDragRef,
+        starCornerRadiusDragRef,
+        ellipseArcDragRef,
+        ellipseArcRotateDragRef,
+        ellipseArcRatioDragRef,
+      ),
+    {
+      wrapper: ({ children }) => (
+        <Provider store={store}>
+          <ClassNamesProvider>{children}</ClassNamesProvider>
+        </Provider>
+      ),
+    },
+  );
 
   return marqueeRef;
 };

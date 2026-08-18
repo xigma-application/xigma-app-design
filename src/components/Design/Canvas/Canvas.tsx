@@ -43,7 +43,14 @@ import {
 import styles from './canvas.module.scss';
 
 // types
-import { TCornerRadiusDragState, TPolygonCornerRadiusDragState, TStarCornerRadiusDragState } from './hooks/useSelectionTool/types';
+import {
+  TCornerRadiusDragState,
+  TEllipseArcDragState,
+  TEllipseArcRatioDragState,
+  TEllipseArcRotateDragState,
+  TPolygonCornerRadiusDragState,
+  TStarCornerRadiusDragState,
+} from './hooks/useSelectionTool/types';
 import { TDraftEntity } from 'types/design/types';
 import { TDraftRect } from 'types/canvas';
 import { TSliceDraft } from './hooks/useSliceTool/types';
@@ -58,6 +65,9 @@ const Canvas: FC = () => {
   const cornerRadiusDragRef = useRef<TCornerRadiusDragState | null>(null);
   const polygonCornerRadiusDragRef = useRef<TPolygonCornerRadiusDragState | null>(null);
   const starCornerRadiusDragRef = useRef<TStarCornerRadiusDragState | null>(null);
+  const ellipseArcDragRef = useRef<TEllipseArcDragState | null>(null);
+  const ellipseArcRotateDragRef = useRef<TEllipseArcRotateDragState | null>(null);
+  const ellipseArcRatioDragRef = useRef<TEllipseArcRatioDragState | null>(null);
 
   useCanvasResize(canvasRef);
   useCanvasPanZoom(canvasRef);
@@ -74,7 +84,16 @@ const Canvas: FC = () => {
   useDrawMediaTool(canvasRef, draftRef, MEDIA_TOOL_SETTINGS);
   useDrawTextTool(canvasRef, draftRef);
   useDrawTextOnPathTool(canvasRef, draftRef);
-  useSelectionTool(canvasRef, marqueeRef, cornerRadiusDragRef, polygonCornerRadiusDragRef, starCornerRadiusDragRef);
+  useSelectionTool(
+    canvasRef,
+    marqueeRef,
+    cornerRadiusDragRef,
+    polygonCornerRadiusDragRef,
+    starCornerRadiusDragRef,
+    ellipseArcDragRef,
+    ellipseArcRotateDragRef,
+    ellipseArcRatioDragRef,
+  );
   useSliceTool(canvasRef, sliceRef);
   useTextEditOnDoubleClick(canvasRef);
   useHoverHighlight(canvasRef, hoverRef);
@@ -90,6 +109,9 @@ const Canvas: FC = () => {
     cornerRadiusDragRef,
     polygonCornerRadiusDragRef,
     starCornerRadiusDragRef,
+    ellipseArcDragRef,
+    ellipseArcRotateDragRef,
+    ellipseArcRatioDragRef,
   );
 
   return (

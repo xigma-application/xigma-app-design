@@ -22,41 +22,49 @@ orchestrators.
   **Scale tool fully reuses this hook** — see §5) and text-caret editing isn't active
   (`shouldUseCanvasCaretEditing`). Owns six refs internally — `dragStateRef`, `endpointDragRef`,
   `pathOffsetDragRef`, `resizeDragRef`, `rotateDragRef`, `marqueeStartRef` — and three native
-  `PointerEvent` listeners. `cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef`
-  are the odd three out: lifted to `Canvas.tsx` and passed in as parameters (same "parent-owned,
-  ref-drilled" shape as `marqueeRef`/`hoverRef`/`sliceRef` — see `canvas-rendering-pipeline.md` §2),
-  specifically so `useCanvasRenderLoop` can also read them every frame (§13's "mid-drag zero" fix
-  needs to know whether a corner-radius drag is *currently* in progress, which only these three
-  refs' own arm/disarm sites can answer). `polygonVertexCountDragRef`/`starVertexCountDragRef` (§18)
-  stay **private** to this hook instead, like `resizeDragRef`/`rotateDragRef` — they have no
-  zero-state render fallback to suppress mid-drag, so nothing downstream ever needs to know a
-  vertex-count drag is in progress; the handle's rendered position just reads the node's live
-  `sides`/`points` from Redux every frame like anything else.
+  `PointerEvent` listeners. `cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef`/
+  `ellipseArcDragRef`/`ellipseArcRotateDragRef`/`ellipseArcRatioDragRef` (§19) are the odd six out:
+  lifted to `Canvas.tsx` and passed in as parameters (same "parent-owned, ref-drilled" shape as
+  `marqueeRef`/`hoverRef`/`sliceRef` — see `canvas-rendering-pipeline.md` §2), specifically so
+  `useCanvasRenderLoop` can also read them every frame. For the corner-radius three that's §13's
+  "mid-drag zero" fix (needs to know whether a drag is *currently* in progress); for the ellipse-arc
+  three it's simpler — `drawEllipseArcHandleLayer` reads `draggedHandlePosition` off each ref every
+  frame purely so the dragged handle visually follows the live pointer projection instead of jumping
+  to wherever the node's Redux state alone would place it (§19). `polygonVertexCountDragRef`/
+  `starVertexCountDragRef` (§18) stay **private** to this hook instead, like
+  `resizeDragRef`/`rotateDragRef` — they have no such render-time dependency, so nothing downstream
+  ever needs to know a vertex-count drag is in progress; the handle's rendered position just reads
+  the node's live `sides`/`points` from Redux every frame like anything else.
 - `types.ts` — `TDragState`, `TEndpointDragState`, `TPathOffsetDragState`, `TResizeDragState`,
   `TRotateDragState`, `TCornerRadiusDragState`, `TPolygonCornerRadiusDragState`,
   `TStarCornerRadiusDragState`, `TPolygonVertexCountDragState`, `TStarVertexCountDragState`,
+  `TEllipseArcDragState`, `TEllipseArcRotateDragState`, `TEllipseArcRatioDragState` (§19, all three
+  an identical `{ bounds, draggedHandlePosition, flipX, flipY, nodeId, rotation }` shape),
   `TPendingClickAction`, `TLineEndpoint`, `TNodeOrigin`/`TResizeNodeOrigin`/`TRotateNodeOrigin`.
 
 `utils/handlePointerDown/` — one `arm*.ts` per interaction kind, dispatched by a priority `switch`
 in `handlePointerDown.ts` (full table in §3): `armPathOffsetDrag`, `armPolygonVertexCountDrag` (§18),
-`armStarVertexCountDrag` (§18), `armResizeDrag`, `armCornerRadiusDrag` (§11),
-`armPolygonCornerRadiusDrag` (§12), `armStarCornerRadiusDrag` (§15), `armRotateDrag`,
-`armLineEndpointDrag` (→ `armEndpointDrag`), `armHitDrag` (→ `armDrag`), `armGroupBoundsDrag`
-(→ `armDrag`), `armMarqueeDrag`.
+`armStarVertexCountDrag` (§18), `armEllipseArcDrag`/`armEllipseArcRotateDrag`/`armEllipseArcRatioDrag`
+(§19), `armResizeDrag`, `armCornerRadiusDrag` (§11), `armPolygonCornerRadiusDrag` (§12),
+`armStarCornerRadiusDrag` (§15), `armRotateDrag`, `armLineEndpointDrag` (→ `armEndpointDrag`),
+`armHitDrag` (→ `armDrag`), `armGroupBoundsDrag` (→ `armDrag`), `armMarqueeDrag`.
 
-`utils/handlePointerMove/` — one `continue*.ts` per kind. **All eleven run unconditionally on every
-pointermove** — `handlePointerMove.ts` just calls all eleven in sequence; each is a no-op guarded by
+`utils/handlePointerMove/` — one `continue*.ts` per kind. **All fourteen run unconditionally on every
+pointermove** — `handlePointerMove.ts` just calls all fourteen in sequence; each is a no-op guarded by
 `if (dragState)` on its own ref, so only the one actually armed does anything: `continueDrag`,
 `continueEndpointDrag`, `continuePathOffsetDrag`, `continueResizeDrag/` (its own sub-folder, §5),
 `continueRotateDrag`, `continueCornerRadiusDrag` (§11), `continuePolygonCornerRadiusDrag` (§12),
 `continueStarCornerRadiusDrag` (§15), `continuePolygonVertexCountDrag` (§18),
-`continueStarVertexCountDrag` (§18), `continueMarqueeDrag`.
+`continueStarVertexCountDrag` (§18), `continueEllipseArcDrag`/`continueEllipseArcRotateDrag`/
+`continueEllipseArcRatioDrag` (§19), `continueMarqueeDrag`.
 
 `utils/handlePointerUp/` — mirror image, `disarm*.ts` per kind, each clears its own ref and releases
 pointer capture: `disarmDrag` (**resolves `pendingClickAction`**, see §3), `disarmEndpointDrag`,
 `disarmPathOffsetDrag` (also resets cursor to `'hand'`), `disarmResizeDrag`, `disarmRotateDrag`,
 `disarmCornerRadiusDrag`, `disarmPolygonCornerRadiusDrag`, `disarmStarCornerRadiusDrag`,
-`disarmPolygonVertexCountDrag` (§18), `disarmStarVertexCountDrag` (§18), `disarmMarqueeDrag`.
+`disarmPolygonVertexCountDrag` (§18), `disarmStarVertexCountDrag` (§18),
+`disarmEllipseArcDrag`/`disarmEllipseArcRotateDrag`/`disarmEllipseArcRatioDrag` (§19),
+`disarmMarqueeDrag`.
 
 Loose files directly under `useSelectionTool/utils/`: `isPointInGroupBounds.ts`,
 `isPointInSelectedTextBounds.ts`, `toggleSelection.ts`.
@@ -105,7 +113,11 @@ Per-`NodeType` tests (all `Canvas/utils/`):
   reused verbatim by `isPointInGroupBounds.ts`/`isPointInSelectedTextBounds.ts`/the Slice tool's own
   hit-test — safe, since none of those ever pass an object with a `cornerRadius` field, so the
   rounding branch is simply never taken there.
-- `isPointInEllipse.ts` — normalized `(x/rx)² + (y/ry)² ≤ 1`.
+- `isPointInEllipse.ts` — normalized `(x/rx)² + (y/ry)² ≤ 1` for a plain ellipse; ring-and-arc-aware
+  once §19's `arcRatio`/cut fields are in play (own sub-cases: outside the outer bound → miss; ring
+  with no cut → outer-bound-minus-hole-radius test; fully cut away or `arcRatio` at its max → whole
+  outer bound counts as a hit, deliberately broad so an otherwise-invisible node stays click-selectable;
+  otherwise a proper point-in-polygon test against the sector/ring-sector vertices, §19).
 - `isPointInPolygon.ts` / `isPointInStar.ts` — ray-casting over generated vertices, **flip-aware**:
   calls `flipPoint(point, center, flipX, flipY)` before testing (see §8). Also
   **rounded-corner-aware**: swaps in `getRoundedPolygonPoints`/`getRoundedStarPoints` (the same
@@ -137,6 +149,9 @@ switch (true) {
   case Boolean(pathOffsetHandleHit):                          armPathOffsetDrag(...); break;
   case Boolean(polygonVertexCountHandleHit):                  armPolygonVertexCountDrag(...); break;
   case Boolean(starVertexCountHandleHit):                     armStarVertexCountDrag(...); break;
+  case Boolean(ellipseArcHandleHit):                          armEllipseArcDrag(...); break;        // §19 Sweep
+  case Boolean(ellipseArcRotateHandleHit):                    armEllipseArcRotateDrag(...); break;  // §19 Start
+  case Boolean(ellipseArcRatioHandleHit):                     armEllipseArcRatioDrag(...); break;   // §19 Ratio
   case Boolean(resizeHandleHit):                               armResizeDrag(...); break;
   case Boolean(cornerRadiusHandleHit):                         armCornerRadiusDrag(...); break;
   case Boolean(polygonCornerRadiusHandleHit):                  armPolygonCornerRadiusDrag(...); break;
@@ -151,20 +166,23 @@ switch (true) {
   default: break;
 }
 ```
-**Handle priority**: path-offset → **polygon/star vertex-count (§18) → resize** → corner-radius (§11)
-→ polygon corner-radius (§12) → star corner-radius (§15) → rotate → **line endpoint (only if not
-shift)** → shift toggle → plain hit → text-fixed-bounds fallback → group-gap → marquee.
-`cornerRadiusHandleHit`, `polygonCornerRadiusHandleHit`, and `starCornerRadiusHandleHit` are each
-computed as `resizeHandleHit ? null : get*CornerRadiusHandleAtPoint(...)` right where they're read,
-so resize wins any tie deterministically rather than relying on switch-case ordering alone — a node
-is never more than one of Rectangle/Polygon/Star at once, so the three hit-tests never actually
-compete with each other, only each independently with resize. `polygonVertexCountHandleHit`/
-`starVertexCountHandleHit` are the one exception to "resize wins any tie": they're computed
-**unconditionally**, not gated behind `resizeHandleHit ? null : ...`, and checked *before* resize in
-the switch — see §18 for why (a real, not just theoretical, exact-pixel collision with a resize
-handle). Line-endpoint hit-testing is checked *before* the generic whole-node `hit` branch, which is
-why grabbing a line's own endpoint always wins over a whole-line drag even when both technically
-match the same point.
+**Handle priority**: path-offset → **polygon/star vertex-count (§18) → Sweep/Start/Ratio (§19) →
+resize** → corner-radius (§11) → polygon corner-radius (§12) → star corner-radius (§15) → rotate →
+**line endpoint (only if not shift)** → shift toggle → plain hit → text-fixed-bounds fallback →
+group-gap → marquee. `cornerRadiusHandleHit`, `polygonCornerRadiusHandleHit`, and
+`starCornerRadiusHandleHit` are each computed as `resizeHandleHit ? null : get*CornerRadiusHandleAtPoint(...)`
+right where they're read, so resize wins any tie deterministically rather than relying on
+switch-case ordering alone — a node is never more than one of Rectangle/Polygon/Star at once, so the
+three hit-tests never actually compete with each other, only each independently with resize.
+`polygonVertexCountHandleHit`/`starVertexCountHandleHit` and all three
+`ellipseArcHandleHit`/`ellipseArcRotateHandleHit`/`ellipseArcRatioHandleHit` are the exceptions to
+"resize wins any tie": all five are computed **unconditionally**, not gated behind
+`resizeHandleHit ? null : ...`, and checked *before* resize in the switch — for vertex-count, §18's
+exact-pixel collision with a resize handle; for the ellipse-arc trio there's no known coincident-pixel
+case (a node is never simultaneously Polygon/Star/Ellipse), the ungated ordering is just consistency
+with vertex-count rather than a forced fix. Line-endpoint hit-testing is checked *before* the generic
+whole-node `hit` branch, which is why grabbing a line's own endpoint always wins over a whole-line
+drag even when both technically match the same point.
 
 `armHitDrag.ts` — the collapse-vs-replace decision:
 ```ts
@@ -426,8 +444,9 @@ into local space first).
 `useHoverHighlight.ts` is where hover-without-drag cursor updates happen — a `pointermove` listener
 guarded by `event.buttons === 0` (inert mid-drag), with its own priority switch mirroring
 `handlePointerDown`'s hit-test order (line endpoint → path-offset handle → editing-text caret →
-resize handle → rotate handle → default node hover). The Scale-vs-plain-resize cursor swap is
-decided right here too:
+vertex-count → Sweep/Start/Ratio (§19, all three `setClassName('radius')`, same class as
+corner-radius) → resize handle → corner-radius → rotate handle → default node hover). The
+Scale-vs-plain-resize cursor swap is decided right here too:
 ```ts
 case Boolean(resizeHandleHit): {
   const getCursorUrl = activeTool === ToolName.scale ? getRotatedScaleCursorUrl : getRotatedResizeCursorUrl;
@@ -484,6 +503,10 @@ e2e (`e2e/pages/design/`):
   crossing the vertical axis resets to the minimum; a flipped shape's handle stays attached at its
   physically-flipped position (the exact regression class from §17, re-tested here since this handle
   follows the same forward-flip/un-flip pattern independently).
+- `ellipse-arc.spec.ts` (§19) — dragging Sweep cuts a wedge; dragging Start shows the `radius` cursor
+  and actually rotates the cut (the literal wiring bug §19 describes); dragging Ratio hollows a ring
+  even on an uncut ellipse; dragging Ratio into the cut-away gap swaps which side is filled versus
+  the identical drag distance into the fill (the inversion feature, §19's `getEffectiveArcAngles`).
 
 As noted in §3, the pending-click-action collapse/deselect/gap-drag matrix has **no** e2e coverage —
 that correctness relies entirely on the unit suite; e2e here is weighted toward resize/rotate/mirror
@@ -873,13 +896,133 @@ previously unenforced anywhere — this feature is the first thing that actually
 pairs are intended for a future side-panel numeric input, not just this drag handle — same "canvas
 drag now, panel later" split as corner-radius (§11).
 
+## 19. Ellipse arc-cutting handles (Sweep, Start, Ratio)
+
+Three handles on a selected+hovered Ellipse, matching Figma's own Arc tool one-for-one: **Sweep**
+(`arcEndAngle`, on the perimeter) drags a cut into the shape. **Start** (`arcStartAngle`, also on the
+perimeter — distinguished from Sweep only by a small dot drawn inside it, `withDot` param on
+`drawEllipseArcHandle.ts`, `RADIUS_HANDLE_DOT_RADIUS_RATIO`) rotates the whole cut, preserving its
+sweep width. **Ratio** (`arcRatio`, rests at dead center when 0) hollows the shape into a ring; drag
+it past the shape's own angular boundary into the cut-away gap and `arcRatioInverted` flips which of
+the two wedges counts as filled. Math for all three lives in `utils/canvas/ellipseArc/`, a sibling to
+`utils/canvas/cornerRadius/` and `utils/canvas/vertexCount/`.
+
+**The cut-sweep data model — `arcStartAngle`/`arcEndAngle` are never the filled side directly**:
+`getEllipseArcMajorArc(startAngleDeg, endAngleDeg)` is the one function every other piece of this
+feature routes through. It treats the raw `endAngleDeg - startAngleDeg` delta as *how much was cut
+away*, not what's shown, and resolves that into `{ majorStart, majorSweep }` — the actual filled
+majority. A direct cut of e.g. 90° (`arcStartAngle` 0, `arcEndAngle` 90) resolves to
+`{ majorStart: 90, majorSweep: 270 }`: the filled 270° starts at the handle (90) and wraps the long
+way back to the fixed start (0). The magnitude is tracked **continuously, never re-wrapped** — a full
+lap (`|endAngleDeg - startAngleDeg| === 360`, an odd multiple of a full turn) cuts the *entire* shape
+away (`majorSweep` collapses to exactly `0`, "fully cut away"), and continuing to drag the same
+direction past that un-cuts it again (`=== 720`, an even multiple, is a true non-degenerate full
+circle again) — a triangle wave in magnitude, not a plain modulo wrap, so `arcEndAngle` can end up far
+outside `[0, 360)` in the store and that's correct, not a bug to normalize away. The anchor
+(`majorStart`) flips between these two extremes too: on an even-lap ("cutting") cycle count, the
+filled majority grows outward from the handle back to the fixed start; on an odd-lap ("refilling")
+cycle count, the newly-filled sliver instead grows outward from that same fixed start — anchoring it
+at the handle there would place it wherever the handle has spun on to, disconnected from where the
+actual un-cutting is visually happening. `hasEllipseArc(start, end)` (`|majorSweep| < 360`) answers
+"does an arc-aware render/hit-test path apply at all" — true for both a genuine partial cut *and* the
+fully-cut-away extreme (`majorSweep === 0`, which still needs the arc machinery to render as
+"nothing" rather than incorrectly falling back to the plain full-circle path); only an actual full
+circle (`majorSweep` at ±360) is false.
+
+**Gotcha this session started from — the Start (rotate) handle was fully built but never wired
+in**: `armEllipseArcRotateDrag`/`continueEllipseArcRotateDrag`/`disarmEllipseArcRotateDrag` and their
+`TEllipseArcRotateDragState` existed, correct and self-consistent, from an earlier session — but
+`handlePointerDown.ts`/`handlePointerMove.ts`/`handlePointerUp.ts`/`useHoverHighlight.ts` never
+called any of them, and `useSelectionTool.ts`/`Canvas.tsx` never even created the ref. Dragging the
+handle silently did nothing (fell through to whichever priority-switch case came next — usually a
+whole-node move) and hovering it showed no cursor at all, with no error anywhere to point at the gap.
+Worth remembering as a class of bug: a fully-implemented arm/continue/disarm trio is not evidence
+it's reachable — check the priority switches and the hook/`Canvas.tsx` ref plumbing independently.
+
+**Start's rest position — perimeter, not center, distinguished by a dot**: the first fix attempt
+moved Start to the *midpoint* of its own radius so it wouldn't visually collide with Sweep when the
+cut is thin. That was wrong — checked against Figma directly, its "Start handle" sits on the
+perimeter at the same radius as Sweep, told apart only by a dot drawn inside it (`withDot`, above);
+only the separate Ratio handle is actually center-based. `getEllipseArcRotateHandlePosition.ts` is
+consequently a thin wrapper that just delegates to `getEllipseArcHandlePosition.ts` (Sweep's own
+position function) — the two really do share one formula, only their input angle differs
+(`arcStartAngle` vs `arcEndAngle`).
+
+**Ratio (`arcRatio`) turns the shape into a ring**: `drawEllipseArc.ts` computes both an
+outer-radius point set and, when `arcRatio > 0`, a second set at `radius × arcRatio`, then fills with
+`gl.TRIANGLE_STRIP` interleaving outer/inner points (`[outer0, inner0, outer1, inner1, ...]`) instead
+of the plain `gl.TRIANGLE_FAN` from center used at `arcRatio === 0` — a genuinely different topology,
+not a parameterized version of the fan, since the center point sits *outside* the filled ring once
+there's a hole. The `arcRatio === 0` path is kept as a separate branch rather than unified via a
+degenerate zero-radius inner ring specifically so the pre-existing fan behavior is untouched byte-for-
+byte, zero regression risk on every shape that doesn't use this feature. The same
+outer/inner-band split repeats in the hover outline (`drawThickEllipseArcOutline.ts`'s
+`getOpenRingVertices`, a second triangulated band for the hole's own rim) and in hit-testing
+(`isPointInEllipse.ts`, `[...outerPoints, ...innerPoints.reverse()]` fed to the existing
+`isPointInPolygonVertices.ts` ray-caster — the reversed inner half is what makes the ray-caster treat
+the hole as excluded, no special-casing needed in the ray-casting algorithm itself). `arcRatio` is
+clamped to `ELLIPSE_ARC_MAX_RATIO` (`constant/canvas.ts`, currently `1` — a full ring where inner and
+outer edges coincide is allowed on purpose, see the guide-arc case below).
+
+**Ring-band clamped drag, not slide-from-center**: `continueEllipseArcDrag`/
+`continueEllipseArcRotateDrag` project the raw pointer onto a segment for their own "handle visually
+follows the drag" feedback (`draggedHandlePosition`, read by `drawEllipseArcHandleLayer` every frame
+via the parent-owned refs, §1) — that segment now runs from the **inner** band edge
+(`radius × arcRatio`) to the outer edge, not from dead center, so once a ring exists the handle can
+only slide within the visible band instead of disappearing toward the hole. At `arcRatio === 0` the
+inner edge collapses to center, exactly reproducing the pre-ring behavior — again a deliberately
+backward-compatible formula rather than a separate branch.
+
+**`getEffectiveArcAngles` — the trick that makes dragging Ratio into the gap swap sides**: matches
+Figma's own behavior (drag the Ratio handle across the cut into the gap, and the gap becomes filled,
+the old fill becomes the gap). `continueEllipseArcRatioDrag` computes the pointer's compass angle and
+tests it with `isAngleWithinArc(angle, majorStart, majorSweep)` against the **current, un-inverted**
+`getEllipseArcMajorArc(arcStartAngle, arcEndAngle)` — inside the majority → `arcRatioInverted: false`;
+inside the gap → `true`. Every render/hit-test path that needs "which side is actually filled right
+now" then calls `getEffectiveArcAngles(arcStartAngle, arcEndAngle, arcRatioInverted)` before feeding
+angles to `getEllipseArcPoints`/`getEllipseArcMajorArc` again: not inverted, it passes the raw angles
+through unchanged (identical to every pre-Ratio code path). Inverted, it resolves the *already-computed*
+majorArc once, then feeds `(majorStart, majorStart + majorSweep)` back through the exact same
+`getEllipseArcMajorArc` — turns out that specific pair is the one raw `(start, end)` input whose own
+resolution is exactly the complementary arc (confirmed algebraically before implementing, not just by
+trial): feeding a *majorSweep* as if it were a raw cut delta always yields the *complement* of that
+majorSweep as the new majority, because `getEllipseArcMajorArc` always returns `360 - |sweep|` as the
+new majority regardless of the input's own magnitude. No separate "complement arc" formula was
+written by hand — the existing function already computes it, given the right input. This is also why
+Ratio's own rest-position bisector (`getEllipseArcRatioHandlePosition.ts`) and every ring-fill/outline/
+hit-test call site route through `getEffectiveArcAngles` first rather than branching on
+`arcRatioInverted` locally each time — one resolution point, reused everywhere.
+
+**Guide arc at `arcRatio === 1`**: once the ring's inner and outer edges coincide the fill collapses
+to zero area — same "otherwise invisible, still needs to be selectable and visually locatable"
+problem the pre-existing fully-cut-away state already solved with a straight guide *line*
+(`drawEllipseArcGuideLine.ts`, center to the Sweep handle's position, shown whenever `majorSweep === 0`).
+`drawEllipseArcRatioGuideArc.ts` is the curved counterpart: it walks the same `getEllipseArcPoints`
+output used everywhere else and draws a short `drawLine` segment between every consecutive pair,
+tracing the collapsed ring boundary as a curve instead of a straight line (the radius here is real,
+only the band's *thickness* collapsed) — shown whenever `arcRatio >= 1 && hasEllipseArc(...)` (guarded
+on an actual cut existing; a full circle at max ratio has no separate guide-arc case, the collapsed
+full-circle fill already renders as a hairline itself). `isPointInEllipse.ts` mirrors the same
+"broad, deliberately generous hit region" as the fully-cut-away case here too — `arcRatio >= 1` is
+short-circuited to "the whole outer bound counts as a hit" before the real polygon test ever runs.
+
+**Cursor**: all three handles reuse the existing `'radius'` class (§9) — no new cursor asset, same
+visual language as corner-radius.
+
+**Constants**: `ELLIPSE_ARC_MAX_RATIO` (`1`, `constant/canvas.ts`) — deliberately not capped below 1;
+`RADIUS_HANDLE_DOT_RADIUS_RATIO` (`0.35`) sizes Start's distinguishing dot relative to the handle's
+own `RADIUS_HANDLE_SIZE`, reusing that constant rather than introducing a second handle-size constant.
+`ELLIPSE_ARC_LAP_SNAP_DEGREES` (`Canvas/constants.ts`, predates this session) is the existing
+full-lap-snap tolerance for Sweep, unrelated to Ratio/Start.
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.
-[[design-store-architecture]] — §5's ref-vs-Redux split (this subsystem is its biggest consumer: 9
-separate drag-state refs plus the marquee/drag-move dispatch-per-pointermove nuance; three of those —
-`cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef` — are now parent-owned
-like the ephemeral render refs rather than hook-private, per §13).
+[[design-store-architecture]] — §5's ref-vs-Redux split (this subsystem is its biggest consumer: 12
+separate drag-state refs plus the marquee/drag-move dispatch-per-pointermove nuance; six of those —
+`cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef`/`ellipseArcDragRef`/
+`ellipseArcRotateDragRef`/`ellipseArcRatioDragRef` — are now parent-owned like the ephemeral render
+refs rather than hook-private, per §13/§19).
 [[canvas-rendering-pipeline]] — how selection outlines/handles/cursors actually get drawn once this
 subsystem decides what's selected/hovered; §2's `marqueeRef`/`hoverRef`/`sliceRef` ref-drilling
 pattern is exactly what §13 extends to the three corner-radius drag refs.

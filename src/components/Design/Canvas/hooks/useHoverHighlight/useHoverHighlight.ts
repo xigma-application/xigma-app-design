@@ -21,6 +21,9 @@ import { NodeType, ToolName } from 'types/design/enums';
 // utils
 import { getCollidesWithEditingText } from './utils/getCollidesWithEditingText';
 import { getCornerRadiusHandleAtPoint } from '../../utils/getCornerRadiusHandleAtPoint';
+import { getEllipseArcHandleAtPoint } from '../../utils/getEllipseArcHandleAtPoint';
+import { getEllipseArcRatioHandleAtPoint } from '../../utils/getEllipseArcRatioHandleAtPoint';
+import { getEllipseArcRotateHandleAtPoint } from '../../utils/getEllipseArcRotateHandleAtPoint';
 import { getLineEndpointAtPoint } from '../../utils/getLineEndpointAtPoint';
 import { getNodeAtPoint } from '../../utils/getNodeAtPoint';
 import { getPathOffsetHandleHit } from './utils/getPathOffsetHandleHit';
@@ -57,6 +60,9 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
       const resizeHandleHit = getResizeHandleAtPoint(point, resizableSelectedNodes, viewport);
       const polygonVertexCountHandleHit = getPolygonVertexCountHandleAtPoint(point, resizableSelectedNodes, viewport);
       const starVertexCountHandleHit = getStarVertexCountHandleAtPoint(point, resizableSelectedNodes, viewport);
+      const ellipseArcHandleHit = getEllipseArcHandleAtPoint(point, resizableSelectedNodes, viewport);
+      const ellipseArcRotateHandleHit = getEllipseArcRotateHandleAtPoint(point, resizableSelectedNodes, viewport);
+      const ellipseArcRatioHandleHit = getEllipseArcRatioHandleAtPoint(point, resizableSelectedNodes, viewport);
       const cornerRadiusHandleHit = resizeHandleHit ? null : getCornerRadiusHandleAtPoint(point, resizableSelectedNodes, viewport);
       const polygonCornerRadiusHandleHit = getPolygonCornerRadiusHandleHit(point, resizeHandleHit, resizableSelectedNodes, viewport);
       const starCornerRadiusHandleHit = getStarCornerRadiusHandleHit(point, resizeHandleHit, resizableSelectedNodes, viewport);
@@ -88,6 +94,21 @@ export const useHoverHighlight = (canvasRef: RefObject<HTMLCanvasElement | null>
           setClassName('vertices');
           canvas.style.cursor = '';
           hoverRef.current = starVertexCountHandleHit!.nodeId;
+          break;
+        case Boolean(ellipseArcHandleHit):
+          setClassName('radius');
+          canvas.style.cursor = '';
+          hoverRef.current = ellipseArcHandleHit!.nodeId;
+          break;
+        case Boolean(ellipseArcRotateHandleHit):
+          setClassName('radius');
+          canvas.style.cursor = '';
+          hoverRef.current = ellipseArcRotateHandleHit!.nodeId;
+          break;
+        case Boolean(ellipseArcRatioHandleHit):
+          setClassName('radius');
+          canvas.style.cursor = '';
+          hoverRef.current = ellipseArcRatioHandleHit!.nodeId;
           break;
         case Boolean(resizeHandleHit): {
           const getCursorUrl = activeTool === ToolName.scale ? getRotatedScaleCursorUrl : getRotatedResizeCursorUrl;

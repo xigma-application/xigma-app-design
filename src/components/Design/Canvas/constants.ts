@@ -17,6 +17,8 @@ export const DRAWING_TOOLS: ToolName[] = [
   ToolName.text,
   ToolName.textOnPath,
 ];
+export const ELLIPSE_ARC_GUIDE_LINE_WIDTH = 1;
+export const ELLIPSE_ARC_LAP_SNAP_DEGREES = 3;
 export const ELLIPSE_FILL = '#D9D9D9';
 export const FRAME_FILL = '#FFFFFF';
 export const LINE_STROKE = '#ffffff';

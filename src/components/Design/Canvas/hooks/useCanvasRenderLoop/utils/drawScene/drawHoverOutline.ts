@@ -1,5 +1,5 @@
 // others
-import { DRAFT_FRAME_STROKE, HOVER_OUTLINE_WIDTH, LINE_HOVER_STROKE_WIDTH } from 'constant/canvas';
+import { DRAFT_FRAME_STROKE, ELLIPSE_DEFAULT_ARC_ANGLE, HOVER_OUTLINE_WIDTH, LINE_HOVER_STROKE_WIDTH } from 'constant/canvas';
 
 // types
 import { NodeType } from 'types/design/enums';
@@ -8,7 +8,7 @@ import { TSceneNode, TViewport } from 'types/design/types';
 // utils
 import { drawLine } from 'utils/canvas/drawLine';
 import { drawTextHoverUnderline } from './drawTextHoverUnderline';
-import { drawThickEllipseOutline } from 'utils/canvas/shapes/drawThickEllipseOutline';
+import { drawThickEllipseNodeOutline } from 'utils/canvas/shapes/drawThickEllipseNodeOutline';
 import { drawThickOutline } from 'utils/canvas/drawThickOutline/drawThickOutline';
 import { drawThickPolygonOutline } from 'utils/canvas/shapes/drawThickPolygonOutline';
 import { drawThickStarOutline } from 'utils/canvas/shapes/drawThickStarOutline';
@@ -25,16 +25,22 @@ export const drawHoverOutline = (
   if (hoveredNode) {
     switch (hoveredNode.type) {
       case NodeType.ellipse:
-        drawThickEllipseOutline(
+        drawThickEllipseNodeOutline(
           gl,
           program,
           buffer,
-          hoveredNode,
+          {
+            ...hoveredNode,
+            arcEndAngle: hoveredNode.arcEndAngle ?? ELLIPSE_DEFAULT_ARC_ANGLE,
+            arcStartAngle: hoveredNode.arcStartAngle ?? ELLIPSE_DEFAULT_ARC_ANGLE,
+          },
           DRAFT_FRAME_STROKE,
           HOVER_OUTLINE_WIDTH,
           canvasWidth,
           canvasHeight,
           viewport,
+          hoveredNode.flipX ?? false,
+          hoveredNode.flipY ?? false,
           hoveredNode.rotation,
         );
         break;

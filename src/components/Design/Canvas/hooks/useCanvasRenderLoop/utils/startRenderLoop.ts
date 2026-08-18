@@ -1,7 +1,14 @@
 import { RefObject } from 'react';
 
 // types
-import { TCornerRadiusDragState, TPolygonCornerRadiusDragState, TStarCornerRadiusDragState } from '../../useSelectionTool/types';
+import {
+  TCornerRadiusDragState,
+  TEllipseArcDragState,
+  TEllipseArcRatioDragState,
+  TEllipseArcRotateDragState,
+  TPolygonCornerRadiusDragState,
+  TStarCornerRadiusDragState,
+} from '../../useSelectionTool/types';
 import { TDraftRect } from 'types/canvas';
 import { TDraftEntity } from 'types/design/types';
 import { TImageRenderContext } from '../types';
@@ -25,6 +32,9 @@ const tick = (
   cornerRadiusDragRef?: RefObject<TCornerRadiusDragState | null>,
   polygonCornerRadiusDragRef?: RefObject<TPolygonCornerRadiusDragState | null>,
   starCornerRadiusDragRef?: RefObject<TStarCornerRadiusDragState | null>,
+  ellipseArcDragRef?: RefObject<TEllipseArcDragState | null>,
+  ellipseArcRotateDragRef?: RefObject<TEllipseArcRotateDragState | null>,
+  ellipseArcRatioDragRef?: RefObject<TEllipseArcRatioDragState | null>,
 ): void => {
   const isDraggingCornerRadius =
     Boolean(cornerRadiusDragRef?.current?.hasMoved) ||
@@ -42,6 +52,9 @@ const tick = (
     hoverRef?.current,
     sliceRef?.current,
     isDraggingCornerRadius,
+    ellipseArcDragRef?.current?.draggedHandlePosition ?? null,
+    ellipseArcRotateDragRef?.current?.draggedHandlePosition ?? null,
+    ellipseArcRatioDragRef?.current?.draggedHandlePosition ?? null,
   );
   frameIdRef.current = requestAnimationFrame(() =>
     tick(
@@ -58,6 +71,9 @@ const tick = (
       cornerRadiusDragRef,
       polygonCornerRadiusDragRef,
       starCornerRadiusDragRef,
+      ellipseArcDragRef,
+      ellipseArcRotateDragRef,
+      ellipseArcRatioDragRef,
     ),
   );
 };
@@ -75,6 +91,9 @@ export const startRenderLoop = (
   cornerRadiusDragRef?: RefObject<TCornerRadiusDragState | null>,
   polygonCornerRadiusDragRef?: RefObject<TPolygonCornerRadiusDragState | null>,
   starCornerRadiusDragRef?: RefObject<TStarCornerRadiusDragState | null>,
+  ellipseArcDragRef?: RefObject<TEllipseArcDragState | null>,
+  ellipseArcRotateDragRef?: RefObject<TEllipseArcRotateDragState | null>,
+  ellipseArcRatioDragRef?: RefObject<TEllipseArcRatioDragState | null>,
 ): (() => void) => {
   const frameIdRef: TFrameIdRef = { current: 0 };
 
@@ -93,6 +112,9 @@ export const startRenderLoop = (
       cornerRadiusDragRef,
       polygonCornerRadiusDragRef,
       starCornerRadiusDragRef,
+      ellipseArcDragRef,
+      ellipseArcRotateDragRef,
+      ellipseArcRatioDragRef,
     ),
   );
 

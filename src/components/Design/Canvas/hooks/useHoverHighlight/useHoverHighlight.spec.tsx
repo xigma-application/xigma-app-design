@@ -153,6 +153,29 @@ const addPathTextNode = (x: number, y: number, size = 200): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
+const addEllipseNode = (x: number, y: number, size: number, arcStartAngle?: number, arcEndAngle?: number, arcRatio?: number): string => {
+  store.dispatch(
+    addNode({
+      arcEndAngle,
+      arcRatio,
+      arcStartAngle,
+      fill: '#ff0000',
+      height: size,
+      name: 'Ellipse',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.ellipse,
+      width: size,
+      x,
+      y,
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 const renderHoverHighlight = (
   canvasRef: RefObject<HTMLCanvasElement | null>,
 ): { classNameRef: RefObject<string | null>; hoverRef: RefObject<string | null> } => {
@@ -544,6 +567,72 @@ describe('useHoverHighlight behaviors', () => {
 
     // result — the handle stays visible (hoverRef keeps the node's own id) while it's being hovered
     expect(classNameRef.current).toBe('vertices');
+    expect(hoverRef.current).toBe(idA);
+  });
+
+  it("should apply the radius cursor class and keep the node's own id hovered over a selected ellipse's Sweep handle", () => {
+    // mock — a 100x100 ellipse at (5800, 5000), center (5850, 5050); default arcEndAngle (90°) puts
+    // the Sweep handle at the east rim (5900, 5050)
+    const idA = addEllipseNode(5800, 5000, 100);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { classNameRef, hoverRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 5900, 5050));
+    });
+
+    // result — the handle stays visible (hoverRef keeps the node's own id) while it's being hovered
+    expect(classNameRef.current).toBe('radius');
+    expect(hoverRef.current).toBe(idA);
+  });
+
+  it("should apply the radius cursor class and keep the node's own id hovered over a selected ellipse's Start (rotate) handle", () => {
+    // mock — a 100x100 ellipse at (6000, 5000), center (6050, 5050), cut from the default
+    // arcStartAngle (90°) to arcEndAngle 0°; the Start handle stays at its own east rim (6100, 5050)
+    const idA = addEllipseNode(6000, 5000, 100, 90, 0);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { classNameRef, hoverRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 6100, 5050));
+    });
+
+    // result — the handle stays visible (hoverRef keeps the node's own id) while it's being hovered
+    expect(classNameRef.current).toBe('radius');
+    expect(hoverRef.current).toBe(idA);
+  });
+
+  it("should apply the radius cursor class and keep the node's own id hovered over a selected ellipse's Ratio handle", () => {
+    // mock — a 100x100 ellipse at (6200, 5000); the Ratio handle rests at dead center (6250, 5050)
+    // while arcRatio is 0, even on an uncut ellipse
+    const idA = addEllipseNode(6200, 5000, 100);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { classNameRef, hoverRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 6250, 5050));
+    });
+
+    // result — the handle stays visible (hoverRef keeps the node's own id) while it's being hovered
+    expect(classNameRef.current).toBe('radius');
     expect(hoverRef.current).toBe(idA);
   });
 

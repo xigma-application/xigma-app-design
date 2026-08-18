@@ -12,6 +12,9 @@ import { ToolName } from 'types/design/enums';
 import {
   TCornerRadiusDragState,
   TDragState,
+  TEllipseArcDragState,
+  TEllipseArcRatioDragState,
+  TEllipseArcRotateDragState,
   TEndpointDragState,
   TPathOffsetDragState,
   TPolygonCornerRadiusDragState,
@@ -35,6 +38,9 @@ export const useSelectionTool = (
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>,
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>,
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>,
+  ellipseArcDragRef: RefObject<TEllipseArcDragState | null>,
+  ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null>,
+  ellipseArcRatioDragRef: RefObject<TEllipseArcRatioDragState | null>,
 ): void => {
   const { setClassName } = useClassNames();
   const activeTool = useAppSelector(selectActiveTool);
@@ -69,6 +75,9 @@ export const useSelectionTool = (
           starCornerRadiusDragRef,
           polygonVertexCountDragRef,
           starVertexCountDragRef,
+          ellipseArcDragRef,
+          ellipseArcRotateDragRef,
+          ellipseArcRatioDragRef,
           marqueeStartRef,
           setClassName,
         );
@@ -88,6 +97,9 @@ export const useSelectionTool = (
           starCornerRadiusDragRef,
           polygonVertexCountDragRef,
           starVertexCountDragRef,
+          ellipseArcDragRef,
+          ellipseArcRotateDragRef,
+          ellipseArcRatioDragRef,
           marqueeStartRef,
           marqueeRef,
         );
@@ -107,6 +119,9 @@ export const useSelectionTool = (
           starCornerRadiusDragRef,
           polygonVertexCountDragRef,
           starVertexCountDragRef,
+          ellipseArcDragRef,
+          ellipseArcRotateDragRef,
+          ellipseArcRatioDragRef,
           marqueeStartRef,
           marqueeRef,
           setClassName,
@@ -127,6 +142,9 @@ export const useSelectionTool = (
     canvasRef,
     cornerRadiusDragRef,
     dispatch,
+    ellipseArcDragRef,
+    ellipseArcRatioDragRef,
+    ellipseArcRotateDragRef,
     isCanvasCaretEditingActive,
     marqueeRef,
     polygonCornerRadiusDragRef,

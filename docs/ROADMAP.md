@@ -946,6 +946,30 @@ node.rotation)` w `drawMsdfText.ts`).
       a nie w najbliższy punkt na samym obrysie — bez tego uchwyt wizualnie "lgnie" do kształtu
       zamiast być od niego odsunięty jak w Figmie, tym bardziej przy małym promieniu. Pełny opis
       mechanizmu i tej pułapki: `.claude/docs/selection-and-manipulation.md` §12, §15-16
+- [x] **wycinanie fragmentu elipsy — Sweep/Start/Ratio, jeden do jednego z narzędziem Arc w
+      Figmie** — trzy uchwyty na zaznaczonej i najechanej Ellipse. **Sweep** (`arcEndAngle`, na
+      obwodzie) przeciąga wycięcie w kształt. **Start** (`arcStartAngle`, też na obwodzie, odróżniony
+      od Sweep tylko kropką w środku uchwytu) obraca całe wycięcie, zachowując jego szerokość — jego
+      arm/continue/disarm istniały od wcześniejszej sesji, ale nigdzie nie były podpięte
+      (`handlePointerDown/Move/Up.ts`, `useHoverHighlight.ts`), więc przeciąganie nic nie robiło i nie
+      pokazywał się żaden kursor. **Ratio** (`arcRatio`, w spoczynku siedzi w środku) wydrąża kształt w
+      pierścień; przeciągnięty poza własną granicę kątową kształtu, w wycięty fragment, `arcRatioInverted`
+      zamienia który z dwóch klinów liczy się jako wypełniony — dokładnie zachowanie Figmy przy
+      przeciąganiu uchwytu Ratio w wycięty kawałek. Matematyka bazuje na `getEllipseArcMajorArc`
+      (istniejącej wcześniej funkcji rozwiązującej "ile wycięto" na "co faktycznie wypełnione", ze
+      świadomie nigdy nie zawijanym kątem — pełny obrót to wycięcie całości, drugi pełny obrót
+      przywraca) oraz na nowym `getEffectiveArcAngles`, który przy inwersji podaje już rozwiązany
+      `majorStart`/`majorStart + majorSweep` z powrotem do tej samej funkcji — to jedyna para wejściowa,
+      której własne rozwiązanie jest dokładnie dopełnieniem oryginalnego wycinka, więc dopełnienie nigdy
+      nie zostało napisane ręcznie. Wypełnienie pierścienia to `gl.TRIANGLE_STRIP` między zewnętrznymi i
+      wewnętrznymi punktami zamiast zwykłego `gl.TRIANGLE_FAN` ze środka (środek leży poza wypełnieniem,
+      gdy jest dziura); ten sam podział zewnętrzny/wewnętrzny powtarza się w obrysie hover i w
+      hit-teście. Przy `arcRatio` sięgającym maksimum (1) wypełnienie zapada się do zera, więc
+      `drawEllipseArcRatioGuideArc` rysuje zapadniętą granicę jako krzywą — krzywy odpowiednik istniejącej
+      prostej linii pomocniczej dla w pełni wyciętego kształtu. Uchwyty Sweep/Start podczas przeciągania
+      są teraz ograniczone do pasma pierścienia (wewnętrzny promień → zewnętrzny), zamiast ślizgać się od
+      samego środka, gdy `arcRatio > 0`. Pełny opis mechanizmu: `.claude/docs/selection-and-manipulation.md`
+      §19
 - [ ] **klawiszowe skróty edycji**: Delete/Backspace (usuń zaznaczenie), Cmd/Ctrl+D (duplikuj),
       Cmd/Ctrl+C/V (kopiuj/wklej), strzałki (nudge o 1px, Shift+strzałka o 10px), Cmd/Ctrl+A
       (zaznacz wszystko) — dziś żadne z nich nie istnieje, mimo że infrastruktura klawiszowa

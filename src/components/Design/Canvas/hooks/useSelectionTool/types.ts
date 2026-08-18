@@ -81,6 +81,33 @@ export type TStarVertexCountDragState = {
   rotation: number;
 };
 
+export type TEllipseArcDragState = {
+  bounds: TDraftRect;
+  draggedHandlePosition: TPoint | null;
+  flipX: boolean;
+  flipY: boolean;
+  nodeId: string;
+  rotation: number;
+};
+
+export type TEllipseArcRotateDragState = {
+  bounds: TDraftRect;
+  draggedHandlePosition: TPoint | null;
+  flipX: boolean;
+  flipY: boolean;
+  nodeId: string;
+  rotation: number;
+};
+
+export type TEllipseArcRatioDragState = {
+  bounds: TDraftRect;
+  draggedHandlePosition: TPoint | null;
+  flipX: boolean;
+  flipY: boolean;
+  nodeId: string;
+  rotation: number;
+};
+
 export type TRotateNodeOrigin =
   { x1: number; x2: number; y1: number; y2: number } | { height: number; rotation: number; width: number; x: number; y: number };
 

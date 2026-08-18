@@ -14,7 +14,7 @@ import {
 import { store } from 'store';
 
 // types
-import { TDraftRect } from 'types/canvas';
+import { TDraftRect, TPoint } from 'types/canvas';
 import { TDraftEntity } from 'types/design/types';
 import { TImageRenderContext } from '../../types';
 
@@ -22,6 +22,7 @@ import { TImageRenderContext } from '../../types';
 import { drawCornerRadiusHandlesLayer } from './drawCornerRadiusHandlesLayer';
 import { drawEditingPathTextHandle } from './drawEditingPathTextHandle';
 import { drawEditingText } from './drawEditingText';
+import { drawEllipseArcHandleLayer } from './drawEllipseArcHandleLayer';
 import { drawFrame } from './drawFrame';
 import { drawHoverOutline } from './drawHoverOutline';
 import { drawMarquee } from 'utils/canvas/drawMarquee';
@@ -43,6 +44,9 @@ export const drawScene = (
   hoveredNodeId?: string | null,
   sliceRect?: (TDraftRect & { rotation: number }) | null,
   isDraggingCornerRadius?: boolean,
+  ellipseArcDraggedHandlePosition?: TPoint | null,
+  ellipseArcRotateDraggedHandlePosition?: TPoint | null,
+  ellipseArcRatioDraggedHandlePosition?: TPoint | null,
 ): void => {
   const state = store.getState();
   const viewport = selectViewport(state);
@@ -78,6 +82,19 @@ export const drawScene = (
     Boolean(isDraggingCornerRadius),
   );
   drawVertexCountHandlesLayer(gl, program, buffer, hoveredNode, selectedNodes, clientWidth, clientHeight, viewport);
+  drawEllipseArcHandleLayer(
+    gl,
+    program,
+    buffer,
+    hoveredNode,
+    selectedNodes,
+    clientWidth,
+    clientHeight,
+    viewport,
+    ellipseArcDraggedHandlePosition ?? null,
+    ellipseArcRotateDraggedHandlePosition ?? null,
+    ellipseArcRatioDraggedHandlePosition ?? null,
+  );
   drawFrame(gl, program, buffer, imageContext, draftShape, clientWidth, clientHeight, viewport);
   drawEditingText(
     gl,

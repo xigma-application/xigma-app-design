@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TFrameNode, TLineNode, TMediaNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TLineNode, TMediaNode } from 'types/design/types';
 import { TResizeDragState } from '../../../types';
 
 // utils
@@ -102,6 +102,32 @@ describe('armResizeDrag', () => {
     // result
     expect(resizeDragRef.current?.nodeOrigins).toEqual({
       'media-1': { flip: { x: true, y: false }, height: 50, rotation: 0, width: 100, x: 0, y: 0 },
+    });
+  });
+
+  it('should default flip to false/false for a flippable node with no flipX/flipY set at all', () => {
+    // mock
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef();
+    const ellipse: TEllipseNode = {
+      fill: '#ff0000',
+      height: 50,
+      id: 'ellipse-1',
+      name: 'Ellipse',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.ellipse,
+      width: 100,
+      x: 0,
+      y: 0,
+    };
+
+    // before
+    armResizeDrag(canvas, pointerEvent(), resizeDragRef, [ellipse], 'se', { height: 50, width: 100, x: 0, y: 0 });
+
+    // result
+    expect(resizeDragRef.current?.nodeOrigins).toEqual({
+      'ellipse-1': { flip: { x: false, y: false }, height: 50, rotation: 0, width: 100, x: 0, y: 0 },
     });
   });
 

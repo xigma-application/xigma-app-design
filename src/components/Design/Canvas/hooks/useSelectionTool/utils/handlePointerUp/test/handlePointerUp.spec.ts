@@ -8,6 +8,9 @@ import { store } from 'store';
 import {
   TCornerRadiusDragState,
   TDragState,
+  TEllipseArcDragState,
+  TEllipseArcRatioDragState,
+  TEllipseArcRotateDragState,
   TEndpointDragState,
   TPathOffsetDragState,
   TPolygonCornerRadiusDragState,
@@ -60,6 +63,9 @@ const createPolygonVertexCountDragRef = (
 const createStarVertexCountDragRef = (
   starVertexCountDragState: TStarVertexCountDragState | null = null,
 ): RefObject<TStarVertexCountDragState | null> => ({ current: starVertexCountDragState });
+const createEllipseArcDragRef = (): RefObject<TEllipseArcDragState | null> => ({ current: null });
+const createEllipseArcRotateDragRef = (): RefObject<TEllipseArcRotateDragState | null> => ({ current: null });
+const createEllipseArcRatioDragRef = (): RefObject<TEllipseArcRatioDragState | null> => ({ current: null });
 const createMarqueeStartRef = (point: TPoint | null = null): RefObject<TPoint | null> => ({ current: point });
 const createMarqueeRef = (rect: TDraftRect | null = null): RefObject<TDraftRect | null> => ({ current: rect });
 
@@ -87,6 +93,9 @@ describe('handlePointerUp', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       createMarqueeStartRef(),
       createMarqueeRef(),
       vi.fn(),
@@ -121,6 +130,9 @@ describe('handlePointerUp', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       createMarqueeStartRef(),
       createMarqueeRef(),
       vi.fn(),
@@ -151,6 +163,9 @@ describe('handlePointerUp', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       createMarqueeStartRef(),
       createMarqueeRef(),
       vi.fn(),
@@ -181,6 +196,9 @@ describe('handlePointerUp', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       marqueeRef,
       vi.fn(),

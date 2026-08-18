@@ -9,6 +9,9 @@ import { NodeType } from 'types/design/enums';
 import {
   TCornerRadiusDragState,
   TDragState,
+  TEllipseArcDragState,
+  TEllipseArcRatioDragState,
+  TEllipseArcRotateDragState,
   TEndpointDragState,
   TPathOffsetDragState,
   TPolygonCornerRadiusDragState,
@@ -45,6 +48,9 @@ const createPolygonCornerRadiusDragRef = (): RefObject<TPolygonCornerRadiusDragS
 const createStarCornerRadiusDragRef = (): RefObject<TStarCornerRadiusDragState | null> => ({ current: null });
 const createPolygonVertexCountDragRef = (): RefObject<TPolygonVertexCountDragState | null> => ({ current: null });
 const createStarVertexCountDragRef = (): RefObject<TStarVertexCountDragState | null> => ({ current: null });
+const createEllipseArcDragRef = (): RefObject<TEllipseArcDragState | null> => ({ current: null });
+const createEllipseArcRotateDragRef = (): RefObject<TEllipseArcRotateDragState | null> => ({ current: null });
+const createEllipseArcRatioDragRef = (): RefObject<TEllipseArcRatioDragState | null> => ({ current: null });
 const createMarqueeStartRef = (): RefObject<TPoint | null> => ({ current: null });
 
 const addFrameNode = (x: number, y: number, size = 20): string => {
@@ -102,6 +108,28 @@ const addStarNode = (x: number, y: number, size: number, points: number, ratio: 
       ratio,
       rotation: 0,
       type: NodeType.star,
+      width: size,
+      x,
+      y,
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addEllipseNode = (x: number, y: number, size: number, arcStartAngle?: number, arcEndAngle?: number): string => {
+  store.dispatch(
+    addNode({
+      arcEndAngle,
+      arcStartAngle,
+      fill: '#ff0000',
+      height: size,
+      name: 'Ellipse',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.ellipse,
       width: size,
       x,
       y,
@@ -225,6 +253,9 @@ describe('handlePointerDown', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -257,6 +288,9 @@ describe('handlePointerDown', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -289,6 +323,9 @@ describe('handlePointerDown', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -325,6 +362,9 @@ describe('handlePointerDown', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -359,6 +399,9 @@ describe('handlePointerDown', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -396,6 +439,9 @@ describe('handlePointerDown', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -429,6 +475,9 @@ describe('handlePointerDown', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -466,6 +515,9 @@ describe('handlePointerDown', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -502,6 +554,9 @@ describe('handlePointerDown', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -538,6 +593,9 @@ describe('handlePointerDown', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -575,6 +633,9 @@ describe('handlePointerDown', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -612,6 +673,9 @@ describe('handlePointerDown', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -649,6 +713,9 @@ describe('handlePointerDown', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -686,6 +753,9 @@ describe('handlePointerDown', () => {
       starCornerRadiusDragRef,
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -724,6 +794,9 @@ describe('handlePointerDown', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -760,6 +833,9 @@ describe('handlePointerDown', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -798,6 +874,9 @@ describe('handlePointerDown', () => {
       createStarCornerRadiusDragRef(),
       polygonVertexCountDragRef,
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -837,6 +916,9 @@ describe('handlePointerDown', () => {
       createStarCornerRadiusDragRef(),
       polygonVertexCountDragRef,
       createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
@@ -874,12 +956,136 @@ describe('handlePointerDown', () => {
       createStarCornerRadiusDragRef(),
       createPolygonVertexCountDragRef(),
       starVertexCountDragRef,
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
       marqueeStartRef,
       setClassName,
     );
 
     // result
     expect(starVertexCountDragRef.current).toMatchObject({ nodeId: idA, rotation: 0 });
+    expect(dragStateRef.current).toBeNull();
+    expect(canvas.setPointerCapture).toHaveBeenCalled();
+  });
+
+  it('should delegate to armEllipseArcDrag when the Sweep handle on a selected ellipse is hit', () => {
+    // mock — a 100x100 ellipse at (5800, 5000); default arcEndAngle (90°) puts the Sweep handle at (5900, 5050)
+    const idA = addEllipseNode(5800, 5000, 100);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvas = createCanvas();
+    const dragStateRef = createDragStateRef();
+    const ellipseArcDragRef = createEllipseArcDragRef();
+    const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
+
+    // before
+    handlePointerDown(
+      canvas,
+      pointerEvent(5900, 5050),
+      store.dispatch,
+      dragStateRef,
+      createEndpointDragRef(),
+      createPathOffsetDragRef(),
+      createResizeDragRef(),
+      createRotateDragRef(),
+      createCornerRadiusDragRef(),
+      createPolygonCornerRadiusDragRef(),
+      createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
+      ellipseArcDragRef,
+      createEllipseArcRotateDragRef(),
+      createEllipseArcRatioDragRef(),
+      marqueeStartRef,
+      setClassName,
+    );
+
+    // result
+    expect(ellipseArcDragRef.current).toMatchObject({ nodeId: idA });
+    expect(dragStateRef.current).toBeNull();
+    expect(canvas.setPointerCapture).toHaveBeenCalled();
+  });
+
+  it('should delegate to armEllipseArcRotateDrag when the Start handle on a selected, already-cut ellipse is hit', () => {
+    // mock — a 100x100 ellipse at (6000, 5000), cut from the default arcStartAngle (90°) to
+    // arcEndAngle 0°; the Start handle stays at its own east rim (6100, 5050)
+    const idA = addEllipseNode(6000, 5000, 100, 90, 0);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvas = createCanvas();
+    const dragStateRef = createDragStateRef();
+    const ellipseArcRotateDragRef = createEllipseArcRotateDragRef();
+    const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
+
+    // before
+    handlePointerDown(
+      canvas,
+      pointerEvent(6100, 5050),
+      store.dispatch,
+      dragStateRef,
+      createEndpointDragRef(),
+      createPathOffsetDragRef(),
+      createResizeDragRef(),
+      createRotateDragRef(),
+      createCornerRadiusDragRef(),
+      createPolygonCornerRadiusDragRef(),
+      createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      ellipseArcRotateDragRef,
+      createEllipseArcRatioDragRef(),
+      marqueeStartRef,
+      setClassName,
+    );
+
+    // result
+    expect(ellipseArcRotateDragRef.current).toMatchObject({ nodeId: idA });
+    expect(dragStateRef.current).toBeNull();
+    expect(canvas.setPointerCapture).toHaveBeenCalled();
+  });
+
+  it('should delegate to armEllipseArcRatioDrag when the Ratio handle on a selected ellipse is hit', () => {
+    // mock — a 100x100 ellipse at (6200, 5000); the Ratio handle rests at dead center (6250, 5050)
+    const idA = addEllipseNode(6200, 5000, 100);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvas = createCanvas();
+    const dragStateRef = createDragStateRef();
+    const ellipseArcRatioDragRef = createEllipseArcRatioDragRef();
+    const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
+
+    // before
+    handlePointerDown(
+      canvas,
+      pointerEvent(6250, 5050),
+      store.dispatch,
+      dragStateRef,
+      createEndpointDragRef(),
+      createPathOffsetDragRef(),
+      createResizeDragRef(),
+      createRotateDragRef(),
+      createCornerRadiusDragRef(),
+      createPolygonCornerRadiusDragRef(),
+      createStarCornerRadiusDragRef(),
+      createPolygonVertexCountDragRef(),
+      createStarVertexCountDragRef(),
+      createEllipseArcDragRef(),
+      createEllipseArcRotateDragRef(),
+      ellipseArcRatioDragRef,
+      marqueeStartRef,
+      setClassName,
+    );
+
+    // result
+    expect(ellipseArcRatioDragRef.current).toMatchObject({ nodeId: idA });
     expect(dragStateRef.current).toBeNull();
     expect(canvas.setPointerCapture).toHaveBeenCalled();
   });
