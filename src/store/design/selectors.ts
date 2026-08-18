@@ -1,3 +1,5 @@
+import { createSelector } from '@reduxjs/toolkit';
+
 // store
 import { RootState } from 'store';
 
@@ -30,10 +32,14 @@ export const selectLastTextTool = (state: RootState): ToolName => state.design.l
 
 export const selectNodes = (state: RootState): Record<string, TSceneNode> => state.design.nodes;
 
-export const selectOrderedNodes = (state: RootState): TSceneNode[] => state.design.rootOrder.map((id) => state.design.nodes[id]);
+const selectRootOrder = (state: RootState): string[] => state.design.rootOrder;
+
+export const selectOrderedNodes = createSelector([selectRootOrder, selectNodes], (rootOrder, nodes) => rootOrder.map((id) => nodes[id]));
 
 export const selectSelectedIds = (state: RootState): string[] => state.design.selectedIds;
 
-export const selectSelectedNodes = (state: RootState): TSceneNode[] => state.design.selectedIds.map((id) => state.design.nodes[id]);
+export const selectSelectedNodes = createSelector([selectSelectedIds, selectNodes], (selectedIds, nodes) =>
+  selectedIds.map((id) => nodes[id]),
+);
 
 export const selectViewport = (state: RootState): TViewport => state.design.viewport;

@@ -19,6 +19,7 @@ type TGlCanvasRef = {
   clear: ReturnType<typeof vi.fn>;
   clearColor: ReturnType<typeof vi.fn>;
   colorMask: ReturnType<typeof vi.fn>;
+  deleteProgram: ReturnType<typeof vi.fn>;
 };
 
 const createGlCanvasRef = (): TGlCanvasRef => {
@@ -26,6 +27,7 @@ const createGlCanvasRef = (): TGlCanvasRef => {
   const clearColor = vi.fn();
   const clear = vi.fn();
   const colorMask = vi.fn();
+  const deleteProgram = vi.fn();
 
   vi.spyOn(canvas, 'getContext').mockReturnValue({
     BLEND: 3042,
@@ -42,6 +44,7 @@ const createGlCanvasRef = (): TGlCanvasRef => {
     createProgram: vi.fn(() => ({})),
     createShader: vi.fn(() => ({})),
     deleteBuffer: vi.fn(),
+    deleteProgram,
     enable: vi.fn(),
     getProgramParameter: vi.fn(() => true),
     getShaderParameter: vi.fn(() => true),
@@ -49,7 +52,7 @@ const createGlCanvasRef = (): TGlCanvasRef => {
     shaderSource: vi.fn(),
   } as unknown as WebGL2RenderingContext);
 
-  return { canvasRef: { current: canvas }, clear, clearColor, colorMask };
+  return { canvasRef: { current: canvas }, clear, clearColor, colorMask, deleteProgram };
 };
 
 describe('useCanvasRenderLoop behaviors', () => {
@@ -133,5 +136,19 @@ describe('useCanvasRenderLoop behaviors', () => {
 
     // result
     expect(cancelAnimationFrameMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should delete all three compiled programs on unmount', () => {
+    // mock
+    const { canvasRef, deleteProgram } = createGlCanvasRef();
+
+    // before
+    const { unmount } = renderHook(() => useCanvasRenderLoop(createCanvasRefs({ canvasRef })));
+
+    // action
+    unmount();
+
+    // result
+    expect(deleteProgram).toHaveBeenCalledTimes(3);
   });
 });

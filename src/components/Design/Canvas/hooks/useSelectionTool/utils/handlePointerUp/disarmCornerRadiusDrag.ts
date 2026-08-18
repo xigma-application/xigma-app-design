@@ -1,15 +1,13 @@
 import { RefObject } from 'react';
-import { TCornerRadiusDragState } from 'types/design/canvas/types';
 
 // types
+import { TCornerRadiusDragState } from 'types/design/canvas/types';
+
+// utils
+import { disarmSimpleDrag } from './disarmSimpleDrag';
 
 export const disarmCornerRadiusDrag = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>,
-): void => {
-  if (cornerRadiusDragRef.current) {
-    cornerRadiusDragRef.current = null;
-    canvas.releasePointerCapture(event.pointerId);
-  }
-};
+): void => disarmSimpleDrag(canvas, event, cornerRadiusDragRef);

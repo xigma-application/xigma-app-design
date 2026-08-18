@@ -1,15 +1,13 @@
 import { RefObject } from 'react';
-import { TStarVertexCountDragState } from 'types/design/selectionTool/types';
 
 // types
+import { TStarVertexCountDragState } from 'types/design/selectionTool/types';
+
+// utils
+import { disarmSimpleDrag } from './disarmSimpleDrag';
 
 export const disarmStarVertexCountDrag = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
   starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>,
-): void => {
-  if (starVertexCountDragRef.current) {
-    starVertexCountDragRef.current = null;
-    canvas.releasePointerCapture(event.pointerId);
-  }
-};
+): void => disarmSimpleDrag(canvas, event, starVertexCountDragRef);

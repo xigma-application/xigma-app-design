@@ -34,7 +34,8 @@ export const drawEllipseArcHandleLayer = (
     const arcStartAngle = selectedNode.arcStartAngle ?? ELLIPSE_DEFAULT_ARC_ANGLE;
     const arcEndAngle = selectedNode.arcEndAngle ?? ELLIPSE_DEFAULT_ARC_ANGLE;
     const arcRatio = Math.min(Math.max(selectedNode.arcRatio ?? 0, 0), ELLIPSE_ARC_MAX_RATIO);
-    const isFullyCutAway = getEllipseArcMajorArc(arcStartAngle, arcEndAngle).majorSweep === 0;
+    const majorArc = getEllipseArcMajorArc(arcStartAngle, arcEndAngle);
+    const isFullyCutAway = majorArc.majorSweep === 0;
     const isHovered = hoveredNode?.id === selectedNode.id;
 
     if (shouldShowEllipseArcHandle(bounds, viewport)) {
@@ -58,6 +59,7 @@ export const drawEllipseArcHandleLayer = (
         arcStartAngle,
         arcEndAngle,
         arcRatio,
+        majorArc,
         selectedNode,
         canvasWidth,
         canvasHeight,

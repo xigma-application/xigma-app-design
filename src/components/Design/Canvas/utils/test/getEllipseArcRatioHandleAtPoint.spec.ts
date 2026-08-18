@@ -82,6 +82,14 @@ describe('getEllipseArcRatioHandleAtPoint', () => {
     });
   });
 
+  it('should return null on a fully cut-away shape, matching the draw side which never renders it there', () => {
+    // mock — arcStartAngle defaults to 90; a full 360° lap cut (arcEndAngle 450) collapses majorSweep to 0
+    const node = ellipse({ arcEndAngle: 450, arcRatio: 1 });
+
+    // result — dead center, where the handle would otherwise sit
+    expect(getEllipseArcRatioHandleAtPoint({ x: 50, y: 50 }, [node], IDENTITY_VIEWPORT)).toBeNull();
+  });
+
   it('should move to the complementary (gap) bisector when arcRatioInverted is set', () => {
     // mock — the mirror-opposite point from the non-inverted case above
     const node = ellipse({ arcEndAngle: 90, arcRatio: 1, arcRatioInverted: true, arcStartAngle: 0 });

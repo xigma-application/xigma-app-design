@@ -1,15 +1,10 @@
 import { RefObject } from 'react';
-import { TRotateDragState } from 'types/design/selectionTool/types';
 
 // types
+import { TRotateDragState } from 'types/design/selectionTool/types';
 
-export const disarmRotateDrag = (
-  canvas: HTMLCanvasElement,
-  event: PointerEvent,
-  rotateDragRef: RefObject<TRotateDragState | null>,
-): void => {
-  if (rotateDragRef.current) {
-    rotateDragRef.current = null;
-    canvas.releasePointerCapture(event.pointerId);
-  }
-};
+// utils
+import { disarmSimpleDrag } from './disarmSimpleDrag';
+
+export const disarmRotateDrag = (canvas: HTMLCanvasElement, event: PointerEvent, rotateDragRef: RefObject<TRotateDragState | null>): void =>
+  disarmSimpleDrag(canvas, event, rotateDragRef);

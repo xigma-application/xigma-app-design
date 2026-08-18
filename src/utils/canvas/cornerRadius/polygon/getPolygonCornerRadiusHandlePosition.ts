@@ -1,18 +1,11 @@
-// others
-import { MIN_RADIUS_HANDLE_GAP_PX, ZERO_RADIUS_HANDLE_OFFSET_PX } from 'constant/canvas';
-
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { flipPoint } from 'utils/math/flipPoint';
-import { getCornerRadiusHandleEffectiveSetback } from 'utils/canvas/cornerRadius/getCornerRadiusHandleEffectiveSetback';
-import { getCornerRadiusHandleSetbackMultiplier } from 'utils/canvas/cornerRadius/getCornerRadiusHandleSetbackMultiplier';
+import { getCornerRadiusHandlePositionFromVertices } from 'utils/canvas/cornerRadius/getCornerRadiusHandlePositionFromVertices';
 import { getMaxPolygonCornerRadius } from './getMaxPolygonCornerRadius';
 import { getPolygonPoints } from 'utils/canvas/shapes/getPolygonPoints';
-import { getVertexAngles } from 'utils/math/getVertexAngles';
-import { normalizeVector } from 'utils/math/normalizeVector';
 
 export const getPolygonCornerRadiusHandlePosition = (
   bounds: TDraftRect,
@@ -24,16 +17,8 @@ export const getPolygonCornerRadiusHandlePosition = (
   isDragging = false,
 ): TPoint => {
   const vertices = getPolygonPoints(bounds, sides);
-  const [topVertex] = vertices;
   const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
-  const towardCenter = normalizeVector({ x: center.x - topVertex.x, y: center.y - topVertex.y });
-  const setbackMultiplier = getCornerRadiusHandleSetbackMultiplier(getVertexAngles(vertices)[0]);
-  const rawScreenGap = ZERO_RADIUS_HANDLE_OFFSET_PX / viewport.zoom;
-  const zeroStateScreenGap = Math.min(Math.max(rawScreenGap, MIN_RADIUS_HANDLE_GAP_PX), ZERO_RADIUS_HANDLE_OFFSET_PX);
-  const zeroStateOffset = zeroStateScreenGap / viewport.zoom;
   const maxRadius = getMaxPolygonCornerRadius(bounds, sides);
-  const effectiveSetback = getCornerRadiusHandleEffectiveSetback(cornerRadius, maxRadius, setbackMultiplier, zeroStateOffset, isDragging);
-  const localPosition: TPoint = { x: topVertex.x + towardCenter.x * effectiveSetback, y: topVertex.y + towardCenter.y * effectiveSetback };
 
-  return flipPoint(localPosition, center, flipX, flipY);
+  return getCornerRadiusHandlePositionFromVertices(vertices, center, maxRadius, cornerRadius, viewport, flipX, flipY, isDragging);
 };

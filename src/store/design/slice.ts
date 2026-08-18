@@ -13,10 +13,12 @@ import { handleAddNode } from './utils/handleAddNode';
 import { handleDeleteNode } from './utils/handleDeleteNode';
 import { handleSetActiveTool } from './utils/handleSetActiveTool';
 import { handleSetSelection } from './utils/handleSetSelection';
+import { handleSetViewport } from './utils/handleSetViewport';
 import { handleStartTextEdit } from './utils/handleStartTextEdit';
 import { handleStopTextEdit } from './utils/handleStopTextEdit';
 import { handleUpdateEditingTextBoxPathStartOffset } from './utils/handleUpdateEditingTextBoxPathStartOffset';
 import { handleUpdateNode } from './utils/handleUpdateNode';
+import { handleUpdateTextEditContent } from './utils/handleUpdateTextEditContent';
 import { handleUpdateTextEditSelection } from './utils/handleUpdateTextEditSelection';
 
 const initialState: TDesignState = {
@@ -48,17 +50,13 @@ const designSlice = createSlice({
     deleteNode: (state, action: PayloadAction<string>) => handleDeleteNode(state, action.payload),
     setActiveTool: (state, action: PayloadAction<ToolName>) => handleSetActiveTool(state, action.payload),
     setSelection: (state, action: PayloadAction<string[]>) => handleSetSelection(state, action.payload),
-    setViewport: (state, action: PayloadAction<TViewport>) => {
-      state.viewport = action.payload;
-    },
+    setViewport: (state, action: PayloadAction<TViewport>) => handleSetViewport(state, action.payload),
     startTextEdit: (state, action: PayloadAction<TStartTextEditPayload>) => handleStartTextEdit(state, action.payload),
     stopTextEdit: (state) => handleStopTextEdit(state),
     updateEditingTextBoxPathStartOffset: (state, action: PayloadAction<number>) =>
       handleUpdateEditingTextBoxPathStartOffset(state, action.payload),
     updateNode: (state, action: PayloadAction<{ changes: TSceneNodeChanges; id: string }>) => handleUpdateNode(state, action.payload),
-    updateTextEditContent: (state, action: PayloadAction<string>) => {
-      state.editingTextContent = action.payload;
-    },
+    updateTextEditContent: (state, action: PayloadAction<string>) => handleUpdateTextEditContent(state, action.payload),
     updateTextEditSelection: (state, action: PayloadAction<TTextEditSelection>) => handleUpdateTextEditSelection(state, action.payload),
   },
 });

@@ -37,4 +37,17 @@ describe('getRotatedAnchorSolver', () => {
     expect(anchorWorldAfter.x).toBeCloseTo(anchorWorldBefore.x);
     expect(anchorWorldAfter.y).toBeCloseTo(anchorWorldBefore.y);
   });
+
+  it('should keep the anchor edge fixed even when scaleX lands on exactly 0 mid-crossing', () => {
+    // mock — "e" handle, anchor is the west edge (x=0); an exact-zero scaleX used to zero out
+    // Math.sign(scaleX), collapsing the anchor offset and jumping the west edge away from x=0
+    const bounds = { height: 50, width: 100, x: 0, y: 0 };
+
+    // before
+    const solve = getRotatedAnchorSolver(bounds, 'e', 0, 0, 1);
+    const result = solve(60, 50);
+
+    // result — west edge stays pinned at x=0, box spans [0, 60], not jumped to [-30, 30]
+    expect(result.x).toBeCloseTo(0);
+  });
 });

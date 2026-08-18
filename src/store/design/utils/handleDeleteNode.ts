@@ -13,5 +13,9 @@ export const handleDeleteNode = (state: TDesignState, id: string): void => {
     if (node.type === NodeType.text && node.pathId) {
       handleDeleteNode(state, node.pathId);
     }
+
+    Object.values(state.nodes)
+      .filter((candidate) => candidate.type === NodeType.text && candidate.pathId === id)
+      .forEach((textNode) => handleDeleteNode(state, textNode.id));
   }
 };

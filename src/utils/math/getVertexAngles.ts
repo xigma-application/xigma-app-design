@@ -9,6 +9,7 @@ export const getVertexAngles = (vertices: TPoint[]): number[] =>
     const toNext = { x: next.x - vertex.x, y: next.y - vertex.y };
     const dot = toPrevious.x * toNext.x + toPrevious.y * toNext.y;
     const magnitudes = Math.hypot(toPrevious.x, toPrevious.y) * Math.hypot(toNext.x, toNext.y);
+    const cosAngle = Math.min(Math.max(dot / magnitudes, -1), 1);
 
-    return Math.acos(dot / magnitudes);
+    return Math.acos(cosAngle);
   });

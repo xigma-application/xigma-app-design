@@ -11,4 +11,9 @@ describe('normalizeVector', () => {
     // result
     expect(normalizeVector({ x: 1, y: 0 })).toEqual({ x: 1, y: 0 });
   });
+
+  it('should return the zero vector instead of NaN for a zero-length input', () => {
+    // result
+    expect(normalizeVector({ x: 0, y: 0 })).toEqual({ x: 0, y: 0 });
+  });
 });

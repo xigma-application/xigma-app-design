@@ -56,9 +56,10 @@ export const drawScene = (
   const editingTextBox = selectEditingTextBox(state);
   const nodesById = selectNodes(state);
   const sceneNodes = selectOrderedNodes(state).filter((node) => node.id !== editingNodeId);
-  const selectedNodes = selectSelectedNodes(state).filter((node) => node.id !== editingNodeId);
+  const allSelectedNodes = selectSelectedNodes(state);
+  const selectedNodes = allSelectedNodes.filter((node) => node.id !== editingNodeId);
   const hoveredNode = hoveredNodeId && hoveredNodeId !== editingNodeId ? nodesById[hoveredNodeId] : null;
-  const selectedIds = new Set(selectSelectedNodes(state).map((node) => node.id));
+  const selectedIds = new Set(allSelectedNodes.map((node) => node.id));
   const pathOutlineStyles = getPathOutlineStyles(
     Object.values(nodesById),
     selectedIds,

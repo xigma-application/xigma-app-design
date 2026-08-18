@@ -10,7 +10,7 @@ import { updateTextEditSelection } from 'store/design/slice';
 
 // utils
 import { getCurvedHitAtEvent } from '../getCurvedHitAtEvent';
-import { getEditingOverlay } from '../getEditingOverlay';
+import { getEditingOverlay } from '../../../../utils/getEditingOverlay';
 import { getWordRangeAtIndex } from 'utils/canvas/text/getWordRangeAtIndex';
 import { setEditableSelectionRange } from '../../../../components/TextEditOverlay/utils/setEditableSelectionRange';
 

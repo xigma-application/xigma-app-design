@@ -9,7 +9,7 @@ import { TEllipseNode, TViewport } from 'types/design/types';
 // utils
 import { drawEllipseArcRatioGuideArc } from 'utils/canvas/drawEllipseArcRatioGuideArc';
 import { getEffectiveArcAngles } from 'utils/canvas/ellipseArc/getEffectiveArcAngles';
-import { hasEllipseArc } from 'utils/canvas/ellipseArc/hasEllipseArc';
+import { TEllipseMajorArc } from 'utils/canvas/ellipseArc/getEllipseArcMajorArc';
 
 export const drawArcRatioGuide = (
   gl: WebGL2RenderingContext,
@@ -19,13 +19,19 @@ export const drawArcRatioGuide = (
   arcStartAngle: number,
   arcEndAngle: number,
   arcRatio: number,
+  majorArc: TEllipseMajorArc,
   node: TEllipseNode,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  if (arcRatio >= 1 && hasEllipseArc(arcStartAngle, arcEndAngle)) {
-    const { effectiveEndAngle, effectiveStartAngle } = getEffectiveArcAngles(arcStartAngle, arcEndAngle, node.arcRatioInverted ?? false);
+  if (arcRatio >= 1 && Math.abs(majorArc.majorSweep) < 360) {
+    const { effectiveEndAngle, effectiveStartAngle } = getEffectiveArcAngles(
+      arcStartAngle,
+      arcEndAngle,
+      node.arcRatioInverted ?? false,
+      majorArc,
+    );
 
     drawEllipseArcRatioGuideArc(
       gl,

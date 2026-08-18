@@ -1,15 +1,13 @@
 import { RefObject } from 'react';
-import { TPolygonCornerRadiusDragState } from 'types/design/canvas/types';
 
 // types
+import { TPolygonCornerRadiusDragState } from 'types/design/canvas/types';
+
+// utils
+import { disarmSimpleDrag } from './disarmSimpleDrag';
 
 export const disarmPolygonCornerRadiusDrag = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>,
-): void => {
-  if (polygonCornerRadiusDragRef.current) {
-    polygonCornerRadiusDragRef.current = null;
-    canvas.releasePointerCapture(event.pointerId);
-  }
-};
+): void => disarmSimpleDrag(canvas, event, polygonCornerRadiusDragRef);

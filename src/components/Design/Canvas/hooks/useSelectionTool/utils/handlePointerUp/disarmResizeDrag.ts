@@ -1,15 +1,10 @@
 import { RefObject } from 'react';
-import { TResizeDragState } from 'types/design/selectionTool/types';
 
 // types
+import { TResizeDragState } from 'types/design/selectionTool/types';
 
-export const disarmResizeDrag = (
-  canvas: HTMLCanvasElement,
-  event: PointerEvent,
-  resizeDragRef: RefObject<TResizeDragState | null>,
-): void => {
-  if (resizeDragRef.current) {
-    resizeDragRef.current = null;
-    canvas.releasePointerCapture(event.pointerId);
-  }
-};
+// utils
+import { disarmSimpleDrag } from './disarmSimpleDrag';
+
+export const disarmResizeDrag = (canvas: HTMLCanvasElement, event: PointerEvent, resizeDragRef: RefObject<TResizeDragState | null>): void =>
+  disarmSimpleDrag(canvas, event, resizeDragRef);

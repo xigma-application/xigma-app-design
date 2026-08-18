@@ -1,15 +1,13 @@
 import { RefObject } from 'react';
-import { TEllipseArcRotateDragState } from 'types/design/canvas/types';
 
 // types
+import { TEllipseArcRotateDragState } from 'types/design/canvas/types';
+
+// utils
+import { disarmSimpleDrag } from './disarmSimpleDrag';
 
 export const disarmEllipseArcRotateDrag = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
   ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null>,
-): void => {
-  if (ellipseArcRotateDragRef.current) {
-    ellipseArcRotateDragRef.current = null;
-    canvas.releasePointerCapture(event.pointerId);
-  }
-};
+): void => disarmSimpleDrag(canvas, event, ellipseArcRotateDragRef);

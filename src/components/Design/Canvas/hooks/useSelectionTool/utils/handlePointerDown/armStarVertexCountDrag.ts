@@ -4,6 +4,9 @@ import { RefObject } from 'react';
 import { TDraftRect } from 'types/canvas';
 import { TStarVertexCountDragState } from 'types/design/selectionTool/types';
 
+// utils
+import { armVertexCountDrag } from './armVertexCountDrag';
+
 export const armStarVertexCountDrag = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
@@ -13,7 +16,4 @@ export const armStarVertexCountDrag = (
   rotation: number,
   flipX: boolean,
   flipY: boolean,
-): void => {
-  starVertexCountDragRef.current = { bounds, flipX, flipY, nodeId, rotation };
-  canvas.setPointerCapture(event.pointerId);
-};
+): void => armVertexCountDrag(canvas, event, starVertexCountDragRef, bounds, nodeId, rotation, flipX, flipY);

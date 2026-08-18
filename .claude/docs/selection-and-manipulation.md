@@ -63,19 +63,29 @@ orchestrators.
 - `handlePointerDown.ts`/`handlePointerMove.ts`/`handlePointerUp.ts` (the three top-level
   orchestrators dispatched to from the hook) take `(canvas, event, dispatch, canvasRefs,
   selectionRefs, setClassName)` — six params total, down from the sprawling one-positional-arg-per-ref
-  lists these used to take. Internally they reach into whichever of the two ref objects each `arm*`/
-  `continue*`/`disarm*` call actually needs (e.g. `armCornerRadiusDrag(..., canvasRefs.cornerRadiusDragRef,
-  ...)`, `armPathOffsetDrag(..., selectionRefs.pathOffsetDragRef, ...)`) — the deeper `arm*`/`continue*`/
+  lists these used to take. `handlePointerMove.ts`/`handlePointerUp.ts` reach directly into
+  whichever of the two ref objects each `continue*`/`disarm*` call actually needs (e.g.
+  `continueCornerRadiusDrag(..., canvasRefs.cornerRadiusDragRef, ...)`,
+  `disarmPathOffsetDrag(..., selectionRefs.pathOffsetDragRef, ...)`) — those deeper `continue*`/
   `disarm*` files themselves are untouched, still taking their one specific ref as an explicit
-  parameter exactly as before; only the three dispatchers' own boundary absorbed the two grouped
-  objects.
+  parameter exactly as before; only the dispatchers' own boundary absorbed the two grouped objects.
+  `handlePointerDown.ts` no longer calls any `arm*` directly at all — see below, it was promoted to
+  its own resolver-array pattern, the pointerdown mirror of `useHoverHighlight`'s `resolveHover` (§9).
 
-`utils/handlePointerDown/` — one `arm*.ts` per interaction kind, dispatched by a priority `switch`
-in `handlePointerDown.ts` (full table in §3): `armPathOffsetDrag`, `armPolygonVertexCountDrag` (§18),
-`armStarVertexCountDrag` (§18), `armEllipseArcDrag`/`armEllipseArcRotateDrag`/`armEllipseArcRatioDrag`
-(§19), `armResizeDrag`, `armCornerRadiusDrag` (§11), `armPolygonCornerRadiusDrag` (§12),
-`armStarCornerRadiusDrag` (§15), `armRotateDrag`, `armLineEndpointDrag` (→ `armEndpointDrag`),
-`armHitDrag` (→ `armDrag`), `armGroupBoundsDrag` (→ `armDrag`), `armMarqueeDrag`.
+`utils/handlePointerDown/` — `handlePointerDown.ts` is now a thin orchestrator: it builds one
+`TArmContext` (`types.ts` — `canvas`, `event`, `dispatch`, `canvasRefs`, `selectionRefs`,
+`setClassName`, `point`, `viewport`, `selectedNodes`, `orderedNodes`, `currentSelection`, and `hit`,
+the one whole-node hit-test computed once up front since two later resolvers both need it) and loops
+`ARM_RESOLVERS` (`constants.ts`, full priority table in §3) until one returns `true`. Each entry is an
+`arm*OnPointerDown` function in `armResolvers.ts` — one hit-test, then the matching lower-level
+`arm*Drag` call. The pre-existing lower-level `arm*.ts` files are untouched below that layer:
+`armPathOffsetDrag`, `armPolygonVertexCountDrag` (§18), `armStarVertexCountDrag` (§18),
+`armEllipseArcDrag`/`armEllipseArcRotateDrag`/`armEllipseArcRatioDrag` (§19), `armResizeDrag`,
+`armCornerRadiusDrag` (§11), `armPolygonCornerRadiusDrag` (§12), `armStarCornerRadiusDrag` (§15),
+`armRotateDrag`, `armLineEndpointDrag` (→ `armEndpointDrag`), `armHitDrag` (→ `armDrag`),
+`armGroupBoundsDrag` (→ `armDrag`), `armMarqueeDrag`. `toggleSelectionOnPointerDown` is the one
+resolver with no matching lower-level `arm*Drag` file — shift-click toggling is a synchronous
+`dispatch`, nothing to arm.
 
 `utils/handlePointerMove/` — one `continue*.ts` per kind. **All fourteen run unconditionally on every
 pointermove** — `handlePointerMove.ts` just calls all fourteen in sequence; each is a no-op guarded by
@@ -171,43 +181,52 @@ member's individual rotation, not just raw bounds.
 
 ## 3. Selection state machine — arm on pointerdown, resolve on pointerup
 
-`handlePointerDown.ts`'s full priority table (topmost case wins):
+`handlePointerDown.ts` builds one `TArmContext` and loops `ARM_RESOLVERS` (`constants.ts`) until one
+returns `true`; the array order **is** the priority table (topmost wins), each entry an
+`arm*OnPointerDown` function in `armResolvers.ts` (§1):
 ```ts
-switch (true) {
-  case Boolean(pathOffsetHandleHit):                          armPathOffsetDrag(...); break;
-  case Boolean(polygonVertexCountHandleHit):                  armPolygonVertexCountDrag(...); break;
-  case Boolean(starVertexCountHandleHit):                     armStarVertexCountDrag(...); break;
-  case Boolean(ellipseArcHandleHit):                          armEllipseArcDrag(...); break;        // §19 Sweep
-  case Boolean(ellipseArcRotateHandleHit):                    armEllipseArcRotateDrag(...); break;  // §19 Start
-  case Boolean(ellipseArcRatioHandleHit):                     armEllipseArcRatioDrag(...); break;   // §19 Ratio
-  case Boolean(resizeHandleHit):                               armResizeDrag(...); break;
-  case Boolean(cornerRadiusHandleHit):                         armCornerRadiusDrag(...); break;
-  case Boolean(polygonCornerRadiusHandleHit):                  armPolygonCornerRadiusDrag(...); break;
-  case Boolean(starCornerRadiusHandleHit):                     armStarCornerRadiusDrag(...); break;
-  case Boolean(rotateHandleHit):                               armRotateDrag(...); break;
-  case Boolean(lineEndpointHit) && !event.shiftKey:            armLineEndpointDrag(...); break;
-  case Boolean(hit) && event.shiftKey:                         dispatch(setSelection(toggleSelection(currentSelection, hit.id))); break;
-  case Boolean(hit):                                           armHitDrag(...); break;
-  case !event.shiftKey && isPointInSelectedTextBounds(...):    armHitDrag(canvas, event, dispatch, dragStateRef, selectedNodes[0], ...); break;
-  case !event.shiftKey && isPointInGroupBounds(point, selectedNodes): armGroupBoundsDrag(...); break;
-  case !event.shiftKey:                                        armMarqueeDrag(...); break;
-  default: break;
+export const ARM_RESOLVERS = [
+  armPathOffsetOnPointerDown,
+  armPolygonVertexCountOnPointerDown,
+  armStarVertexCountOnPointerDown,
+  armEllipseArcOnPointerDown,          // §19 Sweep
+  armEllipseArcRotateOnPointerDown,    // §19 Start
+  armEllipseArcRatioOnPointerDown,     // §19 Ratio
+  armResizeOnPointerDown,
+  armCornerRadiusOnPointerDown,
+  armPolygonCornerRadiusOnPointerDown,
+  armStarCornerRadiusOnPointerDown,
+  armRotateOnPointerDown,
+  armLineEndpointOnPointerDown,        // only if !event.shiftKey
+  toggleSelectionOnPointerDown,        // ctx.hit && event.shiftKey
+  armHitOnPointerDown,                 // ctx.hit
+  armSelectedTextBoundsOnPointerDown,  // !event.shiftKey
+  armGroupBoundsOnPointerDown,         // !event.shiftKey
+  armMarqueeOnPointerDown,             // !event.shiftKey (always matches if reached)
+];
+```
+```ts
+for (const resolve of ARM_RESOLVERS) {
+  if (resolve(ctx)) return;
 }
 ```
 **Handle priority**: path-offset → **polygon/star vertex-count (§18) → Sweep/Start/Ratio (§19) →
 resize** → corner-radius (§11) → polygon corner-radius (§12) → star corner-radius (§15) → rotate →
 **line endpoint (only if not shift)** → shift toggle → plain hit → text-fixed-bounds fallback →
-group-gap → marquee. `cornerRadiusHandleHit`, `polygonCornerRadiusHandleHit`, and
-`starCornerRadiusHandleHit` are each computed as `resizeHandleHit ? null : get*CornerRadiusHandleAtPoint(...)`
-right where they're read, so resize wins any tie deterministically rather than relying on
-switch-case ordering alone — a node is never more than one of Rectangle/Polygon/Star at once, so the
-three hit-tests never actually compete with each other, only each independently with resize.
+group-gap → marquee. `armCornerRadiusOnPointerDown`, `armPolygonCornerRadiusOnPointerDown`, and
+`armStarCornerRadiusOnPointerDown` call their `get*CornerRadiusHandleAtPoint(...)` hit-tests
+unconditionally, with **no** `resizeHandleHit` gate anywhere in their own bodies — resize still wins
+any tie, but purely through `ARM_RESOLVERS`' ordering (`armResizeOnPointerDown` sits earlier in the
+array and returns `true`/stops the loop on a match, so these three never even run when resize already
+claimed the point), not through an explicit ternary. A node is never more than one of
+Rectangle/Polygon/Star at once, so the three hit-tests never actually compete with each other, only
+each independently with resize.
 `polygonVertexCountHandleHit`/`starVertexCountHandleHit` and all three
 `ellipseArcHandleHit`/`ellipseArcRotateHandleHit`/`ellipseArcRatioHandleHit` are the exceptions to
-"resize wins any tie": all five are computed **unconditionally**, not gated behind
-`resizeHandleHit ? null : ...`, and checked *before* resize in the switch — for vertex-count, §18's
+"resize wins any tie": all five resolvers are checked *before* `armResizeOnPointerDown` in
+`ARM_RESOLVERS` — for vertex-count, §18's
 exact-pixel collision with a resize handle; for the ellipse-arc trio there's no known coincident-pixel
-case (a node is never simultaneously Polygon/Star/Ellipse), the ungated ordering is just consistency
+case (a node is never simultaneously Polygon/Star/Ellipse), the earlier ordering is just consistency
 with vertex-count rather than a forced fix. Line-endpoint hit-testing is checked *before* the generic
 whole-node `hit` branch, which is why grabbing a line's own endpoint always wins over a whole-line
 drag even when both technically match the same point.
@@ -426,7 +445,7 @@ export const getLineEndpointAtPoint = (point, selectedNodes, viewport) => {
   return null;
 };
 ```
-Checked *before* the generic whole-node `hit` case in §3's priority switch — this is why clicking
+Checked *before* the generic whole-node `hit` resolver in §3's `ARM_RESOLVERS` — this is why clicking
 near a line's tip grabs the endpoint handle instead of starting a whole-line drag, even though the
 line's own tolerance-based hit-test (`isPointNearLine`) would also match that point.
 `continueEndpointDrag.ts` writes the raw world point straight to `x1/y1` or `x2/y2` — **not
@@ -470,22 +489,32 @@ and `getRotateCursorAngle.ts` (quadrant-based on cursor position relative to the
 into local space first).
 
 `useHoverHighlight.ts` is where hover-without-drag cursor updates happen — a `pointermove` listener
-guarded by `event.buttons === 0` (inert mid-drag), with its own priority switch mirroring
-`handlePointerDown`'s hit-test order (line endpoint → path-offset handle → editing-text caret →
-vertex-count → Sweep/Start/Ratio (§19, all three `setClassName('radius')`, same class as
-corner-radius) → resize handle → corner-radius → rotate handle → default node hover). The
-Scale-vs-plain-resize cursor swap is decided right here too:
+guarded by `event.buttons === 0` (inert mid-drag), delegating to `resolveHover.ts`
+(`utils/resolveHover/`), the exact same resolver-array pattern as §3's `handlePointerDown`/
+`ARM_RESOLVERS`: it builds one `THoverResolverContext`, then loops `HOVER_RESOLVERS`
+(`constants.ts`) — each entry a pure `resolveXHover(ctx): THoverResult | undefined` in
+`hoverResolvers.ts` — until one returns a `{ className, cursor, nodeId }` result, which is then
+applied in one place via `setHoverState(canvas, hoverRef, setClassName, ...)`. Same order as
+`handlePointerDown`'s hit-test priority (line endpoint → path-offset handle → editing-text caret →
+vertex-count → Sweep/Start/Ratio (§19, all three `className: 'radius'`, same class as corner-radius)
+→ resize handle → corner-radius → rotate handle → default node hover), plus one final resolver,
+`resolvePlainNodeHover`, that has no gate at all and always returns a result — the plain-node-hover
+fallback, which is *why* the loop never needs a separate post-loop branch: the last entry is
+guaranteed to match. The Scale-vs-plain-resize cursor swap is decided in `resolveResizeHover`:
 ```ts
-case Boolean(resizeHandleHit): {
-  const getCursorUrl = activeTool === ToolName.scale ? getRotatedScaleCursorUrl : getRotatedResizeCursorUrl;
-  canvas.style.cursor = getCursorUrl(getResizeCursorAngle(resizeHandleHit.handle, resizeHandleHit.rotation)) ?? '';
-  hoverRef.current = null;
-  break;
-}
+export const resolveResizeHover = ({ resizeHandleHit, activeTool }: THoverResolverContext): THoverResult | undefined => {
+  if (resizeHandleHit) {
+    const getCursorUrl = activeTool === ToolName.scale ? getRotatedScaleCursorUrl : getRotatedResizeCursorUrl;
+    const cursor = getCursorUrl(getResizeCursorAngle(resizeHandleHit.handle, resizeHandleHit.rotation)) ?? '';
+    return { className: null, cursor, nodeId: null };
+  }
+};
 ```
-`hoverRef` (a ref — pure rendering concern) is only set in the fallback branch (plain node hover, no
-handle); `drawHoverOutline.ts` reads it to draw the hover outline without corner handles, separately
-from `drawSelectionOutline.ts`.
+`hoverRef` (a ref — pure rendering concern) is set by `setHoverState` on *every* resolved case, not
+just the fallback — each `THoverResult` carries its own `nodeId` (the node's own id for a
+radius/vertices/hand handle, `null` for resize/rotate, `hit?.id ?? null` for plain hover);
+`drawHoverOutline.ts` reads it to draw the hover outline without corner handles, separately from
+`drawSelectionOutline.ts`.
 
 **Gotcha — stale hover after a drag ends without a further `pointermove`**: the `event.buttons === 0`
 guard above is correct for its own purpose (don't flicker hover onto other nodes while, say, dragging
@@ -507,7 +536,14 @@ Unit: a real `<canvas>` (`getBoundingClientRect` stubbed, `setPointerCapture` st
 the mounted hook in `useSelectionTool.spec.tsx`), asserted against `store.getState()`. Every
 `arm*`/`continue*`/`disarm*` file and every math helper
 (`getResizeFactors`/`getScaleFactors`/`getRotatedAxis*`/`isRotationAxisSwapped`/`transformCoord`/
-`getSignedScale`/`resizeNode`/...) has its own `test/*.spec.ts` sibling, 100%-coverage granularity.
+`getSignedScale`/`resizeNode`/...) has its own `test/*.spec.ts` sibling, 100%-coverage granularity —
+including the resolver files themselves: `armResolvers.spec.ts` (one `describe` block per
+`arm*OnPointerDown`, §3) and `hoverResolvers.spec.ts`/`resolveHover.spec.ts` (§9), each calling the
+resolver functions directly with a plain `TArmContext`/`THoverResolverContext` object rather than
+going through the full hook, even though the pre-existing `handlePointerDown.spec.ts`/
+`useHoverHighlight.spec.tsx` integration suites already exercise every branch at 100% on their own —
+the dedicated resolver specs pin each function's own contract (its return value) independent of the
+surrounding orchestrator wiring.
 `useSelectionTool.spec.tsx` (~30 `it` blocks) is effectively the canonical enumeration of the state
 machine in §3 — good source list if re-deriving the decision tree from scratch.
 
@@ -607,7 +643,17 @@ multi-candidate collision to ever resolve, so this is wired as a **parallel** me
 Rectangle's rather than sharing it (same reasoning as Line's endpoint-drag being its own mechanism
 instead of shoehorned into resize) — its own drag-state shape
 (`TPolygonCornerRadiusDragState = { bounds, nodeId, rotation, sides }`, no `corner`/`candidates`
-field since there's nothing to disambiguate) and its own `arm*`/`continue*`/`disarm*` trio.
+field since there's nothing to disambiguate). Unlike Rectangle, Polygon's `arm*`/`continue*`/`disarm*`
+trio is **not** independently implemented: `armPolygonCornerRadiusDrag.ts` is a one-line call into
+`armSimpleDrag.ts` (`handlePointerDown/`, generic `<T>(canvas, event, dragRef, state)` — just sets
+the ref and captures the pointer) with the polygon-shaped state object; `disarmPolygonCornerRadiusDrag.ts`
+is the same one-line pattern against `disarmSimpleDrag.ts`. `continuePolygonCornerRadiusDrag.ts`
+supplies `continueShapeCornerRadiusDrag.ts` (`handlePointerMove/`, generic over
+`{ bounds, flipX, flipY, hasMoved, nodeId, rotation }` plus a `getVertices`/`getMaxRadius` callback
+pair) with `getPolygonPoints`/`getMaxPolygonCornerRadius`; Star's equivalent (§15) supplies
+`getStarPoints`/`getMaxStarCornerRadius` to the same generic function — this is what actually removed
+the Polygon/Star duplication `getVertexAngles.ts` et al. already generalized on the math side, one
+layer up in the call stack.
 
 Polygon-specific math lives in `utils/canvas/cornerRadius/polygon/`, a sibling to the Rectangle math
 folder — but as of the Star feature (§15), the actual vertex-angle/tangent-arc/handle-setback math
@@ -630,14 +676,17 @@ still doesn't share, since its 90°-corner math is a simpler special case not wo
   `1 / sin(vertexAngle / 2)`. **This is not the radius itself** — see the dedicated gotcha in §16;
   do not "simplify" a handle-position formula back to using `cornerRadius` directly without reading
   that section first.
-- `getPolygonCornerRadiusHandlePosition.ts` — from the top vertex (local/unflipped/unrotated space),
-  moved toward the bounding-box center by `cornerRadius * setbackMultiplier` world units (§16). Same
-  zero-state zoom-aware offset formula as Rectangle's `getCornerRadiusHandlePositions.ts`
-  (`ZERO_RADIUS_HANDLE_OFFSET_PX`/`MIN_RADIUS_HANDLE_GAP_PX`), but the zero-state ceiling is
-  `maxRadius * setbackMultiplier`, not `maxRadius` alone, since it's being compared against a setback
-  distance, not a raw radius. Deliberately ignores `flipX`/`flipY` — local/unflipped space only, kept
-  simple; the render layer stays consistent by not un-flipping either, so hit-test and drawn position
-  never disagree with each other even though neither accounts for flip.
+- `getPolygonCornerRadiusHandlePosition.ts` — a thin wrapper: builds `vertices`/`center`/`maxRadius`
+  from `bounds`/`sides`, then hands them to `getCornerRadiusHandlePositionFromVertices.ts` (one
+  folder up, in the shared `cornerRadius/` root — not `polygon/`), the shape-agnostic function
+  Star's own wrapper (§15) also calls. That shared function
+  computes from the top vertex (local/unflipped/unrotated space), moves toward the bounding-box
+  center by `cornerRadius * setbackMultiplier` world units (§16, same zero-state zoom-aware offset
+  formula as Rectangle's `getCornerRadiusHandlePositions.ts` —
+  `ZERO_RADIUS_HANDLE_OFFSET_PX`/`MIN_RADIUS_HANDLE_GAP_PX`, zero-state ceiling `maxRadius *
+  setbackMultiplier` rather than `maxRadius` alone since it's compared against a setback distance,
+  not a raw radius), then applies `flipPoint` to the final local position before returning (§17) —
+  it does **not** ignore `flipX`/`flipY`; that final flip is exactly what §17's gotcha fixed.
 - `hasPolygonCornerRadius.ts` — `node.type === NodeType.polygon`, its own guard rather than widening
   `hasCornerRadius.ts` — the two shapes' render/handle-position functions are entirely different
   downstream, and a shared guard would just invite a caller to (wrongly) treat them interchangeably.
@@ -758,9 +807,12 @@ carries a targeted `// eslint-disable-next-line default-case` immediately above 
 
 Structurally identical to §12's Polygon mechanism — same single top-vertex handle
 (`getStarPoints`'s vertex index 0 is always the top outer tip, `-90°`), same one shared
-`cornerRadius` (`TStarNode.cornerRadius?: number`) applied to every vertex, same parallel
-`armStarCornerRadiusDrag`/`continueStarCornerRadiusDrag`/`disarmStarCornerRadiusDrag` trio and
-`TStarCornerRadiusDragState = { bounds, nodeId, points, ratio, rotation }` drag-state shape, same
+`cornerRadius` (`TStarNode.cornerRadius?: number`) applied to every vertex, same
+`armStarCornerRadiusDrag`/`continueStarCornerRadiusDrag`/`disarmStarCornerRadiusDrag` trio built the
+same way on top of the shared `armSimpleDrag`/`continueShapeCornerRadiusDrag`/`disarmSimpleDrag`
+helpers (§12), just supplying `getStarPoints`/`getMaxStarCornerRadius` instead of Polygon's
+equivalents, and `TStarCornerRadiusDragState = { bounds, nodeId, points, ratio, rotation }`
+drag-state shape, same
 `hasStarCornerRadius.ts` guard, same `getStarCornerRadiusHandleAtPoint.ts` (`Canvas/utils/`) +
 `getStarCornerRadiusHandleHit.ts` (`useHoverHighlight/utils/`) split. The one substantive difference
 from Polygon is geometric, not mechanical: a star's vertices alternate outer (convex, sharp tips) and
@@ -847,6 +899,16 @@ zero-state position to snap away from. Consequently `polygonVertexCountDragRef`/
 `starVertexCountDragRef` also never needed lifting out to `Canvas.tsx` (§1) — nothing downstream
 needs an `isDragging` flag, so they stay ordinary hook-private refs.
 
+Same de-duplication as §12's corner-radius trio: `armPolygonVertexCountDrag.ts`/`armStarVertexCountDrag.ts`
+are one-line calls into a generic `armVertexCountDrag.ts` (`handlePointerDown/`, takes
+`{ bounds, nodeId, rotation, flipX, flipY }` positionally rather than a full state object, since
+unlike `armSimpleDrag` there's no per-shape extra field to carry); `disarmPolygonVertexCountDrag.ts`/
+`disarmStarVertexCountDrag.ts` go through the same `disarmSimpleDrag.ts` corner-radius already uses.
+`continuePolygonVertexCountDrag.ts`/`continueStarVertexCountDrag.ts` supply a generic
+`continueVertexCountDrag.ts` (`handlePointerMove/`) with `POLYGON_MIN_SIDES`/`POLYGON_MAX_SIDES` (or
+Star's `STAR_MIN_POINTS`/`STAR_MAX_POINTS`) and a `'sides' | 'points'` field discriminator telling it
+which key to write on `updateNode`'s `changes`.
+
 **Visibility/hit-testing**: `shouldShowVertexCountHandle.ts` reuses corner-radius's screen-size floor
 (`MIN_ELEMENT_SCREEN_SIZE_FOR_RADIUS_HANDLES_PX`) but drops the `cornerRadius`/`isDragging`-driven gap
 check entirely (§14) — there's no analogous "radius value" here to collide on. `getPolygonVertexCountHandleAtPoint.ts`/
@@ -897,13 +959,14 @@ files and *not* vestigial-looking evidence of a missed cleanup.
 **Gotcha — this is the one place resize does *not* win a tie**: for a regular 4-sided Polygon,
 `getVertexAngle(4) = 0°`, which puts the vertex-count handle at the bounding box's exact east
 edge-midpoint — precisely where the resize tool's own "e" edge handle sits. Every other overlapping
-handle in this file (§3, §11) resolves in resize's favor via `resizeHandleHit ? null : ...`, but
+handle resolves in resize's favor by sitting later in `ARM_RESOLVERS`/`HOVER_RESOLVERS` (§3, §9), but
 doing that here would make the vertex-count handle permanently unclickable at exactly `sides === 4`.
-Fixed by computing `polygonVertexCountHandleHit`/`starVertexCountHandleHit` **unconditionally**
-(no resize gate) and checking them *before* `resizeHandleHit` in both `handlePointerDown.ts`'s
-priority switch and `useHoverHighlight.ts`'s cursor switch (§3, §9) — the vertex-count handle now
-wins any coincidental overlap with resize, the one deliberate exception to "resize wins ties" in this
-whole subsystem. `useHoverHighlight.ts` no longer needs the small `getPolygonVertexCountHandleHit.ts`/
+Fixed by computing `polygonVertexCountHandleHit`/`starVertexCountHandleHit` **unconditionally** (no
+resize gate) and placing `armPolygonVertexCountOnPointerDown`/`armStarVertexCountOnPointerDown` and
+`resolvePolygonVertexHover`/`resolveStarVertexHover` *before* the resize resolver in both
+`ARM_RESOLVERS` and `HOVER_RESOLVERS` (§3, §9) — the vertex-count handle now wins any coincidental
+overlap with resize, the one deliberate exception to "resize wins ties" in this whole subsystem.
+`useHoverHighlight.ts` no longer needs the small `getPolygonVertexCountHandleHit.ts`/
 `getStarVertexCountHandleHit.ts` wrapper files that existed briefly during development purely to keep
 a `resizeHandleHit ? null : ...` gate out of the hook body (§12's convention) — once that gate was
 removed, the wrappers added nothing, so the hook calls `getPolygonVertexCountHandleAtPoint`/
@@ -972,7 +1035,8 @@ called any of them, and `useSelectionTool.ts`/`Canvas.tsx` never even created th
 handle silently did nothing (fell through to whichever priority-switch case came next — usually a
 whole-node move) and hovering it showed no cursor at all, with no error anywhere to point at the gap.
 Worth remembering as a class of bug: a fully-implemented arm/continue/disarm trio is not evidence
-it's reachable — check the priority switches and the hook/`Canvas.tsx` ref plumbing independently.
+it's reachable — check `ARM_RESOLVERS`/`HOVER_RESOLVERS` (§3, §9) and the hook/`Canvas.tsx` ref
+plumbing independently.
 
 **Start's rest position — perimeter, not center, distinguished by a dot**: the first fix attempt
 moved Start to the *midpoint* of its own radius so it wouldn't visually collide with Sweep when the

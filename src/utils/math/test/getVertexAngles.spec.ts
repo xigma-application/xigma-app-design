@@ -31,6 +31,19 @@ describe('getVertexAngles', () => {
     });
   });
 
+  it('should clamp a floating-point-driven cosine overshoot instead of returning NaN', () => {
+    // mock — two long, nearly-exactly-opposite vectors whose dot/magnitudes ratio computes to
+    // -1.0000000000000002 in floating point (verified empirically), just past acos's [-1, 1] domain
+    const previous = { x: 9999988.662995802, y: 15707.95837910447 };
+    const vertex = { x: 0, y: 0 };
+    const next = { x: -9999988.6629968, y: -15707.95837910604 };
+
+    // result — a straight (collinear, opposite-facing) vertex should read as pi, not NaN
+    const angles = getVertexAngles([previous, vertex, next]);
+
+    expect(angles[1]).toBeCloseTo(Math.PI, 10);
+  });
+
   it('should return the unsigned local opening angle at a reflex (concave) vertex too, not error or overshoot 180deg', () => {
     // mock — a 5-vertex "notched" shape where (5, 3) is pulled inward, making it reflex relative to
     const vertices = [

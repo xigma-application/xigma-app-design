@@ -34,6 +34,9 @@ export const useCanvasRenderLoop = (refs: TCanvasRefs): void => {
         gl.deleteBuffer(buffer);
         gl.deleteBuffer(imageBuffer);
         gl.deleteBuffer(msdfBuffer);
+        gl.deleteProgram(program);
+        gl.deleteProgram(imageProgram);
+        gl.deleteProgram(msdfProgram);
       };
     }
   }, [refs]);

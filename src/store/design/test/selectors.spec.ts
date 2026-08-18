@@ -93,6 +93,16 @@ describe('design selectors', () => {
     expect(selectOrderedNodes(state)).toEqual([node]);
   });
 
+  it('should return the same array reference for selectOrderedNodes when called again on the same state', () => {
+    // result
+    expect(selectOrderedNodes(state)).toBe(selectOrderedNodes(state));
+  });
+
+  it('should return the same array reference for selectSelectedNodes when called again on the same state', () => {
+    // result
+    expect(selectSelectedNodes(state)).toBe(selectSelectedNodes(state));
+  });
+
   it('should select the viewport', () => {
     // result
     expect(selectViewport(state)).toEqual({ x: 5, y: 10, zoom: 2 });

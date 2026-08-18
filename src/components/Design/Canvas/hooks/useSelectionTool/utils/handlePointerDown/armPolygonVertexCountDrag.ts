@@ -4,6 +4,9 @@ import { RefObject } from 'react';
 import { TDraftRect } from 'types/canvas';
 import { TPolygonVertexCountDragState } from 'types/design/selectionTool/types';
 
+// utils
+import { armVertexCountDrag } from './armVertexCountDrag';
+
 export const armPolygonVertexCountDrag = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
@@ -13,7 +16,4 @@ export const armPolygonVertexCountDrag = (
   rotation: number,
   flipX: boolean,
   flipY: boolean,
-): void => {
-  polygonVertexCountDragRef.current = { bounds, flipX, flipY, nodeId, rotation };
-  canvas.setPointerCapture(event.pointerId);
-};
+): void => armVertexCountDrag(canvas, event, polygonVertexCountDragRef, bounds, nodeId, rotation, flipX, flipY);

@@ -10,7 +10,7 @@ import { updateTextEditSelection } from 'store/design/slice';
 
 // utils
 import { getCurvedHitAtEvent } from '../getCurvedHitAtEvent';
-import { getEditingOverlay } from '../getEditingOverlay';
+import { getEditingOverlay } from '../../../../utils/getEditingOverlay';
 import { getPathTextHandlePoint } from '../../../../utils/getPathTextHandlePoint';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { screenToWorld } from '../../../../utils/screenToWorld';

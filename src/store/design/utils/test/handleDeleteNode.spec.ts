@@ -135,6 +135,21 @@ describe('handleDeleteNode', () => {
     expect(state.rootOrder).toEqual([]);
   });
 
+  it('should cascade-delete the bound text node when deleting a path node directly', () => {
+    // mock
+    const pathNode = buildPathNode();
+    const textNode = buildPathText();
+    const state = buildState({ [pathNode.id]: pathNode, [textNode.id]: textNode });
+
+    // before
+    handleDeleteNode(state, pathNode.id);
+
+    // result
+    expect(state.nodes[pathNode.id]).toBeUndefined();
+    expect(state.nodes[textNode.id]).toBeUndefined();
+    expect(state.rootOrder).toEqual([]);
+  });
+
   it('should not touch any other node when deleting a plain text node with no path binding', () => {
     // mock
     const plainText = buildPathText({ id: 'text-2', pathId: null });

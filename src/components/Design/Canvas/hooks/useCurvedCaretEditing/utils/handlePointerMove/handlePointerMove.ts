@@ -7,7 +7,7 @@ import { updateTextEditSelection } from 'store/design/slice';
 // utils
 import { continueEditingPathOffsetDrag } from './continueEditingPathOffsetDrag';
 import { getCurvedHitAtEvent } from '../getCurvedHitAtEvent';
-import { getEditingOverlay } from '../getEditingOverlay';
+import { getEditingOverlay } from '../../../../utils/getEditingOverlay';
 import { setEditableSelectionRange } from '../../../../components/TextEditOverlay/utils/setEditableSelectionRange';
 
 export const handlePointerMove = (

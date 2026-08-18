@@ -5,7 +5,7 @@ import { AppDispatch } from 'store';
 import { updateTextEditSelection } from 'store/design/slice';
 
 // utils
-import { getEditingOverlay } from '../getEditingOverlay';
+import { getEditingOverlay } from '../../../../utils/getEditingOverlay';
 import { getStraightHitAtEvent } from '../getStraightHitAtEvent';
 import { setEditableSelectionRange } from '../../../../components/TextEditOverlay/utils/setEditableSelectionRange';
 
