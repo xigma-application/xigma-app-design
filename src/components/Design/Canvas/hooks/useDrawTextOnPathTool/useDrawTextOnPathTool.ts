@@ -50,6 +50,7 @@ export const useDrawTextOnPathTool = (refs: TCanvasRefs): void => {
         screenToWorld(getPointerPosition(canvas, event), viewport),
         DEFAULT_SHAPE_SIZE,
         true,
+        viewport.zoom,
       );
 
       dispatch(addNode({ ...rect, name: PATH_NAME, parentId: null, pathType: PathType.ellipse, rotation: 0, type: NodeType.path }));

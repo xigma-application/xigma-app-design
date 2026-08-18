@@ -461,6 +461,21 @@ comment / shapes, potem osobno: draw / scale / actions / dev mode).
       (`create-frame.spec.ts`, `create-section.spec.ts`, `create-rectangle.spec.ts`,
       `create-ellipse.spec.ts`, `create-polygon.spec.ts`, `create-star.spec.ts`,
       `create-text.spec.ts`, `text-on-path.spec.ts`, `create-slice.spec.ts`).
+- [x] **Poprawka: próg "czy to za mały ruch" w `toDraftRectWithDefault` liczony teraz w screen space,
+      nie world space** — zgłoszony bug: przy maksymalnym zoomie (256x) narysowanie świadomie małego
+      kształtu (np. 1x1 world unit, co wymaga realnego przeciągnięcia myszą o ~256px na ekranie) i tak
+      wpadało w gałąź "za mały ruch, podstaw domyślny 100x100", bo stary warunek porównywał surową
+      deltę world-space z `MIN_SHAPE_SIZE` (2) bez uwzględnienia zoomu — im większy zoom, tym mniejsza
+      delta world-space przy tym samym, realnym ruchu ręki. Nowy, osobny `MIN_DRAG_DISTANCE_PX = 2`
+      (`Canvas/constants.ts`, świadomie osobna stała od `MIN_SHAPE_SIZE` — ta druga zostaje jako
+      world-space minimum node'a używane gdzie indziej, np. `computeResizedRect.ts`) mnoży deltę przez
+      `zoom` przed porównaniem, więc "czy to była tylko kropka klikiem, czy świadomy drag" jest teraz
+      pytaniem o dystans na ekranie (motoryka ręki), nie o wynikowy rozmiar w world space — dokładnie
+      odwrotny błąd do tego, co ten sam viewport-independent-threshold problem rozwiązuje gdzie indziej
+      w kodzie (np. hit-testy uchwytów skalujące tolerancję przez `viewport.zoom`). Wszystkie 6 miejsc
+      wywołujących `toDraftRectWithDefault` (Frame/Section/Slice/Rectangle/Ellipse/Polygon/Star/Text/
+      Text on Path) przekazują teraz `viewport.zoom`, który i tak już mieli w scope obok
+      `screenToWorld`.
 
 - [x] **Arrow** — nie osobny typ node'a, tylko `TLineNode` z nowymi, opcjonalnymi polami
       `startPoint`/`endPoint` (`'default' | 'arrow'`, domyślnie `'default'` dla zwykłej Line).

@@ -59,6 +59,7 @@ export const useDrawShapeTool = (refs: TCanvasRefs, { fill, name, tool, type }: 
         screenToWorld(getPointerPosition(canvas, event), viewport),
         DEFAULT_SHAPE_SIZE,
         true,
+        viewport.zoom,
       );
 
       dispatch(addNode({ ...rect, fill, name, parentId: null, rotation: 0, type }));

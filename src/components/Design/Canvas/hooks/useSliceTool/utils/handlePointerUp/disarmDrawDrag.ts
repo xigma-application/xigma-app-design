@@ -26,7 +26,7 @@ export const disarmDrawDrag = (
   if (drawDragRef.current) {
     const viewport = selectViewport(store.getState());
     const current = screenToWorld(getPointerPosition(canvas, event), viewport);
-    const rect = toDraftRectWithDefault(drawDragRef.current.start, current, DEFAULT_SHAPE_SIZE, true);
+    const rect = toDraftRectWithDefault(drawDragRef.current.start, current, DEFAULT_SHAPE_SIZE, true, viewport.zoom);
 
     sliceRef.current = { ...rect, rotation: 0 };
     canvas.style.cursor = DEFAULT_CURSOR;

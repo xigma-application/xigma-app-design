@@ -59,6 +59,7 @@ export const useDrawPolygonTool = (refs: TCanvasRefs, { fill, name, sides, tool 
         screenToWorld(getPointerPosition(canvas, event), viewport),
         DEFAULT_SHAPE_SIZE,
         true,
+        viewport.zoom,
       );
 
       dispatch(addNode({ ...rect, fill, flipX: false, flipY: false, name, parentId: null, rotation: 0, sides, type: NodeType.polygon }));

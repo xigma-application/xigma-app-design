@@ -60,6 +60,7 @@ export const useDrawStarTool = (refs: TCanvasRefs, { fill, name, points, ratio, 
         screenToWorld(getPointerPosition(canvas, event), viewport),
         DEFAULT_SHAPE_SIZE,
         true,
+        viewport.zoom,
       );
 
       dispatch(

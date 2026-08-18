@@ -1,5 +1,5 @@
 // others
-import { MIN_SHAPE_SIZE } from '../constants';
+import { MIN_DRAG_DISTANCE_PX } from '../constants';
 
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
@@ -8,8 +8,15 @@ import { TDraftRect, TPoint } from 'types/canvas';
 import { roundRect } from 'utils/math/roundRect';
 import { toDraftRect } from './toDraftRect';
 
-export const toDraftRectWithDefault = (start: TPoint, current: TPoint, defaultSize: number, centered: boolean): TDraftRect => {
-  const isTooSmall = Math.abs(current.x - start.x) < MIN_SHAPE_SIZE || Math.abs(current.y - start.y) < MIN_SHAPE_SIZE;
+export const toDraftRectWithDefault = (
+  start: TPoint,
+  current: TPoint,
+  defaultSize: number,
+  centered: boolean,
+  zoom: number,
+): TDraftRect => {
+  const isTooSmall =
+    Math.abs(current.x - start.x) * zoom < MIN_DRAG_DISTANCE_PX || Math.abs(current.y - start.y) * zoom < MIN_DRAG_DISTANCE_PX;
 
   if (isTooSmall) {
     const offset = centered ? defaultSize / 2 : 0;

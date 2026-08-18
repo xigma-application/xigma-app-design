@@ -50,6 +50,7 @@ export const useDrawTextTool = (refs: TCanvasRefs): void => {
         screenToWorld(getPointerPosition(canvas, event), viewport),
         DEFAULT_SHAPE_SIZE,
         false,
+        viewport.zoom,
       );
 
       dispatch(startTextEdit({ box: { ...rect, flipX: false, flipY: false, rotation: 0 } }));
