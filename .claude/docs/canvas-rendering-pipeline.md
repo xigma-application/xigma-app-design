@@ -26,10 +26,12 @@ any of the machinery below — see `design-store-architecture.md`'s "Comment sta
 - The context itself is created in `Canvas/hooks/useCanvasRenderLoop/useCanvasRenderLoop.ts`:
   `canvas.getContext(WEBGL_CONTEXT_ID, WEBGL_CONTEXT_ATTRIBUTES)`, both constants in
   `Canvas/constants.ts`: `WEBGL_CONTEXT_ID = 'webgl2'`,
-  `WEBGL_CONTEXT_ATTRIBUTES = { premultipliedAlpha: false }`. `premultipliedAlpha: false` matters
-  because every fragment shader outputs straight (non-premultiplied) alpha and blending is set up to
-  match: `gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)`, set once, not
-  per draw call.
+  `WEBGL_CONTEXT_ATTRIBUTES = { premultipliedAlpha: false, stencil: true }`. `premultipliedAlpha: false`
+  matters because every fragment shader outputs straight (non-premultiplied) alpha and blending is set
+  up to match: `gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)`, set once, not
+  per draw call. `stencil: true` is the one context-setup change [[vector-network]] needed — without it
+  the backing store has no stencil buffer at all, and `drawVectorFill.ts`'s even-odd fill technique
+  (§ that doc, "Rendering") silently no-ops.
 - Three GL programs + their vertex buffers are created **once** in this hook, not per frame (see §3
   for what they are), bundled into a `TImageRenderContext` (`hooks/useCanvasRenderLoop/types.ts`)
   that also carries the texture cache, the MSDF text-geometry cache, and an ellipse-arc-length cache
@@ -482,3 +484,6 @@ where it sits in the paint order.
 [[design-tool-architecture]] — one level up: how a draw tool is assembled using the primitives
 described here. [[design-store-architecture]] — what `drawScene.ts` reads out of `store.getState()`
 every frame.
+[[vector-network]] — the one feature so far needing a context-setup change (`stencil: true` on
+`WEBGL_CONTEXT_ATTRIBUTES`, §1) and a genuinely new WebGL technique (stencil-buffer even-odd fill,
+`drawVectorFill.ts`) not covered by anything else described here.

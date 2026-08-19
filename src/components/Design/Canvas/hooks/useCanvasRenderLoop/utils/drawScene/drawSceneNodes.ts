@@ -18,6 +18,7 @@ import { drawPathOutline } from './drawPathOutline';
 import { drawPolygon } from 'utils/canvas/drawPolygon/drawPolygon';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { drawStar } from 'utils/canvas/drawStar/drawStar';
+import { drawVectorNode } from 'utils/canvas/drawVectorNode/drawVectorNode';
 import { getMsdfAtlasTexture } from 'utils/canvas/text/getMsdfAtlasTexture';
 import { getOrLoadTexture } from 'utils/canvas/getOrLoadTexture';
 
@@ -79,6 +80,9 @@ export const drawSceneNodes = (
         break;
       case NodeType.path:
         drawPathOutline(gl, program, buffer, node, pathOutlineStyles.get(node.id), canvasWidth, canvasHeight, viewport);
+        break;
+      case NodeType.vector:
+        drawVectorNode(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
         break;
       case NodeType.text:
         drawMsdfText(

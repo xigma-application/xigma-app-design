@@ -1,4 +1,5 @@
 // store
+import { endHistoryGesture } from 'store/history/actions';
 import { AppDispatch } from 'store';
 
 // types
@@ -21,6 +22,8 @@ import { disarmRotateDrag } from './disarmRotateDrag';
 import { disarmStarCornerRadiusDrag } from './disarmStarCornerRadiusDrag';
 import { disarmStarRatioDrag } from './disarmStarRatioDrag';
 import { disarmStarVertexCountDrag } from './disarmStarVertexCountDrag';
+import { disarmVectorHandleDrag } from './disarmVectorHandleDrag';
+import { disarmVectorVertexDrag } from './disarmVectorVertexDrag';
 
 export const handlePointerUp = (
   canvas: HTMLCanvasElement,
@@ -45,4 +48,7 @@ export const handlePointerUp = (
   disarmEllipseArcRotateDrag(canvas, event, canvasRefs.ellipseArcRotateDragRef);
   disarmEllipseArcRatioDrag(canvas, event, canvasRefs.ellipseArcRatioDragRef);
   disarmMarqueeDrag(canvas, event, selectionRefs.marqueeStartRef, canvasRefs.marqueeRef);
+  disarmVectorVertexDrag(canvas, event, selectionRefs.vectorVertexDragRef);
+  disarmVectorHandleDrag(canvas, event, selectionRefs.vectorHandleDragRef);
+  dispatch(endHistoryGesture());
 };

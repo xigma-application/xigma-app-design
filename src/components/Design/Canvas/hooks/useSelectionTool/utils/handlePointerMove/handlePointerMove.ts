@@ -17,10 +17,12 @@ import { continuePathOffsetDrag } from './continuePathOffsetDrag';
 import { continuePolygonCornerRadiusDrag } from './continuePolygonCornerRadiusDrag';
 import { continuePolygonVertexCountDrag } from './continuePolygonVertexCountDrag';
 import { continueResizeDrag } from './continueResizeDrag/continueResizeDrag';
-import { continueRotateDrag } from './continueRotateDrag';
+import { continueRotateDrag } from './continueRotateDrag/continueRotateDrag';
 import { continueStarCornerRadiusDrag } from './continueStarCornerRadiusDrag';
 import { continueStarRatioDrag } from './continueStarRatioDrag';
 import { continueStarVertexCountDrag } from './continueStarVertexCountDrag';
+import { continueVectorHandleDrag } from './continueVectorHandleDrag';
+import { continueVectorVertexDrag } from './continueVectorVertexDrag';
 
 export const handlePointerMove = (
   canvas: HTMLCanvasElement,
@@ -44,4 +46,6 @@ export const handlePointerMove = (
   continueEllipseArcRotateDrag(canvas, event, dispatch, canvasRefs.ellipseArcRotateDragRef);
   continueEllipseArcRatioDrag(canvas, event, dispatch, canvasRefs.ellipseArcRatioDragRef);
   continueMarqueeDrag(canvas, event, dispatch, selectionRefs.marqueeStartRef, canvasRefs.marqueeRef);
+  continueVectorVertexDrag(canvas, event, dispatch, selectionRefs.vectorVertexDragRef);
+  continueVectorHandleDrag(canvas, event, dispatch, selectionRefs.vectorHandleDragRef);
 };

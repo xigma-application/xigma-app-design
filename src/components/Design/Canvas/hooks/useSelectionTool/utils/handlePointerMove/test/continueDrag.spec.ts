@@ -41,6 +41,26 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => 
   return rootOrder[rootOrder.length - 1];
 };
 
+const addVectorNode = (): string => {
+  store.dispatch(
+    addNode({
+      fillColor: null,
+      name: 'Vector',
+      parentId: null,
+      segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 describe('continueDrag', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
@@ -96,5 +116,29 @@ describe('continueDrag', () => {
     const node = store.getState().design.nodes[idA];
 
     expect(node).toMatchObject({ x1: 205, x2: 255, y1: 205, y2: 205 });
+  });
+
+  it('should translate a vector node vertices by the pointer delta', () => {
+    // mock
+    const idA = addVectorNode();
+    const canvas = createCanvas();
+    const dragStateRef = createDragStateRef({
+      hasMoved: false,
+      nodeOrigins: {
+        [idA]: { segments: {}, vertices: { v1: { x: 0, y: 0 }, v2: { x: 100, y: 0 } } },
+      },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+    });
+
+    // before
+    continueDrag(canvas, pointerEvent(10, 5), store.dispatch, dragStateRef);
+
+    // result
+    const node = store.getState().design.nodes[idA];
+
+    expect(node).toMatchObject({
+      vertices: { v1: { id: 'v1', x: 10, y: 5 }, v2: { id: 'v2', x: 110, y: 5 } },
+    });
   });
 });

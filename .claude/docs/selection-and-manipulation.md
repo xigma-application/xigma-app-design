@@ -1221,6 +1221,26 @@ identical in shape to the existing `&--radius`/`&--vertices` blocks.
 until this handle became the first thing to actually read them, the identical "canvas drag now, panel
 later" pattern §18 notes for `STAR_MIN_POINTS`/`STAR_MAX_POINTS`.
 
+## 21. Vector Edit Mode — new resolvers, not a parallel tool
+
+`NodeType.vector` (the Pen tool's Vector Network, full detail in `vector-network.md`) is edited by
+**extending** this subsystem's own `ARM_RESOLVERS`/`handlePointerMove.ts`/`handlePointerUp.ts`, the
+same arm/continue/disarm shape every mechanism above uses, gated only on `vectorEditingNodeId` (Redux)
+rather than on `activeTool`: `armVectorHandleOnPointerDown` (drag a Bezier tangent dot, mirroring the
+paired segment's tangent via `getMirroredVectorSegments.ts` when the vertex's `TVertexHandleMode` calls
+for it), `armVectorVertexOnPointerDown` (select + drag a vertex — single-vertex only, no multi-select),
+`armVectorEdgeInsertOnPointerDown` (click a segment's stroke away from either endpoint to split it).
+All three sit at the very top of `ARM_RESOLVERS`, highest priority, mirroring how line-endpoint-drag
+already wins over the generic whole-node hit.
+
+Unlike every corner-radius/vertex-count/ellipse-arc handle above, the vertex-drag path needed **no**
+ref-lifting to `TCanvasRefs` for the render loop to see it live — `continueVectorVertexDrag.ts`
+dispatches a real `updateNode` every `pointermove`, the same rule ordinary node-move already follows
+(§3's "committed mutations go through Redux every tick" line), so `store.getState()` in `drawScene.ts`
+already reflects the drag with no ref needed. The one genuinely new ref this feature added,
+`selectedVectorVertexIdsRef`, is UI-only vertex-selection state with no Redux equivalent — deliberately
+kept off `TDesignState` the same way this subsystem already keeps drag-in-progress state off it.
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.
@@ -1232,3 +1252,6 @@ refs rather than hook-private, per §13/§19).
 [[canvas-rendering-pipeline]] — how selection outlines/handles/cursors actually get drawn once this
 subsystem decides what's selected/hovered; §2's `marqueeRef`/`hoverRef`/`sliceRef` ref-drilling
 pattern is exactly what §13 extends to the three corner-radius drag refs.
+[[vector-network]] — §21 above in full: the Pen tool, the Vector Network data model, and the rest of
+Vector Edit Mode (double-click entry, Delete/Backspace, the Pen-tool-specific pointer handlers) that
+lives outside this subsystem entirely.

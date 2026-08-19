@@ -38,8 +38,10 @@ describe('handleAddNode', () => {
       lastShapeTool: ToolName.rectangle,
       lastTextTool: ToolName.text,
       nodes: {},
+      penActiveVertexId: null,
       rootOrder: [],
       selectedIds: [],
+      vectorEditingNodeId: null,
       viewport: { x: 0, y: 0, zoom: 1 },
     };
 
@@ -69,8 +71,10 @@ describe('handleAddNode', () => {
       lastShapeTool: ToolName.rectangle,
       lastTextTool: ToolName.text,
       nodes: { existing: { ...node, id: 'existing' } },
+      penActiveVertexId: null,
       rootOrder: ['existing'],
       selectedIds: [],
+      vectorEditingNodeId: null,
       viewport: { x: 0, y: 0, zoom: 1 },
     };
 

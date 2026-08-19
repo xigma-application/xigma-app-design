@@ -1,25 +1,31 @@
-import {
-  armCornerRadiusOnPointerDown,
-  armEllipseArcOnPointerDown,
-  armEllipseArcRatioOnPointerDown,
-  armEllipseArcRotateOnPointerDown,
-  armGroupBoundsOnPointerDown,
-  armHitOnPointerDown,
-  armLineEndpointOnPointerDown,
-  armMarqueeOnPointerDown,
-  armPathOffsetOnPointerDown,
-  armPolygonCornerRadiusOnPointerDown,
-  armPolygonVertexCountOnPointerDown,
-  armResizeOnPointerDown,
-  armRotateOnPointerDown,
-  armSelectedTextBoundsOnPointerDown,
-  armStarCornerRadiusOnPointerDown,
-  armStarRatioOnPointerDown,
-  armStarVertexCountOnPointerDown,
-  toggleSelectionOnPointerDown,
-} from './armResolvers';
+import { armCornerRadiusOnPointerDown } from './armResolvers/armCornerRadiusOnPointerDown';
+import { armEllipseArcOnPointerDown } from './armResolvers/armEllipseArcOnPointerDown';
+import { armEllipseArcRatioOnPointerDown } from './armResolvers/armEllipseArcRatioOnPointerDown';
+import { armEllipseArcRotateOnPointerDown } from './armResolvers/armEllipseArcRotateOnPointerDown';
+import { armGroupBoundsOnPointerDown } from './armResolvers/armGroupBoundsOnPointerDown';
+import { armHitOnPointerDown } from './armResolvers/armHitOnPointerDown';
+import { armLineEndpointOnPointerDown } from './armResolvers/armLineEndpointOnPointerDown';
+import { armMarqueeOnPointerDown } from './armResolvers/armMarqueeOnPointerDown';
+import { armPathOffsetOnPointerDown } from './armResolvers/armPathOffsetOnPointerDown';
+import { armPolygonCornerRadiusOnPointerDown } from './armResolvers/armPolygonCornerRadiusOnPointerDown';
+import { armPolygonVertexCountOnPointerDown } from './armResolvers/armPolygonVertexCountOnPointerDown';
+import { armResizeOnPointerDown } from './armResolvers/armResizeOnPointerDown';
+import { armRotateOnPointerDown } from './armResolvers/armRotateOnPointerDown';
+import { armSelectedTextBoundsOnPointerDown } from './armResolvers/armSelectedTextBoundsOnPointerDown';
+import { armStarCornerRadiusOnPointerDown } from './armResolvers/armStarCornerRadiusOnPointerDown';
+import { armStarRatioOnPointerDown } from './armResolvers/armStarRatioOnPointerDown';
+import { armStarVertexCountOnPointerDown } from './armResolvers/armStarVertexCountOnPointerDown';
+import { armVectorEdgeInsertOnPointerDown } from './armResolvers/armVectorEdgeInsertOnPointerDown';
+import { armVectorEditMissOnPointerDown } from './armResolvers/armVectorEditMissOnPointerDown';
+import { armVectorHandleOnPointerDown } from './armResolvers/armVectorHandleOnPointerDown';
+import { armVectorVertexOnPointerDown } from './armResolvers/armVectorVertexOnPointerDown';
+import { toggleSelectionOnPointerDown } from './armResolvers/toggleSelectionOnPointerDown';
 
 export const ARM_RESOLVERS = [
+  armVectorHandleOnPointerDown,
+  armVectorVertexOnPointerDown,
+  armVectorEdgeInsertOnPointerDown,
+  armVectorEditMissOnPointerDown,
   armPathOffsetOnPointerDown,
   armPolygonVertexCountOnPointerDown,
   armStarVertexCountOnPointerDown,

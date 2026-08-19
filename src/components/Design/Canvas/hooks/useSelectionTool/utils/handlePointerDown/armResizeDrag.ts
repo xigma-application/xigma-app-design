@@ -6,6 +6,9 @@ import { TDraftRect, TResizeHandle } from 'types/canvas';
 import { TEllipseNode, TMediaNode, TPolygonNode, TSceneNode, TStarNode, TTextNode } from 'types/design/types';
 import { TResizeDragState, TResizeNodeOrigin } from 'types/design/selectionTool/types';
 
+// utils
+import { getVectorNodeOrigin } from '../../../../utils/getVectorNodeOrigin';
+
 const isFlippableNode = (node: TSceneNode): node is TEllipseNode | TMediaNode | TPolygonNode | TStarNode | TTextNode =>
   node.type === NodeType.ellipse ||
   node.type === NodeType.media ||
@@ -24,17 +27,23 @@ export const armResizeDrag = (
   const nodeOrigins: Record<string, TResizeNodeOrigin> = {};
 
   selectedNodes.forEach((node) => {
-    nodeOrigins[node.id] =
-      node.type === NodeType.line
-        ? { x1: node.x1, x2: node.x2, y1: node.y1, y2: node.y2 }
-        : {
-            flip: isFlippableNode(node) ? { x: node.flipX ?? false, y: node.flipY ?? false } : null,
-            height: node.height,
-            rotation: node.rotation,
-            width: node.width,
-            x: node.x,
-            y: node.y,
-          };
+    switch (node.type) {
+      case NodeType.line:
+        nodeOrigins[node.id] = { x1: node.x1, x2: node.x2, y1: node.y1, y2: node.y2 };
+        break;
+      case NodeType.vector:
+        nodeOrigins[node.id] = getVectorNodeOrigin(node);
+        break;
+      default:
+        nodeOrigins[node.id] = {
+          flip: isFlippableNode(node) ? { x: node.flipX ?? false, y: node.flipY ?? false } : null,
+          height: node.height,
+          rotation: node.rotation,
+          width: node.width,
+          x: node.x,
+          y: node.y,
+        };
+    }
   });
 
   resizeDragRef.current = { aspectRatio: bounds.width / bounds.height, bounds, handle, nodeOrigins };

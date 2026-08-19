@@ -27,5 +27,12 @@ export const handleSetSelection = (state: TDesignState, nextSelectedIds: string[
 
   deselectedIds.filter((id) => isFullyCutAwayEllipse(state, id)).forEach((id) => handleDeleteNode(state, id));
 
+  const staysSoleSelection = nextSelectedIds.length === 1 && nextSelectedIds[0] === state.vectorEditingNodeId;
+
+  if (state.vectorEditingNodeId && !staysSoleSelection) {
+    state.vectorEditingNodeId = null;
+    state.penActiveVertexId = null;
+  }
+
   state.selectedIds = nextSelectedIds;
 };

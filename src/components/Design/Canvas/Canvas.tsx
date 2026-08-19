@@ -17,6 +17,7 @@ import { useCurvedCaretEditing } from './hooks/useCurvedCaretEditing/useCurvedCa
 import { useDrawingCursor } from './hooks/useDrawingCursor/useDrawingCursor';
 import { useDrawLineTool } from './hooks/useDrawLineTool/useDrawLineTool';
 import { useDrawMediaTool } from './hooks/useDrawMediaTool/useDrawMediaTool';
+import { useDrawPenTool } from './hooks/useDrawPenTool/useDrawPenTool';
 import { useDrawPolygonTool } from './hooks/useDrawPolygonTool/useDrawPolygonTool';
 import { useDrawShapeTool } from './hooks/useDrawShapeTool/useDrawShapeTool';
 import { useDrawStarTool } from './hooks/useDrawStarTool/useDrawStarTool';
@@ -24,10 +25,12 @@ import { useDrawTextOnPathTool } from './hooks/useDrawTextOnPathTool/useDrawText
 import { useDrawTextTool } from './hooks/useDrawTextTool/useDrawTextTool';
 import { useHandTool } from './hooks/useHandTool/useHandTool';
 import { useHoverHighlight } from './hooks/useHoverHighlight/useHoverHighlight';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts/useKeyboardShortcuts';
 import { useSelectionTool } from './hooks/useSelectionTool/useSelectionTool';
 import { useSliceTool } from './hooks/useSliceTool/useSliceTool';
 import { useStraightCaretEditing } from './hooks/useStraightCaretEditing/useStraightCaretEditing';
 import { useTextEditOnDoubleClick } from './hooks/useTextEditOnDoubleClick/useTextEditOnDoubleClick';
+import { useVectorEditOnDoubleClick } from './hooks/useVectorEditOnDoubleClick/useVectorEditOnDoubleClick';
 
 // others
 import {
@@ -62,16 +65,19 @@ const Canvas: FC = () => {
   useDrawLineTool(refs, LINE_TOOL_SETTINGS);
   useDrawLineTool(refs, ARROW_TOOL_SETTINGS);
   useDrawMediaTool(refs, MEDIA_TOOL_SETTINGS);
+  useDrawPenTool(refs);
   useDrawTextTool(refs);
   useDrawTextOnPathTool(refs);
   useCommentTool(refs);
   useSelectionTool(refs);
   useSliceTool(refs);
   useTextEditOnDoubleClick(refs);
+  useVectorEditOnDoubleClick(refs);
   useHoverHighlight(refs);
   useCurvedCaretEditing(refs);
   useStraightCaretEditing(refs);
   useDrawingCursor(refs);
+  useKeyboardShortcuts(refs);
   useCanvasRenderLoop(refs);
 
   return (

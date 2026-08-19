@@ -1,7 +1,7 @@
 // types
 import { NodeType, PathType } from 'types/design/enums';
 import { TImageRenderContext } from '../../../types';
-import { TBoxSceneNode, TMediaNode, TPathNode, TPolygonNode, TSceneNode, TStarNode, TTextNode } from 'types/design/types';
+import { TBoxSceneNode, TMediaNode, TPathNode, TPolygonNode, TSceneNode, TStarNode, TTextNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { drawSceneNodes } from '../drawSceneNodes';
@@ -347,5 +347,31 @@ describe('drawSceneNodes', () => {
 
     // result — 1 segment + (2 wing quads + 3 round-cap fills) for the single arrow endpoint
     expect(gl.drawArrays).toHaveBeenCalledTimes(6);
+  });
+
+  it('should draw a stroked vector node from its segments', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const vector: TVectorNode = {
+      fillColor: null,
+      id: 'a',
+      name: 'Vector',
+      parentId: null,
+      segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      strokeColor: '#000000',
+      strokeWidth: 2,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 10 } },
+    };
+
+    // before
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [vector], 100, 100, IDENTITY_VIEWPORT, new Map());
+
+    // result
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, expect.any(Number));
   });
 });

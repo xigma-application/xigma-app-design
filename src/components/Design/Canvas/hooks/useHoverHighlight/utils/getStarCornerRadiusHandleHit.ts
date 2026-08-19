@@ -3,7 +3,7 @@ import { TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
-import { getResizeHandleAtPoint } from '../../../utils/getResizeHandleAtPoint';
+import { getResizeHandleAtPoint } from '../../../utils/getResizeHandleAtPoint/getResizeHandleAtPoint';
 import { getStarCornerRadiusHandleAtPoint } from '../../../utils/getStarCornerRadiusHandleAtPoint';
 
 export const getStarCornerRadiusHandleHit = (

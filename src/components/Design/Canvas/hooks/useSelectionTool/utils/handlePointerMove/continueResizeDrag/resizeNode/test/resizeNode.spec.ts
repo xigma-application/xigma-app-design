@@ -26,6 +26,26 @@ const addFrameNode = (): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
+const addVectorNode = (): string => {
+  store.dispatch(
+    addNode({
+      fillColor: null,
+      name: 'Vector',
+      parentId: null,
+      segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: { x: 2, y: 4 } } },
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 10 } },
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 describe('resizeNode', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
@@ -51,5 +71,25 @@ describe('resizeNode', () => {
 
     // result
     expect(store.getState().design.nodes[idA]).toMatchObject({ height: 80, width: 150, x: 0, y: 0 });
+  });
+
+  it('should route a vector origin to the vector resize path', () => {
+    // mock
+    const idVector = addVectorNode();
+    const origin = {
+      segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: { x: 2, y: 4 } } },
+      vertices: { v1: { x: 0, y: 0 }, v2: { x: 10, y: 10 } },
+    };
+
+    // before
+    resizeNode(idVector, origin, store.dispatch, { x: 0, y: 0 }, 2, 3, false, null);
+
+    // result
+    const node = store.getState().design.nodes[idVector];
+
+    expect(node).toMatchObject({
+      segments: { s1: { tangentStart: { x: 4, y: 12 } } },
+      vertices: { v1: { x: 0, y: 0 }, v2: { x: 20, y: 30 } },
+    });
   });
 });

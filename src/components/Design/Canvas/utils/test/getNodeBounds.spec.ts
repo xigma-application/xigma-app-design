@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TLineNode, TRectangleNode } from 'types/design/types';
+import { TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getNodeBounds } from '../getNodeBounds';
@@ -39,5 +39,24 @@ describe('getNodeBounds', () => {
 
     // result
     expect(getNodeBounds(line)).toEqual({ height: 20, width: 10, x: 0, y: 0 });
+  });
+
+  it('should delegate to getVectorNodeBounds for a vector node', () => {
+    // mock
+    const vector: TVectorNode = {
+      fillColor: '#000',
+      id: '1',
+      name: 'Vector',
+      parentId: null,
+      segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      strokeColor: '#000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 5 } },
+    };
+
+    // result
+    expect(getNodeBounds(vector)).toEqual({ height: 5, width: 10, x: 0, y: 0 });
   });
 });

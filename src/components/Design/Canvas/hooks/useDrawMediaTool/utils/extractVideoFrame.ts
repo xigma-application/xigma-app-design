@@ -63,7 +63,6 @@ export const extractVideoFrame = (file: File, onLoad: (armed: TArmedMedia) => vo
   };
 
   video.onerror = (): void => {
-    console.error('Failed to load video for frame extraction', file.name);
     cleanupVideoElement(video, videoSrc);
   };
 

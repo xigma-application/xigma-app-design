@@ -12,6 +12,8 @@ import { drawThickEllipseNodeOutline } from 'utils/canvas/shapes/drawThickEllips
 import { drawThickOutline } from 'utils/canvas/drawThickOutline/drawThickOutline';
 import { drawThickPolygonOutline } from 'utils/canvas/shapes/drawThickPolygonOutline';
 import { drawThickStarOutline } from 'utils/canvas/shapes/drawThickStarOutline';
+import { drawVectorStroke } from 'utils/canvas/drawVectorNode/drawVectorStroke';
+import { flattenVectorSegments } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
 
 export const drawHoverOutline = (
   gl: WebGL2RenderingContext,
@@ -91,6 +93,19 @@ export const drawHoverOutline = (
         break;
       case NodeType.text:
         drawTextHoverUnderline(gl, program, buffer, hoveredNode, canvasWidth, canvasHeight, viewport);
+        break;
+      case NodeType.vector:
+        drawVectorStroke(
+          gl,
+          program,
+          buffer,
+          flattenVectorSegments(hoveredNode),
+          DRAFT_FRAME_STROKE,
+          HOVER_OUTLINE_WIDTH / viewport.zoom,
+          canvasWidth,
+          canvasHeight,
+          viewport,
+        );
         break;
       default:
         drawThickOutline(

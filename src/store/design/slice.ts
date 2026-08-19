@@ -12,7 +12,7 @@ import {
 } from './constants';
 
 // types
-import { TDesignState, TStartTextEditPayload, TTextEditSelection } from './types';
+import { TDesignSnapshot, TDesignState, TStartTextEditPayload, TTextEditSelection } from './types';
 import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/design/types';
@@ -21,6 +21,7 @@ import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/d
 import { handleAddComment } from './utils/handleAddComment';
 import { handleAddNode } from './utils/handleAddNode';
 import { handleDeleteNode } from './utils/handleDeleteNode';
+import { handleReplaceDesignSnapshot } from './utils/handleReplaceDesignSnapshot';
 import { handleSetActiveTool } from './utils/handleSetActiveTool';
 import { handleSetSelection } from './utils/handleSetSelection';
 import { handleSetViewport } from './utils/handleSetViewport';
@@ -48,8 +49,10 @@ const initialState: TDesignState = {
   lastShapeTool: DEFAULT_SHAPE_TOOL,
   lastTextTool: DEFAULT_TEXT_TOOL,
   nodes: {},
+  penActiveVertexId: null,
   rootOrder: [],
   selectedIds: [],
+  vectorEditingNodeId: null,
   viewport: DEFAULT_VIEWPORT,
 };
 
@@ -72,18 +75,25 @@ const designSlice = createSlice({
       delete state.comments[action.payload];
     },
     deleteNode: (state, action: PayloadAction<string>) => handleDeleteNode(state, action.payload),
+    replaceDesignSnapshot: (state, action: PayloadAction<TDesignSnapshot>) => handleReplaceDesignSnapshot(state, action.payload),
     setActiveTool: (state, action: PayloadAction<ToolName>) => handleSetActiveTool(state, action.payload),
+    setPenActiveVertexId: (state, action: PayloadAction<string | null>) => {
+      state.penActiveVertexId = action.payload;
+    },
     setSelection: (state, action: PayloadAction<string[]>) => handleSetSelection(state, action.payload),
+    setVectorEditingNodeId: (state, action: PayloadAction<string | null>) => {
+      state.vectorEditingNodeId = action.payload;
+    },
     setViewport: (state, action: PayloadAction<TViewport>) => handleSetViewport(state, action.payload),
     startCommentDraft: (state, action: PayloadAction<TPoint>) => {
       state.commentDraftPosition = action.payload;
     },
     startTextEdit: (state, action: PayloadAction<TStartTextEditPayload>) => handleStartTextEdit(state, action.payload),
     stopTextEdit: (state) => handleStopTextEdit(state),
-    updateEditingTextBoxPathStartOffset: (state, action: PayloadAction<number>) =>
-      handleUpdateEditingTextBoxPathStartOffset(state, action.payload),
     updateCommentContent: (state, action: PayloadAction<{ content: string; id: string }>) =>
       handleUpdateCommentContent(state, action.payload),
+    updateEditingTextBoxPathStartOffset: (state, action: PayloadAction<number>) =>
+      handleUpdateEditingTextBoxPathStartOffset(state, action.payload),
     updateNode: (state, action: PayloadAction<{ changes: TSceneNodeChanges; id: string }>) => handleUpdateNode(state, action.payload),
     updateTextEditContent: (state, action: PayloadAction<string>) => handleUpdateTextEditContent(state, action.payload),
     updateTextEditSelection: (state, action: PayloadAction<TTextEditSelection>) => handleUpdateTextEditSelection(state, action.payload),
@@ -96,8 +106,11 @@ export const {
   cancelCommentDraft,
   deleteComment,
   deleteNode,
+  replaceDesignSnapshot,
   setActiveTool,
+  setPenActiveVertexId,
   setSelection,
+  setVectorEditingNodeId,
   setViewport,
   startCommentDraft,
   startTextEdit,

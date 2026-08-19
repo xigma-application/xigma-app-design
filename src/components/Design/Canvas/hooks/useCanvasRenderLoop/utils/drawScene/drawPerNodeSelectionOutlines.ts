@@ -53,6 +53,7 @@ export const drawPerNodeSelectionOutlines = (
         drawLineSelectionOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
         break;
       case NodeType.path:
+      case NodeType.vector:
         break;
       default: {
         const { height, rotation, width, x, y } = node;

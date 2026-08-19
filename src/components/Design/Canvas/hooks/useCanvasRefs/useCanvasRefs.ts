@@ -7,6 +7,8 @@ import {
   TEllipseArcDragState,
   TEllipseArcRatioDragState,
   TEllipseArcRotateDragState,
+  TPenHoverVertex,
+  TPenPreview,
   TPolygonCornerRadiusDragState,
   TSliceDraft,
   TStarCornerRadiusDragState,
@@ -23,7 +25,10 @@ export const useCanvasRefs = (): TCanvasRefs => {
   const ellipseArcRotateDragRef = useRef<TEllipseArcRotateDragState | null>(null);
   const hoverRef = useRef<string | null>(null);
   const marqueeRef = useRef<TDraftRect | null>(null);
+  const penHoverVertexRef = useRef<TPenHoverVertex | null>(null);
+  const penPreviewRef = useRef<TPenPreview | null>(null);
   const polygonCornerRadiusDragRef = useRef<TPolygonCornerRadiusDragState | null>(null);
+  const selectedVectorVertexIdsRef = useRef<string[]>([]);
   const sliceRef = useRef<TSliceDraft | null>(null);
   const starCornerRadiusDragRef = useRef<TStarCornerRadiusDragState | null>(null);
   const refsRef = useRef<TCanvasRefs | null>(null);
@@ -38,7 +43,10 @@ export const useCanvasRefs = (): TCanvasRefs => {
       ellipseArcRotateDragRef,
       hoverRef,
       marqueeRef,
+      penHoverVertexRef,
+      penPreviewRef,
       polygonCornerRadiusDragRef,
+      selectedVectorVertexIdsRef,
       sliceRef,
       starCornerRadiusDragRef,
     };

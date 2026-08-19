@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 
 // types
 import { TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
-import { TDraftEntity } from 'types/design/types';
+import { TDraftEntity, TVectorTangent } from 'types/design/types';
 
 export type TCornerRadiusDragState = {
   bounds: TDraftRect;
@@ -64,6 +64,18 @@ export type TEllipseArcRatioDragState = {
 
 export type TSliceDraft = TDraftRect & { rotation: number };
 
+export type TPenPreview = {
+  from: TPoint;
+  tangentFromOffset: TVectorTangent;
+  to: TPoint;
+};
+
+export type TPenHoverVertex = {
+  nodeId: string;
+  point: TPoint;
+  vertexId: string;
+};
+
 export type TCanvasRefs = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>;
@@ -73,7 +85,10 @@ export type TCanvasRefs = {
   ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null>;
   hoverRef: RefObject<string | null>;
   marqueeRef: RefObject<TDraftRect | null>;
+  penHoverVertexRef: RefObject<TPenHoverVertex | null>;
+  penPreviewRef: RefObject<TPenPreview | null>;
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>;
+  selectedVectorVertexIdsRef: RefObject<string[]>;
   sliceRef: RefObject<TSliceDraft | null>;
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>;
 };

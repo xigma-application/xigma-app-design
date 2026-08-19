@@ -1,0 +1,47 @@
+import { RefObject } from 'react';
+
+// store
+import { setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { store } from 'store';
+
+// types
+import { NodeType } from 'types/design/enums';
+import { TPenDragOrigin } from '../../../types';
+import { TPoint } from 'types/canvas';
+
+// utils
+import { startNewVectorNetwork } from '../startNewVectorNetwork';
+
+const createDragOriginRef = (): RefObject<TPenDragOrigin | null> => ({ current: null });
+const createDragStartRef = (): RefObject<TPoint | null> => ({ current: null });
+
+describe('startNewVectorNetwork', () => {
+  beforeEach(() => {
+    store.dispatch(setSelection([]));
+    store.dispatch(setVectorEditingNodeId(null));
+  });
+
+  it('should add a new vector node with a single vertex at the click point and enter Vector Edit Mode on it', () => {
+    // mock
+    const dragOriginRef = createDragOriginRef();
+    const dragStartRef = createDragStartRef();
+
+    // before
+    startNewVectorNetwork({ x: 10, y: 20 }, store.dispatch, store, dragOriginRef, dragStartRef);
+
+    // result
+    const { design } = store.getState();
+    const newNodeId = design.vectorEditingNodeId;
+
+    expect(newNodeId).not.toBeNull();
+    expect(design.selectedIds).toEqual([newNodeId]);
+    expect(design.nodes[newNodeId as string]).toMatchObject({ fillColor: null, segments: {}, type: NodeType.vector });
+
+    const vertexId = design.penActiveVertexId as string;
+    const node = design.nodes[newNodeId as string];
+
+    expect(node).toMatchObject({ vertices: { [vertexId]: { id: vertexId, x: 10, y: 20 } } });
+    expect(dragOriginRef.current).toEqual({ nodeId: newNodeId, segmentId: null, vertexId });
+    expect(dragStartRef.current).toEqual({ x: 10, y: 20 });
+  });
+});

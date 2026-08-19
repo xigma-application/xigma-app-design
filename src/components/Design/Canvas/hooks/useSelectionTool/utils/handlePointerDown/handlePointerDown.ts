@@ -2,6 +2,7 @@
 import { ARM_RESOLVERS } from './constants';
 
 // store
+import { beginHistoryGesture } from 'store/history/actions';
 import { selectOrderedNodes, selectSelectedIds, selectSelectedNodes, selectViewport } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
@@ -44,6 +45,8 @@ export const handlePointerDown = (
       setClassName,
       viewport,
     };
+
+    dispatch(beginHistoryGesture());
 
     for (const resolve of ARM_RESOLVERS) {
       if (resolve(ctx)) {

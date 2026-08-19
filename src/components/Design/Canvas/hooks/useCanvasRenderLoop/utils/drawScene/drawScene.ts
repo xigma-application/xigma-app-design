@@ -9,6 +9,7 @@ import {
   selectNodes,
   selectOrderedNodes,
   selectSelectedNodes,
+  selectVectorEditingNodeId,
   selectViewport,
 } from 'store/design/selectors';
 import { store } from 'store';
@@ -25,12 +26,14 @@ import { drawEllipseArcHandleLayer } from './drawEllipseArcHandleLayer/drawEllip
 import { drawFrame } from './drawFrame';
 import { drawHoverOutline } from './drawHoverOutline';
 import { drawMarquee } from 'utils/canvas/drawMarquee';
+import { drawPenPreview } from './drawPenPreview';
 import { drawPixelGrid } from 'utils/canvas/drawPixelGrid';
 import { drawSceneBackground } from 'utils/canvas/drawSceneBackground';
 import { drawSceneNodes } from './drawSceneNodes';
 import { drawSelectionOutline } from './drawSelectionOutline';
 import { drawSliceDraft } from 'utils/canvas/drawSliceDraft';
 import { drawStarRatioHandleLayer } from './drawStarRatioHandleLayer';
+import { drawVectorEditHandlesLayer } from './drawVectorEditHandlesLayer/drawVectorEditHandlesLayer';
 import { drawVertexCountHandlesLayer } from './drawVertexCountHandlesLayer';
 import { getPathOutlineStyles } from './getPathOutlineStyles';
 import { hasCornerRadiusDragMoved } from './hasCornerRadiusDragMoved';
@@ -57,6 +60,8 @@ export const drawScene = (
   const editingNodeId = selectEditingNodeId(state);
   const editingTextBox = selectEditingTextBox(state);
   const nodesById = selectNodes(state);
+  const vectorEditingNodeId = selectVectorEditingNodeId(state);
+  const selectedVectorVertexIds = refs.selectedVectorVertexIdsRef.current;
   const sceneNodes = selectOrderedNodes(state).filter((node) => node.id !== editingNodeId);
   const allSelectedNodes = selectSelectedNodes(state);
   const selectedNodes = allSelectedNodes.filter((node) => node.id !== editingNodeId);
@@ -88,6 +93,18 @@ export const drawScene = (
   );
   drawVertexCountHandlesLayer(gl, program, buffer, hoveredNode, selectedNodes, clientWidth, clientHeight, viewport);
   drawStarRatioHandleLayer(gl, program, buffer, hoveredNode, selectedNodes, clientWidth, clientHeight, viewport);
+  drawVectorEditHandlesLayer(
+    gl,
+    program,
+    buffer,
+    nodesById,
+    vectorEditingNodeId,
+    selectedVectorVertexIds,
+    hoveredNodeId,
+    clientWidth,
+    clientHeight,
+    viewport,
+  );
   drawEllipseArcHandleLayer(
     gl,
     program,
@@ -102,6 +119,7 @@ export const drawScene = (
     ellipseArcRatioDraggedHandlePosition,
   );
   drawFrame(gl, program, buffer, imageContext, draftShape, clientWidth, clientHeight, viewport);
+  drawPenPreview(gl, program, buffer, refs.penPreviewRef.current, refs.penHoverVertexRef.current, clientWidth, clientHeight, viewport);
   drawEditingText(
     gl,
     program,

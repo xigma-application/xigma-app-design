@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TEllipseNode, TFrameNode, TLineNode, TMediaNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TLineNode, TMediaNode, TVectorNode } from 'types/design/types';
 import { TResizeDragState } from 'types/design/selectionTool/types';
 
 // utils
@@ -45,6 +45,19 @@ const line: TLineNode = {
   y2: 40,
 };
 
+const vector: TVectorNode = {
+  fillColor: '#000000',
+  id: 'vector-1',
+  name: 'Vector',
+  parentId: null,
+  segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+  strokeColor: '#000000',
+  strokeWidth: 1,
+  type: NodeType.vector,
+  vertexHandleModes: {},
+  vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } },
+};
+
 describe('armResizeDrag', () => {
   it('should record the handle, bounds, aspect ratio and box-node origins, then capture the pointer', () => {
     // mock
@@ -75,6 +88,23 @@ describe('armResizeDrag', () => {
 
     // result
     expect(resizeDragRef.current?.nodeOrigins).toEqual({ 'line-1': { x1: 10, x2: 20, y1: 30, y2: 40 } });
+  });
+
+  it('should record vertex and segment origins for a vector node', () => {
+    // mock
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef();
+
+    // before
+    armResizeDrag(canvas, pointerEvent(), resizeDragRef, [vector], 'e', { height: 100, width: 100, x: 0, y: 0 });
+
+    // result
+    expect(resizeDragRef.current?.nodeOrigins).toEqual({
+      'vector-1': {
+        segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+        vertices: { v1: { x: 0, y: 0 }, v2: { x: 10, y: 0 } },
+      },
+    });
   });
 
   it('should record the current flipX/flipY as the origin snapshot for a media node', () => {

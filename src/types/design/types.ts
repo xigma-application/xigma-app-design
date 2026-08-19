@@ -123,6 +123,34 @@ export type TTextNode = TBaseNode & {
   type: NodeType.text;
 };
 
+export type TVectorVertex = { id: string; x: number; y: number };
+
+// relative offset from its own vertex — moving a vertex moves its handles for free, null = straight at that end
+export type TVectorTangent = { x: number; y: number } | null;
+
+export type TVectorSegment = {
+  endId: string;
+  id: string;
+  startId: string;
+  tangentEnd: TVectorTangent;
+  tangentStart: TVectorTangent;
+};
+
+export type TVertexHandleMode = 'corner' | 'smooth' | 'symmetric';
+
+export type TVectorNode = {
+  fillColor: string | null;
+  id: string;
+  name: string;
+  parentId: string | null;
+  segments: Record<string, TVectorSegment>;
+  strokeColor: string;
+  strokeWidth: number;
+  type: NodeType.vector;
+  vertexHandleModes: Record<string, TVertexHandleMode>;
+  vertices: Record<string, TVectorVertex>;
+};
+
 export type TLineEndpointStyle = 'arrow' | 'default';
 
 export type TLineNode = {
@@ -146,7 +174,7 @@ export type TDraftEntity = TDraftShape | TDraftLine | TDraftPath | TDraftPolygon
 export type TBoxSceneNode =
   TEllipseNode | TFrameNode | TMediaNode | TPathNode | TPolygonNode | TRectangleNode | TSectionNode | TStarNode | TTextNode;
 
-export type TSceneNode = TBoxSceneNode | TLineNode;
+export type TSceneNode = TBoxSceneNode | TLineNode | TVectorNode;
 
 export type TNewSceneNode =
   | Omit<TEllipseNode, 'id'>
@@ -158,7 +186,8 @@ export type TNewSceneNode =
   | Omit<TSectionNode, 'id'>
   | Omit<TStarNode, 'id'>
   | Omit<TTextNode, 'id'>
-  | Omit<TLineNode, 'id'>;
+  | Omit<TLineNode, 'id'>
+  | Omit<TVectorNode, 'id'>;
 
 export type TSceneNodeChanges =
   | Partial<TEllipseNode>
@@ -170,7 +199,8 @@ export type TSceneNodeChanges =
   | Partial<TSectionNode>
   | Partial<TStarNode>
   | Partial<TTextNode>
-  | Partial<TLineNode>;
+  | Partial<TLineNode>
+  | Partial<TVectorNode>;
 
 export type TViewport = {
   x: number;

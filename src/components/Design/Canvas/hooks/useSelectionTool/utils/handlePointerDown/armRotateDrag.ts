@@ -9,6 +9,7 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
 import { getRotateCursorAngle } from 'utils/math/getRotateCursorAngle';
+import { getVectorNodeOrigin } from '../../../../utils/getVectorNodeOrigin';
 
 export const armRotateDrag = (
   canvas: HTMLCanvasElement,
@@ -23,10 +24,16 @@ export const armRotateDrag = (
   const nodeOrigins: Record<string, TRotateNodeOrigin> = {};
 
   selectedNodes.forEach((node) => {
-    nodeOrigins[node.id] =
-      node.type === NodeType.line
-        ? { x1: node.x1, x2: node.x2, y1: node.y1, y2: node.y2 }
-        : { height: node.height, rotation: node.rotation, width: node.width, x: node.x, y: node.y };
+    switch (node.type) {
+      case NodeType.line:
+        nodeOrigins[node.id] = { x1: node.x1, x2: node.x2, y1: node.y1, y2: node.y2 };
+        break;
+      case NodeType.vector:
+        nodeOrigins[node.id] = getVectorNodeOrigin(node);
+        break;
+      default:
+        nodeOrigins[node.id] = { height: node.height, rotation: node.rotation, width: node.width, x: node.x, y: node.y };
+    }
   });
 
   rotateDragRef.current = {

@@ -24,7 +24,6 @@ const isInRotateRing = (point: TPoint, bounds: TDraftRect, viewport: TViewport):
 
   return getRectCorners(bounds).some((corner) => {
     const distance = Math.hypot(point.x - corner.x, point.y - corner.y);
-
     return distance > innerRadius && distance <= outerRadius;
   });
 };
@@ -36,7 +35,7 @@ export const getRotateHandleAtPoint = (
 ): { bounds: TDraftRect; rotation: number } | null => {
   const [singleNode] = selectedNodes;
 
-  if (selectedNodes.length === 1 && singleNode.type !== NodeType.line) {
+  if (selectedNodes.length === 1 && singleNode.type !== NodeType.line && singleNode.type !== NodeType.vector) {
     const bounds = getNodeBounds(singleNode);
     const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
     const testPoint = singleNode.rotation === 0 ? point : rotatePoint(point, center, -singleNode.rotation);
@@ -46,7 +45,6 @@ export const getRotateHandleAtPoint = (
 
   if (isGroupSelection(selectedNodes)) {
     const bounds = getSelectionBounds(selectedNodes);
-
     return isInRotateRing(point, bounds, viewport) ? { bounds, rotation: 0 } : null;
   }
 

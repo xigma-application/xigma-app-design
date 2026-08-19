@@ -11,6 +11,8 @@ import {
   TSelectionToolRefs,
   TStarRatioDragState,
   TStarVertexCountDragState,
+  TVectorHandleDragState,
+  TVectorVertexDragState,
 } from 'types/design/selectionTool/types';
 import { TPoint } from 'types/canvas';
 
@@ -24,6 +26,8 @@ export const useSelectionToolRefs = (): TSelectionToolRefs => {
   const rotateDragRef = useRef<TRotateDragState | null>(null);
   const starRatioDragRef = useRef<TStarRatioDragState | null>(null);
   const starVertexCountDragRef = useRef<TStarVertexCountDragState | null>(null);
+  const vectorHandleDragRef = useRef<TVectorHandleDragState | null>(null);
+  const vectorVertexDragRef = useRef<TVectorVertexDragState | null>(null);
   const selectionRefsRef = useRef<TSelectionToolRefs | null>(null);
 
   if (selectionRefsRef.current === null) {
@@ -37,6 +41,8 @@ export const useSelectionToolRefs = (): TSelectionToolRefs => {
       rotateDragRef,
       starRatioDragRef,
       starVertexCountDragRef,
+      vectorHandleDragRef,
+      vectorVertexDragRef,
     };
   }
 

@@ -14,11 +14,13 @@ import { isPointInPolygon } from './isPointInPolygon';
 import { isPointInRect } from './isPointInRect';
 import { isPointInStar } from './isPointInStar';
 import { isPointInText } from './isPointInText';
+import { isPointInVectorRegions } from './isPointInVectorRegions';
 import { isPointNearLine } from './isPointNearLine';
+import { isPointNearVectorPath } from './isPointNearVectorPath';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
 const getUnrotatedQueryPoint = (point: TPoint, node: TSceneNode): TPoint => {
-  if (node.type === NodeType.line || node.rotation === 0) {
+  if (node.type === NodeType.line || node.type === NodeType.vector || node.rotation === 0) {
     return point;
   }
 
@@ -48,6 +50,8 @@ export const getNodeAtPoint = (point: TPoint, nodes: TSceneNode[], viewport: TVi
         return node.pathId ? isPointInCurvedText(point, node, pathTextTolerance) : isPointInText(testPoint, node);
       case NodeType.path:
         return false;
+      case NodeType.vector:
+        return isPointInVectorRegions(testPoint, node) || isPointNearVectorPath(testPoint, node, lineTolerance);
       default:
         return isPointInRect(testPoint, node);
     }

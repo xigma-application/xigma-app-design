@@ -9,6 +9,7 @@ export enum NodeType {
   section = 'section',
   star = 'star',
   text = 'text',
+  vector = 'vector',
 }
 
 export enum PathType {

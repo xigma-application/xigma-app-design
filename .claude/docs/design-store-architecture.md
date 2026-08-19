@@ -296,8 +296,10 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   lastShapeTool: ToolName.rectangle,
   lastTextTool: ToolName.text,
   nodes: {},
+  penActiveVertexId: null,
   rootOrder: [],
   selectedIds: [],
+  vectorEditingNodeId: null,
   viewport: { x: 0, y: 0, zoom: 1 },
   ...overrides,
 });
@@ -310,10 +312,64 @@ handler's own unit tests. `selectors.spec.ts` builds one shared `state = { desig
 and asserts every selector against it. All follow the `// mock` / `// before` / `// action` /
 `// result` step-comment convention (`xigma-test-conventions`).
 
+## 8. History middleware — `store/history/` (global undo/redo)
+
+Built from scratch as [[vector-network]]'s own foundation — no history mechanism existed anywhere
+before it (ROADMAP Etap 11 was unstarted, undecided even on approach). Deliberately **not** a
+`redux-undo`-style reducer wrapper (which would change `state.design.*` to `state.design.present.*`
+and touch every selector in this file) — a plain `Middleware`, registered once in `store.ts`:
+```ts
+export const store = configureStore({
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(createHistoryMiddleware()),
+  reducer: { design: designReducer },
+});
+```
+`createHistoryMiddleware()` is a **factory**, not a module-level singleton, so every store (the real
+one and every test store) gets its own isolated `past`/`future` stacks — each entry a
+`{ nodes, rootOrder, selectedIds }` snapshot (`TDesignSnapshot`, `store/design/types.ts`), deliberately
+narrower than full `TDesignState`: viewport, active tool, comments, and the two new Pen-session fields
+below are UI state, not document state, matching Figma's own undo scope (undo restores content and
+selection, never pan/zoom or which tool is active).
+
+Four plain actions (`store/history/actions.ts`): `beginHistoryGesture`/`endHistoryGesture` (bracket one
+undo-able gesture), `undo`/`redo`. The coalescing trick that avoids "every drag frame becomes its own
+undo step" (§5's own dispatch-per-pointermove nuance, previously flagged as a **future** problem for
+whichever history system eventually landed):
+- `beginHistoryGesture` records the current snapshot as `pendingSnapshot` but does **not** push to
+  `past` yet.
+- The first `addNode`/`updateNode`/`deleteNode` dispatched while a gesture is open pushes
+  `pendingSnapshot` once; every further one inside the same open gesture pushes nothing more.
+- A dispatch **outside** any open gesture (a keyboard Delete, a plain draw-tool `addNode` — these
+  already fire exactly once per gesture) pushes its own pre-action snapshot immediately, unchanged
+  one-shot behavior.
+- A gesture that opens and closes with no undoable dispatch in between (a plain click, a resolver that
+  turned out to be a no-op) pushes nothing — correct empty-undo-step avoidance.
+
+Wired at exactly two points, not per-mechanism: `useSelectionTool`'s `handlePointerDown.ts` dispatches
+`beginHistoryGesture()` unconditionally at the top (primary button only) and `handlePointerUp.ts`
+dispatches `endHistoryGesture()` unconditionally at the bottom — covering all dozen-plus
+arm/continue/disarm mechanisms in [[selection-and-manipulation]] (move, resize, rotate, every
+corner-radius/vertex-count/ellipse-arc/Vector-Edit-Mode handle) with zero changes to any individual
+`continue*.ts` file, since the middleware is unconditionally safe to bracket a gesture that turns out
+to dispatch nothing undoable. `useDrawPenTool` (multi-click, its own hook — see [[vector-network]])
+wraps its own pointerdown/pointerup the same way, since it isn't part of `useSelectionTool`.
+
+`undo`/`redo` pop/push between `past`/`future` and dispatch a new `design` reducer action,
+`replaceDesignSnapshot` (`handleReplaceDesignSnapshot.ts`, assigns exactly the three snapshot fields),
+via `next(...)` directly rather than `store.dispatch(...)` — deliberately bypassing the middleware's
+own undoable-action branch so an undo/redo application is never itself pushed onto the history stack.
+
+Two new plain fields on `TDesignState` — `penActiveVertexId`/`vectorEditingNodeId` (both
+`string | null`) — drive the Pen tool session and are explicitly **excluded** from history snapshots;
+full detail in [[vector-network]] §4-5.
+
 ## Related
 
 [[design-tool-architecture]] — the toolbar/canvas-hook layer that dispatches into this store.
 [[canvas-rendering-pipeline]] — what `drawScene.ts` reads out of `store.getState()` every frame, and
 the render-loop side of the ref-vs-Redux split described in §5 here.
 [[selection-and-manipulation]] — the single biggest consumer of the ref-vs-Redux pattern (6 separate
-drag-state refs) and of `updateNode`/`setSelection` dispatch-per-pointermove.
+drag-state refs) and of `updateNode`/`setSelection` dispatch-per-pointermove — also §8's own biggest
+consumer, since every one of its drag mechanisms gets undo/redo for free from the same two dispatch
+points.
+[[vector-network]] — the Pen tool / Vector Network feature §8's history middleware was built for.

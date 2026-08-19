@@ -493,7 +493,17 @@ comment / shapes, potem osobno: draw / scale / actions / dev mode).
       przez wspólny `drawLineEndpointArrowheads.ts`. **Świadomie bez zmian w hit-testingu/bboxie**
       (`isPointNearLine.ts`, `getNodeBounds.ts`) — grot jest czysto wizualny, klikalny obszar linii
       zostaje dokładnie taki jak wcześniej, nawet jeśli grot wizualnie wystaje poza sam odcinek.
-- [ ] Pen / vector (najbardziej złożony, na później)
+- [x] **Pen / vector** — nie klasyczny `start → points → close`, tylko prawdziwy Vector Network
+      (`NodeType.vector`: `vertices`/`segments` z kubicznymi tangentami *na segmencie*, nie na
+      wierzchołku — jedyny sposób, żeby rozgałęzienie stopnia 3+ było w ogóle reprezentowalne).
+      Genuinely nie mieści się w checkliście "8 concerns" z tego dokumentu — pierwsze kliknięcie od
+      razu commituje realny node (nie draft), narzędzie jest wieloklikowe/wielosesyjne, `Escape` ma
+      3-stopniowe wyjście (kończy fragment → wyłącza Pen ale zostaje w Vector Edit Mode → dopiero
+      trzeci raz wychodzi z edycji), a edycja (Vector Edit Mode) to nowe resolvery w
+      `useSelectionTool`, nie osobne narzędzie. Fill regionów liczony na żywo z grafu (stencil-buffer
+      even-odd, nowa technika WebGL w tym silniku) zamiast trzymanej listy konturów. Zbudowano przy
+      okazji **cały Etap 11** (undo/redo, patrz niżej) jako fundament, bo bez niego operacje na
+      wierzchołkach/uchwytach nie miałyby żadnego Ctrl+Z. Pełny opis: `.claude/docs/vector-network.md`.
 
 ## Etap 7 — Edycja tekstu (DOM overlay) + rendering tekstu w WebGL
 
@@ -1000,26 +1010,36 @@ node.rotation)` w `drawMsdfText.ts`).
       ciągły ułamek, nie dyskretna wartość jak `points`/`cornerRadius`. Nowy kursor `ratio.png` (nie
       recykling `radius.png`, którego używa Ratio na Ellipse). Pełny opis mechanizmu:
       `.claude/docs/selection-and-manipulation.md` §20
-- [ ] **klawiszowe skróty edycji**: Delete/Backspace (usuń zaznaczenie), Cmd/Ctrl+D (duplikuj),
-      Cmd/Ctrl+C/V (kopiuj/wklej), strzałki (nudge o 1px, Shift+strzałka o 10px), Cmd/Ctrl+A
-      (zaznacz wszystko) — dziś żadne z nich nie istnieje, mimo że infrastruktura klawiszowa
-      (`useKeyboardHandler`) już jest używana w toolbarze
+- [x] **Delete/Backspace** (usuń zaznaczenie) — zbudowane przy okazji Vector Edit Mode
+      (`.claude/docs/vector-network.md` §6), gdzie było potrzebne do usuwania wierzchołków. Nowy hook
+      `Canvas/hooks/useDeleteShortcut/` (nie `useToolbarShortcuts`, bo potrzebuje
+      `refs.selectedVectorVertexIdsRef`, niedostępnego z poziomu `DesignPage`): z zaznaczonym
+      wierzchołkiem Vector Network usuwa tylko jego (+ przyległe segmenty), inaczej usuwa cały
+      zaznaczony node/node'y — pierwsza "usuń zaznaczenie" funkcjonalność w apce w ogóle.
+- [ ] **pozostałe skróty edycji**: Cmd/Ctrl+D (duplikuj), Cmd/Ctrl+C/V (kopiuj/wklej), strzałki
+      (nudge o 1px, Shift+strzałka o 10px), Cmd/Ctrl+A (zaznacz wszystko) — wciąż nie istnieją
 - [ ] **zoom ze skrótów klawiszowych** — Cmd/Ctrl +/− (zoom in/out o krok), Shift+0 (zoom to 100%),
       Shift+1 (zoom to fit), Shift+2 (zoom to selection) — dziś zoom działa tylko przez
       scroll/pinch (Etap 4)
 
 ## Etap 11 — Undo / redo
 
-Brakuje w całej apce — żadna z dotychczasowych zmian w `store/design` (dodanie node'a, przesunięcie,
-resize, zmiana treści tekstu) nie da się cofnąć. Warto zrobić to zanim przybędzie więcej rodzajów
-akcji (grupy, panele właściwości) - im więcej typów mutacji, tym drożej dorabiać historię wstecznie.
-
-- [ ] wybór podejścia: command/history stack nad istniejącymi akcjami `store/design` (undo = odwrotna
-      akcja) vs. snapshoty całego `TDesignState` per krok — do zdecydowania przy starcie tego etapu
-- [ ] Cmd/Ctrl+Z / Cmd/Ctrl+Shift+Z (lub Cmd/Ctrl+Y) skróty klawiszowe
-- [ ] historia nie powinna zapisywać **każdej** klatki drag'a (przesuwanie/resize w trakcie
-      przeciągania) — tylko stan po puszczeniu, tak jak `addNode` już dziś dispatchuje dopiero na
-      pointerup, nie co pixel
+- [x] **zbudowane jako fundament pod Pen Tool / Vector Network** (Etap 6) — bez tego operacje na
+      wierzchołkach/uchwytach nie miałyby żadnego Ctrl+Z. Podejście: **snapshoty**
+      (`{ nodes, rootOrder, selectedIds }`, świadomie węższe niż cały `TDesignState` — viewport/tool/
+      komentarze/sesja Pen tool to stan UI, nie dokumentu), nie command-stack z odwrotnymi akcjami.
+      Nowy plain `Middleware` (`store/history/historyMiddleware.ts`, fabryka, nie singleton — każdy
+      store dostaje własny `past`/`future`), **nie** `redux-undo`-style wrapper reducera (to zmieniłoby
+      kształt `state.design.*` na `state.design.present.*` i dotknęło każdy selektor w tym pliku).
+      Cmd/Ctrl+Z / Cmd/Ctrl+Shift+Z (bez wariantu Cmd/Ctrl+Y).
+- [x] **historia nie zapisuje każdej klatki drag'a** — `beginHistoryGesture()`/`endHistoryGesture()`
+      spinają gest bez wiedzy z góry, czy coś w środku faktycznie zmutuje state (bezpieczne i tanie do
+      wywołania zawsze); pierwszy `addNode`/`updateNode`/`deleteNode` w otwartym geście pcha snapshot
+      raz, reszta w tym samym geście nic nie dodaje. Podpięte w dokładnie dwóch miejscach —
+      `useSelectionTool`'s `handlePointerDown.ts`/`handlePointerUp.ts` — więc automatycznie obejmuje
+      wszystkie mechanizmy przeciągania z Etapu 5/10 (move, resize, rotate, każdy uchwyt
+      corner-radius/vertex-count/ellipse-arc) bez zmiany żadnego pojedynczego `continue*.ts`. Pełny
+      opis: `.claude/docs/design-store-architecture.md` §8.
 
 ## Etap 12 — Grupy i zagnieżdżone frame'y
 

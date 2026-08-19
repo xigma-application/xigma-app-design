@@ -4,7 +4,7 @@ import { AppDispatch } from 'store';
 
 // types
 import { TPoint } from 'types/canvas';
-import { TResizeNodeOrigin } from 'types/design/selectionTool/types';
+import { TResizeNodeOrigin, TVectorNodeOrigin } from 'types/design/selectionTool/types';
 
 // utils
 import { getResizeAxisScale } from './getResizeAxisScale';
@@ -13,7 +13,7 @@ import { getResizedPosition } from './getResizedPosition';
 
 export const resizeBoxNode = (
   id: string,
-  origin: Exclude<TResizeNodeOrigin, { x1: number; x2: number; y1: number; y2: number }>,
+  origin: Exclude<TResizeNodeOrigin, { x1: number; x2: number; y1: number; y2: number } | TVectorNodeOrigin>,
   dispatch: AppDispatch,
   anchors: { x: number | null; y: number | null },
   scaleX: number,

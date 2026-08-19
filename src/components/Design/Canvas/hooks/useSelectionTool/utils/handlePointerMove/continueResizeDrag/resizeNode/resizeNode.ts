@@ -8,6 +8,7 @@ import { TResizeNodeOrigin } from 'types/design/selectionTool/types';
 // utils
 import { resizeBoxNode } from './resizeBoxNode';
 import { resizeLineNode } from './resizeLineNode';
+import { resizeVectorNode } from './resizeVectorNode';
 
 export const resizeNode = (
   id: string,
@@ -19,9 +20,14 @@ export const resizeNode = (
   isSingleBoxOrigin: boolean,
   rotatedAnchorSolver: ((width: number, height: number) => TPoint) | null,
 ): void => {
-  if ('x1' in origin) {
-    resizeLineNode(id, origin, dispatch, anchors, scaleX, scaleY);
-  } else {
-    resizeBoxNode(id, origin, dispatch, anchors, scaleX, scaleY, isSingleBoxOrigin, rotatedAnchorSolver);
+  switch (true) {
+    case 'x1' in origin:
+      resizeLineNode(id, origin, dispatch, anchors, scaleX, scaleY);
+      break;
+    case 'vertices' in origin:
+      resizeVectorNode(id, origin, dispatch, anchors, scaleX, scaleY);
+      break;
+    default:
+      resizeBoxNode(id, origin, dispatch, anchors, scaleX, scaleY, isSingleBoxOrigin, rotatedAnchorSolver);
   }
 };

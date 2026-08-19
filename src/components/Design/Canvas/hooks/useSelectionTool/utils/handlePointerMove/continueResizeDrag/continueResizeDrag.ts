@@ -6,7 +6,7 @@ import { AppDispatch, store } from 'store';
 
 // types
 import { ToolName } from 'types/design/enums';
-import { TResizeDragState } from 'types/design/selectionTool/types';
+import { TResizeDragState, TResizeNodeOrigin, TVectorNodeOrigin } from 'types/design/selectionTool/types';
 
 // utils
 import { getPointerPosition } from '../../../../../utils/getPointerPosition';
@@ -15,6 +15,16 @@ import { getResizeOrScaleFactors } from './getResizeOrScaleFactors';
 import { getResizeQueryPoint } from './getResizeQueryPoint';
 import { resizeNode } from './resizeNode/resizeNode';
 import { screenToWorld } from '../../../../../utils/screenToWorld';
+
+const getSingleBoxOrigin = (
+  originEntries: [string, TResizeNodeOrigin][],
+): Exclude<TResizeNodeOrigin, { x1: number; x2: number; y1: number; y2: number } | TVectorNodeOrigin> | null => {
+  const [singleOriginEntry] = originEntries;
+
+  return originEntries.length === 1 && !('x1' in singleOriginEntry[1]) && !('vertices' in singleOriginEntry[1])
+    ? singleOriginEntry[1]
+    : null;
+};
 
 export const continueResizeDrag = (
   canvas: HTMLCanvasElement,
@@ -27,8 +37,7 @@ export const continueResizeDrag = (
   if (resizeDragState) {
     const { aspectRatio, bounds, handle, nodeOrigins } = resizeDragState;
     const originEntries = Object.entries(nodeOrigins);
-    const [singleOriginEntry] = originEntries;
-    const singleBoxOrigin = originEntries.length === 1 && !('x1' in singleOriginEntry[1]) ? singleOriginEntry[1] : null;
+    const singleBoxOrigin = getSingleBoxOrigin(originEntries);
     const isScaleTool = selectActiveTool(store.getState()) === ToolName.scale;
     const rawPoint = screenToWorld(getPointerPosition(canvas, event), selectViewport(store.getState()));
     const point = getResizeQueryPoint(rawPoint, bounds, singleBoxOrigin);

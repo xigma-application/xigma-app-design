@@ -19,9 +19,17 @@ export type TDesignState = {
   lastShapeTool: ToolName;
   lastTextTool: ToolName;
   nodes: Record<string, TSceneNode>;
+  penActiveVertexId: string | null;
   rootOrder: string[];
   selectedIds: string[];
+  vectorEditingNodeId: string | null;
   viewport: TViewport;
+};
+
+export type TDesignSnapshot = {
+  nodes: Record<string, TSceneNode>;
+  rootOrder: string[];
+  selectedIds: string[];
 };
 
 export type TStartTextEditPayload = {

@@ -6,7 +6,7 @@ import { TEllipseNode, TFrameNode } from 'types/design/types';
 // utils
 import { handleSetSelection } from '../handleSetSelection';
 
-const buildState = (nodes: TDesignState['nodes'], selectedIds: string[]): TDesignState => ({
+const buildState = (nodes: TDesignState['nodes'], selectedIds: string[], overrides: Partial<TDesignState> = {}): TDesignState => ({
   activeTool: ToolName.default,
   commentDraftPosition: null,
   comments: {},
@@ -22,9 +22,12 @@ const buildState = (nodes: TDesignState['nodes'], selectedIds: string[]): TDesig
   lastShapeTool: ToolName.rectangle,
   lastTextTool: ToolName.text,
   nodes,
+  penActiveVertexId: null,
   rootOrder: Object.keys(nodes),
   selectedIds,
+  vectorEditingNodeId: null,
   viewport: { x: 0, y: 0, zoom: 1 },
+  ...overrides,
 });
 
 const frame: TFrameNode = {
@@ -111,5 +114,44 @@ describe('handleSetSelection', () => {
 
     // result
     expect(state.nodes[ellipse.id]).toBeDefined();
+  });
+
+  it('should keep vectorEditingNodeId when the vector node stays the sole selection', () => {
+    // mock
+    const state = buildState({ [frame.id]: frame }, [frame.id], { vectorEditingNodeId: frame.id });
+
+    // before
+    handleSetSelection(state, [frame.id]);
+
+    // result
+    expect(state.vectorEditingNodeId).toBe(frame.id);
+  });
+
+  it('should clear vectorEditingNodeId and penActiveVertexId when the vector node leaves the selection', () => {
+    // mock
+    const state = buildState({ [frame.id]: frame }, [frame.id], { penActiveVertexId: 'vertex-1', vectorEditingNodeId: frame.id });
+
+    // before
+    handleSetSelection(state, []);
+
+    // result
+    expect(state.vectorEditingNodeId).toBeNull();
+    expect(state.penActiveVertexId).toBeNull();
+  });
+
+  it('should clear vectorEditingNodeId when the vector node stays selected but joins a wider selection', () => {
+    // mock
+    const other = { ...frame, id: 'other' };
+    const state = buildState({ [frame.id]: frame, other }, [frame.id], {
+      penActiveVertexId: 'vertex-1',
+      vectorEditingNodeId: frame.id,
+    });
+
+    // before
+    handleSetSelection(state, [frame.id, 'other']);
+
+    // result
+    expect(state.vectorEditingNodeId).toBeNull();
+    expect(state.penActiveVertexId).toBeNull();
   });
 });

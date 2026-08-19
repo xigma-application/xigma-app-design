@@ -211,3 +211,5 @@ stop here if you came looking for how its "shape" is drawn — there isn't one. 
 reducer conventions, the ref-vs-Redux split §7 only touches briefly).
 [[selection-and-manipulation]] — what happens to a node *after* this doc's tools create it: hit-testing,
 selection, drag/resize/rotate.
+[[vector-network]] — the Pen tool / Vector Network, a genuinely different "shape" of tool this doc's
+8-concern checklist only partially covers (multi-click, multi-session, no draft-then-commit).

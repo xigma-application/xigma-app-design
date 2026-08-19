@@ -40,6 +40,8 @@ export const selectLastTextTool = (state: RootState): ToolName => state.design.l
 
 export const selectNodes = (state: RootState): Record<string, TSceneNode> => state.design.nodes;
 
+export const selectPenActiveVertexId = (state: RootState): string | null => state.design.penActiveVertexId;
+
 const selectRootOrder = (state: RootState): string[] => state.design.rootOrder;
 
 export const selectOrderedNodes = createSelector([selectRootOrder, selectNodes], (rootOrder, nodes) => rootOrder.map((id) => nodes[id]));
@@ -49,5 +51,7 @@ export const selectSelectedIds = (state: RootState): string[] => state.design.se
 export const selectSelectedNodes = createSelector([selectSelectedIds, selectNodes], (selectedIds, nodes) =>
   selectedIds.map((id) => nodes[id]),
 );
+
+export const selectVectorEditingNodeId = (state: RootState): string | null => state.design.vectorEditingNodeId;
 
 export const selectViewport = (state: RootState): TViewport => state.design.viewport;

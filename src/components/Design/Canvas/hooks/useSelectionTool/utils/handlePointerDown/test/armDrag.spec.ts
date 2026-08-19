@@ -31,6 +31,26 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => 
   return rootOrder[rootOrder.length - 1];
 };
 
+const addVectorNode = (): string => {
+  store.dispatch(
+    addNode({
+      fillColor: '#000000',
+      name: 'Vector',
+      parentId: null,
+      segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } },
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 describe('armDrag', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
@@ -65,6 +85,23 @@ describe('armDrag', () => {
     expect(dragStateRef.current).toMatchObject({
       nodeOrigins: { [idA]: { x1: 200, x2: 250, y1: 200, y2: 200 } },
       pendingClickAction: { id: idA, kind: 'collapse' },
+    });
+  });
+
+  it('should snapshot a vector node origin as its vertices and segments', () => {
+    // mock
+    const idA = addVectorNode();
+    const dragStateRef = createDragStateRef();
+
+    // before
+    armDrag([idA], null, { x: 0, y: 0 }, dragStateRef);
+
+    // result
+    expect(dragStateRef.current?.nodeOrigins).toEqual({
+      [idA]: {
+        segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+        vertices: { v1: { x: 0, y: 0 }, v2: { x: 10, y: 0 } },
+      },
     });
   });
 });

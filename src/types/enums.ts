@@ -2,9 +2,11 @@ export enum KeyboardKeys {
   '+' = '+',
   '-' = '-',
   alt = 'Alt',
+  backspace = 'Backspace',
   c = 'KeyC',
   control = 'Control',
   d = 'KeyD',
+  delete = 'Delete',
   escape = 'Escape',
   f = 'KeyF',
   h = 'KeyH',
@@ -17,6 +19,7 @@ export enum KeyboardKeys {
   shift = 'Shift',
   t = 'KeyT',
   v = 'KeyV',
+  z = 'KeyZ',
 }
 
 export enum MouseButton {

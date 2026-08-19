@@ -4,7 +4,7 @@ import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
 import { getPolygonCornerRadiusHandleAtPoint } from '../../../utils/getPolygonCornerRadiusHandleAtPoint';
-import { getResizeHandleAtPoint } from '../../../utils/getResizeHandleAtPoint';
+import { getResizeHandleAtPoint } from '../../../utils/getResizeHandleAtPoint/getResizeHandleAtPoint';
 
 export const getPolygonCornerRadiusHandleHit = (
   point: TPoint,
