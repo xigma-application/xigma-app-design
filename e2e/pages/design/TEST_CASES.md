@@ -1374,6 +1374,90 @@ axis whose direction depends only on `points`, never on the ratio being dragged)
 #155-#156 stay unit-only for the same reason as the vertex-count handle's analogous rows above —
 exact `store.getState()`/direct-function-call assertions, not real-browser-timing paths.
 
+## Pen tool and vector editing
+
+Pen (`ToolName.pen`, shortcut `p`) and its Pencil variant (`ToolName.pencil`, `shift+p`, lives only
+in Pen's dropdown — same shared-button/last-used-variant mechanic as Frame/Section above, backed by
+its own `lastPenTool` store field) draw a `NodeType.vector` node: a graph of `vertices` connected by
+`segments`, each segment optionally carrying a `tangentStart`/`tangentEnd` handle that curves it. A
+plain click places a straight-segment vertex; a click-drag places one with an outgoing tangent handle,
+curving the segment just placed. Clicking back onto the path's own start vertex closes the loop
+(the closing segment can itself be curved, if the vertex just before it was dragged). `Escape` is
+staged, one step per press: (1) stop extending — clears the "active" vertex so the rubber-band
+preview line disappears, but stays on Pen and stays in vector edit mode; (2) revert the active tool
+to Move, still in edit mode; (3) exit vector edit mode entirely. Switching tools mid-draw without
+pressing Escape first (e.g. clicking Move directly) leaves the in-progress vertex "stale" — switching
+back to Pen resumes extending from it, while an explicit Escape first starts a disconnected fragment
+instead. A finished (or abandoned) fragment and a later one clicked elsewhere both extend the _same_
+vector node's `segments`/`vertices` map rather than creating a new node, as long as vector edit mode
+was never exited in between.
+
+Double-clicking an already-placed vector node (Move tool, nothing else selected) re-enters vector
+edit mode for it, rendering per-vertex dots and per-segment tangent handles
+(`drawVectorEditHandlesLayer/`). Dragging a vertex dot moves that vertex; dragging a tangent handle
+curves its segment. A vertex's `vertexHandleModes` entry (`corner`/`smooth`/`symmetric`,
+`getMirroredVectorSegments.ts`) controls whether dragging one of its two handles also moves the
+other: `symmetric` mirrors using the dragged handle's own new length, `smooth` mirrors using the
+other handle's existing length, `corner` never mirrors. Clicking on an edge (not a vertex) inserts a
+new vertex there, splitting the segment in two. A miss-click (empty space) while editing only clears
+the active _vertex_ selection, staying in edit mode — `armVectorEditMissOnPointerDown.ts` deliberately
+does not fall through to the marquee resolver's `setSelection([])`, since that would exit edit mode on
+every stray miss; exiting by click is reserved for a deliberate **double**-click on empty space
+(`useVectorEditOnDoubleClick.ts`), which only clears `vectorEditingNodeId` — the node's own
+`selectedIds` entry is untouched, so it stays selected (ordinary resize/rotate handles), just no
+longer in edit mode. `handleSetSelection.ts` also clears `vectorEditingNodeId` any time the selection
+changes to something other than solely the node being edited (e.g. selecting a different node), so
+there is no quirk where a previous node's edit handles linger on screen after that.
+
+Two gotchas the specs below work around, worth knowing before adding more:
+
+- **Undo/redo shortcuts must use `Control+z`/`Control+Shift+z`, never `ControlOrMeta+z`.** This
+  project picks its primary modifier key (`⌘` vs `Ctrl`) at runtime from
+  `react-device-detect`'s `isMacOs`, which reads `navigator.userAgent` — and Playwright's built-in
+  `devices['Desktop Chrome']` preset always reports a Windows-flavored UA regardless of the host OS,
+  so the app always resolves to `Ctrl` in this suite even when it's actually running on a Mac.
+  Playwright's `'ControlOrMeta'` alias, by contrast, resolves from the real host OS and sends `⌘` on
+  a Mac runner — which the app never listens for here, so the shortcut silently does nothing. This
+  matches the plain `'Control'` already used in `selection.spec.ts`.
+- **A vector node's whole stroke renders in a brighter "actively editing this vertex" tint once any
+  vertex/handle has been grabbed, and that tint is driven by a ref (not undoable store state), so it
+  outlives an undo that reverts the vertex's actual position.** A full-canvas (or even whole-shape)
+  screenshot comparison back to an untouched "before" capture will spuriously differ for this reason
+  alone. Isolate the geometric claim instead: clip to a small region containing only the specific
+  point/vertex under test, ideally one with no segment passing through it at all (see
+  `dragVectorPoint`'s neighboring-vertex and undo tests below for the pattern), or compare two
+  post-interaction captures to each other rather than to a pristine baseline.
+
+| #   | Scenario                                                                                                               | Unit |           E2E            |
+| --- | ---------------------------------------------------------------------------------------------------------------------- | :--: | :----------------------: |
+| 157 | Clicking places vertices and extends an open path with straight segments on every click                                |  ✅  |     ✅ `pen.spec.ts`     |
+| 158 | Click-dragging while placing a vertex curves the new segment via a tangent handle                                      |  ✅  |     ✅ `pen.spec.ts`     |
+| 159 | A drag shorter than `MIN_DRAG_DISTANCE_PX` is still treated as a plain (straight) click                                |  ✅  |     ✅ `pen.spec.ts`     |
+| 160 | The pen preview (rubber-band) line follows the pointer, and a snap indicator appears near the start vertex             |  ✅  |     ✅ `pen.spec.ts`     |
+| 161 | Clicking back onto the start vertex closes the loop with a straight closing segment                                    |  ✅  |     ✅ `pen.spec.ts`     |
+| 162 | Dragging the vertex just before closing stages a curve that also bends the closing segment                             |  ✅  |     ✅ `pen.spec.ts`     |
+| 163 | A closed loop renders a different, connected outline than the same vertices left open                                  |  ✅  |     ✅ `pen.spec.ts`     |
+| 164 | Escape steps through: stop extending → revert tool to Move → exit vector edit mode, one stage per press                |  ✅  |     ✅ `pen.spec.ts`     |
+| 165 | Switching tools mid-draw without Escape leaves the in-progress node directly editable via the Move tool                |  ✅  |     ✅ `pen.spec.ts`     |
+| 166 | Switching back to Pen after leaving mid-draw (no Escape) resumes extending from the stale active vertex                |  ✅  |     ✅ `pen.spec.ts`     |
+| 167 | After finishing one fragment, clicking elsewhere still extends the same vector node's segments, not a new node         |  ✅  |     ✅ `pen.spec.ts`     |
+| 168 | Pen sits between Rectangle and Text in the toolbar                                                                     |  —   |     ✅ `pen.spec.ts`     |
+| 169 | Pencil lives only in the Pen dropdown (no top-level icon), and the shared button remembers it as last-used             |  ✅  |     ✅ `pen.spec.ts`     |
+| 170 | Pen and Pencil apply distinct cursor classNames while active                                                           |  —   |     ✅ `pen.spec.ts`     |
+| 171 | The Pencil tool does not draw anything on the canvas yet (placeholder variant)                                         |  ✅  |     ✅ `pen.spec.ts`     |
+| 172 | The Pen tool stays active after finishing a network, unlike shape tools which revert to the default tool               |  ✅  |     ✅ `pen.spec.ts`     |
+| 173 | Undo steps back through vertex placements one click at a time, redo-equivalent independent references land pixel-equal |  ✅  |     ✅ `pen.spec.ts`     |
+| 174 | Double-clicking a vector node enters edit mode; double-clicking empty space exits it again, leaving selection intact   |  ✅  | ✅ `vector-edit.spec.ts` |
+| 175 | Dragging a vertex dot moves that vertex                                                                                |  ✅  | ✅ `vector-edit.spec.ts` |
+| 176 | Dragging an existing tangent handle curves the adjacent segment                                                        |  ✅  | ✅ `vector-edit.spec.ts` |
+| 177 | Dragging one handle at a `smooth` vertex also moves its other handle, curving both segments                            |  ✅  | ✅ `vector-edit.spec.ts` |
+| 178 | Clicking an edge in edit mode inserts a new vertex there, splitting the segment                                        |  ✅  | ✅ `vector-edit.spec.ts` |
+| 179 | Clicking empty space in edit mode deselects the active vertex but keeps edit mode open (single click, not double)      |  ✅  | ✅ `vector-edit.spec.ts` |
+| 180 | Selecting a different node while still editing one cleanly exits edit mode for the original — no lingering handles     |  ✅  | ✅ `vector-edit.spec.ts` |
+| 181 | A selected (not editing) vector node still resizes via the ordinary 8-direction handles                                |  ✅  | ✅ `vector-edit.spec.ts` |
+| 182 | A selected (not editing) vector node still rotates via the ordinary rotate ring                                        |  ✅  | ✅ `vector-edit.spec.ts` |
+| 183 | Undo after dragging a vertex restores its previous position                                                            |  ✅  | ✅ `vector-edit.spec.ts` |
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

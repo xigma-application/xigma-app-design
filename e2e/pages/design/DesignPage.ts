@@ -15,6 +15,8 @@ export type TToolName =
   | 'hand'
   | 'line'
   | 'media'
+  | 'pen'
+  | 'pencil'
   | 'polygon'
   | 'rectangle'
   | 'scale'
@@ -134,6 +136,26 @@ export class DesignPage {
 
   async drawTextOnPath(x1: number, y1: number, x2: number, y2: number): Promise<void> {
     await this.selectToolFromDropdown('text', 'Text on path');
+    await this.pointerDown(x1, y1);
+    await this.page.mouse.move(x2, y2, { steps: 5 });
+    await this.pointerUp();
+  }
+
+  // clicks each point in turn with the Pen tool active — every click places (or re-visits) a
+  // straight-segment vertex, so this covers any plain-click vector path, including closing a loop
+  // by passing the first point's coordinates again as the last entry
+  async drawVectorPath(points: { x: number; y: number }[]): Promise<void> {
+    await this.selectTool('pen');
+
+    for (const point of points) {
+      await this.click(point.x, point.y);
+    }
+  }
+
+  // a click-drag from one screen point to another, with no tool selection of its own — reused both
+  // for placing a curved (tangent-handle) vertex mid-draw and for dragging an existing vertex/handle
+  // once in vector edit mode, since both are the same down-move-up primitive at the app level
+  async dragVectorPoint(x1: number, y1: number, x2: number, y2: number): Promise<void> {
     await this.pointerDown(x1, y1);
     await this.page.mouse.move(x2, y2, { steps: 5 });
     await this.pointerUp();
