@@ -22,7 +22,7 @@ import { getVectorVertexAtPoint } from '../../../../../utils/getVectorVertexAtPo
 const getTangentStart = (pending: TPendingOutgoingTangent | null, activeVertexId: string): TVectorTangent =>
   pending && pending.vertexId === activeVertexId ? pending.tangent : null;
 
-const getEdgeHit = (point: TPoint, node: TVectorNode, viewport: TViewport): { segmentId: string } | null =>
+const getEdgeHit = (point: TPoint, node: TVectorNode, viewport: TViewport): { point: TPoint; segmentId: string } | null =>
   getVectorEdgeAtPoint(point, node, VECTOR_EDGE_HIT_TOLERANCE_PX / viewport.zoom, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
 
 export const continueVectorNetwork = (
@@ -43,7 +43,7 @@ export const continueVectorNetwork = (
   if (hover) {
     closeLoopOntoVertex(node, activeVertexId, hover.vertexId, segmentId, tangentStart, dispatch, pendingOutgoingTangentRef);
   } else if (edgeHit) {
-    closeLoopOntoEdge(node, activeVertexId, edgeHit.segmentId, point, segmentId, tangentStart, dispatch, pendingOutgoingTangentRef);
+    closeLoopOntoEdge(node, activeVertexId, edgeHit.segmentId, edgeHit.point, segmentId, tangentStart, dispatch, pendingOutgoingTangentRef);
   } else {
     extendWithNewVertex(
       point,

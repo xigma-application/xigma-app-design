@@ -128,6 +128,49 @@ describe('useDrawPenTool behaviors', () => {
     expect(Object.keys(node.segments)).toHaveLength(1);
   });
 
+  it('should close the network back onto the starting point without doubling the segment — A -> B -> A', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setActiveTool(ToolName.pen));
+
+    // before
+    renderPenTool(canvasRef);
+
+    // action — first click plants vertex A
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 0, 0));
+    });
+
+    const nodeId = store.getState().design.vectorEditingNodeId as string;
+
+    // action — second click plants vertex B, connecting A -> B
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 100, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 100, 0));
+    });
+
+    // action — third click lands back on A, closing the network instead of adding a duplicate segment
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 0, 0));
+    });
+
+    // result
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+
+    expect(Object.keys(node.vertices)).toHaveLength(2);
+    expect(Object.keys(node.segments)).toHaveLength(1);
+    expect(store.getState().design.penActiveVertexId).toBeNull();
+  });
+
   it('should preview the pen line toward the pointer on pointermove while a vertex is active', () => {
     // mock
     const canvasRef = createCanvasRef();
@@ -235,6 +278,117 @@ describe('useDrawPenTool behaviors', () => {
 
     // result
     expect(refs.penNewVertexPreviewRef.current).toBeNull();
+  });
+
+  it('should switch the cursor to pen-extend and attract the preview onto the segment when hovering its interior with no vertex currently active', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setActiveTool(ToolName.pen));
+
+    // before — place v1 at (0,0) and v2 at (100,0), connected by one segment, then stop extending
+    const { getClassName, refs } = renderPenTool(canvasRef);
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 100, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 100, 0));
+    });
+    act(() => {
+      store.dispatch(setPenActiveVertexId(null));
+    });
+
+    // action — hover near the far end of the segment, well outside the midpoint's snap radius
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 90, 2));
+    });
+
+    // result
+    expect(getClassName()).toBe('pen-extend');
+    expect(refs.penNewVertexPreviewRef.current).toEqual({ x: 90, y: 0 });
+    expect(refs.hoveredSegmentIdRef.current).not.toBeNull();
+  });
+
+  it('should switch the cursor to pen-snap and lock the preview onto the exact midpoint when hovering close enough to it', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setActiveTool(ToolName.pen));
+
+    // before — place v1 at (0,0) and v2 at (100,0), connected by one segment, then stop extending
+    const { getClassName, refs } = renderPenTool(canvasRef);
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 100, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 100, 0));
+    });
+    act(() => {
+      store.dispatch(setPenActiveVertexId(null));
+    });
+
+    // action — hover a couple of px off the segment's midpoint (50,0)
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 50, 2));
+    });
+
+    // result
+    expect(getClassName()).toBe('pen-snap');
+    expect(refs.penNewVertexPreviewRef.current).toEqual({ x: 50, y: 0 });
+    expect(refs.hoveredSegmentIdRef.current).not.toBeNull();
+  });
+
+  it('should clear the hovered-segment highlight once the tool leaves Pen', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setActiveTool(ToolName.pen));
+
+    // before — place v1 at (0,0) and v2 at (100,0), connected by one segment, then stop extending
+    const { refs } = renderPenTool(canvasRef);
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 100, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 100, 0));
+    });
+    act(() => {
+      store.dispatch(setPenActiveVertexId(null));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 50, 2));
+    });
+
+    expect(refs.hoveredSegmentIdRef.current).not.toBeNull();
+
+    // action
+    act(() => {
+      store.dispatch(setActiveTool(ToolName.default));
+    });
+
+    // result
+    expect(refs.hoveredSegmentIdRef.current).toBeNull();
   });
 
   it('should reset the in-progress drag on pointercancel', () => {

@@ -146,33 +146,106 @@ segment drawn from that point picks up the dragged tangent as its `tangentStart`
 later point would.
 
 **Live preview** (`penPreviewRef`/`penNewVertexPreviewRef`, `TCanvasRefs`, ref not Redux — pure
-uncommitted visuals), two cases depending on whether there's an active vertex yet:
+uncommitted visuals), two cases depending on whether there's an active vertex yet, both driven by the
+**same shared resolver pipeline** (below):
 - **No active vertex** (`handlePointerMove.ts`'s `node === null` branch — nothing placed yet at all, or
-  `node` case with no `penActiveVertexId`) — `penNewVertexPreviewRef` just tracks the raw cursor position
-  each move; nothing computes hover/snapping here since there's no active vertex to draw a rubber-band
-  from yet.
-- **Active vertex exists** — `updateVectorPenPreview.ts` recomputes `penPreviewRef` every pointermove:
-  the rubber-band edge from the active vertex to the cursor, curved via `tangentFromOffset` if a drag left
-  a pending outgoing tangent, with its endpoint (`to`) snapping onto any nearby existing vertex of the
-  network (attraction only, no separate visual — see below) rather than the raw pointer position, so the
-  next click naturally lands on/connects to it (shown even before requiring a second click, satisfying
-  "handler podąża za nim między networkami" within the one active object — cross-*object* connecting is
-  explicitly out of scope, see §7).
+  `node` case with no `penActiveVertexId`) — `updateNewVertexPreview.ts` recomputes `penNewVertexPreviewRef`
+  every pointermove.
+- **Active vertex exists** — `updateVectorPenPreview.ts` recomputes `penPreviewRef` every pointermove: the
+  rubber-band edge from the active vertex to the cursor, curved via `tangentFromOffset` if a drag left a
+  pending outgoing tangent, with its endpoint (`to`) resolved the same way as the no-active-vertex case
+  below rather than the raw pointer position, so the next click naturally lands on/connects to it (shown
+  even before requiring a second click, satisfying "handler podąża za nim między networkami" within the
+  one active object — cross-*object* connecting is explicitly out of scope, see §7).
 
-`drawScene/drawPenPreview/drawPenPreview.ts` renders both — never touches Vector Network state, and is
-itself just a thin orchestrator: `drawPenSegmentPreview.ts` owns the rubber-band stroke/rotation math,
-`drawVertexPreviewDot.ts` is the shared dot primitive both it and the bare cursor-position case call, and
-each sits flat as a sibling in the `drawPenPreview/` folder (own `test/`), split out once the single-file
-version accumulated too many concerns to review at a glance. `drawVertexPreviewDot` draws a vertex-styled
-dot (white fill, blue border, `VECTOR_VERTEX_SIZE` —
-matching a real committed vertex dot, not the larger `VECTOR_SNAP_INDICATOR_RADIUS_PX` circle an earlier
-version used) at `penNewVertexPreviewRef`'s point *and* at the rubber-band's `to` endpoint, so the
-"where will my next click land" dot shows continuously across every point of a session, not just the
-very first one — asked for directly after the first version only showed it before the first click.
-**There is no separate snap-indicator overlay any more** (an earlier `penHoverVertexRef`/`TPenHoverVertex`
-ref+type existed solely to draw one, removed in full — asked for directly, "usuń wskaźnik, zostaw samo
-przyciąganie") — the attraction is now only visible as the rubber-band's endpoint (and its dot) jumping
-onto the nearby vertex, not as an extra circle drawn around it.
+**Vertex/edge hover resolution — `handlePointerMove/resolvePenPointHover/`, mirrors
+`useHoverHighlight`'s `resolveHover`/`hoverResolvers` chain-of-responsibility exactly** (same shape,
+asked for directly, "zobacz jak to jest zrobione i zrób tak samo"): `PEN_POINT_HOVER_RESOLVERS`
+(`resolvePenPointHover/constants.ts`) is an ordered array of pure `(ctx) => TPenPointHoverResult |
+undefined` functions — `resolveVertexPointHover` first, `resolveEdgePointHover` second
+(`resolvePenPointHover/hoverResolvers/`) — each taking a `TPenPointHoverContext`
+(`node`/`point`/`viewport`/optional `excludeVertexId`) and returning `{ hoverKind: 'vertex' | 'edge' |
+'edge-snap'; point: TPoint; segmentId: string | null }` on a match. Both `updateNewVertexPreview.ts`
+(idle) and `updateVectorPenPreview.ts` (active-draw) — flat siblings in `handlePointerMove/`, not nested
+inside `resolvePenPointHover/` themselves, since that folder holds only the shared resolver pipeline, not
+either of its two call sites — loop over the **same** resolver array and stop at the first match. The
+only difference is `updateVectorPenPreview.ts` passes `excludeVertexId: activeVertexId` so the vertex
+you're extending *from* is never offered back as its own snap target, and it wraps the winning `point`
+into the rubber-band's `to` (instead of writing straight to `penNewVertexPreviewRef`). This means
+edge-hover (attract + highlight + cursor, below) works identically whether the network is idle or
+mid-draw — extending onto an existing segment previews the same "closing onto an edge" outcome
+`closeLoopOntoEdge.ts` (§6) actually commits on click, instead of only showing feedback for closing onto
+an existing *vertex*. (First pass nested `updateNewVertexPreview.ts` itself inside a same-named
+promoted folder, with `updateVectorPenPreview.ts` reaching into a sibling's folder for the shared
+pieces — corrected by the user once `updateVectorPenPreview.ts` grew the same dependency: the shared
+resolver pipeline moved to this neutrally-named folder and both call sites went back to flat sibling
+files, "przenieść wyżej... a tamten folder zmienić na jakąś ogólną nazwę".)
+- **`resolveVertexPointHover`** — `getVectorVertexAtPoint`, unchanged snap-onto-a-vertex behavior.
+- **`resolveEdgePointHover`** — `getVectorEdgeAtPoint.ts` (§6) returns `{ point, segmentId, snapped }`,
+  not just the `segmentId`. `point` is the cursor's continuous perpendicular projection onto the hit
+  sub-segment (`getClosestPointOnLine.ts`) **unless** that projection lands within `vertexTolerance` of
+  the segment's fixed midpoint (`getSegmentMidpoint.ts`, `utils/canvas/vectorNetwork/` — averages the
+  two endpoints for a straight segment, or the curve's `t=0.5` point via `flattenSegment(start, end,
+  tangentStart, tangentEnd, 2)[1]` for a curved one), in which case `point` locks onto that exact
+  midpoint and `snapped` is `true`. `resolveEdgePointHover` maps `snapped` to the hover kind:
+  `hoverKind: snapped ? 'edge-snap' : 'edge'`.
+  **This two-tier shape (loose continuous attraction across the whole segment, full snap only near the
+  midpoint) is the result of two rounds of direct correction, both worth keeping in mind before touching
+  this file again:**
+  1. A first version replaced the continuous projection outright with "hit-test proximity to the
+     midpoint only" — meaning nothing happened at all unless the cursor was already within
+     `vertexTolerance` of the midpoint, so hovering anywhere else along a long segment showed no
+     color/cursor feedback whatsoever. Reported directly ("wgl nie przyciąga i nie podpowiada linia")
+     and reverted by the user re-editing `getVectorEdgeAtPoint.ts` back to the continuous-projection
+     version in their IDE mid-session ("Cofam twoje zmiany... Tak cofnąłem tylko tą część").
+  2. The now-current shape is the reconciliation: keep the continuous, whole-segment attraction as the
+     general "there's an edge here" affordance (`pen-extend`, no full lock), and layer the midpoint-only
+     **full snap** (`pen-snap`, point locks exactly onto the midpoint) on top of it, triggered only once
+     the cursor is actually close to that specific point — "Gdy jestem blisko tego punktu powinno
+     przyciągnąć ale mówię punktu nie całego segmentu."
+- A third ref, **`hoveredSegmentIdRef`** (`TCanvasRefs`), carries the matched `segmentId` (or `null`) from
+  whichever resolver ran into the render loop, consumed by `drawVectorEditOutline/` (below). Cursor class
+  comes from `handlePointerMove.ts`'s `getPenHoverCursorClassName`, mapping `hoverKind` three-to-two:
+  `'vertex'`/`'edge-snap'` → `'pen-snap'`, `'edge'` → `'pen-extend'` (an until-then-unused cursor asset
+  that already existed in `canvas.module.scss`/`assets/icons/cursors/`), `null` → `'pen'`. Same mapping
+  used by both the idle and active-draw branches. `startVectorFragment.ts`/`continueVectorNetwork.ts`
+  (§6) both pass the resolver's `point` (whichever of the two tiers matched), not the raw click
+  coordinate, into `splitVectorSegment.ts`/`closeLoopOntoEdge.ts` — the committed split point always
+  matches whatever was last previewed.
+
+**Rendering — `drawScene/drawVectorEditHandlesLayer/drawVectorEditOutline/`**, promoted from a single
+flat file to its own folder once it grew a second, unrelated `if`-branch (the "ifologia" split rule,
+[[xigma-module-structure]] — asked for directly, "trzeba rozbić te ify na osobne funkcje"):
+- `drawVectorEditOutline.ts` — thin orchestrator, calls the two pieces below in sequence.
+- `drawEditModeOutline.ts` — the plain gray `VECTOR_EDIT_OUTLINE_STROKE` (`#aaaaaa`) whole-node outline,
+  skipped while the node is the separately-hover-outlined one (unchanged from before the split).
+- `drawHoveredSegmentHighlight.ts` — draws the currently-hovered segment (`hoveredSegmentId`) a second
+  time in `VECTOR_EDGE_HOVER_STROKE` (`#cd4422`) on top of the gray outline, **plus** a helper dot
+  (`drawVertexPreviewDot`, reused as-is — see below) at that segment's `getSegmentMidpoint`. This dot is
+  the additive "suggested insertion point" from the original ask ("dodatkowo pokazuje punkt który można
+  doczepić na środku pomiędzy dwoma punktami") — it is drawn continuously for as long as *any* part of
+  the segment is hovered, independent of whether the cursor has actually snapped to it yet
+  (`resolveEdgePointHover`'s two-tier logic above only affects the *attraction point* and *cursor*, not
+  whether this dot is drawn) — "to jest bardziej pomocniczy punkt niż ostateczny."
+
+`drawScene/drawPenPreview/drawPenPreview.ts` renders the preview dots — never touches Vector Network
+state, and is itself just a thin orchestrator: `drawPenSegmentPreview.ts` owns the rubber-band
+stroke/rotation math, `drawVertexPreviewDot.ts` is the shared dot primitive both it and the bare
+cursor-position case call, and each sits flat as a sibling in the `drawPenPreview/` folder (own `test/`),
+split out once the single-file version accumulated too many concerns to review at a glance.
+`drawVertexPreviewDot` draws a vertex-styled dot (white fill, blue border, `VECTOR_VERTEX_SIZE` — matching
+a real committed vertex dot, not the larger `VECTOR_SNAP_INDICATOR_RADIUS_PX` circle an earlier version
+used) at `penNewVertexPreviewRef`'s point *and* at the rubber-band's `to` endpoint, so the "where will my
+next click land" dot shows continuously across every point of a session, not just the very first one —
+asked for directly after the first version only showed it before the first click. This same primitive is
+reused, unmodified, by `drawHoveredSegmentHighlight.ts` above for the edge-midpoint helper dot.
+**There is no separate snap-indicator overlay for vertex-snap** (an earlier `penHoverVertexRef`/
+`TPenHoverVertex` ref+type existed solely to draw one, removed in full — asked for directly, "usuń
+wskaźnik, zostaw samo przyciąganie") — the vertex attraction is only visible as the rubber-band's endpoint
+(and its dot) jumping onto the nearby vertex, not as an extra circle drawn around it. Edge-hover is the
+one exception to "attraction only, no extra visual": the segment highlight stroke *and* the midpoint
+helper dot above **are** a deliberate second and third visual (Figma parity, asked for directly), not a
+snap-indicator circle around a point.
 
 ## 5. Escape — 3-stage exit
 

@@ -23,6 +23,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
   const ellipseArcDragRef = useRef<TEllipseArcDragState | null>(null);
   const ellipseArcRatioDragRef = useRef<TEllipseArcRatioDragState | null>(null);
   const ellipseArcRotateDragRef = useRef<TEllipseArcRotateDragState | null>(null);
+  const hoveredSegmentIdRef = useRef<string | null>(null);
   const hoveredVectorVertexIdRef = useRef<string | null>(null);
   const hoverRef = useRef<string | null>(null);
   const marqueeRef = useRef<TDraftRect | null>(null);
@@ -44,6 +45,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
       ellipseArcRatioDragRef,
       ellipseArcRotateDragRef,
       hoverRef,
+      hoveredSegmentIdRef,
       hoveredVectorVertexIdRef,
       marqueeRef,
       penNewVertexPreviewRef,

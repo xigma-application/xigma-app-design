@@ -1,16 +1,14 @@
 import { RefObject } from 'react';
 
 // others
-import { VECTOR_VERTEX_HIT_RADIUS_PX } from 'constant/canvas';
+import { PEN_POINT_HOVER_RESOLVERS } from './resolvePenPointHover/constants';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPendingOutgoingTangent } from '../../types';
+import { TPenPointHoverKind } from './resolvePenPointHover/types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode, TViewport } from 'types/design/types';
-
-// utils
-import { getVectorVertexAtPoint } from '../../../../utils/getVectorVertexAtPoint';
 
 export const updateVectorPenPreview = (
   point: TPoint,
@@ -19,19 +17,33 @@ export const updateVectorPenPreview = (
   viewport: TViewport,
   penPreviewRef: TCanvasRefs['penPreviewRef'],
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
-): boolean => {
-  const hover = getVectorVertexAtPoint(point, node, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom, activeVertexId);
-  const hoverVertex = hover ? node.vertices[hover.vertexId] : null;
+  hoveredSegmentIdRef: TCanvasRefs['hoveredSegmentIdRef'],
+): TPenPointHoverKind | null => {
   const activeVertex = activeVertexId ? node.vertices[activeVertexId] : null;
-  const pending = pendingOutgoingTangentRef.current;
 
-  penPreviewRef.current = activeVertex
-    ? {
-        from: activeVertex,
-        tangentFromOffset: pending && pending.vertexId === activeVertexId ? pending.tangent : null,
-        to: hoverVertex ?? point,
+  if (activeVertex) {
+    const pending = pendingOutgoingTangentRef.current;
+    const tangentFromOffset = pending && pending.vertexId === activeVertexId ? pending.tangent : null;
+
+    for (const resolve of PEN_POINT_HOVER_RESOLVERS) {
+      const result = resolve({ excludeVertexId: activeVertexId, node, point, viewport });
+
+      if (result) {
+        penPreviewRef.current = { from: activeVertex, tangentFromOffset, to: result.point };
+        hoveredSegmentIdRef.current = result.segmentId;
+
+        return result.hoverKind;
       }
-    : null;
+    }
 
-  return hoverVertex !== null;
+    penPreviewRef.current = { from: activeVertex, tangentFromOffset, to: point };
+    hoveredSegmentIdRef.current = null;
+
+    return null;
+  }
+
+  penPreviewRef.current = null;
+  hoveredSegmentIdRef.current = null;
+
+  return null;
 };

@@ -8,7 +8,7 @@ import { TVectorNode, TViewport } from 'types/design/types';
 import { drawVectorStroke } from 'utils/canvas/drawVectorNode/drawVectorStroke';
 import { flattenVectorSegments } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
 
-export const drawVectorEditOutline = (
+export const drawEditModeOutline = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,

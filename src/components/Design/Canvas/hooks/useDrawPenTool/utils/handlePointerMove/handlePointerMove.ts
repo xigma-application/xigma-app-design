@@ -7,6 +7,7 @@ import { AppDispatch, AppStore } from 'store';
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPenDragOrigin, TPendingOutgoingTangent } from '../../types';
+import { TPenPointHoverKind } from './resolvePenPointHover/types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -16,6 +17,18 @@ import { screenToWorld } from '../../../../utils/screenToWorld';
 import { updateNewVertexPreview } from './updateNewVertexPreview';
 import { updateVectorHandleDrag } from './updateVectorHandleDrag';
 import { updateVectorPenPreview } from './updateVectorPenPreview';
+
+const getPenHoverCursorClassName = (hoverKind: TPenPointHoverKind | null): string => {
+  switch (hoverKind) {
+    case 'vertex':
+    case 'edge-snap':
+      return 'pen-snap';
+    case 'edge':
+      return 'pen-extend';
+    default:
+      return 'pen';
+  }
+};
 
 export const handlePointerMove = (
   canvas: HTMLCanvasElement,
@@ -27,6 +40,7 @@ export const handlePointerMove = (
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
   penPreviewRef: TCanvasRefs['penPreviewRef'],
   penNewVertexPreviewRef: TCanvasRefs['penNewVertexPreviewRef'],
+  hoveredSegmentIdRef: TCanvasRefs['hoveredSegmentIdRef'],
   setClassName: (className: string | null) => void,
 ): void => {
   const state = appStore.getState();
@@ -36,6 +50,7 @@ export const handlePointerMove = (
 
   if (dragOriginRef.current && dragStartRef.current) {
     updateVectorHandleDrag(point, dragOriginRef.current, dragStartRef.current, viewport, dispatch, appStore, pendingOutgoingTangentRef);
+    hoveredSegmentIdRef.current = null;
     setClassName('pen');
   } else {
     const vectorEditingNodeId = selectVectorEditingNodeId(state);
@@ -43,15 +58,23 @@ export const handlePointerMove = (
     const penActiveVertexId = selectPenActiveVertexId(state);
 
     if (node && penActiveVertexId) {
-      const isSnapped = updateVectorPenPreview(point, node, penActiveVertexId, viewport, penPreviewRef, pendingOutgoingTangentRef);
+      const hoverKind = updateVectorPenPreview(
+        point,
+        node,
+        penActiveVertexId,
+        viewport,
+        penPreviewRef,
+        pendingOutgoingTangentRef,
+        hoveredSegmentIdRef,
+      );
 
       penNewVertexPreviewRef.current = null;
-      setClassName(isSnapped ? 'pen-snap' : 'pen');
+      setClassName(getPenHoverCursorClassName(hoverKind));
     } else {
-      const isSnapped = updateNewVertexPreview(point, node, viewport, penNewVertexPreviewRef);
+      const hoverKind = updateNewVertexPreview(point, node, viewport, penNewVertexPreviewRef, hoveredSegmentIdRef);
 
       penPreviewRef.current = null;
-      setClassName(isSnapped ? 'pen-snap' : 'pen');
+      setClassName(getPenHoverCursorClassName(hoverKind));
     }
   }
 };

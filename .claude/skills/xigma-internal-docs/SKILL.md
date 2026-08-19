@@ -18,9 +18,13 @@ tool is assembled, written after implementing the Arrow tool).
 
 ## Before starting work
 
-If `.claude/docs/` contains a file matching the area you're about to touch, read it **before**
-exploring the codebase with `grep`/`Explore` — it exists specifically to skip that rediscovery.
-Check `ls .claude/docs/` (or the file listing already in context) rather than assuming none exists.
+**Always start implementation by reading the docs.** Before any other exploration step — before
+spawning an `Explore`/research subagent, before `grep`-ing the codebase, before reading source
+files one by one — run `ls .claude/docs/` and read any file matching the area you're about to
+touch. This comes first, not after a round of subagent research has already rediscovered what the
+doc already says. It exists specifically to skip that rediscovery — using subagents to re-derive
+the same architecture the doc already documents wastes turns and tokens that reading one file up
+front would have avoided.
 
 A doc found this way is a claim about the architecture as of when it was written, not a guarantee —
 if something it says doesn't match what you find in the actual source (a renamed file, a changed

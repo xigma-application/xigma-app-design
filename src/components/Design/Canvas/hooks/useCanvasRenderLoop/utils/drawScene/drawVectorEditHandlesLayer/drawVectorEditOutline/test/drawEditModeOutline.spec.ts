@@ -3,7 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { drawVectorEditOutline } from '../drawVectorEditOutline';
+import { drawEditModeOutline } from '../drawEditModeOutline';
 
 const drawVectorStrokeMock = vi.fn();
 
@@ -27,14 +27,14 @@ const node: TVectorNode = {
   vertices: {},
 };
 
-describe('drawVectorEditOutline', () => {
+describe('drawEditModeOutline', () => {
   beforeEach(() => {
     drawVectorStrokeMock.mockClear();
   });
 
   it('should draw the gray edit-mode outline at a constant screen width when the node is not the hovered one', () => {
     // before
-    drawVectorEditOutline({} as WebGL2RenderingContext, {} as WebGLProgram, {} as WebGLBuffer, node, null, 200, 150, {
+    drawEditModeOutline({} as WebGL2RenderingContext, {} as WebGLProgram, {} as WebGLBuffer, node, null, 200, 150, {
       x: 0,
       y: 0,
       zoom: 2,
@@ -47,7 +47,7 @@ describe('drawVectorEditOutline', () => {
 
   it('should skip drawing when the node is the currently hovered node', () => {
     // before
-    drawVectorEditOutline({} as WebGL2RenderingContext, {} as WebGLProgram, {} as WebGLBuffer, node, node.id, 200, 150, IDENTITY_VIEWPORT);
+    drawEditModeOutline({} as WebGL2RenderingContext, {} as WebGLProgram, {} as WebGLBuffer, node, node.id, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawVectorStrokeMock).not.toHaveBeenCalled();

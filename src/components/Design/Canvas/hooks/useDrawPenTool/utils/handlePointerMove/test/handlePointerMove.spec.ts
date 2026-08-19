@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeId, updateNode } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -29,6 +29,7 @@ const createDragStartRef = (value: TPoint | null = null): RefObject<TPoint | nul
 const createPendingOutgoingTangentRef = (): RefObject<TPendingOutgoingTangent | null> => ({ current: null });
 const createPenPreviewRef = (): TCanvasRefs['penPreviewRef'] => ({ current: null });
 const createPenNewVertexPreviewRef = (): TCanvasRefs['penNewVertexPreviewRef'] => ({ current: null });
+const createHoveredSegmentIdRef = (): TCanvasRefs['hoveredSegmentIdRef'] => ({ current: null });
 
 const addVectorNodeWithSegment = (): string => {
   store.dispatch(
@@ -77,6 +78,7 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      createHoveredSegmentIdRef(),
       setClassName,
     );
 
@@ -107,6 +109,7 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      createHoveredSegmentIdRef(),
       setClassName,
     );
 
@@ -141,6 +144,7 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      createHoveredSegmentIdRef(),
       setClassName,
     );
 
@@ -173,11 +177,80 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      createHoveredSegmentIdRef(),
       setClassName,
     );
 
     // result
     expect(penNewVertexPreviewRef.current).toEqual({ id: 'v1', x: 0, y: 0 });
+    expect(setClassName).toHaveBeenCalledWith('pen-snap');
+  });
+
+  it('should attract the next-vertex preview onto a hovered segment, report it as hovered, and switch to the pen-extend cursor', () => {
+    // mock
+    const nodeId = addVectorNodeWithSegment();
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setPenActiveVertexId(null));
+
+    const canvas = createCanvas();
+    const penPreviewRef = createPenPreviewRef();
+    const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
+    const hoveredSegmentIdRef = createHoveredSegmentIdRef();
+    const setClassName = vi.fn();
+
+    // before — hover near the far end of s1 (v1 0,0 -> v2 100,0), well outside the midpoint's snap radius
+    handlePointerMove(
+      canvas,
+      pointerEvent(90, 2),
+      store.dispatch,
+      store,
+      createDragOriginRef(),
+      createDragStartRef(),
+      createPendingOutgoingTangentRef(),
+      penPreviewRef,
+      penNewVertexPreviewRef,
+      hoveredSegmentIdRef,
+      setClassName,
+    );
+
+    // result
+    expect(penNewVertexPreviewRef.current).toEqual({ x: 90, y: 0 });
+    expect(hoveredSegmentIdRef.current).toBe('s1');
+    expect(setClassName).toHaveBeenCalledWith('pen-extend');
+  });
+
+  it('should lock the next-vertex preview onto the exact midpoint and switch to the pen-snap cursor when hovering close enough to it', () => {
+    // mock
+    const nodeId = addVectorNodeWithSegment();
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setPenActiveVertexId(null));
+
+    const canvas = createCanvas();
+    const penPreviewRef = createPenPreviewRef();
+    const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
+    const hoveredSegmentIdRef = createHoveredSegmentIdRef();
+    const setClassName = vi.fn();
+
+    // before — hover a couple of px off s1's midpoint (v1 0,0 -> v2 100,0 -> midpoint 50,0)
+    handlePointerMove(
+      canvas,
+      pointerEvent(50, 2),
+      store.dispatch,
+      store,
+      createDragOriginRef(),
+      createDragStartRef(),
+      createPendingOutgoingTangentRef(),
+      penPreviewRef,
+      penNewVertexPreviewRef,
+      hoveredSegmentIdRef,
+      setClassName,
+    );
+
+    // result
+    expect(penNewVertexPreviewRef.current).toEqual({ x: 50, y: 0 });
+    expect(hoveredSegmentIdRef.current).toBe('s1');
     expect(setClassName).toHaveBeenCalledWith('pen-snap');
   });
 
@@ -206,6 +279,7 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      createHoveredSegmentIdRef(),
       setClassName,
     );
 
@@ -238,11 +312,92 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      createHoveredSegmentIdRef(),
       setClassName,
     );
 
     // result
     expect(penPreviewRef.current).toMatchObject({ to: { id: 'v2', x: 100, y: 0 } });
+    expect(setClassName).toHaveBeenCalledWith('pen-snap');
+  });
+
+  it('should attract the rubber-band preview onto a hovered segment, report it as hovered, and switch to the pen-extend cursor while extending', () => {
+    // mock — s1 runs v1(0,0) -> v2(100,0); extending from a separate, unconnected v3(50,100)
+    const nodeId = addVectorNodeWithSegment();
+
+    store.dispatch(
+      updateNode({
+        changes: { vertices: { ...(store.getState().design.nodes[nodeId] as TVectorNode).vertices, v3: { id: 'v3', x: 50, y: 100 } } },
+        id: nodeId,
+      }),
+    );
+    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setPenActiveVertexId('v3'));
+
+    const canvas = createCanvas();
+    const penPreviewRef = createPenPreviewRef();
+    const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
+    const hoveredSegmentIdRef = createHoveredSegmentIdRef();
+    const setClassName = vi.fn();
+
+    // before — hover near the far end of s1, well outside the midpoint's snap radius
+    handlePointerMove(
+      canvas,
+      pointerEvent(90, 2),
+      store.dispatch,
+      store,
+      createDragOriginRef(),
+      createDragStartRef(),
+      createPendingOutgoingTangentRef(),
+      penPreviewRef,
+      penNewVertexPreviewRef,
+      hoveredSegmentIdRef,
+      setClassName,
+    );
+
+    // result
+    expect(penPreviewRef.current).toMatchObject({ to: { x: 90, y: 0 } });
+    expect(hoveredSegmentIdRef.current).toBe('s1');
+    expect(setClassName).toHaveBeenCalledWith('pen-extend');
+  });
+
+  it('should lock the rubber-band preview onto the exact midpoint and switch to the pen-snap cursor while extending', () => {
+    // mock — s1 runs v1(0,0) -> v2(100,0); extending from a separate, unconnected v3(50,100)
+    const nodeId = addVectorNodeWithSegment();
+
+    store.dispatch(
+      updateNode({
+        changes: { vertices: { ...(store.getState().design.nodes[nodeId] as TVectorNode).vertices, v3: { id: 'v3', x: 50, y: 100 } } },
+        id: nodeId,
+      }),
+    );
+    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setPenActiveVertexId('v3'));
+
+    const canvas = createCanvas();
+    const penPreviewRef = createPenPreviewRef();
+    const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
+    const hoveredSegmentIdRef = createHoveredSegmentIdRef();
+    const setClassName = vi.fn();
+
+    // before — hover a couple of px off s1's midpoint (50,0)
+    handlePointerMove(
+      canvas,
+      pointerEvent(50, 2),
+      store.dispatch,
+      store,
+      createDragOriginRef(),
+      createDragStartRef(),
+      createPendingOutgoingTangentRef(),
+      penPreviewRef,
+      penNewVertexPreviewRef,
+      hoveredSegmentIdRef,
+      setClassName,
+    );
+
+    // result
+    expect(penPreviewRef.current).toMatchObject({ to: { x: 50, y: 0 } });
+    expect(hoveredSegmentIdRef.current).toBe('s1');
     expect(setClassName).toHaveBeenCalledWith('pen-snap');
   });
 });

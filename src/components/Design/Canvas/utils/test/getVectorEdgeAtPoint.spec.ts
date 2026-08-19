@@ -30,8 +30,37 @@ describe('getVectorEdgeAtPoint', () => {
     // action
     const hit = getVectorEdgeAtPoint({ x: 5, y: 0.5 }, node, 2, 1);
 
-    // result
-    expect(hit).toEqual({ segmentId: 's1' });
+    // result — also reports the closest point projected onto the edge, for hover attraction; right on
+    // the midpoint here (5, 0), so it also counts as snapped
+    expect(hit).toEqual({ point: { x: 5, y: 0 }, segmentId: 's1', snapped: true });
+  });
+
+  it('should report the continuous projected point, not snapped, when hovering the interior away from the midpoint', () => {
+    // mock — v1(0,0)-v2(10,0), midpoint (5,0); hovering near x=8, well outside the midpoint's snap radius
+    const node = buildNode(
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } },
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+    );
+
+    // action
+    const hit = getVectorEdgeAtPoint({ x: 8, y: 0.5 }, node, 2, 1);
+
+    // result — the raw projected point (8, 0), unsnapped, since it's outside the vertexTolerance(1) radius around the midpoint
+    expect(hit).toEqual({ point: { x: 8, y: 0 }, segmentId: 's1', snapped: false });
+  });
+
+  it('should snap fully onto the exact midpoint once the projected point is close enough to it', () => {
+    // mock — v1(0,0)-v2(10,0), midpoint (5,0); hovering a bit off it, but within the snap radius
+    const node = buildNode(
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } },
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+    );
+
+    // action — projects onto (5.5, 0), within vertexTolerance(1) of the (5,0) midpoint
+    const hit = getVectorEdgeAtPoint({ x: 5.5, y: 0.5 }, node, 2, 1);
+
+    // result — locks onto the exact midpoint (5, 0), not the raw projection (5.5, 0)
+    expect(hit).toEqual({ point: { x: 5, y: 0 }, segmentId: 's1', snapped: true });
   });
 
   it('should return null when the point is near the end vertex of an edge instead of its interior', () => {

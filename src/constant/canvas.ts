@@ -45,6 +45,7 @@ export const ZERO_RADIUS_HANDLE_OFFSET_PX = 30;
 export const TEXT_SELECTION_FILL_ALPHA = 0.35;
 export const VECTOR_CURVE_SEGMENTS = 24;
 export const VECTOR_EDGE_HIT_TOLERANCE_PX = 6;
+export const VECTOR_EDGE_HOVER_STROKE = '#cd4422';
 export const VECTOR_EDIT_OUTLINE_STROKE = '#aaaaaa';
 export const VECTOR_HANDLE_FILL = '#0d99ff';
 export const VECTOR_HANDLE_HIT_RADIUS_PX = 5;

@@ -36,7 +36,7 @@ export const startVectorFragment = (
     dispatch(setPenActiveVertexId(hover.vertexId));
     dispatch(endHistoryGesture());
   } else if (edgeHit) {
-    const { newVertexId, segments, vertices } = splitVectorSegment(node, edgeHit.segmentId, point);
+    const { newVertexId, segments, vertices } = splitVectorSegment(node, edgeHit.segmentId, edgeHit.point);
 
     dispatch(updateNode({ changes: { segments, vertices }, id: node.id }));
     dispatch(setPenActiveVertexId(newVertexId));

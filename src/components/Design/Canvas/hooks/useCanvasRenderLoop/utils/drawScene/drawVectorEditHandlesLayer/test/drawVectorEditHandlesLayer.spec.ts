@@ -53,6 +53,7 @@ const call = (
   selectedVertexIds: string[],
   hoveredNodeId: string | null,
   hoveredVertexId: string | null = null,
+  hoveredSegmentId: string | null = null,
   penActiveVertexId: string | null = null,
 ): void => {
   const gl = {} as WebGL2RenderingContext;
@@ -68,6 +69,7 @@ const call = (
     selectedVertexIds,
     hoveredNodeId,
     hoveredVertexId,
+    hoveredSegmentId,
     penActiveVertexId,
     200,
     150,
@@ -113,7 +115,7 @@ describe('drawVectorEditHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorEditHandlesLayer(gl, program, buffer, frameNodes, 'frame-1', [], null, null, null, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorEditHandlesLayer(gl, program, buffer, frameNodes, 'frame-1', [], null, null, null, null, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawVectorStrokeMock).not.toHaveBeenCalled();
@@ -126,6 +128,15 @@ describe('drawVectorEditHandlesLayer', () => {
     // result
     expect(drawVectorStrokeMock).toHaveBeenCalledTimes(1);
     expect(drawVectorStrokeMock).toHaveBeenCalledWith({}, {}, {}, expect.anything(), '#aaaaaa', 2, 200, 150, IDENTITY_VIEWPORT);
+  });
+
+  it('should draw the hovered segment highlight when a hoveredSegmentId is given', () => {
+    // before
+    call(vectorNode.id, [], null, null, 's1');
+
+    // result — the gray outline, plus the single hovered segment drawn again in the highlight color
+    expect(drawVectorStrokeMock).toHaveBeenCalledTimes(2);
+    expect(drawVectorStrokeMock).toHaveBeenNthCalledWith(2, {}, {}, {}, expect.anything(), '#cd4422', 2, 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should skip the gray edit-mode outline when the edited node is the currently hovered node — the blue hover outline already covers it', () => {
@@ -174,7 +185,7 @@ describe('drawVectorEditHandlesLayer', () => {
 
   it('should draw the Pen tool active vertex (the segment being extended from) with the selected-style outer/inner pair', () => {
     // before
-    call(vectorNode.id, [], null, null, 'v1');
+    call(vectorNode.id, [], null, null, null, 'v1');
 
     // result — same rendering as a real selection, even though v1 isn't in selectedVertexIds
     const selectedOuterDot = drawEllipseMock.mock.calls.find((args) => args[3].width === SELECTED_OUTER_SIZE)?.[3];
@@ -204,6 +215,7 @@ describe('drawVectorEditHandlesLayer', () => {
       rotatedNodes,
       rotatedVectorNode.id,
       ['v1'],
+      null,
       null,
       null,
       null,

@@ -20,7 +20,7 @@ import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 
 export const useDrawPenTool = (refs: TCanvasRefs): void => {
-  const { canvasRef, penNewVertexPreviewRef, penPreviewRef } = refs;
+  const { canvasRef, hoveredSegmentIdRef, penNewVertexPreviewRef, penPreviewRef } = refs;
   const activeTool = useAppSelector(selectActiveTool);
   const dispatch = useAppDispatch();
   const appStore = useAppStore();
@@ -44,6 +44,7 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
       pendingOutgoingTangentRef,
       penPreviewRef,
       penNewVertexPreviewRef,
+      hoveredSegmentIdRef,
       setClassName,
     );
   };
@@ -77,7 +78,8 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
         canvas.removeEventListener('pointercancel', pointerCancelListener);
         penPreviewRef.current = null;
         penNewVertexPreviewRef.current = null;
+        hoveredSegmentIdRef.current = null;
       };
     }
-  }, [activeTool, appStore, canvasRef, dispatch, penNewVertexPreviewRef, penPreviewRef, setClassName]);
+  }, [activeTool, appStore, canvasRef, dispatch, hoveredSegmentIdRef, penNewVertexPreviewRef, penPreviewRef, setClassName]);
 };
