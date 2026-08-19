@@ -22,6 +22,7 @@ const addVectorNode = (): string => {
       fillColor: null,
       name: 'Vector',
       parentId: null,
+      rotation: 0,
       segments: {},
       strokeColor: '#000000',
       strokeWidth: 1,

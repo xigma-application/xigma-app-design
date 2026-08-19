@@ -10,6 +10,7 @@ import {
   selectEditingTextContent,
   selectOrderedNodes,
   selectSelectedNodes,
+  selectVectorEditingNodeId,
 } from 'store/design/selectors';
 import { RootState } from 'store';
 
@@ -34,8 +35,9 @@ export const resolveToolHover = (
 ): void => {
   const editingTextBox = selectEditingTextBox(state);
   const isEditingText = Boolean(editingTextBox);
+  const isEditingVector = Boolean(selectVectorEditingNodeId(state));
   const selectedNodes = selectSelectedNodes(state);
-  const resizableSelectedNodes = isEditingText ? [] : selectedNodes;
+  const resizableSelectedNodes = isEditingText || isEditingVector ? [] : selectedNodes;
   const ctx: THoverResolverContext = {
     activeTool,
     editingContent: selectEditingTextContent(state),

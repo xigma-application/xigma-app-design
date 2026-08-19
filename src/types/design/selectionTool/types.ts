@@ -17,10 +17,14 @@ export type TVectorNodeOrigin = {
 
 export type TNodeOrigin = { x1: number; x2: number; y1: number; y2: number } | { x: number; y: number } | TVectorNodeOrigin;
 
+// resize keeps the node's live rotation (unlike rotate's TVectorNodeOrigin, resize never bakes it away)
+// so a rotated single vector node's opposite corner can be anchored the same way a rotated box is
+export type TVectorResizeOrigin = TVectorNodeOrigin & { rotation: number };
+
 export type TResizeNodeOrigin =
   | { x1: number; x2: number; y1: number; y2: number }
   | { flip: { x: boolean; y: boolean } | null; height: number; rotation: number; width: number; x: number; y: number }
-  | TVectorNodeOrigin;
+  | TVectorResizeOrigin;
 
 export type TDragState = {
   hasMoved: boolean;
@@ -73,7 +77,7 @@ export type TStarRatioDragState = {
 export type TRotateNodeOrigin =
   | { x1: number; x2: number; y1: number; y2: number }
   | { height: number; rotation: number; width: number; x: number; y: number }
-  | TVectorNodeOrigin;
+  | (TVectorNodeOrigin & { rotation: number });
 
 export type TRotateDragState = {
   cursorAngle: number;
@@ -102,7 +106,6 @@ export type TSelectionToolRefs = {
   pathOffsetDragRef: RefObject<TPathOffsetDragState | null>;
   polygonVertexCountDragRef: RefObject<TPolygonVertexCountDragState | null>;
   resizeDragRef: RefObject<TResizeDragState | null>;
-  rotateDragRef: RefObject<TRotateDragState | null>;
   starRatioDragRef: RefObject<TStarRatioDragState | null>;
   starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>;
   vectorHandleDragRef: RefObject<TVectorHandleDragState | null>;

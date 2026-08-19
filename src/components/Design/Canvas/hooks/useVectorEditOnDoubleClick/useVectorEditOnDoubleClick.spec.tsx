@@ -23,12 +23,13 @@ const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
 
 const doubleClickEvent = (x: number, y: number): MouseEvent => new MouseEvent('dblclick', { clientX: x, clientY: y });
 
-const addTriangleVectorNode = (): string => {
+const addTriangleVectorNode = (rotation = 0): string => {
   store.dispatch(
     addNode({
       fillColor: '#ff0000',
       name: 'Vector',
       parentId: null,
+      rotation,
       segments: {
         ab: { endId: 'b', id: 'ab', startId: 'a', tangentEnd: null, tangentStart: null },
         bc: { endId: 'c', id: 'bc', startId: 'b', tangentEnd: null, tangentStart: null },
@@ -162,6 +163,27 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
 
     // result
     expect(store.getState().design.vectorEditingNodeId).toBeNull();
+  });
+
+  it('should leave a rotated node untouched when merely entering Vector Edit Mode on it — no bake yet', () => {
+    // mock — 180deg around the triangle's own bounds-center (2025, 2025) maps each vertex to its
+    // point-symmetric opposite, so the double-click must land on the rotated (flipped) triangle; baking
+    // is deferred to the first actual interaction (armBakeVectorRotationOnPointerDown.ts), not entry
+    const idA = addTriangleVectorNode(180);
+    const canvasRef = createCanvasRef();
+    const originalNode = store.getState().design.nodes[idA];
+
+    // before
+    renderDoubleClickTool(canvasRef);
+
+    // action
+    canvasRef.current?.dispatchEvent(doubleClickEvent(2025, 2030));
+
+    // result
+    const { design } = store.getState();
+
+    expect(design.vectorEditingNodeId).toBe(idA);
+    expect(design.nodes[idA]).toEqual(originalNode);
   });
 
   it('should not exit Vector Edit Mode when double-clicking the shape currently being edited', () => {

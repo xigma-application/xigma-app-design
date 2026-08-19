@@ -37,7 +37,7 @@ export const handlePointerUp = (
   disarmEndpointDrag(canvas, event, selectionRefs.endpointDragRef);
   disarmPathOffsetDrag(canvas, event, selectionRefs.pathOffsetDragRef, setClassName);
   disarmResizeDrag(canvas, event, selectionRefs.resizeDragRef);
-  disarmRotateDrag(canvas, event, selectionRefs.rotateDragRef);
+  disarmRotateDrag(canvas, event, canvasRefs.rotateDragRef);
   disarmCornerRadiusDrag(canvas, event, canvasRefs.cornerRadiusDragRef);
   disarmPolygonCornerRadiusDrag(canvas, event, canvasRefs.polygonCornerRadiusDragRef);
   disarmStarCornerRadiusDrag(canvas, event, canvasRefs.starCornerRadiusDragRef);

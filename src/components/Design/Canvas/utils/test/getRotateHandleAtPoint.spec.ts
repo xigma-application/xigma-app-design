@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TFrameNode, TLineNode } from 'types/design/types';
+import { TFrameNode, TLineNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getRotateHandleAtPoint } from '../getRotateHandleAtPoint';
@@ -41,6 +41,25 @@ const line: TLineNode = {
   y2: 0,
 };
 
+const vector: TVectorNode = {
+  fillColor: null,
+  id: 'vector-1',
+  name: 'Vector',
+  parentId: null,
+  rotation: 0,
+  segments: {},
+  strokeColor: '#000000',
+  strokeWidth: 1,
+  type: NodeType.vector,
+  vertexHandleModes: {},
+  vertices: {
+    v1: { id: 'v1', x: 0, y: 0 },
+    v2: { id: 'v2', x: 100, y: 0 },
+    v3: { id: 'v3', x: 100, y: 100 },
+    v4: { id: 'v4', x: 0, y: 100 },
+  },
+};
+
 describe('getRotateHandleAtPoint', () => {
   it('should return null when nothing is selected', () => {
     expect(getRotateHandleAtPoint({ x: 0, y: 0 }, [], IDENTITY_VIEWPORT)).toBeNull();
@@ -48,6 +67,19 @@ describe('getRotateHandleAtPoint', () => {
 
   it('should return null when the single selected node is a line', () => {
     expect(getRotateHandleAtPoint({ x: 0, y: 0 }, [line], IDENTITY_VIEWPORT)).toBeNull();
+  });
+
+  it('should detect the ring just outside a corner handle, on a single selected vector node', () => {
+    // result
+    expect(getRotateHandleAtPoint({ x: 0, y: -10 }, [vector], IDENTITY_VIEWPORT)).toEqual({
+      bounds: { height: 100, width: 100, x: 0, y: 0 },
+      rotation: 0,
+    });
+  });
+
+  it('should return null for a single selected vector node when the point is not in the ring', () => {
+    // result
+    expect(getRotateHandleAtPoint({ x: 50, y: 50 }, [vector], IDENTITY_VIEWPORT)).toBeNull();
   });
 
   it('should detect the ring just outside a corner handle, on a single selected node', () => {

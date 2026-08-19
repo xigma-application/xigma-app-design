@@ -6,11 +6,12 @@ import { store } from 'store';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import { TFrameNode } from 'types/design/types';
+import { TFrameNode, TVectorNode } from 'types/design/types';
 import { TResizeDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { continueResizeDrag } from '../continueResizeDrag';
+import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBounds';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
 const createCanvas = (): HTMLCanvasElement => {
@@ -47,6 +48,32 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number, parentId: s
 const addMediaNode = (x: number, y: number, width: number, height: number, parentId: string | null = null, rotation = 0): string => {
   store.dispatch(
     addNode({ flipX: false, flipY: false, height, name: 'Image', parentId, rotation, src: 'a.png', type: NodeType.media, width, x, y }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addVectorNode = (x: number, y: number, width: number, height: number, rotation = 0): string => {
+  store.dispatch(
+    addNode({
+      fillColor: '#ff0000',
+      name: 'Vector',
+      parentId: null,
+      rotation,
+      segments: {},
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: {
+        v1: { id: 'v1', x, y },
+        v2: { id: 'v2', x: x + width, y },
+        v3: { id: 'v3', x: x + width, y: y + height },
+        v4: { id: 'v4', x, y: y + height },
+      },
+    }),
   );
 
   const { rootOrder } = store.getState().design;
@@ -481,6 +508,40 @@ describe('continueResizeDrag', () => {
 
     const newCenter = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
     const anchorWorldAfter = rotatePoint({ x: node.x + node.width, y: node.y + node.height }, newCenter, 90);
+
+    expect(anchorWorldAfter.x).toBeCloseTo(anchorWorldBefore.x);
+    expect(anchorWorldAfter.y).toBeCloseTo(anchorWorldBefore.y);
+  });
+
+  it('should keep the anchor edge fixed in WORLD space when resizing a single rotated VECTOR node, mirroring a rotated box', () => {
+    // mock — same 100x50, 90deg, "e"-handle scenario as the box test above, adapted to a vector node's
+    // vertex-cloud geometry, to prove a rotated vector's opposite edge no longer drifts on resize
+    const idA = addVectorNode(0, 0, 100, 50, 90);
+    const canvas = createCanvas();
+    const bounds = { height: 50, width: 100, x: 0, y: 0 };
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 1,
+      bounds,
+      handle: 'e',
+      nodeOrigins: {
+        [idA]: {
+          rotation: 90,
+          segments: {},
+          vertices: { v1: { x: 0, y: 0 }, v2: { x: 100, y: 0 }, v3: { x: 100, y: 50 }, v4: { x: 0, y: 50 } },
+        },
+      },
+    });
+    const oldCenter = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+    const anchorWorldBefore = rotatePoint({ x: bounds.x, y: oldCenter.y }, oldCenter, 90);
+
+    // before
+    continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef);
+
+    // result
+    const node = store.getState().design.nodes[idA] as TVectorNode;
+    const newBounds = getVectorNodeBounds(node);
+    const newCenter = { x: newBounds.x + newBounds.width / 2, y: newBounds.y + newBounds.height / 2 };
+    const anchorWorldAfter = rotatePoint({ x: newBounds.x, y: newCenter.y }, newCenter, 90);
 
     expect(anchorWorldAfter.x).toBeCloseTo(anchorWorldBefore.x);
     expect(anchorWorldAfter.y).toBeCloseTo(anchorWorldBefore.y);

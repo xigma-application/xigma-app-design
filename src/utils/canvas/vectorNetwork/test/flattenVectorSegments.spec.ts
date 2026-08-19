@@ -16,6 +16,7 @@ describe('flattenVectorSegments', () => {
       id: '1',
       name: 'Vector',
       parentId: null,
+      rotation: 0,
       segments: {
         s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
         s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: { x: 0, y: 5 }, tangentStart: null },
@@ -54,6 +55,7 @@ describe('flattenVectorSegments', () => {
       id: '1',
       name: 'Vector',
       parentId: null,
+      rotation: 0,
       segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
       strokeColor: '#000',
       strokeWidth: 1,

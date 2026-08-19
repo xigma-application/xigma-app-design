@@ -8,6 +8,7 @@ import { TArmContext } from '../../types';
 import { TEllipseNode, TLineNode, TPolygonNode, TRectangleNode, TStarNode, TTextNode, TVectorNode } from 'types/design/types';
 
 // utils
+import { armBakeVectorRotationOnPointerDown } from '../armBakeVectorRotationOnPointerDown';
 import { armCornerRadiusOnPointerDown } from '../armCornerRadiusOnPointerDown';
 import { armEllipseArcOnPointerDown } from '../armEllipseArcOnPointerDown';
 import { armEllipseArcRatioOnPointerDown } from '../armEllipseArcRatioOnPointerDown';
@@ -81,12 +82,13 @@ const addTextNode = (x: number, y: number, width = 200, height = 200): TTextNode
   return nodes[rootOrder[rootOrder.length - 1]] as TTextNode;
 };
 
-const addVectorNode = (segments: TVectorNode['segments'], vertices: TVectorNode['vertices']): string => {
+const addVectorNode = (segments: TVectorNode['segments'], vertices: TVectorNode['vertices'], rotation = 0): string => {
   store.dispatch(
     addNode({
       fillColor: '#000000',
       name: 'Vector',
       parentId: null,
+      rotation,
       segments,
       strokeColor: '#000000',
       strokeWidth: 1,
@@ -458,7 +460,7 @@ describe('armRotateOnPointerDown', () => {
 
     // result
     expect(armRotateOnPointerDown(ctx)).toBe(true);
-    expect(ctx.selectionRefs.rotateDragRef.current).not.toBeNull();
+    expect(ctx.canvasRefs.rotateDragRef.current).not.toBeNull();
   });
 
   it('should return undefined when the point misses the rotate ring', () => {
@@ -467,7 +469,7 @@ describe('armRotateOnPointerDown', () => {
 
     // result
     expect(armRotateOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.selectionRefs.rotateDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.rotateDragRef.current).toBeNull();
   });
 });
 
@@ -647,6 +649,61 @@ describe('armMarqueeOnPointerDown', () => {
     // result
     expect(armMarqueeOnPointerDown(ctx)).toBeUndefined();
     expect(ctx.selectionRefs.marqueeStartRef.current).toBeNull();
+  });
+});
+
+describe('armBakeVectorRotationOnPointerDown', () => {
+  afterEach(() => {
+    store.dispatch(setVectorEditingNodeId(null));
+  });
+
+  it('should bake a live rotation into vertices and reset it to 0, without claiming the pointerdown', () => {
+    // mock — a 100x100 square rotated 90deg around its own bounds-center (50, 50)
+    const nodeId = addVectorNode(
+      {},
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 100, y: 100 }, v4: { id: 'v4', x: 0, y: 100 } },
+      90,
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    const ctx = createContext();
+
+    // action
+    const result = armBakeVectorRotationOnPointerDown(ctx);
+
+    // result — never claims the event, so the real resolver for whatever was actually clicked still runs
+    expect(result).toBeUndefined();
+    expect(ctx.dispatch).toHaveBeenCalledTimes(1);
+
+    const action = (ctx.dispatch as ReturnType<typeof vi.fn>).mock.calls[0][0] as ReturnType<typeof updateNode>;
+
+    expect(action.payload.id).toBe(nodeId);
+    expect(action.payload.changes).toMatchObject({ rotation: 0 });
+  });
+
+  it('should not dispatch when the currently-edited vector node has no rotation', () => {
+    // mock
+    const nodeId = addVectorNode({}, { v1: { id: 'v1', x: 0, y: 0 } });
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    const ctx = createContext();
+
+    // result
+    expect(armBakeVectorRotationOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.dispatch).not.toHaveBeenCalled();
+  });
+
+  it('should not dispatch when Vector Edit Mode is not active', () => {
+    // before
+    const ctx = createContext();
+
+    // result
+    expect(armBakeVectorRotationOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.dispatch).not.toHaveBeenCalled();
   });
 });
 

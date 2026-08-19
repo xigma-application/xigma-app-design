@@ -47,6 +47,7 @@ export const startNewVectorNetwork = (
       fillColor: null,
       name: VECTOR_NAME,
       parentId: null,
+      rotation: 0,
       segments: {},
       strokeColor: VECTOR_STROKE,
       strokeWidth: VECTOR_STROKE_WIDTH,

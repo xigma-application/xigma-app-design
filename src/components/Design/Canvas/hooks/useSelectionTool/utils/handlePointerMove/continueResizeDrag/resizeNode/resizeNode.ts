@@ -8,7 +8,7 @@ import { TResizeNodeOrigin } from 'types/design/selectionTool/types';
 // utils
 import { resizeBoxNode } from './resizeBoxNode';
 import { resizeLineNode } from './resizeLineNode';
-import { resizeVectorNode } from './resizeVectorNode';
+import { resizeVectorNode } from './resizeVectorNode/resizeVectorNode';
 
 export const resizeNode = (
   id: string,
@@ -25,7 +25,7 @@ export const resizeNode = (
       resizeLineNode(id, origin, dispatch, anchors, scaleX, scaleY);
       break;
     case 'vertices' in origin:
-      resizeVectorNode(id, origin, dispatch, anchors, scaleX, scaleY);
+      resizeVectorNode(id, origin, dispatch, anchors, scaleX, scaleY, rotatedAnchorSolver);
       break;
     default:
       resizeBoxNode(id, origin, dispatch, anchors, scaleX, scaleY, isSingleBoxOrigin, rotatedAnchorSolver);

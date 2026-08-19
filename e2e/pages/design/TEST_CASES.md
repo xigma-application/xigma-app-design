@@ -1457,6 +1457,7 @@ Two gotchas the specs below work around, worth knowing before adding more:
 | 181 | A selected (not editing) vector node still resizes via the ordinary 8-direction handles                                |  ✅  | ✅ `vector-edit.spec.ts` |
 | 182 | A selected (not editing) vector node still rotates via the ordinary rotate ring                                        |  ✅  | ✅ `vector-edit.spec.ts` |
 | 183 | Undo after dragging a vertex restores its previous position                                                            |  ✅  | ✅ `vector-edit.spec.ts` |
+| 184 | Dragging a vertex on an already-rotated, not-yet-baked vector node moves only that vertex, not the whole shape         |  ✅  | ✅ `vector-edit.spec.ts` |
 
 ## Why so few scenarios get e2e coverage
 

@@ -15,6 +15,7 @@ import {
 } from 'types/design/canvas/types';
 import { TDraftEntity } from 'types/design/types';
 import { TDraftRect } from 'types/canvas';
+import { TRotateDragState } from 'types/design/selectionTool/types';
 
 export const useCanvasRefs = (): TCanvasRefs => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -28,6 +29,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
   const penHoverVertexRef = useRef<TPenHoverVertex | null>(null);
   const penPreviewRef = useRef<TPenPreview | null>(null);
   const polygonCornerRadiusDragRef = useRef<TPolygonCornerRadiusDragState | null>(null);
+  const rotateDragRef = useRef<TRotateDragState | null>(null);
   const selectedVectorVertexIdsRef = useRef<string[]>([]);
   const sliceRef = useRef<TSliceDraft | null>(null);
   const starCornerRadiusDragRef = useRef<TStarCornerRadiusDragState | null>(null);
@@ -46,6 +48,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
       penHoverVertexRef,
       penPreviewRef,
       polygonCornerRadiusDragRef,
+      rotateDragRef,
       selectedVectorVertexIdsRef,
       sliceRef,
       starCornerRadiusDragRef,

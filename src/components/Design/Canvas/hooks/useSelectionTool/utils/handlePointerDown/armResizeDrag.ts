@@ -32,7 +32,7 @@ export const armResizeDrag = (
         nodeOrigins[node.id] = { x1: node.x1, x2: node.x2, y1: node.y1, y2: node.y2 };
         break;
       case NodeType.vector:
-        nodeOrigins[node.id] = getVectorNodeOrigin(node);
+        nodeOrigins[node.id] = { ...getVectorNodeOrigin(node), rotation: node.rotation };
         break;
       default:
         nodeOrigins[node.id] = {

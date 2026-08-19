@@ -35,7 +35,7 @@ export const handlePointerMove = (
   continueEndpointDrag(canvas, event, dispatch, selectionRefs.endpointDragRef);
   continuePathOffsetDrag(canvas, event, dispatch, selectionRefs.pathOffsetDragRef);
   continueResizeDrag(canvas, event, dispatch, selectionRefs.resizeDragRef);
-  continueRotateDrag(canvas, event, dispatch, selectionRefs.rotateDragRef);
+  continueRotateDrag(canvas, event, dispatch, canvasRefs.rotateDragRef);
   continueCornerRadiusDrag(canvas, event, dispatch, canvasRefs.cornerRadiusDragRef);
   continuePolygonCornerRadiusDrag(canvas, event, dispatch, canvasRefs.polygonCornerRadiusDragRef);
   continueStarCornerRadiusDrag(canvas, event, dispatch, canvasRefs.starCornerRadiusDragRef);

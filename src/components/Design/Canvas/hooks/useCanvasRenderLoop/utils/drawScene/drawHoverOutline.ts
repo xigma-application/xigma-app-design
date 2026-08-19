@@ -6,6 +6,7 @@ import { NodeType } from 'types/design/enums';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
+import { bakeVectorNodeRotation } from 'components/Design/Canvas/utils/bakeVectorNodeRotation';
 import { drawLine } from 'utils/canvas/drawLine';
 import { drawTextHoverUnderline } from './drawTextHoverUnderline';
 import { drawThickEllipseNodeOutline } from 'utils/canvas/shapes/drawThickEllipseNodeOutline';
@@ -99,7 +100,7 @@ export const drawHoverOutline = (
           gl,
           program,
           buffer,
-          flattenVectorSegments(hoveredNode),
+          flattenVectorSegments({ ...hoveredNode, ...bakeVectorNodeRotation(hoveredNode) }),
           DRAFT_FRAME_STROKE,
           HOVER_OUTLINE_WIDTH / viewport.zoom,
           canvasWidth,

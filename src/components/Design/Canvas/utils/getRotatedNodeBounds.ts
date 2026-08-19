@@ -11,7 +11,7 @@ import { rotatePoint } from 'utils/math/rotatePoint';
 export const getRotatedNodeBounds = (node: TSceneNode): TDraftRect => {
   const bounds = getNodeBounds(node);
 
-  if (node.type === NodeType.line || node.type === NodeType.vector || node.rotation === 0) {
+  if (node.type === NodeType.line || node.rotation === 0) {
     return bounds;
   }
 

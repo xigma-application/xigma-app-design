@@ -3,12 +3,18 @@ import { DRAFT_FRAME_STROKE, VECTOR_CURVE_SEGMENTS, VECTOR_SNAP_INDICATOR_RADIUS
 
 // types
 import { TPenHoverVertex, TPenPreview } from 'types/design/canvas/types';
-import { TViewport } from 'types/design/types';
+import { TSceneNode, TViewport } from 'types/design/types';
+import { TPoint } from 'types/canvas';
 
 // utils
 import { drawEllipse } from 'utils/canvas/shapes/drawEllipse';
 import { drawVectorStroke } from 'utils/canvas/drawVectorNode/drawVectorStroke';
 import { flattenSegment } from 'utils/canvas/vectorNetwork/flattenSegment';
+import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
+import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBounds';
+import { rotatePoint } from 'utils/math/rotatePoint';
+
+const ORIGIN: TPoint = { x: 0, y: 0 };
 
 export const drawPenPreview = (
   gl: WebGL2RenderingContext,
@@ -16,12 +22,22 @@ export const drawPenPreview = (
   buffer: WebGLBuffer,
   preview: TPenPreview | null,
   hoverVertex: TPenHoverVertex | null,
+  nodes: Record<string, TSceneNode>,
+  vectorEditingNodeId: string | null,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
+  const editingNode = getVectorEditingNode(nodes, vectorEditingNodeId);
+  const rotation = editingNode?.rotation ?? 0;
+  const bounds = editingNode ? getVectorNodeBounds(editingNode) : null;
+  const pivot = bounds ? { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 } : ORIGIN;
+
   if (preview) {
-    const points = flattenSegment(preview.from, preview.to, preview.tangentFromOffset, null, VECTOR_CURVE_SEGMENTS);
+    const from = rotatePoint(preview.from, pivot, rotation);
+    const to = rotatePoint(preview.to, pivot, rotation);
+    const tangentFromOffset = preview.tangentFromOffset ? rotatePoint(preview.tangentFromOffset, ORIGIN, rotation) : null;
+    const points = flattenSegment(from, to, tangentFromOffset, null, VECTOR_CURVE_SEGMENTS);
 
     drawVectorStroke(
       gl,
@@ -38,6 +54,7 @@ export const drawPenPreview = (
 
   if (hoverVertex) {
     const radius = VECTOR_SNAP_INDICATOR_RADIUS_PX / viewport.zoom;
+    const point = rotatePoint(hoverVertex.point, pivot, rotation);
 
     drawEllipse(
       gl,
@@ -47,8 +64,8 @@ export const drawPenPreview = (
         height: radius * 2,
         stroke: DRAFT_FRAME_STROKE,
         width: radius * 2,
-        x: hoverVertex.point.x - radius,
-        y: hoverVertex.point.y - radius,
+        x: point.x - radius,
+        y: point.y - radius,
       },
       canvasWidth,
       canvasHeight,

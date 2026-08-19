@@ -94,6 +94,7 @@ describe('handlePointerUp', () => {
         ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
         marqueeRef: createMarqueeRef(),
         polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+        rotateDragRef: createRotateDragRef(),
         starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
       }),
       createSelectionToolRefs({
@@ -103,7 +104,6 @@ describe('handlePointerUp', () => {
         pathOffsetDragRef: createPathOffsetDragRef(),
         polygonVertexCountDragRef: createPolygonVertexCountDragRef(),
         resizeDragRef: createResizeDragRef(),
-        rotateDragRef: createRotateDragRef(),
         starVertexCountDragRef: createStarVertexCountDragRef(),
       }),
       vi.fn(),
@@ -135,6 +135,7 @@ describe('handlePointerUp', () => {
         ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
         marqueeRef: createMarqueeRef(),
         polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+        rotateDragRef: createRotateDragRef(),
         starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
       }),
       createSelectionToolRefs({
@@ -144,7 +145,6 @@ describe('handlePointerUp', () => {
         pathOffsetDragRef: createPathOffsetDragRef(),
         polygonVertexCountDragRef: createPolygonVertexCountDragRef(),
         resizeDragRef: createResizeDragRef(),
-        rotateDragRef: createRotateDragRef(),
         starVertexCountDragRef: createStarVertexCountDragRef(),
       }),
       vi.fn(),
@@ -172,6 +172,7 @@ describe('handlePointerUp', () => {
         ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
         marqueeRef: createMarqueeRef(),
         polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+        rotateDragRef: createRotateDragRef(),
         starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
       }),
       createSelectionToolRefs({
@@ -181,7 +182,6 @@ describe('handlePointerUp', () => {
         pathOffsetDragRef: createPathOffsetDragRef(),
         polygonVertexCountDragRef: createPolygonVertexCountDragRef(),
         resizeDragRef: createResizeDragRef(),
-        rotateDragRef: createRotateDragRef(),
         starVertexCountDragRef: createStarVertexCountDragRef(),
       }),
       vi.fn(),
@@ -209,6 +209,7 @@ describe('handlePointerUp', () => {
         ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
         marqueeRef: marqueeRef,
         polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+        rotateDragRef: createRotateDragRef(),
         starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
       }),
       createSelectionToolRefs({
@@ -218,7 +219,6 @@ describe('handlePointerUp', () => {
         pathOffsetDragRef: createPathOffsetDragRef(),
         polygonVertexCountDragRef: createPolygonVertexCountDragRef(),
         resizeDragRef: createResizeDragRef(),
-        rotateDragRef: createRotateDragRef(),
         starVertexCountDragRef: createStarVertexCountDragRef(),
       }),
       vi.fn(),

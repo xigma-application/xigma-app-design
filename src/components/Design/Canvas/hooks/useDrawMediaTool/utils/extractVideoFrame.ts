@@ -64,6 +64,8 @@ export const extractVideoFrame = (file: File, onLoad: (armed: TArmedMedia) => vo
 
   video.onerror = (): void => {
     cleanupVideoElement(video, videoSrc);
+    // eslint-disable-next-line no-console -- no error-reporting/toast channel reaches this handler, so surfacing the failure at all requires the console directly
+    console.error('Failed to load video for frame extraction', file.name);
   };
 
   document.body.appendChild(video);

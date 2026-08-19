@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 
 // types
 import { TVectorHandleDragState } from 'types/design/selectionTool/types';
-import { TVectorHandleHit } from '../../../../utils/getVectorHandleAtPoint';
+import { TVectorHandleHit } from '../../../../../utils/getVectorHandleAtPoint';
 
 // utils
 import { armVectorHandleDrag } from '../armVectorHandleDrag';

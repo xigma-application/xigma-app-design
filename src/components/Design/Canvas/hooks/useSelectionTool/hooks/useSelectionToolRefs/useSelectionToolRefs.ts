@@ -7,7 +7,6 @@ import {
   TPathOffsetDragState,
   TPolygonVertexCountDragState,
   TResizeDragState,
-  TRotateDragState,
   TSelectionToolRefs,
   TStarRatioDragState,
   TStarVertexCountDragState,
@@ -23,7 +22,6 @@ export const useSelectionToolRefs = (): TSelectionToolRefs => {
   const pathOffsetDragRef = useRef<TPathOffsetDragState | null>(null);
   const polygonVertexCountDragRef = useRef<TPolygonVertexCountDragState | null>(null);
   const resizeDragRef = useRef<TResizeDragState | null>(null);
-  const rotateDragRef = useRef<TRotateDragState | null>(null);
   const starRatioDragRef = useRef<TStarRatioDragState | null>(null);
   const starVertexCountDragRef = useRef<TStarVertexCountDragState | null>(null);
   const vectorHandleDragRef = useRef<TVectorHandleDragState | null>(null);
@@ -38,7 +36,6 @@ export const useSelectionToolRefs = (): TSelectionToolRefs => {
       pathOffsetDragRef,
       polygonVertexCountDragRef,
       resizeDragRef,
-      rotateDragRef,
       starRatioDragRef,
       starVertexCountDragRef,
       vectorHandleDragRef,

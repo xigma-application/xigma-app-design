@@ -21,6 +21,7 @@ const buildNode = (vertices: TVectorVertex[], segments: TVectorSegment[]): TVect
   id: '1',
   name: 'Vector',
   parentId: null,
+  rotation: 0,
   segments: Object.fromEntries(segments.map((segment) => [segment.id, segment])),
   strokeColor: '#000',
   strokeWidth: 1,

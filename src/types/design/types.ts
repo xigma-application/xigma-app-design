@@ -125,7 +125,6 @@ export type TTextNode = TBaseNode & {
 
 export type TVectorVertex = { id: string; x: number; y: number };
 
-// relative offset from its own vertex — moving a vertex moves its handles for free, null = straight at that end
 export type TVectorTangent = { x: number; y: number } | null;
 
 export type TVectorSegment = {
@@ -143,6 +142,7 @@ export type TVectorNode = {
   id: string;
   name: string;
   parentId: string | null;
+  rotation: number;
   segments: Record<string, TVectorSegment>;
   strokeColor: string;
   strokeWidth: number;

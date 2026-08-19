@@ -25,13 +25,20 @@ export type TVectorNode = {
   segments: Record<string, TVectorSegment>;
   vertexHandleModes: Record<string, TVertexHandleMode>;
   fillColor: string; strokeColor: string; strokeWidth: number;
+  rotation: number;
 };
 ```
 
-Not a `TBaseNode` (no `x/y/width/height/rotation`) — like `TLineNode`, a point graph doesn't fit a box.
-Bounds are derived on demand (`utils/canvas/vectorNetwork/getVectorNodeBounds.ts`, min/max over
-`vertices`), exactly mirroring how `getNodeBounds.ts` already special-cases `TLineNode`. No stored
-`rotation` either — group rotate/move apply directly to vertex/tangent coordinates (§6).
+Not a `TBaseNode` (no `x/y/width/height`) — like `TLineNode`, a point graph doesn't fit a box. Bounds
+are derived on demand (`utils/canvas/vectorNetwork/getVectorNodeBounds.ts`, min/max over `vertices`),
+exactly mirroring how `getNodeBounds.ts` already special-cases `TLineNode`.
+
+`rotation` **is** stored (unlike `TLineNode`), but `vertices`/`segments` always stay in that rotation's
+*local/reference* frame — `rotation` is a live transform applied non-destructively wherever the shape is
+drawn or hit-tested (`bakeVectorNodeRotation.ts`, mirroring `TBaseNode.rotation`'s role for every other
+shape), never baked into the stored coordinates at rest. It only gets permanently folded into
+`vertices`/`segments` (and reset to `0`) at specific points where downstream math still assumes a
+rotation-free node — group transforms and Vector Edit Mode entry — see §6/§7.
 
 **Tangents live on the segment, not the vertex.** A branch vertex (degree 3+) can have several outgoing
 segments each needing its own tangent at that point; a single `handleIn`/`handleOut` pair on the vertex
@@ -91,8 +98,12 @@ doesn't.
   (see `canvas-rendering-pipeline.md` §1).
 - `drawSceneNodes.ts` gets a `case NodeType.vector`; `drawHoverOutline.ts` and
   `drawPerNodeSelectionOutlines.ts` also get cases (hover redraws the stroke thicker; per-node selection
-  outline is a no-op there, same as `NodeType.path` — Vector Edit Mode's own handle layer, below, is what
-  shows while selected/editing, not a generic box outline).
+  draws the same bounds-box-plus-corner-handles outline every box node gets, using
+  `getVectorNodeBounds.ts` + `node.rotation`, except while `vectorEditingNodeId` matches the node — then
+  it's a no-op, since Vector Edit Mode's own handle layer, below, is what shows during editing instead).
+  Both `drawSceneNodes.ts`'s fill/stroke render and the hover outline call `bakeVectorNodeRotation.ts`
+  first — `node.rotation` is never baked into stored `vertices`/`segments` (§1), so anything drawing the
+  shape must apply that rotation transform itself, non-destructively, every frame.
 - `drawScene/drawVectorEditHandlesLayer.ts` — vertex dots (highlighted per `selectedVectorVertexIdsRef`)
   and tangent-handle dots + guide lines, gated only on `vectorEditingNodeId !== null` (Redux). Runs
   during **both** Pen-tool drawing and Vector Edit Mode, since both are just that one field being set —
@@ -175,7 +186,45 @@ New entries in `handlePointerDown/constants.ts`'s `ARM_RESOLVERS` (highest prior
   shared vertex gets straight (null) tangents on both sides, a visually-reasonable but not
   curve-exact split.
 - Entry without Pen: `useVectorEditOnDoubleClick.ts` mirrors `useTextEditOnDoubleClick.ts`'s shape
-  exactly — double-click a `NodeType.vector` node on the Selection tool sets `vectorEditingNodeId`.
+  exactly — double-click a `NodeType.vector` node on the Selection tool sets `vectorEditingNodeId`. Entry
+  itself never touches `rotation` — a rotated node can be entered and left again with the selection
+  outline still tilted, as long as nothing was actually dragged.
+- `armBakeVectorRotationOnPointerDown.ts` — first entry in `ARM_RESOLVERS` (ahead of every other Vector
+  Edit Mode resolver below), and the only one that never claims the pointer event (always returns
+  `undefined`, letting whichever resolver actually matches the click still run). On every pointerdown
+  while `vectorEditingNodeId` points at a node with a non-zero `rotation`, it permanently folds that
+  rotation into `vertices`/`segments` and resets it to `0` (`bakeVectorNodeRotation.ts`) *before* any
+  hit-testing below runs — vertex/handle dragging reads/writes raw coordinates with no rotation
+  awareness, so an actual edit must always start from a rotation-free node. This is deliberately deferred
+  to the first pointerdown *inside* edit mode, not entry, so merely looking at a rotated node in Vector
+  Edit Mode and leaving again doesn't reset it. `drawVectorEditHandlesLayer.ts` applies the same
+  `bakeVectorNodeRotation.ts` transform for **display only** (no dispatch) before drawing vertex dots and
+  tangent handles, so they track the shape's true rotated position even in the brief window before any
+  bake has actually landed in the store. **Known, accepted trade-off**: once a rotated node's rotation is
+  baked, `drawPerNodeSelectionOutlines.ts`'s vector-node outline (§3) can no longer render a tilted
+  rectangle for it — that outline gets its tilt from `bounds` (the node's *raw, pre-rotation* local box)
+  drawn together with `node.rotation`; once baked, `bounds` is recomputed from the now-rotated vertices
+  (their axis-aligned bounding box, wider than the original tilted rectangle) while `rotation` reads `0`,
+  so the box renders un-tilted. Deliberately accepted rather than fixed, since avoiding it would mean
+  either never baking (bringing back the vertex-jump bug below) or computing a true minimum-area bounding
+  rectangle from the point set — real added complexity for what's just a selection-outline cosmetic.
+- **Pen tool has its own, separate bake call** — `useDrawPenTool/utils/handlePointerDown/handlePointerDown.ts`
+  doesn't go through `ARM_RESOLVERS` (§4) at all, so `armBakeVectorRotationOnPointerDown.ts` above never
+  fires for it. It carries its own equivalent, `bakeEditingNodeRotation.ts` (same folder), called at the
+  top of every Pen pointerdown before `startNewVectorNetwork`/`startVectorFragment`/`continueVectorNetwork`
+  run — same guard (`node.rotation` truthy), same `bakeVectorNodeRotation.ts` call, same dispatch shape.
+  Necessary because those three handlers read/write vertex coordinates in raw local space exactly like the
+  Selection-tool resolvers do; without this, drawing new points onto a rotated, not-yet-baked network
+  reproduces the same per-frame vertex-jump instability that motivated baking in the first place, for the
+  Pen-tool path specifically.
+  `drawScene/drawPenPreview.ts` (§4's live preview) is the one renderer that still has to stay
+  rotation-*aware* rather than relying on baking alone: its snap-indicator circle updates on every
+  `pointermove`, including the window *before* any pointerdown (hence bake) has happened, so it reads
+  `node.vertices` while `node.rotation` may still be non-zero — it applies the same
+  `bakeVectorNodeRotation.ts`-style pivot rotation as `drawVectorEditHandlesLayer.ts` (display-only, no
+  dispatch) so the hover dot lands on the visually-rotated vertex instead of the raw local one. Don't
+  remove this thinking it's now dead code just because pointerdown bakes — the hover window before that
+  first click is exactly when it's load-bearing.
 - Continuing via Pen from inside Edit Mode falls out for free — `useDrawPenTool` only checks
   `activeTool === pen`, and `vectorEditingNodeId` already persists across the tool switch (§5), so
   pressing `P` again resumes on the existing network with no extra wiring.
@@ -193,14 +242,46 @@ New entries in `handlePointerDown/constants.ts`'s `ARM_RESOLVERS` (highest prior
   different object's.
 - **Single-vertex selection only** — no shift-multi-select or marquee-select of vertices within a
   network. `selectedVectorVertexIdsRef` holds zero or one id. Move/delete still work per-vertex.
-- **No solo resize/rotate handles on a Vector Network** — `getResizeHandleAtPoint.ts`/
-  `getRotateHandleAtPoint.ts` exclude `NodeType.vector` from the single-node branch, exactly like
-  `NodeType.line` already does, and for the identical reason: a rotated, arbitrary point-cloud has no
-  well-defined "local unrotated bounds" to resize against without a stored rotation field, which vertices
-  (absolute world coords, like Line's `x1/y1/x2/y2`) don't have. **Group** resize/rotate/move *do* work
-  (`getVectorNodeOrigin.ts`/`resizeVectorNode.ts`/`rotateVectorNodeOrigin.ts`/`translateVectorVertices.ts`
-  — the group case has none of solo-resize's rotational complexity, since it's a uniform world-space
-  scale/rotation with no per-node local-axis projection).
+- **Solo rotate and solo resize both work, including on an already-rotated node** —
+  `getResizeHandleAtPoint.ts`/`getRotateHandleAtPoint.ts` no longer exclude `NodeType.vector`; both fall
+  through to the same generic single-node branch every box node uses (`getNodeBounds.ts` + `node.rotation`,
+  §1). Rotating a single vector node keeps `rotation` fully live across repeated gestures, exactly like a
+  box node: `armRotateDrag.ts` records the origin's raw `rotation`/`vertices`/`segments` **unchanged** at
+  arm-time (no baking), and `getRotatedNodeChanges.ts`'s single-node vector branch sets
+  `rotation: origin.rotation + deltaDegrees`, leaving vertices/segments untouched — the same
+  accumulate-onto-the-live-value shape `rotateShapeNodeOrigin.ts` already used for every other node type.
+  **This replaced an earlier version that baked the origin's rotation into vertices and reset the field
+  to just `deltaDegrees` on every new gesture** (arming the *next* drag re-baked from there again). That
+  was mathematically equivalent for the shape's own fill/stroke (baked-vertices-at-30° + `rotation: 0` at
+  drag-start renders identically to raw-vertices + `rotation: 30`), but not for
+  `drawPerNodeSelectionOutlines.ts`'s vector-node outline rectangle, which derives its tilt from `bounds`
+  (the *raw, pre-rotation* local box) drawn together with `rotation` — once a gesture baked the vertices,
+  `bounds` recomputed from them became the shape's axis-aligned bounding box instead of the original tight
+  local one, so grabbing the rotate handle a second time made the outline visibly snap toward looking
+  un-tilted the instant the drag started, before the user had moved the pointer at all. A **group** rotate
+  still needs to fully bake (below) since a shared external pivot can't be expressed as a live `rotation`
+  field alone; that baking now happens lazily inside `getRotatedNodeChanges.ts`'s group branch (folding in
+  `origin.rotation` around the origin's own bounds-center first, via the same `bakeVectorNodeRotation.ts`
+  — now typed to accept a `{rotation, segments, vertices}` origin snapshot, not just a full `TVectorNode`
+  — then rotating the result around the external pivot), rather than `armRotateDrag.ts` baking every
+  selected vector node unconditionally at arm-time regardless of whether the drag turns out solo or group.
+  Resizing a single vector node reuses the exact same rotated-anchor-solve a rotated box gets
+  (`continueResizeDrag.ts`'s `getSingleRotatableOrigin` now admits a vector origin carrying its live
+  `rotation`, feeding the shared `getResizeQueryPoint.ts`/`getResizeAnchorSolver.ts` pipeline unchanged —
+  neither reads anything box-specific off the origin, only `.rotation`). Since a vector has no single
+  `x/y` position to solve for, `resizeVectorNode.ts` scales vertices anchor-relatively as before, then
+  (only when a `rotatedAnchorSolver` is present) computes the delta between the scaled shape's own new
+  bounds-center and the solver's target center, and translates every vertex by that delta — left
+  unrounded, exactly like a rotated box's `x`/`y` (`getResizeChanges.ts`), to avoid reintroducing anchor
+  drift through rounding.
+- **Group rotate/resize/move stay exactly as before** (your call, asked directly — solo behavior was the
+  ask) — `resizeVectorNode.ts` grew the solo-only anchor-correction step above, but a group resize's
+  `rotatedAnchorSolver` is always `null` (only a true single-node selection gets one), so it takes the
+  same plain anchor-relative scale path it always has; `getVectorNodeOrigin.ts`/`rotateVectorNodeOrigin.ts`/
+  `translateVectorVertices.ts` are untouched. A group rotate always fully bakes into vertices (any
+  pre-existing solo `rotation` gets folded in first, same `bakeVectorNodeRotation.ts` step as Vector Edit
+  Mode entry) because the group's shared pivot generally isn't the node's own center, so the
+  set-`rotation`-live shortcut above doesn't apply there.
 - **No freehand Pencil** — `ToolName.pencil`'s toolbar entry stays exactly as wired before this feature
   (icon/shortcut/cursor only); only the click-based `ToolName.pen` flow is implemented. Freehand would
   need stroke-sampling + curve-fitting, a different algorithm the spec never described.

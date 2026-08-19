@@ -79,7 +79,7 @@ export const drawScene = (
   drawPixelGrid(gl, imageContext.gridProgram, imageContext.gridBuffer, clientWidth, clientHeight, viewport);
   drawSceneNodes(gl, program, buffer, imageContext, sceneNodes, clientWidth, clientHeight, viewport, pathOutlineStyles);
   drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport);
-  drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport);
+  drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeId);
   drawCornerRadiusHandlesLayer(
     gl,
     program,
@@ -119,7 +119,18 @@ export const drawScene = (
     ellipseArcRatioDraggedHandlePosition,
   );
   drawFrame(gl, program, buffer, imageContext, draftShape, clientWidth, clientHeight, viewport);
-  drawPenPreview(gl, program, buffer, refs.penPreviewRef.current, refs.penHoverVertexRef.current, clientWidth, clientHeight, viewport);
+  drawPenPreview(
+    gl,
+    program,
+    buffer,
+    refs.penPreviewRef.current,
+    refs.penHoverVertexRef.current,
+    nodesById,
+    vectorEditingNodeId,
+    clientWidth,
+    clientHeight,
+    viewport,
+  );
   drawEditingText(
     gl,
     program,

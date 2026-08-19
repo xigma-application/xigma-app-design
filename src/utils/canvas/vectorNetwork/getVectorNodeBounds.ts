@@ -1,11 +1,11 @@
 // types
 import { TDraftRect } from 'types/canvas';
-import { TVectorNode } from 'types/design/types';
+import { TVectorNodeOrigin } from 'types/design/selectionTool/types';
 
 // utils
 import { getVectorHandlePosition } from './getVectorHandlePosition';
 
-export const getVectorNodeBounds = (node: TVectorNode): TDraftRect => {
+export const getVectorNodeBounds = (node: TVectorNodeOrigin): TDraftRect => {
   const handlePoints = Object.values(node.segments).flatMap((segment) => {
     const handleStart = getVectorHandlePosition(node.vertices[segment.startId], segment.tangentStart);
     const handleEnd = getVectorHandlePosition(node.vertices[segment.endId], segment.tangentEnd);

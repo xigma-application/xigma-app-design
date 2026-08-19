@@ -10,6 +10,7 @@ const buildNode = (vertices: Record<string, TVectorVertex>, segments: Record<str
   id: '1',
   name: 'Vector',
   parentId: null,
+  rotation: 0,
   segments,
   strokeColor: '#000000',
   strokeWidth: 1,

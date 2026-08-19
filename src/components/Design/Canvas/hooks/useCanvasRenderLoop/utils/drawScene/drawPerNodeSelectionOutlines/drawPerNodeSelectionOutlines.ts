@@ -1,5 +1,5 @@
 // others
-import { DRAFT_FRAME_STROKE, LINE_SELECTED_STROKE_WIDTH } from 'constant/canvas';
+import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 
 // types
 import { NodeType } from 'types/design/enums';
@@ -7,36 +7,11 @@ import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
 import { drawCornerHandles } from 'utils/canvas/drawCornerHandles';
-import { drawLine } from 'utils/canvas/drawLine';
-import { drawLineEndpointHandles } from 'utils/canvas/drawLineEndpointHandles';
-import { drawPathTextFontSizeGuide } from './drawPathTextFontSizeGuide';
+import { drawLineSelectionOutline } from './drawLineSelectionOutline';
+import { drawPathTextFontSizeGuide } from '../drawPathTextFontSizeGuide';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
-import { drawSelectedPathTextHandle } from './drawSelectedPathTextHandle';
-
-const drawLineSelectionOutline = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
-  node: Extract<TSceneNode, { type: NodeType.line }>,
-  canvasWidth: number,
-  canvasHeight: number,
-  viewport: TViewport,
-): void => {
-  drawLine(gl, program, buffer, node, DRAFT_FRAME_STROKE, LINE_SELECTED_STROKE_WIDTH / viewport.zoom, canvasWidth, canvasHeight, viewport);
-  drawLineEndpointHandles(
-    gl,
-    program,
-    buffer,
-    [
-      { x: node.x1, y: node.y1 },
-      { x: node.x2, y: node.y2 },
-    ],
-    DRAFT_FRAME_STROKE,
-    canvasWidth,
-    canvasHeight,
-    viewport,
-  );
-};
+import { drawSelectedPathTextHandle } from '../drawSelectedPathTextHandle';
+import { drawVectorSelectionOutline } from './drawVectorSelectionOutline';
 
 export const drawPerNodeSelectionOutlines = (
   gl: WebGL2RenderingContext,
@@ -46,6 +21,7 @@ export const drawPerNodeSelectionOutlines = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  vectorEditingNodeId: string | null,
 ): void => {
   selectedNodes.forEach((node) => {
     switch (node.type) {
@@ -53,7 +29,9 @@ export const drawPerNodeSelectionOutlines = (
         drawLineSelectionOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
         break;
       case NodeType.path:
+        break;
       case NodeType.vector:
+        drawVectorSelectionOutline(gl, program, buffer, node, vectorEditingNodeId, canvasWidth, canvasHeight, viewport);
         break;
       default: {
         const { height, rotation, width, x, y } = node;

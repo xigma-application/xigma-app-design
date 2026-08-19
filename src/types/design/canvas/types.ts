@@ -3,6 +3,7 @@ import { RefObject } from 'react';
 // types
 import { TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
 import { TDraftEntity, TVectorTangent } from 'types/design/types';
+import { TRotateDragState } from 'types/design/selectionTool/types';
 
 export type TCornerRadiusDragState = {
   bounds: TDraftRect;
@@ -88,6 +89,7 @@ export type TCanvasRefs = {
   penHoverVertexRef: RefObject<TPenHoverVertex | null>;
   penPreviewRef: RefObject<TPenPreview | null>;
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>;
+  rotateDragRef: RefObject<TRotateDragState | null>;
   selectedVectorVertexIdsRef: RefObject<string[]>;
   sliceRef: RefObject<TSliceDraft | null>;
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>;

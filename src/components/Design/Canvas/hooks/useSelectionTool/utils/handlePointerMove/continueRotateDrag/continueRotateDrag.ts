@@ -27,10 +27,11 @@ export const continueRotateDrag = (
     const { cursorAngle, nodeOrigins, pivot, startAngle } = rotateDragState;
     const point = screenToWorld(getPointerPosition(canvas, event), selectViewport(store.getState()));
     const deltaDegrees = getAngleBetweenPoints(pivot, point) - startAngle;
+    const isSingleNodeRotate = Object.keys(nodeOrigins).length === 1;
 
     canvas.style.cursor = getRotatedRotateCursorUrl(cursorAngle + deltaDegrees) ?? canvas.style.cursor;
     Object.entries(nodeOrigins).forEach(([id, origin]) => {
-      dispatch(updateNode({ changes: getRotatedNodeChanges(origin, pivot, deltaDegrees), id }));
+      dispatch(updateNode({ changes: getRotatedNodeChanges(origin, pivot, deltaDegrees, isSingleNodeRotate), id }));
     });
   }
 };

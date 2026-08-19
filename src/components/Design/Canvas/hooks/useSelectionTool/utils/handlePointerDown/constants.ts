@@ -1,3 +1,4 @@
+import { armBakeVectorRotationOnPointerDown } from './armResolvers/armBakeVectorRotationOnPointerDown';
 import { armCornerRadiusOnPointerDown } from './armResolvers/armCornerRadiusOnPointerDown';
 import { armEllipseArcOnPointerDown } from './armResolvers/armEllipseArcOnPointerDown';
 import { armEllipseArcRatioOnPointerDown } from './armResolvers/armEllipseArcRatioOnPointerDown';
@@ -22,6 +23,7 @@ import { armVectorVertexOnPointerDown } from './armResolvers/armVectorVertexOnPo
 import { toggleSelectionOnPointerDown } from './armResolvers/toggleSelectionOnPointerDown';
 
 export const ARM_RESOLVERS = [
+  armBakeVectorRotationOnPointerDown,
   armVectorHandleOnPointerDown,
   armVectorVertexOnPointerDown,
   armVectorEdgeInsertOnPointerDown,

@@ -31,6 +31,7 @@ const addVectorNode = (): string => {
       fillColor: '#ff0000',
       name: 'Vector',
       parentId: null,
+      rotation: 0,
       segments: {
         'segment-1': { endId: 'vertex-2', id: 'segment-1', startId: 'vertex-1', tangentEnd: null, tangentStart: null },
         'segment-2': { endId: 'vertex-3', id: 'segment-2', startId: 'vertex-2', tangentEnd: null, tangentStart: null },
@@ -58,6 +59,7 @@ const addClosedTriangleVectorNode = (): string => {
       fillColor: '#ff0000',
       name: 'Vector',
       parentId: null,
+      rotation: 0,
       segments: {
         ab: { endId: 'b', id: 'ab', startId: 'a', tangentEnd: null, tangentStart: null },
         bc: { endId: 'c', id: 'bc', startId: 'b', tangentEnd: null, tangentStart: null },

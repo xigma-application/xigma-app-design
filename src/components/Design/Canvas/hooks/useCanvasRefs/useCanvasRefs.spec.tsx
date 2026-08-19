@@ -21,6 +21,7 @@ describe('useCanvasRefs behaviors', () => {
       penHoverVertexRef: { current: null },
       penPreviewRef: { current: null },
       polygonCornerRadiusDragRef: { current: null },
+      rotateDragRef: { current: null },
       selectedVectorVertexIdsRef: { current: [] },
       sliceRef: { current: null },
       starCornerRadiusDragRef: { current: null },

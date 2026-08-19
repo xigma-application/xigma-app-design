@@ -50,6 +50,7 @@ const vector: TVectorNode = {
   id: 'vector-1',
   name: 'Vector',
   parentId: null,
+  rotation: 0,
   segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
   strokeColor: '#000000',
   strokeWidth: 1,
@@ -101,8 +102,48 @@ describe('armRotateDrag', () => {
     // result
     expect(rotateDragRef.current?.nodeOrigins).toEqual({
       'vector-1': {
+        rotation: 0,
         segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
-        vertices: { v1: { x: 0, y: 0 }, v2: { x: 10, y: 0 } },
+        vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } },
+      },
+    });
+  });
+
+  it('should record the raw rotation and vertices of an already-rotated vector node as-is, without baking them together', () => {
+    // mock — baking here would let a second rotate gesture silently reset the node's visual tilt to 0
+    // (the earlier bug this guards against), so the origin must carry the live rotation and untouched
+    // vertices side by side
+    const canvas = createCanvas();
+    const rotateDragRef = createRotateDragRef();
+    const rotatedVector: TVectorNode = {
+      ...vector,
+      rotation: 90,
+      segments: {},
+      vertices: {
+        v1: { id: 'v1', x: 100, y: 100 },
+        v2: { id: 'v2', x: 110, y: 100 },
+        v3: { id: 'v3', x: 110, y: 110 },
+        v4: { id: 'v4', x: 100, y: 110 },
+      },
+    };
+
+    // before
+    armRotateDrag(canvas, pointerEvent(), rotateDragRef, [rotatedVector], { height: 10, width: 10, x: 100, y: 100 }, 90, {
+      x: 110,
+      y: 105,
+    });
+
+    // result
+    expect(rotateDragRef.current?.nodeOrigins).toEqual({
+      'vector-1': {
+        rotation: 90,
+        segments: {},
+        vertices: {
+          v1: { id: 'v1', x: 100, y: 100 },
+          v2: { id: 'v2', x: 110, y: 100 },
+          v3: { id: 'v3', x: 110, y: 110 },
+          v4: { id: 'v4', x: 100, y: 110 },
+        },
       },
     });
   });

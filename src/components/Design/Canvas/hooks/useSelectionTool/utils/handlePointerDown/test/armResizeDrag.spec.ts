@@ -50,6 +50,7 @@ const vector: TVectorNode = {
   id: 'vector-1',
   name: 'Vector',
   parentId: null,
+  rotation: 0,
   segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
   strokeColor: '#000000',
   strokeWidth: 1,
@@ -90,7 +91,7 @@ describe('armResizeDrag', () => {
     expect(resizeDragRef.current?.nodeOrigins).toEqual({ 'line-1': { x1: 10, x2: 20, y1: 30, y2: 40 } });
   });
 
-  it('should record vertex and segment origins for a vector node', () => {
+  it('should record vertex, segment, and live rotation origins for a vector node', () => {
     // mock
     const canvas = createCanvas();
     const resizeDragRef = createResizeDragRef();
@@ -101,10 +102,24 @@ describe('armResizeDrag', () => {
     // result
     expect(resizeDragRef.current?.nodeOrigins).toEqual({
       'vector-1': {
+        rotation: 0,
         segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
         vertices: { v1: { x: 0, y: 0 }, v2: { x: 10, y: 0 } },
       },
     });
+  });
+
+  it('should record a non-zero rotation in the vector node origin', () => {
+    // mock
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef();
+    const rotatedVector: TVectorNode = { ...vector, rotation: 30 };
+
+    // before
+    armResizeDrag(canvas, pointerEvent(), resizeDragRef, [rotatedVector], 'e', { height: 100, width: 100, x: 0, y: 0 });
+
+    // result
+    expect(resizeDragRef.current?.nodeOrigins).toMatchObject({ 'vector-1': { rotation: 30 } });
   });
 
   it('should record the current flipX/flipY as the origin snapshot for a media node', () => {

@@ -22,6 +22,7 @@ const vectorNode: TVectorNode = {
   id: 'vector-1',
   name: 'Vector',
   parentId: null,
+  rotation: 0,
   segments: {
     s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: { x: 5, y: 0 } },
   },
@@ -133,5 +134,30 @@ describe('drawVectorEditHandlesLayer', () => {
     expect(vertexDrawCalls).toHaveLength(2);
     expect(vertexDrawCalls.find((args) => args[3].x === -2.5)?.[3]).toMatchObject({ fill: '#0d99ff' });
     expect(vertexDrawCalls.find((args) => args[3].x === 7.5)?.[3]).toMatchObject({ fill: '#ffffff' });
+  });
+
+  it('should draw vertex dots at their rotated world position for a node with a persisted, not-yet-baked rotation', () => {
+    // mock — v1(0,0)/v2(10,0), 90deg around the bounds-center (5, 0): v1 -> (5, -5), v2 -> (5, 5); dots
+    // must track the same rotated positions the fill/stroke render at (drawVectorNode.ts), not the raw
+    // stored coordinates, since baking is deferred until an actual edit starts
+    const rotatedVectorNode: TVectorNode = { ...vectorNode, rotation: 90, segments: {} };
+    const rotatedNodes: Record<string, TSceneNode> = { [rotatedVectorNode.id]: rotatedVectorNode };
+    const gl = {} as WebGL2RenderingContext;
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawVectorEditHandlesLayer(gl, program, buffer, rotatedNodes, rotatedVectorNode.id, ['v1'], null, 200, 150, IDENTITY_VIEWPORT);
+
+    // result
+    const vertexDrawCalls = drawEllipseMock.mock.calls.filter((args) => args[3].width === 5 / IDENTITY_VIEWPORT.zoom);
+    const selectedDot = vertexDrawCalls.find((args) => args[3].fill === '#0d99ff')?.[3];
+    const unselectedDot = vertexDrawCalls.find((args) => args[3].fill === '#ffffff')?.[3];
+
+    expect(vertexDrawCalls).toHaveLength(2);
+    expect(selectedDot.x).toBeCloseTo(2.5);
+    expect(selectedDot.y).toBeCloseTo(-7.5);
+    expect(unselectedDot.x).toBeCloseTo(2.5);
+    expect(unselectedDot.y).toBeCloseTo(2.5);
   });
 });

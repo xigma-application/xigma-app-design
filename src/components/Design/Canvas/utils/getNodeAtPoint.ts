@@ -20,7 +20,7 @@ import { isPointNearVectorPath } from './isPointNearVectorPath';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
 const getUnrotatedQueryPoint = (point: TPoint, node: TSceneNode): TPoint => {
-  if (node.type === NodeType.line || node.type === NodeType.vector || node.rotation === 0) {
+  if (node.type === NodeType.line || node.rotation === 0) {
     return point;
   }
 

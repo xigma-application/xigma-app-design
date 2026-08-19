@@ -16,7 +16,6 @@ describe('useSelectionToolRefs behaviors', () => {
       pathOffsetDragRef: { current: null },
       polygonVertexCountDragRef: { current: null },
       resizeDragRef: { current: null },
-      rotateDragRef: { current: null },
       starRatioDragRef: { current: null },
       starVertexCountDragRef: { current: null },
       vectorHandleDragRef: { current: null },

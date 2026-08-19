@@ -235,6 +235,49 @@ test('a selected (not editing) vector node still rotates via the ordinary rotate
   expect(after.equals(before)).toBe(false);
 });
 
+test('dragging a vertex on an already-rotated node moves only that vertex, not the whole shape', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-rotated-vertex-drag');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawOpenTriangle(designPage); // v1(900,300) v2(1050,300) v3(1050,450) — bounds are a 150x150 square
+  await exitVectorEditMode(page, designPage);
+
+  await designPage.click(975, 300); // select the node (not editing), to reveal the rotate ring
+
+  // ring just outside the "nw" handle, swung to due north of the bounds-center (975, 375) — same
+  // clean-angle technique as rotate.spec.ts's deterministic-45deg test — for a persisted rotation:45
+  // that never gets baked into the vertices (armRotateDrag.ts keeps a solo rotate live, see #7 in
+  // vector-network.md), so entering edit mode below starts from a still-rotated, not-yet-baked node
+  await designPage.dragVectorPoint(890, 290, 975, 275);
+
+  // v1/v2/v3 rotated 45deg around (975, 375): v1(900,300) -> (975,269); v2(1050,300) -> (1081,375);
+  // v3(1050,450) -> (975,481); the v1-v2 edge midpoint (975,300) -> (1028,322)
+  await designPage.doubleClick(1028, 322); // enter Vector Edit Mode on the rotated shape
+
+  // v3's own dot, well clear of the toolbar and of v1 (the vertex being dragged below) — isolates
+  // whether v3 itself visibly moves from the "actively editing" stroke tint, which is already
+  // constant for the whole gesture by the time the first screenshot below is taken (see the vector
+  // edit gotcha note above)
+  const v3Region = { height: 24, width: 24, x: 963, y: 469 };
+
+  await designPage.pointerDown(975, 269); // grab v1's dot — this pointerdown bakes the rotation
+  const v3AtGrab = await page.screenshot({ clip: v3Region });
+
+  await designPage.pointerMove(920, 220); // first increment of the drag
+  const v3MidDrag = await page.screenshot({ clip: v3Region });
+
+  await designPage.pointerMove(870, 170); // second increment — a still-drifting render pivot (the bug
+  // this guards against) would keep shifting v3 here too, not just settle after one frame
+  const v3LateInDrag = await page.screenshot({ clip: v3Region });
+
+  await designPage.pointerUp();
+
+  expect(v3MidDrag.equals(v3AtGrab)).toBe(true);
+  expect(v3LateInDrag.equals(v3MidDrag)).toBe(true);
+});
+
 test('undo after dragging a vertex restores its previous position', async ({ page }) => {
   const designPage = new DesignPage(page);
 

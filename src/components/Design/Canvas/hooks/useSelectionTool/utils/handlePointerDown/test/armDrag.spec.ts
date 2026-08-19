@@ -37,6 +37,7 @@ const addVectorNode = (): string => {
       fillColor: '#000000',
       name: 'Vector',
       parentId: null,
+      rotation: 0,
       segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
       strokeColor: '#000000',
       strokeWidth: 1,

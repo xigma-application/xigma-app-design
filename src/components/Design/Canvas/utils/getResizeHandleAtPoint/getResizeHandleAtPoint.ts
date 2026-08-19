@@ -17,7 +17,7 @@ export const getResizeHandleAtPoint = (
 ): { bounds: TDraftRect; handle: TResizeHandle; rotation: number } | null => {
   const [singleNode] = selectedNodes;
 
-  if (selectedNodes.length === 1 && singleNode.type !== NodeType.line && singleNode.type !== NodeType.vector) {
+  if (selectedNodes.length === 1 && singleNode.type !== NodeType.line) {
     const bounds = getNodeBounds(singleNode);
     const testPoint = getUnrotatedQueryPoint(point, bounds, singleNode.rotation);
     const handle = getHandleAtBounds(testPoint, bounds, viewport);

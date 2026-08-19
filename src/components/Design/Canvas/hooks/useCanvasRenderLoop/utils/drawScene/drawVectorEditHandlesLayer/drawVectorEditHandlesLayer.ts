@@ -2,6 +2,7 @@
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
+import { bakeVectorNodeRotation } from '../../../../../utils/bakeVectorNodeRotation';
 import { drawVectorEditOutline } from './drawVectorEditOutline';
 import { drawVectorTangentHandles } from './drawVectorTangentHandles';
 import { drawVectorVertexDots } from './drawVectorVertexDots';
@@ -19,9 +20,11 @@ export const drawVectorEditHandlesLayer = (
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  const node = getVectorEditingNode(nodes, vectorEditingNodeId);
+  const editingNode = getVectorEditingNode(nodes, vectorEditingNodeId);
 
-  if (node) {
+  if (editingNode) {
+    const node = { ...editingNode, ...bakeVectorNodeRotation(editingNode) };
+
     drawVectorEditOutline(gl, program, buffer, node, hoveredNodeId, canvasWidth, canvasHeight, viewport);
     drawVectorTangentHandles(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
     drawVectorVertexDots(gl, program, buffer, node, selectedVertexIds, canvasWidth, canvasHeight, viewport);

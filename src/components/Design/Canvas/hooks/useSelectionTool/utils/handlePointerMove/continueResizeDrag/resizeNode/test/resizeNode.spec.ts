@@ -32,6 +32,7 @@ const addVectorNode = (): string => {
       fillColor: null,
       name: 'Vector',
       parentId: null,
+      rotation: 0,
       segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: { x: 2, y: 4 } } },
       strokeColor: '#000000',
       strokeWidth: 1,
@@ -77,6 +78,7 @@ describe('resizeNode', () => {
     // mock
     const idVector = addVectorNode();
     const origin = {
+      rotation: 0,
       segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: { x: 2, y: 4 } } },
       vertices: { v1: { x: 0, y: 0 }, v2: { x: 10, y: 10 } },
     };

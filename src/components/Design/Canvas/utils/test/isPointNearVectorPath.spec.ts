@@ -10,6 +10,7 @@ const buildNode = (segments: TVectorNode['segments'], vertices: TVectorNode['ver
   id: '1',
   name: 'Vector',
   parentId: null,
+  rotation: 0,
   segments,
   strokeColor: '#000',
   strokeWidth: 1,

@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TFrameNode, TLineNode } from 'types/design/types';
+import { TFrameNode, TLineNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getResizeHandleAtPoint } from '../getResizeHandleAtPoint';
@@ -41,6 +41,25 @@ const line: TLineNode = {
   y2: 0,
 };
 
+const vector: TVectorNode = {
+  fillColor: null,
+  id: 'vector-1',
+  name: 'Vector',
+  parentId: null,
+  rotation: 0,
+  segments: {},
+  strokeColor: '#000000',
+  strokeWidth: 1,
+  type: NodeType.vector,
+  vertexHandleModes: {},
+  vertices: {
+    v1: { id: 'v1', x: 0, y: 0 },
+    v2: { id: 'v2', x: 100, y: 0 },
+    v3: { id: 'v3', x: 100, y: 100 },
+    v4: { id: 'v4', x: 0, y: 100 },
+  },
+};
+
 describe('getResizeHandleAtPoint', () => {
   it('should return null when nothing is selected', () => {
     // result
@@ -50,6 +69,20 @@ describe('getResizeHandleAtPoint', () => {
   it('should return null when the single selected node is a line', () => {
     // result
     expect(getResizeHandleAtPoint({ x: 0, y: 0 }, [line], IDENTITY_VIEWPORT)).toBeNull();
+  });
+
+  it('should detect a corner handle on a single selected vector node, using its computed bounds', () => {
+    // result
+    expect(getResizeHandleAtPoint({ x: 0, y: 0 }, [vector], IDENTITY_VIEWPORT)).toEqual({
+      bounds: { height: 100, width: 100, x: 0, y: 0 },
+      handle: 'nw',
+      rotation: 0,
+    });
+  });
+
+  it('should return null for a single selected vector node when the point misses every handle', () => {
+    // result
+    expect(getResizeHandleAtPoint({ x: 50, y: 50 }, [vector], IDENTITY_VIEWPORT)).toBeNull();
   });
 
   it('should return null when the selected nodes are multiple but do not share a parent', () => {

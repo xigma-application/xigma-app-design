@@ -2,6 +2,7 @@
 import { TVectorNode, TViewport } from 'types/design/types';
 
 // utils
+import { bakeVectorNodeRotation } from 'components/Design/Canvas/utils/bakeVectorNodeRotation';
 import { deriveVectorFaces } from '../vectorNetwork/deriveVectorFaces';
 import { drawVectorFill } from './drawVectorFill';
 import { drawVectorStroke } from './drawVectorStroke';
@@ -16,17 +17,20 @@ export const drawVectorNode = (
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  if (node.fillColor) {
-    drawVectorFill(gl, program, buffer, deriveVectorFaces(node), node.fillColor, canvasWidth, canvasHeight, viewport);
+  const { segments, vertices } = bakeVectorNodeRotation(node);
+  const renderedNode: TVectorNode = { ...node, segments, vertices };
+
+  if (renderedNode.fillColor) {
+    drawVectorFill(gl, program, buffer, deriveVectorFaces(renderedNode), renderedNode.fillColor, canvasWidth, canvasHeight, viewport);
   }
 
   drawVectorStroke(
     gl,
     program,
     buffer,
-    flattenVectorSegments(node),
-    node.strokeColor,
-    node.strokeWidth,
+    flattenVectorSegments(renderedNode),
+    renderedNode.strokeColor,
+    renderedNode.strokeWidth,
     canvasWidth,
     canvasHeight,
     viewport,

@@ -8,7 +8,6 @@ export const createSelectionToolRefs = (overrides: Partial<TSelectionToolRefs> =
   pathOffsetDragRef: { current: null },
   polygonVertexCountDragRef: { current: null },
   resizeDragRef: { current: null },
-  rotateDragRef: { current: null },
   starRatioDragRef: { current: null },
   starVertexCountDragRef: { current: null },
   vectorHandleDragRef: { current: null },
