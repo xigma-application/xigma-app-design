@@ -26,15 +26,17 @@ describe('disarmVectorVertexDrag', () => {
   it('should do nothing when no vector vertex drag is in progress', () => {
     // mock
     const canvas = createCanvas();
+    const setClassName = vi.fn();
 
     // before
-    disarmVectorVertexDrag(canvas, pointerEvent(), createVectorVertexDragRef());
+    disarmVectorVertexDrag(canvas, pointerEvent(), createVectorVertexDragRef(), setClassName);
 
     // result
     expect(canvas.releasePointerCapture).not.toHaveBeenCalled();
+    expect(setClassName).not.toHaveBeenCalled();
   });
 
-  it('should clear the vector-vertex-drag ref and release pointer capture', () => {
+  it('should clear the vector-vertex-drag ref, release pointer capture, and reset the cursor', () => {
     // mock
     const canvas = createCanvas();
     const vectorVertexDragRef = createVectorVertexDragRef({
@@ -42,12 +44,14 @@ describe('disarmVectorVertexDrag', () => {
       origins: { 'vertex-1': { x: 0, y: 0 } },
       pointerStart: { x: 5, y: 5 },
     });
+    const setClassName = vi.fn();
 
     // before
-    disarmVectorVertexDrag(canvas, pointerEvent(2), vectorVertexDragRef);
+    disarmVectorVertexDrag(canvas, pointerEvent(2), vectorVertexDragRef, setClassName);
 
     // result
     expect(vectorVertexDragRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
+    expect(setClassName).toHaveBeenCalledWith(null);
   });
 });

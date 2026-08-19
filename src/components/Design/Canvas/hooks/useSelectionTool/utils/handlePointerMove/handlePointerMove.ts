@@ -32,6 +32,7 @@ export const handlePointerMove = (
   dispatch: AppDispatch,
   canvasRefs: TCanvasRefs,
   selectionRefs: TSelectionToolRefs,
+  setClassName: (className: string | null) => void,
 ): void => {
   continueDrag(canvas, event, dispatch, selectionRefs.dragStateRef);
   continueEndpointDrag(canvas, event, dispatch, selectionRefs.endpointDragRef);
@@ -48,8 +49,8 @@ export const handlePointerMove = (
   continueEllipseArcRotateDrag(canvas, event, dispatch, canvasRefs.ellipseArcRotateDragRef);
   continueEllipseArcRatioDrag(canvas, event, dispatch, canvasRefs.ellipseArcRatioDragRef);
   continueMarqueeDrag(canvas, event, dispatch, selectionRefs.marqueeStartRef, canvasRefs.marqueeRef);
-  continueVectorVertexDrag(canvas, event, dispatch, selectionRefs.vectorVertexDragRef);
-  continueVectorHandleDrag(canvas, event, dispatch, selectionRefs.vectorHandleDragRef);
+  continueVectorVertexDrag(canvas, event, dispatch, selectionRefs.vectorVertexDragRef, setClassName);
+  continueVectorHandleDrag(canvas, event, dispatch, selectionRefs.vectorHandleDragRef, setClassName);
   resolveVectorVertexHover(canvas, event, canvasRefs.hoveredVectorVertexIdRef);
   resolveVectorTangentHandleHover(canvas, event, canvasRefs.hoveredVectorHandleRef);
 };

@@ -26,15 +26,17 @@ describe('disarmVectorHandleDrag', () => {
   it('should do nothing when no vector handle drag is in progress', () => {
     // mock
     const canvas = createCanvas();
+    const setClassName = vi.fn();
 
     // before
-    disarmVectorHandleDrag(canvas, pointerEvent(), createVectorHandleDragRef());
+    disarmVectorHandleDrag(canvas, pointerEvent(), createVectorHandleDragRef(), setClassName);
 
     // result
     expect(canvas.releasePointerCapture).not.toHaveBeenCalled();
+    expect(setClassName).not.toHaveBeenCalled();
   });
 
-  it('should clear the vector-handle-drag ref and release pointer capture', () => {
+  it('should clear the vector-handle-drag ref, release pointer capture, and reset the cursor', () => {
     // mock
     const canvas = createCanvas();
     const vectorHandleDragRef = createVectorHandleDragRef({
@@ -43,12 +45,14 @@ describe('disarmVectorHandleDrag', () => {
       segmentId: 'segment-1',
       vertexId: 'vertex-1',
     });
+    const setClassName = vi.fn();
 
     // before
-    disarmVectorHandleDrag(canvas, pointerEvent(2), vectorHandleDragRef);
+    disarmVectorHandleDrag(canvas, pointerEvent(2), vectorHandleDragRef, setClassName);
 
     // result
     expect(vectorHandleDragRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
+    expect(setClassName).toHaveBeenCalledWith(null);
   });
 });

@@ -712,13 +712,14 @@ describe('armVectorEditMissOnPointerDown', () => {
     store.dispatch(setVectorEditingNodeId(null));
   });
 
-  it('should deselect the current vertex and claim the pointerdown when Vector Edit Mode is active and the click hits nothing', () => {
+  it('should deselect the current vertex and tangent handle, and claim the pointerdown, when Vector Edit Mode is active and the click hits nothing', () => {
     // mock
     store.dispatch(setVectorEditingNodeId('vector-1'));
 
     const canvasRefs = createCanvasRefs();
 
     canvasRefs.selectedVectorVertexIdsRef.current = ['vertex-1'];
+    canvasRefs.selectedVectorHandleRef.current = { end: 'start', segmentId: 's1' };
 
     // before
     const ctx = createContext({ canvasRefs, hit: null });
@@ -726,6 +727,7 @@ describe('armVectorEditMissOnPointerDown', () => {
     // result
     expect(armVectorEditMissOnPointerDown(ctx)).toBe(true);
     expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.selectedVectorHandleRef.current).toBeNull();
   });
 
   it('should return undefined (letting the click fall through) when Vector Edit Mode is not active', () => {
@@ -753,7 +755,7 @@ describe('armVectorHandleOnPointerDown', () => {
     store.dispatch(setVectorEditingNodeId(null));
   });
 
-  it('should arm the vector-handle drag and return true when a tangent handle is hit', () => {
+  it('should arm the vector-handle drag, select the handle, deselect any vertex, and return true when a tangent handle is hit', () => {
     // mock — the start handle of v1(0,0) sits at (10, 20) via its tangentStart offset
     const nodeId = addVectorNode(
       { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: { x: 10, y: 20 } } },
@@ -762,13 +764,19 @@ describe('armVectorHandleOnPointerDown', () => {
 
     store.dispatch(setVectorEditingNodeId(nodeId));
 
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+
     // before
-    const ctx = createContext({ point: { x: 10, y: 20 } });
+    const ctx = createContext({ canvasRefs, point: { x: 10, y: 20 } });
 
     // result
     expect(armVectorHandleOnPointerDown(ctx)).toBe(true);
     expect(ctx.selectionRefs.vectorHandleDragRef.current).toEqual({ end: 'start', nodeId, segmentId: 's1', vertexId: 'v1' });
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
+    expect(canvasRefs.selectedVectorHandleRef.current).toEqual({ end: 'start', segmentId: 's1' });
+    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
   });
 
   it('should return undefined when the point misses every handle', () => {
@@ -803,7 +811,7 @@ describe('armVectorCornerHandleOnPointerDown', () => {
     store.dispatch(setVectorEditingNodeId(null));
   });
 
-  it('should arm the vector-handle drag from a corner vertex, mark it smooth, and return true when Ctrl is held', () => {
+  it('should arm the vector-handle drag from a corner vertex, mark it smooth, select the new handle, deselect any vertex, and return true when Ctrl is held', () => {
     // mock — v1 is a plain corner (no tangent on either side) of its one connected segment
     const nodeId = addVectorNode(
       { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
@@ -812,14 +820,20 @@ describe('armVectorCornerHandleOnPointerDown', () => {
 
     store.dispatch(setVectorEditingNodeId(nodeId));
 
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+
     // before
-    const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 2, y: 0 } });
+    const ctx = createContext({ canvasRefs, event: pointerEvent({ ctrlKey: true }), point: { x: 2, y: 0 } });
 
     // result
     expect(armVectorCornerHandleOnPointerDown(ctx)).toBe(true);
     expect(ctx.selectionRefs.vectorHandleDragRef.current).toEqual({ end: 'start', nodeId, segmentId: 's1', vertexId: 'v1' });
     expect(ctx.dispatch).toHaveBeenCalledWith(updateNode({ changes: { vertexHandleModes: { v1: 'smooth' } }, id: nodeId }));
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
+    expect(canvasRefs.selectedVectorHandleRef.current).toEqual({ end: 'start', segmentId: 's1' });
+    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
   });
 
   it('should arm the vector-handle drag from a corner vertex when Meta (macOS Cmd) is held instead of Ctrl', () => {
@@ -889,7 +903,7 @@ describe('armVectorVertexOnPointerDown', () => {
     store.dispatch(setVectorEditingNodeId(null));
   });
 
-  it('should arm the vector-vertex drag and return true when a vertex is hit', () => {
+  it('should arm the vector-vertex drag, select the vertex, deselect any tangent handle, and return true when a vertex is hit', () => {
     // mock
     const nodeId = addVectorNode(
       { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
@@ -898,8 +912,12 @@ describe('armVectorVertexOnPointerDown', () => {
 
     store.dispatch(setVectorEditingNodeId(nodeId));
 
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorHandleRef.current = { end: 'start', segmentId: 's1' };
+
     // before
-    const ctx = createContext({ point: { x: 2, y: 0 } });
+    const ctx = createContext({ canvasRefs, point: { x: 2, y: 0 } });
 
     // result
     expect(armVectorVertexOnPointerDown(ctx)).toBe(true);
@@ -910,6 +928,7 @@ describe('armVectorVertexOnPointerDown', () => {
       pointerStart: { x: 2, y: 0 },
     });
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
+    expect(canvasRefs.selectedVectorHandleRef.current).toBeNull();
   });
 
   it('should return undefined when the point misses every vertex', () => {

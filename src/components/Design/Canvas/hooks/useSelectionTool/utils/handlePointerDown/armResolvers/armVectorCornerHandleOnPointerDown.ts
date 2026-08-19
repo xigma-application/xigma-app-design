@@ -16,6 +16,7 @@ import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode'
 
 export const armVectorCornerHandleOnPointerDown = ({
   canvas,
+  canvasRefs,
   dispatch,
   event,
   point,
@@ -30,6 +31,8 @@ export const armVectorCornerHandleOnPointerDown = ({
 
       if (hit) {
         dispatch(updateNode({ changes: { vertexHandleModes: { ...node.vertexHandleModes, [hit.vertexId]: 'smooth' } }, id: node.id }));
+        canvasRefs.selectedVectorHandleRef.current = { end: hit.end, segmentId: hit.segmentId };
+        canvasRefs.selectedVectorVertexIdsRef.current = [];
         armVectorHandleDrag(canvas, event, selectionRefs.vectorHandleDragRef, node.id, hit);
 
         return true;

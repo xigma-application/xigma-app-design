@@ -421,6 +421,35 @@ describe('useDrawPenTool behaviors', () => {
     expect(refs.penPreviewRef.current).toBeNull();
   });
 
+  it('should track the live cursor position for the drag-preview handle while dragging, then clear it on release', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setActiveTool(ToolName.pen));
+
+    // before — first click plants vertex 1
+    const { refs } = renderPenTool(canvasRef);
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+    });
+
+    // action — drag out a handle without releasing yet
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 20, 5));
+    });
+
+    expect(refs.penDraggedHandlePositionRef.current).toEqual({ x: 20, y: 5 });
+
+    // action — release
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 20, 5));
+    });
+
+    // result
+    expect(refs.penDraggedHandlePositionRef.current).toBeNull();
+  });
+
   it('should reset the in-progress drag on pointercancel', () => {
     // mock
     const canvasRef = createCanvasRef();

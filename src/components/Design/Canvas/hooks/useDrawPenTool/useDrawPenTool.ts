@@ -20,7 +20,7 @@ import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 
 export const useDrawPenTool = (refs: TCanvasRefs): void => {
-  const { canvasRef, hoveredSegmentIdRef, penNewVertexPreviewRef, penPreviewRef } = refs;
+  const { canvasRef, hoveredSegmentIdRef, penDraggedHandlePositionRef, penNewVertexPreviewRef, penPreviewRef } = refs;
   const activeTool = useAppSelector(selectActiveTool);
   const dispatch = useAppDispatch();
   const appStore = useAppStore();
@@ -45,17 +45,18 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
       pendingOutgoingTangentRef,
       penPreviewRef,
       penNewVertexPreviewRef,
+      penDraggedHandlePositionRef,
       hoveredSegmentIdRef,
       setClassName,
     );
   };
 
   const onPointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
-    handlePointerUp(canvas, event, dispatch, dragOriginRef, dragStartRef);
+    handlePointerUp(canvas, event, dispatch, dragOriginRef, dragStartRef, penDraggedHandlePositionRef);
   };
 
   const onPointerCancel = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
-    handlePointerCancel(canvas, event, dispatch, dragOriginRef, dragStartRef);
+    handlePointerCancel(canvas, event, dispatch, dragOriginRef, dragStartRef, penDraggedHandlePositionRef);
   };
 
   useEffect(() => {
@@ -79,8 +80,19 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
         canvas.removeEventListener('pointercancel', pointerCancelListener);
         penPreviewRef.current = null;
         penNewVertexPreviewRef.current = null;
+        penDraggedHandlePositionRef.current = null;
         hoveredSegmentIdRef.current = null;
       };
     }
-  }, [activeTool, appStore, canvasRef, dispatch, hoveredSegmentIdRef, penNewVertexPreviewRef, penPreviewRef, setClassName]);
+  }, [
+    activeTool,
+    appStore,
+    canvasRef,
+    dispatch,
+    hoveredSegmentIdRef,
+    penDraggedHandlePositionRef,
+    penNewVertexPreviewRef,
+    penPreviewRef,
+    setClassName,
+  ]);
 };

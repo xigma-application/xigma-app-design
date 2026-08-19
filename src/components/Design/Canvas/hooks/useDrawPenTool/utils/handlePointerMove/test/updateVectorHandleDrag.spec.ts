@@ -15,6 +15,7 @@ import { updateVectorHandleDrag } from '../updateVectorHandleDrag';
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const createPendingOutgoingTangentRef = (): RefObject<TPendingOutgoingTangent | null> => ({ current: null });
+const createPenDraggedHandlePositionRef = (): RefObject<{ x: number; y: number } | null> => ({ current: null });
 
 const addVectorNodeWithSegment = (): string => {
   store.dispatch(
@@ -47,6 +48,7 @@ describe('updateVectorHandleDrag', () => {
     // mock
     const nodeId = addVectorNodeWithSegment();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+    const penDraggedHandlePositionRef = createPenDraggedHandlePositionRef();
 
     // before — 1 world unit of movement, well under the threshold
     updateVectorHandleDrag(
@@ -57,6 +59,7 @@ describe('updateVectorHandleDrag', () => {
       store.dispatch,
       store,
       pendingOutgoingTangentRef,
+      penDraggedHandlePositionRef,
     );
 
     // result
@@ -64,12 +67,14 @@ describe('updateVectorHandleDrag', () => {
 
     expect(node.segments.s1.tangentEnd).toBeNull();
     expect(pendingOutgoingTangentRef.current).toBeNull();
+    expect(penDraggedHandlePositionRef.current).toBeNull();
   });
 
-  it('should set the tangent on the origin segment and record the pending outgoing tangent once past the threshold', () => {
+  it('should set the tangent on the origin segment, record the pending outgoing tangent, and track the live cursor position once past the threshold', () => {
     // mock
     const nodeId = addVectorNodeWithSegment();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+    const penDraggedHandlePositionRef = createPenDraggedHandlePositionRef();
 
     // before
     updateVectorHandleDrag(
@@ -80,6 +85,7 @@ describe('updateVectorHandleDrag', () => {
       store.dispatch,
       store,
       pendingOutgoingTangentRef,
+      penDraggedHandlePositionRef,
     );
 
     // result
@@ -88,12 +94,14 @@ describe('updateVectorHandleDrag', () => {
     expect(node.segments.s1.tangentEnd).toEqual({ x: -20, y: -5 });
     expect(node.vertexHandleModes.v1).toBe('smooth');
     expect(pendingOutgoingTangentRef.current).toEqual({ tangent: { x: 20, y: 5 }, vertexId: 'v1' });
+    expect(penDraggedHandlePositionRef.current).toEqual({ x: 20, y: 5 });
   });
 
-  it('should record the pending outgoing tangent without touching any segment when dragging a fresh vertex with no segmentId yet', () => {
+  it('should record the pending outgoing tangent and live cursor position without touching any segment when dragging a fresh vertex with no segmentId yet', () => {
     // mock
     const nodeId = addVectorNodeWithSegment();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+    const penDraggedHandlePositionRef = createPenDraggedHandlePositionRef();
 
     // before
     updateVectorHandleDrag(
@@ -104,6 +112,7 @@ describe('updateVectorHandleDrag', () => {
       store.dispatch,
       store,
       pendingOutgoingTangentRef,
+      penDraggedHandlePositionRef,
     );
 
     // result
@@ -111,11 +120,13 @@ describe('updateVectorHandleDrag', () => {
 
     expect(node.segments.s1.tangentEnd).toBeNull();
     expect(pendingOutgoingTangentRef.current).toEqual({ tangent: { x: 0, y: 20 }, vertexId: 'v1' });
+    expect(penDraggedHandlePositionRef.current).toEqual({ x: 0, y: 20 });
   });
 
   it('should do nothing when the drag origin points at a node that no longer exists', () => {
     // mock
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+    const penDraggedHandlePositionRef = createPenDraggedHandlePositionRef();
 
     // before
     updateVectorHandleDrag(
@@ -126,9 +137,11 @@ describe('updateVectorHandleDrag', () => {
       store.dispatch,
       store,
       pendingOutgoingTangentRef,
+      penDraggedHandlePositionRef,
     );
 
     // result
     expect(pendingOutgoingTangentRef.current).toBeNull();
+    expect(penDraggedHandlePositionRef.current).toBeNull();
   });
 });

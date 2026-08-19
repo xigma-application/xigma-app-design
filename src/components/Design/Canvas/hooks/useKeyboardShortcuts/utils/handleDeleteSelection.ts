@@ -1,5 +1,3 @@
-import { RefObject } from 'react';
-
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { deleteNode, updateNode } from 'store/design/slice';
@@ -7,6 +5,7 @@ import { selectSelectedIds, selectVectorEditingNodeId } from 'store/design/selec
 import { AppDispatch, store } from 'store';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TVectorNode, TVectorSegment } from 'types/design/types';
 
 // utils
@@ -19,7 +18,8 @@ const getRemainingSegments = (node: TVectorNode, selectedVertexIds: string[]): R
     ),
   );
 
-export const handleDeleteSelection = (dispatch: AppDispatch, selectedVectorVertexIdsRef: RefObject<string[]>): void => {
+export const handleDeleteSelection = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
+  const { selectedVectorHandleRef, selectedVectorVertexIdsRef } = refs;
   const state = store.getState();
   const node = getVectorEditingNode(state.design.nodes, selectVectorEditingNodeId(state));
   const selectedVertexIds = selectedVectorVertexIdsRef.current;
@@ -30,7 +30,7 @@ export const handleDeleteSelection = (dispatch: AppDispatch, selectedVectorVerte
 
     dispatch(updateNode({ changes: { segments, vertices }, id: node.id }));
     selectedVectorVertexIdsRef.current = [];
-  } else {
+  } else if (!selectedVectorHandleRef.current) {
     dispatch(beginHistoryGesture());
     selectSelectedIds(state).forEach((id) => dispatch(deleteNode(id)));
     dispatch(endHistoryGesture());

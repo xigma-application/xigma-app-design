@@ -19,6 +19,7 @@ export const continueVectorVertexDrag = (
   event: PointerEvent,
   dispatch: AppDispatch,
   vectorVertexDragRef: RefObject<TVectorVertexDragState | null>,
+  setClassName: (className: string | null) => void,
 ): void => {
   const dragState = vectorVertexDragRef.current;
 
@@ -33,6 +34,7 @@ export const continueVectorVertexDrag = (
       const draggedVertices = translateVectorVertices(dragState.origins, deltaX, deltaY);
 
       dispatch(updateNode({ changes: { vertices: { ...node.vertices, ...draggedVertices } }, id: dragState.nodeId }));
+      setClassName('move');
     }
   }
 };

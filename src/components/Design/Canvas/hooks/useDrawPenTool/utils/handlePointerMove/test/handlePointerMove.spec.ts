@@ -29,6 +29,7 @@ const createDragStartRef = (value: TPoint | null = null): RefObject<TPoint | nul
 const createPendingOutgoingTangentRef = (): RefObject<TPendingOutgoingTangent | null> => ({ current: null });
 const createPenPreviewRef = (): TCanvasRefs['penPreviewRef'] => ({ current: null });
 const createPenNewVertexPreviewRef = (): TCanvasRefs['penNewVertexPreviewRef'] => ({ current: null });
+const createPenDraggedHandlePositionRef = (): TCanvasRefs['penDraggedHandlePositionRef'] => ({ current: null });
 const createHoveredSegmentIdRef = (): TCanvasRefs['hoveredSegmentIdRef'] => ({ current: null });
 
 const addVectorNodeWithSegment = (): string => {
@@ -59,12 +60,13 @@ describe('handlePointerMove', () => {
     store.dispatch(setPenActiveVertexId(null));
   });
 
-  it('should drag the outgoing tangent handle when a drag is already armed, keeping the plain pen cursor', () => {
+  it('should drag the outgoing tangent handle when a drag is already armed, tracking the live cursor position for the drag preview, keeping the plain pen cursor', () => {
     // mock
     const nodeId = addVectorNodeWithSegment();
     const canvas = createCanvas();
     const penPreviewRef = createPenPreviewRef();
     const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
+    const penDraggedHandlePositionRef = createPenDraggedHandlePositionRef();
     const setClassName = vi.fn();
 
     // before
@@ -78,6 +80,7 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      penDraggedHandlePositionRef,
       createHoveredSegmentIdRef(),
       setClassName,
     );
@@ -86,7 +89,38 @@ describe('handlePointerMove', () => {
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
 
     expect(node.segments.s1.tangentEnd).toEqual({ x: -20, y: -5 });
+    expect(penDraggedHandlePositionRef.current).toEqual({ x: 20, y: 5 });
     expect(setClassName).toHaveBeenCalledWith('pen');
+  });
+
+  it('should clear the drag-preview handle position once no drag is armed', () => {
+    // mock
+    const canvas = createCanvas();
+    const penPreviewRef = createPenPreviewRef();
+    const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
+    const penDraggedHandlePositionRef = createPenDraggedHandlePositionRef();
+    const setClassName = vi.fn();
+
+    penDraggedHandlePositionRef.current = { x: 20, y: 5 };
+
+    // before
+    handlePointerMove(
+      canvas,
+      pointerEvent(10, 10),
+      store.dispatch,
+      store,
+      createDragOriginRef(),
+      createDragStartRef(),
+      createPendingOutgoingTangentRef(),
+      penPreviewRef,
+      penNewVertexPreviewRef,
+      penDraggedHandlePositionRef,
+      createHoveredSegmentIdRef(),
+      setClassName,
+    );
+
+    // result
+    expect(penDraggedHandlePositionRef.current).toBeNull();
   });
 
   it('should clear the pen preview, and preview the next vertex at the pointer, when no node is currently in Vector Edit Mode', () => {
@@ -109,6 +143,7 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      createPenDraggedHandlePositionRef(),
       createHoveredSegmentIdRef(),
       setClassName,
     );
@@ -144,6 +179,7 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      createPenDraggedHandlePositionRef(),
       createHoveredSegmentIdRef(),
       setClassName,
     );
@@ -177,6 +213,7 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      createPenDraggedHandlePositionRef(),
       createHoveredSegmentIdRef(),
       setClassName,
     );
@@ -210,6 +247,7 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      createPenDraggedHandlePositionRef(),
       hoveredSegmentIdRef,
       setClassName,
     );
@@ -244,6 +282,7 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      createPenDraggedHandlePositionRef(),
       hoveredSegmentIdRef,
       setClassName,
     );
@@ -279,6 +318,7 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      createPenDraggedHandlePositionRef(),
       createHoveredSegmentIdRef(),
       setClassName,
     );
@@ -312,6 +352,7 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      createPenDraggedHandlePositionRef(),
       createHoveredSegmentIdRef(),
       setClassName,
     );
@@ -351,6 +392,7 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      createPenDraggedHandlePositionRef(),
       hoveredSegmentIdRef,
       setClassName,
     );
@@ -391,6 +433,7 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      createPenDraggedHandlePositionRef(),
       hoveredSegmentIdRef,
       setClassName,
     );

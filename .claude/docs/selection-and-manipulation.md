@@ -1241,6 +1241,43 @@ already reflects the drag with no ref needed. The one genuinely new ref this fea
 `selectedVectorVertexIdsRef`, is UI-only vertex-selection state with no Redux equivalent — deliberately
 kept off `TDesignState` the same way this subsystem already keeps drag-in-progress state off it.
 
+**Tangent-handle selection is a second, mutually-exclusive ref, not a variant of vertex selection.**
+`selectedVectorHandleRef` (`TCanvasRefs`, shape `TVectorHandleHover = { end, segmentId }`, the same
+shape `hoveredVectorHandleRef` already used for hover) was added alongside `selectedVectorVertexIdsRef`
+— asked for directly as "wspólne punkty na wektorze" (vertices and tangent handles are the same kind of
+selectable point on the network, so selecting one always clears the other): `armVectorVertexOnPointerDown`
+sets the vertex and nulls `selectedVectorHandleRef`; `armVectorHandleOnPointerDown` **and**
+`armVectorCornerHandleOnPointerDown` (the Ctrl-pull-a-fresh-handle resolver, §9 of `vector-network.md`)
+both set the handle and clear `selectedVectorVertexIdsRef` to `[]`. Both directions are enforced at the
+arm site, not derived at render time, so there's never a frame where both are simultaneously non-empty.
+`armVectorEditMissOnPointerDown`, `useSelectionTool.ts`'s own cleanup effect (tool switch away), and
+`useVectorEditOnDoubleClick.ts`'s "vectorEditingNodeId changed" effect all clear **both** refs together
+— every place that already reset the vertex selection needed the identical line added for the handle.
+
+**Rendering the selected handle mirrors the selected-vertex look, diamond instead of circle.**
+`drawVectorTangentHandles.ts` gained a `selectedHandle: TVectorHandleHover | null` parameter (threaded
+through `drawVectorEditHandlesLayer.ts`/`drawScene.ts` next to the existing `hoveredHandle`), computing
+`isStartSelected`/`isEndSelected` the same way `isStartHovered`/`isEndHovered` already work, and passing
+an `isSelected` flag into `drawTangentHandle.ts` — when true it takes precedence over hover entirely
+(matching `drawVectorVertexDots.ts`'s own `if (selected) {...} else {...hover...}` shape) and draws a
+solid `VECTOR_HANDLE_FILL` connecting line plus a white-then-blue diamond pair at
+`VECTOR_VERTEX_SELECTED_SCALE`/`_INNER_SCALE`, the exact same constants the selected-vertex ellipse pair
+uses. The rendering itself was split into small single-purpose files rather than kept as branches inside
+one function (asked for directly, mirroring the folder-promotion rule in `xigma-module-structure`):
+`drawHandleDiamond.ts` (one plain filled rotated-square primitive, reused by both), and
+`drawSelectedTangentHandleDot.ts` / `drawDefaultTangentHandleDot.ts` (the two mutually-exclusive dot
+styles), leaving `drawTangentHandle.ts` itself as a thin orchestrator that draws the line then dispatches
+to whichever dot function applies.
+
+**Cursor**: dragging either a vertex or a tangent handle now switches the cursor to the `move` class
+(`&--move` in `canvas.module.scss`, already wired to `move.png` but previously unused anywhere in JS) —
+`continueVectorVertexDrag.ts`/`continueVectorHandleDrag.ts` call `setClassName('move')` on every
+successful drag tick, and `disarmVectorVertexDrag.ts`/`disarmVectorHandleDrag.ts` reset it to `null` on
+release. This meant threading `setClassName` one level deeper than before: `useSelectionTool.ts`'s
+`onPointerMove` didn't previously pass it into `handlePointerMove.ts` at all (only `onPointerDown`/
+`onPointerUp` did), since no other `continue*Drag` needed it — `continueRotateDrag.ts` sets `canvas.style.cursor`
+directly instead, a different, lower-level mechanism from the CSS-class approach used here.
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.

@@ -125,6 +125,7 @@ describe('handlePointerMove', () => {
         resizeDragRef: createResizeDragRef(),
         starVertexCountDragRef: createStarVertexCountDragRef(),
       }),
+      vi.fn(),
     );
 
     // result
@@ -166,6 +167,7 @@ describe('handlePointerMove', () => {
         resizeDragRef: createResizeDragRef(),
         starVertexCountDragRef: createStarVertexCountDragRef(),
       }),
+      vi.fn(),
     );
 
     // result
@@ -202,6 +204,7 @@ describe('handlePointerMove', () => {
         resizeDragRef: createResizeDragRef(),
         starVertexCountDragRef: createStarVertexCountDragRef(),
       }),
+      vi.fn(),
     );
 
     // result
@@ -239,6 +242,7 @@ describe('handlePointerMove', () => {
         resizeDragRef: createResizeDragRef(),
         starVertexCountDragRef: createStarVertexCountDragRef(),
       }),
+      vi.fn(),
     );
 
     // result

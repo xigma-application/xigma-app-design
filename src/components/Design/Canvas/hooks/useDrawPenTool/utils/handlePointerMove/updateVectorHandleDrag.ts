@@ -23,6 +23,7 @@ export const updateVectorHandleDrag = (
   dispatch: AppDispatch,
   appStore: AppStore,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
+  penDraggedHandlePositionRef: RefObject<TPoint | null>,
 ): void => {
   const dx = point.x - dragStart.x;
   const dy = point.y - dragStart.y;
@@ -38,6 +39,7 @@ export const updateVectorHandleDrag = (
 
       dispatch(updateNode({ changes: { segments, vertexHandleModes }, id: dragOrigin.nodeId }));
       pendingOutgoingTangentRef.current = { tangent: { x: dx, y: dy }, vertexId: dragOrigin.vertexId };
+      penDraggedHandlePositionRef.current = point;
     }
   }
 };

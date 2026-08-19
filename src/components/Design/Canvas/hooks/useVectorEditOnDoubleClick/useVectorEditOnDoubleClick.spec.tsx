@@ -12,6 +12,7 @@ import { store } from 'store';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
 
 const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
   const canvas = document.createElement('canvas');
@@ -62,14 +63,14 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
-const renderDoubleClickTool = (canvasRef: RefObject<HTMLCanvasElement | null>): RefObject<string[]> => {
+const renderDoubleClickTool = (canvasRef: RefObject<HTMLCanvasElement | null>): TCanvasRefs => {
   const refs = createCanvasRefs({ canvasRef });
 
   renderHook(() => useVectorEditOnDoubleClick(refs), {
     wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
   });
 
-  return refs.selectedVectorVertexIdsRef;
+  return refs;
 };
 
 describe('useVectorEditOnDoubleClick behaviors', () => {
@@ -130,12 +131,13 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     expect(store.getState().design.vectorEditingNodeId).toBeNull();
   });
 
-  it('should clear a leftover vertex selection whenever vectorEditingNodeId changes', () => {
+  it('should clear a leftover vertex selection and tangent handle selection whenever vectorEditingNodeId changes', () => {
     // mock
     const canvasRef = createCanvasRef();
-    const selectedVectorVertexIdsRef = renderDoubleClickTool(canvasRef);
+    const refs = renderDoubleClickTool(canvasRef);
 
-    selectedVectorVertexIdsRef.current = ['stale-vertex'];
+    refs.selectedVectorVertexIdsRef.current = ['stale-vertex'];
+    refs.selectedVectorHandleRef.current = { end: 'start', segmentId: 's1' };
 
     // before
     act(() => {
@@ -143,7 +145,8 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     });
 
     // result
-    expect(selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(refs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(refs.selectedVectorHandleRef.current).toBeNull();
   });
 
   it('should exit Vector Edit Mode when double-clicking empty space while already editing', () => {

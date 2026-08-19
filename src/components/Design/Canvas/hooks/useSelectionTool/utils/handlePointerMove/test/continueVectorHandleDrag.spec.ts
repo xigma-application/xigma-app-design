@@ -54,39 +54,45 @@ describe('continueVectorHandleDrag', () => {
   it('should do nothing when no vector handle drag is in progress', () => {
     // mock
     const canvas = createCanvas();
+    const setClassName = vi.fn();
 
     // before
-    continueVectorHandleDrag(canvas, pointerEvent(10, 10), store.dispatch, createVectorHandleDragRef());
+    continueVectorHandleDrag(canvas, pointerEvent(10, 10), store.dispatch, createVectorHandleDragRef(), setClassName);
 
     // result
     expect(store.getState().design.nodes).toEqual({});
+    expect(setClassName).not.toHaveBeenCalled();
   });
 
   it('should do nothing when the drag points at a node that no longer exists', () => {
     // mock
     const canvas = createCanvas();
     const vectorHandleDragRef = createVectorHandleDragRef({ end: 'start', nodeId: 'missing-node', segmentId: 's1', vertexId: 'v1' });
+    const setClassName = vi.fn();
 
     // before
-    continueVectorHandleDrag(canvas, pointerEvent(10, 10), store.dispatch, vectorHandleDragRef);
+    continueVectorHandleDrag(canvas, pointerEvent(10, 10), store.dispatch, vectorHandleDragRef, setClassName);
 
     // result
     expect(store.getState().design.nodes).toEqual({});
+    expect(setClassName).not.toHaveBeenCalled();
   });
 
-  it('should set the tangentStart on the dragged segment relative to the vertex when dragging the "start" handle', () => {
+  it('should set the tangentStart on the dragged segment relative to the vertex and switch the cursor to move when dragging the "start" handle', () => {
     // mock
     const idA = addVectorNode();
     const canvas = createCanvas();
     const vectorHandleDragRef = createVectorHandleDragRef({ end: 'start', nodeId: idA, segmentId: 's1', vertexId: 'v1' });
+    const setClassName = vi.fn();
 
     // before
-    continueVectorHandleDrag(canvas, pointerEvent(20, 5), store.dispatch, vectorHandleDragRef);
+    continueVectorHandleDrag(canvas, pointerEvent(20, 5), store.dispatch, vectorHandleDragRef, setClassName);
 
     // result
     const node = store.getState().design.nodes[idA];
 
     expect(node).toMatchObject({ segments: { s1: { tangentStart: { x: 20, y: 5 } } } });
+    expect(setClassName).toHaveBeenCalledWith('move');
   });
 
   it('should set the tangentEnd on the dragged segment relative to the vertex when dragging the "end" handle', () => {
@@ -94,9 +100,10 @@ describe('continueVectorHandleDrag', () => {
     const idA = addVectorNode();
     const canvas = createCanvas();
     const vectorHandleDragRef = createVectorHandleDragRef({ end: 'end', nodeId: idA, segmentId: 's1', vertexId: 'v2' });
+    const setClassName = vi.fn();
 
     // before
-    continueVectorHandleDrag(canvas, pointerEvent(120, 15), store.dispatch, vectorHandleDragRef);
+    continueVectorHandleDrag(canvas, pointerEvent(120, 15), store.dispatch, vectorHandleDragRef, setClassName);
 
     // result
     const node = store.getState().design.nodes[idA];

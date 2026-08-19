@@ -20,6 +20,7 @@ export const continueVectorHandleDrag = (
   event: PointerEvent,
   dispatch: AppDispatch,
   vectorHandleDragRef: RefObject<TVectorHandleDragState | null>,
+  setClassName: (className: string | null) => void,
 ): void => {
   const dragState = vectorHandleDragRef.current;
 
@@ -36,6 +37,7 @@ export const continueVectorHandleDrag = (
       const segments = getMirroredVectorSegments(node.segments, dragState.vertexId, mode, dragState.segmentId, field, tangent);
 
       dispatch(updateNode({ changes: { segments }, id: dragState.nodeId }));
+      setClassName('move');
     }
   }
 };

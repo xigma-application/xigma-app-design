@@ -85,10 +85,12 @@ export type TCanvasRefs = {
   hoveredVectorVertexIdRef: RefObject<string | null>;
   hoverRef: RefObject<string | null>;
   marqueeRef: RefObject<TDraftRect | null>;
+  penDraggedHandlePositionRef: RefObject<TPoint | null>;
   penNewVertexPreviewRef: RefObject<TPoint | null>;
   penPreviewRef: RefObject<TPenPreview | null>;
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>;
   rotateDragRef: RefObject<TRotateDragState | null>;
+  selectedVectorHandleRef: RefObject<TVectorHandleHover | null>;
   selectedVectorVertexIdsRef: RefObject<string[]>;
   sliceRef: RefObject<TSliceDraft | null>;
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>;

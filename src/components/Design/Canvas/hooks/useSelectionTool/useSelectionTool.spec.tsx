@@ -597,12 +597,13 @@ describe('useSelectionTool behaviors', () => {
     expect(refs.hoveredVectorVertexIdRef.current).toBeNull();
   });
 
-  it('should clear the selected vector vertex once the tool leaves Move/Scale, instead of leaving a stale "selected" dot behind — e.g. switching back to Pen', () => {
+  it('should clear the selected vector vertex and tangent handle once the tool leaves Move/Scale, instead of leaving a stale "selected" dot behind — e.g. switching back to Pen', () => {
     // mock
     const canvasRef = createCanvasRef();
     const refs = createCanvasRefs({ canvasRef });
 
     refs.selectedVectorVertexIdsRef.current = ['v1'];
+    refs.selectedVectorHandleRef.current = { end: 'start', segmentId: 's1' };
 
     // before
     renderHook(() => useSelectionTool(refs), {
@@ -620,6 +621,7 @@ describe('useSelectionTool behaviors', () => {
 
     // result
     expect(refs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(refs.selectedVectorHandleRef.current).toBeNull();
   });
 
   it('should not react to pointer events while a path-text node is being edited', () => {

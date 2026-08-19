@@ -65,8 +65,10 @@ export const drawScene = (
   const selectedVectorVertexIds = refs.selectedVectorVertexIdsRef.current;
   const hoveredVectorVertexId = refs.hoveredVectorVertexIdRef.current;
   const hoveredVectorHandle = refs.hoveredVectorHandleRef.current;
+  const selectedVectorHandle = refs.selectedVectorHandleRef.current;
   const hoveredSegmentId = refs.hoveredSegmentIdRef.current;
   const penActiveVertexId = selectPenActiveVertexId(state);
+  const penDraggedHandlePosition = refs.penDraggedHandlePositionRef.current;
   const sceneNodes = selectOrderedNodes(state).filter((node) => node.id !== editingNodeId);
   const allSelectedNodes = selectSelectedNodes(state);
   const selectedNodes = allSelectedNodes.filter((node) => node.id !== editingNodeId);
@@ -109,7 +111,9 @@ export const drawScene = (
     hoveredVectorVertexId,
     hoveredSegmentId,
     hoveredVectorHandle,
+    selectedVectorHandle,
     penActiveVertexId,
+    penDraggedHandlePosition,
     clientWidth,
     clientHeight,
     viewport,

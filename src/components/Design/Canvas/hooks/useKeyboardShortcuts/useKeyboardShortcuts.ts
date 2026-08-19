@@ -43,10 +43,10 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => handleLeave(dispatch), ...shortcuts.escape },
       { action: (): any => dispatch(redo()), ...shortcuts.redo },
       { action: (): any => dispatch(undo()), ...shortcuts.undo },
-      { action: (): any => handleDeleteSelection(dispatch, refs.selectedVectorVertexIdsRef), secondaryKey: KeyboardKeys.delete },
-      { action: (): any => handleDeleteSelection(dispatch, refs.selectedVectorVertexIdsRef), secondaryKey: KeyboardKeys.backspace },
+      { action: (): any => handleDeleteSelection(dispatch, refs), secondaryKey: KeyboardKeys.delete },
+      { action: (): any => handleDeleteSelection(dispatch, refs), secondaryKey: KeyboardKeys.backspace },
     ],
-    [dispatch, refs.selectedVectorVertexIdsRef],
+    [dispatch, refs.selectedVectorVertexIdsRef, refs.selectedVectorHandleRef],
   );
 
   useKeyboardHandler(true, [], keysMap, undefined, true);

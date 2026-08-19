@@ -54,12 +54,14 @@ describe('continueVectorVertexDrag', () => {
   it('should do nothing when no vector vertex drag is in progress', () => {
     // mock
     const canvas = createCanvas();
+    const setClassName = vi.fn();
 
     // before
-    continueVectorVertexDrag(canvas, pointerEvent(10, 10), store.dispatch, createVectorVertexDragRef());
+    continueVectorVertexDrag(canvas, pointerEvent(10, 10), store.dispatch, createVectorVertexDragRef(), setClassName);
 
     // result
     expect(store.getState().design.nodes).toEqual({});
+    expect(setClassName).not.toHaveBeenCalled();
   });
 
   it('should do nothing when the drag points at a node that no longer exists', () => {
@@ -70,15 +72,17 @@ describe('continueVectorVertexDrag', () => {
       origins: { v1: { x: 0, y: 0 } },
       pointerStart: { x: 0, y: 0 },
     });
+    const setClassName = vi.fn();
 
     // before
-    continueVectorVertexDrag(canvas, pointerEvent(10, 10), store.dispatch, vectorVertexDragRef);
+    continueVectorVertexDrag(canvas, pointerEvent(10, 10), store.dispatch, vectorVertexDragRef, setClassName);
 
     // result
     expect(store.getState().design.nodes).toEqual({});
+    expect(setClassName).not.toHaveBeenCalled();
   });
 
-  it('should translate only the dragged vertices, leaving the rest untouched', () => {
+  it('should translate only the dragged vertices, leaving the rest untouched, and switch the cursor to move', () => {
     // mock
     const idA = addVectorNode();
     const canvas = createCanvas();
@@ -87,9 +91,10 @@ describe('continueVectorVertexDrag', () => {
       origins: { v1: { x: 0, y: 0 } },
       pointerStart: { x: 0, y: 0 },
     });
+    const setClassName = vi.fn();
 
     // before
-    continueVectorVertexDrag(canvas, pointerEvent(15, 7), store.dispatch, vectorVertexDragRef);
+    continueVectorVertexDrag(canvas, pointerEvent(15, 7), store.dispatch, vectorVertexDragRef, setClassName);
 
     // result
     const node = store.getState().design.nodes[idA];
@@ -97,5 +102,6 @@ describe('continueVectorVertexDrag', () => {
     expect(node).toMatchObject({
       vertices: { v1: { id: 'v1', x: 15, y: 7 }, v2: { id: 'v2', x: 100, y: 0 } },
     });
+    expect(setClassName).toHaveBeenCalledWith('move');
   });
 });

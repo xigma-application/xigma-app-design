@@ -510,6 +510,23 @@ straight line underneath the real curve+handle visuals for the whole drag. Fixed
 a new drag starts, shaping a real tangent instead, or the loop closes and `penActiveVertexId` clears,
 which the hover branch already self-clears on the very next `updateNewVertexPreview` call).
 
+**Live mirrored drag-preview handle — a third, render-only diamond that literally follows the cursor.**
+`updateVectorHandleDrag.ts` writes the incoming segment's `tangentEnd` as `{-dx, -dy}` (mirrored *away*
+from the cursor, §4) — correct for the committed curve, but it means nothing ever showed a handle on the
+cursor's own side while dragging. Since the mirror of that mirror is trivially the cursor itself
+(`vertex + (dx, dy) = vertex + (point - dragStart) = point`), a fourth ref, `penDraggedHandlePositionRef`
+(`TCanvasRefs`, parent-owned like `ellipseArcDragRef`'s `draggedHandlePosition` — the render loop needs
+to read it every frame), is set to the raw `point` alongside `tangentEnd`/`pendingOutgoingTangentRef` in
+`updateVectorHandleDrag.ts`, and cleared the instant the gesture ends: in `handlePointerUp.ts`/
+`handlePointerCancel.ts` (immediate, no extra `pointermove` needed) and defensively in
+`handlePointerMove.ts`'s hover branch (`dragOriginRef.current` falsy) for any other path back to idle.
+`drawVectorTangentHandles.ts` draws it via a small `drawPenDragHandlePreview` helper (same file, not
+promoted to its own module) — reuses the existing `drawTangentHandle` primitive unmodified, from
+`node.vertices[penActiveVertexId]` to `penDraggedHandlePosition`, so it looks identical to a real
+tangent-handle line/diamond even though it's never written to `segment.tangentStart`/`tangentEnd` and
+disappears the moment the drag ends (asked for directly: "tymczasowo rysować tangen odbity w stronę
+kursora... Potem tangen ten przy kursorze ginie").
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

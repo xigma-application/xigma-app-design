@@ -34,7 +34,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
   };
 
   const onPointerMove = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs, selectRefs: TSelectionToolRefs): void => {
-    handlePointerMove(canvas, event, dispatch, canvasRefs, selectRefs);
+    handlePointerMove(canvas, event, dispatch, canvasRefs, selectRefs, setClassName);
   };
 
   const onPointerUp = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs, selectRefs: TSelectionToolRefs): void => {
@@ -65,6 +65,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         canvas.removeEventListener('pointerup', pointerUpListener);
         canvas.removeEventListener('pointerleave', pointerLeaveListener);
         refs.selectedVectorVertexIdsRef.current = [];
+        refs.selectedVectorHandleRef.current = null;
       };
     }
   }, [activeTool, dispatch, isCanvasCaretEditingActive, refs, selectionRefs, setClassName]);

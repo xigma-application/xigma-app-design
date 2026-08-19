@@ -1,4 +1,5 @@
 // types
+import { TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 import { TVectorHandleHover } from 'types/design/canvas/types';
 
@@ -20,7 +21,9 @@ export const drawVectorEditHandlesLayer = (
   hoveredVertexId: string | null,
   hoveredSegmentId: string | null,
   hoveredHandle: TVectorHandleHover | null,
+  selectedHandle: TVectorHandleHover | null,
   penActiveVertexId: string | null,
+  penDraggedHandlePosition: TPoint | null,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
@@ -32,7 +35,19 @@ export const drawVectorEditHandlesLayer = (
     const visualSelectedVertexIds = penActiveVertexId ? [...selectedVertexIds, penActiveVertexId] : selectedVertexIds;
 
     drawVectorEditOutline(gl, program, buffer, node, hoveredNodeId, hoveredSegmentId, canvasWidth, canvasHeight, viewport);
-    drawVectorTangentHandles(gl, program, buffer, node, hoveredHandle, canvasWidth, canvasHeight, viewport);
+    drawVectorTangentHandles(
+      gl,
+      program,
+      buffer,
+      node,
+      hoveredHandle,
+      selectedHandle,
+      penActiveVertexId,
+      penDraggedHandlePosition,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+    );
     drawVectorVertexDots(gl, program, buffer, node, visualSelectedVertexIds, hoveredVertexId, canvasWidth, canvasHeight, viewport);
   }
 };

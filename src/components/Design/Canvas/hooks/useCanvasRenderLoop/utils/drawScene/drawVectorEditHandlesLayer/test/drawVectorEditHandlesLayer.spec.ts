@@ -59,6 +59,8 @@ const call = (
   hoveredSegmentId: string | null = null,
   penActiveVertexId: string | null = null,
   hoveredHandle: TVectorHandleHover | null = null,
+  selectedHandle: TVectorHandleHover | null = null,
+  penDraggedHandlePosition: { x: number; y: number } | null = null,
 ): void => {
   const gl = {} as WebGL2RenderingContext;
   const program = {} as WebGLProgram;
@@ -75,7 +77,9 @@ const call = (
     hoveredVertexId,
     hoveredSegmentId,
     hoveredHandle,
+    selectedHandle,
     penActiveVertexId,
+    penDraggedHandlePosition,
     200,
     150,
     IDENTITY_VIEWPORT,
@@ -122,7 +126,24 @@ describe('drawVectorEditHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorEditHandlesLayer(gl, program, buffer, frameNodes, 'frame-1', [], null, null, null, null, null, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorEditHandlesLayer(
+      gl,
+      program,
+      buffer,
+      frameNodes,
+      'frame-1',
+      [],
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorStrokeMock).not.toHaveBeenCalled();
@@ -205,6 +226,47 @@ describe('drawVectorEditHandlesLayer', () => {
     expect(selectedInnerDot).toMatchObject({ x: -SELECTED_INNER_SIZE / 2 });
   });
 
+  it('should draw a selected tangent handle as a solid-blue line and white-then-blue diamond pair, matching the selected-vertex style', () => {
+    // before
+    call(vectorNode.id, [], null, null, null, null, null, { end: 'start', segmentId: 's1' });
+
+    // result — the same enlarge/recolor treatment selected vertices get, just diamond-shaped
+    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 5, y1: 0, y2: 0 }, '#0d99ff', 1, 200, 150, IDENTITY_VIEWPORT);
+
+    const outerDiamond = drawRectMock.mock.calls.find((args) => args[3].width === SELECTED_OUTER_SIZE)?.[3];
+    const innerDiamond = drawRectMock.mock.calls.find((args) => args[3].fill === '#0d99ff' && args[3].width === SELECTED_INNER_SIZE)?.[3];
+
+    expect(outerDiamond).toMatchObject({ fill: '#ffffff' });
+    expect(innerDiamond).toBeDefined();
+  });
+
+  it('should deselect the tangent handle rendering once a vertex takes over the selection', () => {
+    // before — selectedVertexIds non-empty, selectedHandle explicitly stale/null (mirrors the mutual-exclusivity the arm resolvers enforce)
+    call(vectorNode.id, ['v1'], null, null, null, null, null, null);
+
+    // result — the handle falls back to its plain bordered-diamond look, not the selected two-layer pair
+    expect(drawRectMock).toHaveBeenCalledTimes(1);
+    expect(drawRectMock).toHaveBeenCalledWith(
+      {},
+      {},
+      {},
+      { fill: '#ffffff', height: BASE_SIZE, stroke: '#0d99ff', width: BASE_SIZE, x: 2.5, y: -2.5 },
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      45,
+    );
+  });
+
+  it('should draw an extra tangent handle line from the Pen active vertex to the live-dragged cursor position', () => {
+    // before
+    call(vectorNode.id, [], null, null, null, 'v1', null, null, { x: 30, y: 40 });
+
+    // result — the existing v1 handle line (0,0 -> 5,0) plus the new drag-preview line (0,0 -> 30,40)
+    expect(drawLineMock).toHaveBeenCalledTimes(2);
+    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 30, y1: 0, y2: 40 }, '#aaaaaa', 1, 200, 150, IDENTITY_VIEWPORT);
+  });
+
   it('should draw vertex dots at their rotated world position for a node with a persisted, not-yet-baked rotation', () => {
     // mock — v1(0,0)/v2(10,0), 90deg around the bounds-center (5, 0): v1 -> (5, -5), v2 -> (5, 5); dots
     // must track the same rotated positions the fill/stroke render at (drawVectorNode.ts), not the raw
@@ -223,6 +285,8 @@ describe('drawVectorEditHandlesLayer', () => {
       rotatedNodes,
       rotatedVectorNode.id,
       ['v1'],
+      null,
+      null,
       null,
       null,
       null,

@@ -40,6 +40,7 @@ export const handlePointerMove = (
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
   penPreviewRef: TCanvasRefs['penPreviewRef'],
   penNewVertexPreviewRef: TCanvasRefs['penNewVertexPreviewRef'],
+  penDraggedHandlePositionRef: TCanvasRefs['penDraggedHandlePositionRef'],
   hoveredSegmentIdRef: TCanvasRefs['hoveredSegmentIdRef'],
   setClassName: (className: string | null) => void,
 ): void => {
@@ -49,13 +50,24 @@ export const handlePointerMove = (
   const point: TPoint = { x: Math.round(rawPoint.x), y: Math.round(rawPoint.y) };
 
   if (dragOriginRef.current && dragStartRef.current) {
-    updateVectorHandleDrag(point, dragOriginRef.current, dragStartRef.current, viewport, dispatch, appStore, pendingOutgoingTangentRef);
+    updateVectorHandleDrag(
+      point,
+      dragOriginRef.current,
+      dragStartRef.current,
+      viewport,
+      dispatch,
+      appStore,
+      pendingOutgoingTangentRef,
+      penDraggedHandlePositionRef,
+    );
     hoveredSegmentIdRef.current = null;
     setClassName('pen');
   } else {
     const vectorEditingNodeId = selectVectorEditingNodeId(state);
     const node = getVectorEditingNode(state.design.nodes, vectorEditingNodeId);
     const penActiveVertexId = selectPenActiveVertexId(state);
+
+    penDraggedHandlePositionRef.current = null;
 
     if (node && penActiveVertexId) {
       const hoverKind = updateVectorPenPreview(
