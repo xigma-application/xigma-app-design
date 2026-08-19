@@ -18,12 +18,10 @@ export const updateVectorPenPreview = (
   activeVertexId: string | null,
   viewport: TViewport,
   penPreviewRef: TCanvasRefs['penPreviewRef'],
-  penHoverVertexRef: TCanvasRefs['penHoverVertexRef'],
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
 ): void => {
   const hover = getVectorVertexAtPoint(point, node, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom, activeVertexId);
   const hoverVertex = hover ? node.vertices[hover.vertexId] : null;
-  penHoverVertexRef.current = hover && hoverVertex ? { nodeId: node.id, point: hoverVertex, vertexId: hover.vertexId } : null;
   const activeVertex = activeVertexId ? node.vertices[activeVertexId] : null;
   const pending = pendingOutgoingTangentRef.current;
 

@@ -1,7 +1,7 @@
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TDesignState } from '../../types';
-import { TEllipseNode, TFrameNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { handleSetSelection } from '../handleSetSelection';
@@ -54,6 +54,21 @@ const buildEllipse = (overrides: Partial<TEllipseNode> = {}): TEllipseNode => ({
   width: 10,
   x: 0,
   y: 0,
+  ...overrides,
+});
+
+const buildVectorNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
+  fillColor: null,
+  id: 'vector-1',
+  name: 'Vector',
+  parentId: null,
+  rotation: 0,
+  segments: {},
+  strokeColor: '#000000',
+  strokeWidth: 1,
+  type: NodeType.vector,
+  vertexHandleModes: {},
+  vertices: { v1: { id: 'v1', x: 0, y: 0 } },
   ...overrides,
 });
 
@@ -153,5 +168,63 @@ describe('handleSetSelection', () => {
     // result
     expect(state.vectorEditingNodeId).toBeNull();
     expect(state.penActiveVertexId).toBeNull();
+  });
+
+  it('should delete a deselected vector node that never got any segments drawn', () => {
+    // mock — the abandoned-first-click case: one vertex, no segments
+    const node = buildVectorNode();
+    const state = buildState({ [node.id]: node }, [node.id]);
+
+    // before
+    handleSetSelection(state, []);
+
+    // result
+    expect(state.nodes[node.id]).toBeUndefined();
+  });
+
+  it('should not delete a deselected vector node that already has a segment', () => {
+    // mock
+    const node = buildVectorNode({
+      segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } },
+    });
+    const state = buildState({ [node.id]: node }, [node.id]);
+
+    // before
+    handleSetSelection(state, []);
+
+    // result
+    expect(state.nodes[node.id]).toBeDefined();
+  });
+
+  it('should delete the vector-editing node once its edit mode exits, when it never got any segments drawn', () => {
+    // mock — Escape/selecting a different node while an empty just-clicked vector node is still open
+    const node = buildVectorNode();
+    const other = { ...frame, id: 'other' };
+    const state = buildState({ [node.id]: node, other }, [node.id], { vectorEditingNodeId: node.id });
+
+    // before
+    handleSetSelection(state, [other.id]);
+
+    // result
+    expect(state.vectorEditingNodeId).toBeNull();
+    expect(state.nodes[node.id]).toBeUndefined();
+  });
+
+  it('should not delete the vector-editing node once its edit mode exits, when it already has a segment', () => {
+    // mock
+    const node = buildVectorNode({
+      segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } },
+    });
+    const other = { ...frame, id: 'other' };
+    const state = buildState({ [node.id]: node, other }, [node.id], { vectorEditingNodeId: node.id });
+
+    // before
+    handleSetSelection(state, [other.id]);
+
+    // result
+    expect(state.vectorEditingNodeId).toBeNull();
+    expect(state.nodes[node.id]).toBeDefined();
   });
 });

@@ -1,8 +1,8 @@
 // others
-import { DRAFT_FRAME_STROKE, VECTOR_CURVE_SEGMENTS, VECTOR_SNAP_INDICATOR_RADIUS_PX, VECTOR_STROKE_WIDTH } from 'constant/canvas';
+import { DRAFT_FRAME_STROKE, VECTOR_CURVE_SEGMENTS, VECTOR_STROKE_WIDTH, VECTOR_VERTEX_FILL, VECTOR_VERTEX_SIZE } from 'constant/canvas';
 
 // types
-import { TPenHoverVertex, TPenPreview } from 'types/design/canvas/types';
+import { TPenPreview } from 'types/design/canvas/types';
 import { TSceneNode, TViewport } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
@@ -16,12 +16,42 @@ import { rotatePoint } from 'utils/math/rotatePoint';
 
 const ORIGIN: TPoint = { x: 0, y: 0 };
 
+const drawVertexPreviewDot = (
+  gl: WebGL2RenderingContext,
+  program: WebGLProgram,
+  buffer: WebGLBuffer,
+  point: TPoint,
+  canvasWidth: number,
+  canvasHeight: number,
+  viewport: TViewport,
+): void => {
+  const vertexSize = VECTOR_VERTEX_SIZE / viewport.zoom;
+
+  drawEllipse(
+    gl,
+    program,
+    buffer,
+    {
+      fill: VECTOR_VERTEX_FILL,
+      height: vertexSize,
+      stroke: DRAFT_FRAME_STROKE,
+      width: vertexSize,
+      x: point.x - vertexSize / 2,
+      y: point.y - vertexSize / 2,
+    },
+    canvasWidth,
+    canvasHeight,
+    viewport,
+    0,
+  );
+};
+
 export const drawPenPreview = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
   preview: TPenPreview | null,
-  hoverVertex: TPenHoverVertex | null,
+  newVertexPreview: TPoint | null,
   nodes: Record<string, TSceneNode>,
   vectorEditingNodeId: string | null,
   canvasWidth: number,
@@ -50,27 +80,10 @@ export const drawPenPreview = (
       canvasHeight,
       viewport,
     );
+    drawVertexPreviewDot(gl, program, buffer, to, canvasWidth, canvasHeight, viewport);
   }
 
-  if (hoverVertex) {
-    const radius = VECTOR_SNAP_INDICATOR_RADIUS_PX / viewport.zoom;
-    const point = rotatePoint(hoverVertex.point, pivot, rotation);
-
-    drawEllipse(
-      gl,
-      program,
-      buffer,
-      {
-        height: radius * 2,
-        stroke: DRAFT_FRAME_STROKE,
-        width: radius * 2,
-        x: point.x - radius,
-        y: point.y - radius,
-      },
-      canvasWidth,
-      canvasHeight,
-      viewport,
-      0,
-    );
+  if (newVertexPreview) {
+    drawVertexPreviewDot(gl, program, buffer, newVertexPreview, canvasWidth, canvasHeight, viewport);
   }
 };

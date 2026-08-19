@@ -26,68 +26,28 @@ const node: TVectorNode = {
 };
 
 const createPenPreviewRef = (): TCanvasRefs['penPreviewRef'] => ({ current: null });
-const createPenHoverVertexRef = (): TCanvasRefs['penHoverVertexRef'] => ({ current: null });
 const createPendingOutgoingTangentRef = (value: TPendingOutgoingTangent | null = null): RefObject<TPendingOutgoingTangent | null> => ({
   current: value,
 });
 
 describe('updateVectorPenPreview', () => {
-  it('should highlight the nearby vertex as a snap target when the pointer hovers close to it', () => {
+  it('should clear the rubber-band preview when there is no active vertex', () => {
     // mock
     const penPreviewRef = createPenPreviewRef();
-    const penHoverVertexRef = createPenHoverVertexRef();
 
     // before
-    updateVectorPenPreview(
-      { x: 1, y: 0 },
-      node,
-      null,
-      IDENTITY_VIEWPORT,
-      penPreviewRef,
-      penHoverVertexRef,
-      createPendingOutgoingTangentRef(),
-    );
+    updateVectorPenPreview({ x: 900, y: 900 }, node, null, IDENTITY_VIEWPORT, penPreviewRef, createPendingOutgoingTangentRef());
 
     // result
-    expect(penHoverVertexRef.current).toEqual({ nodeId: 'vector-1', point: { id: 'v1', x: 0, y: 0 }, vertexId: 'v1' });
-  });
-
-  it('should clear the hover target when the pointer is far from every vertex', () => {
-    // mock
-    const penPreviewRef = createPenPreviewRef();
-    const penHoverVertexRef = createPenHoverVertexRef();
-
-    // before
-    updateVectorPenPreview(
-      { x: 900, y: 900 },
-      node,
-      null,
-      IDENTITY_VIEWPORT,
-      penPreviewRef,
-      penHoverVertexRef,
-      createPendingOutgoingTangentRef(),
-    );
-
-    // result
-    expect(penHoverVertexRef.current).toBeNull();
     expect(penPreviewRef.current).toBeNull();
   });
 
   it('should draw the rubber-band preview from the active vertex to the pointer when no vertex is hovered', () => {
     // mock
     const penPreviewRef = createPenPreviewRef();
-    const penHoverVertexRef = createPenHoverVertexRef();
 
     // before
-    updateVectorPenPreview(
-      { x: 500, y: 500 },
-      node,
-      'v1',
-      IDENTITY_VIEWPORT,
-      penPreviewRef,
-      penHoverVertexRef,
-      createPendingOutgoingTangentRef(),
-    );
+    updateVectorPenPreview({ x: 500, y: 500 }, node, 'v1', IDENTITY_VIEWPORT, penPreviewRef, createPendingOutgoingTangentRef());
 
     // result
     expect(penPreviewRef.current).toEqual({ from: { id: 'v1', x: 0, y: 0 }, tangentFromOffset: null, to: { x: 500, y: 500 } });
@@ -97,7 +57,6 @@ describe('updateVectorPenPreview', () => {
     // mock
     const nodeWithTwoVertices: TVectorNode = { ...node, vertices: { ...node.vertices, v2: { id: 'v2', x: 100, y: 0 } } };
     const penPreviewRef = createPenPreviewRef();
-    const penHoverVertexRef = createPenHoverVertexRef();
 
     // before — active vertex is v1, pointer hovers right on v2
     updateVectorPenPreview(
@@ -106,7 +65,6 @@ describe('updateVectorPenPreview', () => {
       'v1',
       IDENTITY_VIEWPORT,
       penPreviewRef,
-      penHoverVertexRef,
       createPendingOutgoingTangentRef(),
     );
 
@@ -117,11 +75,10 @@ describe('updateVectorPenPreview', () => {
   it('should carry the pending outgoing tangent into the preview when it matches the active vertex', () => {
     // mock
     const penPreviewRef = createPenPreviewRef();
-    const penHoverVertexRef = createPenHoverVertexRef();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef({ tangent: { x: 5, y: 5 }, vertexId: 'v1' });
 
     // before
-    updateVectorPenPreview({ x: 500, y: 500 }, node, 'v1', IDENTITY_VIEWPORT, penPreviewRef, penHoverVertexRef, pendingOutgoingTangentRef);
+    updateVectorPenPreview({ x: 500, y: 500 }, node, 'v1', IDENTITY_VIEWPORT, penPreviewRef, pendingOutgoingTangentRef);
 
     // result
     expect(penPreviewRef.current).toMatchObject({ tangentFromOffset: { x: 5, y: 5 } });

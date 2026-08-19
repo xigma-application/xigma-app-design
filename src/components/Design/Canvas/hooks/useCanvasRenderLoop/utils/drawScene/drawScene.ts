@@ -124,7 +124,7 @@ export const drawScene = (
     program,
     buffer,
     refs.penPreviewRef.current,
-    refs.penHoverVertexRef.current,
+    refs.penNewVertexPreviewRef.current,
     nodesById,
     vectorEditingNodeId,
     clientWidth,

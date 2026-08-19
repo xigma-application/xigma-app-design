@@ -28,7 +28,7 @@ const createDragOriginRef = (value: TPenDragOrigin | null = null): RefObject<TPe
 const createDragStartRef = (value: TPoint | null = null): RefObject<TPoint | null> => ({ current: value });
 const createPendingOutgoingTangentRef = (): RefObject<TPendingOutgoingTangent | null> => ({ current: null });
 const createPenPreviewRef = (): TCanvasRefs['penPreviewRef'] => ({ current: null });
-const createPenHoverVertexRef = (): TCanvasRefs['penHoverVertexRef'] => ({ current: null });
+const createPenNewVertexPreviewRef = (): TCanvasRefs['penNewVertexPreviewRef'] => ({ current: null });
 
 const addVectorNodeWithSegment = (): string => {
   store.dispatch(
@@ -63,7 +63,7 @@ describe('handlePointerMove', () => {
     const nodeId = addVectorNodeWithSegment();
     const canvas = createCanvas();
     const penPreviewRef = createPenPreviewRef();
-    const penHoverVertexRef = createPenHoverVertexRef();
+    const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
 
     // before
     handlePointerMove(
@@ -75,7 +75,7 @@ describe('handlePointerMove', () => {
       createDragStartRef({ x: 0, y: 0 }),
       createPendingOutgoingTangentRef(),
       penPreviewRef,
-      penHoverVertexRef,
+      penNewVertexPreviewRef,
     );
 
     // result
@@ -84,14 +84,13 @@ describe('handlePointerMove', () => {
     expect(node.segments.s1.tangentEnd).toEqual({ x: -20, y: -5 });
   });
 
-  it('should clear the pen preview and hover target when no node is currently in Vector Edit Mode', () => {
+  it('should clear the pen preview, and preview the next vertex at the pointer, when no node is currently in Vector Edit Mode', () => {
     // mock
     const canvas = createCanvas();
     const penPreviewRef = createPenPreviewRef();
-    const penHoverVertexRef = createPenHoverVertexRef();
+    const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
 
     penPreviewRef.current = { from: { x: 0, y: 0 }, tangentFromOffset: null, to: { x: 1, y: 1 } };
-    penHoverVertexRef.current = { nodeId: 'stale', point: { x: 0, y: 0 }, vertexId: 'stale-vertex' };
 
     // before
     handlePointerMove(
@@ -103,12 +102,12 @@ describe('handlePointerMove', () => {
       createDragStartRef(),
       createPendingOutgoingTangentRef(),
       penPreviewRef,
-      penHoverVertexRef,
+      penNewVertexPreviewRef,
     );
 
     // result
     expect(penPreviewRef.current).toBeNull();
-    expect(penHoverVertexRef.current).toBeNull();
+    expect(penNewVertexPreviewRef.current).toEqual({ x: 10, y: 10 });
   });
 
   it('should update the pen preview toward the pointer when a node is being edited', () => {
@@ -120,7 +119,9 @@ describe('handlePointerMove', () => {
 
     const canvas = createCanvas();
     const penPreviewRef = createPenPreviewRef();
-    const penHoverVertexRef = createPenHoverVertexRef();
+    const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
+
+    penNewVertexPreviewRef.current = { x: 999, y: 999 };
 
     // before
     handlePointerMove(
@@ -132,10 +133,11 @@ describe('handlePointerMove', () => {
       createDragStartRef(),
       createPendingOutgoingTangentRef(),
       penPreviewRef,
-      penHoverVertexRef,
+      penNewVertexPreviewRef,
     );
 
     // result
     expect(penPreviewRef.current).toMatchObject({ to: { x: 500, y: 500 } });
+    expect(penNewVertexPreviewRef.current).toBeNull();
   });
 });

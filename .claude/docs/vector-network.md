@@ -145,13 +145,30 @@ drag is a no-op), but `pendingOutgoingTangentRef` still gets set unconditionally
 segment drawn from that point picks up the dragged tangent as its `tangentStart` exactly like any
 later point would.
 
-**Live preview** (`penPreviewRef`/`penHoverVertexRef`, `TCanvasRefs`, ref not Redux — pure uncommitted
-visuals): `updateVectorPenPreview.ts` recomputes every pointermove — the snap-indicator circle over any
-nearby vertex of the network (shown even before an active vertex exists, satisfying "handler podąża za
-nim między networkami" within the one active object — cross-*object* connecting is explicitly out of
-scope, see §7) and, once there's an active vertex, the rubber-band edge to the cursor, curved via
-`tangentFromOffset` if a drag left a pending outgoing tangent. `drawScene/drawPenPreview.ts` renders it;
-never touches Vector Network state.
+**Live preview** (`penPreviewRef`/`penNewVertexPreviewRef`, `TCanvasRefs`, ref not Redux — pure
+uncommitted visuals), two cases depending on whether there's an active vertex yet:
+- **No active vertex** (`handlePointerMove.ts`'s `node === null` branch — nothing placed yet at all, or
+  `node` case with no `penActiveVertexId`) — `penNewVertexPreviewRef` just tracks the raw cursor position
+  each move; nothing computes hover/snapping here since there's no active vertex to draw a rubber-band
+  from yet.
+- **Active vertex exists** — `updateVectorPenPreview.ts` recomputes `penPreviewRef` every pointermove:
+  the rubber-band edge from the active vertex to the cursor, curved via `tangentFromOffset` if a drag left
+  a pending outgoing tangent, with its endpoint (`to`) snapping onto any nearby existing vertex of the
+  network (attraction only, no separate visual — see below) rather than the raw pointer position, so the
+  next click naturally lands on/connects to it (shown even before requiring a second click, satisfying
+  "handler podąża za nim między networkami" within the one active object — cross-*object* connecting is
+  explicitly out of scope, see §7).
+
+`drawScene/drawPenPreview.ts` renders both — never touches Vector Network state. A single small
+`drawVertexPreviewDot` helper draws a vertex-styled dot (white fill, blue border, `VECTOR_VERTEX_SIZE` —
+matching a real committed vertex dot, not the larger `VECTOR_SNAP_INDICATOR_RADIUS_PX` circle an earlier
+version used) at `penNewVertexPreviewRef`'s point *and* at the rubber-band's `to` endpoint, so the
+"where will my next click land" dot shows continuously across every point of a session, not just the
+very first one — asked for directly after the first version only showed it before the first click.
+**There is no separate snap-indicator overlay any more** (an earlier `penHoverVertexRef`/`TPenHoverVertex`
+ref+type existed solely to draw one, removed in full — asked for directly, "usuń wskaźnik, zostaw samo
+przyciąganie") — the attraction is now only visible as the rubber-band's endpoint (and its dot) jumping
+onto the nearby vertex, not as an extra circle drawn around it.
 
 ## 5. Escape — 3-stage exit
 
@@ -218,11 +235,11 @@ New entries in `handlePointerDown/constants.ts`'s `ARM_RESOLVERS` (highest prior
   reproduces the same per-frame vertex-jump instability that motivated baking in the first place, for the
   Pen-tool path specifically.
   `drawScene/drawPenPreview.ts` (§4's live preview) is the one renderer that still has to stay
-  rotation-*aware* rather than relying on baking alone: its snap-indicator circle updates on every
+  rotation-*aware* rather than relying on baking alone: its rubber-band line/dot update on every
   `pointermove`, including the window *before* any pointerdown (hence bake) has happened, so it reads
   `node.vertices` while `node.rotation` may still be non-zero — it applies the same
   `bakeVectorNodeRotation.ts`-style pivot rotation as `drawVectorEditHandlesLayer.ts` (display-only, no
-  dispatch) so the hover dot lands on the visually-rotated vertex instead of the raw local one. Don't
+  dispatch) so the preview lands on the visually-rotated vertex instead of the raw local one. Don't
   remove this thinking it's now dead code just because pointerdown bakes — the hover window before that
   first click is exactly when it's load-bearing.
 - Continuing via Pen from inside Edit Mode falls out for free — `useDrawPenTool` only checks
@@ -234,6 +251,31 @@ New entries in `handlePointerDown/constants.ts`'s `ARM_RESOLVERS` (highest prior
   Lives in `Canvas.tsx`'s own tree (not `useToolbarShortcuts`, which is mounted at `DesignPage` level)
   specifically because it needs `refs.selectedVectorVertexIdsRef`, a `TCanvasRefs` ref inaccessible from
   there — same reasoning that kept `vectorEditingNodeId`/`penActiveVertexId` in Redux instead (§4).
+- **An abandoned, still-empty vector node is auto-deleted the moment its edit session fully ends** —
+  place one point, back all the way out (Escape ×3, per §5) without ever drawing a segment, and the
+  node disappears instead of leaving a permanent, invisible, zero-segment node behind. `isEmptyVectorNode.ts`
+  (`store/design/utils/`) is the predicate — `node.type === NodeType.vector && Object.keys(node.segments)
+  .length === 0`, true for the fresh one-vertex-no-segments node `startNewVectorNetwork.ts` (§4) creates
+  on the very first click. Wired into **every** place `vectorEditingNodeId` can transition away from a
+  node, so it fires regardless of which exit path was used:
+  - `handleSetVectorEditingNodeId.ts` — the `setVectorEditingNodeId` reducer itself now diffs old vs. new
+    payload; if the *previous* id resolves to an empty vector node, `handleDeleteNode.ts` runs before the
+    field updates. Catches the two exits that dispatch this action directly with no accompanying
+    `setSelection`: Escape's 3rd stage (§5) and `useVectorEditOnDoubleClick.ts`'s empty-space exit (§6
+    above) — neither of those touches `selectedIds`, so nothing else would have caught them.
+  - `handleSetSelection.ts` — the *other* way `vectorEditingNodeId` can clear, as a side effect of
+    selecting something else (e.g. clicking a different node) rather than a direct `setVectorEditingNodeId`
+    call (see "Selecting a different node..." above). Split into two named steps for this reason
+    (`deleteDegenerateDeselectedNodes` / `exitVectorEditingIfNeeded`): the second one now runs the same
+    `isEmptyVectorNode.ts` check right before nulling `vectorEditingNodeId`. The first step is unrelated
+    but pre-existing — it already auto-deletes a *deselected*, fully-cut-away ellipse arc
+    (`isFullyCutAwayEllipse`) the same way; `isEmptyVectorNode.ts` was added as a second condition
+    alongside it, the established precedent for "auto-clean a degenerate node on the way out" in this file.
+  - **Never fires while the node still has any segment** — both call sites check the *specific node being
+    exited*, not "any empty vector node anywhere," so continuing to draw a second, still-unconnected
+    fragment vertex onto an already-populated network and backing out leaves the whole node (and its
+    existing segments) untouched; only a node with zero segments *overall* is ever deleted, matching "jeśli
+    mamy wektor... nie możemy usunąć jeśli jakiś wektor jest" (asked for directly).
 
 ## 7. Explicit scope trims (flagged, not silent)
 

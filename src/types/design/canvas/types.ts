@@ -71,12 +71,6 @@ export type TPenPreview = {
   to: TPoint;
 };
 
-export type TPenHoverVertex = {
-  nodeId: string;
-  point: TPoint;
-  vertexId: string;
-};
-
 export type TCanvasRefs = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>;
@@ -86,7 +80,7 @@ export type TCanvasRefs = {
   ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null>;
   hoverRef: RefObject<string | null>;
   marqueeRef: RefObject<TDraftRect | null>;
-  penHoverVertexRef: RefObject<TPenHoverVertex | null>;
+  penNewVertexPreviewRef: RefObject<TPoint | null>;
   penPreviewRef: RefObject<TPenPreview | null>;
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>;
   rotateDragRef: RefObject<TRotateDragState | null>;

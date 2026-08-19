@@ -18,7 +18,7 @@ const NO_NODES: Record<string, TSceneNode> = {};
 
 const call = (
   preview: { from: { x: number; y: number }; tangentFromOffset: { x: number; y: number } | null; to: { x: number; y: number } } | null,
-  hoverVertex: { nodeId: string; point: { x: number; y: number }; vertexId: string } | null,
+  newVertexPreview: { x: number; y: number } | null,
   nodes: Record<string, TSceneNode>,
   vectorEditingNodeId: string | null,
 ): void => {
@@ -27,7 +27,7 @@ const call = (
     {} as WebGLProgram,
     {} as WebGLBuffer,
     preview,
-    hoverVertex,
+    newVertexPreview,
     nodes,
     vectorEditingNodeId,
     100,
@@ -42,7 +42,7 @@ describe('drawPenPreview', () => {
     drawEllipseMock.mockClear();
   });
 
-  it('should draw nothing when there is no preview segment and no hover vertex', () => {
+  it('should draw nothing when there is no preview segment and no new-vertex preview', () => {
     // before
     call(null, null, NO_NODES, null);
 
@@ -51,7 +51,7 @@ describe('drawPenPreview', () => {
     expect(drawEllipseMock).not.toHaveBeenCalled();
   });
 
-  it('should draw a vector stroke for the preview segment from the pen origin to the pointer', () => {
+  it('should draw a vector stroke for the preview segment from the pen origin to the pointer, plus a vertex-styled dot at its endpoint', () => {
     // mock
     const preview = { from: { x: 0, y: 0 }, tangentFromOffset: null, to: { x: 10, y: 10 } };
 
@@ -69,34 +69,24 @@ describe('drawPenPreview', () => {
         segmentId: 'preview',
       },
     ]);
-  });
 
-  it('should draw a snap-indicator ellipse centered on the hovered vertex', () => {
-    // mock
-    const hoverVertex = { nodeId: 'node', point: { x: 5, y: 5 }, vertexId: 'vertex' };
-
-    // before
-    call(null, hoverVertex, NO_NODES, null);
-
-    // result — VECTOR_SNAP_INDICATOR_RADIUS_PX (8) / zoom (1)
+    // result — the dot previews exactly where the next click will land, same as the very-first-point dot
     expect(drawEllipseMock).toHaveBeenCalledTimes(1);
-    expect(drawEllipseMock.mock.calls[0][3]).toEqual({ height: 16, stroke: '#0d99ff', width: 16, x: -3, y: -3 });
+    expect(drawEllipseMock.mock.calls[0][3]).toEqual({ fill: '#ffffff', height: 5, stroke: '#0d99ff', width: 5, x: 7.5, y: 7.5 });
   });
 
-  it('should draw both the preview stroke and the snap-indicator ellipse together', () => {
-    // mock
-    const preview = { from: { x: 0, y: 0 }, tangentFromOffset: null, to: { x: 10, y: 10 } };
-    const hoverVertex = { nodeId: 'node', point: { x: 10, y: 10 }, vertexId: 'vertex' };
+  it('should draw a vertex-styled dot at the raw cursor position when no vector network is open yet', () => {
+    // before — no preview, no editing node: just a bare cursor position ahead of the very first click,
+    // which has no node/vertex to rotate around
+    call(null, { x: 5, y: 5 }, NO_NODES, null);
 
-    // before
-    call(preview, hoverVertex, NO_NODES, null);
-
-    // result
-    expect(drawVectorStrokeMock).toHaveBeenCalledTimes(1);
+    // result — VECTOR_VERTEX_SIZE (5) / zoom (1), styled like a real vertex dot (white fill, blue
+    // border)
     expect(drawEllipseMock).toHaveBeenCalledTimes(1);
+    expect(drawEllipseMock.mock.calls[0][3]).toEqual({ fill: '#ffffff', height: 5, stroke: '#0d99ff', width: 5, x: 2.5, y: 2.5 });
   });
 
-  it('should rotate the preview stroke and snap-indicator around the edited node rotation, matching where the real vertices render', () => {
+  it('should rotate the preview stroke — and its endpoint dot — around the edited node rotation, matching where the real vertices render', () => {
     // mock — v1(0,0)/v2(10,0), 90deg around the bounds-center (5, 0): v1 -> (5, -5), v2 -> (5, 5), the
     // same math the vertex dots use (drawVectorEditHandlesLayer), so the in-progress preview lands on
     // top of them instead of drawing at the raw, un-rotated local coordinates
@@ -115,10 +105,9 @@ describe('drawPenPreview', () => {
     };
     const nodes: Record<string, TSceneNode> = { [rotatedVectorNode.id]: rotatedVectorNode };
     const preview = { from: { x: 0, y: 0 }, tangentFromOffset: null, to: { x: 10, y: 0 } };
-    const hoverVertex = { nodeId: rotatedVectorNode.id, point: { x: 10, y: 0 }, vertexId: 'v2' };
 
     // before
-    call(preview, hoverVertex, nodes, rotatedVectorNode.id);
+    call(preview, null, nodes, rotatedVectorNode.id);
 
     // result — the stroke's endpoints must sit at the rotated positions, not the raw local ones
     const [{ points }] = drawVectorStrokeMock.mock.calls[0][3];
@@ -128,11 +117,11 @@ describe('drawPenPreview', () => {
     expect(points[points.length - 1].x).toBeCloseTo(5);
     expect(points[points.length - 1].y).toBeCloseTo(5);
 
-    // result — the snap-indicator ellipse must be centered on the rotated hover vertex (5, 5), not (10, 0)
-    const ellipseArgs = drawEllipseMock.mock.calls[0][3];
+    // result — the endpoint dot must sit at the rotated position (5, 5), not the raw local (10, 0)
+    const dotArgs = drawEllipseMock.mock.calls[0][3];
 
-    expect(ellipseArgs.x + ellipseArgs.width / 2).toBeCloseTo(5);
-    expect(ellipseArgs.y + ellipseArgs.height / 2).toBeCloseTo(5);
+    expect(dotArgs.x + dotArgs.width / 2).toBeCloseTo(5);
+    expect(dotArgs.y + dotArgs.height / 2).toBeCloseTo(5);
   });
 
   it('should curve the preview through a dragged outgoing tangent, rotating it as a direction vector around the origin, not around the node pivot', () => {

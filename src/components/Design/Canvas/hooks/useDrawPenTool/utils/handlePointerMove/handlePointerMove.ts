@@ -25,7 +25,7 @@ export const handlePointerMove = (
   dragStartRef: RefObject<TPoint | null>,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
   penPreviewRef: TCanvasRefs['penPreviewRef'],
-  penHoverVertexRef: TCanvasRefs['penHoverVertexRef'],
+  penNewVertexPreviewRef: TCanvasRefs['penNewVertexPreviewRef'],
 ): void => {
   const state = appStore.getState();
   const viewport = selectViewport(state);
@@ -40,10 +40,11 @@ export const handlePointerMove = (
 
     if (node) {
       const penActiveVertexId = selectPenActiveVertexId(state);
-      updateVectorPenPreview(point, node, penActiveVertexId, viewport, penPreviewRef, penHoverVertexRef, pendingOutgoingTangentRef);
+      updateVectorPenPreview(point, node, penActiveVertexId, viewport, penPreviewRef, pendingOutgoingTangentRef);
+      penNewVertexPreviewRef.current = null;
     } else {
       penPreviewRef.current = null;
-      penHoverVertexRef.current = null;
+      penNewVertexPreviewRef.current = point;
     }
   }
 };
