@@ -92,13 +92,26 @@ key. You should never need to edit either component file; only `constants.ts`:
   the dropdown item's shortcut hint (`MouseModes.tsx`/`ToolDropdown.tsx` both do
   `KEYBOARD_SHORTCUTS[tool].join('')`). Updating only this makes the UI *claim* a shortcut exists
   without it actually working.
-- `pages/DesignPage/hooks/useToolbarShortcuts/shortcuts.ts` + `useToolbarShortcuts.ts` — the real
-  keydown-to-`dispatch(setActiveTool(...))` wiring, via a shared `useKeyboardHandler` hook. A
+- `Canvas/hooks/useKeyboardShortcuts/shortcuts.ts` + `useKeyboardShortcuts.ts` (moved here from
+  `pages/DesignPage/hooks/useToolbarShortcuts/` at some point — same two-file shape, just relocated) — the
+  real keydown-to-`dispatch(setActiveTool(...))` wiring, via a shared `useKeyboardHandler` hook. A
   modifier-combo shortcut (Arrow's `Shift+L`, Section's `Shift+S`) needs `primaryKeys: ['shift']` in
   `shortcuts.ts` so it doesn't also fire on the bare key already bound to a sibling tool (Line's
   plain `L`).
 
 **Both registries must be updated together** for a shortcut to actually work and be discoverable.
+
+**Shipped-and-fixed real instance of "updated only one"**: the Pen tool (`ToolName.pen`, `P`) and Pencil
+(`ToolName.pencil`, `Shift+P`) both had correct entries in `keys.ts` (display) *and* in `shortcuts.ts`
+(the `{ secondaryKey, primaryKeys }` definitions) from the start — but `useKeyboardShortcuts.ts`'s own
+`keysMap` array (the actual list iterated by `useKeyboardHandler`, built as
+`{ action: () => dispatch(setActiveTool(ToolName.x)), ...shortcuts[ToolName.x] }` per tool) never got an
+entry for either. So the tooltip showed "P" correctly, `shortcuts.ts` had the right key definition sitting
+right there — and pressing P did nothing, because nothing in the array actually paired that definition with
+a `dispatch` call. This is a **third** place hiding inside what the two-registry framing above treats as
+one unit (`shortcuts.ts` supplies the key definition, but `useKeyboardShortcuts.ts`'s array is what actually
+activates it) — worth checking explicitly, not just "is it in `shortcuts.ts`", whenever a shortcut is
+reported as visually present but non-functional.
 
 ## 7. Canvas interaction (the actual drag gesture)
 

@@ -415,12 +415,7 @@ New entries in `handlePointerDown/constants.ts`'s `ARM_RESOLVERS` (highest prior
   (icon/shortcut/cursor only); only the click-based `ToolName.pen` flow is implemented. Freehand would
   need stroke-sampling + curve-fitting, a different algorithm the spec never described.
 - **Stroke end caps** — explicitly deferred (asked directly).
-- **No "pull a fresh handle out of a corner point" in Vector Edit Mode** — `armVectorHandleOnPointerDown`
-  hit-tests via `getVectorHandlePosition`, which returns nothing for a `null` tangent, so there's no
-  handle dot to grab on a vertex that was placed as a plain corner (no drag at creation time). Creating
-  a *new* curve handle is only possible during Pen-tool drawing (click-drag while placing a point); Edit
-  Mode can only reshape a handle that already exists. Figma additionally supports Option/Alt-dragging a
-  corner point in edit mode to pull a fresh pair of handles out of it — not implemented here.
+- ~~No "pull a fresh handle out of a corner point" in Vector Edit Mode~~ — **implemented**, see §9.
 - **No standalone "select just an edge, delete only it" interaction** — Vector Edit Mode selects and
   deletes **vertices** (`selectedVectorVertexIdsRef`), not segments in isolation; deleting a vertex
   correctly removes every segment touching it (§6's Delete/Backspace), but there's no way to remove one
@@ -438,6 +433,82 @@ orchestrators (and `useDrawPenTool`'s own pointerdown/pointerup) unconditionally
 on every gesture regardless of what it turns out to be, since the middleware only actually pushes a
 snapshot the first time an undoable action (`addNode`/`updateNode`/`deleteNode`) fires inside an open
 gesture, coalescing an entire drag into one entry.
+
+## 9. Corner-pull handles, the render-only default tangent preview, and handle styling/hover
+
+Landed as a follow-up round after §6-8, closing the "pull a fresh handle out of a corner point" gap
+§7 used to flag as unimplemented, plus a Figma-parity pass on how tangent handles look and default.
+
+**Ctrl/Cmd+drag pulls a fresh handle out of a plain corner vertex.** `armVectorCornerHandleOnPointerDown.ts`
+(`ARM_RESOLVERS`, between `armVectorHandleOnPointerDown` and `armVectorVertexOnPointerDown` — existing-handle
+drag still wins, plain vertex-move still wins when the modifier isn't held) fires only when
+`event.ctrlKey || event.metaKey` (macOS Cmd resolves through `metaKey`, same as `useCommentDraftKeyDown.ts`'s
+submit shortcut — deliberately a plain OR check here, not the keyboard-shortcut system's
+`CONTROL_PRIMARY_KEY`/`primaryKeys` machinery, since that's for `KeyboardEvent`s matched against a `keysMap`,
+not a raw pointer-event modifier read). `getVectorCornerHandleAtPoint.ts` (`Canvas/utils/`) hit-tests the
+*vertex* itself (not an existing handle dot), then picks whichever touching segment-end still has a null
+tangent (falling back to the first touching segment if both already have one, e.g. re-dragging). Once armed,
+it reuses `armVectorHandleDrag`/`continueVectorHandleDrag`/`disarmVectorHandleDrag` **unmodified** — the only
+new code is the hit-test and the resolver; the drag mechanics are identical to dragging an already-real
+handle. `getMirroredVectorSegments.ts` was extended so a vertex's *other* segment-end can now be mirrored
+into even when it doesn't have a tangent yet (`getOtherHandlesAtVertex` no longer filters out null tangents;
+`getMirroredTangent`'s length falls back to the dragged handle's own length when the other side has nothing
+to preserve) — so pulling a handle out of a true mid-path corner (two segments, both null) now yields a
+symmetric pair from the first drag frame, matching Figma's "pull a fresh pair of handles" behavior; pulling
+from a path *endpoint* (one segment) just shapes that one segment, no mirroring target exists.
+
+**The default tangentStart preview is render-only — it never touches the store until dragged for real.**
+The first attempt at "show a curve handle at the segment's start vertex too, not just where you dragged"
+actually wrote a computed default into `segment.tangentStart` from `updateVectorHandleDrag.ts` (the Pen
+tool's own click-drag-to-shape-a-curve path) — reverted after real testing, because writing a real value
+there **changes the rendered curve's shape** the instant a default gets applied (`flattenSegment` uses
+both tangents unconditionally once either is non-null), which is not what "just show me where I *could*
+grab a handle" is supposed to do. The fix moved the default entirely into the *rendering/hit-testing*
+layer: `getEffectiveTangentStart.ts` (`utils/canvas/vectorNetwork/`) returns the segment's real
+`tangentStart` if one exists, otherwise derives a preview value from `tangentEnd` alone — direction aimed
+at the same shared control point `tangentEnd` implies (`(end - start) + tangentEnd`, i.e. the point where
+`start + tangentStart` and `end + tangentEnd` would coincide if both control points were literally the same
+point — the "grab a straight line at one spot and pull it into an arc" construction), length capped to
+`VECTOR_DEFAULT_TANGENT_START_RATIO` (`0.5`, `constant/canvas.ts`) of `tangentEnd`'s own length so the
+preview handle's dot never lands exactly on top of the real `tangentEnd` handle's dot. `segment.tangentStart`
+itself is never written by this — `drawVectorTangentHandles.ts` and `getVectorHandleAtPoint.ts` both call
+`getEffectiveTangentStart` instead of reading `segment.tangentStart` raw, so the preview is simultaneously
+visible *and* grabbable (dragging it runs through the completely ordinary `armVectorHandleOnPointerDown` →
+`continueVectorHandleDrag` path, which writes a real value the moment a real drag starts) without ever
+perturbing the actual curve on its own. Two things this section replaced along the way, worth knowing if
+this code looks like it should be simpler: an earlier version tried "continue the direction of whatever
+segment precedes this vertex, scaled to that segment's own length" — dropped for being both more complex
+(needs a third segment lookup, a not-a-predecessor fallback) and visibly wrong once tested (the real
+requirement was matching `tangentEnd`'s own direction/shared-point, not the unrelated incoming segment).
+
+**Handle styling**: `drawTangentHandle.ts` (own file, `drawVectorTangentHandles/` — promoted from a flat
+`drawVectorTangentHandles.ts` once it grew this per-handle helper, same "ifologia" folder-promotion rule
+as `drawScene/`) draws the connecting line in `VECTOR_EDIT_OUTLINE_STROKE` (the same gray as the Vector Edit
+Mode connection outline — **not** `VECTOR_HANDLE_FILL` blue and **not** the node's own `strokeColor`, both
+tried and rejected: "kolor przyjmuje ten domyślny jak kontur który przedstawia połączenie") and the handle
+dot as a diamond — `drawRect` with `rotation: 45` (a square rotated 45° is a diamond by construction, no
+dedicated diamond primitive needed), white fill (`VECTOR_VERTEX_FILL`)/blue border (`VECTOR_HANDLE_FILL`),
+sized `VECTOR_VERTEX_SIZE` to match the plain vertex dots. **Hover** state (`VECTOR_HANDLE_HOVER_STROKE`,
+`#a6cef7`) recolors only the *line*, not the dot — the dot instead enlarges by `VECTOR_VERTEX_HOVER_SCALE`
+(same factor vertex-dot hover already uses) with its own fill/border colors untouched ("kwadrat nie
+dotykamy jego kolory zostają"). Hover detection is a new resolver, `resolveVectorTangentHandleHover.ts`
+(`useSelectionTool/utils/handlePointerMove/`, mirrors `resolveVectorVertexHover.ts` exactly, called right
+after it), writing into a new `TCanvasRefs` ref, `hoveredVectorHandleRef` (`TVectorHandleHover | null =
+{end, segmentId} | null`) — reuses `getVectorHandleAtPoint` for the hit-test, so hovering a still-default
+preview handle highlights it too, consistent with it already being grabbable.
+
+**Gotcha, shipped-and-fixed — a stale rubber-band line pointing at the just-placed vertex during an active
+drag.** `handlePointerMove.ts` (Pen tool) branches on `dragOriginRef.current`: while a drag is in progress
+it only calls `updateVectorHandleDrag` (shapes `tangentEnd`), never `updateVectorPenPreview` (the "next
+click" rubber-band, which only runs in the hover branch) — but `drawPenPreview.ts` still renders whatever
+`penPreviewRef.current` last held, unconditionally, every frame, regardless of drag state. Since nothing
+cleared it at the moment a new vertex got placed, the rubber-band from the *previous* hover (pointing from
+the prior vertex to right where you just clicked, i.e. now the newly-placed vertex) kept rendering as a
+straight line underneath the real curve+handle visuals for the whole drag. Fixed with one line —
+`useDrawPenTool.ts`'s `onPointerDown` sets `penPreviewRef.current = null` before delegating to
+`handlePointerDown` — since a fresh click always makes the old rubber-band stale one way or another (either
+a new drag starts, shaping a real tangent instead, or the loop closes and `penActiveVertexId` clears,
+which the hover branch already self-clears on the very next `updateNewVertexPreview` call).
 
 ## Related
 

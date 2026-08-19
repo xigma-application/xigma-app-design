@@ -16,6 +16,7 @@ describe('createCanvasRefs behaviors', () => {
       ellipseArcRotateDragRef: { current: null },
       hoverRef: { current: null },
       hoveredSegmentIdRef: { current: null },
+      hoveredVectorHandleRef: { current: null },
       hoveredVectorVertexIdRef: { current: null },
       marqueeRef: { current: null },
       penNewVertexPreviewRef: { current: null },

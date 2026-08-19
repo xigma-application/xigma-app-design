@@ -73,6 +73,22 @@ describe('getMirroredVectorSegments', () => {
     expect(updated.s2.tangentStart?.y).toBeCloseTo(4);
   });
 
+  it('should mirror onto the other segment still-null tangent using the dragged handle own length', () => {
+    // mock — s2 touches v1 but has no tangentEnd set yet (a fresh corner-handle pull)
+    const segments = {
+      s1: buildSegment({ endId: 'v2', id: 's1', startId: 'v1' }),
+      s2: buildSegment({ endId: 'v1', id: 's2', startId: 'v9' }),
+    };
+
+    // action
+    const updated = getMirroredVectorSegments(segments, 'v1', 'smooth', 's1', 'tangentStart', { x: -6, y: -8 });
+
+    // result
+    expect(updated.s1.tangentStart).toEqual({ x: -6, y: -8 });
+    expect(updated.s2.tangentEnd?.x).toBeCloseTo(6);
+    expect(updated.s2.tangentEnd?.y).toBeCloseTo(8);
+  });
+
   it('should skip mirroring when no other segment has a handle at the shared vertex', () => {
     // mock
     const segments = {

@@ -30,6 +30,7 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
   const pendingOutgoingTangentRef = useRef<TPendingOutgoingTangent | null>(null);
 
   const onPointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
+    penPreviewRef.current = null;
     handlePointerDown(canvas, event, dispatch, appStore, dragOriginRef, dragStartRef, pendingOutgoingTangentRef);
   };
 

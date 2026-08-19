@@ -76,6 +76,20 @@ describe('getVectorHandleAtPoint', () => {
     expect(hit).toEqual({ distance: 0, end: 'start', segmentId: 's1', vertexId: 'v1' });
   });
 
+  it('should return the default start handle when only the end tangent is set, without it landing on the end handle', () => {
+    // mock — v1(0,0) -> v2(10,0), tangentEnd (-2,0); default start handle lands at v1 + (1,0), not on the end handle
+    const node = buildNode(
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } },
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: { x: -2, y: 0 }, tangentStart: null } },
+    );
+
+    // action
+    const hit = getVectorHandleAtPoint({ x: 1, y: 0 }, node, 1);
+
+    // result
+    expect(hit).toEqual({ distance: 0, end: 'start', segmentId: 's1', vertexId: 'v1' });
+  });
+
   it('should return the end handle when only the end tangent is set', () => {
     // mock
     const node = buildNode(

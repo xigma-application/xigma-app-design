@@ -9,15 +9,18 @@ import {
 // types
 import { NodeType } from 'types/design/enums';
 import { TSceneNode, TVectorNode } from 'types/design/types';
+import { TVectorHandleHover } from 'types/design/canvas/types';
 
 // utils
 import { drawVectorEditHandlesLayer } from '../drawVectorEditHandlesLayer';
 
 const drawEllipseMock = vi.fn();
+const drawRectMock = vi.fn();
 const drawLineMock = vi.fn();
 const drawVectorStrokeMock = vi.fn();
 
 vi.mock('utils/canvas/shapes/drawEllipse', () => ({ drawEllipse: (...args: unknown[]): void => drawEllipseMock(...args) }));
+vi.mock('utils/canvas/drawRect/drawRect', () => ({ drawRect: (...args: unknown[]): void => drawRectMock(...args) }));
 vi.mock('utils/canvas/drawLine', () => ({ drawLine: (...args: unknown[]): void => drawLineMock(...args) }));
 vi.mock('utils/canvas/drawVectorNode/drawVectorStroke', () => ({
   drawVectorStroke: (...args: unknown[]): void => drawVectorStrokeMock(...args),
@@ -55,6 +58,7 @@ const call = (
   hoveredVertexId: string | null = null,
   hoveredSegmentId: string | null = null,
   penActiveVertexId: string | null = null,
+  hoveredHandle: TVectorHandleHover | null = null,
 ): void => {
   const gl = {} as WebGL2RenderingContext;
   const program = {} as WebGLProgram;
@@ -70,6 +74,7 @@ const call = (
     hoveredNodeId,
     hoveredVertexId,
     hoveredSegmentId,
+    hoveredHandle,
     penActiveVertexId,
     200,
     150,
@@ -80,6 +85,7 @@ const call = (
 describe('drawVectorEditHandlesLayer', () => {
   beforeEach(() => {
     drawEllipseMock.mockClear();
+    drawRectMock.mockClear();
     drawLineMock.mockClear();
     drawVectorStrokeMock.mockClear();
   });
@@ -92,6 +98,7 @@ describe('drawVectorEditHandlesLayer', () => {
     expect(drawVectorStrokeMock).not.toHaveBeenCalled();
     expect(drawLineMock).not.toHaveBeenCalled();
     expect(drawEllipseMock).not.toHaveBeenCalled();
+    expect(drawRectMock).not.toHaveBeenCalled();
   });
 
   it('should draw nothing when vectorEditingNodeId points at a non-vector node', () => {
@@ -115,7 +122,7 @@ describe('drawVectorEditHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorEditHandlesLayer(gl, program, buffer, frameNodes, 'frame-1', [], null, null, null, null, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorEditHandlesLayer(gl, program, buffer, frameNodes, 'frame-1', [], null, null, null, null, null, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawVectorStrokeMock).not.toHaveBeenCalled();
@@ -151,9 +158,10 @@ describe('drawVectorEditHandlesLayer', () => {
     // before
     call(vectorNode.id, [], null);
 
-    // result — only the tangentStart end (v1) has a handle; the tangentEnd-less end (v2) draws nothing
+    // result — only the tangentStart end (v1) has a handle; the tangentEnd-less end (v2) draws nothing;
+    // the line uses the same gray as the edit-mode connection outline
     expect(drawLineMock).toHaveBeenCalledTimes(1);
-    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 5, y1: 0, y2: 0 }, '#0d99ff', 1, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 5, y1: 0, y2: 0 }, '#aaaaaa', 1, 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should draw a selected vertex as a larger white-then-blue pair and an unselected vertex as a single default-fill dot', () => {
@@ -215,6 +223,7 @@ describe('drawVectorEditHandlesLayer', () => {
       rotatedNodes,
       rotatedVectorNode.id,
       ['v1'],
+      null,
       null,
       null,
       null,

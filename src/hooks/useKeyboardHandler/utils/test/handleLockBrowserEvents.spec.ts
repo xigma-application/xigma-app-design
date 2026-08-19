@@ -34,6 +34,18 @@ describe('handleLockBrowserEvents', () => {
     expect(preventDefaultSpy).not.toHaveBeenCalled();
   });
 
+  it('should prevent the browser default for a bare Alt keydown, regardless of ctrl', () => {
+    // mock
+    const event = new KeyboardEvent('keydown', { key: 'Alt' });
+    const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+
+    // before
+    handleLockBrowserEvents(false, event, KeyboardKeys.alt);
+
+    // result
+    expect(preventDefaultSpy).toHaveBeenCalled();
+  });
+
   it('should not prevent the browser default for a key outside the reserved list', () => {
     // mock
     const event = createEvent();

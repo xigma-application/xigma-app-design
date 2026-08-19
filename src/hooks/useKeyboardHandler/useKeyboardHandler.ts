@@ -5,6 +5,7 @@ import { KeyboardKeys } from 'types/enums';
 import { TKeysMap } from './types';
 
 // utils
+import { handleLockBrowserEvents } from './utils/handleLockBrowserEvents';
 import { triggerActions } from './utils/triggerActions';
 
 export type TUseKeyboardHandler = {
@@ -28,8 +29,14 @@ export const useKeyboardHandler = (
 
     const maybeKeyboardEvent = event as KeyboardEvent | ReactKeyboardEvent<HTMLElement>;
 
-    if ('key' in maybeKeyboardEvent && !isPrimaryKey(maybeKeyboardEvent.key)) {
-      triggerActions(maybeKeyboardEvent, keysMap, lockBrowserEvents);
+    if ('key' in maybeKeyboardEvent) {
+      if (isPrimaryKey(maybeKeyboardEvent.key)) {
+        if (lockBrowserEvents) {
+          handleLockBrowserEvents(maybeKeyboardEvent.ctrlKey, maybeKeyboardEvent, maybeKeyboardEvent.key);
+        }
+      } else {
+        triggerActions(maybeKeyboardEvent, keysMap, lockBrowserEvents);
+      }
     }
   };
 

@@ -3,6 +3,7 @@ import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
 // utils
+import { getEffectiveTangentStart } from 'utils/canvas/vectorNetwork/getEffectiveTangentStart';
 import { getVectorHandlePosition } from 'utils/canvas/vectorNetwork/getVectorHandlePosition';
 
 export type TVectorHandleHit = { end: 'end' | 'start'; segmentId: string; vertexId: string };
@@ -12,7 +13,7 @@ export const getVectorHandleAtPoint = (point: TPoint, node: TVectorNode, toleran
     .flatMap((segment) => {
       const start = node.vertices[segment.startId];
       const end = node.vertices[segment.endId];
-      const handleStart = getVectorHandlePosition(start, segment.tangentStart);
+      const handleStart = getVectorHandlePosition(start, getEffectiveTangentStart(node.vertices, segment));
       const handleEnd = getVectorHandlePosition(end, segment.tangentEnd);
       const options: (TVectorHandleHit & { distance: number })[] = [];
 

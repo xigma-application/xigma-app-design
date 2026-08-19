@@ -150,6 +150,48 @@ describe('useKeyboardShortcuts behaviors', () => {
     expect(store.getState().design.activeTool).toBe(ToolName.ellipse);
   });
 
+  it('should switch to the pen tool on "P"', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyP' });
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.pen);
+  });
+
+  it('should switch to the pencil tool on "Shift+P"', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyP', shiftKey: true });
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.pencil);
+  });
+
+  it('should switch to the pen tool (not pencil) on a plain "P" without the shift modifier', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyP' });
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.pen);
+  });
+
   it('should switch to the text tool on "T"', () => {
     // mock
     const store = createTestStore();

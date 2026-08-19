@@ -16,6 +16,7 @@ import { armSelectedTextBoundsOnPointerDown } from './armResolvers/armSelectedTe
 import { armStarCornerRadiusOnPointerDown } from './armResolvers/armStarCornerRadiusOnPointerDown';
 import { armStarRatioOnPointerDown } from './armResolvers/armStarRatioOnPointerDown';
 import { armStarVertexCountOnPointerDown } from './armResolvers/armStarVertexCountOnPointerDown';
+import { armVectorCornerHandleOnPointerDown } from './armResolvers/armVectorCornerHandleOnPointerDown';
 import { armVectorEditMissOnPointerDown } from './armResolvers/armVectorEditMissOnPointerDown';
 import { armVectorHandleOnPointerDown } from './armResolvers/armVectorHandleOnPointerDown';
 import { armVectorVertexOnPointerDown } from './armResolvers/armVectorVertexOnPointerDown';
@@ -24,6 +25,7 @@ import { toggleSelectionOnPointerDown } from './armResolvers/toggleSelectionOnPo
 export const ARM_RESOLVERS = [
   armBakeVectorRotationOnPointerDown,
   armVectorHandleOnPointerDown,
+  armVectorCornerHandleOnPointerDown,
   armVectorVertexOnPointerDown,
   armVectorEditMissOnPointerDown,
   armPathOffsetOnPointerDown,

@@ -26,6 +26,7 @@ import { armSelectedTextBoundsOnPointerDown } from '../armSelectedTextBoundsOnPo
 import { armStarCornerRadiusOnPointerDown } from '../armStarCornerRadiusOnPointerDown';
 import { armStarRatioOnPointerDown } from '../armStarRatioOnPointerDown';
 import { armStarVertexCountOnPointerDown } from '../armStarVertexCountOnPointerDown';
+import { armVectorCornerHandleOnPointerDown } from '../armVectorCornerHandleOnPointerDown';
 import { armVectorEditMissOnPointerDown } from '../armVectorEditMissOnPointerDown';
 import { armVectorHandleOnPointerDown } from '../armVectorHandleOnPointerDown';
 import { armVectorVertexOnPointerDown } from '../armVectorVertexOnPointerDown';
@@ -793,6 +794,92 @@ describe('armVectorHandleOnPointerDown', () => {
 
     // result
     expect(armVectorHandleOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.selectionRefs.vectorHandleDragRef.current).toBeNull();
+  });
+});
+
+describe('armVectorCornerHandleOnPointerDown', () => {
+  afterEach(() => {
+    store.dispatch(setVectorEditingNodeId(null));
+  });
+
+  it('should arm the vector-handle drag from a corner vertex, mark it smooth, and return true when Ctrl is held', () => {
+    // mock — v1 is a plain corner (no tangent on either side) of its one connected segment
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 2, y: 0 } });
+
+    // result
+    expect(armVectorCornerHandleOnPointerDown(ctx)).toBe(true);
+    expect(ctx.selectionRefs.vectorHandleDragRef.current).toEqual({ end: 'start', nodeId, segmentId: 's1', vertexId: 'v1' });
+    expect(ctx.dispatch).toHaveBeenCalledWith(updateNode({ changes: { vertexHandleModes: { v1: 'smooth' } }, id: nodeId }));
+    expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
+  });
+
+  it('should arm the vector-handle drag from a corner vertex when Meta (macOS Cmd) is held instead of Ctrl', () => {
+    // mock — v1 is a plain corner (no tangent on either side) of its one connected segment
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    const ctx = createContext({ event: pointerEvent({ metaKey: true }), point: { x: 2, y: 0 } });
+
+    // result
+    expect(armVectorCornerHandleOnPointerDown(ctx)).toBe(true);
+    expect(ctx.selectionRefs.vectorHandleDragRef.current).toEqual({ end: 'start', nodeId, segmentId: 's1', vertexId: 'v1' });
+  });
+
+  it('should return undefined when neither Ctrl nor Meta is held', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    const ctx = createContext({ point: { x: 2, y: 0 } });
+
+    // result
+    expect(armVectorCornerHandleOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.selectionRefs.vectorHandleDragRef.current).toBeNull();
+    expect(ctx.dispatch).not.toHaveBeenCalled();
+  });
+
+  it('should return undefined when the point misses every vertex', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 900, y: 900 } });
+
+    // result
+    expect(armVectorCornerHandleOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.selectionRefs.vectorHandleDragRef.current).toBeNull();
+  });
+
+  it('should return undefined when Vector Edit Mode is not active', () => {
+    // before
+    const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 2, y: 0 } });
+
+    // result
+    expect(armVectorCornerHandleOnPointerDown(ctx)).toBeUndefined();
     expect(ctx.selectionRefs.vectorHandleDragRef.current).toBeNull();
   });
 });

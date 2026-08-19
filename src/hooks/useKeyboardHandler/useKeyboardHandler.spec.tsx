@@ -127,6 +127,36 @@ describe('useKeyboardHandler behaviors', () => {
     expect(preventDefaultSpy).toHaveBeenCalled();
   });
 
+  it('should block the browser default for a bare Alt press when lockBrowserEvents is set', () => {
+    // mock
+    const event = new KeyboardEvent('keydown', { key: 'Alt' });
+    const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+
+    // before
+    renderHook(() => useKeyboardHandler(true, [], [keyMap], undefined, true));
+
+    // action
+    window.dispatchEvent(event);
+
+    // result
+    expect(preventDefaultSpy).toHaveBeenCalled();
+  });
+
+  it('should not block the browser default for a bare Alt press when lockBrowserEvents is not set', () => {
+    // mock
+    const event = new KeyboardEvent('keydown', { key: 'Alt' });
+    const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+
+    // before
+    renderHook(() => useKeyboardHandler(true, [], [keyMap]));
+
+    // action
+    window.dispatchEvent(event);
+
+    // result
+    expect(preventDefaultSpy).not.toHaveBeenCalled();
+  });
+
   it('should stop propagation when stopPropagation is set', () => {
     // mock
     const event = new KeyboardEvent('keydown', { code: KeyboardKeys.c });
@@ -140,6 +170,20 @@ describe('useKeyboardHandler behaviors', () => {
 
     // result
     expect(stopPropagationSpy).toHaveBeenCalled();
+  });
+
+  it('should do nothing when the dispatched event has no key property', () => {
+    // mock — anyKey would fire regardless of which key matched, proving the 'key' guard is what blocks this
+    const action = vi.fn();
+
+    // before
+    renderHook(() => useKeyboardHandler(true, [], [{ ...keyMap, action, anyKey: true }]));
+
+    // action
+    window.dispatchEvent(new Event('keydown'));
+
+    // result
+    expect(action).not.toHaveBeenCalled();
   });
 
   it('should do nothing when no element matches the given id', () => {

@@ -391,6 +391,36 @@ describe('useDrawPenTool behaviors', () => {
     expect(refs.hoveredSegmentIdRef.current).toBeNull();
   });
 
+  it('should clear the stale rubber-band preview line as soon as a new point is placed, instead of leaving it pointing at the just-placed vertex', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setActiveTool(ToolName.pen));
+
+    // before — place v1, then hover to build up a rubber-band preview toward (40, 0)
+    const { refs } = renderPenTool(canvasRef);
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 40, 0));
+    });
+
+    expect(refs.penPreviewRef.current).not.toBeNull();
+
+    // action — click there to place v2; the old rubber-band must not linger through the click-drag
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 40, 0));
+    });
+
+    // result
+    expect(refs.penPreviewRef.current).toBeNull();
+  });
+
   it('should reset the in-progress drag on pointercancel', () => {
     // mock
     const canvasRef = createCanvasRef();

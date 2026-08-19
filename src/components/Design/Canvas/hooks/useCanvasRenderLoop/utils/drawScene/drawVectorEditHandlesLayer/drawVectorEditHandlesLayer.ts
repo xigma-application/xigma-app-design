@@ -1,10 +1,11 @@
 // types
 import { TSceneNode, TViewport } from 'types/design/types';
+import { TVectorHandleHover } from 'types/design/canvas/types';
 
 // utils
 import { bakeVectorNodeRotation } from '../../../../../utils/bakeVectorNodeRotation';
 import { drawVectorEditOutline } from './drawVectorEditOutline/drawVectorEditOutline';
-import { drawVectorTangentHandles } from './drawVectorTangentHandles';
+import { drawVectorTangentHandles } from './drawVectorTangentHandles/drawVectorTangentHandles';
 import { drawVectorVertexDots } from './drawVectorVertexDots';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
 
@@ -18,6 +19,7 @@ export const drawVectorEditHandlesLayer = (
   hoveredNodeId: string | null,
   hoveredVertexId: string | null,
   hoveredSegmentId: string | null,
+  hoveredHandle: TVectorHandleHover | null,
   penActiveVertexId: string | null,
   canvasWidth: number,
   canvasHeight: number,
@@ -30,7 +32,7 @@ export const drawVectorEditHandlesLayer = (
     const visualSelectedVertexIds = penActiveVertexId ? [...selectedVertexIds, penActiveVertexId] : selectedVertexIds;
 
     drawVectorEditOutline(gl, program, buffer, node, hoveredNodeId, hoveredSegmentId, canvasWidth, canvasHeight, viewport);
-    drawVectorTangentHandles(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
+    drawVectorTangentHandles(gl, program, buffer, node, hoveredHandle, canvasWidth, canvasHeight, viewport);
     drawVectorVertexDots(gl, program, buffer, node, visualSelectedVertexIds, hoveredVertexId, canvasWidth, canvasHeight, viewport);
   }
 };

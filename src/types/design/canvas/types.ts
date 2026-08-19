@@ -71,6 +71,8 @@ export type TPenPreview = {
   to: TPoint;
 };
 
+export type TVectorHandleHover = { end: 'end' | 'start'; segmentId: string };
+
 export type TCanvasRefs = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>;
@@ -79,6 +81,7 @@ export type TCanvasRefs = {
   ellipseArcRatioDragRef: RefObject<TEllipseArcRatioDragState | null>;
   ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null>;
   hoveredSegmentIdRef: RefObject<string | null>;
+  hoveredVectorHandleRef: RefObject<TVectorHandleHover | null>;
   hoveredVectorVertexIdRef: RefObject<string | null>;
   hoverRef: RefObject<string | null>;
   marqueeRef: RefObject<TDraftRect | null>;

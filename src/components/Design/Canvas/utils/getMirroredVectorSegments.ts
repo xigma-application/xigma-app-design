@@ -1,7 +1,7 @@
 // types
 import { TVertexHandleMode, TVectorSegment, TVectorTangent } from 'types/design/types';
 
-type TOtherHandle = { end: 'tangentEnd' | 'tangentStart'; segmentId: string; tangent: { x: number; y: number } };
+type TOtherHandle = { end: 'tangentEnd' | 'tangentStart'; segmentId: string; tangent: TVectorTangent };
 
 const getOtherHandlesAtVertex = (segments: Record<string, TVectorSegment>, vertexId: string, excludeSegmentId: string): TOtherHandle[] =>
   Object.values(segments)
@@ -9,16 +9,24 @@ const getOtherHandlesAtVertex = (segments: Record<string, TVectorSegment>, verte
     .flatMap((segment) => {
       const handles: TOtherHandle[] = [];
 
-      if (segment.startId === vertexId && segment.tangentStart) {
+      if (segment.startId === vertexId) {
         handles.push({ end: 'tangentStart', segmentId: segment.id, tangent: segment.tangentStart });
       }
 
-      if (segment.endId === vertexId && segment.tangentEnd) {
+      if (segment.endId === vertexId) {
         handles.push({ end: 'tangentEnd', segmentId: segment.id, tangent: segment.tangentEnd });
       }
 
       return handles;
     });
+
+const getMirroredTangent = (mode: TVertexHandleMode, tangent: { x: number; y: number }, other: TOtherHandle): TVectorTangent => {
+  const otherLength =
+    mode === 'symmetric' || !other.tangent ? Math.hypot(tangent.x, tangent.y) : Math.hypot(other.tangent.x, other.tangent.y);
+  const angle = Math.atan2(-tangent.y, -tangent.x);
+
+  return { x: Math.cos(angle) * otherLength, y: Math.sin(angle) * otherLength };
+};
 
 export const getMirroredVectorSegments = (
   segments: Record<string, TVectorSegment>,
@@ -35,11 +43,8 @@ export const getMirroredVectorSegments = (
 
     if (others.length === 1) {
       const [other] = others;
-      const otherLength = mode === 'symmetric' ? Math.hypot(tangent.x, tangent.y) : Math.hypot(other.tangent.x, other.tangent.y);
-      const angle = Math.atan2(-tangent.y, -tangent.x);
-      const mirrored: TVectorTangent = { x: Math.cos(angle) * otherLength, y: Math.sin(angle) * otherLength };
 
-      updated[other.segmentId] = { ...updated[other.segmentId], [other.end]: mirrored };
+      updated[other.segmentId] = { ...updated[other.segmentId], [other.end]: getMirroredTangent(mode, tangent, other) };
     }
   }
 
