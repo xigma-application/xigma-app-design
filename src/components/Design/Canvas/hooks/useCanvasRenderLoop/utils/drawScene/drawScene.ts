@@ -8,6 +8,7 @@ import {
   selectEditingTextContent,
   selectNodes,
   selectOrderedNodes,
+  selectPenActiveVertexId,
   selectSelectedNodes,
   selectVectorEditingNodeId,
   selectViewport,
@@ -26,7 +27,7 @@ import { drawEllipseArcHandleLayer } from './drawEllipseArcHandleLayer/drawEllip
 import { drawFrame } from './drawFrame';
 import { drawHoverOutline } from './drawHoverOutline';
 import { drawMarquee } from 'utils/canvas/drawMarquee';
-import { drawPenPreview } from './drawPenPreview';
+import { drawPenPreview } from './drawPenPreview/drawPenPreview';
 import { drawPixelGrid } from 'utils/canvas/drawPixelGrid';
 import { drawSceneBackground } from 'utils/canvas/drawSceneBackground';
 import { drawSceneNodes } from './drawSceneNodes';
@@ -62,6 +63,8 @@ export const drawScene = (
   const nodesById = selectNodes(state);
   const vectorEditingNodeId = selectVectorEditingNodeId(state);
   const selectedVectorVertexIds = refs.selectedVectorVertexIdsRef.current;
+  const hoveredVectorVertexId = refs.hoveredVectorVertexIdRef.current;
+  const penActiveVertexId = selectPenActiveVertexId(state);
   const sceneNodes = selectOrderedNodes(state).filter((node) => node.id !== editingNodeId);
   const allSelectedNodes = selectSelectedNodes(state);
   const selectedNodes = allSelectedNodes.filter((node) => node.id !== editingNodeId);
@@ -101,6 +104,8 @@ export const drawScene = (
     vectorEditingNodeId,
     selectedVectorVertexIds,
     hoveredNodeId,
+    hoveredVectorVertexId,
+    penActiveVertexId,
     clientWidth,
     clientHeight,
     viewport,

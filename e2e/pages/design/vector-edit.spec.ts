@@ -24,6 +24,20 @@ const exitVectorEditMode = async (page: Page, designPage: DesignPage): Promise<v
   await page.keyboard.press('Escape');
 };
 
+// v1(900,300) -> v2(1000,300) -> v3(1000,400) -> v4(900,400) -> back onto v1, closing the loop. Round
+// coordinates keep the edge-midpoints (used by the edge-insert tests below) simple to reason about.
+// Closing the loop clears penActiveVertexId (see closeLoopOntoVertex.ts), leaving the canvas on the Pen
+// tool, still in vector edit mode, but with no vertex currently being extended.
+const drawClosedSquare = async (designPage: DesignPage): Promise<void> => {
+  await designPage.drawVectorPath([
+    { x: 900, y: 300 },
+    { x: 1000, y: 300 },
+    { x: 1000, y: 400 },
+    { x: 900, y: 400 },
+    { x: 900, y: 300 },
+  ]);
+};
+
 test('double-clicking a vector node enters edit mode; double-clicking empty space exits it again', async ({ page }) => {
   const designPage = new DesignPage(page);
 
@@ -115,21 +129,89 @@ test('dragging one handle at a "smooth" vertex also moves its other handle, curv
   expect(after.equals(before)).toBe(false); // segment 2 moved too, though its own handle was untouched
 });
 
-test('clicking an edge in edit mode inserts a new vertex there, splitting the segment', async ({ page }) => {
+test('clicking an edge with the Move tool no longer inserts a vertex — that now requires the Pen tool, matching Figma', async ({
+  page,
+}) => {
   const designPage = new DesignPage(page);
 
-  await designPage.goto('e2e-test-vector-edit-edge-insert');
+  await designPage.goto('e2e-test-vector-edit-edge-move-tool-noop');
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage);
   await designPage.selectTool('default');
 
+  // rest at the same neutral point before each capture — the Move tool (unlike Pen) runs the ordinary
+  // node hover-outline highlight, so leaving the cursor on the edge for the "after" shot alone would
+  // make the two captures differ regardless of whether a vertex was actually inserted
+  const neutral = { x: 1400, y: 700 };
+
+  await designPage.pointerMove(neutral.x, neutral.y);
   const before = await designPage.canvas.screenshot();
 
   await designPage.click(975, 300); // midpoint of the v1-v2 edge
+  await designPage.pointerMove(neutral.x, neutral.y);
 
   const after = await designPage.canvas.screenshot();
-  expect(after.equals(before)).toBe(false);
+  expect(after.equals(before)).toBe(true);
+});
+
+test('clicking an edge with the Pen tool selected but not currently extending inserts a vertex there, splitting the segment and arming the new point for immediate extension', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-edge-insert-idle');
+  await expect(designPage.canvas).toBeVisible();
+
+  // still on Pen, still in edit mode, but penActiveVertexId is null: closing the loop ended extension
+  await drawClosedSquare(designPage);
+
+  const before = await designPage.canvas.screenshot();
+
+  await designPage.click(950, 300); // midpoint of the v1-v2 (top) edge
+
+  const afterInsert = await designPage.canvas.screenshot();
+  expect(afterInsert.equals(before)).toBe(false);
+
+  // the split point must have been armed as the active vertex — extending straight to a fresh point
+  // should draw a new connected segment from it, not place a second, disconnected floating vertex
+  await designPage.click(950, 150);
+
+  const afterExtend = await designPage.canvas.screenshot();
+  expect(afterExtend.equals(afterInsert)).toBe(false);
+});
+
+test('clicking an existing segment while actively drawing attaches the in-progress line to it, splitting the segment and ending the extension', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-edge-insert-drawing');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawClosedSquare(designPage);
+
+  // start a brand-new, disconnected fragment away from the square, then actively extend from it —
+  // penActiveVertexId is set again, this time mid-draw rather than idle
+  await designPage.click(1200, 350);
+
+  const before = await designPage.canvas.screenshot();
+
+  await designPage.click(1000, 350); // midpoint of the square's right (v2-v3) edge
+
+  const afterAttach = await designPage.canvas.screenshot();
+  expect(afterAttach.equals(before)).toBe(false);
+
+  // the extension must have ended at the attach point — a further click starts an unconnected new
+  // fragment instead of continuing the same line, so the region around the square's untouched left
+  // edge stays pixel-identical throughout
+  const leftEdgeRegion = { height: 40, width: 40, x: 880, y: 330 };
+  const beforeFurtherClick = await page.screenshot({ clip: leftEdgeRegion });
+
+  await designPage.click(1200, 450);
+
+  const afterFurtherClick = await page.screenshot({ clip: leftEdgeRegion });
+  expect(afterFurtherClick.equals(beforeFurtherClick)).toBe(true);
 });
 
 test('clicking empty space in edit mode deselects the active vertex but keeps edit mode open', async ({ page }) => {

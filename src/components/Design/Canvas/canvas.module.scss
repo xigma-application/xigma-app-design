@@ -90,6 +90,20 @@
         auto;
     }
 
+    &--pen-snap {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/pen-snap.png') 8x) 4 4,
+        auto;
+    }
+
+    &--pen-extend {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/pen-extend.png') 8x) 4 4,
+        auto;
+    }
+
     &--pencil {
       cursor:
         /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */

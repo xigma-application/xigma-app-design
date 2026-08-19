@@ -159,8 +159,12 @@ uncommitted visuals), two cases depending on whether there's an active vertex ye
   "handler podąża za nim między networkami" within the one active object — cross-*object* connecting is
   explicitly out of scope, see §7).
 
-`drawScene/drawPenPreview.ts` renders both — never touches Vector Network state. A single small
-`drawVertexPreviewDot` helper draws a vertex-styled dot (white fill, blue border, `VECTOR_VERTEX_SIZE` —
+`drawScene/drawPenPreview/drawPenPreview.ts` renders both — never touches Vector Network state, and is
+itself just a thin orchestrator: `drawPenSegmentPreview.ts` owns the rubber-band stroke/rotation math,
+`drawVertexPreviewDot.ts` is the shared dot primitive both it and the bare cursor-position case call, and
+each sits flat as a sibling in the `drawPenPreview/` folder (own `test/`), split out once the single-file
+version accumulated too many concerns to review at a glance. `drawVertexPreviewDot` draws a vertex-styled
+dot (white fill, blue border, `VECTOR_VERTEX_SIZE` —
 matching a real committed vertex dot, not the larger `VECTOR_SNAP_INDICATOR_RADIUS_PX` circle an earlier
 version used) at `penNewVertexPreviewRef`'s point *and* at the rubber-band's `to` endpoint, so the
 "where will my next click land" dot shows continuously across every point of a session, not just the
@@ -196,12 +200,22 @@ New entries in `handlePointerDown/constants.ts`'s `ARM_RESOLVERS` (highest prior
   (`selectedVectorVertexIdsRef`, single-vertex only — see §7) and drag a vertex; dispatches `updateNode`
   every `pointermove` like an ordinary node move, so no ref-lifting needed for the render loop to see it
   live.
-- `armVectorEdgeInsertOnPointerDown` — click a segment's stroke away from either endpoint
-  (`getVectorEdgeAtPoint.ts`) to split it into two segments at that point. One-shot `updateNode`, no drag
-  state. Splitting a curved segment does **not** run proper De Casteljau subdivision (see §7) — the
-  original `tangentStart`/`tangentEnd` are kept on the outer ends of the two new segments and the new
-  shared vertex gets straight (null) tangents on both sides, a visually-reasonable but not
-  curve-exact split.
+- **Edge-splitting is Pen-only, not a Move-tool resolver.** `armVectorEdgeInsertOnPointerDown.ts`
+  originally lived here (click a segment's stroke away from either endpoint — `getVectorEdgeAtPoint.ts`
+  — to split it, one-shot `updateNode`, no drag state) and fired regardless of active tool. Removed
+  from `ARM_RESOLVERS` and the file deleted outright — Figma only allows edge-splitting with the Pen
+  tool active, so this stayed a Move-tool affordance too long. The split math itself moved to
+  `useDrawPenTool/utils/handlePointerDown/splitVectorSegment.ts` (still: original `tangentStart`/
+  `tangentEnd` kept on the outer ends of the two new segments, the new shared vertex gets straight/null
+  tangents on both sides — not proper De Casteljau subdivision, see §7, just a visually-reasonable
+  split) and is now called from two Pen-tool sites: `startVectorFragment.ts` (Pen idle, no active
+  vertex — clicking an edge splits it and arms the new vertex as `penActiveVertexId`, ready for
+  immediate extension, same as clicking empty canvas would) and
+  `continueVectorNetwork/closeLoopOntoEdge.ts` (Pen mid-extension — clicking an edge splits it **and**
+  connects the active vertex to the new split point via a fresh segment, then clears
+  `penActiveVertexId` exactly like `closeLoopOntoVertex.ts` closing onto an existing vertex — "attaching
+  a line by extending it onto an existing edge" is the same gesture as closing a loop, just onto a
+  freshly-created point instead of a pre-existing one).
 - Entry without Pen: `useVectorEditOnDoubleClick.ts` mirrors `useTextEditOnDoubleClick.ts`'s shape
   exactly — double-click a `NodeType.vector` node on the Selection tool sets `vectorEditingNodeId`. Entry
   itself never touches `rotation` — a rotated node can be entered and left again with the selection
@@ -234,7 +248,7 @@ New entries in `handlePointerDown/constants.ts`'s `ARM_RESOLVERS` (highest prior
   Selection-tool resolvers do; without this, drawing new points onto a rotated, not-yet-baked network
   reproduces the same per-frame vertex-jump instability that motivated baking in the first place, for the
   Pen-tool path specifically.
-  `drawScene/drawPenPreview.ts` (§4's live preview) is the one renderer that still has to stay
+  `drawScene/drawPenPreview/drawPenPreview.ts` (§4's live preview) is the one renderer that still has to stay
   rotation-*aware* rather than relying on baking alone: its rubber-band line/dot update on every
   `pointermove`, including the window *before* any pointerdown (hence bake) has happened, so it reads
   `node.vertices` while `node.rotation` may still be non-zero — it applies the same
@@ -338,9 +352,9 @@ New entries in `handlePointerDown/constants.ts`'s `ARM_RESOLVERS` (highest prior
   deletes **vertices** (`selectedVectorVertexIdsRef`), not segments in isolation; deleting a vertex
   correctly removes every segment touching it (§6's Delete/Backspace), but there's no way to remove one
   segment while leaving both its endpoint vertices in place as newly-disconnected points. Requirement
-  #8's "zaznaczać edge" is only met in the sense that `armVectorEdgeInsertOnPointerDown` hit-tests and
-  acts on a clicked edge (to split it) — it doesn't persist a "this edge is selected" UI state the way
-  vertex selection does.
+  #8's "zaznaczać edge" is only met in the sense that the Pen tool's edge hit-testing (§6,
+  `getVectorEdgeAtPoint.ts` via `splitVectorSegment.ts`) acts on a clicked edge to split it — it
+  doesn't persist a "this edge is selected" UI state the way vertex selection does.
 
 ## 8. Undo/redo — built as this feature's own foundation
 

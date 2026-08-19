@@ -16,6 +16,8 @@ export const drawVectorEditHandlesLayer = (
   vectorEditingNodeId: string | null,
   selectedVertexIds: string[],
   hoveredNodeId: string | null,
+  hoveredVertexId: string | null,
+  penActiveVertexId: string | null,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
@@ -24,9 +26,10 @@ export const drawVectorEditHandlesLayer = (
 
   if (editingNode) {
     const node = { ...editingNode, ...bakeVectorNodeRotation(editingNode) };
+    const visualSelectedVertexIds = penActiveVertexId ? [...selectedVertexIds, penActiveVertexId] : selectedVertexIds;
 
     drawVectorEditOutline(gl, program, buffer, node, hoveredNodeId, canvasWidth, canvasHeight, viewport);
     drawVectorTangentHandles(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
-    drawVectorVertexDots(gl, program, buffer, node, selectedVertexIds, canvasWidth, canvasHeight, viewport);
+    drawVectorVertexDots(gl, program, buffer, node, visualSelectedVertexIds, hoveredVertexId, canvasWidth, canvasHeight, viewport);
   }
 };

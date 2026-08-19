@@ -23,6 +23,7 @@ import { continueStarRatioDrag } from './continueStarRatioDrag';
 import { continueStarVertexCountDrag } from './continueStarVertexCountDrag';
 import { continueVectorHandleDrag } from './continueVectorHandleDrag';
 import { continueVectorVertexDrag } from './continueVectorVertexDrag';
+import { resolveVectorVertexHover } from './resolveVectorVertexHover';
 
 export const handlePointerMove = (
   canvas: HTMLCanvasElement,
@@ -48,4 +49,5 @@ export const handlePointerMove = (
   continueMarqueeDrag(canvas, event, dispatch, selectionRefs.marqueeStartRef, canvasRefs.marqueeRef);
   continueVectorVertexDrag(canvas, event, dispatch, selectionRefs.vectorVertexDragRef);
   continueVectorHandleDrag(canvas, event, dispatch, selectionRefs.vectorHandleDragRef);
+  resolveVectorVertexHover(canvas, event, canvasRefs.hoveredVectorVertexIdRef);
 };

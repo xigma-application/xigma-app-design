@@ -19,7 +19,7 @@ export const updateVectorPenPreview = (
   viewport: TViewport,
   penPreviewRef: TCanvasRefs['penPreviewRef'],
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
-): void => {
+): boolean => {
   const hover = getVectorVertexAtPoint(point, node, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom, activeVertexId);
   const hoverVertex = hover ? node.vertices[hover.vertexId] : null;
   const activeVertex = activeVertexId ? node.vertices[activeVertexId] : null;
@@ -32,4 +32,6 @@ export const updateVectorPenPreview = (
         to: hoverVertex ?? point,
       }
     : null;
+
+  return hoverVertex !== null;
 };

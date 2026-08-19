@@ -58,12 +58,13 @@ describe('handlePointerMove', () => {
     store.dispatch(setPenActiveVertexId(null));
   });
 
-  it('should drag the outgoing tangent handle when a drag is already armed', () => {
+  it('should drag the outgoing tangent handle when a drag is already armed, keeping the plain pen cursor', () => {
     // mock
     const nodeId = addVectorNodeWithSegment();
     const canvas = createCanvas();
     const penPreviewRef = createPenPreviewRef();
     const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
+    const setClassName = vi.fn();
 
     // before
     handlePointerMove(
@@ -76,12 +77,14 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      setClassName,
     );
 
     // result
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
 
     expect(node.segments.s1.tangentEnd).toEqual({ x: -20, y: -5 });
+    expect(setClassName).toHaveBeenCalledWith('pen');
   });
 
   it('should clear the pen preview, and preview the next vertex at the pointer, when no node is currently in Vector Edit Mode', () => {
@@ -89,6 +92,7 @@ describe('handlePointerMove', () => {
     const canvas = createCanvas();
     const penPreviewRef = createPenPreviewRef();
     const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
+    const setClassName = vi.fn();
 
     penPreviewRef.current = { from: { x: 0, y: 0 }, tangentFromOffset: null, to: { x: 1, y: 1 } };
 
@@ -103,14 +107,81 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      setClassName,
     );
 
     // result
     expect(penPreviewRef.current).toBeNull();
     expect(penNewVertexPreviewRef.current).toEqual({ x: 10, y: 10 });
+    expect(setClassName).toHaveBeenCalledWith('pen');
   });
 
-  it('should update the pen preview toward the pointer when a node is being edited', () => {
+  it('should clear the pen preview and preview a fresh next vertex at the pointer when a node is being edited but no vertex is currently active — e.g. right after closing a loop or after Escape stopped extending a connected point', () => {
+    // mock
+    const nodeId = addVectorNodeWithSegment();
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setPenActiveVertexId(null));
+
+    const canvas = createCanvas();
+    const penPreviewRef = createPenPreviewRef();
+    const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
+    const setClassName = vi.fn();
+
+    penPreviewRef.current = { from: { x: 0, y: 0 }, tangentFromOffset: null, to: { x: 1, y: 1 } };
+
+    // before
+    handlePointerMove(
+      canvas,
+      pointerEvent(300, 300),
+      store.dispatch,
+      store,
+      createDragOriginRef(),
+      createDragStartRef(),
+      createPendingOutgoingTangentRef(),
+      penPreviewRef,
+      penNewVertexPreviewRef,
+      setClassName,
+    );
+
+    // result
+    expect(penPreviewRef.current).toBeNull();
+    expect(penNewVertexPreviewRef.current).toEqual({ x: 300, y: 300 });
+    expect(setClassName).toHaveBeenCalledWith('pen');
+  });
+
+  it('should snap the next-vertex preview onto an existing vertex and switch to the pen-snap cursor when hovering near it with no vertex currently active', () => {
+    // mock
+    const nodeId = addVectorNodeWithSegment();
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setPenActiveVertexId(null));
+
+    const canvas = createCanvas();
+    const penPreviewRef = createPenPreviewRef();
+    const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
+    const setClassName = vi.fn();
+
+    // before — hover a couple of px away from v1 (0,0)
+    handlePointerMove(
+      canvas,
+      pointerEvent(2, 1),
+      store.dispatch,
+      store,
+      createDragOriginRef(),
+      createDragStartRef(),
+      createPendingOutgoingTangentRef(),
+      penPreviewRef,
+      penNewVertexPreviewRef,
+      setClassName,
+    );
+
+    // result
+    expect(penNewVertexPreviewRef.current).toEqual({ id: 'v1', x: 0, y: 0 });
+    expect(setClassName).toHaveBeenCalledWith('pen-snap');
+  });
+
+  it('should update the pen preview toward the pointer, keeping the plain pen cursor, when a node is being edited and no vertex is nearby', () => {
     // mock
     const nodeId = addVectorNodeWithSegment();
 
@@ -120,6 +191,7 @@ describe('handlePointerMove', () => {
     const canvas = createCanvas();
     const penPreviewRef = createPenPreviewRef();
     const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
+    const setClassName = vi.fn();
 
     penNewVertexPreviewRef.current = { x: 999, y: 999 };
 
@@ -134,10 +206,43 @@ describe('handlePointerMove', () => {
       createPendingOutgoingTangentRef(),
       penPreviewRef,
       penNewVertexPreviewRef,
+      setClassName,
     );
 
     // result
     expect(penPreviewRef.current).toMatchObject({ to: { x: 500, y: 500 } });
     expect(penNewVertexPreviewRef.current).toBeNull();
+    expect(setClassName).toHaveBeenCalledWith('pen');
+  });
+
+  it('should switch to the pen-snap cursor when the rubber-band preview snaps onto another vertex while extending', () => {
+    // mock
+    const nodeId = addVectorNodeWithSegment();
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setPenActiveVertexId('v1'));
+
+    const canvas = createCanvas();
+    const penPreviewRef = createPenPreviewRef();
+    const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
+    const setClassName = vi.fn();
+
+    // before — hover right on v2 (100,0), well within the snap radius
+    handlePointerMove(
+      canvas,
+      pointerEvent(100, 0),
+      store.dispatch,
+      store,
+      createDragOriginRef(),
+      createDragStartRef(),
+      createPendingOutgoingTangentRef(),
+      penPreviewRef,
+      penNewVertexPreviewRef,
+      setClassName,
+    );
+
+    // result
+    expect(penPreviewRef.current).toMatchObject({ to: { id: 'v2', x: 100, y: 0 } });
+    expect(setClassName).toHaveBeenCalledWith('pen-snap');
   });
 });

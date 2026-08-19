@@ -29,14 +29,21 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
   const dispatch = useAppDispatch();
   const selectionRefs = useSelectionToolRefs();
 
-  const onPointerDown = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs, selectRefs: TSelectionToolRefs): void =>
+  const onPointerDown = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs, selectRefs: TSelectionToolRefs): void => {
     handlePointerDown(canvas, event, dispatch, canvasRefs, selectRefs, setClassName);
+  };
 
-  const onPointerMove = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs, selectRefs: TSelectionToolRefs): void =>
+  const onPointerMove = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs, selectRefs: TSelectionToolRefs): void => {
     handlePointerMove(canvas, event, dispatch, canvasRefs, selectRefs);
+  };
 
-  const onPointerUp = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs, selectRefs: TSelectionToolRefs): void =>
+  const onPointerUp = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs, selectRefs: TSelectionToolRefs): void => {
     handlePointerUp(canvas, event, dispatch, canvasRefs, selectRefs, setClassName);
+  };
+
+  const onPointerLeave = (canvasRefs: TCanvasRefs): void => {
+    canvasRefs.hoveredVectorVertexIdRef.current = null;
+  };
 
   useEffect(() => {
     const canvas = refs.canvasRef.current;
@@ -45,15 +52,19 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
       const pointerDownListener = (event: PointerEvent): void => onPointerDown(canvas, event, refs, selectionRefs);
       const pointerMoveListener = (event: PointerEvent): void => onPointerMove(canvas, event, refs, selectionRefs);
       const pointerUpListener = (event: PointerEvent): void => onPointerUp(canvas, event, refs, selectionRefs);
+      const pointerLeaveListener = (): void => onPointerLeave(refs);
 
       canvas.addEventListener('pointerdown', pointerDownListener);
       canvas.addEventListener('pointermove', pointerMoveListener);
       canvas.addEventListener('pointerup', pointerUpListener);
+      canvas.addEventListener('pointerleave', pointerLeaveListener);
 
       return (): void => {
         canvas.removeEventListener('pointerdown', pointerDownListener);
         canvas.removeEventListener('pointermove', pointerMoveListener);
         canvas.removeEventListener('pointerup', pointerUpListener);
+        canvas.removeEventListener('pointerleave', pointerLeaveListener);
+        refs.selectedVectorVertexIdsRef.current = [];
       };
     }
   }, [activeTool, dispatch, isCanvasCaretEditingActive, refs, selectionRefs, setClassName]);

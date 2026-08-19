@@ -1,5 +1,8 @@
 import { useEffect, useRef } from 'react';
 
+// hooks
+import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
+
 // store
 import { selectActiveTool } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector, useAppStore } from 'store';
@@ -21,6 +24,7 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
   const activeTool = useAppSelector(selectActiveTool);
   const dispatch = useAppDispatch();
   const appStore = useAppStore();
+  const { setClassName } = useClassNames();
   const dragOriginRef = useRef<TPenDragOrigin | null>(null);
   const dragStartRef = useRef<TPoint | null>(null);
   const pendingOutgoingTangentRef = useRef<TPendingOutgoingTangent | null>(null);
@@ -40,6 +44,7 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
       pendingOutgoingTangentRef,
       penPreviewRef,
       penNewVertexPreviewRef,
+      setClassName,
     );
   };
 
@@ -70,7 +75,9 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
         canvas.removeEventListener('pointermove', pointerMoveListener);
         canvas.removeEventListener('pointerup', pointerUpListener);
         canvas.removeEventListener('pointercancel', pointerCancelListener);
+        penPreviewRef.current = null;
+        penNewVertexPreviewRef.current = null;
       };
     }
-  }, [activeTool, appStore, canvasRef, dispatch, penNewVertexPreviewRef, penPreviewRef]);
+  }, [activeTool, appStore, canvasRef, dispatch, penNewVertexPreviewRef, penPreviewRef, setClassName]);
 };

@@ -574,6 +574,54 @@ describe('useSelectionTool behaviors', () => {
     expect(store.getState().design.nodes[idA]).toMatchObject({ x1: 2820, x2: 2900, y1: 760, y2: 700 });
   });
 
+  it('should clear the hovered vector vertex id when the pointer leaves the canvas', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+    const refs = createCanvasRefs({ canvasRef });
+
+    refs.hoveredVectorVertexIdRef.current = 'v1';
+
+    // before
+    renderHook(() => useSelectionTool(refs), {
+      wrapper: ({ children }) => (
+        <Provider store={store}>
+          <ClassNamesProvider>{children}</ClassNamesProvider>
+        </Provider>
+      ),
+    });
+
+    // action
+    canvasRef.current?.dispatchEvent(new PointerEvent('pointerleave'));
+
+    // result
+    expect(refs.hoveredVectorVertexIdRef.current).toBeNull();
+  });
+
+  it('should clear the selected vector vertex once the tool leaves Move/Scale, instead of leaving a stale "selected" dot behind — e.g. switching back to Pen', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+    const refs = createCanvasRefs({ canvasRef });
+
+    refs.selectedVectorVertexIdsRef.current = ['v1'];
+
+    // before
+    renderHook(() => useSelectionTool(refs), {
+      wrapper: ({ children }) => (
+        <Provider store={store}>
+          <ClassNamesProvider>{children}</ClassNamesProvider>
+        </Provider>
+      ),
+    });
+
+    // action
+    act(() => {
+      store.dispatch(setActiveTool(ToolName.pen));
+    });
+
+    // result
+    expect(refs.selectedVectorVertexIdsRef.current).toEqual([]);
+  });
+
   it('should not react to pointer events while a path-text node is being edited', () => {
     // mock
     const idA = addFrameNode(3000, 700);

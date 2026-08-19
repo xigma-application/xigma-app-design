@@ -13,6 +13,7 @@ import { TPoint } from 'types/canvas';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
 import { screenToWorld } from '../../../../utils/screenToWorld';
+import { updateNewVertexPreview } from './updateNewVertexPreview';
 import { updateVectorHandleDrag } from './updateVectorHandleDrag';
 import { updateVectorPenPreview } from './updateVectorPenPreview';
 
@@ -26,6 +27,7 @@ export const handlePointerMove = (
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
   penPreviewRef: TCanvasRefs['penPreviewRef'],
   penNewVertexPreviewRef: TCanvasRefs['penNewVertexPreviewRef'],
+  setClassName: (className: string | null) => void,
 ): void => {
   const state = appStore.getState();
   const viewport = selectViewport(state);
@@ -34,17 +36,22 @@ export const handlePointerMove = (
 
   if (dragOriginRef.current && dragStartRef.current) {
     updateVectorHandleDrag(point, dragOriginRef.current, dragStartRef.current, viewport, dispatch, appStore, pendingOutgoingTangentRef);
+    setClassName('pen');
   } else {
     const vectorEditingNodeId = selectVectorEditingNodeId(state);
     const node = getVectorEditingNode(state.design.nodes, vectorEditingNodeId);
+    const penActiveVertexId = selectPenActiveVertexId(state);
 
-    if (node) {
-      const penActiveVertexId = selectPenActiveVertexId(state);
-      updateVectorPenPreview(point, node, penActiveVertexId, viewport, penPreviewRef, pendingOutgoingTangentRef);
+    if (node && penActiveVertexId) {
+      const isSnapped = updateVectorPenPreview(point, node, penActiveVertexId, viewport, penPreviewRef, pendingOutgoingTangentRef);
+
       penNewVertexPreviewRef.current = null;
+      setClassName(isSnapped ? 'pen-snap' : 'pen');
     } else {
+      const isSnapped = updateNewVertexPreview(point, node, viewport, penNewVertexPreviewRef);
+
       penPreviewRef.current = null;
-      penNewVertexPreviewRef.current = point;
+      setClassName(isSnapped ? 'pen-snap' : 'pen');
     }
   }
 };

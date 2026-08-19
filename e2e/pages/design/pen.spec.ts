@@ -205,7 +205,10 @@ test('Escape steps through stopping the active vertex, then the tool, then vecto
   await designPage.pointerMove(750, 320);
   const afterEscape1Near = await designPage.canvas.screenshot();
 
-  expect(afterEscape1Near.equals(afterEscape1Far)).toBe(true); // no more preview line to move
+  // the rubber-band line is gone, but the floating next-point dot now tracks the cursor again (with
+  // vertex-snap attraction) instead of staying hidden — see handlePointerMove.ts's node-but-no-active-
+  // vertex branch — so near vs. far still differ, just via that dot instead of the old preview line
+  expect(afterEscape1Near.equals(afterEscape1Far)).toBe(false);
 
   await page.keyboard.press('Escape'); // 2nd — reverts the tool to default, keeps edit mode
 
@@ -439,11 +442,22 @@ test('undo steps back through vertex placements one click at a time', async ({ p
 
   expect(state2.equals(referenceTwoVertices)).toBe(true);
 
+  // state1 (v1 alone, no segments, node not deleted) can no longer be reached by "draw v1, then
+  // Escape" — v1 would be the node's only, still-unconnected vertex, and Escape now deletes exactly
+  // that dangling case outright (see deleteDanglingActiveVertex.ts). Reach the same end state a
+  // different way instead: draw v1 and v2 (a real segment now exists), Escape (only stops extending,
+  // since v2 is connected), then delete v2 via the ordinary vertex-selection Delete key — that path
+  // never cascades into whole-node deletion, leaving v1 alone exactly like the undo-derived state1
   await designPage.goto('e2e-test-pen-undo-reference-one-vertex');
   await expect(designPage.canvas).toBeVisible();
   await designPage.selectTool('pen');
   await designPage.click(700, 300);
+  await designPage.click(850, 300);
   await page.keyboard.press('Escape');
+  await designPage.selectTool('default');
+  await designPage.click(850, 300); // select v2's dot
+  await page.keyboard.press('Backspace');
+  await designPage.selectTool('pen'); // back to Pen — state1 stayed on Pen the whole time via undo
   await designPage.pointerMove(1500, 900);
   const referenceOneVertex = await designPage.canvas.screenshot();
 

@@ -2,6 +2,7 @@ import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
 
 // store
 import designReducer, {
+  addNode,
   setActiveTool,
   setPenActiveVertexId,
   setSelection,
@@ -12,12 +13,34 @@ import { store as realStore } from 'store';
 import { TDesignState } from 'store/design/types';
 
 // types
-import { ToolName } from 'types/design/enums';
+import { NodeType, ToolName } from 'types/design/enums';
+import { TVectorNode } from 'types/design/types';
 
 // utils
 import { handleLeave } from '../handleLeave';
 
 const createTestStore = (): EnhancedStore<{ design: TDesignState }> => configureStore({ reducer: { design: designReducer } });
+
+const addVectorNode = (segments: TVectorNode['segments'], vertices: TVectorNode['vertices']): string => {
+  realStore.dispatch(
+    addNode({
+      fillColor: '#ff0000',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments,
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices,
+    }),
+  );
+
+  const { rootOrder } = realStore.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
 
 describe('handleLeave', () => {
   it('should reset the active tool to default and clear the selection', () => {
@@ -68,6 +91,22 @@ describe('handleLeave', () => {
       // result
       expect(realStore.getState().design.penActiveVertexId).toBeNull();
       expect(realStore.getState().design.activeTool).toBe(ToolName.pen);
+    });
+
+    it('should delete a dangling, still-unconnected active vertex via handleEscapePenActiveVertex — see its own spec for the full outer/inner-node scenarios', () => {
+      // mock
+      const vectorId = addVectorNode({}, { v1: { id: 'v1', x: 0, y: 0 } });
+
+      realStore.dispatch(setVectorEditingNodeId(vectorId));
+      realStore.dispatch(setPenActiveVertexId('v1'));
+
+      // action
+      handleLeave(realStore.dispatch);
+
+      // result
+      expect(realStore.getState().design.nodes[vectorId]).toBeUndefined();
+      expect(realStore.getState().design.vectorEditingNodeId).toBeNull();
+      expect(realStore.getState().design.penActiveVertexId).toBeNull();
     });
 
     it('should reset the active tool to default when leaving vector editing with the pen tool active', () => {

@@ -36,10 +36,18 @@ describe('updateVectorPenPreview', () => {
     const penPreviewRef = createPenPreviewRef();
 
     // before
-    updateVectorPenPreview({ x: 900, y: 900 }, node, null, IDENTITY_VIEWPORT, penPreviewRef, createPendingOutgoingTangentRef());
+    const isSnapped = updateVectorPenPreview(
+      { x: 900, y: 900 },
+      node,
+      null,
+      IDENTITY_VIEWPORT,
+      penPreviewRef,
+      createPendingOutgoingTangentRef(),
+    );
 
     // result
     expect(penPreviewRef.current).toBeNull();
+    expect(isSnapped).toBe(false);
   });
 
   it('should draw the rubber-band preview from the active vertex to the pointer when no vertex is hovered', () => {
@@ -47,10 +55,18 @@ describe('updateVectorPenPreview', () => {
     const penPreviewRef = createPenPreviewRef();
 
     // before
-    updateVectorPenPreview({ x: 500, y: 500 }, node, 'v1', IDENTITY_VIEWPORT, penPreviewRef, createPendingOutgoingTangentRef());
+    const isSnapped = updateVectorPenPreview(
+      { x: 500, y: 500 },
+      node,
+      'v1',
+      IDENTITY_VIEWPORT,
+      penPreviewRef,
+      createPendingOutgoingTangentRef(),
+    );
 
     // result
     expect(penPreviewRef.current).toEqual({ from: { id: 'v1', x: 0, y: 0 }, tangentFromOffset: null, to: { x: 500, y: 500 } });
+    expect(isSnapped).toBe(false);
   });
 
   it('should snap the rubber-band preview endpoint to the hovered vertex instead of the raw pointer position', () => {
@@ -59,7 +75,7 @@ describe('updateVectorPenPreview', () => {
     const penPreviewRef = createPenPreviewRef();
 
     // before — active vertex is v1, pointer hovers right on v2
-    updateVectorPenPreview(
+    const isSnapped = updateVectorPenPreview(
       { x: 100, y: 0 },
       nodeWithTwoVertices,
       'v1',
@@ -70,6 +86,7 @@ describe('updateVectorPenPreview', () => {
 
     // result
     expect(penPreviewRef.current).toMatchObject({ to: { id: 'v2', x: 100, y: 0 } });
+    expect(isSnapped).toBe(true);
   });
 
   it('should carry the pending outgoing tangent into the preview when it matches the active vertex', () => {

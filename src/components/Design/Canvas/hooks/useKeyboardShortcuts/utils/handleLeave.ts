@@ -1,10 +1,13 @@
 // store
-import { cancelCommentDraft, setActiveTool, setPenActiveVertexId, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { cancelCommentDraft, setActiveTool, setSelection, setVectorEditingNodeId } from 'store/design/slice';
 import { selectActiveTool, selectPenActiveVertexId, selectVectorEditingNodeId } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
 import { ToolName } from 'types/design/enums';
+
+// utils
+import { handleEscapePenActiveVertex } from './handleEscapePenActiveVertex';
 
 export const handleLeave = (dispatch: AppDispatch): void => {
   const state = store.getState();
@@ -12,15 +15,19 @@ export const handleLeave = (dispatch: AppDispatch): void => {
   const penActiveVertexId = selectPenActiveVertexId(state);
   const vectorEditingNodeId = selectVectorEditingNodeId(state);
 
-  if (penActiveVertexId) {
-    dispatch(setPenActiveVertexId(null));
-  } else if (vectorEditingNodeId && (activeTool === ToolName.pen || activeTool === ToolName.pencil)) {
-    dispatch(setActiveTool(ToolName.default));
-  } else if (vectorEditingNodeId) {
-    dispatch(setVectorEditingNodeId(null));
-  } else {
-    dispatch(setActiveTool(ToolName.default));
-    dispatch(setSelection([]));
-    dispatch(cancelCommentDraft());
+  switch (true) {
+    case penActiveVertexId !== null:
+      handleEscapePenActiveVertex(dispatch);
+      break;
+    case vectorEditingNodeId !== null && (activeTool === ToolName.pen || activeTool === ToolName.pencil):
+      dispatch(setActiveTool(ToolName.default));
+      break;
+    case vectorEditingNodeId !== null:
+      dispatch(setVectorEditingNodeId(null));
+      break;
+    default:
+      dispatch(setActiveTool(ToolName.default));
+      dispatch(setSelection([]));
+      dispatch(cancelCommentDraft());
   }
 };

@@ -2,12 +2,16 @@ import { act, renderHook } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { RefObject } from 'react';
 
+// components
+import ClassNamesProvider from 'components/Design/core/ClassNamesProvider/ClassNamesProvider';
+
 // hooks
 import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
+import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
 import { useDrawPenTool } from './useDrawPenTool';
 
 // store
-import { setActiveTool, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { setActiveTool, setPenActiveVertexId, setSelection, setVectorEditingNodeId } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -28,14 +32,24 @@ const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
 const pointerEvent = (type: string, x: number, y: number, options: Partial<PointerEventInit> = {}): PointerEvent =>
   new PointerEvent(type, { button: 0, clientX: x, clientY: y, pointerId: 1, ...options });
 
-const renderPenTool = (canvasRef: RefObject<HTMLCanvasElement | null>): TCanvasRefs => {
+const renderPenTool = (canvasRef: RefObject<HTMLCanvasElement | null>): { getClassName: () => string | null; refs: TCanvasRefs } => {
   const refs = createCanvasRefs({ canvasRef });
 
-  renderHook(() => useDrawPenTool(refs), {
-    wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-  });
+  const { result } = renderHook(
+    () => {
+      useDrawPenTool(refs);
+      return useClassNames();
+    },
+    {
+      wrapper: ({ children }) => (
+        <Provider store={store}>
+          <ClassNamesProvider>{children}</ClassNamesProvider>
+        </Provider>
+      ),
+    },
+  );
 
-  return refs;
+  return { getClassName: () => result.current.className, refs };
 };
 
 describe('useDrawPenTool behaviors', () => {
@@ -121,7 +135,7 @@ describe('useDrawPenTool behaviors', () => {
     store.dispatch(setActiveTool(ToolName.pen));
 
     // before
-    const refs = renderPenTool(canvasRef);
+    const { getClassName, refs } = renderPenTool(canvasRef);
 
     act(() => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
@@ -135,8 +149,92 @@ describe('useDrawPenTool behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 40, 0));
     });
 
-    // result
+    // result — not near any other vertex, so the cursor stays the plain pen
     expect(refs.penPreviewRef.current).toMatchObject({ to: { x: 40, y: 0 } });
+    expect(getClassName()).toBe('pen');
+  });
+
+  it('should switch the cursor to pen-snap while extending, once the pointer hovers close enough to snap the rubber-band onto another vertex', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setActiveTool(ToolName.pen));
+
+    // before — v1 at (0,0), v2 at (100,0)
+    const { getClassName } = renderPenTool(canvasRef);
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 100, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 100, 0));
+    });
+
+    // action — hover back onto v1, well within the snap radius
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 1, 1));
+    });
+
+    // result
+    expect(getClassName()).toBe('pen-snap');
+  });
+
+  it('should switch the cursor to pen-snap when hovering an existing vertex with no vertex currently active', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setActiveTool(ToolName.pen));
+
+    // before — place a single vertex at (0,0), then stop extending from it
+    const { getClassName } = renderPenTool(canvasRef);
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 0, 0));
+    });
+    act(() => {
+      store.dispatch(setPenActiveVertexId(null));
+    });
+
+    // action — hover back onto that same vertex
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 1, 1));
+    });
+
+    // result
+    expect(getClassName()).toBe('pen-snap');
+  });
+
+  it('should clear the floating next-point preview dot once the tool leaves Pen, instead of leaving it stuck on screen', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setActiveTool(ToolName.pen));
+
+    // before
+    const { refs } = renderPenTool(canvasRef);
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 40, 0));
+    });
+
+    expect(refs.penNewVertexPreviewRef.current).toEqual({ x: 40, y: 0 });
+
+    // action
+    act(() => {
+      store.dispatch(setActiveTool(ToolName.default));
+    });
+
+    // result
+    expect(refs.penNewVertexPreviewRef.current).toBeNull();
   });
 
   it('should reset the in-progress drag on pointercancel', () => {

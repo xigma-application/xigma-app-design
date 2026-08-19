@@ -1,3 +1,11 @@
+// others
+import {
+  VECTOR_VERTEX_HOVER_SCALE,
+  VECTOR_VERTEX_SELECTED_INNER_SCALE,
+  VECTOR_VERTEX_SELECTED_SCALE,
+  VECTOR_VERTEX_SIZE,
+} from 'constant/canvas';
+
 // types
 import { NodeType } from 'types/design/enums';
 import { TSceneNode, TVectorNode } from 'types/design/types';
@@ -17,6 +25,11 @@ vi.mock('utils/canvas/drawVectorNode/drawVectorStroke', () => ({
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
+const BASE_SIZE = VECTOR_VERTEX_SIZE;
+const HOVER_SIZE = VECTOR_VERTEX_SIZE * VECTOR_VERTEX_HOVER_SCALE;
+const SELECTED_OUTER_SIZE = VECTOR_VERTEX_SIZE * VECTOR_VERTEX_SELECTED_SCALE;
+const SELECTED_INNER_SIZE = VECTOR_VERTEX_SIZE * VECTOR_VERTEX_SELECTED_INNER_SCALE;
+
 const vectorNode: TVectorNode = {
   fillColor: null,
   id: 'vector-1',
@@ -35,7 +48,13 @@ const vectorNode: TVectorNode = {
 
 const nodes: Record<string, TSceneNode> = { [vectorNode.id]: vectorNode };
 
-const call = (vectorEditingNodeId: string | null, selectedVertexIds: string[], hoveredNodeId: string | null): void => {
+const call = (
+  vectorEditingNodeId: string | null,
+  selectedVertexIds: string[],
+  hoveredNodeId: string | null,
+  hoveredVertexId: string | null = null,
+  penActiveVertexId: string | null = null,
+): void => {
   const gl = {} as WebGL2RenderingContext;
   const program = {} as WebGLProgram;
   const buffer = {} as WebGLBuffer;
@@ -48,6 +67,8 @@ const call = (vectorEditingNodeId: string | null, selectedVertexIds: string[], h
     vectorEditingNodeId,
     selectedVertexIds,
     hoveredNodeId,
+    hoveredVertexId,
+    penActiveVertexId,
     200,
     150,
     IDENTITY_VIEWPORT,
@@ -92,7 +113,7 @@ describe('drawVectorEditHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorEditHandlesLayer(gl, program, buffer, frameNodes, 'frame-1', [], null, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorEditHandlesLayer(gl, program, buffer, frameNodes, 'frame-1', [], null, null, null, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawVectorStrokeMock).not.toHaveBeenCalled();
@@ -124,16 +145,45 @@ describe('drawVectorEditHandlesLayer', () => {
     expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 5, y1: 0, y2: 0 }, '#0d99ff', 1, 200, 150, IDENTITY_VIEWPORT);
   });
 
-  it('should draw a selected-fill vertex dot for a selected vertex and a default-fill dot for an unselected one', () => {
+  it('should draw a selected vertex as a larger white-then-blue pair and an unselected vertex as a single default-fill dot', () => {
     // before
     call(vectorNode.id, ['v1'], null);
 
     // result
-    const vertexDrawCalls = drawEllipseMock.mock.calls.filter((args) => args[3].width === 5 / IDENTITY_VIEWPORT.zoom);
+    const selectedOuterDot = drawEllipseMock.mock.calls.find((args) => args[3].width === SELECTED_OUTER_SIZE)?.[3];
+    const selectedInnerDot = drawEllipseMock.mock.calls.find(
+      (args) => args[3].fill === '#0d99ff' && args[3].width === SELECTED_INNER_SIZE,
+    )?.[3];
+    const unselectedDot = drawEllipseMock.mock.calls.find((args) => args[3].x === 10 - BASE_SIZE / 2)?.[3];
 
-    expect(vertexDrawCalls).toHaveLength(2);
-    expect(vertexDrawCalls.find((args) => args[3].x === -2.5)?.[3]).toMatchObject({ fill: '#0d99ff' });
-    expect(vertexDrawCalls.find((args) => args[3].x === 7.5)?.[3]).toMatchObject({ fill: '#ffffff' });
+    expect(selectedOuterDot).toMatchObject({ fill: '#ffffff', x: -SELECTED_OUTER_SIZE / 2 });
+    expect(selectedInnerDot).toMatchObject({ width: SELECTED_INNER_SIZE, x: -SELECTED_INNER_SIZE / 2 });
+    expect(unselectedDot).toMatchObject({ fill: '#ffffff', width: BASE_SIZE });
+  });
+
+  it('should draw the hovered vertex larger than its unhovered neighbor', () => {
+    // before
+    call(vectorNode.id, [], null, 'v1');
+
+    // result
+    const vertexDrawCalls = drawEllipseMock.mock.calls.filter((args) => args[3].fill === '#ffffff');
+
+    expect(vertexDrawCalls.find((args) => args[3].x === -HOVER_SIZE / 2)?.[3]).toMatchObject({ width: HOVER_SIZE });
+    expect(vertexDrawCalls.find((args) => args[3].x === 10 - BASE_SIZE / 2)?.[3]).toMatchObject({ width: BASE_SIZE });
+  });
+
+  it('should draw the Pen tool active vertex (the segment being extended from) with the selected-style outer/inner pair', () => {
+    // before
+    call(vectorNode.id, [], null, null, 'v1');
+
+    // result — same rendering as a real selection, even though v1 isn't in selectedVertexIds
+    const selectedOuterDot = drawEllipseMock.mock.calls.find((args) => args[3].width === SELECTED_OUTER_SIZE)?.[3];
+    const selectedInnerDot = drawEllipseMock.mock.calls.find(
+      (args) => args[3].fill === '#0d99ff' && args[3].width === SELECTED_INNER_SIZE,
+    )?.[3];
+
+    expect(selectedOuterDot).toMatchObject({ fill: '#ffffff', x: -SELECTED_OUTER_SIZE / 2 });
+    expect(selectedInnerDot).toMatchObject({ x: -SELECTED_INNER_SIZE / 2 });
   });
 
   it('should draw vertex dots at their rotated world position for a node with a persisted, not-yet-baked rotation', () => {
@@ -147,17 +197,29 @@ describe('drawVectorEditHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorEditHandlesLayer(gl, program, buffer, rotatedNodes, rotatedVectorNode.id, ['v1'], null, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorEditHandlesLayer(
+      gl,
+      program,
+      buffer,
+      rotatedNodes,
+      rotatedVectorNode.id,
+      ['v1'],
+      null,
+      null,
+      null,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
-    const vertexDrawCalls = drawEllipseMock.mock.calls.filter((args) => args[3].width === 5 / IDENTITY_VIEWPORT.zoom);
-    const selectedDot = vertexDrawCalls.find((args) => args[3].fill === '#0d99ff')?.[3];
-    const unselectedDot = vertexDrawCalls.find((args) => args[3].fill === '#ffffff')?.[3];
+    const selectedDot = drawEllipseMock.mock.calls.find((args) => args[3].fill === '#0d99ff')?.[3];
+    const unselectedDot = drawEllipseMock.mock.calls.find((args) => args[3].width === BASE_SIZE / IDENTITY_VIEWPORT.zoom)?.[3];
 
-    expect(vertexDrawCalls).toHaveLength(2);
-    expect(selectedDot.x).toBeCloseTo(2.5);
-    expect(selectedDot.y).toBeCloseTo(-7.5);
-    expect(unselectedDot.x).toBeCloseTo(2.5);
-    expect(unselectedDot.y).toBeCloseTo(2.5);
+    expect(drawEllipseMock).toHaveBeenCalledTimes(3);
+    expect(selectedDot.x).toBeCloseTo(5 - SELECTED_INNER_SIZE / 2);
+    expect(selectedDot.y).toBeCloseTo(-5 - SELECTED_INNER_SIZE / 2);
+    expect(unselectedDot.x).toBeCloseTo(5 - BASE_SIZE / 2);
+    expect(unselectedDot.y).toBeCloseTo(5 - BASE_SIZE / 2);
   });
 });

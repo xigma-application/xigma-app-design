@@ -27,7 +27,6 @@ import { armStarCornerRadiusOnPointerDown } from '../armStarCornerRadiusOnPointe
 import { armStarRatioOnPointerDown } from '../armStarRatioOnPointerDown';
 import { armStarVertexCountOnPointerDown } from '../armStarVertexCountOnPointerDown';
 import { armVectorEditMissOnPointerDown } from '../armVectorEditMissOnPointerDown';
-import { armVectorEdgeInsertOnPointerDown } from '../armVectorEdgeInsertOnPointerDown';
 import { armVectorHandleOnPointerDown } from '../armVectorHandleOnPointerDown';
 import { armVectorVertexOnPointerDown } from '../armVectorVertexOnPointerDown';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
@@ -745,72 +744,6 @@ describe('armVectorEditMissOnPointerDown', () => {
 
     // result
     expect(armVectorEditMissOnPointerDown(ctx)).toBeUndefined();
-  });
-});
-
-describe('armVectorEdgeInsertOnPointerDown', () => {
-  afterEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
-  });
-
-  it('should insert a new vertex splitting the segment and return true when the point lands on a straight edge', () => {
-    // mock — a straight edge from v1(0,0) to v2(100,0)
-    const nodeId = addVectorNode(
-      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
-      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
-    );
-
-    store.dispatch(setVectorEditingNodeId(nodeId));
-
-    // before
-    const ctx = createContext({ point: { x: 50, y: 0 } });
-
-    // action
-    const result = armVectorEdgeInsertOnPointerDown(ctx);
-
-    // result
-    expect(result).toBe(true);
-    expect(ctx.dispatch).toHaveBeenCalledTimes(1);
-
-    const action = (ctx.dispatch as ReturnType<typeof vi.fn>).mock.calls[0][0] as ReturnType<typeof updateNode>;
-    const { segments, vertices } = action.payload.changes as Pick<TVectorNode, 'segments' | 'vertices'>;
-    const newVertexId = segments.s1.endId;
-
-    expect(action.payload.id).toBe(nodeId);
-    expect(newVertexId).not.toBe('v2');
-    expect(segments.s1).toEqual({ endId: newVertexId, id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null });
-    expect(Object.keys(segments)).toHaveLength(2);
-
-    const newSegmentId = Object.keys(segments).find((id) => id !== 's1') as string;
-
-    expect(segments[newSegmentId]).toEqual({ endId: 'v2', id: newSegmentId, startId: newVertexId, tangentEnd: null, tangentStart: null });
-    expect(vertices[newVertexId]).toEqual({ id: newVertexId, x: 50, y: 0 });
-  });
-
-  it('should return undefined and not dispatch when the point misses every edge', () => {
-    // mock
-    const nodeId = addVectorNode(
-      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
-      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
-    );
-
-    store.dispatch(setVectorEditingNodeId(nodeId));
-
-    // before
-    const ctx = createContext({ point: { x: 900, y: 900 } });
-
-    // result
-    expect(armVectorEdgeInsertOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.dispatch).not.toHaveBeenCalled();
-  });
-
-  it('should return undefined and not dispatch when Vector Edit Mode is not active', () => {
-    // before
-    const ctx = createContext({ point: { x: 50, y: 0 } });
-
-    // result
-    expect(armVectorEdgeInsertOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.dispatch).not.toHaveBeenCalled();
   });
 });
 
