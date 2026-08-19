@@ -25,6 +25,10 @@ export const handleSetActiveTool = (state: TDesignState, tool: ToolName): void =
     case ToolName.slice:
       state.lastFrameTool = tool;
       break;
+    case ToolName.pen:
+    case ToolName.pencil:
+      state.lastPenTool = tool;
+      break;
     case ToolName.text:
     case ToolName.textOnPath:
       state.lastTextTool = tool;

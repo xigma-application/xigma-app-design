@@ -31,6 +31,7 @@ const buildState = (nodes: TDesignState['nodes'], selectedIds: string[] = []): T
   editingTextContent: '',
   lastFrameTool: ToolName.frame,
   lastMouseTool: ToolName.default,
+  lastPenTool: ToolName.pen,
   lastShapeTool: ToolName.rectangle,
   lastTextTool: ToolName.text,
   nodes,

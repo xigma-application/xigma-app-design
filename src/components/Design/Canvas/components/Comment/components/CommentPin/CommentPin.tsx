@@ -26,10 +26,15 @@ const CommentPin: FC<TCommentPinProps> = ({ comment, x, y }) => {
   const lastDateLabel = getLastDateLabel(comment.createdAt, t);
 
   return (
-    <div className={styles.CommentPin__anchor} style={{ left: x, top: y }}>
+    <div
+      className={cx(styles.CommentPin, {
+        [styles['CommentPin--visible']]: visible,
+      })}
+      style={{ left: x, top: y }}
+    >
       <div
-        className={cx(styles.CommentPin, {
-          [styles['CommentPin--visible']]: visible,
+        className={cx(styles.CommentPin__wrapper, {
+          [styles['CommentPin__wrapper--visible']]: visible,
         })}
         onMouseLeave={onMouseLeave}
       >

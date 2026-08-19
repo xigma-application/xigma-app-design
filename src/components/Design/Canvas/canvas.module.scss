@@ -83,6 +83,20 @@
         auto;
     }
 
+    &--pen {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/pen.png') 8x) 4 4,
+        auto;
+    }
+
+    &--pencil {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/pencil.png') 8x) 8 24,
+        auto;
+    }
+
     &--radius {
       cursor:
         /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */

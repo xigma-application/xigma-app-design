@@ -44,6 +44,7 @@ const state = {
     editingTextBox: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 },
     editingTextContent: 'hello',
     lastMouseTool: ToolName.hand,
+    lastPenTool: ToolName.pen,
     lastShapeTool: ToolName.ellipse,
     lastTextTool: ToolName.textOnPath,
     nodes: { [node.id]: node },

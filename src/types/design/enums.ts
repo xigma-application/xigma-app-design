@@ -24,6 +24,8 @@ export enum ToolName {
   hand = 'hand',
   line = 'line',
   media = 'media',
+  pen = 'pen',
+  pencil = 'pencil',
   polygon = 'polygon',
   rectangle = 'rectangle',
   scale = 'scale',

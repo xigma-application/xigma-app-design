@@ -75,6 +75,8 @@ import PaddingLR from './svg/padding-lr.svg?react';
 import PaddingR from './svg/padding-r.svg?react';
 import PaddingT from './svg/padding-t.svg?react';
 import PaddingTB from './svg/padding-tb.svg?react';
+import PenTool from './svg/pen-tool.svg?react';
+import PencilTool from './svg/pencil-tool.svg?react';
 import Percentage from './svg/percentage.svg?react';
 import Plus from './svg/plus.svg?react';
 import PolygonTool from './svg/polygon-tool.svg?react';
@@ -175,6 +177,8 @@ export const Icons = {
   PaddingR,
   PaddingT,
   PaddingTB,
+  PenTool,
+  PencilTool,
   Percentage,
   Plus,
   PolygonTool,

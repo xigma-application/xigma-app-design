@@ -47,6 +47,7 @@ describe('design slice', () => {
       editingTextContent: '',
       lastFrameTool: ToolName.frame,
       lastMouseTool: ToolName.default,
+      lastPenTool: ToolName.pen,
       lastShapeTool: ToolName.rectangle,
       lastTextTool: ToolName.text,
       nodes: {},

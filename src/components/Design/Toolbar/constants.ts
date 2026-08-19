@@ -17,6 +17,8 @@ export const TOOL_ICON: Record<ToolName, keyof typeof Icons> = {
   [ToolName.hand]: 'HandTool',
   [ToolName.line]: 'LineTool',
   [ToolName.media]: 'FileTool',
+  [ToolName.pen]: 'PenTool',
+  [ToolName.pencil]: 'PencilTool',
   [ToolName.polygon]: 'PolygonTool',
   [ToolName.rectangle]: 'RectangleTool',
   [ToolName.scale]: 'ScaleTool',
@@ -37,6 +39,8 @@ export const TOOL_LABEL: Record<ToolName, string> = {
   [ToolName.hand]: `${translationNameSpace}.tool.hand`,
   [ToolName.line]: `${translationNameSpace}.tool.line`,
   [ToolName.media]: `${translationNameSpace}.tool.media`,
+  [ToolName.pen]: `${translationNameSpace}.tool.pen`,
+  [ToolName.pencil]: `${translationNameSpace}.tool.pencil`,
   [ToolName.polygon]: `${translationNameSpace}.tool.polygon`,
   [ToolName.rectangle]: `${translationNameSpace}.tool.rectangle`,
   [ToolName.scale]: `${translationNameSpace}.tool.scale`,
@@ -60,14 +64,29 @@ export const TOOL_GROUP_ITEMS: Partial<Record<ToolName, ToolName[]>> = {
     ToolName.media,
   ],
   [ToolName.text]: [ToolName.text, ToolName.textOnPath],
+  [ToolName.pen]: [ToolName.pen, ToolName.pencil],
 };
 
 export const TOOL_ICON_SIZE: Partial<Record<ToolName, number>> = {
+  [ToolName.comment]: 17,
+  [ToolName.pen]: 24,
+  [ToolName.pencil]: 24,
   [ToolName.polygon]: 17,
   [ToolName.slice]: 18,
   [ToolName.star]: 20,
-  [ToolName.comment]: 17,
 };
 
-export const TOOLS_WITH_DROPDOWN: ToolName[] = [ToolName.default, ToolName.frame, ToolName.rectangle, ToolName.text];
-export const TOOLBAR_ORDER: ToolName[] = [ToolName.default, ToolName.frame, ToolName.rectangle, ToolName.text, ToolName.comment];
+export const TOOL_DROPDOWN_ICON_SIZE: Partial<Record<ToolName, number>> = {
+  [ToolName.pen]: 21,
+  [ToolName.pencil]: 21,
+};
+
+export const TOOLS_WITH_DROPDOWN: ToolName[] = [ToolName.default, ToolName.frame, ToolName.rectangle, ToolName.text, ToolName.pen];
+export const TOOLBAR_ORDER: ToolName[] = [
+  ToolName.default,
+  ToolName.frame,
+  ToolName.rectangle,
+  ToolName.pen,
+  ToolName.text,
+  ToolName.comment,
+];

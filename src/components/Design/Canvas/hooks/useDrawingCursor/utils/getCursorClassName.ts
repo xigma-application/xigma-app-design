@@ -5,13 +5,14 @@ import { DRAWING_TOOLS } from '../../../constants';
 import { ToolName } from 'types/design/enums';
 
 export const getCursorClassName = (activeTool: ToolName): string | null => {
-  if (activeTool === ToolName.comment) {
-    return 'comment';
+  switch (activeTool) {
+    case ToolName.comment:
+      return 'comment';
+    case ToolName.pen:
+      return 'pen';
+    case ToolName.pencil:
+      return 'pencil';
+    default:
+      return DRAWING_TOOLS.includes(activeTool) ? 'drawing' : null;
   }
-
-  if (DRAWING_TOOLS.includes(activeTool)) {
-    return 'drawing';
-  }
-
-  return null;
 };

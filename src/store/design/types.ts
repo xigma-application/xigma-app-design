@@ -15,6 +15,7 @@ export type TDesignState = {
   editingTextContent: string;
   lastFrameTool: ToolName;
   lastMouseTool: ToolName;
+  lastPenTool: ToolName;
   lastShapeTool: ToolName;
   lastTextTool: ToolName;
   nodes: Record<string, TSceneNode>;

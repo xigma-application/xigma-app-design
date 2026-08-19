@@ -30,6 +30,7 @@ const createTestStore = (viewport = { x: 0, y: 0, zoom: 1 }): EnhancedStore<{ de
         editingTextContent: '',
         lastFrameTool: ToolName.frame,
         lastMouseTool: ToolName.default,
+        lastPenTool: ToolName.pen,
         lastShapeTool: ToolName.rectangle,
         lastTextTool: ToolName.text,
         nodes: {},
@@ -48,27 +49,27 @@ const renderWithStore = (store: EnhancedStore<{ design: TDesignState }>): Return
     </Provider>,
   );
 
-const getAnchor = (container: HTMLElement): HTMLDivElement => container.querySelector('[class*="__anchor"]') as HTMLDivElement;
+const getRoot = (container: HTMLElement): HTMLDivElement => container.firstElementChild as HTMLDivElement;
 
-const getPin = (container: HTMLElement): HTMLDivElement => getAnchor(container).firstElementChild as HTMLDivElement;
+const getWrapper = (container: HTMLElement): HTMLDivElement => getRoot(container).firstElementChild as HTMLDivElement;
 
 describe('CommentPin behaviors', () => {
-  it('should position the anchor at the given world-to-screen point', () => {
+  it('should position the root at the given world-to-screen point', () => {
     // before
     const { container } = renderWithStore(createTestStore());
-    const anchor = getAnchor(container);
+    const root = getRoot(container);
 
     // result
-    expect(anchor).toHaveStyle({ left: '12px', top: '34px' });
+    expect(root).toHaveStyle({ left: '12px', top: '34px' });
   });
 
   it('should render collapsed (no expanded modifier class) by default', () => {
     // before
     const { container } = renderWithStore(createTestStore());
-    const pin = getPin(container);
+    const wrapper = getWrapper(container);
 
     // result
-    expect(pin.className).not.toMatch(/CommentPin--visible/);
+    expect(wrapper.className).not.toMatch(/CommentPin__wrapper--visible/);
   });
 
   it('should expand on hovering the icon badge', () => {
@@ -80,24 +81,24 @@ describe('CommentPin behaviors', () => {
     fireEvent.mouseEnter(badge);
 
     // result
-    const pin = getPin(container);
+    const wrapper = getWrapper(container);
 
-    expect(pin.className).toMatch(/CommentPin--visible/);
+    expect(wrapper.className).toMatch(/CommentPin__wrapper--visible/);
   });
 
   it('should collapse again on mouse leave when not being edited', () => {
     // before
     const { container } = renderWithStore(createTestStore());
     const badge = container.querySelector('[class*="__icon-wrapper"]') as HTMLDivElement;
-    const pin = getPin(container);
+    const wrapper = getWrapper(container);
 
     fireEvent.mouseEnter(badge);
 
     // action
-    fireEvent.mouseLeave(pin);
+    fireEvent.mouseLeave(wrapper);
 
     // result
-    expect(pin.className).not.toMatch(/CommentPin--visible/);
+    expect(wrapper.className).not.toMatch(/CommentPin__wrapper--visible/);
   });
 
   it('should keep a constant pixel size regardless of the canvas zoom, since x/y are already world-to-screen', () => {
@@ -106,7 +107,7 @@ describe('CommentPin behaviors', () => {
     const zoomedIn = renderWithStore(createTestStore({ x: 0, y: 0, zoom: 2 }));
 
     // result
-    expect(getAnchor(zoomedOut.container).style.transform).toBe('');
-    expect(getAnchor(zoomedIn.container).style.transform).toBe('');
+    expect(getRoot(zoomedOut.container).style.transform).toBe('');
+    expect(getRoot(zoomedIn.container).style.transform).toBe('');
   });
 });

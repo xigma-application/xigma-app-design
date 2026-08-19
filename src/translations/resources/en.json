@@ -23,6 +23,8 @@
   "design.toolbar.tool.hand": "Hand tool",
   "design.toolbar.tool.line": "Line",
   "design.toolbar.tool.media": "Image/video...",
+  "design.toolbar.tool.pen": "Pen",
+  "design.toolbar.tool.pencil": "Pencil",
   "design.toolbar.tool.polygon": "Polygon",
   "design.toolbar.tool.rectangle": "Rectangle",
   "design.toolbar.tool.scale": "Scale",

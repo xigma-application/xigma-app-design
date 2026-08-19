@@ -12,6 +12,22 @@ describe('getCursorClassName', () => {
     expect(result).toBe('comment');
   });
 
+  it('should return "pen" for the Pen tool', () => {
+    // before
+    const result = getCursorClassName(ToolName.pen);
+
+    // result
+    expect(result).toBe('pen');
+  });
+
+  it('should return "pencil" for the Pencil tool', () => {
+    // before
+    const result = getCursorClassName(ToolName.pencil);
+
+    // result
+    expect(result).toBe('pencil');
+  });
+
   it('should return "drawing" for a tool in DRAWING_TOOLS', () => {
     // before
     const result = getCursorClassName(ToolName.frame);

@@ -17,6 +17,7 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   editingTextContent: '',
   lastFrameTool: ToolName.frame,
   lastMouseTool: ToolName.default,
+  lastPenTool: ToolName.pen,
   lastShapeTool: ToolName.rectangle,
   lastTextTool: ToolName.text,
   nodes: {},
@@ -135,6 +136,39 @@ describe('handleSetActiveTool', () => {
 
     // result
     expect(state.lastMouseTool).toBe(ToolName.hand);
+  });
+
+  it('should remember the last pen tool when switching to the pen tool', () => {
+    // mock
+    const state = buildState({ lastPenTool: ToolName.pencil });
+
+    // before
+    handleSetActiveTool(state, ToolName.pen);
+
+    // result
+    expect(state.lastPenTool).toBe(ToolName.pen);
+  });
+
+  it('should remember the last pen tool when switching to the pencil tool', () => {
+    // mock
+    const state = buildState();
+
+    // before
+    handleSetActiveTool(state, ToolName.pencil);
+
+    // result
+    expect(state.lastPenTool).toBe(ToolName.pencil);
+  });
+
+  it('should keep the last pen tool when switching to a non-pen-group tool', () => {
+    // mock
+    const state = buildState({ lastPenTool: ToolName.pencil });
+
+    // before
+    handleSetActiveTool(state, ToolName.comment);
+
+    // result
+    expect(state.lastPenTool).toBe(ToolName.pencil);
   });
 
   it('should remember the last text tool when switching to the text-on-path tool', () => {

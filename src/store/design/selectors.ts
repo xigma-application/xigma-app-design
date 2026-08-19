@@ -32,6 +32,8 @@ export const selectLastFrameTool = (state: RootState): ToolName => state.design.
 
 export const selectLastMouseTool = (state: RootState): ToolName => state.design.lastMouseTool;
 
+export const selectLastPenTool = (state: RootState): ToolName => state.design.lastPenTool;
+
 export const selectLastShapeTool = (state: RootState): ToolName => state.design.lastShapeTool;
 
 export const selectLastTextTool = (state: RootState): ToolName => state.design.lastTextTool;

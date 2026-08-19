@@ -27,6 +27,7 @@ const createTestStore = (): EnhancedStore<{ design: TDesignState }> =>
         editingTextContent: '',
         lastFrameTool: ToolName.frame,
         lastMouseTool: ToolName.default,
+        lastPenTool: ToolName.pen,
         lastShapeTool: ToolName.rectangle,
         lastTextTool: ToolName.text,
         nodes: {},
