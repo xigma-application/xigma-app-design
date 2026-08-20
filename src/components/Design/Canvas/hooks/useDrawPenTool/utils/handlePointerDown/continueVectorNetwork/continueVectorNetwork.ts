@@ -25,6 +25,12 @@ const getTangentStart = (pending: TPendingOutgoingTangent | null, activeVertexId
 const getEdgeHit = (point: TPoint, node: TVectorNode, viewport: TViewport): { segmentId: string; t: number } | null =>
   getVectorEdgeAtPoint(point, node, VECTOR_EDGE_HIT_TOLERANCE_PX / viewport.zoom, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
 
+const isOnActiveVertex = (point: TPoint, node: TVectorNode, activeVertexId: string, viewport: TViewport): boolean => {
+  const activeVertex = node.vertices[activeVertexId];
+
+  return Math.hypot(point.x - activeVertex.x, point.y - activeVertex.y) <= VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom;
+};
+
 export const continueVectorNetwork = (
   point: TPoint,
   node: TVectorNode,
@@ -35,26 +41,31 @@ export const continueVectorNetwork = (
   dragStartRef: RefObject<TPoint | null>,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
 ): void => {
-  const hover = getVectorVertexAtPoint(point, node, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom, activeVertexId);
-  const edgeHit = hover ? null : getEdgeHit(point, node, viewport);
-  const tangentStart = getTangentStart(pendingOutgoingTangentRef.current, activeVertexId);
-  const segmentId = nanoid();
-
-  if (hover) {
-    closeLoopOntoVertex(node, activeVertexId, hover.vertexId, segmentId, tangentStart, dispatch, pendingOutgoingTangentRef);
-  } else if (edgeHit) {
-    closeLoopOntoEdge(node, activeVertexId, edgeHit.segmentId, edgeHit.t, segmentId, tangentStart, dispatch, pendingOutgoingTangentRef);
+  if (isOnActiveVertex(point, node, activeVertexId, viewport)) {
+    dragOriginRef.current = { nodeId: node.id, segmentId: null, vertexId: activeVertexId };
+    dragStartRef.current = point;
   } else {
-    extendWithNewVertex(
-      point,
-      node,
-      activeVertexId,
-      segmentId,
-      tangentStart,
-      dispatch,
-      dragOriginRef,
-      dragStartRef,
-      pendingOutgoingTangentRef,
-    );
+    const hover = getVectorVertexAtPoint(point, node, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom, activeVertexId);
+    const edgeHit = hover ? null : getEdgeHit(point, node, viewport);
+    const tangentStart = getTangentStart(pendingOutgoingTangentRef.current, activeVertexId);
+    const segmentId = nanoid();
+
+    if (hover) {
+      closeLoopOntoVertex(node, activeVertexId, hover.vertexId, segmentId, tangentStart, dispatch, pendingOutgoingTangentRef);
+    } else if (edgeHit) {
+      closeLoopOntoEdge(node, activeVertexId, edgeHit.segmentId, edgeHit.t, segmentId, tangentStart, dispatch, pendingOutgoingTangentRef);
+    } else {
+      extendWithNewVertex(
+        point,
+        node,
+        activeVertexId,
+        segmentId,
+        tangentStart,
+        dispatch,
+        dragOriginRef,
+        dragStartRef,
+        pendingOutgoingTangentRef,
+      );
+    }
   }
 };

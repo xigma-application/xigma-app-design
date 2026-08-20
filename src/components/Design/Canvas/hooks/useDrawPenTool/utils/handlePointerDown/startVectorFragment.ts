@@ -5,7 +5,6 @@ import { RefObject } from 'react';
 import { VECTOR_EDGE_HIT_TOLERANCE_PX, VECTOR_VERTEX_HIT_RADIUS_PX } from 'constant/canvas';
 
 // store
-import { endHistoryGesture } from 'store/history/actions';
 import { setPenActiveVertexId, updateNode } from 'store/design/slice';
 import { AppDispatch } from 'store';
 
@@ -37,7 +36,9 @@ export const startVectorFragment = (
 
   if (hover) {
     dispatch(setPenActiveVertexId(hover.vertexId));
-    dispatch(endHistoryGesture());
+
+    dragOriginRef.current = { nodeId: node.id, segmentId: null, vertexId: hover.vertexId };
+    dragStartRef.current = point;
   } else if (edgeHit) {
     const { newVertexId, segments, vertices } = splitVectorSegment(node, edgeHit.segmentId, edgeHit.t);
 

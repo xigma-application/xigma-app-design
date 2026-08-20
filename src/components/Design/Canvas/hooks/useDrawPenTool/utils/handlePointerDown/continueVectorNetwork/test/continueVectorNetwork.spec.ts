@@ -100,6 +100,38 @@ describe('continueVectorNetwork', () => {
     expect(pendingOutgoingTangentRef.current).toBeNull();
   });
 
+  it('should arm the drag on the active vertex itself, without adding any vertex/segment, when clicking exactly on it', () => {
+    // mock — the active vertex (the one you're currently extending from) is otherwise excluded from
+    // getVectorVertexAtPoint's hover match (it can't close a loop onto itself), so clicking right back on
+    // it used to fall through to "extend with a new vertex" at the same coordinates as a degenerate
+    // zero-length segment; it should instead let you (re)shape its pending outgoing tangent
+    const nodeId = addVectorNode();
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const dragOriginRef = createDragOriginRef();
+    const dragStartRef = createDragStartRef();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+
+    // before — click right on v1, the active vertex itself
+    continueVectorNetwork(
+      { x: 0, y: 0 },
+      node,
+      'v1',
+      IDENTITY_VIEWPORT,
+      store.dispatch,
+      dragOriginRef,
+      dragStartRef,
+      pendingOutgoingTangentRef,
+    );
+
+    // result
+    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+
+    expect(Object.keys(updatedNode.vertices)).toEqual(['v1', 'v2']);
+    expect(Object.keys(updatedNode.segments)).toHaveLength(0);
+    expect(dragOriginRef.current).toEqual({ nodeId, segmentId: null, vertexId: 'v1' });
+    expect(dragStartRef.current).toEqual({ x: 0, y: 0 });
+  });
+
   it('should add a new vertex and segment, keep drawing, when clicking away from any existing vertex', () => {
     // mock
     const nodeId = addVectorNode();

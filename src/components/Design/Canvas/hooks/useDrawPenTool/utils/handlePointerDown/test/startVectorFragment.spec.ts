@@ -84,7 +84,24 @@ describe('startVectorFragment', () => {
     // result
     expect(store.getState().design.penActiveVertexId).toBe('v1');
     expect(Object.keys((store.getState().design.nodes[nodeId] as TVectorNode).vertices)).toEqual(['v1']);
-    expect(dragOriginRef.current).toBeNull();
+  });
+
+  it('should arm the drag on the resumed vertex, so click-dragging away from it shapes a fresh outgoing tangent', () => {
+    // mock — same click-drag-to-curve capability startNewVectorNetwork/the blank-canvas branch already give a
+    // brand-new vertex, now also available when resuming an existing one ("od innego punktu startuje")
+    const nodeId = addVectorNode();
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const dragOriginRef = createDragOriginRef();
+    const dragStartRef = createDragStartRef();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+
+    // before
+    startVectorFragment({ x: 1, y: 1 }, node, IDENTITY_VIEWPORT, store.dispatch, dragOriginRef, dragStartRef, pendingOutgoingTangentRef);
+
+    // result — segmentId: null since there's no incoming segment to mirror-shape from a resumed vertex,
+    // mirroring the exact same convention startNewVectorNetwork/the blank-canvas branch already use
+    expect(dragOriginRef.current).toEqual({ nodeId, segmentId: null, vertexId: 'v1' });
+    expect(dragStartRef.current).toEqual({ x: 1, y: 1 });
   });
 
   it('should clear a stale pending outgoing tangent left over from a fragment ended earlier (e.g. by Escape) when resuming an existing vertex', () => {

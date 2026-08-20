@@ -131,8 +131,9 @@ Three pointerdown cases (`useDrawPenTool/utils/`), dispatched on `node`/`penActi
    point: `addNode` a real one-vertex `TVectorNode` immediately (not a draft — there's nothing to hold in
    `draftRef`, unlike every drag-to-commit tool), then `setVectorEditingNodeId`/`setPenActiveVertexId`.
 2. **`startVectorFragment.ts`** — a network exists, no active vertex (fresh fragment). Hovering an
-   existing vertex just resumes from it (no mutation); blank canvas adds a new, disconnected vertex to
-   the same node.
+   existing vertex just resumes from it (no vertex/segment mutation, but the drag **is** armed — §15 —
+   so click-dragging away from it still shapes a fresh outgoing tangent); blank canvas adds a new,
+   disconnected vertex to the same node.
 3. **`continueVectorNetwork.ts`** — an active vertex exists. Hovering **any** existing vertex of the
    network (not just the fragment's own start — requirement #3) adds a connecting segment and **clears**
    `penActiveVertexId`, always ending the fragment on a click-to-existing-vertex (closure itself is never
@@ -768,6 +769,65 @@ now-smoother stroke it's supposed to trace). `getSegmentMidpoint.ts`'s own `flat
 (hardcoded to get exactly the `t=0.5` sample, unrelated to visual resolution) and `splitCubicBezier.ts`
 (De Casteljau control-point math, takes no segment count at all) were untouched — neither one tessellates
 for display.
+
+## 15. Click-drag tangent creation now also works when resuming an existing vertex
+
+Asked for directly, with two screenshots of the desired gesture: press on point A, drag — instead of
+rubber-banding a segment toward B, this shapes a gray outgoing tangent handle at A (`VECTOR_EDIT_OUTLINE_STROKE`
+gray line, per §9's `drawPenDragHandlePreview`); releasing commits that pending tangent, and *only then*
+does hovering/clicking toward B draw the actual curve, in `DRAFT_FRAME_STROKE` blue
+(`drawPenSegmentPreview.ts`). Point A, per the ask, can be any of three cases: starting a fresh network,
+extending mid-draw onto blank canvas, or **resuming an already-placed vertex to start a new fragment from
+it**.
+
+The first two cases already worked this way — `startNewVectorNetwork.ts` and `extendWithNewVertex.ts`
+(§4's `continueVectorNetwork.ts` blank-canvas branch) both unconditionally arm `dragOriginRef`/`dragStartRef`
+the moment they place a point, so the very next `pointermove` while the button is still held goes through
+`updateVectorHandleDrag.ts` instead of the idle rubber-band path (§4's shared resolver pipeline). The third
+case — `startVectorFragment.ts`'s `hover` branch, clicking back onto an existing vertex with no active
+fragment — did **not**: it only dispatched `setPenActiveVertexId` and immediately `endHistoryGesture()`,
+with no drag ever armed. A click-drag from a resumed vertex fell through to the idle hover path exactly as
+if the button had never been held, so no tangent could ever be shaped there. There was an explicit test
+asserting `dragOriginRef.current` stayed `null` after this branch — this was a deliberate scope trim in the
+original Pen tool build, not an oversight, which is why it needed calling out rather than just "fixing" —
+the test itself has been rewritten to assert the drag now arms instead.
+
+**Fix**: the `hover` branch now arms `dragOriginRef.current = { nodeId: node.id, segmentId: null,
+vertexId: hover.vertexId }` / `dragStartRef.current = point`, the exact same `segmentId: null` convention
+`startNewVectorNetwork.ts` uses (§4: "no incoming segment to mirror-shape yet, so that half of the drag is
+a no-op" — a resumed vertex may have other segments already touching it, but there's no unambiguous
+"incoming" one to pick among them, so this deliberately only ever sets up a *pending outgoing* tangent for
+whatever segment gets drawn next, never mirrors into an existing one). The inline `endHistoryGesture()`
+call was removed rather than kept alongside the new arm — it existed only because this branch used to be a
+guaranteed no-op needing its gesture closed early; now that a drag can genuinely mutate the node
+(`updateVectorHandleDrag.ts` dispatches `updateNode` past `MIN_DRAG_DISTANCE_PX`), the gesture needs to
+stay open across the possible drag exactly like the other two branches already leave it, closing naturally
+on the unconditional `endHistoryGesture()` in `handlePointerUp.ts`/`handlePointerCancel.ts` — a plain click
+with no drag still closes on the very next pointerup either way, so nothing regresses for that path.
+
+**A fourth case surfaced immediately after, with its own screenshot: pressing down back on the vertex
+you're *currently* extending from** (`continueVectorNetwork.ts`, `penActiveVertexId` already set — not a
+fresh resume, mid-fragment) **— e.g. hovering toward B with the normal blue rubber-band preview already
+showing, then moving back onto the active vertex A itself and drag-shaping its tangent from there instead
+of clicking away for B.** `getVectorVertexAtPoint`'s `excludeId` parameter is already passed
+`activeVertexId` everywhere in this file specifically so the active vertex never satisfies its own `hover`
+match (closing a loop onto the point you're extending *from* is meaningless — zero-length) — meaning a
+click exactly on it always fell all the way through to the `else` branch, `extendWithNewVertex`, adding a
+second, fully-overlapping vertex at the same coordinates connected by a degenerate zero-length segment.
+
+**Fix**: a new `isOnActiveVertex` check runs *first*, ahead of the existing `hover`/`edgeHit`/blank-canvas
+three-way branch (which only runs in its `else`) — a plain distance check against `node.vertices[activeVertexId]`
+using the same `VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom` tolerance `findEdgeMatchOnSegment`'s own
+`nearEndpoint` check already uses. When it matches, `continueVectorNetwork` arms the drag exactly like
+`startVectorFragment.ts`'s hover branch above (`segmentId: null`, no mirroring — same reasoning: no single
+unambiguous "incoming" segment to pick if the active vertex is a branch point) and does nothing else — no
+vertex, no segment, `penActiveVertexId` itself untouched (this call never dispatches it either way; the
+caller already set it when this vertex first became active). Deliberately **not** clearing
+`pendingOutgoingTangentRef` first, unlike `startVectorFragment.ts`'s hover branch — that clear exists there
+specifically for the Escape-interrupted-then-resumed staleness case (§11), which doesn't apply here: this
+branch only ever runs *mid-fragment*, so any existing pending tangent on this same vertex is either from
+earlier in this same uninterrupted session (legitimately still current) or gets overwritten the moment a
+real drag exceeds `MIN_DRAG_DISTANCE_PX` regardless.
 
 ## Related
 
