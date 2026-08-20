@@ -14,14 +14,7 @@ import { getVectorEditingNode } from '../../../../../../utils/getVectorEditingNo
 import { getVectorEdgeAtPoint } from '../../../../../../utils/getVectorEdgeAtPoint';
 import { getVectorSegmentMidpointAtPoint } from 'utils/canvas/vectorNetwork/getVectorSegmentMidpointAtPoint';
 
-export const armVectorSegmentOnPointerDown = ({
-  canvas,
-  canvasRefs,
-  event,
-  point,
-  selectionRefs,
-  viewport,
-}: TArmContext): true | undefined => {
+export const armVectorSegmentOnPointerDown = ({ canvas, canvasRefs, event, point, viewport }: TArmContext): true | undefined => {
   const node = getVectorEditingNode(store.getState().design.nodes, selectVectorEditingNodeId(store.getState()));
 
   if (node) {
@@ -36,7 +29,7 @@ export const armVectorSegmentOnPointerDown = ({
       const midpointHit = getVectorSegmentMidpointAtPoint(point, node, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
       const canSplit = midpointHit?.segmentId === hit.segmentId;
 
-      armVectorSegmentClick(canvas, event, canvasRefs, selectionRefs, node, hit.segmentId, canSplit, point);
+      armVectorSegmentClick(canvas, event, canvasRefs, node, hit.segmentId, canSplit, point);
 
       return true;
     }

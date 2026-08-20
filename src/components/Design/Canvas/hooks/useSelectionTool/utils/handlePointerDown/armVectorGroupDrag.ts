@@ -1,7 +1,7 @@
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
-import { TSelectionToolRefs, TVectorPendingClickAction } from 'types/design/selectionTool/types';
+import { TVectorPendingClickAction } from 'types/design/selectionTool/types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
@@ -14,7 +14,6 @@ export const armVectorGroupDrag = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
   canvasRefs: TCanvasRefs,
-  selectionRefs: TSelectionToolRefs,
   node: TVectorNode,
   point: TPoint,
   pendingClickAction: TVectorPendingClickAction,
@@ -28,5 +27,5 @@ export const armVectorGroupDrag = (
     ? getVectorMultiSelectBox(node, selectedVertexIds, selectedHandles, canvasRefs.vectorMultiSelectBoxRef)
     : null;
 
-  armVectorMultiDrag(canvas, event, selectionRefs.vectorMultiDragRef, node, vertexIds, selectedHandles, point, pendingClickAction, box);
+  armVectorMultiDrag(canvas, event, canvasRefs.vectorMultiDragRef, node, vertexIds, selectedHandles, point, pendingClickAction, box);
 };

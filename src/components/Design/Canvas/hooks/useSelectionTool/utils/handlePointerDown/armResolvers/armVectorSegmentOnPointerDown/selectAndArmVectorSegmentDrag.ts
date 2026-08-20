@@ -4,7 +4,6 @@ import { VECTOR_SEGMENT_INSERT_T } from 'constant/canvas';
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
-import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
@@ -15,7 +14,6 @@ export const selectAndArmVectorSegmentDrag = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
   canvasRefs: TCanvasRefs,
-  selectionRefs: TSelectionToolRefs,
   node: TVectorNode,
   segmentId: string,
   canSplit: boolean,
@@ -28,5 +26,5 @@ export const selectAndArmVectorSegmentDrag = (
   const vertexIds = getVectorSegmentVertexIds(node, [segmentId]);
   const pendingClickAction = canSplit ? { kind: 'split-segment' as const, segmentId, t: VECTOR_SEGMENT_INSERT_T } : null;
 
-  armVectorMultiDrag(canvas, event, selectionRefs.vectorMultiDragRef, node, vertexIds, [], point, pendingClickAction);
+  armVectorMultiDrag(canvas, event, canvasRefs.vectorMultiDragRef, node, vertexIds, [], point, pendingClickAction);
 };

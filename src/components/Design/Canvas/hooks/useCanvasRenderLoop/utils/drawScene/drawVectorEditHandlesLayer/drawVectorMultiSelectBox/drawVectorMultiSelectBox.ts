@@ -21,6 +21,7 @@ export const drawVectorMultiSelectBox = (
   vectorMultiSelectBoxRef: RefObject<TVectorMultiSelectBox | null>,
   vectorMultiSelectResizeDrag: TVectorMultiSelectResizeDragState | null,
   vectorMultiSelectRotateDrag: TVectorMultiSelectRotateDragState | null,
+  isVectorMultiDragMoving: boolean,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
@@ -30,7 +31,7 @@ export const drawVectorMultiSelectBox = (
       drawVectorMultiSelectResizeDragBox(gl, program, buffer, vectorMultiSelectResizeDrag, canvasWidth, canvasHeight, viewport);
     } else if (vectorMultiSelectRotateDrag) {
       drawVectorMultiSelectRotateDragBox(gl, program, buffer, vectorMultiSelectRotateDrag, canvasWidth, canvasHeight, viewport);
-    } else {
+    } else if (!isVectorMultiDragMoving) {
       drawVectorMultiSelectStaticBox(
         gl,
         program,

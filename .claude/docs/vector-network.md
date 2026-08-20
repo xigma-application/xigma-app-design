@@ -1621,6 +1621,99 @@ Deliberately unit-only (`TEST_CASES.md` #218), for the same reason as §32: pure
 rendering/timing stake, already precisely asserted via `store.getState()` in `armResolvers.spec.ts`,
 `resolveVectorCornerHandleDrag.spec.ts`, and `disarmVectorHandleDrag.spec.ts`.
 
+## 34. §15's active-vertex drag had silently drifted to unconditional mirroring — regated behind Ctrl/Cmd
+
+§15's own text is explicit that the "pressing down back on the vertex you're currently extending
+from" case should arm with `segmentId: null`, "no mirroring — same reasoning: no single unambiguous
+'incoming' segment to pick if the active vertex is a branch point". At some point after that section
+was written, `continueVectorNetwork.ts`'s `isPointNearVertex` branch drifted away from that: it started
+calling `getIncomingSegmentId(node, activeVertexId)` unconditionally whenever an incoming segment
+existed, mirroring the drag into it every time — with its own dedicated (and passing) unit test
+asserting exactly that mirroring as the intended behavior. The doc was never updated to match, so §15's
+prose and the actual code disagreed with each other by the time this was reported.
+
+Reported directly, in concrete A→B terms: placing A, placing B with a plain click (straight A-B), then
+a fresh press-drag-release gesture starting exactly on B (the active vertex) was bending the
+already-committed A-B segment — described as "tworzy tanges na punkcie A" (creates a tangent at point
+A) — even though nothing about that gesture should touch A at all. The confusion took a few rounds to
+pin down precisely, since the same drag *also* stages a real, always-visible pending-tangent preview
+diamond at B for whatever gets drawn next (§18) — a screenshot diff between "dragged from B" and "never
+dragged" always differs for that reason alone, regardless of whether A-B itself bent, which is why an
+early attempt at an e2e regression test for this (comparing the no-Ctrl case against an all-straight
+reference) failed even after the fix — it was accidentally asserting the pending-tangent preview away
+too, not just the A-B mirroring. The two renders that actually isolate the fix are "no-Ctrl drag from B"
+vs. "Ctrl+drag from B", compared directly against each other — both show the same pending-tangent
+diamond at B, so the only remaining difference between them is whether A-B bent.
+
+**The fix, confirmed directly**: the symmetric "both sides bend together" mirroring the user was
+describing does belong in this codebase — but as the *Ctrl/Cmd-gated* mechanism (matching §9's
+corner-pull and §30's segment-bend, both already Ctrl-gated), not as this gesture's unconditional
+default. `continueVectorNetwork.ts` now takes an `isCtrlPressed: boolean` parameter
+(`event.ctrlKey || event.metaKey`, threaded down from `startOrContinueVectorNetwork.ts`, the same
+plain-OR check §9's `armVectorCornerHandleOnPointerDown.ts`/§9's own note explains is deliberate here
+rather than the keyboard-shortcut system's `primaryKeys` machinery):
+```ts
+const segmentId = isCtrlPressed ? getIncomingSegmentId(node, activeVertexId) : null;
+```
+Plain drag from the active vertex → `segmentId: null`, same as `startVectorFragment.ts`'s resume-hover
+branch and `startNewVectorNetwork.ts`'s first vertex — only the vertex's own pending outgoing tangent
+gets staged (§4/§18), the incoming segment stays exactly as committed. Ctrl/Cmd+drag from the active
+vertex → mirrors into the incoming segment's `tangentEnd`, restoring §15's originally-drifted-away-from
+behavior, now reachable only deliberately. Placing an actual new vertex (`extendWithNewVertex.ts`) is
+untouched either way — dragging while creating a genuinely new point still shapes both the new segment's
+`tangentStart` and (via the render-only mirrored-preview diamond, §9) the outgoing side, exactly as
+before; this section is specifically about re-grabbing the vertex you already placed.
+
+`continueVectorNetwork.spec.ts` gained a fourth branch pair for this exact vertex-with-existing-incoming-
+segment case: plain drag → `segmentId: null` (was previously asserted as the mirroring case before this
+fix), Ctrl+drag → `segmentId` resolves to the real incoming segment (this is the assertion that used to
+run unconditionally). A fifth case closes the one remaining branch `getIncomingSegmentId`'s own
+`?? null` fallback needs: Ctrl held but the active vertex has no incoming segment at all (the very first
+vertex of a fresh network) — still resolves to `null`, since there's nothing to mirror into regardless of
+the modifier. `TEST_CASES.md` #208 was reworded to describe the now-gated behavior; #219 is the new e2e
+capture (`pen.spec.ts`) comparing the two renders directly, per the isolation note above.
+
+## 35. §21/§31's multi-select box now hides itself for the duration of a group-translate drag
+
+Asked for directly: while dragging 2+ selected vertices around by grabbing inside their bounding box
+(§21's plain group-move mechanism, `armVectorMultiDrag`/`continueVectorMultiDrag`/`disarmVectorMultiDrag`
+— distinct from §31's later resize/rotate box, which has its own drag refs), the box itself used to keep
+rendering, recomputed fresh from the vertices' live positions every frame — visually just floating along
+with the group, adding no information during the move itself (unlike the resize/rotate boxes, which stay
+visible on purpose since their own shape *is* the feedback for that gesture). Fixed by hiding the box
+specifically for the group-translate case: `drawVectorMultiSelectBox.ts`'s existing three-way branch
+(resize-drag box / rotate-drag box / static box) gained a fourth condition on the static branch —
+`else if (!isVectorMultiDragMoving)` — so the box renders at rest and during resize/rotate exactly as
+before, but not for the one gesture this was asked about.
+
+**Getting `isVectorMultiDragMoving` to the render loop required lifting `vectorMultiDragRef` itself**,
+the same "hook-private ref the render loop also needs to see" problem `canvas-rendering-pipeline.md` §1/
+§2 and this doc's §13/§19 (corner-radius, ellipse-arc) already solved the same way: the ref moved out of
+`TSelectionToolRefs` (previously created privately inside `useSelectionToolRefs.ts`, invisible to the
+render loop) into `TCanvasRefs` (`useCanvasRefs.ts`/`createCanvasRefs.ts`), so `Canvas.tsx`'s one shared
+`refs` object now owns it, and `useSelectionTool` reads/writes it off that same object like every other
+lifted drag-state ref. `drawScene.ts` derives `isVectorMultiDragMoving = Boolean(refs.vectorMultiDragRef
+.current?.hasMoved)` once per frame (mirroring `hasCornerRadiusDragMoved.ts`'s own `hasMoved`-keyed
+gate, §13) and threads it through `drawVectorEditHandlesLayer.ts` into `drawVectorMultiSelectBox.ts`.
+
+**Every `armVectorMultiDrag`/`continueVectorMultiDrag`/`disarmVectorMultiDrag` call site needed
+repointing from `selectionRefs.vectorMultiDragRef` to `canvasRefs.vectorMultiDragRef`**, since the three
+functions themselves already took the ref as a plain explicit parameter (not tied to which container
+type it came from) — no changes needed inside `armVectorMultiDrag.ts`/`continueVectorMultiDrag.ts`/
+`disarmVectorMultiDrag.ts` at all, only their callers. This cascaded to removing the now-fully-unused
+`selectionRefs: TSelectionToolRefs` parameter from `armVectorGroupDrag.ts` and
+`selectAndArmVectorSegmentDrag.ts` (both only ever used it for this one ref), which in turn simplified
+`armVectorSegmentClick.ts` and `armVectorSegmentOnPointerDown.ts` down to not needing `selectionRefs`
+at all either — `armVectorVertexClick.ts`/`armVectorHandleClick.ts` kept it, since they still need it for
+`selectAndArmVectorVertexDrag`/`selectAndArmVectorHandleDrag`'s own, non-lifted drag refs
+(`vectorVertexDragRef`/`vectorHandleDragRef`).
+
+Covered by a new `vector-edit.spec.ts` scenario (`TEST_CASES.md` #220): captures a known-empty baseline
+region at the box's own top-edge position (a real, non-degenerate triangle so that edge never coincides
+with an actual drawn segment), confirms the box renders there at rest, confirms the same region matches
+the empty baseline again mid-drag (pressed and moved past the threshold, not yet released), then confirms
+it reappears once released.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

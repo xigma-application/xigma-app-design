@@ -174,7 +174,6 @@ export type TSelectionToolRefs = {
   vectorHandleDragRef: RefObject<TVectorHandleDragState | null>;
   vectorMarqueeModeRef: RefObject<TVectorMarqueeMode | null>;
   vectorMarqueeStartRef: RefObject<TPoint | null>;
-  vectorMultiDragRef: RefObject<TVectorMultiDragState | null>;
   vectorSegmentBendDragRef: RefObject<TVectorSegmentBendDragState | null>;
   vectorVertexDragRef: RefObject<TVectorVertexDragState | null>;
 };

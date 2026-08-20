@@ -17,7 +17,12 @@ import {
 import { TDraftEntity } from 'types/design/types';
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TPenDragOrigin } from '../useDrawPenTool/types';
-import { TRotateDragState, TVectorMultiSelectResizeDragState, TVectorMultiSelectRotateDragState } from 'types/design/selectionTool/types';
+import {
+  TRotateDragState,
+  TVectorMultiDragState,
+  TVectorMultiSelectResizeDragState,
+  TVectorMultiSelectRotateDragState,
+} from 'types/design/selectionTool/types';
 
 export const useCanvasRefs = (): TCanvasRefs => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -47,6 +52,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
   const selectedVectorVertexIdsRef = useRef<string[]>([]);
   const sliceRef = useRef<TSliceDraft | null>(null);
   const starCornerRadiusDragRef = useRef<TStarCornerRadiusDragState | null>(null);
+  const vectorMultiDragRef = useRef<TVectorMultiDragState | null>(null);
   const vectorMultiSelectBoxRef = useRef<TVectorMultiSelectBox | null>(null);
   const vectorMultiSelectResizeDragRef = useRef<TVectorMultiSelectResizeDragState | null>(null);
   const vectorMultiSelectRotateDragRef = useRef<TVectorMultiSelectRotateDragState | null>(null);
@@ -81,6 +87,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
       selectedVectorVertexIdsRef,
       sliceRef,
       starCornerRadiusDragRef,
+      vectorMultiDragRef,
       vectorMultiSelectBoxRef,
       vectorMultiSelectResizeDragRef,
       vectorMultiSelectRotateDragRef,

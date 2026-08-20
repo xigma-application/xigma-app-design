@@ -37,6 +37,7 @@ describe('useCanvasRefs behaviors', () => {
       selectedVectorVertexIdsRef: { current: [] },
       sliceRef: { current: null },
       starCornerRadiusDragRef: { current: null },
+      vectorMultiDragRef: { current: null },
       vectorMultiSelectBoxRef: { current: null },
       vectorMultiSelectResizeDragRef: { current: null },
       vectorMultiSelectRotateDragRef: { current: null },

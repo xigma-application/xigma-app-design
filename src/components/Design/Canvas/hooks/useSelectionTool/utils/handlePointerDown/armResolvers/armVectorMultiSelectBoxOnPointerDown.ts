@@ -13,13 +13,7 @@ import { isPointInRect } from '../../../../../utils/isPointInRect';
 import { isVectorMultiSelectBoxEligible } from '../../../../../utils/isVectorMultiSelectBoxEligible';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
-export const armVectorMultiSelectBoxOnPointerDown = ({
-  canvas,
-  canvasRefs,
-  event,
-  point,
-  selectionRefs,
-}: TArmContext): true | undefined => {
+export const armVectorMultiSelectBoxOnPointerDown = ({ canvas, canvasRefs, event, point }: TArmContext): true | undefined => {
   if (!event.shiftKey) {
     const node = getVectorEditingNode(store.getState().design.nodes, selectVectorEditingNodeId(store.getState()));
 
@@ -33,7 +27,7 @@ export const armVectorMultiSelectBoxOnPointerDown = ({
         const localPoint = box && pivot && rotatePoint(point, pivot, -box.rotation);
 
         if (box && localPoint && isPointInRect(localPoint, box.bounds)) {
-          armVectorMultiDrag(canvas, event, selectionRefs.vectorMultiDragRef, node, selectedVertexIds, selectedHandles, point, null, box);
+          armVectorMultiDrag(canvas, event, canvasRefs.vectorMultiDragRef, node, selectedVertexIds, selectedHandles, point, null, box);
 
           return true;
         }

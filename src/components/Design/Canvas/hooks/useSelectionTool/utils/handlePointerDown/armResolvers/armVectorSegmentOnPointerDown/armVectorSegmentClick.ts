@@ -1,7 +1,6 @@
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
-import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
@@ -14,7 +13,6 @@ export const armVectorSegmentClick = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
   canvasRefs: TCanvasRefs,
-  selectionRefs: TSelectionToolRefs,
   node: TVectorNode,
   segmentId: string,
   canSplit: boolean,
@@ -25,9 +23,9 @@ export const armVectorSegmentClick = (
       canvasRefs.selectedVectorSegmentIdsRef.current = toggleSelection(canvasRefs.selectedVectorSegmentIdsRef.current, segmentId);
       break;
     case isPartOfVectorMultiSelection(canvasRefs, canvasRefs.selectedVectorSegmentIdsRef.current.includes(segmentId)):
-      armVectorGroupDrag(canvas, event, canvasRefs, selectionRefs, node, point, { id: segmentId, kind: 'segment' });
+      armVectorGroupDrag(canvas, event, canvasRefs, node, point, { id: segmentId, kind: 'segment' });
       break;
     default:
-      selectAndArmVectorSegmentDrag(canvas, event, canvasRefs, selectionRefs, node, segmentId, canSplit, point);
+      selectAndArmVectorSegmentDrag(canvas, event, canvasRefs, node, segmentId, canSplit, point);
   }
 };

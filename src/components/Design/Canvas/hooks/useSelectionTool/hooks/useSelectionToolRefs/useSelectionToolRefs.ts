@@ -13,7 +13,6 @@ import {
   TStarVertexCountDragState,
   TVectorHandleDragState,
   TVectorMarqueeMode,
-  TVectorMultiDragState,
   TVectorSegmentBendDragState,
   TVectorVertexDragState,
 } from 'types/design/selectionTool/types';
@@ -32,7 +31,6 @@ export const useSelectionToolRefs = (): TSelectionToolRefs => {
   const vectorHandleDragRef = useRef<TVectorHandleDragState | null>(null);
   const vectorMarqueeModeRef = useRef<TVectorMarqueeMode | null>(null);
   const vectorMarqueeStartRef = useRef<TPoint | null>(null);
-  const vectorMultiDragRef = useRef<TVectorMultiDragState | null>(null);
   const vectorSegmentBendDragRef = useRef<TVectorSegmentBendDragState | null>(null);
   const vectorVertexDragRef = useRef<TVectorVertexDragState | null>(null);
   const selectionRefsRef = useRef<TSelectionToolRefs | null>(null);
@@ -51,7 +49,6 @@ export const useSelectionToolRefs = (): TSelectionToolRefs => {
       vectorHandleDragRef,
       vectorMarqueeModeRef,
       vectorMarqueeStartRef,
-      vectorMultiDragRef,
       vectorSegmentBendDragRef,
       vectorVertexDragRef,
     };

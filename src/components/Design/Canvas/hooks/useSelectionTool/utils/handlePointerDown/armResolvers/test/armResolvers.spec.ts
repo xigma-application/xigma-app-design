@@ -829,7 +829,7 @@ describe('armVectorHandleOnPointerDown', () => {
     expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
     expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v2']);
     expect(ctx.selectionRefs.vectorHandleDragRef.current).toBeNull();
-    expect(ctx.selectionRefs.vectorMultiDragRef.current).toMatchObject({
+    expect(ctx.canvasRefs.vectorMultiDragRef.current).toMatchObject({
       pendingClickAction: { end: 'start', kind: 'handle', segmentId: 's1' },
       vertexOrigins: { v2: { x: 100, y: 0 } },
     });
@@ -1316,7 +1316,7 @@ describe('armVectorVertexOnPointerDown', () => {
     expect(armVectorVertexOnPointerDown(ctx)).toBe(true);
     expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
     expect(ctx.selectionRefs.vectorVertexDragRef.current).toBeNull();
-    expect(ctx.selectionRefs.vectorMultiDragRef.current).toMatchObject({
+    expect(ctx.canvasRefs.vectorMultiDragRef.current).toMatchObject({
       pendingClickAction: { id: 'v1', kind: 'vertex' },
       vertexOrigins: { v1: { x: 0, y: 0 }, v2: { x: 100, y: 0 } },
     });
@@ -1417,7 +1417,7 @@ describe('armVectorMultiSelectBoxOnPointerDown', () => {
 
     // result
     expect(armVectorMultiSelectBoxOnPointerDown(ctx)).toBe(true);
-    expect(ctx.selectionRefs.vectorMultiDragRef.current).toEqual({
+    expect(ctx.canvasRefs.vectorMultiDragRef.current).toEqual({
       boxOrigin: { height: 100, width: 100, x: 0, y: 0 },
       handleOrigins: {},
       hasMoved: false,
@@ -1447,7 +1447,7 @@ describe('armVectorMultiSelectBoxOnPointerDown', () => {
 
     // result
     expect(armVectorMultiSelectBoxOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.selectionRefs.vectorMultiDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.vectorMultiDragRef.current).toBeNull();
   });
 
   it('should return undefined when fewer than 2 points are selected', () => {
@@ -1831,7 +1831,7 @@ describe('armVectorSegmentOnPointerDown', () => {
     // result
     expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
     expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1', 's2']);
-    expect(selectionRefs.vectorMultiDragRef.current?.vertexOrigins).toEqual({
+    expect(ctx.canvasRefs.vectorMultiDragRef.current?.vertexOrigins).toEqual({
       v1: { x: 0, y: 0 },
       v2: { x: 100, y: 0 },
       v3: { x: 200, y: 0 },
@@ -1856,7 +1856,7 @@ describe('armVectorSegmentOnPointerDown', () => {
     // result
     expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
     expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
-    expect(selectionRefs.vectorMultiDragRef.current?.vertexOrigins).toEqual({ v1: { x: 0, y: 0 }, v2: { x: 100, y: 0 } });
+    expect(ctx.canvasRefs.vectorMultiDragRef.current?.vertexOrigins).toEqual({ v1: { x: 0, y: 0 }, v2: { x: 100, y: 0 } });
   });
 
   it('should also arm a pending split-segment click action when the click lands precisely on the segment’s own fixed midpoint, so a plain click (no drag) splits it instead of leaving it selected', () => {
@@ -1875,7 +1875,7 @@ describe('armVectorSegmentOnPointerDown', () => {
 
     // result
     expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
-    expect(selectionRefs.vectorMultiDragRef.current?.pendingClickAction).toEqual({ kind: 'split-segment', segmentId: 's1', t: 0.5 });
+    expect(ctx.canvasRefs.vectorMultiDragRef.current?.pendingClickAction).toEqual({ kind: 'split-segment', segmentId: 's1', t: 0.5 });
   });
 
   it('should NOT arm a pending split-segment click action when the click lands elsewhere on the segment, away from its own fixed midpoint — a plain click there just leaves the segment selected, same as before this feature existed', () => {
@@ -1896,6 +1896,6 @@ describe('armVectorSegmentOnPointerDown', () => {
     // result — the segment is still selected (eager, arm-time write), but no split is pending for release
     expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
     expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
-    expect(selectionRefs.vectorMultiDragRef.current?.pendingClickAction).toBeNull();
+    expect(ctx.canvasRefs.vectorMultiDragRef.current?.pendingClickAction).toBeNull();
   });
 });

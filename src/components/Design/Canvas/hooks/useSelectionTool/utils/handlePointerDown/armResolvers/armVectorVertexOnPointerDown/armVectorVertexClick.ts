@@ -28,7 +28,7 @@ export const armVectorVertexClick = (
       canvasRefs.selectedVectorVertexIdsRef.current = toggleSelection(canvasRefs.selectedVectorVertexIdsRef.current, hit.vertexId);
       break;
     case isPartOfVectorMultiSelection(canvasRefs, canvasRefs.selectedVectorVertexIdsRef.current.includes(hit.vertexId)):
-      armVectorGroupDrag(canvas, event, canvasRefs, selectionRefs, node, point, { id: hit.vertexId, kind: 'vertex' });
+      armVectorGroupDrag(canvas, event, canvasRefs, node, point, { id: hit.vertexId, kind: 'vertex' });
       break;
     default:
       selectAndArmVectorVertexDrag(canvas, event, canvasRefs, selectionRefs, node, hit.vertexId, point);

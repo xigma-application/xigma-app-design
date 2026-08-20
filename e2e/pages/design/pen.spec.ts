@@ -537,6 +537,41 @@ test('click-dragging directly on the active vertex — not while placing it — 
   expect(curved.equals(straight)).toBe(false);
 });
 
+test('a plain (no-Ctrl) drag directly on the active vertex renders differently than a Ctrl/Cmd+drag on the same gesture — only Ctrl bends the already-committed incoming segment', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  // mock — v1-v2 is committed as a plain straight segment first; a fresh press-drag-release gesture
+  // directly on v2 (the active vertex) stages v2's own pending outgoing tangent either way (rendered
+  // identically in both cases, per §18's persistent preview diamond — not what this test is isolating),
+  // but must additionally bend the already-committed v1-v2 segment only when Ctrl/Cmd is held, matching
+  // the Ctrl-gated mirroring §9/§30 already use for reshaping an existing segment elsewhere in this
+  // feature; comparing the two renders directly (rather than against an all-straight reference) is what
+  // isolates that one difference from the shared pending-tangent preview both cases render identically
+  await designPage.goto('e2e-test-pen-drag-active-vertex-no-ctrl');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300); // v1
+  await designPage.click(850, 300); // v2, plain click — straight v1-v2, v2 is now the active vertex
+  await designPage.dragVectorPoint(850, 300, 900, 250); // plain drag directly on v2, no Ctrl held
+  await designPage.pointerMove(1500, 900);
+  const noCtrlResult = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-pen-drag-active-vertex-ctrl');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300); // v1
+  await designPage.click(850, 300); // v2, plain click — straight v1-v2, v2 is now the active vertex
+  await designPage.ctrlDragVectorPoint(850, 300, 900, 250); // Ctrl+drag directly on v2 — mirrors into v1-v2
+  await designPage.pointerMove(1500, 900);
+  const ctrlResult = await designPage.canvas.screenshot();
+
+  expect(noCtrlResult.equals(ctrlResult)).toBe(false);
+});
+
 test('click-dragging directly on a resumed (non-active) vertex shapes its outgoing tangent', async ({ page }) => {
   const designPage = new DesignPage(page);
 

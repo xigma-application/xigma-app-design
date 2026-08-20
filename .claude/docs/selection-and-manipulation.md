@@ -1368,10 +1368,10 @@ reusing the single shared `marqueeRef` for the visual safe.
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.
 [[design-store-architecture]] — §5's ref-vs-Redux split (this subsystem is its biggest consumer: 12
-separate drag-state refs plus the marquee/drag-move dispatch-per-pointermove nuance; six of those —
+separate drag-state refs plus the marquee/drag-move dispatch-per-pointermove nuance; seven of those —
 `cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef`/`ellipseArcDragRef`/
-`ellipseArcRotateDragRef`/`ellipseArcRatioDragRef` — are now parent-owned like the ephemeral render
-refs rather than hook-private, per §13/§19).
+`ellipseArcRotateDragRef`/`ellipseArcRatioDragRef`/`vectorMultiDragRef` — are now parent-owned like the
+ephemeral render refs rather than hook-private, per §13/§19/[[vector-network]] §35).
 [[canvas-rendering-pipeline]] — how selection outlines/handles/cursors actually get drawn once this
 subsystem decides what's selected/hovered; §2's `marqueeRef`/`hoverRef`/`sliceRef` ref-drilling
 pattern is exactly what §13 extends to the three corner-radius drag refs.

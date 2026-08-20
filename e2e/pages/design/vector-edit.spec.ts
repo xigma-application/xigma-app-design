@@ -642,6 +642,46 @@ test('shift+click mixes a vertex and a tangent handle into one multi-selection, 
   expect(afterHandle.equals(beforeHandle)).toBe(false);
 });
 
+test('the multi-select box disappears for the duration of a group-translate drag, then reappears once released', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-box-hidden-during-move');
+  await expect(designPage.canvas).toBeVisible();
+
+  // a real (non-degenerate) triangle, so the two selected corners' bounding box top edge (900,300)-
+  // (1050,300) doesn't coincide with any actual drawn segment — v2 sits above that line, at (1000,220),
+  // so the box's own stroke there is the only thing that could ever render at this clip region
+  await designPage.drawVectorPath([
+    { x: 900, y: 300 },
+    { x: 1000, y: 220 },
+    { x: 1050, y: 450 },
+  ]);
+  await designPage.selectTool('default');
+
+  // known-empty baseline for the box's own top-edge region, captured before selecting anything
+  const boxEdgeRegion = { height: 20, width: 20, x: 965, y: 290 };
+  const emptyBaseline = await page.screenshot({ clip: boxEdgeRegion });
+
+  await designPage.click(900, 300); // select v1
+  await designPage.click(1050, 450, { shift: true }); // add v3 — 2-point box, eligible (no handles involved)
+
+  const atRest = await page.screenshot({ clip: boxEdgeRegion });
+  expect(atRest.equals(emptyBaseline)).toBe(false); // the box's top edge really does render there at rest
+
+  // press inside the box's own interior (not on any dot) and drag past the movement threshold, without
+  // releasing yet — this is the group-translate gesture the box should hide for
+  await designPage.pointerDown(975, 375);
+  await designPage.pointerMove(1025, 375);
+
+  const midDrag = await page.screenshot({ clip: boxEdgeRegion });
+  expect(midDrag.equals(emptyBaseline)).toBe(true); // invisible for the duration of the move
+
+  await designPage.pointerUp();
+
+  const afterRelease = await page.screenshot({ clip: boxEdgeRegion });
+  expect(afterRelease.equals(emptyBaseline)).toBe(false); // reappears once the drag ends
+});
+
 test('shift+click multi-selects two tangent handles with no vertex in the selection: no bounding box renders (too complex a case, Figma doesn’t have one either), and dragging one of them moves both together with the mouse instead of leaving a preview-only handle frozen in place', async ({
   page,
 }) => {

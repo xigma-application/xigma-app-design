@@ -4,7 +4,12 @@ import { RefObject } from 'react';
 import { TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
 import { TDraftEntity, TVectorTangent } from 'types/design/types';
 import { TPenDragOrigin } from 'components/Design/Canvas/hooks/useDrawPenTool/types';
-import { TRotateDragState, TVectorMultiSelectResizeDragState, TVectorMultiSelectRotateDragState } from 'types/design/selectionTool/types';
+import {
+  TRotateDragState,
+  TVectorMultiDragState,
+  TVectorMultiSelectResizeDragState,
+  TVectorMultiSelectRotateDragState,
+} from 'types/design/selectionTool/types';
 
 export type TCornerRadiusDragState = {
   bounds: TDraftRect;
@@ -108,6 +113,7 @@ export type TCanvasRefs = {
   selectedVectorVertexIdsRef: RefObject<string[]>;
   sliceRef: RefObject<TSliceDraft | null>;
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>;
+  vectorMultiDragRef: RefObject<TVectorMultiDragState | null>;
   vectorMultiSelectBoxRef: RefObject<TVectorMultiSelectBox | null>;
   vectorMultiSelectResizeDragRef: RefObject<TVectorMultiSelectResizeDragState | null>;
   vectorMultiSelectRotateDragRef: RefObject<TVectorMultiSelectRotateDragState | null>;

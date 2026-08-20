@@ -28,7 +28,8 @@ const createCanvas = (): HTMLCanvasElement => {
   return canvas;
 };
 
-const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointerdown', { pointerId });
+const pointerEvent = (pointerId = 1, options: Partial<PointerEventInit> = {}): PointerEvent =>
+  new PointerEvent('pointerdown', { pointerId, ...options });
 
 const createDragOriginRef = (): RefObject<TPenDragOrigin | null> => ({ current: null });
 const createDragStartRef = (): RefObject<TPoint | null> => ({ current: null });
@@ -161,9 +162,48 @@ describe('startOrContinueVectorNetwork', () => {
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      false,
     );
     expect(startNewVectorNetworkMock).not.toHaveBeenCalled();
     expect(startVectorFragmentMock).not.toHaveBeenCalled();
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(5);
+  });
+
+  it("should forward Ctrl/Cmd held during the pointerdown into continueVectorNetwork, so it can mirror into the active vertex's incoming segment", () => {
+    // mock
+    const canvas = createCanvas();
+    const dispatch = vi.fn();
+    const appStore = {} as AppStore;
+    const dragOriginRef = createDragOriginRef();
+    const dragStartRef = createDragStartRef();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+
+    // before
+    startOrContinueVectorNetwork(
+      canvas,
+      pointerEvent(6, { ctrlKey: true }),
+      { x: 10, y: 20 },
+      node,
+      'v1',
+      IDENTITY_VIEWPORT,
+      dispatch,
+      appStore,
+      dragOriginRef,
+      dragStartRef,
+      pendingOutgoingTangentRef,
+    );
+
+    // result
+    expect(continueVectorNetworkMock).toHaveBeenCalledWith(
+      { x: 10, y: 20 },
+      node,
+      'v1',
+      IDENTITY_VIEWPORT,
+      dispatch,
+      dragOriginRef,
+      dragStartRef,
+      pendingOutgoingTangentRef,
+      true,
+    );
   });
 });

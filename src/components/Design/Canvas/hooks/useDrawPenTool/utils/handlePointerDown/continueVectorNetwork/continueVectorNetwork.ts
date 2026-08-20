@@ -38,9 +38,12 @@ export const continueVectorNetwork = (
   dragOriginRef: RefObject<TPenDragOrigin | null>,
   dragStartRef: RefObject<TPoint | null>,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
+  isCtrlPressed: boolean,
 ): void => {
   if (isPointNearVertex(point, node.vertices[activeVertexId], VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom)) {
-    dragOriginRef.current = { nodeId: node.id, segmentId: getIncomingSegmentId(node, activeVertexId), vertexId: activeVertexId };
+    const segmentId = isCtrlPressed ? getIncomingSegmentId(node, activeVertexId) : null;
+
+    dragOriginRef.current = { nodeId: node.id, segmentId, vertexId: activeVertexId };
     dragStartRef.current = point;
   } else {
     const hover = getVectorVertexAtPoint(point, node, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom, activeVertexId);

@@ -59,7 +59,7 @@ export const handlePointerMove = (
   continueVectorVertexDrag(canvas, event, dispatch, selectionRefs.vectorVertexDragRef, setClassName);
   resolveVectorCornerHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs);
   continueVectorHandleDrag(canvas, event, dispatch, selectionRefs.vectorHandleDragRef, setClassName);
-  continueVectorMultiDrag(canvas, event, dispatch, selectionRefs.vectorMultiDragRef, canvasRefs.vectorMultiSelectBoxRef, setClassName);
+  continueVectorMultiDrag(canvas, event, dispatch, canvasRefs.vectorMultiDragRef, canvasRefs.vectorMultiSelectBoxRef, setClassName);
   continueVectorMultiSelectResizeDrag(canvas, event, dispatch, canvasRefs.vectorMultiSelectResizeDragRef);
   continueVectorMultiSelectRotateDrag(canvas, event, dispatch, canvasRefs.vectorMultiSelectRotateDragRef);
   continueVectorSegmentBendDrag(canvas, event, dispatch, canvasRefs, selectionRefs.vectorSegmentBendDragRef, setClassName);

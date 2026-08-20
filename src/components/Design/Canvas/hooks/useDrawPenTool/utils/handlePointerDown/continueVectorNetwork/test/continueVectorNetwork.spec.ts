@@ -88,6 +88,7 @@ describe('continueVectorNetwork', () => {
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      false,
     );
 
     // result
@@ -123,6 +124,7 @@ describe('continueVectorNetwork', () => {
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      false,
     );
 
     // result
@@ -134,16 +136,16 @@ describe('continueVectorNetwork', () => {
     expect(dragStartRef.current).toEqual({ x: 0, y: 0 });
   });
 
-  it("should arm the drag on the active vertex's own incoming segment when clicking exactly on it and that segment already exists — so dragging the outgoing tangent mirrors into the incoming one instead of leaving it a no-op", () => {
-    // mock — v3 is the active vertex and also s1's endId (v2 -> v3 already committed); clicking back on
-    // v3 itself must find s1 as the incoming segment to mirror-shape, not fall back to segmentId: null
+  it("should NOT mirror into the active vertex's own incoming segment on a plain (non-Ctrl) click-drag, even when that segment already exists — the already-committed segment stays straight, only the vertex's own pending outgoing tangent (for whatever gets drawn next) is shaped", () => {
+    // mock — v3 is the active vertex and also s1's endId (v2 -> v3 already committed); a plain drag from
+    // v3 must not bend s1, only Ctrl/Cmd+drag is allowed to do that (see the Ctrl case below)
     const nodeId = addVectorNodeWithEdge();
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const dragOriginRef = createDragOriginRef();
     const dragStartRef = createDragStartRef();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
 
-    // before — click right on v3(300,0), the active vertex itself
+    // before — click right on v3(300,0), the active vertex itself, no Ctrl held
     continueVectorNetwork(
       { x: 300, y: 0 },
       node,
@@ -153,11 +155,67 @@ describe('continueVectorNetwork', () => {
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      false,
+    );
+
+    // result
+    expect(dragOriginRef.current).toEqual({ nodeId, segmentId: null, vertexId: 'v3' });
+    expect(dragStartRef.current).toEqual({ x: 300, y: 0 });
+  });
+
+  it("should arm the drag on the active vertex's own incoming segment when Ctrl/Cmd is held while clicking exactly on it and that segment already exists — so dragging the outgoing tangent mirrors into the incoming one instead of leaving it a no-op", () => {
+    // mock — same setup as above, but with Ctrl held: v3 is the active vertex and also s1's endId
+    // (v2 -> v3 already committed); clicking back on v3 itself must find s1 as the incoming segment to
+    // mirror-shape, not fall back to segmentId: null
+    const nodeId = addVectorNodeWithEdge();
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const dragOriginRef = createDragOriginRef();
+    const dragStartRef = createDragStartRef();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+
+    // before — Ctrl+click right on v3(300,0), the active vertex itself
+    continueVectorNetwork(
+      { x: 300, y: 0 },
+      node,
+      'v3',
+      IDENTITY_VIEWPORT,
+      store.dispatch,
+      dragOriginRef,
+      dragStartRef,
+      pendingOutgoingTangentRef,
+      true,
     );
 
     // result
     expect(dragOriginRef.current).toEqual({ nodeId, segmentId: 's1', vertexId: 'v3' });
     expect(dragStartRef.current).toEqual({ x: 300, y: 0 });
+  });
+
+  it('should keep segmentId null when Ctrl/Cmd is held but the active vertex has no incoming segment to mirror into', () => {
+    // mock — v1 is the active vertex and the very first vertex of the network, so it has no incoming
+    // segment at all yet; Ctrl being held must not change that — there's nothing to mirror into
+    const nodeId = addVectorNode();
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const dragOriginRef = createDragOriginRef();
+    const dragStartRef = createDragStartRef();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+
+    // before — Ctrl+click right on v1(0,0), the active vertex itself
+    continueVectorNetwork(
+      { x: 0, y: 0 },
+      node,
+      'v1',
+      IDENTITY_VIEWPORT,
+      store.dispatch,
+      dragOriginRef,
+      dragStartRef,
+      pendingOutgoingTangentRef,
+      true,
+    );
+
+    // result
+    expect(dragOriginRef.current).toEqual({ nodeId, segmentId: null, vertexId: 'v1' });
+    expect(dragStartRef.current).toEqual({ x: 0, y: 0 });
   });
 
   it('should add a new vertex and segment, keep drawing, when clicking away from any existing vertex', () => {
@@ -178,6 +236,7 @@ describe('continueVectorNetwork', () => {
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      false,
     );
 
     // result
@@ -210,6 +269,7 @@ describe('continueVectorNetwork', () => {
       createDragOriginRef(),
       createDragStartRef(),
       pendingOutgoingTangentRef,
+      false,
     );
 
     // result
@@ -237,6 +297,7 @@ describe('continueVectorNetwork', () => {
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      false,
     );
 
     // result

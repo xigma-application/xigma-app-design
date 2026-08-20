@@ -32,7 +32,7 @@ export const armVectorHandleClick = (
       });
       break;
     case isPartOfVectorMultiSelection(canvasRefs, isHitHandleSelected):
-      armVectorGroupDrag(canvas, event, canvasRefs, selectionRefs, node, point, { end: hit.end, kind: 'handle', segmentId: hit.segmentId });
+      armVectorGroupDrag(canvas, event, canvasRefs, node, point, { end: hit.end, kind: 'handle', segmentId: hit.segmentId });
       break;
     default:
       selectAndArmVectorHandleDrag(canvas, event, canvasRefs, selectionRefs, node.id, hit);

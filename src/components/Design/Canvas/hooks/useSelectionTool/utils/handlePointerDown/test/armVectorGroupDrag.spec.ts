@@ -9,7 +9,6 @@ import { TVectorNode } from 'types/design/types';
 // utils
 import { armVectorGroupDrag } from '../armVectorGroupDrag';
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
-import { createSelectionToolRefs } from '../../../hooks/useSelectionToolRefs/createSelectionToolRefs';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -54,15 +53,14 @@ describe('armVectorGroupDrag', () => {
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
-    const selectionRefs = createSelectionToolRefs();
 
     canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
-    armVectorGroupDrag(canvas, pointerEvent(3), canvasRefs, selectionRefs, node, { x: 0, y: 0 }, { id: 'v1', kind: 'vertex' });
+    armVectorGroupDrag(canvas, pointerEvent(3), canvasRefs, node, { x: 0, y: 0 }, { id: 'v1', kind: 'vertex' });
 
     // result
-    expect(selectionRefs.vectorMultiDragRef.current?.boxOrigin).toEqual({ height: 100, width: 100, x: 0, y: 0 });
+    expect(canvasRefs.vectorMultiDragRef.current?.boxOrigin).toEqual({ height: 100, width: 100, x: 0, y: 0 });
     expect(canvasRefs.vectorMultiSelectBoxRef.current).toEqual({
       bounds: { height: 100, width: 100, x: 0, y: 0 },
       rotation: 0,
@@ -76,15 +74,14 @@ describe('armVectorGroupDrag', () => {
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
-    const selectionRefs = createSelectionToolRefs();
 
     canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
 
     // before
-    armVectorGroupDrag(canvas, pointerEvent(3), canvasRefs, selectionRefs, node, { x: 0, y: 0 }, { id: 'v1', kind: 'vertex' });
+    armVectorGroupDrag(canvas, pointerEvent(3), canvasRefs, node, { x: 0, y: 0 }, { id: 'v1', kind: 'vertex' });
 
     // result
-    expect(selectionRefs.vectorMultiDragRef.current?.boxOrigin).toBeNull();
+    expect(canvasRefs.vectorMultiDragRef.current?.boxOrigin).toBeNull();
     expect(canvasRefs.vectorMultiSelectBoxRef.current).toBeNull();
   });
 
@@ -95,16 +92,15 @@ describe('armVectorGroupDrag', () => {
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
-    const selectionRefs = createSelectionToolRefs();
 
     canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
 
     // before
-    armVectorGroupDrag(canvas, pointerEvent(3), canvasRefs, selectionRefs, node, { x: 0, y: 0 }, { id: 's1', kind: 'segment' });
+    armVectorGroupDrag(canvas, pointerEvent(3), canvasRefs, node, { x: 0, y: 0 }, { id: 's1', kind: 'segment' });
 
     // result
-    expect(selectionRefs.vectorMultiDragRef.current?.vertexOrigins).toEqual({ v1: { x: 0, y: 0 }, v2: { x: 100, y: 100 } });
-    expect(selectionRefs.vectorMultiDragRef.current?.boxOrigin).toBeNull();
+    expect(canvasRefs.vectorMultiDragRef.current?.vertexOrigins).toEqual({ v1: { x: 0, y: 0 }, v2: { x: 100, y: 100 } });
+    expect(canvasRefs.vectorMultiDragRef.current?.boxOrigin).toBeNull();
     expect(canvasRefs.vectorMultiSelectBoxRef.current).toBeNull();
   });
 });

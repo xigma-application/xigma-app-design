@@ -61,6 +61,7 @@ describe('drawVectorMultiSelectBox', () => {
       createVectorMultiSelectBoxRef(),
       null,
       null,
+      false,
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -87,6 +88,7 @@ describe('drawVectorMultiSelectBox', () => {
       boxRef,
       null,
       null,
+      false,
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -121,6 +123,7 @@ describe('drawVectorMultiSelectBox', () => {
       createVectorMultiSelectBoxRef(),
       vectorMultiSelectResizeDrag,
       null,
+      false,
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -165,6 +168,7 @@ describe('drawVectorMultiSelectBox', () => {
       createVectorMultiSelectBoxRef(),
       null,
       vectorMultiSelectRotateDrag,
+      false,
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -198,6 +202,7 @@ describe('drawVectorMultiSelectBox', () => {
       boxRef,
       null,
       null,
+      false,
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -216,6 +221,30 @@ describe('drawVectorMultiSelectBox', () => {
       150,
       IDENTITY_VIEWPORT,
     );
+    expect(drawVectorMultiSelectResizeDragBoxMock).not.toHaveBeenCalled();
+    expect(drawVectorMultiSelectRotateDragBoxMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw nothing while a plain group-translate drag is actively moving, even with 2+ points selected and no resize/rotate drag', () => {
+    // before — the box should stay hidden for the duration of the move, per direct request
+    drawVectorMultiSelectBox(
+      {} as WebGL2RenderingContext,
+      {} as WebGLProgram,
+      {} as WebGLBuffer,
+      node,
+      ['v1', 'v2'],
+      [],
+      createVectorMultiSelectBoxRef(),
+      null,
+      null,
+      true,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
+
+    // result
+    expect(drawVectorMultiSelectStaticBoxMock).not.toHaveBeenCalled();
     expect(drawVectorMultiSelectResizeDragBoxMock).not.toHaveBeenCalled();
     expect(drawVectorMultiSelectRotateDragBoxMock).not.toHaveBeenCalled();
   });

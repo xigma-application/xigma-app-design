@@ -31,7 +31,17 @@ export const startOrContinueVectorNetwork = (
   } else if (!penActiveVertexId) {
     startVectorFragment(point, node, viewport, dispatch, dragOriginRef, dragStartRef, pendingOutgoingTangentRef);
   } else {
-    continueVectorNetwork(point, node, penActiveVertexId, viewport, dispatch, dragOriginRef, dragStartRef, pendingOutgoingTangentRef);
+    continueVectorNetwork(
+      point,
+      node,
+      penActiveVertexId,
+      viewport,
+      dispatch,
+      dragOriginRef,
+      dragStartRef,
+      pendingOutgoingTangentRef,
+      event.ctrlKey || event.metaKey,
+    );
   }
 
   canvas.setPointerCapture(event.pointerId);
