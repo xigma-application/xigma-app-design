@@ -9,7 +9,7 @@ import { useAppDispatch, useAppSelector, useAppStore } from 'store';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TPenDragOrigin, TPendingOutgoingTangent } from './types';
+import { TPendingOutgoingTangent } from './types';
 import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 
@@ -23,6 +23,7 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
   const {
     canvasRef,
     hoveredSegmentIdRef,
+    penDragOriginRef: dragOriginRef,
     penDraggedHandlePositionRef,
     penHoveredDragArmableVertexRef,
     penNewVertexPreviewRef,
@@ -32,7 +33,6 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
   const dispatch = useAppDispatch();
   const appStore = useAppStore();
   const { setClassName } = useClassNames();
-  const dragOriginRef = useRef<TPenDragOrigin | null>(null);
   const dragStartRef = useRef<TPoint | null>(null);
   const pendingOutgoingTangentRef = useRef<TPendingOutgoingTangent | null>(null);
 
@@ -88,6 +88,7 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
         canvas.removeEventListener('pointercancel', pointerCancelListener);
         penPreviewRef.current = null;
         penNewVertexPreviewRef.current = null;
+        dragOriginRef.current = null;
         penDraggedHandlePositionRef.current = null;
         hoveredSegmentIdRef.current = null;
         penHoveredDragArmableVertexRef.current = false;
@@ -98,6 +99,7 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
     appStore,
     canvasRef,
     dispatch,
+    dragOriginRef,
     hoveredSegmentIdRef,
     penDraggedHandlePositionRef,
     penHoveredDragArmableVertexRef,

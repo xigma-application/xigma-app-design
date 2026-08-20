@@ -25,6 +25,7 @@ export const drawVectorEditHandlesLayer = (
   hoveredHandle: TVectorHandleHover | null,
   selectedHandles: TVectorHandleHover[],
   penActiveVertexId: string | null,
+  dragOriginVertexId: string | null,
   penDraggedHandlePosition: TPoint | null,
   canvasWidth: number,
   canvasHeight: number,
@@ -34,7 +35,7 @@ export const drawVectorEditHandlesLayer = (
 
   if (editingNode) {
     const node = { ...editingNode, ...bakeVectorNodeRotation(editingNode) };
-    const visualSelectedVertexIds = getVisualSelectedVectorVertexIds(selectedVertexIds, penActiveVertexId);
+    const visualSelectedVertexIds = getVisualSelectedVectorVertexIds(selectedVertexIds, penActiveVertexId ?? dragOriginVertexId);
     const oneHopVertexIds = getOneHopVectorVertexIds(node, visualSelectedVertexIds);
 
     drawVectorEditOutline(gl, program, buffer, node, hoveredSegmentId, canvasWidth, canvasHeight, viewport);
@@ -47,7 +48,7 @@ export const drawVectorEditHandlesLayer = (
       selectedHandles,
       visualSelectedVertexIds,
       oneHopVertexIds,
-      penActiveVertexId,
+      dragOriginVertexId,
       penDraggedHandlePosition,
       canvasWidth,
       canvasHeight,

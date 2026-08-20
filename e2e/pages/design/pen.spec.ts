@@ -591,3 +591,36 @@ test('click-dragging onto an existing vertex to close the loop shapes the closin
 
   expect(curvedClose.equals(straightClose)).toBe(false);
 });
+
+test('a click-drag close reveals both the closing segment’s own tangent and the live-dragged handle, unlike a plain closing click', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+  const region = { height: 120, width: 220, x: 630, y: 220 };
+
+  await designPage.goto('e2e-test-pen-close-drag-handles');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300); // v1
+  await designPage.click(850, 300); // v2
+  await designPage.click(850, 450); // v3, now the active vertex
+  await designPage.pointerDown(700, 300); // press directly on v1 to start closing
+  await designPage.pointerMove(650, 250); // drag out — shapes the closing segment's tangentEnd live
+  const midDrag = await page.screenshot({ clip: region });
+
+  await designPage.pointerUp();
+
+  await designPage.goto('e2e-test-pen-close-drag-handles-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300);
+  await designPage.click(850, 300);
+  await designPage.click(850, 450);
+  await designPage.click(700, 300); // plain close, no drag — no tangent handles to reveal
+  await designPage.pointerMove(650, 250); // rest at the same spot the drag test ended up at
+  const noDrag = await page.screenshot({ clip: region });
+
+  expect(midDrag.equals(noDrag)).toBe(false);
+});

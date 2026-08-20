@@ -917,6 +917,83 @@ mid-fragment (`resolveVertexPointHover` called with `excludeVertexId` set), a pl
 unconditionally drag-armable. No ambiguity to resolve at the hover layer at all; the resolver's existing
 output already disambiguates it for free.
 
+## 18. A persistent tangent-handle diamond for the staged-but-not-yet-committed outgoing tangent
+
+Asked for directly, with a screenshot of the desired look: while drawing (an active fragment, `preview`
+non-null), if the active vertex already has a pending outgoing tangent staged (§4's
+`pendingOutgoingTangentRef`, surfaced into `preview.tangentFromOffset` by `updateVectorPenPreview.ts`), a
+real tangent-handle diamond — not just the rubber-band curve it shapes — should stay visible the whole
+time you're aiming toward the next point, not only during the original drag that created it
+(`penDraggedHandlePositionRef`'s live diamond, §9, is cleared the instant that drag ends).
+
+**Fix, entirely inside `drawPenSegmentPreview.ts`, no new refs**: `tangentFromOffset` was already computed
+there (previously only used to shape the rubber-band curve, and only inside the "stroke needed" branch,
+skipped whenever `from === to` — §16's snapped-onto-active-vertex case). It's now hoisted to always compute,
+and whenever non-null, `drawTangentHandle` (the exact same primitive §9's diamonds and §10's real segment
+handles already share — no new visual, no new styling decision) draws a plain, unselected/unhovered handle
+from `from` to `from + tangentFromOffset`. This reuses data already in scope — `preview.from`/
+`preview.tangentFromOffset` are already threaded into this function — so no ref needed to be lifted, unlike
+§19 immediately below. Only fires while an active fragment exists (`drawPenPreview.ts`'s `if (preview)`
+branch); the idle/no-active-vertex case has no `tangentFromOffset` concept at all.
+
+## 19. Two tangent handles during a click-drag close — lifting `dragOriginRef` so the render loop can see it
+
+Immediate follow-up ask, still about the closing-drag from §17: "those 2 tangents should appear" while
+dragging onto an existing vertex to close the loop — the closing segment's own outgoing tangent (at the
+vertex you're closing *from*) and the one being actively shaped (at the vertex you're closing *onto*).
+Both turned out to already be silently broken for this specific case, for two independent reasons that
+both trace back to the same root cause: `closeLoopOntoVertex.ts` (§17) clears `penActiveVertexId` to `null`
+*before* the drag continues (closing always ends the active fragment), and two different rendering paths
+both used to key off `penActiveVertexId` as their only way to know which vertex a live drag was anchored
+to:
+
+1. **`drawPenDragHandlePreview.ts`** (§9's live mirrored diamond, follows the cursor) resolved its anchor
+   vertex via `node.vertices[penActiveVertexId]` — with that now `null`, the whole component silently
+   rendered nothing for the entire closing-drag, even though `updateVectorHandleDrag.ts` was mutating the
+   segment's `tangentEnd` correctly the whole time.
+2. **`drawVectorEditHandlesLayer.ts`'s own `visualSelectedVertexIds`** (§10's "does this segment touch a
+   selected vertex" reveal rule) — `getVisualSelectedVectorVertexIds(selectedVertexIds, penActiveVertexId)`
+   — with `penActiveVertexId` null and the closing-*from* vertex never added to Vector Edit Mode's own
+   `selectedVertexIds` ref either, the closing segment's real, already-committed `tangentStart` (passed in
+   at creation time, §17) had *no* selected/one-hop endpoint to reveal it through — invisible by the same
+   §10 rule that normally shows a fresh segment's own handles immediately.
+
+**Fix: `dragOriginRef` (`TPenDragOrigin | null` — `{nodeId, segmentId, vertexId}`, §4/§9) is lifted from a
+hook-local `useRef` inside `useDrawPenTool` into `TCanvasRefs` as `penDragOriginRef`**, exactly the same
+move `penDraggedHandlePositionRef` itself already went through for the same reason (the render loop needs
+to read a Pen-tool drag ref that isn't Redux state). `useDrawPenTool.ts` now destructures
+`penDragOriginRef: dragOriginRef` from `refs` instead of creating its own `useRef` — every internal
+handler keeps calling it `dragOriginRef`, only its *origin* changed, so `handlePointerDown.ts`/
+`handlePointerMove.ts`/`handlePointerUp.ts`/`handlePointerCancel.ts` needed no signature changes at all.
+The mount-cleanup effect now also resets `dragOriginRef.current = null` on tool switch-away, since a ref
+now living in `TCanvasRefs` persists across this hook's own mount/unmount cycles (tool switches) instead of
+being torn down for free — leaving a stale non-null value there could otherwise make a future
+`handlePointerMove` on Pen misread an old drag as still armed.
+
+With the ref lifted, `drawScene.ts` reads `dragOriginVertexId = refs.penDragOriginRef.current?.vertexId ??
+null` once per frame and threads it two places:
+- **`drawVectorTangentHandles.ts`/`drawPenDragHandlePreview.ts`**: the parameter that used to be named
+  `penActiveVertexId` is now literally `dragOriginVertexId` (a rename, not just a new parallel value) —
+  this component's only real job is showing where a live drag is anchored, which was *never* actually the
+  same concept as "the Redux-tracked active vertex," it just always happened to coincide with it until
+  closing broke that assumption.
+- **`drawVectorEditHandlesLayer.ts`**: `getVisualSelectedVectorVertexIds(selectedVertexIds, penActiveVertexId
+  ?? dragOriginVertexId)` — a plain fallback, deliberately *not* passing both simultaneously or merging two
+  lists. In every drag-armed case except closing, `penActiveVertexId` and `dragOriginRef.vertexId` already
+  point at the exact same vertex (`extendWithNewVertex.ts`, `continueVectorNetwork.ts`'s own-vertex branch
+  §15, `startVectorFragment.ts`'s hover branch §15 — all set both to match), so the fallback is a genuine
+  no-op there; it only ever actually kicks in for the one case where they diverge — closing — which is
+  exactly the case that needed it.
+
+The net effect during a closing-drag: the closing-*from* vertex now counts as visually selected again (its
+real, already-committed `tangentStart` handle reappears via the ordinary §10 mechanism, *and* its vertex
+dot gets the selected two-layer styling, both harmless/expected side effects of being "visually active"),
+while `drawPenDragHandlePreview` now correctly anchors its live cursor-following diamond on the closing-
+*onto* vertex instead of rendering nothing. Two real, independent handles — one static (the closing-from
+vertex's own tangent), one live (the vertex being dragged onto) — matching what dragging onto an existing
+vertex earlier in the *same* fragment already showed for free (§10's rule already covered that case, since
+the newly-placed vertex there **was** `penActiveVertexId` at drag time).
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

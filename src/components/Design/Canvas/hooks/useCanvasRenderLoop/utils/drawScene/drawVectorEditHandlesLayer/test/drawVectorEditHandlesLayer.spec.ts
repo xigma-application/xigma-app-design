@@ -60,6 +60,7 @@ const call = (
   hoveredHandle: TVectorHandleHover | null = null,
   selectedHandles: TVectorHandleHover[] = [],
   penDraggedHandlePosition: { x: number; y: number } | null = null,
+  dragOriginVertexId: string | null = null,
 ): void => {
   const gl = {} as WebGL2RenderingContext;
   const program = {} as WebGLProgram;
@@ -77,6 +78,7 @@ const call = (
     hoveredHandle,
     selectedHandles,
     penActiveVertexId,
+    dragOriginVertexId,
     penDraggedHandlePosition,
     200,
     150,
@@ -135,6 +137,7 @@ describe('drawVectorEditHandlesLayer', () => {
       null,
       null,
       [],
+      null,
       null,
       null,
       200,
@@ -269,12 +272,27 @@ describe('drawVectorEditHandlesLayer', () => {
   });
 
   it('should draw an extra tangent handle line from the Pen active vertex to the live-dragged cursor position', () => {
-    // before
-    call(vectorNode.id, [], null, null, 'v1', null, [], { x: 30, y: 40 });
+    // before — dragOriginVertexId mirrors penActiveVertexId here, as it does for every Pen-tool drag-armed
+    // site except closing a loop (extendWithNewVertex.ts/continueVectorNetwork.ts's own-vertex branch/
+    // startVectorFragment.ts's hover branch always set both to the same vertex; only closeLoopOntoVertex.ts
+    // clears penActiveVertexId while the drag continues)
+    call(vectorNode.id, [], null, null, 'v1', null, [], { x: 30, y: 40 }, 'v1');
 
     // result — the existing v1 handle line (0,0 -> 5,0), v2's own default preview handle line (10,0 -> 7.5,0,
     // now also revealed since v1 counts as selected via penActiveVertexId), plus the drag-preview line
     // (0,0 -> 30,40)
+    expect(drawLineMock).toHaveBeenCalledTimes(3);
+    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 30, y1: 0, y2: 40 }, '#aaaaaa', 1, 200, 150, IDENTITY_VIEWPORT);
+  });
+
+  it('should also reveal handles via the drag’s origin vertex when penActiveVertexId is null — e.g. closing a loop by dragging (penActiveVertexId is cleared before the drag continues)', () => {
+    // before — penActiveVertexId null, but dragOriginVertexId is v1, mirroring closeLoopOntoVertex.ts's
+    // sequence (setPenActiveVertexId(null) dispatched, then dragOriginRef armed on the same vertex)
+    call(vectorNode.id, [], null, null, null, null, [], { x: 30, y: 40 }, 'v1');
+
+    // result — same reveal as the real active-vertex case above: v1's own handle, v2's one-hop preview
+    // handle, plus the live drag-preview line anchored on v1 (not silently hidden just because
+    // penActiveVertexId itself reads null at this point)
     expect(drawLineMock).toHaveBeenCalledTimes(3);
     expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 30, y1: 0, y2: 40 }, '#aaaaaa', 1, 200, 150, IDENTITY_VIEWPORT);
   });
@@ -322,6 +340,7 @@ describe('drawVectorEditHandlesLayer', () => {
       null,
       null,
       [],
+      null,
       null,
       null,
       200,
@@ -377,6 +396,7 @@ describe('drawVectorEditHandlesLayer', () => {
       null,
       null,
       [],
+      null,
       null,
       null,
       200,

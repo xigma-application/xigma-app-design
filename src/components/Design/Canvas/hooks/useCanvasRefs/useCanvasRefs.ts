@@ -15,6 +15,7 @@ import {
 } from 'types/design/canvas/types';
 import { TDraftEntity } from 'types/design/types';
 import { TDraftRect, TPoint } from 'types/canvas';
+import { TPenDragOrigin } from '../useDrawPenTool/types';
 import { TRotateDragState } from 'types/design/selectionTool/types';
 
 export const useCanvasRefs = (): TCanvasRefs => {
@@ -29,6 +30,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
   const hoveredVectorVertexIdRef = useRef<string | null>(null);
   const hoverRef = useRef<string | null>(null);
   const marqueeRef = useRef<TDraftRect | null>(null);
+  const penDragOriginRef = useRef<TPenDragOrigin | null>(null);
   const penDraggedHandlePositionRef = useRef<TPoint | null>(null);
   const penHoveredDragArmableVertexRef = useRef<boolean>(false);
   const penNewVertexPreviewRef = useRef<TPoint | null>(null);
@@ -54,6 +56,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
       hoveredVectorHandleRef,
       hoveredVectorVertexIdRef,
       marqueeRef,
+      penDragOriginRef,
       penDraggedHandlePositionRef,
       penHoveredDragArmableVertexRef,
       penNewVertexPreviewRef,

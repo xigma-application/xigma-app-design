@@ -30,7 +30,7 @@ describe('drawPenDragHandlePreview', () => {
     drawTangentHandleMock.mockClear();
   });
 
-  it('should draw a plain, unhovered/unselected handle from the Pen active vertex to the live-dragged cursor position', () => {
+  it('should draw a plain, unhovered/unselected handle from the drag’s origin vertex to the live-dragged cursor position', () => {
     // before
     drawPenDragHandlePreview(
       {} as WebGL2RenderingContext,
@@ -61,7 +61,7 @@ describe('drawPenDragHandlePreview', () => {
     );
   });
 
-  it('should draw nothing when there is no Pen active vertex', () => {
+  it('should draw nothing when the drag has no origin vertex', () => {
     // before
     drawPenDragHandlePreview(
       {} as WebGL2RenderingContext,

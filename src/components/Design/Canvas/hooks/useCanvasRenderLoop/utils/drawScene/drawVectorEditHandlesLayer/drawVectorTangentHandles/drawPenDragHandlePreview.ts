@@ -10,21 +10,21 @@ export const drawPenDragHandlePreview = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   node: TVectorNode,
-  penActiveVertexId: string | null,
+  dragOriginVertexId: string | null,
   penDraggedHandlePosition: TPoint | null,
   dotSize: number,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  const activeVertex = penActiveVertexId ? node.vertices[penActiveVertexId] : null;
+  const dragOriginVertex = dragOriginVertexId ? node.vertices[dragOriginVertexId] : null;
 
-  if (activeVertex && penDraggedHandlePosition) {
+  if (dragOriginVertex && penDraggedHandlePosition) {
     drawTangentHandle(
       gl,
       program,
       buffer,
-      activeVertex,
+      dragOriginVertex,
       penDraggedHandlePosition,
       dotSize,
       false,

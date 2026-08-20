@@ -3,6 +3,7 @@ import { RefObject } from 'react';
 // types
 import { TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
 import { TDraftEntity, TVectorTangent } from 'types/design/types';
+import { TPenDragOrigin } from 'components/Design/Canvas/hooks/useDrawPenTool/types';
 import { TRotateDragState } from 'types/design/selectionTool/types';
 
 export type TCornerRadiusDragState = {
@@ -85,6 +86,7 @@ export type TCanvasRefs = {
   hoveredVectorVertexIdRef: RefObject<string | null>;
   hoverRef: RefObject<string | null>;
   marqueeRef: RefObject<TDraftRect | null>;
+  penDragOriginRef: RefObject<TPenDragOrigin | null>;
   penDraggedHandlePositionRef: RefObject<TPoint | null>;
   penHoveredDragArmableVertexRef: RefObject<boolean>;
   penNewVertexPreviewRef: RefObject<TPoint | null>;
