@@ -102,11 +102,12 @@ describe('updateVectorPenPreview', () => {
       penHoveredDragArmableVertexRef,
     );
 
-    // result — closing onto a *different* vertex mid-fragment, not drag-armable (that click ends the fragment)
+    // result — closing onto a *different* vertex mid-fragment is drag-armable too: a click-drag there
+    // shapes the closing segment's own tangentEnd (closeLoopOntoVertex.ts)
     expect(penPreviewRef.current).toMatchObject({ to: { id: 'v2', x: 100, y: 0 } });
     expect(hoverKind).toBe('vertex');
     expect(hoveredSegmentIdRef.current).toBeNull();
-    expect(penHoveredDragArmableVertexRef.current).toBe(false);
+    expect(penHoveredDragArmableVertexRef.current).toBe(true);
   });
 
   it('should attract the rubber-band preview endpoint onto a hovered segment and report it as hovered, closing-onto-an-edge style', () => {

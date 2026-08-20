@@ -32,7 +32,7 @@ export const updateVectorPenPreview = (
       if (result) {
         penPreviewRef.current = { from: activeVertex, tangentFromOffset, to: result.point };
         hoveredSegmentIdRef.current = result.segmentId;
-        penHoveredDragArmableVertexRef.current = result.hoverKind === 'active-vertex';
+        penHoveredDragArmableVertexRef.current = result.hoverKind === 'active-vertex' || result.hoverKind === 'vertex';
 
         return result.hoverKind;
       }

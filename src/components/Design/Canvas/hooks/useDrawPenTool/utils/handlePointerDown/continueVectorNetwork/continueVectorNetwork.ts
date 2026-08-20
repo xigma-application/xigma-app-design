@@ -46,7 +46,18 @@ export const continueVectorNetwork = (
     const segmentId = nanoid();
 
     if (hover) {
-      closeLoopOntoVertex(node, activeVertexId, hover.vertexId, segmentId, tangentStart, dispatch, pendingOutgoingTangentRef);
+      closeLoopOntoVertex(
+        point,
+        node,
+        activeVertexId,
+        hover.vertexId,
+        segmentId,
+        tangentStart,
+        dispatch,
+        dragOriginRef,
+        dragStartRef,
+        pendingOutgoingTangentRef,
+      );
     } else if (edgeHit) {
       closeLoopOntoEdge(node, activeVertexId, edgeHit.segmentId, edgeHit.t, segmentId, tangentStart, dispatch, pendingOutgoingTangentRef);
     } else {

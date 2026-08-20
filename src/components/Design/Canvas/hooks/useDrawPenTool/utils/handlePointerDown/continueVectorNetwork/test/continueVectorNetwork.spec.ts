@@ -70,7 +70,7 @@ describe('continueVectorNetwork', () => {
     store.dispatch(setPenActiveVertexId(null));
   });
 
-  it('should close the loop onto an existing vertex when clicking near it, clearing penActiveVertexId', () => {
+  it('should close the loop onto an existing vertex when clicking near it, clearing penActiveVertexId and arming a drag on the closing segment', () => {
     // mock
     const nodeId = addVectorNode();
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
@@ -98,6 +98,8 @@ describe('continueVectorNetwork', () => {
     expect(Object.keys(updatedNode.vertices)).toEqual(['v1', 'v2']);
     expect(store.getState().design.penActiveVertexId).toBeNull();
     expect(pendingOutgoingTangentRef.current).toBeNull();
+    expect(dragOriginRef.current).toEqual({ nodeId, segmentId: segment.id, vertexId: 'v2' });
+    expect(dragStartRef.current).toEqual({ x: 100, y: 100 });
   });
 
   it('should arm the drag on the active vertex itself, without adding any vertex/segment, when clicking exactly on it', () => {

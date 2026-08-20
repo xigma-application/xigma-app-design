@@ -865,8 +865,10 @@ in this pipeline already follows. Fixed by adding `resolveActiveVertexHover.ts`
 `node.vertices[excludeVertexId]` and returns a new, distinct `hoverKind: 'active-vertex'` (added to
 `TPenPointHoverKind`, mapped to the same `'pen-snap'` cursor class as plain `'vertex'`). This let
 `updateVectorPenPreview.ts` shrink back down to a plain resolver loop with no special-cased branch —
-`penHoveredDragArmableVertexRef.current = result.hoverKind === 'active-vertex'` is now the *only* extra
-line needed, derived straight from the resolver's own output instead of re-testing distance separately.
+`penHoveredDragArmableVertexRef.current = result.hoverKind === 'active-vertex' || result.hoverKind ===
+'vertex'` is now the *only* extra line needed, derived straight from the resolver's own output instead of
+re-testing distance separately (the plain `'vertex'` half of that check is explained in §17 below — it
+wasn't drag-armable yet at the time this section first landed).
 `updateNewVertexPreview.ts` (the idle/resuming-vertex case, §15) needed no equivalent resolver — every
 vertex match there (`hoverKind === 'vertex'`, `resolveVertexPointHover` with no `excludeVertexId` at all)
 is already drag-armable by construction, so its existing `result.hoverKind === 'vertex'` check was already
@@ -877,6 +879,43 @@ and `continueVectorNetwork.ts`'s own pointerdown arm-check (§15) — deliberate
 through the resolver pipeline, since arming a drag at `pointerdown` and previewing a hover before any click
 happens are different concerns (one needs a plain boolean, the other needs the full resolver
 point/segmentId/hoverKind shape); only the *hover preview* half needed to join the resolver chain.
+
+## 17. Closing onto an existing vertex is drag-armable too — the cross now covers every clickable point
+
+Asked for directly as a follow-up once §16's cross landed: "it'd be worth having it also when we're
+drawing segments and instead of placing a new point B we click on a point that already exists" — i.e. the
+*closing* case, `continueVectorNetwork.ts`'s `hover` branch (mid-fragment, hovering a *different* existing
+vertex than the active one). Confirmed the recommended scope directly when asked: not just the cross, but
+real click-drag-to-shape-tangent behavior backing it, so the cross keeps meaning one consistent thing
+("drag here to shape a tangent") everywhere it appears, rather than being a plain click-target hint in this
+one spot and a drag-affordance everywhere else.
+
+**`closeLoopOntoVertex.ts` now arms the drag** exactly like every other commit-a-segment site
+(`extendWithNewVertex.ts`, §15's active-vertex/resumed-vertex cases): once the closing segment is
+created, `dragOriginRef.current = { nodeId: node.id, segmentId, vertexId: targetVertexId }` /
+`dragStartRef.current = point`, so a click-drag onto the target (not just a plain click) shapes that
+closing segment's own `tangentEnd` via the same unmodified `updateVectorHandleDrag.ts` mirror-into-
+`dragOrigin.segmentId` mechanism every other drag-armed site already uses — no new drag machinery, just a
+new call site. Two things had to move to make this safe:
+
+- **The inline `dispatch(endHistoryGesture())` was removed**, same reasoning as §15's `startVectorFragment.ts`
+  fix — closing used to be guaranteed to need no further mutation, so ending the gesture immediately was
+  harmless; now a drag can genuinely mutate the segment's tangent after the click, so the gesture must stay
+  open across it, closing naturally on the unconditional `endHistoryGesture()` in `handlePointerUp.ts`/
+  `handlePointerCancel.ts` instead.
+- **The already-connected duplicate-segment guard (`isAlreadyConnected`) now also skips arming the drag**,
+  not just skips creating the segment — if `A`/`B` are already directly connected, closing is a no-op
+  beyond clearing `penActiveVertexId`, and there's no real segment id left to mirror a drag into (arming one
+  anyway would silently mutate a stale/wrong segment on the next `updateVectorHandleDrag` call).
+
+**The hover-preview side needed one line, not a new resolver**: `updateVectorPenPreview.ts`'s
+`penHoveredDragArmableVertexRef.current` check (§16) grew from `hoverKind === 'active-vertex'` to
+`hoverKind === 'active-vertex' || hoverKind === 'vertex'` — no third resolver or hover kind needed, because
+mid-fragment (`resolveVertexPointHover` called with `excludeVertexId` set), a plain `'vertex'` match can
+*only* ever mean "an existing vertex other than the active one" (the active one is claimed by
+`resolveActiveVertexHover` first, §16) — which is now unconditionally the closing case, and now
+unconditionally drag-armable. No ambiguity to resolve at the hover layer at all; the resolver's existing
+output already disambiguates it for free.
 
 ## Related
 

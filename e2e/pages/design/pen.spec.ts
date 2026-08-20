@@ -563,3 +563,31 @@ test('click-dragging directly on a resumed (non-active) vertex shapes its outgoi
 
   expect(curved.equals(straight)).toBe(false);
 });
+
+test('click-dragging onto an existing vertex to close the loop shapes the closing segment’s tangent, instead of only ever closing it straight', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-pen-drag-close-loop-tangent');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300); // v1
+  await designPage.click(850, 300); // v2
+  await designPage.dragVectorPoint(700, 450, 650, 500); // v3, dragged out
+  await designPage.dragVectorPoint(700, 300, 650, 250); // close back onto v1 — a drag, not a plain click
+  const curvedClose = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-pen-drag-close-loop-tangent-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300);
+  await designPage.click(850, 300);
+  await designPage.dragVectorPoint(700, 450, 650, 500);
+  await designPage.click(700, 300); // close with a plain click — no tangent on the closing segment
+  const straightClose = await designPage.canvas.screenshot();
+
+  expect(curvedClose.equals(straightClose)).toBe(false);
+});

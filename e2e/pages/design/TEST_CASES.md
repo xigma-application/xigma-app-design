@@ -1501,6 +1501,7 @@ Two gotchas the specs below work around, worth knowing before adding more:
 | 191 | Splitting a curved edge preserves the original curve's shape on both sides — proper De Casteljau subdivision, no kink at the new point          |  ✅  | ✅ `vector-edit.spec.ts` |
 | 192 | Click-dragging directly on the active vertex (a separate gesture, not while placing it) shapes the tangent for the next segment                 |  ✅  |     ✅ `pen.spec.ts`     |
 | 193 | Click-dragging directly on a resumed (non-active) vertex after Escape shapes its outgoing tangent the same way                                  |  ✅  |     ✅ `pen.spec.ts`     |
+| 194 | Click-dragging onto an existing vertex to close the loop shapes the closing segment's tangent, instead of only ever closing it straight         |  ✅  |     ✅ `pen.spec.ts`     |
 
 ## Why so few scenarios get e2e coverage
 

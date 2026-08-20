@@ -6,12 +6,15 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TPendingOutgoingTangent } from '../../../../types';
+import { TPenDragOrigin, TPendingOutgoingTangent } from '../../../../types';
+import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
 // utils
 import { closeLoopOntoVertex } from '../closeLoopOntoVertex';
 
+const createDragOriginRef = (): RefObject<TPenDragOrigin | null> => ({ current: null });
+const createDragStartRef = (): RefObject<TPoint | null> => ({ current: null });
 const createPendingOutgoingTangentRef = (value: TPendingOutgoingTangent | null = null): RefObject<TPendingOutgoingTangent | null> => ({
   current: value,
 });
@@ -44,14 +47,28 @@ describe('closeLoopOntoVertex', () => {
     store.dispatch(setPenActiveVertexId('v1'));
   });
 
-  it('should connect the active vertex to the target vertex, clear the active vertex, and end the history gesture', () => {
-    // mock
+  it('should connect the active vertex to the target vertex, clear the active vertex, and arm a drag on the closing segment', () => {
+    // mock — arming the drag lets a click-drag onto the target vertex also shape the closing segment's
+    // tangentEnd, instead of only ever committing a straight closing segment
     const nodeId = addVectorNode();
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const dragOriginRef = createDragOriginRef();
+    const dragStartRef = createDragStartRef();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef({ tangent: { x: 1, y: 1 }, vertexId: 'v1' });
 
     // before
-    closeLoopOntoVertex(node, 'v1', 'v2', 'segment-1', null, store.dispatch, pendingOutgoingTangentRef);
+    closeLoopOntoVertex(
+      { x: 100, y: 100 },
+      node,
+      'v1',
+      'v2',
+      'segment-1',
+      null,
+      store.dispatch,
+      dragOriginRef,
+      dragStartRef,
+      pendingOutgoingTangentRef,
+    );
 
     // result
     const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
@@ -59,6 +76,8 @@ describe('closeLoopOntoVertex', () => {
     expect(updatedNode.segments['segment-1']).toMatchObject({ endId: 'v2', startId: 'v1', tangentStart: null });
     expect(store.getState().design.penActiveVertexId).toBeNull();
     expect(pendingOutgoingTangentRef.current).toBeNull();
+    expect(dragOriginRef.current).toEqual({ nodeId, segmentId: 'segment-1', vertexId: 'v2' });
+    expect(dragStartRef.current).toEqual({ x: 100, y: 100 });
   });
 
   it('should carry the given tangentStart onto the closing segment', () => {
@@ -67,7 +86,18 @@ describe('closeLoopOntoVertex', () => {
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
 
     // before
-    closeLoopOntoVertex(node, 'v1', 'v2', 'segment-1', { x: 5, y: 5 }, store.dispatch, createPendingOutgoingTangentRef());
+    closeLoopOntoVertex(
+      { x: 100, y: 100 },
+      node,
+      'v1',
+      'v2',
+      'segment-1',
+      { x: 5, y: 5 },
+      store.dispatch,
+      createDragOriginRef(),
+      createDragStartRef(),
+      createPendingOutgoingTangentRef(),
+    );
 
     // result
     const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
@@ -75,7 +105,7 @@ describe('closeLoopOntoVertex', () => {
     expect(updatedNode.segments['segment-1'].tangentStart).toEqual({ x: 5, y: 5 });
   });
 
-  it('should not create a duplicate segment when the active vertex and target vertex are already directly connected — A -> B -> A must not double the line', () => {
+  it('should not create a duplicate segment or arm a drag when the active vertex and target vertex are already directly connected — A -> B -> A must not double the line', () => {
     // mock — v1 -> v2 already connected by s1, then closing back from v2 onto v1
     const nodeId = addVectorNode();
 
@@ -87,17 +117,30 @@ describe('closeLoopOntoVertex', () => {
     );
 
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const dragOriginRef = createDragOriginRef();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef({ tangent: { x: 1, y: 1 }, vertexId: 'v2' });
 
     // before
-    closeLoopOntoVertex(node, 'v2', 'v1', 'segment-2', null, store.dispatch, pendingOutgoingTangentRef);
+    closeLoopOntoVertex(
+      { x: 0, y: 0 },
+      node,
+      'v2',
+      'v1',
+      'segment-2',
+      null,
+      store.dispatch,
+      dragOriginRef,
+      createDragStartRef(),
+      pendingOutgoingTangentRef,
+    );
 
-    // result — no new segment added, but the gesture still ends like a normal close
+    // result — no new segment added, no segment to arm a drag on either, but the close still finishes
     const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
 
     expect(Object.keys(updatedNode.segments)).toEqual(['s1']);
     expect(store.getState().design.penActiveVertexId).toBeNull();
     expect(pendingOutgoingTangentRef.current).toBeNull();
+    expect(dragOriginRef.current).toBeNull();
   });
 
   it('should not create a duplicate segment when the existing segment runs in the opposite direction', () => {
@@ -114,7 +157,18 @@ describe('closeLoopOntoVertex', () => {
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
 
     // before
-    closeLoopOntoVertex(node, 'v1', 'v2', 'segment-2', null, store.dispatch, createPendingOutgoingTangentRef());
+    closeLoopOntoVertex(
+      { x: 0, y: 0 },
+      node,
+      'v1',
+      'v2',
+      'segment-2',
+      null,
+      store.dispatch,
+      createDragOriginRef(),
+      createDragStartRef(),
+      createPendingOutgoingTangentRef(),
+    );
 
     // result
     const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
@@ -136,7 +190,18 @@ describe('closeLoopOntoVertex', () => {
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
 
     // before
-    closeLoopOntoVertex(node, 'v1', 'v2', 'segment-2', null, store.dispatch, createPendingOutgoingTangentRef());
+    closeLoopOntoVertex(
+      { x: 0, y: 0 },
+      node,
+      'v1',
+      'v2',
+      'segment-2',
+      null,
+      store.dispatch,
+      createDragOriginRef(),
+      createDragStartRef(),
+      createPendingOutgoingTangentRef(),
+    );
 
     // result
     const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
