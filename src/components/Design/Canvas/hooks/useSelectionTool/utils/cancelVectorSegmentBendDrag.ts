@@ -19,16 +19,18 @@ export const cancelVectorSegmentBendDrag = (
   const dragState = vectorSegmentBendDragRef.current;
 
   if (event.key === 'Escape' && dragState) {
-    const node = getVectorEditingNode(store.getState().design.nodes, dragState.nodeId);
+    if (dragState.status === 'committed') {
+      const node = getVectorEditingNode(store.getState().design.nodes, dragState.nodeId);
 
-    if (node) {
-      const segment = node.segments[dragState.segmentId];
-      const segments = {
-        ...node.segments,
-        [dragState.segmentId]: { ...segment, tangentEnd: dragState.originalTangentEnd, tangentStart: dragState.originalTangentStart },
-      };
+      if (node) {
+        const segment = node.segments[dragState.segmentId];
+        const segments = {
+          ...node.segments,
+          [dragState.segmentId]: { ...segment, tangentEnd: dragState.originalTangentEnd, tangentStart: dragState.originalTangentStart },
+        };
 
-      dispatch(updateNode({ changes: { segments }, id: dragState.nodeId }));
+        dispatch(updateNode({ changes: { segments }, id: dragState.nodeId }));
+      }
     }
 
     vectorSegmentBendDragRef.current = null;

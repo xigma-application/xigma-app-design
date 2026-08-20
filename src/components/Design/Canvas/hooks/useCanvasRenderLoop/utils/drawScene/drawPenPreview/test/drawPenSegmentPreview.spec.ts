@@ -55,11 +55,13 @@ describe('drawPenSegmentPreview', () => {
     expect(drawVectorStrokeMock).toHaveBeenCalledTimes(1);
     expect(drawVectorStrokeMock.mock.calls[0][3]).toEqual([
       {
+        endId: 'preview-to',
         points: [
           { x: 0, y: 0 },
           { x: 10, y: 10 },
         ],
         segmentId: 'preview',
+        startId: 'preview-from',
       },
     ]);
 

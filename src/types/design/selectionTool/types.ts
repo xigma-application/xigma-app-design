@@ -8,8 +8,6 @@ export type TPendingClickAction = { id: string; kind: 'collapse' } | { kind: 'de
 
 export type TLineEndpoint = 'a' | 'b';
 
-// full segments (not just tangents) so a group transform can rebuild the whole `segments` record from
-// the origin snapshot alone, with no live store read needed — mirrors the line x1/y1/x2/y2 shape
 export type TVectorNodeOrigin = {
   segments: Record<string, TVectorSegment>;
   vertices: Record<string, TPoint>;
@@ -17,8 +15,6 @@ export type TVectorNodeOrigin = {
 
 export type TNodeOrigin = { x1: number; x2: number; y1: number; y2: number } | { x: number; y: number } | TVectorNodeOrigin;
 
-// resize keeps the node's live rotation (unlike rotate's TVectorNodeOrigin, resize never bakes it away)
-// so a rotated single vector node's opposite corner can be anchored the same way a rotated box is
 export type TVectorResizeOrigin = TVectorNodeOrigin & { rotation: number };
 
 export type TResizeNodeOrigin =
@@ -99,6 +95,15 @@ export type TVectorHandleDragState = {
   vertexId: string;
 };
 
+export type TVectorCornerHandleDragCandidate = { angle: number; end: 'end' | 'start'; segmentId: string };
+
+export type TPendingVectorCornerHandleDragState = {
+  candidates: TVectorCornerHandleDragCandidate[];
+  dragStart: TPoint;
+  nodeId: string;
+  vertexId: string;
+};
+
 export type TVectorPendingClickAction =
   | { id: string; kind: 'vertex' }
   | { end: 'end' | 'start'; kind: 'handle'; segmentId: string }
@@ -117,15 +122,20 @@ export type TVectorMultiDragState = {
 
 export type TVectorMarqueeMode = 'everything' | 'handles' | 'points';
 
-export type TVectorSegmentBendDragState = {
-  dragStart: TPoint;
-  nodeId: string;
-  originalTangentEnd: TPoint | null;
-  originalTangentStart: TPoint | null;
-  segmentId: string;
-  tangentEnd: TPoint;
-  tangentStart: TPoint;
-};
+export type TVectorBendDragCandidate = { angle: number; segmentId: string };
+
+export type TVectorSegmentBendDragState =
+  | { candidates: TVectorBendDragCandidate[]; dragStart: TPoint; nodeId: string; status: 'pending' }
+  | {
+      dragStart: TPoint;
+      nodeId: string;
+      originalTangentEnd: TPoint | null;
+      originalTangentStart: TPoint | null;
+      segmentId: string;
+      status: 'committed';
+      tangentEnd: TPoint;
+      tangentStart: TPoint;
+    };
 
 export type TVectorMultiSelectResizeDragState = {
   anchor: { x: number | null; y: number | null };
@@ -156,6 +166,7 @@ export type TSelectionToolRefs = {
   endpointDragRef: RefObject<TEndpointDragState | null>;
   marqueeStartRef: RefObject<TPoint | null>;
   pathOffsetDragRef: RefObject<TPathOffsetDragState | null>;
+  pendingVectorCornerHandleDragRef: RefObject<TPendingVectorCornerHandleDragState | null>;
   polygonVertexCountDragRef: RefObject<TPolygonVertexCountDragState | null>;
   resizeDragRef: RefObject<TResizeDragState | null>;
   starRatioDragRef: RefObject<TStarRatioDragState | null>;

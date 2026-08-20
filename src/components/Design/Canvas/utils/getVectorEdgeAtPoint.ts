@@ -8,7 +8,7 @@ import { getClosestPointOnLine } from './getClosestPointOnLine';
 import { getSegmentMidpoint } from 'utils/canvas/vectorNetwork/getSegmentMidpoint';
 import { getVectorCurveSegmentCount } from 'utils/canvas/vectorNetwork/getVectorCurveSegmentCount';
 
-type TVectorEdgeMatch = { point: TPoint; segmentId: string; snapped: boolean; t: number };
+export type TVectorEdgeMatch = { point: TPoint; segmentId: string; snapped: boolean; t: number };
 
 const findEdgeMatchOnSegment = (
   point: TPoint,
@@ -55,15 +55,19 @@ const findEdgeMatchOnSegment = (
   return null;
 };
 
+export const getAllVectorEdgeMatchesAtPoint = (
+  point: TPoint,
+  node: TVectorNode,
+  edgeTolerance: number,
+  vertexTolerance: number,
+): TVectorEdgeMatch[] =>
+  Object.values(node.segments)
+    .map((segment) => findEdgeMatchOnSegment(point, segment, node, edgeTolerance, vertexTolerance))
+    .filter((match): match is TVectorEdgeMatch => match !== null);
+
 export const getVectorEdgeAtPoint = (
   point: TPoint,
   node: TVectorNode,
   edgeTolerance: number,
   vertexTolerance: number,
-): TVectorEdgeMatch | null => {
-  const matches = Object.values(node.segments)
-    .map((segment) => findEdgeMatchOnSegment(point, segment, node, edgeTolerance, vertexTolerance))
-    .filter((match): match is TVectorEdgeMatch => match !== null);
-
-  return matches[0] ?? null;
-};
+): TVectorEdgeMatch | null => getAllVectorEdgeMatchesAtPoint(point, node, edgeTolerance, vertexTolerance)[0] ?? null;

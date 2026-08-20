@@ -54,7 +54,7 @@ describe('drawSelectedSegmentsHighlight', () => {
       {},
       {},
       {},
-      [{ points: [node.vertices.v1, node.vertices.v2], segmentId: 's1' }],
+      [{ endId: 'v2', points: [node.vertices.v1, node.vertices.v2], segmentId: 's1', startId: 'v1' }],
       '#0d99ff',
       2,
       200,
@@ -79,8 +79,8 @@ describe('drawSelectedSegmentsHighlight', () => {
     // result
     expect(drawVectorStrokeMock).toHaveBeenCalledTimes(1);
     expect(drawVectorStrokeMock.mock.calls[0][3]).toEqual([
-      { points: [node.vertices.v1, node.vertices.v2], segmentId: 's1' },
-      { points: [node.vertices.v2, node.vertices.v3], segmentId: 's2' },
+      { endId: 'v2', points: [node.vertices.v1, node.vertices.v2], segmentId: 's1', startId: 'v1' },
+      { endId: 'v3', points: [node.vertices.v2, node.vertices.v3], segmentId: 's2', startId: 'v2' },
     ]);
   });
 

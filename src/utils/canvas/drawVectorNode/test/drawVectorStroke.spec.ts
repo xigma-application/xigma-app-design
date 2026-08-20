@@ -42,11 +42,13 @@ describe('drawVectorStroke', () => {
     const buffer = {} as WebGLBuffer;
     const segments = [
       {
+        endId: 'v2',
         points: [
           { x: 0, y: 0 },
           { x: 10, y: 0 },
         ],
         segmentId: 's1',
+        startId: 'v1',
       },
     ];
 
@@ -70,11 +72,13 @@ describe('drawVectorStroke', () => {
     const buffer = {} as WebGLBuffer;
     const segments = [
       {
+        endId: 'v2',
         points: [
           { x: 0, y: 0 },
           { x: 10, y: 0 },
         ],
         segmentId: 's1',
+        startId: 'v1',
       },
     ];
 
@@ -97,11 +101,13 @@ describe('drawVectorStroke', () => {
     const buffer = {} as WebGLBuffer;
     const segments = [
       {
+        endId: 'v2',
         points: [
           { x: 0, y: 0 },
           { x: 10, y: 0 },
         ],
         segmentId: 's1',
+        startId: 'v1',
       },
     ];
 
@@ -121,11 +127,13 @@ describe('drawVectorStroke', () => {
     const buffer = {} as WebGLBuffer;
     const segments = [
       {
+        endId: 'v2',
         points: [
           { x: 5, y: 5 },
           { x: 5, y: 5 },
         ],
         segmentId: 's1',
+        startId: 'v1',
       },
     ];
 

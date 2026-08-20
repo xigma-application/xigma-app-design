@@ -64,7 +64,14 @@ describe('continueVectorMultiDrag', () => {
     const setClassName = vi.fn();
 
     // before
-    continueVectorMultiDrag(canvas, pointerEvent(10, 10), store.dispatch, createVectorMultiDragRef(), createVectorMultiSelectBoxRef(), setClassName);
+    continueVectorMultiDrag(
+      canvas,
+      pointerEvent(10, 10),
+      store.dispatch,
+      createVectorMultiDragRef(),
+      createVectorMultiSelectBoxRef(),
+      setClassName,
+    );
 
     // result
     expect(store.getState().design.nodes).toEqual({});
@@ -86,7 +93,14 @@ describe('continueVectorMultiDrag', () => {
     const setClassName = vi.fn();
 
     // before
-    continueVectorMultiDrag(canvas, pointerEvent(10, 10), store.dispatch, vectorMultiDragRef, createVectorMultiSelectBoxRef(), setClassName);
+    continueVectorMultiDrag(
+      canvas,
+      pointerEvent(10, 10),
+      store.dispatch,
+      vectorMultiDragRef,
+      createVectorMultiSelectBoxRef(),
+      setClassName,
+    );
 
     // result
     expect(store.getState().design.nodes).toEqual({});

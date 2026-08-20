@@ -38,11 +38,15 @@ describe('flattenVectorSegments', () => {
     // result
     expect(flattened).toHaveLength(2);
     expect(flattened[0].segmentId).toBe('s1');
+    expect(flattened[0].startId).toBe('v1');
+    expect(flattened[0].endId).toBe('v2');
     expect(toXY(flattened[0].points)).toEqual([
       { x: 0, y: 0 },
       { x: 10, y: 0 },
     ]);
     expect(flattened[1].segmentId).toBe('s2');
+    expect(flattened[1].startId).toBe('v2');
+    expect(flattened[1].endId).toBe('v3');
     expect(flattened[1].points.length).toBeGreaterThan(2);
     expect(toXY(flattened[1].points)[0]).toEqual({ x: 10, y: 0 });
     expect(toXY(flattened[1].points)[flattened[1].points.length - 1]).toEqual({ x: 10, y: 10 });

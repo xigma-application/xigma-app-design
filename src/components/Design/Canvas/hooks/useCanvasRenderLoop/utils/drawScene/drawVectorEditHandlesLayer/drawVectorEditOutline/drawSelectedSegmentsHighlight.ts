@@ -27,6 +27,7 @@ export const drawSelectedSegmentsHighlight = (
       const end = node.vertices[segment.endId];
 
       return {
+        endId: segment.endId,
         points: flattenSegment(
           start,
           end,
@@ -35,6 +36,7 @@ export const drawSelectedSegmentsHighlight = (
           getVectorCurveSegmentCount(start, end, segment.tangentStart, segment.tangentEnd),
         ),
         segmentId: segment.id,
+        startId: segment.startId,
       };
     });
 

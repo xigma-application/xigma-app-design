@@ -3,7 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TVectorNode, TVectorSegment, TVectorVertex } from 'types/design/types';
 
 // utils
-import { getVectorEdgeAtPoint } from '../getVectorEdgeAtPoint';
+import { getAllVectorEdgeMatchesAtPoint, getVectorEdgeAtPoint } from '../getVectorEdgeAtPoint';
 
 const buildNode = (vertices: Record<string, TVectorVertex>, segments: Record<string, TVectorSegment>): TVectorNode => ({
   fillColor: '#000000',
@@ -106,5 +106,40 @@ describe('getVectorEdgeAtPoint', () => {
 
     // result
     expect(hit).toBeNull();
+  });
+});
+
+describe('getAllVectorEdgeMatchesAtPoint', () => {
+  it('should return every segment whose edge-hit zone reaches the point, not just the first created', () => {
+    // mock — two segments sharing v1, close enough together near it that both flattened polylines fall
+    // within the (generous) edgeTolerance of a point just past the shared vertex
+    const node = buildNode(
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 }, v3: { id: 'v3', x: 0, y: 10 } },
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v1', tangentEnd: null, tangentStart: null },
+      },
+    );
+
+    // action — (3, 3) sits outside both segments' vertexTolerance(1) around v1, but within edgeTolerance(5)
+    // of both flattened lines
+    const matches = getAllVectorEdgeMatchesAtPoint({ x: 3, y: 3 }, node, 5, 1);
+
+    // result
+    expect(matches.map((match) => match.segmentId)).toEqual(['s1', 's2']);
+  });
+
+  it('should return an empty array when no segment is within range', () => {
+    // mock
+    const node = buildNode(
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } },
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+    );
+
+    // action
+    const matches = getAllVectorEdgeMatchesAtPoint({ x: 100, y: 100 }, node, 2, 1);
+
+    // result
+    expect(matches).toEqual([]);
   });
 });

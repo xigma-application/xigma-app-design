@@ -1484,6 +1484,143 @@ is a function of its neighbor's tangent and visibly moves — just via the wrong
 even under the old broken code; the test instead checks the handle landed at the precise
 delta-translated position, which the buggy formula misses by a wide margin).
 
+## 32. §30's Ctrl/Cmd+drag bend picks the wrong segment near a branch point — fixed by deferring the choice to the first drag direction, Figma-style
+
+Reported directly, with a precise repro and the fix's own shape already sketched by the user: draw a
+square with one edge extended past its corner (a "diving board" sticking out past the join of two other
+segments), so three segments meet at one vertex. Starting a Ctrl/Cmd+drag bend (§30) anywhere near that
+vertex always bent the same segment — whichever was `Object.values(node.segments)`'s first entry, i.e.
+whichever was drawn first — regardless of which segment the user actually meant to grab. Figma instead
+picks the segment whose own direction from the vertex is closest to the direction the user's first real
+mouse movement travels in.
+
+Root cause was in `getVectorEdgeAtPoint.ts`: `nearEndpoint` only excludes a segment from matching when the
+point is within `vertexTolerance` of one of *its own* two endpoints — it has no notion of a vertex being
+shared by other segments. In the ring between `vertexTolerance` and `edgeTolerance` around a branch point,
+every incident segment's flattened polyline can fall within `edgeTolerance` of the same click simultaneously,
+and the old `matches[0] ?? null` just took whichever segment happened to iterate first.
+
+Fixed without touching `getVectorEdgeAtPoint.ts` itself — it's shared by 6 call sites (hover, plain segment
+click, two Pen-tool call sites, plus this one), so narrowing its tie-break would have risked all of them.
+Instead, refactored it into `getAllVectorEdgeMatchesAtPoint` (returns every match, in the same iteration
+order as before) with `getVectorEdgeAtPoint` now just `[0] ?? null` on top — so every other caller is
+behaviorally unchanged, verified by `getVectorEdgeAtPoint.spec.ts`'s existing suite passing untouched.
+
+The bend gesture alone now branches on `matches.length`:
+
+- **Exactly one match** (the overwhelmingly common case, and the old down+up-with-no-movement path):
+  commits immediately, unchanged from §30's original behavior.
+- **Zero matches**: no-op, unchanged.
+- **Two or more matches** (the ambiguous branch-point zone): `armVectorBendSegmentOnPointerDown.ts` no
+  longer writes anything to the store on pointerdown. It computes a `TVectorBendDragCandidate` per match
+  (`getVectorBendDragCandidates.ts` — for each candidate, whichever endpoint is nearer the click is the
+  "shared" vertex, and the candidate's `angle` is the direction from that vertex toward the segment's
+  *other* endpoint) and arms `vectorSegmentBendDragRef` in a new `status: 'pending'` state (just
+  `candidates`, `dragStart`, `nodeId` — no tangents, no selection) instead of the old flat shape. Straight
+  geometry only (`end - start`), not tangent-aware — a segment that's already curved meeting straight ones
+  at a shared vertex mid-multi-bend is a deliberately unhandled rare compound case.
+
+  `continueVectorSegmentBendDrag.ts` resolves `'pending'` to `'committed'` the first time the drag clears
+  `MIN_DRAG_DISTANCE_PX` (same threshold §30 already used to gate the offset math, now doing double duty
+  as the "first real direction is known" signal): `pickClosestAngleMatch.ts` (`utils/math/` — generic over
+  any `{ angle: number }` candidate, later reused by §33's corner-handle fix too) picks whichever
+  candidate's `angle` has the smallest angular distance (wrapped correctly across the 0°/360° seam) to
+  `getAngleBetweenPoints(dragStart, point)`, the actual drag direction. This is exactly the sector-bisector
+  partition the user described by hand (the reported example: a "right" segment's own zone would span
+  ±45°/90° depending on its neighbors' angular spacing on each side) — nearest-angle selection is
+  mathematically equivalent to bisector partitioning without having to compute the bisectors explicitly.
+
+  `commitVectorBendSegment.ts` is the single place that does what §30's arm resolver used to do inline
+  (default straight tangents if none exist, mark both endpoints `'symmetric'`, select the segment,
+  dispatch, arm the ref as `'committed'`) — now shared by three call sites instead of duplicated: the
+  unambiguous pointerdown case, the pending-drag resolution above, and `disarmVectorSegmentBendDrag.ts`'s
+  fallback (pointerup with the drag still `'pending'`, i.e. released before any real movement — picks
+  `candidates[0]`, preserving the exact old first-created-wins behavior for that specific case, since
+  there's no direction to disambiguate from yet). Returns the committed state directly rather than
+  requiring callers to re-read it back out of the ref afterward — `continueVectorSegmentBendDrag.ts` uses
+  this to avoid an `Optional`-chained re-read that would've otherwise left an unreachable branch (`bendState
+  == null` right after unconditionally setting it) for 100%-branch coverage to complain about.
+
+  `cancelVectorSegmentBendDrag.ts`'s Escape handler now checks `status` first: a `'committed'` drag reverts
+  tangents exactly as before; a `'pending'` one just clears the ref, since nothing was ever written to
+  revert.
+
+`TVectorSegmentBendDragState` became a discriminated union (`'pending' | 'committed'`) rather than adding
+optional fields to the flat shape, so every reader is forced to handle both cases at the type level instead
+of by convention.
+
+Deliberately unit-only (`TEST_CASES.md` #217, not a new `vector-edit.spec.ts` scenario) — the candidate
+selection is pure deterministic angle math with no rendering or event-timing stake, already asserted
+precisely via `store.getState()` in `armResolvers.spec.ts` (the new pending-arm case) and
+`continueVectorSegmentBendDrag/test/continueVectorSegmentBendDrag.spec.ts` (the angle-based resolution
+itself, plus the below-threshold-stays-pending case), mirroring this doc's own stated rationale for why
+most scenarios in `TEST_CASES.md` skip e2e.
+
+## 33. §9's corner-pull has the exact same first-created-wins bug as §32 — fixed the same way, plus a real-world discovery about coincident vertices
+
+Same class of bug as §32, one gesture over: `getVectorCornerHandleAtPoint.ts` finds the nearest vertex to
+a Ctrl/Cmd click, then `armVectorCornerHandleOnPointerDown.ts` picked which touching segment to pull a
+fresh handle from via `touchingSegments.find(...) ?? touchingSegments[0]` — a tangent-presence preference
+with `Object.values(node.segments)` order (creation order) as the fallback, no notion of drag direction at
+all. Reported with a live repro: a "+" cross (Ctrl+drag from dead center, dragging down bent the *top and
+bottom* segments together regardless of direction; dragging toward the right segment still bent top+bottom,
+never right).
+
+Fixed with the same deferred-resolution shape as §32:
+
+- `armVectorCornerHandleOnPointerDown.ts` branches on `touchingSegments.length` instead of the old
+  find-with-fallback: **one** touching segment commits immediately (unchanged from before); **zero**
+  no-ops (an isolated vertex, e.g. a stray Pen click never connected to anything); **two or more** arms
+  `pendingVectorCornerHandleDragRef` (`status`-free this time — `TVectorHandleDragState` itself stays a
+  flat shape since it's shared with the *other*, already-unambiguous handle-drag entry point in
+  `armVectorHandleOnPointerDown/selectAndArmVectorHandleDrag.ts`, dragging a handle you clicked precisely
+  on — turning it into a union would have forced that unrelated caller to handle a `'pending'` case it can
+  never produce; the pending state lives in its own separate ref instead).
+- `getVectorCornerHandleDragCandidates.ts` builds one `{ angle, end, segmentId }` per touching segment —
+  `end`/`angle` computed structurally from which of the segment's two ids equals the vertex, not by
+  distance, so no ambiguity about which side of the segment is "near" (unlike §32, where the click point
+  could be anywhere along the segment's own length).
+- `resolveVectorCornerHandleDrag.ts` (new — sits in `handlePointerMove.ts` right before the pre-existing
+  `continueVectorHandleDrag.ts`, which was already shared by *both* handle-drag entry points and needed no
+  changes itself) resolves `'pending'` to a live `vectorHandleDragRef` the first time the drag clears
+  `MIN_DRAG_DISTANCE_PX`, via the same `pickClosestAngleMatch.ts` §32 introduced — reused verbatim, not
+  reimplemented, since the angular-distance math is identical.
+- `commitVectorCornerHandleDrag.ts` is the shared write (mark the vertex `'symmetric'`, select only the new
+  handle, arm `vectorHandleDragRef`) — same three-call-site shape as §32's `commitVectorBendSegment.ts`:
+  the unambiguous pointerdown case, the pending-drag resolution above, and `disarmVectorHandleDrag.ts`'s
+  pointerup fallback (`candidates[0]`, for a click released with no movement at all).
+- `getMirroredVectorSegments.ts` (pre-existing, untouched) still only mirrors the dragged handle onto a
+  sibling when the vertex has *exactly one* other touching handle — a true 3+-way branch point never
+  triggers it regardless of which candidate the angle-match picks, so this fix doesn't change §9's
+  mirroring behavior at all, only which segment gets selected in the first place.
+
+**A real-world wrinkle surfaced while verifying the reported cross**, not from picking the wrong segment
+among genuine candidates at one vertex, but from there being *two* vertices at (visually) the same spot:
+the Pen tool only reuses an existing vertex when a click lands within `VECTOR_VERTEX_HIT_RADIUS_PX` of it
+(`startVectorFragment.ts`, `continueVectorNetwork.ts`) — anything further creates an independent one, and
+nothing in the codebase ever merges coincident vertices after the fact. Drawing a horizontal line and then
+a vertical one "by eye" through what looks like the same center point can easily produce two separate,
+overlapping vertices — one touched by only the left/right segments, the other by only top/bottom — rather
+than one shared vertex touched by all four. `getVectorCornerHandleAtPoint`'s nearest-vertex pick, being
+stable-sorted, then always resolves to the same one of the two regardless of click position or drag
+direction, which is exactly what the reported repro showed (always top+bottom, never left/right). A
+grouping fix (treating every vertex within tolerance as one candidate pool, each candidate keyed to
+whichever of the grouped vertex ids it actually touches so `commitVectorCornerHandleDrag`'s later
+`vertexHandleModes`/mirroring still target the real vertex) was prototyped and works, but deliberately
+**not shipped** — confirmed against Figma, which has the same gap (it doesn't merge near-coincident points
+from separately-drawn paths either). Precision of the original draw is what determines whether a crossing
+shape gets one shared vertex or two independent ones; this fix only guarantees correct direction-based
+selection once a real shared vertex exists.
+
+`resolveVectorCornerHandleDrag.ts` and `disarmVectorHandleDrag.ts` both take the whole `selectionRefs`
+object rather than picking out `pendingVectorCornerHandleDragRef`/`vectorHandleDragRef` as separate
+positional params — the only two functions in this feature that ever need two different selection refs at
+once, so passing the container instead of an ever-growing positional list was the more legible call.
+
+Deliberately unit-only (`TEST_CASES.md` #218), for the same reason as §32: pure angle math, no
+rendering/timing stake, already precisely asserted via `store.getState()` in `armResolvers.spec.ts`,
+`resolveVectorCornerHandleDrag.spec.ts`, and `disarmVectorHandleDrag.spec.ts`.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

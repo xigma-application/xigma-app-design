@@ -2,34 +2,12 @@
 import { TPoint } from 'types/canvas';
 
 // utils
+import { getPolylineJoinVertices } from './getPolylineJoinVertices';
+import { getPolylineSegmentOffset } from './getPolylineSegmentOffset';
 import { getQuadVertices } from '../getQuadVertices';
 
-const getSegmentOffset = (from: TPoint, to: TPoint, halfWidth: number): TPoint | null => {
-  const dx = to.x - from.x;
-  const dy = to.y - from.y;
-  const length = Math.hypot(dx, dy);
-
-  if (length === 0) {
-    return null;
-  }
-
-  return { x: (-dy / length) * halfWidth, y: (dx / length) * halfWidth };
-};
-
-const getJoinVertices = (point: TPoint, previousOffset: TPoint, nextOffset: TPoint): number[] =>
-  getQuadVertices(
-    point.x + previousOffset.x,
-    point.y + previousOffset.y,
-    point.x + nextOffset.x,
-    point.y + nextOffset.y,
-    point.x - nextOffset.x,
-    point.y - nextOffset.y,
-    point.x - previousOffset.x,
-    point.y - previousOffset.y,
-  );
-
 export const getThickPolylineVertices = (points: TPoint[], halfWidth: number): number[] => {
-  const offsets = points.slice(0, -1).map((point, index) => getSegmentOffset(point, points[index + 1], halfWidth));
+  const offsets = points.slice(0, -1).map((point, index) => getPolylineSegmentOffset(point, points[index + 1], halfWidth));
 
   const segmentVertices = offsets.flatMap((offset, index) => {
     if (!offset) {
@@ -58,7 +36,7 @@ export const getThickPolylineVertices = (points: TPoint[], halfWidth: number): n
       return [];
     }
 
-    return getJoinVertices(points[index + 1], previousOffset, nextOffset);
+    return getPolylineJoinVertices(points[index + 1], previousOffset, nextOffset, halfWidth);
   });
 
   return [...segmentVertices, ...joinVertices];

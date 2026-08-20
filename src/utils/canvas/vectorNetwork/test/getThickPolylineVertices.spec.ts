@@ -32,11 +32,10 @@ describe('getThickPolylineVertices', () => {
     expect(vertices).toHaveLength(36);
   });
 
-  it('should fill the join wedge at an interior vertex with a quad spanning both segments’ offset directions', () => {
-    // before — same right-angle turn as above: segment 1 (0,0)->(10,0) offsets by (0,1)/(0,-1),
-    // segment 2 (10,0)->(10,10) offsets by (-1,0)/(1,0); the join quad at (10,0) connects
-    // (10,0)+(0,1), (10,0)+(-1,0), (10,0)-(-1,0), (10,0)-(0,1) — this is what actually plugs the
-    // triangular notch a naive per-segment-only quad list leaves open on a curved/angled polyline
+  it('should fill the join wedge at an interior vertex with a sharp miter, not a flat bevel cut', () => {
+    // before — same right-angle turn as above: segment 1 (0,0)->(10,0), segment 2 (10,0)->(10,10);
+    // the outer edges of both segments extend to meet at (11,-1) — a proper sharp square corner,
+    // exactly like Figma renders one, instead of a visibly flat-cut corner
     const vertices = getThickPolylineVertices(
       [
         { x: 0, y: 0 },
@@ -47,7 +46,10 @@ describe('getThickPolylineVertices', () => {
     );
 
     // result — the last 12 numbers (the join quad) are appended after both segment quads
-    expect(vertices.slice(-12)).toEqual([10, 1, 9, 0, 11, 0, 10, 1, 11, 0, 10, -1]);
+    const join = vertices.slice(-12);
+    const expected = [10, 0, 10, -1, 11, -1, 10, 0, 11, -1, 11, 0];
+
+    join.forEach((value, index) => expect(value).toBeCloseTo(expected[index]));
   });
 
   it('should skip a zero-length segment pair (two identical consecutive points) and contribute nothing for it, including no join around it', () => {

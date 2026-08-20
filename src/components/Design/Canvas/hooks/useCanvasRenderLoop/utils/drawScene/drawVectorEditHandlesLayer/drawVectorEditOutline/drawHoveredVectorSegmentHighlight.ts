@@ -36,7 +36,7 @@ export const drawHoveredVectorSegmentHighlight = (
       gl,
       program,
       buffer,
-      [{ points, segmentId: hoveredSegment.id }],
+      [{ endId: hoveredSegment.endId, points, segmentId: hoveredSegment.id, startId: hoveredSegment.startId }],
       VECTOR_HANDLE_FILL,
       HOVER_OUTLINE_WIDTH / viewport.zoom,
       canvasWidth,

@@ -54,11 +54,11 @@ export const handlePointerUp = (
   disarmEllipseArcRatioDrag(canvas, event, canvasRefs.ellipseArcRatioDragRef);
   disarmMarqueeDrag(canvas, event, selectionRefs.marqueeStartRef, canvasRefs.marqueeRef);
   disarmVectorVertexDrag(canvas, event, selectionRefs.vectorVertexDragRef, setClassName);
-  disarmVectorHandleDrag(canvas, event, selectionRefs.vectorHandleDragRef, setClassName);
+  disarmVectorHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   disarmVectorMultiDrag(canvas, event, dispatch, canvasRefs, selectionRefs.vectorMultiDragRef, setClassName);
   disarmVectorMultiSelectResizeDrag(canvas, event, canvasRefs.vectorMultiSelectResizeDragRef, canvasRefs.vectorMultiSelectBoxRef);
   disarmVectorMultiSelectRotateDrag(canvas, event, canvasRefs.vectorMultiSelectRotateDragRef, canvasRefs.vectorMultiSelectBoxRef);
-  disarmVectorSegmentBendDrag(canvas, event, selectionRefs.vectorSegmentBendDragRef, setClassName);
+  disarmVectorSegmentBendDrag(canvas, event, dispatch, canvasRefs, selectionRefs.vectorSegmentBendDragRef, setClassName);
   disarmVectorMarqueeDrag(canvas, event, canvasRefs, selectionRefs.vectorMarqueeStartRef, selectionRefs.vectorMarqueeModeRef);
   dispatch(endHistoryGesture());
 };

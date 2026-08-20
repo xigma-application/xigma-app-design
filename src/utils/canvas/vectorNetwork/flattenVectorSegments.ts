@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { flattenSegment } from './flattenSegment';
 import { getVectorCurveSegmentCount } from './getVectorCurveSegmentCount';
 
-export type TFlattenedVectorSegment = { points: TPoint[]; segmentId: string };
+export type TFlattenedVectorSegment = { endId: string; points: TPoint[]; segmentId: string; startId: string };
 
 const cache = new WeakMap<TVectorNode, TFlattenedVectorSegment[]>();
 
@@ -22,6 +22,7 @@ export const flattenVectorSegments = (node: TVectorNode): TFlattenedVectorSegmen
     const end = node.vertices[segment.endId];
 
     return {
+      endId: segment.endId,
       points: flattenSegment(
         start,
         end,
@@ -30,6 +31,7 @@ export const flattenVectorSegments = (node: TVectorNode): TFlattenedVectorSegmen
         getVectorCurveSegmentCount(start, end, segment.tangentStart, segment.tangentEnd),
       ),
       segmentId: segment.id,
+      startId: segment.startId,
     };
   });
 

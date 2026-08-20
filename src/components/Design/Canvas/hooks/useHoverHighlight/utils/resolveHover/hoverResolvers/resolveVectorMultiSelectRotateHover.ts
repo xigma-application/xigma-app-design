@@ -11,7 +11,10 @@ export const resolveVectorMultiSelectRotateHover = ({
   vectorMultiSelectBox,
   viewport,
 }: THoverResolverContext): THoverResult | undefined => {
-  if (vectorMultiSelectBox && isInVectorMultiSelectRotateRing(point, vectorMultiSelectBox.bounds, viewport, vectorMultiSelectBox.rotation)) {
+  if (
+    vectorMultiSelectBox &&
+    isInVectorMultiSelectRotateRing(point, vectorMultiSelectBox.bounds, viewport, vectorMultiSelectBox.rotation)
+  ) {
     return {
       className: null,
       cursor: getRotatedRotateCursorUrl(getRotateCursorAngle(point, vectorMultiSelectBox.bounds, vectorMultiSelectBox.rotation)) ?? '',

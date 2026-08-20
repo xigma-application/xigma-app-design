@@ -39,7 +39,7 @@ export const drawPenSegmentPreview = (
       gl,
       program,
       buffer,
-      [{ points, segmentId: 'preview' }],
+      [{ endId: 'preview-to', points, segmentId: 'preview', startId: 'preview-from' }],
       DRAFT_FRAME_STROKE,
       VECTOR_STROKE_WIDTH / viewport.zoom,
       canvasWidth,

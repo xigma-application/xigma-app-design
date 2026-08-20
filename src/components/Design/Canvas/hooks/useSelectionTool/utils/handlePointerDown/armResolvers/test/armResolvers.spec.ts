@@ -1033,6 +1033,69 @@ describe('armVectorCornerHandleOnPointerDown', () => {
     expect(armVectorCornerHandleOnPointerDown(ctx)).toBeUndefined();
     expect(ctx.selectionRefs.vectorHandleDragRef.current).toBeNull();
   });
+
+  it('should treat the hit vertex as the segment’s end when it’s the endId rather than the startId', () => {
+    // mock — v1 is the endId of its one connected segment, not the startId
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v1', id: 's1', startId: 'v2', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 2, y: 0 } });
+
+    // result
+    expect(armVectorCornerHandleOnPointerDown(ctx)).toBe(true);
+    expect(ctx.selectionRefs.vectorHandleDragRef.current).toEqual({ end: 'end', nodeId, segmentId: 's1', vertexId: 'v1' });
+  });
+
+  it('should return undefined when the hit vertex has no connected segment', () => {
+    // mock — an isolated vertex, e.g. left behind by a Pen-tool click that was never connected
+    const nodeId = addVectorNode({}, { v1: { id: 'v1', x: 0, y: 0 } });
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 0, y: 0 } });
+
+    // result
+    expect(armVectorCornerHandleOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.selectionRefs.vectorHandleDragRef.current).toBeNull();
+    expect(ctx.selectionRefs.pendingVectorCornerHandleDragRef.current).toBeNull();
+  });
+
+  it('should arm a pending ambiguous corner-handle drag, writing nothing to the store yet, when 2+ segments touch the hit vertex', () => {
+    // mock — v1 is shared by s1 (toward v2, "right") and s2 (toward v3, "down")
+    const nodeId = addVectorNode(
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v1', tangentEnd: null, tangentStart: null },
+      },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 0, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 0, y: 0 } });
+
+    // result
+    expect(armVectorCornerHandleOnPointerDown(ctx)).toBe(true);
+    expect(ctx.dispatch).not.toHaveBeenCalled();
+    expect(ctx.selectionRefs.vectorHandleDragRef.current).toBeNull();
+    expect(ctx.selectionRefs.pendingVectorCornerHandleDragRef.current).toEqual({
+      candidates: [
+        { angle: 0, end: 'start', segmentId: 's1' },
+        { angle: 90, end: 'start', segmentId: 's2' },
+      ],
+      dragStart: { x: 0, y: 0 },
+      nodeId,
+      vertexId: 'v1',
+    });
+    expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
+  });
 });
 
 describe('armVectorBendSegmentOnPointerDown', () => {
@@ -1077,6 +1140,7 @@ describe('armVectorBendSegmentOnPointerDown', () => {
       originalTangentEnd: null,
       originalTangentStart: null,
       segmentId: 's1',
+      status: 'committed',
       tangentEnd: { x: -100 / 3, y: 0 },
       tangentStart: { x: 100 / 3, y: 0 },
     });
@@ -1164,6 +1228,37 @@ describe('armVectorBendSegmentOnPointerDown', () => {
     // result
     expect(armVectorBendSegmentOnPointerDown(ctx)).toBeUndefined();
     expect(ctx.selectionRefs.vectorSegmentBendDragRef.current).toBeNull();
+  });
+
+  it('should arm a pending ambiguous bend, writing nothing to the store yet, when the click lands where two segments both come within the edge-hit tolerance of a shared vertex', () => {
+    // mock — v1 is shared by s1 (toward v2, "right") and s2 (toward v3, "down"); clicking at (5,5) is just
+    // past the 6px vertex-hit radius around v1, but still within the 6px edge-hit tolerance of both
+    const nodeId = addVectorNode(
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v1', tangentEnd: null, tangentStart: null },
+      },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 0, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 5, y: 5 } });
+
+    // result
+    expect(armVectorBendSegmentOnPointerDown(ctx)).toBe(true);
+    expect(ctx.dispatch).not.toHaveBeenCalled();
+    expect(ctx.selectionRefs.vectorSegmentBendDragRef.current).toEqual({
+      candidates: [
+        { angle: 0, segmentId: 's1' },
+        { angle: 90, segmentId: 's2' },
+      ],
+      dragStart: { x: 5, y: 5 },
+      nodeId,
+      status: 'pending',
+    });
+    expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
   });
 });
 

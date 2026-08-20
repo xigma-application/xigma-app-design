@@ -6,6 +6,7 @@ export const createSelectionToolRefs = (overrides: Partial<TSelectionToolRefs> =
   endpointDragRef: { current: null },
   marqueeStartRef: { current: null },
   pathOffsetDragRef: { current: null },
+  pendingVectorCornerHandleDragRef: { current: null },
   polygonVertexCountDragRef: { current: null },
   resizeDragRef: { current: null },
   starRatioDragRef: { current: null },

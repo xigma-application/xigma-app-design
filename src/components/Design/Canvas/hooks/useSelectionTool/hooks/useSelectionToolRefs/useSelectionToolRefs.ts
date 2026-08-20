@@ -5,6 +5,7 @@ import {
   TDragState,
   TEndpointDragState,
   TPathOffsetDragState,
+  TPendingVectorCornerHandleDragState,
   TPolygonVertexCountDragState,
   TResizeDragState,
   TSelectionToolRefs,
@@ -23,6 +24,7 @@ export const useSelectionToolRefs = (): TSelectionToolRefs => {
   const endpointDragRef = useRef<TEndpointDragState | null>(null);
   const marqueeStartRef = useRef<TPoint | null>(null);
   const pathOffsetDragRef = useRef<TPathOffsetDragState | null>(null);
+  const pendingVectorCornerHandleDragRef = useRef<TPendingVectorCornerHandleDragState | null>(null);
   const polygonVertexCountDragRef = useRef<TPolygonVertexCountDragState | null>(null);
   const resizeDragRef = useRef<TResizeDragState | null>(null);
   const starRatioDragRef = useRef<TStarRatioDragState | null>(null);
@@ -41,6 +43,7 @@ export const useSelectionToolRefs = (): TSelectionToolRefs => {
       endpointDragRef,
       marqueeStartRef,
       pathOffsetDragRef,
+      pendingVectorCornerHandleDragRef,
       polygonVertexCountDragRef,
       resizeDragRef,
       starRatioDragRef,

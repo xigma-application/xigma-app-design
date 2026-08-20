@@ -12,6 +12,7 @@ describe('createSelectionToolRefs behaviors', () => {
       endpointDragRef: { current: null },
       marqueeStartRef: { current: null },
       pathOffsetDragRef: { current: null },
+      pendingVectorCornerHandleDragRef: { current: null },
       polygonVertexCountDragRef: { current: null },
       resizeDragRef: { current: null },
       starRatioDragRef: { current: null },

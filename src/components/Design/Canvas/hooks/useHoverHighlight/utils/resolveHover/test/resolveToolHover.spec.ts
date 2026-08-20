@@ -76,7 +76,16 @@ describe('resolveToolHover', () => {
     const setClassName = vi.fn();
 
     // before
-    resolveToolHover(canvas, hoverRef, setClassName, ToolName.default, { x: 0, y: 0 }, IDENTITY_VIEWPORT, store.getState(), createCanvasRefs());
+    resolveToolHover(
+      canvas,
+      hoverRef,
+      setClassName,
+      ToolName.default,
+      { x: 0, y: 0 },
+      IDENTITY_VIEWPORT,
+      store.getState(),
+      createCanvasRefs(),
+    );
 
     // result — resize wins over the plain node-hover fallback: hover clears, no positioning class
     expect(hoverRef.current).toBeNull();
@@ -95,7 +104,16 @@ describe('resolveToolHover', () => {
     const setClassName = vi.fn();
 
     // before
-    resolveToolHover(canvas, hoverRef, setClassName, ToolName.default, { x: 0, y: 0 }, IDENTITY_VIEWPORT, store.getState(), createCanvasRefs());
+    resolveToolHover(
+      canvas,
+      hoverRef,
+      setClassName,
+      ToolName.default,
+      { x: 0, y: 0 },
+      IDENTITY_VIEWPORT,
+      store.getState(),
+      createCanvasRefs(),
+    );
 
     // result — falls through past the (suppressed) resize resolver to plain node hover instead
     expect(hoverRef.current).toBe(idA);
@@ -133,7 +151,16 @@ describe('resolveToolHover', () => {
     const setClassName = vi.fn();
 
     // before
-    resolveToolHover(canvas, hoverRef, setClassName, ToolName.default, { x: 1010, y: 1010 }, IDENTITY_VIEWPORT, store.getState(), createCanvasRefs());
+    resolveToolHover(
+      canvas,
+      hoverRef,
+      setClassName,
+      ToolName.default,
+      { x: 1010, y: 1010 },
+      IDENTITY_VIEWPORT,
+      store.getState(),
+      createCanvasRefs(),
+    );
 
     // result
     expect(hoverRef.current).toBe(idA);
@@ -149,7 +176,16 @@ describe('resolveToolHover', () => {
     const setClassName = vi.fn();
 
     // before
-    resolveToolHover(canvas, hoverRef, setClassName, ToolName.default, { x: 9000, y: 9000 }, IDENTITY_VIEWPORT, store.getState(), createCanvasRefs());
+    resolveToolHover(
+      canvas,
+      hoverRef,
+      setClassName,
+      ToolName.default,
+      { x: 9000, y: 9000 },
+      IDENTITY_VIEWPORT,
+      store.getState(),
+      createCanvasRefs(),
+    );
 
     // result
     expect(hoverRef.current).toBeNull();

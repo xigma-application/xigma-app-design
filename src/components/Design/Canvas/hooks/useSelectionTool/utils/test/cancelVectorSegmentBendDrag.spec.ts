@@ -53,6 +53,7 @@ describe('cancelVectorSegmentBendDrag', () => {
       originalTangentEnd: null,
       originalTangentStart: null,
       segmentId: 's1',
+      status: 'committed',
       tangentEnd: { x: 20, y: 40 },
       tangentStart: { x: 60, y: 40 },
     });
@@ -89,6 +90,7 @@ describe('cancelVectorSegmentBendDrag', () => {
       originalTangentEnd: { x: 20, y: 40 },
       originalTangentStart: { x: 60, y: 40 },
       segmentId: 's1',
+      status: 'committed',
       tangentEnd: { x: 200, y: 400 },
       tangentStart: { x: 600, y: 400 },
     });
@@ -118,6 +120,7 @@ describe('cancelVectorSegmentBendDrag', () => {
       originalTangentEnd: null,
       originalTangentStart: null,
       segmentId: 's1',
+      status: 'committed',
       tangentEnd: { x: 200, y: 400 },
       tangentStart: { x: 600, y: 400 },
     });
@@ -141,8 +144,29 @@ describe('cancelVectorSegmentBendDrag', () => {
       originalTangentEnd: null,
       originalTangentStart: null,
       segmentId: 's1',
+      status: 'committed',
       tangentEnd: { x: 200, y: 400 },
       tangentStart: { x: 600, y: 400 },
+    });
+    const setClassName = vi.fn();
+    const dispatch = vi.fn();
+
+    // before
+    cancelVectorSegmentBendDrag(keyDownEvent('Escape'), dispatch, dragRef, setClassName);
+
+    // result
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(dragRef.current).toBeNull();
+    expect(setClassName).toHaveBeenCalledWith(null);
+  });
+
+  it('should just clear the drag ref on Escape for a pending ambiguous drag, without writing anything to the store', () => {
+    // mock — no segment has been chosen yet, so there is nothing to revert
+    const dragRef = createVectorSegmentBendDragRef({
+      candidates: [{ angle: 0, segmentId: 's1' }],
+      dragStart: { x: 0, y: 0 },
+      nodeId: 'path-1',
+      status: 'pending',
     });
     const setClassName = vi.fn();
     const dispatch = vi.fn();

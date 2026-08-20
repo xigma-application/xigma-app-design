@@ -379,9 +379,9 @@ describe('resolveVectorMultiSelectResizeHover', () => {
 
   it('should return a hover result with the rotated resize cursor when a resize handle was hit', () => {
     // result
-    expect(resolveVectorMultiSelectResizeHover(createContext({ vectorMultiSelectBox: box, vectorMultiSelectResizeHandle: 'se' }))).toMatchObject(
-      { className: null, nodeId: null },
-    );
+    expect(
+      resolveVectorMultiSelectResizeHover(createContext({ vectorMultiSelectBox: box, vectorMultiSelectResizeHandle: 'se' })),
+    ).toMatchObject({ className: null, nodeId: null });
   });
 
   it('should return undefined when no resize handle was hit', () => {

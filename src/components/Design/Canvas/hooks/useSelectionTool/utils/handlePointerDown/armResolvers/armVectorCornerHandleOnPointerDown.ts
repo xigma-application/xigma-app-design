@@ -3,15 +3,15 @@ import { VECTOR_VERTEX_HIT_RADIUS_PX } from 'constant/canvas';
 
 // store
 import { selectVectorEditingNodeId } from 'store/design/selectors';
-import { updateNode } from 'store/design/slice';
 import { store } from 'store';
 
 // types
 import { TArmContext } from '../types';
 
 // utils
-import { armVectorHandleDrag } from '../armVectorHandleDrag';
+import { commitVectorCornerHandleDrag } from '../../../../../utils/commitVectorCornerHandleDrag';
 import { getVectorCornerHandleAtPoint } from '../../../../../utils/getVectorCornerHandleAtPoint';
+import { getVectorCornerHandleDragCandidates } from '../../../../../utils/getVectorCornerHandleDragCandidates';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
 
 export const armVectorCornerHandleOnPointerDown = ({
@@ -30,13 +30,37 @@ export const armVectorCornerHandleOnPointerDown = ({
       const hit = getVectorCornerHandleAtPoint(point, node, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
 
       if (hit) {
-        dispatch(updateNode({ changes: { vertexHandleModes: { ...node.vertexHandleModes, [hit.vertexId]: 'symmetric' } }, id: node.id }));
-        canvasRefs.selectedVectorHandlesRef.current = [{ end: hit.end, segmentId: hit.segmentId }];
-        canvasRefs.selectedVectorVertexIdsRef.current = [];
-        canvasRefs.selectedVectorSegmentIdsRef.current = [];
-        armVectorHandleDrag(canvas, event, selectionRefs.vectorHandleDragRef, node.id, hit);
+        const touchingSegments = Object.values(node.segments).filter(
+          (segment) => segment.startId === hit.vertexId || segment.endId === hit.vertexId,
+        );
 
-        return true;
+        if (touchingSegments.length === 1) {
+          const segment = touchingSegments[0];
+
+          commitVectorCornerHandleDrag(
+            node,
+            hit.vertexId,
+            { end: segment.endId === hit.vertexId ? 'end' : 'start', segmentId: segment.id },
+            dispatch,
+            canvasRefs,
+            selectionRefs.vectorHandleDragRef,
+          );
+          canvas.setPointerCapture(event.pointerId);
+
+          return true;
+        }
+
+        if (touchingSegments.length > 1) {
+          selectionRefs.pendingVectorCornerHandleDragRef.current = {
+            candidates: getVectorCornerHandleDragCandidates(touchingSegments, hit.vertexId, node),
+            dragStart: point,
+            nodeId: node.id,
+            vertexId: hit.vertexId,
+          };
+          canvas.setPointerCapture(event.pointerId);
+
+          return true;
+        }
       }
     }
   }
