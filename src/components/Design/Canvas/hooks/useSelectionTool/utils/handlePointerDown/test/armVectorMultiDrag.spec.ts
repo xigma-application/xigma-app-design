@@ -59,6 +59,7 @@ describe('armVectorMultiDrag', () => {
 
     // result
     expect(vectorMultiDragRef.current).toEqual({
+      boxOrigin: null,
       handleOrigins: { 'end:s1': { x: -5, y: 0 }, 'start:s1': { x: 5, y: 0 } },
       hasMoved: false,
       nodeId: 'vector-1',

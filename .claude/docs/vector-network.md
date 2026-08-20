@@ -1396,6 +1396,94 @@ perturbs the curve's flattened-polyline antialiasing regardless of whether the h
 bent-vs-moved comparison against a non-Ctrl drag on the same point, and a cursor-className comparison
 between hovering the vertex vs. the segment's interior under Ctrl.
 
+## 31. Multi-select box excludes tangent handles entirely — Figma doesn't have a bounding box for them either
+
+Landed as a follow-up correction to the (separately in-progress) vector multi-select resize/rotate box
+feature: the box's eligibility gate was `selectedVertexIds.length + selectedHandles.length > 1`,
+meaning 2+ selected tangent handles (with zero vertices) drew a bounding box and could arm resize/rotate
+drags on them — reported directly as unwanted ("Jak zaznaczamy tangeny to nie powinien się pojawić box.
+To jest zbyt złożona sprawa. Nawet figma tego nie ma" — when we select tangents the box shouldn't
+appear, it's too complex a case, even Figma doesn't have this). Fixed by extracting the shared predicate
+`isVectorMultiSelectBoxEligible.ts` (`Canvas/utils/`) — `selectedHandles.length === 0 &&
+selectedVertexIds.length > 1` — and swapping it in at all six call sites that previously repeated the
+inline arithmetic: `drawVectorMultiSelectBox.ts` (render gate, wraps the resize-drag/rotate-drag/static
+branches alike), `resolveToolHover.ts` (hover-context box computation), and the four pointerdown arm
+resolvers (`armVectorGroupDrag.ts`, `armVectorMultiSelectBoxOnPointerDown.ts`,
+`armVectorMultiSelectResizeOnPointerDown.ts`, `armVectorMultiSelectRotateOnPointerDown.ts`). Any tangent
+handle in the selection now unconditionally kills box eligibility, even mixed with 2+ selected vertices —
+not just a pure-handle selection.
+
+**A real bug surfaced while verifying the "handles should just translate with the mouse, ignoring the
+box" follow-up request** ("One powinny się poruszać zgodnie z ruchem myszki tak jakby ignorując boxa" /
+"Teraz to wygląda jakby były w boxie" — they should move with the mouse as if ignoring the box / now it
+looks like they're in a box — user-observed live, reproduced with a plain multi-select of 2+ tangent
+handles via marquee/shift-click, no bend gesture involved). Root cause: `getVectorMultiSelectOrigins.ts`
+snapshot each selected handle's drag-origin via `handle.end === 'start' ? getEffectiveTangentStart(...) :
+segment.tangentEnd` — the `'end'` branch read the segment's **raw** `tangentEnd` instead of
+`getEffectiveTangentEnd.ts` (§10's render-only preview fallback for a segment that only has a real
+tangent on one side). A selected `'end'` handle whose `tangentEnd` was still `null` (only ever shown as
+a derived preview position, never dragged for real yet) resolved to no origin at all, so
+`continueVectorMultiDrag.ts`'s `translateVectorHandles` — which only iterates the origins it was given —
+silently left that handle frozen in place every frame while any other selected handle/vertex moved by
+the pointer delta as normal. With one point of a 2-handle selection stuck and the other tracking the
+cursor, the drag visually reads exactly like resizing a box from one corner. Fixed by mirroring the
+`'start'` branch: `getEffectiveTangentEnd(node.vertices, segment)` for the `'end'` case, matching the
+established pattern `drawSegmentTangentHandles.ts`/`getVectorHandleAtPoint.ts` already use for both
+sides (§10) — a multi-drag on a preview-only handle now commits it to a real `tangentEnd` on first
+movement, same "drag a preview for real" semantics as the single-handle drag path.
+
+**The exact same raw-`tangentEnd` bug existed a third time**, in `getVectorMultiSelectBounds.ts`
+(`utils/canvas/vectorNetwork/`) — found while writing the e2e regression test for the fix above, where
+a "no box renders" check kept passing even with `isVectorMultiSelectBoxEligible` deliberately reverted,
+because this function's own `getSelectedHandlePoints` also read raw `segment.tangentEnd` instead of
+`getEffectiveTangentEnd`, silently dropping a preview-only `'end'` handle from the bounds computation
+and collapsing it to a degenerate zero-size rect no `drawRect` call would visibly render — masking the
+eligibility bug rather than proving it fixed. Fixed the same way, mirroring the `'start'` branch. Note
+this call site is presently unreachable with a non-empty `selectedHandles` in practice (every caller of
+`getVectorMultiSelectBox`/`getVectorMultiSelectBounds` already goes through the
+`isVectorMultiSelectBoxEligible` gate above, which requires zero handles) — fixed anyway for consistency
+and to not leave a second landmine for whenever box eligibility rules next change.
+
+**`drawVectorMultiSelectBox.ts` was promoted to its own folder**, `drawVectorMultiSelectBox/`, following
+the established "ifologia" split pattern (§`xigma-module-structure` skill) once its three render branches
+(static box / live resize-drag box / live rotate-drag box) grew into their own concerns:
+`drawVectorMultiSelectBox.ts` is now a thin orchestrator dispatching to flat siblings
+`drawVectorMultiSelectStaticBox.ts`, `drawVectorMultiSelectResizeDragBox.ts`, and
+`drawVectorMultiSelectRotateDragBox.ts`, each with its own `test/` spec (the orchestrator's own spec mocks
+the three siblings and asserts dispatch, same as `drawVectorTangentHandles.spec.ts` mocks its own
+siblings).
+
+**The resize-drag box's rotation pivot needed no separate argument, but the tests still expected the old
+one.** `TVectorMultiSelectResizeDragState` had grown `anchor`/`anchorWorld` fields (the (separately
+in-progress) resize/rotate-box feature's own work) so that `continueVectorMultiSelectResizeDrag.ts`
+repositions `liveBounds` every tick (`repositionRotatedVectorMultiSelectBounds`,
+`getVectorMultiSelectResizeTransform.ts`) such that its own center is already the correct, anchor-stable
+rotation pivot — matching the "every rotated shape spins around its own bounds' center" convention
+elsewhere in this app, so `drawVectorMultiSelectResizeDragBox.ts` never needs to thread a separate pivot
+through to `drawRect`. Several tests (`armVectorMultiSelectResizeDrag.spec.ts`, `armResolvers.spec.ts`,
+`continueVectorMultiSelectResizeDrag.spec.ts`, `disarmVectorMultiSelectResizeDrag.spec.ts`,
+`drawVectorMultiSelectResizeDragBox.spec.ts`) still had fixtures/expectations from before that type grew —
+one of them (`continueVectorMultiSelectResizeDrag.spec.ts`'s rotated-box case) actually crashed at runtime
+(`TypeError` reading `.x` of `undefined`) rather than just failing an assertion, since
+`repositionRotatedVectorMultiSelectBounds` only skips touching `anchor`/`anchorWorld` when `rotation===0`.
+Fixed by adding the missing fields (computed correctly, not just type-satisfying placeholders) and, for
+the one test that still expected an explicit pivot argument, updating its expectation to match the current
+(correct) no-separate-pivot contract instead. `getVectorMultiSelectResizeTransform.ts` and
+`getVectorMultiSelectSelectionKey.ts` had no dedicated unit spec of their own at all up to this point
+(only indirect coverage through the integration-level drag specs) — added
+`getVectorMultiSelectResizeTransform.spec.ts`/`getVectorMultiSelectSelectionKey.spec.ts` directly
+exercising every branch (both anchor sides null/non-null, both "min"/"max"-side handles, the zero-size
+degenerate case) to close out the last coverage gaps this whole area had.
+
+Covered by a new `vector-edit.spec.ts` scenario (`TEST_CASES.md` #216): multi-selecting two tangent
+handles with zero vertices selected draws no box, and dragging the real one moves the preview-only one by
+the exact same pixel delta — verified to actually catch both regressions above by deliberately reverting
+each fix in turn and confirming the test fails (a naive "did the region change" assertion on the
+preview-only handle does **not** catch the frozen-handle bug, since a preview handle's rendered position
+is a function of its neighbor's tangent and visibly moves — just via the wrong, curve-derived formula —
+even under the old broken code; the test instead checks the handle landed at the precise
+delta-translated position, which the buggy formula misses by a wide margin).
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

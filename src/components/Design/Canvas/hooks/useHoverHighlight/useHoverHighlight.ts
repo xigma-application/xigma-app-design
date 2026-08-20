@@ -22,7 +22,7 @@ export const useHoverHighlight = (refs: TCanvasRefs): void => {
 
   const handlePointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     if (event.buttons === 0) {
-      resolveHover(canvas, event, hoverRef, setClassName, activeTool);
+      resolveHover(canvas, event, hoverRef, setClassName, activeTool, refs);
     }
   };
 

@@ -5,6 +5,7 @@ import { selectOrderedNodes, selectViewport } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { ToolName } from 'types/design/enums';
 
 // utils
@@ -20,6 +21,7 @@ export const resolveHover = (
   hoverRef: RefObject<string | null>,
   setClassName: (className: string | null) => void,
   activeTool: ToolName,
+  refs: TCanvasRefs,
 ): void => {
   const state = store.getState();
   const viewport = selectViewport(state);
@@ -29,6 +31,6 @@ export const resolveHover = (
   if (activeTool === ToolName.comment) {
     setHoverState(canvas, hoverRef, setClassName, 'comment', '', hit?.id ?? null);
   } else {
-    resolveToolHover(canvas, hoverRef, setClassName, activeTool, point, viewport, state);
+    resolveToolHover(canvas, hoverRef, setClassName, activeTool, point, viewport, state, refs);
   }
 };

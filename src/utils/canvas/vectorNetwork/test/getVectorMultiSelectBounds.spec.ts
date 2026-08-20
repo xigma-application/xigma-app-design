@@ -70,6 +70,20 @@ describe('getVectorMultiSelectBounds', () => {
     expect(bounds).toEqual({ height: 0, width: 0, x: 10, y: 0 });
   });
 
+  it('should include a selected handle end position, resolved via the effective (possibly derived) tangentEnd, when there is no real tangentEnd', () => {
+    // mock — no real tangentEnd, derived from tangentStart instead
+    const node = buildNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: { x: 20, y: 0 } } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    // before
+    const bounds = getVectorMultiSelectBounds(node, [], [{ end: 'end', segmentId: 's1' }]);
+
+    // result — direction (v1 - v2 + tangentStart) = (-80, 0), scaled to half of tangentStart's own length (10), lands at (90, 0)
+    expect(bounds).toEqual({ height: 0, width: 0, x: 90, y: 0 });
+  });
+
   it('should skip a selected handle whose segment no longer exists', () => {
     // mock
     const node = buildNode({}, { v1: { id: 'v1', x: 0, y: 0 } });

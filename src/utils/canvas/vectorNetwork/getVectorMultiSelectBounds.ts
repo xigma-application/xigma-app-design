@@ -4,6 +4,7 @@ import { TVectorHandleHover } from 'types/design/canvas/types';
 import { TVectorNode, TVectorVertex } from 'types/design/types';
 
 // utils
+import { getEffectiveTangentEnd } from './getEffectiveTangentEnd';
 import { getEffectiveTangentStart } from './getEffectiveTangentStart';
 import { getVectorHandlePosition } from './getVectorHandlePosition';
 
@@ -14,7 +15,8 @@ const getSelectedHandlePoints = (node: TVectorNode, selectedHandles: TVectorHand
 
       if (segment) {
         const vertex = handle.end === 'start' ? node.vertices[segment.startId] : node.vertices[segment.endId];
-        const tangent = handle.end === 'start' ? getEffectiveTangentStart(node.vertices, segment) : segment.tangentEnd;
+        const tangent =
+          handle.end === 'start' ? getEffectiveTangentStart(node.vertices, segment) : getEffectiveTangentEnd(node.vertices, segment);
 
         return getVectorHandlePosition(vertex, tangent);
       }

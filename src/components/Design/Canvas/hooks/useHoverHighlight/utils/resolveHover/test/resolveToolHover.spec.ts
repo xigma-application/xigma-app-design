@@ -8,7 +8,10 @@ import { store } from 'store';
 import { NodeType, ToolName } from 'types/design/enums';
 
 // utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { resolveToolHover } from '../resolveToolHover';
+
+vi.mock('utils/canvas/getRotatedResizeCursorUrl', () => ({ getRotatedResizeCursorUrl: vi.fn(() => 'url(resize.png), auto') }));
 
 const createCanvas = (): HTMLCanvasElement => document.createElement('canvas');
 
@@ -73,7 +76,7 @@ describe('resolveToolHover', () => {
     const setClassName = vi.fn();
 
     // before
-    resolveToolHover(canvas, hoverRef, setClassName, ToolName.default, { x: 0, y: 0 }, IDENTITY_VIEWPORT, store.getState());
+    resolveToolHover(canvas, hoverRef, setClassName, ToolName.default, { x: 0, y: 0 }, IDENTITY_VIEWPORT, store.getState(), createCanvasRefs());
 
     // result — resize wins over the plain node-hover fallback: hover clears, no positioning class
     expect(hoverRef.current).toBeNull();
@@ -92,10 +95,33 @@ describe('resolveToolHover', () => {
     const setClassName = vi.fn();
 
     // before
-    resolveToolHover(canvas, hoverRef, setClassName, ToolName.default, { x: 0, y: 0 }, IDENTITY_VIEWPORT, store.getState());
+    resolveToolHover(canvas, hoverRef, setClassName, ToolName.default, { x: 0, y: 0 }, IDENTITY_VIEWPORT, store.getState(), createCanvasRefs());
 
     // result — falls through past the (suppressed) resize resolver to plain node hover instead
     expect(hoverRef.current).toBe(idA);
+  });
+
+  it('should show a resize cursor when hovering a corner of the bounding box of 2+ selected vertices in Vector Edit Mode — the actual bug this covers: a standalone resolver in useSelectionTool used to lose a race against this hook’s own pointermove listener, which always runs afterward and clears canvas.style.cursor back to blank', () => {
+    // mock — v1(0,0)/v3(100,100) selected (diagonal corners), bounds "se" at (100,100)
+    const idA = addSquareVectorNode(0, 0);
+
+    store.dispatch(setVectorEditingNodeId(idA));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v3'];
+
+    const canvas = createCanvas();
+    const hoverRef: RefObject<string | null> = { current: null };
+    const setClassName = vi.fn();
+
+    // before
+    resolveToolHover(canvas, hoverRef, setClassName, ToolName.default, { x: 100, y: 100 }, IDENTITY_VIEWPORT, store.getState(), canvasRefs);
+
+    // result — the resolver's own cursor write lands on the canvas element, independent of setClassName
+    // (which stays a no-op throughout Vector Edit Mode)
+    expect(canvas.style.cursor).toBe('url(resize.png), auto');
+    expect(hoverRef.current).toBeNull();
   });
 
   it('should fall back to plain node hover when no resolver matches', () => {
@@ -107,7 +133,7 @@ describe('resolveToolHover', () => {
     const setClassName = vi.fn();
 
     // before
-    resolveToolHover(canvas, hoverRef, setClassName, ToolName.default, { x: 1010, y: 1010 }, IDENTITY_VIEWPORT, store.getState());
+    resolveToolHover(canvas, hoverRef, setClassName, ToolName.default, { x: 1010, y: 1010 }, IDENTITY_VIEWPORT, store.getState(), createCanvasRefs());
 
     // result
     expect(hoverRef.current).toBe(idA);
@@ -123,7 +149,7 @@ describe('resolveToolHover', () => {
     const setClassName = vi.fn();
 
     // before
-    resolveToolHover(canvas, hoverRef, setClassName, ToolName.default, { x: 9000, y: 9000 }, IDENTITY_VIEWPORT, store.getState());
+    resolveToolHover(canvas, hoverRef, setClassName, ToolName.default, { x: 9000, y: 9000 }, IDENTITY_VIEWPORT, store.getState(), createCanvasRefs());
 
     // result
     expect(hoverRef.current).toBeNull();

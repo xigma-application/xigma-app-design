@@ -72,6 +72,7 @@ describe('disarmVectorMultiDrag', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
     const vectorMultiDragRef = createVectorMultiDragRef({
+      boxOrigin: null,
       handleOrigins: {},
       hasMoved: true,
       nodeId: 'path-1',
@@ -98,6 +99,7 @@ describe('disarmVectorMultiDrag', () => {
     canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
 
     const vectorMultiDragRef = createVectorMultiDragRef({
+      boxOrigin: null,
       handleOrigins: {},
       hasMoved: false,
       nodeId: 'path-1',
@@ -121,6 +123,7 @@ describe('disarmVectorMultiDrag', () => {
     canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     const vectorMultiDragRef = createVectorMultiDragRef({
+      boxOrigin: null,
       handleOrigins: {},
       hasMoved: false,
       nodeId: 'path-1',
@@ -147,6 +150,7 @@ describe('disarmVectorMultiDrag', () => {
     canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
 
     const vectorMultiDragRef = createVectorMultiDragRef({
+      boxOrigin: null,
       handleOrigins: {},
       hasMoved: false,
       nodeId: 'path-1',
@@ -172,6 +176,7 @@ describe('disarmVectorMultiDrag', () => {
     canvasRefs.selectedVectorSegmentIdsRef.current = ['s1', 's2'];
 
     const vectorMultiDragRef = createVectorMultiDragRef({
+      boxOrigin: null,
       handleOrigins: {},
       hasMoved: false,
       nodeId: 'path-1',
@@ -197,6 +202,7 @@ describe('disarmVectorMultiDrag', () => {
     canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     const vectorMultiDragRef = createVectorMultiDragRef({
+      boxOrigin: null,
       handleOrigins: {},
       hasMoved: true,
       nodeId: 'path-1',
@@ -224,6 +230,7 @@ describe('disarmVectorMultiDrag', () => {
     canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
 
     const vectorMultiDragRef = createVectorMultiDragRef({
+      boxOrigin: null,
       handleOrigins: {},
       hasMoved: false,
       nodeId,
@@ -255,6 +262,7 @@ describe('disarmVectorMultiDrag', () => {
     canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
 
     const vectorMultiDragRef = createVectorMultiDragRef({
+      boxOrigin: null,
       handleOrigins: {},
       hasMoved: false,
       nodeId: 'missing-node',

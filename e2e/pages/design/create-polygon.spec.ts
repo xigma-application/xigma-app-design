@@ -44,11 +44,12 @@ test('has no keyboard shortcut, unlike Rectangle/Ellipse/Line/Frame', async ({ p
   await designPage.goto('e2e-test-project');
   await expect(designPage.canvas).toBeVisible();
 
-  // "p" is not bound to anything, so the active tool must stay the default one
+  // "p" is bound to the Pen tool (shortcuts.ts), not Polygon — pressing it must activate Pen, and must
+  // never activate Polygon itself (there is no ToolName.polygon entry in shortcuts.ts at all)
   await page.keyboard.press('p');
 
-  const defaultTool = designPage.toolRadio('default');
-  await expect(defaultTool).toHaveAttribute('aria-checked', 'true');
+  const penTool = designPage.toolRadio('pen');
+  await expect(penTool).toHaveAttribute('aria-checked', 'true');
 
   const polygonTool = designPage.toolRadio('polygon');
   await expect(polygonTool).toHaveCount(0);

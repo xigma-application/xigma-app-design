@@ -8,8 +8,10 @@ import { TArmContext } from '../types';
 // utils
 import { armVectorMultiDrag } from '../armVectorMultiDrag';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
-import { getVectorMultiSelectBounds } from 'utils/canvas/vectorNetwork/getVectorMultiSelectBounds';
+import { getVectorMultiSelectBox } from '../../../../../utils/getVectorMultiSelectBox';
 import { isPointInRect } from '../../../../../utils/isPointInRect';
+import { isVectorMultiSelectBoxEligible } from '../../../../../utils/isVectorMultiSelectBoxEligible';
+import { rotatePoint } from 'utils/math/rotatePoint';
 
 export const armVectorMultiSelectBoxOnPointerDown = ({
   canvas,
@@ -25,11 +27,13 @@ export const armVectorMultiSelectBoxOnPointerDown = ({
       const selectedVertexIds = canvasRefs.selectedVectorVertexIdsRef.current;
       const selectedHandles = canvasRefs.selectedVectorHandlesRef.current;
 
-      if (selectedVertexIds.length + selectedHandles.length > 1) {
-        const bounds = getVectorMultiSelectBounds(node, selectedVertexIds, selectedHandles);
+      if (isVectorMultiSelectBoxEligible(selectedVertexIds, selectedHandles)) {
+        const box = getVectorMultiSelectBox(node, selectedVertexIds, selectedHandles, canvasRefs.vectorMultiSelectBoxRef);
+        const pivot = box && { x: box.bounds.x + box.bounds.width / 2, y: box.bounds.y + box.bounds.height / 2 };
+        const localPoint = box && pivot && rotatePoint(point, pivot, -box.rotation);
 
-        if (bounds && isPointInRect(point, bounds)) {
-          armVectorMultiDrag(canvas, event, selectionRefs.vectorMultiDragRef, node, selectedVertexIds, selectedHandles, point);
+        if (box && localPoint && isPointInRect(localPoint, box.bounds)) {
+          armVectorMultiDrag(canvas, event, selectionRefs.vectorMultiDragRef, node, selectedVertexIds, selectedHandles, point, null, box);
 
           return true;
         }

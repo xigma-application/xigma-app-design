@@ -12,6 +12,7 @@ import { applyPendingClickAction } from '../applyPendingClickAction';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 
 const baseDragState = (overrides: Partial<TVectorMultiDragState>): TVectorMultiDragState => ({
+  boxOrigin: null,
   handleOrigins: {},
   hasMoved: false,
   nodeId: 'path-1',

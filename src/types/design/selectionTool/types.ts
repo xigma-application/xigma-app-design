@@ -106,6 +106,7 @@ export type TVectorPendingClickAction =
   | { kind: 'split-segment'; segmentId: string; t: number };
 
 export type TVectorMultiDragState = {
+  boxOrigin: TDraftRect | null;
   handleOrigins: Record<string, TPoint>;
   hasMoved: boolean;
   nodeId: string;
@@ -124,6 +125,30 @@ export type TVectorSegmentBendDragState = {
   segmentId: string;
   tangentEnd: TPoint;
   tangentStart: TPoint;
+};
+
+export type TVectorMultiSelectResizeDragState = {
+  anchor: { x: number | null; y: number | null };
+  anchorWorld: TPoint;
+  bounds: TDraftRect;
+  handle: TResizeHandle;
+  handleOrigins: Record<string, TPoint>;
+  liveBounds: TDraftRect;
+  nodeId: string;
+  rotation: number;
+  vertexOrigins: Record<string, TPoint>;
+};
+
+export type TVectorMultiSelectRotateDragState = {
+  bounds: TDraftRect;
+  cursorAngle: number;
+  deltaDegrees: number;
+  handleOrigins: Record<string, TPoint>;
+  nodeId: string;
+  pivot: TPoint;
+  rotation: number;
+  startAngle: number;
+  vertexOrigins: Record<string, TPoint>;
 };
 
 export type TSelectionToolRefs = {

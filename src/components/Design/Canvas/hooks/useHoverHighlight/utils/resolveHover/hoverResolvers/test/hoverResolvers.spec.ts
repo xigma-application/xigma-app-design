@@ -15,6 +15,8 @@ import { resolveResizeHover } from '../resolveResizeHover';
 import { resolveRotateHover } from '../resolveRotateHover';
 import { resolveStarRatioHover } from '../resolveStarRatioHover';
 import { resolveStarVertexHover } from '../resolveStarVertexHover';
+import { resolveVectorMultiSelectResizeHover } from '../resolveVectorMultiSelectResizeHover';
+import { resolveVectorMultiSelectRotateHover } from '../resolveVectorMultiSelectRotateHover';
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
@@ -28,6 +30,8 @@ const createContext = (overrides: Partial<THoverResolverContext>): THoverResolve
   resizableSelectedNodes: [],
   resizeHandleHit: null,
   selectedNodes: [],
+  vectorMultiSelectBox: null,
+  vectorMultiSelectResizeHandle: null,
   viewport: IDENTITY_VIEWPORT,
   ...overrides,
 });
@@ -367,6 +371,53 @@ describe('resolveRotateHover', () => {
   it('should return undefined when the point misses the rotate ring', () => {
     // result
     expect(resolveRotateHover(createContext({ point: { x: 900, y: 900 }, resizableSelectedNodes: [rotatingFrame] }))).toBeUndefined();
+  });
+});
+
+describe('resolveVectorMultiSelectResizeHover', () => {
+  const box = { bounds: { height: 100, width: 100, x: 0, y: 0 }, rotation: 0, selectionKey: 'v1,v2' };
+
+  it('should return a hover result with the rotated resize cursor when a resize handle was hit', () => {
+    // result
+    expect(resolveVectorMultiSelectResizeHover(createContext({ vectorMultiSelectBox: box, vectorMultiSelectResizeHandle: 'se' }))).toMatchObject(
+      { className: null, nodeId: null },
+    );
+  });
+
+  it('should return undefined when no resize handle was hit', () => {
+    // result
+    expect(
+      resolveVectorMultiSelectResizeHover(createContext({ vectorMultiSelectBox: box, vectorMultiSelectResizeHandle: null })),
+    ).toBeUndefined();
+  });
+
+  it('should return undefined when there is no multi-select box at all', () => {
+    // result
+    expect(
+      resolveVectorMultiSelectResizeHover(createContext({ vectorMultiSelectBox: null, vectorMultiSelectResizeHandle: 'se' })),
+    ).toBeUndefined();
+  });
+});
+
+describe('resolveVectorMultiSelectRotateHover', () => {
+  const box = { bounds: { height: 100, width: 100, x: 0, y: 0 }, rotation: 0, selectionKey: 'v1,v2' };
+
+  it('should return a hover result with the rotate cursor just outside a corner of the multi-select bounds', () => {
+    // result
+    expect(resolveVectorMultiSelectRotateHover(createContext({ point: { x: 0, y: -10 }, vectorMultiSelectBox: box }))).toMatchObject({
+      className: null,
+      nodeId: null,
+    });
+  });
+
+  it('should return undefined when the point misses the rotate ring', () => {
+    // result
+    expect(resolveVectorMultiSelectRotateHover(createContext({ point: { x: 50, y: 50 }, vectorMultiSelectBox: box }))).toBeUndefined();
+  });
+
+  it('should return undefined when there is no multi-select box at all', () => {
+    // result
+    expect(resolveVectorMultiSelectRotateHover(createContext({ point: { x: 0, y: -10 }, vectorMultiSelectBox: null }))).toBeUndefined();
   });
 });
 

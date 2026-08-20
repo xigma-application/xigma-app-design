@@ -8,6 +8,7 @@ import { store } from 'store';
 import { NodeType, ToolName } from 'types/design/enums';
 
 // utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { resolveHover } from '../resolveHover';
 
 const createCanvas = (): HTMLCanvasElement => {
@@ -48,7 +49,7 @@ describe('resolveHover', () => {
     const setClassName = vi.fn();
 
     // before
-    resolveHover(canvas, pointerEvent(0, 0), hoverRef, setClassName, ToolName.default);
+    resolveHover(canvas, pointerEvent(0, 0), hoverRef, setClassName, ToolName.default, createCanvasRefs());
 
     // result — resize wins over the plain node-hover fallback: hover clears, no positioning class
     expect(hoverRef.current).toBeNull();
@@ -64,7 +65,7 @@ describe('resolveHover', () => {
     const setClassName = vi.fn();
 
     // before
-    resolveHover(canvas, pointerEvent(1010, 1010), hoverRef, setClassName, ToolName.default);
+    resolveHover(canvas, pointerEvent(1010, 1010), hoverRef, setClassName, ToolName.default, createCanvasRefs());
 
     // result
     expect(hoverRef.current).toBe(idA);
@@ -80,7 +81,7 @@ describe('resolveHover', () => {
     const setClassName = vi.fn();
 
     // before
-    resolveHover(canvas, pointerEvent(9000, 9000), hoverRef, setClassName, ToolName.default);
+    resolveHover(canvas, pointerEvent(9000, 9000), hoverRef, setClassName, ToolName.default, createCanvasRefs());
 
     // result
     expect(hoverRef.current).toBeNull();
@@ -99,7 +100,7 @@ describe('resolveHover', () => {
     const setClassName = vi.fn();
 
     // before
-    resolveHover(canvas, pointerEvent(3000, 3000), hoverRef, setClassName, ToolName.comment);
+    resolveHover(canvas, pointerEvent(3000, 3000), hoverRef, setClassName, ToolName.comment, createCanvasRefs());
 
     // result — still hovers the node (for the outline) but the cursor class stays 'comment'
     expect(hoverRef.current).toBe(idA);
@@ -115,7 +116,7 @@ describe('resolveHover', () => {
     const setClassName = vi.fn();
 
     // before
-    resolveHover(canvas, pointerEvent(9000, 9000), hoverRef, setClassName, ToolName.comment);
+    resolveHover(canvas, pointerEvent(9000, 9000), hoverRef, setClassName, ToolName.comment, createCanvasRefs());
 
     // result
     expect(hoverRef.current).toBeNull();

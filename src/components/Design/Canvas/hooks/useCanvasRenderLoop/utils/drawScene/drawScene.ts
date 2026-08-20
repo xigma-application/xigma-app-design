@@ -75,6 +75,8 @@ export const drawScene = (
   const penActiveVertexId = selectPenActiveVertexId(state);
   const dragOriginVertexId = refs.penDragOriginRef.current?.vertexId ?? null;
   const penDraggedHandlePosition = refs.penDraggedHandlePositionRef.current;
+  const vectorMultiSelectResizeDrag = refs.vectorMultiSelectResizeDragRef.current;
+  const vectorMultiSelectRotateDrag = refs.vectorMultiSelectRotateDragRef.current;
   const sceneNodes = selectOrderedNodes(state).filter((node) => node.id !== editingNodeId);
   const allSelectedNodes = selectSelectedNodes(state);
   const selectedNodes = allSelectedNodes.filter((node) => node.id !== editingNodeId);
@@ -125,6 +127,9 @@ export const drawScene = (
     penActiveVertexId,
     dragOriginVertexId,
     penDraggedHandlePosition,
+    refs.vectorMultiSelectBoxRef,
+    vectorMultiSelectResizeDrag,
+    vectorMultiSelectRotateDrag,
     clientWidth,
     clientHeight,
     viewport,

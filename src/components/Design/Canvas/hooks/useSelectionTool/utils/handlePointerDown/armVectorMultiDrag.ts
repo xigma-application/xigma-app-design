@@ -2,14 +2,12 @@ import { RefObject } from 'react';
 
 // types
 import { TPoint } from 'types/canvas';
-import { TVectorHandleHover } from 'types/design/canvas/types';
+import { TVectorHandleHover, TVectorMultiSelectBox } from 'types/design/canvas/types';
 import { TVectorMultiDragState, TVectorPendingClickAction } from 'types/design/selectionTool/types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { getEffectiveTangentStart } from 'utils/canvas/vectorNetwork/getEffectiveTangentStart';
-
-const getVectorHandleOriginKey = (handle: TVectorHandleHover): string => `${handle.end}:${handle.segmentId}`;
+import { getVectorMultiSelectOrigins } from './getVectorMultiSelectOrigins';
 
 export const armVectorMultiDrag = (
   canvas: HTMLCanvasElement,
@@ -20,19 +18,18 @@ export const armVectorMultiDrag = (
   selectedHandles: TVectorHandleHover[],
   point: TPoint,
   pendingClickAction: TVectorPendingClickAction | null = null,
+  box: TVectorMultiSelectBox | null = null,
 ): void => {
-  const vertexOrigins = Object.fromEntries(
-    selectedVertexIds.map((vertexId) => [vertexId, { x: node.vertices[vertexId].x, y: node.vertices[vertexId].y }]),
-  );
-  const handleOrigins = Object.fromEntries(
-    selectedHandles.flatMap((handle) => {
-      const segment = node.segments[handle.segmentId];
-      const tangent = handle.end === 'start' ? getEffectiveTangentStart(node.vertices, segment) : segment.tangentEnd;
+  const { handleOrigins, vertexOrigins } = getVectorMultiSelectOrigins(node, selectedVertexIds, selectedHandles);
 
-      return tangent ? [[getVectorHandleOriginKey(handle), tangent]] : [];
-    }),
-  );
-
-  vectorMultiDragRef.current = { handleOrigins, hasMoved: false, nodeId: node.id, pendingClickAction, pointerStart: point, vertexOrigins };
+  vectorMultiDragRef.current = {
+    boxOrigin: box?.bounds ?? null,
+    handleOrigins,
+    hasMoved: false,
+    nodeId: node.id,
+    pendingClickAction,
+    pointerStart: point,
+    vertexOrigins,
+  };
   canvas.setPointerCapture(event.pointerId);
 };

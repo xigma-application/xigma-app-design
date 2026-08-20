@@ -7,6 +7,7 @@ import { store } from 'store';
 // types
 import { NodeType } from 'types/design/enums';
 import { TVectorMultiDragState } from 'types/design/selectionTool/types';
+import { TVectorMultiSelectBox } from 'types/design/canvas/types';
 
 // utils
 import { continueVectorMultiDrag } from '../continueVectorMultiDrag';
@@ -23,6 +24,10 @@ const pointerEvent = (x: number, y: number): PointerEvent => new PointerEvent('p
 
 const createVectorMultiDragRef = (vectorMultiDragState: TVectorMultiDragState | null = null): RefObject<TVectorMultiDragState | null> => ({
   current: vectorMultiDragState,
+});
+
+const createVectorMultiSelectBoxRef = (box: TVectorMultiSelectBox | null = null): RefObject<TVectorMultiSelectBox | null> => ({
+  current: box,
 });
 
 const addVectorNode = (): string => {
@@ -59,7 +64,7 @@ describe('continueVectorMultiDrag', () => {
     const setClassName = vi.fn();
 
     // before
-    continueVectorMultiDrag(canvas, pointerEvent(10, 10), store.dispatch, createVectorMultiDragRef(), setClassName);
+    continueVectorMultiDrag(canvas, pointerEvent(10, 10), store.dispatch, createVectorMultiDragRef(), createVectorMultiSelectBoxRef(), setClassName);
 
     // result
     expect(store.getState().design.nodes).toEqual({});
@@ -70,6 +75,7 @@ describe('continueVectorMultiDrag', () => {
     // mock
     const canvas = createCanvas();
     const vectorMultiDragRef = createVectorMultiDragRef({
+      boxOrigin: null,
       handleOrigins: {},
       hasMoved: false,
       nodeId: 'missing-node',
@@ -80,7 +86,7 @@ describe('continueVectorMultiDrag', () => {
     const setClassName = vi.fn();
 
     // before
-    continueVectorMultiDrag(canvas, pointerEvent(10, 10), store.dispatch, vectorMultiDragRef, setClassName);
+    continueVectorMultiDrag(canvas, pointerEvent(10, 10), store.dispatch, vectorMultiDragRef, createVectorMultiSelectBoxRef(), setClassName);
 
     // result
     expect(store.getState().design.nodes).toEqual({});
@@ -92,6 +98,7 @@ describe('continueVectorMultiDrag', () => {
     const idA = addVectorNode();
     const canvas = createCanvas();
     const vectorMultiDragRef = createVectorMultiDragRef({
+      boxOrigin: null,
       handleOrigins: { 'end:s1': { x: -5, y: 0 }, 'start:s1': { x: 5, y: 0 } },
       hasMoved: false,
       nodeId: idA,
@@ -102,7 +109,7 @@ describe('continueVectorMultiDrag', () => {
     const setClassName = vi.fn();
 
     // before — cursor moved to (10, 4): delta (10, 4)
-    continueVectorMultiDrag(canvas, pointerEvent(10, 4), store.dispatch, vectorMultiDragRef, setClassName);
+    continueVectorMultiDrag(canvas, pointerEvent(10, 4), store.dispatch, vectorMultiDragRef, createVectorMultiSelectBoxRef(), setClassName);
 
     // result
     const node = store.getState().design.nodes[idA];
@@ -115,5 +122,63 @@ describe('continueVectorMultiDrag', () => {
 
     // result — a real move marks the drag as having moved, so a pending collapse won't fire on release
     expect(vectorMultiDragRef.current?.hasMoved).toBe(true);
+  });
+
+  it('should translate the canonical multi-select box by the same delta as the points, so it visually follows the drag instead of staying behind at its pre-drag position', () => {
+    // mock — the box drag was armed with a snapshot of its own pre-drag bounds (boxOrigin)
+    const idA = addVectorNode();
+    const canvas = createCanvas();
+    const vectorMultiDragRef = createVectorMultiDragRef({
+      boxOrigin: { height: 0, width: 100, x: 0, y: 0 },
+      handleOrigins: {},
+      hasMoved: false,
+      nodeId: idA,
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+      vertexOrigins: { v1: { x: 0, y: 0 }, v2: { x: 100, y: 0 } },
+    });
+    const vectorMultiSelectBoxRef = createVectorMultiSelectBoxRef({
+      bounds: { height: 0, width: 100, x: 0, y: 0 },
+      rotation: 0,
+      selectionKey: 'v1,v2',
+    });
+    const setClassName = vi.fn();
+
+    // before — cursor moved to (10, 4): delta (10, 4)
+    continueVectorMultiDrag(canvas, pointerEvent(10, 4), store.dispatch, vectorMultiDragRef, vectorMultiSelectBoxRef, setClassName);
+
+    // result — the box's rotation and selection key stay untouched, only its position moves
+    expect(vectorMultiSelectBoxRef.current).toEqual({
+      bounds: { height: 0, width: 100, x: 10, y: 4 },
+      rotation: 0,
+      selectionKey: 'v1,v2',
+    });
+  });
+
+  it('should not touch the canonical box when this particular drag never snapshotted one (e.g. a plain segment/vertex drag, not a drag through the box itself)', () => {
+    // mock
+    const idA = addVectorNode();
+    const canvas = createCanvas();
+    const vectorMultiDragRef = createVectorMultiDragRef({
+      boxOrigin: null,
+      handleOrigins: {},
+      hasMoved: false,
+      nodeId: idA,
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+      vertexOrigins: { v1: { x: 0, y: 0 } },
+    });
+    const vectorMultiSelectBoxRef = createVectorMultiSelectBoxRef({
+      bounds: { height: 0, width: 100, x: 0, y: 0 },
+      rotation: 0,
+      selectionKey: 'v1',
+    });
+    const setClassName = vi.fn();
+
+    // before
+    continueVectorMultiDrag(canvas, pointerEvent(10, 4), store.dispatch, vectorMultiDragRef, vectorMultiSelectBoxRef, setClassName);
+
+    // result
+    expect(vectorMultiSelectBoxRef.current).toEqual({ bounds: { height: 0, width: 100, x: 0, y: 0 }, rotation: 0, selectionKey: 'v1' });
   });
 });

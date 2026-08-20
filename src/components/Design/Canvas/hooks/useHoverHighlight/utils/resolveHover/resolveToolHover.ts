@@ -15,6 +15,7 @@ import {
 import { RootState } from 'store';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 import { THoverResolverContext } from './types';
@@ -22,6 +23,9 @@ import { TViewport } from 'types/design/types';
 
 // utils
 import { getResizeHandleAtPoint } from '../../../../utils/getResizeHandleAtPoint/getResizeHandleAtPoint';
+import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
+import { getVectorMultiSelectBoxForHover } from './getVectorMultiSelectBoxForHover';
+import { getVectorMultiSelectResizeHandle } from '../../../../utils/getVectorMultiSelectResizeHandle';
 import { setHoverState } from '../setHoverState';
 
 export const resolveToolHover = (
@@ -32,13 +36,24 @@ export const resolveToolHover = (
   point: TPoint,
   viewport: TViewport,
   state: RootState,
+  refs: TCanvasRefs,
 ): void => {
   const editingTextBox = selectEditingTextBox(state);
   const isEditingText = Boolean(editingTextBox);
-  const isEditingVector = Boolean(selectVectorEditingNodeId(state));
+  const vectorEditingNodeId = selectVectorEditingNodeId(state);
+  const isEditingVector = Boolean(vectorEditingNodeId);
   const selectedNodes = selectSelectedNodes(state);
   const resizableSelectedNodes = isEditingText || isEditingVector ? [] : selectedNodes;
   const applyClassName = isEditingVector ? (): void => {} : setClassName;
+  const vectorEditingNode = isEditingVector ? getVectorEditingNode(state.design.nodes, vectorEditingNodeId) : null;
+  const selectedVertexIds = refs.selectedVectorVertexIdsRef.current;
+  const selectedHandles = refs.selectedVectorHandlesRef.current;
+  const vectorMultiSelectBox = getVectorMultiSelectBoxForHover(
+    vectorEditingNode,
+    selectedVertexIds,
+    selectedHandles,
+    refs.vectorMultiSelectBoxRef,
+  );
   const ctx: THoverResolverContext = {
     activeTool,
     editingContent: selectEditingTextContent(state),
@@ -49,6 +64,9 @@ export const resolveToolHover = (
     resizableSelectedNodes,
     resizeHandleHit: getResizeHandleAtPoint(point, resizableSelectedNodes, viewport),
     selectedNodes,
+    vectorMultiSelectBox,
+    vectorMultiSelectResizeHandle:
+      vectorMultiSelectBox && getVectorMultiSelectResizeHandle(point, vectorMultiSelectBox.bounds, viewport, vectorMultiSelectBox.rotation),
     viewport,
   };
 

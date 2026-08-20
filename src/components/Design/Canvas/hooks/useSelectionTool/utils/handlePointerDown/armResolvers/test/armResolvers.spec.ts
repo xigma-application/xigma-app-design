@@ -31,6 +31,8 @@ import { armVectorCornerHandleOnPointerDown } from '../armVectorCornerHandleOnPo
 import { armVectorHandleOnPointerDown } from '../armVectorHandleOnPointerDown/armVectorHandleOnPointerDown';
 import { armVectorMarqueeOnPointerDown } from '../armVectorMarqueeOnPointerDown';
 import { armVectorMultiSelectBoxOnPointerDown } from '../armVectorMultiSelectBoxOnPointerDown';
+import { armVectorMultiSelectResizeOnPointerDown } from '../armVectorMultiSelectResizeOnPointerDown';
+import { armVectorMultiSelectRotateOnPointerDown } from '../armVectorMultiSelectRotateOnPointerDown';
 import { armVectorSegmentOnPointerDown } from '../armVectorSegmentOnPointerDown/armVectorSegmentOnPointerDown';
 import { armVectorVertexOnPointerDown } from '../armVectorVertexOnPointerDown/armVectorVertexOnPointerDown';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
@@ -1321,6 +1323,7 @@ describe('armVectorMultiSelectBoxOnPointerDown', () => {
     // result
     expect(armVectorMultiSelectBoxOnPointerDown(ctx)).toBe(true);
     expect(ctx.selectionRefs.vectorMultiDragRef.current).toEqual({
+      boxOrigin: { height: 100, width: 100, x: 0, y: 0 },
       handleOrigins: {},
       hasMoved: false,
       nodeId,
@@ -1398,6 +1401,215 @@ describe('armVectorMultiSelectBoxOnPointerDown', () => {
 
     // result
     expect(armVectorMultiSelectBoxOnPointerDown(ctx)).toBeUndefined();
+  });
+});
+
+describe('armVectorMultiSelectResizeOnPointerDown', () => {
+  afterEach(() => {
+    store.dispatch(setVectorEditingNodeId(null));
+  });
+
+  it('should arm a resize drag and return true when clicking exactly on a corner of the bounding box of 2+ selected vertices', () => {
+    // mock — v1(0,0), v2(100,100) selected, bounds corners at (0,0)/(100,0)/(100,100)/(0,100); click on "se"
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+
+    // before
+    const ctx = createContext({ canvasRefs, point: { x: 100, y: 100 } });
+
+    // result
+    expect(armVectorMultiSelectResizeOnPointerDown(ctx)).toBe(true);
+    // the 'se' handle anchors from the opposite ('nw') corner, (0,0), which stays put under a 0deg
+    // rotation, so anchorWorld lands on that same (0,0) point
+    expect(ctx.canvasRefs.vectorMultiSelectResizeDragRef.current).toEqual({
+      anchor: { x: 0, y: 0 },
+      anchorWorld: { x: 0, y: 0 },
+      bounds: { height: 100, width: 100, x: 0, y: 0 },
+      handle: 'se',
+      handleOrigins: {},
+      liveBounds: { height: 100, width: 100, x: 0, y: 0 },
+      nodeId,
+      rotation: 0,
+      vertexOrigins: { v1: { x: 0, y: 0 }, v2: { x: 100, y: 100 } },
+    });
+    expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
+  });
+
+  it('should return undefined when fewer than 2 points are selected', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+
+    // before
+    const ctx = createContext({ canvasRefs, point: { x: 100, y: 100 } });
+
+    // result
+    expect(armVectorMultiSelectResizeOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.canvasRefs.vectorMultiSelectResizeDragRef.current).toBeNull();
+  });
+
+  it('should return undefined when the point misses every handle zone', () => {
+    // mock — well inside the box, away from any corner/edge
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+
+    // before
+    const ctx = createContext({ canvasRefs, point: { x: 50, y: 50 } });
+
+    // result
+    expect(armVectorMultiSelectResizeOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  it('should return undefined when Vector Edit Mode is not active', () => {
+    // before
+    const ctx = createContext({ point: { x: 100, y: 100 } });
+
+    // result
+    expect(armVectorMultiSelectResizeOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  it('should return undefined for a corner click that lands just outside the box — reserved for the rotate ring instead, since a diagonal 2-point selection’s own vertices commonly sit exactly on these corners', () => {
+    // mock — v1(0,0), v2(100,100) selected; click 3px outside the "se" corner (100,100)
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+
+    // before
+    const ctx = createContext({ canvasRefs, point: { x: 103, y: 103 } });
+
+    // result
+    expect(armVectorMultiSelectResizeOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.canvasRefs.vectorMultiSelectResizeDragRef.current).toBeNull();
+  });
+});
+
+describe('armVectorMultiSelectRotateOnPointerDown', () => {
+  afterEach(() => {
+    store.dispatch(setVectorEditingNodeId(null));
+  });
+
+  it('should arm a rotate drag and return true when clicking in the ring just outside a corner of the bounding box of 2+ selected vertices', () => {
+    // mock — v1(0,0), v2(100,100) selected; click 10px below the "se" corner (100,100), inside the
+    // 6-16px annulus around it and outside the box itself
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+
+    // before
+    const ctx = createContext({ canvasRefs, point: { x: 100, y: 110 } });
+
+    // result
+    expect(armVectorMultiSelectRotateOnPointerDown(ctx)).toBe(true);
+    expect(ctx.canvasRefs.vectorMultiSelectRotateDragRef.current).toMatchObject({ nodeId, pivot: { x: 50, y: 50 } });
+    expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
+  });
+
+  it('should return undefined when fewer than 2 points are selected', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+
+    // before
+    const ctx = createContext({ canvasRefs, point: { x: 100, y: 110 } });
+
+    // result
+    expect(armVectorMultiSelectRotateOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.canvasRefs.vectorMultiSelectRotateDragRef.current).toBeNull();
+  });
+
+  it('should return undefined when the point misses the ring entirely', () => {
+    // mock — well inside the box, away from any corner
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+
+    // before
+    const ctx = createContext({ canvasRefs, point: { x: 50, y: 50 } });
+
+    // result
+    expect(armVectorMultiSelectRotateOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  it('should arm a rotate drag for a corner click that lands just outside the box, even though it would fall inside the ordinary 6px resize-corner radius — the case armVectorMultiSelectResizeOnPointerDown now refuses', () => {
+    // mock — v1(0,0), v2(100,100) selected; click 3px outside the "se" corner (100,100)
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+
+    // before
+    const ctx = createContext({ canvasRefs, point: { x: 103, y: 103 } });
+
+    // result
+    expect(armVectorMultiSelectRotateOnPointerDown(ctx)).toBe(true);
+    expect(ctx.canvasRefs.vectorMultiSelectRotateDragRef.current).toMatchObject({ nodeId, pivot: { x: 50, y: 50 } });
+  });
+
+  it('should return undefined when Vector Edit Mode is not active', () => {
+    // before
+    const ctx = createContext({ point: { x: 100, y: 110 } });
+
+    // result
+    expect(armVectorMultiSelectRotateOnPointerDown(ctx)).toBeUndefined();
   });
 });
 

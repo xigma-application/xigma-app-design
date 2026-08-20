@@ -8,6 +8,7 @@ import { AppDispatch, store } from 'store';
 // types
 import { TPoint } from 'types/canvas';
 import { TVectorMultiDragState } from 'types/design/selectionTool/types';
+import { TVectorMultiSelectBox } from 'types/design/canvas/types';
 import { TVectorSegment } from 'types/design/types';
 
 // utils
@@ -38,6 +39,7 @@ export const continueVectorMultiDrag = (
   event: PointerEvent,
   dispatch: AppDispatch,
   vectorMultiDragRef: RefObject<TVectorMultiDragState | null>,
+  vectorMultiSelectBoxRef: RefObject<TVectorMultiSelectBox | null>,
   setClassName: (className: string | null) => void,
 ): void => {
   const dragState = vectorMultiDragRef.current;
@@ -54,6 +56,13 @@ export const continueVectorMultiDrag = (
       const deltaY = point.y - dragState.pointerStart.y;
       const vertices = { ...node.vertices, ...translateVectorVertices(dragState.vertexOrigins, deltaX, deltaY) };
       const segments = translateVectorHandles(node.segments, dragState.handleOrigins, deltaX, deltaY);
+
+      if (dragState.boxOrigin && vectorMultiSelectBoxRef.current) {
+        vectorMultiSelectBoxRef.current = {
+          ...vectorMultiSelectBoxRef.current,
+          bounds: { ...dragState.boxOrigin, x: dragState.boxOrigin.x + deltaX, y: dragState.boxOrigin.y + deltaY },
+        };
+      }
 
       dispatch(updateNode({ changes: { segments, vertices }, id: dragState.nodeId }));
       setClassName('move');

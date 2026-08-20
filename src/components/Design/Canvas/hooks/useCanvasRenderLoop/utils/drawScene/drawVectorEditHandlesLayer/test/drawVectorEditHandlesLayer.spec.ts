@@ -7,9 +7,10 @@ import {
 } from 'constant/canvas';
 
 // types
+import { RefObject } from 'react';
 import { NodeType } from 'types/design/enums';
 import { TSceneNode, TVectorNode } from 'types/design/types';
-import { TVectorHandleHover } from 'types/design/canvas/types';
+import { TVectorHandleHover, TVectorMultiSelectBox } from 'types/design/canvas/types';
 
 // utils
 import { drawVectorEditHandlesLayer } from '../drawVectorEditHandlesLayer';
@@ -51,6 +52,8 @@ const vectorNode: TVectorNode = {
 
 const nodes: Record<string, TSceneNode> = { [vectorNode.id]: vectorNode };
 
+const createVectorMultiSelectBoxRef = (): RefObject<TVectorMultiSelectBox | null> => ({ current: null });
+
 const call = (
   vectorEditingNodeId: string | null,
   selectedVertexIds: string[],
@@ -90,6 +93,9 @@ const call = (
     penActiveVertexId,
     dragOriginVertexId,
     penDraggedHandlePosition,
+    createVectorMultiSelectBoxRef(),
+    null,
+    null,
     200,
     150,
     IDENTITY_VIEWPORT,
@@ -153,6 +159,9 @@ describe('drawVectorEditHandlesLayer', () => {
       null,
       [],
       null,
+      null,
+      null,
+      createVectorMultiSelectBoxRef(),
       null,
       null,
       200,
@@ -397,6 +406,9 @@ describe('drawVectorEditHandlesLayer', () => {
       null,
       null,
       null,
+      createVectorMultiSelectBoxRef(),
+      null,
+      null,
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -456,6 +468,9 @@ describe('drawVectorEditHandlesLayer', () => {
       null,
       [],
       null,
+      null,
+      null,
+      createVectorMultiSelectBoxRef(),
       null,
       null,
       200,

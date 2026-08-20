@@ -1,13 +1,15 @@
 // types
+import { RefObject } from 'react';
 import { TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
-import { TVectorHandleHover } from 'types/design/canvas/types';
+import { TVectorHandleHover, TVectorMultiSelectBox } from 'types/design/canvas/types';
+import { TVectorMultiSelectResizeDragState, TVectorMultiSelectRotateDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { bakeVectorNodeRotation } from '../../../../../utils/bakeVectorNodeRotation';
 import { drawVectorEditOutline } from './drawVectorEditOutline/drawVectorEditOutline';
 import { drawVectorEdgeInsertPreview } from './drawVectorEdgeInsertPreview';
-import { drawVectorMultiSelectBox } from './drawVectorMultiSelectBox';
+import { drawVectorMultiSelectBox } from './drawVectorMultiSelectBox/drawVectorMultiSelectBox';
 import { drawVectorTangentHandles } from './drawVectorTangentHandles/drawVectorTangentHandles';
 import { drawVectorVertexDots } from './drawVectorVertexDots/drawVectorVertexDots';
 import { getOneHopVectorVertexIds } from 'utils/canvas/vectorNetwork/getOneHopVectorVertexIds';
@@ -34,6 +36,9 @@ export const drawVectorEditHandlesLayer = (
   penActiveVertexId: string | null,
   dragOriginVertexId: string | null,
   penDraggedHandlePosition: TPoint | null,
+  vectorMultiSelectBoxRef: RefObject<TVectorMultiSelectBox | null>,
+  vectorMultiSelectResizeDrag: TVectorMultiSelectResizeDragState | null,
+  vectorMultiSelectRotateDrag: TVectorMultiSelectRotateDragState | null,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
@@ -77,7 +82,20 @@ export const drawVectorEditHandlesLayer = (
       viewport,
     );
     drawVectorVertexDots(gl, program, buffer, node, visualSelectedVertexIds, hoveredVertexId, canvasWidth, canvasHeight, viewport);
-    drawVectorMultiSelectBox(gl, program, buffer, node, selectedVertexIds, selectedHandles, canvasWidth, canvasHeight, viewport);
+    drawVectorMultiSelectBox(
+      gl,
+      program,
+      buffer,
+      node,
+      selectedVertexIds,
+      selectedHandles,
+      vectorMultiSelectBoxRef,
+      vectorMultiSelectResizeDrag,
+      vectorMultiSelectRotateDrag,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+    );
     drawVectorEdgeInsertPreview(gl, program, buffer, hoveredVectorEdgeInsertPoint, canvasWidth, canvasHeight, viewport);
   }
 };

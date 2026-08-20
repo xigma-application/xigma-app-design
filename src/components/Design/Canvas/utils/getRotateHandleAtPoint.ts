@@ -14,7 +14,7 @@ import { isGroupSelection } from './isGroupSelection';
 import { isPointInRect } from './isPointInRect';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
-const isInRotateRing = (point: TPoint, bounds: TDraftRect, viewport: TViewport): boolean => {
+export const isInRotateRing = (point: TPoint, bounds: TDraftRect, viewport: TViewport): boolean => {
   if (isPointInRect(point, bounds)) {
     return false;
   }

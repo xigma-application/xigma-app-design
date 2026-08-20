@@ -642,6 +642,61 @@ test('shift+click mixes a vertex and a tangent handle into one multi-selection, 
   expect(afterHandle.equals(beforeHandle)).toBe(false);
 });
 
+test('shift+click multi-selects two tangent handles with no vertex in the selection: no bounding box renders (too complex a case, Figma doesn’t have one either), and dragging one of them moves both together with the mouse instead of leaving a preview-only handle frozen in place', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-handle-only-multi-select');
+  await expect(designPage.canvas).toBeVisible();
+
+  // an empty-canvas corner where a 2-point bounding box's stroke would pass through if one rendered —
+  // captured before anything is drawn, as the known-empty baseline
+  const boxCornerRegion = { height: 30, width: 30, x: 1063, y: 185 };
+  const emptyBaseline = await page.screenshot({ clip: boxCornerRegion });
+
+  // v1 placed with a drag (900,300)->(1000,200) stages a REAL outgoing tangentStart, (100,-100); v2 is
+  // a plain click at (1100,500), so segment s1 commits with tangentStart real but tangentEnd still null
+  // — v2's handle only ever exists as a rendered/hit-testable preview (getEffectiveTangentEnd), derived
+  // from tangentStart, never written to the store. This is the exact shape of the regression this test
+  // guards: a preview-only handle has no drag-origin of its own unless the multi-drag code resolves it
+  // through the same effective/preview fallback the draw and hit-test code already use.
+  await designPage.selectTool('pen');
+  await designPage.dragVectorPoint(900, 300, 1000, 200); // v1, dragged — stages tangentStart (100,-100)
+  await designPage.click(1100, 500); // v2, plain click — tangentEnd stays null
+  await designPage.selectTool('default');
+
+  await designPage.click(900, 300); // select v1 — reveals segment s1's handles at both ends
+  await designPage.click(1000, 200); // select v1's own (real) handle alone
+  await designPage.click(1078, 433, { shift: true }); // add v2's (preview-only) handle — 2 handles, 0 vertices
+
+  const boxCornerWithHandlesSelected = await page.screenshot({ clip: boxCornerRegion });
+
+  expect(boxCornerWithHandlesSelected.equals(emptyBaseline)).toBe(true);
+
+  // dragging the (real) start handle by (50,-50) must translate the preview-only end handle by the
+  // exact same delta, not just "some amount" — a naive assertion that its region merely changed would
+  // also pass under the regression this guards against: with no drag-origin of its own, the preview
+  // handle still visibly moves as its parent segment's changing tangentStart continuously re-derives it
+  // (getEffectiveTangentEnd), just along the wrong curve/scaling path instead of 1:1 with the cursor.
+  // So this checks the one thing that actually distinguishes the two: the exact landing spot. Under the
+  // fix the end handle lands at its old position + (50,-50) = (1078+50, 433-50) = (1128, 383); under the
+  // regression it instead re-derives to (1085, 395) — 43px off, and nothing renders at (1128, 383).
+  const startHandleRegion = { height: 24, width: 24, x: 988, y: 188 };
+  const predictedEndHandleRegion = { height: 20, width: 20, x: 1118, y: 373 };
+
+  const beforeStart = await page.screenshot({ clip: startHandleRegion });
+  const beforePredictedEnd = await page.screenshot({ clip: predictedEndHandleRegion });
+
+  await designPage.dragVectorPoint(1000, 200, 1050, 150); // grab the already-selected (real) start handle and drag it by (50,-50)
+
+  const afterStart = await page.screenshot({ clip: startHandleRegion });
+  const afterPredictedEnd = await page.screenshot({ clip: predictedEndHandleRegion });
+
+  expect(afterStart.equals(beforeStart)).toBe(false); // the dragged handle itself moved
+  expect(afterPredictedEnd.equals(beforePredictedEnd)).toBe(false); // the preview-only handle landed exactly (50,-50) away too
+});
+
 test('dragging a marquee over empty space selects every vertex whose point falls inside it, leaving points outside untouched', async ({
   page,
 }) => {

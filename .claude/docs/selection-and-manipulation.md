@@ -1299,13 +1299,20 @@ synchronous ref/state edit, gesture ends there). This means a shift+click can le
 — some vertices and some handles selected together — which is the point: "to są wspólne punkty na
 wektorze" (they're the same kind of selectable point), asked for directly.
 
-**The group-move box — translate-only, deliberately no resize/rotate corners.** Once 2+ points are
-selected (mixed vertices/handles), `drawVectorMultiSelectBox.ts` draws a plain stroke rectangle over
-`getVectorMultiSelectBounds.ts`'s bounds (vertex positions + resolved handle absolute positions, same
-`getEffectiveTangentStart`/`tangentEnd` resolution the render/hit-test layers already use) — no
-`drawCornerHandles` call, unlike every other bounds-box in this file (`drawGroupSelectionOutline.ts`
-included) which all draw corner handles. Clicking inside that box (not on a specific point, not
-shift-held) arms `vectorMultiDragRef` (`TVectorMultiDragState`, a new type: `vertexOrigins` +
+**The group-move box — vertices only, deliberately excludes any selection containing a tangent handle.**
+*(Superseded in part, see [[vector-network]] §31: the box gained real resize/rotate corner handles in a
+later, separate pass, and its eligibility narrowed from "2+ points, mixed vertices/handles allowed" to
+"2+ points, zero tangent handles" — a bounding box with resize/rotate semantics has no clean definition
+for a set of tangent-handle control points, and Figma doesn't have one for this case either.)* Originally:
+once 2+ points were selected (mixed vertices/handles allowed), `drawVectorMultiSelectBox.ts` drew a plain
+stroke rectangle over `getVectorMultiSelectBounds.ts`'s bounds (vertex positions + resolved handle
+absolute positions, same `getEffectiveTangentStart`/`tangentEnd` resolution the render/hit-test layers
+already use) — no `drawCornerHandles` call, unlike every other bounds-box in this file
+(`drawGroupSelectionOutline.ts` included) which all draw corner handles. A handle-only or mixed
+multi-selection can still be dragged as a rigid group today — just never via a box interior click, only by
+grabbing one of its own already-selected members directly (`armVectorGroupDrag.ts`). Clicking inside that
+box (not on a specific point, not shift-held) arms `vectorMultiDragRef` (`TVectorMultiDragState`, a new
+type: `vertexOrigins` +
 `handleOrigins` — the latter keyed by `` `${end}:${segmentId}` ``, snapshotting the *absolute* tangent
 value at arm time since a rigid group translate needs per-point origin+delta, unlike single-handle drag's
 absolute recompute-from-vertex shape). `continueVectorMultiDrag.ts` then translates every origin by the
