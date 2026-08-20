@@ -569,6 +569,27 @@ test('dragging a marquee over empty space selects every vertex whose point falls
   expect(afterV3.equals(beforeV3)).toBe(true);
 });
 
+test('dragging a marquee over a segment’s own middle selects it, even though neither endpoint vertex falls inside the box', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-marquee-select-segment');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawOpenTriangle(designPage); // v1(900,300), v2(1050,300), v3(1050,450) — v1-v2 is a straight horizontal segment
+  await designPage.selectTool('default');
+
+  const midpointRegion = { height: 20, width: 20, x: 965, y: 290 }; // (975, 300), well clear of both v1 and v2
+  const before = await page.screenshot({ clip: midpointRegion });
+
+  // a marquee spanning x 950-1000, y 290-310 — squarely over the segment's middle, missing both v1(900,300) and v2(1050,300)
+  await designPage.dragVectorPoint(950, 290, 1000, 310);
+
+  const after = await page.screenshot({ clip: midpointRegion });
+  expect(after.equals(before)).toBe(false);
+});
+
 test('hovering a segment with the Move tool highlights it in blue at partial opacity, distinct from both the neutral look and a fully-selected segment', async ({
   page,
 }) => {

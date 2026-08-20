@@ -12,6 +12,7 @@ export const armVectorMarqueeOnPointerDown = ({ canvas, canvasRefs, event, hit, 
     canvasRefs.selectedVectorVertexIdsRef.current = [];
     canvasRefs.selectedVectorHandlesRef.current = [];
     canvasRefs.selectedVectorSegmentIdsRef.current = [];
+    selectionRefs.vectorMarqueeModeRef.current = null;
     selectionRefs.vectorMarqueeStartRef.current = point;
     canvas.setPointerCapture(event.pointerId);
 

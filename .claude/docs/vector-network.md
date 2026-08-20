@@ -1142,6 +1142,47 @@ armVectorHandleOnPointerDown.ts`, `resolveVectorTangentHandleHover.ts`) now comp
 careful about which one goes where — the narrow one to vertex-dot/box rendering, the wide one to
 one-hop/tangent-visibility — rather than the one-array shortcut the first attempt took.
 
+## 23. Marquee-select widened to handles and segments, with a Figma-parity "first catch locks the
+gesture" rule
+
+Before this, `continueVectorMarqueeDrag.ts` only ever computed `getVectorPointsInRect.ts` (vertices) —
+tangent handles and segments could never be marquee-selected at all, only clicked individually. Asked for
+directly, describing Figma's own behavior: "Jak zaznaczy jeden point to pozwala tylko pointy zaznaczać.
+Jak zaznaczy tangen albo segment to pozwala wtedy wszystko zaznaczać" (catching one point only allows
+catching points; catching a tangent or a segment then allows catching everything) — clarified further
+once the first cut only looked at each frame's rect contents in isolation: "jak wybierzemy tangen albo
+segment i potem point to mają być wszystkie zaznaczone... Chodzi o to że jeśli point będzie pierwszy...
+To blokuje resztę" (select a tangent/segment and then a point — everything should end up selected; the
+exclusivity only kicks in when the *point* is first, which then blocks the rest).
+
+**Two new hit-test utilities, mirroring `getVectorPointsInRect.ts`'s shape** (`utils/canvas/vectorNetwork/`):
+- `getVectorHandlesInRect.ts` — tests every segment's **effective** tangent position (`getEffectiveTangentStart`/
+  `getEffectiveTangentEnd`, §9's default-preview construction) against the rect, point-in-rect, same as a
+  vertex — so a still-default (never-dragged) preview handle is just as catchable as a real one, consistent
+  with it already being click-grabbable.
+- `getVectorSegmentsInRect.ts` — **bounding-box overlap**, not "any flattened sample point falls in the
+  rect": a first version tested individual `flattenSegment` sample points, which is fine for a densely-
+  sampled curve but silently missed a marquee dropped over the *middle* of a plain straight segment, since
+  `flattenSegment` short-circuits a tangent-less segment to just its two endpoints (`start`, `end` — see §1)
+  with no interior samples at all. Bounding-box overlap (same "touch" semantics `getCollidedNodes.ts`
+  already uses for the scene-level marquee) fixes this for free and is cheaper besides.
+
+**The "first catch locks the gesture" rule** — `TVectorMarqueeMode = 'points' | 'everything'`
+(`types/design/selectionTool/types.ts`), tracked in a new ref (`vectorMarqueeModeRef`, `TSelectionToolRefs`,
+reset to `null` by `armVectorMarqueeOnPointerDown.ts` at arm time and again by `disarmVectorMarqueeDrag.ts`
+on release). `resolveVectorMarqueeMode.ts` (`handlePointerMove/`, its own file/tests for the pure decision)
+is the whole rule: return the existing mode unchanged if already resolved; otherwise resolve to `'points'`
+the first time any vertex is caught, `'everything'` the first time a handle or segment is caught with no
+vertex caught, or stay `null` if nothing's caught yet. `continueVectorMarqueeDrag.ts` computes all three
+hit-lists every frame regardless (cheap, and needed either way once resolved), calls
+`resolveVectorMarqueeMode` to (maybe) lock in the mode, then a `switch` on the resolved mode decides what
+actually lands in the three `selectedVector*Ref`s: `'points'` keeps handles/segments forced empty even once
+the growing box also covers them; `'everything'` includes all three live, so a point that enters the box
+*after* the lock already happened gets added alongside whatever handle/segment triggered it — the drag
+never reverts to points-only once unlocked, mirroring the "handle first, point added later" case from the
+direct clarification above. `null` (nothing caught by either the current frame or any earlier one) clears
+all three, same as before this feature existed.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows
