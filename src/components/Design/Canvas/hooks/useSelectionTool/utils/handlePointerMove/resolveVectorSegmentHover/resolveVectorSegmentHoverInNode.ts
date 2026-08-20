@@ -55,5 +55,7 @@ export const resolveVectorSegmentHoverInNode = (
     const midpointHit = getVectorSegmentMidpointAtPoint(point, bakedNode, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
 
     setClassName(midpointHit ? 'pen-extend' : null);
+  } else {
+    hoveredVectorEdgeInsertPointRef.current = null;
   }
 };

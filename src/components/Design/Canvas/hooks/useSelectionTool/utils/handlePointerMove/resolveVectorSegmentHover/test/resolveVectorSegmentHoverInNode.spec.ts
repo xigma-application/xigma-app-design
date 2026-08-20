@@ -24,7 +24,7 @@ const pointerEvent = (x: number, y: number, buttons = 0): PointerEvent =>
   new PointerEvent('pointermove', { buttons, clientX: x, clientY: y });
 
 const createHoveredVectorSegmentIdRef = (): RefObject<string | null> => ({ current: null });
-const createHoveredVectorEdgeInsertPointRef = (): RefObject<TPoint | null> => ({ current: null });
+const createHoveredVectorEdgeInsertPointRef = (value: TPoint | null = null): RefObject<TPoint | null> => ({ current: value });
 
 const addVectorNode = (): string => {
   store.dispatch(
@@ -169,9 +169,13 @@ describe('resolveVectorSegmentHoverInNode', () => {
     expect(setClassName).toHaveBeenCalledWith(null);
   });
 
-  it('should still update the hovered segment id but leave the insert-point/cursor alone while a mouse button is held', () => {
-    // mock — the insert-point dot and pen-extend cursor are hover-only affordances; a button held means
-    // some other drag owns the cursor right now (e.g. 'move'), which this must not clobber
+  it('should still update the hovered segment id but hide the insert-point dot and leave the cursor alone while a mouse button is held', () => {
+    // mock — the insert-point dot is a hover-only affordance; a button held means a drag is (or might be)
+    // in progress, e.g. moving the very segment the dot sat on — without this, the dot is left rendering
+    // at its last hover position while the segment moves out from under it (bug report: "jak ruszymy
+    // segment to ten point zostaje w starej pozycji" — moving the segment leaves the point at its old
+    // spot). Pre-seeding the ref with a stale point here catches a regression back to "just don't touch
+    // it," which happened to also read as null in a fresh ref and could look like this test still passed.
     const nodeId = addVectorNode();
 
     store.dispatch(setVectorEditingNodeId(nodeId));
@@ -179,7 +183,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
     const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
-    const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef();
+    const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef({ x: 50, y: 0 });
     const setClassName = vi.fn();
 
     // before
