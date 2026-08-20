@@ -50,8 +50,8 @@ describe('closeLoopOntoEdge', () => {
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef({ tangent: { x: 1, y: 1 }, vertexId: 'v3' });
 
-    // before
-    closeLoopOntoEdge(node, 'v3', 's1', { x: 50, y: 0 }, 'segment-connect', null, store.dispatch, pendingOutgoingTangentRef);
+    // before — t=0.5 along the straight v1(0,0)-v2(100,0) edge lands exactly on its midpoint
+    closeLoopOntoEdge(node, 'v3', 's1', 0.5, 'segment-connect', null, store.dispatch, pendingOutgoingTangentRef);
 
     // result
     const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
@@ -71,16 +71,7 @@ describe('closeLoopOntoEdge', () => {
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
 
     // before
-    closeLoopOntoEdge(
-      node,
-      'v3',
-      's1',
-      { x: 50, y: 0 },
-      'segment-connect',
-      { x: 5, y: 5 },
-      store.dispatch,
-      createPendingOutgoingTangentRef(),
-    );
+    closeLoopOntoEdge(node, 'v3', 's1', 0.5, 'segment-connect', { x: 5, y: 5 }, store.dispatch, createPendingOutgoingTangentRef());
 
     // result
     const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;

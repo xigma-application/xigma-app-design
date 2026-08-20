@@ -283,7 +283,7 @@ describe('drawVectorEditHandlesLayer', () => {
     // before
     call(vectorNode.id, [], null, null, null, 'v1', null, [], { x: 30, y: 40 });
 
-    // result — the real v1 handle line (0,0 -> 5,0), v2's own default preview handle line (10,0 -> 7.5,0,
+    // result — the existing v1 handle line (0,0 -> 5,0), v2's own default preview handle line (10,0 -> 7.5,0,
     // now also revealed since v1 counts as selected via penActiveVertexId), plus the drag-preview line
     // (0,0 -> 30,40)
     expect(drawLineMock).toHaveBeenCalledTimes(3);
@@ -397,10 +397,10 @@ describe('drawVectorEditHandlesLayer', () => {
       IDENTITY_VIEWPORT,
     );
 
-    // result — s1 has no tangent so it draws nothing; s2's real tangentStart handle at B draws (10,0)+(5,0)=(15,0),
-    // and since B is a selected endpoint of s2, C's own default preview handle draws too (20,0)+(-2.5,0)=(17.5,0)
-    expect(drawLineMock).toHaveBeenCalledTimes(2);
+    // result — s1 has no tangent so it draws nothing; B is one hop from A via straight s1, so s2's real
+    // tangentStart handle at B draws (10,0)+(5,0)=(15,0) — but s2 does not directly touch A, so C's own end
+    // stays hidden (one-hop-by-vertex reveals only B's own handle, not the far end of B's other segment)
+    expect(drawLineMock).toHaveBeenCalledTimes(1);
     expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 10, x2: 15, y1: 0, y2: 0 }, '#aaaaaa', 1, 200, 150, IDENTITY_VIEWPORT);
-    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 20, x2: 17.5, y1: 0, y2: 0 }, '#aaaaaa', 1, 200, 150, IDENTITY_VIEWPORT);
   });
 });

@@ -10,7 +10,7 @@ import { setPenActiveVertexId, updateNode } from 'store/design/slice';
 import { AppDispatch } from 'store';
 
 // types
-import { TPenDragOrigin } from '../../types';
+import { TPenDragOrigin, TPendingOutgoingTangent } from '../../types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode, TViewport } from 'types/design/types';
 
@@ -19,6 +19,9 @@ import { getVectorEdgeAtPoint } from '../../../../utils/getVectorEdgeAtPoint';
 import { getVectorVertexAtPoint } from '../../../../utils/getVectorVertexAtPoint';
 import { splitVectorSegment } from './splitVectorSegment';
 
+const getEdgeHit = (point: TPoint, node: TVectorNode, viewport: TViewport): { segmentId: string; t: number } | null =>
+  getVectorEdgeAtPoint(point, node, VECTOR_EDGE_HIT_TOLERANCE_PX / viewport.zoom, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
+
 export const startVectorFragment = (
   point: TPoint,
   node: TVectorNode,
@@ -26,17 +29,17 @@ export const startVectorFragment = (
   dispatch: AppDispatch,
   dragOriginRef: RefObject<TPenDragOrigin | null>,
   dragStartRef: RefObject<TPoint | null>,
+  pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
 ): void => {
   const hover = getVectorVertexAtPoint(point, node, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
-  const edgeHit = hover
-    ? null
-    : getVectorEdgeAtPoint(point, node, VECTOR_EDGE_HIT_TOLERANCE_PX / viewport.zoom, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
+  const edgeHit = hover ? null : getEdgeHit(point, node, viewport);
+  pendingOutgoingTangentRef.current = null;
 
   if (hover) {
     dispatch(setPenActiveVertexId(hover.vertexId));
     dispatch(endHistoryGesture());
   } else if (edgeHit) {
-    const { newVertexId, segments, vertices } = splitVectorSegment(node, edgeHit.segmentId, edgeHit.point);
+    const { newVertexId, segments, vertices } = splitVectorSegment(node, edgeHit.segmentId, edgeHit.t);
 
     dispatch(updateNode({ changes: { segments, vertices }, id: node.id }));
     dispatch(setPenActiveVertexId(newVertexId));

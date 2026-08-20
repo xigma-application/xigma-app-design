@@ -29,7 +29,7 @@ export const startOrContinueVectorNetwork = (
   if (!node) {
     startNewVectorNetwork(point, dispatch, appStore, dragOriginRef, dragStartRef);
   } else if (!penActiveVertexId) {
-    startVectorFragment(point, node, viewport, dispatch, dragOriginRef, dragStartRef);
+    startVectorFragment(point, node, viewport, dispatch, dragOriginRef, dragStartRef, pendingOutgoingTangentRef);
   } else {
     continueVectorNetwork(point, node, penActiveVertexId, viewport, dispatch, dragOriginRef, dragStartRef, pendingOutgoingTangentRef);
   }

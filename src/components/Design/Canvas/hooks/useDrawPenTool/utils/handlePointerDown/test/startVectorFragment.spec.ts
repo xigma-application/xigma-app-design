@@ -6,7 +6,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TPenDragOrigin } from '../../../types';
+import { TPenDragOrigin, TPendingOutgoingTangent } from '../../../types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
@@ -17,6 +17,9 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const createDragOriginRef = (): RefObject<TPenDragOrigin | null> => ({ current: null });
 const createDragStartRef = (): RefObject<TPoint | null> => ({ current: null });
+const createPendingOutgoingTangentRef = (pending: TPendingOutgoingTangent | null = null): RefObject<TPendingOutgoingTangent | null> => ({
+  current: pending,
+});
 
 const addVectorNode = (): string => {
   store.dispatch(
@@ -73,14 +76,33 @@ describe('startVectorFragment', () => {
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const dragOriginRef = createDragOriginRef();
     const dragStartRef = createDragStartRef();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
 
     // before
-    startVectorFragment({ x: 1, y: 1 }, node, IDENTITY_VIEWPORT, store.dispatch, dragOriginRef, dragStartRef);
+    startVectorFragment({ x: 1, y: 1 }, node, IDENTITY_VIEWPORT, store.dispatch, dragOriginRef, dragStartRef, pendingOutgoingTangentRef);
 
     // result
     expect(store.getState().design.penActiveVertexId).toBe('v1');
     expect(Object.keys((store.getState().design.nodes[nodeId] as TVectorNode).vertices)).toEqual(['v1']);
     expect(dragOriginRef.current).toBeNull();
+  });
+
+  it('should clear a stale pending outgoing tangent left over from a fragment ended earlier (e.g. by Escape) when resuming an existing vertex', () => {
+    // mock — mirrors interrupting a click-drag curve with Escape, then clicking back onto that same vertex:
+    // nothing in this codebase clears pendingOutgoingTangentRef on Escape or on tool switches, so without this
+    // reset the resumed vertex would silently inherit the old drag's tangent and instantly render/commit a
+    // curve on the very next pointermove/click, even though the user only intended a plain click
+    const nodeId = addVectorNode();
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const dragOriginRef = createDragOriginRef();
+    const dragStartRef = createDragStartRef();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef({ tangent: { x: 40, y: 40 }, vertexId: 'v1' });
+
+    // before
+    startVectorFragment({ x: 1, y: 1 }, node, IDENTITY_VIEWPORT, store.dispatch, dragOriginRef, dragStartRef, pendingOutgoingTangentRef);
+
+    // result
+    expect(pendingOutgoingTangentRef.current).toBeNull();
   });
 
   it('should add a new vertex and arm the drag when clicking away from any existing vertex', () => {
@@ -89,9 +111,10 @@ describe('startVectorFragment', () => {
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const dragOriginRef = createDragOriginRef();
     const dragStartRef = createDragStartRef();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
 
     // before
-    startVectorFragment({ x: 50, y: 50 }, node, IDENTITY_VIEWPORT, store.dispatch, dragOriginRef, dragStartRef);
+    startVectorFragment({ x: 50, y: 50 }, node, IDENTITY_VIEWPORT, store.dispatch, dragOriginRef, dragStartRef, pendingOutgoingTangentRef);
 
     // result
     const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
@@ -109,9 +132,10 @@ describe('startVectorFragment', () => {
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const dragOriginRef = createDragOriginRef();
     const dragStartRef = createDragStartRef();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
 
     // before
-    startVectorFragment({ x: 50, y: 0 }, node, IDENTITY_VIEWPORT, store.dispatch, dragOriginRef, dragStartRef);
+    startVectorFragment({ x: 50, y: 0 }, node, IDENTITY_VIEWPORT, store.dispatch, dragOriginRef, dragStartRef, pendingOutgoingTangentRef);
 
     // result
     const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;

@@ -412,8 +412,10 @@ double-click handler at all, regardless of teardown timing.
 only once `viewport.zoom >= GRID_MIN_ZOOM` (4, i.e. 400%, matching Figma's own threshold) —
 `drawScene.ts` calls it unconditionally every frame and the gate lives inside the function itself
 (same "no branch in the orchestrator" shape as every other optional layer here). Since world space is
-already "1 unit = 1px" (§4; nodes snap to whole pixels), a grid line drawn at every integer world
-coordinate makes a 1×1 node's edges land exactly on the grid with no separate snapping logic needed.
+already "1 unit = 1px" (§4; most node types snap to whole pixels — Vector Network points are the one
+exception, snapping to the half-pixel grid instead, [[vector-network]] §13), a grid line drawn at every
+integer world coordinate makes a 1×1 node's edges land exactly on the grid with no separate snapping logic
+needed.
 
 **Why a shader, not `GL_LINES`**: at 400%+ zoom the visible world spans hundreds of grid cells;
 drawing one vertex pair per row/column would mean regenerating and re-clipping thousands of line

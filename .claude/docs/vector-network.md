@@ -209,9 +209,11 @@ files, "przenieść wyżej... a tamten folder zmienić na jakąś ogólną nazw�
   `'vertex'`/`'edge-snap'` → `'pen-snap'`, `'edge'` → `'pen-extend'` (an until-then-unused cursor asset
   that already existed in `canvas.module.scss`/`assets/icons/cursors/`), `null` → `'pen'`. Same mapping
   used by both the idle and active-draw branches. `startVectorFragment.ts`/`continueVectorNetwork.ts`
-  (§6) both pass the resolver's `point` (whichever of the two tiers matched), not the raw click
-  coordinate, into `splitVectorSegment.ts`/`closeLoopOntoEdge.ts` — the committed split point always
-  matches whatever was last previewed.
+  (§6) both pass the resolver's `t` (the curve parameter at whichever of the two tiers matched, §12 —
+  not the raw click coordinate, and no longer the resolved `point` either since §12) into
+  `splitVectorSegment.ts`/`closeLoopOntoEdge.ts` — the committed split point always matches whatever was
+  last previewed, now derived exactly from `t` rather than from the (slightly lossy, polyline-projected)
+  preview point.
 
 **Rendering — `drawScene/drawVectorEditHandlesLayer/drawVectorEditOutline/`**, promoted from a single
 flat file to its own folder once it grew a second, unrelated `if`-branch (the "ifologia" split rule,
@@ -278,10 +280,9 @@ New entries in `handlePointerDown/constants.ts`'s `ARM_RESOLVERS` (highest prior
   — to split it, one-shot `updateNode`, no drag state) and fired regardless of active tool. Removed
   from `ARM_RESOLVERS` and the file deleted outright — Figma only allows edge-splitting with the Pen
   tool active, so this stayed a Move-tool affordance too long. The split math itself moved to
-  `useDrawPenTool/utils/handlePointerDown/splitVectorSegment.ts` (still: original `tangentStart`/
-  `tangentEnd` kept on the outer ends of the two new segments, the new shared vertex gets straight/null
-  tangents on both sides — not proper De Casteljau subdivision, see §7, just a visually-reasonable
-  split) and is now called from two Pen-tool sites: `startVectorFragment.ts` (Pen idle, no active
+  `useDrawPenTool/utils/handlePointerDown/splitVectorSegment.ts` — proper De Casteljau subdivision
+  since §12, not just a visually-reasonable approximation — and is now called from two Pen-tool sites:
+  `startVectorFragment.ts` (Pen idle, no active
   vertex — clicking an edge splits it and arms the new vertex as `penActiveVertexId`, ready for
   immediate extension, same as clicking empty canvas would) and
   `continueVectorNetwork/closeLoopOntoEdge.ts` (Pen mid-extension — clicking an edge splits it **and**
@@ -528,43 +529,61 @@ tangent-handle line/diamond even though it's never written to `segment.tangentSt
 disappears the moment the drag ends (asked for directly: "tymczasowo rysować tangen odbity w stronę
 kursora... Potem tangen ten przy kursorze ginie").
 
-## 10. Tangent-handle visibility — hidden unless a selected vertex is one of the segment's two endpoints
+## 10. Tangent-handle visibility — hidden unless a selected vertex directly touches or one-hops to a segment
 
 Landed as a follow-up after §9 shipped a click-and-drag mirrored preview — tangent handles used to render
 for **every** segment of the edited network unconditionally (`drawSegmentTangentHandles.ts` drew both ends
 regardless of any selection state), which cluttered any network with more than a couple of curved segments.
-Figma parity, asked for directly: selecting a vertex reveals the tangent handles of **every segment touching
-it** — both that vertex's own handle **and** the handle at the far/neighbor end of each such segment — but
-goes no further than that one hop (the neighbor's *other* segments, if any, stay hidden). A branch vertex
-with several segments (a "starburst" — the concrete case this was verified against) reveals one pair of
-handles per touching segment, all at once. Clicking a handle directly (which, per §6, replaces vertex
-selection with handle selection) keeps that one handle visible even once its vertex is no longer selected.
+Went through three real rounds of live user correction before landing on the final rule below — each round's
+"fix" turned out to satisfy one confirmed case while breaking another, until the two rules were finally kept
+**separate** instead of collapsed into one. Worth reading the whole arc if touching this code again, since
+the two rules look almost redundant at a glance but aren't.
 
-**Segment-level visibility, `isVectorSegmentEndpointSelected.ts` (`utils/canvas/vectorNetwork/`) — one
-predicate shared by rendering and hit-testing** — `(segmentStartId, segmentEndId, selectedVertexIds) =>
-selectedVertexIds.includes(segmentStartId) || selectedVertexIds.includes(segmentEndId)`. Deliberately
-**not** parameterized by which end the handle in question belongs to — a segment either has a selected
-endpoint or it doesn't, and when it does, *both* of its handles (if they exist at all — a segment with no
-tangent on some end still draws nothing there, visibility is only an additional gate on top of that) become
-visible together, which is what produces the one-hop neighbor reveal. The "handle itself selected" exception
-is layered on top of this at each call site (`isSegmentEndpointSelected || isThisEndSpecificallySelected`),
-since that part genuinely is per-end, not per-segment.
+**The final rule, confirmed directly against concrete screenshots for both halves:**
+1. **A segment directly touching a selected/active vertex always reveals *both* its ends** — "Tak, zawsze —
+   dla każdego segmentu dotykającego P" (yes, always, for every segment touching P), confirmed against a
+   real curve where the selected vertex is one of the segment's own two endpoints: own handle *and* the
+   far/neighbor handle on that same segment both show, regardless of whether that segment is straight or
+   curved. A branch vertex with several segments (a "starburst") reveals one pair per touching segment, all
+   at once — this is what "one hop, both directions" meant in the very first request for this feature.
+2. **A segment reached only through a one-hop *straight* corridor reveals *only* the corridor-connected
+   end** — not the far end of that segment too. Concretely: `A --plain click, straight--> B --click-drag,
+   curve--> C`, selecting `A`: `B`'s own handle on the `B`–`C` segment shows (Figma parity — the straight
+   corner is transparent, so `B` counts as reached), but `C`'s own handle does **not**, since `C` is two
+   conceptual hops from `A` and `B`–`C` never directly touches `A`. Confirmed directly: "Ma być tylko tangen
+   tego pierwszego a pokazuje dwa" (there should only be the first one's tangent, but it shows two).
 
-- **Rendering**: `drawSegmentTangentHandles.ts` computes `isSegmentEndpointSelected` once per segment, then
-  `isStartVisible = isSegmentEndpointSelected || isStartSelected` / `isEndVisible = isSegmentEndpointSelected
-  || isEndSelected` — a plain gate around the pre-existing `if (handleStart)`/`if (handleEnd)` checks, not a
-  new drawing path. `selectedVertexIds` threads one level further down than before: `drawVectorEditHandlesLayer.ts`
-  → `drawVectorTangentHandles.ts` → `drawSegmentTangentHandles.ts`.
-- **Hit-testing/hover**: `getVectorHandleAtPoint.ts` gained `selectedVertexIds`/`selectedHandles` params and
-  computes the same `isSegmentEndpointSelected` once per segment inside its own `Object.values(node.segments)`
-  loop (candidates are pushed conditionally now, rather than built unconditionally then filtered after —
-  needed because the per-segment context, not just the per-candidate `vertexId`, is what visibility depends
-  on) — an invisible handle is never returned as a hit, so `armVectorHandleOnPointerDown.ts` (drag-arm) and
-  `resolveVectorTangentHandleHover.ts` (cursor/highlight) both stay consistent with what's on screen for
-  free, with no separate visibility check of their own.
+**Why these can't be merged into a single "OR over one expanded set" check** (the mistake made twice before
+landing here): if you fold rule 2's one-hop set into the *same* vertex-id list rule 1's "either end in the
+set → show both ends" checks against, a corridor-reached vertex (`B` above) — now sitting in that combined
+set purely because it's one hop from `A` — makes rule 1 fire for **`B`'s *other* segment** too, revealing
+its far end (`C`'s handle) as an unwanted side effect. This is exactly the regression reported as "teraz
+patrzy o jeden za daleko" (now it looks one too far) after the first attempt to reuse one shared set. The fix
+is keeping **two separate id lists** and checking both, not merging them:
+
+- `selectedVertexIds` — the literal selection (`visualSelectedVertexIds`: real selection + `penActiveVertexId`,
+  see below) — used **only** for the "does this segment directly touch the selection" check
+  (`isVectorSegmentEndpointSelected.ts`, `utils/canvas/vectorNetwork/`: `(segmentStartId, segmentEndId,
+  selectedVertexIds) => selectedVertexIds.includes(segmentStartId) || selectedVertexIds.includes(segmentEndId)`) —
+  when true, **both** ends are visible, full stop.
+- `oneHopVertexIds` (`getOneHopVectorVertexIds.ts`, `utils/canvas/vectorNetwork/`) — the selection expanded by
+  one hop, but **only** through segments carrying no tangent at all (`!segment.tangentStart &&
+  !segment.tangentEnd` — a real curve is an opaque boundary the expansion never crosses, a plain corner is
+  transparent to it) — checked **per end, independently** (`oneHopVertexIds.includes(segment.startId)` /
+  `...endId`), *only* as a fallback when rule 1 didn't already make the segment visible.
+
+Combined per end: `isStartVisible = isSegmentDirectlyTouchingSelection || oneHopVertexIds.includes(segment.startId)
+|| isStartHandleItselfSelected` (and the mirror for `isEndVisible`). `drawSegmentTangentHandles.ts` and
+`getVectorHandleAtPoint.ts` both compute it this exact way, taking `selectedVertexIds` **and**
+`oneHopVertexIds` as two separate parameters (not one pre-merged list) — `drawVectorEditHandlesLayer.ts`,
+`armVectorHandleOnPointerDown.ts`, and `resolveVectorTangentHandleHover.ts` each compute
+`oneHopVertexIds = getOneHopVectorVertexIds(node, visualSelectedVertexIds)` once and pass both down. The
+"handle itself selected" exception is layered on top of this at each call site, since that part is
+genuinely per-end, never per-segment.
+
 - **The Pen tool's still-active vertex counts as "selected" too, matching §3/§9's live-drawing UX.**
   `drawVectorEditHandlesLayer.ts` already computed `visualSelectedVertexIds` (real selection +
-  `penActiveVertexId`, when set) for vertex-dot rendering; the same merge is now a named helper,
+  `penActiveVertexId`, when set) for vertex-dot rendering; the same merge is a named helper,
   `getVisualSelectedVectorVertexIds.ts` (`utils/canvas/vectorNetwork/`), reused by the renderer **and** by
   `armVectorHandleOnPointerDown.ts`/`resolveVectorTangentHandleHover.ts` before they call
   `getVectorHandleAtPoint`. This matters concretely: `penActiveVertexId` persists across a tool switch away
@@ -585,27 +604,115 @@ since that part genuinely is per-end, not per-segment.
   `segment.tangentEnd` raw, same non-destructive preview-only contract as the original. The shared ratio
   constant was renamed `VECTOR_DEFAULT_TANGENT_PREVIEW_RATIO` (was `..._START_RATIO`) since it now scales
   a preview in either direction, not just the start one.
-- **One-hop reveal through a plain (tangent-less) connector — `getOneHopVectorVertexIds.ts`, and the
-  "opaque curve" fix that followed a real regression.** Reported directly, with screenshots, mid-session: a
-  network authored as `A --plain click, no drag--> B --click-drag, real curve--> C` (a straight segment
-  followed by a curved one) failed to reveal `B`–`C`'s handles when only `A` was selected — because
-  `isVectorSegmentEndpointSelected` (above) only ever checked a segment's own two ids against the *literal*
-  `selectedVertexIds`, and `B` was never added to that list just for being `A`'s neighbor across a
-  tangent-less segment. `getOneHopVectorVertexIds.ts` computes an expanded id set — the selection plus, for
-  every **straight** segment (`!segment.tangentStart && !segment.tangentEnd`) touching a selected vertex,
-  that segment's *other* endpoint too — and this expanded set (not the raw selection) is what
-  `drawVectorEditHandlesLayer.ts`/`armVectorHandleOnPointerDown.ts`/`resolveVectorTangentHandleHover.ts` now
-  feed into `isVectorSegmentEndpointSelected`. A first version expanded through **every** touching segment
-  regardless of whether it carried a real tangent — reported broken immediately after ("pokazuje o jeden
-  punkt za daleko w obie strony", confirmed against a starburst where the selected vertex's own two curved
-  neighbors are legitimate one-hop reveals, but *their* other segments must not be): since a real curve's
-  far vertex also got added to the expanded set, *any other segment touching that vertex* then satisfied
-  `isVectorSegmentEndpointSelected` too, cascading a second hop. The fix restricts expansion to straight
-  segments only — a real curve now acts as an opaque boundary that stops the reveal, while a plain
-  click-placed corner (no tangent, i.e. visually invisible as its own "shape") is transparent to it, which
-  is what a plain corner should feel like: not a real segment worth stopping at. Confirmed against both the
-  straight→curve chain and an all-curved starburst (`getOneHopVectorVertexIds.spec.ts` covers both, plus the
-  no-segments and multi-branch cases).
+
+## 11. Gotcha, shipped-and-fixed — a stale `pendingOutgoingTangentRef` surviving an Escape-interrupted fragment
+
+Reported directly, with before/after screenshots: click-drag to curve a segment, press `Escape` (stage 1,
+§5 — clears only `penActiveVertexId`, ends the fragment), then click straight back onto that same vertex to
+resume drawing from it. The very next `pointermove` (or even the resuming click itself, if the pointer moved
+at all between down and up) instantly rendered — and would commit — a brand-new curved tangent the user never
+dragged for, "wchodzi w tryb robienia kolejnego tangentu" (enters the mode of making another tangent) purely
+from a plain click, and the effect felt wildly oversensitive to the tiniest cursor movement ("bardzo
+wrażliwe są te łuki").
+
+**Root cause: `pendingOutgoingTangentRef` (§4, hook-local to `useDrawPenTool`, never lifted to `TCanvasRefs`)
+is only ever cleared when a segment actually commits** (`extendWithNewVertex.ts`/`closeLoopOntoVertex.ts`/
+`closeLoopOntoEdge.ts`, inside `continueVectorNetwork/`) — nothing clears it when a fragment merely *ends*
+without committing anything further: not Escape (dispatches a plain Redux `setPenActiveVertexId(null)`, with
+no way to reach a ref private to a different hook instance's closure), not switching tools, not
+`startVectorFragment.ts`'s own `hover` branch (resuming an *existing* vertex via a plain click). So the ref
+kept holding `{ tangent: <the earlier drag's delta>, vertexId: <the same vertex just resumed> }` across the
+entire interruption. Both consumers of this ref — `updateVectorPenPreview.ts` (idle rubber-band preview) and
+`continueVectorNetwork.ts`'s `getTangentStart` (the next committed segment's `tangentStart`) — only check
+`pending.vertexId === activeVertexId`, with no concept of "is this the *same drawing session* as when the
+tangent was staged, or a resumed one." Resuming the exact vertex that had a staged tangent made that check
+pass trivially, silently reusing stale, unrelated drag-delta math for the new session.
+
+**Fix: `startVectorFragment.ts` now unconditionally resets `pendingOutgoingTangentRef.current = null` before
+its three branches run** (`hover`/`edgeHit`/blank-canvas) — the function threads the ref through as a new
+parameter (`startOrContinueVectorNetwork.ts` passes it along, already had it in scope for the sibling
+`continueVectorNetwork` call). Scoped correctly: `startVectorFragment` only ever runs at the *start* of a
+fragment (`penActiveVertexId === null`, per `startOrContinueVectorNetwork.ts`'s branch), never mid-fragment
+— so this can't clobber the legitimate same-session carry-over `continueVectorNetwork.ts` relies on for
+consecutive smooth-mirrored segments (v1→v2→v3 within one continuous draw). `startNewVectorNetwork.ts`
+(brand-new node, fresh `nanoid()` vertex id) was deliberately left untouched — a freshly generated id can
+never collide with a stale `pending.vertexId`, so the guard there is already unreachable and adding a redundant
+clear would just be dead defensive code.
+
+## 12. Edge-splitting via proper De Casteljau subdivision — the naive split retired
+
+Reported directly, with screenshots: inserting a new point on an existing **curved** segment (Pen idle,
+clicking mid-edge, §6) visibly kinked the curve right at the new point. `splitVectorSegment.ts` originally
+did the simplest thing that could work — keep the original `tangentStart` on the first new segment,
+the original `tangentEnd` on the second, and null both tangents at the newly shared vertex — which is
+flagged in the git history as a deliberate simplification, not an oversight, but real testing showed the
+resulting kink is visually obvious on anything but a very shallow curve, and it's a well-known, exactly
+solvable problem: standard cubic Bezier subdivision.
+
+**`splitCubicBezier.ts` (`utils/canvas/vectorNetwork/`) implements the standard De Casteljau construction**
+— given the segment's absolute control points (`start`, `start+tangentStart` or `start` itself if null,
+`end+tangentEnd` or `end` itself if null, `end` — the same "missing tangent's control point coincides with
+its vertex" convention `flattenSegment.ts` already used for rendering, kept consistent here) and a split
+parameter `t`, it computes the two new cubic curves via three rounds of linear interpolation and converts
+the resulting absolute control points back into the codebase's tangent-offset representation
+(`{x,y}` relative to each segment's own vertex). The defining property of this construction — unlike the
+naive split — is that the union of the two output curves retraces the **exact same path** as the original,
+for any `t`: no visual kink is possible by construction, not just approximated away. A fully straight
+segment (`!tangentStart && !tangentEnd`) short-circuits to a plain linear interpolation of the split point
+with every output tangent `null`, mirroring `flattenSegment.ts`'s own straight-line fast path — running the
+full subdivision math on a degenerate (zero-length control arm) bezier does *not* reduce to "stays straight"
+on its own and was verified to introduce spurious curvature before this guard was added. A resulting tangent
+offset that comes out as exactly `{x:0,y:0}` (always exact, never a floating-point near-miss, since it only
+happens when the corresponding input tangent was itself `null`) is reported as `null` rather than a
+zero-length object, so a still-straight side of a partially-curved segment doesn't accidentally start
+looking like a "real" zero-length tangent to `getEffectiveTangentStart.ts`/`getEffectiveTangentEnd.ts`'s
+truthiness checks (§9, §10) — those exist specifically to derive a *preview* handle when a tangent is
+genuinely absent, and a stray zero-length object would silently defeat that.
+
+**Finding the split parameter `t` — extending the existing polyline-projection hit-test rather than adding
+a second one.** `getVectorEdgeAtPoint.ts` already flattens a segment into `VECTOR_CURVE_SEGMENTS` uniform-`t`
+samples and finds the closest point via `getClosestPointOnLine.ts` on whichever consecutive pair the cursor
+falls nearest to (§4's edge-hover mechanism, shared verbatim). `getClosestPointOnLine.ts` was extended to
+also return the local projection ratio (`{ point, t }` instead of a bare point — its only caller already
+lived in this same file, so this was a safe, non-breaking signature change) and `getVectorEdgeAtPoint.ts`
+combines that local ratio with the sample pair's index to recover the full-curve `t = (index + localT) /
+(points.length - 1)` — dividing by the *actual* flattened point count rather than the `VECTOR_CURVE_SEGMENTS`
+constant directly, since a fully straight segment's fast path only ever produces 2 points regardless of that
+constant. When the hover snaps to the segment's exact midpoint (the pre-existing "suggested insertion point"
+tier, §4), `t` is hardcoded to exactly `0.5` rather than whatever the polyline projection happened to
+compute — matching `getSegmentMidpoint.ts`'s own construction (`flattenSegment(...,2)[1]`, the literal `t=0.5`
+sample) exactly, so a snapped click and a non-snapped click landing on the same pixel don't silently split at
+two different parameters.
+
+**`splitVectorSegment.ts` now takes `t` instead of a `point`, and derives the split vertex's position from
+the subdivision itself** (`split.point`) rather than from the caller's (slightly lossy, polyline-approximated)
+hit-test position — the two are visually indistinguishable at `VECTOR_CURVE_SEGMENTS` resolution, but deriving
+position from the same computation that derives the tangents guarantees the vertex and its handles are always
+mutually consistent. Both call sites changed to match: `startVectorFragment.ts` (Pen idle) and
+`continueVectorNetwork/closeLoopOntoEdge.ts` (Pen mid-extension, §6) both now thread `edgeHit.t` through
+instead of `edgeHit.point`.
+
+## 13. Point placement snaps to the half-pixel grid, not the whole-pixel one — Figma parity
+
+Reported directly: "POint przyczepia się 1x1 px w figmie można się przesuwać o 0.5px w x i y" (the point
+snaps to a 1×1 px grid; in Figma you can move by 0.5px in x and y). Scoped to **drawing** specifically
+("Gdy rysuje") — placing/inserting new points with the Pen tool — not the already-unrounded post-hoc vertex
+drag (`continueVectorVertexDrag.ts` never rounded at all; dragging an *existing* vertex already had full
+float precision).
+
+**`roundVectorPoint.ts` (`utils/canvas/vectorNetwork/`)** — `{ x: Math.round(x*2)/2, y: Math.round(y*2)/2 }`
+— replaces the plain `Math.round(x)`/`Math.round(y)` pair at the two places `useDrawPenTool` turns a raw
+`screenToWorld` position into the `point` every placement decision is built from:
+`handlePointerDown/handlePointerDown.ts` (every click: new vertex, resumed vertex, edge-split hit-test) and
+`handlePointerMove/handlePointerMove.ts` (the live preview position, *and* the `point` fed into
+`updateVectorHandleDrag.ts`'s click-drag tangent shaping — so tangent handles shaped while placing a vertex
+also gained the finer grid, not just the vertex position itself). `splitVectorSegment.ts`'s own
+`Math.round(split.point.x)` (§12) was switched to the same helper for consistency — the De Casteljau split
+point now also lands on the half-pixel grid rather than the whole-pixel one.
+
+Every *downstream* consumer of these points — `startNewVectorNetwork.ts`, `startVectorFragment.ts`,
+`continueVectorNetwork/extendWithNewVertex.ts` — reads `point.x`/`point.y` straight through with no rounding
+of their own, so fixing it at these two upstream call sites was sufficient; nothing else needed touching.
 
 ## Related
 

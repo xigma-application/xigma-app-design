@@ -28,7 +28,7 @@ describe('getVectorHandleAtPoint', () => {
     );
 
     // action
-    const hit = getVectorHandleAtPoint({ x: 0, y: 0 }, node, 5, ['v1', 'v2'], []);
+    const hit = getVectorHandleAtPoint({ x: 0, y: 0 }, node, 5, ['v1', 'v2'], [], []);
 
     // result
     expect(hit).toEqual({ distance: 1, end: 'start', segmentId: 's1', vertexId: 'v1' });
@@ -42,7 +42,7 @@ describe('getVectorHandleAtPoint', () => {
     );
 
     // action
-    const hit = getVectorHandleAtPoint({ x: 0, y: 0 }, node, 5, ['v1', 'v2'], []);
+    const hit = getVectorHandleAtPoint({ x: 0, y: 0 }, node, 5, ['v1', 'v2'], [], []);
 
     // result
     expect(hit).toBeNull();
@@ -56,7 +56,7 @@ describe('getVectorHandleAtPoint', () => {
     );
 
     // action
-    const hit = getVectorHandleAtPoint({ x: 0, y: 0 }, node, 5, ['v1', 'v2'], []);
+    const hit = getVectorHandleAtPoint({ x: 0, y: 0 }, node, 5, ['v1', 'v2'], [], []);
 
     // result
     expect(hit).toBeNull();
@@ -70,7 +70,7 @@ describe('getVectorHandleAtPoint', () => {
     );
 
     // action
-    const hit = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, ['v1', 'v2'], []);
+    const hit = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, ['v1', 'v2'], [], []);
 
     // result
     expect(hit).toEqual({ distance: 0, end: 'start', segmentId: 's1', vertexId: 'v1' });
@@ -84,7 +84,7 @@ describe('getVectorHandleAtPoint', () => {
     );
 
     // action
-    const hit = getVectorHandleAtPoint({ x: 1, y: 0 }, node, 1, ['v1', 'v2'], []);
+    const hit = getVectorHandleAtPoint({ x: 1, y: 0 }, node, 1, ['v1', 'v2'], [], []);
 
     // result
     expect(hit).toEqual({ distance: 0, end: 'start', segmentId: 's1', vertexId: 'v1' });
@@ -98,7 +98,7 @@ describe('getVectorHandleAtPoint', () => {
     );
 
     // action
-    const hit = getVectorHandleAtPoint({ x: 8, y: 0 }, node, 1, ['v1', 'v2'], []);
+    const hit = getVectorHandleAtPoint({ x: 8, y: 0 }, node, 1, ['v1', 'v2'], [], []);
 
     // result
     expect(hit).toEqual({ distance: 0, end: 'end', segmentId: 's1', vertexId: 'v2' });
@@ -112,7 +112,7 @@ describe('getVectorHandleAtPoint', () => {
     );
 
     // action
-    const hit = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, [], []);
+    const hit = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, [], [], []);
 
     // result
     expect(hit).toBeNull();
@@ -126,31 +126,32 @@ describe('getVectorHandleAtPoint', () => {
     );
 
     // action
-    const hit = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, [], [{ end: 'start', segmentId: 's1' }]);
+    const hit = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, [], [], [{ end: 'start', segmentId: 's1' }]);
 
     // result
     expect(hit).toEqual({ distance: 0, end: 'start', segmentId: 's1', vertexId: 'v1' });
   });
 
-  it('should return the start handle (attached to v1) when only the far/neighbor vertex v2 is selected — one-hop reveal', () => {
-    // mock — Figma parity: selecting a vertex also reveals the handles of every segment touching it, including
-    // the neighbor's own end, not just the selected vertex's own end
+  it('should return the start handle (attached to v1) when v2 is directly selected — a directly-touching segment always reveals both ends', () => {
+    // mock — v2 is one of segment s1's own two endpoints, so both ends show unconditionally (confirmed
+    // directly: "Tak, zawsze — dla każdego segmentu dotykającego P")
     const node = buildNode(
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } },
       { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: { x: 2, y: 0 } } },
     );
 
     // action
-    const hit = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, ['v2'], []);
+    const hit = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, ['v2'], [], []);
 
     // result
     expect(hit).toEqual({ distance: 0, end: 'start', segmentId: 's1', vertexId: 'v1' });
   });
 
-  it('should not reveal a second segment’s far handle two hops away from the selected vertex', () => {
-    // mock — v1 -s1- v2 -s2- v3 chain; selecting v2 reveals both s1's and s2's handles (both touch v2), but
-    // s2's own start-tangent handle lives at v2 itself so it's already covered — the real one-hop boundary is
-    // that s1's tangentStart (attached to v1, far from v2) must stay hidden when only v3 is selected instead
+  it('should return the own-end handle of a vertex reached one hop away through a straight connector, but not the far end of that same segment', () => {
+    // mock — v1 -s1(real tangent)- v2 -s2(straight)- v3 chain; selecting v3 reaches v2 one hop away (through the
+    // straight s2), which reveals v2's own default-preview handle on s1's tangentEnd side (v2 + default offset
+    // (-1,0) = (9,0)) — but s1 does not directly touch v3, so v1's own handle (0,0)+(2,0)=(2,0) on the far side
+    // of that same segment must stay hidden (this is the one-hop-by-vertex, not one-hop-by-segment, distinction)
     const node = buildNode(
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 }, v3: { id: 'v3', x: 20, y: 0 } },
       {
@@ -159,10 +160,12 @@ describe('getVectorHandleAtPoint', () => {
       },
     );
 
-    // action — v3 selected, two segments away from s1's start handle at v1+(2,0)=(2,0)
-    const hit = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, ['v3'], []);
+    // action — v3 selected; v2 is the one-hop neighbor via straight s2
+    const hitOwnEnd = getVectorHandleAtPoint({ x: 9, y: 0 }, node, 1, ['v3'], ['v3', 'v2'], []);
+    const hitFarEnd = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, ['v3'], ['v3', 'v2'], []);
 
     // result
-    expect(hit).toBeNull();
+    expect(hitOwnEnd).toEqual({ distance: 0, end: 'end', segmentId: 's1', vertexId: 'v2' });
+    expect(hitFarEnd).toBeNull();
   });
 });

@@ -219,6 +219,36 @@ test('clicking an existing segment while actively drawing attaches the in-progre
   expect(afterFurtherClick.equals(beforeFurtherClick)).toBe(true);
 });
 
+test('splitting a curved edge preserves the original curve’s shape on both sides — no kink at the new point', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-edge-insert-curve-shape');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(900, 300); // v1
+  await designPage.dragVectorPoint(1050, 300, 1050, 250); // v2, dragged — curves the v1-v2 segment
+  await page.keyboard.press('Escape'); // stop extending — Pen idle, still in edit mode
+
+  // two regions straddling the segment, well clear of where the new split-point vertex dot will render
+  // (its own midpoint, ~(975, 319)) — De Casteljau subdivision retraces the exact same path on both
+  // sides of a split, so unlike the old naive split (kept the outer tangents unchanged, nulled the new
+  // shared vertex — see splitVectorSegment.ts), these regions must stay pixel-identical after the split
+  const nearV1Region = { height: 50, width: 50, x: 898, y: 282 };
+  const nearV2Region = { height: 50, width: 50, x: 1002, y: 296 };
+
+  const beforeNearV1 = await page.screenshot({ clip: nearV1Region });
+  const beforeNearV2 = await page.screenshot({ clip: nearV2Region });
+
+  await designPage.click(975, 319); // the curve's own midpoint — snaps the edge-insert split there
+
+  const afterNearV1 = await page.screenshot({ clip: nearV1Region });
+  const afterNearV2 = await page.screenshot({ clip: nearV2Region });
+
+  expect(afterNearV1.equals(beforeNearV1)).toBe(true);
+  expect(afterNearV2.equals(beforeNearV2)).toBe(true);
+});
+
 test('clicking empty space in edit mode deselects the active vertex but keeps edit mode open', async ({ page }) => {
   const designPage = new DesignPage(page);
 

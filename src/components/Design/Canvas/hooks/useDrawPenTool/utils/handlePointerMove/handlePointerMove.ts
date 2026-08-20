@@ -13,6 +13,7 @@ import { TPoint } from 'types/canvas';
 // utils
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
+import { roundVectorPoint } from 'utils/canvas/vectorNetwork/roundVectorPoint';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 import { updateNewVertexPreview } from './updateNewVertexPreview';
 import { updateVectorHandleDrag } from './updateVectorHandleDrag';
@@ -47,7 +48,7 @@ export const handlePointerMove = (
   const state = appStore.getState();
   const viewport = selectViewport(state);
   const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
-  const point: TPoint = { x: Math.round(rawPoint.x), y: Math.round(rawPoint.y) };
+  const point: TPoint = roundVectorPoint(rawPoint);
 
   if (dragOriginRef.current && dragStartRef.current) {
     updateVectorHandleDrag(

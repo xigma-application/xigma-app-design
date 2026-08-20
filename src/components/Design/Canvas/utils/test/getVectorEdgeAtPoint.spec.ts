@@ -31,8 +31,9 @@ describe('getVectorEdgeAtPoint', () => {
     const hit = getVectorEdgeAtPoint({ x: 5, y: 0.5 }, node, 2, 1);
 
     // result — also reports the closest point projected onto the edge, for hover attraction; right on
-    // the midpoint here (5, 0), so it also counts as snapped
-    expect(hit).toEqual({ point: { x: 5, y: 0 }, segmentId: 's1', snapped: true });
+    // the midpoint here (5, 0), so it also counts as snapped, which locks the reported curve parameter to
+    // exactly 0.5 too (used by the Pen tool to split the segment at exactly this point)
+    expect(hit).toEqual({ point: { x: 5, y: 0 }, segmentId: 's1', snapped: true, t: 0.5 });
   });
 
   it('should report the continuous projected point, not snapped, when hovering the interior away from the midpoint', () => {
@@ -45,8 +46,9 @@ describe('getVectorEdgeAtPoint', () => {
     // action
     const hit = getVectorEdgeAtPoint({ x: 8, y: 0.5 }, node, 2, 1);
 
-    // result — the raw projected point (8, 0), unsnapped, since it's outside the vertexTolerance(1) radius around the midpoint
-    expect(hit).toEqual({ point: { x: 8, y: 0 }, segmentId: 's1', snapped: false });
+    // result — the raw projected point (8, 0), unsnapped, since it's outside the vertexTolerance(1) radius
+    // around the midpoint; t=0.8 matches its position 80% of the way along the (single, unflattened) edge
+    expect(hit).toEqual({ point: { x: 8, y: 0 }, segmentId: 's1', snapped: false, t: 0.8 });
   });
 
   it('should snap fully onto the exact midpoint once the projected point is close enough to it', () => {
@@ -59,8 +61,9 @@ describe('getVectorEdgeAtPoint', () => {
     // action — projects onto (5.5, 0), within vertexTolerance(1) of the (5,0) midpoint
     const hit = getVectorEdgeAtPoint({ x: 5.5, y: 0.5 }, node, 2, 1);
 
-    // result — locks onto the exact midpoint (5, 0), not the raw projection (5.5, 0)
-    expect(hit).toEqual({ point: { x: 5, y: 0 }, segmentId: 's1', snapped: true });
+    // result — locks onto the exact midpoint (5, 0), not the raw projection (5.5, 0); t locks to exactly
+    // 0.5 too, not the raw projection's 0.55
+    expect(hit).toEqual({ point: { x: 5, y: 0 }, segmentId: 's1', snapped: true, t: 0.5 });
   });
 
   it('should return null when the point is near the end vertex of an edge instead of its interior', () => {

@@ -10,7 +10,7 @@ import { flattenSegment } from 'utils/canvas/vectorNetwork/flattenSegment';
 import { getClosestPointOnLine } from './getClosestPointOnLine';
 import { getSegmentMidpoint } from 'utils/canvas/vectorNetwork/getSegmentMidpoint';
 
-type TVectorEdgeMatch = { point: TPoint; segmentId: string; snapped: boolean };
+type TVectorEdgeMatch = { point: TPoint; segmentId: string; snapped: boolean; t: number };
 
 const findEdgeMatchOnSegment = (
   point: TPoint,
@@ -26,18 +26,25 @@ const findEdgeMatchOnSegment = (
 
   if (!nearEndpoint) {
     const points = flattenSegment(start, end, segment.tangentStart, segment.tangentEnd, VECTOR_CURVE_SEGMENTS);
-    const closestPoint = points
+    const candidate = points
       .slice(0, -1)
-      .map((current, index) =>
-        getClosestPointOnLine(point, { x1: current.x, x2: points[index + 1].x, y1: current.y, y2: points[index + 1].y }),
-      )
-      .find((candidate) => Math.hypot(point.x - candidate.x, point.y - candidate.y) <= edgeTolerance);
+      .map((current, index) => {
+        const { point: candidatePoint, t: localT } = getClosestPointOnLine(point, {
+          x1: current.x,
+          x2: points[index + 1].x,
+          y1: current.y,
+          y2: points[index + 1].y,
+        });
 
-    if (closestPoint) {
+        return { point: candidatePoint, t: (index + localT) / (points.length - 1) };
+      })
+      .find(({ point: candidatePoint }) => Math.hypot(point.x - candidatePoint.x, point.y - candidatePoint.y) <= edgeTolerance);
+
+    if (candidate) {
       const midpoint = getSegmentMidpoint(start, end, segment.tangentStart, segment.tangentEnd);
-      const snapped = Math.hypot(closestPoint.x - midpoint.x, closestPoint.y - midpoint.y) <= vertexTolerance;
+      const snapped = Math.hypot(candidate.point.x - midpoint.x, candidate.point.y - midpoint.y) <= vertexTolerance;
 
-      return { point: snapped ? midpoint : closestPoint, segmentId: segment.id, snapped };
+      return { point: snapped ? midpoint : candidate.point, segmentId: segment.id, snapped, t: snapped ? 0.5 : candidate.t };
     }
   }
 

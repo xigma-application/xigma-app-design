@@ -1497,6 +1497,8 @@ Two gotchas the specs below work around, worth knowing before adding more:
 | 187 | Shift+click toggles a vertex into the multi-selection, and a second shift+click on it removes it again                                          |  ✅  | ✅ `vector-edit.spec.ts` |
 | 188 | Shift+click mixes a vertex and a tangent handle into one multi-selection; dragging inside the resulting box moves both together                 |  ✅  | ✅ `vector-edit.spec.ts` |
 | 189 | Dragging a marquee over empty space selects every vertex/handle whose point falls inside it, leaving points outside untouched                   |  ✅  | ✅ `vector-edit.spec.ts` |
+| 190 | Resuming a vertex after Escape interrupts a curve does not silently reuse the old drag as the next segment's tangent                            |  ✅  |     ✅ `pen.spec.ts`     |
+| 191 | Splitting a curved edge preserves the original curve's shape on both sides — proper De Casteljau subdivision, no kink at the new point          |  ✅  | ✅ `vector-edit.spec.ts` |
 
 ## Why so few scenarios get e2e coverage
 

@@ -46,6 +46,7 @@ describe('drawVectorTangentHandles', () => {
     const hoveredHandle = { end: 'start' as const, segmentId: 's1' };
     const selectedHandles = [{ end: 'end' as const, segmentId: 's2' }];
     const selectedVertexIds = ['v1'];
+    const oneHopVertexIds = ['v1'];
 
     // before
     drawVectorTangentHandles(
@@ -56,6 +57,7 @@ describe('drawVectorTangentHandles', () => {
       hoveredHandle,
       selectedHandles,
       selectedVertexIds,
+      oneHopVertexIds,
       null,
       null,
       200,
@@ -74,6 +76,7 @@ describe('drawVectorTangentHandles', () => {
       hoveredHandle,
       selectedHandles,
       selectedVertexIds,
+      oneHopVertexIds,
       5,
       200,
       150,
@@ -88,6 +91,7 @@ describe('drawVectorTangentHandles', () => {
       hoveredHandle,
       selectedHandles,
       selectedVertexIds,
+      oneHopVertexIds,
       5,
       200,
       150,
@@ -106,6 +110,7 @@ describe('drawVectorTangentHandles', () => {
       {} as WebGLBuffer,
       node,
       null,
+      [],
       [],
       [],
       'v1',
@@ -130,6 +135,7 @@ describe('drawVectorTangentHandles', () => {
       {} as WebGLBuffer,
       node,
       null,
+      [],
       [],
       [],
       null,

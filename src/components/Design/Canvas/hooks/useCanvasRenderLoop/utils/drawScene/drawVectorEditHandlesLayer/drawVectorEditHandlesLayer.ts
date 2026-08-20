@@ -36,7 +36,7 @@ export const drawVectorEditHandlesLayer = (
   if (editingNode) {
     const node = { ...editingNode, ...bakeVectorNodeRotation(editingNode) };
     const visualSelectedVertexIds = getVisualSelectedVectorVertexIds(selectedVertexIds, penActiveVertexId);
-    const tangentVisibleVertexIds = getOneHopVectorVertexIds(node, visualSelectedVertexIds);
+    const oneHopVertexIds = getOneHopVectorVertexIds(node, visualSelectedVertexIds);
 
     drawVectorEditOutline(gl, program, buffer, node, hoveredNodeId, hoveredSegmentId, canvasWidth, canvasHeight, viewport);
     drawVectorTangentHandles(
@@ -46,7 +46,8 @@ export const drawVectorEditHandlesLayer = (
       node,
       hoveredHandle,
       selectedHandles,
-      tangentVisibleVertexIds,
+      visualSelectedVertexIds,
+      oneHopVertexIds,
       penActiveVertexId,
       penDraggedHandlePosition,
       canvasWidth,

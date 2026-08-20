@@ -16,6 +16,7 @@ export const getVectorHandleAtPoint = (
   node: TVectorNode,
   tolerance: number,
   selectedVertexIds: string[],
+  oneHopVertexIds: string[],
   selectedHandles: TVectorHandleHover[],
 ): TVectorHandleHit | null => {
   const isHandleSelected = (segmentId: string, end: 'end' | 'start'): boolean =>
@@ -27,10 +28,13 @@ export const getVectorHandleAtPoint = (
       const end = node.vertices[segment.endId];
       const handleStart = getVectorHandlePosition(start, getEffectiveTangentStart(node.vertices, segment));
       const handleEnd = getVectorHandlePosition(end, getEffectiveTangentEnd(node.vertices, segment));
-      const isSegmentEndpointSelected = isVectorSegmentEndpointSelected(segment.startId, segment.endId, selectedVertexIds);
+      const isSegmentDirectlyTouchingSelection = isVectorSegmentEndpointSelected(segment.startId, segment.endId, selectedVertexIds);
       const options: (TVectorHandleHit & { distance: number })[] = [];
 
-      if (handleStart && (isSegmentEndpointSelected || isHandleSelected(segment.id, 'start'))) {
+      if (
+        handleStart &&
+        (isSegmentDirectlyTouchingSelection || oneHopVertexIds.includes(segment.startId) || isHandleSelected(segment.id, 'start'))
+      ) {
         options.push({
           distance: Math.hypot(point.x - handleStart.x, point.y - handleStart.y),
           end: 'start',
@@ -39,7 +43,10 @@ export const getVectorHandleAtPoint = (
         });
       }
 
-      if (handleEnd && (isSegmentEndpointSelected || isHandleSelected(segment.id, 'end'))) {
+      if (
+        handleEnd &&
+        (isSegmentDirectlyTouchingSelection || oneHopVertexIds.includes(segment.endId) || isHandleSelected(segment.id, 'end'))
+      ) {
         options.push({
           distance: Math.hypot(point.x - handleEnd.x, point.y - handleEnd.y),
           end: 'end',

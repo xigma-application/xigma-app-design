@@ -21,6 +21,7 @@ export const drawSegmentTangentHandles = (
   hoveredHandle: TVectorHandleHover | null,
   selectedHandles: TVectorHandleHover[],
   selectedVertexIds: string[],
+  oneHopVertexIds: string[],
   dotSize: number,
   canvasWidth: number,
   canvasHeight: number,
@@ -34,9 +35,9 @@ export const drawSegmentTangentHandles = (
   const isEndHovered = hoveredHandle?.segmentId === segment.id && hoveredHandle.end === 'end';
   const isStartSelected = isHandleSelected(selectedHandles, segment.id, 'start');
   const isEndSelected = isHandleSelected(selectedHandles, segment.id, 'end');
-  const isSegmentEndpointSelected = isVectorSegmentEndpointSelected(segment.startId, segment.endId, selectedVertexIds);
-  const isStartVisible = isSegmentEndpointSelected || isStartSelected;
-  const isEndVisible = isSegmentEndpointSelected || isEndSelected;
+  const isSegmentDirectlyTouchingSelection = isVectorSegmentEndpointSelected(segment.startId, segment.endId, selectedVertexIds);
+  const isStartVisible = isSegmentDirectlyTouchingSelection || oneHopVertexIds.includes(segment.startId) || isStartSelected;
+  const isEndVisible = isSegmentDirectlyTouchingSelection || oneHopVertexIds.includes(segment.endId) || isEndSelected;
 
   if (handleStart && isStartVisible) {
     drawTangentHandle(

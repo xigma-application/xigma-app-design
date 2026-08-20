@@ -7,7 +7,6 @@ import { AppDispatch } from 'store';
 
 // types
 import { TPendingOutgoingTangent } from '../../../types';
-import { TPoint } from 'types/canvas';
 import { TVectorNode, TVectorSegment, TVectorTangent } from 'types/design/types';
 
 // utils
@@ -17,13 +16,13 @@ export const closeLoopOntoEdge = (
   node: TVectorNode,
   activeVertexId: string,
   edgeSegmentId: string,
-  point: TPoint,
+  t: number,
   connectingSegmentId: string,
   tangentStart: TVectorTangent,
   dispatch: AppDispatch,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
 ): void => {
-  const { newVertexId, segments: splitSegments, vertices } = splitVectorSegment(node, edgeSegmentId, point);
+  const { newVertexId, segments: splitSegments, vertices } = splitVectorSegment(node, edgeSegmentId, t);
   const connectingSegment: TVectorSegment = {
     endId: newVertexId,
     id: connectingSegmentId,

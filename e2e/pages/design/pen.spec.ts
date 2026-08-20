@@ -224,6 +224,41 @@ test('Escape steps through stopping the active vertex, then the tool, then vecto
   expect(exited.equals(stillEditing)).toBe(false); // the dots disappeared
 });
 
+test('resuming a vertex after Escape interrupts a curve does not silently reuse the old drag as the next segment’s tangent', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+  const previewRegion = { height: 60, width: 200, x: 780, y: 270 };
+
+  // mock — v1 plain, v2 dragged into a curve, Escape (stops extending), then click straight back onto v2 and
+  // hover the same far point: without the fix, v2 still carries the earlier drag's pendingOutgoingTangentRef,
+  // so this preview line renders curved even though nothing was dragged this time
+  await designPage.goto('e2e-test-pen-escape-resume-stale-tangent');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300); // v1
+  await designPage.dragVectorPoint(850, 300, 850, 250); // v2, dragged — stages an outgoing tangent
+  await page.keyboard.press('Escape'); // stops extending, v2 no longer active
+  await designPage.click(850, 300); // resume from v2 via a plain click, no drag
+  await designPage.pointerMove(950, 300);
+
+  const resumedPreview = await page.screenshot({ clip: previewRegion });
+
+  // mock — an independent session where v2 is placed fresh with a plain click, never dragged at all, then
+  // hovering the exact same far point: this is the known-straight reference the resumed preview must match
+  await designPage.goto('e2e-test-pen-escape-resume-stale-tangent-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(850, 300); // v2, placed directly, no earlier curve/drag/Escape at all
+  await designPage.pointerMove(950, 300);
+
+  const freshPreview = await page.screenshot({ clip: previewRegion });
+
+  expect(resumedPreview.equals(freshPreview)).toBe(true);
+});
+
 test('switching tools mid-draw leaves the node directly editable via the Move tool', async ({ page }) => {
   const designPage = new DesignPage(page);
 

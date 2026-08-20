@@ -32,12 +32,13 @@ export const armVectorHandleOnPointerDown = ({
       canvasRefs.selectedVectorVertexIdsRef.current,
       selectPenActiveVertexId(state),
     );
-    const visibleVertexIds = getOneHopVectorVertexIds(node, visualSelectedVertexIds);
+    const oneHopVertexIds = getOneHopVectorVertexIds(node, visualSelectedVertexIds);
     const hit = getVectorHandleAtPoint(
       point,
       node,
       VECTOR_HANDLE_HIT_RADIUS_PX / viewport.zoom,
-      visibleVertexIds,
+      visualSelectedVertexIds,
+      oneHopVertexIds,
       canvasRefs.selectedVectorHandlesRef.current,
     );
 

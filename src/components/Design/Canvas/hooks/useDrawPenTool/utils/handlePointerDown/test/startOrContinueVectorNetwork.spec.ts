@@ -113,7 +113,15 @@ describe('startOrContinueVectorNetwork', () => {
     );
 
     // result
-    expect(startVectorFragmentMock).toHaveBeenCalledWith({ x: 10, y: 20 }, node, IDENTITY_VIEWPORT, dispatch, dragOriginRef, dragStartRef);
+    expect(startVectorFragmentMock).toHaveBeenCalledWith(
+      { x: 10, y: 20 },
+      node,
+      IDENTITY_VIEWPORT,
+      dispatch,
+      dragOriginRef,
+      dragStartRef,
+      pendingOutgoingTangentRef,
+    );
     expect(startNewVectorNetworkMock).not.toHaveBeenCalled();
     expect(continueVectorNetworkMock).not.toHaveBeenCalled();
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(4);

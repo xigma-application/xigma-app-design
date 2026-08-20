@@ -14,6 +14,7 @@ import { TPoint } from 'types/canvas';
 import { bakeEditingNodeRotation } from './bakeEditingNodeRotation';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
+import { roundVectorPoint } from 'utils/canvas/vectorNetwork/roundVectorPoint';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 import { startOrContinueVectorNetwork } from './startOrContinueVectorNetwork';
 
@@ -32,7 +33,7 @@ export const handlePointerDown = (
     const vectorEditingNodeId = selectVectorEditingNodeId(state);
     const penActiveVertexId = selectPenActiveVertexId(state);
     const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
-    const point: TPoint = { x: Math.round(rawPoint.x), y: Math.round(rawPoint.y) };
+    const point: TPoint = roundVectorPoint(rawPoint);
     const editingNode = getVectorEditingNode(state.design.nodes, vectorEditingNodeId);
 
     dispatch(beginHistoryGesture());
