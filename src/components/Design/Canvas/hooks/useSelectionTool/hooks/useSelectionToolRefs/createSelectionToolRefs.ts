@@ -14,6 +14,7 @@ export const createSelectionToolRefs = (overrides: Partial<TSelectionToolRefs> =
   vectorMarqueeModeRef: { current: null },
   vectorMarqueeStartRef: { current: null },
   vectorMultiDragRef: { current: null },
+  vectorSegmentBendDragRef: { current: null },
   vectorVertexDragRef: { current: null },
   ...overrides,
 });

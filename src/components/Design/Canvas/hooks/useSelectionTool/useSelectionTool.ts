@@ -16,6 +16,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 // utils
+import { cancelVectorSegmentBendDrag } from './utils/cancelVectorSegmentBendDrag';
 import { handlePointerDown } from './utils/handlePointerDown/handlePointerDown';
 import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
@@ -46,6 +47,10 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
     canvasRefs.hoveredVectorSegmentIdRef.current = null;
   };
 
+  const onKeyDown = (event: KeyboardEvent): void => {
+    cancelVectorSegmentBendDrag(event, dispatch, selectionRefs.vectorSegmentBendDragRef, setClassName);
+  };
+
   useEffect(() => {
     const canvas = refs.canvasRef.current;
 
@@ -54,17 +59,20 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
       const pointerMoveListener = (event: PointerEvent): void => onPointerMove(canvas, event, refs, selectionRefs);
       const pointerUpListener = (event: PointerEvent): void => onPointerUp(canvas, event, refs, selectionRefs);
       const pointerLeaveListener = (): void => onPointerLeave(refs);
+      const keyDownListener = (event: KeyboardEvent): void => onKeyDown(event);
 
       canvas.addEventListener('pointerdown', pointerDownListener);
       canvas.addEventListener('pointermove', pointerMoveListener);
       canvas.addEventListener('pointerup', pointerUpListener);
       canvas.addEventListener('pointerleave', pointerLeaveListener);
+      window.addEventListener('keydown', keyDownListener);
 
       return (): void => {
         canvas.removeEventListener('pointerdown', pointerDownListener);
         canvas.removeEventListener('pointermove', pointerMoveListener);
         canvas.removeEventListener('pointerup', pointerUpListener);
         canvas.removeEventListener('pointerleave', pointerLeaveListener);
+        window.removeEventListener('keydown', keyDownListener);
         refs.selectedVectorVertexIdsRef.current = [];
         refs.selectedVectorHandlesRef.current = [];
         refs.selectedVectorSegmentIdsRef.current = [];

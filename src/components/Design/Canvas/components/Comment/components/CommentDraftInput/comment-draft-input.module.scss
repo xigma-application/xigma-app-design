@@ -12,7 +12,7 @@
   &__pin {
     background-color: var(--color-blue-1);
     border-radius: 16px 16px 16px 0;
-    box-shadow: elevation.$elevation-200-canvas;
+    box-shadow: elevation.$elevation200Canvas;
     flex-shrink: 0;
     height: 32px;
     position: relative;
@@ -24,7 +24,7 @@
     align-items: center;
     background-color: var(--color-neutral-5);
     border-radius: 12px;
-    box-shadow: elevation.$elevation-200-canvas;
+    box-shadow: elevation.$elevation200Canvas;
     display: flex;
     gap: 10px;
     min-height: 40px;

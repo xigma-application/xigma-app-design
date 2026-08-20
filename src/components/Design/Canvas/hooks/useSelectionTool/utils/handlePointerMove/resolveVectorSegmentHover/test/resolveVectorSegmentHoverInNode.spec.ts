@@ -20,8 +20,8 @@ const createCanvas = (): HTMLCanvasElement => {
   return canvas;
 };
 
-const pointerEvent = (x: number, y: number, buttons = 0): PointerEvent =>
-  new PointerEvent('pointermove', { buttons, clientX: x, clientY: y });
+const pointerEvent = (x: number, y: number, buttons = 0, ctrlKey = false): PointerEvent =>
+  new PointerEvent('pointermove', { buttons, clientX: x, clientY: y, ctrlKey });
 
 const createHoveredVectorSegmentIdRef = (): RefObject<string | null> => ({ current: null });
 const createHoveredVectorEdgeInsertPointRef = (value: TPoint | null = null): RefObject<TPoint | null> => ({ current: value });
@@ -201,5 +201,93 @@ describe('resolveVectorSegmentHoverInNode', () => {
     expect(hoveredVectorSegmentIdRef.current).toBe('s1');
     expect(hoveredVectorEdgeInsertPointRef.current).toBeNull();
     expect(setClassName).not.toHaveBeenCalled();
+  });
+
+  it('should switch the cursor to bend and hide the insert-point dot when Ctrl is held over a segment, instead of the pen-extend/split affordance', () => {
+    // mock — holding Ctrl means the user wants to bend the segment (armVectorBendSegmentOnPointerDown.ts),
+    // a completely different gesture than the plain-click split — the insert-point dot must not show
+    const nodeId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const canvas = createCanvas();
+    const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
+    const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef({ x: 50, y: 0 });
+    const setClassName = vi.fn();
+
+    // before — Ctrl held, hovering the segment's own interior (not necessarily the fixed midpoint)
+    resolveVectorSegmentHoverInNode(
+      canvas,
+      pointerEvent(25, 0, 0, true),
+      store.getState(),
+      node,
+      hoveredVectorSegmentIdRef,
+      hoveredVectorEdgeInsertPointRef,
+      setClassName,
+    );
+
+    // result
+    expect(hoveredVectorSegmentIdRef.current).toBe('s1');
+    expect(hoveredVectorEdgeInsertPointRef.current).toBeNull();
+    expect(setClassName).toHaveBeenCalledWith('bend');
+  });
+
+  it('should switch the cursor to segment (not bend) when Ctrl is held directly over an existing vertex — that gesture pulls a fresh tangent handle, not bends the segment', () => {
+    // mock — v1 sits at (0,0); getVectorEdgeAtPoint deliberately excludes the near-vertex zone (its own
+    // `nearEndpoint` check), so without this the segment-hover resolver would fall through to `hit ===
+    // null` and clear the cursor instead of switching it
+    const nodeId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const canvas = createCanvas();
+    const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
+    const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef();
+    const setClassName = vi.fn();
+
+    // before — Ctrl held, hovering v1 itself
+    resolveVectorSegmentHoverInNode(
+      canvas,
+      pointerEvent(0, 0, 0, true),
+      store.getState(),
+      node,
+      hoveredVectorSegmentIdRef,
+      hoveredVectorEdgeInsertPointRef,
+      setClassName,
+    );
+
+    // result
+    expect(setClassName).toHaveBeenCalledWith('segment');
+  });
+
+  it('should clear the cursor when Ctrl is held but the pointer misses every segment', () => {
+    // mock
+    const nodeId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const canvas = createCanvas();
+    const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
+    const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef();
+    const setClassName = vi.fn();
+
+    // before
+    resolveVectorSegmentHoverInNode(
+      canvas,
+      pointerEvent(500, 500, 0, true),
+      store.getState(),
+      node,
+      hoveredVectorSegmentIdRef,
+      hoveredVectorEdgeInsertPointRef,
+      setClassName,
+    );
+
+    // result
+    expect(hoveredVectorSegmentIdRef.current).toBeNull();
+    expect(hoveredVectorEdgeInsertPointRef.current).toBeNull();
+    expect(setClassName).toHaveBeenCalledWith(null);
   });
 });

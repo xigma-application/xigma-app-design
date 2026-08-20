@@ -10,12 +10,13 @@ import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useSelectionTool } from './useSelectionTool';
 
 // store
-import { addNode, setActiveTool, setSelection, startTextEdit, stopTextEdit } from 'store/design/slice';
+import { addNode, setActiveTool, setSelection, setVectorEditingNodeId, startTextEdit, stopTextEdit } from 'store/design/slice';
 import { store } from 'store';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TDraftRect, TEditingTextBox } from 'types/canvas';
+import { TVectorNode } from 'types/design/types';
 
 const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
   const canvas = document.createElement('canvas');
@@ -60,6 +61,27 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => 
   return rootOrder[rootOrder.length - 1];
 };
 
+const addVectorNode = (): string => {
+  store.dispatch(
+    addNode({
+      fillColor: null,
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { v1: { id: 'v1', x: 3400, y: 700 }, v2: { id: 'v2', x: 3500, y: 700 } },
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 const renderSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>): RefObject<TDraftRect | null> => {
   const refs = createCanvasRefs({ canvasRef });
 
@@ -79,6 +101,7 @@ describe('useSelectionTool behaviors', () => {
     store.dispatch(setActiveTool(ToolName.default));
     store.dispatch(setSelection([]));
     store.dispatch(stopTextEdit());
+    store.dispatch(setVectorEditingNodeId(null));
   });
 
   it('should not react to pointer events when the default tool is not active', () => {
@@ -725,6 +748,46 @@ describe('useSelectionTool behaviors', () => {
     // result
     expect(store.getState().design.selectedIds).toEqual([]);
     expect(idA).toBeTruthy();
+  });
+
+  it('should bend a segment on Ctrl+drag, and revert it back to its pre-drag tangents on Escape mid-drag', () => {
+    // mock — v1(3400,700)-v2(3500,700), plain straight segment
+    const nodeId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    renderSelectionTool(canvasRef);
+
+    // action — Ctrl+mousedown reveals straight-line default tangents, then dragging bends the segment
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 3450, 700, { ctrlKey: true }));
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 3450, 760, { ctrlKey: true }));
+
+    // result — the drag actually changed the tangents away from the straight-line defaults it started at
+    const bentNode = store.getState().design.nodes[nodeId] as TVectorNode;
+
+    expect(bentNode.segments.s1.tangentStart).not.toEqual({ x: 100 / 3, y: 0 });
+    expect(bentNode.segments.s1.tangentEnd).not.toEqual({ x: -100 / 3, y: 0 });
+
+    // action — Escape mid-drag (button still conceptually held) cancels it
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+
+    // result — back to null, the segment's state from before the Ctrl+click ever happened
+    const revertedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+
+    expect(revertedNode.segments.s1.tangentStart).toBeNull();
+    expect(revertedNode.segments.s1.tangentEnd).toBeNull();
+
+    // action — further pointer movement no longer bends anything, since Escape cleared the drag
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 3450, 900, { ctrlKey: true }));
+
+    // result
+    const afterFurtherMove = store.getState().design.nodes[nodeId] as TVectorNode;
+
+    expect(afterFurtherMove.segments.s1.tangentStart).toBeNull();
+    expect(afterFurtherMove.segments.s1.tangentEnd).toBeNull();
   });
 
   it('should not react to pointer events while a flipped straight-text node is being edited', () => {

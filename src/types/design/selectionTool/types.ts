@@ -116,6 +116,16 @@ export type TVectorMultiDragState = {
 
 export type TVectorMarqueeMode = 'everything' | 'handles' | 'points';
 
+export type TVectorSegmentBendDragState = {
+  dragStart: TPoint;
+  nodeId: string;
+  originalTangentEnd: TPoint | null;
+  originalTangentStart: TPoint | null;
+  segmentId: string;
+  tangentEnd: TPoint;
+  tangentStart: TPoint;
+};
+
 export type TSelectionToolRefs = {
   dragStateRef: RefObject<TDragState | null>;
   endpointDragRef: RefObject<TEndpointDragState | null>;
@@ -129,5 +139,6 @@ export type TSelectionToolRefs = {
   vectorMarqueeModeRef: RefObject<TVectorMarqueeMode | null>;
   vectorMarqueeStartRef: RefObject<TPoint | null>;
   vectorMultiDragRef: RefObject<TVectorMultiDragState | null>;
+  vectorSegmentBendDragRef: RefObject<TVectorSegmentBendDragState | null>;
   vectorVertexDragRef: RefObject<TVectorVertexDragState | null>;
 };

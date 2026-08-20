@@ -25,6 +25,7 @@ import { disarmStarVertexCountDrag } from './disarmStarVertexCountDrag';
 import { disarmVectorHandleDrag } from './disarmVectorHandleDrag';
 import { disarmVectorMarqueeDrag } from './disarmVectorMarqueeDrag';
 import { disarmVectorMultiDrag } from './disarmVectorMultiDrag/disarmVectorMultiDrag';
+import { disarmVectorSegmentBendDrag } from './disarmVectorSegmentBendDrag';
 import { disarmVectorVertexDrag } from './disarmVectorVertexDrag';
 
 export const handlePointerUp = (
@@ -53,6 +54,7 @@ export const handlePointerUp = (
   disarmVectorVertexDrag(canvas, event, selectionRefs.vectorVertexDragRef, setClassName);
   disarmVectorHandleDrag(canvas, event, selectionRefs.vectorHandleDragRef, setClassName);
   disarmVectorMultiDrag(canvas, event, dispatch, canvasRefs, selectionRefs.vectorMultiDragRef, setClassName);
+  disarmVectorSegmentBendDrag(canvas, event, selectionRefs.vectorSegmentBendDragRef, setClassName);
   disarmVectorMarqueeDrag(canvas, event, canvasRefs, selectionRefs.vectorMarqueeStartRef, selectionRefs.vectorMarqueeModeRef);
   dispatch(endHistoryGesture());
 };

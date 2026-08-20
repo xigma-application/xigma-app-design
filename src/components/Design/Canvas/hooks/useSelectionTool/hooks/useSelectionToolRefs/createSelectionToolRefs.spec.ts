@@ -20,6 +20,7 @@ describe('createSelectionToolRefs behaviors', () => {
       vectorMarqueeModeRef: { current: null },
       vectorMarqueeStartRef: { current: null },
       vectorMultiDragRef: { current: null },
+      vectorSegmentBendDragRef: { current: null },
       vectorVertexDragRef: { current: null },
     });
   });

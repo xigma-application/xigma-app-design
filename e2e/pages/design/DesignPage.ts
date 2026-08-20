@@ -161,6 +161,16 @@ export class DesignPage {
     await this.pointerUp();
   }
 
+  // same down-move-up primitive as dragVectorPoint, with Control held for the whole gesture — used to
+  // arm/continue a Ctrl+drag bend on a straight vector segment
+  async ctrlDragVectorPoint(x1: number, y1: number, x2: number, y2: number): Promise<void> {
+    await this.page.keyboard.down('Control');
+    await this.pointerDown(x1, y1);
+    await this.page.mouse.move(x2, y2, { steps: 5 });
+    await this.pointerUp();
+    await this.page.keyboard.up('Control');
+  }
+
   async typeText(content: string): Promise<void> {
     await this.page.keyboard.type(content);
   }
@@ -189,15 +199,23 @@ export class DesignPage {
     await this.pointerUp();
   }
 
-  async click(x: number, y: number, options: { shift?: boolean } = {}): Promise<void> {
+  async click(x: number, y: number, options: { shift?: boolean; ctrl?: boolean } = {}): Promise<void> {
     if (options.shift) {
       await this.page.keyboard.down('Shift');
+    }
+
+    if (options.ctrl) {
+      await this.page.keyboard.down('Control');
     }
 
     await this.page.mouse.click(x, y);
 
     if (options.shift) {
       await this.page.keyboard.up('Shift');
+    }
+
+    if (options.ctrl) {
+      await this.page.keyboard.up('Control');
     }
   }
 

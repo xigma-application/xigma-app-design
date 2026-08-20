@@ -1539,6 +1539,9 @@ Two gotchas the specs below work around, worth knowing before adding more:
 | 210 | Hovering anywhere on a segment with the Move tool shows an insertion dot at its own fixed midpoint, but the cursor only switches to pen-extend once the pointer is precisely over that point                                                             |  ✅  |            —             |
 | 211 | Clicking precisely on a segment's own fixed midpoint with the Move tool splits it and selects the new vertex there, instead of selecting the segment                                                                                                     |  ✅  | ✅ `vector-edit.spec.ts` |
 | 212 | Clicking an already-selected segment still splits it (if precisely on its fixed midpoint) rather than leaving the now-stale segment id selected                                                                                                          |  ✅  |            —             |
+| 213 | Ctrl/Cmd+clicking a segment (no drag yet) reveals its default straight-line tangent handles on both endpoints without bending it — the click only arms the drag, dragging is what actually shapes the curve                                              |  ✅  | ✅ `vector-edit.spec.ts` |
+| 214 | Ctrl/Cmd+dragging a segment's interior bends it into a curve via its tangents, distinct from a plain (no-Ctrl) drag on the same point, which just moves the whole segment instead                                                                        |  ✅  | ✅ `vector-edit.spec.ts` |
+| 215 | Ctrl/Cmd+hovering an existing vertex shows the segment cursor (pulling a fresh handle), distinct from Ctrl/Cmd+hovering the same segment's own interior (bending it), which shows the bend cursor                                                        |  ✅  | ✅ `vector-edit.spec.ts` |
 
 ## Why so few scenarios get e2e coverage
 

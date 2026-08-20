@@ -26,6 +26,7 @@ import { armSelectedTextBoundsOnPointerDown } from '../armSelectedTextBoundsOnPo
 import { armStarCornerRadiusOnPointerDown } from '../armStarCornerRadiusOnPointerDown';
 import { armStarRatioOnPointerDown } from '../armStarRatioOnPointerDown';
 import { armStarVertexCountOnPointerDown } from '../armStarVertexCountOnPointerDown';
+import { armVectorBendSegmentOnPointerDown } from '../armVectorBendSegmentOnPointerDown';
 import { armVectorCornerHandleOnPointerDown } from '../armVectorCornerHandleOnPointerDown';
 import { armVectorHandleOnPointerDown } from '../armVectorHandleOnPointerDown/armVectorHandleOnPointerDown';
 import { armVectorMarqueeOnPointerDown } from '../armVectorMarqueeOnPointerDown';
@@ -1029,6 +1030,138 @@ describe('armVectorCornerHandleOnPointerDown', () => {
     // result
     expect(armVectorCornerHandleOnPointerDown(ctx)).toBeUndefined();
     expect(ctx.selectionRefs.vectorHandleDragRef.current).toBeNull();
+  });
+});
+
+describe('armVectorBendSegmentOnPointerDown', () => {
+  afterEach(() => {
+    store.dispatch(setVectorEditingNodeId(null));
+  });
+
+  it('should reveal straight-line default tangents on both ends, mark both endpoints symmetric, select only the segment (so its tangent handles render), arm a bend drag remembering the original (null) tangents for an Escape-revert, and return true when Ctrl is held over a plain straight segment', () => {
+    // mock — v1(0,0)-v2(100,0), plain straight segment, no tangents yet
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvasRefs = createCanvasRefs({
+      selectedVectorSegmentIdsRef: { current: ['s1'] },
+      selectedVectorVertexIdsRef: { current: ['v1'] },
+    });
+
+    // before — click well inside the segment, away from either endpoint
+    const ctx = createContext({ canvasRefs, event: pointerEvent({ ctrlKey: true }), point: { x: 25, y: 0 } });
+
+    // result
+    expect(armVectorBendSegmentOnPointerDown(ctx)).toBe(true);
+    expect(ctx.dispatch).toHaveBeenCalledWith(
+      updateNode({
+        changes: {
+          segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: { x: -100 / 3, y: 0 }, tangentStart: { x: 100 / 3, y: 0 } } },
+          vertexHandleModes: { v1: 'symmetric', v2: 'symmetric' },
+        },
+        id: nodeId,
+      }),
+    );
+    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(ctx.selectionRefs.vectorSegmentBendDragRef.current).toEqual({
+      dragStart: { x: 25, y: 0 },
+      nodeId,
+      originalTangentEnd: null,
+      originalTangentStart: null,
+      segmentId: 's1',
+      tangentEnd: { x: -100 / 3, y: 0 },
+      tangentStart: { x: 100 / 3, y: 0 },
+    });
+    expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
+  });
+
+  it('should arm the bend drag when Meta (macOS Cmd) is held instead of Ctrl', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    const ctx = createContext({ event: pointerEvent({ metaKey: true }), point: { x: 25, y: 0 } });
+
+    // result
+    expect(armVectorBendSegmentOnPointerDown(ctx)).toBe(true);
+    expect(ctx.selectionRefs.vectorSegmentBendDragRef.current).toMatchObject({ nodeId, segmentId: 's1' });
+  });
+
+  it('should use the segment’s own existing tangents as the baseline (not reset to straight) when it’s already curved, remembering them as the original for an Escape-revert', () => {
+    // mock — s1 already has a real, non-default tangent on each end
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: { x: -10, y: 5 }, tangentStart: { x: 10, y: -5 } } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 25, y: 0 } });
+
+    // result
+    expect(armVectorBendSegmentOnPointerDown(ctx)).toBe(true);
+    expect(ctx.selectionRefs.vectorSegmentBendDragRef.current).toMatchObject({
+      originalTangentEnd: { x: -10, y: 5 },
+      originalTangentStart: { x: 10, y: -5 },
+      tangentEnd: { x: -10, y: 5 },
+      tangentStart: { x: 10, y: -5 },
+    });
+  });
+
+  it('should return undefined when neither Ctrl nor Meta is held', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    const ctx = createContext({ point: { x: 25, y: 0 } });
+
+    // result
+    expect(armVectorBendSegmentOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.selectionRefs.vectorSegmentBendDragRef.current).toBeNull();
+    expect(ctx.dispatch).not.toHaveBeenCalled();
+  });
+
+  it('should return undefined when the point misses every segment', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 900, y: 900 } });
+
+    // result
+    expect(armVectorBendSegmentOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.selectionRefs.vectorSegmentBendDragRef.current).toBeNull();
+  });
+
+  it('should return undefined when Vector Edit Mode is not active', () => {
+    // before
+    const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 25, y: 0 } });
+
+    // result
+    expect(armVectorBendSegmentOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.selectionRefs.vectorSegmentBendDragRef.current).toBeNull();
   });
 });
 

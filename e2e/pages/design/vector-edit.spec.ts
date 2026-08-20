@@ -793,3 +793,100 @@ test('dragging directly on an unselected segment selects it and moves only its o
   expect(afterV2.equals(beforeV2)).toBe(false);
   expect(afterV3.equals(beforeV3)).toBe(true); // v3 belongs only to the untouched v2-v3 segment
 });
+
+// v1(900,300) -> v2(1050,300), a single plain straight segment — the minimal shape needed to
+// exercise the Ctrl/Cmd+drag "bend a straight segment" gesture (armVectorBendSegmentOnPointerDown.ts)
+const drawStraightSegment = async (designPage: DesignPage): Promise<void> => {
+  await designPage.drawVectorPath([
+    { x: 900, y: 300 },
+    { x: 1050, y: 300 },
+  ]);
+};
+
+test('Ctrl/Cmd+clicking a segment (no drag yet) reveals its default straight-line tangent handles right away — regression check: armVectorBendSegmentOnPointerDown.ts used to clear the whole vector selection instead of selecting the segment, which hid the handles it had just written until something else (re-)selected the segment', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-bend-reveal-handles');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawStraightSegment(designPage);
+  await designPage.selectTool('default'); // still in edit mode, left over from drawing
+
+  // v2 is still the Pen tool's own "active vertex" here, which independently reveals its segment's
+  // handles too (see vector-network.md §10) — clearing it first (Escape's stage 1, penActiveVertexId
+  // only, still in edit mode) isolates the Ctrl+click below as the actual cause of any handle reveal
+  await page.keyboard.press('Escape');
+
+  // off the segment's own fixed midpoint (975,300) — a plain (non-Ctrl) click exactly on the midpoint
+  // splits the segment instead of just selecting it (see the Move-tool midpoint-split tests above),
+  // which would confound the second click below
+  const onSegment = { x: 940, y: 300 };
+
+  await designPage.click(onSegment.x, onSegment.y, { ctrl: true }); // down+up, no movement — arms the bend, writes default tangents
+  await designPage.pointerMove(1400, 700);
+  const afterCtrlClick = await designPage.canvas.screenshot();
+
+  // a plain click on the very same, already-tangented segment goes through the ordinary, known-good
+  // segment-selection path (selectAndArmVectorSegmentDrag.ts) — it can only ever reveal the handles
+  // that a correct Ctrl+click should have already revealed, never hide anything, so if the Ctrl+click
+  // above already showed them this second click changes nothing further
+  await designPage.click(onSegment.x, onSegment.y);
+  await designPage.pointerMove(1400, 700);
+  const afterPlainReselect = await designPage.canvas.screenshot();
+
+  expect(afterCtrlClick.equals(afterPlainReselect)).toBe(true);
+});
+
+test('Ctrl/Cmd+dragging a straight segment’s interior bends it into a curve via its tangents — distinct from a plain (no-Ctrl) drag on the same point, which just moves the whole segment instead', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-bend-segment');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawStraightSegment(designPage);
+  await designPage.selectTool('default');
+
+  await designPage.ctrlDragVectorPoint(975, 300, 975, 200); // bend the segment upward
+  const bent = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-vector-edit-bend-segment-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawStraightSegment(designPage);
+  await designPage.selectTool('default');
+
+  await designPage.dragVectorPoint(975, 300, 975, 200); // identical drag, no Ctrl — plain segment move
+  const moved = await designPage.canvas.screenshot();
+
+  expect(bent.equals(moved)).toBe(false);
+});
+
+test('Ctrl/Cmd+hovering an existing vertex shows the segment cursor (pulling a fresh handle out of it), distinct from Ctrl/Cmd+hovering the same segment’s own interior (bending it), which shows the bend cursor', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-bend-vs-corner-cursor');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawStraightSegment(designPage); // v1(900,300) -> v2(1050,300)
+  await designPage.selectTool('default');
+  await page.keyboard.press('Escape'); // clear the Pen tool's leftover active vertex, see the test above
+
+  await page.keyboard.down('Control');
+
+  await designPage.pointerMove(900, 300); // directly over v1 — pulls a fresh handle, not a bend
+  const overVertex = await designPage.cursorClassName();
+
+  await designPage.pointerMove(940, 300); // off the v1-v2 edge's own midpoint, still well inside it
+  const overSegment = await designPage.cursorClassName();
+
+  await page.keyboard.up('Control');
+
+  expect(overVertex).toContain('segment');
+  expect(overSegment).toContain('bend');
+});

@@ -24,6 +24,7 @@ import { continueStarVertexCountDrag } from './continueStarVertexCountDrag';
 import { continueVectorHandleDrag } from './continueVectorHandleDrag';
 import { continueVectorMarqueeDrag } from './continueVectorMarqueeDrag';
 import { continueVectorMultiDrag } from './continueVectorMultiDrag';
+import { continueVectorSegmentBendDrag } from './continueVectorSegmentBendDrag';
 import { continueVectorVertexDrag } from './continueVectorVertexDrag';
 import { resolveVectorSegmentHover } from './resolveVectorSegmentHover/resolveVectorSegmentHover';
 import { resolveVectorTangentHandleHover } from './resolveVectorTangentHandleHover';
@@ -55,6 +56,7 @@ export const handlePointerMove = (
   continueVectorVertexDrag(canvas, event, dispatch, selectionRefs.vectorVertexDragRef, setClassName);
   continueVectorHandleDrag(canvas, event, dispatch, selectionRefs.vectorHandleDragRef, setClassName);
   continueVectorMultiDrag(canvas, event, dispatch, selectionRefs.vectorMultiDragRef, setClassName);
+  continueVectorSegmentBendDrag(canvas, event, dispatch, selectionRefs.vectorSegmentBendDragRef, setClassName);
   continueVectorMarqueeDrag(canvas, event, canvasRefs, selectionRefs.vectorMarqueeStartRef, selectionRefs.vectorMarqueeModeRef);
   resolveVectorVertexHover(canvas, event, canvasRefs.hoveredVectorVertexIdRef);
   resolveVectorTangentHandleHover(canvas, event, canvasRefs);
