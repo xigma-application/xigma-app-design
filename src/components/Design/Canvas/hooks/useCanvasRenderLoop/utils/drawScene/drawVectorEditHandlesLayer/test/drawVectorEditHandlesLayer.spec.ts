@@ -62,6 +62,7 @@ const call = (
   penDraggedHandlePosition: { x: number; y: number } | null = null,
   dragOriginVertexId: string | null = null,
   selectedSegmentIds: string[] = [],
+  hoveredVectorSegmentId: string | null = null,
 ): void => {
   const gl = {} as WebGL2RenderingContext;
   const program = {} as WebGLProgram;
@@ -77,6 +78,7 @@ const call = (
     selectedSegmentIds,
     hoveredVertexId,
     hoveredSegmentId,
+    hoveredVectorSegmentId,
     hoveredHandle,
     selectedHandles,
     penActiveVertexId,
@@ -139,6 +141,7 @@ describe('drawVectorEditHandlesLayer', () => {
       null,
       null,
       null,
+      null,
       [],
       null,
       null,
@@ -179,12 +182,31 @@ describe('drawVectorEditHandlesLayer', () => {
     expect(drawVectorStrokeMock).toHaveBeenNthCalledWith(2, {}, {}, {}, expect.anything(), '#0d99ff', 2, 200, 150, IDENTITY_VIEWPORT);
   });
 
+  it('should draw the hovered-vector-segment highlight in blue at half opacity when a segment is hovered by the Selection tool', () => {
+    // before
+    call(vectorNode.id, [], null, null, null, null, [], null, null, [], 's1');
+
+    // result — the gray outline, plus the hovered segment drawn again in blue with alpha 0.5
+    expect(drawVectorStrokeMock).toHaveBeenCalledTimes(2);
+    expect(drawVectorStrokeMock).toHaveBeenNthCalledWith(2, {}, {}, {}, expect.anything(), '#0d99ff', 2, 200, 150, IDENTITY_VIEWPORT, 0.5);
+  });
+
   it('should draw nothing for a segment’s tangent handle when its parent vertex is not selected', () => {
     // before — no vertex/handle selected at all, so the s1 tangentStart handle stays hidden
     call(vectorNode.id, []);
 
     // result
     expect(drawLineMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw a segment’s tangent handles once the segment itself is selected, even with no vertex selected', () => {
+    // before — s1 selected directly, no vertex/handle selection at all
+    call(vectorNode.id, [], null, null, null, null, [], null, null, ['s1']);
+
+    // result — both ends of s1 reveal their handle, exactly like a directly-touched-vertex selection would
+    expect(drawLineMock).toHaveBeenCalledTimes(2);
+    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 5, y1: 0, y2: 0 }, '#aaaaaa', 1, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 10, x2: 7.5, y1: 0, y2: 0 }, '#aaaaaa', 1, 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should draw a tangent handle line and dot for a segment end once its parent vertex is selected', () => {
@@ -352,6 +374,7 @@ describe('drawVectorEditHandlesLayer', () => {
       null,
       null,
       null,
+      null,
       [],
       null,
       null,
@@ -406,6 +429,7 @@ describe('drawVectorEditHandlesLayer', () => {
       chainNode.id,
       ['A'],
       [],
+      null,
       null,
       null,
       null,

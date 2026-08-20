@@ -1485,7 +1485,7 @@ Two gotchas the specs below work around, worth knowing before adding more:
 | 175 | Dragging a vertex dot moves that vertex                                                                                                         |  ✅  | ✅ `vector-edit.spec.ts` |
 | 176 | Dragging an existing tangent handle curves the adjacent segment                                                                                 |  ✅  | ✅ `vector-edit.spec.ts` |
 | 177 | Dragging one handle at a `smooth` vertex also moves its other handle, curving both segments                                                     |  ✅  | ✅ `vector-edit.spec.ts` |
-| 178 | Clicking an edge with the Move tool selects the segment instead of splitting it — splitting still requires the Pen tool, matching Figma        |  ✅  | ✅ `vector-edit.spec.ts` |
+| 178 | Clicking an edge with the Move tool selects the segment instead of splitting it — splitting still requires the Pen tool, matching Figma         |  ✅  | ✅ `vector-edit.spec.ts` |
 | 179 | Clicking empty space in edit mode deselects the active vertex but keeps edit mode open (single click, not double)                               |  ✅  | ✅ `vector-edit.spec.ts` |
 | 180 | Selecting a different node while still editing one cleanly exits edit mode for the original — no lingering handles                              |  ✅  | ✅ `vector-edit.spec.ts` |
 | 181 | A selected (not editing) vector node still resizes via the ordinary 8-direction handles                                                         |  ✅  | ✅ `vector-edit.spec.ts` |
@@ -1504,6 +1504,11 @@ Two gotchas the specs below work around, worth knowing before adding more:
 | 194 | Click-dragging onto an existing vertex to close the loop shapes the closing segment's tangent, instead of only ever closing it straight         |  ✅  |     ✅ `pen.spec.ts`     |
 | 195 | A click-drag close reveals both the closing segment's own tangent and the live-dragged handle, unlike a plain closing click                     |  ✅  |     ✅ `pen.spec.ts`     |
 | 196 | Clicking a segment with the Move tool selects it, and Delete removes just that segment, leaving both endpoint vertices and the other segment    |  ✅  | ✅ `vector-edit.spec.ts` |
+| 197 | Hovering a segment with the Move tool (no button held) highlights it in blue at half opacity, distinct from both neutral and a full selection   |  ✅  | ✅ `vector-edit.spec.ts` |
+| 198 | Shift+click toggles a segment into a multi-selection with another segment, and a second shift+click on it removes it again                      |  ✅  | ✅ `vector-edit.spec.ts` |
+| 199 | Shift-selecting a segment also reveals its own tangent handles, even with no vertex of its own separately selected                              |  ✅  |            —             |
+| 200 | Dragging one of several selected segments moves the whole group together, not just the one grabbed                                              |  ✅  | ✅ `vector-edit.spec.ts` |
+| 201 | Dragging directly on an unselected segment selects it and moves it in one gesture, translating only its own two endpoint vertices               |  ✅  | ✅ `vector-edit.spec.ts` |
 
 ## Why so few scenarios get e2e coverage
 

@@ -3,7 +3,7 @@ import { RefObject } from 'react';
 // types
 import { TPoint } from 'types/canvas';
 import { TVectorHandleHover } from 'types/design/canvas/types';
-import { TVectorMultiDragState } from 'types/design/selectionTool/types';
+import { TVectorMultiDragState, TVectorPendingClickAction } from 'types/design/selectionTool/types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
@@ -19,6 +19,7 @@ export const armVectorMultiDrag = (
   selectedVertexIds: string[],
   selectedHandles: TVectorHandleHover[],
   point: TPoint,
+  pendingClickAction: TVectorPendingClickAction | null = null,
 ): void => {
   const vertexOrigins = Object.fromEntries(
     selectedVertexIds.map((vertexId) => [vertexId, { x: node.vertices[vertexId].x, y: node.vertices[vertexId].y }]),
@@ -32,6 +33,6 @@ export const armVectorMultiDrag = (
     }),
   );
 
-  vectorMultiDragRef.current = { handleOrigins, nodeId: node.id, pointerStart: point, vertexOrigins };
+  vectorMultiDragRef.current = { handleOrigins, hasMoved: false, nodeId: node.id, pendingClickAction, pointerStart: point, vertexOrigins };
   canvas.setPointerCapture(event.pointerId);
 };

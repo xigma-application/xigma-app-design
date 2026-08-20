@@ -18,6 +18,7 @@ export const getVectorHandleAtPoint = (
   selectedVertexIds: string[],
   oneHopVertexIds: string[],
   selectedHandles: TVectorHandleHover[],
+  selectedSegmentIds: string[],
 ): TVectorHandleHit | null => {
   const isHandleSelected = (segmentId: string, end: 'end' | 'start'): boolean =>
     selectedHandles.some((selected) => selected.segmentId === segmentId && selected.end === end);
@@ -28,7 +29,8 @@ export const getVectorHandleAtPoint = (
       const end = node.vertices[segment.endId];
       const handleStart = getVectorHandlePosition(start, getEffectiveTangentStart(node.vertices, segment));
       const handleEnd = getVectorHandlePosition(end, getEffectiveTangentEnd(node.vertices, segment));
-      const isSegmentDirectlyTouchingSelection = isVectorSegmentEndpointSelected(segment.startId, segment.endId, selectedVertexIds);
+      const isSegmentDirectlyTouchingSelection =
+        isVectorSegmentEndpointSelected(segment.startId, segment.endId, selectedVertexIds) || selectedSegmentIds.includes(segment.id);
       const options: (TVectorHandleHit & { distance: number })[] = [];
 
       if (

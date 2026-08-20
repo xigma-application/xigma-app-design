@@ -99,9 +99,14 @@ export type TVectorHandleDragState = {
   vertexId: string;
 };
 
+export type TVectorPendingClickAction =
+  { id: string; kind: 'vertex' } | { end: 'end' | 'start'; kind: 'handle'; segmentId: string } | { id: string; kind: 'segment' };
+
 export type TVectorMultiDragState = {
   handleOrigins: Record<string, TPoint>;
+  hasMoved: boolean;
   nodeId: string;
+  pendingClickAction: TVectorPendingClickAction | null;
   pointerStart: TPoint;
   vertexOrigins: Record<string, TPoint>;
 };

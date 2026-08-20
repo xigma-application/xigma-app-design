@@ -53,6 +53,7 @@ export const VECTOR_EDIT_OUTLINE_STROKE = '#aaaaaa';
 export const VECTOR_HANDLE_FILL = '#0d99ff';
 export const VECTOR_HANDLE_HIT_RADIUS_PX = 5;
 export const VECTOR_HANDLE_HOVER_STROKE = '#a6cef7';
+export const VECTOR_SEGMENT_HOVER_FILL_ALPHA = 0.5;
 export const VECTOR_SNAP_INDICATOR_RADIUS_PX = 8;
 export const VECTOR_STROKE_WIDTH = 1;
 export const VECTOR_VERTEX_FILL = '#ffffff';

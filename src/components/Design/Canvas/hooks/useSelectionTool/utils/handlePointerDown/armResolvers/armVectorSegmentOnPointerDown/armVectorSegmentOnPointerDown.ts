@@ -6,13 +6,21 @@ import { selectVectorEditingNodeId } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { TArmContext } from '../types';
+import { TArmContext } from '../../types';
 
 // utils
-import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
-import { getVectorEdgeAtPoint } from '../../../../../utils/getVectorEdgeAtPoint';
+import { armVectorSegmentClick } from './armVectorSegmentClick';
+import { getVectorEditingNode } from '../../../../../../utils/getVectorEditingNode';
+import { getVectorEdgeAtPoint } from '../../../../../../utils/getVectorEdgeAtPoint';
 
-export const armVectorSegmentOnPointerDown = ({ canvasRefs, point, viewport }: TArmContext): true | undefined => {
+export const armVectorSegmentOnPointerDown = ({
+  canvas,
+  canvasRefs,
+  event,
+  point,
+  selectionRefs,
+  viewport,
+}: TArmContext): true | undefined => {
   const node = getVectorEditingNode(store.getState().design.nodes, selectVectorEditingNodeId(store.getState()));
 
   if (node) {
@@ -24,9 +32,7 @@ export const armVectorSegmentOnPointerDown = ({ canvasRefs, point, viewport }: T
     );
 
     if (hit) {
-      canvasRefs.selectedVectorSegmentIdsRef.current = [hit.segmentId];
-      canvasRefs.selectedVectorVertexIdsRef.current = [];
-      canvasRefs.selectedVectorHandlesRef.current = [];
+      armVectorSegmentClick(canvas, event, canvasRefs, selectionRefs, node, hit.segmentId, point);
 
       return true;
     }

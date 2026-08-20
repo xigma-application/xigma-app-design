@@ -16,6 +16,7 @@ export const drawVectorStroke = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  alpha = 1,
 ): void => {
   const halfWidth = strokeWidth / 2;
   const vertices = segments.flatMap(({ points }) => getThickPolylineVertices(points, halfWidth));
@@ -39,6 +40,6 @@ export const drawVectorStroke = (
   gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-  gl.uniform4fv(colorLocation, hexToRgbaFloat(color));
+  gl.uniform4fv(colorLocation, hexToRgbaFloat(color, alpha));
   gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
 };

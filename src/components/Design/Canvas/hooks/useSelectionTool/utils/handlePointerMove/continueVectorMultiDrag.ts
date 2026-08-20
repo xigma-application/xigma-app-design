@@ -47,6 +47,8 @@ export const continueVectorMultiDrag = (
     const node = getVectorEditingNode(state.design.nodes, dragState.nodeId);
 
     if (node) {
+      dragState.hasMoved = true;
+
       const point = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
       const deltaX = point.x - dragState.pointerStart.x;
       const deltaY = point.y - dragState.pointerStart.y;

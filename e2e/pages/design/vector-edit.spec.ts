@@ -568,3 +568,103 @@ test('dragging a marquee over empty space selects every vertex whose point falls
   expect(afterV2.equals(beforeV2)).toBe(false);
   expect(afterV3.equals(beforeV3)).toBe(true);
 });
+
+test('hovering a segment with the Move tool highlights it in blue at partial opacity, distinct from both the neutral look and a fully-selected segment', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-segment-hover');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawOpenTriangle(designPage); // v1(900,300), v2(1050,300), v3(1050,450)
+  await designPage.selectTool('default');
+
+  await designPage.pointerMove(1400, 700); // rest well away from the shape
+  const neutral = await designPage.canvas.screenshot();
+
+  await designPage.pointerMove(975, 300); // midpoint of the v1-v2 edge — no button held, hover only
+  const hovered = await designPage.canvas.screenshot();
+  expect(hovered.equals(neutral)).toBe(false);
+
+  await designPage.click(975, 300); // fully select the same segment (opaque, not just half-opacity)
+  const selected = await designPage.canvas.screenshot();
+  expect(selected.equals(hovered)).toBe(false);
+});
+
+test('shift+click toggles a segment into a multi-selection with another segment, and dragging one of the selected segments moves the whole group together', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-segment-shift-multi-select');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawOpenTriangle(designPage); // v1(900,300), v2(1050,300), v3(1050,450)
+  await designPage.selectTool('default');
+
+  const neutral = { x: 1400, y: 700 };
+
+  await designPage.click(975, 300); // select the v1-v2 segment alone
+  await designPage.pointerMove(neutral.x, neutral.y);
+  const singleSelected = await designPage.canvas.screenshot();
+
+  await designPage.click(1050, 375, { shift: true }); // add the v2-v3 segment — now a 2-segment multi-selection
+  await designPage.pointerMove(neutral.x, neutral.y);
+  const multiSelected = await designPage.canvas.screenshot();
+  expect(multiSelected.equals(singleSelected)).toBe(false);
+
+  await designPage.click(1050, 375, { shift: true }); // remove the v2-v3 segment again
+  await designPage.pointerMove(neutral.x, neutral.y);
+  const backToSingle = await designPage.canvas.screenshot();
+  expect(backToSingle.equals(singleSelected)).toBe(true); // round trip back to the single-segment look
+
+  // re-select both segments together, then drag starting from inside the already-selected v1-v2
+  // segment — since the two selected segments together touch every vertex (v1, v2, v3), the whole
+  // triangle must move, not just the segment that was actually grabbed
+  await designPage.click(1050, 375, { shift: true });
+
+  const v1Region = { height: 24, width: 24, x: 888, y: 288 };
+  const v3Region = { height: 24, width: 24, x: 1038, y: 438 };
+  const beforeV1 = await page.screenshot({ clip: v1Region });
+  const beforeV3 = await page.screenshot({ clip: v3Region });
+
+  await designPage.dragVectorPoint(975, 300, 975, 200); // grab the v1-v2 segment, not either vertex dot
+
+  const afterV1 = await page.screenshot({ clip: v1Region });
+  const afterV3 = await page.screenshot({ clip: v3Region });
+
+  expect(afterV1.equals(beforeV1)).toBe(false);
+  expect(afterV3.equals(beforeV3)).toBe(false);
+});
+
+test('dragging directly on an unselected segment selects it and moves only its own two endpoint vertices, in one gesture', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-segment-drag');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawOpenTriangle(designPage); // v1(900,300), v2(1050,300), v3(1050,450)
+  await designPage.selectTool('default');
+
+  const v1Region = { height: 24, width: 24, x: 888, y: 288 };
+  const v2Region = { height: 24, width: 24, x: 1038, y: 288 };
+  const v3Region = { height: 24, width: 24, x: 1038, y: 438 };
+
+  const beforeV1 = await page.screenshot({ clip: v1Region });
+  const beforeV2 = await page.screenshot({ clip: v2Region });
+  const beforeV3 = await page.screenshot({ clip: v3Region });
+
+  // no prior click — grabbing straight from the segment's interior must select and move it together
+  await designPage.dragVectorPoint(975, 300, 975, 200);
+
+  const afterV1 = await page.screenshot({ clip: v1Region });
+  const afterV2 = await page.screenshot({ clip: v2Region });
+  const afterV3 = await page.screenshot({ clip: v3Region });
+
+  expect(afterV1.equals(beforeV1)).toBe(false);
+  expect(afterV2.equals(beforeV2)).toBe(false);
+  expect(afterV3.equals(beforeV3)).toBe(true); // v3 belongs only to the untouched v2-v3 segment
+});

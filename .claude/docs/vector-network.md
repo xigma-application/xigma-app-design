@@ -385,8 +385,9 @@ New entries in `handlePointerDown/constants.ts`'s `ARM_RESOLVERS` (highest prior
 - **Cross-object connecting/merging is out of scope** (your call, asked directly) — Pen/Vector Edit Mode
   only ever snap to vertices of the one network currently open (`vectorEditingNodeId`), never a
   different object's.
-- **Single-vertex selection only** — no shift-multi-select or marquee-select of vertices within a
-  network. `selectedVectorVertexIdsRef` holds zero or one id. Move/delete still work per-vertex.
+- ~~Single-vertex selection only~~ — **implemented**: shift-multi-select and marquee-select of
+  vertices/handles, plus multi-drag, all landed as part of §9-11's work; `selectedVectorVertexIdsRef`
+  now holds any number of ids. See §20 for segment selection, which followed the same shift-toggle shape.
 - **Solo rotate and solo resize both work, including on an already-rotated node** —
   `getResizeHandleAtPoint.ts`/`getRotateHandleAtPoint.ts` no longer exclude `NodeType.vector`; both fall
   through to the same generic single-node branch every box node uses (`getNodeBounds.ts` + `node.rotation`,
@@ -432,13 +433,9 @@ New entries in `handlePointerDown/constants.ts`'s `ARM_RESOLVERS` (highest prior
   need stroke-sampling + curve-fitting, a different algorithm the spec never described.
 - **Stroke end caps** — explicitly deferred (asked directly).
 - ~~No "pull a fresh handle out of a corner point" in Vector Edit Mode~~ — **implemented**, see §9.
-- **No standalone "select just an edge, delete only it" interaction** — Vector Edit Mode selects and
-  deletes **vertices** (`selectedVectorVertexIdsRef`), not segments in isolation; deleting a vertex
-  correctly removes every segment touching it (§6's Delete/Backspace), but there's no way to remove one
-  segment while leaving both its endpoint vertices in place as newly-disconnected points. Requirement
-  #8's "zaznaczać edge" is only met in the sense that the Pen tool's edge hit-testing (§6,
-  `getVectorEdgeAtPoint.ts` via `splitVectorSegment.ts`) acts on a clicked edge to split it — it
-  doesn't persist a "this edge is selected" UI state the way vertex selection does.
+- ~~No standalone "select just an edge, delete only it" interaction~~ — **implemented**, see §20:
+  a segment can be selected (single, shift-multi, or dragged-as-a-group), hovered, and deleted on its
+  own, independent of vertex selection.
 
 ## 8. Undo/redo — built as this feature's own foundation
 
@@ -993,6 +990,125 @@ while `drawPenDragHandlePreview` now correctly anchors its live cursor-following
 vertex's own tangent), one live (the vertex being dragged onto) — matching what dragging onto an existing
 vertex earlier in the *same* fragment already showed for free (§10's rule already covered that case, since
 the newly-placed vertex there **was** `penActiveVertexId` at drag time).
+
+## 20. Segment selection — click, shift-multi-select, hover, and drag-by-the-segment
+
+Landed in two rounds: a first pass added single-segment click-to-select plus delete
+(`armVectorSegmentOnPointerDown.ts` in `ARM_RESOLVERS`, lowest priority among the vector resolvers —
+vertex/handle/multi-select-box all win a tied hit first; `getVectorEdgeAtPoint.ts`, §6, already existed
+for Pen's own edge-attraction and is reused unmodified for the hit-test). A follow-up round added
+shift-multi-select, a hover highlight, tangent-handle reveal for a directly-selected segment, and
+dragging a selection by grabbing any one of its already-selected segments — closing the three gaps §7
+used to flag.
+
+**Selection state**: `selectedVectorSegmentIdsRef` (`TCanvasRefs`, `string[]`) — same shift-toggle shape
+as vertex/handle selection (`toggleSelection.ts`), and, like those, **not mutually exclusive with them**:
+a shift-click only ever touches its own category's ref, so a vertex, a handle, and a segment can all be
+selected together at once. A plain (non-shift) click on a segment resets all three refs to just that one
+segment, mirroring every other plain-click-replaces-selection resolver in this file.
+
+**Hover** — a *second*, independent ref from Pen's own `hoveredSegmentIdRef` (§4's orange "extend/attract"
+highlight, `#cd4422`, Pen-tool only): `hoveredVectorSegmentIdRef`, set by `resolveVectorSegmentHover.ts`
+(`useSelectionTool/utils/handlePointerMove/`, mirrors `resolveVectorVertexHover.ts` exactly, same
+`getVectorEdgeAtPoint` tolerances as the arm resolver) and cleared on `pointerleave` alongside
+`hoveredVectorVertexIdRef`. Rendered via `drawHoveredVectorSegmentHighlight.ts` (new file, sibling to the
+Pen-only `drawHoveredSegmentHighlight.ts` in `drawVectorEditOutline/`) — the *same* `VECTOR_HANDLE_FILL`
+blue the selected-segment highlight uses (`drawSelectedSegmentsHighlight.ts`), but at
+`VECTOR_SEGMENT_HOVER_FILL_ALPHA` (`0.5`) instead of fully opaque, so hover reads as a lighter version of
+"this is about to be selected" rather than a different color meaning a different thing. This required
+threading an optional `alpha = 1` parameter through `drawVectorStroke.ts` itself (`hexToRgbaFloat(color,
+alpha)` — that function already took an alpha argument, just never received one from here) — the WebGL
+context already runs with `gl.BLEND`/`SRC_ALPHA, ONE_MINUS_SRC_ALPHA` globally
+(`useCanvasRenderLoop/utils/setupRenderLoop.ts`), so no rendering-pipeline change was needed, only the
+uniform value.
+
+**Tangent-handle reveal** — §10's two-list visibility rule (`selectedVertexIds` for "directly touching",
+`oneHopVertexIds` for the one-hop corridor case) gained a third, orthogonal check:
+`selectedSegmentIds.includes(segment.id)` folded into the *same* "directly touching" boolean in both
+`drawSegmentTangentHandles.ts` (rendering) and `getVectorHandleAtPoint.ts` (hit-testing) — a segment that
+is itself selected reveals both its own tangent handles unconditionally, exactly like a segment touching a
+selected vertex already did. This is the "kilka naraz w tym pointy tangesy" requirement: shift-selecting
+several segments makes every one of their tangent handles visible *and* grabbable at once, with no need to
+separately select their vertices first. `selectedSegmentIds` threads down as one more parameter alongside
+the existing pair everywhere they already flowed (`drawVectorEditHandlesLayer.ts` already had it in scope
+for the outline highlight; `armVectorHandleOnPointerDown.ts`/`resolveVectorTangentHandleHover.ts` read it
+off `canvasRefs.selectedVectorSegmentIdsRef.current`, same as the other two).
+
+**Drag-by-the-segment** — reuses the existing multi-drag mechanism (`armVectorMultiDrag`/
+`continueVectorMultiDrag`, originally built for "click inside the bounding box of 2+ selected
+vertices/handles to move them together," §"Vector Edit Mode" resolver notes) rather than inventing a
+parallel drag state: a non-shift pointerdown on a segment computes the *union* of vertex ids from
+`selectedVectorVertexIdsRef` plus every endpoint of every currently-selected segment
+(`getVectorSegmentVertexIds.ts`, new, `utils/canvas/vectorNetwork/` — dedupes a segment id list down to
+its vertex ids) and arms `armVectorMultiDrag` with that set, `selectedVectorHandlesRef.current` passed
+through unchanged. No new translate math was needed — tangents are stored relative to their own vertex
+(§1), so translating a segment's two endpoint vertices carries its tangent handles for free, the same
+"for free" property vertex-dragging already relied on. Mirrors `armHitDrag.ts`'s collapse-vs-keep
+decision (`selection-and-manipulation.md` §3): clicking a segment **already** in the multi-selection keeps
+the whole selection and drags everything in it; clicking one that **isn't** first collapses the selection
+down to just that segment (clearing vertex/handle refs, same as the existing plain-click branch), then
+drags only its own two vertices. **This "keep the whole selection" behavior is now deferred to release,
+not decided at pointerdown** — see §21, a same-day follow-up correction.
+
+## 21. Collapse-vs-keep for a multi-selected point is resolved on release, not on press — and the three
+per-kind click resolvers got their own folders
+
+Landed as a direct correction to §20's first cut: clicking an already-multi-selected vertex/handle/segment
+used to decide immediately, at `pointerdown`, whether the click would collapse the selection down to just
+that one item — so a click-and-drag meant to move the whole group instead snapped down to a single item
+the instant the button went down, before any drag could happen. Reported directly ("jak mamy multi i
+klikam point to odznacza wszystkie... jak klikne w punkt i nie ruszę myszką to wtedy faktycznie powinno
+resztę odznaczyć" — collapsing must wait for a release with no movement, exactly `armHitDrag.ts`'s
+existing collapse-vs-keep contract for whole-node multi-selections, which this vector-level version was
+supposed to mirror from the start but didn't).
+
+**The fix**: `TVectorMultiDragState` (`types/design/selectionTool/types.ts`) gained `hasMoved: boolean`
+and `pendingClickAction: TVectorPendingClickAction | null` — the same two fields `TDragState` already
+carries for the node-level version, `TVectorPendingClickAction` a `{ kind: 'vertex' | 'handle' | 'segment',
+...id }` discriminated union naming which single item to collapse to. `armVectorMultiDrag.ts` takes an
+optional `pendingClickAction` (default `null`) and seeds `hasMoved: false`; `continueVectorMultiDrag.ts`
+sets `dragState.hasMoved = true` on the first real move, mirroring `continueDrag.ts`. Resolution moved
+into `disarmVectorMultiDrag.ts` (now takes `canvasRefs` too, wired through `handlePointerUp.ts`): only when
+`!hasMoved` does it apply the pending action, writing straight into `canvasRefs.selectedVector*Ref` (no
+Redux dispatch — vector selection has always lived in refs, §6/§7) via a `switch` on `pendingClickAction.
+kind` (`// no default` — the union is exhaustive by construction, so a runtime default branch would be
+permanently dead code and break 100% coverage).
+
+**The three per-category "is this click ambiguous" checks were pulled into two shared files** (asked for
+directly — the union-computation and arm-call had been copy-pasted three times across the vertex/handle/
+segment resolvers): `isPartOfVectorMultiSelection.ts` (`totalSelected > 1 && isHitItemSelected`, `handlePointerDown/`,
+shared) and `armVectorGroupDrag.ts` (computes the vertex-id union — selected vertices plus every selected
+segment's own endpoints, via `getVectorSegmentVertexIds.ts` — and calls `armVectorMultiDrag` with the
+caller's `TVectorPendingClickAction`, `handlePointerDown/`, shared). Both live at the shared
+`handlePointerDown/` level, not nested under any one resolver, since all three click resolvers call them.
+
+**Each `armVector*OnPointerDown.ts` was promoted to its own same-named folder, its own private utils moving
+in alongside it** — asked for directly, mirroring this codebase's established "ifologia" folder-promotion
+convention (`drawVectorEditOutline/`, §3/§9) rather than leaving a flat file's growing branch logic inline:
+- `armResolvers/armVectorVertexOnPointerDown/` — `armVectorVertexOnPointerDown.ts` (hit-test only, now a
+  thin orchestrator), `armVectorVertexClick.ts` (the shift/multi/plain `switch (true)` — moved out to its
+  own file on top of the folder promotion, since the switch itself was still enough logic to be its own
+  concern), `selectAndArmVectorVertexDrag.ts` (the plain-click "replace selection + arm a single-vertex
+  drag" branch, its own function since it's more than a one-line delegate), and `armVectorVertexDrag.ts`
+  itself (moved in from the old shared `handlePointerDown/` location once nothing else referenced it
+  directly anymore — only ever called from `selectAndArmVectorVertexDrag.ts`).
+- `armResolvers/armVectorHandleOnPointerDown/` — same shape: `armVectorHandleOnPointerDown.ts` (hit-test),
+  `armVectorHandleClick.ts` (the switch), `selectAndArmVectorHandleDrag.ts` (plain-click branch). Unlike
+  the vertex case, `armVectorHandleDrag.ts` **stayed** at the shared `handlePointerDown/` level — it's also
+  called directly by `armVectorCornerHandleOnPointerDown.ts` (§9), a different resolver entirely, so moving
+  it into this folder would have misrepresented it as handle-resolver-private.
+- `armResolvers/armVectorSegmentOnPointerDown/` — same shape again: `armVectorSegmentOnPointerDown.ts`,
+  `armVectorSegmentClick.ts`, `selectAndArmVectorSegmentDrag.ts`. `armVectorMultiDrag.ts` similarly stayed
+  shared (also called by `armVectorGroupDrag.ts` and `armVectorMultiSelectBoxOnPointerDown.ts`).
+- The `switch (true) { case <boolean-expr>: ...; default: ... }` idiom used in every `armVector*Click.ts`
+  mirrors `continueDrag.ts`'s `getOriginChanges`/`continueRotateDrag`'s `getRotatedNodeChanges`/
+  `resizeNode.ts` — the established shape in this codebase for "3+ branches that aren't a plain
+  `switch(x)` over one value, but *are* mutually exclusive boolean conditions," per `[[xigma-switch-over-if]]`.
+- Test coverage stayed where it already was — `armResolvers/test/armResolvers.spec.ts`'s three `describe`
+  blocks (unchanged in shape, just their imports repointed into the new nested paths) still exercise all
+  three resolvers' full contracts end to end, since none of this reorganization changed behavior, only
+  where the same logic lives. `armVectorVertexDrag.spec.ts` moved together with its implementation, into
+  `armVectorVertexOnPointerDown/test/`.
 
 ## Related
 

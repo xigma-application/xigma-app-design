@@ -49,6 +49,7 @@ describe('drawSegmentTangentHandles', () => {
       [],
       BOTH_VERTICES_SELECTED,
       [],
+      [],
       5,
       200,
       150,
@@ -102,6 +103,7 @@ describe('drawSegmentTangentHandles', () => {
       [],
       BOTH_VERTICES_SELECTED,
       [],
+      [],
       5,
       200,
       150,
@@ -128,6 +130,7 @@ describe('drawSegmentTangentHandles', () => {
       null,
       [],
       BOTH_VERTICES_SELECTED,
+      [],
       [],
       5,
       200,
@@ -182,6 +185,7 @@ describe('drawSegmentTangentHandles', () => {
       [],
       BOTH_VERTICES_SELECTED,
       [],
+      [],
       5,
       200,
       150,
@@ -232,6 +236,7 @@ describe('drawSegmentTangentHandles', () => {
       { end: 'start', segmentId: 'other-segment' },
       [],
       BOTH_VERTICES_SELECTED,
+      [],
       [],
       5,
       200,
@@ -284,6 +289,7 @@ describe('drawSegmentTangentHandles', () => {
       [{ end: 'end', segmentId: 's1' }],
       BOTH_VERTICES_SELECTED,
       [],
+      [],
       5,
       200,
       150,
@@ -335,6 +341,7 @@ describe('drawSegmentTangentHandles', () => {
       [{ end: 'end', segmentId: 'other-segment' }],
       BOTH_VERTICES_SELECTED,
       [],
+      [],
       5,
       200,
       150,
@@ -357,6 +364,33 @@ describe('drawSegmentTangentHandles', () => {
     );
   });
 
+  it('should draw both ends of a segment once the segment itself is selected, even with no vertex/handle selected', () => {
+    // mock
+    const segment = { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: { x: -5, y: 0 }, tangentStart: { x: 5, y: 0 } };
+    const node = buildNode({ s1: segment });
+
+    // before
+    drawSegmentTangentHandles(
+      {} as WebGL2RenderingContext,
+      {} as WebGLProgram,
+      {} as WebGLBuffer,
+      node,
+      segment,
+      null,
+      [],
+      [],
+      [],
+      ['s1'],
+      5,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
+
+    // result
+    expect(drawTangentHandleMock).toHaveBeenCalledTimes(2);
+  });
+
   it('should draw neither end when no vertex is selected and neither handle is itself selected', () => {
     // mock
     const segment = { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: { x: -5, y: 0 }, tangentStart: { x: 5, y: 0 } };
@@ -370,6 +404,7 @@ describe('drawSegmentTangentHandles', () => {
       node,
       segment,
       null,
+      [],
       [],
       [],
       [],
@@ -398,6 +433,7 @@ describe('drawSegmentTangentHandles', () => {
       null,
       [],
       ['v1'],
+      [],
       [],
       5,
       200,
@@ -451,6 +487,7 @@ describe('drawSegmentTangentHandles', () => {
       [],
       ['v2'],
       [],
+      [],
       5,
       200,
       150,
@@ -475,6 +512,7 @@ describe('drawSegmentTangentHandles', () => {
       segment,
       null,
       [{ end: 'end', segmentId: 's1' }],
+      [],
       [],
       [],
       5,

@@ -90,6 +90,30 @@ describe('drawVectorStroke', () => {
     expect(bufferedAtHalfZoom[1]).toBe(1);
   });
 
+  it('should default to fully opaque, and forward an explicit alpha into the color uniform', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const segments = [
+      {
+        points: [
+          { x: 0, y: 0 },
+          { x: 10, y: 0 },
+        ],
+        segmentId: 's1',
+      },
+    ];
+
+    // before
+    drawVectorStroke(gl, program, buffer, segments, '#0d99ff', 2, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorStroke(gl, program, buffer, segments, '#0d99ff', 2, 200, 150, IDENTITY_VIEWPORT, 0.5);
+
+    // result
+    expect(gl.uniform4fv).toHaveBeenNthCalledWith(1, expect.anything(), [13 / 255, 153 / 255, 1, 1]);
+    expect(gl.uniform4fv).toHaveBeenNthCalledWith(2, expect.anything(), [13 / 255, 153 / 255, 1, 0.5]);
+  });
+
   it('should not draw when every segment pair collapses to zero-length vertices (degenerate polylines only)', () => {
     // mock
     const gl = createGlMock();

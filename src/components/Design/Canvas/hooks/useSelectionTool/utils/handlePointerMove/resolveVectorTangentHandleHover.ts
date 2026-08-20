@@ -37,6 +37,7 @@ export const resolveVectorTangentHandleHover = (canvas: HTMLCanvasElement, event
       visualSelectedVertexIds,
       oneHopVertexIds,
       canvasRefs.selectedVectorHandlesRef.current,
+      canvasRefs.selectedVectorSegmentIdsRef.current,
     );
 
     canvasRefs.hoveredVectorHandleRef.current = hit ? { end: hit.end, segmentId: hit.segmentId } : null;

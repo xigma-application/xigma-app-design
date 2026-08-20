@@ -60,7 +60,9 @@ describe('armVectorMultiDrag', () => {
     // result
     expect(vectorMultiDragRef.current).toEqual({
       handleOrigins: { 'end:s1': { x: -5, y: 0 }, 'start:s1': { x: 5, y: 0 } },
+      hasMoved: false,
       nodeId: 'vector-1',
+      pendingClickAction: null,
       pointerStart: { x: 8, y: 9 },
       vertexOrigins: { v1: { x: 0, y: 0 }, v3: { x: 20, y: 10 } },
     });
@@ -77,5 +79,18 @@ describe('armVectorMultiDrag', () => {
 
     // result
     expect(vectorMultiDragRef.current?.handleOrigins).toEqual({});
+  });
+
+  it('should default the pending click action to null when none is given, and store one when given', () => {
+    // mock
+    const canvas = createCanvas();
+    const vectorMultiDragRef = createVectorMultiDragRef();
+
+    // before
+    armVectorMultiDrag(canvas, pointerEvent(), vectorMultiDragRef, vector, ['v1'], [], { x: 0, y: 0 }, { id: 'v1', kind: 'vertex' });
+
+    // result
+    expect(vectorMultiDragRef.current?.pendingClickAction).toEqual({ id: 'v1', kind: 'vertex' });
+    expect(vectorMultiDragRef.current?.hasMoved).toBe(false);
   });
 });

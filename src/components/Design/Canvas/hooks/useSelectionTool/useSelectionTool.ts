@@ -43,6 +43,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
 
   const onPointerLeave = (canvasRefs: TCanvasRefs): void => {
     canvasRefs.hoveredVectorVertexIdRef.current = null;
+    canvasRefs.hoveredVectorSegmentIdRef.current = null;
   };
 
   useEffect(() => {

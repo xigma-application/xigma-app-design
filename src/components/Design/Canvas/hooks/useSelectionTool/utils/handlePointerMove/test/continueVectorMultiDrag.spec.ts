@@ -71,7 +71,9 @@ describe('continueVectorMultiDrag', () => {
     const canvas = createCanvas();
     const vectorMultiDragRef = createVectorMultiDragRef({
       handleOrigins: {},
+      hasMoved: false,
       nodeId: 'missing-node',
+      pendingClickAction: null,
       pointerStart: { x: 0, y: 0 },
       vertexOrigins: { v1: { x: 0, y: 0 } },
     });
@@ -91,7 +93,9 @@ describe('continueVectorMultiDrag', () => {
     const canvas = createCanvas();
     const vectorMultiDragRef = createVectorMultiDragRef({
       handleOrigins: { 'end:s1': { x: -5, y: 0 }, 'start:s1': { x: 5, y: 0 } },
+      hasMoved: false,
       nodeId: idA,
+      pendingClickAction: { id: 'v2', kind: 'vertex' },
       pointerStart: { x: 0, y: 0 },
       vertexOrigins: { v2: { x: 100, y: 0 } },
     });
@@ -108,5 +112,8 @@ describe('continueVectorMultiDrag', () => {
       vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 110, y: 4 } },
     });
     expect(setClassName).toHaveBeenCalledWith('move');
+
+    // result — a real move marks the drag as having moved, so a pending collapse won't fire on release
+    expect(vectorMultiDragRef.current?.hasMoved).toBe(true);
   });
 });

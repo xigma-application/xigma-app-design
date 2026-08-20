@@ -27,11 +27,11 @@ import { armStarCornerRadiusOnPointerDown } from '../armStarCornerRadiusOnPointe
 import { armStarRatioOnPointerDown } from '../armStarRatioOnPointerDown';
 import { armStarVertexCountOnPointerDown } from '../armStarVertexCountOnPointerDown';
 import { armVectorCornerHandleOnPointerDown } from '../armVectorCornerHandleOnPointerDown';
-import { armVectorHandleOnPointerDown } from '../armVectorHandleOnPointerDown';
+import { armVectorHandleOnPointerDown } from '../armVectorHandleOnPointerDown/armVectorHandleOnPointerDown';
 import { armVectorMarqueeOnPointerDown } from '../armVectorMarqueeOnPointerDown';
 import { armVectorMultiSelectBoxOnPointerDown } from '../armVectorMultiSelectBoxOnPointerDown';
-import { armVectorSegmentOnPointerDown } from '../armVectorSegmentOnPointerDown';
-import { armVectorVertexOnPointerDown } from '../armVectorVertexOnPointerDown';
+import { armVectorSegmentOnPointerDown } from '../armVectorSegmentOnPointerDown/armVectorSegmentOnPointerDown';
+import { armVectorVertexOnPointerDown } from '../armVectorVertexOnPointerDown/armVectorVertexOnPointerDown';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { createSelectionToolRefs } from '../../../../hooks/useSelectionToolRefs/createSelectionToolRefs';
 import { toggleSelectionOnPointerDown } from '../toggleSelectionOnPointerDown';
@@ -797,6 +797,35 @@ describe('armVectorHandleOnPointerDown', () => {
     expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
   });
 
+  it('should keep the whole multi-selection and arm a group drag with a pending collapse when clicking an already-selected handle', () => {
+    // mock — the handle is already selected directly, alongside an unrelated selected vertex
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: { x: 10, y: 20 } } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v2'];
+
+    // before
+    const ctx = createContext({ canvasRefs, point: { x: 10, y: 20 } });
+
+    // result — the selection is left untouched at pointerdown time; only released-without-moving resolves
+    // the collapse (see disarmVectorMultiDrag.spec.ts)
+    expect(armVectorHandleOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
+    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v2']);
+    expect(ctx.selectionRefs.vectorHandleDragRef.current).toBeNull();
+    expect(ctx.selectionRefs.vectorMultiDragRef.current).toMatchObject({
+      pendingClickAction: { end: 'start', kind: 'handle', segmentId: 's1' },
+      vertexOrigins: { v2: { x: 100, y: 0 } },
+    });
+  });
+
   it('should toggle the handle into the multi-selection on shift+click, without arming a drag or touching the vertex selection', () => {
     // mock — v1 stays selected (its own handle must be selected/its parent vertex must be selected to be hittable at all), v2 tags along
     const nodeId = addVectorNode(
@@ -1030,6 +1059,33 @@ describe('armVectorVertexOnPointerDown', () => {
     expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
   });
 
+  it('should keep the whole multi-selection and arm a group drag with a pending collapse when clicking an already-selected vertex', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+
+    // before
+    const ctx = createContext({ canvasRefs, point: { x: 2, y: 0 } });
+
+    // result — the selection is left untouched at pointerdown time; only released-without-moving resolves
+    // the collapse (see disarmVectorMultiDrag.spec.ts)
+    expect(armVectorVertexOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
+    expect(ctx.selectionRefs.vectorVertexDragRef.current).toBeNull();
+    expect(ctx.selectionRefs.vectorMultiDragRef.current).toMatchObject({
+      pendingClickAction: { id: 'v1', kind: 'vertex' },
+      vertexOrigins: { v1: { x: 0, y: 0 }, v2: { x: 100, y: 0 } },
+    });
+  });
+
   it('should toggle the vertex into the multi-selection on shift+click, without arming a drag or touching the handle selection', () => {
     // mock
     const nodeId = addVectorNode(
@@ -1127,7 +1183,9 @@ describe('armVectorMultiSelectBoxOnPointerDown', () => {
     expect(armVectorMultiSelectBoxOnPointerDown(ctx)).toBe(true);
     expect(ctx.selectionRefs.vectorMultiDragRef.current).toEqual({
       handleOrigins: {},
+      hasMoved: false,
       nodeId,
+      pendingClickAction: null,
       pointerStart: { x: 50, y: 50 },
       vertexOrigins: { v1: { x: 0, y: 0 }, v2: { x: 100, y: 100 } },
     });
@@ -1255,5 +1313,103 @@ describe('armVectorSegmentOnPointerDown', () => {
 
     // result
     expect(armVectorSegmentOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  it('should add the segment to the selection on shift-click without touching vertex/handle selection', () => {
+    // mock
+    const nodeId = addVectorNode(
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+      },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 200, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v3'];
+
+    // before
+    const ctx = createContext({ canvasRefs, event: pointerEvent({ shiftKey: true }), point: { x: 150, y: 0 } });
+
+    // result
+    expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1', 's2']);
+    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v3']);
+  });
+
+  it('should remove the segment from the selection on shift-click when it is already selected', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
+
+    // before
+    const ctx = createContext({ canvasRefs, event: pointerEvent({ shiftKey: true }), point: { x: 25, y: 0 } });
+
+    // result
+    expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+  });
+
+  it('should keep the whole multi-selection and arm a drag of every selected segment when clicking an already-selected segment', () => {
+    // mock
+    const nodeId = addVectorNode(
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+      },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 200, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvasRefs = createCanvasRefs();
+    const selectionRefs = createSelectionToolRefs();
+
+    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1', 's2'];
+
+    // before
+    const ctx = createContext({ canvasRefs, point: { x: 25, y: 0 }, selectionRefs });
+
+    // result
+    expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1', 's2']);
+    expect(selectionRefs.vectorMultiDragRef.current?.vertexOrigins).toEqual({
+      v1: { x: 0, y: 0 },
+      v2: { x: 100, y: 0 },
+      v3: { x: 200, y: 0 },
+    });
+  });
+
+  it('should select just the clicked segment and arm a drag of its own two vertices when it was not already selected', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvasRefs = createCanvasRefs();
+    const selectionRefs = createSelectionToolRefs();
+
+    // before
+    const ctx = createContext({ canvasRefs, point: { x: 25, y: 0 }, selectionRefs });
+
+    // result
+    expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(selectionRefs.vectorMultiDragRef.current?.vertexOrigins).toEqual({ v1: { x: 0, y: 0 }, v2: { x: 100, y: 0 } });
   });
 });

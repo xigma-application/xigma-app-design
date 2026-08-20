@@ -28,7 +28,7 @@ describe('getVectorHandleAtPoint', () => {
     );
 
     // action
-    const hit = getVectorHandleAtPoint({ x: 0, y: 0 }, node, 5, ['v1', 'v2'], [], []);
+    const hit = getVectorHandleAtPoint({ x: 0, y: 0 }, node, 5, ['v1', 'v2'], [], [], []);
 
     // result
     expect(hit).toEqual({ distance: 1, end: 'start', segmentId: 's1', vertexId: 'v1' });
@@ -42,7 +42,7 @@ describe('getVectorHandleAtPoint', () => {
     );
 
     // action
-    const hit = getVectorHandleAtPoint({ x: 0, y: 0 }, node, 5, ['v1', 'v2'], [], []);
+    const hit = getVectorHandleAtPoint({ x: 0, y: 0 }, node, 5, ['v1', 'v2'], [], [], []);
 
     // result
     expect(hit).toBeNull();
@@ -56,7 +56,7 @@ describe('getVectorHandleAtPoint', () => {
     );
 
     // action
-    const hit = getVectorHandleAtPoint({ x: 0, y: 0 }, node, 5, ['v1', 'v2'], [], []);
+    const hit = getVectorHandleAtPoint({ x: 0, y: 0 }, node, 5, ['v1', 'v2'], [], [], []);
 
     // result
     expect(hit).toBeNull();
@@ -70,7 +70,7 @@ describe('getVectorHandleAtPoint', () => {
     );
 
     // action
-    const hit = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, ['v1', 'v2'], [], []);
+    const hit = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, ['v1', 'v2'], [], [], []);
 
     // result
     expect(hit).toEqual({ distance: 0, end: 'start', segmentId: 's1', vertexId: 'v1' });
@@ -84,7 +84,7 @@ describe('getVectorHandleAtPoint', () => {
     );
 
     // action
-    const hit = getVectorHandleAtPoint({ x: 1, y: 0 }, node, 1, ['v1', 'v2'], [], []);
+    const hit = getVectorHandleAtPoint({ x: 1, y: 0 }, node, 1, ['v1', 'v2'], [], [], []);
 
     // result
     expect(hit).toEqual({ distance: 0, end: 'start', segmentId: 's1', vertexId: 'v1' });
@@ -98,7 +98,7 @@ describe('getVectorHandleAtPoint', () => {
     );
 
     // action
-    const hit = getVectorHandleAtPoint({ x: 8, y: 0 }, node, 1, ['v1', 'v2'], [], []);
+    const hit = getVectorHandleAtPoint({ x: 8, y: 0 }, node, 1, ['v1', 'v2'], [], [], []);
 
     // result
     expect(hit).toEqual({ distance: 0, end: 'end', segmentId: 's1', vertexId: 'v2' });
@@ -112,7 +112,7 @@ describe('getVectorHandleAtPoint', () => {
     );
 
     // action
-    const hit = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, [], [], []);
+    const hit = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, [], [], [], []);
 
     // result
     expect(hit).toBeNull();
@@ -126,7 +126,7 @@ describe('getVectorHandleAtPoint', () => {
     );
 
     // action
-    const hit = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, [], [], [{ end: 'start', segmentId: 's1' }]);
+    const hit = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, [], [], [{ end: 'start', segmentId: 's1' }], []);
 
     // result
     expect(hit).toEqual({ distance: 0, end: 'start', segmentId: 's1', vertexId: 'v1' });
@@ -141,7 +141,21 @@ describe('getVectorHandleAtPoint', () => {
     );
 
     // action
-    const hit = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, ['v2'], [], []);
+    const hit = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, ['v2'], [], [], []);
+
+    // result
+    expect(hit).toEqual({ distance: 0, end: 'start', segmentId: 's1', vertexId: 'v1' });
+  });
+
+  it('should return a handle whose segment is directly selected, even with no vertex/handle selected', () => {
+    // mock — same handle as the "no selection at all" case above, but s1 itself is now selected
+    const node = buildNode(
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } },
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: { x: 2, y: 0 } } },
+    );
+
+    // action
+    const hit = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, [], [], [], ['s1']);
 
     // result
     expect(hit).toEqual({ distance: 0, end: 'start', segmentId: 's1', vertexId: 'v1' });
@@ -161,8 +175,8 @@ describe('getVectorHandleAtPoint', () => {
     );
 
     // action — v3 selected; v2 is the one-hop neighbor via straight s2
-    const hitOwnEnd = getVectorHandleAtPoint({ x: 9, y: 0 }, node, 1, ['v3'], ['v3', 'v2'], []);
-    const hitFarEnd = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, ['v3'], ['v3', 'v2'], []);
+    const hitOwnEnd = getVectorHandleAtPoint({ x: 9, y: 0 }, node, 1, ['v3'], ['v3', 'v2'], [], []);
+    const hitFarEnd = getVectorHandleAtPoint({ x: 2, y: 0 }, node, 1, ['v3'], ['v3', 'v2'], [], []);
 
     // result
     expect(hitOwnEnd).toEqual({ distance: 0, end: 'end', segmentId: 's1', vertexId: 'v2' });

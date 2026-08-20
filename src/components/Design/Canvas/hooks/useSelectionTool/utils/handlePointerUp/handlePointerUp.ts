@@ -52,7 +52,7 @@ export const handlePointerUp = (
   disarmMarqueeDrag(canvas, event, selectionRefs.marqueeStartRef, canvasRefs.marqueeRef);
   disarmVectorVertexDrag(canvas, event, selectionRefs.vectorVertexDragRef, setClassName);
   disarmVectorHandleDrag(canvas, event, selectionRefs.vectorHandleDragRef, setClassName);
-  disarmVectorMultiDrag(canvas, event, selectionRefs.vectorMultiDragRef, setClassName);
+  disarmVectorMultiDrag(canvas, event, canvasRefs, selectionRefs.vectorMultiDragRef, setClassName);
   disarmVectorMarqueeDrag(canvas, event, canvasRefs, selectionRefs.vectorMarqueeStartRef);
   dispatch(endHistoryGesture());
 };

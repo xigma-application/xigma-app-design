@@ -597,6 +597,29 @@ describe('useSelectionTool behaviors', () => {
     expect(refs.hoveredVectorVertexIdRef.current).toBeNull();
   });
 
+  it('should clear the hovered vector segment id when the pointer leaves the canvas', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+    const refs = createCanvasRefs({ canvasRef });
+
+    refs.hoveredVectorSegmentIdRef.current = 's1';
+
+    // before
+    renderHook(() => useSelectionTool(refs), {
+      wrapper: ({ children }) => (
+        <Provider store={store}>
+          <ClassNamesProvider>{children}</ClassNamesProvider>
+        </Provider>
+      ),
+    });
+
+    // action
+    canvasRef.current?.dispatchEvent(new PointerEvent('pointerleave'));
+
+    // result
+    expect(refs.hoveredVectorSegmentIdRef.current).toBeNull();
+  });
+
   it('should clear the selected vector vertex and tangent handle once the tool leaves Move/Scale, instead of leaving a stale "selected" dot behind — e.g. switching back to Pen', () => {
     // mock
     const canvasRef = createCanvasRef();

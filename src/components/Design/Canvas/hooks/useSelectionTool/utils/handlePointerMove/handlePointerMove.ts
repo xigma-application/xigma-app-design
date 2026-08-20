@@ -25,6 +25,7 @@ import { continueVectorHandleDrag } from './continueVectorHandleDrag';
 import { continueVectorMarqueeDrag } from './continueVectorMarqueeDrag';
 import { continueVectorMultiDrag } from './continueVectorMultiDrag';
 import { continueVectorVertexDrag } from './continueVectorVertexDrag';
+import { resolveVectorSegmentHover } from './resolveVectorSegmentHover';
 import { resolveVectorTangentHandleHover } from './resolveVectorTangentHandleHover';
 import { resolveVectorVertexHover } from './resolveVectorVertexHover';
 
@@ -57,4 +58,5 @@ export const handlePointerMove = (
   continueVectorMarqueeDrag(canvas, event, canvasRefs, selectionRefs.vectorMarqueeStartRef);
   resolveVectorVertexHover(canvas, event, canvasRefs.hoveredVectorVertexIdRef);
   resolveVectorTangentHandleHover(canvas, event, canvasRefs);
+  resolveVectorSegmentHover(canvas, event, canvasRefs.hoveredVectorSegmentIdRef);
 };
