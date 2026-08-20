@@ -61,6 +61,7 @@ const call = (
   selectedHandles: TVectorHandleHover[] = [],
   penDraggedHandlePosition: { x: number; y: number } | null = null,
   dragOriginVertexId: string | null = null,
+  selectedSegmentIds: string[] = [],
 ): void => {
   const gl = {} as WebGL2RenderingContext;
   const program = {} as WebGLProgram;
@@ -73,6 +74,7 @@ const call = (
     nodes,
     vectorEditingNodeId,
     selectedVertexIds,
+    selectedSegmentIds,
     hoveredVertexId,
     hoveredSegmentId,
     hoveredHandle,
@@ -133,6 +135,7 @@ describe('drawVectorEditHandlesLayer', () => {
       frameNodes,
       'frame-1',
       [],
+      [],
       null,
       null,
       null,
@@ -165,6 +168,15 @@ describe('drawVectorEditHandlesLayer', () => {
     // result — the gray outline, plus the single hovered segment drawn again in the highlight color
     expect(drawVectorStrokeMock).toHaveBeenCalledTimes(2);
     expect(drawVectorStrokeMock).toHaveBeenNthCalledWith(2, {}, {}, {}, expect.anything(), '#cd4422', 2, 200, 150, IDENTITY_VIEWPORT);
+  });
+
+  it('should draw the selected-segment highlight in blue when a segment is selected', () => {
+    // before
+    call(vectorNode.id, [], null, null, null, null, [], null, null, ['s1']);
+
+    // result — the gray outline, plus the selected segment drawn again in the selected-state blue
+    expect(drawVectorStrokeMock).toHaveBeenCalledTimes(2);
+    expect(drawVectorStrokeMock).toHaveBeenNthCalledWith(2, {}, {}, {}, expect.anything(), '#0d99ff', 2, 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should draw nothing for a segment’s tangent handle when its parent vertex is not selected', () => {
@@ -336,6 +348,7 @@ describe('drawVectorEditHandlesLayer', () => {
       rotatedNodes,
       rotatedVectorNode.id,
       ['v1'],
+      [],
       null,
       null,
       null,
@@ -392,6 +405,7 @@ describe('drawVectorEditHandlesLayer', () => {
       chainNodes,
       chainNode.id,
       ['A'],
+      [],
       null,
       null,
       null,

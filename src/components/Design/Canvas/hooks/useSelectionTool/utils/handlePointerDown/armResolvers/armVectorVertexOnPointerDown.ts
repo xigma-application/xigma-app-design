@@ -33,6 +33,7 @@ export const armVectorVertexOnPointerDown = ({
       } else {
         canvasRefs.selectedVectorVertexIdsRef.current = [hit.vertexId];
         canvasRefs.selectedVectorHandlesRef.current = [];
+        canvasRefs.selectedVectorSegmentIdsRef.current = [];
         armVectorVertexDrag(canvas, event, selectionRefs.vectorVertexDragRef, node, hit.vertexId, point);
       }
 

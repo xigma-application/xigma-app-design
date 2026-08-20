@@ -7,10 +7,14 @@ import { drawVectorEditOutline } from '../drawVectorEditOutline';
 
 const drawEditModeOutlineMock = vi.fn();
 const drawHoveredSegmentHighlightMock = vi.fn();
+const drawSelectedSegmentsHighlightMock = vi.fn();
 
 vi.mock('../drawEditModeOutline', () => ({ drawEditModeOutline: (...args: unknown[]): void => drawEditModeOutlineMock(...args) }));
 vi.mock('../drawHoveredSegmentHighlight', () => ({
   drawHoveredSegmentHighlight: (...args: unknown[]): void => drawHoveredSegmentHighlightMock(...args),
+}));
+vi.mock('../drawSelectedSegmentsHighlight', () => ({
+  drawSelectedSegmentsHighlight: (...args: unknown[]): void => drawSelectedSegmentsHighlightMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -33,18 +37,20 @@ describe('drawVectorEditOutline', () => {
   beforeEach(() => {
     drawEditModeOutlineMock.mockClear();
     drawHoveredSegmentHighlightMock.mockClear();
+    drawSelectedSegmentsHighlightMock.mockClear();
   });
 
-  it('should draw the edit-mode outline and the hovered-segment highlight, each as its own concern', () => {
+  it('should draw the edit-mode outline, the selected-segments highlight, and the hovered-segment highlight, each as its own concern', () => {
     // before
     const gl = {} as WebGL2RenderingContext;
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
-    drawVectorEditOutline(gl, program, buffer, node, 's1', 200, 150, IDENTITY_VIEWPORT);
+    drawVectorEditOutline(gl, program, buffer, node, ['s2'], 's1', 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawEditModeOutlineMock).toHaveBeenCalledWith(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawSelectedSegmentsHighlightMock).toHaveBeenCalledWith(gl, program, buffer, node, ['s2'], 200, 150, IDENTITY_VIEWPORT);
     expect(drawHoveredSegmentHighlightMock).toHaveBeenCalledWith(gl, program, buffer, node, 's1', 200, 150, IDENTITY_VIEWPORT);
   });
 });

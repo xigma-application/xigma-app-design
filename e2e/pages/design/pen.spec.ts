@@ -228,7 +228,13 @@ test('resuming a vertex after Escape interrupts a curve does not silently reuse 
   page,
 }) => {
   const designPage = new DesignPage(page);
-  const previewRegion = { height: 60, width: 200, x: 780, y: 270 };
+  // clipped to start just past v2's own dot (850,300) — the "resumed" scenario's v1 also curves into v2
+  // from below (the drag target was above v2, so its mirrored tangentEnd approaches from y > 300), and
+  // that curve tail's antialiasing reaches into the clip if it starts at/before v2's own x — the "fresh"
+  // reference has no v1 at all, so a clip wide enough to catch that tail would never match pixel-for-pixel
+  // regardless of the fix under test; starting past the dot keeps the comparison to just the preview line
+  // itself, which is what this test actually cares about
+  const previewRegion = { height: 60, width: 115, x: 860, y: 270 };
 
   // mock — v1 plain, v2 dragged into a curve, Escape (stops extending), then click straight back onto v2 and
   // hover the same far point: without the fix, v2 still carries the earlier drag's pendingOutgoingTangentRef,

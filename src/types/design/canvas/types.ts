@@ -94,6 +94,7 @@ export type TCanvasRefs = {
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>;
   rotateDragRef: RefObject<TRotateDragState | null>;
   selectedVectorHandlesRef: RefObject<TVectorHandleHover[]>;
+  selectedVectorSegmentIdsRef: RefObject<string[]>;
   selectedVectorVertexIdsRef: RefObject<string[]>;
   sliceRef: RefObject<TSliceDraft | null>;
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>;

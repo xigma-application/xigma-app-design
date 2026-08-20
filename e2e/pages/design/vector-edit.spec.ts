@@ -3,6 +3,9 @@ import { Page, test, expect } from '@playwright/test';
 // components
 import { DesignPage } from './DesignPage';
 
+// utils
+import { countMismatchedPixels } from './compareScreenshots';
+
 test.describe.configure({ mode: 'serial' });
 
 // v1 (900,300) -> v2 (1050,300) -> v3 (1050,450), all plain clicks (no curve), left open. Leaves the
@@ -134,30 +137,56 @@ test('dragging one handle at a "smooth" vertex also moves its other handle, curv
   expect(after.equals(before)).toBe(false); // segment 2 moved too, though its own handle was untouched
 });
 
-test('clicking an edge with the Move tool no longer inserts a vertex — that now requires the Pen tool, matching Figma', async ({
+test('clicking an edge with the Move tool selects the segment instead of splitting it — that still requires the Pen tool, matching Figma', async ({
   page,
 }) => {
   const designPage = new DesignPage(page);
 
-  await designPage.goto('e2e-test-vector-edit-edge-move-tool-noop');
+  await designPage.goto('e2e-test-vector-edit-edge-move-tool-select');
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage);
   await designPage.selectTool('default');
 
-  // rest at the same neutral point before each capture — the Move tool (unlike Pen) runs the ordinary
-  // node hover-outline highlight, so leaving the cursor on the edge for the "after" shot alone would
-  // make the two captures differ regardless of whether a vertex was actually inserted
-  const neutral = { x: 1400, y: 700 };
-
-  await designPage.pointerMove(neutral.x, neutral.y);
-  const before = await designPage.canvas.screenshot();
-
   await designPage.click(975, 300); // midpoint of the v1-v2 edge
-  await designPage.pointerMove(neutral.x, neutral.y);
+  const moveToolSelect = await designPage.canvas.screenshot();
 
-  const after = await designPage.canvas.screenshot();
-  expect(after.equals(before)).toBe(true);
+  await designPage.goto('e2e-test-vector-edit-edge-move-tool-select-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawOpenTriangle(designPage);
+  await designPage.selectTool('pen');
+  await designPage.click(975, 300); // Pen tool, same point: splits the edge and arms the new vertex
+  const penToolSplit = await designPage.canvas.screenshot();
+
+  // the Move tool's plain segment-selection highlight looks nothing like the Pen tool's inserted vertex
+  expect(moveToolSelect.equals(penToolSplit)).toBe(false);
+});
+
+test('clicking a segment with the Move tool selects it, and Delete removes just that segment, leaving both endpoint vertices and the other segment in place', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-segment-select-delete');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawOpenTriangle(designPage);
+  await designPage.selectTool('default');
+
+  await designPage.click(975, 300); // midpoint of the v1-v2 edge — selects that segment
+  const selected = await designPage.canvas.screenshot();
+
+  await page.keyboard.press('Delete');
+  const afterDelete = await designPage.canvas.screenshot();
+
+  expect(afterDelete.equals(selected)).toBe(false); // the v1-v2 edge is gone
+
+  // the other segment (v2-v3) survives untouched — still there to select
+  await designPage.click(1050, 375); // midpoint of the v2-v3 edge
+  const remainingSelected = await designPage.canvas.screenshot();
+
+  expect(remainingSelected.equals(afterDelete)).toBe(false);
 });
 
 test('clicking an edge with the Pen tool selected but not currently extending inserts a vertex there, splitting the segment and arming the new point for immediate extension', async ({
@@ -225,15 +254,19 @@ test('splitting a curved edge preserves the original curve’s shape on both sid
   await designPage.goto('e2e-test-vector-edit-edge-insert-curve-shape');
   await expect(designPage.canvas).toBeVisible();
 
+  const neutral = { x: 1400, y: 700 };
+
   await designPage.selectTool('pen');
   await designPage.click(900, 300); // v1
   await designPage.dragVectorPoint(1050, 300, 1050, 250); // v2, dragged — curves the v1-v2 segment
   await page.keyboard.press('Escape'); // stop extending — Pen idle, still in edit mode
+  await designPage.pointerMove(neutral.x, neutral.y); // rest away from the curve before capturing
 
   // two regions straddling the segment, well clear of where the new split-point vertex dot will render
   // (its own midpoint, ~(975, 319)) — De Casteljau subdivision retraces the exact same path on both
   // sides of a split, so unlike the old naive split (kept the outer tangents unchanged, nulled the new
-  // shared vertex — see splitVectorSegment.ts), these regions must stay pixel-identical after the split
+  // shared vertex — see splitVectorSegment.ts), these regions must render the same curve shape after
+  // the split
   const nearV1Region = { height: 50, width: 50, x: 898, y: 282 };
   const nearV2Region = { height: 50, width: 50, x: 1002, y: 296 };
 
@@ -241,12 +274,26 @@ test('splitting a curved edge preserves the original curve’s shape on both sid
   const beforeNearV2 = await page.screenshot({ clip: nearV2Region });
 
   await designPage.click(975, 319); // the curve's own midpoint — snaps the edge-insert split there
+  await page.keyboard.press('Escape'); // deselect the newly-armed split point — otherwise its own
+  // tangent-handle diamonds render in "after" and never in "before", swamping the comparison with a
+  // difference that has nothing to do with the curve's shape (already covered by the sibling test that
+  // asserts the split point gets armed for immediate extension)
+  await designPage.pointerMove(neutral.x, neutral.y);
 
   const afterNearV1 = await page.screenshot({ clip: nearV1Region });
   const afterNearV2 = await page.screenshot({ clip: nearV2Region });
 
-  expect(afterNearV1.equals(beforeNearV1)).toBe(true);
-  expect(afterNearV2.equals(beforeNearV2)).toBe(true);
+  // a plain Buffer.equals() is the wrong tool here: the pre-split curve is flattened as a single
+  // polyline (its own adaptive segment count over the *whole* curve, getVectorCurveSegmentCount.ts),
+  // while post-split each half is flattened independently (its own adaptive count over just *that*
+  // half) — same continuous geometric path, but sampled at different points along it, so antialiasing
+  // shades a thin diagonal band of edge pixels by up to one color level even with zero actual shape
+  // change. pixelmatch's default antialiasing detection (includeAA: false) filters exactly that kind of
+  // noise while still catching a real discontinuity — expect(...).toBe(0) here (not "close to 0") is
+  // deliberate: this file's dev-only pixelmatch/pngjs dependency should stay confined to this one case,
+  // not become a general house style for the suite.
+  expect(countMismatchedPixels(beforeNearV1, afterNearV1)).toBe(0);
+  expect(countMismatchedPixels(beforeNearV2, afterNearV2)).toBe(0);
 });
 
 test('clicking empty space in edit mode deselects the active vertex but keeps edit mode open', async ({ page }) => {

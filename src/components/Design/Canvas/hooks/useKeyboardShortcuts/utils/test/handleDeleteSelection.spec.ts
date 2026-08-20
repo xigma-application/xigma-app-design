@@ -154,6 +154,25 @@ describe('handleDeleteSelection', () => {
     expect(refs.selectedVectorVertexIdsRef.current).toEqual([]);
   });
 
+  it('should remove only the selected segment, leaving both its endpoint vertices in place, when a segment is selected instead of a vertex', () => {
+    // mock
+    const vectorId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeId(vectorId));
+
+    const refs = createCanvasRefs({ selectedVectorSegmentIdsRef: { current: ['segment-1'] } });
+
+    // before
+    handleDeleteSelection(store.dispatch, refs);
+
+    // result — segment-1 (vertex-1 -> vertex-2) is gone, segment-2 untouched, and every vertex survives
+    const vectorNode = store.getState().design.nodes[vectorId] as TVectorNode;
+
+    expect(Object.keys(vectorNode.segments)).toEqual(['segment-2']);
+    expect(Object.keys(vectorNode.vertices)).toEqual(['vertex-1', 'vertex-2', 'vertex-3']);
+    expect(refs.selectedVectorSegmentIdsRef.current).toEqual([]);
+  });
+
   it('should leave a broken loop unfilled — deleting a vertex that breaks a previously closed (filled) triangle drops its face instead of crashing or keeping a stale fill', () => {
     // mock
     const vectorId = addClosedTriangleVectorNode();

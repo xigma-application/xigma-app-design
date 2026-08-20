@@ -51,6 +51,7 @@ export const armVectorHandleOnPointerDown = ({
       } else {
         canvasRefs.selectedVectorHandlesRef.current = [{ end: hit.end, segmentId: hit.segmentId }];
         canvasRefs.selectedVectorVertexIdsRef.current = [];
+        canvasRefs.selectedVectorSegmentIdsRef.current = [];
         armVectorHandleDrag(canvas, event, selectionRefs.vectorHandleDragRef, node.id, hit);
       }
 

@@ -63,6 +63,7 @@ export const drawScene = (
   const nodesById = selectNodes(state);
   const vectorEditingNodeId = selectVectorEditingNodeId(state);
   const selectedVectorVertexIds = refs.selectedVectorVertexIdsRef.current;
+  const selectedVectorSegmentIds = refs.selectedVectorSegmentIdsRef.current;
   const hoveredVectorVertexId = refs.hoveredVectorVertexIdRef.current;
   const hoveredVectorHandle = refs.hoveredVectorHandleRef.current;
   const selectedVectorHandles = refs.selectedVectorHandlesRef.current;
@@ -108,6 +109,7 @@ export const drawScene = (
     nodesById,
     vectorEditingNodeId,
     selectedVectorVertexIds,
+    selectedVectorSegmentIds,
     hoveredVectorVertexId,
     hoveredSegmentId,
     hoveredVectorHandle,

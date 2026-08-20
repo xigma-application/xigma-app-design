@@ -27,6 +27,7 @@ describe('createCanvasRefs behaviors', () => {
       polygonCornerRadiusDragRef: { current: null },
       rotateDragRef: { current: null },
       selectedVectorHandlesRef: { current: [] },
+      selectedVectorSegmentIdsRef: { current: [] },
       selectedVectorVertexIdsRef: { current: [] },
       sliceRef: { current: null },
       starCornerRadiusDragRef: { current: null },

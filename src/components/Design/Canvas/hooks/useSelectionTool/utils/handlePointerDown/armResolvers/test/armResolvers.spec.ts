@@ -30,6 +30,7 @@ import { armVectorCornerHandleOnPointerDown } from '../armVectorCornerHandleOnPo
 import { armVectorHandleOnPointerDown } from '../armVectorHandleOnPointerDown';
 import { armVectorMarqueeOnPointerDown } from '../armVectorMarqueeOnPointerDown';
 import { armVectorMultiSelectBoxOnPointerDown } from '../armVectorMultiSelectBoxOnPointerDown';
+import { armVectorSegmentOnPointerDown } from '../armVectorSegmentOnPointerDown';
 import { armVectorVertexOnPointerDown } from '../armVectorVertexOnPointerDown';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { createSelectionToolRefs } from '../../../../hooks/useSelectionToolRefs/createSelectionToolRefs';
@@ -1200,5 +1201,59 @@ describe('armVectorMultiSelectBoxOnPointerDown', () => {
 
     // result
     expect(armVectorMultiSelectBoxOnPointerDown(ctx)).toBeUndefined();
+  });
+});
+
+describe('armVectorSegmentOnPointerDown', () => {
+  afterEach(() => {
+    store.dispatch(setVectorEditingNodeId(null));
+  });
+
+  it('should select the segment and deselect any vertex/handle when a segment interior is hit', () => {
+    // mock — v1(0,0)-v2(100,0), click well away from either endpoint
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
+
+    // before
+    const ctx = createContext({ canvasRefs, point: { x: 25, y: 0 } });
+
+    // result
+    expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+  });
+
+  it('should return undefined when the point misses every segment', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    const ctx = createContext({ point: { x: 900, y: 900 } });
+
+    // result
+    expect(armVectorSegmentOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  it('should return undefined when Vector Edit Mode is not active', () => {
+    // before
+    const ctx = createContext({ point: { x: 25, y: 0 } });
+
+    // result
+    expect(armVectorSegmentOnPointerDown(ctx)).toBeUndefined();
   });
 });

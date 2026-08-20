@@ -38,6 +38,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
   const polygonCornerRadiusDragRef = useRef<TPolygonCornerRadiusDragState | null>(null);
   const rotateDragRef = useRef<TRotateDragState | null>(null);
   const selectedVectorHandlesRef = useRef<TVectorHandleHover[]>([]);
+  const selectedVectorSegmentIdsRef = useRef<string[]>([]);
   const selectedVectorVertexIdsRef = useRef<string[]>([]);
   const sliceRef = useRef<TSliceDraft | null>(null);
   const starCornerRadiusDragRef = useRef<TStarCornerRadiusDragState | null>(null);
@@ -64,6 +65,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
       polygonCornerRadiusDragRef,
       rotateDragRef,
       selectedVectorHandlesRef,
+      selectedVectorSegmentIdsRef,
       selectedVectorVertexIdsRef,
       sliceRef,
       starCornerRadiusDragRef,

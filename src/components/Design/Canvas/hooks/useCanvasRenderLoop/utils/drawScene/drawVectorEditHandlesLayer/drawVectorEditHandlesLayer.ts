@@ -20,6 +20,7 @@ export const drawVectorEditHandlesLayer = (
   nodes: Record<string, TSceneNode>,
   vectorEditingNodeId: string | null,
   selectedVertexIds: string[],
+  selectedSegmentIds: string[],
   hoveredVertexId: string | null,
   hoveredSegmentId: string | null,
   hoveredHandle: TVectorHandleHover | null,
@@ -38,7 +39,7 @@ export const drawVectorEditHandlesLayer = (
     const visualSelectedVertexIds = getVisualSelectedVectorVertexIds(selectedVertexIds, penActiveVertexId ?? dragOriginVertexId);
     const oneHopVertexIds = getOneHopVectorVertexIds(node, visualSelectedVertexIds);
 
-    drawVectorEditOutline(gl, program, buffer, node, hoveredSegmentId, canvasWidth, canvasHeight, viewport);
+    drawVectorEditOutline(gl, program, buffer, node, selectedSegmentIds, hoveredSegmentId, canvasWidth, canvasHeight, viewport);
     drawVectorTangentHandles(
       gl,
       program,
