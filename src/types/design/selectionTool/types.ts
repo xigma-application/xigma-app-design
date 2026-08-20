@@ -111,7 +111,7 @@ export type TVectorMultiDragState = {
   vertexOrigins: Record<string, TPoint>;
 };
 
-export type TVectorMarqueeMode = 'everything' | 'points';
+export type TVectorMarqueeMode = 'everything' | 'handles' | 'points';
 
 export type TSelectionToolRefs = {
   dragStateRef: RefObject<TDragState | null>;

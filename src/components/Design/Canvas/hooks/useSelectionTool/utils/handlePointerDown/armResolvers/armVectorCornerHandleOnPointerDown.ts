@@ -30,7 +30,7 @@ export const armVectorCornerHandleOnPointerDown = ({
       const hit = getVectorCornerHandleAtPoint(point, node, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
 
       if (hit) {
-        dispatch(updateNode({ changes: { vertexHandleModes: { ...node.vertexHandleModes, [hit.vertexId]: 'smooth' } }, id: node.id }));
+        dispatch(updateNode({ changes: { vertexHandleModes: { ...node.vertexHandleModes, [hit.vertexId]: 'symmetric' } }, id: node.id }));
         canvasRefs.selectedVectorHandlesRef.current = [{ end: hit.end, segmentId: hit.segmentId }];
         canvasRefs.selectedVectorVertexIdsRef.current = [];
         canvasRefs.selectedVectorSegmentIdsRef.current = [];

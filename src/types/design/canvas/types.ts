@@ -93,6 +93,8 @@ export type TCanvasRefs = {
   penNewVertexPreviewRef: RefObject<TPoint | null>;
   penPreviewRef: RefObject<TPenPreview | null>;
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>;
+  preVectorMarqueeSegmentIdsRef: RefObject<string[]>;
+  preVectorMarqueeVertexIdsRef: RefObject<string[]>;
   rotateDragRef: RefObject<TRotateDragState | null>;
   selectedVectorHandlesRef: RefObject<TVectorHandleHover[]>;
   selectedVectorSegmentIdsRef: RefObject<string[]>;

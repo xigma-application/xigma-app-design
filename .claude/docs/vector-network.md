@@ -1183,6 +1183,85 @@ never reverts to points-only once unlocked, mirroring the "handle first, point a
 direct clarification above. `null` (nothing caught by either the current frame or any earlier one) clears
 all three, same as before this feature existed.
 
+## 24. Marquee catch precedence — handles beat points beat segments, each exclusive of the rest
+
+§23's "first catch locks the gesture" rule has since been replaced by a strict, three-way priority order,
+arrived at over several rounds of direct feedback. `TVectorMarqueeMode` is now `'handles' | 'points' |
+'everything'` (`types/design/selectionTool/types.ts`) — `'everything'` is a legacy name kept to avoid a
+wider rename; it is reached only via a segments-only catch and no longer means "combine everything caught".
+
+**The rule, `resolveVectorMarqueeMode.ts`, as a single `switch (true)`** (no `if`, per direct request —
+each `case` is a boolean expression, first match wins, and two cases can share one `return` via
+fall-through):
+1. A handle caught this frame (`handleHits.length > 0`), or the gesture is already locked to `'handles'` →
+   `'handles'`. This is the top priority and can *promote* an already-locked `'points'` or `'everything'`
+   mode straight to `'handles'` mid-gesture — the only case where the mode moves to a different exclusive
+   category after locking. Direct ask, verbatim: "Jak zaznaczamy tangeny to nic innego nie może wtedy być w
+   tej liście, nawet pointy" (when we're catching tangents, nothing else may be in that list, not even
+   points).
+2. Already locked to `'points'` → stays `'points'` (permanent, like `'handles'`, but only while no handle
+   ever joins in).
+3. A vertex caught this frame (`vertexIds.length > 0`) → `'points'`, unconditionally — segments never
+   survive alongside a point, regardless of how many are involved. Direct ask, verbatim: "Jak zaznaczymy
+   segmenty ale trafimy na pointy to wywalamy segmenty z listy i zaznaczymy tylko pointy... Niezależnie od
+   liczby segmentów" (regardless of segment count) — this superseded an intermediate version of the rule
+   that kept segments combined with a point once 2+ were already selected.
+4. Already locked to `'everything'` → stays `'everything'` (only reachable here since a live handle/vertex
+   catch would have already returned above).
+5. A segment caught this frame (`segmentHits.length > 0`) → `'everything'`, segments-only, nothing above it
+   to lose to.
+6. Otherwise → `currentMode` unchanged (still `null` if nothing has ever been caught).
+
+`continueVectorMarqueeDrag.ts`'s `switch` on the resolved mode mirrors this exclusivity directly in what it
+writes to the three `selectedVector*Ref`s — each case populates exactly one of vertex/handle/segment and
+force-empties the other two, there is no longer a case that combines more than one category.
+
+## 25. Pre-marquee snapshot refs — keeping a deselected point/segment's tangents catchable through a fresh marquee gesture
+
+`armVectorMarqueeOnPointerDown.ts` clears the live vertex/handle/segment selection synchronously at
+pointer-down, before the first `pointermove` frame. Tangent-handle *visibility* (§10's reveal rule) is
+gated on that same live selection (`isVectorHandleVisible.ts`: touching a selected vertex or segment, or
+one-hopped to one, reveals a handle) — so a point or segment that was selected (and had its tangents
+visible) right before the user starts a marquee specifically to drag a box onto those tangents would have
+them vanish on frame 0, before the box ever reaches them. Direct bug report: "jak zaznaczym point i mamy
+widoczne tangeny to próbując złapać tangeny boxem odklikuje się point przez co chowają się tangent[y]" — the
+point should still end up deselected, but its tangents must stay visible/catchable until pointer-up.
+
+**Fix**: two new `TCanvasRefs` (`useCanvasRefs.ts`/`createCanvasRefs.ts`, both real-hook and test-helper
+constructors) — `preVectorMarqueeVertexIdsRef` and `preVectorMarqueeSegmentIdsRef`. `armVectorMarqueeOnPointerDown.ts`
+snapshots the live selection into them *before* clearing it. For the rest of the gesture:
+- `continueVectorMarqueeDrag.ts` feeds the vertex snapshot into `getVisualSelectedVectorVertexIds` (instead
+  of a hardcoded `[]`) when computing `tangentVisibilityVertexIds` for hit-testing, and passes the segment
+  snapshot directly as `getVectorHandlesInRect`'s `selectedSegmentIds` param (instead of a hardcoded `[]`) —
+  so a handle revealed only by the pre-drag selection is catchable by the box.
+- `drawVectorEditHandlesLayer.ts` takes both snapshots as extra params and merges them in *only* for the
+  tangent-visibility computation fed to `drawVectorTangentHandles` — never into the `visualSelectedVertexIds`
+  used for vertex-dot rendering or the plain `selectedSegmentIds` used for the segment highlight in
+  `drawVectorEditOutline`. This is what keeps the deselected point/segment itself looking deselected while
+  its tangents stay drawn.
+- `disarmVectorMarqueeDrag.ts` clears both snapshots back to `[]` on release, so the effect is scoped to a
+  single gesture.
+
+The snapshot is deliberately *not* fed into `resolveVectorMarqueeMode`'s `vertexIds`/`segmentHits` — it only
+widens what's visible/catchable, it never counts as something the current frame "caught" for §24's priority
+resolution.
+
+## 26. Fresh-tangent gestures mark the vertex `'symmetric'`, not `'smooth'` — both handles mirror length, not just angle
+
+`getMirroredVectorSegments.ts` (§9/§20) already distinguished `'smooth'` (mirrors angle only; the *other*
+handle keeps its own existing length) from `'symmetric'` (mirrors angle *and* length) — see `TVertexHandleMode`
+(`types/design/types.ts`). The two gestures that create a vertex's first real tangent by dragging —
+`updateVectorHandleDrag.ts` (Pen tool click-drag, §15) and `armVectorCornerHandleOnPointerDown.ts`
+(Ctrl/Cmd-drag pulling a handle out of a plain corner, §9) — both used to tag the vertex `'smooth'`. Direct
+reports against both: dragging one side out left the *opposite* handle's length untouched — it rotated to
+stay collinear but stayed short/stubby instead of extending or retracting together with the one being
+dragged ("Zmienia się jego położenie po osi obrotowej [kąt owszem]... ale nie rozciąga się wzdłuż" — its
+angle changes, but it doesn't stretch along its length). Both now tag the vertex `'symmetric'` instead —
+`getMirroredVectorSegments.ts` itself is unchanged, only which mode gets *written* at creation time. A
+vertex only ends up `'corner'` (fully independent handles) or `'smooth'` (angle-only) through some other,
+currently nonexistent, write path — there is presently no UI to set either explicitly once a tangent-drag
+gesture has touched a vertex.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

@@ -34,10 +34,14 @@ describe('disarmVectorMarqueeDrag', () => {
     expect(canvas.releasePointerCapture).not.toHaveBeenCalled();
   });
 
-  it('should clear the vector-marquee start ref, the resolved mode, and the shared marquee rect, and release pointer capture', () => {
+  it('should clear the vector-marquee start ref, the resolved mode, the shared marquee rect, and the pre-drag vertex snapshot, and release pointer capture', () => {
     // mock
     const canvas = createCanvas();
-    const canvasRefs = createCanvasRefs({ marqueeRef: { current: { height: 10, width: 10, x: 0, y: 0 } } });
+    const canvasRefs = createCanvasRefs({
+      marqueeRef: { current: { height: 10, width: 10, x: 0, y: 0 } },
+      preVectorMarqueeSegmentIdsRef: { current: ['segment-1'] },
+      preVectorMarqueeVertexIdsRef: { current: ['vertex-1'] },
+    });
     const vectorMarqueeStartRef = createVectorMarqueeStartRef({ x: 5, y: 5 });
     const vectorMarqueeModeRef = createVectorMarqueeModeRef('points');
 
@@ -48,6 +52,8 @@ describe('disarmVectorMarqueeDrag', () => {
     expect(vectorMarqueeStartRef.current).toBeNull();
     expect(vectorMarqueeModeRef.current).toBeNull();
     expect(canvasRefs.marqueeRef.current).toBeNull();
+    expect(canvasRefs.preVectorMarqueeVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.preVectorMarqueeSegmentIdsRef.current).toEqual([]);
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
   });
 });

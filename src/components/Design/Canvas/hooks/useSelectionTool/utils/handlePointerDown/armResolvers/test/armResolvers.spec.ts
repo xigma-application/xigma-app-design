@@ -714,7 +714,7 @@ describe('armVectorMarqueeOnPointerDown', () => {
     store.dispatch(setVectorEditingNodeId(null));
   });
 
-  it('should deselect the current vertex/handle selection, arm a marquee, capture the pointer, and claim the pointerdown, when Vector Edit Mode is active and the click hits nothing', () => {
+  it('should deselect the current vertex/handle selection, snapshot the pre-drag vertex selection, arm a marquee, capture the pointer, and claim the pointerdown, when Vector Edit Mode is active and the click hits nothing', () => {
     // mock
     store.dispatch(setVectorEditingNodeId('vector-1'));
 
@@ -722,6 +722,7 @@ describe('armVectorMarqueeOnPointerDown', () => {
 
     canvasRefs.selectedVectorVertexIdsRef.current = ['vertex-1'];
     canvasRefs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
+    canvasRefs.selectedVectorSegmentIdsRef.current = ['segment-1'];
 
     // before
     const ctx = createContext({ canvasRefs, hit: null, point: { x: 42, y: 24 } });
@@ -730,6 +731,11 @@ describe('armVectorMarqueeOnPointerDown', () => {
     expect(armVectorMarqueeOnPointerDown(ctx)).toBe(true);
     expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
     expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    // the pre-drag vertex/segment selection is snapshotted, not just dropped — continueVectorMarqueeDrag.ts
+    // uses it to keep their tangents visible/catchable for the rest of the gesture even once deselected
+    expect(canvasRefs.preVectorMarqueeVertexIdsRef.current).toEqual(['vertex-1']);
+    expect(canvasRefs.preVectorMarqueeSegmentIdsRef.current).toEqual(['segment-1']);
     expect(ctx.selectionRefs.vectorMarqueeStartRef.current).toEqual({ x: 42, y: 24 });
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
   });
@@ -939,7 +945,7 @@ describe('armVectorCornerHandleOnPointerDown', () => {
     store.dispatch(setVectorEditingNodeId(null));
   });
 
-  it('should arm the vector-handle drag from a corner vertex, mark it smooth, select the new handle, deselect any vertex, and return true when Ctrl is held', () => {
+  it('should arm the vector-handle drag from a corner vertex, mark it symmetric, select the new handle, deselect any vertex, and return true when Ctrl is held', () => {
     // mock — v1 is a plain corner (no tangent on either side) of its one connected segment
     const nodeId = addVectorNode(
       { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
@@ -958,7 +964,7 @@ describe('armVectorCornerHandleOnPointerDown', () => {
     // result
     expect(armVectorCornerHandleOnPointerDown(ctx)).toBe(true);
     expect(ctx.selectionRefs.vectorHandleDragRef.current).toEqual({ end: 'start', nodeId, segmentId: 's1', vertexId: 'v1' });
-    expect(ctx.dispatch).toHaveBeenCalledWith(updateNode({ changes: { vertexHandleModes: { v1: 'smooth' } }, id: nodeId }));
+    expect(ctx.dispatch).toHaveBeenCalledWith(updateNode({ changes: { vertexHandleModes: { v1: 'symmetric' } }, id: nodeId }));
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
     expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
     expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);

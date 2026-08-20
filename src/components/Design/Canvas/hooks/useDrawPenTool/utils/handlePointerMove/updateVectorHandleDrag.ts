@@ -32,7 +32,7 @@ export const updateVectorHandleDrag = (
     const node = getVectorEditingNode(appStore.getState().design.nodes, dragOrigin.nodeId);
 
     if (node) {
-      const vertexHandleModes = { ...node.vertexHandleModes, [dragOrigin.vertexId]: 'smooth' as const };
+      const vertexHandleModes = { ...node.vertexHandleModes, [dragOrigin.vertexId]: 'symmetric' as const };
       const segments = dragOrigin.segmentId
         ? { ...node.segments, [dragOrigin.segmentId]: { ...node.segments[dragOrigin.segmentId], tangentEnd: { x: -dx, y: -dy } } }
         : node.segments;

@@ -23,6 +23,9 @@ import { isPointNearVertex } from '../../../../../utils/isPointNearVertex';
 const getTangentStart = (pending: TPendingOutgoingTangent | null, activeVertexId: string): TVectorTangent =>
   pending && pending.vertexId === activeVertexId ? pending.tangent : null;
 
+const getIncomingSegmentId = (node: TVectorNode, vertexId: string): string | null =>
+  Object.values(node.segments).find((segment) => segment.endId === vertexId)?.id ?? null;
+
 const getEdgeHit = (point: TPoint, node: TVectorNode, viewport: TViewport): { segmentId: string; t: number } | null =>
   getVectorEdgeAtPoint(point, node, VECTOR_EDGE_HIT_TOLERANCE_PX / viewport.zoom, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
 
@@ -37,7 +40,7 @@ export const continueVectorNetwork = (
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
 ): void => {
   if (isPointNearVertex(point, node.vertices[activeVertexId], VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom)) {
-    dragOriginRef.current = { nodeId: node.id, segmentId: null, vertexId: activeVertexId };
+    dragOriginRef.current = { nodeId: node.id, segmentId: getIncomingSegmentId(node, activeVertexId), vertexId: activeVertexId };
     dragStartRef.current = point;
   } else {
     const hover = getVectorVertexAtPoint(point, node, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom, activeVertexId);

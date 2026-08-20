@@ -134,6 +134,32 @@ describe('continueVectorNetwork', () => {
     expect(dragStartRef.current).toEqual({ x: 0, y: 0 });
   });
 
+  it("should arm the drag on the active vertex's own incoming segment when clicking exactly on it and that segment already exists — so dragging the outgoing tangent mirrors into the incoming one instead of leaving it a no-op", () => {
+    // mock — v3 is the active vertex and also s1's endId (v2 -> v3 already committed); clicking back on
+    // v3 itself must find s1 as the incoming segment to mirror-shape, not fall back to segmentId: null
+    const nodeId = addVectorNodeWithEdge();
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const dragOriginRef = createDragOriginRef();
+    const dragStartRef = createDragStartRef();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+
+    // before — click right on v3(300,0), the active vertex itself
+    continueVectorNetwork(
+      { x: 300, y: 0 },
+      node,
+      'v3',
+      IDENTITY_VIEWPORT,
+      store.dispatch,
+      dragOriginRef,
+      dragStartRef,
+      pendingOutgoingTangentRef,
+    );
+
+    // result
+    expect(dragOriginRef.current).toEqual({ nodeId, segmentId: 's1', vertexId: 'v3' });
+    expect(dragStartRef.current).toEqual({ x: 300, y: 0 });
+  });
+
   it('should add a new vertex and segment, keep drawing, when clicking away from any existing vertex', () => {
     // mock
     const nodeId = addVectorNode();

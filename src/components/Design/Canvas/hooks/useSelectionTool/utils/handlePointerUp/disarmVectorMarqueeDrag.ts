@@ -16,6 +16,8 @@ export const disarmVectorMarqueeDrag = (
     vectorMarqueeStartRef.current = null;
     vectorMarqueeModeRef.current = null;
     canvasRefs.marqueeRef.current = null;
+    canvasRefs.preVectorMarqueeVertexIdsRef.current = [];
+    canvasRefs.preVectorMarqueeSegmentIdsRef.current = [];
     canvas.releasePointerCapture(event.pointerId);
   }
 };

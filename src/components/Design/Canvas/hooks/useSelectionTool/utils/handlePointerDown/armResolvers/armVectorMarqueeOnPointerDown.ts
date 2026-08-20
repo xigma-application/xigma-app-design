@@ -9,6 +9,8 @@ export const armVectorMarqueeOnPointerDown = ({ canvas, canvasRefs, event, hit, 
   const vectorEditingNodeId = selectVectorEditingNodeId(store.getState());
 
   if (vectorEditingNodeId && !hit && !event.shiftKey) {
+    canvasRefs.preVectorMarqueeVertexIdsRef.current = canvasRefs.selectedVectorVertexIdsRef.current;
+    canvasRefs.preVectorMarqueeSegmentIdsRef.current = canvasRefs.selectedVectorSegmentIdsRef.current;
     canvasRefs.selectedVectorVertexIdsRef.current = [];
     canvasRefs.selectedVectorHandlesRef.current = [];
     canvasRefs.selectedVectorSegmentIdsRef.current = [];

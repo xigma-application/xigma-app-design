@@ -8,17 +8,19 @@ export const resolveVectorMarqueeMode = (
   handleHits: TVectorHandleHover[],
   segmentHits: string[],
 ): TVectorMarqueeMode | null => {
-  if (currentMode) {
-    return currentMode;
+  switch (true) {
+    case handleHits.length > 0:
+    case currentMode === 'handles':
+      return 'handles';
+    case currentMode === 'points':
+      return 'points';
+    case vertexIds.length > 0:
+      return 'points';
+    case currentMode === 'everything':
+      return 'everything';
+    case segmentHits.length > 0:
+      return 'everything';
+    default:
+      return currentMode;
   }
-
-  if (vertexIds.length > 0) {
-    return 'points';
-  }
-
-  if (handleHits.length > 0 || segmentHits.length > 0) {
-    return 'everything';
-  }
-
-  return null;
 };

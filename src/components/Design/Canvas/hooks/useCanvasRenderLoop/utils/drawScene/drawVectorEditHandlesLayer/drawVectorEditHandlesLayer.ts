@@ -21,7 +21,9 @@ export const drawVectorEditHandlesLayer = (
   nodes: Record<string, TSceneNode>,
   vectorEditingNodeId: string | null,
   selectedVertexIds: string[],
+  preMarqueeVertexIds: string[],
   selectedSegmentIds: string[],
+  preMarqueeSegmentIds: string[],
   hoveredVertexId: string | null,
   hoveredSegmentId: string | null,
   hoveredVectorSegmentId: string | null,
@@ -39,8 +41,10 @@ export const drawVectorEditHandlesLayer = (
   if (editingNode) {
     const node = { ...editingNode, ...bakeVectorNodeRotation(editingNode) };
     const visualSelectedVertexIds = getVisualSelectedVectorVertexIds(selectedVertexIds, penActiveVertexId ?? dragOriginVertexId);
-    const tangentVisibilityVertexIds = getTangentVisibilityVertexIds(node, visualSelectedVertexIds, selectedHandles);
+    const visualSelectedVertexIdsTotal = [...visualSelectedVertexIds, ...preMarqueeVertexIds];
+    const tangentVisibilityVertexIds = getTangentVisibilityVertexIds(node, visualSelectedVertexIdsTotal, selectedHandles);
     const oneHopVertexIds = getOneHopVectorVertexIds(node, tangentVisibilityVertexIds);
+    const tangentVisibilitySegmentIds = [...selectedSegmentIds, ...preMarqueeSegmentIds];
 
     drawVectorEditOutline(
       gl,
@@ -63,7 +67,7 @@ export const drawVectorEditHandlesLayer = (
       selectedHandles,
       tangentVisibilityVertexIds,
       oneHopVertexIds,
-      selectedSegmentIds,
+      tangentVisibilitySegmentIds,
       dragOriginVertexId,
       penDraggedHandlePosition,
       canvasWidth,

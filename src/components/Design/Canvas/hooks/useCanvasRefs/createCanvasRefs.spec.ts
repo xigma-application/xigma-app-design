@@ -26,6 +26,8 @@ describe('createCanvasRefs behaviors', () => {
       penNewVertexPreviewRef: { current: null },
       penPreviewRef: { current: null },
       polygonCornerRadiusDragRef: { current: null },
+      preVectorMarqueeSegmentIdsRef: { current: [] },
+      preVectorMarqueeVertexIdsRef: { current: [] },
       rotateDragRef: { current: null },
       selectedVectorHandlesRef: { current: [] },
       selectedVectorSegmentIdsRef: { current: [] },

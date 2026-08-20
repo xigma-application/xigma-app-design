@@ -70,7 +70,7 @@ describe('updateVectorHandleDrag', () => {
     expect(penDraggedHandlePositionRef.current).toBeNull();
   });
 
-  it('should set the tangent on the origin segment, record the pending outgoing tangent, and track the live cursor position once past the threshold', () => {
+  it('should set the tangent on the origin segment, mark the vertex symmetric so future edits mirror both angle and length, record the pending outgoing tangent, and track the live cursor position once past the threshold', () => {
     // mock
     const nodeId = addVectorNodeWithSegment();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
@@ -92,7 +92,7 @@ describe('updateVectorHandleDrag', () => {
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
 
     expect(node.segments.s1.tangentEnd).toEqual({ x: -20, y: -5 });
-    expect(node.vertexHandleModes.v1).toBe('smooth');
+    expect(node.vertexHandleModes.v1).toBe('symmetric');
     expect(pendingOutgoingTangentRef.current).toEqual({ tangent: { x: 20, y: 5 }, vertexId: 'v1' });
     expect(penDraggedHandlePositionRef.current).toEqual({ x: 20, y: 5 });
   });
