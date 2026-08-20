@@ -498,3 +498,68 @@ test('undo steps back through vertex placements one click at a time', async ({ p
 
   expect(state1.equals(referenceOneVertex)).toBe(true);
 });
+
+test('click-dragging directly on the active vertex — not while placing it — shapes the tangent for the next segment', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  // mock — v2 is placed with a plain click first (straight, no tangent), and only *afterwards*, as a
+  // fully separate press-drag-release gesture, do we grab v2 again at its own committed position;
+  // this is distinct from the already-covered "click-drag while placing a vertex" case above, where
+  // the drag is part of the very same gesture that creates the vertex
+  await designPage.goto('e2e-test-pen-drag-active-vertex-tangent');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300); // v1
+  await designPage.click(850, 300); // v2, plain click — now the active vertex, no tangent yet
+  await designPage.dragVectorPoint(850, 300, 900, 250); // separate gesture: press-drag directly on v2 itself
+  await designPage.click(850, 450); // v3 — the new segment inherits the tangent just staged on v2
+  await designPage.pointerMove(1500, 900);
+  const curved = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-pen-drag-active-vertex-tangent-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawVectorPath([
+    { x: 700, y: 300 },
+    { x: 850, y: 300 },
+    { x: 850, y: 450 }, // plain clicks only — straight segments throughout, no drag on v2 at all
+  ]);
+  await designPage.pointerMove(1500, 900);
+  const straight = await designPage.canvas.screenshot();
+
+  expect(curved.equals(straight)).toBe(false);
+});
+
+test('click-dragging directly on a resumed (non-active) vertex shapes its outgoing tangent', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  // mock — v2 is placed, Escape stops extending (v2 no longer active, per Escape's 1st stage), then
+  // v2 is resumed by pressing directly on its own position with no active vertex at all — exercises
+  // startVectorFragment.ts's hover branch, distinct from the active-vertex case above
+  await designPage.goto('e2e-test-pen-drag-resumed-vertex-tangent');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300); // v1
+  await designPage.click(850, 300); // v2
+  await page.keyboard.press('Escape'); // stops extending — v2 no longer the active vertex
+  await designPage.dragVectorPoint(850, 300, 900, 250); // resume v2 by pressing directly on it, then drag
+  await designPage.click(850, 450); // v3 — inherits the tangent staged on the resumed v2
+  await designPage.pointerMove(1500, 900);
+  const curved = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-pen-drag-resumed-vertex-tangent-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300);
+  await designPage.click(850, 300);
+  await page.keyboard.press('Escape');
+  await designPage.click(850, 300); // resume with a plain click, no drag
+  await designPage.click(850, 450);
+  await designPage.pointerMove(1500, 900);
+  const straight = await designPage.canvas.screenshot();
+
+  expect(curved.equals(straight)).toBe(false);
+});

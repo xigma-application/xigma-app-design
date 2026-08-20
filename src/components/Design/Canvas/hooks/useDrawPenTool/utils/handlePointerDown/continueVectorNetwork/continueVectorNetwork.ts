@@ -18,18 +18,13 @@ import { closeLoopOntoVertex } from './closeLoopOntoVertex';
 import { extendWithNewVertex } from './extendWithNewVertex';
 import { getVectorEdgeAtPoint } from '../../../../../utils/getVectorEdgeAtPoint';
 import { getVectorVertexAtPoint } from '../../../../../utils/getVectorVertexAtPoint';
+import { isPointNearVertex } from '../../../../../utils/isPointNearVertex';
 
 const getTangentStart = (pending: TPendingOutgoingTangent | null, activeVertexId: string): TVectorTangent =>
   pending && pending.vertexId === activeVertexId ? pending.tangent : null;
 
 const getEdgeHit = (point: TPoint, node: TVectorNode, viewport: TViewport): { segmentId: string; t: number } | null =>
   getVectorEdgeAtPoint(point, node, VECTOR_EDGE_HIT_TOLERANCE_PX / viewport.zoom, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
-
-const isOnActiveVertex = (point: TPoint, node: TVectorNode, activeVertexId: string, viewport: TViewport): boolean => {
-  const activeVertex = node.vertices[activeVertexId];
-
-  return Math.hypot(point.x - activeVertex.x, point.y - activeVertex.y) <= VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom;
-};
 
 export const continueVectorNetwork = (
   point: TPoint,
@@ -41,7 +36,7 @@ export const continueVectorNetwork = (
   dragStartRef: RefObject<TPoint | null>,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
 ): void => {
-  if (isOnActiveVertex(point, node, activeVertexId, viewport)) {
+  if (isPointNearVertex(point, node.vertices[activeVertexId], VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom)) {
     dragOriginRef.current = { nodeId: node.id, segmentId: null, vertexId: activeVertexId };
     dragStartRef.current = point;
   } else {

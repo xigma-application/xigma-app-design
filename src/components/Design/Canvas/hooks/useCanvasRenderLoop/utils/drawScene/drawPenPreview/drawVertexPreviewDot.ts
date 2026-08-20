@@ -6,6 +6,7 @@ import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
+import { drawDragArmableVertexCross } from './drawDragArmableVertexCross';
 import { drawEllipse } from 'utils/canvas/shapes/drawEllipse';
 
 export const drawVertexPreviewDot = (
@@ -13,6 +14,7 @@ export const drawVertexPreviewDot = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   point: TPoint,
+  isDragArmable: boolean,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
@@ -36,4 +38,8 @@ export const drawVertexPreviewDot = (
     viewport,
     0,
   );
+
+  if (isDragArmable) {
+    drawDragArmableVertexCross(gl, program, buffer, point, vertexSize, canvasWidth, canvasHeight, viewport);
+  }
 };

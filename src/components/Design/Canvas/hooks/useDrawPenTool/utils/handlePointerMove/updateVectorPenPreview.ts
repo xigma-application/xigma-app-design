@@ -18,6 +18,7 @@ export const updateVectorPenPreview = (
   penPreviewRef: TCanvasRefs['penPreviewRef'],
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
   hoveredSegmentIdRef: TCanvasRefs['hoveredSegmentIdRef'],
+  penHoveredDragArmableVertexRef: TCanvasRefs['penHoveredDragArmableVertexRef'],
 ): TPenPointHoverKind | null => {
   const activeVertex = activeVertexId ? node.vertices[activeVertexId] : null;
 
@@ -31,6 +32,7 @@ export const updateVectorPenPreview = (
       if (result) {
         penPreviewRef.current = { from: activeVertex, tangentFromOffset, to: result.point };
         hoveredSegmentIdRef.current = result.segmentId;
+        penHoveredDragArmableVertexRef.current = result.hoverKind === 'active-vertex';
 
         return result.hoverKind;
       }
@@ -38,12 +40,14 @@ export const updateVectorPenPreview = (
 
     penPreviewRef.current = { from: activeVertex, tangentFromOffset, to: point };
     hoveredSegmentIdRef.current = null;
+    penHoveredDragArmableVertexRef.current = false;
 
     return null;
   }
 
   penPreviewRef.current = null;
   hoveredSegmentIdRef.current = null;
+  penHoveredDragArmableVertexRef.current = false;
 
   return null;
 };

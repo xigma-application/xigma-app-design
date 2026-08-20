@@ -13,6 +13,7 @@ export const updateNewVertexPreview = (
   viewport: TViewport,
   penNewVertexPreviewRef: TCanvasRefs['penNewVertexPreviewRef'],
   hoveredSegmentIdRef: TCanvasRefs['hoveredSegmentIdRef'],
+  penHoveredDragArmableVertexRef: TCanvasRefs['penHoveredDragArmableVertexRef'],
 ): TPenPointHoverKind | null => {
   if (node) {
     for (const resolve of PEN_POINT_HOVER_RESOLVERS) {
@@ -21,6 +22,7 @@ export const updateNewVertexPreview = (
       if (result) {
         penNewVertexPreviewRef.current = result.point;
         hoveredSegmentIdRef.current = result.segmentId;
+        penHoveredDragArmableVertexRef.current = result.hoverKind === 'vertex';
 
         return result.hoverKind;
       }
@@ -29,6 +31,7 @@ export const updateNewVertexPreview = (
 
   penNewVertexPreviewRef.current = point;
   hoveredSegmentIdRef.current = null;
+  penHoveredDragArmableVertexRef.current = false;
 
   return null;
 };

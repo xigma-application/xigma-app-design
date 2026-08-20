@@ -20,7 +20,14 @@ import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 
 export const useDrawPenTool = (refs: TCanvasRefs): void => {
-  const { canvasRef, hoveredSegmentIdRef, penDraggedHandlePositionRef, penNewVertexPreviewRef, penPreviewRef } = refs;
+  const {
+    canvasRef,
+    hoveredSegmentIdRef,
+    penDraggedHandlePositionRef,
+    penHoveredDragArmableVertexRef,
+    penNewVertexPreviewRef,
+    penPreviewRef,
+  } = refs;
   const activeTool = useAppSelector(selectActiveTool);
   const dispatch = useAppDispatch();
   const appStore = useAppStore();
@@ -47,6 +54,7 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
       penNewVertexPreviewRef,
       penDraggedHandlePositionRef,
       hoveredSegmentIdRef,
+      penHoveredDragArmableVertexRef,
       setClassName,
     );
   };
@@ -82,6 +90,7 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
         penNewVertexPreviewRef.current = null;
         penDraggedHandlePositionRef.current = null;
         hoveredSegmentIdRef.current = null;
+        penHoveredDragArmableVertexRef.current = false;
       };
     }
   }, [
@@ -91,6 +100,7 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
     dispatch,
     hoveredSegmentIdRef,
     penDraggedHandlePositionRef,
+    penHoveredDragArmableVertexRef,
     penNewVertexPreviewRef,
     penPreviewRef,
     setClassName,

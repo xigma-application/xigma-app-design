@@ -4,6 +4,7 @@ import { TPenPointHoverContext } from '../../types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
+import { resolveActiveVertexHover } from '../resolveActiveVertexHover';
 import { resolveEdgePointHover } from '../resolveEdgePointHover';
 import { resolveVertexPointHover } from '../resolveVertexPointHover';
 
@@ -28,6 +29,32 @@ const createContext = (overrides: Partial<TPenPointHoverContext> = {}): TPenPoin
   point: { x: 900, y: 900 },
   viewport: IDENTITY_VIEWPORT,
   ...overrides,
+});
+
+describe('resolveActiveVertexHover', () => {
+  it('should return the active-vertex hover kind and its own point when hovering back onto the excluded (active) vertex', () => {
+    // result — hovering right on v1, the vertex currently being extended from
+    expect(resolveActiveVertexHover(createContext({ excludeVertexId: 'v1', point: { x: 0, y: 0 } }))).toEqual({
+      hoverKind: 'active-vertex',
+      point: { id: 'v1', x: 0, y: 0 },
+      segmentId: null,
+    });
+  });
+
+  it('should return undefined when no vertex is excluded (idle, no active vertex yet)', () => {
+    // result
+    expect(resolveActiveVertexHover(createContext({ point: { x: 0, y: 0 } }))).toBeUndefined();
+  });
+
+  it('should return undefined when hovering a different vertex than the excluded one', () => {
+    // result — hovering v2 while v1 is the active/excluded vertex
+    expect(resolveActiveVertexHover(createContext({ excludeVertexId: 'v1', point: { x: 100, y: 0 } }))).toBeUndefined();
+  });
+
+  it('should return undefined when far from the excluded vertex', () => {
+    // result
+    expect(resolveActiveVertexHover(createContext({ excludeVertexId: 'v1', point: { x: 900, y: 900 } }))).toBeUndefined();
+  });
 });
 
 describe('resolveVertexPointHover', () => {

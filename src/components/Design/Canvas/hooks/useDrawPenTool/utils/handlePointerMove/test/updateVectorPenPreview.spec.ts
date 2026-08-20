@@ -27,6 +27,7 @@ const node: TVectorNode = {
 
 const createPenPreviewRef = (): TCanvasRefs['penPreviewRef'] => ({ current: null });
 const createHoveredSegmentIdRef = (): TCanvasRefs['hoveredSegmentIdRef'] => ({ current: null });
+const createPenHoveredDragArmableVertexRef = (): TCanvasRefs['penHoveredDragArmableVertexRef'] => ({ current: false });
 const createPendingOutgoingTangentRef = (value: TPendingOutgoingTangent | null = null): RefObject<TPendingOutgoingTangent | null> => ({
   current: value,
 });
@@ -36,6 +37,7 @@ describe('updateVectorPenPreview', () => {
     // mock
     const penPreviewRef = createPenPreviewRef();
     const hoveredSegmentIdRef = createHoveredSegmentIdRef();
+    const penHoveredDragArmableVertexRef = createPenHoveredDragArmableVertexRef();
 
     // before
     const hoverKind = updateVectorPenPreview(
@@ -46,18 +48,21 @@ describe('updateVectorPenPreview', () => {
       penPreviewRef,
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
+      penHoveredDragArmableVertexRef,
     );
 
     // result
     expect(penPreviewRef.current).toBeNull();
     expect(hoverKind).toBeNull();
     expect(hoveredSegmentIdRef.current).toBeNull();
+    expect(penHoveredDragArmableVertexRef.current).toBe(false);
   });
 
   it('should draw the rubber-band preview from the active vertex to the pointer when no vertex is hovered', () => {
     // mock
     const penPreviewRef = createPenPreviewRef();
     const hoveredSegmentIdRef = createHoveredSegmentIdRef();
+    const penHoveredDragArmableVertexRef = createPenHoveredDragArmableVertexRef();
 
     // before
     const hoverKind = updateVectorPenPreview(
@@ -68,12 +73,14 @@ describe('updateVectorPenPreview', () => {
       penPreviewRef,
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
+      penHoveredDragArmableVertexRef,
     );
 
     // result
     expect(penPreviewRef.current).toEqual({ from: { id: 'v1', x: 0, y: 0 }, tangentFromOffset: null, to: { x: 500, y: 500 } });
     expect(hoverKind).toBeNull();
     expect(hoveredSegmentIdRef.current).toBeNull();
+    expect(penHoveredDragArmableVertexRef.current).toBe(false);
   });
 
   it('should snap the rubber-band preview endpoint to the hovered vertex instead of the raw pointer position', () => {
@@ -81,6 +88,7 @@ describe('updateVectorPenPreview', () => {
     const nodeWithTwoVertices: TVectorNode = { ...node, vertices: { ...node.vertices, v2: { id: 'v2', x: 100, y: 0 } } };
     const penPreviewRef = createPenPreviewRef();
     const hoveredSegmentIdRef = createHoveredSegmentIdRef();
+    const penHoveredDragArmableVertexRef = createPenHoveredDragArmableVertexRef();
 
     // before — active vertex is v1, pointer hovers right on v2
     const hoverKind = updateVectorPenPreview(
@@ -91,12 +99,14 @@ describe('updateVectorPenPreview', () => {
       penPreviewRef,
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
+      penHoveredDragArmableVertexRef,
     );
 
-    // result
+    // result — closing onto a *different* vertex mid-fragment, not drag-armable (that click ends the fragment)
     expect(penPreviewRef.current).toMatchObject({ to: { id: 'v2', x: 100, y: 0 } });
     expect(hoverKind).toBe('vertex');
     expect(hoveredSegmentIdRef.current).toBeNull();
+    expect(penHoveredDragArmableVertexRef.current).toBe(false);
   });
 
   it('should attract the rubber-band preview endpoint onto a hovered segment and report it as hovered, closing-onto-an-edge style', () => {
@@ -108,6 +118,7 @@ describe('updateVectorPenPreview', () => {
     };
     const penPreviewRef = createPenPreviewRef();
     const hoveredSegmentIdRef = createHoveredSegmentIdRef();
+    const penHoveredDragArmableVertexRef = createPenHoveredDragArmableVertexRef();
 
     // before — active vertex is v3, pointer hovers near the far end of s1, well outside the midpoint's snap radius
     const hoverKind = updateVectorPenPreview(
@@ -118,12 +129,14 @@ describe('updateVectorPenPreview', () => {
       penPreviewRef,
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
+      penHoveredDragArmableVertexRef,
     );
 
     // result
     expect(penPreviewRef.current).toMatchObject({ to: { x: 90, y: 0 } });
     expect(hoverKind).toBe('edge');
     expect(hoveredSegmentIdRef.current).toBe('s1');
+    expect(penHoveredDragArmableVertexRef.current).toBe(false);
   });
 
   it('should lock the rubber-band preview endpoint onto the exact midpoint and report edge-snap when hovering close enough to it', () => {
@@ -135,6 +148,7 @@ describe('updateVectorPenPreview', () => {
     };
     const penPreviewRef = createPenPreviewRef();
     const hoveredSegmentIdRef = createHoveredSegmentIdRef();
+    const penHoveredDragArmableVertexRef = createPenHoveredDragArmableVertexRef();
 
     // before — active vertex is v3, pointer hovers a couple of px off s1's midpoint (50,0)
     const hoverKind = updateVectorPenPreview(
@@ -145,18 +159,23 @@ describe('updateVectorPenPreview', () => {
       penPreviewRef,
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
+      penHoveredDragArmableVertexRef,
     );
 
     // result
     expect(penPreviewRef.current).toMatchObject({ to: { x: 50, y: 0 } });
     expect(hoverKind).toBe('edge-snap');
     expect(hoveredSegmentIdRef.current).toBe('s1');
+    expect(penHoveredDragArmableVertexRef.current).toBe(false);
   });
 
-  it('should never snap onto the active vertex itself, even when hovering right on top of it', () => {
-    // mock
+  it('should snap onto the active vertex itself and flag the hover as drag-armable when hovering right on top of it', () => {
+    // mock — pressing here now arms a click-drag to (re)shape this vertex's own outgoing tangent
+    // (continueVectorNetwork.ts's isPointNearVertex check), so the hover/preview layer must show the
+    // same affordance instead of silently falling through to the raw, unsnapped pointer position
     const penPreviewRef = createPenPreviewRef();
     const hoveredSegmentIdRef = createHoveredSegmentIdRef();
+    const penHoveredDragArmableVertexRef = createPenHoveredDragArmableVertexRef();
 
     // before — active vertex is v1, pointer hovers right on v1 too
     const hoverKind = updateVectorPenPreview(
@@ -167,17 +186,21 @@ describe('updateVectorPenPreview', () => {
       penPreviewRef,
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
+      penHoveredDragArmableVertexRef,
     );
 
     // result
-    expect(penPreviewRef.current).toMatchObject({ to: { x: 0, y: 0 } });
-    expect(hoverKind).toBeNull();
+    expect(penPreviewRef.current).toEqual({ from: { id: 'v1', x: 0, y: 0 }, tangentFromOffset: null, to: { id: 'v1', x: 0, y: 0 } });
+    expect(hoverKind).toBe('active-vertex');
+    expect(hoveredSegmentIdRef.current).toBeNull();
+    expect(penHoveredDragArmableVertexRef.current).toBe(true);
   });
 
   it('should carry the pending outgoing tangent into the preview when it matches the active vertex', () => {
     // mock
     const penPreviewRef = createPenPreviewRef();
     const hoveredSegmentIdRef = createHoveredSegmentIdRef();
+    const penHoveredDragArmableVertexRef = createPenHoveredDragArmableVertexRef();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef({ tangent: { x: 5, y: 5 }, vertexId: 'v1' });
 
     // before
@@ -189,6 +212,7 @@ describe('updateVectorPenPreview', () => {
       penPreviewRef,
       pendingOutgoingTangentRef,
       hoveredSegmentIdRef,
+      penHoveredDragArmableVertexRef,
     );
 
     // result

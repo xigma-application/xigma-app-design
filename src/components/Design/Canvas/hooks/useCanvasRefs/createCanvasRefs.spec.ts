@@ -20,6 +20,7 @@ describe('createCanvasRefs behaviors', () => {
       hoveredVectorVertexIdRef: { current: null },
       marqueeRef: { current: null },
       penDraggedHandlePositionRef: { current: null },
+      penHoveredDragArmableVertexRef: { current: false },
       penNewVertexPreviewRef: { current: null },
       penPreviewRef: { current: null },
       polygonCornerRadiusDragRef: { current: null },

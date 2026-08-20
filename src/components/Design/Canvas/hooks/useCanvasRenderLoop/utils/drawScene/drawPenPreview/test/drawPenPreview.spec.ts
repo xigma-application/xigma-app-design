@@ -7,11 +7,13 @@ import { drawPenPreview } from '../drawPenPreview';
 
 const drawVectorStrokeMock = vi.fn();
 const drawEllipseMock = vi.fn();
+const drawLineMock = vi.fn();
 
 vi.mock('utils/canvas/drawVectorNode/drawVectorStroke', () => ({
   drawVectorStroke: (...args: unknown[]): void => drawVectorStrokeMock(...args),
 }));
 vi.mock('utils/canvas/shapes/drawEllipse', () => ({ drawEllipse: (...args: unknown[]): void => drawEllipseMock(...args) }));
+vi.mock('utils/canvas/drawLine', () => ({ drawLine: (...args: unknown[]): void => drawLineMock(...args) }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const NO_NODES: Record<string, TSceneNode> = {};
@@ -21,6 +23,7 @@ const call = (
   newVertexPreview: { x: number; y: number } | null,
   nodes: Record<string, TSceneNode>,
   vectorEditingNodeId: string | null,
+  isDragArmable = false,
 ): void => {
   drawPenPreview(
     {} as WebGL2RenderingContext,
@@ -28,6 +31,7 @@ const call = (
     {} as WebGLBuffer,
     preview,
     newVertexPreview,
+    isDragArmable,
     nodes,
     vectorEditingNodeId,
     100,
@@ -40,6 +44,7 @@ describe('drawPenPreview', () => {
   beforeEach(() => {
     drawVectorStrokeMock.mockClear();
     drawEllipseMock.mockClear();
+    drawLineMock.mockClear();
   });
 
   it('should draw nothing when there is no preview segment and no new-vertex preview', () => {
@@ -101,5 +106,14 @@ describe('drawPenPreview', () => {
     expect(points[0].y).toBeCloseTo(-5);
     expect(points[points.length - 1].x).toBeCloseTo(5);
     expect(points[points.length - 1].y).toBeCloseTo(5);
+  });
+
+  it('should forward isDragArmable to both the segment preview and the standalone new-vertex dot', () => {
+    // before
+    call({ from: { x: 0, y: 0 }, tangentFromOffset: null, to: { x: 10, y: 10 } }, { x: 50, y: 50 }, NO_NODES, null, true);
+
+    // result — both dots draw their plain ellipse as always, plus a small cross overlay each
+    expect(drawEllipseMock).toHaveBeenCalledTimes(2);
+    expect(drawLineMock).toHaveBeenCalledTimes(4);
   });
 });

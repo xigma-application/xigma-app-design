@@ -31,6 +31,7 @@ const createPenPreviewRef = (): TCanvasRefs['penPreviewRef'] => ({ current: null
 const createPenNewVertexPreviewRef = (): TCanvasRefs['penNewVertexPreviewRef'] => ({ current: null });
 const createPenDraggedHandlePositionRef = (): TCanvasRefs['penDraggedHandlePositionRef'] => ({ current: null });
 const createHoveredSegmentIdRef = (): TCanvasRefs['hoveredSegmentIdRef'] => ({ current: null });
+const createPenHoveredDragArmableVertexRef = (): TCanvasRefs['penHoveredDragArmableVertexRef'] => ({ current: false });
 
 const addVectorNodeWithSegment = (): string => {
   store.dispatch(
@@ -82,6 +83,7 @@ describe('handlePointerMove', () => {
       penNewVertexPreviewRef,
       penDraggedHandlePositionRef,
       createHoveredSegmentIdRef(),
+      createPenHoveredDragArmableVertexRef(),
       setClassName,
     );
 
@@ -116,6 +118,7 @@ describe('handlePointerMove', () => {
       penNewVertexPreviewRef,
       penDraggedHandlePositionRef,
       createHoveredSegmentIdRef(),
+      createPenHoveredDragArmableVertexRef(),
       setClassName,
     );
 
@@ -145,6 +148,7 @@ describe('handlePointerMove', () => {
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
       createHoveredSegmentIdRef(),
+      createPenHoveredDragArmableVertexRef(),
       setClassName,
     );
 
@@ -181,6 +185,7 @@ describe('handlePointerMove', () => {
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
       createHoveredSegmentIdRef(),
+      createPenHoveredDragArmableVertexRef(),
       setClassName,
     );
 
@@ -215,6 +220,7 @@ describe('handlePointerMove', () => {
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
       createHoveredSegmentIdRef(),
+      createPenHoveredDragArmableVertexRef(),
       setClassName,
     );
 
@@ -249,6 +255,7 @@ describe('handlePointerMove', () => {
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
       hoveredSegmentIdRef,
+      createPenHoveredDragArmableVertexRef(),
       setClassName,
     );
 
@@ -284,6 +291,7 @@ describe('handlePointerMove', () => {
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
       hoveredSegmentIdRef,
+      createPenHoveredDragArmableVertexRef(),
       setClassName,
     );
 
@@ -320,6 +328,7 @@ describe('handlePointerMove', () => {
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
       createHoveredSegmentIdRef(),
+      createPenHoveredDragArmableVertexRef(),
       setClassName,
     );
 
@@ -354,6 +363,7 @@ describe('handlePointerMove', () => {
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
       createHoveredSegmentIdRef(),
+      createPenHoveredDragArmableVertexRef(),
       setClassName,
     );
 
@@ -394,6 +404,7 @@ describe('handlePointerMove', () => {
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
       hoveredSegmentIdRef,
+      createPenHoveredDragArmableVertexRef(),
       setClassName,
     );
 
@@ -435,12 +446,49 @@ describe('handlePointerMove', () => {
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
       hoveredSegmentIdRef,
+      createPenHoveredDragArmableVertexRef(),
       setClassName,
     );
 
     // result
     expect(penPreviewRef.current).toMatchObject({ to: { x: 50, y: 0 } });
     expect(hoveredSegmentIdRef.current).toBe('s1');
+    expect(setClassName).toHaveBeenCalledWith('pen-snap');
+  });
+
+  it('should flag the hover as drag-armable and switch to the pen-snap cursor when hovering back on the active vertex itself', () => {
+    // mock
+    const nodeId = addVectorNodeWithSegment();
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setPenActiveVertexId('v1'));
+
+    const canvas = createCanvas();
+    const penPreviewRef = createPenPreviewRef();
+    const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
+    const penHoveredDragArmableVertexRef = createPenHoveredDragArmableVertexRef();
+    const setClassName = vi.fn();
+
+    // before — hover right back on v1 (0,0), the vertex currently being extended from
+    handlePointerMove(
+      canvas,
+      pointerEvent(0, 0),
+      store.dispatch,
+      store,
+      createDragOriginRef(),
+      createDragStartRef(),
+      createPendingOutgoingTangentRef(),
+      penPreviewRef,
+      penNewVertexPreviewRef,
+      createPenDraggedHandlePositionRef(),
+      createHoveredSegmentIdRef(),
+      penHoveredDragArmableVertexRef,
+      setClassName,
+    );
+
+    // result
+    expect(penPreviewRef.current).toMatchObject({ to: { id: 'v1', x: 0, y: 0 } });
+    expect(penHoveredDragArmableVertexRef.current).toBe(true);
     expect(setClassName).toHaveBeenCalledWith('pen-snap');
   });
 });

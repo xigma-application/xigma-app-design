@@ -20,6 +20,7 @@ export const drawPenSegmentPreview = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   preview: TPenPreview,
+  isDragArmable: boolean,
   pivot: TPoint,
   rotation: number,
   canvasWidth: number,
@@ -28,19 +29,22 @@ export const drawPenSegmentPreview = (
 ): void => {
   const from = rotatePoint(preview.from, pivot, rotation);
   const to = rotatePoint(preview.to, pivot, rotation);
-  const tangentFromOffset = preview.tangentFromOffset ? rotatePoint(preview.tangentFromOffset, ORIGIN, rotation) : null;
-  const points = flattenSegment(from, to, tangentFromOffset, null, getVectorCurveSegmentCount(from, to, tangentFromOffset, null));
 
-  drawVectorStroke(
-    gl,
-    program,
-    buffer,
-    [{ points, segmentId: 'preview' }],
-    DRAFT_FRAME_STROKE,
-    VECTOR_STROKE_WIDTH / viewport.zoom,
-    canvasWidth,
-    canvasHeight,
-    viewport,
-  );
-  drawVertexPreviewDot(gl, program, buffer, to, canvasWidth, canvasHeight, viewport);
+  if (from.x !== to.x || from.y !== to.y) {
+    const tangentFromOffset = preview.tangentFromOffset ? rotatePoint(preview.tangentFromOffset, ORIGIN, rotation) : null;
+    const points = flattenSegment(from, to, tangentFromOffset, null, getVectorCurveSegmentCount(from, to, tangentFromOffset, null));
+
+    drawVectorStroke(
+      gl,
+      program,
+      buffer,
+      [{ points, segmentId: 'preview' }],
+      DRAFT_FRAME_STROKE,
+      VECTOR_STROKE_WIDTH / viewport.zoom,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+    );
+  }
+  drawVertexPreviewDot(gl, program, buffer, to, isDragArmable, canvasWidth, canvasHeight, viewport);
 };

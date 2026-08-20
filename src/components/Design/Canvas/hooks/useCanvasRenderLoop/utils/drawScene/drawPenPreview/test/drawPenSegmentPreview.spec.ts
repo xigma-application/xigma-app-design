@@ -3,11 +3,13 @@ import { drawPenSegmentPreview } from '../drawPenSegmentPreview';
 
 const drawVectorStrokeMock = vi.fn();
 const drawEllipseMock = vi.fn();
+const drawLineMock = vi.fn();
 
 vi.mock('utils/canvas/drawVectorNode/drawVectorStroke', () => ({
   drawVectorStroke: (...args: unknown[]): void => drawVectorStrokeMock(...args),
 }));
 vi.mock('utils/canvas/shapes/drawEllipse', () => ({ drawEllipse: (...args: unknown[]): void => drawEllipseMock(...args) }));
+vi.mock('utils/canvas/drawLine', () => ({ drawLine: (...args: unknown[]): void => drawLineMock(...args) }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const ORIGIN = { x: 0, y: 0 };
@@ -16,12 +18,14 @@ const call = (
   preview: { from: { x: number; y: number }; tangentFromOffset: { x: number; y: number } | null; to: { x: number; y: number } },
   pivot: { x: number; y: number },
   rotation: number,
+  isDragArmable = false,
 ): void => {
   drawPenSegmentPreview(
     {} as WebGL2RenderingContext,
     {} as WebGLProgram,
     {} as WebGLBuffer,
     preview,
+    isDragArmable,
     pivot,
     rotation,
     100,
@@ -34,6 +38,7 @@ describe('drawPenSegmentPreview', () => {
   beforeEach(() => {
     drawVectorStrokeMock.mockClear();
     drawEllipseMock.mockClear();
+    drawLineMock.mockClear();
   });
 
   it('should draw a vector stroke for the preview segment from the pen origin to the pointer, plus a vertex-styled dot at its endpoint', () => {
@@ -100,5 +105,31 @@ describe('drawPenSegmentPreview', () => {
     expect(points[0].y).toBeCloseTo(-5);
     expect(points[points.length - 1].x).toBeCloseTo(5);
     expect(points[points.length - 1].y).toBeCloseTo(5);
+  });
+
+  it('should skip the stroke entirely — drawing only the endpoint dot — when snapped onto the origin vertex itself (from equals to)', () => {
+    // mock — hovering the active vertex snaps `to` onto it, per updateVectorPenPreview; degenerate
+    // zero-length stroke would otherwise flatten into a spurious tiny loop
+    const preview = { from: { x: 5, y: 5 }, tangentFromOffset: { x: 5, y: 0 }, to: { x: 5, y: 5 } };
+
+    // before
+    call(preview, ORIGIN, 0, true);
+
+    // result
+    expect(drawVectorStrokeMock).not.toHaveBeenCalled();
+    expect(drawEllipseMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should draw the same dot plus a small cross overlay when isDragArmable is true', () => {
+    // mock
+    const preview = { from: { x: 0, y: 0 }, tangentFromOffset: null, to: { x: 10, y: 10 } };
+
+    // before
+    call(preview, ORIGIN, 0, true);
+
+    // result — the plain dot always draws...
+    expect(drawEllipseMock).toHaveBeenCalledTimes(1);
+    // ...plus the small cross overlay on top of it
+    expect(drawLineMock).toHaveBeenCalledTimes(2);
   });
 });

@@ -829,6 +829,55 @@ branch only ever runs *mid-fragment*, so any existing pending tangent on this sa
 earlier in this same uninterrupted session (legitimately still current) or gets overwritten the moment a
 real drag exceeds `MIN_DRAG_DISTANCE_PX` regardless.
 
+## 16. Hover affordance for a drag-armable vertex — a resolver, not a special case, and a cross overlay, not a new shape
+
+Follow-up asked for directly, with screenshots at each step: once §15 made click-dragging from a resumed or
+active vertex shape a tangent, there was no visual cue *before* the click telling you a given vertex-hover
+was one of these drag-armable spots versus an ordinary vertex hover (e.g. mid-fragment, hovering a
+*different* vertex to close the loop onto it — never drag-armable, §15). Went through the same
+two-round-correction pattern §10 warns to expect from this codebase's history:
+
+1. **First pass invented a brand new shape** — a hollow ring (`drawThickEllipseOutline.ts`, reusing the
+   annulus primitive real ellipse-arc nodes use) sized independently of the existing dot, replacing it
+   outright when drag-armable. Reported back immediately as broken — the cross inside rendered as a
+   distorted "pinwheel," and more fundamentally: "Miał być ten niebieski border w środku tej białej kropki
+   a w tym niebieskim krzyżyk mały pomarańczowy" (it was supposed to be that blue border in the middle of
+   the white dot, and inside that blue [border] a small orange cross) — i.e. **keep the existing white/blue
+   `drawVertexPreviewDot` exactly as-is, unconditionally, and only additively overlay a small cross on top
+   of it**, not switch between two different shapes for two different states ("Dlaczego zrobiłeś na dwa
+   różne widoki?" — why did you make it into two different views?).
+2. **Fixed to exactly that**: `drawVertexPreviewDot.ts` always draws the same `drawEllipse` call it always
+   did, then — only if `isDragArmable` — layers `drawDragArmableVertexCross.ts` on top, two thin
+   `drawLine` diagonals in `VECTOR_EDGE_HOVER_STROKE` orange, sized as a small *fraction* of the same
+   `vertexSize` the dot itself used (`CROSS_RADIUS_RATIO = 0.25`, `CROSS_STROKE_RATIO = 0.12` — no
+   independent constant, so the cross always stays proportional to whatever the dot's own size is,
+   including its `1 / viewport.zoom` scaling, without a second zoom division). One view, one dot, an
+   optional small addition — not a second shape.
+
+**A separate correction, asked immediately after landing the fix above: the "is this vertex drag-armable"
+check lived as a hand-rolled distance test bolted directly into `updateVectorPenPreview.ts`, not as an
+entry in `PEN_POINT_HOVER_RESOLVERS`** ("Czemu nie wrzuciłeś tego w resolver?" — why didn't you put this in
+a resolver?) — inconsistent with §4's explicit chain-of-responsibility architecture every other hover case
+in this pipeline already follows. Fixed by adding `resolveActiveVertexHover.ts`
+(`resolvePenPointHover/hoverResolvers/`) as a proper resolver, first in the array (ahead of
+`resolveVertexPointHover`, which structurally can never also match — it explicitly excludes
+`excludeVertexId`, so the two can't double-fire on the same point) — it checks `isPointNearVertex` against
+`node.vertices[excludeVertexId]` and returns a new, distinct `hoverKind: 'active-vertex'` (added to
+`TPenPointHoverKind`, mapped to the same `'pen-snap'` cursor class as plain `'vertex'`). This let
+`updateVectorPenPreview.ts` shrink back down to a plain resolver loop with no special-cased branch —
+`penHoveredDragArmableVertexRef.current = result.hoverKind === 'active-vertex'` is now the *only* extra
+line needed, derived straight from the resolver's own output instead of re-testing distance separately.
+`updateNewVertexPreview.ts` (the idle/resuming-vertex case, §15) needed no equivalent resolver — every
+vertex match there (`hoverKind === 'vertex'`, `resolveVertexPointHover` with no `excludeVertexId` at all)
+is already drag-armable by construction, so its existing `result.hoverKind === 'vertex'` check was already
+correct and untouched by this refactor.
+
+`isPointNearVertex.ts` (`Canvas/utils/`) is the one small shared predicate behind both the resolver above
+and `continueVectorNetwork.ts`'s own pointerdown arm-check (§15) — deliberately **not** itself routed
+through the resolver pipeline, since arming a drag at `pointerdown` and previewing a hover before any click
+happens are different concerns (one needs a plain boolean, the other needs the full resolver
+point/segmentId/hoverKind shape); only the *hover preview* half needed to join the resolver chain.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

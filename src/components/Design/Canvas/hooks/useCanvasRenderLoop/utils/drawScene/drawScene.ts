@@ -137,6 +137,7 @@ export const drawScene = (
     buffer,
     refs.penPreviewRef.current,
     refs.penNewVertexPreviewRef.current,
+    refs.penHoveredDragArmableVertexRef.current,
     nodesById,
     vectorEditingNodeId,
     clientWidth,

@@ -51,6 +51,7 @@ export const drawHoveredSegmentHighlight = (
       program,
       buffer,
       getSegmentMidpoint(start, end, hoveredSegment.tangentStart, hoveredSegment.tangentEnd),
+      false,
       canvasWidth,
       canvasHeight,
       viewport,

@@ -21,6 +21,7 @@ import { updateVectorPenPreview } from './updateVectorPenPreview';
 
 const getPenHoverCursorClassName = (hoverKind: TPenPointHoverKind | null): string => {
   switch (hoverKind) {
+    case 'active-vertex':
     case 'vertex':
     case 'edge-snap':
       return 'pen-snap';
@@ -43,6 +44,7 @@ export const handlePointerMove = (
   penNewVertexPreviewRef: TCanvasRefs['penNewVertexPreviewRef'],
   penDraggedHandlePositionRef: TCanvasRefs['penDraggedHandlePositionRef'],
   hoveredSegmentIdRef: TCanvasRefs['hoveredSegmentIdRef'],
+  penHoveredDragArmableVertexRef: TCanvasRefs['penHoveredDragArmableVertexRef'],
   setClassName: (className: string | null) => void,
 ): void => {
   const state = appStore.getState();
@@ -79,12 +81,20 @@ export const handlePointerMove = (
         penPreviewRef,
         pendingOutgoingTangentRef,
         hoveredSegmentIdRef,
+        penHoveredDragArmableVertexRef,
       );
 
       penNewVertexPreviewRef.current = null;
       setClassName(getPenHoverCursorClassName(hoverKind));
     } else {
-      const hoverKind = updateNewVertexPreview(point, node, viewport, penNewVertexPreviewRef, hoveredSegmentIdRef);
+      const hoverKind = updateNewVertexPreview(
+        point,
+        node,
+        viewport,
+        penNewVertexPreviewRef,
+        hoveredSegmentIdRef,
+        penHoveredDragArmableVertexRef,
+      );
 
       penPreviewRef.current = null;
       setClassName(getPenHoverCursorClassName(hoverKind));

@@ -86,6 +86,7 @@ export type TCanvasRefs = {
   hoverRef: RefObject<string | null>;
   marqueeRef: RefObject<TDraftRect | null>;
   penDraggedHandlePositionRef: RefObject<TPoint | null>;
+  penHoveredDragArmableVertexRef: RefObject<boolean>;
   penNewVertexPreviewRef: RefObject<TPoint | null>;
   penPreviewRef: RefObject<TPenPreview | null>;
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>;

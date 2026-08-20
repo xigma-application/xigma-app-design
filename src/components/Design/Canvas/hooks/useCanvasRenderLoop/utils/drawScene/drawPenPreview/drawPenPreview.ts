@@ -17,6 +17,7 @@ export const drawPenPreview = (
   buffer: WebGLBuffer,
   preview: TPenPreview | null,
   newVertexPreview: TPoint | null,
+  isDragArmable: boolean,
   nodes: Record<string, TSceneNode>,
   vectorEditingNodeId: string | null,
   canvasWidth: number,
@@ -29,10 +30,10 @@ export const drawPenPreview = (
   const pivot = bounds ? { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 } : ORIGIN;
 
   if (preview) {
-    drawPenSegmentPreview(gl, program, buffer, preview, pivot, rotation, canvasWidth, canvasHeight, viewport);
+    drawPenSegmentPreview(gl, program, buffer, preview, isDragArmable, pivot, rotation, canvasWidth, canvasHeight, viewport);
   }
 
   if (newVertexPreview) {
-    drawVertexPreviewDot(gl, program, buffer, newVertexPreview, canvasWidth, canvasHeight, viewport);
+    drawVertexPreviewDot(gl, program, buffer, newVertexPreview, isDragArmable, canvasWidth, canvasHeight, viewport);
   }
 };

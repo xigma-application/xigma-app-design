@@ -14,6 +14,7 @@ export const createCanvasRefs = (overrides: Partial<TCanvasRefs> = {}): TCanvasR
   hoveredVectorVertexIdRef: { current: null },
   marqueeRef: { current: null },
   penDraggedHandlePositionRef: { current: null },
+  penHoveredDragArmableVertexRef: { current: false },
   penNewVertexPreviewRef: { current: null },
   penPreviewRef: { current: null },
   polygonCornerRadiusDragRef: { current: null },

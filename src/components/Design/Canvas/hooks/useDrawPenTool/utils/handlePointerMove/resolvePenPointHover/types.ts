@@ -2,7 +2,7 @@
 import { TPoint } from 'types/canvas';
 import { TVectorNode, TViewport } from 'types/design/types';
 
-export type TPenPointHoverKind = 'edge' | 'edge-snap' | 'vertex';
+export type TPenPointHoverKind = 'active-vertex' | 'edge' | 'edge-snap' | 'vertex';
 
 export type TPenPointHoverContext = {
   excludeVertexId?: string | null;
