@@ -54,7 +54,6 @@ const nodes: Record<string, TSceneNode> = { [vectorNode.id]: vectorNode };
 const call = (
   vectorEditingNodeId: string | null,
   selectedVertexIds: string[],
-  hoveredNodeId: string | null,
   hoveredVertexId: string | null = null,
   hoveredSegmentId: string | null = null,
   penActiveVertexId: string | null = null,
@@ -73,7 +72,6 @@ const call = (
     nodes,
     vectorEditingNodeId,
     selectedVertexIds,
-    hoveredNodeId,
     hoveredVertexId,
     hoveredSegmentId,
     hoveredHandle,
@@ -96,7 +94,7 @@ describe('drawVectorEditHandlesLayer', () => {
 
   it('should draw nothing when there is no node currently in Vector Edit Mode', () => {
     // before
-    call(null, [], null);
+    call(null, []);
 
     // result
     expect(drawVectorStrokeMock).not.toHaveBeenCalled();
@@ -136,7 +134,6 @@ describe('drawVectorEditHandlesLayer', () => {
       null,
       null,
       null,
-      null,
       [],
       null,
       null,
@@ -149,9 +146,9 @@ describe('drawVectorEditHandlesLayer', () => {
     expect(drawVectorStrokeMock).not.toHaveBeenCalled();
   });
 
-  it('should draw the gray edit-mode outline when the edited node is not the currently hovered node', () => {
+  it('should always draw the gray edit-mode outline, even while the edited node is also the hovered node', () => {
     // before
-    call(vectorNode.id, [], null);
+    call(vectorNode.id, []);
 
     // result
     expect(drawVectorStrokeMock).toHaveBeenCalledTimes(1);
@@ -160,24 +157,16 @@ describe('drawVectorEditHandlesLayer', () => {
 
   it('should draw the hovered segment highlight when a hoveredSegmentId is given', () => {
     // before
-    call(vectorNode.id, [], null, null, 's1');
+    call(vectorNode.id, [], null, 's1');
 
     // result — the gray outline, plus the single hovered segment drawn again in the highlight color
     expect(drawVectorStrokeMock).toHaveBeenCalledTimes(2);
     expect(drawVectorStrokeMock).toHaveBeenNthCalledWith(2, {}, {}, {}, expect.anything(), '#cd4422', 2, 200, 150, IDENTITY_VIEWPORT);
   });
 
-  it('should skip the gray edit-mode outline when the edited node is the currently hovered node — the blue hover outline already covers it', () => {
-    // before
-    call(vectorNode.id, [], vectorNode.id);
-
-    // result
-    expect(drawVectorStrokeMock).not.toHaveBeenCalled();
-  });
-
   it('should draw nothing for a segment’s tangent handle when its parent vertex is not selected', () => {
     // before — no vertex/handle selected at all, so the s1 tangentStart handle stays hidden
-    call(vectorNode.id, [], null);
+    call(vectorNode.id, []);
 
     // result
     expect(drawLineMock).not.toHaveBeenCalled();
@@ -185,7 +174,7 @@ describe('drawVectorEditHandlesLayer', () => {
 
   it('should draw a tangent handle line and dot for a segment end once its parent vertex is selected', () => {
     // before — v1 is the real tangentStart handle's own parent vertex
-    call(vectorNode.id, ['v1'], null);
+    call(vectorNode.id, ['v1']);
 
     // result — the real tangentStart handle at v1, plus the tangentEnd-less end's own default preview handle
     // (both draw together once either endpoint is selected — Figma's one-hop neighbor reveal); the line uses
@@ -197,7 +186,7 @@ describe('drawVectorEditHandlesLayer', () => {
 
   it('should draw a selected vertex as a larger white-then-blue pair and an unselected vertex as a single default-fill dot', () => {
     // before
-    call(vectorNode.id, ['v1'], null);
+    call(vectorNode.id, ['v1']);
 
     // result
     const selectedOuterDot = drawEllipseMock.mock.calls.find((args) => args[3].width === SELECTED_OUTER_SIZE)?.[3];
@@ -213,7 +202,7 @@ describe('drawVectorEditHandlesLayer', () => {
 
   it('should draw the hovered vertex larger than its unhovered neighbor', () => {
     // before
-    call(vectorNode.id, [], null, 'v1');
+    call(vectorNode.id, [], 'v1');
 
     // result
     const vertexDrawCalls = drawEllipseMock.mock.calls.filter((args) => args[3].fill === '#ffffff');
@@ -224,7 +213,7 @@ describe('drawVectorEditHandlesLayer', () => {
 
   it('should draw the Pen tool active vertex (the segment being extended from) with the selected-style outer/inner pair', () => {
     // before
-    call(vectorNode.id, [], null, null, null, 'v1');
+    call(vectorNode.id, [], null, null, 'v1');
 
     // result — same rendering as a real selection, even though v1 isn't in selectedVertexIds
     const selectedOuterDot = drawEllipseMock.mock.calls.find((args) => args[3].width === SELECTED_OUTER_SIZE)?.[3];
@@ -238,7 +227,7 @@ describe('drawVectorEditHandlesLayer', () => {
 
   it('should draw a selected tangent handle as a solid-blue line and white-then-blue diamond pair, matching the selected-vertex style', () => {
     // before
-    call(vectorNode.id, [], null, null, null, null, null, [{ end: 'start', segmentId: 's1' }]);
+    call(vectorNode.id, [], null, null, null, null, [{ end: 'start', segmentId: 's1' }]);
 
     // result — the same enlarge/recolor treatment selected vertices get, just diamond-shaped
     expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 5, y1: 0, y2: 0 }, '#0d99ff', 1, 200, 150, IDENTITY_VIEWPORT);
@@ -252,7 +241,7 @@ describe('drawVectorEditHandlesLayer', () => {
 
   it('should deselect the tangent handle rendering once a vertex takes over the selection', () => {
     // before — selectedVertexIds non-empty, selectedHandles explicitly empty (mirrors the mutual-exclusivity a plain click enforces)
-    call(vectorNode.id, ['v1'], null, null, null, null, null, []);
+    call(vectorNode.id, ['v1'], null, null, null, null, []);
 
     // result — both handles fall back to their plain bordered-diamond look, not the selected two-layer pair;
     // v1's real handle and v2's own default preview handle both draw since v1 (either endpoint) is selected
@@ -281,7 +270,7 @@ describe('drawVectorEditHandlesLayer', () => {
 
   it('should draw an extra tangent handle line from the Pen active vertex to the live-dragged cursor position', () => {
     // before
-    call(vectorNode.id, [], null, null, null, 'v1', null, [], { x: 30, y: 40 });
+    call(vectorNode.id, [], null, null, 'v1', null, [], { x: 30, y: 40 });
 
     // result — the existing v1 handle line (0,0 -> 5,0), v2's own default preview handle line (10,0 -> 7.5,0,
     // now also revealed since v1 counts as selected via penActiveVertexId), plus the drag-preview line
@@ -292,7 +281,7 @@ describe('drawVectorEditHandlesLayer', () => {
 
   it('should draw the multi-select box when 2+ vertices are selected together, with no corner handles', () => {
     // before
-    call(vectorNode.id, ['v1', 'v2'], null);
+    call(vectorNode.id, ['v1', 'v2']);
 
     // result — one plain stroke rect over the bounding box of v1(0,0)/v2(10,0), no drawCornerHandles call
     const boxRect = drawRectMock.mock.calls.find((args) => args[3].height === 0 && args[3].width === 10)?.[3];
@@ -302,7 +291,7 @@ describe('drawVectorEditHandlesLayer', () => {
 
   it('should not draw the multi-select box when only a single vertex is selected', () => {
     // before
-    call(vectorNode.id, ['v1'], null);
+    call(vectorNode.id, ['v1']);
 
     // result — only the selected-vertex ellipse pair draws via drawRect... none, since vertex dots use drawEllipse;
     // the box itself must never call drawRect with the plain-box (no fill/no dot) shape
@@ -329,7 +318,6 @@ describe('drawVectorEditHandlesLayer', () => {
       rotatedNodes,
       rotatedVectorNode.id,
       ['v1'],
-      null,
       null,
       null,
       null,
@@ -385,7 +373,6 @@ describe('drawVectorEditHandlesLayer', () => {
       chainNodes,
       chainNode.id,
       ['A'],
-      null,
       null,
       null,
       null,

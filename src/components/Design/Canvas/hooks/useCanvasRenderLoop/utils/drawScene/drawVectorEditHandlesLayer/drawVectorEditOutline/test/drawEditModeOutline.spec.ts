@@ -11,8 +11,6 @@ vi.mock('utils/canvas/drawVectorNode/drawVectorStroke', () => ({
   drawVectorStroke: (...args: unknown[]): void => drawVectorStrokeMock(...args),
 }));
 
-const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
-
 const node: TVectorNode = {
   fillColor: null,
   id: 'vector-1',
@@ -32,9 +30,9 @@ describe('drawEditModeOutline', () => {
     drawVectorStrokeMock.mockClear();
   });
 
-  it('should draw the gray edit-mode outline at a constant screen width when the node is not the hovered one', () => {
+  it('should draw the gray edit-mode outline at a constant screen width, regardless of hover', () => {
     // before
-    drawEditModeOutline({} as WebGL2RenderingContext, {} as WebGLProgram, {} as WebGLBuffer, node, null, 200, 150, {
+    drawEditModeOutline({} as WebGL2RenderingContext, {} as WebGLProgram, {} as WebGLBuffer, node, 200, 150, {
       x: 0,
       y: 0,
       zoom: 2,
@@ -43,13 +41,5 @@ describe('drawEditModeOutline', () => {
     // result — HOVER_OUTLINE_WIDTH (2) / zoom (2) = 1
     expect(drawVectorStrokeMock).toHaveBeenCalledTimes(1);
     expect(drawVectorStrokeMock).toHaveBeenCalledWith({}, {}, {}, [], '#aaaaaa', 1, 200, 150, { x: 0, y: 0, zoom: 2 });
-  });
-
-  it('should skip drawing when the node is the currently hovered node', () => {
-    // before
-    drawEditModeOutline({} as WebGL2RenderingContext, {} as WebGLProgram, {} as WebGLBuffer, node, node.id, 200, 150, IDENTITY_VIEWPORT);
-
-    // result
-    expect(drawVectorStrokeMock).not.toHaveBeenCalled();
   });
 });

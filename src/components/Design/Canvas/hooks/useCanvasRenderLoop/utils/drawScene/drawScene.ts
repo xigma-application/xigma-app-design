@@ -85,7 +85,7 @@ export const drawScene = (
   drawSceneBackground(gl);
   drawPixelGrid(gl, imageContext.gridProgram, imageContext.gridBuffer, clientWidth, clientHeight, viewport);
   drawSceneNodes(gl, program, buffer, imageContext, sceneNodes, clientWidth, clientHeight, viewport, pathOutlineStyles);
-  drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport);
+  drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport, vectorEditingNodeId);
   drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeId);
   drawCornerRadiusHandlesLayer(
     gl,
@@ -107,7 +107,6 @@ export const drawScene = (
     nodesById,
     vectorEditingNodeId,
     selectedVectorVertexIds,
-    hoveredNodeId,
     hoveredVectorVertexId,
     hoveredSegmentId,
     hoveredVectorHandle,

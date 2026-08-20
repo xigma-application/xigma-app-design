@@ -101,6 +101,11 @@ doesn't.
   draws the same bounds-box-plus-corner-handles outline every box node gets, using
   `getVectorNodeBounds.ts` + `node.rotation`, except while `vectorEditingNodeId` matches the node — then
   it's a no-op, since Vector Edit Mode's own handle layer, below, is what shows during editing instead).
+  `drawHoverOutline.ts` takes `vectorEditingNodeId` as a parameter for the same reason and skips the
+  hovered node entirely (`hoveredNode.id !== vectorEditingNodeId` gate before the `switch`, not just the
+  `vector` case — the hovered node can never legitimately be anything but a vector node when this matches)
+  — without it, moving the cursor over the network's own strokes/vertices while already inside Vector Edit
+  Mode redrew the thick hover outline on top of the edit-mode gray outline + handles layer every frame.
   Both `drawSceneNodes.ts`'s fill/stroke render and the hover outline call `bakeVectorNodeRotation.ts`
   first — `node.rotation` is never baked into stored `vertices`/`segments` (§1), so anything drawing the
   shape must apply that rotation transform itself, non-destructively, every frame.
@@ -220,7 +225,16 @@ flat file to its own folder once it grew a second, unrelated `if`-branch (the "i
 [[xigma-module-structure]] — asked for directly, "trzeba rozbić te ify na osobne funkcje"):
 - `drawVectorEditOutline.ts` — thin orchestrator, calls the two pieces below in sequence.
 - `drawEditModeOutline.ts` — the plain gray `VECTOR_EDIT_OUTLINE_STROKE` (`#aaaaaa`) whole-node outline,
-  skipped while the node is the separately-hover-outlined one (unchanged from before the split).
+  drawn unconditionally regardless of hover state. **Used to skip itself while the node was the
+  separately-hover-outlined one** — on the assumption `drawHoverOutline.ts`'s thicker outline would always
+  be covering the same shape whenever that happened. Once `drawHoverOutline.ts` was fixed to stop drawing
+  its own outline for the node currently open in Vector Edit Mode (§3, above), that assumption broke: hovering
+  the network *while already inside edit mode* left both outlines suppressed simultaneously — the gray
+  outline vanishing exactly while the cursor sat over it, reported directly with a screenshot. Fixed by
+  dropping `drawEditModeOutline.ts`'s own hover check entirely (and the now-dead `hoveredNodeId` parameter
+  threaded down to it through `drawVectorEditOutline.ts`/`drawVectorEditHandlesLayer.ts`) — the two
+  outlines were never meant to both react to hover independently; only `drawHoverOutline.ts`'s edit-mode
+  suppression was the actual fix needed.
 - `drawHoveredSegmentHighlight.ts` — draws the currently-hovered segment (`hoveredSegmentId`) a second
   time in `VECTOR_EDGE_HOVER_STROKE` (`#cd4422`) on top of the gray outline, **plus** a helper dot
   (`drawVertexPreviewDot`, reused as-is — see below) at that segment's `getSegmentMidpoint`. This dot is

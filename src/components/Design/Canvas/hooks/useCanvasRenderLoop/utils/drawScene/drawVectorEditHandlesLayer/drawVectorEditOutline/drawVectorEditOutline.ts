@@ -10,12 +10,11 @@ export const drawVectorEditOutline = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   node: TVectorNode,
-  hoveredNodeId: string | null,
   hoveredSegmentId: string | null,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  drawEditModeOutline(gl, program, buffer, node, hoveredNodeId, canvasWidth, canvasHeight, viewport);
+  drawEditModeOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
   drawHoveredSegmentHighlight(gl, program, buffer, node, hoveredSegmentId, canvasWidth, canvasHeight, viewport);
 };

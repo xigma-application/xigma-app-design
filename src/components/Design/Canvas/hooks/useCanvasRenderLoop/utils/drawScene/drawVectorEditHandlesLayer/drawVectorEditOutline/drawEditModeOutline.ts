@@ -13,22 +13,19 @@ export const drawEditModeOutline = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   node: TVectorNode,
-  hoveredNodeId: string | null,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  if (node.id !== hoveredNodeId) {
-    drawVectorStroke(
-      gl,
-      program,
-      buffer,
-      flattenVectorSegments(node),
-      VECTOR_EDIT_OUTLINE_STROKE,
-      HOVER_OUTLINE_WIDTH / viewport.zoom,
-      canvasWidth,
-      canvasHeight,
-      viewport,
-    );
-  }
+  drawVectorStroke(
+    gl,
+    program,
+    buffer,
+    flattenVectorSegments(node),
+    VECTOR_EDIT_OUTLINE_STROKE,
+    HOVER_OUTLINE_WIDTH / viewport.zoom,
+    canvasWidth,
+    canvasHeight,
+    viewport,
+  );
 };

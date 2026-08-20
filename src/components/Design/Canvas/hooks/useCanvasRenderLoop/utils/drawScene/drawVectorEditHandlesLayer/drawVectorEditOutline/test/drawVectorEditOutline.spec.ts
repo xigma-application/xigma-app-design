@@ -41,10 +41,10 @@ describe('drawVectorEditOutline', () => {
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
-    drawVectorEditOutline(gl, program, buffer, node, 'hovered-node-id', 's1', 200, 150, IDENTITY_VIEWPORT);
+    drawVectorEditOutline(gl, program, buffer, node, 's1', 200, 150, IDENTITY_VIEWPORT);
 
     // result
-    expect(drawEditModeOutlineMock).toHaveBeenCalledWith(gl, program, buffer, node, 'hovered-node-id', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawEditModeOutlineMock).toHaveBeenCalledWith(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
     expect(drawHoveredSegmentHighlightMock).toHaveBeenCalledWith(gl, program, buffer, node, 's1', 200, 150, IDENTITY_VIEWPORT);
   });
 });
