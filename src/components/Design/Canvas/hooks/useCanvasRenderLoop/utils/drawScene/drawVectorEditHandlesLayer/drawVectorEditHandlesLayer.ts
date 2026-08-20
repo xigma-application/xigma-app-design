@@ -9,7 +9,9 @@ import { drawVectorEditOutline } from './drawVectorEditOutline/drawVectorEditOut
 import { drawVectorMultiSelectBox } from './drawVectorMultiSelectBox';
 import { drawVectorTangentHandles } from './drawVectorTangentHandles/drawVectorTangentHandles';
 import { drawVectorVertexDots } from './drawVectorVertexDots';
+import { getOneHopVectorVertexIds } from 'utils/canvas/vectorNetwork/getOneHopVectorVertexIds';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
+import { getVisualSelectedVectorVertexIds } from 'utils/canvas/vectorNetwork/getVisualSelectedVectorVertexIds';
 
 export const drawVectorEditHandlesLayer = (
   gl: WebGL2RenderingContext,
@@ -33,7 +35,8 @@ export const drawVectorEditHandlesLayer = (
 
   if (editingNode) {
     const node = { ...editingNode, ...bakeVectorNodeRotation(editingNode) };
-    const visualSelectedVertexIds = penActiveVertexId ? [...selectedVertexIds, penActiveVertexId] : selectedVertexIds;
+    const visualSelectedVertexIds = getVisualSelectedVectorVertexIds(selectedVertexIds, penActiveVertexId);
+    const tangentVisibleVertexIds = getOneHopVectorVertexIds(node, visualSelectedVertexIds);
 
     drawVectorEditOutline(gl, program, buffer, node, hoveredNodeId, hoveredSegmentId, canvasWidth, canvasHeight, viewport);
     drawVectorTangentHandles(
@@ -43,6 +46,7 @@ export const drawVectorEditHandlesLayer = (
       node,
       hoveredHandle,
       selectedHandles,
+      tangentVisibleVertexIds,
       penActiveVertexId,
       penDraggedHandlePosition,
       canvasWidth,

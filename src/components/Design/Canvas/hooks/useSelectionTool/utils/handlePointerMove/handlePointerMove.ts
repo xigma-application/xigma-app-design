@@ -56,5 +56,5 @@ export const handlePointerMove = (
   continueVectorMultiDrag(canvas, event, dispatch, selectionRefs.vectorMultiDragRef, setClassName);
   continueVectorMarqueeDrag(canvas, event, canvasRefs, selectionRefs.vectorMarqueeStartRef);
   resolveVectorVertexHover(canvas, event, canvasRefs.hoveredVectorVertexIdRef);
-  resolveVectorTangentHandleHover(canvas, event, canvasRefs.hoveredVectorHandleRef);
+  resolveVectorTangentHandleHover(canvas, event, canvasRefs);
 };

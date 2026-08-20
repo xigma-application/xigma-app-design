@@ -1393,9 +1393,20 @@ vector node's `segments`/`vertices` map rather than creating a new node, as long
 was never exited in between.
 
 Double-clicking an already-placed vector node (Move tool, nothing else selected) re-enters vector
-edit mode for it, rendering per-vertex dots and per-segment tangent handles
-(`drawVectorEditHandlesLayer/`). Dragging a vertex dot moves that vertex; dragging a tangent handle
-curves its segment. A vertex's `vertexHandleModes` entry (`corner`/`smooth`/`symmetric`,
+edit mode for it, rendering per-vertex dots (`drawVectorEditHandlesLayer/`). Tangent handles are
+**not** shown by default — a segment's handles only render (and only become hittable/hoverable, via
+the same `isVectorSegmentEndpointSelected.ts` predicate both layers share) once one of that segment's
+two endpoint vertices is in the _effective_ selected-vertex set — selecting a vertex reveals the
+handles of every segment touching it, both its own end and the neighboring vertex's end one hop away,
+matching Figma (a branch vertex with several segments reveals a handle pair per segment).
+`getOneHopVectorVertexIds.ts` grows that effective set by one further hop, but **only** through a
+segment carrying no tangent at all (a plain corner) — a real curve is an opaque boundary the reveal
+never crosses, so `A --plain click--> B --curved--> C` selecting `A` reveals `B`–`C`'s handles too,
+while a chain of real curves stops exactly at the selected vertex's own two neighbors, no further. A
+handle stays visible on its own once directly selected, or if it belongs to the Pen tool's still-active
+vertex, even without its parent vertex selected. Dragging a vertex dot moves that vertex; dragging a
+(now-visible) tangent handle curves its segment.
+A vertex's `vertexHandleModes` entry (`corner`/`smooth`/`symmetric`,
 `getMirroredVectorSegments.ts`) controls whether dragging one of its two handles also moves the
 other: `symmetric` mirrors using the dragged handle's own new length, `smooth` mirrors using the
 other handle's existing length, `corner` never mirrors. Clicking on an edge (not a vertex) with the
@@ -1408,9 +1419,12 @@ of active tool; moved into the Pen tool's own pointerdown chain and removed from
 entirely to match Figma, where edge-splitting is a Pen-only affordance. A miss-click (empty space) while
 editing clears the current point selection and — new since `armVectorMarqueeOnPointerDown.ts` replaced
 the old miss-only `armVectorEditMissOnPointerDown.ts` — arms a marquee scoped to the edited network's own
-vertices/handles: a plain click with no further movement nets out to "just deselect" (the marquee never
-collects anything if the pointer never moves), while a click-drag selects every vertex/handle whose point
-falls inside the dragged rect. This still never exits edit mode by itself; exiting by click is reserved
+vertices: a plain click with no further movement nets out to "just deselect" (the marquee never
+collects anything if the pointer never moves), while a click-drag selects every **vertex** whose point
+falls inside the dragged rect (`getVectorPointsInRect.ts` — tangent handles are deliberately excluded from
+box-drag selection, since sweeping a box near a curve routinely catches a handle's control point along with
+nearby vertices; a single click/shift-click on a handle still selects it directly, per below). This still
+never exits edit mode by itself; exiting by click is reserved
 for a deliberate **double**-click on empty space (`useVectorEditOnDoubleClick.ts`), which only clears
 `vectorEditingNodeId` — the node's own `selectedIds` entry is untouched, so it stays selected (ordinary
 resize/rotate handles), just no longer in edit mode. `handleSetSelection.ts` also clears

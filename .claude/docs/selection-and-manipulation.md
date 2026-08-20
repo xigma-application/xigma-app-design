@@ -1254,6 +1254,14 @@ arm site, not derived at render time, so there's never a frame where both are si
 `useVectorEditOnDoubleClick.ts`'s "vectorEditingNodeId changed" effect all clear **both** refs together
 — every place that already reset the vertex selection needed the identical line added for the handle.
 
+**Tangent handles are hidden by default — visible only once a selected vertex is one of their segment's two
+endpoints (Figma's one-hop neighbor reveal, plus one further hop *through* a plain tangent-less corner,
+never through a real curve — `vector-network.md` §10's `getOneHopVectorVertexIds.ts`), or the handle itself
+is selected.** A later follow-up narrowed `armVectorHandleOnPointerDown` and `resolveVectorTangentHandleHover`'s
+own hit-testing to match: both now filter `getVectorHandleAtPoint` candidates through the same
+`isVectorSegmentEndpointSelected` predicate the renderer uses (fed the one-hop-expanded vertex set, not the
+raw selection), so a handle that isn't drawn can never still be dragged/hovered at its old position.
+
 **Rendering the selected handle mirrors the selected-vertex look, diamond instead of circle.**
 `drawVectorTangentHandles.ts` gained a `selectedHandle: TVectorHandleHover | null` parameter (threaded
 through `drawVectorEditHandlesLayer.ts`/`drawScene.ts` next to the existing `hoveredHandle`), computing
@@ -1316,15 +1324,25 @@ plain click with no movement still nets out to "just deselect" (the marquee neve
 pointer never moves), so this is a strict superset of the old behavior, not a replacement of it.
 `continueVectorMarqueeDrag.ts` reads `vectorMarqueeStartRef`, builds a `TDraftRect` via the same
 `toDraftRect.ts` the whole-node marquee uses, and calls `getVectorPointsInRect.ts` (new,
-`utils/canvas/vectorNetwork/`) to collect every vertex/handle whose *point* falls inside — a plain AABB
+`utils/canvas/vectorNetwork/`) to collect every **vertex** whose *point* falls inside — a plain AABB
 containment test reimplemented locally in that file rather than importing the feature-local
 `Canvas/utils/isPointInRect.ts` from a global util (would violate the global-layer-never-imports-from-
 components rule in `xigma-module-structure`); unlike the whole-node marquee there's no touch-vs-fully-
 inside Ctrl toggle, since a point has no area — "inside" is unambiguous. Critically, this function writes
-straight into `canvasRefs.selectedVectorVertexIdsRef`/`selectedVectorHandlesRef` (plain ref mutation, no
-`dispatch` at all) rather than `dispatch(setSelection(...))` the way whole-node `continueMarqueeDrag.ts`
-does — because vector-point selection is UI-ref state, not Redux state, same as everywhere else in this
-section.
+straight into `canvasRefs.selectedVectorVertexIdsRef` (plain ref mutation, no `dispatch` at all) rather
+than `dispatch(setSelection(...))` the way whole-node `continueMarqueeDrag.ts` does — because vector-point
+selection is UI-ref state, not Redux state, same as everywhere else in this section.
+
+**Tangent handles are deliberately excluded from box-drag marquee selection.** A first version had
+`getVectorPointsInRect.ts` also collect handles whose resolved absolute position (`getVectorHandlePosition`/
+`getEffectiveTangentStart`) fell inside the rect, mirroring the vertex test, and `continueVectorMarqueeDrag.ts`
+wrote that result into `selectedVectorHandlesRef`. Reverted — box-dragging over a curve routinely sweeps a
+handle's control point along with the vertices it's near, silently mixing a tangent handle into what the user
+meant as a plain point selection. `getVectorPointsInRect.ts` now returns a plain `string[]` of vertex ids
+only (the `handles`/`TVectorPointsInRect` shape is gone), and `continueVectorMarqueeDrag.ts` unconditionally
+sets `canvasRefs.selectedVectorHandlesRef.current = []` on every tick — a marquee drag always clears any
+prior handle selection rather than replacing it with a new one. Shift+click toggling a single tangent handle
+(above) is unaffected — this only narrows the box-drag path.
 
 **Why a separate start-ref instead of reusing `marqueeStartRef`.** The *visual* rectangle ref
 (`TCanvasRefs.marqueeRef`) **is** shared as-is with the whole-node marquee — `drawMarquee.ts` just draws

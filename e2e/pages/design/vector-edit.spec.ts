@@ -119,6 +119,11 @@ test('dragging one handle at a "smooth" vertex also moves its other handle, curv
   await designPage.click(1200, 300); // v3, plain click — segment 2 inherits the staged tangent
   await designPage.selectTool('default');
 
+  // v3, not v2, is left as the Pen tool's still-active vertex once the tool switches away — v2's own
+  // handle is otherwise hidden (tangent handles only show for a selected/still-active parent vertex),
+  // so it must be explicitly selected here before it can be grabbed
+  await designPage.click(1050, 300); // select v2
+
   // the region around segment 2 (v2 -> v3), well clear of segment 1's own handle at (1050, 350)
   const region = { height: 100, width: 220, x: 1030, y: 210 };
   const before = await page.screenshot({ clip: region });

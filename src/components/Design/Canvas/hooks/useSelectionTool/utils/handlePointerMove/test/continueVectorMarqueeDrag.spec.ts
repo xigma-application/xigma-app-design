@@ -77,8 +77,8 @@ describe('continueVectorMarqueeDrag', () => {
     expect(canvasRefs.marqueeRef.current).toBeNull();
   });
 
-  it('should draw the marquee rect and select the vertex whose point falls inside it, leaving points outside untouched', () => {
-    // mock — v1(0,0)/v2(100,0) selected via the marquee's own tangentStart/tangentEnd handles too; v3(500,500) stays outside
+  it('should draw the marquee rect and select the vertex whose point falls inside it, clearing any handle selection', () => {
+    // mock — v1(0,0)/v2(100,0); v3(500,500) stays outside; s1's real tangentStart handle also sits at (5,0) but must not be selected
     const nodeId = addVectorNode();
 
     store.dispatch(setVectorEditingNodeId(nodeId));
@@ -86,13 +86,13 @@ describe('continueVectorMarqueeDrag', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
-    // before — marquee (0,0) -> (5,0): a thin sliver that only ever contains v1 and s1's real tangentStart handle at (5,0)
+    // before — marquee (0,0) -> (5,0): a thin sliver that only ever contains v1 (and s1's tangentStart handle at (5,0))
     continueVectorMarqueeDrag(canvas, pointerEvent(5, 0), canvasRefs, createVectorMarqueeStartRef({ x: 0, y: 0 }));
 
     // result
     expect(canvasRefs.marqueeRef.current).toEqual({ height: 0, width: 5, x: 0, y: 0 });
     expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1']);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
+    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
   });
 
   it('should select nothing when the marquee misses every point', () => {

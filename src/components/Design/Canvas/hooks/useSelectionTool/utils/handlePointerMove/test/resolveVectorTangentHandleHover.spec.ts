@@ -1,14 +1,12 @@
-import { RefObject } from 'react';
-
 // store
-import { addNode, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeId } from 'store/design/slice';
 import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TVectorHandleHover } from 'types/design/canvas/types';
 
 // utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { resolveVectorTangentHandleHover } from '../resolveVectorTangentHandleHover';
 
 const createCanvas = (): HTMLCanvasElement => {
@@ -20,8 +18,6 @@ const createCanvas = (): HTMLCanvasElement => {
 };
 
 const pointerEvent = (x: number, y: number): PointerEvent => new PointerEvent('pointermove', { clientX: x, clientY: y });
-
-const createHoveredVectorHandleRef = (): RefObject<TVectorHandleHover | null> => ({ current: null });
 
 const addVectorNode = (): string => {
   store.dispatch(
@@ -48,34 +44,70 @@ describe('resolveVectorTangentHandleHover', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
     store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setPenActiveVertexId(null));
   });
 
   it('should do nothing when no node is currently in Vector Edit Mode', () => {
     // mock
     const canvas = createCanvas();
-    const hoveredVectorHandleRef = createHoveredVectorHandleRef();
+    const canvasRefs = createCanvasRefs();
 
     // before
-    resolveVectorTangentHandleHover(canvas, pointerEvent(5, 0), hoveredVectorHandleRef);
+    resolveVectorTangentHandleHover(canvas, pointerEvent(5, 0), canvasRefs);
 
     // result
-    expect(hoveredVectorHandleRef.current).toBeNull();
+    expect(canvasRefs.hoveredVectorHandleRef.current).toBeNull();
   });
 
-  it('should set the hovered handle when the pointer rests on a tangent handle', () => {
-    // mock — s1's start handle sits at v1(0,0) + tangentStart(5,0) = (5,0)
+  it('should set the hovered handle when the pointer rests on a tangent handle whose parent vertex is selected', () => {
+    // mock — s1's start handle sits at v1(0,0) + tangentStart(5,0) = (5,0); v1 must be selected for it to be visible/hittable
     const nodeId = addVectorNode();
 
     store.dispatch(setVectorEditingNodeId(nodeId));
 
     const canvas = createCanvas();
-    const hoveredVectorHandleRef = createHoveredVectorHandleRef();
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
 
     // before
-    resolveVectorTangentHandleHover(canvas, pointerEvent(5, 0), hoveredVectorHandleRef);
+    resolveVectorTangentHandleHover(canvas, pointerEvent(5, 0), canvasRefs);
 
     // result
-    expect(hoveredVectorHandleRef.current).toEqual({ end: 'start', segmentId: 's1' });
+    expect(canvasRefs.hoveredVectorHandleRef.current).toEqual({ end: 'start', segmentId: 's1' });
+  });
+
+  it('should not set the hovered handle when its parent vertex is not selected and it is not itself selected', () => {
+    // mock — same handle, but nothing is selected, so it is neither visible nor hittable
+    const nodeId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+
+    // before
+    resolveVectorTangentHandleHover(canvas, pointerEvent(5, 0), canvasRefs);
+
+    // result
+    expect(canvasRefs.hoveredVectorHandleRef.current).toBeNull();
+  });
+
+  it('should set the hovered handle when its parent vertex is only the Pen tool’s still-active vertex', () => {
+    // mock — v1 is penActiveVertexId, not part of selectedVectorVertexIdsRef, and must still make its own handle hittable
+    const nodeId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setPenActiveVertexId('v1'));
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+
+    // before
+    resolveVectorTangentHandleHover(canvas, pointerEvent(5, 0), canvasRefs);
+
+    // result
+    expect(canvasRefs.hoveredVectorHandleRef.current).toEqual({ end: 'start', segmentId: 's1' });
   });
 
   it('should clear the hovered handle once the pointer moves away from every handle', () => {
@@ -85,13 +117,15 @@ describe('resolveVectorTangentHandleHover', () => {
     store.dispatch(setVectorEditingNodeId(nodeId));
 
     const canvas = createCanvas();
-    const hoveredVectorHandleRef = createHoveredVectorHandleRef();
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
 
     // before
-    resolveVectorTangentHandleHover(canvas, pointerEvent(5, 0), hoveredVectorHandleRef);
-    resolveVectorTangentHandleHover(canvas, pointerEvent(50, 50), hoveredVectorHandleRef);
+    resolveVectorTangentHandleHover(canvas, pointerEvent(5, 0), canvasRefs);
+    resolveVectorTangentHandleHover(canvas, pointerEvent(50, 50), canvasRefs);
 
     // result
-    expect(hoveredVectorHandleRef.current).toBeNull();
+    expect(canvasRefs.hoveredVectorHandleRef.current).toBeNull();
   });
 });

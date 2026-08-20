@@ -175,14 +175,24 @@ describe('drawVectorEditHandlesLayer', () => {
     expect(drawVectorStrokeMock).not.toHaveBeenCalled();
   });
 
-  it('should draw a tangent handle line and dot for a segment end that has a tangent', () => {
-    // before
+  it('should draw nothing for a segment’s tangent handle when its parent vertex is not selected', () => {
+    // before — no vertex/handle selected at all, so the s1 tangentStart handle stays hidden
     call(vectorNode.id, [], null);
 
-    // result — only the tangentStart end (v1) has a handle; the tangentEnd-less end (v2) draws nothing;
-    // the line uses the same gray as the edit-mode connection outline
-    expect(drawLineMock).toHaveBeenCalledTimes(1);
+    // result
+    expect(drawLineMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw a tangent handle line and dot for a segment end once its parent vertex is selected', () => {
+    // before — v1 is the real tangentStart handle's own parent vertex
+    call(vectorNode.id, ['v1'], null);
+
+    // result — the real tangentStart handle at v1, plus the tangentEnd-less end's own default preview handle
+    // (both draw together once either endpoint is selected — Figma's one-hop neighbor reveal); the line uses
+    // the same gray as the edit-mode connection outline
+    expect(drawLineMock).toHaveBeenCalledTimes(2);
     expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 5, y1: 0, y2: 0 }, '#aaaaaa', 1, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 10, x2: 7.5, y1: 0, y2: 0 }, '#aaaaaa', 1, 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should draw a selected vertex as a larger white-then-blue pair and an unselected vertex as a single default-fill dot', () => {
@@ -244,13 +254,24 @@ describe('drawVectorEditHandlesLayer', () => {
     // before — selectedVertexIds non-empty, selectedHandles explicitly empty (mirrors the mutual-exclusivity a plain click enforces)
     call(vectorNode.id, ['v1'], null, null, null, null, null, []);
 
-    // result — the handle falls back to its plain bordered-diamond look, not the selected two-layer pair
-    expect(drawRectMock).toHaveBeenCalledTimes(1);
+    // result — both handles fall back to their plain bordered-diamond look, not the selected two-layer pair;
+    // v1's real handle and v2's own default preview handle both draw since v1 (either endpoint) is selected
+    expect(drawRectMock).toHaveBeenCalledTimes(2);
     expect(drawRectMock).toHaveBeenCalledWith(
       {},
       {},
       {},
       { fill: '#ffffff', height: BASE_SIZE, stroke: '#0d99ff', width: BASE_SIZE, x: 2.5, y: -2.5 },
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      45,
+    );
+    expect(drawRectMock).toHaveBeenCalledWith(
+      {},
+      {},
+      {},
+      { fill: '#ffffff', height: BASE_SIZE, stroke: '#0d99ff', width: BASE_SIZE, x: 5, y: -2.5 },
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -262,8 +283,10 @@ describe('drawVectorEditHandlesLayer', () => {
     // before
     call(vectorNode.id, [], null, null, null, 'v1', null, [], { x: 30, y: 40 });
 
-    // result — the existing v1 handle line (0,0 -> 5,0) plus the new drag-preview line (0,0 -> 30,40)
-    expect(drawLineMock).toHaveBeenCalledTimes(2);
+    // result — the real v1 handle line (0,0 -> 5,0), v2's own default preview handle line (10,0 -> 7.5,0,
+    // now also revealed since v1 counts as selected via penActiveVertexId), plus the drag-preview line
+    // (0,0 -> 30,40)
+    expect(drawLineMock).toHaveBeenCalledTimes(3);
     expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 30, y1: 0, y2: 40 }, '#aaaaaa', 1, 200, 150, IDENTITY_VIEWPORT);
   });
 
@@ -327,5 +350,57 @@ describe('drawVectorEditHandlesLayer', () => {
     expect(selectedDot.y).toBeCloseTo(-5 - SELECTED_INNER_SIZE / 2);
     expect(unselectedDot.x).toBeCloseTo(5 - BASE_SIZE / 2);
     expect(unselectedDot.y).toBeCloseTo(5 - BASE_SIZE / 2);
+  });
+
+  it('should reveal a curved segment’s handles reached through a straight (tangent-less) connector — one-hop-by-vertex, not by-segment', () => {
+    // mock — A(selected) --straight(s1, no tangent)-- B --curved(s2, real tangentStart at B)-- C; B has no
+    // tangent of its own on s1, but must still count as a revealed neighbor of A so s2's handles (which
+    // don't touch A directly) become visible too, matching Figma
+    const chainNode: TVectorNode = {
+      fillColor: null,
+      id: 'chain-1',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {
+        s1: { endId: 'B', id: 's1', startId: 'A', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'C', id: 's2', startId: 'B', tangentEnd: null, tangentStart: { x: 5, y: 0 } },
+      },
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { A: { id: 'A', x: 0, y: 0 }, B: { id: 'B', x: 10, y: 0 }, C: { id: 'C', x: 20, y: 0 } },
+    };
+    const chainNodes: Record<string, TSceneNode> = { [chainNode.id]: chainNode };
+    const gl = {} as WebGL2RenderingContext;
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before — only A is selected
+    drawVectorEditHandlesLayer(
+      gl,
+      program,
+      buffer,
+      chainNodes,
+      chainNode.id,
+      ['A'],
+      null,
+      null,
+      null,
+      null,
+      [],
+      null,
+      null,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
+
+    // result — s1 has no tangent so it draws nothing; s2's real tangentStart handle at B draws (10,0)+(5,0)=(15,0),
+    // and since B is a selected endpoint of s2, C's own default preview handle draws too (20,0)+(-2.5,0)=(17.5,0)
+    expect(drawLineMock).toHaveBeenCalledTimes(2);
+    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 10, x2: 15, y1: 0, y2: 0 }, '#aaaaaa', 1, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 20, x2: 17.5, y1: 0, y2: 0 }, '#aaaaaa', 1, 200, 150, IDENTITY_VIEWPORT);
   });
 });

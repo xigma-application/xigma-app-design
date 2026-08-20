@@ -1,5 +1,5 @@
 // store
-import { addNode, setSelection, setVectorEditingNodeId, updateNode } from 'store/design/slice';
+import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeId, updateNode } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -769,6 +769,7 @@ describe('armVectorMarqueeOnPointerDown', () => {
 describe('armVectorHandleOnPointerDown', () => {
   afterEach(() => {
     store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setPenActiveVertexId(null));
   });
 
   it('should arm the vector-handle drag, select the handle, deselect any vertex, and return true when a tangent handle is hit', () => {
@@ -796,7 +797,7 @@ describe('armVectorHandleOnPointerDown', () => {
   });
 
   it('should toggle the handle into the multi-selection on shift+click, without arming a drag or touching the vertex selection', () => {
-    // mock
+    // mock — v1 stays selected (its own handle must be selected/its parent vertex must be selected to be hittable at all), v2 tags along
     const nodeId = addVectorNode(
       { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: { x: 10, y: 20 } } },
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
@@ -806,7 +807,7 @@ describe('armVectorHandleOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v2'];
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     const ctx = createContext({ canvasRefs, event: pointerEvent({ shiftKey: true }), point: { x: 10, y: 20 } });
@@ -814,7 +815,7 @@ describe('armVectorHandleOnPointerDown', () => {
     // result
     expect(armVectorHandleOnPointerDown(ctx)).toBe(true);
     expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v2']);
+    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
     expect(ctx.selectionRefs.vectorHandleDragRef.current).toBeNull();
     expect(ctx.canvas.setPointerCapture).not.toHaveBeenCalled();
   });
@@ -855,6 +856,42 @@ describe('armVectorHandleOnPointerDown', () => {
     // result
     expect(armVectorHandleOnPointerDown(ctx)).toBeUndefined();
     expect(ctx.selectionRefs.vectorHandleDragRef.current).toBeNull();
+  });
+
+  it('should return undefined when the point sits exactly on a handle whose parent vertex is not selected and which is not itself selected', () => {
+    // mock — hidden handle: v1 not selected, the handle itself not selected either
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: { x: 10, y: 20 } } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    const ctx = createContext({ point: { x: 10, y: 20 } });
+
+    // result
+    expect(armVectorHandleOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.selectionRefs.vectorHandleDragRef.current).toBeNull();
+  });
+
+  it('should hit a handle whose parent vertex is only the Pen tool’s still-active vertex, not part of selectedVectorVertexIdsRef', () => {
+    // mock — mirrors leaving the Pen tool mid-draw without ever explicitly selecting v1 via the Selection tool:
+    // penActiveVertexId keeps v1's handle visible/hittable exactly like a real vertex selection would
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: { x: 10, y: 20 } } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setPenActiveVertexId('v1'));
+
+    // before
+    const ctx = createContext({ point: { x: 10, y: 20 } });
+
+    // result
+    expect(armVectorHandleOnPointerDown(ctx)).toBe(true);
+    expect(ctx.selectionRefs.vectorHandleDragRef.current).toEqual({ end: 'start', nodeId, segmentId: 's1', vertexId: 'v1' });
   });
 
   it('should return undefined when Vector Edit Mode is not active', () => {

@@ -28,11 +28,10 @@ export const continueVectorMarqueeDrag = (
     if (node) {
       const point = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
       const rect = toDraftRect(vectorMarqueeStartRef.current, point);
-      const { handles, vertexIds } = getVectorPointsInRect(node, rect);
 
       canvasRefs.marqueeRef.current = rect;
-      canvasRefs.selectedVectorVertexIdsRef.current = vertexIds;
-      canvasRefs.selectedVectorHandlesRef.current = handles;
+      canvasRefs.selectedVectorVertexIdsRef.current = getVectorPointsInRect(node, rect);
+      canvasRefs.selectedVectorHandlesRef.current = [];
     }
   }
 };

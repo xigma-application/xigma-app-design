@@ -45,6 +45,7 @@ describe('drawVectorTangentHandles', () => {
     });
     const hoveredHandle = { end: 'start' as const, segmentId: 's1' };
     const selectedHandles = [{ end: 'end' as const, segmentId: 's2' }];
+    const selectedVertexIds = ['v1'];
 
     // before
     drawVectorTangentHandles(
@@ -54,6 +55,7 @@ describe('drawVectorTangentHandles', () => {
       node,
       hoveredHandle,
       selectedHandles,
+      selectedVertexIds,
       null,
       null,
       200,
@@ -71,6 +73,7 @@ describe('drawVectorTangentHandles', () => {
       node.segments.s1,
       hoveredHandle,
       selectedHandles,
+      selectedVertexIds,
       5,
       200,
       150,
@@ -84,6 +87,7 @@ describe('drawVectorTangentHandles', () => {
       node.segments.s2,
       hoveredHandle,
       selectedHandles,
+      selectedVertexIds,
       5,
       200,
       150,
@@ -103,6 +107,7 @@ describe('drawVectorTangentHandles', () => {
       node,
       null,
       [],
+      [],
       'v1',
       { x: 30, y: 40 },
       200,
@@ -119,11 +124,20 @@ describe('drawVectorTangentHandles', () => {
     const node = buildNode({});
 
     // before
-    drawVectorTangentHandles({} as WebGL2RenderingContext, {} as WebGLProgram, {} as WebGLBuffer, node, null, [], null, null, 200, 150, {
-      x: 0,
-      y: 0,
-      zoom: 2,
-    });
+    drawVectorTangentHandles(
+      {} as WebGL2RenderingContext,
+      {} as WebGLProgram,
+      {} as WebGLBuffer,
+      node,
+      null,
+      [],
+      [],
+      null,
+      null,
+      200,
+      150,
+      { x: 0, y: 0, zoom: 2 },
+    );
 
     // result
     expect(drawPenDragHandlePreviewMock).toHaveBeenCalledWith({}, {}, {}, node, null, null, 2.5, 200, 150, { x: 0, y: 0, zoom: 2 });
