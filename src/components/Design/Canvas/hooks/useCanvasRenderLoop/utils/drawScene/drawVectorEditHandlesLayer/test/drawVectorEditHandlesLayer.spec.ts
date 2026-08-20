@@ -274,6 +274,12 @@ describe('drawVectorEditHandlesLayer', () => {
 
     expect(outerDiamond).toMatchObject({ fill: '#ffffff' });
     expect(innerDiamond).toBeDefined();
+
+    // result — selecting the handle must NOT make its own parent vertex (v1) render as selected too;
+    // only the handle diamond gets the selected treatment, the vertex dot stays plain
+    const selectedVertexDot = drawEllipseMock.mock.calls.find((args) => args[3].fill === '#0d99ff');
+
+    expect(selectedVertexDot).toBeUndefined();
   });
 
   it('should deselect the tangent handle rendering once a vertex takes over the selection', () => {

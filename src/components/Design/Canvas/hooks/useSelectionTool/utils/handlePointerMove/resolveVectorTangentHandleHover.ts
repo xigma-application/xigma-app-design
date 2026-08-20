@@ -12,6 +12,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { bakeVectorNodeRotation } from '../../../../utils/bakeVectorNodeRotation';
 import { getOneHopVectorVertexIds } from 'utils/canvas/vectorNetwork/getOneHopVectorVertexIds';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getTangentVisibilityVertexIds } from 'utils/canvas/vectorNetwork/getTangentVisibilityVertexIds';
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
 import { getVectorHandleAtPoint } from '../../../../utils/getVectorHandleAtPoint';
 import { getVisualSelectedVectorVertexIds } from 'utils/canvas/vectorNetwork/getVisualSelectedVectorVertexIds';
@@ -29,12 +30,17 @@ export const resolveVectorTangentHandleHover = (canvas: HTMLCanvasElement, event
       canvasRefs.selectedVectorVertexIdsRef.current,
       selectPenActiveVertexId(state),
     );
-    const oneHopVertexIds = getOneHopVectorVertexIds(node, visualSelectedVertexIds);
+    const tangentVisibilityVertexIds = getTangentVisibilityVertexIds(
+      bakedNode,
+      visualSelectedVertexIds,
+      canvasRefs.selectedVectorHandlesRef.current,
+    );
+    const oneHopVertexIds = getOneHopVectorVertexIds(node, tangentVisibilityVertexIds);
     const hit = getVectorHandleAtPoint(
       point,
       bakedNode,
       VECTOR_HANDLE_HIT_RADIUS_PX / viewport.zoom,
-      visualSelectedVertexIds,
+      tangentVisibilityVertexIds,
       oneHopVertexIds,
       canvasRefs.selectedVectorHandlesRef.current,
       canvasRefs.selectedVectorSegmentIdsRef.current,

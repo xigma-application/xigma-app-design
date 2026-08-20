@@ -10,6 +10,7 @@ import { drawVectorMultiSelectBox } from './drawVectorMultiSelectBox';
 import { drawVectorTangentHandles } from './drawVectorTangentHandles/drawVectorTangentHandles';
 import { drawVectorVertexDots } from './drawVectorVertexDots';
 import { getOneHopVectorVertexIds } from 'utils/canvas/vectorNetwork/getOneHopVectorVertexIds';
+import { getTangentVisibilityVertexIds } from 'utils/canvas/vectorNetwork/getTangentVisibilityVertexIds';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
 import { getVisualSelectedVectorVertexIds } from 'utils/canvas/vectorNetwork/getVisualSelectedVectorVertexIds';
 
@@ -38,7 +39,8 @@ export const drawVectorEditHandlesLayer = (
   if (editingNode) {
     const node = { ...editingNode, ...bakeVectorNodeRotation(editingNode) };
     const visualSelectedVertexIds = getVisualSelectedVectorVertexIds(selectedVertexIds, penActiveVertexId ?? dragOriginVertexId);
-    const oneHopVertexIds = getOneHopVectorVertexIds(node, visualSelectedVertexIds);
+    const tangentVisibilityVertexIds = getTangentVisibilityVertexIds(node, visualSelectedVertexIds, selectedHandles);
+    const oneHopVertexIds = getOneHopVectorVertexIds(node, tangentVisibilityVertexIds);
 
     drawVectorEditOutline(
       gl,
@@ -59,7 +61,7 @@ export const drawVectorEditHandlesLayer = (
       node,
       hoveredHandle,
       selectedHandles,
-      visualSelectedVertexIds,
+      tangentVisibilityVertexIds,
       oneHopVertexIds,
       selectedSegmentIds,
       dragOriginVertexId,

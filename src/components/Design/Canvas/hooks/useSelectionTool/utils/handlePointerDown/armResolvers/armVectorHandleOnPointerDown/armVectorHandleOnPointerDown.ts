@@ -11,6 +11,7 @@ import { TArmContext } from '../../types';
 // utils
 import { armVectorHandleClick } from './armVectorHandleClick';
 import { getOneHopVectorVertexIds } from 'utils/canvas/vectorNetwork/getOneHopVectorVertexIds';
+import { getTangentVisibilityVertexIds } from 'utils/canvas/vectorNetwork/getTangentVisibilityVertexIds';
 import { getVectorEditingNode } from '../../../../../../utils/getVectorEditingNode';
 import { getVectorHandleAtPoint } from '../../../../../../utils/getVectorHandleAtPoint';
 import { getVisualSelectedVectorVertexIds } from 'utils/canvas/vectorNetwork/getVisualSelectedVectorVertexIds';
@@ -31,12 +32,17 @@ export const armVectorHandleOnPointerDown = ({
       canvasRefs.selectedVectorVertexIdsRef.current,
       selectPenActiveVertexId(state),
     );
-    const oneHopVertexIds = getOneHopVectorVertexIds(node, visualSelectedVertexIds);
+    const tangentVisibilityVertexIds = getTangentVisibilityVertexIds(
+      node,
+      visualSelectedVertexIds,
+      canvasRefs.selectedVectorHandlesRef.current,
+    );
+    const oneHopVertexIds = getOneHopVectorVertexIds(node, tangentVisibilityVertexIds);
     const hit = getVectorHandleAtPoint(
       point,
       node,
       VECTOR_HANDLE_HIT_RADIUS_PX / viewport.zoom,
-      visualSelectedVertexIds,
+      tangentVisibilityVertexIds,
       oneHopVertexIds,
       canvasRefs.selectedVectorHandlesRef.current,
       canvasRefs.selectedVectorSegmentIdsRef.current,

@@ -1110,6 +1110,38 @@ convention (`drawVectorEditOutline/`, §3/§9) rather than leaving a flat file's
   where the same logic lives. `armVectorVertexDrag.spec.ts` moved together with its implementation, into
   `armVectorVertexOnPointerDown/test/`.
 
+## 22. Selecting a handle now reveals tangents as if its own vertex were selected — but must not make
+that vertex's own dot render as selected
+
+A direct reversal of part of §10's original spec: §10's "handle itself selected" exception was
+deliberately narrow — selecting a handle only revealed *that one handle*, never its neighbors, even
+though selecting the handle's own *vertex* already reveals every touching segment's both ends (§10 rule
+1) plus the one-hop corridor (rule 2). Asked to change directly: "zaznaczając osobno tangen powinno być
+takie zachowanie jakbyśmy point zaznaczyli... A obecnie się chowają dlatego że ja tak pisałem że ma być
+ale trzeba to zmienić" (selecting a handle should behave as if its point were selected — it currently
+hides them because I asked for it that way, but that needs to change now).
+
+**First attempt folded the handle's parent vertex straight into `getVisualSelectedVectorVertexIds.ts`**
+(the one shared merge already used for the Pen active vertex, §4/§10) — correct for tangent-visibility
+purposes, but that same merged array is *also* what `drawVectorVertexDots.ts` reads to decide which
+vertex dot renders in the enlarged/blue "selected" style. Since a handle's own vertex was never actually
+*vertex-selected* (`selectedVectorVertexIdsRef` untouched — only `selectedVectorHandlesRef` holds the
+click), folding it into the same array made that vertex's dot incorrectly render as selected too.
+Reported immediately from a live screenshot ("pointy nie powinien być zaznaczony... wygląda jakby był
+nadal zaznaczony" — the point shouldn't be selected, it looks like it still is).
+
+**Fix: kept two separate arrays instead of one.** `getVisualSelectedVectorVertexIds.ts` reverted to its
+original two-argument shape (`selectedVertexIds`, `penActiveVertexId`/`dragOriginVertexId`) — unchanged,
+still the one `drawVectorVertexDots.ts` and `drawVectorMultiSelectBox.ts` read for dot/box styling. A new
+`getTangentVisibilityVertexIds.ts` (`utils/canvas/vectorNetwork/`) takes that narrow result plus
+`selectedHandles` and widens it *only* with each selected handle's own parent vertex (`end === 'start' ?
+segment.startId : segment.endId`) — this wider result feeds `getOneHopVectorVertexIds` and is the
+`selectedVertexIds` argument `drawSegmentTangentHandles.ts`/`getVectorHandleAtPoint.ts` actually receive.
+All three call sites (`drawVectorEditHandlesLayer.ts`, `armVectorHandleOnPointerDown/
+armVectorHandleOnPointerDown.ts`, `resolveVectorTangentHandleHover.ts`) now compute both arrays and are
+careful about which one goes where — the narrow one to vertex-dot/box rendering, the wide one to
+one-hop/tangent-visibility — rather than the one-array shortcut the first attempt took.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows
