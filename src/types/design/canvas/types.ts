@@ -82,6 +82,7 @@ export type TCanvasRefs = {
   ellipseArcRatioDragRef: RefObject<TEllipseArcRatioDragState | null>;
   ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null>;
   hoveredSegmentIdRef: RefObject<string | null>;
+  hoveredVectorEdgeInsertPointRef: RefObject<TPoint | null>;
   hoveredVectorHandleRef: RefObject<TVectorHandleHover | null>;
   hoveredVectorSegmentIdRef: RefObject<string | null>;
   hoveredVectorVertexIdRef: RefObject<string | null>;

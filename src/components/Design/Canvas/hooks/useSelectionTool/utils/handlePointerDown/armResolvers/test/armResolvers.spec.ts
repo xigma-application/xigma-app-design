@@ -1418,4 +1418,44 @@ describe('armVectorSegmentOnPointerDown', () => {
     expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
     expect(selectionRefs.vectorMultiDragRef.current?.vertexOrigins).toEqual({ v1: { x: 0, y: 0 }, v2: { x: 100, y: 0 } });
   });
+
+  it('should also arm a pending split-segment click action when the click lands precisely on the segment’s own fixed midpoint, so a plain click (no drag) splits it instead of leaving it selected', () => {
+    // mock — resolved on release by disarmVectorMultiDrag.ts, not here; this only checks the arm-time state
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const selectionRefs = createSelectionToolRefs();
+
+    // before — click exactly on the segment's own midpoint (50,0)
+    const ctx = createContext({ point: { x: 50, y: 0 }, selectionRefs });
+
+    // result
+    expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
+    expect(selectionRefs.vectorMultiDragRef.current?.pendingClickAction).toEqual({ kind: 'split-segment', segmentId: 's1', t: 0.5 });
+  });
+
+  it('should NOT arm a pending split-segment click action when the click lands elsewhere on the segment, away from its own fixed midpoint — a plain click there just leaves the segment selected, same as before this feature existed', () => {
+    // mock — "muszę kliknąć w ten point konkretnie, a nie że klikam w segment i mi się robi środkowy point"
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvasRefs = createCanvasRefs();
+    const selectionRefs = createSelectionToolRefs();
+
+    // before — click near x=25, well off the segment's own midpoint (50,0) but still on the segment itself
+    const ctx = createContext({ canvasRefs, point: { x: 25, y: 0 }, selectionRefs });
+
+    // result — the segment is still selected (eager, arm-time write), but no split is pending for release
+    expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(selectionRefs.vectorMultiDragRef.current?.pendingClickAction).toBeNull();
+  });
 });

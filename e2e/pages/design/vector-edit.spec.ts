@@ -173,7 +173,7 @@ test('dragging a click-drag-created tangent handle a different distance also mov
   expect(short.equals(long)).toBe(false);
 });
 
-test('clicking an edge with the Move tool selects the segment instead of splitting it — that still requires the Pen tool, matching Figma', async ({
+test('clicking an edge away from its own midpoint with the Move tool selects the segment instead of splitting it — that still requires the Pen tool, matching Figma', async ({
   page,
 }) => {
   const designPage = new DesignPage(page);
@@ -184,7 +184,7 @@ test('clicking an edge with the Move tool selects the segment instead of splitti
   await drawOpenTriangle(designPage);
   await designPage.selectTool('default');
 
-  await designPage.click(975, 300); // midpoint of the v1-v2 edge
+  await designPage.click(940, 300); // off the v1-v2 edge's own midpoint (975,300) — plain selection only
   const moveToolSelect = await designPage.canvas.screenshot();
 
   await designPage.goto('e2e-test-vector-edit-edge-move-tool-select-reference');
@@ -192,11 +192,43 @@ test('clicking an edge with the Move tool selects the segment instead of splitti
 
   await drawOpenTriangle(designPage);
   await designPage.selectTool('pen');
-  await designPage.click(975, 300); // Pen tool, same point: splits the edge and arms the new vertex
+  await designPage.click(940, 300); // Pen tool, same point: splits the edge and arms the new vertex
   const penToolSplit = await designPage.canvas.screenshot();
 
   // the Move tool's plain segment-selection highlight looks nothing like the Pen tool's inserted vertex
   expect(moveToolSelect.equals(penToolSplit)).toBe(false);
+});
+
+test('clicking precisely on an edge’s own midpoint with the Move tool splits it and selects the new vertex, exactly like the Pen tool does', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-edge-move-tool-midpoint-split');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawOpenTriangle(designPage);
+  await designPage.selectTool('default');
+
+  // a second click on the very same spot re-grabs whatever is now sitting there — done identically in
+  // both this and the reference branch below, so the "actively editing this vertex" tint (see this file's
+  // own top-of-file gotcha note) affects both equally and cancels out of the comparison
+  await designPage.click(975, 300); // exactly the v1-v2 edge's own midpoint — splits it on this first click
+  await designPage.click(975, 300); // re-click: now hits the freshly split-in real vertex
+  const moveToolSplit = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-vector-edit-edge-move-tool-midpoint-select-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawOpenTriangle(designPage);
+  await designPage.selectTool('default');
+
+  await designPage.click(940, 300); // off-midpoint click, well away from any vertex — plain selection only
+  await designPage.click(940, 300); // re-click: still just the same segment, never split
+  const moveToolPlainSelect = await designPage.canvas.screenshot();
+
+  // the selected-vertex render at the midpoint looks nothing like the plain segment-selection highlight
+  expect(moveToolSplit.equals(moveToolPlainSelect)).toBe(false);
 });
 
 test('clicking a segment with the Move tool selects it, and Delete removes that segment, dropping the endpoint it leaves with no segment left but keeping the other segment and its still-connected endpoint', async ({
@@ -210,7 +242,7 @@ test('clicking a segment with the Move tool selects it, and Delete removes that 
   await drawOpenTriangle(designPage);
   await designPage.selectTool('default');
 
-  await designPage.click(975, 300); // midpoint of the v1-v2 edge — selects that segment
+  await designPage.click(940, 300); // off the v1-v2 edge's own midpoint (975,300) — selects that segment
   const selected = await designPage.canvas.screenshot();
 
   await page.keyboard.press('Delete');
@@ -219,7 +251,7 @@ test('clicking a segment with the Move tool selects it, and Delete removes that 
   expect(afterDelete.equals(selected)).toBe(false); // the v1-v2 edge is gone
 
   // the other segment (v2-v3) survives untouched — still there to select
-  await designPage.click(1050, 375); // midpoint of the v2-v3 edge
+  await designPage.click(1050, 340); // off the v2-v3 edge's own midpoint (1050,375)
   const remainingSelected = await designPage.canvas.screenshot();
 
   expect(remainingSelected.equals(afterDelete)).toBe(false);
@@ -676,11 +708,11 @@ test('hovering a segment with the Move tool highlights it in blue at partial opa
   await designPage.pointerMove(1400, 700); // rest well away from the shape
   const neutral = await designPage.canvas.screenshot();
 
-  await designPage.pointerMove(975, 300); // midpoint of the v1-v2 edge — no button held, hover only
+  await designPage.pointerMove(940, 300); // off the v1-v2 edge's own midpoint — no button held, hover only
   const hovered = await designPage.canvas.screenshot();
   expect(hovered.equals(neutral)).toBe(false);
 
-  await designPage.click(975, 300); // fully select the same segment (opaque, not just half-opacity)
+  await designPage.click(940, 300); // fully select the same segment (opaque, not just half-opacity)
   const selected = await designPage.canvas.screenshot();
   expect(selected.equals(hovered)).toBe(false);
 });
@@ -698,7 +730,7 @@ test('shift+click toggles a segment into a multi-selection with another segment,
 
   const neutral = { x: 1400, y: 700 };
 
-  await designPage.click(975, 300); // select the v1-v2 segment alone
+  await designPage.click(940, 300); // select the v1-v2 segment alone (off its own midpoint)
   await designPage.pointerMove(neutral.x, neutral.y);
   const singleSelected = await designPage.canvas.screenshot();
 

@@ -12,6 +12,7 @@ import { TArmContext } from '../../types';
 import { armVectorSegmentClick } from './armVectorSegmentClick';
 import { getVectorEditingNode } from '../../../../../../utils/getVectorEditingNode';
 import { getVectorEdgeAtPoint } from '../../../../../../utils/getVectorEdgeAtPoint';
+import { getVectorSegmentMidpointAtPoint } from 'utils/canvas/vectorNetwork/getVectorSegmentMidpointAtPoint';
 
 export const armVectorSegmentOnPointerDown = ({
   canvas,
@@ -32,7 +33,10 @@ export const armVectorSegmentOnPointerDown = ({
     );
 
     if (hit) {
-      armVectorSegmentClick(canvas, event, canvasRefs, selectionRefs, node, hit.segmentId, point);
+      const midpointHit = getVectorSegmentMidpointAtPoint(point, node, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
+      const canSplit = midpointHit?.segmentId === hit.segmentId;
+
+      armVectorSegmentClick(canvas, event, canvasRefs, selectionRefs, node, hit.segmentId, canSplit, point);
 
       return true;
     }

@@ -1,10 +1,16 @@
 import { RefObject } from 'react';
 
+// store
+import { addNode, setVectorEditingNodeId } from 'store/design/slice';
+import { store } from 'store';
+
 // types
+import { NodeType } from 'types/design/enums';
 import { TVectorMultiDragState } from 'types/design/selectionTool/types';
+import { TVectorNode } from 'types/design/types';
 
 // utils
-import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
+import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { disarmVectorMultiDrag } from '../disarmVectorMultiDrag';
 
 const createCanvas = (): HTMLCanvasElement => {
@@ -21,7 +27,32 @@ const createVectorMultiDragRef = (vectorMultiDragState: TVectorMultiDragState | 
   current: vectorMultiDragState,
 });
 
+const addVectorNode = (): string => {
+  store.dispatch(
+    addNode({
+      fillColor: null,
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 describe('disarmVectorMultiDrag', () => {
+  beforeEach(() => {
+    store.dispatch(setVectorEditingNodeId(null));
+  });
+
   it('should do nothing when no multi-drag is in progress', () => {
     // mock
     const canvas = createCanvas();
@@ -29,7 +60,7 @@ describe('disarmVectorMultiDrag', () => {
     const setClassName = vi.fn();
 
     // before
-    disarmVectorMultiDrag(canvas, pointerEvent(), canvasRefs, createVectorMultiDragRef(), setClassName);
+    disarmVectorMultiDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, createVectorMultiDragRef(), setClassName);
 
     // result
     expect(canvas.releasePointerCapture).not.toHaveBeenCalled();
@@ -51,7 +82,7 @@ describe('disarmVectorMultiDrag', () => {
     const setClassName = vi.fn();
 
     // before
-    disarmVectorMultiDrag(canvas, pointerEvent(2), canvasRefs, vectorMultiDragRef, setClassName);
+    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vectorMultiDragRef, setClassName);
 
     // result
     expect(vectorMultiDragRef.current).toBeNull();
@@ -76,7 +107,7 @@ describe('disarmVectorMultiDrag', () => {
     });
 
     // before
-    disarmVectorMultiDrag(canvas, pointerEvent(2), canvasRefs, vectorMultiDragRef, vi.fn());
+    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vectorMultiDragRef, vi.fn());
 
     // result
     expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
@@ -99,7 +130,7 @@ describe('disarmVectorMultiDrag', () => {
     });
 
     // before
-    disarmVectorMultiDrag(canvas, pointerEvent(2), canvasRefs, vectorMultiDragRef, vi.fn());
+    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vectorMultiDragRef, vi.fn());
 
     // result
     expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v2']);
@@ -125,7 +156,7 @@ describe('disarmVectorMultiDrag', () => {
     });
 
     // before
-    disarmVectorMultiDrag(canvas, pointerEvent(2), canvasRefs, vectorMultiDragRef, vi.fn());
+    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vectorMultiDragRef, vi.fn());
 
     // result
     expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
@@ -150,7 +181,7 @@ describe('disarmVectorMultiDrag', () => {
     });
 
     // before
-    disarmVectorMultiDrag(canvas, pointerEvent(2), canvasRefs, vectorMultiDragRef, vi.fn());
+    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vectorMultiDragRef, vi.fn());
 
     // result
     expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
@@ -175,9 +206,67 @@ describe('disarmVectorMultiDrag', () => {
     });
 
     // before
-    disarmVectorMultiDrag(canvas, pointerEvent(2), canvasRefs, vectorMultiDragRef, vi.fn());
+    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vectorMultiDragRef, vi.fn());
 
     // result
     expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
+  });
+
+  it('should split the pending segment and select the new vertex when released without ever moving — a plain click always splits, never leaves the segment selected', () => {
+    // mock — v1(0,0)-v2(100,0), s1 selected (eagerly, at pointer-down) before this release resolves it
+    const nodeId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
+
+    const vectorMultiDragRef = createVectorMultiDragRef({
+      handleOrigins: {},
+      hasMoved: false,
+      nodeId,
+      pendingClickAction: { kind: 'split-segment', segmentId: 's1', t: 0.5 },
+      pointerStart: { x: 50, y: 0 },
+      vertexOrigins: { v1: { x: 0, y: 0 }, v2: { x: 100, y: 0 } },
+    });
+
+    // before
+    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vectorMultiDragRef, vi.fn());
+
+    // result — s1 is gone from the selection (the click always splits, per the direct ask, regardless of
+    // whether it was already selected); a new vertex sits at the split point and is itself now selected
+    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const [newVertexId] = canvasRefs.selectedVectorVertexIdsRef.current;
+
+    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.selectedVectorVertexIdsRef.current).toHaveLength(1);
+    expect(updatedNode.vertices[newVertexId]).toEqual({ id: newVertexId, x: 50, y: 0 });
+    expect(Object.keys(updatedNode.segments)).toHaveLength(2);
+  });
+
+  it('should do nothing for a pending split-segment action if the vector-editing node can no longer be found', () => {
+    // mock — e.g. the node got deleted or vector edit mode was exited between arm and release
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
+
+    const vectorMultiDragRef = createVectorMultiDragRef({
+      handleOrigins: {},
+      hasMoved: false,
+      nodeId: 'missing-node',
+      pendingClickAction: { kind: 'split-segment', segmentId: 's1', t: 0.5 },
+      pointerStart: { x: 50, y: 0 },
+      vertexOrigins: {},
+    });
+
+    // before
+    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vectorMultiDragRef, vi.fn());
+
+    // result — untouched, no crash
+    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
   });
 });

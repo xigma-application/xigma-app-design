@@ -1423,7 +1423,19 @@ on that connecting segment, so a click-_drag_ onto the split point shapes its ta
 ever joining it with a straight line, same as `closeLoopOntoVertex.ts` already did; row 207).
 This used to be a Move-tool arm-resolver (`armVectorEdgeInsertOnPointerDown.ts`) that fired regardless
 of active tool; moved into the Pen tool's own pointerdown chain and removed from `ARM_RESOLVERS`
-entirely to match Figma, where edge-splitting is a Pen-only affordance. A miss-click (empty space) while
+entirely to match Figma, where edge-splitting used to be a Pen-only affordance. It's since come back to
+the Move tool too, but narrower: hovering anywhere along a segment (still gated by the same wide
+`getVectorEdgeAtPoint.ts` edge tolerance the blue hover-highlight already used) reveals an insertion dot
+fixed at that segment's own geometric midpoint (`getSegmentMidpoint.ts`, not the cursor's own position
+along the curve — direct correction after a first cut that tracked the cursor: "ma być tylko ten który
+się pojawia na środku"), switching the cursor to `pen-extend` only once the pointer is precisely over that
+dot (`getVectorSegmentMidpointAtPoint.ts`, a `VECTOR_VERTEX_HIT_RADIUS_PX`-radius hit-test mirroring
+`getVectorVertexAtPoint.ts`). A plain click precisely on the dot splits the segment and selects the new
+vertex there (rows 210–212); a plain click anywhere else on the segment still just selects it, same as
+before this feature existed — `armVectorSegmentOnPointerDown.ts` still eagerly selects on press either
+way (so a real drag from anywhere on the segment keeps working exactly as before, row 200/201), only
+deciding split-vs-stay-selected in `disarmVectorMultiDrag.ts` on release without movement, via a new
+`'split-segment'` `TVectorPendingClickAction` variant. A miss-click (empty space) while
 editing clears the current point selection and — new since `armVectorMarqueeOnPointerDown.ts` replaced
 the old miss-only `armVectorEditMissOnPointerDown.ts` — arms a marquee scoped to the edited network's own
 vertices: a plain click with no further movement nets out to "just deselect" (the marquee never
@@ -1492,7 +1504,7 @@ Two gotchas the specs below work around, worth knowing before adding more:
 | 175 | Dragging a vertex dot moves that vertex                                                                                                                                                                                                                  |  ✅  | ✅ `vector-edit.spec.ts` |
 | 176 | Dragging an existing tangent handle curves the adjacent segment                                                                                                                                                                                          |  ✅  | ✅ `vector-edit.spec.ts` |
 | 177 | Dragging one handle at a vertex whose tangent was click-drag-created also moves its other handle, curving both segments — the vertex is tagged `symmetric` (angle **and** length mirror), not `smooth` (angle only)                                      |  ✅  | ✅ `vector-edit.spec.ts` |
-| 178 | Clicking an edge with the Move tool selects the segment instead of splitting it — splitting still requires the Pen tool, matching Figma                                                                                                                  |  ✅  | ✅ `vector-edit.spec.ts` |
+| 178 | Clicking an edge away from its own fixed midpoint with the Move tool selects the segment, same as before this feature existed                                                                                                                            |  ✅  | ✅ `vector-edit.spec.ts` |
 | 179 | Clicking empty space in edit mode deselects the active vertex but keeps edit mode open (single click, not double)                                                                                                                                        |  ✅  | ✅ `vector-edit.spec.ts` |
 | 180 | Selecting a different node while still editing one cleanly exits edit mode for the original — no lingering handles                                                                                                                                       |  ✅  | ✅ `vector-edit.spec.ts` |
 | 181 | A selected (not editing) vector node still resizes via the ordinary 8-direction handles                                                                                                                                                                  |  ✅  | ✅ `vector-edit.spec.ts` |
@@ -1524,6 +1536,9 @@ Two gotchas the specs below work around, worth knowing before adding more:
 | 207 | Click-dragging onto an existing segment while actively drawing (Pen) attaches the in-progress line to it and arms a drag on the connecting segment, so the same click-drag shapes its tangent                                                            |  ✅  | ✅ `vector-edit.spec.ts` |
 | 208 | Click-dragging directly on the Pen's active vertex, when it already has a real incoming segment, mirrors the drag into that segment's tangent instead of leaving it a no-op (row 192's e2e capture already renders the gesture's other, outgoing effect) |  ✅  |            —             |
 | 209 | Dragging a click-drag-created tangent handle a different distance moves the vertex's other handle the same distance, not just to the same angle — length mirrors, not only rotation                                                                      |  ✅  | ✅ `vector-edit.spec.ts` |
+| 210 | Hovering anywhere on a segment with the Move tool shows an insertion dot at its own fixed midpoint, but the cursor only switches to pen-extend once the pointer is precisely over that point                                                             |  ✅  |            —             |
+| 211 | Clicking precisely on a segment's own fixed midpoint with the Move tool splits it and selects the new vertex there, instead of selecting the segment                                                                                                     |  ✅  | ✅ `vector-edit.spec.ts` |
+| 212 | Clicking an already-selected segment still splits it (if precisely on its fixed midpoint) rather than leaving the now-stale segment id selected                                                                                                          |  ✅  |            —             |
 
 ## Why so few scenarios get e2e coverage
 

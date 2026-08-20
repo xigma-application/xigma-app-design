@@ -17,6 +17,7 @@ export const armVectorSegmentClick = (
   selectionRefs: TSelectionToolRefs,
   node: TVectorNode,
   segmentId: string,
+  canSplit: boolean,
   point: TPoint,
 ): void => {
   switch (true) {
@@ -27,6 +28,6 @@ export const armVectorSegmentClick = (
       armVectorGroupDrag(canvas, event, canvasRefs, selectionRefs, node, point, { id: segmentId, kind: 'segment' });
       break;
     default:
-      selectAndArmVectorSegmentDrag(canvas, event, canvasRefs, selectionRefs, node, segmentId, point);
+      selectAndArmVectorSegmentDrag(canvas, event, canvasRefs, selectionRefs, node, segmentId, canSplit, point);
   }
 };

@@ -10,6 +10,7 @@ export const createCanvasRefs = (overrides: Partial<TCanvasRefs> = {}): TCanvasR
   ellipseArcRotateDragRef: { current: null },
   hoverRef: { current: null },
   hoveredSegmentIdRef: { current: null },
+  hoveredVectorEdgeInsertPointRef: { current: null },
   hoveredVectorHandleRef: { current: null },
   hoveredVectorSegmentIdRef: { current: null },
   hoveredVectorVertexIdRef: { current: null },

@@ -1292,6 +1292,48 @@ single active vertex on Escape, generalized here to every vertex against an arbi
 deleting a *vertex* explicitly already has its own, separate question of whether to bridge/reconnect its
 two neighbors (out of scope here, not asked for), so that branch is left as-is.
 
+## 29. Move tool can now split a segment too — but only by clicking its own fixed midpoint dot, not anywhere along it
+
+§20's edge-splitting was Pen-only (§27's history: it used to be a Move-tool arm-resolver, got removed to
+match Figma). Direct ask to bring a version of it back to the Move tool, refined over several rounds of
+"no, not quite" feedback into its final shape:
+
+1. **The hover affordance is two-tier, not one.** A visible insertion dot appears anywhere the pointer is
+   within the *existing*, wide `getVectorEdgeAtPoint.ts` edge tolerance (same test the blue hover-highlight
+   already uses) — but it's always drawn at the segment's own fixed geometric midpoint
+   (`getSegmentMidpoint.ts`), never at the cursor's own position along the curve. A first cut tracked the
+   cursor; corrected directly: "ma być tylko ten który się pojawia na środku, nie ruchomy" (only the one
+   that appears in the middle, not movable) and "dlaczego zrobiłeś na całym odcinku to?" (why did you make
+   it track the whole segment?). The `pen-extend` cursor className, by contrast, only switches on once the
+   pointer is precisely over that dot — a *separate*, narrow hit-test
+   (`getVectorSegmentMidpointAtPoint.ts`, a `VECTOR_VERTEX_HIT_RADIUS_PX`-radius check mirroring
+   `getVectorVertexAtPoint.ts`), not the wide edge tolerance: "Kursor się tylko zmienia jak najadę na
+   point, nie na cały segment." Implemented in `resolveVectorSegmentHoverInNode.ts`
+   (`useSelectionTool/utils/handlePointerMove/resolveVectorSegmentHover/`, itself promoted to its own
+   folder with `clearVectorSegmentHover.ts` as the sibling "no node" branch) — a new `hoveredVectorEdgeInsertPointRef`
+   (`TCanvasRefs`) feeds `drawVectorEdgeInsertPreview.ts` (a hover-sized dot, `drawVertexDot.ts` reused from
+   `drawVectorVertexDots/`, itself promoted to its own folder for the same reason).
+2. **The click affordance matches the narrow hit-test, not the wide one.** "Plus muszę kliknąć w ten point
+   konkretnie, a nie że klikam w segment i mi się robi środkowy point" (I have to click specifically on
+   that point, not that clicking anywhere on the segment creates the middle point). `armVectorSegmentOnPointerDown.ts`
+   still claims the pointerdown via the *wide* edge hit-test (so drag-to-select-and-move from anywhere on
+   the segment, rows 200/201, keeps working unchanged), but separately checks
+   `getVectorSegmentMidpointAtPoint.ts` for that *same* segment; only when both agree does the click carry
+   split potential.
+3. **Split-vs-select is resolved on release, exactly like §21's vertex/handle/segment collapse-on-release
+   pattern, via a new `TVectorPendingClickAction` variant.** `selectAndArmVectorSegmentDrag.ts` still
+   eagerly selects the segment at press time either way (so it *looks* selected mid-drag exactly as
+   before) and arms `armVectorMultiDrag` with `pendingClickAction: { kind: 'split-segment', segmentId, t:
+   VECTOR_SEGMENT_INSERT_T }` when the midpoint hit-test matched, or `null` otherwise. `disarmVectorMultiDrag.ts`
+   (promoted to its own folder — `applyPendingClickAction.ts` now itself delegates the `'split-segment'`
+   case to `applySplitSegmentClickAction.ts`, and every case funnels through a shared
+   `setExclusiveVectorSelection.ts` instead of the same three-ref-assignment block repeated per case) only
+   applies it when `!hasMoved`: calls `splitVectorSegment.ts` (the same De Casteljau split the Pen tool
+   uses, at the fixed `t = VECTOR_SEGMENT_INSERT_T = 0.5`, `constant/canvas.ts`) and selects the new vertex
+   exclusively — the old segment id is never left selected, split or not ("Co ważne jeśli segment był
+   zaznaczony trzeba go odznaczyć"). A real drag (`hasMoved`) never applies the pending action at all, so
+   dragging from the midpoint still just translates the segment like grabbing it anywhere else would.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

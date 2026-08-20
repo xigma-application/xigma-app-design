@@ -38,6 +38,7 @@ export const resolveToolHover = (
   const isEditingVector = Boolean(selectVectorEditingNodeId(state));
   const selectedNodes = selectSelectedNodes(state);
   const resizableSelectedNodes = isEditingText || isEditingVector ? [] : selectedNodes;
+  const applyClassName = isEditingVector ? (): void => {} : setClassName;
   const ctx: THoverResolverContext = {
     activeTool,
     editingContent: selectEditingTextContent(state),
@@ -55,7 +56,7 @@ export const resolveToolHover = (
     const result = resolve(ctx);
 
     if (result) {
-      return setHoverState(canvas, hoverRef, setClassName, result.className, result.cursor, result.nodeId);
+      return setHoverState(canvas, hoverRef, applyClassName, result.className, result.cursor, result.nodeId);
     }
   }
 };

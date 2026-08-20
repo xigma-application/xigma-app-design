@@ -71,6 +71,7 @@ export const drawScene = (
   const selectedVectorHandles = refs.selectedVectorHandlesRef.current;
   const hoveredSegmentId = refs.hoveredSegmentIdRef.current;
   const hoveredVectorSegmentId = refs.hoveredVectorSegmentIdRef.current;
+  const hoveredVectorEdgeInsertPoint = refs.hoveredVectorEdgeInsertPointRef.current;
   const penActiveVertexId = selectPenActiveVertexId(state);
   const dragOriginVertexId = refs.penDragOriginRef.current?.vertexId ?? null;
   const penDraggedHandlePosition = refs.penDraggedHandlePositionRef.current;
@@ -118,6 +119,7 @@ export const drawScene = (
     hoveredVectorVertexId,
     hoveredSegmentId,
     hoveredVectorSegmentId,
+    hoveredVectorEdgeInsertPoint,
     hoveredVectorHandle,
     selectedVectorHandles,
     penActiveVertexId,

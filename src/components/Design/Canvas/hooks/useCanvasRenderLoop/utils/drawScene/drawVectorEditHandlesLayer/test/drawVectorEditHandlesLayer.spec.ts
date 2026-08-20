@@ -65,6 +65,7 @@ const call = (
   hoveredVectorSegmentId: string | null = null,
   preMarqueeVertexIds: string[] = [],
   preMarqueeSegmentIds: string[] = [],
+  hoveredVectorEdgeInsertPoint: { x: number; y: number } | null = null,
 ): void => {
   const gl = {} as WebGL2RenderingContext;
   const program = {} as WebGLProgram;
@@ -83,6 +84,7 @@ const call = (
     hoveredVertexId,
     hoveredSegmentId,
     hoveredVectorSegmentId,
+    hoveredVectorEdgeInsertPoint,
     hoveredHandle,
     selectedHandles,
     penActiveVertexId,
@@ -144,6 +146,7 @@ describe('drawVectorEditHandlesLayer', () => {
       [],
       [],
       [],
+      null,
       null,
       null,
       null,
@@ -389,6 +392,7 @@ describe('drawVectorEditHandlesLayer', () => {
       null,
       null,
       null,
+      null,
       [],
       null,
       null,
@@ -445,6 +449,7 @@ describe('drawVectorEditHandlesLayer', () => {
       [],
       [],
       [],
+      null,
       null,
       null,
       null,

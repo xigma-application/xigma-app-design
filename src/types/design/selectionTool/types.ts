@@ -100,7 +100,10 @@ export type TVectorHandleDragState = {
 };
 
 export type TVectorPendingClickAction =
-  { id: string; kind: 'vertex' } | { end: 'end' | 'start'; kind: 'handle'; segmentId: string } | { id: string; kind: 'segment' };
+  | { id: string; kind: 'vertex' }
+  | { end: 'end' | 'start'; kind: 'handle'; segmentId: string }
+  | { id: string; kind: 'segment' }
+  | { kind: 'split-segment'; segmentId: string; t: number };
 
 export type TVectorMultiDragState = {
   handleOrigins: Record<string, TPoint>;
