@@ -62,7 +62,19 @@ export const continueVectorNetwork = (
         pendingOutgoingTangentRef,
       );
     } else if (edgeHit) {
-      closeLoopOntoEdge(node, activeVertexId, edgeHit.segmentId, edgeHit.t, segmentId, tangentStart, dispatch, pendingOutgoingTangentRef);
+      closeLoopOntoEdge(
+        point,
+        node,
+        activeVertexId,
+        edgeHit.segmentId,
+        edgeHit.t,
+        segmentId,
+        tangentStart,
+        dispatch,
+        dragOriginRef,
+        dragStartRef,
+        pendingOutgoingTangentRef,
+      );
     } else {
       extendWithNewVertex(
         point,

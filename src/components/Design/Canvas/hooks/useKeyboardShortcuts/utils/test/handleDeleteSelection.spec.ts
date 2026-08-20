@@ -154,8 +154,9 @@ describe('handleDeleteSelection', () => {
     expect(refs.selectedVectorVertexIdsRef.current).toEqual([]);
   });
 
-  it('should remove only the selected segment, leaving both its endpoint vertices in place, when a segment is selected instead of a vertex', () => {
-    // mock
+  it('should remove the selected segment and drop the endpoint it leaves with no segment left, but keep an endpoint still held by another segment, when a segment is selected instead of a vertex', () => {
+    // mock — vertex-1 -(segment-1)- vertex-2 -(segment-2)- vertex-3; deleting segment-1 leaves vertex-1
+    // with zero remaining segments (a floating dangling point) while vertex-2 stays held by segment-2
     const vectorId = addVectorNode();
 
     store.dispatch(setVectorEditingNodeId(vectorId));
@@ -165,11 +166,12 @@ describe('handleDeleteSelection', () => {
     // before
     handleDeleteSelection(store.dispatch, refs);
 
-    // result — segment-1 (vertex-1 -> vertex-2) is gone, segment-2 untouched, and every vertex survives
+    // result — segment-1 (vertex-1 -> vertex-2) is gone along with the now-orphaned vertex-1; segment-2
+    // and its two endpoints (vertex-2, vertex-3) are untouched
     const vectorNode = store.getState().design.nodes[vectorId] as TVectorNode;
 
     expect(Object.keys(vectorNode.segments)).toEqual(['segment-2']);
-    expect(Object.keys(vectorNode.vertices)).toEqual(['vertex-1', 'vertex-2', 'vertex-3']);
+    expect(Object.keys(vectorNode.vertices)).toEqual(['vertex-2', 'vertex-3']);
     expect(refs.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 

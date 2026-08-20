@@ -219,7 +219,7 @@ describe('continueVectorNetwork', () => {
     expect(segment.tangentStart).toEqual({ x: 5, y: 5 });
   });
 
-  it('should split the edge and connect the active vertex to the new split point when clicking on an existing segment — attaching the in-progress line to the network', () => {
+  it('should split the edge and connect the active vertex to the new split point when clicking on an existing segment — attaching the in-progress line to the network, and arm a drag on the connecting segment so a click-drag onto the split point can also shape it', () => {
     // mock — v1(0,0) is being extended, v2(200,0)-v3(300,0) is an existing segment elsewhere on the node
     const nodeId = addVectorNodeWithEdge();
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
@@ -251,7 +251,9 @@ describe('continueVectorNetwork', () => {
 
     expect(connectingSegment).toMatchObject({ endId: newVertexId, startId: 'v1' });
     expect(store.getState().design.penActiveVertexId).toBeNull();
-    // the drag stayed unarmed — this gesture closes the extension instead of starting a new one
-    expect(dragOriginRef.current).toBeNull();
+    // the drag is armed on the connecting segment and the new split vertex, mirroring closeLoopOntoVertex —
+    // a click-drag onto the split point shapes its tangent instead of only ever committing a straight join
+    expect(dragOriginRef.current).toEqual({ nodeId, segmentId: connectingSegment?.id, vertexId: newVertexId });
+    expect(dragStartRef.current).toEqual({ x: 250, y: 0 });
   });
 });

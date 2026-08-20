@@ -1262,6 +1262,36 @@ vertex only ends up `'corner'` (fully independent handles) or `'smooth'` (angle-
 currently nonexistent, write path — there is presently no UI to set either explicitly once a tangent-drag
 gesture has touched a vertex.
 
+## 27. Click-dragging onto an existing edge while extending now arms a drag, same as closing onto a vertex
+
+§15/§20's `closeLoopOntoEdge.ts` (attaching an in-progress Pen line to an existing segment by splitting it,
+mirroring `closeLoopOntoVertex.ts`'s "close onto an existing point" case) used to dispatch
+`endHistoryGesture()` immediately and never touch `dragOriginRef`/`dragStartRef` — so a click-*drag* onto
+the split point behaved exactly like a plain click: the connecting segment always came out straight, the
+drag silently discarded. Direct report, very specific by design ("scenariusz jest bardzo specific"):
+dragging from the split point B to shape a new curve there, mid-extension, did nothing. Fixed to match
+`closeLoopOntoVertex.ts` exactly: `closeLoopOntoEdge.ts` now takes `point`/`dragOriginRef`/`dragStartRef`
+too, arms `dragOriginRef.current = { nodeId, segmentId: connectingSegmentId, vertexId: newVertexId }` and
+`dragStartRef.current = point` instead of ending the gesture, and no longer dispatches
+`endHistoryGesture()` itself — `handlePointerUp.ts` already does that unconditionally on release for every
+Pen gesture (§ arm/continue/disarm trio), so the premature call was both redundant and exactly what
+prevented the drag from ever being observed. A plain click (no movement past `MIN_DRAG_DISTANCE_PX`) is
+unaffected — arming then immediately releasing produces no visible change, same as `closeLoopOntoVertex.ts`
+always did for a plain closing click.
+
+## 28. Deleting a segment now prunes any endpoint it leaves with zero remaining segments
+
+`handleDeleteSelection.ts`'s vertex-selection branch already recomputed both `vertices` and `segments`
+together (`getRemainingSegments`). Its sibling segment-selection branch didn't: it only ever filtered
+`node.segments`, so a vertex whose only segment(s) got deleted stayed behind in `node.vertices` forever —
+a floating, unselectable-by-normal-means dot with nothing attached (screenshot: an orphaned point sitting
+apart from an otherwise-normal two-segment path). Fixed with a new `getRemainingVertices(vertices,
+segments)` helper (same reachability check `deleteDanglingActiveVertex.ts` already used for the Pen tool's
+single active vertex on Escape, generalized here to every vertex against an arbitrary post-delete
+`segments` map) — applied only in the segment-selection branch, deliberately not the vertex-selection one:
+deleting a *vertex* explicitly already has its own, separate question of whether to bridge/reconnect its
+two neighbors (out of scope here, not asked for), so that branch is left as-is.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

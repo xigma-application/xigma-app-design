@@ -1,18 +1,19 @@
 import { RefObject } from 'react';
 
 // store
-import { endHistoryGesture } from 'store/history/actions';
 import { setPenActiveVertexId, updateNode } from 'store/design/slice';
 import { AppDispatch } from 'store';
 
 // types
-import { TPendingOutgoingTangent } from '../../../types';
+import { TPenDragOrigin, TPendingOutgoingTangent } from '../../../types';
+import { TPoint } from 'types/canvas';
 import { TVectorNode, TVectorSegment, TVectorTangent } from 'types/design/types';
 
 // utils
 import { splitVectorSegment } from '../splitVectorSegment';
 
 export const closeLoopOntoEdge = (
+  point: TPoint,
   node: TVectorNode,
   activeVertexId: string,
   edgeSegmentId: string,
@@ -20,6 +21,8 @@ export const closeLoopOntoEdge = (
   connectingSegmentId: string,
   tangentStart: TVectorTangent,
   dispatch: AppDispatch,
+  dragOriginRef: RefObject<TPenDragOrigin | null>,
+  dragStartRef: RefObject<TPoint | null>,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
 ): void => {
   const { newVertexId, segments: splitSegments, vertices } = splitVectorSegment(node, edgeSegmentId, t);
@@ -34,7 +37,8 @@ export const closeLoopOntoEdge = (
 
   dispatch(updateNode({ changes: { segments, vertices }, id: node.id }));
   dispatch(setPenActiveVertexId(null));
-  dispatch(endHistoryGesture());
 
+  dragOriginRef.current = { nodeId: node.id, segmentId: connectingSegmentId, vertexId: newVertexId };
+  dragStartRef.current = point;
   pendingOutgoingTangentRef.current = null;
 };

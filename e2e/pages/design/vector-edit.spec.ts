@@ -110,10 +110,12 @@ test('dragging an existing tangent handle curves the adjacent segment', async ({
   expect(after.equals(before)).toBe(false);
 });
 
-test('dragging one handle at a "smooth" vertex also moves its other handle, curving both segments', async ({ page }) => {
+test('dragging one handle at a vertex whose tangent was click-drag-created also moves its other handle, curving both segments (vertexHandleModes is `symmetric`, not `smooth`, for a freshly dragged tangent)', async ({
+  page,
+}) => {
   const designPage = new DesignPage(page);
 
-  await designPage.goto('e2e-test-vector-edit-smooth-mirror');
+  await designPage.goto('e2e-test-vector-edit-symmetric-mirror');
   await expect(designPage.canvas).toBeVisible();
 
   await designPage.selectTool('pen');
@@ -135,6 +137,40 @@ test('dragging one handle at a "smooth" vertex also moves its other handle, curv
 
   const after = await page.screenshot({ clip: region });
   expect(after.equals(before)).toBe(false); // segment 2 moved too, though its own handle was untouched
+});
+
+// regression check for the reported bug where the mirrored handle only rotated to match the dragged
+// handle's new angle but kept its own old length — v2's handle is dragged straight down (angle never
+// changes between the two scenarios below, only the distance), so the mirrored handle above v2 must
+// land at a different height in each capture; under the old (angle-only) bug it would land at the exact
+// same spot both times, since only the angle — identical here — fed into the mirror
+test('dragging a click-drag-created tangent handle a different distance also moves its vertex’s other handle the same distance, not just to the same angle', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+  const otherHandleRegion = { height: 200, width: 60, x: 1020, y: 80 }; // spans every tip position used below
+
+  const dragAndCapture = async (dragToX: number, dragToY: number): Promise<Buffer> => {
+    await designPage.selectTool('pen');
+    await designPage.click(900, 300); // v1
+    await designPage.dragVectorPoint(1050, 300, 1050, 250); // v2, dragged — stages an outgoing tangent
+    await designPage.click(1200, 300); // v3, plain click — segment 2 inherits the staged tangent
+    await designPage.selectTool('default');
+    await designPage.click(1050, 300); // select v2 to reveal its handles
+    await designPage.dragVectorPoint(1050, 350, dragToX, dragToY); // drag segment 1's handle straight down
+
+    return page.screenshot({ clip: otherHandleRegion });
+  };
+
+  await designPage.goto('e2e-test-vector-edit-symmetric-mirror-length-short');
+  await expect(designPage.canvas).toBeVisible();
+  const short = await dragAndCapture(1050, 380); // handle dragged 80px down
+
+  await designPage.goto('e2e-test-vector-edit-symmetric-mirror-length-long');
+  await expect(designPage.canvas).toBeVisible();
+  const long = await dragAndCapture(1050, 500); // handle dragged 200px down — same direction, longer
+
+  expect(short.equals(long)).toBe(false);
 });
 
 test('clicking an edge with the Move tool selects the segment instead of splitting it — that still requires the Pen tool, matching Figma', async ({
@@ -163,7 +199,7 @@ test('clicking an edge with the Move tool selects the segment instead of splitti
   expect(moveToolSelect.equals(penToolSplit)).toBe(false);
 });
 
-test('clicking a segment with the Move tool selects it, and Delete removes just that segment, leaving both endpoint vertices and the other segment in place', async ({
+test('clicking a segment with the Move tool selects it, and Delete removes that segment, dropping the endpoint it leaves with no segment left but keeping the other segment and its still-connected endpoint', async ({
   page,
 }) => {
   const designPage = new DesignPage(page);
@@ -187,6 +223,18 @@ test('clicking a segment with the Move tool selects it, and Delete removes just 
   const remainingSelected = await designPage.canvas.screenshot();
 
   expect(remainingSelected.equals(afterDelete)).toBe(false);
+
+  // v1 (900,300) had only the just-deleted segment — it must be pruned as a floating, unusable point,
+  // not left behind: a click right on its former position now hits nothing, same as truly empty space
+  await designPage.click(1500, 900); // deselect first
+  await designPage.click(900, 300); // v1's former position
+  const clickedOldV1 = await designPage.canvas.screenshot();
+
+  await designPage.click(1500, 900); // deselect
+  await designPage.click(1400, 700); // genuinely empty canvas space, same "nothing here" outcome expected
+  const clickedEmptySpace = await designPage.canvas.screenshot();
+
+  expect(clickedOldV1.equals(clickedEmptySpace)).toBe(true);
 });
 
 test('clicking an edge with the Pen tool selected but not currently extending inserts a vertex there, splitting the segment and arming the new point for immediate extension', async ({
@@ -246,6 +294,30 @@ test('clicking an existing segment while actively drawing attaches the in-progre
 
   const afterFurtherClick = await page.screenshot({ clip: leftEdgeRegion });
   expect(afterFurtherClick.equals(beforeFurtherClick)).toBe(true);
+});
+
+test('click-dragging onto an existing segment while actively drawing attaches the in-progress line to it and shapes the connecting segment’s tangent, instead of only ever joining it straight', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-edge-insert-drag-tangent');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawClosedSquare(designPage);
+  await designPage.click(1200, 350); // starts a new, disconnected fragment's active vertex
+  await designPage.dragVectorPoint(1000, 350, 1050, 300); // click-drag onto the square's right (v2-v3) edge midpoint
+  const curvedAttach = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-vector-edit-edge-insert-drag-tangent-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawClosedSquare(designPage);
+  await designPage.click(1200, 350);
+  await designPage.click(1000, 350); // plain click — no tangent on the connecting segment
+  const straightAttach = await designPage.canvas.screenshot();
+
+  expect(curvedAttach.equals(straightAttach)).toBe(false);
 });
 
 test('splitting a curved edge preserves the original curve’s shape on both sides — no kink at the new point', async ({ page }) => {

@@ -6,7 +6,7 @@ import { AppDispatch, store } from 'store';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TVectorNode, TVectorSegment } from 'types/design/types';
+import { TVectorNode, TVectorSegment, TVectorVertex } from 'types/design/types';
 
 // utils
 import { getVectorEditingNode } from '../../../utils/getVectorEditingNode';
@@ -16,6 +16,14 @@ const getRemainingSegments = (node: TVectorNode, selectedVertexIds: string[]): R
     Object.entries(node.segments).filter(
       ([, segment]) => !selectedVertexIds.includes(segment.startId) && !selectedVertexIds.includes(segment.endId),
     ),
+  );
+
+const getRemainingVertices = (
+  vertices: Record<string, TVectorVertex>,
+  segments: Record<string, TVectorSegment>,
+): Record<string, TVectorVertex> =>
+  Object.fromEntries(
+    Object.entries(vertices).filter(([id]) => Object.values(segments).some((segment) => segment.startId === id || segment.endId === id)),
   );
 
 export const handleDeleteSelection = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
@@ -33,8 +41,9 @@ export const handleDeleteSelection = (dispatch: AppDispatch, refs: TCanvasRefs):
     selectedVectorVertexIdsRef.current = [];
   } else if (node && selectedSegmentIds.length > 0) {
     const segments = Object.fromEntries(Object.entries(node.segments).filter(([id]) => !selectedSegmentIds.includes(id)));
+    const vertices = getRemainingVertices(node.vertices, segments);
 
-    dispatch(updateNode({ changes: { segments }, id: node.id }));
+    dispatch(updateNode({ changes: { segments, vertices }, id: node.id }));
     selectedVectorSegmentIdsRef.current = [];
   } else if (selectedVectorHandlesRef.current.length === 0) {
     dispatch(beginHistoryGesture());
