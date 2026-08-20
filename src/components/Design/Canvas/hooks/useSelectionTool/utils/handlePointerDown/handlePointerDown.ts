@@ -13,8 +13,8 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 // utils
-import { getNodeAtPoint } from '../../../../utils/getNodeAtPoint';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getSelectionHitAtPoint } from './getSelectionHitAtPoint';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 
 export const handlePointerDown = (
@@ -37,7 +37,7 @@ export const handlePointerDown = (
       currentSelection: selectSelectedIds(state),
       dispatch,
       event,
-      hit: getNodeAtPoint(point, orderedNodes, viewport),
+      hit: getSelectionHitAtPoint(point, orderedNodes, viewport),
       orderedNodes,
       point,
       selectedNodes,

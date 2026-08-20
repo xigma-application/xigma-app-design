@@ -1,6 +1,16 @@
 // types
 import { NodeType, PathType } from 'types/design/enums';
-import { TBoxSceneNode, TMediaNode, TPathNode, TPolygonNode, TSceneNode, TStarNode, TTextNode, TVectorNode } from 'types/design/types';
+import {
+  TBoxSceneNode,
+  TMediaNode,
+  TPathNode,
+  TPolygonNode,
+  TSceneNode,
+  TSectionNode,
+  TStarNode,
+  TTextNode,
+  TVectorNode,
+} from 'types/design/types';
 
 // utils
 import { drawPerNodeSelectionOutlines } from '../drawPerNodeSelectionOutlines';
@@ -29,7 +39,7 @@ const createGlMock = (): WebGL2RenderingContext =>
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const buildNode = (
-  overrides: Partial<Exclude<TBoxSceneNode, TPathNode | TPolygonNode | TStarNode | TMediaNode | TTextNode>>,
+  overrides: Partial<Exclude<TBoxSceneNode, TPathNode | TPolygonNode | TSectionNode | TStarNode | TMediaNode | TTextNode>>,
 ): TSceneNode => ({
   fill: '#ff0000',
   height: 10,

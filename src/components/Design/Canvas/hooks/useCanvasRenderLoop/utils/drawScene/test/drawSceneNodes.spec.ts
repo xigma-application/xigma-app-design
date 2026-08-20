@@ -1,7 +1,17 @@
 // types
 import { NodeType, PathType } from 'types/design/enums';
 import { TImageRenderContext } from '../../../types';
-import { TBoxSceneNode, TMediaNode, TPathNode, TPolygonNode, TSceneNode, TStarNode, TTextNode, TVectorNode } from 'types/design/types';
+import {
+  TBoxSceneNode,
+  TMediaNode,
+  TPathNode,
+  TPolygonNode,
+  TSceneNode,
+  TSectionNode,
+  TStarNode,
+  TTextNode,
+  TVectorNode,
+} from 'types/design/types';
 
 // utils
 import { drawSceneNodes } from '../drawSceneNodes';
@@ -51,7 +61,7 @@ const IMAGE_CONTEXT: TImageRenderContext = {
 };
 
 const buildNode = (
-  overrides: Partial<Exclude<TBoxSceneNode, TPathNode | TPolygonNode | TStarNode | TMediaNode | TTextNode>>,
+  overrides: Partial<Exclude<TBoxSceneNode, TPathNode | TPolygonNode | TSectionNode | TStarNode | TMediaNode | TTextNode>>,
 ): TSceneNode => ({
   fill: '#ff0000',
   height: 10,

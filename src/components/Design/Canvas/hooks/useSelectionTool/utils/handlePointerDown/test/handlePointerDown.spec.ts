@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setSelection, setVectorEditingNodeId } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -196,6 +196,37 @@ const addTextNode = (x: number, y: number, size = 500): string => {
 
 const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => {
   store.dispatch(addNode({ name: 'Line', parentId: null, stroke: '#000000', type: NodeType.line, x1, x2, y1, y2 }));
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addClosedSquareVectorNode = (x: number, y: number, size: number): string => {
+  store.dispatch(
+    addNode({
+      fillColor: '#ff0000',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'v4', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+        s4: { endId: 'v1', id: 's4', startId: 'v4', tangentEnd: null, tangentStart: null },
+      },
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: {
+        v1: { id: 'v1', x, y },
+        v2: { id: 'v2', x: x + size, y },
+        v3: { id: 'v3', x: x + size, y: y + size },
+        v4: { id: 'v4', x, y: y + size },
+      },
+    }),
+  );
 
   const { rootOrder } = store.getState().design;
 
@@ -435,6 +466,95 @@ describe('handlePointerDown', () => {
     expect(dragStateRef.current).toBeNull();
     expect(marqueeStartRef.current).not.toBeNull();
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(1);
+  });
+
+  it('should fall through to the marquee instead of dragging the whole shape when clicking the interior of a vector node currently being edited', () => {
+    // mock — a closed 100x100 square vector node, currently open in Vector Edit Mode
+    const idA = addClosedSquareVectorNode(6400, 6400, 100);
+
+    store.dispatch(setSelection([idA]));
+    store.dispatch(setVectorEditingNodeId(idA));
+
+    const canvas = createCanvas();
+    const dragStateRef = createDragStateRef();
+    const marqueeStartRef = createMarqueeStartRef();
+    const vectorMarqueeStartRef: RefObject<TPoint | null> = { current: null };
+    const setClassName = vi.fn();
+
+    // before — dead center of the square, well clear of every vertex/handle/segment
+    handlePointerDown(
+      canvas,
+      pointerEvent(6450, 6450),
+      store.dispatch,
+      createCanvasRefs({
+        cornerRadiusDragRef: createCornerRadiusDragRef(),
+        ellipseArcDragRef: createEllipseArcDragRef(),
+        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+        rotateDragRef: createRotateDragRef(),
+        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+      }),
+      createSelectionToolRefs({
+        dragStateRef,
+        endpointDragRef: createEndpointDragRef(),
+        marqueeStartRef,
+        pathOffsetDragRef: createPathOffsetDragRef(),
+        polygonVertexCountDragRef: createPolygonVertexCountDragRef(),
+        resizeDragRef: createResizeDragRef(),
+        starVertexCountDragRef: createStarVertexCountDragRef(),
+        vectorMarqueeStartRef,
+      }),
+      setClassName,
+    );
+
+    // result — no whole-node drag armed; falls through to the vector marquee instead
+    expect(dragStateRef.current).toBeNull();
+    expect(marqueeStartRef.current).toBeNull();
+    expect(vectorMarqueeStartRef.current).not.toBeNull();
+    store.dispatch(setVectorEditingNodeId(null));
+  });
+
+  it('should still drag the whole shape when clicking the interior of a vector node that is selected but not currently being edited', () => {
+    // mock — same square, but no Vector Edit Mode session open for it
+    const idA = addClosedSquareVectorNode(6600, 6400, 100);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvas = createCanvas();
+    const dragStateRef = createDragStateRef();
+    const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
+
+    // before
+    handlePointerDown(
+      canvas,
+      pointerEvent(6650, 6450),
+      store.dispatch,
+      createCanvasRefs({
+        cornerRadiusDragRef: createCornerRadiusDragRef(),
+        ellipseArcDragRef: createEllipseArcDragRef(),
+        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+        rotateDragRef: createRotateDragRef(),
+        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+      }),
+      createSelectionToolRefs({
+        dragStateRef,
+        endpointDragRef: createEndpointDragRef(),
+        marqueeStartRef,
+        pathOffsetDragRef: createPathOffsetDragRef(),
+        polygonVertexCountDragRef: createPolygonVertexCountDragRef(),
+        resizeDragRef: createResizeDragRef(),
+        starVertexCountDragRef: createStarVertexCountDragRef(),
+      }),
+      setClassName,
+    );
+
+    // result — ordinary whole-node drag, unaffected
+    expect(dragStateRef.current).toMatchObject({ pendingClickAction: null });
+    expect(marqueeStartRef.current).toBeNull();
   });
 
   it('should allow dragging from anywhere in a selected text node fixed box, even past its rendered content', () => {
