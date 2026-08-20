@@ -12,6 +12,7 @@ import { TArmContext } from '../types';
 import { armVectorHandleDrag } from '../armVectorHandleDrag';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
 import { getVectorHandleAtPoint } from '../../../../../utils/getVectorHandleAtPoint';
+import { toggleVectorHandleSelection } from '../../toggleVectorHandleSelection';
 
 export const armVectorHandleOnPointerDown = ({
   canvas,
@@ -27,9 +28,16 @@ export const armVectorHandleOnPointerDown = ({
     const hit = getVectorHandleAtPoint(point, node, VECTOR_HANDLE_HIT_RADIUS_PX / viewport.zoom);
 
     if (hit) {
-      canvasRefs.selectedVectorHandleRef.current = { end: hit.end, segmentId: hit.segmentId };
-      canvasRefs.selectedVectorVertexIdsRef.current = [];
-      armVectorHandleDrag(canvas, event, selectionRefs.vectorHandleDragRef, node.id, hit);
+      if (event.shiftKey) {
+        canvasRefs.selectedVectorHandlesRef.current = toggleVectorHandleSelection(canvasRefs.selectedVectorHandlesRef.current, {
+          end: hit.end,
+          segmentId: hit.segmentId,
+        });
+      } else {
+        canvasRefs.selectedVectorHandlesRef.current = [{ end: hit.end, segmentId: hit.segmentId }];
+        canvasRefs.selectedVectorVertexIdsRef.current = [];
+        armVectorHandleDrag(canvas, event, selectionRefs.vectorHandleDragRef, node.id, hit);
+      }
 
       return true;
     }

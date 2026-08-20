@@ -1278,6 +1278,67 @@ release. This meant threading `setClassName` one level deeper than before: `useS
 `onPointerUp` did), since no other `continue*Drag` needed it — `continueRotateDrag.ts` sets `canvas.style.cursor`
 directly instead, a different, lower-level mechanism from the CSS-class approach used here.
 
+**Multi-selection — both refs became arrays, shift toggles membership, a plain click still replaces.**
+`selectedVectorVertexIdsRef` was already an array (per its own name); `selectedVectorHandleRef` became
+`selectedVectorHandlesRef: TVectorHandleHover[]` to match. A **plain** click on a vertex/handle still
+fully replaces the selection with just that one item and clears the other ref (unchanged from the
+single-select behavior above) — the mutual exclusivity only applies to this replace case.
+**Shift+click toggles** the clicked vertex/handle into or out of whichever ref it belongs to, via
+`toggleSelection.ts` (reused as-is for vertex ids) and a new `toggleVectorHandleSelection.ts` (object
+equality on `{end, segmentId}` instead of a plain id), **without** touching the other ref or arming any
+drag — mirrors `toggleSelectionOnPointerDown.ts`'s existing whole-node shift-click shape exactly (a
+synchronous ref/state edit, gesture ends there). This means a shift+click can leave the selection mixed
+— some vertices and some handles selected together — which is the point: "to są wspólne punkty na
+wektorze" (they're the same kind of selectable point), asked for directly.
+
+**The group-move box — translate-only, deliberately no resize/rotate corners.** Once 2+ points are
+selected (mixed vertices/handles), `drawVectorMultiSelectBox.ts` draws a plain stroke rectangle over
+`getVectorMultiSelectBounds.ts`'s bounds (vertex positions + resolved handle absolute positions, same
+`getEffectiveTangentStart`/`tangentEnd` resolution the render/hit-test layers already use) — no
+`drawCornerHandles` call, unlike every other bounds-box in this file (`drawGroupSelectionOutline.ts`
+included) which all draw corner handles. Clicking inside that box (not on a specific point, not
+shift-held) arms `vectorMultiDragRef` (`TVectorMultiDragState`, a new type: `vertexOrigins` +
+`handleOrigins` — the latter keyed by `` `${end}:${segmentId}` ``, snapshotting the *absolute* tangent
+value at arm time since a rigid group translate needs per-point origin+delta, unlike single-handle drag's
+absolute recompute-from-vertex shape). `continueVectorMultiDrag.ts` then translates every origin by the
+same pixel delta and writes both `vertices` and `segments` in one `updateNode` dispatch. The arm resolver,
+`armVectorMultiSelectBoxOnPointerDown.ts`, sits right after `armVectorVertexOnPointerDown` in
+`ARM_RESOLVERS` — ahead of `armVectorMarqueeOnPointerDown` (next), since a click inside the box must win
+over the "click hit nothing, start a marquee" fallback.
+
+**Marquee-selecting vector points — the old plain miss-resolver became a marquee-arming one.**
+`armVectorEditMissOnPointerDown.ts` (miss → immediately deselect, no drag) was replaced outright by
+`armVectorMarqueeOnPointerDown.ts`: same trigger (`vectorEditingNodeId && !hit`, plus a new `!event.shiftKey`
+guard matching the whole-node marquee's own gate), but instead of just clearing both selection refs, it
+also arms a **new**, vector-scoped `vectorMarqueeStartRef` (`TSelectionToolRefs`, paired conceptually with
+the existing whole-node `marqueeStartRef` but never the same ref — see below) and captures the pointer. A
+plain click with no movement still nets out to "just deselect" (the marquee never collects anything if the
+pointer never moves), so this is a strict superset of the old behavior, not a replacement of it.
+`continueVectorMarqueeDrag.ts` reads `vectorMarqueeStartRef`, builds a `TDraftRect` via the same
+`toDraftRect.ts` the whole-node marquee uses, and calls `getVectorPointsInRect.ts` (new,
+`utils/canvas/vectorNetwork/`) to collect every vertex/handle whose *point* falls inside — a plain AABB
+containment test reimplemented locally in that file rather than importing the feature-local
+`Canvas/utils/isPointInRect.ts` from a global util (would violate the global-layer-never-imports-from-
+components rule in `xigma-module-structure`); unlike the whole-node marquee there's no touch-vs-fully-
+inside Ctrl toggle, since a point has no area — "inside" is unambiguous. Critically, this function writes
+straight into `canvasRefs.selectedVectorVertexIdsRef`/`selectedVectorHandlesRef` (plain ref mutation, no
+`dispatch` at all) rather than `dispatch(setSelection(...))` the way whole-node `continueMarqueeDrag.ts`
+does — because vector-point selection is UI-ref state, not Redux state, same as everywhere else in this
+section.
+
+**Why a separate start-ref instead of reusing `marqueeStartRef`.** The *visual* rectangle ref
+(`TCanvasRefs.marqueeRef`) **is** shared as-is with the whole-node marquee — `drawMarquee.ts` just draws
+whatever's in it, generically, regardless of which mechanism populated it. But the *arming* ref could not
+be shared: `continueMarqueeDrag.ts` (whole-node) and `continueVectorMarqueeDrag.ts` both run
+unconditionally every `pointermove`, each gated only on `if (theirOwnStartRef.current)` — sharing one
+start ref would make both fire simultaneously off the same drag, double-processing it (nodes *and* vector
+points at once). Mutual exclusivity between the two marquee *kinds* falls out for free from
+`ARM_RESOLVERS` ordering instead: `armVectorMarqueeOnPointerDown` sits early (right where the old miss
+resolver was) and unconditionally claims any qualifying pointerdown while Vector Edit Mode is active, so
+`armMarqueeOnPointerDown` (whole-node, near the very end of the array) never even gets reached in that
+state — only one of the two start-refs is ever non-null at a time, by construction, which is what makes
+reusing the single shared `marqueeRef` for the visual safe.
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.

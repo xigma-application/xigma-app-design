@@ -392,3 +392,97 @@ test('undo after dragging a vertex restores its previous position', async ({ pag
   expect(originAfterUndo.equals(originAfterDrag)).toBe(false); // the dot reappears at (900, 300)
   expect(destinationAfterUndo.equals(destinationAfterDrag)).toBe(false); // and leaves (850, 250)
 });
+
+test('shift+click toggles a vertex into the multi-selection and back out again', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-shift-toggle');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawOpenTriangle(designPage);
+  await designPage.selectTool('default');
+
+  // rest at the same neutral point before each capture — otherwise the cursor's own resting position
+  // (on v1's dot vs. on v2's dot) drives a real hover-highlight pixel difference unrelated to selection
+  const neutral = { x: 1400, y: 700 };
+
+  await designPage.click(900, 300); // select v1 alone
+  await designPage.pointerMove(neutral.x, neutral.y);
+  const singleSelected = await designPage.canvas.screenshot();
+
+  await designPage.click(1050, 300, { shift: true }); // add v2 — now a 2-point multi-selection
+  await designPage.pointerMove(neutral.x, neutral.y);
+  const multiSelected = await designPage.canvas.screenshot();
+  expect(multiSelected.equals(singleSelected)).toBe(false);
+
+  await designPage.click(1050, 300, { shift: true }); // remove v2 again
+  await designPage.pointerMove(neutral.x, neutral.y);
+  const backToSingle = await designPage.canvas.screenshot();
+  expect(backToSingle.equals(singleSelected)).toBe(true); // round trip back to the plain single-vertex look
+});
+
+test('shift+click mixes a vertex and a tangent handle into one multi-selection, and dragging inside its box moves both together', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-mixed-multi-select');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(900, 300); // v1
+  await designPage.dragVectorPoint(1050, 300, 1050, 250); // v2, dragged — handle now sits at (1050, 350)
+  await designPage.selectTool('default');
+
+  await designPage.click(900, 300); // select v1
+  await designPage.click(1050, 350, { shift: true }); // add v2's tangent handle — a mixed selection
+
+  // isolated regions around v1's dot and the handle's dot — the two selected points that must move
+  // together; v2's own region is deliberately not compared here, since the curve leading into v2
+  // visibly reshapes once v1/the handle move even though v2's own dot position never changes (the
+  // "unrelated stroke shape" gotcha this file already documents above)
+  const v1Region = { height: 24, width: 24, x: 888, y: 288 };
+  const handleRegion = { height: 24, width: 24, x: 1038, y: 338 };
+
+  const beforeV1 = await page.screenshot({ clip: v1Region });
+  const beforeHandle = await page.screenshot({ clip: handleRegion });
+
+  await designPage.dragVectorPoint(975, 325, 1025, 325); // drag inside the box interior (its center), not on any dot
+
+  const afterV1 = await page.screenshot({ clip: v1Region });
+  const afterHandle = await page.screenshot({ clip: handleRegion });
+
+  expect(afterV1.equals(beforeV1)).toBe(false);
+  expect(afterHandle.equals(beforeHandle)).toBe(false);
+});
+
+test('dragging a marquee over empty space selects every vertex whose point falls inside it, leaving points outside untouched', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-marquee-select');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawOpenTriangle(designPage); // v1(900,300), v2(1050,300), v3(1050,450)
+  await designPage.selectTool('default');
+
+  const v1Region = { height: 24, width: 24, x: 888, y: 288 };
+  const v2Region = { height: 24, width: 24, x: 1038, y: 288 };
+  const v3Region = { height: 24, width: 24, x: 1038, y: 438 };
+
+  const beforeV1 = await page.screenshot({ clip: v1Region });
+  const beforeV2 = await page.screenshot({ clip: v2Region });
+  const beforeV3 = await page.screenshot({ clip: v3Region });
+
+  // a marquee spanning y 250-320 catches v1/v2 (both at y=300) while staying well clear of v3 (y=450)
+  await designPage.dragVectorPoint(850, 250, 1100, 320);
+
+  const afterV1 = await page.screenshot({ clip: v1Region });
+  const afterV2 = await page.screenshot({ clip: v2Region });
+  const afterV3 = await page.screenshot({ clip: v3Region });
+
+  expect(afterV1.equals(beforeV1)).toBe(false);
+  expect(afterV2.equals(beforeV2)).toBe(false);
+  expect(afterV3.equals(beforeV3)).toBe(true);
+});

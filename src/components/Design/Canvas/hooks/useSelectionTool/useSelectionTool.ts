@@ -65,7 +65,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         canvas.removeEventListener('pointerup', pointerUpListener);
         canvas.removeEventListener('pointerleave', pointerLeaveListener);
         refs.selectedVectorVertexIdsRef.current = [];
-        refs.selectedVectorHandleRef.current = null;
+        refs.selectedVectorHandlesRef.current = [];
       };
     }
   }, [activeTool, dispatch, isCanvasCaretEditingActive, refs, selectionRefs, setClassName]);

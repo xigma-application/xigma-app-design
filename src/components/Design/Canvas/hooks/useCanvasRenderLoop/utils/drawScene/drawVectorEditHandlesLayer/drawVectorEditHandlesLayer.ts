@@ -6,6 +6,7 @@ import { TVectorHandleHover } from 'types/design/canvas/types';
 // utils
 import { bakeVectorNodeRotation } from '../../../../../utils/bakeVectorNodeRotation';
 import { drawVectorEditOutline } from './drawVectorEditOutline/drawVectorEditOutline';
+import { drawVectorMultiSelectBox } from './drawVectorMultiSelectBox';
 import { drawVectorTangentHandles } from './drawVectorTangentHandles/drawVectorTangentHandles';
 import { drawVectorVertexDots } from './drawVectorVertexDots';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
@@ -21,7 +22,7 @@ export const drawVectorEditHandlesLayer = (
   hoveredVertexId: string | null,
   hoveredSegmentId: string | null,
   hoveredHandle: TVectorHandleHover | null,
-  selectedHandle: TVectorHandleHover | null,
+  selectedHandles: TVectorHandleHover[],
   penActiveVertexId: string | null,
   penDraggedHandlePosition: TPoint | null,
   canvasWidth: number,
@@ -41,7 +42,7 @@ export const drawVectorEditHandlesLayer = (
       buffer,
       node,
       hoveredHandle,
-      selectedHandle,
+      selectedHandles,
       penActiveVertexId,
       penDraggedHandlePosition,
       canvasWidth,
@@ -49,5 +50,6 @@ export const drawVectorEditHandlesLayer = (
       viewport,
     );
     drawVectorVertexDots(gl, program, buffer, node, visualSelectedVertexIds, hoveredVertexId, canvasWidth, canvasHeight, viewport);
+    drawVectorMultiSelectBox(gl, program, buffer, node, selectedVertexIds, selectedHandles, canvasWidth, canvasHeight, viewport);
   }
 };

@@ -90,7 +90,7 @@ export type TCanvasRefs = {
   penPreviewRef: RefObject<TPenPreview | null>;
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>;
   rotateDragRef: RefObject<TRotateDragState | null>;
-  selectedVectorHandleRef: RefObject<TVectorHandleHover | null>;
+  selectedVectorHandlesRef: RefObject<TVectorHandleHover[]>;
   selectedVectorVertexIdsRef: RefObject<string[]>;
   sliceRef: RefObject<TSliceDraft | null>;
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>;

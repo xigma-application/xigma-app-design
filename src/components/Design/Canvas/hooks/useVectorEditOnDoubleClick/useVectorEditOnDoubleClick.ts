@@ -18,7 +18,7 @@ import { getDoubleClickedVectorNode } from './utils/getDoubleClickedVectorNode';
 import { getNodeAtPoint } from '../../utils/getNodeAtPoint';
 
 export const useVectorEditOnDoubleClick = (refs: TCanvasRefs): void => {
-  const { selectedVectorHandleRef, selectedVectorVertexIdsRef } = refs;
+  const { selectedVectorHandlesRef, selectedVectorVertexIdsRef } = refs;
   const vectorEditingNodeId = useAppSelector(selectVectorEditingNodeId);
   const dispatch = useAppDispatch();
 
@@ -39,8 +39,8 @@ export const useVectorEditOnDoubleClick = (refs: TCanvasRefs): void => {
 
   useEffect(() => {
     selectedVectorVertexIdsRef.current = [];
-    selectedVectorHandleRef.current = null;
-  }, [selectedVectorHandleRef, selectedVectorVertexIdsRef, vectorEditingNodeId]);
+    selectedVectorHandlesRef.current = [];
+  }, [selectedVectorHandlesRef, selectedVectorVertexIdsRef, vectorEditingNodeId]);
 
   useDoubleClickActivation(refs, Boolean(vectorEditingNodeId), getTarget, handleHit);
   useDoubleClickActivation(refs, !vectorEditingNodeId, getEmptySpaceTarget, handleEmptySpaceHit);

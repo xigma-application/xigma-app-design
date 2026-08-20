@@ -106,7 +106,7 @@ describe('handleDeleteSelection', () => {
 
     store.dispatch(setSelection([idA]));
 
-    const refs = createCanvasRefs({ selectedVectorHandleRef: { current: { end: 'start', segmentId: 's1' } } });
+    const refs = createCanvasRefs({ selectedVectorHandlesRef: { current: [{ end: 'start', segmentId: 's1' }] } });
 
     // before
     handleDeleteSelection(store.dispatch, refs);

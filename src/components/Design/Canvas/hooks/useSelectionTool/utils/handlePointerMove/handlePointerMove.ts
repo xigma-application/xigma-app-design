@@ -22,6 +22,8 @@ import { continueStarCornerRadiusDrag } from './continueStarCornerRadiusDrag';
 import { continueStarRatioDrag } from './continueStarRatioDrag';
 import { continueStarVertexCountDrag } from './continueStarVertexCountDrag';
 import { continueVectorHandleDrag } from './continueVectorHandleDrag';
+import { continueVectorMarqueeDrag } from './continueVectorMarqueeDrag';
+import { continueVectorMultiDrag } from './continueVectorMultiDrag';
 import { continueVectorVertexDrag } from './continueVectorVertexDrag';
 import { resolveVectorTangentHandleHover } from './resolveVectorTangentHandleHover';
 import { resolveVectorVertexHover } from './resolveVectorVertexHover';
@@ -51,6 +53,8 @@ export const handlePointerMove = (
   continueMarqueeDrag(canvas, event, dispatch, selectionRefs.marqueeStartRef, canvasRefs.marqueeRef);
   continueVectorVertexDrag(canvas, event, dispatch, selectionRefs.vectorVertexDragRef, setClassName);
   continueVectorHandleDrag(canvas, event, dispatch, selectionRefs.vectorHandleDragRef, setClassName);
+  continueVectorMultiDrag(canvas, event, dispatch, selectionRefs.vectorMultiDragRef, setClassName);
+  continueVectorMarqueeDrag(canvas, event, canvasRefs, selectionRefs.vectorMarqueeStartRef);
   resolveVectorVertexHover(canvas, event, canvasRefs.hoveredVectorVertexIdRef);
   resolveVectorTangentHandleHover(canvas, event, canvasRefs.hoveredVectorHandleRef);
 };

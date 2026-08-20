@@ -19,7 +19,7 @@ const getRemainingSegments = (node: TVectorNode, selectedVertexIds: string[]): R
   );
 
 export const handleDeleteSelection = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
-  const { selectedVectorHandleRef, selectedVectorVertexIdsRef } = refs;
+  const { selectedVectorHandlesRef, selectedVectorVertexIdsRef } = refs;
   const state = store.getState();
   const node = getVectorEditingNode(state.design.nodes, selectVectorEditingNodeId(state));
   const selectedVertexIds = selectedVectorVertexIdsRef.current;
@@ -30,7 +30,7 @@ export const handleDeleteSelection = (dispatch: AppDispatch, refs: TCanvasRefs):
 
     dispatch(updateNode({ changes: { segments, vertices }, id: node.id }));
     selectedVectorVertexIdsRef.current = [];
-  } else if (!selectedVectorHandleRef.current) {
+  } else if (selectedVectorHandlesRef.current.length === 0) {
     dispatch(beginHistoryGesture());
     selectSelectedIds(state).forEach((id) => dispatch(deleteNode(id)));
     dispatch(endHistoryGesture());

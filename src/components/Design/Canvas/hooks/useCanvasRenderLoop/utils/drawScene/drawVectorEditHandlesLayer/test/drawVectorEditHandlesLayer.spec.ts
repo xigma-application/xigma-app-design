@@ -59,7 +59,7 @@ const call = (
   hoveredSegmentId: string | null = null,
   penActiveVertexId: string | null = null,
   hoveredHandle: TVectorHandleHover | null = null,
-  selectedHandle: TVectorHandleHover | null = null,
+  selectedHandles: TVectorHandleHover[] = [],
   penDraggedHandlePosition: { x: number; y: number } | null = null,
 ): void => {
   const gl = {} as WebGL2RenderingContext;
@@ -77,7 +77,7 @@ const call = (
     hoveredVertexId,
     hoveredSegmentId,
     hoveredHandle,
-    selectedHandle,
+    selectedHandles,
     penActiveVertexId,
     penDraggedHandlePosition,
     200,
@@ -137,7 +137,7 @@ describe('drawVectorEditHandlesLayer', () => {
       null,
       null,
       null,
-      null,
+      [],
       null,
       null,
       200,
@@ -228,7 +228,7 @@ describe('drawVectorEditHandlesLayer', () => {
 
   it('should draw a selected tangent handle as a solid-blue line and white-then-blue diamond pair, matching the selected-vertex style', () => {
     // before
-    call(vectorNode.id, [], null, null, null, null, null, { end: 'start', segmentId: 's1' });
+    call(vectorNode.id, [], null, null, null, null, null, [{ end: 'start', segmentId: 's1' }]);
 
     // result — the same enlarge/recolor treatment selected vertices get, just diamond-shaped
     expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 5, y1: 0, y2: 0 }, '#0d99ff', 1, 200, 150, IDENTITY_VIEWPORT);
@@ -241,8 +241,8 @@ describe('drawVectorEditHandlesLayer', () => {
   });
 
   it('should deselect the tangent handle rendering once a vertex takes over the selection', () => {
-    // before — selectedVertexIds non-empty, selectedHandle explicitly stale/null (mirrors the mutual-exclusivity the arm resolvers enforce)
-    call(vectorNode.id, ['v1'], null, null, null, null, null, null);
+    // before — selectedVertexIds non-empty, selectedHandles explicitly empty (mirrors the mutual-exclusivity a plain click enforces)
+    call(vectorNode.id, ['v1'], null, null, null, null, null, []);
 
     // result — the handle falls back to its plain bordered-diamond look, not the selected two-layer pair
     expect(drawRectMock).toHaveBeenCalledTimes(1);
@@ -260,11 +260,32 @@ describe('drawVectorEditHandlesLayer', () => {
 
   it('should draw an extra tangent handle line from the Pen active vertex to the live-dragged cursor position', () => {
     // before
-    call(vectorNode.id, [], null, null, null, 'v1', null, null, { x: 30, y: 40 });
+    call(vectorNode.id, [], null, null, null, 'v1', null, [], { x: 30, y: 40 });
 
     // result — the existing v1 handle line (0,0 -> 5,0) plus the new drag-preview line (0,0 -> 30,40)
     expect(drawLineMock).toHaveBeenCalledTimes(2);
     expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 30, y1: 0, y2: 40 }, '#aaaaaa', 1, 200, 150, IDENTITY_VIEWPORT);
+  });
+
+  it('should draw the multi-select box when 2+ vertices are selected together, with no corner handles', () => {
+    // before
+    call(vectorNode.id, ['v1', 'v2'], null);
+
+    // result — one plain stroke rect over the bounding box of v1(0,0)/v2(10,0), no drawCornerHandles call
+    const boxRect = drawRectMock.mock.calls.find((args) => args[3].height === 0 && args[3].width === 10)?.[3];
+
+    expect(boxRect).toMatchObject({ stroke: '#0d99ff', x: 0, y: 0 });
+  });
+
+  it('should not draw the multi-select box when only a single vertex is selected', () => {
+    // before
+    call(vectorNode.id, ['v1'], null);
+
+    // result — only the selected-vertex ellipse pair draws via drawRect... none, since vertex dots use drawEllipse;
+    // the box itself must never call drawRect with the plain-box (no fill/no dot) shape
+    const boxRect = drawRectMock.mock.calls.find((args) => args[3].height === 0 && args[3].width === 10);
+
+    expect(boxRect).toBeUndefined();
   });
 
   it('should draw vertex dots at their rotated world position for a node with a persisted, not-yet-baked rotation', () => {
@@ -289,7 +310,7 @@ describe('drawVectorEditHandlesLayer', () => {
       null,
       null,
       null,
-      null,
+      [],
       null,
       null,
       200,

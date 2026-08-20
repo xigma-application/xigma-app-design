@@ -603,7 +603,7 @@ describe('useSelectionTool behaviors', () => {
     const refs = createCanvasRefs({ canvasRef });
 
     refs.selectedVectorVertexIdsRef.current = ['v1'];
-    refs.selectedVectorHandleRef.current = { end: 'start', segmentId: 's1' };
+    refs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
 
     // before
     renderHook(() => useSelectionTool(refs), {
@@ -621,7 +621,7 @@ describe('useSelectionTool behaviors', () => {
 
     // result
     expect(refs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(refs.selectedVectorHandleRef.current).toBeNull();
+    expect(refs.selectedVectorHandlesRef.current).toEqual([]);
   });
 
   it('should not react to pointer events while a path-text node is being edited', () => {

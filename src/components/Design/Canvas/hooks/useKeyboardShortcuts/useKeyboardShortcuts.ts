@@ -46,7 +46,7 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => handleDeleteSelection(dispatch, refs), secondaryKey: KeyboardKeys.delete },
       { action: (): any => handleDeleteSelection(dispatch, refs), secondaryKey: KeyboardKeys.backspace },
     ],
-    [dispatch, refs.selectedVectorVertexIdsRef, refs.selectedVectorHandleRef],
+    [dispatch, refs.selectedVectorVertexIdsRef, refs.selectedVectorHandlesRef],
   );
 
   useKeyboardHandler(true, [], keysMap, undefined, true);

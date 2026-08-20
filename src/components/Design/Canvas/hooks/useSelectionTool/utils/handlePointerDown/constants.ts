@@ -17,8 +17,9 @@ import { armStarCornerRadiusOnPointerDown } from './armResolvers/armStarCornerRa
 import { armStarRatioOnPointerDown } from './armResolvers/armStarRatioOnPointerDown';
 import { armStarVertexCountOnPointerDown } from './armResolvers/armStarVertexCountOnPointerDown';
 import { armVectorCornerHandleOnPointerDown } from './armResolvers/armVectorCornerHandleOnPointerDown';
-import { armVectorEditMissOnPointerDown } from './armResolvers/armVectorEditMissOnPointerDown';
 import { armVectorHandleOnPointerDown } from './armResolvers/armVectorHandleOnPointerDown';
+import { armVectorMarqueeOnPointerDown } from './armResolvers/armVectorMarqueeOnPointerDown';
+import { armVectorMultiSelectBoxOnPointerDown } from './armResolvers/armVectorMultiSelectBoxOnPointerDown';
 import { armVectorVertexOnPointerDown } from './armResolvers/armVectorVertexOnPointerDown';
 import { toggleSelectionOnPointerDown } from './armResolvers/toggleSelectionOnPointerDown';
 
@@ -27,7 +28,8 @@ export const ARM_RESOLVERS = [
   armVectorHandleOnPointerDown,
   armVectorCornerHandleOnPointerDown,
   armVectorVertexOnPointerDown,
-  armVectorEditMissOnPointerDown,
+  armVectorMultiSelectBoxOnPointerDown,
+  armVectorMarqueeOnPointerDown,
   armPathOffsetOnPointerDown,
   armPolygonVertexCountOnPointerDown,
   armStarVertexCountOnPointerDown,

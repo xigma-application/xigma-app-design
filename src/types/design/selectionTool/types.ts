@@ -99,6 +99,13 @@ export type TVectorHandleDragState = {
   vertexId: string;
 };
 
+export type TVectorMultiDragState = {
+  handleOrigins: Record<string, TPoint>;
+  nodeId: string;
+  pointerStart: TPoint;
+  vertexOrigins: Record<string, TPoint>;
+};
+
 export type TSelectionToolRefs = {
   dragStateRef: RefObject<TDragState | null>;
   endpointDragRef: RefObject<TEndpointDragState | null>;
@@ -109,5 +116,7 @@ export type TSelectionToolRefs = {
   starRatioDragRef: RefObject<TStarRatioDragState | null>;
   starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>;
   vectorHandleDragRef: RefObject<TVectorHandleDragState | null>;
+  vectorMarqueeStartRef: RefObject<TPoint | null>;
+  vectorMultiDragRef: RefObject<TVectorMultiDragState | null>;
   vectorVertexDragRef: RefObject<TVectorVertexDragState | null>;
 };

@@ -23,6 +23,8 @@ import { disarmStarCornerRadiusDrag } from './disarmStarCornerRadiusDrag';
 import { disarmStarRatioDrag } from './disarmStarRatioDrag';
 import { disarmStarVertexCountDrag } from './disarmStarVertexCountDrag';
 import { disarmVectorHandleDrag } from './disarmVectorHandleDrag';
+import { disarmVectorMarqueeDrag } from './disarmVectorMarqueeDrag';
+import { disarmVectorMultiDrag } from './disarmVectorMultiDrag';
 import { disarmVectorVertexDrag } from './disarmVectorVertexDrag';
 
 export const handlePointerUp = (
@@ -50,5 +52,7 @@ export const handlePointerUp = (
   disarmMarqueeDrag(canvas, event, selectionRefs.marqueeStartRef, canvasRefs.marqueeRef);
   disarmVectorVertexDrag(canvas, event, selectionRefs.vectorVertexDragRef, setClassName);
   disarmVectorHandleDrag(canvas, event, selectionRefs.vectorHandleDragRef, setClassName);
+  disarmVectorMultiDrag(canvas, event, selectionRefs.vectorMultiDragRef, setClassName);
+  disarmVectorMarqueeDrag(canvas, event, canvasRefs, selectionRefs.vectorMarqueeStartRef);
   dispatch(endHistoryGesture());
 };

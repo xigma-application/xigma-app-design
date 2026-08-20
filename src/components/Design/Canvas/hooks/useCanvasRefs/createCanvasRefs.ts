@@ -18,7 +18,7 @@ export const createCanvasRefs = (overrides: Partial<TCanvasRefs> = {}): TCanvasR
   penPreviewRef: { current: null },
   polygonCornerRadiusDragRef: { current: null },
   rotateDragRef: { current: null },
-  selectedVectorHandleRef: { current: null },
+  selectedVectorHandlesRef: { current: [] },
   selectedVectorVertexIdsRef: { current: [] },
   sliceRef: { current: null },
   starCornerRadiusDragRef: { current: null },

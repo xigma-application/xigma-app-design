@@ -19,6 +19,8 @@ describe('useSelectionToolRefs behaviors', () => {
       starRatioDragRef: { current: null },
       starVertexCountDragRef: { current: null },
       vectorHandleDragRef: { current: null },
+      vectorMarqueeStartRef: { current: null },
+      vectorMultiDragRef: { current: null },
       vectorVertexDragRef: { current: null },
     });
   });

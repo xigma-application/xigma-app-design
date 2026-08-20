@@ -1405,15 +1405,29 @@ segment in two (`splitVectorSegment.ts`, shared by `startVectorFragment.ts`'s id
 to the new split point and ends the extension, exactly like closing a loop onto an existing vertex).
 This used to be a Move-tool arm-resolver (`armVectorEdgeInsertOnPointerDown.ts`) that fired regardless
 of active tool; moved into the Pen tool's own pointerdown chain and removed from `ARM_RESOLVERS`
-entirely to match Figma, where edge-splitting is a Pen-only affordance. A miss-click (empty space) while editing only clears
-the active _vertex_ selection, staying in edit mode — `armVectorEditMissOnPointerDown.ts` deliberately
-does not fall through to the marquee resolver's `setSelection([])`, since that would exit edit mode on
-every stray miss; exiting by click is reserved for a deliberate **double**-click on empty space
-(`useVectorEditOnDoubleClick.ts`), which only clears `vectorEditingNodeId` — the node's own
-`selectedIds` entry is untouched, so it stays selected (ordinary resize/rotate handles), just no
-longer in edit mode. `handleSetSelection.ts` also clears `vectorEditingNodeId` any time the selection
-changes to something other than solely the node being edited (e.g. selecting a different node), so
-there is no quirk where a previous node's edit handles linger on screen after that.
+entirely to match Figma, where edge-splitting is a Pen-only affordance. A miss-click (empty space) while
+editing clears the current point selection and — new since `armVectorMarqueeOnPointerDown.ts` replaced
+the old miss-only `armVectorEditMissOnPointerDown.ts` — arms a marquee scoped to the edited network's own
+vertices/handles: a plain click with no further movement nets out to "just deselect" (the marquee never
+collects anything if the pointer never moves), while a click-drag selects every vertex/handle whose point
+falls inside the dragged rect. This still never exits edit mode by itself; exiting by click is reserved
+for a deliberate **double**-click on empty space (`useVectorEditOnDoubleClick.ts`), which only clears
+`vectorEditingNodeId` — the node's own `selectedIds` entry is untouched, so it stays selected (ordinary
+resize/rotate handles), just no longer in edit mode. `handleSetSelection.ts` also clears
+`vectorEditingNodeId` any time the selection changes to something other than solely the node being edited
+(e.g. selecting a different node), so there is no quirk where a previous node's edit handles linger on
+screen after that.
+
+Both `selectedVectorVertexIdsRef` and `selectedVectorHandlesRef` (`TCanvasRefs`) are arrays — a vertex or
+tangent handle can be part of a multi-selection alongside others of either kind. A **plain** click on a
+point still fully replaces the selection with just that one item (clearing the other ref, same
+mutual-exclusivity as before); **shift+click** instead toggles that one point into or out of whichever ref
+it belongs to, leaving everything else untouched (`toggleSelection.ts`/`toggleVectorHandleSelection.ts`),
+so a shift-click sequence can freely mix vertices and handles into one combined selection. Once 2+ points
+are selected, `drawVectorMultiSelectBox.ts` draws a plain bounding-box outline over them with **no**
+resize/rotate corner handles (translate-only, deliberately) — clicking inside that box (not on a specific
+point, not shift-held) arms a rigid group drag (`vectorMultiDragRef`/`continueVectorMultiDrag.ts`) that
+translates every selected vertex and handle by the same pixel delta in one `updateNode` dispatch.
 
 Two gotchas the specs below work around, worth knowing before adding more:
 
@@ -1466,6 +1480,9 @@ Two gotchas the specs below work around, worth knowing before adding more:
 | 184 | Dragging a vertex on an already-rotated, not-yet-baked vector node moves only that vertex, not the whole shape                                  |  ✅  | ✅ `vector-edit.spec.ts` |
 | 185 | With the Pen tool selected but idle (not extending), clicking an edge splits it and arms the new point for immediate extension                  |  ✅  | ✅ `vector-edit.spec.ts` |
 | 186 | With the Pen tool actively extending, clicking an existing edge attaches the in-progress line to it (splitting the edge) and ends the extension |  ✅  | ✅ `vector-edit.spec.ts` |
+| 187 | Shift+click toggles a vertex into the multi-selection, and a second shift+click on it removes it again                                          |  ✅  | ✅ `vector-edit.spec.ts` |
+| 188 | Shift+click mixes a vertex and a tangent handle into one multi-selection; dragging inside the resulting box moves both together                 |  ✅  | ✅ `vector-edit.spec.ts` |
+| 189 | Dragging a marquee over empty space selects every vertex/handle whose point falls inside it, leaving points outside untouched                   |  ✅  | ✅ `vector-edit.spec.ts` |
 
 ## Why so few scenarios get e2e coverage
 
