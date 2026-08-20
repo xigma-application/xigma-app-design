@@ -1334,6 +1334,68 @@ match Figma). Direct ask to bring a version of it back to the Move tool, refined
    zaznaczony trzeba go odznaczyć"). A real drag (`hasMoved`) never applies the pending action at all, so
    dragging from the midpoint still just translates the segment like grabbing it anywhere else would.
 
+## 30. Ctrl/Cmd+drag bends a straight segment — a second Ctrl gesture alongside §9's corner-pull, disambiguated by hover cursor
+
+Figma parity: holding Ctrl/Cmd and dragging a segment's own interior (not a vertex) bends it into a
+curve, distinct from §9's Ctrl/Cmd+drag-out-of-a-corner-vertex gesture. `armVectorBendSegmentOnPointerDown.ts`
+(`ARM_RESOLVERS`, between `armVectorCornerHandleOnPointerDown` and `armVectorVertexOnPointerDown` —
+so an exact vertex hit still wins the corner-pull gesture; this one only fires on a genuine
+`getVectorEdgeAtPoint.ts` mid-segment hit, whose own `nearEndpoint` check already excludes the
+near-vertex zone) fires on pointerdown, before any drag distance is checked:
+
+1. Writes straight-line-equivalent default tangents onto the segment if it doesn't already have real
+   ones (`getStraightTangent`: `(to - from) / 3`, the standard "collinear control points render as a
+   straight line" cubic-bezier construction — visually identical to the un-tangented straight segment,
+   confirmed by the curve-tessellation adaptive count still just retracing the same line), and marks
+   both endpoints `'symmetric'`.
+2. Arms `vectorSegmentBendDragRef` (`TVectorSegmentBendDragState` — `dragStart`, the segment's id, the
+   just-written `tangentStart`/`tangentEnd`, and the *original* `tangentStart`/`tangentEnd` for an
+   Escape-revert).
+3. **Selects the segment** (`selectedVectorSegmentIdsRef.current = [hit.segmentId]`) — same
+   `selectAndArmVectorSegmentDrag.ts` pattern §20 already established for plain segment selection,
+   not a no-op or a full deselect. **Regression, shipped and fixed in the same round**: an earlier
+   version cleared all three vector selection refs to `[]` here instead (mirroring §9's
+   `armVectorCornerHandleOnPointerDown.ts`, which *does* clear everything since it selects a *handle*,
+   not a *vertex/segment*). That looked identical in a quick manual check because the segment's own
+   endpoint often still carried the Pen tool's leftover `penActiveVertexId` (also counted as
+   "selected" by §10's tangent-visibility rule) — but with that carried-over selection absent (e.g.
+   after an explicit Escape, or on a segment neither endpoint was ever the active Pen vertex for),
+   §10's `drawSegmentTangentHandles.ts` visibility gate (`isSegmentDirectlyTouchingSelection ||
+   oneHopVertexIds.includes(...) || isHandleSelected(...)`) had nothing to key off, so the tangent
+   diamonds §1 above had just written into the store never actually rendered — reported directly
+   ("Prawie wszystko jest ale tangeny nie są widoczne"). Fixed by selecting the segment instead of
+   clearing, which is also the *correct* Figma-parity selection state regardless (the segment is what
+   the gesture is acting on) — not a special-cased workaround.
+
+`continueVectorSegmentBendDrag.ts` only starts reshaping the curve once the drag clears
+`MIN_DRAG_DISTANCE_PX` — offsets both tangents by the same `(dx, dy) * BEND_OFFSET_SCALE` (`4/3`,
+i.e. the drag vector maps to a proportional tangent-length change, mirroring how a fresh click-drag
+handle is shaped elsewhere in this feature) and sets the `'bend'` cursor className. `cancelVectorSegmentBendDrag.ts`
+(a `keydown` listener in `useSelectionTool.ts`, alongside the existing pointer listeners) reverts to
+the *original* tangents on Escape mid-drag, distinct from a plain Escape with no bend in progress
+(§5's staged exit, unaffected). `disarmVectorSegmentBendDrag.ts` on pointerup just clears the drag ref
+and releases pointer capture — the selection made at arm time (step 3 above) deliberately survives the
+gesture, so the handles stay visible/grabbable afterward exactly like any other segment selection.
+
+**Hover cursor, added as a follow-up in the same round**: before this, holding Ctrl/Cmd and hovering
+*exactly* over an existing vertex (the corner-pull target, §9) showed no distinct cursor feedback —
+`resolveVectorSegmentHoverInNode.ts`'s Ctrl-branch only ever checked the bend-eligible edge hit
+(`hit ? 'bend' : null`), and `getVectorEdgeAtPoint.ts` returns `null` right where a vertex actually
+sits (the same `nearEndpoint` exclusion used above), so hovering a point showed the plain default
+cursor instead of any hint that a different Ctrl gesture applies there. Fixed by checking
+`getVectorCornerHandleAtPoint.ts` (the exact hit-test `armVectorCornerHandleOnPointerDown.ts` itself
+arms on) first: `setClassName(vertexHit ? 'segment' : hit ? 'bend' : null)`. The `'segment'` cursor
+className/asset (`canvas.module.scss`, `assets/icons/cursors/segment.png`) already existed structurally
+alongside `'bend'` before this — this wiring is what actually makes it switch on hover.
+
+Covered by `e2e/pages/design/vector-edit.spec.ts` (rows 213-215, `TEST_CASES.md`): a differential
+regression test for the visibility fix (Ctrl-click's own screenshot must already match a known-good
+plain-reselect of the same segment, not just "some pixel changed" — a plain before/after diff turned
+out to pass even against the buggy clear-selection version, since writing the tangents alone already
+perturbs the curve's flattened-polyline antialiasing regardless of whether the handles render), a
+bent-vs-moved comparison against a non-Ctrl drag on the same point, and a cursor-className comparison
+between hovering the vertex vs. the segment's interior under Ctrl.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows
