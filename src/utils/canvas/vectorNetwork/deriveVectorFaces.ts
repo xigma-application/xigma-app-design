@@ -1,6 +1,3 @@
-// others
-import { VECTOR_CURVE_SEGMENTS } from 'constant/canvas';
-
 // types
 import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
@@ -8,6 +5,7 @@ import { TVectorNode } from 'types/design/types';
 // utils
 import { buildVectorHalfEdgeAdjacency } from './buildVectorHalfEdgeAdjacency';
 import { flattenSegment } from './flattenSegment';
+import { getVectorCurveSegmentCount } from './getVectorCurveSegmentCount';
 import { TVectorFaceStep, walkVectorFace } from './walkVectorFace';
 
 const cache = new WeakMap<TVectorNode, TPoint[][]>();
@@ -18,7 +16,9 @@ const getFaceBoundary = (steps: TVectorFaceStep[], node: TVectorNode): TPoint[] 
     const forward = segment.startId === fromId;
     const tangentAtFrom = forward ? segment.tangentStart : segment.tangentEnd;
     const tangentAtTo = forward ? segment.tangentEnd : segment.tangentStart;
-    const points = flattenSegment(node.vertices[fromId], node.vertices[toId], tangentAtFrom, tangentAtTo, VECTOR_CURVE_SEGMENTS);
+    const from = node.vertices[fromId];
+    const to = node.vertices[toId];
+    const points = flattenSegment(from, to, tangentAtFrom, tangentAtTo, getVectorCurveSegmentCount(from, to, tangentAtFrom, tangentAtTo));
 
     return points.slice(0, -1);
   });

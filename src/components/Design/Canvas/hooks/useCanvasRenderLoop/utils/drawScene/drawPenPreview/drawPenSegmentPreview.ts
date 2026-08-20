@@ -1,5 +1,5 @@
 // others
-import { DRAFT_FRAME_STROKE, VECTOR_CURVE_SEGMENTS, VECTOR_STROKE_WIDTH } from 'constant/canvas';
+import { DRAFT_FRAME_STROKE, VECTOR_STROKE_WIDTH } from 'constant/canvas';
 
 // types
 import { TPenPreview } from 'types/design/canvas/types';
@@ -10,6 +10,7 @@ import { TViewport } from 'types/design/types';
 import { drawVectorStroke } from 'utils/canvas/drawVectorNode/drawVectorStroke';
 import { drawVertexPreviewDot } from './drawVertexPreviewDot';
 import { flattenSegment } from 'utils/canvas/vectorNetwork/flattenSegment';
+import { getVectorCurveSegmentCount } from 'utils/canvas/vectorNetwork/getVectorCurveSegmentCount';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
 const ORIGIN: TPoint = { x: 0, y: 0 };
@@ -28,7 +29,7 @@ export const drawPenSegmentPreview = (
   const from = rotatePoint(preview.from, pivot, rotation);
   const to = rotatePoint(preview.to, pivot, rotation);
   const tangentFromOffset = preview.tangentFromOffset ? rotatePoint(preview.tangentFromOffset, ORIGIN, rotation) : null;
-  const points = flattenSegment(from, to, tangentFromOffset, null, VECTOR_CURVE_SEGMENTS);
+  const points = flattenSegment(from, to, tangentFromOffset, null, getVectorCurveSegmentCount(from, to, tangentFromOffset, null));
 
   drawVectorStroke(
     gl,

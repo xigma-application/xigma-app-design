@@ -1,12 +1,10 @@
-// others
-import { VECTOR_CURVE_SEGMENTS } from 'constant/canvas';
-
 // types
 import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
 // utils
 import { flattenSegment } from './flattenSegment';
+import { getVectorCurveSegmentCount } from './getVectorCurveSegmentCount';
 
 export type TFlattenedVectorSegment = { points: TPoint[]; segmentId: string };
 
@@ -19,16 +17,21 @@ export const flattenVectorSegments = (node: TVectorNode): TFlattenedVectorSegmen
     return cached;
   }
 
-  const flattened = Object.values(node.segments).map((segment) => ({
-    points: flattenSegment(
-      node.vertices[segment.startId],
-      node.vertices[segment.endId],
-      segment.tangentStart,
-      segment.tangentEnd,
-      VECTOR_CURVE_SEGMENTS,
-    ),
-    segmentId: segment.id,
-  }));
+  const flattened = Object.values(node.segments).map((segment) => {
+    const start = node.vertices[segment.startId];
+    const end = node.vertices[segment.endId];
+
+    return {
+      points: flattenSegment(
+        start,
+        end,
+        segment.tangentStart,
+        segment.tangentEnd,
+        getVectorCurveSegmentCount(start, end, segment.tangentStart, segment.tangentEnd),
+      ),
+      segmentId: segment.id,
+    };
+  });
 
   cache.set(node, flattened);
 

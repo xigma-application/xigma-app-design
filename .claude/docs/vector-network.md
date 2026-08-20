@@ -728,6 +728,47 @@ Every *downstream* consumer of these points — `startNewVectorNetwork.ts`, `sta
 `continueVectorNetwork/extendWithNewVertex.ts` — reads `point.x`/`point.y` straight through with no rounding
 of their own, so fixing it at these two upstream call sites was sufficient; nothing else needed touching.
 
+## 14. Curve tessellation — adaptive segment count replaces the flat `VECTOR_CURVE_SEGMENTS` constant
+
+Reported directly, with a screenshot: a large, mostly-straight arc curving sharply near one end showed
+visible faceting — long straight-edge "seams" along the shallow part, and a fan of small overlapping
+diamond-ish quads where the curve turns sharply. Worse the bigger the arc and the closer the zoom
+("im bliżej jest zoom i większy łuk tym bardziej jest ten wektor pocięty").
+
+**Root cause: `flattenSegment.ts` always subdivided a curve into a fixed `VECTOR_CURVE_SEGMENTS` (24)
+count, uniform in `t`, regardless of the curve's actual size.** Uniform-`t` sampling doesn't adapt to
+curvature or scale — a tiny curve and a curve spanning thousands of world units both got exactly 24
+straight quads (`drawVectorStroke.ts`, §3: one quad per flattened point pair, no joins between them).
+For a small curve 24 is plenty; for a large one each quad covers a much longer chord, so the polyline
+visibly deviates from the true curve, and high-curvature regions (where equal `t` steps turn through a
+much larger angle) show the worst of it — exactly the "fan of quads" artifact reported.
+
+**Fix: `getVectorCurveSegmentCount.ts` (`utils/canvas/vectorNetwork/`) computes a segment count from the
+segment's own control-polygon length** (`start→controlStart→controlEnd→end`, the same "missing tangent's
+control point coincides with its vertex" convention `flattenSegment.ts`/`splitCubicBezier.ts` already use,
+so this doesn't introduce a second convention) — `ceil(controlPolygonLength / VECTOR_CURVE_SEGMENT_WORLD_LENGTH)`,
+clamped to `[VECTOR_CURVE_MIN_SEGMENTS, VECTOR_CURVE_MAX_SEGMENTS]` (`constant/canvas.ts`: `24`/`200`/`12`
+respectively — the min preserves the exact look small curves already had, so no existing curve gets
+coarser). This is **world-space, not screen-space/zoom-aware** — a deliberate scope trim: tying resolution
+to zoom would need threading `viewport` into every flatten call site (several of which, like
+`deriveVectorFaces.ts`, have no natural access to it and must stay deterministic regardless of the current
+view), whereas tying it to the curve's actual size fixes the "większy łuk" half of the report directly and
+the "bliżej zoom" half incidentally, since a curve large enough to need it at all only starts existing
+past the `MIN_SEGMENTS` floor's implicit ~288-world-unit threshold (`24 × 12`) — well beyond what any of
+this codebase's curve-fixture tests use, so every existing exact-point-count assertion (`deriveVectorFaces.spec.ts`,
+`drawPenSegmentPreview.spec.ts`) kept passing unchanged; only real large curves get more segments.
+
+**Replaces `VECTOR_CURVE_SEGMENTS` at all five call sites that flatten a curve for display or hit-testing**
+— `flattenVectorSegments.ts` (main stroke/fill render, §3), `deriveVectorFaces.ts` (fill boundary, §2),
+`getVectorEdgeAtPoint.ts` (edge hover/hit-test polyline projection, §4/§12), `drawHoveredSegmentHighlight.ts`
+(§4's edge-hover highlight overlay), and `drawPenSegmentPreview.ts` (the Pen tool's live rubber-band
+preview) — kept uniform deliberately: leaving even one of these on the old fixed count would make it
+visibly disagree with the others on a large curve (e.g. the hover highlight not exactly overlaying the
+now-smoother stroke it's supposed to trace). `getSegmentMidpoint.ts`'s own `flattenSegment(...,2)` call
+(hardcoded to get exactly the `t=0.5` sample, unrelated to visual resolution) and `splitCubicBezier.ts`
+(De Casteljau control-point math, takes no segment count at all) were untouched — neither one tessellates
+for display.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

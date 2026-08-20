@@ -91,7 +91,8 @@ describe('drawPenSegmentPreview', () => {
     // before
     call(preview, { x: 5, y: 0 }, 90);
 
-    // result — a curved (tangent-shaped) preview subdivides into VECTOR_CURVE_SEGMENTS (24) + 1 points
+    // result — a curved (tangent-shaped) preview subdivides into VECTOR_CURVE_MIN_SEGMENTS (24) + 1 points
+    // (this small control polygon floors to the minimum, well under the adaptive threshold)
     const [{ points }] = drawVectorStrokeMock.mock.calls[0][3];
 
     expect(points).toHaveLength(25);
