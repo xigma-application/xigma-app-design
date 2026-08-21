@@ -1,15 +1,51 @@
+// store
+import { deleteNode, updateNode } from 'store/design/slice';
+import { AppDispatch, store } from 'store';
+
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TSelectionToolRefs } from 'types/design/selectionTool/types';
+import { TVectorNode } from 'types/design/types';
+
+// utils
+import { bakeVectorNodeRotation } from '../../../../utils/bakeVectorNodeRotation';
+import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
+import { mergeVectorVertices } from 'utils/canvas/vectorNetwork/mergeVectorVertices';
 
 export const disarmVectorVertexDrag = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
+  dispatch: AppDispatch,
   canvasRefs: TCanvasRefs,
   selectionRefs: TSelectionToolRefs,
   setClassName: (className: string | null) => void,
 ): void => {
-  if (selectionRefs.vectorVertexDragRef.current) {
+  const dragState = selectionRefs.vectorVertexDragRef.current;
+
+  if (dragState) {
+    if (dragState.mergeTarget) {
+      const state = store.getState();
+      const sourceNode = getVectorEditingNode(state.design.nodes, dragState.nodeId);
+
+      if (sourceNode) {
+        const [sourceVertexId] = Object.keys(dragState.origins);
+        const isSameNode = dragState.mergeTarget.nodeId === sourceNode.id;
+        const rawTargetNode = state.design.nodes[dragState.mergeTarget.nodeId] as TVectorNode;
+        const targetNode = isSameNode
+          ? sourceNode
+          : { ...bakeVectorNodeRotation(rawTargetNode), vertexHandleModes: rawTargetNode.vertexHandleModes };
+        const merged = mergeVectorVertices(sourceNode, targetNode, sourceVertexId, dragState.mergeTarget.vertexId);
+
+        dispatch(updateNode({ changes: merged, id: sourceNode.id }));
+
+        if (!isSameNode) {
+          dispatch(deleteNode(dragState.mergeTarget.nodeId));
+        }
+
+        canvasRefs.selectedVectorVertexIdsRef.current = [sourceVertexId];
+      }
+    }
+
     canvas.releasePointerCapture(event.pointerId);
     selectionRefs.vectorVertexDragRef.current = null;
     canvasRefs.vectorAlignmentGuideRef.current = null;

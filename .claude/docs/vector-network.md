@@ -390,9 +390,11 @@ New entries in `handlePointerDown/constants.ts`'s `ARM_RESOLVERS` (highest prior
 
 ## 7. Explicit scope trims (flagged, not silent)
 
-- **Cross-object connecting/merging is out of scope** (your call, asked directly) — Pen/Vector Edit Mode
-  only ever snap to vertices of the one network currently open (`vectorEditingNodeId`), never a
-  different object's.
+- ~~Cross-object connecting/merging is out of scope~~ — **still true for the Pen tool specifically**
+  (Pen/its own click-to-close-a-loop only ever snaps to vertices of the one network currently open,
+  `vectorEditingNodeId`, never a different object's — that part of the original decision stands
+  unchanged), but a **separate, later feature implements it for Vector Edit Mode's vertex** *drag*,
+  including across two different shapes — see §46.
 - ~~Single-vertex selection only~~ — **implemented**: shift-multi-select and marquee-select of
   vertices/handles, plus multi-drag, all landed as part of §9-11's work; `selectedVectorVertexIdsRef`
   now holds any number of ids. See §20 for segment selection, which followed the same shift-toggle shape.
@@ -2762,6 +2764,75 @@ branches described above.
   now call a handler-hook instead of dispatching `setActiveTool` inline. Still true for wiring an
   ordinary new tool (icon/label/group stay entirely in `constants.ts`); only relevant if the new tool
   needs its own Vector-Edit-Mode membership decision on either path above.
+
+## 46. Dragging one vertex onto another merges them — same shape or two entirely different ones
+
+Landed as a follow-up asked for directly ("nie można je łączyć kiedy pointem najadę na point przyda się
+taka opcja... snap do tego punktu i zmiana kursora"), closing the gap §33 documented ("nothing in the
+codebase ever merges coincident vertices after the fact") for the one gesture where it matters most:
+dragging an existing vertex, in Vector Edit Mode, onto another existing vertex. Deliberately broader than
+§7's Pen-tool scope trim — this also merges across two *different* vector nodes (confirmed directly,
+including after the added complexity of absorbing another node's rotation/graph was spelled out).
+
+**Convention: the dragged vertex always survives; the vertex it's dropped onto is always the one absorbed
+and removed.** This single rule is what makes the same-shape and cross-shape cases collapse into one
+algorithm — `vectorEditingNodeId` never has to change (the node currently open for editing is never the
+one deleted), and the post-merge selection is always just `[draggedVertexId]`, no branching needed.
+
+- **Cross-node hit-test** — `Canvas/utils/getVectorVertexAtPointAcrossNodes.ts` scans *every*
+  `NodeType.vector` node on the canvas (not just the one being edited), baking each one's rotation first
+  (`bakeVectorNodeRotation.ts`, same as `getAllVectorVertexPositions.ts`'s existing alignment-guide scan)
+  so a not-currently-baked shape elsewhere is still hit-tested in true world coordinates. Returns the
+  resolved absolute point alongside the ids, so the caller never needs to re-fetch/re-bake just to read a
+  position. Tolerance reuses `VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom` — the same constant plain
+  vertex-hover hit-testing already uses, for a consistent affordance size, not
+  `VECTOR_ALIGNMENT_SNAP_TOLERANCE_PX` (that one drives the separate, weaker axis-alignment guide, §40).
+- **`handlePointerMove/continueVectorVertexDrag/`** (promoted from a flat file to its own folder, same
+  "ifologia" split rule as §9/§32/§42, once the merge-detection block grew into its own concern) — the
+  main file still computes the drag's post-alignment-corrected position exactly as before, then, only when
+  exactly one vertex is being dragged (`vectorVertexDragRef` never actually holds more than one — group
+  drag is a different ref/mechanism, `armVectorGroupDrag`/multi-select), hands off to
+  `resolveVectorVertexMerge.ts`: if `getVectorVertexAtPointAcrossNodes` finds a hit, it overwrites the
+  dragged vertex's position with the hit's exact point (a full coincidence snap, stronger than and
+  overriding the axis-alignment guide — nulls `vectorAlignmentGuideRef` instead of showing both), records
+  `{ nodeId, vertexId }` on the drag state's own `mergeTarget` field, and switches the cursor to `'point'`;
+  no hit clears `mergeTarget` back to `null` and falls back to the ordinary `'move'`/alignment-guide path.
+- **Why `mergeTarget` lives on `TVectorVertexDragState` itself (mutated in place), not a separate ref** —
+  this ref has exactly one producer and one other consumer (`disarmVectorVertexDrag.ts`); nothing else
+  ever needs to reason about the field's absence, unlike §32/§33's precedent where a genuinely *shared*
+  ref forced a separate "pending" ref onto an unrelated caller.
+- **Why the merge target is recorded live during the drag, not re-derived from scratch at disarm time** —
+  if the pointer never actually moves between down and up, `continueVectorVertexDrag` never runs at all;
+  re-deriving purely from the vertex's final (unmoved) position at disarm would risk auto-merging two
+  vertices that only *happen* to sit within tolerance from earlier imprecise drawing (the exact, deliberately
+  unfixed gap §33 documents) even though nothing was actually dragged onto anything.
+- **`utils/canvas/vectorNetwork/mergeVectorVertices.ts`** — the pure merge algorithm, taking two lightweight
+  `Pick<TVectorNode, 'segments' | 'vertexHandleModes' | 'vertices'>` slices (not full nodes, so tests don't
+  need full fixtures) rather than one node plus an id, since the cross-node case has no single "the node"
+  to mutate in place: unions both sides' `segments`, retargets every `startId`/`endId` equal to the
+  absorbed vertex onto the surviving one (tangents are untouched — they're offsets relative to their own
+  vertex, §1, so retargeting the anchor id alone reshapes correctly), drops any segment that became a
+  self-loop this way (the direct edge between two vertices that were already adjacent collapses instead of
+  surviving as a zero-length segment — parallel/multi-edges from any other overlap are deliberately left
+  alone, not deduped, since face derivation's half-edge walk already tolerates those), then unions and
+  prunes `vertices`/`vertexHandleModes` the same way. Returns a plain patch; never deletes a node itself.
+- **`disarmVectorVertexDrag.ts`** reads the live (already-snapped, by the last `continueVectorVertexDrag`
+  write) node fresh from the store, decides `isSameNode` from whether the merge target's `nodeId` matches
+  the node actually being edited, bakes the *other* node's rotation only when it's a genuinely different,
+  never-entered-for-editing node (`bakeVectorNodeRotation` is a documented no-op when `rotation` is already
+  `0`, so reusing it unconditionally there is harmless), dispatches the merge patch onto the surviving
+  node, and — only for the cross-node case — dispatches an ordinary `deleteNode` for the absorbed one.
+  Both land inside the same drag's history gesture (§8) as one undo step. `dispatch` had to be threaded
+  into this disarm function for the first time (mirroring the sibling disarms on the same line in
+  `handlePointerUp.ts` that already receive it) — every earlier version of this function was a pure ref/DOM
+  cleanup with nothing to dispatch.
+- **Cursor asset** — `assets/icons/cursors/point.png` already existed in the repo, unused by anything, until
+  this feature gave it a `&--point` class in `canvas.module.scss` (identical shape to the existing
+  `&--pen-snap`/`&--pen-extend` blocks, hotspot `4 4` per direct request).
+- Verified live via the Playwright MCP browser against the actual dev server (dragging one square's corner
+  onto an adjacent corner of the same square collapses that edge into a triangle; dragging one square's
+  corner onto a second, entirely separate square absorbs the whole second square and deletes it) before
+  the permanent regression tests were written — see `TEST_CASES.md` #245/#246, `vector-edit.spec.ts`.
 
 ## Related
 

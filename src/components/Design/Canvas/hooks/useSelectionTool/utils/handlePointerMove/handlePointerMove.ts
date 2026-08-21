@@ -28,7 +28,7 @@ import { continueVectorMultiDrag } from './continueVectorMultiDrag';
 import { continueVectorMultiSelectResizeDrag } from './continueVectorMultiSelectResizeDrag';
 import { continueVectorMultiSelectRotateDrag } from './continueVectorMultiSelectRotateDrag';
 import { continueVectorSegmentBendDrag } from './continueVectorSegmentBendDrag/continueVectorSegmentBendDrag';
-import { continueVectorVertexDrag } from './continueVectorVertexDrag';
+import { continueVectorVertexDrag } from './continueVectorVertexDrag/continueVectorVertexDrag';
 import { resolveVectorCornerHandleDrag } from './resolveVectorCornerHandleDrag';
 import { resolveVectorPaintHover } from './resolveVectorPaintHover';
 import { resolveVectorSegmentHover } from './resolveVectorSegmentHover/resolveVectorSegmentHover';

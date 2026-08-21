@@ -1579,3 +1579,97 @@ test('Paint fills all 3 regions of a curved "egg" network crossed by a triangle 
   // actually painted something, rather than having silently stopped after an uncaught exception
   expect(shot.length).toBeGreaterThan(0);
 });
+
+test('dragging one vertex of a closed square onto its adjacent vertex merges them: cursor switches to the merge affordance mid-drag, and release collapses the shared edge into a triangle', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-merge-same-shape');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawClosedSquare(designPage); // v1(900,300), v2(1000,300), v3(1000,400), v4(900,400)
+  await designPage.selectVectorEditMoveTool();
+
+  await designPage.pointerDown(900, 400); // v4
+  await designPage.pointerMove(900, 350);
+  await designPage.pointerMove(903, 302); // a couple px off v1(900,300) — within merge tolerance, not exact
+
+  const cursor = await designPage.canvas.evaluate((el) => getComputedStyle(el).cursor);
+
+  await designPage.pointerUp();
+
+  expect(cursor).toContain('point.png');
+
+  const result = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const state = store.getState();
+    const nodeId = state.design.rootOrder[state.design.rootOrder.length - 1];
+    const node = state.design.nodes[nodeId];
+
+    return { segmentCount: Object.keys(node.segments).length, vertexCount: Object.keys(node.vertices).length };
+  });
+
+  // 4 vertices/segments before the merge — v1 absorbs v4, and the v4-v1 closing edge collapses to a
+  // self-loop and gets dropped, leaving a plain 3-vertex/3-segment triangle
+  expect(result.vertexCount).toBe(3);
+  expect(result.segmentCount).toBe(3);
+});
+
+test('dragging a vertex of one vector shape onto a vertex of a completely separate shape merges the two shapes into one, deleting the absorbed shape', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-merge-cross-shape');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawClosedSquare(designPage); // shape A: v1(900,300) .. v4(900,400)
+  await exitVectorEditMode(designPage);
+
+  await designPage.drawVectorPath([
+    { x: 1300, y: 300 },
+    { x: 1400, y: 300 },
+    { x: 1400, y: 400 },
+    { x: 1300, y: 400 },
+    { x: 1300, y: 300 },
+  ]); // shape B, a second, fully separate closed square
+  await exitVectorEditMode(designPage);
+
+  const { idA, idB } = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { rootOrder } = store.getState().design;
+
+    return { idA: rootOrder[0], idB: rootOrder[1] };
+  });
+
+  await designPage.doubleClick(1350, 350); // enter Vector Edit Mode on shape B
+
+  await designPage.pointerDown(1300, 300); // shape B's own top-left vertex
+  await designPage.pointerMove(1150, 300);
+  await designPage.pointerMove(1003, 302); // a couple px off shape A's top-right vertex (1000,300)
+  await designPage.pointerUp();
+
+  const result = await page.evaluate(
+    async ([nodeIdA, nodeIdB]) => {
+      const { store } = await import('/src/store/index.ts');
+      const state = store.getState();
+      const nodeB = state.design.nodes[nodeIdB];
+
+      return {
+        nodeAExists: Boolean(state.design.nodes[nodeIdA]),
+        segmentCount: Object.keys(nodeB.segments).length,
+        vectorEditingNodeId: state.design.vectorEditingNodeId,
+        vertexCount: Object.keys(nodeB.vertices).length,
+      };
+    },
+    [idA, idB],
+  );
+
+  // shape A is fully absorbed and deleted; shape B (the node still open for editing) keeps its own id and
+  // gains shape A's whole graph — both squares' 4+4 vertices/segments, minus the one merged-away vertex
+  expect(result.nodeAExists).toBe(false);
+  expect(result.vertexCount).toBe(7);
+  expect(result.segmentCount).toBe(8);
+  expect(result.vectorEditingNodeId).toBe(idB);
+});

@@ -1,5 +1,5 @@
 // others
-import { VECTOR_ALIGNMENT_SNAP_TOLERANCE_PX } from 'constant/canvas';
+import { VECTOR_ALIGNMENT_SNAP_TOLERANCE_PX, VECTOR_VERTEX_HIT_RADIUS_PX } from 'constant/canvas';
 
 // store
 import { updateNode } from 'store/design/slice';
@@ -11,12 +11,13 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 // utils
-import { getAllVectorVertexPositions } from '../../../../utils/getAllVectorVertexPositions';
-import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
-import { getVectorGroupAlignmentGuide } from '../../../../utils/getVectorGroupAlignmentGuide';
-import { screenToWorld } from '../../../../utils/screenToWorld';
-import { translateVectorVertices } from '../../../../utils/translateVectorVertices';
+import { getAllVectorVertexPositions } from '../../../../../utils/getAllVectorVertexPositions';
+import { getPointerPosition } from '../../../../../utils/getPointerPosition';
+import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
+import { getVectorGroupAlignmentGuide } from '../../../../../utils/getVectorGroupAlignmentGuide';
+import { resolveVectorVertexMerge } from './resolveVectorVertexMerge';
+import { screenToWorld } from '../../../../../utils/screenToWorld';
+import { translateVectorVertices } from '../../../../../utils/translateVectorVertices';
 
 export const continueVectorVertexDrag = (
   canvas: HTMLCanvasElement,
@@ -44,9 +45,16 @@ export const continueVectorVertexDrag = (
       const { deltaCorrection, guide } = getVectorGroupAlignmentGuide(draggedPoints, candidates, alignmentTolerance);
       const draggedVertices = translateVectorVertices(dragState.origins, deltaX + deltaCorrection.x, deltaY + deltaCorrection.y);
 
+      if (draggedVertexIds.length === 1) {
+        const mergeTolerance = VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom;
+
+        resolveVectorVertexMerge(draggedVertices, dragState, state.design.nodes, guide, mergeTolerance, canvasRefs, setClassName);
+      } else {
+        canvasRefs.vectorAlignmentGuideRef.current = guide;
+        setClassName('move');
+      }
+
       dispatch(updateNode({ changes: { vertices: { ...node.vertices, ...draggedVertices } }, id: dragState.nodeId }));
-      canvasRefs.vectorAlignmentGuideRef.current = guide;
-      setClassName('move');
     }
   }
 };

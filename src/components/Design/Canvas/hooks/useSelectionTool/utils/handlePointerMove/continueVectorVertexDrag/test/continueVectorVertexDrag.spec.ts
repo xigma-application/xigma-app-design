@@ -1,5 +1,5 @@
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setSelection, updateNode } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -7,8 +7,8 @@ import { NodeType } from 'types/design/enums';
 
 // utils
 import { continueVectorVertexDrag } from '../continueVectorVertexDrag';
-import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
-import { createSelectionToolRefs } from '../../../hooks/useSelectionToolRefs/createSelectionToolRefs';
+import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
+import { createSelectionToolRefs } from '../../../../hooks/useSelectionToolRefs/createSelectionToolRefs';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -186,5 +186,98 @@ describe('continueVectorVertexDrag', () => {
       vertices: { v1: { id: 'v1', x: 20, y: 350 }, v2: { id: 'v2', x: 120, y: 350 } },
     });
     expect(canvasRefs.vectorAlignmentGuideRef.current).not.toBeNull();
+  });
+
+  it('should snap a single dragged vertex exactly onto another vertex of the SAME node when within merge tolerance, record the merge target, and switch the cursor to point', () => {
+    // mock — coordinates far from any other vertex this file's other tests leave lying around in the
+    // (unreset between tests) store, so the merge target found below is unambiguously this node's own
+    const idA = addVectorNode();
+
+    store.dispatch(
+      updateNode({
+        changes: { vertices: { v1: { id: 'v1', x: 5000, y: 0 }, v2: { id: 'v2', x: 5100, y: 0 } } },
+        id: idA,
+      }),
+    );
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const selectionRefs = createSelectionToolRefs();
+
+    selectionRefs.vectorVertexDragRef.current = { nodeId: idA, origins: { v1: { x: 5000, y: 0 } }, pointerStart: { x: 5000, y: 0 } };
+
+    const setClassName = vi.fn();
+
+    // before
+    continueVectorVertexDrag(canvas, pointerEvent(5102, 1), store.dispatch, canvasRefs, selectionRefs, setClassName);
+
+    // result
+    const node = store.getState().design.nodes[idA];
+
+    expect(node).toMatchObject({ vertices: { v1: { id: 'v1', x: 5100, y: 0 } } });
+    expect(selectionRefs.vectorVertexDragRef.current?.mergeTarget).toEqual({ nodeId: idA, vertexId: 'v2' });
+    expect(canvasRefs.vectorAlignmentGuideRef.current).toBeNull();
+    expect(setClassName).toHaveBeenCalledWith('point');
+  });
+
+  it('should detect a merge target belonging to a DIFFERENT vector node, not just the one being edited', () => {
+    // mock — a separate node has a vertex within merge tolerance of the drag
+    const idA = addVectorNode();
+
+    store.dispatch(
+      addNode({
+        fillColor: null,
+        filledFaceKeys: [],
+        name: 'Vector',
+        parentId: null,
+        rotation: 0,
+        segments: {},
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: NodeType.vector,
+        vertexHandleModes: {},
+        vertices: { other: { id: 'other', x: 500, y: 500 } },
+      }),
+    );
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const selectionRefs = createSelectionToolRefs();
+
+    selectionRefs.vectorVertexDragRef.current = { nodeId: idA, origins: { v1: { x: 500, y: 500 } }, pointerStart: { x: 500, y: 500 } };
+
+    const setClassName = vi.fn();
+
+    // before — v1 dragged to (500,500), exactly onto the other node's vertex
+    continueVectorVertexDrag(canvas, pointerEvent(500, 500), store.dispatch, canvasRefs, selectionRefs, setClassName);
+
+    // result
+    expect(selectionRefs.vectorVertexDragRef.current?.mergeTarget?.vertexId).toBe('other');
+    expect(selectionRefs.vectorVertexDragRef.current?.mergeTarget?.nodeId).not.toBe(idA);
+    expect(setClassName).toHaveBeenCalledWith('point');
+  });
+
+  it('should clear a previously recorded merge target and restore the move cursor once dragged back out of tolerance', () => {
+    // mock
+    const idA = addVectorNode();
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const selectionRefs = createSelectionToolRefs();
+
+    selectionRefs.vectorVertexDragRef.current = {
+      mergeTarget: { nodeId: idA, vertexId: 'v2' },
+      nodeId: idA,
+      origins: { v1: { x: 0, y: 0 } },
+      pointerStart: { x: 0, y: 0 },
+    };
+
+    const setClassName = vi.fn();
+
+    // before — well outside merge tolerance of v2(100,0)
+    continueVectorVertexDrag(canvas, pointerEvent(15, 7), store.dispatch, canvasRefs, selectionRefs, setClassName);
+
+    // result
+    expect(selectionRefs.vectorVertexDragRef.current?.mergeTarget).toBeNull();
+    expect(setClassName).toHaveBeenCalledWith('move');
   });
 });

@@ -83,6 +83,7 @@ export type TRotateDragState = {
 };
 
 export type TVectorVertexDragState = {
+  mergeTarget?: { nodeId: string; vertexId: string } | null;
   nodeId: string;
   origins: Record<string, TPoint>;
   pointerStart: TPoint;
