@@ -4,6 +4,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TVectorNode } from 'types/design/types';
 
 // utils
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
@@ -128,7 +129,7 @@ describe('disarmVectorVertexDrag', () => {
     disarmVectorVertexDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result
-    const node = store.getState().design.nodes[idA];
+    const node = store.getState().design.nodes[idA] as TVectorNode;
 
     expect(node).toMatchObject({ vertices: { v1: { id: 'v1', x: 100, y: 0 } } });
     expect(Object.keys(node.vertices)).not.toContain('v2');

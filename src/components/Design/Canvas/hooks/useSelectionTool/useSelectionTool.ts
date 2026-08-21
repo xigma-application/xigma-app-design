@@ -82,7 +82,8 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         activeTool === ToolName.move ||
         activeTool === ToolName.scale ||
         activeTool === ToolName.lasso ||
-        activeTool === ToolName.paint) &&
+        activeTool === ToolName.paint ||
+        activeTool === ToolName.bend) &&
       !isCanvasCaretEditingActive
     ) {
       const pointerDownListener = (event: PointerEvent): void => onPointerDown(canvas, event, refs, selectionRefs);

@@ -40,6 +40,17 @@ everything else, including every hook/util/component you touch, is held to the s
    was actually the thing that needed fixing. This is the last step, after tests/tsc are already
    green, not a substitute for them.
 
+## Don't re-run it redundantly once it's green
+
+Once `npm run test:coverage` passes clean (100% across all four metrics) after the actual
+unit-test-relevant changes are in, a **later** step in the same task that doesn't touch any `src/**`
+`.ts`/`.tsx` file (implementation or `.spec.ts(x)`) does not need a second full run. This includes:
+running `npm run prettier:write` (formatting-only diffs can't change coverage), adding/editing an
+`e2e/**` Playwright spec, updating `TEST_CASES.md`, or writing/updating `.claude/docs/**` notes. Run
+`tsc -p tsconfig.app.json --noEmit` (cheap) and/or `npx playwright test` for e2e-only follow-up work
+instead of paying for the full ~90s+ coverage run again. Only re-trigger `test:coverage` if a `src/**`
+unit-relevant file changes again after the last green run.
+
 ## Worked example: a gesture's *release* path, not just its *start*
 
 `useSelectionTool.ts`'s `handlePointerUp` has an `if (endpointDragRef.current) { endpointDragRef.current

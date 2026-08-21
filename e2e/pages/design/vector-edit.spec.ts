@@ -1580,6 +1580,39 @@ test('Paint fills all 3 regions of a curved "egg" network crossed by a triangle 
   expect(shot.length).toBeGreaterThan(0);
 });
 
+test('selecting Bend from VectorEditToolbar makes a plain (no-Ctrl) segment drag bend it, pixel-identical to the existing Ctrl/Cmd+drag gesture, and stays active until switched away', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-bend-tool-selected');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawStraightSegment(designPage);
+  await designPage.selectVectorEditMoveTool();
+  await page.getByRole('button', { name: 'Bend' }).click();
+
+  // clipped to the curve's own neighborhood, well clear of VectorEditToolbar's floating panel — the
+  // canvas element's bounding box spans the whole viewport underneath the toolbar chrome (see
+  // DesignPage.ts's own canvasSafeArea note), so an unclipped screenshot would also capture the Bend
+  // button's now-pressed/highlighted look, which the reference run below never triggers
+  const region = { height: 200, width: 200, x: 875, y: 150 };
+
+  await designPage.dragVectorPoint(975, 300, 975, 200); // no Ctrl held — Bend tool alone should curve it
+  const bentViaTool = await page.screenshot({ clip: region });
+
+  await designPage.goto('e2e-test-vector-edit-bend-tool-selected-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawStraightSegment(designPage);
+  await designPage.selectVectorEditMoveTool();
+
+  await designPage.ctrlDragVectorPoint(975, 300, 975, 200); // identical drag, via the existing Ctrl gesture
+  const bentViaCtrl = await page.screenshot({ clip: region });
+
+  expect(bentViaTool.equals(bentViaCtrl)).toBe(true);
+});
+
 test('dragging one vertex of a closed square onto its adjacent vertex merges them: cursor switches to the merge affordance mid-drag, and release collapses the shared edge into a triangle', async ({
   page,
 }) => {

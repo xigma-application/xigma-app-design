@@ -1,5 +1,5 @@
 // store
-import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeId, updateNode } from 'store/design/slice';
+import { addNode, setActiveTool, setPenActiveVertexId, setSelection, setVectorEditingNodeId, updateNode } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -1259,6 +1259,7 @@ describe('armVectorCornerHandleOnPointerDown', () => {
 describe('armVectorBendSegmentOnPointerDown', () => {
   afterEach(() => {
     store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setActiveTool(ToolName.default));
   });
 
   it('should reveal straight-line default tangents on both ends, mark both endpoints symmetric, select only the segment (so its tangent handles render), arm a bend drag remembering the original (null) tangents for an Escape-revert, and return true when Ctrl is held over a plain straight segment', () => {
@@ -1316,6 +1317,24 @@ describe('armVectorBendSegmentOnPointerDown', () => {
 
     // before
     const ctx = createContext({ event: pointerEvent({ metaKey: true }), point: { x: 25, y: 0 } });
+
+    // result
+    expect(armVectorBendSegmentOnPointerDown(ctx)).toBe(true);
+    expect(ctx.selectionRefs.vectorSegmentBendDragRef.current).toMatchObject({ nodeId, segmentId: 's1' });
+  });
+
+  it('should arm the bend drag when the Bend tool is the active tool, even with neither Ctrl nor Meta held', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setActiveTool(ToolName.bend));
+
+    // before
+    const ctx = createContext({ point: { x: 25, y: 0 } });
 
     // result
     expect(armVectorBendSegmentOnPointerDown(ctx)).toBe(true);

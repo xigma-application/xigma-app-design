@@ -1,11 +1,11 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setActiveTool, setSelection, setVectorEditingNodeId } from 'store/design/slice';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
@@ -52,6 +52,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
     store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setActiveTool(ToolName.default));
   });
 
   it('should show the fixed midpoint insert-point anywhere along the segment, but only switch the cursor to pen-extend once the pointer is precisely over that point', () => {
@@ -221,6 +222,36 @@ describe('resolveVectorSegmentHoverInNode', () => {
     resolveVectorSegmentHoverInNode(
       canvas,
       pointerEvent(25, 0, 0, true),
+      store.getState(),
+      node,
+      hoveredVectorSegmentIdRef,
+      hoveredVectorEdgeInsertPointRef,
+      setClassName,
+    );
+
+    // result
+    expect(hoveredVectorSegmentIdRef.current).toBe('s1');
+    expect(hoveredVectorEdgeInsertPointRef.current).toBeNull();
+    expect(setClassName).toHaveBeenCalledWith('bend');
+  });
+
+  it('should switch the cursor to bend and hide the insert-point dot when the Bend tool is active, even with no Ctrl held', () => {
+    // mock — persistently selecting Bend from VectorEditToolbar must feel identical to holding Ctrl
+    const nodeId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setActiveTool(ToolName.bend));
+
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const canvas = createCanvas();
+    const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
+    const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef({ x: 50, y: 0 });
+    const setClassName = vi.fn();
+
+    // before — no Ctrl held, hovering the segment's own interior
+    resolveVectorSegmentHoverInNode(
+      canvas,
+      pointerEvent(25, 0),
       store.getState(),
       node,
       hoveredVectorSegmentIdRef,

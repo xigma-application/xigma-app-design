@@ -4,6 +4,9 @@ import { useTranslation } from 'react-i18next';
 // components
 import { Icon } from 'shared';
 
+// hooks
+import { useIsBendModifierHeld } from './useIsBendModifierHeld';
+
 // others
 import cx from 'classnames';
 import { ICON_SIZE, TVectorEditTool } from '../constants';
@@ -25,11 +28,25 @@ export type TUseVectorEditToolbar = {
   vectorEditingNodeId: string | null;
 };
 
+export const getIsVectorEditToolActive = (toolName: ToolName | undefined, activeTool: ToolName, isBendModifierHeld: boolean): boolean => {
+  switch (toolName) {
+    case undefined:
+      return false;
+    case ToolName.move:
+      return activeTool === ToolName.move && !isBendModifierHeld;
+    case ToolName.bend:
+      return activeTool === ToolName.bend || (activeTool === ToolName.move && isBendModifierHeld);
+    default:
+      return activeTool === toolName;
+  }
+};
+
 export const useVectorEditToolbar = (): TUseVectorEditToolbar => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const vectorEditingNodeId = useAppSelector(selectVectorEditingNodeId);
   const activeTool = useAppSelector(selectActiveTool);
+  const isBendModifierHeld = useIsBendModifierHeld();
 
   const handleClose = useCallback((): void => {
     dispatch(setActiveTool(ToolName.default));
@@ -38,7 +55,7 @@ export const useVectorEditToolbar = (): TUseVectorEditToolbar => {
 
   const renderTool = useCallback(
     (tool: TVectorEditTool): ReactNode => {
-      const isActive = tool.toolName !== undefined && activeTool === tool.toolName;
+      const isActive = getIsVectorEditToolActive(tool.toolName, activeTool, isBendModifierHeld);
       const handleClick =
         tool.toolName !== undefined
           ? (): void => {
@@ -61,7 +78,7 @@ export const useVectorEditToolbar = (): TUseVectorEditToolbar => {
         </button>
       );
     },
-    [activeTool, dispatch, t],
+    [activeTool, dispatch, isBendModifierHeld, t],
   );
 
   return { handleClose, renderTool, vectorEditingNodeId };

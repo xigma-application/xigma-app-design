@@ -11,6 +11,7 @@ export const translationNameSpace = `${parentNameSpace}.toolbar`;
 
 export const TOOL_ICON: Record<ToolName, keyof typeof Icons> = {
   [ToolName.arrow]: 'ArrowTool',
+  [ToolName.bend]: 'BendTool',
   [ToolName.default]: 'MoveTool',
   [ToolName.ellipse]: 'EllipseTool',
   [ToolName.frame]: 'FrameTool',
@@ -35,6 +36,7 @@ export const TOOL_ICON: Record<ToolName, keyof typeof Icons> = {
 
 export const TOOL_LABEL: Record<ToolName, string> = {
   [ToolName.arrow]: `${translationNameSpace}.tool.arrow`,
+  [ToolName.bend]: 'design.toolbar.vectorEditToolbar.tool.bend',
   [ToolName.comment]: `${translationNameSpace}.tool.comment`,
   [ToolName.default]: `${translationNameSpace}.tool.default`,
   [ToolName.ellipse]: `${translationNameSpace}.tool.ellipse`,

@@ -4,10 +4,11 @@ import { RefObject } from 'react';
 import { VECTOR_EDGE_HIT_TOLERANCE_PX, VECTOR_VERTEX_HIT_RADIUS_PX } from 'constant/canvas';
 
 // store
-import { selectViewport } from 'store/design/selectors';
+import { selectActiveTool, selectViewport } from 'store/design/selectors';
 import { RootState } from 'store';
 
 // types
+import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
@@ -50,7 +51,7 @@ export const resolveVectorSegmentHoverInNode = (
 
   hoveredVectorSegmentIdRef.current = hit?.segmentId ?? null;
 
-  if (event.buttons === 0 && (event.ctrlKey || event.metaKey)) {
+  if (event.buttons === 0 && (event.ctrlKey || event.metaKey || selectActiveTool(state) === ToolName.bend)) {
     hoveredVectorEdgeInsertPointRef.current = null;
     const vertexHit = getVectorCornerHandleAtPoint(point, bakedNode, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
     const alternativeCursor = hit ? 'bend' : null;

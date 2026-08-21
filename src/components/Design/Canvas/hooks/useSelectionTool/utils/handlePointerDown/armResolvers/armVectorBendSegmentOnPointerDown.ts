@@ -2,11 +2,12 @@
 import { VECTOR_EDGE_HIT_TOLERANCE_PX, VECTOR_VERTEX_HIT_RADIUS_PX } from 'constant/canvas';
 
 // store
-import { selectVectorEditingNodeId } from 'store/design/selectors';
+import { selectActiveTool, selectVectorEditingNodeId } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
 import { TArmContext } from '../types';
+import { ToolName } from 'types/design/enums';
 
 // utils
 import { commitVectorBendSegment } from '../../../../../utils/commitVectorBendSegment';
@@ -23,7 +24,7 @@ export const armVectorBendSegmentOnPointerDown = ({
   selectionRefs,
   viewport,
 }: TArmContext): true | undefined => {
-  if (event.ctrlKey || event.metaKey) {
+  if (event.ctrlKey || event.metaKey || selectActiveTool(store.getState()) === ToolName.bend) {
     const node = getVectorEditingNode(store.getState().design.nodes, selectVectorEditingNodeId(store.getState()));
 
     if (node) {

@@ -2834,6 +2834,63 @@ one deleted), and the post-merge selection is always just `[draggedVertexId]`, n
   corner onto a second, entirely separate square absorbs the whole second square and deletes it) before
   the permanent regression tests were written — see `TEST_CASES.md` #245/#246, `vector-edit.spec.ts`.
 
+## 47. Bend becomes a real, persistent tool — plus a Ctrl-held visual preview in `VectorEditToolbar`
+
+Until now, "Bend" (the segment-interior-curving gesture from §32-33) only ever existed as a Ctrl/Cmd
+modifier on top of the Move tool — `VectorEditToolbar`'s own Bend button (§41) was purely decorative,
+its `TOOLS` entry carrying no `toolName`, so clicking it dispatched nothing. Two things were asked for
+directly, and are genuinely different mechanisms: (1) clicking Bend in the toolbar should make it a real,
+*persistent* active tool — plain (no-Ctrl) segment drags bend from then on, until the user switches away
+— and (2) merely *holding* Ctrl/Cmd while Move is the real active tool should *visually* flip the
+toolbar's highlighted button to Bend, with **no** Redux dispatch, reverting the instant Ctrl/Cmd is
+released.
+
+**One rule unifies both**: `ToolName.bend` is a real enum value now (added alphabetically between
+`arrow` and `comment`), wired through every place `ToolName.move` already was (`useSelectionTool.ts`'s
+pointer-handler mount-gate, `dispatchTool.ts`'s `VECTOR_EDIT_ALLOWED_TOOLS` whitelist,
+`VectorEditToolbar/constants.ts`'s `TOOLS` entry, `Toolbar/constants.ts`'s exhaustive `TOOL_ICON`/
+`TOOL_LABEL` maps — adding the enum value and running `tsc` immediately surfaced exactly which
+`Record<ToolName, ...>` maps needed a new entry, rather than hunting for them by hand). `handleLeave.ts`'s
+Escape-staging needed **no change** — it already reads `activeTool !== ToolName.move` generically (not
+a hardcoded tool list), so Escape from Bend already staged back to Move correctly by construction.
+
+`useVectorEditToolbar.tsx`'s `renderTool` swaps its old one-line `isActive` check for a switch-shaped
+helper, `getIsVectorEditToolActive(toolName, activeTool, isBendModifierHeld)` (xigma-switch-over-if: 3+
+branches on the same value), the only place either scenario's logic lives:
+- any tool with no `toolName` → never active (unchanged).
+- Move → active only when it's the real `activeTool` **and** Ctrl/Cmd isn't currently held.
+- Bend → active when it's the real `activeTool`, **or** when Move is the real `activeTool` and Ctrl/Cmd
+  *is* held.
+- every other tool → the original plain `activeTool === toolName` check, untouched.
+
+Neither branch ever touches Redux — the toolbar's own highlight is the only thing that moves when Ctrl
+is held; `activeTool` itself only changes on an actual click, via the already-generic `handleClick`.
+
+**`isBendModifierHeld` — a genuinely new mechanism, `VectorEditToolbar/hooks/useIsBendModifierHeld.ts`.**
+Confirmed via a repo-wide grep that nothing in this codebase tracks a modifier key *continuously* before
+this — every existing Ctrl/Cmd check (§32's bend-drag arm, §9's corner-handle-pull) reads `event.ctrlKey`
+off one specific pointer event; the closest precedent for continuous tracking is `useSelectionTool.ts`'s
+Shift listener, which doesn't store any state at all, it just re-synthesizes a `pointermove` to refresh
+an *already-in-progress* drag. This is the first place that needed the actual live boolean, since nothing
+is being dragged — a toolbar button just needs to know if the key is down right now. A small hook with a
+`useState` plus `window` `keydown`/`keyup`/`blur` listeners (the `blur` reset covers Alt-Tabbing away
+mid-hold, where `keyup` would otherwise never fire and the flag would stick `true` forever) — no Context
+or Redux needed, since per `xigma-provider-placement` this state is consumed by exactly one component
+subtree (`VectorEditToolbar` itself), which doesn't even rise to needing a shared provider.
+
+**Making the underlying drag/hover logic respect the persistent tool, not just the live modifier** —
+`armVectorBendSegmentOnPointerDown.ts`'s gate became `event.ctrlKey || event.metaKey ||
+selectActiveTool(store.getState()) === ToolName.bend`; `resolveVectorSegmentHoverInNode.ts`'s hover-cursor
+branch got the identical addition, so hovering a segment with Bend persistently selected shows the same
+`bend` cursor Ctrl-hover already does, instead of looking inert until the user *also* holds Ctrl. Verified
+e2e (`TEST_CASES.md` #247) that a plain drag with Bend selected from the toolbar renders **pixel-identical**
+to the existing Ctrl+drag gesture on the same two points — same underlying `commitVectorBendSegment`/
+`continueVectorSegmentBendDrag` machinery either way, only the arm condition differs.
+
+**Deliberately not touched**: `armVectorCornerHandleOnPointerDown.ts` (§9's Ctrl+drag-a-fresh-handle-
+from-a-corner-vertex gesture) — it shares the same Ctrl/Cmd modifier by convention, but is a different
+feature never called "Bend" anywhere in the code or the user's own request; left Ctrl-only.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

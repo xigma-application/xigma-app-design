@@ -47,7 +47,6 @@ export const continueVectorVertexDrag = (
 
       if (draggedVertexIds.length === 1) {
         const mergeTolerance = VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom;
-
         resolveVectorVertexMerge(draggedVertices, dragState, state.design.nodes, guide, mergeTolerance, canvasRefs, setClassName);
       } else {
         canvasRefs.vectorAlignmentGuideRef.current = guide;

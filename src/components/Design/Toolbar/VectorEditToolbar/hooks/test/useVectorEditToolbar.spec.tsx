@@ -2,7 +2,7 @@ import { act, fireEvent, render, renderHook, screen } from '@testing-library/rea
 import { Provider } from 'react-redux';
 
 // hooks
-import { useVectorEditToolbar } from '../useVectorEditToolbar';
+import { getIsVectorEditToolActive, useVectorEditToolbar } from '../useVectorEditToolbar';
 
 // store
 import { setActiveTool, setVectorEditingNodeId } from 'store/design/slice';
@@ -86,6 +86,31 @@ describe('useVectorEditToolbar', () => {
     expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'false');
   });
 
+  it('should dispatch Bend as the real active tool on click, and show it active when Bend already is the active tool', () => {
+    // before
+    store.dispatch(setActiveTool(ToolName.bend));
+
+    const { result } = renderUseVectorEditToolbar();
+
+    render(
+      <Provider store={store}>
+        {result.current.renderTool({ icon: 'BendTool', labelKey: 'design.toolbar.vectorEditToolbar.tool.bend', toolName: ToolName.bend })}
+      </Provider>,
+    );
+
+    // result
+    expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
+
+    // action
+    act(() => {
+      store.dispatch(setActiveTool(ToolName.default));
+    });
+    fireEvent.click(screen.getByRole('button'));
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.bend);
+  });
+
   it('should render a tool with no ToolName as inert — never active, no click handler', () => {
     // before
     store.dispatch(setActiveTool(ToolName.pen));
@@ -108,5 +133,49 @@ describe('useVectorEditToolbar', () => {
 
     // result
     expect(store.getState().design.activeTool).toBe(ToolName.pen);
+  });
+});
+
+describe('getIsVectorEditToolActive', () => {
+  it('should return false for a tool with no ToolName', () => {
+    // result
+    expect(getIsVectorEditToolActive(undefined, ToolName.move, false)).toBe(false);
+  });
+
+  it('should show Move active when it is the real active tool and Ctrl is not held', () => {
+    // result
+    expect(getIsVectorEditToolActive(ToolName.move, ToolName.move, false)).toBe(true);
+  });
+
+  it('should hide Move’s active state while Ctrl is held, even though it is still the real active tool', () => {
+    // result
+    expect(getIsVectorEditToolActive(ToolName.move, ToolName.move, true)).toBe(false);
+  });
+
+  it('should show Bend active when it is the real active tool, regardless of Ctrl', () => {
+    // result
+    expect(getIsVectorEditToolActive(ToolName.bend, ToolName.bend, false)).toBe(true);
+    expect(getIsVectorEditToolActive(ToolName.bend, ToolName.bend, true)).toBe(true);
+  });
+
+  it('should preview Bend as active while Ctrl is held and Move is the real active tool, with no other real tool active', () => {
+    // result
+    expect(getIsVectorEditToolActive(ToolName.bend, ToolName.move, true)).toBe(true);
+  });
+
+  it('should not preview Bend when Ctrl is not held, even with Move as the real active tool', () => {
+    // result
+    expect(getIsVectorEditToolActive(ToolName.bend, ToolName.move, false)).toBe(false);
+  });
+
+  it('should not preview Bend while some other real tool (not Move) is active, even with Ctrl held', () => {
+    // result
+    expect(getIsVectorEditToolActive(ToolName.bend, ToolName.lasso, true)).toBe(false);
+  });
+
+  it('should fall back to a plain equality check for every other tool', () => {
+    // result
+    expect(getIsVectorEditToolActive(ToolName.lasso, ToolName.lasso, false)).toBe(true);
+    expect(getIsVectorEditToolActive(ToolName.lasso, ToolName.paint, false)).toBe(false);
   });
 });

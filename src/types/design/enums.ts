@@ -18,6 +18,7 @@ export enum PathType {
 
 export enum ToolName {
   arrow = 'arrow',
+  bend = 'bend',
   comment = 'comment',
   default = 'default',
   ellipse = 'ellipse',

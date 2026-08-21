@@ -89,6 +89,48 @@ describe('VectorEditToolbar', () => {
     expect(store.getState().design.activeTool).toBe(ToolName.move);
   });
 
+  it('should switch to Bend and keep it active after clicking it, independent of Ctrl/Cmd', () => {
+    // before
+    act(() => store.dispatch(setVectorEditingNodeId('node-1')));
+
+    renderVectorEditToolbar();
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'Bend' }));
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.bend);
+    expect(screen.getByRole('button', { name: 'Bend' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('should visually preview Bend instead of Move while Ctrl is held, reverting to Move on release, with no change to the real active tool', () => {
+    // before
+    act(() => {
+      store.dispatch(setVectorEditingNodeId('node-1'));
+      store.dispatch(setActiveTool(ToolName.move));
+    });
+
+    renderVectorEditToolbar();
+
+    expect(screen.getByRole('button', { name: 'Move' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Bend' })).toHaveAttribute('aria-pressed', 'false');
+
+    // action
+    fireEvent.keyDown(window, { key: 'Control' });
+
+    // result — visual only, the real active tool never changes
+    expect(screen.getByRole('button', { name: 'Move' })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: 'Bend' })).toHaveAttribute('aria-pressed', 'true');
+    expect(store.getState().design.activeTool).toBe(ToolName.move);
+
+    // action
+    fireEvent.keyUp(window, { key: 'Control' });
+
+    // result
+    expect(screen.getByRole('button', { name: 'Move' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Bend' })).toHaveAttribute('aria-pressed', 'false');
+  });
+
   it('should exit Vector Edit Mode and reset the active tool when clicking the close button', () => {
     // before
     act(() => {
