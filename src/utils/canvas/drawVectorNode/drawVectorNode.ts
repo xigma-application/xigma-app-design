@@ -21,7 +21,13 @@ export const drawVectorNode = (
   const renderedNode: TVectorNode = { ...node, segments, vertices };
 
   if (renderedNode.fillColor) {
-    drawVectorFill(gl, program, buffer, deriveVectorFaces(renderedNode), renderedNode.fillColor, canvasWidth, canvasHeight, viewport);
+    const filledFaces = deriveVectorFaces(renderedNode)
+      .filter((face) => renderedNode.filledFaceKeys.includes(face.key))
+      .map((face) => face.points);
+
+    if (filledFaces.length > 0) {
+      drawVectorFill(gl, program, buffer, filledFaces, renderedNode.fillColor, canvasWidth, canvasHeight, viewport);
+    }
   }
 
   drawVectorStroke(

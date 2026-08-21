@@ -20,6 +20,7 @@ describe('useCanvasRefs behaviors', () => {
       hoveredSegmentIdRef: { current: null },
       hoveredVectorEdgeInsertPointRef: { current: null },
       hoveredVectorHandleRef: { current: null },
+      hoveredVectorPaintFaceKeyRef: { current: null },
       hoveredVectorSegmentIdRef: { current: null },
       hoveredVectorVertexIdRef: { current: null },
       marqueeRef: { current: null },

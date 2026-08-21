@@ -20,7 +20,7 @@ export type TVectorEditTool = {
 export const TOOLS: TVectorEditTool[] = [
   { icon: 'MoveVectorTool', labelKey: 'design.toolbar.tool.default', toolName: ToolName.default },
   { icon: 'LassoTool', labelKey: `${translationNameSpace}.tool.lasso`, toolName: ToolName.lasso },
-  { icon: 'PaintTool', labelKey: `${translationNameSpace}.tool.paint` },
+  { icon: 'PaintTool', labelKey: `${translationNameSpace}.tool.paint`, toolName: ToolName.paint },
   { icon: 'BendTool', labelKey: `${translationNameSpace}.tool.bend` },
   { icon: 'CutTool', labelKey: `${translationNameSpace}.tool.cut` },
 ];

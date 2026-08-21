@@ -65,6 +65,7 @@ const addVectorNode = (): string => {
   store.dispatch(
     addNode({
       fillColor: null,
+      filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
       rotation: 0,
@@ -88,6 +89,7 @@ const addVectorNodeWithTangent = (): string => {
   store.dispatch(
     addNode({
       fillColor: null,
+      filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
       rotation: 0,

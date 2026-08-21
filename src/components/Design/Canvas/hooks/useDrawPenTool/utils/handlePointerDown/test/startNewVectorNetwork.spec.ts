@@ -8,6 +8,7 @@ import { store } from 'store';
 import { NodeType } from 'types/design/enums';
 import { TPenDragOrigin } from '../../../types';
 import { TPoint } from 'types/canvas';
+import { VECTOR_FILL } from '../../../../../constants';
 
 // utils
 import { startNewVectorNetwork } from '../startNewVectorNetwork';
@@ -35,7 +36,7 @@ describe('startNewVectorNetwork', () => {
 
     expect(newNodeId).not.toBeNull();
     expect(design.selectedIds).toEqual([newNodeId]);
-    expect(design.nodes[newNodeId as string]).toMatchObject({ fillColor: null, segments: {}, type: NodeType.vector });
+    expect(design.nodes[newNodeId as string]).toMatchObject({ fillColor: VECTOR_FILL, segments: {}, type: NodeType.vector });
 
     const vertexId = design.penActiveVertexId as string;
     const node = design.nodes[newNodeId as string];

@@ -34,6 +34,7 @@ import { armVectorMarqueeOnPointerDown } from '../armVectorMarqueeOnPointerDown'
 import { armVectorMultiSelectBoxOnPointerDown } from '../armVectorMultiSelectBoxOnPointerDown';
 import { armVectorMultiSelectResizeOnPointerDown } from '../armVectorMultiSelectResizeOnPointerDown';
 import { armVectorMultiSelectRotateOnPointerDown } from '../armVectorMultiSelectRotateOnPointerDown';
+import { armVectorPaintOnPointerDown } from '../armVectorPaintOnPointerDown';
 import { armVectorSegmentOnPointerDown } from '../armVectorSegmentOnPointerDown/armVectorSegmentOnPointerDown';
 import { armVectorVertexOnPointerDown } from '../armVectorVertexOnPointerDown/armVectorVertexOnPointerDown';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
@@ -92,6 +93,7 @@ const addVectorNode = (segments: TVectorNode['segments'], vertices: TVectorNode[
   store.dispatch(
     addNode({
       fillColor: '#000000',
+      filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
       rotation,
@@ -825,6 +827,110 @@ describe('armVectorLassoOnPointerDown', () => {
     // result
     expect(armVectorLassoOnPointerDown(ctx)).toBeUndefined();
     expect(ctx.canvasRefs.vectorLassoPathRef.current).toBeNull();
+  });
+});
+
+describe('armVectorPaintOnPointerDown', () => {
+  afterEach(() => {
+    store.dispatch(setVectorEditingNodeId(null));
+  });
+
+  it('should add the clicked face to filledFaceKeys and claim the pointerdown, when the face is not yet filled', () => {
+    // mock — a closed triangle, one derivable face
+    const nodeId = addVectorNode(
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'v1', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+      },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 50, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before — a point inside the triangle
+    const ctx = createContext({ activeTool: ToolName.paint, point: { x: 50, y: 40 } });
+
+    // result
+    expect(armVectorPaintOnPointerDown(ctx)).toBe(true);
+    expect(ctx.dispatch).toHaveBeenCalledTimes(1);
+
+    const action = (ctx.dispatch as ReturnType<typeof vi.fn>).mock.calls[0][0] as ReturnType<typeof updateNode>;
+
+    expect(action.payload.id).toBe(nodeId);
+    expect(action.payload.changes).toEqual({ filledFaceKeys: ['s1,s2,s3'] });
+  });
+
+  it('should remove the clicked face from filledFaceKeys when it is already filled', () => {
+    // mock
+    const nodeId = addVectorNode(
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'v1', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+      },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 50, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(updateNode({ changes: { filledFaceKeys: ['s1,s2,s3'] }, id: nodeId }));
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.paint, point: { x: 50, y: 40 } });
+
+    // result
+    expect(armVectorPaintOnPointerDown(ctx)).toBe(true);
+
+    const action = (ctx.dispatch as ReturnType<typeof vi.fn>).mock.calls[0][0] as ReturnType<typeof updateNode>;
+
+    expect(action.payload.changes).toEqual({ filledFaceKeys: [] });
+  });
+
+  it('should claim the pointerdown without dispatching when the click misses every face', () => {
+    // mock
+    const nodeId = addVectorNode(
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'v1', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+      },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 50, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before — a point well outside the triangle
+    const ctx = createContext({ activeTool: ToolName.paint, point: { x: 500, y: 500 } });
+
+    // result
+    expect(armVectorPaintOnPointerDown(ctx)).toBe(true);
+    expect(ctx.dispatch).not.toHaveBeenCalled();
+  });
+
+  it('should return undefined (letting the click fall through) when Paint is not the active tool', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.default });
+
+    // result
+    expect(armVectorPaintOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.dispatch).not.toHaveBeenCalled();
+  });
+
+  it('should return undefined (letting the click fall through) when Vector Edit Mode is not active', () => {
+    // before
+    const ctx = createContext({ activeTool: ToolName.paint });
+
+    // result
+    expect(armVectorPaintOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.dispatch).not.toHaveBeenCalled();
   });
 });
 

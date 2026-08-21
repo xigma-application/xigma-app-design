@@ -2,7 +2,7 @@ import { nanoid } from '@reduxjs/toolkit';
 import { RefObject } from 'react';
 
 // others
-import { VECTOR_NAME, VECTOR_STROKE } from '../../../../constants';
+import { VECTOR_FILL, VECTOR_NAME, VECTOR_STROKE } from '../../../../constants';
 import { VECTOR_STROKE_WIDTH } from 'constant/canvas';
 
 // store
@@ -44,7 +44,8 @@ export const startNewVectorNetwork = (
 
   dispatch(
     addNode({
-      fillColor: null,
+      fillColor: VECTOR_FILL,
+      filledFaceKeys: [],
       name: VECTOR_NAME,
       parentId: null,
       rotation: 0,

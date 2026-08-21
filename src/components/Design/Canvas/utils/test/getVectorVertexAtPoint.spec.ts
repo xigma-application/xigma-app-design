@@ -7,6 +7,7 @@ import { getVectorVertexAtPoint } from '../getVectorVertexAtPoint';
 
 const buildNode = (vertices: TVectorNode['vertices']): TVectorNode => ({
   fillColor: '#000000',
+  filledFaceKeys: [],
   id: '1',
   name: 'Vector',
   parentId: null,

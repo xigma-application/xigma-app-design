@@ -8,7 +8,12 @@ import { flattenSegment } from './flattenSegment';
 import { getVectorCurveSegmentCount } from './getVectorCurveSegmentCount';
 import { TVectorFaceStep, walkVectorFace } from './walkVectorFace';
 
-const cache = new WeakMap<TVectorNode, TPoint[][]>();
+export type TVectorFace = {
+  key: string;
+  points: TPoint[];
+};
+
+const cache = new WeakMap<TVectorNode, TVectorFace[]>();
 
 const getFaceBoundary = (steps: TVectorFaceStep[], node: TVectorNode): TPoint[] =>
   steps.flatMap(({ fromId, segmentId, toId }) => {
@@ -23,7 +28,7 @@ const getFaceBoundary = (steps: TVectorFaceStep[], node: TVectorNode): TPoint[] 
     return points.slice(0, -1);
   });
 
-export const deriveVectorFaces = (node: TVectorNode): TPoint[][] => {
+export const deriveVectorFaces = (node: TVectorNode): TVectorFace[] => {
   const cached = cache.get(node);
 
   if (cached) {
@@ -34,7 +39,7 @@ export const deriveVectorFaces = (node: TVectorNode): TPoint[][] => {
   const adjacency = buildVectorHalfEdgeAdjacency(segments);
   const visited = new Set<string>();
   const seenFaceKeys = new Set<string>();
-  const faces: TPoint[][] = [];
+  const faces: TVectorFace[] = [];
 
   segments.forEach((segment) => {
     [
@@ -44,14 +49,14 @@ export const deriveVectorFaces = (node: TVectorNode): TPoint[][] => {
       const steps = walkVectorFace(segment.id, direction.fromId, direction.toId, adjacency, visited, segments.length);
 
       if (steps) {
-        const faceKey = steps
+        const key = steps
           .map((step) => step.segmentId)
           .sort()
           .join(',');
 
-        if (!seenFaceKeys.has(faceKey)) {
-          seenFaceKeys.add(faceKey);
-          faces.push(getFaceBoundary(steps, node));
+        if (!seenFaceKeys.has(key)) {
+          seenFaceKeys.add(key);
+          faces.push({ key, points: getFaceBoundary(steps, node) });
         }
       }
     });

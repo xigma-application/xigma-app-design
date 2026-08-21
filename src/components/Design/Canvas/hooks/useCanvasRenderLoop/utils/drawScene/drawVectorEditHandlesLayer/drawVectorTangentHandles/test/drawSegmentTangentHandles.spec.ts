@@ -14,6 +14,7 @@ const BOTH_VERTICES_SELECTED = ['v1', 'v2'];
 
 const buildNode = (segments: TVectorNode['segments']): TVectorNode => ({
   fillColor: null,
+  filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',
   parentId: null,

@@ -7,6 +7,7 @@ import { getVectorHandlesInRect } from '../getVectorHandlesInRect';
 
 const node: TVectorNode = {
   fillColor: null,
+  filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',
   parentId: null,

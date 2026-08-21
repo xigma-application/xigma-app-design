@@ -12,6 +12,14 @@ describe('getCursorClassName', () => {
     expect(result).toBe('comment');
   });
 
+  it('should return "paint" for the Paint tool', () => {
+    // before
+    const result = getCursorClassName(ToolName.paint);
+
+    // result
+    expect(result).toBe('paint');
+  });
+
   it('should return "pen" for the Pen tool', () => {
     // before
     const result = getCursorClassName(ToolName.pen);

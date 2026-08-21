@@ -159,5 +159,26 @@
         -webkit-image-set(url('../../../assets/icons/cursors/segment.png') 8x) 4 4,
         auto;
     }
+
+    &--paint {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/drop.png') 8x) 16 16,
+        auto;
+    }
+
+    &--paint-add {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/drop-add.png') 8x) 16 16,
+        auto;
+    }
+
+    &--paint-remove {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/drop-remove.png') 8x) 16 16,
+        auto;
+    }
   }
 }

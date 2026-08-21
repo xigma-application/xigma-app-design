@@ -31,6 +31,7 @@ const addBranchingVectorNode = (): string => {
   store.dispatch(
     addNode({
       fillColor: null,
+      filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
       rotation: 0,

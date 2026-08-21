@@ -97,6 +97,7 @@ export type TCanvasRefs = {
   hoveredSegmentIdRef: RefObject<string | null>;
   hoveredVectorEdgeInsertPointRef: RefObject<TPoint | null>;
   hoveredVectorHandleRef: RefObject<TVectorHandleHover | null>;
+  hoveredVectorPaintFaceKeyRef: RefObject<string | null>;
   hoveredVectorSegmentIdRef: RefObject<string | null>;
   hoveredVectorVertexIdRef: RefObject<string | null>;
   hoverRef: RefObject<string | null>;

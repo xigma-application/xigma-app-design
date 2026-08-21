@@ -87,6 +87,7 @@ describe('drawPenPreview', () => {
     // drawPenPreview actually derives the pivot/rotation from the editing node and forwards them
     const rotatedVectorNode: TVectorNode = {
       fillColor: null,
+      filledFaceKeys: [],
       id: 'vector-1',
       name: 'Vector',
       parentId: null,

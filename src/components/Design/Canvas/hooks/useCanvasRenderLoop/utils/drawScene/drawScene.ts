@@ -37,6 +37,8 @@ import { drawStarRatioHandleLayer } from './drawStarRatioHandleLayer';
 import { drawVectorAlignmentGuide } from './drawVectorAlignmentGuide';
 import { drawVectorEditHandlesLayer } from './drawVectorEditHandlesLayer/drawVectorEditHandlesLayer';
 import { drawVectorLasso } from './drawVectorLasso';
+import { drawVectorPaintHoverPreview } from './drawVectorPaintHoverPreview';
+import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';
 import { drawVertexCountHandlesLayer } from './drawVertexCountHandlesLayer';
 import { getPathOutlineStyles } from './getPathOutlineStyles';
 import { hasCornerRadiusDragMoved } from './hasCornerRadiusDragMoved';
@@ -64,6 +66,8 @@ export const drawScene = (
   const editingTextBox = selectEditingTextBox(state);
   const nodesById = selectNodes(state);
   const vectorEditingNodeId = selectVectorEditingNodeId(state);
+  const vectorEditingNode = getVectorEditingNode(nodesById, vectorEditingNodeId);
+  const hoveredVectorPaintFaceKey = refs.hoveredVectorPaintFaceKeyRef.current;
   const selectedVectorVertexIds = refs.selectedVectorVertexIdsRef.current;
   const preMarqueeVectorVertexIds = refs.preVectorMarqueeVertexIdsRef.current;
   const selectedVectorSegmentIds = refs.selectedVectorSegmentIdsRef.current;
@@ -186,6 +190,7 @@ export const drawScene = (
   drawEditingPathTextHandle(gl, program, buffer, editingTextBox, clientWidth, clientHeight, viewport);
   drawVectorAlignmentGuide(gl, program, buffer, refs.vectorAlignmentGuideRef.current, clientWidth, clientHeight, viewport);
   drawVectorLasso(gl, program, buffer, refs.vectorLassoPathRef.current, clientWidth, clientHeight, viewport);
+  drawVectorPaintHoverPreview(gl, program, buffer, vectorEditingNode, hoveredVectorPaintFaceKey, clientWidth, clientHeight, viewport);
   drawMarquee(gl, program, buffer, marqueeRect, clientWidth, clientHeight, viewport);
   drawSliceDraft(gl, program, buffer, sliceRect, clientWidth, clientHeight, viewport);
 };

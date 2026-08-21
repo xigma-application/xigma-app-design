@@ -15,6 +15,7 @@ const addVectorNode = (segments: TVectorNode['segments']): string => {
   store.dispatch(
     addNode({
       fillColor: null,
+      filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
       rotation: 0,

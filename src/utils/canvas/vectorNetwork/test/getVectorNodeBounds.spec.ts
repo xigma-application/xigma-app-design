@@ -7,6 +7,7 @@ import { getVectorNodeBounds } from '../getVectorNodeBounds';
 
 const buildNode = (vertices: TVectorNode['vertices'], segments: TVectorNode['segments'] = {}): TVectorNode => ({
   fillColor: '#000000',
+  filledFaceKeys: [],
   id: '1',
   name: 'Vector',
   parentId: null,

@@ -81,6 +81,14 @@ closed shape, closed shape + separate open tail, multiple disjoint closed shapes
 See `deriveVectorFaces.spec.ts`/`walkVectorFace.spec.ts` for the exact cases this covers and the ones it
 doesn't.
 
+**Update (§43, Paint tool)**: the *geometry* of a face is still never persisted — `deriveVectorFaces.ts`
+recomputes every face's boundary fresh on every call, exactly as above. What changed is that each face
+now also carries a stable `key` (the same sorted-segment-id string this function already used internally
+for its own de-dupe pass), and `TVectorNode.filledFaceKeys: string[]` persists *which* of those keys are
+currently painted. This is still "derived, not duplicated" in the sense that matters: a stale key (one
+whose segments got deleted) simply matches no current face and renders nothing, with no explicit cleanup
+needed — see §43.
+
 ## 3. Rendering — `utils/canvas/drawVectorNode/`
 
 - `flattenSegment.ts` (`vectorNetwork/`) — cubic-bezier-to-polyline, fixed `VECTOR_CURVE_SEGMENTS`
@@ -2454,6 +2462,116 @@ transparency regression guard) plus unit coverage for every new file
 (`armVectorLassoOnPointerDown.ts`, `continueVectorLassoDrag.ts`, `disarmVectorLassoDrag.ts`,
 `getVectorPointsInPolygon.ts`, `drawVectorLasso.ts`, and the whole `drawDashedPolylineOutline/` folder)
 at 100%.
+
+## 43. The Paint tool — per-face fill toggling, `filledFaceKeys`, and a live add/remove hover preview
+
+A new dedicated Vector Edit Mode tool (`ToolName.paint`, shortcut `Shift+B`) that fills or unfills one
+`deriveVectorFaces` region at a time with the node's own `fillColor`, instead of the previous
+all-or-nothing "the whole shape is filled or it isn't". Wired into `VectorEditToolbar` (§41) exactly like
+Lasso — `TOOLS`' Paint entry gained `toolName: ToolName.paint`, which is the only thing that made its
+button dispatch `setActiveTool` (the button/icon/label already existed as an inert placeholder).
+
+**`TVectorNode.filledFaceKeys: string[]` is the one new piece of state**, and `deriveVectorFaces.ts`
+changed shape to support it: it now returns `TVectorFace[]` (`{key: string; points: TPoint[]}[]`) instead
+of the old bare `TPoint[][]`, promoting a key that already existed internally (the sorted, comma-joined
+segment-id set used for its own dedupe pass, §2) to a real return value. `drawVectorNode.ts` filters
+`deriveVectorFaces(node)` down to the faces whose `key` is in `filledFaceKeys` before calling
+`drawVectorFill.ts` (only calling it at all when at least one face matched — an empty `filledFaceKeys`
+with a non-null `fillColor` now legitimately draws no fill, unlike the old single-fillColor-implies-fill
+model). Every other caller of the old `TPoint[][]` shape (`isPointInVectorRegions.ts`) updated to read
+`.points`; the new `getVectorFaceAtPoint.ts` (`Canvas/utils/`) is the hit-test this tool actually needs —
+`deriveVectorFaces(node).find((face) => isPointInPolygonVertices(point, face.points))?.key ?? null`, one
+face can ever match since planar faces from a half-edge walk never overlap.
+
+**New vector networks now default to `fillColor: VECTOR_FILL` instead of `null`**
+(`startNewVectorNetwork.ts`) — a real, if minimal, scoping decision: there is still no fill-color-picker
+UI anywhere in the app, so `filledFaceKeys` toggling would have had zero visible effect against a `null`
+fillColor (`drawVectorNode.ts`'s `if (renderedNode.fillColor)` guard). `VECTOR_FILL` (`'#D9D9D9'`,
+`Canvas/constants.ts`) already existed, unused, mirroring `ELLIPSE_FILL`/`RECTANGLE_FILL`'s role for
+every other shape tool — this just actually wires it in.
+
+**Click handling — `armVectorPaintOnPointerDown.ts`, no drag/continue machinery at all**, deliberately
+simpler than Lasso: this tool's whole interaction is "click a face, toggle it", not a gesture that spans
+`pointermove`/`pointerup`. Inserted into `ARM_RESOLVERS` (`handlePointerDown/constants.ts`) right after
+`armBakeVectorRotationOnPointerDown` (so its own hit-test reads an already-rotation-baked node from the
+store) and before every vertex/handle/segment resolver — same precedence reasoning as Lasso (§42): a
+click on top of an existing vertex must never arm a vertex-drag while Paint is active. Gated on
+`activeTool === ToolName.paint && node` (via `getVectorEditingNode`), it **always returns `true`** once
+that gate passes, hit or miss — clicking empty space inside the vector network while Paint is active is a
+deliberate no-op, not a fallthrough to any other resolver. On a hit, `filledFaceKeys` is updated with a
+plain `array.includes` toggle, dispatched as one `updateNode({ changes: { filledFaceKeys }, id })` — the
+same direct-dispatch shape every other single-click vector mutation already uses
+(`armBakeVectorRotationOnPointerDown.ts`, `armVectorBendSegmentOnPointerDown.ts`).
+
+**Segment deletion self-heals the fill with zero extra code.** `filledFaceKeys` only ever stores the
+topological key, never geometry — deleting a segment that closed some face simply means that face's key
+no longer appears in the next `deriveVectorFaces(node)` call, so `drawVectorNode.ts`'s `.filter(...)`
+naturally drops it. No pruning/garbage-collection pass was written or is needed (confirmed directly by
+the user's own framing of the requirement: "można usunąć segmenty więc fill znika" — this is exactly the
+derived-not-duplicated architecture §2 already established, just exercised by a new code path).
+
+**Hover preview — `resolveVectorPaintHover.ts` (pointermove) + `drawVectorPaintHoverPreview.ts`
+(render loop), plus three new cursor states, all via the existing `setClassName` mechanism, not
+`canvas.style.cursor`.** This codebase has two different cursor-update patterns in play
+(`useSliceTool`'s `updateHoverCursor.ts` sets `canvas.style.cursor` directly to a generated data-URI for
+continuously-varying rotation angles), but every Vector-Edit-Mode cursor — `resolveVectorSegmentHoverInNode.ts`'s
+`'segment'`/`'bend'`/`'pen-extend'`, Lasso's `'lasso'` — goes through `setClassName(...)` toggling a BEM
+modifier class in `canvas.module.scss`, so Paint follows that convention: three new classes,
+`&--paint`/`&--paint-add`/`&--paint-remove`, each mapping to `drop.png`/`drop-add.png`/`drop-remove.png`
+(pre-existing cursor assets, `assets/icons/cursors/`) at hotspot `16 16`. `getCursorClassName.ts` gained a
+`case ToolName.paint: return 'paint';` so the idle drop cursor shows the instant the tool is selected
+(unlike Lasso, which has no idle cursor class of its own and relies on the plain default cursor until a
+drag actually starts) — Paint needed this because its own hover resolver only overrides the className
+while the pointer is actually resting over the vector network's own bounding faces.
+
+`resolveVectorPaintHover.ts` is appended **last** in `handlePointerMove.ts`'s call sequence, after
+`resolveVectorSegmentHover` — every hover resolver in that file unconditionally calls `setClassName(...)`
+based on its own local hit-test with no `activeTool` gating at all (the Ctrl+hover-to-bend affordance is
+meant to work regardless of which Vector Edit tool is active), so whichever resolver runs last wins for
+that frame. Paint's own resolver is the only one of the group that's actually gated on `activeTool ===
+ToolName.paint` — everywhere else, it does nothing at all (no `setClassName` call), so it never clobbers
+another tool's cursor. When it does apply (and the pointer isn't currently held, `event.buttons === 0`),
+it resolves `getVectorFaceAtPoint` on the baked node and sets `canvasRefs.hoveredVectorPaintFaceKeyRef`
+(new `TCanvasRefs` field, same four-file wiring as `vectorLassoPathRef`: `types/design/canvas/types.ts`,
+`useCanvasRefs.ts`, `createCanvasRefs.ts`, plus a reset in `useSelectionTool.ts`'s tool-change cleanup) —
+`'paint-add'` when the hovered face isn't filled yet, `'paint-remove'` when it already is, `'paint'` (the
+idle cursor) when the pointer misses every face.
+
+The same ref drives `drawVectorPaintHoverPreview.ts` (`useCanvasRenderLoop/utils/drawScene/`, called from
+`drawScene.ts` right after `drawVectorLasso`), which draws a translucent overlay on the hovered face only
+— reusing `drawVectorFill.ts`'s alpha parameter exactly like Lasso's own fill preview (§42), at
+`MARQUEE_FILL_ALPHA`. Colors are reused, not invented: `DRAFT_FRAME_STROKE` (`#0d99ff`, blue) for "hovering
+an unfilled face, click would add", `VECTOR_EDGE_HOVER_STROKE` (`#cd4422`, orange) for "hovering an
+already-filled face, click would remove" — asked for directly with two reference screenshots showing
+exactly this blue/orange hover-preview distinction. Because this preview re-derives the face fresh every
+frame from the live node (not a frozen snapshot taken at hover-start), it automatically flips from
+add-blue to remove-orange the instant a click lands, with no extra invalidation needed — confirmed live
+in the e2e test below, which has to explicitly move the pointer away before each screenshot specifically
+*because* this live-tracking preview would otherwise still be rendering over the just-toggled face.
+
+**Self-intersecting single faces ("bowtie" shapes) resolve correctly for hit-testing, confirmed directly
+against a user-provided reference screenshot** — two triangular lobes from one 4-vertex closed loop whose
+two non-adjacent segments cross at a point that isn't a shared vertex. `deriveVectorFaces` already walks
+this as one face (simple 4-segment cycle, no branch vertex — see §2), and its own even-odd stencil fill
+already rendered both lobes correctly for whole-shape fills; what this tool newly exercises is hit-testing
+into either lobe. `isPointInPolygonVertices.ts` (`Canvas/utils/`) is a textbook even-odd ray-cast, which
+handles self-intersecting polygons correctly for free — it only ever counts ray/edge crossings, with no
+assumption that the polygon is simple. Regression-locked in `getVectorFaceAtPoint.spec.ts` with a bowtie
+fixture: two points, one in each visual lobe, both resolve to the same face key.
+
+**Not implemented, deliberately out of scope for this pass**: drag-painting across multiple faces in one
+gesture (Figma's paint bucket supports this; here every stroke is a single click-toggle, no
+`continueVectorPaintDrag`/pointer-capture machinery exists) — the user's own framing of the requirement
+never described a drag gesture, only per-face add/remove.
+
+Covered by a real end-to-end e2e test (`vector-edit.spec.ts`): draws a closed square (one face), toggles
+Paint on via `Shift+B`, clicks the face once (screenshot differs from the unfilled baseline) and again
+(screenshot matches the baseline again) — genuine WebGL stencil-fill rendering that only a real browser
+can catch. Unit coverage (100%) for every new file: `armVectorPaintOnPointerDown.ts` (added into the
+combined `armResolvers.spec.ts`, matching that folder's existing one-file convention),
+`resolveVectorPaintHover.ts`, `drawVectorPaintHoverPreview.ts`, `getVectorFaceAtPoint.ts`, plus the
+`deriveVectorFaces.ts`/`drawVectorNode.ts` shape-migration fallout across roughly 80 existing test
+fixtures (mechanical `filledFaceKeys: []` backfill, since it's a new required field).
 
 ## Related
 

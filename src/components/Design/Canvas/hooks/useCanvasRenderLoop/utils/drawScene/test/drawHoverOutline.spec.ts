@@ -219,6 +219,7 @@ describe('drawHoverOutline', () => {
     const buffer = {} as WebGLBuffer;
     const vector: TVectorNode = {
       fillColor: null,
+      filledFaceKeys: [],
       id: 'a',
       name: 'Vector',
       parentId: null,
@@ -246,6 +247,7 @@ describe('drawHoverOutline', () => {
     const buffer = {} as WebGLBuffer;
     const vector: TVectorNode = {
       fillColor: null,
+      filledFaceKeys: [],
       id: 'a',
       name: 'Vector',
       parentId: null,

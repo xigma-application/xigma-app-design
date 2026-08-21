@@ -7,6 +7,7 @@ import { getVectorMultiSelectBounds } from '../getVectorMultiSelectBounds';
 
 const buildNode = (segments: TVectorNode['segments'], vertices: TVectorNode['vertices']): TVectorNode => ({
   fillColor: null,
+  filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',
   parentId: null,

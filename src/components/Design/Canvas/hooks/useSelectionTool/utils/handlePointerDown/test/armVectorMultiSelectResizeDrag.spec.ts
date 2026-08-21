@@ -22,6 +22,7 @@ const createVectorMultiSelectResizeDragRef = (): RefObject<TVectorMultiSelectRes
 
 const vector: TVectorNode = {
   fillColor: '#000000',
+  filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',
   parentId: null,

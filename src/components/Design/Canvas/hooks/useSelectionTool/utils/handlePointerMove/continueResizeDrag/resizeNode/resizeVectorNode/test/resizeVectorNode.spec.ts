@@ -23,6 +23,7 @@ const addVectorNode = (): string => {
   store.dispatch(
     addNode({
       fillColor: '#ffffff',
+      filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
       rotation: 0,

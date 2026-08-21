@@ -30,6 +30,7 @@ import { continueVectorMultiSelectRotateDrag } from './continueVectorMultiSelect
 import { continueVectorSegmentBendDrag } from './continueVectorSegmentBendDrag/continueVectorSegmentBendDrag';
 import { continueVectorVertexDrag } from './continueVectorVertexDrag';
 import { resolveVectorCornerHandleDrag } from './resolveVectorCornerHandleDrag';
+import { resolveVectorPaintHover } from './resolveVectorPaintHover';
 import { resolveVectorSegmentHover } from './resolveVectorSegmentHover/resolveVectorSegmentHover';
 import { resolveVectorTangentHandleHover } from './resolveVectorTangentHandleHover';
 import { resolveVectorVertexHover } from './resolveVectorVertexHover';
@@ -69,4 +70,5 @@ export const handlePointerMove = (
   resolveVectorVertexHover(canvas, event, canvasRefs.hoveredVectorVertexIdRef);
   resolveVectorTangentHandleHover(canvas, event, canvasRefs);
   resolveVectorSegmentHover(canvas, event, canvasRefs.hoveredVectorSegmentIdRef, canvasRefs.hoveredVectorEdgeInsertPointRef, setClassName);
+  resolveVectorPaintHover(canvas, event, canvasRefs, setClassName);
 };

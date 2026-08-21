@@ -7,6 +7,7 @@ import { isPointInVectorRegions } from '../isPointInVectorRegions';
 
 const buildNode = (segments: TVectorNode['segments'], vertices: TVectorNode['vertices']): TVectorNode => ({
   fillColor: '#000',
+  filledFaceKeys: [],
   id: '1',
   name: 'Vector',
   parentId: null,

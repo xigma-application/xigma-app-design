@@ -7,6 +7,7 @@ import { getVectorCornerHandleDragCandidates } from '../getVectorCornerHandleDra
 
 const buildNode = (vertices: Record<string, TVectorVertex>, segments: Record<string, TVectorSegment>): TVectorNode => ({
   fillColor: '#000000',
+  filledFaceKeys: [],
   id: '1',
   name: 'Vector',
   parentId: null,

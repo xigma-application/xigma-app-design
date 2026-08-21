@@ -7,6 +7,7 @@ import { applyVectorPointSnapping } from '../applyVectorPointSnapping';
 
 const buildVectorNode = (overrides: Partial<TVectorNode>): TVectorNode => ({
   fillColor: null,
+  filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',
   parentId: null,

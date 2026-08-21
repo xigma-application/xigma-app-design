@@ -13,6 +13,7 @@ vi.mock('utils/canvas/drawVectorNode/drawVectorStroke', () => ({
 
 const node: TVectorNode = {
   fillColor: null,
+  filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',
   parentId: null,

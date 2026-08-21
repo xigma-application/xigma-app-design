@@ -25,6 +25,7 @@ const addClosedSquareVectorNode = (x: number, y: number, size: number): string =
   store.dispatch(
     addNode({
       fillColor: '#ff0000',
+      filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
       rotation: 0,

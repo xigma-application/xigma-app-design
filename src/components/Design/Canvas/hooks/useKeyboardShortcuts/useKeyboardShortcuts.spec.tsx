@@ -248,6 +248,20 @@ describe('useKeyboardShortcuts behaviors', () => {
     expect(store.getState().design.activeTool).toBe(ToolName.media);
   });
 
+  it('should switch to the paint tool on "Shift+B"', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyB', shiftKey: true });
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.paint);
+  });
+
   it('should switch to the scale tool (not media) on a plain "K" without the modifiers', () => {
     // mock
     const store = createTestStore();

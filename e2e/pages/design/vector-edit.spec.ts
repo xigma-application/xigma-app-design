@@ -1392,3 +1392,35 @@ test('the Lasso fill renders a uniform translucent overlay over empty canvas WHI
   // region; a correctly opaque canvas produces one uniform translucent-blue-over-background color
   expect(maxChannelDelta).toBeLessThan(4);
 });
+
+test('the Paint tool (activated via its "Shift+B" shortcut) fills a clicked face and removes the fill again on a second click of the same face', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-paint-toggle');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawClosedSquare(designPage); // v1(900,300) v2(1000,300) v3(1000,400) v4(900,400), one face
+  await designPage.selectTool('default');
+  await page.keyboard.press('Shift+B');
+
+  // a small region well inside the face, clear of the stroke/vertex dots — the cursor is parked away
+  // from it before every screenshot so the Paint tool's own live hover preview (a translucent
+  // add/remove overlay that tracks the resting cursor, not just the click itself) never leaks in
+  const interiorRegion = { height: 30, width: 30, x: 935, y: 335 };
+
+  await page.mouse.move(600, 600);
+  const unfilled = await page.screenshot({ clip: interiorRegion });
+
+  await designPage.click(950, 350);
+  await page.mouse.move(600, 600);
+  const filled = await page.screenshot({ clip: interiorRegion });
+
+  await designPage.click(950, 350);
+  await page.mouse.move(600, 600);
+  const unfilledAgain = await page.screenshot({ clip: interiorRegion });
+
+  expect(filled.equals(unfilled)).toBe(false);
+  expect(unfilledAgain.equals(unfilled)).toBe(true);
+});

@@ -139,6 +139,7 @@ export type TVertexHandleMode = 'corner' | 'smooth' | 'symmetric';
 
 export type TVectorNode = {
   fillColor: string | null;
+  filledFaceKeys: string[];
   id: string;
   name: string;
   parentId: string | null;

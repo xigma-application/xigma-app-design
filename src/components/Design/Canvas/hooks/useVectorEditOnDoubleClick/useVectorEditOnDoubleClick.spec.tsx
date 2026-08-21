@@ -28,6 +28,7 @@ const addTriangleVectorNode = (rotation = 0): string => {
   store.dispatch(
     addNode({
       fillColor: '#ff0000',
+      filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
       rotation,

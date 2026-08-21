@@ -7,6 +7,7 @@ import { bakeVectorNodeRotation } from '../bakeVectorNodeRotation';
 
 const buildNode = (rotation: number): TVectorNode => ({
   fillColor: '#ff0000',
+  filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',
   parentId: null,

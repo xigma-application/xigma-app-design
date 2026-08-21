@@ -16,6 +16,7 @@ export const shortcuts = {
   [ToolName.lasso]: { secondaryKey: KeyboardKeys.q },
   [ToolName.line]: { secondaryKey: KeyboardKeys.l },
   [ToolName.media]: { primaryKeys: [CONTROL_PRIMARY_KEY, 'shift'], secondaryKey: KeyboardKeys.k },
+  [ToolName.paint]: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.b },
   [ToolName.pen]: { secondaryKey: KeyboardKeys.p },
   [ToolName.pencil]: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.p },
   [ToolName.rectangle]: { secondaryKey: KeyboardKeys.r },

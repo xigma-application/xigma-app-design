@@ -13,6 +13,7 @@ describe('flattenVectorSegments', () => {
     // mock
     const node: TVectorNode = {
       fillColor: '#000',
+      filledFaceKeys: [],
       id: '1',
       name: 'Vector',
       parentId: null,
@@ -56,6 +57,7 @@ describe('flattenVectorSegments', () => {
     // mock
     const node: TVectorNode = {
       fillColor: '#000',
+      filledFaceKeys: [],
       id: '1',
       name: 'Vector',
       parentId: null,

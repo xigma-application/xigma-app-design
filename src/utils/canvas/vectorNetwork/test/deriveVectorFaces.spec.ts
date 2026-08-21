@@ -18,6 +18,7 @@ const vertex = (id: string, x: number, y: number): TVectorVertex => ({ id, x, y 
 
 const buildNode = (vertices: TVectorVertex[], segments: TVectorSegment[]): TVectorNode => ({
   fillColor: '#000',
+  filledFaceKeys: [],
   id: '1',
   name: 'Vector',
   parentId: null,
@@ -45,7 +46,7 @@ describe('deriveVectorFaces', () => {
 
     // result
     expect(faces).toHaveLength(1);
-    expect(toXY(faces[0])).toEqual([
+    expect(toXY(faces[0].points)).toEqual([
       { x: 0, y: 0 },
       { x: 10, y: 0 },
       { x: 5, y: 10 },
@@ -75,7 +76,7 @@ describe('deriveVectorFaces', () => {
 
     // result
     expect(faces).toHaveLength(1);
-    expect(toXY(faces[0])).toEqual([
+    expect(toXY(faces[0].points)).toEqual([
       { x: 0, y: 0 },
       { x: 10, y: 0 },
       { x: 5, y: 10 },
@@ -94,12 +95,12 @@ describe('deriveVectorFaces', () => {
 
     // result
     expect(faces).toHaveLength(2);
-    expect(toXY(faces[0])).toEqual([
+    expect(toXY(faces[0].points)).toEqual([
       { x: 0, y: 0 },
       { x: 10, y: 0 },
       { x: 5, y: 10 },
     ]);
-    expect(toXY(faces[1])).toEqual([
+    expect(toXY(faces[1].points)).toEqual([
       { x: 100, y: 0 },
       { x: 110, y: 0 },
       { x: 105, y: 10 },
@@ -117,9 +118,9 @@ describe('deriveVectorFaces', () => {
     // the straight closing segment contributes only its own start point, so the boundary is far more than
     // the 2 raw endpoints a straight-only loop would produce
     expect(faces).toHaveLength(1);
-    expect(faces[0].length).toBeGreaterThan(2);
-    expect(faces[0]).toHaveLength(25);
-    expect(faces[0][0]).toEqual({ x: 0, y: 0 });
+    expect(faces[0].points.length).toBeGreaterThan(2);
+    expect(faces[0].points).toHaveLength(25);
+    expect(faces[0].points[0]).toEqual({ x: 0, y: 0 });
   });
 
   it('should read tangents from the segment’s own end (not blindly startId->endId) when the winning walk traverses it backwards', () => {
@@ -137,9 +138,9 @@ describe('deriveVectorFaces', () => {
     // result — still exactly one face; the "ac" leg is now curved (tangents set), so it alone
     // contributes segmentCount points (24) instead of 1, on top of the 2 straight legs' 1 point each
     expect(faces).toHaveLength(1);
-    expect(faces[0]).toHaveLength(26);
+    expect(faces[0].points).toHaveLength(26);
     // the curved leg's own first point is exactly its fromId vertex "c", regardless of which tangent won
-    expect(faces[0][2]).toEqual({ x: 5, y: 10 });
+    expect(faces[0].points[2]).toEqual({ x: 5, y: 10 });
   });
 
   it('should return the same cached result for the same node reference instead of recomputing', () => {

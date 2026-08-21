@@ -1137,8 +1137,8 @@ Drobniejsze, ale zauważalne różnice względem Figmy, niepowiązane z żadnym 
       pojawia się tylko w Vector Edit Mode, 10px nad głównym `Toolbar` (`bottom: calc(100% + 10px)`,
       wyśrodkowany względem jego szerokości — renderowany jako dziecko `Toolbar.tsx`, nie osobno w
       `DesignPage.tsx`). Lista przycisków budowana z jednego `const TOOLS` (`VectorEditToolbar/
-      constants.ts`) i mapowana przez `renderTool` — Move i Lasso mają realne działanie (własny
-      `toolName`, aktywne dokładnie gdy ten `ToolName` jest bieżącym narzędziem), Paint/Bend/Cut
+      constants.ts`) i mapowana przez `renderTool` — Move, Lasso i Paint mają realne działanie (własny
+      `toolName`, aktywne dokładnie gdy ten `ToolName` jest bieżącym narzędziem), Bend/Cut
       wciąż renderują się jako nieaktywne placeholdery bez własnego `ToolName` — dojdą później. X
       zamyka Vector Edit Mode wprost (`setVectorEditingNodeId(null)` + reset toola), nie przez
       3-stopniowe Escape z Etapu 6. Cała logika (dispatch, `renderTool`, `handleClose`) wydzielona do
@@ -1166,6 +1166,27 @@ Drobniejsze, ale zauważalne różnice względem Figmy, niepowiązane z żadnym 
       nieprzezroczysty; naprawione zmianą na `colorMask(true,true,true,false)`, z e2e regresją łapiącą
       błąd tylko w trakcie aktywnego przeciągania (klatka po puszczeniu przycisku i tak odzyskuje pełną
       nieprzezroczystość). Pełny opis: `.claude/docs/vector-network.md` §42.
+- [x] **Paint tool** — dedykowane narzędzie (`ToolName.paint`, skrót `Shift+B`) do wypełniania
+      pojedynczych "faces" sieci wektorowej kolorem `fillColor` node'a, per-face zamiast całego
+      kształtu naraz. Nowe pole `TVectorNode.filledFaceKeys: string[]` — lista kluczy face'ów (ten sam
+      stabilny, topologiczny klucz co `deriveVectorFaces.ts` już liczył wewnętrznie), zamiast
+      globalnego "ma fill/nie ma" jak dotąd; `deriveVectorFaces.ts` teraz zwraca `{key, points}[]`
+      (było `TPoint[][]`) właśnie po to, żeby ten klucz był dostępny na zewnątrz. Klucze faces'ów są
+      czysto pochodne (liczone od segmentów przy każdym renderze/hit-teście) — usunięcie segmentu, który
+      domykał dany face, sprawia że jego klucz przestaje istnieć i fill sam znika, bez żadnego
+      dodatkowego czyszczenia `filledFaceKeys`. Klik przełącza fill danego face'a (dodaj/usuń), przez
+      nowy `armVectorPaintOnPointerDown.ts` — jak Lasso, wstawiony blisko czoła `ARM_RESOLVERS`, żeby
+      przechwycić klik zanim zrobi to jakikolwiek resolver wierzchołka/segmentu. Hover pokazuje
+      podgląd na żywo (niebieski = doda fill, pomarańczowy = usunie — te same kolory co
+      `DRAFT_FRAME_STROKE`/`VECTOR_EDGE_HOVER_STROKE` gdzie indziej), oraz kursor `drop.png` (spoczynek)
+      / `drop-add.png` / `drop-remove.png` (nad face'em) przez ten sam mechanizm `setClassName`, co
+      reszta kursorów Vector Edit Mode (nie osobny `canvas.style.cursor`). Hit-test (`getVectorFaceAtPoint.ts`,
+      ray-casting even-odd) poprawnie obsługuje też samo-przecinający się pojedynczy face (np.
+      "bowtie" — dwa wierzchołki krawędzi przecinają się wizualnie bez wspólnego wierzchołka) — punkt w
+      dowolnym z dwóch płatów trafia w ten sam klucz, bo even-odd ray-cast nie zależy od topologii.
+      Nowe sieci wektorowe dostają teraz domyślny `fillColor: VECTOR_FILL` zamiast `null` (dotąd
+      nieużywana stała) — inaczej Paint nie miałby żadnego widocznego efektu, bo w apce wciąż nie ma
+      color pickera do fill. Pełny opis: `.claude/docs/vector-network.md` §43.
 - [ ] menu kontekstowe (prawy klik) na node'ach i na pustym canvasie — Copy/Paste, Duplicate,
       Bring to front/Send to back, Delete itd. — dziś nie istnieje w ogóle
 - [ ] kontrolka zoomu w rogu canvasu (aktualny % + dropdown: Zoom to fit / Zoom to selection /

@@ -15,6 +15,7 @@ export const KEYBOARD_SHORTCUTS: TKeyboardShortcuts = {
   [ToolName.lasso]: ['Q'],
   [ToolName.line]: ['L'],
   [ToolName.media]: [CONTROL, SHIFT, 'K'],
+  [ToolName.paint]: [SHIFT, 'B'],
   [ToolName.pen]: ['P'],
   [ToolName.pencil]: [SHIFT, 'P'],
   [ToolName.polygon]: [],

@@ -36,6 +36,7 @@ describe('drawVectorNode', () => {
     const buffer = {} as WebGLBuffer;
     const node: TVectorNode = {
       fillColor: '#ff0000',
+      filledFaceKeys: ['k1'],
       id: '1',
       name: 'Vector',
       parentId: null,
@@ -47,7 +48,7 @@ describe('drawVectorNode', () => {
       vertexHandleModes: {},
       vertices: {},
     };
-    const faces = [[{ x: 0, y: 0 }]];
+    const faces = [{ key: 'k1', points: [{ x: 0, y: 0 }] }];
     const flattened = [{ points: [{ x: 0, y: 0 }], segmentId: 's1' }];
 
     deriveVectorFacesMock.mockReturnValue(faces);
@@ -59,7 +60,41 @@ describe('drawVectorNode', () => {
     // result
     expect(deriveVectorFacesMock).toHaveBeenCalledWith(node);
     expect(flattenVectorSegmentsMock).toHaveBeenCalledWith(node);
-    expect(drawVectorFillMock).toHaveBeenCalledWith(gl, program, buffer, faces, '#ff0000', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorFillMock).toHaveBeenCalledWith(gl, program, buffer, [faces[0].points], '#ff0000', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorStrokeMock).toHaveBeenCalledWith(gl, program, buffer, flattened, '#00ff00', 3, 200, 150, IDENTITY_VIEWPORT);
+  });
+
+  it('should derive faces but skip drawing a fill when the node has a fillColor but no face matches filledFaceKeys', () => {
+    // mock
+    const gl = {} as WebGL2RenderingContext;
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const node: TVectorNode = {
+      fillColor: '#ff0000',
+      filledFaceKeys: [],
+      id: '1',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {},
+      strokeColor: '#00ff00',
+      strokeWidth: 3,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: {},
+    };
+    const faces = [{ key: 'k1', points: [{ x: 0, y: 0 }] }];
+    const flattened = [{ points: [{ x: 0, y: 0 }], segmentId: 's1' }];
+
+    deriveVectorFacesMock.mockReturnValue(faces);
+    flattenVectorSegmentsMock.mockReturnValue(flattened);
+
+    // before
+    drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
+
+    // result
+    expect(deriveVectorFacesMock).toHaveBeenCalledWith(node);
+    expect(drawVectorFillMock).not.toHaveBeenCalled();
     expect(drawVectorStrokeMock).toHaveBeenCalledWith(gl, program, buffer, flattened, '#00ff00', 3, 200, 150, IDENTITY_VIEWPORT);
   });
 
@@ -70,6 +105,7 @@ describe('drawVectorNode', () => {
     const buffer = {} as WebGLBuffer;
     const node: TVectorNode = {
       fillColor: null,
+      filledFaceKeys: [],
       id: '1',
       name: 'Vector',
       parentId: null,

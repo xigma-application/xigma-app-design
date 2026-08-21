@@ -6,5 +6,5 @@ import { TVectorNode } from 'types/design/types';
 import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
 import { isPointInPolygonVertices } from './isPointInPolygonVertices';
 
-export const isPointInVectorRegions = (point: TPoint, node: TVectorNode): boolean =>
-  deriveVectorFaces(node).some((face) => isPointInPolygonVertices(point, face.points));
+export const getVectorFaceAtPoint = (point: TPoint, node: TVectorNode): string | null =>
+  deriveVectorFaces(node).find((face) => isPointInPolygonVertices(point, face.points))?.key ?? null;

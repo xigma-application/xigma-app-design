@@ -2,6 +2,7 @@ export enum KeyboardKeys {
   '+' = '+',
   '-' = '-',
   alt = 'Alt',
+  b = 'KeyB',
   backspace = 'Backspace',
   c = 'KeyC',
   control = 'Control',

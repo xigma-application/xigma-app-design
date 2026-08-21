@@ -45,6 +45,7 @@ describe('getNodeBounds', () => {
     // mock
     const vector: TVectorNode = {
       fillColor: '#000',
+      filledFaceKeys: [],
       id: '1',
       name: 'Vector',
       parentId: null,

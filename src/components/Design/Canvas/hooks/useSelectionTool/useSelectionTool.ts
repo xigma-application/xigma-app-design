@@ -78,7 +78,10 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
 
     if (
       canvas &&
-      (activeTool === ToolName.default || activeTool === ToolName.scale || activeTool === ToolName.lasso) &&
+      (activeTool === ToolName.default ||
+        activeTool === ToolName.scale ||
+        activeTool === ToolName.lasso ||
+        activeTool === ToolName.paint) &&
       !isCanvasCaretEditingActive
     ) {
       const pointerDownListener = (event: PointerEvent): void => onPointerDown(canvas, event, refs, selectionRefs);
@@ -111,6 +114,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         refs.snappedVectorHandleRef.current = null;
         refs.vectorAlignmentGuideRef.current = null;
         refs.vectorLassoPathRef.current = null;
+        refs.hoveredVectorPaintFaceKeyRef.current = null;
         lastPointerClientPositionRef.current = null;
       };
     }

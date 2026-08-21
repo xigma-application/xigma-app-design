@@ -35,6 +35,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
   const hoveredSegmentIdRef = useRef<string | null>(null);
   const hoveredVectorEdgeInsertPointRef = useRef<TPoint | null>(null);
   const hoveredVectorHandleRef = useRef<TVectorHandleHover | null>(null);
+  const hoveredVectorPaintFaceKeyRef = useRef<string | null>(null);
   const hoveredVectorSegmentIdRef = useRef<string | null>(null);
   const hoveredVectorVertexIdRef = useRef<string | null>(null);
   const hoverRef = useRef<string | null>(null);
@@ -75,6 +76,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
       hoveredSegmentIdRef,
       hoveredVectorEdgeInsertPointRef,
       hoveredVectorHandleRef,
+      hoveredVectorPaintFaceKeyRef,
       hoveredVectorSegmentIdRef,
       hoveredVectorVertexIdRef,
       marqueeRef,

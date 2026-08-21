@@ -36,6 +36,7 @@ const SELECTED_INNER_SIZE = VECTOR_VERTEX_SIZE * VECTOR_VERTEX_SELECTED_INNER_SC
 
 const vectorNode: TVectorNode = {
   fillColor: null,
+  filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',
   parentId: null,
@@ -462,6 +463,7 @@ describe('drawVectorEditHandlesLayer', () => {
     // don't touch A directly) become visible too, matching Figma
     const chainNode: TVectorNode = {
       fillColor: null,
+      filledFaceKeys: [],
       id: 'chain-1',
       name: 'Vector',
       parentId: null,
