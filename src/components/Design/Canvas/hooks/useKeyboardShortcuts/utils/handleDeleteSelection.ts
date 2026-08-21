@@ -34,8 +34,9 @@ export const handleDeleteSelection = (dispatch: AppDispatch, refs: TCanvasRefs):
   const selectedSegmentIds = selectedVectorSegmentIdsRef.current;
 
   if (node && selectedVertexIds.length > 0) {
-    const vertices = Object.fromEntries(Object.entries(node.vertices).filter(([id]) => !selectedVertexIds.includes(id)));
+    const verticesAfterDeletion = Object.fromEntries(Object.entries(node.vertices).filter(([id]) => !selectedVertexIds.includes(id)));
     const segments = getRemainingSegments(node, selectedVertexIds);
+    const vertices = getRemainingVertices(verticesAfterDeletion, segments);
 
     dispatch(updateNode({ changes: { segments, vertices }, id: node.id }));
     selectedVectorVertexIdsRef.current = [];

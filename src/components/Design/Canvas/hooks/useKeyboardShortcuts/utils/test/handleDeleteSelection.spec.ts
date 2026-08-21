@@ -154,6 +154,27 @@ describe('handleDeleteSelection', () => {
     expect(refs.selectedVectorVertexIdsRef.current).toEqual([]);
   });
 
+  it('should also drop both other endpoints when deleting the shared middle vertex leaves them with no segment left', () => {
+    // mock — vertex-1 -(segment-1)- vertex-2 -(segment-2)- vertex-3; deleting the shared vertex-2
+    // removes both segments, which would otherwise leave vertex-1 and vertex-3 behind as two
+    // dangling, disconnected points with no stroke connecting them (the reported bug)
+    const vectorId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeId(vectorId));
+
+    const refs = createRefs(['vertex-2']);
+
+    // before
+    handleDeleteSelection(store.dispatch, refs);
+
+    // result
+    const vectorNode = store.getState().design.nodes[vectorId] as TVectorNode;
+
+    expect(vectorNode.segments).toEqual({});
+    expect(vectorNode.vertices).toEqual({});
+    expect(refs.selectedVectorVertexIdsRef.current).toEqual([]);
+  });
+
   it('should remove the selected segment and drop the endpoint it leaves with no segment left, but keep an endpoint still held by another segment, when a segment is selected instead of a vertex', () => {
     // mock — vertex-1 -(segment-1)- vertex-2 -(segment-2)- vertex-3; deleting segment-1 leaves vertex-1
     // with zero remaining segments (a floating dangling point) while vertex-2 stays held by segment-2
