@@ -35,6 +35,15 @@ Every message starts with `XG-APP: ` — this repo's established convention (`gi
 project`, `XG-APP: claude permissions`, `XG-APP: roadmap extended`). A drafted message missing the
 prefix is a mistake — fix it before showing the form, don't rely on the user to notice.
 
+## Language
+
+The commit message itself (everything after `XG-APP: `) is always written in English, even when the
+whole conversation with the user is happening in Polish (asked for directly — "po ang commity",
+i.e. commits in English) and even though a lot of this repo's existing history predates that ask and
+is in Polish. Surrounding conversational text around the form (e.g. the "Proposed commit:" label)
+can stay in whichever language the conversation itself is in — this rule is about the committed
+message content, not the chat framing around it.
+
 ## After approval
 
 The user reviewing and approving the message shown in the form is authorization for **both** steps
