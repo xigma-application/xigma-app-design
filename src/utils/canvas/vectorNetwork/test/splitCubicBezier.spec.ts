@@ -91,4 +91,20 @@ describe('splitCubicBezier', () => {
     expect(split.point).toEqual(end);
     expect(split.secondTangentEnd).toBeNull();
   });
+
+  it('should keep a non-null offset when only ONE axis lands exactly on zero (a purely vertical tangent handle) — every other test either zeroes both axes at once (t=0/t=1/missing tangent) or neither', () => {
+    // mock — start(0,0) -> end(100,0), tangentStart offset purely vertical ((0,10) — x is exactly 0,
+    // y is not), so firstTangentStart's own x-offset from "start" lands exactly on 0 while its y-offset
+    // doesn't, exercising the x===0 && y===0 check's short-circuit with a real, mixed (not all-zero,
+    // not all-nonzero) offset instead
+    const start = { x: 0, y: 0 };
+    const end = { x: 100, y: 0 };
+
+    // action
+    const split = splitCubicBezier(start, end, { x: 0, y: 10 }, { x: -5, y: 0 }, 0.5);
+
+    // result — a = lerp(start, controlStart=(0,10), 0.5) = (0,5); offset from start (0,0) is (0,5): x
+    // is exactly 0 but y isn't, so this must NOT collapse to null
+    expect(split.firstTangentStart).toEqual({ x: 0, y: 5 });
+  });
 });

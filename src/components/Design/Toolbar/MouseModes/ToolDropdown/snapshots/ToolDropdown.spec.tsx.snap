@@ -14,10 +14,10 @@ exports[`ToolDropdown snapshots > should render ToolDropdown 1`] = `
       class="_Icon_49a9ec"
       data-fpl-icon-size="16"
       fill="none"
-      height="5"
+      height="16"
       style="color: var(--color-neutral-1);"
       viewBox="0 0 16 16"
-      width="5"
+      width="16"
     >
       <path
         d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"

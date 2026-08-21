@@ -12,6 +12,8 @@ const getCubicBezierPoint = (p0: TPoint, p1: TPoint, p2: TPoint, p3: TPoint, t: 
   return { x: a * p0.x + b * p1.x + c * p2.x + d * p3.x, y: a * p0.y + b * p1.y + c * p2.y + d * p3.y };
 };
 
+const hasZeroMagnitude = (tangent: TVectorTangent): boolean => !tangent || (tangent.x === 0 && tangent.y === 0);
+
 export const flattenSegment = (
   start: TPoint,
   end: TPoint,
@@ -19,7 +21,7 @@ export const flattenSegment = (
   tangentAtEnd: TVectorTangent,
   segmentCount: number,
 ): TPoint[] => {
-  if (!tangentAtStart && !tangentAtEnd) {
+  if (hasZeroMagnitude(tangentAtStart) && hasZeroMagnitude(tangentAtEnd)) {
     return [start, end];
   }
 

@@ -53,6 +53,10 @@
     font-weight: 400;
     padding-right: var(--spacer-2);
     white-space: nowrap;
+
+    &--active {
+      color: var(--color-on-blue-1);
+    }
   }
 
   &__separator {

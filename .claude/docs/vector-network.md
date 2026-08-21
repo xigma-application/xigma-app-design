@@ -2549,15 +2549,13 @@ add-blue to remove-orange the instant a click lands, with no extra invalidation 
 in the e2e test below, which has to explicitly move the pointer away before each screenshot specifically
 *because* this live-tracking preview would otherwise still be rendering over the just-toggled face.
 
-**Self-intersecting single faces ("bowtie" shapes) resolve correctly for hit-testing, confirmed directly
-against a user-provided reference screenshot** — two triangular lobes from one 4-vertex closed loop whose
-two non-adjacent segments cross at a point that isn't a shared vertex. `deriveVectorFaces` already walks
-this as one face (simple 4-segment cycle, no branch vertex — see §2), and its own even-odd stencil fill
-already rendered both lobes correctly for whole-shape fills; what this tool newly exercises is hit-testing
-into either lobe. `isPointInPolygonVertices.ts` (`Canvas/utils/`) is a textbook even-odd ray-cast, which
-handles self-intersecting polygons correctly for free — it only ever counts ray/edge crossings, with no
-assumption that the polygon is simple. Regression-locked in `getVectorFaceAtPoint.spec.ts` with a bowtie
-fixture: two points, one in each visual lobe, both resolve to the same face key.
+**Self-intersecting single faces ("bowtie" shapes) — superseded, see §44.** This section originally
+claimed a bowtie (two triangular lobes from one 4-segment loop crossing at a non-vertex point) resolved as
+ONE face via `isPointInPolygonVertices.ts`'s even-odd ray-cast. That was true of the ORIGINAL, simpler
+`deriveVectorFaces` (no branch-vertex or crossing support). §44 rewrote face derivation entirely — a
+crossing like this now **splits into two independently paintable faces**, Figma parity, asked for
+directly. `getVectorFaceAtPoint.spec.ts`'s own bowtie fixture was updated accordingly (two lobes now
+resolve to two DIFFERENT keys, not the same one).
 
 **Not implemented, deliberately out of scope for this pass**: drag-painting across multiple faces in one
 gesture (Figma's paint bucket supports this; here every stroke is a single click-toggle, no
@@ -2572,6 +2570,141 @@ combined `armResolvers.spec.ts`, matching that folder's existing one-file conven
 `resolveVectorPaintHover.ts`, `drawVectorPaintHoverPreview.ts`, `getVectorFaceAtPoint.ts`, plus the
 `deriveVectorFaces.ts`/`drawVectorNode.ts` shape-migration fallout across roughly 80 existing test
 fixtures (mechanical `filledFaceKeys: []` backfill, since it's a new required field).
+
+## 44. Face derivation, rewritten — angle-sorted half-edge traversal (DCEL), general planarization, and the tail-tangent-scaling bug
+
+§43 shipped Paint against the ORIGINAL `deriveVectorFaces` (§2): a simple "walk forward while every
+vertex has exactly one unvisited way onward" algorithm, correct only for degree-2 simple loops. Real usage
+immediately surfaced it as too narrow — three live bug reports, in order: two closed regions sharing a
+full edge (a triangle glued onto a square along one side) couldn't be filled at all; a dangling tail off a
+shape's own vertex broke fill entirely; a T-junction with a branch pointing into a shape's own interior did
+too. All three are **branch vertices** (degree 3+) — a case the "exactly one way onward" rule aborts on
+by design. Fixing this meant rewriting face-finding as a proper planar-graph half-edge structure (DCEL,
+confirmed against literature as the standard technique for this exact problem — see below), not patching
+the old algorithm.
+
+**`buildVectorHalfEdgeAdjacency.ts` now angle-sorts each vertex's outgoing half-edges** (`atan2` of the
+segment's own tangent at that vertex, or the straight-line direction if untangented) instead of leaving
+them in arbitrary segment-iteration order. **`getNextVectorHalfEdge.ts`** (new) resolves a face's next
+boundary edge as *the edge immediately clockwise from the arriving edge's own twin* in that sorted list —
+well-defined for any degree: a degree-2 vertex has exactly one other option (matches the old algorithm's
+behavior), a degree-1 dead end resolves to the twin itself (the walk backtracks along it, no longer an
+abort), and a degree-3+ branch vertex resolves deterministically by rotational order instead of aborting.
+**Angle ties break by distance** (nearer vertex wins) — necessary because this app's own smart alignment
+guides (§40) actively produce exact angle ties whenever a dragged point lands on another edge's row/column,
+which is common, not a rare coincidence; without the tie-break, `Array.sort`'s undefined ordering on equal
+keys could non-deterministically collapse an entire shape's face derivation to zero faces mid-drag —
+a real, live-caught regression ("od tej pory nie można już malować" — painting stops working entirely).
+
+**`walkVectorFace.ts` rewritten to match**: closure is now "the walk would repeat its own exact starting
+half-edge" (not "arrived back at the starting VERTEX", which closes branch-vertex loops too early and
+hands the rest of the cycle to whichever other walk tries it next) — this switched a chain of sequential
+early-return `if`s into a `switch (true)` (matching this repo's existing `switch(true)` idiom, e.g.
+`updateHoverCursor.ts`), since the three checks (`!next`, closing, already-visited-elsewhere) are guard
+conditions on different values, not a discriminant switch on one variable. The `visited` Set is shared
+across every `walkVectorFace` call within one `deriveVectorFaces` pass (mirroring the original design),
+so a mid-walk "already visited" hit means a *different, earlier* walk already claimed that half-edge —
+this is the one branch that's genuinely reachable in normal use (verified by a dedicated unit test seeding
+`visited` before the call), unlike deriveVectorFaces' own `seenFaceKeys` dedup (next paragraph).
+
+**Distinguishing a real bounded face from the walk's other output — the outer/unbounded face, and a
+lone dangling edge's own degenerate "there and back" — is now purely mathematical, via
+`getVectorFaceSignedArea.ts` (shoelace formula) plus one narrow exception:**
+- **Signed area `>= 0`** keeps genuine bounded regions and rejects the outer face (always traces the
+  opposite rotational sense, negative area) — including the not-quite-intuitive case of a dangling
+  antenna poking *into* a real bounded face's own interior, which the walk legitimately traverses twice
+  (out and back) as part of that face's boundary: the antenna's own forward+backward pass cancels to ~0
+  net area in the shoelace sum, so the REAL face's own positive area still wins. An earlier version of
+  this filter used a `hasRepeatedSegment` heuristic instead ("any face whose steps repeat a segment id is
+  the outer face") — **wrong**, and a real live bug: it discarded the antenna-into-interior face
+  entirely (a rectangle with a branch pointing inward became completely unpaintable), since that face's
+  own steps legitimately repeat the antenna's segment id too. Replaced by the area-only test.
+- **The one thing area alone can't distinguish**: a lone dangling segment's own trivial "face" (walked
+  there-and-back over itself) is *also* exactly zero area — same as a perfectly symmetric bowtie's own
+  two-lobe cancellation. `isSelfBacktrack` (`steps.length === 2 && steps[0].segmentId ===
+  steps[1].segmentId`) is the one narrow, purely topological exception: a walk backtracking over the
+  *same physical segment* encloses nothing, while two *different* segments joining the same two vertices
+  (e.g. a straight edge and a curved one forming a lens — see `deriveVectorFaces.spec.ts`) is a real
+  2-edge loop that happens to enclose actual area, and must not be excluded by the same check.
+- **`deriveVectorFaces.ts`'s own `seenFaceKeys` dedup guard is now empirically confirmed unreachable**,
+  not just assumed safe — the shared `visited` Set already prevents a second walk from ever re-tracing a
+  half-edge another walk claimed, and the one scenario that used to reach it (a perfectly-zero-area
+  bowtie, found via both windings) now gets planarized apart into distinct keys before this point.
+  Verified by temporarily replacing the guard with a `throw` and re-running the full Design/Canvas unit
+  suite (2265 tests) plus a dedicated e2e case reproducing the live-reported "egg crossed by a triangle"
+  shape (two crossings on the same curve — the exact topology that surfaced the tangent-scaling bug
+  below) — never triggered. Marked `/* v8 ignore if */` rather than removed, since a future change to the
+  walk/planarization logic could reopen a path to it, and the guard costs nothing to keep.
+
+**Planarization (`planarizeVectorNetwork/`, new folder) — Figma parity, asked for directly: "jak mamy to
+przecięcie to tworzy w tym miejscu nowy fill".** Two segments that geometrically cross without sharing a
+vertex now become their own new, independently paintable region — straight/straight, straight/curved, and
+curved/curved alike (an earlier pass handled only straight/straight, explicitly documented as a known gap;
+extending it to curves was asked for directly once a real curve-crossing-a-triangle case was shown live).
+Structure (each concern its own file, the promoted-function-folder pattern from
+[[xigma-module-structure]] applied one level up from a single function to a whole cluster):
+- **`findAllNetworkCrossings.ts`** — the O(segments²) pairwise search: every segment is first flattened
+  to a polyline (`flattenForCrossingSearch.ts`, reusing `flattenSegment.ts` at rendering density — cheap,
+  runs once per segment) and crossings are found via ordinary straight-sub-edge intersection
+  (`findSegmentCrossings.ts` → `getStraightSegmentIntersection.ts`, Cramer's rule) between every pair of
+  polylines. A found crossing's polyline-local position converts back to a t on the ORIGINAL segment
+  (`(subEdgeIndex + localT) / (polylinePointCount - 1)`).
+- **`refineCrossing.ts`** — the coarse polyline search only localizes a crossing to within one sub-edge's
+  width, fine for a clean X but visibly off for a near-tangent/glancing crossing (two curves grazing each
+  other at a shallow angle — a real live case: a triangle's own rounded apex barely touching a "petal"
+  curve). Since the fill boundary is built from this point while the STROKE is still drawn from the
+  untouched original curve, any error here is directly visible as the fill missing or overshooting the
+  stroke right at that point. Refined via 4 rounds of re-sampling a shrinking window (16 points/round,
+  via `getSubArcPoints.ts` — an exact sub-arc extracted through two chained `splitCubicBezier` cuts, not
+  an approximation) and re-intersecting — cheap specifically because it only runs on the handful of
+  crossings the coarse pass actually found, not on every pair it checked.
+- **`splitSegmentAtCrossings.ts`** — splits one segment into pieces at every crossing along it via
+  sequential De Casteljau subdivision (`splitCubicBezier.ts`, pre-existing, already used for T-junction
+  inserts). **The live-caught bug, and the mathematical crux of this whole section**: De Casteljau
+  scales a split's own tail-end tangent by `(1 - t)` on *every* cut — a tail's own control point isn't
+  simply "the original tangent, trimmed", it's genuinely repositioned by the subdivision math. Reusing
+  the ORIGINAL, un-scaled `segment.tangentEnd` on a segment's *second* (or later) crossing — instead of
+  the *previous* split's own `secondTangentEnd` — feeds the next `splitCubicBezier` call a tangent
+  magnitude that belongs to a longer arc than the one actually being split, corrupting the curve's shape
+  from that point on. Visually: a filled region's own boundary bulging past its stroke by a wide, visible
+  margin, confirmed against a live screenshot ("wybrzuszone jajko"). Fixed by threading a
+  `remainderTangentEnd` through the split loop exactly like `remainderTangentStart` already was.
+  Regression-locked in `splitSegmentAtCrossings.spec.ts`: a curve with two crossings, checked two ways —
+  the middle piece evaluated at its own local midpoint must land exactly where the *original* unsplit
+  curve sits at the same global t, and the last piece's own tangentEnd must match splitting the original
+  curve directly at the last crossing in one step (`splitCubicBezier`'s own output used as ground truth),
+  NOT the raw original tangentEnd.
+- **`buildPlanarSegments.ts`** — thin: pass a segment through unchanged if it has no recorded crossings,
+  otherwise replace it with `splitSegmentAtCrossings`'s pieces (sorted by t first, regardless of the
+  input array's own order).
+- **`planarizeVectorNetwork.ts`** — the orchestrator, reduced to two calls once the above split out
+  (`findAllNetworkCrossings` then `buildPlanarSegments`), asked for directly after the first version grew
+  too much inline logic ("planarizeVectorNetwork też sporo logiki spróbuj to jakoś scalić a funkcje do
+  osobnych plików").
+
+**Virtual crossing vertex ids are deterministic and collision-safe for multiple crossings on the same
+segment pair**: `` `x:${firstId}:${secondId}:${tA.toFixed(6)}` `` (sorted original segment ids + the
+crossing's own t, not just the segment pair) — a curve can cross another curve at more than one point,
+unlike two straight lines, so the pair alone isn't a unique key.
+
+**Face key stability under a vertex drag is deliberately asymmetric, confirmed against a live report of
+the opposite expectation.** A genuine topology change (a crossing appears, disappears, or a branch vertex
+gets dragged into/out of another face's interior) legitimately produces new face keys — there's no
+"lineage" tracking a face's identity across such a change (asked and answered directly: none exists,
+adding it would need matching old keys to new ones by geometric overlap, out of scope). What must NOT
+change a key is incidental recomputation — the same physical crossing, on the same two segments, at
+(near enough) the same point, must always re-derive the same split-piece ids. Verified directly: a drag
+that briefly creates then resolves a crossing must never leave `deriveVectorFaces` returning zero faces
+(the literal live bug — a filled shape stopped being paintable at all mid-drag, traced to the angle-tie
+issue above, not to key instability).
+
+Regression-locked in a combined ~35 new unit tests across `walkVectorFace.spec.ts`,
+`buildVectorHalfEdgeAdjacency.spec.ts`, `getNextVectorHalfEdge.spec.ts`, `getVectorFaceSignedArea.spec.ts`,
+`getVectorHalfEdgeAngle.spec.ts`, `deriveVectorFaces.spec.ts`, and one file per function under
+`planarizeVectorNetwork/test/` — plus a dedicated e2e case (`vector-edit.spec.ts`, TEST_CASES.md #243)
+reproducing the exact live "egg crossed by a triangle" shape end-to-end. 100% branch coverage across the
+whole `vectorNetwork/` tree except the two `/* v8 ignore */`-marked, empirically-confirmed-unreachable
+branches described above.
 
 ## Related
 

@@ -46,7 +46,7 @@ const ToolDropdown: FC<TToolDropdownProps> = ({ tool }) => {
   const selectedTool = getGroupDisplayedTool(tool, lastShapeTool, lastMouseTool, lastFrameTool, lastTextTool, lastPenTool);
 
   return (
-    <Popover trigger={<Icon name="ChevronDown" size={5} />} triggerAriaLabel={`${tool} options`} triggerClassName={styles.ToolDropdown}>
+    <Popover trigger={<Icon name="ChevronDown" size={16} />} triggerAriaLabel={`${tool} options`} triggerClassName={styles.ToolDropdown}>
       {(groupItems ?? [tool]).map((groupTool) => (
         <PopoverItem
           className={styles.ToolDropdown__item}

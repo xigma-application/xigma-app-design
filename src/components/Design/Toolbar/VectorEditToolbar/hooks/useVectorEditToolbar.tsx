@@ -55,7 +55,9 @@ export const useVectorEditToolbar = (): TUseVectorEditToolbar => {
           type="button"
         >
           <Icon color={isActive ? 'onBlue1' : 'neutral1'} name={tool.icon} size={ICON_SIZE} />
-          <span className={styles.VectorEditToolbar__label}>{t(tool.labelKey)}</span>
+          <span className={cx(styles.VectorEditToolbar__label, { [styles['VectorEditToolbar__label--active']]: isActive })}>
+            {t(tool.labelKey)}
+          </span>
         </button>
       );
     },

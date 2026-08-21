@@ -1,6 +1,9 @@
 // types
 import { TVectorHalfEdge } from './buildVectorHalfEdgeAdjacency';
 
+// utils
+import { getNextVectorHalfEdge } from './getNextVectorHalfEdge';
+
 export type TVectorFaceStep = { fromId: string; segmentId: string; toId: string };
 
 export const walkVectorFace = (
@@ -11,34 +14,34 @@ export const walkVectorFace = (
   visited: Set<string>,
   segmentCount: number,
 ): TVectorFaceStep[] | null => {
-  const steps: TVectorFaceStep[] = [];
-  let fromId = startFromId;
-  let toId = startToId;
-  let segmentId = startSegmentId;
+  const startKey = `${startSegmentId}:${startFromId}`;
 
-  for (let step = 0; step <= segmentCount; step += 1) {
-    const key = `${segmentId}:${fromId}`;
+  if (!visited.has(startKey)) {
+    const steps: TVectorFaceStep[] = [];
+    let fromId = startFromId;
+    let toId = startToId;
+    let segmentId = startSegmentId;
 
-    if (visited.has(key)) {
-      return null;
+    for (let step = 0; step <= segmentCount * 2; step += 1) {
+      const next = getNextVectorHalfEdge(adjacency, fromId, toId, segmentId);
+      const nextKey = next ? `${next.segmentId}:${toId}` : null;
+
+      visited.add(`${segmentId}:${fromId}`);
+      steps.push({ fromId, segmentId, toId });
+
+      switch (true) {
+        case !next:
+          return null;
+        case nextKey === startKey:
+          return steps;
+        case visited.has(nextKey!):
+          return null;
+        default:
+          fromId = toId;
+          toId = next!.toId;
+          segmentId = next!.segmentId;
+      }
     }
-
-    visited.add(key);
-    steps.push({ fromId, segmentId, toId });
-
-    if (toId === startFromId) {
-      return steps;
-    }
-
-    const incident = (adjacency.get(toId) ?? []).filter((edge) => !(edge.segmentId === segmentId && edge.toId === fromId));
-
-    if (incident.length !== 1) {
-      return null;
-    }
-
-    fromId = toId;
-    toId = incident[0].toId;
-    segmentId = incident[0].segmentId;
   }
 
   return null;

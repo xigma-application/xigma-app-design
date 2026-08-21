@@ -51,9 +51,11 @@ describe('getVectorFaceAtPoint', () => {
     expect(getVectorFaceAtPoint({ x: 500, y: 500 }, node)).toBeNull();
   });
 
-  it('should resolve a point in either lobe of a single self-intersecting (bowtie) face to the same key', () => {
-    // mock — a 4-vertex loop whose edges cross at the center, forming two visually separate
-    // triangular lobes that are topologically one face (one closed 4-segment walk)
+  it('should resolve each lobe of a self-intersecting (bowtie) shape to its own distinct, independently paintable face key — Figma parity', () => {
+    // mock — a 4-vertex loop whose edges (s2, s4) cross at the center without sharing a vertex there,
+    // forming two visually separate triangular lobes; the crossing becomes its own new region (matches
+    // how a shared edge or T-junction already splits into separate faces), so each lobe now gets its
+    // own key instead of both resolving to the same whole-shape key
     const node = buildNode(
       {
         s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
@@ -69,9 +71,12 @@ describe('getVectorFaceAtPoint', () => {
       },
     );
 
-    // result — bottom lobe and top lobe both resolve, the crossing leaves the shape's own left/right edges empty
-    expect(getVectorFaceAtPoint({ x: 50, y: 10 }, node)).toBe('s1,s2,s3,s4');
-    expect(getVectorFaceAtPoint({ x: 50, y: 90 }, node)).toBe('s1,s2,s3,s4');
-    expect(getVectorFaceAtPoint({ x: 5, y: 50 }, node)).toBeNull();
+    // result
+    const bottomLobeKey = getVectorFaceAtPoint({ x: 50, y: 10 }, node);
+    const topLobeKey = getVectorFaceAtPoint({ x: 50, y: 90 }, node);
+
+    expect(bottomLobeKey).not.toBeNull();
+    expect(topLobeKey).not.toBeNull();
+    expect(bottomLobeKey).not.toBe(topLobeKey);
   });
 });

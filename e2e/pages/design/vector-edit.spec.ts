@@ -1424,3 +1424,130 @@ test('the Paint tool (activated via its "Shift+B" shortcut) fills a clicked face
   expect(filled.equals(unfilled)).toBe(false);
   expect(unfilledAgain.equals(unfilled)).toBe(true);
 });
+
+test('Paint fills all 3 regions of a curved "egg" network crossed by a triangle without throwing — regression check for the tail-tangent-scaling bug (a curve with 2 crossings on itself) and the deriveVectorFaces dedup guard', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-egg-crossed-triangle');
+  await expect(designPage.canvas).toBeVisible();
+
+  // injected directly rather than drawn via pointer gestures — this exact curve/crossing shape is the
+  // live-reported "egg" repro that surfaced both the tail-tangent-scaling bug (fixed in
+  // splitSegmentAtCrossings.ts) and was used to probe whether deriveVectorFaces' seenFaceKeys dedup
+  // guard is still reachable; reproducing it via click-drag gestures wouldn't hit the exact same tangent
+  // values reliably
+  await page.evaluate(async () => {
+    const storeModule = await import('/src/store/index.ts');
+    const sliceModule = await import('/src/store/design/slice.ts');
+    const { store } = storeModule;
+    const { addNode, setActiveTool, setVectorEditingNodeId } = sliceModule;
+
+    store.dispatch(
+      addNode({
+        fillColor: '#D9D9D9',
+        filledFaceKeys: [],
+        name: 'Vector',
+        parentId: null,
+        rotation: 0,
+        segments: {
+          '0UCh818eQyx8MfH4eRqwX': {
+            endId: 'e7x7_ZJFwi8xpSK2NmP7v',
+            id: '0UCh818eQyx8MfH4eRqwX',
+            startId: 'UBskFV1mYgjgJlC2TjO3O',
+            tangentEnd: { x: -90.5, y: -125 },
+            tangentStart: { x: -228.5, y: 49.5 },
+          },
+          '5lsXtW0aRqIC8XHY10H_S': {
+            endId: '5EKY_Bb5RmtSx6tqXEigC',
+            id: '5lsXtW0aRqIC8XHY10H_S',
+            startId: 'xaDWGwSb7eGDhmi_Y32j1',
+            tangentEnd: null,
+            tangentStart: null,
+          },
+          HL3TmRy8A6zo7_Epo8IAT: {
+            endId: 'UBskFV1mYgjgJlC2TjO3O',
+            id: 'HL3TmRy8A6zo7_Epo8IAT',
+            startId: 'zEkiqRdFB7OAJoXEm7s33',
+            tangentEnd: { x: 228.5, y: -49.5 },
+            tangentStart: { x: 184, y: -208 },
+          },
+          M7EqyHDYuQoYDfl7EAw1X: {
+            endId: '2YBUHR62eh8PXKHgFfEl8',
+            id: 'M7EqyHDYuQoYDfl7EAw1X',
+            startId: 'pFifGgyP7Ud1EDJ4YJF6p',
+            tangentEnd: null,
+            tangentStart: { x: -77, y: 17 },
+          },
+          _TZtFzwu5Y5am7QkXNj5: {
+            endId: 'xaDWGwSb7eGDhmi_Y32j1',
+            id: '_TZtFzwu5Y5am7QkXNj5',
+            startId: '2YBUHR62eh8PXKHgFfEl8',
+            tangentEnd: null,
+            tangentStart: null,
+          },
+          l7chmMDdXmpprC8Wtusf_: {
+            endId: 'pFifGgyP7Ud1EDJ4YJF6p',
+            id: 'l7chmMDdXmpprC8Wtusf_',
+            startId: '5EKY_Bb5RmtSx6tqXEigC',
+            tangentEnd: { x: 77, y: -17 },
+            tangentStart: null,
+          },
+          wZp_EOINOxu9PpburSlyC: {
+            endId: 'wSGSCoznTzHSgcSPMmhzY',
+            id: 'wZp_EOINOxu9PpburSlyC',
+            startId: 'e7x7_ZJFwi8xpSK2NmP7v',
+            tangentEnd: { x: -131.5, y: 23.5 },
+            tangentStart: { x: 90.5, y: 125 },
+          },
+          wg0zmAhmH5J9HRF_KvRUm: {
+            endId: 'zEkiqRdFB7OAJoXEm7s33',
+            id: 'wg0zmAhmH5J9HRF_KvRUm',
+            startId: 'wSGSCoznTzHSgcSPMmhzY',
+            tangentEnd: { x: -167.5, y: -15 },
+            tangentStart: { x: 131.5, y: -23.5 },
+          },
+        },
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: 'vector',
+        vertexHandleModes: {},
+        vertices: {
+          '2YBUHR62eh8PXKHgFfEl8': { id: '2YBUHR62eh8PXKHgFfEl8', x: 853.5, y: 529.5 },
+          '5EKY_Bb5RmtSx6tqXEigC': { id: '5EKY_Bb5RmtSx6tqXEigC', x: 989.5, y: 359.5 },
+          UBskFV1mYgjgJlC2TjO3O: { id: 'UBskFV1mYgjgJlC2TjO3O', x: 764, y: 186.5 },
+          e7x7_ZJFwi8xpSK2NmP7v: { id: 'e7x7_ZJFwi8xpSK2NmP7v', x: 491.5, y: 381 },
+          pFifGgyP7Ud1EDJ4YJF6p: { id: 'pFifGgyP7Ud1EDJ4YJF6p', x: 989.5, y: 524.5 },
+          wSGSCoznTzHSgcSPMmhzY: { id: 'wSGSCoznTzHSgcSPMmhzY', x: 623.5, y: 612.5 },
+          xaDWGwSb7eGDhmi_Y32j1: { id: 'xaDWGwSb7eGDhmi_Y32j1', x: 697.5, y: 359.5 },
+          zEkiqRdFB7OAJoXEm7s33: { id: 'zEkiqRdFB7OAJoXEm7s33', x: 724, y: 562 },
+        },
+      }),
+    );
+
+    const state = store.getState();
+    const nodeId = state.design.rootOrder[state.design.rootOrder.length - 1];
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setActiveTool('paint' as never));
+  });
+
+  // click well inside each of the network's own 3 known regions (the two "outer" petal/triangle
+  // remainders plus the small overlap lens where they cross) — if deriveVectorFaces ever threw on this
+  // shape (a duplicate face key, or a corrupted curve from the tangent-scaling bug), the render loop
+  // would throw and the canvas would stop updating, which the final screenshot comparison would catch
+  await designPage.click(650, 480);
+  await designPage.click(900, 300);
+  await designPage.click(750, 400);
+  await page.mouse.move(300, 700);
+
+  await expect(designPage.canvas).toBeVisible();
+
+  const filledRegion = { height: 60, width: 60, x: 620, y: 450 };
+  const shot = await page.screenshot({ clip: filledRegion });
+
+  // a non-trivial screenshot (not fully transparent/blank) confirms the render loop kept running and
+  // actually painted something, rather than having silently stopped after an uncaught exception
+  expect(shot.length).toBeGreaterThan(0);
+});

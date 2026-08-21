@@ -1180,13 +1180,24 @@ Drobniejsze, ale zauważalne różnice względem Figmy, niepowiązane z żadnym 
       podgląd na żywo (niebieski = doda fill, pomarańczowy = usunie — te same kolory co
       `DRAFT_FRAME_STROKE`/`VECTOR_EDGE_HOVER_STROKE` gdzie indziej), oraz kursor `drop.png` (spoczynek)
       / `drop-add.png` / `drop-remove.png` (nad face'em) przez ten sam mechanizm `setClassName`, co
-      reszta kursorów Vector Edit Mode (nie osobny `canvas.style.cursor`). Hit-test (`getVectorFaceAtPoint.ts`,
-      ray-casting even-odd) poprawnie obsługuje też samo-przecinający się pojedynczy face (np.
-      "bowtie" — dwa wierzchołki krawędzi przecinają się wizualnie bez wspólnego wierzchołka) — punkt w
-      dowolnym z dwóch płatów trafia w ten sam klucz, bo even-odd ray-cast nie zależy od topologii.
+      reszta kursorów Vector Edit Mode (nie osobny `canvas.style.cursor`). Hit-test przez
+      `getVectorFaceAtPoint.ts` (ray-casting even-odd).
       Nowe sieci wektorowe dostają teraz domyślny `fillColor: VECTOR_FILL` zamiast `null` (dotąd
       nieużywana stała) — inaczej Paint nie miałby żadnego widocznego efektu, bo w apce wciąż nie ma
       color pickera do fill. Pełny opis: `.claude/docs/vector-network.md` §43.
+- [x] **Wykrywanie regionów, przepisane od zera** — pierwsza wersja `deriveVectorFaces` (prosty spacer
+      "dokładnie jedna nieodwiedzona droga dalej") łamała się na realnych przypadkach: dwa regiony ze
+      wspólną krawędzią, wiszący ogon, T-junction z odgałęzieniem do wnętrza — wszystko to wierzchołki
+      stopnia 3+. Przepisane jako właściwa struktura half-edge (DCEL) z sąsiedztwem sortowanym kątowo
+      (`buildVectorHalfEdgeAdjacency.ts`, `getNextVectorHalfEdge.ts`) — z tie-breakiem po odległości przy
+      remisach kątowych (realnie występują przez smart alignment guides). Dodano też pełną planaryzację
+      (`planarizeVectorNetwork/`) — przecięcie dwóch segmentów (prosta-prosta, prosta-krzywa,
+      krzywa-krzywa) tworzy teraz nowy, niezależnie malowalny region zamiast zostawać jednym
+      samoprzecinającym się face'em (Figma-parity). Po drodze naprawiony realny błąd matematyczny w
+      dzieleniu krzywej Béziera (De Casteljau skaluje tangent "ogona" przy każdym kolejnym cięciu —
+      ponowne użycie oryginalnego, nieprzeskalowanego tangentu przy 2+ przecięciach na tej samej krzywej
+      psuło jej kształt, widoczne jako wybrzuszony fill wychodzący poza kontur). Pełny opis:
+      `.claude/docs/vector-network.md` §44.
 - [ ] menu kontekstowe (prawy klik) na node'ach i na pustym canvasie — Copy/Paste, Duplicate,
       Bring to front/Send to back, Delete itd. — dziś nie istnieje w ogóle
 - [ ] kontrolka zoomu w rogu canvasu (aktualny % + dropdown: Zoom to fit / Zoom to selection /
