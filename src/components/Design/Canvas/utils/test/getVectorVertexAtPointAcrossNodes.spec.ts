@@ -61,6 +61,19 @@ describe('getVectorVertexAtPointAcrossNodes', () => {
     expect(hit).toEqual({ nodeId: 'b', point: { x: 2, y: 0 }, vertexId: 'target' });
   });
 
+  it('should pick the closer of two candidate vertices when each belongs to a different node', () => {
+    // mock — both nodes have one un-excluded vertex within tolerance; "a" is the nearer of the two
+    const nodeA = buildVectorNode({ id: 'a', vertices: { near: { id: 'near', x: 1, y: 0 } } });
+    const nodeB = buildVectorNode({ id: 'b', vertices: { far: { id: 'far', x: 3, y: 0 } } });
+    const nodes: Record<string, TSceneNode> = { a: nodeA, b: nodeB };
+
+    // before
+    const hit = getVectorVertexAtPointAcrossNodes({ x: 0, y: 0 }, nodes, 5, 'other');
+
+    // result
+    expect(hit).toEqual({ nodeId: 'a', point: { x: 1, y: 0 }, vertexId: 'near' });
+  });
+
   it('should resolve the hit against the target node’s baked, world-space position, not its raw rotated local coordinates', () => {
     // mock — target(10,0) rotated 90deg around bounds-center (5,0) lands at world (5,5)
     const nodeA = buildVectorNode({ id: 'a', vertices: { dragged: { id: 'dragged', x: 5, y: 5 } } });

@@ -5,6 +5,9 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { bakeVectorNodeRotation } from './bakeVectorNodeRotation';
+import { getVectorVertexAtPoint } from './getVectorVertexAtPoint';
+
+type TCandidate = { distance: number; nodeId: string; point: TPoint; vertexId: string };
 
 export const getVectorVertexAtPointAcrossNodes = (
   point: TPoint,
@@ -14,15 +17,24 @@ export const getVectorVertexAtPointAcrossNodes = (
 ): { nodeId: string; point: TPoint; vertexId: string } | null => {
   const candidates = Object.values(nodes)
     .filter((node): node is Extract<TSceneNode, { type: NodeType.vector }> => node.type === NodeType.vector)
-    .flatMap((node) => Object.values(bakeVectorNodeRotation(node).vertices).map((vertex) => ({ nodeId: node.id, vertex })))
-    .filter(({ vertex }) => vertex.id !== excludeVertexId)
-    .map(({ nodeId, vertex }) => ({
-      distance: Math.hypot(point.x - vertex.x, point.y - vertex.y),
-      nodeId,
-      point: { x: vertex.x, y: vertex.y },
-      vertexId: vertex.id,
-    }))
-    .filter((candidate) => candidate.distance <= tolerance)
+    .map((node): TCandidate | null => {
+      const bakedNode = { ...node, ...bakeVectorNodeRotation(node) };
+      const hit = getVectorVertexAtPoint(point, bakedNode, tolerance, excludeVertexId);
+
+      if (hit) {
+        const vertex = bakedNode.vertices[hit.vertexId];
+
+        return {
+          distance: Math.hypot(point.x - vertex.x, point.y - vertex.y),
+          nodeId: node.id,
+          point: { x: vertex.x, y: vertex.y },
+          vertexId: hit.vertexId,
+        };
+      }
+
+      return null;
+    })
+    .filter((candidate): candidate is TCandidate => candidate !== null)
     .sort((a, b) => a.distance - b.distance);
 
   return candidates.length > 0 ? { nodeId: candidates[0].nodeId, point: candidates[0].point, vertexId: candidates[0].vertexId } : null;

@@ -2787,6 +2787,17 @@ one deleted), and the post-merge selection is always just `[draggedVertexId]`, n
   position. Tolerance reuses `VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom` — the same constant plain
   vertex-hover hit-testing already uses, for a consistent affordance size, not
   `VECTOR_ALIGNMENT_SNAP_TOLERANCE_PX` (that one drives the separate, weaker axis-alignment guide, §40).
+  **Update:** originally hand-duplicated the single-node hit-test's distance/filter/sort chain inline
+  instead of calling `getVectorVertexAtPoint.ts` (flagged by a `/code-review` pass — two copies of the
+  same tie-breaking logic that could silently drift). Now maps each vector node through
+  `getVectorVertexAtPoint` (baked first, same as before) to get that node's own closest candidate, then
+  re-derives just that one candidate's distance to pick the closest *across* nodes — a second, outer
+  sort, since `getVectorVertexAtPoint`'s return value doesn't carry distance out. Behavior-preserving
+  (existing tests passed unchanged); the one new test added — two different nodes each contributing a
+  valid candidate — exists purely because coverage caught that the outer sort's comparator had never
+  actually run with 2+ elements before (every prior test either excluded one node's only vertex or put
+  both candidates in the same node, where the *inner* sort inside `getVectorVertexAtPoint` was doing the
+  comparing instead).
 - **`handlePointerMove/continueVectorVertexDrag/`** (promoted from a flat file to its own folder, same
   "ifologia" split rule as §9/§32/§42, once the merge-detection block grew into its own concern) — the
   main file still computes the drag's post-alignment-corrected position exactly as before, then, only when
