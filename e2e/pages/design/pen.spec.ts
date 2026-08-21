@@ -485,20 +485,21 @@ test('undo steps back through vertex placements one click at a time', async ({ p
 
   // state1 (v1 alone, no segments, node not deleted) can no longer be reached by "draw v1, then
   // Escape" — v1 would be the node's only, still-unconnected vertex, and Escape now deletes exactly
-  // that dangling case outright (see deleteDanglingActiveVertex.ts). Reach the same end state a
-  // different way instead: draw v1 and v2 (a real segment now exists), Escape (only stops extending,
-  // since v2 is connected), then delete v2 via the ordinary vertex-selection Delete key — that path
-  // never cascades into whole-node deletion, leaving v1 alone exactly like the undo-derived state1
+  // that dangling case outright (see deleteDanglingActiveVertex.ts). It also can no longer be reached
+  // by drawing v1+v2 and deleting v2 via the Delete key — handleDeleteSelection.ts's vertex-deletion
+  // branch now prunes *any* vertex left with zero remaining segments (not just the one directly
+  // selected, fixing a separate orphaned-dot bug), so deleting v2 orphans v1 too and both vanish
+  // together. Reach the same end state via undo instead, from an independent, shorter session: v1+v2
+  // is the exact same single gesture-pair state1's own second undo already restores (the pre-gesture
+  // snapshot captured just before v2 was placed doesn't depend on whether a v3 was ever drawn
+  // afterwards), so undoing it once here must land on the identical result
   await designPage.goto('e2e-test-pen-undo-reference-one-vertex');
   await expect(designPage.canvas).toBeVisible();
   await designPage.selectTool('pen');
   await designPage.click(700, 300);
   await designPage.click(850, 300);
   await page.keyboard.press('Escape');
-  await designPage.selectTool('default');
-  await designPage.click(850, 300); // select v2's dot
-  await page.keyboard.press('Backspace');
-  await designPage.selectTool('pen'); // back to Pen — state1 stayed on Pen the whole time via undo
+  await page.keyboard.press('Control+z'); // undoes the v2 placement, leaving v1 alone
   await designPage.pointerMove(1500, 900);
   const referenceOneVertex = await designPage.canvas.screenshot();
 
@@ -664,4 +665,77 @@ test('a click-drag close reveals both the closing segment’s own tangent and th
   const noDrag = await page.screenshot({ clip: region });
 
   expect(midDrag.equals(noDrag)).toBe(false);
+});
+
+test('hovering within the angle-snap tolerance of horizontal pulls the rubber-band preview onto the exact axis', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-pen-angle-snap-preview');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300); // v1
+  await designPage.pointerMove(850, 304); // a couple of px off horizontal — within the angle-snap tolerance
+  const nearHorizontal = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-pen-angle-snap-preview-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300);
+  await designPage.pointerMove(850, 300); // exactly horizontal — the position the snap should pull onto
+  const exactHorizontal = await designPage.canvas.screenshot();
+
+  // the near-horizontal hover snaps onto the same axis, rendering pixel-identical to hovering exactly on it
+  expect(nearHorizontal.equals(exactHorizontal)).toBe(true);
+});
+
+test('a diagonal hover, well outside the angle-snap tolerance, keeps the default blue preview instead of the orange snap color', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-pen-angle-snap-diagonal');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300); // v1
+  await designPage.pointerMove(850, 450); // 45deg — well outside the snap tolerance
+  const diagonal = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-pen-angle-snap-diagonal-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300);
+  await designPage.pointerMove(850, 300); // horizontal, at the same x — snapped, orange
+  const horizontal = await designPage.canvas.screenshot();
+
+  expect(diagonal.equals(horizontal)).toBe(false);
+});
+
+test('clicking within the angle-snap tolerance commits the new vertex exactly onto the cardinal axis, not the raw cursor position', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-pen-angle-snap-commit');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300); // v1
+  await designPage.click(850, 304); // v2 — a couple of px off horizontal, within the angle-snap tolerance
+  await designPage.pointerMove(1500, 900); // rest away
+  const snappedCommit = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-pen-angle-snap-commit-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300);
+  await designPage.click(850, 300); // exactly horizontal — where the snap should have landed
+  await designPage.pointerMove(1500, 900);
+  const exactCommit = await designPage.canvas.screenshot();
+
+  expect(snappedCommit.equals(exactCommit)).toBe(true);
 });

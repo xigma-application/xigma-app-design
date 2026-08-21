@@ -1279,7 +1279,7 @@ prevented the drag from ever being observed. A plain click (no movement past `MI
 unaffected — arming then immediately releasing produces no visible change, same as `closeLoopOntoVertex.ts`
 always did for a plain closing click.
 
-## 28. Deleting a segment now prunes any endpoint it leaves with zero remaining segments
+## 28. Deleting a segment or a vertex now prunes any *other* endpoint it leaves with zero remaining segments
 
 `handleDeleteSelection.ts`'s vertex-selection branch already recomputed both `vertices` and `segments`
 together (`getRemainingSegments`). Its sibling segment-selection branch didn't: it only ever filtered
@@ -1288,9 +1288,26 @@ a floating, unselectable-by-normal-means dot with nothing attached (screenshot: 
 apart from an otherwise-normal two-segment path). Fixed with a new `getRemainingVertices(vertices,
 segments)` helper (same reachability check `deleteDanglingActiveVertex.ts` already used for the Pen tool's
 single active vertex on Escape, generalized here to every vertex against an arbitrary post-delete
-`segments` map) — applied only in the segment-selection branch, deliberately not the vertex-selection one:
-deleting a *vertex* explicitly already has its own, separate question of whether to bridge/reconnect its
-two neighbors (out of scope here, not asked for), so that branch is left as-is.
+`segments` map) — this section originally said the fix was applied only to the segment-selection branch,
+deliberately not the vertex-selection one, on the reasoning that deleting a vertex already has its own
+separate bridge/reconnect question. That reasoning didn't survive contact with a concrete repro: deleting
+the **shared vertex of a "V" shape** (the bottom point, touching both arms) removed both incident
+segments, which left *both remaining arm-tip vertices* orphaned — the exact same dangling-dot bug, just
+reached by deleting the middle point instead of an end one. `getRemainingVertices` is now applied in
+**both** branches (vertex-selection and segment-selection) — deleting a vertex prunes every *other*
+vertex the deletion happens to orphan, not just accounts for the one explicitly selected.
+
+**Consequence — an isolated single vertex with zero segments is no longer reachable by deleting
+anything**, only by undo (which restores a raw pre-gesture snapshot, bypassing this cleanup entirely) or
+by a fresh network's very first vertex before a second point is ever placed. `pen.spec.ts`'s undo
+regression test used to reconstruct that exact state as an independent reference by drawing two vertices
+and deleting the second one — that stopped working the moment this fix landed, since deleting v2 now
+orphans-and-removes v1 too (both endpoints of the one segment being removed lose their only segment
+simultaneously). Fixed by reconstructing the reference via undo instead of deletion (draw v1+v2, Escape,
+one `Ctrl+Z`) — the pre-gesture snapshot `Ctrl+Z` restores there is provably the same one a longer
+3-vertex session's second `Ctrl+Z` would land on, since neither drawing a v3 afterward nor Escape (it
+never touches `nodes`/`rootOrder`/`selectedIds`, §8) can change what was already snapshotted before v2's
+own gesture ran.
 
 ## 29. Move tool can now split a segment too — but only by clicking its own fixed midpoint dot, not anywhere along it
 
@@ -1777,6 +1794,68 @@ the first fix attempt's off-axis spike were only conclusively told apart this wa
 in this kind of per-wedge offset reconstruction are easy to get subtly wrong in a way that still passes
 a plausible-looking manual derivation, and only show up as a visibly wrong tip shape, not a type error
 or a failing pre-existing test.
+
+## 37. Angle snap — Pen drawing attracts to horizontal/vertical, colored orange, zoom-aware tolerance
+
+Asked for directly: while extending a network with the Pen tool, a segment aimed close to horizontal
+or vertical should snap onto that exact axis (Figma/Illustrator-style "constrain to axis" assist,
+always-on rather than modifier-gated) and recolor to orange — reusing the existing edge-hover orange
+(`VECTOR_EDGE_HOVER_STROKE`, §4) rather than a new color — while it's snapped.
+
+**Core math — `getAngleSnappedVectorPoint.ts` (`utils/canvas/vectorNetwork/`).** Given `from` (the
+active vertex) and `to` (the raw pointer position), it computes the angle via `getAngleBetweenPoints`,
+picks the nearest of the four cardinal candidates (`[0, 90, 180, -90]`) via `pickClosestAngleMatch.ts`
+(already used by §32/§33's bend/corner-handle candidate resolution — `getAngularDistance` was exported
+from that file rather than duplicated, the first cross-feature reuse of that helper), and snaps only if
+the angular distance to that candidate is within `VECTOR_ANGLE_SNAP_TOLERANCE_DEGREES` (`constant/canvas.ts`,
+`5`, zoom-adjusted — see below).
+
+**Snapping locks the perpendicular axis to `from`, it does not preserve the raw drawn distance** — a
+first version re-projected `to` via `distance * cos/sin(snapAngle)`, preserving the exact pointer
+distance and rotating it onto the axis. That looked reasonable in isolation but failed its own e2e
+regression test: a near-horizontal hover (`to` a couple of px off axis) and a hover exactly on the axis
+have slightly different `hypot(dx, dy)`, so the trig reprojection landed the near-horizontal case a
+fraction of a world unit away from the exactly-on-axis case — invisible to the eye but enough to fail a
+pixel-equality screenshot diff, and not how axis-constrain actually behaves in Figma/Illustrator anyway
+(constraining to horizontal keeps the cursor's own x, it doesn't preserve the diagonal drag distance).
+Fixed to the simpler, correct shape: `isHorizontal = snapAngle === 0 || snapAngle === 180`, then
+`point = isHorizontal ? { x: to.x, y: from.y } : { x: from.x, y: to.y }` — no trig, and a near-axis hover
+now resolves to the byte-identical point a dead-on-axis hover would, by construction.
+
+**Tolerance shrinks past 100% zoom, floored — asked for directly mid-implementation ("zoom im bliżej
+tym te przyciąganie nie powinno być tak mocne").** `getAngleSnapToleranceDegrees(zoom)` =
+`max(VECTOR_ANGLE_SNAP_MIN_TOLERANCE_DEGREES, VECTOR_ANGLE_SNAP_TOLERANCE_DEGREES / max(zoom, 1))` —
+at/below 100% zoom the tolerance stays at the flat 5° base (deliberately not made *more* forgiving
+zoomed out, only less forgiving zoomed in, since a raw angle in world space is already zoom-invariant on
+its own — the tolerance change is a pure feel adjustment, not a geometric correction), and past 100% it
+shrinks proportionally to `1/zoom` so a precise, zoomed-in placement doesn't keep getting yanked onto an
+axis the way a coarse, zoomed-out one benefits from. `VECTOR_ANGLE_SNAP_MIN_TOLERANCE_DEGREES` (`0.5`)
+stops it from shrinking to an unusable sliver at extreme zoom.
+
+**Two call sites, both already had `activeVertex`/`viewport` in scope — no new plumbing needed:**
+- **Live preview** — `updateVectorPenPreview.ts`'s existing "no resolver matched" fallback branch (blank
+  canvas, mid-fragment) was extracted into its own file, `applyAngleSnapToPenPreview.ts` (flat sibling in
+  `handlePointerMove/`, same "named helper over inline branch body" convention `[[xigma-function-style]]`
+  calls for), which calls `getAngleSnappedVectorPoint` and writes the result into `penPreviewRef` alongside
+  a new `isSnapped: boolean` field. Vertex/edge-hover resolver hits (§4) are untouched and always write
+  `isSnapped: false` — angle-snap is strictly the blank-canvas fallback, snapping onto an existing
+  point/edge always wins.
+- **Commit** — `continueVectorNetwork.ts`'s own blank-canvas branch (the one that calls
+  `extendWithNewVertex.ts`) runs the same `getAngleSnappedVectorPoint` call on the point before passing it
+  through, then re-applies `roundVectorPoint.ts` (§13) — the trig-free snap already lands on `from`'s own
+  y/x (already grid-aligned), so the re-round is a no-op in practice but keeps the "every committed vector
+  point is grid-rounded" invariant intact regardless of what a future snap mechanism computes.
+
+**`TPenPreview.isSnapped`** (`types/design/canvas/types.ts`) is the new field threading the flag from
+computation through to rendering. `drawPenSegmentPreview.ts` reads it to pick the stroke color:
+`preview.isSnapped ? VECTOR_EDGE_HOVER_STROKE : DRAFT_FRAME_STROKE` — the *only* rendering change; the
+dot/tangent-handle drawing underneath is untouched.
+
+**Scope note**: angle-snap only ever applies relative to the active vertex being extended *from* — it
+has no concept of the previous segment's own direction (absolute screen horizontal/vertical only, asked
+for directly over relative-to-last-segment), and it never applies to `startNewVectorNetwork.ts`'s first
+point or `startVectorFragment.ts`'s fresh-disconnected-vertex blank-canvas case, since neither has a
+`from` vertex to snap relative to.
 
 ## Related
 

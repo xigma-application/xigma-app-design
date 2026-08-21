@@ -10,6 +10,9 @@ import { TPenPointHoverKind } from './resolvePenPointHover/types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode, TViewport } from 'types/design/types';
 
+// utils
+import { applyAngleSnapToPenPreview } from './applyAngleSnapToPenPreview';
+
 export const updateVectorPenPreview = (
   point: TPoint,
   node: TVectorNode,
@@ -30,7 +33,7 @@ export const updateVectorPenPreview = (
       const result = resolve({ excludeVertexId: activeVertexId, node, point, viewport });
 
       if (result) {
-        penPreviewRef.current = { from: activeVertex, tangentFromOffset, to: result.point };
+        penPreviewRef.current = { from: activeVertex, isSnapped: false, tangentFromOffset, to: result.point };
         hoveredSegmentIdRef.current = result.segmentId;
         penHoveredDragArmableVertexRef.current = result.hoverKind === 'active-vertex' || result.hoverKind === 'vertex';
 
@@ -38,11 +41,15 @@ export const updateVectorPenPreview = (
       }
     }
 
-    penPreviewRef.current = { from: activeVertex, tangentFromOffset, to: point };
-    hoveredSegmentIdRef.current = null;
-    penHoveredDragArmableVertexRef.current = false;
-
-    return null;
+    return applyAngleSnapToPenPreview(
+      point,
+      activeVertex,
+      tangentFromOffset,
+      viewport.zoom,
+      penPreviewRef,
+      hoveredSegmentIdRef,
+      penHoveredDragArmableVertexRef,
+    );
   }
 
   penPreviewRef.current = null;

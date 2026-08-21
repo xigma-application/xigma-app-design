@@ -59,7 +59,7 @@ describe('updateVectorPenPreview', () => {
   });
 
   it('should draw the rubber-band preview from the active vertex to the pointer when no vertex is hovered', () => {
-    // mock
+    // mock — 45deg, well outside the angle-snap tolerance
     const penPreviewRef = createPenPreviewRef();
     const hoveredSegmentIdRef = createHoveredSegmentIdRef();
     const penHoveredDragArmableVertexRef = createPenHoveredDragArmableVertexRef();
@@ -77,10 +77,38 @@ describe('updateVectorPenPreview', () => {
     );
 
     // result
-    expect(penPreviewRef.current).toEqual({ from: { id: 'v1', x: 0, y: 0 }, tangentFromOffset: null, to: { x: 500, y: 500 } });
+    expect(penPreviewRef.current).toEqual({
+      from: { id: 'v1', x: 0, y: 0 },
+      isSnapped: false,
+      tangentFromOffset: null,
+      to: { x: 500, y: 500 },
+    });
     expect(hoverKind).toBeNull();
     expect(hoveredSegmentIdRef.current).toBeNull();
     expect(penHoveredDragArmableVertexRef.current).toBe(false);
+  });
+
+  it('should snap the rubber-band preview onto the nearest cardinal direction and flag it, when the pointer is within the angle tolerance', () => {
+    // mock — a couple of px off horizontal from v1(0,0), within the snap tolerance
+    const penPreviewRef = createPenPreviewRef();
+    const hoveredSegmentIdRef = createHoveredSegmentIdRef();
+    const penHoveredDragArmableVertexRef = createPenHoveredDragArmableVertexRef();
+
+    // before
+    updateVectorPenPreview(
+      { x: 500, y: 5 },
+      node,
+      'v1',
+      IDENTITY_VIEWPORT,
+      penPreviewRef,
+      createPendingOutgoingTangentRef(),
+      hoveredSegmentIdRef,
+      penHoveredDragArmableVertexRef,
+    );
+
+    // result — pulled onto the exact horizontal axis
+    expect(penPreviewRef.current?.isSnapped).toBe(true);
+    expect(penPreviewRef.current?.to.y).toBeCloseTo(0);
   });
 
   it('should snap the rubber-band preview endpoint to the hovered vertex instead of the raw pointer position', () => {
@@ -191,7 +219,12 @@ describe('updateVectorPenPreview', () => {
     );
 
     // result
-    expect(penPreviewRef.current).toEqual({ from: { id: 'v1', x: 0, y: 0 }, tangentFromOffset: null, to: { id: 'v1', x: 0, y: 0 } });
+    expect(penPreviewRef.current).toEqual({
+      from: { id: 'v1', x: 0, y: 0 },
+      isSnapped: false,
+      tangentFromOffset: null,
+      to: { id: 'v1', x: 0, y: 0 },
+    });
     expect(hoverKind).toBe('active-vertex');
     expect(hoveredSegmentIdRef.current).toBeNull();
     expect(penHoveredDragArmableVertexRef.current).toBe(true);

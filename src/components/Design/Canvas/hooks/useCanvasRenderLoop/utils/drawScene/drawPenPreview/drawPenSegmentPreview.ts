@@ -1,5 +1,5 @@
 // others
-import { DRAFT_FRAME_STROKE, VECTOR_STROKE_WIDTH, VECTOR_VERTEX_SIZE } from 'constant/canvas';
+import { DRAFT_FRAME_STROKE, VECTOR_EDGE_HOVER_STROKE, VECTOR_STROKE_WIDTH, VECTOR_VERTEX_SIZE } from 'constant/canvas';
 
 // types
 import { TPenPreview } from 'types/design/canvas/types';
@@ -40,7 +40,7 @@ export const drawPenSegmentPreview = (
       program,
       buffer,
       [{ endId: 'preview-to', points, segmentId: 'preview', startId: 'preview-from' }],
-      DRAFT_FRAME_STROKE,
+      preview.isSnapped ? VECTOR_EDGE_HOVER_STROKE : DRAFT_FRAME_STROKE,
       VECTOR_STROKE_WIDTH / viewport.zoom,
       canvasWidth,
       canvasHeight,

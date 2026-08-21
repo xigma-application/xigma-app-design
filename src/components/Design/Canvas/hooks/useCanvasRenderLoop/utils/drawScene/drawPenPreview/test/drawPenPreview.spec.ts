@@ -19,7 +19,12 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const NO_NODES: Record<string, TSceneNode> = {};
 
 const call = (
-  preview: { from: { x: number; y: number }; tangentFromOffset: { x: number; y: number } | null; to: { x: number; y: number } } | null,
+  preview: {
+    from: { x: number; y: number };
+    isSnapped?: boolean;
+    tangentFromOffset: { x: number; y: number } | null;
+    to: { x: number; y: number };
+  } | null,
   newVertexPreview: { x: number; y: number } | null,
   nodes: Record<string, TSceneNode>,
   vectorEditingNodeId: string | null,
@@ -29,7 +34,7 @@ const call = (
     {} as WebGL2RenderingContext,
     {} as WebGLProgram,
     {} as WebGLBuffer,
-    preview,
+    preview && { ...preview, isSnapped: preview.isSnapped ?? false },
     newVertexPreview,
     isDragArmable,
     nodes,

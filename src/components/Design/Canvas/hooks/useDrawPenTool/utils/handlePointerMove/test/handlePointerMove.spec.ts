@@ -133,7 +133,7 @@ describe('handlePointerMove', () => {
     const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
     const setClassName = vi.fn();
 
-    penPreviewRef.current = { from: { x: 0, y: 0 }, tangentFromOffset: null, to: { x: 1, y: 1 } };
+    penPreviewRef.current = { from: { x: 0, y: 0 }, isSnapped: false, tangentFromOffset: null, to: { x: 1, y: 1 } };
 
     // before
     handlePointerMove(
@@ -170,7 +170,7 @@ describe('handlePointerMove', () => {
     const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
     const setClassName = vi.fn();
 
-    penPreviewRef.current = { from: { x: 0, y: 0 }, tangentFromOffset: null, to: { x: 1, y: 1 } };
+    penPreviewRef.current = { from: { x: 0, y: 0 }, isSnapped: false, tangentFromOffset: null, to: { x: 1, y: 1 } };
 
     // before
     handlePointerMove(

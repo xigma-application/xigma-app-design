@@ -16,9 +16,11 @@ import { TVectorNode, TVectorTangent, TViewport } from 'types/design/types';
 import { closeLoopOntoEdge } from './closeLoopOntoEdge';
 import { closeLoopOntoVertex } from './closeLoopOntoVertex';
 import { extendWithNewVertex } from './extendWithNewVertex';
+import { getAngleSnappedVectorPoint } from 'utils/canvas/vectorNetwork/getAngleSnappedVectorPoint';
 import { getVectorEdgeAtPoint } from '../../../../../utils/getVectorEdgeAtPoint';
 import { getVectorVertexAtPoint } from '../../../../../utils/getVectorVertexAtPoint';
 import { isPointNearVertex } from '../../../../../utils/isPointNearVertex';
+import { roundVectorPoint } from 'utils/canvas/vectorNetwork/roundVectorPoint';
 
 const getTangentStart = (pending: TPendingOutgoingTangent | null, activeVertexId: string): TVectorTangent =>
   pending && pending.vertexId === activeVertexId ? pending.tangent : null;
@@ -79,8 +81,10 @@ export const continueVectorNetwork = (
         pendingOutgoingTangentRef,
       );
     } else {
+      const snappedPoint = roundVectorPoint(getAngleSnappedVectorPoint(node.vertices[activeVertexId], point, viewport.zoom).point);
+
       extendWithNewVertex(
-        point,
+        snappedPoint,
         node,
         activeVertexId,
         segmentId,

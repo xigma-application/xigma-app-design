@@ -73,6 +73,7 @@ export type TSliceDraft = TDraftRect & { rotation: number };
 
 export type TPenPreview = {
   from: TPoint;
+  isSnapped: boolean;
   tangentFromOffset: TVectorTangent;
   to: TPoint;
 };

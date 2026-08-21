@@ -1,4 +1,4 @@
-const getAngularDistance = (a: number, b: number): number => {
+export const getAngularDistance = (a: number, b: number): number => {
   const diff = Math.abs(a - b) % 360;
 
   return diff > 180 ? 360 - diff : diff;

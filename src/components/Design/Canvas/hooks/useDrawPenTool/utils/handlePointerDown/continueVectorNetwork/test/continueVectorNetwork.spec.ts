@@ -253,6 +253,34 @@ describe('continueVectorNetwork', () => {
     expect(dragStartRef.current).toEqual({ x: 500, y: 500 });
   });
 
+  it('should snap the new vertex onto the exact horizontal axis when clicking within the angle-snap tolerance of the active vertex', () => {
+    // mock — a couple of px off horizontal from v1(0,0), within the angle-snap tolerance
+    const nodeId = addVectorNode();
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const dragOriginRef = createDragOriginRef();
+    const dragStartRef = createDragStartRef();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+
+    // before
+    continueVectorNetwork(
+      { x: 500, y: 5 },
+      node,
+      'v1',
+      IDENTITY_VIEWPORT,
+      store.dispatch,
+      dragOriginRef,
+      dragStartRef,
+      pendingOutgoingTangentRef,
+      false,
+    );
+
+    // result — pulled exactly onto v1's own y, not the raw clicked y
+    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const newVertexId = store.getState().design.penActiveVertexId as string;
+
+    expect(updatedNode.vertices[newVertexId].y).toBe(0);
+  });
+
   it('should carry the pending outgoing tangent into the new segment when it matches the active vertex', () => {
     // mock
     const nodeId = addVectorNode();

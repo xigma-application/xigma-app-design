@@ -17,7 +17,12 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const ORIGIN = { x: 0, y: 0 };
 
 const call = (
-  preview: { from: { x: number; y: number }; tangentFromOffset: { x: number; y: number } | null; to: { x: number; y: number } },
+  preview: {
+    from: { x: number; y: number };
+    isSnapped?: boolean;
+    tangentFromOffset: { x: number; y: number } | null;
+    to: { x: number; y: number };
+  },
   pivot: { x: number; y: number },
   rotation: number,
   isDragArmable = false,
@@ -26,7 +31,7 @@ const call = (
     {} as WebGL2RenderingContext,
     {} as WebGLProgram,
     {} as WebGLBuffer,
-    preview,
+    { ...preview, isSnapped: preview.isSnapped ?? false },
     isDragArmable,
     pivot,
     rotation,
@@ -164,5 +169,27 @@ describe('drawPenSegmentPreview', () => {
     expect(drawEllipseMock).toHaveBeenCalledTimes(1);
     // ...plus the small cross overlay on top of it
     expect(drawLineMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('should draw the stroke in the default blue color when the preview is not angle-snapped', () => {
+    // mock
+    const preview = { from: { x: 0, y: 0 }, isSnapped: false, tangentFromOffset: null, to: { x: 10, y: 10 } };
+
+    // before
+    call(preview, ORIGIN, 0);
+
+    // result
+    expect(drawVectorStrokeMock.mock.calls[0][4]).toBe('#0d99ff');
+  });
+
+  it('should draw the stroke in the orange snap-highlight color when the preview is angle-snapped', () => {
+    // mock
+    const preview = { from: { x: 0, y: 0 }, isSnapped: true, tangentFromOffset: null, to: { x: 10, y: 0 } };
+
+    // before
+    call(preview, ORIGIN, 0);
+
+    // result
+    expect(drawVectorStrokeMock.mock.calls[0][4]).toBe('#cd4422');
   });
 });
