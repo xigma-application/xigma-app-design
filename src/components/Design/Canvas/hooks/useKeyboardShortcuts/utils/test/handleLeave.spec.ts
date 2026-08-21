@@ -110,7 +110,7 @@ describe('handleLeave', () => {
       expect(realStore.getState().design.penActiveVertexId).toBeNull();
     });
 
-    it('should reset the active tool to default when leaving vector editing with the pen tool active', () => {
+    it('should switch the active tool to Move, without exiting Vector Edit Mode, when leaving vector editing with the Pen tool active', () => {
       // mock
       realStore.dispatch(setVectorEditingNodeId('node-1'));
       realStore.dispatch(setActiveTool(ToolName.pen));
@@ -119,19 +119,34 @@ describe('handleLeave', () => {
       handleLeave(realStore.dispatch);
 
       // result
-      expect(realStore.getState().design.activeTool).toBe(ToolName.default);
+      expect(realStore.getState().design.activeTool).toBe(ToolName.move);
       expect(realStore.getState().design.vectorEditingNodeId).toBe('node-1');
     });
 
-    it('should clear the vector editing node id when leaving vector editing with a non-pen tool active', () => {
+    it('should also switch the active tool to Move, without exiting Vector Edit Mode, when leaving vector editing with the Paint tool active', () => {
+      // mock — the same "return to Move first" rule applies to every Vector Edit sub-tool, not just Pen/Pencil
+      realStore.dispatch(setVectorEditingNodeId('node-1'));
+      realStore.dispatch(setActiveTool(ToolName.paint));
+
+      // action
+      handleLeave(realStore.dispatch);
+
+      // result
+      expect(realStore.getState().design.activeTool).toBe(ToolName.move);
+      expect(realStore.getState().design.vectorEditingNodeId).toBe('node-1');
+    });
+
+    it('should clear the vector editing node id and reset the active tool to default when leaving vector editing with the Move tool already active', () => {
       // mock
       realStore.dispatch(setVectorEditingNodeId('node-1'));
+      realStore.dispatch(setActiveTool(ToolName.move));
 
       // action
       handleLeave(realStore.dispatch);
 
       // result
       expect(realStore.getState().design.vectorEditingNodeId).toBeNull();
+      expect(realStore.getState().design.activeTool).toBe(ToolName.default);
     });
   });
 });

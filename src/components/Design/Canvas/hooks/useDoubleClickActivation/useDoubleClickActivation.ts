@@ -37,7 +37,7 @@ export const useDoubleClickActivation = <TTarget>(
   useEffect(() => {
     const canvas = canvasRef.current;
 
-    if (canvas && activeTool === ToolName.default && !isBlocked) {
+    if (canvas && (activeTool === ToolName.default || activeTool === ToolName.move) && !isBlocked) {
       const onDoubleClick = (event: MouseEvent): void => handleDoubleClick(canvas, event);
       canvas.addEventListener('dblclick', onDoubleClick);
 

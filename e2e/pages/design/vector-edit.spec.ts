@@ -18,11 +18,13 @@ const drawOpenTriangle = async (designPage: DesignPage): Promise<void> => {
   ]);
 };
 
-// switches to the Move tool and presses Escape twice, which — per the Pen tool's staged Escape
-// behavior — fully exits vector edit mode for a path that was drawn entirely with plain clicks
-// (1st: clears the still-active last vertex, 2nd: since the tool is already Move, exits editing).
+// presses Escape three times, which — per the Pen tool's staged Escape behavior — fully exits vector
+// edit mode for a path that was drawn entirely with plain clicks (1st: clears the still-active last
+// vertex; 2nd: any non-Move tool active first stages back to the Vector Edit Move tool, without
+// exiting; 3rd: Move is now active, so this Escape actually exits editing).
 const exitVectorEditMode = async (page: Page, designPage: DesignPage): Promise<void> => {
   await designPage.selectTool('default');
+  await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
 };
@@ -455,8 +457,9 @@ test('selecting a different node while still editing one cleanly exits edit mode
 
   await drawOpenTriangle(designPage);
   await designPage.selectTool('default');
-  await page.keyboard.press('Escape'); // exit edit mode for A explicitly first
-  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape'); // 1st: clears the still-active last vertex
+  await page.keyboard.press('Escape'); // 2nd: stages back to the Vector Edit Move tool, still editing
+  await page.keyboard.press('Escape'); // 3rd: Move now active — exit edit mode for A explicitly
   await designPage.drawFrame(1300, 300, 1400, 400);
   await designPage.click(1350, 350);
 

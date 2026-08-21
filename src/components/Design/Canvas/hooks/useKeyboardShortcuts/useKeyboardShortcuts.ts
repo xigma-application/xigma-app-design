@@ -17,6 +17,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { ToolName } from 'types/design/enums';
 
 // utils
+import { getDefaultMoveTool } from './utils/getDefaultMoveTool';
 import { handleDeleteSelection } from './utils/handleDeleteSelection';
 import { handleLeave } from './utils/handleLeave';
 
@@ -25,7 +26,7 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
 
   const keysMap: TKeysMap = useMemo(
     () => [
-      { action: (): any => dispatch(setActiveTool(ToolName.default)), ...shortcuts[ToolName.default] },
+      { action: (): any => dispatch(setActiveTool(getDefaultMoveTool())), ...shortcuts[ToolName.default] },
       { action: (): any => dispatch(setActiveTool(ToolName.frame)), ...shortcuts[ToolName.frame] },
       { action: (): any => dispatch(setActiveTool(ToolName.hand)), ...shortcuts[ToolName.hand] },
       { action: (): any => dispatch(setActiveTool(ToolName.lasso)), ...shortcuts[ToolName.lasso] },

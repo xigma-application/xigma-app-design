@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 // store
 import { selectOrderedNodes, selectVectorEditingNodeId, selectViewport } from 'store/design/selectors';
-import { setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { setActiveTool, setSelection, setVectorEditingNodeId } from 'store/design/slice';
 import { RootState, useAppDispatch, useAppSelector } from 'store';
 
 // hooks
@@ -11,6 +11,7 @@ import { useDoubleClickActivation } from '../useDoubleClickActivation/useDoubleC
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TVectorNode } from 'types/design/types';
+import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -28,12 +29,14 @@ export const useVectorEditOnDoubleClick = (refs: TCanvasRefs): void => {
   const handleHit = (target: TVectorNode): void => {
     dispatch(setSelection([target.id]));
     dispatch(setVectorEditingNodeId(target.id));
+    dispatch(setActiveTool(ToolName.move));
   };
 
   const getEmptySpaceTarget = (point: TPoint, state: RootState): true | null =>
     getNodeAtPoint(point, selectOrderedNodes(state), selectViewport(state)) ? null : true;
 
   const handleEmptySpaceHit = (): void => {
+    dispatch(setActiveTool(ToolName.default));
     dispatch(setVectorEditingNodeId(null));
   };
 

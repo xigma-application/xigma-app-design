@@ -7,7 +7,7 @@ import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useKeyboardShortcuts } from './useKeyboardShortcuts';
 
 // store
-import designReducer, { addNode, setActiveTool, setSelection } from 'store/design/slice';
+import designReducer, { addNode, setActiveTool, setSelection, setVectorEditingNodeId } from 'store/design/slice';
 import { redo, undo } from 'store/history/actions';
 import { store as realStore } from 'store';
 import { TDesignState } from 'store/design/types';
@@ -438,5 +438,30 @@ describe('useKeyboardShortcuts delete/backspace behaviors', () => {
 
     // result
     expect(realStore.getState().design.nodes[idA]).toBeUndefined();
+  });
+});
+
+// getDefaultMoveTool reads vectorEditingNodeId off the real store singleton too (not whatever store
+// wraps the component), so this branch needs the same realStore + Provider setup as the block above
+describe('useKeyboardShortcuts "V" behaviors while Vector Edit Mode is active', () => {
+  afterEach(() => {
+    realStore.dispatch(setVectorEditingNodeId(null));
+  });
+
+  it('should switch to the Vector Edit Move tool (not the plain default tool) on "V" while a node is being vector-edited', () => {
+    // mock
+    realStore.dispatch(setVectorEditingNodeId('node-1'));
+    realStore.dispatch(setActiveTool(ToolName.pen));
+
+    // before
+    renderHook(() => useKeyboardShortcuts(createCanvasRefs()), {
+      wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
+    });
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyV' });
+
+    // result
+    expect(realStore.getState().design.activeTool).toBe(ToolName.move);
   });
 });

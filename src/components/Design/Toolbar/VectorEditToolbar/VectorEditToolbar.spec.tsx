@@ -47,9 +47,12 @@ describe('VectorEditToolbar', () => {
     expect(screen.getByText('More')).toBeInTheDocument();
   });
 
-  it('should show Move as active whenever the Pen tool is not the active tool', () => {
+  it('should show Move as active whenever the Move tool is the active tool', () => {
     // before
-    act(() => store.dispatch(setVectorEditingNodeId('node-1')));
+    act(() => {
+      store.dispatch(setVectorEditingNodeId('node-1'));
+      store.dispatch(setActiveTool(ToolName.move));
+    });
 
     renderVectorEditToolbar();
 
@@ -83,7 +86,7 @@ describe('VectorEditToolbar', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Move' }));
 
     // result
-    expect(store.getState().design.activeTool).toBe(ToolName.default);
+    expect(store.getState().design.activeTool).toBe(ToolName.move);
   });
 
   it('should exit Vector Edit Mode and reset the active tool when clicking the close button', () => {

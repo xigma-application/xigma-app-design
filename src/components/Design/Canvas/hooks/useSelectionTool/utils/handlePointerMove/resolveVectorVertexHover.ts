@@ -4,8 +4,11 @@ import { RefObject } from 'react';
 import { VECTOR_VERTEX_HIT_RADIUS_PX } from 'constant/canvas';
 
 // store
-import { selectVectorEditingNodeId, selectViewport } from 'store/design/selectors';
+import { selectActiveTool, selectVectorEditingNodeId, selectViewport } from 'store/design/selectors';
 import { store } from 'store';
+
+// types
+import { ToolName } from 'types/design/enums';
 
 // utils
 import { bakeVectorNodeRotation } from '../../../../utils/bakeVectorNodeRotation';
@@ -22,7 +25,7 @@ export const resolveVectorVertexHover = (
   const state = store.getState();
   const node = getVectorEditingNode(state.design.nodes, selectVectorEditingNodeId(state));
 
-  if (node) {
+  if (node && selectActiveTool(state) !== ToolName.paint) {
     const viewport = selectViewport(state);
     const bakedNode = { ...node, ...bakeVectorNodeRotation(node) };
     const point = screenToWorld(getPointerPosition(canvas, event), viewport);

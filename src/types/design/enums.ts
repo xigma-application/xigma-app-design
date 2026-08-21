@@ -26,6 +26,7 @@ export enum ToolName {
   lasso = 'lasso',
   line = 'line',
   media = 'media',
+  move = 'move',
   paint = 'paint',
   pen = 'pen',
   pencil = 'pencil',

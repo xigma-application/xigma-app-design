@@ -79,6 +79,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
     if (
       canvas &&
       (activeTool === ToolName.default ||
+        activeTool === ToolName.move ||
         activeTool === ToolName.scale ||
         activeTool === ToolName.lasso ||
         activeTool === ToolName.paint) &&

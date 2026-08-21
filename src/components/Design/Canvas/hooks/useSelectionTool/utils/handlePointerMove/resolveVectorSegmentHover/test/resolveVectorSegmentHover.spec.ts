@@ -1,11 +1,11 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setActiveTool, setSelection, setVectorEditingNodeId } from 'store/design/slice';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -51,6 +51,7 @@ describe('resolveVectorSegmentHover', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
     store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setActiveTool(ToolName.default));
   });
 
   it('should do nothing when no node is currently in Vector Edit Mode', () => {
@@ -123,5 +124,43 @@ describe('resolveVectorSegmentHover', () => {
     expect(hoveredVectorSegmentIdRef.current).toBe('s1');
     expect(hoveredVectorEdgeInsertPointRef.current).toBeNull();
     expect(setClassName).not.toHaveBeenCalled();
+  });
+
+  it('should clear the hover state and reset the cursor, never highlighting a segment, while the Paint tool is active', () => {
+    // mock — Paint only interacts with faces, so segment hover/cursor must stay fully inert even over a segment
+    const nodeId = addVectorNode();
+    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setActiveTool(ToolName.paint));
+    const canvas = createCanvas();
+    const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
+    const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef();
+    const setClassName = vi.fn();
+
+    // before
+    resolveVectorSegmentHover(canvas, pointerEvent(50, 0), hoveredVectorSegmentIdRef, hoveredVectorEdgeInsertPointRef, setClassName);
+
+    // result
+    expect(hoveredVectorSegmentIdRef.current).toBeNull();
+    expect(hoveredVectorEdgeInsertPointRef.current).toBeNull();
+    expect(setClassName).toHaveBeenCalledWith(null);
+  });
+
+  it('should clear the hover state and reset the cursor, never highlighting a segment, while the Lasso tool is active', () => {
+    // mock — Lasso only interacts with points, so segment hover/cursor must stay fully inert even over a segment
+    const nodeId = addVectorNode();
+    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setActiveTool(ToolName.lasso));
+    const canvas = createCanvas();
+    const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
+    const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef();
+    const setClassName = vi.fn();
+
+    // before
+    resolveVectorSegmentHover(canvas, pointerEvent(50, 0), hoveredVectorSegmentIdRef, hoveredVectorEdgeInsertPointRef, setClassName);
+
+    // result
+    expect(hoveredVectorSegmentIdRef.current).toBeNull();
+    expect(hoveredVectorEdgeInsertPointRef.current).toBeNull();
+    expect(setClassName).toHaveBeenCalledWith(null);
   });
 });

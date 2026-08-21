@@ -19,10 +19,11 @@ export const handleLeave = (dispatch: AppDispatch): void => {
     case penActiveVertexId !== null:
       handleEscapePenActiveVertex(dispatch);
       break;
-    case vectorEditingNodeId !== null && (activeTool === ToolName.pen || activeTool === ToolName.pencil):
-      dispatch(setActiveTool(ToolName.default));
+    case vectorEditingNodeId !== null && activeTool !== ToolName.move:
+      dispatch(setActiveTool(ToolName.move));
       break;
     case vectorEditingNodeId !== null:
+      dispatch(setActiveTool(ToolName.default));
       dispatch(setVectorEditingNodeId(null));
       break;
     default:
