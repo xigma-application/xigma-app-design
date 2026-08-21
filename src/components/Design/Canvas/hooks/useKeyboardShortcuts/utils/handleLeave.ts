@@ -4,12 +4,14 @@ import { selectActiveTool, selectPenActiveVertexId, selectVectorEditingNodeId } 
 import { AppDispatch, store } from 'store';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { ToolName } from 'types/design/enums';
 
 // utils
+import { clearPenPreviewRefs } from './clearPenPreviewRefs';
 import { handleEscapePenActiveVertex } from './handleEscapePenActiveVertex';
 
-export const handleLeave = (dispatch: AppDispatch): void => {
+export const handleLeave = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
   const state = store.getState();
   const activeTool = selectActiveTool(state);
   const penActiveVertexId = selectPenActiveVertexId(state);
@@ -18,6 +20,7 @@ export const handleLeave = (dispatch: AppDispatch): void => {
   switch (true) {
     case penActiveVertexId !== null:
       handleEscapePenActiveVertex(dispatch);
+      clearPenPreviewRefs(refs);
       break;
     case vectorEditingNodeId !== null && activeTool !== ToolName.move:
       dispatch(setActiveTool(ToolName.move));

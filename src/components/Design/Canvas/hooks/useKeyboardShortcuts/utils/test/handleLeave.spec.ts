@@ -17,6 +17,7 @@ import { NodeType, ToolName } from 'types/design/enums';
 import { TVectorNode } from 'types/design/types';
 
 // utils
+import { createCanvasRefs } from '../../../useCanvasRefs/createCanvasRefs';
 import { handleLeave } from '../handleLeave';
 
 const createTestStore = (): EnhancedStore<{ design: TDesignState }> => configureStore({ reducer: { design: designReducer } });
@@ -52,7 +53,7 @@ describe('handleLeave', () => {
     store.dispatch(setSelection(['node-1']));
 
     // action
-    handleLeave(store.dispatch);
+    handleLeave(store.dispatch, createCanvasRefs());
 
     // result
     expect(store.getState().design.activeTool).toBe(ToolName.default);
@@ -66,7 +67,7 @@ describe('handleLeave', () => {
     store.dispatch(startCommentDraft({ x: 10, y: 20 }));
 
     // action
-    handleLeave(store.dispatch);
+    handleLeave(store.dispatch, createCanvasRefs());
 
     // result
     expect(store.getState().design.commentDraftPosition).toBeNull();
@@ -87,11 +88,30 @@ describe('handleLeave', () => {
       realStore.dispatch(setActiveTool(ToolName.pen));
 
       // action
-      handleLeave(realStore.dispatch);
+      handleLeave(realStore.dispatch, createCanvasRefs());
 
       // result
       expect(realStore.getState().design.penActiveVertexId).toBeNull();
       expect(realStore.getState().design.activeTool).toBe(ToolName.pen);
+    });
+
+    // regression check: the staged tangent-preview line/handle live in plain refs written only by
+    // the canvas's own pointermove handler — without this, Escape's Redux dispatch alone left them
+    // stale on screen until the next real pointermove came along and overwrote them; see
+    // clearPenPreviewRefs's own spec for the exhaustive per-ref assertions, this just proves the call
+    // actually happens on this branch
+    it('should clear the staged pen-preview refs via clearPenPreviewRefs when clearing the active pen vertex', () => {
+      // mock
+      const refs = createCanvasRefs();
+
+      realStore.dispatch(setPenActiveVertexId('vertex-1'));
+      refs.penPreviewRef.current = { from: { x: 0, y: 0 }, isSnapped: false, tangentFromOffset: { x: 10, y: 10 }, to: { x: 20, y: 20 } };
+
+      // action
+      handleLeave(realStore.dispatch, refs);
+
+      // result
+      expect(refs.penPreviewRef.current).toBeNull();
     });
 
     it('should delete a dangling, still-unconnected active vertex via handleEscapePenActiveVertex — see its own spec for the full outer/inner-node scenarios', () => {
@@ -102,7 +122,7 @@ describe('handleLeave', () => {
       realStore.dispatch(setPenActiveVertexId('v1'));
 
       // action
-      handleLeave(realStore.dispatch);
+      handleLeave(realStore.dispatch, createCanvasRefs());
 
       // result
       expect(realStore.getState().design.nodes[vectorId]).toBeUndefined();
@@ -116,7 +136,7 @@ describe('handleLeave', () => {
       realStore.dispatch(setActiveTool(ToolName.pen));
 
       // action
-      handleLeave(realStore.dispatch);
+      handleLeave(realStore.dispatch, createCanvasRefs());
 
       // result
       expect(realStore.getState().design.activeTool).toBe(ToolName.move);
@@ -129,7 +149,7 @@ describe('handleLeave', () => {
       realStore.dispatch(setActiveTool(ToolName.paint));
 
       // action
-      handleLeave(realStore.dispatch);
+      handleLeave(realStore.dispatch, createCanvasRefs());
 
       // result
       expect(realStore.getState().design.activeTool).toBe(ToolName.move);
@@ -142,7 +162,7 @@ describe('handleLeave', () => {
       realStore.dispatch(setActiveTool(ToolName.move));
 
       // action
-      handleLeave(realStore.dispatch);
+      handleLeave(realStore.dispatch, createCanvasRefs());
 
       // result
       expect(realStore.getState().design.vectorEditingNodeId).toBeNull();

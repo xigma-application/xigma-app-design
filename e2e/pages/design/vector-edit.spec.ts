@@ -76,6 +76,35 @@ test('double-clicking a vector node enters edit mode; double-clicking empty spac
   expect(exitedAgain.equals(notEditing)).toBe(true); // round trip back to the same rendered state
 });
 
+// regression check: the staged tangent's preview line/diamond handle (drawn while the pointer is
+// still following a not-yet-placed next point) live in a plain ref (penPreviewRef) written only by
+// the canvas's own pointermove handler — pressing Escape only ever dispatches Redux actions, so
+// without an explicit clear it left that stale diamond+line rendered on screen until the next real
+// pointermove happened to overwrite it, exactly as reported live: "escape się usuwa dopiero jak
+// myszką ruszę"
+test('pressing Escape after a click-drag-staged tangent clears its preview line/handle immediately, with no pointer move required first', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+  const region = { height: 350, width: 350, x: 950, y: 150 }; // spans v2 and the staged preview's cursor target below
+
+  await designPage.goto('e2e-test-vector-edit-escape-clears-pen-preview');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(900, 300); // v1
+  await designPage.dragVectorPoint(1050, 300, 1050, 250); // v2, dragged — curves segment 1, stages an outgoing tangent
+  await designPage.pointerMove(1200, 450); // follow the still-staged tangent — renders its diamond + a straight preview line
+
+  await page.keyboard.press('Escape'); // cancel the draw — deliberately no pointer move afterward
+  const immediatelyAfterEscape = await page.screenshot({ clip: region });
+
+  await designPage.pointerMove(1400, 700); // now let one real pointermove happen, well clear of the shape
+  const afterSubsequentMove = await page.screenshot({ clip: region });
+
+  expect(immediatelyAfterEscape.equals(afterSubsequentMove)).toBe(true);
+});
+
 test('dragging a vertex dot moves that vertex', async ({ page }) => {
   const designPage = new DesignPage(page);
 
