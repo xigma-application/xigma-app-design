@@ -1,5 +1,5 @@
 // others
-import { DRAFT_FRAME_STROKE, MARQUEE_FILL_ALPHA, VECTOR_EDGE_HOVER_STROKE } from 'constant/canvas';
+import { DRAFT_FRAME_STROKE, VECTOR_EDGE_HOVER_STROKE } from 'constant/canvas';
 
 // types
 import { TVectorNode, TViewport } from 'types/design/types';
@@ -7,7 +7,7 @@ import { TVectorNode, TViewport } from 'types/design/types';
 // utils
 import { bakeVectorNodeRotation } from 'components/Design/Canvas/utils/bakeVectorNodeRotation';
 import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
-import { drawVectorFill } from 'utils/canvas/drawVectorNode/drawVectorFill';
+import { drawVectorHatchFill } from 'utils/canvas/drawVectorNode/drawVectorHatchFill';
 
 export const drawVectorPaintHoverPreview = (
   gl: WebGL2RenderingContext,
@@ -27,7 +27,7 @@ export const drawVectorPaintHoverPreview = (
       const isFilled = node.filledFaceKeys.includes(hoveredFaceKey);
       const color = isFilled ? VECTOR_EDGE_HOVER_STROKE : DRAFT_FRAME_STROKE;
 
-      drawVectorFill(gl, program, buffer, [face.points], color, canvasWidth, canvasHeight, viewport, MARQUEE_FILL_ALPHA);
+      drawVectorHatchFill(gl, program, buffer, [face.points], color, canvasWidth, canvasHeight, viewport);
     }
   }
 };

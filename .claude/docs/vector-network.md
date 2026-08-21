@@ -2538,16 +2538,42 @@ it resolves `getVectorFaceAtPoint` on the baked node and sets `canvasRefs.hovere
 idle cursor) when the pointer misses every face.
 
 The same ref drives `drawVectorPaintHoverPreview.ts` (`useCanvasRenderLoop/utils/drawScene/`, called from
-`drawScene.ts` right after `drawVectorLasso`), which draws a translucent overlay on the hovered face only
-— reusing `drawVectorFill.ts`'s alpha parameter exactly like Lasso's own fill preview (§42), at
-`MARQUEE_FILL_ALPHA`. Colors are reused, not invented: `DRAFT_FRAME_STROKE` (`#0d99ff`, blue) for "hovering
-an unfilled face, click would add", `VECTOR_EDGE_HOVER_STROKE` (`#cd4422`, orange) for "hovering an
-already-filled face, click would remove" — asked for directly with two reference screenshots showing
-exactly this blue/orange hover-preview distinction. Because this preview re-derives the face fresh every
-frame from the live node (not a frozen snapshot taken at hover-start), it automatically flips from
-add-blue to remove-orange the instant a click lands, with no extra invalidation needed — confirmed live
-in the e2e test below, which has to explicitly move the pointer away before each screenshot specifically
-*because* this live-tracking preview would otherwise still be rendering over the just-toggled face.
+`drawScene.ts` right after `drawVectorLasso`), which draws a preview on the hovered face only. Colors are
+reused, not invented: `DRAFT_FRAME_STROKE` (`#0d99ff`, blue) for "hovering an unfilled face, click would
+add", `VECTOR_EDGE_HOVER_STROKE` (`#cd4422`, orange) for "hovering an already-filled face, click would
+remove" — asked for directly with two reference screenshots showing exactly this blue/orange
+hover-preview distinction. Because this preview re-derives the face fresh every frame from the live node
+(not a frozen snapshot taken at hover-start), it automatically flips from add-blue to remove-orange the
+instant a click lands, with no extra invalidation needed — confirmed live in the e2e test below, which
+has to explicitly move the pointer away before each screenshot specifically *because* this live-tracking
+preview would otherwise still be rendering over the just-toggled face.
+
+**Update: diagonal-hatch rendering instead of a solid translucent overlay** (asked for directly, again
+with two Figma reference screenshots — a blue-hatched "add" face and an orange/red-hatched "remove"
+face). `drawVectorPaintHoverPreview.ts` now calls a new `drawVectorHatchFill.ts`
+(`utils/canvas/drawVectorNode/`) instead of `drawVectorFill.ts`, so `MARQUEE_FILL_ALPHA` no longer applies
+here — the hatch lines themselves are drawn fully opaque, and the see-through gaps between them are what
+reads as a translucent preview, matching Figma's own look. `drawVectorHatchFill.ts` duplicates
+`drawVectorFill.ts`'s even-odd stencil-mask setup verbatim (same convention as
+`drawDashedPolylineOutline.ts` vs. `drawVectorFill.ts` already duplicating shader/uniform boilerplate
+rather than sharing an abstraction — this codebase's established pattern for these small WebGL draw
+primitives) but swaps the final composite pass: instead of a covering quad drawn as two triangles, it
+computes a 45°-diagonal line field via the new `getHatchLineVertices.ts` and composites it as `gl.LINES`,
+still masked by the same stencil buffer built from the face's own triangle-fan — meaning the hatch lines
+are automatically clipped to the exact face silhouette (self-intersecting/concave shapes included) with
+no separate polygon-clipping code. `getHatchLineVertices.ts` is pure math: for a 45° hatch, every point on
+a given line satisfies `x - y = offset`; it walks `offset` across the point set's own bounding-box
+diagonal in fixed steps (`(spacingPx * Math.SQRT2) / zoom` — the `Math.SQRT2` factor converts a
+screen-space perpendicular spacing into the right step along this diagonal parametrization) and clips
+each line to the bounding box directly (`Math.max`/`Math.min` against the box edges) rather than
+depending on the stencil pass to trim excess length — the two clips are independent: the bbox clip keeps
+the vertex buffer small, the stencil clip is what actually shapes the fill. New constant
+`VECTOR_PAINT_HATCH_SPACING_PX = 6` (`constant/canvas.ts`) controls line density in screen pixels,
+dividing by `viewport.zoom` inside `getHatchLineVertices.ts` so the hatch stays visually constant-density
+regardless of canvas zoom level, the same screen-space-constant convention `DASH_GAP_PX`/`DASH_LENGTH_PX`
+already use for dashed outlines. `drawVectorFill.ts` itself is untouched — it still backs the real
+persisted fill (`drawVectorNode.ts`) and the Lasso selection preview (`drawVectorLasso.ts`, §42), both of
+which are meant to read as solid/translucent, not hatched.
 
 **Self-intersecting single faces ("bowtie" shapes) — superseded, see §44.** This section originally
 claimed a bowtie (two triangular lobes from one 4-segment loop crossing at a non-vertex point) resolved as
