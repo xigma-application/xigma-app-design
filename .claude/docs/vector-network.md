@@ -1923,6 +1923,153 @@ position (an already-committed tangent, untouched) and the render-only default-p
 (§9's `getEffectiveTangentStart`/`getEffectiveTangentEnd`) are never snapped, since neither is a live
 drag with a `from`/pointer pair to measure an angle between.
 
+## 39. Shift hard-constrains the angle snap to every 15deg increment (Figma parity), and re-evaluates immediately on keydown/keyup with no pointer movement needed
+
+Follow-up ask, direct: "chcę gdy user trzyma shift snap się dodatkowo robił w kątach... W figmie jest
+tak od 0 do 90 stopni mozna dodatkowo zrobić pod kątem 5 snapów" (want the snap to additionally happen
+at other angles while Shift is held — Figma allows 5 extra snap angles between 0 and 90). Confirmed
+directly as a **hard constraint** (always snaps to the nearest 15° increment regardless of how far the
+raw angle is, not a wider tolerance around more candidates) and as applying to **both** segments and
+tangent handles, matching §37/§38's existing scope exactly.
+
+**`getAngleSnappedVectorPoint.ts` gained a fourth parameter, `isShiftPressed` (default `false`,
+backward-compatible with every pre-existing call site).** When `true`, it takes a completely different
+branch (`getShiftSnappedPoint`) instead of the tolerance-gated cardinal-only logic §37 already had:
+```ts
+const getShiftSnappedPoint = (from: TPoint, to: TPoint): TPoint => {
+  const angle = getAngleBetweenPoints(from, to);
+  const snapAngle = Math.round(angle / VECTOR_SHIFT_ANGLE_SNAP_INCREMENT_DEGREES) * VECTOR_SHIFT_ANGLE_SNAP_INCREMENT_DEGREES;
+
+  return getPointOnSnapAngle(from, to, snapAngle);
+};
+```
+`VECTOR_SHIFT_ANGLE_SNAP_INCREMENT_DEGREES` (`15`, `constant/canvas.ts`) — plain rounding to the
+nearest multiple works correctly across the full `atan2` range `(-180°, 180°]` with no candidate-list/
+wraparound logic needed (unlike §37's `pickClosestAngleMatch`), since 15 evenly divides 360 and
+`Math.round` already handles the ties. Shift mode is checked **before** the zoom-tolerance check and
+short-circuits past it entirely — `isSnapped` is unconditionally `true` whenever Shift is held (except
+the pre-existing zero-distance guard), since a hard constraint has no "close enough" concept to fail.
+
+**`getPointOnSnapAngle` generalizes §37's axis-lock trick to arbitrary angles, extracted as its own
+function reused by both modes.** The cardinal-only default snap always resolved to exactly `{x:
+to.x, y: from.y}` or `{x: from.x, y: to.y}` — no trig, hence byte-identical near-axis-vs-exact-axis
+results (§37's own fix, still true and still exercised: the default mode's candidates are still only
+`[0, 90, 180, -90]`, so it can never reach the third branch below). Shift's 15° increments need a
+real construction for the 8 non-cardinal angles (15°, 30°, 45°, 60°, 120°, 135°, 150°, 165° — mirrored
+across all four quadrants), built as a vector projection:
+```ts
+const getPointOnSnapAngle = (from: TPoint, to: TPoint, snapAngleDegrees: number): TPoint => {
+  if (snapAngleDegrees === 0 || snapAngleDegrees === 180 || snapAngleDegrees === -180) {
+    return { x: to.x, y: from.y };
+  }
+  if (snapAngleDegrees === 90 || snapAngleDegrees === -90) {
+    return { x: from.x, y: to.y };
+  }
+
+  const radians = (snapAngleDegrees * Math.PI) / 180;
+  const directionX = Math.cos(radians);
+  const directionY = Math.sin(radians);
+  const projectedDistance = (to.x - from.x) * directionX + (to.y - from.y) * directionY;
+
+  return { x: from.x + projectedDistance * directionX, y: from.y + projectedDistance * directionY };
+};
+```
+This is the dot product of the raw cursor vector onto the snapped direction's unit vector — the same
+"drop the perpendicular component, keep the along-ray component" construction Figma's own shift-
+constrain uses (confirmed against its behavior directly), which is *why* it correctly generalizes the
+cardinal case rather than needing a separate formula: at exactly 0°/90°/180°/270° the projection would
+algebraically reduce to the same axis-lock result, but those three angles are special-cased anyway to
+avoid `Math.cos`/`Math.sin` floating-point noise on values that used to be — and still must remain —
+exact.
+
+**A first version tried unifying all four candidates through the trig projection formula uniformly
+(no special-casing), and it broke an already-passing e2e pixel-equality test.** `from.x + (to.x -
+from.x) * 1.0` is not always bit-identical to `to.x` in floating point for arbitrary values, even
+though it's algebraically the same number — this reintroduced exactly the kind of near-axis-vs-
+exact-axis discrepancy §37's *own* "why the first trig attempt failed" story already worked through
+and fixed once. Keeping the three cardinal branches as plain coordinate copies (no arithmetic at all)
+is what preserves that already-hard-won byte-identical guarantee; only genuinely non-cardinal angles
+go through the projection math, where no such pre-existing exact-equality test could ever have existed
+in the first place (§37 never covered 15°/30°/etc.).
+
+**Threaded through the same four call sites §37/§38 established, all backward-compatible defaults:**
+`applyAngleSnapToPenPreview.ts` → `updateVectorPenPreview.ts` → Pen's `handlePointerMove.ts` (reads
+`event.shiftKey`) for the live rubber-band preview; `updateVectorHandleDrag.ts` (Pen tangent
+click-drag) also reads `event.shiftKey` from the same `handlePointerMove.ts`; `continueVectorNetwork.ts`
+gained the parameter for the **commit** point (blank-canvas branch, same as §37's own commit-time call),
+threaded from `startOrContinueVectorNetwork.ts` reading `event.shiftKey` off the `pointerdown` event
+(mirroring the existing `event.ctrlKey || event.metaKey` line right above it — Shift has no
+platform-alternate key, so no `||` needed); `continueVectorHandleDrag.ts` (Vector Edit Mode) reads
+`event.shiftKey` directly off its own `pointermove` event, same call site §38 modified for the
+tolerance-based mode.
+
+**Second follow-up, immediate: "jak wciśnie się shift podczas rysowania to od razu robi snapa nawet
+jeśli user nie ruszy myszką" (pressing Shift while drawing should snap right away even if the user
+doesn't move the mouse) — Figma's own behavior.** Every one of the four call sites above only runs
+inside a `pointermove` handler, so pressing/releasing Shift while the cursor is stationary previously
+changed nothing until the next real mouse movement — a real, live-feel gap this ask closed.
+
+**Fix: track the last known screen pointer position, and replay it as a synthetic `pointermove` on
+every Shift `keydown`/`keyup`.** Both `useDrawPenTool.ts` and `useSelectionTool.ts` gained a
+`lastPointerClientPositionRef` (`useRef<TPoint | null>`, hook-local — not lifted to `TCanvasRefs`,
+since nothing outside either hook's own `onShiftKeyChange` closure ever needs it), written at the top
+of **both** `onPointerDown` and `onPointerMove` (not `onPointerMove` alone — a Shift press immediately
+after the very first `pointerdown` of a drag, before any `pointermove` has fired yet, needs a known
+position too; this was caught by a first draft of the Pen-tool test that pressed Shift right after
+`pointerdown` with zero `pointermove`s and got no effect, before the fix moved the position-recording
+call up into `onPointerDown` as well):
+```ts
+const onShiftKeyChange = (canvas: HTMLCanvasElement, event: KeyboardEvent): void => {
+  if (event.key === 'Shift' && lastPointerClientPositionRef.current) {
+    const { x, y } = lastPointerClientPositionRef.current;
+
+    onPointerMove(canvas, new PointerEvent('pointermove', { clientX: x, clientY: y, pointerId: -1, shiftKey: event.shiftKey }));
+  }
+};
+```
+A direct function call into the hook's own `onPointerMove`, not a real `canvas.dispatchEvent(...)` —
+reuses the exact same preview/drag branching logic with zero duplication, and can't create a feedback
+loop the way dispatching a real DOM event onto the listened-to element might. `pointerId: -1` is never
+read by anything downstream (`getPointerPosition.ts` only reads `clientX`/`clientY`; nothing in either
+call chain touches `event.pointerId` for a `pointermove`), so any placeholder value works.
+
+**`useDrawPenTool.ts`**: window-level `keydown`/`keyup` listeners added alongside the existing
+canvas-level pointer listeners, gated the same way (only attached while `activeTool === ToolName.pen`).
+Calling the existing `onPointerMove` unconditionally is safe here regardless of session state — with no
+active vertex and no drag in progress it just falls through to the idle `updateNewVertexPreview` branch,
+which doesn't read Shift at all (§37's scope note: angle-snap never applies with no `from` vertex), so a
+Shift press before ever clicking anything is a harmless no-op recompute of the same idle state.
+
+**`useSelectionTool.ts`**: same shape, but gated on `selectRefs.vectorHandleDragRef.current` being
+non-null before replaying the synthetic move — deliberately **not** unconditional the way the Pen
+tool's version is. This hook's `handlePointerMove.ts` unconditionally runs all fourteen `continue*Drag`
+functions every real `pointermove` (§ "selection-and-manipulation.md" §1), and most of them dispatch a
+real `updateNode` on every call when their own ref is armed (resize, rotate, plain move, ...) — replaying
+a synthetic move at the *same* screen position they already processed would just make them redundantly
+re-dispatch identical values (harmless but wasteful, and arguably surprising to trigger from a keystroke
+unrelated to whatever gesture is actually in progress). Gating on `vectorHandleDragRef` specifically —
+the only one of the fourteen that reads `shiftKey` at all — keeps the synthetic replay scoped to exactly
+the mechanism it exists for.
+
+**Test coverage caught a genuine floating-point precision gap, not a logic bug.** A first unit test for
+the Shift-hard-constrain preview case asserted `toMatchObject({ to: { x: 100, y: 100 } })` for a 45°
+diagonal drag from the origin — algebraically exact (45° is already a 15°-multiple, so the "constrained"
+point should equal the raw input), but the projection formula's `Math.cos(45°)`/`Math.sin(45°)`
+round-trip landed at `100.00000000000001`, failing exact equality. Not a bug in the implementation —
+the same floating-point reality any trig-based reconstruction has — fixed by asserting with
+`toBeCloseTo` instead of exact equality for that one non-cardinal case, consistent with how the rest of
+this feature's non-cardinal-angle tests were already written.
+
+Covered by 8 new e2e scenarios (`TEST_CASES.md` #229-234) across `pen.spec.ts`/`vector-edit.spec.ts`:
+Shift-commit and Shift-drag hard-constraint for both segments and tangent handles (asserting the
+Shift-held render *differs* from the identical no-Shift gesture, the same robustness-over-exact-pixel-
+match approach used throughout this feature for trig-path cases — see §37's own note on why exact
+pixel equality is reserved for the trig-free cardinal path), plus three immediate-re-evaluation-on-
+keydown scenarios (rubber-band preview, Pen click-drag, and Vector Edit Mode drag) that assert a
+screenshot taken right after `page.keyboard.down('Shift')` — with **zero** intervening pointer
+movement — already differs from the screenshot taken just before it. A new `shiftDragVectorPoint`
+helper was added to `DesignPage.ts`, mirroring the existing `ctrlDragVectorPoint` shape exactly.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

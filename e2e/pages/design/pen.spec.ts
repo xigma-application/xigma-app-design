@@ -792,3 +792,100 @@ test('click-dragging a tangent handle well outside the angle-snap tolerance keep
 
   expect(diagonalDrag.equals(horizontalDrag)).toBe(false);
 });
+
+test('Shift held while clicking a diagonal point hard-constrains the new vertex to the nearest 15deg increment, even at an angle the plain snap ignores', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  // mock — a diagonal click well outside the plain (no-Shift) snap's 4-cardinal-only reach
+  await designPage.goto('e2e-test-pen-shift-angle-snap-commit');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300); // v1
+  await designPage.click(850, 386, { shift: true }); // Shift held — hard-constrained to a 15deg increment
+  await designPage.pointerMove(1500, 900);
+  const shiftClick = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-pen-shift-angle-snap-commit-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300);
+  await designPage.click(850, 386); // the exact same click, no Shift — commits at the raw diagonal point
+  await designPage.pointerMove(1500, 900);
+  const plainClick = await designPage.canvas.screenshot();
+
+  expect(shiftClick.equals(plainClick)).toBe(false);
+});
+
+test('Shift held while dragging a tangent handle while placing a vertex hard-constrains it to the nearest 15deg increment', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+  const region = { height: 120, width: 220, x: 780, y: 250 };
+
+  await designPage.goto('e2e-test-pen-shift-tangent-angle-snap-drag');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300); // v1
+  await designPage.shiftDragVectorPoint(850, 300, 950, 350); // Shift held — 45deg, well off any cardinal
+  const shiftDrag = await page.screenshot({ clip: region });
+
+  await designPage.goto('e2e-test-pen-shift-tangent-angle-snap-drag-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300);
+  await designPage.dragVectorPoint(850, 300, 950, 350); // identical drag, no Shift
+  const plainDrag = await page.screenshot({ clip: region });
+
+  expect(shiftDrag.equals(plainDrag)).toBe(false);
+});
+
+test('pressing Shift immediately re-evaluates the rubber-band preview, without needing the pointer to move again', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-pen-shift-immediate-preview-snap');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300); // v1
+  await designPage.pointerMove(850, 386); // diagonal hover, well outside the plain snap's reach
+  const beforeShift = await designPage.canvas.screenshot();
+
+  // action — hold Shift down with no further pointer movement at all
+  await page.keyboard.down('Shift');
+  const afterShift = await designPage.canvas.screenshot();
+  await page.keyboard.up('Shift');
+
+  // result — the preview already changed just from the key press
+  expect(afterShift.equals(beforeShift)).toBe(false);
+});
+
+test('pressing Shift immediately re-evaluates an in-progress tangent-handle drag, without needing the pointer to move again', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+  const region = { height: 120, width: 220, x: 780, y: 250 };
+
+  await designPage.goto('e2e-test-pen-shift-immediate-drag-snap');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300); // v1
+  await designPage.pointerDown(850, 300); // press on v2's spot — places it and arms the tangent drag
+  await designPage.pointerMove(950, 350); // drag out diagonally, past the minimum drag threshold
+  const beforeShift = await page.screenshot({ clip: region });
+
+  // action — hold Shift down with no further pointer movement
+  await page.keyboard.down('Shift');
+  const afterShift = await page.screenshot({ clip: region });
+  await page.keyboard.up('Shift');
+  await designPage.pointerUp();
+
+  // result — the live tangent handle already snapped just from the key press
+  expect(afterShift.equals(beforeShift)).toBe(false);
+});

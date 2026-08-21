@@ -52,6 +52,7 @@ export const handlePointerMove = (
   const viewport = selectViewport(state);
   const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
   const point: TPoint = roundVectorPoint(rawPoint);
+  const isShiftPressed = event.shiftKey;
 
   if (dragOriginRef.current && dragStartRef.current) {
     updateVectorHandleDrag(
@@ -59,6 +60,7 @@ export const handlePointerMove = (
       dragOriginRef.current,
       dragStartRef.current,
       viewport,
+      isShiftPressed,
       dispatch,
       appStore,
       pendingOutgoingTangentRef,
@@ -81,6 +83,7 @@ export const handlePointerMove = (
         node,
         penActiveVertexId,
         viewport,
+        isShiftPressed,
         penPreviewRef,
         pendingOutgoingTangentRef,
         hoveredSegmentIdRef,

@@ -163,6 +163,7 @@ describe('startOrContinueVectorNetwork', () => {
       dragStartRef,
       pendingOutgoingTangentRef,
       false,
+      false,
     );
     expect(startNewVectorNetworkMock).not.toHaveBeenCalled();
     expect(startVectorFragmentMock).not.toHaveBeenCalled();
@@ -203,6 +204,46 @@ describe('startOrContinueVectorNetwork', () => {
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      true,
+      false,
+    );
+  });
+
+  it('should forward Shift held during the pointerdown into continueVectorNetwork, for the hard 15deg angle constraint', () => {
+    // mock
+    const canvas = createCanvas();
+    const dispatch = vi.fn();
+    const appStore = {} as AppStore;
+    const dragOriginRef = createDragOriginRef();
+    const dragStartRef = createDragStartRef();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+
+    // before
+    startOrContinueVectorNetwork(
+      canvas,
+      pointerEvent(7, { shiftKey: true }),
+      { x: 10, y: 20 },
+      node,
+      'v1',
+      IDENTITY_VIEWPORT,
+      dispatch,
+      appStore,
+      dragOriginRef,
+      dragStartRef,
+      pendingOutgoingTangentRef,
+    );
+
+    // result
+    expect(continueVectorNetworkMock).toHaveBeenCalledWith(
+      { x: 10, y: 20 },
+      node,
+      'v1',
+      IDENTITY_VIEWPORT,
+      dispatch,
+      dragOriginRef,
+      dragStartRef,
+      pendingOutgoingTangentRef,
+      false,
       true,
     );
   });

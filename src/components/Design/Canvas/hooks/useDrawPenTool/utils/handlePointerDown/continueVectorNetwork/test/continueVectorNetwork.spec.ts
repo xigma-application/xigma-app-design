@@ -89,6 +89,7 @@ describe('continueVectorNetwork', () => {
       dragStartRef,
       pendingOutgoingTangentRef,
       false,
+      false,
     );
 
     // result
@@ -125,6 +126,7 @@ describe('continueVectorNetwork', () => {
       dragStartRef,
       pendingOutgoingTangentRef,
       false,
+      false,
     );
 
     // result
@@ -156,6 +158,7 @@ describe('continueVectorNetwork', () => {
       dragStartRef,
       pendingOutgoingTangentRef,
       false,
+      false,
     );
 
     // result
@@ -184,6 +187,7 @@ describe('continueVectorNetwork', () => {
       dragStartRef,
       pendingOutgoingTangentRef,
       true,
+      false,
     );
 
     // result
@@ -211,6 +215,7 @@ describe('continueVectorNetwork', () => {
       dragStartRef,
       pendingOutgoingTangentRef,
       true,
+      false,
     );
 
     // result
@@ -236,6 +241,7 @@ describe('continueVectorNetwork', () => {
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      false,
       false,
     );
 
@@ -272,6 +278,7 @@ describe('continueVectorNetwork', () => {
       dragStartRef,
       pendingOutgoingTangentRef,
       false,
+      false,
     );
 
     // result — pulled exactly onto v1's own y, not the raw clicked y
@@ -279,6 +286,72 @@ describe('continueVectorNetwork', () => {
     const newVertexId = store.getState().design.penActiveVertexId as string;
 
     expect(updatedNode.vertices[newVertexId].y).toBe(0);
+  });
+
+  it('should hard-constrain the new vertex to the nearest 15deg increment when Shift is held, even at an angle the plain (no-Shift) snap would never attract to', () => {
+    // mock — a point placed exactly on a 30deg ray from v1(0,0) at distance 300, well outside the
+    // plain snap's 4-cardinal-only reach — Shift's 15deg increments include 30deg exactly, so this
+    // should commit right where it was clicked (its own angle already lands on a candidate)
+    const nodeId = addVectorNode();
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const dragOriginRef = createDragOriginRef();
+    const dragStartRef = createDragStartRef();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+    const radians = (30 * Math.PI) / 180;
+    const clickPoint = { x: 300 * Math.cos(radians), y: 300 * Math.sin(radians) };
+
+    // before — Shift held
+    continueVectorNetwork(
+      clickPoint,
+      node,
+      'v1',
+      IDENTITY_VIEWPORT,
+      store.dispatch,
+      dragOriginRef,
+      dragStartRef,
+      pendingOutgoingTangentRef,
+      false,
+      true,
+    );
+
+    // result — lands on the same 30deg ray (within half-pixel rounding), not deflected off it
+    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const newVertexId = store.getState().design.penActiveVertexId as string;
+    const placed = updatedNode.vertices[newVertexId];
+
+    expect(placed.x).toBeCloseTo(clickPoint.x, 0);
+    expect(placed.y).toBeCloseTo(clickPoint.y, 0);
+  });
+
+  it('should hard-constrain a diagonal click to the nearest 15deg increment when Shift is held, deflecting it off the raw clicked point', () => {
+    // mock — a point at atan2(202,300) ≈ 33.98deg from v1(0,0) — closest to the 30deg candidate, so
+    // Shift should deflect the commit off the raw click, unlike a plain (no-Shift) click which would
+    // commit at the exact raw point since it's nowhere near a cardinal direction
+    const nodeId = addVectorNode();
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const dragOriginRef = createDragOriginRef();
+    const dragStartRef = createDragStartRef();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+
+    // before — Shift held
+    continueVectorNetwork(
+      { x: 300, y: 202 },
+      node,
+      'v1',
+      IDENTITY_VIEWPORT,
+      store.dispatch,
+      dragOriginRef,
+      dragStartRef,
+      pendingOutgoingTangentRef,
+      false,
+      true,
+    );
+
+    // result — deflected off the raw y=202, not committed straight through
+    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const newVertexId = store.getState().design.penActiveVertexId as string;
+
+    expect(updatedNode.vertices[newVertexId].y).not.toBe(202);
   });
 
   it('should carry the pending outgoing tangent into the new segment when it matches the active vertex', () => {
@@ -297,6 +370,7 @@ describe('continueVectorNetwork', () => {
       createDragOriginRef(),
       createDragStartRef(),
       pendingOutgoingTangentRef,
+      false,
       false,
     );
 
@@ -325,6 +399,7 @@ describe('continueVectorNetwork', () => {
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      false,
       false,
     );
 

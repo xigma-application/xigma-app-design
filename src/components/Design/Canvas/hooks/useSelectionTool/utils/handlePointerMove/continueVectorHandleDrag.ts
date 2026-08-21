@@ -35,7 +35,7 @@ export const continueVectorHandleDrag = (
       const viewport = selectViewport(state);
       const point = screenToWorld(getPointerPosition(canvas, event), viewport);
       const vertex = node.vertices[dragState.vertexId];
-      const { isSnapped, point: snappedPoint } = getAngleSnappedVectorPoint(vertex, point, viewport.zoom);
+      const { isSnapped, point: snappedPoint } = getAngleSnappedVectorPoint(vertex, point, viewport.zoom, event.shiftKey);
       const tangent: TVectorTangent = { x: Math.round(snappedPoint.x - vertex.x), y: Math.round(snappedPoint.y - vertex.y) };
       const field = dragState.end === 'start' ? 'tangentStart' : 'tangentEnd';
       const mode = node.vertexHandleModes[dragState.vertexId] ?? 'corner';

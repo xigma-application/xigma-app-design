@@ -41,6 +41,7 @@ export const continueVectorNetwork = (
   dragStartRef: RefObject<TPoint | null>,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
   isCtrlPressed: boolean,
+  isShiftPressed: boolean,
 ): void => {
   if (isPointNearVertex(point, node.vertices[activeVertexId], VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom)) {
     const segmentId = isCtrlPressed ? getIncomingSegmentId(node, activeVertexId) : null;
@@ -81,7 +82,9 @@ export const continueVectorNetwork = (
         pendingOutgoingTangentRef,
       );
     } else {
-      const snappedPoint = roundVectorPoint(getAngleSnappedVectorPoint(node.vertices[activeVertexId], point, viewport.zoom).point);
+      const snappedPoint = roundVectorPoint(
+        getAngleSnappedVectorPoint(node.vertices[activeVertexId], point, viewport.zoom, isShiftPressed).point,
+      );
 
       extendWithNewVertex(
         snappedPoint,

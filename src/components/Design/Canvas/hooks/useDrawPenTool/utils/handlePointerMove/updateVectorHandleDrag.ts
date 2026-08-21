@@ -21,6 +21,7 @@ export const updateVectorHandleDrag = (
   dragOrigin: TPenDragOrigin,
   dragStart: TPoint,
   viewport: TViewport,
+  isShiftPressed: boolean,
   dispatch: AppDispatch,
   appStore: AppStore,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
@@ -31,7 +32,7 @@ export const updateVectorHandleDrag = (
     const node = getVectorEditingNode(appStore.getState().design.nodes, dragOrigin.nodeId);
 
     if (node) {
-      const { isSnapped, point: snappedPoint } = getAngleSnappedVectorPoint(dragStart, point, viewport.zoom);
+      const { isSnapped, point: snappedPoint } = getAngleSnappedVectorPoint(dragStart, point, viewport.zoom, isShiftPressed);
       const dx = snappedPoint.x - dragStart.x;
       const dy = snappedPoint.y - dragStart.y;
       const vertexHandleModes = { ...node.vertexHandleModes, [dragOrigin.vertexId]: 'symmetric' as const };

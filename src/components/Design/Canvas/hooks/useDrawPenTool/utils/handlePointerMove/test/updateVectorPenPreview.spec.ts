@@ -45,6 +45,7 @@ describe('updateVectorPenPreview', () => {
       node,
       null,
       IDENTITY_VIEWPORT,
+      false,
       penPreviewRef,
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
@@ -70,6 +71,7 @@ describe('updateVectorPenPreview', () => {
       node,
       'v1',
       IDENTITY_VIEWPORT,
+      false,
       penPreviewRef,
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
@@ -100,6 +102,7 @@ describe('updateVectorPenPreview', () => {
       node,
       'v1',
       IDENTITY_VIEWPORT,
+      false,
       penPreviewRef,
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
@@ -109,6 +112,30 @@ describe('updateVectorPenPreview', () => {
     // result — pulled onto the exact horizontal axis
     expect(penPreviewRef.current?.isSnapped).toBe(true);
     expect(penPreviewRef.current?.to.y).toBeCloseTo(0);
+  });
+
+  it('should hard-constrain the rubber-band preview to the nearest 15deg increment when Shift is held, deflecting it off an angle the plain snap ignores', () => {
+    // mock — atan2(12, 20) ≈ 31deg, closest to the 30deg increment
+    const penPreviewRef = createPenPreviewRef();
+    const hoveredSegmentIdRef = createHoveredSegmentIdRef();
+    const penHoveredDragArmableVertexRef = createPenHoveredDragArmableVertexRef();
+
+    // before — Shift held
+    updateVectorPenPreview(
+      { x: 20, y: 12 },
+      node,
+      'v1',
+      IDENTITY_VIEWPORT,
+      true,
+      penPreviewRef,
+      createPendingOutgoingTangentRef(),
+      hoveredSegmentIdRef,
+      penHoveredDragArmableVertexRef,
+    );
+
+    // result
+    expect(penPreviewRef.current?.isSnapped).toBe(true);
+    expect(penPreviewRef.current?.to).not.toEqual({ x: 20, y: 12 });
   });
 
   it('should snap the rubber-band preview endpoint to the hovered vertex instead of the raw pointer position', () => {
@@ -124,6 +151,7 @@ describe('updateVectorPenPreview', () => {
       nodeWithTwoVertices,
       'v1',
       IDENTITY_VIEWPORT,
+      false,
       penPreviewRef,
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
@@ -155,6 +183,7 @@ describe('updateVectorPenPreview', () => {
       nodeWithSegment,
       'v3',
       IDENTITY_VIEWPORT,
+      false,
       penPreviewRef,
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
@@ -185,6 +214,7 @@ describe('updateVectorPenPreview', () => {
       nodeWithSegment,
       'v3',
       IDENTITY_VIEWPORT,
+      false,
       penPreviewRef,
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
@@ -212,6 +242,7 @@ describe('updateVectorPenPreview', () => {
       node,
       'v1',
       IDENTITY_VIEWPORT,
+      false,
       penPreviewRef,
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
@@ -243,6 +274,7 @@ describe('updateVectorPenPreview', () => {
       node,
       'v1',
       IDENTITY_VIEWPORT,
+      false,
       penPreviewRef,
       pendingOutgoingTangentRef,
       hoveredSegmentIdRef,

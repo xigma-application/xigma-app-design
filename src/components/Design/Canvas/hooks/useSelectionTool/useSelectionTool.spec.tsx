@@ -82,6 +82,29 @@ const addVectorNode = (): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
+// same v1(3400,700)/v2(3500,700) layout, but s1 already carries a real tangentStart (a handle at
+// v1 + (50,0) = (3450,700)) so there's an existing, grabbable handle to drag in Vector Edit Mode
+const addVectorNodeWithTangent = (): string => {
+  store.dispatch(
+    addNode({
+      fillColor: null,
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: { x: 50, y: 0 } } },
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { v1: { id: 'v1', x: 3400, y: 700 }, v2: { id: 'v2', x: 3500, y: 700 } },
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 const renderSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>): RefObject<TDraftRect | null> => {
   const refs = createCanvasRefs({ canvasRef });
 
@@ -669,6 +692,82 @@ describe('useSelectionTool behaviors', () => {
     // result
     expect(refs.selectedVectorVertexIdsRef.current).toEqual([]);
     expect(refs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(refs.snappedVectorHandleRef.current).toBeNull();
+  });
+
+  it('should re-evaluate an in-progress tangent-handle drag immediately when Shift is pressed, without a further pointermove', () => {
+    // mock — s1's real tangentStart handle sits at v1(3400,700) + (50,0) = (3450,700)
+    const nodeId = addVectorNodeWithTangent();
+    const canvasRef = createCanvasRef();
+    const refs = createCanvasRefs({ canvasRef });
+
+    refs.selectedVectorVertexIdsRef.current = ['v1']; // reveals v1's own handle for hit-testing
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    renderHook(() => useSelectionTool(refs), {
+      wrapper: ({ children }) => (
+        <Provider store={store}>
+          <ClassNamesProvider>{children}</ClassNamesProvider>
+        </Provider>
+      ),
+    });
+
+    // press exactly on the handle, then drag it to an off-cardinal diagonal position (dx=20,dy=12,
+    // ~31deg from v1) — an unsnapped in-progress drag
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 3450, 700));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 3420, 712));
+    });
+
+    expect(refs.snappedVectorHandleRef.current).toBeNull();
+
+    // action — Shift held, no further pointer movement
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true }));
+    });
+
+    // result — hard-constrained at the same live position, no additional mouse movement needed
+    expect(refs.snappedVectorHandleRef.current).toEqual({ end: 'start', segmentId: 's1' });
+
+    // action — Shift released, still no further pointer movement
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Shift', shiftKey: false }));
+    });
+
+    // result — back to the plain unsnapped drag at the same diagonal position
+    expect(refs.snappedVectorHandleRef.current).toBeNull();
+  });
+
+  it('should not react to Shift while no tangent-handle drag is in progress', () => {
+    // mock
+    const nodeId = addVectorNodeWithTangent();
+    const canvasRef = createCanvasRef();
+    const refs = createCanvasRefs({ canvasRef });
+
+    store.dispatch(setVectorEditingNodeId(nodeId));
+
+    // before
+    renderHook(() => useSelectionTool(refs), {
+      wrapper: ({ children }) => (
+        <Provider store={store}>
+          <ClassNamesProvider>{children}</ClassNamesProvider>
+        </Provider>
+      ),
+    });
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 3420, 712));
+    });
+
+    // action — Shift held, but nothing is being dragged
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true }));
+    });
+
+    // result
     expect(refs.snappedVectorHandleRef.current).toBeNull();
   });
 

@@ -36,13 +36,16 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
   const { setClassName } = useClassNames();
   const dragStartRef = useRef<TPoint | null>(null);
   const pendingOutgoingTangentRef = useRef<TPendingOutgoingTangent | null>(null);
+  const lastPointerClientPositionRef = useRef<TPoint | null>(null);
 
   const onPointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
+    lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
     penPreviewRef.current = null;
     handlePointerDown(canvas, event, dispatch, appStore, dragOriginRef, dragStartRef, pendingOutgoingTangentRef);
   };
 
   const onPointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
+    lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
     handlePointerMove(
       canvas,
       event,
@@ -69,6 +72,14 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
     handlePointerCancel(canvas, event, dispatch, dragOriginRef, dragStartRef, penDraggedHandlePositionRef, penDraggedHandleIsSnappedRef);
   };
 
+  const onShiftKeyChange = (canvas: HTMLCanvasElement, event: KeyboardEvent): void => {
+    if (event.key === 'Shift' && lastPointerClientPositionRef.current) {
+      const { x, y } = lastPointerClientPositionRef.current;
+
+      onPointerMove(canvas, new PointerEvent('pointermove', { clientX: x, clientY: y, pointerId: -1, shiftKey: event.shiftKey }));
+    }
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
 
@@ -77,17 +88,23 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
       const pointerMoveListener = (event: PointerEvent): void => onPointerMove(canvas, event);
       const pointerUpListener = (event: PointerEvent): void => onPointerUp(canvas, event);
       const pointerCancelListener = (event: PointerEvent): void => onPointerCancel(canvas, event);
+      const shiftKeyDownListener = (event: KeyboardEvent): void => onShiftKeyChange(canvas, event);
+      const shiftKeyUpListener = (event: KeyboardEvent): void => onShiftKeyChange(canvas, event);
 
       canvas.addEventListener('pointerdown', pointerDownListener);
       canvas.addEventListener('pointermove', pointerMoveListener);
       canvas.addEventListener('pointerup', pointerUpListener);
       canvas.addEventListener('pointercancel', pointerCancelListener);
+      window.addEventListener('keydown', shiftKeyDownListener);
+      window.addEventListener('keyup', shiftKeyUpListener);
 
       return (): void => {
         canvas.removeEventListener('pointerdown', pointerDownListener);
         canvas.removeEventListener('pointermove', pointerMoveListener);
         canvas.removeEventListener('pointerup', pointerUpListener);
         canvas.removeEventListener('pointercancel', pointerCancelListener);
+        window.removeEventListener('keydown', shiftKeyDownListener);
+        window.removeEventListener('keyup', shiftKeyUpListener);
         penPreviewRef.current = null;
         penNewVertexPreviewRef.current = null;
         dragOriginRef.current = null;
@@ -95,6 +112,7 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
         penDraggedHandleIsSnappedRef.current = false;
         hoveredSegmentIdRef.current = null;
         penHoveredDragArmableVertexRef.current = false;
+        lastPointerClientPositionRef.current = null;
       };
     }
   }, [

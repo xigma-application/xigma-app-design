@@ -21,6 +21,7 @@ describe('applyAngleSnapToPenPreview', () => {
       { id: 'v1', x: 0, y: 0 },
       null,
       1,
+      false,
       penPreviewRef,
       hoveredSegmentIdRef,
       penHoveredDragArmableVertexRef,
@@ -48,6 +49,7 @@ describe('applyAngleSnapToPenPreview', () => {
       { id: 'v1', x: 0, y: 0 },
       null,
       1,
+      false,
       penPreviewRef,
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
@@ -72,6 +74,7 @@ describe('applyAngleSnapToPenPreview', () => {
       { id: 'v1', x: 0, y: 0 },
       { x: 5, y: 5 },
       1,
+      false,
       penPreviewRef,
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
@@ -91,6 +94,7 @@ describe('applyAngleSnapToPenPreview', () => {
       { id: 'v1', x: 0, y: 0 },
       null,
       10,
+      false,
       penPreviewRef,
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
@@ -98,5 +102,29 @@ describe('applyAngleSnapToPenPreview', () => {
 
     // result
     expect(penPreviewRef.current).toMatchObject({ isSnapped: false, to: { x: 150, y: 3 } });
+  });
+
+  it('should hard-constrain to the nearest 15deg increment and always flag it snapped when Shift is held, even at an angle the plain snap ignores', () => {
+    // mock — 45deg from (0,0), nowhere near a cardinal direction
+    const penPreviewRef = createPenPreviewRef();
+
+    // before — Shift held
+    applyAngleSnapToPenPreview(
+      { x: 100, y: 100 },
+      { id: 'v1', x: 0, y: 0 },
+      null,
+      1,
+      true,
+      penPreviewRef,
+      createHoveredSegmentIdRef(),
+      createPenHoveredDragArmableVertexRef(),
+    );
+
+    // result — a 45deg diagonal drag already lands on a 15deg increment, so the preview commits right
+    // where clicked (within floating-point precision of the trig projection non-cardinal angles go
+    // through), but flagged as snapped (the hard constraint is always active under Shift)
+    expect(penPreviewRef.current?.isSnapped).toBe(true);
+    expect(penPreviewRef.current?.to.x).toBeCloseTo(100);
+    expect(penPreviewRef.current?.to.y).toBeCloseTo(100);
   });
 });

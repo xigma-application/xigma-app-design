@@ -1050,3 +1050,62 @@ test('dragging an existing tangent handle well outside the angle-snap tolerance 
 
   expect(diagonal.equals(horizontal)).toBe(false);
 });
+
+test('Shift held while dragging an existing tangent handle hard-constrains it to the nearest 15deg increment, differing from the identical drag without Shift', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+  const region = { height: 120, width: 220, x: 1030, y: 250 };
+
+  await designPage.goto('e2e-test-vector-edit-handle-shift-angle-snap');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(900, 300); // v1
+  await designPage.dragVectorPoint(1050, 300, 1050, 250); // v2, dragged — handle sits at (1050, 350)
+  await designPage.selectTool('default');
+
+  await designPage.shiftDragVectorPoint(1050, 350, 1150, 350); // Shift held — 45deg relative to v2
+  const shiftDrag = await page.screenshot({ clip: region });
+
+  await designPage.goto('e2e-test-vector-edit-handle-shift-angle-snap-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(900, 300);
+  await designPage.dragVectorPoint(1050, 300, 1050, 250);
+  await designPage.selectTool('default');
+
+  await designPage.dragVectorPoint(1050, 350, 1150, 350); // identical drag, no Shift
+  const plainDrag = await page.screenshot({ clip: region });
+
+  expect(shiftDrag.equals(plainDrag)).toBe(false);
+});
+
+test('pressing Shift immediately re-evaluates an in-progress existing-handle drag, without needing the pointer to move again', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+  const region = { height: 120, width: 220, x: 1030, y: 250 };
+
+  await designPage.goto('e2e-test-vector-edit-handle-shift-immediate-snap');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(900, 300); // v1
+  await designPage.dragVectorPoint(1050, 300, 1050, 250); // v2, dragged — handle sits at (1050, 350)
+  await designPage.selectTool('default');
+
+  await designPage.pointerDown(1050, 350); // grab the existing handle
+  await designPage.pointerMove(1150, 350); // drag diagonally, well past the minimum threshold
+  const beforeShift = await page.screenshot({ clip: region });
+
+  // action — hold Shift down with no further pointer movement
+  await page.keyboard.down('Shift');
+  const afterShift = await page.screenshot({ clip: region });
+  await page.keyboard.up('Shift');
+  await designPage.pointerUp();
+
+  // result — the live handle already snapped just from the key press
+  expect(afterShift.equals(beforeShift)).toBe(false);
+});

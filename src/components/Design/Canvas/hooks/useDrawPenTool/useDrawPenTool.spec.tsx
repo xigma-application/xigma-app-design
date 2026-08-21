@@ -470,4 +470,120 @@ describe('useDrawPenTool behaviors', () => {
     // result
     expect(canvasRef.current?.releasePointerCapture).toHaveBeenCalledWith(1);
   });
+
+  it('should re-evaluate the rubber-band preview immediately when Shift is pressed, without waiting for the pointer to move', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setActiveTool(ToolName.pen));
+
+    // before — place v1, then hover at a diagonal position nowhere near a cardinal direction
+    const { refs } = renderPenTool(canvasRef);
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 20, 12));
+    });
+
+    expect(refs.penPreviewRef.current?.isSnapped).toBe(false);
+
+    // action — Shift held, no further pointer movement
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true }));
+    });
+
+    // result — hard-constrained to the nearest 15deg increment right away
+    expect(refs.penPreviewRef.current?.isSnapped).toBe(true);
+    expect(refs.penPreviewRef.current?.to).not.toEqual({ x: 20, y: 12 });
+  });
+
+  it('should re-evaluate an in-progress tangent-handle drag immediately when Shift is pressed, without a further pointermove', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setActiveTool(ToolName.pen));
+
+    // before — place v1, press down on v2, then drag out past the minimum distance at an off-cardinal
+    // diagonal position, establishing an unsnapped in-progress drag
+    const { refs } = renderPenTool(canvasRef);
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 20, 12));
+    });
+
+    expect(refs.penDraggedHandleIsSnappedRef.current).toBe(false);
+
+    // action — Shift held, no further pointer movement
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true }));
+    });
+
+    // result — hard-constrained at the same live position, no additional mouse movement needed
+    expect(refs.penDraggedHandleIsSnappedRef.current).toBe(true);
+    expect(refs.penDraggedHandlePositionRef.current).not.toEqual({ x: 20, y: 12 });
+  });
+
+  it('should re-evaluate again on keyup once Shift is released, dropping the hard constraint', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setActiveTool(ToolName.pen));
+
+    const { refs } = renderPenTool(canvasRef);
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 0, 0));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 20, 12));
+    });
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true }));
+    });
+
+    expect(refs.penPreviewRef.current?.isSnapped).toBe(true);
+
+    // action — Shift released, still no further pointer movement
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Shift', shiftKey: false }));
+    });
+
+    // result — back to the plain tolerance-based snap, which this diagonal angle falls outside of
+    expect(refs.penPreviewRef.current?.isSnapped).toBe(false);
+    expect(refs.penPreviewRef.current?.to).toEqual({ x: 20, y: 12 });
+  });
+
+  it('should ignore non-Shift keys and do nothing when no pointer position is known yet', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setActiveTool(ToolName.pen));
+
+    const { refs } = renderPenTool(canvasRef);
+
+    // action — a key other than Shift, before any pointer event has ever fired
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { altKey: true, key: 'Alt' }));
+    });
+
+    // result
+    expect(refs.penPreviewRef.current).toBeNull();
+  });
 });

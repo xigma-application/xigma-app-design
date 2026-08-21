@@ -171,6 +171,16 @@ export class DesignPage {
     await this.page.keyboard.up('Control');
   }
 
+  // same down-move-up primitive as dragVectorPoint, with Shift held for the whole gesture — used to
+  // hard-constrain a vector segment/tangent drag to the nearest 15deg increment
+  async shiftDragVectorPoint(x1: number, y1: number, x2: number, y2: number): Promise<void> {
+    await this.page.keyboard.down('Shift');
+    await this.pointerDown(x1, y1);
+    await this.page.mouse.move(x2, y2, { steps: 5 });
+    await this.pointerUp();
+    await this.page.keyboard.up('Shift');
+  }
+
   async typeText(content: string): Promise<void> {
     await this.page.keyboard.type(content);
   }

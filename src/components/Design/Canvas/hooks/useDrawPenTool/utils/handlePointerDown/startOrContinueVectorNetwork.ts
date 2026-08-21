@@ -41,6 +41,7 @@ export const startOrContinueVectorNetwork = (
       dragStartRef,
       pendingOutgoingTangentRef,
       event.ctrlKey || event.metaKey,
+      event.shiftKey,
     );
   }
 

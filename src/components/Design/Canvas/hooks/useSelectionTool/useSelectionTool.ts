@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 // others
 import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from 'store';
 // types
 import { ToolName } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
+import { TPoint } from 'types/canvas';
 import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 // utils
@@ -29,12 +30,15 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
   const isCanvasCaretEditingActive = shouldUseCanvasCaretEditing(editingTextBox);
   const dispatch = useAppDispatch();
   const selectionRefs = useSelectionToolRefs();
+  const lastPointerClientPositionRef = useRef<TPoint | null>(null);
 
   const onPointerDown = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs, selectRefs: TSelectionToolRefs): void => {
+    lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
     handlePointerDown(canvas, event, dispatch, canvasRefs, selectRefs, setClassName);
   };
 
   const onPointerMove = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs, selectRefs: TSelectionToolRefs): void => {
+    lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
     handlePointerMove(canvas, event, dispatch, canvasRefs, selectRefs, setClassName);
   };
 
@@ -51,6 +55,24 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
     cancelVectorSegmentBendDrag(event, dispatch, selectionRefs.vectorSegmentBendDragRef, setClassName);
   };
 
+  const onShiftKeyChange = (
+    canvas: HTMLCanvasElement,
+    event: KeyboardEvent,
+    canvasRefs: TCanvasRefs,
+    selectRefs: TSelectionToolRefs,
+  ): void => {
+    if (event.key === 'Shift' && selectRefs.vectorHandleDragRef.current && lastPointerClientPositionRef.current) {
+      const { x, y } = lastPointerClientPositionRef.current;
+
+      onPointerMove(
+        canvas,
+        new PointerEvent('pointermove', { clientX: x, clientY: y, pointerId: -1, shiftKey: event.shiftKey }),
+        canvasRefs,
+        selectRefs,
+      );
+    }
+  };
+
   useEffect(() => {
     const canvas = refs.canvasRef.current;
 
@@ -60,12 +82,16 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
       const pointerUpListener = (event: PointerEvent): void => onPointerUp(canvas, event, refs, selectionRefs);
       const pointerLeaveListener = (): void => onPointerLeave(refs);
       const keyDownListener = (event: KeyboardEvent): void => onKeyDown(event);
+      const shiftKeyDownListener = (event: KeyboardEvent): void => onShiftKeyChange(canvas, event, refs, selectionRefs);
+      const shiftKeyUpListener = (event: KeyboardEvent): void => onShiftKeyChange(canvas, event, refs, selectionRefs);
 
       canvas.addEventListener('pointerdown', pointerDownListener);
       canvas.addEventListener('pointermove', pointerMoveListener);
       canvas.addEventListener('pointerup', pointerUpListener);
       canvas.addEventListener('pointerleave', pointerLeaveListener);
       window.addEventListener('keydown', keyDownListener);
+      window.addEventListener('keydown', shiftKeyDownListener);
+      window.addEventListener('keyup', shiftKeyUpListener);
 
       return (): void => {
         canvas.removeEventListener('pointerdown', pointerDownListener);
@@ -73,10 +99,13 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         canvas.removeEventListener('pointerup', pointerUpListener);
         canvas.removeEventListener('pointerleave', pointerLeaveListener);
         window.removeEventListener('keydown', keyDownListener);
+        window.removeEventListener('keydown', shiftKeyDownListener);
+        window.removeEventListener('keyup', shiftKeyUpListener);
         refs.selectedVectorVertexIdsRef.current = [];
         refs.selectedVectorHandlesRef.current = [];
         refs.selectedVectorSegmentIdsRef.current = [];
         refs.snappedVectorHandleRef.current = null;
+        lastPointerClientPositionRef.current = null;
       };
     }
   }, [activeTool, dispatch, isCanvasCaretEditingActive, refs, selectionRefs, setClassName]);

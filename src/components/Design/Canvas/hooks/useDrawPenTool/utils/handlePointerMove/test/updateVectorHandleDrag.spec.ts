@@ -58,6 +58,7 @@ describe('updateVectorHandleDrag', () => {
       { nodeId, segmentId: 's1', vertexId: 'v1' },
       { x: 0, y: 0 },
       IDENTITY_VIEWPORT,
+      false,
       store.dispatch,
       store,
       pendingOutgoingTangentRef,
@@ -87,6 +88,7 @@ describe('updateVectorHandleDrag', () => {
       { nodeId, segmentId: 's1', vertexId: 'v1' },
       { x: 0, y: 0 },
       IDENTITY_VIEWPORT,
+      false,
       store.dispatch,
       store,
       pendingOutgoingTangentRef,
@@ -117,6 +119,7 @@ describe('updateVectorHandleDrag', () => {
       { nodeId, segmentId: 's1', vertexId: 'v1' },
       { x: 0, y: 0 },
       IDENTITY_VIEWPORT,
+      false,
       store.dispatch,
       store,
       pendingOutgoingTangentRef,
@@ -146,6 +149,7 @@ describe('updateVectorHandleDrag', () => {
       { nodeId, segmentId: 's1', vertexId: 'v1' },
       { x: 0, y: 0 },
       IDENTITY_VIEWPORT,
+      false,
       store.dispatch,
       store,
       pendingOutgoingTangentRef,
@@ -158,6 +162,33 @@ describe('updateVectorHandleDrag', () => {
 
     expect(node.segments.s1.tangentEnd).toEqual({ x: 0, y: -20 });
     expect(Object.is(node.segments.s1.tangentEnd?.x, -0)).toBe(false);
+    expect(penDraggedHandleIsSnappedRef.current).toBe(true);
+  });
+
+  it('should hard-constrain the tangent to the nearest 15deg increment when Shift is held, deflecting it off the raw drag point', () => {
+    // mock — atan2(12, 20) ≈ 31deg, closest to the 30deg increment, well outside the plain snap's
+    // 4-cardinal-only reach
+    const nodeId = addVectorNodeWithSegment();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+    const penDraggedHandlePositionRef = createPenDraggedHandlePositionRef();
+    const penDraggedHandleIsSnappedRef = createPenDraggedHandleIsSnappedRef();
+
+    // before — Shift held
+    updateVectorHandleDrag(
+      { x: 20, y: 12 },
+      { nodeId, segmentId: 's1', vertexId: 'v1' },
+      { x: 0, y: 0 },
+      IDENTITY_VIEWPORT,
+      true,
+      store.dispatch,
+      store,
+      pendingOutgoingTangentRef,
+      penDraggedHandlePositionRef,
+      penDraggedHandleIsSnappedRef,
+    );
+
+    // result — deflected off the raw (20,12), always flagged snapped under the hard constraint
+    expect(penDraggedHandlePositionRef.current).not.toEqual({ x: 20, y: 12 });
     expect(penDraggedHandleIsSnappedRef.current).toBe(true);
   });
 
@@ -174,6 +205,7 @@ describe('updateVectorHandleDrag', () => {
       { nodeId, segmentId: null, vertexId: 'v1' },
       { x: 0, y: 0 },
       IDENTITY_VIEWPORT,
+      false,
       store.dispatch,
       store,
       pendingOutgoingTangentRef,
@@ -201,6 +233,7 @@ describe('updateVectorHandleDrag', () => {
       { nodeId: 'missing-node', segmentId: 's1', vertexId: 'v1' },
       { x: 0, y: 0 },
       IDENTITY_VIEWPORT,
+      false,
       store.dispatch,
       store,
       pendingOutgoingTangentRef,

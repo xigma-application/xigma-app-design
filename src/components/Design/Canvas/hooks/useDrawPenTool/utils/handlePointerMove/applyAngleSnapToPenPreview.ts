@@ -12,11 +12,12 @@ export const applyAngleSnapToPenPreview = (
   activeVertex: TVectorVertex,
   tangentFromOffset: TVectorTangent,
   zoom: number,
+  isShiftPressed: boolean,
   penPreviewRef: TCanvasRefs['penPreviewRef'],
   hoveredSegmentIdRef: TCanvasRefs['hoveredSegmentIdRef'],
   penHoveredDragArmableVertexRef: TCanvasRefs['penHoveredDragArmableVertexRef'],
 ): TPenPointHoverKind | null => {
-  const { isSnapped, point: snappedPoint } = getAngleSnappedVectorPoint(activeVertex, point, zoom);
+  const { isSnapped, point: snappedPoint } = getAngleSnappedVectorPoint(activeVertex, point, zoom, isShiftPressed);
 
   penPreviewRef.current = { from: activeVertex, isSnapped, tangentFromOffset, to: snappedPoint };
   hoveredSegmentIdRef.current = null;
