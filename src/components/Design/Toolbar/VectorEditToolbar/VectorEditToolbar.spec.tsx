@@ -1,0 +1,105 @@
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
+
+// components
+import VectorEditToolbar from './VectorEditToolbar';
+
+// store
+import { setActiveTool, setVectorEditingNodeId } from 'store/design/slice';
+import { store } from 'store';
+
+// types
+import { ToolName } from 'types/design/enums';
+
+const renderVectorEditToolbar = (): ReturnType<typeof render> =>
+  render(
+    <Provider store={store}>
+      <VectorEditToolbar />
+    </Provider>,
+  );
+
+describe('VectorEditToolbar', () => {
+  beforeEach(() => {
+    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setActiveTool(ToolName.default));
+  });
+
+  it('should render nothing when not in Vector Edit Mode', () => {
+    // before
+    const { container } = renderVectorEditToolbar();
+
+    // result
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should render the toolbar once a node enters Vector Edit Mode', () => {
+    // before
+    act(() => store.dispatch(setVectorEditingNodeId('node-1')));
+
+    renderVectorEditToolbar();
+
+    // result
+    expect(screen.getByText('Move')).toBeInTheDocument();
+    expect(screen.getByText('Lasso')).toBeInTheDocument();
+    expect(screen.getByText('Paint')).toBeInTheDocument();
+    expect(screen.getByText('Bend')).toBeInTheDocument();
+    expect(screen.getByText('Cut')).toBeInTheDocument();
+    expect(screen.getByText('More')).toBeInTheDocument();
+  });
+
+  it('should show Move as active whenever the Pen tool is not the active tool', () => {
+    // before
+    act(() => store.dispatch(setVectorEditingNodeId('node-1')));
+
+    renderVectorEditToolbar();
+
+    // result
+    expect(screen.getByRole('button', { name: 'Move' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('should show no tool as active while the Pen tool is active', () => {
+    // before
+    act(() => {
+      store.dispatch(setVectorEditingNodeId('node-1'));
+      store.dispatch(setActiveTool(ToolName.pen));
+    });
+
+    renderVectorEditToolbar();
+
+    // result
+    expect(screen.getByRole('button', { name: 'Move' })).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('should switch the active tool back to Move when clicking Move, e.g. to interrupt the Pen tool', () => {
+    // before
+    act(() => {
+      store.dispatch(setVectorEditingNodeId('node-1'));
+      store.dispatch(setActiveTool(ToolName.pen));
+    });
+
+    renderVectorEditToolbar();
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'Move' }));
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.default);
+  });
+
+  it('should exit Vector Edit Mode and reset the active tool when clicking the close button', () => {
+    // before
+    act(() => {
+      store.dispatch(setVectorEditingNodeId('node-1'));
+      store.dispatch(setActiveTool(ToolName.pen));
+    });
+
+    renderVectorEditToolbar();
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+
+    // result
+    expect(store.getState().design.vectorEditingNodeId).toBeNull();
+    expect(store.getState().design.activeTool).toBe(ToolName.default);
+  });
+});

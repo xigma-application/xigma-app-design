@@ -12,7 +12,7 @@ import { updateTextEditSelection } from 'store/design/slice';
 import { getEditingOverlay } from '../../../../utils/getEditingOverlay';
 import { getStraightHitAtEvent } from '../getStraightHitAtEvent';
 import { getWordRangeAtIndex } from 'utils/canvas/text/getWordRangeAtIndex';
-import { setEditableSelectionRange } from '../../../../components/TextEditOverlay/utils/setEditableSelectionRange';
+import { setEditableSelectionRange } from '../../../../TextEditOverlay/utils/setEditableSelectionRange';
 
 export const handleDoubleClick = (
   canvas: HTMLCanvasElement,

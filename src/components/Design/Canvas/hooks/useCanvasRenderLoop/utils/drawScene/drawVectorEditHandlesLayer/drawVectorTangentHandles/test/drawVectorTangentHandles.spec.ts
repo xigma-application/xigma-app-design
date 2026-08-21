@@ -172,18 +172,6 @@ describe('drawVectorTangentHandles', () => {
     );
 
     // result
-    expect(drawPenDragHandlePreviewMock).toHaveBeenCalledWith(
-      {},
-      {},
-      {},
-      node,
-      null,
-      null,
-      false,
-      2.5,
-      200,
-      150,
-      { x: 0, y: 0, zoom: 2 },
-    );
+    expect(drawPenDragHandlePreviewMock).toHaveBeenCalledWith({}, {}, {}, node, null, null, false, 2.5, 200, 150, { x: 0, y: 0, zoom: 2 });
   });
 });

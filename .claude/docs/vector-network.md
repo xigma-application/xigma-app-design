@@ -2230,6 +2230,107 @@ pixel-equality-over-exact-pattern approach: a scenario with the raw drag landing
 another shape's vertex row/column, compared against an independent reference run landing exactly on it,
 asserting the two screenshots are byte-identical.
 
+## 41. `VectorEditToolbar` — the floating Move/Lasso/Paint/Bend/Cut panel shown only in Vector Edit Mode
+
+A new floating UI panel, not a new interaction mechanism — asked for directly with two Figma reference
+screenshots and exact SCSS values (spacing/radius/elevation tokens, panel/button styles). Lives at
+`components/Design/Toolbar/VectorEditToolbar/`, nested under the main `Toolbar` (not a
+`DesignPage.tsx`-level sibling) specifically so it can render `bottom: calc(100% + 10px)` — anchored
+10px above `Toolbar`'s own box and horizontally centered against it, rather than hardcoding a pixel
+offset from the viewport bottom that would silently drift if `Toolbar`'s own height/position ever
+changed. Mounted unconditionally by `Toolbar.tsx` as a sibling of `MouseModes`; renders `null` itself
+whenever `selectVectorEditingNodeId` is `null`.
+
+**Global design tokens introduced for this, in a new `src/styles/_variables.scss`** (asked for
+directly — "Najlepiej plik variables.scss" — kept separate from `_theme.scss`, which is specifically
+the dark/light color-map generator, not a home for spacing/radius/shadow constants): `--spacer-2`
+(`8px`), `--radius-medium` (`8px`, not explicitly specified — picked as a reasonable middle value
+between `MouseModes`' hardcoded `5px` button radius and this feature's own `--radius-large` `13px`),
+`--radius-large` (`13px`), `--elevation-200-canvas` (the exact multi-layer shadow value given). No new
+`--color-bg`/`--color-bg-toolbar-selected` color tokens, even though the original ask's CSS pasted
+those names directly — added once, then explicitly removed ("Usunąłem zmienne pod kolor nie ma sensu
+duplikować"): they'd have been pure aliases of the already-existing `--color-neutral-5`/`--color-blue-1`
+(matching `Toolbar`'s own background and the existing blue selected-state color), so the component's
+SCSS references those two directly instead.
+
+**Every button is built from one static config, `TOOLS` (`VectorEditToolbar/constants.ts`), not
+individually hand-written JSX** — asked for directly, twice (first "z const z budować tą listę", then
+"tools do constants.ts i TOOLS" once the const existed but still lived inline in the component):
+```ts
+export type TVectorEditTool = { icon: keyof typeof Icons; labelKey: string; toolName?: ToolName };
+export const TOOLS: TVectorEditTool[] = [
+  { icon: 'MoveVectorTool', labelKey: 'design.toolbar.tool.default', toolName: ToolName.default },
+  { icon: 'LassoTool', labelKey: `${translationNameSpace}.tool.lasso` },
+  { icon: 'PaintTool', labelKey: `${translationNameSpace}.tool.paint` },
+  { icon: 'BendTool', labelKey: `${translationNameSpace}.tool.bend` },
+  { icon: 'CutTool', labelKey: `${translationNameSpace}.tool.cut` },
+];
+```
+The optional `toolName` field is the load-bearing bit: only Move carries one (`ToolName.default`, the
+one real, pre-existing tool this whole panel reduces to right now), so it's the only entry rendered as
+clickable/highlightable — Lasso/Paint/Bend/Cut render through the exact same `renderTool` path but come
+out inert (no `onClick`, `aria-pressed` always `false`), since none of them has a `ToolName` to drive
+yet ("narazie niektóre narzędzie nie mamy więc dodamy później"). Adding a real tool later is just
+filling in that field — no branching to add. `More` and `Close` are deliberately **not** in `TOOLS` and
+stay hand-written in the component ("tutaj jest close wiec pewnie będzie indywidualny case") — `More`
+has no dropdown menu yet (nothing to populate it with) and reverses icon/label order from every other
+button; `Close` has real behavior (see below) but no label/active-state concept at all. Icon size is a
+flat `24px` across every `TOOLS`-driven button, asked for directly ("Icon size 24px dla kazdej").
+
+**Active/inactive derivation, asked for directly: "Generalnie jeśli jest aktywny pen to żadne narzędzie
+nie jest aktywne. Jeśli przerwiemy pen domyślnie opcja move... która już jest [aktywna]."** Move's
+`isActive` is `tool.toolName !== undefined && activeTool !== ToolName.pen` — deliberately phrased as
+"not Pen" rather than "equals default", since Move is the *only* tool with a `toolName` today and is
+meant to read as active for literally every non-Pen state, matching "Move is already the implicit
+default the moment Pen stops being active" rather than requiring an exact `ToolName.default` match that
+would need revisiting the instant a second real tool joins `TOOLS`.
+
+**All the dispatch/selector logic — `renderTool`, `handleClose`, exposing `vectorEditingNodeId` —
+lives in a dedicated hook, `hooks/useVectorEditToolbar.tsx`, not inline in the component** (asked for
+directly, twice: first `renderTool` into `useCallback` to stop it being redefined every render with no
+memoization, then the whole `handleClose` + `renderTool` pair "do hooka" for full separation).
+`VectorEditToolbar.tsx` itself is now pure JSX consuming the hook's return value — no `useAppDispatch`/
+`useAppSelector` calls of its own. One Rules-of-Hooks gotcha from the extraction: the component's own
+early-return (`if (!vectorEditingNodeId) return null`) has to come **after** the `useVectorEditToolbar()`
+call, not before — hooks can never run conditionally, and the hook call was originally interleaved with
+the early-return during the incremental `useCallback` step, which briefly violated that.
+
+**`Close` (X) is a hard, unconditional exit — not the 3-stage Escape from §"Pen/vector" in
+`ROADMAP.md`'s Etap 6.** `handleClose` dispatches both `setActiveTool(ToolName.default)` and
+`setVectorEditingNodeId(null)` in one go, regardless of whatever stage Escape would currently be on —
+clicking the panel's own close button is an explicit single action, so it collapses what Escape does
+over up to three separate presses into one.
+
+**Icon assets already existed on disk** (`move-vector-tool.svg`, `lasso-tool.svg`, `paint-tool.svg`,
+`bend-tool.svg`, `cut-tool.svg`) but weren't registered in the shared icon barrel yet — added to
+`assets/svg.ts`'s import list and `Icons` export object, both alphabetically sorted per that file's own
+convention. New i18n keys added to both `en.json`/`pl.json`: `design.toolbar.vectorEditToolbar.*`
+(nested under `design.toolbar.*`, matching the component's physical nesting under `Toolbar/` — nudged
+into place after the component itself got moved there, see below) for Lasso/Paint/Bend/Cut/More, plus a
+new standalone `common.close` reused by any future icon-only close button elsewhere. Move's own label
+reuses the *existing* `design.toolbar.tool.default` key rather than adding a duplicate — same tool,
+same name, no reason for two keys.
+
+**Landed mid-refactor: a separate, concurrent cleanup removed a redundant `components/` folder segment
+throughout `Canvas/` (`Canvas/components/Comment/...` → `Canvas/Comment/...`,
+`Canvas/components/TextEditOverlay/...` → `Canvas/TextEditOverlay/...`), and moved this feature's own
+folder from a `DesignPage.tsx`-level `components/Design/VectorEditToolbar/` to its final
+`components/Design/Toolbar/VectorEditToolbar/` nested location — both **not** self-contained to this
+feature ("Nigdy nie twórz components folder to trochę przesada" / "Takie zagnieżdżanie" was a
+repo-wide instruction, not scoped to this one component).** The moves briefly broke several relative
+imports that hadn't been updated for the new depth — two TS import paths (`CommentDraftInput.tsx`'s
+import of `CommentDraftFooter`, `CommentDraftFooter.tsx`'s import of `useSubmitCommentDraft`) and two
+SCSS `@use` paths (`comment-pin.module.scss`, `comment-draft-input.module.scss`, both pointing at
+`styles/mixins/`) — each simply had one-to-two extra `../` segments left over from the deeper
+pre-cleanup structure. Fixed by recounting the actual directory depth from each file's new location
+rather than guessing; a repo-wide scan (both a clean `tsc -p tsconfig.app.json --noEmit` run and a
+Python script resolving every `@use`/`@import '../...'` path in every `.scss` file against what
+actually exists on disk) confirmed no other file was left with a stale relative path. `VectorEditToolbar`'s
+own `translationNameSpace` computation (`` `${toolbarNamespace}.vectorEditToolbar` ``, importing
+`Toolbar/constants.ts`'s own namespace rather than `Design/constants.ts`'s root one) had to be adjusted
+in the same move, since the relative import that used to reach the `design`-root namespace directly
+now resolves one level shallower.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

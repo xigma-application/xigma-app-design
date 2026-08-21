@@ -2,7 +2,7 @@ import cx from 'classnames';
 import { FC } from 'react';
 
 // hooks
-import { useSubmitCommentDraft } from '../../hooks/useSubmitCommentDraft';
+import { useSubmitCommentDraft } from '../hooks/useSubmitCommentDraft';
 
 // shared
 import Icon from 'shared/UI/Icon/Icon';

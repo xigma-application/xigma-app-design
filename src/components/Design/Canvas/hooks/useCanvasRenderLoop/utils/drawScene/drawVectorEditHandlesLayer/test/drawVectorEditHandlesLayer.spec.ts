@@ -311,23 +311,10 @@ describe('drawVectorEditHandlesLayer', () => {
   it('should draw a snapped tangent handle line in the angle-snap orange, overriding the selected-blue it would otherwise get', () => {
     // before — the same handle is both selected (drag-armed) and currently snapped, matching a real
     // in-progress angle-snapped drag
-    call(
-      vectorNode.id,
-      [],
-      null,
-      null,
-      null,
-      null,
-      [{ end: 'start', segmentId: 's1' }],
-      null,
-      null,
-      [],
-      null,
-      [],
-      [],
-      null,
-      { end: 'start', segmentId: 's1' },
-    );
+    call(vectorNode.id, [], null, null, null, null, [{ end: 'start', segmentId: 's1' }], null, null, [], null, [], [], null, {
+      end: 'start',
+      segmentId: 's1',
+    });
 
     // result
     expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 5, y1: 0, y2: 0 }, '#cd4422', 1, 200, 150, IDENTITY_VIEWPORT);

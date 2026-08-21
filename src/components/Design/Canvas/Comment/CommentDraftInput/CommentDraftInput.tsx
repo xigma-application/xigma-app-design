@@ -3,7 +3,7 @@ import { FC, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import CommentDraftFooter from './components/CommentDraftFooter/CommentDraftFooter';
+import CommentDraftFooter from './CommentDraftFooter/CommentDraftFooter';
 
 // hooks
 import { useCommentDraftAutoFocus } from './hooks/useCommentDraftAutoFocus';
@@ -14,7 +14,7 @@ import { useCommentDraftValue } from './hooks/useCommentDraftValue';
 import { useSubmitCommentDraft } from './hooks/useSubmitCommentDraft';
 
 // others
-import { translationNameSpace } from '../../constants';
+import { translationNameSpace } from '../constants';
 
 // styles
 import styles from './comment-draft-input.module.scss';

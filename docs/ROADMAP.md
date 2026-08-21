@@ -1133,6 +1133,20 @@ Drobniejsze, ale zauważalne różnice względem Figmy, niepowiązane z żadnym 
       komentarza celowo wyłączone na razie (hook/reducer zostały, ale nic ich nie wywołuje).
       Pełny opis: `.claude/docs/design-tool-architecture.md`, `.claude/docs/design-store-architecture.md`
       ("Comment state"), testy: `e2e/pages/design/comment.spec.ts`
+- [x] **`VectorEditToolbar`** — pływający panel narzędzi (Move/Lasso/Paint/Bend/Cut + More/X),
+      pojawia się tylko w Vector Edit Mode, 10px nad głównym `Toolbar` (`bottom: calc(100% + 10px)`,
+      wyśrodkowany względem jego szerokości — renderowany jako dziecko `Toolbar.tsx`, nie osobno w
+      `DesignPage.tsx`). Lista przycisków budowana z jednego `const TOOLS` (`VectorEditToolbar/
+      constants.ts`) i mapowana przez `renderTool` — na razie tylko Move ma realne działanie
+      (`toolName: ToolName.default`, aktywne zawsze gdy Pen nie jest aktywnym narzędziem; kliknięcie
+      przełącza z powrotem na Move, przerywając Pen), reszta (Lasso/Paint/Bend/Cut) renderuje się
+      jako nieaktywne placeholdery bez własnego `ToolName` — dojdą później. X zamyka Vector Edit Mode
+      wprost (`setVectorEditingNodeId(null)` + reset toola), nie przez 3-stopniowe Escape z Etapu 6.
+      Cała logika (dispatch, `renderTool`, `handleClose`) wydzielona do `hooks/useVectorEditToolbar.tsx`
+      — komponent to czysty JSX. Nowe tokeny SCSS (`src/styles/_variables.scss`: `--spacer-2`,
+      `--radius-medium`, `--radius-large`, `--elevation-200-canvas`) — świadomie bez nowych
+      `--color-bg`/`--color-bg-toolbar-selected`, bo dublowałyby już istniejące `--color-neutral-5`/
+      `--color-blue-1`.
 - [ ] menu kontekstowe (prawy klik) na node'ach i na pustym canvasie — Copy/Paste, Duplicate,
       Bring to front/Send to back, Delete itd. — dziś nie istnieje w ogóle
 - [ ] kontrolka zoomu w rogu canvasu (aktualny % + dropdown: Zoom to fit / Zoom to selection /

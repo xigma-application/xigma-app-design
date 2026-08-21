@@ -10,6 +10,7 @@ import AspectRatio from './svg/aspect-ratio.svg?react';
 import AutoHeight from './svg/auto-height.svg?react';
 import AutoLayout from './svg/auto-layout.svg?react';
 import AutoWidth from './svg/auto-width.svg?react';
+import BendTool from './svg/bend-tool.svg?react';
 import BorderRadiusB from './svg/border-radius-b.svg?react';
 import BorderRadiusL from './svg/border-radius-l.svg?react';
 import BorderRadiusR from './svg/border-radius-r.svg?react';
@@ -27,6 +28,7 @@ import Columns from './svg/columns.svg?react';
 import CommentTool from './svg/comment-tool.svg?react';
 import Component from './svg/component.svg?react';
 import Corners from './svg/corners.svg?react';
+import CutTool from './svg/cut-tool.svg?react';
 import Detached from './svg/detached.svg?react';
 import DropEmpty from './svg/drop-empty.svg?react';
 import DropFilled from './svg/drop-filled.svg?react';
@@ -52,6 +54,7 @@ import HeightRestricted from './svg/height-restricted.svg?react';
 import HtmlTag from './svg/html-tag.svg?react';
 import IndividualInsets from './svg/individual-insets.svg?react';
 import InputsConnector from './svg/inputs-connector.svg?react';
+import LassoTool from './svg/lasso-tool.svg?react';
 import LineTool from './svg/line-tool.svg?react';
 import Logo from './svg/logo.svg?react';
 import MarginB from './svg/margin-b.svg?react';
@@ -68,6 +71,7 @@ import Minus from './svg/minus.svg?react';
 import MoreOptions from './svg/more-options.svg?react';
 import MoveHand from './svg/move-hand.svg?react';
 import MoveTool from './svg/move-tool.svg?react';
+import MoveVectorTool from './svg/move-vector-tool.svg?react';
 import Opacity from './svg/opacity.svg?react';
 import PaddingB from './svg/padding-b.svg?react';
 import PaddingL from './svg/padding-l.svg?react';
@@ -75,6 +79,7 @@ import PaddingLR from './svg/padding-lr.svg?react';
 import PaddingR from './svg/padding-r.svg?react';
 import PaddingT from './svg/padding-t.svg?react';
 import PaddingTB from './svg/padding-tb.svg?react';
+import PaintTool from './svg/paint-tool.svg?react';
 import PenTool from './svg/pen-tool.svg?react';
 import PencilTool from './svg/pencil-tool.svg?react';
 import Percentage from './svg/percentage.svg?react';
@@ -112,6 +117,7 @@ export const Icons = {
   AutoHeight,
   AutoLayout,
   AutoWidth,
+  BendTool,
   BorderRadiusB,
   BorderRadiusL,
   BorderRadiusR,
@@ -129,6 +135,7 @@ export const Icons = {
   CommentTool,
   Component,
   Corners,
+  CutTool,
   Detached,
   DropEmpty,
   DropFilled,
@@ -154,6 +161,7 @@ export const Icons = {
   HtmlTag,
   IndividualInsets,
   InputsConnector,
+  LassoTool,
   LineTool,
   Logo,
   MarginB,
@@ -170,6 +178,7 @@ export const Icons = {
   MoreOptions,
   MoveHand,
   MoveTool,
+  MoveVectorTool,
   Opacity,
   PaddingB,
   PaddingL,
@@ -177,6 +186,7 @@ export const Icons = {
   PaddingR,
   PaddingT,
   PaddingTB,
+  PaintTool,
   PenTool,
   PencilTool,
   Percentage,

@@ -62,19 +62,20 @@ const IMAGE_CONTEXT: TImageRenderContext = {
 
 const buildNode = (
   overrides: Partial<Exclude<TBoxSceneNode, TPathNode | TPolygonNode | TSectionNode | TStarNode | TMediaNode | TTextNode>>,
-): TSceneNode => ({
-  fill: '#ff0000',
-  height: 10,
-  id: 'node',
-  name: 'Frame',
-  parentId: null,
-  rotation: 0,
-  type: NodeType.frame,
-  width: 10,
-  x: 0,
-  y: 0,
-  ...overrides,
-}) as TSceneNode;
+): TSceneNode =>
+  ({
+    fill: '#ff0000',
+    height: 10,
+    id: 'node',
+    name: 'Frame',
+    parentId: null,
+    rotation: 0,
+    type: NodeType.frame,
+    width: 10,
+    x: 0,
+    y: 0,
+    ...overrides,
+  }) as TSceneNode;
 
 describe('drawSceneNodes', () => {
   it('should draw nothing when there are no nodes', () => {

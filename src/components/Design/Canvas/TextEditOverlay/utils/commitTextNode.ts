@@ -1,5 +1,5 @@
 // others
-import { TEXT_FILL, TEXT_FONT_FAMILY, TEXT_FONT_SIZE, TEXT_NAME } from '../../../constants';
+import { TEXT_FILL, TEXT_FONT_FAMILY, TEXT_FONT_SIZE, TEXT_NAME } from '../../constants';
 
 // store
 import { addNode, updateNode } from 'store/design/slice';

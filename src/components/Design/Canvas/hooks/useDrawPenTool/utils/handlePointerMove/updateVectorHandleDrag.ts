@@ -35,13 +35,11 @@ export const updateVectorHandleDrag = (
     const node = getVectorEditingNode(nodes, dragOrigin.nodeId);
 
     if (node) {
-      const { guide, isAngleSnapped, point: snappedPoint } = applyVectorPointSnapping(
-        dragStart,
-        point,
-        viewport.zoom,
-        isShiftPressed,
-        nodes,
-      );
+      const {
+        guide,
+        isAngleSnapped,
+        point: snappedPoint,
+      } = applyVectorPointSnapping(dragStart, point, viewport.zoom, isShiftPressed, nodes);
       const dx = snappedPoint.x - dragStart.x;
       const dy = snappedPoint.y - dragStart.y;
       const vertexHandleModes = { ...node.vertexHandleModes, [dragOrigin.vertexId]: 'symmetric' as const };

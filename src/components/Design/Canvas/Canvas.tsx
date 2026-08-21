@@ -2,8 +2,8 @@ import cx from 'classnames';
 import { FC } from 'react';
 
 // components
-import Comment from './components/Comment/Comment';
-import TextEditOverlay from './components/TextEditOverlay/TextEditOverlay';
+import Comment from './Comment/Comment';
+import TextEditOverlay from './TextEditOverlay/TextEditOverlay';
 
 // hooks
 import { useCanvasDragPan } from './hooks/useCanvasDragPan/useCanvasDragPan';

@@ -7,7 +7,7 @@ import { updateTextEditSelection } from 'store/design/slice';
 // utils
 import { getEditingOverlay } from '../../../../utils/getEditingOverlay';
 import { getStraightHitAtEvent } from '../getStraightHitAtEvent';
-import { setEditableSelectionRange } from '../../../../components/TextEditOverlay/utils/setEditableSelectionRange';
+import { setEditableSelectionRange } from '../../../../TextEditOverlay/utils/setEditableSelectionRange';
 
 export const handlePointerMove = (
   canvas: HTMLCanvasElement,

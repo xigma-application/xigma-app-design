@@ -2,7 +2,7 @@ import { FC, useRef } from 'react';
 
 // others
 import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
-import { TEXT_FONT_FAMILY, TEXT_FONT_SIZE } from '../../constants';
+import { TEXT_FONT_FAMILY, TEXT_FONT_SIZE } from '../constants';
 
 // hooks
 import { useBlockShortcutPropagation } from './hooks/useBlockShortcutPropagation';
@@ -19,7 +19,7 @@ import { useAppSelector } from 'store';
 import styles from './TextEditOverlay.module.scss';
 
 // utils
-import { worldToScreen } from '../../utils/worldToScreen';
+import { worldToScreen } from '../utils/worldToScreen';
 
 const TextEditOverlay: FC = () => {
   const box = useAppSelector(selectEditingTextBox);

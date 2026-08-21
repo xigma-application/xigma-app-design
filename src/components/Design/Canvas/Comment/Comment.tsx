@@ -1,15 +1,15 @@
 import { FC } from 'react';
 
 // components
-import CommentDraftInput from './components/CommentDraftInput/CommentDraftInput';
-import CommentPin from './components/CommentPin/CommentPin';
+import CommentDraftInput from './CommentDraftInput/CommentDraftInput';
+import CommentPin from './CommentPin/CommentPin';
 
 // store
 import { selectCommentDraftPosition, selectComments, selectViewport } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // utils
-import { worldToScreen } from '../../utils/worldToScreen';
+import { worldToScreen } from '../utils/worldToScreen';
 
 const Comment: FC = () => {
   const comments = useAppSelector(selectComments);

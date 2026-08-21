@@ -38,19 +38,20 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const buildNode = (
   overrides: Partial<Exclude<TBoxSceneNode, TPathNode | TPolygonNode | TSectionNode | TStarNode | TMediaNode | TTextNode>>,
-): TSceneNode => ({
-  fill: '#ff0000',
-  height: 10,
-  id: 'node',
-  name: 'Frame',
-  parentId: null,
-  rotation: 0,
-  type: NodeType.frame,
-  width: 10,
-  x: 0,
-  y: 0,
-  ...overrides,
-}) as TSceneNode;
+): TSceneNode =>
+  ({
+    fill: '#ff0000',
+    height: 10,
+    id: 'node',
+    name: 'Frame',
+    parentId: null,
+    rotation: 0,
+    type: NodeType.frame,
+    width: 10,
+    x: 0,
+    y: 0,
+    ...overrides,
+  }) as TSceneNode;
 
 describe('drawHoverOutline', () => {
   it('should draw nothing when no node is hovered', () => {

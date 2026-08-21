@@ -42,16 +42,7 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
   const onPointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
     penPreviewRef.current = null;
-    handlePointerDown(
-      canvas,
-      event,
-      dispatch,
-      appStore,
-      dragOriginRef,
-      dragStartRef,
-      pendingOutgoingTangentRef,
-      vectorAlignmentGuideRef,
-    );
+    handlePointerDown(canvas, event, dispatch, appStore, dragOriginRef, dragStartRef, pendingOutgoingTangentRef, vectorAlignmentGuideRef);
   };
 
   const onPointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void => {

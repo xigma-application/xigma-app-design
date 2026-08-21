@@ -7,19 +7,20 @@ import { getCollidedNodes } from '../getCollidedNodes';
 
 const buildNode = (
   overrides: Partial<Exclude<TBoxSceneNode, TPathNode | TPolygonNode | TSectionNode | TStarNode | TMediaNode | TTextNode>>,
-): TSceneNode => ({
-  fill: '#ff0000',
-  height: 10,
-  id: 'node',
-  name: 'Frame',
-  parentId: null,
-  rotation: 0,
-  type: NodeType.frame,
-  width: 10,
-  x: 0,
-  y: 0,
-  ...overrides,
-}) as TSceneNode;
+): TSceneNode =>
+  ({
+    fill: '#ff0000',
+    height: 10,
+    id: 'node',
+    name: 'Frame',
+    parentId: null,
+    rotation: 0,
+    type: NodeType.frame,
+    width: 10,
+    x: 0,
+    y: 0,
+    ...overrides,
+  }) as TSceneNode;
 
 describe('getCollidedNodes', () => {
   it('should return a node the area only partially overlaps, when full containment is not required', () => {

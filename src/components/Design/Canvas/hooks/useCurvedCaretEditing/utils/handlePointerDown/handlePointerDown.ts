@@ -14,7 +14,7 @@ import { getEditingOverlay } from '../../../../utils/getEditingOverlay';
 import { getPathTextHandlePoint } from '../../../../utils/getPathTextHandlePoint';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { screenToWorld } from '../../../../utils/screenToWorld';
-import { setEditableSelectionRange } from '../../../../components/TextEditOverlay/utils/setEditableSelectionRange';
+import { setEditableSelectionRange } from '../../../../TextEditOverlay/utils/setEditableSelectionRange';
 
 export const handlePointerDown = (
   canvas: HTMLCanvasElement,
