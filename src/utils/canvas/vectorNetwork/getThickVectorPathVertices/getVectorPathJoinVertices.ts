@@ -31,9 +31,6 @@ const getBranchJoinVertices = (point: TPoint, endpoints: TVertexEndpoint[], half
     const nextLeft = getAwayLeftOffset(next);
     const previousOffset = { x: -currentLeft.x, y: -currentLeft.y };
 
-    // only the one wedge left uncovered by every other arm's own quad — the widest, and only if it's
-    // reflex (>180deg) — needs a real miter tip; every other wedge already sits inside another arm's
-    // solid fill, so a plain bevel (no outward extension) avoids spiking past the true silhouette
     if (index === widestGapIndex && gaps[index] > Math.PI) {
       return getPolylineJoinVertices(point, previousOffset, nextLeft, halfWidth);
     }
