@@ -1,12 +1,16 @@
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { applyAngleSnapToPenPreview } from '../applyAngleSnapToPenPreview';
 
+const nodes: Record<string, TSceneNode> = {};
+
 const createPenPreviewRef = (): TCanvasRefs['penPreviewRef'] => ({ current: null });
 const createHoveredSegmentIdRef = (): TCanvasRefs['hoveredSegmentIdRef'] => ({ current: 'stale-segment-id' });
 const createPenHoveredDragArmableVertexRef = (): TCanvasRefs['penHoveredDragArmableVertexRef'] => ({ current: true });
+const createVectorAlignmentGuideRef = (): TCanvasRefs['vectorAlignmentGuideRef'] => ({ current: null });
 
 describe('applyAngleSnapToPenPreview', () => {
   it('should preview the raw pointer position, unsnapped, when the angle is well outside the tolerance', () => {
@@ -22,9 +26,11 @@ describe('applyAngleSnapToPenPreview', () => {
       null,
       1,
       false,
+      nodes,
       penPreviewRef,
       hoveredSegmentIdRef,
       penHoveredDragArmableVertexRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -50,9 +56,11 @@ describe('applyAngleSnapToPenPreview', () => {
       null,
       1,
       false,
+      nodes,
       penPreviewRef,
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -75,9 +83,11 @@ describe('applyAngleSnapToPenPreview', () => {
       { x: 5, y: 5 },
       1,
       false,
+      nodes,
       penPreviewRef,
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -95,9 +105,11 @@ describe('applyAngleSnapToPenPreview', () => {
       null,
       10,
       false,
+      nodes,
       penPreviewRef,
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -115,9 +127,11 @@ describe('applyAngleSnapToPenPreview', () => {
       null,
       1,
       true,
+      nodes,
       penPreviewRef,
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
+      createVectorAlignmentGuideRef(),
     );
 
     // result — a 45deg diagonal drag already lands on a 15deg increment, so the preview commits right

@@ -1109,3 +1109,173 @@ test('pressing Shift immediately re-evaluates an in-progress existing-handle dra
   // result — the live handle already snapped just from the key press
   expect(afterShift.equals(beforeShift)).toBe(false);
 });
+
+test('dragging an existing tangent handle near a vertex on a completely separate shape snaps it onto that alignment guide, pixel-identical to dragging exactly there', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+  const region = { height: 300, width: 400, x: 650, y: 250 };
+
+  // mock — shape A is an unrelated short vertical line at x=700 (the alignment candidate); shape B:
+  // v1(900,300) -> v2(1050,300), v2 dragged out — handle sits at (1050,350)
+  await designPage.goto('e2e-test-vector-edit-handle-alignment-guide');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawVectorPath([
+    { x: 700, y: 300 },
+    { x: 700, y: 500 },
+  ]);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+
+  await designPage.selectTool('pen');
+  await designPage.click(900, 300); // v1
+  await designPage.dragVectorPoint(1050, 300, 1050, 250); // v2, dragged — handle now sits at (1050, 350)
+  await designPage.selectTool('default');
+
+  await designPage.dragVectorPoint(1050, 350, 703, 400); // handle dragged a couple of px off shape A's x=700 column
+  const snapped = await page.screenshot({ clip: region });
+
+  await designPage.goto('e2e-test-vector-edit-handle-alignment-guide-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawVectorPath([
+    { x: 700, y: 300 },
+    { x: 700, y: 500 },
+  ]);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+
+  await designPage.selectTool('pen');
+  await designPage.click(900, 300);
+  await designPage.dragVectorPoint(1050, 300, 1050, 250);
+  await designPage.selectTool('default');
+
+  await designPage.dragVectorPoint(1050, 350, 700, 400); // exactly on shape A's column — where the guide should have snapped
+  const exact = await page.screenshot({ clip: region });
+
+  expect(snapped.equals(exact)).toBe(true);
+});
+
+test('dragging an existing single vertex near a vertex on a completely separate shape snaps it onto that alignment guide, pixel-identical to dragging exactly there', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+  const region = { height: 400, width: 500, x: 650, y: 250 };
+
+  // mock — shape A is an unrelated short vertical line at x=700 (the alignment candidate); shape B is
+  // a plain 2-point line, v1 later dragged a couple of px off shape A's x=700 column
+  await designPage.goto('e2e-test-vector-edit-vertex-alignment-guide');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawVectorPath([
+    { x: 700, y: 300 },
+    { x: 700, y: 500 },
+  ]);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+
+  await designPage.drawVectorPath([
+    { x: 900, y: 300 },
+    { x: 1050, y: 300 },
+  ]);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+  await designPage.selectTool('default');
+
+  await designPage.dragVectorPoint(900, 300, 703, 600); // v1 dragged a couple of px off shape A's x=700 column
+  const snapped = await page.screenshot({ clip: region });
+
+  await designPage.goto('e2e-test-vector-edit-vertex-alignment-guide-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawVectorPath([
+    { x: 700, y: 300 },
+    { x: 700, y: 500 },
+  ]);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+
+  await designPage.drawVectorPath([
+    { x: 900, y: 300 },
+    { x: 1050, y: 300 },
+  ]);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+  await designPage.selectTool('default');
+
+  await designPage.dragVectorPoint(900, 300, 700, 600); // exactly on shape A's column
+  const exact = await page.screenshot({ clip: region });
+
+  expect(snapped.equals(exact)).toBe(true);
+});
+
+test('box-dragging several selected vertices together snaps the whole group by the same correction once any one of them touches an alignment guide, pixel-identical to dragging exactly onto it', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+  const region = { height: 500, width: 600, x: 600, y: 250 };
+
+  // mock — shape A is an unrelated short vertical line at x=700 (the alignment candidate); shape B is
+  // a real (non-degenerate) triangle, its v1 and v3 corners multi-selected and dragged together as a
+  // group — only v1 ends up near shape A's column, so the correction that snaps it there must carry v3
+  // (and the whole group) along by the exact same amount
+  await designPage.goto('e2e-test-vector-edit-group-alignment-guide');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawVectorPath([
+    { x: 700, y: 300 },
+    { x: 700, y: 500 },
+  ]);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+
+  await designPage.drawVectorPath([
+    { x: 900, y: 300 },
+    { x: 1000, y: 220 },
+    { x: 1050, y: 450 },
+  ]);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+  await designPage.selectTool('default');
+
+  await designPage.click(900, 300); // select v1
+  await designPage.click(1050, 450, { shift: true }); // add v3 — 2-point box
+
+  // press inside the box's own interior (not on any dot) and drag by (-197,50): v1 raw lands at
+  // (703,350), a couple of px off shape A's x=700 column
+  await designPage.pointerDown(975, 375);
+  await designPage.pointerMove(778, 425);
+  await designPage.pointerUp();
+  const snapped = await page.screenshot({ clip: region });
+
+  await designPage.goto('e2e-test-vector-edit-group-alignment-guide-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawVectorPath([
+    { x: 700, y: 300 },
+    { x: 700, y: 500 },
+  ]);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+
+  await designPage.drawVectorPath([
+    { x: 900, y: 300 },
+    { x: 1000, y: 220 },
+    { x: 1050, y: 450 },
+  ]);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+  await designPage.selectTool('default');
+
+  await designPage.click(900, 300);
+  await designPage.click(1050, 450, { shift: true });
+
+  // exactly (-200,50): v1 lands exactly on shape A's x=700 column
+  await designPage.pointerDown(975, 375);
+  await designPage.pointerMove(775, 425);
+  await designPage.pointerUp();
+  const exact = await page.screenshot({ clip: region });
+
+  expect(snapped.equals(exact)).toBe(true);
+});

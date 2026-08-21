@@ -29,6 +29,7 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
     penHoveredDragArmableVertexRef,
     penNewVertexPreviewRef,
     penPreviewRef,
+    vectorAlignmentGuideRef,
   } = refs;
   const activeTool = useAppSelector(selectActiveTool);
   const dispatch = useAppDispatch();
@@ -41,7 +42,16 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
   const onPointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
     penPreviewRef.current = null;
-    handlePointerDown(canvas, event, dispatch, appStore, dragOriginRef, dragStartRef, pendingOutgoingTangentRef);
+    handlePointerDown(
+      canvas,
+      event,
+      dispatch,
+      appStore,
+      dragOriginRef,
+      dragStartRef,
+      pendingOutgoingTangentRef,
+      vectorAlignmentGuideRef,
+    );
   };
 
   const onPointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
@@ -60,16 +70,19 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
       penDraggedHandleIsSnappedRef,
       hoveredSegmentIdRef,
       penHoveredDragArmableVertexRef,
+      vectorAlignmentGuideRef,
       setClassName,
     );
   };
 
   const onPointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     handlePointerUp(canvas, event, dispatch, dragOriginRef, dragStartRef, penDraggedHandlePositionRef, penDraggedHandleIsSnappedRef);
+    vectorAlignmentGuideRef.current = null;
   };
 
   const onPointerCancel = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     handlePointerCancel(canvas, event, dispatch, dragOriginRef, dragStartRef, penDraggedHandlePositionRef, penDraggedHandleIsSnappedRef);
+    vectorAlignmentGuideRef.current = null;
   };
 
   const onShiftKeyChange = (canvas: HTMLCanvasElement, event: KeyboardEvent): void => {
@@ -113,6 +126,7 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
         hoveredSegmentIdRef.current = null;
         penHoveredDragArmableVertexRef.current = false;
         lastPointerClientPositionRef.current = null;
+        vectorAlignmentGuideRef.current = null;
       };
     }
   }, [
@@ -128,5 +142,6 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
     penNewVertexPreviewRef,
     penPreviewRef,
     setClassName,
+    vectorAlignmentGuideRef,
   ]);
 };

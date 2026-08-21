@@ -56,10 +56,10 @@ export const handlePointerMove = (
   continueEllipseArcRotateDrag(canvas, event, dispatch, canvasRefs.ellipseArcRotateDragRef);
   continueEllipseArcRatioDrag(canvas, event, dispatch, canvasRefs.ellipseArcRatioDragRef);
   continueMarqueeDrag(canvas, event, dispatch, selectionRefs.marqueeStartRef, canvasRefs.marqueeRef);
-  continueVectorVertexDrag(canvas, event, dispatch, selectionRefs.vectorVertexDragRef, setClassName);
+  continueVectorVertexDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   resolveVectorCornerHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs);
-  continueVectorHandleDrag(canvas, event, dispatch, selectionRefs.vectorHandleDragRef, canvasRefs.snappedVectorHandleRef, setClassName);
-  continueVectorMultiDrag(canvas, event, dispatch, canvasRefs.vectorMultiDragRef, canvasRefs.vectorMultiSelectBoxRef, setClassName);
+  continueVectorHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
+  continueVectorMultiDrag(canvas, event, dispatch, canvasRefs, setClassName);
   continueVectorMultiSelectResizeDrag(canvas, event, dispatch, canvasRefs.vectorMultiSelectResizeDragRef);
   continueVectorMultiSelectRotateDrag(canvas, event, dispatch, canvasRefs.vectorMultiSelectRotateDragRef);
   continueVectorSegmentBendDrag(canvas, event, dispatch, canvasRefs, selectionRefs.vectorSegmentBendDragRef, setClassName);

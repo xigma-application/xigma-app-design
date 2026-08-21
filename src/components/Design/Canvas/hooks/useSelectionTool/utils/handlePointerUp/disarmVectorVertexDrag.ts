@@ -1,17 +1,18 @@
-import { RefObject } from 'react';
-
 // types
-import { TVectorVertexDragState } from 'types/design/selectionTool/types';
+import { TCanvasRefs } from 'types/design/canvas/types';
+import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 export const disarmVectorVertexDrag = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
-  vectorVertexDragRef: RefObject<TVectorVertexDragState | null>,
+  canvasRefs: TCanvasRefs,
+  selectionRefs: TSelectionToolRefs,
   setClassName: (className: string | null) => void,
 ): void => {
-  if (vectorVertexDragRef.current) {
+  if (selectionRefs.vectorVertexDragRef.current) {
     canvas.releasePointerCapture(event.pointerId);
-    vectorVertexDragRef.current = null;
+    selectionRefs.vectorVertexDragRef.current = null;
+    canvasRefs.vectorAlignmentGuideRef.current = null;
     setClassName(null);
   }
 };

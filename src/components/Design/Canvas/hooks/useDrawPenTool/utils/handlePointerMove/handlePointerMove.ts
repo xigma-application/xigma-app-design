@@ -46,6 +46,7 @@ export const handlePointerMove = (
   penDraggedHandleIsSnappedRef: TCanvasRefs['penDraggedHandleIsSnappedRef'],
   hoveredSegmentIdRef: TCanvasRefs['hoveredSegmentIdRef'],
   penHoveredDragArmableVertexRef: TCanvasRefs['penHoveredDragArmableVertexRef'],
+  vectorAlignmentGuideRef: TCanvasRefs['vectorAlignmentGuideRef'],
   setClassName: (className: string | null) => void,
 ): void => {
   const state = appStore.getState();
@@ -66,6 +67,7 @@ export const handlePointerMove = (
       pendingOutgoingTangentRef,
       penDraggedHandlePositionRef,
       penDraggedHandleIsSnappedRef,
+      vectorAlignmentGuideRef,
     );
     hoveredSegmentIdRef.current = null;
     setClassName('pen');
@@ -81,6 +83,7 @@ export const handlePointerMove = (
       const hoverKind = updateVectorPenPreview(
         point,
         node,
+        state.design.nodes,
         penActiveVertexId,
         viewport,
         isShiftPressed,
@@ -88,6 +91,7 @@ export const handlePointerMove = (
         pendingOutgoingTangentRef,
         hoveredSegmentIdRef,
         penHoveredDragArmableVertexRef,
+        vectorAlignmentGuideRef,
       );
 
       penNewVertexPreviewRef.current = null;
@@ -103,6 +107,7 @@ export const handlePointerMove = (
       );
 
       penPreviewRef.current = null;
+      vectorAlignmentGuideRef.current = null;
       setClassName(getPenHoverCursorClassName(hoverKind));
     }
   }

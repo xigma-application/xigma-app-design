@@ -6,6 +6,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPenDragOrigin, TPendingOutgoingTangent } from '../../../types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
@@ -28,6 +29,7 @@ const pointerEvent = (x: number, y: number, options: Partial<PointerEventInit> =
 const createDragOriginRef = (): RefObject<TPenDragOrigin | null> => ({ current: null });
 const createDragStartRef = (): RefObject<TPoint | null> => ({ current: null });
 const createPendingOutgoingTangentRef = (): RefObject<TPendingOutgoingTangent | null> => ({ current: null });
+const createVectorAlignmentGuideRef = (): TCanvasRefs['vectorAlignmentGuideRef'] => ({ current: null });
 
 const addVectorNode = (): string => {
   store.dispatch(
@@ -70,6 +72,7 @@ describe('handlePointerDown', () => {
       createDragOriginRef(),
       createDragStartRef(),
       createPendingOutgoingTangentRef(),
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -90,6 +93,7 @@ describe('handlePointerDown', () => {
       createDragOriginRef(),
       createDragStartRef(),
       createPendingOutgoingTangentRef(),
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -116,6 +120,7 @@ describe('handlePointerDown', () => {
       createDragOriginRef(),
       createDragStartRef(),
       createPendingOutgoingTangentRef(),
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -143,6 +148,7 @@ describe('handlePointerDown', () => {
       createDragOriginRef(),
       createDragStartRef(),
       createPendingOutgoingTangentRef(),
+      createVectorAlignmentGuideRef(),
     );
 
     // result

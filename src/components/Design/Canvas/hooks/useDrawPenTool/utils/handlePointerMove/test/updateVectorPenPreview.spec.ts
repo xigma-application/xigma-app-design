@@ -4,7 +4,7 @@ import { RefObject } from 'react';
 import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPendingOutgoingTangent } from '../../../types';
-import { TVectorNode } from 'types/design/types';
+import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { updateVectorPenPreview } from '../updateVectorPenPreview';
@@ -25,12 +25,15 @@ const node: TVectorNode = {
   vertices: { v1: { id: 'v1', x: 0, y: 0 } },
 };
 
+const nodes: Record<string, TSceneNode> = { [node.id]: node };
+
 const createPenPreviewRef = (): TCanvasRefs['penPreviewRef'] => ({ current: null });
 const createHoveredSegmentIdRef = (): TCanvasRefs['hoveredSegmentIdRef'] => ({ current: null });
 const createPenHoveredDragArmableVertexRef = (): TCanvasRefs['penHoveredDragArmableVertexRef'] => ({ current: false });
 const createPendingOutgoingTangentRef = (value: TPendingOutgoingTangent | null = null): RefObject<TPendingOutgoingTangent | null> => ({
   current: value,
 });
+const createVectorAlignmentGuideRef = (): TCanvasRefs['vectorAlignmentGuideRef'] => ({ current: null });
 
 describe('updateVectorPenPreview', () => {
   it('should clear the rubber-band preview when there is no active vertex', () => {
@@ -43,6 +46,7 @@ describe('updateVectorPenPreview', () => {
     const hoverKind = updateVectorPenPreview(
       { x: 900, y: 900 },
       node,
+      nodes,
       null,
       IDENTITY_VIEWPORT,
       false,
@@ -50,6 +54,7 @@ describe('updateVectorPenPreview', () => {
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
       penHoveredDragArmableVertexRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -69,6 +74,7 @@ describe('updateVectorPenPreview', () => {
     const hoverKind = updateVectorPenPreview(
       { x: 500, y: 500 },
       node,
+      nodes,
       'v1',
       IDENTITY_VIEWPORT,
       false,
@@ -76,6 +82,7 @@ describe('updateVectorPenPreview', () => {
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
       penHoveredDragArmableVertexRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -100,6 +107,7 @@ describe('updateVectorPenPreview', () => {
     updateVectorPenPreview(
       { x: 500, y: 5 },
       node,
+      nodes,
       'v1',
       IDENTITY_VIEWPORT,
       false,
@@ -107,6 +115,7 @@ describe('updateVectorPenPreview', () => {
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
       penHoveredDragArmableVertexRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result — pulled onto the exact horizontal axis
@@ -124,6 +133,7 @@ describe('updateVectorPenPreview', () => {
     updateVectorPenPreview(
       { x: 20, y: 12 },
       node,
+      nodes,
       'v1',
       IDENTITY_VIEWPORT,
       true,
@@ -131,6 +141,7 @@ describe('updateVectorPenPreview', () => {
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
       penHoveredDragArmableVertexRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -149,6 +160,7 @@ describe('updateVectorPenPreview', () => {
     const hoverKind = updateVectorPenPreview(
       { x: 100, y: 0 },
       nodeWithTwoVertices,
+      nodes,
       'v1',
       IDENTITY_VIEWPORT,
       false,
@@ -156,6 +168,7 @@ describe('updateVectorPenPreview', () => {
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
       penHoveredDragArmableVertexRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result — closing onto a *different* vertex mid-fragment is drag-armable too: a click-drag there
@@ -181,6 +194,7 @@ describe('updateVectorPenPreview', () => {
     const hoverKind = updateVectorPenPreview(
       { x: 90, y: 2 },
       nodeWithSegment,
+      nodes,
       'v3',
       IDENTITY_VIEWPORT,
       false,
@@ -188,6 +202,7 @@ describe('updateVectorPenPreview', () => {
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
       penHoveredDragArmableVertexRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -212,6 +227,7 @@ describe('updateVectorPenPreview', () => {
     const hoverKind = updateVectorPenPreview(
       { x: 50, y: 2 },
       nodeWithSegment,
+      nodes,
       'v3',
       IDENTITY_VIEWPORT,
       false,
@@ -219,6 +235,7 @@ describe('updateVectorPenPreview', () => {
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
       penHoveredDragArmableVertexRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -240,6 +257,7 @@ describe('updateVectorPenPreview', () => {
     const hoverKind = updateVectorPenPreview(
       { x: 0, y: 0 },
       node,
+      nodes,
       'v1',
       IDENTITY_VIEWPORT,
       false,
@@ -247,6 +265,7 @@ describe('updateVectorPenPreview', () => {
       createPendingOutgoingTangentRef(),
       hoveredSegmentIdRef,
       penHoveredDragArmableVertexRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -272,6 +291,7 @@ describe('updateVectorPenPreview', () => {
     updateVectorPenPreview(
       { x: 500, y: 500 },
       node,
+      nodes,
       'v1',
       IDENTITY_VIEWPORT,
       false,
@@ -279,6 +299,7 @@ describe('updateVectorPenPreview', () => {
       pendingOutgoingTangentRef,
       hoveredSegmentIdRef,
       penHoveredDragArmableVertexRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result

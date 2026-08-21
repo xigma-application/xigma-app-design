@@ -33,6 +33,7 @@ const createPenDraggedHandlePositionRef = (): TCanvasRefs['penDraggedHandlePosit
 const createPenDraggedHandleIsSnappedRef = (): TCanvasRefs['penDraggedHandleIsSnappedRef'] => ({ current: false });
 const createHoveredSegmentIdRef = (): TCanvasRefs['hoveredSegmentIdRef'] => ({ current: null });
 const createPenHoveredDragArmableVertexRef = (): TCanvasRefs['penHoveredDragArmableVertexRef'] => ({ current: false });
+const createVectorAlignmentGuideRef = (): TCanvasRefs['vectorAlignmentGuideRef'] => ({ current: null });
 
 const addVectorNodeWithSegment = (): string => {
   store.dispatch(
@@ -86,6 +87,8 @@ describe('handlePointerMove', () => {
       createPenDraggedHandleIsSnappedRef(),
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
+      createVectorAlignmentGuideRef(),
+
       setClassName,
     );
 
@@ -122,6 +125,8 @@ describe('handlePointerMove', () => {
       penDraggedHandleIsSnappedRef,
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
+      createVectorAlignmentGuideRef(),
+
       setClassName,
     );
 
@@ -157,6 +162,8 @@ describe('handlePointerMove', () => {
       penDraggedHandleIsSnappedRef,
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
+      createVectorAlignmentGuideRef(),
+
       setClassName,
     );
 
@@ -189,6 +196,8 @@ describe('handlePointerMove', () => {
       createPenDraggedHandleIsSnappedRef(),
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
+      createVectorAlignmentGuideRef(),
+
       setClassName,
     );
 
@@ -227,6 +236,8 @@ describe('handlePointerMove', () => {
       createPenDraggedHandleIsSnappedRef(),
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
+      createVectorAlignmentGuideRef(),
+
       setClassName,
     );
 
@@ -263,6 +274,8 @@ describe('handlePointerMove', () => {
       createPenDraggedHandleIsSnappedRef(),
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
+      createVectorAlignmentGuideRef(),
+
       setClassName,
     );
 
@@ -299,6 +312,8 @@ describe('handlePointerMove', () => {
       createPenDraggedHandleIsSnappedRef(),
       hoveredSegmentIdRef,
       createPenHoveredDragArmableVertexRef(),
+      createVectorAlignmentGuideRef(),
+
       setClassName,
     );
 
@@ -336,6 +351,8 @@ describe('handlePointerMove', () => {
       createPenDraggedHandleIsSnappedRef(),
       hoveredSegmentIdRef,
       createPenHoveredDragArmableVertexRef(),
+      createVectorAlignmentGuideRef(),
+
       setClassName,
     );
 
@@ -374,6 +391,8 @@ describe('handlePointerMove', () => {
       createPenDraggedHandleIsSnappedRef(),
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
+      createVectorAlignmentGuideRef(),
+
       setClassName,
     );
 
@@ -410,6 +429,8 @@ describe('handlePointerMove', () => {
       createPenDraggedHandleIsSnappedRef(),
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
+      createVectorAlignmentGuideRef(),
+
       setClassName,
     );
 
@@ -452,6 +473,8 @@ describe('handlePointerMove', () => {
       createPenDraggedHandleIsSnappedRef(),
       hoveredSegmentIdRef,
       createPenHoveredDragArmableVertexRef(),
+      createVectorAlignmentGuideRef(),
+
       setClassName,
     );
 
@@ -495,6 +518,8 @@ describe('handlePointerMove', () => {
       createPenDraggedHandleIsSnappedRef(),
       hoveredSegmentIdRef,
       createPenHoveredDragArmableVertexRef(),
+      createVectorAlignmentGuideRef(),
+
       setClassName,
     );
 
@@ -532,6 +557,8 @@ describe('handlePointerMove', () => {
       createPenDraggedHandleIsSnappedRef(),
       createHoveredSegmentIdRef(),
       penHoveredDragArmableVertexRef,
+      createVectorAlignmentGuideRef(),
+
       setClassName,
     );
 

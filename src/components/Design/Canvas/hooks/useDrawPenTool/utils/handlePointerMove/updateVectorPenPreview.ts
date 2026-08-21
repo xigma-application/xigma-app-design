@@ -8,7 +8,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPendingOutgoingTangent } from '../../types';
 import { TPenPointHoverKind } from './resolvePenPointHover/types';
 import { TPoint } from 'types/canvas';
-import { TVectorNode, TViewport } from 'types/design/types';
+import { TSceneNode, TVectorNode, TViewport } from 'types/design/types';
 
 // utils
 import { applyAngleSnapToPenPreview } from './applyAngleSnapToPenPreview';
@@ -16,6 +16,7 @@ import { applyAngleSnapToPenPreview } from './applyAngleSnapToPenPreview';
 export const updateVectorPenPreview = (
   point: TPoint,
   node: TVectorNode,
+  nodes: Record<string, TSceneNode>,
   activeVertexId: string | null,
   viewport: TViewport,
   isShiftPressed: boolean,
@@ -23,6 +24,7 @@ export const updateVectorPenPreview = (
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
   hoveredSegmentIdRef: TCanvasRefs['hoveredSegmentIdRef'],
   penHoveredDragArmableVertexRef: TCanvasRefs['penHoveredDragArmableVertexRef'],
+  vectorAlignmentGuideRef: TCanvasRefs['vectorAlignmentGuideRef'],
 ): TPenPointHoverKind | null => {
   const activeVertex = activeVertexId ? node.vertices[activeVertexId] : null;
 
@@ -37,6 +39,7 @@ export const updateVectorPenPreview = (
         penPreviewRef.current = { from: activeVertex, isSnapped: false, tangentFromOffset, to: result.point };
         hoveredSegmentIdRef.current = result.segmentId;
         penHoveredDragArmableVertexRef.current = result.hoverKind === 'active-vertex' || result.hoverKind === 'vertex';
+        vectorAlignmentGuideRef.current = null;
 
         return result.hoverKind;
       }
@@ -48,15 +51,18 @@ export const updateVectorPenPreview = (
       tangentFromOffset,
       viewport.zoom,
       isShiftPressed,
+      nodes,
       penPreviewRef,
       hoveredSegmentIdRef,
       penHoveredDragArmableVertexRef,
+      vectorAlignmentGuideRef,
     );
   }
 
   penPreviewRef.current = null;
   hoveredSegmentIdRef.current = null;
   penHoveredDragArmableVertexRef.current = false;
+  vectorAlignmentGuideRef.current = null;
 
   return null;
 };

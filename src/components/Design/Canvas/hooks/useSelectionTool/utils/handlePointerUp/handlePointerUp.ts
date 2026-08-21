@@ -53,9 +53,9 @@ export const handlePointerUp = (
   disarmEllipseArcRotateDrag(canvas, event, canvasRefs.ellipseArcRotateDragRef);
   disarmEllipseArcRatioDrag(canvas, event, canvasRefs.ellipseArcRatioDragRef);
   disarmMarqueeDrag(canvas, event, selectionRefs.marqueeStartRef, canvasRefs.marqueeRef);
-  disarmVectorVertexDrag(canvas, event, selectionRefs.vectorVertexDragRef, setClassName);
+  disarmVectorVertexDrag(canvas, event, canvasRefs, selectionRefs, setClassName);
   disarmVectorHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
-  disarmVectorMultiDrag(canvas, event, dispatch, canvasRefs, canvasRefs.vectorMultiDragRef, setClassName);
+  disarmVectorMultiDrag(canvas, event, dispatch, canvasRefs, setClassName);
   disarmVectorMultiSelectResizeDrag(canvas, event, canvasRefs.vectorMultiSelectResizeDragRef, canvasRefs.vectorMultiSelectBoxRef);
   disarmVectorMultiSelectRotateDrag(canvas, event, canvasRefs.vectorMultiSelectRotateDragRef, canvasRefs.vectorMultiSelectBoxRef);
   disarmVectorSegmentBendDrag(canvas, event, dispatch, canvasRefs, selectionRefs.vectorSegmentBendDragRef, setClassName);

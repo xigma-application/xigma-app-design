@@ -1,11 +1,8 @@
-import { RefObject } from 'react';
-
 // store
 import { AppDispatch } from 'store';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TVectorMultiDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { applyPendingClickAction } from './applyPendingClickAction';
@@ -15,10 +12,9 @@ export const disarmVectorMultiDrag = (
   event: PointerEvent,
   dispatch: AppDispatch,
   canvasRefs: TCanvasRefs,
-  vectorMultiDragRef: RefObject<TVectorMultiDragState | null>,
   setClassName: (className: string | null) => void,
 ): void => {
-  const dragState = vectorMultiDragRef.current;
+  const dragState = canvasRefs.vectorMultiDragRef.current;
 
   if (dragState) {
     if (!dragState.hasMoved) {
@@ -26,7 +22,8 @@ export const disarmVectorMultiDrag = (
     }
 
     canvas.releasePointerCapture(event.pointerId);
-    vectorMultiDragRef.current = null;
+    canvasRefs.vectorMultiDragRef.current = null;
+    canvasRefs.vectorAlignmentGuideRef.current = null;
     setClassName(null);
   }
 };

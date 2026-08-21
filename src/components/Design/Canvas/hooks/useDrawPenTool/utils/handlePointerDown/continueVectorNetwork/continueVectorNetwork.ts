@@ -5,18 +5,19 @@ import { RefObject } from 'react';
 import { VECTOR_EDGE_HIT_TOLERANCE_PX, VECTOR_VERTEX_HIT_RADIUS_PX } from 'constant/canvas';
 
 // store
-import { AppDispatch } from 'store';
+import { AppDispatch, AppStore } from 'store';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPenDragOrigin, TPendingOutgoingTangent } from '../../../types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode, TVectorTangent, TViewport } from 'types/design/types';
 
 // utils
+import { applyVectorPointSnapping } from '../../../../../utils/applyVectorPointSnapping';
 import { closeLoopOntoEdge } from './closeLoopOntoEdge';
 import { closeLoopOntoVertex } from './closeLoopOntoVertex';
 import { extendWithNewVertex } from './extendWithNewVertex';
-import { getAngleSnappedVectorPoint } from 'utils/canvas/vectorNetwork/getAngleSnappedVectorPoint';
 import { getVectorEdgeAtPoint } from '../../../../../utils/getVectorEdgeAtPoint';
 import { getVectorVertexAtPoint } from '../../../../../utils/getVectorVertexAtPoint';
 import { isPointNearVertex } from '../../../../../utils/isPointNearVertex';
@@ -37,9 +38,11 @@ export const continueVectorNetwork = (
   activeVertexId: string,
   viewport: TViewport,
   dispatch: AppDispatch,
+  appStore: AppStore,
   dragOriginRef: RefObject<TPenDragOrigin | null>,
   dragStartRef: RefObject<TPoint | null>,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
+  vectorAlignmentGuideRef: TCanvasRefs['vectorAlignmentGuideRef'],
   isCtrlPressed: boolean,
   isShiftPressed: boolean,
 ): void => {
@@ -82,9 +85,14 @@ export const continueVectorNetwork = (
         pendingOutgoingTangentRef,
       );
     } else {
-      const snappedPoint = roundVectorPoint(
-        getAngleSnappedVectorPoint(node.vertices[activeVertexId], point, viewport.zoom, isShiftPressed).point,
+      const { point: snapped } = applyVectorPointSnapping(
+        node.vertices[activeVertexId],
+        point,
+        viewport.zoom,
+        isShiftPressed,
+        appStore.getState().design.nodes,
       );
+      const snappedPoint = roundVectorPoint(snapped);
 
       extendWithNewVertex(
         snappedPoint,
@@ -98,5 +106,7 @@ export const continueVectorNetwork = (
         pendingOutgoingTangentRef,
       );
     }
+
+    vectorAlignmentGuideRef.current = null;
   }
 };

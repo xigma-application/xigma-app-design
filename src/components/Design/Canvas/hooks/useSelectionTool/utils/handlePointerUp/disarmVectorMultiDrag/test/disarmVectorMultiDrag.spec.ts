@@ -1,12 +1,9 @@
-import { RefObject } from 'react';
-
 // store
 import { addNode, setVectorEditingNodeId } from 'store/design/slice';
 import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TVectorMultiDragState } from 'types/design/selectionTool/types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
@@ -22,10 +19,6 @@ const createCanvas = (): HTMLCanvasElement => {
 };
 
 const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointerup', { pointerId });
-
-const createVectorMultiDragRef = (vectorMultiDragState: TVectorMultiDragState | null = null): RefObject<TVectorMultiDragState | null> => ({
-  current: vectorMultiDragState,
-});
 
 const addVectorNode = (): string => {
   store.dispatch(
@@ -60,7 +53,7 @@ describe('disarmVectorMultiDrag', () => {
     const setClassName = vi.fn();
 
     // before
-    disarmVectorMultiDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, createVectorMultiDragRef(), setClassName);
+    disarmVectorMultiDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, setClassName);
 
     // result
     expect(canvas.releasePointerCapture).not.toHaveBeenCalled();
@@ -71,7 +64,8 @@ describe('disarmVectorMultiDrag', () => {
     // mock
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
-    const vectorMultiDragRef = createVectorMultiDragRef({
+
+    canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
       handleOrigins: {},
       hasMoved: true,
@@ -79,14 +73,15 @@ describe('disarmVectorMultiDrag', () => {
       pendingClickAction: null,
       pointerStart: { x: 5, y: 5 },
       vertexOrigins: { 'vertex-1': { x: 0, y: 0 } },
-    });
+    };
+
     const setClassName = vi.fn();
 
     // before
-    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vectorMultiDragRef, setClassName);
+    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, setClassName);
 
     // result
-    expect(vectorMultiDragRef.current).toBeNull();
+    expect(canvasRefs.vectorMultiDragRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
     expect(setClassName).toHaveBeenCalledWith(null);
   });
@@ -98,7 +93,7 @@ describe('disarmVectorMultiDrag', () => {
 
     canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
 
-    const vectorMultiDragRef = createVectorMultiDragRef({
+    canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
       handleOrigins: {},
       hasMoved: false,
@@ -106,10 +101,10 @@ describe('disarmVectorMultiDrag', () => {
       pendingClickAction: null,
       pointerStart: { x: 5, y: 5 },
       vertexOrigins: { v1: { x: 0, y: 0 } },
-    });
+    };
 
     // before
-    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vectorMultiDragRef, vi.fn());
+    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vi.fn());
 
     // result
     expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
@@ -122,7 +117,7 @@ describe('disarmVectorMultiDrag', () => {
 
     canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
-    const vectorMultiDragRef = createVectorMultiDragRef({
+    canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
       handleOrigins: {},
       hasMoved: false,
@@ -130,10 +125,10 @@ describe('disarmVectorMultiDrag', () => {
       pendingClickAction: { id: 'v2', kind: 'vertex' },
       pointerStart: { x: 5, y: 5 },
       vertexOrigins: { v1: { x: 0, y: 0 }, v2: { x: 10, y: 0 } },
-    });
+    };
 
     // before
-    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vectorMultiDragRef, vi.fn());
+    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vi.fn());
 
     // result
     expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v2']);
@@ -149,7 +144,7 @@ describe('disarmVectorMultiDrag', () => {
     canvasRefs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
     canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
 
-    const vectorMultiDragRef = createVectorMultiDragRef({
+    canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
       handleOrigins: {},
       hasMoved: false,
@@ -157,10 +152,10 @@ describe('disarmVectorMultiDrag', () => {
       pendingClickAction: { end: 'start', kind: 'handle', segmentId: 's1' },
       pointerStart: { x: 5, y: 5 },
       vertexOrigins: {},
-    });
+    };
 
     // before
-    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vectorMultiDragRef, vi.fn());
+    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vi.fn());
 
     // result
     expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
@@ -175,7 +170,7 @@ describe('disarmVectorMultiDrag', () => {
 
     canvasRefs.selectedVectorSegmentIdsRef.current = ['s1', 's2'];
 
-    const vectorMultiDragRef = createVectorMultiDragRef({
+    canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
       handleOrigins: {},
       hasMoved: false,
@@ -183,10 +178,10 @@ describe('disarmVectorMultiDrag', () => {
       pendingClickAction: { id: 's1', kind: 'segment' },
       pointerStart: { x: 5, y: 5 },
       vertexOrigins: {},
-    });
+    };
 
     // before
-    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vectorMultiDragRef, vi.fn());
+    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vi.fn());
 
     // result
     expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
@@ -201,7 +196,7 @@ describe('disarmVectorMultiDrag', () => {
 
     canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
-    const vectorMultiDragRef = createVectorMultiDragRef({
+    canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
       handleOrigins: {},
       hasMoved: true,
@@ -209,10 +204,10 @@ describe('disarmVectorMultiDrag', () => {
       pendingClickAction: { id: 'v2', kind: 'vertex' },
       pointerStart: { x: 5, y: 5 },
       vertexOrigins: { v1: { x: 0, y: 0 }, v2: { x: 10, y: 0 } },
-    });
+    };
 
     // before
-    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vectorMultiDragRef, vi.fn());
+    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vi.fn());
 
     // result
     expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
@@ -229,7 +224,7 @@ describe('disarmVectorMultiDrag', () => {
 
     canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
 
-    const vectorMultiDragRef = createVectorMultiDragRef({
+    canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
       handleOrigins: {},
       hasMoved: false,
@@ -237,10 +232,10 @@ describe('disarmVectorMultiDrag', () => {
       pendingClickAction: { kind: 'split-segment', segmentId: 's1', t: 0.5 },
       pointerStart: { x: 50, y: 0 },
       vertexOrigins: { v1: { x: 0, y: 0 }, v2: { x: 100, y: 0 } },
-    });
+    };
 
     // before
-    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vectorMultiDragRef, vi.fn());
+    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vi.fn());
 
     // result — s1 is gone from the selection (the click always splits, per the direct ask, regardless of
     // whether it was already selected); a new vertex sits at the split point and is itself now selected
@@ -261,7 +256,7 @@ describe('disarmVectorMultiDrag', () => {
 
     canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
 
-    const vectorMultiDragRef = createVectorMultiDragRef({
+    canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
       handleOrigins: {},
       hasMoved: false,
@@ -269,10 +264,10 @@ describe('disarmVectorMultiDrag', () => {
       pendingClickAction: { kind: 'split-segment', segmentId: 's1', t: 0.5 },
       pointerStart: { x: 50, y: 0 },
       vertexOrigins: {},
-    });
+    };
 
     // before
-    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vectorMultiDragRef, vi.fn());
+    disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vi.fn());
 
     // result — untouched, no crash
     expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);

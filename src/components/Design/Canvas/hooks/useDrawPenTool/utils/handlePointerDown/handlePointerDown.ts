@@ -7,6 +7,7 @@ import { AppDispatch, AppStore } from 'store';
 
 // types
 import { MouseButton } from 'types/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPenDragOrigin, TPendingOutgoingTangent } from '../../types';
 import { TPoint } from 'types/canvas';
 
@@ -26,6 +27,7 @@ export const handlePointerDown = (
   dragOriginRef: RefObject<TPenDragOrigin | null>,
   dragStartRef: RefObject<TPoint | null>,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
+  vectorAlignmentGuideRef: TCanvasRefs['vectorAlignmentGuideRef'],
 ): void => {
   if (event.button === MouseButton.primary) {
     const state = appStore.getState();
@@ -50,6 +52,7 @@ export const handlePointerDown = (
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      vectorAlignmentGuideRef,
     );
   }
 };

@@ -2070,6 +2070,166 @@ screenshot taken right after `page.keyboard.down('Shift')` — with **zero** int
 movement — already differs from the screenshot taken just before it. A new `shiftDragVectorPoint`
 helper was added to `DesignPage.ts`, mirroring the existing `ctrlDragVectorPoint` shape exactly.
 
+## 40. Smart alignment guides — Figma-style row/column snapping against every vertex on the scene, for both Pen drawing and Vector Edit Mode dragging
+
+Asked for directly, with two reference screenshots of Figma's own behavior: a thin orange/coral guide
+line connecting the point currently being placed/dragged to another vertex elsewhere on the canvas —
+possibly on a completely different shape — whenever the two line up on the same x (vertical guide) or y
+(horizontal guide). Three scope questions were asked and answered up front: candidates are **every
+vertex of every Vector node on the scene**, not just the current network (matching what the screenshots
+showed — alignment to a vertex on an unrelated shape); the guide **actually snaps** the position, it
+isn't just a visual hint; and it applies to **both** vertex placement/dragging and tangent-handle
+dragging, mirroring §37/§38's own scope exactly.
+
+**Core math — `getVectorAlignmentGuide.ts` (`utils/canvas/vectorNetwork/`), a per-point primitive
+unrelated to `getAngleSnappedVectorPoint.ts`.** Given one `point` and a flat list of candidate
+`TPoint`s, it independently finds the closest candidate sharing `point`'s x (within
+`toleranceWorldUnits`) and the closest one sharing its y — a `reduce` accumulating a
+`{distance, point}` pair per axis via a small `getClosestMatch` helper, replaced only if the new
+candidate is both within tolerance and closer than the current best. Both axes resolve completely
+independently, so a point can align vertically to one vertex and horizontally to a *different* one at
+the same time — the exported result type is `TVectorPointAlignmentMatch = {horizontal: TPoint | null,
+point: TPoint, vertical: TPoint | null}`, where `point` is the snapped position (the matched axis pulled
+onto the candidate's coordinate, the untouched axis left alone).
+
+**`getAllVectorVertexPositions.ts` (`components/Design/Canvas/utils/`) gathers the candidate pool —
+first written in the wrong module layer, self-caught before it shipped.** It was initially placed in
+the global `utils/canvas/vectorNetwork/` folder, importing `bakeVectorNodeRotation.ts` (feature-local)
+to get world-space positions for rotated nodes. That's exactly the "global layer importing from
+`components/`" violation this doc's own `getVectorPointsInRect.ts` story already worked through once
+(that file had to reimplement `isPointInRect.ts` locally rather than import the feature-local version)
+— caught on review, fixed by moving the file to `components/Design/Canvas/utils/` and switching to a
+relative import. It flattens every `TVectorNode`'s vertices (via `bakeVectorNodeRotation`'s read-only
+preview transform, same convention `drawVectorEditHandlesLayer.ts` already uses) across the *entire*
+`nodes` record, filtering out any ids in an `excludeVertexIds: string[]` parameter — a point trivially
+"aligns" with itself, and (added for the group-drag case below) with every other vertex currently being
+dragged alongside it.
+
+**`applyVectorPointSnapping.ts` (`components/Design/Canvas/utils/`) is the orchestrator merging §37's
+angle-snap with this feature's alignment guide into one call, used by every single-point call site.**
+Two independent mechanisms — `getAngleSnappedVectorPoint` (relative to `from`, the anchor vertex) and
+`getVectorAlignmentGuide` (relative to every *other* scene vertex) — resolve separately, then merge
+per axis: a matched alignment guide wins that axis over whatever the angle snap produced for it, since
+lining up exactly with a real point elsewhere is a more specific signal than a directional preference;
+the axis the guide didn't touch keeps the angle snap's own result. This is a deliberate priority rule,
+not an arbitrary pick — it's what makes a diagonal drag that happens to also line up with another vertex
+snap onto that vertex rather than the nearest 15°/cardinal direction.
+
+**The guide's own rendering type, `TVectorAlignmentGuide`, carries a separate anchor per axis — not one
+shared point — specifically to support the group-drag case below.** A single dragged point's guide has
+one obvious anchor (its own position), but a *group* of several dragged vertices can have its vertical
+guide anchored on one of them and its horizontal guide anchored on a completely different one (see the
+group-alignment case). The type reflects that from the start:
+```ts
+export type TVectorAlignmentAxisGuide = { anchor: TPoint; match: TPoint };
+export type TVectorAlignmentGuide = { horizontal: TVectorAlignmentAxisGuide | null; vertical: TVectorAlignmentAxisGuide | null };
+```
+For a single-point caller, `applyVectorPointSnapping.ts` builds both axes' `anchor` from the same final
+merged `point` — visually identical to a single shared anchor, just expressed through the general shape.
+`drawVectorAlignmentGuide.ts` (new file, called unconditionally every frame in `drawScene.ts` like every
+other ref-gated preview layer) draws up to two independent 1px (zoom-scaled) lines, `guide.vertical.anchor
+→ guide.vertical.match` and `guide.horizontal.anchor → guide.horizontal.match`, in a new
+`VECTOR_ALIGNMENT_GUIDE_STROKE` (`#cd4422`, `constant/canvas.ts` — happens to reuse the same hex as
+`VECTOR_EDGE_HOVER_STROKE`, unrelated coincidence, not a shared constant). `vectorAlignmentGuideRef`
+(`TCanvasRefs`, parent-owned like every other per-frame render-loop input) is the ref threading the
+current guide (or `null`) from whichever call site last computed one through to this draw call.
+
+**A real, live-tested bug: the alignment tolerance shrank at zoom below 100%, unlike every other
+pixel-tolerance conversion in this codebase.** First written as
+`VECTOR_ALIGNMENT_SNAP_TOLERANCE_PX / Math.max(zoom, 1)` — copying §37's own `getAngleSnapToleranceDegrees`
+clamp pattern by instinct. But that clamp exists there specifically because *degrees* are a
+zoom-invariant unit already (§37's own doc: "a raw angle in world space is already zoom-invariant on its
+own"), so the clamp is a deliberate *feel* choice, not a geometric necessity. A pixel-distance tolerance
+is different: every other conversion in this codebase (`VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom`,
+`VECTOR_EDGE_HIT_TOLERANCE_PX / viewport.zoom`, no clamp, throughout `useSelectionTool`/`useDrawPenTool`)
+keeps the *screen-space* tolerance constant at every zoom level by dividing by the raw zoom with no
+floor. The clamped version instead kept the *world-space* tolerance constant below 100% zoom, which
+means the on-screen catch radius shrank the further out you zoomed (at 50% zoom, an intended ~4 screen
+px tolerance collapsed to ~2). Reported live ("Ten guide póki co nie działa" — this guide doesn't work
+yet) after the rest of the wiring had already been code-reviewed clean; found by comparing against the
+established `CONST_PX / viewport.zoom` convention rather than by guessing, fixed to match it exactly
+(`VECTOR_ALIGNMENT_SNAP_TOLERANCE_PX / zoom`, no clamp).
+
+**Wired at six call sites — three single-point ones reusing `applyVectorPointSnapping.ts` directly,
+three group ones needing a second, purpose-built aggregator:**
+
+- **Pen rubber-band preview** — `applyAngleSnapToPenPreview.ts` (§37/§38's own file) gained a `nodes`
+  parameter and now calls `applyVectorPointSnapping` instead of `getAngleSnappedVectorPoint` directly,
+  writing `vectorAlignmentGuideRef.current` alongside the existing `isSnapped`/`to` fields.
+  `updateVectorPenPreview.ts` clears the guide ref on every branch that *doesn't* reach this fallback
+  (a resolver hit, or no active vertex at all) — the guide is strictly a blank-canvas-fallback concept,
+  same scope note as angle-snap's own.
+- **Pen commit** — `continueVectorNetwork.ts`'s blank-canvas branch (the one calling
+  `extendWithNewVertex.ts`) runs the same `applyVectorPointSnapping` call before `roundVectorPoint.ts`,
+  then unconditionally clears `vectorAlignmentGuideRef.current = null` right after the whole
+  arm-a-drag-or-commit `if`/`else` — a live guide is a preview concept that shouldn't outlive the
+  discrete action that follows it.
+- **Pen tangent click-drag** — `updateVectorHandleDrag.ts` (§38's own file), same substitution.
+- **Vector Edit Mode tangent drag** — `continueVectorHandleDrag.ts` (§38's own file) swapped its direct
+  `getAngleSnappedVectorPoint` call for `applyVectorPointSnapping`, excluding the handle's own vertex id
+  from candidates. Refactored in the same change to take whole `canvasRefs: TCanvasRefs` and
+  `selectionRefs: TSelectionToolRefs` objects instead of the two individual refs it used to receive
+  (`vectorHandleDragRef`, `snappedVectorHandleRef`) — asked for directly mid-review ("selectionRefs,
+  canvasRefs przekazuj jako jeden argument w sensie cały obiekt ref"), matching the whole-object
+  convention `resolveVectorCornerHandleDrag.ts`/`disarmVectorHandleDrag.ts` already established.
+- **Vector Edit Mode single-vertex drag** — `continueVectorVertexDrag.ts`, previously a bare
+  `deltaX`/`deltaY` translate with no snapping concept of any kind (not even angle-snap). Same
+  refactor to whole-object params; computes a group-alignment result (below) over its one dragged
+  vertex's raw projected position.
+- **Vector Edit Mode multi-drag (box-drag of several selected vertices/handles at once)** —
+  `continueVectorMultiDrag.ts`. This one was genuinely missed on the first pass: the single-vertex path
+  (`continueVectorVertexDrag.ts`) got wired first and reported working live ("Na single point działa"),
+  which surfaced the *real* gap by contrast ("jak boxem przesuwam kilka pointów to nie działa" — doesn't
+  work when moving several points via the box) — a materially different drag mechanism
+  (`TVectorMultiDragState`, its own `vertexOrigins`/`handleOrigins`/`boxOrigin`), not a variant of the
+  single-vertex one.
+
+**Group alignment needed a second aggregator, `getVectorGroupAlignmentGuide.ts` — asked for directly
+("Musi być pod multi i kotwiczyć jesli któryś się zetknie jak w Figmie"): the whole group moves as one
+rigid unit, but any single dragged vertex touching a guide should pull the entire group by that
+correction.** Reuses the per-point `getVectorAlignmentGuide` primitive unchanged, called once per
+dragged vertex's raw (pre-correction) projected position, then picks the single closest match across
+*all* of them independently per axis — so a vertical match on one dragged vertex and a horizontal match
+on a completely different one can both win at once, each keeping its own anchor. A `deltaCorrection:
+TPoint` is derived from the winning match(es) (`match.x - point.x` for vertical, `match.y - point.y` for
+horizontal) and added to the group's raw `deltaX`/`deltaY` *before* translating anything — vertices,
+tangent handles (`handleOrigins`), and the canonical multi-select box (`boxOrigin`) all move by that
+same corrected delta, keeping the whole selection rigid. `continueVectorVertexDrag.ts`'s single-vertex
+case is just this same aggregator called with a one-element `draggedPoints` array — no separate code
+path, the group case subsumes the single one exactly.
+
+**A live-tested clarification shaped the anchor design: "guide dostosowuje się do pozycji myszki a nie
+kropki" (the guide follows the mouse, not the dot) — correct during Pen drawing (no grab-offset concept,
+the placed point *is* the cursor), wrong anywhere in Vector Edit Mode (dragging an existing
+element must track that element's own — possibly grab-offset-preserved, possibly snapped — position, not
+the raw cursor).** This is exactly why `TVectorAlignmentGuide`'s anchor is derived from each mechanism's
+*final, corrected* position rather than the raw pointer: `continueVectorHandleDrag.ts`'s tangent handle
+has no grab-offset (it tracks the cursor 1:1 by design, matching how handles always behaved), so its raw
+`point` already *is* the right anchor once matched; `continueVectorVertexDrag.ts`/`continueVectorMultiDrag.ts`
+preserve whatever offset existed between the click and the vertex's own position (`origin + delta`, not
+the raw cursor), and the group aggregator's anchors are built from the *post-correction* position
+specifically so the rendered guide line always touches the dot's true landing spot, never wherever the
+mouse happens to be mid-drag.
+
+**Redundant ref-passing cleanup, caught mid-review on the multi-drag wiring specifically:**
+`continueVectorMultiDrag.ts`/`disarmVectorMultiDrag.ts` had each gained a `canvasRefs: TCanvasRefs`
+parameter for the alignment-guide ref while *also* still receiving `vectorMultiDragRef`/
+`vectorMultiSelectBoxRef` as separate parameters — both of which are themselves just fields on that same
+`canvasRefs` object, spotted directly in the call site diff ("Co to ma być?"). Both files now take only
+`canvasRefs` and read `canvasRefs.vectorMultiDragRef`/`canvasRefs.vectorMultiSelectBoxRef` internally,
+matching the same whole-object convention applied to the other four call sites above.
+
+Every ref that carries a live guide is cleared in the matching disarm/cleanup path, mirroring how
+`snappedVectorHandleRef`/`penDraggedHandleIsSnappedRef` are already handled: `useDrawPenTool.ts`'s
+`onPointerUp`/`onPointerCancel`/unmount cleanup; `disarmVectorHandleDrag.ts`, `disarmVectorVertexDrag.ts`,
+and `disarmVectorMultiDrag.ts` on release; `useSelectionTool.ts`'s tool-switch unmount cleanup.
+
+Covered by 4 new e2e scenarios (`TEST_CASES.md` #235-238) — Pen-tool commit, Vector Edit Mode tangent
+drag, single-vertex drag, and box-drag of a multi-selected group — each following §37's own
+pixel-equality-over-exact-pattern approach: a scenario with the raw drag landing a couple of px off
+another shape's vertex row/column, compared against an independent reference run landing exactly on it,
+asserting the two screenshots are byte-identical.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

@@ -105,6 +105,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         refs.selectedVectorHandlesRef.current = [];
         refs.selectedVectorSegmentIdsRef.current = [];
         refs.snappedVectorHandleRef.current = null;
+        refs.vectorAlignmentGuideRef.current = null;
         lastPointerClientPositionRef.current = null;
       };
     }

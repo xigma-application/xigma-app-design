@@ -1,16 +1,14 @@
-import { RefObject } from 'react';
-
 // store
 import { addNode, setSelection } from 'store/design/slice';
 import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TVectorHandleDragState } from 'types/design/selectionTool/types';
-import { TVectorHandleHover } from 'types/design/canvas/types';
 
 // utils
 import { continueVectorHandleDrag } from '../continueVectorHandleDrag';
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
+import { createSelectionToolRefs } from '../../../hooks/useSelectionToolRefs/createSelectionToolRefs';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -21,12 +19,6 @@ const createCanvas = (): HTMLCanvasElement => {
 };
 
 const pointerEvent = (x: number, y: number): PointerEvent => new PointerEvent('pointermove', { clientX: x, clientY: y });
-
-const createVectorHandleDragRef = (
-  vectorHandleDragState: TVectorHandleDragState | null = null,
-): RefObject<TVectorHandleDragState | null> => ({ current: vectorHandleDragState });
-
-const createSnappedVectorHandleRef = (): RefObject<TVectorHandleHover | null> => ({ current: null });
 
 const addVectorNode = (): string => {
   store.dispatch(
@@ -57,17 +49,12 @@ describe('continueVectorHandleDrag', () => {
   it('should do nothing when no vector handle drag is in progress', () => {
     // mock
     const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const selectionRefs = createSelectionToolRefs();
     const setClassName = vi.fn();
 
     // before
-    continueVectorHandleDrag(
-      canvas,
-      pointerEvent(10, 10),
-      store.dispatch,
-      createVectorHandleDragRef(),
-      createSnappedVectorHandleRef(),
-      setClassName,
-    );
+    continueVectorHandleDrag(canvas, pointerEvent(10, 10), store.dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result
     expect(store.getState().design.nodes).toEqual({});
@@ -77,11 +64,15 @@ describe('continueVectorHandleDrag', () => {
   it('should do nothing when the drag points at a node that no longer exists', () => {
     // mock
     const canvas = createCanvas();
-    const vectorHandleDragRef = createVectorHandleDragRef({ end: 'start', nodeId: 'missing-node', segmentId: 's1', vertexId: 'v1' });
+    const canvasRefs = createCanvasRefs();
+    const selectionRefs = createSelectionToolRefs();
+
+    selectionRefs.vectorHandleDragRef.current = { end: 'start', nodeId: 'missing-node', segmentId: 's1', vertexId: 'v1' };
+
     const setClassName = vi.fn();
 
     // before
-    continueVectorHandleDrag(canvas, pointerEvent(10, 10), store.dispatch, vectorHandleDragRef, createSnappedVectorHandleRef(), setClassName);
+    continueVectorHandleDrag(canvas, pointerEvent(10, 10), store.dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result
     expect(store.getState().design.nodes).toEqual({});
@@ -92,37 +83,37 @@ describe('continueVectorHandleDrag', () => {
     // mock
     const idA = addVectorNode();
     const canvas = createCanvas();
-    const vectorHandleDragRef = createVectorHandleDragRef({ end: 'start', nodeId: idA, segmentId: 's1', vertexId: 'v1' });
-    const snappedVectorHandleRef = createSnappedVectorHandleRef();
+    const canvasRefs = createCanvasRefs();
+    const selectionRefs = createSelectionToolRefs();
+
+    selectionRefs.vectorHandleDragRef.current = { end: 'start', nodeId: idA, segmentId: 's1', vertexId: 'v1' };
+
     const setClassName = vi.fn();
 
     // before — atan2(5, 20) ≈ 14deg, outside the 5deg tolerance
-    continueVectorHandleDrag(canvas, pointerEvent(20, 5), store.dispatch, vectorHandleDragRef, snappedVectorHandleRef, setClassName);
+    continueVectorHandleDrag(canvas, pointerEvent(20, 5), store.dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result
     const node = store.getState().design.nodes[idA];
 
     expect(node).toMatchObject({ segments: { s1: { tangentStart: { x: 20, y: 5 } } } });
     expect(setClassName).toHaveBeenCalledWith('move');
-    expect(snappedVectorHandleRef.current).toBeNull();
+    expect(canvasRefs.snappedVectorHandleRef.current).toBeNull();
   });
 
   it('should set the tangentEnd on the dragged segment relative to the vertex when dragging the "end" handle', () => {
     // mock
     const idA = addVectorNode();
     const canvas = createCanvas();
-    const vectorHandleDragRef = createVectorHandleDragRef({ end: 'end', nodeId: idA, segmentId: 's1', vertexId: 'v2' });
+    const canvasRefs = createCanvasRefs();
+    const selectionRefs = createSelectionToolRefs();
+
+    selectionRefs.vectorHandleDragRef.current = { end: 'end', nodeId: idA, segmentId: 's1', vertexId: 'v2' };
+
     const setClassName = vi.fn();
 
     // before
-    continueVectorHandleDrag(
-      canvas,
-      pointerEvent(120, 15),
-      store.dispatch,
-      vectorHandleDragRef,
-      createSnappedVectorHandleRef(),
-      setClassName,
-    );
+    continueVectorHandleDrag(canvas, pointerEvent(120, 15), store.dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result
     const node = store.getState().design.nodes[idA];
@@ -134,33 +125,75 @@ describe('continueVectorHandleDrag', () => {
     // mock
     const idA = addVectorNode();
     const canvas = createCanvas();
-    const vectorHandleDragRef = createVectorHandleDragRef({ end: 'start', nodeId: idA, segmentId: 's1', vertexId: 'v1' });
-    const snappedVectorHandleRef = createSnappedVectorHandleRef();
+    const canvasRefs = createCanvasRefs();
+    const selectionRefs = createSelectionToolRefs();
+
+    selectionRefs.vectorHandleDragRef.current = { end: 'start', nodeId: idA, segmentId: 's1', vertexId: 'v1' };
+
     const setClassName = vi.fn();
 
     // before — a couple of px off horizontal from v1(0,0), within the angle-snap tolerance
-    continueVectorHandleDrag(canvas, pointerEvent(20, 1), store.dispatch, vectorHandleDragRef, snappedVectorHandleRef, setClassName);
+    continueVectorHandleDrag(canvas, pointerEvent(20, 1), store.dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result — pulled onto the exact horizontal axis
     const node = store.getState().design.nodes[idA];
 
     expect(node).toMatchObject({ segments: { s1: { tangentStart: { x: 20, y: 0 } } } });
-    expect(snappedVectorHandleRef.current).toEqual({ end: 'start', segmentId: 's1' });
+    expect(canvasRefs.snappedVectorHandleRef.current).toEqual({ end: 'start', segmentId: 's1' });
+  });
+
+  it('should snap the dragged handle tip onto an alignment guide with a vertex on a completely separate vector node, and record the guide', () => {
+    // mock — a second, unrelated vector node has a vertex at x=20, well within alignment tolerance of
+    // the drag's own x — the tangent tip should snap onto that column instead of the raw drag x
+    const idA = addVectorNode();
+
+    store.dispatch(
+      addNode({
+        fillColor: null,
+        name: 'Vector',
+        parentId: null,
+        rotation: 0,
+        segments: {},
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: NodeType.vector,
+        vertexHandleModes: {},
+        vertices: { a: { id: 'a', x: 20, y: 900 } },
+      }),
+    );
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const selectionRefs = createSelectionToolRefs();
+
+    selectionRefs.vectorHandleDragRef.current = { end: 'start', nodeId: idA, segmentId: 's1', vertexId: 'v1' };
+
+    const setClassName = vi.fn();
+
+    // before — drag a couple of px off x=20, well outside cardinal angle-snap tolerance from v1(0,0)
+    continueVectorHandleDrag(canvas, pointerEvent(22, 350), store.dispatch, canvasRefs, selectionRefs, setClassName);
+
+    // result — snapped onto x=20, and the alignment guide is recorded
+    const node = store.getState().design.nodes[idA];
+
+    expect(node).toMatchObject({ segments: { s1: { tangentStart: { x: 20, y: 350 } } } });
+    expect(canvasRefs.vectorAlignmentGuideRef.current).not.toBeNull();
   });
 
   it('should clear a previously recorded snapped handle once the drag angle leaves the tolerance again', () => {
     // mock
     const idA = addVectorNode();
     const canvas = createCanvas();
-    const vectorHandleDragRef = createVectorHandleDragRef({ end: 'start', nodeId: idA, segmentId: 's1', vertexId: 'v1' });
-    const snappedVectorHandleRef = createSnappedVectorHandleRef();
+    const canvasRefs = createCanvasRefs();
+    const selectionRefs = createSelectionToolRefs();
 
-    snappedVectorHandleRef.current = { end: 'start', segmentId: 's1' };
+    selectionRefs.vectorHandleDragRef.current = { end: 'start', nodeId: idA, segmentId: 's1', vertexId: 'v1' };
+    canvasRefs.snappedVectorHandleRef.current = { end: 'start', segmentId: 's1' };
 
     // before — atan2(5, 20) ≈ 14deg, outside the tolerance
-    continueVectorHandleDrag(canvas, pointerEvent(20, 5), store.dispatch, vectorHandleDragRef, snappedVectorHandleRef, vi.fn());
+    continueVectorHandleDrag(canvas, pointerEvent(20, 5), store.dispatch, canvasRefs, selectionRefs, vi.fn());
 
     // result
-    expect(snappedVectorHandleRef.current).toBeNull();
+    expect(canvasRefs.snappedVectorHandleRef.current).toBeNull();
   });
 });

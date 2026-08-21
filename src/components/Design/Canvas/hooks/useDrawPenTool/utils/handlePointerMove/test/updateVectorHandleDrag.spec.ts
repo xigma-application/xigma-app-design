@@ -6,6 +6,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPendingOutgoingTangent } from '../../../types';
 import { TVectorNode } from 'types/design/types';
 
@@ -17,6 +18,7 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const createPendingOutgoingTangentRef = (): RefObject<TPendingOutgoingTangent | null> => ({ current: null });
 const createPenDraggedHandlePositionRef = (): RefObject<{ x: number; y: number } | null> => ({ current: null });
 const createPenDraggedHandleIsSnappedRef = (): RefObject<boolean> => ({ current: false });
+const createVectorAlignmentGuideRef = (): TCanvasRefs['vectorAlignmentGuideRef'] => ({ current: null });
 
 const addVectorNodeWithSegment = (): string => {
   store.dispatch(
@@ -64,6 +66,7 @@ describe('updateVectorHandleDrag', () => {
       pendingOutgoingTangentRef,
       penDraggedHandlePositionRef,
       penDraggedHandleIsSnappedRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -94,6 +97,7 @@ describe('updateVectorHandleDrag', () => {
       pendingOutgoingTangentRef,
       penDraggedHandlePositionRef,
       penDraggedHandleIsSnappedRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -125,6 +129,7 @@ describe('updateVectorHandleDrag', () => {
       pendingOutgoingTangentRef,
       penDraggedHandlePositionRef,
       penDraggedHandleIsSnappedRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result — pulled onto the exact horizontal axis (y locked to 0), mirrored onto the incoming segment
@@ -155,6 +160,7 @@ describe('updateVectorHandleDrag', () => {
       pendingOutgoingTangentRef,
       penDraggedHandlePositionRef,
       penDraggedHandleIsSnappedRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result — x locked to 0, negated back to positive zero rather than -0
@@ -185,6 +191,7 @@ describe('updateVectorHandleDrag', () => {
       pendingOutgoingTangentRef,
       penDraggedHandlePositionRef,
       penDraggedHandleIsSnappedRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result — deflected off the raw (20,12), always flagged snapped under the hard constraint
@@ -211,6 +218,7 @@ describe('updateVectorHandleDrag', () => {
       pendingOutgoingTangentRef,
       penDraggedHandlePositionRef,
       penDraggedHandleIsSnappedRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -239,6 +247,7 @@ describe('updateVectorHandleDrag', () => {
       pendingOutgoingTangentRef,
       penDraggedHandlePositionRef,
       penDraggedHandleIsSnappedRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result

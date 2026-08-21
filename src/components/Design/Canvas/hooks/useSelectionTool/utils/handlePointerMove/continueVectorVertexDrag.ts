@@ -1,4 +1,5 @@
-import { RefObject } from 'react';
+// others
+import { VECTOR_ALIGNMENT_SNAP_TOLERANCE_PX } from 'constant/canvas';
 
 // store
 import { updateNode } from 'store/design/slice';
@@ -6,11 +7,14 @@ import { selectViewport } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
-import { TVectorVertexDragState } from 'types/design/selectionTool/types';
+import { TCanvasRefs } from 'types/design/canvas/types';
+import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 // utils
+import { getAllVectorVertexPositions } from '../../../../utils/getAllVectorVertexPositions';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
+import { getVectorGroupAlignmentGuide } from '../../../../utils/getVectorGroupAlignmentGuide';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 import { translateVectorVertices } from '../../../../utils/translateVectorVertices';
 
@@ -18,22 +22,30 @@ export const continueVectorVertexDrag = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
   dispatch: AppDispatch,
-  vectorVertexDragRef: RefObject<TVectorVertexDragState | null>,
+  canvasRefs: TCanvasRefs,
+  selectionRefs: TSelectionToolRefs,
   setClassName: (className: string | null) => void,
 ): void => {
-  const dragState = vectorVertexDragRef.current;
+  const dragState = selectionRefs.vectorVertexDragRef.current;
 
   if (dragState) {
     const state = store.getState();
     const node = getVectorEditingNode(state.design.nodes, dragState.nodeId);
 
     if (node) {
-      const point = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
+      const viewport = selectViewport(state);
+      const point = screenToWorld(getPointerPosition(canvas, event), viewport);
       const deltaX = point.x - dragState.pointerStart.x;
       const deltaY = point.y - dragState.pointerStart.y;
-      const draggedVertices = translateVectorVertices(dragState.origins, deltaX, deltaY);
+      const draggedVertexIds = Object.keys(dragState.origins);
+      const draggedPoints = draggedVertexIds.map((id) => ({ x: dragState.origins[id].x + deltaX, y: dragState.origins[id].y + deltaY }));
+      const candidates = getAllVectorVertexPositions(state.design.nodes, draggedVertexIds);
+      const alignmentTolerance = VECTOR_ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom;
+      const { deltaCorrection, guide } = getVectorGroupAlignmentGuide(draggedPoints, candidates, alignmentTolerance);
+      const draggedVertices = translateVectorVertices(dragState.origins, deltaX + deltaCorrection.x, deltaY + deltaCorrection.y);
 
       dispatch(updateNode({ changes: { vertices: { ...node.vertices, ...draggedVertices } }, id: dragState.nodeId }));
+      canvasRefs.vectorAlignmentGuideRef.current = guide;
       setClassName('move');
     }
   }

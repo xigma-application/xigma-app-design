@@ -4,6 +4,7 @@ import { RefObject } from 'react';
 import { AppDispatch, AppStore } from 'store';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPenDragOrigin, TPendingOutgoingTangent } from '../../types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode, TViewport } from 'types/design/types';
@@ -25,6 +26,7 @@ export const startOrContinueVectorNetwork = (
   dragOriginRef: RefObject<TPenDragOrigin | null>,
   dragStartRef: RefObject<TPoint | null>,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
+  vectorAlignmentGuideRef: TCanvasRefs['vectorAlignmentGuideRef'],
 ): void => {
   if (!node) {
     startNewVectorNetwork(point, dispatch, appStore, dragOriginRef, dragStartRef);
@@ -37,9 +39,11 @@ export const startOrContinueVectorNetwork = (
       penActiveVertexId,
       viewport,
       dispatch,
+      appStore,
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      vectorAlignmentGuideRef,
       event.ctrlKey || event.metaKey,
       event.shiftKey,
     );

@@ -17,6 +17,7 @@ import {
 import { TDraftEntity } from 'types/design/types';
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TPenDragOrigin } from '../useDrawPenTool/types';
+import { TVectorAlignmentGuide } from '../../utils/applyVectorPointSnapping';
 import {
   TRotateDragState,
   TVectorMultiDragState,
@@ -54,6 +55,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
   const sliceRef = useRef<TSliceDraft | null>(null);
   const snappedVectorHandleRef = useRef<TVectorHandleHover | null>(null);
   const starCornerRadiusDragRef = useRef<TStarCornerRadiusDragState | null>(null);
+  const vectorAlignmentGuideRef = useRef<TVectorAlignmentGuide | null>(null);
   const vectorMultiDragRef = useRef<TVectorMultiDragState | null>(null);
   const vectorMultiSelectBoxRef = useRef<TVectorMultiSelectBox | null>(null);
   const vectorMultiSelectResizeDragRef = useRef<TVectorMultiSelectResizeDragState | null>(null);
@@ -91,6 +93,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
       sliceRef,
       snappedVectorHandleRef,
       starCornerRadiusDragRef,
+      vectorAlignmentGuideRef,
       vectorMultiDragRef,
       vectorMultiSelectBoxRef,
       vectorMultiSelectResizeDragRef,

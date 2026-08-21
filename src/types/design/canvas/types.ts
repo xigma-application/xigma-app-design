@@ -4,6 +4,7 @@ import { RefObject } from 'react';
 import { TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
 import { TDraftEntity, TVectorTangent } from 'types/design/types';
 import { TPenDragOrigin } from 'components/Design/Canvas/hooks/useDrawPenTool/types';
+import { TVectorAlignmentGuide } from 'components/Design/Canvas/utils/applyVectorPointSnapping';
 import {
   TRotateDragState,
   TVectorMultiDragState,
@@ -116,6 +117,7 @@ export type TCanvasRefs = {
   sliceRef: RefObject<TSliceDraft | null>;
   snappedVectorHandleRef: RefObject<TVectorHandleHover | null>;
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>;
+  vectorAlignmentGuideRef: RefObject<TVectorAlignmentGuide | null>;
   vectorMultiDragRef: RefObject<TVectorMultiDragState | null>;
   vectorMultiSelectBoxRef: RefObject<TVectorMultiSelectBox | null>;
   vectorMultiSelectResizeDragRef: RefObject<TVectorMultiSelectResizeDragState | null>;

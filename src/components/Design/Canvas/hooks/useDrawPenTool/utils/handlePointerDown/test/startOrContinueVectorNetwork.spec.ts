@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPenDragOrigin, TPendingOutgoingTangent } from '../../../types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
@@ -34,6 +35,7 @@ const pointerEvent = (pointerId = 1, options: Partial<PointerEventInit> = {}): P
 const createDragOriginRef = (): RefObject<TPenDragOrigin | null> => ({ current: null });
 const createDragStartRef = (): RefObject<TPoint | null> => ({ current: null });
 const createPendingOutgoingTangentRef = (): RefObject<TPendingOutgoingTangent | null> => ({ current: null });
+const createVectorAlignmentGuideRef = (): TCanvasRefs['vectorAlignmentGuideRef'] => ({ current: null });
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
@@ -80,6 +82,7 @@ describe('startOrContinueVectorNetwork', () => {
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -111,6 +114,7 @@ describe('startOrContinueVectorNetwork', () => {
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -150,6 +154,7 @@ describe('startOrContinueVectorNetwork', () => {
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -159,9 +164,11 @@ describe('startOrContinueVectorNetwork', () => {
       'v1',
       IDENTITY_VIEWPORT,
       dispatch,
+      appStore,
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
       false,
       false,
     );
@@ -192,6 +199,7 @@ describe('startOrContinueVectorNetwork', () => {
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -201,9 +209,11 @@ describe('startOrContinueVectorNetwork', () => {
       'v1',
       IDENTITY_VIEWPORT,
       dispatch,
+      appStore,
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
       true,
       false,
     );
@@ -231,6 +241,7 @@ describe('startOrContinueVectorNetwork', () => {
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
     );
 
     // result
@@ -240,9 +251,11 @@ describe('startOrContinueVectorNetwork', () => {
       'v1',
       IDENTITY_VIEWPORT,
       dispatch,
+      appStore,
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
       false,
       true,
     );

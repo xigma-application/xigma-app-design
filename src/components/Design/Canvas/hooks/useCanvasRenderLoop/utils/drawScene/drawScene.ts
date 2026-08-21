@@ -34,6 +34,7 @@ import { drawSceneNodes } from './drawSceneNodes';
 import { drawSelectionOutline } from './drawSelectionOutline';
 import { drawSliceDraft } from 'utils/canvas/drawSliceDraft';
 import { drawStarRatioHandleLayer } from './drawStarRatioHandleLayer';
+import { drawVectorAlignmentGuide } from './drawVectorAlignmentGuide';
 import { drawVectorEditHandlesLayer } from './drawVectorEditHandlesLayer/drawVectorEditHandlesLayer';
 import { drawVertexCountHandlesLayer } from './drawVertexCountHandlesLayer';
 import { getPathOutlineStyles } from './getPathOutlineStyles';
@@ -182,6 +183,7 @@ export const drawScene = (
     viewport,
   );
   drawEditingPathTextHandle(gl, program, buffer, editingTextBox, clientWidth, clientHeight, viewport);
+  drawVectorAlignmentGuide(gl, program, buffer, refs.vectorAlignmentGuideRef.current, clientWidth, clientHeight, viewport);
   drawMarquee(gl, program, buffer, marqueeRect, clientWidth, clientHeight, viewport);
   drawSliceDraft(gl, program, buffer, sliceRect, clientWidth, clientHeight, viewport);
 };

@@ -889,3 +889,45 @@ test('pressing Shift immediately re-evaluates an in-progress tangent-handle drag
   // result — the live tangent handle already snapped just from the key press
   expect(afterShift.equals(beforeShift)).toBe(false);
 });
+
+test('placing a new vertex near a vertex on a completely separate shape snaps it onto that alignment guide, pixel-identical to placing it exactly there', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  // mock — shape A is an unrelated short vertical line at x=700 (the alignment candidate); shape B is
+  // drawn separately, its second vertex placed a couple of px off shape A's x=700 column
+  await designPage.goto('e2e-test-pen-alignment-guide-commit');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawVectorPath([
+    { x: 700, y: 300 },
+    { x: 700, y: 500 },
+  ]);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+
+  await designPage.selectTool('pen');
+  await designPage.click(900, 300); // shape B's v1
+  await designPage.click(703, 600); // shape B's v2 — a couple of px off shape A's x=700 column
+  await designPage.pointerMove(1500, 900); // rest away
+  const snapped = await designPage.canvas.screenshot();
+
+  await designPage.goto('e2e-test-pen-alignment-guide-commit-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawVectorPath([
+    { x: 700, y: 300 },
+    { x: 700, y: 500 },
+  ]);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+
+  await designPage.selectTool('pen');
+  await designPage.click(900, 300);
+  await designPage.click(700, 600); // exactly on shape A's column — where the guide should have snapped
+  await designPage.pointerMove(1500, 900);
+  const exact = await designPage.canvas.screenshot();
+
+  expect(snapped.equals(exact)).toBe(true);
+});

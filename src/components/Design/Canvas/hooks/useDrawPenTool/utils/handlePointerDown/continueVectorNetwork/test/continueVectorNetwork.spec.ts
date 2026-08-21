@@ -6,6 +6,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPenDragOrigin, TPendingOutgoingTangent } from '../../../../types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
@@ -20,6 +21,7 @@ const createDragStartRef = (): RefObject<TPoint | null> => ({ current: null });
 const createPendingOutgoingTangentRef = (value: TPendingOutgoingTangent | null = null): RefObject<TPendingOutgoingTangent | null> => ({
   current: value,
 });
+const createVectorAlignmentGuideRef = (): TCanvasRefs['vectorAlignmentGuideRef'] => ({ current: null });
 
 const addVectorNode = (): string => {
   store.dispatch(
@@ -85,9 +87,11 @@ describe('continueVectorNetwork', () => {
       'v1',
       IDENTITY_VIEWPORT,
       store.dispatch,
+      store,
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
       false,
       false,
     );
@@ -122,9 +126,11 @@ describe('continueVectorNetwork', () => {
       'v1',
       IDENTITY_VIEWPORT,
       store.dispatch,
+      store,
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
       false,
       false,
     );
@@ -154,9 +160,11 @@ describe('continueVectorNetwork', () => {
       'v3',
       IDENTITY_VIEWPORT,
       store.dispatch,
+      store,
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
       false,
       false,
     );
@@ -183,9 +191,11 @@ describe('continueVectorNetwork', () => {
       'v3',
       IDENTITY_VIEWPORT,
       store.dispatch,
+      store,
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
       true,
       false,
     );
@@ -211,9 +221,11 @@ describe('continueVectorNetwork', () => {
       'v1',
       IDENTITY_VIEWPORT,
       store.dispatch,
+      store,
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
       true,
       false,
     );
@@ -238,9 +250,11 @@ describe('continueVectorNetwork', () => {
       'v1',
       IDENTITY_VIEWPORT,
       store.dispatch,
+      store,
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
       false,
       false,
     );
@@ -274,9 +288,11 @@ describe('continueVectorNetwork', () => {
       'v1',
       IDENTITY_VIEWPORT,
       store.dispatch,
+      store,
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
       false,
       false,
     );
@@ -307,9 +323,11 @@ describe('continueVectorNetwork', () => {
       'v1',
       IDENTITY_VIEWPORT,
       store.dispatch,
+      store,
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
       false,
       true,
     );
@@ -340,9 +358,11 @@ describe('continueVectorNetwork', () => {
       'v1',
       IDENTITY_VIEWPORT,
       store.dispatch,
+      store,
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
       false,
       true,
     );
@@ -367,9 +387,11 @@ describe('continueVectorNetwork', () => {
       'v1',
       IDENTITY_VIEWPORT,
       store.dispatch,
+      store,
       createDragOriginRef(),
       createDragStartRef(),
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
       false,
       false,
     );
@@ -396,9 +418,11 @@ describe('continueVectorNetwork', () => {
       'v1',
       IDENTITY_VIEWPORT,
       store.dispatch,
+      store,
       dragOriginRef,
       dragStartRef,
       pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
       false,
       false,
     );
@@ -419,5 +443,60 @@ describe('continueVectorNetwork', () => {
     // a click-drag onto the split point shapes its tangent instead of only ever committing a straight join
     expect(dragOriginRef.current).toEqual({ nodeId, segmentId: connectingSegment?.id, vertexId: newVertexId });
     expect(dragStartRef.current).toEqual({ x: 250, y: 0 });
+  });
+
+  it('should snap the committed vertex onto an alignment guide with a vertex on a completely separate vector node, then clear the guide ref', () => {
+    // mock — a second, unrelated vector node has a vertex at x=500, well within alignment tolerance of
+    // the click's own x — the committed point should snap onto that column instead of the raw click x
+    const nodeId = addVectorNode();
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+
+    store.dispatch(
+      addNode({
+        fillColor: null,
+        name: 'Vector',
+        parentId: null,
+        rotation: 0,
+        segments: {},
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: NodeType.vector,
+        vertexHandleModes: {},
+        vertices: { a: { id: 'a', x: 500, y: 900 } },
+      }),
+    );
+
+    const dragOriginRef = createDragOriginRef();
+    const dragStartRef = createDragStartRef();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+    const vectorAlignmentGuideRef = createVectorAlignmentGuideRef();
+
+    vectorAlignmentGuideRef.current = {
+      horizontal: null,
+      vertical: { anchor: { x: 999, y: 999 }, match: { x: 999, y: 999 } },
+    };
+
+    // before — click a couple of px off x=500, well outside cardinal angle-snap tolerance from v1(0,0)
+    continueVectorNetwork(
+      { x: 502, y: 350 },
+      node,
+      'v1',
+      IDENTITY_VIEWPORT,
+      store.dispatch,
+      store,
+      dragOriginRef,
+      dragStartRef,
+      pendingOutgoingTangentRef,
+      vectorAlignmentGuideRef,
+      false,
+      false,
+    );
+
+    // result — snapped onto x=500, and the guide ref is cleared once the point actually commits
+    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const newVertexId = store.getState().design.penActiveVertexId as string;
+
+    expect(updatedNode.vertices[newVertexId].x).toBe(500);
+    expect(vectorAlignmentGuideRef.current).toBeNull();
   });
 });
