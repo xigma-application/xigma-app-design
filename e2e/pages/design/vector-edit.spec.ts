@@ -1279,3 +1279,116 @@ test('box-dragging several selected vertices together snaps the whole group by t
 
   expect(snapped.equals(exact)).toBe(true);
 });
+
+test('the Lasso tool (activated via its "Q" shortcut) selects every vertex whose point falls inside a freeform, multi-point drawn loop, leaving points outside untouched', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-lasso-select');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawOpenTriangle(designPage); // v1(900,300), v2(1050,300), v3(1050,450)
+  await designPage.selectTool('default');
+  await page.keyboard.press('q');
+
+  const v1Region = { height: 24, width: 24, x: 888, y: 288 };
+  const v2Region = { height: 24, width: 24, x: 1038, y: 288 };
+  const v3Region = { height: 24, width: 24, x: 1038, y: 438 };
+
+  const beforeV1 = await page.screenshot({ clip: v1Region });
+  const beforeV2 = await page.screenshot({ clip: v2Region });
+  const beforeV3 = await page.screenshot({ clip: v3Region });
+
+  // a freeform loop tracing a rectangle spanning y 250-320, same enclosure as the marquee's own
+  // equivalent test — catches v1/v2 (both at y=300), stays well clear of v3 (y=450)
+  await designPage.dragVectorLasso([
+    { x: 850, y: 250 },
+    { x: 1100, y: 250 },
+    { x: 1100, y: 320 },
+    { x: 850, y: 320 },
+  ]);
+
+  const afterV1 = await page.screenshot({ clip: v1Region });
+  const afterV2 = await page.screenshot({ clip: v2Region });
+  const afterV3 = await page.screenshot({ clip: v3Region });
+
+  expect(afterV1.equals(beforeV1)).toBe(false);
+  expect(afterV2.equals(beforeV2)).toBe(false);
+  expect(afterV3.equals(beforeV3)).toBe(true);
+});
+
+test('starting a Lasso drag directly on top of an existing vertex still starts a lasso stroke instead of dragging that vertex — a dedicated tool intercepts the click before any vertex-drag resolver sees it', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-lasso-over-vertex');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawOpenTriangle(designPage); // v1(900,300), v2(1050,300), v3(1050,450)
+  await designPage.selectTool('default');
+  await page.keyboard.press('q');
+
+  const v1Region = { height: 40, width: 40, x: 880, y: 280 };
+  const beforeV1 = await page.screenshot({ clip: v1Region });
+
+  // dragging starting exactly on v1 and ending well away from it — if this were a vertex drag, v1
+  // would have moved to the release point; a lasso stroke instead leaves it exactly where it was
+  await designPage.dragVectorLasso([
+    { x: 900, y: 300 },
+    { x: 1200, y: 600 },
+  ]);
+
+  const afterV1 = await page.screenshot({ clip: v1Region });
+
+  expect(afterV1.equals(beforeV1)).toBe(true);
+});
+
+test('the Lasso fill renders a uniform translucent overlay over empty canvas WHILE the stroke is still being drawn, not the page’s own checker background bleeding through a torn alpha channel', async ({
+  page,
+}) => {
+  // asserted mid-drag, deliberately never releasing the pointer: the render loop redraws an opaque
+  // background over the whole canvas every frame (drawSceneBackground.ts), which re-opaques any torn
+  // alpha channel on the very next tick — so a regression here is only ever visible for the single
+  // live frame the fill is still being drawn, never in a screenshot taken after pointerUp
+  const { PNG } = await import('pngjs');
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-lasso-fill-opaque-canvas');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawOpenTriangle(designPage); // v1(900,300), v2(1050,300), v3(1050,450) — well clear of the loop below
+  await designPage.selectTool('default');
+  await page.keyboard.press('q');
+
+  // a loop over empty canvas, away from any node's own stroke/fill — pointer stays held down
+  await designPage.pointerDown(500, 550);
+  await designPage.pointerMove(700, 550);
+  await designPage.pointerMove(700, 650);
+  await designPage.pointerMove(500, 650);
+
+  // a small region well inside the fill, clear of the dashed border and the corner vertex dots
+  const interiorRegion = { height: 40, width: 40, x: 560, y: 580 };
+  const screenshot = await page.screenshot({ clip: interiorRegion });
+
+  await designPage.pointerUp();
+
+  const png = PNG.sync.read(screenshot);
+
+  const [firstR, firstG, firstB] = [png.data[0], png.data[1], png.data[2]];
+  let maxChannelDelta = 0;
+
+  for (let index = 0; index < png.data.length; index += 4) {
+    maxChannelDelta = Math.max(
+      maxChannelDelta,
+      Math.abs(png.data[index] - firstR),
+      Math.abs(png.data[index + 1] - firstG),
+      Math.abs(png.data[index + 2] - firstB),
+    );
+  }
+
+  // a checkerboard bleeding through would swing wildly between two very different colors across this
+  // region; a correctly opaque canvas produces one uniform translucent-blue-over-background color
+  expect(maxChannelDelta).toBeLessThan(4);
+});

@@ -69,8 +69,10 @@ describe('useCanvasDragPan behaviors', () => {
     renderDragPan(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 40, 25));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 40, 25));
+    });
 
     // result
     expect(store.getState().design.viewport).toEqual({ x: 30, y: 15, zoom: 1 });
@@ -84,8 +86,10 @@ describe('useCanvasDragPan behaviors', () => {
     renderDragPan(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10, 0));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 40, 25));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10, 0));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 40, 25));
+    });
 
     // result
     expect(store.getState().design.viewport).toEqual(DEFAULT_VIEWPORT);
@@ -131,7 +135,9 @@ describe('useCanvasDragPan behaviors', () => {
     renderDragPan(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 10, 10));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 10, 10));
+    });
 
     // result
     expect(canvasRef.current?.releasePointerCapture).not.toHaveBeenCalled();
@@ -145,9 +151,11 @@ describe('useCanvasDragPan behaviors', () => {
     renderDragPan(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 10, 10));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 999, 999));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 10, 10));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 999, 999));
+    });
 
     // result
     expect(store.getState().design.viewport).toEqual(DEFAULT_VIEWPORT);

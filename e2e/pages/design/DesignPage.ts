@@ -181,6 +181,21 @@ export class DesignPage {
     await this.page.keyboard.up('Shift');
   }
 
+  // a free-hand multi-point drag (Lasso tool) — down at the first point, through every intermediate
+  // point in order, up at the last; unlike dragVectorPoint's single interpolated straight line, the
+  // actual drawn shape is the polyline connecting these points
+  async dragVectorLasso(points: { x: number; y: number }[]): Promise<void> {
+    const [first, ...rest] = points;
+
+    await this.pointerDown(first.x, first.y);
+
+    for (const point of rest) {
+      await this.pointerMove(point.x, point.y);
+    }
+
+    await this.pointerUp();
+  }
+
   async typeText(content: string): Promise<void> {
     await this.page.keyboard.type(content);
   }

@@ -56,6 +56,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
   const snappedVectorHandleRef = useRef<TVectorHandleHover | null>(null);
   const starCornerRadiusDragRef = useRef<TStarCornerRadiusDragState | null>(null);
   const vectorAlignmentGuideRef = useRef<TVectorAlignmentGuide | null>(null);
+  const vectorLassoPathRef = useRef<TPoint[] | null>(null);
   const vectorMultiDragRef = useRef<TVectorMultiDragState | null>(null);
   const vectorMultiSelectBoxRef = useRef<TVectorMultiSelectBox | null>(null);
   const vectorMultiSelectResizeDragRef = useRef<TVectorMultiSelectResizeDragState | null>(null);
@@ -94,6 +95,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
       snappedVectorHandleRef,
       starCornerRadiusDragRef,
       vectorAlignmentGuideRef,
+      vectorLassoPathRef,
       vectorMultiDragRef,
       vectorMultiSelectBoxRef,
       vectorMultiSelectResizeDragRef,

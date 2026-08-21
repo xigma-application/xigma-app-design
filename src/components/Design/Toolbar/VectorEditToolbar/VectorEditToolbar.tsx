@@ -8,7 +8,7 @@ import { Icon } from 'shared';
 import { useVectorEditToolbar } from './hooks/useVectorEditToolbar';
 
 // others
-import { TOOLS, translationNameSpace } from './constants';
+import { ICON_SIZE, TOOLS, translationNameSpace } from './constants';
 
 // styles
 import styles from './vector-edit-toolbar.module.scss';
@@ -28,12 +28,16 @@ const VectorEditToolbar: FC = () => {
       {TOOLS.slice(2).map(renderTool)}
       <div className={styles.VectorEditToolbar__separator} />
       <button className={styles.VectorEditToolbar__button} type="button">
-        <span className={styles.VectorEditToolbar__label}>{t(`${translationNameSpace}.more`)}</span>
-        <Icon name="ChevronDown" size={8} />
+        <div className={styles.VectorEditToolbar__more}>
+          <span className={styles.VectorEditToolbar__label} style={{ padding: '0' }}>
+            {t(`${translationNameSpace}.more`)}
+          </span>
+          <Icon name="ChevronDown" size={16} />
+        </div>
       </button>
       <div className={styles.VectorEditToolbar__separator} />
       <button aria-label={t('common.close')} className={styles.VectorEditToolbar__button} onClick={handleClose} type="button">
-        <Icon name="Close" />
+        <Icon name="Close" size={ICON_SIZE} />
       </button>
     </div>
   );

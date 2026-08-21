@@ -38,6 +38,7 @@ describe('createCanvasRefs behaviors', () => {
       snappedVectorHandleRef: { current: null },
       starCornerRadiusDragRef: { current: null },
       vectorAlignmentGuideRef: { current: null },
+      vectorLassoPathRef: { current: null },
       vectorMultiDragRef: { current: null },
       vectorMultiSelectBoxRef: { current: null },
       vectorMultiSelectResizeDragRef: { current: null },

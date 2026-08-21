@@ -23,6 +23,7 @@ import { disarmStarCornerRadiusDrag } from './disarmStarCornerRadiusDrag';
 import { disarmStarRatioDrag } from './disarmStarRatioDrag';
 import { disarmStarVertexCountDrag } from './disarmStarVertexCountDrag';
 import { disarmVectorHandleDrag } from './disarmVectorHandleDrag';
+import { disarmVectorLassoDrag } from './disarmVectorLassoDrag';
 import { disarmVectorMarqueeDrag } from './disarmVectorMarqueeDrag';
 import { disarmVectorMultiDrag } from './disarmVectorMultiDrag/disarmVectorMultiDrag';
 import { disarmVectorMultiSelectResizeDrag } from './disarmVectorMultiSelectResizeDrag';
@@ -55,6 +56,7 @@ export const handlePointerUp = (
   disarmMarqueeDrag(canvas, event, selectionRefs.marqueeStartRef, canvasRefs.marqueeRef);
   disarmVectorVertexDrag(canvas, event, canvasRefs, selectionRefs, setClassName);
   disarmVectorHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
+  disarmVectorLassoDrag(canvas, event, canvasRefs, setClassName);
   disarmVectorMultiDrag(canvas, event, dispatch, canvasRefs, setClassName);
   disarmVectorMultiSelectResizeDrag(canvas, event, canvasRefs.vectorMultiSelectResizeDragRef, canvasRefs.vectorMultiSelectBoxRef);
   disarmVectorMultiSelectRotateDrag(canvas, event, canvasRefs.vectorMultiSelectRotateDragRef, canvasRefs.vectorMultiSelectBoxRef);

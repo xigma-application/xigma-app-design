@@ -3,7 +3,7 @@ import { ARM_RESOLVERS } from './constants';
 
 // store
 import { beginHistoryGesture } from 'store/history/actions';
-import { selectOrderedNodes, selectSelectedIds, selectSelectedNodes, selectViewport } from 'store/design/selectors';
+import { selectActiveTool, selectOrderedNodes, selectSelectedIds, selectSelectedNodes, selectViewport } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
@@ -32,6 +32,7 @@ export const handlePointerDown = (
     const selectedNodes = selectSelectedNodes(state);
     const orderedNodes = selectOrderedNodes(state);
     const ctx: TArmContext = {
+      activeTool: selectActiveTool(state),
       canvas,
       canvasRefs,
       currentSelection: selectSelectedIds(state),

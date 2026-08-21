@@ -89,7 +89,9 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     renderDoubleClickTool(canvasRef);
 
     // action — inside the triangle
-    canvasRef.current?.dispatchEvent(doubleClickEvent(2025, 2020));
+    act(() => {
+      canvasRef.current?.dispatchEvent(doubleClickEvent(2025, 2020));
+    });
 
     // result
     const { design } = store.getState();
@@ -108,7 +110,9 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     renderDoubleClickTool(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(doubleClickEvent(2205, 2205));
+    act(() => {
+      canvasRef.current?.dispatchEvent(doubleClickEvent(2205, 2205));
+    });
 
     // result
     expect(store.getState().design.vectorEditingNodeId).toBeNull();
@@ -125,7 +129,9 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     renderDoubleClickTool(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(doubleClickEvent(2025, 2020));
+    act(() => {
+      canvasRef.current?.dispatchEvent(doubleClickEvent(2025, 2020));
+    });
 
     // result
     expect(store.getState().design.vectorEditingNodeId).toBeNull();
@@ -162,7 +168,9 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     renderDoubleClickTool(canvasRef);
 
     // action — nowhere near the triangle
-    canvasRef.current?.dispatchEvent(doubleClickEvent(9000, 9000));
+    act(() => {
+      canvasRef.current?.dispatchEvent(doubleClickEvent(9000, 9000));
+    });
 
     // result
     expect(store.getState().design.vectorEditingNodeId).toBeNull();
@@ -180,7 +188,9 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     renderDoubleClickTool(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(doubleClickEvent(2025, 2030));
+    act(() => {
+      canvasRef.current?.dispatchEvent(doubleClickEvent(2025, 2030));
+    });
 
     // result
     const { design } = store.getState();
@@ -202,7 +212,9 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     renderDoubleClickTool(canvasRef);
 
     // action — inside the triangle it's already editing
-    canvasRef.current?.dispatchEvent(doubleClickEvent(2025, 2020));
+    act(() => {
+      canvasRef.current?.dispatchEvent(doubleClickEvent(2025, 2020));
+    });
 
     // result
     expect(store.getState().design.vectorEditingNodeId).toBe(idA);

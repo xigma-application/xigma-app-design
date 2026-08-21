@@ -52,6 +52,20 @@ describe('useKeyboardShortcuts behaviors', () => {
     expect(store.getState().design.activeTool).toBe(ToolName.hand);
   });
 
+  it('should switch to the lasso tool on "Q"', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyQ' });
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.lasso);
+  });
+
   it('should switch to the rectangle tool on "R"', () => {
     // mock
     const store = createTestStore();

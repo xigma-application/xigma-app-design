@@ -76,7 +76,11 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
   useEffect(() => {
     const canvas = refs.canvasRef.current;
 
-    if (canvas && (activeTool === ToolName.default || activeTool === ToolName.scale) && !isCanvasCaretEditingActive) {
+    if (
+      canvas &&
+      (activeTool === ToolName.default || activeTool === ToolName.scale || activeTool === ToolName.lasso) &&
+      !isCanvasCaretEditingActive
+    ) {
       const pointerDownListener = (event: PointerEvent): void => onPointerDown(canvas, event, refs, selectionRefs);
       const pointerMoveListener = (event: PointerEvent): void => onPointerMove(canvas, event, refs, selectionRefs);
       const pointerUpListener = (event: PointerEvent): void => onPointerUp(canvas, event, refs, selectionRefs);
@@ -106,6 +110,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         refs.selectedVectorSegmentIdsRef.current = [];
         refs.snappedVectorHandleRef.current = null;
         refs.vectorAlignmentGuideRef.current = null;
+        refs.vectorLassoPathRef.current = null;
         lastPointerClientPositionRef.current = null;
       };
     }

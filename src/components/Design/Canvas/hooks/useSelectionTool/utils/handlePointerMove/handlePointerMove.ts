@@ -22,6 +22,7 @@ import { continueStarCornerRadiusDrag } from './continueStarCornerRadiusDrag';
 import { continueStarRatioDrag } from './continueStarRatioDrag';
 import { continueStarVertexCountDrag } from './continueStarVertexCountDrag';
 import { continueVectorHandleDrag } from './continueVectorHandleDrag';
+import { continueVectorLassoDrag } from './continueVectorLassoDrag';
 import { continueVectorMarqueeDrag } from './continueVectorMarqueeDrag';
 import { continueVectorMultiDrag } from './continueVectorMultiDrag';
 import { continueVectorMultiSelectResizeDrag } from './continueVectorMultiSelectResizeDrag';
@@ -59,6 +60,7 @@ export const handlePointerMove = (
   continueVectorVertexDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   resolveVectorCornerHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs);
   continueVectorHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
+  continueVectorLassoDrag(canvas, event, canvasRefs);
   continueVectorMultiDrag(canvas, event, dispatch, canvasRefs, setClassName);
   continueVectorMultiSelectResizeDrag(canvas, event, dispatch, canvasRefs.vectorMultiSelectResizeDragRef);
   continueVectorMultiSelectRotateDrag(canvas, event, dispatch, canvasRefs.vectorMultiSelectRotateDragRef);

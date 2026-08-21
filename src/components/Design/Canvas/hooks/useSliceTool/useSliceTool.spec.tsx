@@ -152,12 +152,16 @@ describe('useSliceTool behaviors', () => {
     // before
     const sliceRef = renderSliceTool(canvasRef);
 
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 500, 500));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 550, 550));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 550, 550));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 500, 500));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 550, 550));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 550, 550));
+    });
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 900, 900));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 900, 900));
+    });
 
     // result
     expect(sliceRef.current).toBeNull();

@@ -1,5 +1,5 @@
 import { Provider } from 'react-redux';
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { RefObject } from 'react';
 
 // hooks
@@ -118,7 +118,9 @@ describe('useTextEditOnDoubleClick behaviors', () => {
     renderDoubleClickTool(canvasRef);
 
     // action — close to the "Hi" glyphs near the top-left of the box
-    canvasRef.current?.dispatchEvent(doubleClickEvent(2002, 2002));
+    act(() => {
+      canvasRef.current?.dispatchEvent(doubleClickEvent(2002, 2002));
+    });
 
     // result
     const { design } = store.getState();
@@ -143,7 +145,9 @@ describe('useTextEditOnDoubleClick behaviors', () => {
     const stopPropagationSpy = vi.spyOn(event, 'stopPropagation');
 
     // action
-    canvasRef.current?.dispatchEvent(event);
+    act(() => {
+      canvasRef.current?.dispatchEvent(event);
+    });
 
     // result
     expect(preventDefaultSpy).toHaveBeenCalled();
@@ -163,7 +167,9 @@ describe('useTextEditOnDoubleClick behaviors', () => {
     renderDoubleClickTool(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(doubleClickEvent(2750, 2750));
+    act(() => {
+      canvasRef.current?.dispatchEvent(doubleClickEvent(2750, 2750));
+    });
 
     // result
     const { design } = store.getState();
@@ -182,7 +188,9 @@ describe('useTextEditOnDoubleClick behaviors', () => {
     renderDoubleClickTool(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(doubleClickEvent(2850, 3100));
+    act(() => {
+      canvasRef.current?.dispatchEvent(doubleClickEvent(2850, 3100));
+    });
 
     // result
     const { design } = store.getState();
@@ -203,7 +211,9 @@ describe('useTextEditOnDoubleClick behaviors', () => {
     renderDoubleClickTool(canvasRef);
 
     // action — far from the "Hi" glyphs but still inside the 500x500 fixed box
-    canvasRef.current?.dispatchEvent(doubleClickEvent(2400, 2400));
+    act(() => {
+      canvasRef.current?.dispatchEvent(doubleClickEvent(2400, 2400));
+    });
 
     // result
     expect(store.getState().design.editingNodeId).toBe(idA);
@@ -217,7 +227,9 @@ describe('useTextEditOnDoubleClick behaviors', () => {
     renderDoubleClickTool(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(doubleClickEvent(9000, 9000));
+    act(() => {
+      canvasRef.current?.dispatchEvent(doubleClickEvent(9000, 9000));
+    });
 
     // result
     expect(store.getState().design.editingTextBox).toBeNull();
@@ -233,7 +245,9 @@ describe('useTextEditOnDoubleClick behaviors', () => {
     renderDoubleClickTool(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(doubleClickEvent(2205, 2205));
+    act(() => {
+      canvasRef.current?.dispatchEvent(doubleClickEvent(2205, 2205));
+    });
 
     // result
     expect(store.getState().design.editingTextBox).toBeNull();
@@ -251,7 +265,9 @@ describe('useTextEditOnDoubleClick behaviors', () => {
     renderDoubleClickTool(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(doubleClickEvent(2302, 2302));
+    act(() => {
+      canvasRef.current?.dispatchEvent(doubleClickEvent(2302, 2302));
+    });
 
     // result
     expect(store.getState().design.editingNodeId).toBeNull();
@@ -278,7 +294,9 @@ describe('useTextEditOnDoubleClick behaviors', () => {
     renderDoubleClickTool(canvasRef);
 
     // action — double-clicking inside the same box while it's actively being edited
-    canvasRef.current?.dispatchEvent(doubleClickEvent(2902, 2902));
+    act(() => {
+      canvasRef.current?.dispatchEvent(doubleClickEvent(2902, 2902));
+    });
 
     // result — the live session's own (unsaved) content must survive, not reset to 'original'
     const { design } = store.getState();

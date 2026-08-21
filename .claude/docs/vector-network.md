@@ -2331,6 +2331,130 @@ own `translationNameSpace` computation (`` `${toolbarNamespace}.vectorEditToolba
 in the same move, since the relative import that used to reach the `design`-root namespace directly
 now resolves one level shallower.
 
+## 42. The Lasso tool — freeform vertex-only selection, its own arm resolver precedence, and a real transparency bug it surfaced in `drawVectorFill.ts`
+
+A new dedicated Vector Edit Mode tool (`ToolName.lasso`, shortcut `Q`) — not a modifier on the
+existing rectangular marquee (§21/§31), a genuinely separate tool with its own icon/cursor/keyboard
+shortcut, activated from `VectorEditToolbar` (§41) or the "Q" key. Two screenshots of Figma's own
+lasso were the spec: a freeform, hand-drawn contour whose interior fills translucent and whose border
+renders dashed, snapping the selection to whatever vertices land inside it as it's drawn.
+
+**Scope, confirmed directly rather than assumed**: candidates are **vertices only** — no
+handles/segments mode-switching the way the box marquee's `resolveVectorMarqueeMode.ts`
+(points/handles/everything) does. This was asked and answered explicitly up front, deliberately
+simpler than parity with the existing marquee.
+
+**A dedicated tool needs to intercept the click before any vertex/handle/segment resolver gets a
+chance — the existing resolvers in `ARM_RESOLVERS` (`useSelectionTool/utils/handlePointerDown/
+constants.ts`) never check `activeTool` at all, they only gate on `vectorEditingNodeId` and
+hit-testing.** That's correct for Move (the *implicit default* interaction while in Vector Edit Mode
+with no dedicated tool selected), but wrong for Lasso: starting a lasso stroke directly on top of an
+existing vertex must never arm a vertex-drag. `armVectorLassoOnPointerDown.ts` is inserted as the
+very **first** entry in `ARM_RESOLVERS`, checking `activeTool === ToolName.lasso &&
+vectorEditingNodeId` and unconditionally consuming the event (returning `true`) whenever that holds,
+regardless of what's under the cursor. This required adding `activeTool: ToolName` to `TArmContext`
+(`handlePointerDown/types.ts`), populated once in `handlePointerDown.ts` via `selectActiveTool(state)`
+— the first field any resolver needed that wasn't already computed per-pointerdown. Covered directly
+by a live e2e test (`TEST_CASES.md`, new): a lasso drag starting exactly on an existing vertex and
+ending far away leaves that vertex's own pixel region completely unchanged, proving no drag armed.
+
+**The drawn path is a single ref, not split between selection-tool bookkeeping and canvas-render
+mirroring** — `canvasRefs.vectorLassoPathRef: RefObject<TPoint[] | null>` (new `TCanvasRefs` field,
+threaded through `useCanvasRefs.ts`/`createCanvasRefs.ts` the same as every other canvas ref) holds
+the live, growing point array used for *both* the running hit-test on every `pointermove`
+(`continueVectorLassoDrag.ts`) *and* the render loop's own read of it every frame
+(`drawScene.ts` → `drawVectorLasso.ts`) — matching `canvasRefs.marqueeRef`'s own precedent of one ref
+serving both roles for the rectangular marquee, rather than splitting drag-arithmetic state
+(`selectionRefs`) from a separate render-mirror the way some earlier features do.
+
+**Hit-testing reuses the ray-casting algorithm already living in `components/Design/Canvas/utils/
+isPointInPolygonVertices.ts`, but doesn't import it** — the new `getVectorPointsInPolygon.ts`
+(`utils/canvas/vectorNetwork/`, a **global**-layer file) reimplements the same point-in-polygon math
+locally, exactly the layering rule this doc's own §"module-structure" story already established for
+`getVectorPointsInRect.ts` (which similarly reimplements a trivial `isPointInRect` rather than
+importing the feature-local version) — the global vector-network utils layer never imports from
+`components/`. The path is always treated as an **implicitly closed** loop (wraparound via modulo,
+last point connects back to the first), matching what the two reference screenshots showed even
+mid-drag: a just-started lasso stroke (still mostly a straight out-and-back line) renders as a thin
+sliver, which is exactly what a closed loop of a near-straight path looks like.
+
+**Rendering reuses two existing primitives rather than inventing new ones, both extended with small,
+backward-compatible additions:**
+- **Fill** — `drawVectorFill.ts` (the same even-odd stencil-buffer technique real Vector node fills
+  already use, §3) gained a trailing `alpha = 1` parameter (default preserves every existing opaque
+  call site untouched), called as `drawVectorFill(gl, program, buffer, [path], DRAFT_FRAME_STROKE, ...,
+  MARQUEE_FILL_ALPHA)` — the same translucent-blue-over-scene look the box marquee already has,
+  reusing its exact color/alpha constants rather than inventing new ones.
+- **Outline** — a new `drawDashedPolylineOutline/` folder (not a flat file — asked for directly, along
+  with splitting its internals: "do osbnego folderu i jego funkcje rozbij do pliku. pointAtDistance"
+  then, once that landed, "[the dashVertices block] to też osobna funkcja w innym pliku"), generalizing
+  `drawDashedRectOutline.ts`'s perimeter-parameterized dash walk from a rect's four fixed edges to an
+  arbitrary point sequence:
+  - `getPointAtDistance.ts` — walks a `TPolylineSegment[]` (`readonly [TPoint, TPoint]` pairs) to the
+    point sitting a given arc-length distance along the closed loop, wrapping via modulo for
+    out-of-range distances.
+  - `getDashVertices.ts` — resolves the dash count from the path's total perimeter and the zoom-scaled
+    dash+gap pattern length (identical `Math.max(1, Math.round(perimeter / patternLength))` formula as
+    `drawDashedRectOutline.ts`), then samples `getPointAtDistance` twice per dash (start/end) to
+    produce the flat `[x1,y1,x2,y2,...]` vertex array.
+  - `drawDashedPolylineOutline.ts` itself is left as pure GL plumbing (uniform/attribute wiring,
+    `gl.drawArrays(gl.LINES, ...)`) once the math moved out — mirrors how `drawVectorFill.ts` sits
+    beside its own sibling `getVectorFillCoveringQuad.ts`.
+  - A genuine dead-code trap surfaced while extracting `getPointAtDistance`: a `for`-loop version
+    needs a trailing `return` after the loop to satisfy TypeScript's "not all code paths return"
+    check, even though that line is mathematically unreachable (the walk is guaranteed to resolve
+    within the segments, since `perimeter` and each segment's length come from the identical
+    `Math.hypot` formula evaluated twice) — an unreachable statement that a 100%-branch-coverage gate
+    can never satisfy. Fixed by restructuring as `segments.reduce(...)` with a `{ found, point,
+    remaining }` accumulator instead: the seed value is *always* evaluated (every `reduce` call
+    evaluates its initial value unconditionally, whether or not it ends up being the final result), so
+    there's no longer a genuinely-dead line — every branch is legitimately reachable through ordinary
+    multi-segment test paths.
+  - `VECTOR_LASSO_DASH_LENGTH_PX`/`VECTOR_LASSO_DASH_GAP_PX` (`constant/canvas.ts`) started at `8`/`6`
+    (matching `SLICE_BOUNDING_BOX_DASH_LENGTH_PX`/`_GAP_PX`'s existing proportions), then both scaled
+    by 0.75 (`6`/`4.5`) on a direct "make the outline 25% denser" ask — keeping the dash:gap ratio
+    fixed, just shortening the whole repeating cycle.
+
+**A real, live-caught bug: the lasso fill visibly showed the page's own checker texture bleeding
+through the canvas while actively drawing.** Root cause: `drawVectorFill.ts`'s stencil-composite pass
+called `gl.colorMask(true, true, true, true)` before drawing the translucent covering quad — harmless
+for every *pre-existing* caller (real Vector node fills are always fully opaque, so writing `alpha=1`
+into a framebuffer that's already `alpha=1` from the frame's own background pass is a no-op), but this
+was the *first* caller to ever pass `alpha < 1` through this path. `drawSceneBackground.ts` — the very
+first draw call every frame — deliberately does `gl.colorMask(true, true, true, false)` right after
+painting the opaque background specifically so the canvas element's *own* alpha channel stays locked
+at fully opaque for the rest of the frame (`WEBGL_CONTEXT_ATTRIBUTES` has no explicit `alpha: false`,
+so the `<canvas>` really does composite against the DOM behind it, `premultipliedAlpha: false`).
+`drawVectorFill.ts`'s own `colorMask(true,true,true,true)` re-enabled alpha writes for its composite
+pass, letting the lasso's `alpha=0.2` actually punch a translucent hole in the canvas's own alpha
+channel — and with nothing running afterward to re-lock it, that hole let the checker texture div
+(`Canvas__texture`, sitting behind the canvas as its idle-state background) show straight through.
+Fixed by changing that one `colorMask` call to `(true, true, true, false)`, matching
+`drawSceneBackground.ts`'s own convention — RGB channels still composite normally against whatever's
+already drawn (correct translucency), alpha is simply never touched again after the background pass
+locks it.
+
+**The regression is only observable for a single live frame, not after release — this shaped how the
+e2e test had to be written.** `drawSceneBackground.ts` repaints the whole canvas opaque at the start of
+*every* frame, so a torn alpha channel self-heals on the very next tick regardless of the bug; a
+screenshot taken after `pointerUp()` (the natural place to assert from) would never have caught it,
+which is exactly why the first attempt at this regression test passed even with the bug deliberately
+reintroduced. Fixed by asserting **mid-drag**, holding the pointer down across the screenshot instead
+of releasing first — confirmed both ways (reverting the `colorMask` fix locally to prove the test fails
+without it, then restoring the fix to confirm it passes) before trusting the test as a real guard.
+
+**Scope note**: shift/handles-mode/additive-selection (holding Shift to extend an existing selection,
+the way the box marquee behaves via `preVectorMarqueeVertexIdsRef`) is deliberately **not**
+implemented for Lasso yet — every stroke replaces the current vertex selection outright, matching the
+"simpler than the marquee" scope decision above.
+
+Covered by 3 new e2e scenarios in `vector-edit.spec.ts` (freeform enclosure selecting the right
+vertices; starting a drag on an existing vertex intercepting instead of dragging it; the mid-drag
+transparency regression guard) plus unit coverage for every new file
+(`armVectorLassoOnPointerDown.ts`, `continueVectorLassoDrag.ts`, `disarmVectorLassoDrag.ts`,
+`getVectorPointsInPolygon.ts`, `drawVectorLasso.ts`, and the whole `drawDashedPolylineOutline/` folder)
+at 100%.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

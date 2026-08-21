@@ -40,15 +40,24 @@
     }
   }
 
+  &__more {
+    align-items: center;
+    display: flex;
+    margin-left: var(--spacer-2);
+    margin-right: var(--spacer-1);
+  }
+
   &__label {
+    font-family: Inter, sans-serif;
     font-size: 11px;
+    font-weight: 400;
     padding-right: var(--spacer-2);
     white-space: nowrap;
   }
 
   &__separator {
     background-color: var(--color-neutral-3);
-    height: 100%;
+    height: calc(100% + var(--spacer-2) * 2);
     width: 1px;
   }
 }

@@ -36,6 +36,7 @@ import { drawSliceDraft } from 'utils/canvas/drawSliceDraft';
 import { drawStarRatioHandleLayer } from './drawStarRatioHandleLayer';
 import { drawVectorAlignmentGuide } from './drawVectorAlignmentGuide';
 import { drawVectorEditHandlesLayer } from './drawVectorEditHandlesLayer/drawVectorEditHandlesLayer';
+import { drawVectorLasso } from './drawVectorLasso';
 import { drawVertexCountHandlesLayer } from './drawVertexCountHandlesLayer';
 import { getPathOutlineStyles } from './getPathOutlineStyles';
 import { hasCornerRadiusDragMoved } from './hasCornerRadiusDragMoved';
@@ -184,6 +185,7 @@ export const drawScene = (
   );
   drawEditingPathTextHandle(gl, program, buffer, editingTextBox, clientWidth, clientHeight, viewport);
   drawVectorAlignmentGuide(gl, program, buffer, refs.vectorAlignmentGuideRef.current, clientWidth, clientHeight, viewport);
+  drawVectorLasso(gl, program, buffer, refs.vectorLassoPathRef.current, clientWidth, clientHeight, viewport);
   drawMarquee(gl, program, buffer, marqueeRect, clientWidth, clientHeight, viewport);
   drawSliceDraft(gl, program, buffer, sliceRect, clientWidth, clientHeight, viewport);
 };

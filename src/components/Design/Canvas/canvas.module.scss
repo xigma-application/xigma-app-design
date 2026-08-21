@@ -55,6 +55,13 @@
         auto;
     }
 
+    &--lasso {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/lasso.png') 8x) 4 4,
+        auto;
+    }
+
     &--hand {
       cursor:
         /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */

@@ -32,6 +32,7 @@ export const createCanvasRefs = (overrides: Partial<TCanvasRefs> = {}): TCanvasR
   snappedVectorHandleRef: { current: null },
   starCornerRadiusDragRef: { current: null },
   vectorAlignmentGuideRef: { current: null },
+  vectorLassoPathRef: { current: null },
   vectorMultiDragRef: { current: null },
   vectorMultiSelectBoxRef: { current: null },
   vectorMultiSelectResizeDragRef: { current: null },

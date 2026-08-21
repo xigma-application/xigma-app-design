@@ -38,7 +38,7 @@ export const useVectorEditToolbar = (): TUseVectorEditToolbar => {
 
   const renderTool = useCallback(
     (tool: TVectorEditTool): ReactNode => {
-      const isActive = tool.toolName !== undefined && activeTool !== ToolName.pen;
+      const isActive = tool.toolName !== undefined && activeTool === tool.toolName;
       const handleClick =
         tool.toolName !== undefined
           ? (): void => {

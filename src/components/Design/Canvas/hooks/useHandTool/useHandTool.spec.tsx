@@ -71,8 +71,10 @@ describe('useHandTool behaviors', () => {
     renderHandTool(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 40, 25));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 40, 25));
+    });
 
     // result
     expect(store.getState().design.viewport).toEqual({ x: 30, y: 15, zoom: 1 });
@@ -88,8 +90,10 @@ describe('useHandTool behaviors', () => {
     renderHandTool(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10, 1));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 40, 25));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10, 1));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 40, 25));
+    });
 
     // result
     expect(store.getState().design.viewport).toEqual(DEFAULT_VIEWPORT);
@@ -162,7 +166,9 @@ describe('useHandTool behaviors', () => {
     renderHandTool(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 10, 10));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 10, 10));
+    });
 
     // result
     expect(canvasRef.current?.releasePointerCapture).not.toHaveBeenCalled();
@@ -178,9 +184,11 @@ describe('useHandTool behaviors', () => {
     renderHandTool(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 10, 10));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 999, 999));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 10, 10));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 999, 999));
+    });
 
     // result
     expect(store.getState().design.viewport).toEqual(DEFAULT_VIEWPORT);
@@ -206,7 +214,9 @@ describe('useHandTool behaviors', () => {
     expect(classNameRef.current).not.toBe('hand');
     expect(classNameRef.current).not.toBe('pressing');
 
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 999, 999));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 999, 999));
+    });
     expect(store.getState().design.viewport).toEqual(DEFAULT_VIEWPORT);
   });
 });

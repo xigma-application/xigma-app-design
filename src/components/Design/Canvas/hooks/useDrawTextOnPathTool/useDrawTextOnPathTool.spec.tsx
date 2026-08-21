@@ -1,6 +1,6 @@
 import { Provider } from 'react-redux';
 import { RefObject } from 'react';
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 
 // hooks
 import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
@@ -51,8 +51,10 @@ describe('useDrawTextOnPathTool behaviors', () => {
     renderTextOnPathTool(canvasRef, draftRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 4000, 4000));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 4020, 4020));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 4000, 4000));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 4020, 4020));
+    });
 
     // result
     expect(draftRef.current).toBeNull();
@@ -69,8 +71,10 @@ describe('useDrawTextOnPathTool behaviors', () => {
     renderTextOnPathTool(canvasRef, draftRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 4100, 4100));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 4150, 4140));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 4100, 4100));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 4150, 4140));
+    });
 
     // result
     expect(draftRef.current).toEqual({ height: 40, pathType: 'ellipse', type: NodeType.path, width: 50, x: 4100, y: 4100 });
@@ -87,9 +91,11 @@ describe('useDrawTextOnPathTool behaviors', () => {
     renderTextOnPathTool(canvasRef, draftRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 4200, 4200));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 4250, 4240));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 4250, 4240));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 4200, 4200));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 4250, 4240));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 4250, 4240));
+    });
 
     // result
     const { design } = store.getState();
@@ -113,8 +119,10 @@ describe('useDrawTextOnPathTool behaviors', () => {
     renderTextOnPathTool(canvasRef, draftRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 4300, 4300, 1));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 4350, 4340));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 4300, 4300, 1));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 4350, 4340));
+    });
 
     // result
     expect(draftRef.current).toBeNull();
@@ -131,8 +139,10 @@ describe('useDrawTextOnPathTool behaviors', () => {
     renderTextOnPathTool(canvasRef, draftRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 4400, 4400));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 4400, 4400));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 4400, 4400));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 4400, 4400));
+    });
 
     // result
     const { design } = store.getState();
@@ -152,7 +162,9 @@ describe('useDrawTextOnPathTool behaviors', () => {
     renderTextOnPathTool(canvasRef, draftRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 4500, 4500));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 4500, 4500));
+    });
 
     // result
     expect(store.getState().design.activeTool).toBe(ToolName.textOnPath);

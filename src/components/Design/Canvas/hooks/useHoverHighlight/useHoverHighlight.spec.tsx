@@ -237,7 +237,9 @@ describe('useHoverHighlight behaviors', () => {
     const { hoverRef } = renderHoverHighlight(canvasRef);
 
     // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 160, 160));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 160, 160));
+    });
 
     // result
     expect(hoverRef.current).toBe(idA);

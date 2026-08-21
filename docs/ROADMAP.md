@@ -1137,16 +1137,35 @@ Drobniejsze, ale zauważalne różnice względem Figmy, niepowiązane z żadnym 
       pojawia się tylko w Vector Edit Mode, 10px nad głównym `Toolbar` (`bottom: calc(100% + 10px)`,
       wyśrodkowany względem jego szerokości — renderowany jako dziecko `Toolbar.tsx`, nie osobno w
       `DesignPage.tsx`). Lista przycisków budowana z jednego `const TOOLS` (`VectorEditToolbar/
-      constants.ts`) i mapowana przez `renderTool` — na razie tylko Move ma realne działanie
-      (`toolName: ToolName.default`, aktywne zawsze gdy Pen nie jest aktywnym narzędziem; kliknięcie
-      przełącza z powrotem na Move, przerywając Pen), reszta (Lasso/Paint/Bend/Cut) renderuje się
-      jako nieaktywne placeholdery bez własnego `ToolName` — dojdą później. X zamyka Vector Edit Mode
-      wprost (`setVectorEditingNodeId(null)` + reset toola), nie przez 3-stopniowe Escape z Etapu 6.
-      Cała logika (dispatch, `renderTool`, `handleClose`) wydzielona do `hooks/useVectorEditToolbar.tsx`
-      — komponent to czysty JSX. Nowe tokeny SCSS (`src/styles/_variables.scss`: `--spacer-2`,
-      `--radius-medium`, `--radius-large`, `--elevation-200-canvas`) — świadomie bez nowych
-      `--color-bg`/`--color-bg-toolbar-selected`, bo dublowałyby już istniejące `--color-neutral-5`/
-      `--color-blue-1`.
+      constants.ts`) i mapowana przez `renderTool` — Move i Lasso mają realne działanie (własny
+      `toolName`, aktywne dokładnie gdy ten `ToolName` jest bieżącym narzędziem), Paint/Bend/Cut
+      wciąż renderują się jako nieaktywne placeholdery bez własnego `ToolName` — dojdą później. X
+      zamyka Vector Edit Mode wprost (`setVectorEditingNodeId(null)` + reset toola), nie przez
+      3-stopniowe Escape z Etapu 6. Cała logika (dispatch, `renderTool`, `handleClose`) wydzielona do
+      `hooks/useVectorEditToolbar.tsx` — komponent to czysty JSX. Nowe tokeny SCSS
+      (`src/styles/_variables.scss`: `--spacer-2`, `--radius-medium`, `--radius-large`,
+      `--elevation-200-canvas`) — świadomie bez nowych `--color-bg`/`--color-bg-toolbar-selected`, bo
+      dublowałyby już istniejące `--color-neutral-5`/`--color-blue-1`.
+- [x] **Lasso tool** — dedykowane narzędzie (`ToolName.lasso`, skrót `Q`) do zaznaczania wierzchołków
+      dowolnym, ręcznie rysowanym konturem, tylko w Vector Edit Mode — zaznacza wyłącznie wierzchołki
+      (nie uchwyty/segmenty, świadomie prostsze niż istniejący prostokątny marquee z jego trybami
+      points/handles/everything). Kliknięcie Lasso zawsze przechwytuje pointerdown jako pierwsze w
+      `ARM_RESOLVERS` (`armVectorLassoOnPointerDown.ts`), nawet bezpośrednio na istniejącym
+      wierzchołku — dedykowane narzędzie nigdy nie uzbraja przeciągania wierzchołka. Kontur zapisywany
+      w `canvasRefs.vectorLassoPathRef` (żywy podgląd + hit-testing w jednym), test przynależności
+      przez `getVectorPointsInPolygon.ts` (ray-casting, kontur traktowany jako domknięta pętla —
+      lokalna implementacja w warstwie globalnej, nie import z `components/`, ten sam wzorzec co
+      `getVectorPointsInRect.ts`). Renderowanie: wypełnienie przez `drawVectorFill.ts` (ten sam
+      stencil-buffer even-odd co prawdziwy fill Vector node'a, teraz z opcjonalnym `alpha`) + dashed
+      outline przez nowy `drawDashedPolylineOutline/` (własny folder, `getPointAtDistance.ts` i
+      `getDashVertices.ts` jako osobne, testowane jednostkowo funkcje — generalizacja istniejącego
+      `drawDashedRectOutline.ts` na dowolny, niekoniecznie prostokątny kontur). Żywy raport z sesji:
+      lasso realnie prześwitywało teksturą tła canvasu podczas rysowania — `drawVectorFill.ts` własnym
+      `colorMask(true,true,true,true)` nadpisywało globalne zablokowanie zapisu do kanału alfa, które
+      `drawSceneBackground.ts` ustawia raz na klatkę, żeby canvas zawsze zostawał wizualnie
+      nieprzezroczysty; naprawione zmianą na `colorMask(true,true,true,false)`, z e2e regresją łapiącą
+      błąd tylko w trakcie aktywnego przeciągania (klatka po puszczeniu przycisku i tak odzyskuje pełną
+      nieprzezroczystość). Pełny opis: `.claude/docs/vector-network.md` §42.
 - [ ] menu kontekstowe (prawy klik) na node'ach i na pustym canvasie — Copy/Paste, Duplicate,
       Bring to front/Send to back, Delete itd. — dziś nie istnieje w ogóle
 - [ ] kontrolka zoomu w rogu canvasu (aktualny % + dropdown: Zoom to fit / Zoom to selection /

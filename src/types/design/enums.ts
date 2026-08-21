@@ -23,6 +23,7 @@ export enum ToolName {
   ellipse = 'ellipse',
   frame = 'frame',
   hand = 'hand',
+  lasso = 'lasso',
   line = 'line',
   media = 'media',
   pen = 'pen',

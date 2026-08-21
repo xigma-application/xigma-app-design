@@ -75,7 +75,9 @@ describe('drawVectorFill', () => {
 
     expect(gl.drawArrays).toHaveBeenNthCalledWith(1, gl.TRIANGLE_FAN, 0, 3);
 
-    expect(gl.colorMask).toHaveBeenNthCalledWith(2, true, true, true, true);
+    // alpha stays masked off — the canvas's own alpha channel must stay locked opaque, see
+    // drawVectorFill.ts's own comment on why
+    expect(gl.colorMask).toHaveBeenNthCalledWith(2, true, true, true, false);
     expect(gl.stencilFunc).toHaveBeenNthCalledWith(2, gl.NOTEQUAL, 0, 0xff);
     expect(gl.stencilOp).toHaveBeenNthCalledWith(2, gl.KEEP, gl.KEEP, gl.KEEP);
 
@@ -116,5 +118,45 @@ describe('drawVectorFill', () => {
     expect(gl.drawArrays).toHaveBeenNthCalledWith(1, gl.TRIANGLE_FAN, 0, 3);
     expect(gl.drawArrays).toHaveBeenNthCalledWith(2, gl.TRIANGLE_FAN, 0, 4);
     expect(gl.drawArrays).toHaveBeenNthCalledWith(3, gl.TRIANGLES, 0, 6);
+  });
+
+  it('should composite the fill fully opaque when no alpha is given', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const faces = [
+      [
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+      ],
+    ];
+
+    // before
+    drawVectorFill(gl, program, buffer, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), [13 / 255, 153 / 255, 255 / 255, 1]);
+  });
+
+  it('should composite the fill at the given alpha, for a translucent preview overlay like the lasso selection', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const faces = [
+      [
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+      ],
+    ];
+
+    // before
+    drawVectorFill(gl, program, buffer, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0.2);
+
+    // result
+    expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), [13 / 255, 153 / 255, 255 / 255, 0.2]);
   });
 });

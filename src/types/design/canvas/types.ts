@@ -118,6 +118,7 @@ export type TCanvasRefs = {
   snappedVectorHandleRef: RefObject<TVectorHandleHover | null>;
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>;
   vectorAlignmentGuideRef: RefObject<TVectorAlignmentGuide | null>;
+  vectorLassoPathRef: RefObject<TPoint[] | null>;
   vectorMultiDragRef: RefObject<TVectorMultiDragState | null>;
   vectorMultiSelectBoxRef: RefObject<TVectorMultiSelectBox | null>;
   vectorMultiSelectResizeDragRef: RefObject<TVectorMultiSelectResizeDragState | null>;

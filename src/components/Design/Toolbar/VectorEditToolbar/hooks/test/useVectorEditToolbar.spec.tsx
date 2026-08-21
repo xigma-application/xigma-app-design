@@ -1,4 +1,4 @@
-import { fireEvent, render, renderHook, screen } from '@testing-library/react';
+import { act, fireEvent, render, renderHook, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // hooks
@@ -38,14 +38,16 @@ describe('useVectorEditToolbar', () => {
     const { result } = renderUseVectorEditToolbar();
 
     // action
-    result.current.handleClose();
+    act(() => {
+      result.current.handleClose();
+    });
 
     // result
     expect(store.getState().design.vectorEditingNodeId).toBeNull();
     expect(store.getState().design.activeTool).toBe(ToolName.default);
   });
 
-  it('should render a tool with a real ToolName as active whenever Pen is not the active tool, and switch the active tool on click', () => {
+  it('should render a tool with a real ToolName as active exactly when it is the active tool, and switch the active tool on click', () => {
     // before
     const { result } = renderUseVectorEditToolbar();
 
@@ -59,11 +61,29 @@ describe('useVectorEditToolbar', () => {
     expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
 
     // action
-    store.dispatch(setActiveTool(ToolName.pen));
+    act(() => {
+      store.dispatch(setActiveTool(ToolName.pen));
+    });
     fireEvent.click(screen.getByRole('button'));
 
     // result
     expect(store.getState().design.activeTool).toBe(ToolName.default);
+  });
+
+  it('should not show a real-ToolName tool as active when a DIFFERENT real tool is the active one — not just "not Pen"', () => {
+    // before — Lasso is active, not Pen and not Move's own default either
+    store.dispatch(setActiveTool(ToolName.lasso));
+
+    const { result } = renderUseVectorEditToolbar();
+
+    render(
+      <Provider store={store}>
+        {result.current.renderTool({ icon: 'MoveVectorTool', labelKey: 'design.toolbar.tool.default', toolName: ToolName.default })}
+      </Provider>,
+    );
+
+    // result
+    expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('should render a tool with no ToolName as inert — never active, no click handler', () => {
@@ -74,7 +94,7 @@ describe('useVectorEditToolbar', () => {
 
     render(
       <Provider store={store}>
-        {result.current.renderTool({ icon: 'LassoTool', labelKey: 'design.toolbar.vectorEditToolbar.tool.lasso' })}
+        {result.current.renderTool({ icon: 'PaintTool', labelKey: 'design.toolbar.vectorEditToolbar.tool.paint' })}
       </Provider>,
     );
 

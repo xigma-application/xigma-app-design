@@ -13,6 +13,7 @@ export const shortcuts = {
   [ToolName.ellipse]: { secondaryKey: KeyboardKeys.o },
   [ToolName.frame]: { secondaryKey: KeyboardKeys.f },
   [ToolName.hand]: { secondaryKey: KeyboardKeys.h },
+  [ToolName.lasso]: { secondaryKey: KeyboardKeys.q },
   [ToolName.line]: { secondaryKey: KeyboardKeys.l },
   [ToolName.media]: { primaryKeys: [CONTROL_PRIMARY_KEY, 'shift'], secondaryKey: KeyboardKeys.k },
   [ToolName.pen]: { secondaryKey: KeyboardKeys.p },

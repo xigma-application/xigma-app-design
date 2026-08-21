@@ -863,8 +863,10 @@ describe('useSelectionTool behaviors', () => {
     renderSelectionTool(canvasRef);
 
     // action — Ctrl+mousedown reveals straight-line default tangents, then dragging bends the segment
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 3450, 700, { ctrlKey: true }));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 3450, 760, { ctrlKey: true }));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 3450, 700, { ctrlKey: true }));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 3450, 760, { ctrlKey: true }));
+    });
 
     // result — the drag actually changed the tangents away from the straight-line defaults it started at
     const bentNode = store.getState().design.nodes[nodeId] as TVectorNode;
@@ -873,7 +875,9 @@ describe('useSelectionTool behaviors', () => {
     expect(bentNode.segments.s1.tangentEnd).not.toEqual({ x: -100 / 3, y: 0 });
 
     // action — Escape mid-drag (button still conceptually held) cancels it
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    });
 
     // result — back to null, the segment's state from before the Ctrl+click ever happened
     const revertedNode = store.getState().design.nodes[nodeId] as TVectorNode;
@@ -882,7 +886,9 @@ describe('useSelectionTool behaviors', () => {
     expect(revertedNode.segments.s1.tangentEnd).toBeNull();
 
     // action — further pointer movement no longer bends anything, since Escape cleared the drag
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 3450, 900, { ctrlKey: true }));
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 3450, 900, { ctrlKey: true }));
+    });
 
     // result
     const afterFurtherMove = store.getState().design.nodes[nodeId] as TVectorNode;

@@ -3,7 +3,7 @@ import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeId, up
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, ToolName } from 'types/design/enums';
 import { TArmContext } from '../../types';
 import { TEllipseNode, TLineNode, TPolygonNode, TRectangleNode, TStarNode, TTextNode, TVectorNode } from 'types/design/types';
 
@@ -29,6 +29,7 @@ import { armStarVertexCountOnPointerDown } from '../armStarVertexCountOnPointerD
 import { armVectorBendSegmentOnPointerDown } from '../armVectorBendSegmentOnPointerDown';
 import { armVectorCornerHandleOnPointerDown } from '../armVectorCornerHandleOnPointerDown';
 import { armVectorHandleOnPointerDown } from '../armVectorHandleOnPointerDown/armVectorHandleOnPointerDown';
+import { armVectorLassoOnPointerDown } from '../armVectorLassoOnPointerDown';
 import { armVectorMarqueeOnPointerDown } from '../armVectorMarqueeOnPointerDown';
 import { armVectorMultiSelectBoxOnPointerDown } from '../armVectorMultiSelectBoxOnPointerDown';
 import { armVectorMultiSelectResizeOnPointerDown } from '../armVectorMultiSelectResizeOnPointerDown';
@@ -109,6 +110,7 @@ const addVectorNode = (segments: TVectorNode['segments'], vertices: TVectorNode[
 };
 
 const createContext = (overrides: Partial<TArmContext> = {}): TArmContext => ({
+  activeTool: ToolName.default,
   canvas: createCanvas(),
   canvasRefs: createCanvasRefs(),
   currentSelection: [],
@@ -773,6 +775,56 @@ describe('armVectorMarqueeOnPointerDown', () => {
     // result
     expect(armVectorMarqueeOnPointerDown(ctx)).toBeUndefined();
     expect(ctx.selectionRefs.vectorMarqueeStartRef.current).toBeNull();
+  });
+});
+
+describe('armVectorLassoOnPointerDown', () => {
+  afterEach(() => {
+    store.dispatch(setVectorEditingNodeId(null));
+  });
+
+  it('should clear the current vertex/handle/segment selection, start the lasso path at the click point, set the lasso cursor, capture the pointer, and claim the pointerdown, when Lasso is active and Vector Edit Mode is on', () => {
+    // mock
+    store.dispatch(setVectorEditingNodeId('vector-1'));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['vertex-1'];
+    canvasRefs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
+    canvasRefs.selectedVectorSegmentIdsRef.current = ['segment-1'];
+
+    // before — a click that would otherwise land squarely on a node, to prove Lasso intercepts it anyway
+    const ctx = createContext({ activeTool: ToolName.lasso, canvasRefs, hit: rectangle, point: { x: 42, y: 24 } });
+
+    // result
+    expect(armVectorLassoOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorLassoPathRef.current).toEqual([{ x: 42, y: 24 }]);
+    expect(ctx.setClassName).toHaveBeenCalledWith('lasso');
+    expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
+  });
+
+  it('should return undefined (letting the click fall through) when Lasso is not the active tool', () => {
+    // mock
+    store.dispatch(setVectorEditingNodeId('vector-1'));
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.default });
+
+    // result
+    expect(armVectorLassoOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.canvasRefs.vectorLassoPathRef.current).toBeNull();
+  });
+
+  it('should return undefined (letting the click fall through) when Vector Edit Mode is not active', () => {
+    // before
+    const ctx = createContext({ activeTool: ToolName.lasso });
+
+    // result
+    expect(armVectorLassoOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.canvasRefs.vectorLassoPathRef.current).toBeNull();
   });
 });
 

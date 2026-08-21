@@ -3,11 +3,13 @@ import { AppDispatch } from 'store';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
+import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 export type TArmContext = {
+  activeTool: ToolName;
   canvas: HTMLCanvasElement;
   canvasRefs: TCanvasRefs;
   currentSelection: string[];
