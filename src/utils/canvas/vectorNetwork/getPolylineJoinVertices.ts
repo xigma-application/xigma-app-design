@@ -6,7 +6,7 @@ import { getQuadVertices } from '../getQuadVertices';
 
 const MITER_LIMIT = 4;
 
-const getBevelVertices = (point: TPoint, previousOffset: TPoint, nextOffset: TPoint): number[] =>
+export const getBevelVertices = (point: TPoint, previousOffset: TPoint, nextOffset: TPoint): number[] =>
   getQuadVertices(
     point.x + previousOffset.x,
     point.y + previousOffset.y,

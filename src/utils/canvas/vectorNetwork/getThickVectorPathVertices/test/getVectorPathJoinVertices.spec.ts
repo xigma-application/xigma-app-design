@@ -39,8 +39,12 @@ describe('getVectorPathJoinVertices', () => {
     vertices.forEach((value, index) => expect(value).toBeCloseTo(expected[index]));
   });
 
-  it('should fall back to a bevel fan for a branch vertex touched by 3+ segment ends', () => {
-    // mock — the T-branch from getThickVectorPathVertices.spec.ts's own fan test
+  it('should join every wedge for a branch vertex touched by 3+ segment ends, mitering only the one wedge left uncovered by every other arm', () => {
+    // mock — the T-branch from getThickVectorPathVertices.spec.ts's own fan test: none of its 3
+    // wedges is reflex (one is the exact-180deg collinear pass-through, the other two are plain
+    // 90deg wedges already covered by the horizontal arm's own quad), so every one is a flat bevel —
+    // mitering wedges that are already covered would just project a spike past the real silhouette
+    // (the bug this per-wedge "only the widest, and only if reflex" gate exists to avoid)
     const endpointsByVertexId = new Map<string, TVertexEndpoint[]>([
       [
         'v1',
@@ -56,13 +60,19 @@ describe('getVectorPathJoinVertices', () => {
     const vertices = getVectorPathJoinVertices(endpointsByVertexId, 1);
 
     // result
-    const expected = [0, 0, 0, -1, 0, -1, 0, 0, 0, 1, 1, 0, 0, 0, -1, 0, 0, 1];
+    // prettier-ignore
+    const expected = [
+      0, 1, 0, 1, 0, -1, 0, 1, 0, -1, 0, -1,
+      0, -1, -1, 0, 1, 0, 0, -1, 1, 0, 0, 1,
+      1, 0, 0, -1, 0, 1, 1, 0, 0, 1, -1, 0,
+    ];
 
     vertices.forEach((value, index) => expect(value).toBeCloseTo(expected[index]));
   });
 
-  it('should fall back to a bevel fan for exactly 2 endpoints that are both outgoing (no incoming/outgoing pair)', () => {
-    // mock
+  it('should miter only the widest (reflex) wedge for exactly 2 endpoints that are both outgoing (no incoming/outgoing pair)', () => {
+    // mock — the wide (270deg) wedge on the far side gets a real miter, the narrow (90deg) one
+    // between the two arms themselves gets a flat bevel
     const endpointsByVertexId = new Map<string, TVertexEndpoint[]>([
       [
         'v1',
@@ -77,7 +87,11 @@ describe('getVectorPathJoinVertices', () => {
     const vertices = getVectorPathJoinVertices(endpointsByVertexId, 1);
 
     // result
-    const expected = [0, 0, 0, 1, 1, 0, 0, 0, -1, 0, 0, -1];
+    // prettier-ignore
+    const expected = [
+      0, -1, -1, 0, 1, 0, 0, -1, 1, 0, 0, 1,
+      0, 0, -1, 0, -1, -1, 0, 0, -1, -1, 0, -1,
+    ];
 
     vertices.forEach((value, index) => expect(value).toBeCloseTo(expected[index]));
   });

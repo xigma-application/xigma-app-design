@@ -1714,6 +1714,70 @@ with an actual drawn segment), confirms the box renders there at rest, confirms 
 the empty baseline again mid-drag (pressed and moved past the threshold, not yet released), then confirms
 it reappears once released.
 
+## 36. Stroke join geometry — `getThickPolylineVertices.ts`/`getThickVectorPathVertices/`, and a branch-vertex flat-chamfer bug
+
+§3's rendering summary above describes `drawVectorStroke.ts` as "one quad per consecutive flattened
+point pair, no joins between them" — that was true when written but has since drifted: every vertex
+where two or more of these quads meet now gets an explicit join fill, added because the plain
+per-segment quads alone leave a visible triangular notch at any non-collinear corner once stroke width
+and zoom are large enough to see it (`VECTOR_STROKE_WIDTH` is 1 world unit — invisible at zoom 1,
+obvious at zoom 30+, which is why this class of bug only ever gets caught/reported at high zoom).
+
+**`getPolylineJoinVertices.ts`** is the core primitive: given a vertex point plus the perpendicular
+offsets of the segment arriving and the segment leaving, it computes a proper sharp **miter** join
+(the two offset lines extended until they meet), falling back to a flat **bevel** quad only when the
+turn is collinear (`cross === 0`), a dead 180° reversal (`bisectorLength === 0`), or the miter would
+shoot out past `MITER_LIMIT` (4× half-width) on a near-total-reversal turn — same fallback conditions
+browsers use for Canvas/SVG `lineJoin: miter`. `getThickPolylineVertices.ts` calls it for every
+interior point of a single flattened segment's own point array (relevant once a curve's flattened
+into several sub-points, or a closed shape's own middle vertices).
+
+**Network-level joins** (where a Pen-drawn vertex connects *separate* segment objects, the common case
+for a straight polyline corner) go through `getThickVectorPathVertices/`: `collectVectorPathVertexEndpoints.ts`
+groups every segment-endpoint by shared vertex id, and `getVectorPathJoinVertices.ts` branches on how
+many segment-ends land on that vertex — exactly 2 with one incoming/one outgoing reuses
+`getPolylineJoinVertices` directly (a plain corner); anything else (a branch vertex touched by 3+
+segments, or 2 segments that are both outgoing with no natural incoming side) goes through
+`getBranchJoinVertices`.
+
+**The bug, reported directly with a screenshot**: a Pen-tool arrowhead (one shaft segment plus two
+segments Ctrl/Cmd-extended from the same vertex, per §32/§33) rendered with a flat chamfer cut into
+the tip instead of a sharp point — background visible right where the two diagonal arms should meet.
+`getBranchJoinVertices` sorted the vertex's endpoints by angle and, for every angularly-adjacent pair,
+filled the wedge between them with a single flat bevel triangle — never attempting a miter, regardless
+of the angle. That's correct-looking for the two *narrow* wedges of a 3-arm branch (each ~90° here,
+already solid-filled by the segments' own overlapping quads, so a bevel there is redundant but
+harmless) — but the *third* wedge, the wide one that wraps around through the branch's actual visible
+tip, needs the same sharp miter a plain 2-segment corner gets, and never got one.
+
+**First fix attempt, and why it wasn't enough**: calling `getPolylineJoinVertices` — the same "previous
+offset = negated current-arm away-offset, next offset = following-arm away-offset" reconstruction
+described above — for *every* angularly-adjacent pair uniformly did produce a sharp tip on the one
+wedge that needed it. But it also made the two already-solid wedges each compute their *own*
+independent miter, and those two spurious miters project further out than the true tip (`1 + sqrt(2)`
+vs the correct `sqrt(2)`, in half-width units) — visibly pulling the whole tip into an asymmetric
+"flag" shape, off-axis toward whichever arm's spurious miter reached furthest. Caught live, against a
+running build, immediately after the first fix looked plausible in isolation.
+
+**Actual fix**: only the *single widest* gap between angularly-adjacent arms gets the full
+`getPolylineJoinVertices` treatment, and only if it's reflex (> 180°) — every other wedge gets the
+plain flat `getBevelVertices` quad (now exported from `getPolylineJoinVertices.ts`) with no outward
+extension at all. A branch vertex's gaps always sum to exactly 360°, so at most one can be reflex;
+when one is, it's provably the one wedge no other arm's quad already covers, and it's the only one
+that should ever project a point. The T-branch case above has no reflex gap at all (its widest is the
+exact-180° collinear pass-through) — every wedge there gets a bevel, correctly, since none of its
+wedges needs a tip. Regression test: `getThickVectorPathVertices.spec.ts`'s "widest wedge is the
+exterior one" case asserts the *entire* fan, not just the tip coordinate, specifically to catch the
+spurious-extra-miter shape the first attempt produced.
+
+**Verification note**: this class of bug is essentially invisible at default zoom (§ above) — reproducing
+and confirming the fix required actually drawing the shape with the Pen tool and zooming in ~30-40x in
+a live browser (Playwright MCP), not just reading the vertex math. Both the original flat-notch bug and
+the first fix attempt's off-axis spike were only conclusively told apart this way — sign/pairing errors
+in this kind of per-wedge offset reconstruction are easy to get subtly wrong in a way that still passes
+a plausible-looking manual derivation, and only show up as a visibly wrong tip shape, not a type error
+or a failing pre-existing test.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows
