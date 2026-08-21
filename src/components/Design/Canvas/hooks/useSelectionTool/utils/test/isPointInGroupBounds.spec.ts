@@ -19,7 +19,7 @@ const buildNode = (
   x: 0,
   y: 0,
   ...overrides,
-});
+}) as TSceneNode;
 
 describe('isPointInGroupBounds', () => {
   it('should return true for a point in the gap between two same-parent selected nodes', () => {

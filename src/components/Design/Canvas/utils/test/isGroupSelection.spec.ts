@@ -19,7 +19,7 @@ const buildNode = (
   x: 0,
   y: 0,
   ...overrides,
-});
+}) as TSceneNode;
 
 describe('isGroupSelection', () => {
   it('should return true for 2+ nodes sharing the same parent', () => {

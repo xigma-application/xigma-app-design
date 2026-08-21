@@ -1,6 +1,6 @@
 // types
+import { TLineNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
-import { TSceneNodeChanges } from 'types/design/types';
 
 // utils
 import { rotatePoint } from 'utils/math/rotatePoint';
@@ -9,7 +9,7 @@ export const rotateLineNodeOrigin = (
   origin: { x1: number; x2: number; y1: number; y2: number },
   pivot: TPoint,
   deltaDegrees: number,
-): TSceneNodeChanges => {
+): Partial<TLineNode> => {
   const { x: x1, y: y1 } = rotatePoint({ x: origin.x1, y: origin.y1 }, pivot, deltaDegrees);
   const { x: x2, y: y2 } = rotatePoint({ x: origin.x2, y: origin.y2 }, pivot, deltaDegrees);
 

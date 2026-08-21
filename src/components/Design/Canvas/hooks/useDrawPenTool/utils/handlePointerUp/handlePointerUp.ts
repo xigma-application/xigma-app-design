@@ -16,11 +16,13 @@ export const handlePointerUp = (
   dragOriginRef: RefObject<TPenDragOrigin | null>,
   dragStartRef: RefObject<TPoint | null>,
   penDraggedHandlePositionRef: RefObject<TPoint | null>,
+  penDraggedHandleIsSnappedRef: RefObject<boolean>,
 ): void => {
   if (event.button === MouseButton.primary) {
     dragOriginRef.current = null;
     dragStartRef.current = null;
     penDraggedHandlePositionRef.current = null;
+    penDraggedHandleIsSnappedRef.current = false;
     canvas.releasePointerCapture(event.pointerId);
     dispatch(endHistoryGesture());
   }

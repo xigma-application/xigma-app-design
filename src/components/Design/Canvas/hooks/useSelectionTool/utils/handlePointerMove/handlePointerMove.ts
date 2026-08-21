@@ -58,7 +58,7 @@ export const handlePointerMove = (
   continueMarqueeDrag(canvas, event, dispatch, selectionRefs.marqueeStartRef, canvasRefs.marqueeRef);
   continueVectorVertexDrag(canvas, event, dispatch, selectionRefs.vectorVertexDragRef, setClassName);
   resolveVectorCornerHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs);
-  continueVectorHandleDrag(canvas, event, dispatch, selectionRefs.vectorHandleDragRef, setClassName);
+  continueVectorHandleDrag(canvas, event, dispatch, selectionRefs.vectorHandleDragRef, canvasRefs.snappedVectorHandleRef, setClassName);
   continueVectorMultiDrag(canvas, event, dispatch, canvasRefs.vectorMultiDragRef, canvasRefs.vectorMultiSelectBoxRef, setClassName);
   continueVectorMultiSelectResizeDrag(canvas, event, dispatch, canvasRefs.vectorMultiSelectResizeDragRef);
   continueVectorMultiSelectRotateDrag(canvas, event, dispatch, canvasRefs.vectorMultiSelectRotateDragRef);

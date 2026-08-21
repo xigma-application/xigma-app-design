@@ -16,6 +16,7 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const createPendingOutgoingTangentRef = (): RefObject<TPendingOutgoingTangent | null> => ({ current: null });
 const createPenDraggedHandlePositionRef = (): RefObject<{ x: number; y: number } | null> => ({ current: null });
+const createPenDraggedHandleIsSnappedRef = (): RefObject<boolean> => ({ current: false });
 
 const addVectorNodeWithSegment = (): string => {
   store.dispatch(
@@ -49,6 +50,7 @@ describe('updateVectorHandleDrag', () => {
     const nodeId = addVectorNodeWithSegment();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
     const penDraggedHandlePositionRef = createPenDraggedHandlePositionRef();
+    const penDraggedHandleIsSnappedRef = createPenDraggedHandleIsSnappedRef();
 
     // before — 1 world unit of movement, well under the threshold
     updateVectorHandleDrag(
@@ -60,6 +62,7 @@ describe('updateVectorHandleDrag', () => {
       store,
       pendingOutgoingTangentRef,
       penDraggedHandlePositionRef,
+      penDraggedHandleIsSnappedRef,
     );
 
     // result
@@ -68,15 +71,17 @@ describe('updateVectorHandleDrag', () => {
     expect(node.segments.s1.tangentEnd).toBeNull();
     expect(pendingOutgoingTangentRef.current).toBeNull();
     expect(penDraggedHandlePositionRef.current).toBeNull();
+    expect(penDraggedHandleIsSnappedRef.current).toBe(false);
   });
 
-  it('should set the tangent on the origin segment, mark the vertex symmetric so future edits mirror both angle and length, record the pending outgoing tangent, and track the live cursor position once past the threshold', () => {
+  it('should set the tangent on the origin segment, mark the vertex symmetric so future edits mirror both angle and length, record the pending outgoing tangent, and track the live cursor position once past the threshold — angle well outside the snap tolerance, so the raw drag is used unchanged', () => {
     // mock
     const nodeId = addVectorNodeWithSegment();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
     const penDraggedHandlePositionRef = createPenDraggedHandlePositionRef();
+    const penDraggedHandleIsSnappedRef = createPenDraggedHandleIsSnappedRef();
 
-    // before
+    // before — atan2(5, 20) ≈ 14deg, outside the 5deg tolerance
     updateVectorHandleDrag(
       { x: 20, y: 5 },
       { nodeId, segmentId: 's1', vertexId: 'v1' },
@@ -86,6 +91,7 @@ describe('updateVectorHandleDrag', () => {
       store,
       pendingOutgoingTangentRef,
       penDraggedHandlePositionRef,
+      penDraggedHandleIsSnappedRef,
     );
 
     // result
@@ -95,6 +101,64 @@ describe('updateVectorHandleDrag', () => {
     expect(node.vertexHandleModes.v1).toBe('symmetric');
     expect(pendingOutgoingTangentRef.current).toEqual({ tangent: { x: 20, y: 5 }, vertexId: 'v1' });
     expect(penDraggedHandlePositionRef.current).toEqual({ x: 20, y: 5 });
+    expect(penDraggedHandleIsSnappedRef.current).toBe(false);
+  });
+
+  it('should snap the tangent onto the exact axis and flag it when the drag angle is within tolerance', () => {
+    // mock
+    const nodeId = addVectorNodeWithSegment();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+    const penDraggedHandlePositionRef = createPenDraggedHandlePositionRef();
+    const penDraggedHandleIsSnappedRef = createPenDraggedHandleIsSnappedRef();
+
+    // before — a couple of px off horizontal, within the angle-snap tolerance
+    updateVectorHandleDrag(
+      { x: 20, y: 1 },
+      { nodeId, segmentId: 's1', vertexId: 'v1' },
+      { x: 0, y: 0 },
+      IDENTITY_VIEWPORT,
+      store.dispatch,
+      store,
+      pendingOutgoingTangentRef,
+      penDraggedHandlePositionRef,
+      penDraggedHandleIsSnappedRef,
+    );
+
+    // result — pulled onto the exact horizontal axis (y locked to 0), mirrored onto the incoming segment
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+
+    expect(node.segments.s1.tangentEnd).toEqual({ x: -20, y: 0 });
+    expect(pendingOutgoingTangentRef.current).toEqual({ tangent: { x: 20, y: 0 }, vertexId: 'v1' });
+    expect(penDraggedHandlePositionRef.current).toEqual({ x: 20, y: 0 });
+    expect(penDraggedHandleIsSnappedRef.current).toBe(true);
+  });
+
+  it('should snap the tangent onto the exact vertical axis, normalizing the locked x component to positive zero', () => {
+    // mock
+    const nodeId = addVectorNodeWithSegment();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+    const penDraggedHandlePositionRef = createPenDraggedHandlePositionRef();
+    const penDraggedHandleIsSnappedRef = createPenDraggedHandleIsSnappedRef();
+
+    // before — a couple of degrees off vertical, within the angle-snap tolerance
+    updateVectorHandleDrag(
+      { x: 1, y: 20 },
+      { nodeId, segmentId: 's1', vertexId: 'v1' },
+      { x: 0, y: 0 },
+      IDENTITY_VIEWPORT,
+      store.dispatch,
+      store,
+      pendingOutgoingTangentRef,
+      penDraggedHandlePositionRef,
+      penDraggedHandleIsSnappedRef,
+    );
+
+    // result — x locked to 0, negated back to positive zero rather than -0
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+
+    expect(node.segments.s1.tangentEnd).toEqual({ x: 0, y: -20 });
+    expect(Object.is(node.segments.s1.tangentEnd?.x, -0)).toBe(false);
+    expect(penDraggedHandleIsSnappedRef.current).toBe(true);
   });
 
   it('should record the pending outgoing tangent and live cursor position without touching any segment when dragging a fresh vertex with no segmentId yet', () => {
@@ -102,6 +166,7 @@ describe('updateVectorHandleDrag', () => {
     const nodeId = addVectorNodeWithSegment();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
     const penDraggedHandlePositionRef = createPenDraggedHandlePositionRef();
+    const penDraggedHandleIsSnappedRef = createPenDraggedHandleIsSnappedRef();
 
     // before
     updateVectorHandleDrag(
@@ -113,6 +178,7 @@ describe('updateVectorHandleDrag', () => {
       store,
       pendingOutgoingTangentRef,
       penDraggedHandlePositionRef,
+      penDraggedHandleIsSnappedRef,
     );
 
     // result
@@ -127,6 +193,7 @@ describe('updateVectorHandleDrag', () => {
     // mock
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
     const penDraggedHandlePositionRef = createPenDraggedHandlePositionRef();
+    const penDraggedHandleIsSnappedRef = createPenDraggedHandleIsSnappedRef();
 
     // before
     updateVectorHandleDrag(
@@ -138,10 +205,12 @@ describe('updateVectorHandleDrag', () => {
       store,
       pendingOutgoingTangentRef,
       penDraggedHandlePositionRef,
+      penDraggedHandleIsSnappedRef,
     );
 
     // result
     expect(pendingOutgoingTangentRef.current).toBeNull();
     expect(penDraggedHandlePositionRef.current).toBeNull();
+    expect(penDraggedHandleIsSnappedRef.current).toBe(false);
   });
 });

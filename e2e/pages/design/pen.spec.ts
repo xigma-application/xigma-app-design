@@ -739,3 +739,56 @@ test('clicking within the angle-snap tolerance commits the new vertex exactly on
 
   expect(snappedCommit.equals(exactCommit)).toBe(true);
 });
+
+test('click-dragging a tangent handle while placing a vertex, within the angle-snap tolerance of horizontal, snaps it onto the exact axis and colors it orange', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+  const region = { height: 100, width: 220, x: 780, y: 250 };
+
+  // mock — v1 plain, v2 placed with a click-drag whose direction is a couple of px off horizontal
+  // (within the angle-snap tolerance) — the tangent handle itself should snap onto the exact axis
+  await designPage.goto('e2e-test-pen-tangent-angle-snap-drag');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300); // v1
+  await designPage.dragVectorPoint(850, 300, 950, 303); // v2, dragged — near-horizontal tangent
+  const snappedDrag = await page.screenshot({ clip: region });
+
+  // mock — the same gesture, but dragged exactly horizontal — the position the snap should land on
+  await designPage.goto('e2e-test-pen-tangent-angle-snap-drag-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300);
+  await designPage.dragVectorPoint(850, 300, 950, 300); // exactly horizontal
+  const exactDrag = await page.screenshot({ clip: region });
+
+  expect(snappedDrag.equals(exactDrag)).toBe(true);
+});
+
+test('click-dragging a tangent handle well outside the angle-snap tolerance keeps the default blue instead of the orange snap color', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+  const region = { height: 100, width: 220, x: 780, y: 250 };
+
+  await designPage.goto('e2e-test-pen-tangent-angle-snap-diagonal');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300); // v1
+  await designPage.dragVectorPoint(850, 300, 950, 350); // 45deg — well outside the snap tolerance
+  const diagonalDrag = await page.screenshot({ clip: region });
+
+  await designPage.goto('e2e-test-pen-tangent-angle-snap-diagonal-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(700, 300);
+  await designPage.dragVectorPoint(850, 300, 950, 300); // exactly horizontal — snapped, orange
+  const horizontalDrag = await page.screenshot({ clip: region });
+
+  expect(diagonalDrag.equals(horizontalDrag)).toBe(false);
+});

@@ -60,6 +60,7 @@ export const drawPenSegmentPreview = (
       VECTOR_VERTEX_SIZE / viewport.zoom,
       false,
       false,
+      false,
       canvasWidth,
       canvasHeight,
       viewport,

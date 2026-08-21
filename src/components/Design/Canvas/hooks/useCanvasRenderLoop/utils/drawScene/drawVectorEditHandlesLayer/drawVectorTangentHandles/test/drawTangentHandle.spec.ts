@@ -26,6 +26,7 @@ describe('drawTangentHandle', () => {
       4,
       false,
       false,
+      false,
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -55,6 +56,7 @@ describe('drawTangentHandle', () => {
       { x: 3, y: 4 },
       4,
       true,
+      false,
       false,
       200,
       150,
@@ -86,6 +88,7 @@ describe('drawTangentHandle', () => {
       4,
       false,
       true,
+      false,
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -129,6 +132,7 @@ describe('drawTangentHandle', () => {
       4,
       true,
       true,
+      false,
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -138,5 +142,26 @@ describe('drawTangentHandle', () => {
     expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 3, y1: 0, y2: 4 }, '#0d99ff', 1, 200, 150, IDENTITY_VIEWPORT);
     expect(drawRectMock).toHaveBeenCalledTimes(2);
     expect(drawRectMock.mock.calls.map((args) => args[3].width)).toEqual([8, 6]);
+  });
+
+  it('should draw the line in the angle-snap orange when snapped, overriding both hover and selected styling', () => {
+    // before
+    drawTangentHandle(
+      {} as WebGL2RenderingContext,
+      {} as WebGLProgram,
+      {} as WebGLBuffer,
+      { x: 0, y: 0 },
+      { x: 3, y: 4 },
+      4,
+      true,
+      true,
+      true,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
+
+    // result
+    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 3, y1: 0, y2: 4 }, '#cd4422', 1, 200, 150, IDENTITY_VIEWPORT);
   });
 });

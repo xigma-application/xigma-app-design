@@ -13,7 +13,7 @@ import { TDesignState } from 'store/design/types';
 import { ToolName } from 'types/design/enums';
 import { TComment } from 'types/design/types';
 
-const comment: TComment = { author: 'Xigma', content: 'hello', id: 'comment-1', x: 0, y: 0 };
+const comment: TComment = { author: 'Xigma', content: 'hello', createdAt: 0, id: 'comment-1', x: 0, y: 0 };
 
 const createTestStore = (viewport = { x: 0, y: 0, zoom: 1 }): EnhancedStore<{ design: TDesignState }> =>
   configureStore({
@@ -34,8 +34,10 @@ const createTestStore = (viewport = { x: 0, y: 0, zoom: 1 }): EnhancedStore<{ de
         lastShapeTool: ToolName.rectangle,
         lastTextTool: ToolName.text,
         nodes: {},
+        penActiveVertexId: null,
         rootOrder: [],
         selectedIds: [],
+        vectorEditingNodeId: null,
         viewport,
       },
     },

@@ -23,6 +23,7 @@ const pointerEvent = (): PointerEvent => new PointerEvent('pointercancel', { poi
 const createDragOriginRef = (value: TPenDragOrigin | null): RefObject<TPenDragOrigin | null> => ({ current: value });
 const createDragStartRef = (value: TPoint | null): RefObject<TPoint | null> => ({ current: value });
 const createPenDraggedHandlePositionRef = (value: TPoint | null): RefObject<TPoint | null> => ({ current: value });
+const createPenDraggedHandleIsSnappedRef = (value: boolean): RefObject<boolean> => ({ current: value });
 
 describe('handlePointerCancel', () => {
   it('should clear the drag refs and release the pointer capture regardless of which button triggered the cancel', () => {
@@ -31,14 +32,24 @@ describe('handlePointerCancel', () => {
     const dragOriginRef = createDragOriginRef({ nodeId: 'n', segmentId: null, vertexId: 'v' });
     const dragStartRef = createDragStartRef({ x: 1, y: 1 });
     const penDraggedHandlePositionRef = createPenDraggedHandlePositionRef({ x: 5, y: 5 });
+    const penDraggedHandleIsSnappedRef = createPenDraggedHandleIsSnappedRef(true);
 
     // before
-    handlePointerCancel(canvas, pointerEvent(), store.dispatch, dragOriginRef, dragStartRef, penDraggedHandlePositionRef);
+    handlePointerCancel(
+      canvas,
+      pointerEvent(),
+      store.dispatch,
+      dragOriginRef,
+      dragStartRef,
+      penDraggedHandlePositionRef,
+      penDraggedHandleIsSnappedRef,
+    );
 
     // result
     expect(dragOriginRef.current).toBeNull();
     expect(dragStartRef.current).toBeNull();
     expect(penDraggedHandlePositionRef.current).toBeNull();
+    expect(penDraggedHandleIsSnappedRef.current).toBe(false);
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
   });
 });

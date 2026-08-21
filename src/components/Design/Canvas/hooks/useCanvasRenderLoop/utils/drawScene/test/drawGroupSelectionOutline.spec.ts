@@ -40,7 +40,7 @@ const buildNode = (
   x: 0,
   y: 0,
   ...overrides,
-});
+}) as TSceneNode;
 
 describe('drawGroupSelectionOutline', () => {
   it('should draw one shared outline and 4 corner handles for the combined bounds, not per node', () => {

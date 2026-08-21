@@ -30,6 +30,7 @@ const createPendingOutgoingTangentRef = (): RefObject<TPendingOutgoingTangent | 
 const createPenPreviewRef = (): TCanvasRefs['penPreviewRef'] => ({ current: null });
 const createPenNewVertexPreviewRef = (): TCanvasRefs['penNewVertexPreviewRef'] => ({ current: null });
 const createPenDraggedHandlePositionRef = (): TCanvasRefs['penDraggedHandlePositionRef'] => ({ current: null });
+const createPenDraggedHandleIsSnappedRef = (): TCanvasRefs['penDraggedHandleIsSnappedRef'] => ({ current: false });
 const createHoveredSegmentIdRef = (): TCanvasRefs['hoveredSegmentIdRef'] => ({ current: null });
 const createPenHoveredDragArmableVertexRef = (): TCanvasRefs['penHoveredDragArmableVertexRef'] => ({ current: false });
 
@@ -82,6 +83,7 @@ describe('handlePointerMove', () => {
       penPreviewRef,
       penNewVertexPreviewRef,
       penDraggedHandlePositionRef,
+      createPenDraggedHandleIsSnappedRef(),
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
       setClassName,
@@ -95,15 +97,50 @@ describe('handlePointerMove', () => {
     expect(setClassName).toHaveBeenCalledWith('pen');
   });
 
-  it('should clear the drag-preview handle position once no drag is armed', () => {
+  it('should snap the dragged handle onto the exact axis and flag it once armed within the angle-snap tolerance', () => {
+    // mock
+    const nodeId = addVectorNodeWithSegment();
+    const canvas = createCanvas();
+    const penPreviewRef = createPenPreviewRef();
+    const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
+    const penDraggedHandlePositionRef = createPenDraggedHandlePositionRef();
+    const penDraggedHandleIsSnappedRef = createPenDraggedHandleIsSnappedRef();
+    const setClassName = vi.fn();
+
+    // before — a couple of px off horizontal, within the angle-snap tolerance
+    handlePointerMove(
+      canvas,
+      pointerEvent(20, 1),
+      store.dispatch,
+      store,
+      createDragOriginRef({ nodeId, segmentId: 's1', vertexId: 'v1' }),
+      createDragStartRef({ x: 0, y: 0 }),
+      createPendingOutgoingTangentRef(),
+      penPreviewRef,
+      penNewVertexPreviewRef,
+      penDraggedHandlePositionRef,
+      penDraggedHandleIsSnappedRef,
+      createHoveredSegmentIdRef(),
+      createPenHoveredDragArmableVertexRef(),
+      setClassName,
+    );
+
+    // result
+    expect(penDraggedHandlePositionRef.current).toEqual({ x: 20, y: 0 });
+    expect(penDraggedHandleIsSnappedRef.current).toBe(true);
+  });
+
+  it('should clear the drag-preview handle position and its snapped flag once no drag is armed', () => {
     // mock
     const canvas = createCanvas();
     const penPreviewRef = createPenPreviewRef();
     const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
     const penDraggedHandlePositionRef = createPenDraggedHandlePositionRef();
+    const penDraggedHandleIsSnappedRef = createPenDraggedHandleIsSnappedRef();
     const setClassName = vi.fn();
 
     penDraggedHandlePositionRef.current = { x: 20, y: 5 };
+    penDraggedHandleIsSnappedRef.current = true;
 
     // before
     handlePointerMove(
@@ -117,6 +154,7 @@ describe('handlePointerMove', () => {
       penPreviewRef,
       penNewVertexPreviewRef,
       penDraggedHandlePositionRef,
+      penDraggedHandleIsSnappedRef,
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
       setClassName,
@@ -124,6 +162,7 @@ describe('handlePointerMove', () => {
 
     // result
     expect(penDraggedHandlePositionRef.current).toBeNull();
+    expect(penDraggedHandleIsSnappedRef.current).toBe(false);
   });
 
   it('should clear the pen preview, and preview the next vertex at the pointer, when no node is currently in Vector Edit Mode', () => {
@@ -147,6 +186,7 @@ describe('handlePointerMove', () => {
       penPreviewRef,
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
+      createPenDraggedHandleIsSnappedRef(),
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
       setClassName,
@@ -184,6 +224,7 @@ describe('handlePointerMove', () => {
       penPreviewRef,
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
+      createPenDraggedHandleIsSnappedRef(),
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
       setClassName,
@@ -219,6 +260,7 @@ describe('handlePointerMove', () => {
       penPreviewRef,
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
+      createPenDraggedHandleIsSnappedRef(),
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
       setClassName,
@@ -254,6 +296,7 @@ describe('handlePointerMove', () => {
       penPreviewRef,
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
+      createPenDraggedHandleIsSnappedRef(),
       hoveredSegmentIdRef,
       createPenHoveredDragArmableVertexRef(),
       setClassName,
@@ -290,6 +333,7 @@ describe('handlePointerMove', () => {
       penPreviewRef,
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
+      createPenDraggedHandleIsSnappedRef(),
       hoveredSegmentIdRef,
       createPenHoveredDragArmableVertexRef(),
       setClassName,
@@ -327,6 +371,7 @@ describe('handlePointerMove', () => {
       penPreviewRef,
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
+      createPenDraggedHandleIsSnappedRef(),
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
       setClassName,
@@ -362,6 +407,7 @@ describe('handlePointerMove', () => {
       penPreviewRef,
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
+      createPenDraggedHandleIsSnappedRef(),
       createHoveredSegmentIdRef(),
       createPenHoveredDragArmableVertexRef(),
       setClassName,
@@ -403,6 +449,7 @@ describe('handlePointerMove', () => {
       penPreviewRef,
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
+      createPenDraggedHandleIsSnappedRef(),
       hoveredSegmentIdRef,
       createPenHoveredDragArmableVertexRef(),
       setClassName,
@@ -445,6 +492,7 @@ describe('handlePointerMove', () => {
       penPreviewRef,
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
+      createPenDraggedHandleIsSnappedRef(),
       hoveredSegmentIdRef,
       createPenHoveredDragArmableVertexRef(),
       setClassName,
@@ -481,6 +529,7 @@ describe('handlePointerMove', () => {
       penPreviewRef,
       penNewVertexPreviewRef,
       createPenDraggedHandlePositionRef(),
+      createPenDraggedHandleIsSnappedRef(),
       createHoveredSegmentIdRef(),
       penHoveredDragArmableVertexRef,
       setClassName,

@@ -75,6 +75,8 @@ export const drawScene = (
   const penActiveVertexId = selectPenActiveVertexId(state);
   const dragOriginVertexId = refs.penDragOriginRef.current?.vertexId ?? null;
   const penDraggedHandlePosition = refs.penDraggedHandlePositionRef.current;
+  const isPenDraggedHandleSnapped = refs.penDraggedHandleIsSnappedRef.current;
+  const snappedVectorHandle = refs.snappedVectorHandleRef.current;
   const vectorMultiSelectResizeDrag = refs.vectorMultiSelectResizeDragRef.current;
   const vectorMultiSelectRotateDrag = refs.vectorMultiSelectRotateDragRef.current;
   const isVectorMultiDragMoving = Boolean(refs.vectorMultiDragRef.current?.hasMoved);
@@ -125,9 +127,11 @@ export const drawScene = (
     hoveredVectorEdgeInsertPoint,
     hoveredVectorHandle,
     selectedVectorHandles,
+    snappedVectorHandle,
     penActiveVertexId,
     dragOriginVertexId,
     penDraggedHandlePosition,
+    isPenDraggedHandleSnapped,
     refs.vectorMultiSelectBoxRef,
     vectorMultiSelectResizeDrag,
     vectorMultiSelectRotateDrag,

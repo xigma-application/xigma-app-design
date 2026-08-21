@@ -39,6 +39,7 @@ describe('drawPenDragHandlePreview', () => {
       node,
       'v1',
       { x: 30, y: 40 },
+      false,
       5,
       200,
       150,
@@ -55,6 +56,40 @@ describe('drawPenDragHandlePreview', () => {
       5,
       false,
       false,
+      false,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
+  });
+
+  it('should forward isSnapped through to the tangent handle when the live drag is angle-snapped', () => {
+    // before
+    drawPenDragHandlePreview(
+      {} as WebGL2RenderingContext,
+      {} as WebGLProgram,
+      {} as WebGLBuffer,
+      node,
+      'v1',
+      { x: 30, y: 0 },
+      true,
+      5,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
+
+    // result
+    expect(drawTangentHandleMock).toHaveBeenCalledWith(
+      {},
+      {},
+      {},
+      node.vertices.v1,
+      { x: 30, y: 0 },
+      5,
+      false,
+      false,
+      true,
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -70,6 +105,7 @@ describe('drawPenDragHandlePreview', () => {
       node,
       null,
       { x: 30, y: 40 },
+      false,
       5,
       200,
       150,
@@ -89,6 +125,7 @@ describe('drawPenDragHandlePreview', () => {
       node,
       'v1',
       null,
+      false,
       5,
       200,
       150,

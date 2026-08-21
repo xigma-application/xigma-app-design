@@ -19,7 +19,7 @@ const buildNode = (
   x: 0,
   y: 0,
   ...overrides,
-});
+}) as TSceneNode;
 
 describe('getCollidedNodes', () => {
   it('should return a node the area only partially overlaps, when full containment is not required', () => {

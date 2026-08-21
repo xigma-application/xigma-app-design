@@ -15,10 +15,12 @@ export const handlePointerCancel = (
   dragOriginRef: RefObject<TPenDragOrigin | null>,
   dragStartRef: RefObject<TPoint | null>,
   penDraggedHandlePositionRef: RefObject<TPoint | null>,
+  penDraggedHandleIsSnappedRef: RefObject<boolean>,
 ): void => {
   dragOriginRef.current = null;
   dragStartRef.current = null;
   penDraggedHandlePositionRef.current = null;
+  penDraggedHandleIsSnappedRef.current = false;
   canvas.releasePointerCapture(event.pointerId);
   dispatch(endHistoryGesture());
 };

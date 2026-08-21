@@ -19,7 +19,7 @@ const buildNode = (
   x: 0,
   y: 0,
   ...overrides,
-});
+}) as TSceneNode;
 
 describe('haveSameParent', () => {
   it('should return true when every node shares the same parentId', () => {

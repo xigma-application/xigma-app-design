@@ -985,3 +985,68 @@ test('Ctrl/Cmd+hovering an existing vertex shows the segment cursor (pulling a f
   expect(overVertex).toContain('segment');
   expect(overSegment).toContain('bend');
 });
+
+test('dragging an existing tangent handle within the angle-snap tolerance of horizontal snaps it onto the exact axis, pixel-identical to dragging exactly horizontal', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+  const region = { height: 120, width: 220, x: 1030, y: 250 };
+
+  // mock — v1(900,300) -> v2(1050,300), v2 dragged out — handle sits at (1050,350); grabbing that
+  // handle and dragging it a couple of degrees off horizontal (relative to v2, the handle's own
+  // vertex) should snap it onto the exact axis
+  await designPage.goto('e2e-test-vector-edit-handle-angle-snap');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(900, 300); // v1
+  await designPage.dragVectorPoint(1050, 300, 1050, 250); // v2, dragged — handle now sits at (1050, 350)
+  await designPage.selectTool('default');
+
+  await designPage.dragVectorPoint(1050, 350, 1150, 302); // near-horizontal relative to v2(1050,300)
+  const snapped = await page.screenshot({ clip: region });
+
+  await designPage.goto('e2e-test-vector-edit-handle-angle-snap-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(900, 300);
+  await designPage.dragVectorPoint(1050, 300, 1050, 250);
+  await designPage.selectTool('default');
+
+  await designPage.dragVectorPoint(1050, 350, 1150, 300); // exactly horizontal relative to v2
+  const exact = await page.screenshot({ clip: region });
+
+  expect(snapped.equals(exact)).toBe(true);
+});
+
+test('dragging an existing tangent handle well outside the angle-snap tolerance keeps the default blue instead of the orange snap color', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+  const region = { height: 120, width: 220, x: 1030, y: 250 };
+
+  await designPage.goto('e2e-test-vector-edit-handle-angle-snap-diagonal');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(900, 300);
+  await designPage.dragVectorPoint(1050, 300, 1050, 250);
+  await designPage.selectTool('default');
+
+  await designPage.dragVectorPoint(1050, 350, 1150, 350); // 45deg relative to v2 — well outside tolerance
+  const diagonal = await page.screenshot({ clip: region });
+
+  await designPage.goto('e2e-test-vector-edit-handle-angle-snap-diagonal-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('pen');
+  await designPage.click(900, 300);
+  await designPage.dragVectorPoint(1050, 300, 1050, 250);
+  await designPage.selectTool('default');
+
+  await designPage.dragVectorPoint(1050, 350, 1150, 300); // exactly horizontal — snapped, orange
+  const horizontal = await page.screenshot({ clip: region });
+
+  expect(diagonal.equals(horizontal)).toBe(false);
+});

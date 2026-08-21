@@ -1,6 +1,5 @@
 // types
 import { TPoint } from 'types/canvas';
-import { TSceneNodeChanges } from 'types/design/types';
 
 // utils
 import { rotatePoint } from 'utils/math/rotatePoint';
@@ -9,7 +8,7 @@ export const rotateShapeNodeOrigin = (
   origin: { height: number; rotation: number; width: number; x: number; y: number },
   pivot: TPoint,
   deltaDegrees: number,
-): TSceneNodeChanges => {
+): { rotation: number; x: number; y: number } => {
   const originCenter = { x: origin.x + origin.width / 2, y: origin.y + origin.height / 2 };
   const newCenter = rotatePoint(originCenter, pivot, deltaDegrees);
 

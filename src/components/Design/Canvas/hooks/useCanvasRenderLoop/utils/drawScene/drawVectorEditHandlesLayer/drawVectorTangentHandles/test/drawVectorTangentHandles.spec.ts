@@ -37,7 +37,7 @@ describe('drawVectorTangentHandles', () => {
     drawPenDragHandlePreviewMock.mockClear();
   });
 
-  it('should draw every segment’s tangent handles once each, forwarding the shared hover/selection state and dot size', () => {
+  it('should draw every segment’s tangent handles once each, forwarding the shared hover/selection/snapped state and dot size', () => {
     // mock
     const node = buildNode({
       s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
@@ -45,6 +45,7 @@ describe('drawVectorTangentHandles', () => {
     });
     const hoveredHandle = { end: 'start' as const, segmentId: 's1' };
     const selectedHandles = [{ end: 'end' as const, segmentId: 's2' }];
+    const snappedHandle = { end: 'start' as const, segmentId: 's1' };
     const selectedVertexIds = ['v1'];
     const oneHopVertexIds = ['v1'];
 
@@ -56,11 +57,13 @@ describe('drawVectorTangentHandles', () => {
       node,
       hoveredHandle,
       selectedHandles,
+      snappedHandle,
       selectedVertexIds,
       oneHopVertexIds,
       ['s2'],
       null,
       null,
+      false,
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -76,6 +79,7 @@ describe('drawVectorTangentHandles', () => {
       node.segments.s1,
       hoveredHandle,
       selectedHandles,
+      snappedHandle,
       selectedVertexIds,
       oneHopVertexIds,
       ['s2'],
@@ -92,6 +96,7 @@ describe('drawVectorTangentHandles', () => {
       node.segments.s2,
       hoveredHandle,
       selectedHandles,
+      snappedHandle,
       selectedVertexIds,
       oneHopVertexIds,
       ['s2'],
@@ -102,7 +107,7 @@ describe('drawVectorTangentHandles', () => {
     );
   });
 
-  it('should always also draw the Pen drag-handle preview, with the same dot size', () => {
+  it('should always also draw the Pen drag-handle preview, with the same dot size, forwarding its snapped flag', () => {
     // mock
     const node = buildNode({});
 
@@ -114,18 +119,32 @@ describe('drawVectorTangentHandles', () => {
       node,
       null,
       [],
+      null,
       [],
       [],
       [],
       'v1',
       { x: 30, y: 40 },
+      true,
       200,
       150,
       IDENTITY_VIEWPORT,
     );
 
     // result
-    expect(drawPenDragHandlePreviewMock).toHaveBeenCalledWith({}, {}, {}, node, 'v1', { x: 30, y: 40 }, 5, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawPenDragHandlePreviewMock).toHaveBeenCalledWith(
+      {},
+      {},
+      {},
+      node,
+      'v1',
+      { x: 30, y: 40 },
+      true,
+      5,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
   });
 
   it('should scale the dot size down with zoom', () => {
@@ -140,17 +159,31 @@ describe('drawVectorTangentHandles', () => {
       node,
       null,
       [],
+      null,
       [],
       [],
       [],
       null,
       null,
+      false,
       200,
       150,
       { x: 0, y: 0, zoom: 2 },
     );
 
     // result
-    expect(drawPenDragHandlePreviewMock).toHaveBeenCalledWith({}, {}, {}, node, null, null, 2.5, 200, 150, { x: 0, y: 0, zoom: 2 });
+    expect(drawPenDragHandlePreviewMock).toHaveBeenCalledWith(
+      {},
+      {},
+      {},
+      node,
+      null,
+      null,
+      false,
+      2.5,
+      200,
+      150,
+      { x: 0, y: 0, zoom: 2 },
+    );
   });
 });

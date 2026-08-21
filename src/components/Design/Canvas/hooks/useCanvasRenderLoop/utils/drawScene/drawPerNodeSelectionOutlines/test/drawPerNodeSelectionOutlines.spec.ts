@@ -52,7 +52,7 @@ const buildNode = (
   x: 0,
   y: 0,
   ...overrides,
-});
+}) as TSceneNode;
 
 describe('drawPerNodeSelectionOutlines', () => {
   it('should draw a separate outline and 4 corner handles for each node', () => {

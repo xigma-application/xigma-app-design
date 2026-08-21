@@ -39,6 +39,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
   const hoverRef = useRef<string | null>(null);
   const marqueeRef = useRef<TDraftRect | null>(null);
   const penDragOriginRef = useRef<TPenDragOrigin | null>(null);
+  const penDraggedHandleIsSnappedRef = useRef<boolean>(false);
   const penDraggedHandlePositionRef = useRef<TPoint | null>(null);
   const penHoveredDragArmableVertexRef = useRef<boolean>(false);
   const penNewVertexPreviewRef = useRef<TPoint | null>(null);
@@ -51,6 +52,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
   const selectedVectorSegmentIdsRef = useRef<string[]>([]);
   const selectedVectorVertexIdsRef = useRef<string[]>([]);
   const sliceRef = useRef<TSliceDraft | null>(null);
+  const snappedVectorHandleRef = useRef<TVectorHandleHover | null>(null);
   const starCornerRadiusDragRef = useRef<TStarCornerRadiusDragState | null>(null);
   const vectorMultiDragRef = useRef<TVectorMultiDragState | null>(null);
   const vectorMultiSelectBoxRef = useRef<TVectorMultiSelectBox | null>(null);
@@ -74,6 +76,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
       hoveredVectorVertexIdRef,
       marqueeRef,
       penDragOriginRef,
+      penDraggedHandleIsSnappedRef,
       penDraggedHandlePositionRef,
       penHoveredDragArmableVertexRef,
       penNewVertexPreviewRef,
@@ -86,6 +89,7 @@ export const useCanvasRefs = (): TCanvasRefs => {
       selectedVectorSegmentIdsRef,
       selectedVectorVertexIdsRef,
       sliceRef,
+      snappedVectorHandleRef,
       starCornerRadiusDragRef,
       vectorMultiDragRef,
       vectorMultiSelectBoxRef,

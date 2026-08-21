@@ -5,6 +5,14 @@ type TElapsedTime = {
   unit: TElapsedTimeUnit;
 };
 
+const LARGER_UNITS = [
+  { seconds: 60 * 60 * 24 * 365, unit: 'years' },
+  { seconds: 60 * 60 * 24 * 30, unit: 'months' },
+  { seconds: 60 * 60 * 24 * 7, unit: 'weeks' },
+  { seconds: 60 * 60 * 24, unit: 'days' },
+  { seconds: 60 * 60, unit: 'hours' },
+] as const;
+
 const getElapsedTime = (date: number, now: number = Date.now()): TElapsedTime => {
   const elapsedSeconds = Math.floor((now - date) / 1000);
 
@@ -12,27 +20,13 @@ const getElapsedTime = (date: number, now: number = Date.now()): TElapsedTime =>
     return { count: 0, unit: 'now' };
   }
 
-  const units = [
-    { seconds: 60, unit: 'minutes' },
-    { seconds: 60 * 60, unit: 'hours' },
-    { seconds: 60 * 60 * 24, unit: 'days' },
-    { seconds: 60 * 60 * 24 * 7, unit: 'weeks' },
-    { seconds: 60 * 60 * 24 * 30, unit: 'months' },
-    { seconds: 60 * 60 * 24 * 365, unit: 'years' },
-  ] as const;
+  const matchedUnit = LARGER_UNITS.find(({ seconds }) => elapsedSeconds >= seconds);
 
-  for (let i = units.length - 1; i >= 0; i--) {
-    const { unit, seconds } = units[i];
-
-    if (elapsedSeconds >= seconds) {
-      return {
-        count: Math.floor(elapsedSeconds / seconds),
-        unit,
-      };
-    }
+  if (matchedUnit) {
+    return { count: Math.floor(elapsedSeconds / matchedUnit.seconds), unit: matchedUnit.unit };
   }
 
-  return { count: 0, unit: 'now' };
+  return { count: Math.floor(elapsedSeconds / 60), unit: 'minutes' };
 };
 
 export const getLastDateLabel = (createdAt: number, t: TT, now: number = Date.now()): string => {

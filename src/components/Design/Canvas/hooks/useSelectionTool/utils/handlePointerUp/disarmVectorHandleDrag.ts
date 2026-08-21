@@ -39,6 +39,7 @@ export const disarmVectorHandleDrag = (
   if (selectionRefs.vectorHandleDragRef.current) {
     canvas.releasePointerCapture(event.pointerId);
     selectionRefs.vectorHandleDragRef.current = null;
+    canvasRefs.snappedVectorHandleRef.current = null;
     setClassName(null);
   }
 };

@@ -40,7 +40,7 @@ const buildNode = (
   x: 0,
   y: 0,
   ...overrides,
-});
+}) as TSceneNode;
 
 describe('drawSelectionOutline', () => {
   it('should draw nothing when there is no selection', () => {

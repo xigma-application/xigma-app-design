@@ -62,10 +62,10 @@ describe('disarmVectorHandleDrag', () => {
     expect(setClassName).not.toHaveBeenCalled();
   });
 
-  it('should clear the vector-handle-drag ref, release pointer capture, and reset the cursor', () => {
+  it('should clear the vector-handle-drag ref and the snapped-handle ref, release pointer capture, and reset the cursor', () => {
     // mock
     const canvas = createCanvas();
-    const canvasRefs = createCanvasRefs();
+    const canvasRefs = createCanvasRefs({ snappedVectorHandleRef: { current: { end: 'end', segmentId: 'segment-1' } } });
     const dispatch = vi.fn();
     const selectionRefs = createSelectionToolRefs({
       vectorHandleDragRef: { current: { end: 'end', nodeId: 'path-1', segmentId: 'segment-1', vertexId: 'vertex-1' } },
@@ -77,6 +77,7 @@ describe('disarmVectorHandleDrag', () => {
 
     // result
     expect(selectionRefs.vectorHandleDragRef.current).toBeNull();
+    expect(canvasRefs.snappedVectorHandleRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
     expect(setClassName).toHaveBeenCalledWith(null);
   });

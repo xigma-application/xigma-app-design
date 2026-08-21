@@ -13,6 +13,7 @@ import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
+import { getAngleSnappedVectorPoint } from 'utils/canvas/vectorNetwork/getAngleSnappedVectorPoint';
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
 
 export const updateVectorHandleDrag = (
@@ -24,22 +25,27 @@ export const updateVectorHandleDrag = (
   appStore: AppStore,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
   penDraggedHandlePositionRef: RefObject<TPoint | null>,
+  penDraggedHandleIsSnappedRef: RefObject<boolean>,
 ): void => {
-  const dx = point.x - dragStart.x;
-  const dy = point.y - dragStart.y;
-
-  if (Math.hypot(dx, dy) >= MIN_DRAG_DISTANCE_PX / viewport.zoom) {
+  if (Math.hypot(point.x - dragStart.x, point.y - dragStart.y) >= MIN_DRAG_DISTANCE_PX / viewport.zoom) {
     const node = getVectorEditingNode(appStore.getState().design.nodes, dragOrigin.nodeId);
 
     if (node) {
+      const { isSnapped, point: snappedPoint } = getAngleSnappedVectorPoint(dragStart, point, viewport.zoom);
+      const dx = snappedPoint.x - dragStart.x;
+      const dy = snappedPoint.y - dragStart.y;
       const vertexHandleModes = { ...node.vertexHandleModes, [dragOrigin.vertexId]: 'symmetric' as const };
       const segments = dragOrigin.segmentId
-        ? { ...node.segments, [dragOrigin.segmentId]: { ...node.segments[dragOrigin.segmentId], tangentEnd: { x: -dx, y: -dy } } }
+        ? {
+            ...node.segments,
+            [dragOrigin.segmentId]: { ...node.segments[dragOrigin.segmentId], tangentEnd: { x: -dx || 0, y: -dy || 0 } },
+          }
         : node.segments;
 
       dispatch(updateNode({ changes: { segments, vertexHandleModes }, id: dragOrigin.nodeId }));
       pendingOutgoingTangentRef.current = { tangent: { x: dx, y: dy }, vertexId: dragOrigin.vertexId };
-      penDraggedHandlePositionRef.current = point;
+      penDraggedHandlePositionRef.current = snappedPoint;
+      penDraggedHandleIsSnappedRef.current = isSnapped;
     }
   }
 };

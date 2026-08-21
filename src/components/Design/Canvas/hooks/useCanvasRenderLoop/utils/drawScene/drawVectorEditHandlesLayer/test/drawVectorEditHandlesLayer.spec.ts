@@ -69,6 +69,8 @@ const call = (
   preMarqueeVertexIds: string[] = [],
   preMarqueeSegmentIds: string[] = [],
   hoveredVectorEdgeInsertPoint: { x: number; y: number } | null = null,
+  snappedHandle: TVectorHandleHover | null = null,
+  isPenDraggedHandleSnapped = false,
 ): void => {
   const gl = {} as WebGL2RenderingContext;
   const program = {} as WebGLProgram;
@@ -90,9 +92,11 @@ const call = (
     hoveredVectorEdgeInsertPoint,
     hoveredHandle,
     selectedHandles,
+    snappedHandle,
     penActiveVertexId,
     dragOriginVertexId,
     penDraggedHandlePosition,
+    isPenDraggedHandleSnapped,
     createVectorMultiSelectBoxRef(),
     null,
     null,
@@ -162,6 +166,8 @@ describe('drawVectorEditHandlesLayer', () => {
       null,
       null,
       null,
+      null,
+      false,
       createVectorMultiSelectBoxRef(),
       null,
       null,
@@ -302,6 +308,31 @@ describe('drawVectorEditHandlesLayer', () => {
     expect(selectedVertexDot).toBeUndefined();
   });
 
+  it('should draw a snapped tangent handle line in the angle-snap orange, overriding the selected-blue it would otherwise get', () => {
+    // before — the same handle is both selected (drag-armed) and currently snapped, matching a real
+    // in-progress angle-snapped drag
+    call(
+      vectorNode.id,
+      [],
+      null,
+      null,
+      null,
+      null,
+      [{ end: 'start', segmentId: 's1' }],
+      null,
+      null,
+      [],
+      null,
+      [],
+      [],
+      null,
+      { end: 'start', segmentId: 's1' },
+    );
+
+    // result
+    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 5, y1: 0, y2: 0 }, '#cd4422', 1, 200, 150, IDENTITY_VIEWPORT);
+  });
+
   it('should deselect the tangent handle rendering once a vertex takes over the selection', () => {
     // before — selectedVertexIds non-empty, selectedHandles explicitly empty (mirrors the mutual-exclusivity a plain click enforces)
     call(vectorNode.id, ['v1'], null, null, null, null, []);
@@ -343,6 +374,14 @@ describe('drawVectorEditHandlesLayer', () => {
     // (0,0 -> 30,40)
     expect(drawLineMock).toHaveBeenCalledTimes(3);
     expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 30, y1: 0, y2: 40 }, '#aaaaaa', 1, 200, 150, IDENTITY_VIEWPORT);
+  });
+
+  it('should draw the Pen drag-preview line in the angle-snap orange when the live drag is snapped', () => {
+    // before — same setup as the plain drag-preview case above, but flagged as snapped
+    call(vectorNode.id, [], null, null, 'v1', null, [], { x: 30, y: 0 }, 'v1', [], null, [], [], null, null, true);
+
+    // result
+    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 30, y1: 0, y2: 0 }, '#cd4422', 1, 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should also reveal handles via the drag’s origin vertex when penActiveVertexId is null — e.g. closing a loop by dragging (penActiveVertexId is cleared before the drag continues)', () => {
@@ -408,6 +447,8 @@ describe('drawVectorEditHandlesLayer', () => {
       null,
       null,
       null,
+      null,
+      false,
       createVectorMultiSelectBoxRef(),
       null,
       null,
@@ -473,6 +514,8 @@ describe('drawVectorEditHandlesLayer', () => {
       null,
       null,
       null,
+      null,
+      false,
       createVectorMultiSelectBoxRef(),
       null,
       null,

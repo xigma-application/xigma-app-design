@@ -32,7 +32,9 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
 describe('handleUpdateCommentContent', () => {
   it('should update the content of an existing comment', () => {
     // mock
-    const state = buildState({ comments: { 'comment-1': { author: 'Xigma', content: 'hello', id: 'comment-1', x: 0, y: 0 } } });
+    const state = buildState({
+      comments: { 'comment-1': { author: 'Xigma', content: 'hello', createdAt: 0, id: 'comment-1', x: 0, y: 0 } },
+    });
 
     // before
     handleUpdateCommentContent(state, { content: 'updated', id: 'comment-1' });

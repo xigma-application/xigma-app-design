@@ -12,6 +12,9 @@ import { isVectorSegmentEndpointSelected } from 'utils/canvas/vectorNetwork/isVe
 const isHandleSelected = (selectedHandles: TVectorHandleHover[], segmentId: string, end: 'end' | 'start'): boolean =>
   selectedHandles.some((selected) => selected.segmentId === segmentId && selected.end === end);
 
+const isHandleSnapped = (snappedHandle: TVectorHandleHover | null, segmentId: string, end: 'end' | 'start'): boolean =>
+  snappedHandle?.segmentId === segmentId && snappedHandle.end === end;
+
 export const drawSegmentTangentHandles = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
@@ -20,6 +23,7 @@ export const drawSegmentTangentHandles = (
   segment: TVectorSegment,
   hoveredHandle: TVectorHandleHover | null,
   selectedHandles: TVectorHandleHover[],
+  snappedHandle: TVectorHandleHover | null,
   selectedVertexIds: string[],
   oneHopVertexIds: string[],
   selectedSegmentIds: string[],
@@ -51,6 +55,7 @@ export const drawSegmentTangentHandles = (
       dotSize,
       isStartHovered,
       isStartSelected,
+      isHandleSnapped(snappedHandle, segment.id, 'start'),
       canvasWidth,
       canvasHeight,
       viewport,
@@ -58,6 +63,19 @@ export const drawSegmentTangentHandles = (
   }
 
   if (handleEnd && isEndVisible) {
-    drawTangentHandle(gl, program, buffer, end, handleEnd, dotSize, isEndHovered, isEndSelected, canvasWidth, canvasHeight, viewport);
+    drawTangentHandle(
+      gl,
+      program,
+      buffer,
+      end,
+      handleEnd,
+      dotSize,
+      isEndHovered,
+      isEndSelected,
+      isHandleSnapped(snappedHandle, segment.id, 'end'),
+      canvasWidth,
+      canvasHeight,
+      viewport,
+    );
   }
 };

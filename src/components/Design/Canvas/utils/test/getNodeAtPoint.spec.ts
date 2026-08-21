@@ -19,7 +19,7 @@ const buildNode = (
   x: 0,
   y: 0,
   ...overrides,
-});
+}) as TSceneNode;
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 

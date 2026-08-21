@@ -24,6 +24,7 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
     canvasRef,
     hoveredSegmentIdRef,
     penDragOriginRef: dragOriginRef,
+    penDraggedHandleIsSnappedRef,
     penDraggedHandlePositionRef,
     penHoveredDragArmableVertexRef,
     penNewVertexPreviewRef,
@@ -53,6 +54,7 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
       penPreviewRef,
       penNewVertexPreviewRef,
       penDraggedHandlePositionRef,
+      penDraggedHandleIsSnappedRef,
       hoveredSegmentIdRef,
       penHoveredDragArmableVertexRef,
       setClassName,
@@ -60,11 +62,11 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
   };
 
   const onPointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
-    handlePointerUp(canvas, event, dispatch, dragOriginRef, dragStartRef, penDraggedHandlePositionRef);
+    handlePointerUp(canvas, event, dispatch, dragOriginRef, dragStartRef, penDraggedHandlePositionRef, penDraggedHandleIsSnappedRef);
   };
 
   const onPointerCancel = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
-    handlePointerCancel(canvas, event, dispatch, dragOriginRef, dragStartRef, penDraggedHandlePositionRef);
+    handlePointerCancel(canvas, event, dispatch, dragOriginRef, dragStartRef, penDraggedHandlePositionRef, penDraggedHandleIsSnappedRef);
   };
 
   useEffect(() => {
@@ -90,6 +92,7 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
         penNewVertexPreviewRef.current = null;
         dragOriginRef.current = null;
         penDraggedHandlePositionRef.current = null;
+        penDraggedHandleIsSnappedRef.current = false;
         hoveredSegmentIdRef.current = null;
         penHoveredDragArmableVertexRef.current = false;
       };
@@ -101,6 +104,7 @@ export const useDrawPenTool = (refs: TCanvasRefs): void => {
     dispatch,
     dragOriginRef,
     hoveredSegmentIdRef,
+    penDraggedHandleIsSnappedRef,
     penDraggedHandlePositionRef,
     penHoveredDragArmableVertexRef,
     penNewVertexPreviewRef,

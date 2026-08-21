@@ -1857,6 +1857,72 @@ for directly over relative-to-last-segment), and it never applies to `startNewVe
 point or `startVectorFragment.ts`'s fresh-disconnected-vertex blank-canvas case, since neither has a
 `from` vertex to snap relative to.
 
+## 38. §37's angle snap extended to tangent handles — both drag mechanisms, same math, its own two refs
+
+Follow-up ask, immediate: "teraz ten snap dodaj do tangesów wektora" (now add that snap to the vector's
+tangents too). Same core math (`getAngleSnappedVectorPoint.ts`, unchanged) and same orange
+(`VECTOR_EDGE_HOVER_STROKE`) recolor convention as §37, applied to the two places a tangent handle
+itself gets dragged — deliberately **not** the segment-drawing gesture §37 already covers, a
+structurally different mechanism (dragging a handle reshapes an existing/staged tangent, it doesn't aim
+a new segment).
+
+**Snap origin is always the handle's own vertex, not the handle's current position** — matching §37's
+"relative to the vertex you're extending from" convention exactly, just applied to whichever vertex owns
+the tangent being dragged instead of the Pen's active vertex.
+
+**Two call sites, both already had the vertex/viewport in scope:**
+- **Pen tool click-drag** — `updateVectorHandleDrag.ts` (shapes the just-placed/just-grabbed vertex's
+  tangent, §4/§9/§15) now calls `getAngleSnappedVectorPoint(dragStart, point, viewport.zoom)` — `dragStart`
+  is always the tangent's own vertex position (armed as such by every call site that sets
+  `dragOriginRef`/`dragStartRef`, §4/§9/§15/§17/§27), so no new parameter was needed. The mirrored
+  `tangentEnd` written onto the incoming segment (`{ x: -dx, y: -dy }`) picks up the snapped `dx`/`dy`
+  for free. A new `penDraggedHandleIsSnappedRef` (`TCanvasRefs`, parent-owned like
+  `penDraggedHandlePositionRef` itself — the render loop needs to read it every frame, same reasoning as
+  that ref's own §9 addition) carries the flag through to `drawPenDragHandlePreview.ts`, which forwards
+  it to `drawTangentHandle.ts`.
+- **Vector Edit Mode drag** — `continueVectorHandleDrag.ts` (the `useSelectionTool` resolver dragging an
+  already-committed handle, §6/§20) computes `getAngleSnappedVectorPoint(vertex, point, viewport.zoom)`
+  before deriving the tangent offset, same shape. A new `snappedVectorHandleRef`
+  (`TCanvasRefs['snappedVectorHandleRef']`, `TVectorHandleHover | null` — reusing the existing
+  `{end, segmentId}` shape `hoveredVectorHandleRef`/`selectedVectorHandlesRef` already use, rather than a
+  bare boolean) records *which* handle is currently snapped, since (unlike the Pen tool's single live
+  drag) any of a segment's two ends could be the one being dragged. Set on every `continueVectorHandleDrag`
+  tick (`isSnapped ? { end: dragState.end, segmentId: dragState.segmentId } : null`), cleared in
+  `disarmVectorHandleDrag.ts` alongside the drag ref itself and in `useSelectionTool.ts`'s tool-switch
+  cleanup effect (same place `selectedVectorHandlesRef`/`selectedVectorVertexIdsRef` already reset,
+  §21).
+
+**`drawTangentHandle.ts` gained a third `isSnapped` boolean parameter, checked first in its
+line-color `switch`** — asked to use a `switch` explicitly rather than the nested `if`s a first pass
+used ("switch użyj"): `isSnapped → VECTOR_EDGE_HOVER_STROKE`, `isSelected → VECTOR_HANDLE_FILL`,
+`isHovered → VECTOR_HANDLE_HOVER_STROKE`, `default → VECTOR_EDIT_OUTLINE_STROKE` — snapped overrides
+both hover and selected, since a handle can legitimately be all three at once mid-drag (armed via a
+selected segment's endpoint, per §20's segment-drag-selects-first behavior) and the snap feedback is
+the more specific, momentary signal. Every call site threading a boolean down to this function
+(`drawSegmentTangentHandles.ts` via a new `snappedHandle: TVectorHandleHover | null` parameter compared
+per-end the same way `isHandleSelected` already compares `selectedHandles`; `drawPenDragHandlePreview.ts`
+via the new ref's value directly; `drawPenSegmentPreview.ts`'s own tangent-handle draw, §9's persistent
+staged-tangent diamond — always `false`, since that one only ever shows a *committed* `tangentStart`
+offset, never a live drag) had to add the new positional argument, cascading up through
+`drawVectorTangentHandles.ts` → `drawVectorEditHandlesLayer.ts` → `drawScene.ts` the same way
+`isDragArmable`/`penDraggedHandlePosition` already do for sibling flags.
+
+**Gotcha, caught before it shipped — negating an axis-locked zero tangent component produces `-0`,**
+which fails a plain `toEqual({ x: -20, y: 0 })` Jest/Vitest assertion (`-0` and `0` are `===` but not
+`Object.is`-equal, and `toEqual` uses the latter). `updateVectorHandleDrag.ts`'s `tangentEnd: { x: -dx,
+y: -dy }` construction now reads `{ x: -dx || 0, y: -dy || 0 }` — `||` coalesces `-0` (falsy) back to
+`+0` without disturbing any genuinely non-zero value. Purely a normalization for predictable equality
+checks (and consistent serialized JSON, since `-0` round-trips through `JSON.stringify` as `"0"` but
+still trips exact-value comparisons before that point) — `-0 === 0` is `true` everywhere else
+(arithmetic, rendering, hit-testing), so this was never a visible/behavioral bug, only a latent testing
+footgun that angle-snap made newly common (an exact-zero locked axis is now a routine case, not a rare
+floating-point coincidence).
+
+**Scope note, same as §37's**: only the two drag-a-handle mechanisms above snap — a handle's *rest*
+position (an already-committed tangent, untouched) and the render-only default-preview construction
+(§9's `getEffectiveTangentStart`/`getEffectiveTangentEnd`) are never snapped, since neither is a live
+drag with a `from`/pointer pair to measure an angle between.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

@@ -76,6 +76,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         refs.selectedVectorVertexIdsRef.current = [];
         refs.selectedVectorHandlesRef.current = [];
         refs.selectedVectorSegmentIdsRef.current = [];
+        refs.snappedVectorHandleRef.current = null;
       };
     }
   }, [activeTool, dispatch, isCanvasCaretEditingActive, refs, selectionRefs, setClassName]);
