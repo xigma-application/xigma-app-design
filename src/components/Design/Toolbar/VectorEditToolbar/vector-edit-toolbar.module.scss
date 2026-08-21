@@ -64,4 +64,9 @@
     height: calc(100% + var(--spacer-2) * 2);
     width: 1px;
   }
+
+  &__shortcut {
+    color: color-mix(in srgb, var(--color-neutral-1) 70%, transparent);
+    margin-left: 12px;
+  }
 }

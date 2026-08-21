@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { Icon } from 'shared';
+import { Icon, Tooltip } from 'shared';
 
 // hooks
 import { useVectorEditToolbar } from './hooks/useVectorEditToolbar';
@@ -36,9 +36,11 @@ const VectorEditToolbar: FC = () => {
         </div>
       </button>
       <div className={styles.VectorEditToolbar__separator} />
-      <button aria-label={t('common.close')} className={styles.VectorEditToolbar__button} onClick={handleClose} type="button">
-        <Icon name="Close" size={ICON_SIZE} />
-      </button>
+      <Tooltip content={t('common.close')}>
+        <button aria-label={t('common.close')} className={styles.VectorEditToolbar__button} onClick={handleClose} type="button">
+          <Icon name="Close" size={ICON_SIZE} />
+        </button>
+      </Tooltip>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { Provider } from 'react-redux';
 
 // components
 import VectorEditToolbar from './VectorEditToolbar';
+import { TooltipProvider } from 'shared';
 
 // store
 import { setActiveTool, setVectorEditingNodeId } from 'store/design/slice';
@@ -14,7 +15,9 @@ import { ToolName } from 'types/design/enums';
 const renderVectorEditToolbar = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <VectorEditToolbar />
+      <TooltipProvider>
+        <VectorEditToolbar />
+      </TooltipProvider>
     </Provider>,
   );
 

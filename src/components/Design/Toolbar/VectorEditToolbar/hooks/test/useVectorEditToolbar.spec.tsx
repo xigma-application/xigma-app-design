@@ -1,6 +1,9 @@
 import { act, fireEvent, render, renderHook, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
+// components
+import { TooltipProvider } from 'shared';
+
 // hooks
 import { getIsVectorEditToolActive, useVectorEditToolbar } from '../useVectorEditToolbar';
 
@@ -53,7 +56,9 @@ describe('useVectorEditToolbar', () => {
 
     render(
       <Provider store={store}>
-        {result.current.renderTool({ icon: 'MoveVectorTool', labelKey: 'design.toolbar.tool.default', toolName: ToolName.default })}
+        <TooltipProvider>
+          {result.current.renderTool({ icon: 'MoveVectorTool', labelKey: 'design.toolbar.tool.default', toolName: ToolName.default })}
+        </TooltipProvider>
       </Provider>,
     );
 
@@ -78,7 +83,9 @@ describe('useVectorEditToolbar', () => {
 
     render(
       <Provider store={store}>
-        {result.current.renderTool({ icon: 'MoveVectorTool', labelKey: 'design.toolbar.tool.default', toolName: ToolName.default })}
+        <TooltipProvider>
+          {result.current.renderTool({ icon: 'MoveVectorTool', labelKey: 'design.toolbar.tool.default', toolName: ToolName.default })}
+        </TooltipProvider>
       </Provider>,
     );
 
@@ -94,7 +101,9 @@ describe('useVectorEditToolbar', () => {
 
     render(
       <Provider store={store}>
-        {result.current.renderTool({ icon: 'BendTool', labelKey: 'design.toolbar.vectorEditToolbar.tool.bend', toolName: ToolName.bend })}
+        <TooltipProvider>
+          {result.current.renderTool({ icon: 'BendTool', labelKey: 'design.toolbar.vectorEditToolbar.tool.bend', toolName: ToolName.bend })}
+        </TooltipProvider>
       </Provider>,
     );
 
@@ -119,7 +128,9 @@ describe('useVectorEditToolbar', () => {
 
     render(
       <Provider store={store}>
-        {result.current.renderTool({ icon: 'PaintTool', labelKey: 'design.toolbar.vectorEditToolbar.tool.paint' })}
+        <TooltipProvider>
+          {result.current.renderTool({ icon: 'PaintTool', labelKey: 'design.toolbar.vectorEditToolbar.tool.paint' })}
+        </TooltipProvider>
       </Provider>,
     );
 

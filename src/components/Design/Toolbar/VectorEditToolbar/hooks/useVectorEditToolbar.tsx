@@ -2,7 +2,7 @@ import { ReactNode, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { Icon } from 'shared';
+import { Icon, Tooltip } from 'shared';
 
 // hooks
 import { useIsBendModifierHeld } from './useIsBendModifierHeld';
@@ -64,18 +64,27 @@ export const useVectorEditToolbar = (): TUseVectorEditToolbar => {
           : undefined;
 
       return (
-        <button
-          aria-pressed={isActive}
-          className={cx(styles.VectorEditToolbar__button, { [styles['VectorEditToolbar__button--active']]: isActive })}
+        <Tooltip
+          content={
+            <>
+              {t(tool.labelKey)}
+              {tool.shortcut && <span className={styles.VectorEditToolbar__shortcut}>{tool.shortcut.join('')}</span>}
+            </>
+          }
           key={tool.labelKey}
-          onClick={handleClick}
-          type="button"
         >
-          <Icon color={isActive ? 'onBlue1' : 'neutral1'} name={tool.icon} size={ICON_SIZE} />
-          <span className={cx(styles.VectorEditToolbar__label, { [styles['VectorEditToolbar__label--active']]: isActive })}>
-            {t(tool.labelKey)}
-          </span>
-        </button>
+          <button
+            aria-pressed={isActive}
+            className={cx(styles.VectorEditToolbar__button, { [styles['VectorEditToolbar__button--active']]: isActive })}
+            onClick={handleClick}
+            type="button"
+          >
+            <Icon color={isActive ? 'onBlue1' : 'neutral1'} name={tool.icon} size={ICON_SIZE} />
+            <span className={cx(styles.VectorEditToolbar__label, { [styles['VectorEditToolbar__label--active']]: isActive })}>
+              {t(tool.labelKey)}
+            </span>
+          </button>
+        </Tooltip>
       );
     },
     [activeTool, dispatch, isBendModifierHeld, t],
