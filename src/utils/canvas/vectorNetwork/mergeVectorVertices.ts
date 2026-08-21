@@ -1,7 +1,7 @@
 // types
 import { TVectorNode } from 'types/design/types';
 
-type TVectorNetworkData = Pick<TVectorNode, 'segments' | 'vertexHandleModes' | 'vertices'>;
+type TVectorNetworkData = Pick<TVectorNode, 'filledFaceKeys' | 'segments' | 'vertexHandleModes' | 'vertices'>;
 
 export const mergeVectorVertices = (
   sourceNode: TVectorNetworkData,
@@ -21,6 +21,9 @@ export const mergeVectorVertices = (
   const vertexHandleModes = Object.fromEntries(
     Object.entries({ ...sourceNode.vertexHandleModes, ...targetNode.vertexHandleModes }).filter(([id]) => id !== targetVertexId),
   );
+  const filledFaceKeys = Array.from(new Set([...sourceNode.filledFaceKeys, ...targetNode.filledFaceKeys])).filter((key) =>
+    key.split(',').every((segmentId) => segmentId in segments),
+  );
 
-  return { segments, vertexHandleModes, vertices };
+  return { filledFaceKeys, segments, vertexHandleModes, vertices };
 };

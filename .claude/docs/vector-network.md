@@ -2834,6 +2834,41 @@ one deleted), and the post-merge selection is always just `[draggedVertexId]`, n
   corner onto a second, entirely separate square absorbs the whole second square and deletes it) before
   the permanent regression tests were written — see `TEST_CASES.md` #245/#246, `vector-edit.spec.ts`.
 
+**Update: two ref/state gaps fixed, both flagged by a `/code-review` pass and confirmed live (one from an
+actual browser crash the user hit).**
+
+- **Stale `mergeTarget` no longer crashes `disarmVectorVertexDrag.ts` at pointerup.** The target node id
+  recorded live by `resolveVectorVertexMerge.ts` mid-drag (§ above — "recorded live during the drag, not
+  re-derived at disarm time") can go stale if that node is deleted before the pointer is released (a
+  concurrent edit from another session is the realistic trigger, given this codebase's multi-session
+  editing pattern — not reproducible by a single browser's own pointer-capture-driven interaction). The
+  disarm handler used to force-cast the looked-up target node (`as TVectorNode`) with no existence check;
+  now `targetNode` is only built when the lookup actually resolves, and a missing target silently abandons
+  the merge (same "no hit → fall back to ordinary move" shape §above already uses mid-drag) instead of
+  throwing on `bakeVectorNodeRotation`'s `undefined.rotation` read.
+- **`selectedVectorHandlesRef`/`selectedVectorSegmentIdsRef` are now cleared whenever a merge actually
+  lands**, same as every other selection-changing vector interaction (`armVectorVertexOnPointerDown`,
+  `armVectorSegmentOnPointerDown`, marquee/lasso disarm, …) already does. Without this, a tangent handle or
+  segment selected *before* the drag could reference a segment that the merge's self-loop pruning (§above)
+  had just deleted — the next `pointermove` (`resolveVectorTangentHandleHover` →
+  `getTangentVisibilityVertexIds`) would then read `node.segments[handle.segmentId]` on an id no longer in
+  `segments` and crash on `undefined.endId`. Root-caused from a live-reported browser stack trace, not
+  found by static review alone.
+- **`mergeVectorVertices.ts` now also merges `filledFaceKeys`**, unioned via `Set` and filtered to keep
+  only keys whose every referenced segment id (face keys are comma-joined segment id lists, §43) still
+  exists in the merged `segments` — covering both the cross-node case (the absorbed node's painted faces
+  used to just vanish when `deleteNode` removed it, since nothing carried its `filledFaceKeys` over) and,
+  as a side effect of the same filter, the same-node collapse case (a face key that depended on a now-
+  pruned self-loop segment is dropped instead of surviving as a dangling id nothing can resolve).
+  `disarmVectorVertexDrag.ts`'s cross-node `targetNode` construction now includes
+  `filledFaceKeys: rawTargetNode.filledFaceKeys` alongside the rotation-baked `segments`/`vertices` and the
+  existing `vertexHandleModes` passthrough — `TVectorNetworkData`'s `Pick` grew to include it too. Verified
+  live via the Playwright MCP browser directly against `store.getState()` (not just a screenshot — a
+  first before/after screenshot pair with the fix already applied looked identical either way, since
+  nothing is *supposed* to visibly change; only a stashed-vs-fixed comparison of the same repro made the
+  bug and the fix visible) before the permanent regression test was written — see `TEST_CASES.md` #249,
+  `vector-edit.spec.ts`.
+
 ## 47. Bend becomes a real, persistent tool — plus a Ctrl-held visual preview in `VectorEditToolbar`
 
 Until now, "Bend" (the segment-interior-curving gesture from §32-33) only ever existed as a Ctrl/Cmd

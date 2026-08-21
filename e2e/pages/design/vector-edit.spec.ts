@@ -1706,3 +1706,58 @@ test('dragging a vertex of one vector shape onto a vertex of a completely separa
   expect(result.segmentCount).toBe(8);
   expect(result.vectorEditingNodeId).toBe(idB);
 });
+
+test('a painted face on the absorbed shape survives being merged into a completely separate shape', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-merge-cross-shape-filled-face');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawClosedSquare(designPage); // shape A: v1(900,300) .. v4(900,400) — the one that will be absorbed
+  await designPage.selectVectorEditMoveTool();
+  await page.keyboard.press('Shift+B');
+  await designPage.click(950, 350); // paint shape A's single face
+  await exitVectorEditMode(designPage);
+
+  await designPage.drawVectorPath([
+    { x: 1300, y: 300 },
+    { x: 1400, y: 300 },
+    { x: 1400, y: 400 },
+    { x: 1300, y: 400 },
+    { x: 1300, y: 300 },
+  ]); // shape B, a second, fully separate closed square — this one survives the merge
+  await exitVectorEditMode(designPage);
+
+  const { idA, idB, faceKeyOnA } = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { rootOrder, nodes } = store.getState().design;
+    const [nodeIdA, nodeIdB] = rootOrder;
+
+    return { faceKeyOnA: nodes[nodeIdA].filledFaceKeys, idA: nodeIdA, idB: nodeIdB };
+  });
+
+  expect(faceKeyOnA).toHaveLength(1); // sanity check: the paint click actually filled shape A's face
+
+  await designPage.doubleClick(1350, 350); // enter Vector Edit Mode on shape B
+
+  await designPage.pointerDown(1300, 300); // shape B's own top-left vertex
+  await designPage.pointerMove(1150, 300);
+  await designPage.pointerMove(1003, 302); // a couple px off shape A's top-right vertex (1000,300)
+  await designPage.pointerUp();
+
+  const result = await page.evaluate(
+    async ([nodeIdA, nodeIdB]) => {
+      const { store } = await import('/src/store/index.ts');
+      const state = store.getState();
+      const nodeB = state.design.nodes[nodeIdB];
+
+      return { filledFaceKeys: nodeB.filledFaceKeys, nodeAExists: Boolean(state.design.nodes[nodeIdA]) };
+    },
+    [idA, idB],
+  );
+
+  // shape A (the painted, absorbed shape) is gone, but its face's paint carried over onto the survivor —
+  // regression check for mergeVectorVertices.ts silently dropping filledFaceKeys during a cross-node merge
+  expect(result.nodeAExists).toBe(false);
+  expect(result.filledFaceKeys).toEqual(faceKeyOnA);
+});

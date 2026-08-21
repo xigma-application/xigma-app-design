@@ -4,7 +4,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TVectorNode } from 'types/design/types';
+import { TVectorNode, TVectorSegment } from 'types/design/types';
 
 // utils
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
@@ -21,7 +21,7 @@ const createCanvas = (): HTMLCanvasElement => {
 
 const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointerup', { pointerId });
 
-const addVectorNode = (vertices: { id: string; x: number; y: number }[]): string => {
+const addVectorNode = (vertices: { id: string; x: number; y: number }[], segments: Record<string, TVectorSegment> = {}): string => {
   store.dispatch(
     addNode({
       fillColor: null,
@@ -29,7 +29,7 @@ const addVectorNode = (vertices: { id: string; x: number; y: number }[]): string
       name: 'Vector',
       parentId: null,
       rotation: 0,
-      segments: {},
+      segments,
       strokeColor: '#000000',
       strokeWidth: 1,
       type: NodeType.vector,
@@ -104,6 +104,68 @@ describe('disarmVectorVertexDrag', () => {
     // result
     expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
     expect(selectionRefs.vectorVertexDragRef.current).toBeNull();
+  });
+
+  it('should abandon a cross-node merge without crashing when the target node was deleted before pointerup', () => {
+    // mock — source node is still valid, but the merge target node vanished from the store in the meantime
+    // (e.g. deleted by another selection or a concurrent edit) before the drag was released
+    const idA = addVectorNode([{ id: 'v1', x: 200, y: 200 }]);
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const selectionRefs = createSelectionToolRefs();
+
+    selectionRefs.vectorVertexDragRef.current = {
+      mergeTarget: { nodeId: 'deleted-node', vertexId: 'v2' },
+      nodeId: idA,
+      origins: { v1: { x: 200, y: 200 } },
+      pointerStart: { x: 200, y: 200 },
+    };
+
+    const setClassName = vi.fn();
+
+    // before
+    disarmVectorVertexDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, setClassName);
+
+    // result
+    expect(store.getState().design.nodes[idA]).toMatchObject({ vertices: { v1: { id: 'v1', x: 200, y: 200 } } });
+    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(selectionRefs.vectorVertexDragRef.current).toBeNull();
+  });
+
+  it('should clear stale selected handles and segments after a same-node merge collapses their shared segment', () => {
+    // mock — v1/v2 share segment "s1", which will collapse into a self-loop and get pruned by the merge;
+    // s1 is pre-selected as a handle and a segment, simulating stale refs left over from before the drag
+    const idA = addVectorNode(
+      [
+        { id: 'v1', x: 100, y: 0 },
+        { id: 'v2', x: 100, y: 0 },
+      ],
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+    );
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const selectionRefs = createSelectionToolRefs();
+
+    canvasRefs.selectedVectorHandlesRef.current = [{ end: 'end', segmentId: 's1' }];
+    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
+    selectionRefs.vectorVertexDragRef.current = {
+      mergeTarget: { nodeId: idA, vertexId: 'v2' },
+      nodeId: idA,
+      origins: { v1: { x: 0, y: 0 } },
+      pointerStart: { x: 0, y: 0 },
+    };
+
+    const setClassName = vi.fn();
+
+    // before
+    disarmVectorVertexDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, setClassName);
+
+    // result
+    const node = store.getState().design.nodes[idA] as TVectorNode;
+
+    expect(node.segments).not.toHaveProperty('s1');
+    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 
   it('should merge onto a target vertex of the SAME node, dropping the absorbed vertex, and select the surviving vertex', () => {

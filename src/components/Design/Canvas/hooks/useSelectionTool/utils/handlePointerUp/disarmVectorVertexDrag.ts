@@ -26,14 +26,18 @@ export const disarmVectorVertexDrag = (
     if (dragState.mergeTarget) {
       const state = store.getState();
       const sourceNode = getVectorEditingNode(state.design.nodes, dragState.nodeId);
+      const isSameNode = dragState.mergeTarget.nodeId === sourceNode?.id;
+      const rawTargetNode = state.design.nodes[dragState.mergeTarget.nodeId] as TVectorNode | undefined;
+      const targetNode = isSameNode
+        ? sourceNode
+        : rawTargetNode && {
+            ...bakeVectorNodeRotation(rawTargetNode),
+            filledFaceKeys: rawTargetNode.filledFaceKeys,
+            vertexHandleModes: rawTargetNode.vertexHandleModes,
+          };
 
-      if (sourceNode) {
+      if (sourceNode && targetNode) {
         const [sourceVertexId] = Object.keys(dragState.origins);
-        const isSameNode = dragState.mergeTarget.nodeId === sourceNode.id;
-        const rawTargetNode = state.design.nodes[dragState.mergeTarget.nodeId] as TVectorNode;
-        const targetNode = isSameNode
-          ? sourceNode
-          : { ...bakeVectorNodeRotation(rawTargetNode), vertexHandleModes: rawTargetNode.vertexHandleModes };
         const merged = mergeVectorVertices(sourceNode, targetNode, sourceVertexId, dragState.mergeTarget.vertexId);
 
         dispatch(updateNode({ changes: merged, id: sourceNode.id }));
@@ -43,6 +47,8 @@ export const disarmVectorVertexDrag = (
         }
 
         canvasRefs.selectedVectorVertexIdsRef.current = [sourceVertexId];
+        canvasRefs.selectedVectorHandlesRef.current = [];
+        canvasRefs.selectedVectorSegmentIdsRef.current = [];
       }
     }
 
