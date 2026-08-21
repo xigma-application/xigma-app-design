@@ -6,6 +6,9 @@ import { Provider } from 'react-redux';
 import MouseModes from './MouseModes';
 import { TooltipProvider } from 'shared';
 
+// core
+import CanvasRefsProvider from 'pages/DesignPage/core/CanvasRefsProvider/CanvasRefsProvider';
+
 // store
 import { setActiveTool } from 'store/design/slice';
 import { store } from 'store';
@@ -16,9 +19,11 @@ import { ToolName } from 'types/design/enums';
 const renderMouseModes = (timeoutEnter?: number): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <TooltipProvider timeoutEnter={timeoutEnter}>
-        <MouseModes />
-      </TooltipProvider>
+      <CanvasRefsProvider>
+        <TooltipProvider timeoutEnter={timeoutEnter}>
+          <MouseModes />
+        </TooltipProvider>
+      </CanvasRefsProvider>
     </Provider>,
   );
 

@@ -4,6 +4,9 @@ import { useTranslation } from 'react-i18next';
 // components
 import { Icon, Popover, PopoverCompound } from 'shared';
 
+// hooks
+import { useSelectGroupTool } from './hooks/useSelectGroupTool';
+
 // others
 import { KEYBOARD_SHORTCUTS } from '../../../keys';
 import { TOOL_DROPDOWN_ICON_SIZE, TOOL_GROUP_ITEMS, TOOL_ICON, TOOL_LABEL } from '../../constants';
@@ -16,8 +19,7 @@ import {
   selectLastShapeTool,
   selectLastTextTool,
 } from 'store/design/selectors';
-import { setActiveTool } from 'store/design/slice';
-import { useAppDispatch, useAppSelector } from 'store';
+import { useAppSelector } from 'store';
 
 // styles
 import styles from './tool-dropdown.module.scss';
@@ -36,12 +38,12 @@ export type TToolDropdownProps = {
 
 const ToolDropdown: FC<TToolDropdownProps> = ({ tool }) => {
   const { t } = useTranslation();
-  const dispatch = useAppDispatch();
   const lastFrameTool = useAppSelector(selectLastFrameTool);
   const lastMouseTool = useAppSelector(selectLastMouseTool);
   const lastPenTool = useAppSelector(selectLastPenTool);
   const lastShapeTool = useAppSelector(selectLastShapeTool);
   const lastTextTool = useAppSelector(selectLastTextTool);
+  const handleSelectGroupTool = useSelectGroupTool();
   const groupItems = TOOL_GROUP_ITEMS[tool];
   const selectedTool = getGroupDisplayedTool(tool, lastShapeTool, lastMouseTool, lastFrameTool, lastTextTool, lastPenTool);
 
@@ -54,7 +56,7 @@ const ToolDropdown: FC<TToolDropdownProps> = ({ tool }) => {
           iconSize={TOOL_DROPDOWN_ICON_SIZE[groupTool]}
           key={groupTool}
           label={t(TOOL_LABEL[groupTool])}
-          onClick={() => dispatch(setActiveTool(groupTool))}
+          onClick={handleSelectGroupTool(groupTool)}
           selected={groupTool === selectedTool}
           shortcut={KEYBOARD_SHORTCUTS[groupTool].join('')}
           shortcutClassName={styles.ToolDropdown__shortcut}

@@ -2732,6 +2732,37 @@ reproducing the exact live "egg crossed by a triangle" shape end-to-end. 100% br
 whole `vectorNetwork/` tree except the two `/* v8 ignore */`-marked, empirically-confirmed-unreachable
 branches described above.
 
+## 45. Toolbar tool switching now differs by input method: keyboard shortcuts block leaving Vector Edit Mode, mouse toolbar clicks exit it instead
+
+- `Canvas/hooks/useKeyboardShortcuts/utils/dispatchTool.ts` — keyboard shortcuts route through this
+  instead of `dispatch(setActiveTool(tool))` directly. While `vectorEditingNodeId !== null`, a
+  shortcut for any tool outside its own local `VECTOR_EDIT_ALLOWED_TOOLS` (`pen`, `pencil`, `lasso`,
+  `paint`, `move`) is swallowed entirely — the keypress does nothing, Vector Edit Mode stays open on
+  whatever tool was already active. Reads `store.getState()` fresh each call, same convention as
+  `handleLeave.ts` (§5) — state is looked up inside the util, not passed in.
+- `components/Design/Toolbar/utils/selectToolbarTool.ts` — the main `MouseModes`/`ToolDropdown`
+  toolbar routes through this instead, via two new handler-hooks, `MouseModes/hooks/useSelectTool.ts`
+  (the `ToggleGroupPrimitive.Root`'s `onValueChange`) and
+  `ToolDropdown/hooks/useSelectGroupTool.ts` (each dropdown `PopoverItem`'s `onClick`, curried per
+  `groupTool` since it's built inside a `.map`). Opposite behavior from the keyboard path: it always
+  sets the tool, and additionally clears `vectorEditingNodeId` (the same `setVectorEditingNodeId(null)`
+  as §5 stage 3) whenever the picked tool isn't `pen`/`pencil` — its own local `PEN_GROUP_TOOLS`
+  array, deliberately not read from `TOOL_GROUP_ITEMS[ToolName.pen]` (that field is
+  `Partial<Record<...>>`, so reading it needs an `undefined` fallback that can never actually be hit
+  here — a local literal array avoids asserting away a dead branch just to satisfy coverage).
+- The asymmetry is deliberate, asked for directly: a keyboard shortcut fired while deep in Vector Edit
+  Mode is easy to trigger by accident, so anything outside the whitelist is blocked outright and
+  Vector Edit Mode never closes underneath you; a toolbar click is a deliberate, visible action, so
+  it's always honored — and now exits Vector Edit Mode rather than being blocked (an earlier version
+  of this same change disabled/greyed out the toolbar buttons instead, which was wrong — mouse
+  switching must always work) or silently leaving `vectorEditingNodeId` stale, matching Escape's own
+  stage-3 exit (§5).
+- This makes `design-tool-architecture.md`'s §3 claim — "you should never need to edit either
+  component file" — no longer quite true for *this* concern: `MouseModes.tsx`/`ToolDropdown.tsx` both
+  now call a handler-hook instead of dispatching `setActiveTool` inline. Still true for wiring an
+  ordinary new tool (icon/label/group stay entirely in `constants.ts`); only relevant if the new tool
+  needs its own Vector-Edit-Mode membership decision on either path above.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

@@ -1,4 +1,4 @@
-import { Page, test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 // components
 import { DesignPage } from './DesignPage';
@@ -18,15 +18,11 @@ const drawOpenTriangle = async (designPage: DesignPage): Promise<void> => {
   ]);
 };
 
-// presses Escape three times, which — per the Pen tool's staged Escape behavior — fully exits vector
-// edit mode for a path that was drawn entirely with plain clicks (1st: clears the still-active last
-// vertex; 2nd: any non-Move tool active first stages back to the Vector Edit Move tool, without
-// exiting; 3rd: Move is now active, so this Escape actually exits editing).
-const exitVectorEditMode = async (page: Page, designPage: DesignPage): Promise<void> => {
+// clicking any main-toolbar tool outside the Pen group (selectToolbarTool.ts) now exits Vector Edit
+// Mode in one go — same net effect (tool -> default, vectorEditingNodeId -> null, node stays
+// selected) as the old 3-stage Escape sequence, since neither path ever touches selectedIds.
+const exitVectorEditMode = async (designPage: DesignPage): Promise<void> => {
   await designPage.selectTool('default');
-  await page.keyboard.press('Escape');
-  await page.keyboard.press('Escape');
-  await page.keyboard.press('Escape');
 };
 
 // v1(900,300) -> v2(1000,300) -> v3(1000,400) -> v4(900,400) -> back onto v1, closing the loop. Round
@@ -50,7 +46,7 @@ test('double-clicking a vector node enters edit mode; double-clicking empty spac
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage);
-  await exitVectorEditMode(page, designPage);
+  await exitVectorEditMode(designPage);
 
   // clipped to the shape's own neighborhood, well clear of the floating toolbar — the toolbar's
   // container measures/re-centers itself independently of anything under test here, and shifts by a
@@ -112,7 +108,7 @@ test('dragging a vertex dot moves that vertex', async ({ page }) => {
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage);
-  await designPage.selectTool('default'); // still in edit mode, left over from drawing
+  await designPage.selectVectorEditMoveTool();
 
   const before = await designPage.canvas.screenshot();
 
@@ -131,7 +127,7 @@ test('dragging an existing tangent handle curves the adjacent segment', async ({
   await designPage.selectTool('pen');
   await designPage.click(900, 300); // v1
   await designPage.dragVectorPoint(1050, 300, 1050, 250); // v2, dragged — handle now sits at (1050, 350)
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   const before = await designPage.canvas.screenshot();
 
@@ -153,7 +149,7 @@ test('dragging one handle at a vertex whose tangent was click-drag-created also 
   await designPage.click(900, 300); // v1
   await designPage.dragVectorPoint(1050, 300, 1050, 250); // v2, dragged — stages an outgoing tangent
   await designPage.click(1200, 300); // v3, plain click — segment 2 inherits the staged tangent
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   // v3, not v2, is left as the Pen tool's still-active vertex once the tool switches away — v2's own
   // handle is otherwise hidden (tangent handles only show for a selected/still-active parent vertex),
@@ -186,7 +182,7 @@ test('dragging a click-drag-created tangent handle a different distance also mov
     await designPage.click(900, 300); // v1
     await designPage.dragVectorPoint(1050, 300, 1050, 250); // v2, dragged — stages an outgoing tangent
     await designPage.click(1200, 300); // v3, plain click — segment 2 inherits the staged tangent
-    await designPage.selectTool('default');
+    await designPage.selectVectorEditMoveTool();
     await designPage.click(1050, 300); // select v2 to reveal its handles
     await designPage.dragVectorPoint(1050, 350, dragToX, dragToY); // drag segment 1's handle straight down
 
@@ -213,7 +209,7 @@ test('clicking an edge away from its own midpoint with the Move tool selects the
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage);
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.click(940, 300); // off the v1-v2 edge's own midpoint (975,300) — plain selection only
   const moveToolSelect = await designPage.canvas.screenshot();
@@ -239,7 +235,7 @@ test('clicking precisely on an edge’s own midpoint with the Move tool splits i
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage);
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   // a second click on the very same spot re-grabs whatever is now sitting there — done identically in
   // both this and the reference branch below, so the "actively editing this vertex" tint (see this file's
@@ -252,7 +248,7 @@ test('clicking precisely on an edge’s own midpoint with the Move tool splits i
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage);
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.click(940, 300); // off-midpoint click, well away from any vertex — plain selection only
   await designPage.click(940, 300); // re-click: still just the same segment, never split
@@ -271,7 +267,7 @@ test('clicking a segment with the Move tool selects it, and Delete removes that 
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage);
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.click(940, 300); // off the v1-v2 edge's own midpoint (975,300) — selects that segment
   const selected = await designPage.canvas.screenshot();
@@ -438,7 +434,7 @@ test('clicking empty space in edit mode deselects the active vertex but keeps ed
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage);
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.click(1050, 300); // "select" v2 (its dot turns blue)
   const selected = await designPage.canvas.screenshot();
@@ -475,7 +471,7 @@ test('selecting a different node while still editing one cleanly exits edit mode
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage); // node A, still being edited
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
   await designPage.drawFrame(1300, 300, 1400, 400); // node B, auto-selected on creation
   await designPage.click(1350, 350); // reaffirm B is the current selection
 
@@ -485,7 +481,7 @@ test('selecting a different node while still editing one cleanly exits edit mode
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage);
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
   await page.keyboard.press('Escape'); // 1st: clears the still-active last vertex
   await page.keyboard.press('Escape'); // 2nd: stages back to the Vector Edit Move tool, still editing
   await page.keyboard.press('Escape'); // 3rd: Move now active — exit edit mode for A explicitly
@@ -506,7 +502,7 @@ test('a selected (not editing) vector node still resizes via the ordinary 8-dire
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage);
-  await exitVectorEditMode(page, designPage);
+  await exitVectorEditMode(designPage);
 
   await designPage.click(975, 300); // select the node (not editing)
   const before = await designPage.canvas.screenshot();
@@ -524,7 +520,7 @@ test('a selected (not editing) vector node still rotates via the ordinary rotate
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage);
-  await exitVectorEditMode(page, designPage);
+  await exitVectorEditMode(designPage);
 
   await designPage.click(975, 300); // select the node (not editing)
   const before = await designPage.canvas.screenshot();
@@ -542,7 +538,7 @@ test('dragging a vertex on an already-rotated node moves only that vertex, not t
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage); // v1(900,300) v2(1050,300) v3(1050,450) — bounds are a 150x150 square
-  await exitVectorEditMode(page, designPage);
+  await exitVectorEditMode(designPage);
 
   await designPage.click(975, 300); // select the node (not editing), to reveal the rotate ring
 
@@ -585,7 +581,7 @@ test('undo after dragging a vertex restores its previous position', async ({ pag
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage);
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   const before = await designPage.canvas.screenshot();
 
@@ -618,7 +614,7 @@ test('shift+click toggles a vertex into the multi-selection and back out again',
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage);
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   // rest at the same neutral point before each capture — otherwise the cursor's own resting position
   // (on v1's dot vs. on v2's dot) drives a real hover-highlight pixel difference unrelated to selection
@@ -650,7 +646,7 @@ test('shift+click mixes a vertex and a tangent handle into one multi-selection, 
   await designPage.selectTool('pen');
   await designPage.click(900, 300); // v1
   await designPage.dragVectorPoint(1050, 300, 1050, 250); // v2, dragged — handle now sits at (1050, 350)
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.click(900, 300); // select v1
   await designPage.click(1050, 350, { shift: true }); // add v2's tangent handle — a mixed selection
@@ -688,7 +684,7 @@ test('the multi-select box disappears for the duration of a group-translate drag
     { x: 1000, y: 220 },
     { x: 1050, y: 450 },
   ]);
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   // known-empty baseline for the box's own top-edge region, captured before selecting anything
   const boxEdgeRegion = { height: 20, width: 20, x: 965, y: 290 };
@@ -736,7 +732,7 @@ test('shift+click multi-selects two tangent handles with no vertex in the select
   await designPage.selectTool('pen');
   await designPage.dragVectorPoint(900, 300, 1000, 200); // v1, dragged — stages tangentStart (100,-100)
   await designPage.click(1100, 500); // v2, plain click — tangentEnd stays null
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.click(900, 300); // select v1 — reveals segment s1's handles at both ends
   await designPage.click(1000, 200); // select v1's own (real) handle alone
@@ -778,7 +774,7 @@ test('dragging a marquee over empty space selects every vertex whose point falls
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage); // v1(900,300), v2(1050,300), v3(1050,450)
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   const v1Region = { height: 24, width: 24, x: 888, y: 288 };
   const v2Region = { height: 24, width: 24, x: 1038, y: 288 };
@@ -809,7 +805,7 @@ test('dragging a marquee over a segment’s own middle selects it, even though n
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage); // v1(900,300), v2(1050,300), v3(1050,450) — v1-v2 is a straight horizontal segment
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   const midpointRegion = { height: 20, width: 20, x: 965, y: 290 }; // (975, 300), well clear of both v1 and v2
   const before = await page.screenshot({ clip: midpointRegion });
@@ -830,7 +826,7 @@ test('hovering a segment with the Move tool highlights it in blue at partial opa
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage); // v1(900,300), v2(1050,300), v3(1050,450)
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.pointerMove(1400, 700); // rest well away from the shape
   const neutral = await designPage.canvas.screenshot();
@@ -853,7 +849,7 @@ test('shift+click toggles a segment into a multi-selection with another segment,
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage); // v1(900,300), v2(1050,300), v3(1050,450)
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   const neutral = { x: 1400, y: 700 };
 
@@ -899,7 +895,7 @@ test('dragging directly on an unselected segment selects it and moves only its o
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage); // v1(900,300), v2(1050,300), v3(1050,450)
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   const v1Region = { height: 24, width: 24, x: 888, y: 288 };
   const v2Region = { height: 24, width: 24, x: 1038, y: 288 };
@@ -939,7 +935,7 @@ test('Ctrl/Cmd+clicking a segment (no drag yet) reveals its default straight-lin
   await expect(designPage.canvas).toBeVisible();
 
   await drawStraightSegment(designPage);
-  await designPage.selectTool('default'); // still in edit mode, left over from drawing
+  await designPage.selectVectorEditMoveTool();
 
   // v2 is still the Pen tool's own "active vertex" here, which independently reveals its segment's
   // handles too (see vector-network.md §10) — clearing it first (Escape's stage 1, penActiveVertexId
@@ -975,7 +971,7 @@ test('Ctrl/Cmd+dragging a straight segment’s interior bends it into a curve vi
   await expect(designPage.canvas).toBeVisible();
 
   await drawStraightSegment(designPage);
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.ctrlDragVectorPoint(975, 300, 975, 200); // bend the segment upward
   const bent = await designPage.canvas.screenshot();
@@ -984,7 +980,7 @@ test('Ctrl/Cmd+dragging a straight segment’s interior bends it into a curve vi
   await expect(designPage.canvas).toBeVisible();
 
   await drawStraightSegment(designPage);
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.dragVectorPoint(975, 300, 975, 200); // identical drag, no Ctrl — plain segment move
   const moved = await designPage.canvas.screenshot();
@@ -1001,7 +997,7 @@ test('Ctrl/Cmd+hovering an existing vertex shows the segment cursor (pulling a f
   await expect(designPage.canvas).toBeVisible();
 
   await drawStraightSegment(designPage); // v1(900,300) -> v2(1050,300)
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
   await page.keyboard.press('Escape'); // clear the Pen tool's leftover active vertex, see the test above
 
   await page.keyboard.down('Control');
@@ -1033,7 +1029,7 @@ test('dragging an existing tangent handle within the angle-snap tolerance of hor
   await designPage.selectTool('pen');
   await designPage.click(900, 300); // v1
   await designPage.dragVectorPoint(1050, 300, 1050, 250); // v2, dragged — handle now sits at (1050, 350)
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.dragVectorPoint(1050, 350, 1150, 302); // near-horizontal relative to v2(1050,300)
   const snapped = await page.screenshot({ clip: region });
@@ -1044,7 +1040,7 @@ test('dragging an existing tangent handle within the angle-snap tolerance of hor
   await designPage.selectTool('pen');
   await designPage.click(900, 300);
   await designPage.dragVectorPoint(1050, 300, 1050, 250);
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.dragVectorPoint(1050, 350, 1150, 300); // exactly horizontal relative to v2
   const exact = await page.screenshot({ clip: region });
@@ -1064,7 +1060,7 @@ test('dragging an existing tangent handle well outside the angle-snap tolerance 
   await designPage.selectTool('pen');
   await designPage.click(900, 300);
   await designPage.dragVectorPoint(1050, 300, 1050, 250);
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.dragVectorPoint(1050, 350, 1150, 350); // 45deg relative to v2 — well outside tolerance
   const diagonal = await page.screenshot({ clip: region });
@@ -1075,7 +1071,7 @@ test('dragging an existing tangent handle well outside the angle-snap tolerance 
   await designPage.selectTool('pen');
   await designPage.click(900, 300);
   await designPage.dragVectorPoint(1050, 300, 1050, 250);
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.dragVectorPoint(1050, 350, 1150, 300); // exactly horizontal — snapped, orange
   const horizontal = await page.screenshot({ clip: region });
@@ -1095,7 +1091,7 @@ test('Shift held while dragging an existing tangent handle hard-constrains it to
   await designPage.selectTool('pen');
   await designPage.click(900, 300); // v1
   await designPage.dragVectorPoint(1050, 300, 1050, 250); // v2, dragged — handle sits at (1050, 350)
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.shiftDragVectorPoint(1050, 350, 1150, 350); // Shift held — 45deg relative to v2
   const shiftDrag = await page.screenshot({ clip: region });
@@ -1106,7 +1102,7 @@ test('Shift held while dragging an existing tangent handle hard-constrains it to
   await designPage.selectTool('pen');
   await designPage.click(900, 300);
   await designPage.dragVectorPoint(1050, 300, 1050, 250);
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.dragVectorPoint(1050, 350, 1150, 350); // identical drag, no Shift
   const plainDrag = await page.screenshot({ clip: region });
@@ -1126,7 +1122,7 @@ test('pressing Shift immediately re-evaluates an in-progress existing-handle dra
   await designPage.selectTool('pen');
   await designPage.click(900, 300); // v1
   await designPage.dragVectorPoint(1050, 300, 1050, 250); // v2, dragged — handle sits at (1050, 350)
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.pointerDown(1050, 350); // grab the existing handle
   await designPage.pointerMove(1150, 350); // drag diagonally, well past the minimum threshold
@@ -1163,7 +1159,7 @@ test('dragging an existing tangent handle near a vertex on a completely separate
   await designPage.selectTool('pen');
   await designPage.click(900, 300); // v1
   await designPage.dragVectorPoint(1050, 300, 1050, 250); // v2, dragged — handle now sits at (1050, 350)
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.dragVectorPoint(1050, 350, 703, 400); // handle dragged a couple of px off shape A's x=700 column
   const snapped = await page.screenshot({ clip: region });
@@ -1181,7 +1177,7 @@ test('dragging an existing tangent handle near a vertex on a completely separate
   await designPage.selectTool('pen');
   await designPage.click(900, 300);
   await designPage.dragVectorPoint(1050, 300, 1050, 250);
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.dragVectorPoint(1050, 350, 700, 400); // exactly on shape A's column — where the guide should have snapped
   const exact = await page.screenshot({ clip: region });
@@ -1213,7 +1209,7 @@ test('dragging an existing single vertex near a vertex on a completely separate 
   ]);
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.dragVectorPoint(900, 300, 703, 600); // v1 dragged a couple of px off shape A's x=700 column
   const snapped = await page.screenshot({ clip: region });
@@ -1234,7 +1230,7 @@ test('dragging an existing single vertex near a vertex on a completely separate 
   ]);
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.dragVectorPoint(900, 300, 700, 600); // exactly on shape A's column
   const exact = await page.screenshot({ clip: region });
@@ -1269,7 +1265,7 @@ test('box-dragging several selected vertices together snaps the whole group by t
   ]);
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.click(900, 300); // select v1
   await designPage.click(1050, 450, { shift: true }); // add v3 — 2-point box
@@ -1298,7 +1294,7 @@ test('box-dragging several selected vertices together snaps the whole group by t
   ]);
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
 
   await designPage.click(900, 300);
   await designPage.click(1050, 450, { shift: true });
@@ -1321,7 +1317,7 @@ test('the Lasso tool (activated via its "Q" shortcut) selects every vertex whose
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage); // v1(900,300), v2(1050,300), v3(1050,450)
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
   await page.keyboard.press('q');
 
   const v1Region = { height: 24, width: 24, x: 888, y: 288 };
@@ -1359,7 +1355,7 @@ test('starting a Lasso drag directly on top of an existing vertex still starts a
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage); // v1(900,300), v2(1050,300), v3(1050,450)
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
   await page.keyboard.press('q');
 
   const v1Region = { height: 40, width: 40, x: 880, y: 280 };
@@ -1391,7 +1387,7 @@ test('the Lasso fill renders a uniform translucent overlay over empty canvas WHI
   await expect(designPage.canvas).toBeVisible();
 
   await drawOpenTriangle(designPage); // v1(900,300), v2(1050,300), v3(1050,450) — well clear of the loop below
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
   await page.keyboard.press('q');
 
   // a loop over empty canvas, away from any node's own stroke/fill — pointer stays held down
@@ -1434,7 +1430,7 @@ test('the Paint tool (activated via its "Shift+B" shortcut) fills a clicked face
   await expect(designPage.canvas).toBeVisible();
 
   await drawClosedSquare(designPage); // v1(900,300) v2(1000,300) v3(1000,400) v4(900,400), one face
-  await designPage.selectTool('default');
+  await designPage.selectVectorEditMoveTool();
   await page.keyboard.press('Shift+B');
 
   // a small region well inside the face, clear of the stroke/vertex dots — the cursor is parked away

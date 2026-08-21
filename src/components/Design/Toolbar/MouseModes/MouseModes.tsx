@@ -6,6 +6,9 @@ import { useTranslation } from 'react-i18next';
 import ToolDropdown from './ToolDropdown/ToolDropdown';
 import { Icon, Tooltip } from 'shared';
 
+// hooks
+import { useSelectTool } from './hooks/useSelectTool';
+
 // others
 import { KEYBOARD_SHORTCUTS } from '../../keys';
 import { TOOL_ICON, TOOL_ICON_SIZE, TOOL_LABEL, TOOLBAR_ORDER, TOOLS_WITH_DROPDOWN } from '../constants';
@@ -19,14 +22,10 @@ import {
   selectLastShapeTool,
   selectLastTextTool,
 } from 'store/design/selectors';
-import { setActiveTool } from 'store/design/slice';
-import { useAppDispatch, useAppSelector } from 'store';
+import { useAppSelector } from 'store';
 
 // styles
 import styles from './mouse-modes.module.scss';
-
-// types
-import { ToolName } from 'types/design/enums';
 
 // utils
 import { getGroupDisplayedTool } from '../utils/getGroupDisplayedTool';
@@ -39,15 +38,10 @@ const MouseModes: FC = () => {
   const lastPenTool = useAppSelector(selectLastPenTool);
   const lastShapeTool = useAppSelector(selectLastShapeTool);
   const lastTextTool = useAppSelector(selectLastTextTool);
-  const dispatch = useAppDispatch();
+  const handleSelectTool = useSelectTool();
 
   return (
-    <ToggleGroupPrimitive.Root
-      className={styles.MouseModes}
-      onValueChange={(value: string) => value && dispatch(setActiveTool(value as ToolName))}
-      type="single"
-      value={activeTool}
-    >
+    <ToggleGroupPrimitive.Root className={styles.MouseModes} onValueChange={handleSelectTool} type="single" value={activeTool}>
       {TOOLBAR_ORDER.map((name) => {
         const displayedTool = getGroupDisplayedTool(name, lastShapeTool, lastMouseTool, lastFrameTool, lastTextTool, lastPenTool);
         const isActive = displayedTool === activeTool;

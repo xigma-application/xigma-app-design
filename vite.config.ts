@@ -18,6 +18,11 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+  server: {
+    watch: {
+      ignored: ['**/coverage/**'],
+    },
+  },
   test: {
     coverage: {
       exclude: ['src/main.tsx', 'src/assets/**', 'src/constant/mainKeys.ts'],

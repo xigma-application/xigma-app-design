@@ -1,12 +1,18 @@
 import { renderHook } from '@testing-library/react';
 
-// hooks
-import { useCanvasRefs } from './useCanvasRefs';
+// components
+import CanvasRefsProvider from './CanvasRefsProvider';
 
-describe('useCanvasRefs behaviors', () => {
-  it('should return an object of independent refs, each starting out empty', () => {
+// hooks
+import { useCanvasRefsContext } from './hooks/useCanvasRefsContext';
+
+const renderCanvasRefs = (): ReturnType<typeof renderHook<ReturnType<typeof useCanvasRefsContext>, unknown>> =>
+  renderHook(() => useCanvasRefsContext(), { wrapper: ({ children }) => <CanvasRefsProvider>{children}</CanvasRefsProvider> });
+
+describe('CanvasRefsProvider behaviors', () => {
+  it('should provide an object of independent refs, each starting out empty', () => {
     // before
-    const { result } = renderHook(() => useCanvasRefs());
+    const { result } = renderCanvasRefs();
 
     // result
     expect(result.current).toEqual({
@@ -51,7 +57,7 @@ describe('useCanvasRefs behaviors', () => {
 
   it('should keep returning the same ref objects across re-renders', () => {
     // before
-    const { rerender, result } = renderHook(() => useCanvasRefs());
+    const { rerender, result } = renderCanvasRefs();
     const firstRefs = result.current;
 
     // action
@@ -60,5 +66,6 @@ describe('useCanvasRefs behaviors', () => {
     // result
     expect(result.current.canvasRef).toBe(firstRefs.canvasRef);
     expect(result.current.draftRef).toBe(firstRefs.draftRef);
+    expect(result.current).toBe(firstRefs);
   });
 });

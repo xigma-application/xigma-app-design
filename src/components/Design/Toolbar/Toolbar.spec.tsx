@@ -3,6 +3,9 @@ import { Provider } from 'react-redux';
 
 // components
 import Toolbar from './Toolbar';
+
+// core
+import CanvasRefsProvider from 'pages/DesignPage/core/CanvasRefsProvider/CanvasRefsProvider';
 import { TooltipProvider } from 'shared';
 
 // store
@@ -13,9 +16,11 @@ describe('Toolbar snapshots', () => {
     // before
     const { asFragment } = render(
       <Provider store={store}>
-        <TooltipProvider>
-          <Toolbar />
-        </TooltipProvider>
+        <CanvasRefsProvider>
+          <TooltipProvider>
+            <Toolbar />
+          </TooltipProvider>
+        </CanvasRefsProvider>
       </Provider>,
     );
 

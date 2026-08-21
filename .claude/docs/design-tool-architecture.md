@@ -49,7 +49,10 @@ one (Arrow reused `useDrawLineTool` entirely, just with a different config).
 
 All of `MouseModes.tsx` and `ToolDropdown.tsx` are **fully generic** — they iterate
 `TOOLBAR_ORDER`/`TOOL_GROUP_ITEMS` and read `TOOL_ICON`/`TOOL_LABEL`/`TOOL_ICON_SIZE` by `ToolName`
-key. You should never need to edit either component file; only `constants.ts`:
+key. For wiring an ordinary new tool you should never need to edit either component file; only
+`constants.ts` (the one exception is Vector Edit Mode's own tool-switch handling — see
+`vector-network.md` §45 — which both components now route through via a handler-hook instead of
+dispatching `setActiveTool` inline; irrelevant unless the new tool needs its own decision there):
 
 - `TOOL_ICON: Record<ToolName, keyof typeof Icons>` — **exhaustive** `Record`, TS will refuse to
   compile until every `ToolName` has an entry.

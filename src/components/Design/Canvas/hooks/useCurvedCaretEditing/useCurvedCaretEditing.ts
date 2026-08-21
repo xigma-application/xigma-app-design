@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
 
+// core
+import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
+
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-
-// others
-import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
 
 // store
 import { selectEditingTextBox } from 'store/design/selectors';

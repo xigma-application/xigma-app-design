@@ -5,20 +5,28 @@ import { render, screen } from '@testing-library/react';
 // components
 import ToolDropdown from './ToolDropdown';
 
+// core
+import CanvasRefsProvider from 'pages/DesignPage/core/CanvasRefsProvider/CanvasRefsProvider';
+
 // store
 import { store } from 'store';
 
 // types
 import { ToolName } from 'types/design/enums';
 
+const renderToolDropdown = (tool: ToolName): ReturnType<typeof render> =>
+  render(
+    <Provider store={store}>
+      <CanvasRefsProvider>
+        <ToolDropdown tool={tool} />
+      </CanvasRefsProvider>
+    </Provider>,
+  );
+
 describe('ToolDropdown snapshots', () => {
   it('should render ToolDropdown', () => {
     // before
-    const { asFragment } = render(
-      <Provider store={store}>
-        <ToolDropdown tool={ToolName.default} />
-      </Provider>,
-    );
+    const { asFragment } = renderToolDropdown(ToolName.default);
 
     // result
     expect(asFragment()).toMatchSnapshot();
@@ -31,11 +39,7 @@ describe('ToolDropdown behaviors', () => {
     const user = userEvent.setup();
 
     // before
-    render(
-      <Provider store={store}>
-        <ToolDropdown tool={ToolName.frame} />
-      </Provider>,
-    );
+    renderToolDropdown(ToolName.frame);
 
     // action
     await user.click(screen.getByRole('button', { name: 'frame options' }));
@@ -50,11 +54,7 @@ describe('ToolDropdown behaviors', () => {
     const user = userEvent.setup();
 
     // before
-    render(
-      <Provider store={store}>
-        <ToolDropdown tool={ToolName.frame} />
-      </Provider>,
-    );
+    renderToolDropdown(ToolName.frame);
 
     // action
     await user.click(screen.getByRole('button', { name: 'frame options' }));
@@ -69,11 +69,7 @@ describe('ToolDropdown behaviors', () => {
     const user = userEvent.setup();
 
     // before
-    render(
-      <Provider store={store}>
-        <ToolDropdown tool={ToolName.rectangle} />
-      </Provider>,
-    );
+    renderToolDropdown(ToolName.rectangle);
 
     // action
     await user.click(screen.getByRole('button', { name: 'rectangle options' }));
@@ -89,11 +85,7 @@ describe('ToolDropdown behaviors', () => {
     const user = userEvent.setup();
 
     // before
-    render(
-      <Provider store={store}>
-        <ToolDropdown tool={ToolName.frame} />
-      </Provider>,
-    );
+    renderToolDropdown(ToolName.frame);
 
     // action
     await user.click(screen.getByRole('button', { name: 'frame options' }));
@@ -109,11 +101,7 @@ describe('ToolDropdown behaviors', () => {
     const user = userEvent.setup();
 
     // before
-    render(
-      <Provider store={store}>
-        <ToolDropdown tool={ToolName.line} />
-      </Provider>,
-    );
+    renderToolDropdown(ToolName.line);
 
     // action
     await user.click(screen.getByRole('button', { name: 'line options' }));
@@ -128,11 +116,7 @@ describe('ToolDropdown behaviors', () => {
     const user = userEvent.setup();
 
     // before
-    render(
-      <Provider store={store}>
-        <ToolDropdown tool={ToolName.default} />
-      </Provider>,
-    );
+    renderToolDropdown(ToolName.default);
 
     // action
     await user.click(screen.getByRole('button', { name: 'default options' }));

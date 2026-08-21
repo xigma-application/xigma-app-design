@@ -210,9 +210,12 @@ test('Escape steps through stopping the active vertex, then the tool, then vecto
   // vertex branch — so near vs. far still differ, just via that dot instead of the old preview line
   expect(afterEscape1Near.equals(afterEscape1Far)).toBe(false);
 
-  await page.keyboard.press('Escape'); // 2nd — reverts the tool to default, keeps edit mode
+  await page.keyboard.press('Escape'); // 2nd — reverts the tool to Move (ToolName.move), keeps edit mode
 
-  await expect(designPage.toolRadio('default')).toHaveAttribute('aria-checked', 'true');
+  // ToolName.move is distinct from the main toolbar's default/hand/scale group (see
+  // vector-network.md §41/§45) — it only ever shows as pressed on VectorEditToolbar's own Move
+  // button, never as a checked radio on the main toolbar
+  await expect(page.getByRole('button', { exact: true, name: 'Move' })).toHaveAttribute('aria-pressed', 'true');
   await expect(designPage.toolRadio('pen')).toHaveAttribute('aria-checked', 'false');
 
   const stillEditing = await designPage.canvas.screenshot(); // v1/v2 dots still rendered

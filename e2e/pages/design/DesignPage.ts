@@ -66,6 +66,13 @@ export class DesignPage {
     await this.toolRadio(tool).click();
   }
 
+  // VectorEditToolbar's own Move button (ToolName.move) — distinct from the main toolbar's
+  // default/Move slot (ToolName.default): clicking it switches away from Pen without leaving
+  // Vector Edit Mode, unlike selectTool('default') on the main toolbar (selectToolbarTool.ts).
+  async selectVectorEditMoveTool(): Promise<void> {
+    await this.page.getByRole('button', { exact: true, name: 'Move' }).click();
+  }
+
   async selectToolFromDropdown(group: TToolName, label: string): Promise<void> {
     await this.page.getByRole('button', { name: `${group} options` }).click();
     await this.page.getByText(label, { exact: true }).click();

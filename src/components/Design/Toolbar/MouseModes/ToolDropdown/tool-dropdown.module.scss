@@ -18,9 +18,6 @@
     background-color: var(--color-neutral-3);
   }
 
-  // the class is repeated so this reliably beats the shared PopoverItem's own base rules
-  // regardless of stylesheet order, without adding any theme/hover logic to that shared component
-
   &__item.ToolDropdown__item:hover {
     color: var(--color-on-blue-1);
 

@@ -5,13 +5,14 @@ import { FC } from 'react';
 import Comment from './Comment/Comment';
 import TextEditOverlay from './TextEditOverlay/TextEditOverlay';
 
+// core
+import { useClassNames } from '../core/ClassNamesProvider/hooks/useClassNames';
+
 // hooks
 import { useCanvasDragPan } from './hooks/useCanvasDragPan/useCanvasDragPan';
 import { useCanvasPanZoom } from './hooks/useCanvasPanZoom/useCanvasPanZoom';
-import { useCanvasRefs } from './hooks/useCanvasRefs/useCanvasRefs';
 import { useCanvasRenderLoop } from './hooks/useCanvasRenderLoop/useCanvasRenderLoop';
 import { useCanvasResize } from './hooks/useCanvasResize/useCanvasResize';
-import { useClassNames } from '../core/ClassNamesProvider/hooks/useClassNames';
 import { useCommentTool } from './hooks/useCommentTool/useCommentTool';
 import { useCurvedCaretEditing } from './hooks/useCurvedCaretEditing/useCurvedCaretEditing';
 import { useDrawingCursor } from './hooks/useDrawingCursor/useDrawingCursor';
@@ -45,12 +46,15 @@ import {
   STAR_TOOL_SETTINGS,
 } from './toolSettings';
 
+// pages
+import { useCanvasRefsContext } from 'pages/DesignPage/core/CanvasRefsProvider/hooks/useCanvasRefsContext';
+
 // styles
 import styles from './canvas.module.scss';
 
 const Canvas: FC = () => {
   const { className } = useClassNames();
-  const refs = useCanvasRefs();
+  const refs = useCanvasRefsContext();
 
   useCanvasResize(refs);
   useCanvasPanZoom(refs);

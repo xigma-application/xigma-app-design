@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { RefObject } from 'react';
 
-// components
+// core
 import ClassNamesProvider from 'components/Design/core/ClassNamesProvider/ClassNamesProvider';
 
 // hooks

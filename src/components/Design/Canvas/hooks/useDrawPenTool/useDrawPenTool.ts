@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-// hooks
+// core
 import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
 
 // store

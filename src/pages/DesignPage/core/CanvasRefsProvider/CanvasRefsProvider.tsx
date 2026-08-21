@@ -1,4 +1,7 @@
-import { useRef } from 'react';
+import { FC, useMemo, useRef } from 'react';
+
+// others
+import { CanvasRefsContext } from './context';
 
 // types
 import {
@@ -14,10 +17,11 @@ import {
   TVectorHandleHover,
   TVectorMultiSelectBox,
 } from 'types/design/canvas/types';
+import { TCanvasRefsProviderProps } from './types';
 import { TDraftEntity } from 'types/design/types';
 import { TDraftRect, TPoint } from 'types/canvas';
-import { TPenDragOrigin } from '../useDrawPenTool/types';
-import { TVectorAlignmentGuide } from '../../utils/applyVectorPointSnapping';
+import { TPenDragOrigin } from 'components/Design/Canvas/hooks/useDrawPenTool/types';
+import { TVectorAlignmentGuide } from 'components/Design/Canvas/utils/applyVectorPointSnapping';
 import {
   TRotateDragState,
   TVectorMultiDragState,
@@ -25,7 +29,7 @@ import {
   TVectorMultiSelectRotateDragState,
 } from 'types/design/selectionTool/types';
 
-export const useCanvasRefs = (): TCanvasRefs => {
+const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cornerRadiusDragRef = useRef<TCornerRadiusDragState | null>(null);
   const draftRef = useRef<TDraftEntity | null>(null);
@@ -62,10 +66,9 @@ export const useCanvasRefs = (): TCanvasRefs => {
   const vectorMultiSelectBoxRef = useRef<TVectorMultiSelectBox | null>(null);
   const vectorMultiSelectResizeDragRef = useRef<TVectorMultiSelectResizeDragState | null>(null);
   const vectorMultiSelectRotateDragRef = useRef<TVectorMultiSelectRotateDragState | null>(null);
-  const refsRef = useRef<TCanvasRefs | null>(null);
 
-  if (refsRef.current === null) {
-    refsRef.current = {
+  const refs = useMemo<TCanvasRefs>(
+    () => ({
       canvasRef,
       cornerRadiusDragRef,
       draftRef,
@@ -102,8 +105,11 @@ export const useCanvasRefs = (): TCanvasRefs => {
       vectorMultiSelectBoxRef,
       vectorMultiSelectResizeDragRef,
       vectorMultiSelectRotateDragRef,
-    };
-  }
+    }),
+    [],
+  );
 
-  return refsRef.current;
+  return <CanvasRefsContext.Provider value={refs}>{children}</CanvasRefsContext.Provider>;
 };
+
+export default CanvasRefsProvider;
