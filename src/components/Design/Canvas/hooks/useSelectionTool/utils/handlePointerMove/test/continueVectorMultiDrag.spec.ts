@@ -1,5 +1,5 @@
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -46,6 +46,7 @@ const addVectorNode = (): string => {
 describe('continueVectorMultiDrag', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should do nothing when no multi-drag is in progress', () => {
@@ -62,8 +63,8 @@ describe('continueVectorMultiDrag', () => {
     expect(setClassName).not.toHaveBeenCalled();
   });
 
-  it('should do nothing when the drag points at a node that no longer exists', () => {
-    // mock
+  it('should do nothing when none of the dragged vertices/handles resolve to any currently-open node', () => {
+    // mock — vectorEditingNodeIds is empty, so the drag's own vertex origin can't be resolved to any node
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
@@ -71,7 +72,6 @@ describe('continueVectorMultiDrag', () => {
       boxOrigin: null,
       handleOrigins: {},
       hasMoved: false,
-      nodeId: 'missing-node',
       pendingClickAction: null,
       pointerStart: { x: 0, y: 0 },
       vertexOrigins: { v1: { x: 0, y: 0 } },
@@ -90,6 +90,9 @@ describe('continueVectorMultiDrag', () => {
   it('should translate every selected vertex and every selected handle by the same delta, and switch the cursor to move', () => {
     // mock
     const idA = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([idA]));
+
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
@@ -97,7 +100,6 @@ describe('continueVectorMultiDrag', () => {
       boxOrigin: null,
       handleOrigins: { 'end:s1': { x: -5, y: 0 }, 'start:s1': { x: 5, y: 0 } },
       hasMoved: false,
-      nodeId: idA,
       pendingClickAction: { id: 'v2', kind: 'vertex' },
       pointerStart: { x: 0, y: 0 },
       vertexOrigins: { v2: { x: 100, y: 0 } },
@@ -124,6 +126,9 @@ describe('continueVectorMultiDrag', () => {
   it('should translate the canonical multi-select box by the same delta as the points, so it visually follows the drag instead of staying behind at its pre-drag position', () => {
     // mock — the box drag was armed with a snapshot of its own pre-drag bounds (boxOrigin)
     const idA = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([idA]));
+
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
@@ -131,7 +136,6 @@ describe('continueVectorMultiDrag', () => {
       boxOrigin: { height: 0, width: 100, x: 0, y: 0 },
       handleOrigins: {},
       hasMoved: false,
-      nodeId: idA,
       pendingClickAction: null,
       pointerStart: { x: 0, y: 0 },
       vertexOrigins: { v1: { x: 0, y: 0 }, v2: { x: 100, y: 0 } },
@@ -154,6 +158,9 @@ describe('continueVectorMultiDrag', () => {
   it('should not touch the canonical box when this particular drag never snapshotted one (e.g. a plain segment/vertex drag, not a drag through the box itself)', () => {
     // mock
     const idA = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([idA]));
+
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
@@ -161,7 +168,6 @@ describe('continueVectorMultiDrag', () => {
       boxOrigin: null,
       handleOrigins: {},
       hasMoved: false,
-      nodeId: idA,
       pendingClickAction: null,
       pointerStart: { x: 0, y: 0 },
       vertexOrigins: { v1: { x: 0, y: 0 } },
@@ -202,6 +208,7 @@ describe('continueVectorMultiDrag', () => {
         vertices: { a: { id: 'a', x: 20, y: 900 } },
       }),
     );
+    store.dispatch(setVectorEditingNodeIds([idA]));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
@@ -210,7 +217,6 @@ describe('continueVectorMultiDrag', () => {
       boxOrigin: { height: 0, width: 100, x: 0, y: 0 },
       handleOrigins: { 'end:s1': { x: -5, y: 0 }, 'start:s1': { x: 5, y: 0 } },
       hasMoved: false,
-      nodeId: idA,
       pendingClickAction: null,
       pointerStart: { x: 0, y: 0 },
       vertexOrigins: { v1: { x: 0, y: 0 }, v2: { x: 100, y: 0 } },

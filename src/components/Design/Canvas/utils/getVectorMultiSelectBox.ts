@@ -2,14 +2,16 @@ import { RefObject } from 'react';
 
 // types
 import { TVectorHandleHover, TVectorMultiSelectBox } from 'types/design/canvas/types';
-import { TVectorNode } from 'types/design/types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getVectorMultiSelectBounds } from 'utils/canvas/vectorNetwork/getVectorMultiSelectBounds';
+import { getVectorMultiSelectPoints } from './getVectorMultiSelectPoints';
 import { getVectorMultiSelectSelectionKey } from './getVectorMultiSelectSelectionKey';
 
 export const getVectorMultiSelectBox = (
-  node: TVectorNode,
+  nodes: Record<string, TSceneNode>,
+  vectorEditingNodeIds: string[],
   selectedVertexIds: string[],
   selectedHandles: TVectorHandleHover[],
   boxRef: RefObject<TVectorMultiSelectBox | null>,
@@ -20,7 +22,8 @@ export const getVectorMultiSelectBox = (
     return boxRef.current;
   }
 
-  const bounds = getVectorMultiSelectBounds(node, selectedVertexIds, selectedHandles);
+  const points = getVectorMultiSelectPoints(nodes, vectorEditingNodeIds, selectedVertexIds, selectedHandles);
+  const bounds = getVectorMultiSelectBounds(points);
 
   boxRef.current = bounds ? { bounds, rotation: 0, selectionKey } : null;
 

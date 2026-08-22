@@ -24,7 +24,7 @@ export const applyPendingClickAction = (dispatch: AppDispatch, canvasRefs: TCanv
         setExclusiveVectorSelection(canvasRefs, { segmentIds: [pendingClickAction.id] });
         break;
       case 'split-segment':
-        applySplitSegmentClickAction(dispatch, canvasRefs, dragState.nodeId, pendingClickAction.segmentId, pendingClickAction.t);
+        applySplitSegmentClickAction(dispatch, canvasRefs, pendingClickAction.nodeId, pendingClickAction.segmentId, pendingClickAction.t);
         break;
       // no default
     }

@@ -1598,7 +1598,6 @@ describe('armVectorMultiSelectBoxOnPointerDown', () => {
       boxOrigin: { height: 100, width: 100, x: 0, y: 0 },
       handleOrigins: {},
       hasMoved: false,
-      nodeId,
       pendingClickAction: null,
       pointerStart: { x: 50, y: 50 },
       vertexOrigins: { v1: { x: 0, y: 0 }, v2: { x: 100, y: 100 } },
@@ -1708,7 +1707,6 @@ describe('armVectorMultiSelectResizeOnPointerDown', () => {
       handle: 'se',
       handleOrigins: {},
       liveBounds: { height: 100, width: 100, x: 0, y: 0 },
-      nodeId,
       rotation: 0,
       vertexOrigins: { v1: { x: 0, y: 0 }, v2: { x: 100, y: 100 } },
     });
@@ -1810,7 +1808,7 @@ describe('armVectorMultiSelectRotateOnPointerDown', () => {
 
     // result
     expect(armVectorMultiSelectRotateOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.vectorMultiSelectRotateDragRef.current).toMatchObject({ nodeId, pivot: { x: 50, y: 50 } });
+    expect(ctx.canvasRefs.vectorMultiSelectRotateDragRef.current).toMatchObject({ pivot: { x: 50, y: 50 } });
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
   });
 
@@ -1873,7 +1871,7 @@ describe('armVectorMultiSelectRotateOnPointerDown', () => {
 
     // result
     expect(armVectorMultiSelectRotateOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.vectorMultiSelectRotateDragRef.current).toMatchObject({ nodeId, pivot: { x: 50, y: 50 } });
+    expect(ctx.canvasRefs.vectorMultiSelectRotateDragRef.current).toMatchObject({ pivot: { x: 50, y: 50 } });
   });
 
   it('should return undefined when Vector Edit Mode is not active', () => {
@@ -2052,7 +2050,12 @@ describe('armVectorSegmentOnPointerDown', () => {
 
     // result
     expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.vectorMultiDragRef.current?.pendingClickAction).toEqual({ kind: 'split-segment', segmentId: 's1', t: 0.5 });
+    expect(ctx.canvasRefs.vectorMultiDragRef.current?.pendingClickAction).toEqual({
+      kind: 'split-segment',
+      nodeId,
+      segmentId: 's1',
+      t: 0.5,
+    });
   });
 
   it('should NOT arm a pending split-segment click action when the click lands elsewhere on the segment, away from its own fixed midpoint — a plain click there just leaves the segment selected, same as before this feature existed', () => {

@@ -25,7 +25,6 @@ describe('drawVectorMultiSelectResizeDragBox', () => {
         handle: 'se',
         handleOrigins: {},
         liveBounds: { height: 80, width: 200, x: -16.7, y: 22.3 },
-        nodeId: 'vector-1',
         rotation: 30,
         vertexOrigins: {},
       },

@@ -3,7 +3,7 @@ import { RefObject } from 'react';
 // types
 import { NodeType } from 'types/design/enums';
 import { TVectorMultiSelectResizeDragState } from 'types/design/selectionTool/types';
-import { TVectorNode } from 'types/design/types';
+import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { armVectorMultiSelectResizeDrag } from '../armVectorMultiSelectResizeDrag';
@@ -35,6 +35,9 @@ const vector: TVectorNode = {
   vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 5 } },
 };
 
+const nodes: Record<string, TSceneNode> = { 'vector-1': vector };
+const vectorEditingNodeIds = ['vector-1'];
+
 describe('armVectorMultiSelectResizeDrag', () => {
   it('should snapshot the bounds, handle, vertex origins, and handle origins, then capture the pointer', () => {
     // mock
@@ -47,7 +50,8 @@ describe('armVectorMultiSelectResizeDrag', () => {
       canvas,
       pointerEvent(3),
       resizeDragRef,
-      vector,
+      nodes,
+      vectorEditingNodeIds,
       ['v1', 'v2'],
       [{ end: 'start', segmentId: 's1' }],
       bounds,
@@ -64,7 +68,6 @@ describe('armVectorMultiSelectResizeDrag', () => {
       handle: 'se',
       handleOrigins: { 'start:s1': { x: 5, y: 0 } },
       liveBounds: bounds,
-      nodeId: 'vector-1',
       rotation: 0,
       vertexOrigins: { v1: { x: 0, y: 0 }, v2: { x: 10, y: 5 } },
     });

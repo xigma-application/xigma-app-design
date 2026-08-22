@@ -1608,6 +1608,8 @@ suite and not repeated here, lives in `__test-cases__/multi-vector-edit.test.md`
 | 257 | Hovering another open node's vertex or segment with the Pen tool shows the snap/extend cursor and rubber-band preview before any click — the same affordance same-node hovering already gets                                |  ⏳  | ✅ `multi-vector-edit.spec.ts` |
 | 258 | Clicking genuinely blank canvas with the Pen tool while several nodes are open creates an independent new vector ("vector C") — the other open nodes are left completely untouched, no stray contour tacked onto either one |  ✅  | ✅ `multi-vector-edit.spec.ts` |
 | 259 | The Paint tool fills a face on the second, non-primary open node, not just the first (`vectorEditingNodeIds[0]`) — a real WebGL stencil-fill render only e2e can observe                                                    |  ✅  | ✅ `multi-vector-edit.spec.ts` |
+| 260 | The multi-select box spans two open nodes at once (marquee across both) and dragging its interior moves every vertex on both nodes by the same real-pointer-drag delta, in one grouped dispatch                             |  ✅  | ✅ `multi-vector-edit.spec.ts` |
+| 261 | Selecting a single segment (not its own vertices) makes the multi-select box eligible, and dragging the box moves both of the segment's endpoints together                                                                  |  ✅  | ✅ `multi-vector-edit.spec.ts` |
 
 ## Why so few scenarios get e2e coverage
 

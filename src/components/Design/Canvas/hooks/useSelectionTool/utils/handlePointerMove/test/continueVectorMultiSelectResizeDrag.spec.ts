@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -53,6 +53,7 @@ const addVectorNode = (): string => {
 describe('continueVectorMultiSelectResizeDrag', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should do nothing when no resize drag is in progress', () => {
@@ -67,7 +68,7 @@ describe('continueVectorMultiSelectResizeDrag', () => {
   });
 
   it('should do nothing when the drag points at a node that no longer exists', () => {
-    // mock
+    // mock — vectorEditingNodeIds is empty, so no vertex/handle origin resolves to any node
     const canvas = createCanvas();
     const dragRef = createVectorMultiSelectResizeDragRef({
       anchor: { x: 0, y: 0 },
@@ -76,7 +77,6 @@ describe('continueVectorMultiSelectResizeDrag', () => {
       handle: 'se',
       handleOrigins: {},
       liveBounds: { height: 100, width: 100, x: 0, y: 0 },
-      nodeId: 'missing-node',
       rotation: 0,
       vertexOrigins: { v1: { x: 0, y: 0 } },
     });
@@ -92,6 +92,9 @@ describe('continueVectorMultiSelectResizeDrag', () => {
     // mock — v1(0,0)/v2(100,100) selected, dragging the "se" handle: anchor is the opposite ("nw") corner
     // (0,0), which coincides with v1 here, so v1 stays put while v2 and the tangent offset both double
     const nodeId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
     const canvas = createCanvas();
     const dragRef = createVectorMultiSelectResizeDragRef({
       anchor: { x: 0, y: 0 },
@@ -100,7 +103,6 @@ describe('continueVectorMultiSelectResizeDrag', () => {
       handle: 'se',
       handleOrigins: { 'start:s1': { x: 5, y: 0 } },
       liveBounds: { height: 100, width: 100, x: 0, y: 0 },
-      nodeId,
       rotation: 0,
       vertexOrigins: { v1: { x: 0, y: 0 }, v2: { x: 100, y: 100 } },
     });
@@ -124,6 +126,9 @@ describe('continueVectorMultiSelectResizeDrag', () => {
     // (100,0), local "se" corner (100,100) sits at world (0,100); v1 is the anchor, v2 is the dragged
     // corner (see the arithmetic in the file's own comment history for how these are derived)
     const nodeId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
     const canvas = createCanvas();
     const dragRef = createVectorMultiSelectResizeDragRef({
       anchor: { x: 0, y: 0 },
@@ -132,7 +137,6 @@ describe('continueVectorMultiSelectResizeDrag', () => {
       handle: 'se',
       handleOrigins: {},
       liveBounds: { height: 100, width: 100, x: 0, y: 0 },
-      nodeId,
       rotation: 90,
       vertexOrigins: { v1: { x: 100, y: 0 }, v2: { x: 0, y: 100 } },
     });
@@ -155,6 +159,9 @@ describe('continueVectorMultiSelectResizeDrag', () => {
   it('should leave the perpendicular axis untouched for an edge handle', () => {
     // mock — "e" handle only scales x; y has no anchor at all, so v2's y stays exactly as it was
     const nodeId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
     const canvas = createCanvas();
     const dragRef = createVectorMultiSelectResizeDragRef({
       anchor: { x: 0, y: null },
@@ -163,7 +170,6 @@ describe('continueVectorMultiSelectResizeDrag', () => {
       handle: 'e',
       handleOrigins: {},
       liveBounds: { height: 100, width: 100, x: 0, y: 0 },
-      nodeId,
       rotation: 0,
       vertexOrigins: { v2: { x: 100, y: 100 } },
     });
@@ -181,6 +187,9 @@ describe('continueVectorMultiSelectResizeDrag', () => {
     // mock — "n" handle only anchors y (from the far/"s" edge, 100); x has no anchor at all, so v1's x
     // must pass through unchanged while both its y and the end-side handle offset scale by 2x
     const nodeId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
     const canvas = createCanvas();
     const dragRef = createVectorMultiSelectResizeDragRef({
       anchor: { x: null, y: 100 },
@@ -189,7 +198,6 @@ describe('continueVectorMultiSelectResizeDrag', () => {
       handle: 'n',
       handleOrigins: { 'end:s1': { x: -3, y: 4 } },
       liveBounds: { height: 100, width: 100, x: 0, y: 0 },
-      nodeId,
       rotation: 0,
       vertexOrigins: { v1: { x: 20, y: 10 } },
     });

@@ -23,7 +23,7 @@ export const armVectorSegmentClick = (
       canvasRefs.selectedVectorSegmentIdsRef.current = toggleSelection(canvasRefs.selectedVectorSegmentIdsRef.current, segmentId);
       break;
     case isPartOfVectorMultiSelection(canvasRefs, canvasRefs.selectedVectorSegmentIdsRef.current.includes(segmentId)):
-      armVectorGroupDrag(canvas, event, canvasRefs, node, point, { id: segmentId, kind: 'segment' });
+      armVectorGroupDrag(canvas, event, canvasRefs, point, { id: segmentId, kind: 'segment' });
       break;
     default:
       selectAndArmVectorSegmentDrag(canvas, event, canvasRefs, node, segmentId, canSplit, point);

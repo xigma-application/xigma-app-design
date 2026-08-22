@@ -1,8 +1,20 @@
 // types
-import { TVectorNode } from 'types/design/types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
-import { getVectorSegmentVertexIds } from 'utils/canvas/vectorNetwork/getVectorSegmentVertexIds';
+import { findVectorEditingNodeForSegment } from './findVectorEditingNodeForSegment';
 
-export const getVectorMultiSelectVertexIds = (node: TVectorNode, selectedVertexIds: string[], selectedSegmentIds: string[]): string[] =>
-  Array.from(new Set([...selectedVertexIds, ...getVectorSegmentVertexIds(node, selectedSegmentIds)]));
+const getSegmentVertexIds = (nodes: Record<string, TSceneNode>, vectorEditingNodeIds: string[], segmentId: string): string[] => {
+  const node = findVectorEditingNodeForSegment(vectorEditingNodeIds, nodes, segmentId);
+  const segment = node?.segments[segmentId];
+
+  return segment ? [segment.startId, segment.endId] : [];
+};
+
+export const getVectorMultiSelectVertexIds = (
+  nodes: Record<string, TSceneNode>,
+  vectorEditingNodeIds: string[],
+  selectedVertexIds: string[],
+  selectedSegmentIds: string[],
+): string[] =>
+  Array.from(new Set([...selectedVertexIds, ...selectedSegmentIds.flatMap((id) => getSegmentVertexIds(nodes, vectorEditingNodeIds, id))]));

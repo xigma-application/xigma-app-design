@@ -33,10 +33,20 @@ Aktualizowane na żywo w trakcie testowania w przeglądarce (Playwright MCP). �
 - [x] ✅ 15. Usuń wierzchołek z A i z B jednocześnie, jeden undo cofa oba (potwierdzone live: Delete zamieniło oba trójkąty w linie, jeden Cmd+Z przywrócił oba naraz)
 - [ ] ⏳ 16. To samo dla segmentów (pokryte jednostkowo w `handleDeleteSelection.spec.ts`, nie powtarzane live — mechanizm identyczny jak wierzchołki)
 
-## 6. Multi-select box/resize/rotate (ograniczenie Fazy 1)
+## 6. Multi-select box/resize/rotate
 
 - [x] ⚠️ 17. 2+ wierzchołki w jednym węźle → box działa — próba live niekonkluzywna (zaznaczone dwa wierzchołki A leżały akurat współliniowo z krawędzią, box degeneruje się do linii nierozróżnialnej wizualnie od segmentu). Pokryte jednostkowo (`armVectorMultiSelectBoxOnPointerDown` w `armResolvers.spec.ts`), traktuję jako ✅ na podstawie testów.
-- [x] ✅ 18. Po jednym wierzchołku z A i z B → box NIE pojawia się (potwierdzone live: zaznaczono po jednym wierzchołku z A i B — nie pojawił się żaden dodatkowy prostokąt do grupowego przesuwania poza istniejącym node-level selection boxem; zgodne z `getVectorMultiSelectOwningNode` zwracającym `null`)
+- [x] ✅ 18. **(Aktualizacja — poprzednio "box NIE pojawia się", teraz zaimplementowane na życzenie usera.)** Po jednym wierzchołku z A i z B → box POJAWIA SIĘ i obejmuje oba (potwierdzone live: marquee po całych A+B → jeden wspólny box; drag/resize/rotate z boxa przesuwa/skaluje/obraca oba węzły naraz, jeden Undo cofa całość). Zob. sekcja 10 poniżej.
+
+## 6a. Multi-select box — segmenty i cross-node (dodane po code-review i bezpośrednim zgłoszeniu usera: "Nie pojawia się box jak zaznaczymy A i B wektor")
+
+- [x] ✅ 18a. Niebieski box zwykłego zaznaczenia węzłów (node-level) znika po wejściu w Enter (potwierdzone live: 2 trójkąty zaznaczone, box widoczny przed Enter, znika natychmiast po Enter, zamiast tego widać handle-layer obu węzłów)
+- [x] ✅ 18b. Zaznaczenie POJEDYNCZEGO segmentu (Shift+klik na krawędź, nie na punkt) → box POJAWIA SIĘ obejmując oba końce segmentu (potwierdzone live na krawędzi trójkąta B; wcześniej wymagało 2+ jawnie zaznaczonych wierzchołków)
+- [x] ✅ 18c. Resize/rotate/move CURSOR na boxie (hover i w trakcie przeciągania) — potwierdzone live: kursor resize na rogu, kursor rotate tuż za rogiem, klasa `--move` we wnętrzu, wszystkie poprawnie czyszczone po zjechaniu myszką poza box (wcześniej: martwy kod w `useHoverHighlight`, nigdy się nie odpalał w vector edit mode)
+- [x] ✅ 18d. Marquee obejmujące WSZYSTKIE wierzchołki dwóch osobnych otwartych węzłów (A+B całe) → jeden wspólny box (potwierdzone live, patrz sekcja 10)
+- [x] ✅ 18e. Przeciągnięcie za wnętrze cross-node boxa → oba węzły przesuwają się razem o ten sam delta (potwierdzone live, debug snapshot `deltaX/deltaY` mid-drag + screenshot)
+- [x] ✅ 18f. Przeciągnięcie za róg cross-node boxa (resize) → oba węzły skalują się razem względem wspólnego zakotwiczenia (potwierdzone live, oba trójkąty urosły proporcjonalnie)
+- [x] ✅ 18g. Przeciągnięcie tuż za róg cross-node boxa (rotate) → oba węzły obracają się razem wokół wspólnego pivota, box też się przechyla (potwierdzone live przy małym kącie obrotu; duży kąt potrafi wysłać drugi trójkąt poza widoczny viewport — to poprawna geometria dla szerokiego boxa, nie bug)
 
 ## 7. Escape i wyjście
 
@@ -83,3 +93,47 @@ kliknięciem Pen-a zamiast tylko drag-iem (§46 już to miał dla dragu).
 **Nic nie zostało już świadomie pominięte w tym obszarze** — wszystkie trzy przypadki z pierwotnej
 specyfikacji (position-sharing bez łączenia — zamienione na realne łączenie na życzenie usera;
 "vector C" przy pustym kliknięciu) są teraz zaimplementowane i potwierdzone live.
+
+## 10. Multi-select box — segmenty i pełny cross-node (dodane po code-review, potem rozszerzone na żywo po bezpośrednim zgłoszeniu usera)
+
+Code-review pierwszego przejścia znalazł trzy bugi w boxie multi-select ograniczonym do jednego węzła
+(niebieski node-level box nie znikał po Enter; box nie obejmował segmentów, tylko jawnie zaznaczone
+wierzchołki; kursory resize/rotate/move były martwym kodem w `useHoverHighlight`, bo ten hook nigdy się
+nie aktywuje w vector edit mode). Wszystkie trzy naprawione i potwierdzone live — patrz punkty 18a-18c
+wyżej.
+
+Zaraz po commicie tej naprawy user zapytał wprost: _"Jak? Nie pojawia się box jak zaznaczymy A i B
+wektor"_ — w trybie edycji, zaznaczając CAŁE A i CAŁE B (nie pojedyncze punkty), box się nie pojawiał.
+Przyczyna: `getVectorMultiSelectOwningNode` wymagało, żeby WSZYSTKO zaznaczone należało do jednego
+węzła — cross-node selection zwracało `null` i box się wyłączał całkowicie. To samo dotyczyło samego
+mechanizmu drag/resize/rotate (`nodeId: string` w stanie drag-u). User potwierdził że to osobne, większe
+zadanie i poprosił o rozszerzenie.
+
+- [x] ✅ 29. Marquee po całych A+B (wszystkie wierzchołki obu trójkątów) → jeden wspólny box obejmujący
+      oba (potwierdzone live: box widoczny od (650,250) do (1050,300), wszystkie 6 wierzchołków
+      podświetlonych na niebiesko)
+- [x] ✅ 30. Przeciągnięcie za wnętrze cross-node boxa (move) → oba węzły przesuwają się razem o
+      identyczny delta (potwierdzone live: debug snapshot `deltaX=0, deltaY=180` w trakcie drag-u,
+      potem screenshot — oba trójkąty faktycznie przesunięte o 180px w dół, box podążył razem z nimi)
+- [x] ✅ 31. Przeciągnięcie za róg cross-node boxa (resize) → oba węzły skalują się razem względem
+      wspólnego zakotwiczenia (potwierdzone live: oba trójkąty urosły proporcjonalnie po przeciągnięciu
+      rogu na zewnątrz)
+- [x] ✅ 32. Przeciągnięcie tuż za róg cross-node boxa, w pierścieniu rotate (rotate) → oba węzły
+      obracają się razem wokół wspólnego pivota (środek boxa), box też się przechyla (potwierdzone live
+      przy małym kącie — obie trójkąty pozostały widoczne i zachowały względne położenie względem
+      siebie; przy dużym kącie jeden trójkąt potrafi wylecieć poza widoczny viewport, co jest poprawną
+      geometrią dla szerokiego/płaskiego boxa, nie błędem)
+
+**Uwaga o metodyce live-testów**: pojedynczy `page.mouse.move` "teleportujący" bez pośrednich kroków
+czasem czytał nieaktualny stan kursora/DOM przy natychmiastowym odczycie — prawdziwa interakcja
+myszką zawsze ma ruch pośredni, więc to artefakt narzędzia testowego, nie bug produktu. Dodanie 3-10
+`steps` do ruchu poprzedzającego `pointerdown` ustabilizowało wszystkie powtórki.
+
+Pełny opis architektury (nowe/zmienione pliki: `getVectorMultiSelectPoints.ts`,
+`groupVectorMultiSelectOriginsByNode.ts`, `getBakedVectorEditingNodes.ts`, usunięcie
+`getVectorMultiSelectOwningNode.ts`, usunięcie `nodeId` z trzech typów stanu drag-u) w
+`.claude/docs/vector-network.md` §49.
+
+**e2e**: `e2e/pages/design/multi-vector-edit.spec.ts`, `TEST_CASES.md` rows 260-261 — cross-node box
+drag-move (dwa osobne trójkąty, marquee po obu, drag za wnętrze boxa), i box aktywny dla samego
+zaznaczonego segmentu (jeden trójkąt, przekątna krawędź, drag przesuwa oba końce razem).

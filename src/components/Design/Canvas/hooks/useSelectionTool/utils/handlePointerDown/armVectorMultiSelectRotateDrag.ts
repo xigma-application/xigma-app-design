@@ -4,7 +4,7 @@ import { RefObject } from 'react';
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TVectorHandleHover } from 'types/design/canvas/types';
 import { TVectorMultiSelectRotateDragState } from 'types/design/selectionTool/types';
-import { TVectorNode } from 'types/design/types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
@@ -15,7 +15,8 @@ export const armVectorMultiSelectRotateDrag = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
   vectorMultiSelectRotateDragRef: RefObject<TVectorMultiSelectRotateDragState | null>,
-  node: TVectorNode,
+  nodes: Record<string, TSceneNode>,
+  vectorEditingNodeIds: string[],
   selectedVertexIds: string[],
   selectedHandles: TVectorHandleHover[],
   bounds: TDraftRect,
@@ -23,14 +24,13 @@ export const armVectorMultiSelectRotateDrag = (
   point: TPoint,
 ): void => {
   const pivot: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
-  const { handleOrigins, vertexOrigins } = getVectorMultiSelectOrigins(node, selectedVertexIds, selectedHandles);
+  const { handleOrigins, vertexOrigins } = getVectorMultiSelectOrigins(nodes, vectorEditingNodeIds, selectedVertexIds, selectedHandles);
 
   vectorMultiSelectRotateDragRef.current = {
     bounds,
     cursorAngle: getRotateCursorAngle(point, bounds, rotation),
     deltaDegrees: 0,
     handleOrigins,
-    nodeId: node.id,
     pivot,
     rotation,
     startAngle: getAngleBetweenPoints(pivot, point),

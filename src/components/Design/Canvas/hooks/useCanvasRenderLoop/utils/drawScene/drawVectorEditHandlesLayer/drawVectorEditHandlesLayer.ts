@@ -12,10 +12,10 @@ import { drawVectorEdgeInsertPreview } from './drawVectorEdgeInsertPreview';
 import { drawVectorMultiSelectBox } from './drawVectorMultiSelectBox/drawVectorMultiSelectBox';
 import { drawVectorTangentHandles } from './drawVectorTangentHandles/drawVectorTangentHandles';
 import { drawVectorVertexDots } from './drawVectorVertexDots/drawVectorVertexDots';
+import { getBakedVectorEditingNodes } from './getBakedVectorEditingNodes';
 import { getOneHopVectorVertexIds } from 'utils/canvas/vectorNetwork/getOneHopVectorVertexIds';
 import { getTangentVisibilityVertexIds } from 'utils/canvas/vectorNetwork/getTangentVisibilityVertexIds';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
-import { getVectorMultiSelectVertexIds } from '../../../../../utils/getVectorMultiSelectVertexIds';
 import { getVisualSelectedVectorVertexIds } from 'utils/canvas/vectorNetwork/getVisualSelectedVectorVertexIds';
 
 export const drawVectorEditHandlesLayer = (
@@ -47,6 +47,8 @@ export const drawVectorEditHandlesLayer = (
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
+  const bakedNodes = getBakedVectorEditingNodes(nodes, vectorEditingNodeIds);
+
   vectorEditingNodeIds.forEach((vectorEditingNodeId) => {
     const editingNode = getVectorEditingNode(nodes, vectorEditingNodeId);
 
@@ -57,7 +59,6 @@ export const drawVectorEditHandlesLayer = (
       const tangentVisibilityVertexIds = getTangentVisibilityVertexIds(node, visualSelectedVertexIdsTotal, selectedHandles);
       const oneHopVertexIds = getOneHopVectorVertexIds(node, tangentVisibilityVertexIds);
       const tangentVisibilitySegmentIds = [...selectedSegmentIds, ...preMarqueeSegmentIds];
-      const multiSelectVertexIds = getVectorMultiSelectVertexIds(node, selectedVertexIds, selectedSegmentIds);
 
       drawVectorEditOutline(
         gl,
@@ -90,23 +91,25 @@ export const drawVectorEditHandlesLayer = (
         viewport,
       );
       drawVectorVertexDots(gl, program, buffer, node, visualSelectedVertexIds, hoveredVertexId, canvasWidth, canvasHeight, viewport);
-
-      drawVectorMultiSelectBox(
-        gl,
-        program,
-        buffer,
-        node,
-        multiSelectVertexIds,
-        selectedHandles,
-        vectorMultiSelectBoxRef,
-        vectorMultiSelectResizeDrag,
-        vectorMultiSelectRotateDrag,
-        isVectorMultiDragMoving,
-        canvasWidth,
-        canvasHeight,
-        viewport,
-      );
       drawVectorEdgeInsertPreview(gl, program, buffer, hoveredVectorEdgeInsertPoint, canvasWidth, canvasHeight, viewport);
     }
   });
+
+  drawVectorMultiSelectBox(
+    gl,
+    program,
+    buffer,
+    bakedNodes,
+    vectorEditingNodeIds,
+    selectedVertexIds,
+    selectedSegmentIds,
+    selectedHandles,
+    vectorMultiSelectBoxRef,
+    vectorMultiSelectResizeDrag,
+    vectorMultiSelectRotateDrag,
+    isVectorMultiDragMoving,
+    canvasWidth,
+    canvasHeight,
+    viewport,
+  );
 };

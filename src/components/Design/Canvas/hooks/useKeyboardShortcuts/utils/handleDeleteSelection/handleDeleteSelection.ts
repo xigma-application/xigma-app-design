@@ -10,7 +10,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 // utils
 import { deleteSelectedSegments } from './deleteSelectedSegments';
 import { deleteSelectedVertices } from './deleteSelectedVertices';
-import { dispatchAsOneGestureIfMultiNode } from './dispatchAsOneGestureIfMultiNode';
+import { dispatchAsOneGestureIfMultiNode } from '../../../../utils/dispatchAsOneGestureIfMultiNode';
 import { getOwningSegmentNodes } from './getOwningSegmentNodes';
 import { getOwningVertexNodes } from './getOwningVertexNodes';
 

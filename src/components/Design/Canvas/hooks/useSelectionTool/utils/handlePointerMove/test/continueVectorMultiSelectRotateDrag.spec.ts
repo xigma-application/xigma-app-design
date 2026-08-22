@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -53,6 +53,7 @@ const addVectorNode = (): string => {
 describe('continueVectorMultiSelectRotateDrag', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should do nothing when no rotate drag is in progress', () => {
@@ -67,14 +68,13 @@ describe('continueVectorMultiSelectRotateDrag', () => {
   });
 
   it('should do nothing when the drag points at a node that no longer exists', () => {
-    // mock
+    // mock — vectorEditingNodeIds is empty, so no vertex/handle origin resolves to any node
     const canvas = createCanvas();
     const dragRef = createVectorMultiSelectRotateDragRef({
       bounds: { height: 0, width: 100, x: 0, y: 0 },
       cursorAngle: 0,
       deltaDegrees: 0,
       handleOrigins: {},
-      nodeId: 'missing-node',
       pivot: { x: 50, y: 0 },
       rotation: 0,
       startAngle: 0,
@@ -92,13 +92,15 @@ describe('continueVectorMultiSelectRotateDrag', () => {
     // mock — v1(0,0)/v2(100,0) selected, pivot (50,0), armed with the pointer due east (startAngle 0);
     // dragging the pointer due south of the pivot is a 90deg turn
     const nodeId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
     const canvas = createCanvas();
     const dragRef = createVectorMultiSelectRotateDragRef({
       bounds: { height: 0, width: 100, x: 0, y: 0 },
       cursorAngle: 0,
       deltaDegrees: 0,
       handleOrigins: { 'start:s1': { x: 5, y: 0 } },
-      nodeId,
       pivot: { x: 50, y: 0 },
       rotation: 0,
       startAngle: 0,
@@ -122,13 +124,15 @@ describe('continueVectorMultiSelectRotateDrag', () => {
   it('should rotate a selected "end" tangent offset around the origin too, not just "start" ones', () => {
     // mock — same 90deg turn as above, but the selected handle is the segment's "end" side this time
     const nodeId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
     const canvas = createCanvas();
     const dragRef = createVectorMultiSelectRotateDragRef({
       bounds: { height: 0, width: 100, x: 0, y: 0 },
       cursorAngle: 0,
       deltaDegrees: 0,
       handleOrigins: { 'end:s1': { x: -5, y: 0 } },
-      nodeId,
       pivot: { x: 50, y: 0 },
       rotation: 0,
       startAngle: 0,

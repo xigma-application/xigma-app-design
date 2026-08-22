@@ -3084,6 +3084,85 @@ non-primary node), `TEST_CASES.md` rows 250-259. Full live-verified scenario log
 branch-logic paths already pinned down by the unit suite and not repeated as e2e, lives outside this repo
 doc at `__test-cases__/multi-vector-edit.test.md`.
 
+## 49. Multi-select box — segments, and full cross-node support
+
+Two rounds landed back to back, both starting from live bugs the user found by testing directly in
+the browser (auto-mode session, no plan-mode checkpoint — the fixes were verified live via Playwright
+MCP as they went, per the established live-iteration workflow for feel-sensitive canvas math).
+
+**Round 1 — three bugs in the single-node box** (`drawSelectionOutline.ts`, `getVectorMultiSelectBox.ts`,
+`resolveVectorMultiSelectBoxHover.ts`, `resolveVectorIdleHover.ts`, all new/changed under
+`Design/Canvas/utils/` and `useSelectionTool/utils/handlePointerMove/`):
+
+1. **The node-level blue group-selection box no longer lingers after Enter opens multi-vector-edit.**
+   `drawSelectionOutline.ts` filters `selectedNodes` against `vectorEditingNodeIds` before deciding
+   group-vs-per-node rendering — previously only the single-node path (`drawVectorSelectionOutline.ts`,
+   §46) skipped nodes already open for editing; `drawGroupSelectionOutline` (2+ plain-selected nodes)
+   had no such guard at all, so the box from the ordinary multi-select never disappeared once Enter
+   opened the same nodes for vector editing.
+2. **The box now appears for a selected segment (or a point+segment mix), not just 2+ selected
+   vertices.** A segment resolves to its two endpoint vertices via `getVectorSegmentVertexIds`
+   (already used by the drag machinery, §46) — new `getVectorMultiSelectVertexIds.ts` wraps that and
+   is threaded through eligibility, bounds, and every arm/render call site. Tangent handles still
+   exclude the box entirely, confirmed directly with the user rather than assumed.
+3. **Resize/rotate/move cursors, previously dead code, now actually work.**
+   `resolveVectorMultiSelectResizeHover`/`RotateHover` lived in `useHoverHighlight`, which only
+   activates for `activeTool === default/scale/comment` — never true during vector edit (`move`), so
+   these resolvers never ran, on hover or during drag. New `resolveVectorMultiSelectBoxHover.ts` runs
+   inside `useSelectionTool`'s own pointermove chain instead. It was extracted alongside the existing
+   vertex/segment/paint hover resolvers into `resolveVectorIdleHover.ts` (per the user's own request,
+   mid-review, to pull the inline guard out of `handlePointerMove.ts` into its own function) so all of
+   them skip cleanly while a multi-select resize/rotate/move drag is active — otherwise they'd
+   overwrite the drag's own cursor mid-gesture, a real bug caught live (cursor going stale/empty the
+   moment the pointer left the box).
+
+**Round 2 — full cross-node support**, prompted directly: *"Nie pojawia się box jak zaznaczymy A i B
+wektor"* (inside edit mode, marquee/lasso-selecting the entirety of two separate open nodes). The box
+and its three interactions were still fundamentally single-node: `getVectorMultiSelectOwningNode.ts`
+(now deleted) required every selected id to belong to the *same* node, so a selection spanning two
+open nodes resolved to `null` and the whole box silently disabled itself.
+
+- **Every box-adjacent helper became node-set-aware.** `getVectorMultiSelectBox.ts`/
+  `getVectorMultiSelectOrigins.ts`/`getVectorMultiSelectVertexIds.ts` now take
+  `(nodes, vectorEditingNodeIds, ...)` instead of a single `TVectorNode`, resolving each vertex/handle
+  to its own owning node via the existing `findVectorEditingNodeForVertex`/`ForSegment` (§48). New
+  `getVectorMultiSelectPoints.ts` (`Design/Canvas/utils/`) replaces the point-resolution half of the
+  old `getVectorMultiSelectBounds.ts`, which is now a pure `(points: TPoint[]) => TDraftRect | null` —
+  geometry only, no node lookups, callable identically whether the points came from one node or five.
+- **Drag continuation now dispatches per owning node, not one shared `nodeId`.** The three drag-state
+  types (`TVectorMultiDragState`/`MultiSelectResizeDragState`/`MultiSelectRotateDragState`) dropped
+  their `nodeId: string` field entirely — a cross-node drag has no single node to name. New
+  `groupVectorMultiSelectOriginsByNode.ts` partitions a flat `vertexOrigins`/`handleOrigins` pair (ids
+  are globally unique, so this is unambiguous, per the same invariant §48 already leans on) into one
+  group per owning node; `continueVectorMultiDrag`/`MultiSelectResizeDrag`/`MultiSelectRotateDrag` each
+  compute the shared transform (delta, scale, rotation) exactly once — the *math* doesn't change
+  per-node, only *which vertices* it applies to — then loop the groups and `dispatch(updateNode(...))`
+  once per node, wrapped in `dispatchAsOneGestureIfMultiNode` (moved from
+  `useKeyboardShortcuts/utils/handleDeleteSelection/` to the shared `Design/Canvas/utils/`, since it's
+  now needed by both delete and every multi-select drag) so a cross-node move/resize/rotate still costs
+  the user one Undo.
+- **`applyPendingClickAction`'s `split-segment` case moved its own `nodeId` onto the pending-action
+  object itself** (`TVectorPendingClickAction`'s `split-segment` variant gained a `nodeId: string`
+  field) rather than reading the drag state's now-removed one — that action was always about one
+  specific clicked segment regardless of how the rest of the drag state evolved, so it needed its own
+  answer to "which node," decoupled from the group-drag's node-agnostic `vertexOrigins`.
+- **The render layer draws the box once, not once per open node.** `drawVectorEditHandlesLayer.ts`
+  used to compute and draw the box *inside* its per-node `forEach` — harmless when only one node could
+  ever be open, wrong once a selection could span several: the box would either duplicate-draw or only
+  reflect whichever node's iteration happened to run last. New `getBakedVectorEditingNodes.ts` bakes
+  every open node's rotation once up front (preserving the render path's existing rotation-aware
+  behavior, §9), and the box draw call was hoisted out of the loop to run exactly once, over the full
+  `vectorEditingNodeIds` set.
+
+Verified live via Playwright MCP end to end: marquee-selecting all of two separately-drawn triangles
+inside multi-vector-edit produces one box spanning both; dragging the box body moves both together
+(confirmed via a `deltaX`/`deltaY` debug snapshot mid-drag, then visually); dragging a corner resizes
+both from the shared anchor; dragging just outside a corner rotates both around the shared pivot,
+box included. One live-testing false alarm worth recording: a single `page.mouse.move` teleport
+without intermediate steps sometimes reads stale cursor/DOM state on the very next evaluate — real
+interaction always has intermediate movement, so this is a test-harness artifact, not a product bug;
+adding 3-10 `steps` to the approach move before `pointerdown` made every repro reliable.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

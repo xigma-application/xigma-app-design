@@ -373,3 +373,74 @@ test('the Paint tool fills a face on the second, non-primary open node, not just
   expect(nodes[idB].filledFaceKeys ?? []).not.toHaveLength(0);
   expect(nodes[idA].filledFaceKeys ?? []).toHaveLength(0); // A was never touched
 });
+
+test('the multi-select box spans two open nodes at once and dragging its interior moves both together', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-multi-vector-box-cross-node-move');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawClosedSquareAt(designPage, 900, 300); // A
+  await exitVectorEditMode(designPage);
+  await drawClosedSquareAt(designPage, 1200, 300); // B
+  await exitVectorEditMode(designPage);
+
+  await openMultipleViaEnter(designPage, page, [
+    { x: 900, y: 300 },
+    { x: 1200, y: 300 },
+  ]);
+
+  // marquee every vertex of both squares — the box's own bounds then span x:[900,1300], y:[300,400]
+  await designPage.dragVectorPoint(850, 250, 1350, 450);
+
+  const before = await readDesignState(page);
+  const [idA, idB] = before.rootOrder;
+
+  // drag from a point inside the box but on neither shape's own edges — the empty gap between them
+  await designPage.dragVectorPoint(1150, 350, 1150, 500);
+
+  const after = await readDesignState(page);
+
+  // every vertex on both nodes shifted by the same (0, 150) delta
+  expect(hasVertexNear(after.nodes[idA].vertices, 900, 450)).toBe(true);
+  expect(hasVertexNear(after.nodes[idA].vertices, 900, 300)).toBe(false);
+  expect(hasVertexNear(after.nodes[idB].vertices, 1200, 450)).toBe(true);
+  expect(hasVertexNear(after.nodes[idB].vertices, 1200, 300)).toBe(false);
+});
+
+test('selecting a single segment (not its own vertices) makes the multi-select box eligible, and dragging it moves both endpoints together', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-multi-vector-box-segment-eligible');
+  await expect(designPage.canvas).toBeVisible();
+
+  // a triangle, not a square — a square's own edges are all axis-aligned, so a single selected edge
+  // would bound a zero-height/zero-width degenerate box with no interior to drag from at all
+  await designPage.drawVectorPath([
+    { x: 900, y: 300 }, // v1
+    { x: 1000, y: 300 }, // v2
+    { x: 950, y: 250 }, // v3 (apex)
+    { x: 900, y: 300 }, // back onto v1, closing the loop
+  ]);
+  await exitVectorEditMode(designPage);
+
+  await designPage.doubleClick(925, 275); // midpoint of the diagonal v1-v3 edge, entering Vector Edit Mode
+
+  // shift-click that same edge midpoint — toggles segment selection instead of splitting on a plain click
+  await designPage.click(925, 275, { shift: true });
+
+  const before = await readDesignState(page);
+  const [idA] = before.rootOrder;
+
+  // the segment's own box is (900,250)-(950,300); drag from inside it, off the diagonal line itself
+  await designPage.dragVectorPoint(920, 270, 920, 220);
+
+  const after = await readDesignState(page);
+
+  expect(hasVertexNear(after.nodes[idA].vertices, 900, 250)).toBe(true); // v1 (segment start) moved
+  expect(hasVertexNear(after.nodes[idA].vertices, 950, 200)).toBe(true); // v3 (segment end) moved by the same delta
+  expect(hasVertexNear(after.nodes[idA].vertices, 900, 300)).toBe(false); // v1 left its old spot
+  expect(hasVertexNear(after.nodes[idA].vertices, 1000, 300)).toBe(true); // v2, not part of the segment, never moved
+});

@@ -3,7 +3,7 @@ import { RefObject } from 'react';
 // types
 import { NodeType } from 'types/design/enums';
 import { TVectorMultiSelectBox } from 'types/design/canvas/types';
-import { TVectorNode } from 'types/design/types';
+import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { drawVectorMultiSelectStaticBox } from '../drawVectorMultiSelectStaticBox';
@@ -29,6 +29,9 @@ const node: TVectorNode = {
   vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 40 } },
 };
 
+const nodes: Record<string, TSceneNode> = { 'vector-1': node };
+const vectorEditingNodeIds = ['vector-1'];
+
 const createVectorMultiSelectBoxRef = (box: TVectorMultiSelectBox | null = null): RefObject<TVectorMultiSelectBox | null> => ({
   current: box,
 });
@@ -44,7 +47,8 @@ describe('drawVectorMultiSelectStaticBox', () => {
       {} as WebGL2RenderingContext,
       {} as WebGLProgram,
       {} as WebGLBuffer,
-      node,
+      nodes,
+      vectorEditingNodeIds,
       ['missing-1', 'missing-2'],
       [],
       createVectorMultiSelectBoxRef(),
@@ -65,7 +69,8 @@ describe('drawVectorMultiSelectStaticBox', () => {
       {} as WebGL2RenderingContext,
       {} as WebGLProgram,
       {} as WebGLBuffer,
-      node,
+      nodes,
+      vectorEditingNodeIds,
       ['v1', 'v2'],
       [],
       boxRef,
@@ -98,7 +103,8 @@ describe('drawVectorMultiSelectStaticBox', () => {
       {} as WebGL2RenderingContext,
       {} as WebGLProgram,
       {} as WebGLBuffer,
-      node,
+      nodes,
+      vectorEditingNodeIds,
       ['v1', 'v2'],
       [],
       boxRef,

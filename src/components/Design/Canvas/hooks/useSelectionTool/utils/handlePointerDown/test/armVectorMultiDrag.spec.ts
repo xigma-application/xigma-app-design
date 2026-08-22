@@ -3,7 +3,7 @@ import { RefObject } from 'react';
 // types
 import { NodeType } from 'types/design/enums';
 import { TVectorMultiDragState } from 'types/design/selectionTool/types';
-import { TVectorNode } from 'types/design/types';
+import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { armVectorMultiDrag } from '../armVectorMultiDrag';
@@ -38,6 +38,9 @@ const vector: TVectorNode = {
   vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 5 }, v3: { id: 'v3', x: 20, y: 10 } },
 };
 
+const nodes: Record<string, TSceneNode> = { 'vector-1': vector };
+const vectorEditingNodeIds = ['vector-1'];
+
 describe('armVectorMultiDrag', () => {
   it('should snapshot every selected vertex origin, every selected handle origin, and the pointer start, then capture the pointer', () => {
     // mock
@@ -49,7 +52,8 @@ describe('armVectorMultiDrag', () => {
       canvas,
       pointerEvent(3),
       vectorMultiDragRef,
-      vector,
+      nodes,
+      vectorEditingNodeIds,
       ['v1', 'v3'],
       [
         { end: 'start', segmentId: 's1' },
@@ -63,7 +67,6 @@ describe('armVectorMultiDrag', () => {
       boxOrigin: null,
       handleOrigins: { 'end:s1': { x: -5, y: 0 }, 'start:s1': { x: 5, y: 0 } },
       hasMoved: false,
-      nodeId: 'vector-1',
       pendingClickAction: null,
       pointerStart: { x: 8, y: 9 },
       vertexOrigins: { v1: { x: 0, y: 0 }, v3: { x: 20, y: 10 } },
@@ -77,7 +80,10 @@ describe('armVectorMultiDrag', () => {
     const vectorMultiDragRef = createVectorMultiDragRef();
 
     // before
-    armVectorMultiDrag(canvas, pointerEvent(), vectorMultiDragRef, vector, [], [{ end: 'end', segmentId: 's2' }], { x: 0, y: 0 });
+    armVectorMultiDrag(canvas, pointerEvent(), vectorMultiDragRef, nodes, vectorEditingNodeIds, [], [{ end: 'end', segmentId: 's2' }], {
+      x: 0,
+      y: 0,
+    });
 
     // result
     expect(vectorMultiDragRef.current?.handleOrigins).toEqual({});
@@ -89,7 +95,20 @@ describe('armVectorMultiDrag', () => {
     const vectorMultiDragRef = createVectorMultiDragRef();
 
     // before
-    armVectorMultiDrag(canvas, pointerEvent(), vectorMultiDragRef, vector, ['v1'], [], { x: 0, y: 0 }, { id: 'v1', kind: 'vertex' });
+    armVectorMultiDrag(
+      canvas,
+      pointerEvent(),
+      vectorMultiDragRef,
+      nodes,
+      vectorEditingNodeIds,
+      ['v1'],
+      [],
+      { x: 0, y: 0 },
+      {
+        id: 'v1',
+        kind: 'vertex',
+      },
+    );
 
     // result
     expect(vectorMultiDragRef.current?.pendingClickAction).toEqual({ id: 'v1', kind: 'vertex' });

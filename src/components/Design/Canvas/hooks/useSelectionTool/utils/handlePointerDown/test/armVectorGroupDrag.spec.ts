@@ -1,10 +1,9 @@
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TVectorNode } from 'types/design/types';
 
 // utils
 import { armVectorGroupDrag } from '../armVectorGroupDrag';
@@ -45,20 +44,21 @@ const addVectorNode = (): string => {
 describe('armVectorGroupDrag', () => {
   afterEach(() => {
     store.dispatch(setSelection([]));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should snapshot the canonical multi-select box when grabbing an already-selected member of a 2+ selection, so a group drag started this way (not from the box’s own interior) keeps the box in sync too', () => {
     // mock — v1(0,0)/v2(100,100) both selected; grabbing v1's own dot (not the box interior) still
     // moves the whole group, so the box must be snapshotted here exactly like armVectorMultiSelectBoxOnPointerDown does
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
-    armVectorGroupDrag(canvas, pointerEvent(3), canvasRefs, node, { x: 0, y: 0 }, { id: 'v1', kind: 'vertex' });
+    armVectorGroupDrag(canvas, pointerEvent(3), canvasRefs, { x: 0, y: 0 }, { id: 'v1', kind: 'vertex' });
 
     // result
     expect(canvasRefs.vectorMultiDragRef.current?.boxOrigin).toEqual({ height: 100, width: 100, x: 0, y: 0 });
@@ -72,14 +72,14 @@ describe('armVectorGroupDrag', () => {
   it('should not snapshot a box when fewer than 2 points/handles are selected', () => {
     // mock — a single selected vertex dragged directly, no group/box concept applies
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
 
     // before
-    armVectorGroupDrag(canvas, pointerEvent(3), canvasRefs, node, { x: 0, y: 0 }, { id: 'v1', kind: 'vertex' });
+    armVectorGroupDrag(canvas, pointerEvent(3), canvasRefs, { x: 0, y: 0 }, { id: 'v1', kind: 'vertex' });
 
     // result
     expect(canvasRefs.vectorMultiDragRef.current?.boxOrigin).toBeNull();
@@ -90,14 +90,14 @@ describe('armVectorGroupDrag', () => {
     // mock — only the segment is "selected" (not its own vertices individually); the drag needs to move
     // both endpoints, and the box now treats a segment's endpoints the same as an explicit vertex selection
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
 
     // before
-    armVectorGroupDrag(canvas, pointerEvent(3), canvasRefs, node, { x: 0, y: 0 }, { id: 's1', kind: 'segment' });
+    armVectorGroupDrag(canvas, pointerEvent(3), canvasRefs, { x: 0, y: 0 }, { id: 's1', kind: 'segment' });
 
     // result
     expect(canvasRefs.vectorMultiDragRef.current?.vertexOrigins).toEqual({ v1: { x: 0, y: 0 }, v2: { x: 100, y: 100 } });

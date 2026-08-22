@@ -23,7 +23,6 @@ describe('drawVectorMultiSelectRotateDragBox', () => {
         cursorAngle: 0,
         deltaDegrees: 20,
         handleOrigins: {},
-        nodeId: 'vector-1',
         pivot: { x: 50, y: 20 },
         rotation: 10,
         startAngle: 0,

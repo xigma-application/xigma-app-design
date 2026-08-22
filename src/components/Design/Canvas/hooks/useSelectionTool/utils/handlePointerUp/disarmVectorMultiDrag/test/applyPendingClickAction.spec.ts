@@ -15,7 +15,6 @@ const baseDragState = (overrides: Partial<TVectorMultiDragState>): TVectorMultiD
   boxOrigin: null,
   handleOrigins: {},
   hasMoved: false,
-  nodeId: 'path-1',
   pendingClickAction: null,
   pointerStart: { x: 0, y: 0 },
   vertexOrigins: {},
@@ -115,7 +114,7 @@ describe('applyPendingClickAction', () => {
     applyPendingClickAction(
       store.dispatch,
       canvasRefs,
-      baseDragState({ nodeId, pendingClickAction: { kind: 'split-segment', segmentId: 's1', t: 0.5 } }),
+      baseDragState({ pendingClickAction: { kind: 'split-segment', nodeId, segmentId: 's1', t: 0.5 } }),
     );
 
     // result

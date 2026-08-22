@@ -3,7 +3,7 @@ import { RefObject } from 'react';
 // types
 import { NodeType } from 'types/design/enums';
 import { TVectorMultiSelectRotateDragState } from 'types/design/selectionTool/types';
-import { TVectorNode } from 'types/design/types';
+import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { armVectorMultiSelectRotateDrag } from '../armVectorMultiSelectRotateDrag';
@@ -35,6 +35,9 @@ const vector: TVectorNode = {
   vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } },
 };
 
+const nodes: Record<string, TSceneNode> = { 'vector-1': vector };
+const vectorEditingNodeIds = ['vector-1'];
+
 describe('armVectorMultiSelectRotateDrag', () => {
   it('should snapshot the pivot (bounds center), start angle, cursor angle, vertex origins, and handle origins, then capture the pointer', () => {
     // mock — bounds center (5, 0); pointer grabbed at (10, 0), due east of the pivot
@@ -47,7 +50,8 @@ describe('armVectorMultiSelectRotateDrag', () => {
       canvas,
       pointerEvent(3),
       rotateDragRef,
-      vector,
+      nodes,
+      vectorEditingNodeIds,
       ['v1', 'v2'],
       [{ end: 'start', segmentId: 's1' }],
       bounds,
@@ -61,7 +65,6 @@ describe('armVectorMultiSelectRotateDrag', () => {
       cursorAngle: 90,
       deltaDegrees: 0,
       handleOrigins: { 'start:s1': { x: 5, y: 0 } },
-      nodeId: 'vector-1',
       pivot: { x: 5, y: 0 },
       rotation: 0,
       startAngle: 0,

@@ -1,8 +1,11 @@
+// store
+import { selectVectorEditingNodeIds } from 'store/design/selectors';
+import { store } from 'store';
+
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
 import { TVectorPendingClickAction } from 'types/design/selectionTool/types';
-import { TVectorNode } from 'types/design/types';
 
 // utils
 import { armVectorMultiDrag } from './armVectorMultiDrag';
@@ -14,16 +17,33 @@ export const armVectorGroupDrag = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
   canvasRefs: TCanvasRefs,
-  node: TVectorNode,
   point: TPoint,
   pendingClickAction: TVectorPendingClickAction,
 ): void => {
+  const state = store.getState();
+  const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
   const selectedVertexIds = canvasRefs.selectedVectorVertexIdsRef.current;
   const selectedHandles = canvasRefs.selectedVectorHandlesRef.current;
-  const vertexIds = getVectorMultiSelectVertexIds(node, selectedVertexIds, canvasRefs.selectedVectorSegmentIdsRef.current);
+  const vertexIds = getVectorMultiSelectVertexIds(
+    state.design.nodes,
+    vectorEditingNodeIds,
+    selectedVertexIds,
+    canvasRefs.selectedVectorSegmentIdsRef.current,
+  );
   const box = isVectorMultiSelectBoxEligible(vertexIds, selectedHandles)
-    ? getVectorMultiSelectBox(node, vertexIds, selectedHandles, canvasRefs.vectorMultiSelectBoxRef)
+    ? getVectorMultiSelectBox(state.design.nodes, vectorEditingNodeIds, vertexIds, selectedHandles, canvasRefs.vectorMultiSelectBoxRef)
     : null;
 
-  armVectorMultiDrag(canvas, event, canvasRefs.vectorMultiDragRef, node, vertexIds, selectedHandles, point, pendingClickAction, box);
+  armVectorMultiDrag(
+    canvas,
+    event,
+    canvasRefs.vectorMultiDragRef,
+    state.design.nodes,
+    vectorEditingNodeIds,
+    vertexIds,
+    selectedHandles,
+    point,
+    pendingClickAction,
+    box,
+  );
 };

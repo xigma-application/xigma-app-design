@@ -12,7 +12,6 @@ import { getRotateCursorAngle } from 'utils/math/getRotateCursorAngle';
 import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
 import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
 import { getVectorMultiSelectBox } from '../../../../utils/getVectorMultiSelectBox';
-import { getVectorMultiSelectOwningNode } from '../../../../utils/getVectorMultiSelectOwningNode';
 import { getVectorMultiSelectResizeHandle } from '../../../../utils/getVectorMultiSelectResizeHandle';
 import { getVectorMultiSelectVertexIds } from '../../../../utils/getVectorMultiSelectVertexIds';
 import { isInVectorMultiSelectRotateRing } from '../../../../utils/isInVectorMultiSelectRotateRing';
@@ -28,20 +27,20 @@ export const resolveVectorMultiSelectBoxHover = (
   setClassName: (className: string | null) => void,
 ): void => {
   const state = store.getState();
+  const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
   const selectedVertexIds = canvasRefs.selectedVectorVertexIdsRef.current;
   const selectedHandles = canvasRefs.selectedVectorHandlesRef.current;
   const selectedSegmentIds = canvasRefs.selectedVectorSegmentIdsRef.current;
-  const node = getVectorMultiSelectOwningNode(
-    selectVectorEditingNodeIds(state),
-    state.design.nodes,
-    selectedVertexIds,
-    selectedHandles,
-    selectedSegmentIds,
-  );
-  const vertexIds = node ? getVectorMultiSelectVertexIds(node, selectedVertexIds, selectedSegmentIds) : selectedVertexIds;
+  const vertexIds = getVectorMultiSelectVertexIds(state.design.nodes, vectorEditingNodeIds, selectedVertexIds, selectedSegmentIds);
 
-  if (node && isVectorMultiSelectBoxEligible(vertexIds, selectedHandles)) {
-    const box = getVectorMultiSelectBox(node, vertexIds, selectedHandles, canvasRefs.vectorMultiSelectBoxRef);
+  if (isVectorMultiSelectBoxEligible(vertexIds, selectedHandles)) {
+    const box = getVectorMultiSelectBox(
+      state.design.nodes,
+      vectorEditingNodeIds,
+      vertexIds,
+      selectedHandles,
+      canvasRefs.vectorMultiSelectBoxRef,
+    );
 
     /* v8 ignore if -- eligibility already guarantees 2+ resolvable vertex/handle points, so bounds is never null here */
     if (box) {

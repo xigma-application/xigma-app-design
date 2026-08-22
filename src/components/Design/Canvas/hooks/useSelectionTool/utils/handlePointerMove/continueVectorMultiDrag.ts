@@ -3,21 +3,26 @@ import { VECTOR_ALIGNMENT_SNAP_TOLERANCE_PX } from 'constant/canvas';
 
 // store
 import { updateNode } from 'store/design/slice';
-import { selectViewport } from 'store/design/selectors';
+import { selectVectorEditingNodeIds, selectViewport } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
-import { TVectorSegment } from 'types/design/types';
+import { TSceneNode, TVectorSegment } from 'types/design/types';
 
 // utils
+import { dispatchAsOneGestureIfMultiNode } from '../../../../utils/dispatchAsOneGestureIfMultiNode';
 import { getAllVectorVertexPositions } from '../../../../utils/getAllVectorVertexPositions';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
 import { getVectorGroupAlignmentGuide } from '../../../../utils/getVectorGroupAlignmentGuide';
+import { groupVectorMultiSelectOriginsByNode } from '../../../../utils/groupVectorMultiSelectOriginsByNode';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 import { translateVectorVertices } from '../../../../utils/translateVectorVertices';
+
+const pickOrigins = (origins: Record<string, TPoint>, ids: string[]): Record<string, TPoint> =>
+  Object.fromEntries(ids.map((id) => [id, origins[id]]));
 
 const translateVectorHandles = (
   segments: Record<string, TVectorSegment>,
@@ -47,9 +52,11 @@ export const continueVectorMultiDrag = (
 
   if (dragState) {
     const state = store.getState();
-    const node = getVectorEditingNode(state.design.nodes, dragState.nodeId);
+    const nodes: Record<string, TSceneNode> = state.design.nodes;
+    const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
+    const groups = groupVectorMultiSelectOriginsByNode(nodes, vectorEditingNodeIds, dragState.vertexOrigins, dragState.handleOrigins);
 
-    if (node) {
+    if (Object.keys(groups).length !== 0) {
       dragState.hasMoved = true;
 
       const viewport = selectViewport(state);
@@ -61,13 +68,28 @@ export const continueVectorMultiDrag = (
         x: dragState.vertexOrigins[id].x + rawDeltaX,
         y: dragState.vertexOrigins[id].y + rawDeltaY,
       }));
-      const candidates = getAllVectorVertexPositions(state.design.nodes, draggedVertexIds);
+      const candidates = getAllVectorVertexPositions(nodes, draggedVertexIds);
       const alignmentTolerance = VECTOR_ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom;
       const { deltaCorrection, guide } = getVectorGroupAlignmentGuide(draggedPoints, candidates, alignmentTolerance);
       const deltaX = rawDeltaX + deltaCorrection.x;
       const deltaY = rawDeltaY + deltaCorrection.y;
-      const vertices = { ...node.vertices, ...translateVectorVertices(dragState.vertexOrigins, deltaX, deltaY) };
-      const segments = translateVectorHandles(node.segments, dragState.handleOrigins, deltaX, deltaY);
+
+      dispatchAsOneGestureIfMultiNode(dispatch, Object.keys(groups).length, () => {
+        Object.entries(groups).forEach(([nodeId, group]) => {
+          const node = getVectorEditingNode(nodes, nodeId);
+
+          /* v8 ignore if -- groups only ever contains node ids groupVectorMultiSelectOriginsByNode already resolved against this same `nodes` object, so the lookup can't fail here */
+          if (node) {
+            const vertices = {
+              ...node.vertices,
+              ...translateVectorVertices(pickOrigins(dragState.vertexOrigins, group.vertexIds), deltaX, deltaY),
+            };
+            const segments = translateVectorHandles(node.segments, pickOrigins(dragState.handleOrigins, group.handleKeys), deltaX, deltaY);
+
+            dispatch(updateNode({ changes: { segments, vertices }, id: nodeId }));
+          }
+        });
+      });
 
       if (dragState.boxOrigin && canvasRefs.vectorMultiSelectBoxRef.current) {
         canvasRefs.vectorMultiSelectBoxRef.current = {
@@ -76,7 +98,6 @@ export const continueVectorMultiDrag = (
         };
       }
 
-      dispatch(updateNode({ changes: { segments, vertices }, id: dragState.nodeId }));
       canvasRefs.vectorAlignmentGuideRef.current = guide;
       setClassName('move');
     }

@@ -109,13 +109,12 @@ export type TVectorPendingClickAction =
   | { id: string; kind: 'vertex' }
   | { end: 'end' | 'start'; kind: 'handle'; segmentId: string }
   | { id: string; kind: 'segment' }
-  | { kind: 'split-segment'; segmentId: string; t: number };
+  | { kind: 'split-segment'; nodeId: string; segmentId: string; t: number };
 
 export type TVectorMultiDragState = {
   boxOrigin: TDraftRect | null;
   handleOrigins: Record<string, TPoint>;
   hasMoved: boolean;
-  nodeId: string;
   pendingClickAction: TVectorPendingClickAction | null;
   pointerStart: TPoint;
   vertexOrigins: Record<string, TPoint>;
@@ -145,7 +144,6 @@ export type TVectorMultiSelectResizeDragState = {
   handle: TResizeHandle;
   handleOrigins: Record<string, TPoint>;
   liveBounds: TDraftRect;
-  nodeId: string;
   rotation: number;
   vertexOrigins: Record<string, TPoint>;
 };
@@ -155,7 +153,6 @@ export type TVectorMultiSelectRotateDragState = {
   cursorAngle: number;
   deltaDegrees: number;
   handleOrigins: Record<string, TPoint>;
-  nodeId: string;
   pivot: TPoint;
   rotation: number;
   startAngle: number;

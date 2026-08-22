@@ -23,7 +23,6 @@ import { TViewport } from 'types/design/types';
 
 // utils
 import { getResizeHandleAtPoint } from '../../../../utils/getResizeHandleAtPoint/getResizeHandleAtPoint';
-import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
 import { getVectorMultiSelectBoxForHover } from './getVectorMultiSelectBoxForHover';
 import { getVectorMultiSelectResizeHandle } from '../../../../utils/getVectorMultiSelectResizeHandle';
 import { setHoverState } from '../setHoverState';
@@ -45,11 +44,11 @@ export const resolveToolHover = (
   const selectedNodes = selectSelectedNodes(state);
   const resizableSelectedNodes = isEditingText || isEditingVector ? [] : selectedNodes;
   const applyClassName = isEditingVector ? (): void => {} : setClassName;
-  const vectorEditingNode = isEditingVector ? getVectorEditingNode(state.design.nodes, vectorEditingNodeIds[0]) : null;
   const selectedVertexIds = refs.selectedVectorVertexIdsRef.current;
   const selectedHandles = refs.selectedVectorHandlesRef.current;
   const vectorMultiSelectBox = getVectorMultiSelectBoxForHover(
-    vectorEditingNode,
+    state.design.nodes,
+    vectorEditingNodeIds,
     selectedVertexIds,
     selectedHandles,
     refs.vectorMultiSelectBoxRef,

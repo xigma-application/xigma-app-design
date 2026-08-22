@@ -2,23 +2,28 @@ import { RefObject } from 'react';
 
 // store
 import { updateNode } from 'store/design/slice';
-import { selectViewport } from 'store/design/selectors';
+import { selectVectorEditingNodeIds, selectViewport } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
 import { TPoint } from 'types/canvas';
 import { TVectorMultiSelectRotateDragState } from 'types/design/selectionTool/types';
-import { TVectorSegment, TVectorVertex } from 'types/design/types';
+import { TSceneNode, TVectorSegment, TVectorVertex } from 'types/design/types';
 
 // utils
+import { dispatchAsOneGestureIfMultiNode } from '../../../../utils/dispatchAsOneGestureIfMultiNode';
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
+import { groupVectorMultiSelectOriginsByNode } from '../../../../utils/groupVectorMultiSelectOriginsByNode';
 import { rotatePoint } from 'utils/math/rotatePoint';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 
 const ORIGIN: TPoint = { x: 0, y: 0 };
+
+const pickOrigins = (origins: Record<string, TPoint>, ids: string[]): Record<string, TPoint> =>
+  Object.fromEntries(ids.map((id) => [id, origins[id]]));
 
 const rotateVectorVertices = (origins: Record<string, TPoint>, pivot: TPoint, deltaDegrees: number): Record<string, TVectorVertex> =>
   Object.fromEntries(
@@ -53,20 +58,31 @@ export const continueVectorMultiSelectRotateDrag = (
 
   if (dragState) {
     const state = store.getState();
-    const node = getVectorEditingNode(state.design.nodes, dragState.nodeId);
+    const nodes: Record<string, TSceneNode> = state.design.nodes;
+    const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
+    const viewport = selectViewport(state);
+    const point = screenToWorld(getPointerPosition(canvas, event), viewport);
+    const deltaDegrees = getAngleBetweenPoints(dragState.pivot, point) - dragState.startAngle;
 
-    if (node) {
-      const viewport = selectViewport(state);
-      const point = screenToWorld(getPointerPosition(canvas, event), viewport);
-      const deltaDegrees = getAngleBetweenPoints(dragState.pivot, point) - dragState.startAngle;
+    dragState.deltaDegrees = deltaDegrees;
+    canvas.style.cursor = getRotatedRotateCursorUrl(dragState.cursorAngle + deltaDegrees) ?? canvas.style.cursor;
 
-      dragState.deltaDegrees = deltaDegrees;
-      canvas.style.cursor = getRotatedRotateCursorUrl(dragState.cursorAngle + deltaDegrees) ?? canvas.style.cursor;
+    const groups = groupVectorMultiSelectOriginsByNode(nodes, vectorEditingNodeIds, dragState.vertexOrigins, dragState.handleOrigins);
 
-      const vertices = { ...node.vertices, ...rotateVectorVertices(dragState.vertexOrigins, dragState.pivot, deltaDegrees) };
-      const segments = rotateVectorHandles(node.segments, dragState.handleOrigins, deltaDegrees);
+    dispatchAsOneGestureIfMultiNode(dispatch, Object.keys(groups).length, () => {
+      Object.entries(groups).forEach(([nodeId, group]) => {
+        const node = getVectorEditingNode(nodes, nodeId);
 
-      dispatch(updateNode({ changes: { segments, vertices }, id: dragState.nodeId }));
-    }
+        /* v8 ignore if -- groups only ever contains node ids groupVectorMultiSelectOriginsByNode already resolved against this same `nodes` object, so the lookup can't fail here */
+        if (node) {
+          const vertexOrigins = pickOrigins(dragState.vertexOrigins, group.vertexIds);
+          const handleOrigins = pickOrigins(dragState.handleOrigins, group.handleKeys);
+          const vertices = { ...node.vertices, ...rotateVectorVertices(vertexOrigins, dragState.pivot, deltaDegrees) };
+          const segments = rotateVectorHandles(node.segments, handleOrigins, deltaDegrees);
+
+          dispatch(updateNode({ changes: { segments, vertices }, id: nodeId }));
+        }
+      });
+    });
   }
 };

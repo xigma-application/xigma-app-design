@@ -49,7 +49,6 @@ describe('disarmVectorMultiSelectResizeDrag', () => {
       handle: 'se',
       handleOrigins: {},
       liveBounds: { height: 200, width: 200, x: 0, y: 0 },
-      nodeId: 'vector-1',
       rotation: 0,
       vertexOrigins: {},
     });
@@ -74,7 +73,6 @@ describe('disarmVectorMultiSelectResizeDrag', () => {
       handle: 'se',
       handleOrigins: {},
       liveBounds: { height: 200, width: 200, x: 0, y: 0 },
-      nodeId: 'vector-1',
       rotation: 30,
       vertexOrigins: {},
     });
@@ -97,7 +95,6 @@ describe('disarmVectorMultiSelectResizeDrag', () => {
       handle: 'se',
       handleOrigins: {},
       liveBounds: { height: 200, width: 200, x: 0, y: 0 },
-      nodeId: 'vector-1',
       rotation: 0,
       vertexOrigins: {},
     });

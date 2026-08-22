@@ -3,7 +3,7 @@ import { RefObject } from 'react';
 // types
 import { NodeType } from 'types/design/enums';
 import { TVectorMultiSelectBox } from 'types/design/canvas/types';
-import { TVectorNode } from 'types/design/types';
+import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { drawVectorMultiSelectBox } from '../drawVectorMultiSelectBox';
@@ -39,6 +39,9 @@ const node: TVectorNode = {
   vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 40 } },
 };
 
+const nodes: Record<string, TSceneNode> = { 'vector-1': node };
+const vectorEditingNodeIds = ['vector-1'];
+
 const createVectorMultiSelectBoxRef = (box: TVectorMultiSelectBox | null = null): RefObject<TVectorMultiSelectBox | null> => ({
   current: box,
 });
@@ -56,8 +59,10 @@ describe('drawVectorMultiSelectBox', () => {
       {} as WebGL2RenderingContext,
       {} as WebGLProgram,
       {} as WebGLBuffer,
-      node,
+      nodes,
+      vectorEditingNodeIds,
       ['v1'],
+      [],
       [],
       createVectorMultiSelectBoxRef(),
       null,
@@ -83,8 +88,10 @@ describe('drawVectorMultiSelectBox', () => {
       {} as WebGL2RenderingContext,
       {} as WebGLProgram,
       {} as WebGLBuffer,
-      node,
+      nodes,
+      vectorEditingNodeIds,
       ['v1'],
+      [],
       [],
       boxRef,
       null,
@@ -108,7 +115,6 @@ describe('drawVectorMultiSelectBox', () => {
       handle: 'se' as const,
       handleOrigins: {},
       liveBounds: { height: 40, width: 100, x: 0, y: 0 },
-      nodeId: 'vector-1',
       rotation: 0,
       vertexOrigins: {},
     };
@@ -118,8 +124,10 @@ describe('drawVectorMultiSelectBox', () => {
       {} as WebGL2RenderingContext,
       {} as WebGLProgram,
       {} as WebGLBuffer,
-      node,
+      nodes,
+      vectorEditingNodeIds,
       ['v1', 'v2'],
+      [],
       [],
       createVectorMultiSelectBoxRef(),
       vectorMultiSelectResizeDrag,
@@ -151,7 +159,6 @@ describe('drawVectorMultiSelectBox', () => {
       cursorAngle: 0,
       deltaDegrees: 0,
       handleOrigins: {},
-      nodeId: 'vector-1',
       pivot: { x: 50, y: 20 },
       rotation: 0,
       startAngle: 0,
@@ -163,8 +170,10 @@ describe('drawVectorMultiSelectBox', () => {
       {} as WebGL2RenderingContext,
       {} as WebGLProgram,
       {} as WebGLBuffer,
-      node,
+      nodes,
+      vectorEditingNodeIds,
       ['v1', 'v2'],
+      [],
       [],
       createVectorMultiSelectBoxRef(),
       null,
@@ -197,8 +206,10 @@ describe('drawVectorMultiSelectBox', () => {
       {} as WebGL2RenderingContext,
       {} as WebGLProgram,
       {} as WebGLBuffer,
-      node,
+      nodes,
+      vectorEditingNodeIds,
       ['v1', 'v2'],
+      [],
       [],
       boxRef,
       null,
@@ -214,7 +225,8 @@ describe('drawVectorMultiSelectBox', () => {
       {},
       {},
       {},
-      node,
+      nodes,
+      vectorEditingNodeIds,
       ['v1', 'v2'],
       [],
       boxRef,
@@ -232,8 +244,10 @@ describe('drawVectorMultiSelectBox', () => {
       {} as WebGL2RenderingContext,
       {} as WebGLProgram,
       {} as WebGLBuffer,
-      node,
+      nodes,
+      vectorEditingNodeIds,
       ['v1', 'v2'],
+      [],
       [],
       createVectorMultiSelectBoxRef(),
       null,

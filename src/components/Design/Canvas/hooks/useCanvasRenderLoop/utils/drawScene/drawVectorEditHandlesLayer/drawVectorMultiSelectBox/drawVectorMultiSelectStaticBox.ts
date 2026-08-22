@@ -5,7 +5,7 @@ import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 
 // types
 import { TVectorHandleHover, TVectorMultiSelectBox } from 'types/design/canvas/types';
-import { TVectorNode, TViewport } from 'types/design/types';
+import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
@@ -15,7 +15,8 @@ export const drawVectorMultiSelectStaticBox = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
-  node: TVectorNode,
+  nodes: Record<string, TSceneNode>,
+  vectorEditingNodeIds: string[],
   selectedVertexIds: string[],
   selectedHandles: TVectorHandleHover[],
   vectorMultiSelectBoxRef: RefObject<TVectorMultiSelectBox | null>,
@@ -23,7 +24,7 @@ export const drawVectorMultiSelectStaticBox = (
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  const box = getVectorMultiSelectBox(node, selectedVertexIds, selectedHandles, vectorMultiSelectBoxRef);
+  const box = getVectorMultiSelectBox(nodes, vectorEditingNodeIds, selectedVertexIds, selectedHandles, vectorMultiSelectBoxRef);
 
   if (box) {
     drawRect(gl, program, buffer, { ...box.bounds, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport, box.rotation);

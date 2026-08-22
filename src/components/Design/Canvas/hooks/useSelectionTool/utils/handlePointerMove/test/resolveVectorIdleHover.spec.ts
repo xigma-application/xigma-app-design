@@ -37,7 +37,6 @@ describe('resolveVectorIdleHover', () => {
       boxOrigin: null,
       handleOrigins: {},
       hasMoved: false,
-      nodeId: 'vector-1',
       pendingClickAction: null,
       pointerStart: { x: 0, y: 0 },
       vertexOrigins: {},
