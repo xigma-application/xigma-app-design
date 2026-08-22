@@ -6,8 +6,7 @@ import { TVectorNode, TViewport } from 'types/design/types';
 
 // utils
 import { drawVectorStroke } from 'utils/canvas/drawVectorNode/drawVectorStroke';
-import { flattenSegment } from 'utils/canvas/vectorNetwork/flattenSegment';
-import { getVectorCurveSegmentCount } from 'utils/canvas/vectorNetwork/getVectorCurveSegmentCount';
+import { flattenVectorSegments } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
 
 export const drawHoveredVectorSegmentHighlight = (
   gl: WebGL2RenderingContext,
@@ -19,24 +18,16 @@ export const drawHoveredVectorSegmentHighlight = (
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  const hoveredSegment = hoveredSegmentId ? node.segments[hoveredSegmentId] : null;
+  const hoveredSegment = hoveredSegmentId
+    ? flattenVectorSegments(node).find((segment) => segment.segmentId === hoveredSegmentId)
+    : undefined;
 
   if (hoveredSegment) {
-    const start = node.vertices[hoveredSegment.startId];
-    const end = node.vertices[hoveredSegment.endId];
-    const points = flattenSegment(
-      start,
-      end,
-      hoveredSegment.tangentStart,
-      hoveredSegment.tangentEnd,
-      getVectorCurveSegmentCount(start, end, hoveredSegment.tangentStart, hoveredSegment.tangentEnd),
-    );
-
     drawVectorStroke(
       gl,
       program,
       buffer,
-      [{ endId: hoveredSegment.endId, points, segmentId: hoveredSegment.id, startId: hoveredSegment.startId }],
+      [hoveredSegment],
       VECTOR_HANDLE_FILL,
       HOVER_OUTLINE_WIDTH / viewport.zoom,
       canvasWidth,
