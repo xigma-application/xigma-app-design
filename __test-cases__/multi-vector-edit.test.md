@@ -26,7 +26,7 @@ Aktualizowane na żywo w trakcie testowania w przeglądarce (Playwright MCP). �
 ## 4. Marquee / Lasso
 
 - [ ] ⏳ 13. Marquee obejmujący wierzchołki z A i z B — nie testowane live, pokryte jednostkowo (`continueVectorMarqueeDrag.spec.ts`)
-- [ ] ⏳ 14. Lasso analogicznie — nie testowane live, pokryte jednostkowo (`continueVectorLassoDrag.spec.ts`)
+- [x] ✅ 14. Lasso analogicznie — potwierdzone live, zob. sekcja 11 poniżej (i fix tam opisany dla przesuwania zaznaczenia bez wychodzenia z narzędzia Lasso)
 
 ## 5. Usuwanie (Delete/Backspace)
 
@@ -133,6 +133,61 @@ Pełny opis architektury (nowe/zmienione pliki: `getVectorMultiSelectPoints.ts`,
 `groupVectorMultiSelectOriginsByNode.ts`, `getBakedVectorEditingNodes.ts`, usunięcie
 `getVectorMultiSelectOwningNode.ts`, usunięcie `nodeId` z trzech typów stanu drag-u) w
 `.claude/docs/vector-network.md` §49.
+
+## 11. Lasso — nie blokuje przesuwania już zaznaczonych elementów (zgłoszone przez usera na żywo)
+
+User: _"Gdy mamy lasso blokujemy eventy poza zaznaczaniem pointów ale jak zaznaczymy lasso i chcemy
+przesunąć elementy zaznaczone lasso nie pozwala."_ Doprecyzowanie usera — dwa warunki: (1) jeśli
+lasso aktywne i NIC nie jest zaznaczone, lasso nie pozwala na nic poza zaznaczaniem; (2) jeśli lasso
+aktywne i COŚ jest zaznaczone, to zaznaczone coś powinno dać się przesunąć. _"Co ważne to że pointy
+są zaznaczone nie znaczy że lasso może nie działać, raczej kwestia co jest klikalne a co nie."_ —
+lasso ma dalej normalnie zaznaczać nowe rzeczy, tylko już zaznaczone elementy mają stać się
+"klikalne" pod spodem.
+
+Przyczyna: `armVectorLassoOnPointerDown` przy `activeTool === lasso` przechwytywał KAŻDY
+`pointerdown` bezwarunkowo — czyścił zaznaczenie i startował nową ścieżkę lasso, niezależnie od tego
+co było pod kursorem.
+
+**Pierwsza próba fixu była za szeroka i odrzucona w trakcie pracy**: samo przesunięcie
+`armVectorLassoOnPointerDown` na koniec listy hit-testowych resolverów w `ARM_RESOLVERS` (żeby
+wierzchołek/uchwyt/segment/box, które nie sprawdzają `activeTool`, dostały pierwszeństwo) naprawiało
+warunek (2), ale psuło warunek (1) — klik na dowolny, NIEzaznaczony wierzchołek zaczynałby wtedy jego
+drag zamiast lasso, bo `armVectorVertexOnPointerDown` domyślnie zaznacza-i-przeciąga cokolwiek trafi,
+zaznaczone czy nie. Istniejący (i wciąż aktualny) e2e test `vector-edit.spec.ts` row 240 explicit
+sprawdzał dokładnie ten przypadek — klik dokładnie na NIEzaznaczonym wierzchołku musi wciąż zacząć
+lasso, nie drag. Ten test nie został zmieniony i musiał dalej przechodzić.
+
+**Finalny fix** (chirurgiczny, bez zmiany kolejności `ARM_RESOLVERS`):
+`armVectorLassoOnPointerDown` sam sprawdza teraz, czy klik trafia w element, który JEST już częścią
+bieżącego zaznaczenia (zaznaczony wierzchołek/uchwyt/segment, albo wnętrze/róg/pierścień
+multi-select boxa zbudowanego z bieżącego zaznaczenia) — i tylko wtedy oddaje (`return undefined`)
+pointerdown dalej, do zwykłych resolverów (`armVectorVertexOnPointerDown` itd.), które już poprawnie
+obsługują drag/group-drag. Klik na cokolwiek NIEzaznaczonego (albo puste miejsce) dalej zachowuje się
+dokładnie jak wcześniej — czyści zaznaczenie i zaczyna nową ścieżkę lasso. Nowy plik
+`isPointOnVectorMultiSelectBox.ts` (`Design/Canvas/utils/`) łączy istniejące
+resize-handle/rotate-ring/interior sprawdzenia w jeden predykat, użyty tylko tutaj.
+
+- [x] ✅ 33. Lasso-select dwóch dolnych wierzchołków trójkąta (trzeci, górny, poza pętlą) →
+      zaznaczone dokładnie dwa (potwierdzone live: oba dolne na niebiesko, górny biały)
+- [x] ✅ 34. Przeciągnięcie zaczynając DOKŁADNIE na zaznaczonym wierzchołku, narzędzie Lasso wciąż
+      aktywne → oba zaznaczone wierzchołki przesuwają się razem, trzeci nietknięty (potwierdzone
+      live: `store.getState()` przed/po — oba `y: 400 → 450`, trzeci wierzchołek bez zmian; Lasso
+      pozostało zaznaczone w toolbarze przez cały czas)
+- [x] ✅ 35. Lasso po wszystkich trzech wierzchołkach (puste pole wokół kształtu) → nadal działa jak
+      zwykłe zaznaczanie, wszystkie trzy stają się zaznaczone, box multi-select się pojawia
+      (potwierdzone live screenshotem)
+- [x] ✅ 36. Przeciągnięcie zaczynając we WNĘTRZU multi-select boxa (nie dokładnie na punkcie), Lasso
+      wciąż aktywne → cała grupa (wszystkie 3) przesuwa się razem (potwierdzone live:
+      `store.getState()` przed/po — wszystkie trzy `y` +60 o identyczny delta)
+- [x] ✅ 37. Klik dokładnie na NIEzaznaczonym wierzchołku, Lasso wciąż aktywne → dalej zaczyna nową
+      ścieżkę lasso zamiast przeciągać wierzchołek (e2e `vector-edit.spec.ts` row 240, niezmieniony
+      test dalej przechodzi — dowód że fix nie poszedł za daleko)
+
+Regresja + nowa logika pokryta jednostkowo w `armResolvers.spec.ts` (8 nowych testów,
+`armVectorLassoOnPointerDown` describe block: trafienie w zaznaczony/niezaznaczony wierzchołek,
+uchwyt, segment, oraz box) i nowym `isPointOnVectorMultiSelectBox.spec.ts` — całość 100%
+branch/function/line/statement coverage. e2e: `vector-edit.spec.ts` row 262 (nowy, przeciąganie z
+zaznaczonego wierzchołka przesuwa całą grupę) obok niezmienionego row 240.
 
 **e2e**: `e2e/pages/design/multi-vector-edit.spec.ts`, `TEST_CASES.md` rows 260-261 — cross-node box
 drag-move (dwa osobne trójkąty, marquee po obu, drag za wnętrze boxa), i box aktywny dla samego

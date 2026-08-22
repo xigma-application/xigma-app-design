@@ -19,7 +19,7 @@ import { armStarVertexCountOnPointerDown } from './armResolvers/armStarVertexCou
 import { armVectorBendSegmentOnPointerDown } from './armResolvers/armVectorBendSegmentOnPointerDown';
 import { armVectorCornerHandleOnPointerDown } from './armResolvers/armVectorCornerHandleOnPointerDown';
 import { armVectorHandleOnPointerDown } from './armResolvers/armVectorHandleOnPointerDown/armVectorHandleOnPointerDown';
-import { armVectorLassoOnPointerDown } from './armResolvers/armVectorLassoOnPointerDown';
+import { armVectorLassoOnPointerDown } from './armResolvers/armVectorLassoOnPointerDown/armVectorLassoOnPointerDown';
 import { armVectorMarqueeOnPointerDown } from './armResolvers/armVectorMarqueeOnPointerDown';
 import { armVectorMultiSelectBoxOnPointerDown } from './armResolvers/armVectorMultiSelectBoxOnPointerDown';
 import { armVectorMultiSelectResizeOnPointerDown } from './armResolvers/armVectorMultiSelectResizeOnPointerDown';

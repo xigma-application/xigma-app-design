@@ -29,7 +29,7 @@ import { armStarVertexCountOnPointerDown } from '../armStarVertexCountOnPointerD
 import { armVectorBendSegmentOnPointerDown } from '../armVectorBendSegmentOnPointerDown';
 import { armVectorCornerHandleOnPointerDown } from '../armVectorCornerHandleOnPointerDown';
 import { armVectorHandleOnPointerDown } from '../armVectorHandleOnPointerDown/armVectorHandleOnPointerDown';
-import { armVectorLassoOnPointerDown } from '../armVectorLassoOnPointerDown';
+import { armVectorLassoOnPointerDown } from '../armVectorLassoOnPointerDown/armVectorLassoOnPointerDown';
 import { armVectorMarqueeOnPointerDown } from '../armVectorMarqueeOnPointerDown';
 import { armVectorMultiSelectBoxOnPointerDown } from '../armVectorMultiSelectBoxOnPointerDown';
 import { armVectorMultiSelectResizeOnPointerDown } from '../armVectorMultiSelectResizeOnPointerDown';
@@ -827,6 +827,172 @@ describe('armVectorLassoOnPointerDown', () => {
     // result
     expect(armVectorLassoOnPointerDown(ctx)).toBeUndefined();
     expect(ctx.canvasRefs.vectorLassoPathRef.current).toBeNull();
+  });
+
+  it('should return undefined (yield to the vertex-drag resolver) when the click lands exactly on an already-selected vertex', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.lasso, canvasRefs, point: { x: 0, y: 0 } });
+
+    // result
+    expect(armVectorLassoOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.canvasRefs.vectorLassoPathRef.current).toBeNull();
+    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1']);
+  });
+
+  it('should still start a fresh lasso path when the click lands on a vertex that is NOT part of the current selection', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    // before — nothing selected, so v1 is hittable but not "clickable" for a drag
+    const ctx = createContext({ activeTool: ToolName.lasso, point: { x: 0, y: 0 } });
+
+    // result
+    expect(armVectorLassoOnPointerDown(ctx)).toBe(true);
+    expect(ctx.canvasRefs.vectorLassoPathRef.current).toEqual([{ x: 0, y: 0 }]);
+  });
+
+  it('should return undefined (yield) when the click lands exactly on an already-selected tangent handle', () => {
+    // mock — the start handle of v1(0,0) sits at (10, 20) via its tangentStart offset; v1 must be
+    // selected for the handle to be visible/hittable at all
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: { x: 10, y: 20 } } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.lasso, canvasRefs, point: { x: 10, y: 20 } });
+
+    // result
+    expect(armVectorLassoOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.canvasRefs.vectorLassoPathRef.current).toBeNull();
+  });
+
+  it('should still start a fresh lasso path when the click lands on a handle that is NOT itself selected', () => {
+    // mock — v1 selected just enough to make its own handle visible/hittable, but the handle itself
+    // was never added to the handle selection
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: { x: 10, y: 20 } } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.lasso, canvasRefs, point: { x: 10, y: 20 } });
+
+    // result
+    expect(armVectorLassoOnPointerDown(ctx)).toBe(true);
+    expect(ctx.canvasRefs.vectorLassoPathRef.current).toEqual([{ x: 10, y: 20 }]);
+  });
+
+  it('should return undefined (yield) when the click lands on an already-selected segment', () => {
+    // mock — v1(0,0)-v2(100,0), click well away from either endpoint
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.lasso, canvasRefs, point: { x: 25, y: 0 } });
+
+    // result
+    expect(armVectorLassoOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.canvasRefs.vectorLassoPathRef.current).toBeNull();
+  });
+
+  it('should still start a fresh lasso path when the click lands on a segment that is NOT selected', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.lasso, point: { x: 25, y: 0 } });
+
+    // result
+    expect(armVectorLassoOnPointerDown(ctx)).toBe(true);
+    expect(ctx.canvasRefs.vectorLassoPathRef.current).toEqual([{ x: 25, y: 0 }]);
+  });
+
+  it('should return undefined (yield to the multi-select box) when the click lands inside the bounding box of 2+ selected vertices', () => {
+    // mock — v1(0,0), v2(100,100) selected, click at their shared bounding box's center
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.lasso, canvasRefs, point: { x: 50, y: 50 } });
+
+    // result
+    expect(armVectorLassoOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.canvasRefs.vectorLassoPathRef.current).toBeNull();
+    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
+  });
+
+  it('should still start a fresh lasso path when the click falls outside the multi-select box of 2+ selected vertices', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.lasso, canvasRefs, point: { x: 900, y: 900 } });
+
+    // result — clears the pre-existing v1/v2 selection, exactly like starting any other fresh lasso
+    expect(armVectorLassoOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(ctx.canvasRefs.vectorLassoPathRef.current).toEqual([{ x: 900, y: 900 }]);
   });
 });
 

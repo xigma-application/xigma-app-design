@@ -3,20 +3,17 @@ import { selectVectorEditingNodeIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { TArmContext } from '../types';
+import { TArmContext } from '../../types';
 import { ToolName } from 'types/design/enums';
 
-export const armVectorLassoOnPointerDown = ({
-  activeTool,
-  canvas,
-  canvasRefs,
-  event,
-  point,
-  setClassName,
-}: TArmContext): true | undefined => {
+// utils
+import { hitsCurrentVectorSelection } from './hitsCurrentVectorSelection';
+
+export const armVectorLassoOnPointerDown = (context: TArmContext): true | undefined => {
+  const { activeTool, canvas, canvasRefs, event, point, setClassName } = context;
   const vectorEditingNodeIds = selectVectorEditingNodeIds(store.getState());
 
-  if (activeTool === ToolName.lasso && vectorEditingNodeIds.length > 0) {
+  if (activeTool === ToolName.lasso && vectorEditingNodeIds.length > 0 && !hitsCurrentVectorSelection(context, vectorEditingNodeIds)) {
     canvasRefs.selectedVectorVertexIdsRef.current = [];
     canvasRefs.selectedVectorHandlesRef.current = [];
     canvasRefs.selectedVectorSegmentIdsRef.current = [];

@@ -8,6 +8,11 @@ import { countMismatchedPixels } from './compareScreenshots';
 
 test.describe.configure({ mode: 'serial' });
 
+// vertex ids are freshly generated per draw, so position is the only stable way to identify one after
+// a round trip through page.evaluate
+const hasVertexNear = (vertices: Record<string, { x: number; y: number }> | undefined, x: number, y: number): boolean =>
+  Object.values(vertices ?? {}).some((vertex) => Math.abs(vertex.x - x) < 3 && Math.abs(vertex.y - y) < 3);
+
 // v1 (900,300) -> v2 (1050,300) -> v3 (1050,450), all plain clicks (no curve), left open. Leaves the
 // canvas still on the Pen tool with the node in vector edit mode, exactly as a real draw session would.
 const drawOpenTriangle = async (designPage: DesignPage): Promise<void> => {
@@ -1346,7 +1351,7 @@ test('the Lasso tool (activated via its "Q" shortcut) selects every vertex whose
   expect(afterV3.equals(beforeV3)).toBe(true);
 });
 
-test('starting a Lasso drag directly on top of an existing vertex still starts a lasso stroke instead of dragging that vertex — a dedicated tool intercepts the click before any vertex-drag resolver sees it', async ({
+test('starting a Lasso drag directly on top of an UNselected existing vertex still starts a lasso stroke instead of dragging that vertex — Lasso only yields the click to an already-selected element', async ({
   page,
 }) => {
   const designPage = new DesignPage(page);
@@ -1361,8 +1366,9 @@ test('starting a Lasso drag directly on top of an existing vertex still starts a
   const v1Region = { height: 40, width: 40, x: 880, y: 280 };
   const beforeV1 = await page.screenshot({ clip: v1Region });
 
-  // dragging starting exactly on v1 and ending well away from it — if this were a vertex drag, v1
-  // would have moved to the release point; a lasso stroke instead leaves it exactly where it was
+  // v1 is not selected at this point — dragging starting exactly on it and ending well away from it
+  // still starts a lasso stroke instead of dragging that vertex, leaving it exactly where it was; see
+  // the next test for the opposite case, where the vertex IS already selected
   await designPage.dragVectorLasso([
     { x: 900, y: 300 },
     { x: 1200, y: 600 },
@@ -1371,6 +1377,47 @@ test('starting a Lasso drag directly on top of an existing vertex still starts a
   const afterV1 = await page.screenshot({ clip: v1Region });
 
   expect(afterV1.equals(beforeV1)).toBe(true);
+});
+
+test('starting a Lasso drag directly on top of an ALREADY-selected vertex moves the whole selection instead of starting a new lasso stroke', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-lasso-drag-selection');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawOpenTriangle(designPage); // v1(900,300), v2(1050,300), v3(1050,450)
+  await designPage.selectVectorEditMoveTool();
+  await page.keyboard.press('q');
+
+  // a freeform loop spanning y 250-320 catches v1 and v2 (both at y=300), stays well clear of v3 (y=450)
+  await designPage.dragVectorLasso([
+    { x: 850, y: 250 },
+    { x: 1100, y: 250 },
+    { x: 1100, y: 320 },
+    { x: 850, y: 320 },
+  ]);
+
+  // dragging starting exactly on the now-selected v1 — if Lasso still intercepted this click
+  // unconditionally, this would clear the selection and start a fresh lasso stroke instead
+  await designPage.dragVectorPoint(900, 300, 900, 380);
+
+  const vertices = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const state = store.getState();
+    const nodeId = state.design.rootOrder[state.design.rootOrder.length - 1];
+
+    return state.design.nodes[nodeId].vertices;
+  });
+
+  // v1 and v2, both selected by the lasso, moved together by the same +80 delta; v3, never selected,
+  // stayed exactly where it was drawn
+  expect(hasVertexNear(vertices, 900, 380)).toBe(true);
+  expect(hasVertexNear(vertices, 1050, 380)).toBe(true);
+  expect(hasVertexNear(vertices, 1050, 450)).toBe(true);
+  expect(hasVertexNear(vertices, 900, 300)).toBe(false);
+  expect(hasVertexNear(vertices, 1050, 300)).toBe(false);
 });
 
 test('the Lasso fill renders a uniform translucent overlay over empty canvas WHILE the stroke is still being drawn, not the page’s own checker background bleeding through a torn alpha channel', async ({

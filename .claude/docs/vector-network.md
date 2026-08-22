@@ -3163,6 +3163,47 @@ without intermediate steps sometimes reads stale cursor/DOM state on the very ne
 interaction always has intermediate movement, so this is a test-harness artifact, not a product bug;
 adding 3-10 `steps` to the approach move before `pointerdown` made every repro reliable.
 
+## 50. Lasso tool no longer hijacks pointerdown on an already-selected/draggable element
+
+Reported live by the user, in two precise conditions: with Lasso active and *nothing* selected,
+Lasso should own every pointerdown (selecting only); with Lasso active and *something* already
+selected, clicking that selection should move it, not restart a new lasso path. *"Co ważne to że
+pointy są zaznaczone nie znaczy że lasso może nie działać, raczej kwestia co jest klikalne a co
+nie"* — Lasso must keep being able to start fresh selections; only already-selected elements become
+click-and-drag targets underneath it.
+
+Root cause: `armVectorLassoOnPointerDown` fired unconditionally whenever `activeTool === lasso` and
+any vector node was open, regardless of what was under the pointer.
+
+**First attempt, tried and reverted mid-implementation**: reordering `ARM_RESOLVERS`
+(`handlePointerDown/constants.ts`) to put the hit-test resolvers (vertex, handle, segment,
+multi-select box — none of which check `activeTool`) ahead of Lasso, mirroring how
+`armVectorMarqueeOnPointerDown` already sits after them for the `move` tool. This satisfied the
+"already selected" condition but broke the "nothing selected" one: `armVectorVertexOnPointerDown`
+selects-and-drags *any* vertex it hits, selected or not, so a click on an unselected vertex would
+silently start a vertex drag instead of a lasso stroke — contradicted by an existing, still-accurate
+e2e test (`vector-edit.spec.ts` row 240) asserting exactly that click still starts a lasso stroke.
+
+**Final fix**: `ARM_RESOLVERS`'s order is unchanged; `armVectorLassoOnPointerDown` itself now hit-tests
+whether the pointerdown lands on an element that's part of the *current* selection — a selected
+vertex/handle/segment (via the same `get*AtPointAcrossOpenNodes` getters the real resolvers use, then
+a membership check against the selected-id refs), or the interactive area (interior/resize
+corner/rotate ring) of the multi-select box built from the current selection. Only then does it
+`return undefined`, yielding to the normal resolver chain exactly as before reordering was ever
+considered. Everything else — an unselected element, or blank canvas — still clears the selection and
+starts a fresh lasso path, unchanged. New `isPointOnVectorMultiSelectBox.ts`
+(`Design/Canvas/utils/`) bundles the box's three interactive-zone checks into one predicate for this.
+
+Verified live via Playwright MCP: lasso-selecting two of a triangle's three vertices, then dragging
+starting exactly on one of the now-selected vertices, moves both together (confirmed via
+`store.getState()` before/after) while Lasso stays the active tool throughout; dragging from inside
+the resulting multi-select box (not on a vertex) also group-moves; a drag starting on a vertex that
+is *not* selected, or on genuinely empty canvas, still clears selection and starts a brand new lasso
+path, unchanged. Unit: 8 new cases in `armResolvers.spec.ts`'s `armVectorLassoOnPointerDown` block
+(selected/unselected × vertex/handle/segment, plus box-interior-in/out), 100% branch coverage. e2e:
+`vector-edit.spec.ts` row 262 alongside the unmodified row 240. See
+`__test-cases__/multi-vector-edit.test.md` §11 for the full scenario log.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows
