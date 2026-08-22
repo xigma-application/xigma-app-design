@@ -2718,9 +2718,9 @@ unlike two straight lines, so the pair alone isn't a unique key.
 **Face key stability under a vertex drag is deliberately asymmetric, confirmed against a live report of
 the opposite expectation.** A genuine topology change (a crossing appears, disappears, or a branch vertex
 gets dragged into/out of another face's interior) legitimately produces new face keys — there's no
-"lineage" tracking a face's identity across such a change (asked and answered directly: none exists,
-adding it would need matching old keys to new ones by geometric overlap, out of scope). What must NOT
-change a key is incidental recomputation — the same physical crossing, on the same two segments, at
+"lineage" tracking a face's identity across such a change at the `deriveVectorFaces` level itself (none
+exists here, and none should — see §51 for the best-effort geometric-overlap remap that now runs one
+layer up, at gesture-commit time, instead). What must NOT change a key is incidental recomputation — the same physical crossing, on the same two segments, at
 (near enough) the same point, must always re-derive the same split-piece ids. Verified directly: a drag
 that briefly creates then resolves a crossing must never leave `deriveVectorFaces` returning zero faces
 (the literal live bug — a filled shape stopped being paintable at all mid-drag, traced to the angle-tie
@@ -3203,6 +3203,84 @@ path, unchanged. Unit: 8 new cases in `armResolvers.spec.ts`'s `armVectorLassoOn
 (selected/unselected × vertex/handle/segment, plus box-interior-in/out), 100% branch coverage. e2e:
 `vector-edit.spec.ts` row 262 alongside the unmodified row 240. See
 `__test-cases__/multi-vector-edit.test.md` §11 for the full scenario log.
+
+## 51. A painted face survives a topology-changing gesture — best-effort geometric remap, not lineage tracking
+
+Live-reported: painting a shape (§43), then dragging a vertex until the shape self-intersects, made the
+fill vanish entirely — `deriveVectorFaces` (§44) legitimately derives new, different face keys for a
+genuine crossing, but `node.filledFaceKeys` still held the old, now-stale key. §44's own note above
+already explains why `deriveVectorFaces` itself will never track this ("no lineage... at that level",
+by design) — this section is the one layer up that closes the gap, at the point a gesture actually
+commits, not inside face derivation itself.
+
+**Why gesture-commit time, not any of the ~30 `dispatch(updateNode(...))` call sites that touch a vector
+node's `vertices`/`segments` mid-drag**: there is no single dispatch chokepoint for vector geometry
+changes — `continueVectorVertexDrag.ts`/`continueVectorHandleDrag.ts`/`continueVectorSegmentBendDrag.ts`/
+the three multi-select `continueVectorMultiSelect*Drag.ts` files, plus `resizeVectorNode.ts`, all dispatch
+`updateNode` on every `pointermove`, each building its own partial `changes` object — hooking a remap into
+every one of them would mean recomputing faces on every mouse-move frame. What every one of those drags
+*does* share is `useSelectionTool/utils/handlePointerDown/handlePointerDown.ts` /
+`handlePointerUp/handlePointerUp.ts` — the one place `beginHistoryGesture()`/`endHistoryGesture()`
+bracket **every** drag mechanism (`design-store-architecture.md`'s history middleware groups any number of
+`updateNode` dispatches inside one open gesture into a single Undo step for free, confirmed directly —
+no explicit multi-dispatch coalescing needed), so a one-shot check at the very end of `handlePointerUp`
+is both cheap (runs once per gesture, not per frame) and lands in the same Undo step as the gesture's own
+geometry change.
+
+**Mechanism** (`useSelectionTool/utils/vectorFaceFillRemap/`, new folder):
+- `handlePointerDown.ts` calls `snapshotVectorFaceFills(state)` right after `beginHistoryGesture()`,
+  storing `Record<nodeId, TVectorNode>` — every vector node in the **whole document** with
+  `filledFaceKeys.length > 0` — into a new `selectionRefs.vectorFaceFillSnapshotRef`. Deliberately
+  document-wide, not scoped to `vectorEditingNodeIds`: an ordinary bounding-box resize of a painted vector
+  node (`resizeVectorNode.ts`) can also change its face topology without Vector Edit Mode ever being
+  entered. Cheap either way — this only stores object references (Redux/Immer nodes are already
+  immutable), not clones.
+- `handlePointerUp.ts` calls `remapVectorFaceFillsAfterGesture(dispatch, selectionRefs)` as its last step,
+  right before `dispatch(endHistoryGesture())`. For each snapshotted node whose current store reference
+  changed (an identity check — untouched nodes short-circuit immediately), `remapFilledFaceKeys(oldNode,
+  newNode)` (`utils/canvas/vectorNetwork/`, sibling to `deriveVectorFaces.ts`) decides the new
+  `filledFaceKeys`, and a corrective `updateNode` only dispatches if that set actually differs from what's
+  already there.
+- `remapFilledFaceKeys.ts`: old keys still present in `deriveVectorFaces(newNode)` pass through unchanged
+  (two short-circuits — no fills at all, or no key actually went stale — skip calling `deriveVectorFaces`
+  a second time). For keys that did go stale, every new face whose polygon overlaps a stale old face —
+  tested via `isPointInPolygonVertices` (`Canvas/utils/`, the same ray-cast the Paint tool's own click
+  hit-test already uses) applied **both directions** (new face's own centroid inside the old face's
+  polygon, OR the old face's centroid inside the new one) — inherits the fill. Both directions matter for
+  different topology changes: a face **splitting** into several (self-intersection) is reliably caught by
+  "new centroid inside old polygon", since each split piece is by construction a fragment of the old
+  face's own area; a **merge** (several old faces collapsing into one bigger new face, e.g. deleting a
+  dividing segment) is reliably caught by the other direction instead, since the new face's own centroid
+  isn't guaranteed to land inside any single one of the several old fragments that fed it, but each old
+  fragment's centroid is guaranteed to land inside the new, larger face that absorbed it.
+
+**Known, deliberately-accepted limitation, verified both live and analytically — not a bug**: the
+overlap test is genuinely geometric, not merely a heuristic proxy, and a single-vertex drag that creates a
+self-intersection necessarily moves that vertex to a position *outside* the shape's own pre-drag boundary
+(a topological necessity — otherwise the new edge could never reach across a non-adjacent edge to cross
+it). The resulting sliver face immediately touching the dragged vertex is bounded partly by that
+now-exterior point, and can end up with **zero** actual overlap against the old, pre-drag polygon — not a
+near-miss the heuristic fails to catch, but a real absence of shared area. Confirmed by exhaustively
+sampling one live-reproduced drag (a rectangle dragged into a bowtie identical in shape to the one in the
+original bug report): a dense 21×21 grid over the near-vertex sliver's own bounding box found **zero**
+sample points landing inside the pre-drag rectangle, out of 182 points that were themselves inside the
+sliver. The larger, far-side lobe (the one *not* touching the dragged vertex) is unaffected by this and
+reliably keeps its fill in every case tested, live and in the unit suite — this is what actually closes
+the reported bug (a shape's fill no longer disappears outright the instant it self-intersects). Extending
+this to also backfill the near-vertex sliver was considered and explicitly declined (asked and answered
+directly: the more permissive rule — fill every fragment descended from the same stale key regardless of
+overlap — was rejected as too broad, since it would also incorrectly propagate fill across a genuinely
+separate, deliberately-unfilled adjacent region in shapes with several faces meeting at a shared edge, the
+exact "square + triangle sharing an edge" shape `deriveVectorFaces.spec.ts` already regression-locks).
+
+Unit: `getPolygonCentroid.spec.ts` (`utils/math/`), `remapFilledFaceKeys.spec.ts` (split/merge/
+unrelated-face-untouched cases), `snapshotVectorFaceFills.spec.ts`, `remapVectorFaceFillsAfterGesture.spec.ts`
+(real `store`, mirroring `disarmVectorVertexDrag.spec.ts`'s convention) — 100% branch coverage including
+both the "reference changed but topology didn't" and "reference changed and topology did" paths. e2e:
+`vector-edit.spec.ts`, TEST_CASES.md #263 — a painted square dragged into a self-intersecting shape,
+asserting via `store.getState()` (same pattern as TEST_CASES.md #249's cross-shape-merge fill test) that
+the resulting `filledFaceKeys` is non-empty and genuinely different from the stale pre-drag key, without
+asserting on the known-excluded sliver either way.
 
 ## Related
 

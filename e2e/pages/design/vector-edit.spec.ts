@@ -1808,3 +1808,49 @@ test('a painted face on the absorbed shape survives being merged into a complete
   expect(result.nodeAExists).toBe(false);
   expect(result.filledFaceKeys).toEqual(faceKeyOnA);
 });
+
+test('a painted square keeps its fill on the region unaffected by the drag after a vertex drag turns it into a self-intersecting ("bowtie") shape', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-paint-survives-self-intersection');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawClosedSquare(designPage); // v1(900,300) v2(1000,300) v3(1000,400) v4(900,400), one face
+  await designPage.selectVectorEditMoveTool();
+  await page.keyboard.press('Shift+B');
+  await designPage.click(950, 350); // paint the square's single face
+  await exitVectorEditMode(designPage);
+
+  const { faceKeysBefore, nodeId } = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { rootOrder, nodes } = store.getState().design;
+    const [id] = rootOrder;
+
+    return { faceKeysBefore: nodes[id].filledFaceKeys, nodeId: id };
+  });
+
+  expect(faceKeysBefore).toHaveLength(1); // sanity check: the paint click actually filled the square
+
+  await designPage.doubleClick(950, 350); // re-enter Vector Edit Mode, Move tool active by default
+  await designPage.pointerDown(900, 300); // v1, dragged past the opposite v2-v3 edge
+  await designPage.pointerMove(1000, 360);
+  await designPage.pointerMove(1080, 350);
+  await designPage.pointerUp();
+
+  const faceKeysAfter = await page.evaluate(
+    async ([id]) => {
+      const { store } = await import('/src/store/index.ts');
+
+      return store.getState().design.nodes[id].filledFaceKeys;
+    },
+    [nodeId],
+  );
+
+  // the drag legitimately produces new face keys (the topology genuinely changed) — the old, now-stale
+  // key must not survive verbatim, but the drag must not leave the shape entirely unpainted either
+  // (the reported bug: the whole square lost its fill the instant it self-intersected)
+  expect(faceKeysAfter).not.toEqual(faceKeysBefore);
+  expect(faceKeysAfter.length).toBeGreaterThan(0);
+});
