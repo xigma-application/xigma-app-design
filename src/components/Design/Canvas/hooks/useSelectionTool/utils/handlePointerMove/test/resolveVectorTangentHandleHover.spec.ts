@@ -1,5 +1,5 @@
 // store
-import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -44,7 +44,7 @@ const addVectorNode = (): string => {
 describe('resolveVectorTangentHandleHover', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
     store.dispatch(setPenActiveVertexId(null));
   });
 
@@ -64,7 +64,7 @@ describe('resolveVectorTangentHandleHover', () => {
     // mock — s1's start handle sits at v1(0,0) + tangentStart(5,0) = (5,0); v1 must be selected for it to be visible/hittable
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
@@ -82,7 +82,7 @@ describe('resolveVectorTangentHandleHover', () => {
     // mock — same handle, but nothing is selected, so it is neither visible nor hittable
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
@@ -98,7 +98,7 @@ describe('resolveVectorTangentHandleHover', () => {
     // mock — v1 is penActiveVertexId, not part of selectedVectorVertexIdsRef, and must still make its own handle hittable
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setPenActiveVertexId('v1'));
 
     const canvas = createCanvas();
@@ -115,7 +115,7 @@ describe('resolveVectorTangentHandleHover', () => {
     // mock
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();

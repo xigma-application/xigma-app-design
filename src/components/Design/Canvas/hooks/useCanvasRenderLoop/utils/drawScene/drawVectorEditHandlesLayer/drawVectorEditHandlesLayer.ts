@@ -22,7 +22,7 @@ export const drawVectorEditHandlesLayer = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   nodes: Record<string, TSceneNode>,
-  vectorEditingNodeId: string | null,
+  vectorEditingNodeIds: string[],
   selectedVertexIds: string[],
   preMarqueeVertexIds: string[],
   selectedSegmentIds: string[],
@@ -46,62 +46,64 @@ export const drawVectorEditHandlesLayer = (
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  const editingNode = getVectorEditingNode(nodes, vectorEditingNodeId);
+  vectorEditingNodeIds.forEach((vectorEditingNodeId) => {
+    const editingNode = getVectorEditingNode(nodes, vectorEditingNodeId);
 
-  if (editingNode) {
-    const node = { ...editingNode, ...bakeVectorNodeRotation(editingNode) };
-    const visualSelectedVertexIds = getVisualSelectedVectorVertexIds(selectedVertexIds, penActiveVertexId ?? dragOriginVertexId);
-    const visualSelectedVertexIdsTotal = [...visualSelectedVertexIds, ...preMarqueeVertexIds];
-    const tangentVisibilityVertexIds = getTangentVisibilityVertexIds(node, visualSelectedVertexIdsTotal, selectedHandles);
-    const oneHopVertexIds = getOneHopVectorVertexIds(node, tangentVisibilityVertexIds);
-    const tangentVisibilitySegmentIds = [...selectedSegmentIds, ...preMarqueeSegmentIds];
+    if (editingNode) {
+      const node = { ...editingNode, ...bakeVectorNodeRotation(editingNode) };
+      const visualSelectedVertexIds = getVisualSelectedVectorVertexIds(selectedVertexIds, penActiveVertexId ?? dragOriginVertexId);
+      const visualSelectedVertexIdsTotal = [...visualSelectedVertexIds, ...preMarqueeVertexIds];
+      const tangentVisibilityVertexIds = getTangentVisibilityVertexIds(node, visualSelectedVertexIdsTotal, selectedHandles);
+      const oneHopVertexIds = getOneHopVectorVertexIds(node, tangentVisibilityVertexIds);
+      const tangentVisibilitySegmentIds = [...selectedSegmentIds, ...preMarqueeSegmentIds];
 
-    drawVectorEditOutline(
-      gl,
-      program,
-      buffer,
-      node,
-      selectedSegmentIds,
-      hoveredSegmentId,
-      hoveredVectorSegmentId,
-      canvasWidth,
-      canvasHeight,
-      viewport,
-    );
-    drawVectorTangentHandles(
-      gl,
-      program,
-      buffer,
-      node,
-      hoveredHandle,
-      selectedHandles,
-      snappedHandle,
-      tangentVisibilityVertexIds,
-      oneHopVertexIds,
-      tangentVisibilitySegmentIds,
-      dragOriginVertexId,
-      penDraggedHandlePosition,
-      isPenDraggedHandleSnapped,
-      canvasWidth,
-      canvasHeight,
-      viewport,
-    );
-    drawVectorVertexDots(gl, program, buffer, node, visualSelectedVertexIds, hoveredVertexId, canvasWidth, canvasHeight, viewport);
-    drawVectorMultiSelectBox(
-      gl,
-      program,
-      buffer,
-      node,
-      selectedVertexIds,
-      selectedHandles,
-      vectorMultiSelectBoxRef,
-      vectorMultiSelectResizeDrag,
-      vectorMultiSelectRotateDrag,
-      isVectorMultiDragMoving,
-      canvasWidth,
-      canvasHeight,
-      viewport,
-    );
-    drawVectorEdgeInsertPreview(gl, program, buffer, hoveredVectorEdgeInsertPoint, canvasWidth, canvasHeight, viewport);
-  }
+      drawVectorEditOutline(
+        gl,
+        program,
+        buffer,
+        node,
+        selectedSegmentIds,
+        hoveredSegmentId,
+        hoveredVectorSegmentId,
+        canvasWidth,
+        canvasHeight,
+        viewport,
+      );
+      drawVectorTangentHandles(
+        gl,
+        program,
+        buffer,
+        node,
+        hoveredHandle,
+        selectedHandles,
+        snappedHandle,
+        tangentVisibilityVertexIds,
+        oneHopVertexIds,
+        tangentVisibilitySegmentIds,
+        dragOriginVertexId,
+        penDraggedHandlePosition,
+        isPenDraggedHandleSnapped,
+        canvasWidth,
+        canvasHeight,
+        viewport,
+      );
+      drawVectorVertexDots(gl, program, buffer, node, visualSelectedVertexIds, hoveredVertexId, canvasWidth, canvasHeight, viewport);
+      drawVectorMultiSelectBox(
+        gl,
+        program,
+        buffer,
+        node,
+        selectedVertexIds,
+        selectedHandles,
+        vectorMultiSelectBoxRef,
+        vectorMultiSelectResizeDrag,
+        vectorMultiSelectRotateDrag,
+        isVectorMultiDragMoving,
+        canvasWidth,
+        canvasHeight,
+        viewport,
+      );
+      drawVectorEdgeInsertPreview(gl, program, buffer, hoveredVectorEdgeInsertPoint, canvasWidth, canvasHeight, viewport);
+    }
+  });
 };

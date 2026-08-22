@@ -1,0 +1,85 @@
+# Vector Edit Mode — Multi-Node Editing Phase 1 — Live Browser Test Log
+
+Aktualizowane na żywo w trakcie testowania w przeglądarce (Playwright MCP). ✅ = przeszło, ❌ = nie przeszło (opis błędu obok), ⏳ = jeszcze nie testowane.
+
+## 1. Wejście do trybu (Enter)
+
+- [x] ✅ 1. Zaznacz 2 wektory → `Enter` → oba wchodzą w tryb edycji (potwierdzone live: oba trójkąty dostały gray outline + kropki wierzchołków jednocześnie, VectorEditToolbar aktywny na "Przesuń")
+- [ ] ⏳ 2. Zaznacz 1 wektor → `Enter` → nic się nie dzieje — nie testowane live, pokryte jednostkowo (`handleEnterMultiVectorEdit.spec.ts`)
+- [ ] ⏳ 3. Zaznacz wektor + frame → `Enter` → wchodzi tylko wektor — nie testowane live, pokryte jednostkowo
+- [ ] ⏳ 4. Zaznacz 3+ wektory → `Enter` → wszystkie otwarte — nie testowane live, pokryte jednostkowo
+
+## 2. Renderowanie przy kilku otwartych węzłach
+
+- [ ] ⏳ 5. Hover nad otwartym węzłem nie pokazuje grubego hover-outline — nie testowane live (wymaga śledzenia hover bez kliku), pokryte jednostkowo (`drawHoverOutline.spec.ts`)
+- [x] ✅ 6. Zaznaczenie (Move) otwartych węzłów nie dubluje outline (widoczne tylko handle-layer, brak podwójnego box+corner-handles per trójkąt)
+
+## 3. Hit-testing między węzłami
+
+- [x] ✅ 7. Drag wierzchołka na A rusza tylko A (potwierdzone live: dolny wierzchołek A wydłużony, B bez zmian)
+- [x] ✅ 8. Drag wierzchołka na B rusza tylko B (potwierdzone live: teraz dolny wierzchołek B też wydłużony, A pozostał na swoim miejscu z poprzedniego kroku)
+- [x] ✅ 9. Tangent handle na A i na B chwytalny niezależnie (ten sam dowód co #11 — uchwyty na obu węzłach powstały i są przeciągalne niezależnie)
+- [ ] ⏳ 10. Segment bliżej kursora wygrywa między A i B — nie testowane live, pokryte jednostkowo (`getVectorEdgeAtPointAcrossOpenNodes.spec.ts`)
+- [x] ✅ 11. Ctrl+drag z narożnika na A i na B (potwierdzone live: Ctrl+drag z górnego-lewego rogu A i osobno z górnego-lewego rogu B — obie krzywe pociągnięte niezależnie, widoczne diamentowe uchwyty na obu)
+- [ ] ⏳ 12. Bend na A i na B — nie testowane live, pokryte jednostkowo (`armVectorBendSegmentOnPointerDown` + `getAllVectorEdgeMatchesAtPointAcrossOpenNodes.spec.ts`)
+
+## 4. Marquee / Lasso
+
+- [ ] ⏳ 13. Marquee obejmujący wierzchołki z A i z B — nie testowane live, pokryte jednostkowo (`continueVectorMarqueeDrag.spec.ts`)
+- [ ] ⏳ 14. Lasso analogicznie — nie testowane live, pokryte jednostkowo (`continueVectorLassoDrag.spec.ts`)
+
+## 5. Usuwanie (Delete/Backspace)
+
+- [x] ✅ 15. Usuń wierzchołek z A i z B jednocześnie, jeden undo cofa oba (potwierdzone live: Delete zamieniło oba trójkąty w linie, jeden Cmd+Z przywrócił oba naraz)
+- [ ] ⏳ 16. To samo dla segmentów (pokryte jednostkowo w `handleDeleteSelection.spec.ts`, nie powtarzane live — mechanizm identyczny jak wierzchołki)
+
+## 6. Multi-select box/resize/rotate (ograniczenie Fazy 1)
+
+- [x] ⚠️ 17. 2+ wierzchołki w jednym węźle → box działa — próba live niekonkluzywna (zaznaczone dwa wierzchołki A leżały akurat współliniowo z krawędzią, box degeneruje się do linii nierozróżnialnej wizualnie od segmentu). Pokryte jednostkowo (`armVectorMultiSelectBoxOnPointerDown` w `armResolvers.spec.ts`), traktuję jako ✅ na podstawie testów.
+- [x] ✅ 18. Po jednym wierzchołku z A i z B → box NIE pojawia się (potwierdzone live: zaznaczono po jednym wierzchołku z A i B — nie pojawił się żaden dodatkowy prostokąt do grupowego przesuwania poza istniejącym node-level selection boxem; zgodne z `getVectorMultiSelectOwningNode` zwracającym `null`)
+
+## 7. Escape i wyjście
+
+- [x] ✅ 19. Escape przy 2 otwartych węzłach zamyka oba (potwierdzone live: 1× Escape, VectorEditToolbar zniknął, oba trójkąty wróciły do zwykłego rysowania)
+- [x] ⚠️ 20. Odznaczenie jednego z dwóch zamyka tylko jego — **mechanizm poprawny i pokryty testem jednostkowym (`handleSetSelection.spec.ts`), ale live: nie znalazłem żadnej ścieżki UI, która by go faktycznie wywołała.** Klik na pustym canvasie w trybie multi-edit jest przechwytywany przez `armVectorMarqueeOnPointerDown` (marquee wektorowe), więc nie dociera do `setSelection` w ogóle — sprawdzone live, zaznaczenie i tryb edycji obu węzłów pozostały nietknięte po pustym kliknięciu. Shift-klik bezpośrednio na otwarty węzeł też jest przechwytywany przez resolvery wektorowe (vertex/segment), nie generyczny toggle selekcji. Realny trigger istniałby dopiero przy innym mechanizmie wyboru (np. panel warstw, którego nie ma) — do potwierdzenia z Tobą czy to akceptowalne w Fazie 1, czy wymaga dodania jakiejś ścieżki.
+
+## 8. Regresja
+
+- [x] ✅ 21. Zwykły podwójny klik na jeden wektor (potwierdzone live: tylko A wszedł w edycję, B pozostał zwykłym czarnym kształtem)
+- [x] ✅ 22. Pen tool przy 2 otwartych węzłach rysuje na właściwym z nich, bez crasha (**FIX zastosowany na żywo, `resolvePenTargetNode.ts`**: Pen już nie celuje na sztywno w `vectorEditingNodeIds[0]`, tylko dynamicznie rozpoznaje węzeł po tym, gdzie faktycznie klikasz/kontynuujesz — najpierw wierzchołek, potem krawędź, dopiero na końcu domyślny pierwszy węzeł). Potwierdzone live trzema próbami, wszystkie bez przekładania kolejności zaznaczenia (A cały czas pierwszy): (a) klik na istniejący wierzchołek B wznowił rysowanie i dorysował nowy segment; (b) **klik dokładnie na środek krawędzi (segmentu) B rozdzielił ją nowym wierzchołkiem (split) — to była luka zgłoszona przez usera po pierwszej wersji fixu, teraz zamknięta przez `getVectorEdgeAtPointAcrossOpenNodes` jako drugi poziom rozpoznawania**. Kliknięcie w zupełnie puste miejsce nadal domyślnie trafia w pierwszy węzeł — jedyny pozostały, świadomy wyjątek, bo wymagałby osobnej funkcji "utwórz wektor C")
+- [x] ✅ 23. Paint tool — **FIX zastosowany na żywo** (`getVectorFaceAtPointAcrossOpenNodes.ts` + `armVectorPaintOnPointerDown.ts` + `resolveVectorPaintHover.ts` + `drawVectorPaintHoverPreview.ts`, `hoveredVectorPaintFaceKeyRef` zmieniony na `{faceKey, nodeId} | null`). Znaleziony live przez usera: pierwotnie malowanie działało tylko na pierwszym węźle — kliknięcie wewnątrz B (nieprymarnego) nic nie robiło. Po fixie potwierdzone live: kliknięcie wewnątrz B pokazało poprawny hover-preview (kreskowanie) i faktycznie zamalowało B na szaro, niezależnie od kolejności zaznaczenia — oba kształty pomalowane jednocześnie na zrzucie ekranu.
+- [x] ✅ 24. Zwykła edycja pojedynczego wektora bez regresji (potwierdzone pośrednio: drag wierzchołka, double-click, Escape, Delete/undo — wszystko zachowuje się jak dotąd dla pojedynczego węzła w trakcie tej sesji)
+
+## 9. Pen — realne łączenie wektorów (dodane na żywo po dyskusji z userem, poza pierwotnym zakresem Fazy 1)
+
+Odkryte przy okazji testu #22: Pen kliknięty na wierzchołek/krawędź innego otwartego wektora tworzył
+nowy punkt tylko _wizualnie_ pokrywający się ze współrzędnymi (position-sharing bez łączenia — zgodne
+z pierwotną specyfikacją). Po rozmowie z userem zdecydowano dodać **prawdziwe scalanie**, wyzwalane
+kliknięciem Pen-a zamiast tylko drag-iem (§46 już to miał dla dragu).
+
+- [x] ✅ 25. Kropka→kropka: Pen z aktywnego wierzchołka A, klik dokładnie na istniejący wierzchołek B →
+      cały graf B zostaje wchłonięty do A (`closeLoopOntoAnotherNode.ts`), nowy segment łączy je, B znika
+      jako osobny węzeł i jako `vectorEditingNodeIds`. Potwierdzone live strukturalnie: przeciągnięcie
+      scalonego punktu porusza całym dawnym B razem z mostem — nie tylko wizualna zbieżność.
+- [x] ✅ 26. Kropka→segment: klik na środek krawędzi B (nie wierzchołek) → segment B zostaje
+      rozdzielony (`splitVectorSegment`, ta sama matematyka co przy zwykłym split w obrębie jednego węzła)
+      i nowy punkt zostaje połączony z A (`closeLoopOntoAnotherNodeEdge.ts`). Potwierdzone live
+      strukturalnie tą samą metodą (drag scalonego punktu porusza całym B).
+- [x] ✅ 27. Podpowiedź/snap przed kliknięciem — pierwsza wersja fixu (#25/#26) łączyła poprawnie na
+      klik, ale bez żadnej wizualnej zapowiedzi (user to zauważył: "nie ma podpowiedzi w sensie snapa").
+      Naprawione w `updateVectorPenPreview.ts` — rubber-band i klasa kursora canvasu teraz sprawdzają też
+      inne otwarte węzły, nie tylko ten aktywny. Potwierdzone live: hover dokładnie na wierzchołku B →
+      kursor `pen-snap`, linia przyciąga się do niego; hover blisko krawędzi B → kursor `pen-extend`,
+      segment podświetla się na czerwono — identycznie jak w obrębie jednego wektora.
+
+- [x] ✅ 28. Klik Pen-em w zupełnie puste miejsce (bez najeżdżania na A ani B) → tworzy **prawdziwy,
+      osobny wektor C**, a A i B zostają otwarte. Wcześniej (przed tym fixem) taki klik dorzucał
+      odłączony kontur do pierwszego otwartego węzła — user to przewidział i poprosił o naprawę.
+      Naprawione w `resolvePenTargetNode.ts` (zwraca `null` zamiast domyślnego pierwszego węzła, gdy
+      naprawdę nic nie trafiono) + `startNewVectorNetwork.ts` (dołącza nowy węzeł do istniejących
+      `selectedIds`/`vectorEditingNodeIds` zamiast je zastępować). Potwierdzone live: trzeci, w pełni
+      niezależny trójkąt powstał i jest otwarty w edycji razem z A i B, bez żadnego połączenia z nimi.
+
+**Nic nie zostało już świadomie pominięte w tym obszarze** — wszystkie trzy przypadki z pierwotnej
+specyfikacji (position-sharing bez łączenia — zamienione na realne łączenie na życzenie usera;
+"vector C" przy pustym kliknięciu) są teraz zaimplementowane i potwierdzone live.

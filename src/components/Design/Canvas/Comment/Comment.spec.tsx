@@ -34,7 +34,7 @@ const createTestStore = (): EnhancedStore<{ design: TDesignState }> =>
         penActiveVertexId: null,
         rootOrder: [],
         selectedIds: [],
-        vectorEditingNodeId: null,
+        vectorEditingNodeIds: [],
         viewport: { x: 10, y: 20, zoom: 2 },
       },
     },

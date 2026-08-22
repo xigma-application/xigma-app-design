@@ -1,6 +1,6 @@
 // store
-import { selectVectorEditingNodeId } from 'store/design/selectors';
-import { setActiveTool, setVectorEditingNodeId } from 'store/design/slice';
+import { selectVectorEditingNodeIds } from 'store/design/selectors';
+import { setActiveTool, setVectorEditingNodeIds } from 'store/design/slice';
 import { AppDispatch, store } from 'store';
 
 // types
@@ -14,13 +14,13 @@ import { handleEscapePenActiveVertex } from 'components/Design/Canvas/hooks/useK
 const PEN_GROUP_TOOLS: ToolName[] = [ToolName.pen, ToolName.pencil];
 
 export const selectToolbarTool = (dispatch: AppDispatch, tool: ToolName, refs: TCanvasRefs): void => {
-  const vectorEditingNodeId = selectVectorEditingNodeId(store.getState());
+  const vectorEditingNodeIds = selectVectorEditingNodeIds(store.getState());
   const isPenGroupTool = PEN_GROUP_TOOLS.includes(tool);
 
-  if (vectorEditingNodeId !== null && !isPenGroupTool) {
+  if (vectorEditingNodeIds.length > 0 && !isPenGroupTool) {
     handleEscapePenActiveVertex(dispatch);
     clearPenPreviewRefs(refs);
-    dispatch(setVectorEditingNodeId(null));
+    dispatch(setVectorEditingNodeIds([]));
   }
 
   dispatch(setActiveTool(tool));

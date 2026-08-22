@@ -6,7 +6,7 @@ import VectorEditToolbar from './VectorEditToolbar';
 import { TooltipProvider } from 'shared';
 
 // store
-import { setActiveTool, setVectorEditingNodeId } from 'store/design/slice';
+import { setActiveTool, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -23,7 +23,7 @@ const renderVectorEditToolbar = (): ReturnType<typeof render> =>
 
 describe('VectorEditToolbar', () => {
   beforeEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
     store.dispatch(setActiveTool(ToolName.default));
   });
 
@@ -37,7 +37,7 @@ describe('VectorEditToolbar', () => {
 
   it('should render the toolbar once a node enters Vector Edit Mode', () => {
     // before
-    act(() => store.dispatch(setVectorEditingNodeId('node-1')));
+    act(() => store.dispatch(setVectorEditingNodeIds(['node-1'])));
 
     renderVectorEditToolbar();
 
@@ -53,7 +53,7 @@ describe('VectorEditToolbar', () => {
   it('should show Move as active whenever the Move tool is the active tool', () => {
     // before
     act(() => {
-      store.dispatch(setVectorEditingNodeId('node-1'));
+      store.dispatch(setVectorEditingNodeIds(['node-1']));
       store.dispatch(setActiveTool(ToolName.move));
     });
 
@@ -66,7 +66,7 @@ describe('VectorEditToolbar', () => {
   it('should show no tool as active while the Pen tool is active', () => {
     // before
     act(() => {
-      store.dispatch(setVectorEditingNodeId('node-1'));
+      store.dispatch(setVectorEditingNodeIds(['node-1']));
       store.dispatch(setActiveTool(ToolName.pen));
     });
 
@@ -79,7 +79,7 @@ describe('VectorEditToolbar', () => {
   it('should switch the active tool back to Move when clicking Move, e.g. to interrupt the Pen tool', () => {
     // before
     act(() => {
-      store.dispatch(setVectorEditingNodeId('node-1'));
+      store.dispatch(setVectorEditingNodeIds(['node-1']));
       store.dispatch(setActiveTool(ToolName.pen));
     });
 
@@ -94,7 +94,7 @@ describe('VectorEditToolbar', () => {
 
   it('should switch to Bend and keep it active after clicking it, independent of Ctrl/Cmd', () => {
     // before
-    act(() => store.dispatch(setVectorEditingNodeId('node-1')));
+    act(() => store.dispatch(setVectorEditingNodeIds(['node-1'])));
 
     renderVectorEditToolbar();
 
@@ -109,7 +109,7 @@ describe('VectorEditToolbar', () => {
   it('should visually preview Bend instead of Move while Ctrl is held, reverting to Move on release, with no change to the real active tool', () => {
     // before
     act(() => {
-      store.dispatch(setVectorEditingNodeId('node-1'));
+      store.dispatch(setVectorEditingNodeIds(['node-1']));
       store.dispatch(setActiveTool(ToolName.move));
     });
 
@@ -137,7 +137,7 @@ describe('VectorEditToolbar', () => {
   it('should exit Vector Edit Mode and reset the active tool when clicking the close button', () => {
     // before
     act(() => {
-      store.dispatch(setVectorEditingNodeId('node-1'));
+      store.dispatch(setVectorEditingNodeIds(['node-1']));
       store.dispatch(setActiveTool(ToolName.pen));
     });
 
@@ -147,7 +147,7 @@ describe('VectorEditToolbar', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
 
     // result
-    expect(store.getState().design.vectorEditingNodeId).toBeNull();
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
     expect(store.getState().design.activeTool).toBe(ToolName.default);
   });
 });

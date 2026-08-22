@@ -25,7 +25,7 @@ const buildState = (nodes: TDesignState['nodes'], selectedIds: string[], overrid
   penActiveVertexId: null,
   rootOrder: Object.keys(nodes),
   selectedIds,
-  vectorEditingNodeId: null,
+  vectorEditingNodeIds: [],
   viewport: { x: 0, y: 0, zoom: 1 },
   ...overrides,
 });
@@ -132,43 +132,71 @@ describe('handleSetSelection', () => {
     expect(state.nodes[ellipse.id]).toBeDefined();
   });
 
-  it('should keep vectorEditingNodeId when the vector node stays the sole selection', () => {
+  it('should keep vectorEditingNodeIds when the vector node stays the sole selection', () => {
     // mock
-    const state = buildState({ [frame.id]: frame }, [frame.id], { vectorEditingNodeId: frame.id });
+    const state = buildState({ [frame.id]: frame }, [frame.id], { vectorEditingNodeIds: [frame.id] });
 
     // before
     handleSetSelection(state, [frame.id]);
 
     // result
-    expect(state.vectorEditingNodeId).toBe(frame.id);
+    expect(state.vectorEditingNodeIds).toEqual([frame.id]);
   });
 
-  it('should clear vectorEditingNodeId and penActiveVertexId when the vector node leaves the selection', () => {
+  it('should clear vectorEditingNodeIds and penActiveVertexId when the vector node leaves the selection', () => {
     // mock
-    const state = buildState({ [frame.id]: frame }, [frame.id], { penActiveVertexId: 'vertex-1', vectorEditingNodeId: frame.id });
+    const state = buildState({ [frame.id]: frame }, [frame.id], { penActiveVertexId: 'vertex-1', vectorEditingNodeIds: [frame.id] });
 
     // before
     handleSetSelection(state, []);
 
     // result
-    expect(state.vectorEditingNodeId).toBeNull();
+    expect(state.vectorEditingNodeIds).toEqual([]);
     expect(state.penActiveVertexId).toBeNull();
   });
 
-  it('should clear vectorEditingNodeId when the vector node stays selected but joins a wider selection', () => {
-    // mock
+  it('should keep vectorEditingNodeIds when the vector node stays selected but joins a wider selection', () => {
+    // mock — new semantics: only ids that actually left the selection exit editing
     const other = { ...frame, id: 'other' };
     const state = buildState({ [frame.id]: frame, other }, [frame.id], {
       penActiveVertexId: 'vertex-1',
-      vectorEditingNodeId: frame.id,
+      vectorEditingNodeIds: [frame.id],
     });
 
     // before
     handleSetSelection(state, [frame.id, 'other']);
 
     // result
-    expect(state.vectorEditingNodeId).toBeNull();
-    expect(state.penActiveVertexId).toBeNull();
+    expect(state.vectorEditingNodeIds).toEqual([frame.id]);
+    expect(state.penActiveVertexId).toBe('vertex-1');
+  });
+
+  it('should exit editing only for the node that left the selection, keeping the other open node untouched', () => {
+    // mock — two nodes open for editing, only one gets deselected
+    const other = { ...frame, id: 'other' };
+    const state = buildState({ [frame.id]: frame, other }, [frame.id, 'other'], {
+      vectorEditingNodeIds: [frame.id, 'other'],
+    });
+
+    // before
+    handleSetSelection(state, ['other']);
+
+    // result
+    expect(state.vectorEditingNodeIds).toEqual(['other']);
+  });
+
+  it('should exit editing for every open node when the whole selection is cleared', () => {
+    // mock
+    const other = { ...frame, id: 'other' };
+    const state = buildState({ [frame.id]: frame, other }, [frame.id, 'other'], {
+      vectorEditingNodeIds: [frame.id, 'other'],
+    });
+
+    // before
+    handleSetSelection(state, []);
+
+    // result
+    expect(state.vectorEditingNodeIds).toEqual([]);
   });
 
   it('should delete a deselected vector node that never got any segments drawn', () => {
@@ -202,13 +230,13 @@ describe('handleSetSelection', () => {
     // mock — Escape/selecting a different node while an empty just-clicked vector node is still open
     const node = buildVectorNode();
     const other = { ...frame, id: 'other' };
-    const state = buildState({ [node.id]: node, other }, [node.id], { vectorEditingNodeId: node.id });
+    const state = buildState({ [node.id]: node, other }, [node.id], { vectorEditingNodeIds: [node.id] });
 
     // before
     handleSetSelection(state, [other.id]);
 
     // result
-    expect(state.vectorEditingNodeId).toBeNull();
+    expect(state.vectorEditingNodeIds).toEqual([]);
     expect(state.nodes[node.id]).toBeUndefined();
   });
 
@@ -219,13 +247,13 @@ describe('handleSetSelection', () => {
       vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } },
     });
     const other = { ...frame, id: 'other' };
-    const state = buildState({ [node.id]: node, other }, [node.id], { vectorEditingNodeId: node.id });
+    const state = buildState({ [node.id]: node, other }, [node.id], { vectorEditingNodeIds: [node.id] });
 
     // before
     handleSetSelection(state, [other.id]);
 
     // result
-    expect(state.vectorEditingNodeId).toBeNull();
+    expect(state.vectorEditingNodeIds).toEqual([]);
     expect(state.nodes[node.id]).toBeDefined();
   });
 });

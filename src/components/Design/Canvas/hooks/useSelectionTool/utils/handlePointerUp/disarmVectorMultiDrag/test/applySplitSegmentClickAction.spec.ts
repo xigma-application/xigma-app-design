@@ -1,5 +1,5 @@
 // store
-import { addNode, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -34,14 +34,14 @@ const addVectorNode = (): string => {
 
 describe('applySplitSegmentClickAction', () => {
   beforeEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should split the segment at t, dispatch the change, and select only the new vertex', () => {
     // mock
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs({
       selectedVectorSegmentIdsRef: { current: ['s1'] },

@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -474,7 +474,7 @@ describe('handlePointerDown', () => {
     const idA = addClosedSquareVectorNode(6400, 6400, 100);
 
     store.dispatch(setSelection([idA]));
-    store.dispatch(setVectorEditingNodeId(idA));
+    store.dispatch(setVectorEditingNodeIds([idA]));
 
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef();
@@ -513,7 +513,7 @@ describe('handlePointerDown', () => {
     expect(dragStateRef.current).toBeNull();
     expect(marqueeStartRef.current).toBeNull();
     expect(vectorMarqueeStartRef.current).not.toBeNull();
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should still drag the whole shape when clicking the interior of a vector node that is selected but not currently being edited', () => {

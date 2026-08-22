@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -62,7 +62,7 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 describe('resolveToolHover', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should apply the first matching resolver result and stop checking the rest', () => {
@@ -98,7 +98,7 @@ describe('resolveToolHover', () => {
     const idA = addSquareVectorNode(0, 0);
 
     store.dispatch(setSelection([idA]));
-    store.dispatch(setVectorEditingNodeId(idA));
+    store.dispatch(setVectorEditingNodeIds([idA]));
 
     const canvas = createCanvas();
     const hoverRef: RefObject<string | null> = { current: null };
@@ -124,7 +124,7 @@ describe('resolveToolHover', () => {
     // mock — v1(0,0)/v3(100,100) selected (diagonal corners), bounds "se" at (100,100)
     const idA = addSquareVectorNode(0, 0);
 
-    store.dispatch(setVectorEditingNodeId(idA));
+    store.dispatch(setVectorEditingNodeIds([idA]));
 
     const canvasRefs = createCanvasRefs();
 

@@ -1198,6 +1198,40 @@ Drobniejsze, ale zauważalne różnice względem Figmy, niepowiązane z żadnym 
       ponowne użycie oryginalnego, nieprzeskalowanego tangentu przy 2+ przecięciach na tej samej krzywej
       psuło jej kształt, widoczne jako wybrzuszony fill wychodzący poza kontur). Pełny opis:
       `.claude/docs/vector-network.md` §44.
+- [x] **Przełączanie narzędzi klawiaturą vs myszką w Vector Edit Mode różni się celowo** — skrót
+      klawiszowy poza białą listą (`pen`/`pencil`/`lasso`/`paint`/`move`) jest całkowicie ignorowany
+      (`dispatchTool.ts`, `VECTOR_EDIT_ALLOWED_TOOLS`) i tryb zostaje otwarty na dotychczasowym
+      narzędziu — łatwo trafić w skrót przypadkiem w trakcie edycji. Klik w toolbar
+      (`selectToolbarTool.ts`) zawsze wykonuje wybór i dodatkowo zamyka Vector Edit Mode, jeśli wybrane
+      narzędzie nie jest z grupy Pen — świadome, celowe działanie zawsze powinno przejść. Pełny opis:
+      `.claude/docs/vector-network.md` §45.
+- [x] **Przeciąganie jednego wierzchołka na drugi scala je** — działa zarówno w obrębie tego samego
+      kształtu (wspólna krawędź zapada się zamiast zostać zerowej długości pętlą), jak i między dwoma
+      zupełnie różnymi wektorami (przeciągany wierzchołek zawsze przeżywa, ten pod nim zawsze zostaje
+      wchłonięty razem z całym swoim grafem, a jego węzeł usunięty). Kursor zmienia się na dedykowaną
+      ikonę `point.png` w trakcie przeciągania nad celem. `filledFaceKeys` przenoszone razem z
+      wchłanianym kształtem, przefiltrowane do kluczy, których wszystkie segmenty nadal istnieją po
+      scaleniu. Pełny opis: `.claude/docs/vector-network.md` §46.
+- [x] **Bend jako prawdziwe, trwałe narzędzie w `VectorEditToolbar`**, nie tylko modyfikator Ctrl/Cmd —
+      kliknięcie w panelu włącza je na stałe (zwykły, bez-Ctrl drag segmentu gnie go, aż użytkownik
+      przełączy się na inne narzędzie), wpięte w te same bramki co Move (`VECTOR_EDIT_ALLOWED_TOOLS`,
+      mapy ikon/etykiet toolbara). Samo trzymanie Ctrl/Cmd, gdy realnie aktywny jest Move, teraz też
+      wizualnie podświetla przycisk Bend w toolbarze (bez żadnego dispatchu Reduxa) — nowy hook
+      `useIsBendModifierHeld.ts`, pierwszy w tej apce mechanizm śledzący stan klawisza modyfikującego w
+      sposób ciągły. Pełny opis: `.claude/docs/vector-network.md` §47.
+- [x] **Edycja kilku wektorów naraz** — `vectorEditingNodeId: string | null` zamienione na
+      `vectorEditingNodeIds: string[]` w całym kodzie; zaznacz 2+ wektory i wciśnij **Enter**
+      (tymczasowy mechanizm wejścia), żeby otworzyć je wszystkie naraz do edycji. Wektory nigdy się
+      strukturalnie nie łączą same z siebie — jedynie jawny gest (przeciągnięcie wierzchołka na
+      wierzchołek, §46, albo kliknięcie Pena w istniejący wierzchołek/segment innego otwartego węzła)
+      robi to naprawdę. Nowy, generyczny `pickClosestVectorHitAcrossNodes.ts` + pięć cienkich
+      wrapperów obsługuje hit-testing/hover/marquee/lasso/Paint na całym otwartym zbiorze; usuwanie
+      wierzchołków/segmentów rozłożonych na kilku węzłach grupuje się po właścicielu i pakuje w jeden
+      gest historii (jeden Undo cofa wszystko). Pen dynamicznie celuje w faktycznie dotknięty otwarty
+      węzeł zamiast sztywno w pierwszy (`resolvePenTargetNode.ts`), a puste kliknięcie Penem przy 2+
+      otwartych węzłach tworzy naprawdę niezależny, nowy wektor ("wektor C") zamiast doklejać kontur do
+      pierwszego z nich. Pełny opis: `.claude/docs/vector-network.md` §48, e2e:
+      `e2e/pages/design/multi-vector-edit.spec.ts`.
 - [ ] menu kontekstowe (prawy klik) na node'ach i na pustym canvasie — Copy/Paste, Duplicate,
       Bring to front/Send to back, Delete itd. — dziś nie istnieje w ogóle
 - [ ] kontrolka zoomu w rogu canvasu (aktualny % + dropdown: Zoom to fit / Zoom to selection /

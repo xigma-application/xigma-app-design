@@ -1,5 +1,5 @@
 // store
-import { selectVectorEditingNodeId } from 'store/design/selectors';
+import { selectVectorEditingNodeIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -14,9 +14,9 @@ export const armVectorLassoOnPointerDown = ({
   point,
   setClassName,
 }: TArmContext): true | undefined => {
-  const vectorEditingNodeId = selectVectorEditingNodeId(store.getState());
+  const vectorEditingNodeIds = selectVectorEditingNodeIds(store.getState());
 
-  if (activeTool === ToolName.lasso && vectorEditingNodeId) {
+  if (activeTool === ToolName.lasso && vectorEditingNodeIds.length > 0) {
     canvasRefs.selectedVectorVertexIdsRef.current = [];
     canvasRefs.selectedVectorHandlesRef.current = [];
     canvasRefs.selectedVectorSegmentIdsRef.current = [];

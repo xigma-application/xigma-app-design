@@ -21,7 +21,7 @@ export const drawPerNodeSelectionOutlines = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
-  vectorEditingNodeId: string | null,
+  vectorEditingNodeIds: string[],
 ): void => {
   selectedNodes.forEach((node) => {
     switch (node.type) {
@@ -31,7 +31,7 @@ export const drawPerNodeSelectionOutlines = (
       case NodeType.path:
         break;
       case NodeType.vector:
-        drawVectorSelectionOutline(gl, program, buffer, node, vectorEditingNodeId, canvasWidth, canvasHeight, viewport);
+        drawVectorSelectionOutline(gl, program, buffer, node, vectorEditingNodeIds, canvasWidth, canvasHeight, viewport);
         break;
       default: {
         const { height, rotation, width, x, y } = node;

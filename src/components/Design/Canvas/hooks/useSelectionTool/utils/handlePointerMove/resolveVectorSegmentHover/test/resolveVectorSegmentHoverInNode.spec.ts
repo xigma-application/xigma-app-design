@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setActiveTool, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setActiveTool, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -51,7 +51,7 @@ const addVectorNode = (): string => {
 describe('resolveVectorSegmentHoverInNode', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
     store.dispatch(setActiveTool(ToolName.default));
   });
 
@@ -61,7 +61,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
     // segment, but "kursor się tylko zmienia jak najadę na point" — cursor only right on the point itself)
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
@@ -91,7 +91,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
     // mock
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
@@ -119,7 +119,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
     // mock
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
@@ -146,7 +146,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
     // mock
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
@@ -180,7 +180,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
     // it," which happened to also read as null in a fresh ref and could look like this test still passed.
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
@@ -210,7 +210,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
     // a completely different gesture than the plain-click split — the insert-point dot must not show
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
@@ -239,7 +239,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
     // mock — persistently selecting Bend from VectorEditToolbar must feel identical to holding Ctrl
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setActiveTool(ToolName.bend));
 
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
@@ -271,7 +271,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
     // null` and clear the cursor instead of switching it
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
@@ -298,7 +298,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
     // mock
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();

@@ -1,5 +1,5 @@
 // store
-import { addNode, setActiveTool, setVectorEditingNodeId, updateNode } from 'store/design/slice';
+import { addNode, setActiveTool, setVectorEditingNodeIds, updateNode } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -49,13 +49,13 @@ const addTriangleVectorNode = (): string => {
 describe('resolveVectorPaintHover', () => {
   beforeEach(() => {
     store.dispatch(setActiveTool(ToolName.default));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should clear the hovered face ref and leave the cursor className untouched when Paint is not the active tool', () => {
     // mock
     const nodeId = addTriangleVectorNode();
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
     const setClassName = vi.fn();
@@ -87,7 +87,7 @@ describe('resolveVectorPaintHover', () => {
     // mock
     const nodeId = addTriangleVectorNode();
     store.dispatch(setActiveTool(ToolName.paint));
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
     const setClassName = vi.fn();
@@ -104,7 +104,7 @@ describe('resolveVectorPaintHover', () => {
     // mock
     const nodeId = addTriangleVectorNode();
     store.dispatch(setActiveTool(ToolName.paint));
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
     const setClassName = vi.fn();
@@ -113,7 +113,7 @@ describe('resolveVectorPaintHover', () => {
     resolveVectorPaintHover(canvas, pointerEvent(50, 40), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorPaintFaceKeyRef.current).toBe('s1,s2,s3');
+    expect(canvasRefs.hoveredVectorPaintFaceKeyRef.current).toEqual({ faceKey: 's1,s2,s3', nodeId });
     expect(setClassName).toHaveBeenCalledWith('paint-add');
   });
 
@@ -122,7 +122,7 @@ describe('resolveVectorPaintHover', () => {
     const nodeId = addTriangleVectorNode();
     store.dispatch(updateNode({ changes: { filledFaceKeys: ['s1,s2,s3'] }, id: nodeId }));
     store.dispatch(setActiveTool(ToolName.paint));
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
     const setClassName = vi.fn();
@@ -134,11 +134,43 @@ describe('resolveVectorPaintHover', () => {
     expect(setClassName).toHaveBeenCalledWith('paint-remove');
   });
 
+  it('should hover a face on the second of several open nodes, not just the first', () => {
+    // mock — two open nodes, the pointer sits over the second one's face
+    const firstNodeId = addTriangleVectorNode();
+    const secondNodeId = addTriangleVectorNode();
+
+    store.dispatch(
+      updateNode({
+        changes: {
+          segments: {
+            s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+            s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+            s3: { endId: 'v1', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+          },
+          vertices: { v1: { id: 'v1', x: 500, y: 500 }, v2: { id: 'v2', x: 600, y: 500 }, v3: { id: 'v3', x: 550, y: 600 } },
+        },
+        id: secondNodeId,
+      }),
+    );
+    store.dispatch(setActiveTool(ToolName.paint));
+    store.dispatch(setVectorEditingNodeIds([firstNodeId, secondNodeId]));
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const setClassName = vi.fn();
+
+    // before — inside the second node's face, far from the first node's face
+    resolveVectorPaintHover(canvas, pointerEvent(550, 540), canvasRefs, setClassName);
+
+    // result
+    expect(canvasRefs.hoveredVectorPaintFaceKeyRef.current).toEqual({ faceKey: 's1,s2,s3', nodeId: secondNodeId });
+    expect(setClassName).toHaveBeenCalledWith('paint-add');
+  });
+
   it("should fall back to the idle 'paint' cursor and a null hovered face key when the pointer misses every face", () => {
     // mock
     const nodeId = addTriangleVectorNode();
     store.dispatch(setActiveTool(ToolName.paint));
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
     const setClassName = vi.fn();

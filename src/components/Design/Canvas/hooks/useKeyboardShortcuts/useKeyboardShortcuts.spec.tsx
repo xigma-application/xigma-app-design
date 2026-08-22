@@ -7,7 +7,7 @@ import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useKeyboardShortcuts } from './useKeyboardShortcuts';
 
 // store
-import designReducer, { addNode, setActiveTool, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import designReducer, { addNode, setActiveTool, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { redo, undo } from 'store/history/actions';
 import { store as realStore } from 'store';
 import { TDesignState } from 'store/design/types';
@@ -445,12 +445,12 @@ describe('useKeyboardShortcuts delete/backspace behaviors', () => {
 // wraps the component), so this branch needs the same realStore + Provider setup as the block above
 describe('useKeyboardShortcuts "V" behaviors while Vector Edit Mode is active', () => {
   afterEach(() => {
-    realStore.dispatch(setVectorEditingNodeId(null));
+    realStore.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should switch to the Vector Edit Move tool (not the plain default tool) on "V" while a node is being vector-edited', () => {
     // mock
-    realStore.dispatch(setVectorEditingNodeId('node-1'));
+    realStore.dispatch(setVectorEditingNodeIds(['node-1']));
     realStore.dispatch(setActiveTool(ToolName.pen));
 
     // before
@@ -463,5 +463,75 @@ describe('useKeyboardShortcuts "V" behaviors while Vector Edit Mode is active', 
 
     // result
     expect(realStore.getState().design.activeTool).toBe(ToolName.move);
+  });
+});
+
+// handleEnterMultiVectorEdit reads/dispatches on the real store singleton too, same reason as the two
+// blocks above
+describe('useKeyboardShortcuts "Enter" behaviors', () => {
+  const addVectorNode = (): string => {
+    realStore.dispatch(
+      addNode({
+        fillColor: null,
+        filledFaceKeys: [],
+        name: 'Vector',
+        parentId: null,
+        rotation: 0,
+        segments: {},
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: NodeType.vector,
+        vertexHandleModes: {},
+        vertices: { v1: { id: 'v1', x: 0, y: 0 } },
+      }),
+    );
+
+    const { rootOrder } = realStore.getState().design;
+
+    return rootOrder[rootOrder.length - 1];
+  };
+
+  beforeEach(() => {
+    realStore.dispatch(setSelection([]));
+    realStore.dispatch(setVectorEditingNodeIds([]));
+    realStore.dispatch(setActiveTool(ToolName.default));
+  });
+
+  it('should open every selected vector node for editing on "Enter" when two or more are selected', () => {
+    // mock
+    const vectorIdA = addVectorNode();
+    const vectorIdB = addVectorNode();
+
+    realStore.dispatch(setSelection([vectorIdA, vectorIdB]));
+
+    // before
+    renderHook(() => useKeyboardShortcuts(createCanvasRefs()), {
+      wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
+    });
+
+    // action
+    fireEvent.keyDown(window, { code: 'Enter' });
+
+    // result
+    expect(realStore.getState().design.vectorEditingNodeIds).toEqual([vectorIdA, vectorIdB]);
+    expect(realStore.getState().design.activeTool).toBe(ToolName.move);
+  });
+
+  it('should do nothing on "Enter" when fewer than two vector nodes are selected', () => {
+    // mock
+    const vectorIdA = addVectorNode();
+
+    realStore.dispatch(setSelection([vectorIdA]));
+
+    // before
+    renderHook(() => useKeyboardShortcuts(createCanvasRefs()), {
+      wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
+    });
+
+    // action
+    fireEvent.keyDown(window, { code: 'Enter' });
+
+    // result
+    expect(realStore.getState().design.vectorEditingNodeIds).toEqual([]);
   });
 });

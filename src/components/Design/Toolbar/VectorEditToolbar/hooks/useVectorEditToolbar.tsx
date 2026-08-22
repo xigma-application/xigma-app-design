@@ -12,8 +12,8 @@ import cx from 'classnames';
 import { ICON_SIZE, TVectorEditTool } from '../constants';
 
 // store
-import { selectActiveTool, selectVectorEditingNodeId } from 'store/design/selectors';
-import { setActiveTool, setVectorEditingNodeId } from 'store/design/slice';
+import { selectActiveTool, selectVectorEditingNodeIds } from 'store/design/selectors';
+import { setActiveTool, setVectorEditingNodeIds } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
 // styles
@@ -25,7 +25,7 @@ import { ToolName } from 'types/design/enums';
 export type TUseVectorEditToolbar = {
   handleClose: () => void;
   renderTool: (tool: TVectorEditTool) => ReactNode;
-  vectorEditingNodeId: string | null;
+  vectorEditingNodeIds: string[];
 };
 
 export const getIsVectorEditToolActive = (toolName: ToolName | undefined, activeTool: ToolName, isBendModifierHeld: boolean): boolean => {
@@ -44,13 +44,13 @@ export const getIsVectorEditToolActive = (toolName: ToolName | undefined, active
 export const useVectorEditToolbar = (): TUseVectorEditToolbar => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const vectorEditingNodeId = useAppSelector(selectVectorEditingNodeId);
+  const vectorEditingNodeIds = useAppSelector(selectVectorEditingNodeIds);
   const activeTool = useAppSelector(selectActiveTool);
   const isBendModifierHeld = useIsBendModifierHeld();
 
   const handleClose = useCallback((): void => {
     dispatch(setActiveTool(ToolName.default));
-    dispatch(setVectorEditingNodeId(null));
+    dispatch(setVectorEditingNodeIds([]));
   }, [dispatch]);
 
   const renderTool = useCallback(
@@ -90,5 +90,5 @@ export const useVectorEditToolbar = (): TUseVectorEditToolbar => {
     [activeTool, dispatch, isBendModifierHeld, t],
   );
 
-  return { handleClose, renderTool, vectorEditingNodeId };
+  return { handleClose, renderTool, vectorEditingNodeIds };
 };

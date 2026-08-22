@@ -1,5 +1,5 @@
 // store
-import { addNode, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -46,7 +46,7 @@ const addVectorNode = (): string => {
 
 describe('applyPendingClickAction', () => {
   beforeEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should do nothing when there is no pending click action', () => {
@@ -107,7 +107,7 @@ describe('applyPendingClickAction', () => {
     // mock
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs({ selectedVectorSegmentIdsRef: { current: ['s1'] } });
 

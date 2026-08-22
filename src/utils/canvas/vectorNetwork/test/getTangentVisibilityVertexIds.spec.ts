@@ -54,4 +54,12 @@ describe('getTangentVisibilityVertexIds', () => {
     // result
     expect(result).toEqual(['v1']);
   });
+
+  it('should ignore a selected handle whose segment does not belong to this node — e.g. a handle selected on a different node while several are open for editing', () => {
+    // action
+    const result = getTangentVisibilityVertexIds(node, ['v1'], [{ end: 'start', segmentId: 'segment-from-another-node' }]);
+
+    // result
+    expect(result).toEqual(['v1']);
+  });
 });

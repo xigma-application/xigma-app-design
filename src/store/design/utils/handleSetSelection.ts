@@ -30,17 +30,13 @@ const deleteDegenerateDeselectedNodes = (state: TDesignState, deselectedIds: str
 };
 
 const exitVectorEditingIfNeeded = (state: TDesignState, nextSelectedIds: string[]): void => {
-  const staysSoleSelection = nextSelectedIds.length === 1 && nextSelectedIds[0] === state.vectorEditingNodeId;
+  const exitedIds = state.vectorEditingNodeIds.filter((id) => !nextSelectedIds.includes(id));
 
-  if (state.vectorEditingNodeId && !staysSoleSelection) {
-    const exitedVectorEditingNodeId = state.vectorEditingNodeId;
-
-    state.vectorEditingNodeId = null;
+  if (exitedIds.length > 0) {
+    state.vectorEditingNodeIds = state.vectorEditingNodeIds.filter((id) => !exitedIds.includes(id));
     state.penActiveVertexId = null;
 
-    if (isEmptyVectorNode(state, exitedVectorEditingNodeId)) {
-      handleDeleteNode(state, exitedVectorEditingNodeId);
-    }
+    exitedIds.filter((id) => isEmptyVectorNode(state, id)).forEach((id) => handleDeleteNode(state, id));
   }
 };
 

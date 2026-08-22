@@ -1,6 +1,6 @@
 // store
-import { cancelCommentDraft, setActiveTool, setSelection, setVectorEditingNodeId } from 'store/design/slice';
-import { selectActiveTool, selectPenActiveVertexId, selectVectorEditingNodeId } from 'store/design/selectors';
+import { cancelCommentDraft, setActiveTool, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActiveTool, selectPenActiveVertexId, selectVectorEditingNodeIds } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
@@ -15,19 +15,19 @@ export const handleLeave = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
   const state = store.getState();
   const activeTool = selectActiveTool(state);
   const penActiveVertexId = selectPenActiveVertexId(state);
-  const vectorEditingNodeId = selectVectorEditingNodeId(state);
+  const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
 
   switch (true) {
     case penActiveVertexId !== null:
       handleEscapePenActiveVertex(dispatch);
       clearPenPreviewRefs(refs);
       break;
-    case vectorEditingNodeId !== null && activeTool !== ToolName.move:
+    case vectorEditingNodeIds.length > 0 && activeTool !== ToolName.move:
       dispatch(setActiveTool(ToolName.move));
       break;
-    case vectorEditingNodeId !== null:
+    case vectorEditingNodeIds.length > 0:
       dispatch(setActiveTool(ToolName.default));
-      dispatch(setVectorEditingNodeId(null));
+      dispatch(setVectorEditingNodeIds([]));
       break;
     default:
       dispatch(setActiveTool(ToolName.default));

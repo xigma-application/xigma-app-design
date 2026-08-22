@@ -1,5 +1,5 @@
 // store
-import { addNode, setActiveTool, setPenActiveVertexId, setSelection, setVectorEditingNodeId, updateNode } from 'store/design/slice';
+import { addNode, setActiveTool, setPenActiveVertexId, setSelection, setVectorEditingNodeIds, updateNode } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -663,7 +663,7 @@ describe('armMarqueeOnPointerDown', () => {
 
 describe('armBakeVectorRotationOnPointerDown', () => {
   afterEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should bake a live rotation into vertices and reset it to 0, without claiming the pointerdown', () => {
@@ -674,7 +674,7 @@ describe('armBakeVectorRotationOnPointerDown', () => {
       90,
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     const ctx = createContext();
@@ -696,7 +696,7 @@ describe('armBakeVectorRotationOnPointerDown', () => {
     // mock
     const nodeId = addVectorNode({}, { v1: { id: 'v1', x: 0, y: 0 } });
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     const ctx = createContext();
@@ -718,12 +718,12 @@ describe('armBakeVectorRotationOnPointerDown', () => {
 
 describe('armVectorMarqueeOnPointerDown', () => {
   afterEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should deselect the current vertex/handle selection, snapshot the pre-drag vertex selection, arm a marquee, capture the pointer, and claim the pointerdown, when Vector Edit Mode is active and the click hits nothing', () => {
     // mock
-    store.dispatch(setVectorEditingNodeId('vector-1'));
+    store.dispatch(setVectorEditingNodeIds(['vector-1']));
 
     const canvasRefs = createCanvasRefs();
 
@@ -758,7 +758,7 @@ describe('armVectorMarqueeOnPointerDown', () => {
 
   it('should return undefined (letting the click fall through) when the click hits a node', () => {
     // mock
-    store.dispatch(setVectorEditingNodeId('vector-1'));
+    store.dispatch(setVectorEditingNodeIds(['vector-1']));
 
     // before
     const ctx = createContext({ hit: rectangle });
@@ -769,7 +769,7 @@ describe('armVectorMarqueeOnPointerDown', () => {
 
   it('should return undefined (letting the click fall through) when shift is held', () => {
     // mock
-    store.dispatch(setVectorEditingNodeId('vector-1'));
+    store.dispatch(setVectorEditingNodeIds(['vector-1']));
 
     // before
     const ctx = createContext({ event: pointerEvent({ shiftKey: true }), hit: null });
@@ -782,12 +782,12 @@ describe('armVectorMarqueeOnPointerDown', () => {
 
 describe('armVectorLassoOnPointerDown', () => {
   afterEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should clear the current vertex/handle/segment selection, start the lasso path at the click point, set the lasso cursor, capture the pointer, and claim the pointerdown, when Lasso is active and Vector Edit Mode is on', () => {
     // mock
-    store.dispatch(setVectorEditingNodeId('vector-1'));
+    store.dispatch(setVectorEditingNodeIds(['vector-1']));
 
     const canvasRefs = createCanvasRefs();
 
@@ -810,7 +810,7 @@ describe('armVectorLassoOnPointerDown', () => {
 
   it('should return undefined (letting the click fall through) when Lasso is not the active tool', () => {
     // mock
-    store.dispatch(setVectorEditingNodeId('vector-1'));
+    store.dispatch(setVectorEditingNodeIds(['vector-1']));
 
     // before
     const ctx = createContext({ activeTool: ToolName.default });
@@ -832,7 +832,7 @@ describe('armVectorLassoOnPointerDown', () => {
 
 describe('armVectorPaintOnPointerDown', () => {
   afterEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should add the clicked face to filledFaceKeys and claim the pointerdown, when the face is not yet filled', () => {
@@ -846,7 +846,7 @@ describe('armVectorPaintOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 50, y: 100 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before — a point inside the triangle
     const ctx = createContext({ activeTool: ToolName.paint, point: { x: 50, y: 40 } });
@@ -872,7 +872,7 @@ describe('armVectorPaintOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 50, y: 100 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(updateNode({ changes: { filledFaceKeys: ['s1,s2,s3'] }, id: nodeId }));
 
     // before
@@ -897,7 +897,7 @@ describe('armVectorPaintOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 50, y: 100 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before — a point well outside the triangle
     const ctx = createContext({ activeTool: ToolName.paint, point: { x: 500, y: 500 } });
@@ -914,7 +914,7 @@ describe('armVectorPaintOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     const ctx = createContext({ activeTool: ToolName.default });
@@ -936,7 +936,7 @@ describe('armVectorPaintOnPointerDown', () => {
 
 describe('armVectorHandleOnPointerDown', () => {
   afterEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
     store.dispatch(setPenActiveVertexId(null));
   });
 
@@ -947,7 +947,7 @@ describe('armVectorHandleOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -971,7 +971,7 @@ describe('armVectorHandleOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1000,7 +1000,7 @@ describe('armVectorHandleOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1024,7 +1024,7 @@ describe('armVectorHandleOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1045,7 +1045,7 @@ describe('armVectorHandleOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     const ctx = createContext({ point: { x: 900, y: 900 } });
@@ -1062,7 +1062,7 @@ describe('armVectorHandleOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     const ctx = createContext({ point: { x: 10, y: 20 } });
@@ -1080,7 +1080,7 @@ describe('armVectorHandleOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setPenActiveVertexId('v1'));
 
     // before
@@ -1103,7 +1103,7 @@ describe('armVectorHandleOnPointerDown', () => {
 
 describe('armVectorCornerHandleOnPointerDown', () => {
   afterEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should arm the vector-handle drag from a corner vertex, mark it symmetric, select the new handle, deselect any vertex, and return true when Ctrl is held', () => {
@@ -1113,7 +1113,7 @@ describe('armVectorCornerHandleOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1138,7 +1138,7 @@ describe('armVectorCornerHandleOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     const ctx = createContext({ event: pointerEvent({ metaKey: true }), point: { x: 2, y: 0 } });
@@ -1155,7 +1155,7 @@ describe('armVectorCornerHandleOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     const ctx = createContext({ point: { x: 2, y: 0 } });
@@ -1173,7 +1173,7 @@ describe('armVectorCornerHandleOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 900, y: 900 } });
@@ -1199,7 +1199,7 @@ describe('armVectorCornerHandleOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 2, y: 0 } });
@@ -1213,7 +1213,7 @@ describe('armVectorCornerHandleOnPointerDown', () => {
     // mock — an isolated vertex, e.g. left behind by a Pen-tool click that was never connected
     const nodeId = addVectorNode({}, { v1: { id: 'v1', x: 0, y: 0 } });
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 0, y: 0 } });
@@ -1234,7 +1234,7 @@ describe('armVectorCornerHandleOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 0, y: 100 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 0, y: 0 } });
@@ -1258,7 +1258,7 @@ describe('armVectorCornerHandleOnPointerDown', () => {
 
 describe('armVectorBendSegmentOnPointerDown', () => {
   afterEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
     store.dispatch(setActiveTool(ToolName.default));
   });
 
@@ -1269,7 +1269,7 @@ describe('armVectorBendSegmentOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs({
       selectedVectorSegmentIdsRef: { current: ['s1'] },
@@ -1313,7 +1313,7 @@ describe('armVectorBendSegmentOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     const ctx = createContext({ event: pointerEvent({ metaKey: true }), point: { x: 25, y: 0 } });
@@ -1330,7 +1330,7 @@ describe('armVectorBendSegmentOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setActiveTool(ToolName.bend));
 
     // before
@@ -1348,7 +1348,7 @@ describe('armVectorBendSegmentOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 25, y: 0 } });
@@ -1370,7 +1370,7 @@ describe('armVectorBendSegmentOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     const ctx = createContext({ point: { x: 25, y: 0 } });
@@ -1388,7 +1388,7 @@ describe('armVectorBendSegmentOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 900, y: 900 } });
@@ -1418,7 +1418,7 @@ describe('armVectorBendSegmentOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 0, y: 100 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 5, y: 5 } });
@@ -1441,7 +1441,7 @@ describe('armVectorBendSegmentOnPointerDown', () => {
 
 describe('armVectorVertexOnPointerDown', () => {
   afterEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should arm the vector-vertex drag, select the vertex, deselect any tangent handle, and return true when a vertex is hit', () => {
@@ -1451,7 +1451,7 @@ describe('armVectorVertexOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1479,7 +1479,7 @@ describe('armVectorVertexOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1506,7 +1506,7 @@ describe('armVectorVertexOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1530,7 +1530,7 @@ describe('armVectorVertexOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1551,7 +1551,7 @@ describe('armVectorVertexOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     const ctx = createContext({ point: { x: 900, y: 900 } });
@@ -1573,7 +1573,7 @@ describe('armVectorVertexOnPointerDown', () => {
 
 describe('armVectorMultiSelectBoxOnPointerDown', () => {
   afterEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should arm a group drag and return true when clicking inside the bounding box of 2+ selected vertices, away from any single point', () => {
@@ -1583,7 +1583,7 @@ describe('armVectorMultiSelectBoxOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1613,7 +1613,7 @@ describe('armVectorMultiSelectBoxOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1634,7 +1634,7 @@ describe('armVectorMultiSelectBoxOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1654,7 +1654,7 @@ describe('armVectorMultiSelectBoxOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1678,7 +1678,7 @@ describe('armVectorMultiSelectBoxOnPointerDown', () => {
 
 describe('armVectorMultiSelectResizeOnPointerDown', () => {
   afterEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should arm a resize drag and return true when clicking exactly on a corner of the bounding box of 2+ selected vertices', () => {
@@ -1688,7 +1688,7 @@ describe('armVectorMultiSelectResizeOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1722,7 +1722,7 @@ describe('armVectorMultiSelectResizeOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1743,7 +1743,7 @@ describe('armVectorMultiSelectResizeOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1771,7 +1771,7 @@ describe('armVectorMultiSelectResizeOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1788,7 +1788,7 @@ describe('armVectorMultiSelectResizeOnPointerDown', () => {
 
 describe('armVectorMultiSelectRotateOnPointerDown', () => {
   afterEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should arm a rotate drag and return true when clicking in the ring just outside a corner of the bounding box of 2+ selected vertices', () => {
@@ -1799,7 +1799,7 @@ describe('armVectorMultiSelectRotateOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1821,7 +1821,7 @@ describe('armVectorMultiSelectRotateOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1842,7 +1842,7 @@ describe('armVectorMultiSelectRotateOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1862,7 +1862,7 @@ describe('armVectorMultiSelectRotateOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1887,7 +1887,7 @@ describe('armVectorMultiSelectRotateOnPointerDown', () => {
 
 describe('armVectorSegmentOnPointerDown', () => {
   afterEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should select the segment and deselect any vertex/handle when a segment interior is hit', () => {
@@ -1897,7 +1897,7 @@ describe('armVectorSegmentOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1921,7 +1921,7 @@ describe('armVectorSegmentOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     const ctx = createContext({ point: { x: 900, y: 900 } });
@@ -1948,7 +1948,7 @@ describe('armVectorSegmentOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 200, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1971,7 +1971,7 @@ describe('armVectorSegmentOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
 
@@ -1995,7 +1995,7 @@ describe('armVectorSegmentOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 200, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
     const selectionRefs = createSelectionToolRefs();
@@ -2022,7 +2022,7 @@ describe('armVectorSegmentOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
     const selectionRefs = createSelectionToolRefs();
@@ -2043,7 +2043,7 @@ describe('armVectorSegmentOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const selectionRefs = createSelectionToolRefs();
 
@@ -2062,7 +2062,7 @@ describe('armVectorSegmentOnPointerDown', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
     const selectionRefs = createSelectionToolRefs();

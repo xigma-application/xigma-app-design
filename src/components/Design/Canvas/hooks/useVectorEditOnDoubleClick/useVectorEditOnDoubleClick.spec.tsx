@@ -7,7 +7,7 @@ import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useVectorEditOnDoubleClick } from './useVectorEditOnDoubleClick';
 
 // store
-import { addNode, setActiveTool, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setActiveTool, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -78,7 +78,7 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
   beforeEach(() => {
     store.dispatch(setActiveTool(ToolName.default));
     store.dispatch(setSelection([]));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should enter Vector Edit Mode and select the node when double-clicked inside its filled region', () => {
@@ -97,7 +97,7 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     // result
     const { design } = store.getState();
 
-    expect(design.vectorEditingNodeId).toBe(idA);
+    expect(design.vectorEditingNodeIds).toEqual([idA]);
     expect(design.selectedIds).toEqual([idA]);
   });
 
@@ -116,7 +116,7 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.vectorEditingNodeId).toBeNull();
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
   });
 
   it('should not react when the active tool is not the default selection tool', () => {
@@ -135,10 +135,10 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.vectorEditingNodeId).toBeNull();
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
   });
 
-  it('should clear a leftover vertex selection and tangent handle selection whenever vectorEditingNodeId changes', () => {
+  it('should clear a leftover vertex selection and tangent handle selection whenever vectorEditingNodeIds changes', () => {
     // mock
     const canvasRef = createCanvasRef();
     const refs = renderDoubleClickTool(canvasRef);
@@ -148,7 +148,7 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
 
     // before
     act(() => {
-      store.dispatch(setVectorEditingNodeId('some-other-node'));
+      store.dispatch(setVectorEditingNodeIds(['some-other-node']));
     });
 
     // result
@@ -162,7 +162,7 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     const canvasRef = createCanvasRef();
 
     act(() => {
-      store.dispatch(setVectorEditingNodeId(idA));
+      store.dispatch(setVectorEditingNodeIds([idA]));
     });
 
     // before
@@ -174,7 +174,7 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.vectorEditingNodeId).toBeNull();
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
   });
 
   it('should leave a rotated node untouched when merely entering Vector Edit Mode on it — no bake yet', () => {
@@ -196,7 +196,7 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     // result
     const { design } = store.getState();
 
-    expect(design.vectorEditingNodeId).toBe(idA);
+    expect(design.vectorEditingNodeIds).toEqual([idA]);
     expect(design.nodes[idA]).toEqual(originalNode);
   });
 
@@ -206,7 +206,7 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     const canvasRef = createCanvasRef();
 
     act(() => {
-      store.dispatch(setVectorEditingNodeId(idA));
+      store.dispatch(setVectorEditingNodeIds([idA]));
     });
 
     // before
@@ -218,6 +218,6 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.vectorEditingNodeId).toBe(idA);
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([idA]);
   });
 });

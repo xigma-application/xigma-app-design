@@ -1470,7 +1470,7 @@ test('Paint fills all 3 regions of a curved "egg" network crossed by a triangle 
     const storeModule = await import('/src/store/index.ts');
     const sliceModule = await import('/src/store/design/slice.ts');
     const { store } = storeModule;
-    const { addNode, setActiveTool, setVectorEditingNodeId } = sliceModule;
+    const { addNode, setActiveTool, setVectorEditingNodeIds } = sliceModule;
 
     store.dispatch(
       addNode({
@@ -1557,7 +1557,7 @@ test('Paint fills all 3 regions of a curved "egg" network crossed by a triangle 
     const state = store.getState();
     const nodeId = state.design.rootOrder[state.design.rootOrder.length - 1];
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setActiveTool('paint' as never));
   });
 
@@ -1692,7 +1692,7 @@ test('dragging a vertex of one vector shape onto a vertex of a completely separa
       return {
         nodeAExists: Boolean(state.design.nodes[nodeIdA]),
         segmentCount: Object.keys(nodeB.segments).length,
-        vectorEditingNodeId: state.design.vectorEditingNodeId,
+        vectorEditingNodeIds: state.design.vectorEditingNodeIds,
         vertexCount: Object.keys(nodeB.vertices).length,
       };
     },
@@ -1704,7 +1704,7 @@ test('dragging a vertex of one vector shape onto a vertex of a completely separa
   expect(result.nodeAExists).toBe(false);
   expect(result.vertexCount).toBe(7);
   expect(result.segmentCount).toBe(8);
-  expect(result.vectorEditingNodeId).toBe(idB);
+  expect(result.vectorEditingNodeIds).toEqual([idB]);
 });
 
 test('a painted face on the absorbed shape survives being merged into a completely separate shape', async ({ page }) => {

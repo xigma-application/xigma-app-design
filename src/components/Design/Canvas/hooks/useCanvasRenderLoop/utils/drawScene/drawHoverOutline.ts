@@ -24,9 +24,9 @@ export const drawHoverOutline = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
-  vectorEditingNodeId: string | null,
+  vectorEditingNodeIds: string[],
 ): void => {
-  if (hoveredNode && hoveredNode.id !== vectorEditingNodeId) {
+  if (hoveredNode && !vectorEditingNodeIds.includes(hoveredNode.id)) {
     switch (hoveredNode.type) {
       case NodeType.ellipse:
         drawThickEllipseNodeOutline(

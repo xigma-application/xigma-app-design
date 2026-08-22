@@ -1,6 +1,7 @@
 // store
-import { deleteNode, setPenActiveVertexId, setVectorEditingNodeId, updateNode } from 'store/design/slice';
-import { AppDispatch } from 'store';
+import { deleteNode, setPenActiveVertexId, setVectorEditingNodeIds, updateNode } from 'store/design/slice';
+import { selectVectorEditingNodeIds } from 'store/design/selectors';
+import { AppDispatch, store } from 'store';
 
 // types
 import { TVectorNode } from 'types/design/types';
@@ -12,7 +13,7 @@ export const deleteDanglingActiveVertex = (dispatch: AppDispatch, node: TVectorN
     dispatch(setPenActiveVertexId(null));
   } else if (Object.keys(node.vertices).length === 1) {
     dispatch(deleteNode(node.id));
-    dispatch(setVectorEditingNodeId(null));
+    dispatch(setVectorEditingNodeIds(selectVectorEditingNodeIds(store.getState()).filter((id) => id !== node.id)));
     dispatch(setPenActiveVertexId(null));
   } else {
     const vertices = Object.fromEntries(Object.entries(node.vertices).filter(([id]) => id !== vertexId));

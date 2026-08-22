@@ -2,7 +2,7 @@
 import { VECTOR_HANDLE_HIT_RADIUS_PX } from 'constant/canvas';
 
 // store
-import { selectPenActiveVertexId, selectVectorEditingNodeId } from 'store/design/selectors';
+import { selectPenActiveVertexId, selectVectorEditingNodeIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -10,10 +10,7 @@ import { TArmContext } from '../../types';
 
 // utils
 import { armVectorHandleClick } from './armVectorHandleClick';
-import { getOneHopVectorVertexIds } from 'utils/canvas/vectorNetwork/getOneHopVectorVertexIds';
-import { getTangentVisibilityVertexIds } from 'utils/canvas/vectorNetwork/getTangentVisibilityVertexIds';
-import { getVectorEditingNode } from '../../../../../../utils/getVectorEditingNode';
-import { getVectorHandleAtPoint } from '../../../../../../utils/getVectorHandleAtPoint';
+import { getVectorHandleAtPointAcrossOpenNodes } from '../../../../../../utils/getVectorHandleAtPointAcrossOpenNodes';
 import { getVisualSelectedVectorVertexIds } from 'utils/canvas/vectorNetwork/getVisualSelectedVectorVertexIds';
 
 export const armVectorHandleOnPointerDown = ({
@@ -25,33 +22,22 @@ export const armVectorHandleOnPointerDown = ({
   viewport,
 }: TArmContext): true | undefined => {
   const state = store.getState();
-  const node = getVectorEditingNode(state.design.nodes, selectVectorEditingNodeId(state));
+  const visualSelectedVertexIds = getVisualSelectedVectorVertexIds(
+    canvasRefs.selectedVectorVertexIdsRef.current,
+    selectPenActiveVertexId(state),
+  );
+  const result = getVectorHandleAtPointAcrossOpenNodes(
+    point,
+    selectVectorEditingNodeIds(state),
+    state.design.nodes,
+    VECTOR_HANDLE_HIT_RADIUS_PX / viewport.zoom,
+    visualSelectedVertexIds,
+    canvasRefs.selectedVectorHandlesRef.current,
+    canvasRefs.selectedVectorSegmentIdsRef.current,
+  );
 
-  if (node) {
-    const visualSelectedVertexIds = getVisualSelectedVectorVertexIds(
-      canvasRefs.selectedVectorVertexIdsRef.current,
-      selectPenActiveVertexId(state),
-    );
-    const tangentVisibilityVertexIds = getTangentVisibilityVertexIds(
-      node,
-      visualSelectedVertexIds,
-      canvasRefs.selectedVectorHandlesRef.current,
-    );
-    const oneHopVertexIds = getOneHopVectorVertexIds(node, tangentVisibilityVertexIds);
-    const hit = getVectorHandleAtPoint(
-      point,
-      node,
-      VECTOR_HANDLE_HIT_RADIUS_PX / viewport.zoom,
-      tangentVisibilityVertexIds,
-      oneHopVertexIds,
-      canvasRefs.selectedVectorHandlesRef.current,
-      canvasRefs.selectedVectorSegmentIdsRef.current,
-    );
-
-    if (hit) {
-      armVectorHandleClick(canvas, event, canvasRefs, selectionRefs, node, hit, point);
-
-      return true;
-    }
+  if (result) {
+    armVectorHandleClick(canvas, event, canvasRefs, selectionRefs, result.node, result.hit, point);
+    return true;
   }
 };

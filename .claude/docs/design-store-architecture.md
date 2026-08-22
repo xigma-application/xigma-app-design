@@ -299,7 +299,7 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   penActiveVertexId: null,
   rootOrder: [],
   selectedIds: [],
-  vectorEditingNodeId: null,
+  vectorEditingNodeIds: [],
   viewport: { x: 0, y: 0, zoom: 1 },
   ...overrides,
 });
@@ -359,9 +359,10 @@ wraps its own pointerdown/pointerup the same way, since it isn't part of `useSel
 via `next(...)` directly rather than `store.dispatch(...)` — deliberately bypassing the middleware's
 own undoable-action branch so an undo/redo application is never itself pushed onto the history stack.
 
-Two new plain fields on `TDesignState` — `penActiveVertexId`/`vectorEditingNodeId` (both
+Two new plain fields on `TDesignState` — `penActiveVertexId` (`string | null`) and, since
+[[vector-network]] §48's multi-node conversion, `vectorEditingNodeIds` (`string[]`, was a single
 `string | null`) — drive the Pen tool session and are explicitly **excluded** from history snapshots;
-full detail in [[vector-network]] §4-5.
+full detail in [[vector-network]] §4-5, §48.
 
 ## Related
 

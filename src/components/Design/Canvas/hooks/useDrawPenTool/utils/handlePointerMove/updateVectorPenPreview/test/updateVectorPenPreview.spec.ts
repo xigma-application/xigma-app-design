@@ -3,7 +3,7 @@ import { RefObject } from 'react';
 // types
 import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TPendingOutgoingTangent } from '../../../types';
+import { TPendingOutgoingTangent } from '../../../../types';
 import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
@@ -305,5 +305,68 @@ describe('updateVectorPenPreview', () => {
 
     // result
     expect(penPreviewRef.current).toMatchObject({ tangentFromOffset: { x: 5, y: 5 } });
+  });
+
+  it('should attract the rubber-band preview onto a vertex on another open node, and report it as not drag-armable', () => {
+    // mock — node's own vertex is far from the pointer, so its own resolvers find nothing; the other
+    // open node has a vertex right where the pointer is hovering
+    const otherNode: TVectorNode = {
+      ...node,
+      id: 'vector-2',
+      vertices: { vb: { id: 'vb', x: 500, y: 500 } },
+    };
+    const nodesWithOther: Record<string, TSceneNode> = { ...nodes, [otherNode.id]: otherNode };
+    const penPreviewRef = createPenPreviewRef();
+    const hoveredSegmentIdRef = createHoveredSegmentIdRef();
+    const penHoveredDragArmableVertexRef = createPenHoveredDragArmableVertexRef();
+
+    // before — active vertex is v1 on the main node, pointer hovers right on vb on the other open node
+    const hoverKind = updateVectorPenPreview(
+      { x: 500, y: 500 },
+      node,
+      nodesWithOther,
+      'v1',
+      IDENTITY_VIEWPORT,
+      false,
+      penPreviewRef,
+      createPendingOutgoingTangentRef(),
+      hoveredSegmentIdRef,
+      penHoveredDragArmableVertexRef,
+      createVectorAlignmentGuideRef(),
+      [otherNode.id],
+    );
+
+    // result
+    expect(penPreviewRef.current).toMatchObject({ to: { id: 'vb', x: 500, y: 500 } });
+    expect(hoverKind).toBe('vertex');
+    expect(penHoveredDragArmableVertexRef.current).toBe(false);
+  });
+
+  it('should skip a stale other-open-node id that no longer resolves to a vector node', () => {
+    // mock — otherOpenNodeIds carries an id that isn't in the nodes map at all; the loop must skip it
+    // and fall through to the plain angle-snap preview instead of throwing
+    const penPreviewRef = createPenPreviewRef();
+    const hoveredSegmentIdRef = createHoveredSegmentIdRef();
+    const penHoveredDragArmableVertexRef = createPenHoveredDragArmableVertexRef();
+
+    // before
+    const hoverKind = updateVectorPenPreview(
+      { x: 500, y: 500 },
+      node,
+      nodes,
+      'v1',
+      IDENTITY_VIEWPORT,
+      false,
+      penPreviewRef,
+      createPendingOutgoingTangentRef(),
+      hoveredSegmentIdRef,
+      penHoveredDragArmableVertexRef,
+      createVectorAlignmentGuideRef(),
+      ['missing-node'],
+    );
+
+    // result
+    expect(hoverKind).toBeNull();
+    expect(penPreviewRef.current).toMatchObject({ to: { x: 500, y: 500 } });
   });
 });

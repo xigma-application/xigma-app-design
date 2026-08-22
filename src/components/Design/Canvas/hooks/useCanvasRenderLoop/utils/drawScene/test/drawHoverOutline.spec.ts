@@ -61,7 +61,7 @@ describe('drawHoverOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawHoverOutline(gl, program, buffer, null, 100, 100, IDENTITY_VIEWPORT, null);
+    drawHoverOutline(gl, program, buffer, null, 100, 100, IDENTITY_VIEWPORT, []);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -75,7 +75,7 @@ describe('drawHoverOutline', () => {
     const node = buildNode({ height: 20, width: 10, x: 0, y: 0 });
 
     // before
-    drawHoverOutline(gl, program, buffer, node, 100, 100, IDENTITY_VIEWPORT, null);
+    drawHoverOutline(gl, program, buffer, node, 100, 100, IDENTITY_VIEWPORT, []);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -90,7 +90,7 @@ describe('drawHoverOutline', () => {
     const node = buildNode({ height: 20, type: NodeType.ellipse, width: 10, x: 0, y: 0 });
 
     // before
-    drawHoverOutline(gl, program, buffer, node, 100, 100, IDENTITY_VIEWPORT, null);
+    drawHoverOutline(gl, program, buffer, node, 100, 100, IDENTITY_VIEWPORT, []);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -119,7 +119,7 @@ describe('drawHoverOutline', () => {
     };
 
     // before
-    drawHoverOutline(gl, program, buffer, polygon, 100, 100, IDENTITY_VIEWPORT, null);
+    drawHoverOutline(gl, program, buffer, polygon, 100, 100, IDENTITY_VIEWPORT, []);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -149,7 +149,7 @@ describe('drawHoverOutline', () => {
     };
 
     // before
-    drawHoverOutline(gl, program, buffer, star, 100, 100, IDENTITY_VIEWPORT, null);
+    drawHoverOutline(gl, program, buffer, star, 100, 100, IDENTITY_VIEWPORT, []);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -180,7 +180,7 @@ describe('drawHoverOutline', () => {
     };
 
     // before
-    drawHoverOutline(gl, program, buffer, text, 100, 100, IDENTITY_VIEWPORT, null);
+    drawHoverOutline(gl, program, buffer, text, 100, 100, IDENTITY_VIEWPORT, []);
 
     // result — a single thin quad, not the 24-vertex bounding-box ring
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -205,7 +205,7 @@ describe('drawHoverOutline', () => {
     };
 
     // before
-    drawHoverOutline(gl, program, buffer, line, 100, 100, IDENTITY_VIEWPORT, null);
+    drawHoverOutline(gl, program, buffer, line, 100, 100, IDENTITY_VIEWPORT, []);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -233,7 +233,7 @@ describe('drawHoverOutline', () => {
     };
 
     // before
-    drawHoverOutline(gl, program, buffer, vector, 100, 100, IDENTITY_VIEWPORT, null);
+    drawHoverOutline(gl, program, buffer, vector, 100, 100, IDENTITY_VIEWPORT, []);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -261,7 +261,34 @@ describe('drawHoverOutline', () => {
     };
 
     // before
-    drawHoverOutline(gl, program, buffer, vector, 100, 100, IDENTITY_VIEWPORT, 'a');
+    drawHoverOutline(gl, program, buffer, vector, 100, 100, IDENTITY_VIEWPORT, ['a']);
+
+    // result
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+  });
+
+  it('should draw nothing for the hovered node while it is the second of several nodes open in Vector Edit Mode', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const vector: TVectorNode = {
+      fillColor: null,
+      filledFaceKeys: [],
+      id: 'b',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      strokeColor: '#000000',
+      strokeWidth: 2,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 10 } },
+    };
+
+    // before
+    drawHoverOutline(gl, program, buffer, vector, 100, 100, IDENTITY_VIEWPORT, ['a', 'b']);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();

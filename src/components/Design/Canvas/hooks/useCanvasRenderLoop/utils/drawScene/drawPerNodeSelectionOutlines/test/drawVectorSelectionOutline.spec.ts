@@ -36,16 +36,7 @@ describe('drawVectorSelectionOutline', () => {
 
   it('should draw a bounding-box outline and corner handles at the node rotation when it is not the currently edited node', () => {
     // before
-    drawVectorSelectionOutline(
-      {} as WebGL2RenderingContext,
-      {} as WebGLProgram,
-      {} as WebGLBuffer,
-      node,
-      null,
-      200,
-      150,
-      IDENTITY_VIEWPORT,
-    );
+    drawVectorSelectionOutline({} as WebGL2RenderingContext, {} as WebGLProgram, {} as WebGLBuffer, node, [], 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawRectMock).toHaveBeenCalledWith(
@@ -78,7 +69,25 @@ describe('drawVectorSelectionOutline', () => {
       {} as WebGLProgram,
       {} as WebGLBuffer,
       node,
-      node.id,
+      [node.id],
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
+
+    // result
+    expect(drawRectMock).not.toHaveBeenCalled();
+    expect(drawCornerHandlesMock).not.toHaveBeenCalled();
+  });
+
+  it('should skip drawing when the node is the second of several nodes currently in Vector Edit Mode', () => {
+    // before
+    drawVectorSelectionOutline(
+      {} as WebGL2RenderingContext,
+      {} as WebGLProgram,
+      {} as WebGLBuffer,
+      node,
+      ['other-node', node.id],
       200,
       150,
       IDENTITY_VIEWPORT,

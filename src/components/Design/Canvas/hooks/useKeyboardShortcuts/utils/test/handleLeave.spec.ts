@@ -6,7 +6,7 @@ import designReducer, {
   setActiveTool,
   setPenActiveVertexId,
   setSelection,
-  setVectorEditingNodeId,
+  setVectorEditingNodeIds,
   startCommentDraft,
 } from 'store/design/slice';
 import { store as realStore } from 'store';
@@ -79,7 +79,7 @@ describe('handleLeave', () => {
     afterEach(() => {
       realStore.dispatch(setActiveTool(ToolName.default));
       realStore.dispatch(setPenActiveVertexId(null));
-      realStore.dispatch(setVectorEditingNodeId(null));
+      realStore.dispatch(setVectorEditingNodeIds([]));
     });
 
     it('should clear the active pen vertex, without resetting the active tool, when one is set', () => {
@@ -118,7 +118,7 @@ describe('handleLeave', () => {
       // mock
       const vectorId = addVectorNode({}, { v1: { id: 'v1', x: 0, y: 0 } });
 
-      realStore.dispatch(setVectorEditingNodeId(vectorId));
+      realStore.dispatch(setVectorEditingNodeIds([vectorId]));
       realStore.dispatch(setPenActiveVertexId('v1'));
 
       // action
@@ -126,13 +126,13 @@ describe('handleLeave', () => {
 
       // result
       expect(realStore.getState().design.nodes[vectorId]).toBeUndefined();
-      expect(realStore.getState().design.vectorEditingNodeId).toBeNull();
+      expect(realStore.getState().design.vectorEditingNodeIds).toEqual([]);
       expect(realStore.getState().design.penActiveVertexId).toBeNull();
     });
 
     it('should switch the active tool to Move, without exiting Vector Edit Mode, when leaving vector editing with the Pen tool active', () => {
       // mock
-      realStore.dispatch(setVectorEditingNodeId('node-1'));
+      realStore.dispatch(setVectorEditingNodeIds(['node-1']));
       realStore.dispatch(setActiveTool(ToolName.pen));
 
       // action
@@ -140,12 +140,12 @@ describe('handleLeave', () => {
 
       // result
       expect(realStore.getState().design.activeTool).toBe(ToolName.move);
-      expect(realStore.getState().design.vectorEditingNodeId).toBe('node-1');
+      expect(realStore.getState().design.vectorEditingNodeIds).toEqual(['node-1']);
     });
 
     it('should also switch the active tool to Move, without exiting Vector Edit Mode, when leaving vector editing with the Paint tool active', () => {
       // mock — the same "return to Move first" rule applies to every Vector Edit sub-tool, not just Pen/Pencil
-      realStore.dispatch(setVectorEditingNodeId('node-1'));
+      realStore.dispatch(setVectorEditingNodeIds(['node-1']));
       realStore.dispatch(setActiveTool(ToolName.paint));
 
       // action
@@ -153,19 +153,19 @@ describe('handleLeave', () => {
 
       // result
       expect(realStore.getState().design.activeTool).toBe(ToolName.move);
-      expect(realStore.getState().design.vectorEditingNodeId).toBe('node-1');
+      expect(realStore.getState().design.vectorEditingNodeIds).toEqual(['node-1']);
     });
 
     it('should clear the vector editing node id and reset the active tool to default when leaving vector editing with the Move tool already active', () => {
       // mock
-      realStore.dispatch(setVectorEditingNodeId('node-1'));
+      realStore.dispatch(setVectorEditingNodeIds(['node-1']));
       realStore.dispatch(setActiveTool(ToolName.move));
 
       // action
       handleLeave(realStore.dispatch, createCanvasRefs());
 
       // result
-      expect(realStore.getState().design.vectorEditingNodeId).toBeNull();
+      expect(realStore.getState().design.vectorEditingNodeIds).toEqual([]);
       expect(realStore.getState().design.activeTool).toBe(ToolName.default);
     });
   });

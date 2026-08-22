@@ -81,6 +81,8 @@ export type TPenPreview = {
 
 export type TVectorHandleHover = { end: 'end' | 'start'; segmentId: string };
 
+export type TVectorPaintFaceHover = { faceKey: string; nodeId: string };
+
 export type TVectorMultiSelectBox = {
   bounds: TDraftRect;
   rotation: number;
@@ -97,7 +99,7 @@ export type TCanvasRefs = {
   hoveredSegmentIdRef: RefObject<string | null>;
   hoveredVectorEdgeInsertPointRef: RefObject<TPoint | null>;
   hoveredVectorHandleRef: RefObject<TVectorHandleHover | null>;
-  hoveredVectorPaintFaceKeyRef: RefObject<string | null>;
+  hoveredVectorPaintFaceKeyRef: RefObject<TVectorPaintFaceHover | null>;
   hoveredVectorSegmentIdRef: RefObject<string | null>;
   hoveredVectorVertexIdRef: RefObject<string | null>;
   hoverRef: RefObject<string | null>;

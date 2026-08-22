@@ -10,7 +10,7 @@ import {
   selectEditingTextContent,
   selectOrderedNodes,
   selectSelectedNodes,
-  selectVectorEditingNodeId,
+  selectVectorEditingNodeIds,
 } from 'store/design/selectors';
 import { RootState } from 'store';
 
@@ -40,12 +40,12 @@ export const resolveToolHover = (
 ): void => {
   const editingTextBox = selectEditingTextBox(state);
   const isEditingText = Boolean(editingTextBox);
-  const vectorEditingNodeId = selectVectorEditingNodeId(state);
-  const isEditingVector = Boolean(vectorEditingNodeId);
+  const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
+  const isEditingVector = vectorEditingNodeIds.length > 0;
   const selectedNodes = selectSelectedNodes(state);
   const resizableSelectedNodes = isEditingText || isEditingVector ? [] : selectedNodes;
   const applyClassName = isEditingVector ? (): void => {} : setClassName;
-  const vectorEditingNode = isEditingVector ? getVectorEditingNode(state.design.nodes, vectorEditingNodeId) : null;
+  const vectorEditingNode = isEditingVector ? getVectorEditingNode(state.design.nodes, vectorEditingNodeIds[0]) : null;
   const selectedVertexIds = refs.selectedVectorVertexIdsRef.current;
   const selectedHandles = refs.selectedVectorHandlesRef.current;
   const vectorMultiSelectBox = getVectorMultiSelectBoxForHover(

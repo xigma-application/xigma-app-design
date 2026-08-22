@@ -14,12 +14,12 @@ export const drawVectorSelectionOutline = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   node: TVectorNode,
-  vectorEditingNodeId: string | null,
+  vectorEditingNodeIds: string[],
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  if (node.id !== vectorEditingNodeId) {
+  if (!vectorEditingNodeIds.includes(node.id)) {
     const bounds = getVectorNodeBounds(node);
 
     drawRect(gl, program, buffer, { ...bounds, stroke: DRAFT_FRAME_STROKE }, canvasWidth, canvasHeight, viewport, node.rotation);

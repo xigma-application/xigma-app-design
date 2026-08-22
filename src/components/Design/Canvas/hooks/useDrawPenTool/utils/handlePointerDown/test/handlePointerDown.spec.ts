@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -56,7 +56,7 @@ const addVectorNode = (): string => {
 describe('handlePointerDown', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
     store.dispatch(setPenActiveVertexId(null));
   });
 
@@ -77,7 +77,7 @@ describe('handlePointerDown', () => {
     );
 
     // result
-    expect(store.getState().design.vectorEditingNodeId).toBeNull();
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
     expect(canvas.setPointerCapture).not.toHaveBeenCalled();
   });
 
@@ -98,9 +98,9 @@ describe('handlePointerDown', () => {
     );
 
     // result
-    const { vectorEditingNodeId } = store.getState().design;
+    const { vectorEditingNodeIds } = store.getState().design;
 
-    expect(vectorEditingNodeId).not.toBeNull();
+    expect(vectorEditingNodeIds).not.toEqual([]);
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(1);
   });
 
@@ -108,7 +108,7 @@ describe('handlePointerDown', () => {
     // mock
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
 
@@ -135,7 +135,7 @@ describe('handlePointerDown', () => {
     // mock
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setPenActiveVertexId('v1'));
 
     const canvas = createCanvas();

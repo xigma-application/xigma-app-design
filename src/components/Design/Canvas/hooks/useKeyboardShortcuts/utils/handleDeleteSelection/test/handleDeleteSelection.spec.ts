@@ -1,5 +1,5 @@
 // store
-import { addNode, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { undo } from 'store/history/actions';
 import { store } from 'store';
 
@@ -9,7 +9,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { createCanvasRefs } from '../../../useCanvasRefs/createCanvasRefs';
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
 import { handleDeleteSelection } from '../handleDeleteSelection';
 
@@ -55,6 +55,30 @@ const addVectorNode = (): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
+const addSecondVectorNode = (): string => {
+  store.dispatch(
+    addNode({
+      fillColor: '#ff0000',
+      filledFaceKeys: [],
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {
+        'segment-3': { endId: 'vertex-5', id: 'segment-3', startId: 'vertex-4', tangentEnd: null, tangentStart: null },
+      },
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { 'vertex-4': { id: 'vertex-4', x: 0, y: 0 }, 'vertex-5': { id: 'vertex-5', x: 10, y: 10 } },
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 const addClosedTriangleVectorNode = (): string => {
   store.dispatch(
     addNode({
@@ -84,7 +108,7 @@ const addClosedTriangleVectorNode = (): string => {
 describe('handleDeleteSelection', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should delete every selected node', () => {
@@ -139,7 +163,7 @@ describe('handleDeleteSelection', () => {
     // mock
     const vectorId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(vectorId));
+    store.dispatch(setVectorEditingNodeIds([vectorId]));
 
     const refs = createRefs(['vertex-1']);
 
@@ -162,7 +186,7 @@ describe('handleDeleteSelection', () => {
     // dangling, disconnected points with no stroke connecting them (the reported bug)
     const vectorId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(vectorId));
+    store.dispatch(setVectorEditingNodeIds([vectorId]));
 
     const refs = createRefs(['vertex-2']);
 
@@ -182,7 +206,7 @@ describe('handleDeleteSelection', () => {
     // with zero remaining segments (a floating dangling point) while vertex-2 stays held by segment-2
     const vectorId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(vectorId));
+    store.dispatch(setVectorEditingNodeIds([vectorId]));
 
     const refs = createCanvasRefs({ selectedVectorSegmentIdsRef: { current: ['segment-1'] } });
 
@@ -202,7 +226,7 @@ describe('handleDeleteSelection', () => {
     // mock
     const vectorId = addClosedTriangleVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(vectorId));
+    store.dispatch(setVectorEditingNodeIds([vectorId]));
 
     // before — the closed triangle starts out with exactly one fillable face
     const closedNode = store.getState().design.nodes[vectorId] as TVectorNode;
@@ -216,5 +240,106 @@ describe('handleDeleteSelection', () => {
     const brokenNode = store.getState().design.nodes[vectorId] as TVectorNode;
 
     expect(deriveVectorFaces(brokenNode)).toEqual([]);
+  });
+
+  it('should delete selected vertices spanning two different open nodes, one updateNode dispatch per node', () => {
+    // mock — two open nodes, one selected vertex on each
+    const vectorIdA = addVectorNode();
+    const vectorIdB = addSecondVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([vectorIdA, vectorIdB]));
+
+    const refs = createRefs(['vertex-1', 'vertex-4']);
+
+    // before
+    handleDeleteSelection(store.dispatch, refs);
+
+    // result — each node only lost its own selected vertex/segment, the other node untouched otherwise
+    const nodeA = store.getState().design.nodes[vectorIdA] as TVectorNode;
+    const nodeB = store.getState().design.nodes[vectorIdB] as TVectorNode;
+
+    expect(nodeA.vertices).not.toHaveProperty('vertex-1');
+    expect(nodeB.vertices).not.toHaveProperty('vertex-4');
+    expect(refs.selectedVectorVertexIdsRef.current).toEqual([]);
+  });
+
+  it('should restore both nodes with a single undo when a vertex delete spans two open nodes', () => {
+    // mock
+    const vectorIdA = addVectorNode();
+    const vectorIdB = addSecondVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([vectorIdA, vectorIdB]));
+
+    // before
+    handleDeleteSelection(store.dispatch, createRefs(['vertex-1', 'vertex-4']));
+    store.dispatch(undo());
+
+    // result
+    const nodeA = store.getState().design.nodes[vectorIdA] as TVectorNode;
+    const nodeB = store.getState().design.nodes[vectorIdB] as TVectorNode;
+
+    expect(nodeA.vertices).toHaveProperty('vertex-1');
+    expect(nodeB.vertices).toHaveProperty('vertex-4');
+  });
+
+  it('should delete selected segments spanning two different open nodes, one updateNode dispatch per node', () => {
+    // mock — two open nodes, one selected segment on each
+    const vectorIdA = addVectorNode();
+    const vectorIdB = addSecondVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([vectorIdA, vectorIdB]));
+
+    const refs = createCanvasRefs({ selectedVectorSegmentIdsRef: { current: ['segment-1', 'segment-3'] } });
+
+    // before
+    handleDeleteSelection(store.dispatch, refs);
+
+    // result
+    const nodeA = store.getState().design.nodes[vectorIdA] as TVectorNode;
+    const nodeB = store.getState().design.nodes[vectorIdB] as TVectorNode;
+
+    expect(nodeA.segments).not.toHaveProperty('segment-1');
+    expect(nodeB.segments).not.toHaveProperty('segment-3');
+    expect(refs.selectedVectorSegmentIdsRef.current).toEqual([]);
+  });
+
+  it('should clear a stale vertex selection that no longer belongs to any currently open node, without dispatching anything', () => {
+    // mock — the selected vertex id used to belong to a node that is no longer open for editing
+    const vectorId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([vectorId]));
+
+    const refs = createRefs(['vertex-1']);
+
+    store.dispatch(setVectorEditingNodeIds([]));
+
+    // before
+    handleDeleteSelection(store.dispatch, refs);
+
+    // result
+    const vectorNode = store.getState().design.nodes[vectorId] as TVectorNode;
+
+    expect(vectorNode.vertices).toHaveProperty('vertex-1');
+    expect(refs.selectedVectorVertexIdsRef.current).toEqual([]);
+  });
+
+  it('should clear a stale segment selection that no longer belongs to any currently open node, without dispatching anything', () => {
+    // mock
+    const vectorId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([vectorId]));
+
+    const refs = createCanvasRefs({ selectedVectorSegmentIdsRef: { current: ['segment-1'] } });
+
+    store.dispatch(setVectorEditingNodeIds([]));
+
+    // before
+    handleDeleteSelection(store.dispatch, refs);
+
+    // result
+    const vectorNode = store.getState().design.nodes[vectorId] as TVectorNode;
+
+    expect(vectorNode.segments).toHaveProperty('segment-1');
+    expect(refs.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 });

@@ -82,7 +82,7 @@ const call = (
     program,
     buffer,
     nodes,
-    vectorEditingNodeId,
+    vectorEditingNodeId ? [vectorEditingNodeId] : [],
     selectedVertexIds,
     preMarqueeVertexIds,
     selectedSegmentIds,
@@ -153,7 +153,7 @@ describe('drawVectorEditHandlesLayer', () => {
       program,
       buffer,
       frameNodes,
-      'frame-1',
+      ['frame-1'],
       [],
       [],
       [],
@@ -421,7 +421,7 @@ describe('drawVectorEditHandlesLayer', () => {
       program,
       buffer,
       rotatedNodes,
-      rotatedVectorNode.id,
+      [rotatedVectorNode.id],
       ['v1'],
       [],
       [],
@@ -489,7 +489,7 @@ describe('drawVectorEditHandlesLayer', () => {
       program,
       buffer,
       chainNodes,
-      chainNode.id,
+      [chainNode.id],
       ['A'],
       [],
       [],
@@ -519,5 +519,49 @@ describe('drawVectorEditHandlesLayer', () => {
     // stays hidden (one-hop-by-vertex reveals only B's own handle, not the far end of B's other segment)
     expect(drawLineMock).toHaveBeenCalledTimes(1);
     expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 10, x2: 15, y1: 0, y2: 0 }, '#aaaaaa', 1, 200, 150, IDENTITY_VIEWPORT);
+  });
+
+  it('should draw the gray edit-mode outline for every node currently open in Vector Edit Mode, not just one', () => {
+    // mock — a second, independent vector node also open for editing at the same time
+    const secondNode: TVectorNode = { ...vectorNode, id: 'vector-2', segments: {} };
+    const twoOpenNodes: Record<string, TSceneNode> = { [vectorNode.id]: vectorNode, [secondNode.id]: secondNode };
+    const gl = {} as WebGL2RenderingContext;
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawVectorEditHandlesLayer(
+      gl,
+      program,
+      buffer,
+      twoOpenNodes,
+      [vectorNode.id, secondNode.id],
+      [],
+      [],
+      [],
+      [],
+      null,
+      null,
+      null,
+      null,
+      null,
+      [],
+      null,
+      null,
+      null,
+      null,
+      false,
+      createVectorMultiSelectBoxRef(),
+      null,
+      null,
+      false,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
+
+    // result — one gray-outline draw per open node
+    expect(drawVectorStrokeMock).toHaveBeenCalledTimes(2);
+    expect(drawVectorStrokeMock).toHaveBeenCalledWith({}, {}, {}, expect.anything(), '#aaaaaa', 2, 200, 150, IDENTITY_VIEWPORT);
   });
 });

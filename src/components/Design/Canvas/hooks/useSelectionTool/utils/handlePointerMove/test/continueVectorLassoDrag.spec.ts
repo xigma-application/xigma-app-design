@@ -1,5 +1,5 @@
 // store
-import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -44,7 +44,7 @@ const addVectorNode = (): string => {
 describe('continueVectorLassoDrag', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
     store.dispatch(setPenActiveVertexId(null));
   });
 
@@ -79,7 +79,7 @@ describe('continueVectorLassoDrag', () => {
     // mock — v1(20,20) inside a 0,0 -> 100,100 box the path will trace, v2(500,500) well outside
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();

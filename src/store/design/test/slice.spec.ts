@@ -54,7 +54,7 @@ describe('design slice', () => {
       penActiveVertexId: null,
       rootOrder: [],
       selectedIds: [],
-      vectorEditingNodeId: null,
+      vectorEditingNodeIds: [],
       viewport: { x: 0, y: 0, zoom: 1 },
     });
   });

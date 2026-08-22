@@ -7,11 +7,13 @@ export const getTangentVisibilityVertexIds = (
   visualSelectedVertexIds: string[],
   selectedHandles: TVectorHandleHover[],
 ): string[] => {
-  const handleVertexIds = selectedHandles.map((handle) => {
-    const segment = node.segments[handle.segmentId];
+  const handleVertexIds = selectedHandles
+    .filter((handle) => node.segments[handle.segmentId])
+    .map((handle) => {
+      const segment = node.segments[handle.segmentId];
 
-    return handle.end === 'start' ? segment.startId : segment.endId;
-  });
+      return handle.end === 'start' ? segment.startId : segment.endId;
+    });
 
   return Array.from(new Set([...visualSelectedVertexIds, ...handleVertexIds]));
 };

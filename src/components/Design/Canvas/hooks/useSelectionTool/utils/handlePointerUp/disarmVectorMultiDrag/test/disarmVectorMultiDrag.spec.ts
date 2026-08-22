@@ -1,5 +1,5 @@
 // store
-import { addNode, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -44,7 +44,7 @@ const addVectorNode = (): string => {
 
 describe('disarmVectorMultiDrag', () => {
   beforeEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should do nothing when no multi-drag is in progress', () => {
@@ -218,7 +218,7 @@ describe('disarmVectorMultiDrag', () => {
     // mock — v1(0,0)-v2(100,0), s1 selected (eagerly, at pointer-down) before this release resolves it
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();

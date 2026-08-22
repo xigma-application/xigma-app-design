@@ -1,14 +1,14 @@
 // store
-import { selectVectorEditingNodeId } from 'store/design/selectors';
+import { selectVectorEditingNodeIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
 import { TArmContext } from '../types';
 
 export const armVectorMarqueeOnPointerDown = ({ canvas, canvasRefs, event, hit, point, selectionRefs }: TArmContext): true | undefined => {
-  const vectorEditingNodeId = selectVectorEditingNodeId(store.getState());
+  const vectorEditingNodeIds = selectVectorEditingNodeIds(store.getState());
 
-  if (vectorEditingNodeId && !hit && !event.shiftKey) {
+  if (vectorEditingNodeIds.length > 0 && !hit && !event.shiftKey) {
     canvasRefs.preVectorMarqueeVertexIdsRef.current = canvasRefs.selectedVectorVertexIdsRef.current;
     canvasRefs.preVectorMarqueeSegmentIdsRef.current = canvasRefs.selectedVectorSegmentIdsRef.current;
     canvasRefs.selectedVectorVertexIdsRef.current = [];

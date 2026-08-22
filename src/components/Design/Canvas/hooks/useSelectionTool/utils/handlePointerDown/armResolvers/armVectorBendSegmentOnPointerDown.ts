@@ -2,7 +2,7 @@
 import { VECTOR_EDGE_HIT_TOLERANCE_PX, VECTOR_VERTEX_HIT_RADIUS_PX } from 'constant/canvas';
 
 // store
-import { selectActiveTool, selectVectorEditingNodeId } from 'store/design/selectors';
+import { selectActiveTool, selectVectorEditingNodeIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -11,9 +11,8 @@ import { ToolName } from 'types/design/enums';
 
 // utils
 import { commitVectorBendSegment } from '../../../../../utils/commitVectorBendSegment';
-import { getAllVectorEdgeMatchesAtPoint } from '../../../../../utils/getVectorEdgeAtPoint';
+import { getAllVectorEdgeMatchesAtPointAcrossOpenNodes } from '../../../../../utils/getAllVectorEdgeMatchesAtPointAcrossOpenNodes';
 import { getVectorBendDragCandidates } from '../../../../../utils/getVectorBendDragCandidates';
-import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
 
 export const armVectorBendSegmentOnPointerDown = ({
   canvas,
@@ -25,15 +24,17 @@ export const armVectorBendSegmentOnPointerDown = ({
   viewport,
 }: TArmContext): true | undefined => {
   if (event.ctrlKey || event.metaKey || selectActiveTool(store.getState()) === ToolName.bend) {
-    const node = getVectorEditingNode(store.getState().design.nodes, selectVectorEditingNodeId(store.getState()));
+    const state = store.getState();
+    const result = getAllVectorEdgeMatchesAtPointAcrossOpenNodes(
+      point,
+      selectVectorEditingNodeIds(state),
+      state.design.nodes,
+      VECTOR_EDGE_HIT_TOLERANCE_PX / viewport.zoom,
+      VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom,
+    );
 
-    if (node) {
-      const matches = getAllVectorEdgeMatchesAtPoint(
-        point,
-        node,
-        VECTOR_EDGE_HIT_TOLERANCE_PX / viewport.zoom,
-        VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom,
-      );
+    if (result) {
+      const { matches, node } = result;
 
       if (matches.length === 1) {
         commitVectorBendSegment(node, matches[0].segmentId, point, dispatch, canvasRefs, selectionRefs.vectorSegmentBendDragRef);
@@ -42,17 +43,17 @@ export const armVectorBendSegmentOnPointerDown = ({
         return true;
       }
 
-      if (matches.length > 1) {
-        selectionRefs.vectorSegmentBendDragRef.current = {
-          candidates: getVectorBendDragCandidates(matches, node, point),
-          dragStart: point,
-          nodeId: node.id,
-          status: 'pending',
-        };
-        canvas.setPointerCapture(event.pointerId);
+      // matches.length is always >= 1 here (getAllVectorEdgeMatchesAtPointAcrossOpenNodes only returns a
+      // result for a node with at least one match), so falling past the ===1 case above means > 1
+      selectionRefs.vectorSegmentBendDragRef.current = {
+        candidates: getVectorBendDragCandidates(matches, node, point),
+        dragStart: point,
+        nodeId: node.id,
+        status: 'pending',
+      };
+      canvas.setPointerCapture(event.pointerId);
 
-        return true;
-      }
+      return true;
     }
   }
 };

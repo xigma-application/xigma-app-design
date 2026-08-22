@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setActiveTool, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setActiveTool, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -50,7 +50,7 @@ const addVectorNode = (): string => {
 describe('resolveVectorSegmentHover', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
     store.dispatch(setActiveTool(ToolName.default));
   });
 
@@ -73,7 +73,7 @@ describe('resolveVectorSegmentHover', () => {
   it('should set the hovered segment id and insert-point, and switch the cursor to pen-extend, when the pointer rests over the interior of a segment', () => {
     // mock
     const nodeId = addVectorNode();
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     const canvas = createCanvas();
     const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
     const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef();
@@ -91,7 +91,7 @@ describe('resolveVectorSegmentHover', () => {
   it('should clear the hovered segment id, the insert-point, and the cursor once the pointer moves away from every segment', () => {
     // mock
     const nodeId = addVectorNode();
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     const canvas = createCanvas();
     const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
     const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef();
@@ -111,7 +111,7 @@ describe('resolveVectorSegmentHover', () => {
     // mock — the insert-point dot and pen-extend cursor are hover-only affordances; a button held means
     // some other drag owns the cursor right now (e.g. 'move'), which this must not clobber
     const nodeId = addVectorNode();
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     const canvas = createCanvas();
     const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
     const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef();
@@ -129,7 +129,7 @@ describe('resolveVectorSegmentHover', () => {
   it('should clear the hover state and reset the cursor, never highlighting a segment, while the Paint tool is active', () => {
     // mock — Paint only interacts with faces, so segment hover/cursor must stay fully inert even over a segment
     const nodeId = addVectorNode();
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setActiveTool(ToolName.paint));
     const canvas = createCanvas();
     const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
@@ -148,7 +148,7 @@ describe('resolveVectorSegmentHover', () => {
   it('should clear the hover state and reset the cursor, never highlighting a segment, while the Lasso tool is active', () => {
     // mock — Lasso only interacts with points, so segment hover/cursor must stay fully inert even over a segment
     const nodeId = addVectorNode();
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setActiveTool(ToolName.lasso));
     const canvas = createCanvas();
     const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
@@ -162,5 +162,21 @@ describe('resolveVectorSegmentHover', () => {
     expect(hoveredVectorSegmentIdRef.current).toBeNull();
     expect(hoveredVectorEdgeInsertPointRef.current).toBeNull();
     expect(setClassName).toHaveBeenCalledWith(null);
+  });
+
+  it('should do nothing when the open node id no longer resolves to any node (stale id), without crashing', () => {
+    // mock — defensive case: vectorEditingNodeIds references a node that no longer exists
+    store.dispatch(setVectorEditingNodeIds(['stale-node-id']));
+    const canvas = createCanvas();
+    const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
+    const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef();
+    const setClassName = vi.fn();
+
+    // before
+    resolveVectorSegmentHover(canvas, pointerEvent(50, 0), hoveredVectorSegmentIdRef, hoveredVectorEdgeInsertPointRef, setClassName);
+
+    // result
+    expect(hoveredVectorSegmentIdRef.current).toBeNull();
+    expect(hoveredVectorEdgeInsertPointRef.current).toBeNull();
   });
 });

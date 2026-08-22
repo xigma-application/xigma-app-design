@@ -1,36 +1,20 @@
 import { RefObject } from 'react';
 
 // store
-import { selectPenActiveVertexId, selectVectorEditingNodeId, selectViewport } from 'store/design/selectors';
+import { selectViewport } from 'store/design/selectors';
 import { AppDispatch, AppStore } from 'store';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPenDragOrigin, TPendingOutgoingTangent } from '../../types';
-import { TPenPointHoverKind } from './resolvePenPointHover/types';
 import { TPoint } from 'types/canvas';
 
 // utils
+import { continueVectorHandleDrag } from './continueVectorHandleDrag';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
 import { roundVectorPoint } from 'utils/canvas/vectorNetwork/roundVectorPoint';
 import { screenToWorld } from '../../../../utils/screenToWorld';
-import { updateNewVertexPreview } from './updateNewVertexPreview';
-import { updateVectorHandleDrag } from './updateVectorHandleDrag';
-import { updateVectorPenPreview } from './updateVectorPenPreview';
-
-const getPenHoverCursorClassName = (hoverKind: TPenPointHoverKind | null): string => {
-  switch (hoverKind) {
-    case 'active-vertex':
-    case 'vertex':
-    case 'edge-snap':
-      return 'pen-snap';
-    case 'edge':
-      return 'pen-extend';
-    default:
-      return 'pen';
-  }
-};
+import { updatePenPreview } from './updatePenPreview';
 
 export const handlePointerMove = (
   canvas: HTMLCanvasElement,
@@ -49,14 +33,13 @@ export const handlePointerMove = (
   vectorAlignmentGuideRef: TCanvasRefs['vectorAlignmentGuideRef'],
   setClassName: (className: string | null) => void,
 ): void => {
-  const state = appStore.getState();
-  const viewport = selectViewport(state);
+  const viewport = selectViewport(appStore.getState());
   const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
   const point: TPoint = roundVectorPoint(rawPoint);
   const isShiftPressed = event.shiftKey;
 
   if (dragOriginRef.current && dragStartRef.current) {
-    updateVectorHandleDrag(
+    continueVectorHandleDrag(
       point,
       dragOriginRef.current,
       dragStartRef.current,
@@ -68,47 +51,24 @@ export const handlePointerMove = (
       penDraggedHandlePositionRef,
       penDraggedHandleIsSnappedRef,
       vectorAlignmentGuideRef,
+      hoveredSegmentIdRef,
+      setClassName,
     );
-    hoveredSegmentIdRef.current = null;
-    setClassName('pen');
   } else {
-    const vectorEditingNodeId = selectVectorEditingNodeId(state);
-    const node = getVectorEditingNode(state.design.nodes, vectorEditingNodeId);
-    const penActiveVertexId = selectPenActiveVertexId(state);
-
-    penDraggedHandlePositionRef.current = null;
-    penDraggedHandleIsSnappedRef.current = false;
-
-    if (node && penActiveVertexId) {
-      const hoverKind = updateVectorPenPreview(
-        point,
-        node,
-        state.design.nodes,
-        penActiveVertexId,
-        viewport,
-        isShiftPressed,
-        penPreviewRef,
-        pendingOutgoingTangentRef,
-        hoveredSegmentIdRef,
-        penHoveredDragArmableVertexRef,
-        vectorAlignmentGuideRef,
-      );
-
-      penNewVertexPreviewRef.current = null;
-      setClassName(getPenHoverCursorClassName(hoverKind));
-    } else {
-      const hoverKind = updateNewVertexPreview(
-        point,
-        node,
-        viewport,
-        penNewVertexPreviewRef,
-        hoveredSegmentIdRef,
-        penHoveredDragArmableVertexRef,
-      );
-
-      penPreviewRef.current = null;
-      vectorAlignmentGuideRef.current = null;
-      setClassName(getPenHoverCursorClassName(hoverKind));
-    }
+    updatePenPreview(
+      point,
+      viewport,
+      isShiftPressed,
+      appStore,
+      penPreviewRef,
+      penNewVertexPreviewRef,
+      penDraggedHandlePositionRef,
+      penDraggedHandleIsSnappedRef,
+      pendingOutgoingTangentRef,
+      hoveredSegmentIdRef,
+      penHoveredDragArmableVertexRef,
+      vectorAlignmentGuideRef,
+      setClassName,
+    );
   }
 };

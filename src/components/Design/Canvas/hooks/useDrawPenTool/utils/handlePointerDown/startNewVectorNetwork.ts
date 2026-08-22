@@ -6,7 +6,8 @@ import { VECTOR_FILL, VECTOR_NAME, VECTOR_STROKE } from '../../../../constants';
 import { VECTOR_STROKE_WIDTH } from 'constant/canvas';
 
 // store
-import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectSelectedIds, selectVectorEditingNodeIds } from 'store/design/selectors';
 import { AppDispatch, AppStore } from 'store';
 
 // types
@@ -22,11 +23,12 @@ const activateNewVertex = (
   dragOriginRef: RefObject<TPenDragOrigin | null>,
   dragStartRef: RefObject<TPoint | null>,
 ): void => {
-  const { rootOrder } = appStore.getState().design;
+  const state = appStore.getState();
+  const { rootOrder } = state.design;
   const newNodeId = rootOrder[rootOrder.length - 1];
 
-  dispatch(setSelection([newNodeId]));
-  dispatch(setVectorEditingNodeId(newNodeId));
+  dispatch(setSelection([...selectSelectedIds(state), newNodeId]));
+  dispatch(setVectorEditingNodeIds([...selectVectorEditingNodeIds(state), newNodeId]));
   dispatch(setPenActiveVertexId(vertexId));
 
   dragOriginRef.current = { nodeId: newNodeId, segmentId: null, vertexId };

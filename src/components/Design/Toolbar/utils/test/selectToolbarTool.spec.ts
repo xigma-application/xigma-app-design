@@ -1,5 +1,5 @@
 // store
-import { setActiveTool, setPenActiveVertexId, setVectorEditingNodeId } from 'store/design/slice';
+import { setActiveTool, setPenActiveVertexId, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -12,7 +12,7 @@ import { selectToolbarTool } from '../selectToolbarTool';
 describe('selectToolbarTool', () => {
   afterEach(() => {
     store.dispatch(setActiveTool(ToolName.default));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
     store.dispatch(setPenActiveVertexId(null));
   });
 
@@ -22,36 +22,36 @@ describe('selectToolbarTool', () => {
 
     // result
     expect(store.getState().design.activeTool).toBe(ToolName.frame);
-    expect(store.getState().design.vectorEditingNodeId).toBeNull();
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
   });
 
   it('should switch to a pen-group tool without leaving Vector Edit Mode', () => {
     // before
-    store.dispatch(setVectorEditingNodeId('node-1'));
+    store.dispatch(setVectorEditingNodeIds(['node-1']));
 
     // action
     selectToolbarTool(store.dispatch, ToolName.pencil, createCanvasRefs());
 
     // result
     expect(store.getState().design.activeTool).toBe(ToolName.pencil);
-    expect(store.getState().design.vectorEditingNodeId).toBe('node-1');
+    expect(store.getState().design.vectorEditingNodeIds).toEqual(['node-1']);
   });
 
   it('should switch to a non-pen tool and leave Vector Edit Mode', () => {
     // before
-    store.dispatch(setVectorEditingNodeId('node-1'));
+    store.dispatch(setVectorEditingNodeIds(['node-1']));
 
     // action
     selectToolbarTool(store.dispatch, ToolName.rectangle, createCanvasRefs());
 
     // result
     expect(store.getState().design.activeTool).toBe(ToolName.rectangle);
-    expect(store.getState().design.vectorEditingNodeId).toBeNull();
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
   });
 
   it('should clear the active pen vertex and staged preview refs when leaving Vector Edit Mode mid-draw', () => {
     // before — same cleanup Escape does (handleLeave.ts), now also needed from a toolbar click
-    store.dispatch(setVectorEditingNodeId('node-1'));
+    store.dispatch(setVectorEditingNodeIds(['node-1']));
     store.dispatch(setPenActiveVertexId('vertex-1'));
 
     const refs = createCanvasRefs();
@@ -68,7 +68,7 @@ describe('selectToolbarTool', () => {
 
   it('should not touch the active pen vertex when switching within the pen group', () => {
     // before
-    store.dispatch(setVectorEditingNodeId('node-1'));
+    store.dispatch(setVectorEditingNodeIds(['node-1']));
     store.dispatch(setPenActiveVertexId('vertex-1'));
 
     // action

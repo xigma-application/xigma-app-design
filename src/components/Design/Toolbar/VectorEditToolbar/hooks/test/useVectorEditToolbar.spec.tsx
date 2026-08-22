@@ -8,7 +8,7 @@ import { TooltipProvider } from 'shared';
 import { getIsVectorEditToolActive, useVectorEditToolbar } from '../useVectorEditToolbar';
 
 // store
-import { setActiveTool, setVectorEditingNodeId } from 'store/design/slice';
+import { setActiveTool, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -19,23 +19,23 @@ const renderUseVectorEditToolbar = (): ReturnType<typeof renderHook<ReturnType<t
 
 describe('useVectorEditToolbar', () => {
   beforeEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
     store.dispatch(setActiveTool(ToolName.default));
   });
 
-  it('should expose the current vector-editing node id', () => {
+  it('should expose the current vector-editing node ids', () => {
     // before
-    store.dispatch(setVectorEditingNodeId('node-1'));
+    store.dispatch(setVectorEditingNodeIds(['node-1']));
 
     const { result } = renderUseVectorEditToolbar();
 
     // result
-    expect(result.current.vectorEditingNodeId).toBe('node-1');
+    expect(result.current.vectorEditingNodeIds).toEqual(['node-1']);
   });
 
   it('should exit Vector Edit Mode and reset the active tool via handleClose', () => {
     // before
-    store.dispatch(setVectorEditingNodeId('node-1'));
+    store.dispatch(setVectorEditingNodeIds(['node-1']));
     store.dispatch(setActiveTool(ToolName.pen));
 
     const { result } = renderUseVectorEditToolbar();
@@ -46,7 +46,7 @@ describe('useVectorEditToolbar', () => {
     });
 
     // result
-    expect(store.getState().design.vectorEditingNodeId).toBeNull();
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
     expect(store.getState().design.activeTool).toBe(ToolName.default);
   });
 

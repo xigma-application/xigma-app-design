@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -19,7 +19,7 @@ const createDragStartRef = (): RefObject<TPoint | null> => ({ current: null });
 describe('startNewVectorNetwork', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should add a new vector node with a single vertex at the click point and enter Vector Edit Mode on it', () => {
@@ -32,9 +32,9 @@ describe('startNewVectorNetwork', () => {
 
     // result
     const { design } = store.getState();
-    const newNodeId = design.vectorEditingNodeId;
+    const newNodeId = design.vectorEditingNodeIds[0] as string | undefined;
 
-    expect(newNodeId).not.toBeNull();
+    expect(newNodeId).not.toBeUndefined();
     expect(design.selectedIds).toEqual([newNodeId]);
     expect(design.nodes[newNodeId as string]).toMatchObject({ fillColor: VECTOR_FILL, segments: {}, type: NodeType.vector });
 

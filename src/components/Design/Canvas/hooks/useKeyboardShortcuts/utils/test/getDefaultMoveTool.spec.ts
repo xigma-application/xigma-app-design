@@ -1,5 +1,5 @@
 // store
-import { setVectorEditingNodeId } from 'store/design/slice';
+import { setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -10,12 +10,12 @@ import { getDefaultMoveTool } from '../getDefaultMoveTool';
 
 describe('getDefaultMoveTool', () => {
   afterEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should return the Vector Edit Move tool when a node is currently being vector-edited', () => {
     // mock
-    store.dispatch(setVectorEditingNodeId('node-1'));
+    store.dispatch(setVectorEditingNodeIds(['node-1']));
 
     // result
     expect(getDefaultMoveTool()).toBe(ToolName.move);

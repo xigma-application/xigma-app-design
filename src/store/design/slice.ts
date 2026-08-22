@@ -24,7 +24,7 @@ import { handleDeleteNode } from './utils/handleDeleteNode';
 import { handleReplaceDesignSnapshot } from './utils/handleReplaceDesignSnapshot';
 import { handleSetActiveTool } from './utils/handleSetActiveTool';
 import { handleSetSelection } from './utils/handleSetSelection';
-import { handleSetVectorEditingNodeId } from './utils/handleSetVectorEditingNodeId';
+import { handleSetVectorEditingNodeIds } from './utils/handleSetVectorEditingNodeIds';
 import { handleSetViewport } from './utils/handleSetViewport';
 import { handleStartTextEdit } from './utils/handleStartTextEdit';
 import { handleStopTextEdit } from './utils/handleStopTextEdit';
@@ -53,7 +53,7 @@ const initialState: TDesignState = {
   penActiveVertexId: null,
   rootOrder: [],
   selectedIds: [],
-  vectorEditingNodeId: null,
+  vectorEditingNodeIds: [],
   viewport: DEFAULT_VIEWPORT,
 };
 
@@ -82,7 +82,7 @@ const designSlice = createSlice({
       state.penActiveVertexId = action.payload;
     },
     setSelection: (state, action: PayloadAction<string[]>) => handleSetSelection(state, action.payload),
-    setVectorEditingNodeId: (state, action: PayloadAction<string | null>) => handleSetVectorEditingNodeId(state, action.payload),
+    setVectorEditingNodeIds: (state, action: PayloadAction<string[]>) => handleSetVectorEditingNodeIds(state, action.payload),
     setViewport: (state, action: PayloadAction<TViewport>) => handleSetViewport(state, action.payload),
     startCommentDraft: (state, action: PayloadAction<TPoint>) => {
       state.commentDraftPosition = action.payload;
@@ -109,7 +109,7 @@ export const {
   setActiveTool,
   setPenActiveVertexId,
   setSelection,
-  setVectorEditingNodeId,
+  setVectorEditingNodeIds,
   setViewport,
   startCommentDraft,
   startTextEdit,

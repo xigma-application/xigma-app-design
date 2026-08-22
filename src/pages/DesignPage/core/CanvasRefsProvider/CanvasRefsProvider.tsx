@@ -16,6 +16,7 @@ import {
   TStarCornerRadiusDragState,
   TVectorHandleHover,
   TVectorMultiSelectBox,
+  TVectorPaintFaceHover,
 } from 'types/design/canvas/types';
 import { TCanvasRefsProviderProps } from './types';
 import { TDraftEntity } from 'types/design/types';
@@ -39,7 +40,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const hoveredSegmentIdRef = useRef<string | null>(null);
   const hoveredVectorEdgeInsertPointRef = useRef<TPoint | null>(null);
   const hoveredVectorHandleRef = useRef<TVectorHandleHover | null>(null);
-  const hoveredVectorPaintFaceKeyRef = useRef<string | null>(null);
+  const hoveredVectorPaintFaceKeyRef = useRef<TVectorPaintFaceHover | null>(null);
   const hoveredVectorSegmentIdRef = useRef<string | null>(null);
   const hoveredVectorVertexIdRef = useRef<string | null>(null);
   const hoverRef = useRef<string | null>(null);

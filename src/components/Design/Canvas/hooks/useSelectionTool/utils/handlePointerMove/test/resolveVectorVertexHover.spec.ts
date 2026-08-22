@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -47,7 +47,7 @@ const addVectorNode = (): string => {
 describe('resolveVectorVertexHover', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should do nothing when no node is currently in Vector Edit Mode', () => {
@@ -65,7 +65,7 @@ describe('resolveVectorVertexHover', () => {
   it('should set the hovered vertex id when the pointer rests on a vertex', () => {
     // mock
     const nodeId = addVectorNode();
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     const canvas = createCanvas();
     const hoveredVectorVertexIdRef = createHoveredVectorVertexIdRef();
 
@@ -79,7 +79,7 @@ describe('resolveVectorVertexHover', () => {
   it('should clear the hovered vertex id once the pointer moves away from every vertex', () => {
     // mock
     const nodeId = addVectorNode();
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     const canvas = createCanvas();
     const hoveredVectorVertexIdRef = createHoveredVectorVertexIdRef();
 

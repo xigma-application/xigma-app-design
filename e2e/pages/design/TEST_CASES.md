@@ -1588,6 +1588,27 @@ Two gotchas the specs below work around, worth knowing before adding more:
 | 248 | Holding Ctrl/Cmd while Move is the active tool visually flips `VectorEditToolbar`'s highlighted button from Move to Bend with no change to the real active tool, reverting on release; the persistent Bend selection (row 247) is unaffected by Ctrl either way — pure toolbar UI state with no rendering/timing stake beyond what `VectorEditToolbar.spec.tsx`'s real component render + window keydown/keyup already asserts precisely                     |  ✅  |            —             |
 | 249 | A painted face on a shape survives a cross-shape vertex merge that absorbs and deletes that shape — regression check for `mergeVectorVertices.ts` silently dropping the absorbed node's `filledFaceKeys`, live-reported after a merge made a previously-painted face vanish                                                                                                                                                                                  |  ✅  | ✅ `vector-edit.spec.ts` |
 
+## Multi-vector edit (Phase 1 — several open nodes at once)
+
+Several `NodeType.vector` nodes can be open for editing simultaneously (`vectorEditingNodeIds:
+string[]`, entered by selecting 2+ vectors and pressing Enter). They never structurally connect
+on their own — only an explicit gesture (drag-to-merge, or a Pen click landing on another open
+node) does. Full scenario log, including branch-logic paths already pinned down by the unit
+suite and not repeated here, lives in `__test-cases__/multi-vector-edit.test.md`.
+
+| #   | Scenario                                                                                                                                                                                                                    | Unit |              E2E               |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :----------------------------: |
+| 250 | Selecting two vector nodes and pressing Enter opens both for editing at once — real handles rendered on both, `vectorEditingNodeIds` holds both ids                                                                         |  ✅  | ✅ `multi-vector-edit.spec.ts` |
+| 251 | Dragging a vertex on one open node moves only that node — the sibling open node's own geometry is untouched, proving cross-node hit-testing actually resolves to the right owner                                            |  ✅  | ✅ `multi-vector-edit.spec.ts` |
+| 252 | A marquee drawn across two open nodes catches vertices from both (union, not pick-one), leaving vertices outside the box on either node untouched                                                                           |  ✅  | ✅ `multi-vector-edit.spec.ts` |
+| 253 | Deleting vertices selected across two open nodes removes both in one gesture, grouped by owning node, and a single Undo restores both — one history gesture, not two                                                        |  ✅  | ✅ `multi-vector-edit.spec.ts` |
+| 254 | Pressing Escape while two nodes are open exits editing for both at once, not one at a time                                                                                                                                  |  ✅  | ✅ `multi-vector-edit.spec.ts` |
+| 255 | Clicking exactly on another open node's vertex with the Pen tool performs a real structural merge (absorb-and-delete, reusing §46's merge semantics) — not just a visual coincidence of coordinates                         |  ✅  | ✅ `multi-vector-edit.spec.ts` |
+| 256 | Clicking on another open node's segment (not a vertex) with the Pen tool splits that segment and merges the two nodes into one, same as row 255 but via `splitVectorSegment`                                                |  ✅  | ✅ `multi-vector-edit.spec.ts` |
+| 257 | Hovering another open node's vertex or segment with the Pen tool shows the snap/extend cursor and rubber-band preview before any click — the same affordance same-node hovering already gets                                |  ⏳  | ✅ `multi-vector-edit.spec.ts` |
+| 258 | Clicking genuinely blank canvas with the Pen tool while several nodes are open creates an independent new vector ("vector C") — the other open nodes are left completely untouched, no stray contour tacked onto either one |  ✅  | ✅ `multi-vector-edit.spec.ts` |
+| 259 | The Paint tool fills a face on the second, non-primary open node, not just the first (`vectorEditingNodeIds[0]`) — a real WebGL stencil-fill render only e2e can observe                                                    |  ✅  | ✅ `multi-vector-edit.spec.ts` |
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

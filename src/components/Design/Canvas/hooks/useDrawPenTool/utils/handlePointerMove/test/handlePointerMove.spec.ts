@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeId, updateNode } from 'store/design/slice';
+import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds, updateNode } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -60,7 +60,7 @@ const addVectorNodeWithSegment = (): string => {
 describe('handlePointerMove', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
     store.dispatch(setPenActiveVertexId(null));
   });
 
@@ -212,7 +212,7 @@ describe('handlePointerMove', () => {
     // mock
     const nodeId = addVectorNodeWithSegment();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setPenActiveVertexId(null));
 
     const canvas = createCanvas();
@@ -252,7 +252,7 @@ describe('handlePointerMove', () => {
     // mock
     const nodeId = addVectorNodeWithSegment();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setPenActiveVertexId(null));
 
     const canvas = createCanvas();
@@ -289,7 +289,7 @@ describe('handlePointerMove', () => {
     // mock
     const nodeId = addVectorNodeWithSegment();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setPenActiveVertexId(null));
 
     const canvas = createCanvas();
@@ -328,7 +328,7 @@ describe('handlePointerMove', () => {
     // mock
     const nodeId = addVectorNodeWithSegment();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setPenActiveVertexId(null));
 
     const canvas = createCanvas();
@@ -367,7 +367,7 @@ describe('handlePointerMove', () => {
     // mock
     const nodeId = addVectorNodeWithSegment();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setPenActiveVertexId('v1'));
 
     const canvas = createCanvas();
@@ -407,7 +407,7 @@ describe('handlePointerMove', () => {
     // mock
     const nodeId = addVectorNodeWithSegment();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setPenActiveVertexId('v1'));
 
     const canvas = createCanvas();
@@ -450,7 +450,7 @@ describe('handlePointerMove', () => {
         id: nodeId,
       }),
     );
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setPenActiveVertexId('v3'));
 
     const canvas = createCanvas();
@@ -495,7 +495,7 @@ describe('handlePointerMove', () => {
         id: nodeId,
       }),
     );
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setPenActiveVertexId('v3'));
 
     const canvas = createCanvas();
@@ -534,7 +534,7 @@ describe('handlePointerMove', () => {
     // mock
     const nodeId = addVectorNodeWithSegment();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setPenActiveVertexId('v1'));
 
     const canvas = createCanvas();

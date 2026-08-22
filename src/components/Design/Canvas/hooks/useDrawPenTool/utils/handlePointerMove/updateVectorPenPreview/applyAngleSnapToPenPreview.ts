@@ -1,11 +1,11 @@
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TPenPointHoverKind } from './resolvePenPointHover/types';
+import { TPenPointHoverKind } from '../resolvePenPointHover/types';
 import { TPoint } from 'types/canvas';
 import { TSceneNode, TVectorTangent, TVectorVertex } from 'types/design/types';
 
 // utils
-import { applyVectorPointSnapping } from '../../../../utils/applyVectorPointSnapping';
+import { applyVectorPointSnapping } from '../../../../../utils/applyVectorPointSnapping';
 
 export const applyAngleSnapToPenPreview = (
   point: TPoint,

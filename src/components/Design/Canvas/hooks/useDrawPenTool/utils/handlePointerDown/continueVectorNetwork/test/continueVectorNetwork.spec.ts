@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -70,7 +70,7 @@ const addVectorNodeWithEdge = (): string => {
 describe('continueVectorNetwork', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
     store.dispatch(setPenActiveVertexId(null));
   });
 
@@ -501,5 +501,121 @@ describe('continueVectorNetwork', () => {
 
     expect(updatedNode.vertices[newVertexId].x).toBe(500);
     expect(vectorAlignmentGuideRef.current).toBeNull();
+  });
+
+  it('should merge into another open node when clicking its vertex, absorbing it into the node being extended', () => {
+    // mock — v1 on node A is being extended and closes directly onto vb on the other open node, B
+    const sourceId = addVectorNode();
+
+    store.dispatch(
+      addNode({
+        fillColor: null,
+        filledFaceKeys: [],
+        name: 'Vector',
+        parentId: null,
+        rotation: 0,
+        segments: {},
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: NodeType.vector,
+        vertexHandleModes: {},
+        vertices: { vb: { id: 'vb', x: 500, y: 500 } },
+      }),
+    );
+
+    const { rootOrder } = store.getState().design;
+    const targetId = rootOrder[rootOrder.length - 1];
+
+    store.dispatch(setVectorEditingNodeIds([sourceId, targetId]));
+
+    const node = store.getState().design.nodes[sourceId] as TVectorNode;
+    const dragOriginRef = createDragOriginRef();
+    const dragStartRef = createDragStartRef();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+
+    // before — click right on vb
+    continueVectorNetwork(
+      { x: 500, y: 500 },
+      node,
+      'v1',
+      IDENTITY_VIEWPORT,
+      store.dispatch,
+      store,
+      dragOriginRef,
+      dragStartRef,
+      pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
+      false,
+      false,
+    );
+
+    // result
+    const state = store.getState();
+    const updatedSource = state.design.nodes[sourceId] as TVectorNode;
+
+    expect(state.design.nodes[targetId]).toBeUndefined();
+    expect(updatedSource.vertices).toHaveProperty('vb');
+    expect(state.design.vectorEditingNodeIds).toEqual([sourceId]);
+    expect(dragOriginRef.current).toEqual({ nodeId: sourceId, segmentId: expect.any(String), vertexId: 'vb' });
+    expect(dragStartRef.current).toEqual({ x: 500, y: 500 });
+  });
+
+  it('should split and merge into another open node when clicking its edge, absorbing it into the node being extended', () => {
+    // mock — v1 on node A is being extended and closes onto the midpoint of an edge on the other open node, B
+    const sourceId = addVectorNode();
+
+    store.dispatch(
+      addNode({
+        fillColor: null,
+        filledFaceKeys: [],
+        name: 'Vector',
+        parentId: null,
+        rotation: 0,
+        segments: { sb: { endId: 'vb2', id: 'sb', startId: 'vb1', tangentEnd: null, tangentStart: null } },
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: NodeType.vector,
+        vertexHandleModes: {},
+        vertices: { vb1: { id: 'vb1', x: 500, y: 0 }, vb2: { id: 'vb2', x: 500, y: 100 } },
+      }),
+    );
+
+    const { rootOrder } = store.getState().design;
+    const targetId = rootOrder[rootOrder.length - 1];
+
+    store.dispatch(setVectorEditingNodeIds([sourceId, targetId]));
+
+    const node = store.getState().design.nodes[sourceId] as TVectorNode;
+    const dragOriginRef = createDragOriginRef();
+    const dragStartRef = createDragStartRef();
+    const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
+
+    // before — click the midpoint of the vb1-vb2 edge
+    continueVectorNetwork(
+      { x: 500, y: 50 },
+      node,
+      'v1',
+      IDENTITY_VIEWPORT,
+      store.dispatch,
+      store,
+      dragOriginRef,
+      dragStartRef,
+      pendingOutgoingTangentRef,
+      createVectorAlignmentGuideRef(),
+      false,
+      false,
+    );
+
+    // result
+    const state = store.getState();
+    const updatedSource = state.design.nodes[sourceId] as TVectorNode;
+    const newVertexId = updatedSource.segments.sb.endId;
+
+    expect(state.design.nodes[targetId]).toBeUndefined();
+    expect(newVertexId).not.toBe('vb1');
+    expect(newVertexId).not.toBe('vb2');
+    expect(updatedSource.vertices[newVertexId]).toEqual({ id: newVertexId, x: 500, y: 50 });
+    expect(state.design.vectorEditingNodeIds).toEqual([sourceId]);
+    expect(dragStartRef.current).toEqual({ x: 500, y: 50 });
   });
 });

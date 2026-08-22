@@ -1,6 +1,6 @@
 // store
 import { setPenActiveVertexId } from 'store/design/slice';
-import { selectPenActiveVertexId, selectVectorEditingNodeId } from 'store/design/selectors';
+import { selectPenActiveVertexId, selectVectorEditingNodeIds } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // utils
@@ -10,7 +10,7 @@ import { getVectorEditingNode } from '../../../utils/getVectorEditingNode';
 export const handleEscapePenActiveVertex = (dispatch: AppDispatch): void => {
   const state = store.getState();
   const penActiveVertexId = selectPenActiveVertexId(state);
-  const node = getVectorEditingNode(state.design.nodes, selectVectorEditingNodeId(state));
+  const node = getVectorEditingNode(state.design.nodes, selectVectorEditingNodeIds(state)[0] ?? null);
 
   if (node && penActiveVertexId) {
     deleteDanglingActiveVertex(dispatch, node, penActiveVertexId);

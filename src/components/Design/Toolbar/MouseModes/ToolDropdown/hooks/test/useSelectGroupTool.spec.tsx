@@ -9,7 +9,7 @@ import CanvasRefsProvider from 'pages/DesignPage/core/CanvasRefsProvider/CanvasR
 import { useSelectGroupTool } from '../useSelectGroupTool';
 
 // store
-import { setActiveTool, setVectorEditingNodeId } from 'store/design/slice';
+import { setActiveTool, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -24,7 +24,7 @@ const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
 describe('useSelectGroupTool behaviors', () => {
   afterEach(() => {
     store.dispatch(setActiveTool(ToolName.default));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should switch the active tool', () => {
@@ -40,7 +40,7 @@ describe('useSelectGroupTool behaviors', () => {
 
   it('should leave Vector Edit Mode when a non-pen-group tool is picked', () => {
     // before
-    store.dispatch(setVectorEditingNodeId('node-1'));
+    store.dispatch(setVectorEditingNodeIds(['node-1']));
 
     const { result } = renderHook(() => useSelectGroupTool(), { wrapper });
 
@@ -48,12 +48,12 @@ describe('useSelectGroupTool behaviors', () => {
     result.current(ToolName.ellipse)();
 
     // result
-    expect(store.getState().design.vectorEditingNodeId).toBeNull();
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
   });
 
   it('should keep Vector Edit Mode open when the pencil tool is picked', () => {
     // before
-    store.dispatch(setVectorEditingNodeId('node-1'));
+    store.dispatch(setVectorEditingNodeIds(['node-1']));
 
     const { result } = renderHook(() => useSelectGroupTool(), { wrapper });
 
@@ -61,6 +61,6 @@ describe('useSelectGroupTool behaviors', () => {
     result.current(ToolName.pencil)();
 
     // result
-    expect(store.getState().design.vectorEditingNodeId).toBe('node-1');
+    expect(store.getState().design.vectorEditingNodeIds).toEqual(['node-1']);
   });
 });

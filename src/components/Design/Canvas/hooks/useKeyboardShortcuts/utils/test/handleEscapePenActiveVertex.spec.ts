@@ -1,5 +1,5 @@
 // store
-import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -34,7 +34,7 @@ const addVectorNode = (segments: TVectorNode['segments'], vertices: TVectorNode[
 describe('handleEscapePenActiveVertex', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
     store.dispatch(setPenActiveVertexId(null));
   });
 
@@ -53,7 +53,7 @@ describe('handleEscapePenActiveVertex', () => {
     // mock
     const vectorId = addVectorNode({}, { v1: { id: 'v1', x: 0, y: 0 } });
 
-    store.dispatch(setVectorEditingNodeId(vectorId));
+    store.dispatch(setVectorEditingNodeIds([vectorId]));
     store.dispatch(setPenActiveVertexId('v1'));
 
     // before
@@ -61,7 +61,7 @@ describe('handleEscapePenActiveVertex', () => {
 
     // result
     expect(store.getState().design.nodes[vectorId]).toBeUndefined();
-    expect(store.getState().design.vectorEditingNodeId).toBeNull();
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
     expect(store.getState().design.penActiveVertexId).toBeNull();
   });
 
@@ -72,7 +72,7 @@ describe('handleEscapePenActiveVertex', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 }, v3: { id: 'v3', x: 50, y: 50 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(vectorId));
+    store.dispatch(setVectorEditingNodeIds([vectorId]));
     store.dispatch(setPenActiveVertexId('v3'));
 
     // before
@@ -80,7 +80,7 @@ describe('handleEscapePenActiveVertex', () => {
 
     // result
     expect(store.getState().design.nodes[vectorId]).toMatchObject({ vertices: { v1: { id: 'v1' }, v2: { id: 'v2' } } });
-    expect(store.getState().design.vectorEditingNodeId).toBe(vectorId);
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([vectorId]);
     expect(store.getState().design.penActiveVertexId).toBeNull();
   });
 
@@ -91,7 +91,7 @@ describe('handleEscapePenActiveVertex', () => {
       { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } },
     );
 
-    store.dispatch(setVectorEditingNodeId(vectorId));
+    store.dispatch(setVectorEditingNodeIds([vectorId]));
     store.dispatch(setPenActiveVertexId('v2'));
 
     // before

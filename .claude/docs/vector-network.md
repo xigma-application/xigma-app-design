@@ -2937,6 +2937,153 @@ to the existing Ctrl+drag gesture on the same two points — same underlying `co
 from-a-corner-vertex gesture) — it shares the same Ctrl/Cmd modifier by convention, but is a different
 feature never called "Bend" anywhere in the code or the user's own request; left Ctrl-only.
 
+## 48. Multi-vector editing — several nodes open at once, `vectorEditingNodeIds: string[]`
+
+Landed after a direct feasibility question ("Powiedz mi czy multi edycja wektorów czy będzie bardzo
+skomplikowana?"), with the scope pinned down up front: several `NodeType.vector` nodes can be open for
+Vector Edit Mode simultaneously, but they **never structurally connect on their own** — you can position
+points from one near another purely for visual coordinate-sharing, nothing functionally merges unless an
+explicit gesture (drag-to-merge, §46, or a Pen click landing on another open node, below) does it. A new
+segment that doesn't extend from any currently-open node's active vertex creates a genuinely independent
+new vector ("vector C"), not a stray contour on whichever node happened to be first.
+
+**State: `vectorEditingNodeId: string | null` → `vectorEditingNodeIds: string[]`** throughout —
+`TDesignState`, the `setVectorEditingNodeId` reducer (renamed `setVectorEditingNodeIds`), its selector,
+and `handleSetVectorEditingNodeIds.ts` (generalizing the old single-id "previous id emptied out → delete
+it" empty-node cleanup into a set-difference over every id that dropped out of the array).
+`handleSetSelection.ts`'s `exitVectorEditingIfNeeded` now exits only the ids that actually left the new
+selection, not the whole open set — **deselecting one open node exits editing only for that node, the
+others stay open**; `handleReplaceDesignSnapshot.ts` filters the array against post-undo `nodes` instead
+of nulling a single id. `handleLeave.ts`'s Escape staging exits **every** open node in one press once
+Move is already the active tool, not one at a time (a deliberate default, not asked for directly, but
+cheap to change later — see below).
+
+**Entry mechanism, explicitly temporary** ("na razie zróbmy tak tymczasowo... nie przejmuj się tym co
+zaznaczamy to jest tymczasowe rozwiązanie"): select 2+ vector nodes with the ordinary canvas multi-select,
+press **Enter**. `useKeyboardShortcuts/utils/handleEnterMultiVectorEdit.ts` filters `selectedIds` down to
+`NodeType.vector` entries and only dispatches (`setVectorEditingNodeIds` + `setActiveTool(move)`) when 2+
+survive the filter — one vector plus a frame, or just one vector alone, is a no-op; a mix of several
+vectors and a frame opens only the vectors, order preserved. No UI entry point beyond Enter exists yet.
+
+**Cross-open-set hit-testing — one generic core, five thin typed wrappers, all in `Canvas/utils/`.**
+`pickClosestVectorHitAcrossNodes.ts` maps a node-id list through: bake rotation → run a caller-supplied
+`hitTest`/`getDistance` pair → sort by distance → return the winner + its owning node — the same
+map→hit→distance→sort shape §46's `getVectorVertexAtPointAcrossNodes.ts` already used for its *global*
+scan, generalized with two callbacks instead of one hardcoded vertex lookup, and scoped by the caller to
+whichever node-id list it's given (the currently-*open* set here, not every vector on the canvas). Built
+on top: `getVectorVertexAtPointAcrossOpenNodes.ts`, `getVectorHandleAtPointAcrossOpenNodes.ts`,
+`getVectorEdgeAtPointAcrossOpenNodes.ts`, `getVectorCornerHandleAtPointAcrossOpenNodes.ts`,
+`getVectorFaceAtPointAcrossOpenNodes.ts` (Paint, below); the bend-segment case needs every ambiguous
+match rather than one winner, so `getAllVectorEdgeMatchesAtPointAcrossOpenNodes.ts` stays a plain loop
+instead of routing through the core helper. `findVectorEditingNodeForVertex.ts`/
+`findVectorEditingNodeForSegment.ts` are the companion ownership lookups — given the open-node-id list and
+a vertex/segment id, return whichever open node's own map actually contains it, or `null`. Safe by
+construction: every vertex/segment id is `nanoid()`-generated and globally unique across the whole scene
+(confirmed against `splitVectorSegment.ts`, `startNewVectorNetwork.ts`, `startVectorFragment.ts`), so the
+existing flat selection/hover refs (`TCanvasRefs`) never needed to become node-scoped maps — only code
+that must resolve an id back to its *owning* node needed a lookup at all.
+
+**Arm resolvers, hover resolvers, rendering, marquee/lasso** all swapped their single-node
+`getVectorEditingNode(nodes, selectVectorEditingNodeId(state))` for the open-set + the matching
+across-open-nodes wrapper — mechanical, one node hit-tested is still one node hit-tested, just now chosen
+from N candidates instead of assumed to be the one open node. Marquee/lasso are the one place that's a
+**union, not a pick-one**: `continueVectorMarqueeDrag.ts`/`continueVectorLassoDrag.ts` `flatMap` the
+existing single-node rect/polygon hit-test across every open node and concatenate — no dedup needed,
+again because ids are globally unique. `drawVectorEditHandlesLayer.ts` wraps its per-node draw body in a
+`vectorEditingNodeIds.forEach`; every ref/value the body reads is already flat and only ever matches ids
+that exist in *that* node's own maps, so nothing inside the loop body itself needed to change.
+
+**Delete groups by owning node, one history gesture when it spans more than one.**
+`handleDeleteSelection.ts` — since this session also split it into its own folder (below) — resolves the
+owning node(s) for whatever's selected via `getOwningVertexNodes`/`getOwningSegmentNodes`, dispatches one
+`updateNode` per affected node, and wraps the whole batch in `beginHistoryGesture`/`endHistoryGesture`
+**only** when `owningNodes.length > 1` (`dispatchAsOneGestureIfMultiNode.ts`) — a single-node delete stays
+exactly as cheap as before, a delete spanning two open nodes still costs the user only one Undo.
+
+**Pen tool dynamically targets whichever open node the current gesture actually touches, instead of a
+hardcoded `vectorEditingNodeIds[0]`.** The original Phase-1 plan deliberately deferred this ("Pen tool
+keeps targeting a single node... for now") — live testing immediately surfaced it as a real bug (clicking
+to extend a segment onto a non-primary open node's vertex silently did nothing), so it was fixed in the
+same session rather than left for a later phase. `resolvePenTargetNode.ts`
+(`useDrawPenTool/utils/`) is the single source of truth every Pen entry point (`handlePointerDown.ts`,
+`handlePointerMove.ts` via `updatePenPreview.ts`) now calls: if a vertex is already active, resolve its
+*owning* node via `findVectorEditingNodeForVertex`; otherwise try a vertex hit across the open set, then
+an edge hit across the open set; a genuinely blank hit returns `null` **only when `vectorEditingNodeIds.length
+> 1`** — with 0 or 1 open nodes it still falls back to the primary/only one, preserving the original,
+unrelated single-node "add a disconnected contour" Pen behavior untouched (an earlier version of this
+function broke exactly that existing behavior/test by returning `null` unconditionally — fixed by scoping
+the guard to the genuinely-multi-node case only).
+
+**Paint has the identical bug and the identical fix shape**, found by the user directly ("Ale segmenty nie
+działają oraz malowanie" — segments already worked via the generic across-open-nodes resolvers above;
+Paint was the real, separate bug): `armVectorPaintOnPointerDown.ts`/`resolveVectorPaintHover.ts`/
+`drawVectorPaintHoverPreview.ts` now route through `getVectorFaceAtPointAcrossOpenNodes.ts` and a new
+`TVectorPaintFaceHover = {faceKey, nodeId}` shape (was a bare `faceKey` string, implicitly always the
+primary node) — `hoveredVectorPaintFaceKeyRef`'s declared type and `CanvasRefsProvider.tsx` both updated
+to match.
+
+**Pen clicking onto another open node's vertex or segment now performs a real structural merge, reusing
+§46's absorb-and-delete semantics — not just a coordinate coincidence.** Discovered live: drawing from
+node A onto a coordinate that happened to sit on node B's own vertex *looked* connected but was two
+unrelated points at the same spot, matching the original "position-sharing, not merging" spec exactly —
+until the user found the same coincidence live and asked directly whether it should be a real merge
+("może warto jedną to zostawić i dać możliwość łączenia z pena?"), then confirmed "Pełny merge jak przy
+drag" when asked to choose. Two new files parallel `closeLoopOntoVertex.ts`/`closeLoopOntoEdge.ts` (§4)
+but absorb a *second node's* whole graph instead of just adding one segment within the same node:
+`closeLoopOntoAnotherNode.ts` (vertex-target — unions `vertices`/`segments`/`vertexHandleModes`/
+`filledFaceKeys` from both nodes via plain object spread, no id retargeting needed given global
+uniqueness, adds the new connecting segment, `deleteNode`s the absorbed target, prunes it from
+`vectorEditingNodeIds`) and `closeLoopOntoAnotherNodeEdge.ts` (edge-target — same union, but starts from
+`splitVectorSegment(targetNode, ...)` to get a fresh split vertex first, identical De Casteljau math to
+§12's same-node split). Unlike §46's drag-merge, no vertex-id collapsing is needed here: the clicked
+target vertex is already sitting at the exact click position, so nothing needs to move. `continueVectorNetwork.ts`
+resolves which case applies via `resolveContinueVectorNetworkHit.ts`/`applyContinueVectorNetworkHit.ts` —
+this pair (further split into `getCrossNodeVertexHover.ts`/`getCrossNodeEdgeHit.ts`/`getEdgeHit.ts` inside
+`resolveContinueVectorNetworkHit/`) mirrors this doc's own established resolve-then-apply shape (§44's
+DCEL traversal, §32/§33's angle-candidate disambiguation): the resolver returns a discriminated
+`TContinueVectorNetworkHit` (`vertex` / `crossNodeVertex` / `edge` / `crossNodeEdge` / `extend`), the
+applier switches on it — same-node cases delegate to the original §4 helpers unchanged, the two
+cross-node cases delegate to the new ones above.
+
+**No visual snap hint existed before the click landed** — found live immediately after confirming the
+merge itself worked ("wiesz kumam można połączyć ale nie ma podpowiedzi w sensie snapa"). Fixed in
+`updateVectorPenPreview.ts`: after the same-node hover resolvers (§16/§27) find nothing, a new
+`resolveAcrossOtherOpenNodes` loop tries the identical `PEN_POINT_HOVER_RESOLVERS` chain against every
+*other* open node in turn — a hit sets the rubber-band preview and cursor class exactly as a same-node
+snap would (`pen-snap` on a vertex/edge-midpoint hit, `pen-extend` mid-segment, per
+`getPenHoverCursorClassName.ts`), just never marks it drag-armable (`penHoveredDragArmableVertexRef` stays
+`false` — nothing is being dragged, only clicked).
+
+**A blank click with 2+ nodes open now creates a genuinely independent new vector, "vector C" — not a
+stray contour on the first open node.** Live-discovered as the one remaining gap in the original spec's
+own third clause ("jeśli w tym trybie ktoś zacznie budować nowy segment który nie wychodzi z żadnego
+wektora a i b to tak jakby tworzył wektor C"): before this fix, a Pen click touching neither A nor B
+silently fell back to extending A (the primary/first open node) with a disconnected contour — the
+long-standing, unrelated single-node Pen behavior §7 already scopes out, just never previously exercised
+with 2+ nodes open. `resolvePenTargetNode.ts`'s final fallback (above) returning `null` only in the
+genuinely-multi-node case is half of the fix; the other half is `startNewVectorNetwork.ts`'s
+`activateNewVertex`, which used to **replace** `selectedIds`/`vectorEditingNodeIds` with just the new
+node — now it reads both fresh from the store and **appends** the new node instead
+(`[...selectSelectedIds(state), newNodeId]` / `[...selectVectorEditingNodeIds(state), newNodeId]`), so A
+and B stay open and selected alongside the freshly-created C rather than being silently dropped out of
+edit mode the moment C is born.
+
+**Internal-only refactors from the same session, no behavior change**: `handleDeleteSelection.ts` moved
+into its own `handleDeleteSelection/` folder with every private helper (`getRemainingSegments`,
+`getRemainingVertices`, `getOwningVertexNodes`, `getOwningSegmentNodes`, `deleteSelectedVertices`,
+`deleteSelectedSegments`, `dispatchAsOneGestureIfMultiNode`) split into its own file plus its own
+dedicated spec — matching the same one-function-per-file convention `resolveContinueVectorNetworkHit/`
+above already follows. `handlePointerMove.ts`'s two `if` branches (drag-continuation vs. hover-preview)
+now each live in their own function — the drag branch was already `continueVectorHandleDrag.ts`
+unchanged, the preview branch is the new `updatePenPreview.ts`.
+
+**e2e**: `e2e/pages/design/multi-vector-edit.spec.ts` (10 scenarios — Enter opens both nodes, cross-node
+drag isolation, cross-node marquee union, grouped delete + single Undo, Escape closes both, Pen click-merge
+onto a vertex, onto an edge, the pre-click snap cursor, blank-click vector-C creation, Paint on the
+non-primary node), `TEST_CASES.md` rows 250-259. Full live-verified scenario log, including the
+branch-logic paths already pinned down by the unit suite and not repeated as e2e, lives outside this repo
+doc at `__test-cases__/multi-vector-edit.test.md`.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

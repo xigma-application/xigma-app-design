@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -42,7 +42,7 @@ const addVectorNode = (): string => {
 
 describe('cancelVectorSegmentBendDrag', () => {
   beforeEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should do nothing when the key pressed is not Escape, even mid-drag', () => {
@@ -83,7 +83,7 @@ describe('cancelVectorSegmentBendDrag', () => {
     // mock — the drag already bent the segment away from its original tangents
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const dragRef = createVectorSegmentBendDragRef({
       dragStart: { x: 0, y: 0 },
@@ -113,7 +113,7 @@ describe('cancelVectorSegmentBendDrag', () => {
     // mock
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const dragRef = createVectorSegmentBendDragRef({
       dragStart: { x: 0, y: 0 },

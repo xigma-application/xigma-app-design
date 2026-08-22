@@ -9,7 +9,7 @@ import CanvasRefsProvider from 'pages/DesignPage/core/CanvasRefsProvider/CanvasR
 import { useSelectTool } from '../useSelectTool';
 
 // store
-import { setActiveTool, setVectorEditingNodeId } from 'store/design/slice';
+import { setActiveTool, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -24,7 +24,7 @@ const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
 describe('useSelectTool behaviors', () => {
   afterEach(() => {
     store.dispatch(setActiveTool(ToolName.default));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should switch the active tool', () => {
@@ -53,7 +53,7 @@ describe('useSelectTool behaviors', () => {
 
   it('should leave Vector Edit Mode when a non-pen-group tool is picked', () => {
     // before
-    store.dispatch(setVectorEditingNodeId('node-1'));
+    store.dispatch(setVectorEditingNodeIds(['node-1']));
 
     const { result } = renderHook(() => useSelectTool(), { wrapper });
 
@@ -61,6 +61,6 @@ describe('useSelectTool behaviors', () => {
     result.current(ToolName.rectangle);
 
     // result
-    expect(store.getState().design.vectorEditingNodeId).toBeNull();
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
   });
 });

@@ -1,5 +1,5 @@
 // store
-import { addNode, setVectorEditingNodeId } from 'store/design/slice';
+import { addNode, setVectorEditingNodeIds } from 'store/design/slice';
 import { selectOrderedNodes } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -55,7 +55,7 @@ const addClosedSquareVectorNode = (x: number, y: number, size: number): string =
 
 describe('getSelectionHitAtPoint', () => {
   afterEach(() => {
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should return the hit node as-is when it is not the one currently being vector-edited', () => {
@@ -73,7 +73,7 @@ describe('getSelectionHitAtPoint', () => {
     // mock — dead center of a closed 100x100 square
     const idA = addClosedSquareVectorNode(200, 200, 100);
 
-    store.dispatch(setVectorEditingNodeId(idA));
+    store.dispatch(setVectorEditingNodeIds([idA]));
 
     // action
     const hit = getSelectionHitAtPoint({ x: 250, y: 250 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
@@ -86,7 +86,7 @@ describe('getSelectionHitAtPoint', () => {
     // mock
     const idA = addClosedSquareVectorNode(400, 200, 100);
 
-    // action — no setVectorEditingNodeId dispatched
+    // action — no setVectorEditingNodeIds dispatched
     const hit = getSelectionHitAtPoint({ x: 450, y: 250 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
 
     // result

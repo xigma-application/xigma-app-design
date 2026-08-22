@@ -1,13 +1,14 @@
 import { RefObject } from 'react';
 
 // store
-import { selectPenActiveVertexId, selectVectorEditingNodeId, selectViewport } from 'store/design/selectors';
+import { selectPenActiveVertexId, selectVectorEditingNodeIds, selectViewport } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { TCanvasRefs, TVectorHandleHover } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
 import { TVectorMarqueeMode } from 'types/design/selectionTool/types';
+import { TVectorNode } from 'types/design/types';
 
 // utils
 import { getOneHopVectorVertexIds } from 'utils/canvas/vectorNetwork/getOneHopVectorVertexIds';
@@ -31,31 +32,36 @@ export const continueVectorMarqueeDrag = (
 ): void => {
   if (vectorMarqueeStartRef.current) {
     const state = store.getState();
-    const node = getVectorEditingNode(state.design.nodes, selectVectorEditingNodeId(state));
+    const openNodes = selectVectorEditingNodeIds(state)
+      .map((id) => getVectorEditingNode(state.design.nodes, id))
+      .filter((node): node is TVectorNode => node !== null);
 
-    if (node) {
+    if (openNodes.length > 0) {
       const point = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
       const rect = toDraftRect(vectorMarqueeStartRef.current, point);
-      const vertexIds = getVectorPointsInRect(node, rect);
-      const segmentHits = getVectorSegmentsInRect(node, rect);
       const visualSelectedVertexIds = getVisualSelectedVectorVertexIds(
         canvasRefs.preVectorMarqueeVertexIdsRef.current,
         selectPenActiveVertexId(state),
       );
-      const tangentVisibilityVertexIds = getTangentVisibilityVertexIds(
-        node,
-        visualSelectedVertexIds,
-        canvasRefs.selectedVectorHandlesRef.current,
-      );
-      const oneHopVertexIds = getOneHopVectorVertexIds(node, tangentVisibilityVertexIds);
-      const handleHits = getVectorHandlesInRect(
-        node,
-        rect,
-        tangentVisibilityVertexIds,
-        oneHopVertexIds,
-        canvasRefs.preVectorMarqueeSegmentIdsRef.current,
-        canvasRefs.selectedVectorHandlesRef.current,
-      );
+      const vertexIds = openNodes.flatMap((node) => getVectorPointsInRect(node, rect));
+      const segmentHits = openNodes.flatMap((node) => getVectorSegmentsInRect(node, rect));
+      const handleHits: TVectorHandleHover[] = openNodes.flatMap((node) => {
+        const tangentVisibilityVertexIds = getTangentVisibilityVertexIds(
+          node,
+          visualSelectedVertexIds,
+          canvasRefs.selectedVectorHandlesRef.current,
+        );
+        const oneHopVertexIds = getOneHopVectorVertexIds(node, tangentVisibilityVertexIds);
+
+        return getVectorHandlesInRect(
+          node,
+          rect,
+          tangentVisibilityVertexIds,
+          oneHopVertexIds,
+          canvasRefs.preVectorMarqueeSegmentIdsRef.current,
+          canvasRefs.selectedVectorHandlesRef.current,
+        );
+      });
 
       canvasRefs.marqueeRef.current = rect;
       vectorMarqueeModeRef.current = resolveVectorMarqueeMode(vectorMarqueeModeRef.current, vertexIds, handleHits, segmentHits);

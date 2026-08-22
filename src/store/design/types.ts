@@ -22,7 +22,7 @@ export type TDesignState = {
   penActiveVertexId: string | null;
   rootOrder: string[];
   selectedIds: string[];
-  vectorEditingNodeId: string | null;
+  vectorEditingNodeIds: string[];
   viewport: TViewport;
 };
 

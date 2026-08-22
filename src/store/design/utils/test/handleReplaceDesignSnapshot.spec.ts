@@ -54,7 +54,7 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   penActiveVertexId: null,
   rootOrder: [],
   selectedIds: [],
-  vectorEditingNodeId: null,
+  vectorEditingNodeIds: [],
   viewport: { x: 0, y: 0, zoom: 1 },
   ...overrides,
 });
@@ -81,45 +81,59 @@ describe('handleReplaceDesignSnapshot', () => {
     expect(state.selectedIds).toEqual([frame.id]);
   });
 
-  it('should keep vectorEditingNodeId and penActiveVertexId when the restored node still has the active vertex', () => {
+  it('should keep vectorEditingNodeIds and penActiveVertexId when the restored node still has the active vertex', () => {
     // mock
     const vector = buildVectorNode();
-    const state = buildState({ penActiveVertexId: 'vertex-1', vectorEditingNodeId: vector.id });
+    const state = buildState({ penActiveVertexId: 'vertex-1', vectorEditingNodeIds: [vector.id] });
     const snapshot = buildSnapshot({ nodes: { [vector.id]: vector } });
 
     // before
     handleReplaceDesignSnapshot(state, snapshot);
 
     // result
-    expect(state.vectorEditingNodeId).toBe(vector.id);
+    expect(state.vectorEditingNodeIds).toEqual([vector.id]);
     expect(state.penActiveVertexId).toBe('vertex-1');
   });
 
-  it('should clear vectorEditingNodeId and penActiveVertexId when the restored snapshot no longer has that node', () => {
+  it('should clear vectorEditingNodeIds and penActiveVertexId when the restored snapshot no longer has that node', () => {
     // mock
     const vector = buildVectorNode();
-    const state = buildState({ penActiveVertexId: 'vertex-1', vectorEditingNodeId: vector.id });
+    const state = buildState({ penActiveVertexId: 'vertex-1', vectorEditingNodeIds: [vector.id] });
     const snapshot = buildSnapshot({ nodes: {} });
 
     // before
     handleReplaceDesignSnapshot(state, snapshot);
 
     // result
-    expect(state.vectorEditingNodeId).toBeNull();
+    expect(state.vectorEditingNodeIds).toEqual([]);
     expect(state.penActiveVertexId).toBeNull();
   });
 
-  it('should clear penActiveVertexId when the restored node no longer has that vertex', () => {
+  it('should clear penActiveVertexId when the restored primary node no longer has that vertex', () => {
     // mock
     const vector = buildVectorNode();
-    const state = buildState({ penActiveVertexId: 'vertex-stale', vectorEditingNodeId: vector.id });
+    const state = buildState({ penActiveVertexId: 'vertex-stale', vectorEditingNodeIds: [vector.id] });
     const snapshot = buildSnapshot({ nodes: { [vector.id]: vector } });
 
     // before
     handleReplaceDesignSnapshot(state, snapshot);
 
     // result
-    expect(state.vectorEditingNodeId).toBe(vector.id);
+    expect(state.vectorEditingNodeIds).toEqual([vector.id]);
     expect(state.penActiveVertexId).toBeNull();
+  });
+
+  it('should keep only the open node that survives an undo when two were open and one got removed', () => {
+    // mock — two nodes open for editing, the undo/redo snapshot only brings one of them back
+    const survivor = buildVectorNode({ id: 'vector-survivor' });
+    const removed = buildVectorNode({ id: 'vector-removed' });
+    const state = buildState({ vectorEditingNodeIds: [removed.id, survivor.id] });
+    const snapshot = buildSnapshot({ nodes: { [survivor.id]: survivor } });
+
+    // before
+    handleReplaceDesignSnapshot(state, snapshot);
+
+    // result
+    expect(state.vectorEditingNodeIds).toEqual([survivor.id]);
   });
 });

@@ -10,7 +10,7 @@ import {
   selectOrderedNodes,
   selectPenActiveVertexId,
   selectSelectedNodes,
-  selectVectorEditingNodeId,
+  selectVectorEditingNodeIds,
   selectViewport,
 } from 'store/design/selectors';
 import { store } from 'store';
@@ -38,7 +38,6 @@ import { drawVectorAlignmentGuide } from './drawVectorAlignmentGuide';
 import { drawVectorEditHandlesLayer } from './drawVectorEditHandlesLayer/drawVectorEditHandlesLayer';
 import { drawVectorLasso } from './drawVectorLasso';
 import { drawVectorPaintHoverPreview } from './drawVectorPaintHoverPreview';
-import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';
 import { drawVertexCountHandlesLayer } from './drawVertexCountHandlesLayer';
 import { getPathOutlineStyles } from './getPathOutlineStyles';
 import { hasCornerRadiusDragMoved } from './hasCornerRadiusDragMoved';
@@ -65,9 +64,8 @@ export const drawScene = (
   const editingNodeId = selectEditingNodeId(state);
   const editingTextBox = selectEditingTextBox(state);
   const nodesById = selectNodes(state);
-  const vectorEditingNodeId = selectVectorEditingNodeId(state);
-  const vectorEditingNode = getVectorEditingNode(nodesById, vectorEditingNodeId);
-  const hoveredVectorPaintFaceKey = refs.hoveredVectorPaintFaceKeyRef.current;
+  const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
+  const hoveredVectorPaintFace = refs.hoveredVectorPaintFaceKeyRef.current;
   const selectedVectorVertexIds = refs.selectedVectorVertexIdsRef.current;
   const preMarqueeVectorVertexIds = refs.preVectorMarqueeVertexIdsRef.current;
   const selectedVectorSegmentIds = refs.selectedVectorSegmentIdsRef.current;
@@ -102,8 +100,8 @@ export const drawScene = (
   drawSceneBackground(gl);
   drawPixelGrid(gl, imageContext.gridProgram, imageContext.gridBuffer, clientWidth, clientHeight, viewport);
   drawSceneNodes(gl, program, buffer, imageContext, sceneNodes, clientWidth, clientHeight, viewport, pathOutlineStyles);
-  drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport, vectorEditingNodeId);
-  drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeId);
+  drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
+  drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
   drawCornerRadiusHandlesLayer(
     gl,
     program,
@@ -122,7 +120,7 @@ export const drawScene = (
     program,
     buffer,
     nodesById,
-    vectorEditingNodeId,
+    vectorEditingNodeIds,
     selectedVectorVertexIds,
     preMarqueeVectorVertexIds,
     selectedVectorSegmentIds,
@@ -168,7 +166,7 @@ export const drawScene = (
     refs.penNewVertexPreviewRef.current,
     refs.penHoveredDragArmableVertexRef.current,
     nodesById,
-    vectorEditingNodeId,
+    vectorEditingNodeIds[0] ?? null,
     clientWidth,
     clientHeight,
     viewport,
@@ -190,7 +188,7 @@ export const drawScene = (
   drawEditingPathTextHandle(gl, program, buffer, editingTextBox, clientWidth, clientHeight, viewport);
   drawVectorAlignmentGuide(gl, program, buffer, refs.vectorAlignmentGuideRef.current, clientWidth, clientHeight, viewport);
   drawVectorLasso(gl, program, buffer, refs.vectorLassoPathRef.current, clientWidth, clientHeight, viewport);
-  drawVectorPaintHoverPreview(gl, program, buffer, vectorEditingNode, hoveredVectorPaintFaceKey, clientWidth, clientHeight, viewport);
+  drawVectorPaintHoverPreview(gl, program, buffer, nodesById, hoveredVectorPaintFace, clientWidth, clientHeight, viewport);
   drawMarquee(gl, program, buffer, marqueeRect, clientWidth, clientHeight, viewport);
   drawSliceDraft(gl, program, buffer, sliceRect, clientWidth, clientHeight, viewport);
 };

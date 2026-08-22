@@ -1,8 +1,11 @@
 import { RefObject } from 'react';
 
+// others
+import { VECTOR_VERTEX_HIT_RADIUS_PX } from 'constant/canvas';
+
 // store
 import { beginHistoryGesture } from 'store/history/actions';
-import { selectPenActiveVertexId, selectVectorEditingNodeId, selectViewport } from 'store/design/selectors';
+import { selectPenActiveVertexId, selectVectorEditingNodeIds, selectViewport } from 'store/design/selectors';
 import { AppDispatch, AppStore } from 'store';
 
 // types
@@ -14,7 +17,7 @@ import { TPoint } from 'types/canvas';
 // utils
 import { bakeEditingNodeRotation } from './bakeEditingNodeRotation';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
+import { resolvePenTargetNode } from '../resolvePenTargetNode';
 import { roundVectorPoint } from 'utils/canvas/vectorNetwork/roundVectorPoint';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 import { startOrContinueVectorNetwork } from './startOrContinueVectorNetwork';
@@ -32,11 +35,28 @@ export const handlePointerDown = (
   if (event.button === MouseButton.primary) {
     const state = appStore.getState();
     const viewport = selectViewport(state);
-    const vectorEditingNodeId = selectVectorEditingNodeId(state);
+    const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
     const penActiveVertexId = selectPenActiveVertexId(state);
     const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
     const point: TPoint = roundVectorPoint(rawPoint);
-    const editingNode = getVectorEditingNode(state.design.nodes, vectorEditingNodeId);
+
+    const editingNode = resolvePenTargetNode(
+      point,
+      vectorEditingNodeIds,
+      state.design.nodes,
+      penActiveVertexId,
+      VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom,
+      viewport.zoom,
+    );
+
+    const node = resolvePenTargetNode(
+      point,
+      vectorEditingNodeIds,
+      appStore.getState().design.nodes,
+      penActiveVertexId,
+      VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom,
+      viewport.zoom,
+    );
 
     dispatch(beginHistoryGesture());
     bakeEditingNodeRotation(dispatch, editingNode);
@@ -44,7 +64,7 @@ export const handlePointerDown = (
       canvas,
       event,
       point,
-      getVectorEditingNode(appStore.getState().design.nodes, vectorEditingNodeId),
+      node,
       penActiveVertexId,
       viewport,
       dispatch,

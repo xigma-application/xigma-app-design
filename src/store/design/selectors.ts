@@ -52,6 +52,6 @@ export const selectSelectedNodes = createSelector([selectSelectedIds, selectNode
   selectedIds.map((id) => nodes[id]),
 );
 
-export const selectVectorEditingNodeId = (state: RootState): string | null => state.design.vectorEditingNodeId;
+export const selectVectorEditingNodeIds = (state: RootState): string[] => state.design.vectorEditingNodeIds;
 
 export const selectViewport = (state: RootState): TViewport => state.design.viewport;

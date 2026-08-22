@@ -2,7 +2,7 @@
 import { VECTOR_VERTEX_HIT_RADIUS_PX } from 'constant/canvas';
 
 // store
-import { selectVectorEditingNodeId } from 'store/design/selectors';
+import { selectVectorEditingNodeIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -10,8 +10,7 @@ import { TArmContext } from '../../types';
 
 // utils
 import { armVectorVertexClick } from './armVectorVertexClick';
-import { getVectorEditingNode } from '../../../../../../utils/getVectorEditingNode';
-import { getVectorVertexAtPoint } from '../../../../../../utils/getVectorVertexAtPoint';
+import { getVectorVertexAtPointAcrossOpenNodes } from '../../../../../../utils/getVectorVertexAtPointAcrossOpenNodes';
 
 export const armVectorVertexOnPointerDown = ({
   canvas,
@@ -21,15 +20,16 @@ export const armVectorVertexOnPointerDown = ({
   selectionRefs,
   viewport,
 }: TArmContext): true | undefined => {
-  const node = getVectorEditingNode(store.getState().design.nodes, selectVectorEditingNodeId(store.getState()));
+  const state = store.getState();
+  const result = getVectorVertexAtPointAcrossOpenNodes(
+    point,
+    selectVectorEditingNodeIds(state),
+    state.design.nodes,
+    VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom,
+  );
 
-  if (node) {
-    const hit = getVectorVertexAtPoint(point, node, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
-
-    if (hit) {
-      armVectorVertexClick(canvas, event, canvasRefs, selectionRefs, node, hit, point);
-
-      return true;
-    }
+  if (result) {
+    armVectorVertexClick(canvas, event, canvasRefs, selectionRefs, result.node, { vertexId: result.vertexId }, point);
+    return true;
   }
 };

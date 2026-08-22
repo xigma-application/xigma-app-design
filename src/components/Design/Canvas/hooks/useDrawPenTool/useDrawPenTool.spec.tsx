@@ -11,7 +11,7 @@ import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNa
 import { useDrawPenTool } from './useDrawPenTool';
 
 // store
-import { setActiveTool, setPenActiveVertexId, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { setActiveTool, setPenActiveVertexId, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -55,7 +55,7 @@ const renderPenTool = (canvasRef: RefObject<HTMLCanvasElement | null>): { getCla
 describe('useDrawPenTool behaviors', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
     store.dispatch(setActiveTool(ToolName.default));
   });
 
@@ -70,7 +70,7 @@ describe('useDrawPenTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
 
     // result
-    expect(store.getState().design.vectorEditingNodeId).toBeNull();
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
   });
 
   it('should start a new vector network on pointerdown when the pen tool is active', () => {
@@ -88,9 +88,9 @@ describe('useDrawPenTool behaviors', () => {
     });
 
     // result
-    const { vectorEditingNodeId } = store.getState().design;
+    const { vectorEditingNodeIds } = store.getState().design;
 
-    expect(vectorEditingNodeId).not.toBeNull();
+    expect(vectorEditingNodeIds).not.toEqual([]);
     expect(canvasRef.current?.setPointerCapture).toHaveBeenCalledWith(1);
   });
 
@@ -111,7 +111,7 @@ describe('useDrawPenTool behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 0, 0));
     });
 
-    const nodeId = store.getState().design.vectorEditingNodeId as string;
+    const nodeId = store.getState().design.vectorEditingNodeIds[0] as string;
 
     // action — second click plants vertex 2 and connects it back to vertex 1
     act(() => {
@@ -145,7 +145,7 @@ describe('useDrawPenTool behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 0, 0));
     });
 
-    const nodeId = store.getState().design.vectorEditingNodeId as string;
+    const nodeId = store.getState().design.vectorEditingNodeIds[0] as string;
 
     // action — second click plants vertex B, connecting A -> B
     act(() => {

@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeId, updateNode } from 'store/design/slice';
+import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds, updateNode } from 'store/design/slice';
 import { store } from 'store';
 
 // utils
@@ -53,7 +53,7 @@ const addVectorNode = (): string => {
 describe('continueVectorMarqueeDrag', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
     store.dispatch(setPenActiveVertexId(null));
   });
 
@@ -91,7 +91,7 @@ describe('continueVectorMarqueeDrag', () => {
     // mock — v1(0,0)/v2(100,0); v3(500,500) stays outside; s1's real tangentStart handle also sits at (5,0) but must not be selected
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
@@ -115,7 +115,7 @@ describe('continueVectorMarqueeDrag', () => {
     // mock
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
@@ -148,7 +148,7 @@ describe('continueVectorMarqueeDrag', () => {
         id: nodeId,
       }),
     );
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setPenActiveVertexId('v1'));
 
     const canvas = createCanvas();
@@ -179,7 +179,7 @@ describe('continueVectorMarqueeDrag', () => {
         id: nodeId,
       }),
     );
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
@@ -213,7 +213,7 @@ describe('continueVectorMarqueeDrag', () => {
         id: nodeId,
       }),
     );
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs({ preVectorMarqueeVertexIdsRef: { current: ['v1'] } });
@@ -246,7 +246,7 @@ describe('continueVectorMarqueeDrag', () => {
         id: nodeId,
       }),
     );
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs({ preVectorMarqueeSegmentIdsRef: { current: ['s1'] } });
@@ -270,7 +270,7 @@ describe('continueVectorMarqueeDrag', () => {
     // mock — v1(0,0)-v2(100,0), plain straight segment; a box over its middle touches neither endpoint
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
@@ -299,7 +299,7 @@ describe('continueVectorMarqueeDrag', () => {
         id: nodeId,
       }),
     );
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
@@ -330,7 +330,7 @@ describe('continueVectorMarqueeDrag', () => {
         id: nodeId,
       }),
     );
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
@@ -360,7 +360,7 @@ describe('continueVectorMarqueeDrag', () => {
     // mock — v1(0,0)-v2(100,0), plain straight segment
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
@@ -419,7 +419,7 @@ describe('continueVectorMarqueeDrag', () => {
     const { rootOrder } = store.getState().design;
     const nodeId = rootOrder[rootOrder.length - 1];
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
@@ -447,7 +447,7 @@ describe('continueVectorMarqueeDrag', () => {
     // mock — v1(0,0)/v2(100,0); s1's tangentStart handle sits at (5,0)
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
@@ -477,7 +477,7 @@ describe('continueVectorMarqueeDrag', () => {
         id: nodeId,
       }),
     );
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setPenActiveVertexId('v1'));
 
     const canvas = createCanvas();
@@ -510,7 +510,7 @@ describe('continueVectorMarqueeDrag', () => {
     // throughout (mirrors leaving the Pen tool mid-draw), same as the handle-catches-alone test above
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setPenActiveVertexId('v1'));
 
     const canvas = createCanvas();

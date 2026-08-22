@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 
 // store
-import { selectOrderedNodes, selectVectorEditingNodeId, selectViewport } from 'store/design/selectors';
-import { setActiveTool, setSelection, setVectorEditingNodeId } from 'store/design/slice';
+import { selectOrderedNodes, selectVectorEditingNodeIds, selectViewport } from 'store/design/selectors';
+import { setActiveTool, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { RootState, useAppDispatch, useAppSelector } from 'store';
 
 // hooks
@@ -20,7 +20,7 @@ import { getNodeAtPoint } from '../../utils/getNodeAtPoint';
 
 export const useVectorEditOnDoubleClick = (refs: TCanvasRefs): void => {
   const { selectedVectorHandlesRef, selectedVectorSegmentIdsRef, selectedVectorVertexIdsRef } = refs;
-  const vectorEditingNodeId = useAppSelector(selectVectorEditingNodeId);
+  const vectorEditingNodeIds = useAppSelector(selectVectorEditingNodeIds);
   const dispatch = useAppDispatch();
 
   const getTarget = (point: TPoint, state: RootState): TVectorNode | null =>
@@ -28,7 +28,7 @@ export const useVectorEditOnDoubleClick = (refs: TCanvasRefs): void => {
 
   const handleHit = (target: TVectorNode): void => {
     dispatch(setSelection([target.id]));
-    dispatch(setVectorEditingNodeId(target.id));
+    dispatch(setVectorEditingNodeIds([target.id]));
     dispatch(setActiveTool(ToolName.move));
   };
 
@@ -37,15 +37,14 @@ export const useVectorEditOnDoubleClick = (refs: TCanvasRefs): void => {
 
   const handleEmptySpaceHit = (): void => {
     dispatch(setActiveTool(ToolName.default));
-    dispatch(setVectorEditingNodeId(null));
+    dispatch(setVectorEditingNodeIds([]));
   };
 
   useEffect(() => {
     selectedVectorVertexIdsRef.current = [];
     selectedVectorHandlesRef.current = [];
     selectedVectorSegmentIdsRef.current = [];
-  }, [selectedVectorHandlesRef, selectedVectorSegmentIdsRef, selectedVectorVertexIdsRef, vectorEditingNodeId]);
-
-  useDoubleClickActivation(refs, Boolean(vectorEditingNodeId), getTarget, handleHit);
-  useDoubleClickActivation(refs, !vectorEditingNodeId, getEmptySpaceTarget, handleEmptySpaceHit);
+  }, [selectedVectorHandlesRef, selectedVectorSegmentIdsRef, selectedVectorVertexIdsRef, vectorEditingNodeIds]);
+  useDoubleClickActivation(refs, vectorEditingNodeIds.length > 0, getTarget, handleHit);
+  useDoubleClickActivation(refs, vectorEditingNodeIds.length === 0, getEmptySpaceTarget, handleEmptySpaceHit);
 };

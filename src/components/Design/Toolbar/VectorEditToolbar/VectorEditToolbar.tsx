@@ -15,9 +15,9 @@ import styles from './vector-edit-toolbar.module.scss';
 
 const VectorEditToolbar: FC = () => {
   const { t } = useTranslation();
-  const { handleClose, renderTool, vectorEditingNodeId } = useVectorEditToolbar();
+  const { handleClose, renderTool, vectorEditingNodeIds } = useVectorEditToolbar();
 
-  if (!vectorEditingNodeId) {
+  if (vectorEditingNodeIds.length === 0) {
     return null;
   }
 

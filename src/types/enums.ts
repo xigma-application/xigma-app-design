@@ -8,6 +8,7 @@ export enum KeyboardKeys {
   control = 'Control',
   d = 'KeyD',
   delete = 'Delete',
+  enter = 'Enter',
   escape = 'Escape',
   f = 'KeyF',
   h = 'KeyH',

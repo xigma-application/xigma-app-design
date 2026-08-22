@@ -10,7 +10,7 @@ import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useSelectionTool } from './useSelectionTool';
 
 // store
-import { addNode, setActiveTool, setSelection, setVectorEditingNodeId, startTextEdit, stopTextEdit } from 'store/design/slice';
+import { addNode, setActiveTool, setSelection, setVectorEditingNodeIds, startTextEdit, stopTextEdit } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -126,7 +126,7 @@ describe('useSelectionTool behaviors', () => {
     store.dispatch(setActiveTool(ToolName.default));
     store.dispatch(setSelection([]));
     store.dispatch(stopTextEdit());
-    store.dispatch(setVectorEditingNodeId(null));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should not react to pointer events when the default tool is not active', () => {
@@ -704,7 +704,7 @@ describe('useSelectionTool behaviors', () => {
     const refs = createCanvasRefs({ canvasRef });
 
     refs.selectedVectorVertexIdsRef.current = ['v1']; // reveals v1's own handle for hit-testing
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     renderHook(() => useSelectionTool(refs), {
@@ -749,7 +749,7 @@ describe('useSelectionTool behaviors', () => {
     const canvasRef = createCanvasRef();
     const refs = createCanvasRefs({ canvasRef });
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     renderHook(() => useSelectionTool(refs), {
@@ -857,7 +857,7 @@ describe('useSelectionTool behaviors', () => {
     // mock — v1(3400,700)-v2(3500,700), plain straight segment
     const nodeId = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeId(nodeId));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRef = createCanvasRef();
 
