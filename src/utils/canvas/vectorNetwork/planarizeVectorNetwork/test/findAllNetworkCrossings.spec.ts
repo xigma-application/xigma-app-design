@@ -47,6 +47,34 @@ describe('findAllNetworkCrossings', () => {
     expect(crossingsBySegmentId.size).toBe(0);
   });
 
+  it('should still record a genuine crossing between two segments that share a vertex, when they cross again elsewhere entirely', () => {
+    // mock — a curve leaves 'a' heading almost straight up (away from its own endpoint 'q'), loops
+    // around, and crosses the straight sibling edge 'a'->'p' partway along — a real, separate crossing
+    // far from the shared vertex, not the trivial touch at 'a' itself; regression for the live bug
+    // where sharing a vertex made findAllNetworkCrossings skip the pair entirely, silently losing a
+    // real crossing (and, downstream, a whole bounded face nothing could ever paint)
+    const vertices: Record<string, TVectorVertex> = {
+      a: { id: 'a', x: 0, y: 0 },
+      p: { id: 'p', x: 200, y: 0 },
+      q: { id: 'q', x: 150, y: 50 },
+    };
+    const segmentAP: TVectorSegment = { endId: 'p', id: 'ap', startId: 'a', tangentEnd: null, tangentStart: null };
+    const segmentAQ: TVectorSegment = {
+      endId: 'q',
+      id: 'aq',
+      startId: 'a',
+      tangentEnd: null,
+      tangentStart: { x: -20, y: -200 },
+    };
+
+    // before
+    const { crossingsBySegmentId } = findAllNetworkCrossings([segmentAP, segmentAQ], vertices);
+
+    // result
+    expect(crossingsBySegmentId.get('ap')).toHaveLength(1);
+    expect(crossingsBySegmentId.get('aq')).toHaveLength(1);
+  });
+
   it('should return empty results when no two segments in the network cross at all', () => {
     // mock — two parallel, non-touching segments
     const vertices: Record<string, TVectorVertex> = {

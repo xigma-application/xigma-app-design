@@ -311,6 +311,58 @@ describe('deriveVectorFaces', () => {
     expect(crossingFaces.length).toBeGreaterThan(0);
   });
 
+  it('should still find every bounded face at a branch vertex whose curve tangent points far from its own chord — the rotation-sort-instability regression', () => {
+    // mock — a triangle (a-p-h2) and a loop (a-q-r-a) sharing vertex 'a', connected a second way via
+    // h2-r, with the loop's h2a-side edge crossing qr; 'aq' is a curve whose tangent leaves 'a' pointing
+    // toward q's own chord direction (18.43deg) — deriveVectorFaces must find all 4 bounded faces
+    // Euler's formula guarantees for this graph (V=6, E=9 after the one crossing splits h2a/qr each in
+    // two: F = E - V + 2 = 5, i.e. 4 bounded + 1 unbounded)
+    const chordAngle = Math.atan2(50, 150);
+    const tangentStart = { x: 150 * Math.cos(chordAngle), y: 150 * Math.sin(chordAngle) };
+    const node = buildNode(
+      [vertex('a', 0, 0), vertex('p', 200, 0), vertex('h2', 100, 150), vertex('q', 150, 50), vertex('r', 20, 100)],
+      [
+        seg('ap', 'a', 'p'),
+        seg('ph2', 'p', 'h2'),
+        seg('h2a', 'h2', 'a'),
+        seg('aq', 'a', 'q', tangentStart),
+        seg('qr', 'q', 'r'),
+        seg('ra', 'r', 'a'),
+        seg('h2r', 'h2', 'r'),
+      ],
+    );
+
+    // before
+    const faces = deriveVectorFaces(node);
+
+    // result
+    expect(faces).toHaveLength(4);
+  });
+
+  it('should still find every bounded face when that same curve’s tangent points just barely on the wrong side of an adjacent straight edge — the exact failure threshold', () => {
+    // mock — same graph as above, but the curve tangent now points at 0deg (dead level with 'ap',
+    // rather than 18.43deg above it) — before the fix, crossing this exact threshold (the tangent
+    // sorting at or before 'ap' instead of after it) silently collapsed 2 of the 4 bounded faces
+    const node = buildNode(
+      [vertex('a', 0, 0), vertex('p', 200, 0), vertex('h2', 100, 150), vertex('q', 150, 50), vertex('r', 20, 100)],
+      [
+        seg('ap', 'a', 'p'),
+        seg('ph2', 'p', 'h2'),
+        seg('h2a', 'h2', 'a'),
+        seg('aq', 'a', 'q', { x: 201, y: 0 }),
+        seg('qr', 'q', 'r'),
+        seg('ra', 'r', 'a'),
+        seg('h2r', 'h2', 'r'),
+      ],
+    );
+
+    // before
+    const faces = deriveVectorFaces(node);
+
+    // result
+    expect(faces).toHaveLength(4);
+  });
+
   it('should return the same cached result for the same node reference instead of recomputing', () => {
     // mock
     const node = buildNode(
