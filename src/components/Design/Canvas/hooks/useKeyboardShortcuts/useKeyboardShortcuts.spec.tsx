@@ -466,7 +466,7 @@ describe('useKeyboardShortcuts "V" behaviors while Vector Edit Mode is active', 
   });
 });
 
-// handleEnterMultiVectorEdit reads/dispatches on the real store singleton too, same reason as the two
+// handleEnterVectorEdit reads/dispatches on the real store singleton too, same reason as the two
 // blocks above
 describe('useKeyboardShortcuts "Enter" behaviors', () => {
   const addVectorNode = (): string => {
@@ -484,6 +484,16 @@ describe('useKeyboardShortcuts "Enter" behaviors', () => {
         vertexHandleModes: {},
         vertices: { v1: { id: 'v1', x: 0, y: 0 } },
       }),
+    );
+
+    const { rootOrder } = realStore.getState().design;
+
+    return rootOrder[rootOrder.length - 1];
+  };
+
+  const addFrameNode = (): string => {
+    realStore.dispatch(
+      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
     );
 
     const { rootOrder } = realStore.getState().design;
@@ -517,11 +527,30 @@ describe('useKeyboardShortcuts "Enter" behaviors', () => {
     expect(realStore.getState().design.activeTool).toBe(ToolName.move);
   });
 
-  it('should do nothing on "Enter" when fewer than two vector nodes are selected', () => {
+  it('should open a single selected vector node for editing on "Enter"', () => {
     // mock
     const vectorIdA = addVectorNode();
 
     realStore.dispatch(setSelection([vectorIdA]));
+
+    // before
+    renderHook(() => useKeyboardShortcuts(createCanvasRefs()), {
+      wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
+    });
+
+    // action
+    fireEvent.keyDown(window, { code: 'Enter' });
+
+    // result
+    expect(realStore.getState().design.vectorEditingNodeIds).toEqual([vectorIdA]);
+    expect(realStore.getState().design.activeTool).toBe(ToolName.move);
+  });
+
+  it('should do nothing on "Enter" when no vector nodes are selected', () => {
+    // mock
+    const frameId = addFrameNode();
+
+    realStore.dispatch(setSelection([frameId]));
 
     // before
     renderHook(() => useKeyboardShortcuts(createCanvasRefs()), {

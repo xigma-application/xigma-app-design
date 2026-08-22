@@ -19,7 +19,7 @@ import { ToolName } from 'types/design/enums';
 import { dispatchTool } from './utils/dispatchTool';
 import { getDefaultMoveTool } from './utils/getDefaultMoveTool';
 import { handleDeleteSelection } from './utils/handleDeleteSelection/handleDeleteSelection';
-import { handleEnterMultiVectorEdit } from './utils/handleEnterMultiVectorEdit';
+import { handleEnterVectorEdit } from './utils/handleEnterVectorEdit';
 import { handleLeave } from './utils/handleLeave';
 
 export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
@@ -45,7 +45,7 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => dispatchTool(dispatch, ToolName.paint), ...shortcuts[ToolName.paint] },
       { action: (): any => dispatchTool(dispatch, ToolName.text), ...shortcuts[ToolName.text] },
       { action: (): any => handleLeave(dispatch, refs), ...shortcuts.escape },
-      { action: (): any => handleEnterMultiVectorEdit(dispatch), secondaryKey: KeyboardKeys.enter },
+      { action: (): any => handleEnterVectorEdit(dispatch), secondaryKey: KeyboardKeys.enter },
       { action: (): any => dispatch(redo()), ...shortcuts.redo },
       { action: (): any => dispatch(undo()), ...shortcuts.undo },
       { action: (): any => handleDeleteSelection(dispatch, refs), secondaryKey: KeyboardKeys.delete },

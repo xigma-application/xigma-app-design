@@ -6,7 +6,7 @@ import { store } from 'store';
 import { NodeType, ToolName } from 'types/design/enums';
 
 // utils
-import { handleEnterMultiVectorEdit } from '../handleEnterMultiVectorEdit';
+import { handleEnterVectorEdit } from '../handleEnterVectorEdit';
 
 const addVectorNode = (): string => {
   store.dispatch(
@@ -40,24 +40,39 @@ const addFrameNode = (): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
-describe('handleEnterMultiVectorEdit', () => {
+describe('handleEnterVectorEdit', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
     store.dispatch(setVectorEditingNodeIds([]));
     store.dispatch(setActiveTool(ToolName.default));
   });
 
-  it('should do nothing when fewer than two vector nodes are selected', () => {
+  it('should do nothing when no vector nodes are selected', () => {
+    // mock
+    const frameId = addFrameNode();
+
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    handleEnterVectorEdit(store.dispatch);
+
+    // result
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
+    expect(store.getState().design.activeTool).toBe(ToolName.default);
+  });
+
+  it('should open a single selected vector node for editing and switch to the Move tool', () => {
     // mock
     const vectorId = addVectorNode();
 
     store.dispatch(setSelection([vectorId]));
 
     // before
-    handleEnterMultiVectorEdit(store.dispatch);
+    handleEnterVectorEdit(store.dispatch);
 
     // result
-    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([vectorId]);
+    expect(store.getState().design.activeTool).toBe(ToolName.move);
   });
 
   it('should open every selected vector node for editing and switch to the Move tool when exactly two are selected', () => {
@@ -68,7 +83,7 @@ describe('handleEnterMultiVectorEdit', () => {
     store.dispatch(setSelection([vectorIdA, vectorIdB]));
 
     // before
-    handleEnterMultiVectorEdit(store.dispatch);
+    handleEnterVectorEdit(store.dispatch);
 
     // result
     expect(store.getState().design.vectorEditingNodeIds).toEqual([vectorIdA, vectorIdB]);
@@ -84,7 +99,7 @@ describe('handleEnterMultiVectorEdit', () => {
     store.dispatch(setSelection([vectorIdA, frameId, vectorIdB]));
 
     // before
-    handleEnterMultiVectorEdit(store.dispatch);
+    handleEnterVectorEdit(store.dispatch);
 
     // result
     expect(store.getState().design.vectorEditingNodeIds).toEqual([vectorIdA, vectorIdB]);
@@ -99,7 +114,7 @@ describe('handleEnterMultiVectorEdit', () => {
     store.dispatch(setSelection([vectorIdA, vectorIdB, vectorIdC]));
 
     // before
-    handleEnterMultiVectorEdit(store.dispatch);
+    handleEnterVectorEdit(store.dispatch);
 
     // result
     expect(store.getState().design.vectorEditingNodeIds).toEqual([vectorIdA, vectorIdB, vectorIdC]);

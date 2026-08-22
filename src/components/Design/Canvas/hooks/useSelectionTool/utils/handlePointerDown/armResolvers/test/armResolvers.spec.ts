@@ -37,6 +37,7 @@ import { armVectorMultiSelectRotateOnPointerDown } from '../armVectorMultiSelect
 import { armVectorPaintOnPointerDown } from '../armVectorPaintOnPointerDown';
 import { armVectorSegmentOnPointerDown } from '../armVectorSegmentOnPointerDown/armVectorSegmentOnPointerDown';
 import { armVectorVertexOnPointerDown } from '../armVectorVertexOnPointerDown/armVectorVertexOnPointerDown';
+import { ARM_RESOLVERS } from '../../constants';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { createSelectionToolRefs } from '../../../../hooks/useSelectionToolRefs/createSelectionToolRefs';
 import { toggleSelectionOnPointerDown } from '../toggleSelectionOnPointerDown';
@@ -2312,5 +2313,66 @@ describe('armVectorSegmentOnPointerDown', () => {
     expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
     expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
     expect(ctx.canvasRefs.vectorMultiDragRef.current?.pendingClickAction).toBeNull();
+  });
+});
+
+describe('ARM_RESOLVERS ordering — multi-select box vs. outline vertex point', () => {
+  afterEach(() => {
+    store.dispatch(setActiveTool(ToolName.default));
+    store.dispatch(setVectorEditingNodeIds([]));
+  });
+
+  it("should let the multi-select box resize handle claim the pointerdown before the outline vertex resolver, when a box corner coincides with a selected vertex — a 2-vertex selection's box corners always sit exactly on those two vertices, so without this ordering the resize handle would never be reachable", () => {
+    // mock — v1(0,0), v2(100,100) selected; the box's own "se" corner sits exactly at v2's position
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
+    );
+
+    store.dispatch(setActiveTool(ToolName.default));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+
+    const ctx = createContext({ canvasRefs, point: { x: 100, y: 100 } });
+
+    // before — walk the real resolver chain in its actual production order, exactly as handlePointerDown does
+    const claimedBy = ARM_RESOLVERS.find((resolve) => resolve(ctx));
+
+    // result
+    expect(claimedBy).toBe(armVectorMultiSelectResizeOnPointerDown);
+    expect(ctx.canvasRefs.vectorMultiSelectResizeDragRef.current).toMatchObject({ handle: 'se' });
+  });
+
+  it('should let the multi-select box rotate ring claim the pointerdown before the outline vertex resolver, when the ring coincides with an (unselected) vertex of the same node', () => {
+    // mock — only v1(0,0)/v2(100,100) are selected, so the box spans (0,0)-(100,100) with its "se"
+    // rotate ring 6-16px past (100,100); v3 sits unselected right in that ring, at (100,110) — the
+    // vertex resolver still hits ANY vertex of the node regardless of selection, so this is a real
+    // coincidence a user can hit, not just a selected-vertex one
+    const nodeId = addVectorNode(
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+      },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 }, v3: { id: 'v3', x: 100, y: 110 } },
+    );
+
+    store.dispatch(setActiveTool(ToolName.default));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+
+    const ctx = createContext({ canvasRefs, point: { x: 100, y: 110 } });
+
+    // before
+    const claimedBy = ARM_RESOLVERS.find((resolve) => resolve(ctx));
+
+    // result
+    expect(claimedBy).toBe(armVectorMultiSelectRotateOnPointerDown);
+    expect(ctx.canvasRefs.vectorMultiSelectRotateDragRef.current).not.toBeNull();
   });
 });

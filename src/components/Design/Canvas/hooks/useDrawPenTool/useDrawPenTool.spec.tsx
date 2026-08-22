@@ -128,7 +128,7 @@ describe('useDrawPenTool behaviors', () => {
     expect(Object.keys(node.segments)).toHaveLength(1);
   });
 
-  it('should close the network back onto the starting point without doubling the segment — A -> B -> A', () => {
+  it('should close the network back onto the starting point, creating a second segment between the same two vertices — A -> B -> A is no longer blocked as a duplicate', () => {
     // mock
     const canvasRef = createCanvasRef();
 
@@ -155,7 +155,7 @@ describe('useDrawPenTool behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 100, 0));
     });
 
-    // action — third click lands back on A, closing the network instead of adding a duplicate segment
+    // action — third click lands back on A, closing the network with a second A-B segment
     act(() => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 0, 0));
     });
@@ -167,7 +167,7 @@ describe('useDrawPenTool behaviors', () => {
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
 
     expect(Object.keys(node.vertices)).toHaveLength(2);
-    expect(Object.keys(node.segments)).toHaveLength(1);
+    expect(Object.keys(node.segments)).toHaveLength(2);
     expect(store.getState().design.penActiveVertexId).toBeNull();
   });
 

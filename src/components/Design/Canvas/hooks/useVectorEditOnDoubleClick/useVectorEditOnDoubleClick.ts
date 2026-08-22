@@ -15,6 +15,7 @@ import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 
 // utils
+import { enterVectorEditMode } from '../../utils/enterVectorEditMode';
 import { getDoubleClickedVectorNode } from './utils/getDoubleClickedVectorNode';
 import { getNodeAtPoint } from '../../utils/getNodeAtPoint';
 
@@ -28,8 +29,7 @@ export const useVectorEditOnDoubleClick = (refs: TCanvasRefs): void => {
 
   const handleHit = (target: TVectorNode): void => {
     dispatch(setSelection([target.id]));
-    dispatch(setVectorEditingNodeIds([target.id]));
-    dispatch(setActiveTool(ToolName.move));
+    enterVectorEditMode(dispatch, [target.id]);
   };
 
   const getEmptySpaceTarget = (point: TPoint, state: RootState): true | null =>

@@ -106,8 +106,9 @@ describe('closeLoopOntoVertex', () => {
     expect(updatedNode.segments['segment-1'].tangentStart).toEqual({ x: 5, y: 5 });
   });
 
-  it('should not create a duplicate segment or arm a drag when the active vertex and target vertex are already directly connected — A -> B -> A must not double the line', () => {
-    // mock — v1 -> v2 already connected by s1, then closing back from v2 onto v1
+  it('should create a second, parallel segment and arm a drag when the active vertex and target vertex are already directly connected — closing a second arc from B back onto A must not be blocked', () => {
+    // mock — v1 -> v2 already connected by s1 (a first arc); closing a second arc back from v2 onto v1
+    // must still add its own segment, e.g. to complete a lens/circle made of two arcs sharing both endpoints
     const nodeId = addVectorNode();
 
     store.dispatch(
@@ -135,17 +136,18 @@ describe('closeLoopOntoVertex', () => {
       pendingOutgoingTangentRef,
     );
 
-    // result — no new segment added, no segment to arm a drag on either, but the close still finishes
+    // result
     const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
 
-    expect(Object.keys(updatedNode.segments)).toEqual(['s1']);
+    expect(updatedNode.segments['segment-2']).toMatchObject({ endId: 'v1', startId: 'v2', tangentStart: null });
+    expect(Object.keys(updatedNode.segments)).toEqual(['s1', 'segment-2']);
     expect(store.getState().design.penActiveVertexId).toBeNull();
     expect(pendingOutgoingTangentRef.current).toBeNull();
-    expect(dragOriginRef.current).toBeNull();
+    expect(dragOriginRef.current).toEqual({ nodeId, segmentId: 'segment-2', vertexId: 'v1' });
   });
 
-  it('should not create a duplicate segment when the existing segment runs in the opposite direction', () => {
-    // mock — s1 already runs v2 -> v1; closing from v1 back onto v2 must not add a second, parallel segment
+  it('should create a second, parallel segment when the existing segment runs in the opposite direction', () => {
+    // mock — s1 already runs v2 -> v1; closing from v1 back onto v2 adds a second, parallel segment
     const nodeId = addVectorNode();
 
     store.dispatch(
@@ -174,10 +176,10 @@ describe('closeLoopOntoVertex', () => {
     // result
     const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
 
-    expect(Object.keys(updatedNode.segments)).toEqual(['s1']);
+    expect(Object.keys(updatedNode.segments)).toEqual(['s1', 'segment-2']);
   });
 
-  it('should not create a duplicate segment when the existing segment already runs in the exact same direction', () => {
+  it('should create a second, parallel segment when the existing segment already runs in the exact same direction', () => {
     // mock — s1 already runs v1 -> v2, and the active vertex is v1 itself (e.g. resumed via startVectorFragment)
     const nodeId = addVectorNode();
 
@@ -207,6 +209,6 @@ describe('closeLoopOntoVertex', () => {
     // result
     const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
 
-    expect(Object.keys(updatedNode.segments)).toEqual(['s1']);
+    expect(Object.keys(updatedNode.segments)).toEqual(['s1', 'segment-2']);
   });
 });

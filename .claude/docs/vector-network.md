@@ -924,6 +924,17 @@ mid-fragment (`resolveVertexPointHover` called with `excludeVertexId` set), a pl
 unconditionally drag-armable. No ambiguity to resolve at the hover layer at all; the resolver's existing
 output already disambiguates it for free.
 
+**Update — the `isAlreadyConnected` guard was removed outright.** It blocked a real, legitimate case:
+drawing a first arc `A -> B`, then starting a second fragment from `B` and closing it back onto `A`,
+which should produce a second, independent segment between the same two vertices (e.g. two arcs forming
+a lens/circle shape) — not get silently swallowed. Direction-independence was itself correct (an
+existing `A->B` should also block a naive `B->A` duplicate along the exact same path), but the guard had
+no way to distinguish "the same connection again" from "a deliberately different second connection
+between the same two points", so it blocked both. Nothing downstream (rendering, face-derivation,
+`findAllNetworkCrossings`, `deriveVectorFaces`) assumes at most one segment between a given vertex pair —
+multiple parallel/independent segments between the same two vertices are handled the same as any other
+segment. `closeLoopOntoVertex.ts` now always creates the new segment and arms the drag, unconditionally.
+
 ## 18. A persistent tangent-handle diamond for the staged-but-not-yet-committed outgoing tangent
 
 Asked for directly, with a screenshot of the desired look: while drawing (an active fragment, `preview`
@@ -3298,6 +3309,56 @@ count > original 4 pieces after the drag). e2e: `vector-edit.spec.ts` — TEST_C
 stored key now resolves **unchanged**, not just non-empty and different, since it no longer needs to
 change at all) and #264 (an {8/3} star's multiply-crossed-segment center region, the case that broke the
 real-segment-id design entirely).
+
+## 52. Generalized Vector Edit Mode entry, an unblocked duplicate-segment case, and multi-select box priority over a coincident vertex
+
+Three independent fixes landed together, all asked for in one batch.
+
+**`enterVectorEditMode.ts` (new, `Canvas/utils/`) replaces two separate inline dispatch sequences.**
+Double-click (`useVectorEditOnDoubleClick.ts`'s `handleHit`) and Enter (`useKeyboardShortcuts/utils/
+handleEnterVectorEdit.ts`, renamed from `handleEnterMultiVectorEdit.ts`) each used to inline their own
+`dispatch(setVectorEditingNodeIds(ids)); dispatch(setActiveTool(ToolName.move))` pair. Extracted to one
+shared, deliberately generic `(dispatch, vectorNodeIds: string[])` util — guarded by
+`vectorNodeIds.length > 0` so it's a safe no-op for an empty list, which is what makes the callers below
+safe by construction rather than by their own ad hoc checks. Selection itself (`setSelection`) stays
+caller-specific: double-click still calls it first (the hit target may not be the current selection),
+Enter never did (it operates on whatever's already selected).
+
+**Enter now opens edit mode for a single selected vector too, not just 2+.** The old
+`handleEnterMultiVectorEdit` hard-gated on `vectorIds.length >= 2` (documented in commit `ff46808` as a
+"temporary entry mechanism"), leaving a 1-vector Enter a no-op — asymmetric with double-click, which
+always worked for one. `handleEnterVectorEdit` still filters the current selection down to
+`NodeType.vector` ids (so a mixed selection with e.g. a Frame just drops the non-vector ids, never
+crashes or blocks), but the `>=2` gate is gone — `enterVectorEditMode`'s own `length > 0` guard is the
+only threshold now, matching Figma (Enter opens 1 or more selected vectors alike).
+
+**`closeLoopOntoVertex.ts`'s `isAlreadyConnected` duplicate-segment guard was removed** — see §17's
+update note above for the full reasoning (it blocked a real case: closing a *second*, independent arc
+back onto an already-connected vertex pair, e.g. two arcs forming a lens/circle). Direction-independent
+duplicate detection was the wrong tool for a case that isn't actually a duplicate.
+
+**Multi-select box resize/rotate handles now win over a coincident outline vertex point.** `ARM_RESOLVERS`
+(`handlePointerDown/constants.ts`) had `armVectorVertexOnPointerDown` sitting *before*
+`armVectorMultiSelectResizeOnPointerDown`/`armVectorMultiSelectRotateOnPointerDown` — and since a 2-vertex
+selection's bounding-box corners are, by construction, exactly those two vertices' own positions, the
+resize corner handle of the smallest (and most common) multi-select box was **never actually reachable**
+through the real pointer pipeline: the vertex resolver claimed the click first every time. Fixed by moving
+just those two resolvers ahead of `armVectorVertexOnPointerDown` (the box's *move*/interior-click resolver,
+`armVectorMultiSelectBoxOnPointerDown`, stays where it was, right after vertex — an interior click and a
+vertex click are mutually exclusive by construction, so there was never a coincidence problem there to
+begin with). Both resize/rotate resolvers already position-check before claiming (`getVectorMultiSelectResizeHandle`/
+`isInVectorMultiSelectRotateRing`), so this reorder only changes the outcome for the exact-coincidence
+case; a plain click on a vertex elsewhere on the box's edge/interior still falls through to the vertex
+resolver exactly as before. This is the same "priority via ordering, not an explicit tie-break" pattern
+`selection-and-manipulation.md` §18 already documents for the polygon vertex-count-vs-resize case — see
+that doc for the general principle; this is its Vector Edit Mode instance.
+
+Unit: `enterVectorEditMode.spec.ts`, `handleEnterVectorEdit.spec.ts` (renamed/extended), the "Enter"
+block in `useKeyboardShortcuts.spec.tsx` (now covers the 1-vector case), three
+`closeLoopOntoVertex.spec.ts` cases flipped from "must not duplicate" to "must create the second
+segment", and two new `ARM_RESOLVERS`-ordering regression tests in `armResolvers.spec.ts` that walk the
+real resolver array (not just call one resolver function directly, which would pass regardless of order)
+against a resize-corner and a rotate-ring coincidence.
 
 ## Related
 

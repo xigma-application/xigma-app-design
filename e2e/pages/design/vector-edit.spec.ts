@@ -1875,8 +1875,7 @@ test('a painted region bounded by a multiply-crossed segment’s middle piece st
     const { store } = storeModule;
     const { addNode, setActiveTool, setVectorEditingNodeIds } = sliceModule;
 
-    const seg = (id: string, startId: string, endId: string) =>
-      [id, { endId, id, startId, tangentEnd: null, tangentStart: null }] as const;
+    const seg = (id: string, startId: string, endId: string) => [id, { endId, id, startId, tangentEnd: null, tangentStart: null }] as const;
     const vertex = (id: string, x: number, y: number) => [id, { id, x, y }] as const;
 
     store.dispatch(
@@ -1947,15 +1946,17 @@ test('a painted region bounded by a multiply-crossed segment’s middle piece st
   await designPage.pointerMove(800, 320);
   await designPage.pointerUp();
 
-  const resolvedAfterDrag = await page.evaluate(async ([id]: [string]) => {
-    const { store } = await import('/src/store/index.ts');
-    const { getVectorFillLoopPoints } = await import(
-      '/src/utils/canvas/vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints.ts'
-    );
-    const node = store.getState().design.nodes[id];
+  const resolvedAfterDrag = await page.evaluate(
+    async ([id]: [string]) => {
+      const { store } = await import('/src/store/index.ts');
+      const { getVectorFillLoopPoints } =
+        await import('/src/utils/canvas/vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints.ts');
+      const node = store.getState().design.nodes[id];
 
-    return node.filledFaceKeys.map((key: string) => getVectorFillLoopPoints(node, key) !== null);
-  }, [nodeId]);
+      return node.filledFaceKeys.map((key: string) => getVectorFillLoopPoints(node, key) !== null);
+    },
+    [nodeId],
+  );
 
   expect(resolvedAfterDrag).toEqual([true]);
 });
