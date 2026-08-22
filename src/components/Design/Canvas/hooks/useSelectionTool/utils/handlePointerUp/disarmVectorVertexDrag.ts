@@ -10,7 +10,7 @@ import { TVectorNode } from 'types/design/types';
 // utils
 import { bakeVectorNodeRotation } from '../../../../utils/bakeVectorNodeRotation';
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
-import { mergeVectorVertices } from 'utils/canvas/vectorNetwork/mergeVectorVertices';
+import { mergeVectorVertices } from 'utils/canvas/vectorNetwork/mergeVectorVertices/mergeVectorVertices';
 
 export const disarmVectorVertexDrag = (
   canvas: HTMLCanvasElement,

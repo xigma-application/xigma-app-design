@@ -9,6 +9,7 @@ import { ToolName } from 'types/design/enums';
 // utils
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getVectorFaceAtPointAcrossOpenNodes } from '../../../../utils/getVectorFaceAtPointAcrossOpenNodes';
+import { getVectorFillLoopKeyAtPoint } from 'utils/canvas/vectorNetwork/getVectorFillLoopKeyAtPoint';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 
 export const resolveVectorPaintHover = (
@@ -25,9 +26,10 @@ export const resolveVectorPaintHover = (
     const viewport = selectViewport(state);
     const point = screenToWorld(getPointerPosition(canvas, event), viewport);
     const hit = getVectorFaceAtPointAcrossOpenNodes(point, vectorEditingNodeIds, state.design.nodes);
+    const isFilled = Boolean(hit && getVectorFillLoopKeyAtPoint(hit.node, point));
 
-    canvasRefs.hoveredVectorPaintFaceKeyRef.current = hit ? { faceKey: hit.faceKey, nodeId: hit.node.id } : null;
-    setClassName(hit ? (hit.node.filledFaceKeys.includes(hit.faceKey) ? 'paint-remove' : 'paint-add') : 'paint');
+    canvasRefs.hoveredVectorPaintFaceKeyRef.current = hit ? { faceKey: hit.face.key, isFilled, nodeId: hit.node.id } : null;
+    setClassName(hit ? (isFilled ? 'paint-remove' : 'paint-add') : 'paint');
   } else {
     canvasRefs.hoveredVectorPaintFaceKeyRef.current = null;
   }

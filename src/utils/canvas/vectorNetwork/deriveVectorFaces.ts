@@ -1,38 +1,42 @@
 // types
 import { TPoint } from 'types/canvas';
 import { TVectorNode, TVectorSegment, TVectorVertex } from 'types/design/types';
+import { getVectorPieceBoundaryKeys, TVectorPieceBoundaries } from './getVectorPieceBoundaryKeys';
 
 // utils
 import { buildVectorHalfEdgeAdjacency } from './buildVectorHalfEdgeAdjacency';
-import { flattenSegment } from './flattenSegment';
-import { getVectorCurveSegmentCount } from './getVectorCurveSegmentCount';
+import { flattenVectorFaceSteps } from './flattenVectorFaceSteps';
 import { getVectorFaceSignedArea } from './getVectorFaceSignedArea';
+import { getVectorFillPieceKey } from './getVectorFillPieceKey';
 import { planarizeVectorNetwork } from './planarizeVectorNetwork/planarizeVectorNetwork';
 import { TVectorFaceStep, walkVectorFace } from './walkVectorFace';
 
 export type TVectorFace = {
   key: string;
+  pieceKeys: string[];
   points: TPoint[];
 };
 
-const cache = new WeakMap<TVectorNode, TVectorFace[]>();
-
-const getFaceBoundary = (
+const getPieceKeys = (
   steps: TVectorFaceStep[],
-  segments: Record<string, TVectorSegment>,
+  planarSegments: Record<string, TVectorSegment>,
   vertices: Record<string, TVectorVertex>,
-): TPoint[] =>
-  steps.flatMap(({ fromId, segmentId, toId }) => {
-    const segment = segments[segmentId];
-    const forward = segment.startId === fromId;
-    const tangentAtFrom = forward ? segment.tangentStart : segment.tangentEnd;
-    const tangentAtTo = forward ? segment.tangentEnd : segment.tangentStart;
-    const from = vertices[fromId];
-    const to = vertices[toId];
-    const points = flattenSegment(from, to, tangentAtFrom, tangentAtTo, getVectorCurveSegmentCount(from, to, tangentAtFrom, tangentAtTo));
+  boundaryKeysByRealSegmentId: Map<string, Record<string, TVectorPieceBoundaries>>,
+): string[] => [
+  ...new Set(
+    steps.map((step) => {
+      const realSegmentId = step.segmentId.split('#')[0];
+      const boundaryKeys =
+        boundaryKeysByRealSegmentId.get(realSegmentId) ?? getVectorPieceBoundaryKeys(realSegmentId, planarSegments, vertices);
 
-    return points.slice(0, -1);
-  });
+      boundaryKeysByRealSegmentId.set(realSegmentId, boundaryKeys);
+
+      return getVectorFillPieceKey(realSegmentId, boundaryKeys[step.segmentId]);
+    }),
+  ),
+];
+
+const cache = new WeakMap<TVectorNode, TVectorFace[]>();
 
 const isSelfBacktrack = (steps: TVectorFaceStep[]): boolean => steps.length === 2 && steps[0].segmentId === steps[1].segmentId;
 
@@ -45,6 +49,7 @@ export const deriveVectorFaces = (node: TVectorNode): TVectorFace[] => {
     const adjacency = buildVectorHalfEdgeAdjacency(segments, planar.vertices);
     const visited = new Set<string>();
     const seenFaceKeys = new Set<string>();
+    const boundaryKeysByRealSegmentId = new Map<string, Record<string, TVectorPieceBoundaries>>();
     const faces: TVectorFace[] = [];
 
     segments.forEach((segment) => {
@@ -55,7 +60,7 @@ export const deriveVectorFaces = (node: TVectorNode): TVectorFace[] => {
         const steps = walkVectorFace(segment.id, direction.fromId, direction.toId, adjacency, visited, segments.length);
 
         if (steps && !isSelfBacktrack(steps)) {
-          const points = getFaceBoundary(steps, planar.segments, planar.vertices);
+          const points = flattenVectorFaceSteps(steps, planar.segments, planar.vertices);
 
           if (getVectorFaceSignedArea(points) >= 0) {
             const key = steps
@@ -66,7 +71,7 @@ export const deriveVectorFaces = (node: TVectorNode): TVectorFace[] => {
             /* v8 ignore if -- @preserve unreachable given current walk/planarization logic, see comment above */
             if (!seenFaceKeys.has(key)) {
               seenFaceKeys.add(key);
-              faces.push({ key, points });
+              faces.push({ key, pieceKeys: getPieceKeys(steps, planar.segments, node.vertices, boundaryKeysByRealSegmentId), points });
             }
           }
         }

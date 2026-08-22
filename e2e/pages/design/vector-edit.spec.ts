@@ -1848,9 +1848,114 @@ test('a painted square keeps its fill on the region unaffected by the drag after
     [nodeId],
   );
 
-  // the drag legitimately produces new face keys (the topology genuinely changed) — the old, now-stale
-  // key must not survive verbatim, but the drag must not leave the shape entirely unpainted either
-  // (the reported bug: the whole square lost its fill the instant it self-intersected)
-  expect(faceKeysAfter).not.toEqual(faceKeysBefore);
+  // each piece key is anchored to its own two stable boundaries (real vertices, or crossings
+  // identified by which other real segment they border) rather than to a derived-from-current-
+  // planarization key, so the exact same stored key still resolves after the drag — no remap
+  // needed, and (the reported bug) the fill is never lost the instant the shape self-intersects
+  expect(faceKeysAfter).toEqual(faceKeysBefore);
   expect(faceKeysAfter.length).toBeGreaterThan(0);
+});
+
+test('a painted region bounded by a multiply-crossed segment’s middle piece stays resolvable after a drag changes its crossings — the {8/3}-star regression', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-star-multi-crossed-paint');
+  await expect(designPage.canvas).toBeVisible();
+
+  // an {8/3} star: 8 vertices, each connected to the one 3 steps away, so every one of its 8 segments
+  // crosses several others — the small central region is bounded entirely by MIDDLE pieces of these
+  // multiply-crossed segments (never a whole/unsplit segment), the exact shape that broke resolution
+  // before piece identity was keyed by "which other real segment a piece borders" instead of a
+  // derived-from-current-planarization face key (getVectorPieceBoundaryKeys.ts)
+  await page.evaluate(async () => {
+    const storeModule = await import('/src/store/index.ts');
+    const sliceModule = await import('/src/store/design/slice.ts');
+    const { store } = storeModule;
+    const { addNode, setActiveTool, setVectorEditingNodeIds } = sliceModule;
+
+    const seg = (id: string, startId: string, endId: string) =>
+      [id, { endId, id, startId, tangentEnd: null, tangentStart: null }] as const;
+    const vertex = (id: string, x: number, y: number) => [id, { id, x, y }] as const;
+
+    store.dispatch(
+      addNode({
+        fillColor: '#D9D9D9',
+        filledFaceKeys: [],
+        name: 'Vector',
+        parentId: null,
+        rotation: 0,
+        segments: Object.fromEntries([
+          seg('s0', 'v0', 'v3'),
+          seg('s1', 'v3', 'v6'),
+          seg('s2', 'v6', 'v1'),
+          seg('s3', 'v1', 'v4'),
+          seg('s4', 'v4', 'v7'),
+          seg('s5', 'v7', 'v2'),
+          seg('s6', 'v2', 'v5'),
+          seg('s7', 'v5', 'v0'),
+        ]),
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: 'vector',
+        vertexHandleModes: {},
+        vertices: Object.fromEntries([
+          vertex('v0', 800, 250),
+          vertex('v1', 906, 294),
+          vertex('v2', 950, 400),
+          vertex('v3', 906, 506),
+          vertex('v4', 800, 550),
+          vertex('v5', 694, 506),
+          vertex('v6', 650, 400),
+          vertex('v7', 694, 294),
+        ]),
+      }),
+    );
+
+    const state = store.getState();
+    const nodeId = state.design.rootOrder[state.design.rootOrder.length - 1];
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+    store.dispatch(setActiveTool('paint' as never));
+  });
+
+  // paint the star's small central region
+  await designPage.click(800, 400);
+
+  const { faceKeysBefore, nodeId } = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { rootOrder, nodes } = store.getState().design;
+    const id = rootOrder[rootOrder.length - 1];
+
+    return { faceKeysBefore: nodes[id].filledFaceKeys, nodeId: id };
+  });
+
+  expect(faceKeysBefore).toHaveLength(1); // sanity check: the central region actually got painted
+
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { setActiveTool } = await import('/src/store/design/slice.ts');
+
+    store.dispatch(setActiveTool('default' as never));
+  });
+
+  // drag one of the star's own points inward, changing which segments its two adjacent edges cross —
+  // the stored center-region key must still resolve afterward
+  await designPage.pointerDown(800, 250);
+  await designPage.pointerMove(800, 285);
+  await designPage.pointerMove(800, 320);
+  await designPage.pointerUp();
+
+  const resolvedAfterDrag = await page.evaluate(async ([id]: [string]) => {
+    const { store } = await import('/src/store/index.ts');
+    const { getVectorFillLoopPoints } = await import(
+      '/src/utils/canvas/vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints.ts'
+    );
+    const node = store.getState().design.nodes[id];
+
+    return node.filledFaceKeys.map((key: string) => getVectorFillLoopPoints(node, key) !== null);
+  }, [nodeId]);
+
+  expect(resolvedAfterDrag).toEqual([true]);
 });

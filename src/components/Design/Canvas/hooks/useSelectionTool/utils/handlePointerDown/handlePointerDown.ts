@@ -16,7 +16,6 @@ import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getSelectionHitAtPoint } from './getSelectionHitAtPoint';
 import { screenToWorld } from '../../../../utils/screenToWorld';
-import { snapshotVectorFaceFills } from '../vectorFaceFillRemap/snapshotVectorFaceFills';
 
 export const handlePointerDown = (
   canvas: HTMLCanvasElement,
@@ -49,7 +48,6 @@ export const handlePointerDown = (
     };
 
     dispatch(beginHistoryGesture());
-    selectionRefs.vectorFaceFillSnapshotRef.current = snapshotVectorFaceFills(state);
 
     for (const resolve of ARM_RESOLVERS) {
       if (resolve(ctx)) {

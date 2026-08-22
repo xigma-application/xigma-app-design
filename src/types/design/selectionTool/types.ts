@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 
 // types
 import { TDraftRect, TPoint, TResizeHandle } from 'types/canvas';
-import { TVectorNode, TVectorSegment } from 'types/design/types';
+import { TVectorSegment } from 'types/design/types';
 
 export type TPendingClickAction = { id: string; kind: 'collapse' } | { kind: 'deselect' };
 
@@ -169,7 +169,6 @@ export type TSelectionToolRefs = {
   resizeDragRef: RefObject<TResizeDragState | null>;
   starRatioDragRef: RefObject<TStarRatioDragState | null>;
   starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>;
-  vectorFaceFillSnapshotRef: RefObject<Record<string, TVectorNode> | null>;
   vectorHandleDragRef: RefObject<TVectorHandleDragState | null>;
   vectorMarqueeModeRef: RefObject<TVectorMarqueeMode | null>;
   vectorMarqueeStartRef: RefObject<TPoint | null>;

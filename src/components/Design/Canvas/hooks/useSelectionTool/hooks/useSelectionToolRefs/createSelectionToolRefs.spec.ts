@@ -17,7 +17,6 @@ describe('createSelectionToolRefs behaviors', () => {
       resizeDragRef: { current: null },
       starRatioDragRef: { current: null },
       starVertexCountDragRef: { current: null },
-      vectorFaceFillSnapshotRef: { current: null },
       vectorHandleDragRef: { current: null },
       vectorMarqueeModeRef: { current: null },
       vectorMarqueeStartRef: { current: null },

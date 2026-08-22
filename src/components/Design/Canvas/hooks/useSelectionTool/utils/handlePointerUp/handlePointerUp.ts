@@ -30,7 +30,6 @@ import { disarmVectorMultiSelectResizeDrag } from './disarmVectorMultiSelectResi
 import { disarmVectorMultiSelectRotateDrag } from './disarmVectorMultiSelectRotateDrag';
 import { disarmVectorSegmentBendDrag } from './disarmVectorSegmentBendDrag';
 import { disarmVectorVertexDrag } from './disarmVectorVertexDrag';
-import { remapVectorFaceFillsAfterGesture } from '../vectorFaceFillRemap/remapVectorFaceFillsAfterGesture';
 
 export const handlePointerUp = (
   canvas: HTMLCanvasElement,
@@ -63,6 +62,5 @@ export const handlePointerUp = (
   disarmVectorMultiSelectRotateDrag(canvas, event, canvasRefs.vectorMultiSelectRotateDragRef, canvasRefs.vectorMultiSelectBoxRef);
   disarmVectorSegmentBendDrag(canvas, event, dispatch, canvasRefs, selectionRefs.vectorSegmentBendDragRef, setClassName);
   disarmVectorMarqueeDrag(canvas, event, canvasRefs, selectionRefs.vectorMarqueeStartRef, selectionRefs.vectorMarqueeModeRef);
-  remapVectorFaceFillsAfterGesture(dispatch, selectionRefs);
   dispatch(endHistoryGesture());
 };

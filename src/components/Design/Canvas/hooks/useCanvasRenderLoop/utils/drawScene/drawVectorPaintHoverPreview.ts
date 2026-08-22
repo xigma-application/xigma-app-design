@@ -28,8 +28,7 @@ export const drawVectorPaintHoverPreview = (
     const face = deriveVectorFaces(bakedNode).find((candidate) => candidate.key === hoveredFace.faceKey);
 
     if (face) {
-      const isFilled = node.filledFaceKeys.includes(hoveredFace.faceKey);
-      const color = isFilled ? VECTOR_EDGE_HOVER_STROKE : DRAFT_FRAME_STROKE;
+      const color = hoveredFace.isFilled ? VECTOR_EDGE_HOVER_STROKE : DRAFT_FRAME_STROKE;
 
       drawVectorHatchFill(gl, program, buffer, [face.points], color, canvasWidth, canvasHeight, viewport);
     }

@@ -4,14 +4,15 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { drawVectorNode } from '../drawVectorNode';
+import { getVectorFillColorForLoopKey } from '../../vectorNetwork/getVectorFillColorForLoopKey';
 
-const deriveVectorFacesMock = vi.fn();
+const getVectorFillLoopPointsMock = vi.fn();
 const drawVectorFillMock = vi.fn();
 const drawVectorStrokeMock = vi.fn();
 const flattenVectorSegmentsMock = vi.fn();
 
-vi.mock('../../vectorNetwork/deriveVectorFaces', () => ({
-  deriveVectorFaces: (...args: unknown[]): unknown => deriveVectorFacesMock(...args),
+vi.mock('../../vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints', () => ({
+  getVectorFillLoopPoints: (...args: unknown[]): unknown => getVectorFillLoopPointsMock(...args),
 }));
 vi.mock('../drawVectorFill', () => ({ drawVectorFill: (...args: unknown[]): void => drawVectorFillMock(...args) }));
 vi.mock('../drawVectorStroke', () => ({ drawVectorStroke: (...args: unknown[]): void => drawVectorStrokeMock(...args) }));
@@ -23,20 +24,20 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 describe('drawVectorNode', () => {
   beforeEach(() => {
-    deriveVectorFacesMock.mockClear();
+    getVectorFillLoopPointsMock.mockClear();
     drawVectorFillMock.mockClear();
     drawVectorStrokeMock.mockClear();
     flattenVectorSegmentsMock.mockClear();
   });
 
-  it('should derive faces/segments then draw the fill followed by the stroke, using the node’s own colors and width', () => {
+  it('should resolve each filled loop key to its current points then draw the fill followed by the stroke, using the node’s own colors and width', () => {
     // mock
     const gl = {} as WebGL2RenderingContext;
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
     const node: TVectorNode = {
       fillColor: '#ff0000',
-      filledFaceKeys: ['k1'],
+      filledFaceKeys: ['s1,s2,s3'],
       id: '1',
       name: 'Vector',
       parentId: null,
@@ -48,30 +49,39 @@ describe('drawVectorNode', () => {
       vertexHandleModes: {},
       vertices: {},
     };
-    const faces = [{ key: 'k1', points: [{ x: 0, y: 0 }] }];
+    const loopPoints = [{ x: 0, y: 0 }];
     const flattened = [{ points: [{ x: 0, y: 0 }], segmentId: 's1' }];
 
-    deriveVectorFacesMock.mockReturnValue(faces);
+    getVectorFillLoopPointsMock.mockReturnValue(loopPoints);
     flattenVectorSegmentsMock.mockReturnValue(flattened);
 
     // before
     drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
 
     // result
-    expect(deriveVectorFacesMock).toHaveBeenCalledWith(node);
+    expect(getVectorFillLoopPointsMock).toHaveBeenCalledWith(node, 's1,s2,s3');
     expect(flattenVectorSegmentsMock).toHaveBeenCalledWith(node);
-    expect(drawVectorFillMock).toHaveBeenCalledWith(gl, program, buffer, [faces[0].points], '#ff0000', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorFillMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      [loopPoints],
+      getVectorFillColorForLoopKey('s1,s2,s3'),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
     expect(drawVectorStrokeMock).toHaveBeenCalledWith(gl, program, buffer, flattened, '#00ff00', 3, 200, 150, IDENTITY_VIEWPORT);
   });
 
-  it('should derive faces but skip drawing a fill when the node has a fillColor but no face matches filledFaceKeys', () => {
+  it('should draw each filled loop through its own separate drawVectorFill call, not one call batching every loop together — batching would XOR independently-painted loops’ stencil bits together if they come to overlap in screen space', () => {
     // mock
     const gl = {} as WebGL2RenderingContext;
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
     const node: TVectorNode = {
       fillColor: '#ff0000',
-      filledFaceKeys: [],
+      filledFaceKeys: ['s1,s2,s3', 's3,s4,s5'],
       id: '1',
       name: 'Vector',
       parentId: null,
@@ -83,22 +93,60 @@ describe('drawVectorNode', () => {
       vertexHandleModes: {},
       vertices: {},
     };
-    const faces = [{ key: 'k1', points: [{ x: 0, y: 0 }] }];
+    const loopAPoints = [{ x: 0, y: 0 }];
+    const loopBPoints = [{ x: 1, y: 1 }];
     const flattened = [{ points: [{ x: 0, y: 0 }], segmentId: 's1' }];
 
-    deriveVectorFacesMock.mockReturnValue(faces);
+    getVectorFillLoopPointsMock.mockImplementation((_node: TVectorNode, key: string) => (key === 's1,s2,s3' ? loopAPoints : loopBPoints));
+    flattenVectorSegmentsMock.mockReturnValue(flattened);
+
+    // before
+    drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
+
+    // result — each loop also gets its own color, derived from its own key, so two loops always differ
+    const colorA = getVectorFillColorForLoopKey('s1,s2,s3');
+    const colorB = getVectorFillColorForLoopKey('s3,s4,s5');
+
+    expect(drawVectorFillMock).toHaveBeenCalledTimes(2);
+    expect(colorB).not.toBe(colorA);
+    expect(drawVectorFillMock).toHaveBeenNthCalledWith(1, gl, program, buffer, [loopAPoints], colorA, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorFillMock).toHaveBeenNthCalledWith(2, gl, program, buffer, [loopBPoints], colorB, 200, 150, IDENTITY_VIEWPORT);
+  });
+
+  it('should skip drawing a fill when a filled loop key no longer resolves to any current points (its segments were deleted)', () => {
+    // mock
+    const gl = {} as WebGL2RenderingContext;
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const node: TVectorNode = {
+      fillColor: '#ff0000',
+      filledFaceKeys: ['stale-key'],
+      id: '1',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {},
+      strokeColor: '#00ff00',
+      strokeWidth: 3,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: {},
+    };
+    const flattened = [{ points: [{ x: 0, y: 0 }], segmentId: 's1' }];
+
+    getVectorFillLoopPointsMock.mockReturnValue(null);
     flattenVectorSegmentsMock.mockReturnValue(flattened);
 
     // before
     drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
 
     // result
-    expect(deriveVectorFacesMock).toHaveBeenCalledWith(node);
+    expect(getVectorFillLoopPointsMock).toHaveBeenCalledWith(node, 'stale-key');
     expect(drawVectorFillMock).not.toHaveBeenCalled();
     expect(drawVectorStrokeMock).toHaveBeenCalledWith(gl, program, buffer, flattened, '#00ff00', 3, 200, 150, IDENTITY_VIEWPORT);
   });
 
-  it('should skip drawing a fill (and never call deriveVectorFaces) when the node has no fillColor', () => {
+  it('should skip drawing a fill (and never resolve any loop) when the node has no filled faces', () => {
     // mock
     const gl = {} as WebGL2RenderingContext;
     const program = {} as WebGLProgram;
@@ -125,7 +173,7 @@ describe('drawVectorNode', () => {
     drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
 
     // result
-    expect(deriveVectorFacesMock).not.toHaveBeenCalled();
+    expect(getVectorFillLoopPointsMock).not.toHaveBeenCalled();
     expect(drawVectorFillMock).not.toHaveBeenCalled();
     expect(drawVectorStrokeMock).toHaveBeenCalledWith(gl, program, buffer, flattened, '#00ff00', 3, 200, 150, IDENTITY_VIEWPORT);
   });

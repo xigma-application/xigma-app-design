@@ -33,7 +33,7 @@ describe('getVectorFaceAtPoint', () => {
     );
 
     // result
-    expect(getVectorFaceAtPoint({ x: 50, y: 40 }, node)).toBe('s1,s2,s3');
+    expect(getVectorFaceAtPoint({ x: 50, y: 40 }, node)?.key).toBe('s1,s2,s3');
   });
 
   it('should return null when the point misses every face', () => {
@@ -72,11 +72,11 @@ describe('getVectorFaceAtPoint', () => {
     );
 
     // result
-    const bottomLobeKey = getVectorFaceAtPoint({ x: 50, y: 10 }, node);
-    const topLobeKey = getVectorFaceAtPoint({ x: 50, y: 90 }, node);
+    const bottomLobeKey = getVectorFaceAtPoint({ x: 50, y: 10 }, node)?.key;
+    const topLobeKey = getVectorFaceAtPoint({ x: 50, y: 90 }, node)?.key;
 
-    expect(bottomLobeKey).not.toBeNull();
-    expect(topLobeKey).not.toBeNull();
+    expect(bottomLobeKey).not.toBeUndefined();
+    expect(topLobeKey).not.toBeUndefined();
     expect(bottomLobeKey).not.toBe(topLobeKey);
   });
 });

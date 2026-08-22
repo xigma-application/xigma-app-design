@@ -62,4 +62,6 @@ See `components/Design/Canvas/utils/getNodeAtPoint.ts` for this rule applied.
 
 [[xigma-function-style]] — once a function's branching gets heavy enough that even a `switch`
 case body carries multiple concerns, that skill's "ifologia" rule covers splitting each branch out
-into its own named function.
+into its own named function. For many branches that do *not* share one discriminant value (e.g. an
+ordered chain of independent hit-tests, or a fan-out over several independent refs), see that
+skill's resolver-chain and self-guarding-fan-out sections instead — a `switch` doesn't apply there.

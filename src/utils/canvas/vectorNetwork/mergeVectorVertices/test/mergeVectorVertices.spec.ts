@@ -39,7 +39,7 @@ describe('mergeVectorVertices', () => {
   it('should drop a filled-face key that referenced a segment pruned by the merge', () => {
     // mock — same self-loop setup as above, but "s1" was also the sole boundary of a painted face
     const node = {
-      filledFaceKeys: ['s1'],
+      filledFaceKeys: ['s1[v:source|v:target]'],
       segments: { s1: { endId: 'target', id: 's1', startId: 'source', tangentEnd: null, tangentStart: null } },
       vertexHandleModes: {},
       vertices: { source: { id: 'source', x: 0, y: 0 }, target: { id: 'target', x: 10, y: 0 } },
@@ -115,13 +115,13 @@ describe('mergeVectorVertices', () => {
     // mock — targetNode has a painted face keyed by "s1", the segment that survives absorption unchanged;
     // sourceNode already had an unrelated face of its own painted, keyed by "sA"
     const sourceNode = {
-      filledFaceKeys: ['sA'],
+      filledFaceKeys: ['sA[v:other|v:source]'],
       segments: { sA: { endId: 'other', id: 'sA', startId: 'source', tangentEnd: null, tangentStart: null } },
       vertexHandleModes: {},
       vertices: { other: { id: 'other', x: 0, y: 5 }, source: { id: 'source', x: 10, y: 0 } },
     };
     const targetNode = {
-      filledFaceKeys: ['s1'],
+      filledFaceKeys: ['s1[v:b|v:target]'],
       segments: { s1: { endId: 'b', id: 's1', startId: 'target', tangentEnd: null, tangentStart: null } },
       vertexHandleModes: {},
       vertices: { b: { id: 'b', x: 20, y: 0 }, target: { id: 'target', x: 10, y: 0 } },
@@ -131,6 +131,6 @@ describe('mergeVectorVertices', () => {
     const merged = mergeVectorVertices(sourceNode, targetNode, 'source', 'target');
 
     // result
-    expect(merged.filledFaceKeys).toEqual(['sA', 's1']);
+    expect(merged.filledFaceKeys).toEqual(['sA[v:other|v:source]', 's1[v:b|v:target]']);
   });
 });

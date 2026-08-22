@@ -1024,7 +1024,9 @@ describe('armVectorPaintOnPointerDown', () => {
     const action = (ctx.dispatch as ReturnType<typeof vi.fn>).mock.calls[0][0] as ReturnType<typeof updateNode>;
 
     expect(action.payload.id).toBe(nodeId);
-    expect(action.payload.changes).toEqual({ filledFaceKeys: ['s1,s2,s3'] });
+    expect(action.payload.changes).toEqual({
+      filledFaceKeys: ['s1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]'],
+    });
   });
 
   it('should remove the clicked face from filledFaceKeys when it is already filled', () => {
@@ -1039,7 +1041,7 @@ describe('armVectorPaintOnPointerDown', () => {
     );
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
-    store.dispatch(updateNode({ changes: { filledFaceKeys: ['s1,s2,s3'] }, id: nodeId }));
+    store.dispatch(updateNode({ changes: { filledFaceKeys: ['s1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]'] }, id: nodeId }));
 
     // before
     const ctx = createContext({ activeTool: ToolName.paint, point: { x: 50, y: 40 } });

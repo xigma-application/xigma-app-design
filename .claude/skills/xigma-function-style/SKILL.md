@@ -1,6 +1,6 @@
 ---
 name: xigma-function-style
-description: How functions and effects are shaped in xigma — positive `if` guards instead of early-return negative guards, and named helper functions instead of inline closures inside useEffect/callbacks. Load before writing or reviewing a function with a null/undefined check, or a non-trivial useEffect/callback body.
+description: How functions and effects are shaped in xigma — positive `if` guards instead of early-return negative guards, named helper functions instead of inline closures inside useEffect/callbacks, splitting a heavy-branching function ("ifologia"), an ordered resolver-chain or self-guarding fan-out for a many-branch dispatcher, and named predicates + OR-combinator for a compound hit-test. Load before writing or reviewing a function with a null/undefined check, a non-trivial useEffect/callback body, a new branch in a pointer-event dispatcher (arm/continue/disarm), or a multi-clause `||`/`&&` condition.
 ---
 
 # xigma Function Style
@@ -378,9 +378,115 @@ folder-promotion rule kicks in too: the split-out pieces sit flat as siblings in
 (not a further nested `utils/`), and the original function's spec moves into a nested `test/`
 alongside them.
 
+## Ordered resolver chain for many mutually-exclusive, order-sensitive branches
+
+When one dispatcher must pick exactly one of many (10+) non-trivial branches, and *which one wins
+matters* (a more specific hit-test must be tried before a more general catch-all), don't grow the
+dispatcher into one long `if`/`else if` chain — and it's not a [[xigma-switch-over-if]] case either,
+since there's no single discriminant value to switch on. Instead:
+
+- Extract each branch into its own file/function named `armXOnPointerDown`, taking one shared
+  context object and returning `true | undefined` — `true` means "I claimed this event, stop
+  here"; `undefined` means "not mine, try the next resolver". This is the same positive-guard shape
+  as the single-condition case above, just returning a sentinel instead of falling off the end.
+- Collect the resolver functions into one ordered array (most-specific first, catch-all last) in a
+  dedicated `constants.ts`.
+- The dispatcher itself shrinks to building the shared context once, then looping with an early
+  return on the first resolver that claims the event:
+
+```ts
+for (const resolve of ARM_RESOLVERS) {
+  if (resolve(ctx)) {
+    return;
+  }
+}
+```
+
+A resolver itself stays a plain positive guard over its own slice of the context:
+
+```ts
+export const armHitOnPointerDown = ({ canvas, currentSelection, dispatch, event, hit, point, selectedNodes, selectionRefs }: TArmContext): true | undefined => {
+  if (hit) {
+    armHitDrag(canvas, event, dispatch, selectionRefs.dragStateRef, hit, currentSelection, selectedNodes, point);
+    return true;
+  }
+};
+```
+
+See `hooks/useSelectionTool/utils/handlePointerDown/` — `constants.ts`'s `ARM_RESOLVERS` orders 30
+resolvers (vector-editing resolvers first as the most specific, plain marquee/group-select last as
+the catch-all), each living in its own `armResolvers/armXOnPointerDown.ts` file, sharing one
+`TArmContext` type (`types.ts`).
+
+## Self-guarding fan-out for many independent branches
+
+When branches are independent rather than mutually exclusive — each cares only about its own slice
+of state, and in practice at most one is ever active, but nothing needs to *pick a winner* — don't
+route them through a claim/short-circuit chain either. Give each branch its own ref and its own
+named function that positive-guards on that ref, then call every function unconditionally in
+sequence; each no-ops unless its own ref happens to be set:
+
+```ts
+export const continueEndpointDrag = (canvas: HTMLCanvasElement, event: PointerEvent, dispatch: AppDispatch, endpointDragRef: RefObject<TEndpointDragState | null>): void => {
+  const endpointDragState = endpointDragRef.current;
+
+  if (endpointDragState) {
+    // ...uses endpointDragState, dispatches an update
+  }
+};
+```
+
+```ts
+export const handlePointerMove = (canvas, event, dispatch, canvasRefs, selectionRefs, setClassName): void => {
+  continueDrag(canvas, event, dispatch, selectionRefs.dragStateRef);
+  continueEndpointDrag(canvas, event, dispatch, selectionRefs.endpointDragRef);
+  continueResizeDrag(canvas, event, dispatch, selectionRefs.resizeDragRef);
+  // ...20+ more, one call per drag kind, order doesn't matter
+};
+```
+
+This is deliberately not [[xigma-switch-over-if]]'s "3+ ifs on the same value" shape — each function
+guards a *different* ref, there's no single discriminant to switch on. It's also deliberately not
+the claim/short-circuit resolver chain above: nothing here needs to pick a winner, since only one
+drag ref is ever armed at a time by the paired `armXOnPointerDown` resolver, so calling all of them
+is cheap and keeps adding a new drag kind a pure addition (one new file + one new call) instead of a
+change to any existing branch.
+
+See `hooks/useSelectionTool/utils/handlePointerMove/handlePointerMove.ts` and
+`.../handlePointerUp/handlePointerUp.ts` — the `armXOnPointerDown` → `continueXDrag` →
+`disarmXDrag` naming triad mirrors one drag kind's full pointerdown/pointermove/pointerup
+lifecycle end to end, with `disarmXDrag` guarding the same ref symmetrically on the way out.
+
+## Named predicates + OR-combinator for a compound hit-test
+
+When a boolean condition really means "any of these hit-tests passed" and each disjunct needs
+multi-line logic of its own (not a one-line comparison), extract each disjunct into its own named
+`hitsX(context, ...): boolean` predicate and combine them in a thin combinator function with plain
+`||` — don't inline the whole compound condition into one `if`:
+
+```ts
+export const hitsCurrentVectorSelection = (context: TArmContext, vectorEditingNodeIds: string[]): boolean =>
+  hitsSelectedVertex(context, vectorEditingNodeIds) ||
+  hitsSelectedHandle(context, vectorEditingNodeIds) ||
+  hitsSelectedSegment(context, vectorEditingNodeIds) ||
+  hitsMultiSelectBox(context, vectorEditingNodeIds);
+```
+
+Each `hitsX` predicate is independently readable and independently unit-testable, and the
+combinator still short-circuits the same way one big inline `||` chain would — this is the
+"ifologia" rule above applied to a boolean expression instead of a sequence of statements.
+
+See `armResolvers/armVectorLassoOnPointerDown/hitsCurrentVectorSelection.ts` and its four sibling
+`hitsSelectedVertex.ts` / `hitsSelectedHandle.ts` / `hitsSelectedSegment.ts` / `hitsMultiSelectBox.ts`
+predicates.
+
 ## Related
 
 [[xigma-module-structure]] — once a helper like this is reused from more than one place, it moves
 out of the hook's file into its own `utils/<functionName>.ts`; once a function itself earns a split
 per the "ifologia" rule above, that skill also covers where the resulting files (and their own
 promoted folder) live.
+
+[[xigma-switch-over-if]] — covers the sibling case where 3+ branches *do* test one shared
+discriminant value; the resolver-chain and self-guarding fan-out patterns above are for when they
+don't.

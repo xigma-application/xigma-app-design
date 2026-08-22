@@ -81,7 +81,7 @@ export type TPenPreview = {
 
 export type TVectorHandleHover = { end: 'end' | 'start'; segmentId: string };
 
-export type TVectorPaintFaceHover = { faceKey: string; nodeId: string };
+export type TVectorPaintFaceHover = { faceKey: string; isFilled: boolean; nodeId: string };
 
 export type TVectorMultiSelectBox = {
   bounds: TDraftRect;

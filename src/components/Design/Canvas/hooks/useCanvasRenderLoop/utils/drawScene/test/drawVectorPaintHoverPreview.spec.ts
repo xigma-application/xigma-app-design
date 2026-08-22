@@ -58,7 +58,16 @@ describe('drawVectorPaintHoverPreview', () => {
 
   it('should draw nothing when the hovered node id no longer resolves to any node', () => {
     // before
-    drawVectorPaintHoverPreview(gl, program, buffer, nodes, { faceKey: 'k1', nodeId: 'missing' }, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorPaintHoverPreview(
+      gl,
+      program,
+      buffer,
+      nodes,
+      { faceKey: 'k1', isFilled: true, nodeId: 'missing' },
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorHatchFillMock).not.toHaveBeenCalled();
@@ -69,7 +78,16 @@ describe('drawVectorPaintHoverPreview', () => {
     deriveVectorFacesMock.mockReturnValue([]);
 
     // before
-    drawVectorPaintHoverPreview(gl, program, buffer, nodes, { faceKey: 'stale-key', nodeId: node.id }, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorPaintHoverPreview(
+      gl,
+      program,
+      buffer,
+      nodes,
+      { faceKey: 'stale-key', isFilled: true, nodeId: node.id },
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorHatchFillMock).not.toHaveBeenCalled();
@@ -80,7 +98,16 @@ describe('drawVectorPaintHoverPreview', () => {
     deriveVectorFacesMock.mockReturnValue([{ key: 'k1', points: [{ x: 0, y: 0 }] }]);
 
     // before
-    drawVectorPaintHoverPreview(gl, program, buffer, nodes, { faceKey: 'k1', nodeId: node.id }, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorPaintHoverPreview(
+      gl,
+      program,
+      buffer,
+      nodes,
+      { faceKey: 'k1', isFilled: true, nodeId: node.id },
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 0, y: 0 }]], '#cd4422', 200, 150, IDENTITY_VIEWPORT);
@@ -99,7 +126,7 @@ describe('drawVectorPaintHoverPreview', () => {
       program,
       buffer,
       unfilledNodes,
-      { faceKey: 'k2', nodeId: unfilledNode.id },
+      { faceKey: 'k2', isFilled: false, nodeId: unfilledNode.id },
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -126,7 +153,16 @@ describe('drawVectorPaintHoverPreview', () => {
     const mixedNodes: Record<string, TSceneNode> = { [frameNode.id]: frameNode };
 
     // before
-    drawVectorPaintHoverPreview(gl, program, buffer, mixedNodes, { faceKey: 'k1', nodeId: frameNode.id }, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorPaintHoverPreview(
+      gl,
+      program,
+      buffer,
+      mixedNodes,
+      { faceKey: 'k1', isFilled: true, nodeId: frameNode.id },
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorHatchFillMock).not.toHaveBeenCalled();

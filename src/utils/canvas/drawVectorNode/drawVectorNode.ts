@@ -3,10 +3,11 @@ import { TVectorNode, TViewport } from 'types/design/types';
 
 // utils
 import { bakeVectorNodeRotation } from 'components/Design/Canvas/utils/bakeVectorNodeRotation';
-import { deriveVectorFaces } from '../vectorNetwork/deriveVectorFaces';
 import { drawVectorFill } from './drawVectorFill';
 import { drawVectorStroke } from './drawVectorStroke';
 import { flattenVectorSegments } from '../vectorNetwork/flattenVectorSegments';
+import { getVectorFillColorForLoopKey } from '../vectorNetwork/getVectorFillColorForLoopKey';
+import { getVectorFillLoopPoints } from '../vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints';
 
 export const drawVectorNode = (
   gl: WebGL2RenderingContext,
@@ -20,15 +21,13 @@ export const drawVectorNode = (
   const { segments, vertices } = bakeVectorNodeRotation(node);
   const renderedNode: TVectorNode = { ...node, segments, vertices };
 
-  if (renderedNode.fillColor) {
-    const filledFaces = deriveVectorFaces(renderedNode)
-      .filter((face) => renderedNode.filledFaceKeys.includes(face.key))
-      .map((face) => face.points);
+  renderedNode.filledFaceKeys.forEach((key) => {
+    const points = getVectorFillLoopPoints(renderedNode, key);
 
-    if (filledFaces.length > 0) {
-      drawVectorFill(gl, program, buffer, filledFaces, renderedNode.fillColor, canvasWidth, canvasHeight, viewport);
+    if (points) {
+      drawVectorFill(gl, program, buffer, [points], getVectorFillColorForLoopKey(key), canvasWidth, canvasHeight, viewport);
     }
-  }
+  });
 
   drawVectorStroke(
     gl,

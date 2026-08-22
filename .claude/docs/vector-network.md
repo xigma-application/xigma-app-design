@@ -2719,8 +2719,9 @@ unlike two straight lines, so the pair alone isn't a unique key.
 the opposite expectation.** A genuine topology change (a crossing appears, disappears, or a branch vertex
 gets dragged into/out of another face's interior) legitimately produces new face keys — there's no
 "lineage" tracking a face's identity across such a change at the `deriveVectorFaces` level itself (none
-exists here, and none should — see §51 for the best-effort geometric-overlap remap that now runs one
-layer up, at gesture-commit time, instead). What must NOT change a key is incidental recomputation — the same physical crossing, on the same two segments, at
+exists here, and none should — see §51 for how a painted face's fill survives such a change anyway, via
+piece identity kept one layer up rather than any lineage tracked here). What must NOT change a key is
+incidental recomputation — the same physical crossing, on the same two segments, at
 (near enough) the same point, must always re-derive the same split-piece ids. Verified directly: a drag
 that briefly creates then resolves a crossing must never leave `deriveVectorFaces` returning zero faces
 (the literal live bug — a filled shape stopped being paintable at all mid-drag, traced to the angle-tie
@@ -3204,83 +3205,99 @@ path, unchanged. Unit: 8 new cases in `armResolvers.spec.ts`'s `armVectorLassoOn
 `vector-edit.spec.ts` row 262 alongside the unmodified row 240. See
 `__test-cases__/multi-vector-edit.test.md` §11 for the full scenario log.
 
-## 51. A painted face survives a topology-changing gesture — best-effort geometric remap, not lineage tracking
+## 51. A painted face survives a topology-changing gesture — stable piece identity, not derived-key lineage or geometric remap
 
 Live-reported: painting a shape (§43), then dragging a vertex until the shape self-intersects, made the
 fill vanish entirely — `deriveVectorFaces` (§44) legitimately derives new, different face keys for a
 genuine crossing, but `node.filledFaceKeys` still held the old, now-stale key. §44's own note above
 already explains why `deriveVectorFaces` itself will never track this ("no lineage... at that level",
-by design) — this section is the one layer up that closes the gap, at the point a gesture actually
-commits, not inside face derivation itself.
+by design) — the fix lives one layer up: `filledFaceKeys` no longer stores anything *derived* from a
+current planarization at all, so there is nothing for a topology change to make stale in the first place.
 
-**Why gesture-commit time, not any of the ~30 `dispatch(updateNode(...))` call sites that touch a vector
-node's `vertices`/`segments` mid-drag**: there is no single dispatch chokepoint for vector geometry
-changes — `continueVectorVertexDrag.ts`/`continueVectorHandleDrag.ts`/`continueVectorSegmentBendDrag.ts`/
-the three multi-select `continueVectorMultiSelect*Drag.ts` files, plus `resizeVectorNode.ts`, all dispatch
-`updateNode` on every `pointermove`, each building its own partial `changes` object — hooking a remap into
-every one of them would mean recomputing faces on every mouse-move frame. What every one of those drags
-*does* share is `useSelectionTool/utils/handlePointerDown/handlePointerDown.ts` /
-`handlePointerUp/handlePointerUp.ts` — the one place `beginHistoryGesture()`/`endHistoryGesture()`
-bracket **every** drag mechanism (`design-store-architecture.md`'s history middleware groups any number of
-`updateNode` dispatches inside one open gesture into a single Undo step for free, confirmed directly —
-no explicit multi-dispatch coalescing needed), so a one-shot check at the very end of `handlePointerUp`
-is both cheap (runs once per gesture, not per frame) and lands in the same Undo step as the gesture's own
-geometry change.
+**Two earlier designs were tried and superseded before this one, each for a concrete, reproduced
+failure — worth knowing since they explain what this design deliberately avoids:**
 
-**Mechanism** (`useSelectionTool/utils/vectorFaceFillRemap/`, new folder):
-- `handlePointerDown.ts` calls `snapshotVectorFaceFills(state)` right after `beginHistoryGesture()`,
-  storing `Record<nodeId, TVectorNode>` — every vector node in the **whole document** with
-  `filledFaceKeys.length > 0` — into a new `selectionRefs.vectorFaceFillSnapshotRef`. Deliberately
-  document-wide, not scoped to `vectorEditingNodeIds`: an ordinary bounding-box resize of a painted vector
-  node (`resizeVectorNode.ts`) can also change its face topology without Vector Edit Mode ever being
-  entered. Cheap either way — this only stores object references (Redux/Immer nodes are already
-  immutable), not clones.
-- `handlePointerUp.ts` calls `remapVectorFaceFillsAfterGesture(dispatch, selectionRefs)` as its last step,
-  right before `dispatch(endHistoryGesture())`. For each snapshotted node whose current store reference
-  changed (an identity check — untouched nodes short-circuit immediately), `remapFilledFaceKeys(oldNode,
-  newNode)` (`utils/canvas/vectorNetwork/`, sibling to `deriveVectorFaces.ts`) decides the new
-  `filledFaceKeys`, and a corrective `updateNode` only dispatches if that set actually differs from what's
-  already there.
-- `remapFilledFaceKeys.ts`: old keys still present in `deriveVectorFaces(newNode)` pass through unchanged
-  (two short-circuits — no fills at all, or no key actually went stale — skip calling `deriveVectorFaces`
-  a second time). For keys that did go stale, every new face whose polygon overlaps a stale old face —
-  tested via `isPointInPolygonVertices` (`Canvas/utils/`, the same ray-cast the Paint tool's own click
-  hit-test already uses) applied **both directions** (new face's own centroid inside the old face's
-  polygon, OR the old face's centroid inside the new one) — inherits the fill. Both directions matter for
-  different topology changes: a face **splitting** into several (self-intersection) is reliably caught by
-  "new centroid inside old polygon", since each split piece is by construction a fragment of the old
-  face's own area; a **merge** (several old faces collapsing into one bigger new face, e.g. deleting a
-  dividing segment) is reliably caught by the other direction instead, since the new face's own centroid
-  isn't guaranteed to land inside any single one of the several old fragments that fed it, but each old
-  fragment's centroid is guaranteed to land inside the new, larger face that absorbed it.
+- **First attempt: best-effort geometric-overlap remap**, run once at gesture-commit time
+  (`beginHistoryGesture`/`endHistoryGesture` bracket every drag — see §48 for why that's the one
+  reliable chokepoint, not any of the ~30 individual `dispatch(updateNode(...))` call sites). Snapshot
+  every painted vector node before the gesture, and after it, swap any now-stale key for whichever new
+  face's polygon overlaps the old one (`isPointInPolygonVertices`, centroid-in-polygon tested both
+  directions to catch a split and a merge). Superseded: a self-intersecting drag's sliver region
+  immediately touching the dragged vertex can have **zero** geometric overlap with the shape's own
+  pre-drag polygon (confirmed by exhaustively sampling a live-reproduced bowtie drag — 0 of 182 sampled
+  sliver points landed inside the pre-drag rectangle) — not a heuristic near-miss, a real absence of
+  shared area, so the sliver stayed unfillable by construction.
+- **Second attempt: a stable loop of real segment ids**, storing `filledFaceKeys` as the sorted, deduped
+  real `node.segments` ids bounding a face (recovering a split piece's real id via `.split('#')[0]`),
+  with rendering reconstructing the loop's current geometry from those ids directly instead of matching
+  a derived key. This closed the sliver gap entirely (Figma parity — every fragment of a self-intersected
+  shape keeps its fill, not just the majority lobe) for any face where no *single* real segment is
+  crossed more than once. Superseded on a densely self-intersecting network (an {8/3} star: 8 segments,
+  each crossing several others) — `.split('#')[0]` collapses e.g. `s1#0` and `s1#1` to the same bare
+  `s1`, discarding *which* piece of a multiply-crossed segment actually bounded the painted face, so a
+  face bounded by such a piece couldn't be resolved at all.
 
-**Known, deliberately-accepted limitation, verified both live and analytically — not a bug**: the
-overlap test is genuinely geometric, not merely a heuristic proxy, and a single-vertex drag that creates a
-self-intersection necessarily moves that vertex to a position *outside* the shape's own pre-drag boundary
-(a topological necessity — otherwise the new edge could never reach across a non-adjacent edge to cross
-it). The resulting sliver face immediately touching the dragged vertex is bounded partly by that
-now-exterior point, and can end up with **zero** actual overlap against the old, pre-drag polygon — not a
-near-miss the heuristic fails to catch, but a real absence of shared area. Confirmed by exhaustively
-sampling one live-reproduced drag (a rectangle dragged into a bowtie identical in shape to the one in the
-original bug report): a dense 21×21 grid over the near-vertex sliver's own bounding box found **zero**
-sample points landing inside the pre-drag rectangle, out of 182 points that were themselves inside the
-sliver. The larger, far-side lobe (the one *not* touching the dragged vertex) is unaffected by this and
-reliably keeps its fill in every case tested, live and in the unit suite — this is what actually closes
-the reported bug (a shape's fill no longer disappears outright the instant it self-intersects). Extending
-this to also backfill the near-vertex sliver was considered and explicitly declined (asked and answered
-directly: the more permissive rule — fill every fragment descended from the same stale key regardless of
-overlap — was rejected as too broad, since it would also incorrectly propagate fill across a genuinely
-separate, deliberately-unfilled adjacent region in shapes with several faces meeting at a shared edge, the
-exact "square + triangle sharing an edge" shape `deriveVectorFaces.spec.ts` already regression-locks).
+**Current mechanism — piece identity keyed by what a piece borders, not by its position:**
+`splitSegmentAtCrossings.ts` (§44) already names each piece deterministically
+(`` `${segment.id}#${index}` ``) and gives it a `startId`/`endId` that's either a real vertex or a
+virtual crossing vertex id in the format `` `x:${sortedFirstSegmentId}:${sortedSecondSegmentId}:${t}` ``
+(§44) — stable in *which two segments cross*, unstable only in the exact `t`. `getVectorPieceBoundaryKeys.ts`
+(`utils/canvas/vectorNetwork/`) turns each of a real segment's current pieces into a boundary-key pair
+that keeps the stable part and discards the drift-prone `t`: a real endpoint becomes `` `v:${vertexId}` ``;
+a crossing becomes `` `x:${otherRealSegmentId}:${occurrence}` ``, where `occurrence` is a piece-index-order
+tiebreaker (0, 1, ...) for the rare case of the same two segments crossing more than once (curves only).
+`getVectorFillPieceKey.ts` formats one piece as `` `${realSegmentId}[${sortedBoundaryA}|${sortedBoundaryB}]` ``;
+`getVectorFillLoopKey.ts` sorts/dedupes/joins a face's piece keys into the string stored in
+`filledFaceKeys` — `deriveVectorFaces.ts` computes a face's `pieceKeys: string[]` this way, and
+`armVectorPaintOnPointerDown.ts` stores `getVectorFillLoopKey(face.pieceKeys)` on click, same as before.
 
-Unit: `getPolygonCentroid.spec.ts` (`utils/math/`), `remapFilledFaceKeys.spec.ts` (split/merge/
-unrelated-face-untouched cases), `snapshotVectorFaceFills.spec.ts`, `remapVectorFaceFillsAfterGesture.spec.ts`
-(real `store`, mirroring `disarmVectorVertexDrag.spec.ts`'s convention) — 100% branch coverage including
-both the "reference changed but topology didn't" and "reference changed and topology did" paths. e2e:
-`vector-edit.spec.ts`, TEST_CASES.md #263 — a painted square dragged into a self-intersecting shape,
-asserting via `store.getState()` (same pattern as TEST_CASES.md #249's cross-shape-merge fill test) that
-the resulting `filledFaceKeys` is non-empty and genuinely different from the stale pre-drag key, without
-asserting on the known-excluded sliver either way.
+Rendering resolves a stored key back to points in `getVectorFillLoopPoints/` (own folder, per
+[[xigma-module-structure]]'s function-promotion rule — `getVectorFillLoopPoints.ts` the orchestrator,
+each concern a flat sibling): for each stored piece key, `resolvePieceKeyToUnit.ts` locates the piece's
+two stored boundaries in the segment's **current** ordered vertex walk (`buildVertexSequence.ts`) and
+resolves to a `TResolvedPieceUnit` spanning **every** current piece between them — not just one exact
+match. This is the fix for the multiply-crossed case *and* stays correct for the original bowtie bug:
+a stored whole-segment key's two boundaries are always that segment's own two real endpoints, which
+still exist at the start and end of the current vertex walk regardless of how many *new* crossings a
+drag has inserted in between, so a fresh self-intersection subdividing a previously-whole piece still
+resolves to the (now several) current pieces spanning the same two endpoints. Units — not raw pieces —
+are what gets chained back into a closed loop (`chainIntoSteps.ts`/`walkNextStep.ts`, unit-granularity
+graph walk identical in shape to the original single-piece-per-key version): chaining at the unit level
+means a crossing shared internally by two different units in the same loop (e.g. a bowtie's two
+diagonals crossing each other, both part of the painted quad) never becomes an ambiguous shared vertex
+at the outer chain's level — it stays purely internal to each unit's own `expandUnitStep.ts` expansion.
+`getVectorFillLoopKeyAtPoint.ts` (unchanged shape) still finds which stored loop, if any, covers a
+given point for the Paint tool's click-to-toggle and hover-preview cursor.
+
+Two knock-on fixes landed alongside the piece-identity redesign:
+- **Per-loop stencil pass, not one batched call**: `drawVectorNode.ts` calls `drawVectorFill` once per
+  stored loop (each with its own `gl.clear(STENCIL_BUFFER_BIT)`) instead of batching every loop into one
+  call — batching two independently-painted loops that come to overlap in screen space after a drag
+  would XOR their stencil bits together and cancel the overlap region, found live on two adjacent
+  painted triangles.
+- **`mergeVectorVertices.ts`** (own folder too, one function per file —
+  `getMergedSegments`/`getMergedVertices`/`getMergedVertexHandleModes`/`getMergedFilledFaceKeys`,
+  `mergeVectorVertices.ts` the thin orchestrator) prunes a stale `filledFaceKeys` entry by checking
+  `pieceKey.split('[')[0] in segments` per piece — the real-segment-id prefix of the new piece-key
+  format, not the old bare-id format the pre-piece-identity version checked.
+
+**Per-loop fill color, unrelated to the identity fix itself but landed the same session**: each painted
+loop renders in its own color, deterministically derived from its own key (`getVectorFillColorForLoopKey.ts`
+— a string hash → hue → HSL→hex, no randomness, no state) instead of every loop on a node sharing one
+`fillColor` field — makes independently-painted regions visually distinguishable without adding any
+schema/state (the now-unused `TVectorNode.fillColor` field itself was left in place rather than threading
+its removal through every fixture that still sets it).
+
+Unit: one file per function under `getVectorFillLoopPoints/test/` and `mergeVectorVertices/test/` (both
+promoted folders), plus `getVectorPieceBoundaryKeys.spec.ts`, `getVectorFillPieceKey.spec.ts`,
+`getVectorFillLoopKey.spec.ts`, `getVectorFillLoopKeyAtPoint.spec.ts`, `getVectorFillColorForLoopKey.spec.ts`,
+`flattenVectorFaceSteps.spec.ts`, `getVectorFaceAtPointAcrossOpenNodes.spec.ts` — 100% branch coverage,
+including the multiply-crossed-segment case (a segment crossed twice, piece resolved by which other
+segments it borders) and the fresh-crossing-subdivides-a-whole-piece case (the bowtie regression, unit
+count > original 4 pieces after the drag). e2e: `vector-edit.spec.ts` — TEST_CASES.md #263 (bowtie: the
+stored key now resolves **unchanged**, not just non-empty and different, since it no longer needs to
+change at all) and #264 (an {8/3} star's multiply-crossed-segment center region, the case that broke the
+real-segment-id design entirely).
 
 ## Related
 

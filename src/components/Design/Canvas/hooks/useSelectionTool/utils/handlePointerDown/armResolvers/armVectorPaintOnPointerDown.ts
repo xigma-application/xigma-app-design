@@ -9,6 +9,8 @@ import { ToolName } from 'types/design/enums';
 
 // utils
 import { getVectorFaceAtPointAcrossOpenNodes } from '../../../../../utils/getVectorFaceAtPointAcrossOpenNodes';
+import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
+import { getVectorFillLoopKeyAtPoint } from 'utils/canvas/vectorNetwork/getVectorFillLoopKeyAtPoint';
 
 export const armVectorPaintOnPointerDown = ({ activeTool, dispatch, point }: TArmContext): true | undefined => {
   const state = store.getState();
@@ -18,12 +20,16 @@ export const armVectorPaintOnPointerDown = ({ activeTool, dispatch, point }: TAr
     const hit = getVectorFaceAtPointAcrossOpenNodes(point, vectorEditingNodeIds, state.design.nodes);
 
     if (hit) {
-      const { faceKey, node } = hit;
-      const filledFaceKeys = node.filledFaceKeys.includes(faceKey)
-        ? node.filledFaceKeys.filter((key) => key !== faceKey)
-        : [...node.filledFaceKeys, faceKey];
+      const { face, node } = hit;
+      const existingLoopKey = getVectorFillLoopKeyAtPoint(node, point);
 
-      dispatch(updateNode({ changes: { filledFaceKeys }, id: node.id }));
+      if (existingLoopKey) {
+        const filledFaceKeys = node.filledFaceKeys.filter((key) => key !== existingLoopKey);
+        dispatch(updateNode({ changes: { filledFaceKeys }, id: node.id }));
+      } else {
+        const filledFaceKeys = [...node.filledFaceKeys, getVectorFillLoopKey(face.pieceKeys)];
+        dispatch(updateNode({ changes: { filledFaceKeys }, id: node.id }));
+      }
     }
 
     return true;

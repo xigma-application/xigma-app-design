@@ -113,14 +113,14 @@ describe('resolveVectorPaintHover', () => {
     resolveVectorPaintHover(canvas, pointerEvent(50, 40), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorPaintFaceKeyRef.current).toEqual({ faceKey: 's1,s2,s3', nodeId });
+    expect(canvasRefs.hoveredVectorPaintFaceKeyRef.current).toEqual({ faceKey: 's1,s2,s3', isFilled: false, nodeId });
     expect(setClassName).toHaveBeenCalledWith('paint-add');
   });
 
   it("should set the 'paint-remove' cursor when hovering an already-filled face", () => {
     // mock
     const nodeId = addTriangleVectorNode();
-    store.dispatch(updateNode({ changes: { filledFaceKeys: ['s1,s2,s3'] }, id: nodeId }));
+    store.dispatch(updateNode({ changes: { filledFaceKeys: ['s1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]'] }, id: nodeId }));
     store.dispatch(setActiveTool(ToolName.paint));
     store.dispatch(setVectorEditingNodeIds([nodeId]));
     const canvas = createCanvas();
@@ -162,7 +162,7 @@ describe('resolveVectorPaintHover', () => {
     resolveVectorPaintHover(canvas, pointerEvent(550, 540), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorPaintFaceKeyRef.current).toEqual({ faceKey: 's1,s2,s3', nodeId: secondNodeId });
+    expect(canvasRefs.hoveredVectorPaintFaceKeyRef.current).toEqual({ faceKey: 's1,s2,s3', isFilled: false, nodeId: secondNodeId });
     expect(setClassName).toHaveBeenCalledWith('paint-add');
   });
 
