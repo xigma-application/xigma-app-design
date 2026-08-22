@@ -9,41 +9,46 @@ import { TArmContext } from '../types';
 import { armVectorMultiSelectRotateDrag } from '../armVectorMultiSelectRotateDrag';
 import { getVectorMultiSelectBox } from '../../../../../utils/getVectorMultiSelectBox';
 import { getVectorMultiSelectVertexIds } from '../../../../../utils/getVectorMultiSelectVertexIds';
+import { hitsSelectedSegment } from './armVectorLassoOnPointerDown/hitsSelectedSegment';
 import { isInVectorMultiSelectRotateRing } from '../../../../../utils/isInVectorMultiSelectRotateRing';
 import { isVectorMultiSelectBoxEligible } from '../../../../../utils/isVectorMultiSelectBoxEligible';
 
-export const armVectorMultiSelectRotateOnPointerDown = ({ canvas, canvasRefs, event, point, viewport }: TArmContext): true | undefined => {
-  const state = store.getState();
-  const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
-  const selectedVertexIds = canvasRefs.selectedVectorVertexIdsRef.current;
-  const selectedHandles = canvasRefs.selectedVectorHandlesRef.current;
-  const selectedSegmentIds = canvasRefs.selectedVectorSegmentIdsRef.current;
-  const vertexIds = getVectorMultiSelectVertexIds(state.design.nodes, vectorEditingNodeIds, selectedVertexIds, selectedSegmentIds);
+export const armVectorMultiSelectRotateOnPointerDown = (context: TArmContext): true | undefined => {
+  const { canvas, canvasRefs, event, point, viewport } = context;
 
-  if (isVectorMultiSelectBoxEligible(vertexIds, selectedHandles)) {
-    const box = getVectorMultiSelectBox(
-      state.design.nodes,
-      vectorEditingNodeIds,
-      vertexIds,
-      selectedHandles,
-      canvasRefs.vectorMultiSelectBoxRef,
-    );
+  if (!event.shiftKey) {
+    const state = store.getState();
+    const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
+    const selectedVertexIds = canvasRefs.selectedVectorVertexIdsRef.current;
+    const selectedHandles = canvasRefs.selectedVectorHandlesRef.current;
+    const selectedSegmentIds = canvasRefs.selectedVectorSegmentIdsRef.current;
+    const vertexIds = getVectorMultiSelectVertexIds(state.design.nodes, vectorEditingNodeIds, selectedVertexIds, selectedSegmentIds);
 
-    if (box && isInVectorMultiSelectRotateRing(point, box.bounds, viewport, box.rotation)) {
-      armVectorMultiSelectRotateDrag(
-        canvas,
-        event,
-        canvasRefs.vectorMultiSelectRotateDragRef,
+    if (isVectorMultiSelectBoxEligible(vertexIds, selectedHandles) && !hitsSelectedSegment(context, vectorEditingNodeIds)) {
+      const box = getVectorMultiSelectBox(
         state.design.nodes,
         vectorEditingNodeIds,
         vertexIds,
         selectedHandles,
-        box.bounds,
-        box.rotation,
-        point,
+        canvasRefs.vectorMultiSelectBoxRef,
       );
 
-      return true;
+      if (box && isInVectorMultiSelectRotateRing(point, box.bounds, viewport, box.rotation)) {
+        armVectorMultiSelectRotateDrag(
+          canvas,
+          event,
+          canvasRefs.vectorMultiSelectRotateDragRef,
+          state.design.nodes,
+          vectorEditingNodeIds,
+          vertexIds,
+          selectedHandles,
+          box.bounds,
+          box.rotation,
+          point,
+        );
+
+        return true;
+      }
     }
   }
 };

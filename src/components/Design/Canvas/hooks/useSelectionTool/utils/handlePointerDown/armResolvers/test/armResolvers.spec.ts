@@ -1948,6 +1948,52 @@ describe('armVectorMultiSelectResizeOnPointerDown', () => {
     expect(armVectorMultiSelectResizeOnPointerDown(ctx)).toBeUndefined();
     expect(ctx.canvasRefs.vectorMultiSelectResizeDragRef.current).toBeNull();
   });
+
+  it('should return undefined for a shift+click on a resize-handle position instead of arming a resize — shift always means "toggle selection", regardless of where it lands', () => {
+    // mock — same v1(0,0)/v2(100,100) "se"-corner setup as the first test above, but with shiftKey held
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+
+    // before
+    const ctx = createContext({ canvasRefs, event: pointerEvent({ shiftKey: true }), point: { x: 100, y: 100 } });
+
+    // result
+    expect(armVectorMultiSelectResizeOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.canvasRefs.vectorMultiSelectResizeDragRef.current).toBeNull();
+  });
+
+  it('should return undefined when the point lands on an already-selected segment that happens to coincide with a resize-handle position — the whole-selection drag must win, not a resize (real reported bug: a triangle’s v1-v2 segment midpoint sits exactly on the multi-select box’s own north-edge handle)', () => {
+    // mock — v1(900,300), v2(1050,300), v3(1050,450); s1(v1-v2)/s2(v2-v3) both selected, so the box
+    // spans (900,300)-(1050,450) and its north-edge handle sits at (975,300) — the exact midpoint of s1
+    const nodeId = addVectorNode(
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+      },
+      { v1: { id: 'v1', x: 900, y: 300 }, v2: { id: 'v2', x: 1050, y: 300 }, v3: { id: 'v3', x: 1050, y: 450 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1', 's2'];
+
+    // before
+    const ctx = createContext({ canvasRefs, point: { x: 975, y: 300 } });
+
+    // result
+    expect(armVectorMultiSelectResizeOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.canvasRefs.vectorMultiSelectResizeDragRef.current).toBeNull();
+  });
 });
 
 describe('armVectorMultiSelectRotateOnPointerDown', () => {
@@ -2046,6 +2092,27 @@ describe('armVectorMultiSelectRotateOnPointerDown', () => {
 
     // result
     expect(armVectorMultiSelectRotateOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  it('should return undefined for a shift+click in the rotate ring instead of arming a rotate — shift always means "toggle selection", regardless of where it lands', () => {
+    // mock — same v1(0,0)/v2(100,100) ring-position setup as the first test above, but with shiftKey held
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+
+    // before
+    const ctx = createContext({ canvasRefs, event: pointerEvent({ shiftKey: true }), point: { x: 100, y: 110 } });
+
+    // result
+    expect(armVectorMultiSelectRotateOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.canvasRefs.vectorMultiSelectRotateDragRef.current).toBeNull();
   });
 });
 

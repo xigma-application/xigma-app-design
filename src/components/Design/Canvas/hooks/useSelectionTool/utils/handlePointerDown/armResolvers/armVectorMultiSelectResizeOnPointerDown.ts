@@ -10,41 +10,46 @@ import { armVectorMultiSelectResizeDrag } from '../armVectorMultiSelectResizeDra
 import { getVectorMultiSelectBox } from '../../../../../utils/getVectorMultiSelectBox';
 import { getVectorMultiSelectResizeHandle } from '../../../../../utils/getVectorMultiSelectResizeHandle';
 import { getVectorMultiSelectVertexIds } from '../../../../../utils/getVectorMultiSelectVertexIds';
+import { hitsSelectedSegment } from './armVectorLassoOnPointerDown/hitsSelectedSegment';
 import { isVectorMultiSelectBoxEligible } from '../../../../../utils/isVectorMultiSelectBoxEligible';
 
-export const armVectorMultiSelectResizeOnPointerDown = ({ canvas, canvasRefs, event, point, viewport }: TArmContext): true | undefined => {
-  const state = store.getState();
-  const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
-  const selectedVertexIds = canvasRefs.selectedVectorVertexIdsRef.current;
-  const selectedHandles = canvasRefs.selectedVectorHandlesRef.current;
-  const selectedSegmentIds = canvasRefs.selectedVectorSegmentIdsRef.current;
-  const vertexIds = getVectorMultiSelectVertexIds(state.design.nodes, vectorEditingNodeIds, selectedVertexIds, selectedSegmentIds);
+export const armVectorMultiSelectResizeOnPointerDown = (context: TArmContext): true | undefined => {
+  const { canvas, canvasRefs, event, point, viewport } = context;
 
-  if (isVectorMultiSelectBoxEligible(vertexIds, selectedHandles)) {
-    const box = getVectorMultiSelectBox(
-      state.design.nodes,
-      vectorEditingNodeIds,
-      vertexIds,
-      selectedHandles,
-      canvasRefs.vectorMultiSelectBoxRef,
-    );
-    const handle = box && getVectorMultiSelectResizeHandle(point, box.bounds, viewport, box.rotation);
+  if (!event.shiftKey) {
+    const state = store.getState();
+    const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
+    const selectedVertexIds = canvasRefs.selectedVectorVertexIdsRef.current;
+    const selectedHandles = canvasRefs.selectedVectorHandlesRef.current;
+    const selectedSegmentIds = canvasRefs.selectedVectorSegmentIdsRef.current;
+    const vertexIds = getVectorMultiSelectVertexIds(state.design.nodes, vectorEditingNodeIds, selectedVertexIds, selectedSegmentIds);
 
-    if (box && handle) {
-      armVectorMultiSelectResizeDrag(
-        canvas,
-        event,
-        canvasRefs.vectorMultiSelectResizeDragRef,
+    if (isVectorMultiSelectBoxEligible(vertexIds, selectedHandles) && !hitsSelectedSegment(context, vectorEditingNodeIds)) {
+      const box = getVectorMultiSelectBox(
         state.design.nodes,
         vectorEditingNodeIds,
         vertexIds,
         selectedHandles,
-        box.bounds,
-        box.rotation,
-        handle,
+        canvasRefs.vectorMultiSelectBoxRef,
       );
+      const handle = box && getVectorMultiSelectResizeHandle(point, box.bounds, viewport, box.rotation);
 
-      return true;
+      if (box && handle) {
+        armVectorMultiSelectResizeDrag(
+          canvas,
+          event,
+          canvasRefs.vectorMultiSelectResizeDragRef,
+          state.design.nodes,
+          vectorEditingNodeIds,
+          vertexIds,
+          selectedHandles,
+          box.bounds,
+          box.rotation,
+          handle,
+        );
+
+        return true;
+      }
     }
   }
 };
