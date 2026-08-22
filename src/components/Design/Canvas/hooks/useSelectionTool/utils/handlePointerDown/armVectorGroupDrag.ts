@@ -7,7 +7,7 @@ import { TVectorNode } from 'types/design/types';
 // utils
 import { armVectorMultiDrag } from './armVectorMultiDrag';
 import { getVectorMultiSelectBox } from '../../../../utils/getVectorMultiSelectBox';
-import { getVectorSegmentVertexIds } from 'utils/canvas/vectorNetwork/getVectorSegmentVertexIds';
+import { getVectorMultiSelectVertexIds } from '../../../../utils/getVectorMultiSelectVertexIds';
 import { isVectorMultiSelectBoxEligible } from '../../../../utils/isVectorMultiSelectBoxEligible';
 
 export const armVectorGroupDrag = (
@@ -20,11 +20,9 @@ export const armVectorGroupDrag = (
 ): void => {
   const selectedVertexIds = canvasRefs.selectedVectorVertexIdsRef.current;
   const selectedHandles = canvasRefs.selectedVectorHandlesRef.current;
-  const vertexIds = Array.from(
-    new Set([...selectedVertexIds, ...getVectorSegmentVertexIds(node, canvasRefs.selectedVectorSegmentIdsRef.current)]),
-  );
-  const box = isVectorMultiSelectBoxEligible(selectedVertexIds, selectedHandles)
-    ? getVectorMultiSelectBox(node, selectedVertexIds, selectedHandles, canvasRefs.vectorMultiSelectBoxRef)
+  const vertexIds = getVectorMultiSelectVertexIds(node, selectedVertexIds, canvasRefs.selectedVectorSegmentIdsRef.current);
+  const box = isVectorMultiSelectBoxEligible(vertexIds, selectedHandles)
+    ? getVectorMultiSelectBox(node, vertexIds, selectedHandles, canvasRefs.vectorMultiSelectBoxRef)
     : null;
 
   armVectorMultiDrag(canvas, event, canvasRefs.vectorMultiDragRef, node, vertexIds, selectedHandles, point, pendingClickAction, box);

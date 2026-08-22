@@ -53,6 +53,7 @@ export const resolveToolHover = (
     selectedVertexIds,
     selectedHandles,
     refs.vectorMultiSelectBoxRef,
+    refs.selectedVectorSegmentIdsRef.current,
   );
   const ctx: THoverResolverContext = {
     activeTool,

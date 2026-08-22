@@ -12,11 +12,13 @@ import { TVectorSegment, TVectorVertex } from 'types/design/types';
 
 // utils
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getResizeCursorAngle } from 'utils/math/getResizeCursorAngle';
 import {
   getScaledVectorMultiSelectBounds,
   getVectorMultiSelectResizeScale,
   repositionRotatedVectorMultiSelectBounds,
 } from '../../../../utils/getVectorMultiSelectResizeTransform';
+import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
 import { rotatePoint } from 'utils/math/rotatePoint';
 import { screenToWorld } from '../../../../utils/screenToWorld';
@@ -85,6 +87,7 @@ export const continueVectorMultiSelectResizeDrag = (
       const scaledBounds = getScaledVectorMultiSelectBounds(bounds, anchor, scaleX, scaleY);
 
       dragState.liveBounds = repositionRotatedVectorMultiSelectBounds(scaledBounds, dragState.anchor, dragState.anchorWorld, rotation);
+      canvas.style.cursor = getRotatedResizeCursorUrl(getResizeCursorAngle(handle, rotation)) ?? canvas.style.cursor;
       dispatch(updateNode({ changes: { segments, vertices }, id: dragState.nodeId }));
     }
   }

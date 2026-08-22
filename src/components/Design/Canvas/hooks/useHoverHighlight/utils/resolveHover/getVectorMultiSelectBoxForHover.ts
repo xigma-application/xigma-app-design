@@ -6,6 +6,7 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { getVectorMultiSelectBox } from '../../../../utils/getVectorMultiSelectBox';
+import { getVectorMultiSelectVertexIds } from '../../../../utils/getVectorMultiSelectVertexIds';
 import { isVectorMultiSelectBoxEligible } from '../../../../utils/isVectorMultiSelectBoxEligible';
 
 export const getVectorMultiSelectBoxForHover = (
@@ -13,7 +14,13 @@ export const getVectorMultiSelectBoxForHover = (
   selectedVertexIds: string[],
   selectedHandles: TVectorHandleHover[],
   vectorMultiSelectBoxRef: RefObject<TVectorMultiSelectBox | null>,
-): TVectorMultiSelectBox | null =>
-  vectorEditingNode && isVectorMultiSelectBoxEligible(selectedVertexIds, selectedHandles)
-    ? getVectorMultiSelectBox(vectorEditingNode, selectedVertexIds, selectedHandles, vectorMultiSelectBoxRef)
+  selectedSegmentIds: string[] = [],
+): TVectorMultiSelectBox | null => {
+  const vertexIds = vectorEditingNode
+    ? getVectorMultiSelectVertexIds(vectorEditingNode, selectedVertexIds, selectedSegmentIds)
+    : selectedVertexIds;
+
+  return vectorEditingNode && isVectorMultiSelectBoxEligible(vertexIds, selectedHandles)
+    ? getVectorMultiSelectBox(vectorEditingNode, vertexIds, selectedHandles, vectorMultiSelectBoxRef)
     : null;
+};

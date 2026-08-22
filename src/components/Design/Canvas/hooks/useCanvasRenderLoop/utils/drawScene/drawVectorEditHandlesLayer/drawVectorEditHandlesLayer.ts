@@ -15,6 +15,7 @@ import { drawVectorVertexDots } from './drawVectorVertexDots/drawVectorVertexDot
 import { getOneHopVectorVertexIds } from 'utils/canvas/vectorNetwork/getOneHopVectorVertexIds';
 import { getTangentVisibilityVertexIds } from 'utils/canvas/vectorNetwork/getTangentVisibilityVertexIds';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
+import { getVectorMultiSelectVertexIds } from '../../../../../utils/getVectorMultiSelectVertexIds';
 import { getVisualSelectedVectorVertexIds } from 'utils/canvas/vectorNetwork/getVisualSelectedVectorVertexIds';
 
 export const drawVectorEditHandlesLayer = (
@@ -56,6 +57,7 @@ export const drawVectorEditHandlesLayer = (
       const tangentVisibilityVertexIds = getTangentVisibilityVertexIds(node, visualSelectedVertexIdsTotal, selectedHandles);
       const oneHopVertexIds = getOneHopVectorVertexIds(node, tangentVisibilityVertexIds);
       const tangentVisibilitySegmentIds = [...selectedSegmentIds, ...preMarqueeSegmentIds];
+      const multiSelectVertexIds = getVectorMultiSelectVertexIds(node, selectedVertexIds, selectedSegmentIds);
 
       drawVectorEditOutline(
         gl,
@@ -88,12 +90,13 @@ export const drawVectorEditHandlesLayer = (
         viewport,
       );
       drawVectorVertexDots(gl, program, buffer, node, visualSelectedVertexIds, hoveredVertexId, canvasWidth, canvasHeight, viewport);
+
       drawVectorMultiSelectBox(
         gl,
         program,
         buffer,
         node,
-        selectedVertexIds,
+        multiSelectVertexIds,
         selectedHandles,
         vectorMultiSelectBoxRef,
         vectorMultiSelectResizeDrag,

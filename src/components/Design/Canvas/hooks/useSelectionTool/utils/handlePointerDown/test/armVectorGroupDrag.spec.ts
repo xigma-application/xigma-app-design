@@ -86,9 +86,9 @@ describe('armVectorGroupDrag', () => {
     expect(canvasRefs.vectorMultiSelectBoxRef.current).toBeNull();
   });
 
-  it('should include vertices reachable through a selected segment in the drag itself, without pulling them into the box’s own selection key', () => {
-    // mock — only the segment is "selected" (not its own vertices individually); the drag still needs
-    // to move both endpoints, but the canonical box only ever keys off real vertex/handle selection
+  it('should include vertices reachable through a selected segment in both the drag and the box, since a lone selected segment resolves to its two endpoints', () => {
+    // mock — only the segment is "selected" (not its own vertices individually); the drag needs to move
+    // both endpoints, and the box now treats a segment's endpoints the same as an explicit vertex selection
     const nodeId = addVectorNode();
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
@@ -101,7 +101,11 @@ describe('armVectorGroupDrag', () => {
 
     // result
     expect(canvasRefs.vectorMultiDragRef.current?.vertexOrigins).toEqual({ v1: { x: 0, y: 0 }, v2: { x: 100, y: 100 } });
-    expect(canvasRefs.vectorMultiDragRef.current?.boxOrigin).toBeNull();
-    expect(canvasRefs.vectorMultiSelectBoxRef.current).toBeNull();
+    expect(canvasRefs.vectorMultiDragRef.current?.boxOrigin).toEqual({ height: 100, width: 100, x: 0, y: 0 });
+    expect(canvasRefs.vectorMultiSelectBoxRef.current).toEqual({
+      bounds: { height: 100, width: 100, x: 0, y: 0 },
+      rotation: 0,
+      selectionKey: 'v1,v2',
+    });
   });
 });

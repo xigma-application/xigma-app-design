@@ -10,6 +10,7 @@ export const getVectorMultiSelectOwningNode = (
   nodes: Record<string, TSceneNode>,
   selectedVertexIds: string[],
   selectedHandles: TVectorHandleHover[],
+  selectedSegmentIds: string[] = [],
 ): TVectorNode | null =>
   vectorEditingNodeIds
     .map((id) => getVectorEditingNode(nodes, id))
@@ -17,5 +18,6 @@ export const getVectorMultiSelectOwningNode = (
       (node): node is TVectorNode =>
         node !== null &&
         selectedVertexIds.every((id) => node.vertices[id]) &&
-        selectedHandles.every((handle) => node.segments[handle.segmentId]),
+        selectedHandles.every((handle) => node.segments[handle.segmentId]) &&
+        selectedSegmentIds.every((id) => node.segments[id]),
     ) ?? null;

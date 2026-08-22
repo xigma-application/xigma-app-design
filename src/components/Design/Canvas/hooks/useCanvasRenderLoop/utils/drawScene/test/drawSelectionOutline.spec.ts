@@ -88,4 +88,34 @@ describe('drawSelectionOutline', () => {
 
     expect(lineLoopDraws).toHaveLength(5);
   });
+
+  it('should draw nothing for a multi-selection whose nodes are all currently open in Vector Edit Mode', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const nodes = [buildNode({ id: 'a', x: 0, y: 0 }), buildNode({ id: 'b', x: 40, y: 0 })];
+
+    // before
+    drawSelectionOutline(gl, program, buffer, nodes, 100, 100, IDENTITY_VIEWPORT, ['a', 'b']);
+
+    // result
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+  });
+
+  it('should draw a per-node outline only for the nodes not currently open in Vector Edit Mode', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const nodes = [buildNode({ id: 'a', x: 0, y: 0 }), buildNode({ id: 'b', x: 40, y: 0 })];
+
+    // before
+    drawSelectionOutline(gl, program, buffer, nodes, 100, 100, IDENTITY_VIEWPORT, ['a']);
+
+    // result
+    const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
+
+    expect(lineLoopDraws).toHaveLength(5);
+  });
 });
