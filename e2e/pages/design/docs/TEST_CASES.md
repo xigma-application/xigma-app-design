@@ -1650,14 +1650,21 @@ rendered there. Fixed by scoping the interior hit-test to only the faces actuall
 `filledFaceKeys` (reusing `getVectorFillLoopKeyAtPoint.ts`, the same lookup the Paint tool itself
 uses) — an unfilled region now only collides on its own contour (`isPointNearVectorPath.ts`,
 unchanged). This does not apply once a vector is already selected: `armSelectedVectorBoundsOnPointerDown.ts`
-(new, mirrors `armSelectedTextBoundsOnPointerDown.ts`) still arms a whole-bounding-box drag for a
-single already-selected vector node, so an existing selection stays fully draggable from anywhere
-in its box, contour or not.
+(new) still arms a whole-bounding-box drag for a single already-selected vector node, so an
+existing selection stays fully draggable from anywhere in its box, contour or not — **but**, unlike
+`armSelectedTextBoundsOnPointerDown.ts`'s text-box equivalent, it deliberately reuses
+`armGroupBoundsDrag.ts`'s `pendingClickAction: { kind: 'deselect' }` (§3 of
+`selection-and-manipulation.md`, the same mechanism a click in a multi-selection's gap uses) rather
+than a plain `armHitDrag.ts` call: a real drag still moves the shape, but a **plain click that
+doesn't move**, landing past the shape's own contour, deselects it instead of leaving it selected —
+requested on the spot, since a static click there visually looks exactly like missing the shape
+entirely.
 
 | #   | Scenario                                                                                                | Unit |          E2E           |
 | --- | -------------------------------------------------------------------------------------------------------- | :--: | :--------------------: |
 | 282 | Clicking inside an unfilled vector node's bounding box, past its own contour, does not select it          |  ✅  | ✅ `selection.spec.ts` |
 | 283 | A selected vector node can be dragged from anywhere in its bounding box, even past its own contour         |  ✅  | ✅ `selection.spec.ts` |
+| 284 | A plain click (no drag) on an already-selected vector node, landing past its own contour, deselects it — same as missing the shape entirely, unlike the equivalent click on a selected text node's fixed box |  ✅  | ✅ `selection.spec.ts` |
 
 ## Why so few scenarios get e2e coverage
 

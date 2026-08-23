@@ -625,17 +625,17 @@ describe('armSelectedTextBoundsOnPointerDown', () => {
 });
 
 describe('armSelectedVectorBoundsOnPointerDown', () => {
-  it('should arm the hit drag and return true when the point lands inside a selected vector box, past its contour', () => {
+  it('should arm a deselect-on-no-move drag and return true when the point lands inside a selected vector box, past its contour', () => {
     // mock — armDrag reads node origins from the real store, so the selected node must exist there
     const nodeId = addVectorNode(vectorNode.segments, vectorNode.vertices);
     const storedVector = store.getState().design.nodes[nodeId] as TVectorNode;
 
     // before — dead center of the unfilled square, well past its contour
-    const ctx = createContext({ point: { x: 50, y: 50 }, selectedNodes: [storedVector] });
+    const ctx = createContext({ currentSelection: [nodeId], point: { x: 50, y: 50 }, selectedNodes: [storedVector] });
 
-    // result
+    // result — released without moving, a miss-past-the-contour click deselects, same as a gap click
     expect(armSelectedVectorBoundsOnPointerDown(ctx)).toBe(true);
-    expect(ctx.selectionRefs.dragStateRef.current).not.toBeNull();
+    expect(ctx.selectionRefs.dragStateRef.current?.pendingClickAction).toEqual({ kind: 'deselect' });
   });
 
   it('should return undefined when shift is held', () => {
