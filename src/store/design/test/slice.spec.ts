@@ -4,13 +4,18 @@ import slice, {
   addNode,
   cancelCommentDraft,
   deleteComment,
+  deleteNode,
+  replaceDesignSnapshot,
   setActiveTool,
+  setPenActiveVertexId,
   setSelection,
+  setVectorEditingNodeIds,
   setViewport,
   startCommentDraft,
   startTextEdit,
   stopTextEdit,
   updateCommentContent,
+  updateEditingTextBoxPathStartOffset,
   updateNode,
   updateTextEditContent,
   updateTextEditSelection,
@@ -46,6 +51,7 @@ describe('design slice', () => {
       editingTextBox: null,
       editingTextContent: '',
       lastFrameTool: ToolName.frame,
+      lastMoreTool: null,
       lastMouseTool: ToolName.default,
       lastPenTool: ToolName.pen,
       lastShapeTool: ToolName.rectangle,
@@ -151,6 +157,48 @@ describe('design slice', () => {
     expect(state.selectedIds).toEqual(['a', 'b']);
   });
 
+  it('should delete a node', () => {
+    // before
+    const withNode = slice(undefined, addNode(frameNodePayload));
+    const [id] = withNode.rootOrder;
+
+    // action
+    const state = slice(withNode, deleteNode(id));
+
+    // result
+    expect(state.nodes[id]).toBeUndefined();
+    expect(state.rootOrder).toEqual([]);
+  });
+
+  it('should replace the whole design snapshot', () => {
+    // mock
+    const node = { ...frameNodePayload, id: 'node-1' };
+
+    // before
+    const state = slice(undefined, replaceDesignSnapshot({ nodes: { [node.id]: node }, rootOrder: [node.id], selectedIds: [node.id] }));
+
+    // result
+    expect(state.nodes).toEqual({ [node.id]: node });
+    expect(state.rootOrder).toEqual([node.id]);
+    expect(state.selectedIds).toEqual([node.id]);
+  });
+
+  it('should set the pen active vertex id', () => {
+    // before
+    const state = slice(undefined, setPenActiveVertexId('vertex-1'));
+
+    // result
+    expect(state.penActiveVertexId).toBe('vertex-1');
+  });
+
+  it('should set the vector editing node ids', () => {
+    // before
+    const state = slice(undefined, setVectorEditingNodeIds(['node-1']));
+
+    // result
+    expect(state.vectorEditingNodeIds).toEqual(['node-1']);
+  });
+
   it('should start editing a text box', () => {
     // before
     const state = slice(
@@ -236,6 +284,20 @@ describe('design slice', () => {
 
     // after
     vi.restoreAllMocks();
+  });
+
+  it('should update the editing text box path start offset', () => {
+    // before
+    const editing = slice(
+      undefined,
+      startTextEdit({ box: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 } }),
+    );
+
+    // action
+    const state = slice(editing, updateEditingTextBoxPathStartOffset(0.5));
+
+    // result
+    expect(state.editingTextBox?.pathStartOffset).toBe(0.5);
   });
 
   it('should start a comment draft at a given position', () => {

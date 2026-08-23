@@ -153,6 +153,25 @@ describe('VectorEditToolbar', () => {
     expect(screen.getByText('⇧W')).toBeInTheDocument();
   });
 
+  it('should replace the More label with the picked tool once selected from the dropdown, and activate it', async () => {
+    // mock
+    const user = userEvent.setup();
+
+    // before
+    act(() => store.dispatch(setVectorEditingNodeIds(['node-1'])));
+    renderVectorEditToolbar();
+
+    // action
+    await user.click(screen.getByRole('button', { name: 'More' }));
+    await user.click(screen.getByText('Shape builder'));
+
+    // result
+    expect(screen.queryByText('More')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Shape builder' })).toHaveAttribute('aria-pressed', 'true');
+    expect(store.getState().design.activeTool).toBe(ToolName.shapeBuilder);
+    expect(store.getState().design.lastMoreTool).toBe(ToolName.shapeBuilder);
+  });
+
   it('should exit Vector Edit Mode and reset the active tool when clicking the close button', () => {
     // before
     act(() => {

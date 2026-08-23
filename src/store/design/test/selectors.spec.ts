@@ -4,15 +4,23 @@ import {
   selectCommentDraftPosition,
   selectComments,
   selectEditingNodeId,
+  selectEditingSelectionChangedAt,
+  selectEditingSelectionEnd,
+  selectEditingSelectionStart,
   selectEditingTextBox,
   selectEditingTextContent,
+  selectLastFrameTool,
+  selectLastMoreTool,
   selectLastMouseTool,
+  selectLastPenTool,
   selectLastShapeTool,
   selectLastTextTool,
   selectNodes,
   selectOrderedNodes,
+  selectPenActiveVertexId,
   selectSelectedIds,
   selectSelectedNodes,
+  selectVectorEditingNodeIds,
   selectViewport,
 } from '../selectors';
 
@@ -41,15 +49,22 @@ const state = {
     commentDraftPosition: { x: 1, y: 2 },
     comments: { [comment.id]: comment },
     editingNodeId: 'node-2',
+    editingSelectionChangedAt: 42,
+    editingSelectionEnd: 8,
+    editingSelectionStart: 3,
     editingTextBox: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 },
     editingTextContent: 'hello',
+    lastFrameTool: ToolName.section,
+    lastMoreTool: ToolName.shapeBuilder,
     lastMouseTool: ToolName.hand,
     lastPenTool: ToolName.pen,
     lastShapeTool: ToolName.ellipse,
     lastTextTool: ToolName.textOnPath,
     nodes: { [node.id]: node },
+    penActiveVertexId: 'vertex-1',
     rootOrder: [node.id],
     selectedIds: [node.id],
+    vectorEditingNodeIds: [node.id],
     viewport: { x: 5, y: 10, zoom: 2 },
   },
 } as any;
@@ -80,6 +95,21 @@ describe('design selectors', () => {
     expect(selectEditingNodeId(state)).toBe('node-2');
   });
 
+  it('should select the editing selection changed-at timestamp', () => {
+    // result
+    expect(selectEditingSelectionChangedAt(state)).toBe(42);
+  });
+
+  it('should select the editing selection end', () => {
+    // result
+    expect(selectEditingSelectionEnd(state)).toBe(8);
+  });
+
+  it('should select the editing selection start', () => {
+    // result
+    expect(selectEditingSelectionStart(state)).toBe(3);
+  });
+
   it('should select the editing text box', () => {
     // result
     expect(selectEditingTextBox(state)).toEqual({ flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 });
@@ -95,14 +125,39 @@ describe('design selectors', () => {
     expect(selectLastShapeTool(state)).toBe(ToolName.ellipse);
   });
 
+  it('should select the last frame tool', () => {
+    // result
+    expect(selectLastFrameTool(state)).toBe(ToolName.section);
+  });
+
+  it('should select the last More tool', () => {
+    // result
+    expect(selectLastMoreTool(state)).toBe(ToolName.shapeBuilder);
+  });
+
   it('should select the last mouse tool', () => {
     // result
     expect(selectLastMouseTool(state)).toBe(ToolName.hand);
   });
 
+  it('should select the last pen tool', () => {
+    // result
+    expect(selectLastPenTool(state)).toBe(ToolName.pen);
+  });
+
   it('should select the last text tool', () => {
     // result
     expect(selectLastTextTool(state)).toBe(ToolName.textOnPath);
+  });
+
+  it('should select the pen active vertex id', () => {
+    // result
+    expect(selectPenActiveVertexId(state)).toBe('vertex-1');
+  });
+
+  it('should select the vector editing node ids', () => {
+    // result
+    expect(selectVectorEditingNodeIds(state)).toEqual([node.id]);
   });
 
   it('should select the nodes record', () => {

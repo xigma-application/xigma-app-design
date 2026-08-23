@@ -14,6 +14,7 @@ export enum KeyboardKeys {
   h = 'KeyH',
   k = 'KeyK',
   l = 'KeyL',
+  m = 'KeyM',
   o = 'KeyO',
   p = 'KeyP',
   q = 'KeyQ',
@@ -22,6 +23,7 @@ export enum KeyboardKeys {
   shift = 'Shift',
   t = 'KeyT',
   v = 'KeyV',
+  w = 'KeyW',
   x = 'KeyX',
   z = 'KeyZ',
 }

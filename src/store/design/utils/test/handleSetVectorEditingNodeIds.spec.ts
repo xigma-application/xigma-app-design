@@ -17,6 +17,7 @@ const buildState = (nodes: TDesignState['nodes'], overrides: Partial<TDesignStat
   editingTextBox: null,
   editingTextContent: '',
   lastFrameTool: ToolName.frame,
+  lastMoreTool: null,
   lastMouseTool: ToolName.default,
   lastPenTool: ToolName.pen,
   lastShapeTool: ToolName.rectangle,
@@ -58,6 +59,34 @@ describe('handleSetVectorEditingNodeIds', () => {
     // result
     expect(state.vectorEditingNodeIds).toEqual([node.id]);
     expect(state.nodes[node.id]).toBeDefined();
+  });
+
+  it('should reset the last More tool when exiting Vector Edit Mode entirely', () => {
+    // mock
+    const node = buildVectorNode();
+    const state = buildState({ [node.id]: node }, { lastMoreTool: ToolName.shapeBuilder, vectorEditingNodeIds: [node.id] });
+
+    // before
+    handleSetVectorEditingNodeIds(state, []);
+
+    // result
+    expect(state.lastMoreTool).toBeNull();
+  });
+
+  it('should keep the last More tool while Vector Edit Mode is still active on another node', () => {
+    // mock — switching which node is being edited, not exiting
+    const nodeA = buildVectorNode({ id: 'vector-a' });
+    const nodeB = buildVectorNode({ id: 'vector-b' });
+    const state = buildState(
+      { [nodeA.id]: nodeA, [nodeB.id]: nodeB },
+      { lastMoreTool: ToolName.shapeBuilder, vectorEditingNodeIds: [nodeA.id] },
+    );
+
+    // before
+    handleSetVectorEditingNodeIds(state, [nodeB.id]);
+
+    // result
+    expect(state.lastMoreTool).toBe(ToolName.shapeBuilder);
   });
 
   it('should delete the exited node when it never got any segments drawn', () => {

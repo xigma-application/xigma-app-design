@@ -30,6 +30,8 @@ export const selectEditingTextContent = (state: RootState): string => state.desi
 
 export const selectLastFrameTool = (state: RootState): ToolName => state.design.lastFrameTool;
 
+export const selectLastMoreTool = (state: RootState): ToolName | null => state.design.lastMoreTool;
+
 export const selectLastMouseTool = (state: RootState): ToolName => state.design.lastMouseTool;
 
 export const selectLastPenTool = (state: RootState): ToolName => state.design.lastPenTool;

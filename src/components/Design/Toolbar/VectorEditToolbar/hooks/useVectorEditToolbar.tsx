@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 
 // hooks
 import { useIsBendModifierHeld } from './useIsBendModifierHeld';
@@ -14,9 +14,7 @@ import { ToolName } from 'types/design/enums';
 export type TUseVectorEditToolbar = {
   activeTool: ToolName;
   handleClose: () => void;
-  handleMoreOpenChange: (open: boolean) => void;
   isBendModifierHeld: boolean;
-  isMoreOpen: boolean;
   vectorEditingNodeIds: string[];
 };
 
@@ -38,16 +36,11 @@ export const useVectorEditToolbar = (): TUseVectorEditToolbar => {
   const vectorEditingNodeIds = useAppSelector(selectVectorEditingNodeIds);
   const activeTool = useAppSelector(selectActiveTool);
   const isBendModifierHeld = useIsBendModifierHeld();
-  const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   const handleClose = useCallback((): void => {
     dispatch(setActiveTool(ToolName.default));
     dispatch(setVectorEditingNodeIds([]));
   }, [dispatch]);
 
-  const handleMoreOpenChange = useCallback((open: boolean): void => {
-    setIsMoreOpen(open);
-  }, []);
-
-  return { activeTool, handleClose, handleMoreOpenChange, isBendModifierHeld, isMoreOpen, vectorEditingNodeIds };
+  return { activeTool, handleClose, isBendModifierHeld, vectorEditingNodeIds };
 };

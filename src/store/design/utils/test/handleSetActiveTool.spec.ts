@@ -16,6 +16,7 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   editingTextBox: null,
   editingTextContent: '',
   lastFrameTool: ToolName.frame,
+  lastMoreTool: null,
   lastMouseTool: ToolName.default,
   lastPenTool: ToolName.pen,
   lastShapeTool: ToolName.rectangle,
@@ -85,6 +86,39 @@ describe('handleSetActiveTool', () => {
     expect(state.lastShapeTool).toBe(ToolName.media);
   });
 
+  it('should remember the last shape tool when switching to the line tool', () => {
+    // mock
+    const state = buildState();
+
+    // before
+    handleSetActiveTool(state, ToolName.line);
+
+    // result
+    expect(state.lastShapeTool).toBe(ToolName.line);
+  });
+
+  it('should remember the last shape tool when switching to the rectangle tool', () => {
+    // mock
+    const state = buildState();
+
+    // before
+    handleSetActiveTool(state, ToolName.rectangle);
+
+    // result
+    expect(state.lastShapeTool).toBe(ToolName.rectangle);
+  });
+
+  it('should remember the last shape tool when switching to the polygon tool', () => {
+    // mock
+    const state = buildState();
+
+    // before
+    handleSetActiveTool(state, ToolName.polygon);
+
+    // result
+    expect(state.lastShapeTool).toBe(ToolName.polygon);
+  });
+
   it('should keep the last shape tool when switching to a non-shape tool', () => {
     // mock
     const state = buildState({ lastShapeTool: ToolName.ellipse });
@@ -94,6 +128,28 @@ describe('handleSetActiveTool', () => {
 
     // result
     expect(state.lastShapeTool).toBe(ToolName.ellipse);
+  });
+
+  it('should remember the last frame tool when switching to the frame tool', () => {
+    // mock
+    const state = buildState();
+
+    // before
+    handleSetActiveTool(state, ToolName.frame);
+
+    // result
+    expect(state.lastFrameTool).toBe(ToolName.frame);
+  });
+
+  it('should remember the last frame tool when switching to the slice tool', () => {
+    // mock
+    const state = buildState();
+
+    // before
+    handleSetActiveTool(state, ToolName.slice);
+
+    // result
+    expect(state.lastFrameTool).toBe(ToolName.slice);
   });
 
   it('should remember the last frame tool when switching to the section tool', () => {
@@ -127,6 +183,28 @@ describe('handleSetActiveTool', () => {
 
     // result
     expect(state.lastMouseTool).toBe(ToolName.hand);
+  });
+
+  it('should remember the last mouse tool when switching to the default tool', () => {
+    // mock
+    const state = buildState();
+
+    // before
+    handleSetActiveTool(state, ToolName.default);
+
+    // result
+    expect(state.lastMouseTool).toBe(ToolName.default);
+  });
+
+  it('should remember the last mouse tool when switching to the scale tool', () => {
+    // mock
+    const state = buildState();
+
+    // before
+    handleSetActiveTool(state, ToolName.scale);
+
+    // result
+    expect(state.lastMouseTool).toBe(ToolName.scale);
   });
 
   it('should keep the last mouse tool when switching to a non-mouse tool', () => {
@@ -184,6 +262,17 @@ describe('handleSetActiveTool', () => {
     expect(state.lastTextTool).toBe(ToolName.textOnPath);
   });
 
+  it('should remember the last text tool when switching to the text tool', () => {
+    // mock
+    const state = buildState();
+
+    // before
+    handleSetActiveTool(state, ToolName.text);
+
+    // result
+    expect(state.lastTextTool).toBe(ToolName.text);
+  });
+
   it('should keep the last text tool when switching to a non-text-group tool', () => {
     // mock
     const state = buildState({ lastTextTool: ToolName.textOnPath });
@@ -193,5 +282,38 @@ describe('handleSetActiveTool', () => {
 
     // result
     expect(state.lastTextTool).toBe(ToolName.textOnPath);
+  });
+
+  it('should remember the last More tool when switching to the Shape builder tool', () => {
+    // mock
+    const state = buildState();
+
+    // before
+    handleSetActiveTool(state, ToolName.shapeBuilder);
+
+    // result
+    expect(state.lastMoreTool).toBe(ToolName.shapeBuilder);
+  });
+
+  it('should remember the last More tool when switching to the Variable width tool', () => {
+    // mock
+    const state = buildState();
+
+    // before
+    handleSetActiveTool(state, ToolName.variableWidth);
+
+    // result
+    expect(state.lastMoreTool).toBe(ToolName.variableWidth);
+  });
+
+  it('should keep the last More tool when switching to a non-More-group tool', () => {
+    // mock
+    const state = buildState({ lastMoreTool: ToolName.shapeBuilder });
+
+    // before
+    handleSetActiveTool(state, ToolName.comment);
+
+    // result
+    expect(state.lastMoreTool).toBe(ToolName.shapeBuilder);
   });
 });

@@ -51,7 +51,17 @@ describe('dispatchTool', () => {
     store.dispatch(setVectorEditingNodeIds(['node-1']));
 
     // action
-    [ToolName.pen, ToolName.pencil, ToolName.lasso, ToolName.paint, ToolName.move].forEach((tool) => {
+    [
+      ToolName.pen,
+      ToolName.pencil,
+      ToolName.lasso,
+      ToolName.paint,
+      ToolName.move,
+      ToolName.bend,
+      ToolName.cut,
+      ToolName.shapeBuilder,
+      ToolName.variableWidth,
+    ].forEach((tool) => {
       dispatchTool(store.dispatch, tool);
 
       // result

@@ -1769,6 +1769,27 @@ vertex set is currently selected stays hatched permanently, not just on hover
 | 289 | Clicking a filled face selects all its vertices and arms the drag immediately — one continuous click-drag moves it, no separate second gesture required first                                                                                       |  ✅  | ✅ `vector-edit.spec.ts` |
 | 290 | Shift-clicking a second, adjacent filled face keeps its shared divider vertices selected, so a later group drag moves the divider along with the rest of the shape instead of leaving it behind (regression: a per-vertex toggle used to drop them) |  ✅  | ✅ `vector-edit.spec.ts` |
 
+## Vector Edit Toolbar — "More" menu (Shape builder / Variable width)
+
+The floating VectorEditToolbar's "More" slot starts as a plain "More" label + chevron (a
+`Popover`, opening upward via `side="top"` since the toolbar itself floats near the bottom of the
+canvas). Picking Shape builder or Variable width from it (or via their own shortcuts, `M` /
+`Shift+W`) dispatches a real `setActiveTool` and remembers the pick in `lastMoreTool` — same
+"remember the last tool used in this group" mechanic as `lastShapeTool`/`lastFrameTool`, mirrored
+in `handleSetActiveTool.ts`. Once a tool has been picked, the "More" slot permanently swaps to that
+tool's own icon button (blue when active, matching every other VectorEditToolbar button) plus a
+small separate chevron trigger beside it for reopening the dropdown — the same
+icon-button-plus-dropdown-chevron shape as the main Toolbar's `MouseModes`/`ToolDropdown` pair.
+`lastMoreTool` resets to `null` on exiting Vector Edit Mode entirely (`handleSetVectorEditingNodeIds.ts`,
+whenever the next id list is empty), so a later Vector Edit session starts back at the plain "More"
+label rather than remembering the previous session's pick.
+
+| #   | Scenario                                                                                                        | Unit |                  E2E                  |
+| --- | --------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------------------: |
+| 291 | Picking Shape builder from the More dropdown swaps its label for the tool's own icon button and activates it    |  ✅  | ✅ `vector-edit-more-toolbar.spec.ts` |
+| 292 | The "M" / "Shift+W" shortcuts activate Shape builder / Variable width and update which icon the More slot shows |  ✅  | ✅ `vector-edit-more-toolbar.spec.ts` |
+| 293 | Closing Vector Edit Mode resets the More slot back to its plain label, even after a tool was picked             |  ✅  | ✅ `vector-edit-more-toolbar.spec.ts` |
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

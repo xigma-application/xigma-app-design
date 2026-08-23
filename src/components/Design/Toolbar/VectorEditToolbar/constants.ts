@@ -27,13 +27,14 @@ export const TOOLS: TVectorEditTool[] = [
   { icon: 'CutTool', labelKey: `${translationNameSpace}.tool.cut`, shortcut: ['X'], toolName: ToolName.cut },
 ];
 
+export type TMoreToolName = ToolName.shapeBuilder | ToolName.variableWidth;
+
 export type TVectorEditMoreTool = {
-  icon: keyof typeof Icons;
-  labelKey: string;
   shortcut: string;
+  toolName: TMoreToolName;
 };
 
 export const MORE_TOOLS: TVectorEditMoreTool[] = [
-  { icon: 'ShapeBuilderTool', labelKey: `${translationNameSpace}.tool.shapeBuilder`, shortcut: 'M' },
-  { icon: 'VariableWidthTool', labelKey: `${translationNameSpace}.tool.variableWidth`, shortcut: `${SHIFT}W` },
+  { shortcut: 'M', toolName: ToolName.shapeBuilder },
+  { shortcut: `${SHIFT}W`, toolName: ToolName.variableWidth },
 ];

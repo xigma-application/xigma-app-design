@@ -45,6 +45,7 @@ const initialState: TDesignState = {
   editingTextBox: null,
   editingTextContent: '',
   lastFrameTool: DEFAULT_FRAME_TOOL,
+  lastMoreTool: null,
   lastMouseTool: DEFAULT_MOUSE_TOOL,
   lastPenTool: DEFAULT_PEN_TOOL,
   lastShapeTool: DEFAULT_SHAPE_TOOL,

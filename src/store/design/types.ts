@@ -14,6 +14,7 @@ export type TDesignState = {
   editingTextBox: TEditingTextBox | null;
   editingTextContent: string;
   lastFrameTool: ToolName;
+  lastMoreTool: ToolName | null;
   lastMouseTool: ToolName;
   lastPenTool: ToolName;
   lastShapeTool: ToolName;

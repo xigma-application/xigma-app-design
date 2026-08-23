@@ -17,6 +17,7 @@ const buildState = (nodes: TDesignState['nodes'], selectedIds: string[], overrid
   editingTextBox: null,
   editingTextContent: '',
   lastFrameTool: ToolName.frame,
+  lastMoreTool: null,
   lastMouseTool: ToolName.default,
   lastPenTool: ToolName.pen,
   lastShapeTool: ToolName.rectangle,
@@ -234,6 +235,21 @@ describe('handleSetSelection', () => {
 
     // before
     handleSetSelection(state, [other.id]);
+
+    // result
+    expect(state.vectorEditingNodeIds).toEqual([]);
+    expect(state.nodes[node.id]).toBeUndefined();
+  });
+
+  it('should delete an empty vector-editing node on exit even when it was never part of selectedIds', () => {
+    // mock — vectorEditingNodeIds and selectedIds can diverge (e.g. entered via double-click without
+    // also being selected); this exercises exitVectorEditingIfNeeded's own delete path, distinct from
+    // deleteDegenerateDeselectedNodes which only ever looks at selectedIds
+    const node = buildVectorNode();
+    const state = buildState({ [node.id]: node }, [], { vectorEditingNodeIds: [node.id] });
+
+    // before
+    handleSetSelection(state, []);
 
     // result
     expect(state.vectorEditingNodeIds).toEqual([]);

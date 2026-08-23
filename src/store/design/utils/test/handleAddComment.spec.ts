@@ -16,6 +16,7 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   editingTextBox: null,
   editingTextContent: '',
   lastFrameTool: ToolName.frame,
+  lastMoreTool: null,
   lastMouseTool: ToolName.default,
   lastPenTool: ToolName.pen,
   lastShapeTool: ToolName.rectangle,

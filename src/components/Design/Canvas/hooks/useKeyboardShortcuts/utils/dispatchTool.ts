@@ -14,6 +14,8 @@ const VECTOR_EDIT_ALLOWED_TOOLS: ToolName[] = [
   ToolName.move,
   ToolName.bend,
   ToolName.cut,
+  ToolName.shapeBuilder,
+  ToolName.variableWidth,
 ];
 
 export const dispatchTool = (dispatch: AppDispatch, tool: ToolName): void => {

@@ -276,6 +276,34 @@ describe('useKeyboardShortcuts behaviors', () => {
     expect(store.getState().design.activeTool).toBe(ToolName.paint);
   });
 
+  it('should switch to the Shape builder tool on "M"', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyM' });
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.shapeBuilder);
+  });
+
+  it('should switch to the Variable width tool on "Shift+W"', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyW', shiftKey: true });
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.variableWidth);
+  });
+
   it('should switch to the scale tool (not media) on a plain "K" without the modifiers', () => {
     // mock
     const store = createTestStore();

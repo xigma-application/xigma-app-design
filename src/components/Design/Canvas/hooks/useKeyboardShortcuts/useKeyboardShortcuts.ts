@@ -45,6 +45,8 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => dispatchTool(dispatch, ToolName.media), ...shortcuts[ToolName.media] },
       { action: (): any => dispatchTool(dispatch, ToolName.paint), ...shortcuts[ToolName.paint] },
       { action: (): any => dispatchTool(dispatch, ToolName.text), ...shortcuts[ToolName.text] },
+      { action: (): any => dispatchTool(dispatch, ToolName.shapeBuilder), ...shortcuts[ToolName.shapeBuilder] },
+      { action: (): any => dispatchTool(dispatch, ToolName.variableWidth), ...shortcuts[ToolName.variableWidth] },
       { action: (): any => handleLeave(dispatch, refs), ...shortcuts.escape },
       { action: (): any => handleEnterVectorEdit(dispatch), secondaryKey: KeyboardKeys.enter },
       { action: (): any => dispatch(redo()), ...shortcuts.redo },

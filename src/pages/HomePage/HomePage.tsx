@@ -1,9 +1,6 @@
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
-// components
-import { Icon } from 'shared';
-
 // hooks
 import { useTheme } from 'hooks';
 
@@ -20,7 +17,6 @@ const HomePage: FC = () => {
 
   return (
     <main className={styles.HomePage}>
-      <Icon color="blue1" name="Logo" size={32} />
       <h1>{APP_NAME}</h1>
       <p style={{ color: colors.neutral2 }}>{t('home.subtitle')}</p>
       <p style={{ color: colors.neutral2 }}>{t('home.description')}</p>

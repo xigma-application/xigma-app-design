@@ -56,21 +56,6 @@ describe('useVectorEditToolbar', () => {
     expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
     expect(store.getState().design.activeTool).toBe(ToolName.default);
   });
-
-  it('should track the More dropdown open state via handleMoreOpenChange', () => {
-    // before
-    const { result } = renderUseVectorEditToolbar();
-
-    expect(result.current.isMoreOpen).toBe(false);
-
-    // action
-    act(() => {
-      result.current.handleMoreOpenChange(true);
-    });
-
-    // result
-    expect(result.current.isMoreOpen).toBe(true);
-  });
 });
 
 describe('getIsVectorEditToolActive', () => {

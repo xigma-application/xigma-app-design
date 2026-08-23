@@ -1,6 +1,6 @@
 ---
 name: xigma-test-act-wrapping
-description: When a raw canvas.dispatchEvent(...) call in a hook/canvas test needs to be wrapped in act(...) from '@testing-library/react' to silence "An update to TestComponent was not wrapped in act(...)". Load before writing or reviewing a test that dispatches a pointer/keyboard event directly on a DOM node (not via fireEvent/userEvent) inside a component subscribed to Redux state.
+description: When a raw canvas.dispatchEvent(...) call — or any other raw DOM call like element.click() — in a test needs to be wrapped in act(...) from '@testing-library/react' to silence "An update to TestComponent was not wrapped in act(...)". Load before writing or reviewing a test that fires a pointer/keyboard/click event directly on a DOM node (not via fireEvent/userEvent) inside a component subscribed to Redux state.
 ---
 
 # xigma `act()` Wrapping for Raw DOM Event Dispatch
@@ -54,6 +54,17 @@ DOM event: `MouseModes.spec.tsx`'s `act(() => store.dispatch(setActiveTool(ToolN
 `useTheme.spec.tsx`'s `act(() => { result.current.toggleTheme(); });`. Same principle: **any**
 state-changing call made directly (not through a Testing Library helper that already wraps it)
 against a component currently mounted via `render`/`renderHook` needs `act()` around it.
+
+The rule isn't limited to `canvas.dispatchEvent` — any raw DOM method call has the same gap, since
+none of them route through Testing Library's own act-wrapping. `VectorEditMoreDropdownTool.spec.tsx`
+hit this via a plain `screen.getByRole('button', {...}).click()` (not `fireEvent.click(...)`): the
+click dispatches `setActiveTool`, and the same component reads `activeTool` back via
+`useAppSelector` to compute `isActive`, so it re-renders inside the test — same "dispatch which a
+mounted component subscribes to" trigger as the canvas cases above, just via `.click()` instead of
+`dispatchEvent`. Fixed the same way: `act(() => { screen.getByRole(...).click(); });`. Prefer
+`fireEvent.click(...)` when it's already imported for other assertions in the same file (it
+act-wraps for you, and the codebase generally favors it), but a bare `.click()` works too as long
+as it's inside `act()`.
 
 ## Don't over-wrap
 

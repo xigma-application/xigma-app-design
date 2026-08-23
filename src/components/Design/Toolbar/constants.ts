@@ -28,10 +28,12 @@ export const TOOL_ICON: Record<ToolName, keyof typeof Icons> = {
   [ToolName.rectangle]: 'RectangleTool',
   [ToolName.scale]: 'ScaleTool',
   [ToolName.section]: 'SectionTool',
+  [ToolName.shapeBuilder]: 'ShapeBuilderTool',
   [ToolName.slice]: 'SliceTool',
   [ToolName.star]: 'StarTool',
   [ToolName.text]: 'TextTool',
   [ToolName.textOnPath]: 'TextOnPathTool',
+  [ToolName.variableWidth]: 'VariableWidthTool',
   [ToolName.comment]: 'CommentTool',
 };
 
@@ -55,10 +57,12 @@ export const TOOL_LABEL: Record<ToolName, string> = {
   [ToolName.rectangle]: `${translationNameSpace}.tool.rectangle`,
   [ToolName.scale]: `${translationNameSpace}.tool.scale`,
   [ToolName.section]: `${translationNameSpace}.tool.section`,
+  [ToolName.shapeBuilder]: 'design.toolbar.vectorEditToolbar.tool.shapeBuilder',
   [ToolName.slice]: `${translationNameSpace}.tool.slice`,
   [ToolName.star]: `${translationNameSpace}.tool.star`,
   [ToolName.text]: `${translationNameSpace}.tool.text`,
   [ToolName.textOnPath]: `${translationNameSpace}.tool.textOnPath`,
+  [ToolName.variableWidth]: 'design.toolbar.vectorEditToolbar.tool.variableWidth',
 };
 
 export const TOOL_GROUP_ITEMS: Partial<Record<ToolName, ToolName[]>> = {
@@ -78,6 +82,7 @@ export const TOOL_GROUP_ITEMS: Partial<Record<ToolName, ToolName[]>> = {
 };
 
 export const TOOL_ICON_SIZE: Partial<Record<ToolName, number>> = {
+  [ToolName.default]: 24,
   [ToolName.comment]: 17,
   [ToolName.pen]: 24,
   [ToolName.pencil]: 24,

@@ -2766,9 +2766,11 @@ branches described above.
 - `Canvas/hooks/useKeyboardShortcuts/utils/dispatchTool.ts` — keyboard shortcuts route through this
   instead of `dispatch(setActiveTool(tool))` directly. While `vectorEditingNodeId !== null`, a
   shortcut for any tool outside its own local `VECTOR_EDIT_ALLOWED_TOOLS` (`pen`, `pencil`, `lasso`,
-  `paint`, `move`) is swallowed entirely — the keypress does nothing, Vector Edit Mode stays open on
-  whatever tool was already active. Reads `store.getState()` fresh each call, same convention as
-  `handleLeave.ts` (§5) — state is looked up inside the util, not passed in.
+  `paint`, `move`, `bend`, `cut`, `shapeBuilder`, `variableWidth` — the last two added for the
+  VectorEditToolbar "More" menu, §58 below) is swallowed entirely — the keypress does nothing,
+  Vector Edit Mode stays open on whatever tool was already active. Reads `store.getState()` fresh
+  each call, same convention as `handleLeave.ts` (§5) — state is looked up inside the util, not
+  passed in.
 - `components/Design/Toolbar/utils/selectToolbarTool.ts` — the main `MouseModes`/`ToolDropdown`
   toolbar routes through this instead, via two new handler-hooks, `MouseModes/hooks/useSelectTool.ts`
   (the `ToggleGroupPrimitive.Root`'s `onValueChange`) and
@@ -3785,6 +3787,59 @@ between them, since §55's auto-return-to-Move consumes the tool selection after
 square into two nodes, asserting `vectorEditingNodeIds` covers both and pink pixels appear at *both*
 cut points, not just the one keeping the original node id; the pre-existing branch-vertex test (row
 in the same file) was rebuilt as described above rather than added new.
+
+## 58. VectorEditToolbar "More" menu — Shape builder / Variable width as group-memory tools scoped entirely to Vector Edit Mode
+
+Two new `ToolName` members (`shapeBuilder`, `variableWidth`) that exist purely as toolbar/keyboard
+selectable state — no `NodeType`, no draft-fill step, no shader/draw call, no hit-testing entry,
+same "doesn't fit the checklist" shape as `design-tool-architecture.md`'s Comment section, but
+scoped even narrower: unlike Comment, neither gets a slot in the main Toolbar's `TOOLBAR_ORDER` at
+all — they're reachable only from `VectorEditToolbar`'s own "More" `Popover`, plus their own
+keyboard shortcuts (`M` / `Shift+W`), both gated into `dispatchTool.ts`'s
+`VECTOR_EDIT_ALLOWED_TOOLS` (§45) so they behave like every other Vector-Edit-only tool on the
+keyboard path: swallowed if pressed outside Vector Edit Mode's whitelist logic, honored while a
+node is being edited.
+
+**Group memory follows the established `lastXTool` pattern (§2 in `design-tool-architecture.md`),
+but with a new twist: nullable-until-first-pick.** Every existing group (`lastShapeTool`,
+`lastFrameTool`, ...) initializes to a real default `ToolName` so the shared toolbar button always
+has *something* to display. `lastMoreTool: ToolName | null` in `TDesignState` instead starts `null`
+— the "More" trigger renders as a plain "More" label + chevron (`VectorEditMoreDropdownPlaceholder`)
+until the first pick, then permanently swaps to that tool's own icon button, blue when active,
+plus a small separate chevron trigger beside it for reopening the dropdown
+(`VectorEditMoreDropdownTool`) — mirroring the main Toolbar's `MouseModes`/`ToolDropdown` pair, just
+built from scratch rather than reused, since `ToolDropdown` is keyed by a `TOOLBAR_ORDER` member and
+these tools have no such membership. `VectorEditMoreDropdown.tsx` is the thin dispatcher choosing
+between the two, guarded by a local `isMoreToolName` type predicate (`lastMoreTool` is typed
+`ToolName | null` at the store level, deliberately not narrowed to just the two More tools there,
+since a global store type must never import a feature-local type per `xigma-module-structure`).
+`handleSetActiveTool.ts` gets a `case ToolName.shapeBuilder: case ToolName.variableWidth:` writing
+`state.lastMoreTool`, same shape as every other group's case.
+
+**The memory resets on exiting Vector Edit Mode, unlike every other `lastXTool`.** The other groups
+persist for the whole session — `lastShapeTool` still remembers Ellipse after you draw a Frame.
+`lastMoreTool` instead resets to `null` inside `handleSetVectorEditingNodeIds.ts` whenever the next
+id list is empty (i.e. Vector Edit Mode is being left entirely, not just switched to a different
+node) — asked for directly ("Kiedy zamykamy edytor wektora to wraca przycisk more" — closing the
+vector editor should bring the More button back), since Shape builder/Variable width are
+operations *on* whatever's currently being vector-edited, not a general-purpose tool choice worth
+remembering across unrelated sessions the way Ellipse-vs-Star is. Because
+`handleSetVectorEditingNodeIds` is the single funnel every exit path already dispatches through
+(the Close button, Escape, switching to a non-pen-group main-toolbar tool via
+`selectToolbarTool.ts`), this one guard covers all of them with no per-caller changes.
+
+Neither tool has any actual canvas behavior yet (no drag gesture, no rendering) — this section is
+scoped entirely to the toolbar/shortcut/memory wiring; implementing what Shape Builder and Variable
+Width actually *do* to the vector network is unstarted, separate work.
+
+Unit: `handleSetActiveTool.spec.ts` (new group-memory cases), `handleSetVectorEditingNodeIds.spec.ts`
+(reset-on-exit vs. keep-while-still-editing-another-node), `dispatchTool.spec.ts` (both tools added
+to the whitelist-allow test), `useKeyboardShortcuts.spec.tsx` (`M`/`Shift+W` cases),
+`VectorEditMoreDropdown.spec.tsx` + its `VectorEditMoreDropdownPlaceholder`/`VectorEditMoreDropdownTool`/
+`VectorEditMoreDropdownItems`/`VectorEditMoreDropdownItem` siblings, `isMoreToolName.spec.ts`. E2E:
+`vector-edit-more-toolbar.spec.ts` (TEST_CASES.md #291-293) — picking from the dropdown swaps the
+label for the icon and activates it, both shortcuts activate their tool and update which icon shows,
+closing Vector Edit Mode resets the slot back to its plain label even after a tool was picked.
 
 ## Related
 

@@ -10,6 +10,10 @@ export const handleSetVectorEditingNodeIds = (state: TDesignState, nextVectorEdi
 
   state.vectorEditingNodeIds = nextVectorEditingNodeIds;
 
+  if (nextVectorEditingNodeIds.length === 0) {
+    state.lastMoreTool = null;
+  }
+
   previousVectorEditingNodeIds
     .filter((id) => !nextVectorEditingNodeIds.includes(id) && isEmptyVectorNode(state, id))
     .forEach((id) => handleDeleteNode(state, id));
