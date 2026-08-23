@@ -1,5 +1,5 @@
 // store
-import { selectNodes } from 'store/design/selectors';
+import { selectNodes, selectVectorEditingNodeIds } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
@@ -15,13 +15,26 @@ export const disarmVectorShapeBuilderDrag = (
   canvasRefs: TCanvasRefs,
   setClassName: (className: string | null) => void,
 ): void => {
-  if (canvasRefs.vectorShapeBuilderPathRef.current) {
-    commitVectorShapeBuilder(
+  const path = canvasRefs.vectorShapeBuilderPathRef.current;
+
+  if (path) {
+    const state = store.getState();
+    const absorbedNodeIds = commitVectorShapeBuilder(
       dispatch,
-      selectNodes(store.getState()),
+      selectNodes(state),
+      state.design.rootOrder,
+      selectVectorEditingNodeIds(state),
       canvasRefs.touchedVectorShapeBuilderFacesRef.current,
       canvasRefs.isVectorShapeBuilderSubtractRef.current,
+      path,
+      canvasRefs.isVectorShapeBuilderBoxModeRef.current,
     );
+
+    if (absorbedNodeIds.length > 0) {
+      canvasRefs.selectedVectorVertexIdsRef.current = [];
+      canvasRefs.selectedVectorHandlesRef.current = [];
+      canvasRefs.selectedVectorSegmentIdsRef.current = [];
+    }
 
     canvasRefs.vectorShapeBuilderPathRef.current = null;
     canvasRefs.touchedVectorShapeBuilderFacesRef.current = {};

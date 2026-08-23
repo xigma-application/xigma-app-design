@@ -1,5 +1,5 @@
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -65,8 +65,11 @@ describe('disarmVectorShapeBuilderDrag', () => {
   });
 
   it('should commit the touched faces, clear every shape-builder ref, release pointer capture, and restore the tool cursor', () => {
-    // mock
+    // mock — in real usage a node only ever appears in touchedVectorShapeBuilderFacesRef because
+    // armVectorShapeBuilderOnPointerDown already gated on it being in vectorEditingNodeIds; set that
+    // here too so the open-nodes resolution (§62) finds it
     const nodeId = addTriangleVectorNode();
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs({
       isVectorShapeBuilderBoxModeRef: { current: true },
@@ -87,5 +90,70 @@ describe('disarmVectorShapeBuilderDrag', () => {
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
     expect(setClassName).toHaveBeenCalledWith('add');
     expect(store.getState().design.nodes[nodeId]).toMatchObject({ filledFaceKeys: ['s1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]'] });
+  });
+
+  it('should clear vector selection refs and prune the absorbed node id from vectorEditingNodeIds when the drag genuinely crosses and merges two open nodes', () => {
+    // mock — two 150x200 rectangles staggered by (75,100), a proven real-crossing overlap. Segment/
+    // vertex ids are prefixed per rectangle — addNode stores them verbatim (only the node's own top-
+    // level id is nanoid()-generated), so two literal 's1'/'v1' sets would collide once unioned
+    const buildRectangleNode = (prefix: string, offsetX: number, offsetY: number): Parameters<typeof addNode>[0] => ({
+      fillColor: null,
+      filledFaceKeys: [],
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {
+        [`${prefix}s1`]: { endId: `${prefix}v2`, id: `${prefix}s1`, startId: `${prefix}v1`, tangentEnd: null, tangentStart: null },
+        [`${prefix}s2`]: { endId: `${prefix}v3`, id: `${prefix}s2`, startId: `${prefix}v2`, tangentEnd: null, tangentStart: null },
+        [`${prefix}s3`]: { endId: `${prefix}v4`, id: `${prefix}s3`, startId: `${prefix}v3`, tangentEnd: null, tangentStart: null },
+        [`${prefix}s4`]: { endId: `${prefix}v1`, id: `${prefix}s4`, startId: `${prefix}v4`, tangentEnd: null, tangentStart: null },
+      },
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: {
+        [`${prefix}v1`]: { id: `${prefix}v1`, x: offsetX, y: offsetY },
+        [`${prefix}v2`]: { id: `${prefix}v2`, x: offsetX + 150, y: offsetY },
+        [`${prefix}v3`]: { id: `${prefix}v3`, x: offsetX + 150, y: offsetY + 200 },
+        [`${prefix}v4`]: { id: `${prefix}v4`, x: offsetX, y: offsetY + 200 },
+      },
+    });
+
+    store.dispatch(addNode(buildRectangleNode('a', 0, 0)));
+    const idA = store.getState().design.rootOrder[store.getState().design.rootOrder.length - 1];
+
+    store.dispatch(addNode(buildRectangleNode('b', 75, 100)));
+    const idB = store.getState().design.rootOrder[store.getState().design.rootOrder.length - 1];
+
+    store.dispatch(setVectorEditingNodeIds([idA, idB]));
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs({
+      isVectorShapeBuilderBoxModeRef: { current: false },
+      isVectorShapeBuilderSubtractRef: { current: false },
+      selectedVectorHandlesRef: { current: [{ end: 'start', segmentId: 's1' }] },
+      selectedVectorSegmentIdsRef: { current: ['s1'] },
+      selectedVectorVertexIdsRef: { current: ['v1'] },
+      touchedVectorShapeBuilderFacesRef: { current: { [idA]: new Set(['as1,as2,as3,as4']), [idB]: new Set(['bs1,bs2,bs3,bs4']) } },
+      vectorShapeBuilderPathRef: {
+        current: [
+          { x: 25, y: 25 },
+          { x: 100, y: 150 },
+          { x: 200, y: 250 },
+        ],
+      },
+    });
+    const setClassName = vi.fn();
+
+    // before
+    disarmVectorShapeBuilderDrag(canvas, pointerEvent(3), store.dispatch, canvasRefs, setClassName);
+
+    // result
+    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(store.getState().design.nodes[idB]).toBeUndefined(); // absorbed node deleted
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([idA]); // pruned
   });
 });

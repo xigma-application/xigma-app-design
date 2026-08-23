@@ -1834,6 +1834,28 @@ _selection_ click exactly as ambiguous as the _paint_ click actually under test.
 | 300 | Paint on a rectangle drawn inside another rectangle (same node) fills the smaller, innermost face, not the outer one it also sits inside           |  ✅  |    ✅ `vector-edit.spec.ts`    |
 | 301 | Paint across two separate open nodes whose shapes overlap on screen fills the smaller, topmost node's face, not the bigger one it also sits inside |  ✅  | ✅ `multi-vector-edit.spec.ts` |
 
+## Shape Builder across two genuinely different (crossing) vector nodes
+
+Requested directly, with a screenshot: two separate rectangles, drawn as two independent vector
+nodes, overlapping on screen. Shape Builder already spanned every open node for hit-testing, but
+treated each touched node independently — a drag over the overlap only ever merged/filled each
+node's own whole, unsplit rectangle. Fixed by materializing the crossing between the two nodes' own
+segment sets (reusing the fully generic `planarizeVectorNetwork`/`persistVectorNetworkCrossings`) and
+folding the crossing pair into one surviving node, deleting the other — same shape as the existing
+vertex-drag node merge (§46), just triggered by genuine boundary-crossing instead of a coincident
+vertex. Live-caught, shipped-and-fixed one step later, from two more screenshots: grouping only over
+_touched_ nodes silently treated a touched node's untouched crossing neighbor as nonexistent —
+Alt-clicking only one shape's own exclusive corner deleted its neighbor's shared chord instead of
+protecting it, since the untouched neighbor was never even considered for grouping. Fixed by
+resolving every currently-open node (not just the touched ones) before grouping. Full write-up:
+`.claude/docs/vector-network.md` §62.
+
+| #   | Scenario                                                                                                                                                                                 | Unit |                E2E                |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :-------------------------------: |
+| 302 | Dragging across two genuinely overlapping, separate open nodes merges them into one — the survivor absorbs the other, deleted from rootOrder and vectorEditingNodeIds                    |  ✅  | ✅ `vector-shape-builder.spec.ts` |
+| 303 | Alt+drag across two overlapping, separate open nodes subtracts only the crossing sub-region, still combining the pair into one node since the crossing had to be materialized either way |  ✅  | ✅ `vector-shape-builder.spec.ts` |
+| 304 | Alt+click on only one shape's own exclusive corner — never touching the untouched, crossing neighbor at all — still protects the shared chord instead of treating that shape as isolated |  ✅  | ✅ `vector-shape-builder.spec.ts` |
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

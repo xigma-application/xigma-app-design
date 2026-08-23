@@ -2,36 +2,84 @@
 import { DRAFT_FRAME_STROKE, VECTOR_EDGE_HOVER_STROKE } from 'constant/canvas';
 
 // types
-import { TSceneNode, TViewport } from 'types/design/types';
+import { TPoint } from 'types/canvas';
+import { TSceneNode, TVectorNode, TViewport } from 'types/design/types';
 import { TVectorShapeBuilderTouchedFaces } from 'types/design/canvas/types';
 
 // utils
-import { bakeVectorNodeRotation } from 'components/Design/Canvas/utils/bakeVectorNodeRotation';
-import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { drawShapeBuilderNodeFacesHatch } from './drawShapeBuilderNodeFacesHatch';
 import { drawVectorHatchFill } from 'utils/canvas/drawVectorNode/drawVectorHatchFill';
 import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';
+import { getVectorFacesInRect } from 'components/Design/Canvas/utils/getVectorFacesInRect';
+import { getVectorFacesOnPath } from 'components/Design/Canvas/utils/getVectorFacesOnPath';
+import { groupCrossingVectorNodes } from 'utils/canvas/vectorNetwork/mergeVectorNodes/groupCrossingVectorNodes';
+import { toDraftRect } from 'components/Design/Canvas/utils/toDraftRect';
 
 export const drawVectorShapeBuilderHoverPreview = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
   nodes: Record<string, TSceneNode>,
+  rootOrder: string[],
+  vectorEditingNodeIds: string[],
   touchedFaces: TVectorShapeBuilderTouchedFaces,
   isSubtract: boolean,
+  path: TPoint[] | null,
+  isBoxMode: boolean,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
   const color = isSubtract ? VECTOR_EDGE_HOVER_STROKE : DRAFT_FRAME_STROKE;
+  const touchedNodeIds = Object.keys(touchedFaces).filter((nodeId) => touchedFaces[nodeId].size > 0);
 
-  Object.entries(touchedFaces).forEach(([nodeId, faceKeys]) => {
-    const node = getVectorEditingNode(nodes, nodeId);
+  // grouped over every OPEN node, not just the touched ones — a touched node's own boundary can be
+  // protected by an untouched neighbor it crosses (§62), so even a single touched node still needs to
+  // check every open node for a crossing partner, not just whichever ones the path itself already hit
+  if (touchedNodeIds.length >= 1 && path && path.length > 0) {
+    const openNodes = rootOrder
+      .filter((nodeId) => vectorEditingNodeIds.includes(nodeId))
+      .map((nodeId) => getVectorEditingNode(nodes, nodeId))
+      .filter((node): node is TVectorNode => node !== null);
 
-    if (node) {
-      const bakedNode = { ...node, ...bakeVectorNodeRotation(node) };
-      const faces = deriveVectorFaces(bakedNode).filter((face) => faceKeys.has(face.key));
+    groupCrossingVectorNodes(openNodes).forEach((group) => {
+      const isGroupTouched = group.nodeIds.some((nodeId) => touchedNodeIds.includes(nodeId));
 
-      faces.forEach((face) => drawVectorHatchFill(gl, program, buffer, [face.points], color, canvasWidth, canvasHeight, viewport));
-    }
-  });
+      if (isGroupTouched) {
+        if (group.nodeIds.length === 1) {
+          drawShapeBuilderNodeFacesHatch(
+            gl,
+            program,
+            buffer,
+            getVectorEditingNode(nodes, group.nodeIds[0]),
+            touchedFaces[group.nodeIds[0]],
+            color,
+            canvasWidth,
+            canvasHeight,
+            viewport,
+          );
+        } else {
+          const faces = isBoxMode
+            ? getVectorFacesInRect(group.combinedNode, toDraftRect(path[0], path[path.length - 1]))
+            : getVectorFacesOnPath(group.combinedNode, path);
+
+          faces.forEach((face) => drawVectorHatchFill(gl, program, buffer, [face.points], color, canvasWidth, canvasHeight, viewport));
+        }
+      }
+    });
+  } else {
+    touchedNodeIds.forEach((nodeId) =>
+      drawShapeBuilderNodeFacesHatch(
+        gl,
+        program,
+        buffer,
+        getVectorEditingNode(nodes, nodeId),
+        touchedFaces[nodeId],
+        color,
+        canvasWidth,
+        canvasHeight,
+        viewport,
+      ),
+    );
+  }
 };

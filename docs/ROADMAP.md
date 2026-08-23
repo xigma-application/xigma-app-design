@@ -1265,6 +1265,29 @@ Drobniejsze, ale zauważalne różnice względem Figmy, niepowiązane z żadnym 
       się jako otwarta, przerywana linia (trasa A→Z jak ołówkiem), Shift+box jako zamknięty prostokąt —
       osobny `isClosed` parametr w `drawDashedPolylineOutline.ts`. Pełny opis:
       `.claude/docs/vector-network.md` §59-60, e2e: `e2e/pages/design/vector-shape-builder.spec.ts`.
+
+      **Rozszerzenie: przecięcie dwóch RÓŻNYCH node'ów wektorowych** — zgłoszone wprost, ze
+      zrzutem ekranu: dwa osobne prostokąty (dwa osobne node'y), nachodzące na siebie na ekranie.
+      Wcześniej Shape Builder widział oba otwarte node'y przy hit-testingu, ale traktował każdy
+      całkowicie niezależnie — przeciągnięcie po przecięciu scalało/wypełniało zawsze cały, niepodzielony
+      prostokąt każdego node'a. Naprawione materializacją przecięcia między zbiorami segmentów obu
+      node'ów (`planarizeVectorNetwork`/`persistVectorNetworkCrossings` są w pełni generyczne — nie mają
+      pojęcia "właściciela" segmentu, więc dostają po prostu unię segmentów z dwóch node'ów) i złożeniem
+      pary w jeden ocalały node, kasując drugi — dokładnie ten sam mechanizm co istniejące scalanie
+      node'ów przez przeciągnięcie wierzchołka na wierzchołek (§46), tylko wyzwalane przez faktyczne
+      przecięcie granic zamiast wspólnego wierzchołka. Nowy `utils/canvas/vectorNetwork/mergeVectorNodes/`
+      (`doVectorNodesCross.ts` + `groupCrossingVectorNodes.ts`) grupuje **wszystkie aktualnie otwarte**
+      node'y w spójne składowe (transytywnie — A×B i B×C scala też A z C, mimo że A i C się nie
+      stykają) — nie tylko dotknięte, co samo w sobie było żywo złapanym bugiem: Alt+klik tylko w
+      wyłączny róg jednego kształtu, bez dotknięcia nietkniętego sąsiada z którym się przecina, kasował
+      całą granicę sąsiada zamiast chronić wspólną cięciwę, bo nietknięty sąsiad w ogóle nie trafiał do
+      grupowania. Naprawione czytaniem `vectorEditingNodeIds` zamiast kluczy `touchedFaces`. A
+      `commitVectorShapeBuilder.ts` rozbity na 3 pliki: cienki orkiestrator + niezmieniona ścieżka
+      pojedynczego node'a + nowa ścieżka dla grupy 2+ (re-hit-test surowej ścieżki przeciągnięcia
+      względem połączonego node'a, bo stare klucze face'ów przestają istnieć po podziale). Idle hover
+      (przed kliknięciem) świadomie zostaje przybliżeniem — pokazuje cały, niepodzielony face
+      najmniejszego/najwyższego node'a w punkcie (fix z §61), dokładny podział widać dopiero gdy
+      przeciągnięcie faktycznie się zacznie. Pełny opis: `.claude/docs/vector-network.md` §62.
 - [ ] menu kontekstowe (prawy klik) na node'ach i na pustym canvasie — Copy/Paste, Duplicate,
       Bring to front/Send to back, Delete itd. — dziś nie istnieje w ogóle
 - [ ] kontrolka zoomu w rogu canvasu (aktualny % + dropdown: Zoom to fit / Zoom to selection /

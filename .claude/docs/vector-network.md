@@ -4095,6 +4095,168 @@ node's bounds too, making a *selection* click exactly as ambiguous as the *paint
 actually about — a separate, unrelated concern from the fill hit-test fixed here, not something this
 change attempts to also fix.
 
+## 62. Shape Builder across genuinely different vector nodes — materializing a crossing between two nodes' own segment sets, then folding them into one survivor
+
+Requested directly, with a screenshot: two separate rectangles, drawn as two independent vector
+nodes, overlapping on screen. Shape Builder already spans every open node for hit-testing/hover
+(§59's `...AcrossOpenNodes` helpers), but `commitVectorShapeBuilder.ts` still treated every touched
+node **independently** — it had no notion that two different nodes' boundaries could actually cross,
+so a drag over the overlap only ever merged/filled each node's own *whole, unsplit* rectangle, never
+producing the real split sub-regions the crossing implies.
+
+**The core insight, confirmed before writing any new algorithm**: `planarizeVectorNetwork`/
+`persistVectorNetworkCrossings` (`planarizeVectorNetwork/`) are already fully generic — they take a
+flat `segments`/`vertices` pair with zero per-node ownership concept, and `findAllNetworkCrossings`
+pairwise-checks every segment in the input regardless of origin. Vertex/segment ids are `nanoid()`-
+generated and globally unique across the whole scene (already relied on by §48), so a plain object-
+spread union of two different nodes' `segments`/`vertices`/`filledFaceKeys`/`vertexHandleModes` never
+collides — no retargeting step needed (unlike `mergeVectorVertices`, §46, which retargets a
+*coincident* vertex; here there isn't one). This meant the whole existing single-node pipeline
+(`deriveVectorFaces`, `mergeVectorFaces`, `subtractVectorFaces`, `getVectorFacesOnPath`/
+`...InRect`) could be reused **verbatim** on a synthetic combined node — no new geometry math
+anywhere, only new orchestration around it.
+
+**New `utils/canvas/vectorNetwork/mergeVectorNodes/`** (mirrors `mergeVectorFaces/`/
+`mergeVectorVertices/`'s one-function-per-file shape):
+- `doVectorNodesCross.ts` — `(bakedNodeA, bakedNodeB) => boolean`. An AABB overlap check
+  (`getVectorNodeBounds`) as a cheap early-out, then — only if bounds overlap — tags each node's own
+  segment ids into a `Set`, runs `findAllNetworkCrossings` on the union, and checks whether any
+  introduced crossing (its `virtualVertices` key, `` `x:${firstId}:${secondId}:${t}` ``) pairs a
+  segment from A with a segment from B, not just A-with-A or B-with-B. Both inputs must already be
+  **baked** (`bakeVectorNodeRotation`) — vertex coordinates are only comparable in world space, and
+  two differently-rotated nodes' *raw* vertices live in fundamentally different, incomparable frames.
+- `groupCrossingVectorNodes.ts` — `(nodes: TVectorNode[]) => TVectorNodeGroup[]`
+  (`{ combinedNode, nodeIds }`). Builds connected components over the input via pairwise
+  `doVectorNodesCross` (realistic touched-node counts are 2-5, so O(n²) is fine). A singleton
+  component's `combinedNode` is the **original, unbaked** node, completely untouched — this
+  preserves the existing single-node commit path's own contract exactly (still works in that node's
+  own local/pre-rotation frame, `rotation` never touched). A component of 2+ bakes each member,
+  unions their `segments`/`vertices`/`vertexHandleModes`/`filledFaceKeys` (plain spread), runs
+  `persistVectorNetworkCrossings` on the union, and returns `{ ...survivor, segments, vertices,
+  filledFaceKeys, rotation: 0, vertexHandleModes }` — survivor = the group's lowest-`rootOrder`
+  member (the function's own contract: **input must already be sorted ascending by rootOrder**, same
+  z-order-wins convention used elsewhere; the survivor falls out for free as whichever node the outer
+  scan reaches first, since a BFS start id is always the first not-yet-visited node in that order).
+
+  Caught by review before it ever ran: a naive `nodes.filter(n => !visited.has(n.id)).map(n =>
+  collectConnectedComponent(...))` looks equivalent to a single `forEach` doing both, but isn't — the
+  `.filter` snapshots `visited` **once**, before any component has been walked, so a node swept into
+  an earlier BFS still gets `collectConnectedComponent` called on it again later (returning an empty
+  component, since its own `while` loop's first check finds it already visited) — producing a bogus
+  zero-length group and crashing on `nodeIds[0]`. Fixed by checking `visited` fresh inside a single
+  `forEach`, immediately before deciding whether to start a new component.
+
+**The stale-touched-key problem, and why the raw path has to be re-threaded through to commit**: a
+crossing group's own touched sub-faces can't be resolved from the whole-shape face keys each member
+node recorded independently during the drag (`touchedVectorShapeBuilderFacesRef`) — those keys don't
+exist any more once the nodes are combined and re-split into genuinely different sub-regions. Fixed
+by re-hit-testing the **original drag path/box** against the group's already-combined,
+already-crossing-persisted node, reusing `getVectorFacesOnPath`/`getVectorFacesInRect` exactly as
+armed at drag-start. This is why `commitVectorShapeBuilder.ts` gained `path`/`isBoxMode` params
+(sourced from `canvasRefs.vectorShapeBuilderPathRef`/`isVectorShapeBuilderBoxModeRef`, already live
+throughout the gesture) alongside the pre-existing `touchedFaces` — the size-1 (unchanged, single-
+node) branch still uses the stale keys exactly as before; only the size-2+ branch needs the path.
+
+**Commit split into 3 files, one concern each** (`handlePointerUp/disarmVectorShapeBuilderDrag/`):
+`commitVectorShapeBuilder.ts` (thin orchestrator: resolves every currently-**open** node in rootOrder
+— not just the touched ones, see the live-caught bug below — groups all of them, then for each group
+containing at least one touched member dispatches to whichever of the two below applies, collects
+absorbed ids, dispatches one final `setVectorEditingNodeIds` prune), `commitSingleVectorShapeBuilderNode.ts`
+(the original, byte-for-byte unchanged single-node logic, just extracted to its own file), and
+`commitCrossingVectorNodeGroup.ts` (new: re-hit-test → `mergeVectorFaces`/`subtractVectorFaces` on
+the combined node → one `updateNode` for the survivor with `rotation: 0` → one `deleteNode` per
+absorbed id → returns the absorbed ids so the orchestrator can prune `vectorEditingNodeIds` and the
+caller can clear stale selection refs).
+
+**Live-caught, shipped-and-fixed: grouping only over *touched* nodes silently treated a touched
+node's untouched crossing neighbor as if it didn't exist.** Reported directly with two more
+screenshots, right after the first version above shipped: Alt+clicking only a shape's own exclusive
+corner — never touching the *other*, untouched shape it crosses — deleted its **entire** boundary
+instead of leaving the small remnant the real Figma-style behavior implies (the shared chord with the
+untouched neighbor should survive). Root cause: `groupCrossingVectorNodes` was fed only the nodes
+present in `touchedFaces`, so a lone touched node with an untouched-but-crossing neighbor always
+formed a **singleton group of one** — the pairwise crossing check inside `groupCrossingVectorNodes`
+never even ran, since there was only ever one node in its input to begin with, and
+`subtractVectorFaces` correctly-per-its-own-contract treated that lone face as having "no neighbor to
+protect." Whether a touched node's own boundary is exclusive or shared depends on *every* node it
+crosses, not just the ones the gesture also happened to touch — exactly the same principle
+`getExclusiveSegmentIds`/`getInteriorSegmentIds` already apply *within* one node's own faces (all of
+them, not just the touched subset). Fixed by resolving `openNodes` from **every** id in
+`vectorEditingNodeIds` (not `touchedFaces`'s own keys) before grouping, then per resulting group
+checking `group.nodeIds.some(id => touched)` to decide whether to act on it at all — an untouched
+node can now pull a touched neighbor into a real 2+ group purely by crossing it, contributing its own
+geometry to protect the shared chord, without ever having any of its *own* faces merged/subtracted.
+The identical bug existed in `drawVectorShapeBuilderHoverPreview.ts` (gated on
+`touchedNodeIds.length >= 2`, now `>= 1`, same open-nodes resolution) and was fixed the same way.
+Live-reproduced and confirmed with an irregular (non-rectangular, rotated) quadrilateral pair
+matching the report's own screenshots almost exactly, both before (whole neighbor boundary deleted)
+and after (only the touched shape's exclusive edges gone, the small chord-bounded remnant surviving
+right where the two shapes crossed) — caught *because* live verification against the user's own
+repro is the standing methodology for this feature, not stopped at "the unit tests for the first
+version are green."
+
+**`deleteNode` doesn't clean `vectorEditingNodeIds` — the caller must, and one existing caller
+doesn't**: `store/design/utils/handleDeleteNode.ts` cleans `nodes`/`rootOrder`/`selectedIds` and
+cascades attached text nodes, but leaves `vectorEditingNodeIds` alone. Two existing precedents
+disagreed here before this change: the Pen cross-node merge (§48) correctly dispatches
+`setVectorEditingNodeIds(...)` after deleting; the vertex-drag merge (§46,
+`disarmVectorVertexDrag.ts`) does **not**, leaving it stale if the absorbed node happened to be open
+for multi-vector editing. This change follows the correct precedent — `disarmVectorShapeBuilderDrag.ts`
+now also clears `selectedVectorVertexIdsRef`/`...HandlesRef`/`...SegmentIdsRef` unconditionally
+whenever anything got absorbed, mirroring `disarmVectorVertexDrag.ts`'s own simpler
+clear-everything-after-a-merge behavior rather than trying to target specific stale ids. The §46 gap
+itself was **not** fixed here — flagged as a separate, pre-existing, out-of-scope bug.
+
+**Live preview only re-groups mid-drag, never on idle hover — a deliberate, documented approximation**:
+`drawVectorShapeBuilderHoverPreview.ts` gained the identical open-nodes grouping logic, gated behind
+`touchedNodeIds.length >= 1 && path` — a real path only exists once a drag is actually in progress
+(`vectorShapeBuilderPathRef` is `null` until `armVectorShapeBuilderOnPointerDown`), so idle hover
+(before any click) keeps the plain per-node hatch that already existed, picking whichever node's
+*whole* face is smallest/topmost at the cursor (§61's fix) rather than the precise split sliver.
+Confirmed live: hovering a crossing point before clicking shows one whole rectangle hatched; the
+instant a drag starts and sweeps through the crossing, the preview corrects itself to the real split
+regions. This also means a **plain click** (no drag) resolves correctly from its very first frame
+with zero special-casing — `armVectorShapeBuilderOnPointerDown` already seeds
+`touchedVectorShapeBuilderFacesRef` from *every* open node with a matching face (not a single
+winner), and commit's own grouping/re-hit-test runs against `path = [point]` exactly like a 1-point
+drag. The repeated `groupCrossingVectorNodes` + branch shape between `commitVectorShapeBuilder.ts`
+and `drawVectorShapeBuilderHoverPreview.ts` (dispatch vs. draw) was deliberately left as modest
+duplication rather than forced into one shared callback-based abstraction — the actual reusable part
+(`groupCrossingVectorNodes` itself, a real pure function) is already shared; the few lines of
+per-group dispatch-or-draw branching differ enough in kind that merging them would add more
+indirection than the duplication costs. `drawShapeBuilderNodeFacesHatch.ts` (new) extracts the
+"bake, derive, filter by stale key, hatch" 4-liner reused by both the fallback per-node path and each
+size-1 group inside the new grouping branch.
+
+**Live-verified end-to-end** reproducing the user's own screenshots exactly: two Pen-drawn separate
+150x200 rectangles staggered by (75,100) (same proportions as §59's own `crossingRectanglesNode`
+fixture, now as two real nodes instead of one), both opened via multi-vector-edit. A drag sweeping
+only 2 of the 3 resulting sub-regions correctly merged just those two into one node — the third
+region's stroke stayed visibly unfilled but was still structurally absorbed into the same node (node
+count dropped from 2 to 1 either way, confirming the crossing-materialization step runs regardless of
+which specific sub-faces end up touched). A second run sweeping all 3 regions produced one solid,
+seamlessly merged shape with a single set of selection handles. A third run reproducing the
+open-nodes bug fix above with an irregular rotated-quadrilateral pair: Alt-clicking only the exclusive
+corner of the smaller shape correctly left the larger, untouched shape's own boundary fully intact
+plus a small surviving remnant at the crossing — not the "whole neighbor boundary vanishes" result
+the pre-fix version produced for the exact same gesture.
+
+Unit: `doVectorNodesCross.spec.ts` (AABB-disjoint, AABB-overlap-but-shapes-don't-actually-cross via
+an L-shaped notch, genuine crossing, edge-touching-only), `groupCrossingVectorNodes.spec.ts` (1 node,
+2 crossing, 2 non-crossing, 3 nodes transitively crossing A-B-C, an unrelated singleton mixed into a
+crossing pair), `commitSingleVectorShapeBuilderNode.spec.ts` (extracted verbatim from the pre-split
+file), `commitCrossingVectorNodeGroup.spec.ts` (merge, box-mode merge, subtract, path touching
+nothing → empty return), extended `commitVectorShapeBuilder.spec.ts`/`disarmVectorShapeBuilderDrag.spec.ts`/
+`drawVectorShapeBuilderHoverPreview.spec.ts` — including, for both the commit and the hover-preview
+file, a dedicated regression case for the open-vs-touched-nodes bug (a lone touched node with an
+untouched crossing neighbor still forms a real 2+ group) and a case confirming an untouched, non-
+crossing group elsewhere in the same gesture is still correctly skipped. 100% coverage per
+`xigma-unit-coverage` on every touched file. e2e: extended `vector-shape-builder.spec.ts` with two
+genuinely-separate-node crossing-merge and crossing-subtract cases plus the exclusive-corner-only
+regression case; the file's own pre-existing disconnected-nodes test already served as the "don't
+accidentally combine non-crossing touched nodes" regression guard, re-verified green against the
+final code.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

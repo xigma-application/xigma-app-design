@@ -58,6 +58,50 @@ const injectSplitRectangle = (page: Page, offsetX = 0, offsetY = 0, filled = fal
     { filled, offsetX, offsetY },
   );
 
+// a plain, unfilled 150x200 rectangle as its own standalone vector node — for the cross-node
+// crossing scenarios below, where two genuinely SEPARATE nodes overlap on screen (unlike
+// injectSplitRectangle, which is one node with an internal chord). Segment/vertex ids are prefixed
+// per call — addNode stores them verbatim (only the node's own top-level id is nanoid()-generated),
+// so two calls sharing literal 's1'/'v1' ids would collide once unioned for crossing detection
+const injectRectangleNode = (page: Page, prefix: string, offsetX: number, offsetY: number): Promise<string> =>
+  page.evaluate(
+    async ({ offsetX, offsetY, prefix }) => {
+      const { store } = await import('/src/store/index.ts');
+      const { addNode } = await import('/src/store/design/slice.ts');
+
+      store.dispatch(
+        addNode({
+          fillColor: null,
+          filledFaceKeys: [],
+          name: 'Vector',
+          parentId: null,
+          rotation: 0,
+          segments: {
+            [`${prefix}s1`]: { endId: `${prefix}v2`, id: `${prefix}s1`, startId: `${prefix}v1`, tangentEnd: null, tangentStart: null },
+            [`${prefix}s2`]: { endId: `${prefix}v3`, id: `${prefix}s2`, startId: `${prefix}v2`, tangentEnd: null, tangentStart: null },
+            [`${prefix}s3`]: { endId: `${prefix}v4`, id: `${prefix}s3`, startId: `${prefix}v3`, tangentEnd: null, tangentStart: null },
+            [`${prefix}s4`]: { endId: `${prefix}v1`, id: `${prefix}s4`, startId: `${prefix}v4`, tangentEnd: null, tangentStart: null },
+          },
+          strokeColor: '#000000',
+          strokeWidth: 1,
+          type: 'vector',
+          vertexHandleModes: {},
+          vertices: {
+            [`${prefix}v1`]: { id: `${prefix}v1`, x: 900 + offsetX, y: 300 + offsetY },
+            [`${prefix}v2`]: { id: `${prefix}v2`, x: 900 + offsetX + 150, y: 300 + offsetY },
+            [`${prefix}v3`]: { id: `${prefix}v3`, x: 900 + offsetX + 150, y: 300 + offsetY + 200 },
+            [`${prefix}v4`]: { id: `${prefix}v4`, x: 900 + offsetX, y: 300 + offsetY + 200 },
+          },
+        } as never),
+      );
+
+      const state = store.getState();
+
+      return state.design.rootOrder[state.design.rootOrder.length - 1];
+    },
+    { offsetX, offsetY, prefix },
+  );
+
 const enterVectorEditModeFor = (page: Page, nodeIds: string[]): Promise<void> =>
   page.evaluate(async (ids) => {
     const { store } = await import('/src/store/index.ts');
@@ -287,4 +331,99 @@ test('a single drag spanning two disconnected split rectangles merges each one�
   expect(resultA.filledFaceKeys).toHaveLength(1);
   expect(resultB.segmentIds).not.toContain('divider');
   expect(resultB.filledFaceKeys).toHaveLength(1);
+});
+
+test('dragging across two genuinely overlapping, separate open nodes merges them into one — the survivor absorbs the other, which is deleted from rootOrder and vectorEditingNodeIds', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-shape-builder-cross-node-merge');
+  await expect(designPage.canvas).toBeVisible();
+
+  // same overlap proportions as the single-node crossing-rectangles regression above, but as two
+  // genuinely separate nodes this time
+  const idA = await injectRectangleNode(page, 'a', 0, 0); // (900,300)-(1050,500)
+  const idB = await injectRectangleNode(page, 'b', 75, 100); // (975,400)-(1125,600)
+
+  await enterVectorEditModeFor(page, [idA, idB]);
+  await page.keyboard.press('m');
+
+  // sweeps through the A-only region, the overlap, then the B-only region
+  await designPage.dragVectorShapeBuilder([
+    { x: 925, y: 325 },
+    { x: 1000, y: 450 },
+    { x: 1100, y: 575 },
+  ]);
+
+  const state = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const s = store.getState().design;
+
+    return { rootOrder: s.rootOrder, vectorEditingNodeIds: s.vectorEditingNodeIds };
+  });
+  const survivor = await readNode(page, idA);
+
+  expect(state.rootOrder).toEqual([idA]); // B got absorbed and deleted
+  expect(state.vectorEditingNodeIds).toEqual([idA]); // pruned of the deleted id
+  expect(survivor.filledFaceKeys).toHaveLength(1); // all 3 sub-regions merged into one
+});
+
+test('Alt+drag across two overlapping, separate open nodes subtracts only the crossing sub-region, still combining the pair into one node since the crossing had to be materialized either way', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-shape-builder-cross-node-subtract');
+  await expect(designPage.canvas).toBeVisible();
+
+  const idA = await injectRectangleNode(page, 'a', 0, 0); // (900,300)-(1050,500)
+  const idB = await injectRectangleNode(page, 'b', 75, 100); // (975,400)-(1125,600)
+
+  await enterVectorEditModeFor(page, [idA, idB]);
+  await page.keyboard.press('m');
+
+  // Alt+click dead center of the overlap only
+  await designPage.click(1000, 450, { alt: true });
+
+  const state = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+
+    return store.getState().design.rootOrder;
+  });
+  const survivor = await readNode(page, idA);
+
+  expect(state).toEqual([idA]); // still combined into one node, B absorbed
+  expect(survivor.filledFaceKeys).toEqual([]); // nothing was filled to begin with
+  expect(survivor.segmentIds.length).toBeGreaterThan(0); // each rectangle's own outer edges survive
+});
+
+test('Alt+click on only ONE shape’s own exclusive corner — never touching the untouched, crossing neighbor at all — still protects the shared chord instead of treating that shape as fully isolated', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-shape-builder-cross-node-subtract-exclusive-only');
+  await expect(designPage.canvas).toBeVisible();
+
+  const idA = await injectRectangleNode(page, 'a', 0, 0); // (900,300)-(1050,500)
+  const idB = await injectRectangleNode(page, 'b', 75, 100); // (975,400)-(1125,600)
+
+  await enterVectorEditModeFor(page, [idA, idB]);
+  await page.keyboard.press('m');
+
+  // Alt+click deep inside B's own exclusive corner — outside A's bounds (900-1050) entirely
+  await designPage.click(1100, 550, { alt: true });
+
+  const state = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+
+    return store.getState().design.rootOrder;
+  });
+  const survivor = await readNode(page, idA);
+
+  // B still gets absorbed into A even though A itself was never touched by this click — the crossing
+  // had to be materialized regardless, and B's own exclusive boundary is what actually gets deleted
+  expect(state).toEqual([idA]);
+  expect(survivor.segmentIds.length).toBeGreaterThan(4); // A's own 4 edges survive (some split) plus a surviving B chord piece
 });
