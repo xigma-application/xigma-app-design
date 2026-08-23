@@ -1056,6 +1056,56 @@ describe('armVectorPaintOnPointerDown', () => {
     expect(action.payload.changes).toEqual({ filledFaceKeys: [] });
   });
 
+  it('should bake a crossing the clicked face depends on into a real, persisted vertex (regression: painting across a crossing that only existed virtually made the fill disappear the moment the node was cut later)', () => {
+    // mock — a square (a-b-c-d) plus a separate horizontal line crossing its left and right edges, both
+    // living in the same node's segments/vertices, exactly like drawing a second Pen stroke across an
+    // existing shape — the crossing only exists virtually (render-time planarization) until this paint
+    const nodeId = addVectorNode(
+      {
+        line1: { endId: 'p2', id: 'line1', startId: 'p1', tangentEnd: null, tangentStart: null },
+        s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'c', id: 's2', startId: 'b', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'd', id: 's3', startId: 'c', tangentEnd: null, tangentStart: null },
+        s4: { endId: 'a', id: 's4', startId: 'd', tangentEnd: null, tangentStart: null },
+      },
+      {
+        a: { id: 'a', x: 0, y: 0 },
+        b: { id: 'b', x: 100, y: 0 },
+        c: { id: 'c', x: 100, y: 100 },
+        d: { id: 'd', x: 0, y: 100 },
+        p1: { id: 'p1', x: -20, y: 50 },
+        p2: { id: 'p2', x: 120, y: 50 },
+      },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    // before — click inside the top half, above the crossing line
+    const ctx = createContext({ activeTool: ToolName.paint, point: { x: 50, y: 25 } });
+
+    // result
+    expect(armVectorPaintOnPointerDown(ctx)).toBe(true);
+
+    const action = (ctx.dispatch as ReturnType<typeof vi.fn>).mock.calls[0][0] as ReturnType<typeof updateNode>;
+    const changes = action.payload.changes as Partial<TVectorNode>;
+
+    expect(changes.filledFaceKeys).toHaveLength(1);
+    expect(changes.segments).toBeDefined();
+    expect(changes.vertices).toBeDefined();
+
+    const originalVertexIds = new Set(['a', 'b', 'c', 'd', 'p1', 'p2']);
+    const newVertexIds = Object.keys(changes.vertices!).filter((id) => !originalVertexIds.has(id));
+
+    // one shared, real vertex per crossing (s2xline1, s4xline1) — not a synthetic "x:...:...:..." id
+    expect(newVertexIds).toHaveLength(2);
+    newVertexIds.forEach((id) => expect(id).not.toContain(':'));
+
+    // both crossed segments split around the shared real vertex, and are still there to be re-cut later
+    expect(Object.keys(changes.segments!).sort()).toEqual(
+      ['s1', 's2#0', 's2#1', 's3', 's4#0', 's4#1', 'line1#0', 'line1#1', 'line1#2'].sort(),
+    );
+  });
+
   it('should claim the pointerdown without dispatching when the click misses every face', () => {
     // mock
     const nodeId = addVectorNode(
