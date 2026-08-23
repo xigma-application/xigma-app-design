@@ -3569,11 +3569,12 @@ nie dotknie tzn. nie kliknie ich i odklika," with an explicit exception: exiting
 entirely clears every mark regardless of touch state. Two new `Set<string>` refs,
 `newVectorCutVertexIdsRef`/`touchedVectorCutVertexIdsRef` (`TCanvasRefs`, defaulting to `new Set()`
 like the codebase's other always-present array/collection refs, never `null`).
-`markNewVectorCutVertices.ts` (`disarmVectorCutDrag/`) diffs each open node's vertex-id set
-before/after the commit and adds whatever's new — deliberately scoped to nodes that existed under the
-same id both before and after (a brand-new sibling node from a full top-level divide is skipped
-entirely, since there's no cheap way to tell which of *its* inherited vertices are genuinely new
-without deeper cross-referencing, and over-marking is worse than under-marking here).
+`markNewVectorCutVertices.ts` (`disarmVectorCutDrag/`) diffs vertex ids present in the resulting
+open nodes but not the pre-cut ones. **Superseded by §57**: the original version matched nodes by
+id, so a brand-new sibling node (from a Divide, or now a component-splitting Split too) was silently
+skipped — its own share of new vertices never got marked, since it had no same-id counterpart in the
+pre-cut snapshot. Fixed into a scope-wide vertex-id diff (union of all pre-cut nodes' vertex ids vs.
+all post-cut nodes' vertex ids), which needs no node-id matching at all.
 `resolveVectorCutMarkConsumption.ts` runs the actual touch/untouch bookkeeping: adds to `touched` the
 moment a pink id is found selected, and un-marks (removes from both sets) once a *previously touched*
 id is no longer selected — critically, a Split's two coincident vertices (genuinely disconnected but
@@ -3624,6 +3625,166 @@ Split into its own module-structure folders during this arc, matching the siblin
 tangent handles, vertex dots, edge-insert preview) is now its own `drawVectorEditHandlesForNode.ts`,
 called once per open node from the orchestrator, which now itself lives in its own matching
 `drawVectorEditHandlesLayer/` subfolder alongside `test/`.
+
+## 56. Click-to-select a filled face's vertices in Move tool, plus a persistent "fully selected" hatch highlight
+
+A new Move-tool affordance, deliberately mirroring the Paint tool's own hatch-hover visual language
+(§43) but for a different purpose: instead of toggling a face's fill, clicking inside an already-
+**filled** face selects every one of its vertices at once, sparing the user a point-by-point
+multi-select. Requested directly, with a follow-up ("shift też powinien działać na zaznaczanie kilku
+powierzchni") extending it to shift-click multi-face selection.
+
+**The missing primitive — face → real vertex ids.** `TVectorFace.pieceKeys` entries already encode
+every real, persisted vertex id bounding that piece, in the form `${segmentId}[${boundaryA}|${boundaryB}]`
+where each boundary token is either `v:<realVertexId>` or `x:<otherSegmentId>:<n>` (a virtual,
+not-yet-persisted crossing — see planarization in §12/§53). New `getVectorFaceVertexIds.ts`
+(`utils/canvas/vectorNetwork/`) parses every piece key with a small regex and returns the deduped set
+of `v:`-tagged ids, silently dropping any still-virtual `x:` boundary — correct, since a virtual
+crossing isn't rendered as a selectable vertex dot until persisted anyway. New
+`getVectorFullySelectedFaces.ts` (same folder) uses it plus the existing
+`node.filledFaceKeys.includes(getVectorFillLoopKey(face.pieceKeys))` filled-check (the same pattern
+`getVectorFilledFacesTouchingVertexIds.ts`, §54, already established) to return every currently
+filled face whose entire vertex set is a subset of the live selection.
+
+**Click handling — `armVectorFaceSelectOnPointerDown.ts`**, gated on `activeTool === ToolName.move
+&& vectorEditingNodeIds.length > 0`, inserted into `ARM_RESOLVERS` right after
+`armVectorSegmentOnPointerDown` and before `armVectorMarqueeOnPointerDown` — late enough that an
+actual vertex/segment/handle/multi-select-box hit still wins, but early enough to intercept before
+`armVectorMarqueeOnPointerDown`'s catch-all (which would otherwise clear the selection and start a
+marquee drag on the same click). Unlike Paint's resolver, this one does **not** unconditionally
+return `true` — a miss (empty space, or a face with no fill) returns `undefined` so the click falls
+through to the normal marquee/whole-node-drag behavior; only an actual filled-face hit is claimed.
+Mirrors `armVectorPaintOnPointerDown.ts`'s crossing-persistence dance exactly (`persistVectorNetworkCrossings`
+→ dispatch `updateNode` only if geometry actually changed → re-derive the face from the *persisted*
+node before reading its vertex ids), since a face's pieceKeys depend on the segment-id space they
+were derived from — reusing the pre-persist face object here would resolve to a stale/wrong id set.
+Plain click replaces `selectedVectorVertexIdsRef` outright (and clears `selectedVectorHandlesRef`/
+`selectedVectorSegmentIdsRef`, same as a fresh single-vertex selection would); shift-click **unions**
+the face's vertex ids into the current selection (plain `Set` spread, not the existing per-id
+`toggleSelection` helper single-vertex clicks use) — live-tested regression: two faces sharing a
+divider edge (e.g. a square split into a top/bottom half) share that divider's two vertex ids, so a
+per-id *toggle* on the second shift-click flipped those shared ids back OFF (they were already
+selected from the first face), silently dropping them from the selection — invisible until a
+subsequent group-drag, where the divider visibly stayed frozen in place while the rest of the
+selection moved. Fixed by making shift-click purely additive; a shift-click on a face whose vertices
+are already all selected is now a no-op rather than a deselect. **Also arms a group drag
+immediately** (`armVectorGroupDrag(canvas, event, canvasRefs, point, null)`, `pendingClickAction:
+null` since there's no single vertex/handle/segment id to collapse to on a no-move release — a
+plain click-without-drag on a face correctly leaves the whole face selected, per
+`applyPendingClickAction.ts`'s existing "no `pendingClickAction` → no-op" contract) — asked for
+directly after the first live pass required an awkward click-release-click-drag two-step; the
+existing `armVectorGroupDrag` (shared with the single-vertex/segment/handle "click an
+already-multi-selected member" path) reads the vertex ids this resolver just wrote into
+`selectedVectorVertexIdsRef`, so a click and an immediate drag now work as one continuous gesture,
+same as clicking any other already-selected vector element. `armVectorGroupDrag`'s own
+`pendingClickAction` parameter widened from `TVectorPendingClickAction` to `TVectorPendingClickAction
+| null` for this call (its existing three callers, which always pass a concrete click-action object,
+are unaffected) — it was already just forwarding straight through to `armVectorMultiDrag`, which
+accepted `| null` from the start.
+
+**Hover preview — `resolveVectorFaceSelectHover.ts` + `drawVectorFaceSelectHoverPreview.ts`**,
+copying `resolveVectorPaintHover.ts`/`drawVectorPaintHoverPreview.ts`'s shape almost verbatim but
+gated on `ToolName.move` instead of `ToolName.paint`, with no add/remove distinction — only a filled
+face sets the hover ref at all (`hoveredVectorFaceSelectRef`, new `TCanvasRefs` field, same
+four-file wiring as `hoveredVectorPaintFaceKeyRef`: `types/design/canvas/types.ts`,
+`createCanvasRefs.ts`, `CanvasRefsProvider.tsx`, plus a reset in `useSelectionTool.ts`'s tool-change
+cleanup), always hatched in `DRAFT_FRAME_STROKE` blue — the same "would select/add" blue Paint's own
+hover uses, deliberately reused rather than inventing a new color so both affordances read as the
+same visual language. Called from `resolveVectorIdleHover.ts` right after `resolveVectorPaintHover`
+(no cursor className change — out of scope, not asked for).
+
+**Persistent highlight — `drawVectorSelectedFillPreview.ts`**, called from `drawScene.ts` right
+after `drawVectorDraggedFillPreview` (§54's sibling). Unlike §54's drag preview (whose touched-face
+set is computed once when the drag arms, since topology doesn't change mid-drag), this one
+re-derives `getVectorFullySelectedFaces` fresh **every frame** from the live
+`selectedVectorVertexIdsRef`/`vectorEditingNodeIds`, across every open node — the selection can
+change by many different paths (this click, Lasso, marquee, individual shift-clicks on points), so
+there's no single "arm" moment to snapshot against. Same blue `DRAFT_FRAME_STROKE`, same
+`drawVectorHatchFill` primitive, one hatch call per frame covering every fully-selected filled face
+across every open vector node at once.
+
+Unit-only, same precedent as Paint's own hover-highlight and §54's drag highlight (TEST_CASES.md's
+established rationale: a screenshot diff only proves "something changed," not which face/branch) —
+`getVectorFaceVertexIds.spec.ts`, `getVectorFullySelectedFaces.spec.ts`,
+`armVectorFaceSelectOnPointerDown.spec.ts` (folded into the shared `armResolvers.spec.ts`, matching
+that folder's one-file convention), `resolveVectorFaceSelectHover.spec.ts`,
+`drawVectorFaceSelectHoverPreview.spec.ts`, `drawVectorSelectedFillPreview.spec.ts`.
+
+## 57. Split now tears into two nodes when it genuinely disconnects the network, same as Divide
+
+Prompted by a direct live-testing question ("Powinno oderwać na 2 wektory czy to będzie
+skomplikowane?" — should it tear into two vectors, or would that be complicated) after live-verifying
+that a horizontal Divide drag through a rectangle correctly produced two vectors, then checking the
+same result via two individual Split clicks instead — and finding it stayed one node with two
+severed-but-coincident edges, never splitting.
+
+**Why one Split could already leave the network disconnected.** Severing a segment never adds any
+new connectivity — it only ever removes it. A closed loop survives one severed edge as a single open
+chain (the remaining edges still bridge it), but severing a *second* edge that shares no vertex with
+the first cuts that chain in two, with nothing left to bridge the halves — exactly the two-plain-
+-clicks repro above. `commitVectorSplit.ts` previously never checked for this: it just dispatched
+`severVectorSegmentAtPoint`'s output as a single `updateNode`, regardless of whether the resulting
+vertex/segment graph was still one connected piece.
+
+**The fix reuses Divide's own component-splitting primitives** rather than inventing new ones:
+`splitVectorNetworkIntoComponents` (already used by `findVectorDivideResult.ts`, §53) run directly on
+the severed network to count components, and `commitVectorCutComponents` (§53's shared
+sort-by-size/`updateNode`-the-largest/`addNode`-the-rest helper) to actually commit a ≥2-component
+result. Fill is resolved per component via `resolveSurvivingFilledFaceKeys` alone (no
+`addCutClosingSegment` — a Split has no drag line to add a chord along, so a loop cut open on two
+sides genuinely loses its fill on both halves, not just one; this is the correct, not merely
+tolerated, outcome, verified by both a unit test and by live-testing that a pre-filled square splits
+into two unfilled halves).
+
+**Baking is conditional, unlike Divide's callers.** `findVectorDivideResult`/
+`findVectorConnectedCutResult` always bake rotation to world space first, since a Divide line is
+itself defined in world space. A Split's `segmentId`/`t` hit is local to the node regardless of its
+rotation, so `commitVectorSplit` only bakes (`bakeVectorNodeRotation`, then re-severs against the
+baked node) inside the `components.length >= 2` branch — resetting `rotation: 0` only on the actual
+multi-node commit, same as `commitVectorCutComponents` already does for Divide. The ordinary
+single-component case (the overwhelming majority of Splits) is untouched: still an unbaked
+`updateNode` with the node's existing rotation left alone, exactly as before this change. This means
+`severVectorSegmentAtPoint` is called twice in the rare multi-component branch (once unbaked, to
+decide the branch cheaply; once baked, for the actual committed geometry) — the ids from the first
+call are discarded, never dispatched, so there's no cross-call id inconsistency despite each call
+minting its own `nanoid()`s. Component *count* is identical either way since baking only moves
+coordinates, never changes which vertex/segment ids reference which — topology is rotation-invariant.
+
+**`disarmVectorCutDrag.ts`** now reads `commitVectorSplit`'s return value (`string[]` — every
+resulting node id, `[node.id]` for the ordinary case) and, when it's more than one id,
+`setVectorEditingNodeIds`s the pre-cut list with the original id swapped out for the full result set —
+mirroring `commitVectorDivide.ts`'s own `setVectorEditingNodeIds` call, so a Split-produced sibling
+opens for editing immediately, same as a Divide-produced one already did.
+
+**This also fixed §55's documented `markNewVectorCutVertices` limitation as a direct consequence**:
+once Split could produce a brand-new sibling node too, that gap (new sibling's own new vertices never
+pink-marked) became directly reachable from this feature, not just Divide's harder-to-hit multi-node
+case — see the rewritten paragraph in §55 and `markNewVectorCutVertices.ts`'s new global vertex-id
+diff.
+
+One existing unit fixture broke as a direct, intended consequence: `commitVectorSplit.spec.ts`'s
+original test used a two-point, one-segment node — severing a lone segment always disconnects its two
+endpoints (there's nothing else to bridge them), so this is now genuinely the two-node case, not a
+regression to paper over. Similarly, `cut.spec.ts`'s existing branch-vertex Split test (a "Y" shape,
+degree-3 vertex) needed its fixture rebuilt via direct `addNode` injection — the original Pen-tool
+re-entry choreography (`doubleClick` + re-press `'p'`) turned out to already silently produce a
+malformed structure (two segments between the same two vertices, one drawn branch never actually
+wired in, its vertex orphaned with zero segments) that only happened to read as "3 segments" by
+coincidence; the new injected fixture gives a genuine degree-3 vertex, and the new
+`splitVectorNetworkIntoComponents`-based check correctly identifies that severing any one of its 3
+segments splits the severed branch off into its own 1-segment node, leaving the other two still
+joined at the shared vertex — matching the intent of the original assertion, just fixed on top of an
+actually-correct fixture instead of an accidentally-malformed one.
+
+Unit: `commitVectorSplit.spec.ts` (stays-one-node regression on a closed loop's first edge,
+tears-into-two on the second, fill loss on both halves, rotation baking), `markNewVectorCutVertices.spec.ts`
+(rewritten around the new before/after-node-id-list signature, including a dedicated brand-new-sibling
+case), `disarmVectorCutDrag.spec.ts` (new multi-node wiring case: `vectorEditingNodeIds` update +
+both-sides pink marking). E2E: `cut.spec.ts` row 288 — two sequential Splits (re-arming Cut with `'x'`
+between them, since §55's auto-return-to-Move consumes the tool selection after the first) tear a
+square into two nodes, asserting `vectorEditingNodeIds` covers both and pink pixels appear at *both*
+cut points, not just the one keeping the original node id; the pre-existing branch-vertex test (row
+in the same file) was rebuilt as described above rather than added new.
 
 ## Related
 

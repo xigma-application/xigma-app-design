@@ -1,6 +1,6 @@
 // store
 import { selectVectorEditingNodeIds } from 'store/design/selectors';
-import { setActiveTool } from 'store/design/slice';
+import { setActiveTool, setVectorEditingNodeIds } from 'store/design/slice';
 import { AppDispatch, store } from 'store';
 
 // types
@@ -32,7 +32,12 @@ export const disarmVectorCutDrag = (
       const node = getVectorEditingNode(beforeNodes, dragState.hit.nodeId);
 
       if (node) {
-        commitVectorSplit(dispatch, node, dragState.hit.segmentId, dragState.hit.t);
+        const resultNodeIds = commitVectorSplit(dispatch, node, dragState.hit.segmentId, dragState.hit.t);
+
+        if (resultNodeIds.length > 1) {
+          dispatch(setVectorEditingNodeIds([...vectorEditingNodeIds.filter((id) => id !== node.id), ...resultNodeIds]));
+        }
+
         dispatch(setActiveTool(ToolName.move));
       }
     } else if (dragState.status === 'dividing') {
@@ -43,7 +48,7 @@ export const disarmVectorCutDrag = (
       }
     }
 
-    markNewVectorCutVertices(canvasRefs, beforeNodes, vectorEditingNodeIds);
+    markNewVectorCutVertices(canvasRefs, beforeNodes, vectorEditingNodeIds, selectVectorEditingNodeIds(store.getState()));
     canvas.releasePointerCapture(event.pointerId);
     selectionRefs.vectorCutDragRef.current = null;
     canvasRefs.vectorCutPreviewRef.current = null;

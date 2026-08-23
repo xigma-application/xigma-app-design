@@ -1,5 +1,5 @@
 // store
-import { addNode, setActiveTool, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { addNode, setActiveTool, setSelection, setVectorEditingNodeIds, updateNode } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -10,6 +10,7 @@ import { TVectorNode } from 'types/design/types';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { createSelectionToolRefs } from '../../../../hooks/useSelectionToolRefs/createSelectionToolRefs';
 import { disarmVectorCutDrag } from '../disarmVectorCutDrag';
+import { severVectorSegmentAtPoint } from 'utils/canvas/vectorNetwork/cutVectorNetwork/severVectorSegmentAtPoint';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -43,6 +44,39 @@ const addVectorNode = (): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
+// a=(0,0) b=(100,0) c=(100,100) d=(0,100), s1 top / s2 right / s3 bottom / s4 left
+const addSquareNode = (): string => {
+  store.dispatch(
+    addNode({
+      fillColor: null,
+      filledFaceKeys: [],
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {
+        s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'c', id: 's2', startId: 'b', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'd', id: 's3', startId: 'c', tangentEnd: null, tangentStart: null },
+        s4: { endId: 'a', id: 's4', startId: 'd', tangentEnd: null, tangentStart: null },
+      },
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: {
+        a: { id: 'a', x: 0, y: 0 },
+        b: { id: 'b', x: 100, y: 0 },
+        c: { id: 'c', x: 100, y: 100 },
+        d: { id: 'd', x: 0, y: 100 },
+      },
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 describe('disarmVectorCutDrag', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
@@ -66,8 +100,9 @@ describe('disarmVectorCutDrag', () => {
   });
 
   it('should commit a Split when the drag state is still "pending" (no drag past the threshold)', () => {
-    // mock
-    const nodeId = addVectorNode();
+    // mock — a closed square: severing one edge still leaves it as a single open chain, so this
+    // exercises the ordinary (stays-one-node) wiring path
+    const nodeId = addSquareNode();
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
@@ -85,7 +120,7 @@ describe('disarmVectorCutDrag', () => {
     // result
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
 
-    expect(Object.keys(node.segments)).toHaveLength(2);
+    expect(Object.keys(node.segments)).toHaveLength(5);
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
     expect(selectionRefs.vectorCutDragRef.current).toBeNull();
     expect(canvasRefs.vectorCutPreviewRef.current).toBeNull();
@@ -93,6 +128,36 @@ describe('disarmVectorCutDrag', () => {
     // a plain-click Split severs into two brand-new, disconnected vertex ids at the same point
     expect(canvasRefs.newVectorCutVertexIdsRef.current.size).toBe(2);
     // a completed cut hands control back to the Move tool
+    expect(store.getState().design.activeTool).toBe(ToolName.move);
+  });
+
+  it('should split into two separate nodes — updating vectorEditingNodeIds and pink-marking both sides — when the Split genuinely disconnects the network', () => {
+    // mock — the square with its left edge (s4) already severed by an earlier Split, so this second
+    // Split (right edge, s2) has nothing left bridging the two halves
+    const nodeId = addSquareNode();
+    const preSeveredNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const severedChanges = severVectorSegmentAtPoint(preSeveredNode, 's4', 0.5);
+
+    store.dispatch(updateNode({ changes: severedChanges, id: nodeId }));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const { rootOrder: rootOrderBefore } = store.getState().design;
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const selectionRefs = createSelectionToolRefs();
+
+    selectionRefs.vectorCutDragRef.current = { hit: { nodeId, segmentId: 's2', t: 0.5 }, lineStart: { x: 100, y: 50 }, status: 'pending' };
+
+    // before
+    disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, vi.fn());
+
+    // result
+    const newRootOrder = store.getState().design.rootOrder.filter((id) => !rootOrderBefore.includes(id));
+
+    expect(newRootOrder).toHaveLength(1);
+    expect([...store.getState().design.vectorEditingNodeIds].sort()).toEqual([nodeId, ...newRootOrder].sort());
+    // both the original node's own new vertex AND the brand-new sibling's own new vertex get marked
+    expect(canvasRefs.newVectorCutVertexIdsRef.current.size).toBe(2);
     expect(store.getState().design.activeTool).toBe(ToolName.move);
   });
 

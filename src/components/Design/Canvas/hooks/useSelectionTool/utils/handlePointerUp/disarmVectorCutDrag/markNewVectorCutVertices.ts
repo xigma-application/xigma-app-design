@@ -5,21 +5,33 @@ import { store } from 'store';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TSceneNode, TVectorNode } from 'types/design/types';
 
-export const markNewVectorCutVertices = (canvasRefs: TCanvasRefs, beforeNodes: Record<string, TSceneNode>, nodeIds: string[]): void => {
-  const afterNodes = store.getState().design.nodes;
+const collectVectorVertexIds = (nodes: Record<string, TSceneNode>, nodeIds: string[]): Set<string> => {
+  const vertexIds = new Set<string>();
 
   nodeIds.forEach((nodeId) => {
-    const beforeNode = beforeNodes[nodeId] as TVectorNode | undefined;
-    const afterNode = afterNodes[nodeId] as TVectorNode | undefined;
+    const node = nodes[nodeId] as TVectorNode | undefined;
 
-    if (beforeNode && afterNode) {
-      const beforeVertexIds = new Set(Object.keys(beforeNode.vertices));
+    if (node) {
+      Object.keys(node.vertices).forEach((vertexId) => vertexIds.add(vertexId));
+    }
+  });
 
-      Object.keys(afterNode.vertices).forEach((vertexId) => {
-        if (!beforeVertexIds.has(vertexId)) {
-          canvasRefs.newVectorCutVertexIdsRef.current.add(vertexId);
-        }
-      });
+  return vertexIds;
+};
+
+export const markNewVectorCutVertices = (
+  canvasRefs: TCanvasRefs,
+  beforeNodes: Record<string, TSceneNode>,
+  beforeNodeIds: string[],
+  afterNodeIds: string[],
+): void => {
+  const afterNodes = store.getState().design.nodes;
+  const beforeVertexIds = collectVectorVertexIds(beforeNodes, beforeNodeIds);
+  const afterVertexIds = collectVectorVertexIds(afterNodes, afterNodeIds);
+
+  afterVertexIds.forEach((vertexId) => {
+    if (!beforeVertexIds.has(vertexId)) {
+      canvasRefs.newVectorCutVertexIdsRef.current.add(vertexId);
     }
   });
 };

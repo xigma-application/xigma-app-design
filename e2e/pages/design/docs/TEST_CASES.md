@@ -1725,9 +1725,31 @@ Completing an actual cut (Split or a Divide that found something to cut) now als
 to the Move tool (`disarmVectorCutDrag.ts`, gated on `commitVectorDivide.ts`'s own now-`boolean`
 return value so a Divide drag that crossed nothing leaves the tool alone).
 
-| #   | Scenario                                                                                                                     | Unit |            E2E             |
-| --- | ----------------------------------------------------------------------------------------------------------------------------- | :--: | :-------------------------: |
-| 287 | A newly cut-severed vertex renders pink until selected-then-deselected (screenshot pixel-sampled, since the mark lives only in a canvas ref, invisible to `store.getState()`); completing the cut hands control back to the Move tool | ✅  | ✅ `cut.spec.ts` |
+| #   | Scenario                                                                                                                                                                                                                              | Unit |       E2E        |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :--------------: |
+| 287 | A newly cut-severed vertex renders pink until selected-then-deselected (screenshot pixel-sampled, since the mark lives only in a canvas ref, invisible to `store.getState()`); completing the cut hands control back to the Move tool |  ✅  | ✅ `cut.spec.ts` |
+
+## Split now tears into two nodes when it genuinely disconnects the network
+
+A Split never adds connectivity, only removes it — a closed loop survives one severed edge as a
+single open chain (the remaining edges still bridge it), but severing a _second_ edge that shares no
+vertex with the first cuts that chain into two genuinely disconnected pieces, same as Divide already
+did. `commitVectorSplit.ts` now runs the severed network through `splitVectorNetworkIntoComponents`
+(reused from Divide, §53) and, when it finds ≥2 components, commits them as separate nodes via
+`commitVectorCutComponents` (also reused from Divide) instead of the old single-`updateNode` path.
+Fill is resolved per component via `resolveSurvivingFilledFaceKeys` alone (no closing chord — a Split
+has no drag line to add one along), so a loop cut open on two sides genuinely loses its fill on both
+halves. Baking to world-space rotation is conditional: only the rare multi-node branch bakes and
+resets `rotation: 0` (matching Divide's own convention); the ordinary single-piece Split stays
+unbaked, exactly as before. `disarmVectorCutDrag.ts` also now updates `vectorEditingNodeIds` to
+include any brand-new sibling node, and `markNewVectorCutVertices.ts` was rewritten around a global
+before/after vertex-id diff (rather than per-node-id matching) so that sibling's own new vertices get
+pink-marked too — a gap that previously existed for Divide's own multi-node case as well, just never
+surfaced.
+
+| #   | Scenario                                                                                                                                                                                                       | Unit |       E2E        |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :--------------: |
+| 288 | Split: severing a second, opposite edge of a closed loop with nothing left to bridge the two halves tears it into two separate nodes, pink-marking each side's own new vertex, with both left open for editing |  ✅  | ✅ `cut.spec.ts` |
 
 ## Why so few scenarios get e2e coverage
 

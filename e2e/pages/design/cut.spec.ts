@@ -123,7 +123,7 @@ test('Split: a plain click (no drag) on a segment severs it at that point withou
   expect(result.vertexCount).toBe(6);
 });
 
-test('Split: clicking on a branch vertex (3+ segments) detaches only the clicked segment, leaving the other two intact', async ({
+test('Split: clicking on a branch vertex (3+ segments) severs only the clicked segment’s own branch off into its own node, leaving the other two still joined at that vertex', async ({
   page,
 }) => {
   const designPage = new DesignPage(page);
@@ -131,47 +131,69 @@ test('Split: clicking on a branch vertex (3+ segments) detaches only the clicked
   await designPage.goto('e2e-test-cut-split-branch-vertex');
   await expect(designPage.canvas).toBeVisible();
 
-  // a "Y": stem a(900,400)->b(900,300), then two more strokes fanning out from b — b ends up degree 3
-  await designPage.drawVectorPath([
-    { x: 900, y: 400 },
-    { x: 900, y: 300 },
-  ]);
-  await designPage.selectVectorEditMoveTool();
-  await designPage.doubleClick(900, 300); // re-enter Pen on b to keep extending from it
-  await page.keyboard.press('p');
-  await designPage.click(900, 300);
-  await designPage.click(1000, 250);
-  await designPage.selectVectorEditMoveTool();
-  await page.keyboard.press('p');
-  await designPage.click(900, 300);
-  await designPage.click(800, 250);
-  await designPage.selectVectorEditMoveTool();
-
-  const before = await page.evaluate(async () => {
+  // a "Y" injected directly (Pen-tool re-entry via double-click is flaky for this shape): stem
+  // a(900,400)->b(900,300), then two more branches fanning out from b — b is a genuine degree-3 vertex
+  await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
-    const state = store.getState();
-    const nodeId = state.design.rootOrder[state.design.rootOrder.length - 1];
+    const { addNode, setVectorEditingNodeIds } = await import('/src/store/design/slice.ts');
 
-    return { segmentCount: Object.keys(state.design.nodes[nodeId].segments).length };
+    store.dispatch(
+      addNode({
+        fillColor: null,
+        filledFaceKeys: [],
+        name: 'Vector',
+        parentId: null,
+        rotation: 0,
+        segments: {
+          stem: { endId: 'b', id: 'stem', startId: 'a', tangentEnd: null, tangentStart: null },
+          toP1: { endId: 'p1', id: 'toP1', startId: 'b', tangentEnd: null, tangentStart: null },
+          toP2: { endId: 'p2', id: 'toP2', startId: 'b', tangentEnd: null, tangentStart: null },
+        },
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: 'vector',
+        vertexHandleModes: {},
+        vertices: {
+          a: { id: 'a', x: 900, y: 400 },
+          b: { id: 'b', x: 900, y: 300 },
+          p1: { id: 'p1', x: 1000, y: 250 },
+          p2: { id: 'p2', x: 800, y: 250 },
+        },
+      } as never),
+    );
+
+    const state = store.getState();
+
+    store.dispatch(setVectorEditingNodeIds([state.design.rootOrder[state.design.rootOrder.length - 1]]));
   });
 
-  expect(before.segmentCount).toBe(3); // a-b, b-(1000,250), b-(800,250)
+  const rootOrderBefore = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+
+    return store.getState().design.rootOrder;
+  });
 
   await page.keyboard.press('x');
-  await designPage.click(900, 300); // exactly on b
+  await designPage.click(900, 300); // exactly on b — the hit test lands on whichever of its 3 segments is closest
 
-  const after = await page.evaluate(async () => {
+  const after = await page.evaluate(async (before) => {
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
-    const nodeId = state.design.rootOrder[state.design.rootOrder.length - 1];
-    const node = state.design.nodes[nodeId];
+    const newIds = state.design.rootOrder.filter((id) => !before.includes(id));
+    const pieces = [before[0], ...newIds].map((id) => {
+      const node = state.design.nodes[id];
 
-    return { segmentCount: Object.keys(node.segments).length, vertexCount: Object.keys(node.vertices).length };
-  });
+      return { segmentCount: Object.keys(node.segments).length, vertexCount: Object.keys(node.vertices).length };
+    });
 
-  // one of the 3 segments at b got its own new endpoint; the other 2 are still attached to the original b
-  expect(after.segmentCount).toBe(3);
-  expect(after.vertexCount).toBe(5);
+    return { pieces, rootOrder: state.design.rootOrder };
+  }, rootOrderBefore);
+
+  // b's severed branch loses the shared vertex with nothing else to keep it attached, so it splits off
+  // into its own 1-segment/2-vertex node, while the other two branches stay joined at b as one piece
+  expect(after.rootOrder).toHaveLength(rootOrderBefore.length + 1);
+  expect(after.pieces).toContainEqual({ segmentCount: 1, vertexCount: 2 });
+  expect(after.pieces).toContainEqual({ segmentCount: 2, vertexCount: 3 });
 });
 
 test('Divide: a real drag that starts and ends outside the shape on both sides splits a filled square into two independently-filled halves', async ({
@@ -757,4 +779,72 @@ test('a newly cut-severed vertex renders in pink until the user selects it and t
   const afterTouch = await page.screenshot({ clip: region });
 
   expect(countPinkPixels(afterTouch)).toBe(0);
+});
+
+test('Split: severing a second, opposite edge with nothing left to bridge the two halves tears the square into two separate nodes, pink-marking both sides', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-cut-split-tears-into-two-nodes');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawClosedSquare(designPage); // (900,300)-(1000,300)-(1000,400)-(900,400)
+
+  const rootOrderBefore = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+
+    return store.getState().design.rootOrder;
+  });
+
+  await page.keyboard.press('x');
+  await designPage.click(900, 350); // left edge's own midpoint — still one open chain afterwards
+
+  const afterFirstSplit = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+
+    return store.getState().design.rootOrder;
+  });
+
+  expect(afterFirstSplit).toEqual(rootOrderBefore); // no new node yet — the other 3 edges still bridge it
+
+  // completing a Split hands control back to Move, so Cut needs re-arming for the second click
+  await page.keyboard.press('x');
+  await designPage.click(1000, 350); // right edge's own midpoint — nothing left to bridge the two halves
+
+  const after = await page.evaluate(async (before) => {
+    const { store } = await import('/src/store/index.ts');
+    const state = store.getState();
+    const newIds = state.design.rootOrder.filter((id) => !before.includes(id));
+    const pieceIds = [before[0], ...newIds];
+
+    return {
+      activeTool: state.design.activeTool,
+      pieces: pieceIds.map((id) => ({
+        segmentCount: Object.keys(state.design.nodes[id].segments).length,
+        vertexCount: Object.keys(state.design.nodes[id].vertices).length,
+      })),
+      rootOrder: state.design.rootOrder,
+      vectorEditingNodeIds: [...state.design.vectorEditingNodeIds].sort(),
+    };
+  }, rootOrderBefore);
+
+  expect(after.rootOrder).toHaveLength(rootOrderBefore.length + 1); // one brand-new sibling node
+  expect(after.vectorEditingNodeIds).toEqual([...after.rootOrder].sort()); // both halves stay open for editing
+  expect(after.activeTool).toBe('move');
+  after.pieces.forEach((piece) => {
+    expect(piece.vertexCount).toBe(4); // 2 original corners + its own half of each of the 2 cut points
+    expect(piece.segmentCount).toBe(3); // 4 original edges, minus the 2 severed ones, plus its own half of each
+  });
+
+  // both halves' own new cut point renders pink, not just the one that kept the original node id
+  const leftEdgeRegion = { height: 40, width: 40, x: 880, y: 330 };
+  const rightEdgeRegion = { height: 40, width: 40, x: 980, y: 330 };
+  const [leftPixels, rightPixels] = await Promise.all([
+    page.screenshot({ clip: leftEdgeRegion }).then(countPinkPixels),
+    page.screenshot({ clip: rightEdgeRegion }).then(countPinkPixels),
+  ]);
+
+  expect(leftPixels).toBeGreaterThan(0);
+  expect(rightPixels).toBeGreaterThan(0);
 });
