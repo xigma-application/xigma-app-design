@@ -39,6 +39,8 @@
   "design.toolbar.vectorEditToolbar.tool.cut": "Cut",
   "design.toolbar.vectorEditToolbar.tool.lasso": "Lasso",
   "design.toolbar.vectorEditToolbar.tool.paint": "Paint",
+  "design.toolbar.vectorEditToolbar.tool.shapeBuilder": "Shape builder",
+  "design.toolbar.vectorEditToolbar.tool.variableWidth": "Variable width",
   "home.description": "A minimal starter template.",
   "home.subtitle": "Vite + React + TypeScript",
   "notFound.description": "Page not found.",

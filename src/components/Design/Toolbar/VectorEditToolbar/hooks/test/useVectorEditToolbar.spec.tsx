@@ -1,8 +1,5 @@
-import { act, fireEvent, render, renderHook, screen } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { Provider } from 'react-redux';
-
-// components
-import { TooltipProvider } from 'shared';
 
 // hooks
 import { getIsVectorEditToolActive, useVectorEditToolbar } from '../useVectorEditToolbar';
@@ -33,6 +30,16 @@ describe('useVectorEditToolbar', () => {
     expect(result.current.vectorEditingNodeIds).toEqual(['node-1']);
   });
 
+  it('should expose the current active tool', () => {
+    // before
+    store.dispatch(setActiveTool(ToolName.lasso));
+
+    const { result } = renderUseVectorEditToolbar();
+
+    // result
+    expect(result.current.activeTool).toBe(ToolName.lasso);
+  });
+
   it('should exit Vector Edit Mode and reset the active tool via handleClose', () => {
     // before
     store.dispatch(setVectorEditingNodeIds(['node-1']));
@@ -50,100 +57,19 @@ describe('useVectorEditToolbar', () => {
     expect(store.getState().design.activeTool).toBe(ToolName.default);
   });
 
-  it('should render a tool with a real ToolName as active exactly when it is the active tool, and switch the active tool on click', () => {
+  it('should track the More dropdown open state via handleMoreOpenChange', () => {
     // before
     const { result } = renderUseVectorEditToolbar();
 
-    render(
-      <Provider store={store}>
-        <TooltipProvider>
-          {result.current.renderTool({ icon: 'MoveVectorTool', labelKey: 'design.toolbar.tool.default', toolName: ToolName.default })}
-        </TooltipProvider>
-      </Provider>,
-    );
-
-    // result
-    expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
+    expect(result.current.isMoreOpen).toBe(false);
 
     // action
     act(() => {
-      store.dispatch(setActiveTool(ToolName.pen));
+      result.current.handleMoreOpenChange(true);
     });
-    fireEvent.click(screen.getByRole('button'));
 
     // result
-    expect(store.getState().design.activeTool).toBe(ToolName.default);
-  });
-
-  it('should not show a real-ToolName tool as active when a DIFFERENT real tool is the active one — not just "not Pen"', () => {
-    // before — Lasso is active, not Pen and not Move's own default either
-    store.dispatch(setActiveTool(ToolName.lasso));
-
-    const { result } = renderUseVectorEditToolbar();
-
-    render(
-      <Provider store={store}>
-        <TooltipProvider>
-          {result.current.renderTool({ icon: 'MoveVectorTool', labelKey: 'design.toolbar.tool.default', toolName: ToolName.default })}
-        </TooltipProvider>
-      </Provider>,
-    );
-
-    // result
-    expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'false');
-  });
-
-  it('should dispatch Bend as the real active tool on click, and show it active when Bend already is the active tool', () => {
-    // before
-    store.dispatch(setActiveTool(ToolName.bend));
-
-    const { result } = renderUseVectorEditToolbar();
-
-    render(
-      <Provider store={store}>
-        <TooltipProvider>
-          {result.current.renderTool({ icon: 'BendTool', labelKey: 'design.toolbar.vectorEditToolbar.tool.bend', toolName: ToolName.bend })}
-        </TooltipProvider>
-      </Provider>,
-    );
-
-    // result
-    expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
-
-    // action
-    act(() => {
-      store.dispatch(setActiveTool(ToolName.default));
-    });
-    fireEvent.click(screen.getByRole('button'));
-
-    // result
-    expect(store.getState().design.activeTool).toBe(ToolName.bend);
-  });
-
-  it('should render a tool with no ToolName as inert — never active, no click handler', () => {
-    // before
-    store.dispatch(setActiveTool(ToolName.pen));
-
-    const { result } = renderUseVectorEditToolbar();
-
-    render(
-      <Provider store={store}>
-        <TooltipProvider>
-          {result.current.renderTool({ icon: 'PaintTool', labelKey: 'design.toolbar.vectorEditToolbar.tool.paint' })}
-        </TooltipProvider>
-      </Provider>,
-    );
-
-    // result
-    const button = screen.getByRole('button');
-
-    expect(button).toHaveAttribute('aria-pressed', 'false');
-
-    // action — clicking an inert tool must not throw or dispatch anything
-    fireEvent.click(button);
-
-    // result
-    expect(store.getState().design.activeTool).toBe(ToolName.pen);
+    expect(result.current.isMoreOpen).toBe(true);
   });
 });
 

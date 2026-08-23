@@ -11,19 +11,30 @@ import styles from './popover.module.scss';
 export type TPopoverProps = {
   align?: 'center' | 'end' | 'start';
   children: ReactNode;
+  onOpenChange?: (open: boolean) => void;
+  side?: 'bottom' | 'left' | 'right' | 'top';
   sideOffset?: number;
   trigger: ReactNode;
   triggerAriaLabel?: string;
   triggerClassName?: string;
 };
 
-export const Popover: FC<TPopoverProps> = ({ align = 'start', children, sideOffset = 8, trigger, triggerAriaLabel, triggerClassName }) => (
-  <PopoverPrimitive.Root>
+export const Popover: FC<TPopoverProps> = ({
+  align = 'start',
+  children,
+  onOpenChange,
+  side = 'bottom',
+  sideOffset = 8,
+  trigger,
+  triggerAriaLabel,
+  triggerClassName,
+}) => (
+  <PopoverPrimitive.Root onOpenChange={onOpenChange}>
     <PopoverPrimitive.Trigger aria-label={triggerAriaLabel} className={triggerClassName}>
       {trigger}
     </PopoverPrimitive.Trigger>
     <PopoverPrimitive.Portal>
-      <PopoverPrimitive.Content align={align} className={styles.Popover} sideOffset={sideOffset}>
+      <PopoverPrimitive.Content align={align} className={styles.Popover} side={side} sideOffset={sideOffset}>
         {children}
       </PopoverPrimitive.Content>
     </PopoverPrimitive.Portal>

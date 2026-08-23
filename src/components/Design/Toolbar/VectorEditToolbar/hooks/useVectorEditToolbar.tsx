@@ -1,30 +1,22 @@
-import { ReactNode, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-
-// components
-import { Icon, Tooltip } from 'shared';
+import { useCallback, useState } from 'react';
 
 // hooks
 import { useIsBendModifierHeld } from './useIsBendModifierHeld';
-
-// others
-import cx from 'classnames';
-import { ICON_SIZE, TVectorEditTool } from '../constants';
 
 // store
 import { selectActiveTool, selectVectorEditingNodeIds } from 'store/design/selectors';
 import { setActiveTool, setVectorEditingNodeIds } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
-// styles
-import styles from '../vector-edit-toolbar.module.scss';
-
 // types
 import { ToolName } from 'types/design/enums';
 
 export type TUseVectorEditToolbar = {
+  activeTool: ToolName;
   handleClose: () => void;
-  renderTool: (tool: TVectorEditTool) => ReactNode;
+  handleMoreOpenChange: (open: boolean) => void;
+  isBendModifierHeld: boolean;
+  isMoreOpen: boolean;
   vectorEditingNodeIds: string[];
 };
 
@@ -42,53 +34,20 @@ export const getIsVectorEditToolActive = (toolName: ToolName | undefined, active
 };
 
 export const useVectorEditToolbar = (): TUseVectorEditToolbar => {
-  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const vectorEditingNodeIds = useAppSelector(selectVectorEditingNodeIds);
   const activeTool = useAppSelector(selectActiveTool);
   const isBendModifierHeld = useIsBendModifierHeld();
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   const handleClose = useCallback((): void => {
     dispatch(setActiveTool(ToolName.default));
     dispatch(setVectorEditingNodeIds([]));
   }, [dispatch]);
 
-  const renderTool = useCallback(
-    (tool: TVectorEditTool): ReactNode => {
-      const isActive = getIsVectorEditToolActive(tool.toolName, activeTool, isBendModifierHeld);
-      const handleClick =
-        tool.toolName !== undefined
-          ? (): void => {
-              dispatch(setActiveTool(tool.toolName as ToolName));
-            }
-          : undefined;
+  const handleMoreOpenChange = useCallback((open: boolean): void => {
+    setIsMoreOpen(open);
+  }, []);
 
-      return (
-        <Tooltip
-          content={
-            <>
-              {t(tool.labelKey)}
-              {tool.shortcut && <span className={styles.VectorEditToolbar__shortcut}>{tool.shortcut.join('')}</span>}
-            </>
-          }
-          key={tool.labelKey}
-        >
-          <button
-            aria-pressed={isActive}
-            className={cx(styles.VectorEditToolbar__button, { [styles['VectorEditToolbar__button--active']]: isActive })}
-            onClick={handleClick}
-            type="button"
-          >
-            <Icon color={isActive ? 'onBlue1' : 'neutral1'} name={tool.icon} size={ICON_SIZE} />
-            <span className={cx(styles.VectorEditToolbar__label, { [styles['VectorEditToolbar__label--active']]: isActive })}>
-              {t(tool.labelKey)}
-            </span>
-          </button>
-        </Tooltip>
-      );
-    },
-    [activeTool, dispatch, isBendModifierHeld, t],
-  );
-
-  return { handleClose, renderTool, vectorEditingNodeIds };
+  return { activeTool, handleClose, handleMoreOpenChange, isBendModifierHeld, isMoreOpen, vectorEditingNodeIds };
 };

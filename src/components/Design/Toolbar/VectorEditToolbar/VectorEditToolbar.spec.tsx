@@ -1,3 +1,4 @@
+import userEvent from '@testing-library/user-event';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
@@ -132,6 +133,24 @@ describe('VectorEditToolbar', () => {
     // result
     expect(screen.getByRole('button', { name: 'Move' })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('button', { name: 'Bend' })).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('should open the More dropdown and list Shape builder and Variable width', async () => {
+    // mock
+    const user = userEvent.setup();
+
+    // before
+    act(() => store.dispatch(setVectorEditingNodeIds(['node-1'])));
+    renderVectorEditToolbar();
+
+    // action
+    await user.click(screen.getByRole('button', { name: 'More' }));
+
+    // result
+    expect(screen.getByText('Shape builder')).toBeInTheDocument();
+    expect(screen.getByText('M')).toBeInTheDocument();
+    expect(screen.getByText('Variable width')).toBeInTheDocument();
+    expect(screen.getByText('⇧W')).toBeInTheDocument();
   });
 
   it('should exit Vector Edit Mode and reset the active tool when clicking the close button', () => {

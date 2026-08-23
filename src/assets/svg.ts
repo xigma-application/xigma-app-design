@@ -94,12 +94,14 @@ import Rows from './svg/rows.svg?react';
 import Sample from './svg/sample.svg?react';
 import ScaleTool from './svg/scale-tool.svg?react';
 import SectionTool from './svg/section-tool.svg?react';
+import ShapeBuilderTool from './svg/shape-builder-tool.svg?react';
 import SliceTool from './svg/slice-tool.svg?react';
 import StarTool from './svg/star-tool.svg?react';
 import StepBackwardOutlined from './svg/step-backward-outlined.svg?react';
 import TextOnPathTool from './svg/text-on-path-tool.svg?react';
 import TextTool from './svg/text-tool.svg?react';
 import ToggleRotate from './svg/toggle-rotate.svg?react';
+import VariableWidthTool from './svg/variable-width-tool.svg?react';
 import Variant from './svg/variant.svg?react';
 import WidthRestricted from './svg/width-restricted.svg?react';
 import Wrap from './svg/wrap.svg?react';
@@ -201,12 +203,14 @@ export const Icons = {
   Sample,
   ScaleTool,
   SectionTool,
+  ShapeBuilderTool,
   SliceTool,
   StarTool,
   StepBackwardOutlined,
   TextOnPathTool,
   TextTool,
   ToggleRotate,
+  VariableWidthTool,
   Variant,
   WidthRestricted,
   Wrap,

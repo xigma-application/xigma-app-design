@@ -26,3 +26,14 @@ export const TOOLS: TVectorEditTool[] = [
   { icon: 'BendTool', labelKey: `${translationNameSpace}.tool.bend`, shortcut: [CONTROL], toolName: ToolName.bend },
   { icon: 'CutTool', labelKey: `${translationNameSpace}.tool.cut`, shortcut: ['X'], toolName: ToolName.cut },
 ];
+
+export type TVectorEditMoreTool = {
+  icon: keyof typeof Icons;
+  labelKey: string;
+  shortcut: string;
+};
+
+export const MORE_TOOLS: TVectorEditMoreTool[] = [
+  { icon: 'ShapeBuilderTool', labelKey: `${translationNameSpace}.tool.shapeBuilder`, shortcut: 'M' },
+  { icon: 'VariableWidthTool', labelKey: `${translationNameSpace}.tool.variableWidth`, shortcut: `${SHIFT}W` },
+];
