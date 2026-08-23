@@ -1,9 +1,9 @@
 // store
-import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { addNode, setActiveTool, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, ToolName } from 'types/design/enums';
 import { TVectorNode } from 'types/design/types';
 
 // utils
@@ -47,6 +47,7 @@ describe('disarmVectorCutDrag', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
     store.dispatch(setVectorEditingNodeIds([]));
+    store.dispatch(setActiveTool(ToolName.cut));
   });
 
   it('should do nothing when no cut drag is in progress', () => {
@@ -89,6 +90,10 @@ describe('disarmVectorCutDrag', () => {
     expect(selectionRefs.vectorCutDragRef.current).toBeNull();
     expect(canvasRefs.vectorCutPreviewRef.current).toBeNull();
     expect(setClassNameMock).toHaveBeenCalledWith('cut-off');
+    // a plain-click Split severs into two brand-new, disconnected vertex ids at the same point
+    expect(canvasRefs.newVectorCutVertexIdsRef.current.size).toBe(2);
+    // a completed cut hands control back to the Move tool
+    expect(store.getState().design.activeTool).toBe(ToolName.move);
   });
 
   it('should do nothing but still clean up refs/pointer capture when the "pending" drag never hit anything (a plain click on empty space)', () => {
@@ -111,6 +116,8 @@ describe('disarmVectorCutDrag', () => {
     expect(store.getState().design.nodes[nodeId]).toEqual(nodeBefore);
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
     expect(selectionRefs.vectorCutDragRef.current).toBeNull();
+    // nothing was actually cut, so the tool stays put
+    expect(store.getState().design.activeTool).toBe(ToolName.cut);
   });
 
   it('should do nothing but still clean up refs/pointer capture when the "pending" drag\'s node no longer exists', () => {
@@ -154,6 +161,8 @@ describe('disarmVectorCutDrag', () => {
 
     expect(node.segments).toEqual({ s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } });
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
+    // nothing was actually cut, so the tool stays put
+    expect(store.getState().design.activeTool).toBe(ToolName.cut);
   });
 
   it('should commit a Divide, using the preview ref\'s last line end, when the drag state is "dividing"', () => {
@@ -206,5 +215,9 @@ describe('disarmVectorCutDrag', () => {
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
     expect(selectionRefs.vectorCutDragRef.current).toBeNull();
     expect(canvasRefs.vectorCutPreviewRef.current).toBeNull();
+    // the original node id keeps one of the two divided pieces, gaining new severed vertex ids at its crossings
+    expect(canvasRefs.newVectorCutVertexIdsRef.current.size).toBeGreaterThan(0);
+    // a completed cut hands control back to the Move tool
+    expect(store.getState().design.activeTool).toBe(ToolName.move);
   });
 });

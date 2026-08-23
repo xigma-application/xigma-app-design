@@ -115,6 +115,7 @@ export type TCanvasRefs = {
   hoveredVectorVertexIdRef: RefObject<string | null>;
   hoverRef: RefObject<string | null>;
   marqueeRef: RefObject<TDraftRect | null>;
+  newVectorCutVertexIdsRef: RefObject<Set<string>>;
   penDragOriginRef: RefObject<TPenDragOrigin | null>;
   penDraggedHandleIsSnappedRef: RefObject<boolean>;
   penDraggedHandlePositionRef: RefObject<TPoint | null>;
@@ -131,6 +132,7 @@ export type TCanvasRefs = {
   sliceRef: RefObject<TSliceDraft | null>;
   snappedVectorHandleRef: RefObject<TVectorHandleHover | null>;
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>;
+  touchedVectorCutVertexIdsRef: RefObject<Set<string>>;
   vectorAlignmentGuideRef: RefObject<TVectorAlignmentGuide | null>;
   vectorCutPreviewRef: RefObject<TVectorCutPreview | null>;
   vectorLassoPathRef: RefObject<TPoint[] | null>;

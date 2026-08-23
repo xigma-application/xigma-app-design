@@ -51,6 +51,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const hoveredVectorVertexIdRef = useRef<string | null>(null);
   const hoverRef = useRef<string | null>(null);
   const marqueeRef = useRef<TDraftRect | null>(null);
+  const newVectorCutVertexIdsRef = useRef<Set<string>>(new Set());
   const penDragOriginRef = useRef<TPenDragOrigin | null>(null);
   const penDraggedHandleIsSnappedRef = useRef<boolean>(false);
   const penDraggedHandlePositionRef = useRef<TPoint | null>(null);
@@ -67,6 +68,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const sliceRef = useRef<TSliceDraft | null>(null);
   const snappedVectorHandleRef = useRef<TVectorHandleHover | null>(null);
   const starCornerRadiusDragRef = useRef<TStarCornerRadiusDragState | null>(null);
+  const touchedVectorCutVertexIdsRef = useRef<Set<string>>(new Set());
   const vectorAlignmentGuideRef = useRef<TVectorAlignmentGuide | null>(null);
   const vectorCutPreviewRef = useRef<TVectorCutPreview | null>(null);
   const vectorLassoPathRef = useRef<TPoint[] | null>(null);
@@ -94,6 +96,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       hoveredVectorSegmentIdRef,
       hoveredVectorVertexIdRef,
       marqueeRef,
+      newVectorCutVertexIdsRef,
       penDragOriginRef,
       penDraggedHandleIsSnappedRef,
       penDraggedHandlePositionRef,
@@ -110,6 +113,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       sliceRef,
       snappedVectorHandleRef,
       starCornerRadiusDragRef,
+      touchedVectorCutVertexIdsRef,
       vectorAlignmentGuideRef,
       vectorCutPreviewRef,
       vectorLassoPathRef,

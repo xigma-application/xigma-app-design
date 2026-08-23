@@ -3523,6 +3523,108 @@ precedent as the Paint tool's own hover-highlight, which has never had E2E cover
 interesting behavior (which faces, filled or not) is exhaustively pinned by the unit suite; a
 screenshot diff would only prove "something changed," not what.
 
+## 55. Cut tool — pink hover preview/cursor, a newly-severed vertex's own pink mark, and auto-return to Move
+
+Three related Cut-tool requests handled in one arc, all keyed off the tool's existing pink
+(`VECTOR_CUT_CROSSING_FILL = '#ff2fc2'`):
+
+**Idle hover preview.** While hovering a segment with Cut active (not dragging), a live point marker
+now tracks the exact spot a plain click would sever — reusing `getVectorEdgeAtPointAcrossOpenNodes`
+(the same hit-test `resolveVectorSegmentHover.ts` already ran for Move/Pen), including its existing
+snap-to-midpoint behavior, so hovering near a segment's own midpoint shows the marker snapped there
+rather than tracking the raw cursor. `resolveVectorCutHover.ts` does its own independent hit test
+(rather than reading the generic hover refs) and stores into two new refs,
+`hoveredVectorCutPointRef`/`hoveredVectorCutSegmentRef`; `resolveVectorSegmentHover.ts`'s
+`isSegmentHoverBlockedByTool` now also blocks Cut (alongside Paint/Lasso), so the generic blue
+segment highlight and white insert-point dot never show for Cut — it owns its own visuals entirely.
+Render: `drawVectorCutHoverPreview.ts` strokes the whole hovered segment in pink at
+`HOVER_OUTLINE_WIDTH` (mirroring `drawHoveredVectorSegmentHighlight.ts`'s blue, just opaque) and
+draws the point marker via a new shared `drawVectorCutPointMarker.ts` — factored out of
+`drawVectorCutPreview.ts` (the drag-line crossing markers) so both call sites share one definition of
+"what a cut point looks like": **white fill, pink border, same size as a plain unselected vertex
+dot** (`VECTOR_VERTEX_SIZE`, via `drawEllipse` with both `fill` and `stroke` set) — landed here after
+two wrong turns live-corrected by the user: first a solid pink dot (`VECTOR_CUT_CROSSING_FILL`, no
+border) was too flat, but the reflex fix of matching a *selected* vertex's white-ring/pink-center
+two-layer look (bigger, more prominent) was **also** wrong — "Panie mówiłem point rozmiar a dałeś
+teraz stan jakby te różowe pointy były zaznaczone" (I said [normal] point size, you gave a state as
+if selected) — landing on white-fill/pink-stroke at the plain idle size as the actual answer.
+
+**Cursor.** `getCursorClassName.ts` now returns `'cut-off'` for `ToolName.cut`'s idle default (was
+falling through to `null`, the base cursor). `resolveVectorCutHover.ts` force-sets `'cut-off'` on
+every idle move regardless of what any earlier hover resolver in the chain set, since Cut's own hit
+test runs last (after `resolveVectorSegmentHover.ts`, etc.) — otherwise those resolvers' own
+cursor-setting calls (`'pen-extend'`, `null`) would leak through and stick until the next hover
+event happened to re-resolve them. `armVectorCutOnPointerDown.ts` sets `'cut-on'` once on
+pointerdown, left alone for the whole hold (no per-crossing flicker — an earlier version toggled it
+based on `crossings.length` inside `continueVectorCutDrag.ts`, corrected once the user clarified
+cut-on tracks "is the mouse held," not "is something currently crossed": "chyba że user kliknie lpm w
+trakcie [trwania] to cut on"); `disarmVectorCutDrag.ts` resets to `'cut-off'` on release.
+
+**A newly-severed vertex's own pink mark.** Split/Divide's new vertex ids render pink (same
+white-fill/pink-border idle style as the hover marker above, plus the ordinary selected-style
+white-ring/pink-center swap once actually selected — `drawVectorVertexDots.ts` picks
+`VECTOR_CUT_CROSSING_FILL` in place of `VECTOR_VERTEX_FILL`/`VECTOR_VERTEX_SELECTED_FILL` when
+`newVertexIds.has(vertex.id)`) until the user selects it and then deselects it again — "póki user ich
+nie dotknie tzn. nie kliknie ich i odklika," with an explicit exception: exiting Vector Edit Mode
+entirely clears every mark regardless of touch state. Two new `Set<string>` refs,
+`newVectorCutVertexIdsRef`/`touchedVectorCutVertexIdsRef` (`TCanvasRefs`, defaulting to `new Set()`
+like the codebase's other always-present array/collection refs, never `null`).
+`markNewVectorCutVertices.ts` (`disarmVectorCutDrag/`) diffs each open node's vertex-id set
+before/after the commit and adds whatever's new — deliberately scoped to nodes that existed under the
+same id both before and after (a brand-new sibling node from a full top-level divide is skipped
+entirely, since there's no cheap way to tell which of *its* inherited vertices are genuinely new
+without deeper cross-referencing, and over-marking is worse than under-marking here).
+`resolveVectorCutMarkConsumption.ts` runs the actual touch/untouch bookkeeping: adds to `touched` the
+moment a pink id is found selected, and un-marks (removes from both sets) once a *previously touched*
+id is no longer selected — critically, a Split's two coincident vertices (genuinely disconnected but
+sitting at the exact same point, per §53) consume **together**, found by re-looking-up each
+candidate's live `{x,y}` in the open nodes and comparing, since the user can only ever click one twin
+of the pair, never the other. Called from the `resolveVectorIdleHover.ts` chain (every pointermove)
+*and* unconditionally at the end of `handlePointerUp.ts` (every pointerup) — the pointerup call was
+added after a reported bug: a drag-then-click-elsewhere left the mark stuck pink until the next
+incidental mouse jiggle, since the idle-hover chain alone only re-evaluates on the *next* move, not
+the moment the deselecting click itself completes.
+
+**Auto-return to Move.** Completing an actual cut now dispatches `setActiveTool(ToolName.move)` —
+requested mid-session ("jak zrobię cut to wracamy do trybu przesuń") and gated on genuinely having
+cut something: `commitVectorSplit`'s call site only fires it inside the existing `if (node)` guard,
+and `commitVectorDivide.ts` was changed to **return a `boolean`** (`didCut`, previously `void`) so
+`disarmVectorCutDrag.ts` can skip the tool-switch when a Divide drag crossed nothing at all. Internal
+refactor alongside this (requested separately, "wynieś do funkcji ale w tym pliku"): the
+resolve-editing-nodes / find-divide-results / find-connected-cut-results block that used to be one
+inline sequence in `commitVectorDivide` is now three small named functions in the same file
+(`getVectorDivideEditingNodes`, `findAllVectorDivideResults`, `findAllVectorConnectedCutResults`),
+each doing exactly one lookup.
+
+This auto-switch broke one existing e2e regression test that chained two cuts back-to-back under a
+single `'x'` press (`cut.spec.ts`'s "cutting an already-cut piece a second time" — the second drag
+was silently being interpreted as a Move-tool drag once the tool had switched away) — fixed by
+re-pressing `'x'` before the second cut, matching the new expected UX where each cut consumes the
+tool selection.
+
+Unit: `resolveVectorCutHover.spec.ts` (hit-test + snap + cursor forcing),
+`resolveVectorSegmentHover.spec.ts` (new Cut-blocked case), `drawVectorCutHoverPreview.spec.ts`,
+`drawVectorCutPointMarker.spec.ts`, `drawVectorCutPreview.spec.ts` (updated to the shared marker),
+`drawVectorVertexDots.spec.ts` (new pink-mark cases for idle/hovered/selected),
+`markNewVectorCutVertices.spec.ts`, `resolveVectorCutMarkConsumption.spec.ts` (including the
+coincident-pair and no-longer-exists-anywhere edge cases), `commitVectorDivide.spec.ts` (return
+value), `disarmVectorCutDrag.spec.ts` (tool-switch assertions). E2E: `cut.spec.ts` row 287 — pixel-
+samples a small clip for pink (`countPinkPixels`, since the mark lives only in a canvas ref, invisible
+to `store.getState()`) right after a Split, then again after select-then-deselect, and asserts
+`activeTool === 'move'` post-cut. The companion hover-preview/cursor half of this arc stays
+intentionally unit-only (TEST_CASES.md row 285's own rationale applies identically here — same class
+of "which face/segment gets a live paint-style overlay" concern as the Paint tool's hover-highlight,
+which has never had E2E either).
+
+Split into its own module-structure folders during this arc, matching the sibling
+`drawVectorEditOutline/`/`drawVectorMultiSelectBox/`/`drawVectorTangentHandles/`/
+`drawVectorVertexDots/` pattern already established one level down in this same directory
+(`drawVectorEditHandlesLayer.ts` was the one file still sitting flat at the top, requested via
+"drawVectorEditHandlesLayer do osobnego folderu i rozbij to"): the per-node draw body (outline,
+tangent handles, vertex dots, edge-insert preview) is now its own `drawVectorEditHandlesForNode.ts`,
+called once per open node from the orchestrator, which now itself lives in its own matching
+`drawVectorEditHandlesLayer/` subfolder alongside `test/`.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

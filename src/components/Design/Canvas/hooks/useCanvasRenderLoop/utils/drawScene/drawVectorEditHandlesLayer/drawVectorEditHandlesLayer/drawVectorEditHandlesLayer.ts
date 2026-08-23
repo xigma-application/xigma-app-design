@@ -6,17 +6,10 @@ import { TVectorHandleHover, TVectorMultiSelectBox } from 'types/design/canvas/t
 import { TVectorMultiSelectResizeDragState, TVectorMultiSelectRotateDragState } from 'types/design/selectionTool/types';
 
 // utils
-import { bakeVectorNodeRotation } from '../../../../../utils/bakeVectorNodeRotation';
-import { drawVectorEditOutline } from './drawVectorEditOutline/drawVectorEditOutline';
-import { drawVectorEdgeInsertPreview } from './drawVectorEdgeInsertPreview';
-import { drawVectorMultiSelectBox } from './drawVectorMultiSelectBox/drawVectorMultiSelectBox';
-import { drawVectorTangentHandles } from './drawVectorTangentHandles/drawVectorTangentHandles';
-import { drawVectorVertexDots } from './drawVectorVertexDots/drawVectorVertexDots';
-import { getBakedVectorEditingNodes } from './getBakedVectorEditingNodes';
-import { getOneHopVectorVertexIds } from 'utils/canvas/vectorNetwork/getOneHopVectorVertexIds';
-import { getTangentVisibilityVertexIds } from 'utils/canvas/vectorNetwork/getTangentVisibilityVertexIds';
-import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
-import { getVisualSelectedVectorVertexIds } from 'utils/canvas/vectorNetwork/getVisualSelectedVectorVertexIds';
+import { drawVectorEditHandlesForNode } from '../drawVectorEditHandlesForNode/drawVectorEditHandlesForNode';
+import { drawVectorMultiSelectBox } from '../drawVectorMultiSelectBox/drawVectorMultiSelectBox';
+import { getBakedVectorEditingNodes } from '../getBakedVectorEditingNodes';
+import { getVectorEditingNode } from '../../../../../../utils/getVectorEditingNode';
 
 export const drawVectorEditHandlesLayer = (
   gl: WebGL2RenderingContext,
@@ -29,6 +22,7 @@ export const drawVectorEditHandlesLayer = (
   selectedSegmentIds: string[],
   preMarqueeSegmentIds: string[],
   hoveredVertexId: string | null,
+  newVertexIds: Set<string>,
   hoveredSegmentId: string | null,
   hoveredVectorSegmentId: string | null,
   hoveredVectorEdgeInsertPoint: TPoint | null,
@@ -53,36 +47,24 @@ export const drawVectorEditHandlesLayer = (
     const editingNode = getVectorEditingNode(nodes, vectorEditingNodeId);
 
     if (editingNode) {
-      const node = { ...editingNode, ...bakeVectorNodeRotation(editingNode) };
-      const visualSelectedVertexIds = getVisualSelectedVectorVertexIds(selectedVertexIds, penActiveVertexId ?? dragOriginVertexId);
-      const visualSelectedVertexIdsTotal = [...visualSelectedVertexIds, ...preMarqueeVertexIds];
-      const tangentVisibilityVertexIds = getTangentVisibilityVertexIds(node, visualSelectedVertexIdsTotal, selectedHandles);
-      const oneHopVertexIds = getOneHopVectorVertexIds(node, tangentVisibilityVertexIds);
-      const tangentVisibilitySegmentIds = [...selectedSegmentIds, ...preMarqueeSegmentIds];
-
-      drawVectorEditOutline(
+      drawVectorEditHandlesForNode(
         gl,
         program,
         buffer,
-        node,
+        editingNode,
+        selectedVertexIds,
+        preMarqueeVertexIds,
         selectedSegmentIds,
+        preMarqueeSegmentIds,
+        hoveredVertexId,
+        newVertexIds,
         hoveredSegmentId,
         hoveredVectorSegmentId,
-        canvasWidth,
-        canvasHeight,
-        viewport,
-      );
-      drawVectorTangentHandles(
-        gl,
-        program,
-        buffer,
-        node,
+        hoveredVectorEdgeInsertPoint,
         hoveredHandle,
         selectedHandles,
         snappedHandle,
-        tangentVisibilityVertexIds,
-        oneHopVertexIds,
-        tangentVisibilitySegmentIds,
+        penActiveVertexId,
         dragOriginVertexId,
         penDraggedHandlePosition,
         isPenDraggedHandleSnapped,
@@ -90,8 +72,6 @@ export const drawVectorEditHandlesLayer = (
         canvasHeight,
         viewport,
       );
-      drawVectorVertexDots(gl, program, buffer, node, visualSelectedVertexIds, hoveredVertexId, canvasWidth, canvasHeight, viewport);
-      drawVectorEdgeInsertPreview(gl, program, buffer, hoveredVectorEdgeInsertPoint, canvasWidth, canvasHeight, viewport);
     }
   });
 

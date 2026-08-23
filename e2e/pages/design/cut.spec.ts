@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { PNG } from 'pngjs';
 
 // components
 import { DesignPage } from './model/DesignPage';
@@ -21,6 +22,23 @@ const drawClosedSquare = async (designPage: DesignPage): Promise<void> => {
 const paintWholeSquare = async (page: import('@playwright/test').Page, designPage: DesignPage): Promise<void> => {
   await page.keyboard.press('Shift+B');
   await designPage.click(950, 350);
+};
+
+// VECTOR_CUT_CROSSING_FILL (#ff2fc2) — counts pixels close to it anywhere in the screenshot, so the
+// caller doesn't need to reason about devicePixelRatio scaling a clip region down to an exact pixel
+const countPinkPixels = (screenshot: Buffer): number => {
+  const image = PNG.sync.read(screenshot);
+  let count = 0;
+
+  for (let i = 0; i < image.data.length; i += 4) {
+    const distance = Math.hypot(image.data[i] - 255, image.data[i + 1] - 47, image.data[i + 2] - 194);
+
+    if (distance < 40) {
+      count += 1;
+    }
+  }
+
+  return count;
 };
 
 test("pressing 'x' switches the active tool to Cut while a node is open for editing", async ({ page }) => {
@@ -406,6 +424,8 @@ test('Regression: cutting an already-cut piece a second time keeps its fill (a f
 
   const bottomPieceId = afterFirstCut.find((piece) => piece.maxY > 330)!.id;
 
+  // completing a cut now hands control back to the Move tool, so Cut needs re-arming for the second cut
+  await page.keyboard.press('x');
   await designPage.dragVectorPoint(850, 365, 1050, 365); // second cut, through the bottom piece's own middle
 
   const finalPieces = await page.evaluate(async (touchedId) => {
@@ -699,4 +719,42 @@ test('Divide: a genuinely untouched third face elsewhere on the same node keeps 
   // two-face case above; 2 brand new keys replace the top band's split halves
   expect(after.filledFaceKeys).toContain(before.filledFaceKeys[2]);
   expect(after.filledFaceKeys).toHaveLength(3);
+});
+
+test('a newly cut-severed vertex renders in pink until the user selects it and then deselects it again, and completing a cut hands control back to the Move tool', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-cut-pink-mark');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawClosedSquare(designPage);
+
+  await page.keyboard.press('x');
+  await designPage.click(900, 350); // Split at the left edge's own midpoint
+
+  // completing the Split hands control back to the Move tool — a plain click already selects/drags,
+  // no need to press a shortcut again
+  const activeToolAfterCut = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+
+    return store.getState().design.activeTool;
+  });
+
+  expect(activeToolAfterCut).toBe('move');
+
+  const region = { height: 40, width: 40, x: 880, y: 330 };
+  const justCut = await page.screenshot({ clip: region });
+
+  expect(countPinkPixels(justCut)).toBeGreaterThan(0);
+
+  // select the new vertex, then deselect it by selecting a different one — the pink mark must clear
+  // immediately on release, with no extra pointer move required first
+  await designPage.click(900, 350);
+  await designPage.click(1000, 300);
+
+  const afterTouch = await page.screenshot({ clip: region });
+
+  expect(countPinkPixels(afterTouch)).toBe(0);
 });

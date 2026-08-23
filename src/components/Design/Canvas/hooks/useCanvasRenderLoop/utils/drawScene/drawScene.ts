@@ -36,7 +36,7 @@ import { drawSliceDraft } from 'utils/canvas/drawSliceDraft';
 import { drawStarRatioHandleLayer } from './drawStarRatioHandleLayer';
 import { drawVectorAlignmentGuide } from './drawVectorAlignmentGuide';
 import { drawVectorDraggedFillPreview } from './drawVectorDraggedFillPreview';
-import { drawVectorEditHandlesLayer } from './drawVectorEditHandlesLayer/drawVectorEditHandlesLayer';
+import { drawVectorEditHandlesLayer } from './drawVectorEditHandlesLayer/drawVectorEditHandlesLayer/drawVectorEditHandlesLayer';
 import { drawVectorLasso } from './drawVectorLasso';
 import { drawVectorCutHoverPreview } from './drawVectorCutHoverPreview';
 import { drawVectorCutPreview } from './drawVectorCutPreview';
@@ -129,6 +129,7 @@ export const drawScene = (
     selectedVectorSegmentIds,
     preMarqueeVectorSegmentIds,
     hoveredVectorVertexId,
+    refs.newVectorCutVertexIdsRef.current,
     hoveredSegmentId,
     hoveredVectorSegmentId,
     hoveredVectorEdgeInsertPoint,

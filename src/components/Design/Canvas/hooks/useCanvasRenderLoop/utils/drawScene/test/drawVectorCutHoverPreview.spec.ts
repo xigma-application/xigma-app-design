@@ -83,7 +83,13 @@ describe('drawVectorCutHoverPreview', () => {
 
   it('should stroke the whole hovered segment in the cut tool’s pink at the shared hover outline width', () => {
     // mock
-    const flattenedSegment = { points: [{ x: 0, y: 0 }, { x: 100, y: 0 }], segmentId: 's1' };
+    const flattenedSegment = {
+      points: [
+        { x: 0, y: 0 },
+        { x: 100, y: 0 },
+      ],
+      segmentId: 's1',
+    };
 
     flattenVectorSegmentsMock.mockReturnValue([flattenedSegment]);
 
@@ -96,7 +102,13 @@ describe('drawVectorCutHoverPreview', () => {
 
   it('should scale the segment highlight width down by the current zoom level', () => {
     // mock
-    const flattenedSegment = { points: [{ x: 0, y: 0 }, { x: 100, y: 0 }], segmentId: 's1' };
+    const flattenedSegment = {
+      points: [
+        { x: 0, y: 0 },
+        { x: 100, y: 0 },
+      ],
+      segmentId: 's1',
+    };
 
     flattenVectorSegmentsMock.mockReturnValue([flattenedSegment]);
 
@@ -136,7 +148,17 @@ describe('drawVectorCutHoverPreview', () => {
     const mixedNodes: Record<string, TSceneNode> = { [frameNode.id]: frameNode };
 
     // before
-    drawVectorCutHoverPreview(gl, program, buffer, mixedNodes, { nodeId: frameNode.id, segmentId: 's1' }, null, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorCutHoverPreview(
+      gl,
+      program,
+      buffer,
+      mixedNodes,
+      { nodeId: frameNode.id, segmentId: 's1' },
+      null,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorStrokeMock).not.toHaveBeenCalled();

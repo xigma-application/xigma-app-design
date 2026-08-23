@@ -31,7 +31,17 @@ export const drawVectorCutHoverPreview = (
     const segment = flattenVectorSegments(bakedNode).find((candidate) => candidate.segmentId === hoveredSegment.segmentId);
 
     if (segment) {
-      drawVectorStroke(gl, program, buffer, [segment], VECTOR_CUT_LINE_STROKE, HOVER_OUTLINE_WIDTH / viewport.zoom, canvasWidth, canvasHeight, viewport);
+      drawVectorStroke(
+        gl,
+        program,
+        buffer,
+        [segment],
+        VECTOR_CUT_LINE_STROKE,
+        HOVER_OUTLINE_WIDTH / viewport.zoom,
+        canvasWidth,
+        canvasHeight,
+        viewport,
+      );
     }
   }
 

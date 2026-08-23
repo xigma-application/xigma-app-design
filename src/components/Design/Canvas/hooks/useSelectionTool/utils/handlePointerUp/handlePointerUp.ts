@@ -31,6 +31,7 @@ import { disarmVectorMultiSelectResizeDrag } from './disarmVectorMultiSelectResi
 import { disarmVectorMultiSelectRotateDrag } from './disarmVectorMultiSelectRotateDrag';
 import { disarmVectorSegmentBendDrag } from './disarmVectorSegmentBendDrag';
 import { disarmVectorVertexDrag } from './disarmVectorVertexDrag';
+import { resolveVectorCutMarkConsumption } from '../handlePointerMove/resolveVectorCutMarkConsumption';
 
 export const handlePointerUp = (
   canvas: HTMLCanvasElement,
@@ -64,5 +65,6 @@ export const handlePointerUp = (
   disarmVectorSegmentBendDrag(canvas, event, dispatch, canvasRefs, selectionRefs.vectorSegmentBendDragRef, setClassName);
   disarmVectorCutDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   disarmVectorMarqueeDrag(canvas, event, canvasRefs, selectionRefs.vectorMarqueeStartRef, selectionRefs.vectorMarqueeModeRef);
+  resolveVectorCutMarkConsumption(canvasRefs);
   dispatch(endHistoryGesture());
 };

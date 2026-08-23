@@ -1,5 +1,6 @@
 // others
 import {
+  VECTOR_CUT_CROSSING_FILL,
   VECTOR_VERTEX_FILL,
   VECTOR_VERTEX_HOVER_SCALE,
   VECTOR_VERTEX_SELECTED_FILL,
@@ -12,6 +13,7 @@ import {
 import { TVectorNode, TViewport } from 'types/design/types';
 
 // utils
+import { drawEllipse } from 'utils/canvas/shapes/drawEllipse';
 import { drawVertexDot } from './drawVertexDot';
 
 export const drawVectorVertexDots = (
@@ -21,6 +23,7 @@ export const drawVectorVertexDots = (
   node: TVectorNode,
   selectedVertexIds: string[],
   hoveredVertexId: string | null,
+  newVertexIds: Set<string>,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
@@ -29,6 +32,8 @@ export const drawVectorVertexDots = (
   const selected = new Set(selectedVertexIds);
 
   Object.values(node.vertices).forEach((vertex) => {
+    const isNew = newVertexIds.has(vertex.id);
+
     if (selected.has(vertex.id)) {
       drawVertexDot(
         gl,
@@ -49,7 +54,7 @@ export const drawVectorVertexDots = (
         vertex.x,
         vertex.y,
         baseSize * VECTOR_VERTEX_SELECTED_INNER_SCALE,
-        VECTOR_VERTEX_SELECTED_FILL,
+        isNew ? VECTOR_CUT_CROSSING_FILL : VECTOR_VERTEX_SELECTED_FILL,
         canvasWidth,
         canvasHeight,
         viewport,
@@ -57,7 +62,27 @@ export const drawVectorVertexDots = (
     } else {
       const size = vertex.id === hoveredVertexId ? baseSize * VECTOR_VERTEX_HOVER_SCALE : baseSize;
 
-      drawVertexDot(gl, program, buffer, vertex.x, vertex.y, size, VECTOR_VERTEX_FILL, canvasWidth, canvasHeight, viewport);
+      if (isNew) {
+        drawEllipse(
+          gl,
+          program,
+          buffer,
+          {
+            fill: VECTOR_VERTEX_FILL,
+            height: size,
+            stroke: VECTOR_CUT_CROSSING_FILL,
+            width: size,
+            x: vertex.x - size / 2,
+            y: vertex.y - size / 2,
+          },
+          canvasWidth,
+          canvasHeight,
+          viewport,
+          0,
+        );
+      } else {
+        drawVertexDot(gl, program, buffer, vertex.x, vertex.y, size, VECTOR_VERTEX_FILL, canvasWidth, canvasHeight, viewport);
+      }
     }
   });
 };

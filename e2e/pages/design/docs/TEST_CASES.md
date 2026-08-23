@@ -1704,6 +1704,31 @@ dispatched live on every pointermove, as before).
 | --- | ------------------------------------------------------------------------------------------------------- | :--: | :-------------------------------------------------------------------------------------------------------------: |
 | 285 | Dragging a filled face's vertex/segment live-highlights that face; releasing clears the highlight again |  ✅  | — (see rationale below; same as the Paint tool's own hover-highlight, §"Why so few scenarios get e2e coverage") |
 
+## Cut tool — pink hover preview, cursor, and a newly-severed vertex's own pink mark
+
+Split's plain-click hit preview and its live crossing markers reuse the same white-center/pink-border
+style as a plain unselected vector vertex (`drawVectorCutPointMarker.ts`); the whole hovered segment
+gets a full-length pink outline (`drawVectorCutHoverPreview.ts`), suppressing the generic blue
+highlight for Cut specifically (`resolveVectorSegmentHover.ts`). The cursor is `cut-off` any time Cut
+is active and idle (forced every idle move by `resolveVectorCutHover.ts`, so no other resolver's
+cursor leaks through) and `cut-on` for the whole duration a button is held
+(`armVectorCutOnPointerDown.ts` → `disarmVectorCutDrag.ts`).
+
+Separately: a vertex a Split/Divide just severed renders in that same pink (a solid pink dot at rest,
+matching a plain unselected vertex's own size/style exactly — just recolored) until the user selects
+it and then deselects it again, tracked via `newVectorCutVertexIdsRef`/`touchedVectorCutVertexIdsRef`
+and consumed by `resolveVectorCutMarkConsumption.ts` (run on every pointermove **and** on every
+pointerup, so a drag-then-deselect consumes immediately rather than waiting on an incidental later
+mouse move); two vertices severed at the exact same point (a Split's own pair) consume together, since
+the user can only ever click one of them. Exiting Vector Edit Mode entirely clears every mark.
+Completing an actual cut (Split or a Divide that found something to cut) now also hands control back
+to the Move tool (`disarmVectorCutDrag.ts`, gated on `commitVectorDivide.ts`'s own now-`boolean`
+return value so a Divide drag that crossed nothing leaves the tool alone).
+
+| #   | Scenario                                                                                                                     | Unit |            E2E             |
+| --- | ----------------------------------------------------------------------------------------------------------------------------- | :--: | :-------------------------: |
+| 287 | A newly cut-severed vertex renders pink until selected-then-deselected (screenshot pixel-sampled, since the mark lives only in a canvas ref, invisible to `store.getState()`); completing the cut hands control back to the Move tool | ✅  | ✅ `cut.spec.ts` |
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e
