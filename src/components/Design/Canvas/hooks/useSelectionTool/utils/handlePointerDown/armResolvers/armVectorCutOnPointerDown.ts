@@ -19,6 +19,7 @@ export const armVectorCutOnPointerDown = ({
   event,
   point,
   selectionRefs,
+  setClassName,
   viewport,
 }: TArmContext): true | undefined => {
   const state = store.getState();
@@ -40,6 +41,7 @@ export const armVectorCutOnPointerDown = ({
     };
     canvasRefs.vectorCutPreviewRef.current = { crossings: [], lineEnd: point, lineStart: point };
     canvas.setPointerCapture(event.pointerId);
+    setClassName('cut-on');
 
     return true;
   }

@@ -54,12 +54,14 @@ describe('disarmVectorCutDrag', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
     const selectionRefs = createSelectionToolRefs();
+    const setClassNameMock = vi.fn();
 
     // before
-    disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs);
+    disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, setClassNameMock);
 
     // result
     expect(canvas.releasePointerCapture).not.toHaveBeenCalled();
+    expect(setClassNameMock).not.toHaveBeenCalled();
   });
 
   it('should commit a Split when the drag state is still "pending" (no drag past the threshold)', () => {
@@ -74,8 +76,10 @@ describe('disarmVectorCutDrag', () => {
 
     selectionRefs.vectorCutDragRef.current = { hit: { nodeId, segmentId: 's1', t: 0.5 }, lineStart: { x: 50, y: 0 }, status: 'pending' };
 
+    const setClassNameMock = vi.fn();
+
     // before
-    disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs);
+    disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, setClassNameMock);
 
     // result
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
@@ -84,6 +88,7 @@ describe('disarmVectorCutDrag', () => {
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
     expect(selectionRefs.vectorCutDragRef.current).toBeNull();
     expect(canvasRefs.vectorCutPreviewRef.current).toBeNull();
+    expect(setClassNameMock).toHaveBeenCalledWith('cut-off');
   });
 
   it('should do nothing but still clean up refs/pointer capture when the "pending" drag never hit anything (a plain click on empty space)', () => {
@@ -100,7 +105,7 @@ describe('disarmVectorCutDrag', () => {
     selectionRefs.vectorCutDragRef.current = { hit: null, lineStart: { x: 500, y: 500 }, status: 'pending' };
 
     // before
-    disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs);
+    disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, vi.fn());
 
     // result
     expect(store.getState().design.nodes[nodeId]).toEqual(nodeBefore);
@@ -121,7 +126,7 @@ describe('disarmVectorCutDrag', () => {
     };
 
     // before
-    disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs);
+    disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, vi.fn());
 
     // result
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
@@ -142,7 +147,7 @@ describe('disarmVectorCutDrag', () => {
     canvasRefs.vectorCutPreviewRef.current = null;
 
     // before
-    disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs);
+    disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, vi.fn());
 
     // result — no crash, no dispatch of any kind (a zero-length line crosses nothing)
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
@@ -192,7 +197,7 @@ describe('disarmVectorCutDrag', () => {
     canvasRefs.vectorCutPreviewRef.current = { crossings: [], lineEnd: { x: 120, y: 50 }, lineStart: { x: -20, y: 50 } };
 
     // before
-    disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs);
+    disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, vi.fn());
 
     // result
     const newRootOrder = store.getState().design.rootOrder.filter((id) => !rootOrderBefore.includes(id));

@@ -17,6 +17,7 @@ export const disarmVectorCutDrag = (
   dispatch: AppDispatch,
   canvasRefs: TCanvasRefs,
   selectionRefs: TSelectionToolRefs,
+  setClassName: (className: string | null) => void,
 ): void => {
   const dragState = selectionRefs.vectorCutDragRef.current;
 
@@ -36,5 +37,6 @@ export const disarmVectorCutDrag = (
     canvas.releasePointerCapture(event.pointerId);
     selectionRefs.vectorCutDragRef.current = null;
     canvasRefs.vectorCutPreviewRef.current = null;
+    setClassName('cut-off');
   }
 };

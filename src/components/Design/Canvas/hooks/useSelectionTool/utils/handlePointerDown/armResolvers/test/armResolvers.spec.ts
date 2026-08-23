@@ -1243,6 +1243,7 @@ describe('armVectorCutOnPointerDown', () => {
     });
     expect(ctx.canvasRefs.vectorCutPreviewRef.current).toEqual({ crossings: [], lineEnd: { x: 50, y: 0 }, lineStart: { x: 50, y: 0 } });
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
+    expect(ctx.setClassName).toHaveBeenCalledWith('cut-on');
   });
 
   it('should still arm a pending cut drag, with hit: null, when the click misses every segment — a Divide drag can start from empty space, inside a shape, or anywhere else, not just exactly on a path', () => {

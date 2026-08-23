@@ -187,5 +187,19 @@
         -webkit-image-set(url('../../../assets/icons/cursors/drop-remove.png') 8x) 16 16,
         auto;
     }
+
+    &--cut-on {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/cut-on.png') 8x) 4 4,
+        auto;
+    }
+
+    &--cut-off {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/cut-off.png') 8x) 4 4,
+        auto;
+    }
   }
 }
