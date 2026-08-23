@@ -29,8 +29,9 @@ to nieprzezroczyste nakładki na canvas (`LEFT_PANEL_WIDTH = 500`, `RIGHT_PANEL_
       (`window.dispatchEvent(KeyboardEvent{code:'KeyX'})`, realny store, `activeTool` → `'cut'`).
 - [x] ✅ 2. VectorEditToolbar pokazuje "Wytnij" jako aktywny przycisk (podświetlony na niebiesko) gdy
       `activeTool === 'cut'` — potwierdzone zrzutem ekranu, poprawne tłumaczenie PL.
-- [ ] ⏳ 3. Cut nieaktywny/zablokowany poza Vector Edit Mode — niepotwierdzone live, wynika z gate'u w
-      `useSelectionTool.ts`, pokryte jednostkowo.
+- [x] ✅ 3. Cut nieaktywny/zablokowany poza Vector Edit Mode — permanentny e2e (`cut.spec.ts`): skrót 'x'
+      wciąż przełącza `activeTool`, ale realny drag bez otwartego node'a nic nie zmienia
+      (`armVectorCutOnPointerDown` gate'uje na `vectorEditingNodeIds`, nie sam wybór narzędzia).
 
 ## 2. Split mode (klik)
 
@@ -41,9 +42,9 @@ to nieprzezroczyste nakładki na canvas (`LEFT_PANEL_WIDTH = 500`, `RIGHT_PANEL_
       realnym kliknięciem myszy, nie wywołaniem funkcji wprost.
 - [ ] ⏳ 5. Klik dokładnie na istniejący wierzchołek (degree-2) → odłącza tylko ten jeden segment —
       niepotwierdzone live UI (potwierdzone tylko jednostkowo), mechanizm identyczny do #4.
-- [ ] ⏳ 6. Klik na wierzchołek rozgałęzienia (3+ segmenty) → odłącza TYLKO kliknięty segment —
-      niepotwierdzone live UI, pokryte jednostkowo z realistycznym "Y"-kształtem
-      (`severVectorSegmentAtPoint.spec.ts`).
+- [x] ✅ 6. Klik na wierzchołek rozgałęzienia (3+ segmenty) → odłącza TYLKO kliknięty segment —
+      permanentny e2e (`cut.spec.ts`, realny klik na "Y"-kształcie zbudowanym przez Pen), oprócz
+      pokrycia jednostkowego (`severVectorSegmentAtPoint.spec.ts`).
 
 ## 3. Divide mode (przeciągnięcie)
 
@@ -56,14 +57,14 @@ to nieprzezroczyste nakładki na canvas (`LEFT_PANEL_WIDTH = 500`, `RIGHT_PANEL_
       **wizualnie** — zrzut ekranu pokazuje dwa niezależnie wypełnione prostokąty (zielony/fioletowy,
       każdy własny deterministyczny kolor per-loop), oba nadal otwarte w edycji (białe kropki
       wierzchołków widoczne na obu).
-- [ ] ⏳ 9. Cięcie kwadrata BEZ wypełnienia → obie połówki bez fill — pokryte jednostkowo, niepotwierdzone
-      live UI (mechanizm identyczny do #8, tylko `finish` no-opuje zamiast dodawać closing segment).
-- [ ] ⏳ 10. Linia tnąca mija węzeł całkowicie → węzeł zupełnie nietknięty — pokryte jednostkowo,
-      niepotwierdzone live UI.
-- [ ] ⏳ 11. Linia przecina jedną krawędź zamkniętego trójkąta raz → nic się nie dzieli (pozostałe dwie
-      krawędzie wciąż łączą oba kawałki) — pokryte jednostkowo, niepotwierdzone live UI.
-- [ ] ⏳ 12. 2 otwarte node'y, jedno przeciągnięcie tnie oba → do 4 wynikowych node'ów, jeden krok Undo
-      cofa wszystko naraz — pokryte jednostkowo, niepotwierdzone live UI (real drag across 2 open nodes + real Cmd+Z).
+- [x] ✅ 9. Cięcie kwadrata BEZ wypełnienia → obie połówki bez fill — permanentny e2e (`cut.spec.ts`).
+- [x] ✅ 10. Linia tnąca mija węzeł całkowicie → węzeł zupełnie nietknięty — permanentny e2e (`cut.spec.ts`,
+      `toEqual` na całym node przed/po).
+- [x] ✅ 11. Linia przecina jedną krawędź zamkniętego trójkąta raz → nic się nie dzieli (pozostałe dwie
+      krawędzie wciąż łączą oba kawałki) — permanentny e2e (`cut.spec.ts`).
+- [x] ✅ 12. 2 otwarte node'y, jedno przeciągnięcie tnie oba → do 4 wynikowych node'ów, jeden krok Undo
+      cofa wszystko naraz — permanentny e2e (`cut-multi.spec.ts`, real drag across 2 open nodes + real
+      Control+Z), plus osobny scenariusz gdzie drag trafia tylko JEDEN z dwóch otwartych node'ów.
 
 ## 4. Prawdziwy bug znaleziony przez usera live (naprawiony) — środkowy fill ginął przy cięciu >2 segmentów
 
@@ -164,3 +165,16 @@ porównaniem z `realSegmentIds`.
       realne przeciągnięcia myszą (Wytnij) w 1/3 i 2/3 wysokości → zrzut ekranu pokazuje 3 równe,
       niezależnie wypełnione części (niebieska/fioletowa/zielona), żadna pusta. 100% coverage
       (`npm run test:coverage`), `tsc --noEmit` czysty.
+
+## 7. Permanentne pokrycie e2e (`e2e/pages/design/cut.spec.ts`, `cut-multi.spec.ts`)
+
+Wszystkie powyższe live-MCP demo (jednorazowe, nic nie zostawiają w repo) przekute na trwałe testy
+Playwright — 15 scenariuszy razem, real `page.mouse`/`page.keyboard`, real
+`store.getState()`/`updateNode` assercje, zero screenshot-only tam gdzie strukturalna asercja jest
+precyzyjniejsza. Numeracja i szczegóły w `e2e/pages/design/TEST_CASES.md` (wiersze 265–277).
+`cut.spec.ts` — pojedynczy node: wiring skrótu, oba tryby Split, wszystkie warianty Divide (linia na
+zewnątrz obu stron, linia mijająca, jedna krawędź trójkąta, niewypełniony kształt), wszystkie 3
+regresje z §4/§5/§6 (namiot, drugie cięcie, malowanie przez przecięcie), Undo. `cut-multi.spec.ts` —
+2 otwarte node'y: cięcie trafia tylko w jeden, cięcie trafia w oba (4 kawałki), Undo cofa oba naraz.
+
+`npx playwright test cut.spec.ts cut-multi.spec.ts` — 15/15 zielone.
