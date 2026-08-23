@@ -8,7 +8,7 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { commitVectorDivide } from '../commitVectorDivide';
-import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
+import { createCanvasRefs } from '../../../../../../useCanvasRefs/createCanvasRefs';
 import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
 import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
 
@@ -138,7 +138,7 @@ describe('commitVectorDivide', () => {
     expect(store.getState().design.rootOrder).toEqual(rootOrderBefore);
   });
 
-  it('should leave a closed triangle untouched when the cut line crosses only one of its edges (severing there still leaves one connected component via the other two edges)', () => {
+  it('should keep a closed triangle as one node but genuinely sever the one edge the cut line crosses, when it crosses only that edge and no other', () => {
     // mock — triangle a(0,0)-b(100,0)-c(50,100); cut line crosses only edge a-b, near its midpoint
     store.dispatch(
       addNode({
@@ -162,7 +162,6 @@ describe('commitVectorDivide', () => {
 
     const { rootOrder: rootOrderBefore } = store.getState().design;
     const nodeId = rootOrderBefore[rootOrderBefore.length - 1];
-    const nodeBefore = store.getState().design.nodes[nodeId] as TVectorNode;
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
@@ -171,9 +170,21 @@ describe('commitVectorDivide', () => {
     // before — a short vertical line crossing only edge a-b (y=0), well short of reaching edges b-c/c-a
     commitVectorDivide(store.dispatch, { x: 50, y: -10 }, { x: 50, y: 10 }, [nodeId], canvasRefs);
 
-    // result — still one connected shape (the triangle's other two edges still bridge the severed piece)
+    // result — still one connected node (no new node, the other two edges still keep it one piece), but
+    // edge a-b is now genuinely severed into two disconnected segments — two new points at the same
+    // coordinate, not one shared pass-through vertex, matching a plain Split click
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const newVertexIds = Object.keys(node.vertices).filter((id) => !['a', 'b', 'c'].includes(id));
+    const touchingSegments = Object.values(node.segments).filter(
+      (segment) => newVertexIds.includes(segment.startId) || newVertexIds.includes(segment.endId),
+    );
+
     expect(store.getState().design.rootOrder).toEqual(rootOrderBefore);
-    expect(store.getState().design.nodes[nodeId]).toEqual(nodeBefore);
+    expect(Object.keys(node.vertices)).toHaveLength(5);
+    expect(Object.keys(node.segments)).toHaveLength(4);
+    expect(newVertexIds).toHaveLength(2);
+    expect(touchingSegments).toHaveLength(2);
+    expect(touchingSegments[0].id).not.toBe(touchingSegments[1].id);
   });
 
   it('should cut two open nodes in one gesture, only touching the one the line actually crosses', () => {
@@ -327,5 +338,82 @@ describe('commitVectorDivide', () => {
 
       expect(node.filledFaceKeys.length).toBeGreaterThan(0);
     });
+  });
+
+  it('should splice a cut line into the same node as a real chord that cleanly divides one face in two, giving both new pieces their own fill, while the untouched-looking bottom face actually loses its own (its one boundary edge got genuinely severed for the cut’s sake, with nothing on the far side to keep it closed)', () => {
+    // mock — a square (v1..v4) already split by an internal chord (mid) into a top and bottom face, both
+    // painted their own fill; a vertical line crosses the top edge and the internal chord, splitting the
+    // top face in two, but the outline stays one connected piece via the untouched bottom face
+    const segments = {
+      mid: { endId: 'midR', id: 'mid', startId: 'midL', tangentEnd: null, tangentStart: null },
+      s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+      s2: { endId: 'midR', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+      s3: { endId: 'v3', id: 's3', startId: 'midR', tangentEnd: null, tangentStart: null },
+      s4: { endId: 'v4', id: 's4', startId: 'v3', tangentEnd: null, tangentStart: null },
+      s5: { endId: 'midL', id: 's5', startId: 'v4', tangentEnd: null, tangentStart: null },
+      s6: { endId: 'v1', id: 's6', startId: 'midL', tangentEnd: null, tangentStart: null },
+    } as const;
+    const vertices = {
+      midL: { id: 'midL', x: 0, y: 50 },
+      midR: { id: 'midR', x: 100, y: 50 },
+      v1: { id: 'v1', x: 0, y: 0 },
+      v2: { id: 'v2', x: 100, y: 0 },
+      v3: { id: 'v3', x: 100, y: 100 },
+      v4: { id: 'v4', x: 0, y: 100 },
+    };
+    const faces = deriveVectorFaces({
+      fillColor: null,
+      filledFaceKeys: [],
+      id: 'chord-probe',
+      name: '',
+      parentId: null,
+      rotation: 0,
+      segments,
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices,
+    });
+
+    expect(faces).toHaveLength(2);
+
+    store.dispatch(
+      addNode({
+        fillColor: '#ff0000',
+        filledFaceKeys: faces.map((face) => getVectorFillLoopKey(face.pieceKeys)),
+        name: 'Vector',
+        parentId: null,
+        rotation: 0,
+        segments,
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: NodeType.vector,
+        vertexHandleModes: {},
+        vertices,
+      }),
+    );
+
+    const { rootOrder: rootOrderBefore } = store.getState().design;
+    const nodeId = rootOrderBefore[rootOrderBefore.length - 1];
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    // before — crosses the top edge (y=0) then the internal chord (y=50), stopping well short of the
+    // bottom edge (y=100), so the bottom face is never touched
+    commitVectorDivide(store.dispatch, { x: 50, y: -20 }, { x: 50, y: 80 }, [nodeId], canvasRefs);
+
+    // result — no new node (the bottom face's other two edges keep the outline connected as one piece),
+    // the top face's two new pieces both inherit its fill, and the bottom face — never itself re-closed
+    // by this cut — isn't among them
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const bottomKey = faces.find((face) => face.pieceKeys.some((key) => key.startsWith('s4[')))!;
+
+    expect(store.getState().design.rootOrder).toEqual(rootOrderBefore);
+    expect(node.filledFaceKeys).toHaveLength(2);
+    expect(node.filledFaceKeys).not.toContain(getVectorFillLoopKey(bottomKey.pieceKeys));
+    expect(deriveVectorFaces(node)).toHaveLength(2);
   });
 });

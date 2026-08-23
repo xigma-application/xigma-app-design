@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // components
-import { DesignPage } from './DesignPage';
+import { DesignPage } from './model/DesignPage';
 
 test('draws a new star on the canvas using the Star option from the Rectangle dropdown', async ({ page }) => {
   const designPage = new DesignPage(page);

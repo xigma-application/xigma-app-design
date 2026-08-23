@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // components
-import { DesignPage } from './DesignPage';
+import { DesignPage } from './model/DesignPage';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -502,4 +502,201 @@ test('a single Undo after a Divide cut restores the original filled square in on
 
   expect(afterUndo.rootOrder).toEqual(before.rootOrder);
   expect(afterUndo.node).toEqual(before.node);
+});
+
+test('Divide: a chord that cleanly divides one face of a two-face shape gives both new pieces their own fill, Figma-style, even though the crossed segments are genuinely severed (not shared) — the untouched-looking other face loses its fill instead, since its own boundary edge got severed with nothing on its far side', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-cut-connected-single-face-split');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawClosedSquare(designPage);
+  // an internal horizontal chord, drawn with the Pen still active from drawClosedSquare, splits the
+  // square into a top and a bottom face before either is painted
+  await designPage.click(900, 350);
+  await designPage.click(1000, 350);
+  await page.keyboard.press('Shift+B');
+  await designPage.click(950, 320); // paint top
+  await designPage.click(950, 380); // paint bottom
+
+  const before = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const state = store.getState();
+    const node = state.design.nodes[state.design.rootOrder[0]];
+
+    return { filledFaceKeys: node.filledFaceKeys, rootOrder: state.design.rootOrder, vertexCount: Object.keys(node.vertices).length };
+  });
+
+  expect(before.filledFaceKeys).toHaveLength(2); // sanity check: both faces actually got painted
+
+  await page.keyboard.press('x');
+  // crosses the top edge (y=300) and the internal chord (y=350), stopping well short of the bottom
+  // edge (y=400) — cleanly splits the top face into two, but only ever touches the bottom face's own
+  // top edge without ever exiting it again
+  await designPage.dragVectorPoint(950, 250, 950, 380);
+
+  const after = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const state = store.getState();
+    const node = state.design.nodes[state.design.rootOrder[0]];
+
+    return { filledFaceKeys: node.filledFaceKeys, rootOrder: state.design.rootOrder, vertexCount: Object.keys(node.vertices).length };
+  });
+
+  expect(after.rootOrder).toEqual(before.rootOrder); // no new node — the bottom face's other edges keep it one piece
+  // 2 brand new fill entries, one per new top piece — neither is the original (now-stale) top key, and
+  // the bottom face's original key isn't among them either (its own chord was severed for the cut, with
+  // nothing on the far side left to close it)
+  expect(after.filledFaceKeys).toHaveLength(2);
+  expect(after.filledFaceKeys).not.toEqual(expect.arrayContaining(before.filledFaceKeys));
+  expect(after.vertexCount).toBe(before.vertexCount + 4); // both crossed segments genuinely severed (2 points each)
+});
+
+test('Divide: a drag that crosses only one edge and ends inside the shape genuinely severs that edge — two disconnected points, not one shared pass-through vertex, same as a plain Split click, so the touched face loses its fill', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-cut-connected-single-crossing-severs');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawClosedSquare(designPage);
+  await designPage.selectVectorEditMoveTool();
+  await paintWholeSquare(page, designPage);
+
+  const before = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const state = store.getState();
+    const node = state.design.nodes[state.design.rootOrder[0]];
+
+    return { rootOrder: state.design.rootOrder, vertexIds: Object.keys(node.vertices) };
+  });
+
+  await page.keyboard.press('x');
+  // crosses only the top edge (y=300) and never reaches back out anywhere else — a dangling single
+  // crossing with nothing on the other side to connect to
+  await designPage.dragVectorPoint(950, 250, 950, 320);
+
+  const after = await page.evaluate(async (beforeVertexIds) => {
+    const { store } = await import('/src/store/index.ts');
+    const state = store.getState();
+    const node = state.design.nodes[state.design.rootOrder[0]];
+    const newVertexIds = Object.keys(node.vertices).filter((id) => !beforeVertexIds.includes(id));
+    const touchingSegments = Object.values(node.segments).filter(
+      (segment) => newVertexIds.includes(segment.startId) || newVertexIds.includes(segment.endId),
+    ) as { endId: string; id: string; startId: string }[];
+
+    return { filledFaceKeys: node.filledFaceKeys, newVertexIds, rootOrder: state.design.rootOrder, touchingSegments };
+  }, before.vertexIds);
+
+  expect(after.rootOrder).toEqual(before.rootOrder); // still one node
+  expect(after.newVertexIds).toHaveLength(2); // two new, disconnected points, not one shared pass-through
+  expect(after.touchingSegments).toHaveLength(2); // one segment ends at each — nothing bridges them
+  expect(after.touchingSegments[0].id).not.toBe(after.touchingSegments[1].id);
+  // the square's only face was bounded by the now-severed edge, with nothing on the far side to close
+  // it back up — no fill survives it
+  expect(after.filledFaceKeys).toEqual([]);
+});
+
+test('Divide: a dangling crossing that never reaches the internal chord leaves the bottom face completely untouched, keeping its exact original fill key, while the top face it did touch loses its own', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-cut-connected-isolated-leaves-other-face-untouched');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawClosedSquare(designPage);
+  await designPage.click(900, 350);
+  await designPage.click(1000, 350);
+  await page.keyboard.press('Shift+B');
+  await designPage.click(950, 320); // paint top
+  await designPage.click(950, 380); // paint bottom
+
+  const before = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const state = store.getState();
+    const node = state.design.nodes[state.design.rootOrder[0]];
+
+    return { filledFaceKeys: node.filledFaceKeys, rootOrder: state.design.rootOrder };
+  });
+
+  await page.keyboard.press('x');
+  // crosses only the top edge (y=300), stopping at y=320 — well short of the internal chord (y=350), so
+  // the bottom face is never touched by this drag at all, not even indirectly
+  await designPage.dragVectorPoint(950, 250, 950, 320);
+
+  const after = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const state = store.getState();
+    const node = state.design.nodes[state.design.rootOrder[0]];
+
+    return { filledFaceKeys: node.filledFaceKeys, rootOrder: state.design.rootOrder };
+  });
+
+  expect(after.rootOrder).toEqual(before.rootOrder);
+  // exactly one surviving key, byte-identical to the bottom face's original one (painted second, so it's
+  // filledFaceKeys[1] beforehand) — the top face it actually touched loses its own entirely
+  expect(after.filledFaceKeys).toEqual([before.filledFaceKeys[1]]);
+});
+
+test('Divide: a genuinely untouched third face elsewhere on the same node keeps its exact original fill key, while the face adjacent to the actual cut loses its own as collateral, same as the two-face case', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-cut-connected-untouched-third-face-survives');
+  await expect(designPage.canvas).toBeVisible();
+
+  // a tall rectangle split into 3 equal horizontal bands by two internal chords, each painted its own
+  // fill — the cut below only ever crosses the top edge and the first (top/middle) chord
+  await designPage.drawVectorPath([
+    { x: 900, y: 300 },
+    { x: 1000, y: 300 },
+    { x: 1000, y: 500 },
+    { x: 900, y: 500 },
+    { x: 900, y: 300 },
+  ]);
+  await designPage.click(900, 366);
+  await designPage.click(1000, 366);
+  await designPage.click(900, 433);
+  await designPage.click(1000, 433);
+  await page.keyboard.press('Shift+B');
+  await designPage.click(950, 330); // top band
+  await designPage.click(950, 400); // middle band
+  await designPage.click(950, 466); // bottom band
+
+  const before = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const state = store.getState();
+    const node = state.design.nodes[state.design.rootOrder[0]];
+
+    return { filledFaceKeys: node.filledFaceKeys, rootOrder: state.design.rootOrder };
+  });
+
+  expect(before.filledFaceKeys).toHaveLength(3); // sanity check: all 3 bands actually got painted
+
+  await page.keyboard.press('x');
+  // crosses the top edge (y=300) and the first internal chord (y=366), cleanly splitting only the top
+  // band into two — stops well short of the second chord (y=433), so the bottom band is never touched
+  // by this drag at all, not even indirectly
+  await designPage.dragVectorPoint(950, 250, 950, 400);
+
+  const after = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const state = store.getState();
+    const node = state.design.nodes[state.design.rootOrder[0]];
+
+    return { filledFaceKeys: node.filledFaceKeys, rootOrder: state.design.rootOrder };
+  });
+
+  expect(after.rootOrder).toEqual(before.rootOrder);
+  // the bottom band's key survives completely untouched (painted third, so it's filledFaceKeys[2]
+  // beforehand); the middle band's own key is gone even though the drag never entered it directly — its
+  // one boundary edge at y=366 was severed as collateral of the top band's cut, same mechanic as the
+  // two-face case above; 2 brand new keys replace the top band's split halves
+  expect(after.filledFaceKeys).toContain(before.filledFaceKeys[2]);
+  expect(after.filledFaceKeys).toHaveLength(3);
 });

@@ -43,7 +43,7 @@ The bar is "would a real browser catch something a unit test can't", not "did an
 
 1. Add the test to the most relevant existing file under `e2e/pages/design/` (e.g. `selection.spec.ts`
    for selection-related behavior) or create a new `<feature>.spec.ts` there if none fits.
-2. Use the `DesignPage` page object (`e2e/pages/design/DesignPage.ts`) — `goto`, `selectTool`,
+2. Use the `DesignPage` page object (`e2e/pages/design/model/DesignPage.ts`) — `goto`, `selectTool`,
    `drawFrame`, `click`, `pointerDown`/`pointerMove`/`pointerUp`, `panBy`, `zoomAt`. Extend it with a
    new helper method if the gesture needs one not yet covered, following the existing methods'
    shape (thin wrappers over `page.mouse`/`page.keyboard`).

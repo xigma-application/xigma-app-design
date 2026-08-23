@@ -3375,6 +3375,82 @@ left alone — rotating a collinear pair around their shared center is still a m
 there's no equivalent no-op to guard against. Unit: new case in `armResolvers.spec.ts`'s
 `armVectorMultiSelectResizeOnPointerDown` block (same-row v1/v2, click on the degenerate "nw"/"sw" corner).
 
+## 53. A Divide cut that doesn't disconnect the shape still cuts it — every crossing genuinely severs, with fill inherited only across an actual chord
+
+Asked for directly, with Figma's own Cut/scissor tool as the reference: cutting a segment shouldn't
+require the drag to fully separate the shape into independent pieces. Before this, `commitVectorDivide.ts`'s
+`findVectorDivideResult` only ever committed when severing the crossings actually split the network into
+`components.length > 1` — anything short of that (a single crossing where the drag ends inside the shape,
+or a chord that fully crosses one face of a multi-face node without ever touching the outer boundary a
+second time) was discarded outright: not just "no new node", but *nothing committed at all*.
+
+**Three designs were tried in sequence; the first two were live-corrected by the user against a real
+repro (a square + one internal chord, both faces painted) before landing on the shipped one.**
+
+- **First: splice the line in as shared, non-disconnecting geometry** (reusing Paint's own
+  `persistVectorNetworkCrossings`). Fill survived automatically (old loop keys still resolved, no remap
+  needed), and it *looked* right in a screenshot — but the user rejected it outright once shown the actual
+  vertex data: "cięcie miało ciąć, nie tworzyć point" (cutting was supposed to *cut*, not create a
+  pass-through point) and "segmenty powinny być oderwane od siebie" (segments should come apart from each
+  other) — confirmed against Figma's own behavior (a screenshot: dragging one resulting corner independently
+  distorts only that piece, the other stays a clean rectangle). A shared vertex can never do that; Split's
+  existing `severVectorSegmentAtPoint` already sets the real precedent (two disconnected points at the same
+  coordinate, not one).
+- **Second: always sever every crossing into two disconnected points** (matching Split), with a *duplicated*
+  chord (two independent copies, one per new sub-face, geometrically coincident but never sharing a vertex)
+  for the interior stretch between two adjacent crossings. This fixed the independence requirement — but a
+  plain "leave `filledFaceKeys` alone" (Split's own approach) turned out to depend on an artifact:
+  `deriveVectorFaces`'s general half-edge walk happily traces out to a now-dangling dead end and back as a
+  zero-area spike, so it still finds a nominally "closed" face for a plain square with one isolated severed
+  edge and *keeps* the stale key resolving — while the *same* isolated severing on a square-plus-chord node
+  does *not* re-close (confirmed by direct comparison: identical single-edge cut, opposite outcome, purely
+  because of what else the walk happens to hit). Un-Figma-like either way once actually tested live: the
+  user's own repro showed the newly-cut pieces **losing** fill while an untouched-looking face kept it —
+  backwards from Figma, which keeps fill on a clean split.
+- **Shipped: sever every crossing (always two points), but compute `filledFaceKeys` explicitly instead of
+  leaning on whatever `deriveVectorFaces` happens to still trace.** A face inherits fill only if it's
+  geometrically found via `getPolygonCentroid` + `getVectorFaceAtPoint` to sit inside an *originally*
+  filled face, **and** none of its `pieceKeys` reference a stub segment left over from an *isolated*
+  crossing (`isolatedStubIds` — a crossing with no chord touching either of its two severed points).
+  That second condition is the fix for the spike artifact: it doesn't matter whether the general walk can
+  still trace a technically-closed loop through a dangling stub, that stub never legitimately closes
+  anything, so any face touching it is excluded outright regardless.
+
+**Net effect, matching the user's own corrected mental model:** a face a chord *cleanly* divides (two
+adjacent crossings, both ends producing a real, filled interior stretch) gets its fill copied onto *both*
+new independent pieces, Figma-style. A face touched by only an *isolated* crossing (no chord on either
+side — the drag entered without ever crossing back out, or the crossed segment was collateral for a
+*different* face's clean split) loses its fill outright, same as it would from a plain Split click — even
+if that face's other boundary looks untouched at a glance, because the specific edge it needed to stay
+closed is the one that got severed.
+
+**Wiring**: `commitVectorDivide` (now its own folder, `commitVectorDivide/` — `findVectorDivideResult.ts`,
+`findVectorConnectedCutResult.ts`, `applyDivideResults.ts`, `applyConnectedCutResults.ts`,
+`finishDividedComponent.ts`, `commitVectorCutComponents.ts`, `types.ts`, one function per file per
+[[xigma-module-structure]]) runs the existing severing-based `findVectorDivideResult` first, unchanged, for
+every node — nodes it can't fully divide fall through to `findVectorConnectedCutResult`
+(`materializeVectorNetworkCut`) instead of being dropped. Both result lists dispatch inside the same
+`dispatchAsOneGestureIfMultiNode` bracket, so a drag that fully divides one open node and connected-cuts
+another in the same gesture still lands as one Undo step. `applyConnectedCutResults` now explicitly sets
+`filledFaceKeys` on the updated node (not left untouched like Split) — it's computed fresh by
+`materializeVectorNetworkCut` itself, not merged/resolved by the caller.
+
+Live-verified via Playwright MCP against the reported repro and the corrected one, both with screenshots:
+a square with an internal chord, cut with a line crossing the top edge and the chord — both new top pieces
+render filled (their own color each, matching §51's per-loop coloring), the bottom face renders unfilled.
+Also verified the independence requirement directly against the real dispatch pipeline (not just pure
+functions): the two new severed vertices at each crossing have different ids and nothing bridges them.
+
+Unit: `materializeVectorNetworkCut.spec.ts` (5 cases, 100% branch: no crossings, an isolated single
+crossing genuinely severs and drops that face's fill while an untouched face keeps its exact key, a clean
+chord split keeps both new pieces filled while the severed-but-unchorded far face is excluded, synthetic
+endpoints never leak into the result, a two-separate-contour node where the line passes through empty
+space *between* them and that gap fragment is correctly dropped) plus matching `commitVectorDivide.spec.ts`
+cases for the same three shapes end-to-end through the real dispatch. E2E: `cut.spec.ts` rows 278–281
+(`TEST_CASES.md`) — the clean-chord-split case, the isolated-crossing-severs case, an isolated crossing
+that leaves a genuinely untouched sibling face's key byte-identical, and a 3-band node proving an
+untouched *third* face survives while only the one collaterally touched by the cut loses its fill.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

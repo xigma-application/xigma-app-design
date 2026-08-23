@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // components
-import { DesignPage } from './DesignPage';
+import { DesignPage } from './model/DesignPage';
 
 test('shift-click adds a second frame to the selection and draws the shared group outline', async ({ page }) => {
   const designPage = new DesignPage(page);

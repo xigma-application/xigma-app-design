@@ -50,7 +50,6 @@ export const commitVectorCutComponents = (
       );
 
       const { rootOrder } = store.getState().design;
-
       return rootOrder[rootOrder.length - 1];
     });
   }

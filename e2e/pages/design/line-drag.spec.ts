@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // components
-import { DesignPage } from './DesignPage';
+import { DesignPage } from './model/DesignPage';
 
 test('dragging a line by its body moves both endpoints together, while dragging an endpoint moves only that one', async ({ page }) => {
   const designPage = new DesignPage(page);

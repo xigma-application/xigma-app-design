@@ -21,7 +21,7 @@ to, że live-testing przez UI jest niezastąpiony i nie zastępuje go wywołanie
 Przy okazji znaleziona i naprawiona przyczyna, dla której wcześniejsze próby (syntetyczne
 `dispatchEvent` i trustowane `page.mouse`) w ogóle nie rejestrowały kliknięć: `LeftPanel`/`RightPanel`
 to nieprzezroczyste nakładki na canvas (`LEFT_PANEL_WIDTH = 500`, `RIGHT_PANEL_WIDTH = 240`, patrz
-`e2e/pages/design/DesignPage.ts`) — wcześniejsze testy klikały w x < 500, czyli w obszar zasłonięty.
+`e2e/pages/design/model/DesignPage.ts`) — wcześniejsze testy klikały w x < 500, czyli w obszar zasłonięty.
 
 ## 1. Wiring narzędzia
 
@@ -178,3 +178,64 @@ regresje z §4/§5/§6 (namiot, drugie cięcie, malowanie przez przecięcie), Un
 2 otwarte node'y: cięcie trafia tylko w jeden, cięcie trafia w oba (4 kawałki), Undo cofa oba naraz.
 
 `npx playwright test cut.spec.ts cut-multi.spec.ts` — 15/15 zielone.
+
+## 8. Cięcie segmentu bez rozdzielania na dwa wektory (jak w Figmie)
+
+Zgłoszenie: zrzuty ekranu pokazujące, że cięcie linią, która NIE przecina całego kształtu na wylot
+(np. wchodzi przez jedną krawędź i kończy się w środku, albo przecina tylko JEDNĄ twarz
+wielotwarzowego node'a bez odłączania jej od reszty konturu), powinno mimo to fizycznie przecinać
+segmenty — tak jak w Figmie. Wskazane wprost: `commitVectorDivide.ts`'s `findVectorDivideResult`
+(`components.length > 1` guard) to zabezpieczenie, które to blokuje — od niego trzeba zacząć.
+
+**Trzy podejścia, dwa odrzucone live przez usera na podstawie realnego repro:**
+
+1. **Wklejenie linii jako wspólnej, NIE-rozłączającej geometrii** (mechanizm Paint'a,
+   `persistVectorNetworkCrossings` — jeden dzielony wierzchołek na przecięcie). Fill przetrwał
+   automatycznie, wyglądało dobrze na zrzucie ekranu — ALE user odrzucił po zobaczeniu realnych
+   danych wierzchołków: "cięcie miało ciąć, nie tworzyć point" i "segmenty powinny być oderwane od
+   siebie" — potwierdzone zrzutem z Figmy (przeciągnięcie jednego rogu niezależnie zniekształca
+   TYLKO ten kawałek, drugi zostaje idealnym prostokątem). Wspólny wierzchołek nigdy tego nie da;
+   istniejący `severVectorSegmentAtPoint` (Split) już ustanawia właściwy precedens (2 rozłączne
+   punkty w tym samym miejscu).
+2. **Zawsze severować każde przecięcie na 2 rozłączne punkty** (jak Split), z DUBLOWANĄ cięciwą (2
+   niezależne kopie, po jednej na nową pod-twarz) dla odcinka między dwoma sąsiednimi przecięciami.
+   To naprawiło niezależność — ale samo zostawienie `filledFaceKeys` bez zmian (jak robi Split)
+   okazało się polegać na artefakcie: ogólny spacer po twarzach (`deriveVectorFaces`) potrafi
+   "wyjść do martwego końca i wrócić" jako zerowy kolec, więc dla zwykłego kwadratu z 1 odciętą
+   krawędzią WCIĄŻ znajduje "zamkniętą" twarz i fill przetrwał — a dla IDENTYCZNEGO odcięcia na
+   kwadracie z wewnętrzną cięciwą NIE (potwierdzone bezpośrednim porównaniem obu scenariuszy).
+   Sprzecznie z Figmą tak czy inaczej: live repro usera pokazał, że NOWO przecięte kawałki TRACIŁY
+   fill, a nietknięta-z-pozoru twarz go ZACHOWAŁA — odwrotnie niż powinno być.
+3. **Wdrożone: zawsze severuj (zawsze 2 punkty), ale licz `filledFaceKeys` jawnie**, zamiast polegać
+   na tym co przypadkiem wciąż znajdzie `deriveVectorFaces`. Twarz dziedziczy fill tylko jeśli jej
+   środek ciężkości (`getPolygonCentroid`) trafia w oryginalnie wypełnioną twarz (`getVectorFaceAtPoint`)
+   ORAZ żaden z jej `pieceKeys` nie odwołuje się do "osieroconego" kawałka po IZOLOWANYM przecięciu
+   (przecięcie bez cięciwy po żadnej stronie) — to właśnie usuwa artefakt kolca: nieważne czy spacer
+   wciąż coś "zamknie", martwy kawałek nigdy legalnie niczego nie zamyka.
+
+**Efekt końcowy, zgodny ze skorygowanym przez usera modelem:** twarz CZYSTO podzielona cięciwą (2
+sąsiednie przecięcia, oba tworzące realny wewnętrzny odcinek) dostaje fill skopiowany na OBIE nowe,
+niezależne części — jak w Figmie. Twarz dotknięta tylko IZOLOWANYM przecięciem (bez cięciwy po żadnej
+stronie — linia weszła i nie wyszła z powrotem, albo przecięty segment był "przy okazji" dla cięcia
+INNEJ twarzy) traci fill całkowicie, tak jak zwykły klik Split — nawet jeśli jej pozostała granica
+wygląda nietknięta, bo to właśnie ta jedna krawędź, która musiała zostać zamknięta, padła ofiarą cięcia.
+
+`commitVectorDivide.ts` (teraz osobny folder `commitVectorDivide/`, jedna funkcja na plik) najpierw
+próbuje istniejącej (niezmienionej) logiki pełnego Divide dla każdego node'a; dla node'ów, które się
+nie rozdzielają, dokłada fallback (`findVectorConnectedCutResult` → `materializeVectorNetworkCut`)
+zamiast całkowicie odrzucać wynik.
+
+- [x] ✅ 19. Zweryfikowane live (Playwright MCP, wielokrotnie, po każdej z 3 iteracji): kwadrat z
+      wewnętrzną cięciwą (2 niezależnie pomalowane twarze), cięcie linią przez górną krawędź +
+      cięciwę. Finalny, poprawny wynik: `rootOrder` bez zmian (brak nowego node'a), obie nowe
+      górne części WYPEŁNIONE (własny kolor każda), dolna twarz BEZ fill. Zrzut ekranu i realne
+      przeciągnięcie myszą w store potwierdzają pełną niezależność (różne id wierzchołków, nic
+      ich nie łączy).
+- [x] ✅ 20. Permanentny e2e: `cut.spec.ts`, 4 nowe testy (`TEST_CASES.md` wiersze 278–281) —
+      severing z utratą fill, czysty split cięciwą z dziedziczeniem fill na obie części, izolowane
+      przecięcie zostawiające nietkniętą twarz bez zmian, oraz 3-pasmowy node potwierdzający że
+      GENUINE nietknięta trzecia twarz przetrwała a tylko collateral-dotknięta traci fill.
+      Jednostkowo: `materializeVectorNetworkCut.spec.ts` (5 przypadków, 100% branch coverage) +
+      dopasowane przypadki w `commitVectorDivide.spec.ts`. Cała gałąź `cutVectorNetwork` +
+      `disarmVectorCutDrag`: 86/86 testów, 100% pokrycia. `cut.spec.ts`+`cut-multi.spec.ts`:
+      19/19 zielone.

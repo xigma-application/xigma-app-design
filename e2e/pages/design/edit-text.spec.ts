@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // components
-import { DesignPage } from './DesignPage';
+import { DesignPage } from './model/DesignPage';
 
 test('double-clicking an unselected text node enters edit mode with all its content selected, so typing replaces it', async ({ page }) => {
   const designPage = new DesignPage(page);

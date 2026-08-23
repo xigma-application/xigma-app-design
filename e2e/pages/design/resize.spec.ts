@@ -2,7 +2,7 @@ import path from 'path';
 import { test, expect } from '@playwright/test';
 
 // components
-import { DesignPage } from './DesignPage';
+import { DesignPage } from './model/DesignPage';
 
 const HAND_FIXTURE_PATH = path.join(import.meta.dirname, '../../../src/assets/icons/cursors/hand.png');
 

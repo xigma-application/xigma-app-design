@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // components
-import { DesignPage } from './DesignPage';
+import { DesignPage } from './model/DesignPage';
 
 test('draws a new slice on the canvas using the Slice option from the Frame dropdown, staying on the Slice tool afterwards', async ({
   page,

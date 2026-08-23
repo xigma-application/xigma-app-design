@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // components
-import { DesignPage } from './DesignPage';
+import { DesignPage } from './model/DesignPage';
 
 const waitForCursor = async (designPage: DesignPage, x: number, y: number): Promise<string> => {
   for (let attempt = 0; attempt < 20; attempt++) {

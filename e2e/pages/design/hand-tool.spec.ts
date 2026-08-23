@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // components
-import { DesignPage } from './DesignPage';
+import { DesignPage } from './model/DesignPage';
 
 test('panning with the hand tool moves the canvas content, and a frame remains selectable at its new screen position afterwards', async ({
   page,

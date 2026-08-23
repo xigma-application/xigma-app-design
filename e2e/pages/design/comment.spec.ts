@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // components
-import { DesignPage } from './DesignPage';
+import { DesignPage } from './model/DesignPage';
 
 test('clicking the canvas with the Comment tool opens a focused draft input at the click position', async ({ page }) => {
   const designPage = new DesignPage(page);

@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 // components
-import { DesignPage } from './DesignPage';
+import { DesignPage } from './model/DesignPage';
 
 // utils
-import { countMismatchedPixels } from './compareScreenshots';
+import { countMismatchedPixels } from '../../utils/compareScreenshots';
 
 test.describe.configure({ mode: 'serial' });
 

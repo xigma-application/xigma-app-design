@@ -7,7 +7,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 // utils
-import { commitVectorDivide } from './commitVectorDivide';
+import { commitVectorDivide } from './commitVectorDivide/commitVectorDivide';
 import { commitVectorSplit } from './commitVectorSplit';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
 
