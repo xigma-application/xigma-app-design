@@ -9,6 +9,7 @@ import { TShortcut } from './types';
 export const shortcuts = {
   [ToolName.arrow]: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.l },
   [ToolName.comment]: { secondaryKey: KeyboardKeys.c },
+  [ToolName.cut]: { secondaryKey: KeyboardKeys.x },
   [ToolName.default]: { secondaryKey: KeyboardKeys.v },
   [ToolName.ellipse]: { secondaryKey: KeyboardKeys.o },
   [ToolName.frame]: { secondaryKey: KeyboardKeys.f },

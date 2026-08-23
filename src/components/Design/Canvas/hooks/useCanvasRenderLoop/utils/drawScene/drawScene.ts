@@ -37,6 +37,7 @@ import { drawStarRatioHandleLayer } from './drawStarRatioHandleLayer';
 import { drawVectorAlignmentGuide } from './drawVectorAlignmentGuide';
 import { drawVectorEditHandlesLayer } from './drawVectorEditHandlesLayer/drawVectorEditHandlesLayer';
 import { drawVectorLasso } from './drawVectorLasso';
+import { drawVectorCutPreview } from './drawVectorCutPreview';
 import { drawVectorPaintHoverPreview } from './drawVectorPaintHoverPreview';
 import { drawVertexCountHandlesLayer } from './drawVertexCountHandlesLayer';
 import { getPathOutlineStyles } from './getPathOutlineStyles';
@@ -189,6 +190,7 @@ export const drawScene = (
   drawVectorAlignmentGuide(gl, program, buffer, refs.vectorAlignmentGuideRef.current, clientWidth, clientHeight, viewport);
   drawVectorLasso(gl, program, buffer, refs.vectorLassoPathRef.current, clientWidth, clientHeight, viewport);
   drawVectorPaintHoverPreview(gl, program, buffer, nodesById, hoveredVectorPaintFace, clientWidth, clientHeight, viewport);
+  drawVectorCutPreview(gl, program, buffer, refs.vectorCutPreviewRef.current, clientWidth, clientHeight, viewport);
   drawMarquee(gl, program, buffer, marqueeRect, clientWidth, clientHeight, viewport);
   drawSliceDraft(gl, program, buffer, sliceRect, clientWidth, clientHeight, viewport);
 };

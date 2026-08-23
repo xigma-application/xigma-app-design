@@ -20,6 +20,7 @@ export enum ToolName {
   arrow = 'arrow',
   bend = 'bend',
   comment = 'comment',
+  cut = 'cut',
   default = 'default',
   ellipse = 'ellipse',
   frame = 'frame',

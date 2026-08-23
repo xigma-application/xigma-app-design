@@ -159,6 +159,11 @@ export type TVectorMultiSelectRotateDragState = {
   vertexOrigins: Record<string, TPoint>;
 };
 
+export type TVectorCutHit = { nodeId: string; segmentId: string; t: number };
+
+export type TVectorCutDragState =
+  { hit: TVectorCutHit | null; lineStart: TPoint; status: 'pending' } | { lineStart: TPoint; status: 'dividing' };
+
 export type TSelectionToolRefs = {
   dragStateRef: RefObject<TDragState | null>;
   endpointDragRef: RefObject<TEndpointDragState | null>;
@@ -169,6 +174,7 @@ export type TSelectionToolRefs = {
   resizeDragRef: RefObject<TResizeDragState | null>;
   starRatioDragRef: RefObject<TStarRatioDragState | null>;
   starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>;
+  vectorCutDragRef: RefObject<TVectorCutDragState | null>;
   vectorHandleDragRef: RefObject<TVectorHandleDragState | null>;
   vectorMarqueeModeRef: RefObject<TVectorMarqueeMode | null>;
   vectorMarqueeStartRef: RefObject<TPoint | null>;

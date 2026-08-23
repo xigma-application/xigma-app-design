@@ -24,5 +24,5 @@ export const TOOLS: TVectorEditTool[] = [
   { icon: 'LassoTool', labelKey: `${translationNameSpace}.tool.lasso`, shortcut: ['Q'], toolName: ToolName.lasso },
   { icon: 'PaintTool', labelKey: `${translationNameSpace}.tool.paint`, shortcut: [SHIFT, 'B'], toolName: ToolName.paint },
   { icon: 'BendTool', labelKey: `${translationNameSpace}.tool.bend`, shortcut: [CONTROL], toolName: ToolName.bend },
-  { icon: 'CutTool', labelKey: `${translationNameSpace}.tool.cut`, shortcut: ['X'] },
+  { icon: 'CutTool', labelKey: `${translationNameSpace}.tool.cut`, shortcut: ['X'], toolName: ToolName.cut },
 ];

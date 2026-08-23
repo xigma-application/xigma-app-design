@@ -21,6 +21,7 @@ import { continueRotateDrag } from './continueRotateDrag/continueRotateDrag';
 import { continueStarCornerRadiusDrag } from './continueStarCornerRadiusDrag';
 import { continueStarRatioDrag } from './continueStarRatioDrag';
 import { continueStarVertexCountDrag } from './continueStarVertexCountDrag';
+import { continueVectorCutDrag } from './continueVectorCutDrag/continueVectorCutDrag';
 import { continueVectorHandleDrag } from './continueVectorHandleDrag';
 import { continueVectorLassoDrag } from './continueVectorLassoDrag';
 import { continueVectorMarqueeDrag } from './continueVectorMarqueeDrag';
@@ -63,6 +64,7 @@ export const handlePointerMove = (
   continueVectorMultiSelectResizeDrag(canvas, event, dispatch, canvasRefs.vectorMultiSelectResizeDragRef);
   continueVectorMultiSelectRotateDrag(canvas, event, dispatch, canvasRefs.vectorMultiSelectRotateDragRef);
   continueVectorSegmentBendDrag(canvas, event, dispatch, canvasRefs, selectionRefs.vectorSegmentBendDragRef, setClassName);
+  continueVectorCutDrag(canvas, event, canvasRefs, selectionRefs.vectorCutDragRef);
   continueVectorMarqueeDrag(canvas, event, canvasRefs, selectionRefs.vectorMarqueeStartRef, selectionRefs.vectorMarqueeModeRef);
   resolveVectorIdleHover(canvas, event, canvasRefs, setClassName);
 };

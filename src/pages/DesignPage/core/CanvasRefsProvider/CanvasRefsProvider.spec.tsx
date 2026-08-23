@@ -47,6 +47,7 @@ describe('CanvasRefsProvider behaviors', () => {
       snappedVectorHandleRef: { current: null },
       starCornerRadiusDragRef: { current: null },
       vectorAlignmentGuideRef: { current: null },
+      vectorCutPreviewRef: { current: null },
       vectorLassoPathRef: { current: null },
       vectorMultiDragRef: { current: null },
       vectorMultiSelectBoxRef: { current: null },

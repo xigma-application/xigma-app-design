@@ -11,6 +11,7 @@ import {
   TSelectionToolRefs,
   TStarRatioDragState,
   TStarVertexCountDragState,
+  TVectorCutDragState,
   TVectorHandleDragState,
   TVectorMarqueeMode,
   TVectorSegmentBendDragState,
@@ -28,6 +29,7 @@ export const useSelectionToolRefs = (): TSelectionToolRefs => {
   const resizeDragRef = useRef<TResizeDragState | null>(null);
   const starRatioDragRef = useRef<TStarRatioDragState | null>(null);
   const starVertexCountDragRef = useRef<TStarVertexCountDragState | null>(null);
+  const vectorCutDragRef = useRef<TVectorCutDragState | null>(null);
   const vectorHandleDragRef = useRef<TVectorHandleDragState | null>(null);
   const vectorMarqueeModeRef = useRef<TVectorMarqueeMode | null>(null);
   const vectorMarqueeStartRef = useRef<TPoint | null>(null);
@@ -46,6 +48,7 @@ export const useSelectionToolRefs = (): TSelectionToolRefs => {
       resizeDragRef,
       starRatioDragRef,
       starVertexCountDragRef,
+      vectorCutDragRef,
       vectorHandleDragRef,
       vectorMarqueeModeRef,
       vectorMarqueeStartRef,

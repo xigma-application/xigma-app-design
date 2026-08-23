@@ -89,6 +89,10 @@ export type TVectorMultiSelectBox = {
   selectionKey: string;
 };
 
+export type TVectorCutCrossing = { nodeId: string; point: TPoint; segmentId: string; t: number };
+
+export type TVectorCutPreview = { crossings: TVectorCutCrossing[]; lineEnd: TPoint; lineStart: TPoint };
+
 export type TCanvasRefs = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>;
@@ -121,6 +125,7 @@ export type TCanvasRefs = {
   snappedVectorHandleRef: RefObject<TVectorHandleHover | null>;
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>;
   vectorAlignmentGuideRef: RefObject<TVectorAlignmentGuide | null>;
+  vectorCutPreviewRef: RefObject<TVectorCutPreview | null>;
   vectorLassoPathRef: RefObject<TPoint[] | null>;
   vectorMultiDragRef: RefObject<TVectorMultiDragState | null>;
   vectorMultiSelectBoxRef: RefObject<TVectorMultiSelectBox | null>;

@@ -14,6 +14,7 @@ import {
   TPolygonCornerRadiusDragState,
   TSliceDraft,
   TStarCornerRadiusDragState,
+  TVectorCutPreview,
   TVectorHandleHover,
   TVectorMultiSelectBox,
   TVectorPaintFaceHover,
@@ -62,6 +63,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const snappedVectorHandleRef = useRef<TVectorHandleHover | null>(null);
   const starCornerRadiusDragRef = useRef<TStarCornerRadiusDragState | null>(null);
   const vectorAlignmentGuideRef = useRef<TVectorAlignmentGuide | null>(null);
+  const vectorCutPreviewRef = useRef<TVectorCutPreview | null>(null);
   const vectorLassoPathRef = useRef<TPoint[] | null>(null);
   const vectorMultiDragRef = useRef<TVectorMultiDragState | null>(null);
   const vectorMultiSelectBoxRef = useRef<TVectorMultiSelectBox | null>(null);
@@ -101,6 +103,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       snappedVectorHandleRef,
       starCornerRadiusDragRef,
       vectorAlignmentGuideRef,
+      vectorCutPreviewRef,
       vectorLassoPathRef,
       vectorMultiDragRef,
       vectorMultiSelectBoxRef,

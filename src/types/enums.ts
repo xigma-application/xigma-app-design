@@ -22,6 +22,7 @@ export enum KeyboardKeys {
   shift = 'Shift',
   t = 'KeyT',
   v = 'KeyV',
+  x = 'KeyX',
   z = 'KeyZ',
 }
 

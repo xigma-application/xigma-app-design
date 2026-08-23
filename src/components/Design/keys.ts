@@ -8,6 +8,7 @@ import { ToolName } from 'types/design/enums';
 export const KEYBOARD_SHORTCUTS: TKeyboardShortcuts = {
   [ToolName.arrow]: [SHIFT, 'L'],
   [ToolName.comment]: ['C'],
+  [ToolName.cut]: ['X'],
   [ToolName.default]: ['V'],
   [ToolName.ellipse]: ['O'],
   [ToolName.frame]: ['F'],

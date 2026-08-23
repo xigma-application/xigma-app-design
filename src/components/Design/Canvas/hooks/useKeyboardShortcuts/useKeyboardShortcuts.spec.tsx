@@ -234,6 +234,20 @@ describe('useKeyboardShortcuts behaviors', () => {
     expect(store.getState().design.activeTool).toBe(ToolName.comment);
   });
 
+  it('should switch to the cut tool on "X"', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyX' });
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.cut);
+  });
+
   it('should switch to the media tool on "Cmd+Shift+K" (the CONTROL_PRIMARY_KEY resolves to meta on macOS, mocked for this suite)', () => {
     // mock
     const store = createTestStore();

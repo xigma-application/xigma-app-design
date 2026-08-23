@@ -28,6 +28,7 @@ import { armStarRatioOnPointerDown } from '../armStarRatioOnPointerDown';
 import { armStarVertexCountOnPointerDown } from '../armStarVertexCountOnPointerDown';
 import { armVectorBendSegmentOnPointerDown } from '../armVectorBendSegmentOnPointerDown';
 import { armVectorCornerHandleOnPointerDown } from '../armVectorCornerHandleOnPointerDown';
+import { armVectorCutOnPointerDown } from '../armVectorCutOnPointerDown';
 import { armVectorHandleOnPointerDown } from '../armVectorHandleOnPointerDown/armVectorHandleOnPointerDown';
 import { armVectorLassoOnPointerDown } from '../armVectorLassoOnPointerDown/armVectorLassoOnPointerDown';
 import { armVectorMarqueeOnPointerDown } from '../armVectorMarqueeOnPointerDown';
@@ -1100,6 +1101,82 @@ describe('armVectorPaintOnPointerDown', () => {
     // result
     expect(armVectorPaintOnPointerDown(ctx)).toBeUndefined();
     expect(ctx.dispatch).not.toHaveBeenCalled();
+  });
+});
+
+describe('armVectorCutOnPointerDown', () => {
+  afterEach(() => {
+    store.dispatch(setVectorEditingNodeIds([]));
+  });
+
+  it('should arm a pending cut drag with the hit when a segment is hit, with Cut active', () => {
+    // mock — a(0,0)->b(100,0), clicked at its own midpoint
+    const nodeId = addVectorNode(
+      { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+      { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const selectionRefs = createSelectionToolRefs();
+    const canvasRefs = createCanvasRefs();
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.cut, canvasRefs, point: { x: 50, y: 0 }, selectionRefs });
+
+    // result
+    expect(armVectorCutOnPointerDown(ctx)).toBe(true);
+    expect(ctx.selectionRefs.vectorCutDragRef.current).toMatchObject({
+      hit: { nodeId, segmentId: 's1', t: 0.5 },
+      status: 'pending',
+    });
+    expect(ctx.canvasRefs.vectorCutPreviewRef.current).toEqual({ crossings: [], lineEnd: { x: 50, y: 0 }, lineStart: { x: 50, y: 0 } });
+    expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
+  });
+
+  it('should still arm a pending cut drag, with hit: null, when the click misses every segment — a Divide drag can start from empty space, inside a shape, or anywhere else, not just exactly on a path', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+      { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const selectionRefs = createSelectionToolRefs();
+    const canvasRefs = createCanvasRefs();
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.cut, canvasRefs, point: { x: 500, y: 500 }, selectionRefs });
+
+    // result
+    expect(armVectorCutOnPointerDown(ctx)).toBe(true);
+    expect(ctx.selectionRefs.vectorCutDragRef.current).toEqual({ hit: null, lineStart: { x: 500, y: 500 }, status: 'pending' });
+    expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
+  });
+
+  it('should return undefined when Cut is not the active tool', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+      { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.default, point: { x: 50, y: 0 } });
+
+    // result
+    expect(armVectorCutOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  it('should return undefined when Vector Edit Mode is not active', () => {
+    // before
+    const ctx = createContext({ activeTool: ToolName.cut, point: { x: 50, y: 0 } });
+
+    // result
+    expect(armVectorCutOnPointerDown(ctx)).toBeUndefined();
   });
 });
 
