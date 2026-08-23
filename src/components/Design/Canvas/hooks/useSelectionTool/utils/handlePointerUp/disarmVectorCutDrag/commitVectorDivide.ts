@@ -9,7 +9,7 @@ import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { addCutClosingSegment } from 'utils/canvas/vectorNetwork/cutVectorNetwork/addCutClosingSegment';
+import { addCutClosingSegment } from 'utils/canvas/vectorNetwork/cutVectorNetwork/addCutClosingSegment/addCutClosingSegment';
 import { bakeVectorNodeRotation } from '../../../../../utils/bakeVectorNodeRotation';
 import { commitVectorCutComponents } from './commitVectorCutComponents';
 import { dispatchAsOneGestureIfMultiNode } from '../../../../../utils/dispatchAsOneGestureIfMultiNode';

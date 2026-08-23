@@ -1,5 +1,5 @@
 // types
-import { TVectorNetworkComponent } from '../types';
+import { TVectorNetworkComponent } from '../../types';
 
 // utils
 import { addCutClosingSegment } from '../addCutClosingSegment';
