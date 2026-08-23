@@ -23,6 +23,7 @@ import { armPolygonVertexCountOnPointerDown } from '../armPolygonVertexCountOnPo
 import { armResizeOnPointerDown } from '../armResizeOnPointerDown';
 import { armRotateOnPointerDown } from '../armRotateOnPointerDown';
 import { armSelectedTextBoundsOnPointerDown } from '../armSelectedTextBoundsOnPointerDown';
+import { armSelectedVectorBoundsOnPointerDown } from '../armSelectedVectorBoundsOnPointerDown';
 import { armStarCornerRadiusOnPointerDown } from '../armStarCornerRadiusOnPointerDown';
 import { armStarRatioOnPointerDown } from '../armStarRatioOnPointerDown';
 import { armStarVertexCountOnPointerDown } from '../armStarVertexCountOnPointerDown';
@@ -222,6 +223,31 @@ const line: TLineNode = {
   x2: 600,
   y1: 500,
   y2: 500,
+};
+
+const vectorNode: TVectorNode = {
+  fillColor: null,
+  filledFaceKeys: [],
+  id: 'vector-1',
+  name: 'Vector',
+  parentId: null,
+  rotation: 0,
+  segments: {
+    s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+    s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+    s3: { endId: 'v4', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+    s4: { endId: 'v1', id: 's4', startId: 'v4', tangentEnd: null, tangentStart: null },
+  },
+  strokeColor: '#000000',
+  strokeWidth: 1,
+  type: NodeType.vector,
+  vertexHandleModes: {},
+  vertices: {
+    v1: { id: 'v1', x: 0, y: 0 },
+    v2: { id: 'v2', x: 100, y: 0 },
+    v3: { id: 'v3', x: 100, y: 100 },
+    v4: { id: 'v4', x: 0, y: 100 },
+  },
 };
 
 describe('armPathOffsetOnPointerDown', () => {
@@ -594,6 +620,39 @@ describe('armSelectedTextBoundsOnPointerDown', () => {
 
     // result
     expect(armSelectedTextBoundsOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.selectionRefs.dragStateRef.current).toBeNull();
+  });
+});
+
+describe('armSelectedVectorBoundsOnPointerDown', () => {
+  it('should arm the hit drag and return true when the point lands inside a selected vector box, past its contour', () => {
+    // mock — armDrag reads node origins from the real store, so the selected node must exist there
+    const nodeId = addVectorNode(vectorNode.segments, vectorNode.vertices);
+    const storedVector = store.getState().design.nodes[nodeId] as TVectorNode;
+
+    // before — dead center of the unfilled square, well past its contour
+    const ctx = createContext({ point: { x: 50, y: 50 }, selectedNodes: [storedVector] });
+
+    // result
+    expect(armSelectedVectorBoundsOnPointerDown(ctx)).toBe(true);
+    expect(ctx.selectionRefs.dragStateRef.current).not.toBeNull();
+  });
+
+  it('should return undefined when shift is held', () => {
+    // before
+    const ctx = createContext({ event: pointerEvent({ shiftKey: true }), point: { x: 50, y: 50 }, selectedNodes: [vectorNode] });
+
+    // result
+    expect(armSelectedVectorBoundsOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.selectionRefs.dragStateRef.current).toBeNull();
+  });
+
+  it('should return undefined when the point misses the vector bounding box', () => {
+    // before
+    const ctx = createContext({ point: { x: 900, y: 900 }, selectedNodes: [vectorNode] });
+
+    // result
+    expect(armSelectedVectorBoundsOnPointerDown(ctx)).toBeUndefined();
     expect(ctx.selectionRefs.dragStateRef.current).toBeNull();
   });
 });

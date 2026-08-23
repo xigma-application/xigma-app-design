@@ -1641,6 +1641,24 @@ including the live-reported bugs behind rows 267–269 below, lives in `__test-c
 | 280 | Divide: an isolated crossing (drag enters a face but never crosses back out) leaves any genuinely untouched sibling face's fill key byte-identical, while the touched face's own fill is gone                                                                                                                              |  ✅  |    ✅ `cut.spec.ts`    |
 | 281 | Divide: on a 3-band node, a cut that cleanly splits only the top band leaves a genuinely untouched third (bottom) band's fill key byte-identical, while the middle band — never entered directly, but collaterally severed at its shared boundary with the top band — loses its own fill                                   |  ✅  |    ✅ `cut.spec.ts`    |
 
+## Vector node selection (Move tool)
+
+A vector node's plain-click/hover hit-test (`getNodeAtPoint.ts` → `isPointInVectorRegions.ts` +
+`isPointNearVectorPath.ts`) used to collide across its **entire derived face area**, filled or not
+— so clicking dead center of a bare, unpainted outline selected it, even though nothing was
+rendered there. Fixed by scoping the interior hit-test to only the faces actually listed in
+`filledFaceKeys` (reusing `getVectorFillLoopKeyAtPoint.ts`, the same lookup the Paint tool itself
+uses) — an unfilled region now only collides on its own contour (`isPointNearVectorPath.ts`,
+unchanged). This does not apply once a vector is already selected: `armSelectedVectorBoundsOnPointerDown.ts`
+(new, mirrors `armSelectedTextBoundsOnPointerDown.ts`) still arms a whole-bounding-box drag for a
+single already-selected vector node, so an existing selection stays fully draggable from anywhere
+in its box, contour or not.
+
+| #   | Scenario                                                                                                | Unit |          E2E           |
+| --- | -------------------------------------------------------------------------------------------------------- | :--: | :--------------------: |
+| 282 | Clicking inside an unfilled vector node's bounding box, past its own contour, does not select it          |  ✅  | ✅ `selection.spec.ts` |
+| 283 | A selected vector node can be dragged from anywhere in its bounding box, even past its own contour         |  ✅  | ✅ `selection.spec.ts` |
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

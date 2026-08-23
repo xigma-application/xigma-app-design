@@ -3,6 +3,8 @@ import { NodeType } from 'types/design/enums';
 import { TVectorNode } from 'types/design/types';
 
 // utils
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
 import { isPointInVectorRegions } from '../isPointInVectorRegions';
 
 const buildNode = (segments: TVectorNode['segments'], vertices: TVectorNode['vertices']): TVectorNode => ({
@@ -29,15 +31,22 @@ const triangle = buildNode(
   { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 10, y: 0 }, c: { id: 'c', x: 0, y: 10 } },
 );
 
+const filledTriangle: TVectorNode = { ...triangle, filledFaceKeys: [getVectorFillLoopKey(deriveVectorFaces(triangle)[0].pieceKeys)] };
+
 describe('isPointInVectorRegions', () => {
-  it('should return true for a point inside a closed triangular region', () => {
-    // result
-    expect(isPointInVectorRegions({ x: 2, y: 2 }, triangle)).toBe(true);
+  it('should return false for a point inside a closed but unfilled region', () => {
+    // result — an unfilled region only collides on its contour, not its interior
+    expect(isPointInVectorRegions({ x: 2, y: 2 }, triangle)).toBe(false);
   });
 
-  it('should return false for a point outside every closed region', () => {
+  it('should return true for a point inside a filled region', () => {
     // result
-    expect(isPointInVectorRegions({ x: 20, y: 20 }, triangle)).toBe(false);
+    expect(isPointInVectorRegions({ x: 2, y: 2 }, filledTriangle)).toBe(true);
+  });
+
+  it('should return false for a point outside every filled region', () => {
+    // result
+    expect(isPointInVectorRegions({ x: 20, y: 20 }, filledTriangle)).toBe(false);
   });
 
   it('should always return false for a node with no closed regions (an open path)', () => {

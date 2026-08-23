@@ -2496,6 +2496,21 @@ model). Every other caller of the old `TPoint[][]` shape (`isPointInVectorRegion
 `deriveVectorFaces(node).find((face) => isPointInPolygonVertices(point, face.points))?.key ?? null`, one
 face can ever match since planar faces from a half-edge walk never overlap.
 
+**Later fix — `isPointInVectorRegions.ts` originally kept testing every `deriveVectorFaces` region
+regardless of `filledFaceKeys`**, so the outer Selection tool's plain-click hit-test (`getNodeAtPoint.ts`)
+still collided across a whole *unpainted* face's interior, not just its contour — a real reported UX bug
+(a bare, unfilled outline was fully clickable inside, not just on its stroke). Fixed by rewriting
+`isPointInVectorRegions.ts` to reuse `getVectorFillLoopKeyAtPoint.ts` (the exact same "am I inside an
+actually-painted loop" lookup the Paint tool itself uses) instead of `deriveVectorFaces` +
+`isPointInPolygonVertices` directly — an unfilled region now only ever collides via
+`isPointNearVectorPath.ts`'s contour tolerance test, never its interior. This one is deliberately **not**
+extended to an already-selected vector: `armSelectedVectorBoundsOnPointerDown.ts`
+(`useSelectionTool/utils/handlePointerDown/armResolvers/`, new) mirrors
+`armSelectedTextBoundsOnPointerDown.ts` — once a single vector node is the current selection, its whole
+AABB (`isPointInSelectedVectorBounds.ts`, rotation-aware the same way the text version is) stays
+draggable, contour or not, exactly like a selected text node's fixed box (§10 of
+`selection-and-manipulation.md`).
+
 **New vector networks now default to `fillColor: VECTOR_FILL` instead of `null`**
 (`startNewVectorNetwork.ts`) — a real, if minimal, scoping decision: there is still no fill-color-picker
 UI anywhere in the app, so `filledFaceKeys` toggling would have had zero visible effect against a `null`

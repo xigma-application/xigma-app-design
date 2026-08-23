@@ -13,6 +13,11 @@ import { store } from 'store';
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
+import { TVectorNode } from 'types/design/types';
+
+// utils
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
 
 const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
   const canvas = document.createElement('canvas');
@@ -25,27 +30,47 @@ const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
 const doubleClickEvent = (x: number, y: number): MouseEvent => new MouseEvent('dblclick', { clientX: x, clientY: y });
 
 const addTriangleVectorNode = (rotation = 0): string => {
+  const segments: TVectorNode['segments'] = {
+    ab: { endId: 'b', id: 'ab', startId: 'a', tangentEnd: null, tangentStart: null },
+    bc: { endId: 'c', id: 'bc', startId: 'b', tangentEnd: null, tangentStart: null },
+    ca: { endId: 'a', id: 'ca', startId: 'c', tangentEnd: null, tangentStart: null },
+  };
+  const vertices: TVectorNode['vertices'] = {
+    a: { id: 'a', x: 2000, y: 2000 },
+    b: { id: 'b', x: 2050, y: 2000 },
+    c: { id: 'c', x: 2025, y: 2050 },
+  };
+
+  // its interior only counts as a hit once it's actually painted, matching a real drawn-then-filled shape
+  const unpaintedNode: TVectorNode = {
+    fillColor: '#ff0000',
+    filledFaceKeys: [],
+    id: 'triangle-face-lookup',
+    name: 'Vector',
+    parentId: null,
+    rotation: 0,
+    segments,
+    strokeColor: '#000000',
+    strokeWidth: 1,
+    type: NodeType.vector,
+    vertexHandleModes: {},
+    vertices,
+  };
+  const [face] = deriveVectorFaces(unpaintedNode);
+
   store.dispatch(
     addNode({
       fillColor: '#ff0000',
-      filledFaceKeys: [],
+      filledFaceKeys: [getVectorFillLoopKey(face.pieceKeys)],
       name: 'Vector',
       parentId: null,
       rotation,
-      segments: {
-        ab: { endId: 'b', id: 'ab', startId: 'a', tangentEnd: null, tangentStart: null },
-        bc: { endId: 'c', id: 'bc', startId: 'b', tangentEnd: null, tangentStart: null },
-        ca: { endId: 'a', id: 'ca', startId: 'c', tangentEnd: null, tangentStart: null },
-      },
+      segments,
       strokeColor: '#000000',
       strokeWidth: 1,
       type: NodeType.vector,
       vertexHandleModes: {},
-      vertices: {
-        a: { id: 'a', x: 2000, y: 2000 },
-        b: { id: 'b', x: 2050, y: 2000 },
-        c: { id: 'c', x: 2025, y: 2050 },
-      },
+      vertices,
     }),
   );
 

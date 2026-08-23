@@ -219,3 +219,54 @@ test('a selected text node can be dragged from anywhere in its fixed box, even p
 
   expect(afterDrag.equals(selected)).toBe(false);
 });
+
+test('clicking inside an unfilled vector node, past its own contour, does not select it', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-selection-vector-empty-area');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawVectorPath([
+    { x: 700, y: 200 },
+    { x: 850, y: 200 },
+    { x: 850, y: 350 },
+    { x: 700, y: 350 },
+    { x: 700, y: 200 }, // close the loop
+  ]);
+  await designPage.selectTool('default'); // exit vector edit mode
+  await designPage.click(1500, 700); // deselect — empty canvas
+  const baseline = await designPage.canvas.screenshot();
+
+  await designPage.click(775, 275); // dead center of the unfilled square, well past its contour
+  const afterClick = await designPage.canvas.screenshot();
+
+  expect(afterClick.equals(baseline)).toBe(true);
+});
+
+test('a selected vector node can be dragged from anywhere in its bounding box, even past its own contour', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-selection-vector-drag-empty-area');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawVectorPath([
+    { x: 700, y: 200 },
+    { x: 850, y: 200 },
+    { x: 850, y: 350 },
+    { x: 700, y: 350 },
+    { x: 700, y: 200 },
+  ]);
+  await designPage.selectTool('default');
+  await designPage.click(1500, 700); // deselect
+
+  await designPage.click(700, 275); // select it by clicking directly on its left edge (contour)
+  const selected = await designPage.canvas.screenshot();
+
+  // drag from deep inside the box, past its own contour — must still move the node
+  await designPage.pointerDown(775, 275);
+  await designPage.pointerMove(875, 375);
+  await designPage.pointerUp();
+  const afterDrag = await designPage.canvas.screenshot();
+
+  expect(afterDrag.equals(selected)).toBe(false);
+});

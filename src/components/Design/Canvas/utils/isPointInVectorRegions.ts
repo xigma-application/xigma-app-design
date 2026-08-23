@@ -3,8 +3,7 @@ import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
-import { isPointInPolygonVertices } from './isPointInPolygonVertices';
+import { getVectorFillLoopKeyAtPoint } from 'utils/canvas/vectorNetwork/getVectorFillLoopKeyAtPoint';
 
 export const isPointInVectorRegions = (point: TPoint, node: TVectorNode): boolean =>
-  deriveVectorFaces(node).some((face) => isPointInPolygonVertices(point, face.points));
+  getVectorFillLoopKeyAtPoint(node, point) !== null;

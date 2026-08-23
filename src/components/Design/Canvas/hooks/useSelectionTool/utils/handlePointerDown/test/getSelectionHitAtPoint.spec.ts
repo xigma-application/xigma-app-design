@@ -69,25 +69,25 @@ describe('getSelectionHitAtPoint', () => {
     expect(hit?.id).toBe(idA);
   });
 
-  it('should null out a hit on the interior of the node currently open in Vector Edit Mode', () => {
-    // mock — dead center of a closed 100x100 square
+  it('should null out a hit on the contour of the node currently open in Vector Edit Mode', () => {
+    // mock — left edge of a closed 100x100 square
     const idA = addClosedSquareVectorNode(200, 200, 100);
 
     store.dispatch(setVectorEditingNodeIds([idA]));
 
     // action
-    const hit = getSelectionHitAtPoint({ x: 250, y: 250 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+    const hit = getSelectionHitAtPoint({ x: 200, y: 250 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
 
     // result
     expect(hit).toBeNull();
   });
 
   it('should still return a hit on that same vector node when it is not the one being edited', () => {
-    // mock
+    // mock — a point on the square's own contour, since an unfilled region only collides on its outline
     const idA = addClosedSquareVectorNode(400, 200, 100);
 
     // action — no setVectorEditingNodeIds dispatched
-    const hit = getSelectionHitAtPoint({ x: 450, y: 250 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+    const hit = getSelectionHitAtPoint({ x: 400, y: 250 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
 
     // result
     expect(hit?.id).toBe(idA);
