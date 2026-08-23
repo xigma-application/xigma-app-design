@@ -304,7 +304,7 @@ test('the canvas-drawn selection highlight on a rotated node disappears once the
   expect(selectedAll.equals(collapsed)).toBe(false);
 });
 
-test('double-clicking a selected text node past its rendered content (but inside its fixed box) does not enter edit mode', async ({
+test('double-clicking a selected text node past its rendered content (but inside its fixed box) never enters edit mode, same as a single plain click there', async ({
   page,
 }) => {
   const designPage = new DesignPage(page);
@@ -317,16 +317,53 @@ test('double-clicking a selected text node past its rendered content (but inside
   await designPage.click(1550, 600); // commit
 
   await designPage.click(905, 310); // select it, on the rendered glyphs
+
+  // deep inside the box, far from "HI" — entering edit mode requires actually hitting the glyphs;
+  // each half of the double-click also deselects on its own now (the click-past-content deselect
+  // above), so the only thing left to prove here is that no edit overlay ever appears in between
+  await designPage.doubleClick(1200, 450);
+  await designPage.pointerMove(1500, 700); // neutral resting point, avoids hover-outline artifacts
+  const afterDoubleClick = await designPage.canvas.screenshot();
+
+  // reference: the identical scenario, but a single plain click instead of a double-click — if the
+  // double-click had entered edit mode even briefly, its own overlay/caret would render differently
+  await designPage.goto('e2e-test-edit-text-selected-bounds-reference-single-click');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawTextBox(900, 300, 1300, 500);
+  await designPage.typeText('HI');
+  await designPage.click(1550, 600);
+
+  await designPage.click(905, 310);
+  await designPage.click(1200, 450);
+  await designPage.pointerMove(1500, 700);
+  const afterSingleClick = await designPage.canvas.screenshot();
+
+  expect(afterDoubleClick.equals(afterSingleClick)).toBe(true);
+});
+
+test('clicking (without dragging) a selected text node past its rendered content deselects it, same as missing the box entirely', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-selection-text-click-deselect');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawTextBox(900, 300, 1300, 500);
+  await designPage.typeText('HI');
+  await designPage.click(1550, 600); // commit
+
+  await designPage.click(905, 310); // select it, on the rendered glyphs
   await designPage.pointerMove(1500, 700); // neutral resting point, avoids hover-outline artifacts
   const selected = await designPage.canvas.screenshot();
 
-  // deep inside the box, far from "HI" — entering edit mode requires actually hitting the glyphs,
-  // so this double-click must have no visible effect at all: no edit overlay, no content change
-  await designPage.doubleClick(1200, 450);
-  await designPage.pointerMove(1500, 700); // same neutral resting point as above
-  const afterDoubleClick = await designPage.canvas.screenshot();
+  // a plain click (no drag) deep inside the box, past "HI" — must deselect, not just sit there
+  await designPage.click(1200, 450);
+  await designPage.pointerMove(1500, 700);
+  const afterClick = await designPage.canvas.screenshot();
 
-  expect(afterDoubleClick.equals(selected)).toBe(true);
+  expect(afterClick.equals(selected)).toBe(false);
 });
 
 test('clicking a point on an upside-down (180-degree rotated) text box places the caret there, not always at the end', async ({ page }) => {

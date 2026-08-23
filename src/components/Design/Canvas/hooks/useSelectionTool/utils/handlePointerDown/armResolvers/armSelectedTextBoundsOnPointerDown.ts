@@ -2,21 +2,19 @@
 import { TArmContext } from '../types';
 
 // utils
-import { armHitDrag } from '../armHitDrag';
+import { armGroupBoundsDrag } from '../armGroupBoundsDrag';
 import { isPointInSelectedTextBounds } from '../../isPointInSelectedTextBounds';
 
 export const armSelectedTextBoundsOnPointerDown = ({
   canvas,
   currentSelection,
-  dispatch,
   event,
   point,
   selectedNodes,
   selectionRefs,
 }: TArmContext): true | undefined => {
   if (!event.shiftKey && isPointInSelectedTextBounds(point, selectedNodes)) {
-    armHitDrag(canvas, event, dispatch, selectionRefs.dragStateRef, selectedNodes[0], currentSelection, selectedNodes, point);
-
+    armGroupBoundsDrag(canvas, event, selectionRefs.dragStateRef, currentSelection, point);
     return true;
   }
 };

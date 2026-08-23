@@ -554,7 +554,17 @@ something (spawns the edit overlay) even over empty space. Fixed by dropping the
 edit mode now always requires actually hitting the rendered glyphs, selected or not, matching every other
 double-click case in this section (#58, #157 below). `isPointInSelectedTextBounds.ts` itself is
 untouched and still backs the _drag_ fallback (`armSelectedTextBoundsOnPointerDown.ts`, #38-#41 above) —
-only entering edit mode tightened, not moving an already-selected box. `TextEditOverlay.tsx` seeds the `contentEditable` div's
+only entering edit mode tightened, not moving an already-selected box.
+
+**Second later fix — the drag fallback itself (`armSelectedTextBoundsOnPointerDown.ts`) got the same
+`pendingClickAction: 'deselect'` treatment as its vector equivalent** (§"Vector node selection (Move
+tool)" below): it now arms via `armGroupBoundsDrag.ts` instead of a plain `armHitDrag.ts` call, so a
+plain click (no drag) landing inside a selected text's fixed box but past its rendered content
+deselects it on release, exactly matching a gap click — a real drag still moves it, unaffected. This
+also means each half of a `dblclick` on such a point deselects on its own now; #59 below only proves
+no edit overlay ever briefly appears in between (compared against an identical single-click reference,
+not the pre-click "selected" screenshot, since that screenshot itself changes once the click lands).
+`TextEditOverlay.tsx` seeds the `contentEditable` div's
 initial DOM content from the node's existing `content` (`setEditableTextContent.ts`, the inverse of
 the existing `getEditableTextContent.ts`) and selects all of it via `window.getSelection()`/`Range`
 (`selectEditableTextContent.ts`) — both only run once per edit session, gated on `box`/
@@ -578,21 +588,22 @@ render passes by id, so the live `contentEditable` overlay and its own `drawEdit
 are the only representation on screen — otherwise the stale static glyphs would render underneath
 the live-typed ones.
 
-| #   | Scenario                                                                                                                                      | Unit |            E2E            |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------: |
-| 58  | Double-clicking an unselected text node enters edit mode with all its content selected, so typing replaces it instead of appending            |  ✅  |  ✅ `edit-text.spec.ts`   |
-| 157 | Re-entering edit mode on a multi-line text node selects all of its content, not just the line/word under the double-click point               |  ✅  |  ✅ `edit-text.spec.ts`   |
-| 59  | Double-clicking a selected text node past its rendered content (but inside its fixed box) does not enter edit mode                            |  ✅  |  ✅ `edit-text.spec.ts`   |
-| 60  | Blurring an existing-node edit updates that node's content in place, never adds a duplicate node                                              |  ✅  |             —             |
-| 61  | Clearing all content on an existing node and blurring deletes that node, matching a freshly-drawn empty box never being created               |  ✅  |  ✅ `edit-text.spec.ts`   |
-| 105 | Clearing all content on an existing text-on-path node and blurring deletes both the text node and its bound path node, not just the text      |  ✅  | ✅ `text-on-path.spec.ts` |
-| 62  | The node currently being edited is excluded from normal fill, selection-outline, and hover-outline rendering                                  |  ✅  |             —             |
-| 63  | A rotated, mirrored node being edited keeps rendering its glyphs (`drawEditingText.ts`) at its own rotation/flip                              |  ✅  |  ✅ `edit-text.spec.ts`   |
-| 64  | The canvas-drawn selection highlight/caret (`drawEditingCaretAndSelection.ts`) reacts to the live selection, even on a rotated node           |  ✅  |  ✅ `edit-text.spec.ts`   |
-| 86  | Clicking a point on a rotated or flipped straight-text box places the caret there, not wherever native (unrotated) DOM hit-testing would land |  ✅  |  ✅ `edit-text.spec.ts`   |
-| 91  | Clicking a point on a plain (unrotated, unflipped) straight-text box places the caret there too, instead of exiting edit mode entirely        |  ✅  |  ✅ `edit-text.spec.ts`   |
-| 92  | Double-clicking a word while actively composing straight text selects that word, so typing replaces it instead of colliding with the caret    |  ✅  |  ✅ `edit-text.spec.ts`   |
-| 93  | Double-clicking a word inside a live, unsaved re-edit does not fall back to `useTextEditOnDoubleClick.ts`'s stale hit-test and discard it     |  ✅  |  ✅ `edit-text.spec.ts`   |
+| #   | Scenario                                                                                                                                         | Unit |            E2E            |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------ | :--: | :-----------------------: |
+| 58  | Double-clicking an unselected text node enters edit mode with all its content selected, so typing replaces it instead of appending               |  ✅  |  ✅ `edit-text.spec.ts`   |
+| 157 | Re-entering edit mode on a multi-line text node selects all of its content, not just the line/word under the double-click point                  |  ✅  |  ✅ `edit-text.spec.ts`   |
+| 59  | Double-clicking a selected text node past its rendered content (but inside its fixed box) does not enter edit mode                               |  ✅  |  ✅ `edit-text.spec.ts`   |
+| 286 | A plain click (no drag) on an already-selected text node, landing past its own rendered content, deselects it — same as missing the box entirely |  ✅  |  ✅ `edit-text.spec.ts`   |
+| 60  | Blurring an existing-node edit updates that node's content in place, never adds a duplicate node                                                 |  ✅  |             —             |
+| 61  | Clearing all content on an existing node and blurring deletes that node, matching a freshly-drawn empty box never being created                  |  ✅  |  ✅ `edit-text.spec.ts`   |
+| 105 | Clearing all content on an existing text-on-path node and blurring deletes both the text node and its bound path node, not just the text         |  ✅  | ✅ `text-on-path.spec.ts` |
+| 62  | The node currently being edited is excluded from normal fill, selection-outline, and hover-outline rendering                                     |  ✅  |             —             |
+| 63  | A rotated, mirrored node being edited keeps rendering its glyphs (`drawEditingText.ts`) at its own rotation/flip                                 |  ✅  |  ✅ `edit-text.spec.ts`   |
+| 64  | The canvas-drawn selection highlight/caret (`drawEditingCaretAndSelection.ts`) reacts to the live selection, even on a rotated node              |  ✅  |  ✅ `edit-text.spec.ts`   |
+| 86  | Clicking a point on a rotated or flipped straight-text box places the caret there, not wherever native (unrotated) DOM hit-testing would land    |  ✅  |  ✅ `edit-text.spec.ts`   |
+| 91  | Clicking a point on a plain (unrotated, unflipped) straight-text box places the caret there too, instead of exiting edit mode entirely           |  ✅  |  ✅ `edit-text.spec.ts`   |
+| 92  | Double-clicking a word while actively composing straight text selects that word, so typing replaces it instead of colliding with the caret       |  ✅  |  ✅ `edit-text.spec.ts`   |
+| 93  | Double-clicking a word inside a live, unsaved re-edit does not fall back to `useTextEditOnDoubleClick.ts`'s stale hit-test and discard it        |  ✅  |  ✅ `edit-text.spec.ts`   |
 
 #61/#105's unit coverage (`useCommitTextEdit.spec.tsx`, `handleDeleteNode.spec.ts`) already asserts
 `store.getState().design.nodes`/`rootOrder` exactly, including the path-node cascade specifically —

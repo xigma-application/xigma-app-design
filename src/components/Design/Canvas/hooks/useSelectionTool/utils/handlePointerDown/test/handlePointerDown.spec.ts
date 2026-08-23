@@ -596,8 +596,9 @@ describe('handlePointerDown', () => {
       setClassName,
     );
 
-    // result
-    expect(dragStateRef.current).toMatchObject({ pendingClickAction: null });
+    // result — a whole-node drag is armed (a real drag still moves it); released without moving,
+    // this deselects instead of leaving it selected, since the click missed the rendered content
+    expect(dragStateRef.current).toMatchObject({ pendingClickAction: { kind: 'deselect' } });
     expect(marqueeStartRef.current).toBeNull();
   });
 

@@ -595,16 +595,16 @@ describe('armHitOnPointerDown', () => {
 });
 
 describe('armSelectedTextBoundsOnPointerDown', () => {
-  it('should arm the hit drag and return true when the point lands inside a selected text box', () => {
+  it('should arm a deselect-on-no-move drag and return true when the point lands inside a selected text box', () => {
     // mock — armDrag reads node origins from the real store, so the selected node must exist there
     const storedText = addTextNode(0, 0);
 
     // before
-    const ctx = createContext({ point: { x: 50, y: 50 }, selectedNodes: [storedText] });
+    const ctx = createContext({ currentSelection: [storedText.id], point: { x: 50, y: 50 }, selectedNodes: [storedText] });
 
-    // result
+    // result — released without moving, a miss-past-the-content click deselects, same as a gap click
     expect(armSelectedTextBoundsOnPointerDown(ctx)).toBe(true);
-    expect(ctx.selectionRefs.dragStateRef.current).not.toBeNull();
+    expect(ctx.selectionRefs.dragStateRef.current?.pendingClickAction).toEqual({ kind: 'deselect' });
   });
 
   it('should return undefined when shift is held', () => {
