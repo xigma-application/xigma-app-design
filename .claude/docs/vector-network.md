@@ -3360,6 +3360,21 @@ segment", and two new `ARM_RESOLVERS`-ordering regression tests in `armResolvers
 real resolver array (not just call one resolver function directly, which would pass regardless of order)
 against a resize-corner and a rotate-ring coincidence.
 
+**Update — the resize win-over-vertex rule above needed a carve-out for a degenerate box.** A pre-existing
+e2e test (`vector-edit.spec.ts`, from `8077137`) proved dragging an already-lasso-selected vertex must
+move the whole selection — but a lasso selection isn't restricted to diagonal pairs: two vertices sharing
+an axis (e.g. both at the same `y`) produce a bounding box with zero width or height, whose corner handles
+then coincide with a selected vertex the same way §52's diagonal 2-vertex case does. The reorder above made
+`armVectorMultiSelectResizeOnPointerDown` claim that click too, but resizing a zero-size axis is a
+mathematical no-op — `getAxisScale` (`getVectorMultiSelectResizeTransform.ts`) always returns `1` when
+`boundsSize` is `0`, since its dragged/anchor corner coordinates collapse to the same value — so the drag
+silently did nothing instead of moving the group, regressing the `8077137` guarantee. Fixed by requiring
+`box.bounds.width > 0 && box.bounds.height > 0` before the resize resolver claims the click at all; a
+genuinely diagonal (non-degenerate) 2-vertex box, §52's own case, is unaffected. Rotate was deliberately
+left alone — rotating a collinear pair around their shared center is still a meaningful transform, so
+there's no equivalent no-op to guard against. Unit: new case in `armResolvers.spec.ts`'s
+`armVectorMultiSelectResizeOnPointerDown` block (same-row v1/v2, click on the degenerate "nw"/"sw" corner).
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

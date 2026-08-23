@@ -32,7 +32,8 @@ export const armVectorMultiSelectResizeOnPointerDown = (context: TArmContext): t
         selectedHandles,
         canvasRefs.vectorMultiSelectBoxRef,
       );
-      const handle = box && getVectorMultiSelectResizeHandle(point, box.bounds, viewport, box.rotation);
+      const isResizable = box && box.bounds.width > 0 && box.bounds.height > 0;
+      const handle = isResizable && getVectorMultiSelectResizeHandle(point, box.bounds, viewport, box.rotation);
 
       if (box && handle) {
         armVectorMultiSelectResizeDrag(

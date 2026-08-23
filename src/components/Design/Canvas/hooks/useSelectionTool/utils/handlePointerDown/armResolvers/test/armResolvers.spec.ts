@@ -2124,6 +2124,28 @@ describe('armVectorMultiSelectResizeOnPointerDown', () => {
     expect(armVectorMultiSelectResizeOnPointerDown(ctx)).toBeUndefined();
     expect(ctx.canvasRefs.vectorMultiSelectResizeDragRef.current).toBeNull();
   });
+
+  it('should return undefined for a click on a corner of a zero-height bounding box — a lasso-selected pair of same-row vertices has no meaningful resize on that axis (scale is always locked to 1), so the click must fall through to the vertex resolver and move the selection instead', () => {
+    // mock — v1(900,300), v2(1050,300) both selected: bounds height is 0, so its "nw"/"sw" corners
+    // both coincide exactly with v1's own position
+    const nodeId = addVectorNode(
+      { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      { v1: { id: 'v1', x: 900, y: 300 }, v2: { id: 'v2', x: 1050, y: 300 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+
+    // before
+    const ctx = createContext({ canvasRefs, point: { x: 900, y: 300 } });
+
+    // result
+    expect(armVectorMultiSelectResizeOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.canvasRefs.vectorMultiSelectResizeDragRef.current).toBeNull();
+  });
 });
 
 describe('armVectorMultiSelectRotateOnPointerDown', () => {
