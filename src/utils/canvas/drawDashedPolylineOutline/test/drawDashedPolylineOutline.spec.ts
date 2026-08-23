@@ -23,7 +23,7 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const DASH_LENGTH_PX = 8;
 const DASH_GAP_PX = 6;
 
-// a 100x100 square, traced as an open path — the function must close it itself
+// a 100x100 square, traced as an open path — with isClosed the function must close it itself
 const square = [
   { x: 0, y: 0 },
   { x: 100, y: 0 },
@@ -39,7 +39,19 @@ describe('drawDashedPolylineOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawDashedPolylineOutline(gl, program, buffer, [{ x: 0, y: 0 }], '#0d99ff', 100, 100, IDENTITY_VIEWPORT, DASH_LENGTH_PX, DASH_GAP_PX);
+    drawDashedPolylineOutline(
+      gl,
+      program,
+      buffer,
+      [{ x: 0, y: 0 }],
+      true,
+      '#0d99ff',
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+      DASH_LENGTH_PX,
+      DASH_GAP_PX,
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -61,6 +73,7 @@ describe('drawDashedPolylineOutline', () => {
         { x: 5, y: 5 },
         { x: 5, y: 5 },
       ],
+      true,
       '#0d99ff',
       100,
       100,
@@ -73,14 +86,14 @@ describe('drawDashedPolylineOutline', () => {
     expect(gl.drawArrays).not.toHaveBeenCalled();
   });
 
-  it('should close the path itself, drawing the dashes as one LINES call sized to match the resolved dash count', () => {
+  it('should close the path itself when isClosed is true, drawing the dashes as one LINES call sized to match the resolved dash count', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawDashedPolylineOutline(gl, program, buffer, square, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, DASH_LENGTH_PX, DASH_GAP_PX);
+    drawDashedPolylineOutline(gl, program, buffer, square, true, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, DASH_LENGTH_PX, DASH_GAP_PX);
 
     // result — one LINES call, vertex count derived straight from the buffered data (getDashVertices.ts
     // owns the actual dash-count/spacing math, tested on its own)
@@ -91,6 +104,25 @@ describe('drawDashedPolylineOutline', () => {
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINES, 0, vertices.length / 2);
   });
 
+  it('should leave the path open when isClosed is false, tracing fewer segments (and a shorter perimeter) than the closed version', () => {
+    // mock
+    const glClosed = createGlMock();
+    const glOpen = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawDashedPolylineOutline(glClosed, program, buffer, square, true, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, DASH_LENGTH_PX, DASH_GAP_PX);
+    drawDashedPolylineOutline(glOpen, program, buffer, square, false, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, DASH_LENGTH_PX, DASH_GAP_PX);
+
+    // result — the open path never draws the final square->first-point segment, so it produces
+    // strictly fewer dash vertices than the closed one over the same points
+    const closedVertexCount = (glClosed.bufferData as ReturnType<typeof vi.fn>).mock.calls[0][1].length;
+    const openVertexCount = (glOpen.bufferData as ReturnType<typeof vi.fn>).mock.calls[0][1].length;
+
+    expect(openVertexCount).toBeLessThan(closedVertexCount);
+  });
+
   it('should color the dashes with the given stroke color', () => {
     // mock
     const gl = createGlMock();
@@ -98,7 +130,7 @@ describe('drawDashedPolylineOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawDashedPolylineOutline(gl, program, buffer, square, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, DASH_LENGTH_PX, DASH_GAP_PX);
+    drawDashedPolylineOutline(gl, program, buffer, square, true, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, DASH_LENGTH_PX, DASH_GAP_PX);
 
     // result
     expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), hexToRgbaFloat('#0d99ff'));

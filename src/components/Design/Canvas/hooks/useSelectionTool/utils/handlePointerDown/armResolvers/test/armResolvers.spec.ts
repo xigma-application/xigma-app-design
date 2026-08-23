@@ -39,6 +39,7 @@ import { armVectorMultiSelectResizeOnPointerDown } from '../armVectorMultiSelect
 import { armVectorMultiSelectRotateOnPointerDown } from '../armVectorMultiSelectRotateOnPointerDown';
 import { armVectorPaintOnPointerDown } from '../armVectorPaintOnPointerDown';
 import { armVectorSegmentOnPointerDown } from '../armVectorSegmentOnPointerDown/armVectorSegmentOnPointerDown';
+import { armVectorShapeBuilderOnPointerDown } from '../armVectorShapeBuilderOnPointerDown';
 import { armVectorVertexOnPointerDown } from '../armVectorVertexOnPointerDown/armVectorVertexOnPointerDown';
 import { ARM_RESOLVERS } from '../../constants';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
@@ -2875,5 +2876,87 @@ describe('ARM_RESOLVERS ordering — multi-select box vs. outline vertex point',
     // result
     expect(claimedBy).toBe(armVectorMultiSelectRotateOnPointerDown);
     expect(ctx.canvasRefs.vectorMultiSelectRotateDragRef.current).not.toBeNull();
+  });
+});
+
+describe('armVectorShapeBuilderOnPointerDown', () => {
+  afterEach(() => {
+    store.dispatch(setVectorEditingNodeIds([]));
+  });
+
+  it('should seed the shape-builder path, reset touched faces, set the cursor class, capture the pointer, and return true, when Shape Builder is active and Vector Edit Mode is on', () => {
+    // mock
+    store.dispatch(setVectorEditingNodeIds(['vector-1']));
+
+    const canvasRefs = createCanvasRefs();
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.shapeBuilder, canvasRefs, point: { x: 42, y: 24 } });
+
+    // result
+    expect(armVectorShapeBuilderOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.vectorShapeBuilderPathRef.current).toEqual([{ x: 42, y: 24 }]);
+    expect(canvasRefs.touchedVectorShapeBuilderFacesRef.current).toEqual({});
+    expect(canvasRefs.isVectorShapeBuilderBoxModeRef.current).toBe(false);
+    expect(canvasRefs.isVectorShapeBuilderSubtractRef.current).toBe(false);
+    expect(ctx.setClassName).toHaveBeenCalledWith('add');
+    expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
+  });
+
+  it('should seed touched faces with the face under the click point, even on a plain click with no drag', () => {
+    // mock — vectorNode's own module-level triangle fixture (v1/v2/v3, s1/s2/s3)
+    const nodeId = addVectorNode(vectorNode.segments, vectorNode.vertices);
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    // before — a point inside the triangle
+    const ctx = createContext({ activeTool: ToolName.shapeBuilder, canvasRefs, point: { x: 50, y: 40 } });
+
+    // result
+    expect(armVectorShapeBuilderOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.touchedVectorShapeBuilderFacesRef.current[nodeId].size).toBe(1);
+  });
+
+  it('should record box mode and subtract mode from shift/alt held at pointerdown', () => {
+    // mock
+    store.dispatch(setVectorEditingNodeIds(['vector-1']));
+
+    const canvasRefs = createCanvasRefs();
+
+    // before
+    const ctx = createContext({
+      activeTool: ToolName.shapeBuilder,
+      canvasRefs,
+      event: pointerEvent({ altKey: true, shiftKey: true }),
+      point: { x: 42, y: 24 },
+    });
+
+    // result
+    expect(armVectorShapeBuilderOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.isVectorShapeBuilderBoxModeRef.current).toBe(true);
+    expect(canvasRefs.isVectorShapeBuilderSubtractRef.current).toBe(true);
+  });
+
+  it('should return undefined when Shape Builder is not the active tool', () => {
+    // mock
+    store.dispatch(setVectorEditingNodeIds(['vector-1']));
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.default });
+
+    // result
+    expect(armVectorShapeBuilderOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.canvasRefs.vectorShapeBuilderPathRef.current).toBeNull();
+  });
+
+  it('should return undefined when Vector Edit Mode is not active', () => {
+    // before
+    const ctx = createContext({ activeTool: ToolName.shapeBuilder });
+
+    // result
+    expect(armVectorShapeBuilderOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.canvasRefs.vectorShapeBuilderPathRef.current).toBeNull();
   });
 });

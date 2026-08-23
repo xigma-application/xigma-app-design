@@ -12,6 +12,7 @@ export const drawDashedPolylineOutline = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   points: TPoint[],
+  isClosed: boolean,
   color: string,
   canvasWidth: number,
   canvasHeight: number,
@@ -20,7 +21,11 @@ export const drawDashedPolylineOutline = (
   dashGap: number,
 ): void => {
   if (points.length >= 2) {
-    const segments: TPolylineSegment[] = points.map((point, index) => [point, points[(index + 1) % points.length]]);
+    const segmentCount = isClosed ? points.length : points.length - 1;
+    const segments: TPolylineSegment[] = Array.from({ length: segmentCount }, (_, index) => [
+      points[index],
+      points[(index + 1) % points.length],
+    ]);
     const perimeter = segments.reduce((sum, [start, end]) => sum + Math.hypot(end.x - start.x, end.y - start.y), 0);
 
     if (perimeter !== 0) {

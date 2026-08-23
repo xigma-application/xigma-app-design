@@ -16,6 +16,8 @@ export const getCursorClassName = (activeTool: ToolName): string | null => {
       return 'pen';
     case ToolName.pencil:
       return 'pencil';
+    case ToolName.shapeBuilder:
+      return 'add';
     default:
       return DRAWING_TOOLS.includes(activeTool) ? 'drawing' : null;
   }

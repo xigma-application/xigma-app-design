@@ -43,8 +43,11 @@ import { drawVectorCutHoverPreview } from './drawVectorCutHoverPreview';
 import { drawVectorCutPreview } from './drawVectorCutPreview';
 import { drawVectorPaintHoverPreview } from './drawVectorPaintHoverPreview';
 import { drawVectorSelectedFillPreview } from './drawVectorSelectedFillPreview';
+import { drawVectorShapeBuilderHoverPreview } from './drawVectorShapeBuilderHoverPreview';
+import { drawVectorShapeBuilderPath } from './drawVectorShapeBuilderPath';
 import { drawVertexCountHandlesLayer } from './drawVertexCountHandlesLayer';
 import { getPathOutlineStyles } from './getPathOutlineStyles';
+import { getShapeBuilderPreviewFaces } from './getShapeBuilderPreviewFaces';
 import { hasCornerRadiusDragMoved } from './hasCornerRadiusDragMoved';
 
 export const drawScene = (
@@ -71,6 +74,7 @@ export const drawScene = (
   const nodesById = selectNodes(state);
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
   const hoveredVectorPaintFace = refs.hoveredVectorPaintFaceKeyRef.current;
+  const shapeBuilderPreviewFaces = getShapeBuilderPreviewFaces(refs);
   const hoveredVectorFaceSelect = refs.hoveredVectorFaceSelectRef.current;
   const selectedVectorVertexIds = refs.selectedVectorVertexIdsRef.current;
   const preMarqueeVectorVertexIds = refs.preVectorMarqueeVertexIdsRef.current;
@@ -195,6 +199,27 @@ export const drawScene = (
   drawEditingPathTextHandle(gl, program, buffer, editingTextBox, clientWidth, clientHeight, viewport);
   drawVectorAlignmentGuide(gl, program, buffer, refs.vectorAlignmentGuideRef.current, clientWidth, clientHeight, viewport);
   drawVectorLasso(gl, program, buffer, refs.vectorLassoPathRef.current, clientWidth, clientHeight, viewport);
+  drawVectorShapeBuilderPath(
+    gl,
+    program,
+    buffer,
+    refs.vectorShapeBuilderPathRef.current,
+    refs.isVectorShapeBuilderBoxModeRef.current,
+    clientWidth,
+    clientHeight,
+    viewport,
+  );
+  drawVectorShapeBuilderHoverPreview(
+    gl,
+    program,
+    buffer,
+    nodesById,
+    shapeBuilderPreviewFaces,
+    refs.isVectorShapeBuilderSubtractRef.current,
+    clientWidth,
+    clientHeight,
+    viewport,
+  );
   drawVectorPaintHoverPreview(gl, program, buffer, nodesById, hoveredVectorPaintFace, clientWidth, clientHeight, viewport);
   drawVectorFaceSelectHoverPreview(gl, program, buffer, nodesById, hoveredVectorFaceSelect, clientWidth, clientHeight, viewport);
   drawVectorDraggedFillPreview(gl, program, buffer, nodesById, refs.draggedVectorFillFacesRef.current, clientWidth, clientHeight, viewport);

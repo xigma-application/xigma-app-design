@@ -86,4 +86,39 @@ describe('resolvePieceKeyToUnit', () => {
     // before / result
     expect(resolvePieceKeyToUnit('s1[v:a|v:a]', planarSegments, vertices, new Map())).toBeNull();
   });
+
+  it('should still resolve a piece on one side of a gap, when Shape Builder deleted the middle piece between two crossings — regression for a real live-caught bug (getVectorFillLoopPoints silently returning null for a merged shape)', () => {
+    // mock — "s1" was crossed twice (at x:s2:0 and x:s3:0); the middle piece (s1#1) was since
+    // deleted by a merge, leaving s1#0 (a->x:s2:0) and s1#2 (x:s3:0->b) with a real gap between them
+    const planarSegments = {
+      's1#0': { endId: 'x:s2:0', id: 's1#0', startId: 'a', tangentEnd: null, tangentStart: null },
+      's1#2': { endId: 'b', id: 's1#2', startId: 'x:s3:0', tangentEnd: null, tangentStart: null },
+    };
+    const vertices = { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } };
+
+    // before — the key stored for the surviving piece on the "a" side of the gap
+    const unitA = resolvePieceKeyToUnit('s1[v:a|x:s2:0]', planarSegments, vertices, new Map());
+
+    // result
+    expect(unitA).toEqual({ endId: 'x:s2:0', id: 's1[v:a|x:s2:0]', pieces: [planarSegments['s1#0']], startId: 'a' });
+
+    // before — the key stored for the surviving piece on the "b" side of the gap
+    const unitB = resolvePieceKeyToUnit('s1[x:s3:0|v:b]', planarSegments, vertices, new Map());
+
+    // result
+    expect(unitB).toEqual({ endId: 'b', id: 's1[x:s3:0|v:b]', pieces: [planarSegments['s1#2']], startId: 'x:s3:0' });
+  });
+
+  it('should return null for a boundary pair spanning across a gap (no piece connects the two runs)', () => {
+    // mock — same gapped "s1" as above; a key claiming to span from "a" all the way to "b" can't
+    // resolve, since the middle piece that would have connected them is gone
+    const planarSegments = {
+      's1#0': { endId: 'x:s2:0', id: 's1#0', startId: 'a', tangentEnd: null, tangentStart: null },
+      's1#2': { endId: 'b', id: 's1#2', startId: 'x:s3:0', tangentEnd: null, tangentStart: null },
+    };
+    const vertices = { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } };
+
+    // before / result
+    expect(resolvePieceKeyToUnit('s1[v:a|v:b]', planarSegments, vertices, new Map())).toBeNull();
+  });
 });

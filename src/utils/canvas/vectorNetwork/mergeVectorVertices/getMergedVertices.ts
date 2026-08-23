@@ -1,6 +1,6 @@
 // types
 import { TVectorVertex } from 'types/design/types';
-import { TVectorNetworkData } from './types';
+import { TVectorNetworkData } from '../types';
 
 export const getMergedVertices = (
   sourceNode: TVectorNetworkData,

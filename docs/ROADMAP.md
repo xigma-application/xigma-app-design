@@ -1244,6 +1244,27 @@ Drobniejsze, ale zauważalne różnice względem Figmy, niepowiązane z żadnym 
       wszystkie wierzchołki jakiegoś wypełnionego face'a są aktualnie zaznaczone (dowolną drogą — tym
       klikiem, Lasso, marquee), face zostaje tak samo podświetlony na stałe, nie tylko na hover.
       Pełny opis: `.claude/docs/vector-network.md` §56.
+- [x] **Shape Builder** (`ToolName.shapeBuilder`, skrót `M` w dropdownzie "More" `VectorEditToolbar`) —
+      Figma-owe narzędzie łączące/odejmujące face'e przez realne kasowanie segmentów granicznych, nie
+      tylko przełączanie fillu: przeciągnięcie (freeform albo, z Shift, box) po dwóch+ face'ach usuwa
+      wspólną granicę między nimi i wypełnia powstałą unię; zwykły klik (bez przeciągnięcia) działa tak
+      samo na jednym face'ie; **Alt** odejmuje zamiast łączyć — kasuje tylko *wyłączną* granicę
+      dotkniętego face'a (segmenty niedzielone z żadnym nietkniętym sąsiadem), więc odjęcie jednej
+      połówki podzielonego kształtu nigdy nie narusza granicy drugiej połówki, a face bez sąsiadów
+      (nic do ochrony) traci całą swoją granicę razem z fillem. Rozłączne podsieci wektora (np. dwa
+      osobne, nachodzące na siebie prostokąty w jednym node'ie) scalają się niezależnie bez żadnego
+      specjalnego kodu — segment jest "wewnętrzny"/"wyłączny" tylko względem face'ów, które faktycznie
+      graniczy, więc dwa niepowiązane komponenty nigdy nie dzielą segmentu. Po drodze złapane i
+      naprawione żywo dwa błędy na tle identyfikatorów segmentów po przecięciach (§51's `pieceKeys` to
+      zła baza do kasowania realnych `node.segments` — trzeba operować na surowym, sufiksowanym
+      `face.key`) oraz luka w resolverze fillu po §51 (kasowanie środkowego kawałka realnego segmentu
+      łamało założenie "kawałki zawsze tworzą jeden ciągły łańcuch", naprawione przez
+      `buildVertexRuns.ts` zwracające niezależne, rozłączne biegi zamiast jednej sekwencji). Kursor
+      przełącza się między `add.png`/`remove.png` natychmiast po (nie)trzymaniu Alt, nawet bez ruchu
+      myszy (synthetic-pointermove wzorem istniejącego mechanizmu dla Shift). Freeform ścieżka rysuje
+      się jako otwarta, przerywana linia (trasa A→Z jak ołówkiem), Shift+box jako zamknięty prostokąt —
+      osobny `isClosed` parametr w `drawDashedPolylineOutline.ts`. Pełny opis:
+      `.claude/docs/vector-network.md` §59-60, e2e: `e2e/pages/design/vector-shape-builder.spec.ts`.
 - [ ] menu kontekstowe (prawy klik) na node'ach i na pustym canvasie — Copy/Paste, Duplicate,
       Bring to front/Send to back, Delete itd. — dziś nie istnieje w ogóle
 - [ ] kontrolka zoomu w rogu canvasu (aktualny % + dropdown: Zoom to fit / Zoom to selection /

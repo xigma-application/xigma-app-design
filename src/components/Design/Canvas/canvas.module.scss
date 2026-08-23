@@ -201,5 +201,19 @@
         -webkit-image-set(url('../../../assets/icons/cursors/cut-off.png') 8x) 4 4,
         auto;
     }
+
+    &--add {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/add.png') 8x) 5 4,
+        auto;
+    }
+
+    &--remove {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/remove.png') 8x) 5 4,
+        auto;
+    }
   }
 }

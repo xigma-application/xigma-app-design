@@ -107,6 +107,34 @@ const addVectorNodeWithTangent = (): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
+// a closed triangle, unlike addVectorNode/addVectorNodeWithTangent's open line — Shape Builder
+// hover hit-testing needs a real bounded face to land on
+const addTriangleVectorNode = (): string => {
+  store.dispatch(
+    addNode({
+      fillColor: '#000000',
+      filledFaceKeys: [],
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'v1', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+      },
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { v1: { id: 'v1', x: 3400, y: 700 }, v2: { id: 'v2', x: 3500, y: 700 }, v3: { id: 'v3', x: 3450, y: 800 } },
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 const renderSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>): RefObject<TDraftRect | null> => {
   const refs = createCanvasRefs({ canvasRef });
 
@@ -771,6 +799,79 @@ describe('useSelectionTool behaviors', () => {
 
     // result
     expect(refs.snappedVectorHandleRef.current).toBeNull();
+  });
+
+  it('should re-evaluate the Shape Builder hover immediately when Alt is pressed, without a further pointermove', () => {
+    // mock — triangle spans x:3400-3500, y:700-800; hover the interior at (3450,750)
+    const nodeId = addTriangleVectorNode();
+    const canvasRef = createCanvasRef();
+    const refs = createCanvasRefs({ canvasRef });
+
+    store.dispatch(setActiveTool(ToolName.shapeBuilder));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    // before
+    renderHook(() => useSelectionTool(refs), {
+      wrapper: ({ children }) => (
+        <Provider store={store}>
+          <ClassNamesProvider>{children}</ClassNamesProvider>
+        </Provider>
+      ),
+    });
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 3450, 750));
+    });
+
+    expect(refs.isVectorShapeBuilderSubtractRef.current).toBe(false);
+
+    // action — Alt held, no further pointer movement
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { altKey: true, key: 'Alt' }));
+    });
+
+    // result — subtract mode flips on at the same live hover position
+    expect(refs.isVectorShapeBuilderSubtractRef.current).toBe(true);
+    expect(refs.hoveredVectorShapeBuilderFaceRef.current).toEqual({ faceKey: 's1,s2,s3', nodeId });
+
+    // action — Alt released, still no further pointer movement
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keyup', { altKey: false, key: 'Alt' }));
+    });
+
+    // result — back to add mode at the same hover position
+    expect(refs.isVectorShapeBuilderSubtractRef.current).toBe(false);
+  });
+
+  it('should not react to Alt while Shape Builder is not the active tool', () => {
+    // mock
+    const nodeId = addTriangleVectorNode();
+    const canvasRef = createCanvasRef();
+    const refs = createCanvasRefs({ canvasRef });
+
+    store.dispatch(setActiveTool(ToolName.default));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    // before
+    renderHook(() => useSelectionTool(refs), {
+      wrapper: ({ children }) => (
+        <Provider store={store}>
+          <ClassNamesProvider>{children}</ClassNamesProvider>
+        </Provider>
+      ),
+    });
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 3450, 750));
+    });
+
+    // action — Alt held, but Shape Builder isn't active
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { altKey: true, key: 'Alt' }));
+    });
+
+    // result
+    expect(refs.isVectorShapeBuilderSubtractRef.current).toBe(false);
   });
 
   it('should not react to pointer events while a path-text node is being edited', () => {

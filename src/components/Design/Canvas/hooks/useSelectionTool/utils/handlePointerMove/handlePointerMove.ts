@@ -29,9 +29,11 @@ import { continueVectorMultiDrag } from './continueVectorMultiDrag';
 import { continueVectorMultiSelectResizeDrag } from './continueVectorMultiSelectResizeDrag';
 import { continueVectorMultiSelectRotateDrag } from './continueVectorMultiSelectRotateDrag';
 import { continueVectorSegmentBendDrag } from './continueVectorSegmentBendDrag/continueVectorSegmentBendDrag';
+import { continueVectorShapeBuilderDrag } from './continueVectorShapeBuilderDrag';
 import { continueVectorVertexDrag } from './continueVectorVertexDrag/continueVectorVertexDrag';
 import { resolveVectorCornerHandleDrag } from './resolveVectorCornerHandleDrag';
 import { resolveVectorIdleHover } from './resolveVectorIdleHover';
+import { resolveVectorShapeBuilderHover } from './resolveVectorShapeBuilderHover';
 
 export const handlePointerMove = (
   canvas: HTMLCanvasElement,
@@ -60,6 +62,7 @@ export const handlePointerMove = (
   resolveVectorCornerHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs);
   continueVectorHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   continueVectorLassoDrag(canvas, event, canvasRefs);
+  continueVectorShapeBuilderDrag(canvas, event, canvasRefs, setClassName);
   continueVectorMultiDrag(canvas, event, dispatch, canvasRefs, setClassName);
   continueVectorMultiSelectResizeDrag(canvas, event, dispatch, canvasRefs.vectorMultiSelectResizeDragRef);
   continueVectorMultiSelectRotateDrag(canvas, event, dispatch, canvasRefs.vectorMultiSelectRotateDragRef);
@@ -67,4 +70,5 @@ export const handlePointerMove = (
   continueVectorCutDrag(canvas, event, canvasRefs, selectionRefs.vectorCutDragRef);
   continueVectorMarqueeDrag(canvas, event, canvasRefs, selectionRefs.vectorMarqueeStartRef, selectionRefs.vectorMarqueeModeRef);
   resolveVectorIdleHover(canvas, event, canvasRefs, setClassName);
+  resolveVectorShapeBuilderHover(canvas, event, canvasRefs, setClassName);
 };

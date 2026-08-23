@@ -203,6 +203,27 @@ export class DesignPage {
     await this.pointerUp();
   }
 
+  // same down/move.../up primitive as dragVectorLasso, kept as its own named method since it's a
+  // semantically distinct tool (Shape Builder's freeform sweep, not a selection lasso)
+  async dragVectorShapeBuilder(points: { x: number; y: number }[]): Promise<void> {
+    const [first, ...rest] = points;
+
+    await this.pointerDown(first.x, first.y);
+
+    for (const point of rest) {
+      await this.pointerMove(point.x, point.y);
+    }
+
+    await this.pointerUp();
+  }
+
+  // same primitive, with Alt held for the whole gesture — Shape Builder's subtract mode
+  async altDragVectorShapeBuilder(points: { x: number; y: number }[]): Promise<void> {
+    await this.page.keyboard.down('Alt');
+    await this.dragVectorShapeBuilder(points);
+    await this.page.keyboard.up('Alt');
+  }
+
   async typeText(content: string): Promise<void> {
     await this.page.keyboard.type(content);
   }
@@ -231,13 +252,17 @@ export class DesignPage {
     await this.pointerUp();
   }
 
-  async click(x: number, y: number, options: { shift?: boolean; ctrl?: boolean } = {}): Promise<void> {
+  async click(x: number, y: number, options: { alt?: boolean; ctrl?: boolean; shift?: boolean } = {}): Promise<void> {
     if (options.shift) {
       await this.page.keyboard.down('Shift');
     }
 
     if (options.ctrl) {
       await this.page.keyboard.down('Control');
+    }
+
+    if (options.alt) {
+      await this.page.keyboard.down('Alt');
     }
 
     await this.page.mouse.click(x, y);
@@ -248,6 +273,10 @@ export class DesignPage {
 
     if (options.ctrl) {
       await this.page.keyboard.up('Control');
+    }
+
+    if (options.alt) {
+      await this.page.keyboard.up('Alt');
     }
   }
 

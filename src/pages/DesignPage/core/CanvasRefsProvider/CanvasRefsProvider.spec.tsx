@@ -32,7 +32,10 @@ describe('CanvasRefsProvider behaviors', () => {
       hoveredVectorHandleRef: { current: null },
       hoveredVectorPaintFaceKeyRef: { current: null },
       hoveredVectorSegmentIdRef: { current: null },
+      hoveredVectorShapeBuilderFaceRef: { current: null },
       hoveredVectorVertexIdRef: { current: null },
+      isVectorShapeBuilderBoxModeRef: { current: false },
+      isVectorShapeBuilderSubtractRef: { current: false },
       marqueeRef: { current: null },
       newVectorCutVertexIdsRef: { current: new Set() },
       penDragOriginRef: { current: null },
@@ -52,6 +55,7 @@ describe('CanvasRefsProvider behaviors', () => {
       snappedVectorHandleRef: { current: null },
       starCornerRadiusDragRef: { current: null },
       touchedVectorCutVertexIdsRef: { current: new Set() },
+      touchedVectorShapeBuilderFacesRef: { current: {} },
       vectorAlignmentGuideRef: { current: null },
       vectorCutPreviewRef: { current: null },
       vectorLassoPathRef: { current: null },
@@ -59,6 +63,7 @@ describe('CanvasRefsProvider behaviors', () => {
       vectorMultiSelectBoxRef: { current: null },
       vectorMultiSelectResizeDragRef: { current: null },
       vectorMultiSelectRotateDragRef: { current: null },
+      vectorShapeBuilderPathRef: { current: null },
     });
   });
 

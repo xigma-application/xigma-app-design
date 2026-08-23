@@ -44,6 +44,14 @@ describe('getCursorClassName', () => {
     expect(result).toBe('pencil');
   });
 
+  it('should return "shape-builder" for the Shape Builder tool', () => {
+    // before
+    const result = getCursorClassName(ToolName.shapeBuilder);
+
+    // result
+    expect(result).toBe('add');
+  });
+
   it('should return "drawing" for a tool in DRAWING_TOOLS', () => {
     // before
     const result = getCursorClassName(ToolName.frame);

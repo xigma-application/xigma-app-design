@@ -29,6 +29,7 @@ import { armVectorMultiSelectResizeOnPointerDown } from './armResolvers/armVecto
 import { armVectorMultiSelectRotateOnPointerDown } from './armResolvers/armVectorMultiSelectRotateOnPointerDown';
 import { armVectorPaintOnPointerDown } from './armResolvers/armVectorPaintOnPointerDown';
 import { armVectorSegmentOnPointerDown } from './armResolvers/armVectorSegmentOnPointerDown/armVectorSegmentOnPointerDown';
+import { armVectorShapeBuilderOnPointerDown } from './armResolvers/armVectorShapeBuilderOnPointerDown';
 import { armVectorVertexOnPointerDown } from './armResolvers/armVectorVertexOnPointerDown/armVectorVertexOnPointerDown';
 import { toggleSelectionOnPointerDown } from './armResolvers/toggleSelectionOnPointerDown';
 
@@ -36,6 +37,7 @@ export const ARM_RESOLVERS = [
   armVectorLassoOnPointerDown,
   armBakeVectorRotationOnPointerDown,
   armVectorPaintOnPointerDown,
+  armVectorShapeBuilderOnPointerDown,
   armVectorCutOnPointerDown,
   armVectorHandleOnPointerDown,
   armVectorCornerHandleOnPointerDown,

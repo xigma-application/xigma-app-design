@@ -1790,6 +1790,34 @@ label rather than remembering the previous session's pick.
 | 292 | The "M" / "Shift+W" shortcuts activate Shape builder / Variable width and update which icon the More slot shows |  ✅  | ✅ `vector-edit-more-toolbar.spec.ts` |
 | 293 | Closing Vector Edit Mode resets the More slot back to its plain label, even after a tool was picked             |  ✅  | ✅ `vector-edit-more-toolbar.spec.ts` |
 
+## Shape Builder (freeform merge/subtract of vector faces)
+
+Figma-style Shape Builder: a freeform (or Shift-held box) drag over one or more vector faces
+deletes the boundary segment(s) between the faces it touches and fills the resulting union; a
+plain click (no drag) works the same way on a single face; Alt+drag/click subtracts instead —
+deleting only the touched face's own _exclusive_ boundary (segments not shared with an untouched
+neighbor), so a face fully enclosed by other faces is un-filled with its shared edges intact, while
+an isolated face with nothing to protect has its whole boundary deleted along with its fill.
+Disconnected sub-networks never need special-casing: a segment can only be "interior"/"exclusive"
+relative to faces it actually borders, and two faces in different components never share one, so one
+drag spanning several unrelated shapes merges each independently for free. Full write-up:
+`.claude/docs/vector-network.md` §59 (feature) and §60 (a piece-identity resolver gap this feature's
+mid-segment deletions exposed). E2E here specifically targets real-browser modifier-key threading
+(Alt/Shift reaching the pointer gesture through actual `KeyboardEvent`/`PointerEvent` state, not a
+synthetic unit-test event) and the two live-caught regressions below, both of which unit tests alone
+had already pinned down at the pure-function level (`mergeVectorFaces`/`subtractVectorFaces` specs)
+but had escaped a full real-gesture run once, per [[xigma-e2e-coverage]]'s standing rule for
+modifier-key-dependent canvas behavior.
+
+| #   | Scenario                                                                                                                                            | Unit |                E2E                |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :-------------------------------: |
+| 294 | A freeform drag across a split rectangle's two halves merges them into one face, deleting the shared divider segment                                |  ✅  | ✅ `vector-shape-builder.spec.ts` |
+| 295 | A plain click fills a single unfilled face; Alt+click on that same isolated face deletes its whole boundary, since it has no neighbor to protect    |  ✅  | ✅ `vector-shape-builder.spec.ts` |
+| 296 | Alt+click subtracts a face by deleting only its own exclusive boundary, leaving the segment shared with an untouched, still-filled neighbor intact  |  ✅  | ✅ `vector-shape-builder.spec.ts` |
+| 297 | Holding Shift while dragging still merges via a box hit-test instead of the freeform path, proving the real modifier reaches the gesture            |  ✅  | ✅ `vector-shape-builder.spec.ts` |
+| 298 | Regression: dragging across two overlapping (crossing) rectangles merges all 3 resulting regions into one face, not 3 separate fills                |  ✅  | ✅ `vector-shape-builder.spec.ts` |
+| 299 | A single drag spanning two disconnected split rectangles merges each one's own halves independently, without joining the two shapes into each other |  ✅  | ✅ `vector-shape-builder.spec.ts` |
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

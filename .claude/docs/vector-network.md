@@ -3841,6 +3841,210 @@ to the whitelist-allow test), `useKeyboardShortcuts.spec.tsx` (`M`/`Shift+W` cas
 label for the icon and activates it, both shortcuts activate their tool and update which icon shows,
 closing Vector Edit Mode resets the slot back to its plain label even after a tool was picked.
 
+## 59. Shape Builder — merging/subtracting faces by actually deleting/protecting boundary segments, plus two live-caught real-segment-id bugs
+
+`ToolName.shapeBuilder` (§58) gets real canvas behavior: a Figma-style tool that merges the faces a
+drag sweeps over by deleting the segments between them, or (Alt held) subtracts a face by deleting
+its own exclusive boundary. Confirmed against the user's own reference screenshots: after a merge,
+the dividing *stroke* is gone too, not just the fill — this has to be a genuine topology mutation,
+not a `filledFaceKeys`-only trick (stroke rendering draws every segment in `node.segments`
+regardless of fill, per §2/§3).
+
+**Gesture** — same arm/continue/disarm triad as Lasso (§42), reusing its shape rather than adding a
+new pattern: `armVectorShapeBuilderOnPointerDown.ts` seeds `vectorShapeBuilderPathRef` with the
+click point *and* immediately hit-tests it into `touchedVectorShapeBuilderFacesRef` (a
+`Record<nodeId, Set<faceKey>>`) — necessary because a plain click never fires a `pointermove`, so
+if only `continueVectorShapeBuilderDrag` populated touched faces, a single click would do nothing
+(shipped-and-fixed: this exact bug, live-caught — "lpm bez przeciągania powinniśmy móc wykonać akcja
+na jednym fillu"). `continueVectorShapeBuilderDrag.ts` re-derives touched faces every move — as a
+freeform path (`getVectorFacesOnPath.ts`/`...AcrossOpenNodes.ts`, point-in-polygon per path point,
+`Canvas/utils/`) normally, or as a swept box (`getVectorFacesInRect.ts`/`...AcrossOpenNodes.ts`,
+`isPointInRect` + `getRectCorners` dual test) while Shift is held — and **unions** into the touched
+set rather than replacing it, so a mid-drag Shift toggle never drops an already-swept face.
+`isVectorShapeBuilderSubtractRef`/`isVectorShapeBuilderBoxModeRef` track Alt/Shift the same way,
+read fresh every move. `disarmVectorShapeBuilderDrag/commitVectorShapeBuilder.ts` re-resolves the
+touched face *keys* against a `persistVectorNetworkCrossings`-baked live node (same pattern
+`armVectorPaintOnPointerDown.ts` already uses) and dispatches one `updateNode` per touched node.
+
+**Rendering** — `drawVectorShapeBuilderPath.ts` draws only a dashed outline for the live path/box
+(no translucent fill under it, the one deliberate divergence from `drawVectorLasso.ts`, asked for
+directly), and only a hatch-fill hover preview — `drawVectorShapeBuilderHoverPreview.ts`, blue add /
+orange subtract via `drawVectorHatchFill.ts`, same convention as Paint's own hover. An earlier
+version also dashed-outlined the individual segments bounding the hovered/touched face
+(`drawVectorShapeBuilderHoverOutline.ts`) — removed entirely, asked for directly ("usuń ten efekt z
+segmentów na liniach bo wygląda to fatalnie"): the dashed outline sat exactly on top of the node's
+own white stroke and was functionally invisible. `getShapeBuilderPreviewFaces.ts`
+(`useCanvasRenderLoop/utils/drawScene/`) picks what the hatch preview shows each frame: an
+in-progress drag's `touchedVectorShapeBuilderFacesRef` takes priority, falling back to just the
+single `hoveredVectorShapeBuilderFaceRef` face so the preview still shows on hover alone, before any
+drag starts — extracted out of `drawScene.ts` itself after a nested-ternary review comment ("to ma
+funkcja zwracać").
+
+**Freeform path renders open, not closed** — asked for directly ("Jak rysujemy bez shift ściezke to
+powinna to być sciezka jak na mapie która prowadzi od A do Z a to jest takie trochę lasso" / "to
+jakbyś rysował ołówkiem linię"): `drawDashedPolylineOutline.ts` used to always close its own
+polyline (wrapping the last point back to the first), which is correct for Lasso's closed loop and
+for Shape Builder's own Shift+box mode, but made a freeform drag read as a closed lasso shape
+instead of an open pencil-line route. Gained a 5th positional `isClosed: boolean` param (after
+`points`, before `color`) — the segment count becomes `points.length` (wraps around) when `true`,
+`points.length - 1` (stops at the last point) when `false`. `drawVectorLasso.ts` always passes
+`true`; `drawVectorShapeBuilderPath.ts` passes `isBoxMode` straight through — open trace in freeform
+mode, closed rectangle in Shift/box mode, matching each gesture's own real shape.
+
+**Cursor, two live-caught gotchas**: `getCursorClassName.ts` has `case ToolName.shapeBuilder: return
+'add';` so the tool's own cursor shows the instant it's selected, matching Paint's precedent. Final
+cursor assets are `add.png`/`remove.png` (hotspot `5 4` each, `canvas.module.scss`'s `&--add`/
+`&--remove`) — an earlier `pointer-group.png`/single-cursor version was replaced once Alt-subtract
+needed its own distinct cursor.
+
+1. *Idle cursor dropping out on any mouse movement* — `resolveVectorShapeBuilderHover.ts` initially
+   never called `setClassName` at all. Since every hover resolver inside `resolveVectorIdleHover.ts`
+   runs unconditionally with no `activeTool` gating (§43's own note on this same file), one of them
+   (segment hover) unconditionally reset the cursor to `null` on every idle move once Shape Builder
+   had no resolver of its own re-asserting its class — confirmed live via
+   `document.querySelector('canvas').className` (a real screenshot can't show the OS cursor sprite,
+   so this needed a DOM-class check instead of a visual diff). Fixed two ways together:
+   `resolveVectorShapeBuilderHover.ts` now calls `setClassName(event.altKey ? 'remove' : 'add')`
+   unconditionally whenever its own gate passes (hit or miss, same as Paint's idle fallback), *and*
+   its call in `handlePointerMove.ts` was moved to run **last**, after `resolveVectorIdleHover(...)`
+   itself — "whichever hover resolver runs last wins for a given frame" (§43) only holds for whoever
+   truly is last in the full chain, not merely last within one nested sub-list.
+2. *Alt held mid-hover/mid-drag never switched the cursor to `remove`* — asked for directly ("Plus
+   kiedy trzymamy alt zmieniamy ikone na remove.png"), then reported broken twice in a row
+   ("Klikam alt ale ikona nie przełacza się na remove." / "Kursor nadal ten sam.") before the actual
+   site was found: `resolveVectorShapeBuilderHover.ts`'s `setClassName('add')` call was hardcoded,
+   never conditioned on `event.altKey`, despite `isVectorShapeBuilderSubtractRef` itself already
+   being tracked correctly — the ref was right, the DOM class just never reflected it. A first fix
+   pass added `onAltKeyChange` to `useSelectionTool.ts` (mirroring the existing `onShiftKeyChange`
+   synthetic-`pointermove` pattern, so Alt press/release re-evaluates the hover/cursor immediately
+   even with zero mouse movement) — necessary, since without it Alt only ever took effect on the
+   *next* physical mouse move, but **not sufficient alone**: the resolver itself still needed the
+   `event.altKey ? 'remove' : 'add'` conditional added in three places
+   (`resolveVectorShapeBuilderHover.ts`, `continueVectorShapeBuilderDrag.ts`,
+   `armVectorShapeBuilderOnPointerDown.ts`) before the cursor would actually flip.
+
+**The real bug, and the mathematical crux of this whole section**: a face's stable `pieceKeys`
+(§51 — `` `${realSegmentId}[${boundaries}]` ``, deliberately keyed by the *original, unsuffixed*
+segment id so a filled region survives a later topology change) are the wrong data source for
+deciding which literal `node.segments` entries to delete. `getInteriorSegmentIds`
+(merge — a piece is deletable when the exactly-2 faces bordering it are both touched) and
+`getExclusiveSegmentIds` (subtract — deletable when *every* face bordering it, 1 or 2, is touched)
+both originally grouped pieces by their stripped real-segment-id and required *every* piece of that
+id to qualify before deleting any of them — reasoning that a segment couldn't be "half deleted".
+That reasoning was backwards: `persistVectorNetworkCrossings` (called before either function ever
+runs, in `commitVectorShapeBuilder.ts`) already materializes each crossing's pieces as their own
+fully independent `node.segments` entries (literal keys like `"r1Bottom#0"`/`"r1Bottom#1"`, each
+with real `startId`/`endId`) — there is no atomicity left to protect, and requiring unanimity across
+sibling pieces meant a real segment crossed by anything else could never be deleted at all. Live
+symptom: two rectangles overlapping without sharing a vertex (the ordinary case — any Venn-diagram-
+style boolean union) planarizes into exactly 3 faces, but a drag touching all 3 produced **3
+separate fills, zero segments deleted** — every segment either of the two crossings touch has
+*one* piece bordering two touched faces (interior) and *one* piece still on the true outer
+boundary (not interior), so the old all-or-nothing rule always failed for literally every segment.
+Root-caused live (`document.querySelector`, direct `store.dispatch`/`deriveVectorFaces` calls via
+`page.evaluate`, no UI clicking needed to reproduce), confirmed via a temporary `console.log` of
+each face's own `pieceKeys` before deleting the grouping logic entirely.
+
+Second-order bug in the *fix itself*, also caught by a failing unit test before it ever reached the
+browser: the first correction still used `pieceKeys` (its `.split('[')[0]` prefix strips the "#N"
+suffix on purpose, to stay stable across topology changes) as the literal segment id to delete —
+which, on a *crossed* segment, doesn't match anything in `node.segments` at all (the persisted key
+is `"r1Bottom#0"`, the stripped piece-key prefix is bare `"r1Bottom"`), so nothing was ever deleted,
+silently. The real fix: a face's own `key` (§2/§44's `steps.map(step => step.segmentId).sort()
+.join(',')`) is built from the *raw*, walked segment ids — "#N" suffixes intact — exactly what
+`node.segments` is keyed by once persisted. `getFaceKeysBySegmentId.ts` (renamed from
+`getFaceKeysByPieceKey.ts`, `mergeVectorFaces/`) maps each raw segment id from `face.key.split(',')`
+to the set of face keys bordering it; both `getInteriorSegmentIds.ts`/`getExclusiveSegmentIds.ts`
+now filter this map directly and return matched segment ids verbatim — no per-real-segment grouping
+step at all (`getPieceKeysBySegmentId.ts` was deleted, now genuinely unused). Regression-locked in
+`mergeVectorFaces.spec.ts` with a hand-built, already-persisted two-crossing-rectangles fixture
+(`crossingRectanglesNode`) asserting exactly one resulting face — reproduces the live "3 sectors →
+1 union" case without needing a browser.
+
+**Subtract deletes geometry too, not just fill — asked for directly ("Figma usuwa cały segment w
+takim case"), with one explicit protection**: `subtractVectorFaces.ts` deletes a touched face's own
+*exclusive* boundary (segments bordering only touched faces) via `getExclusiveSegmentIds.ts`, prunes
+orphaned vertices (`getRemainingVertices`), and drops the touched face's own `filledFaceKeys` entry
+unconditionally (even when nothing was geometrically deletable — a face fully enclosed by untouched
+neighbors loses its fill this pass with nothing to delete yet, and a later pass peeling a neighbor
+first can then delete it — confirmed as intentional, matching Figma's own iterative behavior, not a
+bug to fix). The one hard constraint, asked for directly: a segment shared with a still-standing,
+untouched neighbor is **never** deleted (`getExclusiveSegmentIds` requires *every* bordering face —
+not just one side — to be touched), so subtracting one half of a divided shape always leaves the
+other half's own boundary fully intact.
+
+**Disconnected components divide independently, with zero extra code** — confirmed live with two
+entirely separate divided rectangles in one node: sweeping across all 4 faces at once produced two
+independently-merged, independently-colored solid shapes, never one shape bridging both. This falls
+straight out of the algorithm with no special-casing: a segment can only ever be interior/exclusive
+relative to faces it actually borders, and two disjoint components share no segments at all.
+
+Unit: one file per function under `mergeVectorFaces/test/` (100% branch coverage, including the
+crossing-rectangles regression above), `getVectorFacesOnPath.spec.ts`/`getVectorFacesInRect.spec.ts`
++ their `...AcrossOpenNodes` siblings (`Canvas/utils/test/`), the new arm/continue/disarm/hover
+resolver specs, `drawVectorShapeBuilderPath.spec.ts`/`...HoverPreview.spec.ts`/`getShapeBuilderPreviewFaces.spec.ts`,
+plus `useSelectionTool.spec.tsx`'s own `onAltKeyChange` cases (a closed-triangle fixture, since the
+file's existing vector-node helpers were open 2-vertex lines — Shape Builder hover hit-testing needs
+a real bounded face).
+
+Live-verified end-to-end via Playwright MCP direct `store.dispatch`/`page.evaluate` throughout
+implementation (faster and more reliable than driving the Pen tool through raw clicks to build exact
+test topologies), then locked in permanently as `e2e/pages/design/vector-shape-builder.spec.ts`
+(TEST_CASES.md #294-299) once the tool stopped actively changing shape: freeform merge across a
+split rectangle, plain-click fill, Alt+click subtract on an isolated face (no neighbor to protect,
+so the whole boundary goes) vs. on a face with an untouched filled neighbor (only the exclusive
+edges go, the shared divider survives), Shift-held box-mode merge, the crossing-rectangles
+regression from above, and the disconnected-independence case — the last three specifically chosen
+because they're real-browser-modifier-key-dependent (Alt/Shift reaching the gesture through actual
+`KeyboardEvent`/`PointerEvent` state) or were live regressions once already, exactly the class of
+bug [[xigma-e2e-coverage]] flags as worth a permanent test over a unit-only one.
+
+## 60. §51's piece-identity resolver assumed a real segment's surviving pieces are always one unbroken chain — Shape Builder's mid-segment deletion breaks that assumption, silently
+
+Found live, one step past §59's own crown-shape test: the merged shape rendered fine right after
+the commit, but **stopped rendering entirely** the moment anything re-derived it fresh (a page
+reload replaying the same node shape, or simply re-checking it) — `getVectorFillLoopPoints` started
+returning `null` for a `filledFaceKeys` entry that was visibly present and textually well-formed.
+Knock-on symptom that surfaced it: Paint-clicking the (invisibly-filled) shape **added a duplicate
+of its own key instead of removing it** — `getVectorFillLoopKeyAtPoint` (same underlying resolver)
+couldn't find the loop at the click point either, so `armVectorPaintOnPointerDown.ts`'s existing
+`existingLoopKey ? remove : add` branch took the "add" path against a face that was, in fact,
+already filled.
+
+**Root cause**: `buildVertexSequence.ts` (`getVectorFillLoopPoints/`) — used by
+`resolvePieceKeyToUnit.ts` to turn a stored `realSegmentId[boundaryA|boundaryB]` piece key back into
+the current segment pieces spanning those two boundaries — chained every current piece of a real
+segment into **one** flat vertex sequence via `pieceIds.map(id => boundaryKeys[id].end)`, silently
+assuming piece `i`'s end always equals piece `i+1`'s start. That was true for every scenario that
+existed before this feature: a fresh *crossing* only ever **subdivides** a piece (more pieces, same
+total span, still contiguous) — nothing before Shape Builder ever **deleted** a middle piece while
+keeping its outer siblings. `getExclusiveSegmentIds`/`getInteriorSegmentIds` (§59) do exactly that:
+a real segment crossed twice, with only its middle piece interior/exclusive, ends up with two
+*surviving, disconnected* pieces on either side of a genuine gap. `buildVertexSequence` still
+concatenated them as if adjacent, producing a vertex sequence missing the second piece's own real
+start vertex entirely — so a stored key naming that exact vertex as a boundary could never be found
+in it (`indexOf` returns -1), and `resolvePieceKeyToUnit` returned `null` for that one piece,
+which fails the whole loop (`hasEveryUnit` in `getVectorFillLoopPoints.ts`).
+
+**Fix**: renamed to `buildVertexRuns.ts`, now returns `TVectorPieceRun[]` — one run per maximal
+contiguous stretch of pieces (a new run starts whenever the running sequence's last vertex doesn't
+match the next piece's own start), each carrying its own `pieceIds`/`vertexSequence` pair.
+`resolvePieceKeyToUnit.ts` now searches for a run containing **both** of a piece key's boundaries
+(`runs.find(run => run.vertexSequence.includes(boundaryA) && ...includes(boundaryB))`) instead of
+indexing into one assumed-contiguous sequence — a boundary pair that genuinely spans a gap (crosses
+between two runs) correctly still resolves to `null`, since no single run contains both.
+
+Regression-locked directly in `resolvePieceKeyToUnit.spec.ts` (a hand-built gapped `planarSegments`
+fixture — piece `s1#0` and `s1#2` present, `s1#1` deleted — asserting each surviving piece's own key
+still resolves independently, and a key spanning across the gap correctly returns `null`) and
+`buildVertexRuns.spec.ts` (the same gap case, asserting two separate runs). Live-verified end-to-end
+against the exact crown-shape node from §59: `getVectorFillLoopPoints` now returns real points where
+it previously returned `null`, and a Paint click on the shape now toggles it off on the first click
+instead of duplicating its key. Full regression suite (2840 tests across `Canvas`/`vectorNetwork`)
+stayed green — this resolver is shared by Paint's hit-testing, the committed-fill render pass, and
+(indirectly) anything else that stores a `filledFaceKeys` entry, so a change here needed proof
+nothing else regressed, not just that Shape Builder's own case now works.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

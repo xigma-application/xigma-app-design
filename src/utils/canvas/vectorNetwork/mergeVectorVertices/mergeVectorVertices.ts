@@ -1,5 +1,5 @@
 // types
-import { TVectorNetworkData } from './types';
+import { TVectorNetworkData } from '../types';
 
 // utils
 import { getMergedFilledFaceKeys } from './getMergedFilledFaceKeys';

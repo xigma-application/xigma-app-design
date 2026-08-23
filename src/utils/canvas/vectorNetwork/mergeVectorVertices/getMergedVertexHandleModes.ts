@@ -1,6 +1,6 @@
 // types
 import { TVertexHandleMode } from 'types/design/types';
-import { TVectorNetworkData } from './types';
+import { TVectorNetworkData } from '../types';
 
 export const getMergedVertexHandleModes = (
   sourceNode: TVectorNetworkData,

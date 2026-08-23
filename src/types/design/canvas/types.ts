@@ -99,6 +99,8 @@ export type TVectorDraggedFillFaces = Record<string, string[]>;
 
 export type TVectorCutSegmentHover = { nodeId: string; segmentId: string };
 
+export type TVectorShapeBuilderTouchedFaces = Record<string, Set<string>>;
+
 export type TCanvasRefs = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>;
@@ -115,8 +117,11 @@ export type TCanvasRefs = {
   hoveredVectorHandleRef: RefObject<TVectorHandleHover | null>;
   hoveredVectorPaintFaceKeyRef: RefObject<TVectorPaintFaceHover | null>;
   hoveredVectorSegmentIdRef: RefObject<string | null>;
+  hoveredVectorShapeBuilderFaceRef: RefObject<TVectorFaceHover | null>;
   hoveredVectorVertexIdRef: RefObject<string | null>;
   hoverRef: RefObject<string | null>;
+  isVectorShapeBuilderBoxModeRef: RefObject<boolean>;
+  isVectorShapeBuilderSubtractRef: RefObject<boolean>;
   marqueeRef: RefObject<TDraftRect | null>;
   newVectorCutVertexIdsRef: RefObject<Set<string>>;
   penDragOriginRef: RefObject<TPenDragOrigin | null>;
@@ -136,6 +141,7 @@ export type TCanvasRefs = {
   snappedVectorHandleRef: RefObject<TVectorHandleHover | null>;
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>;
   touchedVectorCutVertexIdsRef: RefObject<Set<string>>;
+  touchedVectorShapeBuilderFacesRef: RefObject<TVectorShapeBuilderTouchedFaces>;
   vectorAlignmentGuideRef: RefObject<TVectorAlignmentGuide | null>;
   vectorCutPreviewRef: RefObject<TVectorCutPreview | null>;
   vectorLassoPathRef: RefObject<TPoint[] | null>;
@@ -143,4 +149,5 @@ export type TCanvasRefs = {
   vectorMultiSelectBoxRef: RefObject<TVectorMultiSelectBox | null>;
   vectorMultiSelectResizeDragRef: RefObject<TVectorMultiSelectResizeDragState | null>;
   vectorMultiSelectRotateDragRef: RefObject<TVectorMultiSelectRotateDragState | null>;
+  vectorShapeBuilderPathRef: RefObject<TPoint[] | null>;
 };

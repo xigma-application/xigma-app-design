@@ -30,6 +30,7 @@ import { disarmVectorMultiDrag } from './disarmVectorMultiDrag/disarmVectorMulti
 import { disarmVectorMultiSelectResizeDrag } from './disarmVectorMultiSelectResizeDrag';
 import { disarmVectorMultiSelectRotateDrag } from './disarmVectorMultiSelectRotateDrag';
 import { disarmVectorSegmentBendDrag } from './disarmVectorSegmentBendDrag';
+import { disarmVectorShapeBuilderDrag } from './disarmVectorShapeBuilderDrag/disarmVectorShapeBuilderDrag';
 import { disarmVectorVertexDrag } from './disarmVectorVertexDrag';
 import { resolveVectorCutMarkConsumption } from '../handlePointerMove/resolveVectorCutMarkConsumption';
 
@@ -59,6 +60,7 @@ export const handlePointerUp = (
   disarmVectorVertexDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   disarmVectorHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   disarmVectorLassoDrag(canvas, event, canvasRefs, setClassName);
+  disarmVectorShapeBuilderDrag(canvas, event, dispatch, canvasRefs, setClassName);
   disarmVectorMultiDrag(canvas, event, dispatch, canvasRefs, setClassName);
   disarmVectorMultiSelectResizeDrag(canvas, event, canvasRefs.vectorMultiSelectResizeDragRef, canvasRefs.vectorMultiSelectBoxRef);
   disarmVectorMultiSelectRotateDrag(canvas, event, canvasRefs.vectorMultiSelectRotateDragRef, canvasRefs.vectorMultiSelectBoxRef);

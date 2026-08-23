@@ -3,7 +3,7 @@ import { TVectorSegment, TVectorVertex } from 'types/design/types';
 import { TResolvedPieceUnit } from './types';
 
 // utils
-import { buildVertexSequence } from './buildVertexSequence';
+import { buildVertexRuns } from './buildVertexRuns';
 import { getVectorPieceBoundaryKeys, TVectorPieceBoundaries } from '../getVectorPieceBoundaryKeys';
 
 const PIECE_KEY_PATTERN = /^(.+)\[(.+)\|(.+)]$/;
@@ -23,16 +23,16 @@ export const resolvePieceKeyToUnit = (
 
     boundaryKeysByRealSegmentId.set(realSegmentId, boundaryKeys);
 
-    const pieceIds = Object.keys(boundaryKeys);
+    const runs = buildVertexRuns(Object.keys(boundaryKeys), boundaryKeys);
+    const run = runs.find((candidate) => candidate.vertexSequence.includes(boundaryA) && candidate.vertexSequence.includes(boundaryB));
 
-    if (pieceIds.length > 0) {
-      const vertexSequence = buildVertexSequence(pieceIds, boundaryKeys);
-      const indexA = vertexSequence.indexOf(boundaryA);
-      const indexB = vertexSequence.indexOf(boundaryB);
+    if (run) {
+      const indexA = run.vertexSequence.indexOf(boundaryA);
+      const indexB = run.vertexSequence.indexOf(boundaryB);
 
-      if (indexA !== -1 && indexB !== -1 && indexA !== indexB) {
+      if (indexA !== indexB) {
         const [from, to] = indexA < indexB ? [indexA, indexB] : [indexB, indexA];
-        const pieces = pieceIds.slice(from, to).map((pieceId) => planarSegments[pieceId]);
+        const pieces = run.pieceIds.slice(from, to).map((pieceId) => planarSegments[pieceId]);
 
         return { endId: pieces[pieces.length - 1].endId, id: pieceKey, pieces, startId: pieces[0].startId };
       }

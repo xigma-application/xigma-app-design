@@ -1,6 +1,6 @@
 // types
 import { TVectorSegment } from 'types/design/types';
-import { TVectorNetworkData } from './types';
+import { TVectorNetworkData } from '../types';
 
 // utils
 import { retargetVertexId } from './retargetVertexId';

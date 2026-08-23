@@ -54,6 +54,6 @@ describe('drawVectorLasso', () => {
 
     // result — the fill wraps the raw path as a single face, same shape the dashed outline traces
     expect(drawVectorFillMock).toHaveBeenCalledWith({}, {}, {}, [path], '#0d99ff', 200, 150, IDENTITY_VIEWPORT, 0.2);
-    expect(drawDashedPolylineOutlineMock).toHaveBeenCalledWith({}, {}, {}, path, '#0d99ff', 200, 150, IDENTITY_VIEWPORT, 6, 4.5);
+    expect(drawDashedPolylineOutlineMock).toHaveBeenCalledWith({}, {}, {}, path, true, '#0d99ff', 200, 150, IDENTITY_VIEWPORT, 6, 4.5);
   });
 });

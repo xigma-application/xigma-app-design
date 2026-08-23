@@ -7,7 +7,7 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { getRemainingSegments } from './getRemainingSegments';
-import { getRemainingVertices } from './getRemainingVertices';
+import { getRemainingVertices } from 'utils/canvas/vectorNetwork/getRemainingVertices';
 
 export const deleteSelectedVertices = (dispatch: AppDispatch, owningNodes: TVectorNode[], selectedVertexIds: string[]): void => {
   owningNodes.forEach((node) => {

@@ -73,6 +73,24 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
     }
   };
 
+  const onAltKeyChange = (
+    canvas: HTMLCanvasElement,
+    event: KeyboardEvent,
+    canvasRefs: TCanvasRefs,
+    selectRefs: TSelectionToolRefs,
+  ): void => {
+    if (event.key === 'Alt' && activeTool === ToolName.shapeBuilder && lastPointerClientPositionRef.current) {
+      const { x, y } = lastPointerClientPositionRef.current;
+
+      onPointerMove(
+        canvas,
+        new PointerEvent('pointermove', { altKey: event.altKey, clientX: x, clientY: y, pointerId: -1 }),
+        canvasRefs,
+        selectRefs,
+      );
+    }
+  };
+
   useEffect(() => {
     const canvas = refs.canvasRef.current;
 
@@ -84,7 +102,8 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         activeTool === ToolName.lasso ||
         activeTool === ToolName.paint ||
         activeTool === ToolName.bend ||
-        activeTool === ToolName.cut) &&
+        activeTool === ToolName.cut ||
+        activeTool === ToolName.shapeBuilder) &&
       !isCanvasCaretEditingActive
     ) {
       const pointerDownListener = (event: PointerEvent): void => onPointerDown(canvas, event, refs, selectionRefs);
@@ -94,6 +113,8 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
       const keyDownListener = (event: KeyboardEvent): void => onKeyDown(event);
       const shiftKeyDownListener = (event: KeyboardEvent): void => onShiftKeyChange(canvas, event, refs, selectionRefs);
       const shiftKeyUpListener = (event: KeyboardEvent): void => onShiftKeyChange(canvas, event, refs, selectionRefs);
+      const altKeyDownListener = (event: KeyboardEvent): void => onAltKeyChange(canvas, event, refs, selectionRefs);
+      const altKeyUpListener = (event: KeyboardEvent): void => onAltKeyChange(canvas, event, refs, selectionRefs);
 
       canvas.addEventListener('pointerdown', pointerDownListener);
       canvas.addEventListener('pointermove', pointerMoveListener);
@@ -102,6 +123,8 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
       window.addEventListener('keydown', keyDownListener);
       window.addEventListener('keydown', shiftKeyDownListener);
       window.addEventListener('keyup', shiftKeyUpListener);
+      window.addEventListener('keydown', altKeyDownListener);
+      window.addEventListener('keyup', altKeyUpListener);
 
       return (): void => {
         canvas.removeEventListener('pointerdown', pointerDownListener);
@@ -111,6 +134,8 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         window.removeEventListener('keydown', keyDownListener);
         window.removeEventListener('keydown', shiftKeyDownListener);
         window.removeEventListener('keyup', shiftKeyUpListener);
+        window.removeEventListener('keydown', altKeyDownListener);
+        window.removeEventListener('keyup', altKeyUpListener);
         refs.selectedVectorVertexIdsRef.current = [];
         refs.selectedVectorHandlesRef.current = [];
         refs.selectedVectorSegmentIdsRef.current = [];
@@ -120,6 +145,11 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         refs.hoveredVectorPaintFaceKeyRef.current = null;
         refs.hoveredVectorFaceSelectRef.current = null;
         refs.vectorCutPreviewRef.current = null;
+        refs.vectorShapeBuilderPathRef.current = null;
+        refs.touchedVectorShapeBuilderFacesRef.current = {};
+        refs.hoveredVectorShapeBuilderFaceRef.current = null;
+        refs.isVectorShapeBuilderBoxModeRef.current = false;
+        refs.isVectorShapeBuilderSubtractRef.current = false;
         selectionRefs.vectorCutDragRef.current = null;
         lastPointerClientPositionRef.current = null;
       };

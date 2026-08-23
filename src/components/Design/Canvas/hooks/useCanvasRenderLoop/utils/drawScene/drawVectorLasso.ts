@@ -28,6 +28,7 @@ export const drawVectorLasso = (
     program,
     buffer,
     path,
+    true,
     DRAFT_FRAME_STROKE,
     canvasWidth,
     canvasHeight,
