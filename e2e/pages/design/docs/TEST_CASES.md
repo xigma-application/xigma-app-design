@@ -543,9 +543,18 @@ Figma's own behavior: double-clicking a text node — selected or not — enters
 entire existing content selected, so typing immediately replaces it. `editingTextBox`/
 `editingTextContent` gained a sibling `editingNodeId` (`store/design/types.ts`), set by a new
 `useTextEditOnDoubleClick.ts` hook (a plain `dblclick` listener, gated on the default tool) that
-hit-tests via the same "precise glyph hit, or full box if already the sole selection" layering
-`handlePointerDown.ts` already uses (`getDoubleClickedTextNode.ts`, reusing `getNodeAtPoint.ts` and
-`isPointInSelectedTextBounds.ts` unchanged). `TextEditOverlay.tsx` seeds the `contentEditable` div's
+hit-tests via `getDoubleClickedTextNode.ts`, a thin wrapper over the ordinary `getNodeAtPoint.ts`.
+
+**Later fix — `getDoubleClickedTextNode.ts` originally also fell back to `isPointInSelectedTextBounds.ts`
+(the same "precise glyph hit, or full box if already the sole selection" layering `handlePointerDown.ts`
+uses for dragging)**, so double-clicking anywhere in an already-selected text's fixed box — even well
+past its rendered content — entered edit mode. Reported live as worse than the equivalent vector-selection
+bug further below ("Vector node selection (Move tool)"): unlike a plain click, this one visibly _does_
+something (spawns the edit overlay) even over empty space. Fixed by dropping the bounds fallback entirely — entering
+edit mode now always requires actually hitting the rendered glyphs, selected or not, matching every other
+double-click case in this section (#58, #157 below). `isPointInSelectedTextBounds.ts` itself is
+untouched and still backs the _drag_ fallback (`armSelectedTextBoundsOnPointerDown.ts`, #38-#41 above) —
+only entering edit mode tightened, not moving an already-selected box. `TextEditOverlay.tsx` seeds the `contentEditable` div's
 initial DOM content from the node's existing `content` (`setEditableTextContent.ts`, the inverse of
 the existing `getEditableTextContent.ts`) and selects all of it via `window.getSelection()`/`Range`
 (`selectEditableTextContent.ts`) — both only run once per edit session, gated on `box`/
@@ -573,7 +582,7 @@ the live-typed ones.
 | --- | --------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------: |
 | 58  | Double-clicking an unselected text node enters edit mode with all its content selected, so typing replaces it instead of appending            |  ✅  |  ✅ `edit-text.spec.ts`   |
 | 157 | Re-entering edit mode on a multi-line text node selects all of its content, not just the line/word under the double-click point               |  ✅  |  ✅ `edit-text.spec.ts`   |
-| 59  | Double-clicking a selected text node past its rendered content (but inside its fixed box) still enters edit mode                              |  ✅  |  ✅ `edit-text.spec.ts`   |
+| 59  | Double-clicking a selected text node past its rendered content (but inside its fixed box) does not enter edit mode                            |  ✅  |  ✅ `edit-text.spec.ts`   |
 | 60  | Blurring an existing-node edit updates that node's content in place, never adds a duplicate node                                              |  ✅  |             —             |
 | 61  | Clearing all content on an existing node and blurring deletes that node, matching a freshly-drawn empty box never being created               |  ✅  |  ✅ `edit-text.spec.ts`   |
 | 105 | Clearing all content on an existing text-on-path node and blurring deletes both the text node and its bound path node, not just the text      |  ✅  | ✅ `text-on-path.spec.ts` |
@@ -1660,10 +1669,10 @@ doesn't move**, landing past the shape's own contour, deselects it instead of le
 requested on the spot, since a static click there visually looks exactly like missing the shape
 entirely.
 
-| #   | Scenario                                                                                                | Unit |          E2E           |
-| --- | -------------------------------------------------------------------------------------------------------- | :--: | :--------------------: |
-| 282 | Clicking inside an unfilled vector node's bounding box, past its own contour, does not select it          |  ✅  | ✅ `selection.spec.ts` |
-| 283 | A selected vector node can be dragged from anywhere in its bounding box, even past its own contour         |  ✅  | ✅ `selection.spec.ts` |
+| #   | Scenario                                                                                                                                                                                                     | Unit |          E2E           |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :--: | :--------------------: |
+| 282 | Clicking inside an unfilled vector node's bounding box, past its own contour, does not select it                                                                                                             |  ✅  | ✅ `selection.spec.ts` |
+| 283 | A selected vector node can be dragged from anywhere in its bounding box, even past its own contour                                                                                                           |  ✅  | ✅ `selection.spec.ts` |
 | 284 | A plain click (no drag) on an already-selected vector node, landing past its own contour, deselects it — same as missing the shape entirely, unlike the equivalent click on a selected text node's fixed box |  ✅  | ✅ `selection.spec.ts` |
 
 ## Vector Edit Mode — live fill highlight during vertex/segment drag
@@ -1680,9 +1689,9 @@ any other multi-vertex drag) and cleared on release (`disarmVectorVertexDrag.ts`
 `disarmVectorMultiDrag.ts`); the drag's own vertex-position updates are unaffected (already
 dispatched live on every pointermove, as before).
 
-| #   | Scenario                                                                                              | Unit |                       E2E                        |
-| --- | -------------------------------------------------------------------------------------------------------- | :--: | :-----------------------------------------------: |
-| 285 | Dragging a filled face's vertex/segment live-highlights that face; releasing clears the highlight again | ✅  | — (see rationale below; same as the Paint tool's own hover-highlight, §"Why so few scenarios get e2e coverage") |
+| #   | Scenario                                                                                                | Unit |                                                       E2E                                                       |
+| --- | ------------------------------------------------------------------------------------------------------- | :--: | :-------------------------------------------------------------------------------------------------------------: |
+| 285 | Dragging a filled face's vertex/segment live-highlights that face; releasing clears the highlight again |  ✅  | — (see rationale below; same as the Paint tool's own hover-highlight, §"Why so few scenarios get e2e coverage") |
 
 ## Why so few scenarios get e2e coverage
 

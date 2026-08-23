@@ -280,8 +280,10 @@ test('the canvas-drawn selection highlight on a rotated node disappears once the
   await designPage.goto('e2e-test-edit-text-rotated-selection-highlight');
   await expect(designPage.canvas).toBeVisible();
 
+  // "SPIN" (not "SPIN ME") — proven at the identical box/rotation above to still reach the box's
+  // own rotation-invariant center once rotated, so the double-click below actually hits the glyphs
   await designPage.drawTextBox(900, 300, 1100, 340);
-  await designPage.typeText('SPIN ME');
+  await designPage.typeText('SPIN');
   await designPage.click(1550, 600); // commit
 
   await designPage.click(905, 310); // select it
@@ -289,7 +291,11 @@ test('the canvas-drawn selection highlight on a rotated node disappears once the
   await designPage.pointerMove(1020, 250); // swing around the center for a clear rotation
   await designPage.pointerUp();
 
-  await designPage.doubleClick(1000, 320); // re-enter edit mode, which selects all content
+  // the drag above rotates by ~90.69deg (getAngleBetweenPoints((1000,320),(1020,250)) -
+  // getAngleBetweenPoints((1000,320),(890,290))); (1011,225) is that rotation applied to (905,310)
+  // [the safe on-glyph point for this box] around the center — the rotation-invariant center itself
+  // sits well past "SPIN"'s own width, same issue as the upside-down "Hi" case above
+  await designPage.doubleClick(1011, 225); // re-enter edit mode, which selects all content
   const selectedAll = await designPage.canvas.screenshot();
 
   await page.keyboard.press('ArrowRight'); // collapses the selection to a caret at its end
@@ -311,11 +317,13 @@ test('double-clicking a selected text node past its rendered content (but inside
   await designPage.click(1550, 600); // commit
 
   await designPage.click(905, 310); // select it, on the rendered glyphs
+  await designPage.pointerMove(1500, 700); // neutral resting point, avoids hover-outline artifacts
   const selected = await designPage.canvas.screenshot();
 
   // deep inside the box, far from "HI" — entering edit mode requires actually hitting the glyphs,
   // so this double-click must have no visible effect at all: no edit overlay, no content change
   await designPage.doubleClick(1200, 450);
+  await designPage.pointerMove(1500, 700); // same neutral resting point as above
   const afterDoubleClick = await designPage.canvas.screenshot();
 
   expect(afterDoubleClick.equals(selected)).toBe(true);
@@ -337,7 +345,10 @@ test('clicking a point on an upside-down (180-degree rotated) text box places th
   await designPage.pointerMove(1110, 350); // the reflection of (890,290) through the box's own center -> exactly 180 degrees
   await designPage.pointerUp();
 
-  await designPage.doubleClick(1000, 320); // re-enter editing at the box's own (rotation-invariant) center
+  // (1095,330) is the 180deg reflection of (905,310) [the safe on-glyph point used elsewhere for
+  // this box] around the center (1000,320) — actually lands on the now-upside-down "Hi" glyphs,
+  // unlike the box's own rotation-invariant center, which sits well past this short word's width
+  await designPage.doubleClick(1095, 330); // re-enter editing on the rendered (now upside-down) "Hi"
   await designPage.click(1089.5, 320); // the boundary between "H" and "i" on the now-upside-down text
   await designPage.typeText('X');
   await designPage.click(1550, 600); // commit
@@ -355,7 +366,7 @@ test('clicking a point on an upside-down (180-degree rotated) text box places th
   await designPage.pointerMove(1110, 350);
   await designPage.pointerUp();
 
-  await designPage.doubleClick(1000, 320);
+  await designPage.doubleClick(1095, 330); // re-enter editing on the rendered (now upside-down) "Hi"
   await designPage.click(1086, 320); // just past "i" on the now-upside-down text
   await designPage.typeText('X');
   await designPage.click(1550, 600);
