@@ -1,19 +1,13 @@
 // others
-import {
-  VECTOR_CUT_CROSSING_FILL,
-  VECTOR_CUT_LINE_STROKE,
-  VECTOR_CUT_LINE_STROKE_WIDTH,
-  VECTOR_VERTEX_FILL,
-  VECTOR_VERTEX_SIZE,
-} from 'constant/canvas';
+import { VECTOR_CUT_LINE_STROKE, VECTOR_CUT_LINE_STROKE_WIDTH } from 'constant/canvas';
 
 // types
 import { TVectorCutPreview } from 'types/design/canvas/types';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { drawEllipse } from 'utils/canvas/shapes/drawEllipse';
 import { drawLine } from 'utils/canvas/drawLine';
+import { drawVectorCutPointMarker } from './drawVectorCutPointMarker';
 
 export const drawVectorCutPreview = (
   gl: WebGL2RenderingContext,
@@ -37,26 +31,8 @@ export const drawVectorCutPreview = (
       viewport,
     );
 
-    const size = VECTOR_VERTEX_SIZE / viewport.zoom;
-
     preview.crossings.forEach((crossing) => {
-      drawEllipse(
-        gl,
-        program,
-        buffer,
-        {
-          fill: VECTOR_VERTEX_FILL,
-          height: size,
-          stroke: VECTOR_CUT_CROSSING_FILL,
-          width: size,
-          x: crossing.point.x - size / 2,
-          y: crossing.point.y - size / 2,
-        },
-        canvasWidth,
-        canvasHeight,
-        viewport,
-        0,
-      );
+      drawVectorCutPointMarker(gl, program, buffer, crossing.point, canvasWidth, canvasHeight, viewport);
     });
   }
 };

@@ -15,6 +15,7 @@ import {
   TSliceDraft,
   TStarCornerRadiusDragState,
   TVectorCutPreview,
+  TVectorCutSegmentHover,
   TVectorDraggedFillFaces,
   TVectorHandleHover,
   TVectorMultiSelectBox,
@@ -41,6 +42,8 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const ellipseArcRatioDragRef = useRef<TEllipseArcRatioDragState | null>(null);
   const ellipseArcRotateDragRef = useRef<TEllipseArcRotateDragState | null>(null);
   const hoveredSegmentIdRef = useRef<string | null>(null);
+  const hoveredVectorCutPointRef = useRef<TPoint | null>(null);
+  const hoveredVectorCutSegmentRef = useRef<TVectorCutSegmentHover | null>(null);
   const hoveredVectorEdgeInsertPointRef = useRef<TPoint | null>(null);
   const hoveredVectorHandleRef = useRef<TVectorHandleHover | null>(null);
   const hoveredVectorPaintFaceKeyRef = useRef<TVectorPaintFaceHover | null>(null);
@@ -83,6 +86,8 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       ellipseArcRotateDragRef,
       hoverRef,
       hoveredSegmentIdRef,
+      hoveredVectorCutPointRef,
+      hoveredVectorCutSegmentRef,
       hoveredVectorEdgeInsertPointRef,
       hoveredVectorHandleRef,
       hoveredVectorPaintFaceKeyRef,

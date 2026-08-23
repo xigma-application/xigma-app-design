@@ -95,6 +95,8 @@ export type TVectorCutPreview = { crossings: TVectorCutCrossing[]; lineEnd: TPoi
 
 export type TVectorDraggedFillFaces = Record<string, string[]>;
 
+export type TVectorCutSegmentHover = { nodeId: string; segmentId: string };
+
 export type TCanvasRefs = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>;
@@ -104,6 +106,8 @@ export type TCanvasRefs = {
   ellipseArcRatioDragRef: RefObject<TEllipseArcRatioDragState | null>;
   ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null>;
   hoveredSegmentIdRef: RefObject<string | null>;
+  hoveredVectorCutPointRef: RefObject<TPoint | null>;
+  hoveredVectorCutSegmentRef: RefObject<TVectorCutSegmentHover | null>;
   hoveredVectorEdgeInsertPointRef: RefObject<TPoint | null>;
   hoveredVectorHandleRef: RefObject<TVectorHandleHover | null>;
   hoveredVectorPaintFaceKeyRef: RefObject<TVectorPaintFaceHover | null>;

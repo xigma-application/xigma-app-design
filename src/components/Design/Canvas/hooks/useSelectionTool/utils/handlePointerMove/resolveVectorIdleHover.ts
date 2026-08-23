@@ -34,6 +34,6 @@ export const resolveVectorIdleHover = (
     );
     resolveVectorPaintHover(canvas, event, canvasRefs, setClassName);
     resolveVectorMultiSelectBoxHover(canvas, event, canvasRefs, setClassName);
-    resolveVectorCutHover(event, setClassName);
+    resolveVectorCutHover(canvas, event, canvasRefs, setClassName);
   }
 };

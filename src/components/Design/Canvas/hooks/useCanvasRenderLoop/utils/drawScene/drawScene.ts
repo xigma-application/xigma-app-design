@@ -38,6 +38,7 @@ import { drawVectorAlignmentGuide } from './drawVectorAlignmentGuide';
 import { drawVectorDraggedFillPreview } from './drawVectorDraggedFillPreview';
 import { drawVectorEditHandlesLayer } from './drawVectorEditHandlesLayer/drawVectorEditHandlesLayer';
 import { drawVectorLasso } from './drawVectorLasso';
+import { drawVectorCutHoverPreview } from './drawVectorCutHoverPreview';
 import { drawVectorCutPreview } from './drawVectorCutPreview';
 import { drawVectorPaintHoverPreview } from './drawVectorPaintHoverPreview';
 import { drawVertexCountHandlesLayer } from './drawVertexCountHandlesLayer';
@@ -192,6 +193,17 @@ export const drawScene = (
   drawVectorLasso(gl, program, buffer, refs.vectorLassoPathRef.current, clientWidth, clientHeight, viewport);
   drawVectorPaintHoverPreview(gl, program, buffer, nodesById, hoveredVectorPaintFace, clientWidth, clientHeight, viewport);
   drawVectorDraggedFillPreview(gl, program, buffer, nodesById, refs.draggedVectorFillFacesRef.current, clientWidth, clientHeight, viewport);
+  drawVectorCutHoverPreview(
+    gl,
+    program,
+    buffer,
+    nodesById,
+    refs.hoveredVectorCutSegmentRef.current,
+    refs.hoveredVectorCutPointRef.current,
+    clientWidth,
+    clientHeight,
+    viewport,
+  );
   drawVectorCutPreview(gl, program, buffer, refs.vectorCutPreviewRef.current, clientWidth, clientHeight, viewport);
   drawMarquee(gl, program, buffer, marqueeRect, clientWidth, clientHeight, viewport);
   drawSliceDraft(gl, program, buffer, sliceRect, clientWidth, clientHeight, viewport);
