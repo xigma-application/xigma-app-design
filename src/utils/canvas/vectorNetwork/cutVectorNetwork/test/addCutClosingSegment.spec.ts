@@ -43,6 +43,45 @@ describe('addCutClosingSegment', () => {
     expect(result.filledFaceKeys![0]).toContain('[');
   });
 
+  it('should still match a face to its crossing when the crossed segment is itself a fragment from an earlier cut (regression: cutting an already-cut piece a second time dropped its fill entirely)', () => {
+    // mock — same half-square as above, but "left" was already severed once by an earlier cut, so this
+    // cut's own findLineNetworkCrossings sees it as "left#1" (severSegmentAtCrossings' own fragment
+    // naming) — the ORIGINAL face's loopKey still says "left" (getPieceKeys always strips "#N"), so
+    // matching crossing.segmentId against realSegmentIds verbatim would find nothing here
+    const component: TVectorNetworkComponent = {
+      segments: {
+        s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'c', id: 's2', startId: 'b', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'd', id: 's3', startId: 'c', tangentEnd: null, tangentStart: null },
+      },
+      vertexHandleModes: {},
+      vertices: {
+        a: { id: 'a', x: 0, y: 0 },
+        b: { id: 'b', x: 100, y: 0 },
+        c: { id: 'c', x: 100, y: 100 },
+        d: { id: 'd', x: 0, y: 100 },
+      },
+    };
+
+    // before
+    const result = addCutClosingSegment(
+      component,
+      { a: 0, d: 1 },
+      ['left[x|y],right[x|y]'],
+      [
+        { lineT: 0, point: { x: 0, y: 0 }, segmentId: 'left#1', t: 0.5 },
+        { lineT: 1, point: { x: 0, y: 100 }, segmentId: 'right#0', t: 0.5 },
+      ],
+    );
+
+    // result — still closes a<->d and resolves a fill key, exactly as with unfragmented segment ids
+    expect(Object.keys(result.segments)).toHaveLength(4);
+    const closingSegment = Object.values(result.segments).find((segment) => !['s1', 's2', 's3'].includes(segment.id))!;
+
+    expect([closingSegment.startId, closingSegment.endId].sort()).toEqual(['a', 'd']);
+    expect(result.filledFaceKeys).toHaveLength(1);
+  });
+
   it("should pair up open ends face-by-face, not two unrelated faces' crossings together", () => {
     // mock — a 4-spoke star (h-a, h-b, h-c, h-d, no outer ring); face1 borders only a/b, face2 borders
     // only c/d — they don't share a real segment, so pairing must stay (a,b) and (c,d), never (b,c)

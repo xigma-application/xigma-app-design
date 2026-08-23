@@ -293,4 +293,39 @@ describe('commitVectorDivide', () => {
       expect(node.filledFaceKeys).toHaveLength(3);
     });
   });
+
+  it('should keep the fill when cutting an already-cut piece a second time (regression: the second cut dropped fill entirely on both new pieces)', () => {
+    // mock — a tall filled rectangle, cut horizontally into thirds with two separate cuts; the second
+    // cut lands on a piece whose own segments are already fragments from the first cut (e.g. "s2#1"),
+    // which is exactly the case addCutClosingSegment's per-face crossing match used to miss
+    const nodeId = addSquareNode(0, true);
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+    const rootOrderBeforeAnyCut = [...store.getState().design.rootOrder];
+
+    // before — first cut near the top (y=30), then cut the resulting bottom piece again near its own
+    // middle (y=65)
+    commitVectorDivide(store.dispatch, { x: -20, y: 30 }, { x: 120, y: 30 }, [nodeId], canvasRefs);
+
+    const afterFirstCutIds = store.getState().design.rootOrder.filter((id) => !rootOrderBeforeAnyCut.includes(id));
+    const bottomPieceId = [nodeId, ...afterFirstCutIds]
+      .map((id) => store.getState().design.nodes[id] as TVectorNode)
+      .find((node) => Math.max(...Object.values(node.vertices).map((v) => v.y)) > 30)!.id;
+
+    commitVectorDivide(store.dispatch, { x: -20, y: 65 }, { x: 120, y: 65 }, [bottomPieceId], canvasRefs);
+
+    // result — three pieces total (top third untouched by the second cut, plus the two the second cut
+    // produced), every single one still filled
+    const finalIds = store.getState().design.rootOrder.filter((id) => !rootOrderBeforeAnyCut.includes(id) || id === nodeId);
+
+    expect(finalIds).toHaveLength(3);
+
+    finalIds.forEach((id) => {
+      const node = store.getState().design.nodes[id] as TVectorNode;
+
+      expect(node.filledFaceKeys.length).toBeGreaterThan(0);
+    });
+  });
 });

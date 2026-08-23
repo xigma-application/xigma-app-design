@@ -12,6 +12,15 @@ import { getVectorNetworkOpenEndpointIds } from './getVectorNetworkOpenEndpointI
 
 const getRealSegmentIdsForLoopKey = (loopKey: string): Set<string> => new Set(loopKey.split(',').map((pieceKey) => pieceKey.split('[')[0]));
 
+// A crossing's segmentId is whatever this cut's own findLineNetworkCrossings saw at cut time — on a
+// piece that already survived an earlier cut, that's a fragment id like "s2#1" (severSegmentAtCrossings'
+// own naming), not the original "s2". filledFaceKeys' pieceKeys are always base ids (getPieceKeys strips
+// the "#N" suffix when deriving them), so matching crossing.segmentId against realSegmentIds verbatim
+// only works on a piece's first-ever cut — cutting an already-cut piece a second time silently matched
+// nothing, leaving that face's own closing pair unpaired and its fill dropped on both new pieces (found
+// live: a rectangle cut in half, then its bottom half cut again).
+const getRealSegmentId = (segmentId: string): string => segmentId.split('#')[0];
+
 export const addCutClosingSegment = (
   component: TVectorNetworkComponent,
   vertexLineT: Record<string, number>,
@@ -23,7 +32,9 @@ export const addCutClosingSegment = (
 
   originalFilledFaceKeys.forEach((loopKey) => {
     const realSegmentIds = getRealSegmentIdsForLoopKey(loopKey);
-    const faceLineTs = new Set(crossings.filter((crossing) => realSegmentIds.has(crossing.segmentId)).map((crossing) => crossing.lineT));
+    const faceLineTs = new Set(
+      crossings.filter((crossing) => realSegmentIds.has(getRealSegmentId(crossing.segmentId))).map((crossing) => crossing.lineT),
+    );
     const faceOpenEndIds = openEndIds.filter((id) => faceLineTs.has(vertexLineT[id]));
     const canPair = faceOpenEndIds.length > 0 && faceOpenEndIds.length % 2 === 0;
 

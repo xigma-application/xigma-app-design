@@ -135,3 +135,32 @@ uwarunkowanie mianownika.
       ekstremalny przypadek cięcia DOKŁADNIE przez wierzchołek-hub o wysokim stopniu (~12% prób w
       syntetycznym teście specjalnie skonstruowanym pod ten przypadek) — user potwierdził, że to nie
       jego scenariusz.
+
+## 6. Prawdziwy bug znaleziony przez usera live (naprawiony) — drugie cięcie tego samego (już raz ciętego) kawałka gubiło fill całkowicie
+
+Zgłoszenie/repro: prostokąt narysowany i pomalowany, przecięty poziomo na 3 równe części (dwa osobne
+cięcia Divide, bo jedna linia daje tylko 2 kawałki). Pierwsze cięcie działało poprawnie (góra + dół,
+oba wypełnione). Drugie cięcie — przecinające DOLNY kawałek z pierwszego cięcia — dawało 2 nowe kawałki
+oba **całkowicie bez fill**, mimo że górna (nietknięta) część nadal miała swój kolor. Złapane live w
+przeglądarce zrzutem ekranu (widoczne puste, tylko-obrys prostokąty).
+
+Przyczyna: własny bug wprowadzony poprawką z §4. `addCutClosingSegment` dopasowuje przecięcia tego
+cięcia do oryginalnej twarzy przez `realSegmentIds.has(crossing.segmentId)` — ale `crossing.segmentId`
+to ID segmentu W TEJ CHWILI (np. `s2#1`, fragment powstały przy PIERWSZYM cięciu, nazwany przez
+`severSegmentAtCrossings`), podczas gdy `realSegmentIds` (wyciągnięte z `filledFaceKeys`) to zawsze
+"czyste" ID bazowe (`s2`) — `getPieceKeys` w `deriveVectorFaces.ts` zawsze obcina sufiks `#N`. Przy
+PIERWSZYM cięciu kawałka oba ID są identyczne (segment jeszcze nigdy nie był cięty), więc dopasowanie
+działa przypadkiem. Przy DRUGIM cięciu tego samego kawałka — nigdy się nie zgadzają, więc żadna para
+nie zostaje domknięta, fill ginie na obu nowych kawałkach.
+
+Naprawa: `crossing.segmentId` jest teraz też obcinane do bazowego ID (`.split('#')[0]`) przed
+porównaniem z `realSegmentIds`.
+
+- [x] ✅ 17. Regresja jednostkowa w `addCutClosingSegment.spec.ts` (fragment-owy `segmentId` typu
+      `left#1` wciąż poprawnie dopasowuje twarz referencyjną `left`) + end-to-end w
+      `commitVectorDivide.spec.ts` (kwadrat cięty dwa razy z rzędu, drugie cięcie na już-raz-ciętym
+      kawałku → wszystkie 3 wynikowe kawałki nadal wypełnione).
+- [x] ✅ 18. Potwierdzone live (Playwright MCP): prostokąt narysowany/pomalowany przez store, dwa
+      realne przeciągnięcia myszą (Wytnij) w 1/3 i 2/3 wysokości → zrzut ekranu pokazuje 3 równe,
+      niezależnie wypełnione części (niebieska/fioletowa/zielona), żadna pusta. 100% coverage
+      (`npm run test:coverage`), `tsc --noEmit` czysty.
