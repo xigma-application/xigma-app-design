@@ -42,6 +42,8 @@ import { armVectorVertexOnPointerDown } from '../armVectorVertexOnPointerDown/ar
 import { ARM_RESOLVERS } from '../../constants';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { createSelectionToolRefs } from '../../../../hooks/useSelectionToolRefs/createSelectionToolRefs';
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
 import { toggleSelectionOnPointerDown } from '../toggleSelectionOnPointerDown';
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -1825,6 +1827,37 @@ describe('armVectorVertexOnPointerDown', () => {
     });
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
     expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+  });
+
+  it('should populate draggedVectorFillFacesRef when the grabbed vertex touches a currently-filled face', () => {
+    // mock — a filled square
+    const segments: TVectorNode['segments'] = {
+      s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+      s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+      s3: { endId: 'v4', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+      s4: { endId: 'v1', id: 's4', startId: 'v4', tangentEnd: null, tangentStart: null },
+    };
+    const vertices: TVectorNode['vertices'] = {
+      v1: { id: 'v1', x: 0, y: 0 },
+      v2: { id: 'v2', x: 100, y: 0 },
+      v3: { id: 'v3', x: 100, y: 100 },
+      v4: { id: 'v4', x: 0, y: 100 },
+    };
+    const nodeId = addVectorNode(segments, vertices);
+    const bareNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const filledFaceKeys = deriveVectorFaces(bareNode).map((face) => getVectorFillLoopKey(face.pieceKeys));
+
+    store.dispatch(updateNode({ changes: { filledFaceKeys }, id: nodeId }));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    // before
+    const ctx = createContext({ canvasRefs, point: { x: 2, y: 0 } });
+
+    // result
+    expect(armVectorVertexOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.draggedVectorFillFacesRef.current?.[nodeId]).toHaveLength(1);
   });
 
   it('should keep the whole multi-selection and arm a group drag with a pending collapse when clicking an already-selected vertex', () => {

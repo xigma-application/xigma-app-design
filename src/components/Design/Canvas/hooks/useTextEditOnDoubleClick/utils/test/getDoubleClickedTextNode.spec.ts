@@ -41,31 +41,21 @@ const frameNode: TFrameNode = {
 describe('getDoubleClickedTextNode', () => {
   it('should return the text node when the point hits its rendered content, even if unselected', () => {
     // result — "Hi" only occupies a small area near the top-left of the 500x500 box
-    expect(getDoubleClickedTextNode({ x: 2, y: 2 }, [textNode], [], IDENTITY_VIEWPORT)).toEqual(textNode);
+    expect(getDoubleClickedTextNode({ x: 2, y: 2 }, [textNode], IDENTITY_VIEWPORT)).toEqual(textNode);
   });
 
-  it('should return null for a point past the rendered content when the text node is not selected', () => {
-    // result
-    expect(getDoubleClickedTextNode({ x: 300, y: 300 }, [textNode], [], IDENTITY_VIEWPORT)).toBeNull();
-  });
-
-  it('should return the text node for a point past the rendered content when it is the sole selection', () => {
-    // result — falls back to the full fixed box once the node is already selected
-    expect(getDoubleClickedTextNode({ x: 300, y: 300 }, [textNode], [textNode], IDENTITY_VIEWPORT)).toEqual(textNode);
+  it('should return null for a point past the rendered content, even when the text node is selected', () => {
+    // result — no fixed-box fallback: entering edit mode requires actually hitting the glyphs
+    expect(getDoubleClickedTextNode({ x: 300, y: 300 }, [textNode], IDENTITY_VIEWPORT)).toBeNull();
   });
 
   it('should return null for a non-text node', () => {
     // result
-    expect(getDoubleClickedTextNode({ x: 1050, y: 1050 }, [frameNode], [frameNode], IDENTITY_VIEWPORT)).toBeNull();
+    expect(getDoubleClickedTextNode({ x: 1050, y: 1050 }, [frameNode], IDENTITY_VIEWPORT)).toBeNull();
   });
 
   it('should return null for a point over empty canvas', () => {
     // result
-    expect(getDoubleClickedTextNode({ x: 5000, y: 5000 }, [textNode, frameNode], [], IDENTITY_VIEWPORT)).toBeNull();
-  });
-
-  it('should return null for a point past the rendered content when multiple nodes are selected', () => {
-    // result — the selected-bounds fallback only applies to a single selected text node
-    expect(getDoubleClickedTextNode({ x: 300, y: 300 }, [textNode], [textNode, frameNode], IDENTITY_VIEWPORT)).toBeNull();
+    expect(getDoubleClickedTextNode({ x: 5000, y: 5000 }, [textNode, frameNode], IDENTITY_VIEWPORT)).toBeNull();
   });
 });

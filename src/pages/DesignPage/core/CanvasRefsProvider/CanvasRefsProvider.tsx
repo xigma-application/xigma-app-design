@@ -15,6 +15,7 @@ import {
   TSliceDraft,
   TStarCornerRadiusDragState,
   TVectorCutPreview,
+  TVectorDraggedFillFaces,
   TVectorHandleHover,
   TVectorMultiSelectBox,
   TVectorPaintFaceHover,
@@ -35,6 +36,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cornerRadiusDragRef = useRef<TCornerRadiusDragState | null>(null);
   const draftRef = useRef<TDraftEntity | null>(null);
+  const draggedVectorFillFacesRef = useRef<TVectorDraggedFillFaces | null>(null);
   const ellipseArcDragRef = useRef<TEllipseArcDragState | null>(null);
   const ellipseArcRatioDragRef = useRef<TEllipseArcRatioDragState | null>(null);
   const ellipseArcRotateDragRef = useRef<TEllipseArcRotateDragState | null>(null);
@@ -75,6 +77,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       canvasRef,
       cornerRadiusDragRef,
       draftRef,
+      draggedVectorFillFacesRef,
       ellipseArcDragRef,
       ellipseArcRatioDragRef,
       ellipseArcRotateDragRef,

@@ -34,7 +34,7 @@ export const selectAndArmVectorSegmentDrag = (
   armVectorMultiDrag(
     canvas,
     event,
-    canvasRefs.vectorMultiDragRef,
+    canvasRefs,
     state.design.nodes,
     selectVectorEditingNodeIds(state),
     vertexIds,

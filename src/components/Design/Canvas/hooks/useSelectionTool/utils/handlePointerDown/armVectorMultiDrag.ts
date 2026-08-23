@@ -1,18 +1,17 @@
-import { RefObject } from 'react';
-
 // types
+import { TCanvasRefs, TVectorHandleHover, TVectorMultiSelectBox } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
-import { TVectorHandleHover, TVectorMultiSelectBox } from 'types/design/canvas/types';
-import { TVectorMultiDragState, TVectorPendingClickAction } from 'types/design/selectionTool/types';
+import { TVectorPendingClickAction } from 'types/design/selectionTool/types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getVectorDraggedFillFaces } from './getVectorDraggedFillFaces';
 import { getVectorMultiSelectOrigins } from './getVectorMultiSelectOrigins';
 
 export const armVectorMultiDrag = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
-  vectorMultiDragRef: RefObject<TVectorMultiDragState | null>,
+  canvasRefs: TCanvasRefs,
   nodes: Record<string, TSceneNode>,
   vectorEditingNodeIds: string[],
   selectedVertexIds: string[],
@@ -23,7 +22,7 @@ export const armVectorMultiDrag = (
 ): void => {
   const { handleOrigins, vertexOrigins } = getVectorMultiSelectOrigins(nodes, vectorEditingNodeIds, selectedVertexIds, selectedHandles);
 
-  vectorMultiDragRef.current = {
+  canvasRefs.vectorMultiDragRef.current = {
     boxOrigin: box?.bounds ?? null,
     handleOrigins,
     hasMoved: false,
@@ -31,5 +30,6 @@ export const armVectorMultiDrag = (
     pointerStart: point,
     vertexOrigins,
   };
+  canvasRefs.draggedVectorFillFacesRef.current = getVectorDraggedFillFaces(nodes, vectorEditingNodeIds, Object.keys(vertexOrigins));
   canvas.setPointerCapture(event.pointerId);
 };

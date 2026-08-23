@@ -37,7 +37,7 @@ export const armVectorMultiSelectBoxOnPointerDown = ({ canvas, canvasRefs, event
         armVectorMultiDrag(
           canvas,
           event,
-          canvasRefs.vectorMultiDragRef,
+          canvasRefs,
           state.design.nodes,
           vectorEditingNodeIds,
           vertexIds,

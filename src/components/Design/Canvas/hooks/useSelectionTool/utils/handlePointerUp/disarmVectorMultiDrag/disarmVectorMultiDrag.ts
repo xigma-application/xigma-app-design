@@ -24,6 +24,7 @@ export const disarmVectorMultiDrag = (
     canvas.releasePointerCapture(event.pointerId);
     canvasRefs.vectorMultiDragRef.current = null;
     canvasRefs.vectorAlignmentGuideRef.current = null;
+    canvasRefs.draggedVectorFillFacesRef.current = null;
     setClassName(null);
   }
 };

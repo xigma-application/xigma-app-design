@@ -1,12 +1,12 @@
-import { RefObject } from 'react';
-
 // types
 import { NodeType } from 'types/design/enums';
-import { TVectorMultiDragState } from 'types/design/selectionTool/types';
 import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { armVectorMultiDrag } from '../armVectorMultiDrag';
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -17,8 +17,6 @@ const createCanvas = (): HTMLCanvasElement => {
 };
 
 const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointerdown', { pointerId });
-
-const createVectorMultiDragRef = (): RefObject<TVectorMultiDragState | null> => ({ current: null });
 
 const vector: TVectorNode = {
   fillColor: '#000000',
@@ -45,13 +43,13 @@ describe('armVectorMultiDrag', () => {
   it('should snapshot every selected vertex origin, every selected handle origin, and the pointer start, then capture the pointer', () => {
     // mock
     const canvas = createCanvas();
-    const vectorMultiDragRef = createVectorMultiDragRef();
+    const canvasRefs = createCanvasRefs();
 
     // before
     armVectorMultiDrag(
       canvas,
       pointerEvent(3),
-      vectorMultiDragRef,
+      canvasRefs,
       nodes,
       vectorEditingNodeIds,
       ['v1', 'v3'],
@@ -63,7 +61,7 @@ describe('armVectorMultiDrag', () => {
     );
 
     // result
-    expect(vectorMultiDragRef.current).toEqual({
+    expect(canvasRefs.vectorMultiDragRef.current).toEqual({
       boxOrigin: null,
       handleOrigins: { 'end:s1': { x: -5, y: 0 }, 'start:s1': { x: 5, y: 0 } },
       hasMoved: false,
@@ -77,28 +75,28 @@ describe('armVectorMultiDrag', () => {
   it('should skip a handle whose end has no resolvable tangent', () => {
     // mock — s2's end (v3) has no tangentEnd at all
     const canvas = createCanvas();
-    const vectorMultiDragRef = createVectorMultiDragRef();
+    const canvasRefs = createCanvasRefs();
 
     // before
-    armVectorMultiDrag(canvas, pointerEvent(), vectorMultiDragRef, nodes, vectorEditingNodeIds, [], [{ end: 'end', segmentId: 's2' }], {
+    armVectorMultiDrag(canvas, pointerEvent(), canvasRefs, nodes, vectorEditingNodeIds, [], [{ end: 'end', segmentId: 's2' }], {
       x: 0,
       y: 0,
     });
 
     // result
-    expect(vectorMultiDragRef.current?.handleOrigins).toEqual({});
+    expect(canvasRefs.vectorMultiDragRef.current?.handleOrigins).toEqual({});
   });
 
   it('should default the pending click action to null when none is given, and store one when given', () => {
     // mock
     const canvas = createCanvas();
-    const vectorMultiDragRef = createVectorMultiDragRef();
+    const canvasRefs = createCanvasRefs();
 
     // before
     armVectorMultiDrag(
       canvas,
       pointerEvent(),
-      vectorMultiDragRef,
+      canvasRefs,
       nodes,
       vectorEditingNodeIds,
       ['v1'],
@@ -111,7 +109,51 @@ describe('armVectorMultiDrag', () => {
     );
 
     // result
-    expect(vectorMultiDragRef.current?.pendingClickAction).toEqual({ id: 'v1', kind: 'vertex' });
-    expect(vectorMultiDragRef.current?.hasMoved).toBe(false);
+    expect(canvasRefs.vectorMultiDragRef.current?.pendingClickAction).toEqual({ id: 'v1', kind: 'vertex' });
+    expect(canvasRefs.vectorMultiDragRef.current?.hasMoved).toBe(false);
+  });
+
+  it('should populate draggedVectorFillFacesRef when a dragged vertex touches a filled face', () => {
+    // mock — a filled square, one vertex dragged
+    const square: TVectorNode = {
+      ...vector,
+      filledFaceKeys: [],
+      id: 'square',
+      segments: {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'v4', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+        s4: { endId: 'v1', id: 's4', startId: 'v4', tangentEnd: null, tangentStart: null },
+      },
+      vertices: {
+        v1: { id: 'v1', x: 0, y: 0 },
+        v2: { id: 'v2', x: 100, y: 0 },
+        v3: { id: 'v3', x: 100, y: 100 },
+        v4: { id: 'v4', x: 0, y: 100 },
+      },
+    };
+    const filledFaceKeys = deriveVectorFaces(square).map((face) => getVectorFillLoopKey(face.pieceKeys));
+    const painted: TVectorNode = { ...square, filledFaceKeys };
+    const nodes: Record<string, TSceneNode> = { square: painted };
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+
+    // before
+    armVectorMultiDrag(canvas, pointerEvent(), canvasRefs, nodes, ['square'], ['v1'], [], { x: 0, y: 0 });
+
+    // result
+    expect(canvasRefs.draggedVectorFillFacesRef.current?.square).toHaveLength(1);
+  });
+
+  it('should clear draggedVectorFillFacesRef when nothing dragged touches a filled face', () => {
+    // mock — no vertices selected
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+
+    // before
+    armVectorMultiDrag(canvas, pointerEvent(), canvasRefs, nodes, vectorEditingNodeIds, [], [], { x: 0, y: 0 });
+
+    // result
+    expect(canvasRefs.draggedVectorFillFacesRef.current).toBeNull();
   });
 });

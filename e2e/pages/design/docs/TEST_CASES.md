@@ -1666,6 +1666,24 @@ entirely.
 | 283 | A selected vector node can be dragged from anywhere in its bounding box, even past its own contour         |  ✅  | ✅ `selection.spec.ts` |
 | 284 | A plain click (no drag) on an already-selected vector node, landing past its own contour, deselects it — same as missing the shape entirely, unlike the equivalent click on a selected text node's fixed box |  ✅  | ✅ `selection.spec.ts` |
 
+## Vector Edit Mode — live fill highlight during vertex/segment drag
+
+While dragging a single vertex or a whole segment (both endpoints) in Vector Edit Mode, any
+currently-filled face touching the dragged vertex/vertices is now hatch-highlighted live, every
+frame, as a visual cue for which fill is about to be affected — the same
+`drawVectorHatchFill.ts` primitive the Paint tool's own hover-highlight already uses
+(`drawVectorPaintHoverPreview.ts`), just driven by the active drag's vertex ids
+(`getVectorFilledFacesTouchingVertexIds.ts` / `getVectorDraggedFillFaces.ts`) instead of pointer
+hover. `draggedVectorFillFacesRef` (`TCanvasRefs`) is set once when the drag is armed
+(`selectAndArmVectorVertexDrag.ts` for a single vertex, `armVectorMultiDrag.ts` for a segment or
+any other multi-vertex drag) and cleared on release (`disarmVectorVertexDrag.ts`,
+`disarmVectorMultiDrag.ts`); the drag's own vertex-position updates are unaffected (already
+dispatched live on every pointermove, as before).
+
+| #   | Scenario                                                                                              | Unit |                       E2E                        |
+| --- | -------------------------------------------------------------------------------------------------------- | :--: | :-----------------------------------------------: |
+| 285 | Dragging a filled face's vertex/segment live-highlights that face; releasing clears the highlight again | ✅  | — (see rationale below; same as the Paint tool's own hover-highlight, §"Why so few scenarios get e2e coverage") |
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

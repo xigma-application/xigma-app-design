@@ -3466,6 +3466,63 @@ cases for the same three shapes end-to-end through the real dispatch. E2E: `cut.
 that leaves a genuinely untouched sibling face's key byte-identical, and a 3-band node proving an
 untouched *third* face survives while only the one collaterally touched by the cut loses its fill.
 
+## 54. A live hatch highlight on any filled face touched by an in-progress vertex/segment drag
+
+Dragging a vertex (or a whole segment, i.e. its two endpoints together) in Vector Edit Mode already
+dispatched `updateNode` on every `pointermove`, so the persisted fill itself always reshaped live —
+but there was no dedicated visual cue calling out *which* filled face was about to change, beyond
+the reshaping itself. Requested by the user: "Przesuwanie wektora — bardziej powiedziałbym segmentu
+— w trybie edycji po fill jeśli jest" (dragging a vector, or more precisely a segment, in edit mode,
+[should show] the fill if there is one), narrowed via a clarifying question to: highlight the
+affected face as a visual cue during the drag, mirroring the Paint tool's own hover-highlight
+(§43) rather than changing the drag mechanics themselves.
+
+**Mechanism**: `getVectorFilledFacesTouchingVertexIds.ts` (new,
+`utils/canvas/vectorNetwork/`) — given a node and a set of vertex ids, collects every segment
+incident to those vertices, then filters `deriveVectorFaces(node)` to faces whose `pieceKeys`
+include one of those segments *and* are currently filled (`node.filledFaceKeys.includes(getVectorFillLoopKey(face.pieceKeys))`).
+Face membership is checked via piece-key prefix (`pieceKey.split('[')[0]` — see §51's
+`${realSegmentId}[${boundaries}]` format), not raw segment ids, since a face's boundary is stored as
+piece keys. `getVectorDraggedFillFaces.ts` (new,
+`useSelectionTool/utils/handlePointerDown/`) wraps this for a multi-node vertex set — groups the
+dragged vertex ids by their owning node (`findVectorEditingNodeForVertex`, same resolver
+§48 already established for cross-node multi-select) and returns `Record<nodeId, faceKey[]> | null`.
+
+**Wiring**: a new ref, `draggedVectorFillFacesRef` (`TCanvasRefs`, next to
+`hoveredVectorPaintFaceKeyRef`) — set once when a drag is armed, not recomputed per `pointermove`,
+since which faces are topologically touched (and whether they're filled) doesn't change mid-drag,
+only their geometry does. `selectAndArmVectorVertexDrag.ts` sets it directly (single vertex, single
+node, already has both `node` and `vertexId` in hand). `armVectorMultiDrag.ts` — the shared arm
+function behind a segment drag (`selectAndArmVectorSegmentDrag.ts`), a multi-vertex-selection drag
+(`armVectorGroupDrag.ts`), and a marquee-box drag (`armVectorMultiSelectBoxOnPointerDown.ts`) — now
+takes the whole `canvasRefs` object (previously just `vectorMultiDragRef`, per
+[[canvas-rendering-pipeline]]'s single-`refs`-object threading preference) and sets it via
+`getVectorDraggedFillFaces`. Both `disarmVectorVertexDrag.ts` and `disarmVectorMultiDrag.ts` clear it
+back to `null` on pointer-up. Render: `drawVectorDraggedFillPreview.ts` (new, `drawScene/`, called
+right after `drawVectorPaintHoverPreview`) re-derives each touched node's faces fresh every frame
+from the live (baked-rotation) node and hatch-fills all of them in one `drawVectorHatchFill` call
+using the same `VECTOR_EDGE_HOVER_STROKE` orange the Paint tool's hover uses for an already-filled
+face — deliberately reusing that color rather than inventing a new one, so the two "this fill is
+about to change" cues read as the same visual language.
+
+Live-verified via Playwright MCP: dragging a single vertex of a filled square shows the hatch
+overlay reshaping with the face live, gone the instant the pointer is released (screenshot
+pixel-sampled near `VECTOR_EDGE_HOVER_STROKE`, ~(196,94,68) after antialiasing/JPEG blending against
+the loop-key-hashed debug fill color — see §44's `getVectorFillColorForLoopKey`); dragging a whole
+top segment (both endpoints together) hatches the entire single-face square, confirming the
+`armVectorMultiDrag` path independently of the single-vertex path.
+
+Unit: `getVectorFilledFacesTouchingVertexIds.spec.ts` (4 cases — shared-divider vertex touches both
+faces, a non-divider vertex touches only its own face, an unfilled touched face is excluded, a
+vertex id with no incident segments), `getVectorDraggedFillFaces.spec.ts` (5 cases, including a
+genuine cross-node combination), `drawVectorDraggedFillPreview.spec.ts` (4 cases, mirroring
+`drawVectorPaintHoverPreview.spec.ts`'s own structure), plus updated `armVectorMultiDrag.spec.ts`
+and a new `armVectorVertexOnPointerDown` case in `armResolvers.spec.ts` for the ref-population
+branch. No new E2E: TEST_CASES.md row 285 documents this as intentionally unit-only, same
+precedent as the Paint tool's own hover-highlight, which has never had E2E coverage either — the
+interesting behavior (which faces, filled or not) is exhaustively pinned by the unit suite; a
+screenshot diff would only prove "something changed," not what.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

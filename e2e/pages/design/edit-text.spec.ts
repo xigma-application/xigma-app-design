@@ -298,7 +298,7 @@ test('the canvas-drawn selection highlight on a rotated node disappears once the
   expect(selectedAll.equals(collapsed)).toBe(false);
 });
 
-test('double-clicking a selected text node past its rendered content (but inside its fixed box) still enters edit mode', async ({
+test('double-clicking a selected text node past its rendered content (but inside its fixed box) does not enter edit mode', async ({
   page,
 }) => {
   const designPage = new DesignPage(page);
@@ -311,22 +311,14 @@ test('double-clicking a selected text node past its rendered content (but inside
   await designPage.click(1550, 600); // commit
 
   await designPage.click(905, 310); // select it, on the rendered glyphs
-  await designPage.doubleClick(1200, 450); // deep inside the box, far from "HI"
-  await designPage.typeText('OK');
-  await designPage.click(1550, 600); // commit the edit, deselecting it
+  const selected = await designPage.canvas.screenshot();
 
-  const replaced = await designPage.canvas.screenshot();
+  // deep inside the box, far from "HI" — entering edit mode requires actually hitting the glyphs,
+  // so this double-click must have no visible effect at all: no edit overlay, no content change
+  await designPage.doubleClick(1200, 450);
+  const afterDoubleClick = await designPage.canvas.screenshot();
 
-  await designPage.goto('e2e-test-edit-text-selected-bounds-reference');
-  await expect(designPage.canvas).toBeVisible();
-
-  await designPage.drawTextBox(900, 300, 1300, 500);
-  await designPage.typeText('OK');
-  await designPage.click(1550, 600);
-
-  const reference = await designPage.canvas.screenshot();
-
-  expect(replaced.equals(reference)).toBe(true);
+  expect(afterDoubleClick.equals(selected)).toBe(true);
 });
 
 test('clicking a point on an upside-down (180-degree rotated) text box places the caret there, not always at the end', async ({ page }) => {

@@ -93,10 +93,13 @@ export type TVectorCutCrossing = { nodeId: string; point: TPoint; segmentId: str
 
 export type TVectorCutPreview = { crossings: TVectorCutCrossing[]; lineEnd: TPoint; lineStart: TPoint };
 
+export type TVectorDraggedFillFaces = Record<string, string[]>;
+
 export type TCanvasRefs = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>;
   draftRef: RefObject<TDraftEntity | null>;
+  draggedVectorFillFacesRef: RefObject<TVectorDraggedFillFaces | null>;
   ellipseArcDragRef: RefObject<TEllipseArcDragState | null>;
   ellipseArcRatioDragRef: RefObject<TEllipseArcRatioDragState | null>;
   ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null>;

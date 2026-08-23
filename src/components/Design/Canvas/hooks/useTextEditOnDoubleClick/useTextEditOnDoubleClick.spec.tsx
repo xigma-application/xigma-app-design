@@ -156,19 +156,19 @@ describe('useTextEditOnDoubleClick behaviors', () => {
   });
 
   it("should carry a rotated, mirrored node's rotation and flip into the editing box, not reset them to zero", () => {
-    // mock — select first, then double-click the node's own center (invariant under its own rotation)
+    // mock — a 500x500 box at (2500,2500) rotated 45deg, flipped on both axes: "Hi" renders near
+    // the box's own top-left in local (unflipped) storage, which a double-flip mirrors to near the
+    // opposite (bottom-right) corner in local space, then +45deg rotation carries that world
     const idA = addTextNode(2500, 2500, 'Hi', 500, true, true, 45);
-
-    store.dispatch(setSelection([idA]));
 
     const canvasRef = createCanvasRef();
 
     // before
     renderDoubleClickTool(canvasRef);
 
-    // action
+    // action — hits the actual rendered "Hi" glyphs, accounting for both the flip and the rotation
     act(() => {
-      canvasRef.current?.dispatchEvent(doubleClickEvent(2750, 2750));
+      canvasRef.current?.dispatchEvent(doubleClickEvent(2750, 3089));
     });
 
     // result
@@ -199,7 +199,7 @@ describe('useTextEditOnDoubleClick behaviors', () => {
     expect(design.editingTextBox).toMatchObject({ pathFlip: true, pathId: 'ellipse-1', pathStartOffset: 0.25 });
   });
 
-  it('should start editing an already-selected text node when double-clicked past its rendered content', () => {
+  it('should not start editing an already-selected text node when double-clicked past its rendered content', () => {
     // mock
     const idA = addTextNode(2100, 2100);
 
@@ -215,8 +215,8 @@ describe('useTextEditOnDoubleClick behaviors', () => {
       canvasRef.current?.dispatchEvent(doubleClickEvent(2400, 2400));
     });
 
-    // result
-    expect(store.getState().design.editingNodeId).toBe(idA);
+    // result — entering edit mode requires actually hitting the glyphs, selection alone isn't enough
+    expect(store.getState().design.editingNodeId).toBeNull();
   });
 
   it('should not start editing when double-clicking empty canvas', () => {

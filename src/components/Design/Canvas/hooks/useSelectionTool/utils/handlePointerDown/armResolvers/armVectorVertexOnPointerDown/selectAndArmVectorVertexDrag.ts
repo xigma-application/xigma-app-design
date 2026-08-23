@@ -6,6 +6,7 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { armVectorVertexDrag } from './armVectorVertexDrag';
+import { getVectorFilledFacesTouchingVertexIds } from 'utils/canvas/vectorNetwork/getVectorFilledFacesTouchingVertexIds';
 
 export const selectAndArmVectorVertexDrag = (
   canvas: HTMLCanvasElement,
@@ -19,5 +20,8 @@ export const selectAndArmVectorVertexDrag = (
   canvasRefs.selectedVectorVertexIdsRef.current = [vertexId];
   canvasRefs.selectedVectorHandlesRef.current = [];
   canvasRefs.selectedVectorSegmentIdsRef.current = [];
+  const touchedFaceKeys = getVectorFilledFacesTouchingVertexIds(node, [vertexId]).map((face) => face.key);
+
+  canvasRefs.draggedVectorFillFacesRef.current = touchedFaceKeys.length ? { [node.id]: touchedFaceKeys } : null;
   armVectorVertexDrag(canvas, event, selectionRefs.vectorVertexDragRef, node, vertexId, point);
 };

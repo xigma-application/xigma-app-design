@@ -55,6 +55,7 @@ export const disarmVectorVertexDrag = (
     canvas.releasePointerCapture(event.pointerId);
     selectionRefs.vectorVertexDragRef.current = null;
     canvasRefs.vectorAlignmentGuideRef.current = null;
+    canvasRefs.draggedVectorFillFacesRef.current = null;
     setClassName(null);
   }
 };

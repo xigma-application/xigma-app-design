@@ -37,7 +37,7 @@ export const armVectorGroupDrag = (
   armVectorMultiDrag(
     canvas,
     event,
-    canvasRefs.vectorMultiDragRef,
+    canvasRefs,
     state.design.nodes,
     vectorEditingNodeIds,
     vertexIds,

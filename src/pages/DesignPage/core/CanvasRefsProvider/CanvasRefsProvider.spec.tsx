@@ -19,6 +19,7 @@ describe('CanvasRefsProvider behaviors', () => {
       canvasRef: { current: null },
       cornerRadiusDragRef: { current: null },
       draftRef: { current: null },
+      draggedVectorFillFacesRef: { current: null },
       ellipseArcDragRef: { current: null },
       ellipseArcRatioDragRef: { current: null },
       ellipseArcRotateDragRef: { current: null },
