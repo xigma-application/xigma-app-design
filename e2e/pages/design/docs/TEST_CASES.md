@@ -1818,6 +1818,22 @@ modifier-key-dependent canvas behavior.
 | 298 | Regression: dragging across two overlapping (crossing) rectangles merges all 3 resulting regions into one face, not 3 separate fills                |  ✅  | ✅ `vector-shape-builder.spec.ts` |
 | 299 | A single drag spanning two disconnected split rectangles merges each one's own halves independently, without joining the two shapes into each other |  ✅  | ✅ `vector-shape-builder.spec.ts` |
 
+## Nested/overlapping face hit-testing (Paint, Move click-select-face)
+
+Reported directly: draw a rectangle, then a second one inside it, Paint the inner one — it filled
+the outer square instead. Root cause and fix (smallest-area-wins instead of first-match) documented
+in `.claude/docs/vector-network.md` §61. Two levels of the same bug, both fixed at their shared choke
+point: two loops nested within one node (`getVectorFaceAtPoint`) and two separate open nodes
+overlapping on screen (`getVectorFaceAtPointAcrossOpenNodes`) — the latter's e2e case opens both
+nodes via a direct `setVectorEditingNodeIds` dispatch rather than the usual click-shift-click-Enter
+flow, since every corner of the inner node sits inside the outer node's bounds too, making a
+_selection_ click exactly as ambiguous as the _paint_ click actually under test.
+
+| #   | Scenario                                                                                                                                           | Unit |              E2E               |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :----------------------------: |
+| 300 | Paint on a rectangle drawn inside another rectangle (same node) fills the smaller, innermost face, not the outer one it also sits inside           |  ✅  |    ✅ `vector-edit.spec.ts`    |
+| 301 | Paint across two separate open nodes whose shapes overlap on screen fills the smaller, topmost node's face, not the bigger one it also sits inside |  ✅  | ✅ `multi-vector-edit.spec.ts` |
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

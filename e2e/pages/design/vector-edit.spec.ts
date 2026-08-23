@@ -1500,6 +1500,48 @@ test('the Paint tool (activated via its "Shift+B" shortcut) fills a clicked face
   expect(unfilledAgain.equals(unfilled)).toBe(true);
 });
 
+test('Paint on a rectangle drawn inside another rectangle fills the smaller, innermost face under the cursor, not the outer one it also sits inside — regression for getVectorFaceAtPoint picking the first match instead of the smallest', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-paint-nested-rectangles');
+  await expect(designPage.canvas).toBeVisible();
+
+  // a 200x100 outer rectangle with a 100x100 inner rectangle sitting entirely inside it, drawn as two
+  // disconnected loops on the same node (pen.spec.ts: closing a loop and clicking elsewhere starts a
+  // new fragment on the same node, not a stray connecting segment) — deriveVectorFaces has no notion
+  // of a "hole", so a click inside the inner square lands inside both faces at once
+  await drawClosedSquare(designPage); // outer: v1(900,300) v2(1000,300) v3(1000,400) v4(900,400)
+  await designPage.drawVectorPath([
+    { x: 925, y: 325 },
+    { x: 975, y: 325 },
+    { x: 975, y: 375 },
+    { x: 925, y: 375 },
+    { x: 925, y: 325 }, // inner: fully inside the outer square's own bounds
+  ]);
+  await designPage.selectVectorEditMoveTool();
+  await page.keyboard.press('Shift+B');
+
+  await designPage.click(950, 350); // dead center of the inner square, also inside the outer one
+
+  const result = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { getVectorFillLoopPoints } = await import('/src/utils/canvas/vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints.ts');
+
+    const state = store.getState();
+    const node = state.design.nodes[state.design.rootOrder[0]];
+    const [filledKey] = node.filledFaceKeys;
+    const points = getVectorFillLoopPoints(node, filledKey);
+
+    return { filledFaceCount: node.filledFaceKeys.length, maxX: Math.max(...(points ?? []).map((point) => point.x)) };
+  });
+
+  // the outer square spans x up to 1000, the inner one only up to 975 — only the inner one got filled
+  expect(result.filledFaceCount).toBe(1);
+  expect(result.maxX).toBe(975);
+});
+
 test('Paint fills all 3 regions of a curved "egg" network crossed by a triangle without throwing — regression check for the tail-tangent-scaling bug (a curve with 2 crossings on itself) and the deriveVectorFaces dedup guard', async ({
   page,
 }) => {

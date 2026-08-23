@@ -374,6 +374,48 @@ test('the Paint tool fills a face on the second, non-primary open node, not just
   expect(nodes[idA].filledFaceKeys ?? []).toHaveLength(0); // A was never touched
 });
 
+test('Paint on two open nodes whose shapes overlap on screen fills the smaller, topmost node’s face under the cursor, not the bigger one it also sits inside — regression for getVectorFaceAtPointAcrossOpenNodes picking the first open node instead of the smallest face across all of them', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-multi-vector-paint-overlapping-nodes');
+  await expect(designPage.canvas).toBeVisible();
+
+  // A: a 200x200 square. B: a fully separate 100x100 square drawn entirely inside A's own on-screen
+  // bounds — two different nodes overlapping on screen, unlike vector-edit.spec.ts's own single-node
+  // nested-loops case. Opened directly via setVectorEditingNodeIds instead of the usual
+  // openMultipleViaEnter click-shift-click flow: every one of B's own corners sits inside A's bounds
+  // too, so a selection click aimed at "B's corner" is exactly as ambiguous as the paint click this
+  // test is actually about — a separate concern from the fill hit-test fixed here
+  await designPage.drawVectorPath([
+    { x: 900, y: 300 },
+    { x: 1100, y: 300 },
+    { x: 1100, y: 500 },
+    { x: 900, y: 500 },
+    { x: 900, y: 300 },
+  ]);
+  await exitVectorEditMode(designPage);
+  await drawClosedSquareAt(designPage, 950, 350); // B, fully inside A's 900-1100 x 300-500 bounds
+  await exitVectorEditMode(designPage);
+
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { setVectorEditingNodeIds } = await import('/src/store/design/slice.ts');
+
+    store.dispatch(setVectorEditingNodeIds(store.getState().design.rootOrder));
+  });
+
+  await page.keyboard.press('Shift+B'); // Paint tool
+  await designPage.click(1000, 400); // dead center of B; also sits inside A's own face
+
+  const { nodes, rootOrder } = await readDesignState(page);
+  const [idA, idB] = rootOrder;
+
+  expect(nodes[idB].filledFaceKeys ?? []).not.toHaveLength(0); // B, the smaller/topmost one, got filled
+  expect(nodes[idA].filledFaceKeys ?? []).toHaveLength(0); // A was never touched
+});
+
 test('the multi-select box spans two open nodes at once and dragging its interior moves both together', async ({ page }) => {
   const designPage = new DesignPage(page);
 

@@ -3,6 +3,8 @@ import { NodeType } from 'types/design/enums';
 import { TVectorNode } from 'types/design/types';
 
 // utils
+import { deriveVectorFaces } from '../deriveVectorFaces';
+import { getVectorFillLoopKey } from '../getVectorFillLoopKey';
 import { getVectorFillLoopKeyAtPoint } from '../getVectorFillLoopKeyAtPoint';
 
 const buildTriangleNode = (filledFaceKeys: string[]): TVectorNode => ({
@@ -57,5 +59,66 @@ describe('getVectorFillLoopKeyAtPoint', () => {
 
     // result
     expect(getVectorFillLoopKeyAtPoint(node, { x: 50, y: 40 })).toBe(TRIANGLE_LOOP_KEY);
+  });
+
+  it('should return the smallest, innermost loop’s key when the point sits inside three nested filled rectangles drawn one inside another', () => {
+    // mock — a 200x200 outer, a 140x140 middle, and a 100x100 inner rectangle, all centered on the
+    // same point and drawn as three disconnected loops on the same node (no shared vertex/segment) —
+    // deriveVectorFaces has no notion of a "hole", so it produces 3 ordinary, independent faces. The
+    // middle rectangle also exercises the reduce's "candidate isn't smaller, keep the current
+    // smallest" branch, not just "found a new smallest" every time
+    const node: TVectorNode = {
+      fillColor: '#000000',
+      filledFaceKeys: [],
+      id: '1',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'v4', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+        s4: { endId: 'v1', id: 's4', startId: 'v4', tangentEnd: null, tangentStart: null },
+        s5: { endId: 'v6', id: 's5', startId: 'v5', tangentEnd: null, tangentStart: null },
+        s6: { endId: 'v7', id: 's6', startId: 'v6', tangentEnd: null, tangentStart: null },
+        s7: { endId: 'v8', id: 's7', startId: 'v7', tangentEnd: null, tangentStart: null },
+        s8: { endId: 'v5', id: 's8', startId: 'v8', tangentEnd: null, tangentStart: null },
+        sm1: { endId: 'vm2', id: 'sm1', startId: 'vm1', tangentEnd: null, tangentStart: null },
+        sm2: { endId: 'vm3', id: 'sm2', startId: 'vm2', tangentEnd: null, tangentStart: null },
+        sm3: { endId: 'vm4', id: 'sm3', startId: 'vm3', tangentEnd: null, tangentStart: null },
+        sm4: { endId: 'vm1', id: 'sm4', startId: 'vm4', tangentEnd: null, tangentStart: null },
+      },
+      strokeColor: '#ffffff',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: {
+        v1: { id: 'v1', x: 0, y: 0 },
+        v2: { id: 'v2', x: 200, y: 0 },
+        v3: { id: 'v3', x: 200, y: 200 },
+        v4: { id: 'v4', x: 0, y: 200 },
+        v5: { id: 'v5', x: 50, y: 50 },
+        v6: { id: 'v6', x: 150, y: 50 },
+        v7: { id: 'v7', x: 150, y: 150 },
+        v8: { id: 'v8', x: 50, y: 150 },
+        vm1: { id: 'vm1', x: 30, y: 30 },
+        vm2: { id: 'vm2', x: 170, y: 30 },
+        vm3: { id: 'vm3', x: 170, y: 170 },
+        vm4: { id: 'vm4', x: 30, y: 170 },
+      },
+    };
+    const faces = deriveVectorFaces(node);
+    const outerFace = faces.find((face) => face.points.some((point) => point.x === 200))!;
+    const middleFace = faces.find((face) => face.points.some((point) => point.x === 170))!;
+    const innerFace = faces.find((face) => face.points.every((point) => point.x !== 200 && point.x !== 170))!;
+    const outerKey = getVectorFillLoopKey(outerFace.pieceKeys);
+    const middleKey = getVectorFillLoopKey(middleFace.pieceKeys);
+    const innerKey = getVectorFillLoopKey(innerFace.pieceKeys);
+    // inner listed before middle so the reduce also hits its "candidate isn't smaller than the
+    // current smallest, keep it" branch when middle is checked against the already-smaller inner
+    const filledNode = { ...node, filledFaceKeys: [outerKey, innerKey, middleKey] };
+
+    // result — (100,100) sits inside all 3 rectangles; the smallest, innermost one wins
+    expect(getVectorFillLoopKeyAtPoint(filledNode, { x: 100, y: 100 })).toBe(innerKey);
   });
 });

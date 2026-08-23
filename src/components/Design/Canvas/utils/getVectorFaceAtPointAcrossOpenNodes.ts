@@ -5,15 +5,18 @@ import { TVectorFace } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
 
 // utils
 import { bakeVectorNodeRotation } from './bakeVectorNodeRotation';
+import { getPolygonArea } from './getPolygonArea';
 import { getVectorEditingNode } from './getVectorEditingNode';
 import { getVectorFaceAtPoint } from './getVectorFaceAtPoint';
+
+type TVectorFaceHit = { face: TVectorFace; node: TVectorNode };
 
 export const getVectorFaceAtPointAcrossOpenNodes = (
   point: TPoint,
   vectorEditingNodeIds: string[],
   nodes: Record<string, TSceneNode>,
-): { face: TVectorFace; node: TVectorNode } | null => {
-  const hit = vectorEditingNodeIds
+): TVectorFaceHit | null =>
+  vectorEditingNodeIds
     .map((nodeId) => getVectorEditingNode(nodes, nodeId))
     .filter((node): node is TVectorNode => node !== null)
     .map((node) => {
@@ -22,7 +25,11 @@ export const getVectorFaceAtPointAcrossOpenNodes = (
 
       return face ? { face, node } : null;
     })
-    .find((candidate) => candidate !== null);
+    .filter((candidate): candidate is TVectorFaceHit => candidate !== null)
+    .reduce<TVectorFaceHit | null>((smallest, candidate) => {
+      if (!smallest || getPolygonArea(candidate.face.points) < getPolygonArea(smallest.face.points)) {
+        return candidate;
+      }
 
-  return hit ?? null;
-};
+      return smallest;
+    }, null);

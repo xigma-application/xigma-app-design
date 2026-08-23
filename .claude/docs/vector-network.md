@@ -4045,6 +4045,56 @@ stayed green — this resolver is shared by Paint's hit-testing, the committed-f
 (indirectly) anything else that stores a `filledFaceKeys` entry, so a change here needed proof
 nothing else regressed, not just that Shape Builder's own case now works.
 
+## 61. Face hit-testing at a point picked the first derived face, not the smallest — broke Paint on a rectangle drawn inside another rectangle
+
+Reported directly, with a reproduction recipe: "Narysuj sobie prostokąt a w nim kolejny prostokąt i
+spróbuj ten w środku pomalować" — draw a rectangle, then a second one inside it, and try to Paint the
+inner one. Live-reproduced first: clicking dead center of the inner square filled the entire *outer*
+square instead, hatch preview and all.
+
+**Root cause**: `deriveVectorFaces` has no notion of a "hole" — two closed loops on the same node with
+no shared vertex/segment (an inner rectangle sitting inside an outer one, but never touching it)
+derive as two ordinary, independent faces: one is the outer rectangle's own plain 4-point polygon
+(oblivious to the inner loop sitting inside it), the other is the inner rectangle. A point at the
+inner square's center is therefore inside *both* derived faces' polygons at once.
+`getVectorFaceAtPoint.ts` resolved this with a plain `deriveVectorFaces(node).find(...)` — first
+match wins, and since the outer face happens to derive first, it always won regardless of which one
+the point was actually, visually, sitting inside. `getVectorFillLoopKeyAtPoint.ts` (used to decide
+whether a clicked point already sits on an existing fill, so a second click removes it) had the exact
+same shape of bug over `node.filledFaceKeys` instead of freshly-derived faces.
+
+**Fix**: new `Canvas/utils/getPolygonArea.ts` (shoelace formula, `Math.abs(sum)/2`, winding-direction
+independent). Both functions now filter to every face/loop whose polygon contains the point, then
+`reduce` to the **smallest-area** match — the same "prefer the most specific/topmost target" instinct
+node-level hit-testing already applies (§5 of the roadmap: last-drawn/topmost wins for overlapping
+top-level nodes), just applied one level down, to faces nested within one node's own boundary.
+
+**A second, structurally identical bug one level up**: `getVectorFaceAtPointAcrossOpenNodes.ts` (used
+by both Paint and Move's click-selects-face affordance, §56, across every currently open Vector Edit
+Mode node) had the same "first match wins" shape, but across *nodes* rather than *faces* — two
+different open vector nodes can overlap on screen (a small shape drawn on top of/inside a bigger,
+separate one), and the old code returned the first open node (in `vectorEditingNodeIds` order, which
+is selection order, not z-order or size) with *any* matching face, not the node whose matching face is
+actually smallest. Fixed the same way: collect every open node's hit face, `reduce` to the smallest
+by `getPolygonArea`. Both fixes sit at the two actual choke points every face-at-a-point consumer
+already funnels through (`getVectorFaceAtPoint` → `getVectorFaceAtPointAcrossOpenNodes`), so Move's
+click-select-face (§56) and Cut's `resolveVectorCutFilledFaceKeys` got the fix for free — neither
+needed its own change, confirmed by re-running their existing suites unmodified.
+
+Regression-locked with a nested/overlapping-rectangles fixture at each of the three levels: two
+in-node loops (`getVectorFaceAtPoint.spec.ts`, `getVectorFillLoopKeyAtPoint.spec.ts` — a 200x200
+outer plus a 140x140 middle plus a 100x100 inner square, the middle one specifically exercising the
+reduce's "candidate isn't smaller, keep the current smallest" branch for 100% coverage, not just
+"found a new smallest" every time), and two separate open nodes
+(`getVectorFaceAtPointAcrossOpenNodes.spec.ts`, same 3-square shape split across `n1`/`n2`/`n3`). e2e:
+`vector-edit.spec.ts` (Paint on a rectangle drawn inside another, single node) and
+`multi-vector-edit.spec.ts` (Paint across two separate, overlapping open nodes) — the cross-node e2e
+case opens both nodes via a direct `setVectorEditingNodeIds` dispatch rather than the usual
+click-shift-click-Enter flow, since every one of the inner node's own corners sits inside the outer
+node's bounds too, making a *selection* click exactly as ambiguous as the *paint* click this test is
+actually about — a separate, unrelated concern from the fill hit-test fixed here, not something this
+change attempts to also fix.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

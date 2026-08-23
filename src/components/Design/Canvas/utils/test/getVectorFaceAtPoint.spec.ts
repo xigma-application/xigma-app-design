@@ -79,4 +79,45 @@ describe('getVectorFaceAtPoint', () => {
     expect(topLobeKey).not.toBeUndefined();
     expect(bottomLobeKey).not.toBe(topLobeKey);
   });
+
+  it('should return the smallest, innermost face when the point sits inside three nested rectangles drawn one inside another', () => {
+    // mock — a 200x200 outer, a 140x140 middle, and a 100x100 inner rectangle, all centered on the
+    // same point and drawn as three disconnected loops (no shared vertex/segment) — deriveVectorFaces
+    // has no notion of a "hole", so a point inside the inner rectangle is inside all 3 plain polygons.
+    // The middle rectangle also exercises the reduce's "candidate isn't smaller, keep the current
+    // smallest" branch, not just "found a new smallest" every time
+    const node = buildNode(
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'v4', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+        s4: { endId: 'v1', id: 's4', startId: 'v4', tangentEnd: null, tangentStart: null },
+        s5: { endId: 'v6', id: 's5', startId: 'v5', tangentEnd: null, tangentStart: null },
+        s6: { endId: 'v7', id: 's6', startId: 'v6', tangentEnd: null, tangentStart: null },
+        s7: { endId: 'v8', id: 's7', startId: 'v7', tangentEnd: null, tangentStart: null },
+        s8: { endId: 'v5', id: 's8', startId: 'v8', tangentEnd: null, tangentStart: null },
+        sm1: { endId: 'vm2', id: 'sm1', startId: 'vm1', tangentEnd: null, tangentStart: null },
+        sm2: { endId: 'vm3', id: 'sm2', startId: 'vm2', tangentEnd: null, tangentStart: null },
+        sm3: { endId: 'vm4', id: 'sm3', startId: 'vm3', tangentEnd: null, tangentStart: null },
+        sm4: { endId: 'vm1', id: 'sm4', startId: 'vm4', tangentEnd: null, tangentStart: null },
+      },
+      {
+        v1: { id: 'v1', x: 0, y: 0 },
+        v2: { id: 'v2', x: 200, y: 0 },
+        v3: { id: 'v3', x: 200, y: 200 },
+        v4: { id: 'v4', x: 0, y: 200 },
+        v5: { id: 'v5', x: 50, y: 50 },
+        v6: { id: 'v6', x: 150, y: 50 },
+        v7: { id: 'v7', x: 150, y: 150 },
+        v8: { id: 'v8', x: 50, y: 150 },
+        vm1: { id: 'vm1', x: 30, y: 30 },
+        vm2: { id: 'vm2', x: 170, y: 30 },
+        vm3: { id: 'vm3', x: 170, y: 170 },
+        vm4: { id: 'vm4', x: 30, y: 170 },
+      },
+    );
+
+    // result — (100,100) sits inside all 3 rectangles; the smallest, innermost one wins
+    expect(getVectorFaceAtPoint({ x: 100, y: 100 }, node)?.key).toBe('s5,s6,s7,s8');
+  });
 });
