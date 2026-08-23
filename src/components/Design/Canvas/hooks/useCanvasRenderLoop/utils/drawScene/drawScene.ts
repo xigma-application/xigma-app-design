@@ -37,10 +37,12 @@ import { drawStarRatioHandleLayer } from './drawStarRatioHandleLayer';
 import { drawVectorAlignmentGuide } from './drawVectorAlignmentGuide';
 import { drawVectorDraggedFillPreview } from './drawVectorDraggedFillPreview';
 import { drawVectorEditHandlesLayer } from './drawVectorEditHandlesLayer/drawVectorEditHandlesLayer/drawVectorEditHandlesLayer';
+import { drawVectorFaceSelectHoverPreview } from './drawVectorFaceSelectHoverPreview';
 import { drawVectorLasso } from './drawVectorLasso';
 import { drawVectorCutHoverPreview } from './drawVectorCutHoverPreview';
 import { drawVectorCutPreview } from './drawVectorCutPreview';
 import { drawVectorPaintHoverPreview } from './drawVectorPaintHoverPreview';
+import { drawVectorSelectedFillPreview } from './drawVectorSelectedFillPreview';
 import { drawVertexCountHandlesLayer } from './drawVertexCountHandlesLayer';
 import { getPathOutlineStyles } from './getPathOutlineStyles';
 import { hasCornerRadiusDragMoved } from './hasCornerRadiusDragMoved';
@@ -69,6 +71,7 @@ export const drawScene = (
   const nodesById = selectNodes(state);
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
   const hoveredVectorPaintFace = refs.hoveredVectorPaintFaceKeyRef.current;
+  const hoveredVectorFaceSelect = refs.hoveredVectorFaceSelectRef.current;
   const selectedVectorVertexIds = refs.selectedVectorVertexIdsRef.current;
   const preMarqueeVectorVertexIds = refs.preVectorMarqueeVertexIdsRef.current;
   const selectedVectorSegmentIds = refs.selectedVectorSegmentIdsRef.current;
@@ -193,7 +196,19 @@ export const drawScene = (
   drawVectorAlignmentGuide(gl, program, buffer, refs.vectorAlignmentGuideRef.current, clientWidth, clientHeight, viewport);
   drawVectorLasso(gl, program, buffer, refs.vectorLassoPathRef.current, clientWidth, clientHeight, viewport);
   drawVectorPaintHoverPreview(gl, program, buffer, nodesById, hoveredVectorPaintFace, clientWidth, clientHeight, viewport);
+  drawVectorFaceSelectHoverPreview(gl, program, buffer, nodesById, hoveredVectorFaceSelect, clientWidth, clientHeight, viewport);
   drawVectorDraggedFillPreview(gl, program, buffer, nodesById, refs.draggedVectorFillFacesRef.current, clientWidth, clientHeight, viewport);
+  drawVectorSelectedFillPreview(
+    gl,
+    program,
+    buffer,
+    nodesById,
+    vectorEditingNodeIds,
+    selectedVectorVertexIds,
+    clientWidth,
+    clientHeight,
+    viewport,
+  );
   drawVectorCutHoverPreview(
     gl,
     program,

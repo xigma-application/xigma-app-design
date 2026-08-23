@@ -1232,6 +1232,18 @@ Drobniejsze, ale zauważalne różnice względem Figmy, niepowiązane z żadnym 
       otwartych węzłach tworzy naprawdę niezależny, nowy wektor ("wektor C") zamiast doklejać kontur do
       pierwszego z nich. Pełny opis: `.claude/docs/vector-network.md` §48, e2e:
       `e2e/pages/design/multi-vector-edit.spec.ts`.
+- [x] **Klik w wypełniony face zaznacza od razu wszystkie jego wierzchołki (narzędzie Move)** —
+      analogiczna afordancja do Paint tool (§43), ale do zaznaczania zamiast malowania: nowy
+      `getVectorFaceVertexIds.ts` parsuje `pieceKeys` face'a (token `v:<id>` = realny wierzchołek,
+      `x:<segmentId>:<n>` = jeszcze niespersystowane przecięcie, pomijane) na realny zestaw id
+      wierzchołków. Zwykły klik podmienia całe zaznaczenie, Shift dokłada (unia, nie toggle per-punkt —
+      dwa sąsiadujące face'e dzielące wspólny podział inaczej traciłyby go przy drugim shift-kliku) —
+      pozwala zaznaczyć kilka face'ów naraz, i od razu zbraja przeciąganie zaznaczonych punktów (bez
+      osobnego drugiego kliknięcia). Hover nad wypełnionym face'em w Move (nie tylko w Paint) pokazuje
+      ten sam niebieski hatch (`DRAFT_FRAME_STROKE`) co afordancja "dodaj fill" Paint tool, a gdy
+      wszystkie wierzchołki jakiegoś wypełnionego face'a są aktualnie zaznaczone (dowolną drogą — tym
+      klikiem, Lasso, marquee), face zostaje tak samo podświetlony na stałe, nie tylko na hover.
+      Pełny opis: `.claude/docs/vector-network.md` §56.
 - [ ] menu kontekstowe (prawy klik) na node'ach i na pustym canvasie — Copy/Paste, Duplicate,
       Bring to front/Send to back, Delete itd. — dziś nie istnieje w ogóle
 - [ ] kontrolka zoomu w rogu canvasu (aktualny % + dropdown: Zoom to fit / Zoom to selection /

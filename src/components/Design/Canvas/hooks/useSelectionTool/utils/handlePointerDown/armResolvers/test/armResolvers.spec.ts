@@ -30,6 +30,7 @@ import { armStarVertexCountOnPointerDown } from '../armStarVertexCountOnPointerD
 import { armVectorBendSegmentOnPointerDown } from '../armVectorBendSegmentOnPointerDown';
 import { armVectorCornerHandleOnPointerDown } from '../armVectorCornerHandleOnPointerDown';
 import { armVectorCutOnPointerDown } from '../armVectorCutOnPointerDown';
+import { armVectorFaceSelectOnPointerDown } from '../armVectorFaceSelectOnPointerDown';
 import { armVectorHandleOnPointerDown } from '../armVectorHandleOnPointerDown/armVectorHandleOnPointerDown';
 import { armVectorLassoOnPointerDown } from '../armVectorLassoOnPointerDown/armVectorLassoOnPointerDown';
 import { armVectorMarqueeOnPointerDown } from '../armVectorMarqueeOnPointerDown';
@@ -1212,6 +1213,264 @@ describe('armVectorPaintOnPointerDown', () => {
     // result
     expect(armVectorPaintOnPointerDown(ctx)).toBeUndefined();
     expect(ctx.dispatch).not.toHaveBeenCalled();
+  });
+});
+
+describe('armVectorFaceSelectOnPointerDown', () => {
+  afterEach(() => {
+    store.dispatch(setVectorEditingNodeIds([]));
+  });
+
+  const triangleFaceKey = 's1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]';
+
+  const addFilledTriangle = (): string => {
+    const nodeId = addVectorNode(
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'v1', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+      },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 50, y: 100 } },
+    );
+
+    store.dispatch(updateNode({ changes: { filledFaceKeys: [triangleFaceKey] }, id: nodeId }));
+
+    return nodeId;
+  };
+
+  it('should select every vertex of a clicked filled face, replacing the current selection', () => {
+    // mock
+    const nodeId = addFilledTriangle();
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['stale'];
+    canvasRefs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 'stale' }];
+    canvasRefs.selectedVectorSegmentIdsRef.current = ['stale'];
+
+    // before — a point inside the triangle
+    const ctx = createContext({ activeTool: ToolName.move, canvasRefs, point: { x: 50, y: 40 } });
+
+    // result
+    expect(armVectorFaceSelectOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.selectedVectorVertexIdsRef.current.sort()).toEqual(['v1', 'v2', 'v3']);
+    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(ctx.dispatch).not.toHaveBeenCalled();
+  });
+
+  it('should arm a group drag of the newly selected vertices immediately, so a click-and-drag in one gesture works without a separate second click', () => {
+    // mock
+    const nodeId = addFilledTriangle();
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.move, canvasRefs, point: { x: 50, y: 40 } });
+
+    // result
+    expect(armVectorFaceSelectOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.vectorMultiDragRef.current).not.toBeNull();
+    expect(Object.keys(canvasRefs.vectorMultiDragRef.current!.vertexOrigins).sort()).toEqual(['v1', 'v2', 'v3']);
+    expect(canvasRefs.vectorMultiDragRef.current!.pendingClickAction).toBeNull();
+  });
+
+  it('should add the face vertices to the current selection on a shift-click, without clearing it', () => {
+    // mock
+    const nodeId = addFilledTriangle();
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['other-vertex'];
+
+    // before
+    const ctx = createContext({
+      activeTool: ToolName.move,
+      canvasRefs,
+      event: pointerEvent({ shiftKey: true }),
+      point: { x: 50, y: 40 },
+    });
+
+    // result
+    expect(armVectorFaceSelectOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.selectedVectorVertexIdsRef.current.sort()).toEqual(['other-vertex', 'v1', 'v2', 'v3'].sort());
+  });
+
+  it('should keep the current selection unchanged when shift-clicking a face whose vertices are already all selected', () => {
+    // mock
+    const nodeId = addFilledTriangle();
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2', 'v3'];
+
+    // before
+    const ctx = createContext({
+      activeTool: ToolName.move,
+      canvasRefs,
+      event: pointerEvent({ shiftKey: true }),
+      point: { x: 50, y: 40 },
+    });
+
+    // result
+    expect(armVectorFaceSelectOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.selectedVectorVertexIdsRef.current.sort()).toEqual(['v1', 'v2', 'v3']);
+  });
+
+  it('should keep a shared divider vertex selected when shift-clicking a second, adjacent filled face (regression: a per-vertex toggle dropped it, freezing the divider on a later group drag)', () => {
+    // mock — a square split into a top and bottom half by an internal divider s7 (v3<->v6), both halves filled
+    const nodeId = addVectorNode(
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'v4', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+        s4: { endId: 'v5', id: 's4', startId: 'v4', tangentEnd: null, tangentStart: null },
+        s5: { endId: 'v6', id: 's5', startId: 'v5', tangentEnd: null, tangentStart: null },
+        s6: { endId: 'v1', id: 's6', startId: 'v6', tangentEnd: null, tangentStart: null },
+        s7: { endId: 'v6', id: 's7', startId: 'v3', tangentEnd: null, tangentStart: null },
+      },
+      {
+        v1: { id: 'v1', x: 0, y: 0 },
+        v2: { id: 'v2', x: 100, y: 0 },
+        v3: { id: 'v3', x: 100, y: 50 },
+        v4: { id: 'v4', x: 100, y: 100 },
+        v5: { id: 'v5', x: 0, y: 100 },
+        v6: { id: 'v6', x: 0, y: 50 },
+      },
+    );
+
+    const filledFaceKeys = deriveVectorFaces(store.getState().design.nodes[nodeId] as TVectorNode).map((face) =>
+      getVectorFillLoopKey(face.pieceKeys),
+    );
+
+    store.dispatch(updateNode({ changes: { filledFaceKeys }, id: nodeId }));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    // before — click the top half, then shift-click the bottom half; both share divider vertices v3/v6
+    const topCtx = createContext({ activeTool: ToolName.move, canvasRefs, point: { x: 60, y: 25 } });
+
+    expect(armVectorFaceSelectOnPointerDown(topCtx)).toBe(true);
+
+    const bottomCtx = createContext({
+      activeTool: ToolName.move,
+      canvasRefs,
+      event: pointerEvent({ shiftKey: true }),
+      point: { x: 60, y: 75 },
+    });
+
+    // result
+    expect(armVectorFaceSelectOnPointerDown(bottomCtx)).toBe(true);
+    expect(canvasRefs.selectedVectorVertexIdsRef.current.sort()).toEqual(['v1', 'v2', 'v3', 'v4', 'v5', 'v6']);
+  });
+
+  it('should persist a virtual crossing into a real vertex before selecting, then include it in the selection', () => {
+    // mock — a square (a-b-c-d) plus a separate horizontal line crossing its left and right edges, the
+    // crossing only exists virtually (render-time planarization) until this click, mirroring Paint's own
+    // crossing-persistence regression test
+    const nodeId = addVectorNode(
+      {
+        line1: { endId: 'p2', id: 'line1', startId: 'p1', tangentEnd: null, tangentStart: null },
+        s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'c', id: 's2', startId: 'b', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'd', id: 's3', startId: 'c', tangentEnd: null, tangentStart: null },
+        s4: { endId: 'a', id: 's4', startId: 'd', tangentEnd: null, tangentStart: null },
+      },
+      {
+        a: { id: 'a', x: 0, y: 0 },
+        b: { id: 'b', x: 100, y: 0 },
+        c: { id: 'c', x: 100, y: 100 },
+        d: { id: 'd', x: 0, y: 100 },
+        p1: { id: 'p1', x: -20, y: 50 },
+        p2: { id: 'p2', x: 120, y: 50 },
+      },
+    );
+
+    const filledFaceKeys = deriveVectorFaces(store.getState().design.nodes[nodeId] as TVectorNode).map((face) =>
+      getVectorFillLoopKey(face.pieceKeys),
+    );
+
+    store.dispatch(updateNode({ changes: { filledFaceKeys }, id: nodeId }));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    // before — click inside the top half, above the crossing line
+    const ctx = createContext({ activeTool: ToolName.move, point: { x: 50, y: 25 } });
+
+    // result
+    expect(armVectorFaceSelectOnPointerDown(ctx)).toBe(true);
+    expect(ctx.dispatch).toHaveBeenCalledTimes(1);
+
+    const originalVertexIds = new Set(['a', 'b', 'c', 'd', 'p1', 'p2']);
+    const selectedVertexIds = ctx.canvasRefs.selectedVectorVertexIdsRef.current;
+
+    expect(selectedVertexIds).toContain('a');
+    expect(selectedVertexIds).toContain('b');
+    expect(selectedVertexIds.some((id) => !originalVertexIds.has(id))).toBe(true);
+  });
+
+  it('should return undefined without changing the selection when the clicked face has no fill', () => {
+    // mock
+    const nodeId = addVectorNode(
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'v1', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+      },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 50, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.move, point: { x: 50, y: 40 } });
+
+    // result
+    expect(armVectorFaceSelectOnPointerDown(ctx)).toBeUndefined();
+    expect(ctx.canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(ctx.dispatch).not.toHaveBeenCalled();
+  });
+
+  it('should return undefined when the click misses every face', () => {
+    // mock
+    const nodeId = addFilledTriangle();
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    // before — a point well outside the triangle
+    const ctx = createContext({ activeTool: ToolName.move, point: { x: 500, y: 500 } });
+
+    // result
+    expect(armVectorFaceSelectOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  it('should return undefined when Move is not the active tool', () => {
+    // mock
+    const nodeId = addFilledTriangle();
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.default, point: { x: 50, y: 40 } });
+
+    // result
+    expect(armVectorFaceSelectOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  it('should return undefined when Vector Edit Mode is not active', () => {
+    // before
+    const ctx = createContext({ activeTool: ToolName.move, point: { x: 50, y: 40 } });
+
+    // result
+    expect(armVectorFaceSelectOnPointerDown(ctx)).toBeUndefined();
   });
 });
 

@@ -18,7 +18,7 @@ export const armVectorGroupDrag = (
   event: PointerEvent,
   canvasRefs: TCanvasRefs,
   point: TPoint,
-  pendingClickAction: TVectorPendingClickAction,
+  pendingClickAction: TVectorPendingClickAction | null,
 ): void => {
   const state = store.getState();
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);

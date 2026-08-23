@@ -1751,6 +1751,24 @@ surfaced.
 | --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :--------------: |
 | 288 | Split: severing a second, opposite edge of a closed loop with nothing left to bridge the two halves tears it into two separate nodes, pink-marking each side's own new vertex, with both left open for editing |  ✅  | ✅ `cut.spec.ts` |
 
+## Click-to-select a filled face's vertices (Move tool)
+
+Clicking inside an already-filled face with the Move tool now selects every one of its vertices at
+once (`getVectorFaceVertexIds.ts` parses the face's `pieceKeys`), replacing the current selection;
+shift-click unions a second face's vertices in instead of replacing, and also arms the group drag
+immediately (`armVectorGroupDrag.ts`, `pendingClickAction: null`) so a single continuous click-drag
+moves the selection with no separate warm-up click required first — both asked for directly after a
+live pass surfaced them. Hovering a filled face with the Move tool shows the same blue hatch
+(`DRAFT_FRAME_STROKE`) as the Paint tool's own "would add" hover, and any filled face whose entire
+vertex set is currently selected stays hatched permanently, not just on hover
+(`drawVectorSelectedFillPreview.ts`, re-derived every frame). Full write-up:
+`.claude/docs/vector-network.md` §56.
+
+| #   | Scenario                                                                                                                                                                                                                                            | Unit |           E2E            |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :----------------------: |
+| 289 | Clicking a filled face selects all its vertices and arms the drag immediately — one continuous click-drag moves it, no separate second gesture required first                                                                                       |  ✅  | ✅ `vector-edit.spec.ts` |
+| 290 | Shift-clicking a second, adjacent filled face keeps its shared divider vertices selected, so a later group drag moves the divider along with the rest of the shape instead of leaving it behind (regression: a per-vertex toggle used to drop them) |  ✅  | ✅ `vector-edit.spec.ts` |
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

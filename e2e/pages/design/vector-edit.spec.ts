@@ -1723,7 +1723,9 @@ test('dragging a vertex of one vector shape onto a vertex of a completely separa
     return { idA: rootOrder[0], idB: rootOrder[1] };
   });
 
-  await designPage.doubleClick(1350, 350); // enter Vector Edit Mode on shape B
+  // on shape B's top-edge contour, not its unfilled interior — since §43's contour-only hit-test fix,
+  // a plain/double click dead-center of an unpainted vector face is no longer a hit at all
+  await designPage.doubleClick(1350, 300); // enter Vector Edit Mode on shape B
 
   await designPage.pointerDown(1300, 300); // shape B's own top-left vertex
   await designPage.pointerMove(1150, 300);
@@ -1785,7 +1787,9 @@ test('a painted face on the absorbed shape survives being merged into a complete
 
   expect(faceKeyOnA).toHaveLength(1); // sanity check: the paint click actually filled shape A's face
 
-  await designPage.doubleClick(1350, 350); // enter Vector Edit Mode on shape B
+  // on shape B's top-edge contour, not its unfilled interior — since §43's contour-only hit-test fix,
+  // a plain/double click dead-center of an unpainted vector face is no longer a hit at all
+  await designPage.doubleClick(1350, 300); // enter Vector Edit Mode on shape B
 
   await designPage.pointerDown(1300, 300); // shape B's own top-left vertex
   await designPage.pointerMove(1150, 300);
@@ -1959,4 +1963,146 @@ test('a painted region bounded by a multiply-crossed segment’s middle piece st
   );
 
   expect(resolvedAfterDrag).toEqual([true]);
+});
+
+// regression check for two live-reported issues in §56's Move-tool "click a filled face to select all
+// its vertices" feature: (1) the click used to only select, requiring a separate second gesture before
+// a drag would actually move anything ("muszę puścić LPM, kliknąć LPM i wtedy mogę dopiero poruszać");
+// (2) shift-clicking a second, adjacent face used to toggle its shared divider vertices OFF (they were
+// already selected from the first face), silently dropping them and leaving the divider frozen in
+// place during a later group drag while the rest of the shape moved
+test('clicking a filled face with the Move tool selects all its vertices and arms the drag immediately, so a single continuous click-drag moves it with no separate second gesture required first', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-face-select-immediate-drag');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawClosedSquare(designPage); // v1(900,300) v2(1000,300) v3(1000,400) v4(900,400)
+  await designPage.selectVectorEditMoveTool();
+  await page.keyboard.press('Shift+B');
+  await designPage.click(950, 350); // paint the whole square
+  await designPage.selectVectorEditMoveTool();
+
+  const v1Region = { height: 24, width: 24, x: 888, y: 288 }; // around v1's original position
+
+  // reference — a plain click (down+up, no movement) on the face, still selects every vertex, so this
+  // is what "selected but never dragged" renders as on this exact node (its own loop-key-hashed debug
+  // fill color, §44, is otherwise a confound between two separately-drawn shapes) — isolates the
+  // selection-highlight itself (which changes v1's tint regardless of any movement) from an actual
+  // position change below
+  await designPage.click(950, 350);
+  const selectedStationary = await page.screenshot({ clip: v1Region });
+
+  await designPage.click(1400, 700); // deselect — back to the exact same starting state as before
+
+  // the actual gesture under test — one continuous down-move-up starting inside the face's interior
+  // (not on any vertex dot), from a freshly deselected state so no prior click has already armed
+  // anything (a second click on an already-selected face's box interior is handled by the pre-existing
+  // armVectorMultiSelectBoxOnPointerDown regardless of this fix, so it wouldn't isolate it)
+  await designPage.dragVectorPoint(950, 350, 1050, 450);
+  const afterOneGestureDrag = await page.screenshot({ clip: v1Region });
+
+  // under the bug this click-drag only ever selected the square (same render as the stationary
+  // reference above); under the fix v1 has actually left this region
+  expect(afterOneGestureDrag.equals(selectedStationary)).toBe(false);
+});
+
+test('shift-clicking a second, adjacent filled face keeps its shared divider vertices selected, so a subsequent group drag moves the divider along with the rest of the shape instead of leaving it behind', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-multi-face-select-drag');
+  await expect(designPage.canvas).toBeVisible();
+
+  // a square split into a top and bottom half by an internal horizontal divider (v3-v6, s7) — both
+  // halves filled, injected directly like this file's own star/tent repros above
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { addNode, setActiveTool, setVectorEditingNodeIds } = await import('/src/store/design/slice.ts');
+    const { deriveVectorFaces } = await import('/src/utils/canvas/vectorNetwork/deriveVectorFaces.ts');
+    const { getVectorFillLoopKey } = await import('/src/utils/canvas/vectorNetwork/getVectorFillLoopKey.ts');
+
+    const segments = {
+      s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+      s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+      s3: { endId: 'v4', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+      s4: { endId: 'v5', id: 's4', startId: 'v4', tangentEnd: null, tangentStart: null },
+      s5: { endId: 'v6', id: 's5', startId: 'v5', tangentEnd: null, tangentStart: null },
+      s6: { endId: 'v1', id: 's6', startId: 'v6', tangentEnd: null, tangentStart: null },
+      s7: { endId: 'v6', id: 's7', startId: 'v3', tangentEnd: null, tangentStart: null },
+    };
+    const vertices = {
+      v1: { id: 'v1', x: 900, y: 300 },
+      v2: { id: 'v2', x: 1000, y: 300 },
+      v3: { id: 'v3', x: 1000, y: 350 },
+      v4: { id: 'v4', x: 1000, y: 400 },
+      v5: { id: 'v5', x: 900, y: 400 },
+      v6: { id: 'v6', x: 900, y: 350 },
+    };
+
+    const faces = deriveVectorFaces({
+      fillColor: '#ff0000',
+      filledFaceKeys: [],
+      id: 'probe',
+      name: '',
+      parentId: null,
+      rotation: 0,
+      segments,
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: 'vector',
+      vertexHandleModes: {},
+      vertices,
+    } as never);
+
+    store.dispatch(
+      addNode({
+        fillColor: '#ff0000',
+        filledFaceKeys: faces.map((face: { pieceKeys: string[] }) => getVectorFillLoopKey(face.pieceKeys)),
+        name: 'Vector',
+        parentId: null,
+        rotation: 0,
+        segments,
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: 'vector',
+        vertexHandleModes: {},
+        vertices,
+      } as never),
+    );
+
+    const state = store.getState();
+
+    store.dispatch(setVectorEditingNodeIds([state.design.rootOrder[state.design.rootOrder.length - 1]]));
+    store.dispatch(setActiveTool('move' as never));
+  });
+
+  await designPage.click(950, 325); // select the top half's vertices (v1, v2, v3, v6)
+  await designPage.click(950, 375, { shift: true }); // add the bottom half's too (v3, v4, v5, v6) —
+  // v3/v6 are shared by both halves; the bug toggled them back OFF here
+
+  // drag from inside the (now multi-selected) top half, not on any dot — translates the whole shape by
+  // (+150, 0) through the real browser pointer-event pipeline (armVectorMultiSelectBoxOnPointerDown ->
+  // continueVectorMultiDrag), not a synthetic jsdom event — this is what a unit test of the arm resolver
+  // alone can't exercise
+  await designPage.dragVectorPoint(950, 325, 1100, 325);
+
+  // read the actual persisted vertex positions rather than diffing pixels: the segments adjacent to a
+  // moved-vs-stationary vertex pair visibly reshape regardless of whether the divider's own endpoints
+  // moved, which makes a small screenshot region an unreliable signal for this specific claim
+  const { v3, v6 } = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { rootOrder, nodes } = store.getState().design;
+    const node = nodes[rootOrder[rootOrder.length - 1]] as { vertices: Record<string, { x: number; y: number }> };
+
+    return { v3: node.vertices.v3, v6: node.vertices.v6 };
+  });
+
+  // under the bug, shift-clicking the bottom face toggled v3/v6 out of the selection, so this drag
+  // never touched them and they'd still sit at their original (1000,350)/(900,350) positions
+  expect(v3).toMatchObject({ x: 1150, y: 350 });
+  expect(v6).toMatchObject({ x: 1050, y: 350 });
 });

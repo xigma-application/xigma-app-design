@@ -20,6 +20,7 @@ describe('createCanvasRefs behaviors', () => {
       hoveredVectorCutPointRef: { current: null },
       hoveredVectorCutSegmentRef: { current: null },
       hoveredVectorEdgeInsertPointRef: { current: null },
+      hoveredVectorFaceSelectRef: { current: null },
       hoveredVectorHandleRef: { current: null },
       hoveredVectorPaintFaceKeyRef: { current: null },
       hoveredVectorSegmentIdRef: { current: null },

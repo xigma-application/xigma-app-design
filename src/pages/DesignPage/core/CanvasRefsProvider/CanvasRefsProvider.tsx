@@ -17,6 +17,7 @@ import {
   TVectorCutPreview,
   TVectorCutSegmentHover,
   TVectorDraggedFillFaces,
+  TVectorFaceHover,
   TVectorHandleHover,
   TVectorMultiSelectBox,
   TVectorPaintFaceHover,
@@ -45,6 +46,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const hoveredVectorCutPointRef = useRef<TPoint | null>(null);
   const hoveredVectorCutSegmentRef = useRef<TVectorCutSegmentHover | null>(null);
   const hoveredVectorEdgeInsertPointRef = useRef<TPoint | null>(null);
+  const hoveredVectorFaceSelectRef = useRef<TVectorFaceHover | null>(null);
   const hoveredVectorHandleRef = useRef<TVectorHandleHover | null>(null);
   const hoveredVectorPaintFaceKeyRef = useRef<TVectorPaintFaceHover | null>(null);
   const hoveredVectorSegmentIdRef = useRef<string | null>(null);
@@ -91,6 +93,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       hoveredVectorCutPointRef,
       hoveredVectorCutSegmentRef,
       hoveredVectorEdgeInsertPointRef,
+      hoveredVectorFaceSelectRef,
       hoveredVectorHandleRef,
       hoveredVectorPaintFaceKeyRef,
       hoveredVectorSegmentIdRef,

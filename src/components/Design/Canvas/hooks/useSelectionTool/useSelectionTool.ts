@@ -118,6 +118,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         refs.vectorAlignmentGuideRef.current = null;
         refs.vectorLassoPathRef.current = null;
         refs.hoveredVectorPaintFaceKeyRef.current = null;
+        refs.hoveredVectorFaceSelectRef.current = null;
         refs.vectorCutPreviewRef.current = null;
         selectionRefs.vectorCutDragRef.current = null;
         lastPointerClientPositionRef.current = null;
