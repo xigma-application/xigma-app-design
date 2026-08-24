@@ -28,6 +28,7 @@ import { drawEllipseArcHandleLayer } from './drawEllipseArcHandleLayer/drawEllip
 import { drawFrame } from './drawFrame';
 import { drawHoverOutline } from './drawHoverOutline';
 import { drawMarquee } from 'utils/canvas/drawMarquee';
+import { drawPencilPreview } from './drawPencilPreview/drawPencilPreview';
 import { drawPenPreview } from './drawPenPreview/drawPenPreview';
 import { drawPixelGrid } from 'utils/canvas/drawPixelGrid';
 import { drawSceneBackground } from 'utils/canvas/drawSceneBackground';
@@ -182,6 +183,17 @@ export const drawScene = (
     refs.penHoveredDragArmableVertexRef.current,
     nodesById,
     vectorEditingNodeIds[0] ?? null,
+    clientWidth,
+    clientHeight,
+    viewport,
+  );
+  drawPencilPreview(
+    gl,
+    program,
+    buffer,
+    refs.pencilPreviewPointsRef.current,
+    refs.pencilRawPreviewPointsRef.current,
+    refs.pencilShowRawPreviewRef.current,
     clientWidth,
     clientHeight,
     viewport,

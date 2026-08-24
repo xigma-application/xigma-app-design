@@ -149,6 +149,7 @@ export type TVectorWidthProfile = {
 };
 
 export type TVectorNode = {
+  capStyle?: 'round';
   fillColor: string | null;
   filledFaceKeys: string[];
   id: string;

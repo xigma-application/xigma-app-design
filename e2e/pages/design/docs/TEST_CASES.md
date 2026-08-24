@@ -136,6 +136,35 @@ arrowhead's visual overflow.
 | 113 | Pressing "Shift+L" activates the Arrow tool, then dragging draws an arrow                           |  —   | ✅ `create-arrow.spec.ts` |
 | 114 | Pressing a plain "L" (no Shift) still activates Line, not Arrow                                     |  —   | ✅ `create-arrow.spec.ts` |
 
+## Pencil drawing
+
+Pencil (`ToolName.pencil`, `Shift+P`, shares Pen's dropdown) is a single continuous drag — press,
+drag, release — that commits exactly one `TVectorNode` per stroke, unlike Pen's click-by-click
+multi-session network. It reuses the existing Vector Edit Mode mechanism unchanged for editing.
+Progressive chunked simplification (not one global RDP pass at release) and tangent-magnitude
+clamping both fix real, reported curve-fit overshoot on tight loops/sharp reversals; full write-up:
+`.claude/docs/pencil-tool.md`.
+
+| #   | Scenario                                                                                                                | Unit |           E2E            |
+| --- | ------------------------------------------------------------------------------------------------------------------------ | :--: | :-----------------------: |
+| 317 | A single drag draws a visible stroke, and the tool stays active for an immediate second stroke, no reselect needed     |  —   | ✅ `pencil.spec.ts`      |
+| 318 | A drag too short to clear the minimum shape size is discarded, drawing nothing                                         |  —   | ✅ `pencil.spec.ts`      |
+| 319 | Shift held mid-drag locks the segment to a straight line and holds it through a direction reversal                     |  —   | ✅ `pencil.spec.ts`      |
+| 320 | Releasing Shift mid-drag resumes freehand drawing from the locked endpoint, instead of staying constrained             |  —   | ✅ `pencil.spec.ts`      |
+| 321 | Releasing the mouse button while Shift is still held (no separate Shift-keyup) still commits the axis-locked segment   |  ✅  | ✅ `pencil.spec.ts`      |
+| 322 | A committed Pencil stroke opens in Vector Edit Mode via double-click, and its vertices drag like an ordinary vector node |  —   | ✅ `pencil.spec.ts`      |
+
+#321 is the fixed regression described in `pencil-tool.md` §5: `handlePointerUp.ts` originally read
+the tail directly, which the Shift branch of `handlePointerMove` never wrote to, so a stroke ended
+by releasing the mouse mid-lock silently drew nothing. Unit-covered directly
+(`foldPendingAxisLock.spec.ts`, `handlePointerUp.spec.ts`'s own wiring test) and kept in e2e too,
+since it's exactly the kind of real pointerup/keyup-ordering bug a synthetic event can hide.
+
+The tight-loop curve-fit overshoot itself (chunked commit + tangent clamping, `pencil-tool.md` §1-2)
+has no dedicated scenario here — it was verified numerically (a standalone deviation-measurement
+script, not a browser) rather than via pixel-diff, since no single function's branch captures the
+bug; #317-320 exercise the same code paths incidentally.
+
 ## Line selection & dragging
 
 Per the product spec (a line behaves like Figma's Line tool): selecting a line shows **no**

@@ -4,6 +4,7 @@ import { TVectorNode, TViewport } from 'types/design/types';
 // utils
 import { bakeVectorNodeRotation } from 'components/Design/Canvas/utils/bakeVectorNodeRotation';
 import { drawVectorFill } from './drawVectorFill';
+import { drawVectorRoundedCaps } from './drawVectorRoundedCaps';
 import { drawVectorStroke } from './drawVectorStroke';
 import { drawVectorVariableStroke } from './drawVectorVariableStroke';
 import { flattenVectorSegments } from '../vectorNetwork/flattenVectorSegments';
@@ -45,4 +46,6 @@ export const drawVectorNode = (
       viewport,
     );
   }
+
+  drawVectorRoundedCaps(gl, program, buffer, renderedNode, canvasWidth, canvasHeight, viewport);
 };

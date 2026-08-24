@@ -397,25 +397,6 @@ test('Pen and Pencil apply distinct cursor classNames while active', async ({ pa
   expect(penClassName).not.toBe(pencilClassName);
 });
 
-test('the Pencil tool does not draw anything on the canvas yet', async ({ page }) => {
-  const designPage = new DesignPage(page);
-
-  await designPage.goto('e2e-test-pencil-no-op');
-  await expect(designPage.canvas).toBeVisible();
-
-  await designPage.selectToolFromDropdown('pen', 'Pencil');
-  // captured only after Pencil is already active, so the toolbar's own highlighted-icon change
-  // (default -> pen group) isn't mistaken for something the tool drew on the canvas
-  const before = await designPage.canvas.screenshot();
-
-  await designPage.click(700, 300);
-  await designPage.dragVectorPoint(850, 300, 950, 450);
-  await designPage.pointerMove(1500, 900);
-
-  const after = await designPage.canvas.screenshot();
-  expect(after.equals(before)).toBe(true);
-});
-
 test('the Pen tool stays active after finishing a network, unlike shape tools reverting to default', async ({ page }) => {
   const designPage = new DesignPage(page);
 

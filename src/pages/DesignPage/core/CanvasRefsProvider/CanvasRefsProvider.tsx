@@ -70,6 +70,9 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const penHoveredDragArmableVertexRef = useRef<boolean>(false);
   const penNewVertexPreviewRef = useRef<TPoint | null>(null);
   const penPreviewRef = useRef<TPenPreview | null>(null);
+  const pencilPreviewPointsRef = useRef<TPoint[] | null>(null);
+  const pencilRawPreviewPointsRef = useRef<TPoint[] | null>(null);
+  const pencilShowRawPreviewRef = useRef<boolean>(false);
   const polygonCornerRadiusDragRef = useRef<TPolygonCornerRadiusDragState | null>(null);
   const preVectorMarqueeSegmentIdsRef = useRef<string[]>([]);
   const preVectorMarqueeVertexIdsRef = useRef<string[]>([]);
@@ -125,6 +128,9 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       penHoveredDragArmableVertexRef,
       penNewVertexPreviewRef,
       penPreviewRef,
+      pencilPreviewPointsRef,
+      pencilRawPreviewPointsRef,
+      pencilShowRawPreviewRef,
       polygonCornerRadiusDragRef,
       preVectorMarqueeSegmentIdsRef,
       preVectorMarqueeVertexIdsRef,

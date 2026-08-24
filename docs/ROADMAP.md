@@ -87,7 +87,6 @@ comment / shapes, potem osobno: draw / scale / actions / dev mode).
       grupy pokazuje ikonę ostatnio wybranego wariantu (`lastShapeTool` w `store/design`) —
       szczegóły narzędzi w Etapie 6 niżej
 - [ ] pen / text (z własnymi dropdownami wariantów, jeśli dojdą warianty) — kolejny krok
-- [ ] shapes (assets), prawa grupa (draw / scale / actions / dev mode)
 
 ## Etap 2 — Model danych sceny
 
@@ -504,6 +503,17 @@ comment / shapes, potem osobno: draw / scale / actions / dev mode).
       even-odd, nowa technika WebGL w tym silniku) zamiast trzymanej listy konturów. Zbudowano przy
       okazji **cały Etap 11** (undo/redo, patrz niżej) jako fundament, bo bez niego operacje na
       wierzchołkach/uchwytach nie miałyby żadnego Ctrl+Z. Pełny opis: `.claude/docs/vector-network.md`.
+- [x] **Pencil** — jedno ciągłe przeciągnięcie (press → drag → release) commituje dokładnie jeden
+      `TVectorNode`, w przeciwieństwie do wieloklikowego Pena; edycja to ten sam, niezmieniony
+      mechanizm Vector Edit Mode. Surowa ścieżka myszy jest upraszczana progresywnie, kawałkami
+      (nie jednym globalnym przebiegiem RDP przy puszczeniu) i dopasowywana krzywą Catmull-Roma ze
+      ściętą (clamped) styczną — obie poprawki naprawiają realny, zgłoszony bug: ciasna pętla/ostry
+      zwrot w środku dłuższej kreski "rozjeżdżał się" wizualnie, bo dopasowanie krzywej widziało
+      punkty z zupełnie innej części kreski. Zaokrąglone końce (`capStyle: 'round'`, tylko przy
+      renderowaniu, nie w danych) widoczne już w trakcie ciągnięcia, nie dopiero po puszczeniu.
+      Shift trzyma oś (poziom/pion) aż do puszczenia, nawet po zmianie kierunku ruchu — i działa
+      też gdy puszczono najpierw przycisk myszy, a Shift dopiero potem (osobny, naprawiony bug).
+      Pełny opis: `.claude/docs/pencil-tool.md`.
 
 ## Etap 7 — Edycja tekstu (DOM overlay) + rendering tekstu w WebGL
 

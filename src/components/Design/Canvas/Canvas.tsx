@@ -18,6 +18,7 @@ import { useCurvedCaretEditing } from './hooks/useCurvedCaretEditing/useCurvedCa
 import { useDrawingCursor } from './hooks/useDrawingCursor/useDrawingCursor';
 import { useDrawLineTool } from './hooks/useDrawLineTool/useDrawLineTool';
 import { useDrawMediaTool } from './hooks/useDrawMediaTool/useDrawMediaTool';
+import { useDrawPencilTool } from './hooks/useDrawPencilTool/useDrawPencilTool';
 import { useDrawPenTool } from './hooks/useDrawPenTool/useDrawPenTool';
 import { useDrawPolygonTool } from './hooks/useDrawPolygonTool/useDrawPolygonTool';
 import { useDrawShapeTool } from './hooks/useDrawShapeTool/useDrawShapeTool';
@@ -70,6 +71,7 @@ const Canvas: FC = () => {
   useDrawLineTool(refs, ARROW_TOOL_SETTINGS);
   useDrawMediaTool(refs, MEDIA_TOOL_SETTINGS);
   useDrawPenTool(refs);
+  useDrawPencilTool(refs);
   useDrawTextTool(refs);
   useDrawTextOnPathTool(refs);
   useCommentTool(refs);
