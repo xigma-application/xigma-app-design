@@ -11,10 +11,33 @@ import { createCanvasRefs } from '../../../useCanvasRefs/createCanvasRefs';
 import { handleCopySelection } from '../handleCopySelection';
 import { handlePasteSelection } from '../handlePasteSelection';
 import { setClipboardNodes } from '../clipboard';
+import { setVectorClipboardFragment } from '../vectorClipboard';
 
 const addFrameNode = (): string => {
   store.dispatch(
     addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 5, y: 5 }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addVectorNode = (): string => {
+  store.dispatch(
+    addNode({
+      fillColor: null,
+      filledFaceKeys: [],
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {},
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { v1: { id: 'v1', x: 0, y: 0 } },
+    }),
   );
 
   const { rootOrder } = store.getState().design;
@@ -27,6 +50,7 @@ describe('handlePasteSelection', () => {
     store.dispatch(setSelection([]));
     store.dispatch(setVectorEditingNodeIds([]));
     setClipboardNodes([]);
+    setVectorClipboardFragment({ filledFacePieceKeySets: [], segments: [], vertexHandleModes: {}, vertices: [] });
   });
 
   it('should add an offset clone of every copied node and select the new clones', () => {
@@ -34,7 +58,7 @@ describe('handlePasteSelection', () => {
     const frameId = addFrameNode();
 
     store.dispatch(setSelection([frameId]));
-    handleCopySelection();
+    handleCopySelection(createCanvasRefs());
     store.dispatch(setSelection([]));
 
     // action
@@ -56,7 +80,7 @@ describe('handlePasteSelection', () => {
     const frameId = addFrameNode();
 
     store.dispatch(setSelection([frameId]));
-    handleCopySelection();
+    handleCopySelection(createCanvasRefs());
     store.dispatch(setSelection([]));
 
     const nodeCountBeforePaste = Object.keys(store.getState().design.nodes).length;
@@ -80,12 +104,12 @@ describe('handlePasteSelection', () => {
     expect(Object.keys(store.getState().design.nodes)).toHaveLength(nodeCountBeforePaste);
   });
 
-  it('should do nothing while a vector node is open for editing', () => {
+  it('should do nothing while a vector node is open for editing and only a whole-node clipboard was copied', () => {
     // mock
     const frameId = addFrameNode();
 
     store.dispatch(setSelection([frameId]));
-    handleCopySelection();
+    handleCopySelection(createCanvasRefs());
     store.dispatch(setSelection([]));
     store.dispatch(setVectorEditingNodeIds([frameId]));
 
@@ -96,5 +120,27 @@ describe('handlePasteSelection', () => {
 
     // result
     expect(Object.keys(store.getState().design.nodes)).toHaveLength(nodeCountBeforePaste);
+  });
+
+  it('should paste a copied vector fragment into the open vector node', () => {
+    // mock
+    const vectorId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([vectorId]));
+
+    const copyRefs = createCanvasRefs({ selectedVectorVertexIdsRef: { current: ['v1'] } });
+
+    handleCopySelection(copyRefs);
+
+    const pasteRefs = createCanvasRefs();
+
+    // action
+    handlePasteSelection(store.dispatch, pasteRefs);
+
+    // result
+    const node = store.getState().design.nodes[vectorId] as any;
+
+    expect(Object.keys(node.vertices)).toHaveLength(2);
+    expect(pasteRefs.selectedVectorVertexIdsRef.current).toHaveLength(1);
   });
 });

@@ -126,11 +126,14 @@ Cmd/Ctrl+D (duplicate), Cmd/Ctrl+C/V (copy/paste), Cmd/Ctrl+A (select all), and 
 `nodes` off the real store singleton directly (`store.getState()`, not `useAppSelector`, matching
 `handleDeleteSelection`'s existing style) and each brackets its own multi-dispatch in a single
 `beginHistoryGesture`/`endHistoryGesture` pair so N moved/duplicated/pasted nodes collapse into one
-undo step (`design-store-architecture.md` §8). All four skip entirely while a vector node is open for
-editing (`vectorEditingNodeIds.length > 0`) — Vector Edit Mode owns vertex/segment-level duplicate,
-copy, and delete semantics on its own axis (`selectedVectorVertexIdsRef`/`selectedVectorSegmentIdsRef`,
-not `state.design.selectedIds`), so mixing the two would silently duplicate/nudge the wrong thing.
-Copy/paste's clipboard is a plain module-level array (`utils/clipboard.ts`, `getClipboardNodes`/
+undo step (`design-store-architecture.md` §8). Select All and Nudge skip entirely while a vector node
+is open for editing (`vectorEditingNodeIds.length > 0`) — mixing scene-node-level `selectedIds` with
+Vector Edit Mode's own vertex/segment selection would select/move the wrong thing. Duplicate/Copy/Paste
+instead **branch**: with a vertex or segment selected (`selectedVectorVertexIdsRef`/
+`selectedVectorSegmentIdsRef` non-empty), they delegate to a parallel vertex/segment-level
+implementation (`vector-network.md` §65) instead of no-opping — added as a direct follow-up request
+once the whole-node version shipped. Copy/paste's whole-node clipboard is a plain module-level array
+(`utils/clipboard.ts`, `getClipboardNodes`/
 `setClipboardNodes`) — no OS clipboard integration, lost on reload, deep-cloned on both write and the
 shared `cloneNodeWithOffset.ts` read path (also used by duplicate) so later mutation of the live nodes
 can't corrupt what's sitting in the clipboard. Both duplicate and paste offset the clone by

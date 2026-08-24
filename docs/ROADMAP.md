@@ -86,7 +86,6 @@ comment / shapes, potem osobno: draw / scale / actions / dev mode).
       `TOOL_GROUP_ITEMS[ToolName.rectangle]` (Rectangle, Line, Ellipse, Polygon, Star), przycisk
       grupy pokazuje ikonę ostatnio wybranego wariantu (`lastShapeTool` w `store/design`) —
       szczegóły narzędzi w Etapie 6 niżej
-- [ ] pen / text (z własnymi dropdownami wariantów, jeśli dojdą warianty) — kolejny krok
 
 ## Etap 2 — Model danych sceny
 
@@ -1033,19 +1032,53 @@ node.rotation)` w `drawMsdfText.ts`).
       wszystkie czytają/piszą `selectedIds`/`nodes` bezpośrednio z `store.getState()` (ten sam styl co
       istniejący `handleDeleteSelection`), z każdą wieloelementową operacją spiętą w jeden
       `beginHistoryGesture`/`endHistoryGesture` (N przesuniętych/zduplikowanych/wklejonych node'ów =
-      jeden krok Ctrl+Z). Wszystkie cztery świadomie **nic nie robią, gdy trwa Vector Edit Mode**
-      (`vectorEditingNodeIds.length > 0`) — ten tryb ma własną, osobną semantykę duplikowania/kopiowania
-      na poziomie wierzchołków/segmentów, mieszanie jej z zaznaczeniem node'ów na poziomie sceny
-      dublikowałoby/przesuwało nie to co trzeba. Duplicate i Paste dzielą jeden, nowy
-      `cloneNodeWithOffset.ts` (offset o stałe `DUPLICATE_OFFSET` world units, `structuredClone` żeby
-      klon nie dzielił referencji z oryginałem) — dla duplikowanego tekstu-na-ścieżce świadomie czyści
-      `pathId`, inaczej dwa teksty walczyłyby o pozycję wyznaczaną przez tę samą ścieżkę. Nudge i
-      duplicate/paste dzielą też nowy, wspólny `Canvas/utils/getGeometryDeltaChanges.ts` — wydzielony
-      bez zmian z prywatnej dotąd `getOriginChanges` w `continueDrag.ts` (ten sam switch po kształcie
-      node'a: `x`/`y` vs `x1..y2` vs `vertices`), teraz reużywany trzeci raz. Clipboard dla Copy/Paste to
-      zwykła, modułowa tablica w pamięci (`utils/clipboard.ts`) — bez integracji z systemowym
-      schowkiem, nie przeżywa odświeżenia strony, świadomy najmniejszy sensowny zakres na tę prośbę.
-      Pełny opis: `.claude/docs/design-tool-architecture.md` §6.
+      jeden krok Ctrl+Z). Duplicate i Paste dzielą jeden, nowy `cloneNodeWithOffset.ts` (offset o stałe
+      `DUPLICATE_OFFSET` world units, `structuredClone` żeby klon nie dzielił referencji z oryginałem) —
+      dla duplikowanego tekstu-na-ścieżce świadomie czyści `pathId`, inaczej dwa teksty walczyłyby o
+      pozycję wyznaczaną przez tę samą ścieżkę. Nudge i duplicate/paste dzielą też nowy, wspólny
+      `Canvas/utils/getGeometryDeltaChanges.ts` — wydzielony bez zmian z prywatnej dotąd
+      `getOriginChanges` w `continueDrag.ts` (ten sam switch po kształcie node'a: `x`/`y` vs `x1..y2` vs
+      `vertices`), teraz reużywany trzeci raz. Clipboard dla Copy/Paste to zwykła, modułowa tablica w
+      pamięci (`utils/clipboard.ts`) — bez integracji z systemowym schowkiem, nie przeżywa odświeżenia
+      strony, świadomy najmniejszy sensowny zakres na tę prośbę. Pełny opis:
+      `.claude/docs/design-tool-architecture.md` §6.
+
+      **Rozszerzenie: Duplicate/Copy/Paste działają też na poziomie wierzchołków/segmentów w Vector Edit
+      Mode** (zamiast wcześniejszego "nic nie robią, gdy trwa Vector Edit Mode") — Cmd+D na zaznaczonych
+      wierzchołkach/segmentach klonuje je (offsetem o `DUPLICATE_OFFSET`) z powrotem do **tego samego**
+      node'a; Cmd+C/V kopiuje/wkleja przez osobny, drugi schowek (`vectorClipboard.ts`, świadomie osobny
+      od node-owego `clipboard.ts` — inny kształt danych), wklejając do **ostatniego** aktualnie
+      otwartego node'a (`vectorEditingNodeIds[length-1]`) — świadomy, najprostszy wybór na wypadek
+      multi-vector-editing (Etap 6, §48 w `vector-network.md`), gdzie "który node jest aktywny" nie ma
+      innej jednoznacznej definicji. Klikając w wybranie zaznaczonego segmentu do duplikowania/kopiowania
+      automatycznie dociąga **oba** jego końce (nawet jeśli same wierzchołki nie były osobno zaznaczone),
+      a odwrotnie: jeśli oba końce jakiegoś segmentu trafiają do zaznaczonego zestawu wierzchołków, ten
+      segment dociąga się automatycznie razem z nimi (`extractVectorFragment.ts`) — dokładnie tak, jak
+      Figma duplikuje krawędź między dwoma duplikowanymi punktami. Nowe id (wierzchołków i segmentów)
+      generowane przez `nanoid()` bezpośrednio (nie przez `addNode`'s `prepare` — te id żyją wewnątrz
+      `TVectorNode.vertices`/`segments`, nie jako osobne node'y sceny), więc kolizji z innymi node'ami
+      nie ma z definicji (te mapy są prywatne per-node). Tangenty (`tangentStart`/`tangentEnd`) kopiowane
+      1:1 bez przeliczania — to już ustalony fakt z Etapu 5/10, że są relatywne wektory, nie bezwzględne
+      współrzędne. **Świadomy trim zakresu**: `widthProfile` (Variable Width, Etap 6) nie jest
+      duplikowany/kopiowany — punkty szerokości są indeksowane po pozycji na ścieżce, nie po
+      wierzchołku, więc poprawne przeniesienie wymagałoby osobnej matematyki nie objętej tą prośbą.
+
+      **Poprawka (zgłoszona na żywo, z realnym zrzutem store'u)**: zduplikowany/wklejony **filled**
+      kształt wychodził niewypełniony. Pierwsza wersja przenoszenia fill (dopasowanie po zestawie id
+      wierzchołków, po ponownym odpaleniu `deriveVectorFaces` na złączonym node'ie) działała na
+      syntetycznym kwadracie testowym, ale nie na realnym kształcie z dwóch krzywych łączących te same
+      dwa punkty (soczewka) — bo (1) `getVectorFaceVertexIds` gubi punkty na planarized crossing (marker
+      `x:...`, nie `v:<id>`), i głębiej (2) ponowne wyliczanie faces na złączonym node'ie jest z natury
+      zawodne, skoro duplikat leży zaledwie `DUPLICATE_OFFSET` (10 jednostek) od oryginału — dla
+      dowolnego kształtu większego niż to realnie się z nim nakłada, więc planaryzacja widzi prawdziwe
+      przecięcia między oryginałem a jego własną kopią i rozbija wyliczone faces. Naprawione całkowitym
+      porzuceniem ponownego wyliczania na rzecz **podmiany id wprost w tekście już poprawnego,
+      oryginalnego klucza** (`remapPieceKey.ts`) — `extractVectorFragment` trzyma teraz surowe
+      `pieceKeys` wypełnionej faces (`filledFacePieceKeySets`), `mergeClonedVectorFragment` dokłada
+      analogiczną do wierzchołkowej `segmentIdMap`, a nowy klucz to ten sam string z podmienionymi
+      id (realSegmentId + markery `v:`/`x:`) i ponownie posortowanymi granicami — zero zależności od
+      tego, co jeszcze dzieje się geometrycznie w złączonym node'ie. Pełny opis:
+      `.claude/docs/vector-network.md` §65.
 - [ ] **zoom ze skrótów klawiszowych** — Cmd/Ctrl +/− (zoom in/out o krok), Shift+0 (zoom to 100%),
       Shift+1 (zoom to fit), Shift+2 (zoom to selection) — dziś zoom działa tylko przez
       scroll/pinch (Etap 4)

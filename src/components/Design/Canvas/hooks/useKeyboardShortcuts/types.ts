@@ -1,7 +1,17 @@
 // hooks
 import { TKeyMap } from 'hooks';
 
+// types
+import { TVectorSegment, TVectorVertex, TVertexHandleMode } from 'types/design/types';
+
 export type TShortcut = Omit<TKeyMap, 'action' | 'anyKey' | 'conditions'>;
+
+export type TVectorFragment = {
+  filledFacePieceKeySets: string[][];
+  segments: TVectorSegment[];
+  vertexHandleModes: Record<string, TVertexHandleMode>;
+  vertices: TVectorVertex[];
+};
 
 export type TStandardKeyboardShortcuts = {
   copy: TShortcut;

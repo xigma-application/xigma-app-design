@@ -2,14 +2,22 @@
 import { selectOrderedNodes } from 'store/design/selectors';
 import { store } from 'store';
 
+// types
+import { TCanvasRefs } from 'types/design/canvas/types';
+
 // utils
+import { copyVectorFragment } from './copyVectorFragment';
 import { setClipboardNodes } from './clipboard';
 
-export const handleCopySelection = (): void => {
+export const handleCopySelection = (refs: TCanvasRefs): void => {
   const state = store.getState();
-  const { selectedIds, vectorEditingNodeIds } = state.design;
+  const { nodes, selectedIds, vectorEditingNodeIds } = state.design;
+  const selectedVertexIds = refs.selectedVectorVertexIdsRef.current;
+  const selectedSegmentIds = refs.selectedVectorSegmentIdsRef.current;
 
-  if (selectedIds.length > 0 && vectorEditingNodeIds.length === 0) {
+  if (selectedVertexIds.length > 0 || selectedSegmentIds.length > 0) {
+    copyVectorFragment(nodes, vectorEditingNodeIds, selectedVertexIds, selectedSegmentIds);
+  } else if (selectedIds.length > 0 && vectorEditingNodeIds.length === 0) {
     setClipboardNodes(selectOrderedNodes(state).filter((node) => selectedIds.includes(node.id)));
   }
 };

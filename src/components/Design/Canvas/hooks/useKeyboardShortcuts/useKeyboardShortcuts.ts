@@ -61,7 +61,7 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => handleDeleteSelection(dispatch, refs), secondaryKey: KeyboardKeys.backspace },
       { action: (): any => handleSelectAll(dispatch), ...shortcuts.selectAll },
       { action: (): any => handleDuplicateSelection(dispatch, refs), ...shortcuts.duplicate },
-      { action: (): any => handleCopySelection(), ...shortcuts.copy },
+      { action: (): any => handleCopySelection(refs), ...shortcuts.copy },
       { action: (): any => handlePasteSelection(dispatch, refs), ...shortcuts.paste },
       ...nudgeMap(dispatch, refs),
     ],

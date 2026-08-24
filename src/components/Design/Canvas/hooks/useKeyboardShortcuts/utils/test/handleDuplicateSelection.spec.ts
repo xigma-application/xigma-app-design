@@ -20,6 +20,28 @@ const addFrameNode = (): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
+const addVectorNode = (): string => {
+  store.dispatch(
+    addNode({
+      fillColor: null,
+      filledFaceKeys: [],
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {},
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { v1: { id: 'v1', x: 0, y: 0 } },
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 describe('handleDuplicateSelection', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
@@ -76,7 +98,7 @@ describe('handleDuplicateSelection', () => {
     expect(Object.keys(store.getState().design.nodes)).toHaveLength(nodeCountBeforeDuplicate);
   });
 
-  it('should do nothing while a vector node is open for editing', () => {
+  it('should do nothing while a vector node is open for editing with no vertex/segment selected', () => {
     // mock
     const frameId = addFrameNode();
 
@@ -90,5 +112,24 @@ describe('handleDuplicateSelection', () => {
 
     // result
     expect(Object.keys(store.getState().design.nodes)).toHaveLength(nodeCountBeforeDuplicate);
+  });
+
+  it('should duplicate the selected vertex when a vector node is open for editing', () => {
+    // mock
+    const vectorId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([vectorId]));
+
+    const refs = createCanvasRefs({ selectedVectorVertexIdsRef: { current: ['v1'] } });
+
+    // action
+    handleDuplicateSelection(store.dispatch, refs);
+
+    // result
+    const node = store.getState().design.nodes[vectorId] as any;
+
+    expect(Object.keys(node.vertices)).toHaveLength(2);
+    expect(refs.selectedVectorVertexIdsRef.current).toHaveLength(1);
+    expect(refs.selectedVectorVertexIdsRef.current[0]).not.toBe('v1');
   });
 });

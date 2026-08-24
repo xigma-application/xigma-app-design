@@ -567,6 +567,46 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
     expect(Object.keys(realStore.getState().design.nodes)).toHaveLength(nodeCountBeforePaste + 1);
   });
 
+  it('should duplicate the selected vertex on "Cmd+D" while a vector node is open for editing', () => {
+    // mock
+    realStore.dispatch(
+      addNode({
+        fillColor: null,
+        filledFaceKeys: [],
+        name: 'Vector',
+        parentId: null,
+        rotation: 0,
+        segments: {},
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: NodeType.vector,
+        vertexHandleModes: {},
+        vertices: { v1: { id: 'v1', x: 0, y: 0 } },
+      }),
+    );
+
+    const { rootOrder } = realStore.getState().design;
+    const vectorId = rootOrder[rootOrder.length - 1];
+
+    realStore.dispatch(setVectorEditingNodeIds([vectorId]));
+
+    const refs = createCanvasRefs({ selectedVectorVertexIdsRef: { current: ['v1'] } });
+
+    // before
+    renderHook(() => useKeyboardShortcuts(refs), {
+      wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
+    });
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyD', metaKey: true });
+
+    // result
+    expect(Object.keys((realStore.getState().design.nodes[vectorId] as any).vertices)).toHaveLength(2);
+
+    // cleanup
+    realStore.dispatch(setVectorEditingNodeIds([]));
+  });
+
   it('should nudge the selected node by 1px on "ArrowRight"', () => {
     // mock
     const idA = addFrameNode(10, 10);

@@ -4481,6 +4481,118 @@ unfilled square's top half click-selected then deleted, leaving the divider and 
 intact) — #315-316 stayed unit-only per this file's own established "screenshot diff can't prove
 *which* branch" rationale (TEST_CASES.md's closing section).
 
+## 65. Duplicate/Copy/Paste extended down to vertex/segment level — a shared extract-then-merge pair, not a fourth clipboard mechanism bolted onto Delete's shape
+
+Requested directly ("Dla wektorów też daj duplikację i kopiuj wklej"), as a follow-up to the
+whole-scene-node Duplicate/Copy/Paste built in Etap 10 (`ROADMAP.md`,
+`.claude/docs/design-tool-architecture.md` §6) — which had deliberately no-opped entirely whenever
+`vectorEditingNodeIds.length > 0`, on the reasoning that Vector Edit Mode needed its own semantics.
+This section is that semantics.
+
+**Two new pure primitives carry the whole feature, both in `useKeyboardShortcuts/utils/`, both reused
+by all three operations:**
+- `extractVectorFragment(node, vertexIds, segmentIds) → TVectorFragment` (`{ vertices, segments,
+  vertexHandleModes }`, all arrays/records of the *actual* objects, not just ids) — given a raw
+  vertex-id list and segment-id list, expands them symmetrically: any segment in the input pulls in
+  its own two endpoints (even if those weren't separately selected — duplicating a selected *edge*
+  must duplicate its points too), and conversely any segment in the node whose *both* endpoints ended
+  up in the resulting vertex set gets auto-included, unselected or not — the same "duplicate the
+  connecting edge between two duplicated points" behavior Figma has. `vertexHandleModes` is filtered
+  down to just the included vertices that actually had a non-default entry (the map is sparse —
+  corner-mode vertices have no entry at all).
+- `mergeClonedVectorFragment(targetNode, fragment, offsetX, offsetY) → { changes, newVertexIds,
+  newSegmentIds }` — takes any `TVectorFragment` (doesn't care where it came from) and produces a
+  ready-to-dispatch `updateNode` changes object: every vertex gets a fresh `nanoid()` and an
+  `(offsetX, offsetY)` shift, every segment gets a fresh `nanoid()` with its `startId`/`endId`
+  remapped through the same id substitution, `tangentStart`/`tangentEnd` copied verbatim (established
+  back in Etap 5/10: tangents are relative vectors, not absolute coordinates, so a translate/duplicate
+  never needs to touch them), and the result is merged *onto* `targetNode`'s existing
+  `vertices`/`segments`/`vertexHandleModes` — nothing pre-existing is touched or removed. Because a
+  vector node's `vertices`/`segments` ids are only ever looked up within that one node's own maps
+  (never across nodes, confirmed by grepping every consumer), fresh `nanoid()` calls here need no
+  collision-checking against anything.
+
+**The three operations differ only in where the fragment comes from and where it's merged to** —
+none of them re-implement extraction or merging:
+- **Duplicate** (`duplicateVectorFragment.ts`) — source = `extractVectorFragment` on the *same* owning
+  node(s) the current `selectedVectorVertexIdsRef`/`selectedVectorSegmentIdsRef` point at (found via
+  the existing `getOwningVertexNodes`/`getOwningSegmentNodes` from `handleDeleteSelection/`, reused
+  unchanged rather than duplicated a second time); target = that same node; offset =
+  `DUPLICATE_OFFSET`. Multi-node selections (multi-vector-editing, §48) duplicate independently per
+  owning node, exactly like the whole-scene-node Duplicate already did per selected node.
+- **Copy** (`copyVectorFragment.ts`) — same extraction, but concatenated across every owning node into
+  one flat fragment and stashed in a **second**, parallel module-level clipboard,
+  `vectorClipboard.ts`'s `get/setVectorClipboardFragment` (deliberately separate from the whole-node
+  `clipboard.ts` — different data shape entirely; a `TSceneNode[]` clipboard and a `TVectorFragment`
+  clipboard can coexist without either being queried during the other's paste).
+- **Paste** (`pasteVectorFragment.ts`) — source = the vector clipboard fragment (whatever node(s) it
+  originally came from no longer matters, since every id gets freshly regenerated on merge anyway);
+  target = **the last entry in `vectorEditingNodeIds`** — the simplest defensible choice for "which
+  open node is the paste target" when several can be open simultaneously (§48) and there's no other
+  notion of "active" among them; in the overwhelmingly common single-node-editing case this is just
+  "the node you're editing."
+
+**Wiring**: `handleDuplicateSelection.ts`/`handleCopySelection.ts`/`handlePasteSelection.ts` (the same
+three files Etap 10 built) each gained a leading branch — if `selectedVectorVertexIdsRef.current` or
+`selectedVectorSegmentIdsRef.current` is non-empty, delegate to the vertex/segment path above instead
+of the whole-scene-node path; if both are empty *and* still inside Vector Edit Mode, fall through to
+doing nothing (the original Etap 10 behavior, now scoped to "nothing at all is selected" rather than
+"any Vector Edit Mode session whatsoever"). `handleCopySelection` picked up a new `refs` parameter it
+didn't need before (it only ever read `store.getState()` directly), since the vertex/segment path
+needs the two selection refs. Post-operation selection is written straight onto the refs (`refs.
+selectedVectorVertexIdsRef.current = newVertexIds`, `selectedVectorHandlesRef.current = []`) exactly
+like `handleDeleteSelection.ts` already does for its own vertex-delete branch — this state lives
+outside Redux entirely (§4's ref-vs-Redux split, mirrored in `design-store-architecture.md` §5), so
+there's no dispatch for it. `beginHistoryGesture(getVectorSelectionSnapshot(refs))` /
+`endHistoryGesture()` bracket every multi-dispatch op so N duplicated/pasted vertices+segments still
+collapse into one undo step, same pattern as the whole-node version and as §8's own foundation.
+
+**Explicit scope trim, flagged per this file's own convention (§7)**: a duplicated/pasted fragment
+never carries `widthProfile` (Variable Width points, §63) — those are keyed by fractional position
+*along the path*, not by vertex id, so correctly relocating them onto a translated, re-ided fragment
+is a separate piece of geometry math this request didn't ask for. A vertex/segment fragment that
+happened to sit under a width point simply loses that width point's effect in the clone; the original
+node's own width profile is untouched either way.
+
+**Shipped-and-fixed real instance — a duplicated/pasted filled face came out unfilled.** The first cut
+of fill-carrying (`extractVectorFragment` computing `filledFaceVertexIdSets: string[][]`, then
+re-running `deriveVectorFaces` on the *merged* node and matching the new face by vertex-id set) looked
+correct against a synthetic filled square and shipped — but broke on real data, live-reported with the
+actual store dump: a shape made of **two curved segments sharing both endpoints** (a lens/eye shape,
+not an *n*-sided polygon with *n* distinct vertices), where duplicating left `filledFaceKeys` with only
+the original's one entry, never a second one for the clone. Two compounding problems with the
+re-derive-and-match approach, not one:
+1. `getVectorFaceVertexIds` only resolves a piece key's boundary marker when it's `v:<realVertexId>` —
+   a marker for a **planarized crossing point** is `x:<otherSegmentId>:<n>` instead
+   (`getVectorPieceBoundaryKeys.ts`), which the vertex-id regex silently drops. Switching to matching by
+   each face's **real segment ids** (`getVectorFaceRealSegmentIds.ts`, parsing the id straight off each
+   piece key's own `${realSegmentId}[...]` prefix — the same string a piece key is already keyed by)
+   sidesteps this specific gap, but doesn't fix the deeper problem below.
+2. **Re-deriving faces on the *merged* node is inherently unreliable**, regardless of which id type the
+   match is keyed on — `DUPLICATE_OFFSET` (10 world units, `Canvas/constants.ts`) is a small, fixed
+   nudge, so any shape larger than that overlaps its own freshly-placed duplicate once both live in the
+   same node's `segments`/`vertices` at once. `deriveVectorFaces`'s planarization step (§12) then finds
+   *genuine* crossings between the original and its own clone, fragmenting the derived faces in a way
+   that no longer has a single face whose boundary cleanly equals "just the duplicated segments" — so
+   the match fails and the new key never gets added, silently, no error.
+
+**The fix drops re-derivation entirely** in favor of purely **remapping the already-known-good original
+piece key string** — the key that produced the correctly-filled *original* face is proof enough that key
+shape is valid; duplicating it just needs its ids substituted, not its topology re-solved from scratch.
+`extractVectorFragment` now stores each captured filled face's full, unmodified `pieceKeys: string[]`
+(`TVectorFragment.filledFacePieceKeySets: string[][]`) instead of any derived id set. `mergeClonedVectorFragment`
+builds (in addition to the existing vertex `idMap`) a parallel `segmentIdMap: Map<oldSegmentId,
+newSegmentId>`, and the new `getDuplicatedFilledFaceKeys.ts` calls a new `remapPieceKey.ts` per piece
+key: split it into `realSegmentId` + the two `|`-joined boundary markers, remap the segment id through
+`segmentIdMap`, remap a `v:<id>` marker's id through the vertex `idMap` and an `x:<segmentId>:<n>`
+marker's embedded segment id through `segmentIdMap` too (a self-crossing boundary always references
+*another segment of the same face*, which is guaranteed to also be in the captured set — the "is this
+face captured" filter in `extractVectorFragment` already requires *every* real segment bounding a face
+to be in the duplicated/copied set), then re-sort the two remapped boundaries and rejoin — exactly
+mirroring `getVectorFillPieceKey.ts`'s own construction, just done by string substitution instead of by
+re-walking geometry. This is correct regardless of whatever unrelated overlap the *rest* of the merged
+node's geometry has, since it never looks at that geometry at all.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows
