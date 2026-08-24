@@ -4,6 +4,7 @@ import { NodeType } from 'types/design/enums';
 import { TSceneNodeChanges } from 'types/design/types';
 
 // utils
+import { isVectorWidthProfileEligible } from './isVectorWidthProfileEligible';
 import { syncPathNodeFromText } from './syncPathNodeFromText';
 import { syncPathTextNodes } from './syncPathTextNodes';
 
@@ -17,6 +18,10 @@ export const handleUpdateNode = (state: TDesignState, payload: { changes: TScene
       syncPathTextNodes(state, node);
     } else if (node.type === NodeType.text && node.pathId) {
       syncPathNodeFromText(state, node);
+    }
+
+    if (node.type === NodeType.vector && 'segments' in payload.changes && !isVectorWidthProfileEligible(node)) {
+      node.widthProfile = null;
     }
   }
 };

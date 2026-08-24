@@ -1,0 +1,62 @@
+// types
+import { RootState } from 'store';
+import { TCanvasRefs } from 'types/design/canvas/types';
+import { TPoint } from 'types/canvas';
+import { TVectorWidthPointHandleHit } from '../../../../../../utils/getVectorWidthPointHandleAtPoint';
+
+// utils
+import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
+import { getVectorWidthPointGroupDragTargets } from '../../../../../../utils/getVectorWidthPointGroupDragTargets';
+
+export const armVectorWidthHandleGrab = (
+  canvas: HTMLCanvasElement,
+  canvasRefs: TCanvasRefs,
+  event: PointerEvent,
+  point: TPoint,
+  setClassName: (className: string | null) => void,
+  state: RootState,
+  handleHit: TVectorWidthPointHandleHit | null,
+): true | undefined => {
+  if (handleHit) {
+    const resizeSide = handleHit.target === 'point' ? null : handleHit.target;
+    const groupDrag = resizeSide
+      ? getVectorWidthPointGroupDragTargets(
+          canvasRefs.selectedVectorWidthHandlesRef.current,
+          state.design.nodes,
+          handleHit.nodeId,
+          handleHit.point.id,
+        )
+      : null;
+
+    canvasRefs.vectorWidthPointDragRef.current = {
+      armMagnitude: handleHit.target === 'left' ? handleHit.point.leftOffset : handleHit.point.rightOffset,
+      armWorldPoint: point,
+      groupTargets: groupDrag?.groupTargets ?? [],
+      isNewPoint: false,
+      nodeId: handleHit.nodeId,
+      point: { ...handleHit.point },
+      target: handleHit.target,
+    };
+    canvas.setPointerCapture(event.pointerId);
+
+    if (groupDrag && resizeSide) {
+      canvasRefs.selectedVectorWidthHandlesRef.current = groupDrag.selection;
+      canvasRefs.lastVectorWidthHandleSideRef.current = { nodeId: handleHit.nodeId, pointId: handleHit.point.id, side: resizeSide };
+      canvas.style.cursor = getRotatedResizeCursorUrl(handleHit.angle) ?? '';
+      setClassName(null);
+    } else {
+      const isAlreadySelected = canvasRefs.selectedVectorWidthHandlesRef.current.some(
+        (selected) => selected.side === 'point' && selected.nodeId === handleHit.nodeId && selected.pointId === handleHit.point.id,
+      );
+
+      if (!isAlreadySelected) {
+        canvasRefs.selectedVectorWidthHandlesRef.current = [{ nodeId: handleHit.nodeId, pointId: handleHit.point.id, side: 'point' }];
+      }
+
+      canvas.style.cursor = '';
+      setClassName('controller');
+    }
+
+    return true;
+  }
+};

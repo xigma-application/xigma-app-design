@@ -1019,4 +1019,41 @@ describe('useSelectionTool behaviors', () => {
     expect(store.getState().design.selectedIds).toEqual([]);
     expect(idA).toBeTruthy();
   });
+
+  it('should add a width point when Variable Width is active and the pointer is pressed then released on the stroke', () => {
+    // mock — v1(3400,700)->v2(3500,700), pressed/released at the segment's own midpoint
+    const nodeId = addVectorNode();
+    const canvasRef = createCanvasRef();
+    const refs = createCanvasRefs({ canvasRef });
+
+    store.dispatch(setActiveTool(ToolName.variableWidth));
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    // before
+    renderHook(() => useSelectionTool(refs), {
+      wrapper: ({ children }) => (
+        <Provider store={store}>
+          <ClassNamesProvider>{children}</ClassNamesProvider>
+        </Provider>
+      ),
+    });
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 3450, 700));
+    });
+
+    // result — a width point was armed for a drag on this node's stroke
+    expect(refs.vectorWidthPointDragRef.current).toMatchObject({ isNewPoint: true, nodeId });
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 3450, 700));
+    });
+
+    // result — committed to the store and the drag ref cleared
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+
+    expect(node.widthProfile?.points).toMatchObject({ [Object.keys(node.widthProfile?.points ?? {})[0]]: { position: 0.5 } });
+    expect(refs.vectorWidthPointDragRef.current).toBeNull();
+  });
 });

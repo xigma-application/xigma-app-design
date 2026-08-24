@@ -1,7 +1,7 @@
 // types
 import { NodeType, PathType, ToolName } from 'types/design/enums';
 import { TDesignState } from '../../types';
-import { TFrameNode, TPathNode, TTextNode } from 'types/design/types';
+import { TFrameNode, TPathNode, TTextNode, TVectorNode, TVectorSegment } from 'types/design/types';
 
 // utils
 import { handleUpdateNode } from '../handleUpdateNode';
@@ -54,6 +54,30 @@ const buildPathNode = (overrides: Partial<TPathNode> = {}): TPathNode => ({
   width: 200,
   x: 0,
   y: 0,
+  ...overrides,
+});
+
+const seg = (id: string, startId: string, endId: string): TVectorSegment => ({
+  endId,
+  id,
+  startId,
+  tangentEnd: null,
+  tangentStart: null,
+});
+
+const buildVectorNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
+  fillColor: '#000',
+  filledFaceKeys: [],
+  id: 'vector-1',
+  name: 'Vector',
+  parentId: null,
+  rotation: 0,
+  segments: {},
+  strokeColor: '#000',
+  strokeWidth: 4,
+  type: NodeType.vector,
+  vertexHandleModes: {},
+  vertices: {},
   ...overrides,
 });
 
@@ -125,5 +149,53 @@ describe('handleUpdateNode', () => {
 
     // result
     expect(state.nodes[pathNode.id]).toMatchObject({ height: 300, rotation: 45, width: 300, x: 10, y: 20 });
+  });
+
+  it('should discard a width profile when a segments patch makes the network branch', () => {
+    // mock
+    const vectorNode = buildVectorNode({
+      segments: { s1: seg('s1', 'a', 'b') },
+      widthProfile: { points: { p1: { id: 'p1', leftOffset: 2, position: 0.5, rightOffset: 2 } } },
+    });
+    const state = buildState({ [vectorNode.id]: vectorNode });
+
+    // before — patch in a third segment off 'b', turning it into a branch
+    handleUpdateNode(state, {
+      changes: { segments: { s1: seg('s1', 'a', 'b'), s2: seg('s2', 'b', 'c'), s3: seg('s3', 'b', 'd') } },
+      id: vectorNode.id,
+    });
+
+    // result
+    expect((state.nodes[vectorNode.id] as TVectorNode).widthProfile).toBeNull();
+  });
+
+  it('should keep a width profile when a segments patch keeps the network eligible', () => {
+    // mock
+    const vectorNode = buildVectorNode({
+      segments: { s1: seg('s1', 'a', 'b') },
+      widthProfile: { points: { p1: { id: 'p1', leftOffset: 2, position: 0.5, rightOffset: 2 } } },
+    });
+    const state = buildState({ [vectorNode.id]: vectorNode });
+
+    // before — extend the chain without branching
+    handleUpdateNode(state, {
+      changes: { segments: { s1: seg('s1', 'a', 'b'), s2: seg('s2', 'b', 'c') } },
+      id: vectorNode.id,
+    });
+
+    // result
+    expect((state.nodes[vectorNode.id] as TVectorNode).widthProfile).not.toBeNull();
+  });
+
+  it('should not run the width-profile eligibility check when the patch does not touch segments', () => {
+    // mock
+    const vectorNode = buildVectorNode({ strokeColor: '#000', widthProfile: null });
+    const state = buildState({ [vectorNode.id]: vectorNode });
+
+    // before
+    handleUpdateNode(state, { changes: { strokeColor: '#fff' }, id: vectorNode.id });
+
+    // result
+    expect((state.nodes[vectorNode.id] as TVectorNode).strokeColor).toBe('#fff');
   });
 });

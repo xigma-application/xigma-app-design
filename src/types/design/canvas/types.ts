@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 
 // types
 import { TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
-import { TDraftEntity, TVectorTangent } from 'types/design/types';
+import { TDraftEntity, TVectorTangent, TVectorWidthPoint } from 'types/design/types';
 import { TPenDragOrigin } from 'components/Design/Canvas/hooks/useDrawPenTool/types';
 import { TVectorAlignmentGuide } from 'components/Design/Canvas/utils/applyVectorPointSnapping';
 import {
@@ -101,6 +101,26 @@ export type TVectorCutSegmentHover = { nodeId: string; segmentId: string };
 
 export type TVectorShapeBuilderTouchedFaces = Record<string, Set<string>>;
 
+export type TVectorWidthPointHover = { nodeId: string; segmentId: string; t: number };
+
+export type TVectorWidthPointDragTarget = 'left' | 'point' | 'right';
+
+export type TVectorWidthPointDragGroupTarget = { nodeId: string; point: TVectorWidthPoint };
+
+export type TVectorWidthPointDragState = {
+  armMagnitude: number;
+  armWorldPoint: TPoint;
+  groupTargets: TVectorWidthPointDragGroupTarget[];
+  isNewPoint: boolean;
+  nodeId: string;
+  point: TVectorWidthPoint;
+  target: TVectorWidthPointDragTarget;
+};
+
+export type TVectorWidthHandleSelection = { nodeId: string; pointId: string; side: 'left' | 'point' | 'right' };
+
+export type TVectorWidthLastHandleSide = { nodeId: string; pointId: string; side: 'left' | 'right' };
+
 export type TCanvasRefs = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>;
@@ -119,9 +139,11 @@ export type TCanvasRefs = {
   hoveredVectorSegmentIdRef: RefObject<string | null>;
   hoveredVectorShapeBuilderFaceRef: RefObject<TVectorFaceHover | null>;
   hoveredVectorVertexIdRef: RefObject<string | null>;
+  hoveredVectorWidthPointRef: RefObject<TVectorWidthPointHover | null>;
   hoverRef: RefObject<string | null>;
   isVectorShapeBuilderBoxModeRef: RefObject<boolean>;
   isVectorShapeBuilderSubtractRef: RefObject<boolean>;
+  lastVectorWidthHandleSideRef: RefObject<TVectorWidthLastHandleSide | null>;
   marqueeRef: RefObject<TDraftRect | null>;
   newVectorCutVertexIdsRef: RefObject<Set<string>>;
   penDragOriginRef: RefObject<TPenDragOrigin | null>;
@@ -137,6 +159,7 @@ export type TCanvasRefs = {
   selectedVectorHandlesRef: RefObject<TVectorHandleHover[]>;
   selectedVectorSegmentIdsRef: RefObject<string[]>;
   selectedVectorVertexIdsRef: RefObject<string[]>;
+  selectedVectorWidthHandlesRef: RefObject<TVectorWidthHandleSelection[]>;
   sliceRef: RefObject<TSliceDraft | null>;
   snappedVectorHandleRef: RefObject<TVectorHandleHover | null>;
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>;
@@ -150,4 +173,5 @@ export type TCanvasRefs = {
   vectorMultiSelectResizeDragRef: RefObject<TVectorMultiSelectResizeDragState | null>;
   vectorMultiSelectRotateDragRef: RefObject<TVectorMultiSelectRotateDragState | null>;
   vectorShapeBuilderPathRef: RefObject<TPoint[] | null>;
+  vectorWidthPointDragRef: RefObject<TVectorWidthPointDragState | null>;
 };

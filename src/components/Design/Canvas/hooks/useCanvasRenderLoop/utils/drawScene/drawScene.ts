@@ -1,5 +1,6 @@
 // store
 import {
+  selectActiveTool,
   selectEditingNodeId,
   selectEditingSelectionChangedAt,
   selectEditingSelectionEnd,
@@ -45,8 +46,10 @@ import { drawVectorPaintHoverPreview } from './drawVectorPaintHoverPreview';
 import { drawVectorSelectedFillPreview } from './drawVectorSelectedFillPreview';
 import { drawVectorShapeBuilderHoverPreview } from './drawVectorShapeBuilderHoverPreview';
 import { drawVectorShapeBuilderPath } from './drawVectorShapeBuilderPath';
+import { drawVectorWidthPointsPreview } from './drawVectorWidthPointsPreview/drawVectorWidthPointsPreview';
 import { drawVertexCountHandlesLayer } from './drawVertexCountHandlesLayer';
 import { getPathOutlineStyles } from './getPathOutlineStyles';
+import { getPreviewSceneNodes } from './getPreviewSceneNodes';
 import { getShapeBuilderPreviewFaces } from './getShapeBuilderPreviewFaces';
 import { hasCornerRadiusDragMoved } from './hasCornerRadiusDragMoved';
 
@@ -67,6 +70,7 @@ export const drawScene = (
   const ellipseArcRotateDraggedHandlePosition = refs.ellipseArcRotateDragRef.current?.draggedHandlePosition ?? null;
   const ellipseArcRatioDraggedHandlePosition = refs.ellipseArcRatioDragRef.current?.draggedHandlePosition ?? null;
   const state = store.getState();
+  const activeTool = selectActiveTool(state);
   const viewport = selectViewport(state);
   const { clientHeight, clientWidth } = canvas;
   const editingNodeId = selectEditingNodeId(state);
@@ -94,7 +98,7 @@ export const drawScene = (
   const vectorMultiSelectResizeDrag = refs.vectorMultiSelectResizeDragRef.current;
   const vectorMultiSelectRotateDrag = refs.vectorMultiSelectRotateDragRef.current;
   const isVectorMultiDragMoving = Boolean(refs.vectorMultiDragRef.current?.hasMoved);
-  const sceneNodes = selectOrderedNodes(state).filter((node) => node.id !== editingNodeId);
+  const sceneNodes = getPreviewSceneNodes(selectOrderedNodes(state), editingNodeId, refs);
   const allSelectedNodes = selectSelectedNodes(state);
   const selectedNodes = allSelectedNodes.filter((node) => node.id !== editingNodeId);
   const hoveredNode = hoveredNodeId && hoveredNodeId !== editingNodeId ? nodesById[hoveredNodeId] : null;
@@ -250,6 +254,19 @@ export const drawScene = (
     viewport,
   );
   drawVectorCutPreview(gl, program, buffer, refs.vectorCutPreviewRef.current, clientWidth, clientHeight, viewport);
+  drawVectorWidthPointsPreview(
+    gl,
+    program,
+    buffer,
+    imageContext,
+    nodesById,
+    vectorEditingNodeIds,
+    refs,
+    activeTool,
+    clientWidth,
+    clientHeight,
+    viewport,
+  );
   drawMarquee(gl, program, buffer, marqueeRect, clientWidth, clientHeight, viewport);
   drawSliceDraft(gl, program, buffer, sliceRect, clientWidth, clientHeight, viewport);
 };

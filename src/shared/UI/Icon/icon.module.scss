@@ -1,12 +1,8 @@
+@use '../../../styles/mixins/svg-color';
+
 .Icon {
   display: inline-block;
   flex-shrink: 0;
 
-  :global([data-svg-property='fill']) {
-    fill: currentcolor;
-  }
-
-  :global([data-svg-property='stroke']) {
-    stroke: currentcolor;
-  }
+  @include svg-color.svg-color;
 }

@@ -3828,9 +3828,9 @@ remembering across unrelated sessions the way Ellipse-vs-Star is. Because
 (the Close button, Escape, switching to a non-pen-group main-toolbar tool via
 `selectToolbarTool.ts`), this one guard covers all of them with no per-caller changes.
 
-Neither tool has any actual canvas behavior yet (no drag gesture, no rendering) — this section is
-scoped entirely to the toolbar/shortcut/memory wiring; implementing what Shape Builder and Variable
-Width actually *do* to the vector network is unstarted, separate work.
+Neither tool had any actual canvas behavior yet at the time of writing (no drag gesture, no
+rendering) — this section is scoped entirely to the toolbar/shortcut/memory wiring. What Shape
+Builder and Variable Width actually *do* to the vector network is §59-62 and §63 respectively.
 
 Unit: `handleSetActiveTool.spec.ts` (new group-memory cases), `handleSetVectorEditingNodeIds.spec.ts`
 (reset-on-exit vs. keep-while-still-editing-another-node), `dispatchTool.spec.ts` (both tools added
@@ -4256,6 +4256,120 @@ genuinely-separate-node crossing-merge and crossing-subtract cases plus the excl
 regression case; the file's own pre-existing disconnected-nodes test already served as the "don't
 accidentally combine non-crossing touched nodes" regression guard, re-verified green against the
 final code.
+
+## 63. Variable Width becomes a real tool — width points, drag gestures, rendering, and an eligibility gate that now also covers the keyboard shortcut
+
+§58 left `ToolName.variableWidth` wired into the toolbar/shortcut/memory plumbing but with zero
+canvas behavior. This section is the actual feature: a Figma-style stroke tool that lets a single,
+non-branching vector chain carry one or more width points, each independently draggable along the
+path and outward from it, tapering the stroke's rendered thickness between them.
+
+**Data model** (`types/design/types.ts`): `TVectorWidthPoint = { id, leftOffset, position, rightOffset }`,
+`TVectorWidthProfile = { points: Record<string, TVectorWidthPoint> }`, and `TVectorNode.widthProfile?:
+TVectorWidthProfile | null`. The load-bearing decision is `position: number` — a fraction (0..1) of
+the chain's **total arc length**, not a per-segment local `t`. This falls out for free once the
+chain is stretched: a point never needs remapping when a segment's endpoint moves, because its
+world-space location is always re-derived live from the same stored fraction against whatever the
+chain's current total length happens to be. The flip side, also by design, is that appending a
+**new** segment to the chain (lengthening it) shifts every existing point's on-screen position too,
+since the same fraction now lands earlier along a longer path — verified directly in
+`vector-variable-width.spec.ts`'s stretch-redistribution test. Chain endpoints are never stored as
+points at all — synthesized on the fly at `strokeWidth/2` both sides wherever chain position is
+needed, so nothing has to stay in sync when a vertex moves.
+
+**Eligibility** reuses §57's connected-network primitives one layer down:
+`getVectorVertexDegrees.ts` (extracted so both this feature and the Cut tool's
+`getVectorNetworkOpenEndpointIds.ts` share one degree-counting source of truth) feeds
+`getVectorChainOrder.ts`, which returns `null` on any vertex with degree > 2 (branching) or when the
+segment set isn't one connected walk (e.g. two disjoint loops in one node), and otherwise a
+canonical, deterministic traversal order (lexicographically-smallest starting vertex, so "left"/
+"right" never flip frame-to-frame for a profile that hasn't itself changed).
+`getEligibleVectorWidthNodes.ts` filters a list of node ids down to just the vector nodes with a
+valid chain order — the single function both the pointer-gesture arm resolver and the toolbar gate
+call into.
+
+**The toolbar/dropdown gate vs. the keyboard shortcut — one bug, one shared fix.**
+`useIsVectorEditMoreToolDisabled.ts` (now a thin wrapper around the pure
+`components/Design/Canvas/utils/isVectorEditMoreToolDisabled.ts`) disables Variable Width unless
+`vectorEditingNodeIds.length === 1` **and** that one node is eligible — Shape Builder never gates on
+this at all. `VectorEditMoreDropdownItem`'s `PopoverItem` skips both its `onClick` and the Radix
+`Close` wrapper when disabled (so a click on a disabled item neither activates the tool nor closes
+the popover), and `VectorEditMoreDropdownTool`'s main-slot button gets a real native `disabled`
+attribute. Both correctly re-enable the moment two independently-edited nodes get merged into one by
+the Pen tool (§46/§53's own merge machinery already prunes `vectorEditingNodeIds` down to the
+survivor — no extra code needed here, confirmed live and via the merge tests' own existing
+assertions).
+
+This gate was **not**, until today, reachable from the `Shift+W` shortcut itself:
+`dispatchTool.ts`'s block condition only checked `VECTOR_EDIT_ALLOWED_TOOLS` (§45), and
+`variableWidth` is on that whitelist — so pressing the shortcut while editing a branching or
+multi-node selection silently activated the tool anyway, bypassing the exact same check the button
+enforced. Fixed by extracting `useKeyboardShortcuts/utils/isDispatchToolBlocked.ts`, which ORs the
+whitelist check with `isMoreToolName(tool) && isVectorEditMoreToolDisabled(tool, ...)` — `dispatchTool`
+now just computes `isToolBlocked` from that one function and gates the dispatch on it, so the
+shortcut and both mouse-click paths enforce identical eligibility.
+
+**Break condition** (`store/design/utils/handleUpdateNode.ts`): right after the existing
+`Object.assign(node, payload.changes)`, gated on `'segments' in payload.changes` so an unrelated
+color/position patch never re-walks the chain, `isVectorWidthProfileEligible(node)` (`!widthProfile
+|| getVectorChainOrder(node) !== null`) decides whether to null out `node.widthProfile` outright.
+Because `handleUpdateNode` is the one real choke point every node-mutating caller routes through
+(Pen, Shape Builder, Cut, vertex-merge-on-drag), every one of them reverts a profiled stroke back to
+uniform width for free the moment an edit branches or disconnects the network — no per-caller
+duplication, and no separate "stale segment id" check is needed since `position` is a chain-relative
+fraction rather than a `(segmentId, t)` pair that could dangle.
+
+**Gesture** — `armVectorWidthPointOnPointerDown.ts` fans out via `switch(true)` to three resolvers,
+most-specific first: `armVectorWidthRegulatorShiftToggle` (Shift+click on any handle of a regulator
+toggles that whole regulator, all three of its sides, in/out of
+`selectedVectorWidthHandlesRef`), `armVectorWidthHandleGrab` (grabbing an existing left/right/point
+handle), `armVectorWidthPointCreate` (a plain click on the bare stroke — hit-tested via the same
+`getVectorCutHitAcrossOpenNodes` the Cut tool already uses — seeds a brand-new point at
+`leftOffset = rightOffset = strokeWidth / 2`, **not** interpolated from any nearby existing point).
+`continueVectorWidthPointDrag.ts` branches on `target`: `'point'` re-projects the pointer onto the
+chain each move to update `position` (leaving offsets untouched); `'left'`/`'right'` computes a
+signed perpendicular distance from the anchor and writes the **same** clamped-to-zero distance to
+**both** `leftOffset` and `rightOffset` — so despite the data model nominally supporting an
+asymmetric taper, every drag gesture today only ever produces a symmetric one (confirmed by
+`continueVectorWidthPointDrag.spec.ts`'s own "symmetrically" -titled cases). Disarm always commits
+whatever's in `vectorWidthPointDragRef`, even with zero pointer movement, so a plain click both
+creates and persists a point in one gesture — same "re-derive from refs on disarm, no delta
+bookkeeping" convention as Shape Builder. `commitVectorWidthPointDrag.ts` dispatches one `updateNode`
+per affected node, `dispatchAsOneGestureIfMultiNode`-wrapped so a synced multi-node group resize
+still coalesces into a single Undo step; `beginHistoryGesture`/`endHistoryGesture` already bracket
+every pointer-down/up unconditionally, so no gesture-specific history code was needed at all.
+
+**Multi-select group resize**: grabbing a resize handle re-derives the live group from whatever's
+currently in `selectedVectorWidthHandlesRef` via `getVectorWidthPointGroupDragTargets.ts` (an
+unselected lone point is treated as its own size-1 group) — every member then gets synced to the
+one primary regulator's computed distance for the whole drag, regardless of which specific member's
+handle was actually grabbed. A plain (non-Shift) grab of a handle that isn't part of the current
+multi-selection replaces the selection with just that one regulator first.
+
+**Rendering** — `drawVectorWidthPointsPreview.ts` is gated on `activeTool === ToolName.variableWidth`
+and hides every Variable Width overlay (points, handles, hover marker, label) the instant the tool
+stops being active, regardless of what's still selected in the refs. `getVectorWidthLabelTargets.ts`
+shows the pink numeric badge (`drawValueLabel.ts`, a reusable MSDF-text-plus-`drawRect`-badge
+primitive with real glyph-bounds centering, not approximate font metrics) only during an active
+resize drag (never during a position drag, per `target === 'point'` returning `[]`) or when a
+regulator is merely selected — defaulting to the last-grabbed side remembered in
+`lastVectorWidthHandleSideRef` — with one label rendered per synced member during a group resize.
+The resize cursor rotates to stay parallel to the handle's own guide line, reusing the existing
+`getRotatedResizeCursorUrl`/cursor-rotation infra rather than a new mechanism; hovering the bare
+stroke or an existing handle shows the dedicated `controller.png` cursor (hotspot `4 4`, same
+convention as `bend`/`segment`/`cut-on`/`cut-off`).
+
+Unit: `getVectorChainOrder.spec.ts`, `getVectorVertexDegrees.spec.ts`,
+`getEligibleVectorWidthNodes.spec.ts`, `isVectorEditMoreToolDisabled.spec.ts`,
+`isDispatchToolBlocked.spec.ts`, `dispatchTool.spec.ts` (extended with the two new blocking cases),
+the full arm/continue/disarm/commit trio under `useSelectionTool/utils/handlePointerDown|Move|Up/`,
+`getVectorWidthPointGroupDragTargets.spec.ts`, `toggleVectorWidthRegulatorSelection.spec.ts`,
+`handleUpdateNode.spec.ts` (branching/disconnection revert cases). E2E:
+`vector-variable-width.spec.ts` (TEST_CASES.md, Variable Width section) — adding several points at
+correct chain fractions, the value label showing on selection and hiding on deselect, stretch-
+redistribution keeping a point pinned to its fraction, a branching edit discarding the profile and
+disabling the option, two edited nodes disabling the dropdown item until merged into one, and three
+dedicated cases proving `Shift+W` now respects the exact same gate as the mouse-click paths.
 
 ## Related
 

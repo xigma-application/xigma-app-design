@@ -7,6 +7,7 @@ import VectorEditMoreDropdownItems from '../VectorEditMoreDropdownItems/VectorEd
 import { Icon, Popover, Tooltip } from 'shared';
 
 // hooks
+import { useIsVectorEditMoreToolDisabled } from '../VectorEditMoreDropdownItem/hooks/useIsVectorEditMoreToolDisabled';
 import { useSelectVectorEditTool } from '../../VectorEditToolButton/hooks/useSelectVectorEditTool';
 
 // others
@@ -27,7 +28,8 @@ export type TVectorEditMoreDropdownToolProps = {
 const VectorEditMoreDropdownTool: FC<TVectorEditMoreDropdownToolProps> = ({ toolName }) => {
   const { t } = useTranslation();
   const activeTool = useAppSelector(selectActiveTool);
-  const handleSelect = useSelectVectorEditTool(toolName);
+  const isDisabled = useIsVectorEditMoreToolDisabled(toolName);
+  const handleSelect = useSelectVectorEditTool(isDisabled ? undefined : toolName);
   const shortcut = MORE_TOOLS.find((tool) => tool.toolName === toolName)?.shortcut;
   const isActive = activeTool === toolName;
 
@@ -44,7 +46,11 @@ const VectorEditMoreDropdownTool: FC<TVectorEditMoreDropdownToolProps> = ({ tool
         <button
           aria-label={t(TOOL_LABEL[toolName])}
           aria-pressed={isActive}
-          className={cx(styles.VectorEditToolbar__button, { [styles['VectorEditToolbar__button--active']]: isActive })}
+          className={cx(styles.VectorEditToolbar__button, {
+            [styles['VectorEditToolbar__button--active']]: isActive,
+            [styles['VectorEditToolbar__button--disabled']]: isDisabled,
+          })}
+          disabled={isDisabled}
           onClick={handleSelect}
           type="button"
         >

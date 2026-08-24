@@ -9,6 +9,7 @@ import { getVectorFillColorForLoopKey } from '../../vectorNetwork/getVectorFillC
 const getVectorFillLoopPointsMock = vi.fn();
 const drawVectorFillMock = vi.fn();
 const drawVectorStrokeMock = vi.fn();
+const drawVectorVariableStrokeMock = vi.fn();
 const flattenVectorSegmentsMock = vi.fn();
 
 vi.mock('../../vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints', () => ({
@@ -16,6 +17,9 @@ vi.mock('../../vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints', (
 }));
 vi.mock('../drawVectorFill', () => ({ drawVectorFill: (...args: unknown[]): void => drawVectorFillMock(...args) }));
 vi.mock('../drawVectorStroke', () => ({ drawVectorStroke: (...args: unknown[]): void => drawVectorStrokeMock(...args) }));
+vi.mock('../drawVectorVariableStroke', () => ({
+  drawVectorVariableStroke: (...args: unknown[]): void => drawVectorVariableStrokeMock(...args),
+}));
 vi.mock('../../vectorNetwork/flattenVectorSegments', () => ({
   flattenVectorSegments: (...args: unknown[]): unknown => flattenVectorSegmentsMock(...args),
 }));
@@ -27,6 +31,7 @@ describe('drawVectorNode', () => {
     getVectorFillLoopPointsMock.mockClear();
     drawVectorFillMock.mockClear();
     drawVectorStrokeMock.mockClear();
+    drawVectorVariableStrokeMock.mockClear();
     flattenVectorSegmentsMock.mockClear();
   });
 
@@ -176,5 +181,34 @@ describe('drawVectorNode', () => {
     expect(getVectorFillLoopPointsMock).not.toHaveBeenCalled();
     expect(drawVectorFillMock).not.toHaveBeenCalled();
     expect(drawVectorStrokeMock).toHaveBeenCalledWith(gl, program, buffer, flattened, '#00ff00', 3, 200, 150, IDENTITY_VIEWPORT);
+  });
+
+  it('should draw the variable-width ribbon instead of the uniform stroke when the node carries a width profile', () => {
+    // mock
+    const gl = {} as WebGL2RenderingContext;
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const node: TVectorNode = {
+      fillColor: null,
+      filledFaceKeys: [],
+      id: '1',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {},
+      strokeColor: '#00ff00',
+      strokeWidth: 3,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: {},
+      widthProfile: { points: { p1: { id: 'p1', leftOffset: 10, position: 0.5, rightOffset: 10 } } },
+    };
+
+    // before
+    drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
+
+    // result
+    expect(drawVectorVariableStrokeMock).toHaveBeenCalledWith(gl, program, buffer, node, '#00ff00', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorStrokeMock).not.toHaveBeenCalled();
   });
 });

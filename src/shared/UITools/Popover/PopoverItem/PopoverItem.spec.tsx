@@ -16,6 +16,18 @@ describe('PopoverItem snapshots', () => {
     // result
     expect(asFragment()).toMatchSnapshot();
   });
+
+  it('should render a disabled PopoverItem', () => {
+    // before
+    const { asFragment } = render(
+      <PopoverPrimitive.Root open>
+        <PopoverItem disabled icon="FrameTool" label="Frame" shortcut="F" />
+      </PopoverPrimitive.Root>,
+    );
+
+    // result
+    expect(asFragment()).toMatchSnapshot();
+  });
 });
 
 describe('PopoverItem behaviors', () => {

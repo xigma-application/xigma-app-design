@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { PopoverCompound } from 'shared';
 
 // hooks
+import { useIsVectorEditMoreToolDisabled } from './hooks/useIsVectorEditMoreToolDisabled';
 import { useSelectVectorEditTool } from '../../VectorEditToolButton/hooks/useSelectVectorEditTool';
 
 // others
@@ -20,10 +21,12 @@ export type TVectorEditMoreDropdownItemProps = {
 
 const VectorEditMoreDropdownItem: FC<TVectorEditMoreDropdownItemProps> = ({ selected, tool }) => {
   const { t } = useTranslation();
-  const handleClick = useSelectVectorEditTool(tool.toolName);
+  const isDisabled = useIsVectorEditMoreToolDisabled(tool.toolName);
+  const handleClick = useSelectVectorEditTool(isDisabled ? undefined : tool.toolName);
 
   return (
     <PopoverItem
+      disabled={isDisabled}
       icon={TOOL_ICON[tool.toolName]}
       iconSize={24}
       label={t(TOOL_LABEL[tool.toolName])}

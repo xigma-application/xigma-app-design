@@ -1856,6 +1856,27 @@ resolving every currently-open node (not just the touched ones) before grouping.
 | 303 | Alt+drag across two overlapping, separate open nodes subtracts only the crossing sub-region, still combining the pair into one node since the crossing had to be materialized either way |  ✅  | ✅ `vector-shape-builder.spec.ts` |
 | 304 | Alt+click on only one shape's own exclusive corner — never touching the untouched, crossing neighbor at all — still protects the shared chord instead of treating that shape as isolated |  ✅  | ✅ `vector-shape-builder.spec.ts` |
 
+## Variable Width (width points, drag gestures, eligibility gate)
+
+Figma-style variable-thickness stroke: a click on the bare path of a single, non-branching vector
+chain adds a width point (two draggable diamonds, one per side); dragging a diamond resizes the
+stroke there, dragging the point itself repositions it along the path. `position` is stored as a
+fraction of the whole chain's arc length, so it stays pinned through a stretch and intentionally
+shifts when the chain is lengthened. The toolbar/dropdown eligibility gate (exactly one edited node,
+itself a non-branching chain) now also covers the `Shift+W` keyboard shortcut, which previously
+bypassed it entirely. Full write-up: `.claude/docs/vector-network.md` §63.
+
+| #   | Scenario                                                                                                                                | Unit |                E2E                 |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------- | :--: | :--------------------------------: |
+| 305 | Clicking the bare stroke at two different points adds two distinct width points, each pinned at the correct fraction of the whole chain |  ✅  | ✅ `vector-variable-width.spec.ts` |
+| 306 | Selecting a freshly added width point shows its pink value-label overlay; clicking away deselects it while the point itself stays       |  ✅  | ✅ `vector-variable-width.spec.ts` |
+| 307 | Stretching a segment by dragging its endpoint keeps an existing width point pinned to the same relative fraction, moving it on screen   |  —   | ✅ `vector-variable-width.spec.ts` |
+| 308 | An edit that branches the network discards the node's width profile and disables the Variable Width option again                        |  ✅  | ✅ `vector-variable-width.spec.ts` |
+| 309 | Editing two separate nodes at once disables Variable Width (dropdown item is a no-op); merging them into one via Pen re-enables it      |  ✅  | ✅ `vector-variable-width.spec.ts` |
+| 310 | The `Shift+W` shortcut does not activate Variable Width when no node is being edited at all                                             |  ✅  | ✅ `vector-variable-width.spec.ts` |
+| 311 | The `Shift+W` shortcut does not activate Variable Width when two nodes are being edited simultaneously, even if both are eligible alone |  ✅  | ✅ `vector-variable-width.spec.ts` |
+| 312 | The `Shift+W` shortcut does activate Variable Width when exactly one eligible, non-branching node is being edited                       |  ✅  | ✅ `vector-variable-width.spec.ts` |
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

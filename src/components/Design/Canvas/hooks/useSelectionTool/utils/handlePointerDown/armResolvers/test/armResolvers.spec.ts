@@ -41,6 +41,7 @@ import { armVectorPaintOnPointerDown } from '../armVectorPaintOnPointerDown';
 import { armVectorSegmentOnPointerDown } from '../armVectorSegmentOnPointerDown/armVectorSegmentOnPointerDown';
 import { armVectorShapeBuilderOnPointerDown } from '../armVectorShapeBuilderOnPointerDown';
 import { armVectorVertexOnPointerDown } from '../armVectorVertexOnPointerDown/armVectorVertexOnPointerDown';
+import { armVectorWidthPointOnPointerDown } from '../armVectorWidthPointOnPointerDown/armVectorWidthPointOnPointerDown';
 import { ARM_RESOLVERS } from '../../constants';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { createSelectionToolRefs } from '../../../../hooks/useSelectionToolRefs/createSelectionToolRefs';
@@ -2958,5 +2959,330 @@ describe('armVectorShapeBuilderOnPointerDown', () => {
     // result
     expect(armVectorShapeBuilderOnPointerDown(ctx)).toBeUndefined();
     expect(ctx.canvasRefs.vectorShapeBuilderPathRef.current).toBeNull();
+  });
+});
+
+describe('armVectorWidthPointOnPointerDown', () => {
+  afterEach(() => {
+    store.dispatch(setVectorEditingNodeIds([]));
+  });
+
+  it('should arm a new width point at the closest point on the stroke, seeded with the base half-stroke-width, with Variable Width active', () => {
+    // mock — a(0,0)->b(100,0), clicked at its own midpoint
+    const nodeId = addVectorNode(
+      { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+      { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.variableWidth, canvasRefs, point: { x: 50, y: 0 } });
+
+    // result
+    expect(armVectorWidthPointOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.vectorWidthPointDragRef.current).toMatchObject({
+      isNewPoint: true,
+      nodeId,
+      point: { leftOffset: 0.5, position: 0.5, rightOffset: 0.5 },
+    });
+    expect(canvasRefs.selectedVectorWidthHandlesRef.current).toEqual([
+      { nodeId, pointId: canvasRefs.vectorWidthPointDragRef.current?.point.id, side: 'left' },
+      { nodeId, pointId: canvasRefs.vectorWidthPointDragRef.current?.point.id, side: 'right' },
+      { nodeId, pointId: canvasRefs.vectorWidthPointDragRef.current?.point.id, side: 'point' },
+    ]);
+    expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
+    // seeding a new point arms its right handle, which uses the rotated resize cursor, not the plain controller class
+    expect(ctx.setClassName).toHaveBeenCalledWith(null);
+    expect(canvasRefs.lastVectorWidthHandleSideRef.current).toEqual({
+      nodeId,
+      pointId: canvasRefs.vectorWidthPointDragRef.current?.point.id,
+      side: 'right',
+    });
+  });
+
+  it('should arm a drag on an existing width point marker instead of creating a new one, when the click lands on it, and select only the point itself', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+      { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    );
+
+    store.dispatch(
+      updateNode({
+        changes: { widthProfile: { points: { p1: { id: 'p1', leftOffset: 6, position: 0.5, rightOffset: 6 } } } },
+        id: nodeId,
+      }),
+    );
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    // before — clicking right on the existing marker at (50, 0)
+    const ctx = createContext({ activeTool: ToolName.variableWidth, canvasRefs, point: { x: 50, y: 0 } });
+
+    // result
+    expect(armVectorWidthPointOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.vectorWidthPointDragRef.current).toEqual({
+      armMagnitude: 6,
+      armWorldPoint: { x: 50, y: 0 },
+      groupTargets: [],
+      isNewPoint: false,
+      nodeId,
+      point: { id: 'p1', leftOffset: 6, position: 0.5, rightOffset: 6 },
+      target: 'point',
+    });
+    // clicking the center anchor selects only the point, leaving both diamonds unselected until grabbed directly
+    expect(canvasRefs.selectedVectorWidthHandlesRef.current).toEqual([{ nodeId, pointId: 'p1', side: 'point' }]);
+  });
+
+  it('should select both handle sides of the point when either one is clicked, since they now move together', () => {
+    // mock — a(0,0)->b(100,0), point at midpoint (50,0), normal (0,1) so the right handle sits at (50,-6)
+    const nodeId = addVectorNode(
+      { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+      { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    );
+
+    store.dispatch(
+      updateNode({
+        changes: { widthProfile: { points: { p1: { id: 'p1', leftOffset: 6, position: 0.5, rightOffset: 6 } } } },
+        id: nodeId,
+      }),
+    );
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    // before — clicking right on the right handle
+    const ctx = createContext({ activeTool: ToolName.variableWidth, canvasRefs, point: { x: 50, y: -6 } });
+
+    // result
+    expect(armVectorWidthPointOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.vectorWidthPointDragRef.current).toMatchObject({ target: 'right' });
+    // grabbing a diamond selects both sides plus the point itself, so the anchor shows selected too
+    expect(canvasRefs.selectedVectorWidthHandlesRef.current).toEqual([
+      { nodeId, pointId: 'p1', side: 'left' },
+      { nodeId, pointId: 'p1', side: 'right' },
+      { nodeId, pointId: 'p1', side: 'point' },
+    ]);
+    // grabbing a resize handle uses the rotated resize cursor, not the plain controller class
+    expect(ctx.setClassName).toHaveBeenCalledWith(null);
+    expect(canvasRefs.lastVectorWidthHandleSideRef.current).toEqual({ nodeId, pointId: 'p1', side: 'right' });
+  });
+
+  it('should seed the arm magnitude from the left offset specifically when the left handle is grabbed', () => {
+    // mock — a(0,0)->b(100,0), point at midpoint (50,0), normal (0,1) so the left handle sits at (50,9)
+    const nodeId = addVectorNode(
+      { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+      { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    );
+
+    store.dispatch(
+      updateNode({
+        changes: { widthProfile: { points: { p1: { id: 'p1', leftOffset: 9, position: 0.5, rightOffset: 6 } } } },
+        id: nodeId,
+      }),
+    );
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    // before — clicking right on the left handle
+    const ctx = createContext({ activeTool: ToolName.variableWidth, canvasRefs, point: { x: 50, y: 9 } });
+
+    // result
+    expect(armVectorWidthPointOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.vectorWidthPointDragRef.current).toMatchObject({ armMagnitude: 9, target: 'left' });
+    expect(canvasRefs.lastVectorWidthHandleSideRef.current).toEqual({ nodeId, pointId: 'p1', side: 'left' });
+  });
+
+  it('should return undefined and clear any existing selection when the click misses the stroke and every marker', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+      { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.selectedVectorWidthHandlesRef.current = [{ nodeId, pointId: 'p1', side: 'left' }];
+
+    // before — clicking empty space, well away from the stroke
+    const ctx = createContext({ activeTool: ToolName.variableWidth, canvasRefs, point: { x: 500, y: 500 } });
+
+    // result
+    expect(armVectorWidthPointOnPointerDown(ctx)).toBeUndefined();
+    expect(canvasRefs.vectorWidthPointDragRef.current).toBeNull();
+    expect(canvasRefs.selectedVectorWidthHandlesRef.current).toEqual([]);
+  });
+
+  it('should return undefined when the only editing node is a branching network', () => {
+    // mock — b is a 3-way branch, ineligible for a width profile
+    const nodeId = addVectorNode(
+      {
+        s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'c', id: 's2', startId: 'b', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'd', id: 's3', startId: 'b', tangentEnd: null, tangentStart: null },
+      },
+      { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 }, c: { id: 'c', x: 200, y: 0 }, d: { id: 'd', x: 100, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.variableWidth, point: { x: 50, y: 0 } });
+
+    // result
+    expect(armVectorWidthPointOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  it('should return undefined when Variable Width is not the active tool', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+      { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.default, point: { x: 50, y: 0 } });
+
+    // result
+    expect(armVectorWidthPointOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  it('should return undefined when Vector Edit Mode is not active', () => {
+    // before
+    const ctx = createContext({ activeTool: ToolName.variableWidth, point: { x: 50, y: 0 } });
+
+    // result
+    expect(armVectorWidthPointOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  describe('multi-select', () => {
+    const addTwoWidthPointNode = (): string => {
+      const nodeId = addVectorNode(
+        { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+        { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+      );
+
+      store.dispatch(
+        updateNode({
+          changes: {
+            widthProfile: {
+              points: {
+                p1: { id: 'p1', leftOffset: 6, position: 0.2, rightOffset: 6 },
+                p2: { id: 'p2', leftOffset: 8, position: 0.7, rightOffset: 8 },
+              },
+            },
+          },
+          id: nodeId,
+        }),
+      );
+      store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+      return nodeId;
+    };
+
+    it('should shift+click-toggle a regulator into the selection, as just its "point" entry, without arming any drag', () => {
+      // mock — clicking right on p1's left handle at (20, 6)
+      const nodeId = addTwoWidthPointNode();
+      const canvasRefs = createCanvasRefs();
+      const ctx = createContext({
+        activeTool: ToolName.variableWidth,
+        canvasRefs,
+        event: pointerEvent({ shiftKey: true }),
+        point: { x: 20, y: 6 },
+      });
+
+      // result
+      expect(armVectorWidthPointOnPointerDown(ctx)).toBe(true);
+      expect(canvasRefs.selectedVectorWidthHandlesRef.current).toEqual([{ nodeId, pointId: 'p1', side: 'point' }]);
+      expect(canvasRefs.vectorWidthPointDragRef.current).toBeNull();
+    });
+
+    it('should shift+click-toggle an already-selected regulator back out of the selection', () => {
+      // mock
+      const nodeId = addTwoWidthPointNode();
+      const canvasRefs = createCanvasRefs();
+
+      canvasRefs.selectedVectorWidthHandlesRef.current = [
+        { nodeId, pointId: 'p1', side: 'point' },
+        { nodeId, pointId: 'p2', side: 'point' },
+      ];
+
+      // before — shift-clicking p1's left handle again
+      const ctx = createContext({
+        activeTool: ToolName.variableWidth,
+        canvasRefs,
+        event: pointerEvent({ shiftKey: true }),
+        point: { x: 20, y: 6 },
+      });
+
+      // result
+      expect(armVectorWidthPointOnPointerDown(ctx)).toBe(true);
+      expect(canvasRefs.selectedVectorWidthHandlesRef.current).toEqual([{ nodeId, pointId: 'p2', side: 'point' }]);
+      expect(canvasRefs.vectorWidthPointDragRef.current).toBeNull();
+    });
+
+    it('should arm a group drag across every multi-selected regulator when grabbing a diamond that is already part of the selection', () => {
+      // mock — p1 and p2 were both shift-selected beforehand (only "point" entries)
+      const nodeId = addTwoWidthPointNode();
+      const canvasRefs = createCanvasRefs();
+
+      canvasRefs.selectedVectorWidthHandlesRef.current = [
+        { nodeId, pointId: 'p1', side: 'point' },
+        { nodeId, pointId: 'p2', side: 'point' },
+      ];
+
+      // before — plain click (no shift) right on p1's left handle at (20, 6)
+      const ctx = createContext({ activeTool: ToolName.variableWidth, canvasRefs, point: { x: 20, y: 6 } });
+
+      // result
+      expect(armVectorWidthPointOnPointerDown(ctx)).toBe(true);
+      expect(canvasRefs.vectorWidthPointDragRef.current).toMatchObject({
+        groupTargets: [{ nodeId, point: { id: 'p2', leftOffset: 8, position: 0.7, rightOffset: 8 } }],
+        nodeId,
+        point: { id: 'p1', leftOffset: 6, position: 0.2, rightOffset: 6 },
+        target: 'left',
+      });
+      expect(canvasRefs.selectedVectorWidthHandlesRef.current).toEqual([
+        { nodeId, pointId: 'p1', side: 'left' },
+        { nodeId, pointId: 'p1', side: 'right' },
+        { nodeId, pointId: 'p1', side: 'point' },
+        { nodeId, pointId: 'p2', side: 'left' },
+        { nodeId, pointId: 'p2', side: 'right' },
+        { nodeId, pointId: 'p2', side: 'point' },
+      ]);
+      // the actively-grabbed side (p1's left handle) is remembered, even though the group also includes p2
+      expect(canvasRefs.lastVectorWidthHandleSideRef.current).toEqual({ nodeId, pointId: 'p1', side: 'left' });
+    });
+
+    it('should preserve the existing multi-selection, and arm no group targets, when re-grabbing the center anchor of an already-selected regulator', () => {
+      // mock
+      const nodeId = addTwoWidthPointNode();
+      const canvasRefs = createCanvasRefs();
+
+      canvasRefs.selectedVectorWidthHandlesRef.current = [
+        { nodeId, pointId: 'p1', side: 'point' },
+        { nodeId, pointId: 'p2', side: 'point' },
+      ];
+
+      // before — plain click right on p1's own anchor at (20, 0)
+      const ctx = createContext({ activeTool: ToolName.variableWidth, canvasRefs, point: { x: 20, y: 0 } });
+
+      // result
+      expect(armVectorWidthPointOnPointerDown(ctx)).toBe(true);
+      expect(canvasRefs.vectorWidthPointDragRef.current).toMatchObject({ groupTargets: [], target: 'point' });
+      expect(canvasRefs.selectedVectorWidthHandlesRef.current).toEqual([
+        { nodeId, pointId: 'p1', side: 'point' },
+        { nodeId, pointId: 'p2', side: 'point' },
+      ]);
+    });
   });
 });

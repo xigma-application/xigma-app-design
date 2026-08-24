@@ -5,6 +5,7 @@ import { TVectorNode, TViewport } from 'types/design/types';
 import { bakeVectorNodeRotation } from 'components/Design/Canvas/utils/bakeVectorNodeRotation';
 import { drawVectorFill } from './drawVectorFill';
 import { drawVectorStroke } from './drawVectorStroke';
+import { drawVectorVariableStroke } from './drawVectorVariableStroke';
 import { flattenVectorSegments } from '../vectorNetwork/flattenVectorSegments';
 import { getVectorFillColorForLoopKey } from '../vectorNetwork/getVectorFillColorForLoopKey';
 import { getVectorFillLoopPoints } from '../vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints';
@@ -29,15 +30,19 @@ export const drawVectorNode = (
     }
   });
 
-  drawVectorStroke(
-    gl,
-    program,
-    buffer,
-    flattenVectorSegments(renderedNode),
-    renderedNode.strokeColor,
-    renderedNode.strokeWidth,
-    canvasWidth,
-    canvasHeight,
-    viewport,
-  );
+  if (renderedNode.widthProfile) {
+    drawVectorVariableStroke(gl, program, buffer, renderedNode, renderedNode.strokeColor, canvasWidth, canvasHeight, viewport);
+  } else {
+    drawVectorStroke(
+      gl,
+      program,
+      buffer,
+      flattenVectorSegments(renderedNode),
+      renderedNode.strokeColor,
+      renderedNode.strokeWidth,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+    );
+  }
 };

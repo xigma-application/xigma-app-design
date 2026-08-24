@@ -137,6 +137,17 @@ export type TVectorSegment = {
 
 export type TVertexHandleMode = 'corner' | 'smooth' | 'symmetric';
 
+export type TVectorWidthPoint = {
+  id: string;
+  leftOffset: number;
+  position: number;
+  rightOffset: number;
+};
+
+export type TVectorWidthProfile = {
+  points: Record<string, TVectorWidthPoint>;
+};
+
 export type TVectorNode = {
   fillColor: string | null;
   filledFaceKeys: string[];
@@ -150,6 +161,7 @@ export type TVectorNode = {
   type: NodeType.vector;
   vertexHandleModes: Record<string, TVertexHandleMode>;
   vertices: Record<string, TVectorVertex>;
+  widthProfile?: TVectorWidthProfile | null;
 };
 
 export type TLineEndpointStyle = 'arrow' | 'default';

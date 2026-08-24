@@ -1288,6 +1288,28 @@ Drobniejsze, ale zauważalne różnice względem Figmy, niepowiązane z żadnym 
       (przed kliknięciem) świadomie zostaje przybliżeniem — pokazuje cały, niepodzielony face
       najmniejszego/najwyższego node'a w punkcie (fix z §61), dokładny podział widać dopiero gdy
       przeciągnięcie faktycznie się zacznie. Pełny opis: `.claude/docs/vector-network.md` §62.
+- [x] **Variable Width** (`ToolName.variableWidth`, skrót `Shift+W` w dropdownzie "More"
+      `VectorEditToolbar`) — Figma-owy tryb zmiennej grubości konturu: klik na gołej ścieżce dodaje
+      różowy punkt regulacji (dwa diamenty, lewy/prawy bok konturu), przeciąganie diamentu zmienia
+      grubość w tym miejscu, przeciąganie samego punktu przesuwa go wzdłuż ścieżki. Pozycja punktu to
+      **ułamek (0..1) całej długości łuku łańcucha**, nie lokalne `t` segmentu — dzięki temu punkt
+      zawsze trzyma swoją względną pozycję, nawet gdy segment się rozciąga (rozciągnięcie wierzchołka
+      przesuwa punkt proporcjonalnie), a wydłużenie ścieżki o nowy segment świadomie przesuwa
+      istniejące punkty (ten sam ułamek liczy się teraz względem dłuższej całości). Narzędzie działa
+      tylko na pojedynczym, nierozgałęzionym łańcuchu wektora (`getVectorChainOrder.ts`, dzielone
+      liczenie stopni wierzchołków z Cut toola) — pozycja w toolbarze/dropdownie i sam skrót
+      klawiszowy są zablokowane, dopóki edytowany jest dokładnie jeden taki węzeł (scalenie dwóch
+      edytowanych węzłów Penem automatycznie odblokowuje, bo `vectorEditingNodeIds` spada do 1). Edycja
+      wprowadzająca rozgałęzienie/rozłączenie zeruje `widthProfile` z powrotem do jednolitej grubości —
+      jeden strzał w `handleUpdateNode.ts`, więc działa automatycznie dla Pena, Shape Buildera i Cuta.
+      Shift+klik na regulatorze zaznacza go do grupy — przeciąganie jednego z zaznaczonych synchronizuje
+      grubość na wszystkich. Różowa etykieta z wartością liczbową pokazuje się przy aktywnym
+      przeciąganiu grubości albo przy samym zaznaczeniu (nie przy przesuwaniu pozycji), z osobnym
+      kursorem `controller.png` i obracającym się kursorem resize wzdłuż linii regulatora. Przy okazji
+      złapany i naprawiony bug: skrót `Shift+W` omijał całą bramkę eligibility (działał nawet przy
+      rozgałęzionym/wielo-węzłowym zaznaczeniu) — teraz `dispatchTool.ts` sprawdza dokładnie tę samą
+      bramkę co przycisk/dropdown (`isDispatchToolBlocked.ts`). Pełny opis:
+      `.claude/docs/vector-network.md` §63, e2e: `e2e/pages/design/vector-variable-width.spec.ts`.
 - [ ] menu kontekstowe (prawy klik) na node'ach i na pustym canvasie — Copy/Paste, Duplicate,
       Bring to front/Send to back, Delete itd. — dziś nie istnieje w ogóle
 - [ ] kontrolka zoomu w rogu canvasu (aktualny % + dropdown: Zoom to fit / Zoom to selection /

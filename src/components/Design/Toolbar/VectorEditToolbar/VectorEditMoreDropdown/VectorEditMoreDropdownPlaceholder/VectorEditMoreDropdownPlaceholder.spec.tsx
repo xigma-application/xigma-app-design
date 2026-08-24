@@ -6,11 +6,11 @@ import { Provider } from 'react-redux';
 import VectorEditMoreDropdownPlaceholder from './VectorEditMoreDropdownPlaceholder';
 
 // store
-import { setActiveTool } from 'store/design/slice';
+import { addNode, setActiveTool, setVectorEditingNodeIds } from 'store/design/slice';
 import { store } from 'store';
 
 // types
-import { ToolName } from 'types/design/enums';
+import { NodeType, ToolName } from 'types/design/enums';
 
 const renderVectorEditMoreDropdownPlaceholder = (): ReturnType<typeof render> =>
   render(
@@ -19,9 +19,32 @@ const renderVectorEditMoreDropdownPlaceholder = (): ReturnType<typeof render> =>
     </Provider>,
   );
 
+const addStraightVectorNode = (): string => {
+  store.dispatch(
+    addNode({
+      fillColor: null,
+      filledFaceKeys: [],
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 describe('VectorEditMoreDropdownPlaceholder', () => {
   beforeEach(() => {
     store.dispatch(setActiveTool(ToolName.default));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should render the More label with a trigger button', () => {
@@ -36,6 +59,9 @@ describe('VectorEditMoreDropdownPlaceholder', () => {
   it('should list Shape builder and Variable width once opened, and dispatch setActiveTool on click', async () => {
     // mock
     const user = userEvent.setup();
+    const nodeId = addStraightVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
     renderVectorEditMoreDropdownPlaceholder();

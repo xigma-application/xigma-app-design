@@ -83,6 +83,25 @@ describe('getVectorCutHitAtPoint', () => {
     expect(hit!.t === 0 || hit!.t === 1).toBe(true);
   });
 
+  it('should resolve a click near the apex of a curved segment to its true closest point, not the first tessellated sample', () => {
+    // mock — a(0,0)->b(100,0) bowed upward via tangents, apex sits at t=0.5, (50,75); an unbounded
+    // tolerance means every tessellated sample would pass a naive "first within tolerance" check,
+    // so this only passes if the search finds the globally closest sample instead
+    const node = buildNode(
+      { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: { x: 0, y: 100 }, tangentStart: { x: 0, y: 100 } } },
+      { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    );
+
+    // before
+    const hit = getVectorCutHitAtPoint({ x: 50, y: 75 }, node, Number.POSITIVE_INFINITY, 5);
+
+    // result
+    expect(hit).toMatchObject({ segmentId: 's1' });
+    expect(hit!.t).toBeCloseTo(0.5, 1);
+    expect(hit!.point.x).toBeCloseTo(50, 0);
+    expect(hit!.point.y).toBeCloseTo(75, 0);
+  });
+
   it('should return null when the click misses every segment', () => {
     // mock
     const node = buildNode(

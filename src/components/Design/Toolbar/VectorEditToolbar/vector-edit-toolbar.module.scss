@@ -1,3 +1,5 @@
+@use '../../../../styles/mixins/disabled';
+
 .VectorEditToolbar {
   align-items: center;
   background-color: var(--color-neutral-5);
@@ -36,6 +38,16 @@
 
       &:hover {
         background-color: var(--color-blue-1);
+      }
+    }
+
+    &--disabled {
+      cursor: default;
+
+      @include disabled.disabled;
+
+      &:hover {
+        background-color: transparent;
       }
     }
   }

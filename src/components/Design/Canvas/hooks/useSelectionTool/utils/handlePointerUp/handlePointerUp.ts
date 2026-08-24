@@ -32,6 +32,7 @@ import { disarmVectorMultiSelectRotateDrag } from './disarmVectorMultiSelectRota
 import { disarmVectorSegmentBendDrag } from './disarmVectorSegmentBendDrag';
 import { disarmVectorShapeBuilderDrag } from './disarmVectorShapeBuilderDrag/disarmVectorShapeBuilderDrag';
 import { disarmVectorVertexDrag } from './disarmVectorVertexDrag';
+import { disarmVectorWidthPointDrag } from './disarmVectorWidthPointDrag/disarmVectorWidthPointDrag';
 import { resolveVectorCutMarkConsumption } from '../handlePointerMove/resolveVectorCutMarkConsumption';
 
 export const handlePointerUp = (
@@ -67,6 +68,7 @@ export const handlePointerUp = (
   disarmVectorSegmentBendDrag(canvas, event, dispatch, canvasRefs, selectionRefs.vectorSegmentBendDragRef, setClassName);
   disarmVectorCutDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   disarmVectorMarqueeDrag(canvas, event, canvasRefs, selectionRefs.vectorMarqueeStartRef, selectionRefs.vectorMarqueeModeRef);
+  disarmVectorWidthPointDrag(canvas, event, dispatch, canvasRefs, setClassName);
   resolveVectorCutMarkConsumption(canvasRefs);
   dispatch(endHistoryGesture());
 };

@@ -184,6 +184,26 @@ describe('resolveVectorSegmentHover', () => {
     expect(setClassName).toHaveBeenCalledWith(null);
   });
 
+  it('should clear the hover state and reset the cursor, never highlighting a segment, while Variable Width is active', () => {
+    // mock — Variable Width owns its own pink hover preview (resolveVectorWidthPointHover.ts), so the generic
+    // blue highlight/white insert-point dot must stay fully inert even over a segment
+    const nodeId = addVectorNode();
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+    store.dispatch(setActiveTool(ToolName.variableWidth));
+    const canvas = createCanvas();
+    const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
+    const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef();
+    const setClassName = vi.fn();
+
+    // before
+    resolveVectorSegmentHover(canvas, pointerEvent(50, 0), hoveredVectorSegmentIdRef, hoveredVectorEdgeInsertPointRef, setClassName);
+
+    // result
+    expect(hoveredVectorSegmentIdRef.current).toBeNull();
+    expect(hoveredVectorEdgeInsertPointRef.current).toBeNull();
+    expect(setClassName).toHaveBeenCalledWith(null);
+  });
+
   it('should do nothing when the open node id no longer resolves to any node (stale id), without crashing', () => {
     // mock — defensive case: vectorEditingNodeIds references a node that no longer exists
     store.dispatch(setVectorEditingNodeIds(['stale-node-id']));

@@ -36,21 +36,26 @@ const findCutHitOnSegment = (
     segment.tangentEnd,
     getVectorCurveSegmentCount(start, end, segment.tangentStart, segment.tangentEnd),
   );
-  const candidate = points
-    .slice(0, -1)
-    .map((current, index) => {
-      const { point: candidatePoint, t: localT } = getClosestPointOnLine(point, {
-        x1: current.x,
-        x2: points[index + 1].x,
-        y1: current.y,
-        y2: points[index + 1].y,
-      });
+  const candidates = points.slice(0, -1).map((current, index) => {
+    const { point: candidatePoint, t: localT } = getClosestPointOnLine(point, {
+      x1: current.x,
+      x2: points[index + 1].x,
+      y1: current.y,
+      y2: points[index + 1].y,
+    });
 
-      return { point: candidatePoint, t: (index + localT) / (points.length - 1) };
-    })
-    .find(({ point: candidatePoint }) => Math.hypot(point.x - candidatePoint.x, point.y - candidatePoint.y) <= edgeTolerance);
+    return {
+      distance: Math.hypot(point.x - candidatePoint.x, point.y - candidatePoint.y),
+      point: candidatePoint,
+      t: (index + localT) / (points.length - 1),
+    };
+  });
 
-  return candidate ? { point: candidate.point, segmentId: segment.id, t: candidate.t } : null;
+  const closest = candidates.reduce((closestCandidate, candidate) =>
+    candidate.distance < closestCandidate.distance ? candidate : closestCandidate,
+  );
+
+  return closest.distance <= edgeTolerance ? { point: closest.point, segmentId: segment.id, t: closest.t } : null;
 };
 
 export const getVectorCutHitAtPoint = (

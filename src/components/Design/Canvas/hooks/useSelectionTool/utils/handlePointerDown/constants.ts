@@ -31,6 +31,7 @@ import { armVectorPaintOnPointerDown } from './armResolvers/armVectorPaintOnPoin
 import { armVectorSegmentOnPointerDown } from './armResolvers/armVectorSegmentOnPointerDown/armVectorSegmentOnPointerDown';
 import { armVectorShapeBuilderOnPointerDown } from './armResolvers/armVectorShapeBuilderOnPointerDown';
 import { armVectorVertexOnPointerDown } from './armResolvers/armVectorVertexOnPointerDown/armVectorVertexOnPointerDown';
+import { armVectorWidthPointOnPointerDown } from './armResolvers/armVectorWidthPointOnPointerDown/armVectorWidthPointOnPointerDown';
 import { toggleSelectionOnPointerDown } from './armResolvers/toggleSelectionOnPointerDown';
 
 export const ARM_RESOLVERS = [
@@ -39,6 +40,7 @@ export const ARM_RESOLVERS = [
   armVectorPaintOnPointerDown,
   armVectorShapeBuilderOnPointerDown,
   armVectorCutOnPointerDown,
+  armVectorWidthPointOnPointerDown,
   armVectorHandleOnPointerDown,
   armVectorCornerHandleOnPointerDown,
   armVectorBendSegmentOnPointerDown,

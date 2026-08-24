@@ -1,3 +1,5 @@
+@use '../../../../../styles/mixins/svg-color';
+
 .ToolDropdown {
   align-items: center;
   background-color: transparent;
@@ -21,9 +23,7 @@
   &__item.ToolDropdown__item:hover {
     color: var(--color-on-blue-1);
 
-    :global([data-svg-property='fill']) {
-      fill: var(--color-on-blue-1);
-    }
+    @include svg-color.svg-color(var(--color-on-blue-1));
   }
 
   &__item.ToolDropdown__item:hover &__shortcut {

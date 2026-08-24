@@ -1,3 +1,5 @@
+@use '../../../../styles/mixins/disabled';
+
 .PopoverItem {
   align-items: center;
   border-radius: 5px;
@@ -9,6 +11,16 @@
 
   &:hover {
     background-color: var(--color-blue-1);
+  }
+
+  &--disabled {
+    @include disabled.disabled;
+
+    cursor: default;
+
+    &:hover {
+      background-color: transparent;
+    }
   }
 
   &__label {

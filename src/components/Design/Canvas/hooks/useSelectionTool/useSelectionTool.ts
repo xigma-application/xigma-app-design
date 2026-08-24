@@ -103,7 +103,8 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         activeTool === ToolName.paint ||
         activeTool === ToolName.bend ||
         activeTool === ToolName.cut ||
-        activeTool === ToolName.shapeBuilder) &&
+        activeTool === ToolName.shapeBuilder ||
+        activeTool === ToolName.variableWidth) &&
       !isCanvasCaretEditingActive
     ) {
       const pointerDownListener = (event: PointerEvent): void => onPointerDown(canvas, event, refs, selectionRefs);
@@ -150,6 +151,10 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         refs.hoveredVectorShapeBuilderFaceRef.current = null;
         refs.isVectorShapeBuilderBoxModeRef.current = false;
         refs.isVectorShapeBuilderSubtractRef.current = false;
+        refs.hoveredVectorWidthPointRef.current = null;
+        refs.vectorWidthPointDragRef.current = null;
+        refs.selectedVectorWidthHandlesRef.current = [];
+        refs.lastVectorWidthHandleSideRef.current = null;
         selectionRefs.vectorCutDragRef.current = null;
         lastPointerClientPositionRef.current = null;
       };
