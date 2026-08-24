@@ -12,6 +12,7 @@ export const handleLockBrowserEvents = (
     (ctrlKey &&
       (secondaryKey === KeyboardKeys['+'] ||
         secondaryKey === KeyboardKeys['-'] ||
+        secondaryKey === KeyboardKeys.a ||
         secondaryKey === KeyboardKeys.d ||
         secondaryKey === KeyboardKeys.f ||
         secondaryKey === KeyboardKeys.r ||

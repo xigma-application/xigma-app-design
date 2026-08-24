@@ -1026,8 +1026,26 @@ node.rotation)` w `drawMsdfText.ts`).
       `refs.selectedVectorVertexIdsRef`, niedostępnego z poziomu `DesignPage`): z zaznaczonym
       wierzchołkiem Vector Network usuwa tylko jego (+ przyległe segmenty), inaczej usuwa cały
       zaznaczony node/node'y — pierwsza "usuń zaznaczenie" funkcjonalność w apce w ogóle.
-- [ ] **pozostałe skróty edycji**: Cmd/Ctrl+D (duplikuj), Cmd/Ctrl+C/V (kopiuj/wklej), strzałki
-      (nudge o 1px, Shift+strzałka o 10px), Cmd/Ctrl+A (zaznacz wszystko) — wciąż nie istnieją
+- [x] **pozostałe skróty edycji**: Cmd/Ctrl+D (duplikuj), Cmd/Ctrl+C/V (kopiuj/wklej), strzałki
+      (nudge o 1px, Shift+strzałka o 10px), Cmd/Ctrl+A (zaznacz wszystko) — wszystkie cztery dołożone
+      jako kolejne wpisy w `useKeyboardShortcuts.ts`'s `keysMap` (nie switchują `activeTool`, więc
+      świadomie pomijają display-owe `keys.ts`, tak jak Escape/Undo/Redo/Delete już wcześniej), i
+      wszystkie czytają/piszą `selectedIds`/`nodes` bezpośrednio z `store.getState()` (ten sam styl co
+      istniejący `handleDeleteSelection`), z każdą wieloelementową operacją spiętą w jeden
+      `beginHistoryGesture`/`endHistoryGesture` (N przesuniętych/zduplikowanych/wklejonych node'ów =
+      jeden krok Ctrl+Z). Wszystkie cztery świadomie **nic nie robią, gdy trwa Vector Edit Mode**
+      (`vectorEditingNodeIds.length > 0`) — ten tryb ma własną, osobną semantykę duplikowania/kopiowania
+      na poziomie wierzchołków/segmentów, mieszanie jej z zaznaczeniem node'ów na poziomie sceny
+      dublikowałoby/przesuwało nie to co trzeba. Duplicate i Paste dzielą jeden, nowy
+      `cloneNodeWithOffset.ts` (offset o stałe `DUPLICATE_OFFSET` world units, `structuredClone` żeby
+      klon nie dzielił referencji z oryginałem) — dla duplikowanego tekstu-na-ścieżce świadomie czyści
+      `pathId`, inaczej dwa teksty walczyłyby o pozycję wyznaczaną przez tę samą ścieżkę. Nudge i
+      duplicate/paste dzielą też nowy, wspólny `Canvas/utils/getGeometryDeltaChanges.ts` — wydzielony
+      bez zmian z prywatnej dotąd `getOriginChanges` w `continueDrag.ts` (ten sam switch po kształcie
+      node'a: `x`/`y` vs `x1..y2` vs `vertices`), teraz reużywany trzeci raz. Clipboard dla Copy/Paste to
+      zwykła, modułowa tablica w pamięci (`utils/clipboard.ts`) — bez integracji z systemowym
+      schowkiem, nie przeżywa odświeżenia strony, świadomy najmniejszy sensowny zakres na tę prośbę.
+      Pełny opis: `.claude/docs/design-tool-architecture.md` §6.
 - [ ] **zoom ze skrótów klawiszowych** — Cmd/Ctrl +/− (zoom in/out o krok), Shift+0 (zoom to 100%),
       Shift+1 (zoom to fit), Shift+2 (zoom to selection) — dziś zoom działa tylko przez
       scroll/pinch (Etap 4)

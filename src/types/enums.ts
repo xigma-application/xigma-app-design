@@ -1,7 +1,12 @@
 export enum KeyboardKeys {
   '+' = '+',
   '-' = '-',
+  a = 'KeyA',
   alt = 'Alt',
+  arrowDown = 'ArrowDown',
+  arrowLeft = 'ArrowLeft',
+  arrowRight = 'ArrowRight',
+  arrowUp = 'ArrowUp',
   b = 'KeyB',
   backspace = 'Backspace',
   c = 'KeyC',

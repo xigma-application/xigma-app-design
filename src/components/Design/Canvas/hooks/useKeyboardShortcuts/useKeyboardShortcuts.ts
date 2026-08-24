@@ -17,11 +17,16 @@ import { ToolName } from 'types/design/enums';
 // utils
 import { dispatchTool } from './utils/dispatchTool';
 import { getDefaultMoveTool } from './utils/getDefaultMoveTool';
+import { handleCopySelection } from './utils/handleCopySelection';
 import { handleDeleteSelection } from './utils/handleDeleteSelection/handleDeleteSelection';
+import { handleDuplicateSelection } from './utils/handleDuplicateSelection';
 import { handleEnterVectorEdit } from './utils/handleEnterVectorEdit';
 import { handleLeave } from './utils/handleLeave';
+import { handlePasteSelection } from './utils/handlePasteSelection';
 import { handleRedo } from './utils/handleRedo';
+import { handleSelectAll } from './utils/handleSelectAll';
 import { handleUndo } from './utils/handleUndo';
+import { nudgeMap } from './utils/nudgeMap';
 
 export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
   const dispatch = useAppDispatch();
@@ -54,6 +59,11 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => handleUndo(dispatch, refs), ...shortcuts.undo },
       { action: (): any => handleDeleteSelection(dispatch, refs), secondaryKey: KeyboardKeys.delete },
       { action: (): any => handleDeleteSelection(dispatch, refs), secondaryKey: KeyboardKeys.backspace },
+      { action: (): any => handleSelectAll(dispatch), ...shortcuts.selectAll },
+      { action: (): any => handleDuplicateSelection(dispatch, refs), ...shortcuts.duplicate },
+      { action: (): any => handleCopySelection(), ...shortcuts.copy },
+      { action: (): any => handlePasteSelection(dispatch, refs), ...shortcuts.paste },
+      ...nudgeMap(dispatch, refs),
     ],
     [dispatch, refs.selectedVectorVertexIdsRef, refs.selectedVectorHandlesRef],
   );

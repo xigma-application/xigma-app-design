@@ -145,14 +145,14 @@ Progressive chunked simplification (not one global RDP pass at release) and tang
 clamping both fix real, reported curve-fit overshoot on tight loops/sharp reversals; full write-up:
 `.claude/docs/pencil-tool.md`.
 
-| #   | Scenario                                                                                                                | Unit |           E2E            |
-| --- | ------------------------------------------------------------------------------------------------------------------------ | :--: | :-----------------------: |
-| 317 | A single drag draws a visible stroke, and the tool stays active for an immediate second stroke, no reselect needed     |  —   | ✅ `pencil.spec.ts`      |
-| 318 | A drag too short to clear the minimum shape size is discarded, drawing nothing                                         |  —   | ✅ `pencil.spec.ts`      |
-| 319 | Shift held mid-drag locks the segment to a straight line and holds it through a direction reversal                     |  —   | ✅ `pencil.spec.ts`      |
-| 320 | Releasing Shift mid-drag resumes freehand drawing from the locked endpoint, instead of staying constrained             |  —   | ✅ `pencil.spec.ts`      |
-| 321 | Releasing the mouse button while Shift is still held (no separate Shift-keyup) still commits the axis-locked segment   |  ✅  | ✅ `pencil.spec.ts`      |
-| 322 | A committed Pencil stroke opens in Vector Edit Mode via double-click, and its vertices drag like an ordinary vector node |  —   | ✅ `pencil.spec.ts`      |
+| #   | Scenario                                                                                                                 | Unit |         E2E         |
+| --- | ------------------------------------------------------------------------------------------------------------------------ | :--: | :-----------------: |
+| 317 | A single drag draws a visible stroke, and the tool stays active for an immediate second stroke, no reselect needed       |  —   | ✅ `pencil.spec.ts` |
+| 318 | A drag too short to clear the minimum shape size is discarded, drawing nothing                                           |  —   | ✅ `pencil.spec.ts` |
+| 319 | Shift held mid-drag locks the segment to a straight line and holds it through a direction reversal                       |  —   | ✅ `pencil.spec.ts` |
+| 320 | Releasing Shift mid-drag resumes freehand drawing from the locked endpoint, instead of staying constrained               |  —   | ✅ `pencil.spec.ts` |
+| 321 | Releasing the mouse button while Shift is still held (no separate Shift-keyup) still commits the axis-locked segment     |  ✅  | ✅ `pencil.spec.ts` |
+| 322 | A committed Pencil stroke opens in Vector Edit Mode via double-click, and its vertices drag like an ordinary vector node |  —   | ✅ `pencil.spec.ts` |
 
 #321 is the fixed regression described in `pencil-tool.md` §5: `handlePointerUp.ts` originally read
 the tail directly, which the Shift branch of `handlePointerMove` never wrote to, so a stroke ended

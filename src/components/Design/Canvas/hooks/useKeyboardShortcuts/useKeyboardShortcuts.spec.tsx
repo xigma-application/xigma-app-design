@@ -493,6 +493,117 @@ describe('useKeyboardShortcuts delete/backspace behaviors', () => {
   });
 });
 
+// handleSelectAll/handleDuplicateSelection/handleCopySelection/handlePasteSelection/handleNudgeSelection
+// all read/write the real store singleton directly too, same reasoning as the delete/backspace block above
+describe('useKeyboardShortcuts selection-editing behaviors', () => {
+  const addFrameNode = (x = 0, y = 0): string => {
+    realStore.dispatch(
+      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x, y }),
+    );
+
+    const { rootOrder } = realStore.getState().design;
+
+    return rootOrder[rootOrder.length - 1];
+  };
+
+  beforeEach(() => {
+    realStore.dispatch(setSelection([]));
+  });
+
+  it('should select every node on "Cmd+A"', () => {
+    // mock
+    addFrameNode();
+    addFrameNode();
+
+    // before
+    renderHook(() => useKeyboardShortcuts(createCanvasRefs()), {
+      wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
+    });
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyA', metaKey: true });
+
+    // result
+    expect(realStore.getState().design.selectedIds).toEqual(realStore.getState().design.rootOrder);
+  });
+
+  it('should duplicate the selected node on "Cmd+D"', () => {
+    // mock
+    const idA = addFrameNode();
+
+    realStore.dispatch(setSelection([idA]));
+
+    // before
+    renderHook(() => useKeyboardShortcuts(createCanvasRefs()), {
+      wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
+    });
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyD', metaKey: true });
+
+    // result
+    expect(realStore.getState().design.selectedIds).toHaveLength(1);
+    expect(realStore.getState().design.selectedIds).not.toEqual([idA]);
+  });
+
+  it('should copy the selected node on "Cmd+C" and paste a clone of it on "Cmd+V"', () => {
+    // mock
+    const idA = addFrameNode();
+
+    realStore.dispatch(setSelection([idA]));
+
+    // before
+    renderHook(() => useKeyboardShortcuts(createCanvasRefs()), {
+      wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
+    });
+
+    const nodeCountBeforePaste = Object.keys(realStore.getState().design.nodes).length;
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyC', metaKey: true });
+    fireEvent.keyDown(window, { code: 'KeyV', metaKey: true });
+
+    // result
+    expect(Object.keys(realStore.getState().design.nodes)).toHaveLength(nodeCountBeforePaste + 1);
+  });
+
+  it('should nudge the selected node by 1px on "ArrowRight"', () => {
+    // mock
+    const idA = addFrameNode(10, 10);
+
+    realStore.dispatch(setSelection([idA]));
+
+    // before
+    renderHook(() => useKeyboardShortcuts(createCanvasRefs()), {
+      wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
+    });
+
+    // action
+    fireEvent.keyDown(window, { code: 'ArrowRight' });
+
+    // result
+    expect(realStore.getState().design.nodes[idA]).toMatchObject({ x: 11 });
+  });
+
+  it('should nudge the selected node by 10px on "Shift+ArrowRight"', () => {
+    // mock
+    const idA = addFrameNode(10, 10);
+
+    realStore.dispatch(setSelection([idA]));
+
+    // before
+    renderHook(() => useKeyboardShortcuts(createCanvasRefs()), {
+      wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
+    });
+
+    // action
+    fireEvent.keyDown(window, { code: 'ArrowRight', shiftKey: true });
+
+    // result
+    expect(realStore.getState().design.nodes[idA]).toMatchObject({ x: 20 });
+  });
+});
+
 // getDefaultMoveTool reads vectorEditingNodeId off the real store singleton too (not whatever store
 // wraps the component), so this branch needs the same realStore + Provider setup as the block above
 describe('useKeyboardShortcuts "V" behaviors while Vector Edit Mode is active', () => {

@@ -7,7 +7,7 @@ import { handleLockBrowserEvents } from '../handleLockBrowserEvents';
 const createEvent = (): KeyboardEvent => new KeyboardEvent('keydown');
 
 describe('handleLockBrowserEvents', () => {
-  it.each([KeyboardKeys['+'], KeyboardKeys['-'], KeyboardKeys.d, KeyboardKeys.f, KeyboardKeys.r, KeyboardKeys.s])(
+  it.each([KeyboardKeys['+'], KeyboardKeys['-'], KeyboardKeys.a, KeyboardKeys.d, KeyboardKeys.f, KeyboardKeys.r, KeyboardKeys.s])(
     'should prevent the browser default for ctrl+%s',
     (secondaryKey) => {
       // mock

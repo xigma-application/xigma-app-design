@@ -116,6 +116,30 @@ one unit (`shortcuts.ts` supplies the key definition, but `useKeyboardShortcuts.
 activates it) — worth checking explicitly, not just "is it in `shortcuts.ts`", whenever a shortcut is
 reported as visually present but non-functional.
 
+**Non-tool shortcuts** (Escape, Undo/Redo, Delete/Backspace, and — added later — Select All, Duplicate,
+Copy/Paste, Arrow-key nudge) don't switch `activeTool`, so they skip `keys.ts` entirely (nothing to
+show a tooltip for) and live only as extra entries in `useKeyboardShortcuts.ts`'s `keysMap`, each
+pulling its `{ secondaryKey, primaryKeys }` from a same-named (non-`ToolName`) key in `shortcuts.ts`
+(`escape`, `undo`, `redo`, `selectAll`, `duplicate`, `copy`, `paste`, `nudgeUp`/`nudgeUpLarge`/...).
+Cmd/Ctrl+D (duplicate), Cmd/Ctrl+C/V (copy/paste), Cmd/Ctrl+A (select all), and the arrow-key nudge
+(`NUDGE_STEP`/`NUDGE_STEP_LARGE` with Shift, `Canvas/constants.ts`) all read/write `selectedIds` and
+`nodes` off the real store singleton directly (`store.getState()`, not `useAppSelector`, matching
+`handleDeleteSelection`'s existing style) and each brackets its own multi-dispatch in a single
+`beginHistoryGesture`/`endHistoryGesture` pair so N moved/duplicated/pasted nodes collapse into one
+undo step (`design-store-architecture.md` §8). All four skip entirely while a vector node is open for
+editing (`vectorEditingNodeIds.length > 0`) — Vector Edit Mode owns vertex/segment-level duplicate,
+copy, and delete semantics on its own axis (`selectedVectorVertexIdsRef`/`selectedVectorSegmentIdsRef`,
+not `state.design.selectedIds`), so mixing the two would silently duplicate/nudge the wrong thing.
+Copy/paste's clipboard is a plain module-level array (`utils/clipboard.ts`, `getClipboardNodes`/
+`setClipboardNodes`) — no OS clipboard integration, lost on reload, deep-cloned on both write and the
+shared `cloneNodeWithOffset.ts` read path (also used by duplicate) so later mutation of the live nodes
+can't corrupt what's sitting in the clipboard. Both duplicate and paste offset the clone by
+`DUPLICATE_OFFSET` world units via a new shared `Canvas/utils/getGeometryDeltaChanges.ts` (extracted,
+unchanged, from what used to be `continueDrag.ts`'s private `getOriginChanges` — the same per-node-shape
+delta switch, on `x`/`y` vs `x1..y2` vs `vertices`, now reused a third way for the nudge handler too).
+One deliberate node-shape special-case: cloning a text-on-path node clears its `pathId` — leaving it
+attached would mean two text nodes both bound to (and repositioned by) the *same* original path.
+
 ## 7. Canvas interaction (the actual drag gesture)
 
 - `Canvas/Canvas.tsx` — one `useDraw*Tool(refs, <TOOL>_SETTINGS)` call per tool, where `refs` is the
