@@ -5,6 +5,8 @@ import { MIN_SHAPE_SIZE } from '../../constants';
 
 // store
 import { addNode, setActiveTool, setSelection } from 'store/design/slice';
+import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
+import { getVectorSelectionSnapshot } from 'store/history/getVectorSelectionSnapshot';
 import { selectActiveTool, selectViewport } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector, useAppStore } from 'store';
 
@@ -38,6 +40,7 @@ export const useDrawLineTool = (refs: TCanvasRefs, { endPoint, name, startPoint,
 
   const handlePointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     if (event.button === MouseButton.primary) {
+      dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
       dispatch(setSelection([]));
       startRef.current = screenToWorld(getPointerPosition(canvas, event), viewport);
       canvas.setPointerCapture(event.pointerId);
@@ -89,6 +92,8 @@ export const useDrawLineTool = (refs: TCanvasRefs, { endPoint, name, startPoint,
       canvas.releasePointerCapture(event.pointerId);
       dispatch(setActiveTool(ToolName.default));
     }
+
+    dispatch(endHistoryGesture());
   };
 
   useEffect(() => {
@@ -109,5 +114,5 @@ export const useDrawLineTool = (refs: TCanvasRefs, { endPoint, name, startPoint,
         canvas.removeEventListener('pointerup', onPointerUp);
       };
     }
-  }, [activeTool, appStore, canvasRef, dispatch, draftRef, endPoint, name, startPoint, stroke, tool, viewport]);
+  }, [activeTool, appStore, canvasRef, dispatch, draftRef, endPoint, name, refs, startPoint, stroke, tool, viewport]);
 };

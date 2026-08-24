@@ -92,6 +92,7 @@ export const TOOL_ICON_SIZE: Partial<Record<ToolName, number>> = {
 };
 
 export const TOOL_DROPDOWN_ICON_SIZE: Partial<Record<ToolName, number>> = {
+  [ToolName.default]: 18,
   [ToolName.pen]: 21,
   [ToolName.pencil]: 21,
 };

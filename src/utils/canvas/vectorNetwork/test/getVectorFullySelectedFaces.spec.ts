@@ -64,7 +64,7 @@ describe('getVectorFullySelectedFaces', () => {
     expect(result).toHaveLength(1);
   });
 
-  it('should exclude a fully-selected face that has no fill', () => {
+  it('should include a fully-selected face even when it has no fill', () => {
     // mock — nothing painted
     const node = buildNode(segments, vertices, []);
 
@@ -72,7 +72,7 @@ describe('getVectorFullySelectedFaces', () => {
     const result = getVectorFullySelectedFaces(node, ['v1', 'v2', 'v3', 'v6']);
 
     // result
-    expect(result).toEqual([]);
+    expect(result).toHaveLength(1);
   });
 
   it('should exclude a filled face when only some of its vertices are selected', () => {

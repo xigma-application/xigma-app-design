@@ -1877,6 +1877,31 @@ bypassed it entirely. Full write-up: `.claude/docs/vector-network.md` §63.
 | 311 | The `Shift+W` shortcut does not activate Variable Width when two nodes are being edited simultaneously, even if both are eligible alone |  ✅  | ✅ `vector-variable-width.spec.ts` |
 | 312 | The `Shift+W` shortcut does activate Variable Width when exactly one eligible, non-branching node is being edited                       |  ✅  | ✅ `vector-variable-width.spec.ts` |
 
+## Sector (face) deletion — click-select any face, protect a shared neighbor's boundary on Delete
+
+Delete/Backspace already deleted a selected vertex/segment, and clicking a _filled_ face with the
+Move tool already selected all its vertices (§56) — so Delete already deleted a filled sector
+transitively, by deleting every vertex bounding it. Two gaps closed here, both requested directly:
+(1) the click-select resolver required fill, so an unfilled region couldn't be click-selected at
+all; (2) deleting a selected sector never protected a boundary shared with an untouched neighbor —
+it just deleted every selected vertex's segments outright, unlike Shape Builder's own Alt+click
+subtract. `armVectorFaceSelectOnPointerDown.ts`/`resolveVectorFaceSelectHover.ts` now select/hover
+any face hit regardless of fill; `getVectorFullySelectedFaces.ts` dropped its `filledFaceKeys`
+requirement so the persistent selection highlight and the delete path both recognize an unfilled
+fully-selected sector too. `deleteSelectedVertices.ts` now detects when the selection fully bounds
+one or more faces and reuses Shape Builder's own `subtractVectorFaces` (exclusive-boundary-only
+deletion) for those, falling back to the original per-vertex delete for any remaining selected
+vertices outside a sector — so a plain multi-point delete is unaffected, and a sector delete now
+protects a still-standing neighbor's shared edge exactly like Shape Builder's Alt+click does. Full
+write-up: `.claude/docs/vector-network.md` §64.
+
+| #   | Scenario                                                                                                                        | Unit |           E2E            |
+| --- | ------------------------------------------------------------------------------------------------------------------------------- | :--: | :----------------------: |
+| 313 | Clicking an unfilled face with the Move tool selects its vertices, and Delete removes its whole boundary when isolated          |  ✅  | ✅ `vector-edit.spec.ts` |
+| 314 | Delete on a selected sector deletes only its own exclusive boundary, leaving a segment shared with an untouched neighbor intact |  ✅  | ✅ `vector-edit.spec.ts` |
+| 315 | Delete on a mixed selection (a fully-selected sector plus an unrelated extra vertex) still deletes the extra vertex too         |  ✅  |            —             |
+| 316 | Deleting a filled sector drops its key from `filledFaceKeys` along with the geometry                                            |  ✅  |            —             |
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

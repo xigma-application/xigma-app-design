@@ -9,7 +9,6 @@ import { ToolName } from 'types/design/enums';
 // utils
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getVectorFaceAtPointAcrossOpenNodes } from '../../../../utils/getVectorFaceAtPointAcrossOpenNodes';
-import { getVectorFillLoopKeyAtPoint } from 'utils/canvas/vectorNetwork/getVectorFillLoopKeyAtPoint';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 
 export const resolveVectorFaceSelectHover = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs): void => {
@@ -21,9 +20,8 @@ export const resolveVectorFaceSelectHover = (canvas: HTMLCanvasElement, event: P
     const viewport = selectViewport(state);
     const point = screenToWorld(getPointerPosition(canvas, event), viewport);
     const hit = getVectorFaceAtPointAcrossOpenNodes(point, vectorEditingNodeIds, state.design.nodes);
-    const isFilled = Boolean(hit && getVectorFillLoopKeyAtPoint(hit.node, point));
 
-    canvasRefs.hoveredVectorFaceSelectRef.current = hit && isFilled ? { faceKey: hit.face.key, nodeId: hit.node.id } : null;
+    canvasRefs.hoveredVectorFaceSelectRef.current = hit ? { faceKey: hit.face.key, nodeId: hit.node.id } : null;
   } else {
     canvasRefs.hoveredVectorFaceSelectRef.current = null;
   }

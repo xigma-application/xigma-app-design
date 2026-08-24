@@ -594,22 +594,63 @@ test('undo after dragging a vertex restores its previous position', async ({ pag
   const afterDrag = await designPage.canvas.screenshot();
   expect(afterDrag.equals(before)).toBe(false);
 
-  // once a vertex has been grabbed, the whole path's stroke stays rendered in its brighter
-  // "actively editing this vertex" tint even after undo restores the actual vertex position — that
-  // tint lives in a ref (selectedVectorVertexIdsRef), not in undoable store state, so a full-canvas
-  // comparison back to `before` (never touched) would spuriously differ; comparing small regions at
-  // the origin and destination points, before vs. after undo, isolates the position claim from it
-  const originRegion = { height: 24, width: 24, x: 888, y: 288 };
-  const destinationRegion = { height: 24, width: 24, x: 838, y: 238 };
-  const originAfterDrag = await page.screenshot({ clip: originRegion });
-  const destinationAfterDrag = await page.screenshot({ clip: destinationRegion });
-
+  // undo now restores the selected-vertex tint along with the position — the ref that drives it
+  // (selectedVectorVertexIdsRef) round-trips through the same history gesture as the drag itself, so a
+  // full-canvas comparison back to `before` is (tolerant-AA) exact, not just a positional check on
+  // clipped regions; countMismatchedPixels rather than a raw Buffer.equals() since the two renders come
+  // from independently re-flattened geometry (same reasoning as this file's other pixelmatch uses)
   await page.keyboard.press('Control+z');
-  const originAfterUndo = await page.screenshot({ clip: originRegion });
-  const destinationAfterUndo = await page.screenshot({ clip: destinationRegion });
+  const afterUndo = await designPage.canvas.screenshot();
 
-  expect(originAfterUndo.equals(originAfterDrag)).toBe(false); // the dot reappears at (900, 300)
-  expect(destinationAfterUndo.equals(destinationAfterDrag)).toBe(false); // and leaves (850, 250)
+  expect(countMismatchedPixels(before, afterUndo)).toBe(0);
+});
+
+test('undo after deleting two shift-selected vertices restores both the geometry and the multi-selection highlight', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-multi-vertex-delete-undo');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawOpenTriangle(designPage);
+  await designPage.selectVectorEditMoveTool();
+
+  await designPage.click(1050, 300); // select v2 alone
+  await designPage.click(1050, 450, { shift: true }); // add v3 — 2-point multi-selection
+  const before = await designPage.canvas.screenshot();
+
+  await page.keyboard.press('Delete');
+  const afterDelete = await designPage.canvas.screenshot();
+  expect(afterDelete.equals(before)).toBe(false);
+
+  // undo must restore both vertices AND their multi-selection highlight, not just the geometry —
+  // selectedVectorVertexIdsRef lives outside Redux, so this is the regression this fix closes
+  await page.keyboard.press('Control+z');
+  const afterUndo = await designPage.canvas.screenshot();
+
+  expect(countMismatchedPixels(before, afterUndo)).toBe(0);
+});
+
+test('undo after deleting a selected segment restores both the geometry and the segment-selection highlight', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-segment-delete-undo');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawOpenTriangle(designPage);
+  await designPage.selectVectorEditMoveTool();
+
+  await designPage.click(940, 300); // off the v1-v2 edge's own midpoint (975,300) — selects that segment
+  const before = await designPage.canvas.screenshot();
+
+  await page.keyboard.press('Delete');
+  const afterDelete = await designPage.canvas.screenshot();
+  expect(afterDelete.equals(before)).toBe(false);
+
+  // same regression check as the vertex case above, but for selectedVectorSegmentIdsRef
+  await page.keyboard.press('Control+z');
+  const afterUndo = await designPage.canvas.screenshot();
+
+  expect(countMismatchedPixels(before, afterUndo)).toBe(0);
 });
 
 test('shift+click toggles a vertex into the multi-selection and back out again', async ({ page }) => {
@@ -2147,4 +2188,110 @@ test('shift-clicking a second, adjacent filled face keeps its shared divider ver
   // never touched them and they'd still sit at their original (1000,350)/(900,350) positions
   expect(v3).toMatchObject({ x: 1150, y: 350 });
   expect(v6).toMatchObject({ x: 1050, y: 350 });
+});
+
+// Delete/Backspace already removed a selected vertex/segment (§7/§8) and §56 already let a click
+// select a *filled* face's vertices, so Delete already deleted a filled sector transitively — but the
+// click-select resolver required fill, and deletion never protected a boundary shared with an
+// untouched neighbor (it just deleted every selected vertex, same as any plain multi-point delete).
+// This pair closes both gaps: any face (filled or not) is now click-selectable, and deleting a
+// fully-selected sector reuses Shape Builder's own subtractVectorFaces exclusive-boundary logic so an
+// untouched neighbor's shared edge survives — mirrors vector-shape-builder.spec.ts's own Alt+click
+// coverage, just reached via selection + Delete instead of a dedicated tool.
+test('clicking an unfilled face with the Move tool now selects its vertices too, and Delete removes its whole boundary when nothing borders it', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-unfilled-sector-delete-isolated');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawClosedSquare(designPage); // v1(900,300) v2(1000,300) v3(1000,400) v4(900,400) — left unfilled
+  await designPage.selectVectorEditMoveTool();
+
+  const nodeId = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+
+    return store.getState().design.rootOrder[store.getState().design.rootOrder.length - 1];
+  });
+
+  // action — a plain click inside the still-unfilled face selects its 4 vertices (previously a no-op)
+  await designPage.click(950, 350);
+  await page.keyboard.press('Delete');
+
+  const node = await page.evaluate((id) => import('/src/store/index.ts').then(({ store }) => store.getState().design.nodes[id]), nodeId);
+
+  // no neighbor to protect, so the whole boundary is gone, same as Shape Builder's own isolated-face
+  // Alt+click case
+  expect(node.segments).toEqual({});
+  expect(node.vertices).toEqual({});
+});
+
+test('Delete on a selected sector deletes only its own exclusive boundary, leaving the segment shared with an untouched neighbor intact', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-sector-delete-preserves-shared-neighbor');
+  await expect(designPage.canvas).toBeVisible();
+
+  // a square split into a top/bottom half by divider s7 (v3<->v6), left unfilled — same geometry as
+  // this file's own split-square fixture above (the §56 shift-click test), minus the fill
+  const nodeId = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { addNode, setActiveTool, setVectorEditingNodeIds } = await import('/src/store/design/slice.ts');
+
+    const segments = {
+      s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+      s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+      s3: { endId: 'v4', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+      s4: { endId: 'v5', id: 's4', startId: 'v4', tangentEnd: null, tangentStart: null },
+      s5: { endId: 'v6', id: 's5', startId: 'v5', tangentEnd: null, tangentStart: null },
+      s6: { endId: 'v1', id: 's6', startId: 'v6', tangentEnd: null, tangentStart: null },
+      s7: { endId: 'v6', id: 's7', startId: 'v3', tangentEnd: null, tangentStart: null },
+    };
+    const vertices = {
+      v1: { id: 'v1', x: 900, y: 300 },
+      v2: { id: 'v2', x: 1000, y: 300 },
+      v3: { id: 'v3', x: 1000, y: 350 },
+      v4: { id: 'v4', x: 1000, y: 400 },
+      v5: { id: 'v5', x: 900, y: 400 },
+      v6: { id: 'v6', x: 900, y: 350 },
+    };
+
+    store.dispatch(
+      addNode({
+        fillColor: '#ff0000',
+        filledFaceKeys: [],
+        name: 'Vector',
+        parentId: null,
+        rotation: 0,
+        segments,
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: 'vector',
+        vertexHandleModes: {},
+        vertices,
+      } as never),
+    );
+
+    const state = store.getState();
+    const id = state.design.rootOrder[state.design.rootOrder.length - 1];
+
+    store.dispatch(setVectorEditingNodeIds([id]));
+    store.dispatch(setActiveTool('move' as never));
+
+    return id;
+  });
+
+  // action — click only the top half (selecting v1/v2/v3/v6), then delete it
+  await designPage.click(950, 325);
+  await page.keyboard.press('Delete');
+
+  const node = await page.evaluate((id) => import('/src/store/index.ts').then(({ store }) => store.getState().design.nodes[id]), nodeId);
+
+  // the top's own exclusive edges (s1, s2, s6) are gone, but the divider (s7) and the bottom half's
+  // own boundary (s3, s4, s5) survive since the bottom half was never touched
+  expect(Object.keys(node.segments).sort()).toEqual(['s3', 's4', 's5', 's7']);
+  expect(Object.keys(node.vertices).sort()).toEqual(['v3', 'v4', 'v5', 'v6']);
 });

@@ -1,4 +1,4 @@
-import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
 import { fireEvent, renderHook } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
@@ -8,16 +8,26 @@ import { useKeyboardShortcuts } from './useKeyboardShortcuts';
 
 // store
 import designReducer, { addNode, setActiveTool, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
-import { redo, undo } from 'store/history/actions';
-import { store as realStore } from 'store';
-import { TDesignState } from 'store/design/types';
+import { beginHistoryGesture, endHistoryGesture, undo } from 'store/history/actions';
+import { createHistoryMiddleware } from 'store/history/historyMiddleware';
+import { createHistoryStack } from 'store/history/createHistoryStack';
+import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
+import { AppStore, store as realStore } from 'store';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 
-const createTestStore = (): EnhancedStore<{ design: TDesignState }> => configureStore({ reducer: { design: designReducer } });
+const createTestStore = (): AppStore => {
+  const historyStack = createHistoryStack();
 
-const renderShortcuts = (store: EnhancedStore<{ design: TDesignState }>): void => {
+  return configureStore({
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({ thunk: { extraArgument: historyStack } }).concat(createHistoryMiddleware(historyStack)),
+    reducer: { design: designReducer },
+  });
+};
+
+const renderShortcuts = (store: AppStore): void => {
   renderHook(() => useKeyboardShortcuts(createCanvasRefs()), {
     wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
   });
@@ -290,20 +300,6 @@ describe('useKeyboardShortcuts behaviors', () => {
     expect(store.getState().design.activeTool).toBe(ToolName.shapeBuilder);
   });
 
-  it('should switch to the Variable width tool on "Shift+W"', () => {
-    // mock
-    const store = createTestStore();
-
-    // before
-    renderShortcuts(store);
-
-    // action
-    fireEvent.keyDown(window, { code: 'KeyW', shiftKey: true });
-
-    // result
-    expect(store.getState().design.activeTool).toBe(ToolName.variableWidth);
-  });
-
   it('should switch to the scale tool (not media) on a plain "K" without the modifiers', () => {
     // mock
     const store = createTestStore();
@@ -398,8 +394,16 @@ describe('useKeyboardShortcuts behaviors', () => {
     // mock
     const store = createTestStore();
 
-    // spy
-    vi.spyOn(store, 'dispatch');
+    store.dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
+    store.dispatch(
+      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+    );
+    store.dispatch(endHistoryGesture());
+
+    const { rootOrder } = store.getState().design;
+    const nodeId = rootOrder[rootOrder.length - 1];
+
+    store.dispatch(undo());
 
     // before
     renderShortcuts(store);
@@ -408,15 +412,21 @@ describe('useKeyboardShortcuts behaviors', () => {
     fireEvent.keyDown(window, { code: 'KeyZ', metaKey: true, shiftKey: true });
 
     // result
-    expect(store.dispatch).toHaveBeenCalledWith(redo());
+    expect(store.getState().design.nodes[nodeId]).toBeDefined();
   });
 
   it('should dispatch undo on "Cmd+Z"', () => {
     // mock
     const store = createTestStore();
 
-    // spy
-    vi.spyOn(store, 'dispatch');
+    store.dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
+    store.dispatch(
+      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+    );
+    store.dispatch(endHistoryGesture());
+
+    const { rootOrder } = store.getState().design;
+    const nodeId = rootOrder[rootOrder.length - 1];
 
     // before
     renderShortcuts(store);
@@ -425,7 +435,7 @@ describe('useKeyboardShortcuts behaviors', () => {
     fireEvent.keyDown(window, { code: 'KeyZ', metaKey: true });
 
     // result
-    expect(store.dispatch).toHaveBeenCalledWith(undo());
+    expect(store.getState().design.nodes[nodeId]).toBeUndefined();
   });
 });
 
@@ -604,5 +614,65 @@ describe('useKeyboardShortcuts "Enter" behaviors', () => {
 
     // result
     expect(realStore.getState().design.vectorEditingNodeIds).toEqual([]);
+  });
+});
+
+// dispatchTool.ts's blocking check (isDispatchToolBlocked/getEligibleVectorWidthNodes) reads
+// vectorEditingNodeIds/nodes off the real store singleton directly, not whatever store wraps the
+// component, so — same reasoning as the blocks above — this needs realStore + its Provider, with a
+// single-chain vector node actually open for editing (Variable Width is gated on exactly one eligible
+// vector node, see isVectorEditMoreToolDisabled.ts)
+describe('useKeyboardShortcuts "Shift+W" behaviors', () => {
+  afterEach(() => {
+    realStore.dispatch(setVectorEditingNodeIds([]));
+    realStore.dispatch(setActiveTool(ToolName.default));
+  });
+
+  it('should switch to the Variable width tool on "Shift+W" when a single eligible vector node is open for editing', () => {
+    // mock
+    realStore.dispatch(
+      addNode({
+        fillColor: null,
+        filledFaceKeys: [],
+        name: 'Vector',
+        parentId: null,
+        rotation: 0,
+        segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: NodeType.vector,
+        vertexHandleModes: {},
+        vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 10 } },
+      }),
+    );
+
+    const { rootOrder } = realStore.getState().design;
+    const vectorId = rootOrder[rootOrder.length - 1];
+
+    realStore.dispatch(setVectorEditingNodeIds([vectorId]));
+
+    // before
+    renderHook(() => useKeyboardShortcuts(createCanvasRefs()), {
+      wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
+    });
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyW', shiftKey: true });
+
+    // result
+    expect(realStore.getState().design.activeTool).toBe(ToolName.variableWidth);
+  });
+
+  it('should not switch to the Variable width tool on "Shift+W" when no vector node is open for editing', () => {
+    // before
+    renderHook(() => useKeyboardShortcuts(createCanvasRefs()), {
+      wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
+    });
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyW', shiftKey: true });
+
+    // result
+    expect(realStore.getState().design.activeTool).not.toBe(ToolName.variableWidth);
   });
 });

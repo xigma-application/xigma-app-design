@@ -100,7 +100,7 @@ describe('resolveVectorFaceSelectHover', () => {
     expect(canvasRefs.hoveredVectorFaceSelectRef.current).toBeNull();
   });
 
-  it('should clear the hovered face ref when hovering a face that has no fill', () => {
+  it('should set the hovered face when hovering a face that has no fill', () => {
     // mock
     const nodeId = addTriangleVectorNode();
 
@@ -114,7 +114,7 @@ describe('resolveVectorFaceSelectHover', () => {
     resolveVectorFaceSelectHover(canvas, pointerEvent(50, 40), canvasRefs);
 
     // result
-    expect(canvasRefs.hoveredVectorFaceSelectRef.current).toBeNull();
+    expect(canvasRefs.hoveredVectorFaceSelectRef.current).toEqual({ faceKey: 's1,s2,s3', nodeId });
   });
 
   it('should set the hovered face when hovering an already-filled face', () => {

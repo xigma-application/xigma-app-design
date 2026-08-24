@@ -1,13 +1,17 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore, ThunkAction, UnknownAction } from '@reduxjs/toolkit';
 
 // store
 import designReducer from './design/slice';
+import { createHistoryStack, THistoryStack } from './history/createHistoryStack';
 import { createHistoryMiddleware } from './history/historyMiddleware';
 
 export type RootState = { design: ReturnType<typeof designReducer> };
 
+const historyStack = createHistoryStack();
+
 export const store = configureStore({
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(createHistoryMiddleware()),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({ thunk: { extraArgument: historyStack } }).concat(createHistoryMiddleware(historyStack)),
   reducer: {
     design: designReducer,
   },
@@ -15,3 +19,4 @@ export const store = configureStore({
 
 export type AppDispatch = typeof store.dispatch;
 export type AppStore = typeof store;
+export type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, THistoryStack, UnknownAction>;

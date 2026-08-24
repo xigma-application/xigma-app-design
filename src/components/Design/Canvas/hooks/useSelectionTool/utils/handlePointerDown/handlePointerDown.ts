@@ -3,6 +3,7 @@ import { ARM_RESOLVERS } from './constants';
 
 // store
 import { beginHistoryGesture } from 'store/history/actions';
+import { getVectorSelectionSnapshot } from 'store/history/getVectorSelectionSnapshot';
 import { selectActiveTool, selectOrderedNodes, selectSelectedIds, selectSelectedNodes, selectViewport } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
@@ -47,7 +48,7 @@ export const handlePointerDown = (
       viewport,
     };
 
-    dispatch(beginHistoryGesture());
+    dispatch(beginHistoryGesture(getVectorSelectionSnapshot(canvasRefs)));
 
     for (const resolve of ARM_RESOLVERS) {
       if (resolve(ctx)) {

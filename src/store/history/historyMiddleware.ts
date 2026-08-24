@@ -1,40 +1,33 @@
 import { Middleware, UnknownAction } from '@reduxjs/toolkit';
 
 // store
-import { beginHistoryGesture, endHistoryGesture, redo, undo } from './actions';
-import { addNode, deleteNode, replaceDesignSnapshot, updateNode } from 'store/design/slice';
+import { beginHistoryGesture, endHistoryGesture } from './actions';
+import { addNode, deleteNode, setSelection, updateNode } from 'store/design/slice';
 import { RootState } from 'store';
 
+// others
+import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from './constants';
+
 // utils
-import { createHistoryStack } from './createHistoryStack';
+import { THistoryStack } from './createHistoryStack';
 import { getDesignSnapshot } from './getDesignSnapshot';
 
-const UNDOABLE_ACTION_TYPES: Set<string> = new Set([addNode.type, updateNode.type, deleteNode.type]);
+const UNDOABLE_ACTION_TYPES: Set<string> = new Set([addNode.type, updateNode.type, deleteNode.type, setSelection.type]);
 
-export const createHistoryMiddleware = (): Middleware<object, RootState> => {
-  const historyStack = createHistoryStack();
-
+export const createHistoryMiddleware = (historyStack: THistoryStack): Middleware<object, RootState> => {
   return (store) => (next) => (action) => {
     const typedAction = action as UnknownAction;
 
     switch (true) {
       case beginHistoryGesture.match(typedAction):
-        historyStack.beginGesture(getDesignSnapshot(store.getState()));
+        historyStack.beginGesture({ design: getDesignSnapshot(store.getState()), vectorSelection: typedAction.payload });
         return next(action);
       case endHistoryGesture.match(typedAction):
         historyStack.endGesture();
         return next(action);
-      case undo.match(typedAction): {
-        const snapshot = historyStack.undo(getDesignSnapshot(store.getState()));
-        return snapshot ? next(replaceDesignSnapshot(snapshot)) : undefined;
-      }
-      case redo.match(typedAction): {
-        const snapshot = historyStack.redo(getDesignSnapshot(store.getState()));
-        return snapshot ? next(replaceDesignSnapshot(snapshot)) : undefined;
-      }
       default:
         if (UNDOABLE_ACTION_TYPES.has(typedAction.type)) {
-          historyStack.pushIfUndoable(getDesignSnapshot(store.getState()));
+          historyStack.pushIfUndoable({ design: getDesignSnapshot(store.getState()), vectorSelection: EMPTY_VECTOR_SELECTION_SNAPSHOT });
         }
 
         return next(action);

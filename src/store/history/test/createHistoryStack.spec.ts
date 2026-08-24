@@ -1,10 +1,19 @@
 // types
 import { TDesignSnapshot } from 'store/design/types';
+import { TVectorSelectionSnapshot } from 'types/design/canvas/types';
 
 // utils
-import { createHistoryStack } from '../createHistoryStack';
+import { createHistoryStack, THistorySnapshot } from '../createHistoryStack';
 
-const snapshot = (id: string): TDesignSnapshot => ({ nodes: {}, rootOrder: [id], selectedIds: [] });
+const designSnapshot = (id: string): TDesignSnapshot => ({ nodes: {}, rootOrder: [id], selectedIds: [] });
+
+const vectorSelectionSnapshot = (id: string): TVectorSelectionSnapshot => ({
+  selectedVectorHandles: [],
+  selectedVectorSegmentIds: [],
+  selectedVectorVertexIds: [id],
+});
+
+const snapshot = (id: string): THistorySnapshot => ({ design: designSnapshot(id), vectorSelection: vectorSelectionSnapshot(id) });
 
 describe('createHistoryStack', () => {
   it('should return null from undo when nothing was ever pushed', () => {

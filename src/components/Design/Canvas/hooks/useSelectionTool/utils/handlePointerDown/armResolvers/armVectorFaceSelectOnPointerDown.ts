@@ -13,7 +13,6 @@ import { bakeVectorNodeRotation } from '../../../../../utils/bakeVectorNodeRotat
 import { getVectorFaceAtPoint } from '../../../../../utils/getVectorFaceAtPoint';
 import { getVectorFaceAtPointAcrossOpenNodes } from '../../../../../utils/getVectorFaceAtPointAcrossOpenNodes';
 import { getVectorFaceVertexIds } from 'utils/canvas/vectorNetwork/getVectorFaceVertexIds';
-import { getVectorFillLoopKeyAtPoint } from 'utils/canvas/vectorNetwork/getVectorFillLoopKeyAtPoint';
 import { persistVectorNetworkCrossings } from 'utils/canvas/vectorNetwork/planarizeVectorNetwork/persistVectorNetworkCrossings';
 
 export const armVectorFaceSelectOnPointerDown = ({
@@ -29,9 +28,8 @@ export const armVectorFaceSelectOnPointerDown = ({
 
   if (activeTool === ToolName.move && vectorEditingNodeIds.length > 0) {
     const hit = getVectorFaceAtPointAcrossOpenNodes(point, vectorEditingNodeIds, state.design.nodes);
-    const isFilled = Boolean(hit && getVectorFillLoopKeyAtPoint(hit.node, point));
 
-    if (hit && isFilled) {
+    if (hit) {
       const { segments, vertices } = persistVectorNetworkCrossings(hit.node.segments, hit.node.vertices);
       const geometryChanged = segments !== hit.node.segments;
       const node = { ...hit.node, segments, vertices };

@@ -5,6 +5,8 @@ import { DEFAULT_SHAPE_SIZE, PATH_NAME, PATH_START_OFFSET_TOP } from '../../cons
 
 // store
 import { addNode, setActiveTool, setSelection, startTextEdit } from 'store/design/slice';
+import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
+import { getVectorSelectionSnapshot } from 'store/history/getVectorSelectionSnapshot';
 import { selectActiveTool, selectViewport } from 'store/design/selectors';
 import { store, useAppDispatch, useAppSelector } from 'store';
 
@@ -29,6 +31,7 @@ export const useDrawTextOnPathTool = (refs: TCanvasRefs): void => {
 
   const handlePointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     if (event.button === MouseButton.primary) {
+      dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
       dispatch(setSelection([]));
       startRef.current = screenToWorld(getPointerPosition(canvas, event), viewport);
       canvas.setPointerCapture(event.pointerId);
@@ -78,6 +81,8 @@ export const useDrawTextOnPathTool = (refs: TCanvasRefs): void => {
       canvas.releasePointerCapture(event.pointerId);
       dispatch(setActiveTool(ToolName.default));
     }
+
+    dispatch(endHistoryGesture());
   };
 
   useEffect(() => {
@@ -98,5 +103,5 @@ export const useDrawTextOnPathTool = (refs: TCanvasRefs): void => {
         canvas.removeEventListener('pointerup', onPointerUp);
       };
     }
-  }, [activeTool, canvasRef, dispatch, draftRef, viewport]);
+  }, [activeTool, canvasRef, dispatch, draftRef, refs, viewport]);
 };

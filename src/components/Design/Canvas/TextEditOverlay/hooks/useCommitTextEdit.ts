@@ -2,6 +2,8 @@ import { FocusEvent, RefObject } from 'react';
 
 // store
 import { deleteNode, setSelection, stopTextEdit } from 'store/design/slice';
+import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
+import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 import { useAppDispatch, useAppStore } from 'store';
 
 // types
@@ -26,6 +28,7 @@ export const useCommitTextEdit = (
       const selectOnCommit = selectOnCommitRef.current;
 
       selectOnCommitRef.current = false;
+      dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
 
       if (content.length > 0) {
         commitTextNode(dispatch, box, editingNodeId, content);
@@ -43,6 +46,7 @@ export const useCommitTextEdit = (
         dispatch(setSelection([]));
       }
 
+      dispatch(endHistoryGesture());
       dispatch(stopTextEdit());
     }
   };

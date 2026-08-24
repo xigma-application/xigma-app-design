@@ -7,7 +7,6 @@ import { TKeysMap, useKeyboardHandler } from 'hooks';
 import { shortcuts } from './shortcuts';
 
 // store
-import { redo, undo } from 'store/history/actions';
 import { useAppDispatch } from 'store';
 
 // types
@@ -21,6 +20,8 @@ import { getDefaultMoveTool } from './utils/getDefaultMoveTool';
 import { handleDeleteSelection } from './utils/handleDeleteSelection/handleDeleteSelection';
 import { handleEnterVectorEdit } from './utils/handleEnterVectorEdit';
 import { handleLeave } from './utils/handleLeave';
+import { handleRedo } from './utils/handleRedo';
+import { handleUndo } from './utils/handleUndo';
 
 export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
   const dispatch = useAppDispatch();
@@ -49,8 +50,8 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => dispatchTool(dispatch, ToolName.variableWidth), ...shortcuts[ToolName.variableWidth] },
       { action: (): any => handleLeave(dispatch, refs), ...shortcuts.escape },
       { action: (): any => handleEnterVectorEdit(dispatch), secondaryKey: KeyboardKeys.enter },
-      { action: (): any => dispatch(redo()), ...shortcuts.redo },
-      { action: (): any => dispatch(undo()), ...shortcuts.undo },
+      { action: (): any => handleRedo(dispatch, refs), ...shortcuts.redo },
+      { action: (): any => handleUndo(dispatch, refs), ...shortcuts.undo },
       { action: (): any => handleDeleteSelection(dispatch, refs), secondaryKey: KeyboardKeys.delete },
       { action: (): any => handleDeleteSelection(dispatch, refs), secondaryKey: KeyboardKeys.backspace },
     ],

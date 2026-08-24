@@ -7,7 +7,11 @@ export const handleReplaceDesignSnapshot = (state: TDesignState, snapshot: TDesi
   state.rootOrder = snapshot.rootOrder;
   state.selectedIds = snapshot.selectedIds;
 
-  state.vectorEditingNodeIds = state.vectorEditingNodeIds.filter((id) => state.nodes[id]?.type === NodeType.vector);
+  const validVectorEditingNodeIds = state.vectorEditingNodeIds.filter((id) => state.nodes[id]?.type === NodeType.vector);
+
+  if (validVectorEditingNodeIds.length !== state.vectorEditingNodeIds.length) {
+    state.vectorEditingNodeIds = validVectorEditingNodeIds;
+  }
 
   const primaryEditingNode = state.nodes[state.vectorEditingNodeIds[0]];
 

@@ -5,6 +5,8 @@ import { MIN_SHAPE_SIZE } from '../../../../constants';
 
 // store
 import { addNode, setActiveTool } from 'store/design/slice';
+import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
+import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 import { selectViewport } from 'store/design/selectors';
 import { AppDispatch, AppStore } from 'store';
 
@@ -40,8 +42,10 @@ export const handlePointerUp = (
     const isClick = Math.abs(current.x - startRef.current.x) < MIN_SHAPE_SIZE && Math.abs(current.y - startRef.current.y) < MIN_SHAPE_SIZE;
     const rect = getMediaPlacementRect(isClick, startRef.current, current, armed.naturalWidth, armed.naturalHeight);
 
+    dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
     dispatch(addNode({ ...rect, flipX: false, flipY: false, name, parentId: null, rotation: 0, src: armed.src, type: NodeType.media }));
     appendLastCreatedNodeToSelection(dispatch, appStore);
+    dispatch(endHistoryGesture());
 
     startRef.current = null;
     draftRef.current = null;

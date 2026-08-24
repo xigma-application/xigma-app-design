@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { undo } from 'store/history/actions';
 import { store } from 'store';
 
 // types
@@ -12,6 +13,7 @@ import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
 // utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { handlePointerDown } from '../handlePointerDown';
 
 const createCanvas = (): HTMLCanvasElement => {
@@ -74,11 +76,37 @@ describe('handlePointerDown', () => {
       createDragStartRef(),
       createPendingOutgoingTangentRef(),
       createVectorAlignmentGuideRef(),
+      createCanvasRefs(),
     );
 
     // result
     expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
     expect(canvas.setPointerCapture).not.toHaveBeenCalled();
+  });
+
+  it('should capture the currently selected vector vertices as the gesture-start snapshot', () => {
+    // mock
+    const canvas = createCanvas();
+    const refs = createCanvasRefs({ selectedVectorVertexIdsRef: { current: ['stale-vertex'] } });
+
+    // before
+    handlePointerDown(
+      canvas,
+      pointerEvent(10, 20),
+      store.dispatch,
+      store,
+      createDragOriginRef(),
+      createDragStartRef(),
+      createPendingOutgoingTangentRef(),
+      createVectorAlignmentGuideRef(),
+      refs,
+    );
+
+    // action
+    const restored = store.dispatch(undo());
+
+    // result
+    expect(restored).toEqual({ selectedVectorHandles: [], selectedVectorSegmentIds: [], selectedVectorVertexIds: ['stale-vertex'] });
   });
 
   it('should start a brand-new vector network when no node is currently in Vector Edit Mode', () => {
@@ -95,6 +123,7 @@ describe('handlePointerDown', () => {
       createDragStartRef(),
       createPendingOutgoingTangentRef(),
       createVectorAlignmentGuideRef(),
+      createCanvasRefs(),
     );
 
     // result
@@ -122,6 +151,7 @@ describe('handlePointerDown', () => {
       createDragStartRef(),
       createPendingOutgoingTangentRef(),
       createVectorAlignmentGuideRef(),
+      createCanvasRefs(),
     );
 
     // result
@@ -150,6 +180,7 @@ describe('handlePointerDown', () => {
       createDragStartRef(),
       createPendingOutgoingTangentRef(),
       createVectorAlignmentGuideRef(),
+      createCanvasRefs(),
     );
 
     // result

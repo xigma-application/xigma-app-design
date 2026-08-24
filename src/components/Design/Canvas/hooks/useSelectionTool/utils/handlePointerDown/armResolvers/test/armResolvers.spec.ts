@@ -1419,7 +1419,7 @@ describe('armVectorFaceSelectOnPointerDown', () => {
     expect(selectedVertexIds.some((id) => !originalVertexIds.has(id))).toBe(true);
   });
 
-  it('should return undefined without changing the selection when the clicked face has no fill', () => {
+  it('should select every vertex of a clicked face that has no fill', () => {
     // mock
     const nodeId = addVectorNode(
       {
@@ -1436,9 +1436,8 @@ describe('armVectorFaceSelectOnPointerDown', () => {
     const ctx = createContext({ activeTool: ToolName.move, point: { x: 50, y: 40 } });
 
     // result
-    expect(armVectorFaceSelectOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(ctx.dispatch).not.toHaveBeenCalled();
+    expect(armVectorFaceSelectOnPointerDown(ctx)).toBe(true);
+    expect(ctx.canvasRefs.selectedVectorVertexIdsRef.current.sort()).toEqual(['v1', 'v2', 'v3']);
   });
 
   it('should return undefined when the click misses every face', () => {

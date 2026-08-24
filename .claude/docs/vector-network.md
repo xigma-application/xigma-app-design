@@ -457,6 +457,53 @@ on every gesture regardless of what it turns out to be, since the middleware onl
 snapshot the first time an undoable action (`addNode`/`updateNode`/`deleteNode`) fires inside an open
 gesture, coalescing an entire drag into one entry.
 
+**Segment/vertex/tangent-handle selection now round-trips through undo/redo too.** `selectedVectorVertexIdsRef`/
+`selectedVectorSegmentIdsRef`/`selectedVectorHandlesRef` (§20 below, §"Vector Edit Mode" resolver notes)
+live entirely in `TCanvasRefs`, outside Redux — undo/redo originally only restored the Redux document
+(`nodes`/`rootOrder`/`selectedIds`), so undoing a vertex/segment-affecting mutation left these three refs
+holding whatever they'd been cleared/set to by the delete/drag itself, with no relationship to the
+restored document. Concretely: select two vertices, delete them, undo — the vertices came back, but
+nothing re-selected them, and worse, nothing guaranteed the ids sitting in the refs still existed
+post-undo (a dangling-reference risk for anything doing `node.vertices[id]`).
+
+Fixed by widening what a history entry snapshots: `store/history/createHistoryStack.ts`'s
+`THistorySnapshot = { design: TDesignSnapshot; vectorSelection: TVectorSelectionSnapshot }` — the second
+half is `{ selectedVectorVertexIds, selectedVectorSegmentIds, selectedVectorHandles }`
+(`types/design/canvas/types.ts`), captured from `TCanvasRefs` via `store/history/getVectorSelectionSnapshot.ts`
+at the exact moment `beginHistoryGesture` is dispatched (mirroring how the design half is captured), and
+written back onto the refs via `store/history/applyVectorSelectionSnapshot.ts` when a `undo`/`redo` thunk
+returns a non-null result. `undo`/`redo` became thunks (not plain actions) specifically so a value could
+flow back out of `dispatch(...)` to the caller — see `design-store-architecture.md` §8 for the
+`extraArgument`/thunk wiring.
+
+**The one place a vector-editing mutation could reach the middleware outside an open gesture**:
+`handleDeleteSelection.ts`'s vertex/segment branches used to call the shared
+`dispatchAsOneGestureIfMultiNode.ts` helper, which only opened a gesture bracket when 2+ nodes owned the
+selection (an optimization — a single dispatch needs no bracket to become one undo entry). Since my
+capture point is `beginHistoryGesture` itself, that single-owning-node path had no capture point at all.
+Fixed by giving these two branches their own explicit, unconditional `beginHistoryGesture(getVectorSelectionSnapshot(refs))`
+/ `endHistoryGesture()` bracket instead, capturing the pre-delete selection right before it's cleared two
+lines later anyway — behaviorally inert for the design-snapshot push count (still exactly one entry
+either way), it only adds the missing vector-selection capture. `dispatchAsOneGestureIfMultiNode.ts`
+itself gained an optional 4th `vectorSelection` param (default `EMPTY_VECTOR_SELECTION_SNAPSHOT`) purely
+so its own remaining `beginHistoryGesture()` call still compiles — its other 5 call sites (all vector-drag
+commits, all already nested inside `useSelectionTool`'s own outer pointerdown-bracketed gesture) don't
+need one of their own.
+
+**Gotcha that nearly sank this feature, worth knowing before touching `handleReplaceDesignSnapshot.ts`
+or `useVectorEditOnDoubleClick.ts` again**: the restore mechanism above worked correctly in isolation
+(proven via direct instrumentation — the refs held the right ids immediately after
+`applyVectorSelectionSnapshot` ran) but the moment React flushed the following re-render, the selection
+was gone again. Root cause: `handleReplaceDesignSnapshot.ts`'s `vectorEditingNodeIds =
+vectorEditingNodeIds.filter(...)` always produced a *new* array, even when nothing was actually pruned;
+`useVectorEditOnDoubleClick.ts`'s own cleanup effect depends on that array by reference
+(`useSelector(selectVectorEditingNodeIds)`) and unconditionally wipes all three vector-selection refs on
+every dependency change — so **every** undo/redo (not just ones that changed which node is open) was
+tripping that "switched to a different node" cleanup and erasing the just-restored selection one render
+later. Fixed at the source: `handleReplaceDesignSnapshot.ts` now only reassigns `vectorEditingNodeIds`
+when the filtered result's length actually differs, keeping the same array reference (and therefore the
+same `useSelector` identity, and therefore no spurious effect re-run) on the common no-op path.
+
 ## 9. Corner-pull handles, the render-only default tangent preview, and handle styling/hover
 
 Landed as a follow-up round after §6-8, closing the "pull a fresh handle out of a corner point" gap
@@ -4370,6 +4417,69 @@ correct chain fractions, the value label showing on selection and hiding on dese
 redistribution keeping a point pinned to its fraction, a branching edit discarding the profile and
 disabling the option, two edited nodes disabling the dropdown item until merged into one, and three
 dedicated cases proving `Shift+W` now respects the exact same gate as the mouse-click paths.
+
+## 64. Sector deletion — any face is click-selectable now, and Delete on a selected sector protects a shared, untouched neighbor's boundary
+
+Requested directly ("Zaimplementuj usuwanie sektorów i pointów w wektorze za pomocą delete i
+backspace"). Point (vertex) and segment deletion via Delete/Backspace already existed (§7/§8 above,
+`handleDeleteSelection.ts`), and §56 already let a click on a **filled** face select all its vertices
+in the Move tool — so Delete already deleted a filled sector transitively, by deleting every vertex
+bounding it. Two clarifying decisions were needed before touching anything, since both contradicted
+an existing, deliberately-tested constraint: (1) should an **unfilled** region be click-selectable
+too — §56's own resolver had a dedicated test asserting a no-fill click returns `undefined` and
+changes nothing; (2) should deleting a selected sector protect a boundary shared with an untouched
+neighbor (Shape Builder's own Alt+click semantics), or keep the existing "delete every selected
+vertex, including shared ones" behavior. Both were confirmed: yes to unfilled sectors, and yes to
+protecting the shared neighbor.
+
+**Selection widened to any face, not just filled ones.** `armVectorFaceSelectOnPointerDown.ts`
+dropped its `isFilled` check (`Boolean(hit && getVectorFillLoopKeyAtPoint(hit.node, point))`) — any
+`getVectorFaceAtPointAcrossOpenNodes` hit now claims the click and selects that face's vertex ids,
+filled or not, same plain-replaces/shift-unions behavior as before. `resolveVectorFaceSelectHover.ts`
+dropped the identical check so the hover hatch preview shows for any face too — no fill-gated
+`drawVectorFaceSelectHoverPreview.ts`/`drawVectorSelectedFillPreview.ts` change was needed, neither
+ever checked fill themselves, they just draw whatever face(s) the ref/helper below hands them.
+`getVectorFullySelectedFaces.ts` dropped its own `node.filledFaceKeys.includes(...)` filter — it now
+returns every face whose entire vertex set is currently selected, regardless of fill, which both
+restores the persistent "fully selected" highlight for an unfilled sector and (see below) becomes the
+delete path's own detector for "is this selection actually a sector".
+
+**Deletion reuses Shape Builder's own `subtractVectorFaces`, not a new exclusive-boundary
+algorithm.** `deleteSelectedVertices.ts` (`useKeyboardShortcuts/utils/handleDeleteSelection/`), per
+owning node: computes `getVectorFullySelectedFaces(node, selectedVertexIds)`; if any come back, runs
+`subtractVectorFaces(node, fullySelectedFaces)` (§59's own merge/subtract module — deletes each
+touched face's *exclusive* boundary via `getExclusiveSegmentIds`, prunes orphaned vertices, drops the
+touched face's own `filledFaceKeys` entry) to get an intermediate `sectorNode`; then subtracts the
+sector faces' own vertex ids (`getVectorFaceVertexIds`, flattened into a `Set`) from the original
+selection to get whatever's left over — any vertex the user selected that *isn't* part of a
+fully-enclosed face, e.g. an extra shift-clicked point elsewhere on the same node. That leftover set
+gets the exact same plain per-vertex delete this function always did, just applied on top of
+`sectorNode` instead of the original `node`. When nothing is fully selected (`fullySelectedFaces`
+empty, the ordinary point-selection case), `sectorNode === node` and the leftover set equals the
+original selection verbatim — the whole function collapses back to its pre-existing behavior with one
+harmless addition: `filledFaceKeys` is now always included in the dispatched `updateNode` payload
+(unchanged value on this path, previously omitted entirely and left to self-heal at render time per
+§43 — including it is a no-op here, only doing real work on the sector path).
+
+**Why this protects a shared neighbor with zero new geometry logic.** `getExclusiveSegmentIds`
+(§59) already only deletes a segment when *every* face bordering it is in the touched set — a
+segment on the sector's own outer boundary (bordered by nothing but the unbounded exterior, which
+`deriveVectorFaces` never enumerates as a face) always qualifies, but the shared divider between the
+selected sector and an untouched neighbor does not, since the neighbor's own face is never in
+`fullySelectedFaces`. Two adjacent sectors selected *together* (both fully enclosed by the same
+selection) correctly still lose their shared divider too, exactly matching a Shape Builder drag that
+sweeps both — this isn't special-cased, it falls straight out of "is every bordering face touched".
+
+**Isolated-face case is `subtractVectorFaces`'s existing "no neighbor to protect" behavior, unchanged
+from §59**: a selected sector with no untouched neighbor loses its entire boundary, same as Shape
+Builder's Alt+click on a standalone face. `getVectorFullySelectedFaces.spec.ts`, this section's own
+`armResolvers.spec.ts`/`resolveVectorFaceSelectHover.spec.ts` cases were flipped from asserting "no
+fill → no selection" to asserting the opposite; `deleteSelectedVertices.spec.ts` gained the isolated-
+sector, protected-neighbor, mixed-selection, and filledFaceKeys-drop cases (TEST_CASES.md #313-316).
+e2e: `vector-edit.spec.ts` #313-314 (an unfilled square click-selected then fully deleted; a split,
+unfilled square's top half click-selected then deleted, leaving the divider and the bottom half
+intact) — #315-316 stayed unit-only per this file's own established "screenshot diff can't prove
+*which* branch" rationale (TEST_CASES.md's closing section).
 
 ## Related
 

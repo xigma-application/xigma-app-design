@@ -5,6 +5,7 @@ import { VECTOR_VERTEX_HIT_RADIUS_PX } from 'constant/canvas';
 
 // store
 import { beginHistoryGesture } from 'store/history/actions';
+import { getVectorSelectionSnapshot } from 'store/history/getVectorSelectionSnapshot';
 import { selectPenActiveVertexId, selectVectorEditingNodeIds, selectViewport } from 'store/design/selectors';
 import { AppDispatch, AppStore } from 'store';
 
@@ -31,6 +32,7 @@ export const handlePointerDown = (
   dragStartRef: RefObject<TPoint | null>,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
   vectorAlignmentGuideRef: TCanvasRefs['vectorAlignmentGuideRef'],
+  canvasRefs: TCanvasRefs,
 ): void => {
   if (event.button === MouseButton.primary) {
     const state = appStore.getState();
@@ -58,7 +60,7 @@ export const handlePointerDown = (
       viewport.zoom,
     );
 
-    dispatch(beginHistoryGesture());
+    dispatch(beginHistoryGesture(getVectorSelectionSnapshot(canvasRefs)));
     bakeEditingNodeRotation(dispatch, editingNode);
     startOrContinueVectorNetwork(
       canvas,

@@ -3,23 +3,29 @@ import { HISTORY_LIMIT } from './constants';
 
 // types
 import { TDesignSnapshot } from 'store/design/types';
+import { TVectorSelectionSnapshot } from 'types/design/canvas/types';
+
+export type THistorySnapshot = {
+  design: TDesignSnapshot;
+  vectorSelection: TVectorSelectionSnapshot;
+};
 
 export type THistoryStack = {
-  beginGesture: (snapshot: TDesignSnapshot) => void;
+  beginGesture: (snapshot: THistorySnapshot) => void;
   endGesture: () => void;
-  pushIfUndoable: (currentSnapshot: TDesignSnapshot) => void;
-  redo: (currentSnapshot: TDesignSnapshot) => TDesignSnapshot | null;
-  undo: (currentSnapshot: TDesignSnapshot) => TDesignSnapshot | null;
+  pushIfUndoable: (currentSnapshot: THistorySnapshot) => void;
+  redo: (currentSnapshot: THistorySnapshot) => THistorySnapshot | null;
+  undo: (currentSnapshot: THistorySnapshot) => THistorySnapshot | null;
 };
 
 export const createHistoryStack = (): THistoryStack => {
-  let past: TDesignSnapshot[] = [];
-  let future: TDesignSnapshot[] = [];
+  let past: THistorySnapshot[] = [];
+  let future: THistorySnapshot[] = [];
   let gestureOpen = false;
-  let pendingSnapshot: TDesignSnapshot | null = null;
+  let pendingSnapshot: THistorySnapshot | null = null;
   let snapshotPushedThisGesture = false;
 
-  const pushPast = (snapshot: TDesignSnapshot): void => {
+  const pushPast = (snapshot: THistorySnapshot): void => {
     past = [...past, snapshot].slice(-HISTORY_LIMIT);
     future = [];
   };
@@ -43,7 +49,7 @@ export const createHistoryStack = (): THistoryStack => {
         snapshotPushedThisGesture = true;
       }
     },
-    redo: (currentSnapshot): TDesignSnapshot | null => {
+    redo: (currentSnapshot): THistorySnapshot | null => {
       if (future.length > 0) {
         const snapshot = future[future.length - 1];
 
@@ -55,7 +61,7 @@ export const createHistoryStack = (): THistoryStack => {
 
       return null;
     },
-    undo: (currentSnapshot): TDesignSnapshot | null => {
+    undo: (currentSnapshot): THistorySnapshot | null => {
       if (past.length > 0) {
         const snapshot = past[past.length - 1];
 

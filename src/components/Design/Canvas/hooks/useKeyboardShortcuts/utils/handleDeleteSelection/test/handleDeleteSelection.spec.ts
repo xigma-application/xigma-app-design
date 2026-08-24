@@ -159,6 +159,48 @@ describe('handleDeleteSelection', () => {
     expect(store.getState().design.nodes[idC]).toBeDefined();
   });
 
+  it('should restore the deleted vertex selection when a single-owning-node vertex delete is undone', () => {
+    // mock
+    const vectorId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([vectorId]));
+
+    const refs = createRefs(['vertex-1']);
+
+    // before
+    handleDeleteSelection(store.dispatch, refs);
+
+    // action
+    const restored = store.dispatch(undo());
+
+    // result
+    const vectorNode = store.getState().design.nodes[vectorId] as TVectorNode;
+
+    expect(vectorNode.vertices).toHaveProperty('vertex-1');
+    expect(restored).toEqual({ selectedVectorHandles: [], selectedVectorSegmentIds: [], selectedVectorVertexIds: ['vertex-1'] });
+  });
+
+  it('should restore the deleted segment selection when a single-owning-node segment delete is undone', () => {
+    // mock
+    const vectorId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([vectorId]));
+
+    const refs = createCanvasRefs({ selectedVectorSegmentIdsRef: { current: ['segment-1'] } });
+
+    // before
+    handleDeleteSelection(store.dispatch, refs);
+
+    // action
+    const restored = store.dispatch(undo());
+
+    // result
+    const vectorNode = store.getState().design.nodes[vectorId] as TVectorNode;
+
+    expect(vectorNode.segments).toHaveProperty('segment-1');
+    expect(restored).toEqual({ selectedVectorHandles: [], selectedVectorSegmentIds: ['segment-1'], selectedVectorVertexIds: [] });
+  });
+
   it('should remove only the selected vertices (and their segments) when editing a vector node', () => {
     // mock
     const vectorId = addVectorNode();

@@ -124,6 +124,20 @@ describe('handleReplaceDesignSnapshot', () => {
     expect(state.penActiveVertexId).toBeNull();
   });
 
+  it('should keep the same vectorEditingNodeIds array reference when nothing needs pruning — components reading it via useSelector must not spuriously re-render on every undo/redo', () => {
+    // mock
+    const vector = buildVectorNode();
+    const state = buildState({ vectorEditingNodeIds: [vector.id] });
+    const originalVectorEditingNodeIds = state.vectorEditingNodeIds;
+    const snapshot = buildSnapshot({ nodes: { [vector.id]: vector } });
+
+    // before
+    handleReplaceDesignSnapshot(state, snapshot);
+
+    // result
+    expect(state.vectorEditingNodeIds).toBe(originalVectorEditingNodeIds);
+  });
+
   it('should keep only the open node that survives an undo when two were open and one got removed', () => {
     // mock — two nodes open for editing, the undo/redo snapshot only brings one of them back
     const survivor = buildVectorNode({ id: 'vector-survivor' });

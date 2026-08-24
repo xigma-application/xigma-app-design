@@ -81,6 +81,12 @@ export type TPenPreview = {
 
 export type TVectorHandleHover = { end: 'end' | 'start'; segmentId: string };
 
+export type TVectorSelectionSnapshot = {
+  selectedVectorHandles: TVectorHandleHover[];
+  selectedVectorSegmentIds: string[];
+  selectedVectorVertexIds: string[];
+};
+
 export type TVectorFaceHover = { faceKey: string; nodeId: string };
 
 export type TVectorPaintFaceHover = { faceKey: string; isFilled: boolean; nodeId: string };

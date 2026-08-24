@@ -1,6 +1,6 @@
 // store
 import { addNode, setSelection } from 'store/design/slice';
-import { redo, undo } from '../actions';
+import { beginHistoryGesture, endHistoryGesture, redo, undo } from '../actions';
 import { store } from 'store';
 
 // types
@@ -56,6 +56,40 @@ describe('historyMiddleware', () => {
     store.dispatch(redo());
 
     // result
+    expect(store.getState().design.nodes[idA]).toBeDefined();
+  });
+
+  it('should pair the gesture-start vector-selection payload with the pre-gesture design snapshot', () => {
+    // before
+    store.dispatch(beginHistoryGesture({ selectedVectorHandles: [], selectedVectorSegmentIds: [], selectedVectorVertexIds: ['v1'] }));
+
+    const idA = addFrameNode(0, 0);
+
+    store.dispatch(endHistoryGesture());
+
+    // action
+    const restored = store.dispatch(undo());
+
+    // result
+    expect(store.getState().design.nodes[idA]).toBeUndefined();
+    expect(restored).toEqual({ selectedVectorHandles: [], selectedVectorSegmentIds: [], selectedVectorVertexIds: ['v1'] });
+  });
+
+  it('should treat a plain selection change as its own undo step, independent of any content change', () => {
+    // mock — select a node, then deselect it; neither dispatch touches nodes/rootOrder at all
+    const idA = addFrameNode(0, 0);
+
+    store.dispatch(setSelection([idA]));
+    store.dispatch(setSelection([]));
+
+    // before
+    expect(store.getState().design.selectedIds).toEqual([]);
+
+    // action — undo should only step back through the deselect, restoring the selection, not the node
+    store.dispatch(undo());
+
+    // result
+    expect(store.getState().design.selectedIds).toEqual([idA]);
     expect(store.getState().design.nodes[idA]).toBeDefined();
   });
 });
