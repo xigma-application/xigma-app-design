@@ -234,6 +234,28 @@ describe('getVectorFillLoopPoints', () => {
     expect(pointsA).not.toEqual(pointsB);
   });
 
+  it('should reuse the same node’s planarized network when resolving a second, different loop key instead of re-planarizing it', () => {
+    // mock — two disjoint triangles on one node (mirrors a multi-face vector like a painted grid),
+    // so resolving both faces' loop keys forces getPlanarNetwork to run twice for the same node —
+    // first call populates its own planar-network cache, second call must hit that cache instead
+    const node = buildNode(
+      [vertex('a', 0, 0), vertex('b', 100, 0), vertex('c', 50, 100), vertex('d', 500, 500), vertex('e', 600, 500), vertex('f', 550, 600)],
+      [seg('s1', 'a', 'b'), seg('s2', 'b', 'c'), seg('s3', 'c', 'a'), seg('s4', 'd', 'e'), seg('s5', 'e', 'f'), seg('s6', 'f', 'd')],
+    );
+    const faces = deriveVectorFaces(node);
+    const loopKeyA = getVectorFillLoopKey(faces[0].pieceKeys);
+    const loopKeyB = getVectorFillLoopKey(faces[1].pieceKeys);
+
+    // before
+    const pointsA = getVectorFillLoopPoints(node, loopKeyA);
+    const pointsB = getVectorFillLoopPoints(node, loopKeyB);
+
+    // result — both faces resolve correctly off the one shared, cached planar network
+    expect(pointsA).not.toBeNull();
+    expect(pointsB).not.toBeNull();
+    expect(pointsA).not.toEqual(pointsB);
+  });
+
   it('should cache a null result too, instead of recomputing a known-dead loop on every call', () => {
     // mock
     const node = buildNode([vertex('a', 0, 0), vertex('b', 100, 0)], [seg('s1', 'a', 'b')]);

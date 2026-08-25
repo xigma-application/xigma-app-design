@@ -11,7 +11,11 @@ const drawVectorFillMock = vi.fn();
 const drawVectorStrokeMock = vi.fn();
 const drawVectorVariableStrokeMock = vi.fn();
 const flattenVectorSegmentsMock = vi.fn();
+const bakeVectorNodeRotationMock = vi.fn();
 
+vi.mock('components/Design/Canvas/utils/bakeVectorNodeRotation', () => ({
+  bakeVectorNodeRotation: (...args: unknown[]): unknown => bakeVectorNodeRotationMock(...args),
+}));
 vi.mock('../../vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints', () => ({
   getVectorFillLoopPoints: (...args: unknown[]): unknown => getVectorFillLoopPointsMock(...args),
 }));
@@ -33,6 +37,7 @@ describe('drawVectorNode', () => {
     drawVectorStrokeMock.mockClear();
     drawVectorVariableStrokeMock.mockClear();
     flattenVectorSegmentsMock.mockClear();
+    bakeVectorNodeRotationMock.mockClear();
   });
 
   it('should resolve each filled loop key to its current points then draw the fill followed by the stroke, using the node’s own colors and width', () => {
@@ -210,5 +215,70 @@ describe('drawVectorNode', () => {
     // result
     expect(drawVectorVariableStrokeMock).toHaveBeenCalledWith(gl, program, buffer, node, '#00ff00', 200, 150, IDENTITY_VIEWPORT);
     expect(drawVectorStrokeMock).not.toHaveBeenCalled();
+  });
+
+  it('should pass the node’s own object reference straight through when it isn’t rotated, so the per-node WeakMap render caches keyed on that reference hit across frames instead of recomputing every draw', () => {
+    // mock
+    const gl = {} as WebGL2RenderingContext;
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const node: TVectorNode = {
+      fillColor: null,
+      filledFaceKeys: [],
+      id: '1',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {},
+      strokeColor: '#00ff00',
+      strokeWidth: 3,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: {},
+    };
+    const flattened = [{ points: [{ x: 0, y: 0 }], segmentId: 's1' }];
+
+    flattenVectorSegmentsMock.mockReturnValue(flattened);
+
+    // before
+    drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
+
+    // result
+    expect(bakeVectorNodeRotationMock).not.toHaveBeenCalled();
+    expect(flattenVectorSegmentsMock.mock.calls[0][0]).toBe(node);
+  });
+
+  it('should bake the node’s rotation into a new segments/vertices set before drawing when the node is rotated', () => {
+    // mock
+    const gl = {} as WebGL2RenderingContext;
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const node: TVectorNode = {
+      fillColor: null,
+      filledFaceKeys: [],
+      id: '1',
+      name: 'Vector',
+      parentId: null,
+      rotation: 45,
+      segments: {},
+      strokeColor: '#00ff00',
+      strokeWidth: 3,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: {},
+    };
+    const bakedSegments = { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } };
+    const bakedVertices = { a: { id: 'a', x: 1, y: 2 } };
+    const flattened = [{ points: [{ x: 0, y: 0 }], segmentId: 's1' }];
+
+    bakeVectorNodeRotationMock.mockReturnValue({ rotation: 0, segments: bakedSegments, vertices: bakedVertices });
+    flattenVectorSegmentsMock.mockReturnValue(flattened);
+
+    // before
+    drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
+
+    // result
+    expect(bakeVectorNodeRotationMock).toHaveBeenCalledWith(node);
+    expect(flattenVectorSegmentsMock).toHaveBeenCalledWith({ ...node, rotation: 0, segments: bakedSegments, vertices: bakedVertices });
   });
 });

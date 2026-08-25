@@ -20,8 +20,7 @@ export const drawVectorNode = (
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  const { segments, vertices } = bakeVectorNodeRotation(node);
-  const renderedNode: TVectorNode = { ...node, segments, vertices };
+  const renderedNode: TVectorNode = node.rotation ? { ...node, ...bakeVectorNodeRotation(node) } : node;
 
   renderedNode.filledFaceKeys.forEach((key) => {
     const points = getVectorFillLoopPoints(renderedNode, key);

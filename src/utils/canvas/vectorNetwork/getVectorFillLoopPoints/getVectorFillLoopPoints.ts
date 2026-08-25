@@ -12,6 +12,20 @@ import { planarizeVectorNetwork } from '../planarizeVectorNetwork/planarizeVecto
 import { resolvePieceKeyToUnit } from './resolvePieceKeyToUnit';
 
 const cache = new WeakMap<TVectorNode, Map<string, TPoint[] | null>>();
+const planarCache = new WeakMap<TVectorNode, ReturnType<typeof planarizeVectorNetwork>>();
+
+const getPlanarNetwork = (node: TVectorNode): ReturnType<typeof planarizeVectorNetwork> => {
+  const cached = planarCache.get(node);
+
+  if (!cached) {
+    const planar = planarizeVectorNetwork(Object.values(node.segments), node.vertices);
+    planarCache.set(node, planar);
+
+    return planar;
+  }
+
+  return cached;
+};
 
 const resolveUnits = (
   loopKey: string,
@@ -23,11 +37,10 @@ const resolveUnits = (
 
 export const getVectorFillLoopPoints = (node: TVectorNode, loopKey: string): TPoint[] | null => {
   const nodeCache = cache.get(node) ?? new Map<string, TPoint[] | null>();
-
   cache.set(node, nodeCache);
 
   if (!nodeCache.has(loopKey)) {
-    const planar = planarizeVectorNetwork(Object.values(node.segments), node.vertices);
+    const planar = getPlanarNetwork(node);
     const boundaryKeysByRealSegmentId = new Map<string, Record<string, TVectorPieceBoundaries>>();
     const units = resolveUnits(loopKey, planar.segments, node.vertices, boundaryKeysByRealSegmentId);
     const hasEveryUnit = units.every((unit): unit is TResolvedPieceUnit => unit !== null);
