@@ -18,6 +18,7 @@ import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
 import { getVectorGroupAlignmentGuide } from '../../../../utils/getVectorGroupAlignmentGuide';
 import { groupVectorMultiSelectOriginsByNode } from '../../../../utils/groupVectorMultiSelectOriginsByNode';
+import { scheduleThrottledDispatch } from 'components/Design/Canvas/utils/scheduleThrottledDispatch';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 import { translateVectorVertices } from '../../../../utils/translateVectorVertices';
 
@@ -74,22 +75,24 @@ export const continueVectorMultiDrag = (
       const deltaX = rawDeltaX + deltaCorrection.x;
       const deltaY = rawDeltaY + deltaCorrection.y;
 
-      dispatchAsOneGestureIfMultiNode(dispatch, Object.keys(groups).length, () => {
-        Object.entries(groups).forEach(([nodeId, group]) => {
-          const node = getVectorEditingNode(nodes, nodeId);
+      scheduleThrottledDispatch(dragState.dispatchThrottle, () =>
+        dispatchAsOneGestureIfMultiNode(dispatch, Object.keys(groups).length, () => {
+          Object.entries(groups).forEach(([nodeId, group]) => {
+            const node = getVectorEditingNode(nodes, nodeId);
 
-          /* v8 ignore if -- groups only ever contains node ids groupVectorMultiSelectOriginsByNode already resolved against this same `nodes` object, so the lookup can't fail here */
-          if (node) {
-            const vertices = {
-              ...node.vertices,
-              ...translateVectorVertices(pickOrigins(dragState.vertexOrigins, group.vertexIds), deltaX, deltaY),
-            };
-            const segments = translateVectorHandles(node.segments, pickOrigins(dragState.handleOrigins, group.handleKeys), deltaX, deltaY);
+            /* v8 ignore if -- groups only ever contains node ids groupVectorMultiSelectOriginsByNode already resolved against this same `nodes` object, so the lookup can't fail here */
+            if (node) {
+              const vertices = {
+                ...node.vertices,
+                ...translateVectorVertices(pickOrigins(dragState.vertexOrigins, group.vertexIds), deltaX, deltaY),
+              };
+              const segments = translateVectorHandles(node.segments, pickOrigins(dragState.handleOrigins, group.handleKeys), deltaX, deltaY);
 
-            dispatch(updateNode({ changes: { segments, vertices }, id: nodeId }));
-          }
-        });
-      });
+              dispatch(updateNode({ changes: { segments, vertices }, id: nodeId }));
+            }
+          });
+        }),
+      );
 
       if (dragState.boxOrigin && canvasRefs.vectorMultiSelectBoxRef.current) {
         canvasRefs.vectorMultiSelectBoxRef.current = {

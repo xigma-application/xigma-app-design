@@ -82,7 +82,15 @@ export type TRotateDragState = {
   startAngle: number;
 };
 
+// Dragging a lot of vector geometry at once (many selected vertices/segments) makes each committed
+// update expensive (full face/fill re-derivation) — throttling the dispatch to one per animation
+// frame, instead of one per native pointermove, caps how often that recompute has to happen without
+// changing what gets computed. `run` always holds the latest pending update; `frameId` is the
+// scheduled rAF (or null if none is pending) — see scheduleThrottledDispatch.ts/flushThrottledDispatch.ts.
+export type TThrottledDispatchState = { frameId: number | null; run: (() => void) | null };
+
 export type TVectorVertexDragState = {
+  dispatchThrottle: TThrottledDispatchState;
   mergeTarget?: { nodeId: string; vertexId: string } | null;
   nodeId: string;
   origins: Record<string, TPoint>;
@@ -113,6 +121,7 @@ export type TVectorPendingClickAction =
 
 export type TVectorMultiDragState = {
   boxOrigin: TDraftRect | null;
+  dispatchThrottle: TThrottledDispatchState;
   handleOrigins: Record<string, TPoint>;
   hasMoved: boolean;
   pendingClickAction: TVectorPendingClickAction | null;

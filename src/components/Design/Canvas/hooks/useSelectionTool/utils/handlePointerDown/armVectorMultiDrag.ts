@@ -24,6 +24,7 @@ export const armVectorMultiDrag = (
 
   canvasRefs.vectorMultiDragRef.current = {
     boxOrigin: box?.bounds ?? null,
+    dispatchThrottle: { frameId: null, run: null },
     handleOrigins,
     hasMoved: false,
     pendingClickAction,

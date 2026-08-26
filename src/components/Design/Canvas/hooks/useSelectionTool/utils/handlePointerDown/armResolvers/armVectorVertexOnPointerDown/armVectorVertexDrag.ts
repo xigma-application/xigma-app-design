@@ -15,6 +15,11 @@ export const armVectorVertexDrag = (
 ): void => {
   const vertex = node.vertices[vertexId];
 
-  vectorVertexDragRef.current = { nodeId: node.id, origins: { [vertexId]: { x: vertex.x, y: vertex.y } }, pointerStart: point };
+  vectorVertexDragRef.current = {
+    dispatchThrottle: { frameId: null, run: null },
+    nodeId: node.id,
+    origins: { [vertexId]: { x: vertex.x, y: vertex.y } },
+    pointerStart: point,
+  };
   canvas.setPointerCapture(event.pointerId);
 };

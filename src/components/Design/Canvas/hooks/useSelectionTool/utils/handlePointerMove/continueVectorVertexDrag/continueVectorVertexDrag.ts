@@ -16,6 +16,7 @@ import { getPointerPosition } from '../../../../../utils/getPointerPosition';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
 import { getVectorGroupAlignmentGuide } from '../../../../../utils/getVectorGroupAlignmentGuide';
 import { resolveVectorVertexMerge } from './resolveVectorVertexMerge';
+import { scheduleThrottledDispatch } from 'components/Design/Canvas/utils/scheduleThrottledDispatch';
 import { screenToWorld } from '../../../../../utils/screenToWorld';
 import { translateVectorVertices } from '../../../../../utils/translateVectorVertices';
 
@@ -53,7 +54,9 @@ export const continueVectorVertexDrag = (
         setClassName('move');
       }
 
-      dispatch(updateNode({ changes: { vertices: { ...node.vertices, ...draggedVertices } }, id: dragState.nodeId }));
+      scheduleThrottledDispatch(dragState.dispatchThrottle, () =>
+        dispatch(updateNode({ changes: { vertices: { ...node.vertices, ...draggedVertices } }, id: dragState.nodeId })),
+      );
     }
   }
 };

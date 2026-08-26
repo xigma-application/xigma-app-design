@@ -6,6 +6,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
 import { applyPendingClickAction } from './applyPendingClickAction';
+import { flushThrottledDispatch } from 'components/Design/Canvas/utils/flushThrottledDispatch';
 
 export const disarmVectorMultiDrag = (
   canvas: HTMLCanvasElement,
@@ -17,6 +18,8 @@ export const disarmVectorMultiDrag = (
   const dragState = canvasRefs.vectorMultiDragRef.current;
 
   if (dragState) {
+    flushThrottledDispatch(dragState.dispatchThrottle);
+
     if (!dragState.hasMoved) {
       applyPendingClickAction(dispatch, canvasRefs, dragState);
     }

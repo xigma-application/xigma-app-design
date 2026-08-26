@@ -9,6 +9,7 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { bakeVectorNodeRotation } from '../../../../utils/bakeVectorNodeRotation';
+import { flushThrottledDispatch } from 'components/Design/Canvas/utils/flushThrottledDispatch';
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
 import { mergeVectorVertices } from 'utils/canvas/vectorNetwork/mergeVectorVertices/mergeVectorVertices';
 
@@ -23,6 +24,8 @@ export const disarmVectorVertexDrag = (
   const dragState = selectionRefs.vectorVertexDragRef.current;
 
   if (dragState) {
+    flushThrottledDispatch(dragState.dispatchThrottle);
+
     if (dragState.mergeTarget) {
       const state = store.getState();
       const sourceNode = getVectorEditingNode(state.design.nodes, dragState.nodeId);
