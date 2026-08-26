@@ -12,8 +12,6 @@ import { isVectorHandleVisible } from './isVectorHandleVisible';
 const isPointInRect = (point: TPoint, rect: TDraftRect): boolean =>
   point.x >= rect.x && point.x <= rect.x + rect.width && point.y >= rect.y && point.y <= rect.y + rect.height;
 
-// only ever catches a handle that's actually visible (§10's reveal rule) — a marquee sweeping over
-// otherwise-hidden tangent geometry must not silently select it, the same way you could never click it
 export const getVectorHandlesInRect = (
   node: TVectorNode,
   rect: TDraftRect,
@@ -21,8 +19,12 @@ export const getVectorHandlesInRect = (
   oneHopVertexIds: string[],
   selectedSegmentIds: string[],
   selectedHandles: TVectorHandleHover[],
-): TVectorHandleHover[] =>
-  Object.values(node.segments).flatMap((segment) => {
+): TVectorHandleHover[] => {
+  const selectedVertexIdSet = new Set(selectedVertexIds);
+  const oneHopVertexIdSet = new Set(oneHopVertexIds);
+  const selectedSegmentIdSet = new Set(selectedSegmentIds);
+
+  return Object.values(node.segments).flatMap((segment) => {
     const start = node.vertices[segment.startId];
     const end = node.vertices[segment.endId];
     const handleStart = getVectorHandlePosition(start, getEffectiveTangentStart(node.vertices, segment));
@@ -32,7 +34,7 @@ export const getVectorHandlesInRect = (
     if (
       handleStart &&
       isPointInRect(handleStart, rect) &&
-      isVectorHandleVisible(segment, 'start', selectedVertexIds, oneHopVertexIds, selectedSegmentIds, selectedHandles)
+      isVectorHandleVisible(segment, 'start', selectedVertexIdSet, oneHopVertexIdSet, selectedSegmentIdSet, selectedHandles)
     ) {
       hits.push({ end: 'start', segmentId: segment.id });
     }
@@ -40,10 +42,11 @@ export const getVectorHandlesInRect = (
     if (
       handleEnd &&
       isPointInRect(handleEnd, rect) &&
-      isVectorHandleVisible(segment, 'end', selectedVertexIds, oneHopVertexIds, selectedSegmentIds, selectedHandles)
+      isVectorHandleVisible(segment, 'end', selectedVertexIdSet, oneHopVertexIdSet, selectedSegmentIdSet, selectedHandles)
     ) {
       hits.push({ end: 'end', segmentId: segment.id });
     }
 
     return hits;
   });
+};

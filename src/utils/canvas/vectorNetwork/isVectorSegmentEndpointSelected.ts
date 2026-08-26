@@ -1,2 +1,2 @@
-export const isVectorSegmentEndpointSelected = (segmentStartId: string, segmentEndId: string, selectedVertexIds: string[]): boolean =>
-  selectedVertexIds.includes(segmentStartId) || selectedVertexIds.includes(segmentEndId);
+export const isVectorSegmentEndpointSelected = (segmentStartId: string, segmentEndId: string, selectedVertexIds: ReadonlySet<string>): boolean =>
+  selectedVertexIds.has(segmentStartId) || selectedVertexIds.has(segmentEndId);

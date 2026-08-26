@@ -23,6 +23,10 @@ export const getVectorHandleAtPoint = (
   const isHandleSelected = (segmentId: string, end: 'end' | 'start'): boolean =>
     selectedHandles.some((selected) => selected.segmentId === segmentId && selected.end === end);
 
+  const selectedVertexIdSet = new Set(selectedVertexIds);
+  const oneHopVertexIdSet = new Set(oneHopVertexIds);
+  const selectedSegmentIdSet = new Set(selectedSegmentIds);
+
   const candidates = Object.values(node.segments)
     .flatMap((segment) => {
       const start = node.vertices[segment.startId];
@@ -30,12 +34,12 @@ export const getVectorHandleAtPoint = (
       const handleStart = getVectorHandlePosition(start, getEffectiveTangentStart(node.vertices, segment));
       const handleEnd = getVectorHandlePosition(end, getEffectiveTangentEnd(node.vertices, segment));
       const isSegmentDirectlyTouchingSelection =
-        isVectorSegmentEndpointSelected(segment.startId, segment.endId, selectedVertexIds) || selectedSegmentIds.includes(segment.id);
+        isVectorSegmentEndpointSelected(segment.startId, segment.endId, selectedVertexIdSet) || selectedSegmentIdSet.has(segment.id);
       const options: (TVectorHandleHit & { distance: number })[] = [];
 
       if (
         handleStart &&
-        (isSegmentDirectlyTouchingSelection || oneHopVertexIds.includes(segment.startId) || isHandleSelected(segment.id, 'start'))
+        (isSegmentDirectlyTouchingSelection || oneHopVertexIdSet.has(segment.startId) || isHandleSelected(segment.id, 'start'))
       ) {
         options.push({
           distance: Math.hypot(point.x - handleStart.x, point.y - handleStart.y),
@@ -47,7 +51,7 @@ export const getVectorHandleAtPoint = (
 
       if (
         handleEnd &&
-        (isSegmentDirectlyTouchingSelection || oneHopVertexIds.includes(segment.endId) || isHandleSelected(segment.id, 'end'))
+        (isSegmentDirectlyTouchingSelection || oneHopVertexIdSet.has(segment.endId) || isHandleSelected(segment.id, 'end'))
       ) {
         options.push({
           distance: Math.hypot(point.x - handleEnd.x, point.y - handleEnd.y),

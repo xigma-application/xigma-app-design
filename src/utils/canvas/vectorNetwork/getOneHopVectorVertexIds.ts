@@ -5,15 +5,16 @@ const isStraightSegment = (segment: { tangentEnd: unknown; tangentStart: unknown
   !segment.tangentStart && !segment.tangentEnd;
 
 export const getOneHopVectorVertexIds = (node: TVectorNode, selectedVertexIds: string[]): string[] => {
+  const selected = new Set(selectedVertexIds);
   const expanded = new Set(selectedVertexIds);
 
   Object.values(node.segments).forEach((segment) => {
     if (isStraightSegment(segment)) {
-      if (selectedVertexIds.includes(segment.startId)) {
+      if (selected.has(segment.startId)) {
         expanded.add(segment.endId);
       }
 
-      if (selectedVertexIds.includes(segment.endId)) {
+      if (selected.has(segment.endId)) {
         expanded.add(segment.startId);
       }
     }

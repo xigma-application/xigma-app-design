@@ -29,6 +29,9 @@ export const drawVectorTangentHandles = (
   viewport: TViewport,
 ): void => {
   const dotSize = VECTOR_VERTEX_SIZE / viewport.zoom;
+  const selectedVertexIdSet = new Set(selectedVertexIds);
+  const oneHopVertexIdSet = new Set(oneHopVertexIds);
+  const selectedSegmentIdSet = new Set(selectedSegmentIds);
 
   Object.values(node.segments).forEach((segment) => {
     drawSegmentTangentHandles(
@@ -40,9 +43,9 @@ export const drawVectorTangentHandles = (
       hoveredHandle,
       selectedHandles,
       snappedHandle,
-      selectedVertexIds,
-      oneHopVertexIds,
-      selectedSegmentIds,
+      selectedVertexIdSet,
+      oneHopVertexIdSet,
+      selectedSegmentIdSet,
       dotSize,
       canvasWidth,
       canvasHeight,
