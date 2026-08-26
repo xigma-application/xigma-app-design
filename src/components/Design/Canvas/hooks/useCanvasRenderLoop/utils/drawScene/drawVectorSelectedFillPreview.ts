@@ -26,7 +26,7 @@ export const drawVectorSelectedFillPreview = (
       const node = getVectorEditingNode(nodes, nodeId);
 
       if (node) {
-        const bakedNode = { ...node, ...bakeVectorNodeRotation(node) };
+        const bakedNode = node.rotation ? { ...node, ...bakeVectorNodeRotation(node) } : node;
         return getVectorFullySelectedFaces(bakedNode, selectedVertexIds).map((face) => face.points);
       }
 

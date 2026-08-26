@@ -9,6 +9,32 @@ const getPieceIndex = (pieceId: string): number => {
   return hashIndex === -1 ? 0 : Number(pieceId.slice(hashIndex + 1));
 };
 
+const pieceIdGroupsCache = new WeakMap<Record<string, TVectorSegment>, Map<string, string[]>>();
+
+const getPieceIdGroups = (planarSegments: Record<string, TVectorSegment>): Map<string, string[]> => {
+  const cached = pieceIdGroupsCache.get(planarSegments);
+
+  if (!cached) {
+    const groups = new Map<string, string[]>();
+
+    Object.keys(planarSegments).forEach((pieceId) => {
+      const realSegmentId = pieceId.split('#')[0];
+      const group = groups.get(realSegmentId) ?? [];
+
+      group.push(pieceId);
+      groups.set(realSegmentId, group);
+    });
+
+    groups.forEach((pieceIds) => pieceIds.sort((a, b) => getPieceIndex(a) - getPieceIndex(b)));
+
+    pieceIdGroupsCache.set(planarSegments, groups);
+
+    return groups;
+  }
+
+  return cached;
+};
+
 const resolveBoundaryKey = (
   vertexId: string,
   ownRealSegmentId: string,
@@ -42,9 +68,7 @@ export const getVectorPieceBoundaryKeys = (
   planarSegments: Record<string, TVectorSegment>,
   vertices: Record<string, TVectorVertex>,
 ): Record<string, TVectorPieceBoundaries> => {
-  const pieceIds = Object.keys(planarSegments)
-    .filter((id) => id === realSegmentId || id.startsWith(`${realSegmentId}#`))
-    .sort((a, b) => getPieceIndex(a) - getPieceIndex(b));
+  const pieceIds = getPieceIdGroups(planarSegments).get(realSegmentId) ?? [];
 
   const occurrenceBySegmentId = new Map<string, number>();
   const keyByVertexId = new Map<string, string>();

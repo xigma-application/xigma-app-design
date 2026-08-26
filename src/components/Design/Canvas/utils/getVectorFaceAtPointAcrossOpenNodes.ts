@@ -20,7 +20,7 @@ export const getVectorFaceAtPointAcrossOpenNodes = (
     .map((nodeId) => getVectorEditingNode(nodes, nodeId))
     .filter((node): node is TVectorNode => node !== null)
     .map((node) => {
-      const bakedNode = { ...node, ...bakeVectorNodeRotation(node) };
+      const bakedNode = node.rotation ? { ...node, ...bakeVectorNodeRotation(node) } : node;
       const face = getVectorFaceAtPoint(point, bakedNode);
 
       return face ? { face, node } : null;

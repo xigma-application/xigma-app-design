@@ -15,7 +15,7 @@ export const getBakedVectorEditingNodes = (
     const editingNode = getVectorEditingNode(nodes, nodeId);
 
     if (editingNode) {
-      bakedNodes[nodeId] = { ...editingNode, ...bakeVectorNodeRotation(editingNode) };
+      bakedNodes[nodeId] = editingNode.rotation ? { ...editingNode, ...bakeVectorNodeRotation(editingNode) } : editingNode;
     }
   });
 
