@@ -1,13 +1,15 @@
 import { RefObject } from 'react';
 
 // store
-import { setSelection } from 'store/design/slice';
 import { AppDispatch } from 'store';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
+import { applyPendingDragClickAction } from './applyPendingDragClickAction';
+import { commitDraggedVectorNodeSnapshots } from './commitDraggedVectorNodeSnapshots';
 import { flushThrottledDispatch } from 'components/Design/Canvas/utils/flushThrottledDispatch';
 
 export const disarmDrag = (
@@ -15,20 +17,15 @@ export const disarmDrag = (
   event: PointerEvent,
   dispatch: AppDispatch,
   dragStateRef: RefObject<TDragState | null>,
+  canvasRefs: TCanvasRefs,
 ): void => {
   const dragState = dragStateRef.current;
 
   if (dragState) {
     flushThrottledDispatch(dragState.dispatchThrottle);
-
-    const { hasMoved, pendingClickAction } = dragState;
-
-    if (pendingClickAction?.kind === 'collapse' && !hasMoved) {
-      dispatch(setSelection([pendingClickAction.id]));
-    } else if (pendingClickAction?.kind === 'deselect' && !hasMoved) {
-      dispatch(setSelection([]));
-    }
-
+    commitDraggedVectorNodeSnapshots(dispatch, dragState, canvasRefs);
+    applyPendingDragClickAction(dispatch, dragState);
+    canvasRefs.draggedNodeIdsRef.current = null;
     dragStateRef.current = null;
     canvas.releasePointerCapture(event.pointerId);
   }

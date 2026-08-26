@@ -8,7 +8,7 @@ import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 // utils
 import { disarmCornerRadiusDrag } from './disarmCornerRadiusDrag';
-import { disarmDrag } from './disarmDrag';
+import { disarmDrag } from './disarmDrag/disarmDrag';
 import { disarmEllipseArcDrag } from './disarmEllipseArcDrag';
 import { disarmEllipseArcRatioDrag } from './disarmEllipseArcRatioDrag';
 import { disarmEllipseArcRotateDrag } from './disarmEllipseArcRotateDrag';
@@ -43,7 +43,7 @@ export const handlePointerUp = (
   selectionRefs: TSelectionToolRefs,
   setClassName: (className: string | null) => void,
 ): void => {
-  disarmDrag(canvas, event, dispatch, selectionRefs.dragStateRef);
+  disarmDrag(canvas, event, dispatch, selectionRefs.dragStateRef, canvasRefs);
   disarmEndpointDrag(canvas, event, selectionRefs.endpointDragRef);
   disarmPathOffsetDrag(canvas, event, selectionRefs.pathOffsetDragRef, setClassName);
   disarmResizeDrag(canvas, event, selectionRefs.resizeDragRef);

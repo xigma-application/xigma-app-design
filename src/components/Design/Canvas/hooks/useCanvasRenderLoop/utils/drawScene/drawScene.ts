@@ -101,8 +101,10 @@ export const drawScene = (
   const isVectorMultiDragMoving = Boolean(refs.vectorMultiDragRef.current?.hasMoved);
   const sceneNodes = getPreviewSceneNodes(selectOrderedNodes(state), editingNodeId, refs);
   const allSelectedNodes = selectSelectedNodes(state);
-  const selectedNodes = allSelectedNodes.filter((node) => node.id !== editingNodeId);
-  const hoveredNode = hoveredNodeId && hoveredNodeId !== editingNodeId ? nodesById[hoveredNodeId] : null;
+  const draggedNodeIds = refs.draggedNodeIdsRef.current;
+  const selectedNodes = allSelectedNodes.filter((node) => node.id !== editingNodeId && !draggedNodeIds?.has(node.id));
+  const hoveredNode =
+    hoveredNodeId && hoveredNodeId !== editingNodeId && !draggedNodeIds?.has(hoveredNodeId) ? nodesById[hoveredNodeId] : null;
   const selectedIds = new Set(allSelectedNodes.map((node) => node.id));
   const pathOutlineStyles = getPathOutlineStyles(
     Object.values(nodesById),
@@ -114,7 +116,18 @@ export const drawScene = (
 
   drawSceneBackground(gl);
   drawPixelGrid(gl, imageContext.gridProgram, imageContext.gridBuffer, clientWidth, clientHeight, viewport);
-  drawSceneNodes(gl, program, buffer, imageContext, sceneNodes, clientWidth, clientHeight, viewport, pathOutlineStyles);
+  drawSceneNodes(
+    gl,
+    program,
+    buffer,
+    imageContext,
+    sceneNodes,
+    clientWidth,
+    clientHeight,
+    viewport,
+    pathOutlineStyles,
+    refs.draggedVectorNodeSnapshotsRef.current,
+  );
   drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
   drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
   drawCornerRadiusHandlesLayer(

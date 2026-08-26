@@ -20,6 +20,7 @@ import {
   TVectorFaceHover,
   TVectorHandleHover,
   TVectorMultiSelectBox,
+  TVectorNodeDragSnapshot,
   TVectorPaintFaceHover,
   TVectorShapeBuilderTouchedFaces,
   TVectorWidthHandleSelection,
@@ -43,7 +44,9 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cornerRadiusDragRef = useRef<TCornerRadiusDragState | null>(null);
   const draftRef = useRef<TDraftEntity | null>(null);
+  const draggedNodeIdsRef = useRef<Set<string> | null>(null);
   const draggedVectorFillFacesRef = useRef<TVectorDraggedFillFaces | null>(null);
+  const draggedVectorNodeSnapshotsRef = useRef<Map<string, TVectorNodeDragSnapshot> | null>(null);
   const ellipseArcDragRef = useRef<TEllipseArcDragState | null>(null);
   const ellipseArcRatioDragRef = useRef<TEllipseArcRatioDragState | null>(null);
   const ellipseArcRotateDragRef = useRef<TEllipseArcRotateDragState | null>(null);
@@ -101,7 +104,9 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       canvasRef,
       cornerRadiusDragRef,
       draftRef,
+      draggedNodeIdsRef,
       draggedVectorFillFacesRef,
+      draggedVectorNodeSnapshotsRef,
       ellipseArcDragRef,
       ellipseArcRatioDragRef,
       ellipseArcRotateDragRef,

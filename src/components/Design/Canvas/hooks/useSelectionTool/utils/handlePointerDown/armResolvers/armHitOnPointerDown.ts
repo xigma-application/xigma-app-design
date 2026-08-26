@@ -6,6 +6,7 @@ import { armHitDrag } from '../armHitDrag';
 
 export const armHitOnPointerDown = ({
   canvas,
+  canvasRefs,
   currentSelection,
   dispatch,
   event,
@@ -15,7 +16,7 @@ export const armHitOnPointerDown = ({
   selectionRefs,
 }: TArmContext): true | undefined => {
   if (hit) {
-    armHitDrag(canvas, event, dispatch, selectionRefs.dragStateRef, hit, currentSelection, selectedNodes, point);
+    armHitDrag(canvas, event, dispatch, selectionRefs.dragStateRef, hit, currentSelection, selectedNodes, point, canvasRefs);
 
     return true;
   }

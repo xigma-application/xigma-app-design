@@ -7,6 +7,7 @@ import { NodeType } from 'types/design/enums';
 import { TImageRenderContext } from '../../types';
 import { TPathOutlineStyle } from './getPathOutlineStyles';
 import { TSceneNode, TViewport } from 'types/design/types';
+import { TVectorNodeDragSnapshot } from 'types/design/canvas/types';
 
 // utils
 import { drawEllipseNode } from 'utils/canvas/drawEllipseNode';
@@ -17,8 +18,8 @@ import { drawMsdfText } from 'utils/canvas/text/drawMsdfText';
 import { drawPathOutline } from './drawPathOutline';
 import { drawPolygon } from 'utils/canvas/drawPolygon/drawPolygon';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
+import { drawSceneVectorNode } from './drawSceneVectorNode';
 import { drawStar } from 'utils/canvas/drawStar/drawStar';
-import { drawVectorNode } from 'utils/canvas/drawVectorNode/drawVectorNode';
 import { getMsdfAtlasTexture } from 'utils/canvas/text/getMsdfAtlasTexture';
 import { getOrLoadTexture } from 'utils/canvas/getOrLoadTexture';
 
@@ -32,6 +33,7 @@ export const drawSceneNodes = (
   canvasHeight: number,
   viewport: TViewport,
   pathOutlineStyles: Map<string, TPathOutlineStyle>,
+  draggedVectorNodeSnapshots: Map<string, TVectorNodeDragSnapshot> | null,
 ): void => {
   nodes.forEach((node) => {
     switch (node.type) {
@@ -82,7 +84,7 @@ export const drawSceneNodes = (
         drawPathOutline(gl, program, buffer, node, pathOutlineStyles.get(node.id), canvasWidth, canvasHeight, viewport);
         break;
       case NodeType.vector:
-        drawVectorNode(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
+        drawSceneVectorNode(gl, program, buffer, node, draggedVectorNodeSnapshots, canvasWidth, canvasHeight, viewport);
         break;
       case NodeType.text:
         drawMsdfText(

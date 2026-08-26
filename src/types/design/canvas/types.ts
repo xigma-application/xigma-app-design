@@ -127,11 +127,21 @@ export type TVectorWidthHandleSelection = { nodeId: string; pointId: string; sid
 
 export type TVectorWidthLastHandleSide = { nodeId: string; pointId: string; side: 'left' | 'right' };
 
+export type TVectorNodeDragSnapshot = {
+  deltaX: number;
+  deltaY: number;
+  facesByColor: { color: string; points: TPoint[][] }[];
+  strokeColor: string;
+  strokeVertices: number[];
+};
+
 export type TCanvasRefs = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>;
   draftRef: RefObject<TDraftEntity | null>;
+  draggedNodeIdsRef: RefObject<Set<string> | null>;
   draggedVectorFillFacesRef: RefObject<TVectorDraggedFillFaces | null>;
+  draggedVectorNodeSnapshotsRef: RefObject<Map<string, TVectorNodeDragSnapshot> | null>;
   ellipseArcDragRef: RefObject<TEllipseArcDragState | null>;
   ellipseArcRatioDragRef: RefObject<TEllipseArcRatioDragState | null>;
   ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null>;

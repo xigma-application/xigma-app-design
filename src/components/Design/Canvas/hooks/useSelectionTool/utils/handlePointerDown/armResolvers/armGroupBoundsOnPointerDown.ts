@@ -7,6 +7,7 @@ import { isPointInGroupBounds } from '../../isPointInGroupBounds';
 
 export const armGroupBoundsOnPointerDown = ({
   canvas,
+  canvasRefs,
   currentSelection,
   event,
   point,
@@ -14,7 +15,7 @@ export const armGroupBoundsOnPointerDown = ({
   selectionRefs,
 }: TArmContext): true | undefined => {
   if (!event.shiftKey && isPointInGroupBounds(point, selectedNodes)) {
-    armGroupBoundsDrag(canvas, event, selectionRefs.dragStateRef, currentSelection, point);
+    armGroupBoundsDrag(canvas, event, selectionRefs.dragStateRef, currentSelection, point, canvasRefs);
 
     return true;
   }

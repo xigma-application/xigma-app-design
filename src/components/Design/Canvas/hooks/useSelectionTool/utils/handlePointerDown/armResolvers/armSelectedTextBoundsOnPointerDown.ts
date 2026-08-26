@@ -7,6 +7,7 @@ import { isPointInSelectedTextBounds } from '../../isPointInSelectedTextBounds';
 
 export const armSelectedTextBoundsOnPointerDown = ({
   canvas,
+  canvasRefs,
   currentSelection,
   event,
   point,
@@ -14,7 +15,7 @@ export const armSelectedTextBoundsOnPointerDown = ({
   selectionRefs,
 }: TArmContext): true | undefined => {
   if (!event.shiftKey && isPointInSelectedTextBounds(point, selectedNodes)) {
-    armGroupBoundsDrag(canvas, event, selectionRefs.dragStateRef, currentSelection, point);
+    armGroupBoundsDrag(canvas, event, selectionRefs.dragStateRef, currentSelection, point, canvasRefs);
     return true;
   }
 };

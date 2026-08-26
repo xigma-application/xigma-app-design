@@ -6,6 +6,7 @@ import { selectViewport } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
@@ -19,6 +20,7 @@ export const continueDrag = (
   event: PointerEvent,
   dispatch: AppDispatch,
   dragStateRef: RefObject<TDragState | null>,
+  canvasRefs: TCanvasRefs,
 ): void => {
   const dragState = dragStateRef.current;
 
@@ -26,11 +28,24 @@ export const continueDrag = (
     const point = screenToWorld(getPointerPosition(canvas, event), selectViewport(store.getState()));
     const deltaX = point.x - dragState.pointerStart.x;
     const deltaY = point.y - dragState.pointerStart.y;
+    const snapshots = canvasRefs.draggedVectorNodeSnapshotsRef.current;
 
     dragState.hasMoved = true;
+
+    if (!canvasRefs.draggedNodeIdsRef.current) {
+      canvasRefs.draggedNodeIdsRef.current = new Set(Object.keys(dragState.nodeOrigins));
+    }
+
+    snapshots?.forEach((snapshot) => {
+      snapshot.deltaX = deltaX;
+      snapshot.deltaY = deltaY;
+    });
+
     scheduleThrottledDispatch(dragState.dispatchThrottle, () =>
       Object.entries(dragState.nodeOrigins).forEach(([id, origin]) => {
-        dispatch(updateNode({ changes: getGeometryDeltaChanges(origin, deltaX, deltaY), id }));
+        if (!snapshots?.has(id)) {
+          dispatch(updateNode({ changes: getGeometryDeltaChanges(origin, deltaX, deltaY), id }));
+        }
       }),
     );
   }
