@@ -11,12 +11,14 @@ export const resolveVectorCutFilledFaceKeys = (
   resultNode: TVectorNode,
   originalNode: TVectorNode,
   isolatedStubIds: Set<string>,
-): string[] =>
-  deriveVectorFaces(resultNode)
+): string[] => {
+  const originalFilledFaceKeySet = new Set(originalNode.filledFaceKeys);
+
+  return deriveVectorFaces(resultNode)
     .filter((face) => !face.pieceKeys.some((key) => isolatedStubIds.has(key.split('[')[0])))
     .filter((face) => {
       const originalFace = getVectorFaceAtPoint(getPolygonCentroid(face.points), originalNode);
-
-      return originalFace !== null && originalNode.filledFaceKeys.includes(getVectorFillLoopKey(originalFace.pieceKeys));
+      return originalFace !== null && originalFilledFaceKeySet.has(getVectorFillLoopKey(originalFace.pieceKeys));
     })
     .map((face) => getVectorFillLoopKey(face.pieceKeys));
+};
