@@ -387,6 +387,19 @@ out of scope — no precedent anywhere in the renderer (only 4 shared GL buffers
 per-primitive every frame, [[canvas-rendering-pipeline]] §3/§8) — a materially larger
 rendering-architecture change than anything in this doc.
 
+## 6. Unrelated find while live-verifying §5.7: `getRemainingVertices` was O(vertices × segments)
+
+Found live-testing §5.7's fix, not caused by it: deleting a segment on a large multi-shape vector
+node (via `handleDeleteSelection.ts` → `deleteSelectedSegments.ts`) froze the tab for several seconds.
+Profiling showed `getRemainingVertices.ts` at ~55% self-time of the whole recorded session on a
+1000-shape stress node — it was doing, per vertex, a full linear scan of *every remaining segment*
+(`Object.values(segments).some(...)`) to decide whether that vertex is still referenced by anything,
+an O(vertices × segments) scan with no caching involved at all (pre-existing, unrelated to any fix in
+this doc). Fixed by building the referenced-vertex-id `Set` once in a single O(segments) pass, then
+filtering vertices against it in O(vertices) — same output, `O(vertices + segments)` instead of
+`O(vertices × segments)`. Confirmed live: segment deletion on the stress node went from a multi-second
+freeze to instant.
+
 ## File index
 
 - Caching: `utils/canvas/vectorNetwork/getVectorNodeBounds.ts`,
@@ -428,6 +441,7 @@ rendering-architecture change than anything in this doc.
   `useCanvasRenderLoop/utils/drawScene/drawHoverOutline.ts`,
   `useCanvasRenderLoop/utils/drawScene/drawVectorEditHandlesLayer/drawVectorEditHandlesForNode/
   drawVectorEditHandlesForNode.ts` — both now call `Canvas/utils/getRenderedVectorNode.ts` (§3.6)
+- O(n) segment-deletion fix (§6): `utils/canvas/vectorNetwork/getRemainingVertices.ts`
 
 ## Related
 
