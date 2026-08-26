@@ -1,20 +1,15 @@
 // others
-import {
-  VECTOR_CUT_CROSSING_FILL,
-  VECTOR_VERTEX_FILL,
-  VECTOR_VERTEX_HOVER_SCALE,
-  VECTOR_VERTEX_SELECTED_FILL,
-  VECTOR_VERTEX_SELECTED_INNER_SCALE,
-  VECTOR_VERTEX_SELECTED_SCALE,
-  VECTOR_VERTEX_SIZE,
-} from 'constant/canvas';
+import { VECTOR_VERTEX_FILL, VECTOR_VERTEX_SIZE } from 'constant/canvas';
 
 // types
+import { TPoint } from 'types/canvas';
 import { TVectorNode, TViewport } from 'types/design/types';
 
 // utils
-import { drawEllipse } from 'utils/canvas/shapes/drawEllipse';
-import { drawVertexDot } from './drawVertexDot';
+import { drawHoveredVertexDot } from './drawHoveredVertexDot';
+import { drawNewVertexDot } from './drawNewVertexDot';
+import { drawSelectedVertexDot } from './drawSelectedVertexDot';
+import { drawVectorVertexDotBatch } from './drawVectorVertexDotBatch';
 
 export const drawVectorVertexDots = (
   gl: WebGL2RenderingContext,
@@ -30,59 +25,22 @@ export const drawVectorVertexDots = (
 ): void => {
   const baseSize = VECTOR_VERTEX_SIZE / viewport.zoom;
   const selected = new Set(selectedVertexIds);
+  const plainVertexCenters: TPoint[] = [];
 
   Object.values(node.vertices).forEach((vertex) => {
     const isNew = newVertexIds.has(vertex.id);
+    const isHovered = vertex.id === hoveredVertexId;
 
     if (selected.has(vertex.id)) {
-      drawVertexDot(
-        gl,
-        program,
-        buffer,
-        vertex.x,
-        vertex.y,
-        baseSize * VECTOR_VERTEX_SELECTED_SCALE,
-        VECTOR_VERTEX_FILL,
-        canvasWidth,
-        canvasHeight,
-        viewport,
-      );
-      drawVertexDot(
-        gl,
-        program,
-        buffer,
-        vertex.x,
-        vertex.y,
-        baseSize * VECTOR_VERTEX_SELECTED_INNER_SCALE,
-        isNew ? VECTOR_CUT_CROSSING_FILL : VECTOR_VERTEX_SELECTED_FILL,
-        canvasWidth,
-        canvasHeight,
-        viewport,
-      );
+      drawSelectedVertexDot(gl, program, buffer, vertex, isNew, baseSize, canvasWidth, canvasHeight, viewport);
+    } else if (isNew) {
+      drawNewVertexDot(gl, program, buffer, vertex, isHovered, baseSize, canvasWidth, canvasHeight, viewport);
+    } else if (isHovered) {
+      drawHoveredVertexDot(gl, program, buffer, vertex, baseSize, canvasWidth, canvasHeight, viewport);
     } else {
-      const size = vertex.id === hoveredVertexId ? baseSize * VECTOR_VERTEX_HOVER_SCALE : baseSize;
-
-      if (isNew) {
-        drawEllipse(
-          gl,
-          program,
-          buffer,
-          {
-            fill: VECTOR_VERTEX_FILL,
-            height: size,
-            stroke: VECTOR_CUT_CROSSING_FILL,
-            width: size,
-            x: vertex.x - size / 2,
-            y: vertex.y - size / 2,
-          },
-          canvasWidth,
-          canvasHeight,
-          viewport,
-          0,
-        );
-      } else {
-        drawVertexDot(gl, program, buffer, vertex.x, vertex.y, size, VECTOR_VERTEX_FILL, canvasWidth, canvasHeight, viewport);
-      }
+      plainVertexCenters.push(vertex);
     }
   });
+
+  drawVectorVertexDotBatch(gl, program, buffer, plainVertexCenters, baseSize, VECTOR_VERTEX_FILL, canvasWidth, canvasHeight, viewport);
 };
