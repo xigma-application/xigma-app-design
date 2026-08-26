@@ -8,6 +8,7 @@ import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
 import { getNodeBounds } from './getNodeBounds';
+import { getRenderedVectorNode } from './getRenderedVectorNode';
 import { isPointInCurvedText } from './isPointInCurvedText';
 import { isPointInEllipse } from './isPointInEllipse';
 import { isPointInPolygon } from './isPointInPolygon';
@@ -20,7 +21,7 @@ import { isPointNearVectorPath } from './isPointNearVectorPath';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
 const getUnrotatedQueryPoint = (point: TPoint, node: TSceneNode): TPoint => {
-  if (node.type === NodeType.line || node.rotation === 0) {
+  if (node.type === NodeType.line || node.type === NodeType.vector || node.rotation === 0) {
     return point;
   }
 
@@ -50,8 +51,10 @@ export const getNodeAtPoint = (point: TPoint, nodes: TSceneNode[], viewport: TVi
         return node.pathId ? isPointInCurvedText(point, node, pathTextTolerance) : isPointInText(testPoint, node);
       case NodeType.path:
         return false;
-      case NodeType.vector:
-        return isPointInVectorRegions(testPoint, node) || isPointNearVectorPath(testPoint, node, lineTolerance);
+      case NodeType.vector: {
+        const bakedNode = getRenderedVectorNode(node);
+        return isPointInVectorRegions(testPoint, bakedNode) || isPointNearVectorPath(testPoint, bakedNode, lineTolerance);
+      }
       default:
         return isPointInRect(testPoint, node);
     }
