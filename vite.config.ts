@@ -25,7 +25,7 @@ export default defineConfig({
   },
   test: {
     coverage: {
-      exclude: ['src/main.tsx', 'src/assets/**', 'src/constant/mainKeys.ts'],
+      exclude: ['src/main.tsx', 'src/assets/**', 'src/constant/mainKeys.ts', 'scripts/**'],
       provider: 'v8',
       thresholds: {
         branches: 100,
