@@ -18,7 +18,8 @@ export const drawSelectedSegmentsHighlight = (
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  const flattened = flattenVectorSegments(node).filter((segment) => selectedSegmentIds.includes(segment.segmentId));
+  const selectedSegmentIdSet = new Set(selectedSegmentIds);
+  const flattened = flattenVectorSegments(node).filter((segment) => selectedSegmentIdSet.has(segment.segmentId));
 
   if (flattened.length > 0) {
     drawVectorStroke(

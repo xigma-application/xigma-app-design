@@ -25,13 +25,16 @@ export const drawVectorDraggedFillPreview = (
     const faces = Object.entries(draggedFillFaces).flatMap(([nodeId, faceKeys]) => {
       const node = getVectorEditingNode(nodes, nodeId);
 
-      if (!node) return [];
+      if (node) {
+        const bakedNode: TVectorNode = node.rotation ? { ...node, ...bakeVectorNodeRotation(node) } : node;
+        const faceKeySet = new Set(faceKeys);
 
-      const bakedNode: TVectorNode = node.rotation ? { ...node, ...bakeVectorNodeRotation(node) } : node;
+        return deriveVectorFaces(bakedNode)
+          .filter((face) => faceKeySet.has(face.key))
+          .map((face) => face.points);
+      }
 
-      return deriveVectorFaces(bakedNode)
-        .filter((face) => faceKeys.includes(face.key))
-        .map((face) => face.points);
+      return [];
     });
 
     drawVectorHatchFill(gl, program, buffer, faces, VECTOR_EDGE_HOVER_STROKE, canvasWidth, canvasHeight, viewport);
