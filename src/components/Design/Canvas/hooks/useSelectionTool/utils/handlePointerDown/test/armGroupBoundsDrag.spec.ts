@@ -10,6 +10,7 @@ import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { armGroupBoundsDrag } from '../armGroupBoundsDrag';
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 
 const createCanvasMock = (): HTMLCanvasElement => ({ setPointerCapture: vi.fn() }) as unknown as HTMLCanvasElement;
 
@@ -39,7 +40,7 @@ describe('armGroupBoundsDrag', () => {
     const dragStateRef = createDragStateRef();
 
     // before
-    armGroupBoundsDrag(canvas, event, dragStateRef, [idA, idB], { x: 10, y: 10 });
+    armGroupBoundsDrag(canvas, event, dragStateRef, [idA, idB], { x: 10, y: 10 }, createCanvasRefs());
 
     // result
     expect(dragStateRef.current).toMatchObject({ pendingClickAction: { kind: 'deselect' }, pointerStart: { x: 10, y: 10 } });

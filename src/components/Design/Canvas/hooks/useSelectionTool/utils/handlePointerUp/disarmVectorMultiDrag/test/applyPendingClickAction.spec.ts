@@ -13,6 +13,7 @@ import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs'
 
 const baseDragState = (overrides: Partial<TVectorMultiDragState>): TVectorMultiDragState => ({
   boxOrigin: null,
+  dispatchThrottle: { frameId: null, run: null },
   handleOrigins: {},
   hasMoved: false,
   pendingClickAction: null,

@@ -35,6 +35,7 @@ describe('resolveVectorIdleHover', () => {
     canvasRefs.hoveredVectorVertexIdRef.current = 'sentinel';
     canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
+      dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
       hasMoved: false,
       pendingClickAction: null,

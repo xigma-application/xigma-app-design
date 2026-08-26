@@ -8,6 +8,7 @@ import { NodeType } from 'types/design/enums';
 // utils
 import { continueVectorMultiDrag } from '../continueVectorMultiDrag';
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
+import { flushThrottledDispatch } from 'components/Design/Canvas/utils/flushThrottledDispatch';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -70,6 +71,7 @@ describe('continueVectorMultiDrag', () => {
 
     canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
+      dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
       hasMoved: false,
       pendingClickAction: null,
@@ -98,6 +100,7 @@ describe('continueVectorMultiDrag', () => {
 
     canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
+      dispatchThrottle: { frameId: null, run: null },
       handleOrigins: { 'end:s1': { x: -5, y: 0 }, 'start:s1': { x: 5, y: 0 } },
       hasMoved: false,
       pendingClickAction: { id: 'v2', kind: 'vertex' },
@@ -109,6 +112,7 @@ describe('continueVectorMultiDrag', () => {
 
     // before — cursor moved to (10, 40): delta (10, 40), well outside alignment tolerance of v1(0,0)
     continueVectorMultiDrag(canvas, pointerEvent(10, 40), store.dispatch, canvasRefs, setClassName);
+    flushThrottledDispatch(canvasRefs.vectorMultiDragRef.current!.dispatchThrottle);
 
     // result
     const node = store.getState().design.nodes[idA];
@@ -134,6 +138,7 @@ describe('continueVectorMultiDrag', () => {
 
     canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: { height: 0, width: 100, x: 0, y: 0 },
+      dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
       hasMoved: false,
       pendingClickAction: null,
@@ -166,6 +171,7 @@ describe('continueVectorMultiDrag', () => {
 
     canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
+      dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
       hasMoved: false,
       pendingClickAction: null,
@@ -215,6 +221,7 @@ describe('continueVectorMultiDrag', () => {
 
     canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: { height: 0, width: 100, x: 0, y: 0 },
+      dispatchThrottle: { frameId: null, run: null },
       handleOrigins: { 'end:s1': { x: -5, y: 0 }, 'start:s1': { x: 5, y: 0 } },
       hasMoved: false,
       pendingClickAction: null,
@@ -227,6 +234,7 @@ describe('continueVectorMultiDrag', () => {
 
     // before — raw delta (22,350): v1 lands at (22,350), 2px off a's x=20 column
     continueVectorMultiDrag(canvas, pointerEvent(22, 350), store.dispatch, canvasRefs, setClassName);
+    flushThrottledDispatch(canvasRefs.vectorMultiDragRef.current!.dispatchThrottle);
 
     // result — every dragged element shifted by the same -2px x correction, keeping the group rigid
     const node = store.getState().design.nodes[idA];

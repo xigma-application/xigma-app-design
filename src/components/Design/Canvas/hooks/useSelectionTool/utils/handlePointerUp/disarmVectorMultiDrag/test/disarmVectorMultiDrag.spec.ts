@@ -68,6 +68,7 @@ describe('disarmVectorMultiDrag', () => {
 
     canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
+      dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
       hasMoved: true,
       pendingClickAction: null,
@@ -95,6 +96,7 @@ describe('disarmVectorMultiDrag', () => {
 
     canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
+      dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
       hasMoved: false,
       pendingClickAction: null,
@@ -118,6 +120,7 @@ describe('disarmVectorMultiDrag', () => {
 
     canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
+      dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
       hasMoved: false,
       pendingClickAction: { id: 'v2', kind: 'vertex' },
@@ -144,6 +147,7 @@ describe('disarmVectorMultiDrag', () => {
 
     canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
+      dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
       hasMoved: false,
       pendingClickAction: { end: 'start', kind: 'handle', segmentId: 's1' },
@@ -169,6 +173,7 @@ describe('disarmVectorMultiDrag', () => {
 
     canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
+      dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
       hasMoved: false,
       pendingClickAction: { id: 's1', kind: 'segment' },
@@ -194,6 +199,7 @@ describe('disarmVectorMultiDrag', () => {
 
     canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
+      dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
       hasMoved: true,
       pendingClickAction: { id: 'v2', kind: 'vertex' },
@@ -221,6 +227,7 @@ describe('disarmVectorMultiDrag', () => {
 
     canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
+      dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
       hasMoved: false,
       pendingClickAction: { kind: 'split-segment', nodeId, segmentId: 's1', t: 0.5 },
@@ -252,6 +259,7 @@ describe('disarmVectorMultiDrag', () => {
 
     canvasRefs.vectorMultiDragRef.current = {
       boxOrigin: null,
+      dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
       hasMoved: false,
       pendingClickAction: { kind: 'split-segment', nodeId: 'missing-node', segmentId: 's1', t: 0.5 },

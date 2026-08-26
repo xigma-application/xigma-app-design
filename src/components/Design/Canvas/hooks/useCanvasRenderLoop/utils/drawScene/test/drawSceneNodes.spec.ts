@@ -85,7 +85,7 @@ describe('drawSceneNodes', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [], 100, 100, IDENTITY_VIEWPORT, new Map());
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [], 100, 100, IDENTITY_VIEWPORT, new Map(), null);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -99,7 +99,7 @@ describe('drawSceneNodes', () => {
     const nodes = [buildNode({ id: 'a' }), buildNode({ id: 'b' })];
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, nodes, 100, 100, IDENTITY_VIEWPORT, new Map());
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, nodes, 100, 100, IDENTITY_VIEWPORT, new Map(), null);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
@@ -114,7 +114,7 @@ describe('drawSceneNodes', () => {
     const nodes = [buildNode({ id: 'a', type: NodeType.ellipse })];
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, nodes, 100, 100, IDENTITY_VIEWPORT, new Map());
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, nodes, 100, 100, IDENTITY_VIEWPORT, new Map(), null);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLE_FAN, 0, expect.any(Number));
@@ -142,7 +142,7 @@ describe('drawSceneNodes', () => {
     };
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [polygon], 100, 100, IDENTITY_VIEWPORT, new Map());
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [polygon], 100, 100, IDENTITY_VIEWPORT, new Map(), null);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLE_FAN, 0, expect.any(Number));
@@ -171,7 +171,7 @@ describe('drawSceneNodes', () => {
     };
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [star], 100, 100, IDENTITY_VIEWPORT, new Map());
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [star], 100, 100, IDENTITY_VIEWPORT, new Map(), null);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLE_FAN, 0, expect.any(Number));
@@ -198,7 +198,7 @@ describe('drawSceneNodes', () => {
     };
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [media], 100, 100, IDENTITY_VIEWPORT, new Map());
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [media], 100, 100, IDENTITY_VIEWPORT, new Map(), null);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
@@ -228,7 +228,7 @@ describe('drawSceneNodes', () => {
     };
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [text], 100, 100, IDENTITY_VIEWPORT, new Map());
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [text], 100, 100, IDENTITY_VIEWPORT, new Map(), null);
 
     // result — "hello" is 5 known glyphs in the real MSDF atlas, 6 vertices each
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 30);
@@ -253,7 +253,7 @@ describe('drawSceneNodes', () => {
     };
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [path], 100, 100, IDENTITY_VIEWPORT, new Map());
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [path], 100, 100, IDENTITY_VIEWPORT, new Map(), null);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -278,7 +278,7 @@ describe('drawSceneNodes', () => {
     };
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [path], 100, 100, IDENTITY_VIEWPORT, new Map([['a', 'selected']]));
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [path], 100, 100, IDENTITY_VIEWPORT, new Map([['a', 'selected']]), null);
 
     // result — a stroke-only ellipse draws a LINE_LOOP, no filled TRIANGLE_FAN
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -304,7 +304,7 @@ describe('drawSceneNodes', () => {
     };
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [path], 100, 100, IDENTITY_VIEWPORT, new Map([['a', 'hover']]));
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [path], 100, 100, IDENTITY_VIEWPORT, new Map([['a', 'hover']]), null);
 
     // result — a thick outline is built from triangle quads, not a hairline loop
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, expect.any(Number));
@@ -328,7 +328,7 @@ describe('drawSceneNodes', () => {
     };
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [line], 100, 100, IDENTITY_VIEWPORT, new Map());
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [line], 100, 100, IDENTITY_VIEWPORT, new Map(), null);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -354,7 +354,7 @@ describe('drawSceneNodes', () => {
     };
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [line], 100, 100, IDENTITY_VIEWPORT, new Map());
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [line], 100, 100, IDENTITY_VIEWPORT, new Map(), null);
 
     // result — 1 segment + (2 wing quads + 3 round-cap fills) for the single arrow endpoint
     expect(gl.drawArrays).toHaveBeenCalledTimes(6);
@@ -381,7 +381,7 @@ describe('drawSceneNodes', () => {
     };
 
     // before
-    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [vector], 100, 100, IDENTITY_VIEWPORT, new Map());
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [vector], 100, 100, IDENTITY_VIEWPORT, new Map(), null);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);

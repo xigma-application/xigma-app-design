@@ -155,6 +155,19 @@ describe('useSelectionTool behaviors', () => {
     store.dispatch(setSelection([]));
     store.dispatch(stopTextEdit());
     store.dispatch(setVectorEditingNodeIds([]));
+
+    // drag dispatches are throttled to one per animation frame — run the callback immediately so these
+    // pointer-event-driven tests can assert on the store synchronously, same as before the throttle existed
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback): number => {
+      callback(0);
+
+      return 1;
+    });
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('should not react to pointer events when the default tool is not active', () => {

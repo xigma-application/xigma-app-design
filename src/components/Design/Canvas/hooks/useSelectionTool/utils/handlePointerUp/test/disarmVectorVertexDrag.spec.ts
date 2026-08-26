@@ -65,7 +65,7 @@ describe('disarmVectorVertexDrag', () => {
     const canvasRefs = createCanvasRefs();
     const selectionRefs = createSelectionToolRefs();
 
-    selectionRefs.vectorVertexDragRef.current = { nodeId: 'path-1', origins: { 'vertex-1': { x: 0, y: 0 } }, pointerStart: { x: 5, y: 5 } };
+    selectionRefs.vectorVertexDragRef.current = { dispatchThrottle: { frameId: null, run: null }, nodeId: 'path-1', origins: { 'vertex-1': { x: 0, y: 0 } }, pointerStart: { x: 5, y: 5 } };
     canvasRefs.vectorAlignmentGuideRef.current = {
       horizontal: null,
       vertical: { anchor: { x: 0, y: 0 }, match: { x: 0, y: 0 } },
@@ -90,6 +90,7 @@ describe('disarmVectorVertexDrag', () => {
     const selectionRefs = createSelectionToolRefs();
 
     selectionRefs.vectorVertexDragRef.current = {
+      dispatchThrottle: { frameId: null, run: null },
       mergeTarget: { nodeId: 'missing-target', vertexId: 'v2' },
       nodeId: 'missing-node',
       origins: { v1: { x: 0, y: 0 } },
@@ -115,6 +116,7 @@ describe('disarmVectorVertexDrag', () => {
     const selectionRefs = createSelectionToolRefs();
 
     selectionRefs.vectorVertexDragRef.current = {
+      dispatchThrottle: { frameId: null, run: null },
       mergeTarget: { nodeId: 'deleted-node', vertexId: 'v2' },
       nodeId: idA,
       origins: { v1: { x: 200, y: 200 } },
@@ -149,6 +151,7 @@ describe('disarmVectorVertexDrag', () => {
     canvasRefs.selectedVectorHandlesRef.current = [{ end: 'end', segmentId: 's1' }];
     canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
     selectionRefs.vectorVertexDragRef.current = {
+      dispatchThrottle: { frameId: null, run: null },
       mergeTarget: { nodeId: idA, vertexId: 'v2' },
       nodeId: idA,
       origins: { v1: { x: 0, y: 0 } },
@@ -179,6 +182,7 @@ describe('disarmVectorVertexDrag', () => {
     const selectionRefs = createSelectionToolRefs();
 
     selectionRefs.vectorVertexDragRef.current = {
+      dispatchThrottle: { frameId: null, run: null },
       mergeTarget: { nodeId: idA, vertexId: 'v2' },
       nodeId: idA,
       origins: { v1: { x: 0, y: 0 } },
@@ -211,6 +215,7 @@ describe('disarmVectorVertexDrag', () => {
     const selectionRefs = createSelectionToolRefs();
 
     selectionRefs.vectorVertexDragRef.current = {
+      dispatchThrottle: { frameId: null, run: null },
       mergeTarget: { nodeId: idB, vertexId: 'v2' },
       nodeId: idA,
       origins: { v1: { x: 200, y: 200 } },

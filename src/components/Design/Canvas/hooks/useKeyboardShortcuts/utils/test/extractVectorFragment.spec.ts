@@ -45,6 +45,15 @@ describe('extractVectorFragment', () => {
     expect(fragment.segments).toEqual([{ endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null }]);
   });
 
+  it('should contribute no endpoint vertices for a stale segment id that no longer resolves to any segment on the node', () => {
+    // action — the stale id still ends up in the returned segment id set (unfiltered), but contributes
+    // no endpoints, since there's no segment object to read startId/endId off of
+    const fragment = extractVectorFragment(buildNode(), [], ['stale-segment']);
+
+    // result
+    expect(fragment.vertices).toEqual([]);
+  });
+
   it('should auto-include a segment whose both endpoints are already in the selected vertex set', () => {
     // action
     const fragment = extractVectorFragment(buildNode(), ['v1', 'v2'], []);

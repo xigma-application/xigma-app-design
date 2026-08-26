@@ -110,4 +110,22 @@ describe('drawVectorDraggedFillPreview', () => {
     // result
     expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [], '#cd4422', 200, 150, IDENTITY_VIEWPORT);
   });
+
+  it('should bake the node’s rotation into a new segments/vertices set before deriving faces when the dragged node is rotated', () => {
+    // mock
+    const rotatedNode: TVectorNode = { ...node, rotation: 45 };
+    const rotatedNodes: Record<string, TSceneNode> = { [rotatedNode.id]: rotatedNode };
+    const bakedSegments = { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } };
+    const bakedVertices = { a: { id: 'a', x: 1, y: 2 } };
+
+    bakeVectorNodeRotationMock.mockReturnValue({ rotation: 0, segments: bakedSegments, vertices: bakedVertices });
+    deriveVectorFacesMock.mockReturnValue([]);
+
+    // before
+    drawVectorDraggedFillPreview(gl, program, buffer, rotatedNodes, { [rotatedNode.id]: ['k1'] }, 200, 150, IDENTITY_VIEWPORT);
+
+    // result
+    expect(bakeVectorNodeRotationMock).toHaveBeenCalledWith(rotatedNode);
+    expect(deriveVectorFacesMock).toHaveBeenCalledWith({ ...rotatedNode, rotation: 0, segments: bakedSegments, vertices: bakedVertices });
+  });
 });

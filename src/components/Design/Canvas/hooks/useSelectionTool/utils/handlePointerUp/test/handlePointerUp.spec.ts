@@ -117,6 +117,7 @@ describe('handlePointerUp', () => {
     // mock
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef({
+      dispatchThrottle: { frameId: null, run: null },
       hasMoved: false,
       nodeOrigins: {},
       pendingClickAction: { id: 'a', kind: 'collapse' },

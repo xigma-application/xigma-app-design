@@ -27,6 +27,7 @@ import {
 
 // utils
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
+import { flushThrottledDispatch } from 'components/Design/Canvas/utils/flushThrottledDispatch';
 import { handlePointerMove } from '../handlePointerMove';
 import { createSelectionToolRefs } from '../../../hooks/useSelectionToolRefs/createSelectionToolRefs';
 
@@ -137,6 +138,7 @@ describe('handlePointerMove', () => {
     const idA = addFrameNode(500, 500);
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef({
+      dispatchThrottle: { frameId: null, run: null },
       hasMoved: false,
       nodeOrigins: { [idA]: { x: 500, y: 500 } },
       pendingClickAction: null,
@@ -169,6 +171,7 @@ describe('handlePointerMove', () => {
       }),
       vi.fn(),
     );
+    flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
 
     // result
     expect(store.getState().design.nodes[idA]).toMatchObject({ x: 510, y: 520 });

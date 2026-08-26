@@ -8,6 +8,7 @@ import { store } from 'store';
 import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { disarmDrag } from '../disarmDrag';
 
 const createCanvas = (): HTMLCanvasElement => {
@@ -32,7 +33,7 @@ describe('disarmDrag', () => {
     const canvas = createCanvas();
 
     // before
-    disarmDrag(canvas, pointerEvent(), store.dispatch, createDragStateRef());
+    disarmDrag(canvas, pointerEvent(), store.dispatch, createDragStateRef(), createCanvasRefs());
 
     // result
     expect(canvas.releasePointerCapture).not.toHaveBeenCalled();
@@ -42,6 +43,7 @@ describe('disarmDrag', () => {
     // mock
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef({
+      dispatchThrottle: { frameId: null, run: null },
       hasMoved: false,
       nodeOrigins: {},
       pendingClickAction: { id: 'a', kind: 'collapse' },
@@ -49,7 +51,7 @@ describe('disarmDrag', () => {
     });
 
     // before
-    disarmDrag(canvas, pointerEvent(1), store.dispatch, dragStateRef);
+    disarmDrag(canvas, pointerEvent(1), store.dispatch, dragStateRef, createCanvasRefs());
 
     // result
     expect(store.getState().design.selectedIds).toEqual(['a']);
@@ -63,6 +65,7 @@ describe('disarmDrag', () => {
 
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef({
+      dispatchThrottle: { frameId: null, run: null },
       hasMoved: false,
       nodeOrigins: {},
       pendingClickAction: { kind: 'deselect' },
@@ -70,7 +73,7 @@ describe('disarmDrag', () => {
     });
 
     // before
-    disarmDrag(canvas, pointerEvent(), store.dispatch, dragStateRef);
+    disarmDrag(canvas, pointerEvent(), store.dispatch, dragStateRef, createCanvasRefs());
 
     // result
     expect(store.getState().design.selectedIds).toEqual([]);
@@ -82,6 +85,7 @@ describe('disarmDrag', () => {
 
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef({
+      dispatchThrottle: { frameId: null, run: null },
       hasMoved: true,
       nodeOrigins: {},
       pendingClickAction: { id: 'a', kind: 'collapse' },
@@ -89,7 +93,7 @@ describe('disarmDrag', () => {
     });
 
     // before
-    disarmDrag(canvas, pointerEvent(), store.dispatch, dragStateRef);
+    disarmDrag(canvas, pointerEvent(), store.dispatch, dragStateRef, createCanvasRefs());
 
     // result
     expect(store.getState().design.selectedIds).toEqual(['a', 'b']);

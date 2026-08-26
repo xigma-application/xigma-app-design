@@ -2082,6 +2082,7 @@ describe('armVectorVertexOnPointerDown', () => {
     expect(armVectorVertexOnPointerDown(ctx)).toBe(true);
     expect(ctx.canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1']);
     expect(ctx.selectionRefs.vectorVertexDragRef.current).toEqual({
+      dispatchThrottle: { frameId: null, run: null },
       nodeId,
       origins: { v1: { x: 0, y: 0 } },
       pointerStart: { x: 2, y: 0 },
@@ -2245,6 +2246,7 @@ describe('armVectorMultiSelectBoxOnPointerDown', () => {
     expect(armVectorMultiSelectBoxOnPointerDown(ctx)).toBe(true);
     expect(ctx.canvasRefs.vectorMultiDragRef.current).toEqual({
       boxOrigin: { height: 100, width: 100, x: 0, y: 0 },
+      dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
       hasMoved: false,
       pendingClickAction: null,

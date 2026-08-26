@@ -29,7 +29,12 @@ describe('resolveVectorVertexMerge', () => {
     const target = buildVectorNode({ id: 'target-node', vertices: { target: { id: 'target', x: 10, y: 0 } } });
     const nodes: Record<string, TSceneNode> = { 'target-node': target };
     const draggedVertices = { v1: { id: 'v1', x: 8, y: 1 } };
-    const dragState: TVectorVertexDragState = { nodeId: 'own-node', origins: { v1: { x: 0, y: 0 } }, pointerStart: { x: 0, y: 0 } };
+    const dragState: TVectorVertexDragState = {
+      dispatchThrottle: { frameId: null, run: null },
+      nodeId: 'own-node',
+      origins: { v1: { x: 0, y: 0 } },
+      pointerStart: { x: 0, y: 0 },
+    };
     const canvasRefs = createCanvasRefs();
 
     canvasRefs.vectorAlignmentGuideRef.current = { horizontal: null, vertical: { anchor: { x: 0, y: 0 }, match: { x: 0, y: 0 } } };
@@ -51,6 +56,7 @@ describe('resolveVectorVertexMerge', () => {
     const nodes: Record<string, TSceneNode> = {};
     const draggedVertices = { v1: { id: 'v1', x: 8, y: 1 } };
     const dragState = {
+      dispatchThrottle: { frameId: null, run: null },
       mergeTarget: { nodeId: 'stale-node', vertexId: 'stale-vertex' },
       nodeId: 'own-node',
       origins: { v1: { x: 0, y: 0 } },

@@ -9,6 +9,7 @@ import { NodeType } from 'types/design/enums';
 import { continueVectorVertexDrag } from '../continueVectorVertexDrag';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { createSelectionToolRefs } from '../../../../hooks/useSelectionToolRefs/createSelectionToolRefs';
+import { flushThrottledDispatch } from 'components/Design/Canvas/utils/flushThrottledDispatch';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -68,7 +69,7 @@ describe('continueVectorVertexDrag', () => {
     const canvasRefs = createCanvasRefs();
     const selectionRefs = createSelectionToolRefs();
 
-    selectionRefs.vectorVertexDragRef.current = { nodeId: 'missing-node', origins: { v1: { x: 0, y: 0 } }, pointerStart: { x: 0, y: 0 } };
+    selectionRefs.vectorVertexDragRef.current = { dispatchThrottle: { frameId: null, run: null }, nodeId: 'missing-node', origins: { v1: { x: 0, y: 0 } }, pointerStart: { x: 0, y: 0 } };
 
     const setClassName = vi.fn();
 
@@ -87,12 +88,13 @@ describe('continueVectorVertexDrag', () => {
     const canvasRefs = createCanvasRefs();
     const selectionRefs = createSelectionToolRefs();
 
-    selectionRefs.vectorVertexDragRef.current = { nodeId: idA, origins: { v1: { x: 0, y: 0 } }, pointerStart: { x: 0, y: 0 } };
+    selectionRefs.vectorVertexDragRef.current = { dispatchThrottle: { frameId: null, run: null }, nodeId: idA, origins: { v1: { x: 0, y: 0 } }, pointerStart: { x: 0, y: 0 } };
 
     const setClassName = vi.fn();
 
     // before — well outside alignment tolerance of v2(100,0)
     continueVectorVertexDrag(canvas, pointerEvent(15, 7), store.dispatch, canvasRefs, selectionRefs, setClassName);
+    flushThrottledDispatch(selectionRefs.vectorVertexDragRef.current!.dispatchThrottle);
 
     // result
     const node = store.getState().design.nodes[idA];
@@ -129,12 +131,13 @@ describe('continueVectorVertexDrag', () => {
     const canvasRefs = createCanvasRefs();
     const selectionRefs = createSelectionToolRefs();
 
-    selectionRefs.vectorVertexDragRef.current = { nodeId: idA, origins: { v1: { x: 0, y: 0 } }, pointerStart: { x: 0, y: 0 } };
+    selectionRefs.vectorVertexDragRef.current = { dispatchThrottle: { frameId: null, run: null }, nodeId: idA, origins: { v1: { x: 0, y: 0 } }, pointerStart: { x: 0, y: 0 } };
 
     const setClassName = vi.fn();
 
     // before — v1 dragged a couple of px off x=20
     continueVectorVertexDrag(canvas, pointerEvent(22, 350), store.dispatch, canvasRefs, selectionRefs, setClassName);
+    flushThrottledDispatch(selectionRefs.vectorVertexDragRef.current!.dispatchThrottle);
 
     // result
     const node = store.getState().design.nodes[idA];
@@ -169,6 +172,7 @@ describe('continueVectorVertexDrag', () => {
     const selectionRefs = createSelectionToolRefs();
 
     selectionRefs.vectorVertexDragRef.current = {
+      dispatchThrottle: { frameId: null, run: null },
       nodeId: idA,
       origins: { v1: { x: 0, y: 0 }, v2: { x: 100, y: 0 } },
       pointerStart: { x: 0, y: 0 },
@@ -178,6 +182,7 @@ describe('continueVectorVertexDrag', () => {
 
     // before — raw delta (22,350): v1 lands at (22,350), 2px off the a's x=20 column; v2 lands at (122,350)
     continueVectorVertexDrag(canvas, pointerEvent(22, 350), store.dispatch, canvasRefs, selectionRefs, setClassName);
+    flushThrottledDispatch(selectionRefs.vectorVertexDragRef.current!.dispatchThrottle);
 
     // result — both vertices shifted by the same -2px x correction, keeping the group rigid
     const node = store.getState().design.nodes[idA];
@@ -204,12 +209,13 @@ describe('continueVectorVertexDrag', () => {
     const canvasRefs = createCanvasRefs();
     const selectionRefs = createSelectionToolRefs();
 
-    selectionRefs.vectorVertexDragRef.current = { nodeId: idA, origins: { v1: { x: 5000, y: 0 } }, pointerStart: { x: 5000, y: 0 } };
+    selectionRefs.vectorVertexDragRef.current = { dispatchThrottle: { frameId: null, run: null }, nodeId: idA, origins: { v1: { x: 5000, y: 0 } }, pointerStart: { x: 5000, y: 0 } };
 
     const setClassName = vi.fn();
 
     // before
     continueVectorVertexDrag(canvas, pointerEvent(5102, 1), store.dispatch, canvasRefs, selectionRefs, setClassName);
+    flushThrottledDispatch(selectionRefs.vectorVertexDragRef.current!.dispatchThrottle);
 
     // result
     const node = store.getState().design.nodes[idA];
@@ -244,7 +250,7 @@ describe('continueVectorVertexDrag', () => {
     const canvasRefs = createCanvasRefs();
     const selectionRefs = createSelectionToolRefs();
 
-    selectionRefs.vectorVertexDragRef.current = { nodeId: idA, origins: { v1: { x: 500, y: 500 } }, pointerStart: { x: 500, y: 500 } };
+    selectionRefs.vectorVertexDragRef.current = { dispatchThrottle: { frameId: null, run: null }, nodeId: idA, origins: { v1: { x: 500, y: 500 } }, pointerStart: { x: 500, y: 500 } };
 
     const setClassName = vi.fn();
 
@@ -265,6 +271,7 @@ describe('continueVectorVertexDrag', () => {
     const selectionRefs = createSelectionToolRefs();
 
     selectionRefs.vectorVertexDragRef.current = {
+      dispatchThrottle: { frameId: null, run: null },
       mergeTarget: { nodeId: idA, vertexId: 'v2' },
       nodeId: idA,
       origins: { v1: { x: 0, y: 0 } },

@@ -6,11 +6,34 @@ import { store } from 'store';
 import { NodeType } from 'types/design/enums';
 
 // utils
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { handleSelectAll } from '../handleSelectAll';
 
 const addFrameNode = (): string => {
   store.dispatch(
     addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addVectorNode = (): string => {
+  store.dispatch(
+    addNode({
+      fillColor: null,
+      filledFaceKeys: [],
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } },
+    }),
   );
 
   const { rootOrder } = store.getState().design;
@@ -30,22 +53,27 @@ describe('handleSelectAll', () => {
     addFrameNode();
 
     // action
-    handleSelectAll(store.dispatch);
+    handleSelectAll(store.dispatch, createCanvasRefs());
 
     // result
     expect(store.getState().design.selectedIds).toEqual(store.getState().design.rootOrder);
   });
 
-  it('should do nothing while a vector node is open for editing', () => {
+  it('should select every vertex and segment of the editing vector node instead of touching the node selection while a vector node is open for editing', () => {
     // mock
-    const frameId = addFrameNode();
+    const idA = addVectorNode();
 
-    store.dispatch(setVectorEditingNodeIds([frameId]));
+    store.dispatch(setVectorEditingNodeIds([idA]));
+
+    const canvasRefs = createCanvasRefs();
 
     // action
-    handleSelectAll(store.dispatch);
+    handleSelectAll(store.dispatch, canvasRefs);
 
     // result
     expect(store.getState().design.selectedIds).toEqual([]);
+    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
+    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
   });
 });

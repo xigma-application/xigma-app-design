@@ -10,6 +10,7 @@ import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { armDrag } from '../armDrag';
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 
 const createDragStateRef = (): RefObject<TDragState | null> => ({ current: null });
 
@@ -64,10 +65,11 @@ describe('armDrag', () => {
     const dragStateRef = createDragStateRef();
 
     // before
-    armDrag([idA], null, { x: 5, y: 5 }, dragStateRef);
+    armDrag([idA], null, { x: 5, y: 5 }, dragStateRef, createCanvasRefs());
 
     // result
     expect(dragStateRef.current).toEqual({
+      dispatchThrottle: { frameId: null, run: null },
       hasMoved: false,
       nodeOrigins: { [idA]: { x: 100, y: 100 } },
       pendingClickAction: null,
@@ -81,7 +83,7 @@ describe('armDrag', () => {
     const dragStateRef = createDragStateRef();
 
     // before
-    armDrag([idA], { id: idA, kind: 'collapse' }, { x: 10, y: 10 }, dragStateRef);
+    armDrag([idA], { id: idA, kind: 'collapse' }, { x: 10, y: 10 }, dragStateRef, createCanvasRefs());
 
     // result
     expect(dragStateRef.current).toMatchObject({
@@ -96,7 +98,7 @@ describe('armDrag', () => {
     const dragStateRef = createDragStateRef();
 
     // before
-    armDrag([idA], null, { x: 0, y: 0 }, dragStateRef);
+    armDrag([idA], null, { x: 0, y: 0 }, dragStateRef, createCanvasRefs());
 
     // result
     expect(dragStateRef.current?.nodeOrigins).toEqual({

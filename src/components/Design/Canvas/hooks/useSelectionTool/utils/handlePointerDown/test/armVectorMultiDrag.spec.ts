@@ -63,6 +63,7 @@ describe('armVectorMultiDrag', () => {
     // result
     expect(canvasRefs.vectorMultiDragRef.current).toEqual({
       boxOrigin: null,
+      dispatchThrottle: { frameId: null, run: null },
       handleOrigins: { 'end:s1': { x: -5, y: 0 }, 'start:s1': { x: 5, y: 0 } },
       hasMoved: false,
       pendingClickAction: null,

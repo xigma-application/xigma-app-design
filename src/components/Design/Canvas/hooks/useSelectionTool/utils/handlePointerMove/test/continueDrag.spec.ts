@@ -6,10 +6,12 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { continueDrag } from '../continueDrag';
+import { flushThrottledDispatch } from 'components/Design/Canvas/utils/flushThrottledDispatch';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -21,7 +23,12 @@ const createCanvas = (): HTMLCanvasElement => {
 
 const pointerEvent = (x: number, y: number): PointerEvent => new PointerEvent('pointermove', { clientX: x, clientY: y });
 
-const createDragStateRef = (dragState: TDragState | null = null): RefObject<TDragState | null> => ({ current: dragState });
+const createDragStateRef = (dragState: Omit<TDragState, 'dispatchThrottle'> | null = null): RefObject<TDragState | null> => ({
+  current: dragState && { ...dragState, dispatchThrottle: { frameId: null, run: null } },
+});
+
+const createCanvasRefs = (): TCanvasRefs =>
+  ({ draggedNodeIdsRef: { current: null }, draggedVectorNodeSnapshotsRef: { current: null } }) as unknown as TCanvasRefs;
 
 const addFrameNode = (x: number, y: number, size = 20): string => {
   store.dispatch(
@@ -73,16 +80,17 @@ describe('continueDrag', () => {
     const canvas = createCanvas();
 
     // before
-    continueDrag(canvas, pointerEvent(10, 10), store.dispatch, createDragStateRef());
+    continueDrag(canvas, pointerEvent(10, 10), store.dispatch, createDragStateRef(), createCanvasRefs());
 
     // result
     expect(store.getState().design.nodes).toEqual({});
   });
 
-  it('should move a box node by the pointer delta and mark the drag as moved', () => {
+  it('should move a box node by the pointer delta and mark the drag as moved, dispatching once the throttled frame flushes', () => {
     // mock
     const idA = addFrameNode(100, 100);
     const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
     const dragStateRef = createDragStateRef({
       hasMoved: false,
       nodeOrigins: { [idA]: { x: 100, y: 100 } },
@@ -91,19 +99,22 @@ describe('continueDrag', () => {
     });
 
     // before
-    continueDrag(canvas, pointerEvent(10, 20), store.dispatch, dragStateRef);
+    continueDrag(canvas, pointerEvent(10, 20), store.dispatch, dragStateRef, canvasRefs);
+    flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
 
     // result
     const node = store.getState().design.nodes[idA];
 
     expect(node).toMatchObject({ x: 110, y: 120 });
     expect(dragStateRef.current?.hasMoved).toBe(true);
+    expect(canvasRefs.draggedNodeIdsRef.current).toEqual(new Set([idA]));
   });
 
   it('should move a line node endpoints by the pointer delta', () => {
     // mock
     const idA = addLineNode(200, 200, 250, 200);
     const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
     const dragStateRef = createDragStateRef({
       hasMoved: false,
       nodeOrigins: { [idA]: { x1: 200, x2: 250, y1: 200, y2: 200 } },
@@ -112,7 +123,8 @@ describe('continueDrag', () => {
     });
 
     // before
-    continueDrag(canvas, pointerEvent(5, 5), store.dispatch, dragStateRef);
+    continueDrag(canvas, pointerEvent(5, 5), store.dispatch, dragStateRef, canvasRefs);
+    flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
 
     // result
     const node = store.getState().design.nodes[idA];
@@ -124,6 +136,7 @@ describe('continueDrag', () => {
     // mock
     const idA = addVectorNode();
     const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
     const dragStateRef = createDragStateRef({
       hasMoved: false,
       nodeOrigins: {
@@ -134,13 +147,66 @@ describe('continueDrag', () => {
     });
 
     // before
-    continueDrag(canvas, pointerEvent(10, 5), store.dispatch, dragStateRef);
+    continueDrag(canvas, pointerEvent(10, 5), store.dispatch, dragStateRef, canvasRefs);
+    flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
 
     // result
     const node = store.getState().design.nodes[idA];
 
     expect(node).toMatchObject({
       vertices: { v1: { id: 'v1', x: 10, y: 5 }, v2: { id: 'v2', x: 110, y: 5 } },
+    });
+  });
+
+  it('should not replace an already-initialized dragged-node-ids set on a subsequent pointermove', () => {
+    // mock
+    const idA = addFrameNode(100, 100);
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const existingSet = new Set(['some-other-id']);
+
+    canvasRefs.draggedNodeIdsRef.current = existingSet;
+
+    const dragStateRef = createDragStateRef({
+      hasMoved: false,
+      nodeOrigins: { [idA]: { x: 100, y: 100 } },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+    });
+
+    // before
+    continueDrag(canvas, pointerEvent(10, 20), store.dispatch, dragStateRef, canvasRefs);
+
+    // result
+    expect(canvasRefs.draggedNodeIdsRef.current).toBe(existingSet);
+  });
+
+  it('should skip dispatching a live update for a node that is snapshotted for a frozen drag, and update its snapshot delta directly instead', () => {
+    // mock
+    const idA = addVectorNode();
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const snapshot = { deltaX: 0, deltaY: 0, facesByColor: [], strokeColor: '#000000', strokeVertices: [] };
+
+    canvasRefs.draggedVectorNodeSnapshotsRef.current = new Map([[idA, snapshot]]);
+
+    const dragStateRef = createDragStateRef({
+      hasMoved: false,
+      nodeOrigins: {
+        [idA]: { segments: {}, vertices: { v1: { x: 0, y: 0 }, v2: { x: 100, y: 0 } } },
+      },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+    });
+
+    // before
+    continueDrag(canvas, pointerEvent(10, 5), store.dispatch, dragStateRef, canvasRefs);
+    flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
+
+    // result
+    expect(snapshot).toEqual({ deltaX: 10, deltaY: 5, facesByColor: [], strokeColor: '#000000', strokeVertices: [] });
+    expect(store.getState().design.nodes[idA]).toMatchObject({
+      vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     });
   });
 });

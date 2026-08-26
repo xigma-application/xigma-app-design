@@ -39,4 +39,20 @@ describe('remapPieceKey', () => {
     // result
     expect(result).toBe('s1[v:v1|v:v2]');
   });
+
+  it('should leave a crossing boundary’s referenced segment id untouched when it has no entry in the segment map', () => {
+    // action
+    const result = remapPieceKey('s1[v:v1|x:s2:0]', new Map(), new Map());
+
+    // result
+    expect(result).toBe('s1[v:v1|x:s2:0]');
+  });
+
+  it('should leave a boundary marker untouched when it matches neither the "v:" nor the "x:" prefix pattern', () => {
+    // action
+    const result = remapPieceKey('s1[unrecognized|v:v1]', new Map([['v1', 'w1']]), new Map());
+
+    // result — an unrecognized boundary format falls through both remaps untouched, only re-sorted alongside the vertex marker
+    expect(result).toBe('s1[unrecognized|v:w1]');
+  });
 });

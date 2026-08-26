@@ -18,6 +18,7 @@ const drawEllipseMock = vi.fn();
 const drawRectMock = vi.fn();
 const drawLineMock = vi.fn();
 const drawVectorStrokeMock = vi.fn();
+const drawVectorVertexDotBatchMock = vi.fn();
 
 vi.mock('utils/canvas/shapes/drawEllipse', () => ({ drawEllipse: (...args: unknown[]): void => drawEllipseMock(...args) }));
 vi.mock('utils/canvas/drawRect/drawRect', () => ({ drawRect: (...args: unknown[]): void => drawRectMock(...args) }));
@@ -25,6 +26,10 @@ vi.mock('utils/canvas/drawLine', () => ({ drawLine: (...args: unknown[]): void =
 vi.mock('utils/canvas/drawVectorNode/drawVectorStroke', () => ({
   drawVectorStroke: (...args: unknown[]): void => drawVectorStrokeMock(...args),
 }));
+vi.mock(
+  'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/drawVectorEditHandlesLayer/drawVectorVertexDots/drawVectorVertexDotBatch',
+  () => ({ drawVectorVertexDotBatch: (...args: unknown[]): void => drawVectorVertexDotBatchMock(...args) }),
+);
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
@@ -106,6 +111,7 @@ describe('drawVectorEditHandlesForNode', () => {
     drawRectMock.mockClear();
     drawLineMock.mockClear();
     drawVectorStrokeMock.mockClear();
+    drawVectorVertexDotBatchMock.mockClear();
   });
 
   it('should always draw the gray edit-mode outline, even while the edited node is also the hovered node', () => {
@@ -174,45 +180,55 @@ describe('drawVectorEditHandlesForNode', () => {
     expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 10, x2: 7.5, y1: 0, y2: 0 }, '#aaaaaa', 1, 200, 150, IDENTITY_VIEWPORT);
   });
 
-  it('should draw a selected vertex as a larger white-then-blue pair and an unselected vertex as a single default-fill dot', () => {
+  it('should batch a selected vertex into its own outer/inner selected-tier draws, separate from an unselected vertex’s plain-tier batch', () => {
     // before
     call(vectorNode, ['v1']);
 
-    // result
-    const selectedOuterDot = drawEllipseMock.mock.calls.find((args) => args[3].width === SELECTED_OUTER_SIZE)?.[3];
-    const selectedInnerDot = drawEllipseMock.mock.calls.find(
-      (args) => args[3].fill === '#0d99ff' && args[3].width === SELECTED_INNER_SIZE,
-    )?.[3];
-    const unselectedDot = drawEllipseMock.mock.calls.find((args) => args[3].x === 10 - BASE_SIZE / 2)?.[3];
+    // result — v1 is selected, batched at the selected outer/inner sizes; v2 stays in the plain batch
+    const plainCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[4] === BASE_SIZE);
+    const selectedOuterCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[4] === SELECTED_OUTER_SIZE);
+    const selectedInnerCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[4] === SELECTED_INNER_SIZE);
 
-    expect(selectedOuterDot).toMatchObject({ fill: '#ffffff', x: -SELECTED_OUTER_SIZE / 2 });
-    expect(selectedInnerDot).toMatchObject({ width: SELECTED_INNER_SIZE, x: -SELECTED_INNER_SIZE / 2 });
-    expect(unselectedDot).toMatchObject({ fill: '#ffffff', width: BASE_SIZE });
+    expect(plainCall?.[3]).toEqual([vectorNode.vertices.v2]);
+    expect(selectedOuterCall?.[3]).toEqual([vectorNode.vertices.v1]);
+    expect(selectedOuterCall?.[5]).toBe('#ffffff');
+    expect(selectedInnerCall?.[3]).toEqual([vectorNode.vertices.v1]);
+    expect(selectedInnerCall?.[5]).toBe('#0d99ff');
   });
 
-  it('should draw the hovered vertex larger than its unhovered neighbor', () => {
+  it('should draw the hovered vertex immediately, larger than its unhovered (plain-batched) neighbor', () => {
     // before
     call(vectorNode, [], 'v1');
 
-    // result
-    const vertexDrawCalls = drawEllipseMock.mock.calls.filter((args) => args[3].fill === '#ffffff');
+    // result — the hovered vertex draws immediately via drawEllipse; the other stays in the plain batch
+    expect(drawEllipseMock).toHaveBeenCalledWith(
+      {},
+      {},
+      {},
+      expect.objectContaining({ fill: '#ffffff', width: HOVER_SIZE }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+      0,
+    );
 
-    expect(vertexDrawCalls.find((args) => args[3].x === -HOVER_SIZE / 2)?.[3]).toMatchObject({ width: HOVER_SIZE });
-    expect(vertexDrawCalls.find((args) => args[3].x === 10 - BASE_SIZE / 2)?.[3]).toMatchObject({ width: BASE_SIZE });
+    const plainCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[4] === BASE_SIZE);
+
+    expect(plainCall?.[3]).toEqual([vectorNode.vertices.v2]);
   });
 
-  it('should draw the Pen tool active vertex (the segment being extended from) with the selected-style outer/inner pair', () => {
+  it('should batch the Pen tool active vertex (the segment being extended from) into the selected-style outer/inner tiers', () => {
     // before
     call(vectorNode, [], null, null, 'v1');
 
     // result — same rendering as a real selection, even though v1 isn't in selectedVertexIds
-    const selectedOuterDot = drawEllipseMock.mock.calls.find((args) => args[3].width === SELECTED_OUTER_SIZE)?.[3];
-    const selectedInnerDot = drawEllipseMock.mock.calls.find(
-      (args) => args[3].fill === '#0d99ff' && args[3].width === SELECTED_INNER_SIZE,
-    )?.[3];
+    const selectedOuterCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[4] === SELECTED_OUTER_SIZE);
+    const selectedInnerCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[4] === SELECTED_INNER_SIZE);
 
-    expect(selectedOuterDot).toMatchObject({ fill: '#ffffff', x: -SELECTED_OUTER_SIZE / 2 });
-    expect(selectedInnerDot).toMatchObject({ x: -SELECTED_INNER_SIZE / 2 });
+    expect(selectedOuterCall?.[3]).toEqual([vectorNode.vertices.v1]);
+    expect(selectedOuterCall?.[5]).toBe('#ffffff');
+    expect(selectedInnerCall?.[3]).toEqual([vectorNode.vertices.v1]);
+    expect(selectedInnerCall?.[5]).toBe('#0d99ff');
   });
 
   it('should draw a selected tangent handle as a solid-blue line and white-then-blue diamond pair, matching the selected-vertex style', () => {
@@ -319,15 +335,18 @@ describe('drawVectorEditHandlesForNode', () => {
     // before
     call(rotatedVectorNode, ['v1']);
 
-    // result
-    const selectedDot = drawEllipseMock.mock.calls.find((args) => args[3].fill === '#0d99ff')?.[3];
-    const unselectedDot = drawEllipseMock.mock.calls.find((args) => args[3].width === BASE_SIZE / IDENTITY_VIEWPORT.zoom)?.[3];
+    // result — v1 (selected) and v2 (plain) both flow into their respective batches, at their baked (rotated)
+    // world positions, not the raw stored coordinates
+    const selectedInnerCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[4] === SELECTED_INNER_SIZE);
+    const plainCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[4] === BASE_SIZE);
+    const [selectedCenter] = selectedInnerCall?.[3] as { x: number; y: number }[];
+    const [plainCenter] = plainCall?.[3] as { x: number; y: number }[];
 
-    expect(drawEllipseMock).toHaveBeenCalledTimes(3);
-    expect(selectedDot.x).toBeCloseTo(5 - SELECTED_INNER_SIZE / 2);
-    expect(selectedDot.y).toBeCloseTo(-5 - SELECTED_INNER_SIZE / 2);
-    expect(unselectedDot.x).toBeCloseTo(5 - BASE_SIZE / 2);
-    expect(unselectedDot.y).toBeCloseTo(5 - BASE_SIZE / 2);
+    expect(drawEllipseMock).not.toHaveBeenCalled();
+    expect(selectedCenter.x).toBeCloseTo(5);
+    expect(selectedCenter.y).toBeCloseTo(-5);
+    expect(plainCenter.x).toBeCloseTo(5);
+    expect(plainCenter.y).toBeCloseTo(5);
   });
 
   it('should reveal a curved segment’s handles reached through a straight (tangent-less) connector — one-hop-by-vertex, not by-segment', () => {

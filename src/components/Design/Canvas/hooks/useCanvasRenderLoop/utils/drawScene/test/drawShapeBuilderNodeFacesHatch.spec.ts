@@ -76,4 +76,21 @@ describe('drawShapeBuilderNodeFacesHatch', () => {
     expect(drawVectorHatchFillMock).toHaveBeenCalledTimes(1);
     expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 0, y: 0 }]], '#0d99ff', 200, 150, IDENTITY_VIEWPORT);
   });
+
+  it('should bake the node’s rotation into a new segments/vertices set before deriving faces when the node is rotated', () => {
+    // mock
+    const rotatedNode: TVectorNode = { ...node, rotation: 45 };
+    const bakedSegments = { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } };
+    const bakedVertices = { a: { id: 'a', x: 1, y: 2 } };
+
+    bakeVectorNodeRotationMock.mockReturnValue({ rotation: 0, segments: bakedSegments, vertices: bakedVertices });
+    deriveVectorFacesMock.mockReturnValue([]);
+
+    // before
+    drawShapeBuilderNodeFacesHatch(gl, program, buffer, rotatedNode, new Set(['k1']), '#0d99ff', 200, 150, IDENTITY_VIEWPORT);
+
+    // result
+    expect(bakeVectorNodeRotationMock).toHaveBeenCalledWith(rotatedNode);
+    expect(deriveVectorFacesMock).toHaveBeenCalledWith({ ...rotatedNode, rotation: 0, segments: bakedSegments, vertices: bakedVertices });
+  });
 });

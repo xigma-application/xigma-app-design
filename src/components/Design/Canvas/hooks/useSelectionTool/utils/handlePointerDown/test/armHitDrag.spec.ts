@@ -11,6 +11,7 @@ import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { armHitDrag } from '../armHitDrag';
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 
 const buildNode = (
   overrides: Partial<Exclude<TBoxSceneNode, TPathNode | TPolygonNode | TSectionNode | TStarNode | TMediaNode | TTextNode>>,
@@ -61,7 +62,7 @@ describe('armHitDrag', () => {
     store.dispatch(setSelection([idA, idB]));
 
     // before
-    armHitDrag(canvas, event, store.dispatch, dragStateRef, a, [idA, idB], [a, b], { x: 5, y: 5 });
+    armHitDrag(canvas, event, store.dispatch, dragStateRef, a, [idA, idB], [a, b], { x: 5, y: 5 }, createCanvasRefs());
 
     // result
     expect(dragStateRef.current).toMatchObject({ pendingClickAction: { id: idA, kind: 'collapse' }, pointerStart: { x: 5, y: 5 } });
@@ -84,7 +85,7 @@ describe('armHitDrag', () => {
     store.dispatch(setSelection([idA, idB]));
 
     // before
-    armHitDrag(canvas, event, store.dispatch, dragStateRef, c, [idA, idB], [a, b], { x: 125, y: 5 });
+    armHitDrag(canvas, event, store.dispatch, dragStateRef, c, [idA, idB], [a, b], { x: 125, y: 5 }, createCanvasRefs());
 
     // result
     expect(dragStateRef.current).toMatchObject({ pendingClickAction: { id: idC, kind: 'collapse' }, pointerStart: { x: 125, y: 5 } });
@@ -107,7 +108,7 @@ describe('armHitDrag', () => {
     store.dispatch(setSelection([idA, idB]));
 
     // before
-    armHitDrag(canvas, event, store.dispatch, dragStateRef, c, [idA, idB], [a, b], { x: 505, y: 505 });
+    armHitDrag(canvas, event, store.dispatch, dragStateRef, c, [idA, idB], [a, b], { x: 505, y: 505 }, createCanvasRefs());
 
     // result
     expect(store.getState().design.selectedIds).toEqual([idC]);

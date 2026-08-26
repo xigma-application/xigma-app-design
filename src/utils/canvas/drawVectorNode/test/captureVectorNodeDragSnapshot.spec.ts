@@ -1,0 +1,105 @@
+// types
+import { NodeType } from 'types/design/enums';
+import { TVectorNode } from 'types/design/types';
+
+// utils
+import { captureVectorNodeDragSnapshot } from '../captureVectorNodeDragSnapshot';
+
+const bakeVectorNodeRotationMock = vi.fn();
+const groupFilledFacesByColorMock = vi.fn();
+const flattenVectorSegmentsMock = vi.fn();
+const getThickVectorPathVerticesMock = vi.fn();
+
+vi.mock('components/Design/Canvas/utils/bakeVectorNodeRotation', () => ({
+  bakeVectorNodeRotation: (...args: unknown[]): unknown => bakeVectorNodeRotationMock(...args),
+}));
+vi.mock('../groupFilledFacesByColor', () => ({
+  groupFilledFacesByColor: (...args: unknown[]): unknown => groupFilledFacesByColorMock(...args),
+}));
+vi.mock('../../vectorNetwork/flattenVectorSegments', () => ({
+  flattenVectorSegments: (...args: unknown[]): unknown => flattenVectorSegmentsMock(...args),
+}));
+vi.mock('../../vectorNetwork/getThickVectorPathVertices/getThickVectorPathVertices', () => ({
+  getThickVectorPathVertices: (...args: unknown[]): unknown => getThickVectorPathVerticesMock(...args),
+}));
+
+const baseNode: TVectorNode = {
+  fillColor: '#ff0000',
+  filledFaceKeys: ['s1,s2,s3'],
+  id: '1',
+  name: 'Vector',
+  parentId: null,
+  rotation: 0,
+  segments: {},
+  strokeColor: '#00ff00',
+  strokeWidth: 4,
+  type: NodeType.vector,
+  vertexHandleModes: {},
+  vertices: {},
+};
+
+describe('captureVectorNodeDragSnapshot', () => {
+  beforeEach(() => {
+    bakeVectorNodeRotationMock.mockClear();
+    groupFilledFacesByColorMock.mockClear();
+    flattenVectorSegmentsMock.mockClear();
+    getThickVectorPathVerticesMock.mockClear();
+    groupFilledFacesByColorMock.mockReturnValue(new Map());
+    flattenVectorSegmentsMock.mockReturnValue([]);
+    getThickVectorPathVerticesMock.mockReturnValue([]);
+  });
+
+  it('should capture a zeroed delta, the grouped fill faces, and the stroke color/vertices from the node as given', () => {
+    // mock
+    const points = [[{ x: 0, y: 0 }]];
+
+    groupFilledFacesByColorMock.mockReturnValue(new Map([['#ff0000', points]]));
+    getThickVectorPathVerticesMock.mockReturnValue([0, 0, 10, 0, 10, 1]);
+
+    // before
+    const snapshot = captureVectorNodeDragSnapshot(baseNode);
+
+    // result
+    expect(bakeVectorNodeRotationMock).not.toHaveBeenCalled();
+    expect(groupFilledFacesByColorMock.mock.calls[0][0]).toBe(baseNode);
+    expect(flattenVectorSegmentsMock.mock.calls[0][0]).toBe(baseNode);
+    expect(getThickVectorPathVerticesMock).toHaveBeenCalledWith([], 2);
+    expect(snapshot).toEqual({
+      deltaX: 0,
+      deltaY: 0,
+      facesByColor: [{ color: '#ff0000', points }],
+      strokeColor: '#00ff00',
+      strokeVertices: [0, 0, 10, 0, 10, 1],
+    });
+  });
+
+  it('should skip stroke vertex derivation entirely for a node carrying a width profile', () => {
+    // mock
+    const node: TVectorNode = { ...baseNode, widthProfile: { points: { p1: { id: 'p1', leftOffset: 10, position: 0.5, rightOffset: 10 } } } };
+
+    // before
+    const snapshot = captureVectorNodeDragSnapshot(node);
+
+    // result
+    expect(getThickVectorPathVerticesMock).not.toHaveBeenCalled();
+    expect(snapshot.strokeVertices).toEqual([]);
+  });
+
+  it('should bake rotation into a new node before deriving faces and stroke, but not mutate the original node', () => {
+    // mock
+    const node: TVectorNode = { ...baseNode, rotation: 45 };
+    const bakedSegments = { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } };
+    const bakedVertices = { a: { id: 'a', x: 1, y: 2 } };
+
+    bakeVectorNodeRotationMock.mockReturnValue({ rotation: 0, segments: bakedSegments, vertices: bakedVertices });
+
+    // before
+    captureVectorNodeDragSnapshot(node);
+
+    // result
+    expect(bakeVectorNodeRotationMock).toHaveBeenCalledWith(node);
+    expect(groupFilledFacesByColorMock).toHaveBeenCalledWith({ ...node, rotation: 0, segments: bakedSegments, vertices: bakedVertices });
+    expect(flattenVectorSegmentsMock).toHaveBeenCalledWith({ ...node, rotation: 0, segments: bakedSegments, vertices: bakedVertices });
+    expect(node.rotation).toBe(45);
+  });
+});

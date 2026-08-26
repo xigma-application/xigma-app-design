@@ -62,4 +62,17 @@ describe('getVectorFacesInRectAcrossOpenNodes', () => {
     // result
     expect(getVectorFacesInRectAcrossOpenNodes({ height: 10, width: 10, x: 900, y: 900 }, ['n1'], nodes)).toEqual([]);
   });
+
+  it('should bake a rotated node’s rotation into fresh geometry before checking it against the rect', () => {
+    // mock — a full 360° turn lands the triangle back where it started (within floating-point epsilon),
+    // so the rect still touches it without needing new expected geometry, while still exercising the bake path
+    const node: TVectorNode = { ...buildTriangleNode('n1', 0), rotation: 360 };
+    const nodes: Record<string, TSceneNode> = { n1: node };
+
+    // result
+    const hits = getVectorFacesInRectAcrossOpenNodes({ height: 200, width: 200, x: -50, y: -50 }, ['n1'], nodes);
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0].node.id).toBe('n1');
+  });
 });
