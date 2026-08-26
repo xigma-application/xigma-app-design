@@ -5,12 +5,12 @@ import { TSceneNode, TVectorNode } from 'types/design/types';
 // utils
 import { drawVectorWidthPointHoverMarker } from '../drawVectorWidthPointHoverMarker';
 
-const bakeVectorNodeRotationMock = vi.fn();
+const getRenderedVectorNodeMock = vi.fn();
 const getVectorSegmentPointAtTMock = vi.fn();
 const drawVectorCutPointMarkerMock = vi.fn();
 
-vi.mock('components/Design/Canvas/utils/bakeVectorNodeRotation', () => ({
-  bakeVectorNodeRotation: (...args: unknown[]): unknown => bakeVectorNodeRotationMock(...args),
+vi.mock('components/Design/Canvas/utils/getRenderedVectorNode', () => ({
+  getRenderedVectorNode: (...args: unknown[]): unknown => getRenderedVectorNodeMock(...args),
 }));
 vi.mock('utils/canvas/vectorNetwork/getVectorSegmentPointAtT', () => ({
   getVectorSegmentPointAtT: (...args: unknown[]): unknown => getVectorSegmentPointAtTMock(...args),
@@ -42,7 +42,8 @@ const buildNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
 
 describe('drawVectorWidthPointHoverMarker', () => {
   beforeEach(() => {
-    bakeVectorNodeRotationMock.mockReturnValue({ segments: {}, vertices: {} });
+    getRenderedVectorNodeMock.mockReset();
+    getRenderedVectorNodeMock.mockImplementation((n: TVectorNode) => n);
     getVectorSegmentPointAtTMock.mockReset();
     drawVectorCutPointMarkerMock.mockClear();
   });
@@ -75,5 +76,31 @@ describe('drawVectorWidthPointHoverMarker', () => {
 
     // result
     expect(drawVectorCutPointMarkerMock).not.toHaveBeenCalled();
+  });
+
+  it('should resolve the hover position from whatever getRenderedVectorNode returns for the node, not the raw node itself', () => {
+    // mock
+    const rotatedNode = buildNode({ rotation: 45 });
+    const nodes: Record<string, TSceneNode> = { [rotatedNode.id]: rotatedNode };
+    const renderedNode: TVectorNode = { ...rotatedNode, rotation: 0 };
+
+    getRenderedVectorNodeMock.mockReturnValue(renderedNode);
+    getVectorSegmentPointAtTMock.mockReturnValue({ x: 9, y: 9 });
+
+    // before
+    drawVectorWidthPointHoverMarker(
+      gl,
+      program,
+      buffer,
+      nodes,
+      { nodeId: rotatedNode.id, segmentId: 's1', t: 0.5 },
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
+
+    // result
+    expect(getRenderedVectorNodeMock).toHaveBeenCalledWith(rotatedNode);
+    expect(getVectorSegmentPointAtTMock).toHaveBeenCalledWith(renderedNode, renderedNode.segments.s1, 0.5);
   });
 });

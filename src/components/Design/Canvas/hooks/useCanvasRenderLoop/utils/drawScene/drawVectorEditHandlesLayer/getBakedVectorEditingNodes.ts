@@ -2,7 +2,7 @@
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { bakeVectorNodeRotation } from '../../../../../utils/bakeVectorNodeRotation';
+import { getRenderedVectorNode } from '../../../../../utils/getRenderedVectorNode';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
 
 export const getBakedVectorEditingNodes = (
@@ -15,7 +15,7 @@ export const getBakedVectorEditingNodes = (
     const editingNode = getVectorEditingNode(nodes, nodeId);
 
     if (editingNode) {
-      bakedNodes[nodeId] = editingNode.rotation ? { ...editingNode, ...bakeVectorNodeRotation(editingNode) } : editingNode;
+      bakedNodes[nodeId] = getRenderedVectorNode(editingNode);
     }
   });
 

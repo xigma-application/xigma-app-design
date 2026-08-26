@@ -2,13 +2,13 @@
 import { VECTOR_EDGE_HOVER_STROKE } from 'constant/canvas';
 
 // types
-import { TSceneNode, TVectorNode, TViewport } from 'types/design/types';
+import { TSceneNode, TViewport } from 'types/design/types';
 import { TVectorDraggedFillFaces } from 'types/design/canvas/types';
 
 // utils
-import { bakeVectorNodeRotation } from 'components/Design/Canvas/utils/bakeVectorNodeRotation';
 import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
 import { drawVectorHatchFill } from 'utils/canvas/drawVectorNode/drawVectorHatchFill';
+import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
 import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';
 
 export const drawVectorDraggedFillPreview = (
@@ -26,7 +26,7 @@ export const drawVectorDraggedFillPreview = (
       const node = getVectorEditingNode(nodes, nodeId);
 
       if (node) {
-        const bakedNode: TVectorNode = node.rotation ? { ...node, ...bakeVectorNodeRotation(node) } : node;
+        const bakedNode = getRenderedVectorNode(node);
         const faceKeySet = new Set(faceKeys);
 
         return deriveVectorFaces(bakedNode)

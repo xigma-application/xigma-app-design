@@ -4,8 +4,8 @@ import { TImageRenderContext } from '../../../types';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
-import { bakeVectorNodeRotation } from 'components/Design/Canvas/utils/bakeVectorNodeRotation';
 import { drawValueLabel } from 'utils/canvas/text/drawValueLabel';
+import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
 import { getVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder';
 import { getVectorChainPositionAtFraction } from 'utils/canvas/vectorNetwork/getVectorChainPositionAtFraction';
 import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';
@@ -25,7 +25,7 @@ const drawVectorWidthValueLabelForTarget = (
   viewport: TViewport,
 ): void => {
   const node = getVectorEditingNode(nodes, target.nodeId);
-  const bakedNode = node && { ...node, ...bakeVectorNodeRotation(node) };
+  const bakedNode = node && getRenderedVectorNode(node);
   const chainOrder = bakedNode && getVectorChainOrder(bakedNode);
 
   if (bakedNode && chainOrder) {

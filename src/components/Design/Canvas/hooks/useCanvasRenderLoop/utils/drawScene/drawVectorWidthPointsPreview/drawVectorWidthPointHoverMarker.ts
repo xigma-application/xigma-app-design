@@ -3,8 +3,8 @@ import { TSceneNode, TViewport } from 'types/design/types';
 import { TVectorWidthPointHover } from 'types/design/canvas/types';
 
 // utils
-import { bakeVectorNodeRotation } from 'components/Design/Canvas/utils/bakeVectorNodeRotation';
 import { drawVectorCutPointMarker } from '../drawVectorCutPointMarker';
+import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
 import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';
 import { getVectorSegmentPointAtT } from 'utils/canvas/vectorNetwork/getVectorSegmentPointAtT';
 
@@ -22,7 +22,7 @@ export const drawVectorWidthPointHoverMarker = (
     const node = getVectorEditingNode(nodes, hoveredWidthPoint.nodeId);
 
     if (node) {
-      const bakedNode = { ...node, ...bakeVectorNodeRotation(node) };
+      const bakedNode = getRenderedVectorNode(node);
       const point = getVectorSegmentPointAtT(bakedNode, bakedNode.segments[hoveredWidthPoint.segmentId], hoveredWidthPoint.t);
 
       drawVectorCutPointMarker(gl, program, buffer, point, canvasWidth, canvasHeight, viewport);

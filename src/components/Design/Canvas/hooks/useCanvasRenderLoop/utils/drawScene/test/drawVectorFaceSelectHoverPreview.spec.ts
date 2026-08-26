@@ -5,12 +5,12 @@ import { TSceneNode, TVectorNode } from 'types/design/types';
 // utils
 import { drawVectorFaceSelectHoverPreview } from '../drawVectorFaceSelectHoverPreview';
 
-const bakeVectorNodeRotationMock = vi.fn();
+const getRenderedVectorNodeMock = vi.fn();
 const deriveVectorFacesMock = vi.fn();
 const drawVectorHatchFillMock = vi.fn();
 
-vi.mock('components/Design/Canvas/utils/bakeVectorNodeRotation', () => ({
-  bakeVectorNodeRotation: (...args: unknown[]): unknown => bakeVectorNodeRotationMock(...args),
+vi.mock('components/Design/Canvas/utils/getRenderedVectorNode', () => ({
+  getRenderedVectorNode: (...args: unknown[]): unknown => getRenderedVectorNodeMock(...args),
 }));
 vi.mock('utils/canvas/vectorNetwork/deriveVectorFaces', () => ({
   deriveVectorFaces: (...args: unknown[]): unknown => deriveVectorFacesMock(...args),
@@ -43,7 +43,8 @@ const nodes: Record<string, TSceneNode> = { [node.id]: node };
 
 describe('drawVectorFaceSelectHoverPreview', () => {
   beforeEach(() => {
-    bakeVectorNodeRotationMock.mockReturnValue({ segments: {}, vertices: {} });
+    getRenderedVectorNodeMock.mockReset();
+    getRenderedVectorNodeMock.mockImplementation((n: TVectorNode) => n);
     deriveVectorFacesMock.mockReset();
     drawVectorHatchFillMock.mockClear();
   });
@@ -109,14 +110,13 @@ describe('drawVectorFaceSelectHoverPreview', () => {
     expect(drawVectorHatchFillMock).not.toHaveBeenCalled();
   });
 
-  it('should bake the node’s rotation into a new segments/vertices set before deriving faces when the hovered node is rotated', () => {
+  it('should derive faces from whatever getRenderedVectorNode returns for the hovered node, not the raw node itself', () => {
     // mock
     const rotatedNode: TVectorNode = { ...node, rotation: 45 };
     const rotatedNodes: Record<string, TSceneNode> = { [rotatedNode.id]: rotatedNode };
-    const bakedSegments = { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } };
-    const bakedVertices = { a: { id: 'a', x: 1, y: 2 } };
+    const renderedNode: TVectorNode = { ...rotatedNode, rotation: 0 };
 
-    bakeVectorNodeRotationMock.mockReturnValue({ rotation: 0, segments: bakedSegments, vertices: bakedVertices });
+    getRenderedVectorNodeMock.mockReturnValue(renderedNode);
     deriveVectorFacesMock.mockReturnValue([]);
 
     // before
@@ -132,7 +132,7 @@ describe('drawVectorFaceSelectHoverPreview', () => {
     );
 
     // result
-    expect(bakeVectorNodeRotationMock).toHaveBeenCalledWith(rotatedNode);
-    expect(deriveVectorFacesMock).toHaveBeenCalledWith({ ...rotatedNode, rotation: 0, segments: bakedSegments, vertices: bakedVertices });
+    expect(getRenderedVectorNodeMock).toHaveBeenCalledWith(rotatedNode);
+    expect(deriveVectorFacesMock).toHaveBeenCalledWith(renderedNode);
   });
 });

@@ -2,12 +2,12 @@
 import { TVectorNode, TViewport } from 'types/design/types';
 
 // utils
-import { bakeVectorNodeRotation } from 'components/Design/Canvas/utils/bakeVectorNodeRotation';
 import { drawVectorFill } from './drawVectorFill';
 import { drawVectorRoundedCaps } from './drawVectorRoundedCaps';
 import { drawVectorStroke } from './drawVectorStroke';
 import { drawVectorVariableStroke } from './drawVectorVariableStroke';
 import { flattenVectorSegments } from '../vectorNetwork/flattenVectorSegments';
+import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
 import { groupFilledFacesByColor } from './groupFilledFacesByColor';
 
 export const drawVectorNode = (
@@ -19,7 +19,7 @@ export const drawVectorNode = (
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  const renderedNode: TVectorNode = node.rotation ? { ...node, ...bakeVectorNodeRotation(node) } : node;
+  const renderedNode = getRenderedVectorNode(node);
 
   groupFilledFacesByColor(renderedNode).forEach((faces, color) => {
     drawVectorFill(gl, program, buffer, faces, color, canvasWidth, canvasHeight, viewport);

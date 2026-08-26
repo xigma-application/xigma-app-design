@@ -6,11 +6,11 @@ import { TSceneNode, TVectorNode } from 'types/design/types';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { drawVectorWidthPointsForNode } from '../drawVectorWidthPointsForNode';
 
-const bakeVectorNodeRotationMock = vi.fn();
+const getRenderedVectorNodeMock = vi.fn();
 const drawWidthPointHandlesMock = vi.fn();
 
-vi.mock('components/Design/Canvas/utils/bakeVectorNodeRotation', () => ({
-  bakeVectorNodeRotation: (...args: unknown[]): unknown => bakeVectorNodeRotationMock(...args),
+vi.mock('components/Design/Canvas/utils/getRenderedVectorNode', () => ({
+  getRenderedVectorNode: (...args: unknown[]): unknown => getRenderedVectorNodeMock(...args),
 }));
 vi.mock('../drawWidthPointHandles', () => ({
   drawWidthPointHandles: (...args: unknown[]): void => drawWidthPointHandlesMock(...args),
@@ -39,7 +39,8 @@ const buildNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
 
 describe('drawVectorWidthPointsForNode', () => {
   beforeEach(() => {
-    bakeVectorNodeRotationMock.mockImplementation((node: TVectorNode) => ({ segments: node.segments, vertices: node.vertices }));
+    getRenderedVectorNodeMock.mockReset();
+    getRenderedVectorNodeMock.mockImplementation((node: TVectorNode) => node);
     drawWidthPointHandlesMock.mockClear();
   });
 
@@ -151,6 +152,38 @@ describe('drawVectorWidthPointsForNode', () => {
 
     // result
     expect(drawWidthPointHandlesMock).not.toHaveBeenCalled();
+  });
+
+  it('should walk the chain order from whatever getRenderedVectorNode returns for the node, not the raw node itself', () => {
+    // mock
+    const rotatedNode = buildNode({
+      rotation: 45,
+      widthProfile: { points: { p1: { id: 'p1', leftOffset: 4, position: 0.2, rightOffset: 4 } } },
+    });
+    const nodes: Record<string, TSceneNode> = { [rotatedNode.id]: rotatedNode };
+    const renderedNode: TVectorNode = { ...rotatedNode, rotation: 0 };
+
+    getRenderedVectorNodeMock.mockReturnValue(renderedNode);
+
+    // before
+    drawVectorWidthPointsForNode(gl, program, buffer, nodes, rotatedNode.id, createCanvasRefs(), 200, 150, IDENTITY_VIEWPORT);
+
+    // result
+    expect(getRenderedVectorNodeMock).toHaveBeenCalledWith(rotatedNode);
+    expect(drawWidthPointHandlesMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      renderedNode,
+      expect.anything(),
+      rotatedNode.widthProfile?.points.p1,
+      false,
+      false,
+      false,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
   });
 
   it('should draw nothing when the baked node is not a valid non-branching chain', () => {

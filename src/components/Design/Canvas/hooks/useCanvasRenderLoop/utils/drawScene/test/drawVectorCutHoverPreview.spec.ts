@@ -5,13 +5,13 @@ import { TSceneNode, TVectorNode } from 'types/design/types';
 // utils
 import { drawVectorCutHoverPreview } from '../drawVectorCutHoverPreview';
 
-const bakeVectorNodeRotationMock = vi.fn();
+const getRenderedVectorNodeMock = vi.fn();
 const flattenVectorSegmentsMock = vi.fn();
 const drawVectorStrokeMock = vi.fn();
 const drawVectorCutPointMarkerMock = vi.fn();
 
-vi.mock('components/Design/Canvas/utils/bakeVectorNodeRotation', () => ({
-  bakeVectorNodeRotation: (...args: unknown[]): unknown => bakeVectorNodeRotationMock(...args),
+vi.mock('components/Design/Canvas/utils/getRenderedVectorNode', () => ({
+  getRenderedVectorNode: (...args: unknown[]): unknown => getRenderedVectorNodeMock(...args),
 }));
 vi.mock('utils/canvas/vectorNetwork/flattenVectorSegments', () => ({
   flattenVectorSegments: (...args: unknown[]): unknown => flattenVectorSegmentsMock(...args),
@@ -47,7 +47,8 @@ const nodes: Record<string, TSceneNode> = { [node.id]: node };
 
 describe('drawVectorCutHoverPreview', () => {
   beforeEach(() => {
-    bakeVectorNodeRotationMock.mockReturnValue({ segments: {}, vertices: {} });
+    getRenderedVectorNodeMock.mockReset();
+    getRenderedVectorNodeMock.mockImplementation((n: TVectorNode) => n);
     flattenVectorSegmentsMock.mockReset();
     drawVectorStrokeMock.mockClear();
     drawVectorCutPointMarkerMock.mockClear();
@@ -162,5 +163,22 @@ describe('drawVectorCutHoverPreview', () => {
 
     // result
     expect(drawVectorStrokeMock).not.toHaveBeenCalled();
+  });
+
+  it('should flatten whatever getRenderedVectorNode returns for the hovered node, not the raw node itself', () => {
+    // mock
+    const rotatedNode: TVectorNode = { ...node, rotation: 45 };
+    const rotatedNodes: Record<string, TSceneNode> = { [rotatedNode.id]: rotatedNode };
+    const renderedNode: TVectorNode = { ...rotatedNode, rotation: 0 };
+
+    getRenderedVectorNodeMock.mockReturnValue(renderedNode);
+    flattenVectorSegmentsMock.mockReturnValue([]);
+
+    // before
+    drawVectorCutHoverPreview(gl, program, buffer, rotatedNodes, { nodeId: rotatedNode.id, segmentId: 's1' }, null, 200, 150, IDENTITY_VIEWPORT);
+
+    // result
+    expect(getRenderedVectorNodeMock).toHaveBeenCalledWith(rotatedNode);
+    expect(flattenVectorSegmentsMock).toHaveBeenCalledWith(renderedNode);
   });
 });

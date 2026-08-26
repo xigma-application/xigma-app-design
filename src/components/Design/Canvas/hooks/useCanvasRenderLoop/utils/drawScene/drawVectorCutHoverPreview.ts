@@ -7,10 +7,10 @@ import { TSceneNode, TViewport } from 'types/design/types';
 import { TVectorCutSegmentHover } from 'types/design/canvas/types';
 
 // utils
-import { bakeVectorNodeRotation } from 'components/Design/Canvas/utils/bakeVectorNodeRotation';
 import { drawVectorCutPointMarker } from './drawVectorCutPointMarker';
 import { drawVectorStroke } from 'utils/canvas/drawVectorNode/drawVectorStroke';
 import { flattenVectorSegments } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
+import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
 import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';
 
 export const drawVectorCutHoverPreview = (
@@ -27,7 +27,7 @@ export const drawVectorCutHoverPreview = (
   const node = hoveredSegment ? getVectorEditingNode(nodes, hoveredSegment.nodeId) : null;
 
   if (node && hoveredSegment) {
-    const bakedNode = { ...node, ...bakeVectorNodeRotation(node) };
+    const bakedNode = getRenderedVectorNode(node);
     const segment = flattenVectorSegments(bakedNode).find((candidate) => candidate.segmentId === hoveredSegment.segmentId);
 
     if (segment) {

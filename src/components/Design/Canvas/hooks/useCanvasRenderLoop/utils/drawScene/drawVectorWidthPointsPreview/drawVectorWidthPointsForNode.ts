@@ -3,9 +3,9 @@ import { TSceneNode, TViewport } from 'types/design/types';
 import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
-import { bakeVectorNodeRotation } from 'components/Design/Canvas/utils/bakeVectorNodeRotation';
 import { drawWidthPointHandles } from './drawWidthPointHandles';
 import { getPreviewWidthPoints } from './getPreviewWidthPoints';
+import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
 import { getVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder';
 import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';
 import { isVectorWidthHandleSelected } from './isVectorWidthHandleSelected';
@@ -22,7 +22,7 @@ export const drawVectorWidthPointsForNode = (
   viewport: TViewport,
 ): void => {
   const node = getVectorEditingNode(nodes, nodeId);
-  const bakedNode = node && { ...node, ...bakeVectorNodeRotation(node) };
+  const bakedNode = node && getRenderedVectorNode(node);
   const chainOrder = bakedNode && getVectorChainOrder(bakedNode);
 
   if (node && bakedNode && chainOrder) {

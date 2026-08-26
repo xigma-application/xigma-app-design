@@ -5,8 +5,8 @@ import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
-import { bakeVectorNodeRotation } from 'components/Design/Canvas/utils/bakeVectorNodeRotation';
 import { drawVectorHatchFill } from 'utils/canvas/drawVectorNode/drawVectorHatchFill';
+import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
 import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';
 import { getVectorFullySelectedFaces } from 'utils/canvas/vectorNetwork/getVectorFullySelectedFaces';
 
@@ -26,7 +26,7 @@ export const drawVectorSelectedFillPreview = (
       const node = getVectorEditingNode(nodes, nodeId);
 
       if (node) {
-        const bakedNode = node.rotation ? { ...node, ...bakeVectorNodeRotation(node) } : node;
+        const bakedNode = getRenderedVectorNode(node);
         return getVectorFullySelectedFaces(bakedNode, selectedVertexIds).map((face) => face.points);
       }
 
