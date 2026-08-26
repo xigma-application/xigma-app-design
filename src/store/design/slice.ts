@@ -18,7 +18,6 @@ import { TPoint } from 'types/canvas';
 import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/design/types';
 
 // utils
-import { generateStressTestVectorGrid } from '../../../scripts/generateStressTestVectorGrid';
 import { handleAddComment } from './utils/handleAddComment';
 import { handleAddNode } from './utils/handleAddNode';
 import { handleDeleteNode } from './utils/handleDeleteNode';
@@ -34,8 +33,6 @@ import { handleUpdateEditingTextBoxPathStartOffset } from './utils/handleUpdateE
 import { handleUpdateNode } from './utils/handleUpdateNode';
 import { handleUpdateTextEditContent } from './utils/handleUpdateTextEditContent';
 import { handleUpdateTextEditSelection } from './utils/handleUpdateTextEditSelection';
-
-const stressTestNode = generateStressTestVectorGrid(3000);
 
 const initialState: TDesignState = {
   activeTool: DEFAULT_TOOL,
@@ -53,9 +50,9 @@ const initialState: TDesignState = {
   lastPenTool: DEFAULT_PEN_TOOL,
   lastShapeTool: DEFAULT_SHAPE_TOOL,
   lastTextTool: DEFAULT_TEXT_TOOL,
-  nodes: { [stressTestNode.id]: stressTestNode },
+  nodes: {},
   penActiveVertexId: null,
-  rootOrder: [stressTestNode.id],
+  rootOrder: [],
   selectedIds: [],
   vectorEditingNodeIds: [],
   viewport: DEFAULT_VIEWPORT,
