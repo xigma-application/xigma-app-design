@@ -11,6 +11,7 @@ import { TDragState } from 'types/design/selectionTool/types';
 // utils
 import { getGeometryDeltaChanges } from '../../../../utils/getGeometryDeltaChanges';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { scheduleThrottledDispatch } from 'components/Design/Canvas/utils/scheduleThrottledDispatch';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 
 export const continueDrag = (
@@ -27,8 +28,10 @@ export const continueDrag = (
     const deltaY = point.y - dragState.pointerStart.y;
 
     dragState.hasMoved = true;
-    Object.entries(dragState.nodeOrigins).forEach(([id, origin]) => {
-      dispatch(updateNode({ changes: getGeometryDeltaChanges(origin, deltaX, deltaY), id }));
-    });
+    scheduleThrottledDispatch(dragState.dispatchThrottle, () =>
+      Object.entries(dragState.nodeOrigins).forEach(([id, origin]) => {
+        dispatch(updateNode({ changes: getGeometryDeltaChanges(origin, deltaX, deltaY), id }));
+      }),
+    );
   }
 };

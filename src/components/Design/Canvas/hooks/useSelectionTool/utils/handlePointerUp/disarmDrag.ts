@@ -7,6 +7,9 @@ import { AppDispatch } from 'store';
 // types
 import { TDragState } from 'types/design/selectionTool/types';
 
+// utils
+import { flushThrottledDispatch } from 'components/Design/Canvas/utils/flushThrottledDispatch';
+
 export const disarmDrag = (
   canvas: HTMLCanvasElement,
   event: PointerEvent,
@@ -16,6 +19,8 @@ export const disarmDrag = (
   const dragState = dragStateRef.current;
 
   if (dragState) {
+    flushThrottledDispatch(dragState.dispatchThrottle);
+
     const { hasMoved, pendingClickAction } = dragState;
 
     if (pendingClickAction?.kind === 'collapse' && !hasMoved) {

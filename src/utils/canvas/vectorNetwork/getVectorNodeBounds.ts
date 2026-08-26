@@ -18,10 +18,15 @@ export const getVectorNodeBounds = (node: TVectorNodeOrigin): TDraftRect => {
     return { height: 0, width: 0, x: 0, y: 0 };
   }
 
-  const xs = points.map((point) => point.x);
-  const ys = points.map((point) => point.y);
-  const minX = Math.min(...xs);
-  const minY = Math.min(...ys);
+  const bounds = points.reduce(
+    (accumulator, point) => ({
+      maxX: Math.max(accumulator.maxX, point.x),
+      maxY: Math.max(accumulator.maxY, point.y),
+      minX: Math.min(accumulator.minX, point.x),
+      minY: Math.min(accumulator.minY, point.y),
+    }),
+    { maxX: points[0].x, maxY: points[0].y, minX: points[0].x, minY: points[0].y },
+  );
 
-  return { height: Math.max(...ys) - minY, width: Math.max(...xs) - minX, x: minX, y: minY };
+  return { height: bounds.maxY - bounds.minY, width: bounds.maxX - bounds.minX, x: bounds.minX, y: bounds.minY };
 };

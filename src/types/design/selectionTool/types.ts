@@ -23,6 +23,7 @@ export type TResizeNodeOrigin =
   | TVectorResizeOrigin;
 
 export type TDragState = {
+  dispatchThrottle: TThrottledDispatchState;
   hasMoved: boolean;
   nodeOrigins: Record<string, TNodeOrigin>;
   pendingClickAction: TPendingClickAction | null;

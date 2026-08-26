@@ -8,8 +8,7 @@ import { drawVectorRoundedCaps } from './drawVectorRoundedCaps';
 import { drawVectorStroke } from './drawVectorStroke';
 import { drawVectorVariableStroke } from './drawVectorVariableStroke';
 import { flattenVectorSegments } from '../vectorNetwork/flattenVectorSegments';
-import { getVectorFillColorForLoopKey } from '../vectorNetwork/getVectorFillColorForLoopKey';
-import { getVectorFillLoopPoints } from '../vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints';
+import { groupFilledFacesByColor } from './groupFilledFacesByColor';
 
 export const drawVectorNode = (
   gl: WebGL2RenderingContext,
@@ -22,12 +21,8 @@ export const drawVectorNode = (
 ): void => {
   const renderedNode: TVectorNode = node.rotation ? { ...node, ...bakeVectorNodeRotation(node) } : node;
 
-  renderedNode.filledFaceKeys.forEach((key) => {
-    const points = getVectorFillLoopPoints(renderedNode, key);
-
-    if (points) {
-      drawVectorFill(gl, program, buffer, [points], getVectorFillColorForLoopKey(key), canvasWidth, canvasHeight, viewport);
-    }
+  groupFilledFacesByColor(renderedNode).forEach((faces, color) => {
+    drawVectorFill(gl, program, buffer, faces, color, canvasWidth, canvasHeight, viewport);
   });
 
   if (renderedNode.widthProfile) {

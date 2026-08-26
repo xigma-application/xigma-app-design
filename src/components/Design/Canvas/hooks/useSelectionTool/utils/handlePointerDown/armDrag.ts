@@ -20,6 +20,7 @@ export const armDrag = (
   const { nodes } = store.getState().design;
 
   dragStateRef.current = {
+    dispatchThrottle: { frameId: null, run: null },
     hasMoved: false,
     nodeOrigins: Object.fromEntries(
       armIds.map((id) => {
