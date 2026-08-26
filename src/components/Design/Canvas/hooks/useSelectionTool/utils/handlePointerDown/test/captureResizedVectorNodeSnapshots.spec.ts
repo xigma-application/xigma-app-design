@@ -57,10 +57,10 @@ describe('captureResizedVectorNodeSnapshots', () => {
     captureResizedVectorNodeSnapshots([node], canvasRefs);
 
     // result
-    expect(canvasRefs.resizedVectorNodeSnapshotsRef.current?.get('vector-1')).toEqual(captureVectorNodeResizeSnapshot(node));
+    expect(canvasRefs.resizedVectorNodeSnapshotsRef.current?.get('vector-1')).toEqual(captureVectorNodeResizeSnapshot(node, 0));
   });
 
-  it('should skip a single selected vector node that carries a live rotation — the anchor-correction math it needs isn’t supported by the fast path', () => {
+  it('should capture a single selected vector node that carries a live rotation, passing its rotation through for the anchor-correction fast path', () => {
     // mock
     const canvasRefs = createCanvasRefs();
     const node = buildVectorNode({ rotation: 45 });
@@ -69,10 +69,10 @@ describe('captureResizedVectorNodeSnapshots', () => {
     captureResizedVectorNodeSnapshots([node], canvasRefs);
 
     // result
-    expect(canvasRefs.resizedVectorNodeSnapshotsRef.current).toBeNull();
+    expect(canvasRefs.resizedVectorNodeSnapshotsRef.current?.get('vector-1')).toEqual(captureVectorNodeResizeSnapshot(node, 45));
   });
 
-  it('should still capture a rotated vector node when it’s part of a multi-node selection, since group resize never applies the rotation anchor correction', () => {
+  it('should capture a rotated vector node as part of a multi-node selection with rotation zeroed, since group resize never applies the rotation anchor correction', () => {
     // mock
     const canvasRefs = createCanvasRefs();
     const rotatedNode = buildVectorNode({ id: 'vector-1', rotation: 45 });
@@ -82,7 +82,7 @@ describe('captureResizedVectorNodeSnapshots', () => {
     captureResizedVectorNodeSnapshots([rotatedNode, otherNode], canvasRefs);
 
     // result
-    expect(canvasRefs.resizedVectorNodeSnapshotsRef.current?.has('vector-1')).toBe(true);
+    expect(canvasRefs.resizedVectorNodeSnapshotsRef.current?.get('vector-1')?.rotation).toBe(0);
     expect(canvasRefs.resizedVectorNodeSnapshotsRef.current?.has('vector-2')).toBe(true);
   });
 

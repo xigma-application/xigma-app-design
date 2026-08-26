@@ -141,8 +141,11 @@ export type TVectorNodeResizeSnapshot = {
   anchorY: number | null;
   facesByColor: { color: string; points: TPoint[][] }[];
   flattenedSegments: TFlattenedVectorSegment[];
+  pivot: TPoint;
+  rotation: number;
   scaleX: number;
   scaleY: number;
+  scaledCenter: TPoint;
   strokeColor: string;
   strokeWidth: number;
 };

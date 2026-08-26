@@ -47,8 +47,11 @@ describe('drawVectorNodeResizeSnapshot', () => {
         { color: '#00ff00', points: [[{ x: 5, y: 5 }]] },
       ],
       flattenedSegments: [],
+      pivot: { x: 0, y: 0 },
+      rotation: 0,
       scaleX: 2,
       scaleY: 0.5,
+      scaledCenter: { x: 0, y: 0 },
       strokeColor: '#0d99ff',
       strokeWidth: 4,
     };
@@ -94,8 +97,11 @@ describe('drawVectorNodeResizeSnapshot', () => {
       anchorY: 0,
       facesByColor: [{ color: '#ff0000', points: [[{ x: 10, y: 20 }]] }],
       flattenedSegments: [],
+      pivot: { x: 0, y: 0 },
+      rotation: 0,
       scaleX: 3,
       scaleY: 2,
+      scaledCenter: { x: 0, y: 0 },
       strokeColor: '#0d99ff',
       strokeWidth: 4,
     };
@@ -124,8 +130,11 @@ describe('drawVectorNodeResizeSnapshot', () => {
           startId: 'v1',
         },
       ],
+      pivot: { x: 0, y: 0 },
+      rotation: 0,
       scaleX: 2,
       scaleY: 1,
+      scaledCenter: { x: 0, y: 0 },
       strokeColor: '#0d99ff',
       strokeWidth: 4,
     };
@@ -160,5 +169,29 @@ describe('drawVectorNodeResizeSnapshot', () => {
       150,
       IDENTITY_VIEWPORT,
     );
+  });
+
+  it('should scale, re-center on the scaled bounds, then rotate around the solved pivot for a rotated snapshot', () => {
+    // mock — a point at the anchor-scaled origin (0,0), whose scaled bounds are centered on (10,10);
+    // rotating 90deg around a pivot at (100,50) should land it at (100+10, 50-10) = (110, 40)
+    const snapshot: TVectorNodeResizeSnapshot = {
+      anchorX: 0,
+      anchorY: 0,
+      facesByColor: [{ color: '#ff0000', points: [[{ x: 0, y: 0 }]] }],
+      flattenedSegments: [],
+      pivot: { x: 100, y: 50 },
+      rotation: 90,
+      scaleX: 1,
+      scaleY: 1,
+      scaledCenter: { x: 10, y: 10 },
+      strokeColor: '#0d99ff',
+      strokeWidth: 4,
+    };
+
+    // before
+    drawVectorNodeResizeSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT);
+
+    // result
+    expect(drawVectorFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 110, y: 40 }]], '#ff0000', 200, 150, IDENTITY_VIEWPORT);
   });
 });

@@ -635,8 +635,11 @@ describe('continueResizeDrag', () => {
       anchorY: null,
       facesByColor: [],
       flattenedSegments: [],
+      pivot: { x: 0, y: 0 },
+      rotation: 0,
       scaleX: 1,
       scaleY: 1,
+      scaledCenter: { x: 0, y: 0 },
       strokeColor: '#000000',
       strokeWidth: 1,
     });
@@ -703,6 +706,40 @@ describe('continueResizeDrag', () => {
 
       // result
       expect(canvasRefs.resizedNodeIdsRef.current).toBe(existingSet);
+    });
+
+    it('should update a snapshotted SINGLE ROTATED vector node’s pivot/scaledCenter (not just anchor/scale) via the rotated-anchor solver, without touching the store', () => {
+      // mock — same 100x50, 90deg, "e"-handle scenario as the dispatch-path rotated-vector test above
+      const idA = addVectorNode(0, 0, 100, 50, 90);
+      const canvas = createCanvas();
+      const resizeDragRef = createResizeDragRef({
+        aspectRatio: 1,
+        bounds: { height: 50, width: 100, x: 0, y: 0 },
+        handle: 'e',
+        nodeOrigins: {
+          [idA]: {
+            rotation: 90,
+            segments: {},
+            vertices: { v1: { x: 0, y: 0 }, v2: { x: 100, y: 0 }, v3: { x: 100, y: 50 }, v4: { x: 0, y: 50 } },
+          },
+        },
+      });
+      const canvasRefs = createCanvasRefs();
+      const snapshot = buildSnapshot();
+
+      snapshot.rotation = 90;
+      canvasRefs.resizedVectorNodeSnapshotsRef.current = new Map([[idA, snapshot]]);
+
+      const nodeBefore = store.getState().design.nodes[idA];
+
+      // before
+      continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef, canvasRefs);
+
+      // result — the store node is untouched, but the rotated-anchor solver ran and moved the
+      // snapshot's pivot/scaledCenter away from their identity-scale capture-time defaults
+      expect(store.getState().design.nodes[idA]).toBe(nodeBefore);
+      expect(snapshot.pivot).not.toEqual({ x: 0, y: 0 });
+      expect(snapshot.scaledCenter).not.toEqual({ x: 0, y: 0 });
     });
 
     it('should still dispatch normally for a non-snapshotted node in the same resize gesture as a snapshotted one', () => {

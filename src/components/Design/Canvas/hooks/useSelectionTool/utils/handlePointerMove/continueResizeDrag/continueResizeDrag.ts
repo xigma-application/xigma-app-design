@@ -53,8 +53,8 @@ export const continueResizeDrag = (
     originEntries.forEach(([id, origin]) => {
       const snapshot = snapshots?.get(id);
 
-      if (snapshot) {
-        updateResizedVectorNodeSnapshot(snapshot, anchors, scaleX, scaleY);
+      if (snapshot && 'vertices' in origin) {
+        updateResizedVectorNodeSnapshot(snapshot, origin, anchors, scaleX, scaleY, rotatedAnchorSolver);
       } else {
         resizeNode(id, origin, dispatch, anchors, scaleX, scaleY, Boolean(singleRotatableOrigin), rotatedAnchorSolver);
       }

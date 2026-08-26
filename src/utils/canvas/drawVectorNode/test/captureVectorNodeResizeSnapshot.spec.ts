@@ -47,7 +47,7 @@ describe('captureVectorNodeResizeSnapshot', () => {
     flattenVectorSegmentsMock.mockReturnValue(flattened);
 
     // before
-    const snapshot = captureVectorNodeResizeSnapshot(baseNode);
+    const snapshot = captureVectorNodeResizeSnapshot(baseNode, 0);
 
     // result
     expect(groupFilledFacesByColorMock).toHaveBeenCalledWith(baseNode);
@@ -57,10 +57,30 @@ describe('captureVectorNodeResizeSnapshot', () => {
       anchorY: null,
       facesByColor: [{ color: '#ff0000', points }],
       flattenedSegments: flattened,
+      pivot: { x: 0, y: 0 },
+      rotation: 0,
       scaleX: 1,
       scaleY: 1,
+      scaledCenter: { x: 0, y: 0 },
       strokeColor: '#00ff00',
       strokeWidth: 4,
     });
+  });
+
+  it('should capture the given rotation and seed pivot/scaledCenter from the node’s own bounds center', () => {
+    // mock
+    const node: TVectorNode = {
+      ...baseNode,
+      vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 50 } },
+    };
+
+    // before
+    const snapshot = captureVectorNodeResizeSnapshot(node, 45);
+
+    // result — bounds center of (0,0)-(100,50) is (50,25), used to seed both pivot and scaledCenter
+    // so the very first render frame (before any pointermove updates them) matches the live bake exactly
+    expect(snapshot.rotation).toBe(45);
+    expect(snapshot.pivot).toEqual({ x: 50, y: 25 });
+    expect(snapshot.scaledCenter).toEqual({ x: 50, y: 25 });
   });
 });

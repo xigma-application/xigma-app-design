@@ -4,6 +4,7 @@ import { TVectorNodeOrigin } from 'types/design/selectionTool/types';
 import { TVectorSegment, TVectorVertex } from 'types/design/types';
 
 // utils
+import { getRotatedResizePivot } from './getRotatedResizePivot';
 import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBounds';
 
 export const getAnchorCorrectionDelta = (
@@ -15,10 +16,7 @@ export const getAnchorCorrectionDelta = (
   rotatedAnchorSolver: (width: number, height: number) => TPoint,
 ): TPoint => {
   const originBounds = getVectorNodeBounds(origin);
-  const newWidth = originBounds.width * Math.abs(scaleX);
-  const newHeight = originBounds.height * Math.abs(scaleY);
-  const solvedPosition = rotatedAnchorSolver(newWidth, newHeight);
-  const newCenter = { x: solvedPosition.x + newWidth / 2, y: solvedPosition.y + newHeight / 2 };
+  const newCenter = getRotatedResizePivot(originBounds, scaleX, scaleY, rotatedAnchorSolver);
   const scaledBounds = getVectorNodeBounds({ segments: scaledSegments, vertices: scaledVertices });
   const scaledCenter = { x: scaledBounds.x + scaledBounds.width / 2, y: scaledBounds.y + scaledBounds.height / 2 };
 

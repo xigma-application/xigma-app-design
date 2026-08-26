@@ -7,14 +7,25 @@ import { TVectorNodeResizeSnapshot } from 'types/design/canvas/types';
 import { drawVectorFill } from './drawVectorFill';
 import { drawVectorThickStrokeVertices } from './drawVectorThickStrokeVertices';
 import { getThickVectorPathVertices } from '../vectorNetwork/getThickVectorPathVertices/getThickVectorPathVertices';
+import { rotatePoint } from 'utils/math/rotatePoint';
 
 const scaleAxis = (value: number, anchor: number | null, scale: number): number =>
   anchor === null ? value : anchor + (value - anchor) * scale;
 
-const scalePoint = (point: TPoint, snapshot: TVectorNodeResizeSnapshot): TPoint => ({
-  x: scaleAxis(point.x, snapshot.anchorX, snapshot.scaleX),
-  y: scaleAxis(point.y, snapshot.anchorY, snapshot.scaleY),
-});
+const scalePoint = (point: TPoint, snapshot: TVectorNodeResizeSnapshot): TPoint => {
+  const scaled = { x: scaleAxis(point.x, snapshot.anchorX, snapshot.scaleX), y: scaleAxis(point.y, snapshot.anchorY, snapshot.scaleY) };
+
+  if (!snapshot.rotation) {
+    return scaled;
+  }
+
+  const shifted = {
+    x: scaled.x - snapshot.scaledCenter.x + snapshot.pivot.x,
+    y: scaled.y - snapshot.scaledCenter.y + snapshot.pivot.y,
+  };
+
+  return rotatePoint(shifted, snapshot.pivot, snapshot.rotation);
+};
 
 export const drawVectorNodeResizeSnapshot = (
   gl: WebGL2RenderingContext,

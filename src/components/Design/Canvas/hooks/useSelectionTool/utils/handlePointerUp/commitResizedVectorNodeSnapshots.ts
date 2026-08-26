@@ -1,5 +1,4 @@
 // store
-import { updateNode } from 'store/design/slice';
 import { AppDispatch } from 'store';
 
 // types
@@ -7,8 +6,8 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TResizeDragState } from 'types/design/selectionTool/types';
 
 // utils
-import { resizeVectorSegments } from '../handlePointerMove/continueResizeDrag/resizeNode/resizeVectorNode/resizeVectorSegments';
-import { resizeVectorVertices } from '../handlePointerMove/continueResizeDrag/resizeNode/resizeVectorNode/resizeVectorVertices';
+import { getRotatedAnchorSolver } from '../handlePointerMove/continueResizeDrag/getRotatedAnchorSolver';
+import { resizeVectorNode } from '../handlePointerMove/continueResizeDrag/resizeNode/resizeVectorNode/resizeVectorNode';
 
 export const commitResizedVectorNodeSnapshots = (
   dispatch: AppDispatch,
@@ -18,20 +17,26 @@ export const commitResizedVectorNodeSnapshots = (
   const snapshots = canvasRefs.resizedVectorNodeSnapshotsRef.current;
 
   if (snapshots) {
+    const isSingleNodeResize = Object.keys(resizeDragState.nodeOrigins).length === 1;
+
     snapshots.forEach((snapshot, id) => {
       const origin = resizeDragState.nodeOrigins[id];
 
       if (origin && 'vertices' in origin) {
-        const segments = resizeVectorSegments(origin.segments, snapshot.scaleX, snapshot.scaleY);
-        const vertices = resizeVectorVertices(
-          origin.vertices,
+        const rotatedAnchorSolver =
+          isSingleNodeResize && origin.rotation
+            ? getRotatedAnchorSolver(resizeDragState.bounds, resizeDragState.handle, origin.rotation, snapshot.scaleX, snapshot.scaleY)
+            : null;
+
+        resizeVectorNode(
+          id,
+          origin,
+          dispatch,
           { x: snapshot.anchorX, y: snapshot.anchorY },
           snapshot.scaleX,
           snapshot.scaleY,
-          true,
+          rotatedAnchorSolver,
         );
-
-        dispatch(updateNode({ changes: { segments, vertices }, id }));
       }
     });
 
