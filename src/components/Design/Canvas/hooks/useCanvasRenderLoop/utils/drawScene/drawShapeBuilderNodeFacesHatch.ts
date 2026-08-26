@@ -18,7 +18,7 @@ export const drawShapeBuilderNodeFacesHatch = (
   viewport: TViewport,
 ): void => {
   if (node && faceKeys) {
-    const bakedNode = { ...node, ...bakeVectorNodeRotation(node) };
+    const bakedNode: TVectorNode = node.rotation ? { ...node, ...bakeVectorNodeRotation(node) } : node;
     const faces = deriveVectorFaces(bakedNode).filter((face) => faceKeys.has(face.key));
 
     faces.forEach((face) => drawVectorHatchFill(gl, program, buffer, [face.points], color, canvasWidth, canvasHeight, viewport));

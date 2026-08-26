@@ -2,7 +2,7 @@
 import { DRAFT_FRAME_STROKE, VECTOR_EDGE_HOVER_STROKE } from 'constant/canvas';
 
 // types
-import { TSceneNode, TViewport } from 'types/design/types';
+import { TSceneNode, TVectorNode, TViewport } from 'types/design/types';
 import { TVectorPaintFaceHover } from 'types/design/canvas/types';
 
 // utils
@@ -24,7 +24,7 @@ export const drawVectorPaintHoverPreview = (
   const node = hoveredFace ? getVectorEditingNode(nodes, hoveredFace.nodeId) : null;
 
   if (node && hoveredFace) {
-    const bakedNode = { ...node, ...bakeVectorNodeRotation(node) };
+    const bakedNode: TVectorNode = node.rotation ? { ...node, ...bakeVectorNodeRotation(node) } : node;
     const face = deriveVectorFaces(bakedNode).find((candidate) => candidate.key === hoveredFace.faceKey);
 
     if (face) {

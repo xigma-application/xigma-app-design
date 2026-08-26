@@ -2,7 +2,7 @@
 import { VECTOR_EDGE_HOVER_STROKE } from 'constant/canvas';
 
 // types
-import { TSceneNode, TViewport } from 'types/design/types';
+import { TSceneNode, TVectorNode, TViewport } from 'types/design/types';
 import { TVectorDraggedFillFaces } from 'types/design/canvas/types';
 
 // utils
@@ -27,7 +27,7 @@ export const drawVectorDraggedFillPreview = (
 
       if (!node) return [];
 
-      const bakedNode = { ...node, ...bakeVectorNodeRotation(node) };
+      const bakedNode: TVectorNode = node.rotation ? { ...node, ...bakeVectorNodeRotation(node) } : node;
 
       return deriveVectorFaces(bakedNode)
         .filter((face) => faceKeys.includes(face.key))
