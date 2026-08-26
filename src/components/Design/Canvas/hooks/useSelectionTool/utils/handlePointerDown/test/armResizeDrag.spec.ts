@@ -7,6 +7,7 @@ import { TResizeDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { armResizeDrag } from '../armResizeDrag';
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -68,7 +69,7 @@ describe('armResizeDrag', () => {
     const node = frame('a', 0, 0, 100, 50);
 
     // before
-    armResizeDrag(canvas, pointerEvent(3), resizeDragRef, [node], 'se', { height: 50, width: 100, x: 0, y: 0 });
+    armResizeDrag(canvas, pointerEvent(3), resizeDragRef, [node], 'se', { height: 50, width: 100, x: 0, y: 0 }, createCanvasRefs());
 
     // result
     expect(resizeDragRef.current).toEqual({
@@ -86,7 +87,7 @@ describe('armResizeDrag', () => {
     const resizeDragRef = createResizeDragRef();
 
     // before
-    armResizeDrag(canvas, pointerEvent(), resizeDragRef, [line], 'e', { height: 100, width: 100, x: 0, y: 0 });
+    armResizeDrag(canvas, pointerEvent(), resizeDragRef, [line], 'e', { height: 100, width: 100, x: 0, y: 0 }, createCanvasRefs());
 
     // result
     expect(resizeDragRef.current?.nodeOrigins).toEqual({ 'line-1': { x1: 10, x2: 20, y1: 30, y2: 40 } });
@@ -98,7 +99,7 @@ describe('armResizeDrag', () => {
     const resizeDragRef = createResizeDragRef();
 
     // before
-    armResizeDrag(canvas, pointerEvent(), resizeDragRef, [vector], 'e', { height: 100, width: 100, x: 0, y: 0 });
+    armResizeDrag(canvas, pointerEvent(), resizeDragRef, [vector], 'e', { height: 100, width: 100, x: 0, y: 0 }, createCanvasRefs());
 
     // result
     expect(resizeDragRef.current?.nodeOrigins).toEqual({
@@ -117,7 +118,7 @@ describe('armResizeDrag', () => {
     const rotatedVector: TVectorNode = { ...vector, rotation: 30 };
 
     // before
-    armResizeDrag(canvas, pointerEvent(), resizeDragRef, [rotatedVector], 'e', { height: 100, width: 100, x: 0, y: 0 });
+    armResizeDrag(canvas, pointerEvent(), resizeDragRef, [rotatedVector], 'e', { height: 100, width: 100, x: 0, y: 0 }, createCanvasRefs());
 
     // result
     expect(resizeDragRef.current?.nodeOrigins).toMatchObject({ 'vector-1': { rotation: 30 } });
@@ -143,7 +144,7 @@ describe('armResizeDrag', () => {
     };
 
     // before
-    armResizeDrag(canvas, pointerEvent(), resizeDragRef, [media], 'se', { height: 50, width: 100, x: 0, y: 0 });
+    armResizeDrag(canvas, pointerEvent(), resizeDragRef, [media], 'se', { height: 50, width: 100, x: 0, y: 0 }, createCanvasRefs());
 
     // result
     expect(resizeDragRef.current?.nodeOrigins).toEqual({
@@ -169,7 +170,7 @@ describe('armResizeDrag', () => {
     };
 
     // before
-    armResizeDrag(canvas, pointerEvent(), resizeDragRef, [ellipse], 'se', { height: 50, width: 100, x: 0, y: 0 });
+    armResizeDrag(canvas, pointerEvent(), resizeDragRef, [ellipse], 'se', { height: 50, width: 100, x: 0, y: 0 }, createCanvasRefs());
 
     // result
     expect(resizeDragRef.current?.nodeOrigins).toEqual({
@@ -184,7 +185,7 @@ describe('armResizeDrag', () => {
     const node = frame('a', 0, 0, 100, 50, 30);
 
     // before
-    armResizeDrag(canvas, pointerEvent(), resizeDragRef, [node], 'se', { height: 50, width: 100, x: 0, y: 0 });
+    armResizeDrag(canvas, pointerEvent(), resizeDragRef, [node], 'se', { height: 50, width: 100, x: 0, y: 0 }, createCanvasRefs());
 
     // result
     expect(resizeDragRef.current?.nodeOrigins).toEqual({ a: { flip: null, height: 50, rotation: 30, width: 100, x: 0, y: 0 } });

@@ -40,6 +40,8 @@ export const createCanvasRefs = (overrides: Partial<TCanvasRefs> = {}): TCanvasR
   polygonCornerRadiusDragRef: { current: null },
   preVectorMarqueeSegmentIdsRef: { current: [] },
   preVectorMarqueeVertexIdsRef: { current: [] },
+  resizedNodeIdsRef: { current: null },
+  resizedVectorNodeSnapshotsRef: { current: null },
   rotateDragRef: { current: null },
   selectedVectorHandlesRef: { current: [] },
   selectedVectorSegmentIdsRef: { current: [] },

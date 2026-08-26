@@ -3,6 +3,7 @@ import { RefObject } from 'react';
 // types
 import { TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
 import { TDraftEntity, TVectorTangent, TVectorWidthPoint } from 'types/design/types';
+import { TFlattenedVectorSegment } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
 import { TPenDragOrigin } from 'components/Design/Canvas/hooks/useDrawPenTool/types';
 import { TVectorAlignmentGuide } from 'components/Design/Canvas/utils/applyVectorPointSnapping';
 import {
@@ -135,6 +136,17 @@ export type TVectorNodeDragSnapshot = {
   strokeVertices: number[];
 };
 
+export type TVectorNodeResizeSnapshot = {
+  anchorX: number | null;
+  anchorY: number | null;
+  facesByColor: { color: string; points: TPoint[][] }[];
+  flattenedSegments: TFlattenedVectorSegment[];
+  scaleX: number;
+  scaleY: number;
+  strokeColor: string;
+  strokeWidth: number;
+};
+
 export type TCanvasRefs = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>;
@@ -174,6 +186,8 @@ export type TCanvasRefs = {
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>;
   preVectorMarqueeSegmentIdsRef: RefObject<string[]>;
   preVectorMarqueeVertexIdsRef: RefObject<string[]>;
+  resizedNodeIdsRef: RefObject<Set<string> | null>;
+  resizedVectorNodeSnapshotsRef: RefObject<Map<string, TVectorNodeResizeSnapshot> | null>;
   rotateDragRef: RefObject<TRotateDragState | null>;
   selectedVectorHandlesRef: RefObject<TVectorHandleHover[]>;
   selectedVectorSegmentIdsRef: RefObject<string[]>;

@@ -46,6 +46,8 @@ describe('createCanvasRefs behaviors', () => {
       polygonCornerRadiusDragRef: { current: null },
       preVectorMarqueeSegmentIdsRef: { current: [] },
       preVectorMarqueeVertexIdsRef: { current: [] },
+      resizedNodeIdsRef: { current: null },
+      resizedVectorNodeSnapshotsRef: { current: null },
       rotateDragRef: { current: null },
       selectedVectorHandlesRef: { current: [] },
       selectedVectorSegmentIdsRef: { current: [] },

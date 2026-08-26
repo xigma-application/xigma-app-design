@@ -6,6 +6,7 @@ import { AppDispatch, store } from 'store';
 
 // types
 import { ToolName } from 'types/design/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TResizeDragState, TResizeNodeOrigin } from 'types/design/selectionTool/types';
 
 // utils
@@ -15,6 +16,7 @@ import { getResizeOrScaleFactors } from './getResizeOrScaleFactors';
 import { getResizeQueryPoint } from './getResizeQueryPoint';
 import { resizeNode } from './resizeNode/resizeNode';
 import { screenToWorld } from '../../../../../utils/screenToWorld';
+import { updateResizedVectorNodeSnapshot } from './updateResizedVectorNodeSnapshot';
 
 const getSingleRotatableOrigin = (
   originEntries: [string, TResizeNodeOrigin][],
@@ -29,6 +31,7 @@ export const continueResizeDrag = (
   event: PointerEvent,
   dispatch: AppDispatch,
   resizeDragRef: RefObject<TResizeDragState | null>,
+  canvasRefs: TCanvasRefs,
 ): void => {
   const resizeDragState = resizeDragRef.current;
 
@@ -41,9 +44,20 @@ export const continueResizeDrag = (
     const point = getResizeQueryPoint(rawPoint, bounds, singleRotatableOrigin);
     const { anchors, scaleX, scaleY } = getResizeOrScaleFactors(isScaleTool, handle, bounds, point, aspectRatio, event.shiftKey);
     const rotatedAnchorSolver = getResizeAnchorSolver(bounds, handle, scaleX, scaleY, singleRotatableOrigin);
+    const snapshots = canvasRefs.resizedVectorNodeSnapshotsRef.current;
+
+    if (snapshots && !canvasRefs.resizedNodeIdsRef.current) {
+      canvasRefs.resizedNodeIdsRef.current = new Set(snapshots.keys());
+    }
 
     originEntries.forEach(([id, origin]) => {
-      resizeNode(id, origin, dispatch, anchors, scaleX, scaleY, Boolean(singleRotatableOrigin), rotatedAnchorSolver);
+      const snapshot = snapshots?.get(id);
+
+      if (snapshot) {
+        updateResizedVectorNodeSnapshot(snapshot, anchors, scaleX, scaleY);
+      } else {
+        resizeNode(id, origin, dispatch, anchors, scaleX, scaleY, Boolean(singleRotatableOrigin), rotatedAnchorSolver);
+      }
     });
   }
 };

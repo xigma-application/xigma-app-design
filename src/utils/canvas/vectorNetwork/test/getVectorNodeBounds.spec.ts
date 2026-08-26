@@ -64,4 +64,43 @@ describe('getVectorNodeBounds', () => {
     // result
     expect(getVectorNodeBounds(node)).toEqual({ height: 10, width: 10, x: 0, y: 0 });
   });
+
+  it('should return the same cached result for the same node reference instead of recomputing', () => {
+    // mock
+    const node = buildNode({ v1: { id: 'v1', x: 10, y: 30 }, v2: { id: 'v2', x: -5, y: 5 } });
+
+    // before
+    const first = getVectorNodeBounds(node);
+    const second = getVectorNodeBounds(node);
+
+    // result
+    expect(second).toBe(first);
+  });
+
+  it('should return the same cached empty bounding box for the same vertex-less node reference instead of recomputing', () => {
+    // mock
+    const node = buildNode({});
+
+    // before
+    const first = getVectorNodeBounds(node);
+    const second = getVectorNodeBounds(node);
+
+    // result
+    expect(second).toBe(first);
+  });
+
+  it('should recompute a fresh result for a different node reference, even with identical content', () => {
+    // mock
+    const vertices = { v1: { id: 'v1', x: 10, y: 30 }, v2: { id: 'v2', x: -5, y: 5 } };
+    const nodeA = buildNode(vertices);
+    const nodeB = buildNode(vertices);
+
+    // before
+    const resultA = getVectorNodeBounds(nodeA);
+    const resultB = getVectorNodeBounds(nodeB);
+
+    // result
+    expect(resultB).not.toBe(resultA);
+    expect(resultB).toEqual(resultA);
+  });
 });

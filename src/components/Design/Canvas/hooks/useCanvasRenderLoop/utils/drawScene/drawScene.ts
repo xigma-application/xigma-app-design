@@ -102,10 +102,12 @@ export const drawScene = (
   const sceneNodes = getPreviewSceneNodes(selectOrderedNodes(state), editingNodeId, refs);
   const allSelectedNodes = selectSelectedNodes(state);
   const draggedNodeIds = refs.draggedNodeIdsRef.current;
-  const selectedNodes = allSelectedNodes.filter((node) => node.id !== editingNodeId && !draggedNodeIds?.has(node.id));
-  const hoveredNode =
-    hoveredNodeId && hoveredNodeId !== editingNodeId && !draggedNodeIds?.has(hoveredNodeId) ? nodesById[hoveredNodeId] : null;
+  const resizedNodeIds = refs.resizedNodeIdsRef.current;
+  const isNodeTransforming = (id: string): boolean => Boolean(draggedNodeIds?.has(id)) || Boolean(resizedNodeIds?.has(id));
+  const selectedNodes = allSelectedNodes.filter((node) => node.id !== editingNodeId && !isNodeTransforming(node.id));
   const selectedIds = new Set(allSelectedNodes.map((node) => node.id));
+  const hoveredNode =
+    hoveredNodeId && hoveredNodeId !== editingNodeId && !isNodeTransforming(hoveredNodeId) ? nodesById[hoveredNodeId] : null;
   const pathOutlineStyles = getPathOutlineStyles(
     Object.values(nodesById),
     selectedIds,
@@ -127,6 +129,7 @@ export const drawScene = (
     viewport,
     pathOutlineStyles,
     refs.draggedVectorNodeSnapshotsRef.current,
+    refs.resizedVectorNodeSnapshotsRef.current,
   );
   drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
   drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeIds);

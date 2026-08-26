@@ -7,7 +7,7 @@ import { NodeType } from 'types/design/enums';
 import { TImageRenderContext } from '../../types';
 import { TPathOutlineStyle } from './getPathOutlineStyles';
 import { TSceneNode, TViewport } from 'types/design/types';
-import { TVectorNodeDragSnapshot } from 'types/design/canvas/types';
+import { TVectorNodeDragSnapshot, TVectorNodeResizeSnapshot } from 'types/design/canvas/types';
 
 // utils
 import { drawEllipseNode } from 'utils/canvas/drawEllipseNode';
@@ -34,6 +34,7 @@ export const drawSceneNodes = (
   viewport: TViewport,
   pathOutlineStyles: Map<string, TPathOutlineStyle>,
   draggedVectorNodeSnapshots: Map<string, TVectorNodeDragSnapshot> | null,
+  resizedVectorNodeSnapshots: Map<string, TVectorNodeResizeSnapshot> | null,
 ): void => {
   nodes.forEach((node) => {
     switch (node.type) {
@@ -84,7 +85,17 @@ export const drawSceneNodes = (
         drawPathOutline(gl, program, buffer, node, pathOutlineStyles.get(node.id), canvasWidth, canvasHeight, viewport);
         break;
       case NodeType.vector:
-        drawSceneVectorNode(gl, program, buffer, node, draggedVectorNodeSnapshots, canvasWidth, canvasHeight, viewport);
+        drawSceneVectorNode(
+          gl,
+          program,
+          buffer,
+          node,
+          draggedVectorNodeSnapshots,
+          resizedVectorNodeSnapshots,
+          canvasWidth,
+          canvasHeight,
+          viewport,
+        );
         break;
       case NodeType.text:
         drawMsdfText(

@@ -2,11 +2,13 @@ import { RefObject } from 'react';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDraftRect, TResizeHandle } from 'types/canvas';
 import { TEllipseNode, TMediaNode, TPolygonNode, TSceneNode, TStarNode, TTextNode } from 'types/design/types';
 import { TResizeDragState, TResizeNodeOrigin } from 'types/design/selectionTool/types';
 
 // utils
+import { captureResizedVectorNodeSnapshots } from './captureResizedVectorNodeSnapshots';
 import { getVectorNodeOrigin } from '../../../../utils/getVectorNodeOrigin';
 
 const isFlippableNode = (node: TSceneNode): node is TEllipseNode | TMediaNode | TPolygonNode | TStarNode | TTextNode =>
@@ -23,6 +25,7 @@ export const armResizeDrag = (
   selectedNodes: TSceneNode[],
   handle: TResizeHandle,
   bounds: TDraftRect,
+  canvasRefs: TCanvasRefs,
 ): void => {
   const nodeOrigins: Record<string, TResizeNodeOrigin> = {};
 
@@ -47,5 +50,6 @@ export const armResizeDrag = (
   });
 
   resizeDragRef.current = { aspectRatio: bounds.width / bounds.height, bounds, handle, nodeOrigins };
+  captureResizedVectorNodeSnapshots(selectedNodes, canvasRefs);
   canvas.setPointerCapture(event.pointerId);
 };
