@@ -366,10 +366,21 @@ for the extreme case needs **incremental/differential topology tracking** — on
 actually touched by an edit, never scanning the untouched ones at all — which is a substantially larger,
 separate undertaking, **not started**.
 
-**Rotated nodes still get a cluster-cache miss every render frame**, unchanged from §3.6/§4: `drawVectorNode.ts`
-allocates a new baked node (and, inside the bake, new vertex objects) every frame for `rotation !== 0`,
-and a reference-keyed-by-vertex-object cluster cache inherits that same limitation — pre-existing, not a
-regression from this section's work, and still not fixed.
+### 5.7 — Two render-loop call sites still bypassed §3.6's rotation-bake cache
+
+`drawVectorNode.ts` itself already goes through `getRenderedVectorNode.ts` (§3.6), so a stable (rotated
+but otherwise idle) node's baked vertex/segment objects stay stable frame to frame, and the §5 cluster
+caches keyed on them hit correctly. Two other render-loop call sites did **not** go through that cache
+and were found auditing §3.6's "~19 uncached call sites" list against which of them actually run every
+render frame (as opposed to once per pointer event): `drawHoverOutline.ts` (hover outline stroke on a
+rotated vector) and `drawVectorEditHandlesForNode.ts` (the whole Vector Edit Mode overlay — outline,
+tangent handles, vertex dots — for a rotated node being edited) each called `bakeVectorNodeRotation`
+directly, producing a fresh baked node with fresh vertex/segment objects every single frame, guaranteeing
+a cluster-cache (and, for `drawHoverOutline.ts`, `flattenVectorSegments`'s own cache) miss every frame
+while hovering or editing a rotated vector — this is very likely the root cause of "lag while dragging in
+Vector Edit Mode on a rotated node" the user reported earlier in this session, before the per-cluster
+caching work (§5) even existed to make the miss expensive. **Fixed**: both now call
+`getRenderedVectorNode(node)` instead, the same swap §3.6 already made at its other ten call sites.
 
 **GPU-buffer-level caching** (skipping `bufferData`/`drawArrays` for an unchanged cluster) remains
 out of scope — no precedent anywhere in the renderer (only 4 shared GL buffers total, app-wide, rebound
@@ -413,6 +424,10 @@ rendering-architecture change than anything in this doc.
   getBoundingBox,types}.ts`, `utils/canvas/vectorNetwork/getVectorClusterByRealSegmentId.ts`,
   `utils/canvas/vectorNetwork/planarizeVectorNetwork/planarizeVectorNetwork.ts` (reference-preserving
   no-crossings branch), `store/store.ts` (dev-mode middleware)
+- Rotation-bake cache extended to render-loop stragglers (§5.7):
+  `useCanvasRenderLoop/utils/drawScene/drawHoverOutline.ts`,
+  `useCanvasRenderLoop/utils/drawScene/drawVectorEditHandlesLayer/drawVectorEditHandlesForNode/
+  drawVectorEditHandlesForNode.ts` — both now call `Canvas/utils/getRenderedVectorNode.ts` (§3.6)
 
 ## Related
 

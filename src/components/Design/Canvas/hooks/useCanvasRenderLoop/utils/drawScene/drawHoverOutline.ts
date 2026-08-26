@@ -6,7 +6,6 @@ import { NodeType } from 'types/design/enums';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
-import { bakeVectorNodeRotation } from 'components/Design/Canvas/utils/bakeVectorNodeRotation';
 import { drawLine } from 'utils/canvas/drawLine';
 import { drawTextHoverUnderline } from './drawTextHoverUnderline';
 import { drawThickEllipseNodeOutline } from 'utils/canvas/shapes/drawThickEllipseNodeOutline';
@@ -15,6 +14,7 @@ import { drawThickPolygonOutline } from 'utils/canvas/shapes/drawThickPolygonOut
 import { drawThickStarOutline } from 'utils/canvas/shapes/drawThickStarOutline';
 import { drawVectorStroke } from 'utils/canvas/drawVectorNode/drawVectorStroke';
 import { flattenVectorSegments } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
+import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
 
 export const drawHoverOutline = (
   gl: WebGL2RenderingContext,
@@ -101,7 +101,7 @@ export const drawHoverOutline = (
           gl,
           program,
           buffer,
-          flattenVectorSegments({ ...hoveredNode, ...bakeVectorNodeRotation(hoveredNode) }),
+          flattenVectorSegments(getRenderedVectorNode(hoveredNode)),
           DRAFT_FRAME_STROKE,
           HOVER_OUTLINE_WIDTH / viewport.zoom,
           canvasWidth,

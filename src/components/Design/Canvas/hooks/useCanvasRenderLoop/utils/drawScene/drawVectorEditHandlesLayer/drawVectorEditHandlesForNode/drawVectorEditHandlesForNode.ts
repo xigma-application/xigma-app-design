@@ -4,12 +4,12 @@ import { TVectorHandleHover } from 'types/design/canvas/types';
 import { TVectorNode, TViewport } from 'types/design/types';
 
 // utils
-import { bakeVectorNodeRotation } from '../../../../../../utils/bakeVectorNodeRotation';
 import { drawVectorEditOutline } from '../drawVectorEditOutline/drawVectorEditOutline';
 import { drawVectorEdgeInsertPreview } from '../drawVectorEdgeInsertPreview';
 import { drawVectorTangentHandles } from '../drawVectorTangentHandles/drawVectorTangentHandles';
 import { drawVectorVertexDots } from '../drawVectorVertexDots/drawVectorVertexDots';
 import { getOneHopVectorVertexIds } from 'utils/canvas/vectorNetwork/getOneHopVectorVertexIds/getOneHopVectorVertexIds';
+import { getRenderedVectorNode } from '../../../../../../utils/getRenderedVectorNode';
 import { getTangentVisibilityVertexIds } from 'utils/canvas/vectorNetwork/getTangentVisibilityVertexIds';
 import { getVisualSelectedVectorVertexIds } from 'utils/canvas/vectorNetwork/getVisualSelectedVectorVertexIds';
 
@@ -38,7 +38,7 @@ export const drawVectorEditHandlesForNode = (
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  const node = { ...editingNode, ...bakeVectorNodeRotation(editingNode) };
+  const node = getRenderedVectorNode(editingNode);
   const visualSelectedVertexIds = getVisualSelectedVectorVertexIds(selectedVertexIds, penActiveVertexId ?? dragOriginVertexId);
   const visualSelectedVertexIdsTotal = [...visualSelectedVertexIds, ...preMarqueeVertexIds];
   const tangentVisibilityVertexIds = getTangentVisibilityVertexIds(node, visualSelectedVertexIdsTotal, selectedHandles);
