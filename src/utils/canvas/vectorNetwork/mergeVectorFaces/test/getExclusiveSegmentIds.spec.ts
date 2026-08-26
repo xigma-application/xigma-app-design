@@ -3,7 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { deriveVectorFaces } from '../../deriveVectorFaces';
+import { deriveVectorFaces } from '../../deriveVectorFaces/deriveVectorFaces';
 import { getExclusiveSegmentIds } from '../getExclusiveSegmentIds';
 
 // mock — a 100x100 rectangle split in half by a horizontal "divider" segment (e-f), forming a top

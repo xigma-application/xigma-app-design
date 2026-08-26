@@ -6,7 +6,7 @@ import { TVectorNode, TViewport } from 'types/design/types';
 
 // utils
 import { drawVectorStroke } from 'utils/canvas/drawVectorNode/drawVectorStroke';
-import { flattenVectorSegments } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
+import { flattenVectorSegmentById } from 'utils/canvas/vectorNetwork/flattenVectorSegmentById';
 
 export const drawHoveredVectorSegmentHighlight = (
   gl: WebGL2RenderingContext,
@@ -18,9 +18,7 @@ export const drawHoveredVectorSegmentHighlight = (
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  const hoveredSegment = hoveredSegmentId
-    ? flattenVectorSegments(node).find((segment) => segment.segmentId === hoveredSegmentId)
-    : undefined;
+  const hoveredSegment = hoveredSegmentId ? flattenVectorSegmentById(node, hoveredSegmentId) : null;
 
   if (hoveredSegment) {
     drawVectorStroke(

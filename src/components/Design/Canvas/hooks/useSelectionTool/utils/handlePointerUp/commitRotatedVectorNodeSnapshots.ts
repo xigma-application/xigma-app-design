@@ -9,7 +9,11 @@ import { TRotateDragState } from 'types/design/selectionTool/types';
 // utils
 import { getRotatedNodeChanges } from '../handlePointerMove/continueRotateDrag/getRotatedNodeChanges';
 
-export const commitRotatedVectorNodeSnapshots = (dispatch: AppDispatch, rotateDragState: TRotateDragState, canvasRefs: TCanvasRefs): void => {
+export const commitRotatedVectorNodeSnapshots = (
+  dispatch: AppDispatch,
+  rotateDragState: TRotateDragState,
+  canvasRefs: TCanvasRefs,
+): void => {
   const snapshots = canvasRefs.rotatedVectorNodeSnapshotsRef.current;
 
   if (snapshots) {

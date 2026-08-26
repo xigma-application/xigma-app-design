@@ -2,7 +2,7 @@
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { deriveVectorFaces, TVectorFace } from '../deriveVectorFaces';
+import { deriveVectorFaces, TVectorFace } from '../deriveVectorFaces/deriveVectorFaces';
 import { getInteriorSegmentIds } from './getInteriorSegmentIds';
 import { getRemainingVertices } from '../getRemainingVertices';
 import { getVectorFillLoopKey } from '../getVectorFillLoopKey';

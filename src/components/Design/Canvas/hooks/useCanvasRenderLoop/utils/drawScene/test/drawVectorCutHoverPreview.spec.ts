@@ -175,7 +175,17 @@ describe('drawVectorCutHoverPreview', () => {
     flattenVectorSegmentsMock.mockReturnValue([]);
 
     // before
-    drawVectorCutHoverPreview(gl, program, buffer, rotatedNodes, { nodeId: rotatedNode.id, segmentId: 's1' }, null, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorCutHoverPreview(
+      gl,
+      program,
+      buffer,
+      rotatedNodes,
+      { nodeId: rotatedNode.id, segmentId: 's1' },
+      null,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(getRenderedVectorNodeMock).toHaveBeenCalledWith(rotatedNode);

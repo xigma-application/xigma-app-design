@@ -2,7 +2,7 @@
 import { TVectorNetworkComponent } from '../types';
 
 // utils
-import { deriveVectorFaces } from '../../deriveVectorFaces';
+import { deriveVectorFaces } from '../../deriveVectorFaces/deriveVectorFaces';
 import { getVectorFillLoopKey } from '../../getVectorFillLoopKey';
 import { resolveSurvivingFilledFaceKeys } from '../resolveSurvivingFilledFaceKeys';
 

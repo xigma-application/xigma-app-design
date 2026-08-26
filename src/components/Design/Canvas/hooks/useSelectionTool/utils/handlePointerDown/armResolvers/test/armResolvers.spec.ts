@@ -45,7 +45,7 @@ import { armVectorWidthPointOnPointerDown } from '../armVectorWidthPointOnPointe
 import { ARM_RESOLVERS } from '../../constants';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { createSelectionToolRefs } from '../../../../hooks/useSelectionToolRefs/createSelectionToolRefs';
-import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
 import { toggleSelectionOnPointerDown } from '../toggleSelectionOnPointerDown';
 

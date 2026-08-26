@@ -5,23 +5,27 @@ import { TVectorSegment, TVectorVertex } from 'types/design/types';
 import { planarizeVectorNetwork } from '../planarizeVectorNetwork';
 
 describe('planarizeVectorNetwork', () => {
-  it('should return the segments unchanged (as their own original ids) and no new vertices when nothing crosses', () => {
-    // mock — two disjoint, non-crossing straight segments
+  it('should return the ORIGINAL segments/vertices objects verbatim (same references, not rebuilt copies) when nothing crosses', () => {
+    // mock — two disjoint, non-crossing straight segments; the reference-identity check matters here,
+    // not just deep equality — an unrelated caller relies on this to cheaply tell "did anything change"
+    // via a plain === check instead of re-deriving/re-clustering an unchanged network a second time
     const vertices: Record<string, TVectorVertex> = {
       a1: { id: 'a1', x: 0, y: 0 },
       a2: { id: 'a2', x: 100, y: 0 },
       b1: { id: 'b1', x: 0, y: 100 },
       b2: { id: 'b2', x: 100, y: 100 },
     };
-    const segmentA: TVectorSegment = { endId: 'a2', id: 'sA', startId: 'a1', tangentEnd: null, tangentStart: null };
-    const segmentB: TVectorSegment = { endId: 'b2', id: 'sB', startId: 'b1', tangentEnd: null, tangentStart: null };
+    const segments: Record<string, TVectorSegment> = {
+      sA: { endId: 'a2', id: 'sA', startId: 'a1', tangentEnd: null, tangentStart: null },
+      sB: { endId: 'b2', id: 'sB', startId: 'b1', tangentEnd: null, tangentStart: null },
+    };
 
     // before
-    const result = planarizeVectorNetwork([segmentA, segmentB], vertices);
+    const result = planarizeVectorNetwork(segments, vertices);
 
     // result
-    expect(result.segments).toEqual({ sA: segmentA, sB: segmentB });
-    expect(result.vertices).toEqual(vertices);
+    expect(result.segments).toBe(segments);
+    expect(result.vertices).toBe(vertices);
   });
 
   it('should split both crossing segments and add exactly one new virtual vertex at their crossing point', () => {
@@ -32,11 +36,13 @@ describe('planarizeVectorNetwork', () => {
       b1: { id: 'b1', x: 50, y: -50 },
       b2: { id: 'b2', x: 50, y: 50 },
     };
-    const segmentA: TVectorSegment = { endId: 'a2', id: 'sA', startId: 'a1', tangentEnd: null, tangentStart: null };
-    const segmentB: TVectorSegment = { endId: 'b2', id: 'sB', startId: 'b1', tangentEnd: null, tangentStart: null };
+    const segments: Record<string, TVectorSegment> = {
+      sA: { endId: 'a2', id: 'sA', startId: 'a1', tangentEnd: null, tangentStart: null },
+      sB: { endId: 'b2', id: 'sB', startId: 'b1', tangentEnd: null, tangentStart: null },
+    };
 
     // before
-    const result = planarizeVectorNetwork([segmentA, segmentB], vertices);
+    const result = planarizeVectorNetwork(segments, vertices);
 
     // result
     expect(Object.keys(result.segments).sort()).toEqual(['sA#0', 'sA#1', 'sB#0', 'sB#1']);

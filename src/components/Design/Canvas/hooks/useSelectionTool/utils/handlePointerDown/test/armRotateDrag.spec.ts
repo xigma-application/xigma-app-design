@@ -69,7 +69,16 @@ describe('armRotateDrag', () => {
     const node = frame('a', 0, 0, 100, 100, 30);
 
     // before — the pointer starts due east of the bounds' center (50, 50), so the start angle is 0;
-    armRotateDrag(canvas, pointerEvent(3), rotateDragRef, [node], { height: 100, width: 100, x: 0, y: 0 }, 30, { x: 100, y: 50 }, createCanvasRefs());
+    armRotateDrag(
+      canvas,
+      pointerEvent(3),
+      rotateDragRef,
+      [node],
+      { height: 100, width: 100, x: 0, y: 0 },
+      30,
+      { x: 100, y: 50 },
+      createCanvasRefs(),
+    );
 
     // result
     expect(rotateDragRef.current).toEqual({
@@ -87,7 +96,16 @@ describe('armRotateDrag', () => {
     const rotateDragRef = createRotateDragRef();
 
     // before
-    armRotateDrag(canvas, pointerEvent(), rotateDragRef, [line], { height: 100, width: 100, x: 0, y: 0 }, 0, { x: 100, y: 50 }, createCanvasRefs());
+    armRotateDrag(
+      canvas,
+      pointerEvent(),
+      rotateDragRef,
+      [line],
+      { height: 100, width: 100, x: 0, y: 0 },
+      0,
+      { x: 100, y: 50 },
+      createCanvasRefs(),
+    );
 
     // result
     expect(rotateDragRef.current?.nodeOrigins).toEqual({ 'line-1': { x1: 10, x2: 20, y1: 30, y2: 40 } });
@@ -99,7 +117,16 @@ describe('armRotateDrag', () => {
     const rotateDragRef = createRotateDragRef();
 
     // before
-    armRotateDrag(canvas, pointerEvent(), rotateDragRef, [vector], { height: 100, width: 100, x: 0, y: 0 }, 0, { x: 100, y: 50 }, createCanvasRefs());
+    armRotateDrag(
+      canvas,
+      pointerEvent(),
+      rotateDragRef,
+      [vector],
+      { height: 100, width: 100, x: 0, y: 0 },
+      0,
+      { x: 100, y: 50 },
+      createCanvasRefs(),
+    );
 
     // result
     expect(rotateDragRef.current?.nodeOrigins).toEqual({
@@ -130,10 +157,19 @@ describe('armRotateDrag', () => {
     };
 
     // before
-    armRotateDrag(canvas, pointerEvent(), rotateDragRef, [rotatedVector], { height: 10, width: 10, x: 100, y: 100 }, 90, {
-      x: 110,
-      y: 105,
-    }, createCanvasRefs());
+    armRotateDrag(
+      canvas,
+      pointerEvent(),
+      rotateDragRef,
+      [rotatedVector],
+      { height: 10, width: 10, x: 100, y: 100 },
+      90,
+      {
+        x: 110,
+        y: 105,
+      },
+      createCanvasRefs(),
+    );
 
     // result
     expect(rotateDragRef.current?.nodeOrigins).toEqual({
@@ -157,7 +193,16 @@ describe('armRotateDrag', () => {
     const node = frame('a', 0, 0, 100, 100);
 
     // before — the pointer starts due south of the center (50, 50), which is 90 degrees
-    armRotateDrag(canvas, pointerEvent(), rotateDragRef, [node], { height: 100, width: 100, x: 0, y: 0 }, 0, { x: 50, y: 150 }, createCanvasRefs());
+    armRotateDrag(
+      canvas,
+      pointerEvent(),
+      rotateDragRef,
+      [node],
+      { height: 100, width: 100, x: 0, y: 0 },
+      0,
+      { x: 50, y: 150 },
+      createCanvasRefs(),
+    );
 
     // result
     expect(rotateDragRef.current?.startAngle).toBe(90);

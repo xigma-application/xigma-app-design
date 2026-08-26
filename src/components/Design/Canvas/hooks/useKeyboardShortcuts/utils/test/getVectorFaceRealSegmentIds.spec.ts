@@ -1,5 +1,5 @@
 // types
-import { TVectorFace } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { TVectorFace } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 
 // utils
 import { getVectorFaceRealSegmentIds } from '../getVectorFaceRealSegmentIds';

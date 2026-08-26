@@ -6,7 +6,8 @@ import { TVectorNode, TViewport } from 'types/design/types';
 
 // utils
 import { drawVectorStroke } from 'utils/canvas/drawVectorNode/drawVectorStroke';
-import { flattenVectorSegments } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
+import { flattenVectorSegmentById } from 'utils/canvas/vectorNetwork/flattenVectorSegmentById';
+import { TFlattenedVectorSegment } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
 
 export const drawSelectedSegmentsHighlight = (
   gl: WebGL2RenderingContext,
@@ -18,8 +19,9 @@ export const drawSelectedSegmentsHighlight = (
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  const selectedSegmentIdSet = new Set(selectedSegmentIds);
-  const flattened = flattenVectorSegments(node).filter((segment) => selectedSegmentIdSet.has(segment.segmentId));
+  const flattened = selectedSegmentIds
+    .map((id) => flattenVectorSegmentById(node, id))
+    .filter((segment): segment is TFlattenedVectorSegment => segment !== null);
 
   if (flattened.length > 0) {
     drawVectorStroke(

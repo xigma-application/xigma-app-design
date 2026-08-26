@@ -15,7 +15,7 @@ const getVectorFacesInRectMock = vi.fn();
 vi.mock('components/Design/Canvas/utils/bakeVectorNodeRotation', () => ({
   bakeVectorNodeRotation: (...args: unknown[]): unknown => bakeVectorNodeRotationMock(...args),
 }));
-vi.mock('utils/canvas/vectorNetwork/deriveVectorFaces', () => ({
+vi.mock('utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces', () => ({
   deriveVectorFaces: (...args: unknown[]): unknown => deriveVectorFacesMock(...args),
 }));
 vi.mock('utils/canvas/drawVectorNode/drawVectorHatchFill', () => ({

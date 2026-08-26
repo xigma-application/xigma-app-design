@@ -2,7 +2,7 @@
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { deriveVectorFaces, TVectorFace } from './deriveVectorFaces';
+import { deriveVectorFaces, TVectorFace } from './deriveVectorFaces/deriveVectorFaces';
 import { getVectorFillLoopKey } from './getVectorFillLoopKey';
 
 export const getVectorFilledFacesTouchingVertexIds = (node: TVectorNode, vertexIds: string[]): TVectorFace[] => {

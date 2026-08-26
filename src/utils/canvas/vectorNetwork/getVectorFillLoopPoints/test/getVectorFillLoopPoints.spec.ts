@@ -3,7 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TVectorNode, TVectorSegment, TVectorVertex } from 'types/design/types';
 
 // utils
-import { deriveVectorFaces } from '../../deriveVectorFaces';
+import { deriveVectorFaces } from '../../deriveVectorFaces/deriveVectorFaces';
 import { getVectorFillLoopKey } from '../../getVectorFillLoopKey';
 import { getVectorFillLoopPoints } from '../getVectorFillLoopPoints';
 
@@ -256,6 +256,15 @@ describe('getVectorFillLoopPoints', () => {
     expect(pointsA).not.toEqual(pointsB);
   });
 
+  it('should return null for a malformed, bracketless loop key instead of throwing', () => {
+    // mock — a piece key is always `${realSegmentId}[${boundaries}]`; this exercises the fallback that
+    // treats the whole first "piece key" as the real segment id when it has no bracket at all
+    const node = buildNode([vertex('a', 0, 0), vertex('b', 100, 0)], [seg('s1', 'a', 'b')]);
+
+    // before / result
+    expect(getVectorFillLoopPoints(node, 's1')).toBeNull();
+  });
+
   it('should cache a null result too, instead of recomputing a known-dead loop on every call', () => {
     // mock
     const node = buildNode([vertex('a', 0, 0), vertex('b', 100, 0)], [seg('s1', 'a', 'b')]);
@@ -263,6 +272,16 @@ describe('getVectorFillLoopPoints', () => {
 
     // before / result
     expect(getVectorFillLoopPoints(node, loopKey)).toBeNull();
+    expect(getVectorFillLoopPoints(node, loopKey)).toBeNull();
+  });
+
+  it('should return null, computed uncached, when the loop key’s own real segment id has no cluster on the node at all', () => {
+    // mock — 'ghost' never appears among the node's own segments, so getVectorClusterByRealSegmentId
+    // finds no cluster for it, exercising the direct (non-cluster-cached) computeLoopPoints fallback
+    const node = buildNode([vertex('a', 0, 0), vertex('b', 100, 0)], [seg('s1', 'a', 'b')]);
+    const loopKey = pieceKey('ghost', 'x', 'y');
+
+    // before / result
     expect(getVectorFillLoopPoints(node, loopKey)).toBeNull();
   });
 });

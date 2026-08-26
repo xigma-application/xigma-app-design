@@ -4,10 +4,10 @@ import { TVectorNode, TViewport } from 'types/design/types';
 // utils
 import { drawVectorFill } from './drawVectorFill';
 import { drawVectorRoundedCaps } from './drawVectorRoundedCaps';
-import { drawVectorStroke } from './drawVectorStroke';
+import { drawVectorThickStrokeVertices } from './drawVectorThickStrokeVertices';
 import { drawVectorVariableStroke } from './drawVectorVariableStroke';
-import { flattenVectorSegments } from '../vectorNetwork/flattenVectorSegments';
 import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
+import { getVectorNodeThickStrokeVertices } from '../vectorNetwork/getVectorNodeThickStrokeVertices/getVectorNodeThickStrokeVertices';
 import { groupFilledFacesByColor } from './groupFilledFacesByColor';
 
 export const drawVectorNode = (
@@ -28,17 +28,8 @@ export const drawVectorNode = (
   if (renderedNode.widthProfile) {
     drawVectorVariableStroke(gl, program, buffer, renderedNode, renderedNode.strokeColor, canvasWidth, canvasHeight, viewport);
   } else {
-    drawVectorStroke(
-      gl,
-      program,
-      buffer,
-      flattenVectorSegments(renderedNode),
-      renderedNode.strokeColor,
-      renderedNode.strokeWidth,
-      canvasWidth,
-      canvasHeight,
-      viewport,
-    );
+    const strokeVertices = getVectorNodeThickStrokeVertices(renderedNode, renderedNode.strokeWidth / 2);
+    drawVectorThickStrokeVertices(gl, program, buffer, strokeVertices, renderedNode.strokeColor, canvasWidth, canvasHeight, viewport);
   }
 
   drawVectorRoundedCaps(gl, program, buffer, renderedNode, canvasWidth, canvasHeight, viewport);

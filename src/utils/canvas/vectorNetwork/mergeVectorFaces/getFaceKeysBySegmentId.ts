@@ -1,5 +1,5 @@
 // utils
-import { TVectorFace } from '../deriveVectorFaces';
+import { TVectorFace } from '../deriveVectorFaces/deriveVectorFaces';
 
 export const getFaceKeysBySegmentId = (faces: TVectorFace[]): Map<string, Set<string>> => {
   const faceKeysBySegmentId = new Map<string, Set<string>>();

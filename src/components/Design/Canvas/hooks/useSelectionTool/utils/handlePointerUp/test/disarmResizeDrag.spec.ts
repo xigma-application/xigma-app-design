@@ -210,7 +210,13 @@ describe('disarmResizeDrag', () => {
         current: { aspectRatio: 1, bounds, handle: 'e', nodeOrigins: nodeOriginFor(idDirect) },
       };
 
-      continueResizeDrag(directCanvas, new PointerEvent('pointermove', { clientX: 200, clientY: 500 }), store.dispatch, directDragRef, createCanvasRefs());
+      continueResizeDrag(
+        directCanvas,
+        new PointerEvent('pointermove', { clientX: 200, clientY: 500 }),
+        store.dispatch,
+        directDragRef,
+        createCanvasRefs(),
+      );
 
       // before — snapshot path: capture at arm time, update per pointermove (no dispatch), commit once
       const snapshotCanvas = createCanvasForDrag();

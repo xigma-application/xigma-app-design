@@ -1,6 +1,6 @@
 // utils
 import { getVectorFaceVertexIds } from '../getVectorFaceVertexIds';
-import { TVectorFace } from '../deriveVectorFaces';
+import { TVectorFace } from '../deriveVectorFaces/deriveVectorFaces';
 
 describe('getVectorFaceVertexIds', () => {
   it('should return the deduped set of real vertex ids bounding the face', () => {

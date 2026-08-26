@@ -2,7 +2,7 @@
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { findAllNetworkCrossings } from '../planarizeVectorNetwork/findAllNetworkCrossings';
+import { findAllNetworkCrossings } from '../planarizeVectorNetwork/findAllNetworkCrossings/findAllNetworkCrossings';
 import { getVectorNodeBounds } from '../getVectorNodeBounds';
 
 export const doVectorNodesCross = (bakedNodeA: TVectorNode, bakedNodeB: TVectorNode): boolean => {

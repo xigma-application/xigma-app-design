@@ -4,13 +4,17 @@ import { TPlanarVectorNetwork } from './types';
 
 // utils
 import { buildPlanarSegments } from './buildPlanarSegments';
-import { findAllNetworkCrossings } from './findAllNetworkCrossings';
+import { findAllNetworkCrossings } from './findAllNetworkCrossings/findAllNetworkCrossings';
 
-export const planarizeVectorNetwork = (segments: TVectorSegment[], vertices: Record<string, TVectorVertex>): TPlanarVectorNetwork => {
+export const planarizeVectorNetwork = (
+  segmentsRecord: Record<string, TVectorSegment>,
+  vertices: Record<string, TVectorVertex>,
+): TPlanarVectorNetwork => {
+  const segments = Object.values(segmentsRecord);
   const { crossingsBySegmentId, virtualVertices } = findAllNetworkCrossings(segments, vertices);
 
   if (crossingsBySegmentId.size === 0) {
-    return { segments: Object.fromEntries(segments.map((segment) => [segment.id, segment])), vertices };
+    return { segments: segmentsRecord, vertices };
   }
 
   return {

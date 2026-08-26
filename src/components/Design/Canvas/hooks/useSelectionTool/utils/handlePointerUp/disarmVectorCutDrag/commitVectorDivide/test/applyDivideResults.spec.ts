@@ -8,7 +8,7 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { applyDivideResults } from '../applyDivideResults';
-import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { findVectorDivideResult } from '../findVectorDivideResult';
 import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
 

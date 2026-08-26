@@ -12,7 +12,7 @@ const drawVectorHatchFillMock = vi.fn();
 vi.mock('components/Design/Canvas/utils/getRenderedVectorNode', () => ({
   getRenderedVectorNode: (...args: unknown[]): unknown => getRenderedVectorNodeMock(...args),
 }));
-vi.mock('utils/canvas/vectorNetwork/deriveVectorFaces', () => ({
+vi.mock('utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces', () => ({
   deriveVectorFaces: (...args: unknown[]): unknown => deriveVectorFacesMock(...args),
 }));
 vi.mock('utils/canvas/drawVectorNode/drawVectorHatchFill', () => ({

@@ -24,7 +24,7 @@ import { continueStarVertexCountDrag } from './continueStarVertexCountDrag';
 import { continueVectorCutDrag } from './continueVectorCutDrag/continueVectorCutDrag';
 import { continueVectorHandleDrag } from './continueVectorHandleDrag';
 import { continueVectorLassoDrag } from './continueVectorLassoDrag';
-import { continueVectorMarqueeDrag } from './continueVectorMarqueeDrag';
+import { continueVectorMarqueeDrag } from './continueVectorMarqueeDrag/continueVectorMarqueeDrag';
 import { continueVectorMultiDrag } from './continueVectorMultiDrag';
 import { continueVectorMultiSelectResizeDrag } from './continueVectorMultiSelectResizeDrag';
 import { continueVectorMultiSelectRotateDrag } from './continueVectorMultiSelectRotateDrag';

@@ -6,7 +6,7 @@ import { AppDispatch } from 'store';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { mergeVectorFaces } from 'utils/canvas/vectorNetwork/mergeVectorFaces/mergeVectorFaces';
 import { persistVectorNetworkCrossings } from 'utils/canvas/vectorNetwork/planarizeVectorNetwork/persistVectorNetworkCrossings';
 import { subtractVectorFaces } from 'utils/canvas/vectorNetwork/mergeVectorFaces/subtractVectorFaces';

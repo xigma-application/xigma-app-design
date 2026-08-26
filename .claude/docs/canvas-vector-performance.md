@@ -48,9 +48,10 @@ inside a loop over every vertex/segment — O(n²) against selection size × sha
 `Set.has`. Also batched `drawVectorVertexDots.ts` (new `collectVertexDotBuckets.ts`/
 `processVectorVertexDot.ts`/`drawOrCollectVertexDot.ts`) so same-styled dots draw in one pass instead
 of one `drawArrays` per vertex, and rewrote `findAllNetworkCrossings.ts`'s crossing search from a flat
-O(n²) segment-pair scan to a sweep-line broad phase (`boundingBoxesOverlap` pre-filter) — this is what
-[[vector-network]]'s `getVectorNodeClusters` follow-up plan (§5 below) explicitly builds on rather than
-re-solving.
+O(n²) segment-pair scan to a sweep-line broad phase (`boundingBoxesOverlap` pre-filter). **Later
+upgraded again**, in the per-cluster caching work (§5), from that 1D X-sorted sweep line to a uniform
+spatial hash grid — the sweep line degraded badly on grid-like layouts (many segments sharing an X
+range keep the sweep's "active" list huge regardless of Y); see §5 for the final shape.
 
 ### 3.2 — Throttled dispatch to one per animation frame (`71d5edd`, part of `75de2da`)
 
@@ -253,52 +254,127 @@ that cost once per gesture, not once per `pointermove` event (which fires far mo
 render loop's rAF cadence — §3.2 already established this for the plain-dispatch case before any
 snapshot existed).
 
-## 5. Still open: whole-node cache granularity breaks down at many-shapes-per-node scale
+## 5. Per-cluster caching — fill, stroke, and crossing detection at many-shapes-per-node scale
 
-**Everything above assumes the cost of a cache miss is proportional to one shape.** It isn't, for the
+**Everything in §3 assumes the cost of a cache miss is proportional to one shape.** It isn't, for the
 stress-test scenario that drove this whole session: one `TVectorNode` containing thousands of
 *disconnected* shapes (squares with no shared vertices) in one flat `segments`/`vertices` record.
-Editing a single vertex on **one** of those squares still triggers a full re-derivation of **all** of
-them, because every cache here — including every fix above — is keyed on the *whole node's* object
-reference. Any edit anywhere in the node produces one new node object, which invalidates every one of
-those caches for the entire node, however small the actual change. This is architectural, not a bug in
-any individual fix, and none of §3's work addresses it — a real drag/resize/rotate on one shape inside a
-1000+-shape node still recomputes the derivation pipeline for the other 999 shapes on every commit (and,
-for rotated nodes, every render frame — §3.6's cache still keys on the whole node).
+Editing a single vertex on **one** of those squares used to trigger a full re-derivation of **all** of
+them, because every §3 cache is keyed on the *whole node's* object reference — any edit anywhere in the
+node produces one new node object, invalidating every one of those caches for the entire node however
+small the actual change. This section covers the fix: caching at **cluster** granularity (a subset of
+the node's own shapes) instead of whole-node granularity.
 
-A plan exists for the fix (`~/.claude/plans/compressed-leaping-koala.md` at time of writing — **designed,
-not yet implemented**): cache at **cluster** granularity instead of whole-node granularity, where a
-cluster is a graph-connected-component (shared vertices) **unioned with** whatever
-`findAllNetworkCrossings.ts` (§3.1's sweep-line version) already finds crossing each other — two shapes
-with no shared vertex but that visually overlap must still be treated as one cluster, or their cached
-fill boundaries would go stale wherever they cross. For the stress-test scenario (disjoint squares, real
-gaps) this degrades to exactly "one square = one cluster" — the intended win; for one fully-connected
-complex path it degrades to "one cluster = the whole node," identical to today.
+### 5.1 — What a cluster is, and why crossings matter for correctness
 
-Design, in brief: `getVectorNodeClusters.ts` reuses the existing BFS adjacency machinery from
-`vectorNetwork/cutVectorNetwork/` (`buildVectorAdjacency.ts`/`findConnectedVertexIds.ts`) rather than
-reimplementing graph traversal, extended with crossing-adjacency; a new persistent, **string-keyed**
-(not `WeakMap`, since the whole point is surviving across node-reference changes — key:
-`${node.id}:${sortedVertexIds.join(',')}`) LRU cache stores each cluster's derived faces, invalidated
-implicitly by cluster identity changing (any topology change produces a different vertex-id set for the
-affected cluster, a clean miss with no explicit invalidation needed at any of the dozens of mutation
-call sites); `deriveVectorFaces.ts`/`getVectorFillLoopPoints.ts` get rewritten internally to
-compute-or-fetch per cluster and concatenate, with **no change to either function's external signature**.
+A cluster is a graph-connected-component (shapes sharing a vertex) **unioned with** whatever
+`findAllNetworkCrossings.ts` finds crossing each other — two shapes with no shared vertex but that
+visually overlap must still be treated as one cluster, or their cached fill boundaries would go stale
+wherever they cross. For the stress-test scenario (disjoint squares, real gaps) this degrades to exactly
+"one square = one cluster" — the intended win; for one fully-connected complex path it degrades to "one
+cluster = the whole node," identical to pre-cluster behavior — never worse.
 
-**Explicitly out of scope even once that plan lands** (flagged there as follow-up work):
-- **Stroke tessellation** (`flattenVectorSegments`, `getThickVectorPathVertices`) currently has **zero**
-  cache at all (worse off than fill derivation ever was) and profiling shows it as the single largest
-  remaining cost at scale (`drawVectorThickStrokeVertices` ~10%, `getThickVectorPathVertices` ~9% of
-  frame time on the 1000-shape stress scene, per the most recent profile in this session). A strong
-  candidate to reuse the same cluster primitive, deliberately not bundled into the first slice to keep
-  its surface area/risk down.
-- **GPU-buffer-level caching** (skipping `bufferData`/`drawArrays` for an unchanged cluster) — no
-  precedent anywhere in the renderer (only 4 shared GL buffers total, app-wide, rebound per-primitive
-  every frame, [[canvas-rendering-pipeline]] §3/§8) — a materially larger rendering-architecture change.
-- Rotated nodes will **still** get a cluster-cache miss every render frame even after that plan lands —
-  `drawVectorNode.ts` allocates a new baked node (and, inside the bake, new vertex objects) every frame
-  for `rotation !== 0` (§3.6), and a reference-keyed-by-vertex-object cluster cache inherits that same
-  limitation. Not a regression from the plan, a pre-existing one it doesn't fix.
+`getVectorNodeClusters/` (folder — `getVectorNodeClusters.ts`, `getVectorNodeRawClusters.ts`,
+`computeClusters.ts`, `types.ts`) provides **two** cluster views over the same shared `computeClusters`
+core (BFS adjacency reused from `cutVectorNetwork/buildVectorAdjacency.ts`/`findConnectedVertexIds.ts`):
+- `getVectorNodeClusters(planar)` — clusters the **planarized** network (crossings already split into
+  real shared vertices), `WeakMap`-cached on the planar network object. Used by fill derivation, where a
+  visual crossing must merge two clusters.
+- `getVectorNodeRawClusters(node)` — clusters the **raw, unplanarized** node graph by shared-vertex
+  adjacency only, `WeakMap`-cached on the node. Used by stroke tessellation, since stroke joins only need
+  a genuine shared vertex, not a visual crossing — no need to pay planarization's cost for that.
+
+`getVectorNodeThickStrokeVertices.ts` picks between them via `getClustersForStroke.ts`: reuses the
+already-planar clusters when `planar.segments === node.segments && planar.vertices === node.vertices`
+(i.e. `planarizeVectorNetwork.ts`'s no-crossings branch returned the original records verbatim — a
+reference-preservation fix made specifically to enable this check), falling back to raw clustering
+otherwise. Each `TVectorNodeCluster` carries a precomputed `key: string` (sorted-vertex-ids-joined) so
+the result cache below never has to re-derive it per lookup.
+
+### 5.2 — `createClusterResultCache<T>` — the persistent, reference-validated LRU
+
+`createClusterResultCache/` (folder — `createClusterResultCache.ts`, `buildKey.ts`, `isStale.ts`,
+`types.ts`) is what makes cluster caching actually survive Redux's node-reference churn: unlike every §3
+cache, it is **not** a `WeakMap` — it's a plain string-keyed `Map` with manual LRU eviction, since the
+whole point is surviving across node-reference changes that a `WeakMap` would treat as a fresh key.
+
+- **Key**: `${nodeId}:${cluster.key}${extraKey}` — `extraKey` lets one cache serve multiple sub-results
+  per cluster (e.g. `getVectorFillLoopPoints` keys additionally by loop key; the stroke cache keys
+  additionally by half-width, since body-stroke and edit-mode-outline need the same clusters tessellated
+  at two different widths every frame).
+- **Staleness check** (`isStale.ts`): a hit requires every member vertex/segment id in the cluster to
+  still resolve to the *same object reference* it did when cached — not just the same id set. This
+  catches "moved but same id" cases (a dragged vertex keeps its id but gets a new object) that id-set-only
+  keying would miss, without needing any imperative invalidation at the dozens of node-mutation call
+  sites — a topology change naturally produces a different vertex-id set for the affected cluster on its
+  next lookup, a clean miss for free.
+- **Capacity**: `maxEntries` must be sized well above the real cluster count or the LRU thrashes (found
+  live: 2000/5000 was far too small for the 3000-cluster stress scene, size increased to 20000/40000).
+
+### 5.3 — Wired into fill, stroke, and a two-tier cache in front of both
+
+`deriveVectorFaces/deriveVectorFaces.ts`, `getVectorFillLoopPoints/getVectorFillLoopPoints.ts`, and
+`getVectorNodeThickStrokeVertices/getVectorNodeThickStrokeVertices.ts` (each already split into its own
+folder — one function per file, per this codebase's file-splitting convention) all follow the same
+two-tier shape: a `wholeNodeCache: WeakMap<TVectorNode, ...>` sits **in front of** the persistent
+per-cluster cache, giving O(1) hits for repeat same-frame calls against an unchanged node reference,
+falling through to per-cluster compute-or-fetch only when the node reference actually changes (once per
+dispatch) — cheaper than hashing into the cluster cache on every single call when nothing changed at all.
+
+Stroke tessellation (`getVectorNodeThickStrokeVertices.ts`) was flagged as explicitly out of scope in an
+earlier draft of this plan — it has **now been done**, closing what profiling showed as the single
+largest remaining cost after fill/crossing were fixed. It further splits width-independent work
+(`flattenClusterSegments.ts`, cached in `computeClusterStrokeVertices.ts`'s own `flattenCache`) from
+width-dependent triangulation (the outer `strokeCache`, owned by `getNodeStrokeVertices.ts`), since body
+stroke and the edit-mode outline need the same flattened clusters at two different half-widths every
+frame — flattening once, triangulating twice, instead of redoing both from scratch per width.
+
+### 5.4 — Crossing detection: spatial hash grid, replacing the §3.1 sweep line
+
+`findAllNetworkCrossings/` (folder — `findAllNetworkCrossings.ts`, `getCachedFlattenedSegment.ts`,
+`findOverlappingSegmentPairs.ts`, `getCellSize.ts`, `getCellKeys.ts`, `boundingBoxesOverlap.ts`,
+`getBoundingBox.ts`, `types.ts`) replaced §3.1's 1D X-sorted sweep-line broad phase with a uniform
+spatial hash grid: cell size auto-derived from the data (`getCellSize`, targeting ~1 box/cell), each
+bounding box hashed into every cell it spans (`getCellKeys`), candidate pairs collected per cell with
+pair-dedup (`seenPairKeys` in `findOverlappingSegmentPairs.ts`, since a box spanning multiple cells could
+otherwise be checked against the same neighbor more than once). The sweep line degraded badly on grid
+layouts specifically — many segments sharing an X range (same column, different rows) kept its "active"
+list huge regardless of Y, toward O(n × column height) instead of near-linear. Confirmed live:
+`findAllNetworkCrossings` dropped from ~505ms/17.2% to ~50ms/1.3% self-time on the stress scene.
+`getCachedFlattenedSegment.ts` also carries a per-segment flatten/bbox cache (reference-validated the
+same way as §5.2, predating the cluster work) so re-tessellating one moved segment's curve doesn't
+require re-tessellating every other segment in the node just to re-run the crossing search.
+
+### 5.5 — Also landed alongside: dev-mode Redux middleware
+
+`store/store.ts`'s `getDefaultMiddleware` now explicitly disables `immutableCheck`/`serializableCheck` in
+development too (both already auto-disabled in production) — both were adding real, felt latency while
+profiling the stress scene in dev mode, confirmed by the user via a Chrome DevTools call-tree entry for
+`SerializableStateInvariantMiddleware`. No effect on production behavior.
+
+### 5.6 — Honest result: architectural ceiling, not a full fix, on the extreme case
+
+Every fix in §5 was confirmed against the user's own live Chrome DevTools profiling loop, with real,
+measured before/after improvements at each individual step. On a **realistic** single/few-element edit,
+the user confirmed a genuine (if modest) improvement. On the **extreme** stress test (thousands of
+disconnected shapes in one node), the subjective feel stayed largely unchanged, because §5's fixes are
+real but the cost kept shifting to the next-largest remaining item rather than the *total* frame cost
+dropping proportionally — crossing detection (§5.4) still re-scans the **whole node** on every edit
+(that part was never scoped to be cluster-cached, only its broad phase got faster), and clustering itself
+(`computeClusters`) still walks the whole node's adjacency graph fresh on every planarization. A true fix
+for the extreme case needs **incremental/differential topology tracking** — only re-deriving the clusters
+actually touched by an edit, never scanning the untouched ones at all — which is a substantially larger,
+separate undertaking, **not started**.
+
+**Rotated nodes still get a cluster-cache miss every render frame**, unchanged from §3.6/§4: `drawVectorNode.ts`
+allocates a new baked node (and, inside the bake, new vertex objects) every frame for `rotation !== 0`,
+and a reference-keyed-by-vertex-object cluster cache inherits that same limitation — pre-existing, not a
+regression from this section's work, and still not fixed.
+
+**GPU-buffer-level caching** (skipping `bufferData`/`drawArrays` for an unchanged cluster) remains
+out of scope — no precedent anywhere in the renderer (only 4 shared GL buffers total, app-wide, rebound
+per-primitive every frame, [[canvas-rendering-pipeline]] §3/§8) — a materially larger
+rendering-architecture change than anything in this doc.
 
 ## File index
 
@@ -322,7 +398,21 @@ compute-or-fetch per cluster and concatenate, with **no change to either functio
   (`*NodeIdsRef`/`*VectorNodeSnapshotsRef` fields)
 - Hit-testing: `Canvas/utils/getNodeAtPoint.ts`
 - Stress-test scaffold (not part of the app bundle): `scripts/` (generator moved/excluded per `59fe9c6`)
-- Pending cluster-cache plan: `~/.claude/plans/compressed-leaping-koala.md` (not yet implemented — §5)
+- Per-cluster caching (§5): `utils/canvas/vectorNetwork/getVectorNodeClusters/{getVectorNodeClusters,
+  getVectorNodeRawClusters,computeClusters,types}.ts`,
+  `utils/canvas/vectorNetwork/createClusterResultCache/{createClusterResultCache,buildKey,isStale,types}.ts`,
+  `utils/canvas/vectorNetwork/deriveVectorFaces/{deriveVectorFaces,deriveClusterFaces,getPieceKeys,
+  isSelfBacktrack,types}.ts`,
+  `utils/canvas/vectorNetwork/getVectorFillLoopPoints/{getVectorFillLoopPoints,computeLoopPoints,
+  resolveUnits,getRealSegmentIdFromLoopKey,resolvePieceKeyToUnit,chainIntoSteps,expandUnitStep,
+  buildVertexRuns,walkNextStep,types}.ts`,
+  `utils/canvas/vectorNetwork/getVectorNodeThickStrokeVertices/{getVectorNodeThickStrokeVertices,
+  getClustersForStroke,getNodeStrokeVertices,computeClusterStrokeVertices,flattenClusterSegments}.ts`,
+  `utils/canvas/vectorNetwork/planarizeVectorNetwork/findAllNetworkCrossings/{findAllNetworkCrossings,
+  getCachedFlattenedSegment,findOverlappingSegmentPairs,getCellSize,getCellKeys,boundingBoxesOverlap,
+  getBoundingBox,types}.ts`, `utils/canvas/vectorNetwork/getVectorClusterByRealSegmentId.ts`,
+  `utils/canvas/vectorNetwork/planarizeVectorNetwork/planarizeVectorNetwork.ts` (reference-preserving
+  no-crossings branch), `store/store.ts` (dev-mode middleware)
 
 ## Related
 

@@ -7,7 +7,7 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { commitSingleVectorShapeBuilderNode } from '../commitSingleVectorShapeBuilderNode';
-import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
 
 // mock — a 100x100 rectangle split in half by a horizontal "divider" segment (e-f), forming a top

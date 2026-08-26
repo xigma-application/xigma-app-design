@@ -2,7 +2,7 @@
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { deriveVectorFaces, TVectorFace } from '../deriveVectorFaces';
+import { deriveVectorFaces, TVectorFace } from '../deriveVectorFaces/deriveVectorFaces';
 import { getFaceKeysBySegmentId } from './getFaceKeysBySegmentId';
 
 export const getInteriorSegmentIds = (node: TVectorNode, touchedFaces: TVectorFace[]): string[] => {

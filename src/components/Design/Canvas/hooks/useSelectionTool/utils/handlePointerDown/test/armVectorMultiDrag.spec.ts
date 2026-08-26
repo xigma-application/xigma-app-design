@@ -5,7 +5,7 @@ import { TSceneNode, TVectorNode } from 'types/design/types';
 // utils
 import { armVectorMultiDrag } from '../armVectorMultiDrag';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
-import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
 
 const createCanvas = (): HTMLCanvasElement => {

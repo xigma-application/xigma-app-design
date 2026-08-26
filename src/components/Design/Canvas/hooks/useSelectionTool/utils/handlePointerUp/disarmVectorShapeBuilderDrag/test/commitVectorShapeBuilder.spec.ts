@@ -7,7 +7,7 @@ import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { commitVectorShapeBuilder } from '../commitVectorShapeBuilder';
-import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
 
 // wraps a single-node call so every existing (pre-cross-node) test keeps its original 4-arg shape at

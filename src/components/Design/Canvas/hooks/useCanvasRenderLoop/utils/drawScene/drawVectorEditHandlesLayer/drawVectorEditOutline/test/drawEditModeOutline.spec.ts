@@ -5,10 +5,14 @@ import { TVectorNode } from 'types/design/types';
 // utils
 import { drawEditModeOutline } from '../drawEditModeOutline';
 
-const drawVectorStrokeMock = vi.fn();
+const drawVectorThickStrokeVerticesMock = vi.fn();
+const getVectorNodeThickStrokeVerticesMock = vi.fn();
 
-vi.mock('utils/canvas/drawVectorNode/drawVectorStroke', () => ({
-  drawVectorStroke: (...args: unknown[]): void => drawVectorStrokeMock(...args),
+vi.mock('utils/canvas/drawVectorNode/drawVectorThickStrokeVertices', () => ({
+  drawVectorThickStrokeVertices: (...args: unknown[]): void => drawVectorThickStrokeVerticesMock(...args),
+}));
+vi.mock('utils/canvas/vectorNetwork/getVectorNodeThickStrokeVertices/getVectorNodeThickStrokeVertices', () => ({
+  getVectorNodeThickStrokeVertices: (...args: unknown[]): unknown => getVectorNodeThickStrokeVerticesMock(...args),
 }));
 
 const node: TVectorNode = {
@@ -28,7 +32,9 @@ const node: TVectorNode = {
 
 describe('drawEditModeOutline', () => {
   beforeEach(() => {
-    drawVectorStrokeMock.mockClear();
+    drawVectorThickStrokeVerticesMock.mockClear();
+    getVectorNodeThickStrokeVerticesMock.mockReset();
+    getVectorNodeThickStrokeVerticesMock.mockReturnValue([]);
   });
 
   it('should draw the gray edit-mode outline at a constant screen width, regardless of hover', () => {
@@ -39,8 +45,9 @@ describe('drawEditModeOutline', () => {
       zoom: 2,
     });
 
-    // result — HOVER_OUTLINE_WIDTH (2) / zoom (2) = 1
-    expect(drawVectorStrokeMock).toHaveBeenCalledTimes(1);
-    expect(drawVectorStrokeMock).toHaveBeenCalledWith({}, {}, {}, [], '#aaaaaa', 1, 200, 150, { x: 0, y: 0, zoom: 2 });
+    // result — HOVER_OUTLINE_WIDTH (2) / zoom (2) / 2 = 0.5 halfWidth
+    expect(getVectorNodeThickStrokeVerticesMock).toHaveBeenCalledWith(node, 0.5);
+    expect(drawVectorThickStrokeVerticesMock).toHaveBeenCalledTimes(1);
+    expect(drawVectorThickStrokeVerticesMock).toHaveBeenCalledWith({}, {}, {}, [], '#aaaaaa', 200, 150, { x: 0, y: 0, zoom: 2 });
   });
 });

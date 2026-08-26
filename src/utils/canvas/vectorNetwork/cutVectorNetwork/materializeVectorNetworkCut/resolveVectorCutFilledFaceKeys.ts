@@ -2,7 +2,7 @@
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { deriveVectorFaces } from '../../deriveVectorFaces';
+import { deriveVectorFaces } from '../../deriveVectorFaces/deriveVectorFaces';
 import { getPolygonCentroid } from './getPolygonCentroid';
 import { getVectorFaceAtPoint } from 'components/Design/Canvas/utils/getVectorFaceAtPoint';
 import { getVectorFillLoopKey } from '../../getVectorFillLoopKey';

@@ -6,7 +6,7 @@ import { TSceneNode, TViewport } from 'types/design/types';
 import { TVectorDraggedFillFaces } from 'types/design/canvas/types';
 
 // utils
-import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { drawVectorHatchFill } from 'utils/canvas/drawVectorNode/drawVectorHatchFill';
 import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
 import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';

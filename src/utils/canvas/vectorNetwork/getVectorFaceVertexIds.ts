@@ -1,23 +1,34 @@
 // utils
-import { TVectorFace } from './deriveVectorFaces';
+import { TVectorFace } from './deriveVectorFaces/deriveVectorFaces';
 
 const PIECE_KEY_PATTERN = /^(.+)\[(.+)\|(.+)]$/;
 const VERTEX_BOUNDARY_PATTERN = /^v:(.+)$/;
 
+const cache = new WeakMap<TVectorFace, string[]>();
+
 export const getVectorFaceVertexIds = (face: TVectorFace): string[] => {
-  const vertexIds = new Set<string>();
+  const cached = cache.get(face);
 
-  face.pieceKeys.forEach((pieceKey) => {
-    const match = PIECE_KEY_PATTERN.exec(pieceKey);
+  if (!cached) {
+    const vertexIds = new Set<string>();
 
-    [match?.[2], match?.[3]].forEach((boundary) => {
-      const vertexMatch = boundary && VERTEX_BOUNDARY_PATTERN.exec(boundary);
+    face.pieceKeys.forEach((pieceKey) => {
+      const match = PIECE_KEY_PATTERN.exec(pieceKey);
 
-      if (vertexMatch) {
-        vertexIds.add(vertexMatch[1]);
-      }
+      [match?.[2], match?.[3]].forEach((boundary) => {
+        const vertexMatch = boundary && VERTEX_BOUNDARY_PATTERN.exec(boundary);
+
+        if (vertexMatch) {
+          vertexIds.add(vertexMatch[1]);
+        }
+      });
     });
-  });
 
-  return [...vertexIds];
+    const result = [...vertexIds];
+    cache.set(face, result);
+
+    return result;
+  }
+
+  return cached;
 };

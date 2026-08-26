@@ -11,7 +11,7 @@ export const persistVectorNetworkCrossings = (
   segments: Record<string, TVectorSegment>,
   vertices: Record<string, TVectorVertex>,
 ): { segments: Record<string, TVectorSegment>; vertices: Record<string, TVectorVertex> } => {
-  const planar = planarizeVectorNetwork(Object.values(segments), vertices);
+  const planar = planarizeVectorNetwork(segments, vertices);
   const newVertexIds = Object.keys(planar.vertices).filter((id) => !(id in vertices));
 
   if (newVertexIds.length === 0) {

@@ -8,7 +8,7 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { deleteSelectedVertices } from '../deleteSelectedVertices';
-import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { getVectorFaceVertexIds } from 'utils/canvas/vectorNetwork/getVectorFaceVertexIds';
 
 const addVectorNode = (): string => {

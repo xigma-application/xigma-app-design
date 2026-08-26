@@ -2,7 +2,7 @@
 import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
-import { extractVectorFragment } from './extractVectorFragment';
+import { extractVectorFragment } from './extractVectorFragment/extractVectorFragment';
 import { getOwningSegmentNodes } from './handleDeleteSelection/getOwningSegmentNodes';
 import { getOwningVertexNodes } from './handleDeleteSelection/getOwningVertexNodes';
 import { setVectorClipboardFragment } from './vectorClipboard';

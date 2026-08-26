@@ -5,8 +5,8 @@ import { HOVER_OUTLINE_WIDTH, VECTOR_EDIT_OUTLINE_STROKE } from 'constant/canvas
 import { TVectorNode, TViewport } from 'types/design/types';
 
 // utils
-import { drawVectorStroke } from 'utils/canvas/drawVectorNode/drawVectorStroke';
-import { flattenVectorSegments } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
+import { drawVectorThickStrokeVertices } from 'utils/canvas/drawVectorNode/drawVectorThickStrokeVertices';
+import { getVectorNodeThickStrokeVertices } from 'utils/canvas/vectorNetwork/getVectorNodeThickStrokeVertices/getVectorNodeThickStrokeVertices';
 
 export const drawEditModeOutline = (
   gl: WebGL2RenderingContext,
@@ -17,15 +17,6 @@ export const drawEditModeOutline = (
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  drawVectorStroke(
-    gl,
-    program,
-    buffer,
-    flattenVectorSegments(node),
-    VECTOR_EDIT_OUTLINE_STROKE,
-    HOVER_OUTLINE_WIDTH / viewport.zoom,
-    canvasWidth,
-    canvasHeight,
-    viewport,
-  );
+  const strokeVertices = getVectorNodeThickStrokeVertices(node, HOVER_OUTLINE_WIDTH / viewport.zoom / 2);
+  drawVectorThickStrokeVertices(gl, program, buffer, strokeVertices, VECTOR_EDIT_OUTLINE_STROKE, canvasWidth, canvasHeight, viewport);
 };

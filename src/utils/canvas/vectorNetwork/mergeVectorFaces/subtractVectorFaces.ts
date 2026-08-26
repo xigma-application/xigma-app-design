@@ -1,6 +1,6 @@
 // types
 import { TVectorNode } from 'types/design/types';
-import { TVectorFace } from '../deriveVectorFaces';
+import { TVectorFace } from '../deriveVectorFaces/deriveVectorFaces';
 
 // utils
 import { getExclusiveSegmentIds } from './getExclusiveSegmentIds';

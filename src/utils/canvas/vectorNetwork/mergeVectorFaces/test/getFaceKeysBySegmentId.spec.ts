@@ -1,6 +1,6 @@
 // utils
 import { getFaceKeysBySegmentId } from '../getFaceKeysBySegmentId';
-import { TVectorFace } from '../../deriveVectorFaces';
+import { TVectorFace } from '../../deriveVectorFaces/deriveVectorFaces';
 
 describe('getFaceKeysBySegmentId', () => {
   it('should return an empty map for an empty face list', () => {

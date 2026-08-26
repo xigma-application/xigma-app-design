@@ -8,7 +8,7 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { commitVectorSplit } from '../commitVectorSplit';
-import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
 
 const addVectorNode = (): string => {

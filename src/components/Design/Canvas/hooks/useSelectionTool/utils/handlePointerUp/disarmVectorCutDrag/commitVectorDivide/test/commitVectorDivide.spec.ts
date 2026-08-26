@@ -9,7 +9,7 @@ import { TVectorNode } from 'types/design/types';
 // utils
 import { commitVectorDivide } from '../commitVectorDivide';
 import { createCanvasRefs } from '../../../../../../useCanvasRefs/createCanvasRefs';
-import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
 
 const addSquareNode = (x: number, filled: boolean): string => {

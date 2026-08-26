@@ -7,7 +7,7 @@ import { TVectorNode, TViewport } from 'types/design/types';
 // utils
 import { drawVectorStroke } from 'utils/canvas/drawVectorNode/drawVectorStroke';
 import { drawVertexPreviewDot } from '../../drawPenPreview/drawVertexPreviewDot';
-import { flattenVectorSegments } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
+import { flattenVectorSegmentById } from 'utils/canvas/vectorNetwork/flattenVectorSegmentById';
 import { getSegmentMidpoint } from 'utils/canvas/vectorNetwork/getSegmentMidpoint';
 
 export const drawHoveredSegmentHighlight = (
@@ -20,9 +20,7 @@ export const drawHoveredSegmentHighlight = (
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  const hoveredSegment = hoveredSegmentId
-    ? flattenVectorSegments(node).find((segment) => segment.segmentId === hoveredSegmentId)
-    : undefined;
+  const hoveredSegment = hoveredSegmentId ? flattenVectorSegmentById(node, hoveredSegmentId) : null;
 
   if (hoveredSegment) {
     const segment = node.segments[hoveredSegment.segmentId];

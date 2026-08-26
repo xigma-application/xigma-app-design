@@ -11,7 +11,9 @@ const historyStack = createHistoryStack();
 
 export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({ thunk: { extraArgument: historyStack } }).concat(createHistoryMiddleware(historyStack)),
+    getDefaultMiddleware({ immutableCheck: false, serializableCheck: false, thunk: { extraArgument: historyStack } }).concat(
+      createHistoryMiddleware(historyStack),
+    ),
   reducer: {
     design: designReducer,
   },

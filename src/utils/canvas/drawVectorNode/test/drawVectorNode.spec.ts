@@ -8,9 +8,9 @@ import { getVectorFillColorForLoopKey } from '../../vectorNetwork/getVectorFillC
 
 const getVectorFillLoopPointsMock = vi.fn();
 const drawVectorFillMock = vi.fn();
-const drawVectorStrokeMock = vi.fn();
+const drawVectorThickStrokeVerticesMock = vi.fn();
 const drawVectorVariableStrokeMock = vi.fn();
-const flattenVectorSegmentsMock = vi.fn();
+const getVectorNodeThickStrokeVerticesMock = vi.fn();
 const getRenderedVectorNodeMock = vi.fn();
 
 vi.mock('components/Design/Canvas/utils/getRenderedVectorNode', () => ({
@@ -20,12 +20,14 @@ vi.mock('../../vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints', (
   getVectorFillLoopPoints: (...args: unknown[]): unknown => getVectorFillLoopPointsMock(...args),
 }));
 vi.mock('../drawVectorFill', () => ({ drawVectorFill: (...args: unknown[]): void => drawVectorFillMock(...args) }));
-vi.mock('../drawVectorStroke', () => ({ drawVectorStroke: (...args: unknown[]): void => drawVectorStrokeMock(...args) }));
+vi.mock('../drawVectorThickStrokeVertices', () => ({
+  drawVectorThickStrokeVertices: (...args: unknown[]): void => drawVectorThickStrokeVerticesMock(...args),
+}));
 vi.mock('../drawVectorVariableStroke', () => ({
   drawVectorVariableStroke: (...args: unknown[]): void => drawVectorVariableStrokeMock(...args),
 }));
-vi.mock('../../vectorNetwork/flattenVectorSegments', () => ({
-  flattenVectorSegments: (...args: unknown[]): unknown => flattenVectorSegmentsMock(...args),
+vi.mock('../../vectorNetwork/getVectorNodeThickStrokeVertices/getVectorNodeThickStrokeVertices', () => ({
+  getVectorNodeThickStrokeVertices: (...args: unknown[]): unknown => getVectorNodeThickStrokeVerticesMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -34,9 +36,9 @@ describe('drawVectorNode', () => {
   beforeEach(() => {
     getVectorFillLoopPointsMock.mockClear();
     drawVectorFillMock.mockClear();
-    drawVectorStrokeMock.mockClear();
+    drawVectorThickStrokeVerticesMock.mockClear();
     drawVectorVariableStrokeMock.mockClear();
-    flattenVectorSegmentsMock.mockClear();
+    getVectorNodeThickStrokeVerticesMock.mockClear();
     getRenderedVectorNodeMock.mockReset();
     getRenderedVectorNodeMock.mockImplementation((node: TVectorNode) => node);
   });
@@ -61,17 +63,17 @@ describe('drawVectorNode', () => {
       vertices: {},
     };
     const loopPoints = [{ x: 0, y: 0 }];
-    const flattened = [{ points: [{ x: 0, y: 0 }], segmentId: 's1' }];
+    const strokeVertices = [0, 0, 1, 1];
 
     getVectorFillLoopPointsMock.mockReturnValue(loopPoints);
-    flattenVectorSegmentsMock.mockReturnValue(flattened);
+    getVectorNodeThickStrokeVerticesMock.mockReturnValue(strokeVertices);
 
     // before
     drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(getVectorFillLoopPointsMock).toHaveBeenCalledWith(node, 's1,s2,s3');
-    expect(flattenVectorSegmentsMock).toHaveBeenCalledWith(node);
+    expect(getVectorNodeThickStrokeVerticesMock).toHaveBeenCalledWith(node, 1.5);
     expect(drawVectorFillMock).toHaveBeenCalledWith(
       gl,
       program,
@@ -82,7 +84,16 @@ describe('drawVectorNode', () => {
       150,
       IDENTITY_VIEWPORT,
     );
-    expect(drawVectorStrokeMock).toHaveBeenCalledWith(gl, program, buffer, flattened, '#00ff00', 3, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorThickStrokeVerticesMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      strokeVertices,
+      '#00ff00',
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
   });
 
   it('should draw each filled loop through its own separate drawVectorFill call, not one call batching every loop together — batching would XOR independently-painted loops’ stencil bits together if they come to overlap in screen space', () => {
@@ -106,10 +117,8 @@ describe('drawVectorNode', () => {
     };
     const loopAPoints = [{ x: 0, y: 0 }];
     const loopBPoints = [{ x: 1, y: 1 }];
-    const flattened = [{ points: [{ x: 0, y: 0 }], segmentId: 's1' }];
 
     getVectorFillLoopPointsMock.mockImplementation((_node: TVectorNode, key: string) => (key === 's1,s2,s3' ? loopAPoints : loopBPoints));
-    flattenVectorSegmentsMock.mockReturnValue(flattened);
 
     // before
     drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
@@ -143,10 +152,8 @@ describe('drawVectorNode', () => {
       vertexHandleModes: {},
       vertices: {},
     };
-    const flattened = [{ points: [{ x: 0, y: 0 }], segmentId: 's1' }];
 
     getVectorFillLoopPointsMock.mockReturnValue(null);
-    flattenVectorSegmentsMock.mockReturnValue(flattened);
 
     // before
     drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
@@ -154,7 +161,7 @@ describe('drawVectorNode', () => {
     // result
     expect(getVectorFillLoopPointsMock).toHaveBeenCalledWith(node, 'stale-key');
     expect(drawVectorFillMock).not.toHaveBeenCalled();
-    expect(drawVectorStrokeMock).toHaveBeenCalledWith(gl, program, buffer, flattened, '#00ff00', 3, 200, 150, IDENTITY_VIEWPORT);
+    expect(getVectorNodeThickStrokeVerticesMock).toHaveBeenCalledWith(node, 1.5);
   });
 
   it('should skip drawing a fill (and never resolve any loop) when the node has no filled faces', () => {
@@ -176,9 +183,6 @@ describe('drawVectorNode', () => {
       vertexHandleModes: {},
       vertices: {},
     };
-    const flattened = [{ points: [{ x: 0, y: 0 }], segmentId: 's1' }];
-
-    flattenVectorSegmentsMock.mockReturnValue(flattened);
 
     // before
     drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
@@ -186,7 +190,7 @@ describe('drawVectorNode', () => {
     // result
     expect(getVectorFillLoopPointsMock).not.toHaveBeenCalled();
     expect(drawVectorFillMock).not.toHaveBeenCalled();
-    expect(drawVectorStrokeMock).toHaveBeenCalledWith(gl, program, buffer, flattened, '#00ff00', 3, 200, 150, IDENTITY_VIEWPORT);
+    expect(getVectorNodeThickStrokeVerticesMock).toHaveBeenCalledWith(node, 1.5);
   });
 
   it('should draw the variable-width ribbon instead of the uniform stroke when the node carries a width profile', () => {
@@ -215,7 +219,7 @@ describe('drawVectorNode', () => {
 
     // result
     expect(drawVectorVariableStrokeMock).toHaveBeenCalledWith(gl, program, buffer, node, '#00ff00', 200, 150, IDENTITY_VIEWPORT);
-    expect(drawVectorStrokeMock).not.toHaveBeenCalled();
+    expect(getVectorNodeThickStrokeVerticesMock).not.toHaveBeenCalled();
   });
 
   it('should pass the node through getRenderedVectorNode and draw whatever it returns, so a rotated node’s baked/cached rendering is what actually gets tessellated', () => {
@@ -238,16 +242,14 @@ describe('drawVectorNode', () => {
       vertices: {},
     };
     const renderedNode: TVectorNode = { ...node, rotation: 0 };
-    const flattened = [{ points: [{ x: 0, y: 0 }], segmentId: 's1' }];
 
     getRenderedVectorNodeMock.mockReturnValue(renderedNode);
-    flattenVectorSegmentsMock.mockReturnValue(flattened);
 
     // before
     drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(getRenderedVectorNodeMock).toHaveBeenCalledWith(node);
-    expect(flattenVectorSegmentsMock).toHaveBeenCalledWith(renderedNode);
+    expect(getVectorNodeThickStrokeVerticesMock).toHaveBeenCalledWith(renderedNode, 1.5);
   });
 });

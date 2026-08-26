@@ -10,7 +10,7 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
-import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { handleDeleteSelection } from '../handleDeleteSelection';
 
 const createRefs = (selectedVectorVertexIds: string[] = []): TCanvasRefs =>

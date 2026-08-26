@@ -1,7 +1,7 @@
 // types
 import { TPoint } from 'types/canvas';
 import { TSceneNode, TVectorNode } from 'types/design/types';
-import { TVectorFace } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { TVectorFace } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 
 // utils
 import { bakeVectorNodeRotation } from './bakeVectorNodeRotation';

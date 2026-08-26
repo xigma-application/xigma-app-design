@@ -11,7 +11,7 @@ import { ToolName } from 'types/design/enums';
 
 // utils
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { getVectorHandleAtPointAcrossOpenNodes } from '../../../../utils/getVectorHandleAtPointAcrossOpenNodes';
+import { getVectorHandleAtPointAcrossOpenNodes } from '../../../../utils/getVectorHandleAtPointAcrossOpenNodes/getVectorHandleAtPointAcrossOpenNodes';
 import { getVisualSelectedVectorVertexIds } from 'utils/canvas/vectorNetwork/getVisualSelectedVectorVertexIds';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 

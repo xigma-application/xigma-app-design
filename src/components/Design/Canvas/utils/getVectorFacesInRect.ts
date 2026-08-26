@@ -3,7 +3,7 @@ import { TDraftRect } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { deriveVectorFaces, TVectorFace } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { deriveVectorFaces, TVectorFace } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { getRectCorners } from 'utils/canvas/getRectCorners';
 import { isPointInPolygonVertices } from './isPointInPolygonVertices';
 import { isPointInRect } from './isPointInRect';

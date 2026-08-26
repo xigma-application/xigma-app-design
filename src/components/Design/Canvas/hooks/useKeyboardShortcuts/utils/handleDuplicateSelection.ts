@@ -13,7 +13,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
 import { cloneNodeWithOffset } from './cloneNodeWithOffset';
-import { duplicateVectorFragment } from './duplicateVectorFragment';
+import { duplicateVectorFragment } from './duplicateVectorFragment/duplicateVectorFragment';
 
 export const handleDuplicateSelection = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
   const state = store.getState();

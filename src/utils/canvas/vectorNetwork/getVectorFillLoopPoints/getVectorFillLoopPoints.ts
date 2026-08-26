@@ -1,40 +1,32 @@
 // types
 import { TPoint } from 'types/canvas';
-import { TVectorNode, TVectorSegment, TVectorVertex } from 'types/design/types';
-import { TResolvedPieceUnit } from './types';
-import { TVectorPieceBoundaries } from '../getVectorPieceBoundaryKeys';
+import { TVectorNode } from 'types/design/types';
 
 // utils
-import { chainIntoSteps } from './chainIntoSteps';
-import { expandUnitStep } from './expandUnitStep';
-import { flattenVectorFaceSteps } from '../flattenVectorFaceSteps';
+import { computeLoopPoints } from './computeLoopPoints';
+import { createClusterResultCache } from '../createClusterResultCache/createClusterResultCache';
 import { getPlanarVectorNetwork } from '../getPlanarVectorNetwork';
-import { resolvePieceKeyToUnit } from './resolvePieceKeyToUnit';
+import { getRealSegmentIdFromLoopKey } from './getRealSegmentIdFromLoopKey';
+import { getVectorClusterByRealSegmentId } from '../getVectorClusterByRealSegmentId';
+import { getVectorNodeClusters } from '../getVectorNodeClusters/getVectorNodeClusters';
 
-const cache = new WeakMap<TVectorNode, Map<string, TPoint[] | null>>();
-
-const resolveUnits = (
-  loopKey: string,
-  planarSegments: Record<string, TVectorSegment>,
-  vertices: Record<string, TVectorVertex>,
-  boundaryKeysByRealSegmentId: Map<string, Record<string, TVectorPieceBoundaries>>,
-): (TResolvedPieceUnit | null)[] =>
-  loopKey.split(',').map((pieceKey) => resolvePieceKeyToUnit(pieceKey, planarSegments, vertices, boundaryKeysByRealSegmentId));
+const cache = createClusterResultCache<TPoint[] | null>(20000);
+const wholeNodeCache = new WeakMap<TVectorNode, Map<string, TPoint[] | null>>();
 
 export const getVectorFillLoopPoints = (node: TVectorNode, loopKey: string): TPoint[] | null => {
-  const nodeCache = cache.get(node) ?? new Map<string, TPoint[] | null>();
-  cache.set(node, nodeCache);
+  const nodeCache = wholeNodeCache.get(node) ?? new Map<string, TPoint[] | null>();
+  wholeNodeCache.set(node, nodeCache);
 
   if (!nodeCache.has(loopKey)) {
     const planar = getPlanarVectorNetwork(node);
-    const boundaryKeysByRealSegmentId = new Map<string, Record<string, TVectorPieceBoundaries>>();
-    const units = resolveUnits(loopKey, planar.segments, node.vertices, boundaryKeysByRealSegmentId);
-    const hasEveryUnit = units.every((unit): unit is TResolvedPieceUnit => unit !== null);
-    const outerSteps = hasEveryUnit ? chainIntoSteps(units) : null;
-    const unitsById = hasEveryUnit ? new Map(units.map((unit) => [unit.id, unit])) : null;
-    const atomicSteps = outerSteps && unitsById ? outerSteps.flatMap((step) => expandUnitStep(step, unitsById)) : null;
+    const cluster = getVectorClusterByRealSegmentId(getVectorNodeClusters(planar)).get(getRealSegmentIdFromLoopKey(loopKey));
+    const result = cluster
+      ? cache.get(node.id, cluster, loopKey, planar, () => computeLoopPoints(loopKey, planar, node.vertices))
+      : computeLoopPoints(loopKey, planar, node.vertices);
 
-    nodeCache.set(loopKey, atomicSteps && flattenVectorFaceSteps(atomicSteps, planar.segments, planar.vertices));
+    nodeCache.set(loopKey, result);
+
+    return result;
   }
 
   return nodeCache.get(loopKey) ?? null;

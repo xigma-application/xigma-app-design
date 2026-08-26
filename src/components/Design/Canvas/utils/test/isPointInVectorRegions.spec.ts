@@ -3,7 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
 import { isPointInVectorRegions } from '../isPointInVectorRegions';
 

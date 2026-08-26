@@ -2,7 +2,7 @@
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { deriveVectorFaces, TVectorFace } from './deriveVectorFaces';
+import { deriveVectorFaces, TVectorFace } from './deriveVectorFaces/deriveVectorFaces';
 import { getVectorFaceVertexIds } from './getVectorFaceVertexIds';
 
 export const getVectorFullySelectedFaces = (node: TVectorNode, selectedVertexIds: string[]): TVectorFace[] => {

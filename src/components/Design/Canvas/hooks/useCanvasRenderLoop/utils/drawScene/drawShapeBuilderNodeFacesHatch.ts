@@ -2,7 +2,7 @@
 import { TVectorNode, TViewport } from 'types/design/types';
 
 // utils
-import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { drawVectorHatchFill } from 'utils/canvas/drawVectorNode/drawVectorHatchFill';
 import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
 

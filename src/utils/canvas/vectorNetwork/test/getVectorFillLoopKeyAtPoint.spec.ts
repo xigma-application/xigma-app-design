@@ -3,7 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { deriveVectorFaces } from '../deriveVectorFaces';
+import { deriveVectorFaces } from '../deriveVectorFaces/deriveVectorFaces';
 import { getVectorFillLoopKey } from '../getVectorFillLoopKey';
 import { getVectorFillLoopKeyAtPoint } from '../getVectorFillLoopKeyAtPoint';
 

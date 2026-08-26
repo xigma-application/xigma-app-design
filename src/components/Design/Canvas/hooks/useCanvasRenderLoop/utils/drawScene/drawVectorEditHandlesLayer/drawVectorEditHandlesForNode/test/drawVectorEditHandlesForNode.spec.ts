@@ -19,12 +19,20 @@ const drawRectMock = vi.fn();
 const drawLineMock = vi.fn();
 const drawVectorStrokeMock = vi.fn();
 const drawVectorVertexDotBatchMock = vi.fn();
+const drawVectorThickStrokeVerticesMock = vi.fn();
+const getVectorNodeThickStrokeVerticesMock = vi.fn();
 
 vi.mock('utils/canvas/shapes/drawEllipse', () => ({ drawEllipse: (...args: unknown[]): void => drawEllipseMock(...args) }));
 vi.mock('utils/canvas/drawRect/drawRect', () => ({ drawRect: (...args: unknown[]): void => drawRectMock(...args) }));
 vi.mock('utils/canvas/drawLine', () => ({ drawLine: (...args: unknown[]): void => drawLineMock(...args) }));
 vi.mock('utils/canvas/drawVectorNode/drawVectorStroke', () => ({
   drawVectorStroke: (...args: unknown[]): void => drawVectorStrokeMock(...args),
+}));
+vi.mock('utils/canvas/drawVectorNode/drawVectorThickStrokeVertices', () => ({
+  drawVectorThickStrokeVertices: (...args: unknown[]): void => drawVectorThickStrokeVerticesMock(...args),
+}));
+vi.mock('utils/canvas/vectorNetwork/getVectorNodeThickStrokeVertices/getVectorNodeThickStrokeVertices', () => ({
+  getVectorNodeThickStrokeVertices: (...args: unknown[]): unknown => getVectorNodeThickStrokeVerticesMock(...args),
 }));
 vi.mock(
   'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/drawVectorEditHandlesLayer/drawVectorVertexDots/drawVectorVertexDotBatch',
@@ -112,42 +120,51 @@ describe('drawVectorEditHandlesForNode', () => {
     drawLineMock.mockClear();
     drawVectorStrokeMock.mockClear();
     drawVectorVertexDotBatchMock.mockClear();
+    drawVectorThickStrokeVerticesMock.mockClear();
+    getVectorNodeThickStrokeVerticesMock.mockReset();
+    getVectorNodeThickStrokeVerticesMock.mockReturnValue([]);
   });
 
   it('should always draw the gray edit-mode outline, even while the edited node is also the hovered node', () => {
     // before
     call(vectorNode, []);
 
-    // result
-    expect(drawVectorStrokeMock).toHaveBeenCalledTimes(1);
-    expect(drawVectorStrokeMock).toHaveBeenCalledWith({}, {}, {}, expect.anything(), '#aaaaaa', 2, 200, 150, IDENTITY_VIEWPORT);
+    // result — the outline goes through getVectorNodeThickStrokeVertices/drawVectorThickStrokeVertices
+    // directly now, not the general-purpose drawVectorStroke helper
+    expect(drawVectorStrokeMock).not.toHaveBeenCalled();
+    expect(getVectorNodeThickStrokeVerticesMock).toHaveBeenCalledWith(vectorNode, 1);
+    expect(drawVectorThickStrokeVerticesMock).toHaveBeenCalledTimes(1);
+    expect(drawVectorThickStrokeVerticesMock).toHaveBeenCalledWith({}, {}, {}, [], '#aaaaaa', 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should draw the hovered segment highlight when a hoveredSegmentId is given', () => {
     // before
     call(vectorNode, [], null, 's1');
 
-    // result — the gray outline, plus the single hovered segment drawn again in the highlight color
-    expect(drawVectorStrokeMock).toHaveBeenCalledTimes(2);
-    expect(drawVectorStrokeMock).toHaveBeenNthCalledWith(2, {}, {}, {}, expect.anything(), '#cd4422', 2, 200, 150, IDENTITY_VIEWPORT);
+    // result — the gray outline goes through the thick-stroke-vertices path; the single hovered
+    // segment is still drawn via drawVectorStroke, in the highlight color
+    expect(drawVectorStrokeMock).toHaveBeenCalledTimes(1);
+    expect(drawVectorStrokeMock).toHaveBeenCalledWith({}, {}, {}, expect.anything(), '#cd4422', 2, 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should draw the selected-segment highlight in blue when a segment is selected', () => {
     // before
     call(vectorNode, [], null, null, null, null, [], null, null, ['s1']);
 
-    // result — the gray outline, plus the selected segment drawn again in the selected-state blue
-    expect(drawVectorStrokeMock).toHaveBeenCalledTimes(2);
-    expect(drawVectorStrokeMock).toHaveBeenNthCalledWith(2, {}, {}, {}, expect.anything(), '#0d99ff', 2, 200, 150, IDENTITY_VIEWPORT);
+    // result — the gray outline goes through the thick-stroke-vertices path; the selected segment is
+    // still drawn via drawVectorStroke, in the selected-state blue
+    expect(drawVectorStrokeMock).toHaveBeenCalledTimes(1);
+    expect(drawVectorStrokeMock).toHaveBeenCalledWith({}, {}, {}, expect.anything(), '#0d99ff', 2, 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should draw the hovered-vector-segment highlight in blue at half opacity when a segment is hovered by the Selection tool', () => {
     // before
     call(vectorNode, [], null, null, null, null, [], null, null, [], 's1');
 
-    // result — the gray outline, plus the hovered segment drawn again in blue with alpha 0.5
-    expect(drawVectorStrokeMock).toHaveBeenCalledTimes(2);
-    expect(drawVectorStrokeMock).toHaveBeenNthCalledWith(2, {}, {}, {}, expect.anything(), '#0d99ff', 2, 200, 150, IDENTITY_VIEWPORT, 0.5);
+    // result — the gray outline goes through the thick-stroke-vertices path; the hovered segment is
+    // still drawn via drawVectorStroke, in blue with alpha 0.5
+    expect(drawVectorStrokeMock).toHaveBeenCalledTimes(1);
+    expect(drawVectorStrokeMock).toHaveBeenCalledWith({}, {}, {}, expect.anything(), '#0d99ff', 2, 200, 150, IDENTITY_VIEWPORT, 0.5);
   });
 
   it('should draw nothing for a segment’s tangent handle when its parent vertex is not selected', () => {

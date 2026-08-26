@@ -3,7 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TVectorNetworkComponent } from '../types';
 
 // utils
-import { deriveVectorFaces, TVectorFace } from '../../deriveVectorFaces';
+import { deriveVectorFaces, TVectorFace } from '../../deriveVectorFaces/deriveVectorFaces';
 
 export const deriveClosedFaces = (
   segments: TVectorNetworkComponent['segments'],

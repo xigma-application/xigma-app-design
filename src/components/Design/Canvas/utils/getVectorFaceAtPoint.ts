@@ -3,7 +3,7 @@ import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { deriveVectorFaces, TVectorFace } from 'utils/canvas/vectorNetwork/deriveVectorFaces';
+import { deriveVectorFaces, TVectorFace } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { getPolygonArea } from './getPolygonArea';
 import { isPointInPolygonVertices } from './isPointInPolygonVertices';
 

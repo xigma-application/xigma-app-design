@@ -9,7 +9,7 @@ import { store } from 'store';
 import { TArmContext } from '../../types';
 
 // utils
-import { getVectorHandleAtPointAcrossOpenNodes } from '../../../../../../utils/getVectorHandleAtPointAcrossOpenNodes';
+import { getVectorHandleAtPointAcrossOpenNodes } from '../../../../../../utils/getVectorHandleAtPointAcrossOpenNodes/getVectorHandleAtPointAcrossOpenNodes';
 import { getVisualSelectedVectorVertexIds } from 'utils/canvas/vectorNetwork/getVisualSelectedVectorVertexIds';
 
 export const hitsSelectedHandle = (context: TArmContext, vectorEditingNodeIds: string[]): boolean => {
