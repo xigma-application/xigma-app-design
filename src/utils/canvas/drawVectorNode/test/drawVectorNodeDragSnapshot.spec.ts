@@ -29,7 +29,15 @@ describe('drawVectorNodeDragSnapshot', () => {
       deltaX: 5,
       deltaY: 10,
       facesByColor: [
-        { color: '#ff0000', points: [[{ x: 0, y: 0 }, { x: 1, y: 0 }]] },
+        {
+          color: '#ff0000',
+          points: [
+            [
+              { x: 0, y: 0 },
+              { x: 1, y: 0 },
+            ],
+          ],
+        },
         { color: '#00ff00', points: [[{ x: 2, y: 2 }]] },
       ],
       strokeColor: '#0d99ff',
@@ -46,7 +54,12 @@ describe('drawVectorNodeDragSnapshot', () => {
       gl,
       program,
       buffer,
-      [[{ x: 5, y: 10 }, { x: 6, y: 10 }]],
+      [
+        [
+          { x: 5, y: 10 },
+          { x: 6, y: 10 },
+        ],
+      ],
       '#ff0000',
       200,
       150,

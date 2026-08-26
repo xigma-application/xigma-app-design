@@ -65,7 +65,12 @@ describe('disarmVectorVertexDrag', () => {
     const canvasRefs = createCanvasRefs();
     const selectionRefs = createSelectionToolRefs();
 
-    selectionRefs.vectorVertexDragRef.current = { dispatchThrottle: { frameId: null, run: null }, nodeId: 'path-1', origins: { 'vertex-1': { x: 0, y: 0 } }, pointerStart: { x: 5, y: 5 } };
+    selectionRefs.vectorVertexDragRef.current = {
+      dispatchThrottle: { frameId: null, run: null },
+      nodeId: 'path-1',
+      origins: { 'vertex-1': { x: 0, y: 0 } },
+      pointerStart: { x: 5, y: 5 },
+    };
     canvasRefs.vectorAlignmentGuideRef.current = {
       horizontal: null,
       vertical: { anchor: { x: 0, y: 0 }, match: { x: 0, y: 0 } },

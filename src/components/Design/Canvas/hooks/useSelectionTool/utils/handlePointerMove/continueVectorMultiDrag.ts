@@ -86,7 +86,12 @@ export const continueVectorMultiDrag = (
                 ...node.vertices,
                 ...translateVectorVertices(pickOrigins(dragState.vertexOrigins, group.vertexIds), deltaX, deltaY),
               };
-              const segments = translateVectorHandles(node.segments, pickOrigins(dragState.handleOrigins, group.handleKeys), deltaX, deltaY);
+              const segments = translateVectorHandles(
+                node.segments,
+                pickOrigins(dragState.handleOrigins, group.handleKeys),
+                deltaX,
+                deltaY,
+              );
 
               dispatch(updateNode({ changes: { segments, vertices }, id: nodeId }));
             }

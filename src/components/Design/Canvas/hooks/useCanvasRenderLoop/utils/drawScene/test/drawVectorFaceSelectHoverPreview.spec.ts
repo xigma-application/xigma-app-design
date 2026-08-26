@@ -120,7 +120,16 @@ describe('drawVectorFaceSelectHoverPreview', () => {
     deriveVectorFacesMock.mockReturnValue([]);
 
     // before
-    drawVectorFaceSelectHoverPreview(gl, program, buffer, rotatedNodes, { faceKey: 'k1', nodeId: rotatedNode.id }, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorFaceSelectHoverPreview(
+      gl,
+      program,
+      buffer,
+      rotatedNodes,
+      { faceKey: 'k1', nodeId: rotatedNode.id },
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(bakeVectorNodeRotationMock).toHaveBeenCalledWith(rotatedNode);

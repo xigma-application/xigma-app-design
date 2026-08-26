@@ -75,7 +75,10 @@ describe('captureVectorNodeDragSnapshot', () => {
 
   it('should skip stroke vertex derivation entirely for a node carrying a width profile', () => {
     // mock
-    const node: TVectorNode = { ...baseNode, widthProfile: { points: { p1: { id: 'p1', leftOffset: 10, position: 0.5, rightOffset: 10 } } } };
+    const node: TVectorNode = {
+      ...baseNode,
+      widthProfile: { points: { p1: { id: 'p1', leftOffset: 10, position: 0.5, rightOffset: 10 } } },
+    };
 
     // before
     const snapshot = captureVectorNodeDragSnapshot(node);
