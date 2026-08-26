@@ -52,6 +52,8 @@ import { drawVertexCountHandlesLayer } from './drawVertexCountHandlesLayer';
 import { getPathOutlineStyles } from './getPathOutlineStyles';
 import { getPreviewSceneNodes } from './getPreviewSceneNodes';
 import { getShapeBuilderPreviewFaces } from './getShapeBuilderPreviewFaces';
+import { getVisibleHoveredNode } from './getVisibleHoveredNode';
+import { getVisibleSelectedNodes } from './getVisibleSelectedNodes';
 import { hasCornerRadiusDragMoved } from './hasCornerRadiusDragMoved';
 
 export const drawScene = (
@@ -101,13 +103,9 @@ export const drawScene = (
   const isVectorMultiDragMoving = Boolean(refs.vectorMultiDragRef.current?.hasMoved);
   const sceneNodes = getPreviewSceneNodes(selectOrderedNodes(state), editingNodeId, refs);
   const allSelectedNodes = selectSelectedNodes(state);
-  const draggedNodeIds = refs.draggedNodeIdsRef.current;
-  const resizedNodeIds = refs.resizedNodeIdsRef.current;
-  const isNodeTransforming = (id: string): boolean => Boolean(draggedNodeIds?.has(id)) || Boolean(resizedNodeIds?.has(id));
-  const selectedNodes = allSelectedNodes.filter((node) => node.id !== editingNodeId && !isNodeTransforming(node.id));
+  const selectedNodes = getVisibleSelectedNodes(allSelectedNodes, editingNodeId, refs);
   const selectedIds = new Set(allSelectedNodes.map((node) => node.id));
-  const hoveredNode =
-    hoveredNodeId && hoveredNodeId !== editingNodeId && !isNodeTransforming(hoveredNodeId) ? nodesById[hoveredNodeId] : null;
+  const hoveredNode = getVisibleHoveredNode(nodesById, hoveredNodeId, editingNodeId, refs);
   const pathOutlineStyles = getPathOutlineStyles(
     Object.values(nodesById),
     selectedIds,
@@ -130,6 +128,7 @@ export const drawScene = (
     pathOutlineStyles,
     refs.draggedVectorNodeSnapshotsRef.current,
     refs.resizedVectorNodeSnapshotsRef.current,
+    refs.rotatedVectorNodeSnapshotsRef.current,
   );
   drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
   drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeIds);

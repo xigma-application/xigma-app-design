@@ -22,6 +22,7 @@ import {
   TVectorMultiSelectBox,
   TVectorNodeDragSnapshot,
   TVectorNodeResizeSnapshot,
+  TVectorNodeRotateSnapshot,
   TVectorPaintFaceHover,
   TVectorShapeBuilderTouchedFaces,
   TVectorWidthHandleSelection,
@@ -83,6 +84,8 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const resizedNodeIdsRef = useRef<Set<string> | null>(null);
   const resizedVectorNodeSnapshotsRef = useRef<Map<string, TVectorNodeResizeSnapshot> | null>(null);
   const rotateDragRef = useRef<TRotateDragState | null>(null);
+  const rotatedNodeIdsRef = useRef<Set<string> | null>(null);
+  const rotatedVectorNodeSnapshotsRef = useRef<Map<string, TVectorNodeRotateSnapshot> | null>(null);
   const selectedVectorHandlesRef = useRef<TVectorHandleHover[]>([]);
   const selectedVectorSegmentIdsRef = useRef<string[]>([]);
   const selectedVectorVertexIdsRef = useRef<string[]>([]);
@@ -145,6 +148,8 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       resizedNodeIdsRef,
       resizedVectorNodeSnapshotsRef,
       rotateDragRef,
+      rotatedNodeIdsRef,
+      rotatedVectorNodeSnapshotsRef,
       selectedVectorHandlesRef,
       selectedVectorSegmentIdsRef,
       selectedVectorVertexIdsRef,

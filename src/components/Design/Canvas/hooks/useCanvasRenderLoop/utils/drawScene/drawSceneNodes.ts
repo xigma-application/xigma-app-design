@@ -7,7 +7,7 @@ import { NodeType } from 'types/design/enums';
 import { TImageRenderContext } from '../../types';
 import { TPathOutlineStyle } from './getPathOutlineStyles';
 import { TSceneNode, TViewport } from 'types/design/types';
-import { TVectorNodeDragSnapshot, TVectorNodeResizeSnapshot } from 'types/design/canvas/types';
+import { TVectorNodeDragSnapshot, TVectorNodeResizeSnapshot, TVectorNodeRotateSnapshot } from 'types/design/canvas/types';
 
 // utils
 import { drawEllipseNode } from 'utils/canvas/drawEllipseNode';
@@ -35,6 +35,7 @@ export const drawSceneNodes = (
   pathOutlineStyles: Map<string, TPathOutlineStyle>,
   draggedVectorNodeSnapshots: Map<string, TVectorNodeDragSnapshot> | null,
   resizedVectorNodeSnapshots: Map<string, TVectorNodeResizeSnapshot> | null,
+  rotatedVectorNodeSnapshots: Map<string, TVectorNodeRotateSnapshot> | null,
 ): void => {
   nodes.forEach((node) => {
     switch (node.type) {
@@ -92,6 +93,7 @@ export const drawSceneNodes = (
           node,
           draggedVectorNodeSnapshots,
           resizedVectorNodeSnapshots,
+          rotatedVectorNodeSnapshots,
           canvasWidth,
           canvasHeight,
           viewport,

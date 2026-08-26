@@ -147,6 +147,14 @@ export type TVectorNodeResizeSnapshot = {
   strokeWidth: number;
 };
 
+export type TVectorNodeRotateSnapshot = {
+  deltaDegrees: number;
+  facesByColor: { color: string; points: TPoint[][] }[];
+  pivot: TPoint;
+  strokeColor: string;
+  strokeVertices: number[];
+};
+
 export type TCanvasRefs = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>;
@@ -189,6 +197,8 @@ export type TCanvasRefs = {
   resizedNodeIdsRef: RefObject<Set<string> | null>;
   resizedVectorNodeSnapshotsRef: RefObject<Map<string, TVectorNodeResizeSnapshot> | null>;
   rotateDragRef: RefObject<TRotateDragState | null>;
+  rotatedNodeIdsRef: RefObject<Set<string> | null>;
+  rotatedVectorNodeSnapshotsRef: RefObject<Map<string, TVectorNodeRotateSnapshot> | null>;
   selectedVectorHandlesRef: RefObject<TVectorHandleHover[]>;
   selectedVectorSegmentIdsRef: RefObject<string[]>;
   selectedVectorVertexIdsRef: RefObject<string[]>;

@@ -9,7 +9,16 @@ export const armRotateOnPointerDown = ({ canvas, canvasRefs, event, point, selec
   const rotateHandleHit = getRotateHandleAtPoint(point, selectedNodes, viewport);
 
   if (rotateHandleHit) {
-    armRotateDrag(canvas, event, canvasRefs.rotateDragRef, selectedNodes, rotateHandleHit.bounds, rotateHandleHit.rotation, point);
+    armRotateDrag(
+      canvas,
+      event,
+      canvasRefs.rotateDragRef,
+      selectedNodes,
+      rotateHandleHit.bounds,
+      rotateHandleHit.rotation,
+      point,
+      canvasRefs,
+    );
 
     return true;
   }

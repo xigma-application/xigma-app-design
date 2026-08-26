@@ -2,11 +2,13 @@ import { RefObject } from 'react';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TRotateDragState, TRotateNodeOrigin } from 'types/design/selectionTool/types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { captureRotatedVectorNodeSnapshot } from './captureRotatedVectorNodeSnapshot';
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
 import { getRotateCursorAngle } from 'utils/math/getRotateCursorAngle';
 
@@ -56,9 +58,11 @@ export const armRotateDrag = (
   bounds: TDraftRect,
   rotation: number,
   point: TPoint,
+  canvasRefs: TCanvasRefs,
 ): void => {
   const pivot: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
   const nodeOrigins = getRotateNodeOrigins(selectedNodes);
 
   commitRotateDragState(canvas, event, rotateDragRef, point, bounds, rotation, pivot, nodeOrigins);
+  captureRotatedVectorNodeSnapshot(selectedNodes, canvasRefs);
 };

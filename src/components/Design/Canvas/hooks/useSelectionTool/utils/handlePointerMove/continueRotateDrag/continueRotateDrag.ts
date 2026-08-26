@@ -6,6 +6,7 @@ import { selectViewport } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TRotateDragState } from 'types/design/selectionTool/types';
 
 // utils
@@ -20,6 +21,7 @@ export const continueRotateDrag = (
   event: PointerEvent,
   dispatch: AppDispatch,
   rotateDragRef: RefObject<TRotateDragState | null>,
+  canvasRefs: TCanvasRefs,
 ): void => {
   const rotateDragState = rotateDragRef.current;
 
@@ -28,10 +30,22 @@ export const continueRotateDrag = (
     const point = screenToWorld(getPointerPosition(canvas, event), selectViewport(store.getState()));
     const deltaDegrees = getAngleBetweenPoints(pivot, point) - startAngle;
     const isSingleNodeRotate = Object.keys(nodeOrigins).length === 1;
+    const snapshots = canvasRefs.rotatedVectorNodeSnapshotsRef.current;
 
     canvas.style.cursor = getRotatedRotateCursorUrl(cursorAngle + deltaDegrees) ?? canvas.style.cursor;
+
+    if (snapshots && !canvasRefs.rotatedNodeIdsRef.current) {
+      canvasRefs.rotatedNodeIdsRef.current = new Set(snapshots.keys());
+    }
+
     Object.entries(nodeOrigins).forEach(([id, origin]) => {
-      dispatch(updateNode({ changes: getRotatedNodeChanges(origin, pivot, deltaDegrees, isSingleNodeRotate), id }));
+      const snapshot = snapshots?.get(id);
+
+      if (snapshot) {
+        snapshot.deltaDegrees = deltaDegrees;
+      } else {
+        dispatch(updateNode({ changes: getRotatedNodeChanges(origin, pivot, deltaDegrees, isSingleNodeRotate), id }));
+      }
     });
   }
 };

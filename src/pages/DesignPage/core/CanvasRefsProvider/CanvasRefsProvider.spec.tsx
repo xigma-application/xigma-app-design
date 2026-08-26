@@ -57,6 +57,8 @@ describe('CanvasRefsProvider behaviors', () => {
       resizedNodeIdsRef: { current: null },
       resizedVectorNodeSnapshotsRef: { current: null },
       rotateDragRef: { current: null },
+      rotatedNodeIdsRef: { current: null },
+      rotatedVectorNodeSnapshotsRef: { current: null },
       selectedVectorHandlesRef: { current: [] },
       selectedVectorSegmentIdsRef: { current: [] },
       selectedVectorVertexIdsRef: { current: [] },
