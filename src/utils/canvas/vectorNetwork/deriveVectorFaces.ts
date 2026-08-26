@@ -6,9 +6,9 @@ import { getVectorPieceBoundaryKeys, TVectorPieceBoundaries } from './getVectorP
 // utils
 import { buildVectorHalfEdgeAdjacency } from './buildVectorHalfEdgeAdjacency';
 import { flattenVectorFaceSteps } from './flattenVectorFaceSteps';
+import { getPlanarVectorNetwork } from './getPlanarVectorNetwork';
 import { getVectorFaceSignedArea } from './getVectorFaceSignedArea';
 import { getVectorFillPieceKey } from './getVectorFillPieceKey';
-import { planarizeVectorNetwork } from './planarizeVectorNetwork/planarizeVectorNetwork';
 import { TVectorFaceStep, walkVectorFace } from './walkVectorFace';
 
 export type TVectorFace = {
@@ -44,7 +44,7 @@ export const deriveVectorFaces = (node: TVectorNode): TVectorFace[] => {
   const cached = cache.get(node);
 
   if (!cached) {
-    const planar = planarizeVectorNetwork(Object.values(node.segments), node.vertices);
+    const planar = getPlanarVectorNetwork(node);
     const segments = Object.values(planar.segments);
     const adjacency = buildVectorHalfEdgeAdjacency(segments, planar.vertices);
     const visited = new Set<string>();
