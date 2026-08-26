@@ -489,3 +489,7 @@ every frame.
 [[vector-network]] — the one feature so far needing a context-setup change (`stencil: true` on
 `WEBGL_CONTEXT_ATTRIBUTES`, §1) and a genuinely new WebGL technique (stencil-buffer even-odd fill,
 `drawVectorFill.ts`) not covered by anything else described here.
+[[canvas-vector-performance]] — why `drawSceneVectorNode.ts` (§2/§5) checks a frozen-snapshot map
+before ever calling the plain `drawVectorNode.ts` path, and why GPU-buffer-level caching (never
+attempted — §3/§8's "no persistent VBO reuse anywhere") isn't a quick follow-up for vector nodes at
+scale.

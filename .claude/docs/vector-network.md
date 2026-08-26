@@ -4600,3 +4600,6 @@ node's geometry has, since it never looks at that geometry at all.
 one context-attribute change it needed. [[selection-and-manipulation]] — the resolver-array architecture
 Vector Edit Mode extends rather than duplicates. [[design-store-architecture]] — the history middleware
 in full, and the two new `TDesignState` fields driving the Pen session.
+[[canvas-vector-performance]] — the caching layer sitting in front of §2's face derivation and §36's
+stroke tessellation, why every cache here is keyed on the whole node's object reference, and the
+still-open cluster-cache plan for many-disconnected-shapes-per-node scenes.

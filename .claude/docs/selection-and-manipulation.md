@@ -1378,3 +1378,8 @@ pattern is exactly what §13 extends to the three corner-radius drag refs.
 [[vector-network]] — §21 above in full: the Pen tool, the Vector Network data model, and the rest of
 Vector Edit Mode (double-click entry, Delete/Backspace, the Pen-tool-specific pointer handlers) that
 lives outside this subsystem entirely.
+[[canvas-vector-performance]] — the frozen-snapshot arm→continue→disarm variant this subsystem's own
+drag/resize/rotate resolvers grow into for vector nodes specifically (§4), and why it's a `TCanvasRefs`
+snapshot map rather than a Redux dispatch per `pointermove`, same "don't invalidate every downstream
+cache on every pointer event" reasoning this doc's own dispatch-per-pointermove nuance already flags
+above.
