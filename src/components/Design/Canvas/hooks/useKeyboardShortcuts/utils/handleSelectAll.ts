@@ -1,12 +1,28 @@
 // store
 import { setSelection } from 'store/design/slice';
-import { selectOrderedNodes } from 'store/design/selectors';
+import { selectOrderedNodes, selectVectorEditingNodeIds } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
-export const handleSelectAll = (dispatch: AppDispatch): void => {
-  const state = store.getState();
+// types
+import { TCanvasRefs } from 'types/design/canvas/types';
+import { TVectorNode } from 'types/design/types';
 
-  if (state.design.vectorEditingNodeIds.length === 0) {
+// utils
+import { getVectorEditingNode } from '../../../utils/getVectorEditingNode';
+
+export const handleSelectAll = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
+  const state = store.getState();
+  const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
+
+  if (vectorEditingNodeIds.length > 0) {
+    const editingNodes = vectorEditingNodeIds
+      .map((nodeId) => getVectorEditingNode(state.design.nodes, nodeId))
+      .filter((node): node is TVectorNode => node !== null);
+
+    refs.selectedVectorVertexIdsRef.current = editingNodes.flatMap((node) => Object.keys(node.vertices));
+    refs.selectedVectorSegmentIdsRef.current = editingNodes.flatMap((node) => Object.keys(node.segments));
+    refs.selectedVectorHandlesRef.current = [];
+  } else {
     dispatch(setSelection(selectOrderedNodes(state).map((node) => node.id)));
   }
 };
