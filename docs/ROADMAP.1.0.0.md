@@ -104,9 +104,9 @@ Zaznaczamy checkboxy w miarę postępu. Każdy etap = osobna, malutka porcja pra
 Świadomie odłożone do czasu realnego wyboru fontu (część Etapu 8) — dziś jeden font wpieczony w
 bundle.
 
-- [ ] atlasy fontów na CDN, ładowane dynamicznie (`fetch`) zamiast statycznego importu
-- [ ] cache per `fontFamily`, manifest dostępnych fontów
-- [ ] generator atlasów przenosi się do osobnego repo (ściąga TTF na żądanie zamiast trzymać
+- [x] atlasy fontów na CDN, ładowane dynamicznie (`fetch`) zamiast statycznego importu
+- [x] cache per `fontFamily`, manifest dostępnych fontów
+- [x] generator atlasów przenosi się do osobnego repo (ściąga TTF na żądanie zamiast trzymać
       binarki w gicie)
 
 ## Etap 10 — Dokończenie manipulacji node'ami
