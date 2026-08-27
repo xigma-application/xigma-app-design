@@ -23,6 +23,7 @@
 - [Highlights](#highlights)
 - [Tech stack](#tech-stack)
 - [Getting started](#getting-started)
+- [Shared package (`@xigma/*`)](#shared-package-xigma)
 - [Scripts](#scripts)
 - [Project structure](#project-structure)
 - [Testing](#testing)
@@ -80,7 +81,9 @@ and what's next (side panels, resize/rotate handles, undo/redo, groups, snapping
 
 ## Getting started
 
-Requires Node.js 20+.
+Requires Node.js 20+ and SSH access to the private
+[`xigma-app-shared`](https://github.com/xigma-application/xigma-app-shared) repo (see the next
+section).
 
 ```bash
 npm install
@@ -89,6 +92,32 @@ npm run dev
 
 Vite starts on `http://localhost:5173`. The editor itself lives at `/design/:id` (any id works,
 e.g. `http://localhost:5173/design/my-file`) — the root route is just the Vite-starter home page.
+
+## Shared package (`@xigma/*`)
+
+`@xigma/components`, `@xigma/core`, and `@xigma/scss` (the `Icon` component + SVG registry, shared
+theme tokens, cross-app helpers) are **not** on npm — they live in the separate private repo
+[`xigma-application/xigma-app-shared`](https://github.com/xigma-application/xigma-app-shared) and
+are pulled into `node_modules/@xigma/*` locally by [`scripts/xigma-pull.cjs`](scripts/xigma-pull.cjs).
+
+What the script does (`xigma.json` is its config — `repo`, `branch`, and the list of `packages`):
+
+1. shallow-clones `xigma-app-shared` at the configured branch into a temp dir,
+2. runs `npm install` + `npm run build --workspaces` there,
+3. copies each `packages/<name>` build output into `node_modules/@xigma/<name>`.
+
+It runs automatically after every `npm install` (via the `postinstall` hook), so a normal install
+is all you need. Requirements: `git` on the `PATH` and an SSH key authorized for the shared repo
+(the `repo` URL in `xigma.json` is `git@github.com:…`).
+
+Re-pull manually whenever the shared repo changes and you need the update here:
+
+```bash
+npm run xigma:pull
+```
+
+Because the packages are copied into `node_modules`, changes in `xigma-app-shared` must be pushed
+to its branch first, then re-pulled here — there is no local symlink/workspace link.
 
 ## Scripts
 
@@ -106,6 +135,7 @@ e.g. `http://localhost:5173/design/my-file`) — the root route is just the Vite
 | `npm run stylelint:check` / `stylelint:fix` | Stylelint check / autofix for `.scss`               |
 | `npm run prettier:check` / `prettier:write` | Prettier check / autofix                            |
 | `npm run generate:font-atlas`               | Regenerate the MSDF font atlas from the source TTF  |
+| `npm run xigma:pull`                        | Re-pull the `@xigma/*` packages from `xigma-app-shared` |
 
 ## Project structure
 
