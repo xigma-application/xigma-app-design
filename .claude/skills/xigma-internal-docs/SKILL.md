@@ -50,6 +50,15 @@ context) knowing about, without re-deriving it from scratch? If yes:
 This is deliberately not automatic/silent — do it as a visible step (mention the doc file you
 wrote or updated in your closing summary), not folded silently into the commit.
 
+## Keep ROADMAP entries short
+
+`docs/ROADMAP.*.md` is a simple roadmap, not a docs file — one or two lines per etap/bullet: what
+shipped, checkbox, done. It is not the place for the concern-by-concern implementation narrative,
+file-by-file breakdown, or "why we chose X over Y" reasoning — that level of detail belongs in
+`.claude/docs/*.md` (see above) instead. If a ROADMAP entry is growing past a couple of tight
+sentences, that's a signal to move the detail into a `.claude/docs/*.md` file and leave only a
+one-line pointer/summary in the ROADMAP.
+
 ## Related
 
 [[xigma-e2e-coverage]] — same "don't make the next session/change re-discover this the hard way"
