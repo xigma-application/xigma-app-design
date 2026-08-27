@@ -1,5 +1,6 @@
 <div align="center">
-  <img src="src/assets/images/xigma-logo.svg" width="360" height="104" alt="xigma logo" />
+  <img src="src/assets/images/readme-logo.svg" width="460" alt="xigma logo" />
+  <br /><br />
 
   <p><strong>Rebuilding Figma, 1:1, from scratch.</strong><br />
   Canvas-first editor engine, rendered on <strong>WebGL</strong> — not Canvas 2D, not DOM/SVG.</p>
