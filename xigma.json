@@ -1,5 +1,5 @@
 {
   "repo": "git@github.com:xigma-application/xigma-app-shared.git",
   "branch": "main",
-  "packages": ["components", "core", "scss"]
+  "packages": "*"
 }

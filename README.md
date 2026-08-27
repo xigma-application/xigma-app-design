@@ -95,46 +95,51 @@ e.g. `http://localhost:5173/design/my-file`) — the root route is just the Vite
 
 ## Shared package (`@xigma/*`)
 
-`@xigma/components`, `@xigma/core`, and `@xigma/scss` (the `Icon` component + SVG registry, shared
-theme tokens, cross-app helpers) are **not** on npm — they live in the separate private repo
+The `@xigma/*` packages (`components` — the `Icon` component + SVG registry; `core`; `scss` — shared
+theme tokens; `utils`; `assets`) are **not** on npm — they live in the separate private repo
 [`xigma-application/xigma-app-shared`](https://github.com/xigma-application/xigma-app-shared) and
 are pulled into `node_modules/@xigma/*` locally by [`scripts/xigma-pull.cjs`](scripts/xigma-pull.cjs).
 
-What the script does (`xigma.json` is its config — `repo`, `branch`, and the list of `packages`):
+What the script does (`xigma.json` is its config — `repo`, `branch`, and `packages`):
 
 1. shallow-clones `xigma-app-shared` at the configured branch into a temp dir,
 2. runs `npm install` + `npm run build --workspaces` there,
-3. copies each `packages/<name>` build output into `node_modules/@xigma/<name>`.
+3. copies each built package into `node_modules/@xigma/<name>` and records the commit SHA in
+   `node_modules/@xigma/.xigma-pull-sha`.
+
+`packages` is either an explicit array (`["components", "core"]`) or `"*"` to pull **every**
+`packages/*` dir in the repo (the current default).
 
 It runs automatically after every `npm install` (via the `postinstall` hook), so a normal install
 is all you need. Requirements: `git` on the `PATH` and an SSH key authorized for the shared repo
-(the `repo` URL in `xigma.json` is `git@github.com:…`).
+(the `repo` URL in `xigma.json` is `git@github.com:…`); the script falls back to the HTTPS form of
+that URL if the SSH clone fails.
 
-Re-pull manually whenever the shared repo changes and you need the update here:
-
-```bash
-npm run xigma:pull
-```
+- **Re-pull** after the shared repo changes: `npm run xigma:pull`. When the recorded SHA already
+  matches the branch's remote HEAD the script skips the clone entirely, so running it is cheap.
+- **Skip** the pull (offline, no SSH, CI without repo access): `XIGMA_SKIP_PULL=1 npm install`. If
+  the clone fails but `@xigma/*` is already populated, the script warns and keeps the existing copy
+  instead of failing the install.
 
 Because the packages are copied into `node_modules`, changes in `xigma-app-shared` must be pushed
 to its branch first, then re-pulled here — there is no local symlink/workspace link.
 
 ## Scripts
 
-| Command                                     | What it does                                        |
-| ------------------------------------------- | --------------------------------------------------- |
-| `npm run dev`                               | Start the dev server                                |
-| `npm run build`                             | Type-check (`tsc -b`) and build for production      |
-| `npm run preview`                           | Preview the production build                        |
-| `npm test`                                  | Run unit tests in watch mode                        |
-| `npm run test:run`                          | Run unit tests once                                 |
-| `npm run test:coverage`                     | Run unit tests with the 100% coverage gate enforced |
-| `npm run test:e2e`                          | Run the Playwright e2e suite (headless)             |
-| `npm run test:e2e:ui`                       | Run e2e tests with Playwright's UI runner           |
-| `npm run lint` / `lint:fix`                 | ESLint check / autofix                              |
-| `npm run stylelint:check` / `stylelint:fix` | Stylelint check / autofix for `.scss`               |
-| `npm run prettier:check` / `prettier:write` | Prettier check / autofix                            |
-| `npm run generate:font-atlas`               | Regenerate the MSDF font atlas from the source TTF  |
+| Command                                     | What it does                                            |
+| ------------------------------------------- | ------------------------------------------------------- |
+| `npm run dev`                               | Start the dev server                                    |
+| `npm run build`                             | Type-check (`tsc -b`) and build for production          |
+| `npm run preview`                           | Preview the production build                            |
+| `npm test`                                  | Run unit tests in watch mode                            |
+| `npm run test:run`                          | Run unit tests once                                     |
+| `npm run test:coverage`                     | Run unit tests with the 100% coverage gate enforced     |
+| `npm run test:e2e`                          | Run the Playwright e2e suite (headless)                 |
+| `npm run test:e2e:ui`                       | Run e2e tests with Playwright's UI runner               |
+| `npm run lint` / `lint:fix`                 | ESLint check / autofix                                  |
+| `npm run stylelint:check` / `stylelint:fix` | Stylelint check / autofix for `.scss`                   |
+| `npm run prettier:check` / `prettier:write` | Prettier check / autofix                                |
+| `npm run generate:font-atlas`               | Regenerate the MSDF font atlas from the source TTF      |
 | `npm run xigma:pull`                        | Re-pull the `@xigma/*` packages from `xigma-app-shared` |
 
 ## Project structure

@@ -79,6 +79,12 @@ dispatching `setActiveTool` inline; irrelevant unless the new tool needs its own
 - `Icon` and its SVG registry now live in **`@xigma/components`** (from the `xigma-app-shared`
   repo), pulled into `node_modules/@xigma/*` by `scripts/xigma-pull.cjs` (`xigma.json`, postinstall).
   Import it as `import { Icon } from '@xigma/components'` (or `from 'shared'`, which re-exports it).
+- `scripts/xigma-pull.cjs`: clones the shared repo, `npm install` + `npm run build --workspaces`
+  there, copies each built package into `node_modules/@xigma/*`. `xigma.json` — `repo`, `branch`,
+  and `packages` (an explicit array, or `"*"` = every `packages/*` dir in the repo). Skips the whole
+  clone when `node_modules/@xigma/.xigma-pull-sha` already matches the branch's remote HEAD; set
+  `XIGMA_SKIP_PULL=1` to skip unconditionally (offline / no SSH). Falls back from the SSH `repo` URL
+  to its HTTPS form, and to already-present packages if the clone fails entirely.
 - To add / change an icon, edit `xigma-app-shared` (`packages/components/src/Icon/svg/` +
   `Icon/constants.ts`), push, then re-run `npm run xigma:pull` here. The old local
   `src/assets/svg/` + `src/assets/svg.ts` registry was removed in the `@xigma/*` migration.
