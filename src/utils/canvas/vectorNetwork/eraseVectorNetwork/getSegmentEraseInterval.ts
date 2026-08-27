@@ -4,11 +4,12 @@ import { TErasedSegmentGeometry, TSegmentEraseInterval } from './types';
 
 // utils
 import { flattenSegment } from '../flattenSegment';
-import { getCapsuleDistance } from './getCapsuleDistance';
+import { getPathDistance } from './getCapsuleDistance';
 import { getVectorCurveSegmentCount } from '../getVectorCurveSegmentCount';
 
 const ENDPOINT_EPS = 0.001;
 const MAX_EDGE_SAMPLES = 4000;
+const MIN_SAMPLE_STEP = 0.05;
 
 type TSample = { point: TPoint; t: number };
 
@@ -35,15 +36,10 @@ const sampleSegment = (geometry: TErasedSegmentGeometry, maxStep: number): TSamp
   return samples;
 };
 
-export const getSegmentEraseInterval = (
-  geometry: TErasedSegmentGeometry,
-  capsuleStart: TPoint,
-  capsuleEnd: TPoint,
-  radius: number,
-): TSegmentEraseInterval => {
-  const samples = sampleSegment(geometry, Math.max(radius / 2, 1));
+export const getSegmentEraseInterval = (geometry: TErasedSegmentGeometry, brushPath: TPoint[], radius: number): TSegmentEraseInterval => {
+  const samples = sampleSegment(geometry, Math.max(radius / 2, MIN_SAMPLE_STEP));
   const insideIndices = samples
-    .map((sample, index) => ({ index, inside: getCapsuleDistance(sample.point, capsuleStart, capsuleEnd) <= radius }))
+    .map((sample, index) => ({ index, inside: getPathDistance(sample.point, brushPath) <= radius }))
     .filter(({ inside }) => inside)
     .map(({ index }) => index);
 

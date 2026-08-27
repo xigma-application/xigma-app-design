@@ -14,6 +14,7 @@ export const severVectorSegmentAtPoint = (
   node: TVectorNode,
   segmentId: string,
   t: number,
+  round: boolean = true,
 ): { segments: Record<string, TVectorSegment>; vertices: Record<string, TVectorVertex> } => {
   const segment = node.segments[segmentId];
 
@@ -36,7 +37,7 @@ export const severVectorSegmentAtPoint = (
   const vertexBeforeId = nanoid();
   const vertexAfterId = nanoid();
   const afterSegmentId = nanoid();
-  const splitPoint = roundVectorPoint(split.point);
+  const splitPoint = round ? roundVectorPoint(split.point) : split.point;
 
   return {
     segments: {

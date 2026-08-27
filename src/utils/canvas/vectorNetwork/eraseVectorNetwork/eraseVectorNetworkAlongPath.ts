@@ -4,22 +4,39 @@ import { TVectorNode } from 'types/design/types';
 import { TErasedNetwork } from './types';
 
 // utils
-import { eraseVectorNetworkAlongCapsule } from './eraseVectorNetworkAlongCapsule';
+import { applySegmentErase } from './applySegmentErase/applySegmentErase';
+import { getRemainingVertices } from '../getRemainingVertices';
+import { getSegmentEraseInterval } from './getSegmentEraseInterval';
 
 export const eraseVectorNetworkAlongPath = (node: TVectorNode, path: TPoint[], radius: number): TErasedNetwork | null => {
-  const starts = path.length > 1 ? path.slice(0, -1) : path;
-
-  let current = node;
+  let segments = node.segments;
+  let vertices = node.vertices;
   let changed = false;
 
-  starts.forEach((start, index) => {
-    const result = eraseVectorNetworkAlongCapsule(current, start, path[index + 1] ?? start, radius);
+  Object.values(node.segments).forEach((segment) => {
+    const interval = getSegmentEraseInterval(
+      {
+        end: node.vertices[segment.endId],
+        start: node.vertices[segment.startId],
+        tangentEnd: segment.tangentEnd,
+        tangentStart: segment.tangentStart,
+      },
+      path,
+      radius,
+    );
 
-    if (result) {
-      current = { ...current, segments: result.segments, vertices: result.vertices };
+    if (interval.kind !== 'none') {
+      const result = applySegmentErase({ ...node, segments, vertices }, segment.id, interval);
+
+      segments = result.segments;
+      vertices = result.vertices;
       changed = true;
     }
   });
 
-  return changed ? { segments: current.segments, vertices: current.vertices } : null;
+  if (changed) {
+    return { segments, vertices: getRemainingVertices(vertices, segments) };
+  }
+
+  return null;
 };

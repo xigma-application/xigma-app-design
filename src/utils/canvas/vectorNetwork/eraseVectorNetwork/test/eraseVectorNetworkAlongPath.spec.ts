@@ -49,8 +49,8 @@ describe('eraseVectorNetworkAlongPath', () => {
     expect(Object.keys(result.segments)).toHaveLength(2);
   });
 
-  it('should sweep every consecutive pair of a multi-point path, accumulating the erased result', () => {
-    // action — two separate dabs along the segment carve two gaps → three stubs
+  it('should carve one span per segment — a stroke that dips onto the segment at two places cuts one gap, not two', () => {
+    // action — the stroke touches the segment near x=50 and again near x=150 (going away in between)
     const result = eraseVectorNetworkAlongPath(
       straightNode(),
       [
@@ -61,9 +61,16 @@ describe('eraseVectorNetworkAlongPath', () => {
       ],
       12,
     )!;
+    const xs = Object.values(result.segments)
+      .flatMap((segment) => [result.vertices[segment.startId].x, result.vertices[segment.endId].x])
+      .sort((a, b) => a - b);
 
-    // result
-    expect(Object.keys(result.segments)).toHaveLength(3);
+    // result — two stubs [0..~50] and [~150..200], the whole [50, 150] span gone as one gap
+    expect(Object.keys(result.segments)).toHaveLength(2);
+    expect(xs[0]).toBe(0);
+    expect(xs[3]).toBe(200);
+    expect(xs[1]).toBeLessThan(60);
+    expect(xs[2]).toBeGreaterThan(140);
   });
 
   it('should erase the whole segment when the stroke runs its full length', () => {

@@ -44,13 +44,13 @@ import { drawVectorLasso } from './drawVectorLasso';
 import { drawVectorCutHoverPreview } from './drawVectorCutHoverPreview';
 import { drawVectorCutPreview } from './drawVectorCutPreview';
 import { drawVectorEraseBrush } from './drawVectorEraseBrush';
-import { drawVectorEraseStrokePreview } from './drawVectorEraseStrokePreview';
 import { drawVectorPaintHoverPreview } from './drawVectorPaintHoverPreview';
 import { drawVectorSelectedFillPreview } from './drawVectorSelectedFillPreview';
 import { drawVectorShapeBuilderHoverPreview } from './drawVectorShapeBuilderHoverPreview';
 import { drawVectorShapeBuilderPath } from './drawVectorShapeBuilderPath';
 import { drawVectorWidthPointsPreview } from './drawVectorWidthPointsPreview/drawVectorWidthPointsPreview';
 import { drawVertexCountHandlesLayer } from './drawVertexCountHandlesLayer';
+import { getErasePreviewNodes } from './getErasePreviewNodes';
 import { getPathOutlineStyles } from './getPathOutlineStyles';
 import { getPreviewSceneNodes } from './getPreviewSceneNodes';
 import { getShapeBuilderPreviewFaces } from './getShapeBuilderPreviewFaces';
@@ -103,7 +103,8 @@ export const drawScene = (
   const vectorMultiSelectResizeDrag = refs.vectorMultiSelectResizeDragRef.current;
   const vectorMultiSelectRotateDrag = refs.vectorMultiSelectRotateDragRef.current;
   const isVectorMultiDragMoving = Boolean(refs.vectorMultiDragRef.current?.hasMoved);
-  const sceneNodes = getPreviewSceneNodes(selectOrderedNodes(state), editingNodeId, refs);
+  const previewSceneNodes = getPreviewSceneNodes(selectOrderedNodes(state), editingNodeId, refs);
+  const sceneNodes = getErasePreviewNodes(previewSceneNodes, vectorEditingNodeIds, activeTool, refs, viewport);
   const allSelectedNodes = selectSelectedNodes(state);
   const selectedNodes = getVisibleSelectedNodes(allSelectedNodes, editingNodeId, refs);
   const selectedIds = new Set(allSelectedNodes.map((node) => node.id));
@@ -131,17 +132,6 @@ export const drawScene = (
     refs.draggedVectorNodeSnapshotsRef.current,
     refs.resizedVectorNodeSnapshotsRef.current,
     refs.rotatedVectorNodeSnapshotsRef.current,
-  );
-  drawVectorEraseStrokePreview(
-    gl,
-    program,
-    buffer,
-    refs.vectorEraseStrokeRef.current,
-    refs.eraserDiameterRef.current,
-    activeTool,
-    clientWidth,
-    clientHeight,
-    viewport,
   );
   drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
   drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeIds);

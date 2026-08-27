@@ -8,7 +8,7 @@ import { omitSegment } from './omitSegment';
 import { severVectorSegmentAtPoint } from '../../cutVectorNetwork/severVectorSegmentAtPoint';
 
 export const eraseSegmentEnd = (node: TVectorNode, segmentId: string, tIn: number): TErasedNetwork => {
-  const severed = severVectorSegmentAtPoint(node, segmentId, tIn);
+  const severed = severVectorSegmentAtPoint(node, segmentId, tIn, false);
   const droppedId = findNewSegmentId(node.segments, severed.segments);
 
   if (droppedId) {

@@ -14,3 +14,13 @@ export const getCapsuleDistance = (point: TPoint, capsuleStart: TPoint, capsuleE
 
   return Math.hypot(point.x - closest.x, point.y - closest.y);
 };
+
+export const getPathDistance = (point: TPoint, path: TPoint[]): number => {
+  if (path.length === 1) {
+    return Math.hypot(point.x - path[0].x, point.y - path[0].y);
+  }
+
+  return path
+    .slice(0, -1)
+    .reduce((min, from, index) => Math.min(min, getCapsuleDistance(point, from, path[index + 1])), Number.POSITIVE_INFINITY);
+};

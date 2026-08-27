@@ -4607,33 +4607,51 @@ is emergent, not a boolean subtract.
 
 **The vector data is not touched while the brush is moving** (added after the user pointed at
 Figma's own behaviour: "real time nie modyfikują wektor tylko … urywa ten stroke że widać pod spodem
-linie które są segmentami"). The drag only *records* a world-space point path (`vectorEraseStrokeRef`)
-and *previews* the result; the actual `severVectorSegmentAtPoint` work + `updateNode` happens once,
-on pointer-up. So the whole stroke is genuinely one undo step (not "N updates coalesced into a
-gesture"), and mid-drag the underlying segments stay intact and visible under the preview.
+linie które są segmentami"). The drag only *records* a world-space point path (`vectorEraseStrokeRef`);
+the actual `severVectorSegmentAtPoint` work + `updateNode` happens once, on pointer-up, so the whole
+stroke is genuinely one undo step (not "N updates coalesced into a gesture"). The **rendered preview**
+during the drag is the real erase result even though the **stored** node isn't touched yet — see
+"the live preview is the real geometry" below — and the thin Vector Edit skeleton keeps drawing the
+real, still-intact vertex network on top of it throughout.
 
 **Geometry — `utils/canvas/vectorNetwork/eraseVectorNetwork/`, all pure:**
 - `getSegmentEraseInterval.ts` — flattens the segment (`flattenSegment` + `getVectorCurveSegmentCount`,
   same call as `getVectorEdgeAtPoint.ts`), **densifies** each flattened edge so no two samples sit
-  more than `radius/2` apart (a small brush crossing the middle of a long straight edge would
-  otherwise fall between its two endpoint samples), tests each sample against the brush **capsule**
-  (`getCapsuleDistance.ts` — point→swept-segment, built on `getClosestPointOnLine`), and returns
+  more than `radius/2` apart, floored at `MIN_SAMPLE_STEP = 0.05` world units purely to cap the sample
+  count at absurd zoom levels. (The original floor was `Math.max(radius/2, 1)` — a whole **world**
+  pixel; since `radius` is screen-px-brush-diameter `/ zoom`, past ~2.5x zoom that floor was coarser
+  than the brush itself and the brush could slip between samples entirely, so the eraser silently did
+  nothing while zoomed in. `0.05` is well below any realistic brush radius, so it never affects the
+  actual result.) Tests each sample's distance to the **whole recorded brush path** in one shot
+  (`getPathDistance` in `getCapsuleDistance.ts` — the min over every consecutive-pair leg, each a
+  point→capsule test via `getClosestPointOnLine`; a one-point path is a single dab), and returns
   `none` / `whole` / `{ start, tOut }` / `{ end, tIn }` / `{ middle, tIn, tOut }` (Bézier params via
-  `(index + fraction) / edgeCount`, exactly like `getVectorEdgeAtPoint`). Multiple inside-runs from
-  one brush position are collapsed to one span `[firstIn, lastOut]`. `ENDPOINT_EPS` guards demote a
-  graze that removes nothing (single-sample span, or a span landing on `t≈0`/`t≈1`) back to `none`.
-- `applySegmentErase.ts` — reuses `cutVectorNetwork/severVectorSegmentAtPoint.ts`: `start`/`end`
-  sever once and drop the covered piece; `middle` severs at `tIn`, then severs the far piece at the
-  **re-parameterised** `tOut` (`(tOut - tIn) / (1 - tIn)`) and drops the middle. Typed to
-  `Exclude<TSegmentEraseInterval, { kind: 'none' }>`.
-- `eraseVectorNetworkAlongCapsule.ts` — folds `applySegmentErase` over every segment (interval tested
-  against the *original* geometry, applied against the accumulating one — safe because each id is
-  processed once and splits mint fresh ids), then one `getRemainingVertices` prune. Returns `null`
-  when nothing changed. `filledFaceKeys` untouched — self-heals via re-derivation, exactly as
-  `handleDeleteSelection/deleteSelectedSegments.ts` does.
-- `eraseVectorNetworkAlongPath.ts` — folds `eraseVectorNetworkAlongCapsule` over every consecutive
-  pair of a recorded brush path, threading each pass's `{segments, vertices}` into the next; a
-  single-point path is one dab. This is what runs on commit.
+  `(index + fraction) / edgeCount`, exactly like `getVectorEdgeAtPoint`) — one span per segment,
+  `[firstInsideSample, lastInsideSample]`, regardless of how many separate times the path swept back
+  over it. `ENDPOINT_EPS` guards demote a graze that removes nothing (single-sample span, or a span
+  landing on `t≈0`/`t≈1`) back to `none`.
+- `applySegmentErase.ts` — reuses `cutVectorNetwork/severVectorSegmentAtPoint.ts`, calling it with
+  `round: false` (see below): `start`/`end` sever once and drop the covered piece; `middle` severs at
+  `tIn`, then severs the far piece at the **re-parameterised** `tOut` (`(tOut - tIn) / (1 - tIn)`) and
+  drops the middle. Typed to `Exclude<TSegmentEraseInterval, { kind: 'none' }>`.
+- `eraseVectorNetworkAlongPath.ts` — the whole pipeline: loops every segment **once**, testing it
+  against the *entire* recorded brush path (not a fold over consecutive path-point pairs — that
+  earlier approach re-tested and re-split each segment once per pointer-move step, fragmenting a slow
+  drag into dozens of tiny stubs), applies `applySegmentErase` when the interval isn't `none`, then
+  one `getRemainingVertices` prune. Returns `null` when nothing changed. A single-point path is one
+  dab. `filledFaceKeys` untouched — self-heals via re-derivation, exactly as
+  `handleDeleteSelection/deleteSelectedSegments.ts` does (**caveat**: that "self-heal" only holds while
+  the loop stays closed; erasing all the way through a boundary breaks the loop's walk, and
+  `getVectorFillLoopPoints` then returns `null` for it — same pre-existing gap Delete-segment and Cut
+  have, not something this tool fixes).
+- `severVectorSegmentAtPoint.ts` (`cutVectorNetwork/`, shared with Cut) — grew a `round: boolean = true`
+  4th parameter. The interior-split branch used to always snap the new vertex to the half-pixel grid
+  (`roundVectorPoint`), which is right for a hand-placed cut but wrong for the eraser: a small brush
+  (or a normal brush zoomed in far enough that its world radius drops under ~0.5px) can put `tIn`/`tOut`
+  a fraction of a pixel apart, and rounding both cuts to the *same* grid cell silently collapsed the
+  gap back to zero — the segment looked like it grew an extra point but never actually broke. Erase's
+  three `applySegmentErase/eraseSegment{Start,End,Middle}.ts` call it with `round: false`; Cut's
+  `commitVectorSplit.ts` is untouched (still rounds).
 
 **Interaction — record on drag, commit on release (mirrors Cut's arm/continue/disarm shape):**
 - `armVectorEraseOnPointerDown.ts` (in `ARM_RESOLVERS`, next to Cut) — sets `vectorEraseDragRef`
@@ -4662,11 +4680,39 @@ survives tool switches, resets on reload, **not** undoable. New `KeyboardKeys.e`
 adds `erase` to `isSegmentHoverBlockedByTool` so the generic blue highlight never shows.
 `drawScene/drawVectorEraseBrush.ts` strokes a thin `VECTOR_EDIT_OUTLINE_STROKE` circle at the brush
 centre via `drawEllipse`, radius `eraserDiameterRef / 2 / zoom`, only while Erase is active.
-`drawScene/drawVectorEraseStrokePreview.ts` paints the in-progress `vectorEraseStrokeRef` path over
-the node's fill+stroke in `BACKGROUND_COLOR` (a `drawVectorStroke` thick polyline + two `drawEllipse`
-end caps) — inserted **between `drawSceneNodes` and `drawVectorEditHandlesLayer`** so the thin Vector
-Edit segment lines redraw on top and stay visible under the "torn" area. Cursor
-class `erase` → `erase.png` at hotspot `(8, 24)` (`canvas.module.scss`, `getCursorClassName.ts`).
+
+**The live preview is the real geometry, substituted in for rendering only** — not a painted patch.
+Two earlier attempts got this wrong: first a flat `BACKGROUND_COLOR` mask (tore a hole straight to the
+dark canvas mid-fill), then a version that resolved the tear to the editing node's *own* rendered fill
+color and clipped it to the node's silhouette via the stencil buffer — closer, but still wrong, because
+"what's underneath" was read as "this node's own fill" instead of "whatever is genuinely behind this
+node in the scene" (the canvas, or another shape sitting under it). Any synthetic color is a guess;
+the only way to *show what's really there* is to not paint a guess at all.
+
+`getErasePreviewNodes.ts` does that: for every scene node that's both a `TVectorNode` and one of
+`vectorEditingNodeIds`, while Erase is active and `vectorEraseStrokeRef` holds an in-progress stroke,
+it bakes rotation (`getRenderedVectorNode`) and runs `eraseVectorNetworkAlongPath` — the *exact same*
+function `commitVectorErase.ts` runs on pointer-up — to get the live segments/vertices, and splices
+`{ ...bakedNode, ...erased }` into the array in place of the real node before it reaches
+`drawSceneNodes`. Nothing is dispatched and the stored node is never touched (the substitution is
+recomputed from the refs every frame and discarded), so this still satisfies "the vector data is not
+touched while dragging" — it's a render-only stand-in, exactly like the existing
+`draggedVectorNodeSnapshots`/`resizedVectorNodeSnapshots`/`rotatedVectorNodeSnapshots` maps
+`drawSceneVectorNode.ts` already substitutes for a live drag/resize/rotate, just computed inline
+instead of through a dedicated ref+snapshot-type pair. Once the real node is swapped out for the
+live-eroded one, normal back-to-front compositing does the rest for free: wherever a segment (and the
+fill loop that depended on it) is gone, whatever was already drawn earlier in the frame — the canvas
+background, the grid, another shape underneath — simply shows through, because nothing is drawn over
+it any more. `drawVectorEditHandlesLayer`'s thin skeleton lines are unaffected — they read the editing
+node straight from `nodesById` (`getBakedVectorEditingNodes.ts`), not from this substituted node, so
+the *real*, still-intact vertex network keeps drawing on top throughout the drag. Cursor class `erase`
+→ `erase.png` at hotspot `(8, 24)` (`canvas.module.scss`, `getCursorClassName.ts`).
+
+**Consequence worth knowing:** because the live preview is the real result, it also reproduces the
+real result's own limitation — see the `filledFaceKeys` staleness note in the Geometry section above.
+Erasing anywhere along a closed loop's boundary breaks the loop mid-drag already, so the whole fill
+(not just a local bite) disappears the instant the brush first touches the boundary, not only after
+release.
 
 **Wiring** (same spots as every vector-edit tool): `ToolName.erase`, `VectorEditToolbar/constants.ts`
 `TOOLS` (after Cut, `EraseTool` icon from `@xigma/components` — registered in `xigma-app-shared`
@@ -4678,11 +4724,13 @@ Unit: every new util has its own spec; `armResolvers.spec.ts` gains an `armVecto
 block. E2E: `vector-erase.spec.ts` — `Shift+E` activation, a mid-edge drag proving 4→5 segments with
 no node split, and a `]`-widened dab leaving a wider gap.
 
-**v1 limitations:** a rotated node is baked flat on erase; multiple inside-runs within one segment
-from a single brush position are collapsed to one span; erasing pure fill area that touches no
+**v1 limitations:** a rotated node is baked flat on erase; a stroke that sweeps back over the *same*
+segment from two separate approaches (dips away and returns) collapses to one span covering both,
+rather than leaving the untouched middle stretch intact; erasing pure fill area that touches no
 segment does nothing (Figma's eraser is path-based too); no right-sidebar weight/shape panel; the
-drag preview masks in flat `BACKGROUND_COLOR` (Figma composites the grid through the torn area) and
-the brushed path uses miter joins + round end caps, not a fully round-jointed capsule union.
+brushed path uses miter joins + round end caps, not a fully round-jointed capsule union; erasing all
+the way through a filled loop's boundary drops the whole fill rather than leaving a hole (the
+pre-existing `filledFaceKeys` staleness noted above, shared with Delete-segment and Cut).
 
 ## Related
 
