@@ -9,8 +9,8 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { bakeVectorNodeRotation } from '../../../utils/bakeVectorNodeRotation';
-import { eraseVectorNetworkAlongPath } from 'utils/canvas/vectorNetwork/eraseVectorNetwork/eraseVectorNetworkAlongPath';
 import { getVectorEditingNode } from '../../../utils/getVectorEditingNode';
+import { subtractCapsuleFromVectorNetwork } from 'utils/canvas/vectorNetwork/eraseVectorNetwork/subtractCapsuleFromVectorNetwork/subtractCapsuleFromVectorNetwork';
 
 export const commitVectorErase = (dispatch: AppDispatch, path: TPoint[], radius: number): void => {
   const state = store.getState();
@@ -20,12 +20,12 @@ export const commitVectorErase = (dispatch: AppDispatch, path: TPoint[], radius:
 
     if (node) {
       const baked = { ...node, ...bakeVectorNodeRotation(node) };
-      const result = eraseVectorNetworkAlongPath(baked, path, radius);
+      const result = subtractCapsuleFromVectorNetwork(baked, path, radius);
 
       if (result) {
         const changes: Partial<TVectorNode> = node.rotation
-          ? { rotation: 0, segments: result.segments, vertices: result.vertices }
-          : { segments: result.segments, vertices: result.vertices };
+          ? { filledFaceKeys: result.filledFaceKeys, rotation: 0, segments: result.segments, vertices: result.vertices }
+          : { filledFaceKeys: result.filledFaceKeys, segments: result.segments, vertices: result.vertices };
 
         dispatch(updateNode({ changes, id: node.id }));
       }

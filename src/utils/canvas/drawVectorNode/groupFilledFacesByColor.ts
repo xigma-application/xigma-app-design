@@ -13,7 +13,7 @@ export const groupFilledFacesByColor = (renderedNode: TVectorNode): Map<string, 
     const points = getVectorFillLoopPoints(renderedNode, key);
 
     if (points) {
-      const color = getVectorFillColorForLoopKey(key);
+      const color = renderedNode.fillColorOverrideByKey?.[key] ?? getVectorFillColorForLoopKey(key);
       const faces = facesByColor.get(color) ?? [];
 
       faces.push(points);

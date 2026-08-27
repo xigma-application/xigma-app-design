@@ -50,6 +50,7 @@ import { drawVectorShapeBuilderHoverPreview } from './drawVectorShapeBuilderHove
 import { drawVectorShapeBuilderPath } from './drawVectorShapeBuilderPath';
 import { drawVectorWidthPointsPreview } from './drawVectorWidthPointsPreview/drawVectorWidthPointsPreview';
 import { drawVertexCountHandlesLayer } from './drawVertexCountHandlesLayer';
+import { getEraseAwareNodesById } from './getEraseAwareNodesById';
 import { getErasePreviewNodes } from './getErasePreviewNodes';
 import { getPathOutlineStyles } from './getPathOutlineStyles';
 import { getPreviewSceneNodes } from './getPreviewSceneNodes';
@@ -105,6 +106,7 @@ export const drawScene = (
   const isVectorMultiDragMoving = Boolean(refs.vectorMultiDragRef.current?.hasMoved);
   const previewSceneNodes = getPreviewSceneNodes(selectOrderedNodes(state), editingNodeId, refs);
   const sceneNodes = getErasePreviewNodes(previewSceneNodes, vectorEditingNodeIds, activeTool, refs, viewport);
+  const eraseAwareNodesById = getEraseAwareNodesById(nodesById, sceneNodes, vectorEditingNodeIds, activeTool);
   const allSelectedNodes = selectSelectedNodes(state);
   const selectedNodes = getVisibleSelectedNodes(allSelectedNodes, editingNodeId, refs);
   const selectedIds = new Set(allSelectedNodes.map((node) => node.id));
@@ -152,7 +154,7 @@ export const drawScene = (
     gl,
     program,
     buffer,
-    nodesById,
+    eraseAwareNodesById,
     vectorEditingNodeIds,
     selectedVectorVertexIds,
     preMarqueeVectorVertexIds,
