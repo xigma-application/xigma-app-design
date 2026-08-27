@@ -1,0 +1,27 @@
+.FieldGroup {
+  align-items: center;
+  border: 1px solid var(--color-input-background);
+  border-radius: 5px;
+  box-sizing: border-box;
+  column-gap: 1px;
+  display: flex;
+  width: 100%;
+
+  &:focus-within {
+    border: 1px solid var(--color-blue-1);
+  }
+
+  & > *:first-child {
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  & > *:last-child {
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+  }
+
+  & > *:not(:first-child):not(:last-child) {
+    border-radius: 0;
+  }
+}

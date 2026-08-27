@@ -1,0 +1,18 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ColorPicker snapshots > should render ColorPicker with the trigger visible and the panel closed 1`] = `
+<DocumentFragment>
+  <button
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    class=""
+    data-state="closed"
+    type="button"
+  />
+  <button
+    type="button"
+  >
+    Open
+  </button>
+</DocumentFragment>
+`;

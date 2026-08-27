@@ -32,6 +32,7 @@ import {
   TVectorWidthPointHover,
 } from 'types/design/canvas/types';
 import { TCanvasRefsProviderProps } from './types';
+import { TColorSampleRequest } from 'utils/canvas/colorPixelSampler/types';
 import { TDraftEntity } from 'types/design/types';
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TPenDragOrigin } from 'components/Design/Canvas/hooks/useDrawPenTool/types';
@@ -45,6 +46,7 @@ import {
 
 const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const colorSampleRequestRef = useRef<TColorSampleRequest | null>(null);
   const cornerRadiusDragRef = useRef<TCornerRadiusDragState | null>(null);
   const draftRef = useRef<TDraftEntity | null>(null);
   const draggedNodeIdsRef = useRef<Set<string> | null>(null);
@@ -112,6 +114,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const refs = useMemo<TCanvasRefs>(
     () => ({
       canvasRef,
+      colorSampleRequestRef,
       cornerRadiusDragRef,
       draftRef,
       draggedNodeIdsRef,

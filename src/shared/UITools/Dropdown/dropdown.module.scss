@@ -1,0 +1,27 @@
+.Dropdown {
+  align-items: center;
+  background-color: var(--color-input-background);
+  border: 1px solid var(--color-input-background);
+  border-radius: 5px;
+  box-sizing: border-box;
+  column-gap: 4px;
+  cursor: pointer;
+  display: flex;
+  height: 24px;
+  padding: 0 5px;
+
+  &[data-state='open'] {
+    border-color: var(--color-blue-1);
+  }
+
+  &__content {
+    outline: none;
+  }
+
+  &__label {
+    color: var(--color-neutral-1);
+    flex: 1;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+}

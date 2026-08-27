@@ -1,0 +1,54 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Footer snapshots > should render Footer 1`] = `
+<DocumentFragment>
+  <div
+    class="_Footer_2b7b24"
+  >
+    <div
+      class="_Footer__colors_2b7b24"
+    >
+      <div
+        class="_Footer__swatch_2b7b24"
+        data-no-drag="true"
+      >
+        <div
+          class="_Color_a21594 _Footer__swatchColor_2b7b24"
+        >
+          <div
+            class="_Color__picker_a21594"
+            style="background-color: rgb(255, 0, 0);"
+          />
+          <div
+            class="_Color__picker-alpha_a21594"
+            style="background-color: rgb(255, 0, 0);"
+          />
+          <div
+            class="_Color__picker-texture_a21594"
+          />
+        </div>
+      </div>
+      <div
+        class="_Footer__swatch_2b7b24"
+        data-no-drag="true"
+      >
+        <div
+          class="_Color_a21594 _Footer__swatchColor_2b7b24"
+        >
+          <div
+            class="_Color__picker_a21594"
+            style="background-color: rgb(0, 255, 0);"
+          />
+          <div
+            class="_Color__picker-alpha_a21594"
+            style="background-color: rgba(0, 255, 0, 0.5);"
+          />
+          <div
+            class="_Color__picker-texture_a21594"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

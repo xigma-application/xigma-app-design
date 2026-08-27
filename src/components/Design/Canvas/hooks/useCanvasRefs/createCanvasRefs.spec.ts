@@ -12,6 +12,7 @@ describe('createCanvasRefs behaviors', () => {
     // result
     expect(refs).toEqual({
       canvasRef: { current: null },
+      colorSampleRequestRef: { current: null },
       cornerRadiusDragRef: { current: null },
       draftRef: { current: null },
       draggedNodeIdsRef: { current: null },

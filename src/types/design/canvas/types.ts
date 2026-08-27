@@ -3,6 +3,7 @@ import { RefObject } from 'react';
 // types
 import { TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
 import { TDraftEntity, TVectorTangent, TVectorWidthPoint } from 'types/design/types';
+import { TColorSampleRequest } from 'utils/canvas/colorPixelSampler/types';
 import { TFlattenedVectorSegment } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
 import { TPenDragOrigin } from 'components/Design/Canvas/hooks/useDrawPenTool/types';
 import { TVectorAlignmentGuide } from 'components/Design/Canvas/utils/applyVectorPointSnapping';
@@ -160,6 +161,7 @@ export type TVectorNodeRotateSnapshot = {
 
 export type TCanvasRefs = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
+  colorSampleRequestRef: RefObject<TColorSampleRequest | null>;
   cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>;
   draftRef: RefObject<TDraftEntity | null>;
   draggedNodeIdsRef: RefObject<Set<string> | null>;

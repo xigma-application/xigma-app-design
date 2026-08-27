@@ -1,10 +1,9 @@
-import cx from 'classnames';
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
 import VectorEditMoreDropdownItems from '../VectorEditMoreDropdownItems/VectorEditMoreDropdownItems';
-import { Icon, Popover, Tooltip } from 'shared';
+import { Button, ButtonMenu, Icon, Tooltip } from 'shared';
 
 // hooks
 import { useIsVectorEditMoreToolDisabled } from '../VectorEditMoreDropdownItem/hooks/useIsVectorEditMoreToolDisabled';
@@ -43,28 +42,24 @@ const VectorEditMoreDropdownTool: FC<TVectorEditMoreDropdownToolProps> = ({ tool
           </>
         }
       >
-        <button
-          aria-label={t(TOOL_LABEL[toolName])}
-          aria-pressed={isActive}
-          className={cx(styles.VectorEditToolbar__button, {
-            [styles['VectorEditToolbar__button--active']]: isActive,
-            [styles['VectorEditToolbar__button--disabled']]: isDisabled,
-          })}
+        <Button
+          active={isActive}
+          ariaLabel={t(TOOL_LABEL[toolName])}
+          className={styles['VectorEditToolbar__tool-button']}
           disabled={isDisabled}
           onClick={handleSelect}
-          type="button"
         >
           <Icon color={isActive ? 'onBlue1' : 'neutral1'} name={TOOL_ICON[toolName]} size={ICON_SIZE} />
-        </button>
+        </Button>
       </Tooltip>
-      <Popover
+      <ButtonMenu
+        className={styles['VectorEditToolbar__more-chevron']}
         side="top"
         trigger={<Icon name="ChevronDown" size={16} />}
         triggerAriaLabel={t(`${translationNameSpace}.more`)}
-        triggerClassName={styles['VectorEditToolbar__more-chevron']}
       >
         <VectorEditMoreDropdownItems lastMoreTool={toolName} />
-      </Popover>
+      </ButtonMenu>
     </div>
   );
 };

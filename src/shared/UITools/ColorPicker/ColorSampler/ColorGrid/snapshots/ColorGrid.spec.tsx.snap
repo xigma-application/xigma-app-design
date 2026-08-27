@@ -1,0 +1,213 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ColorGrid snapshots > should render ColorGrid 1`] = `
+<DocumentFragment>
+  <div
+    class="_ColorGrid_239723"
+  >
+    <div
+      class="_ColorGrid__color-grid_239723"
+    >
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+      <div
+        class="_ColorGrid__picker-grid_239723"
+        style="background-color: rgb(0, 0, 0);"
+      />
+    </div>
+    <div
+      class="_ColorGrid__picker-target-color_239723"
+    />
+  </div>
+</DocumentFragment>
+`;

@@ -1,0 +1,20 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SaturationMap snapshots > should render SaturationMap with the thumb positioned from saturation/value 1`] = `
+<DocumentFragment>
+  <div
+    class="_SaturationMap_3b3079"
+  >
+    <div
+      class="_SaturationMap__input_3b3079"
+      data-no-drag="true"
+      style="background-color: rgb(255, 0, 0);"
+    >
+      <div
+        class="_SaturationMap__thumb_3b3079"
+        style="left: calc(8px + 1 * (100% - 16px)); top: calc(8px + 0 * (100% - 16px));"
+      />
+    </div>
+  </div>
+</DocumentFragment>
+`;

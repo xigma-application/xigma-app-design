@@ -1,0 +1,65 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ColorValueInput snapshots > should render ColorValueInput defaulting to the hex format 1`] = `
+<DocumentFragment>
+  <div
+    class="_ColorValueInput_9ed6f4"
+  >
+    <button
+      aria-expanded="false"
+      aria-haspopup="dialog"
+      class="_Dropdown_cc217a _ColorValueInput__formatTrigger_9ed6f4"
+      data-state="closed"
+      data-test-bypass-global-shortcuts="true"
+      type="button"
+    >
+      <span
+        class="_Dropdown__label_cc217a"
+      >
+        Hex
+      </span>
+      <svg
+        class="Icon"
+        data-fpl-icon-size="16"
+        fill="none"
+        height="12"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 16 16"
+        width="12"
+      >
+        <path
+          d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+          data-svg-property="fill"
+          fill="white"
+        />
+      </svg>
+    </button>
+    <div
+      class="_FieldGroup_6b82ec"
+    >
+      <input
+        class="_HexField_94e65f"
+        data-test-bypass-global-shortcuts="true"
+        value="ff0000"
+      />
+      <div
+        class="_AlphaField_59d187"
+        data-test-bypass-global-shortcuts="true"
+      >
+        <input
+          class="_AlphaField__input_59d187"
+          max="100"
+          min="0"
+          type="number"
+          value="100"
+        />
+        <span
+          class="_AlphaField__unit_59d187"
+        >
+          %
+        </span>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

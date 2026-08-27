@@ -5,3 +5,18 @@
   font-weight: 400;
   src: url('../assets/fonts/inter/source/Inter-Regular.ttf') format('truetype');
 }
+
+/* stylelint-disable font-family-name-quotes */
+$fontFamily:
+  inter,
+  ui-sans-serif,
+  system-ui,
+  -apple-system,
+  'system-ui',
+  'Segoe UI',
+  roboto,
+  'Helvetica Neue',
+  arial,
+  'Noto Sans',
+  sans-serif,
+  sfprolocalrange;

@@ -1,0 +1,16 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`FieldGroup snapshots > should render FieldGroup wrapping its children in one bordered box 1`] = `
+<DocumentFragment>
+  <div
+    class="_FieldGroup_6b82ec"
+  >
+    <input
+      value="hex"
+    />
+    <input
+      value="alpha"
+    />
+  </div>
+</DocumentFragment>
+`;

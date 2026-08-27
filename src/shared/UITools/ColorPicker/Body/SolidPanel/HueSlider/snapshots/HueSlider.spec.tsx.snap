@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HueSlider snapshots > should render HueSlider with the thumb positioned from hue 1`] = `
+<DocumentFragment>
+  <div
+    class="_HueSlider_f465ba"
+    data-no-drag="true"
+  >
+    <div
+      class="_HueSlider__thumb_f465ba"
+      style="left: calc(8px + 0.5 * (100% - 16px));"
+    />
+  </div>
+</DocumentFragment>
+`;

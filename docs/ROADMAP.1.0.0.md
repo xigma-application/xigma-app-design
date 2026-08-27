@@ -335,29 +335,29 @@ comment / shapes, potem osobno: draw / scale / actions / dev mode).
       odróżnialny od "gotowe, tylko zaznaczone".
 
       **Poprawka (po zgłoszeniu, że uchwyt offsetu nie reaguje od razu po narysowaniu)**: po
-                  puszczeniu myszy `useDrawTextOnPathTool.ts` wchodzi w edycję tekstu **bez `id`** — węzeł
-                  tekstowy nie istnieje jeszcze w Reduxie, bo Text (i Text on Path) commituje się dopiero na
-                  `blur` (Etap 7), nie od razu jak reszta narzędzi. Trzy miejsca liczące pozycję/hit-test
-                  uchwytu offsetu opierały się jednak wyłącznie na **zacommitowanym** node'ie: `drawScene.ts`
-                  rysował uchwyt tylko dla node'a znalezionego w `nodesById`, a `useHoverHighlight.ts` i
-                  `useCurvedCaretEditing.ts` hit-testowały tylko `selectedNodes` — w efekcie podczas
-                  pierwszego rysowania uchwyt był niewidoczny, kursor przy najechaniu się nie zmieniał, a
-                  kliknięcie/przeciągnięcie w ogóle nie łapało uchwytu, mimo że dokładnie ten sam gest
-                  działał już poprawnie dla wcześniej zapisanego tekstu na ścieżce. Naprawione przestawieniem
-                  wszystkich trzech miejsc na **`editingTextBox`** (stan aktywnej edycji w Reduxie, istnieje
-                  od razu, niezależnie od tego czy węzeł już jest zacommitowany) jako jedyne źródło prawdy
-                  podczas edycji — `getPathTextHandlePoint.ts` już wcześniej przyjmował ten typ zamiennie z
-                  prawdziwym node'em, więc rysowanie/hit-test/drag przestawiły się bez zmiany matematyki,
-                  tylko zmieniając *skąd* biorą dane. Przeciąganie w trakcie tworzenia aktualizuje
-                  `editingTextBox.pathStartOffset` bezpośrednio (`updateEditingTextBoxPathStartOffset`, nowy
-                  reducer) i dopiero komit zapisuje tę wartość na właściwym node'ie; gdy węzeł już istnieje
-                  (ponowna edycja zapisanego tekstu), przeciąganie nadal aktualizuje też node'a na żywo, jak
-                  wcześniej. Przy okazji: `useCurvedCaretEditing.ts` (hit-test kliknięcia w tekst na krzywej)
-                  rozbity na osobne pliki per handler pointerowy (`utils/handlePointerDown/`,
-                  `utils/handlePointerMove/`, `utils/handlePointerUp/`), analogicznie do istniejącej
-                  struktury `useSelectionTool`. Zweryfikowane e2e (Playwright): narysowanie ścieżki,
-                  wpisanie tekstu i przeciągnięcie uchwytu offsetu w tej samej, nieprzerwanej sesji edycji —
-                  bez klikania gdziekolwiek indziej po drodze
+                                              puszczeniu myszy `useDrawTextOnPathTool.ts` wchodzi w edycję tekstu **bez `id`** — węzeł
+                                              tekstowy nie istnieje jeszcze w Reduxie, bo Text (i Text on Path) commituje się dopiero na
+                                              `blur` (Etap 7), nie od razu jak reszta narzędzi. Trzy miejsca liczące pozycję/hit-test
+                                              uchwytu offsetu opierały się jednak wyłącznie na **zacommitowanym** node'ie: `drawScene.ts`
+                                              rysował uchwyt tylko dla node'a znalezionego w `nodesById`, a `useHoverHighlight.ts` i
+                                              `useCurvedCaretEditing.ts` hit-testowały tylko `selectedNodes` — w efekcie podczas
+                                              pierwszego rysowania uchwyt był niewidoczny, kursor przy najechaniu się nie zmieniał, a
+                                              kliknięcie/przeciągnięcie w ogóle nie łapało uchwytu, mimo że dokładnie ten sam gest
+                                              działał już poprawnie dla wcześniej zapisanego tekstu na ścieżce. Naprawione przestawieniem
+                                              wszystkich trzech miejsc na **`editingTextBox`** (stan aktywnej edycji w Reduxie, istnieje
+                                              od razu, niezależnie od tego czy węzeł już jest zacommitowany) jako jedyne źródło prawdy
+                                              podczas edycji — `getPathTextHandlePoint.ts` już wcześniej przyjmował ten typ zamiennie z
+                                              prawdziwym node'em, więc rysowanie/hit-test/drag przestawiły się bez zmiany matematyki,
+                                              tylko zmieniając *skąd* biorą dane. Przeciąganie w trakcie tworzenia aktualizuje
+                                              `editingTextBox.pathStartOffset` bezpośrednio (`updateEditingTextBoxPathStartOffset`, nowy
+                                              reducer) i dopiero komit zapisuje tę wartość na właściwym node'ie; gdy węzeł już istnieje
+                                              (ponowna edycja zapisanego tekstu), przeciąganie nadal aktualizuje też node'a na żywo, jak
+                                              wcześniej. Przy okazji: `useCurvedCaretEditing.ts` (hit-test kliknięcia w tekst na krzywej)
+                                              rozbity na osobne pliki per handler pointerowy (`utils/handlePointerDown/`,
+                                              `utils/handlePointerMove/`, `utils/handlePointerUp/`), analogicznie do istniejącej
+                                              struktury `useSelectionTool`. Zweryfikowane e2e (Playwright): narysowanie ścieżki,
+                                              wpisanie tekstu i przeciągnięcie uchwytu offsetu w tej samej, nieprzerwanej sesji edycji —
+                                              bez klikania gdziekolwiek indziej po drodze
 
 - [x] **Slice** — narzędzie do zaznaczania obszaru canvasu pod przyszły eksport (PNG itd.); realnego
       panelu/eksportu jeszcze nie ma (patrz Etap 8/15), więc na razie zachowuje się jak rysowanie
@@ -382,57 +382,57 @@ comment / shapes, potem osobno: draw / scale / actions / dev mode).
       bez shear'u/flip/multi-node, bo Slice zawsze jest dokładnie jednym prostym boxem.
 
       **Poprawka (po zgłoszeniu na żywo, że kursor cały czas pokazuje `pointer.png`)**: `ToolName.slice`
-              dodane do `DRAWING_TOOLS` (Etap 0/1, klasa `--drawing` = krzyżyk na cały czas trwania aktywnego
-              narzędzia) dawało crosshair-owy kursor przez **cały** czas trwania narzędzia, nie tylko podczas
-              samego rysowania — inaczej niż Frame/Section, które zawsze wracają do `default` zaraz po jednym
-              kształcie, więc dla nich ten sam mechanizm nigdy nie kolidował z fazą "edytuj już narysowany
-              kształt". Naprawione nowym `updateHoverCursor.ts` (odpalane co `pointermove`, gdy
-              `event.buttons === 0`), które jawnie nadpisuje `canvas.style.cursor` wartością konkretnego
-              kursora (resize/rotate nad uchwytem, albo jawny "domyślny" poza nimi) zamiast pustego stringa —
-              pusty string tylko *zdejmuje* inline-style i odsłania z powrotem klasę `--drawing`, która nadal
-              jest aktywna, dopóki `activeTool === slice`. "Domyślny" kursor to nie CSS-owe słowo kluczowe
-              `default`, tylko dokładnie ten sam obrazek co bazowy kursor canvasu
-              (`assets/icons/cursors/default.png`) — wydzielony do nowego, współdzielonego
-              `utils/canvas/defaultCursor.ts` (`DEFAULT_CURSOR`), użytego też przy zakończeniu pierwszego
-              rysowania (`disarmDrawDrag.ts`), żeby kursor przełączał się na "gotowe" natychmiast po puszczeniu
-              myszy, a nie dopiero przy najbliższym `pointermove`.
+                                          dodane do `DRAWING_TOOLS` (Etap 0/1, klasa `--drawing` = krzyżyk na cały czas trwania aktywnego
+                                          narzędzia) dawało crosshair-owy kursor przez **cały** czas trwania narzędzia, nie tylko podczas
+                                          samego rysowania — inaczej niż Frame/Section, które zawsze wracają do `default` zaraz po jednym
+                                          kształcie, więc dla nich ten sam mechanizm nigdy nie kolidował z fazą "edytuj już narysowany
+                                          kształt". Naprawione nowym `updateHoverCursor.ts` (odpalane co `pointermove`, gdy
+                                          `event.buttons === 0`), które jawnie nadpisuje `canvas.style.cursor` wartością konkretnego
+                                          kursora (resize/rotate nad uchwytem, albo jawny "domyślny" poza nimi) zamiast pustego stringa —
+                                          pusty string tylko *zdejmuje* inline-style i odsłania z powrotem klasę `--drawing`, która nadal
+                                          jest aktywna, dopóki `activeTool === slice`. "Domyślny" kursor to nie CSS-owe słowo kluczowe
+                                          `default`, tylko dokładnie ten sam obrazek co bazowy kursor canvasu
+                                          (`assets/icons/cursors/default.png`) — wydzielony do nowego, współdzielonego
+                                          `utils/canvas/defaultCursor.ts` (`DEFAULT_CURSOR`), użytego też przy zakończeniu pierwszego
+                                          rysowania (`disarmDrawDrag.ts`), żeby kursor przełączał się na "gotowe" natychmiast po puszczeniu
+                                          myszy, a nie dopiero przy najbliższym `pointermove`.
 
-              **Poprawka (po zgłoszeniu na żywo, ze zrzutem ekranu)**: przy obróconym Slice user chciał
-              dodatkowy, przerywany prostokąt pokazujący **rzeczywisty rozmiar przyszłego eksportu**
-              (axis-aligned bounding box obróconego boxa — to on, nie sam obrócony box, odpowiada realnemu
-              rozmiarowi pikseli, jakie wyjdą z przyszłego eksportu), rysowany pod spodem, plus żeby ten
-              dodatkowy prostokąt też łapał przeciąganie (samo przesuwanie, nie resize/rotate — te zostają
-              wyłącznie na uchwytach właściwego, obróconego boxa). Nowy, generyczny
-              `utils/canvas/getRotatedBoundingBox.ts` (rotuje 4 rogi, bierze AABB) użyty w dwóch miejscach:
-              rysowanie (`drawSliceDraft.ts` woła istniejący `drawDashedRectOutline.ts` na obliczonym bboxie
-              z `rotation=0`, tylko gdy `slice.rotation !== 0` — przy braku obrotu bbox pokrywałby się z
-              właściwym boxem jeden do jednego, więc rysowanie go byłoby czystym marnotrawstwem) i hit-test
-              (`handlePointerDown.ts`: warunek "przesuń" zamieniony z testu przeciw surowym, nieobróconym
-              granicom boxa na test przeciw jego rotowanemu bboxowi) — przy okazji naprawiło to realnego,
-              wcześniej niezauważonego buga: stary test w ogóle nie odwracał punktu kursora przed
-              porównaniem, więc dla dowolnie obróconego Slice'a kliknięcie we właściwy, widoczny obszar boxa
-              czasem w ogóle nie łapało przeciągnięcia. Osobno wypróbowany i **odrzucony** przez usera pomysł
-              na etykietę z wymiarami (`SliceDimensionLabel`, DOM-owy overlay analogiczny do
-              `TextEditOverlay`, z `requestAnimationFrame`-owym mostkiem ref→state, bo `sliceRef` nie
-              wywołuje re-renderów Reacta) — zostawiony tylko przerywany bbox, bez tekstu.
+                                          **Poprawka (po zgłoszeniu na żywo, ze zrzutem ekranu)**: przy obróconym Slice user chciał
+                                          dodatkowy, przerywany prostokąt pokazujący **rzeczywisty rozmiar przyszłego eksportu**
+                                          (axis-aligned bounding box obróconego boxa — to on, nie sam obrócony box, odpowiada realnemu
+                                          rozmiarowi pikseli, jakie wyjdą z przyszłego eksportu), rysowany pod spodem, plus żeby ten
+                                          dodatkowy prostokąt też łapał przeciąganie (samo przesuwanie, nie resize/rotate — te zostają
+                                          wyłącznie na uchwytach właściwego, obróconego boxa). Nowy, generyczny
+                                          `utils/canvas/getRotatedBoundingBox.ts` (rotuje 4 rogi, bierze AABB) użyty w dwóch miejscach:
+                                          rysowanie (`drawSliceDraft.ts` woła istniejący `drawDashedRectOutline.ts` na obliczonym bboxie
+                                          z `rotation=0`, tylko gdy `slice.rotation !== 0` — przy braku obrotu bbox pokrywałby się z
+                                          właściwym boxem jeden do jednego, więc rysowanie go byłoby czystym marnotrawstwem) i hit-test
+                                          (`handlePointerDown.ts`: warunek "przesuń" zamieniony z testu przeciw surowym, nieobróconym
+                                          granicom boxa na test przeciw jego rotowanemu bboxowi) — przy okazji naprawiło to realnego,
+                                          wcześniej niezauważonego buga: stary test w ogóle nie odwracał punktu kursora przed
+                                          porównaniem, więc dla dowolnie obróconego Slice'a kliknięcie we właściwy, widoczny obszar boxa
+                                          czasem w ogóle nie łapało przeciągnięcia. Osobno wypróbowany i **odrzucony** przez usera pomysł
+                                          na etykietę z wymiarami (`SliceDimensionLabel`, DOM-owy overlay analogiczny do
+                                          `TextEditOverlay`, z `requestAnimationFrame`-owym mostkiem ref→state, bo `sliceRef` nie
+                                          wywołuje re-renderów Reacta) — zostawiony tylko przerywany bbox, bez tekstu.
 
-              **Poprawka (po zgłoszeniu na żywo, że przerywana kreska jest za gęsta)**: `drawDashedRectOutline.ts`
-              miał na sztywno wpisane stałe `FONT_SIZE_GUIDE_DASH_LENGTH_PX`/`GAP_PX` (2px/2px — dobre dla
-              wąskiej prowadnicy rozmiaru fontu z Etapu 7, za gęste na duży prostokąt). Sparametryzowany
-              (`dashLength`/`dashGap` jako jawne argumenty), jego jedyny dotychczasowy callsite
-              (`drawPathTextFontSizeGuide.ts`) przekazuje te same stałe co dotąd (zero zmiany zachowania), a
-              Slice dostał własne, wyraźnie rzadsze `SLICE_BOUNDING_BOX_DASH_LENGTH_PX`/`GAP_PX`
-              (`constant/canvas.ts`).
+                                          **Poprawka (po zgłoszeniu na żywo, że przerywana kreska jest za gęsta)**: `drawDashedRectOutline.ts`
+                                          miał na sztywno wpisane stałe `FONT_SIZE_GUIDE_DASH_LENGTH_PX`/`GAP_PX` (2px/2px — dobre dla
+                                          wąskiej prowadnicy rozmiaru fontu z Etapu 7, za gęste na duży prostokąt). Sparametryzowany
+                                          (`dashLength`/`dashGap` jako jawne argumenty), jego jedyny dotychczasowy callsite
+                                          (`drawPathTextFontSizeGuide.ts`) przekazuje te same stałe co dotąd (zero zmiany zachowania), a
+                                          Slice dostał własne, wyraźnie rzadsze `SLICE_BOUNDING_BOX_DASH_LENGTH_PX`/`GAP_PX`
+                                          (`constant/canvas.ts`).
 
-              Zweryfikowane w 100% pokryciem testów jednostkowych oraz e2e (`create-slice.spec.ts`: rysowanie
-              z dropdownu i ze skrótu `S`, resize po narysowaniu, kasowanie po kliknięciu poza obszarem z
-              powrotem do `default` i canvas wracający piksel-w-piksel do stanu sprzed rysowania — screenshot
-              przycięty tak, żeby nie łapał floating toolbara, bo ten realnie zmienia własną ikonkę po użyciu
-              Slice'a, `lastFrameTool`), a na końcu ręcznie przez użytkownika na żywo
+                                          Zweryfikowane w 100% pokryciem testów jednostkowych oraz e2e (`create-slice.spec.ts`: rysowanie
+                                          z dropdownu i ze skrótu `S`, resize po narysowaniu, kasowanie po kliknięciu poza obszarem z
+                                          powrotem do `default` i canvas wracający piksel-w-piksel do stanu sprzed rysowania — screenshot
+                                          przycięty tak, żeby nie łapał floating toolbara, bo ten realnie zmienia własną ikonkę po użyciu
+                                          Slice'a, `lastFrameTool`), a na końcu ręcznie przez użytkownika na żywo
 
 - [x] **Klik bez przeciągnięcia stawia element domyślnego rozmiaru (100×100)** — do tej pory każde
       narzędzie rysujące gate'owało commit na `rect.width >= MIN_SHAPE_SIZE && rect.height >=
-  MIN_SHAPE_SIZE` (`MIN_SHAPE_SIZE = 2`), więc zwykły klik (albo przeciągnięcie zbyt małe w
+MIN_SHAPE_SIZE` (`MIN_SHAPE_SIZE = 2`), więc zwykły klik (albo przeciągnięcie zbyt małe w
       choćby jednej osi) nie robił nic — zgłoszone jako niezgodne z Figmą, gdzie klik zawsze stawia
       element 100×100. Wzorcem był już istniejący mechanizm Media tool
       (`useDrawMediaTool/utils/handlePointerUp/handlePointerUp.ts`), które już umiało odróżnić klik
@@ -481,7 +481,7 @@ comment / shapes, potem osobno: draw / scale / actions / dev mode).
       `TLineToolConfig` (`ARROW_TOOL_SETTINGS`, `endPoint: 'arrow'`), więc geometria/hit-testing/
       resize zostają dokładnie te same co dla Line, zero nowej logiki poza domyślną wartością pola.
       Dzieli slot w toolbarze z Line w dropdownzie Rectangle (`TOOL_GROUP_ITEMS[rectangle] =
-  [rectangle, line, arrow, ellipse, polygon, star, media]`, zaraz po Line), własny skrót
+[rectangle, line, arrow, ellipse, polygon, star, media]`, zaraz po Line), własny skrót
       `Shift+L` (w odróżnieniu od samego `L` dla Line, ten sam wzorzec co Section/Slice). Grot to
       nie wypełniony trójkąt, tylko dwa grube, zaokrąglone "skrzydła" (`drawArrowhead.ts`, nowy
       prymityw w `utils/canvas/`) — w tym silniku nie ma jeszcze prymitywu do rysowania
@@ -642,107 +642,107 @@ przeszkodą, żeby edycja pojedynczego node'a czuła się skończona, nie tylko 
       `node.rotation` do kąta kursora dla pojedynczego node'a
 
       **Poprawka (po zgłoszeniu przez użytkownika, z zrzutami ekranu figmowego resize)**:
-                                                                                                              `continueResizeDrag.ts` w ogóle nie czytał `rotation` node'a — anizotropowy resize
-                                                                                                              (scaleX≠scaleY, np. przeciągnięcie krawędzi grupy tylko w poziomie) skalował `x/y/width/height`
-                                                                                                              obróconego node'a tak, jakby były nieobróconymi współrzędnymi świata, więc "wzrost szerokości"
-                                                                                                              w lokalnej przestrzeni node'a pokazywał się na ekranie jako wzrost w zupełnie innym kierunku niż
-                                                                                                              przeciąganie użytkownika — obrócony node realnie wystawał poza wspólny bbox grupy zamiast się w
-                                                                                                              nim mieścić. Świadomie **bez** shear'u (Figma w tym scenariuszu ścina zaznaczony obrócony
-                                                                                                              element w parallelogram, niespójnie nawet między swoimi własnymi typami node'ów — do
-                                                                                                              przemyślenia osobno, jeśli w ogóle). Zamiast tego: `TResizeNodeOrigin` (i `armResizeDrag.ts`)
-                                                                                                              dostały migawkę `rotation` node'a z momentu złapania uchwytu, a `continueResizeDrag.ts` liczy
-                                                                                                              teraz nową szerokość/wysokość przez rzut światowego wektora skali `(scaleX, scaleY)` na własne,
-                                                                                                              obrócone osie node'a: `√((scaleX·cosθ)² + (scaleY·sinθ)²)` dla szerokości, analogicznie z
-                                                                                                              sin/cos zamienionymi dla wysokości — środek node'a przesuwa się pełną transformacją grupy
-                                                                                                              (`transformCoord` na środku zamiast na rogu bboxa), rotacja zostaje bez zmian. Przy θ=0 wzór
-                                                                                                              matematycznie redukuje się dokładnie do starego zachowania (sprawdzone algebraicznie i
-                                                                                                              testami — żaden z istniejących testów nie zmienił oczekiwanych wartości), więc nieobrócone
-                                                                                                              node'y (i pojedynczy resize, i grupowy) zachowują się identycznie jak wcześniej. Node zawsze
-                                                                                                              zostaje prawdziwym, nieściętym prostokątem — nie da się tego uniknąć bez shear'u, bo
-                                                                                                              anizotropowe skalowanie obróconego kształtu w world space z definicji nie zachowuje kątów
-                                                                                                              prostych (stąd świadomie przyjęta ta metoda, nie "poprawna" w sensie 1:1 z ruchem myszy, tylko
-                                                                                                              najbliższe rozsądne przybliżenie bez ścinania). Zweryfikowane w przeglądarce (Playwright MCP):
-                                                                                                              grupa dwóch prostokątów (jeden obrócony), rozciągnięta tylko poziomo — obrócony prostokąt teraz
-                                                                                                              trzyma się w granicach wspólnego bboxa zamiast z niego wystawać
+                                                                                                                                          `continueResizeDrag.ts` w ogóle nie czytał `rotation` node'a — anizotropowy resize
+                                                                                                                                          (scaleX≠scaleY, np. przeciągnięcie krawędzi grupy tylko w poziomie) skalował `x/y/width/height`
+                                                                                                                                          obróconego node'a tak, jakby były nieobróconymi współrzędnymi świata, więc "wzrost szerokości"
+                                                                                                                                          w lokalnej przestrzeni node'a pokazywał się na ekranie jako wzrost w zupełnie innym kierunku niż
+                                                                                                                                          przeciąganie użytkownika — obrócony node realnie wystawał poza wspólny bbox grupy zamiast się w
+                                                                                                                                          nim mieścić. Świadomie **bez** shear'u (Figma w tym scenariuszu ścina zaznaczony obrócony
+                                                                                                                                          element w parallelogram, niespójnie nawet między swoimi własnymi typami node'ów — do
+                                                                                                                                          przemyślenia osobno, jeśli w ogóle). Zamiast tego: `TResizeNodeOrigin` (i `armResizeDrag.ts`)
+                                                                                                                                          dostały migawkę `rotation` node'a z momentu złapania uchwytu, a `continueResizeDrag.ts` liczy
+                                                                                                                                          teraz nową szerokość/wysokość przez rzut światowego wektora skali `(scaleX, scaleY)` na własne,
+                                                                                                                                          obrócone osie node'a: `√((scaleX·cosθ)² + (scaleY·sinθ)²)` dla szerokości, analogicznie z
+                                                                                                                                          sin/cos zamienionymi dla wysokości — środek node'a przesuwa się pełną transformacją grupy
+                                                                                                                                          (`transformCoord` na środku zamiast na rogu bboxa), rotacja zostaje bez zmian. Przy θ=0 wzór
+                                                                                                                                          matematycznie redukuje się dokładnie do starego zachowania (sprawdzone algebraicznie i
+                                                                                                                                          testami — żaden z istniejących testów nie zmienił oczekiwanych wartości), więc nieobrócone
+                                                                                                                                          node'y (i pojedynczy resize, i grupowy) zachowują się identycznie jak wcześniej. Node zawsze
+                                                                                                                                          zostaje prawdziwym, nieściętym prostokątem — nie da się tego uniknąć bez shear'u, bo
+                                                                                                                                          anizotropowe skalowanie obróconego kształtu w world space z definicji nie zachowuje kątów
+                                                                                                                                          prostych (stąd świadomie przyjęta ta metoda, nie "poprawna" w sensie 1:1 z ruchem myszy, tylko
+                                                                                                                                          najbliższe rozsądne przybliżenie bez ścinania). Zweryfikowane w przeglądarce (Playwright MCP):
+                                                                                                                                          grupa dwóch prostokątów (jeden obrócony), rozciągnięta tylko poziomo — obrócony prostokąt teraz
+                                                                                                                                          trzyma się w granicach wspólnego bboxa zamiast z niego wystawać
 
-                                                                                                              **Trzecia poprawka (po kolejnym zgłoszeniu — "resize single obiektu nie działa")**: powyższa
-                                                                                                              poprawka naprawiła tylko resize **grupy** z obróconym członkiem; pojedynczy zaznaczony obrócony
-                                                                                                              node to zupełnie inny przypadek, źle zdiagnozowany przy okazji poprzedniej poprawki (oba testy
-                                                                                                              jednostkowe "grupowe" miały tylko jeden wpis w `nodeOrigins`, więc w rzeczywistości sprawdzały
-                                                                                                              właśnie tę ścieżkę, nie grupową — poprawione, patrz niżej). Dla pojedynczego node'a `bounds`
-                                                                                                              przekazywane do `continueResizeDrag.ts` to **własny, nieobrócony lokalny box node'a**
-                                                                                                              (`getNodeBounds`, ustawiane w `getResizeHandleAtPoint.ts`), nie world-space AABB grupy — a
-                                                                                                              surowa pozycja kursora (`screenToWorld`) zostaje w world space, więc porównywanie jej
-                                                                                                              bezpośrednio do lokalnego boxa nie miało sensu przy `rotation !== 0` (dokładnie ten sam problem,
-                                                                                                              który hit-testing tego samego uchwytu już rozwiązywał inaczej — `getResizeHandleAtPoint.ts`
-                                                                                                              odwrotnie obraca punkt kliknięcia przed testem, ale samo przeciąganie tego nie robiło).
-                                                                                                              Naprawione przez wydzielenie tej sztuczki do współdzielonego
-                                                                                                              `Canvas/utils/getUnrotatedQueryPoint.ts` (usunięty duplikat z `getResizeHandleAtPoint.ts`,
-                                                                                                              zaimportowany też w `continueResizeDrag.ts`): gdy `nodeOrigins` ma dokładnie jeden wpis
-                                                                                                              (nie-line) i jego `rotation !== 0`, surowy punkt myszy jest najpierw odwrotnie obracany wokół
-                                                                                                              środka `bounds` — od tego momentu punkt i bounds są w tej samej, lokalnej przestrzeni node'a,
-                                                                                                              więc cała reszta istniejącej matematyki (`computeResizedRect`, `getSignedScale`,
-                                                                                                              `transformCoord`) działa poprawnie bez żadnych dalszych zmian. Efekt uboczny: skoro `scaleX`/
-                                                                                                              `scaleY` są już policzone w lokalnej przestrzeni node'a (nie world), zastosowanie do nich
-                                                                                                              wcześniejszego rzutu `getRotatedAxisScales` byłoby podwójną (błędną) transformacją — dla tego
-                                                                                                              jednego przypadku szerokość/wysokość liczone są wprost z `|scaleX|`/`|scaleY|`, bez rzutowania.
-                                                                                                              Zweryfikowane w przeglądarce (Playwright MCP): przeciągnięcie rogu obróconego prostokąta
-                                                                                                              dokładnie wzdłuż jego własnej (obróconej) długiej krawędzi teraz poprawnie wydłuża kształt w
-                                                                                                              tym samym kierunku, z przeciwległym rogiem zostającym nieruchomo jako kotwica — zamiast
-                                                                                                              skakać w kierunku niezwiązanym z ruchem myszy
+                                                                                                                                          **Trzecia poprawka (po kolejnym zgłoszeniu — "resize single obiektu nie działa")**: powyższa
+                                                                                                                                          poprawka naprawiła tylko resize **grupy** z obróconym członkiem; pojedynczy zaznaczony obrócony
+                                                                                                                                          node to zupełnie inny przypadek, źle zdiagnozowany przy okazji poprzedniej poprawki (oba testy
+                                                                                                                                          jednostkowe "grupowe" miały tylko jeden wpis w `nodeOrigins`, więc w rzeczywistości sprawdzały
+                                                                                                                                          właśnie tę ścieżkę, nie grupową — poprawione, patrz niżej). Dla pojedynczego node'a `bounds`
+                                                                                                                                          przekazywane do `continueResizeDrag.ts` to **własny, nieobrócony lokalny box node'a**
+                                                                                                                                          (`getNodeBounds`, ustawiane w `getResizeHandleAtPoint.ts`), nie world-space AABB grupy — a
+                                                                                                                                          surowa pozycja kursora (`screenToWorld`) zostaje w world space, więc porównywanie jej
+                                                                                                                                          bezpośrednio do lokalnego boxa nie miało sensu przy `rotation !== 0` (dokładnie ten sam problem,
+                                                                                                                                          który hit-testing tego samego uchwytu już rozwiązywał inaczej — `getResizeHandleAtPoint.ts`
+                                                                                                                                          odwrotnie obraca punkt kliknięcia przed testem, ale samo przeciąganie tego nie robiło).
+                                                                                                                                          Naprawione przez wydzielenie tej sztuczki do współdzielonego
+                                                                                                                                          `Canvas/utils/getUnrotatedQueryPoint.ts` (usunięty duplikat z `getResizeHandleAtPoint.ts`,
+                                                                                                                                          zaimportowany też w `continueResizeDrag.ts`): gdy `nodeOrigins` ma dokładnie jeden wpis
+                                                                                                                                          (nie-line) i jego `rotation !== 0`, surowy punkt myszy jest najpierw odwrotnie obracany wokół
+                                                                                                                                          środka `bounds` — od tego momentu punkt i bounds są w tej samej, lokalnej przestrzeni node'a,
+                                                                                                                                          więc cała reszta istniejącej matematyki (`computeResizedRect`, `getSignedScale`,
+                                                                                                                                          `transformCoord`) działa poprawnie bez żadnych dalszych zmian. Efekt uboczny: skoro `scaleX`/
+                                                                                                                                          `scaleY` są już policzone w lokalnej przestrzeni node'a (nie world), zastosowanie do nich
+                                                                                                                                          wcześniejszego rzutu `getRotatedAxisScales` byłoby podwójną (błędną) transformacją — dla tego
+                                                                                                                                          jednego przypadku szerokość/wysokość liczone są wprost z `|scaleX|`/`|scaleY|`, bez rzutowania.
+                                                                                                                                          Zweryfikowane w przeglądarce (Playwright MCP): przeciągnięcie rogu obróconego prostokąta
+                                                                                                                                          dokładnie wzdłuż jego własnej (obróconej) długiej krawędzi teraz poprawnie wydłuża kształt w
+                                                                                                                                          tym samym kierunku, z przeciwległym rogiem zostającym nieruchomo jako kotwica — zamiast
+                                                                                                                                          skakać w kierunku niezwiązanym z ruchem myszy
 
-                                                                                                              **Czwarta poprawka (po zgłoszeniu "obrócony element nie robi mirror")**: żadna z
-                                                                                                              poprzednich trzech poprawek nie dotykała samego **mirror/flip przy przekroczeniu kotwicy**
-                                                                                                              na obróconym node'ie — dwa osobne, niezależne błędy w tej samej ścieżce. (1) Dla
-                                                                                                              **grupy** z obróconym członkiem: flaga `flipX`/`flipY` liczyła się wprost ze znaku
-                                                                                                              surowego `scaleX`/`scaleY` w układzie świata, ignorując rotację node'a — dokładnie ta
-                                                                                                              sama klasa błędu, którą druga poprawka (wyżej) naprawiła dla width/height przez
-                                                                                                              `getRotatedAxisScales`, tylko nigdy nie zaaplikowana do flip. Naprawione nową
-                                                                                                              `getRotatedAxisSigns` (rzutuje `scaleX`/`scaleY` na lokalne osie obróconego node'a przez
-                                                                                                              `scaleX·cos²θ + scaleY·sin²θ` dla X, symetrycznie dla Y) — używana zamiast surowego
-                                                                                                              `scaleX`/`scaleY` przy liczeniu `flipX`/`flipY` dla członków grupy (pojedynczy obrócony
-                                                                                                              node nadal używa surowego scale, bo tam `scaleX`/`scaleY` są już w jego własnej lokalnej
-                                                                                                              przestrzeni po fixie z trzeciej poprawki — ponowne rzutowanie byłoby błędem). (2) Dla
-                                                                                                              **pojedynczego** obróconego node'a, znacznie poważniejszy błąd: `getRotatedAnchorSolver`
-                                                                                                              (dodany w trzeciej poprawce) zakładał, że róg-kotwica zawsze leży po tej samej stronie
-                                                                                                              (względem środka) nowego prostokąta — założenie fałszywe, gdy przeciągnięcie faktycznie
-                                                                                                              *przekracza* kotwicę, bo wtedy róg-kotwica fizycznie ląduje po przeciwnej stronie nowego
-                                                                                                              (zmirrorowanego) prostokąta. Przy pełnym symetrycznym przekroczeniu (ten sam rozmiar,
-                                                                                                              odbita pozycja) dawało to dokładnie oryginalny prostokąt z powrotem — czyli wizualnie
-                                                                                                              **nic się nie działo**, dokładnie zgłoszony objaw. Naprawione: znak przesunięcia kotwicy
-                                                                                                              (`crossedSignX`/`crossedSignY`) odwraca się per-oś, gdy dana oś faktycznie przekroczyła
-                                                                                                              (`Math.sign(scaleX)`/`Math.sign(scaleY)` ujemny). Zweryfikowane przez pełny, prawdziwy
-                                                                                                              łańcuch zdarzeń DOM (pointerdown→pointermove→pointerup, nie tylko bezpośrednie wywołanie
-                                                                                                              `continueResizeDrag` — błąd żył w otoczeniu, którego bezpośrednie wywołanie nie
-                                                                                                              wychwyciłoby) porównaniem zrzutów ekranu przed/po oraz z niezależnie zbudowanym
-                                                                                                              prostokątem-referencją w tym samym miejscu; potwierdzone też, że test faktycznie łapie
-                                                                                                              regresję (fail bez poprawki, pass z nią)
+                                                                                                                                          **Czwarta poprawka (po zgłoszeniu "obrócony element nie robi mirror")**: żadna z
+                                                                                                                                          poprzednich trzech poprawek nie dotykała samego **mirror/flip przy przekroczeniu kotwicy**
+                                                                                                                                          na obróconym node'ie — dwa osobne, niezależne błędy w tej samej ścieżce. (1) Dla
+                                                                                                                                          **grupy** z obróconym członkiem: flaga `flipX`/`flipY` liczyła się wprost ze znaku
+                                                                                                                                          surowego `scaleX`/`scaleY` w układzie świata, ignorując rotację node'a — dokładnie ta
+                                                                                                                                          sama klasa błędu, którą druga poprawka (wyżej) naprawiła dla width/height przez
+                                                                                                                                          `getRotatedAxisScales`, tylko nigdy nie zaaplikowana do flip. Naprawione nową
+                                                                                                                                          `getRotatedAxisSigns` (rzutuje `scaleX`/`scaleY` na lokalne osie obróconego node'a przez
+                                                                                                                                          `scaleX·cos²θ + scaleY·sin²θ` dla X, symetrycznie dla Y) — używana zamiast surowego
+                                                                                                                                          `scaleX`/`scaleY` przy liczeniu `flipX`/`flipY` dla członków grupy (pojedynczy obrócony
+                                                                                                                                          node nadal używa surowego scale, bo tam `scaleX`/`scaleY` są już w jego własnej lokalnej
+                                                                                                                                          przestrzeni po fixie z trzeciej poprawki — ponowne rzutowanie byłoby błędem). (2) Dla
+                                                                                                                                          **pojedynczego** obróconego node'a, znacznie poważniejszy błąd: `getRotatedAnchorSolver`
+                                                                                                                                          (dodany w trzeciej poprawce) zakładał, że róg-kotwica zawsze leży po tej samej stronie
+                                                                                                                                          (względem środka) nowego prostokąta — założenie fałszywe, gdy przeciągnięcie faktycznie
+                                                                                                                                          *przekracza* kotwicę, bo wtedy róg-kotwica fizycznie ląduje po przeciwnej stronie nowego
+                                                                                                                                          (zmirrorowanego) prostokąta. Przy pełnym symetrycznym przekroczeniu (ten sam rozmiar,
+                                                                                                                                          odbita pozycja) dawało to dokładnie oryginalny prostokąt z powrotem — czyli wizualnie
+                                                                                                                                          **nic się nie działo**, dokładnie zgłoszony objaw. Naprawione: znak przesunięcia kotwicy
+                                                                                                                                          (`crossedSignX`/`crossedSignY`) odwraca się per-oś, gdy dana oś faktycznie przekroczyła
+                                                                                                                                          (`Math.sign(scaleX)`/`Math.sign(scaleY)` ujemny). Zweryfikowane przez pełny, prawdziwy
+                                                                                                                                          łańcuch zdarzeń DOM (pointerdown→pointermove→pointerup, nie tylko bezpośrednie wywołanie
+                                                                                                                                          `continueResizeDrag` — błąd żył w otoczeniu, którego bezpośrednie wywołanie nie
+                                                                                                                                          wychwyciłoby) porównaniem zrzutów ekranu przed/po oraz z niezależnie zbudowanym
+                                                                                                                                          prostokątem-referencją w tym samym miejscu; potwierdzone też, że test faktycznie łapie
+                                                                                                                                          regresję (fail bez poprawki, pass z nią)
 
-                                                                                                              **Piąta poprawka (po zgłoszeniu przez użytkownika — resize grupy z obróconym node'em nie
-                                                                                                              ścinał się do zera i dryfował w wolnej osi)**: poprzednie dwie poprawki (wyżej) świadomie
-                                                                                                              zachowywały obrócony node jako prawdziwy, nieścięty prostokąt przez rzut wektora skali na
-                                                                                                              jego lokalne osie (`getRotatedAxisScales`/`getRotatedAxisSigns`, √((scaleX·cosθ)² +
-                                                                                                              (scaleY·sinθ)²)) — matematycznie poprawne dla prawdziwej (ścinającej) transformacji, ale
-                                                                                                              przy resizie tylko jednej osi grupy (np. uchwyt `e`, scaleY zamrożone na 1, bo Y w ogóle nie
-                                                                                                              jest ruszane) ten sam wzór i tak przepuszczał kawałek "zamrożonej" osi w drugą, lokalną
-                                                                                                              wymiarę node'a — przy θ=30° ciągnięcie do scaleX=0.09 dawało lokalną szerokość ×0.51
-                                                                                                              (zamiast ×0.09, więc node nigdy nie dochodził do zera tak jak nieobrócony) i lokalną
-                                                                                                              wysokość ×0.87 mimo że oś Y w ogóle nie była częścią gestu — ta niechciana zmiana wysokości
-                                                                                                              zmuszała kod do przesuwania pozycji Y, mimo że przy czysto poziomym resize nic w Y nie
-                                                                                                              powinno się ruszyć. Naprawione zamianą płynnego trygonometrycznego blendu na twardy próg
-                                                                                                              dominującej osi: nowy `isRotationAxisSwapped.ts` (`|sin θ| > |cos θ|`) decyduje, czy lokalna
-                                                                                                              oś X/Y node'a jest bliżej world-X czy world-Y, a
-                                                                                                              `getRotatedAxisScales`/`getRotatedAxisSigns` na tej podstawie przepuszczają
-                                                                                                              `scaleX`/`scaleY` **wprost**, bez rzutowania — więc na swojej dominującej osi obrócony node
-                                                                                                              skaluje się identycznie jak nieobrócony (w tym do zera), a wolna oś (scale=1) zostaje
-                                                                                                              całkowicie nietknięta, bez żadnego driftu pozycji. Przy dokładnie 90° zachowanie to nadal
-                                                                                                              pełny swap (bez zmian, testy przeszły bez modyfikacji), przy 0° to no-op jak zawsze.
-                                                                                                              Świadomy kompromis: przy rotacjach blisko 45° nie ma już płynnego przejścia (twardy próg
-                                                                                                              zamiast blendu) — zaakceptowane na żądanie użytkownika, bo "ścina się do zera jak
-                                                                                                              nieobrócony" było ważniejsze niż ciągłość na granicy 45°. Zweryfikowane end-to-end w
-                                                                                                              `continueResizeDrag.spec.ts` (30° node w grupowym resize tylko-w-X: szerokość skaluje się z
-                                                                                                              scaleX, wysokość i pozycja zostają dokładnie bez zmian — identycznie jak dla nieobróconego
-                                                                                                              node'a na tej samej ścieżce), 100% pokrycie testów utrzymane
+                                                                                                                                          **Piąta poprawka (po zgłoszeniu przez użytkownika — resize grupy z obróconym node'em nie
+                                                                                                                                          ścinał się do zera i dryfował w wolnej osi)**: poprzednie dwie poprawki (wyżej) świadomie
+                                                                                                                                          zachowywały obrócony node jako prawdziwy, nieścięty prostokąt przez rzut wektora skali na
+                                                                                                                                          jego lokalne osie (`getRotatedAxisScales`/`getRotatedAxisSigns`, √((scaleX·cosθ)² +
+                                                                                                                                          (scaleY·sinθ)²)) — matematycznie poprawne dla prawdziwej (ścinającej) transformacji, ale
+                                                                                                                                          przy resizie tylko jednej osi grupy (np. uchwyt `e`, scaleY zamrożone na 1, bo Y w ogóle nie
+                                                                                                                                          jest ruszane) ten sam wzór i tak przepuszczał kawałek "zamrożonej" osi w drugą, lokalną
+                                                                                                                                          wymiarę node'a — przy θ=30° ciągnięcie do scaleX=0.09 dawało lokalną szerokość ×0.51
+                                                                                                                                          (zamiast ×0.09, więc node nigdy nie dochodził do zera tak jak nieobrócony) i lokalną
+                                                                                                                                          wysokość ×0.87 mimo że oś Y w ogóle nie była częścią gestu — ta niechciana zmiana wysokości
+                                                                                                                                          zmuszała kod do przesuwania pozycji Y, mimo że przy czysto poziomym resize nic w Y nie
+                                                                                                                                          powinno się ruszyć. Naprawione zamianą płynnego trygonometrycznego blendu na twardy próg
+                                                                                                                                          dominującej osi: nowy `isRotationAxisSwapped.ts` (`|sin θ| > |cos θ|`) decyduje, czy lokalna
+                                                                                                                                          oś X/Y node'a jest bliżej world-X czy world-Y, a
+                                                                                                                                          `getRotatedAxisScales`/`getRotatedAxisSigns` na tej podstawie przepuszczają
+                                                                                                                                          `scaleX`/`scaleY` **wprost**, bez rzutowania — więc na swojej dominującej osi obrócony node
+                                                                                                                                          skaluje się identycznie jak nieobrócony (w tym do zera), a wolna oś (scale=1) zostaje
+                                                                                                                                          całkowicie nietknięta, bez żadnego driftu pozycji. Przy dokładnie 90° zachowanie to nadal
+                                                                                                                                          pełny swap (bez zmian, testy przeszły bez modyfikacji), przy 0° to no-op jak zawsze.
+                                                                                                                                          Świadomy kompromis: przy rotacjach blisko 45° nie ma już płynnego przejścia (twardy próg
+                                                                                                                                          zamiast blendu) — zaakceptowane na żądanie użytkownika, bo "ścina się do zera jak
+                                                                                                                                          nieobrócony" było ważniejsze niż ciągłość na granicy 45°. Zweryfikowane end-to-end w
+                                                                                                                                          `continueResizeDrag.spec.ts` (30° node w grupowym resize tylko-w-X: szerokość skaluje się z
+                                                                                                                                          scaleX, wysokość i pozycja zostają dokładnie bez zmian — identycznie jak dla nieobróconego
+                                                                                                                                          node'a na tej samej ścieżce), 100% pokrycie testów utrzymane
 
 - [x] **mirror/flip przy przejściu przez zero podczas resize** — `computeResizedRect.ts` przestał
       clampować asymetrycznie do `MIN_SHAPE_SIZE`; przeciągnięcie uchwytu "przez" przeciwległy
@@ -770,18 +770,18 @@ przeszkodą, żeby edycja pojedynczego node'a czuła się skończona, nie tylko 
       lustrzanie.
 
       **Poprawka (Etap 10, po zgłoszeniu przez użytkownika)**: pierwotne założenie "Polygon/Star są
-                                                                                                                                          wystarczająco symetryczne" okazało się błędne — trójkąt (domyślne 3 boki) i domyślna 5-ramienna
-                                                                                                                                          gwiazda **nie** mają symetrii odbicia względem osi poziomej (nieparzysta liczba boków/ramion),
-                                                                                                                                          więc renderowanie zawsze tego samego, kanonicznego układu wierzchołków z `getPolygonPoints`/
-                                                                                                                                          `getStarPoints` (niezależnego od kierunku przeciągnięcia) dawało wizualnie identyczny kształt
-                                                                                                                                          mimo "zmirrorowanego" bboxa. Naprawione tym samym mechanizmem co Media/Text: `TPolygonNode`/
-                                                                                                                                          `TStarNode` też dostały `flipX`/`flipY`, nowy współdzielony prymityw `utils/math/flipPoint.ts`
-                                                                                                                                          (odbicie punktu względem środka) aplikowany jako krok **przed** rotacją w `drawPolygon.ts`/
-                                                                                                                                          `drawStar.ts`/`drawThickPolygonOutline.ts`/`drawThickStarOutline.ts` (ten sam porządek co Text:
-                                                                                                                                          flip, potem rotate), hit-testing (`isPointInPolygon.ts`/`isPointInStar.ts`) odwrotnie odbija
-                                                                                                                                          punkt zapytania przed testem, tym samym trikiem co `isPointInText.ts`. Zweryfikowane manualnie:
-                                                                                                                                          trójkąt faktycznie odwraca się z wierzchołkiem w górę na wierzchołek w dół, a gwiazda zmienia
-                                                                                                                                          orientację ramion (nie tylko pozycję bboxa)
+                                                                                                                                                                      wystarczająco symetryczne" okazało się błędne — trójkąt (domyślne 3 boki) i domyślna 5-ramienna
+                                                                                                                                                                      gwiazda **nie** mają symetrii odbicia względem osi poziomej (nieparzysta liczba boków/ramion),
+                                                                                                                                                                      więc renderowanie zawsze tego samego, kanonicznego układu wierzchołków z `getPolygonPoints`/
+                                                                                                                                                                      `getStarPoints` (niezależnego od kierunku przeciągnięcia) dawało wizualnie identyczny kształt
+                                                                                                                                                                      mimo "zmirrorowanego" bboxa. Naprawione tym samym mechanizmem co Media/Text: `TPolygonNode`/
+                                                                                                                                                                      `TStarNode` też dostały `flipX`/`flipY`, nowy współdzielony prymityw `utils/math/flipPoint.ts`
+                                                                                                                                                                      (odbicie punktu względem środka) aplikowany jako krok **przed** rotacją w `drawPolygon.ts`/
+                                                                                                                                                                      `drawStar.ts`/`drawThickPolygonOutline.ts`/`drawThickStarOutline.ts` (ten sam porządek co Text:
+                                                                                                                                                                      flip, potem rotate), hit-testing (`isPointInPolygon.ts`/`isPointInStar.ts`) odwrotnie odbija
+                                                                                                                                                                      punkt zapytania przed testem, tym samym trikiem co `isPointInText.ts`. Zweryfikowane manualnie:
+                                                                                                                                                                      trójkąt faktycznie odwraca się z wierzchołkiem w górę na wierzchołek w dół, a gwiazda zmienia
+                                                                                                                                                                      orientację ramion (nie tylko pozycję bboxa)
 
 - [x] **rotacja** — `rotation` siedział w `TBaseNode` od Etapu 2, ale nic go nigdy nie ustawiało ani
       nie uwzględniało w renderingu/hit-testingu. Rotacja jest CPU-side post-processingiem już
@@ -797,38 +797,38 @@ przeszkodą, żeby edycja pojedynczego node'a czuła się skończona, nie tylko 
 node.rotation)` w `drawMsdfText.ts`).
 
       **Hit-testing**: zamiast dotykać `isPointInRect/Ellipse/Polygon/Star/Text`, `getNodeAtPoint.ts`
-                                                                                                                                              raz odwrotnie obraca punkt kliknięcia wokół środka node'a przed dispatchem do niezmienionych
-                                                                                                                                              funkcji testujących — ten sam trik co przy flipie w `isPointInText.ts`. Ta sama zasada dla
-                                                                                                                                              uchwytów resize (`getResizeHandleAtPoint.ts`) i dla drag zaznaczonego, obróconego tekstu
-                                                                                                                                              (`isPointInSelectedTextBounds.ts`). Marquee i wspólny bbox grupy (`getCollidedNodes.ts`,
-                                                                                                                                              `getSelectionBounds.ts`) przeszły z surowego `getNodeBounds.ts` na nowy
-                                                                                                                                              `getRotatedNodeBounds.ts` (axis-aligned bbox obróconych rogów) — bo dla obróconego node'a
-                                                                                                                                              surowy bbox przestaje być jego prawdziwym, widocznym zasięgiem.
+                                                                                                                                                                          raz odwrotnie obraca punkt kliknięcia wokół środka node'a przed dispatchem do niezmienionych
+                                                                                                                                                                          funkcji testujących — ten sam trik co przy flipie w `isPointInText.ts`. Ta sama zasada dla
+                                                                                                                                                                          uchwytów resize (`getResizeHandleAtPoint.ts`) i dla drag zaznaczonego, obróconego tekstu
+                                                                                                                                                                          (`isPointInSelectedTextBounds.ts`). Marquee i wspólny bbox grupy (`getCollidedNodes.ts`,
+                                                                                                                                                                          `getSelectionBounds.ts`) przeszły z surowego `getNodeBounds.ts` na nowy
+                                                                                                                                                                          `getRotatedNodeBounds.ts` (axis-aligned bbox obróconych rogów) — bo dla obróconego node'a
+                                                                                                                                                                          surowy bbox przestaje być jego prawdziwym, widocznym zasięgiem.
 
-                                                                                                                                              **Uchwyty resize też się obracają** — pozycja i orientacja nadążają za `rotation` pojedynczego
-                                                                                                                                              zaznaczonego node'a (samo przeciąganie resize zostaje w world space, świadomy kompromis). Nowy
-                                                                                                                                              uchwyt rotacji to pierścień tuż poza promieniem resize (`ROTATE_HANDLE_OUTER_RADIUS_PX`,
-                                                                                                                                              `getRotateHandleAtPoint.ts`), jawnie wykluczający punkty wewnątrz bboxa node'a, żeby zwykły
-                                                                                                                                              klik/drag blisko rogu nie został przechwycony przez rotację. Kursor `rotate.png` obraca się tym
-                                                                                                                                              samym mechanizmem co `resize.png`, wydzielonym do współdzielonej fabryki
-                                                                                                                                              `createCursorRotator.ts` (`getRotateCursorAngle.ts` liczy kąt na podstawie ćwiartki lokalnej
-                                                                                                                                              przestrzeni node'a, skalibrowany tak, że róg "ne" nieobróconego node'a odpowiada 0°, każdy
-                                                                                                                                              kolejny róg zgodnie z ruchem wskazówek zegara +90°). Kąt kursora nie jest liczony tylko raz przy
-                                                                                                                                              złapaniu uchwytu — `continueRotateDrag.ts` przelicza go na każdy `pointermove`
-                                                                                                                                              (`cursorAngle + deltaDegrees`, oba zapamiętane w `TRotateDragState` przy arm) i na bieżąco
-                                                                                                                                              podmienia `canvas.style.cursor`, więc ikona wizualnie obraca się razem z node'em przez cały
-                                                                                                                                              czas trwania przeciągnięcia, nie tylko na starcie i końcu.
+                                                                                                                                                                          **Uchwyty resize też się obracają** — pozycja i orientacja nadążają za `rotation` pojedynczego
+                                                                                                                                                                          zaznaczonego node'a (samo przeciąganie resize zostaje w world space, świadomy kompromis). Nowy
+                                                                                                                                                                          uchwyt rotacji to pierścień tuż poza promieniem resize (`ROTATE_HANDLE_OUTER_RADIUS_PX`,
+                                                                                                                                                                          `getRotateHandleAtPoint.ts`), jawnie wykluczający punkty wewnątrz bboxa node'a, żeby zwykły
+                                                                                                                                                                          klik/drag blisko rogu nie został przechwycony przez rotację. Kursor `rotate.png` obraca się tym
+                                                                                                                                                                          samym mechanizmem co `resize.png`, wydzielonym do współdzielonej fabryki
+                                                                                                                                                                          `createCursorRotator.ts` (`getRotateCursorAngle.ts` liczy kąt na podstawie ćwiartki lokalnej
+                                                                                                                                                                          przestrzeni node'a, skalibrowany tak, że róg "ne" nieobróconego node'a odpowiada 0°, każdy
+                                                                                                                                                                          kolejny róg zgodnie z ruchem wskazówek zegara +90°). Kąt kursora nie jest liczony tylko raz przy
+                                                                                                                                                                          złapaniu uchwytu — `continueRotateDrag.ts` przelicza go na każdy `pointermove`
+                                                                                                                                                                          (`cursorAngle + deltaDegrees`, oba zapamiętane w `TRotateDragState` przy arm) i na bieżąco
+                                                                                                                                                                          podmienia `canvas.style.cursor`, więc ikona wizualnie obraca się razem z node'em przez cały
+                                                                                                                                                                          czas trwania przeciągnięcia, nie tylko na starcie i końcu.
 
-                                                                                                                                              **Rotacja działa dla pojedynczego node'a i dla grupy** — grupa nie ma własnego, persystowanego
-                                                                                                                                              `rotation`; to transient operacja per-drag: każdy człon dostaje `+= deltaDegrees` do własnej
-                                                                                                                                              `rotation`, a jego środek okrąża wspólny środek grupy o ten sam kąt (`continueRotateDrag.ts`).
-                                                                                                                                              Dla pojedynczego node'a pivot === środek node'a, więc formuła automatycznie kolapsuje do
-                                                                                                                                              "pozycja bez zmian, tylko `rotation`" — bez osobnej ścieżki kodu, ten sam trik co przy resize.
-                                                                                                                                              `line` (bez pola `rotation`) rotuje tylko jako część grupy, przez własne punkty `x1/y1/x2/y2`.
-                                                                                                                                              Zweryfikowane manualnie w przeglądarce (Playwright MCP): pojedynczy kwadrat wizualnie się
-                                                                                                                                              obraca wraz z uchwytami, kliknięcie w róg obróconego kształtu (poza jego oryginalnym,
-                                                                                                                                              nieobróconym bboxem) trafia poprawnie, a rotacja grupy dwóch node'ów pokazuje każdy człon
-                                                                                                                                              okrążający wspólny środek i obracający się indywidualnie
+                                                                                                                                                                          **Rotacja działa dla pojedynczego node'a i dla grupy** — grupa nie ma własnego, persystowanego
+                                                                                                                                                                          `rotation`; to transient operacja per-drag: każdy człon dostaje `+= deltaDegrees` do własnej
+                                                                                                                                                                          `rotation`, a jego środek okrąża wspólny środek grupy o ten sam kąt (`continueRotateDrag.ts`).
+                                                                                                                                                                          Dla pojedynczego node'a pivot === środek node'a, więc formuła automatycznie kolapsuje do
+                                                                                                                                                                          "pozycja bez zmian, tylko `rotation`" — bez osobnej ścieżki kodu, ten sam trik co przy resize.
+                                                                                                                                                                          `line` (bez pola `rotation`) rotuje tylko jako część grupy, przez własne punkty `x1/y1/x2/y2`.
+                                                                                                                                                                          Zweryfikowane manualnie w przeglądarce (Playwright MCP): pojedynczy kwadrat wizualnie się
+                                                                                                                                                                          obraca wraz z uchwytami, kliknięcie w róg obróconego kształtu (poza jego oryginalnym,
+                                                                                                                                                                          nieobróconym bboxem) trafia poprawnie, a rotacja grupy dwóch node'ów pokazuje każdy człon
+                                                                                                                                                                          okrążający wspólny środek i obracający się indywidualnie
 
 - [x] **dwuklik, żeby wejść w edycję istniejącego tekstu** — do tej pory edycja była osiągalna
       tylko przy świeżo rysowanym tekstem; nie było ścieżki z powrotem z gotowego `TTextNode` do
@@ -858,84 +858,84 @@ node.rotation)` w `drawMsdfText.ts`).
       miejscu (nie zduplikowała)
 
       **Poprawka (po zgłoszeniu przez użytkownika, ze zrzutem ekranu)**: edycja obróconego/zmirrorowanego
-                                                                                                                                  tekstu renderowała DOM-owy `contentEditable` i canvas'owy `drawEditingText.ts` zawsze przy
-                                                                                                                                  `rotation: 0`/`flipX/Y: false`, niezależnie od realnej transformacji edytowanego node'a — efekt to
-                                                                                                                                  widoczny na zrzucie duch nieobróconego, podświetlonego tekstu nałożony na wciąż poprawnie obrócony
-                                                                                                                                  outline zaznaczenia. `TEditingTextBox` (`types/canvas.ts`) dostał własne `flipX`/`flipY`/`rotation`
-                                                                                                                                  obok istniejącego `x/y/width/height` — ten sam kształt co geometria node'a — wypełniane realną
-                                                                                                                                  wartością node'a w `useTextEditOnDoubleClick.ts` (zamiast zer przy zwykłym rysowaniu nowego tekstu
-                                                                                                                                  w `useDrawTextTool.ts`, gdzie zera są jak najbardziej poprawne, bo nowy tekst na razie zawsze
-                                                                                                                                  powstaje nieobrócony). `drawEditingText.ts` przekazuje te pola dalej do `drawRect`/`drawMsdfText`
-                                                                                                                                  zamiast hardkodowanych stałych, więc canvasowy outline/tekst podczas edycji obraca/mirroruje się
-                                                                                                                                  tym samym mechanizmem co reszta node'ów. DOM-owy `TextEditOverlay.tsx` dostał
-                                                                                                                                  `transform: rotate(${box.rotation}deg) scaleX(...) scaleY(...)` z `transformOrigin: 'center'` —
-                                                                                                                                  **flip w środku, potem rotacja na zewnątrz** w liście `transform`, bo CSS aplikuje transformacje od
-                                                                                                                                  prawej do lewej (ten sam porządek co canvas: `flipGlyphVertices` przed `rotateVertices`). Rotacja
-                                                                                                                                  wokół `transformOrigin: center` w screen-space jest matematycznie tożsama z obrotem wokół środka w
-                                                                                                                                  world-space, bo `worldToScreen` to jednorodne skalowanie (zoom) + przesunięcie — obrót komutuje z
-                                                                                                                                  jednorodnym skalowaniem niezależnie od kolejności. `useCommitTextEdit.ts` przy okazji przestał
-                                                                                                                                  hardkodować `flipX: false, flipY: false, rotation: 0` dla świeżo tworzonego node'a — bierze je teraz
-                                                                                                                                  z `box`, gotowe pod przyszły scenariusz "tekst rysowany wewnątrz obróconej ramki" (dziś realne
-                                                                                                                                  zagnieżdżanie w ramkach jeszcze nie istnieje, patrz Etap 12, więc `box` zawsze niesie zera przy
-                                                                                                                                  zwykłym rysowaniu — ale ścieżka danych jest już gotowa, nie trzeba będzie jej przerabiać).
-                                                                                                                                  Zweryfikowane w przeglądarce (Playwright MCP): obrócony o 30° tekst wchodzi w edycję z DOM-owym
-                                                                                                                                  overlayem wizualnie pokrywającym się z rotowanym outline'em zaznaczenia, zamiast zostawać poziomym
-                                                                                                                                  duchem, a zamiana treści w trakcie edycji zachowuje tę samą rotację po zatwierdzeniu
+                                                                                                                                                              tekstu renderowała DOM-owy `contentEditable` i canvas'owy `drawEditingText.ts` zawsze przy
+                                                                                                                                                              `rotation: 0`/`flipX/Y: false`, niezależnie od realnej transformacji edytowanego node'a — efekt to
+                                                                                                                                                              widoczny na zrzucie duch nieobróconego, podświetlonego tekstu nałożony na wciąż poprawnie obrócony
+                                                                                                                                                              outline zaznaczenia. `TEditingTextBox` (`types/canvas.ts`) dostał własne `flipX`/`flipY`/`rotation`
+                                                                                                                                                              obok istniejącego `x/y/width/height` — ten sam kształt co geometria node'a — wypełniane realną
+                                                                                                                                                              wartością node'a w `useTextEditOnDoubleClick.ts` (zamiast zer przy zwykłym rysowaniu nowego tekstu
+                                                                                                                                                              w `useDrawTextTool.ts`, gdzie zera są jak najbardziej poprawne, bo nowy tekst na razie zawsze
+                                                                                                                                                              powstaje nieobrócony). `drawEditingText.ts` przekazuje te pola dalej do `drawRect`/`drawMsdfText`
+                                                                                                                                                              zamiast hardkodowanych stałych, więc canvasowy outline/tekst podczas edycji obraca/mirroruje się
+                                                                                                                                                              tym samym mechanizmem co reszta node'ów. DOM-owy `TextEditOverlay.tsx` dostał
+                                                                                                                                                              `transform: rotate(${box.rotation}deg) scaleX(...) scaleY(...)` z `transformOrigin: 'center'` —
+                                                                                                                                                              **flip w środku, potem rotacja na zewnątrz** w liście `transform`, bo CSS aplikuje transformacje od
+                                                                                                                                                              prawej do lewej (ten sam porządek co canvas: `flipGlyphVertices` przed `rotateVertices`). Rotacja
+                                                                                                                                                              wokół `transformOrigin: center` w screen-space jest matematycznie tożsama z obrotem wokół środka w
+                                                                                                                                                              world-space, bo `worldToScreen` to jednorodne skalowanie (zoom) + przesunięcie — obrót komutuje z
+                                                                                                                                                              jednorodnym skalowaniem niezależnie od kolejności. `useCommitTextEdit.ts` przy okazji przestał
+                                                                                                                                                              hardkodować `flipX: false, flipY: false, rotation: 0` dla świeżo tworzonego node'a — bierze je teraz
+                                                                                                                                                              z `box`, gotowe pod przyszły scenariusz "tekst rysowany wewnątrz obróconej ramki" (dziś realne
+                                                                                                                                                              zagnieżdżanie w ramkach jeszcze nie istnieje, patrz Etap 12, więc `box` zawsze niesie zera przy
+                                                                                                                                                              zwykłym rysowaniu — ale ścieżka danych jest już gotowa, nie trzeba będzie jej przerabiać).
+                                                                                                                                                              Zweryfikowane w przeglądarce (Playwright MCP): obrócony o 30° tekst wchodzi w edycję z DOM-owym
+                                                                                                                                                              overlayem wizualnie pokrywającym się z rotowanym outline'em zaznaczenia, zamiast zostawać poziomym
+                                                                                                                                                              duchem, a zamiana treści w trakcie edycji zachowuje tę samą rotację po zatwierdzeniu
 
-                                                                                                                      **Druga poprawka (po kolejnym zgłoszeniu, z DevTools obu aplikacji)**: powyższy `transform:
-                                                                                                                      rotate()` na diva rozwiązywał *widoczny* problem, ale nie prawdziwą przyczynę — CSS `rotate()`
-                                                                                                                      to czysto wizualny efekt, który nie wpływa na wewnętrzny layout tekstu przeglądarki (zawijanie
-                                                                                                                      linii, kerning). Nasz canvas wylicza layout ręcznie, bez kerningu (`buildGlyphQuads.ts`,
-                                                                                                                      `measureGlyphTextWidth.ts` — atlas ma 1345 par kerningu, nigdy nieużywanych), więc natywne
-                                                                                                                      zaznaczenie/kursor przeglądarki (pozycjonowane przez jej własny, inny layout) i tak drobno
-                                                                                                                      rozjeżdżały się z renderowanymi glifami MSDF — przy rotacji ten drobny rozjazd zamieniał się w
-                                                                                                                      widoczny, po skosie zdublowany tekst. Użytkownik znalazł w DevTools, że prawdziwa Figma w ogóle
-                                                                                                                      nie obraca swojego ukrytego diva (`<input>` ma nawet `top: -200px`, świadomie zepchnięty poza
-                                                                                                                      ekran) — zamiast tego rysuje kursor/zaznaczenie własnym silnikiem, tak samo jak tekst.
-                                                                                                                      Przepisane na ten sam wzorzec: `TextEditOverlay.tsx` **stracił** `transform`/`transformOrigin` na
-                                                                                                                      zawsze (div zostaje nieobrócony), `caretColor` zmienione z `TEXT_FILL` na `transparent`, i doszło
-                                                                                                                      `&::selection { background-color: transparent }` w SCSS — div jest teraz czysto niewidzialną
-                                                                                                                      powierzchnią do przechwytywania klawiatury/IME, zero własnej reprezentacji wizualnej. Kursor i
-                                                                                                                      zaznaczenie rysowane są teraz na canvasie (`drawEditingCaretAndSelection.ts`, nowy plik wołany z
-                                                                                                                      `drawEditingText.ts`) tym samym prymitywem `drawRect.ts` co obrys edycji, przeliczane z
-                                                                                                                      dokładnie tej samej matematyki co widoczne glify — nowy `wrapTextWithOffsets.ts` (siostrzana
-                                                                                                                      kopia `wrapText.ts`, ale zamiast samych stringów zwraca też offset każdej linii w oryginalnym
-                                                                                                                      tekście — świadomy kompromis: duplikacja zamiast refaktoru już przetestowanego `wrapText.ts`,
-                                                                                                                      żeby nie ryzykować regresji w kodzie renderującym), `findLineIndexForOffset.ts`, `getCaretPoint.ts`
-                                                                                                                      i `getSelectionRects.ts` (offset → world-space punkt/prostokąty, ten sam brak kerningu co
-                                                                                                                      `measureGlyphTextWidth`, więc kursor **z definicji** nie może rozjechać się z glifami — liczy je
-                                                                                                                      ta sama funkcja). Selekcja śledzona jest teraz w Reduxie jako `editingSelectionStart/End`
-                                                                                                                      (offsety znakowe w tym samym stringu co `editingTextContent`), aktualizowane przez nowy hook
-                                                                                                                      `useTrackTextEditSelection.ts` (`onSelect`) i przy okazji w `useTextEditInput.ts` (`onInput`) —
-                                                                                                                      czytane z natywnego `window.getSelection()` przez nowy `getEditableSelectionOffsets.ts`, który
-                                                                                                                      zamiast ręcznie powtarzać chodzenie po `childNodes` (ryzyko rozjazdu z `getEditableTextContent.ts`)
-                                                                                                                      klonuje `Range` od początku diva do granicy zaznaczenia i puszcza wynik przez **ten sam**
-                                                                                                                      `getEditableTextContent.ts` — offset to po prostu długość sklonowanego tekstu, gwarantowanie
-                                                                                                                      spójny z resztą pipeline'u. Ponieważ kursor/zaznaczenie to teraz małe prostokąty *wewnątrz* boxa
-                                                                                                                      edytowanego tekstu (nie sam box), `drawRect.ts` dostał opcjonalny param `rotationCenter` (domyślnie
-                                                                                                                      środek własny rect'a, jak dotąd) — bez niego obrót działby się wokół środka samego kursora, a nie
-                                                                                                                      środka całego node'a, więc kursor obracałby się w miejscu zamiast okrążać razem z tekstem. Flip
-                                                                                                                      aplikowany ręcznie (ten sam trik co `flipTextPoint`, wydzielony typ `TFlippableBox` żeby nie
-                                                                                                                      wymagać pełnego `TTextNode`) **przed** rotacją, ten sam porządek co `drawMsdfText.ts`. Kursor
-                                                                                                                      rysowany jest kolorem `TEXT_FILL` — tym samym co glify, nie akcentowym niebieskim zaznaczenia
-                                                                                                                      — więc gdy kiedyś dojdzie edycja koloru tekstu w środku (dziś jeden `fill` na cały node), oba
-                                                                                                                      mają wspólne źródło prawdy i nie da się ich rozjechać. Miganie liczone jest z offsetu
-                                                                                                                      `editingSelectionChangedAt` (nowe pole w Reduxie, stemplowane `Date.now()` w każdym
-                                                                                                                      `startTextEdit`/`updateTextEditSelection`) zamiast surowego `Date.now() % interval` — kursor
-                                                                                                                      jest w pełni widoczny (bez migania) przez pierwszy pełny interwał od ostatniej zmiany
-                                                                                                                      zaznaczenia/pozycji, dokładnie tak jak w realnych edytorach, gdzie pisanie czy przesuwanie
-                                                                                                                      kursora nie miga, tylko migotanie zaczyna się dopiero po chwili bezruchu. Bez dodatkowego stanu
-                                                                                                                      w Reakcie — liczone na nowo w każdej klatce render loopa, tylko względem tego jednego
-                                                                                                                      znacznika czasu w Reduxie. **Świadomie odłożone**: kliknięcie myszą *wewnątrz*
-                                                                                                                      już otwartej edycji obróconego node'a, żeby przestawić kursor w konkretne miejsce, dziś nie
-                                                                                                                      działa poprawnie (div jest nieobrócony, więc jego niewidzialny hit-region nie pokrywa się z
-                                                                                                                      widocznymi, obróconymi glifami) — strzałki klawiszowe i samo pisanie działają bez zmian (nie
-                                                                                                                      zależą od zgodności pikseli), a naprawa kliknięcia wymagałaby osobnego, canvasowego hit-testu
-                                                                                                                      offsetu znaku (na wzór `getUnrotatedQueryPoint` z `getNodeAtPoint.ts`) plus programowego
-                                                                                                                      ustawienia `Range`/`Selection` — osobny, następny krok. Zweryfikowane w przeglądarce (Playwright
-                                                                                                                      MCP): zaznaczenie „select all" na obróconym tekście dokładnie pokrywa renderowane litery bez
-                                                                                                                      śladu ducha z poprzedniej wersji, a podmiana treści w trakcie edycji nadal poprawnie zachowuje
-                                                                                                                      rotację po zatwierdzeniu
+                                                                                                                                                  **Druga poprawka (po kolejnym zgłoszeniu, z DevTools obu aplikacji)**: powyższy `transform:
+                                                                                                                                                  rotate()` na diva rozwiązywał *widoczny* problem, ale nie prawdziwą przyczynę — CSS `rotate()`
+                                                                                                                                                  to czysto wizualny efekt, który nie wpływa na wewnętrzny layout tekstu przeglądarki (zawijanie
+                                                                                                                                                  linii, kerning). Nasz canvas wylicza layout ręcznie, bez kerningu (`buildGlyphQuads.ts`,
+                                                                                                                                                  `measureGlyphTextWidth.ts` — atlas ma 1345 par kerningu, nigdy nieużywanych), więc natywne
+                                                                                                                                                  zaznaczenie/kursor przeglądarki (pozycjonowane przez jej własny, inny layout) i tak drobno
+                                                                                                                                                  rozjeżdżały się z renderowanymi glifami MSDF — przy rotacji ten drobny rozjazd zamieniał się w
+                                                                                                                                                  widoczny, po skosie zdublowany tekst. Użytkownik znalazł w DevTools, że prawdziwa Figma w ogóle
+                                                                                                                                                  nie obraca swojego ukrytego diva (`<input>` ma nawet `top: -200px`, świadomie zepchnięty poza
+                                                                                                                                                  ekran) — zamiast tego rysuje kursor/zaznaczenie własnym silnikiem, tak samo jak tekst.
+                                                                                                                                                  Przepisane na ten sam wzorzec: `TextEditOverlay.tsx` **stracił** `transform`/`transformOrigin` na
+                                                                                                                                                  zawsze (div zostaje nieobrócony), `caretColor` zmienione z `TEXT_FILL` na `transparent`, i doszło
+                                                                                                                                                  `&::selection { background-color: transparent }` w SCSS — div jest teraz czysto niewidzialną
+                                                                                                                                                  powierzchnią do przechwytywania klawiatury/IME, zero własnej reprezentacji wizualnej. Kursor i
+                                                                                                                                                  zaznaczenie rysowane są teraz na canvasie (`drawEditingCaretAndSelection.ts`, nowy plik wołany z
+                                                                                                                                                  `drawEditingText.ts`) tym samym prymitywem `drawRect.ts` co obrys edycji, przeliczane z
+                                                                                                                                                  dokładnie tej samej matematyki co widoczne glify — nowy `wrapTextWithOffsets.ts` (siostrzana
+                                                                                                                                                  kopia `wrapText.ts`, ale zamiast samych stringów zwraca też offset każdej linii w oryginalnym
+                                                                                                                                                  tekście — świadomy kompromis: duplikacja zamiast refaktoru już przetestowanego `wrapText.ts`,
+                                                                                                                                                  żeby nie ryzykować regresji w kodzie renderującym), `findLineIndexForOffset.ts`, `getCaretPoint.ts`
+                                                                                                                                                  i `getSelectionRects.ts` (offset → world-space punkt/prostokąty, ten sam brak kerningu co
+                                                                                                                                                  `measureGlyphTextWidth`, więc kursor **z definicji** nie może rozjechać się z glifami — liczy je
+                                                                                                                                                  ta sama funkcja). Selekcja śledzona jest teraz w Reduxie jako `editingSelectionStart/End`
+                                                                                                                                                  (offsety znakowe w tym samym stringu co `editingTextContent`), aktualizowane przez nowy hook
+                                                                                                                                                  `useTrackTextEditSelection.ts` (`onSelect`) i przy okazji w `useTextEditInput.ts` (`onInput`) —
+                                                                                                                                                  czytane z natywnego `window.getSelection()` przez nowy `getEditableSelectionOffsets.ts`, który
+                                                                                                                                                  zamiast ręcznie powtarzać chodzenie po `childNodes` (ryzyko rozjazdu z `getEditableTextContent.ts`)
+                                                                                                                                                  klonuje `Range` od początku diva do granicy zaznaczenia i puszcza wynik przez **ten sam**
+                                                                                                                                                  `getEditableTextContent.ts` — offset to po prostu długość sklonowanego tekstu, gwarantowanie
+                                                                                                                                                  spójny z resztą pipeline'u. Ponieważ kursor/zaznaczenie to teraz małe prostokąty *wewnątrz* boxa
+                                                                                                                                                  edytowanego tekstu (nie sam box), `drawRect.ts` dostał opcjonalny param `rotationCenter` (domyślnie
+                                                                                                                                                  środek własny rect'a, jak dotąd) — bez niego obrót działby się wokół środka samego kursora, a nie
+                                                                                                                                                  środka całego node'a, więc kursor obracałby się w miejscu zamiast okrążać razem z tekstem. Flip
+                                                                                                                                                  aplikowany ręcznie (ten sam trik co `flipTextPoint`, wydzielony typ `TFlippableBox` żeby nie
+                                                                                                                                                  wymagać pełnego `TTextNode`) **przed** rotacją, ten sam porządek co `drawMsdfText.ts`. Kursor
+                                                                                                                                                  rysowany jest kolorem `TEXT_FILL` — tym samym co glify, nie akcentowym niebieskim zaznaczenia
+                                                                                                                                                  — więc gdy kiedyś dojdzie edycja koloru tekstu w środku (dziś jeden `fill` na cały node), oba
+                                                                                                                                                  mają wspólne źródło prawdy i nie da się ich rozjechać. Miganie liczone jest z offsetu
+                                                                                                                                                  `editingSelectionChangedAt` (nowe pole w Reduxie, stemplowane `Date.now()` w każdym
+                                                                                                                                                  `startTextEdit`/`updateTextEditSelection`) zamiast surowego `Date.now() % interval` — kursor
+                                                                                                                                                  jest w pełni widoczny (bez migania) przez pierwszy pełny interwał od ostatniej zmiany
+                                                                                                                                                  zaznaczenia/pozycji, dokładnie tak jak w realnych edytorach, gdzie pisanie czy przesuwanie
+                                                                                                                                                  kursora nie miga, tylko migotanie zaczyna się dopiero po chwili bezruchu. Bez dodatkowego stanu
+                                                                                                                                                  w Reakcie — liczone na nowo w każdej klatce render loopa, tylko względem tego jednego
+                                                                                                                                                  znacznika czasu w Reduxie. **Świadomie odłożone**: kliknięcie myszą *wewnątrz*
+                                                                                                                                                  już otwartej edycji obróconego node'a, żeby przestawić kursor w konkretne miejsce, dziś nie
+                                                                                                                                                  działa poprawnie (div jest nieobrócony, więc jego niewidzialny hit-region nie pokrywa się z
+                                                                                                                                                  widocznymi, obróconymi glifami) — strzałki klawiszowe i samo pisanie działają bez zmian (nie
+                                                                                                                                                  zależą od zgodności pikseli), a naprawa kliknięcia wymagałaby osobnego, canvasowego hit-testu
+                                                                                                                                                  offsetu znaku (na wzór `getUnrotatedQueryPoint` z `getNodeAtPoint.ts`) plus programowego
+                                                                                                                                                  ustawienia `Range`/`Selection` — osobny, następny krok. Zweryfikowane w przeglądarce (Playwright
+                                                                                                                                                  MCP): zaznaczenie „select all" na obróconym tekście dokładnie pokrywa renderowane litery bez
+                                                                                                                                                  śladu ducha z poprzedniej wersji, a podmiana treści w trakcie edycji nadal poprawnie zachowuje
+                                                                                                                                                  rotację po zatwierdzeniu
 
 - [x] **corner radius dla Rectangle** — `TRectangleNode.cornerRadius?: number` (opcjonalne, ten sam
       wzorzec co `TLineNode.startPoint/endPoint` z Arrow), ustawiane wyłącznie przez 4 przeciągane
@@ -963,7 +963,7 @@ node.rotation)` w `drawMsdfText.ts`).
       shape'y...) nigdy nie widzi pola `cornerRadius`. Pełny opis mechanizmu:
       `.claude/docs/selection-and-manipulation.md` §11
 - [x] **corner radius dla Polygon i Star** — jeden wspólny promień (`TPolygonNode.cornerRadius?:
-  number` / `TStarNode.cornerRadius?: number`, ten sam opcjonalny wzorzec co Rectangle)
+number` / `TStarNode.cornerRadius?: number`, ten sam opcjonalny wzorzec co Rectangle)
       zaokrąglający **każdy** wierzchołek jednakowo, w przeciwieństwie do 4 niezależnych rogów
       Rectangle — stąd jeden przeciągany uchwyt na stałym "górnym" wierzchołku
       (`getPolygonPoints`/`getStarPoints`'a indeks 0), nie cztery. Star dodatkowo zaokrągla
@@ -1044,41 +1044,41 @@ node.rotation)` w `drawMsdfText.ts`).
       `.claude/docs/design-tool-architecture.md` §6.
 
       **Rozszerzenie: Duplicate/Copy/Paste działają też na poziomie wierzchołków/segmentów w Vector Edit
-              Mode** (zamiast wcześniejszego "nic nie robią, gdy trwa Vector Edit Mode") — Cmd+D na zaznaczonych
-              wierzchołkach/segmentach klonuje je (offsetem o `DUPLICATE_OFFSET`) z powrotem do **tego samego**
-              node'a; Cmd+C/V kopiuje/wkleja przez osobny, drugi schowek (`vectorClipboard.ts`, świadomie osobny
-              od node-owego `clipboard.ts` — inny kształt danych), wklejając do **ostatniego** aktualnie
-              otwartego node'a (`vectorEditingNodeIds[length-1]`) — świadomy, najprostszy wybór na wypadek
-              multi-vector-editing (Etap 6, §48 w `vector-network.md`), gdzie "który node jest aktywny" nie ma
-              innej jednoznacznej definicji. Klikając w wybranie zaznaczonego segmentu do duplikowania/kopiowania
-              automatycznie dociąga **oba** jego końce (nawet jeśli same wierzchołki nie były osobno zaznaczone),
-              a odwrotnie: jeśli oba końce jakiegoś segmentu trafiają do zaznaczonego zestawu wierzchołków, ten
-              segment dociąga się automatycznie razem z nimi (`extractVectorFragment.ts`) — dokładnie tak, jak
-              Figma duplikuje krawędź między dwoma duplikowanymi punktami. Nowe id (wierzchołków i segmentów)
-              generowane przez `nanoid()` bezpośrednio (nie przez `addNode`'s `prepare` — te id żyją wewnątrz
-              `TVectorNode.vertices`/`segments`, nie jako osobne node'y sceny), więc kolizji z innymi node'ami
-              nie ma z definicji (te mapy są prywatne per-node). Tangenty (`tangentStart`/`tangentEnd`) kopiowane
-              1:1 bez przeliczania — to już ustalony fakt z Etapu 5/10, że są relatywne wektory, nie bezwzględne
-              współrzędne. **Świadomy trim zakresu**: `widthProfile` (Variable Width, Etap 6) nie jest
-              duplikowany/kopiowany — punkty szerokości są indeksowane po pozycji na ścieżce, nie po
-              wierzchołku, więc poprawne przeniesienie wymagałoby osobnej matematyki nie objętej tą prośbą.
+                                          Mode** (zamiast wcześniejszego "nic nie robią, gdy trwa Vector Edit Mode") — Cmd+D na zaznaczonych
+                                          wierzchołkach/segmentach klonuje je (offsetem o `DUPLICATE_OFFSET`) z powrotem do **tego samego**
+                                          node'a; Cmd+C/V kopiuje/wkleja przez osobny, drugi schowek (`vectorClipboard.ts`, świadomie osobny
+                                          od node-owego `clipboard.ts` — inny kształt danych), wklejając do **ostatniego** aktualnie
+                                          otwartego node'a (`vectorEditingNodeIds[length-1]`) — świadomy, najprostszy wybór na wypadek
+                                          multi-vector-editing (Etap 6, §48 w `vector-network.md`), gdzie "który node jest aktywny" nie ma
+                                          innej jednoznacznej definicji. Klikając w wybranie zaznaczonego segmentu do duplikowania/kopiowania
+                                          automatycznie dociąga **oba** jego końce (nawet jeśli same wierzchołki nie były osobno zaznaczone),
+                                          a odwrotnie: jeśli oba końce jakiegoś segmentu trafiają do zaznaczonego zestawu wierzchołków, ten
+                                          segment dociąga się automatycznie razem z nimi (`extractVectorFragment.ts`) — dokładnie tak, jak
+                                          Figma duplikuje krawędź między dwoma duplikowanymi punktami. Nowe id (wierzchołków i segmentów)
+                                          generowane przez `nanoid()` bezpośrednio (nie przez `addNode`'s `prepare` — te id żyją wewnątrz
+                                          `TVectorNode.vertices`/`segments`, nie jako osobne node'y sceny), więc kolizji z innymi node'ami
+                                          nie ma z definicji (te mapy są prywatne per-node). Tangenty (`tangentStart`/`tangentEnd`) kopiowane
+                                          1:1 bez przeliczania — to już ustalony fakt z Etapu 5/10, że są relatywne wektory, nie bezwzględne
+                                          współrzędne. **Świadomy trim zakresu**: `widthProfile` (Variable Width, Etap 6) nie jest
+                                          duplikowany/kopiowany — punkty szerokości są indeksowane po pozycji na ścieżce, nie po
+                                          wierzchołku, więc poprawne przeniesienie wymagałoby osobnej matematyki nie objętej tą prośbą.
 
-              **Poprawka (zgłoszona na żywo, z realnym zrzutem store'u)**: zduplikowany/wklejony **filled**
-              kształt wychodził niewypełniony. Pierwsza wersja przenoszenia fill (dopasowanie po zestawie id
-              wierzchołków, po ponownym odpaleniu `deriveVectorFaces` na złączonym node'ie) działała na
-              syntetycznym kwadracie testowym, ale nie na realnym kształcie z dwóch krzywych łączących te same
-              dwa punkty (soczewka) — bo (1) `getVectorFaceVertexIds` gubi punkty na planarized crossing (marker
-              `x:...`, nie `v:<id>`), i głębiej (2) ponowne wyliczanie faces na złączonym node'ie jest z natury
-              zawodne, skoro duplikat leży zaledwie `DUPLICATE_OFFSET` (10 jednostek) od oryginału — dla
-              dowolnego kształtu większego niż to realnie się z nim nakłada, więc planaryzacja widzi prawdziwe
-              przecięcia między oryginałem a jego własną kopią i rozbija wyliczone faces. Naprawione całkowitym
-              porzuceniem ponownego wyliczania na rzecz **podmiany id wprost w tekście już poprawnego,
-              oryginalnego klucza** (`remapPieceKey.ts`) — `extractVectorFragment` trzyma teraz surowe
-              `pieceKeys` wypełnionej faces (`filledFacePieceKeySets`), `mergeClonedVectorFragment` dokłada
-              analogiczną do wierzchołkowej `segmentIdMap`, a nowy klucz to ten sam string z podmienionymi
-              id (realSegmentId + markery `v:`/`x:`) i ponownie posortowanymi granicami — zero zależności od
-              tego, co jeszcze dzieje się geometrycznie w złączonym node'ie. Pełny opis:
-              `.claude/docs/vector-network.md` §65.
+                                          **Poprawka (zgłoszona na żywo, z realnym zrzutem store'u)**: zduplikowany/wklejony **filled**
+                                          kształt wychodził niewypełniony. Pierwsza wersja przenoszenia fill (dopasowanie po zestawie id
+                                          wierzchołków, po ponownym odpaleniu `deriveVectorFaces` na złączonym node'ie) działała na
+                                          syntetycznym kwadracie testowym, ale nie na realnym kształcie z dwóch krzywych łączących te same
+                                          dwa punkty (soczewka) — bo (1) `getVectorFaceVertexIds` gubi punkty na planarized crossing (marker
+                                          `x:...`, nie `v:<id>`), i głębiej (2) ponowne wyliczanie faces na złączonym node'ie jest z natury
+                                          zawodne, skoro duplikat leży zaledwie `DUPLICATE_OFFSET` (10 jednostek) od oryginału — dla
+                                          dowolnego kształtu większego niż to realnie się z nim nakłada, więc planaryzacja widzi prawdziwe
+                                          przecięcia między oryginałem a jego własną kopią i rozbija wyliczone faces. Naprawione całkowitym
+                                          porzuceniem ponownego wyliczania na rzecz **podmiany id wprost w tekście już poprawnego,
+                                          oryginalnego klucza** (`remapPieceKey.ts`) — `extractVectorFragment` trzyma teraz surowe
+                                          `pieceKeys` wypełnionej faces (`filledFacePieceKeySets`), `mergeClonedVectorFragment` dokłada
+                                          analogiczną do wierzchołkowej `segmentIdMap`, a nowy klucz to ten sam string z podmienionymi
+                                          id (realSegmentId + markery `v:`/`x:`) i ponownie posortowanymi granicami — zero zależności od
+                                          tego, co jeszcze dzieje się geometrycznie w złączonym node'ie. Pełny opis:
+                                          `.claude/docs/vector-network.md` §65.
 
 - [ ] **zoom ze skrótów klawiszowych** — Cmd/Ctrl +/− (zoom in/out o krok), Shift+0 (zoom to 100%),
       Shift+1 (zoom to fit), Shift+2 (zoom to selection) — dziś zoom działa tylko przez
@@ -1141,7 +1141,7 @@ to czysto swobodny drag, zero pomocy:
       siebie** — zgłoszony bug: rysowanie kształtu (Rectangle i in.) przeciągnięciem w stronę ujemną
       (w lewo/w górę od punktu startu) przy dużym zoomie dawało widoczny "efekt skoku" — szerokość
       rosła płynnie, po czym `x` nagle "odskakiwało". Przyczyna: `x = Math.round(Math.min(start,
-  current))` i `width = Math.round(Math.abs(current - start))` to dwa **niezależne** zaokrąglenia
+current))` i `width = Math.round(Math.abs(current - start))` to dwa **niezależne** zaokrąglenia
       dwóch powiązanych, ale różnych wielkości ciągłych — ich suma (`x + width`, czyli krawędź
       zakotwiczona w punkcie startowym przy przeciąganiu w stronę ujemną) nie musi równać się
       zaokrągleniu tej krawędzi wprost, więc migotała o ±1 world unit w zależności od części ułamkowej
@@ -1199,7 +1199,7 @@ Drobniejsze, ale zauważalne różnice względem Figmy, niepowiązane z żadnym 
       pojawia się tylko w Vector Edit Mode, 10px nad głównym `Toolbar` (`bottom: calc(100% + 10px)`,
       wyśrodkowany względem jego szerokości — renderowany jako dziecko `Toolbar.tsx`, nie osobno w
       `DesignPage.tsx`). Lista przycisków budowana z jednego `const TOOLS` (`VectorEditToolbar/
-  constants.ts`) i mapowana przez `renderTool` — Move, Lasso i Paint mają realne działanie (własny
+constants.ts`) i mapowana przez `renderTool` — Move, Lasso i Paint mają realne działanie (własny
       `toolName`, aktywne dokładnie gdy ten `ToolName` jest bieżącym narzędziem), Bend/Cut
       wciąż renderują się jako nieaktywne placeholdery bez własnego `ToolName` — dojdą później. X
       zamyka Vector Edit Mode wprost (`setVectorEditingNodeId(null)` + reset toola), nie przez
@@ -1329,27 +1329,27 @@ Drobniejsze, ale zauważalne różnice względem Figmy, niepowiązane z żadnym 
       `.claude/docs/vector-network.md` §59-60, e2e: `e2e/pages/design/vector-shape-builder.spec.ts`.
 
       **Rozszerzenie: przecięcie dwóch RÓŻNYCH node'ów wektorowych** — zgłoszone wprost, ze
-              zrzutem ekranu: dwa osobne prostokąty (dwa osobne node'y), nachodzące na siebie na ekranie.
-              Wcześniej Shape Builder widział oba otwarte node'y przy hit-testingu, ale traktował każdy
-              całkowicie niezależnie — przeciągnięcie po przecięciu scalało/wypełniało zawsze cały, niepodzielony
-              prostokąt każdego node'a. Naprawione materializacją przecięcia między zbiorami segmentów obu
-              node'ów (`planarizeVectorNetwork`/`persistVectorNetworkCrossings` są w pełni generyczne — nie mają
-              pojęcia "właściciela" segmentu, więc dostają po prostu unię segmentów z dwóch node'ów) i złożeniem
-              pary w jeden ocalały node, kasując drugi — dokładnie ten sam mechanizm co istniejące scalanie
-              node'ów przez przeciągnięcie wierzchołka na wierzchołek (§46), tylko wyzwalane przez faktyczne
-              przecięcie granic zamiast wspólnego wierzchołka. Nowy `utils/canvas/vectorNetwork/mergeVectorNodes/`
-              (`doVectorNodesCross.ts` + `groupCrossingVectorNodes.ts`) grupuje **wszystkie aktualnie otwarte**
-              node'y w spójne składowe (transytywnie — A×B i B×C scala też A z C, mimo że A i C się nie
-              stykają) — nie tylko dotknięte, co samo w sobie było żywo złapanym bugiem: Alt+klik tylko w
-              wyłączny róg jednego kształtu, bez dotknięcia nietkniętego sąsiada z którym się przecina, kasował
-              całą granicę sąsiada zamiast chronić wspólną cięciwę, bo nietknięty sąsiad w ogóle nie trafiał do
-              grupowania. Naprawione czytaniem `vectorEditingNodeIds` zamiast kluczy `touchedFaces`. A
-              `commitVectorShapeBuilder.ts` rozbity na 3 pliki: cienki orkiestrator + niezmieniona ścieżka
-              pojedynczego node'a + nowa ścieżka dla grupy 2+ (re-hit-test surowej ścieżki przeciągnięcia
-              względem połączonego node'a, bo stare klucze face'ów przestają istnieć po podziale). Idle hover
-              (przed kliknięciem) świadomie zostaje przybliżeniem — pokazuje cały, niepodzielony face
-              najmniejszego/najwyższego node'a w punkcie (fix z §61), dokładny podział widać dopiero gdy
-              przeciągnięcie faktycznie się zacznie. Pełny opis: `.claude/docs/vector-network.md` §62.
+                                          zrzutem ekranu: dwa osobne prostokąty (dwa osobne node'y), nachodzące na siebie na ekranie.
+                                          Wcześniej Shape Builder widział oba otwarte node'y przy hit-testingu, ale traktował każdy
+                                          całkowicie niezależnie — przeciągnięcie po przecięciu scalało/wypełniało zawsze cały, niepodzielony
+                                          prostokąt każdego node'a. Naprawione materializacją przecięcia między zbiorami segmentów obu
+                                          node'ów (`planarizeVectorNetwork`/`persistVectorNetworkCrossings` są w pełni generyczne — nie mają
+                                          pojęcia "właściciela" segmentu, więc dostają po prostu unię segmentów z dwóch node'ów) i złożeniem
+                                          pary w jeden ocalały node, kasując drugi — dokładnie ten sam mechanizm co istniejące scalanie
+                                          node'ów przez przeciągnięcie wierzchołka na wierzchołek (§46), tylko wyzwalane przez faktyczne
+                                          przecięcie granic zamiast wspólnego wierzchołka. Nowy `utils/canvas/vectorNetwork/mergeVectorNodes/`
+                                          (`doVectorNodesCross.ts` + `groupCrossingVectorNodes.ts`) grupuje **wszystkie aktualnie otwarte**
+                                          node'y w spójne składowe (transytywnie — A×B i B×C scala też A z C, mimo że A i C się nie
+                                          stykają) — nie tylko dotknięte, co samo w sobie było żywo złapanym bugiem: Alt+klik tylko w
+                                          wyłączny róg jednego kształtu, bez dotknięcia nietkniętego sąsiada z którym się przecina, kasował
+                                          całą granicę sąsiada zamiast chronić wspólną cięciwę, bo nietknięty sąsiad w ogóle nie trafiał do
+                                          grupowania. Naprawione czytaniem `vectorEditingNodeIds` zamiast kluczy `touchedFaces`. A
+                                          `commitVectorShapeBuilder.ts` rozbity na 3 pliki: cienki orkiestrator + niezmieniona ścieżka
+                                          pojedynczego node'a + nowa ścieżka dla grupy 2+ (re-hit-test surowej ścieżki przeciągnięcia
+                                          względem połączonego node'a, bo stare klucze face'ów przestają istnieć po podziale). Idle hover
+                                          (przed kliknięciem) świadomie zostaje przybliżeniem — pokazuje cały, niepodzielony face
+                                          najmniejszego/najwyższego node'a w punkcie (fix z §61), dokładny podział widać dopiero gdy
+                                          przeciągnięcie faktycznie się zacznie. Pełny opis: `.claude/docs/vector-network.md` §62.
 
 - [x] **Variable Width** (`ToolName.variableWidth`, skrót `Shift+W` w dropdownzie "More"
       `VectorEditToolbar`) — Figma-owy tryb zmiennej grubości konturu: klik na gołej ścieżce dodaje

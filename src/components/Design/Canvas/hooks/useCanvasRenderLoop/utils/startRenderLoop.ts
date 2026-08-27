@@ -4,6 +4,7 @@ import { TImageRenderContext } from '../types';
 
 // utils
 import { drawScene } from './drawScene/drawScene';
+import { resolveColorSampleRequest } from './resolveColorSampleRequest';
 
 type TFrameIdRef = { current: number };
 
@@ -17,6 +18,7 @@ const tick = (
   refs: TCanvasRefs,
 ): void => {
   drawScene(gl, program, buffer, imageContext, canvas, refs);
+  resolveColorSampleRequest(gl, canvas, refs.colorSampleRequestRef);
   frameIdRef.current = requestAnimationFrame(() => tick(gl, program, buffer, imageContext, canvas, frameIdRef, refs));
 };
 

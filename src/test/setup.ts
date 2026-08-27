@@ -38,3 +38,19 @@ Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
   value: (): null => null,
   writable: true,
 });
+
+// jsdom doesn't implement pointer capture
+Object.defineProperty(HTMLElement.prototype, 'hasPointerCapture', {
+  value: (): boolean => false,
+  writable: true,
+});
+
+Object.defineProperty(HTMLElement.prototype, 'releasePointerCapture', {
+  value: (): void => {},
+  writable: true,
+});
+
+Object.defineProperty(HTMLElement.prototype, 'setPointerCapture', {
+  value: (): void => {},
+  writable: true,
+});

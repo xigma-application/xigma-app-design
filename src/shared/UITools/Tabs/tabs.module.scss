@@ -1,0 +1,40 @@
+.Tabs {
+  align-items: center;
+  column-gap: 5px;
+  display: flex;
+  user-select: none;
+
+  &__tab {
+    align-items: center;
+    border-radius: 5px;
+    box-sizing: border-box;
+    color: var(--color-neutral-2);
+    cursor: pointer;
+    display: flex;
+    font-size: 11px;
+    font-weight: 550;
+    height: 24px;
+    justify-content: center;
+    line-height: 16px;
+    padding-left: 8px;
+    padding-right: 8px;
+
+    &:hover {
+      background-color: var(--color-neutral-3);
+    }
+
+    &--active {
+      background-color: var(--color-neutral-3);
+      color: var(--color-neutral-1);
+    }
+
+    &--disabled {
+      background-color: unset;
+      color: var(--color-neutral-1);
+
+      &:hover {
+        background-color: unset;
+      }
+    }
+  }
+}

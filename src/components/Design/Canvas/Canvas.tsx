@@ -28,6 +28,7 @@ import { useDrawTextTool } from './hooks/useDrawTextTool/useDrawTextTool';
 import { useHandTool } from './hooks/useHandTool/useHandTool';
 import { useHoverHighlight } from './hooks/useHoverHighlight/useHoverHighlight';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts/useKeyboardShortcuts';
+import { useRegisterColorPixelSampler } from './hooks/useRegisterColorPixelSampler/useRegisterColorPixelSampler';
 import { useSelectionTool } from './hooks/useSelectionTool/useSelectionTool';
 import { useSliceTool } from './hooks/useSliceTool/useSliceTool';
 import { useStraightCaretEditing } from './hooks/useStraightCaretEditing/useStraightCaretEditing';
@@ -85,6 +86,7 @@ const Canvas: FC = () => {
   useDrawingCursor(refs);
   useKeyboardShortcuts(refs);
   useCanvasRenderLoop(refs);
+  useRegisterColorPixelSampler(refs);
 
   return (
     <div className={styles.Canvas}>

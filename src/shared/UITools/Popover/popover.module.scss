@@ -1,3 +1,7 @@
+:global([data-radix-popper-content-wrapper]) {
+  z-index: 2 !important;
+}
+
 .Popover {
   background-color: var(--color-neutral-5);
   border-radius: 8px;

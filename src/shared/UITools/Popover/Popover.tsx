@@ -1,3 +1,4 @@
+import cx from 'classnames';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { FC, ReactNode } from 'react';
 
@@ -5,12 +6,17 @@ import { FC, ReactNode } from 'react';
 import PopoverItem from './PopoverItem/PopoverItem';
 import PopoverSeparator from './PopoverSeparator/PopoverSeparator';
 
+// hooks
+import { usePopoverDrag } from './hooks/usePopoverDrag';
+
 // styles
 import styles from './popover.module.scss';
 
 export type TPopoverProps = {
   align?: 'center' | 'end' | 'start';
   children: ReactNode;
+  className?: string;
+  moveable?: boolean;
   onOpenChange?: (open: boolean) => void;
   side?: 'bottom' | 'left' | 'right' | 'top';
   sideOffset?: number;
@@ -22,24 +28,39 @@ export type TPopoverProps = {
 export const Popover: FC<TPopoverProps> = ({
   align = 'start',
   children,
+  className = '',
+  moveable = false,
   onOpenChange,
   side = 'bottom',
   sideOffset = 8,
   trigger,
   triggerAriaLabel,
   triggerClassName,
-}) => (
-  <PopoverPrimitive.Root onOpenChange={onOpenChange}>
-    <PopoverPrimitive.Trigger aria-label={triggerAriaLabel} className={triggerClassName}>
-      {trigger}
-    </PopoverPrimitive.Trigger>
-    <PopoverPrimitive.Portal>
-      <PopoverPrimitive.Content align={align} className={styles.Popover} side={side} sideOffset={sideOffset}>
-        {children}
-      </PopoverPrimitive.Content>
-    </PopoverPrimitive.Portal>
-  </PopoverPrimitive.Root>
-);
+}) => {
+  const { handleOpenChange, offset, onPointerDown, onPointerMove, onPointerUp } = usePopoverDrag(moveable, onOpenChange);
+
+  return (
+    <PopoverPrimitive.Root onOpenChange={handleOpenChange}>
+      <PopoverPrimitive.Trigger aria-label={triggerAriaLabel} className={triggerClassName}>
+        {trigger}
+      </PopoverPrimitive.Trigger>
+      <PopoverPrimitive.Portal>
+        <PopoverPrimitive.Content
+          align={align}
+          className={cx(styles.Popover, className)}
+          onPointerDown={moveable ? onPointerDown : undefined}
+          onPointerMove={moveable ? onPointerMove : undefined}
+          onPointerUp={moveable ? onPointerUp : undefined}
+          side={side}
+          sideOffset={sideOffset}
+          style={moveable ? { transform: `translate(${offset.x}px, ${offset.y}px)` } : undefined}
+        >
+          {children}
+        </PopoverPrimitive.Content>
+      </PopoverPrimitive.Portal>
+    </PopoverPrimitive.Root>
+  );
+};
 
 export const PopoverCompound = {
   PopoverItem,

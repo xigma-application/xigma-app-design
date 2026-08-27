@@ -6,6 +6,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 
 export const createCanvasRefs = (overrides: Partial<TCanvasRefs> = {}): TCanvasRefs => ({
   canvasRef: { current: null },
+  colorSampleRequestRef: { current: null },
   cornerRadiusDragRef: { current: null },
   draftRef: { current: null },
   draggedNodeIdsRef: { current: null },

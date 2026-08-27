@@ -1,0 +1,24 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Tabs snapshots > should render Tabs 1`] = `
+<DocumentFragment>
+  <div
+    class="_Tabs_3d6798"
+  >
+    <div
+      class="_Tabs__tab_3d6798 _Tabs__tab--active_3d6798"
+      data-no-drag="true"
+      data-state="closed"
+    >
+      tabs.solid
+    </div>
+    <div
+      class="_Tabs__tab_3d6798 _Tabs__tab--disabled_3d6798"
+      data-no-drag="true"
+      data-state="closed"
+    >
+      tabs.gradient
+    </div>
+  </div>
+</DocumentFragment>
+`;

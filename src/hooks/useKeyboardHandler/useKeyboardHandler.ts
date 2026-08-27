@@ -6,6 +6,7 @@ import { TKeysMap } from './types';
 
 // utils
 import { handleLockBrowserEvents } from './utils/handleLockBrowserEvents';
+import { isShortcutBypassTarget } from './utils/isShortcutBypassTarget';
 import { triggerActions } from './utils/triggerActions';
 
 export type TUseKeyboardHandler = {
@@ -23,19 +24,23 @@ export const useKeyboardHandler = (
   stopPropagation?: boolean,
 ): TUseKeyboardHandler => {
   const handleKeyDown = (event: KeyboardEvent | ReactKeyboardEvent<HTMLElement> | Event): void => {
-    if (stopPropagation) {
-      (event as Event).stopPropagation();
-    }
+    const shouldHandle = !isShortcutBypassTarget((event as Event).target);
 
-    const maybeKeyboardEvent = event as KeyboardEvent | ReactKeyboardEvent<HTMLElement>;
+    if (shouldHandle) {
+      if (stopPropagation) {
+        (event as Event).stopPropagation();
+      }
 
-    if ('key' in maybeKeyboardEvent) {
-      if (isPrimaryKey(maybeKeyboardEvent.key)) {
-        if (lockBrowserEvents) {
-          handleLockBrowserEvents(maybeKeyboardEvent.ctrlKey, maybeKeyboardEvent, maybeKeyboardEvent.key);
+      const maybeKeyboardEvent = event as KeyboardEvent | ReactKeyboardEvent<HTMLElement>;
+
+      if ('key' in maybeKeyboardEvent) {
+        if (isPrimaryKey(maybeKeyboardEvent.key)) {
+          if (lockBrowserEvents) {
+            handleLockBrowserEvents(maybeKeyboardEvent.ctrlKey, maybeKeyboardEvent, maybeKeyboardEvent.key);
+          }
+        } else {
+          triggerActions(maybeKeyboardEvent, keysMap, lockBrowserEvents);
         }
-      } else {
-        triggerActions(maybeKeyboardEvent, keysMap, lockBrowserEvents);
       }
     }
   };

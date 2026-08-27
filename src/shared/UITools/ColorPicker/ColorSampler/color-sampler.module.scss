@@ -1,0 +1,13 @@
+.ColorSampler {
+  background-color: var(--color-neutral-5);
+  border-radius: 15px;
+  box-shadow: 0 2px 14px rgb(0 0 0 / 20%);
+  box-sizing: border-box;
+  column-gap: 15px;
+  display: flex;
+  height: 64px;
+  padding: 8px;
+  position: fixed;
+  width: 260px;
+  z-index: 999;
+}

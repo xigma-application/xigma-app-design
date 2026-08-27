@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HexField snapshots > should render HexField without the leading # 1`] = `
+<DocumentFragment>
+  <input
+    class="_HexField_94e65f"
+    data-test-bypass-global-shortcuts="true"
+    value="ff0000"
+  />
+</DocumentFragment>
+`;

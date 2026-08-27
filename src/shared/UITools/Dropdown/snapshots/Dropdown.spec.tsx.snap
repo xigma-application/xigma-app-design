@@ -1,0 +1,35 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Dropdown snapshots > should render Dropdown showing the selected option label 1`] = `
+<DocumentFragment>
+  <button
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    class="_Dropdown_cc217a"
+    data-state="closed"
+    data-test-bypass-global-shortcuts="true"
+    type="button"
+  >
+    <span
+      class="_Dropdown__label_cc217a"
+    >
+      Hex
+    </span>
+    <svg
+      class="Icon"
+      data-fpl-icon-size="16"
+      fill="none"
+      height="12"
+      style="color: var(--color-neutral-1);"
+      viewBox="0 0 16 16"
+      width="12"
+    >
+      <path
+        d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+        data-svg-property="fill"
+        fill="white"
+      />
+    </svg>
+  </button>
+</DocumentFragment>
+`;

@@ -1,0 +1,3 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ColorSampler snapshots > should render the grid, result and prompt together once colors have been sampled 1`] = `<DocumentFragment />`;

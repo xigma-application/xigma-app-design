@@ -1,0 +1,38 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Button snapshots > should render Button in its active state 1`] = `
+<DocumentFragment>
+  <button
+    aria-pressed="true"
+    class="_Button_b88d2e _Button--active_b88d2e"
+    type="button"
+  >
+    Click
+  </button>
+</DocumentFragment>
+`;
+
+exports[`Button snapshots > should render Button in its default state 1`] = `
+<DocumentFragment>
+  <button
+    aria-pressed="false"
+    class="_Button_b88d2e"
+    type="button"
+  >
+    Click
+  </button>
+</DocumentFragment>
+`;
+
+exports[`Button snapshots > should render Button in its disabled state 1`] = `
+<DocumentFragment>
+  <button
+    aria-pressed="false"
+    class="_Button_b88d2e _Button--disabled_b88d2e"
+    disabled=""
+    type="button"
+  >
+    Click
+  </button>
+</DocumentFragment>
+`;

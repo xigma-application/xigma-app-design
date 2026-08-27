@@ -20,6 +20,7 @@ describe('CanvasRefsProvider behaviors', () => {
     // result
     expect(result.current).toEqual({
       canvasRef: { current: null },
+      colorSampleRequestRef: { current: null },
       cornerRadiusDragRef: { current: null },
       draftRef: { current: null },
       draggedNodeIdsRef: { current: null },

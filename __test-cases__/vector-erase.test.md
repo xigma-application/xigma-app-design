@@ -46,12 +46,12 @@ z widocznymi pod spodem liniami segmentów. Poprawione: drag tylko nagrywa ście
 (`vectorEraseStrokeRef`), realne `severVectorSegmentAtPoint` + `updateNode` dzieje się raz, na
 pointer-up.
 
-| #   | Scenariusz                                                                                              | Wynik |
-| --- | ------------------------------------------------------------------------------------------------------- | ----- |
-| 13  | W trakcie przeciągania (pointer wciąż wciśnięty) `segs`/`verts` w store **bez zmian** (4/4)             | ✅    |
-| 14  | Podgląd: pasmo w kolorze tła "urywa" stroke tam gdzie przeszedł pędzel, kropki wierzchołków zostają    | ✅    |
-| 15  | Dopiero na `pointer-up` geometria się zmienia (jeden `updateNode`, tu 4→7 segm. dla wolnego pociągu)   | ✅    |
-| 16  | `Cmd+Z` po tym cofa **cały** pociąg jednym ruchem (7/10 → 4/4)                                          | ✅    |
+| #   | Scenariusz                                                                                           | Wynik |
+| --- | ---------------------------------------------------------------------------------------------------- | ----- |
+| 13  | W trakcie przeciągania (pointer wciąż wciśnięty) `segs`/`verts` w store **bez zmian** (4/4)          | ✅    |
+| 14  | Podgląd: pasmo w kolorze tła "urywa" stroke tam gdzie przeszedł pędzel, kropki wierzchołków zostają  | ✅    |
+| 15  | Dopiero na `pointer-up` geometria się zmienia (jeden `updateNode`, tu 4→7 segm. dla wolnego pociągu) | ✅    |
+| 16  | `Cmd+Z` po tym cofa **cały** pociąg jednym ruchem (7/10 → 4/4)                                       | ✅    |
 
 ## 3. Średnica `[` / `]`
 

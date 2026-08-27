@@ -214,6 +214,61 @@ describe('useKeyboardHandler behaviors', () => {
     expect(action).not.toHaveBeenCalled();
   });
 
+  it('should not trigger action when the event target carries the bypass-global-shortcuts attribute', () => {
+    // mock
+    const action = vi.fn();
+    const input = document.createElement('input');
+
+    input.setAttribute('data-test-bypass-global-shortcuts', 'true');
+    document.body.appendChild(input);
+
+    // before
+    renderHook(() => useKeyboardHandler(true, [], [{ ...keyMap, action }]));
+
+    // action
+    fireEvent.keyDown(input, { code: KeyboardKeys.c });
+
+    // result
+    expect(action).not.toHaveBeenCalled();
+  });
+
+  it('should still trigger action for a plain input without the bypass attribute', () => {
+    // mock
+    const action = vi.fn();
+    const input = document.createElement('input');
+
+    document.body.appendChild(input);
+
+    // before
+    renderHook(() => useKeyboardHandler(true, [], [{ ...keyMap, action }]));
+
+    // action
+    fireEvent.keyDown(input, { code: KeyboardKeys.c });
+
+    // result
+    expect(action).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not stop propagation when the event target carries the bypass-global-shortcuts attribute, even with stopPropagation set', () => {
+    // mock
+    const input = document.createElement('input');
+
+    input.setAttribute('data-test-bypass-global-shortcuts', 'true');
+    document.body.appendChild(input);
+
+    const event = new KeyboardEvent('keydown', { bubbles: true, code: KeyboardKeys.c });
+    const stopPropagationSpy = vi.spyOn(event, 'stopPropagation');
+
+    // before
+    renderHook(() => useKeyboardHandler(true, [], [keyMap], undefined, undefined, true));
+
+    // action
+    input.dispatchEvent(event);
+
+    // result
+    expect(stopPropagationSpy).not.toHaveBeenCalled();
+  });
+
   it('should stop listening after unmount', () => {
     // mock
     const action = vi.fn();

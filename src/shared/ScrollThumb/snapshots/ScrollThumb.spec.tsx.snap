@@ -1,0 +1,13 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ScrollThumb snapshots > should render a thumb when the content overflows 1`] = `
+<DocumentFragment>
+  <div
+    class="_ScrollThumb_5d88f1"
+    data-no-drag="true"
+    style="height: 25%; top: 0%;"
+  />
+</DocumentFragment>
+`;
+
+exports[`ScrollThumb snapshots > should render nothing when the content fits without scrolling 1`] = `<DocumentFragment />`;

@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CssField snapshots > should render CssField 1`] = `
+<DocumentFragment>
+  <input
+    class="_CssField_5d271d"
+    data-test-bypass-global-shortcuts="true"
+    value="rgba(255, 0, 0, 1)"
+  />
+</DocumentFragment>
+`;

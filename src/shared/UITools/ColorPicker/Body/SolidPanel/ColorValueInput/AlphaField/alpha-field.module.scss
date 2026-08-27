@@ -1,0 +1,33 @@
+@use '../../../../../../../styles/fonts';
+
+.AlphaField {
+  align-items: center;
+  background-color: var(--color-input-background);
+  border: 1px solid var(--color-input-background);
+  border-radius: 5px;
+  box-sizing: border-box;
+  column-gap: 5px;
+  display: flex;
+  height: 24px;
+  padding: 0 5px;
+
+  &:focus-within {
+    border-color: var(--color-blue-1);
+  }
+
+  &__input {
+    background: none;
+    border: none;
+    color: var(--color-neutral-1);
+    font-family: fonts.$fontFamily;
+    font-size: 11px;
+    outline: none;
+    width: 28px;
+  }
+
+  &__unit {
+    color: var(--color-neutral-2);
+    font-family: fonts.$fontFamily;
+    font-size: 11px;
+  }
+}

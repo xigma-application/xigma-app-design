@@ -7,7 +7,23 @@ exports[`DesignPage snapshots > should render DesignPage 1`] = `
   >
     <div
       class="_LeftPanel_ff9541"
-    />
+    >
+      <div
+        class="_LeftPanel__testTrigger_ff9541"
+      >
+        <button
+          aria-expanded="false"
+          aria-haspopup="dialog"
+          class=""
+          data-state="closed"
+          type="button"
+        >
+          <div>
+            Open color picker (temp test)
+          </div>
+        </button>
+      </div>
+    </div>
     <div
       class="_Canvas_8cb929"
     >

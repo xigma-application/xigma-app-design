@@ -1,0 +1,10 @@
+.ColorPicker {
+  display: flex;
+  flex-direction: column;
+  min-width: 240px;
+  width: 240px;
+
+  &__popover {
+    padding: 0;
+  }
+}

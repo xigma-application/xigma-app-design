@@ -1,0 +1,23 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AlphaField snapshots > should render AlphaField 1`] = `
+<DocumentFragment>
+  <div
+    class="_AlphaField_59d187"
+    data-test-bypass-global-shortcuts="true"
+  >
+    <input
+      class="_AlphaField__input_59d187"
+      max="100"
+      min="0"
+      type="number"
+      value="50"
+    />
+    <span
+      class="_AlphaField__unit_59d187"
+    >
+      %
+    </span>
+  </div>
+</DocumentFragment>
+`;

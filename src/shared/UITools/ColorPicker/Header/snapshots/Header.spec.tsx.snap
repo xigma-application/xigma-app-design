@@ -1,0 +1,53 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Header snapshots > should render Header 1`] = `
+<DocumentFragment>
+  <div
+    class="_Header_09a026"
+  >
+    <div
+      class="_Tabs_3d6798"
+    >
+      <div
+        class="_Tabs__tab_3d6798 _Tabs__tab--active_3d6798"
+        data-no-drag="true"
+        data-state="closed"
+      >
+        Solid
+      </div>
+      <div
+        class="_Tabs__tab_3d6798 _Tabs__tab--disabled_3d6798"
+        data-no-drag="true"
+        data-state="closed"
+      >
+        Gradient
+      </div>
+    </div>
+    <button
+      aria-label="Close"
+      aria-pressed="false"
+      class="_Button_b88d2e _Header__close_09a026"
+      data-state="closed"
+      type="button"
+    >
+      <svg
+        class="Icon"
+        data-fpl-icon-size="24L"
+        fill="none"
+        height="22"
+        style="color: var(--color-neutral-1);"
+        viewBox="0 0 24 24"
+        width="22"
+      >
+        <path
+          clip-rule="evenodd"
+          d="M17.354 6.646a.5.5 0 0 1 0 .708L12.707 12l4.647 4.646a.5.5 0 0 1-.708.708L12 12.707l-4.646 4.647a.5.5 0 0 1-.708-.708L11.293 12 6.646 7.354a.5.5 0 0 1 .708-.707L12 11.293l4.646-4.647a.5.5 0 0 1 .708 0"
+          data-svg-property="fill"
+          fill="white"
+          fill-rule="evenodd"
+        />
+      </svg>
+    </button>
+  </div>
+</DocumentFragment>
+`;

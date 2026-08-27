@@ -1,0 +1,11 @@
+.ColorPrompt {
+  align-items: center;
+  column-gap: 8px;
+  display: flex;
+  margin-left: 12px;
+
+  &__description {
+    color: var(--color-neutral-2);
+    font-size: 11px;
+  }
+}

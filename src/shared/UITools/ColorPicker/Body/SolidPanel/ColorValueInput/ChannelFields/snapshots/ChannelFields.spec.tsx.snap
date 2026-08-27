@@ -1,0 +1,30 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ChannelFields snapshots > should render one input per channel 1`] = `
+<DocumentFragment>
+  <input
+    class="_ChannelFields__field_4004a6"
+    data-test-bypass-global-shortcuts="true"
+    max="255"
+    min="0"
+    type="number"
+    value="255"
+  />
+  <input
+    class="_ChannelFields__field_4004a6"
+    data-test-bypass-global-shortcuts="true"
+    max="255"
+    min="0"
+    type="number"
+    value="128"
+  />
+  <input
+    class="_ChannelFields__field_4004a6"
+    data-test-bypass-global-shortcuts="true"
+    max="255"
+    min="0"
+    type="number"
+    value="0"
+  />
+</DocumentFragment>
+`;

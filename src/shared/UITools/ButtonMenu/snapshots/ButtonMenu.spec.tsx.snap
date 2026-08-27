@@ -1,0 +1,17 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ButtonMenu snapshots > should render ButtonMenu with the trigger visible and the menu closed 1`] = `
+<DocumentFragment>
+  <button
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    class="_ButtonMenu_7516ba"
+    data-state="closed"
+    type="button"
+  >
+    <span>
+      More
+    </span>
+  </button>
+</DocumentFragment>
+`;

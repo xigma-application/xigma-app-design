@@ -1,0 +1,19 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AlphaSlider snapshots > should render AlphaSlider with the thumb positioned from alpha 1`] = `
+<DocumentFragment>
+  <div
+    class="_AlphaSlider_ef5e78"
+    data-no-drag="true"
+  >
+    <div
+      class="_AlphaSlider__gradient_ef5e78"
+      style="background-image: linear-gradient(to right, transparent, rgb(255, 0, 0));"
+    />
+    <div
+      class="_AlphaSlider__thumb_ef5e78"
+      style="left: calc(8px + 0.5 * (100% - 16px));"
+    />
+  </div>
+</DocumentFragment>
+`;
