@@ -4,6 +4,7 @@ import { createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit';
 import {
   DEFAULT_FRAME_TOOL,
   DEFAULT_MOUSE_TOOL,
+  DEFAULT_PAINT_COLOR,
   DEFAULT_PEN_TOOL,
   DEFAULT_SHAPE_TOOL,
   DEFAULT_TEXT_TOOL,
@@ -22,6 +23,7 @@ import { handleAddComment } from './utils/handleAddComment';
 import { handleAddNode } from './utils/handleAddNode';
 import { handleDeleteNode } from './utils/handleDeleteNode';
 import { handleReplaceDesignSnapshot } from './utils/handleReplaceDesignSnapshot';
+import { handleReplaceNode } from './utils/handleReplaceNode';
 import { handleSetActiveTool } from './utils/handleSetActiveTool';
 import { handleSetSelection } from './utils/handleSetSelection';
 import { handleSetVectorEditingNodeIds } from './utils/handleSetVectorEditingNodeIds';
@@ -51,6 +53,7 @@ const initialState: TDesignState = {
   lastShapeTool: DEFAULT_SHAPE_TOOL,
   lastTextTool: DEFAULT_TEXT_TOOL,
   nodes: {},
+  paintColor: DEFAULT_PAINT_COLOR,
   penActiveVertexId: null,
   rootOrder: [],
   selectedIds: [],
@@ -78,7 +81,11 @@ const designSlice = createSlice({
     },
     deleteNode: (state, action: PayloadAction<string>) => handleDeleteNode(state, action.payload),
     replaceDesignSnapshot: (state, action: PayloadAction<TDesignSnapshot>) => handleReplaceDesignSnapshot(state, action.payload),
+    replaceNode: (state, action: PayloadAction<{ id: string; node: TSceneNode }>) => handleReplaceNode(state, action.payload),
     setActiveTool: (state, action: PayloadAction<ToolName>) => handleSetActiveTool(state, action.payload),
+    setPaintColor: (state, action: PayloadAction<string>) => {
+      state.paintColor = action.payload;
+    },
     setPenActiveVertexId: (state, action: PayloadAction<string | null>) => {
       state.penActiveVertexId = action.payload;
     },
@@ -107,7 +114,9 @@ export const {
   deleteComment,
   deleteNode,
   replaceDesignSnapshot,
+  replaceNode,
   setActiveTool,
+  setPaintColor,
   setPenActiveVertexId,
   setSelection,
   setVectorEditingNodeIds,

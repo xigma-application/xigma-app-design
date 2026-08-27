@@ -1,11 +1,14 @@
 // store
 import { addNode, setActiveTool, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { undo } from 'store/history/actions';
 import { store } from 'store';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
+import { TVectorNode } from 'types/design/types';
 
 // utils
+import { createCanvasRefs } from '../../../useCanvasRefs/createCanvasRefs';
 import { handleEnterVectorEdit } from '../handleEnterVectorEdit';
 
 const addVectorNode = (): string => {
@@ -40,6 +43,36 @@ const addFrameNode = (): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
+const addRectangleNode = (): string => {
+  store.dispatch(
+    addNode({
+      fill: '#00ff00',
+      height: 40,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 40,
+      x: 0,
+      y: 0,
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addEllipseNode = (): string => {
+  store.dispatch(
+    addNode({ fill: '#0000ff', height: 30, name: 'Ellipse', parentId: null, rotation: 0, type: NodeType.ellipse, width: 30, x: 0, y: 0 }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 describe('handleEnterVectorEdit', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
@@ -47,14 +80,14 @@ describe('handleEnterVectorEdit', () => {
     store.dispatch(setActiveTool(ToolName.default));
   });
 
-  it('should do nothing when no vector nodes are selected', () => {
+  it('should do nothing when no vector or convertible nodes are selected', () => {
     // mock
     const frameId = addFrameNode();
 
     store.dispatch(setSelection([frameId]));
 
     // before
-    handleEnterVectorEdit(store.dispatch);
+    handleEnterVectorEdit(store.dispatch, createCanvasRefs());
 
     // result
     expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
@@ -68,7 +101,7 @@ describe('handleEnterVectorEdit', () => {
     store.dispatch(setSelection([vectorId]));
 
     // before
-    handleEnterVectorEdit(store.dispatch);
+    handleEnterVectorEdit(store.dispatch, createCanvasRefs());
 
     // result
     expect(store.getState().design.vectorEditingNodeIds).toEqual([vectorId]);
@@ -83,14 +116,14 @@ describe('handleEnterVectorEdit', () => {
     store.dispatch(setSelection([vectorIdA, vectorIdB]));
 
     // before
-    handleEnterVectorEdit(store.dispatch);
+    handleEnterVectorEdit(store.dispatch, createCanvasRefs());
 
     // result
     expect(store.getState().design.vectorEditingNodeIds).toEqual([vectorIdA, vectorIdB]);
     expect(store.getState().design.activeTool).toBe(ToolName.move);
   });
 
-  it('should only include the vector nodes when the selection mixes vector and non-vector nodes', () => {
+  it('should only include the vector nodes when the selection mixes vector and non-convertible nodes', () => {
     // mock
     const vectorIdA = addVectorNode();
     const vectorIdB = addVectorNode();
@@ -99,7 +132,7 @@ describe('handleEnterVectorEdit', () => {
     store.dispatch(setSelection([vectorIdA, frameId, vectorIdB]));
 
     // before
-    handleEnterVectorEdit(store.dispatch);
+    handleEnterVectorEdit(store.dispatch, createCanvasRefs());
 
     // result
     expect(store.getState().design.vectorEditingNodeIds).toEqual([vectorIdA, vectorIdB]);
@@ -114,9 +147,91 @@ describe('handleEnterVectorEdit', () => {
     store.dispatch(setSelection([vectorIdA, vectorIdB, vectorIdC]));
 
     // before
-    handleEnterVectorEdit(store.dispatch);
+    handleEnterVectorEdit(store.dispatch, createCanvasRefs());
 
     // result
     expect(store.getState().design.vectorEditingNodeIds).toEqual([vectorIdA, vectorIdB, vectorIdC]);
+  });
+
+  it('should convert a selected Rectangle into a vector node and open it for editing', () => {
+    // mock
+    const rectangleId = addRectangleNode();
+
+    store.dispatch(setSelection([rectangleId]));
+
+    // action
+    handleEnterVectorEdit(store.dispatch, createCanvasRefs());
+
+    // result
+    const node = store.getState().design.nodes[rectangleId] as TVectorNode;
+
+    expect(node.type).toBe(NodeType.vector);
+    expect(node.fillColor).toBe('#00ff00');
+    expect(Object.keys(node.vertices)).toHaveLength(4);
+    expect(node.filledFaceKeys).toHaveLength(1);
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([rectangleId]);
+    expect(store.getState().design.rootOrder).toContain(rectangleId);
+  });
+
+  it('should convert every eligible shape in a mixed selection, each keeping its own id', () => {
+    // mock
+    const rectangleId = addRectangleNode();
+    const ellipseId = addEllipseNode();
+
+    store.dispatch(setSelection([rectangleId, ellipseId]));
+
+    // action
+    handleEnterVectorEdit(store.dispatch, createCanvasRefs());
+
+    // result
+    const { nodes, vectorEditingNodeIds } = store.getState().design;
+
+    expect(nodes[rectangleId].type).toBe(NodeType.vector);
+    expect(nodes[ellipseId].type).toBe(NodeType.vector);
+    expect(vectorEditingNodeIds).toEqual([rectangleId, ellipseId]);
+  });
+
+  it('should undo a shape-to-vector conversion as a single step, restoring the original shape', () => {
+    // mock
+    const rectangleId = addRectangleNode();
+    const originalNode = store.getState().design.nodes[rectangleId];
+
+    store.dispatch(setSelection([rectangleId]));
+
+    // action
+    handleEnterVectorEdit(store.dispatch, createCanvasRefs());
+    store.dispatch(undo());
+
+    // result
+    expect(store.getState().design.nodes[rectangleId]).toEqual(originalNode);
+  });
+
+  it('should do nothing while a different tool than the selection/move tool is active', () => {
+    // mock
+    const rectangleId = addRectangleNode();
+
+    store.dispatch(setSelection([rectangleId]));
+    store.dispatch(setActiveTool(ToolName.hand));
+
+    // action
+    handleEnterVectorEdit(store.dispatch, createCanvasRefs());
+
+    // result
+    expect(store.getState().design.nodes[rectangleId].type).toBe(NodeType.rectangle);
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
+  });
+
+  it('should do nothing while a vector node is already open for editing', () => {
+    // mock
+    const rectangleId = addRectangleNode();
+
+    store.dispatch(setSelection([rectangleId]));
+    store.dispatch(setVectorEditingNodeIds(['some-other-node']));
+
+    // action
+    handleEnterVectorEdit(store.dispatch, createCanvasRefs());
+
+    // result
+    expect(store.getState().design.nodes[rectangleId].type).toBe(NodeType.rectangle);
   });
 });

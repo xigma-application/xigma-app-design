@@ -20,6 +20,7 @@ import { getDefaultMoveTool } from './utils/getDefaultMoveTool';
 import { handleCopySelection } from './utils/handleCopySelection';
 import { handleDeleteSelection } from './utils/handleDeleteSelection/handleDeleteSelection';
 import { handleDuplicateSelection } from './utils/handleDuplicateSelection';
+import { handleEnterTextEdit } from './utils/handleEnterTextEdit';
 import { handleEnterVectorEdit } from './utils/handleEnterVectorEdit';
 import { handleLeave } from './utils/handleLeave';
 import { handlePasteSelection } from './utils/handlePasteSelection';
@@ -55,7 +56,8 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => dispatchTool(dispatch, ToolName.shapeBuilder), ...shortcuts[ToolName.shapeBuilder] },
       { action: (): any => dispatchTool(dispatch, ToolName.variableWidth), ...shortcuts[ToolName.variableWidth] },
       { action: (): any => handleLeave(dispatch, refs), ...shortcuts.escape },
-      { action: (): any => handleEnterVectorEdit(dispatch), secondaryKey: KeyboardKeys.enter },
+      { action: (): any => handleEnterVectorEdit(dispatch, refs), secondaryKey: KeyboardKeys.enter },
+      { action: (event): any => handleEnterTextEdit(event, dispatch), secondaryKey: KeyboardKeys.enter },
       { action: (): any => handleRedo(dispatch, refs), ...shortcuts.redo },
       { action: (): any => handleUndo(dispatch, refs), ...shortcuts.undo },
       { action: (): any => handleDeleteSelection(dispatch, refs), secondaryKey: KeyboardKeys.delete },

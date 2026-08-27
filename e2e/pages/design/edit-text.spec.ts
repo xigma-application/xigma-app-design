@@ -3,6 +3,72 @@ import { test, expect } from '@playwright/test';
 // components
 import { DesignPage } from './model/DesignPage';
 
+test('pressing Enter on a selected text node enters edit mode with all its content selected, same as double-clicking it', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-edit-text-enter-select-all');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawTextBox(900, 300, 1100, 340);
+  await designPage.typeText('HELLO');
+  await designPage.click(1550, 600); // commit; the node is not selected afterward
+
+  await designPage.click(905, 310); // select it via a plain click on the rendered "H" glyph
+  await page.keyboard.press('Enter'); // the entry point under test — should select all, same as a double-click
+  await designPage.typeText('BYE');
+  await designPage.click(1550, 600); // commit the edit, deselecting it
+
+  const viaEnter = await designPage.canvas.screenshot();
+
+  // reference: the identical scenario, but entered via the existing double-click mechanism instead
+  await designPage.goto('e2e-test-edit-text-enter-select-all-reference');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawTextBox(900, 300, 1100, 340);
+  await designPage.typeText('HELLO');
+  await designPage.click(1550, 600);
+
+  await designPage.doubleClick(905, 310);
+  await designPage.typeText('BYE');
+  await designPage.click(1550, 600);
+
+  const viaDoubleClick = await designPage.canvas.screenshot();
+
+  expect(viaEnter.equals(viaDoubleClick)).toBe(true);
+});
+
+test('pressing Enter while a shape (not text) is selected does not enter text edit mode', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-edit-text-enter-ignores-non-text');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawTextBox(900, 300, 1100, 340);
+  await designPage.typeText('HELLO');
+  await designPage.click(1550, 600); // commit, deselected
+
+  await designPage.click(905, 310); // select the text node
+  await designPage.click(1550, 600); // click empty space, deselecting it again — nothing selected now
+  await designPage.pointerMove(1500, 700);
+  const beforeEnter = await designPage.canvas.screenshot();
+
+  await page.keyboard.press('Enter'); // no selection at all — must be a genuine no-op
+  await designPage.pointerMove(1500, 700);
+  const afterEnter = await designPage.canvas.screenshot();
+
+  expect(afterEnter.equals(beforeEnter)).toBe(true);
+
+  const editingTextBox = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+
+    return store.getState().design.editingTextBox;
+  });
+
+  expect(editingTextBox).toBeNull();
+});
+
 test('double-clicking an unselected text node enters edit mode with all its content selected, so typing replaces it', async ({ page }) => {
   const designPage = new DesignPage(page);
 

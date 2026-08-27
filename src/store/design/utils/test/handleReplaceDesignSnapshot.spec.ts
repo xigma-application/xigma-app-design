@@ -1,7 +1,7 @@
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TDesignSnapshot, TDesignState } from '../../types';
-import { TFrameNode, TVectorNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { handleReplaceDesignSnapshot } from '../handleReplaceDesignSnapshot';
@@ -108,6 +108,60 @@ describe('handleReplaceDesignSnapshot', () => {
     // result
     expect(state.vectorEditingNodeIds).toEqual([]);
     expect(state.penActiveVertexId).toBeNull();
+  });
+
+  it('should reset activeTool back to default when an undo/redo drops vectorEditingNodeIds to empty (e.g. a converted vector reverted to its original shape type)', () => {
+    // mock — mirrors what an undo of Enter's shape-to-vector conversion looks like: the node that
+    // was open for editing is no longer NodeType.vector in the restored snapshot
+    const vector = buildVectorNode();
+    const rectangle: TRectangleNode = {
+      fill: '#ff0000',
+      height: 40,
+      id: vector.id,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 40,
+      x: 0,
+      y: 0,
+    };
+    const state = buildState({ activeTool: ToolName.move, vectorEditingNodeIds: [vector.id] });
+    const snapshot = buildSnapshot({ nodes: { [vector.id]: rectangle }, rootOrder: [vector.id] });
+
+    // before
+    handleReplaceDesignSnapshot(state, snapshot);
+
+    // result
+    expect(state.vectorEditingNodeIds).toEqual([]);
+    expect(state.activeTool).toBe(ToolName.default);
+  });
+
+  it('should not touch activeTool when vectorEditingNodeIds was already empty before the restore', () => {
+    // mock
+    const state = buildState({ activeTool: ToolName.hand, vectorEditingNodeIds: [] });
+    const snapshot = buildSnapshot();
+
+    // before
+    handleReplaceDesignSnapshot(state, snapshot);
+
+    // result
+    expect(state.activeTool).toBe(ToolName.hand);
+  });
+
+  it('should not touch activeTool when at least one vector-editing node survives the restore', () => {
+    // mock
+    const survivor = buildVectorNode({ id: 'vector-survivor' });
+    const removed = buildVectorNode({ id: 'vector-removed' });
+    const state = buildState({ activeTool: ToolName.move, vectorEditingNodeIds: [removed.id, survivor.id] });
+    const snapshot = buildSnapshot({ nodes: { [survivor.id]: survivor } });
+
+    // before
+    handleReplaceDesignSnapshot(state, snapshot);
+
+    // result
+    expect(state.vectorEditingNodeIds).toEqual([survivor.id]);
+    expect(state.activeTool).toBe(ToolName.move);
   });
 
   it('should clear penActiveVertexId when the restored primary node no longer has that vertex', () => {
