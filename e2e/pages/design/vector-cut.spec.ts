@@ -348,7 +348,7 @@ test('Regression: cutting a shape with 3 adjacent painted faces keeps every fill
   await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
     const { addNode, setVectorEditingNodeIds } = await import('/src/store/design/slice.ts');
-    const { deriveVectorFaces } = await import('/src/utils/canvas/vectorNetwork/deriveVectorFaces.ts');
+    const { deriveVectorFaces } = await import('/src/utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces.ts');
     const { getVectorFillLoopKey } = await import('/src/utils/canvas/vectorNetwork/getVectorFillLoopKey.ts');
 
     const segments = {

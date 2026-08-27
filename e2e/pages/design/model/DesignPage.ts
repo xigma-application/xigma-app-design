@@ -238,6 +238,20 @@ export class DesignPage {
     await this.pointerUp();
   }
 
+  // same down/move.../up primitive as dragVectorLasso, for the Erase tool's own freehand brush
+  // stroke in Vector Edit Mode — a real drag through several waypoints, not a single straight line
+  async dragEraseBrush(points: { x: number; y: number }[]): Promise<void> {
+    const [first, ...rest] = points;
+
+    await this.pointerDown(first.x, first.y);
+
+    for (const point of rest) {
+      await this.pointerMove(point.x, point.y);
+    }
+
+    await this.pointerUp();
+  }
+
   async typeText(content: string): Promise<void> {
     await this.page.keyboard.type(content);
   }

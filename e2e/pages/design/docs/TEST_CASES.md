@@ -1933,21 +1933,31 @@ write-up: `.claude/docs/vector-network.md` §64.
 
 ## Erase tool (`.claude/docs/vector-network.md` §66)
 
-A circular brush in Vector Edit Mode (`Shift+E`, next to Cut). Dragging it over the network severs
-every segment it sweeps at the brush edge and drops the covered piece — fully-covered segments go
-whole, orphaned vertices are pruned, the node is never split into a second layer. `[` / `]` resize
-the brush (default 10 screen px, clamped 1–100). The whole geometry (interval detection, sever/drop,
-orphan prune, diameter clamp) is pinned by unit specs; e2e covers the live pointer-capture drag.
+A circular brush in Vector Edit Mode (`Shift+E`, next to Cut). Dragging it over the network is a
+real boolean subtract of the swept brush capsule (`subtractCapsuleFromVectorNetwork.ts`, built on
+`planarizeVectorNetwork` + `deriveVectorFaces`), not a sever-and-drop: a bite that only grazes a
+filled face's boundary carves a new wall inside the fill instead of deleting it — the fill survives
+everywhere it wasn't actually swept. An erase touching only unfilled geometry still degrades to a
+plain gap (no wall drawn), matching the tool's original behaviour there. `[` / `]` resize the brush
+(default 10 screen px, clamped 1–100). A single stroke applies to every node currently open for
+editing at once, independently — see the "multi" rows below. The whole geometry (capsule
+construction, planar subtract, filled-face reclassification, diameter clamp) is pinned by unit
+specs; e2e covers the live pointer-capture drag and the fill-survives-a-boundary-bite behaviour a
+screenshot-diff can't cheaply assert.
 
-| #   | Scenario                                                                                                              | Unit |            E2E            |
-| --- | ------------------------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------: |
-| 317 | `Shift+E` switches the active tool to Erase while a node is open for editing                                                    |  ✅  | ✅ `vector-erase.spec.ts` |
-| 318 | Dragging the eraser across the middle of an edge splits it into two stubs (4→5 segments), leaving the node unsplit             |  ✅  | ✅ `vector-erase.spec.ts` |
-| 319 | Growing the brush with `]` erases a visibly wider stretch of the edge in one dab                                                |  ✅  | ✅ `vector-erase.spec.ts` |
-| 320 | A brush that fully covers a segment deletes it outright and prunes both its vertices                                            |  ✅  |            —             |
-| 321 | `[` / `]` clamp the eraser diameter to `[1, 100]` and are ignored for any other tool                                            |  ✅  |            —             |
-| 323 | The vector data is unchanged while the brush is still moving — only a preview is drawn                                          |  ✅  | ✅ `vector-erase.spec.ts` |
-| 324 | The whole recorded stroke commits in one `updateNode` on pointer-up, reverting as a single undo step                            |  ✅  |            —             |
+| #   | Scenario                                                                                                                                | Unit |               E2E               |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------------: |
+| 317 | `Shift+E` switches the active tool to Erase while a node is open for editing                                                            |  ✅  |    ✅ `vector-erase.spec.ts`    |
+| 318 | Dragging the eraser across the middle of an unfilled edge splits it into two stubs (4→5 segments), leaving the node unsplit             |  ✅  |    ✅ `vector-erase.spec.ts`    |
+| 319 | Growing the brush with `]` erases a visibly wider stretch of the edge in one dab                                                        |  ✅  |    ✅ `vector-erase.spec.ts`    |
+| 320 | A brush that fully covers a segment deletes it outright and prunes both its vertices                                                    |  ✅  |                —                |
+| 321 | `[` / `]` clamp the eraser diameter to `[1, 100]` and are ignored for any other tool                                                    |  ✅  |                —                |
+| 323 | The vector data is unchanged while the brush is still moving — only a preview is drawn                                                  |  ✅  |    ✅ `vector-erase.spec.ts`    |
+| 324 | The whole recorded stroke commits in one `updateNode` on pointer-up, reverting as a single undo step                                    |  ✅  |                —                |
+| 325 | A dip through a filled edge (in and back out) carves a real channel — new wall segments appear and the fill survives, it doesn't vanish |  ✅  |    ✅ `vector-erase.spec.ts`    |
+| 326 | With two filled nodes open at once, a brush drag that only dips into one touches just that one — the sibling stays byte-identical       |  ✅  | ✅ `vector-erase-multi.spec.ts` |
+| 327 | One continuous stroke that dips through both open filled nodes carves a channel in each, and both fills survive independently           |  ✅  | ✅ `vector-erase-multi.spec.ts` |
+| 328 | A single Undo after one stroke that erased through both open nodes reverts both back to their original filled state at once             |  ✅  | ✅ `vector-erase-multi.spec.ts` |
 
 ## Why so few scenarios get e2e coverage
 

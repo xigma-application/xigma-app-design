@@ -1,6 +1,7 @@
 import { RefObject } from 'react';
 
 // types
+import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
 import { TDraftRect, TPoint, TResizeHandle } from 'types/canvas';
 import { TVectorSegment } from 'types/design/types';
 
@@ -83,11 +84,6 @@ export type TRotateDragState = {
   startAngle: number;
 };
 
-// Dragging a lot of vector geometry at once (many selected vertices/segments) makes each committed
-// update expensive (full face/fill re-derivation) — throttling the dispatch to one per animation
-// frame, instead of one per native pointermove, caps how often that recompute has to happen without
-// changing what gets computed. `run` always holds the latest pending update; `frameId` is the
-// scheduled rAF (or null if none is pending) — see scheduleThrottledDispatch.ts/flushThrottledDispatch.ts.
 export type TThrottledDispatchState = { frameId: number | null; run: (() => void) | null };
 
 export type TVectorVertexDragState = {
@@ -174,7 +170,7 @@ export type TVectorCutHit = { nodeId: string; segmentId: string; t: number };
 export type TVectorCutDragState =
   { hit: TVectorCutHit | null; lineStart: TPoint; status: 'pending' } | { lineStart: TPoint; status: 'dividing' };
 
-export type TVectorEraseDragState = { lastPoint: TPoint };
+export type TVectorEraseDragState = { axisLock: TAxisLock | null; lastPoint: TPoint; shiftAnchor: TPoint | null };
 
 export type TSelectionToolRefs = {
   dragStateRef: RefObject<TDragState | null>;

@@ -4694,8 +4694,29 @@ like every other tolerance here). `[` / `]` adjust it, clamped to `[1, 100]` —
 undoable.
 
 **Preview + cursor:** `resolveVectorEraseHover.ts` tracks `eraseBrushCenterRef` on idle moves;
-`drawScene/drawVectorEraseBrush.ts` strokes a thin circle there via `drawEllipse`. Cursor class
-`erase` → `erase.png` at hotspot `(8, 24)`.
+`drawScene/drawVectorEraseBrush.ts` strokes a thin circle there via `drawEllipse`, in
+`DRAFT_FRAME_STROKE` (the same blue used for every other box/frame/selection outline in the app —
+originally a distinct grey, changed on request so the brush outline reads as "the app's own outline
+color" rather than a one-off). Cursor class `erase` → `erase.png` at hotspot `(8, 24)`.
+
+**Shift axis-lock, shared with Pencil's own.** Holding Shift mid-stroke constrains the brush path to
+the nearest cardinal (horizontal/vertical) axis — "lock on first move, hold until release", the same
+shape as Pencil's own Shift lock (`pencil-tool.md` §5). Rather than duplicate that logic, the two
+primitive functions it's built from — `getDominantAxis.ts` and `getAxisLockedPoint.ts` (plus their
+`TAxisLock` type and `AXIS_LOCK_THRESHOLD_PX` constant) — were pulled out of
+`useDrawPencilTool/utils/handlePointerMove/` up into `components/Design/Canvas/utils/`, a location
+both tools' hooks can import from, and Pencil's own files updated to import from the new shared
+location instead of a local copy. Erase's own state lives right on `TVectorEraseDragState`
+(`axisLock`, `shiftAnchor`, alongside the existing `lastPoint`) rather than as separate refs, since
+erase already carries one mutable drag-state object per stroke; `continueVectorEraseDrag.ts` freezes
+`shiftAnchor` to the last real point the first time Shift matters, locks `axisLock` once movement
+clears the threshold, and never re-evaluates the axis once locked. Unlike Pencil, erase needs no
+separate "fold the pending locked point into the tail" step on release — every point, locked or not,
+is pushed straight onto `vectorEraseStrokeRef` the moment it's computed (no chunked/simplified tail
+buffer sits in front of it), so releasing Shift (even via `useSelectionTool.ts`'s existing
+`onShiftKeyChange` synthetic-pointermove-on-key-change mechanism, extended to also fire while
+`vectorEraseDragRef.current` is set, not just `vectorHandleDragRef`) just resumes pushing raw points
+from whatever the real cursor position already is.
 
 ### The live preview is the real geometry, substituted in for rendering only — and it has to reach *two* layers, not one
 
@@ -4749,7 +4770,18 @@ nothing is drawn over it any more.
 `en.json`/`pl.json`.
 
 Unit: every new util has its own spec (100% coverage), including `subtractCapsuleFromVectorNetwork`'s
-own boundary-touching-bite, fully-interior-stroke, and fully-consumed-face scenarios.
+own boundary-touching-bite, fully-interior-stroke, and fully-consumed-face scenarios; the shared
+`getDominantAxis`/`getAxisLockedPoint` primitives have their specs alongside them in
+`components/Design/Canvas/utils/test/`.
+
+e2e: `vector-erase.spec.ts` — the `Shift+E` shortcut, a mid-edge drag on unfilled geometry (the old
+sever/drop parity case), brush-diameter growth via `]`, and the headline fix itself: a dip through a
+filled edge (in and back out) carves new wall segments while `filledFaceKeys` stays non-empty, proving
+the fill survives instead of vanishing. `vector-erase-multi.spec.ts` — with two filled nodes open for
+editing at once, one continuous stroke correctly scopes itself per node: a dip into only one leaves the
+other byte-identical; a dip into both carves and preserves both fills independently; a single Undo
+after the double-touch stroke reverts both nodes at once (one history gesture, not two), mirroring
+`vector-cut-multi.spec.ts`'s own scenario shape for Cut.
 
 **v1 limitations:** a rotated node is baked flat on erase; a stroke that sweeps back over the *same*
 segment from two separate approaches (dips away and returns) collapses to one span covering both,

@@ -5,9 +5,9 @@ import { selectActiveTool } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector, useAppStore } from 'store';
 
 // types
+import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { ToolName } from 'types/design/enums';
-import { TPencilAxis } from './utils/handlePointerMove/getAxisLockedPoint';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -22,7 +22,7 @@ export const useDrawPencilTool = (refs: TCanvasRefs): void => {
   const appStore = useAppStore();
   const committedPointsRef = useRef<TPoint[] | null>(null);
   const tailPointsRef = useRef<TPoint[] | null>(null);
-  const axisLockRef = useRef<TPencilAxis | null>(null);
+  const axisLockRef = useRef<TAxisLock | null>(null);
   const shiftAnchorRef = useRef<TPoint | null>(null);
   const rawPointsRef = useRef<TPoint[] | null>(null);
   const lastPointerClientPositionRef = useRef<TPoint | null>(null);

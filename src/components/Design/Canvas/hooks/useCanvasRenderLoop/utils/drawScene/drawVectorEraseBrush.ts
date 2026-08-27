@@ -1,5 +1,5 @@
 // others
-import { VECTOR_EDIT_OUTLINE_STROKE } from 'constant/canvas';
+import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 
 // types
 import { TPoint } from 'types/canvas';
@@ -27,7 +27,7 @@ export const drawVectorEraseBrush = (
       gl,
       program,
       buffer,
-      { height: radius * 2, stroke: VECTOR_EDIT_OUTLINE_STROKE, width: radius * 2, x: brushCenter.x - radius, y: brushCenter.y - radius },
+      { height: radius * 2, stroke: DRAFT_FRAME_STROKE, width: radius * 2, x: brushCenter.x - radius, y: brushCenter.y - radius },
       canvasWidth,
       canvasHeight,
       viewport,

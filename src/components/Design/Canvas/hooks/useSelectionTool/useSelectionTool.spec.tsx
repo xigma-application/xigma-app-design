@@ -814,6 +814,55 @@ describe('useSelectionTool behaviors', () => {
     expect(refs.snappedVectorHandleRef.current).toBeNull();
   });
 
+  it('should lock the Erase brush path to an axis while Shift is held, and resume freehand immediately once Shift is released', () => {
+    // mock
+    const nodeId = addVectorNode();
+    const canvasRef = createCanvasRef();
+    const refs = createCanvasRefs({ canvasRef });
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+    store.dispatch(setActiveTool(ToolName.erase));
+
+    // before
+    renderHook(() => useSelectionTool(refs), {
+      wrapper: ({ children }) => (
+        <Provider store={store}>
+          <ClassNamesProvider>{children}</ClassNamesProvider>
+        </Provider>
+      ),
+    });
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 3450, 700));
+    });
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 3480, 706));
+    });
+
+    // action — Shift held, movement dominates horizontally past the lock threshold
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 3510, 712, { shiftKey: true }));
+    });
+
+    // result — y snaps back to the anchor's 706
+    expect(refs.vectorEraseStrokeRef.current?.at(-1)).toEqual({ x: 3510, y: 706 });
+
+    // action — still holding Shift, drifts more vertically now, but the x lock holds
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 3520, 750, { shiftKey: true }));
+    });
+
+    expect(refs.vectorEraseStrokeRef.current?.at(-1)).toEqual({ x: 3520, y: 706 });
+
+    // action — Shift released, no further pointer movement
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Shift', shiftKey: false }));
+    });
+
+    // result — the real, unlocked pointer position is used immediately
+    expect(refs.vectorEraseStrokeRef.current?.at(-1)).toEqual({ x: 3520, y: 750 });
+  });
+
   it('should re-evaluate the Shape Builder hover immediately when Alt is pressed, without a further pointermove', () => {
     // mock — triangle spans x:3400-3500, y:700-800; hover the interior at (3450,750)
     const nodeId = addTriangleVectorNode();

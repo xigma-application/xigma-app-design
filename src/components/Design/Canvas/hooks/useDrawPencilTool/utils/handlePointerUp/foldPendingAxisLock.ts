@@ -5,7 +5,7 @@ import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { getAxisLockedPoint, type TPencilAxis } from '../handlePointerMove/getAxisLockedPoint';
+import { getAxisLockedPoint, type TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 
@@ -14,7 +14,7 @@ export const foldPendingAxisLock = (
   event: PointerEvent,
   viewport: TViewport,
   tail: TPoint[],
-  axisLockRef: RefObject<TPencilAxis | null>,
+  axisLockRef: RefObject<TAxisLock | null>,
   shiftAnchorRef: RefObject<TPoint | null>,
 ): void => {
   if (axisLockRef.current && shiftAnchorRef.current) {

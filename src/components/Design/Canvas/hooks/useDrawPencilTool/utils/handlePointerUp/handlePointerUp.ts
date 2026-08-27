@@ -9,8 +9,8 @@ import { selectViewport } from 'store/design/selectors';
 import { AppDispatch, AppStore } from 'store';
 
 // types
+import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TPencilAxis } from '../handlePointerMove/getAxisLockedPoint';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -26,7 +26,7 @@ export const handlePointerUp = (
   refs: TCanvasRefs,
   committedPointsRef: RefObject<TPoint[] | null>,
   tailPointsRef: RefObject<TPoint[] | null>,
-  axisLockRef: RefObject<TPencilAxis | null>,
+  axisLockRef: RefObject<TAxisLock | null>,
   shiftAnchorRef: RefObject<TPoint | null>,
   rawPointsRef: RefObject<TPoint[] | null>,
 ): void => {
@@ -35,9 +35,7 @@ export const handlePointerUp = (
 
   if (committed && tail) {
     const viewport = selectViewport(appStore.getState());
-
     foldPendingAxisLock(canvas, event, viewport, tail, axisLockRef, shiftAnchorRef);
-
     const finalPoints = commitPencilTail(tail, committed, PENCIL_SIMPLIFY_TOLERANCE_PX / viewport.zoom);
 
     commitPencilNodeIfLongEnough(dispatch, appStore, finalPoints);

@@ -22,6 +22,7 @@ import { cancelVectorSegmentBendDrag } from './utils/cancelVectorSegmentBendDrag
 import { handlePointerDown } from './utils/handlePointerDown/handlePointerDown';
 import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
+import { handleShiftKeyChange } from './utils/handleShiftKeyChange/handleShiftKeyChange';
 import { shouldUseCanvasCaretEditing } from '../../utils/shouldUseCanvasCaretEditing';
 
 export const useSelectionTool = (refs: TCanvasRefs): void => {
@@ -64,16 +65,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
     canvasRefs: TCanvasRefs,
     selectRefs: TSelectionToolRefs,
   ): void => {
-    if (event.key === 'Shift' && selectRefs.vectorHandleDragRef.current && lastPointerClientPositionRef.current) {
-      const { x, y } = lastPointerClientPositionRef.current;
-
-      onPointerMove(
-        canvas,
-        new PointerEvent('pointermove', { clientX: x, clientY: y, pointerId: -1, shiftKey: event.shiftKey }),
-        canvasRefs,
-        selectRefs,
-      );
-    }
+    handleShiftKeyChange(canvas, event, canvasRefs, selectRefs, lastPointerClientPositionRef.current, onPointerMove);
   };
 
   const onAltKeyChange = (

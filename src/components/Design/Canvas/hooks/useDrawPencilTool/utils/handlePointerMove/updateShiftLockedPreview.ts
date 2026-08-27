@@ -5,15 +5,15 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
 
 // utils
-import { getAxisLockedPoint, TPencilAxis } from './getAxisLockedPoint';
-import { getDominantAxis } from './getDominantAxis';
+import { getAxisLockedPoint, TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
+import { getDominantAxis } from 'components/Design/Canvas/utils/getDominantAxis';
 import { simplifyPencilPoints } from '../simplifyPencilPoints';
 
 export const updateShiftLockedPreview = (
   refs: TCanvasRefs,
   committed: TPoint[],
   tail: TPoint[],
-  axisLockRef: RefObject<TPencilAxis | null>,
+  axisLockRef: RefObject<TAxisLock | null>,
   shiftAnchorRef: RefObject<TPoint | null>,
   currentPoint: TPoint,
   zoom: number,

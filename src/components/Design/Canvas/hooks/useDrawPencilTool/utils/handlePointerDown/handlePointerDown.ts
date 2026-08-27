@@ -9,8 +9,8 @@ import { AppDispatch, AppStore } from 'store';
 
 // types
 import { MouseButton } from 'types/enums';
+import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TPencilAxis } from '../handlePointerMove/getAxisLockedPoint';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -25,7 +25,7 @@ export const handlePointerDown = (
   refs: TCanvasRefs,
   committedPointsRef: RefObject<TPoint[] | null>,
   tailPointsRef: RefObject<TPoint[] | null>,
-  axisLockRef: RefObject<TPencilAxis | null>,
+  axisLockRef: RefObject<TAxisLock | null>,
   shiftAnchorRef: RefObject<TPoint | null>,
   rawPointsRef: RefObject<TPoint[] | null>,
 ): void => {

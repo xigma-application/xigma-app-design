@@ -5,7 +5,7 @@ import { setSelection } from 'store/design/slice';
 import { store } from 'store';
 
 // types
-import { TPencilAxis } from '../../handlePointerMove/getAxisLockedPoint';
+import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -25,7 +25,7 @@ const pointerEvent = (x: number, y: number, options: Partial<PointerEventInit> =
   new PointerEvent('pointerdown', { button: 0, clientX: x, clientY: y, pointerId: 1, ...options });
 
 const createPointsRef = (): RefObject<TPoint[] | null> => ({ current: null });
-const createAxisLockRef = (): RefObject<TPencilAxis | null> => ({ current: null });
+const createAxisLockRef = (): RefObject<TAxisLock | null> => ({ current: null });
 const createShiftAnchorRef = (): RefObject<TPoint | null> => ({ current: null });
 
 describe('handlePointerDown', () => {

@@ -9,7 +9,7 @@ import { TPoint } from 'types/canvas';
 
 // utils
 import { commitPencilTail } from '../commitPencilTail';
-import { getAxisLockedPoint, TPencilAxis } from './getAxisLockedPoint';
+import { getAxisLockedPoint, TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
 import { getPathLength } from '../getPathLength';
 import { simplifyPencilPoints } from '../simplifyPencilPoints';
 
@@ -17,7 +17,7 @@ export const advancePencilTail = (
   refs: TCanvasRefs,
   committedPointsRef: RefObject<TPoint[] | null>,
   tailPointsRef: RefObject<TPoint[] | null>,
-  axisLockRef: RefObject<TPencilAxis | null>,
+  axisLockRef: RefObject<TAxisLock | null>,
   shiftAnchorRef: RefObject<TPoint | null>,
   committed: TPoint[],
   tail: TPoint[],

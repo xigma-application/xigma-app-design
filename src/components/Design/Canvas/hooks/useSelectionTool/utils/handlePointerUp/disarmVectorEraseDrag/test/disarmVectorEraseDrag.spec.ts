@@ -77,7 +77,9 @@ describe('disarmVectorEraseDrag', () => {
         ],
       },
     });
-    const selectionRefs = createSelectionToolRefs({ vectorEraseDragRef: { current: { lastPoint: { x: 60, y: 0 } } } });
+    const selectionRefs = createSelectionToolRefs({
+      vectorEraseDragRef: { current: { axisLock: null, lastPoint: { x: 60, y: 0 }, shiftAnchor: null } },
+    });
 
     // action
     disarmVectorEraseDrag(canvas, pointerUp(), store.dispatch, canvasRefs, selectionRefs, setClassName);

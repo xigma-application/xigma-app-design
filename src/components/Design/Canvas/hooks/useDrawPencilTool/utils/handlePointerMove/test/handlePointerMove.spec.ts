@@ -4,7 +4,7 @@ import { RefObject } from 'react';
 import { store } from 'store';
 
 // types
-import { TPencilAxis } from '../getAxisLockedPoint';
+import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -23,7 +23,7 @@ const pointerEvent = (x: number, y: number, options: Partial<PointerEventInit> =
   new PointerEvent('pointermove', { clientX: x, clientY: y, pointerId: 1, ...options });
 
 const createPointsRef = (value: TPoint[] | null): RefObject<TPoint[] | null> => ({ current: value });
-const createAxisLockRef = (value: TPencilAxis | null = null): RefObject<TPencilAxis | null> => ({ current: value });
+const createAxisLockRef = (value: TAxisLock | null = null): RefObject<TAxisLock | null> => ({ current: value });
 const createShiftAnchorRef = (value: TPoint | null = null): RefObject<TPoint | null> => ({ current: value });
 
 describe('handlePointerMove', () => {

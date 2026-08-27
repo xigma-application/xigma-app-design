@@ -2105,7 +2105,7 @@ test('shift-clicking a second, adjacent filled face keeps its shared divider ver
   await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
     const { addNode, setActiveTool, setVectorEditingNodeIds } = await import('/src/store/design/slice.ts');
-    const { deriveVectorFaces } = await import('/src/utils/canvas/vectorNetwork/deriveVectorFaces.ts');
+    const { deriveVectorFaces } = await import('/src/utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces.ts');
     const { getVectorFillLoopKey } = await import('/src/utils/canvas/vectorNetwork/getVectorFillLoopKey.ts');
 
     const segments = {

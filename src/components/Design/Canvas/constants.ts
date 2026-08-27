@@ -20,6 +20,7 @@ export const DRAWING_TOOLS: ToolName[] = [
   ToolName.text,
   ToolName.textOnPath,
 ];
+export const AXIS_LOCK_THRESHOLD_PX = 4;
 export const ELLIPSE_ARC_GUIDE_LINE_WIDTH = 1;
 export const ELLIPSE_ARC_LAP_SNAP_DEGREES = 3;
 export const ELLIPSE_FILL = '#D9D9D9';
@@ -36,7 +37,6 @@ export const NUDGE_STEP = 1;
 export const NUDGE_STEP_LARGE = 10;
 export const PATH_NAME = 'Path';
 export const PATH_START_OFFSET_TOP = 0.75;
-export const PENCIL_AXIS_LOCK_THRESHOLD_PX = 4;
 export const PENCIL_CHUNK_LENGTH_PX = 30;
 export const PENCIL_NAME = 'Pencil';
 export const PENCIL_SIMPLIFY_TOLERANCE_PX = 4;

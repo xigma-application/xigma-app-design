@@ -1374,27 +1374,47 @@ Drobniejsze, ale zauważalne różnice względem Figmy, niepowiązane z żadnym 
       bramkę co przycisk/dropdown (`isDispatchToolBlocked.ts`). Pełny opis:
       `.claude/docs/vector-network.md` §63, e2e: `e2e/pages/design/vector-variable-width.spec.ts`.
 - [x] **Erase tool** — okrągły pędzel w `VectorEditToolbar` obok Cut (`ToolName.erase`, `Shift+E`).
-      Przeciąganie po sieci przecina każdy dotknięty segment w miejscach wejścia/wyjścia okręgu
-      pędzla i kasuje tylko przykryty kawałek, zostawiając nowe, edytowalne wierzchołki w punktach
-      cięcia (jak Figma: "adds new editable vector points along the erased area"); segmenty w całości
-      przykryte kasowane w całości, osierocone wierzchołki usuwane. Węzeł **nigdy** nie jest dzielony
-      na osobne warstwy (parytet z Figmą) — dziura w wypełnieniu to efekt uboczny re-derywacji faces
-      (§2), nie boolean. Geometria: `utils/canvas/vectorNetwork/eraseVectorNetwork/` (czyste funkcje —
-      `getSegmentEraseInterval` densyfikuje spłaszczony polyline i testuje próbki względem kapsuły
-      pędzla; `applySegmentErase` reużywa `severVectorSegmentAtPoint`; `eraseVectorNetworkAlongCapsule`
-      składa to nad wszystkimi segmentami + jeden `getRemainingVertices`; `eraseVectorNetworkAlongPath`
-      składa kapsuły nad całą nagraną ścieżką pędzla). **Wektor NIE jest modyfikowany w czasie
-      przeciągania** (jak Figma — poprawka po prośbie usera): drag tylko nagrywa ścieżkę
-      (`vectorEraseStrokeRef`) i rysuje podgląd (`drawVectorEraseStrokePreview.ts` — pasmo w kolorze
-      tła "urywa" stroke, cienkie linie segmentów zostają widoczne pod spodem), a realny
-      `commitVectorErase` + `updateNode` leci raz, na pointer-up. Dzięki temu cały pociąg to
-      naprawdę jeden krok undo. Narzędzie **zostaje** aktywne po pociągu (nie wraca do Move jak Cut).
-      Średnica pędzla: `eraserDiameterRef` (canvas ref, domyślnie 10 px ekranu, `[`/`]` zmienia,
-      clamp `[1,100]`, `adjustEraserDiameter.ts` w `onKeyDown`) — sesyjna, nie undo. Podgląd kursora:
-      cienki okrąg `drawVectorEraseBrush.ts` + `resolveVectorEraseHover.ts` wymusza kursor
-      `erase.png` (hotspot 8,24). Ikona `EraseTool` dorejestrowana w `xigma-app-shared`. Pełny opis:
-      `.claude/docs/vector-network.md` §66, e2e:
-      `e2e/pages/design/vector-erase.spec.ts`.
+      Przeciąganie pędzla po sieci **odejmuje booleanowo** zamiatany kształt kapsuły od wektora: tam
+      gdzie pędzel przejedzie po granicy wypełnionego face'a, wypełnienie zostaje, a w środku pojawia
+      się realne wcięcie (nowe ścianki obrysowują oba boki zamiecionej ścieżki); tam gdzie pędzel
+      przejedzie po segmencie spoza jakiegokolwiek fillu — czysta przerwa, jak wcześniej. Węzeł
+      **nigdy** nie jest dzielony na osobne warstwy (parytet z Figmą — przecięcie na wylot nie tworzy
+      drugiego layera). v1 miało model „przetnij dotknięty segment na wejściu/wyjściu i wyrzuć
+      przykryty kawałek" — sypał się gdy wyrzucony kawałek był brzegiem wypełnionego face'a
+      (`getVectorFillLoopPoints` nie umie obejść otwartej pętli → znikał **cały** fill, nie lokalny
+      gryz; zgłoszone wprost). Nowa geometria (`utils/canvas/vectorNetwork/eraseVectorNetwork/`, czyste
+      funkcje) reużywa silnika planarnego Pena: `buildCapsuleNetwork` buduje kapsułę (suma Minkowskiego
+      ścieżki pędzla i dysku `radius`) jako **zwykłe nowe segmenty**, a
+      `subtractCapsuleFromVectorNetwork` scala je z węzłem, puszcza `planarizeVectorNetwork` +
+      `deriveVectorFaces` (§2) i klasyfikuje każdy kawałek po punkcie środkowym (kawałek z oryginału
+      zostaje gdy środek jest **poza** kapsułą; kawałek z kapsuły zostaje tylko gdy środek jest
+      **wewnątrz** któregoś oryginalnego wypełnionego face'a — stąd ścianka pojawia się wyłącznie tam
+      gdzie wcina się w fill). `MIN_FACE_AREA` + `isEntirelyCapsule` odsiewają sliver-face'y i pływające
+      pętle; `PHASE_OFFSET` (0.0137 rad) na próbkach okręgu/łuku omija zbieżność wierzchołka kapsuły z
+      prawdziwym punktem przecięcia na krawędzi osiowo-równoległej. **Wektor NIE jest modyfikowany w
+      czasie przeciągania** (jak Figma — poprawka po prośbie usera): drag tylko nagrywa ścieżkę
+      (`vectorEraseStrokeRef`), a `getErasePreviewNodes.ts` liczy `subtractCapsuleFromVectorNetwork` co
+      klatkę i podstawia wynikowy węzeł do renderu — bez dispatchu — i to na **dwóch** warstwach:
+      wypełnienie oraz cienki szkielet edycji (`getEraseAwareNodesById.ts`, inaczej szkielet maskował
+      cięcie na niewypełnionej ścieżce). Render-only pin koloru
+      (`TVectorNode.fillColorOverrideByKey`, pole zawsze opcjonalne) trzyma hue face'a stabilne — bez
+      niego hash koloru skakał co klatkę, bo skład brzegowych segmentów rośnie z każdą klatką. Realny
+      `commitVectorErase` + jeden `updateNode` (`filledFaceKeys`/`segments`/`vertices`) leci raz, na
+      pointer-up → cały pociąg to jeden krok undo. Narzędzie **zostaje** aktywne po pociągu (nie wraca
+      do Move jak Cut). Trzymanie **Shift** w czasie przeciągania blokuje pociąg do prostej osiowej
+      linii — wspólne `getAxisLockedPoint`/`getDominantAxis` z Pencilem (przeniesione do
+      `components/Design/Canvas/utils/`); `handleShiftKeyChange` re-forwarduje syntetyczny `pointermove`
+      na wciśnięcie/puszczenie Shift, więc lock łapie/puszcza bez ruchu myszą. Średnica pędzla:
+      `eraserDiameterRef` (`TCanvasRefs`, domyślnie `ERASER_DEFAULT_DIAMETER_PX = 10` px ekranu, na
+      świat przez `/zoom`, `[`/`]` zmienia, clamp `[1,100]`, `adjustEraserDiameter.ts` w `onKeyDown`
+      pod `activeTool === erase`) — sesyjna, nie undo. Kursor `erase` → `erase.png` (hotspot 8,24),
+      podgląd to cienki okrąg (`drawVectorEraseBrush.ts` + `resolveVectorEraseHover.ts`). Ikona
+      `EraseTool` z `@xigma/components`. **Ograniczenia v1:** rotowany węzeł jest spłaszczany na erase;
+      pociąg wracający po tym samym segmencie z dwóch osobnych podejść scala się w jedno pasmo;
+      wymazanie czystego wnętrza fillu (bez dotknięcia brzegu) daje gołą geometrię, nie prawdziwą
+      dziurę (brak współdzielenia koloru pętli); brak panelu w prawym sidebarze. Pełny opis:
+      `.claude/docs/vector-network.md` §66, e2e: `e2e/pages/design/vector-erase.spec.ts`,
+      `e2e/pages/design/vector-erase-multi.spec.ts`.
 - [ ] menu kontekstowe (prawy klik) na node'ach i na pustym canvasie — Copy/Paste, Duplicate,
       Bring to front/Send to back, Delete itd. — dziś nie istnieje w ogóle
 - [ ] kontrolka zoomu w rogu canvasu (aktualny % + dropdown: Zoom to fit / Zoom to selection /

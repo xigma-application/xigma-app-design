@@ -6,7 +6,7 @@ import { undo } from 'store/history/actions';
 import { store } from 'store';
 
 // types
-import { TPencilAxis } from '../../handlePointerMove/getAxisLockedPoint';
+import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
 import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
@@ -30,7 +30,7 @@ const downEvent = (options: Partial<PointerEventInit> = {}): PointerEvent =>
   new PointerEvent('pointerdown', { button: 0, clientX: 0, clientY: 0, pointerId: 1, ...options });
 
 const createPointsRef = (value: TPoint[] | null): RefObject<TPoint[] | null> => ({ current: value });
-const createAxisLockRef = (value: TPencilAxis | null = null): RefObject<TPencilAxis | null> => ({ current: value });
+const createAxisLockRef = (value: TAxisLock | null = null): RefObject<TAxisLock | null> => ({ current: value });
 const createShiftAnchorRef = (value: TPoint | null = null): RefObject<TPoint | null> => ({ current: value });
 
 describe('handlePointerUp', () => {

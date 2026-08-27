@@ -18,7 +18,7 @@ export const armVectorEraseOnPointerDown = ({
   const vectorEditingNodeIds = selectVectorEditingNodeIds(store.getState());
 
   if (activeTool === ToolName.erase && vectorEditingNodeIds.length > 0) {
-    selectionRefs.vectorEraseDragRef.current = { lastPoint: point };
+    selectionRefs.vectorEraseDragRef.current = { axisLock: null, lastPoint: point, shiftAnchor: null };
     canvasRefs.vectorEraseStrokeRef.current = [point];
     canvas.setPointerCapture(event.pointerId);
     setClassName('erase');

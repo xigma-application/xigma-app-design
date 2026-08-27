@@ -13,7 +13,7 @@ const injectSplitRectangle = (page: Page, offsetX = 0, offsetY = 0, filled = fal
     async ({ filled, offsetX, offsetY }) => {
       const { store } = await import('/src/store/index.ts');
       const { addNode } = await import('/src/store/design/slice.ts');
-      const { deriveVectorFaces } = await import('/src/utils/canvas/vectorNetwork/deriveVectorFaces.ts');
+      const { deriveVectorFaces } = await import('/src/utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces.ts');
       const { getVectorFillLoopKey } = await import('/src/utils/canvas/vectorNetwork/getVectorFillLoopKey.ts');
 
       const segments = {
@@ -279,7 +279,7 @@ test('dragging across two overlapping (crossing) rectangles merges all 3 resulti
 
   const faceCount = await page.evaluate(async (id) => {
     const { store } = await import('/src/store/index.ts');
-    const { deriveVectorFaces } = await import('/src/utils/canvas/vectorNetwork/deriveVectorFaces.ts');
+    const { deriveVectorFaces } = await import('/src/utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces.ts');
     const node = store.getState().design.nodes[id];
 
     return deriveVectorFaces({ ...node, filledFaceKeys: [] }).length;

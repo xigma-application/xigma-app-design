@@ -8,8 +8,8 @@ import { selectViewport } from 'store/design/selectors';
 import { AppStore } from 'store';
 
 // types
+import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TPencilAxis } from './getAxisLockedPoint';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -26,7 +26,7 @@ export const handlePointerMove = (
   refs: TCanvasRefs,
   committedPointsRef: RefObject<TPoint[] | null>,
   tailPointsRef: RefObject<TPoint[] | null>,
-  axisLockRef: RefObject<TPencilAxis | null>,
+  axisLockRef: RefObject<TAxisLock | null>,
   shiftAnchorRef: RefObject<TPoint | null>,
   rawPointsRef: RefObject<TPoint[] | null>,
 ): void => {

@@ -1575,7 +1575,7 @@ describe('armVectorEraseOnPointerDown', () => {
 
     // result
     expect(armVectorEraseOnPointerDown(ctx)).toBe(true);
-    expect(ctx.selectionRefs.vectorEraseDragRef.current).toEqual({ lastPoint: { x: 50, y: 0 } });
+    expect(ctx.selectionRefs.vectorEraseDragRef.current).toEqual({ axisLock: null, lastPoint: { x: 50, y: 0 }, shiftAnchor: null });
     expect(ctx.canvasRefs.vectorEraseStrokeRef.current).toEqual([{ x: 50, y: 0 }]);
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
     expect(ctx.setClassName).toHaveBeenCalledWith('erase');

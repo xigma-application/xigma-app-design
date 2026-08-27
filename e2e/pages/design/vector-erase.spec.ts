@@ -27,6 +27,16 @@ const readEditedVectorNode = (page: import('@playwright/test').Page): Promise<{ 
     return { rootOrder: state.design.rootOrder.length, segmentCount: Object.keys(state.design.nodes[id].segments).length };
   });
 
+const readFillState = (page: import('@playwright/test').Page): Promise<{ filledFaceKeys: string[]; segmentCount: number }> =>
+  page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const state = store.getState();
+    const [id] = state.design.vectorEditingNodeIds;
+    const node = state.design.nodes[id] as { filledFaceKeys?: string[]; segments: Record<string, unknown> };
+
+    return { filledFaceKeys: node.filledFaceKeys ?? [], segmentCount: Object.keys(node.segments).length };
+  });
+
 test("pressing 'Shift+E' switches the active tool to Erase while a node is open for editing", async ({ page }) => {
   const designPage = new DesignPage(page);
 
@@ -121,4 +131,36 @@ test('a wider brush (grown with "]") erases more of the edge in one pass', async
   expect(after.segmentCount).toBe(5);
   // a ~30px brush leaves a noticeably wider gap than the 10px default would
   expect(gapWidth).toBeGreaterThan(15);
+});
+
+test('erasing a dip through a filled edge carves a channel — the fill survives instead of vanishing', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-erase-preserves-fill-on-boundary-bite');
+  await expect(designPage.canvas).toBeVisible();
+
+  await drawClosedSquare(designPage);
+  await designPage.selectVectorEditMoveTool();
+  await page.keyboard.press('Shift+B');
+  await designPage.click(950, 350); // paint the whole square
+  await designPage.selectVectorEditMoveTool();
+
+  const before = await readFillState(page);
+  expect(before.filledFaceKeys.length).toBeGreaterThan(0);
+
+  await page.keyboard.press('Shift+E');
+  // a real boolean subtract: dip the brush down through the top edge into the interior and back out,
+  // the same "U-shaped channel" reported live — a sever-and-drop model would delete the whole fill here
+  await designPage.dragEraseBrush([
+    { x: 950, y: 285 },
+    { x: 950, y: 340 },
+    { x: 950, y: 285 },
+  ]);
+
+  const after = await readFillState(page);
+
+  // the fill survives the boundary bite instead of disappearing …
+  expect(after.filledFaceKeys.length).toBeGreaterThan(0);
+  // … and new wall segments were actually carved along the channel, not a no-op
+  expect(after.segmentCount).toBeGreaterThan(4);
 });
