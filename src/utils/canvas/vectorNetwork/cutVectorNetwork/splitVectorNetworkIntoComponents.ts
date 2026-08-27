@@ -15,16 +15,20 @@ export const splitVectorNetworkIntoComponents = (network: TVectorNetworkComponen
 
     if (isUnvisited) {
       const componentVertexIds = findConnectedVertexIds(vertexId, network.segments, adjacency);
+      const segmentIds = new Set<string>();
 
-      componentVertexIds.forEach((id) => visitedVertexIds.add(id));
+      componentVertexIds.forEach((id) => {
+        visitedVertexIds.add(id);
+        (adjacency.get(id) ?? []).forEach((segmentId) => segmentIds.add(segmentId));
+      });
 
-      const vertices = Object.fromEntries(Object.entries(network.vertices).filter(([id]) => componentVertexIds.has(id)));
-      const segments = Object.fromEntries(
-        Object.entries(network.segments).filter(([, segment]) => componentVertexIds.has(segment.startId)),
-      );
-      const vertexHandleModes = Object.fromEntries(Object.entries(network.vertexHandleModes).filter(([id]) => id in vertices));
+      if (segmentIds.size > 0) {
+        const vertices = Object.fromEntries([...componentVertexIds].map((id) => [id, network.vertices[id]]));
+        const segments = Object.fromEntries([...segmentIds].map((id) => [id, network.segments[id]]));
+        const vertexHandleModes = Object.fromEntries(
+          [...componentVertexIds].filter((id) => id in network.vertexHandleModes).map((id) => [id, network.vertexHandleModes[id]]),
+        );
 
-      if (Object.keys(segments).length > 0) {
         components.push({ segments, vertexHandleModes, vertices });
       }
     }

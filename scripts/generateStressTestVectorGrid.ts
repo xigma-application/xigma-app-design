@@ -4,10 +4,6 @@ import { nanoid } from '@reduxjs/toolkit';
 import { NodeType } from 'types/design/enums';
 import { TVectorNode, TVectorSegment, TVectorVertex } from 'types/design/types';
 
-// utils
-import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
-import { getVectorFillPieceKey } from 'utils/canvas/vectorNetwork/getVectorFillPieceKey';
-
 const SQUARE_SIZE = 40;
 const GAP = 20;
 const COLUMNS = 10;
@@ -15,7 +11,6 @@ const COLUMNS = 10;
 export const generateStressTestVectorGrid = (count = 100): TVectorNode => {
   const vertices: Record<string, TVectorVertex> = {};
   const segments: Record<string, TVectorSegment> = {};
-  const filledFaceKeys: string[] = [];
 
   for (let i = 0; i < count; i += 1) {
     const originX = (i % COLUMNS) * (SQUARE_SIZE + GAP);
@@ -35,27 +30,17 @@ export const generateStressTestVectorGrid = (count = 100): TVectorNode => {
       return id;
     });
 
-    const segmentIds = vertexIds.map((startId, index) => {
+    vertexIds.forEach((startId, index) => {
       const endId = vertexIds[(index + 1) % vertexIds.length];
       const id = nanoid();
 
       segments[id] = { endId, id, startId, tangentEnd: null, tangentStart: null };
-
-      return id;
     });
-
-    filledFaceKeys.push(
-      getVectorFillLoopKey(
-        segmentIds.map((segmentId) =>
-          getVectorFillPieceKey(segmentId, { end: `v:${segments[segmentId].endId}`, start: `v:${segments[segmentId].startId}` }),
-        ),
-      ),
-    );
   }
 
   return {
     fillColor: '#D9D9D9',
-    filledFaceKeys,
+    filledFaceKeys: [],
     id: nanoid(),
     name: 'Vector',
     parentId: null,

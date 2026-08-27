@@ -57,4 +57,33 @@ describe('collectClosingPairKeys', () => {
     // result
     expect(collectClosingPairKeys([], [], [], {})).toEqual(new Set());
   });
+
+  it("should still pair a face's open ends when one of its own real segments has no crossings at all", () => {
+    // before — face references segA (has a crossing) and segB (never crossed by anything)
+    const result = collectClosingPairKeys(
+      ['segA[x|y],segB[x|y]'],
+      [
+        { lineT: 0, point: { x: 0, y: 0 }, segmentId: 'segA', t: 0.5 },
+        { lineT: 1, point: { x: 100, y: 0 }, segmentId: 'segA', t: 0.5 },
+      ],
+      ['a', 'b'],
+      { a: 0, b: 1 },
+    );
+
+    // result
+    expect(result).toEqual(new Set(['a|b']));
+  });
+
+  it('should ignore a crossing lineT that has no open-end vertex recorded at that same position', () => {
+    // before — segC has a crossing at lineT 5, but no open end sits at that position
+    const result = collectClosingPairKeys(
+      ['segC[x|y]'],
+      [{ lineT: 5, point: { x: 0, y: 0 }, segmentId: 'segC', t: 0.5 }],
+      ['a', 'b'],
+      { a: 0, b: 1 },
+    );
+
+    // result — segC's own lineT never matches any open end, so nothing can pair
+    expect(result).toEqual(new Set());
+  });
 });
