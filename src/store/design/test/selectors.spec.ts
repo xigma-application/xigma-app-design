@@ -17,6 +17,7 @@ import {
   selectLastTextTool,
   selectNodes,
   selectOrderedNodes,
+  selectPaintColor,
   selectPenActiveVertexId,
   selectSelectedIds,
   selectSelectedNodes,
@@ -61,6 +62,7 @@ const state = {
     lastShapeTool: ToolName.ellipse,
     lastTextTool: ToolName.textOnPath,
     nodes: { [node.id]: node },
+    paintColor: '#d9d9d9',
     penActiveVertexId: 'vertex-1',
     rootOrder: [node.id],
     selectedIds: [node.id],
@@ -148,6 +150,11 @@ describe('design selectors', () => {
   it('should select the last text tool', () => {
     // result
     expect(selectLastTextTool(state)).toBe(ToolName.textOnPath);
+  });
+
+  it('should select the paint color', () => {
+    // result
+    expect(selectPaintColor(state)).toBe('#d9d9d9');
   });
 
   it('should select the pen active vertex id', () => {

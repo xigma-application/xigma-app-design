@@ -1,0 +1,29 @@
+.VectorEditPaintTool {
+  &__trigger {
+    align-items: center;
+    background-color: var(--color-blue-1);
+    border: none;
+    border-radius: var(--radius-medium);
+    cursor: pointer;
+    display: flex;
+    height: 100%;
+    padding: 0;
+
+    &:hover {
+      background-color: var(--color-blue-1);
+    }
+  }
+
+  &__swatch {
+    height: 14px;
+    width: 14px;
+  }
+
+  &__swatch-wrapper {
+    align-items: center;
+    display: flex;
+    height: 24px;
+    justify-content: center;
+    width: 24px;
+  }
+}

@@ -3,6 +3,8 @@ import { NodeType } from 'types/design/enums';
 import { TVectorNode } from 'types/design/types';
 
 // utils
+import { deriveVectorFaces } from '../../deriveVectorFaces/deriveVectorFaces';
+import { getVectorFillLoopKey } from '../../getVectorFillLoopKey';
 import { groupCrossingVectorNodes } from '../groupCrossingVectorNodes';
 
 const buildRectangleNode = (id: string, x: number, y: number, width: number, height: number): TVectorNode => ({
@@ -55,6 +57,23 @@ describe('groupCrossingVectorNodes', () => {
     expect(groups[0].nodeIds).toEqual(['a', 'b']); // a first — lowest in the input (rootOrder) order
     expect(Object.keys(groups[0].combinedNode.segments).length).toBeGreaterThan(8); // real crossings split pieces off
     expect(groups[0].combinedNode.rotation).toBe(0);
+  });
+
+  it('should union both members’ own picked fill colors into the combined node, not just the survivor’s', () => {
+    // mock — each rectangle is individually filled with its own picked color
+    const bareA = buildRectangleNode('a', 0, 0, 100, 100);
+    const bareB = buildRectangleNode('b', 50, 50, 100, 100);
+    const [faceA] = deriveVectorFaces(bareA);
+    const [faceB] = deriveVectorFaces(bareB);
+    const keyA = getVectorFillLoopKey(faceA.pieceKeys);
+    const keyB = getVectorFillLoopKey(faceB.pieceKeys);
+    const nodeA = { ...bareA, fillColorOverrideByKey: { [keyA]: '#ff0000' }, filledFaceKeys: [keyA] };
+    const nodeB = { ...bareB, fillColorOverrideByKey: { [keyB]: '#00ff00' }, filledFaceKeys: [keyB] };
+
+    // result
+    const groups = groupCrossingVectorNodes([nodeA, nodeB]);
+
+    expect(groups[0].combinedNode.fillColorOverrideByKey).toEqual({ [keyA]: '#ff0000', [keyB]: '#00ff00' });
   });
 
   it('should return two independent singleton groups for two nodes that never cross', () => {

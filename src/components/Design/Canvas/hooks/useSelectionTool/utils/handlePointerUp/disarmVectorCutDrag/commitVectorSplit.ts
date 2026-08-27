@@ -8,7 +8,9 @@ import { TVectorNode } from 'types/design/types';
 // utils
 import { bakeVectorNodeRotation } from 'components/Design/Canvas/utils/bakeVectorNodeRotation';
 import { commitVectorCutComponents } from './commitVectorDivide/commitVectorCutComponents';
+import { getEffectiveVectorFillColor } from 'utils/canvas/vectorNetwork/getEffectiveVectorFillColor';
 import { resolveSurvivingFilledFaceKeys } from 'utils/canvas/vectorNetwork/cutVectorNetwork/resolveSurvivingFilledFaceKeys';
+import { resolveVectorCutFilledFaceKeys } from 'utils/canvas/vectorNetwork/cutVectorNetwork/materializeVectorNetworkCut/resolveVectorCutFilledFaceKeys';
 import { severVectorSegmentAtPoint } from 'utils/canvas/vectorNetwork/cutVectorNetwork/severVectorSegmentAtPoint';
 import { splitVectorNetworkIntoComponents } from 'utils/canvas/vectorNetwork/cutVectorNetwork/splitVectorNetworkIntoComponents';
 
@@ -29,15 +31,31 @@ export const commitVectorSplit = (dispatch: AppDispatch, node: TVectorNode, segm
       vertices: bakedSevered.vertices,
     });
 
-    const newNodeIds = commitVectorCutComponents(dispatch, node, bakedComponents, (component) => ({
-      ...component,
-      filledFaceKeys: resolveSurvivingFilledFaceKeys(node.filledFaceKeys, component),
-    }));
+    const newNodeIds = commitVectorCutComponents(dispatch, node, bakedComponents, (component) => {
+      const filledFaceKeys = resolveSurvivingFilledFaceKeys(node.filledFaceKeys, component);
+
+      return {
+        ...component,
+        fillColorOverrideByKey: Object.fromEntries(filledFaceKeys.map((key) => [key, getEffectiveVectorFillColor(node, key)])),
+        filledFaceKeys,
+      };
+    });
 
     return [node.id, ...newNodeIds];
   }
 
-  dispatch(updateNode({ changes: severed, id: node.id }));
+  const resultNode = { ...node, segments: severed.segments, vertices: severed.vertices };
+  const survivingFaces = resolveVectorCutFilledFaceKeys(resultNode, node, new Set());
+  const fillColorOverrideByKey = Object.fromEntries(
+    survivingFaces.map(({ key, originalKey }) => [key, getEffectiveVectorFillColor(node, originalKey)]),
+  );
+
+  dispatch(
+    updateNode({
+      changes: { ...severed, fillColorOverrideByKey, filledFaceKeys: survivingFaces.map((face) => face.key) },
+      id: node.id,
+    }),
+  );
 
   return [node.id];
 };

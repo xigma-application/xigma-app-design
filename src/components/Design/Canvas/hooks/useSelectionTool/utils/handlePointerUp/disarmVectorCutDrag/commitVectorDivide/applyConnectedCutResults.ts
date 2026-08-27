@@ -6,7 +6,7 @@ import { AppDispatch } from 'store';
 import { TVectorConnectedCutResult } from './types';
 
 export const applyConnectedCutResults = (dispatch: AppDispatch, connectedCutResults: TVectorConnectedCutResult[]): void => {
-  connectedCutResults.forEach(({ filledFaceKeys, node, segments, vertices }) => {
-    dispatch(updateNode({ changes: { filledFaceKeys, rotation: 0, segments, vertices }, id: node.id }));
+  connectedCutResults.forEach(({ fillColorOverrideByKey, filledFaceKeys, node, segments, vertices }) => {
+    dispatch(updateNode({ changes: { fillColorOverrideByKey, filledFaceKeys, rotation: 0, segments, vertices }, id: node.id }));
   });
 };

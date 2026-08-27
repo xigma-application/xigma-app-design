@@ -4790,6 +4790,165 @@ face's boundary produces bare unfilled geometry rather than a real hole (the fil
 above); no right-sidebar weight/shape panel; the brushed path uses straight rails + round caps, not a
 fully round-jointed capsule union at interior bends.
 
+## 67. Paint gets a real color — the ColorPicker wired to the tool button, `fillColorOverrideByKey` now set on click instead of only by conversion utils
+
+Until now the hash-derived hue from `getVectorFillColorForLoopKey.ts` (§51) was the *only* color a
+freshly-painted face ever got — `armVectorPaintOnPointerDown.ts` toggled `filledFaceKeys` but never
+touched `fillColorOverrideByKey`, so every click looked like it picked a random color. The ColorPicker
+component (built standalone in an earlier session, never wired into a real consumer) is now the actual
+color source for the Paint tool.
+
+**One new top-level `TDesignState` field, `paintColor: string`** (`store/design/types.ts`), defaulting
+to `DEFAULT_PAINT_COLOR = '#D9D9D9'` (`store/design/constants.ts`) — a plain hex string, mirroring
+`fillColor`/`fillColorOverrideByKey`'s own shape (no alpha channel on a vector fill yet, so the picker's
+alpha stays pinned to 100 for this flow). New `setPaintColor` reducer + `selectPaintColor` selector,
+both following the exact one-line pattern `penActiveVertexId` already used.
+
+**`armVectorPaintOnPointerDown.ts`** now reads `selectPaintColor(state)` and, only on the *add* branch
+(not on un-filling), writes `fillColorOverrideByKey: { ...node.fillColorOverrideByKey, [newLoopKey]:
+paintColor }` alongside `filledFaceKeys` in the dispatched `updateNode`. Un-filling leaves
+`fillColorOverrideByKey` untouched — the stale entry for a key no longer in `filledFaceKeys` is inert,
+same as every other place in this doc that already tolerates orphaned override entries (§51, §66). The
+hash fallback in `getVectorFillColorForLoopKey.ts` still exists and still fires for anything that sets
+`filledFaceKeys` through a path other than this resolver (shape→vector conversion, cut/erase) — it is
+not retroactive, so faces painted before this change keep whatever color they already had.
+
+**The toolbar button itself is no longer generic.** `VectorEditToolbar/constants.ts`'s `TOOLS` array is
+unchanged (still the single source of icon/label/shortcut for all six tools), but `VectorEditToolbar.tsx`
+now special-cases the `paint` entry to render a new `VectorEditPaintTool` component instead of the
+generic `VectorEditToolButton` — every other tool's rendering path is untouched. `VectorEditPaintTool`
+switches its own markup on the `isActive` prop it's given (same prop shape as `VectorEditToolButton`, so
+the parent's `.map()` stays a one-line ternary):
+
+- **Inactive** — identical markup to `VectorEditToolButton` (Tooltip + `Button` + static `PaintTool`
+  icon + label). Click dispatches `setActiveTool(ToolName.paint)` via the existing
+  `useSelectVectorEditTool` hook, same as any other tool.
+- **Active** — swaps to rendering `ColorPicker` directly (imported by path — like Sampler/ButtonMenu
+  before it, `ColorPicker` still isn't in the `shared` barrel), with a `Color` swatch (14×14, sized via
+  a `className` override — the shared `Color` component's own intrinsic size is 16×16, per its one
+  existing consumer, `Footer`'s 24×24 preset cells) as the trigger, reflecting `paintColor` from Redux.
+
+**No extra "is the picker open" state needed anywhere.** Because the inactive→active transition swaps
+in a *new* DOM node (the generic button unmounts, `ColorPicker`'s own Radix `Popover.Trigger` mounts in
+its place), the click that just activated the tool never also opens the panel — it landed on the old
+node. Every click on the new swatch node after that is Radix's own default trigger-toggle behavior
+(`Popover.Root` is uncontrolled here, exactly like every other `Popover` consumer in this codebase):
+2nd click opens, 3rd closes, and the component stays on its "active" render branch throughout since
+that only depends on `activeTool === ToolName.paint`, not on the panel's open state.
+
+**One prop added to the shared `ColorPicker`/`Popover`, `triggerClassName`** — `ColorPicker`'s existing
+`className` prop only ever styled its *content* wrapper, never the trigger button Radix renders, so
+there was previously no way to give that trigger the "selected tool" look (blue background, matching
+every other active `Button` in this toolbar). Threaded straight through to `Popover`'s own
+`triggerClassName` (which already existed and already had this exact use case — `ButtonMenu` uses it),
+so this is a one-line, backward-compatible addition, not a new mechanism.
+
+## 68. Erase/Cut/Shape Builder now carry a face's own picked color forward too — closing the gap §67 flagged
+
+§67 wired the ColorPicker into Paint but explicitly left "cut/erase" (and, unnoted there, Shape
+Builder) falling through to the hash-derived fallback whenever they re-derived a face's loop key —
+every geometry-changing tool nicked a painted face's key composition, so its picked color vanished
+and a new, effectively-random hue appeared instead. Same root cause everywhere: a face's color lives
+in `fillColorOverrideByKey`, keyed by loop key; any operation that changes *which* real segment
+pieces bound a face produces a **new** key, and nothing was carrying the old key's color over to it.
+
+**One shared primitive added first**: `getEffectiveVectorFillColor(node, loopKey)`
+(`utils/canvas/vectorNetwork/getEffectiveVectorFillColor.ts`) — exactly the `?? getVectorFillColorForLoopKey(key)`
+fallback `groupFilledFacesByColor.ts` (the renderer) and `armVectorPaintOnPointerDown.ts` already did
+inline, now the one canonical way to ask "what color does this face actually render as right now,
+override or hash." The renderer was switched to call it instead of repeating the `??` itself.
+
+**`TSurvivingFace = { key: string; originalKey: string }`** (moved from being erase-only, in
+`eraseVectorNetwork/subtractCapsuleFromVectorNetwork/deriveFilledFaceKeys.ts`, up to the shared
+`vectorNetwork/types.ts`) is the pairing every fix below reuses: "this new key's face is the same
+face as that old key's, so look up the old key's effective color and pin it onto the new key."
+
+- **Erase** — `deriveFilledFaceKeys.ts` already computed this pairing for the "does this new face
+  belong to that original filled polygon" test (§66); `subtractCapsuleFromVectorNetwork.ts` now also
+  builds `fillColorOverrideByKey` from it and returns it on `TErasedNetwork`, and
+  `commitVectorErase.ts` forwards it into the dispatched `updateNode`. `getErasePreviewNodes.ts`
+  (the live-drag preview) got *simpler*, not more complex — it used to re-hash `originalKey` by hand
+  (a preview-only hack from §66, before real per-face colors existed); now it just spreads the real
+  `erased.fillColorOverrideByKey` the commit path also uses, so the preview and the commit agree.
+- **Cut** — two sub-paths, one easy one hard:
+  - Non-disconnecting ("connected cut", `materializeVectorNetworkCut.ts`): `resolveVectorCutFilledFaceKeys.ts`
+    already ran a centroid → `getVectorFaceAtPoint(_, originalNode)` lookup per new face to decide
+    *whether* it was filled before (§ "the real, only call site" per its own file) — it just discarded
+    the matched original face's own key afterward. Now it returns `TSurvivingFace[]` instead of
+    `string[]`, and `materializeVectorNetworkCut.ts` builds `fillColorOverrideByKey` from it exactly
+    like Erase does. `TVectorConnectedCutResult` gained the field; `applyConnectedCutResults.ts`
+    forwards it.
+  - Disconnecting (Split/Divide, sharing `commitVectorCutComponents.ts`): `resolveSurvivingFilledFaceKeys.ts`
+    is the "easy" case — a surviving face keeps its *exact original key* (it only filters, never
+    re-derives), so `originalKey === key` and no pairing is even needed, just a direct
+    `getEffectiveVectorFillColor(node, key)` lookup. Both `commitVectorSplit.ts`'s inline
+    ≥2-component `finish` callback and `finishDividedComponent.ts` (Divide) now build a
+    `fillColorOverrideByKey` this way. A face genuinely **closed by the cut line itself**
+    (`addCutClosingSegment.ts`/`deriveClosedFaces.ts`) has no single original ancestor — that's real
+    new geometry, structurally the same as a fresh Paint click on virgin area, so it deliberately
+    keeps falling back to the hash color; `finishDividedComponent.ts` only colors the *surviving*
+    half of its merged key set, never the newly-closed half. `TVectorNetworkComponent` gained an
+    optional `fillColorOverrideByKey` field to carry this through; `commitVectorCutComponents.ts`
+    forwards `finish()`'s result into both its `updateNode` (primary) and `addNode` (spun-off
+    components) dispatches.
+- **Shape Builder** — `subtractVectorFaces.ts` needed **no change at all**: it only ever removes
+  faces, never creates one, and already returned `{ ...node, ... }`, so `fillColorOverrideByKey`
+  was already riding along on the intermediate result object the whole time. The gap was entirely
+  downstream, at the three `updateNode` dispatch sites (`commitCrossingVectorNodeGroup.ts`,
+  `commitSingleVectorShapeBuilderNode.ts`) hand-picking `{ filledFaceKeys, segments, vertices,
+  [rotation] }` out of that result and never mentioning the color field — now they do.
+  `mergeVectorFaces.ts` (the one operation that *does* create a new face, by deleting the interior
+  boundary between touched faces) had the real gap: the merged face's key is brand new, and — since
+  a merge can combine faces that had genuinely different colors — there's no single "correct"
+  answer, so it takes the **first touched face's** effective color, deterministic by touch order.
+  `groupCrossingVectorNodes.ts`'s `buildCombinedNode` had a separate, quieter bug: `filledFaceKeys`
+  was already unioned across every group member via `flatMap`, but `fillColorOverrideByKey` was
+  only ever the survivor's own map (`{ ...survivor, ... }`), so a non-survivor member's own painted
+  faces silently lost their color the moment two open nodes crossed paths — fixed by unioning every
+  member's map the same way `filledFaceKeys` already was.
+- **Not touched**: `deleteSelectedVertices.ts` (Delete key on selected vertices, also calls
+  `subtractVectorFaces.ts`) needed no fix for the same reason as the Shape Builder subtract path —
+  subtract never mints a new key, so the store's pre-existing `fillColorOverrideByKey` for whatever
+  survives is already correct without being re-dispatched.
+
+Every touched file kept/reached 100% coverage; the positive "a key survives geometrically unchanged
+and keeps its color" case and the negative "a brand-new closed-off face does NOT inherit a stale
+color" case are both asserted explicitly wherever the distinction exists (Cut's connected-cut and
+Divide paths especially, since that's where both cases coexist in the same function).
+
+## 69. Paint becomes a real drag brush — multiple faces per stroke, a remove mode, and always-paint-never-remove on an already-filled start face
+
+§67/§68 only ever painted one face per click. Paint now also arms a drag: `armVectorPaintOnPointerDown.ts`
+still handles the single click (and decides add-vs-remove from whatever face was clicked), but
+`continueVectorPaintDrag.ts` (promoted to its own folder — `paintNodeAlongPath.ts`/`addNodeAlongPath.ts`/
+`removeNodeAlongPath.ts` siblings, same split-massive-function shape as `drawScene/`) sweeps every face
+the accumulated stroke path crosses past `MIN_DRAG_DISTANCE_PX`, painting (or, with `isVectorPaintRemoveRef`
+armed, un-filling) each still-untouched-this-stroke face in one dispatch per move event. A
+`touchedVectorPaintLoopKeysRef` Set-per-node prevents re-processing a face already handled earlier in the
+same stroke.
+
+**Always paint, never remove, once a stroke is genuinely dragging**: clicking an already-filled face
+toggles it off (plain click semantics, unchanged) — but if that click turns into a real drag,
+`armVectorPaintOnPointerDown.ts` defers marking the start face "touched" until it's actually re-swept
+by `continueVectorPaintDrag.ts`'s own pass, so a drag that begins on a filled face and moves on always
+ends with that face still filled, never left as an accidental hole. Same brush semantics as Figma: a
+drag only ever adds (or, in remove mode, only ever removes) — it doesn't toggle per-face like a plain
+click does.
+
+**A render-only regression, not a data bug**: the touched-faces drag preview (`drawVectorPaintTouchedFacesPreview.ts`,
+a hatch-fill overlay keyed off `vectorPaintTouchedFacesRef`) draws unconditionally whenever that ref is
+non-null — it doesn't check whether a stroke is actually still in progress. `useSelectionTool.ts`'s
+tool-switch cleanup effect resets `vectorPaintPathRef`/`touchedVectorPaintLoopKeysRef` but had missed
+`vectorPaintTouchedFacesRef`/`isVectorPaintRemoveRef` (both of which `disarmVectorPaintDrag.ts` already
+resets on a clean pointerup) — so a stroke interrupted by a tool switch mid-drag (rather than a normal
+release) left a stale, frozen "touched faces" preview rendering on every subsequent frame, reading as
+the whole shape being painted even though `filledFaceKeys` itself was correct. Fixed by adding the two
+missing resets alongside the two that were already there.
+
+Coverage: unit (100%, including a dedicated spec per split file, not just the orchestrator), e2e
+(`vector-edit.spec.ts` — a drag starting on an already-filled face keeps it filled while still painting
+every new face the stroke crosses).
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

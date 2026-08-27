@@ -1,14 +1,20 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TVectorNode } from 'types/design/types';
+import { TVectorNode, TVectorSegment, TVectorVertex } from 'types/design/types';
 
 // utils
 import { deriveVectorFaces } from '../../../deriveVectorFaces/deriveVectorFaces';
+import { getVectorFillColorForLoopKey } from '../../../getVectorFillColorForLoopKey';
 import { getVectorFillLoopKey } from '../../../getVectorFillLoopKey';
 import { getVectorFillLoopPoints } from '../../../getVectorFillLoopPoints/getVectorFillLoopPoints';
 import { subtractCapsuleFromVectorNetwork } from '../subtractCapsuleFromVectorNetwork';
 
-const buildRectSegments = (x1: number, y1: number, x2: number, y2: number) => ({
+const buildRectSegments = (
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+): { segments: Record<string, TVectorSegment>; vertices: Record<string, TVectorVertex> } => ({
   segments: {
     s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null },
     s2: { endId: 'c', id: 's2', startId: 'b', tangentEnd: null, tangentStart: null },
@@ -123,6 +129,25 @@ describe('subtractCapsuleFromVectorNetwork', () => {
     expect(survivingPolygon).not.toBeNull();
     expect(survivingPolygon!.length).toBeGreaterThan(4);
     expect(Object.keys(result.segments).length).toBeGreaterThan(4);
+
+    // result — the surviving face is pinned to the hash color of the ORIGINAL key, not its own new key
+    const originalKey = node.filledFaceKeys[0];
+    expect(result.fillColorOverrideByKey[result.filledFaceKeys[0]]).toBe(getVectorFillColorForLoopKey(originalKey));
+  });
+
+  it('should keep a real user-picked fill color across the carve instead of falling back to a hash color', () => {
+    // mock — same 40x40 rectangle, but with an explicit paint-tool color override on its original key
+    const node = buildRectNode(0, 0, 40, 40, true);
+    const originalKey = node.filledFaceKeys[0];
+    const paintedNode = { ...node, fillColorOverrideByKey: { [originalKey]: '#ff0000' } };
+    const path = buildStraightDipPath(20, -5.13, 15.13);
+
+    // action
+    const result = subtractCapsuleFromVectorNetwork(paintedNode, path, 3)!;
+
+    // result
+    expect(result.filledFaceKeys).toHaveLength(1);
+    expect(result.fillColorOverrideByKey[result.filledFaceKeys[0]]).toBe('#ff0000');
   });
 
   it('should leave the fill exactly as-is (no fake hole) when the brush never touches the boundary', () => {

@@ -54,7 +54,7 @@ export const resolveVectorSegmentHover = (
   } else {
     clearVectorSegmentHover(event, hoveredVectorSegmentIdRef, hoveredVectorEdgeInsertPointRef);
 
-    if (isSegmentHoverBlockedByTool) {
+    if (isSegmentHoverBlockedByTool && event.buttons === 0) {
       setClassName(null);
     }
   }

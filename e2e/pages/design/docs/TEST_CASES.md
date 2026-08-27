@@ -1959,6 +1959,29 @@ screenshot-diff can't cheaply assert.
 | 327 | One continuous stroke that dips through both open filled nodes carves a channel in each, and both fills survive independently           |  ✅  | ✅ `vector-erase-multi.spec.ts` |
 | 328 | A single Undo after one stroke that erased through both open nodes reverts both back to their original filled state at once             |  ✅  | ✅ `vector-erase-multi.spec.ts` |
 
+## Paint tool — freeform drag mode
+
+A second way to use Paint alongside the original single-face click-toggle (#242 above): press and
+hold, sweep the pointer across several faces, release. Starting the drag on an unfilled face arms
+**add** mode — every unfilled face the stroke crosses fills with the current paint color, live as
+the stroke passes through it. Starting the drag on an already-filled face arms **remove** mode for
+the whole gesture instead — every already-filled face the stroke crosses gets its fill destroyed,
+while an unfilled face the same stroke also sweeps over is left untouched (a remove stroke only
+ever destroys fill, it never adds). The cursor pins to `paint-add`/`paint-remove`
+(`drop-add.png`/`drop-remove.png`) for the whole drag via `isVectorPaintRemoveRef`, and a
+persistent hatch highlight (blue while adding, orange while removing) marks every face the stroke
+has touched so far, clearing on release. Mirrors Shape Builder's own freeform drag
+(`armVectorShapeBuilderOnPointerDown.ts` / `continueVectorShapeBuilderDrag.ts` /
+`disarmVectorShapeBuilderDrag.ts`) one-for-one — same pointer-capture arm/continue/disarm shape,
+same dashed black trail while the drag is in progress (`drawVectorPaintPath.ts`, sharing
+`VECTOR_SHAPE_BUILDER_STROKE`/the Lasso dash constants) — except Paint never merges geometry.
+
+| #   | Scenario                                                                                                                                                                           | Unit |           E2E            |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :----------------------: |
+| 329 | A freeform drag across two faces (a rectangle split by a divider segment) fills both from one gesture, not just the one under the pointer at release                               |  ✅  | ✅ `vector-edit.spec.ts` |
+| 330 | The dashed black trail (same stroke as Shape Builder's own drag) is actually visible on the WebGL canvas while the drag is still in progress — a real repaint only e2e can observe |  ✅  | ✅ `vector-edit.spec.ts` |
+| 331 | A drag starting on an already-filled face arms remove mode for the whole gesture, destroying that face's fill along with every other already-filled face the stroke crosses        |  ✅  | ✅ `vector-edit.spec.ts` |
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

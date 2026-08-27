@@ -20,6 +20,7 @@ export type TDesignState = {
   lastShapeTool: ToolName;
   lastTextTool: ToolName;
   nodes: Record<string, TSceneNode>;
+  paintColor: string;
   penActiveVertexId: string | null;
   rootOrder: string[];
   selectedIds: string[];

@@ -84,6 +84,61 @@ const addSquareNode = (filled: boolean, rotation = 0): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
+// same square as addSquareNode, plus a pendant tail segment (s5, d→e) sticking out — severing the tail
+// disconnects a 2-vertex stub from the still-fully-closed, still-filled square
+const addSquareWithTailNode = (color: string): string => {
+  const segments = {
+    s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null },
+    s2: { endId: 'c', id: 's2', startId: 'b', tangentEnd: null, tangentStart: null },
+    s3: { endId: 'd', id: 's3', startId: 'c', tangentEnd: null, tangentStart: null },
+    s4: { endId: 'a', id: 's4', startId: 'd', tangentEnd: null, tangentStart: null },
+    s5: { endId: 'e', id: 's5', startId: 'd', tangentEnd: null, tangentStart: null },
+  } as const;
+  const vertices = {
+    a: { id: 'a', x: 0, y: 0 },
+    b: { id: 'b', x: 100, y: 0 },
+    c: { id: 'c', x: 100, y: 100 },
+    d: { id: 'd', x: 0, y: 100 },
+    e: { id: 'e', x: -50, y: 100 },
+  };
+  const [face] = deriveVectorFaces({
+    fillColor: null,
+    filledFaceKeys: [],
+    id: 'probe',
+    name: '',
+    parentId: null,
+    rotation: 0,
+    segments,
+    strokeColor: '#000000',
+    strokeWidth: 1,
+    type: NodeType.vector,
+    vertexHandleModes: {},
+    vertices,
+  });
+  const key = getVectorFillLoopKey(face.pieceKeys);
+
+  store.dispatch(
+    addNode({
+      fillColor: '#ff0000',
+      fillColorOverrideByKey: { [key]: color },
+      filledFaceKeys: [key],
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments,
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices,
+    }),
+  );
+
+  const { rootOrder } = store.getState().design;
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 describe('commitVectorSplit', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
@@ -126,6 +181,72 @@ describe('commitVectorSplit', () => {
     const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
 
     expect(Object.keys(updatedNode.vertices)).toHaveLength(6);
+  });
+
+  it('should keep the face’s own picked color after a single click-sever that changes its loop key without disconnecting anything', () => {
+    // mock — a filled square with an explicit paint-tool color; severing s4 doesn't disconnect the
+    // loop (the other 3 edges still bridge it), but it DOES change every piece key touching s4, and
+    // therefore the whole face's loop key, even though nothing about the geometry visually changed
+    const segments = {
+      s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null },
+      s2: { endId: 'c', id: 's2', startId: 'b', tangentEnd: null, tangentStart: null },
+      s3: { endId: 'd', id: 's3', startId: 'c', tangentEnd: null, tangentStart: null },
+      s4: { endId: 'a', id: 's4', startId: 'd', tangentEnd: null, tangentStart: null },
+    } as const;
+    const vertices = {
+      a: { id: 'a', x: 0, y: 0 },
+      b: { id: 'b', x: 100, y: 0 },
+      c: { id: 'c', x: 100, y: 100 },
+      d: { id: 'd', x: 0, y: 100 },
+    };
+    const [face] = deriveVectorFaces({
+      fillColor: null,
+      filledFaceKeys: [],
+      id: 'probe',
+      name: '',
+      parentId: null,
+      rotation: 0,
+      segments,
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices,
+    });
+    const originalKey = getVectorFillLoopKey(face.pieceKeys);
+
+    store.dispatch(
+      addNode({
+        fillColor: '#ff0000',
+        fillColorOverrideByKey: { [originalKey]: '#00ff00' },
+        filledFaceKeys: [originalKey],
+        name: 'Vector',
+        parentId: null,
+        rotation: 0,
+        segments,
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: NodeType.vector,
+        vertexHandleModes: {},
+        vertices,
+      }),
+    );
+
+    const { rootOrder } = store.getState().design;
+    const nodeId = rootOrder[rootOrder.length - 1];
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+
+    // before
+    const resultNodeIds = commitVectorSplit(store.dispatch, node, 's4', 0.5);
+
+    // result
+    expect(resultNodeIds).toEqual([nodeId]);
+
+    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+
+    expect(updatedNode.filledFaceKeys).toHaveLength(1);
+    expect(updatedNode.filledFaceKeys[0]).not.toBe(originalKey); // the key really did change
+    expect(updatedNode.fillColorOverrideByKey?.[updatedNode.filledFaceKeys[0]]).toBe('#00ff00');
   });
 
   it('should split into two separate nodes once a second, opposite edge is severed with nothing left to bridge the two halves', () => {
@@ -173,6 +294,24 @@ describe('commitVectorSplit', () => {
 
       expect(resultNode.filledFaceKeys).toEqual([]);
     });
+  });
+
+  it('should keep the untouched, still-closed square’s own picked color after splitting off an unrelated pendant tail', () => {
+    // mock — severing the tail disconnects a bare 2-vertex stub; the square itself (still a closed,
+    // untouched loop) stays the larger "primary" component and keeps the original node id
+    const nodeId = addSquareWithTailNode('#ff0000');
+    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+
+    // before
+    const resultNodeIds = commitVectorSplit(store.dispatch, node, 's5', 0.5);
+
+    // result
+    expect(resultNodeIds).toHaveLength(2);
+
+    const updatedOriginal = store.getState().design.nodes[nodeId] as TVectorNode;
+
+    expect(updatedOriginal.filledFaceKeys).toHaveLength(1);
+    expect(updatedOriginal.fillColorOverrideByKey?.[updatedOriginal.filledFaceKeys[0]]).toBe('#ff0000');
   });
 
   it('should bake a rotated node’s geometry to world space before splitting it into two nodes, resetting rotation on both', () => {

@@ -25,6 +25,7 @@ import {
   TVectorNodeResizeSnapshot,
   TVectorNodeRotateSnapshot,
   TVectorPaintFaceHover,
+  TVectorPaintTouchedLoopKeys,
   TVectorShapeBuilderTouchedFaces,
   TVectorWidthHandleSelection,
   TVectorWidthLastHandleSide,
@@ -69,6 +70,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const hoveredVectorVertexIdRef = useRef<string | null>(null);
   const hoveredVectorWidthPointRef = useRef<TVectorWidthPointHover | null>(null);
   const hoverRef = useRef<string | null>(null);
+  const isVectorPaintRemoveRef = useRef<boolean>(false);
   const isVectorShapeBuilderBoxModeRef = useRef<boolean>(false);
   const isVectorShapeBuilderSubtractRef = useRef<boolean>(false);
   const lastVectorWidthHandleSideRef = useRef<TVectorWidthLastHandleSide | null>(null);
@@ -99,6 +101,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const snappedVectorHandleRef = useRef<TVectorHandleHover | null>(null);
   const starCornerRadiusDragRef = useRef<TStarCornerRadiusDragState | null>(null);
   const touchedVectorCutVertexIdsRef = useRef<Set<string>>(new Set());
+  const touchedVectorPaintLoopKeysRef = useRef<TVectorPaintTouchedLoopKeys>({});
   const touchedVectorShapeBuilderFacesRef = useRef<TVectorShapeBuilderTouchedFaces>({});
   const vectorAlignmentGuideRef = useRef<TVectorAlignmentGuide | null>(null);
   const vectorCutPreviewRef = useRef<TVectorCutPreview | null>(null);
@@ -108,6 +111,8 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const vectorMultiSelectBoxRef = useRef<TVectorMultiSelectBox | null>(null);
   const vectorMultiSelectResizeDragRef = useRef<TVectorMultiSelectResizeDragState | null>(null);
   const vectorMultiSelectRotateDragRef = useRef<TVectorMultiSelectRotateDragState | null>(null);
+  const vectorPaintPathRef = useRef<TPoint[] | null>(null);
+  const vectorPaintTouchedFacesRef = useRef<TVectorDraggedFillFaces | null>(null);
   const vectorShapeBuilderPathRef = useRef<TPoint[] | null>(null);
   const vectorWidthPointDragRef = useRef<TVectorWidthPointDragState | null>(null);
 
@@ -137,6 +142,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       hoveredVectorShapeBuilderFaceRef,
       hoveredVectorVertexIdRef,
       hoveredVectorWidthPointRef,
+      isVectorPaintRemoveRef,
       isVectorShapeBuilderBoxModeRef,
       isVectorShapeBuilderSubtractRef,
       lastVectorWidthHandleSideRef,
@@ -167,6 +173,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       snappedVectorHandleRef,
       starCornerRadiusDragRef,
       touchedVectorCutVertexIdsRef,
+      touchedVectorPaintLoopKeysRef,
       touchedVectorShapeBuilderFacesRef,
       vectorAlignmentGuideRef,
       vectorCutPreviewRef,
@@ -176,6 +183,8 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       vectorMultiSelectBoxRef,
       vectorMultiSelectResizeDragRef,
       vectorMultiSelectRotateDragRef,
+      vectorPaintPathRef,
+      vectorPaintTouchedFacesRef,
       vectorShapeBuilderPathRef,
       vectorWidthPointDragRef,
     }),

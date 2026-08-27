@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 // components
 import { DesignPage } from './model/DesignPage';
@@ -1539,6 +1539,149 @@ test('the Paint tool (activated via its "Shift+B" shortcut) fills a clicked face
 
   expect(filled.equals(unfilled)).toBe(false);
   expect(unfilledAgain.equals(unfilled)).toBe(true);
+});
+
+// a 100x100 rectangle split in half by a horizontal "divider" segment (e-f), forming a top and a
+// bottom face that share exactly that one segment — mirrors vector-shape-builder.spec.ts's own
+// injectSplitRectangle fixture, used here so a single Paint drag has two genuinely separate faces to
+// sweep across without needing a flaky re-entered Pen path
+const injectSplitRectangle = (page: Page): Promise<string> =>
+  page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { addNode } = await import('/src/store/design/slice.ts');
+
+    store.dispatch(
+      addNode({
+        fillColor: null,
+        filledFaceKeys: [],
+        name: 'Vector',
+        parentId: null,
+        rotation: 0,
+        segments: {
+          bottom: { endId: 'd', id: 'bottom', startId: 'c', tangentEnd: null, tangentStart: null },
+          divider: { endId: 'f', id: 'divider', startId: 'e', tangentEnd: null, tangentStart: null },
+          leftLower: { endId: 'e', id: 'leftLower', startId: 'd', tangentEnd: null, tangentStart: null },
+          leftUpper: { endId: 'a', id: 'leftUpper', startId: 'e', tangentEnd: null, tangentStart: null },
+          rightLower: { endId: 'c', id: 'rightLower', startId: 'f', tangentEnd: null, tangentStart: null },
+          rightUpper: { endId: 'f', id: 'rightUpper', startId: 'b', tangentEnd: null, tangentStart: null },
+          top: { endId: 'b', id: 'top', startId: 'a', tangentEnd: null, tangentStart: null },
+        },
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: 'vector',
+        vertexHandleModes: {},
+        vertices: {
+          a: { id: 'a', x: 900, y: 300 },
+          b: { id: 'b', x: 1000, y: 300 },
+          c: { id: 'c', x: 1000, y: 400 },
+          d: { id: 'd', x: 900, y: 400 },
+          e: { id: 'e', x: 900, y: 350 },
+          f: { id: 'f', x: 1000, y: 350 },
+        },
+      } as never),
+    );
+
+    const state = store.getState();
+
+    return state.design.rootOrder[state.design.rootOrder.length - 1];
+  });
+
+const enterVectorEditModeFor = (page: Page, nodeIds: string[]): Promise<void> =>
+  page.evaluate(async (ids) => {
+    const { store } = await import('/src/store/index.ts');
+    const { setVectorEditingNodeIds } = await import('/src/store/design/slice.ts');
+
+    store.dispatch(setVectorEditingNodeIds(ids));
+  }, nodeIds);
+
+const readVectorNode = (page: Page, nodeId: string): Promise<{ filledFaceKeys: string[] }> =>
+  page.evaluate((id) => {
+    return import('/src/store/index.ts').then(({ store }) => {
+      const node = store.getState().design.nodes[id] as { filledFaceKeys: string[] };
+
+      return { filledFaceKeys: node.filledFaceKeys };
+    });
+  }, nodeId);
+
+test("the Paint tool's freeform drag mode paints every face the stroke crosses in one gesture, and draws a live black trail while the drag is in progress", async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-paint-drag');
+  await expect(designPage.canvas).toBeVisible();
+
+  const nodeId = await injectSplitRectangle(page);
+
+  await enterVectorEditModeFor(page, [nodeId]);
+  await page.keyboard.press('Shift+B');
+
+  const pathRegion = { height: 100, width: 100, x: 900, y: 300 };
+
+  await page.mouse.move(600, 600);
+  const beforeDrag = await page.screenshot({ clip: pathRegion });
+
+  // sweeps from the top half, down through the divider, into the bottom half — mid-gesture, before
+  // releasing, so the live black trail (drawVectorPaintPath, same dashed stroke as Shape Builder's
+  // own drag) has actually been rendered onto the canvas at least once
+  await designPage.pointerDown(950, 310);
+  await designPage.pointerMove(950, 350);
+  await designPage.pointerMove(950, 390);
+  const duringDrag = await page.screenshot({ clip: pathRegion });
+
+  await designPage.pointerUp();
+
+  const result = await readVectorNode(page, nodeId);
+
+  // both faces got painted from this single stroke, without needing two separate clicks
+  expect(result.filledFaceKeys).toHaveLength(2);
+  // the dashed black trail was visibly drawn while the pointer was still down
+  expect(duringDrag.equals(beforeDrag)).toBe(false);
+});
+
+test("a Paint drag starting on an already-filled face arms remove mode for the whole gesture, destroying that face's fill along with every other already-filled face the stroke crosses", async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-vector-edit-paint-drag-destroys-start-face');
+  await expect(designPage.canvas).toBeVisible();
+
+  const nodeId = await injectSplitRectangle(page);
+
+  await enterVectorEditModeFor(page, [nodeId]);
+  await page.keyboard.press('Shift+B');
+
+  // pre-paint both faces with a plain click each, so the drag below starts on an already-filled
+  // face and also sweeps into a second already-filled face
+  await designPage.click(950, 310);
+  await designPage.click(950, 390);
+
+  const beforeDrag = await readVectorNode(page, nodeId);
+
+  expect(beforeDrag.filledFaceKeys).toHaveLength(2);
+
+  const pathRegion = { height: 100, width: 100, x: 900, y: 300 };
+
+  await page.mouse.move(600, 600);
+  const beforeShot = await page.screenshot({ clip: pathRegion });
+
+  // sweep from inside the already-filled top face, down through the divider, into the already-filled
+  // bottom half — starting on a filled face must arm remove for the whole gesture, not just toggle
+  // the starting face off in isolation
+  await designPage.pointerDown(950, 310);
+  await designPage.pointerMove(950, 350);
+  await designPage.pointerMove(950, 390);
+  const duringDrag = await page.screenshot({ clip: pathRegion });
+
+  await designPage.pointerUp();
+
+  const result = await readVectorNode(page, nodeId);
+
+  // both faces got their fill destroyed by the single stroke
+  expect(result.filledFaceKeys).toEqual([]);
+  // the dashed black trail was visibly drawn while the pointer was still down
+  expect(duringDrag.equals(beforeShot)).toBe(false);
 });
 
 test('Paint on a rectangle drawn inside another rectangle fills the smaller, innermost face under the cursor, not the outer one it also sits inside — regression for getVectorFaceAtPoint picking the first match instead of the smallest', async ({

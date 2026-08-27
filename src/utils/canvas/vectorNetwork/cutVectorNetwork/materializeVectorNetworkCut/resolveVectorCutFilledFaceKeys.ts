@@ -1,4 +1,5 @@
 // types
+import { TSurvivingFace } from '../../types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
@@ -11,14 +12,16 @@ export const resolveVectorCutFilledFaceKeys = (
   resultNode: TVectorNode,
   originalNode: TVectorNode,
   isolatedStubIds: Set<string>,
-): string[] => {
+): TSurvivingFace[] => {
   const originalFilledFaceKeySet = new Set(originalNode.filledFaceKeys);
 
   return deriveVectorFaces(resultNode)
     .filter((face) => !face.pieceKeys.some((key) => isolatedStubIds.has(key.split('[')[0])))
-    .filter((face) => {
+    .map((face) => {
       const originalFace = getVectorFaceAtPoint(getPolygonCentroid(face.points), originalNode);
-      return originalFace !== null && originalFilledFaceKeySet.has(getVectorFillLoopKey(originalFace.pieceKeys));
+      const originalKey = originalFace && getVectorFillLoopKey(originalFace.pieceKeys);
+
+      return originalKey && originalFilledFaceKeySet.has(originalKey) ? { key: getVectorFillLoopKey(face.pieceKeys), originalKey } : null;
     })
-    .map((face) => getVectorFillLoopKey(face.pieceKeys));
+    .filter((survivor): survivor is TSurvivingFace => survivor !== null);
 };

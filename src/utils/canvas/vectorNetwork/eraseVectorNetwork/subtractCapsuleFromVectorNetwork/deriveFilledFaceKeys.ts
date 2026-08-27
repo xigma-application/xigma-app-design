@@ -1,5 +1,6 @@
 // types
 import { TOriginalFillPolygon } from './getOriginalFillPolygons';
+import { TSurvivingFace } from '../../types';
 import { TVectorFace } from '../../deriveVectorFaces/types';
 
 // utils
@@ -12,8 +13,6 @@ const MIN_FACE_AREA = 1e-2;
 
 const isEntirelyCapsule = (face: TVectorFace, capsuleSegmentIds: Set<string>): boolean =>
   face.pieceKeys.every((pieceKey) => capsuleSegmentIds.has(pieceKey.split('[')[0]));
-
-export type TSurvivingFace = { key: string; originalKey: string };
 
 export const deriveFilledFaceKeys = (
   newFaces: TVectorFace[],

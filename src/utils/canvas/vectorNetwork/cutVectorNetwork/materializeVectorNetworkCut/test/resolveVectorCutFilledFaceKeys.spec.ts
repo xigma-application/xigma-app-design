@@ -48,8 +48,8 @@ describe('resolveVectorCutFilledFaceKeys', () => {
     // before
     const result = resolveVectorCutFilledFaceKeys(originalNode, originalNode, new Set());
 
-    // result
-    expect(result).toEqual(filledFaceKeys);
+    // result — untouched face, so its new key equals its own original key
+    expect(result).toEqual(filledFaceKeys.map((key) => ({ key, originalKey: key })));
   });
 
   it('should exclude a face whose centroid lands inside an originally-UNfilled face', () => {

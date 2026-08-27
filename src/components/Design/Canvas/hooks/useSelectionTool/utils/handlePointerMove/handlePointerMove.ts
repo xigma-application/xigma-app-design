@@ -29,6 +29,7 @@ import { continueVectorMarqueeDrag } from './continueVectorMarqueeDrag/continueV
 import { continueVectorMultiDrag } from './continueVectorMultiDrag';
 import { continueVectorMultiSelectResizeDrag } from './continueVectorMultiSelectResizeDrag';
 import { continueVectorMultiSelectRotateDrag } from './continueVectorMultiSelectRotateDrag';
+import { continueVectorPaintDrag } from './continueVectorPaintDrag/continueVectorPaintDrag';
 import { continueVectorSegmentBendDrag } from './continueVectorSegmentBendDrag/continueVectorSegmentBendDrag';
 import { continueVectorShapeBuilderDrag } from './continueVectorShapeBuilderDrag';
 import { continueVectorVertexDrag } from './continueVectorVertexDrag/continueVectorVertexDrag';
@@ -65,6 +66,7 @@ export const handlePointerMove = (
   resolveVectorCornerHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs);
   continueVectorHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   continueVectorLassoDrag(canvas, event, canvasRefs);
+  continueVectorPaintDrag(canvas, event, dispatch, canvasRefs);
   continueVectorShapeBuilderDrag(canvas, event, canvasRefs, setClassName);
   continueVectorMultiDrag(canvas, event, dispatch, canvasRefs, setClassName);
   continueVectorMultiSelectResizeDrag(canvas, event, dispatch, canvasRefs.vectorMultiSelectResizeDragRef);

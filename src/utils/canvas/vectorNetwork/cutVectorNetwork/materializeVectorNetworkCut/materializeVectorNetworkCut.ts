@@ -5,6 +5,7 @@ import { TVectorNode, TVectorSegment, TVectorVertex } from 'types/design/types';
 // utils
 import { buildVectorCutChordSegments } from './buildVectorCutChordSegments';
 import { findLineNetworkCrossings } from '../findLineNetworkCrossings';
+import { getEffectiveVectorFillColor } from '../../getEffectiveVectorFillColor';
 import { getIsolatedVectorCutStubIds } from './getIsolatedVectorCutStubIds';
 import { resolveVectorCutFilledFaceKeys } from './resolveVectorCutFilledFaceKeys';
 import { severVectorCutCrossings } from './severVectorCutCrossings';
@@ -13,7 +14,12 @@ export const materializeVectorNetworkCut = (
   node: TVectorNode,
   lineStart: TPoint,
   lineEnd: TPoint,
-): { filledFaceKeys: string[]; segments: Record<string, TVectorSegment>; vertices: Record<string, TVectorVertex> } | null => {
+): {
+  fillColorOverrideByKey: Record<string, string>;
+  filledFaceKeys: string[];
+  segments: Record<string, TVectorSegment>;
+  vertices: Record<string, TVectorVertex>;
+} | null => {
   const crossings = findLineNetworkCrossings(lineStart, lineEnd, node.segments, node.vertices);
 
   if (crossings.length !== 0) {
@@ -24,9 +30,12 @@ export const materializeVectorNetworkCut = (
     const isolatedStubIds = getIsolatedVectorCutStubIds(severed.sides, chordedVertexIds);
     const segments = { ...severed.segments, ...chordSegments };
     const resultNode = { ...node, segments, vertices: severed.vertices };
-    const filledFaceKeys = resolveVectorCutFilledFaceKeys(resultNode, node, isolatedStubIds);
+    const survivingFaces = resolveVectorCutFilledFaceKeys(resultNode, node, isolatedStubIds);
+    const fillColorOverrideByKey = Object.fromEntries(
+      survivingFaces.map(({ key, originalKey }) => [key, getEffectiveVectorFillColor(node, originalKey)]),
+    );
 
-    return { filledFaceKeys, segments, vertices: severed.vertices };
+    return { fillColorOverrideByKey, filledFaceKeys: survivingFaces.map((face) => face.key), segments, vertices: severed.vertices };
   }
 
   return null;

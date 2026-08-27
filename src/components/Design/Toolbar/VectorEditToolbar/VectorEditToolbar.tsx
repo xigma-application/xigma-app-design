@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import VectorEditMoreDropdown from './VectorEditMoreDropdown/VectorEditMoreDropdown';
+import VectorEditPaintTool from './VectorEditPaintTool/VectorEditPaintTool';
 import VectorEditToolButton from './VectorEditToolButton/VectorEditToolButton';
 import { Button, Icon, Tooltip } from 'shared';
 
@@ -14,6 +15,9 @@ import { ICON_SIZE, TOOLS } from './constants';
 
 // styles
 import styles from './vector-edit-toolbar.module.scss';
+
+// types
+import { ToolName } from 'types/design/enums';
 
 const VectorEditToolbar: FC = () => {
   const { t } = useTranslation();
@@ -33,13 +37,21 @@ const VectorEditToolbar: FC = () => {
         />
       ))}
       <div className={styles.VectorEditToolbar__separator} />
-      {TOOLS.slice(2).map((tool) => (
-        <VectorEditToolButton
-          isActive={getIsVectorEditToolActive(tool.toolName, activeTool, isBendModifierHeld)}
-          key={tool.labelKey}
-          tool={tool}
-        />
-      ))}
+      {TOOLS.slice(2).map((tool) =>
+        tool.toolName === ToolName.paint ? (
+          <VectorEditPaintTool
+            isActive={getIsVectorEditToolActive(tool.toolName, activeTool, isBendModifierHeld)}
+            key={tool.labelKey}
+            tool={tool}
+          />
+        ) : (
+          <VectorEditToolButton
+            isActive={getIsVectorEditToolActive(tool.toolName, activeTool, isBendModifierHeld)}
+            key={tool.labelKey}
+            tool={tool}
+          />
+        ),
+      )}
       <div className={styles.VectorEditToolbar__separator} />
       <VectorEditMoreDropdown />
       <div className={styles.VectorEditToolbar__separator} />

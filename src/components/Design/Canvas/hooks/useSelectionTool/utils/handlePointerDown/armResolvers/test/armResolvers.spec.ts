@@ -1,5 +1,14 @@
 // store
-import { addNode, setActiveTool, setPenActiveVertexId, setSelection, setVectorEditingNodeIds, updateNode } from 'store/design/slice';
+import {
+  addNode,
+  setActiveTool,
+  setPaintColor,
+  setPenActiveVertexId,
+  setSelection,
+  setVectorEditingNodeIds,
+  updateNode,
+} from 'store/design/slice';
+import { DEFAULT_PAINT_COLOR } from 'store/design/constants';
 import { store } from 'store';
 
 // types
@@ -1066,6 +1075,7 @@ describe('armVectorLassoOnPointerDown', () => {
 describe('armVectorPaintOnPointerDown', () => {
   afterEach(() => {
     store.dispatch(setVectorEditingNodeIds([]));
+    store.dispatch(setPaintColor(DEFAULT_PAINT_COLOR));
   });
 
   it('should add the clicked face to filledFaceKeys and claim the pointerdown, when the face is not yet filled', () => {
@@ -1092,6 +1102,79 @@ describe('armVectorPaintOnPointerDown', () => {
 
     expect(action.payload.id).toBe(nodeId);
     expect(action.payload.changes).toEqual({
+      fillColorOverrideByKey: { 's1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]': DEFAULT_PAINT_COLOR },
+      filledFaceKeys: ['s1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]'],
+    });
+  });
+
+  it('should pin the paint-add cursor and seed the touched-faces highlight with the clicked face when the click hits one', () => {
+    // mock — a closed triangle, one derivable face
+    const nodeId = addVectorNode(
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'v1', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+      },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 50, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    // before — a point inside the triangle
+    const ctx = createContext({ activeTool: ToolName.paint, point: { x: 50, y: 40 } });
+
+    // result
+    expect(armVectorPaintOnPointerDown(ctx)).toBe(true);
+    expect(ctx.setClassName).toHaveBeenCalledWith('paint-add');
+    expect(ctx.canvasRefs.vectorPaintTouchedFacesRef.current).toEqual({ [nodeId]: ['s1,s2,s3'] });
+  });
+
+  it('should still pin the paint-add cursor and clear the touched-faces highlight when the click misses every face', () => {
+    // mock
+    const nodeId = addVectorNode(
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'v1', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+      },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 50, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    // before — a point well outside the triangle
+    const ctx = createContext({ activeTool: ToolName.paint, point: { x: 500, y: 500 } });
+
+    // result
+    expect(armVectorPaintOnPointerDown(ctx)).toBe(true);
+    expect(ctx.setClassName).toHaveBeenCalledWith('paint-add');
+    expect(ctx.canvasRefs.vectorPaintTouchedFacesRef.current).toEqual({});
+  });
+
+  it('should fill the clicked face with the current paint color from the store, not the default', () => {
+    // mock — a closed triangle, one derivable face
+    const nodeId = addVectorNode(
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'v1', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+      },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 50, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+    store.dispatch(setPaintColor('#ff0000'));
+
+    // before — a point inside the triangle
+    const ctx = createContext({ activeTool: ToolName.paint, point: { x: 50, y: 40 } });
+
+    // result
+    expect(armVectorPaintOnPointerDown(ctx)).toBe(true);
+
+    const action = (ctx.dispatch as ReturnType<typeof vi.fn>).mock.calls[0][0] as ReturnType<typeof updateNode>;
+
+    expect(action.payload.changes).toEqual({
+      fillColorOverrideByKey: { 's1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]': '#ff0000' },
       filledFaceKeys: ['s1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]'],
     });
   });
@@ -1119,6 +1202,50 @@ describe('armVectorPaintOnPointerDown', () => {
     const action = (ctx.dispatch as ReturnType<typeof vi.fn>).mock.calls[0][0] as ReturnType<typeof updateNode>;
 
     expect(action.payload.changes).toEqual({ filledFaceKeys: [] });
+  });
+
+  it('should pin the paint-remove cursor and arm remove mode when the click hits an already-filled face', () => {
+    // mock
+    const nodeId = addVectorNode(
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'v1', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+      },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 50, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+    store.dispatch(updateNode({ changes: { filledFaceKeys: ['s1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]'] }, id: nodeId }));
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.paint, point: { x: 50, y: 40 } });
+
+    // result
+    expect(armVectorPaintOnPointerDown(ctx)).toBe(true);
+    expect(ctx.setClassName).toHaveBeenCalledWith('paint-remove');
+    expect(ctx.canvasRefs.isVectorPaintRemoveRef.current).toBe(true);
+  });
+
+  it('should arm add mode (not remove) when the click misses every face', () => {
+    // mock
+    const nodeId = addVectorNode(
+      {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'v1', id: 's3', startId: 'v3', tangentEnd: null, tangentStart: null },
+      },
+      { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 }, v3: { id: 'v3', x: 50, y: 100 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    // before — a point well outside the triangle
+    const ctx = createContext({ activeTool: ToolName.paint, point: { x: 500, y: 500 } });
+
+    // result
+    expect(armVectorPaintOnPointerDown(ctx)).toBe(true);
+    expect(ctx.canvasRefs.isVectorPaintRemoveRef.current).toBe(false);
   });
 
   it('should bake a crossing the clicked face depends on into a real, persisted vertex (regression: painting across a crossing that only existed virtually made the fill disappear the moment the node was cut later)', () => {

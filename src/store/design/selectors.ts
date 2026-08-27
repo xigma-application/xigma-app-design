@@ -42,6 +42,8 @@ export const selectLastTextTool = (state: RootState): ToolName => state.design.l
 
 export const selectNodes = (state: RootState): Record<string, TSceneNode> => state.design.nodes;
 
+export const selectPaintColor = (state: RootState): string => state.design.paintColor;
+
 export const selectPenActiveVertexId = (state: RootState): string | null => state.design.penActiveVertexId;
 
 const selectRootOrder = (state: RootState): string[] => state.design.rootOrder;

@@ -224,6 +224,20 @@ export class DesignPage {
     await this.page.keyboard.up('Alt');
   }
 
+  // same down/move.../up primitive as dragVectorLasso, for the Paint tool's own freeform drag mode —
+  // sweeping through several faces in one gesture fills every one of them, live, as the stroke passes
+  async dragVectorPaint(points: { x: number; y: number }[]): Promise<void> {
+    const [first, ...rest] = points;
+
+    await this.pointerDown(first.x, first.y);
+
+    for (const point of rest) {
+      await this.pointerMove(point.x, point.y);
+    }
+
+    await this.pointerUp();
+  }
+
   // same down/move.../up primitive as dragVectorLasso, for the Pencil tool's own freehand drag — one
   // continuous gesture commits exactly one vector node, unlike Pen's click-by-click chaining
   async drawPencilStroke(points: { x: number; y: number }[]): Promise<void> {

@@ -3,7 +3,7 @@ import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { getVectorFillColorForLoopKey } from '../vectorNetwork/getVectorFillColorForLoopKey';
+import { getEffectiveVectorFillColor } from '../vectorNetwork/getEffectiveVectorFillColor';
 import { getVectorFillLoopPoints } from '../vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints';
 
 export const groupFilledFacesByColor = (renderedNode: TVectorNode): Map<string, TPoint[][]> => {
@@ -13,7 +13,7 @@ export const groupFilledFacesByColor = (renderedNode: TVectorNode): Map<string, 
     const points = getVectorFillLoopPoints(renderedNode, key);
 
     if (points) {
-      const color = renderedNode.fillColorOverrideByKey?.[key] ?? getVectorFillColorForLoopKey(key);
+      const color = getEffectiveVectorFillColor(renderedNode, key);
       const faces = facesByColor.get(color) ?? [];
 
       faces.push(points);

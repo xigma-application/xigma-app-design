@@ -106,7 +106,11 @@ describe('commitVectorCutComponents', () => {
       vertexHandleModes: {},
       vertices: { c: { id: 'c', x: 200, y: 0 }, d: { id: 'd', x: 300, y: 0 } },
     };
-    const finish = (component: TVectorNetworkComponent): TVectorNetworkComponent => ({ ...component, filledFaceKeys: ['tagged'] });
+    const finish = (component: TVectorNetworkComponent): TVectorNetworkComponent => ({
+      ...component,
+      fillColorOverrideByKey: { tagged: '#ff0000' },
+      filledFaceKeys: ['tagged'],
+    });
 
     // before
     const newNodeIds = commitVectorCutComponents(store.dispatch, node, [componentA, componentB], finish);
@@ -117,5 +121,32 @@ describe('commitVectorCutComponents', () => {
 
     expect(updatedOriginal.filledFaceKeys).toEqual(['tagged']);
     expect(newNode.filledFaceKeys).toEqual(['tagged']);
+    expect(updatedOriginal.fillColorOverrideByKey).toEqual({ tagged: '#ff0000' });
+    expect(newNode.fillColorOverrideByKey).toEqual({ tagged: '#ff0000' });
+  });
+
+  it('should default to an empty color override map when the finish step omits one', () => {
+    // mock
+    const node = addVectorNode();
+    const componentA: TVectorNetworkComponent = {
+      segments: { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+      vertexHandleModes: {},
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    };
+    const componentB: TVectorNetworkComponent = {
+      segments: { s2: { endId: 'd', id: 's2', startId: 'c', tangentEnd: null, tangentStart: null } },
+      vertexHandleModes: {},
+      vertices: { c: { id: 'c', x: 200, y: 0 }, d: { id: 'd', x: 300, y: 0 } },
+    };
+
+    // before
+    const newNodeIds = commitVectorCutComponents(store.dispatch, node, [componentA, componentB], identity);
+
+    // result
+    const updatedOriginal = store.getState().design.nodes[node.id] as TVectorNode;
+    const newNode = store.getState().design.nodes[newNodeIds[0]] as TVectorNode;
+
+    expect(updatedOriginal.fillColorOverrideByKey).toEqual({});
+    expect(newNode.fillColorOverrideByKey).toEqual({});
   });
 });

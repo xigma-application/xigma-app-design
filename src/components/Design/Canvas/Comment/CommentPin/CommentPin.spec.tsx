@@ -35,6 +35,7 @@ const createTestStore = (viewport = { x: 0, y: 0, zoom: 1 }): EnhancedStore<{ de
         lastShapeTool: ToolName.rectangle,
         lastTextTool: ToolName.text,
         nodes: {},
+        paintColor: '#d9d9d9',
         penActiveVertexId: null,
         rootOrder: [],
         selectedIds: [],

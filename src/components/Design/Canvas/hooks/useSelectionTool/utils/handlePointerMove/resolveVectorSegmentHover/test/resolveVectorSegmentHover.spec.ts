@@ -145,6 +145,23 @@ describe('resolveVectorSegmentHover', () => {
     expect(setClassName).toHaveBeenCalledWith(null);
   });
 
+  it("should NOT reset the cursor while the Paint tool is active and the pointer is mid-drag (regression: this used to null out the paint-add cursor on every pointermove of a freeform paint stroke, since it ran unconditionally and after the drag's own resolver had already skipped setting a class)", () => {
+    // mock
+    const nodeId = addVectorNode();
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+    store.dispatch(setActiveTool(ToolName.paint));
+    const canvas = createCanvas();
+    const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
+    const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef();
+    const setClassName = vi.fn();
+
+    // before — LMB held (buttons: 1), as during an active paint drag
+    resolveVectorSegmentHover(canvas, pointerEvent(50, 0, 1), hoveredVectorSegmentIdRef, hoveredVectorEdgeInsertPointRef, setClassName);
+
+    // result
+    expect(setClassName).not.toHaveBeenCalled();
+  });
+
   it('should clear the hover state and reset the cursor, never highlighting a segment, while the Lasso tool is active', () => {
     // mock — Lasso only interacts with points, so segment hover/cursor must stay fully inert even over a segment
     const nodeId = addVectorNode();

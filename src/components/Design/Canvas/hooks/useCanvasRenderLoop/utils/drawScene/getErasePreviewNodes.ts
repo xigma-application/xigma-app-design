@@ -5,7 +5,6 @@ import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
 import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
-import { getVectorFillColorForLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillColorForLoopKey';
 import { subtractCapsuleFromVectorNetwork } from 'utils/canvas/vectorNetwork/eraseVectorNetwork/subtractCapsuleFromVectorNetwork/subtractCapsuleFromVectorNetwork';
 
 export const getErasePreviewNodes = (
@@ -35,10 +34,6 @@ export const getErasePreviewNodes = (
       return node;
     }
 
-    const fillColorOverrideByKey = Object.fromEntries(
-      erased.survivingFaces.map(({ key, originalKey }) => [key, getVectorFillColorForLoopKey(originalKey)]),
-    );
-
-    return { ...bakedNode, ...erased, fillColorOverrideByKey };
+    return { ...bakedNode, ...erased };
   });
 };

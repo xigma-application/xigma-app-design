@@ -104,6 +104,19 @@ describe('ColorPicker behaviors', () => {
     unregister();
   });
 
+  it('should apply a caller-supplied triggerClassName to the trigger button', () => {
+    // before
+    renderColorPicker({
+      onChange: vi.fn(),
+      trigger: <span>Open</span>,
+      triggerClassName: 'custom-trigger',
+      value: { alpha: 100, hex: '#ff0000' },
+    });
+
+    // result
+    expect(screen.getByRole('button', { name: 'Open' }).className).toContain('custom-trigger');
+  });
+
   it('should not switch to the gradient tab since it is disabled', () => {
     // before
     renderColorPicker({ onChange: vi.fn(), trigger: <button type="button">Open</button>, value: { alpha: 100, hex: '#ff0000' } });

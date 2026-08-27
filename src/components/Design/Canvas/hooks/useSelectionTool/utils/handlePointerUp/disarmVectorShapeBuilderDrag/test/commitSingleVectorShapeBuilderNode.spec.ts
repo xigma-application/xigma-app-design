@@ -62,6 +62,27 @@ describe('commitSingleVectorShapeBuilderNode', () => {
     expect(changes.filledFaceKeys).toHaveLength(1);
   });
 
+  it('should forward the merged face’s own picked color in the dispatched changes', () => {
+    // mock — the top face has an explicit paint-tool color
+    const [topFace] = deriveVectorFaces(splitRectangleNode).filter((face) => face.key === 'divider,leftUpper,rightUpper,top');
+    const paintedNode: TVectorNode = {
+      ...splitRectangleNode,
+      fillColorOverrideByKey: { [getVectorFillLoopKey(topFace.pieceKeys)]: '#00ff00' },
+    };
+    const dispatch = vi.fn();
+    const faceKeys = new Set(['bottom,divider,leftLower,rightLower', 'divider,leftUpper,rightUpper,top']);
+
+    // action
+    commitSingleVectorShapeBuilderNode(dispatch, paintedNode, faceKeys, false);
+
+    // result
+    const action = (dispatch.mock.calls[0] as [ReturnType<typeof updateNode>])[0];
+    const changes = action.payload.changes as Partial<TVectorNode>;
+
+    expect(changes.filledFaceKeys).toHaveLength(1);
+    expect(changes.fillColorOverrideByKey?.[changes.filledFaceKeys![0]]).toBe('#00ff00');
+  });
+
   it('should not dispatch when the touched face-key set matches nothing on the node', () => {
     // mock
     const dispatch = vi.fn();

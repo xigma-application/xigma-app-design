@@ -33,6 +33,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   sideOffset,
   trigger,
   triggerAriaLabel,
+  triggerClassName,
   value,
 }) => {
   const [activeTab, setActiveTab] = useState(DEFAULT_ACTIVE_TAB);
@@ -50,6 +51,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
       sideOffset={sideOffset}
       trigger={trigger}
       triggerAriaLabel={triggerAriaLabel}
+      triggerClassName={triggerClassName}
     >
       <div className={cx(styles.ColorPicker, className)}>
         <Header activeTab={activeTab} setActiveTab={handleSetActiveTab} />

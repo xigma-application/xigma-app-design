@@ -7,6 +7,8 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { commitCrossingVectorNodeGroup } from '../commitCrossingVectorNodeGroup';
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
+import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
 import { groupCrossingVectorNodes } from 'utils/canvas/vectorNetwork/mergeVectorNodes/groupCrossingVectorNodes';
 
 // two 150x200 rectangles staggered by (75,100) — proven (mergeVectorFaces.spec.ts's own
@@ -61,6 +63,35 @@ describe('commitCrossingVectorNodeGroup', () => {
     expect(deleteAction.payload).toBe('n2');
     expect(changes.rotation).toBe(0);
     expect(changes.filledFaceKeys).toHaveLength(1);
+  });
+
+  it('should forward the merged face’s own picked color in the dispatched changes', () => {
+    // mock — n1's own single face has an explicit paint-tool color before the two nodes ever cross
+    const bareN1 = buildRectangleNode('n1', 0, 0);
+    const [faceN1] = deriveVectorFaces(bareN1);
+    const paintedN1 = {
+      ...bareN1,
+      fillColorOverrideByKey: { [getVectorFillLoopKey(faceN1.pieceKeys)]: '#00ff00' },
+      filledFaceKeys: [getVectorFillLoopKey(faceN1.pieceKeys)],
+    };
+    const [group] = groupCrossingVectorNodes([paintedN1, buildRectangleNode('n2', 75, 100)]);
+    const dispatch = vi.fn();
+    const path = [
+      { x: 25, y: 25 },
+      { x: 100, y: 150 },
+      { x: 200, y: 250 },
+    ];
+
+    // action
+    commitCrossingVectorNodeGroup(dispatch, group, path, false, false);
+
+    // result — n1's original face key is now stale (its geometry changed once it crossed n2), but the
+    // freshly-merged face still inherits its picked color, not a hash-derived one
+    const updateAction = dispatch.mock.calls.find((call) => call[0].type === updateNode.type)![0] as ReturnType<typeof updateNode>;
+    const changes = updateAction.payload.changes as Partial<TVectorNode>;
+
+    expect(changes.filledFaceKeys!.length).toBeGreaterThan(0);
+    expect(Object.values(changes.fillColorOverrideByKey ?? {})).toContain('#00ff00');
   });
 
   it('should merge via a box (isBoxMode) instead of the freeform path, using only the path’s first/last point as corners', () => {

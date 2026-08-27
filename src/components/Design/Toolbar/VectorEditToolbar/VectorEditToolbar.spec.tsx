@@ -107,6 +107,20 @@ describe('VectorEditToolbar', () => {
     expect(store.getState().design.activeTool).toBe(ToolName.move);
   });
 
+  it('should switch to Paint and show a color swatch trigger instead of the icon once active', () => {
+    // before
+    act(() => store.dispatch(setVectorEditingNodeIds(['node-1'])));
+
+    renderVectorEditToolbar();
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'Paint' }));
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.paint);
+    expect(document.querySelector('[class*="VectorEditPaintTool__swatch"]')).toBeInTheDocument();
+  });
+
   it('should switch to Bend and keep it active after clicking it, independent of Ctrl/Cmd', () => {
     // before
     act(() => store.dispatch(setVectorEditingNodeIds(['node-1'])));

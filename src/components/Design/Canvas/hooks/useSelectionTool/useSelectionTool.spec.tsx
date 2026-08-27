@@ -738,6 +738,38 @@ describe('useSelectionTool behaviors', () => {
     expect(refs.snappedVectorHandleRef.current).toBeNull();
   });
 
+  it('should clear an in-progress paint stroke\'s touched-faces preview once the tool switches away, instead of leaving a stale hatch-fill preview behind', () => {
+    // mock — models a paint drag that got interrupted (tool switched mid-drag) without ever
+    // reaching disarmVectorPaintDrag's own cleanup
+    const canvasRef = createCanvasRef();
+    const refs = createCanvasRefs({ canvasRef });
+
+    refs.vectorPaintPathRef.current = [{ x: 0, y: 0 }];
+    refs.touchedVectorPaintLoopKeysRef.current = { 'node-1': new Set(['face-a']) };
+    refs.vectorPaintTouchedFacesRef.current = { 'node-1': ['face-a'] };
+    refs.isVectorPaintRemoveRef.current = true;
+
+    // before
+    renderHook(() => useSelectionTool(refs), {
+      wrapper: ({ children }) => (
+        <Provider store={store}>
+          <ClassNamesProvider>{children}</ClassNamesProvider>
+        </Provider>
+      ),
+    });
+
+    // action
+    act(() => {
+      store.dispatch(setActiveTool(ToolName.pen));
+    });
+
+    // result
+    expect(refs.vectorPaintPathRef.current).toBeNull();
+    expect(refs.touchedVectorPaintLoopKeysRef.current).toEqual({});
+    expect(refs.vectorPaintTouchedFacesRef.current).toBeNull();
+    expect(refs.isVectorPaintRemoveRef.current).toBe(false);
+  });
+
   it('should re-evaluate an in-progress tangent-handle drag immediately when Shift is pressed, without a further pointermove', () => {
     // mock — s1's real tangentStart handle sits at v1(3400,700) + (50,0) = (3450,700)
     const nodeId = addVectorNodeWithTangent();

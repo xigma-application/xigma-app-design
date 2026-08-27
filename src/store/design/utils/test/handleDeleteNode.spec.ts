@@ -36,6 +36,7 @@ const buildState = (nodes: TDesignState['nodes'], selectedIds: string[] = []): T
   lastShapeTool: ToolName.rectangle,
   lastTextTool: ToolName.text,
   nodes,
+  paintColor: '#d9d9d9',
   penActiveVertexId: null,
   rootOrder: Object.keys(nodes),
   selectedIds,

@@ -23,6 +23,7 @@ const buildState = (nodes: TDesignState['nodes'], overrides: Partial<TDesignStat
   lastShapeTool: ToolName.rectangle,
   lastTextTool: ToolName.text,
   nodes,
+  paintColor: '#d9d9d9',
   penActiveVertexId: null,
   rootOrder: Object.keys(nodes),
   selectedIds: [],

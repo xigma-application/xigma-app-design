@@ -114,6 +114,26 @@ describe('mergeVectorFaces', () => {
     expect(deriveVectorFaces({ ...merged, filledFaceKeys: [] })).toHaveLength(1);
   });
 
+  it('should color the merged face with the first touched face’s own picked color, not a hash-derived one', () => {
+    // mock — the top face has an explicit paint-tool color, the bottom face a different one
+    const faces = deriveVectorFaces(splitRectangleNode);
+    const [topFace, bottomFace] = faces;
+    const paintedNode = {
+      ...splitRectangleNode,
+      fillColorOverrideByKey: {
+        [getVectorFillLoopKey(topFace.pieceKeys)]: '#00ff00',
+        [getVectorFillLoopKey(bottomFace.pieceKeys)]: '#0000ff',
+      },
+    };
+
+    // action — touch the top face first, then the bottom one
+    const merged = mergeVectorFaces(paintedNode, [topFace, bottomFace]);
+
+    // result — the single merged face takes the FIRST touched face's color
+    expect(merged.filledFaceKeys).toHaveLength(1);
+    expect(merged.fillColorOverrideByKey?.[merged.filledFaceKeys[0]]).toBe('#00ff00');
+  });
+
   it('should keep the divider segment and only fill the touched face, when just one face is touched', () => {
     // before
     const [firstFace] = deriveVectorFaces(splitRectangleNode);

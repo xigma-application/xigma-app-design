@@ -142,6 +142,10 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         refs.hoveredVectorPaintFaceKeyRef.current = null;
         refs.hoveredVectorFaceSelectRef.current = null;
         refs.vectorCutPreviewRef.current = null;
+        refs.vectorPaintPathRef.current = null;
+        refs.touchedVectorPaintLoopKeysRef.current = {};
+        refs.vectorPaintTouchedFacesRef.current = null;
+        refs.isVectorPaintRemoveRef.current = false;
         refs.vectorShapeBuilderPathRef.current = null;
         refs.touchedVectorShapeBuilderFacesRef.current = {};
         refs.hoveredVectorShapeBuilderFaceRef.current = null;

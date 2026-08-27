@@ -1,3 +1,6 @@
+// others
+import { DEFAULT_PAINT_COLOR } from '../constants';
+
 // store
 import slice, {
   addComment,
@@ -7,6 +10,7 @@ import slice, {
   deleteNode,
   replaceDesignSnapshot,
   setActiveTool,
+  setPaintColor,
   setPenActiveVertexId,
   setSelection,
   setVectorEditingNodeIds,
@@ -57,6 +61,7 @@ describe('design slice', () => {
       lastShapeTool: ToolName.rectangle,
       lastTextTool: ToolName.text,
       nodes: {},
+      paintColor: DEFAULT_PAINT_COLOR,
       penActiveVertexId: null,
       rootOrder: [],
       selectedIds: [],
@@ -181,6 +186,14 @@ describe('design slice', () => {
     expect(state.nodes).toEqual({ [node.id]: node });
     expect(state.rootOrder).toEqual([node.id]);
     expect(state.selectedIds).toEqual([node.id]);
+  });
+
+  it('should set the paint color', () => {
+    // before
+    const state = slice(undefined, setPaintColor('#ff0000'));
+
+    // result
+    expect(state.paintColor).toBe('#ff0000');
   });
 
   it('should set the pen active vertex id', () => {

@@ -83,6 +83,7 @@ describe('getErasePreviewNodes', () => {
     // mock
     const bakedNode = { ...vectorNode, rotation: 0 };
     const erased = {
+      fillColorOverrideByKey: { 'new-key': getVectorFillColorForLoopKey('old-key') },
       filledFaceKeys: ['new-key'],
       segments: { s1: {} },
       survivingFaces: [{ key: 'new-key', originalKey: 'old-key' }],
@@ -102,10 +103,7 @@ describe('getErasePreviewNodes', () => {
     // result — radius = 20 / 2 / 2 = 5; the new key is pinned to the old key's own color, not its own
     expect(getRenderedVectorNodeMock).toHaveBeenCalledWith(vectorNode);
     expect(subtractCapsuleFromVectorNetworkMock).toHaveBeenCalledWith(bakedNode, [{ x: 5, y: 5 }], 5);
-    expect(result).toEqual([
-      { ...bakedNode, ...erased, fillColorOverrideByKey: { 'new-key': getVectorFillColorForLoopKey('old-key') } },
-      otherNode,
-    ]);
+    expect(result).toEqual([{ ...bakedNode, ...erased }, otherNode]);
   });
 
   it('should fall back to the real node when the stroke misses every segment of it', () => {

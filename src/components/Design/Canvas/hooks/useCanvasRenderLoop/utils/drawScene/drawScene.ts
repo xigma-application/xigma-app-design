@@ -45,6 +45,8 @@ import { drawVectorCutHoverPreview } from './drawVectorCutHoverPreview';
 import { drawVectorCutPreview } from './drawVectorCutPreview';
 import { drawVectorEraseBrush } from './drawVectorEraseBrush';
 import { drawVectorPaintHoverPreview } from './drawVectorPaintHoverPreview';
+import { drawVectorPaintPath } from './drawVectorPaintPath';
+import { drawVectorPaintTouchedFacesPreview } from './drawVectorPaintTouchedFacesPreview';
 import { drawVectorSelectedFillPreview } from './drawVectorSelectedFillPreview';
 import { drawVectorShapeBuilderHoverPreview } from './drawVectorShapeBuilderHoverPreview';
 import { drawVectorShapeBuilderPath } from './drawVectorShapeBuilderPath';
@@ -261,6 +263,18 @@ export const drawScene = (
     viewport,
   );
   drawVectorPaintHoverPreview(gl, program, buffer, nodesById, hoveredVectorPaintFace, clientWidth, clientHeight, viewport);
+  drawVectorPaintTouchedFacesPreview(
+    gl,
+    program,
+    buffer,
+    nodesById,
+    refs.vectorPaintTouchedFacesRef.current,
+    refs.isVectorPaintRemoveRef.current,
+    clientWidth,
+    clientHeight,
+    viewport,
+  );
+  drawVectorPaintPath(gl, program, buffer, refs.vectorPaintPathRef.current, clientWidth, clientHeight, viewport);
   drawVectorFaceSelectHoverPreview(gl, program, buffer, nodesById, hoveredVectorFaceSelect, clientWidth, clientHeight, viewport);
   drawVectorDraggedFillPreview(gl, program, buffer, nodesById, refs.draggedVectorFillFacesRef.current, clientWidth, clientHeight, viewport);
   drawVectorSelectedFillPreview(

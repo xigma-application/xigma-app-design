@@ -10,6 +10,7 @@ export type TVectorDivideResult = {
 };
 
 export type TVectorConnectedCutResult = {
+  fillColorOverrideByKey: Record<string, string>;
   filledFaceKeys: string[];
   node: TVectorNode;
   segments: Record<string, TVectorSegment>;

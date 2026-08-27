@@ -19,5 +19,6 @@ export type TColorPickerProps = {
   sideOffset?: number;
   trigger: ReactNode;
   triggerAriaLabel?: string;
+  triggerClassName?: string;
   value: TColorPickerValue;
 };
