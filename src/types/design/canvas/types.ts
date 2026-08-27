@@ -168,6 +168,8 @@ export type TCanvasRefs = {
   ellipseArcDragRef: RefObject<TEllipseArcDragState | null>;
   ellipseArcRatioDragRef: RefObject<TEllipseArcRatioDragState | null>;
   ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null>;
+  eraseBrushCenterRef: RefObject<TPoint | null>;
+  eraserDiameterRef: RefObject<number>;
   hoveredSegmentIdRef: RefObject<string | null>;
   hoveredVectorCutPointRef: RefObject<TPoint | null>;
   hoveredVectorCutSegmentRef: RefObject<TVectorCutSegmentHover | null>;

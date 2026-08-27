@@ -1,0 +1,27 @@
+// store
+import { selectActiveTool, selectViewport } from 'store/design/selectors';
+import { store } from 'store';
+
+// types
+import { TCanvasRefs } from 'types/design/canvas/types';
+import { ToolName } from 'types/design/enums';
+
+// utils
+import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { screenToWorld } from '../../../../utils/screenToWorld';
+
+export const resolveVectorEraseHover = (
+  canvas: HTMLCanvasElement,
+  event: PointerEvent,
+  canvasRefs: TCanvasRefs,
+  setClassName: (className: string | null) => void,
+): void => {
+  const state = store.getState();
+
+  if (selectActiveTool(state) === ToolName.erase) {
+    setClassName('erase');
+    canvasRefs.eraseBrushCenterRef.current = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
+  } else {
+    canvasRefs.eraseBrushCenterRef.current = null;
+  }
+};

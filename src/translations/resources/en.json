@@ -37,6 +37,7 @@
   "design.toolbar.vectorEditToolbar.more": "More",
   "design.toolbar.vectorEditToolbar.tool.bend": "Bend",
   "design.toolbar.vectorEditToolbar.tool.cut": "Cut",
+  "design.toolbar.vectorEditToolbar.tool.erase": "Erase",
   "design.toolbar.vectorEditToolbar.tool.lasso": "Lasso",
   "design.toolbar.vectorEditToolbar.tool.paint": "Paint",
   "design.toolbar.vectorEditToolbar.tool.shapeBuilder": "Shape builder",

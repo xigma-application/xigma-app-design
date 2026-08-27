@@ -23,6 +23,7 @@ export enum ToolName {
   cut = 'cut',
   default = 'default',
   ellipse = 'ellipse',
+  erase = 'erase',
   frame = 'frame',
   hand = 'hand',
   lasso = 'lasso',

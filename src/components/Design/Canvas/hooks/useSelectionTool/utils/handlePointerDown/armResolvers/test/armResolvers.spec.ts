@@ -30,6 +30,7 @@ import { armStarVertexCountOnPointerDown } from '../armStarVertexCountOnPointerD
 import { armVectorBendSegmentOnPointerDown } from '../armVectorBendSegmentOnPointerDown';
 import { armVectorCornerHandleOnPointerDown } from '../armVectorCornerHandleOnPointerDown';
 import { armVectorCutOnPointerDown } from '../armVectorCutOnPointerDown';
+import { armVectorEraseOnPointerDown } from '../armVectorEraseOnPointerDown';
 import { armVectorFaceSelectOnPointerDown } from '../armVectorFaceSelectOnPointerDown';
 import { armVectorHandleOnPointerDown } from '../armVectorHandleOnPointerDown/armVectorHandleOnPointerDown';
 import { armVectorLassoOnPointerDown } from '../armVectorLassoOnPointerDown/armVectorLassoOnPointerDown';
@@ -1549,6 +1550,59 @@ describe('armVectorCutOnPointerDown', () => {
 
     // result
     expect(armVectorCutOnPointerDown(ctx)).toBeUndefined();
+  });
+});
+
+describe('armVectorEraseOnPointerDown', () => {
+  afterEach(() => {
+    store.dispatch(setVectorEditingNodeIds([]));
+  });
+
+  it('should arm the erase drag, capture the pointer, set the cursor and run a first dab when Erase is active', () => {
+    // mock — a(0,0)->b(100,0)
+    const nodeId = addVectorNode(
+      { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+      { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const selectionRefs = createSelectionToolRefs();
+    const canvasRefs = createCanvasRefs();
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.erase, canvasRefs, point: { x: 50, y: 0 }, selectionRefs });
+
+    // result
+    expect(armVectorEraseOnPointerDown(ctx)).toBe(true);
+    expect(ctx.selectionRefs.vectorEraseDragRef.current).toEqual({ lastPoint: { x: 50, y: 0 } });
+    expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
+    expect(ctx.setClassName).toHaveBeenCalledWith('erase');
+    expect(ctx.dispatch).toHaveBeenCalled();
+  });
+
+  it('should return undefined when Erase is not the active tool', () => {
+    // mock
+    const nodeId = addVectorNode(
+      { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+      { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    );
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    // before
+    const ctx = createContext({ activeTool: ToolName.default, point: { x: 50, y: 0 } });
+
+    // result
+    expect(armVectorEraseOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  it('should return undefined when Vector Edit Mode is not active', () => {
+    // before
+    const ctx = createContext({ activeTool: ToolName.erase, point: { x: 50, y: 0 } });
+
+    // result
+    expect(armVectorEraseOnPointerDown(ctx)).toBeUndefined();
   });
 });
 

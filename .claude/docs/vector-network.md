@@ -4593,6 +4593,82 @@ mirroring `getVectorFillPieceKey.ts`'s own construction, just done by string sub
 re-walking geometry. This is correct regardless of whatever unrelated overlap the *rest* of the merged
 node's geometry has, since it never looks at that geometry at all.
 
+## 66. Erase tool — a circular brush that severs and drops the covered stretch of every segment it sweeps
+
+Requested directly ("Erase jest obok cut narzędzia do wektora", with Figma reference screenshots and
+the Figma help doc), sitting next to Cut on the `VectorEditToolbar` — `ToolName.erase`, `Shift+E`.
+Drag a circular brush over the network; wherever it sweeps a segment, that segment is severed at the
+brush's entry/exit points and only the covered piece removed, leaving the freshly minted split
+vertices as real editable points (Figma's own wording: "adds new editable vector points along the
+erased area"). Fully-covered segments are deleted outright; vertices left with no segment are pruned.
+The node is **never** split into components (Figma parity — erasing all the way across doesn't create
+a second layer); a gap in a closed shape just opens the fill, which re-derives (§2) — the "hole"
+is emergent, not a boolean subtract.
+
+**Geometry — `utils/canvas/vectorNetwork/eraseVectorNetwork/`, all pure:**
+- `getSegmentEraseInterval.ts` — flattens the segment (`flattenSegment` + `getVectorCurveSegmentCount`,
+  same call as `getVectorEdgeAtPoint.ts`), **densifies** each flattened edge so no two samples sit
+  more than `radius/2` apart (a small brush crossing the middle of a long straight edge would
+  otherwise fall between its two endpoint samples), tests each sample against the brush **capsule**
+  (`getCapsuleDistance.ts` — point→swept-segment, built on `getClosestPointOnLine`), and returns
+  `none` / `whole` / `{ start, tOut }` / `{ end, tIn }` / `{ middle, tIn, tOut }` (Bézier params via
+  `(index + fraction) / edgeCount`, exactly like `getVectorEdgeAtPoint`). Multiple inside-runs from
+  one brush position are collapsed to one span `[firstIn, lastOut]`. `ENDPOINT_EPS` guards demote a
+  graze that removes nothing (single-sample span, or a span landing on `t≈0`/`t≈1`) back to `none`.
+- `applySegmentErase.ts` — reuses `cutVectorNetwork/severVectorSegmentAtPoint.ts`: `start`/`end`
+  sever once and drop the covered piece; `middle` severs at `tIn`, then severs the far piece at the
+  **re-parameterised** `tOut` (`(tOut - tIn) / (1 - tIn)`) and drops the middle. Typed to
+  `Exclude<TSegmentEraseInterval, { kind: 'none' }>`.
+- `eraseVectorNetworkAlongCapsule.ts` — folds `applySegmentErase` over every segment (interval tested
+  against the *original* geometry, applied against the accumulating one — safe because each id is
+  processed once and splits mint fresh ids), then one `getRemainingVertices` prune. Returns `null`
+  when nothing changed. `filledFaceKeys` untouched — self-heals via re-derivation, exactly as
+  `handleDeleteSelection/deleteSelectedSegments.ts` does.
+
+**Interaction — mirrors Cut's arm/continue/disarm, but continuous:**
+- `eraseVectorNetworkStep.ts` (`useSelectionTool/utils/`) — one dab: for each editing node, bake
+  rotation (`bakeVectorNodeRotation` — a rotated node is flattened to `rotation: 0` on first erase,
+  since the world-space brush must line up with stored points), run `eraseVectorNetworkAlongCapsule`,
+  `dispatch(updateNode(...))`. Shared by arm + continue.
+- `armVectorEraseOnPointerDown.ts` (in `ARM_RESOLVERS`, next to Cut) — sets `vectorEraseDragRef`
+  (`{ lastPoint }`), `setPointerCapture`, `setClassName('erase')`, one dab at the down point.
+  No `beginHistoryGesture` — `handlePointerDown.ts` already opens one for the whole interaction; the
+  whole stroke is one undo step.
+- `continueVectorEraseDrag.ts` — dab along the capsule `lastPoint → pointer` each move (radius =
+  `eraserDiameterRef / 2 / zoom`), advance `lastPoint`.
+- `disarmVectorEraseDrag.ts` — release capture, clear ref, `setClassName('erase')` (**stays** on the
+  tool, unlike Cut's auto-return to Move — an eraser is used repeatedly).
+
+**Brush size:** `eraserDiameterRef` (a `TCanvasRefs` `RefObject<number>`, default
+`ERASER_DEFAULT_DIAMETER_PX = 10` **screen px** — converted to world via `/zoom` for hit-testing,
+like every other tolerance here). `[` / `]` adjust it, clamped to `[1, 100]` —
+`adjustEraserDiameter.ts`, called from `useSelectionTool.ts`'s `onKeyDown` (the only global keydown
+handler active for the vector-edit tools), gated on `activeTool === ToolName.erase`. Session-scoped:
+survives tool switches, resets on reload, **not** undoable. New `KeyboardKeys.e` / `.bracketLeft` /
+`.bracketRight`.
+
+**Preview + cursor:** `resolveVectorEraseHover.ts` (in the `resolveVectorIdleHover` chain, next to
+`resolveVectorCutHover`) tracks `eraseBrushCenterRef` (world pointer pos) on idle moves and **forces**
+`setClassName('erase')` (same chain-order reason Cut forces `'cut-off'`); `resolveVectorSegmentHover.ts`
+adds `erase` to `isSegmentHoverBlockedByTool` so the generic blue highlight never shows.
+`drawScene/drawVectorEraseBrush.ts` strokes a thin `VECTOR_EDIT_OUTLINE_STROKE` circle at the brush
+centre via `drawEllipse`, radius `eraserDiameterRef / 2 / zoom`, only while Erase is active. Cursor
+class `erase` → `erase.png` at hotspot `(8, 24)` (`canvas.module.scss`, `getCursorClassName.ts`).
+
+**Wiring** (same spots as every vector-edit tool): `ToolName.erase`, `VectorEditToolbar/constants.ts`
+`TOOLS` (after Cut, `EraseTool` icon from `@xigma/components` — registered in `xigma-app-shared`
+`packages/components/src/Icon/constants.ts`), `Toolbar/constants.ts` `TOOL_ICON`/`TOOL_LABEL`,
+`keys.ts`, `shortcuts.ts`, `useKeyboardShortcuts.ts`, `isDispatchToolBlocked.ts`
+`VECTOR_EDIT_ALLOWED_TOOLS`, `useSelectionTool.ts` effect gate, `en.json`/`pl.json`.
+
+Unit: every new util has its own spec; `armResolvers.spec.ts` gains an `armVectorEraseOnPointerDown`
+block. E2E: `vector-erase.spec.ts` — `Shift+E` activation, a mid-edge drag proving 4→5 segments with
+no node split, and a `]`-widened dab leaving a wider gap.
+
+**v1 limitations:** a rotated node is baked flat on first erase; multiple inside-runs within one
+segment from a single brush position are collapsed to one span; erasing pure fill area that touches
+no segment does nothing (Figma's eraser is path-based too); no right-sidebar weight/shape panel.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

@@ -3,6 +3,9 @@ import { renderHook } from '@testing-library/react';
 // components
 import CanvasRefsProvider from './CanvasRefsProvider';
 
+// others
+import { ERASER_DEFAULT_DIAMETER_PX } from 'constant/canvas';
+
 // hooks
 import { useCanvasRefsContext } from './hooks/useCanvasRefsContext';
 
@@ -25,6 +28,8 @@ describe('CanvasRefsProvider behaviors', () => {
       ellipseArcDragRef: { current: null },
       ellipseArcRatioDragRef: { current: null },
       ellipseArcRotateDragRef: { current: null },
+      eraseBrushCenterRef: { current: null },
+      eraserDiameterRef: { current: ERASER_DEFAULT_DIAMETER_PX },
       hoverRef: { current: null },
       hoveredSegmentIdRef: { current: null },
       hoveredVectorCutPointRef: { current: null },

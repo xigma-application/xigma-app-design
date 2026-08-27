@@ -14,6 +14,7 @@ const VECTOR_EDIT_ALLOWED_TOOLS: ToolName[] = [
   ToolName.move,
   ToolName.bend,
   ToolName.cut,
+  ToolName.erase,
   ToolName.shapeBuilder,
   ToolName.variableWidth,
 ];

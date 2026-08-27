@@ -20,6 +20,14 @@ describe('getCursorClassName', () => {
     expect(result).toBe('cut-off');
   });
 
+  it('should return "erase" for the Erase tool', () => {
+    // before
+    const result = getCursorClassName(ToolName.erase);
+
+    // result
+    expect(result).toBe('erase');
+  });
+
   it('should return "paint" for the Paint tool', () => {
     // before
     const result = getCursorClassName(ToolName.paint);

@@ -25,6 +25,7 @@ export const TOOLS: TVectorEditTool[] = [
   { icon: 'PaintTool', labelKey: `${translationNameSpace}.tool.paint`, shortcut: [SHIFT, 'B'], toolName: ToolName.paint },
   { icon: 'BendTool', labelKey: `${translationNameSpace}.tool.bend`, shortcut: [CONTROL], toolName: ToolName.bend },
   { icon: 'CutTool', labelKey: `${translationNameSpace}.tool.cut`, shortcut: ['X'], toolName: ToolName.cut },
+  { icon: 'EraseTool', labelKey: `${translationNameSpace}.tool.erase`, shortcut: [SHIFT, 'E'], toolName: ToolName.erase },
 ];
 
 export type TMoreToolName = ToolName.shapeBuilder | ToolName.variableWidth;

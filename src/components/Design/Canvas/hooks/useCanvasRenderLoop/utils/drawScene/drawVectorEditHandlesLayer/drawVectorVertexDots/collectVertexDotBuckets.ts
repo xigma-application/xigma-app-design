@@ -42,7 +42,19 @@ export const collectVertexDotBuckets = (
     classificationCache.set(node, { classification, key });
   }
 
-  drawImmediateVertexDots(gl, program, buffer, node, selectedVertexIds, newVertexIds, hoveredVertexId, baseSize, canvasWidth, canvasHeight, viewport);
+  drawImmediateVertexDots(
+    gl,
+    program,
+    buffer,
+    node,
+    selectedVertexIds,
+    newVertexIds,
+    hoveredVertexId,
+    baseSize,
+    canvasWidth,
+    canvasHeight,
+    viewport,
+  );
 
   return classification;
 };

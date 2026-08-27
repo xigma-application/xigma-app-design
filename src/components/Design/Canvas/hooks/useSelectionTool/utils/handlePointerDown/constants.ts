@@ -20,6 +20,7 @@ import { armStarVertexCountOnPointerDown } from './armResolvers/armStarVertexCou
 import { armVectorBendSegmentOnPointerDown } from './armResolvers/armVectorBendSegmentOnPointerDown';
 import { armVectorCornerHandleOnPointerDown } from './armResolvers/armVectorCornerHandleOnPointerDown';
 import { armVectorCutOnPointerDown } from './armResolvers/armVectorCutOnPointerDown';
+import { armVectorEraseOnPointerDown } from './armResolvers/armVectorEraseOnPointerDown';
 import { armVectorFaceSelectOnPointerDown } from './armResolvers/armVectorFaceSelectOnPointerDown';
 import { armVectorHandleOnPointerDown } from './armResolvers/armVectorHandleOnPointerDown/armVectorHandleOnPointerDown';
 import { armVectorLassoOnPointerDown } from './armResolvers/armVectorLassoOnPointerDown/armVectorLassoOnPointerDown';
@@ -40,6 +41,7 @@ export const ARM_RESOLVERS = [
   armVectorPaintOnPointerDown,
   armVectorShapeBuilderOnPointerDown,
   armVectorCutOnPointerDown,
+  armVectorEraseOnPointerDown,
   armVectorWidthPointOnPointerDown,
   armVectorHandleOnPointerDown,
   armVectorCornerHandleOnPointerDown,

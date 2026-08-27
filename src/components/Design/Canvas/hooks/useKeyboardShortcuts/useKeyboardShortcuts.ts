@@ -48,6 +48,7 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => dispatchTool(dispatch, ToolName.pencil), ...shortcuts[ToolName.pencil] },
       { action: (): any => dispatchTool(dispatch, ToolName.comment), ...shortcuts[ToolName.comment] },
       { action: (): any => dispatchTool(dispatch, ToolName.cut), ...shortcuts[ToolName.cut] },
+      { action: (): any => dispatchTool(dispatch, ToolName.erase), ...shortcuts[ToolName.erase] },
       { action: (): any => dispatchTool(dispatch, ToolName.media), ...shortcuts[ToolName.media] },
       { action: (): any => dispatchTool(dispatch, ToolName.paint), ...shortcuts[ToolName.paint] },
       { action: (): any => dispatchTool(dispatch, ToolName.text), ...shortcuts[ToolName.text] },

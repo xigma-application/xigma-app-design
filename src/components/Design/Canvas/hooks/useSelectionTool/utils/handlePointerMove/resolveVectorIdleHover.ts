@@ -4,6 +4,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 // utils
 import { resolveVectorCutHover } from './resolveVectorCutHover';
 import { resolveVectorCutMarkConsumption } from './resolveVectorCutMarkConsumption';
+import { resolveVectorEraseHover } from './resolveVectorEraseHover';
 import { resolveVectorFaceSelectHover } from './resolveVectorFaceSelectHover';
 import { resolveVectorMultiSelectBoxHover } from './resolveVectorMultiSelectBoxHover';
 import { resolveVectorPaintHover } from './resolveVectorPaintHover';
@@ -38,6 +39,7 @@ export const resolveVectorIdleHover = (
     resolveVectorFaceSelectHover(canvas, event, canvasRefs);
     resolveVectorMultiSelectBoxHover(canvas, event, canvasRefs, setClassName);
     resolveVectorCutHover(canvas, event, canvasRefs, setClassName);
+    resolveVectorEraseHover(canvas, event, canvasRefs, setClassName);
     resolveVectorCutMarkConsumption(canvasRefs);
   }
 };

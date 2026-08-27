@@ -48,7 +48,21 @@ describe('VectorEditToolbar', () => {
     expect(screen.getByText('Paint')).toBeInTheDocument();
     expect(screen.getByText('Bend')).toBeInTheDocument();
     expect(screen.getByText('Cut')).toBeInTheDocument();
+    expect(screen.getByText('Erase')).toBeInTheDocument();
     expect(screen.getByText('More')).toBeInTheDocument();
+  });
+
+  it('should make Erase the active tool when its button is clicked', () => {
+    // before
+    act(() => store.dispatch(setVectorEditingNodeIds(['node-1'])));
+
+    renderVectorEditToolbar();
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'Erase' }));
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.erase);
   });
 
   it('should show Move as active whenever the Move tool is the active tool', () => {

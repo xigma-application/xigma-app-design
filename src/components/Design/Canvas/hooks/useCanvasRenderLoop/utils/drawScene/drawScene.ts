@@ -43,6 +43,7 @@ import { drawVectorFaceSelectHoverPreview } from './drawVectorFaceSelectHoverPre
 import { drawVectorLasso } from './drawVectorLasso';
 import { drawVectorCutHoverPreview } from './drawVectorCutHoverPreview';
 import { drawVectorCutPreview } from './drawVectorCutPreview';
+import { drawVectorEraseBrush } from './drawVectorEraseBrush';
 import { drawVectorPaintHoverPreview } from './drawVectorPaintHoverPreview';
 import { drawVectorSelectedFillPreview } from './drawVectorSelectedFillPreview';
 import { drawVectorShapeBuilderHoverPreview } from './drawVectorShapeBuilderHoverPreview';
@@ -281,6 +282,17 @@ export const drawScene = (
     viewport,
   );
   drawVectorCutPreview(gl, program, buffer, refs.vectorCutPreviewRef.current, clientWidth, clientHeight, viewport);
+  drawVectorEraseBrush(
+    gl,
+    program,
+    buffer,
+    refs.eraseBrushCenterRef.current,
+    refs.eraserDiameterRef.current,
+    activeTool,
+    clientWidth,
+    clientHeight,
+    viewport,
+  );
   drawVectorWidthPointsPreview(
     gl,
     program,

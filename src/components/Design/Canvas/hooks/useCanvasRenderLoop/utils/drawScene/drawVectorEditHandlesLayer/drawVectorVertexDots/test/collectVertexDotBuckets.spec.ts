@@ -8,7 +8,9 @@ import { collectVertexDotBuckets } from '../collectVertexDotBuckets';
 
 const drawImmediateVertexDotsMock = vi.fn();
 
-vi.mock('../drawImmediateVertexDots', () => ({ drawImmediateVertexDots: (...args: unknown[]): void => drawImmediateVertexDotsMock(...args) }));
+vi.mock('../drawImmediateVertexDots', () => ({
+  drawImmediateVertexDots: (...args: unknown[]): void => drawImmediateVertexDotsMock(...args),
+}));
 vi.mock('../classifyVertexDots', async () => {
   const actual = await vi.importActual<typeof import('../classifyVertexDots')>('../classifyVertexDots');
 

@@ -2,6 +2,7 @@ import { FC, useMemo, useRef } from 'react';
 
 // others
 import { CanvasRefsContext } from './context';
+import { ERASER_DEFAULT_DIAMETER_PX } from 'constant/canvas';
 
 // types
 import {
@@ -52,6 +53,8 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const ellipseArcDragRef = useRef<TEllipseArcDragState | null>(null);
   const ellipseArcRatioDragRef = useRef<TEllipseArcRatioDragState | null>(null);
   const ellipseArcRotateDragRef = useRef<TEllipseArcRotateDragState | null>(null);
+  const eraseBrushCenterRef = useRef<TPoint | null>(null);
+  const eraserDiameterRef = useRef<number>(ERASER_DEFAULT_DIAMETER_PX);
   const hoveredSegmentIdRef = useRef<string | null>(null);
   const hoveredVectorCutPointRef = useRef<TPoint | null>(null);
   const hoveredVectorCutSegmentRef = useRef<TVectorCutSegmentHover | null>(null);
@@ -116,6 +119,8 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       ellipseArcDragRef,
       ellipseArcRatioDragRef,
       ellipseArcRotateDragRef,
+      eraseBrushCenterRef,
+      eraserDiameterRef,
       hoverRef,
       hoveredSegmentIdRef,
       hoveredVectorCutPointRef,

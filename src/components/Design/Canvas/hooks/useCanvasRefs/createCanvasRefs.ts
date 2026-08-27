@@ -1,3 +1,6 @@
+// others
+import { ERASER_DEFAULT_DIAMETER_PX } from 'constant/canvas';
+
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 
@@ -11,6 +14,8 @@ export const createCanvasRefs = (overrides: Partial<TCanvasRefs> = {}): TCanvasR
   ellipseArcDragRef: { current: null },
   ellipseArcRatioDragRef: { current: null },
   ellipseArcRotateDragRef: { current: null },
+  eraseBrushCenterRef: { current: null },
+  eraserDiameterRef: { current: ERASER_DEFAULT_DIAMETER_PX },
   hoverRef: { current: null },
   hoveredSegmentIdRef: { current: null },
   hoveredVectorCutPointRef: { current: null },

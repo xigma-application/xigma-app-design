@@ -1931,6 +1931,22 @@ write-up: `.claude/docs/vector-network.md` §64.
 | 315 | Delete on a mixed selection (a fully-selected sector plus an unrelated extra vertex) still deletes the extra vertex too         |  ✅  |            —             |
 | 316 | Deleting a filled sector drops its key from `filledFaceKeys` along with the geometry                                            |  ✅  |            —             |
 
+## Erase tool (`.claude/docs/vector-network.md` §66)
+
+A circular brush in Vector Edit Mode (`Shift+E`, next to Cut). Dragging it over the network severs
+every segment it sweeps at the brush edge and drops the covered piece — fully-covered segments go
+whole, orphaned vertices are pruned, the node is never split into a second layer. `[` / `]` resize
+the brush (default 10 screen px, clamped 1–100). The whole geometry (interval detection, sever/drop,
+orphan prune, diameter clamp) is pinned by unit specs; e2e covers the live pointer-capture drag.
+
+| #   | Scenario                                                                                                              | Unit |            E2E            |
+| --- | ------------------------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------: |
+| 317 | `Shift+E` switches the active tool to Erase while a node is open for editing                                                    |  ✅  | ✅ `vector-erase.spec.ts` |
+| 318 | Dragging the eraser across the middle of an edge splits it into two stubs (4→5 segments), leaving the node unsplit             |  ✅  | ✅ `vector-erase.spec.ts` |
+| 319 | Growing the brush with `]` erases a visibly wider stretch of the edge in one dab                                                |  ✅  | ✅ `vector-erase.spec.ts` |
+| 320 | A brush that fully covers a segment deletes it outright and prunes both its vertices                                            |  ✅  |            —             |
+| 321 | `[` / `]` clamp the eraser diameter to `[1, 100]` and are ignored for any other tool                                            |  ✅  |            —             |
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

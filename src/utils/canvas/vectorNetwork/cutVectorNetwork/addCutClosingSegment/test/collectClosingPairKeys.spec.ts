@@ -76,12 +76,10 @@ describe('collectClosingPairKeys', () => {
 
   it('should ignore a crossing lineT that has no open-end vertex recorded at that same position', () => {
     // before — segC has a crossing at lineT 5, but no open end sits at that position
-    const result = collectClosingPairKeys(
-      ['segC[x|y]'],
-      [{ lineT: 5, point: { x: 0, y: 0 }, segmentId: 'segC', t: 0.5 }],
-      ['a', 'b'],
-      { a: 0, b: 1 },
-    );
+    const result = collectClosingPairKeys(['segC[x|y]'], [{ lineT: 5, point: { x: 0, y: 0 }, segmentId: 'segC', t: 0.5 }], ['a', 'b'], {
+      a: 0,
+      b: 1,
+    });
 
     // result — segC's own lineT never matches any open end, so nothing can pair
     expect(result).toEqual(new Set());

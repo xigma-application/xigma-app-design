@@ -33,7 +33,7 @@ opis w [[canvas-vector-performance]]. Dwie duże rzeczy zostały świadomie odł
       bufory per-node (`WebGLBuffer` tworzony raz, re-uploadowany tylko gdy geometria realnie się
       zmieniła) zamiast ciągłego re-upload. Wymaga zarządzania cyklem życia buforów
       (`gl.createBuffer`/`gl.deleteBuffer` przy tworzeniu/usuwaniu node'a — czego dziś w kodzie
-      nigdzie nie ma) oraz restrukturyzacji samego cyklu rysowania (bind → *warunkowe* `bufferData` →
+      nigdzie nie ma) oraz restrukturyzacji samego cyklu rysowania (bind → _warunkowe_ `bufferData` →
       `drawArrays`). Dotyka całego pipeline'u renderowania, nie tylko wektorów — szerszy zakres niż
       topology tracking, ale mniejsze ryzyko logicznych regresji (bliżej "instalacji/plumbingu" niż
       subtelnej geometrii).

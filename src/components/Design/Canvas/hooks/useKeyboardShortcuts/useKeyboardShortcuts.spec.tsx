@@ -286,6 +286,20 @@ describe('useKeyboardShortcuts behaviors', () => {
     expect(store.getState().design.activeTool).toBe(ToolName.paint);
   });
 
+  it('should switch to the erase tool on "Shift+E"', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyE', shiftKey: true });
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.erase);
+  });
+
   it('should switch to the Shape builder tool on "M"', () => {
     // mock
     const store = createTestStore();

@@ -36,6 +36,7 @@ describe('isDispatchToolBlocked', () => {
 
   it('should not block a tool listed in the Vector Edit Mode whitelist', () => {
     expect(isDispatchToolBlocked(ToolName.move, ['node-1'], {})).toBe(false);
+    expect(isDispatchToolBlocked(ToolName.erase, ['node-1'], {})).toBe(false);
   });
 
   it('should block a tool not listed in the Vector Edit Mode whitelist', () => {

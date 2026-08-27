@@ -30,7 +30,11 @@ export const resolveVectorSegmentHover = (
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
   const activeTool = selectActiveTool(state);
   const isSegmentHoverBlockedByTool =
-    activeTool === ToolName.paint || activeTool === ToolName.lasso || activeTool === ToolName.cut || activeTool === ToolName.variableWidth;
+    activeTool === ToolName.paint ||
+    activeTool === ToolName.lasso ||
+    activeTool === ToolName.cut ||
+    activeTool === ToolName.erase ||
+    activeTool === ToolName.variableWidth;
 
   if (vectorEditingNodeIds.length > 0 && !isSegmentHoverBlockedByTool) {
     const viewport = selectViewport(state);

@@ -12,6 +12,7 @@ export const shortcuts = {
   [ToolName.cut]: { secondaryKey: KeyboardKeys.x },
   [ToolName.default]: { secondaryKey: KeyboardKeys.v },
   [ToolName.ellipse]: { secondaryKey: KeyboardKeys.o },
+  [ToolName.erase]: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.e },
   [ToolName.frame]: { secondaryKey: KeyboardKeys.f },
   [ToolName.hand]: { secondaryKey: KeyboardKeys.h },
   [ToolName.lasso]: { secondaryKey: KeyboardKeys.q },

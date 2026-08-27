@@ -11,6 +11,7 @@ export const KEYBOARD_SHORTCUTS: TKeyboardShortcuts = {
   [ToolName.cut]: ['X'],
   [ToolName.default]: ['V'],
   [ToolName.ellipse]: ['O'],
+  [ToolName.erase]: [SHIFT, 'E'],
   [ToolName.frame]: ['F'],
   [ToolName.hand]: ['H'],
   [ToolName.lasso]: ['Q'],

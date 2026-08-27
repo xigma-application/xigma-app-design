@@ -10,6 +10,8 @@ export const getCursorClassName = (activeTool: ToolName): string | null => {
       return 'comment';
     case ToolName.cut:
       return 'cut-off';
+    case ToolName.erase:
+      return 'erase';
     case ToolName.paint:
       return 'paint';
     case ToolName.pen:

@@ -17,6 +17,7 @@ import { TPoint } from 'types/canvas';
 import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 // utils
+import { adjustEraserDiameter } from './utils/adjustEraserDiameter';
 import { cancelVectorSegmentBendDrag } from './utils/cancelVectorSegmentBendDrag';
 import { handlePointerDown } from './utils/handlePointerDown/handlePointerDown';
 import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
@@ -49,10 +50,12 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
   const onPointerLeave = (canvasRefs: TCanvasRefs): void => {
     canvasRefs.hoveredVectorVertexIdRef.current = null;
     canvasRefs.hoveredVectorSegmentIdRef.current = null;
+    canvasRefs.eraseBrushCenterRef.current = null;
   };
 
   const onKeyDown = (event: KeyboardEvent): void => {
     cancelVectorSegmentBendDrag(event, dispatch, selectionRefs.vectorSegmentBendDragRef, setClassName);
+    adjustEraserDiameter(event, activeTool, refs.eraserDiameterRef);
   };
 
   const onShiftKeyChange = (
@@ -103,6 +106,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         activeTool === ToolName.paint ||
         activeTool === ToolName.bend ||
         activeTool === ToolName.cut ||
+        activeTool === ToolName.erase ||
         activeTool === ToolName.shapeBuilder ||
         activeTool === ToolName.variableWidth) &&
       !isCanvasCaretEditingActive

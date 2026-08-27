@@ -20,6 +20,7 @@ describe('useSelectionToolRefs behaviors', () => {
       starRatioDragRef: { current: null },
       starVertexCountDragRef: { current: null },
       vectorCutDragRef: { current: null },
+      vectorEraseDragRef: { current: null },
       vectorHandleDragRef: { current: null },
       vectorMarqueeModeRef: { current: null },
       vectorMarqueeStartRef: { current: null },
