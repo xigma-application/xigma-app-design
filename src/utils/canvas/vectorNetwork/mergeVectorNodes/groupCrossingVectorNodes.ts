@@ -2,8 +2,8 @@
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { bakeVectorNodeRotation } from 'components/Design/Canvas/utils/bakeVectorNodeRotation';
 import { doVectorNodesCross } from './doVectorNodesCross';
+import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
 import { persistVectorNetworkCrossings } from '../planarizeVectorNetwork/persistVectorNetworkCrossings';
 
 export type TVectorNodeGroup = { combinedNode: TVectorNode; nodeIds: string[] };
@@ -39,7 +39,7 @@ const buildCombinedNode = (nodeIds: string[], bakedById: Map<string, TVectorNode
 };
 
 export const groupCrossingVectorNodes = (nodes: TVectorNode[]): TVectorNodeGroup[] => {
-  const bakedById = new Map(nodes.map((node) => [node.id, { ...node, ...bakeVectorNodeRotation(node) }]));
+  const bakedById = new Map(nodes.map((node) => [node.id, getRenderedVectorNode(node)]));
   const adjacency = new Map<string, Set<string>>(nodes.map((node) => [node.id, new Set<string>()]));
 
   for (let i = 0; i < nodes.length; i += 1) {
