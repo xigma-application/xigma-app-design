@@ -71,7 +71,7 @@ export const handlePointerMove = (
   continueVectorMultiSelectRotateDrag(canvas, event, dispatch, canvasRefs.vectorMultiSelectRotateDragRef);
   continueVectorSegmentBendDrag(canvas, event, dispatch, canvasRefs, selectionRefs.vectorSegmentBendDragRef, setClassName);
   continueVectorCutDrag(canvas, event, canvasRefs, selectionRefs.vectorCutDragRef);
-  continueVectorEraseDrag(canvas, event, dispatch, selectionRefs.vectorEraseDragRef, canvasRefs.eraserDiameterRef);
+  continueVectorEraseDrag(canvas, event, selectionRefs.vectorEraseDragRef, canvasRefs.vectorEraseStrokeRef);
   continueVectorMarqueeDrag(canvas, event, canvasRefs, selectionRefs.vectorMarqueeStartRef, selectionRefs.vectorMarqueeModeRef);
   continueVectorWidthPointDrag(canvas, event, canvasRefs, setClassName);
   resolveVectorIdleHover(canvas, event, canvasRefs, setClassName);

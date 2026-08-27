@@ -9,10 +9,10 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { bakeVectorNodeRotation } from '../../../utils/bakeVectorNodeRotation';
-import { eraseVectorNetworkAlongCapsule } from 'utils/canvas/vectorNetwork/eraseVectorNetwork/eraseVectorNetworkAlongCapsule';
+import { eraseVectorNetworkAlongPath } from 'utils/canvas/vectorNetwork/eraseVectorNetwork/eraseVectorNetworkAlongPath';
 import { getVectorEditingNode } from '../../../utils/getVectorEditingNode';
 
-export const eraseVectorNetworkStep = (dispatch: AppDispatch, capsuleStart: TPoint, capsuleEnd: TPoint, radius: number): void => {
+export const commitVectorErase = (dispatch: AppDispatch, path: TPoint[], radius: number): void => {
   const state = store.getState();
 
   selectVectorEditingNodeIds(state).forEach((nodeId) => {
@@ -20,7 +20,7 @@ export const eraseVectorNetworkStep = (dispatch: AppDispatch, capsuleStart: TPoi
 
     if (node) {
       const baked = { ...node, ...bakeVectorNodeRotation(node) };
-      const result = eraseVectorNetworkAlongCapsule(baked, capsuleStart, capsuleEnd, radius);
+      const result = eraseVectorNetworkAlongPath(baked, path, radius);
 
       if (result) {
         const changes: Partial<TVectorNode> = node.rotation

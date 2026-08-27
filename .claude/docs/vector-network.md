@@ -4605,6 +4605,13 @@ The node is **never** split into components (Figma parity — erasing all the wa
 a second layer); a gap in a closed shape just opens the fill, which re-derives (§2) — the "hole"
 is emergent, not a boolean subtract.
 
+**The vector data is not touched while the brush is moving** (added after the user pointed at
+Figma's own behaviour: "real time nie modyfikują wektor tylko … urywa ten stroke że widać pod spodem
+linie które są segmentami"). The drag only *records* a world-space point path (`vectorEraseStrokeRef`)
+and *previews* the result; the actual `severVectorSegmentAtPoint` work + `updateNode` happens once,
+on pointer-up. So the whole stroke is genuinely one undo step (not "N updates coalesced into a
+gesture"), and mid-drag the underlying segments stay intact and visible under the preview.
+
 **Geometry — `utils/canvas/vectorNetwork/eraseVectorNetwork/`, all pure:**
 - `getSegmentEraseInterval.ts` — flattens the segment (`flattenSegment` + `getVectorCurveSegmentCount`,
   same call as `getVectorEdgeAtPoint.ts`), **densifies** each flattened edge so no two samples sit
@@ -4624,20 +4631,22 @@ is emergent, not a boolean subtract.
   processed once and splits mint fresh ids), then one `getRemainingVertices` prune. Returns `null`
   when nothing changed. `filledFaceKeys` untouched — self-heals via re-derivation, exactly as
   `handleDeleteSelection/deleteSelectedSegments.ts` does.
+- `eraseVectorNetworkAlongPath.ts` — folds `eraseVectorNetworkAlongCapsule` over every consecutive
+  pair of a recorded brush path, threading each pass's `{segments, vertices}` into the next; a
+  single-point path is one dab. This is what runs on commit.
 
-**Interaction — mirrors Cut's arm/continue/disarm, but continuous:**
-- `eraseVectorNetworkStep.ts` (`useSelectionTool/utils/`) — one dab: for each editing node, bake
-  rotation (`bakeVectorNodeRotation` — a rotated node is flattened to `rotation: 0` on first erase,
-  since the world-space brush must line up with stored points), run `eraseVectorNetworkAlongCapsule`,
-  `dispatch(updateNode(...))`. Shared by arm + continue.
+**Interaction — record on drag, commit on release (mirrors Cut's arm/continue/disarm shape):**
 - `armVectorEraseOnPointerDown.ts` (in `ARM_RESOLVERS`, next to Cut) — sets `vectorEraseDragRef`
-  (`{ lastPoint }`), `setPointerCapture`, `setClassName('erase')`, one dab at the down point.
-  No `beginHistoryGesture` — `handlePointerDown.ts` already opens one for the whole interaction; the
-  whole stroke is one undo step.
-- `continueVectorEraseDrag.ts` — dab along the capsule `lastPoint → pointer` each move (radius =
-  `eraserDiameterRef / 2 / zoom`), advance `lastPoint`.
-- `disarmVectorEraseDrag.ts` — release capture, clear ref, `setClassName('erase')` (**stays** on the
-  tool, unlike Cut's auto-return to Move — an eraser is used repeatedly).
+  (`{ lastPoint }`) and `vectorEraseStrokeRef` (`[point]`), `setPointerCapture`, `setClassName('erase')`.
+  **No dispatch.**
+- `continueVectorEraseDrag.ts` — pushes the pointer position onto `vectorEraseStrokeRef.current`.
+  **No dispatch, no geometry change.**
+- `disarmVectorEraseDrag.ts` — `commitVectorErase(dispatch, strokePath, radius)`: for each editing
+  node, bake rotation (`bakeVectorNodeRotation` — a rotated node flattens to `rotation: 0` on erase,
+  since the world-space brush must line up with stored points), run `eraseVectorNetworkAlongPath`,
+  one `updateNode`. Then clear both refs, release capture, `setClassName('erase')` (**stays** on the
+  tool, unlike Cut's auto-return to Move — an eraser is used repeatedly). `handlePointerDown.ts`
+  already opened the history gesture for the whole interaction, so the single commit = one undo step.
 
 **Brush size:** `eraserDiameterRef` (a `TCanvasRefs` `RefObject<number>`, default
 `ERASER_DEFAULT_DIAMETER_PX = 10` **screen px** — converted to world via `/zoom` for hit-testing,
@@ -4652,7 +4661,11 @@ survives tool switches, resets on reload, **not** undoable. New `KeyboardKeys.e`
 `setClassName('erase')` (same chain-order reason Cut forces `'cut-off'`); `resolveVectorSegmentHover.ts`
 adds `erase` to `isSegmentHoverBlockedByTool` so the generic blue highlight never shows.
 `drawScene/drawVectorEraseBrush.ts` strokes a thin `VECTOR_EDIT_OUTLINE_STROKE` circle at the brush
-centre via `drawEllipse`, radius `eraserDiameterRef / 2 / zoom`, only while Erase is active. Cursor
+centre via `drawEllipse`, radius `eraserDiameterRef / 2 / zoom`, only while Erase is active.
+`drawScene/drawVectorEraseStrokePreview.ts` paints the in-progress `vectorEraseStrokeRef` path over
+the node's fill+stroke in `BACKGROUND_COLOR` (a `drawVectorStroke` thick polyline + two `drawEllipse`
+end caps) — inserted **between `drawSceneNodes` and `drawVectorEditHandlesLayer`** so the thin Vector
+Edit segment lines redraw on top and stay visible under the "torn" area. Cursor
 class `erase` → `erase.png` at hotspot `(8, 24)` (`canvas.module.scss`, `getCursorClassName.ts`).
 
 **Wiring** (same spots as every vector-edit tool): `ToolName.erase`, `VectorEditToolbar/constants.ts`
@@ -4665,9 +4678,11 @@ Unit: every new util has its own spec; `armResolvers.spec.ts` gains an `armVecto
 block. E2E: `vector-erase.spec.ts` — `Shift+E` activation, a mid-edge drag proving 4→5 segments with
 no node split, and a `]`-widened dab leaving a wider gap.
 
-**v1 limitations:** a rotated node is baked flat on first erase; multiple inside-runs within one
-segment from a single brush position are collapsed to one span; erasing pure fill area that touches
-no segment does nothing (Figma's eraser is path-based too); no right-sidebar weight/shape panel.
+**v1 limitations:** a rotated node is baked flat on erase; multiple inside-runs within one segment
+from a single brush position are collapsed to one span; erasing pure fill area that touches no
+segment does nothing (Figma's eraser is path-based too); no right-sidebar weight/shape panel; the
+drag preview masks in flat `BACKGROUND_COLOR` (Figma composites the grid through the torn area) and
+the brushed path uses miter joins + round end caps, not a fully round-jointed capsule union.
 
 ## Related
 

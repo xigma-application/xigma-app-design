@@ -1946,6 +1946,8 @@ orphan prune, diameter clamp) is pinned by unit specs; e2e covers the live point
 | 319 | Growing the brush with `]` erases a visibly wider stretch of the edge in one dab                                                |  ✅  | ✅ `vector-erase.spec.ts` |
 | 320 | A brush that fully covers a segment deletes it outright and prunes both its vertices                                            |  ✅  |            —             |
 | 321 | `[` / `]` clamp the eraser diameter to `[1, 100]` and are ignored for any other tool                                            |  ✅  |            —             |
+| 323 | The vector data is unchanged while the brush is still moving — only a preview is drawn                                          |  ✅  | ✅ `vector-erase.spec.ts` |
+| 324 | The whole recorded stroke commits in one `updateNode` on pointer-up, reverting as a single undo step                            |  ✅  |            —             |
 
 ## Why so few scenarios get e2e coverage
 

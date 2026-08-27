@@ -61,8 +61,15 @@ test('dragging the eraser across the middle of an edge splits it into two stubs,
   expect(before.segmentCount).toBe(4);
 
   await page.keyboard.press('Shift+E');
-  // sweep the brush across the top edge around x≈950, y=300
-  await designPage.dragVectorPoint(935, 300, 965, 300);
+
+  // the geometry must NOT change while the brush is still moving — only a preview is drawn
+  await page.mouse.move(935, 300);
+  await page.mouse.down();
+  await page.mouse.move(950, 300, { steps: 4 });
+  const midDrag = await readEditedVectorNode(page);
+  expect(midDrag.segmentCount).toBe(4);
+  await page.mouse.move(965, 300, { steps: 4 });
+  await page.mouse.up();
 
   const after = await readEditedVectorNode(page);
 

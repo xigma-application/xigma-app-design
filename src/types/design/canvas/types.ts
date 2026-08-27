@@ -215,6 +215,7 @@ export type TCanvasRefs = {
   touchedVectorShapeBuilderFacesRef: RefObject<TVectorShapeBuilderTouchedFaces>;
   vectorAlignmentGuideRef: RefObject<TVectorAlignmentGuide | null>;
   vectorCutPreviewRef: RefObject<TVectorCutPreview | null>;
+  vectorEraseStrokeRef: RefObject<TPoint[] | null>;
   vectorLassoPathRef: RefObject<TPoint[] | null>;
   vectorMultiDragRef: RefObject<TVectorMultiDragState | null>;
   vectorMultiSelectBoxRef: RefObject<TVectorMultiSelectBox | null>;

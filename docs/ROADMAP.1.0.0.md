@@ -1382,14 +1382,18 @@ Drobniejsze, ale zauważalne różnice względem Figmy, niepowiązane z żadnym 
       (§2), nie boolean. Geometria: `utils/canvas/vectorNetwork/eraseVectorNetwork/` (czyste funkcje —
       `getSegmentEraseInterval` densyfikuje spłaszczony polyline i testuje próbki względem kapsuły
       pędzla; `applySegmentErase` reużywa `severVectorSegmentAtPoint`; `eraseVectorNetworkAlongCapsule`
-      składa to nad wszystkimi segmentami + jeden `getRemainingVertices`). Interakcja jak Cut
-      (arm/continue/disarm w `useSelectionTool`), ale ciągła — dab wzdłuż kapsuły `lastPoint→kursor`
-      co ruch, cały pociąg to jeden krok undo (gesture otwiera `handlePointerDown`). Narzędzie
-      **zostaje** aktywne po pociągu (nie wraca do Move jak Cut). Średnica pędzla: `eraserDiameterRef`
-      (canvas ref, domyślnie 10 px ekranu, `[`/`]` zmienia, clamp `[1,100]`, `adjustEraserDiameter.ts`
-      w `onKeyDown`) — sesyjna, nie undo. Podgląd: cienki okrąg `drawVectorEraseBrush.ts` +
-      `resolveVectorEraseHover.ts` wymusza kursor `erase.png` (hotspot 8,24). Ikona `EraseTool`
-      dorejestrowana w `xigma-app-shared`. Pełny opis: `.claude/docs/vector-network.md` §66, e2e:
+      składa to nad wszystkimi segmentami + jeden `getRemainingVertices`; `eraseVectorNetworkAlongPath`
+      składa kapsuły nad całą nagraną ścieżką pędzla). **Wektor NIE jest modyfikowany w czasie
+      przeciągania** (jak Figma — poprawka po prośbie usera): drag tylko nagrywa ścieżkę
+      (`vectorEraseStrokeRef`) i rysuje podgląd (`drawVectorEraseStrokePreview.ts` — pasmo w kolorze
+      tła "urywa" stroke, cienkie linie segmentów zostają widoczne pod spodem), a realny
+      `commitVectorErase` + `updateNode` leci raz, na pointer-up. Dzięki temu cały pociąg to
+      naprawdę jeden krok undo. Narzędzie **zostaje** aktywne po pociągu (nie wraca do Move jak Cut).
+      Średnica pędzla: `eraserDiameterRef` (canvas ref, domyślnie 10 px ekranu, `[`/`]` zmienia,
+      clamp `[1,100]`, `adjustEraserDiameter.ts` w `onKeyDown`) — sesyjna, nie undo. Podgląd kursora:
+      cienki okrąg `drawVectorEraseBrush.ts` + `resolveVectorEraseHover.ts` wymusza kursor
+      `erase.png` (hotspot 8,24). Ikona `EraseTool` dorejestrowana w `xigma-app-shared`. Pełny opis:
+      `.claude/docs/vector-network.md` §66, e2e:
       `e2e/pages/design/vector-erase.spec.ts`.
 - [ ] menu kontekstowe (prawy klik) na node'ach i na pustym canvasie — Copy/Paste, Duplicate,
       Bring to front/Send to back, Delete itd. — dziś nie istnieje w ogóle

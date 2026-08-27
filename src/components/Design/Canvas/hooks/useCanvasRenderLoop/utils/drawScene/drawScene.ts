@@ -44,6 +44,7 @@ import { drawVectorLasso } from './drawVectorLasso';
 import { drawVectorCutHoverPreview } from './drawVectorCutHoverPreview';
 import { drawVectorCutPreview } from './drawVectorCutPreview';
 import { drawVectorEraseBrush } from './drawVectorEraseBrush';
+import { drawVectorEraseStrokePreview } from './drawVectorEraseStrokePreview';
 import { drawVectorPaintHoverPreview } from './drawVectorPaintHoverPreview';
 import { drawVectorSelectedFillPreview } from './drawVectorSelectedFillPreview';
 import { drawVectorShapeBuilderHoverPreview } from './drawVectorShapeBuilderHoverPreview';
@@ -130,6 +131,17 @@ export const drawScene = (
     refs.draggedVectorNodeSnapshotsRef.current,
     refs.resizedVectorNodeSnapshotsRef.current,
     refs.rotatedVectorNodeSnapshotsRef.current,
+  );
+  drawVectorEraseStrokePreview(
+    gl,
+    program,
+    buffer,
+    refs.vectorEraseStrokeRef.current,
+    refs.eraserDiameterRef.current,
+    activeTool,
+    clientWidth,
+    clientHeight,
+    viewport,
   );
   drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
   drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeIds);

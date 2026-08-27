@@ -1558,7 +1558,7 @@ describe('armVectorEraseOnPointerDown', () => {
     store.dispatch(setVectorEditingNodeIds([]));
   });
 
-  it('should arm the erase drag, capture the pointer, set the cursor and run a first dab when Erase is active', () => {
+  it('should start recording the brush path, capture the pointer and set the cursor — without touching geometry — when Erase is active', () => {
     // mock — a(0,0)->b(100,0)
     const nodeId = addVectorNode(
       { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
@@ -1576,9 +1576,10 @@ describe('armVectorEraseOnPointerDown', () => {
     // result
     expect(armVectorEraseOnPointerDown(ctx)).toBe(true);
     expect(ctx.selectionRefs.vectorEraseDragRef.current).toEqual({ lastPoint: { x: 50, y: 0 } });
+    expect(ctx.canvasRefs.vectorEraseStrokeRef.current).toEqual([{ x: 50, y: 0 }]);
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
     expect(ctx.setClassName).toHaveBeenCalledWith('erase');
-    expect(ctx.dispatch).toHaveBeenCalled();
+    expect(ctx.dispatch).not.toHaveBeenCalled();
   });
 
   it('should return undefined when Erase is not the active tool', () => {

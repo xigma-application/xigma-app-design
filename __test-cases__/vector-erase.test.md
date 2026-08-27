@@ -39,6 +39,20 @@ cache Vite albo zrestartować dev server.)
 | 7   | Narzędzie **zostaje** aktywne po zakończeniu pociągu (kolejny pociąg bez ponownego wyboru)                                                                                                    | ✅    |
 | 8   | Podgląd — cienki okrąg pędzla śledzi kursor (i w trakcie pociągu, i przy zwykłym najechaniu)                                                                                                  | ✅    |
 
+## 2b. Podgląd zamiast modyfikacji w czasie rzeczywistym (2026-08-27, prośba usera z ref. do Figmy)
+
+Figma nie modyfikuje wektora podczas przeciągania — jest tylko podgląd "urywania" stroke'a paintem,
+z widocznymi pod spodem liniami segmentów. Poprawione: drag tylko nagrywa ścieżkę pędzla
+(`vectorEraseStrokeRef`), realne `severVectorSegmentAtPoint` + `updateNode` dzieje się raz, na
+pointer-up.
+
+| #   | Scenariusz                                                                                              | Wynik |
+| --- | ------------------------------------------------------------------------------------------------------- | ----- |
+| 13  | W trakcie przeciągania (pointer wciąż wciśnięty) `segs`/`verts` w store **bez zmian** (4/4)             | ✅    |
+| 14  | Podgląd: pasmo w kolorze tła "urywa" stroke tam gdzie przeszedł pędzel, kropki wierzchołków zostają    | ✅    |
+| 15  | Dopiero na `pointer-up` geometria się zmienia (jeden `updateNode`, tu 4→7 segm. dla wolnego pociągu)   | ✅    |
+| 16  | `Cmd+Z` po tym cofa **cały** pociąg jednym ruchem (7/10 → 4/4)                                          | ✅    |
+
 ## 3. Średnica `[` / `]`
 
 | #   | Scenariusz                                                                                  | Wynik |

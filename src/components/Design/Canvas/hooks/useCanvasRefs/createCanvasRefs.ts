@@ -61,6 +61,7 @@ export const createCanvasRefs = (overrides: Partial<TCanvasRefs> = {}): TCanvasR
   touchedVectorShapeBuilderFacesRef: { current: {} },
   vectorAlignmentGuideRef: { current: null },
   vectorCutPreviewRef: { current: null },
+  vectorEraseStrokeRef: { current: null },
   vectorLassoPathRef: { current: null },
   vectorMultiDragRef: { current: null },
   vectorMultiSelectBoxRef: { current: null },

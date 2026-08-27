@@ -100,6 +100,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const touchedVectorShapeBuilderFacesRef = useRef<TVectorShapeBuilderTouchedFaces>({});
   const vectorAlignmentGuideRef = useRef<TVectorAlignmentGuide | null>(null);
   const vectorCutPreviewRef = useRef<TVectorCutPreview | null>(null);
+  const vectorEraseStrokeRef = useRef<TPoint[] | null>(null);
   const vectorLassoPathRef = useRef<TPoint[] | null>(null);
   const vectorMultiDragRef = useRef<TVectorMultiDragState | null>(null);
   const vectorMultiSelectBoxRef = useRef<TVectorMultiSelectBox | null>(null);
@@ -166,6 +167,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       touchedVectorShapeBuilderFacesRef,
       vectorAlignmentGuideRef,
       vectorCutPreviewRef,
+      vectorEraseStrokeRef,
       vectorLassoPathRef,
       vectorMultiDragRef,
       vectorMultiSelectBoxRef,

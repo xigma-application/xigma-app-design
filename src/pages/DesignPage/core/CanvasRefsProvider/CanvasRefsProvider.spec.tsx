@@ -75,6 +75,7 @@ describe('CanvasRefsProvider behaviors', () => {
       touchedVectorShapeBuilderFacesRef: { current: {} },
       vectorAlignmentGuideRef: { current: null },
       vectorCutPreviewRef: { current: null },
+      vectorEraseStrokeRef: { current: null },
       vectorLassoPathRef: { current: null },
       vectorMultiDragRef: { current: null },
       vectorMultiSelectBoxRef: { current: null },

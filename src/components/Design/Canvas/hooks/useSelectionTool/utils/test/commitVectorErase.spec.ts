@@ -7,7 +7,7 @@ import { NodeType } from 'types/design/enums';
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { eraseVectorNetworkStep } from '../eraseVectorNetworkStep';
+import { commitVectorErase } from '../commitVectorErase';
 
 const addVectorNode = (rotation = 0): string => {
   store.dispatch(
@@ -33,19 +33,39 @@ const addVectorNode = (rotation = 0): string => {
 
 const currentNode = (id: string): TVectorNode => store.getState().design.nodes[id] as TVectorNode;
 
-describe('eraseVectorNetworkStep', () => {
+describe('commitVectorErase', () => {
   afterEach(() => store.dispatch(setVectorEditingNodeIds([])));
 
-  it('should commit a mid-segment gap for a brush that straddles the segment', () => {
+  it('should commit a mid-segment gap for a single-point (click) stroke that straddles the segment', () => {
     // mock
     const nodeId = addVectorNode();
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // action
-    eraseVectorNetworkStep(store.dispatch, { x: 50, y: 0 }, { x: 50, y: 0 }, 15);
+    commitVectorErase(store.dispatch, [{ x: 50, y: 0 }], 15);
 
     // result — one edge became two stubs
     expect(Object.keys(currentNode(nodeId).segments)).toHaveLength(2);
+  });
+
+  it('should sweep a multi-point stroke, erasing everything the brush passed over', () => {
+    // mock
+    const nodeId = addVectorNode();
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    // action — a stroke running the length of the segment
+    commitVectorErase(
+      store.dispatch,
+      [
+        { x: 0, y: 0 },
+        { x: 50, y: 0 },
+        { x: 100, y: 0 },
+      ],
+      20,
+    );
+
+    // result — the whole segment is gone
+    expect(currentNode(nodeId).segments).toEqual({});
   });
 
   it('should bake a rotated node down to rotation 0 as part of the erase', () => {
@@ -54,20 +74,34 @@ describe('eraseVectorNetworkStep', () => {
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // action
-    eraseVectorNetworkStep(store.dispatch, { x: 0, y: 0 }, { x: 100, y: 0 }, 200);
+    commitVectorErase(
+      store.dispatch,
+      [
+        { x: 0, y: 0 },
+        { x: 100, y: 0 },
+      ],
+      200,
+    );
 
     // result
     expect(currentNode(nodeId).rotation).toBe(0);
   });
 
-  it('should leave the node untouched when the brush misses everything', () => {
+  it('should leave the node untouched when the stroke misses everything', () => {
     // mock
     const nodeId = addVectorNode();
     store.dispatch(setVectorEditingNodeIds([nodeId]));
     const before = currentNode(nodeId).segments;
 
     // action
-    eraseVectorNetworkStep(store.dispatch, { x: 500, y: 500 }, { x: 500, y: 500 }, 5);
+    commitVectorErase(
+      store.dispatch,
+      [
+        { x: 500, y: 500 },
+        { x: 520, y: 500 },
+      ],
+      5,
+    );
 
     // result
     expect(currentNode(nodeId).segments).toBe(before);
@@ -78,6 +112,6 @@ describe('eraseVectorNetworkStep', () => {
     store.dispatch(setVectorEditingNodeIds(['stale-node-id']));
 
     // action / result — no throw
-    expect(() => eraseVectorNetworkStep(store.dispatch, { x: 0, y: 0 }, { x: 10, y: 0 }, 5)).not.toThrow();
+    expect(() => commitVectorErase(store.dispatch, [{ x: 0, y: 0 }], 5)).not.toThrow();
   });
 });
