@@ -76,11 +76,16 @@ dispatching `setActiveTool` inline; irrelevant unless the new tool needs its own
 
 ## 4. Icons
 
-- SVG source lives in `src/assets/svg/<kebab-name>.svg`, `data-svg-property="fill"` on the path for
-  runtime recoloring (see the `xigma-icons` skill).
-- `src/assets/svg.ts` is the single registry: one `import X from './svg/x.svg?react'` line
-  (alphabetically ordered) feeding into one alphabetically-ordered `Icons = { ... }` object. An SVG
-  file existing on disk does **nothing** until both lines are added here.
+- `Icon` and its SVG registry now live in **`@xigma/components`** (from the `xigma-app-shared`
+  repo), pulled into `node_modules/@xigma/*` by `scripts/xigma-pull.cjs` (`xigma.json`, postinstall).
+  Import it as `import { Icon } from '@xigma/components'` (or `from 'shared'`, which re-exports it).
+- To add / change an icon, edit `xigma-app-shared` (`packages/components/src/Icon/svg/` +
+  `Icon/constants.ts`), push, then re-run `npm run xigma:pull` here. The old local
+  `src/assets/svg/` + `src/assets/svg.ts` registry was removed in the `@xigma/*` migration.
+- Toolbar icon-name maps key off `TIconProps['name']` (from `@xigma/components`), not a local
+  `keyof typeof Icons`.
+- `data-svg-property="fill"`/`"stroke"` on the path still drives runtime recoloring — the recolor
+  mixin now ships in `@xigma/scss` (`@use '@xigma/scss/mixins/svg-color'`).
 
 ## 5. Translations
 
@@ -209,7 +214,8 @@ Two independent render passes, both need updating for a visual change to show up
 2. `types/design/types.ts` — add any new optional field(s) to the node type, if needed.
 3. `Toolbar/constants.ts` — `TOOL_ICON`, `TOOL_LABEL`, append to the right `TOOL_GROUP_ITEMS` array,
    `TOOL_ICON_SIZE` if the icon needs a size override.
-4. `assets/svg.ts` — register the icon (create the SVG first if it doesn't exist).
+4. Icon — add it in `xigma-app-shared` (`packages/components/src/Icon/svg/` + `Icon/constants.ts`),
+   push, `npm run xigma:pull` here. See §4.
 5. `translations/resources/{en,pl}.json` — add the label key.
 6. `store/design/utils/handleSetActiveTool.ts` — add the tool to the right `lastXTool` case.
 7. `components/Design/keys.ts` **and** `useToolbarShortcuts/shortcuts.ts` **and**

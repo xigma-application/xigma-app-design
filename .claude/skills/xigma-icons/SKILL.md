@@ -1,82 +1,51 @@
 ---
 name: xigma-icons
-description: How SVG icons work in xigma — the vite-plugin-svgr pipeline, the data-svg-property recoloring mechanism, and the Icon component. Load before adding a new icon to assets/svg, touching shared/UI/Icon, or when an icon isn't picking up the right color.
+description: How SVG icons work in xigma — the Icon component now ships in @xigma/components, the data-svg-property recoloring mechanism, and where to add a new icon. Load before adding/changing an icon or when an icon isn't picking up the right color.
 ---
 
 # xigma Icons
 
-Ported from x-design's `assets/svg` + `shared/UI/Icon`, adapted to Vite (x-design used
-`@svgr/webpack`).
+**The `Icon` component and its SVG registry moved to `@xigma/components`** (the `xigma-app-shared`
+repo) in the `@xigma/*` migration. The old local `src/assets/svg/*.svg` + `src/assets/svg.ts`
+barrel and `src/shared/UI/Icon/` were deleted.
 
-## The `data-svg-property` mechanism (the whole point)
-
-Icon source files (`src/assets/svg/*.svg`, copied verbatim from x-design — 84 of them) mark the
-elements that should be recolorable with `data-svg-property="fill"` or `="stroke"`, instead of a
-hardcoded color:
-
-```svg
-<path d="..." data-svg-property="fill" fill="white"/>
-```
-
-`fill="white"` is just a placeholder so the raw SVG still looks right if opened directly — it gets
-overridden at runtime. `shared/UI/Icon/Icon.module.scss` targets that attribute:
-
-```scss
-:global([data-svg-property='fill']) { fill: currentColor; }
-:global([data-svg-property='stroke']) { stroke: currentColor; }
-```
-
-A CSS attribute-selector rule beats an element's own `fill="..."` presentation attribute in the
-cascade, so one SVG asset can be recolored per-instance via `currentColor` — no per-icon variants,
-no JS prop-drilling into internal `<path>` elements.
-
-## Build pipeline: `vite-plugin-svgr`
-
-Configured in `vite.config.ts`:
-
-```ts
-svgr({ svgrOptions: { titleProp: true, ref: true } })
-```
-
-SVGO is **off by default** in this plugin (unlike `@svgr/webpack`, which needed an explicit
-`svgo: false` — see the plugin's own README) — so `data-svg-property` and other custom attributes
-survive untouched with zero extra config.
-
-Import syntax uses the `?react` suffix (this plugin's current convention, not x-design's bare-path
-`{ ReactComponent as X }` style — that named-export form is deprecated upstream):
-
-```ts
-import Logo from './svg/logo.svg?react';
-```
-
-Ambient types come from the plugin itself — `/// <reference types="vite-plugin-svgr/client" />` in
-`src/types/vite-env.d.ts`, not a hand-written `module.d.ts` like x-design has.
-
-## `assets/svg.ts` — the `Icons` barrel
-
-One `import X from './svg/name.svg?react'` + barrel-object entry per icon, generated once from
-x-design's own `assets/svg.ts` via a `sed` transform (see the icons-porting conversation) — same
-PascalCase names as x-design (`Logo`, `Close`, `ChevronDown`, ...). All 84 are imported eagerly, so
-the whole set ships in the bundle regardless of which icons a page actually renders — same tradeoff
-x-design makes, not something introduced here.
-
-## `shared/UI/Icon/Icon.tsx`
+## Using an icon in this app
 
 ```tsx
-<Icon name="Logo" color="blue1" size={32} />
+import { Icon } from '@xigma/components'; // or: from 'shared' (re-exports it)
+
+<Icon name="Close" color="blue1" size={32} />
 ```
 
-- `name: keyof typeof Icons` — type-checked against the barrel, typos are compile errors.
-- `color?: keyof typeof colors` (default `'neutral1'`) — one of [[xigma-theming]]'s tokens, applied
-  by setting `style={{ color: colors[color] }}` on the root `<svg>` so `currentColor` picks it up.
-- `SVG = useMemo(() => Icons[name], [name])` — kept even though a plain `Icons[name]` lookup is
-  already referentially stable (object property access on a static object never changes reference);
-  this mirrors x-design's own `Icon.tsx` verbatim rather than diverging for a no-op simplification.
+- `name: TIconProps['name']` — the union of icon names exported by `@xigma/components`. Import
+  `TIconProps` from there when you need the type (e.g. `Record<ToolName, TIconProps['name']>` in
+  `Toolbar/constants.ts`).
+- `color?` (default `'neutral1'`) — one of the shared colour tokens (`blue1`, `neutral1`–`neutral5`,
+  `onBlue1`); applied as `style={{ color }}` on the `<svg>` so `currentColor` picks it up.
+- The package ships its compiled styles — `src/main.tsx` does `import '@xigma/components/index.css'`
+  once. Without it, `Icon`/`Tooltip` render unstyled.
 
-## Adding a new icon
+## The `data-svg-property` recolor mechanism (unchanged)
 
-1. Export the SVG from Figma/design with `data-svg-property="fill"`/`"stroke"` on the elements that
-   should recolor (or add the attribute by hand).
-2. Drop the file in `src/assets/svg/`.
-3. Add its import + barrel entry to `src/assets/svg.ts`, alphabetically, matching the existing
-   PascalCase naming.
+Recolorable elements in the SVG carry `data-svg-property="fill"` / `="stroke"` instead of a
+hardcoded colour (`fill="white"` is just a placeholder for viewing the raw file). The recolor rule
+now ships in `@xigma/scss`:
+
+```scss
+@use '@xigma/scss/mixins/svg-color';
+.Thing { @include svg-color.svg-color(var(--color-blue-1)); }
+```
+
+`@xigma/components`'s own `Icon` already applies this against `currentColor`. A CSS
+attribute-selector beats the element's presentation `fill="..."` in the cascade, so one asset
+recolors per instance — no per-icon variants.
+
+## Adding / changing an icon
+
+Do it in **`xigma-app-shared`** (it has its own `xigma-icons` skill):
+
+1. Add the `.svg` to `packages/components/src/Icon/svg/`, `data-svg-property` on the recolor targets.
+2. Add its import + `Icons` entry in `packages/components/src/Icon/constants.ts` (alphabetical,
+   PascalCase).
+3. Commit + push, then in this repo run `npm run xigma:pull` (or `npm install`) to refresh
+   `node_modules/@xigma/*`.

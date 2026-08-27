@@ -1,9 +1,0 @@
-@use 'svg-color';
-
-@mixin disabled {
-  * {
-    color: var(--color-disabled) !important;
-  }
-
-  @include svg-color.svg-color(var(--color-disabled), true);
-}

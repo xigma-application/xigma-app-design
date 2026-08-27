@@ -1,6 +1,6 @@
 ---
 name: xigma-theming
-description: How color theming and dark/light mode work in xigma — CSS custom properties, the colors token map, and the useTheme hook. Load before adding a new color token, touching src/styles/_theme.scss, constant/colors.ts, or hooks/useTheme, or building anything that needs to read/react to the current theme.
+description: How color theming and dark/light mode work in xigma — CSS custom properties (the theme map now ships in @xigma/scss), the local colors token map, and the useTheme hook. Load before adding a new color token, touching @xigma/scss's theme, constant/colors.ts, or hooks/useTheme, or building anything that needs to read/react to the current theme.
 ---
 
 # xigma Theming
@@ -10,7 +10,12 @@ light/dark class variants (that's what x-design does; deliberately not mirrored 
 `xigma-import-order`'s sibling skills for what *was* mirrored). Instead: **CSS custom properties**
 that both worlds read from the same names.
 
-## `src/styles/_theme.scss` — the only place with real hex values
+## `@xigma/scss`'s `_theme.scss` — the only place with real hex values
+
+Lives in the **`xigma-app-shared`** repo (`packages/scss/src/_theme.scss`), pulled into
+`node_modules/@xigma/scss`. This app loads it once via `src/styles/index.scss`
+(`@use '@xigma/scss/theme'`; `@use '@xigma/scss/variables'` for the non-colour tokens). Editing the
+palette means editing the shared repo + `npm run xigma:pull`.
 
 A Sass map per theme + a mixin that emits `--color-*` custom properties:
 
@@ -45,9 +50,12 @@ export const colors = {
 
 Each value is the CSS `var()` string, not a resolved hex — so `colors.neutral2` used in an inline
 `style` prop is *exactly* the same token as `var(--color-neutral-2)` in a `.module.scss` file, and
-both react to theme changes automatically with no re-render needed. Adding a color token means
-touching **both** files (the hex in `_theme.scss`, the `var()` reference in `colors.ts`) — there is
-no codegen step, unlike x-design's `generateThemeColors.js`.
+both react to theme changes automatically with no re-render needed. There is no codegen step
+(unlike x-design's `generateThemeColors.js`), so a **new** colour token has to be added by hand in
+three places, kept in sync: the hex in `@xigma/scss`'s `_theme.scss` (shared repo), the `var()`
+reference in this repo's `constant/colors.ts`, and `@xigma/components`'s own `src/colors.ts` (which
+types `Icon`'s `color` prop). `@xigma/components` re-exports its `colors` map — a component could
+import that instead of the local `constant/colors.ts`, but HomePage still uses the local one.
 
 ## `hooks/useTheme` — reading/switching the theme in React
 

@@ -55,8 +55,9 @@ export default ComponentName;
 - `FC` from `react`, arrow function, PascalCase matching the folder/file name.
 - **Both** a named export (`export const ComponentName`) when other files need the type/reference
   directly, **and always** `export default ComponentName` at the bottom — this is what lets a
-  barrel (`shared/index.ts`, `hooks/index.ts`) do `export * from './UI/Icon/Icon'` and still expose
-  a usable named binding. See `shared/UI/Icon/Icon.tsx` for the named+default pair in practice.
+  barrel (`shared/index.ts`, `hooks/index.ts`) do `export * from './UITools/Popover/Popover'` and
+  still expose a usable named binding. See `shared/UITools/Popover/Popover.tsx` for the named+default
+  pair in practice.
 - Props type is `TComponentNameProps` (the `T` prefix + PascalCase name convention — see
   `core/Routing/components/ProtectedRoute/ProtectedRoute.tsx`'s `TProtectedRouteProps`).
 
