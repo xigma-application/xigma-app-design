@@ -1,5 +1,5 @@
-// assets
-import { Icons } from 'assets/svg';
+// @xigma
+import { TIconProps } from '@xigma/components';
 
 // others
 import { translationNameSpace as parentNameSpace } from '../constants';
@@ -9,7 +9,7 @@ import { ToolName } from 'types/design/enums';
 
 export const translationNameSpace = `${parentNameSpace}.toolbar`;
 
-export const TOOL_ICON: Record<ToolName, keyof typeof Icons> = {
+export const TOOL_ICON: Record<ToolName, TIconProps['name']> = {
   [ToolName.arrow]: 'ArrowTool',
   [ToolName.bend]: 'BendTool',
   [ToolName.cut]: 'CutTool',

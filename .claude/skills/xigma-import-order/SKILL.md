@@ -1,6 +1,6 @@
 ---
 name: xigma-import-order
-description: Import statement ordering convention for xigma, mirrored from x-design. Load before writing or reviewing the import block of any .ts/.tsx file — covers external-package ordering, the `// category` comment groups, alphabetical group ordering, and default-vs-named import precedence.
+description: Import statement ordering convention for xigma, mirrored from x-design. Load before writing or reviewing the import block of any .ts/.tsx file — covers external-package ordering, the `// @xigma` shared-lib group, the `// category` comment groups, alphabetical group ordering, and default-vs-named import precedence.
 ---
 
 # xigma Import Order
@@ -15,7 +15,11 @@ apply it strictly in new/edited code.
 
 1. **External packages** (bare specifiers: `react`, `classnames`, `lodash`, ...) — no comment header.
 2. Blank line.
-3. **`// <category>` groups** for internal imports (aliases + relative paths), each preceded by a
+3. **`// @xigma` group** — imports from our shared lib (`@xigma/components`, `@xigma/core`,
+   `@xigma/scss`, `@xigma/utils`). Sits directly below the external block and **above every
+   `// category` group** — see the `// @xigma` section below.
+4. Blank line.
+5. **`// <category>` groups** for internal imports (aliases + relative paths), each preceded by a
    blank line, **groups ordered alphabetically by their label**.
 
 ## Ordering within any single block (the external block, or one `// category` group)
@@ -53,7 +57,36 @@ would (see `renderRoute.tsx` importing `../types` under `// types`, or `Routing.
 these category labels at all (`./classNames`, `./constants`).
 
 Groups sort alphabetically by their own label, e.g.:
-`assets < components < core < hooks < others < store < styles < types < utils`.
+`assets < components < core < hooks < others < store < styles < types < utils`. The one fixed
+exception is `// @xigma`, which is always first regardless of what other labels are present.
+
+## The `// @xigma` shared-lib group
+
+`@xigma/*` (from **xigma-app-shared**: `@xigma/components`, `@xigma/core`, `@xigma/scss`,
+`@xigma/utils`) lands in `node_modules` but is our own code, not third-party — so it gets its own
+`// @xigma` header rather than being lumped into the external-packages block. That group goes
+**immediately after the external block and before all the alphabetical `// category` groups**; it
+is not sorted in among them.
+
+```tsx
+import cx from 'classnames';
+import { FC } from 'react';
+
+// @xigma
+import { Icon, Tooltip } from '@xigma/components';
+import { TooltipProvider } from '@xigma/core';
+
+// components
+import Toolbar from './Toolbar';
+```
+
+Within the group the usual default-then-named + alphabetical rules apply. Barrels re-exporting from
+the lib (`src/shared/index.ts`) put their `export … from '@xigma/…'` lines under the same
+`// @xigma` header.
+
+**Exception — side-effect stylesheet imports.** `import '@xigma/components/index.css'` stays under
+`// styles` next to the other CSS imports (`@fontsource/*`, `./x.scss`), not under `// @xigma`.
+SCSS `@use '@xigma/scss/…'` is outside this skill's scope (`.module.scss` files, not `.ts`).
 
 ## `// others`
 
@@ -71,6 +104,9 @@ before `store`).
 
 ```tsx
 import { FC, memo, useRef } from 'react';
+
+// @xigma
+import { Icon } from '@xigma/components';
 
 // components
 import ElementChildren from './ElementChildren';

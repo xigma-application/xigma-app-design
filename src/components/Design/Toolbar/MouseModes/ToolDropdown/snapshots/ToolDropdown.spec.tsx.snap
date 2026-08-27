@@ -11,7 +11,7 @@ exports[`ToolDropdown snapshots > should render ToolDropdown 1`] = `
     type="button"
   >
     <svg
-      class="_Icon_49a9ec"
+      class="Icon"
       data-fpl-icon-size="16"
       fill="none"
       height="16"

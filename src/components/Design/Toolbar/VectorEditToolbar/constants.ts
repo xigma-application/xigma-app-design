@@ -1,5 +1,5 @@
-// assets
-import { Icons } from 'assets/svg';
+// @xigma
+import { TIconProps } from '@xigma/components';
 
 // others
 import { CONTROL, SHIFT } from 'constant/mainKeys';
@@ -13,7 +13,7 @@ export const translationNameSpace = `${toolbarNamespace}.vectorEditToolbar`;
 export const ICON_SIZE = 24;
 
 export type TVectorEditTool = {
-  icon: keyof typeof Icons;
+  icon: TIconProps['name'];
   labelKey: string;
   shortcut?: Array<string>;
   toolName?: ToolName;

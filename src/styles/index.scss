@@ -1,6 +1,6 @@
 @use './fonts';
-@use './theme';
-@use './variables';
+@use '@xigma/scss/theme';
+@use '@xigma/scss/variables';
 
 * {
   box-sizing: border-box;

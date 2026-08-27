@@ -27,7 +27,7 @@ exports[`MouseModes snapshots > should render MouseModes 1`] = `
           type="button"
         >
           <svg
-            class="_Icon_49a9ec"
+            class="Icon"
             data-fpl-icon-size="24L"
             fill="none"
             height="24"
@@ -52,7 +52,7 @@ exports[`MouseModes snapshots > should render MouseModes 1`] = `
         type="button"
       >
         <svg
-          class="_Icon_49a9ec"
+          class="Icon"
           data-fpl-icon-size="16"
           fill="none"
           height="16"
@@ -86,7 +86,7 @@ exports[`MouseModes snapshots > should render MouseModes 1`] = `
           type="button"
         >
           <svg
-            class="_Icon_49a9ec"
+            class="Icon"
             fill="none"
             height="16"
             style="color: var(--color-neutral-1);"
@@ -113,7 +113,7 @@ exports[`MouseModes snapshots > should render MouseModes 1`] = `
         type="button"
       >
         <svg
-          class="_Icon_49a9ec"
+          class="Icon"
           data-fpl-icon-size="16"
           fill="none"
           height="16"
@@ -147,7 +147,7 @@ exports[`MouseModes snapshots > should render MouseModes 1`] = `
           type="button"
         >
           <svg
-            class="_Icon_49a9ec"
+            class="Icon"
             fill="none"
             height="16"
             style="color: var(--color-neutral-1);"
@@ -173,7 +173,7 @@ exports[`MouseModes snapshots > should render MouseModes 1`] = `
         type="button"
       >
         <svg
-          class="_Icon_49a9ec"
+          class="Icon"
           data-fpl-icon-size="16"
           fill="none"
           height="16"
@@ -207,7 +207,7 @@ exports[`MouseModes snapshots > should render MouseModes 1`] = `
           type="button"
         >
           <svg
-            class="_Icon_49a9ec"
+            class="Icon"
             data-fpl-icon-size="24L"
             fill="none"
             height="24"
@@ -232,7 +232,7 @@ exports[`MouseModes snapshots > should render MouseModes 1`] = `
         type="button"
       >
         <svg
-          class="_Icon_49a9ec"
+          class="Icon"
           data-fpl-icon-size="16"
           fill="none"
           height="16"
@@ -266,7 +266,7 @@ exports[`MouseModes snapshots > should render MouseModes 1`] = `
           type="button"
         >
           <svg
-            class="_Icon_49a9ec"
+            class="Icon"
             data-fpl-icon-size="24L"
             fill="none"
             height="16"
@@ -291,7 +291,7 @@ exports[`MouseModes snapshots > should render MouseModes 1`] = `
         type="button"
       >
         <svg
-          class="_Icon_49a9ec"
+          class="Icon"
           data-fpl-icon-size="16"
           fill="none"
           height="16"
@@ -325,7 +325,7 @@ exports[`MouseModes snapshots > should render MouseModes 1`] = `
           type="button"
         >
           <svg
-            class="_Icon_49a9ec"
+            class="Icon"
             data-fpl-icon-size="24L"
             fill="none"
             height="17"

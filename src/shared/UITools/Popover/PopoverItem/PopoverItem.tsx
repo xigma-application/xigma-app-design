@@ -1,9 +1,9 @@
 import cx from 'classnames';
-import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { FC, useMemo } from 'react';
+import * as PopoverPrimitive from '@radix-ui/react-popover';
 
-// components
-import { Icon, TIconProps } from 'shared/UI/Icon/Icon';
+// @xigma
+import { Icon, TIconProps } from '@xigma/components';
 
 // styles
 import styles from './popover-item.module.scss';

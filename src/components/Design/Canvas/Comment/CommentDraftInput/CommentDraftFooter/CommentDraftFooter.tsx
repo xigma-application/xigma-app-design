@@ -1,11 +1,11 @@
 import cx from 'classnames';
 import { FC } from 'react';
 
+// @xigma
+import { Icon } from '@xigma/components';
+
 // hooks
 import { useSubmitCommentDraft } from '../hooks/useSubmitCommentDraft';
-
-// shared
-import Icon from 'shared/UI/Icon/Icon';
 
 // styles
 import styles from './comment-draft-footer.module.scss';
