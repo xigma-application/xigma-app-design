@@ -94,6 +94,11 @@ Zaznaczamy checkboxy w miarę postępu. Każdy etap = osobna, malutka porcja pra
 
 ## Etap 8 — Panele boczne
 
+- [x] **pasek nawigacji w `LeftPanel`** (`NavRail`, 56px) — logo + 5 przełączających się ikon
+      (File/Agents/Assets/Tools/Variables), `@radix-ui/react-toggle-group` (jak `MouseModes`), stan
+      `activeNavItem` trzymany w `LeftPanel` (kontrolowany `NavRail`), na razie samo przełączanie bez
+      podpiętej zawartości paneli. Ikony i logo (`xigma-logo-shape.svg`, statyczny asset poza
+      `Icon`) w `@xigma/components`/`@xigma/assets`.
 - [ ] panel warstw (drzewo node'ów, reorder, visible/locked)
 - [ ] panel właściwości (X/Y/W/H, Fill, Stroke, Opacity/blend mode)
 - [ ] właściwości tekstu (rozmiar/waga/wyrównanie/line-height/letter-spacing)
