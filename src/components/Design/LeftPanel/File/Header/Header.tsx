@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import FileMeta from './FileMeta/FileMeta';
 import { EditableInput, Icon } from 'shared';
 
 // others
@@ -18,20 +19,23 @@ const Header: FC<THeaderProps> = ({ name, onRenameFile }) => {
 
   return (
     <div className={styles.Header}>
-      <EditableInput
-        action={
-          <button aria-label={t(`${translationNameSpace}.menuAriaLabel`)} className={styles.Header__menu} type="button">
-            <Icon name="ChevronDown" size={12} />
-          </button>
-        }
-        ariaLabel={t(`${translationNameSpace}.renameAriaLabel`)}
-        className={styles.Header__name}
-        onChange={onRenameFile}
-        value={name}
-      />
-      <button aria-label={t(`${translationNameSpace}.collapseAriaLabel`)} className={styles.Header__collapse} type="button">
-        <Icon name="PanelLeft" size={24} />
-      </button>
+      <div className={styles.Header__top}>
+        <EditableInput
+          action={
+            <button aria-label={t(`${translationNameSpace}.menuAriaLabel`)} type="button">
+              <Icon name="ChevronDown" size={12} />
+            </button>
+          }
+          ariaLabel={t(`${translationNameSpace}.renameAriaLabel`)}
+          className={styles.Header__name}
+          onChange={onRenameFile}
+          value={name}
+        />
+        <button aria-label={t(`${translationNameSpace}.collapseAriaLabel`)} className={styles.Header__collapse} type="button">
+          <Icon name="PanelLeft" size={24} />
+        </button>
+      </div>
+      <FileMeta />
     </div>
   );
 };

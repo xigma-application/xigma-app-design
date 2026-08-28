@@ -2,7 +2,6 @@ import { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import FileMeta from './FileMeta/FileMeta';
 import Header from './Header/Header';
 
 // others
@@ -18,7 +17,6 @@ const File: FC = () => {
   return (
     <div className={styles.File}>
       <Header name={name} onRenameFile={setName} />
-      <FileMeta />
     </div>
   );
 };

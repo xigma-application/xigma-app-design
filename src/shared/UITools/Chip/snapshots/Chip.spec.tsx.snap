@@ -9,3 +9,14 @@ exports[`Chip snapshots > should render Chip with its default (free) variant 1`]
   </span>
 </DocumentFragment>
 `;
+
+exports[`Chip snapshots > should render an interactive Chip as a button when onClick is provided 1`] = `
+<DocumentFragment>
+  <button
+    class="_Chip_a724d3 _Chip--secondary_a724d3 _Chip--interactive_a724d3"
+    type="button"
+  >
+    Drafts
+  </button>
+</DocumentFragment>
+`;

@@ -1,15 +1,17 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`EditableInput snapshots > should render EditableInput with its value 1`] = `
+exports[`EditableInput snapshots > should render its value as static text in display mode 1`] = `
 <DocumentFragment>
   <div
-    class="_EditableInput_4a8ec5"
+    class="_EditableInput_4a8ec5 _EditableInput--display_4a8ec5"
+    role="button"
+    tabindex="0"
   >
-    <input
-      class="_EditableInput__field_4a8ec5"
-      type="text"
-      value="Untitled"
-    />
+    <span
+      class="_EditableInput__text_4a8ec5"
+    >
+      Untitled
+    </span>
   </div>
 </DocumentFragment>
 `;

@@ -30,7 +30,7 @@ describe('PanelContent behaviors', () => {
     render(<PanelContent activeNavItem={NavItemName.file} />);
 
     // result
-    expect(screen.getByRole('textbox', { name: 'Rename file' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Rename file' })).toBeInTheDocument();
   });
 
   it('should not show the File panel for a non-file nav item', () => {
@@ -38,6 +38,6 @@ describe('PanelContent behaviors', () => {
     render(<PanelContent activeNavItem={NavItemName.tools} />);
 
     // result
-    expect(screen.queryByRole('textbox', { name: 'Rename file' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Rename file' })).not.toBeInTheDocument();
   });
 });

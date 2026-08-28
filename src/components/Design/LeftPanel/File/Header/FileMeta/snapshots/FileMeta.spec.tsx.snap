@@ -3,10 +3,10 @@
 exports[`FileMeta snapshots > should render FileMeta 1`] = `
 <DocumentFragment>
   <div
-    class="_FileMeta_a83008"
+    class="_FileMeta_101369"
   >
     <button
-      class="_FileMeta__drafts_a83008"
+      class="_Chip_a724d3 _Chip--secondary_a724d3 _Chip--interactive_a724d3"
       type="button"
     >
       Drafts

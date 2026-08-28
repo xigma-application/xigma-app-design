@@ -3,34 +3,90 @@
   border: 1px solid transparent;
   border-radius: 5px;
   box-sizing: border-box;
-  column-gap: 2px;
+  color: var(--color-neutral-1);
   display: flex;
+  flex: 1;
+  font: inherit;
+  height: 24px;
   max-width: 100%;
-  padding: 0 4px;
+  min-width: 0;
+  outline: none;
+  padding: 2px 6px;
 
-  &:hover {
-    border-color: var(--color-neutral-3);
+  &__content {
+    align-items: center;
+    display: flex;
+
+    &:hover {
+      .EditableInput--display,
+      .EditableInput__action {
+        background-color: color-mix(in srgb, var(--color-neutral-3) 50%, transparent);
+      }
+    }
+
+    > *:first-child {
+      border-bottom-right-radius: 0;
+      border-top-right-radius: 0;
+    }
+
+    > *:last-child {
+      border-bottom-left-radius: 0;
+      border-top-left-radius: 0;
+    }
   }
 
-  &:focus-within {
-    border-color: var(--color-blue-2);
+  &--display {
+    cursor: text;
+    flex: 0 1 auto;
   }
 
-  &__field {
+  &--display#{&}--display:hover {
+    background-color: color-mix(in srgb, var(--color-neutral-3) 70%, transparent);
+  }
+
+  &--editing {
     background-color: transparent;
-    border: none;
-    color: var(--color-neutral-1);
-    flex: 1;
-    font: inherit;
+    font-size: 13px;
+    font-weight: 550;
+  }
+
+  &__text {
     min-width: 0;
-    outline: none;
-    padding: 2px 0;
+    overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__group#{&}__group {
+    background-color: transparent;
+    border-color: transparent;
+
+    &:focus-within {
+      background-color: transparent;
+      border-color: var(--color-blue-1);
+    }
   }
 
   &__action {
     align-items: center;
+    border-radius: 5px;
     display: flex;
     flex-shrink: 0;
+
+    > button {
+      align-items: center;
+      background-color: transparent;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      display: flex;
+      height: 24px;
+      justify-content: center;
+      padding: 0 6px;
+    }
+  }
+
+  &__action#{&}__action:hover {
+    background-color: color-mix(in srgb, var(--color-neutral-3) 70%, transparent);
   }
 }

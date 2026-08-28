@@ -19,19 +19,20 @@ describe('File behaviors', () => {
     render(<File />);
 
     // result
-    expect(screen.getByRole('textbox', { name: 'Rename file' })).toHaveValue('Untitled');
+    expect(screen.getByRole('button', { name: 'Rename file' })).toHaveTextContent('Untitled');
   });
 
   it('should keep the renamed name after a commit', () => {
     // before
     render(<File />);
-    const field = screen.getByRole('textbox', { name: 'Rename file' });
 
     // action
+    fireEvent.click(screen.getByRole('button', { name: 'Rename file' }));
+    const field = screen.getByRole('textbox', { name: 'Rename file' });
     fireEvent.change(field, { target: { value: 'Screenshots' } });
     fireEvent.blur(field);
 
     // result
-    expect(field).toHaveValue('Screenshots');
+    expect(screen.getByRole('button', { name: 'Rename file' })).toHaveTextContent('Screenshots');
   });
 });
