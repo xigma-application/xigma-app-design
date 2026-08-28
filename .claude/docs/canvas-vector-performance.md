@@ -495,9 +495,65 @@ reference, for `getVectorNodeBounds`'s cache) is unchanged between frames. A gen
 produces a new node object on every throttled dispatch (§3.2), and a whole-node drag/resize/rotate still
 recomputes its faces fresh every frame via the frozen-snapshot pointwise transform (§4) — neither cache
 has anything valid to hit in either case. The one change that would actually help *editing* performance
-on a large multi-shape node is §5.6's **incremental/differential topology tracking** — not started,
-flagged there as high-regression-risk core work, a different undertaking entirely from anything in this
-section.
+on a large multi-shape node is §5.6's **incremental/differential topology tracking** — flagged there as
+high-regression-risk core work; a first, narrow, provably-safe slice of it now exists, §5.8 below.
+
+**Profiling note on the stroke-buffer-cache slice (2026-08-28)**: the user captured a Chrome DevTools
+Performance trace on the 3000-square stress scene after this slice landed. `getOrCreateStrokeBuffer`
+showed 114.8ms self / 117.4ms total (6.8%) — self and total nearly equal, meaning almost none of its
+time was spent in children (`bufferData`/`createBuffer`), i.e. most calls were cache **hits** (bind-only),
+consistent with the cache working as designed. But the same trace was dominated by
+`translateFlatVertices` (`drawVectorNodeDragSnapshot.ts`, 106ms self/10.3%) and its sibling
+`(anonymous) drawVectorNodeDragSnapshot.ts` frame — meaning the capture mostly recorded an active
+**drag**, not idle pan/zoom. That matters because the frozen-snapshot drag path deliberately passes
+`null` for `strokeBufferCache` (§5.7 above) — dragging was never meant to benefit from this cache, and
+this trace confirms it didn't, for the right reason. **No formal before/after A/B was captured** (would
+need the same interaction scripted against the pre-slice commit) — the user's read was a subjective
+"already better" rather than a quantified delta, which is a real but weaker form of confirmation than
+the `977ms → 30.5ms`-grade numbers earlier in this doc. To get a real number here, re-run the same idle
+pan/zoom (not a drag) against both commits.
+
+### 5.8 — Incremental topology tracking, first slice: raw (stroke) clustering skips the graph walk entirely for position-only edits
+
+§5.6 named the real remaining cost on a genuine vertex edit: `computeClusters` re-walks the **whole**
+node's adjacency graph from scratch on every edit, even though the per-cluster fill/stroke *results* are
+already cache-hit-eligible (§5.2/§5.3) once clustering itself has run. This slice removes that graph walk
+entirely for the raw-cluster path (`getVectorNodeRawClusters.ts`, used for stroke tessellation's cluster
+choice via `getClustersForStroke.ts`), for the whole class of edits that move existing vertices without
+touching connectivity — dragging a vertex, editing a curve handle, moving a whole shape — which is most
+day-to-day editing.
+
+**The exact invariant** (not an approximation, not a margin/bounding-box heuristic): raw clustering
+(`computeClusters` fed by `buildVectorAdjacency`/`findConnectedVertexIds`, §5.1) only ever reads a
+segment's `id`, `startId`, and `endId` — never a vertex's `x`/`y`. Confirmed by reading both functions
+directly: `buildVectorAdjacency` builds its map purely from `segment.startId`/`segment.endId`, and
+`findConnectedVertexIds`'s BFS walks purely by segment-to-vertex-id references. So **if the set of
+segment ids and each one's `startId`/`endId` is identical to the last time clusters were computed for
+this node id, the cluster result is provably identical too** — regardless of any vertex having moved,
+been added, or been removed (an added/removed vertex only matters if it changes which segments exist,
+which the segment-id-set check already catches; an orphan vertex with no segments never appears in any
+cluster's output either way, per `computeClusters`'s own `segmentIds.size > 0` filter).
+
+**Implementation**: `isRawSegmentTopologyUnchanged.ts` — given the previous and next `segments` records,
+same length + every id's segment either the same object reference or matching `startId`/`endId` (a
+reference-equality shortcut first, since an Immer/Redux edit leaves untouched segments' references
+alone, same premise as §5.2's `isStale.ts`). `getVectorNodeRawClusters.ts` gained a second, persistent
+tier below its existing same-frame `WeakMap` (§5.3's pattern): a plain `Map<node.id, { clusters,
+segments }>` that survives node-reference churn. On a `WeakMap` miss, check this tier before falling all
+the way back to `computeClusters` — topology unchanged means reuse the stored clusters outright, skipping
+the graph walk; anything else (segment added/removed/rewired) falls through to a full, correct recompute,
+exactly today's behavior. Unbounded (one entry per live node id, not per cluster) — same accepted
+trade-off as this codebase's other persistent caches (§5.7's closing note, `getOrLoadTexture.ts`).
+
+**Deliberately not covered by this slice**: the **planar** cluster path (`getVectorNodeClusters.ts`,
+used for fill derivation) and crossing detection (`findAllNetworkCrossings`, §5.4) — these genuinely
+depend on vertex *positions*, since moving a vertex can create or destroy a visual crossing without any
+segment's `startId`/`endId` ever changing, so the same exact-topology check doesn't apply; a correct
+version there needs a conservative geometric safety check (e.g. a per-cluster bounding-box margin,
+falling back to full recompute whenever a moved vertex could plausibly approach a foreign cluster or
+segment) — a real "cheap-but-approximate, safe-by-construction-fallback" undertaking, not started. This
+slice is the "lighter version" the user asked for; the planar/crossing-detection version is the
+acknowledged "droższa" (more expensive) one to follow, only once this slice has proven itself.
 
 ## 6. Unrelated find while live-verifying §5.7: `getRemainingVertices` was O(vertices × segments)
 
@@ -568,6 +624,8 @@ freeze to instant.
   `utils/canvas/drawVectorNode/{drawVectorNode,drawVectorThickStrokeVertices,
   drawVectorNodeDragSnapshot,drawVectorNodeResizeSnapshot,drawVectorNodeRotateSnapshot,drawVectorStroke}.ts`,
   `useCanvasRenderLoop/utils/drawScene/drawVectorEditHandlesLayer/drawVectorEditOutline/drawEditModeOutline.ts`
+- Incremental topology tracking, first slice — raw/stroke clustering (§5.8):
+  `utils/canvas/vectorNetwork/getVectorNodeClusters/{isRawSegmentTopologyUnchanged,getVectorNodeRawClusters}.ts`
 
 ## Related
 

@@ -27,6 +27,9 @@ opis w [[canvas-vector-performance]]. Dwie duże rzeczy zostały świadomie odł
       rdzenia, na którym stoi cały pipeline wektorowy, a jego historia jest pełna subtelnych bugów
       dokładnie w tym miejscu (bowtie regression, lens shape, self-intersection fill loss — patrz
       [[vector-network]]).
+      **Pierwszy, wąski wycinek zrobiony (2026-08-28)**: raw/stroke clustering pomija pełny graph walk
+      dla edycji, które nie zmieniają topologii segmentów (przesunięcie wierzchołka, edycja uchwytu
+      krzywej) — dowodliwie bezpieczne, nie przybliżone. Pełny opis w [[canvas-vector-performance]] §5.8.
 - [ ] **GPU-buffer-level caching** — renderer dziś re-uploaduje geometrię każdego node'a do GPU
       (`bufferData`) co klatkę, niezależnie czy się faktycznie zmieniła; cała aplikacja dzieli tylko
       4 bufory GL, rebindowane per-primitive (patrz [[canvas-rendering-pipeline]] §3/§8). Cel: trwałe

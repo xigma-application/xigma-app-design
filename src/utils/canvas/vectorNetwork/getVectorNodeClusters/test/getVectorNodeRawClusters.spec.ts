@@ -21,10 +21,10 @@ const seg = (
 
 const vertex = (id: string, x: number, y: number): TVectorVertex => ({ id, x, y });
 
-const buildNode = (vertices: TVectorVertex[], segments: TVectorSegment[]): TVectorNode => ({
+const buildNode = (vertices: TVectorVertex[], segments: TVectorSegment[], id = '1'): TVectorNode => ({
   fillColor: '#000',
   filledFaceKeys: [],
-  id: '1',
+  id,
   name: 'Vector',
   parentId: null,
   rotation: 0,
@@ -78,5 +78,40 @@ describe('getVectorNodeRawClusters', () => {
 
     // result
     expect(second).toBe(first);
+  });
+
+  it('should reuse the previous node id’s cluster result across a new node reference whose segment topology is unchanged, e.g. a dragged vertex', () => {
+    // mock — same node id, a new node/vertex object reference each time (as an immutable edit would
+    // produce), but every segment keeps the same startId/endId — only the vertex position moved
+    const before = buildNode([vertex('a', 0, 0), vertex('b', 10, 0)], [seg('ab', 'a', 'b')], 'incremental-drag');
+    const afterDrag = buildNode([vertex('a', 0, 0), vertex('b', 25, 7)], [seg('ab', 'a', 'b')], 'incremental-drag');
+
+    // before
+    const firstResult = getVectorNodeRawClusters(before);
+    const secondResult = getVectorNodeRawClusters(afterDrag);
+
+    // result — reused, not recomputed, even though the node/vertex objects are new references
+    expect(secondResult).toBe(firstResult);
+  });
+
+  it('should recompute when segment topology actually changed for the same node id, after a previous skip', () => {
+    // mock
+    const before = buildNode([vertex('a', 0, 0), vertex('b', 10, 0)], [seg('ab', 'a', 'b')], 'incremental-recompute');
+    const stillSameTopology = buildNode([vertex('a', 1, 1), vertex('b', 11, 1)], [seg('ab', 'a', 'b')], 'incremental-recompute');
+    const newSegmentAdded = buildNode(
+      [vertex('a', 1, 1), vertex('b', 11, 1), vertex('c', 5, 20)],
+      [seg('ab', 'a', 'b'), seg('bc', 'b', 'c')],
+      'incremental-recompute',
+    );
+
+    // before
+    getVectorNodeRawClusters(before);
+    const reused = getVectorNodeRawClusters(stillSameTopology);
+    const recomputed = getVectorNodeRawClusters(newSegmentAdded);
+
+    // result — the new segment genuinely changes the graph, so it must not reuse the stale result
+    expect(recomputed).not.toBe(reused);
+    expect(recomputed).toHaveLength(1);
+    expect(recomputed[0].segmentIds.sort()).toEqual(['ab', 'bc']);
   });
 });
