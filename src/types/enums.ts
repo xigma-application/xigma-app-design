@@ -8,6 +8,7 @@ export enum KeyboardKeys {
   arrowRight = 'ArrowRight',
   arrowUp = 'ArrowUp',
   b = 'KeyB',
+  backslash = 'Backslash',
   backspace = 'Backspace',
   bracketLeft = 'BracketLeft',
   bracketRight = 'BracketRight',

@@ -8,13 +8,12 @@ import styles from './panel-content.module.scss';
 
 // types
 import { NavItemName } from '../NavRail/types';
+import { TPanelContentProps } from './types';
 
-export type TPanelContentProps = {
-  activeNavItem: NavItemName;
-};
-
-const PanelContent: FC<TPanelContentProps> = ({ activeNavItem }) => (
-  <div className={styles.PanelContent}>{activeNavItem === NavItemName.file && <File />}</div>
+const PanelContent: FC<TPanelContentProps> = ({ activeNavItem, name, onRenameFile }) => (
+  <div className={styles.PanelContent}>
+    {activeNavItem === NavItemName.file && <File name={name} onRenameFile={onRenameFile} />}
+  </div>
 );
 
 export default PanelContent;

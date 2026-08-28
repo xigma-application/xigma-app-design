@@ -451,6 +451,26 @@ describe('useKeyboardShortcuts behaviors', () => {
     // result
     expect(store.getState().design.nodes[nodeId]).toBeUndefined();
   });
+
+  it('should toggle the minimized UI flag on "Cmd+Shift+\\"', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    fireEvent.keyDown(window, { code: 'Backslash', metaKey: true, shiftKey: true });
+
+    // result
+    expect(store.getState().design.isUiMinimized).toBe(true);
+
+    // action
+    fireEvent.keyDown(window, { code: 'Backslash', metaKey: true, shiftKey: true });
+
+    // result
+    expect(store.getState().design.isUiMinimized).toBe(false);
+  });
 });
 
 // handleDeleteSelection reads/writes the real store singleton directly (not whatever store wraps the

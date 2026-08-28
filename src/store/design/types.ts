@@ -13,6 +13,7 @@ export type TDesignState = {
   editingSelectionStart: number;
   editingTextBox: TEditingTextBox | null;
   editingTextContent: string;
+  isUiMinimized: boolean;
   lastFrameTool: ToolName;
   lastMoreTool: ToolName | null;
   lastMouseTool: ToolName;

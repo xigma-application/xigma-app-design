@@ -1,0 +1,63 @@
+.MinimizedToolbar {
+  align-items: center;
+  background-color: color-mix(in srgb, var(--color-neutral-5) 70%, transparent);
+  border-radius: 8px;
+  box-shadow: var(--elevation-100-canvas);
+  box-sizing: border-box;
+  column-gap: 4px;
+  display: flex;
+  height: 48px;
+  left: 12px;
+  padding: 8px;
+  position: absolute;
+  top: 12px;
+  z-index: 1;
+
+  &:hover {
+    background-color: var(--color-neutral-5);
+  }
+
+  &__logo {
+    align-items: center;
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    flex-shrink: 0;
+    height: 32px;
+    justify-content: center;
+    width: 32px;
+
+    svg {
+      height: 20px;
+      width: 20px;
+    }
+  }
+
+  &__content {
+    align-items: center;
+    border-radius: 5px;
+    column-gap: 4px;
+    display: flex;
+    padding-left: 8px;
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--color-neutral-3) 50%, transparent);
+    }
+  }
+
+  &__title {
+    background-color: transparent;
+    border: none;
+    color: var(--color-neutral-1);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    max-width: 160px;
+    overflow: hidden;
+    padding: 0 4px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

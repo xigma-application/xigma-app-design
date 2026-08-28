@@ -1,6 +1,8 @@
 import { FC, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // components
+import MinimizedToolbar from './File/MinimizedToolbar/MinimizedToolbar';
 import NavRail from './NavRail/NavRail';
 import PanelContent from './PanelContent/PanelContent';
 
@@ -9,7 +11,12 @@ import { useHandleResizeMouseDown } from './hooks/useHandleResizeMouseDown';
 import { useResizeHandler } from 'hooks';
 
 // others
+import { DEFAULT_FILE_NAME_KEY } from './File/constants';
 import { LEFT_PANEL_RESIZE_SETTINGS } from './constants';
+
+// store
+import { selectIsUiMinimized } from 'store/design/selectors';
+import { useAppSelector } from 'store';
 
 // styles
 import styles from './left-panel.module.scss';
@@ -18,15 +25,22 @@ import styles from './left-panel.module.scss';
 import { NavItemName } from './NavRail/types';
 
 const LeftPanel: FC = () => {
+  const { t } = useTranslation();
   const panelRef = useRef<HTMLDivElement>(null);
   const [activeNavItem, setActiveNavItem] = useState<NavItemName>(NavItemName.file);
+  const [fileName, setFileName] = useState(() => t(DEFAULT_FILE_NAME_KEY));
+  const isUiMinimized = useAppSelector(selectIsUiMinimized);
   const { cursorX, onMouseDownX, width } = useResizeHandler(LEFT_PANEL_RESIZE_SETTINGS, panelRef);
   const handleResizeMouseDown = useHandleResizeMouseDown(onMouseDownX);
+
+  if (isUiMinimized) {
+    return <MinimizedToolbar name={fileName} />;
+  }
 
   return (
     <div className={styles.LeftPanel} ref={panelRef} style={{ width }}>
       <NavRail activeNavItem={activeNavItem} onSelectNavItem={setActiveNavItem} />
-      <PanelContent activeNavItem={activeNavItem} />
+      <PanelContent activeNavItem={activeNavItem} name={fileName} onRenameFile={setFileName} />
       <div className={styles['LeftPanel__resize-handle']} onMouseDown={handleResizeMouseDown} style={{ cursor: cursorX }} />
     </div>
   );

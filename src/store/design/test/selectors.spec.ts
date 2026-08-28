@@ -9,6 +9,7 @@ import {
   selectEditingSelectionStart,
   selectEditingTextBox,
   selectEditingTextContent,
+  selectIsUiMinimized,
   selectLastFrameTool,
   selectLastMoreTool,
   selectLastMouseTool,
@@ -55,6 +56,7 @@ const state = {
     editingSelectionStart: 3,
     editingTextBox: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 },
     editingTextContent: 'hello',
+    isUiMinimized: true,
     lastFrameTool: ToolName.section,
     lastMoreTool: ToolName.shapeBuilder,
     lastMouseTool: ToolName.hand,
@@ -120,6 +122,11 @@ describe('design selectors', () => {
   it('should select the editing text content', () => {
     // result
     expect(selectEditingTextContent(state)).toBe('hello');
+  });
+
+  it('should select the minimized UI flag', () => {
+    // result
+    expect(selectIsUiMinimized(state)).toBe(true);
   });
 
   it('should select the last shape tool', () => {

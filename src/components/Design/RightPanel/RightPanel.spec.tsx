@@ -1,4 +1,5 @@
 import { fireEvent, render } from '@testing-library/react';
+import { Provider } from 'react-redux';
 
 // components
 import RightPanel from './RightPanel';
@@ -6,10 +7,27 @@ import RightPanel from './RightPanel';
 // others
 import { RIGHT_PANEL_DEFAULT_WIDTH, RIGHT_PANEL_MAX_WIDTH, RIGHT_PANEL_MIN_WIDTH } from './constants';
 
+// store
+import { toggleUiMinimized } from 'store/design/slice';
+import { store } from 'store';
+
+const renderRightPanel = (): ReturnType<typeof render> =>
+  render(
+    <Provider store={store}>
+      <RightPanel />
+    </Provider>,
+  );
+
 describe('RightPanel snapshots', () => {
+  beforeEach(() => {
+    if (store.getState().design.isUiMinimized) {
+      store.dispatch(toggleUiMinimized());
+    }
+  });
+
   it('should render RightPanel', () => {
     // before
-    const { asFragment } = render(<RightPanel />);
+    const { asFragment } = renderRightPanel();
 
     // result
     expect(asFragment()).toMatchSnapshot();
@@ -17,9 +35,15 @@ describe('RightPanel snapshots', () => {
 });
 
 describe('RightPanel behaviors', () => {
+  beforeEach(() => {
+    if (store.getState().design.isUiMinimized) {
+      store.dispatch(toggleUiMinimized());
+    }
+  });
+
   it('should render at its default width', () => {
     // before
-    const { container } = render(<RightPanel />);
+    const { container } = renderRightPanel();
 
     // result
     expect((container.firstChild as HTMLElement).style.width).toBe(`${RIGHT_PANEL_DEFAULT_WIDTH}px`);
@@ -27,7 +51,7 @@ describe('RightPanel behaviors', () => {
 
   it('should grow when the resize handle is dragged left, since the panel is right-anchored', () => {
     // before
-    const { container } = render(<RightPanel />);
+    const { container } = renderRightPanel();
     const panel = container.firstChild as HTMLElement;
     const handle = panel.querySelector('[class*="resize-handle"]')!;
 
@@ -44,7 +68,7 @@ describe('RightPanel behaviors', () => {
 
   it('should clamp to the min width when dragged past it', () => {
     // before
-    const { container } = render(<RightPanel />);
+    const { container } = renderRightPanel();
     const panel = container.firstChild as HTMLElement;
     const handle = panel.querySelector('[class*="resize-handle"]')!;
 
@@ -61,7 +85,7 @@ describe('RightPanel behaviors', () => {
 
   it('should clamp to the max width when dragged past it', () => {
     // before
-    const { container } = render(<RightPanel />);
+    const { container } = renderRightPanel();
     const panel = container.firstChild as HTMLElement;
     const handle = panel.querySelector('[class*="resize-handle"]')!;
 
@@ -74,5 +98,14 @@ describe('RightPanel behaviors', () => {
 
     // result
     expect(panel.style.width).toBe(`${RIGHT_PANEL_MAX_WIDTH}px`);
+  });
+
+  it('should render nothing while the UI is minimized', () => {
+    // before
+    store.dispatch(toggleUiMinimized());
+    const { container } = renderRightPanel();
+
+    // result
+    expect(container.firstChild).toBeNull();
   });
 });

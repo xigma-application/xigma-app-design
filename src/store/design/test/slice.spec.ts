@@ -18,6 +18,7 @@ import slice, {
   startCommentDraft,
   startTextEdit,
   stopTextEdit,
+  toggleUiMinimized,
   updateCommentContent,
   updateEditingTextBoxPathStartOffset,
   updateNode,
@@ -54,6 +55,7 @@ describe('design slice', () => {
       editingSelectionStart: 0,
       editingTextBox: null,
       editingTextContent: '',
+      isUiMinimized: false,
       lastFrameTool: ToolName.frame,
       lastMoreTool: null,
       lastMouseTool: ToolName.default,
@@ -251,6 +253,20 @@ describe('design slice', () => {
     // result
     expect(state.editingTextBox).toBeNull();
     expect(state.editingTextContent).toBe('');
+  });
+
+  it('should toggle the minimized UI flag', () => {
+    // action
+    const minimized = slice(undefined, toggleUiMinimized());
+
+    // result
+    expect(minimized.isUiMinimized).toBe(true);
+
+    // action
+    const expanded = slice(minimized, toggleUiMinimized());
+
+    // result
+    expect(expanded.isUiMinimized).toBe(false);
   });
 
   it('should update the live text edit content', () => {

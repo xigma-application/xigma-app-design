@@ -46,6 +46,7 @@ const initialState: TDesignState = {
   editingSelectionStart: 0,
   editingTextBox: null,
   editingTextContent: '',
+  isUiMinimized: false,
   lastFrameTool: DEFAULT_FRAME_TOOL,
   lastMoreTool: null,
   lastMouseTool: DEFAULT_MOUSE_TOOL,
@@ -97,6 +98,9 @@ const designSlice = createSlice({
     },
     startTextEdit: (state, action: PayloadAction<TStartTextEditPayload>) => handleStartTextEdit(state, action.payload),
     stopTextEdit: (state) => handleStopTextEdit(state),
+    toggleUiMinimized: (state) => {
+      state.isUiMinimized = !state.isUiMinimized;
+    },
     updateCommentContent: (state, action: PayloadAction<{ content: string; id: string }>) =>
       handleUpdateCommentContent(state, action.payload),
     updateEditingTextBoxPathStartOffset: (state, action: PayloadAction<number>) =>
@@ -124,6 +128,7 @@ export const {
   startCommentDraft,
   startTextEdit,
   stopTextEdit,
+  toggleUiMinimized,
   updateCommentContent,
   updateEditingTextBoxPathStartOffset,
   updateNode,

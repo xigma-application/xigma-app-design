@@ -28,6 +28,7 @@ const createTestStore = (viewport = { x: 0, y: 0, zoom: 1 }): EnhancedStore<{ de
         editingSelectionStart: 0,
         editingTextBox: null,
         editingTextContent: '',
+        isUiMinimized: false,
         lastFrameTool: ToolName.frame,
         lastMoreTool: null,
         lastMouseTool: ToolName.default,

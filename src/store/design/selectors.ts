@@ -28,6 +28,8 @@ export const selectEditingTextBox = (state: RootState): TEditingTextBox | null =
 
 export const selectEditingTextContent = (state: RootState): string => state.design.editingTextContent;
 
+export const selectIsUiMinimized = (state: RootState): boolean => state.design.isUiMinimized;
+
 export const selectLastFrameTool = (state: RootState): ToolName => state.design.lastFrameTool;
 
 export const selectLastMoreTool = (state: RootState): ToolName | null => state.design.lastMoreTool;

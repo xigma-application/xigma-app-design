@@ -42,5 +42,6 @@ export const shortcuts = {
   paste: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.v },
   redo: { primaryKeys: [CONTROL_PRIMARY_KEY, 'shift'], secondaryKey: KeyboardKeys.z },
   selectAll: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.a },
+  toggleUiMinimized: { primaryKeys: [CONTROL_PRIMARY_KEY, 'shift'], secondaryKey: KeyboardKeys.backslash },
   undo: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.z },
 } satisfies Partial<Record<ToolName, TShortcut>> & TStandardKeyboardShortcuts;

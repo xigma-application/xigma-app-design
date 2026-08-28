@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 // components
 import FileMeta from './FileMeta/FileMeta';
+import MinimizeUiButton from './MinimizeUiButton/MinimizeUiButton';
 import { EditableInput, Icon } from 'shared';
 
 // others
@@ -31,9 +32,7 @@ const Header: FC<THeaderProps> = ({ name, onRenameFile }) => {
           onChange={onRenameFile}
           value={name}
         />
-        <button aria-label={t(`${translationNameSpace}.collapseAriaLabel`)} className={styles.Header__collapse} type="button">
-          <Icon name="CollapsePanel" size={24} />
-        </button>
+        <MinimizeUiButton />
       </div>
       <FileMeta />
     </div>

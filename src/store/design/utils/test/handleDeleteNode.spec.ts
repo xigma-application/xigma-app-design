@@ -29,6 +29,7 @@ const buildState = (nodes: TDesignState['nodes'], selectedIds: string[] = []): T
   editingSelectionStart: 0,
   editingTextBox: null,
   editingTextContent: '',
+  isUiMinimized: false,
   lastFrameTool: ToolName.frame,
   lastMoreTool: null,
   lastMouseTool: ToolName.default,

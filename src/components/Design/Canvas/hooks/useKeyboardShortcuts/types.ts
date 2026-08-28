@@ -28,5 +28,6 @@ export type TStandardKeyboardShortcuts = {
   paste: TShortcut;
   redo: TShortcut;
   selectAll: TShortcut;
+  toggleUiMinimized: TShortcut;
   undo: TShortcut;
 };

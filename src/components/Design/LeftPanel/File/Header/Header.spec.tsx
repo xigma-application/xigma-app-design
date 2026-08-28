@@ -1,12 +1,36 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
 
 // components
 import Header from './Header';
+import { TooltipProvider } from 'shared';
+
+// store
+import { toggleUiMinimized } from 'store/design/slice';
+import { store } from 'store';
+
+// types
+import { THeaderProps } from './types';
+
+const renderHeader = (props: THeaderProps): ReturnType<typeof render> =>
+  render(
+    <Provider store={store}>
+      <TooltipProvider>
+        <Header {...props} />
+      </TooltipProvider>
+    </Provider>,
+  );
 
 describe('Header snapshots', () => {
+  beforeEach(() => {
+    if (store.getState().design.isUiMinimized) {
+      store.dispatch(toggleUiMinimized());
+    }
+  });
+
   it('should render Header with the file name', () => {
     // before
-    const { asFragment } = render(<Header name="Untitled" onRenameFile={vi.fn()} />);
+    const { asFragment } = renderHeader({ name: 'Untitled', onRenameFile: vi.fn() });
 
     // result
     expect(asFragment()).toMatchSnapshot();
@@ -14,9 +38,15 @@ describe('Header snapshots', () => {
 });
 
 describe('Header behaviors', () => {
+  beforeEach(() => {
+    if (store.getState().design.isUiMinimized) {
+      store.dispatch(toggleUiMinimized());
+    }
+  });
+
   it('should show the file name and reveal the field on click', () => {
     // before
-    render(<Header name="Screenshots" onRenameFile={vi.fn()} />);
+    renderHeader({ name: 'Screenshots', onRenameFile: vi.fn() });
 
     // result
     expect(screen.getByRole('button', { name: 'Rename file' })).toHaveTextContent('Screenshots');
@@ -33,7 +63,7 @@ describe('Header behaviors', () => {
     const onRenameFile = vi.fn();
 
     // before
-    render(<Header name="Untitled" onRenameFile={onRenameFile} />);
+    renderHeader({ name: 'Untitled', onRenameFile });
 
     // action
     fireEvent.click(screen.getByRole('button', { name: 'Rename file' }));
@@ -45,24 +75,24 @@ describe('Header behaviors', () => {
     expect(onRenameFile).toHaveBeenCalledWith('Screenshots');
   });
 
-  it('should render the menu and collapse buttons', () => {
+  it('should render the menu and minimize UI buttons', () => {
     // before
-    render(<Header name="Untitled" onRenameFile={vi.fn()} />);
+    renderHeader({ name: 'Untitled', onRenameFile: vi.fn() });
 
     // result
     expect(screen.getByRole('button', { name: 'File menu' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Collapse panel' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Minimize UI' })).toBeInTheDocument();
   });
 
   it('should hide the menu button while the name is being edited', () => {
     // before
-    render(<Header name="Untitled" onRenameFile={vi.fn()} />);
+    renderHeader({ name: 'Untitled', onRenameFile: vi.fn() });
 
     // action
     fireEvent.click(screen.getByRole('button', { name: 'Rename file' }));
 
     // result
     expect(screen.queryByRole('button', { name: 'File menu' })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Collapse panel' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Minimize UI' })).toBeInTheDocument();
   });
 });

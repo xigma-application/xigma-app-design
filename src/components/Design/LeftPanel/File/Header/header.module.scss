@@ -18,20 +18,4 @@
     font-weight: 600;
     min-width: 0;
   }
-
-  &__collapse {
-    align-items: center;
-    background-color: transparent;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    display: flex;
-    flex-shrink: 0;
-    justify-content: center;
-    padding: 4px;
-
-    &:hover {
-      background-color: color-mix(in srgb, var(--color-neutral-3) 50%, transparent);
-    }
-  }
 }

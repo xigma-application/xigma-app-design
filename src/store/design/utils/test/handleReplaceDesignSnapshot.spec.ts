@@ -45,6 +45,7 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   editingSelectionStart: 0,
   editingTextBox: null,
   editingTextContent: '',
+  isUiMinimized: false,
   lastFrameTool: ToolName.frame,
   lastMoreTool: null,
   lastMouseTool: ToolName.default,

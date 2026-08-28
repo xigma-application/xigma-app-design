@@ -28,4 +28,5 @@ export const KEYBOARD_SHORTCUTS: TKeyboardShortcuts = {
   [ToolName.star]: [],
   [ToolName.text]: ['T'],
   [ToolName.textOnPath]: [],
+  toggleUiMinimized: [SHIFT, CONTROL, '\\'],
 };

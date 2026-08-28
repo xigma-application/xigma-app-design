@@ -54,8 +54,9 @@ exports[`Header snapshots > should render Header with the file name 1`] = `
         </div>
       </div>
       <button
-        aria-label="Collapse panel"
-        class="_Header__collapse_429bc8"
+        aria-label="Minimize UI"
+        class="_MinimizeUiButton_2cc313"
+        data-state="closed"
         type="button"
       >
         <svg

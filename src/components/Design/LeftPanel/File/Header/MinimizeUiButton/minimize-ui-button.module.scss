@@ -1,0 +1,19 @@
+.MinimizeUiButton {
+  align-items: center;
+  background-color: transparent;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  flex-shrink: 0;
+  justify-content: center;
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--color-neutral-3) 50%, transparent);
+  }
+
+  &__shortcut {
+    color: color-mix(in srgb, var(--color-neutral-1) 70%, transparent);
+    margin-left: 12px;
+  }
+}

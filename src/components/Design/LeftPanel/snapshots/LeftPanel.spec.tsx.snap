@@ -319,8 +319,9 @@ exports[`LeftPanel snapshots > should render LeftPanel 1`] = `
               </div>
             </div>
             <button
-              aria-label="Collapse panel"
-              class="_Header__collapse_429bc8"
+              aria-label="Minimize UI"
+              class="_MinimizeUiButton_2cc313"
+              data-state="closed"
               type="button"
             >
               <svg

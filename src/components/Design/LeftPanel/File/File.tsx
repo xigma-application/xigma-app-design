@@ -1,24 +1,18 @@
-import { FC, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { FC } from 'react';
 
 // components
 import Header from './Header/Header';
 
-// others
-import { DEFAULT_FILE_NAME_KEY } from './constants';
-
 // styles
 import styles from './file.module.scss';
 
-const File: FC = () => {
-  const { t } = useTranslation();
-  const [name, setName] = useState(() => t(DEFAULT_FILE_NAME_KEY));
+// types
+import { TFileProps } from './types';
 
-  return (
-    <div className={styles.File}>
-      <Header name={name} onRenameFile={setName} />
-    </div>
-  );
-};
+const File: FC<TFileProps> = ({ name, onRenameFile }) => (
+  <div className={styles.File}>
+    <Header name={name} onRenameFile={onRenameFile} />
+  </div>
+);
 
 export default File;
