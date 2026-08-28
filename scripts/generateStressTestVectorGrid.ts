@@ -4,9 +4,18 @@ import { nanoid } from '@reduxjs/toolkit';
 import { NodeType } from 'types/design/enums';
 import { TVectorNode, TVectorSegment, TVectorVertex } from 'types/design/types';
 
+// utils
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
+import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
+
 const SQUARE_SIZE = 40;
 const GAP = 20;
 const COLUMNS = 10;
+
+const getRandomHexColor = (): string =>
+  `#${Math.floor(Math.random() * 0xffffff)
+    .toString(16)
+    .padStart(6, '0')}`;
 
 export const generateStressTestVectorGrid = (count = 100): TVectorNode => {
   const vertices: Record<string, TVectorVertex> = {};
@@ -38,7 +47,7 @@ export const generateStressTestVectorGrid = (count = 100): TVectorNode => {
     });
   }
 
-  return {
+  const unfilledNode: TVectorNode = {
     fillColor: '#D9D9D9',
     filledFaceKeys: [],
     id: nanoid(),
@@ -52,4 +61,8 @@ export const generateStressTestVectorGrid = (count = 100): TVectorNode => {
     vertexHandleModes: {},
     vertices,
   };
+  const filledFaceKeys = deriveVectorFaces(unfilledNode).map((face) => getVectorFillLoopKey(face.pieceKeys));
+  const fillColorOverrideByKey = Object.fromEntries(filledFaceKeys.map((key) => [key, getRandomHexColor()]));
+
+  return { ...unfilledNode, fillColorOverrideByKey, filledFaceKeys };
 };
