@@ -28,6 +28,7 @@ exports[`Header snapshots > should render Header with the file name 1`] = `
           </div>
           <div
             class="_EditableInput__action_4a8ec5"
+            data-state="closed"
           >
             <button
               aria-label="File menu"

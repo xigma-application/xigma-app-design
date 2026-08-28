@@ -48,6 +48,17 @@ describe('EditableInput behaviors', () => {
     expect(field).toHaveValue('Untitled');
   });
 
+  it('should bypass global keyboard shortcuts while editing', () => {
+    // before
+    render(<EditableInput ariaLabel="name" onChange={vi.fn()} value="Untitled" />);
+
+    // action
+    const field = enterEditing();
+
+    // result
+    expect(field).toHaveAttribute('data-test-bypass-global-shortcuts', 'true');
+  });
+
   it('should report the editing state as it enters and leaves edit mode', () => {
     // mock
     const onEditingChange = vi.fn();
@@ -215,5 +226,63 @@ describe('EditableInput action slot', () => {
     // result
     expect(screen.getByRole('textbox', { name: 'name' })).toBeInTheDocument();
     expect(screen.queryByText('menu')).not.toBeInTheDocument();
+  });
+
+  it('should toggle the action open state on click, without entering edit mode', () => {
+    // before
+    render(<EditableInput action={<span>menu</span>} ariaLabel="name" onChange={vi.fn()} value="Untitled" />);
+    const actionWrapper = screen.getByText('menu').parentElement as HTMLElement;
+
+    // result
+    expect(actionWrapper).toHaveAttribute('data-state', 'closed');
+
+    // action
+    fireEvent.click(actionWrapper);
+
+    // result
+    expect(actionWrapper).toHaveAttribute('data-state', 'open');
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+
+    // action
+    fireEvent.click(actionWrapper);
+
+    // result
+    expect(actionWrapper).toHaveAttribute('data-state', 'closed');
+  });
+
+  it('should stay open when the mousedown lands inside the action', () => {
+    // before
+    render(<EditableInput action={<span>menu</span>} ariaLabel="name" onChange={vi.fn()} value="Untitled" />);
+    const actionWrapper = screen.getByText('menu').parentElement as HTMLElement;
+
+    // action
+    fireEvent.click(actionWrapper);
+
+    // result
+    expect(actionWrapper).toHaveAttribute('data-state', 'open');
+
+    // action
+    fireEvent.mouseDown(actionWrapper);
+
+    // result
+    expect(actionWrapper).toHaveAttribute('data-state', 'open');
+  });
+
+  it('should close the open action when clicking outside it', () => {
+    // before
+    render(<EditableInput action={<span>menu</span>} ariaLabel="name" onChange={vi.fn()} value="Untitled" />);
+    const actionWrapper = screen.getByText('menu').parentElement as HTMLElement;
+
+    // action
+    fireEvent.click(actionWrapper);
+
+    // result
+    expect(actionWrapper).toHaveAttribute('data-state', 'open');
+
+    // action
+    fireEvent.mouseDown(document.body);
+
+    // result
+    expect(actionWrapper).toHaveAttribute('data-state', 'closed');
   });
 });

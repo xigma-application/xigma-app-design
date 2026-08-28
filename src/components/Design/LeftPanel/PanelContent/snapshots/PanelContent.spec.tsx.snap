@@ -42,6 +42,7 @@ exports[`PanelContent snapshots > should render the File panel for the file nav 
               </div>
               <div
                 class="_EditableInput__action_4a8ec5"
+                data-state="closed"
               >
                 <button
                   aria-label="File menu"

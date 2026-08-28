@@ -1,3 +1,5 @@
+@use '@xigma/scss/mixins/svg-color';
+
 .EditableInput {
   align-items: center;
   border: 1px solid transparent;
@@ -16,12 +18,17 @@
   &__content {
     align-items: center;
     display: flex;
+    min-width: 0;
 
     &:hover {
       .EditableInput--display,
-      .EditableInput__action {
+      .EditableInput__action:not([data-state='open']) {
         background-color: color-mix(in srgb, var(--color-neutral-3) 50%, transparent);
       }
+    }
+
+    &:has(.EditableInput__action[data-state='open']) .EditableInput--display {
+      background-color: color-mix(in srgb, var(--color-neutral-3) 50%, transparent);
     }
 
     > *:first-child {
@@ -63,6 +70,11 @@
 
     &:focus-within {
       background-color: transparent;
+      border-color: transparent;
+    }
+
+    &:has(.EditableInput--editing:focus) {
+      background-color: transparent;
       border-color: var(--color-blue-1);
     }
   }
@@ -72,6 +84,16 @@
     border-radius: 5px;
     display: flex;
     flex-shrink: 0;
+
+    &:hover:not([data-state='open']) {
+      background-color: color-mix(in srgb, var(--color-neutral-3) 70%, transparent);
+    }
+
+    &[data-state='open'] {
+      background-color: #394360;
+
+      @include svg-color.svg-color(var(--color-blue-2));
+    }
 
     > button {
       align-items: center;
@@ -84,9 +106,5 @@
       justify-content: center;
       padding: 0 6px;
     }
-  }
-
-  &__action#{&}__action:hover {
-    background-color: color-mix(in srgb, var(--color-neutral-3) 70%, transparent);
   }
 }

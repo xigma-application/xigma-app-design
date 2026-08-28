@@ -31,6 +31,7 @@ exports[`File snapshots > should render File 1`] = `
             </div>
             <div
               class="_EditableInput__action_4a8ec5"
+              data-state="closed"
             >
               <button
                 aria-label="File menu"
