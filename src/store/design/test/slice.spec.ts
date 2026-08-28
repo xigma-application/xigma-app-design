@@ -5,10 +5,14 @@ import { DEFAULT_PAGE_NAME, DEFAULT_PAINT_COLOR } from '../constants';
 import slice, {
   addComment,
   addNode,
+  addPage,
   cancelCommentDraft,
   deleteComment,
   deleteNode,
+  renamePage,
   replaceDesignSnapshot,
+  replaceNode,
+  setActivePage,
   setActiveTool,
   setPaintColor,
   setPenActiveVertexId,
@@ -160,6 +164,19 @@ describe('design slice', () => {
     expect(state.pages[state.activePageId].nodes).toEqual({});
   });
 
+  it('should replace an existing node in the active page', () => {
+    // before
+    const withNode = slice(undefined, addNode(frameNodePayload));
+    const [id] = withNode.pages[withNode.activePageId].rootOrder;
+    const replacement: TFrameNode = { ...frameNodePayload, fill: '#00ff00', id, width: 999 };
+
+    // action
+    const state = slice(withNode, replaceNode({ id, node: replacement }));
+
+    // result
+    expect(state.pages[state.activePageId].nodes[id]).toEqual(replacement);
+  });
+
   it('should set the viewport', () => {
     // before
     const state = slice(undefined, setViewport({ x: 10, y: 20, zoom: 2 }));
@@ -200,6 +217,58 @@ describe('design slice', () => {
     expect(state.pages[state.activePageId].nodes).toEqual({ [node.id]: node });
     expect(state.pages[state.activePageId].rootOrder).toEqual([node.id]);
     expect(state.selectedIds).toEqual([node.id]);
+  });
+
+  it('should set the active page', () => {
+    // before
+    const state = slice(undefined, setActivePage('page-2'));
+
+    // result
+    expect(state.activePageId).toBe('page-2');
+  });
+
+  it('should add a page with a generated id, a default name and make it active', () => {
+    // mock
+    const initial = slice(undefined, { type: 'unknown' });
+
+    // before
+    const state = slice(initial, addPage());
+    const newPageId = state.activePageId;
+
+    // result
+    expect(newPageId).not.toBe(initial.activePageId);
+    expect(Object.keys(state.pages)).toHaveLength(2);
+    expect(state.pages[newPageId].name).toBe('Page 2');
+    expect(state.pages[newPageId].id).toBe(newPageId);
+  });
+
+  it('should insert the added page right after the active page', () => {
+    // mock
+    const initial = slice(undefined, { type: 'unknown' });
+    const firstId = initial.activePageId;
+    const withSecond = slice(initial, addPage());
+    const secondId = withSecond.activePageId;
+    const withThird = slice(withSecond, addPage());
+    const thirdId = withThird.activePageId;
+
+    // before — go back to the first page, then add
+    const reactivated = slice(withThird, setActivePage(firstId));
+    const state = slice(reactivated, addPage());
+    const insertedId = state.activePageId;
+
+    // result
+    expect(Object.keys(state.pages)).toEqual([firstId, insertedId, secondId, thirdId]);
+  });
+
+  it('should rename a page', () => {
+    // mock
+    const initial = slice(undefined, { type: 'unknown' });
+
+    // before
+    const state = slice(initial, renamePage({ id: initial.activePageId, name: 'Renamed page' }));
+
+    // result
+    expect(state.pages[initial.activePageId].name).toBe('Renamed page');
   });
 
   it('should set the paint color', () => {

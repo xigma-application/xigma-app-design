@@ -9,9 +9,9 @@ import { TDesignPage } from './types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import { TComment, TSceneNode, TViewport } from 'types/design/types';
 
-const selectActivePageId = (state: RootState): string => state.design.activePageId;
+export const selectActivePageId = (state: RootState): string => state.design.activePageId;
 
-const selectPages = (state: RootState): Record<string, TDesignPage> => state.design.pages;
+export const selectPages = (state: RootState): Record<string, TDesignPage> => state.design.pages;
 
 export const selectActivePage = createSelector([selectActivePageId, selectPages], (activePageId, pages) => pages[activePageId]);
 

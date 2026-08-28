@@ -1,5 +1,7 @@
 // selectors
 import {
+  selectActivePage,
+  selectActivePageId,
   selectActiveTool,
   selectCommentDraftPosition,
   selectComments,
@@ -18,6 +20,7 @@ import {
   selectLastTextTool,
   selectNodes,
   selectOrderedNodes,
+  selectPages,
   selectPaintColor,
   selectPenActiveVertexId,
   selectSelectedIds,
@@ -81,6 +84,21 @@ const state = {
 } as any;
 
 describe('design selectors', () => {
+  it('should select the active page id', () => {
+    // result
+    expect(selectActivePageId(state)).toBe('page-1');
+  });
+
+  it('should select the pages record', () => {
+    // result
+    expect(selectPages(state)).toBe(state.design.pages);
+  });
+
+  it('should select the active page', () => {
+    // result
+    expect(selectActivePage(state)).toBe(state.design.pages['page-1']);
+  });
+
   it('should select the active tool', () => {
     // result
     expect(selectActiveTool(state)).toBe(ToolName.frame);

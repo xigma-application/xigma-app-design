@@ -23,6 +23,7 @@ import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/d
 import { getActivePage } from './utils/getActivePage';
 import { handleAddComment } from './utils/handleAddComment';
 import { handleAddNode } from './utils/handleAddNode';
+import { handleAddPage } from './utils/handleAddPage';
 import { handleDeleteNode } from './utils/handleDeleteNode';
 import { handleReplaceDesignSnapshot } from './utils/handleReplaceDesignSnapshot';
 import { handleReplaceNode } from './utils/handleReplaceNode';
@@ -85,6 +86,10 @@ const designSlice = createSlice({
       prepare: (node: TNewSceneNode) => ({ payload: { ...node, id: nanoid() } as TSceneNode }),
       reducer: (state, action: PayloadAction<TSceneNode>) => handleAddNode(state, action.payload),
     },
+    addPage: {
+      prepare: () => ({ payload: { id: nanoid() } }),
+      reducer: (state, action: PayloadAction<{ id: string }>) => handleAddPage(state, action.payload.id),
+    },
     cancelCommentDraft: (state) => {
       state.commentDraftPosition = null;
     },
@@ -92,8 +97,14 @@ const designSlice = createSlice({
       delete getActivePage(state).comments[action.payload];
     },
     deleteNode: (state, action: PayloadAction<string>) => handleDeleteNode(state, action.payload),
+    renamePage: (state, action: PayloadAction<{ id: string; name: string }>) => {
+      state.pages[action.payload.id].name = action.payload.name;
+    },
     replaceDesignSnapshot: (state, action: PayloadAction<TDesignSnapshot>) => handleReplaceDesignSnapshot(state, action.payload),
     replaceNode: (state, action: PayloadAction<{ id: string; node: TSceneNode }>) => handleReplaceNode(state, action.payload),
+    setActivePage: (state, action: PayloadAction<string>) => {
+      state.activePageId = action.payload;
+    },
     setActiveTool: (state, action: PayloadAction<ToolName>) => handleSetActiveTool(state, action.payload),
     setPaintColor: (state, action: PayloadAction<string>) => {
       getActivePage(state).paintColor = action.payload;
@@ -125,11 +136,14 @@ const designSlice = createSlice({
 export const {
   addComment,
   addNode,
+  addPage,
   cancelCommentDraft,
   deleteComment,
   deleteNode,
+  renamePage,
   replaceDesignSnapshot,
   replaceNode,
+  setActivePage,
   setActiveTool,
   setPaintColor,
   setPenActiveVertexId,

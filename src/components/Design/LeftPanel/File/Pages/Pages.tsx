@@ -2,9 +2,15 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { Icon } from 'shared';
+import PagesList from './PagesList/PagesList';
+import { Icon, Tooltip } from 'shared';
+
+// hooks
+import { useAddPage } from './hooks/useAddPage';
+import { useTogglePagesExpanded } from './hooks/useTogglePagesExpanded';
 
 // others
+import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
 import { translationNameSpace } from '../constants';
 
 // store
@@ -15,23 +21,49 @@ import { useAppSelector } from 'store';
 import styles from './pages.module.scss';
 
 const Pages: FC = () => {
-  const { t } = useTranslation();
   const activePage = useAppSelector(selectActivePage);
+  const { t } = useTranslation();
+  const { expand, handleStopPropagation, handleToggleClick, handleToggleKeyDown, isExpanded } = useTogglePagesExpanded();
+  const { handleAddPage, pendingEditPageId } = useAddPage(expand);
+  const searchLabel = t(`${translationNameSpace}.pages.searchAriaLabel`);
+  const addLabel = t(`${translationNameSpace}.pages.addAriaLabel`);
+  const findShortcut = KEYBOARD_SHORTCUTS.find.join('');
 
   return (
     <div className={styles.Pages}>
-      <div className={styles.Pages__toggle}>
-        <Icon color="neutral2" name="ChevronRight" size={16} />
+      <div
+        aria-expanded={isExpanded}
+        className={styles.Pages__header}
+        onClick={handleToggleClick}
+        onKeyDown={handleToggleKeyDown}
+        role="button"
+        tabIndex={0}
+      >
+        <div className={styles.Pages__toggle}>
+          <Icon color="neutral2" name={isExpanded ? 'ChevronDown' : 'ChevronRight'} size={16} />
+        </div>
+        <span className={styles.Pages__name}>{isExpanded ? t(`${translationNameSpace}.pages.title`) : activePage.name}</span>
+        <div className={styles['Pages__button-group']} onClick={handleStopPropagation}>
+          <Tooltip
+            content={
+              <>
+                {searchLabel}
+                <span className={styles.Pages__shortcut}>{findShortcut}</span>
+              </>
+            }
+          >
+            <button aria-label={searchLabel} className={styles.Pages__action} type="button">
+              <Icon name="Search" size={24} />
+            </button>
+          </Tooltip>
+          <Tooltip content={addLabel}>
+            <button aria-label={addLabel} className={styles.Pages__action} onClick={handleAddPage} type="button">
+              <Icon name="Plus" size={24} />
+            </button>
+          </Tooltip>
+        </div>
       </div>
-      <span className={styles.Pages__name}>{activePage.name}</span>
-      <div className={styles['Pages__button-group']}>
-        <button aria-label={t(`${translationNameSpace}.pages.searchAriaLabel`)} className={styles.Pages__action} type="button">
-          <Icon name="Search" size={24} />
-        </button>
-        <button aria-label={t(`${translationNameSpace}.pages.addAriaLabel`)} className={styles.Pages__action} type="button">
-          <Icon name="Plus" size={24} />
-        </button>
-      </div>
+      {isExpanded && <PagesList pendingEditPageId={pendingEditPageId} />}
     </div>
   );
 };

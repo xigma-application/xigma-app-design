@@ -1,0 +1,32 @@
+@use '../../../../../../styles/mixins/scrollbar';
+
+.PagesList {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  &__rows {
+    @include scrollbar.scrollbar-hidden;
+
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  &__scrollThumb {
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  &:hover &__scrollThumb {
+    opacity: 1;
+  }
+
+  &__resize-handle {
+    bottom: -3px;
+    height: 6px;
+    left: 0;
+    position: absolute;
+    right: 0;
+  }
+}

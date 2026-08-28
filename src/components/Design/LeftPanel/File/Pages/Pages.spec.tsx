@@ -1,16 +1,28 @@
+import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { render, screen } from '@testing-library/react';
 
 // components
 import Pages from './Pages';
+import { TooltipProvider } from 'shared';
 
 // store
+import designReducer from 'store/design/slice';
 import { store } from 'store';
 
-const renderPages = (): ReturnType<typeof render> =>
+// types
+import { TDesignState } from 'store/design/types';
+
+type TStore = EnhancedStore<{ design: TDesignState }> | typeof store;
+
+const createTestStore = (): EnhancedStore<{ design: TDesignState }> => configureStore({ reducer: { design: designReducer } });
+
+const renderPages = (testStore: TStore = store): ReturnType<typeof render> =>
   render(
-    <Provider store={store}>
-      <Pages />
+    <Provider store={testStore}>
+      <TooltipProvider>
+        <Pages />
+      </TooltipProvider>
     </Provider>,
   );
 
@@ -25,12 +37,13 @@ describe('Pages snapshots', () => {
 });
 
 describe('Pages behaviors', () => {
-  it('should render the active page name from the store', () => {
+  it('should render the active page name from the store, collapsed by default', () => {
     // before
     renderPages();
 
     // result
     expect(screen.getByText('Page 1')).toBeInTheDocument();
+    expect(screen.getByRole('button', { expanded: false })).toBeInTheDocument();
   });
 
   it('should render the search and add-page buttons', () => {
@@ -38,7 +51,56 @@ describe('Pages behaviors', () => {
     renderPages();
 
     // result
-    expect(screen.getByRole('button', { name: 'Search pages' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Add page' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Find' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add new page' })).toBeInTheDocument();
+  });
+
+  it('should expand and show the static "Pages" title and the page list when the header is clicked', () => {
+    // before
+    renderPages();
+
+    // action
+    fireEvent.click(screen.getByRole('button', { expanded: false }));
+
+    // result
+    expect(screen.getByRole('button', { expanded: true })).toBeInTheDocument();
+    expect(screen.getByText('Pages')).toBeInTheDocument();
+    expect(screen.getAllByText('Page 1')).toHaveLength(1);
+  });
+
+  it('should collapse again when the header is clicked a second time', () => {
+    // before
+    renderPages();
+    fireEvent.click(screen.getByRole('button', { expanded: false }));
+
+    // action
+    fireEvent.click(screen.getByRole('button', { expanded: true }));
+
+    // result
+    expect(screen.getByRole('button', { expanded: false })).toBeInTheDocument();
+    expect(screen.queryByText('Pages')).not.toBeInTheDocument();
+  });
+
+  it('should not toggle the expanded state when the search button is clicked', () => {
+    // before
+    renderPages();
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'Find' }));
+
+    // result
+    expect(screen.getByRole('button', { expanded: false })).toBeInTheDocument();
+  });
+
+  it('should add a page, expand the panel, select it and open its name for editing when the add button is clicked', () => {
+    // before
+    renderPages(createTestStore());
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'Add new page' }));
+
+    // result
+    expect(screen.getByRole('button', { expanded: true })).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toHaveValue('Page 2');
   });
 });

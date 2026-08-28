@@ -110,77 +110,86 @@ exports[`PanelContent snapshots > should render the File panel for the file nav 
         class="_Pages_53acda"
       >
         <div
-          class="_Pages__toggle_53acda"
+          aria-expanded="false"
+          class="_Pages__header_53acda"
+          role="button"
+          tabindex="0"
         >
-          <svg
-            aria-hidden="true"
-            class="Icon"
-            data-fpl-icon-size="16"
-            fill="none"
-            height="16"
-            style="color: var(--color-neutral-2);"
-            viewBox="0 0 16 16"
-            width="16"
-          >
-            <path
-              d="M6.768 5.525a.5.5 0 0 1 .707 0l2.121 2.121a.5.5 0 0 1 0 .707l-2.121 2.122a.5.5 0 0 1-.707-.708L8.535 8 6.768 6.232a.5.5 0 0 1 0-.707"
-              data-svg-property="fill"
-              fill="white"
-            />
-          </svg>
-        </div>
-        <span
-          class="_Pages__name_53acda"
-        >
-          Page 1
-        </span>
-        <div
-          class="_Pages__button-group_53acda"
-        >
-          <button
-            aria-label="Search pages"
-            class="_Pages__action_53acda"
-            type="button"
+          <div
+            class="_Pages__toggle_53acda"
           >
             <svg
+              aria-hidden="true"
               class="Icon"
-              data-fpl-icon-size="24"
+              data-fpl-icon-size="16"
               fill="none"
-              height="24"
-              style="color: var(--color-neutral-1);"
-              viewBox="0 0 24 24"
-              width="24"
+              height="16"
+              style="color: var(--color-neutral-2);"
+              viewBox="0 0 16 16"
+              width="16"
             >
               <path
-                d="M11.5 6a5.5 5.5 0 0 1 4.226 9.019l2.127 2.127a.5.5 0 1 1-.707.707l-2.127-2.127A5.5 5.5 0 1 1 11.5 6m0 1a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9"
+                d="M6.768 5.525a.5.5 0 0 1 .707 0l2.121 2.121a.5.5 0 0 1 0 .707l-2.121 2.122a.5.5 0 0 1-.707-.708L8.535 8 6.768 6.232a.5.5 0 0 1 0-.707"
                 data-svg-property="fill"
                 fill="white"
               />
             </svg>
-          </button>
-          <button
-            aria-label="Add page"
-            class="_Pages__action_53acda"
-            type="button"
+          </div>
+          <span
+            class="_Pages__name_53acda"
           >
-            <svg
-              class="Icon"
-              data-fpl-icon-size="24"
-              fill="none"
-              height="24"
-              style="color: var(--color-neutral-1);"
-              viewBox="0 0 24 24"
-              width="24"
+            Page 1
+          </span>
+          <div
+            class="_Pages__button-group_53acda"
+          >
+            <button
+              aria-label="Find"
+              class="_Pages__action_53acda"
+              data-state="closed"
+              type="button"
             >
-              <path
-                clip-rule="evenodd"
-                d="M12 6a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 12 6"
-                data-svg-property="fill"
-                fill="white"
-                fill-rule="evenodd"
-              />
-            </svg>
-          </button>
+              <svg
+                class="Icon"
+                data-fpl-icon-size="24"
+                fill="none"
+                height="24"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 24 24"
+                width="24"
+              >
+                <path
+                  d="M11.5 6a5.5 5.5 0 0 1 4.226 9.019l2.127 2.127a.5.5 0 1 1-.707.707l-2.127-2.127A5.5 5.5 0 1 1 11.5 6m0 1a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+            <button
+              aria-label="Add new page"
+              class="_Pages__action_53acda"
+              data-state="closed"
+              type="button"
+            >
+              <svg
+                class="Icon"
+                data-fpl-icon-size="24"
+                fill="none"
+                height="24"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 24 24"
+                width="24"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M12 6a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 12 6"
+                  data-svg-property="fill"
+                  fill="white"
+                  fill-rule="evenodd"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>

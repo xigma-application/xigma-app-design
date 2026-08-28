@@ -15,13 +15,14 @@ export type TEditableInputFieldProps = {
   className?: string;
   onBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
   onChange: TFunc<[ChangeEvent<HTMLInputElement>]>;
+  onFocus: TFunc<[FocusEvent<HTMLInputElement>]>;
   onKeyDown: TFunc<[KeyboardEvent<HTMLInputElement>]>;
   placeholder?: string;
   value: string;
-} & Omit<ComponentPropsWithoutRef<'input'>, 'className' | 'onBlur' | 'onChange' | 'onKeyDown' | 'value'>;
+} & Omit<ComponentPropsWithoutRef<'input'>, 'className' | 'onBlur' | 'onChange' | 'onFocus' | 'onKeyDown' | 'value'>;
 
 export const EditableInputField = forwardRef<HTMLInputElement, TEditableInputFieldProps>(
-  ({ ariaLabel, className = '', onBlur, onChange, onKeyDown, placeholder, value, ...rest }, ref) => (
+  ({ ariaLabel, className = '', onBlur, onChange, onFocus, onKeyDown, placeholder, value, ...rest }, ref) => (
     <E2EDataAttribute type={E2EAttribute.bypassGlobalShortcuts} value="true">
       <input
         {...rest}
@@ -30,6 +31,7 @@ export const EditableInputField = forwardRef<HTMLInputElement, TEditableInputFie
         className={cx(styles.EditableInput, styles['EditableInput--editing'], className)}
         onBlur={onBlur}
         onChange={onChange}
+        onFocus={onFocus}
         onKeyDown={onKeyDown}
         placeholder={placeholder}
         ref={ref}

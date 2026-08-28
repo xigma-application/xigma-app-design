@@ -1,9 +1,13 @@
 .Pages {
-  align-items: center;
   border-bottom: 1px solid var(--color-neutral-3);
-  column-gap: 4px;
   display: flex;
-  min-height: 40px;
+  flex-direction: column;
+
+  &__header {
+    align-items: center;
+    display: flex;
+    min-height: 40px;
+  }
 
   &__toggle {
     align-items: center;
@@ -41,5 +45,10 @@
     &:hover {
       background-color: color-mix(in srgb, var(--color-neutral-3) 50%, transparent);
     }
+  }
+
+  &__shortcut {
+    color: color-mix(in srgb, var(--color-neutral-1) 70%, transparent);
+    margin-left: 12px;
   }
 }

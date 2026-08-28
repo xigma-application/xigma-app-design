@@ -6,6 +6,7 @@
   border-radius: 5px;
   box-sizing: border-box;
   color: var(--color-neutral-1);
+  cursor: default;
   display: flex;
   flex: 1;
   font: inherit;
@@ -43,7 +44,6 @@
   }
 
   &--display {
-    cursor: text;
     flex: 0 1 auto;
   }
 
@@ -51,10 +51,18 @@
     background-color: color-mix(in srgb, var(--color-neutral-3) 70%, transparent);
   }
 
+  &--selected {
+    background-color: color-mix(in srgb, var(--color-neutral-3) 70%, transparent);
+  }
+
   &--editing {
     background-color: transparent;
     font-size: 13px;
     font-weight: 550;
+
+    &:focus {
+      border-color: var(--color-blue-1);
+    }
   }
 
   &__text {
@@ -76,6 +84,10 @@
     &:has(.EditableInput--editing:focus) {
       background-color: transparent;
       border-color: var(--color-blue-1);
+    }
+
+    .EditableInput--editing:focus {
+      border-color: transparent;
     }
   }
 
@@ -100,7 +112,6 @@
       background-color: transparent;
       border: none;
       color: inherit;
-      cursor: pointer;
       display: flex;
       height: 24px;
       justify-content: center;

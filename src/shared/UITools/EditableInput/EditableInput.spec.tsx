@@ -48,6 +48,27 @@ describe('EditableInput behaviors', () => {
     expect(field).toHaveValue('Untitled');
   });
 
+  it('should start in edit mode when autoEdit is set', () => {
+    // before
+    render(<EditableInput ariaLabel="name" autoEdit onChange={vi.fn()} value="Page 2" />);
+
+    // result
+    expect(screen.getByRole('textbox', { name: 'name' })).toHaveValue('Page 2');
+  });
+
+  it('should select the whole text when the field is focused', () => {
+    // before
+    render(<EditableInput ariaLabel="name" onChange={vi.fn()} value="Untitled" />);
+    const field = enterEditing();
+
+    // action
+    fireEvent.focus(field);
+
+    // result
+    expect(field.selectionStart).toBe(0);
+    expect(field.selectionEnd).toBe('Untitled'.length);
+  });
+
   it('should bypass global keyboard shortcuts while editing', () => {
     // before
     render(<EditableInput ariaLabel="name" onChange={vi.fn()} value="Untitled" />);
@@ -192,6 +213,55 @@ describe('EditableInput behaviors', () => {
     // result
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: 'name' })).toHaveTextContent('Untitled');
+  });
+
+  it('should mark the display as selected when the selected prop is true', () => {
+    // before
+    render(<EditableInput ariaLabel="name" onChange={vi.fn()} selected value="Untitled" />);
+
+    // result
+    expect(screen.getByRole('button', { name: 'name' }).className).toMatch(/EditableInput--selected/);
+  });
+
+  it('should not mark the display as selected by default', () => {
+    // before
+    render(<EditableInput ariaLabel="name" onChange={vi.fn()} value="Untitled" />);
+
+    // result
+    expect(screen.getByRole('button', { name: 'name' }).className).not.toMatch(/EditableInput--selected/);
+  });
+
+  it('should not enter edit mode on a single click when editOnDoubleClick is set', () => {
+    // before
+    render(<EditableInput ariaLabel="name" editOnDoubleClick onChange={vi.fn()} value="Untitled" />);
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'name' }));
+
+    // result
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  });
+
+  it('should enter edit mode on a double click when editOnDoubleClick is set', () => {
+    // before
+    render(<EditableInput ariaLabel="name" editOnDoubleClick onChange={vi.fn()} value="Untitled" />);
+
+    // action
+    fireEvent.doubleClick(screen.getByRole('button', { name: 'name' }));
+
+    // result
+    expect(screen.getByRole('textbox', { name: 'name' })).toBeInTheDocument();
+  });
+
+  it('should still enter edit mode on Enter when editOnDoubleClick is set', () => {
+    // before
+    render(<EditableInput ariaLabel="name" editOnDoubleClick onChange={vi.fn()} value="Untitled" />);
+
+    // action
+    fireEvent.keyDown(screen.getByRole('button', { name: 'name' }), { key: 'Enter' });
+
+    // result
+    expect(screen.getByRole('textbox', { name: 'name' })).toBeInTheDocument();
   });
 
   it('should sync the displayed text when the value prop changes', () => {

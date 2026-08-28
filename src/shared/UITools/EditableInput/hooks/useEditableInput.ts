@@ -5,14 +5,20 @@ export type TUseEditableInputResult = {
   handleBlur: TFunc<[FocusEvent<HTMLInputElement>]>;
   handleChange: TFunc<[ChangeEvent<HTMLInputElement>]>;
   handleDisplayKeyDown: TFunc<[KeyboardEvent<HTMLElement>]>;
+  handleFocus: TFunc<[FocusEvent<HTMLInputElement>]>;
   handleKeyDown: TFunc<[KeyboardEvent<HTMLInputElement>]>;
   isEditing: boolean;
   startEditing: TFunc;
 };
 
-export const useEditableInput = (value: string, onChange: TFunc<[string]>, onEditingChange: TFunc<[boolean]>): TUseEditableInputResult => {
+export const useEditableInput = (
+  value: string,
+  onChange: TFunc<[string]>,
+  onEditingChange: TFunc<[boolean]>,
+  autoEdit = false,
+): TUseEditableInputResult => {
   const [draft, setDraft] = useState(value);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(autoEdit);
   const isCancellingRef = useRef(false);
 
   useEffect(() => {
@@ -38,6 +44,10 @@ export const useEditableInput = (value: string, onChange: TFunc<[string]>, onEdi
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
     setDraft(event.target.value);
+  };
+
+  const handleFocus = (event: FocusEvent<HTMLInputElement>): void => {
+    event.currentTarget.select();
   };
 
   const handleBlur = (event: FocusEvent<HTMLInputElement>): void => {
@@ -66,5 +76,5 @@ export const useEditableInput = (value: string, onChange: TFunc<[string]>, onEdi
     }
   };
 
-  return { draft, handleBlur, handleChange, handleDisplayKeyDown, handleKeyDown, isEditing, startEditing };
+  return { draft, handleBlur, handleChange, handleDisplayKeyDown, handleFocus, handleKeyDown, isEditing, startEditing };
 };
