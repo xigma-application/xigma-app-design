@@ -4,6 +4,7 @@ exports[`LeftPanel snapshots > should render LeftPanel 1`] = `
 <DocumentFragment>
   <div
     class="_LeftPanel_ff9541"
+    style="width: 500px;"
   >
     <div
       class="_NavRail_8eca33"
@@ -260,6 +261,10 @@ exports[`LeftPanel snapshots > should render LeftPanel 1`] = `
         </div>
       </div>
     </div>
+    <div
+      class="_LeftPanel__resize-handle_ff9541"
+      style="cursor: w-resize;"
+    />
   </div>
 </DocumentFragment>
 `;

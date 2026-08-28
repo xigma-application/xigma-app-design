@@ -4,6 +4,13 @@
   position: absolute;
   right: 0;
   top: 0;
-  width: 240px;
   z-index: 1;
+
+  &__resize-handle {
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 8px;
+  }
 }
