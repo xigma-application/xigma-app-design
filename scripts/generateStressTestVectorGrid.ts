@@ -11,11 +11,7 @@ import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLo
 const SQUARE_SIZE = 40;
 const GAP = 20;
 const COLUMNS = 10;
-
-const getRandomHexColor = (): string =>
-  `#${Math.floor(Math.random() * 0xffffff)
-    .toString(16)
-    .padStart(6, '0')}`;
+const FILL_COLOR = '#D9D9D9';
 
 export const generateStressTestVectorGrid = (count = 100): TVectorNode => {
   const vertices: Record<string, TVectorVertex> = {};
@@ -48,7 +44,7 @@ export const generateStressTestVectorGrid = (count = 100): TVectorNode => {
   }
 
   const unfilledNode: TVectorNode = {
-    fillColor: '#D9D9D9',
+    fillColor: FILL_COLOR,
     filledFaceKeys: [],
     id: nanoid(),
     name: 'Vector',
@@ -62,7 +58,7 @@ export const generateStressTestVectorGrid = (count = 100): TVectorNode => {
     vertices,
   };
   const filledFaceKeys = deriveVectorFaces(unfilledNode).map((face) => getVectorFillLoopKey(face.pieceKeys));
-  const fillColorOverrideByKey = Object.fromEntries(filledFaceKeys.map((key) => [key, getRandomHexColor()]));
+  const fillColorOverrideByKey = Object.fromEntries(filledFaceKeys.map((key) => [key, FILL_COLOR]));
 
   return { ...unfilledNode, fillColorOverrideByKey, filledFaceKeys };
 };
