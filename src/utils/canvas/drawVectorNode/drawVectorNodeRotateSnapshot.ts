@@ -22,7 +22,7 @@ export const drawVectorNodeRotateSnapshot = (
 ): void => {
   snapshot.facesByColor.forEach(({ color, points }) => {
     const rotatedFaces = points.map((face) => face.map((point) => rotateSnapshotPoint(point, snapshot)));
-    drawVectorFill(gl, program, buffer, null, rotatedFaces, color, canvasWidth, canvasHeight, viewport);
+    drawVectorFill(gl, program, buffer, null, null, rotatedFaces, color, canvasWidth, canvasHeight, viewport);
   });
 
   const rotatedStrokeVertices: number[] = [];

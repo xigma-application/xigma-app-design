@@ -8,6 +8,7 @@ import { drawVectorRoundedCaps } from './drawVectorRoundedCaps';
 import { drawVectorThickStrokeVertices } from './drawVectorThickStrokeVertices';
 import { drawVectorVariableStroke } from './drawVectorVariableStroke';
 import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
+import { getVectorNodeBounds } from '../vectorNetwork/getVectorNodeBounds';
 import { getVectorNodeThickStrokeVertices } from '../vectorNetwork/getVectorNodeThickStrokeVertices/getVectorNodeThickStrokeVertices';
 import { groupFilledFacesByColor } from './groupFilledFacesByColor';
 
@@ -22,9 +23,10 @@ export const drawVectorNode = (
   viewport: TViewport,
 ): void => {
   const renderedNode = getRenderedVectorNode(node);
+  const nodeBounds = getVectorNodeBounds(renderedNode);
 
   groupFilledFacesByColor(renderedNode).forEach((faces, color) => {
-    drawVectorFill(gl, program, buffer, faceBufferCache, faces, color, canvasWidth, canvasHeight, viewport);
+    drawVectorFill(gl, program, buffer, faceBufferCache, nodeBounds, faces, color, canvasWidth, canvasHeight, viewport);
   });
 
   if (renderedNode.widthProfile) {

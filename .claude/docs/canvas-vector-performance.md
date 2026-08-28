@@ -440,12 +440,34 @@ specifically per-shape-color behavior.
 
 With that fixed, `bufferData` (this fix's actual target) stayed negligible (7.6ms/0.6%) and
 `getOrCreateFaceBuffer` itself cost 6.9ms self/33.4ms total (2.8%) — small and consistent with the
-cache working. The **new largest single item** in the corrected profile is `getVectorFillCoveringQuad`
-(116.4ms self, 9.9%) — it recomputes the covering quad's bounding box from **all** faces on **every**
-frame, uncached, since it isn't wired into any of the §5 cluster caches. Not fixed here; flagged as the
-next concrete candidate if this area gets revisited. Overall: a real, if modest and still not
-formally A/B'd with matched interaction scripts, improvement — not the `977ms → 30.5ms`-grade number
-the rest of this doc holds itself to, but no longer "unquantified noise" either.
+cache working. The **new largest single item** in the corrected profile was `getVectorFillCoveringQuad`
+(116.4ms self, 9.9%) — it recomputed the covering quad's bounding box from **all** faces on **every**
+frame, uncached, since it wasn't wired into any of the §5 cluster caches. Overall: a real, if modest and
+still not formally A/B'd with matched interaction scripts, improvement — not the `977ms → 30.5ms`-grade
+number the rest of this doc holds itself to, but no longer "unquantified noise" either.
+
+**Follow-up (same session): `getVectorFillCoveringQuad` fixed too.** `getVectorFillCoveringQuad.ts`
+now takes an optional `nodeBounds: TDraftRect | null` — when given, it builds the covering quad
+directly from that rect (`getVectorNodeBounds.ts`, the already-cached, §3.5 `WeakMap<TVectorNodeOrigin,
+TDraftRect>`) instead of scanning every face's points. `drawVectorNode.ts` (the one caller with a real
+node) computes `getVectorNodeBounds(renderedNode)` **once** and passes it to every `drawVectorFill`
+call for that node, regardless of color group — a node's own bounds are a valid (if slightly looser)
+substitute for a single color group's tighter bounds here, since the quad only needs to *fully cover*
+the stencil-masked fill area, not tightly wrap it; a few extra covered pixels cost nothing the stencil
+test doesn't already discard. The four ephemeral call sites (three frozen-snapshot draws + the lasso
+preview) still pass `null`, same reasoning as `faceBufferCache` — their faces are recomputed fresh every
+frame anyway, so there's no stable bounds to reuse.
+
+**This did not, and could not, speed up live vector editing** — worth stating explicitly since that was
+the actual motivation for asking about it this session. Both this fix and the original §5.7 slice are
+strictly idle-frame/pan-zoom optimizations: they only pay off when the underlying geometry (and node
+reference, for `getVectorNodeBounds`'s cache) is unchanged between frames. A genuine vertex edit still
+produces a new node object on every throttled dispatch (§3.2), and a whole-node drag/resize/rotate still
+recomputes its faces fresh every frame via the frozen-snapshot pointwise transform (§4) — neither cache
+has anything valid to hit in either case. The one change that would actually help *editing* performance
+on a large multi-shape node is §5.6's **incremental/differential topology tracking** — not started,
+flagged there as high-regression-risk core work, a different undertaking entirely from anything in this
+section.
 
 ## 6. Unrelated find while live-verifying §5.7: `getRemainingVertices` was O(vertices × segments)
 
@@ -506,6 +528,9 @@ freeze to instant.
   getOrCreateFaceBuffer.ts`, `useCanvasRenderLoop/types.ts` (`TImageRenderContext.faceBufferCache`),
   `useCanvasRenderLoop/utils/setupRenderLoop.ts`, `useCanvasRenderLoop/utils/drawScene/
   {drawSceneNodes,drawSceneVectorNode}.ts`, `utils/canvas/drawVectorNode/{drawVectorNode,drawVectorFill}.ts`
+- Stress-test generator fill fix + covering-quad cache (§5.7's profiling-note follow-up):
+  `scripts/generateStressTestVectorGrid.ts`, `utils/canvas/drawVectorNode/getVectorFillCoveringQuad.ts`,
+  reusing the pre-existing `utils/canvas/vectorNetwork/getVectorNodeBounds.ts` (§3.5)
 
 ## Related
 

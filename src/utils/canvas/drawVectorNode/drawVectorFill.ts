@@ -1,5 +1,5 @@
 // types
-import { TPoint } from 'types/canvas';
+import { TDraftRect, TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
 
 // utils
@@ -12,6 +12,7 @@ export const drawVectorFill = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   faceBufferCache: WeakMap<TPoint[], WebGLBuffer> | null,
+  nodeBounds: TDraftRect | null,
   faces: TPoint[][],
   color: string,
   canvasWidth: number,
@@ -49,7 +50,7 @@ export const drawVectorFill = (
     gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(getVectorFillCoveringQuad(faces)), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(getVectorFillCoveringQuad(faces, nodeBounds)), gl.STATIC_DRAW);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
     gl.uniform4fv(colorLocation, hexToRgbaFloat(color, alpha));
     gl.drawArrays(gl.TRIANGLES, 0, 6);

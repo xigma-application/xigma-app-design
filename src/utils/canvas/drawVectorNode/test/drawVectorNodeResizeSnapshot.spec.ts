@@ -67,6 +67,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       program,
       buffer,
       null,
+      null,
       [
         [
           { x: 20, y: 10 },
@@ -83,6 +84,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       gl,
       program,
       buffer,
+      null,
       null,
       [[{ x: 10, y: 2.5 }]],
       '#00ff00',
@@ -116,6 +118,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       gl,
       program,
       buffer,
+      null,
       null,
       [[{ x: 10, y: 40 }]],
       '#ff0000',
@@ -208,6 +211,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       gl,
       program,
       buffer,
+      null,
       null,
       [[{ x: 110, y: 40 }]],
       '#ff0000',

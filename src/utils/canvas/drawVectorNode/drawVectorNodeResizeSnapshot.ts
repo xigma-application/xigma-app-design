@@ -38,7 +38,7 @@ export const drawVectorNodeResizeSnapshot = (
 ): void => {
   snapshot.facesByColor.forEach(({ color, points }) => {
     const scaledFaces = points.map((face) => face.map((point) => scalePoint(point, snapshot)));
-    drawVectorFill(gl, program, buffer, null, scaledFaces, color, canvasWidth, canvasHeight, viewport);
+    drawVectorFill(gl, program, buffer, null, null, scaledFaces, color, canvasWidth, canvasHeight, viewport);
   });
 
   const scaledSegments = snapshot.flattenedSegments.map((segment) => ({

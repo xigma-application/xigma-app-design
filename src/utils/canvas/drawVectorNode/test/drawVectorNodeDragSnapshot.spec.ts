@@ -55,6 +55,7 @@ describe('drawVectorNodeDragSnapshot', () => {
       program,
       buffer,
       null,
+      null,
       [
         [
           { x: 5, y: 10 },
@@ -71,6 +72,7 @@ describe('drawVectorNodeDragSnapshot', () => {
       gl,
       program,
       buffer,
+      null,
       null,
       [[{ x: 7, y: 12 }]],
       '#00ff00',

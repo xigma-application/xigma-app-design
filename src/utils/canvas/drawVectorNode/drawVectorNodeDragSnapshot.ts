@@ -26,7 +26,7 @@ export const drawVectorNodeDragSnapshot = (
 
   snapshot.facesByColor.forEach(({ color, points }) => {
     const translatedFaces = points.map((face) => translatePoints(face, deltaX, deltaY));
-    drawVectorFill(gl, program, buffer, null, translatedFaces, color, canvasWidth, canvasHeight, viewport);
+    drawVectorFill(gl, program, buffer, null, null, translatedFaces, color, canvasWidth, canvasHeight, viewport);
   });
 
   drawVectorThickStrokeVertices(

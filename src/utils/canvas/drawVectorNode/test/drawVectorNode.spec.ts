@@ -7,6 +7,7 @@ import { drawVectorNode } from '../drawVectorNode';
 import { getVectorFillColorForLoopKey } from '../../vectorNetwork/getVectorFillColorForLoopKey';
 
 const getVectorFillLoopPointsMock = vi.fn();
+const getVectorNodeBoundsMock = vi.fn();
 const drawVectorFillMock = vi.fn();
 const drawVectorThickStrokeVerticesMock = vi.fn();
 const drawVectorVariableStrokeMock = vi.fn();
@@ -18,6 +19,9 @@ vi.mock('components/Design/Canvas/utils/getRenderedVectorNode', () => ({
 }));
 vi.mock('../../vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints', () => ({
   getVectorFillLoopPoints: (...args: unknown[]): unknown => getVectorFillLoopPointsMock(...args),
+}));
+vi.mock('../../vectorNetwork/getVectorNodeBounds', () => ({
+  getVectorNodeBounds: (...args: unknown[]): unknown => getVectorNodeBoundsMock(...args),
 }));
 vi.mock('../drawVectorFill', () => ({ drawVectorFill: (...args: unknown[]): void => drawVectorFillMock(...args) }));
 vi.mock('../drawVectorThickStrokeVertices', () => ({
@@ -31,16 +35,19 @@ vi.mock('../../vectorNetwork/getVectorNodeThickStrokeVertices/getVectorNodeThick
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
+const NODE_BOUNDS = { height: 10, width: 10, x: 0, y: 0 };
 
 describe('drawVectorNode', () => {
   beforeEach(() => {
     getVectorFillLoopPointsMock.mockClear();
+    getVectorNodeBoundsMock.mockClear();
     drawVectorFillMock.mockClear();
     drawVectorThickStrokeVerticesMock.mockClear();
     drawVectorVariableStrokeMock.mockClear();
     getVectorNodeThickStrokeVerticesMock.mockClear();
     getRenderedVectorNodeMock.mockReset();
     getRenderedVectorNodeMock.mockImplementation((node: TVectorNode) => node);
+    getVectorNodeBoundsMock.mockReturnValue(NODE_BOUNDS);
   });
 
   it('should resolve each filled loop key to its current points then draw the fill followed by the stroke, using the node’s own colors and width', () => {
@@ -80,6 +87,7 @@ describe('drawVectorNode', () => {
       program,
       buffer,
       faceBufferCache,
+      NODE_BOUNDS,
       [loopPoints],
       getVectorFillColorForLoopKey('s1,s2,s3'),
       200,
@@ -138,6 +146,7 @@ describe('drawVectorNode', () => {
       program,
       buffer,
       faceBufferCache,
+      NODE_BOUNDS,
       [loopAPoints],
       colorA,
       200,
@@ -150,6 +159,7 @@ describe('drawVectorNode', () => {
       program,
       buffer,
       faceBufferCache,
+      NODE_BOUNDS,
       [loopBPoints],
       colorB,
       200,
