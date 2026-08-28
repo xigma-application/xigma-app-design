@@ -22,11 +22,11 @@ export const resolveVectorVertexMerge = (
   if (hit) {
     draggedVertices[vertexId] = { id: vertexId, x: hit.point.x, y: hit.point.y };
     dragState.mergeTarget = { nodeId: hit.nodeId, vertexId: hit.vertexId };
-    canvasRefs.vectorAlignmentGuideRef.current = null;
+    canvasRefs.vectorEdit.vectorAlignmentGuideRef.current = null;
     setClassName('point');
   } else {
     dragState.mergeTarget = null;
-    canvasRefs.vectorAlignmentGuideRef.current = guide;
+    canvasRefs.vectorEdit.vectorAlignmentGuideRef.current = guide;
     setClassName('move');
   }
 };

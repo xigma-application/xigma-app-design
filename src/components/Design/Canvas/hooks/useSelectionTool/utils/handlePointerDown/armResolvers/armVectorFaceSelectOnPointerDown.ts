@@ -41,13 +41,13 @@ export const armVectorFaceSelectOnPointerDown = ({
         dispatch(updateNode({ changes: { segments, vertices }, id: node.id }));
       }
 
-      canvasRefs.selectedVectorVertexIdsRef.current = event.shiftKey
-        ? [...new Set([...canvasRefs.selectedVectorVertexIdsRef.current, ...vertexIds])]
+      canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = event.shiftKey
+        ? [...new Set([...canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current, ...vertexIds])]
         : vertexIds;
 
       if (!event.shiftKey) {
-        canvasRefs.selectedVectorHandlesRef.current = [];
-        canvasRefs.selectedVectorSegmentIdsRef.current = [];
+        canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [];
+        canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = [];
       }
 
       armVectorGroupDrag(canvas, event, canvasRefs, point, null);

@@ -20,9 +20,12 @@ export const armVectorSegmentClick = (
 ): void => {
   switch (true) {
     case event.shiftKey:
-      canvasRefs.selectedVectorSegmentIdsRef.current = toggleSelection(canvasRefs.selectedVectorSegmentIdsRef.current, segmentId);
+      canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = toggleSelection(
+        canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current,
+        segmentId,
+      );
       break;
-    case isPartOfVectorMultiSelection(canvasRefs, canvasRefs.selectedVectorSegmentIdsRef.current.includes(segmentId)):
+    case isPartOfVectorMultiSelection(canvasRefs, canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current.includes(segmentId)):
       armVectorGroupDrag(canvas, event, canvasRefs, point, { id: segmentId, kind: 'segment' });
       break;
     default:

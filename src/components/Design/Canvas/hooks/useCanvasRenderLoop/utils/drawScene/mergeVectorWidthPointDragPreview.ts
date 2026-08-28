@@ -6,7 +6,7 @@ import { TSceneNode } from 'types/design/types';
 export const mergeVectorWidthPointDragPreview =
   (refs: TCanvasRefs) =>
   (node: TSceneNode): TSceneNode => {
-    const drag = refs.vectorWidthPointDragRef.current;
+    const drag = refs.vectorWidth.vectorWidthPointDragRef.current;
     const groupTargetsForNode = drag?.groupTargets.filter((target) => target.nodeId === node.id) ?? [];
 
     if (drag && node.type === NodeType.vector && (node.id === drag.nodeId || groupTargetsForNode.length > 0)) {

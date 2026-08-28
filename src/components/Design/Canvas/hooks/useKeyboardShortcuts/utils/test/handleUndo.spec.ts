@@ -13,18 +13,18 @@ import { handleUndo } from '../handleUndo';
 describe('handleUndo', () => {
   it('should leave the vector-selection refs untouched when there is nothing to undo', () => {
     // mock
-    const refs = createCanvasRefs({ selectedVectorVertexIdsRef: { current: ['still-here'] } });
+    const refs = createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['still-here'] } } });
 
     // action
     handleUndo(store.dispatch, refs);
 
     // result
-    expect(refs.selectedVectorVertexIdsRef.current).toEqual(['still-here']);
+    expect(refs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['still-here']);
   });
 
   it('should restore the pre-gesture vector selection onto the refs when something is undone', () => {
     // mock
-    const refs = createCanvasRefs({ selectedVectorVertexIdsRef: { current: ['pre-gesture-vertex'] } });
+    const refs = createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['pre-gesture-vertex'] } } });
 
     store.dispatch(
       beginHistoryGesture({ selectedVectorHandles: [], selectedVectorSegmentIds: [], selectedVectorVertexIds: ['pre-gesture-vertex'] }),
@@ -34,12 +34,12 @@ describe('handleUndo', () => {
     );
     store.dispatch(endHistoryGesture());
 
-    refs.selectedVectorVertexIdsRef.current = ['different-vertex'];
+    refs.vectorEdit.selectedVectorVertexIdsRef.current = ['different-vertex'];
 
     // action
     handleUndo(store.dispatch, refs);
 
     // result
-    expect(refs.selectedVectorVertexIdsRef.current).toEqual(['pre-gesture-vertex']);
+    expect(refs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['pre-gesture-vertex']);
   });
 });

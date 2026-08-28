@@ -44,15 +44,15 @@ export const resolveToolHover = (
   const selectedNodes = selectSelectedNodes(state);
   const resizableSelectedNodes = isEditingText || isEditingVector ? [] : selectedNodes;
   const applyClassName = isEditingVector ? (): void => {} : setClassName;
-  const selectedVertexIds = refs.selectedVectorVertexIdsRef.current;
-  const selectedHandles = refs.selectedVectorHandlesRef.current;
+  const selectedVertexIds = refs.vectorEdit.selectedVectorVertexIdsRef.current;
+  const selectedHandles = refs.vectorEdit.selectedVectorHandlesRef.current;
   const vectorMultiSelectBox = getVectorMultiSelectBoxForHover(
     state.design.nodes,
     vectorEditingNodeIds,
     selectedVertexIds,
     selectedHandles,
-    refs.vectorMultiSelectBoxRef,
-    refs.selectedVectorSegmentIdsRef.current,
+    refs.vectorMultiSelect.vectorMultiSelectBoxRef,
+    refs.vectorEdit.selectedVectorSegmentIdsRef.current,
   );
   const ctx: THoverResolverContext = {
     activeTool,

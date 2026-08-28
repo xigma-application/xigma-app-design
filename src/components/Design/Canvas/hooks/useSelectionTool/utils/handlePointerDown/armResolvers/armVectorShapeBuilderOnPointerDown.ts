@@ -17,12 +17,12 @@ export const armVectorShapeBuilderOnPointerDown = (context: TArmContext): true |
   if (activeTool === ToolName.shapeBuilder && vectorEditingNodeIds.length > 0) {
     const hits = getVectorFacesOnPathAcrossOpenNodes([point], vectorEditingNodeIds, state.design.nodes);
 
-    canvasRefs.vectorShapeBuilderPathRef.current = [point];
-    canvasRefs.touchedVectorShapeBuilderFacesRef.current = Object.fromEntries(
+    canvasRefs.shapeBuilder.vectorShapeBuilderPathRef.current = [point];
+    canvasRefs.shapeBuilder.touchedVectorShapeBuilderFacesRef.current = Object.fromEntries(
       hits.map(({ faces, node }) => [node.id, new Set(faces.map((face) => face.key))]),
     );
-    canvasRefs.isVectorShapeBuilderBoxModeRef.current = event.shiftKey;
-    canvasRefs.isVectorShapeBuilderSubtractRef.current = event.altKey;
+    canvasRefs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current = event.shiftKey;
+    canvasRefs.shapeBuilder.isVectorShapeBuilderSubtractRef.current = event.altKey;
     setClassName(event.altKey ? 'remove' : 'add');
     canvas.setPointerCapture(event.pointerId);
 

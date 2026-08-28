@@ -44,7 +44,7 @@ describe('applySplitSegmentClickAction', () => {
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs({
-      selectedVectorSegmentIdsRef: { current: ['s1'] },
+      vectorEdit: { selectedVectorSegmentIdsRef: { current: ['s1'] } },
     });
 
     // before — t=0.5 along the straight v1(0,0)-v2(100,0) segment lands exactly on its midpoint
@@ -52,11 +52,11 @@ describe('applySplitSegmentClickAction', () => {
 
     // result
     const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
-    const [newVertexId] = canvasRefs.selectedVectorVertexIdsRef.current;
+    const [newVertexId] = canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current;
 
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toHaveLength(1);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toHaveLength(1);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
     expect(updatedNode.vertices[newVertexId]).toEqual({ id: newVertexId, x: 50, y: 0 });
     expect(Object.keys(updatedNode.segments)).toHaveLength(2);
   });
@@ -64,14 +64,14 @@ describe('applySplitSegmentClickAction', () => {
   it('should do nothing when the vector-editing node can no longer be found', () => {
     // mock — e.g. the node was deleted or edit mode exited between arm and release
     const canvasRefs = createCanvasRefs({
-      selectedVectorSegmentIdsRef: { current: ['s1'] },
+      vectorEdit: { selectedVectorSegmentIdsRef: { current: ['s1'] } },
     });
 
     // before
     applySplitSegmentClickAction(store.dispatch, canvasRefs, 'missing-node', 's1', 0.5);
 
     // result — untouched, no crash
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
   });
 });

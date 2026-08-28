@@ -66,7 +66,7 @@ describe('disarmVectorMultiDrag', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.vectorMultiDragRef.current = {
+    canvasRefs.vectorMultiSelect.vectorMultiDragRef.current = {
       boxOrigin: null,
       dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
@@ -82,7 +82,7 @@ describe('disarmVectorMultiDrag', () => {
     disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.vectorMultiDragRef.current).toBeNull();
+    expect(canvasRefs.vectorMultiSelect.vectorMultiDragRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
     expect(setClassName).toHaveBeenCalledWith(null);
   });
@@ -92,9 +92,9 @@ describe('disarmVectorMultiDrag', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = ['s1'];
 
-    canvasRefs.vectorMultiDragRef.current = {
+    canvasRefs.vectorMultiSelect.vectorMultiDragRef.current = {
       boxOrigin: null,
       dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
@@ -108,7 +108,7 @@ describe('disarmVectorMultiDrag', () => {
     disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vi.fn());
 
     // result
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
   });
 
   it('should collapse the selection down to the pending vertex when released without ever moving', () => {
@@ -116,9 +116,9 @@ describe('disarmVectorMultiDrag', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
-    canvasRefs.vectorMultiDragRef.current = {
+    canvasRefs.vectorMultiSelect.vectorMultiDragRef.current = {
       boxOrigin: null,
       dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
@@ -132,9 +132,9 @@ describe('disarmVectorMultiDrag', () => {
     disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vi.fn());
 
     // result
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v2']);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v2']);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 
   it('should collapse the selection down to the pending handle when released without ever moving', () => {
@@ -142,10 +142,10 @@ describe('disarmVectorMultiDrag', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
 
-    canvasRefs.vectorMultiDragRef.current = {
+    canvasRefs.vectorMultiSelect.vectorMultiDragRef.current = {
       boxOrigin: null,
       dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
@@ -159,9 +159,9 @@ describe('disarmVectorMultiDrag', () => {
     disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vi.fn());
 
     // result
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 
   it('should collapse the selection down to the pending segment when released without ever moving', () => {
@@ -169,9 +169,9 @@ describe('disarmVectorMultiDrag', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1', 's2'];
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = ['s1', 's2'];
 
-    canvasRefs.vectorMultiDragRef.current = {
+    canvasRefs.vectorMultiSelect.vectorMultiDragRef.current = {
       boxOrigin: null,
       dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
@@ -185,9 +185,9 @@ describe('disarmVectorMultiDrag', () => {
     disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vi.fn());
 
     // result
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
   });
 
   it('should leave the whole multi-selection untouched when the pointer actually moved, even with a pending click action', () => {
@@ -195,9 +195,9 @@ describe('disarmVectorMultiDrag', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
-    canvasRefs.vectorMultiDragRef.current = {
+    canvasRefs.vectorMultiSelect.vectorMultiDragRef.current = {
       boxOrigin: null,
       dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
@@ -211,7 +211,7 @@ describe('disarmVectorMultiDrag', () => {
     disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vi.fn());
 
     // result
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
   });
 
   it('should split the pending segment and select the new vertex when released without ever moving — a plain click always splits, never leaves the segment selected', () => {
@@ -223,9 +223,9 @@ describe('disarmVectorMultiDrag', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = ['s1'];
 
-    canvasRefs.vectorMultiDragRef.current = {
+    canvasRefs.vectorMultiSelect.vectorMultiDragRef.current = {
       boxOrigin: null,
       dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
@@ -241,11 +241,11 @@ describe('disarmVectorMultiDrag', () => {
     // result — s1 is gone from the selection (the click always splits, per the direct ask, regardless of
     // whether it was already selected); a new vertex sits at the split point and is itself now selected
     const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
-    const [newVertexId] = canvasRefs.selectedVectorVertexIdsRef.current;
+    const [newVertexId] = canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current;
 
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toHaveLength(1);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toHaveLength(1);
     expect(updatedNode.vertices[newVertexId]).toEqual({ id: newVertexId, x: 50, y: 0 });
     expect(Object.keys(updatedNode.segments)).toHaveLength(2);
   });
@@ -255,9 +255,9 @@ describe('disarmVectorMultiDrag', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = ['s1'];
 
-    canvasRefs.vectorMultiDragRef.current = {
+    canvasRefs.vectorMultiSelect.vectorMultiDragRef.current = {
       boxOrigin: null,
       dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
@@ -271,6 +271,6 @@ describe('disarmVectorMultiDrag', () => {
     disarmVectorMultiDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, vi.fn());
 
     // result — untouched, no crash
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
   });
 });

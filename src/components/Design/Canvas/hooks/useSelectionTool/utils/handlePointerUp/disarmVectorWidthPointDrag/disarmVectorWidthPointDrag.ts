@@ -15,12 +15,12 @@ export const disarmVectorWidthPointDrag = (
   canvasRefs: TCanvasRefs,
   setClassName: (className: string | null) => void,
 ): void => {
-  const drag = canvasRefs.vectorWidthPointDragRef.current;
+  const drag = canvasRefs.vectorWidth.vectorWidthPointDragRef.current;
 
   if (drag) {
     commitVectorWidthPointDrag(dispatch, selectNodes(store.getState()), drag);
 
-    canvasRefs.vectorWidthPointDragRef.current = null;
+    canvasRefs.vectorWidth.vectorWidthPointDragRef.current = null;
     canvas.releasePointerCapture(event.pointerId);
     setClassName(null);
   }

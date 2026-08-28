@@ -7,7 +7,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { TVectorEditRefs } from 'types/design/canvas/types';
 import { TPenDragOrigin, TPendingOutgoingTangent } from '../../../types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
@@ -31,7 +31,7 @@ const pointerEvent = (x: number, y: number, options: Partial<PointerEventInit> =
 const createDragOriginRef = (): RefObject<TPenDragOrigin | null> => ({ current: null });
 const createDragStartRef = (): RefObject<TPoint | null> => ({ current: null });
 const createPendingOutgoingTangentRef = (): RefObject<TPendingOutgoingTangent | null> => ({ current: null });
-const createVectorAlignmentGuideRef = (): TCanvasRefs['vectorAlignmentGuideRef'] => ({ current: null });
+const createVectorAlignmentGuideRef = (): TVectorEditRefs['vectorAlignmentGuideRef'] => ({ current: null });
 
 const addVectorNode = (): string => {
   store.dispatch(
@@ -87,7 +87,7 @@ describe('handlePointerDown', () => {
   it('should capture the currently selected vector vertices as the gesture-start snapshot', () => {
     // mock
     const canvas = createCanvas();
-    const refs = createCanvasRefs({ selectedVectorVertexIdsRef: { current: ['stale-vertex'] } });
+    const refs = createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['stale-vertex'] } } });
 
     // before
     handlePointerDown(

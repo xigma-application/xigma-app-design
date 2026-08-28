@@ -45,7 +45,7 @@ describe('captureResizedVectorNodeSnapshots', () => {
     captureResizedVectorNodeSnapshots([frameNode], canvasRefs);
 
     // result
-    expect(canvasRefs.resizedVectorNodeSnapshotsRef.current).toBeNull();
+    expect(canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current).toBeNull();
   });
 
   it('should capture a snapshot for a single, unrotated selected vector node', () => {
@@ -57,7 +57,9 @@ describe('captureResizedVectorNodeSnapshots', () => {
     captureResizedVectorNodeSnapshots([node], canvasRefs);
 
     // result
-    expect(canvasRefs.resizedVectorNodeSnapshotsRef.current?.get('vector-1')).toEqual(captureVectorNodeResizeSnapshot(node, 0));
+    expect(canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current?.get('vector-1')).toEqual(
+      captureVectorNodeResizeSnapshot(node, 0),
+    );
   });
 
   it('should capture a single selected vector node that carries a live rotation, passing its rotation through for the anchor-correction fast path', () => {
@@ -69,7 +71,9 @@ describe('captureResizedVectorNodeSnapshots', () => {
     captureResizedVectorNodeSnapshots([node], canvasRefs);
 
     // result
-    expect(canvasRefs.resizedVectorNodeSnapshotsRef.current?.get('vector-1')).toEqual(captureVectorNodeResizeSnapshot(node, 45));
+    expect(canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current?.get('vector-1')).toEqual(
+      captureVectorNodeResizeSnapshot(node, 45),
+    );
   });
 
   it('should capture a rotated vector node as part of a multi-node selection with rotation zeroed, since group resize never applies the rotation anchor correction', () => {
@@ -82,8 +86,8 @@ describe('captureResizedVectorNodeSnapshots', () => {
     captureResizedVectorNodeSnapshots([rotatedNode, otherNode], canvasRefs);
 
     // result
-    expect(canvasRefs.resizedVectorNodeSnapshotsRef.current?.get('vector-1')?.rotation).toBe(0);
-    expect(canvasRefs.resizedVectorNodeSnapshotsRef.current?.has('vector-2')).toBe(true);
+    expect(canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current?.get('vector-1')?.rotation).toBe(0);
+    expect(canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current?.has('vector-2')).toBe(true);
   });
 
   it('should skip a vector node with a variable width profile — its stroke isn’t a uniform thickness the fast path can re-tessellate', () => {
@@ -95,7 +99,7 @@ describe('captureResizedVectorNodeSnapshots', () => {
     captureResizedVectorNodeSnapshots([node], canvasRefs);
 
     // result
-    expect(canvasRefs.resizedVectorNodeSnapshotsRef.current).toBeNull();
+    expect(canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current).toBeNull();
   });
 
   it('should skip a non-vector node in a mixed selection, capturing only the vector one', () => {
@@ -107,7 +111,7 @@ describe('captureResizedVectorNodeSnapshots', () => {
     captureResizedVectorNodeSnapshots([frameNode, vectorNode], canvasRefs);
 
     // result
-    expect(canvasRefs.resizedVectorNodeSnapshotsRef.current?.size).toBe(1);
-    expect(canvasRefs.resizedVectorNodeSnapshotsRef.current?.has('vector-1')).toBe(true);
+    expect(canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current?.size).toBe(1);
+    expect(canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current?.has('vector-1')).toBe(true);
   });
 });

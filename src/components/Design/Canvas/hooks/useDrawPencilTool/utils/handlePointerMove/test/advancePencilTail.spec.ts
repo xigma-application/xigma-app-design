@@ -34,7 +34,7 @@ describe('advancePencilTail', () => {
 
     // result
     expect(tail).toEqual([{ x: 0, y: 0 }]);
-    expect(refs.pencilPreviewPointsRef.current).toEqual([{ x: 0, y: 0 }]);
+    expect(refs.pencil.pencilPreviewPointsRef.current).toEqual([{ x: 0, y: 0 }]);
   });
 
   it('should push a new tail point once the move clears the minimum drag distance', () => {
@@ -61,7 +61,7 @@ describe('advancePencilTail', () => {
       { x: 0, y: 0 },
       { x: 5, y: 0 },
     ]);
-    expect(refs.pencilPreviewPointsRef.current).toEqual([
+    expect(refs.pencil.pencilPreviewPointsRef.current).toEqual([
       { x: 0, y: 0 },
       { x: 5, y: 0 },
     ]);
@@ -98,7 +98,7 @@ describe('advancePencilTail', () => {
       { x: 30, y: 0 },
     ]);
     expect(tailPointsRef.current).toEqual([{ x: 30, y: 0 }]);
-    expect(refs.pencilPreviewPointsRef.current).toEqual([
+    expect(refs.pencil.pencilPreviewPointsRef.current).toEqual([
       { x: 0, y: 0 },
       { x: 30, y: 0 },
     ]);

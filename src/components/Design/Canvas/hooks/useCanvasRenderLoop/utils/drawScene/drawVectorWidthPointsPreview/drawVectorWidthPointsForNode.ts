@@ -26,8 +26,8 @@ export const drawVectorWidthPointsForNode = (
   const chainOrder = bakedNode && getVectorChainOrder(bakedNode);
 
   if (node && bakedNode && chainOrder) {
-    const points = getPreviewWidthPoints(node, refs.vectorWidthPointDragRef.current);
-    const selectedHandles = refs.selectedVectorWidthHandlesRef.current;
+    const points = getPreviewWidthPoints(node, refs.vectorWidth.vectorWidthPointDragRef.current);
+    const selectedHandles = refs.vectorEdit.selectedVectorWidthHandlesRef.current;
 
     Object.values(points).forEach((widthPoint) => {
       const isLeftSelected = isVectorWidthHandleSelected(selectedHandles, nodeId, widthPoint.id, 'left');

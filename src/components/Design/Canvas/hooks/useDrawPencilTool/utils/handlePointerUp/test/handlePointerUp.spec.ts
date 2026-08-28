@@ -102,7 +102,7 @@ describe('handlePointerUp', () => {
     // handlePointerUp) actually commits — so this must be exercised end to end, not via handlePointerUp
     // alone, to prove the refs snapshot captured at pointerdown time is what undo ultimately restores
     const canvas = createCanvas();
-    const refs = createCanvasRefs({ selectedVectorVertexIdsRef: { current: ['stale-vertex'] } });
+    const refs = createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['stale-vertex'] } } });
 
     handlePointerDown(
       canvas,
@@ -186,9 +186,9 @@ describe('handlePointerUp', () => {
     const shiftAnchorRef = createShiftAnchorRef({ x: 0, y: 0 });
     const rawPointsRef = createPointsRef([{ x: 0, y: 0 }]);
 
-    refs.pencilPreviewPointsRef.current = [{ x: 0, y: 0 }];
-    refs.pencilRawPreviewPointsRef.current = [{ x: 0, y: 0 }];
-    refs.pencilShowRawPreviewRef.current = true;
+    refs.pencil.pencilPreviewPointsRef.current = [{ x: 0, y: 0 }];
+    refs.pencil.pencilRawPreviewPointsRef.current = [{ x: 0, y: 0 }];
+    refs.pencil.pencilShowRawPreviewRef.current = true;
 
     // before — too short to commit a node, but cleanup must still happen
     handlePointerUp(
@@ -210,9 +210,9 @@ describe('handlePointerUp', () => {
     expect(axisLockRef.current).toBeNull();
     expect(shiftAnchorRef.current).toBeNull();
     expect(rawPointsRef.current).toBeNull();
-    expect(refs.pencilPreviewPointsRef.current).toBeNull();
-    expect(refs.pencilRawPreviewPointsRef.current).toBeNull();
-    expect(refs.pencilShowRawPreviewRef.current).toBe(false);
+    expect(refs.pencil.pencilPreviewPointsRef.current).toBeNull();
+    expect(refs.pencil.pencilRawPreviewPointsRef.current).toBeNull();
+    expect(refs.pencil.pencilShowRawPreviewRef.current).toBe(false);
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
   });
 });

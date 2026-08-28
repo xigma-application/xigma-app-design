@@ -28,9 +28,9 @@ export const resolveVectorPaintHover = (
     const hit = getVectorFaceAtPointAcrossOpenNodes(point, vectorEditingNodeIds, state.design.nodes);
     const isFilled = Boolean(hit && getVectorFillLoopKeyAtPoint(hit.node, point));
 
-    canvasRefs.hoveredVectorPaintFaceKeyRef.current = hit ? { faceKey: hit.face.key, isFilled, nodeId: hit.node.id } : null;
+    canvasRefs.hover.hoveredVectorPaintFaceKeyRef.current = hit ? { faceKey: hit.face.key, isFilled, nodeId: hit.node.id } : null;
     setClassName(hit ? (isFilled ? 'paint-remove' : 'paint-add') : 'paint');
   } else {
-    canvasRefs.hoveredVectorPaintFaceKeyRef.current = null;
+    canvasRefs.hover.hoveredVectorPaintFaceKeyRef.current = null;
   }
 };

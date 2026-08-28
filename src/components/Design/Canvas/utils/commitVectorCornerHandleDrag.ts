@@ -19,8 +19,8 @@ export const commitVectorCornerHandleDrag = (
 ): void => {
   dispatch(updateNode({ changes: { vertexHandleModes: { ...node.vertexHandleModes, [vertexId]: 'symmetric' } }, id: node.id }));
 
-  canvasRefs.selectedVectorHandlesRef.current = [{ end: hit.end, segmentId: hit.segmentId }];
-  canvasRefs.selectedVectorVertexIdsRef.current = [];
-  canvasRefs.selectedVectorSegmentIdsRef.current = [];
+  canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [{ end: hit.end, segmentId: hit.segmentId }];
+  canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = [];
+  canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = [];
   vectorHandleDragRef.current = { end: hit.end, nodeId: node.id, segmentId: hit.segmentId, vertexId };
 };

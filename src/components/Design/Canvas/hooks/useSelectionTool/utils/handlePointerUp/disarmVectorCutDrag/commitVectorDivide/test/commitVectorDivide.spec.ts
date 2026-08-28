@@ -218,15 +218,15 @@ describe('commitVectorDivide', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['a'];
-    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['a'];
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = ['s1'];
 
     // before
     commitVectorDivide(store.dispatch, { x: -20, y: 50 }, { x: 120, y: 50 }, [nodeId], canvasRefs);
 
     // result
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 
   it('should keep all three fills when a horizontal cut crosses four segments shared between three adjacent faces (regression: the middle fill used to be dropped)', () => {

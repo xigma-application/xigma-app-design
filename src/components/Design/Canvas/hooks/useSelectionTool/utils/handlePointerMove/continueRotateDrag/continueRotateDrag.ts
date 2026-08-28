@@ -30,12 +30,12 @@ export const continueRotateDrag = (
     const point = screenToWorld(getPointerPosition(canvas, event), selectViewport(store.getState()));
     const deltaDegrees = getAngleBetweenPoints(pivot, point) - startAngle;
     const isSingleNodeRotate = Object.keys(nodeOrigins).length === 1;
-    const snapshots = canvasRefs.rotatedVectorNodeSnapshotsRef.current;
+    const snapshots = canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current;
 
     canvas.style.cursor = getRotatedRotateCursorUrl(cursorAngle + deltaDegrees) ?? canvas.style.cursor;
 
-    if (snapshots && !canvasRefs.rotatedNodeIdsRef.current) {
-      canvasRefs.rotatedNodeIdsRef.current = new Set(snapshots.keys());
+    if (snapshots && !canvasRefs.transform.rotatedNodeIdsRef.current) {
+      canvasRefs.transform.rotatedNodeIdsRef.current = new Set(snapshots.keys());
     }
 
     Object.entries(nodeOrigins).forEach(([id, origin]) => {

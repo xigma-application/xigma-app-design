@@ -25,10 +25,10 @@ export const resolveVectorShapeBuilderHover = (
     const point = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
     const hit = getVectorFaceAtPointAcrossOpenNodes(point, vectorEditingNodeIds, state.design.nodes);
 
-    canvasRefs.hoveredVectorShapeBuilderFaceRef.current = hit ? { faceKey: hit.face.key, nodeId: hit.node.id } : null;
-    canvasRefs.isVectorShapeBuilderSubtractRef.current = event.altKey;
+    canvasRefs.hover.hoveredVectorShapeBuilderFaceRef.current = hit ? { faceKey: hit.face.key, nodeId: hit.node.id } : null;
+    canvasRefs.shapeBuilder.isVectorShapeBuilderSubtractRef.current = event.altKey;
     setClassName(event.altKey ? 'remove' : 'add');
   } else {
-    canvasRefs.hoveredVectorShapeBuilderFaceRef.current = null;
+    canvasRefs.hover.hoveredVectorShapeBuilderFaceRef.current = null;
   }
 };

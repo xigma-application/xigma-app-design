@@ -14,7 +14,7 @@ import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/
 import { handleDeleteSelection } from '../handleDeleteSelection';
 
 const createRefs = (selectedVectorVertexIds: string[] = []): TCanvasRefs =>
-  createCanvasRefs({ selectedVectorVertexIdsRef: { current: selectedVectorVertexIds } });
+  createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: selectedVectorVertexIds } } });
 
 const addFrameNode = (x: number, y: number, size = 20): string => {
   store.dispatch(
@@ -132,7 +132,7 @@ describe('handleDeleteSelection', () => {
 
     store.dispatch(setSelection([idA]));
 
-    const refs = createCanvasRefs({ selectedVectorHandlesRef: { current: [{ end: 'start', segmentId: 's1' }] } });
+    const refs = createCanvasRefs({ vectorEdit: { selectedVectorHandlesRef: { current: [{ end: 'start', segmentId: 's1' }] } } });
 
     // before
     handleDeleteSelection(store.dispatch, refs);
@@ -186,7 +186,7 @@ describe('handleDeleteSelection', () => {
 
     store.dispatch(setVectorEditingNodeIds([vectorId]));
 
-    const refs = createCanvasRefs({ selectedVectorSegmentIdsRef: { current: ['segment-1'] } });
+    const refs = createCanvasRefs({ vectorEdit: { selectedVectorSegmentIdsRef: { current: ['segment-1'] } } });
 
     // before
     handleDeleteSelection(store.dispatch, refs);
@@ -219,7 +219,7 @@ describe('handleDeleteSelection', () => {
       segments: { 'segment-2': { endId: 'vertex-3', id: 'segment-2', startId: 'vertex-2' } },
       vertices: { 'vertex-2': { id: 'vertex-2', x: 10, y: 10 }, 'vertex-3': { id: 'vertex-3', x: 20, y: 20 } },
     });
-    expect(refs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(refs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
   });
 
   it('should also drop both other endpoints when deleting the shared middle vertex leaves them with no segment left', () => {
@@ -240,7 +240,7 @@ describe('handleDeleteSelection', () => {
 
     expect(vectorNode.segments).toEqual({});
     expect(vectorNode.vertices).toEqual({});
-    expect(refs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(refs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
   });
 
   it('should remove the selected segment and drop the endpoint it leaves with no segment left, but keep an endpoint still held by another segment, when a segment is selected instead of a vertex', () => {
@@ -250,7 +250,7 @@ describe('handleDeleteSelection', () => {
 
     store.dispatch(setVectorEditingNodeIds([vectorId]));
 
-    const refs = createCanvasRefs({ selectedVectorSegmentIdsRef: { current: ['segment-1'] } });
+    const refs = createCanvasRefs({ vectorEdit: { selectedVectorSegmentIdsRef: { current: ['segment-1'] } } });
 
     // before
     handleDeleteSelection(store.dispatch, refs);
@@ -261,7 +261,7 @@ describe('handleDeleteSelection', () => {
 
     expect(Object.keys(vectorNode.segments)).toEqual(['segment-2']);
     expect(Object.keys(vectorNode.vertices)).toEqual(['vertex-2', 'vertex-3']);
-    expect(refs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(refs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 
   it('should leave a broken loop unfilled — deleting a vertex that breaks a previously closed (filled) triangle drops its face instead of crashing or keeping a stale fill', () => {
@@ -302,7 +302,7 @@ describe('handleDeleteSelection', () => {
 
     expect(nodeA.vertices).not.toHaveProperty('vertex-1');
     expect(nodeB.vertices).not.toHaveProperty('vertex-4');
-    expect(refs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(refs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
   });
 
   it('should restore both nodes with a single undo when a vertex delete spans two open nodes', () => {
@@ -331,7 +331,7 @@ describe('handleDeleteSelection', () => {
 
     store.dispatch(setVectorEditingNodeIds([vectorIdA, vectorIdB]));
 
-    const refs = createCanvasRefs({ selectedVectorSegmentIdsRef: { current: ['segment-1', 'segment-3'] } });
+    const refs = createCanvasRefs({ vectorEdit: { selectedVectorSegmentIdsRef: { current: ['segment-1', 'segment-3'] } } });
 
     // before
     handleDeleteSelection(store.dispatch, refs);
@@ -342,7 +342,7 @@ describe('handleDeleteSelection', () => {
 
     expect(nodeA.segments).not.toHaveProperty('segment-1');
     expect(nodeB.segments).not.toHaveProperty('segment-3');
-    expect(refs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(refs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 
   it('should clear a stale vertex selection that no longer belongs to any currently open node, without dispatching anything', () => {
@@ -362,7 +362,7 @@ describe('handleDeleteSelection', () => {
     const vectorNode = store.getState().design.nodes[vectorId] as TVectorNode;
 
     expect(vectorNode.vertices).toHaveProperty('vertex-1');
-    expect(refs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(refs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
   });
 
   it('should clear a stale segment selection that no longer belongs to any currently open node, without dispatching anything', () => {
@@ -371,7 +371,7 @@ describe('handleDeleteSelection', () => {
 
     store.dispatch(setVectorEditingNodeIds([vectorId]));
 
-    const refs = createCanvasRefs({ selectedVectorSegmentIdsRef: { current: ['segment-1'] } });
+    const refs = createCanvasRefs({ vectorEdit: { selectedVectorSegmentIdsRef: { current: ['segment-1'] } } });
 
     store.dispatch(setVectorEditingNodeIds([]));
 
@@ -382,6 +382,6 @@ describe('handleDeleteSelection', () => {
     const vectorNode = store.getState().design.nodes[vectorId] as TVectorNode;
 
     expect(vectorNode.segments).toHaveProperty('segment-1');
-    expect(refs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(refs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 });

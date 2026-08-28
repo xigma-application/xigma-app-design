@@ -120,7 +120,7 @@ describe('handleDuplicateSelection', () => {
 
     store.dispatch(setVectorEditingNodeIds([vectorId]));
 
-    const refs = createCanvasRefs({ selectedVectorVertexIdsRef: { current: ['v1'] } });
+    const refs = createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['v1'] } } });
 
     // action
     handleDuplicateSelection(store.dispatch, refs);
@@ -129,7 +129,7 @@ describe('handleDuplicateSelection', () => {
     const node = store.getState().design.nodes[vectorId] as any;
 
     expect(Object.keys(node.vertices)).toHaveLength(2);
-    expect(refs.selectedVectorVertexIdsRef.current).toHaveLength(1);
-    expect(refs.selectedVectorVertexIdsRef.current[0]).not.toBe('v1');
+    expect(refs.vectorEdit.selectedVectorVertexIdsRef.current).toHaveLength(1);
+    expect(refs.vectorEdit.selectedVectorVertexIdsRef.current[0]).not.toBe('v1');
   });
 });

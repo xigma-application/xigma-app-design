@@ -168,8 +168,8 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     const canvasRef = createCanvasRef();
     const refs = renderDoubleClickTool(canvasRef);
 
-    refs.selectedVectorVertexIdsRef.current = ['stale-vertex'];
-    refs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
+    refs.vectorEdit.selectedVectorVertexIdsRef.current = ['stale-vertex'];
+    refs.vectorEdit.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
 
     // before
     act(() => {
@@ -177,8 +177,8 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     });
 
     // result
-    expect(refs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(refs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(refs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(refs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
   });
 
   it('should exit Vector Edit Mode when double-clicking empty space while already editing', () => {

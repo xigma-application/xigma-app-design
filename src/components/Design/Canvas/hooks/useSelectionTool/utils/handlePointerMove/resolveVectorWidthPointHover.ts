@@ -43,7 +43,7 @@ export const resolveVectorWidthPointHover = (
         );
 
     if (handleHit && handleHit.target !== 'point') {
-      canvasRefs.hoveredVectorWidthPointRef.current = {
+      canvasRefs.hover.hoveredVectorWidthPointRef.current = {
         nodeId: handleHit.nodeId,
         segmentId: handleHit.segmentId,
         t: handleHit.t,
@@ -51,7 +51,7 @@ export const resolveVectorWidthPointHover = (
       canvas.style.cursor = getRotatedResizeCursorUrl(handleHit.angle) ?? '';
       setClassName(null);
     } else if (handleHit) {
-      canvasRefs.hoveredVectorWidthPointRef.current = {
+      canvasRefs.hover.hoveredVectorWidthPointRef.current = {
         nodeId: handleHit.nodeId,
         segmentId: handleHit.segmentId,
         t: handleHit.t,
@@ -59,15 +59,19 @@ export const resolveVectorWidthPointHover = (
       canvas.style.cursor = '';
       setClassName('controller');
     } else if (strokeHit) {
-      canvasRefs.hoveredVectorWidthPointRef.current = { nodeId: strokeHit.node.id, segmentId: strokeHit.hit.segmentId, t: strokeHit.hit.t };
+      canvasRefs.hover.hoveredVectorWidthPointRef.current = {
+        nodeId: strokeHit.node.id,
+        segmentId: strokeHit.hit.segmentId,
+        t: strokeHit.hit.t,
+      };
       canvas.style.cursor = '';
       setClassName('controller');
     } else {
-      canvasRefs.hoveredVectorWidthPointRef.current = null;
+      canvasRefs.hover.hoveredVectorWidthPointRef.current = null;
       canvas.style.cursor = '';
       setClassName(null);
     }
   } else {
-    canvasRefs.hoveredVectorWidthPointRef.current = null;
+    canvasRefs.hover.hoveredVectorWidthPointRef.current = null;
   }
 };

@@ -60,8 +60,8 @@ describe('resolveVectorCutHover', () => {
     resolveVectorCutHover(canvas, pointerEvent(20, 0), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorCutSegmentRef.current).toBeNull();
-    expect(canvasRefs.hoveredVectorCutPointRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorCutSegmentRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorCutPointRef.current).toBeNull();
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -74,15 +74,15 @@ describe('resolveVectorCutHover', () => {
     const canvasRefs = createCanvasRefs();
     const setClassName = vi.fn();
 
-    canvasRefs.hoveredVectorCutSegmentRef.current = { nodeId, segmentId: 's1' };
-    canvasRefs.hoveredVectorCutPointRef.current = { x: 20, y: 0 };
+    canvasRefs.hover.hoveredVectorCutSegmentRef.current = { nodeId, segmentId: 's1' };
+    canvasRefs.hover.hoveredVectorCutPointRef.current = { x: 20, y: 0 };
 
     // before
     resolveVectorCutHover(canvas, pointerEvent(20, 0, 1), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorCutSegmentRef.current).toBeNull();
-    expect(canvasRefs.hoveredVectorCutPointRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorCutSegmentRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorCutPointRef.current).toBeNull();
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -100,8 +100,8 @@ describe('resolveVectorCutHover', () => {
 
     // result
     expect(setClassName).toHaveBeenCalledWith('cut-off');
-    expect(canvasRefs.hoveredVectorCutSegmentRef.current).toEqual({ nodeId, segmentId: 's1' });
-    expect(canvasRefs.hoveredVectorCutPointRef.current).toEqual({ x: 20, y: 0 });
+    expect(canvasRefs.hover.hoveredVectorCutSegmentRef.current).toEqual({ nodeId, segmentId: 's1' });
+    expect(canvasRefs.hover.hoveredVectorCutPointRef.current).toEqual({ x: 20, y: 0 });
   });
 
   it('should snap the hovered point to the segment’s exact midpoint when the cursor lands within its snap tolerance', () => {
@@ -117,7 +117,7 @@ describe('resolveVectorCutHover', () => {
     resolveVectorCutHover(canvas, pointerEvent(49, 0), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorCutPointRef.current).toEqual({ x: 50, y: 0 });
+    expect(canvasRefs.hover.hoveredVectorCutPointRef.current).toEqual({ x: 50, y: 0 });
   });
 
   it('should clear both hover refs but still set the "cut-off" cursor when the pointer misses every segment', () => {
@@ -134,7 +134,7 @@ describe('resolveVectorCutHover', () => {
 
     // result
     expect(setClassName).toHaveBeenCalledWith('cut-off');
-    expect(canvasRefs.hoveredVectorCutSegmentRef.current).toBeNull();
-    expect(canvasRefs.hoveredVectorCutPointRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorCutSegmentRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorCutPointRef.current).toBeNull();
   });
 });

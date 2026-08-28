@@ -60,9 +60,9 @@ export const commitVectorDivide = (
       dispatch(setVectorEditingNodeIds([...untouchedNodeIds, ...touchedNodeIds, ...newNodeIds]));
     });
 
-    canvasRefs.selectedVectorVertexIdsRef.current = [];
-    canvasRefs.selectedVectorHandlesRef.current = [];
-    canvasRefs.selectedVectorSegmentIdsRef.current = [];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = [];
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [];
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = [];
   }
 
   return didCut;

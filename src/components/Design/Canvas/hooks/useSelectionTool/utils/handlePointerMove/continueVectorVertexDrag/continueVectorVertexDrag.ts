@@ -50,7 +50,7 @@ export const continueVectorVertexDrag = (
         const mergeTolerance = VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom;
         resolveVectorVertexMerge(draggedVertices, dragState, state.design.nodes, guide, mergeTolerance, canvasRefs, setClassName);
       } else {
-        canvasRefs.vectorAlignmentGuideRef.current = guide;
+        canvasRefs.vectorEdit.vectorAlignmentGuideRef.current = guide;
         setClassName('move');
       }
 

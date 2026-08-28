@@ -1,5 +1,5 @@
 // types
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { THoverRefs, TPenRefs, TVectorEditRefs } from 'types/design/canvas/types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
@@ -7,10 +7,10 @@ import { applyAngleSnapToPenPreview } from '../applyAngleSnapToPenPreview';
 
 const nodes: Record<string, TSceneNode> = {};
 
-const createPenPreviewRef = (): TCanvasRefs['penPreviewRef'] => ({ current: null });
-const createHoveredSegmentIdRef = (): TCanvasRefs['hoveredSegmentIdRef'] => ({ current: 'stale-segment-id' });
-const createPenHoveredDragArmableVertexRef = (): TCanvasRefs['penHoveredDragArmableVertexRef'] => ({ current: true });
-const createVectorAlignmentGuideRef = (): TCanvasRefs['vectorAlignmentGuideRef'] => ({ current: null });
+const createPenPreviewRef = (): TPenRefs['penPreviewRef'] => ({ current: null });
+const createHoveredSegmentIdRef = (): THoverRefs['hoveredSegmentIdRef'] => ({ current: 'stale-segment-id' });
+const createPenHoveredDragArmableVertexRef = (): TPenRefs['penHoveredDragArmableVertexRef'] => ({ current: true });
+const createVectorAlignmentGuideRef = (): TVectorEditRefs['vectorAlignmentGuideRef'] => ({ current: null });
 
 describe('applyAngleSnapToPenPreview', () => {
   it('should preview the raw pointer position, unsnapped, when the angle is well outside the tolerance', () => {

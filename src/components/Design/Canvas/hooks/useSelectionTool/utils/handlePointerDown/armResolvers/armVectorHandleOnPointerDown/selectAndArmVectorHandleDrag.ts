@@ -14,8 +14,8 @@ export const selectAndArmVectorHandleDrag = (
   nodeId: string,
   hit: TVectorHandleHit,
 ): void => {
-  canvasRefs.selectedVectorHandlesRef.current = [{ end: hit.end, segmentId: hit.segmentId }];
-  canvasRefs.selectedVectorVertexIdsRef.current = [];
-  canvasRefs.selectedVectorSegmentIdsRef.current = [];
+  canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [{ end: hit.end, segmentId: hit.segmentId }];
+  canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = [];
+  canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = [];
   armVectorHandleDrag(canvas, event, selectionRefs.vectorHandleDragRef, nodeId, hit);
 };

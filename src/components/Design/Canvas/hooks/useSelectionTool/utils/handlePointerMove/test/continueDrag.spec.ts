@@ -28,7 +28,10 @@ const createDragStateRef = (dragState: Omit<TDragState, 'dispatchThrottle'> | nu
 });
 
 const createCanvasRefs = (): TCanvasRefs =>
-  ({ draggedNodeIdsRef: { current: null }, draggedVectorNodeSnapshotsRef: { current: null } }) as unknown as TCanvasRefs;
+  ({
+    transform: { draggedNodeIdsRef: { current: null } },
+    vectorSnapshots: { draggedVectorNodeSnapshotsRef: { current: null } },
+  }) as unknown as TCanvasRefs;
 
 const addFrameNode = (x: number, y: number, size = 20): string => {
   store.dispatch(
@@ -107,7 +110,7 @@ describe('continueDrag', () => {
 
     expect(node).toMatchObject({ x: 110, y: 120 });
     expect(dragStateRef.current?.hasMoved).toBe(true);
-    expect(canvasRefs.draggedNodeIdsRef.current).toEqual(new Set([idA]));
+    expect(canvasRefs.transform.draggedNodeIdsRef.current).toEqual(new Set([idA]));
   });
 
   it('should move a line node endpoints by the pointer delta', () => {
@@ -165,7 +168,7 @@ describe('continueDrag', () => {
     const canvasRefs = createCanvasRefs();
     const existingSet = new Set(['some-other-id']);
 
-    canvasRefs.draggedNodeIdsRef.current = existingSet;
+    canvasRefs.transform.draggedNodeIdsRef.current = existingSet;
 
     const dragStateRef = createDragStateRef({
       hasMoved: false,
@@ -178,7 +181,7 @@ describe('continueDrag', () => {
     continueDrag(canvas, pointerEvent(10, 20), store.dispatch, dragStateRef, canvasRefs);
 
     // result
-    expect(canvasRefs.draggedNodeIdsRef.current).toBe(existingSet);
+    expect(canvasRefs.transform.draggedNodeIdsRef.current).toBe(existingSet);
   });
 
   it('should skip dispatching a live update for a node that is snapshotted for a frozen drag, and update its snapshot delta directly instead', () => {
@@ -188,7 +191,7 @@ describe('continueDrag', () => {
     const canvasRefs = createCanvasRefs();
     const snapshot = { deltaX: 0, deltaY: 0, facesByColor: [], strokeColor: '#000000', strokeVertices: [] };
 
-    canvasRefs.draggedVectorNodeSnapshotsRef.current = new Map([[idA, snapshot]]);
+    canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current = new Map([[idA, snapshot]]);
 
     const dragStateRef = createDragStateRef({
       hasMoved: false,

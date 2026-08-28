@@ -15,7 +15,7 @@ export const disarmVectorShapeBuilderDrag = (
   canvasRefs: TCanvasRefs,
   setClassName: (className: string | null) => void,
 ): void => {
-  const path = canvasRefs.vectorShapeBuilderPathRef.current;
+  const path = canvasRefs.shapeBuilder.vectorShapeBuilderPathRef.current;
 
   if (path) {
     const state = store.getState();
@@ -24,22 +24,22 @@ export const disarmVectorShapeBuilderDrag = (
       selectNodes(state),
       state.design.rootOrder,
       selectVectorEditingNodeIds(state),
-      canvasRefs.touchedVectorShapeBuilderFacesRef.current,
-      canvasRefs.isVectorShapeBuilderSubtractRef.current,
+      canvasRefs.shapeBuilder.touchedVectorShapeBuilderFacesRef.current,
+      canvasRefs.shapeBuilder.isVectorShapeBuilderSubtractRef.current,
       path,
-      canvasRefs.isVectorShapeBuilderBoxModeRef.current,
+      canvasRefs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current,
     );
 
     if (absorbedNodeIds.length > 0) {
-      canvasRefs.selectedVectorVertexIdsRef.current = [];
-      canvasRefs.selectedVectorHandlesRef.current = [];
-      canvasRefs.selectedVectorSegmentIdsRef.current = [];
+      canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = [];
+      canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [];
+      canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = [];
     }
 
-    canvasRefs.vectorShapeBuilderPathRef.current = null;
-    canvasRefs.touchedVectorShapeBuilderFacesRef.current = {};
-    canvasRefs.isVectorShapeBuilderBoxModeRef.current = false;
-    canvasRefs.isVectorShapeBuilderSubtractRef.current = false;
+    canvasRefs.shapeBuilder.vectorShapeBuilderPathRef.current = null;
+    canvasRefs.shapeBuilder.touchedVectorShapeBuilderFacesRef.current = {};
+    canvasRefs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current = false;
+    canvasRefs.shapeBuilder.isVectorShapeBuilderSubtractRef.current = false;
     canvas.releasePointerCapture(event.pointerId);
     setClassName('add');
   }

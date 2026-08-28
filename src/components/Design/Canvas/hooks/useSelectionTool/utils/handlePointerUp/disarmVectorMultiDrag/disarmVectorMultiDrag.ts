@@ -15,7 +15,7 @@ export const disarmVectorMultiDrag = (
   canvasRefs: TCanvasRefs,
   setClassName: (className: string | null) => void,
 ): void => {
-  const dragState = canvasRefs.vectorMultiDragRef.current;
+  const dragState = canvasRefs.vectorMultiSelect.vectorMultiDragRef.current;
 
   if (dragState) {
     flushThrottledDispatch(dragState.dispatchThrottle);
@@ -25,9 +25,9 @@ export const disarmVectorMultiDrag = (
     }
 
     canvas.releasePointerCapture(event.pointerId);
-    canvasRefs.vectorMultiDragRef.current = null;
-    canvasRefs.vectorAlignmentGuideRef.current = null;
-    canvasRefs.draggedVectorFillFacesRef.current = null;
+    canvasRefs.vectorMultiSelect.vectorMultiDragRef.current = null;
+    canvasRefs.vectorEdit.vectorAlignmentGuideRef.current = null;
+    canvasRefs.vectorSnapshots.draggedVectorFillFacesRef.current = null;
     setClassName(null);
   }
 };

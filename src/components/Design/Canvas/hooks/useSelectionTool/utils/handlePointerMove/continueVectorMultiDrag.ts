@@ -49,7 +49,7 @@ export const continueVectorMultiDrag = (
   canvasRefs: TCanvasRefs,
   setClassName: (className: string | null) => void,
 ): void => {
-  const dragState = canvasRefs.vectorMultiDragRef.current;
+  const dragState = canvasRefs.vectorMultiSelect.vectorMultiDragRef.current;
 
   if (dragState) {
     const state = store.getState();
@@ -99,14 +99,14 @@ export const continueVectorMultiDrag = (
         }),
       );
 
-      if (dragState.boxOrigin && canvasRefs.vectorMultiSelectBoxRef.current) {
-        canvasRefs.vectorMultiSelectBoxRef.current = {
-          ...canvasRefs.vectorMultiSelectBoxRef.current,
+      if (dragState.boxOrigin && canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef.current) {
+        canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef.current = {
+          ...canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef.current,
           bounds: { ...dragState.boxOrigin, x: dragState.boxOrigin.x + deltaX, y: dragState.boxOrigin.y + deltaY },
         };
       }
 
-      canvasRefs.vectorAlignmentGuideRef.current = guide;
+      canvasRefs.vectorEdit.vectorAlignmentGuideRef.current = guide;
       setClassName('move');
     }
   }

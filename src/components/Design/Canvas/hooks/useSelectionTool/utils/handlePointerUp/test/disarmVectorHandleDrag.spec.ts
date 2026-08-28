@@ -66,7 +66,7 @@ describe('disarmVectorHandleDrag', () => {
   it('should clear the vector-handle-drag ref and the snapped-handle ref, release pointer capture, and reset the cursor', () => {
     // mock
     const canvas = createCanvas();
-    const canvasRefs = createCanvasRefs({ snappedVectorHandleRef: { current: { end: 'end', segmentId: 'segment-1' } } });
+    const canvasRefs = createCanvasRefs({ vectorEdit: { snappedVectorHandleRef: { current: { end: 'end', segmentId: 'segment-1' } } } });
     const dispatch = vi.fn();
     const selectionRefs = createSelectionToolRefs({
       vectorHandleDragRef: { current: { end: 'end', nodeId: 'path-1', segmentId: 'segment-1', vertexId: 'vertex-1' } },
@@ -78,7 +78,7 @@ describe('disarmVectorHandleDrag', () => {
 
     // result
     expect(selectionRefs.vectorHandleDragRef.current).toBeNull();
-    expect(canvasRefs.snappedVectorHandleRef.current).toBeNull();
+    expect(canvasRefs.vectorEdit.snappedVectorHandleRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
     expect(setClassName).toHaveBeenCalledWith(null);
   });
@@ -111,7 +111,7 @@ describe('disarmVectorHandleDrag', () => {
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
 
     expect(node.vertexHandleModes).toEqual({ v1: 'symmetric' });
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
     expect(selectionRefs.pendingVectorCornerHandleDragRef.current).toBeNull();
     expect(selectionRefs.vectorHandleDragRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);

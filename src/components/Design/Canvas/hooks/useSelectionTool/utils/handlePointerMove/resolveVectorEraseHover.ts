@@ -20,8 +20,8 @@ export const resolveVectorEraseHover = (
 
   if (selectActiveTool(state) === ToolName.erase) {
     setClassName('erase');
-    canvasRefs.eraseBrushCenterRef.current = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
+    canvasRefs.vectorErase.eraseBrushCenterRef.current = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
   } else {
-    canvasRefs.eraseBrushCenterRef.current = null;
+    canvasRefs.vectorErase.eraseBrushCenterRef.current = null;
   }
 };

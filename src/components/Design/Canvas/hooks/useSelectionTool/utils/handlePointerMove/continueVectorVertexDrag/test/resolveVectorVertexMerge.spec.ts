@@ -37,7 +37,10 @@ describe('resolveVectorVertexMerge', () => {
     };
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.vectorAlignmentGuideRef.current = { horizontal: null, vertical: { anchor: { x: 0, y: 0 }, match: { x: 0, y: 0 } } };
+    canvasRefs.vectorEdit.vectorAlignmentGuideRef.current = {
+      horizontal: null,
+      vertical: { anchor: { x: 0, y: 0 }, match: { x: 0, y: 0 } },
+    };
 
     const setClassName = vi.fn();
 
@@ -47,7 +50,7 @@ describe('resolveVectorVertexMerge', () => {
     // result
     expect(draggedVertices.v1).toEqual({ id: 'v1', x: 10, y: 0 });
     expect(dragState.mergeTarget).toEqual({ nodeId: 'target-node', vertexId: 'target' });
-    expect(canvasRefs.vectorAlignmentGuideRef.current).toBeNull();
+    expect(canvasRefs.vectorEdit.vectorAlignmentGuideRef.current).toBeNull();
     expect(setClassName).toHaveBeenCalledWith('point');
   });
 
@@ -71,7 +74,7 @@ describe('resolveVectorVertexMerge', () => {
 
     // result
     expect(dragState.mergeTarget).toBeNull();
-    expect(canvasRefs.vectorAlignmentGuideRef.current).toBe(guide);
+    expect(canvasRefs.vectorEdit.vectorAlignmentGuideRef.current).toBe(guide);
     expect(setClassName).toHaveBeenCalledWith('move');
   });
 });

@@ -6,7 +6,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { TVectorEditRefs } from 'types/design/canvas/types';
 import { TPendingOutgoingTangent } from '../../../types';
 import { TVectorNode } from 'types/design/types';
 
@@ -18,7 +18,7 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const createPendingOutgoingTangentRef = (): RefObject<TPendingOutgoingTangent | null> => ({ current: null });
 const createPenDraggedHandlePositionRef = (): RefObject<{ x: number; y: number } | null> => ({ current: null });
 const createPenDraggedHandleIsSnappedRef = (): RefObject<boolean> => ({ current: false });
-const createVectorAlignmentGuideRef = (): TCanvasRefs['vectorAlignmentGuideRef'] => ({ current: null });
+const createVectorAlignmentGuideRef = (): TVectorEditRefs['vectorAlignmentGuideRef'] => ({ current: null });
 
 const addVectorNodeWithSegment = (): string => {
   store.dispatch(

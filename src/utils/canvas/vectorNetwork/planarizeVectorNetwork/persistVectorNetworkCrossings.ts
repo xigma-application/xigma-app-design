@@ -20,7 +20,6 @@ export const persistVectorNetworkCrossings = (
 
   const realIdByVirtualId = new Map(newVertexIds.map((virtualId) => [virtualId, nanoid()]));
   const resolveId = (id: string): string => realIdByVirtualId.get(id) ?? id;
-
   const persistedVertices = { ...vertices };
 
   newVertexIds.forEach((virtualId) => {

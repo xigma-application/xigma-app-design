@@ -28,9 +28,9 @@ export const resolveVectorMultiSelectBoxHover = (
 ): void => {
   const state = store.getState();
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
-  const selectedVertexIds = canvasRefs.selectedVectorVertexIdsRef.current;
-  const selectedHandles = canvasRefs.selectedVectorHandlesRef.current;
-  const selectedSegmentIds = canvasRefs.selectedVectorSegmentIdsRef.current;
+  const selectedVertexIds = canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current;
+  const selectedHandles = canvasRefs.vectorEdit.selectedVectorHandlesRef.current;
+  const selectedSegmentIds = canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current;
   const vertexIds = getVectorMultiSelectVertexIds(state.design.nodes, vectorEditingNodeIds, selectedVertexIds, selectedSegmentIds);
 
   if (isVectorMultiSelectBoxEligible(vertexIds, selectedHandles)) {
@@ -39,7 +39,7 @@ export const resolveVectorMultiSelectBoxHover = (
       vectorEditingNodeIds,
       vertexIds,
       selectedHandles,
-      canvasRefs.vectorMultiSelectBoxRef,
+      canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef,
     );
 
     /* v8 ignore if -- eligibility already guarantees 2+ resolvable vertex/handle points, so bounds is never null here */

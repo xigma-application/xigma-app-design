@@ -13,9 +13,9 @@ import { isVectorMultiSelectBoxEligible } from '../../../../../../utils/isVector
 export const hitsMultiSelectBox = (context: TArmContext, vectorEditingNodeIds: string[]): boolean => {
   const { canvasRefs, point, viewport } = context;
   const state = store.getState();
-  const selectedVertexIds = canvasRefs.selectedVectorVertexIdsRef.current;
-  const selectedHandles = canvasRefs.selectedVectorHandlesRef.current;
-  const selectedSegmentIds = canvasRefs.selectedVectorSegmentIdsRef.current;
+  const selectedVertexIds = canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current;
+  const selectedHandles = canvasRefs.vectorEdit.selectedVectorHandlesRef.current;
+  const selectedSegmentIds = canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current;
   const vertexIds = getVectorMultiSelectVertexIds(state.design.nodes, vectorEditingNodeIds, selectedVertexIds, selectedSegmentIds);
 
   if (!isVectorMultiSelectBoxEligible(vertexIds, selectedHandles)) {
@@ -27,7 +27,7 @@ export const hitsMultiSelectBox = (context: TArmContext, vectorEditingNodeIds: s
     vectorEditingNodeIds,
     vertexIds,
     selectedHandles,
-    canvasRefs.vectorMultiSelectBoxRef,
+    canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef,
   );
 
   return Boolean(box && isPointOnVectorMultiSelectBox(point, box.bounds, viewport, box.rotation));

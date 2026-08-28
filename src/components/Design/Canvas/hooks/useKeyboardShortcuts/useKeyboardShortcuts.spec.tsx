@@ -604,7 +604,7 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
 
     realStore.dispatch(setVectorEditingNodeIds([vectorId]));
 
-    const refs = createCanvasRefs({ selectedVectorVertexIdsRef: { current: ['v1'] } });
+    const refs = createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['v1'] } } });
 
     // before
     renderHook(() => useKeyboardShortcuts(refs), {

@@ -19,7 +19,7 @@ export const armEllipseArcOnPointerDown = ({
     armEllipseArcDrag(
       canvas,
       event,
-      canvasRefs.ellipseArcDragRef,
+      canvasRefs.ellipseArc.ellipseArcDragRef,
       ellipseArcHandleHit.bounds,
       ellipseArcHandleHit.nodeId,
       ellipseArcHandleHit.rotation,

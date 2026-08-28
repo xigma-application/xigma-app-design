@@ -19,9 +19,9 @@ export const armVectorMultiSelectResizeOnPointerDown = (context: TArmContext): t
   if (!event.shiftKey) {
     const state = store.getState();
     const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
-    const selectedVertexIds = canvasRefs.selectedVectorVertexIdsRef.current;
-    const selectedHandles = canvasRefs.selectedVectorHandlesRef.current;
-    const selectedSegmentIds = canvasRefs.selectedVectorSegmentIdsRef.current;
+    const selectedVertexIds = canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current;
+    const selectedHandles = canvasRefs.vectorEdit.selectedVectorHandlesRef.current;
+    const selectedSegmentIds = canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current;
     const vertexIds = getVectorMultiSelectVertexIds(state.design.nodes, vectorEditingNodeIds, selectedVertexIds, selectedSegmentIds);
 
     if (isVectorMultiSelectBoxEligible(vertexIds, selectedHandles) && !hitsSelectedSegment(context, vectorEditingNodeIds)) {
@@ -30,7 +30,7 @@ export const armVectorMultiSelectResizeOnPointerDown = (context: TArmContext): t
         vectorEditingNodeIds,
         vertexIds,
         selectedHandles,
-        canvasRefs.vectorMultiSelectBoxRef,
+        canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef,
       );
       const isResizable = box && box.bounds.width > 0 && box.bounds.height > 0;
       const handle = isResizable && getVectorMultiSelectResizeHandle(point, box.bounds, viewport, box.rotation);
@@ -39,7 +39,7 @@ export const armVectorMultiSelectResizeOnPointerDown = (context: TArmContext): t
         armVectorMultiSelectResizeDrag(
           canvas,
           event,
-          canvasRefs.vectorMultiSelectResizeDragRef,
+          canvasRefs.vectorMultiSelect.vectorMultiSelectResizeDragRef,
           state.design.nodes,
           vectorEditingNodeIds,
           vertexIds,

@@ -21,8 +21,8 @@ export const resolveVectorFaceSelectHover = (canvas: HTMLCanvasElement, event: P
     const point = screenToWorld(getPointerPosition(canvas, event), viewport);
     const hit = getVectorFaceAtPointAcrossOpenNodes(point, vectorEditingNodeIds, state.design.nodes);
 
-    canvasRefs.hoveredVectorFaceSelectRef.current = hit ? { faceKey: hit.face.key, nodeId: hit.node.id } : null;
+    canvasRefs.hover.hoveredVectorFaceSelectRef.current = hit ? { faceKey: hit.face.key, nodeId: hit.node.id } : null;
   } else {
-    canvasRefs.hoveredVectorFaceSelectRef.current = null;
+    canvasRefs.hover.hoveredVectorFaceSelectRef.current = null;
   }
 };

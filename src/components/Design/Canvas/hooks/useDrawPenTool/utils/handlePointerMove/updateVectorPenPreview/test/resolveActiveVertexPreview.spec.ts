@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { THoverRefs, TPenRefs, TVectorEditRefs } from 'types/design/canvas/types';
 import { TPendingOutgoingTangent } from '../../../../types';
 import { TSceneNode, TVectorNode } from 'types/design/types';
 
@@ -28,10 +28,10 @@ const node: TVectorNode = {
 
 const nodes: Record<string, TSceneNode> = { [node.id]: node };
 
-const createPenPreviewRef = (): TCanvasRefs['penPreviewRef'] => ({ current: null });
-const createHoveredSegmentIdRef = (): TCanvasRefs['hoveredSegmentIdRef'] => ({ current: null });
-const createPenHoveredDragArmableVertexRef = (): TCanvasRefs['penHoveredDragArmableVertexRef'] => ({ current: false });
-const createVectorAlignmentGuideRef = (): TCanvasRefs['vectorAlignmentGuideRef'] => ({ current: null });
+const createPenPreviewRef = (): TPenRefs['penPreviewRef'] => ({ current: null });
+const createHoveredSegmentIdRef = (): THoverRefs['hoveredSegmentIdRef'] => ({ current: null });
+const createPenHoveredDragArmableVertexRef = (): TPenRefs['penHoveredDragArmableVertexRef'] => ({ current: false });
+const createVectorAlignmentGuideRef = (): TVectorEditRefs['vectorAlignmentGuideRef'] => ({ current: null });
 const createPendingOutgoingTangentRef = (value: TPendingOutgoingTangent | null = null): RefObject<TPendingOutgoingTangent | null> => ({
   current: value,
 });

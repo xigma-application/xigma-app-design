@@ -7,7 +7,7 @@ import { VECTOR_VERTEX_HIT_RADIUS_PX } from 'constant/canvas';
 import { AppDispatch, AppStore } from 'store';
 
 // types
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { TVectorEditRefs } from 'types/design/canvas/types';
 import { TPenDragOrigin, TPendingOutgoingTangent } from '../../../types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode, TViewport } from 'types/design/types';
@@ -44,7 +44,7 @@ export const continueVectorNetwork = (
   dragOriginRef: RefObject<TPenDragOrigin | null>,
   dragStartRef: RefObject<TPoint | null>,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
-  vectorAlignmentGuideRef: TCanvasRefs['vectorAlignmentGuideRef'],
+  vectorAlignmentGuideRef: TVectorEditRefs['vectorAlignmentGuideRef'],
   isCtrlPressed: boolean,
   isShiftPressed: boolean,
 ): void => {

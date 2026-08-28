@@ -21,14 +21,14 @@ export const armVectorWidthHandleGrab = (
     const resizeSide = handleHit.target === 'point' ? null : handleHit.target;
     const groupDrag = resizeSide
       ? getVectorWidthPointGroupDragTargets(
-          canvasRefs.selectedVectorWidthHandlesRef.current,
+          canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current,
           state.design.nodes,
           handleHit.nodeId,
           handleHit.point.id,
         )
       : null;
 
-    canvasRefs.vectorWidthPointDragRef.current = {
+    canvasRefs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: handleHit.target === 'left' ? handleHit.point.leftOffset : handleHit.point.rightOffset,
       armWorldPoint: point,
       groupTargets: groupDrag?.groupTargets ?? [],
@@ -40,17 +40,23 @@ export const armVectorWidthHandleGrab = (
     canvas.setPointerCapture(event.pointerId);
 
     if (groupDrag && resizeSide) {
-      canvasRefs.selectedVectorWidthHandlesRef.current = groupDrag.selection;
-      canvasRefs.lastVectorWidthHandleSideRef.current = { nodeId: handleHit.nodeId, pointId: handleHit.point.id, side: resizeSide };
+      canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current = groupDrag.selection;
+      canvasRefs.vectorEdit.lastVectorWidthHandleSideRef.current = {
+        nodeId: handleHit.nodeId,
+        pointId: handleHit.point.id,
+        side: resizeSide,
+      };
       canvas.style.cursor = getRotatedResizeCursorUrl(handleHit.angle) ?? '';
       setClassName(null);
     } else {
-      const isAlreadySelected = canvasRefs.selectedVectorWidthHandlesRef.current.some(
+      const isAlreadySelected = canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current.some(
         (selected) => selected.side === 'point' && selected.nodeId === handleHit.nodeId && selected.pointId === handleHit.point.id,
       );
 
       if (!isAlreadySelected) {
-        canvasRefs.selectedVectorWidthHandlesRef.current = [{ nodeId: handleHit.nodeId, pointId: handleHit.point.id, side: 'point' }];
+        canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current = [
+          { nodeId: handleHit.nodeId, pointId: handleHit.point.id, side: 'point' },
+        ];
       }
 
       canvas.style.cursor = '';

@@ -41,8 +41,8 @@ describe('commitVectorBendSegment', () => {
     const canvasRefs = createCanvasRefs();
     const dragRef = { current: null };
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
-    canvasRefs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
 
     // before
     commitVectorBendSegment(node, 's1', { x: 5, y: 5 }, store.dispatch, canvasRefs, dragRef);
@@ -53,9 +53,9 @@ describe('commitVectorBendSegment', () => {
     expect(updated.segments.s1.tangentStart).toEqual({ x: 30, y: 0 });
     expect(updated.segments.s1.tangentEnd).toEqual({ x: -30, y: 0 });
     expect(updated.vertexHandleModes).toEqual({ v1: 'symmetric', v2: 'symmetric' });
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
     expect(dragRef.current).toEqual({
       dragStart: { x: 5, y: 5 },
       nodeId,

@@ -10,7 +10,7 @@ import { TDragState } from 'types/design/selectionTool/types';
 import { getGeometryDeltaChanges } from 'components/Design/Canvas/utils/getGeometryDeltaChanges';
 
 export const commitDraggedVectorNodeSnapshots = (dispatch: AppDispatch, dragState: TDragState, canvasRefs: TCanvasRefs): void => {
-  const snapshots = canvasRefs.draggedVectorNodeSnapshotsRef.current;
+  const snapshots = canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current;
 
   if (snapshots) {
     snapshots.forEach((snapshot, id) => {
@@ -21,6 +21,6 @@ export const commitDraggedVectorNodeSnapshots = (dispatch: AppDispatch, dragStat
       }
     });
 
-    canvasRefs.draggedVectorNodeSnapshotsRef.current = null;
+    canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current = null;
   }
 };

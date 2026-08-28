@@ -51,7 +51,7 @@ export const continueVectorCutDrag = (
           : [];
       });
 
-      canvasRefs.vectorCutPreviewRef.current = { crossings, lineEnd: point, lineStart: dragState.lineStart };
+      canvasRefs.vectorCut.vectorCutPreviewRef.current = { crossings, lineEnd: point, lineStart: dragState.lineStart };
     }
   }
 };

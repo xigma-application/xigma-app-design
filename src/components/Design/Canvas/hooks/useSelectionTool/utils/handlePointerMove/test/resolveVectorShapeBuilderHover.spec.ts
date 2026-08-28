@@ -64,7 +64,7 @@ describe('resolveVectorShapeBuilderHover', () => {
     resolveVectorShapeBuilderHover(canvas, pointerEvent(50, 40), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorShapeBuilderFaceRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorShapeBuilderFaceRef.current).toBeNull();
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -79,7 +79,7 @@ describe('resolveVectorShapeBuilderHover', () => {
     resolveVectorShapeBuilderHover(canvas, pointerEvent(50, 40), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorShapeBuilderFaceRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorShapeBuilderFaceRef.current).toBeNull();
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -96,7 +96,7 @@ describe('resolveVectorShapeBuilderHover', () => {
     resolveVectorShapeBuilderHover(canvas, pointerEvent(50, 40, 1), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorShapeBuilderFaceRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorShapeBuilderFaceRef.current).toBeNull();
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -114,7 +114,7 @@ describe('resolveVectorShapeBuilderHover', () => {
     resolveVectorShapeBuilderHover(canvas, pointerEvent(50, 40), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorShapeBuilderFaceRef.current).toEqual({ faceKey: 's1,s2,s3', nodeId });
+    expect(canvasRefs.hover.hoveredVectorShapeBuilderFaceRef.current).toEqual({ faceKey: 's1,s2,s3', nodeId });
     expect(setClassName).toHaveBeenCalledWith('add');
   });
 
@@ -131,7 +131,7 @@ describe('resolveVectorShapeBuilderHover', () => {
     resolveVectorShapeBuilderHover(canvas, pointerEvent(50, 40, 0, true), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.isVectorShapeBuilderSubtractRef.current).toBe(true);
+    expect(canvasRefs.shapeBuilder.isVectorShapeBuilderSubtractRef.current).toBe(true);
     expect(setClassName).toHaveBeenCalledWith('remove');
   });
 
@@ -163,7 +163,7 @@ describe('resolveVectorShapeBuilderHover', () => {
     resolveVectorShapeBuilderHover(canvas, pointerEvent(550, 540), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorShapeBuilderFaceRef.current).toEqual({ faceKey: 's1,s2,s3', nodeId: secondNodeId });
+    expect(canvasRefs.hover.hoveredVectorShapeBuilderFaceRef.current).toEqual({ faceKey: 's1,s2,s3', nodeId: secondNodeId });
   });
 
   it("should clear the hovered face ref but still re-assert the 'add' cursor when the pointer misses every face", () => {
@@ -179,7 +179,7 @@ describe('resolveVectorShapeBuilderHover', () => {
     resolveVectorShapeBuilderHover(canvas, pointerEvent(500, 500), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorShapeBuilderFaceRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorShapeBuilderFaceRef.current).toBeNull();
     expect(setClassName).toHaveBeenCalledWith('add');
   });
 });

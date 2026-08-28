@@ -23,9 +23,9 @@ export const selectAndArmVectorSegmentDrag = (
   canSplit: boolean,
   point: TPoint,
 ): void => {
-  canvasRefs.selectedVectorSegmentIdsRef.current = [segmentId];
-  canvasRefs.selectedVectorVertexIdsRef.current = [];
-  canvasRefs.selectedVectorHandlesRef.current = [];
+  canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = [segmentId];
+  canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = [];
+  canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [];
 
   const vertexIds = getVectorSegmentVertexIds(node, [segmentId]);
   const pendingClickAction = canSplit ? { kind: 'split-segment' as const, nodeId: node.id, segmentId, t: VECTOR_SEGMENT_INSERT_T } : null;

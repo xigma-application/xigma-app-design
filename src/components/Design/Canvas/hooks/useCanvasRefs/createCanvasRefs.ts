@@ -1,78 +1,43 @@
-// others
-import { ERASER_DEFAULT_DIAMETER_PX } from 'constant/canvas';
+// hooks
+import { createCornerRadiusRefs } from './hooks/useCornerRadiusRefs/createCornerRadiusRefs';
+import { createEllipseArcRefs } from './hooks/useEllipseArcRefs/createEllipseArcRefs';
+import { createHoverRefs } from './hooks/useHoverRefs/createHoverRefs';
+import { createLassoMarqueeRefs } from './hooks/useLassoMarqueeRefs/createLassoMarqueeRefs';
+import { createPenRefs } from './hooks/usePenRefs/createPenRefs';
+import { createPencilRefs } from './hooks/usePencilRefs/createPencilRefs';
+import { createShapeBuilderRefs } from './hooks/useShapeBuilderRefs/createShapeBuilderRefs';
+import { createSliceRefs } from './hooks/useSliceRefs/createSliceRefs';
+import { createTransformRefs } from './hooks/useTransformRefs/createTransformRefs';
+import { createVectorCutRefs } from './hooks/useVectorCutRefs/createVectorCutRefs';
+import { createVectorEditRefs } from './hooks/useVectorEditRefs/createVectorEditRefs';
+import { createVectorEraseRefs } from './hooks/useVectorEraseRefs/createVectorEraseRefs';
+import { createVectorMultiSelectRefs } from './hooks/useVectorMultiSelectRefs/createVectorMultiSelectRefs';
+import { createVectorPaintRefs } from './hooks/useVectorPaintRefs/createVectorPaintRefs';
+import { createVectorSnapshotsRefs } from './hooks/useVectorSnapshotsRefs/createVectorSnapshotsRefs';
+import { createVectorWidthRefs } from './hooks/useVectorWidthRefs/createVectorWidthRefs';
 
 // types
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { TCanvasRefs, TCanvasRefsOverrides } from 'types/design/canvas/types';
 
-export const createCanvasRefs = (overrides: Partial<TCanvasRefs> = {}): TCanvasRefs => ({
+export const createCanvasRefs = (overrides: TCanvasRefsOverrides = {}): TCanvasRefs => ({
   canvasRef: { current: null },
   colorSampleRequestRef: { current: null },
-  cornerRadiusDragRef: { current: null },
   draftRef: { current: null },
-  draggedNodeIdsRef: { current: null },
-  draggedVectorFillFacesRef: { current: null },
-  draggedVectorNodeSnapshotsRef: { current: null },
-  ellipseArcDragRef: { current: null },
-  ellipseArcRatioDragRef: { current: null },
-  ellipseArcRotateDragRef: { current: null },
-  eraseBrushCenterRef: { current: null },
-  eraserDiameterRef: { current: ERASER_DEFAULT_DIAMETER_PX },
-  hoverRef: { current: null },
-  hoveredSegmentIdRef: { current: null },
-  hoveredVectorCutPointRef: { current: null },
-  hoveredVectorCutSegmentRef: { current: null },
-  hoveredVectorEdgeInsertPointRef: { current: null },
-  hoveredVectorFaceSelectRef: { current: null },
-  hoveredVectorHandleRef: { current: null },
-  hoveredVectorPaintFaceKeyRef: { current: null },
-  hoveredVectorSegmentIdRef: { current: null },
-  hoveredVectorShapeBuilderFaceRef: { current: null },
-  hoveredVectorVertexIdRef: { current: null },
-  hoveredVectorWidthPointRef: { current: null },
-  isVectorPaintRemoveRef: { current: false },
-  isVectorShapeBuilderBoxModeRef: { current: false },
-  isVectorShapeBuilderSubtractRef: { current: false },
-  lastVectorWidthHandleSideRef: { current: null },
-  marqueeRef: { current: null },
-  newVectorCutVertexIdsRef: { current: new Set() },
-  penDragOriginRef: { current: null },
-  penDraggedHandleIsSnappedRef: { current: false },
-  penDraggedHandlePositionRef: { current: null },
-  penHoveredDragArmableVertexRef: { current: false },
-  penNewVertexPreviewRef: { current: null },
-  penPreviewRef: { current: null },
-  pencilPreviewPointsRef: { current: null },
-  pencilRawPreviewPointsRef: { current: null },
-  pencilShowRawPreviewRef: { current: false },
-  polygonCornerRadiusDragRef: { current: null },
-  preVectorMarqueeSegmentIdsRef: { current: [] },
-  preVectorMarqueeVertexIdsRef: { current: [] },
-  resizedNodeIdsRef: { current: null },
-  resizedVectorNodeSnapshotsRef: { current: null },
-  rotateDragRef: { current: null },
-  rotatedNodeIdsRef: { current: null },
-  rotatedVectorNodeSnapshotsRef: { current: null },
-  selectedVectorHandlesRef: { current: [] },
-  selectedVectorSegmentIdsRef: { current: [] },
-  selectedVectorVertexIdsRef: { current: [] },
-  selectedVectorWidthHandlesRef: { current: [] },
-  sliceRef: { current: null },
-  snappedVectorHandleRef: { current: null },
-  starCornerRadiusDragRef: { current: null },
-  touchedVectorCutVertexIdsRef: { current: new Set() },
-  touchedVectorPaintLoopKeysRef: { current: {} },
-  touchedVectorShapeBuilderFacesRef: { current: {} },
-  vectorAlignmentGuideRef: { current: null },
-  vectorCutPreviewRef: { current: null },
-  vectorEraseStrokeRef: { current: null },
-  vectorLassoPathRef: { current: null },
-  vectorMultiDragRef: { current: null },
-  vectorMultiSelectBoxRef: { current: null },
-  vectorMultiSelectResizeDragRef: { current: null },
-  vectorMultiSelectRotateDragRef: { current: null },
-  vectorPaintPathRef: { current: null },
-  vectorPaintTouchedFacesRef: { current: null },
-  vectorShapeBuilderPathRef: { current: null },
-  vectorWidthPointDragRef: { current: null },
   ...overrides,
+  cornerRadius: createCornerRadiusRefs(overrides.cornerRadius),
+  ellipseArc: createEllipseArcRefs(overrides.ellipseArc),
+  hover: createHoverRefs(overrides.hover),
+  lassoMarquee: createLassoMarqueeRefs(overrides.lassoMarquee),
+  pen: createPenRefs(overrides.pen),
+  pencil: createPencilRefs(overrides.pencil),
+  shapeBuilder: createShapeBuilderRefs(overrides.shapeBuilder),
+  slice: createSliceRefs(overrides.slice),
+  transform: createTransformRefs(overrides.transform),
+  vectorCut: createVectorCutRefs(overrides.vectorCut),
+  vectorEdit: createVectorEditRefs(overrides.vectorEdit),
+  vectorErase: createVectorEraseRefs(overrides.vectorErase),
+  vectorMultiSelect: createVectorMultiSelectRefs(overrides.vectorMultiSelect),
+  vectorPaint: createVectorPaintRefs(overrides.vectorPaint),
+  vectorSnapshots: createVectorSnapshotsRefs(overrides.vectorSnapshots),
+  vectorWidth: createVectorWidthRefs(overrides.vectorWidth),
 });

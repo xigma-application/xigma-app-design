@@ -7,8 +7,8 @@ export const disarmVectorLassoDrag = (
   canvasRefs: TCanvasRefs,
   setClassName: (className: string | null) => void,
 ): void => {
-  if (canvasRefs.vectorLassoPathRef.current) {
-    canvasRefs.vectorLassoPathRef.current = null;
+  if (canvasRefs.lassoMarquee.vectorLassoPathRef.current) {
+    canvasRefs.lassoMarquee.vectorLassoPathRef.current = null;
     canvas.releasePointerCapture(event.pointerId);
     setClassName(null);
   }

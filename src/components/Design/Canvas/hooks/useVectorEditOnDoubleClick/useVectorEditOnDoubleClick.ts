@@ -20,7 +20,7 @@ import { getDoubleClickedVectorNode } from './utils/getDoubleClickedVectorNode';
 import { getNodeAtPoint } from '../../utils/getNodeAtPoint';
 
 export const useVectorEditOnDoubleClick = (refs: TCanvasRefs): void => {
-  const { selectedVectorHandlesRef, selectedVectorSegmentIdsRef, selectedVectorVertexIdsRef } = refs;
+  const { selectedVectorHandlesRef, selectedVectorSegmentIdsRef, selectedVectorVertexIdsRef } = refs.vectorEdit;
   const vectorEditingNodeIds = useAppSelector(selectVectorEditingNodeIds);
   const dispatch = useAppDispatch();
 

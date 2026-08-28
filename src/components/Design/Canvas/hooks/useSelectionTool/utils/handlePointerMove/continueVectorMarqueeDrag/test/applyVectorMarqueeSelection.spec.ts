@@ -13,9 +13,9 @@ describe('applyVectorMarqueeSelection', () => {
 
     applyVectorMarqueeSelection(canvasRefs, 'handles', ['v1'], [handleHit], ['s1']);
 
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([handleHit]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([handleHit]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 
   it('should select only the vertex ids when mode is "points"', () => {
@@ -23,9 +23,9 @@ describe('applyVectorMarqueeSelection', () => {
 
     applyVectorMarqueeSelection(canvasRefs, 'points', ['v1'], [handleHit], ['s1']);
 
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1']);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1']);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 
   it('should select only the segment hits when mode is "everything"', () => {
@@ -33,22 +33,24 @@ describe('applyVectorMarqueeSelection', () => {
 
     applyVectorMarqueeSelection(canvasRefs, 'everything', ['v1'], [handleHit], ['s1']);
 
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
   });
 
   it('should clear every selection list when mode is null', () => {
     const canvasRefs = createCanvasRefs({
-      selectedVectorHandlesRef: { current: [handleHit] },
-      selectedVectorSegmentIdsRef: { current: ['s1'] },
-      selectedVectorVertexIdsRef: { current: ['v1'] },
+      vectorEdit: {
+        selectedVectorHandlesRef: { current: [handleHit] },
+        selectedVectorSegmentIdsRef: { current: ['s1'] },
+        selectedVectorVertexIdsRef: { current: ['v1'] },
+      },
     });
 
     applyVectorMarqueeSelection(canvasRefs, null, ['v1'], [handleHit], ['s1']);
 
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 });

@@ -69,7 +69,7 @@ describe('drawVectorWidthPointsForNode', () => {
     const nodes: Record<string, TSceneNode> = { [node.id]: node };
     const refs = createCanvasRefs();
 
-    refs.vectorWidthPointDragRef.current = {
+    refs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 0,
       armWorldPoint: { x: 0, y: 0 },
       groupTargets: [],
@@ -94,7 +94,7 @@ describe('drawVectorWidthPointsForNode', () => {
     const nodes: Record<string, TSceneNode> = { [node.id]: node };
     const refs = createCanvasRefs();
 
-    refs.selectedVectorWidthHandlesRef.current = [{ nodeId: node.id, pointId: 'p1', side: 'right' }];
+    refs.vectorEdit.selectedVectorWidthHandlesRef.current = [{ nodeId: node.id, pointId: 'p1', side: 'right' }];
 
     // before
     drawVectorWidthPointsForNode(gl, program, buffer, nodes, node.id, refs, 200, 150, IDENTITY_VIEWPORT);
@@ -124,7 +124,7 @@ describe('drawVectorWidthPointsForNode', () => {
     const nodes: Record<string, TSceneNode> = { [node.id]: node };
     const refs = createCanvasRefs();
 
-    refs.selectedVectorWidthHandlesRef.current = [{ nodeId: node.id, pointId: 'p1', side: 'point' }];
+    refs.vectorEdit.selectedVectorWidthHandlesRef.current = [{ nodeId: node.id, pointId: 'p1', side: 'point' }];
 
     // before
     drawVectorWidthPointsForNode(gl, program, buffer, nodes, node.id, refs, 200, 150, IDENTITY_VIEWPORT);

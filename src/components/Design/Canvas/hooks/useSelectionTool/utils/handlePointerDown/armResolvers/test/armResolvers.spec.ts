@@ -362,7 +362,7 @@ describe('armEllipseArcOnPointerDown', () => {
 
     // result
     expect(armEllipseArcOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.ellipseArcDragRef.current).toMatchObject({ nodeId: 'ellipse-1' });
+    expect(ctx.canvasRefs.ellipseArc.ellipseArcDragRef.current).toMatchObject({ nodeId: 'ellipse-1' });
   });
 
   it('should return undefined when the point misses the handle', () => {
@@ -371,7 +371,7 @@ describe('armEllipseArcOnPointerDown', () => {
 
     // result
     expect(armEllipseArcOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.ellipseArcDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.ellipseArc.ellipseArcDragRef.current).toBeNull();
   });
 });
 
@@ -385,7 +385,7 @@ describe('armEllipseArcRotateOnPointerDown', () => {
 
     // result
     expect(armEllipseArcRotateOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.ellipseArcRotateDragRef.current).toMatchObject({ nodeId: 'ellipse-1' });
+    expect(ctx.canvasRefs.ellipseArc.ellipseArcRotateDragRef.current).toMatchObject({ nodeId: 'ellipse-1' });
   });
 
   it('should return undefined when the point misses the handle', () => {
@@ -394,7 +394,7 @@ describe('armEllipseArcRotateOnPointerDown', () => {
 
     // result
     expect(armEllipseArcRotateOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.ellipseArcRotateDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.ellipseArc.ellipseArcRotateDragRef.current).toBeNull();
   });
 });
 
@@ -406,7 +406,7 @@ describe('armEllipseArcRatioOnPointerDown', () => {
 
     // result
     expect(armEllipseArcRatioOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.ellipseArcRatioDragRef.current).toMatchObject({ nodeId: 'ellipse-1' });
+    expect(ctx.canvasRefs.ellipseArc.ellipseArcRatioDragRef.current).toMatchObject({ nodeId: 'ellipse-1' });
   });
 
   it('should return undefined when the point misses the handle', () => {
@@ -415,7 +415,7 @@ describe('armEllipseArcRatioOnPointerDown', () => {
 
     // result
     expect(armEllipseArcRatioOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.ellipseArcRatioDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.ellipseArc.ellipseArcRatioDragRef.current).toBeNull();
   });
 });
 
@@ -448,7 +448,7 @@ describe('armCornerRadiusOnPointerDown', () => {
 
     // result
     expect(armCornerRadiusOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.cornerRadiusDragRef.current).toMatchObject({ nodeId: 'rectangle-1' });
+    expect(ctx.canvasRefs.cornerRadius.cornerRadiusDragRef.current).toMatchObject({ nodeId: 'rectangle-1' });
   });
 
   it('should return undefined when the point misses every corner-radius handle', () => {
@@ -457,7 +457,7 @@ describe('armCornerRadiusOnPointerDown', () => {
 
     // result
     expect(armCornerRadiusOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.cornerRadiusDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.cornerRadius.cornerRadiusDragRef.current).toBeNull();
   });
 });
 
@@ -469,7 +469,7 @@ describe('armPolygonCornerRadiusOnPointerDown', () => {
 
     // result
     expect(armPolygonCornerRadiusOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.polygonCornerRadiusDragRef.current).toMatchObject({ nodeId: 'polygon-1' });
+    expect(ctx.canvasRefs.cornerRadius.polygonCornerRadiusDragRef.current).toMatchObject({ nodeId: 'polygon-1' });
   });
 
   it('should return undefined when the point misses the handle', () => {
@@ -478,7 +478,7 @@ describe('armPolygonCornerRadiusOnPointerDown', () => {
 
     // result
     expect(armPolygonCornerRadiusOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.polygonCornerRadiusDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.cornerRadius.polygonCornerRadiusDragRef.current).toBeNull();
   });
 });
 
@@ -490,7 +490,7 @@ describe('armStarCornerRadiusOnPointerDown', () => {
 
     // result
     expect(armStarCornerRadiusOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.starCornerRadiusDragRef.current).toMatchObject({ nodeId: 'star-1' });
+    expect(ctx.canvasRefs.cornerRadius.starCornerRadiusDragRef.current).toMatchObject({ nodeId: 'star-1' });
   });
 
   it('should return undefined when the point misses the handle', () => {
@@ -499,7 +499,7 @@ describe('armStarCornerRadiusOnPointerDown', () => {
 
     // result
     expect(armStarCornerRadiusOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.starCornerRadiusDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.cornerRadius.starCornerRadiusDragRef.current).toBeNull();
   });
 });
 
@@ -512,7 +512,7 @@ describe('armRotateOnPointerDown', () => {
 
     // result
     expect(armRotateOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.rotateDragRef.current).not.toBeNull();
+    expect(ctx.canvasRefs.transform.rotateDragRef.current).not.toBeNull();
   });
 
   it('should return undefined when the point misses the rotate ring', () => {
@@ -521,7 +521,7 @@ describe('armRotateOnPointerDown', () => {
 
     // result
     expect(armRotateOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.rotateDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.transform.rotateDragRef.current).toBeNull();
   });
 });
 
@@ -803,22 +803,22 @@ describe('armVectorMarqueeOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['vertex-1'];
-    canvasRefs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
-    canvasRefs.selectedVectorSegmentIdsRef.current = ['segment-1'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['vertex-1'];
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = ['segment-1'];
 
     // before
     const ctx = createContext({ canvasRefs, hit: null, point: { x: 42, y: 24 } });
 
     // result
     expect(armVectorMarqueeOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
     // the pre-drag vertex/segment selection is snapshotted, not just dropped — continueVectorMarqueeDrag.ts
     // uses it to keep their tangents visible/catchable for the rest of the gesture even once deselected
-    expect(canvasRefs.preVectorMarqueeVertexIdsRef.current).toEqual(['vertex-1']);
-    expect(canvasRefs.preVectorMarqueeSegmentIdsRef.current).toEqual(['segment-1']);
+    expect(canvasRefs.vectorEdit.preVectorMarqueeVertexIdsRef.current).toEqual(['vertex-1']);
+    expect(canvasRefs.vectorEdit.preVectorMarqueeSegmentIdsRef.current).toEqual(['segment-1']);
     expect(ctx.selectionRefs.vectorMarqueeStartRef.current).toEqual({ x: 42, y: 24 });
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
   });
@@ -867,19 +867,19 @@ describe('armVectorLassoOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['vertex-1'];
-    canvasRefs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
-    canvasRefs.selectedVectorSegmentIdsRef.current = ['segment-1'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['vertex-1'];
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = ['segment-1'];
 
     // before — a click that would otherwise land squarely on a node, to prove Lasso intercepts it anyway
     const ctx = createContext({ activeTool: ToolName.lasso, canvasRefs, hit: rectangle, point: { x: 42, y: 24 } });
 
     // result
     expect(armVectorLassoOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
-    expect(canvasRefs.vectorLassoPathRef.current).toEqual([{ x: 42, y: 24 }]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.lassoMarquee.vectorLassoPathRef.current).toEqual([{ x: 42, y: 24 }]);
     expect(ctx.setClassName).toHaveBeenCalledWith('lasso');
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
   });
@@ -893,7 +893,7 @@ describe('armVectorLassoOnPointerDown', () => {
 
     // result
     expect(armVectorLassoOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.vectorLassoPathRef.current).toBeNull();
+    expect(ctx.canvasRefs.lassoMarquee.vectorLassoPathRef.current).toBeNull();
   });
 
   it('should return undefined (letting the click fall through) when Vector Edit Mode is not active', () => {
@@ -902,7 +902,7 @@ describe('armVectorLassoOnPointerDown', () => {
 
     // result
     expect(armVectorLassoOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.vectorLassoPathRef.current).toBeNull();
+    expect(ctx.canvasRefs.lassoMarquee.vectorLassoPathRef.current).toBeNull();
   });
 
   it('should return undefined (yield to the vertex-drag resolver) when the click lands exactly on an already-selected vertex', () => {
@@ -916,15 +916,15 @@ describe('armVectorLassoOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
 
     // before
     const ctx = createContext({ activeTool: ToolName.lasso, canvasRefs, point: { x: 0, y: 0 } });
 
     // result
     expect(armVectorLassoOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.vectorLassoPathRef.current).toBeNull();
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1']);
+    expect(ctx.canvasRefs.lassoMarquee.vectorLassoPathRef.current).toBeNull();
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1']);
   });
 
   it('should still start a fresh lasso path when the click lands on a vertex that is NOT part of the current selection', () => {
@@ -941,7 +941,7 @@ describe('armVectorLassoOnPointerDown', () => {
 
     // result
     expect(armVectorLassoOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.vectorLassoPathRef.current).toEqual([{ x: 0, y: 0 }]);
+    expect(ctx.canvasRefs.lassoMarquee.vectorLassoPathRef.current).toEqual([{ x: 0, y: 0 }]);
   });
 
   it('should return undefined (yield) when the click lands exactly on an already-selected tangent handle', () => {
@@ -956,15 +956,15 @@ describe('armVectorLassoOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
-    canvasRefs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
 
     // before
     const ctx = createContext({ activeTool: ToolName.lasso, canvasRefs, point: { x: 10, y: 20 } });
 
     // result
     expect(armVectorLassoOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.vectorLassoPathRef.current).toBeNull();
+    expect(ctx.canvasRefs.lassoMarquee.vectorLassoPathRef.current).toBeNull();
   });
 
   it('should still start a fresh lasso path when the click lands on a handle that is NOT itself selected', () => {
@@ -979,14 +979,14 @@ describe('armVectorLassoOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
 
     // before
     const ctx = createContext({ activeTool: ToolName.lasso, canvasRefs, point: { x: 10, y: 20 } });
 
     // result
     expect(armVectorLassoOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.vectorLassoPathRef.current).toEqual([{ x: 10, y: 20 }]);
+    expect(ctx.canvasRefs.lassoMarquee.vectorLassoPathRef.current).toEqual([{ x: 10, y: 20 }]);
   });
 
   it('should return undefined (yield) when the click lands on an already-selected segment', () => {
@@ -1000,14 +1000,14 @@ describe('armVectorLassoOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = ['s1'];
 
     // before
     const ctx = createContext({ activeTool: ToolName.lasso, canvasRefs, point: { x: 25, y: 0 } });
 
     // result
     expect(armVectorLassoOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.vectorLassoPathRef.current).toBeNull();
+    expect(ctx.canvasRefs.lassoMarquee.vectorLassoPathRef.current).toBeNull();
   });
 
   it('should still start a fresh lasso path when the click lands on a segment that is NOT selected', () => {
@@ -1024,7 +1024,7 @@ describe('armVectorLassoOnPointerDown', () => {
 
     // result
     expect(armVectorLassoOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.vectorLassoPathRef.current).toEqual([{ x: 25, y: 0 }]);
+    expect(ctx.canvasRefs.lassoMarquee.vectorLassoPathRef.current).toEqual([{ x: 25, y: 0 }]);
   });
 
   it('should return undefined (yield to the multi-select box) when the click lands inside the bounding box of 2+ selected vertices', () => {
@@ -1038,15 +1038,15 @@ describe('armVectorLassoOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     const ctx = createContext({ activeTool: ToolName.lasso, canvasRefs, point: { x: 50, y: 50 } });
 
     // result
     expect(armVectorLassoOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.vectorLassoPathRef.current).toBeNull();
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
+    expect(ctx.canvasRefs.lassoMarquee.vectorLassoPathRef.current).toBeNull();
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
   });
 
   it('should still start a fresh lasso path when the click falls outside the multi-select box of 2+ selected vertices', () => {
@@ -1060,15 +1060,15 @@ describe('armVectorLassoOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     const ctx = createContext({ activeTool: ToolName.lasso, canvasRefs, point: { x: 900, y: 900 } });
 
     // result — clears the pre-existing v1/v2 selection, exactly like starting any other fresh lasso
     expect(armVectorLassoOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(ctx.canvasRefs.vectorLassoPathRef.current).toEqual([{ x: 900, y: 900 }]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(ctx.canvasRefs.lassoMarquee.vectorLassoPathRef.current).toEqual([{ x: 900, y: 900 }]);
   });
 });
 
@@ -1126,7 +1126,7 @@ describe('armVectorPaintOnPointerDown', () => {
     // result
     expect(armVectorPaintOnPointerDown(ctx)).toBe(true);
     expect(ctx.setClassName).toHaveBeenCalledWith('paint-add');
-    expect(ctx.canvasRefs.vectorPaintTouchedFacesRef.current).toEqual({ [nodeId]: ['s1,s2,s3'] });
+    expect(ctx.canvasRefs.vectorPaint.vectorPaintTouchedFacesRef.current).toEqual({ [nodeId]: ['s1,s2,s3'] });
   });
 
   it('should still pin the paint-add cursor and clear the touched-faces highlight when the click misses every face', () => {
@@ -1148,7 +1148,7 @@ describe('armVectorPaintOnPointerDown', () => {
     // result
     expect(armVectorPaintOnPointerDown(ctx)).toBe(true);
     expect(ctx.setClassName).toHaveBeenCalledWith('paint-add');
-    expect(ctx.canvasRefs.vectorPaintTouchedFacesRef.current).toEqual({});
+    expect(ctx.canvasRefs.vectorPaint.vectorPaintTouchedFacesRef.current).toEqual({});
   });
 
   it('should fill the clicked face with the current paint color from the store, not the default', () => {
@@ -1224,7 +1224,7 @@ describe('armVectorPaintOnPointerDown', () => {
     // result
     expect(armVectorPaintOnPointerDown(ctx)).toBe(true);
     expect(ctx.setClassName).toHaveBeenCalledWith('paint-remove');
-    expect(ctx.canvasRefs.isVectorPaintRemoveRef.current).toBe(true);
+    expect(ctx.canvasRefs.vectorPaint.isVectorPaintRemoveRef.current).toBe(true);
   });
 
   it('should arm add mode (not remove) when the click misses every face', () => {
@@ -1245,7 +1245,7 @@ describe('armVectorPaintOnPointerDown', () => {
 
     // result
     expect(armVectorPaintOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.isVectorPaintRemoveRef.current).toBe(false);
+    expect(ctx.canvasRefs.vectorPaint.isVectorPaintRemoveRef.current).toBe(false);
   });
 
   it('should bake a crossing the clicked face depends on into a real, persisted vertex (regression: painting across a crossing that only existed virtually made the fill disappear the moment the node was cut later)', () => {
@@ -1376,18 +1376,18 @@ describe('armVectorFaceSelectOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['stale'];
-    canvasRefs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 'stale' }];
-    canvasRefs.selectedVectorSegmentIdsRef.current = ['stale'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['stale'];
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 'stale' }];
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = ['stale'];
 
     // before — a point inside the triangle
     const ctx = createContext({ activeTool: ToolName.move, canvasRefs, point: { x: 50, y: 40 } });
 
     // result
     expect(armVectorFaceSelectOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current.sort()).toEqual(['v1', 'v2', 'v3']);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current.sort()).toEqual(['v1', 'v2', 'v3']);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
     expect(ctx.dispatch).not.toHaveBeenCalled();
   });
 
@@ -1404,9 +1404,9 @@ describe('armVectorFaceSelectOnPointerDown', () => {
 
     // result
     expect(armVectorFaceSelectOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.vectorMultiDragRef.current).not.toBeNull();
-    expect(Object.keys(canvasRefs.vectorMultiDragRef.current!.vertexOrigins).sort()).toEqual(['v1', 'v2', 'v3']);
-    expect(canvasRefs.vectorMultiDragRef.current!.pendingClickAction).toBeNull();
+    expect(canvasRefs.vectorMultiSelect.vectorMultiDragRef.current).not.toBeNull();
+    expect(Object.keys(canvasRefs.vectorMultiSelect.vectorMultiDragRef.current!.vertexOrigins).sort()).toEqual(['v1', 'v2', 'v3']);
+    expect(canvasRefs.vectorMultiSelect.vectorMultiDragRef.current!.pendingClickAction).toBeNull();
   });
 
   it('should add the face vertices to the current selection on a shift-click, without clearing it', () => {
@@ -1417,7 +1417,7 @@ describe('armVectorFaceSelectOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['other-vertex'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['other-vertex'];
 
     // before
     const ctx = createContext({
@@ -1429,7 +1429,7 @@ describe('armVectorFaceSelectOnPointerDown', () => {
 
     // result
     expect(armVectorFaceSelectOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current.sort()).toEqual(['other-vertex', 'v1', 'v2', 'v3'].sort());
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current.sort()).toEqual(['other-vertex', 'v1', 'v2', 'v3'].sort());
   });
 
   it('should keep the current selection unchanged when shift-clicking a face whose vertices are already all selected', () => {
@@ -1440,7 +1440,7 @@ describe('armVectorFaceSelectOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2', 'v3'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2', 'v3'];
 
     // before
     const ctx = createContext({
@@ -1452,7 +1452,7 @@ describe('armVectorFaceSelectOnPointerDown', () => {
 
     // result
     expect(armVectorFaceSelectOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current.sort()).toEqual(['v1', 'v2', 'v3']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current.sort()).toEqual(['v1', 'v2', 'v3']);
   });
 
   it('should keep a shared divider vertex selected when shift-clicking a second, adjacent filled face (regression: a per-vertex toggle dropped it, freezing the divider on a later group drag)', () => {
@@ -1500,7 +1500,7 @@ describe('armVectorFaceSelectOnPointerDown', () => {
 
     // result
     expect(armVectorFaceSelectOnPointerDown(bottomCtx)).toBe(true);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current.sort()).toEqual(['v1', 'v2', 'v3', 'v4', 'v5', 'v6']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current.sort()).toEqual(['v1', 'v2', 'v3', 'v4', 'v5', 'v6']);
   });
 
   it('should persist a virtual crossing into a real vertex before selecting, then include it in the selection', () => {
@@ -1540,7 +1540,7 @@ describe('armVectorFaceSelectOnPointerDown', () => {
     expect(ctx.dispatch).toHaveBeenCalledTimes(1);
 
     const originalVertexIds = new Set(['a', 'b', 'c', 'd', 'p1', 'p2']);
-    const selectedVertexIds = ctx.canvasRefs.selectedVectorVertexIdsRef.current;
+    const selectedVertexIds = ctx.canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current;
 
     expect(selectedVertexIds).toContain('a');
     expect(selectedVertexIds).toContain('b');
@@ -1565,7 +1565,7 @@ describe('armVectorFaceSelectOnPointerDown', () => {
 
     // result
     expect(armVectorFaceSelectOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.selectedVectorVertexIdsRef.current.sort()).toEqual(['v1', 'v2', 'v3']);
+    expect(ctx.canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current.sort()).toEqual(['v1', 'v2', 'v3']);
   });
 
   it('should return undefined when the click misses every face', () => {
@@ -1629,7 +1629,11 @@ describe('armVectorCutOnPointerDown', () => {
       hit: { nodeId, segmentId: 's1', t: 0.5 },
       status: 'pending',
     });
-    expect(ctx.canvasRefs.vectorCutPreviewRef.current).toEqual({ crossings: [], lineEnd: { x: 50, y: 0 }, lineStart: { x: 50, y: 0 } });
+    expect(ctx.canvasRefs.vectorCut.vectorCutPreviewRef.current).toEqual({
+      crossings: [],
+      lineEnd: { x: 50, y: 0 },
+      lineStart: { x: 50, y: 0 },
+    });
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
     expect(ctx.setClassName).toHaveBeenCalledWith('cut-on');
   });
@@ -1703,7 +1707,7 @@ describe('armVectorEraseOnPointerDown', () => {
     // result
     expect(armVectorEraseOnPointerDown(ctx)).toBe(true);
     expect(ctx.selectionRefs.vectorEraseDragRef.current).toEqual({ axisLock: null, lastPoint: { x: 50, y: 0 }, shiftAnchor: null });
-    expect(ctx.canvasRefs.vectorEraseStrokeRef.current).toEqual([{ x: 50, y: 0 }]);
+    expect(ctx.canvasRefs.vectorErase.vectorEraseStrokeRef.current).toEqual([{ x: 50, y: 0 }]);
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
     expect(ctx.setClassName).toHaveBeenCalledWith('erase');
     expect(ctx.dispatch).not.toHaveBeenCalled();
@@ -1751,7 +1755,7 @@ describe('armVectorHandleOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 10, y: 20 } });
@@ -1760,8 +1764,8 @@ describe('armVectorHandleOnPointerDown', () => {
     expect(armVectorHandleOnPointerDown(ctx)).toBe(true);
     expect(ctx.selectionRefs.vectorHandleDragRef.current).toEqual({ end: 'start', nodeId, segmentId: 's1', vertexId: 'v1' });
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
   });
 
   it('should keep the whole multi-selection and arm a group drag with a pending collapse when clicking an already-selected handle', () => {
@@ -1775,8 +1779,8 @@ describe('armVectorHandleOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v2'];
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v2'];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 10, y: 20 } });
@@ -1784,10 +1788,10 @@ describe('armVectorHandleOnPointerDown', () => {
     // result — the selection is left untouched at pointerdown time; only released-without-moving resolves
     // the collapse (see disarmVectorMultiDrag.spec.ts)
     expect(armVectorHandleOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v2']);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v2']);
     expect(ctx.selectionRefs.vectorHandleDragRef.current).toBeNull();
-    expect(ctx.canvasRefs.vectorMultiDragRef.current).toMatchObject({
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiDragRef.current).toMatchObject({
       pendingClickAction: { end: 'start', kind: 'handle', segmentId: 's1' },
       vertexOrigins: { v2: { x: 100, y: 0 } },
     });
@@ -1804,15 +1808,15 @@ describe('armVectorHandleOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     const ctx = createContext({ canvasRefs, event: pointerEvent({ shiftKey: true }), point: { x: 10, y: 20 } });
 
     // result
     expect(armVectorHandleOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
     expect(ctx.selectionRefs.vectorHandleDragRef.current).toBeNull();
     expect(ctx.canvas.setPointerCapture).not.toHaveBeenCalled();
   });
@@ -1828,14 +1832,14 @@ describe('armVectorHandleOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
 
     // before
     const ctx = createContext({ canvasRefs, event: pointerEvent({ shiftKey: true }), point: { x: 10, y: 20 } });
 
     // result
     expect(armVectorHandleOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
   });
 
   it('should return undefined when the point misses every handle', () => {
@@ -1917,7 +1921,7 @@ describe('armVectorCornerHandleOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
 
     // before
     const ctx = createContext({ canvasRefs, event: pointerEvent({ ctrlKey: true }), point: { x: 2, y: 0 } });
@@ -1927,8 +1931,8 @@ describe('armVectorCornerHandleOnPointerDown', () => {
     expect(ctx.selectionRefs.vectorHandleDragRef.current).toEqual({ end: 'start', nodeId, segmentId: 's1', vertexId: 'v1' });
     expect(ctx.dispatch).toHaveBeenCalledWith(updateNode({ changes: { vertexHandleModes: { v1: 'symmetric' } }, id: nodeId }));
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
   });
 
   it('should arm the vector-handle drag from a corner vertex when Meta (macOS Cmd) is held instead of Ctrl', () => {
@@ -2072,8 +2076,10 @@ describe('armVectorBendSegmentOnPointerDown', () => {
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs({
-      selectedVectorSegmentIdsRef: { current: ['s1'] },
-      selectedVectorVertexIdsRef: { current: ['v1'] },
+      vectorEdit: {
+        selectedVectorSegmentIdsRef: { current: ['s1'] },
+        selectedVectorVertexIdsRef: { current: ['v1'] },
+      },
     });
 
     // before — click well inside the segment, away from either endpoint
@@ -2090,9 +2096,9 @@ describe('armVectorBendSegmentOnPointerDown', () => {
         id: nodeId,
       }),
     );
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
     expect(ctx.selectionRefs.vectorSegmentBendDragRef.current).toEqual({
       dragStart: { x: 25, y: 0 },
       nodeId,
@@ -2255,14 +2261,14 @@ describe('armVectorVertexOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 2, y: 0 } });
 
     // result
     expect(armVectorVertexOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1']);
+    expect(ctx.canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1']);
     expect(ctx.selectionRefs.vectorVertexDragRef.current).toEqual({
       dispatchThrottle: { frameId: null, run: null },
       nodeId,
@@ -2270,7 +2276,7 @@ describe('armVectorVertexOnPointerDown', () => {
       pointerStart: { x: 2, y: 0 },
     });
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
   });
 
   it('should populate draggedVectorFillFacesRef when the grabbed vertex touches a currently-filled face', () => {
@@ -2301,7 +2307,7 @@ describe('armVectorVertexOnPointerDown', () => {
 
     // result
     expect(armVectorVertexOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.draggedVectorFillFacesRef.current?.[nodeId]).toHaveLength(1);
+    expect(canvasRefs.vectorSnapshots.draggedVectorFillFacesRef.current?.[nodeId]).toHaveLength(1);
   });
 
   it('should keep the whole multi-selection and arm a group drag with a pending collapse when clicking an already-selected vertex', () => {
@@ -2315,7 +2321,7 @@ describe('armVectorVertexOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 2, y: 0 } });
@@ -2323,9 +2329,9 @@ describe('armVectorVertexOnPointerDown', () => {
     // result — the selection is left untouched at pointerdown time; only released-without-moving resolves
     // the collapse (see disarmVectorMultiDrag.spec.ts)
     expect(armVectorVertexOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
     expect(ctx.selectionRefs.vectorVertexDragRef.current).toBeNull();
-    expect(ctx.canvasRefs.vectorMultiDragRef.current).toMatchObject({
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiDragRef.current).toMatchObject({
       pendingClickAction: { id: 'v1', kind: 'vertex' },
       vertexOrigins: { v1: { x: 0, y: 0 }, v2: { x: 100, y: 0 } },
     });
@@ -2342,15 +2348,15 @@ describe('armVectorVertexOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
 
     // before
     const ctx = createContext({ canvasRefs, event: pointerEvent({ shiftKey: true }), point: { x: 2, y: 0 } });
 
     // result
     expect(armVectorVertexOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1']);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1']);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
     expect(ctx.selectionRefs.vectorVertexDragRef.current).toBeNull();
     expect(ctx.canvas.setPointerCapture).not.toHaveBeenCalled();
   });
@@ -2366,14 +2372,14 @@ describe('armVectorVertexOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     const ctx = createContext({ canvasRefs, event: pointerEvent({ shiftKey: true }), point: { x: 2, y: 0 } });
 
     // result
     expect(armVectorVertexOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v2']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v2']);
   });
 
   it('should return undefined when the point misses every vertex', () => {
@@ -2419,14 +2425,14 @@ describe('armVectorMultiSelectBoxOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 50, y: 50 } });
 
     // result
     expect(armVectorMultiSelectBoxOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.vectorMultiDragRef.current).toEqual({
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiDragRef.current).toEqual({
       boxOrigin: { height: 100, width: 100, x: 0, y: 0 },
       dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
@@ -2449,14 +2455,14 @@ describe('armVectorMultiSelectBoxOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     const ctx = createContext({ canvasRefs, event: pointerEvent({ shiftKey: true }), point: { x: 50, y: 50 } });
 
     // result
     expect(armVectorMultiSelectBoxOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.vectorMultiDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiDragRef.current).toBeNull();
   });
 
   it('should return undefined when fewer than 2 points are selected', () => {
@@ -2470,7 +2476,7 @@ describe('armVectorMultiSelectBoxOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 50, y: 50 } });
@@ -2490,7 +2496,7 @@ describe('armVectorMultiSelectBoxOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 900, y: 900 } });
@@ -2524,7 +2530,7 @@ describe('armVectorMultiSelectResizeOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 100, y: 100 } });
@@ -2533,7 +2539,7 @@ describe('armVectorMultiSelectResizeOnPointerDown', () => {
     expect(armVectorMultiSelectResizeOnPointerDown(ctx)).toBe(true);
     // the 'se' handle anchors from the opposite ('nw') corner, (0,0), which stays put under a 0deg
     // rotation, so anchorWorld lands on that same (0,0) point
-    expect(ctx.canvasRefs.vectorMultiSelectResizeDragRef.current).toEqual({
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiSelectResizeDragRef.current).toEqual({
       anchor: { x: 0, y: 0 },
       anchorWorld: { x: 0, y: 0 },
       bounds: { height: 100, width: 100, x: 0, y: 0 },
@@ -2557,14 +2563,14 @@ describe('armVectorMultiSelectResizeOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 100, y: 100 } });
 
     // result
     expect(armVectorMultiSelectResizeOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.vectorMultiSelectResizeDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiSelectResizeDragRef.current).toBeNull();
   });
 
   it('should return undefined when the point misses every handle zone', () => {
@@ -2578,7 +2584,7 @@ describe('armVectorMultiSelectResizeOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 50, y: 50 } });
@@ -2606,14 +2612,14 @@ describe('armVectorMultiSelectResizeOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 103, y: 103 } });
 
     // result
     expect(armVectorMultiSelectResizeOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.vectorMultiSelectResizeDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiSelectResizeDragRef.current).toBeNull();
   });
 
   it('should return undefined for a shift+click on a resize-handle position instead of arming a resize — shift always means "toggle selection", regardless of where it lands', () => {
@@ -2627,14 +2633,14 @@ describe('armVectorMultiSelectResizeOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     const ctx = createContext({ canvasRefs, event: pointerEvent({ shiftKey: true }), point: { x: 100, y: 100 } });
 
     // result
     expect(armVectorMultiSelectResizeOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.vectorMultiSelectResizeDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiSelectResizeDragRef.current).toBeNull();
   });
 
   it('should return undefined when the point lands on an already-selected segment that happens to coincide with a resize-handle position — the whole-selection drag must win, not a resize (real reported bug: a triangle’s v1-v2 segment midpoint sits exactly on the multi-select box’s own north-edge handle)', () => {
@@ -2652,14 +2658,14 @@ describe('armVectorMultiSelectResizeOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1', 's2'];
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = ['s1', 's2'];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 975, y: 300 } });
 
     // result
     expect(armVectorMultiSelectResizeOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.vectorMultiSelectResizeDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiSelectResizeDragRef.current).toBeNull();
   });
 
   it('should return undefined for a click on a corner of a zero-height bounding box — a lasso-selected pair of same-row vertices has no meaningful resize on that axis (scale is always locked to 1), so the click must fall through to the vertex resolver and move the selection instead', () => {
@@ -2674,14 +2680,14 @@ describe('armVectorMultiSelectResizeOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 900, y: 300 } });
 
     // result
     expect(armVectorMultiSelectResizeOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.vectorMultiSelectResizeDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiSelectResizeDragRef.current).toBeNull();
   });
 });
 
@@ -2702,14 +2708,14 @@ describe('armVectorMultiSelectRotateOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 100, y: 110 } });
 
     // result
     expect(armVectorMultiSelectRotateOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.vectorMultiSelectRotateDragRef.current).toMatchObject({ pivot: { x: 50, y: 50 } });
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiSelectRotateDragRef.current).toMatchObject({ pivot: { x: 50, y: 50 } });
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
   });
 
@@ -2724,14 +2730,14 @@ describe('armVectorMultiSelectRotateOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 100, y: 110 } });
 
     // result
     expect(armVectorMultiSelectRotateOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.vectorMultiSelectRotateDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiSelectRotateDragRef.current).toBeNull();
   });
 
   it('should return undefined when the point misses the ring entirely', () => {
@@ -2745,7 +2751,7 @@ describe('armVectorMultiSelectRotateOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 50, y: 50 } });
@@ -2765,14 +2771,14 @@ describe('armVectorMultiSelectRotateOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 103, y: 103 } });
 
     // result
     expect(armVectorMultiSelectRotateOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.vectorMultiSelectRotateDragRef.current).toMatchObject({ pivot: { x: 50, y: 50 } });
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiSelectRotateDragRef.current).toMatchObject({ pivot: { x: 50, y: 50 } });
   });
 
   it('should return undefined when Vector Edit Mode is not active', () => {
@@ -2794,14 +2800,14 @@ describe('armVectorMultiSelectRotateOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     const ctx = createContext({ canvasRefs, event: pointerEvent({ shiftKey: true }), point: { x: 100, y: 110 } });
 
     // result
     expect(armVectorMultiSelectRotateOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.vectorMultiSelectRotateDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiSelectRotateDragRef.current).toBeNull();
   });
 });
 
@@ -2821,17 +2827,17 @@ describe('armVectorSegmentOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
-    canvasRefs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 25, y: 0 } });
 
     // result
     expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
   });
 
   it('should return undefined when the point misses every segment', () => {
@@ -2872,16 +2878,16 @@ describe('armVectorSegmentOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v3'];
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = ['s1'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v3'];
 
     // before
     const ctx = createContext({ canvasRefs, event: pointerEvent({ shiftKey: true }), point: { x: 150, y: 0 } });
 
     // result
     expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1', 's2']);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v3']);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1', 's2']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v3']);
   });
 
   it('should remove the segment from the selection on shift-click when it is already selected', () => {
@@ -2895,14 +2901,14 @@ describe('armVectorSegmentOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = ['s1'];
 
     // before
     const ctx = createContext({ canvasRefs, event: pointerEvent({ shiftKey: true }), point: { x: 25, y: 0 } });
 
     // result
     expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 
   it('should keep the whole multi-selection and arm a drag of every selected segment when clicking an already-selected segment', () => {
@@ -2920,15 +2926,15 @@ describe('armVectorSegmentOnPointerDown', () => {
     const canvasRefs = createCanvasRefs();
     const selectionRefs = createSelectionToolRefs();
 
-    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1', 's2'];
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = ['s1', 's2'];
 
     // before
     const ctx = createContext({ canvasRefs, point: { x: 25, y: 0 }, selectionRefs });
 
     // result
     expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1', 's2']);
-    expect(ctx.canvasRefs.vectorMultiDragRef.current?.vertexOrigins).toEqual({
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1', 's2']);
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiDragRef.current?.vertexOrigins).toEqual({
       v1: { x: 0, y: 0 },
       v2: { x: 100, y: 0 },
       v3: { x: 200, y: 0 },
@@ -2952,8 +2958,11 @@ describe('armVectorSegmentOnPointerDown', () => {
 
     // result
     expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
-    expect(ctx.canvasRefs.vectorMultiDragRef.current?.vertexOrigins).toEqual({ v1: { x: 0, y: 0 }, v2: { x: 100, y: 0 } });
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiDragRef.current?.vertexOrigins).toEqual({
+      v1: { x: 0, y: 0 },
+      v2: { x: 100, y: 0 },
+    });
   });
 
   it('should also arm a pending split-segment click action when the click lands precisely on the segment’s own fixed midpoint, so a plain click (no drag) splits it instead of leaving it selected', () => {
@@ -2972,7 +2981,7 @@ describe('armVectorSegmentOnPointerDown', () => {
 
     // result
     expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
-    expect(ctx.canvasRefs.vectorMultiDragRef.current?.pendingClickAction).toEqual({
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiDragRef.current?.pendingClickAction).toEqual({
       kind: 'split-segment',
       nodeId,
       segmentId: 's1',
@@ -2997,8 +3006,8 @@ describe('armVectorSegmentOnPointerDown', () => {
 
     // result — the segment is still selected (eager, arm-time write), but no split is pending for release
     expect(armVectorSegmentOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
-    expect(ctx.canvasRefs.vectorMultiDragRef.current?.pendingClickAction).toBeNull();
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiDragRef.current?.pendingClickAction).toBeNull();
   });
 });
 
@@ -3020,7 +3029,7 @@ describe('ARM_RESOLVERS ordering — multi-select box vs. outline vertex point',
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     const ctx = createContext({ canvasRefs, point: { x: 100, y: 100 } });
 
@@ -3029,7 +3038,7 @@ describe('ARM_RESOLVERS ordering — multi-select box vs. outline vertex point',
 
     // result
     expect(claimedBy).toBe(armVectorMultiSelectResizeOnPointerDown);
-    expect(ctx.canvasRefs.vectorMultiSelectResizeDragRef.current).toMatchObject({ handle: 'se' });
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiSelectResizeDragRef.current).toMatchObject({ handle: 'se' });
   });
 
   it('should let the multi-select box rotate ring claim the pointerdown before the outline vertex resolver, when the ring coincides with an (unselected) vertex of the same node', () => {
@@ -3050,7 +3059,7 @@ describe('ARM_RESOLVERS ordering — multi-select box vs. outline vertex point',
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     const ctx = createContext({ canvasRefs, point: { x: 100, y: 110 } });
 
@@ -3059,7 +3068,7 @@ describe('ARM_RESOLVERS ordering — multi-select box vs. outline vertex point',
 
     // result
     expect(claimedBy).toBe(armVectorMultiSelectRotateOnPointerDown);
-    expect(ctx.canvasRefs.vectorMultiSelectRotateDragRef.current).not.toBeNull();
+    expect(ctx.canvasRefs.vectorMultiSelect.vectorMultiSelectRotateDragRef.current).not.toBeNull();
   });
 });
 
@@ -3079,10 +3088,10 @@ describe('armVectorShapeBuilderOnPointerDown', () => {
 
     // result
     expect(armVectorShapeBuilderOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.vectorShapeBuilderPathRef.current).toEqual([{ x: 42, y: 24 }]);
-    expect(canvasRefs.touchedVectorShapeBuilderFacesRef.current).toEqual({});
-    expect(canvasRefs.isVectorShapeBuilderBoxModeRef.current).toBe(false);
-    expect(canvasRefs.isVectorShapeBuilderSubtractRef.current).toBe(false);
+    expect(canvasRefs.shapeBuilder.vectorShapeBuilderPathRef.current).toEqual([{ x: 42, y: 24 }]);
+    expect(canvasRefs.shapeBuilder.touchedVectorShapeBuilderFacesRef.current).toEqual({});
+    expect(canvasRefs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current).toBe(false);
+    expect(canvasRefs.shapeBuilder.isVectorShapeBuilderSubtractRef.current).toBe(false);
     expect(ctx.setClassName).toHaveBeenCalledWith('add');
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
   });
@@ -3100,7 +3109,7 @@ describe('armVectorShapeBuilderOnPointerDown', () => {
 
     // result
     expect(armVectorShapeBuilderOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.touchedVectorShapeBuilderFacesRef.current[nodeId].size).toBe(1);
+    expect(canvasRefs.shapeBuilder.touchedVectorShapeBuilderFacesRef.current[nodeId].size).toBe(1);
   });
 
   it('should record box mode and subtract mode from shift/alt held at pointerdown', () => {
@@ -3119,8 +3128,8 @@ describe('armVectorShapeBuilderOnPointerDown', () => {
 
     // result
     expect(armVectorShapeBuilderOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.isVectorShapeBuilderBoxModeRef.current).toBe(true);
-    expect(canvasRefs.isVectorShapeBuilderSubtractRef.current).toBe(true);
+    expect(canvasRefs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current).toBe(true);
+    expect(canvasRefs.shapeBuilder.isVectorShapeBuilderSubtractRef.current).toBe(true);
   });
 
   it('should return undefined when Shape Builder is not the active tool', () => {
@@ -3132,7 +3141,7 @@ describe('armVectorShapeBuilderOnPointerDown', () => {
 
     // result
     expect(armVectorShapeBuilderOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.vectorShapeBuilderPathRef.current).toBeNull();
+    expect(ctx.canvasRefs.shapeBuilder.vectorShapeBuilderPathRef.current).toBeNull();
   });
 
   it('should return undefined when Vector Edit Mode is not active', () => {
@@ -3141,7 +3150,7 @@ describe('armVectorShapeBuilderOnPointerDown', () => {
 
     // result
     expect(armVectorShapeBuilderOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.canvasRefs.vectorShapeBuilderPathRef.current).toBeNull();
+    expect(ctx.canvasRefs.shapeBuilder.vectorShapeBuilderPathRef.current).toBeNull();
   });
 });
 
@@ -3166,22 +3175,22 @@ describe('armVectorWidthPointOnPointerDown', () => {
 
     // result
     expect(armVectorWidthPointOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.vectorWidthPointDragRef.current).toMatchObject({
+    expect(canvasRefs.vectorWidth.vectorWidthPointDragRef.current).toMatchObject({
       isNewPoint: true,
       nodeId,
       point: { leftOffset: 0.5, position: 0.5, rightOffset: 0.5 },
     });
-    expect(canvasRefs.selectedVectorWidthHandlesRef.current).toEqual([
-      { nodeId, pointId: canvasRefs.vectorWidthPointDragRef.current?.point.id, side: 'left' },
-      { nodeId, pointId: canvasRefs.vectorWidthPointDragRef.current?.point.id, side: 'right' },
-      { nodeId, pointId: canvasRefs.vectorWidthPointDragRef.current?.point.id, side: 'point' },
+    expect(canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current).toEqual([
+      { nodeId, pointId: canvasRefs.vectorWidth.vectorWidthPointDragRef.current?.point.id, side: 'left' },
+      { nodeId, pointId: canvasRefs.vectorWidth.vectorWidthPointDragRef.current?.point.id, side: 'right' },
+      { nodeId, pointId: canvasRefs.vectorWidth.vectorWidthPointDragRef.current?.point.id, side: 'point' },
     ]);
     expect(ctx.canvas.setPointerCapture).toHaveBeenCalledWith(1);
     // seeding a new point arms its right handle, which uses the rotated resize cursor, not the plain controller class
     expect(ctx.setClassName).toHaveBeenCalledWith(null);
-    expect(canvasRefs.lastVectorWidthHandleSideRef.current).toEqual({
+    expect(canvasRefs.vectorEdit.lastVectorWidthHandleSideRef.current).toEqual({
       nodeId,
-      pointId: canvasRefs.vectorWidthPointDragRef.current?.point.id,
+      pointId: canvasRefs.vectorWidth.vectorWidthPointDragRef.current?.point.id,
       side: 'right',
     });
   });
@@ -3208,7 +3217,7 @@ describe('armVectorWidthPointOnPointerDown', () => {
 
     // result
     expect(armVectorWidthPointOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.vectorWidthPointDragRef.current).toEqual({
+    expect(canvasRefs.vectorWidth.vectorWidthPointDragRef.current).toEqual({
       armMagnitude: 6,
       armWorldPoint: { x: 50, y: 0 },
       groupTargets: [],
@@ -3218,7 +3227,7 @@ describe('armVectorWidthPointOnPointerDown', () => {
       target: 'point',
     });
     // clicking the center anchor selects only the point, leaving both diamonds unselected until grabbed directly
-    expect(canvasRefs.selectedVectorWidthHandlesRef.current).toEqual([{ nodeId, pointId: 'p1', side: 'point' }]);
+    expect(canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current).toEqual([{ nodeId, pointId: 'p1', side: 'point' }]);
   });
 
   it('should select both handle sides of the point when either one is clicked, since they now move together', () => {
@@ -3243,16 +3252,16 @@ describe('armVectorWidthPointOnPointerDown', () => {
 
     // result
     expect(armVectorWidthPointOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.vectorWidthPointDragRef.current).toMatchObject({ target: 'right' });
+    expect(canvasRefs.vectorWidth.vectorWidthPointDragRef.current).toMatchObject({ target: 'right' });
     // grabbing a diamond selects both sides plus the point itself, so the anchor shows selected too
-    expect(canvasRefs.selectedVectorWidthHandlesRef.current).toEqual([
+    expect(canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current).toEqual([
       { nodeId, pointId: 'p1', side: 'left' },
       { nodeId, pointId: 'p1', side: 'right' },
       { nodeId, pointId: 'p1', side: 'point' },
     ]);
     // grabbing a resize handle uses the rotated resize cursor, not the plain controller class
     expect(ctx.setClassName).toHaveBeenCalledWith(null);
-    expect(canvasRefs.lastVectorWidthHandleSideRef.current).toEqual({ nodeId, pointId: 'p1', side: 'right' });
+    expect(canvasRefs.vectorEdit.lastVectorWidthHandleSideRef.current).toEqual({ nodeId, pointId: 'p1', side: 'right' });
   });
 
   it('should seed the arm magnitude from the left offset specifically when the left handle is grabbed', () => {
@@ -3277,8 +3286,8 @@ describe('armVectorWidthPointOnPointerDown', () => {
 
     // result
     expect(armVectorWidthPointOnPointerDown(ctx)).toBe(true);
-    expect(canvasRefs.vectorWidthPointDragRef.current).toMatchObject({ armMagnitude: 9, target: 'left' });
-    expect(canvasRefs.lastVectorWidthHandleSideRef.current).toEqual({ nodeId, pointId: 'p1', side: 'left' });
+    expect(canvasRefs.vectorWidth.vectorWidthPointDragRef.current).toMatchObject({ armMagnitude: 9, target: 'left' });
+    expect(canvasRefs.vectorEdit.lastVectorWidthHandleSideRef.current).toEqual({ nodeId, pointId: 'p1', side: 'left' });
   });
 
   it('should return undefined and clear any existing selection when the click misses the stroke and every marker', () => {
@@ -3292,15 +3301,15 @@ describe('armVectorWidthPointOnPointerDown', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorWidthHandlesRef.current = [{ nodeId, pointId: 'p1', side: 'left' }];
+    canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current = [{ nodeId, pointId: 'p1', side: 'left' }];
 
     // before — clicking empty space, well away from the stroke
     const ctx = createContext({ activeTool: ToolName.variableWidth, canvasRefs, point: { x: 500, y: 500 } });
 
     // result
     expect(armVectorWidthPointOnPointerDown(ctx)).toBeUndefined();
-    expect(canvasRefs.vectorWidthPointDragRef.current).toBeNull();
-    expect(canvasRefs.selectedVectorWidthHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorWidth.vectorWidthPointDragRef.current).toBeNull();
+    expect(canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current).toEqual([]);
   });
 
   it('should return undefined when the only editing node is a branching network', () => {
@@ -3385,8 +3394,8 @@ describe('armVectorWidthPointOnPointerDown', () => {
 
       // result
       expect(armVectorWidthPointOnPointerDown(ctx)).toBe(true);
-      expect(canvasRefs.selectedVectorWidthHandlesRef.current).toEqual([{ nodeId, pointId: 'p1', side: 'point' }]);
-      expect(canvasRefs.vectorWidthPointDragRef.current).toBeNull();
+      expect(canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current).toEqual([{ nodeId, pointId: 'p1', side: 'point' }]);
+      expect(canvasRefs.vectorWidth.vectorWidthPointDragRef.current).toBeNull();
     });
 
     it('should shift+click-toggle an already-selected regulator back out of the selection', () => {
@@ -3394,7 +3403,7 @@ describe('armVectorWidthPointOnPointerDown', () => {
       const nodeId = addTwoWidthPointNode();
       const canvasRefs = createCanvasRefs();
 
-      canvasRefs.selectedVectorWidthHandlesRef.current = [
+      canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current = [
         { nodeId, pointId: 'p1', side: 'point' },
         { nodeId, pointId: 'p2', side: 'point' },
       ];
@@ -3409,8 +3418,8 @@ describe('armVectorWidthPointOnPointerDown', () => {
 
       // result
       expect(armVectorWidthPointOnPointerDown(ctx)).toBe(true);
-      expect(canvasRefs.selectedVectorWidthHandlesRef.current).toEqual([{ nodeId, pointId: 'p2', side: 'point' }]);
-      expect(canvasRefs.vectorWidthPointDragRef.current).toBeNull();
+      expect(canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current).toEqual([{ nodeId, pointId: 'p2', side: 'point' }]);
+      expect(canvasRefs.vectorWidth.vectorWidthPointDragRef.current).toBeNull();
     });
 
     it('should arm a group drag across every multi-selected regulator when grabbing a diamond that is already part of the selection', () => {
@@ -3418,7 +3427,7 @@ describe('armVectorWidthPointOnPointerDown', () => {
       const nodeId = addTwoWidthPointNode();
       const canvasRefs = createCanvasRefs();
 
-      canvasRefs.selectedVectorWidthHandlesRef.current = [
+      canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current = [
         { nodeId, pointId: 'p1', side: 'point' },
         { nodeId, pointId: 'p2', side: 'point' },
       ];
@@ -3428,13 +3437,13 @@ describe('armVectorWidthPointOnPointerDown', () => {
 
       // result
       expect(armVectorWidthPointOnPointerDown(ctx)).toBe(true);
-      expect(canvasRefs.vectorWidthPointDragRef.current).toMatchObject({
+      expect(canvasRefs.vectorWidth.vectorWidthPointDragRef.current).toMatchObject({
         groupTargets: [{ nodeId, point: { id: 'p2', leftOffset: 8, position: 0.7, rightOffset: 8 } }],
         nodeId,
         point: { id: 'p1', leftOffset: 6, position: 0.2, rightOffset: 6 },
         target: 'left',
       });
-      expect(canvasRefs.selectedVectorWidthHandlesRef.current).toEqual([
+      expect(canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current).toEqual([
         { nodeId, pointId: 'p1', side: 'left' },
         { nodeId, pointId: 'p1', side: 'right' },
         { nodeId, pointId: 'p1', side: 'point' },
@@ -3443,7 +3452,7 @@ describe('armVectorWidthPointOnPointerDown', () => {
         { nodeId, pointId: 'p2', side: 'point' },
       ]);
       // the actively-grabbed side (p1's left handle) is remembered, even though the group also includes p2
-      expect(canvasRefs.lastVectorWidthHandleSideRef.current).toEqual({ nodeId, pointId: 'p1', side: 'left' });
+      expect(canvasRefs.vectorEdit.lastVectorWidthHandleSideRef.current).toEqual({ nodeId, pointId: 'p1', side: 'left' });
     });
 
     it('should preserve the existing multi-selection, and arm no group targets, when re-grabbing the center anchor of an already-selected regulator', () => {
@@ -3451,7 +3460,7 @@ describe('armVectorWidthPointOnPointerDown', () => {
       const nodeId = addTwoWidthPointNode();
       const canvasRefs = createCanvasRefs();
 
-      canvasRefs.selectedVectorWidthHandlesRef.current = [
+      canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current = [
         { nodeId, pointId: 'p1', side: 'point' },
         { nodeId, pointId: 'p2', side: 'point' },
       ];
@@ -3461,8 +3470,8 @@ describe('armVectorWidthPointOnPointerDown', () => {
 
       // result
       expect(armVectorWidthPointOnPointerDown(ctx)).toBe(true);
-      expect(canvasRefs.vectorWidthPointDragRef.current).toMatchObject({ groupTargets: [], target: 'point' });
-      expect(canvasRefs.selectedVectorWidthHandlesRef.current).toEqual([
+      expect(canvasRefs.vectorWidth.vectorWidthPointDragRef.current).toMatchObject({ groupTargets: [], target: 'point' });
+      expect(canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current).toEqual([
         { nodeId, pointId: 'p1', side: 'point' },
         { nodeId, pointId: 'p2', side: 'point' },
       ]);

@@ -17,7 +17,7 @@ export const getVectorMarqueeHandleHitsForNode = (
   const tangentVisibilityVertexIds = getTangentVisibilityVertexIds(
     node,
     visualSelectedVertexIds,
-    canvasRefs.selectedVectorHandlesRef.current,
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current,
   );
   const oneHopVertexIds = getOneHopVectorVertexIds(node, tangentVisibilityVertexIds);
 
@@ -26,7 +26,7 @@ export const getVectorMarqueeHandleHitsForNode = (
     rect,
     tangentVisibilityVertexIds,
     oneHopVertexIds,
-    canvasRefs.preVectorMarqueeSegmentIdsRef.current,
-    canvasRefs.selectedVectorHandlesRef.current,
+    canvasRefs.vectorEdit.preVectorMarqueeSegmentIdsRef.current,
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current,
   );
 };

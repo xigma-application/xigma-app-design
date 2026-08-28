@@ -8,7 +8,7 @@ import { updateNode } from 'store/design/slice';
 import { AppDispatch, AppStore } from 'store';
 
 // types
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { TVectorEditRefs } from 'types/design/canvas/types';
 import { TPenDragOrigin, TPendingOutgoingTangent } from '../../types';
 import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
@@ -28,7 +28,7 @@ export const updateVectorHandleDrag = (
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
   penDraggedHandlePositionRef: RefObject<TPoint | null>,
   penDraggedHandleIsSnappedRef: RefObject<boolean>,
-  vectorAlignmentGuideRef: TCanvasRefs['vectorAlignmentGuideRef'],
+  vectorAlignmentGuideRef: TVectorEditRefs['vectorAlignmentGuideRef'],
 ): void => {
   if (Math.hypot(point.x - dragStart.x, point.y - dragStart.y) >= MIN_DRAG_DISTANCE_PX / viewport.zoom) {
     const nodes = appStore.getState().design.nodes;

@@ -57,7 +57,7 @@ describe('resolveVectorTangentHandleHover', () => {
     resolveVectorTangentHandleHover(canvas, pointerEvent(5, 0), canvasRefs);
 
     // result
-    expect(canvasRefs.hoveredVectorHandleRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorHandleRef.current).toBeNull();
   });
 
   it('should set the hovered handle when the pointer rests on a tangent handle whose parent vertex is selected', () => {
@@ -69,13 +69,13 @@ describe('resolveVectorTangentHandleHover', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
 
     // before
     resolveVectorTangentHandleHover(canvas, pointerEvent(5, 0), canvasRefs);
 
     // result
-    expect(canvasRefs.hoveredVectorHandleRef.current).toEqual({ end: 'start', segmentId: 's1' });
+    expect(canvasRefs.hover.hoveredVectorHandleRef.current).toEqual({ end: 'start', segmentId: 's1' });
   });
 
   it('should not set the hovered handle when its parent vertex is not selected and it is not itself selected', () => {
@@ -91,7 +91,7 @@ describe('resolveVectorTangentHandleHover', () => {
     resolveVectorTangentHandleHover(canvas, pointerEvent(5, 0), canvasRefs);
 
     // result
-    expect(canvasRefs.hoveredVectorHandleRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorHandleRef.current).toBeNull();
   });
 
   it('should set the hovered handle when its parent vertex is only the Pen tool’s still-active vertex', () => {
@@ -108,7 +108,7 @@ describe('resolveVectorTangentHandleHover', () => {
     resolveVectorTangentHandleHover(canvas, pointerEvent(5, 0), canvasRefs);
 
     // result
-    expect(canvasRefs.hoveredVectorHandleRef.current).toEqual({ end: 'start', segmentId: 's1' });
+    expect(canvasRefs.hover.hoveredVectorHandleRef.current).toEqual({ end: 'start', segmentId: 's1' });
   });
 
   it('should clear the hovered handle once the pointer moves away from every handle', () => {
@@ -120,13 +120,13 @@ describe('resolveVectorTangentHandleHover', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
 
     // before
     resolveVectorTangentHandleHover(canvas, pointerEvent(5, 0), canvasRefs);
     resolveVectorTangentHandleHover(canvas, pointerEvent(50, 50), canvasRefs);
 
     // result
-    expect(canvasRefs.hoveredVectorHandleRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorHandleRef.current).toBeNull();
   });
 });

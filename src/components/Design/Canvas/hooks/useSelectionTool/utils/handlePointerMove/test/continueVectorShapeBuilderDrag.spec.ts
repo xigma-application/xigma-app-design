@@ -62,8 +62,8 @@ describe('continueVectorShapeBuilderDrag', () => {
     continueVectorShapeBuilderDrag(canvas, pointerEvent(10, 10), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.vectorShapeBuilderPathRef.current).toBeNull();
-    expect(canvasRefs.touchedVectorShapeBuilderFacesRef.current).toEqual({});
+    expect(canvasRefs.shapeBuilder.vectorShapeBuilderPathRef.current).toBeNull();
+    expect(canvasRefs.shapeBuilder.touchedVectorShapeBuilderFacesRef.current).toEqual({});
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -77,19 +77,19 @@ describe('continueVectorShapeBuilderDrag', () => {
     const canvasRefs = createCanvasRefs();
     const setClassName = vi.fn();
 
-    canvasRefs.vectorShapeBuilderPathRef.current = [{ x: 50, y: 40 }];
+    canvasRefs.shapeBuilder.vectorShapeBuilderPathRef.current = [{ x: 50, y: 40 }];
 
     // before
     continueVectorShapeBuilderDrag(canvas, pointerEvent(50, 45), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.vectorShapeBuilderPathRef.current).toEqual([
+    expect(canvasRefs.shapeBuilder.vectorShapeBuilderPathRef.current).toEqual([
       { x: 50, y: 40 },
       { x: 50, y: 45 },
     ]);
-    expect(canvasRefs.isVectorShapeBuilderBoxModeRef.current).toBe(false);
-    expect(canvasRefs.isVectorShapeBuilderSubtractRef.current).toBe(false);
-    expect(canvasRefs.touchedVectorShapeBuilderFacesRef.current[nodeId].size).toBe(1);
+    expect(canvasRefs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current).toBe(false);
+    expect(canvasRefs.shapeBuilder.isVectorShapeBuilderSubtractRef.current).toBe(false);
+    expect(canvasRefs.shapeBuilder.touchedVectorShapeBuilderFacesRef.current[nodeId].size).toBe(1);
     expect(setClassName).toHaveBeenCalledWith('add');
   });
 
@@ -104,14 +104,14 @@ describe('continueVectorShapeBuilderDrag', () => {
     const canvasRefs = createCanvasRefs();
     const setClassName = vi.fn();
 
-    canvasRefs.vectorShapeBuilderPathRef.current = [{ x: 0, y: 0 }];
+    canvasRefs.shapeBuilder.vectorShapeBuilderPathRef.current = [{ x: 0, y: 0 }];
 
     // before
     continueVectorShapeBuilderDrag(canvas, pointerEvent(100, 100, { shiftKey: true }), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.isVectorShapeBuilderBoxModeRef.current).toBe(true);
-    expect(canvasRefs.touchedVectorShapeBuilderFacesRef.current[nodeId].size).toBe(1);
+    expect(canvasRefs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current).toBe(true);
+    expect(canvasRefs.shapeBuilder.touchedVectorShapeBuilderFacesRef.current[nodeId].size).toBe(1);
   });
 
   it("should record subtract mode and set the 'remove' cursor while alt is held", () => {
@@ -124,13 +124,13 @@ describe('continueVectorShapeBuilderDrag', () => {
     const canvasRefs = createCanvasRefs();
     const setClassName = vi.fn();
 
-    canvasRefs.vectorShapeBuilderPathRef.current = [{ x: 50, y: 40 }];
+    canvasRefs.shapeBuilder.vectorShapeBuilderPathRef.current = [{ x: 50, y: 40 }];
 
     // before
     continueVectorShapeBuilderDrag(canvas, pointerEvent(50, 45, { altKey: true }), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.isVectorShapeBuilderSubtractRef.current).toBe(true);
+    expect(canvasRefs.shapeBuilder.isVectorShapeBuilderSubtractRef.current).toBe(true);
     expect(setClassName).toHaveBeenCalledWith('remove');
   });
 
@@ -144,13 +144,13 @@ describe('continueVectorShapeBuilderDrag', () => {
     const canvasRefs = createCanvasRefs();
     const setClassName = vi.fn();
 
-    canvasRefs.vectorShapeBuilderPathRef.current = [{ x: 50, y: 40 }];
+    canvasRefs.shapeBuilder.vectorShapeBuilderPathRef.current = [{ x: 50, y: 40 }];
 
     // before — first move touches the face, second move drags far away from it
     continueVectorShapeBuilderDrag(canvas, pointerEvent(50, 45), canvasRefs, setClassName);
     continueVectorShapeBuilderDrag(canvas, pointerEvent(900, 900), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.touchedVectorShapeBuilderFacesRef.current[nodeId].size).toBe(1);
+    expect(canvasRefs.shapeBuilder.touchedVectorShapeBuilderFacesRef.current[nodeId].size).toBe(1);
   });
 });

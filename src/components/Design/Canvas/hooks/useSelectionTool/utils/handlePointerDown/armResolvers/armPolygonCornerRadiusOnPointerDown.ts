@@ -19,7 +19,7 @@ export const armPolygonCornerRadiusOnPointerDown = ({
     armPolygonCornerRadiusDrag(
       canvas,
       event,
-      canvasRefs.polygonCornerRadiusDragRef,
+      canvasRefs.cornerRadius.polygonCornerRadiusDragRef,
       polygonCornerRadiusHandleHit.bounds,
       polygonCornerRadiusHandleHit.nodeId,
       polygonCornerRadiusHandleHit.rotation,

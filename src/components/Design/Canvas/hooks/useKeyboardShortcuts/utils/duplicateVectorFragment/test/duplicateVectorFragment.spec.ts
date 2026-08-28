@@ -54,9 +54,9 @@ describe('duplicateVectorFragment', () => {
 
     expect(Object.keys(node.vertices)).toHaveLength(4);
     expect(Object.keys(node.segments)).toHaveLength(2);
-    expect(refs.selectedVectorVertexIdsRef.current).toHaveLength(2);
-    expect(refs.selectedVectorSegmentIdsRef.current).toHaveLength(1);
-    expect(refs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(refs.vectorEdit.selectedVectorVertexIdsRef.current).toHaveLength(2);
+    expect(refs.vectorEdit.selectedVectorSegmentIdsRef.current).toHaveLength(1);
+    expect(refs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
   });
 
   it('should be undoable as a single step even though it duplicates a vertex and a connected segment together', () => {

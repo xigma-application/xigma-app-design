@@ -19,9 +19,9 @@ export const handleSelectAll = (dispatch: AppDispatch, refs: TCanvasRefs): void 
       .map((nodeId) => getVectorEditingNode(state.design.nodes, nodeId))
       .filter((node): node is TVectorNode => node !== null);
 
-    refs.selectedVectorVertexIdsRef.current = editingNodes.flatMap((node) => Object.keys(node.vertices));
-    refs.selectedVectorSegmentIdsRef.current = editingNodes.flatMap((node) => Object.keys(node.segments));
-    refs.selectedVectorHandlesRef.current = [];
+    refs.vectorEdit.selectedVectorVertexIdsRef.current = editingNodes.flatMap((node) => Object.keys(node.vertices));
+    refs.vectorEdit.selectedVectorSegmentIdsRef.current = editingNodes.flatMap((node) => Object.keys(node.segments));
+    refs.vectorEdit.selectedVectorHandlesRef.current = [];
   } else {
     dispatch(setSelection(selectOrderedNodes(state).map((node) => node.id)));
   }

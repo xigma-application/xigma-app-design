@@ -15,7 +15,7 @@ describe('isNodeTransforming', () => {
     // mock
     const refs = createCanvasRefs();
 
-    refs.draggedNodeIdsRef.current = new Set(['node-1']);
+    refs.transform.draggedNodeIdsRef.current = new Set(['node-1']);
 
     // before
     const result = isNodeTransforming(refs, 'node-1');
@@ -28,7 +28,7 @@ describe('isNodeTransforming', () => {
     // mock
     const refs = createCanvasRefs();
 
-    refs.resizedNodeIdsRef.current = new Set(['node-1']);
+    refs.transform.resizedNodeIdsRef.current = new Set(['node-1']);
 
     // before
     const result = isNodeTransforming(refs, 'node-1');
@@ -41,7 +41,7 @@ describe('isNodeTransforming', () => {
     // mock
     const refs = createCanvasRefs();
 
-    refs.rotatedNodeIdsRef.current = new Set(['node-1']);
+    refs.transform.rotatedNodeIdsRef.current = new Set(['node-1']);
 
     // before
     const result = isNodeTransforming(refs, 'node-1');
@@ -54,7 +54,7 @@ describe('isNodeTransforming', () => {
     // mock
     const refs = createCanvasRefs();
 
-    refs.draggedNodeIdsRef.current = new Set(['other-node']);
+    refs.transform.draggedNodeIdsRef.current = new Set(['other-node']);
 
     // before
     const result = isNodeTransforming(refs, 'node-1');

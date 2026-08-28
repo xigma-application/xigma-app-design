@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // types
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { THoverRefs, TPenRefs, TVectorEditRefs } from 'types/design/canvas/types';
 import { TPendingOutgoingTangent } from '../../../types';
 import { TPenPointHoverKind } from '../resolvePenPointHover/types';
 import { TPoint } from 'types/canvas';
@@ -24,10 +24,10 @@ export const resolveActiveVertexPreview = (
   viewport: TViewport,
   isShiftPressed: boolean,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
-  penPreviewRef: TCanvasRefs['penPreviewRef'],
-  hoveredSegmentIdRef: TCanvasRefs['hoveredSegmentIdRef'],
-  penHoveredDragArmableVertexRef: TCanvasRefs['penHoveredDragArmableVertexRef'],
-  vectorAlignmentGuideRef: TCanvasRefs['vectorAlignmentGuideRef'],
+  penPreviewRef: TPenRefs['penPreviewRef'],
+  hoveredSegmentIdRef: THoverRefs['hoveredSegmentIdRef'],
+  penHoveredDragArmableVertexRef: TPenRefs['penHoveredDragArmableVertexRef'],
+  vectorAlignmentGuideRef: TVectorEditRefs['vectorAlignmentGuideRef'],
   otherOpenNodeIds: string[],
 ): TPenPointHoverKind | null => {
   const tangentFromOffset = getTangentFromOffset(pendingOutgoingTangentRef.current, activeVertexId);

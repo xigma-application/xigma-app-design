@@ -16,7 +16,7 @@ export const hitsSelectedHandle = (context: TArmContext, vectorEditingNodeIds: s
   const { canvasRefs, point, viewport } = context;
   const state = store.getState();
   const visualSelectedVertexIds = getVisualSelectedVectorVertexIds(
-    canvasRefs.selectedVectorVertexIdsRef.current,
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current,
     selectPenActiveVertexId(state),
   );
   const hit = getVectorHandleAtPointAcrossOpenNodes(
@@ -25,12 +25,14 @@ export const hitsSelectedHandle = (context: TArmContext, vectorEditingNodeIds: s
     state.design.nodes,
     VECTOR_HANDLE_HIT_RADIUS_PX / viewport.zoom,
     visualSelectedVertexIds,
-    canvasRefs.selectedVectorHandlesRef.current,
-    canvasRefs.selectedVectorSegmentIdsRef.current,
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current,
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current,
   );
 
   return Boolean(
     hit &&
-    canvasRefs.selectedVectorHandlesRef.current.some((handle) => handle.end === hit.hit.end && handle.segmentId === hit.hit.segmentId),
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current.some(
+      (handle) => handle.end === hit.hit.end && handle.segmentId === hit.hit.segmentId,
+    ),
   );
 };

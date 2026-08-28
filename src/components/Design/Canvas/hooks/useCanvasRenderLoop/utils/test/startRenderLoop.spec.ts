@@ -186,7 +186,7 @@ describe('startRenderLoop', () => {
     // before
     const restingGl = createFullGlMock();
 
-    startRenderLoop(restingGl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ hoverRef }));
+    startRenderLoop(restingGl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ hover: { hoverRef } }));
     rafCallback?.(0);
 
     // action
@@ -203,7 +203,14 @@ describe('startRenderLoop', () => {
       },
     };
 
-    startRenderLoop(draggingGl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ cornerRadiusDragRef, hoverRef }));
+    startRenderLoop(
+      draggingGl,
+      program,
+      buffer,
+      IMAGE_CONTEXT,
+      canvas,
+      createCanvasRefs({ cornerRadius: { cornerRadiusDragRef }, hover: { hoverRef } }),
+    );
     rafCallback?.(0);
 
     // result
@@ -229,7 +236,7 @@ describe('startRenderLoop', () => {
     // before
     const restingGl = createFullGlMock();
 
-    startRenderLoop(restingGl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ hoverRef }));
+    startRenderLoop(restingGl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ hover: { hoverRef } }));
     rafCallback?.(0);
 
     // action
@@ -246,7 +253,14 @@ describe('startRenderLoop', () => {
       },
     };
 
-    startRenderLoop(draggingGl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ hoverRef, polygonCornerRadiusDragRef }));
+    startRenderLoop(
+      draggingGl,
+      program,
+      buffer,
+      IMAGE_CONTEXT,
+      canvas,
+      createCanvasRefs({ cornerRadius: { polygonCornerRadiusDragRef }, hover: { hoverRef } }),
+    );
     rafCallback?.(0);
 
     // result
@@ -274,7 +288,7 @@ describe('startRenderLoop', () => {
     // before
     const restingGl = createFullGlMock();
 
-    startRenderLoop(restingGl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ hoverRef }));
+    startRenderLoop(restingGl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ hover: { hoverRef } }));
     rafCallback?.(0);
 
     // action — armed (ref has a current value) but hasMoved is still false, as armCornerRadiusDrag leaves it
@@ -291,7 +305,14 @@ describe('startRenderLoop', () => {
       },
     };
 
-    startRenderLoop(justArmedGl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ cornerRadiusDragRef, hoverRef }));
+    startRenderLoop(
+      justArmedGl,
+      program,
+      buffer,
+      IMAGE_CONTEXT,
+      canvas,
+      createCanvasRefs({ cornerRadius: { cornerRadiusDragRef }, hover: { hoverRef } }),
+    );
     rafCallback?.(0);
 
     // result — same render as resting, since the drag isn't treated as active yet

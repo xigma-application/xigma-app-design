@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { THoverRefs, TPenRefs } from 'types/design/canvas/types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
@@ -23,9 +23,9 @@ const node: TVectorNode = {
   vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
 };
 
-const createPenNewVertexPreviewRef = (): TCanvasRefs['penNewVertexPreviewRef'] => ({ current: null });
-const createHoveredSegmentIdRef = (): TCanvasRefs['hoveredSegmentIdRef'] => ({ current: null });
-const createPenHoveredDragArmableVertexRef = (): TCanvasRefs['penHoveredDragArmableVertexRef'] => ({ current: false });
+const createPenNewVertexPreviewRef = (): TPenRefs['penNewVertexPreviewRef'] => ({ current: null });
+const createHoveredSegmentIdRef = (): THoverRefs['hoveredSegmentIdRef'] => ({ current: null });
+const createPenHoveredDragArmableVertexRef = (): TPenRefs['penHoveredDragArmableVertexRef'] => ({ current: false });
 
 describe('updateNewVertexPreview', () => {
   it('should preview the raw pointer position and clear the hovered segment when there is no node to snap against', () => {

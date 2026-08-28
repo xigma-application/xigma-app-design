@@ -37,7 +37,7 @@ describe('mergeVectorWidthPointDragPreview', () => {
     const node = buildVectorNode({ widthProfile: { points: { p0: { id: 'p0', leftOffset: 2, position: 0.5, rightOffset: 2 } } } });
     const refs = createCanvasRefs();
 
-    refs.vectorWidthPointDragRef.current = {
+    refs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 0,
       armWorldPoint: { x: 0, y: 0 },
       groupTargets: [],
@@ -61,7 +61,7 @@ describe('mergeVectorWidthPointDragPreview', () => {
     const node = buildVectorNode({ widthProfile: { points: { p2: { id: 'p2', leftOffset: 2, position: 0.4, rightOffset: 2 } } } });
     const refs = createCanvasRefs();
 
-    refs.vectorWidthPointDragRef.current = {
+    refs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 0,
       armWorldPoint: { x: 0, y: 0 },
       groupTargets: [{ nodeId: node.id, point: { id: 'p2', leftOffset: 11, position: 0.4, rightOffset: 11 } }],
@@ -85,7 +85,7 @@ describe('mergeVectorWidthPointDragPreview', () => {
     });
     const refs = createCanvasRefs();
 
-    refs.vectorWidthPointDragRef.current = {
+    refs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 0,
       armWorldPoint: { x: 0, y: 0 },
       groupTargets: [],
@@ -104,7 +104,7 @@ describe('mergeVectorWidthPointDragPreview', () => {
     const node = { ...buildVectorNode(), type: NodeType.frame } as unknown as TSceneNode;
     const refs = createCanvasRefs();
 
-    refs.vectorWidthPointDragRef.current = {
+    refs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 0,
       armWorldPoint: { x: 0, y: 0 },
       groupTargets: [],

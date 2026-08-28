@@ -56,7 +56,7 @@ describe('getVisibleHoveredNode', () => {
     const node = buildFrame('a');
     const refs = createCanvasRefs();
 
-    refs.resizedNodeIdsRef.current = new Set(['a']);
+    refs.transform.resizedNodeIdsRef.current = new Set(['a']);
 
     // before
     const result = getVisibleHoveredNode({ a: node }, 'a', null, refs);

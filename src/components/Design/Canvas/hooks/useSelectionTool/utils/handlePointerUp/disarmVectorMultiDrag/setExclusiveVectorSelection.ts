@@ -5,7 +5,7 @@ export const setExclusiveVectorSelection = (
   canvasRefs: TCanvasRefs,
   selection: { vertexIds?: string[]; handles?: TVectorHandleHover[]; segmentIds?: string[] },
 ): void => {
-  canvasRefs.selectedVectorVertexIdsRef.current = selection.vertexIds ?? [];
-  canvasRefs.selectedVectorHandlesRef.current = selection.handles ?? [];
-  canvasRefs.selectedVectorSegmentIdsRef.current = selection.segmentIds ?? [];
+  canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = selection.vertexIds ?? [];
+  canvasRefs.vectorEdit.selectedVectorHandlesRef.current = selection.handles ?? [];
+  canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = selection.segmentIds ?? [];
 };

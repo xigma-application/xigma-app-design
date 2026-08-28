@@ -44,8 +44,8 @@ export const continueVectorHandleDrag = (
       const segments = getMirroredVectorSegments(node.segments, dragState.vertexId, mode, dragState.segmentId, field, tangent);
 
       dispatch(updateNode({ changes: { segments }, id: dragState.nodeId }));
-      canvasRefs.snappedVectorHandleRef.current = isAngleSnapped ? { end: dragState.end, segmentId: dragState.segmentId } : null;
-      canvasRefs.vectorAlignmentGuideRef.current = guide;
+      canvasRefs.vectorEdit.snappedVectorHandleRef.current = isAngleSnapped ? { end: dragState.end, segmentId: dragState.segmentId } : null;
+      canvasRefs.vectorEdit.vectorAlignmentGuideRef.current = guide;
       setClassName('move');
     }
   }

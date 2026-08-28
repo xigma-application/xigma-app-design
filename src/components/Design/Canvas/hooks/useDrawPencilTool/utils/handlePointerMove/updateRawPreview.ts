@@ -6,6 +6,6 @@ export const updateRawPreview = (event: PointerEvent, refs: TCanvasRefs, rawPoin
   const showRawPreview = event.ctrlKey || event.metaKey;
 
   rawPoints.push(currentPoint);
-  refs.pencilShowRawPreviewRef.current = showRawPreview;
-  refs.pencilRawPreviewPointsRef.current = showRawPreview ? [...rawPoints] : null;
+  refs.pencil.pencilShowRawPreviewRef.current = showRawPreview;
+  refs.pencil.pencilRawPreviewPointsRef.current = showRawPreview ? [...rawPoints] : null;
 };

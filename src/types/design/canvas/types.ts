@@ -161,19 +161,53 @@ export type TVectorNodeRotateSnapshot = {
   strokeVertices: number[];
 };
 
-export type TCanvasRefs = {
-  canvasRef: RefObject<HTMLCanvasElement | null>;
-  colorSampleRequestRef: RefObject<TColorSampleRequest | null>;
-  cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>;
-  draftRef: RefObject<TDraftEntity | null>;
-  draggedNodeIdsRef: RefObject<Set<string> | null>;
-  draggedVectorFillFacesRef: RefObject<TVectorDraggedFillFaces | null>;
-  draggedVectorNodeSnapshotsRef: RefObject<Map<string, TVectorNodeDragSnapshot> | null>;
-  ellipseArcDragRef: RefObject<TEllipseArcDragState | null>;
-  ellipseArcRatioDragRef: RefObject<TEllipseArcRatioDragState | null>;
-  ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null>;
+export type TSliceRefs = {
+  sliceRef: RefObject<TSliceDraft | null>;
+};
+
+export type TPencilRefs = {
+  pencilPreviewPointsRef: RefObject<TPoint[] | null>;
+  pencilRawPreviewPointsRef: RefObject<TPoint[] | null>;
+  pencilShowRawPreviewRef: RefObject<boolean>;
+};
+
+export type TVectorWidthRefs = {
+  vectorWidthPointDragRef: RefObject<TVectorWidthPointDragState | null>;
+};
+
+export type TVectorCutRefs = {
+  newVectorCutVertexIdsRef: RefObject<Set<string>>;
+  touchedVectorCutVertexIdsRef: RefObject<Set<string>>;
+  vectorCutPreviewRef: RefObject<TVectorCutPreview | null>;
+};
+
+export type TVectorEraseRefs = {
   eraseBrushCenterRef: RefObject<TPoint | null>;
   eraserDiameterRef: RefObject<number>;
+  vectorEraseStrokeRef: RefObject<TPoint[] | null>;
+};
+
+export type TVectorPaintRefs = {
+  isVectorPaintRemoveRef: RefObject<boolean>;
+  touchedVectorPaintLoopKeysRef: RefObject<TVectorPaintTouchedLoopKeys>;
+  vectorPaintPathRef: RefObject<TPoint[] | null>;
+  vectorPaintTouchedFacesRef: RefObject<TVectorDraggedFillFaces | null>;
+};
+
+export type TVectorEditRefs = {
+  lastVectorWidthHandleSideRef: RefObject<TVectorWidthLastHandleSide | null>;
+  preVectorMarqueeSegmentIdsRef: RefObject<string[]>;
+  preVectorMarqueeVertexIdsRef: RefObject<string[]>;
+  selectedVectorHandlesRef: RefObject<TVectorHandleHover[]>;
+  selectedVectorSegmentIdsRef: RefObject<string[]>;
+  selectedVectorVertexIdsRef: RefObject<string[]>;
+  selectedVectorWidthHandlesRef: RefObject<TVectorWidthHandleSelection[]>;
+  snappedVectorHandleRef: RefObject<TVectorHandleHover | null>;
+  vectorAlignmentGuideRef: RefObject<TVectorAlignmentGuide | null>;
+};
+
+export type THoverRefs = {
+  hoverRef: RefObject<string | null>;
   hoveredSegmentIdRef: RefObject<string | null>;
   hoveredVectorCutPointRef: RefObject<TPoint | null>;
   hoveredVectorCutSegmentRef: RefObject<TVectorCutSegmentHover | null>;
@@ -185,50 +219,84 @@ export type TCanvasRefs = {
   hoveredVectorShapeBuilderFaceRef: RefObject<TVectorFaceHover | null>;
   hoveredVectorVertexIdRef: RefObject<string | null>;
   hoveredVectorWidthPointRef: RefObject<TVectorWidthPointHover | null>;
-  hoverRef: RefObject<string | null>;
-  isVectorPaintRemoveRef: RefObject<boolean>;
-  isVectorShapeBuilderBoxModeRef: RefObject<boolean>;
-  isVectorShapeBuilderSubtractRef: RefObject<boolean>;
-  lastVectorWidthHandleSideRef: RefObject<TVectorWidthLastHandleSide | null>;
-  marqueeRef: RefObject<TDraftRect | null>;
-  newVectorCutVertexIdsRef: RefObject<Set<string>>;
+};
+
+export type TVectorSnapshotsRefs = {
+  draggedVectorFillFacesRef: RefObject<TVectorDraggedFillFaces | null>;
+  draggedVectorNodeSnapshotsRef: RefObject<Map<string, TVectorNodeDragSnapshot> | null>;
+  resizedVectorNodeSnapshotsRef: RefObject<Map<string, TVectorNodeResizeSnapshot> | null>;
+  rotatedVectorNodeSnapshotsRef: RefObject<Map<string, TVectorNodeRotateSnapshot> | null>;
+};
+
+export type TTransformRefs = {
+  draggedNodeIdsRef: RefObject<Set<string> | null>;
+  resizedNodeIdsRef: RefObject<Set<string> | null>;
+  rotateDragRef: RefObject<TRotateDragState | null>;
+  rotatedNodeIdsRef: RefObject<Set<string> | null>;
+};
+
+export type TPenRefs = {
   penDragOriginRef: RefObject<TPenDragOrigin | null>;
   penDraggedHandleIsSnappedRef: RefObject<boolean>;
   penDraggedHandlePositionRef: RefObject<TPoint | null>;
   penHoveredDragArmableVertexRef: RefObject<boolean>;
   penNewVertexPreviewRef: RefObject<TPoint | null>;
   penPreviewRef: RefObject<TPenPreview | null>;
-  pencilPreviewPointsRef: RefObject<TPoint[] | null>;
-  pencilRawPreviewPointsRef: RefObject<TPoint[] | null>;
-  pencilShowRawPreviewRef: RefObject<boolean>;
+};
+
+export type TEllipseArcRefs = {
+  ellipseArcDragRef: RefObject<TEllipseArcDragState | null>;
+  ellipseArcRatioDragRef: RefObject<TEllipseArcRatioDragState | null>;
+  ellipseArcRotateDragRef: RefObject<TEllipseArcRotateDragState | null>;
+};
+
+export type TCornerRadiusRefs = {
+  cornerRadiusDragRef: RefObject<TCornerRadiusDragState | null>;
   polygonCornerRadiusDragRef: RefObject<TPolygonCornerRadiusDragState | null>;
-  preVectorMarqueeSegmentIdsRef: RefObject<string[]>;
-  preVectorMarqueeVertexIdsRef: RefObject<string[]>;
-  resizedNodeIdsRef: RefObject<Set<string> | null>;
-  resizedVectorNodeSnapshotsRef: RefObject<Map<string, TVectorNodeResizeSnapshot> | null>;
-  rotateDragRef: RefObject<TRotateDragState | null>;
-  rotatedNodeIdsRef: RefObject<Set<string> | null>;
-  rotatedVectorNodeSnapshotsRef: RefObject<Map<string, TVectorNodeRotateSnapshot> | null>;
-  selectedVectorHandlesRef: RefObject<TVectorHandleHover[]>;
-  selectedVectorSegmentIdsRef: RefObject<string[]>;
-  selectedVectorVertexIdsRef: RefObject<string[]>;
-  selectedVectorWidthHandlesRef: RefObject<TVectorWidthHandleSelection[]>;
-  sliceRef: RefObject<TSliceDraft | null>;
-  snappedVectorHandleRef: RefObject<TVectorHandleHover | null>;
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>;
-  touchedVectorCutVertexIdsRef: RefObject<Set<string>>;
-  touchedVectorPaintLoopKeysRef: RefObject<TVectorPaintTouchedLoopKeys>;
-  touchedVectorShapeBuilderFacesRef: RefObject<TVectorShapeBuilderTouchedFaces>;
-  vectorAlignmentGuideRef: RefObject<TVectorAlignmentGuide | null>;
-  vectorCutPreviewRef: RefObject<TVectorCutPreview | null>;
-  vectorEraseStrokeRef: RefObject<TPoint[] | null>;
-  vectorLassoPathRef: RefObject<TPoint[] | null>;
+};
+
+export type TVectorMultiSelectRefs = {
   vectorMultiDragRef: RefObject<TVectorMultiDragState | null>;
   vectorMultiSelectBoxRef: RefObject<TVectorMultiSelectBox | null>;
   vectorMultiSelectResizeDragRef: RefObject<TVectorMultiSelectResizeDragState | null>;
   vectorMultiSelectRotateDragRef: RefObject<TVectorMultiSelectRotateDragState | null>;
-  vectorPaintPathRef: RefObject<TPoint[] | null>;
-  vectorPaintTouchedFacesRef: RefObject<TVectorDraggedFillFaces | null>;
+};
+
+export type TLassoMarqueeRefs = {
+  marqueeRef: RefObject<TDraftRect | null>;
+  vectorLassoPathRef: RefObject<TPoint[] | null>;
+};
+
+export type TShapeBuilderRefs = {
+  isVectorShapeBuilderBoxModeRef: RefObject<boolean>;
+  isVectorShapeBuilderSubtractRef: RefObject<boolean>;
+  touchedVectorShapeBuilderFacesRef: RefObject<TVectorShapeBuilderTouchedFaces>;
   vectorShapeBuilderPathRef: RefObject<TPoint[] | null>;
-  vectorWidthPointDragRef: RefObject<TVectorWidthPointDragState | null>;
+};
+
+export type TCanvasRefs = {
+  canvasRef: RefObject<HTMLCanvasElement | null>;
+  colorSampleRequestRef: RefObject<TColorSampleRequest | null>;
+  cornerRadius: TCornerRadiusRefs;
+  draftRef: RefObject<TDraftEntity | null>;
+  ellipseArc: TEllipseArcRefs;
+  hover: THoverRefs;
+  lassoMarquee: TLassoMarqueeRefs;
+  pen: TPenRefs;
+  pencil: TPencilRefs;
+  shapeBuilder: TShapeBuilderRefs;
+  slice: TSliceRefs;
+  transform: TTransformRefs;
+  vectorCut: TVectorCutRefs;
+  vectorEdit: TVectorEditRefs;
+  vectorErase: TVectorEraseRefs;
+  vectorMultiSelect: TVectorMultiSelectRefs;
+  vectorPaint: TVectorPaintRefs;
+  vectorSnapshots: TVectorSnapshotsRefs;
+  vectorWidth: TVectorWidthRefs;
+};
+
+export type TCanvasRefsOverrides = {
+  [K in keyof TCanvasRefs]?: TCanvasRefs[K] extends RefObject<unknown> ? TCanvasRefs[K] : Partial<TCanvasRefs[K]>;
 };

@@ -23,7 +23,7 @@ export const armVectorHandleOnPointerDown = ({
 }: TArmContext): true | undefined => {
   const state = store.getState();
   const visualSelectedVertexIds = getVisualSelectedVectorVertexIds(
-    canvasRefs.selectedVectorVertexIdsRef.current,
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current,
     selectPenActiveVertexId(state),
   );
   const result = getVectorHandleAtPointAcrossOpenNodes(
@@ -32,8 +32,8 @@ export const armVectorHandleOnPointerDown = ({
     state.design.nodes,
     VECTOR_HANDLE_HIT_RADIUS_PX / viewport.zoom,
     visualSelectedVertexIds,
-    canvasRefs.selectedVectorHandlesRef.current,
-    canvasRefs.selectedVectorSegmentIdsRef.current,
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current,
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current,
   );
 
   if (result) {

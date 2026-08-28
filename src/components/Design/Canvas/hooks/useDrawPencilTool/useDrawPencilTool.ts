@@ -16,7 +16,8 @@ import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 
 export const useDrawPencilTool = (refs: TCanvasRefs): void => {
-  const { canvasRef, pencilPreviewPointsRef } = refs;
+  const { canvasRef } = refs;
+  const { pencilPreviewPointsRef } = refs.pencil;
   const activeTool = useAppSelector(selectActiveTool);
   const dispatch = useAppDispatch();
   const appStore = useAppStore();
@@ -99,8 +100,8 @@ export const useDrawPencilTool = (refs: TCanvasRefs): void => {
         rawPointsRef.current = null;
         lastPointerClientPositionRef.current = null;
         pencilPreviewPointsRef.current = null;
-        refs.pencilRawPreviewPointsRef.current = null;
-        refs.pencilShowRawPreviewRef.current = false;
+        refs.pencil.pencilRawPreviewPointsRef.current = null;
+        refs.pencil.pencilShowRawPreviewRef.current = false;
       };
     }
   }, [activeTool, appStore, canvasRef, dispatch, pencilPreviewPointsRef, refs]);

@@ -71,7 +71,7 @@ describe('disarmVectorVertexDrag', () => {
       origins: { 'vertex-1': { x: 0, y: 0 } },
       pointerStart: { x: 5, y: 5 },
     };
-    canvasRefs.vectorAlignmentGuideRef.current = {
+    canvasRefs.vectorEdit.vectorAlignmentGuideRef.current = {
       horizontal: null,
       vertical: { anchor: { x: 0, y: 0 }, match: { x: 0, y: 0 } },
     };
@@ -83,7 +83,7 @@ describe('disarmVectorVertexDrag', () => {
 
     // result
     expect(selectionRefs.vectorVertexDragRef.current).toBeNull();
-    expect(canvasRefs.vectorAlignmentGuideRef.current).toBeNull();
+    expect(canvasRefs.vectorEdit.vectorAlignmentGuideRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
     expect(setClassName).toHaveBeenCalledWith(null);
   });
@@ -108,7 +108,7 @@ describe('disarmVectorVertexDrag', () => {
     disarmVectorVertexDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
     expect(selectionRefs.vectorVertexDragRef.current).toBeNull();
   });
 
@@ -135,7 +135,7 @@ describe('disarmVectorVertexDrag', () => {
 
     // result
     expect(store.getState().design.nodes[idA]).toMatchObject({ vertices: { v1: { id: 'v1', x: 200, y: 200 } } });
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
     expect(selectionRefs.vectorVertexDragRef.current).toBeNull();
   });
 
@@ -153,8 +153,8 @@ describe('disarmVectorVertexDrag', () => {
     const canvasRefs = createCanvasRefs();
     const selectionRefs = createSelectionToolRefs();
 
-    canvasRefs.selectedVectorHandlesRef.current = [{ end: 'end', segmentId: 's1' }];
-    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [{ end: 'end', segmentId: 's1' }];
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = ['s1'];
     selectionRefs.vectorVertexDragRef.current = {
       dispatchThrottle: { frameId: null, run: null },
       mergeTarget: { nodeId: idA, vertexId: 'v2' },
@@ -172,8 +172,8 @@ describe('disarmVectorVertexDrag', () => {
     const node = store.getState().design.nodes[idA] as TVectorNode;
 
     expect(node.segments).not.toHaveProperty('s1');
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 
   it('should merge onto a target vertex of the SAME node, dropping the absorbed vertex, and select the surviving vertex', () => {
@@ -204,7 +204,7 @@ describe('disarmVectorVertexDrag', () => {
 
     expect(node).toMatchObject({ vertices: { v1: { id: 'v1', x: 100, y: 0 } } });
     expect(Object.keys(node.vertices)).not.toContain('v2');
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1']);
     expect(store.getState().design.nodes[idA]).toBeDefined();
   });
 
@@ -237,6 +237,6 @@ describe('disarmVectorVertexDrag', () => {
 
     expect(state.design.nodes[idB]).toBeUndefined();
     expect(state.design.nodes[idA]).toMatchObject({ vertices: { v1: { id: 'v1', x: 200, y: 200 }, v3: { id: 'v3', x: 300, y: 200 } } });
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1']);
   });
 });

@@ -24,14 +24,14 @@ export const resolveVectorCutMarkConsumption = (canvasRefs: TCanvasRefs): void =
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
 
   if (vectorEditingNodeIds.length === 0) {
-    canvasRefs.newVectorCutVertexIdsRef.current.clear();
-    canvasRefs.touchedVectorCutVertexIdsRef.current.clear();
+    canvasRefs.vectorCut.newVectorCutVertexIdsRef.current.clear();
+    canvasRefs.vectorCut.touchedVectorCutVertexIdsRef.current.clear();
     return;
   }
 
-  const selected = new Set(canvasRefs.selectedVectorVertexIdsRef.current);
-  const newIds = canvasRefs.newVectorCutVertexIdsRef.current;
-  const touchedIds = canvasRefs.touchedVectorCutVertexIdsRef.current;
+  const selected = new Set(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current);
+  const newIds = canvasRefs.vectorCut.newVectorCutVertexIdsRef.current;
+  const touchedIds = canvasRefs.vectorCut.touchedVectorCutVertexIdsRef.current;
 
   newIds.forEach((vertexId) => {
     if (selected.has(vertexId)) {

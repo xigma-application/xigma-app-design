@@ -1,12 +1,12 @@
 // types
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { THoverRefs, TPenRefs, TVectorEditRefs } from 'types/design/canvas/types';
 import { TPenPointHoverKind } from '../resolvePenPointHover/types';
 
 export const clearVectorPenPreview = (
-  penPreviewRef: TCanvasRefs['penPreviewRef'],
-  hoveredSegmentIdRef: TCanvasRefs['hoveredSegmentIdRef'],
-  penHoveredDragArmableVertexRef: TCanvasRefs['penHoveredDragArmableVertexRef'],
-  vectorAlignmentGuideRef: TCanvasRefs['vectorAlignmentGuideRef'],
+  penPreviewRef: TPenRefs['penPreviewRef'],
+  hoveredSegmentIdRef: THoverRefs['hoveredSegmentIdRef'],
+  penHoveredDragArmableVertexRef: TPenRefs['penHoveredDragArmableVertexRef'],
+  vectorAlignmentGuideRef: TVectorEditRefs['vectorAlignmentGuideRef'],
 ): TPenPointHoverKind | null => {
   penPreviewRef.current = null;
   hoveredSegmentIdRef.current = null;

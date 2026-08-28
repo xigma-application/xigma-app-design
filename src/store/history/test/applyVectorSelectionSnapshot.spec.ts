@@ -16,8 +16,8 @@ describe('applyVectorSelectionSnapshot', () => {
     applyVectorSelectionSnapshot(refs, snapshot);
 
     // result
-    expect(refs.selectedVectorHandlesRef.current).toEqual([{ end: 'end', segmentId: 's1' }]);
-    expect(refs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
-    expect(refs.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
+    expect(refs.vectorEdit.selectedVectorHandlesRef.current).toEqual([{ end: 'end', segmentId: 's1' }]);
+    expect(refs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(refs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
   });
 });

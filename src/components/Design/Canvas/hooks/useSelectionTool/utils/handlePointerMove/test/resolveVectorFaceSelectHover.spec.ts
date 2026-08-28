@@ -65,7 +65,7 @@ describe('resolveVectorFaceSelectHover', () => {
     resolveVectorFaceSelectHover(canvas, pointerEvent(50, 40), canvasRefs);
 
     // result
-    expect(canvasRefs.hoveredVectorFaceSelectRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorFaceSelectRef.current).toBeNull();
   });
 
   it('should clear the hovered face ref when no node is in Vector Edit Mode', () => {
@@ -79,7 +79,7 @@ describe('resolveVectorFaceSelectHover', () => {
     resolveVectorFaceSelectHover(canvas, pointerEvent(50, 40), canvasRefs);
 
     // result
-    expect(canvasRefs.hoveredVectorFaceSelectRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorFaceSelectRef.current).toBeNull();
   });
 
   it('should clear the hovered face ref while a pointer button is held', () => {
@@ -97,7 +97,7 @@ describe('resolveVectorFaceSelectHover', () => {
     resolveVectorFaceSelectHover(canvas, pointerEvent(50, 40, 1), canvasRefs);
 
     // result
-    expect(canvasRefs.hoveredVectorFaceSelectRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorFaceSelectRef.current).toBeNull();
   });
 
   it('should set the hovered face when hovering a face that has no fill', () => {
@@ -114,7 +114,7 @@ describe('resolveVectorFaceSelectHover', () => {
     resolveVectorFaceSelectHover(canvas, pointerEvent(50, 40), canvasRefs);
 
     // result
-    expect(canvasRefs.hoveredVectorFaceSelectRef.current).toEqual({ faceKey: 's1,s2,s3', nodeId });
+    expect(canvasRefs.hover.hoveredVectorFaceSelectRef.current).toEqual({ faceKey: 's1,s2,s3', nodeId });
   });
 
   it('should set the hovered face when hovering an already-filled face', () => {
@@ -132,7 +132,7 @@ describe('resolveVectorFaceSelectHover', () => {
     resolveVectorFaceSelectHover(canvas, pointerEvent(50, 40), canvasRefs);
 
     // result
-    expect(canvasRefs.hoveredVectorFaceSelectRef.current).toEqual({ faceKey: 's1,s2,s3', nodeId });
+    expect(canvasRefs.hover.hoveredVectorFaceSelectRef.current).toEqual({ faceKey: 's1,s2,s3', nodeId });
   });
 
   it('should clear the hovered face ref when the pointer misses every face', () => {
@@ -150,6 +150,6 @@ describe('resolveVectorFaceSelectHover', () => {
     resolveVectorFaceSelectHover(canvas, pointerEvent(500, 500), canvasRefs);
 
     // result
-    expect(canvasRefs.hoveredVectorFaceSelectRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorFaceSelectRef.current).toBeNull();
   });
 });

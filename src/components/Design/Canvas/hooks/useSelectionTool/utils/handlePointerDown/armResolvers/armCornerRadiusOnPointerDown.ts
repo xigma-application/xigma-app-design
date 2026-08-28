@@ -19,7 +19,7 @@ export const armCornerRadiusOnPointerDown = ({
     armCornerRadiusDrag(
       canvas,
       event,
-      canvasRefs.cornerRadiusDragRef,
+      canvasRefs.cornerRadius.cornerRadiusDragRef,
       cornerRadiusHandleHit.bounds,
       cornerRadiusHandleHit.corners,
       cornerRadiusHandleHit.nodeId,

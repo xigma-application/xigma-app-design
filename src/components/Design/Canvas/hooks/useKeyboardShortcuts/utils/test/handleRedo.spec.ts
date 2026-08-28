@@ -15,18 +15,18 @@ import { handleUndo } from '../handleUndo';
 describe('handleRedo', () => {
   it('should leave the vector-selection refs untouched when there is nothing to redo', () => {
     // mock
-    const refs = createCanvasRefs({ selectedVectorVertexIdsRef: { current: ['still-here'] } });
+    const refs = createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['still-here'] } } });
 
     // action
     handleRedo(store.dispatch, refs);
 
     // result
-    expect(refs.selectedVectorVertexIdsRef.current).toEqual(['still-here']);
+    expect(refs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['still-here']);
   });
 
   it('should restore the pre-undo vector selection onto the refs when something is redone', () => {
     // mock
-    const refs = createCanvasRefs({ selectedVectorVertexIdsRef: { current: ['before-undo-vertex'] } });
+    const refs = createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['before-undo-vertex'] } } });
 
     store.dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
     store.dispatch(
@@ -36,12 +36,12 @@ describe('handleRedo', () => {
 
     handleUndo(store.dispatch, refs);
 
-    refs.selectedVectorVertexIdsRef.current = ['unrelated-vertex'];
+    refs.vectorEdit.selectedVectorVertexIdsRef.current = ['unrelated-vertex'];
 
     // action
     handleRedo(store.dispatch, refs);
 
     // result
-    expect(refs.selectedVectorVertexIdsRef.current).toEqual(['before-undo-vertex']);
+    expect(refs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['before-undo-vertex']);
   });
 });

@@ -51,7 +51,7 @@ describe('getVisibleSelectedNodes', () => {
     const nodeB = buildFrame('b');
     const refs = createCanvasRefs();
 
-    refs.rotatedNodeIdsRef.current = new Set(['a']);
+    refs.transform.rotatedNodeIdsRef.current = new Set(['a']);
 
     // before
     const result = getVisibleSelectedNodes([nodeA, nodeB], null, refs);

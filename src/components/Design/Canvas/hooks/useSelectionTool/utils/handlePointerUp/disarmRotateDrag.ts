@@ -21,7 +21,7 @@ export const disarmRotateDrag = (
 
   if (rotateDragState) {
     commitRotatedVectorNodeSnapshots(dispatch, rotateDragState, canvasRefs);
-    canvasRefs.rotatedNodeIdsRef.current = null;
+    canvasRefs.transform.rotatedNodeIdsRef.current = null;
     rotateDragRef.current = null;
     canvas.releasePointerCapture(event.pointerId);
   }

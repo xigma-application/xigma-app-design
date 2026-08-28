@@ -17,9 +17,9 @@ export const armVectorMultiSelectBoxOnPointerDown = ({ canvas, canvasRefs, event
   if (!event.shiftKey) {
     const state = store.getState();
     const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
-    const selectedVertexIds = canvasRefs.selectedVectorVertexIdsRef.current;
-    const selectedHandles = canvasRefs.selectedVectorHandlesRef.current;
-    const selectedSegmentIds = canvasRefs.selectedVectorSegmentIdsRef.current;
+    const selectedVertexIds = canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current;
+    const selectedHandles = canvasRefs.vectorEdit.selectedVectorHandlesRef.current;
+    const selectedSegmentIds = canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current;
     const vertexIds = getVectorMultiSelectVertexIds(state.design.nodes, vectorEditingNodeIds, selectedVertexIds, selectedSegmentIds);
 
     if (isVectorMultiSelectBoxEligible(vertexIds, selectedHandles)) {
@@ -28,7 +28,7 @@ export const armVectorMultiSelectBoxOnPointerDown = ({ canvas, canvasRefs, event
         vectorEditingNodeIds,
         vertexIds,
         selectedHandles,
-        canvasRefs.vectorMultiSelectBoxRef,
+        canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef,
       );
       const pivot = box && { x: box.bounds.x + box.bounds.width / 2, y: box.bounds.y + box.bounds.height / 2 };
       const localPoint = box && pivot && rotatePoint(point, pivot, -box.rotation);

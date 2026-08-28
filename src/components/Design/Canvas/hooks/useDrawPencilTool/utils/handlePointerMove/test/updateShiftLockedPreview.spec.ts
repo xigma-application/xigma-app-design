@@ -23,7 +23,7 @@ describe('updateShiftLockedPreview', () => {
 
     // result
     expect(axisLockRef.current).toBeNull();
-    expect(refs.pencilPreviewPointsRef.current).toEqual([
+    expect(refs.pencil.pencilPreviewPointsRef.current).toEqual([
       { x: 0, y: 0 },
       { x: 1, y: 1 },
     ]);
@@ -43,7 +43,7 @@ describe('updateShiftLockedPreview', () => {
     expect(axisLockRef.current).toBe('x');
     expect(shiftAnchorRef.current).toEqual({ x: 0, y: 0 });
     expect(tail).toEqual([{ x: 0, y: 0 }]);
-    expect(refs.pencilPreviewPointsRef.current).toEqual([
+    expect(refs.pencil.pencilPreviewPointsRef.current).toEqual([
       { x: 0, y: 0 },
       { x: 10, y: 0 },
     ]);
@@ -61,7 +61,7 @@ describe('updateShiftLockedPreview', () => {
 
     // result
     expect(axisLockRef.current).toBe('x');
-    expect(refs.pencilPreviewPointsRef.current).toEqual([
+    expect(refs.pencil.pencilPreviewPointsRef.current).toEqual([
       { x: 0, y: 0 },
       { x: 12, y: 0 },
     ]);

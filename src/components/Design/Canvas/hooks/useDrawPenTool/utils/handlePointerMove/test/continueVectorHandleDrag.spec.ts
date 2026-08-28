@@ -6,7 +6,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { THoverRefs, TPenRefs, TVectorEditRefs } from 'types/design/canvas/types';
 import { TPendingOutgoingTangent } from '../../../types';
 import { TVectorNode } from 'types/design/types';
 
@@ -16,10 +16,10 @@ import { continueVectorHandleDrag } from '../continueVectorHandleDrag';
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const createPendingOutgoingTangentRef = (): RefObject<TPendingOutgoingTangent | null> => ({ current: null });
-const createPenDraggedHandlePositionRef = (): TCanvasRefs['penDraggedHandlePositionRef'] => ({ current: null });
-const createPenDraggedHandleIsSnappedRef = (): TCanvasRefs['penDraggedHandleIsSnappedRef'] => ({ current: false });
-const createVectorAlignmentGuideRef = (): TCanvasRefs['vectorAlignmentGuideRef'] => ({ current: null });
-const createHoveredSegmentIdRef = (): TCanvasRefs['hoveredSegmentIdRef'] => ({ current: 's1' });
+const createPenDraggedHandlePositionRef = (): TPenRefs['penDraggedHandlePositionRef'] => ({ current: null });
+const createPenDraggedHandleIsSnappedRef = (): TPenRefs['penDraggedHandleIsSnappedRef'] => ({ current: false });
+const createVectorAlignmentGuideRef = (): TVectorEditRefs['vectorAlignmentGuideRef'] => ({ current: null });
+const createHoveredSegmentIdRef = (): THoverRefs['hoveredSegmentIdRef'] => ({ current: 's1' });
 
 const addVectorNodeWithSegment = (): string => {
   store.dispatch(

@@ -24,7 +24,7 @@ export const resolveVectorTangentHandleHover = (canvas: HTMLCanvasElement, event
     const viewport = selectViewport(state);
     const point = screenToWorld(getPointerPosition(canvas, event), viewport);
     const visualSelectedVertexIds = getVisualSelectedVectorVertexIds(
-      canvasRefs.selectedVectorVertexIdsRef.current,
+      canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current,
       selectPenActiveVertexId(state),
     );
     const result = getVectorHandleAtPointAcrossOpenNodes(
@@ -33,12 +33,12 @@ export const resolveVectorTangentHandleHover = (canvas: HTMLCanvasElement, event
       state.design.nodes,
       VECTOR_HANDLE_HIT_RADIUS_PX / viewport.zoom,
       visualSelectedVertexIds,
-      canvasRefs.selectedVectorHandlesRef.current,
-      canvasRefs.selectedVectorSegmentIdsRef.current,
+      canvasRefs.vectorEdit.selectedVectorHandlesRef.current,
+      canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current,
     );
 
-    canvasRefs.hoveredVectorHandleRef.current = result ? { end: result.hit.end, segmentId: result.hit.segmentId } : null;
+    canvasRefs.hover.hoveredVectorHandleRef.current = result ? { end: result.hit.end, segmentId: result.hit.segmentId } : null;
   } else {
-    canvasRefs.hoveredVectorHandleRef.current = null;
+    canvasRefs.hover.hoveredVectorHandleRef.current = null;
   }
 };

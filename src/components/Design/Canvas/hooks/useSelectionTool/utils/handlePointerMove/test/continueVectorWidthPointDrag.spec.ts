@@ -67,7 +67,7 @@ describe('continueVectorWidthPointDrag', () => {
     const canvasRefs = createCanvasRefs();
     const setClassName = vi.fn();
 
-    canvasRefs.vectorWidthPointDragRef.current = {
+    canvasRefs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 0,
       armWorldPoint: { x: 50, y: 0 },
       groupTargets: [],
@@ -81,7 +81,7 @@ describe('continueVectorWidthPointDrag', () => {
     continueVectorWidthPointDrag(canvas, pointerEvent(50, 10), canvasRefs, setClassName);
 
     // result
-    const drag = canvasRefs.vectorWidthPointDragRef.current;
+    const drag = canvasRefs.vectorWidth.vectorWidthPointDragRef.current;
 
     expect(drag).not.toBeNull();
     expect(drag?.point.leftOffset).toBeCloseTo(10, 5);
@@ -101,7 +101,7 @@ describe('continueVectorWidthPointDrag', () => {
       { nodeId, point: { id: 'p3', leftOffset: 7, position: 0.8, rightOffset: 7 } },
     ];
 
-    canvasRefs.vectorWidthPointDragRef.current = {
+    canvasRefs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 0,
       armWorldPoint: { x: 50, y: 0 },
       groupTargets,
@@ -128,7 +128,7 @@ describe('continueVectorWidthPointDrag', () => {
     const canvasRefs = createCanvasRefs();
     const setClassName = vi.fn();
 
-    canvasRefs.vectorWidthPointDragRef.current = {
+    canvasRefs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 35,
       armWorldPoint: { x: 50, y: 0 },
       groupTargets: [],
@@ -142,14 +142,14 @@ describe('continueVectorWidthPointDrag', () => {
     continueVectorWidthPointDrag(canvas, pointerEvent(50, 0), canvasRefs, setClassName);
 
     // result — no jump: the offset stays exactly at the seeded 35px, not snapping to the raw click-to-anchor distance
-    let drag = canvasRefs.vectorWidthPointDragRef.current;
+    let drag = canvasRefs.vectorWidth.vectorWidthPointDragRef.current;
 
     expect(drag?.point.leftOffset).toBeCloseTo(35, 5);
     expect(drag?.point.rightOffset).toBeCloseTo(35, 5);
 
     // action — a small 1px move should adjust the seed by exactly that much, not replace it
     continueVectorWidthPointDrag(canvas, pointerEvent(50, 1), canvasRefs, setClassName);
-    drag = canvasRefs.vectorWidthPointDragRef.current;
+    drag = canvasRefs.vectorWidth.vectorWidthPointDragRef.current;
 
     expect(drag?.point.leftOffset).toBeCloseTo(36, 5);
     expect(drag?.point.rightOffset).toBeCloseTo(36, 5);
@@ -162,7 +162,7 @@ describe('continueVectorWidthPointDrag', () => {
     const canvasRefs = createCanvasRefs();
     const setClassName = vi.fn();
 
-    canvasRefs.vectorWidthPointDragRef.current = {
+    canvasRefs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 2,
       armWorldPoint: { x: 50, y: 2 },
       groupTargets: [],
@@ -176,7 +176,7 @@ describe('continueVectorWidthPointDrag', () => {
     continueVectorWidthPointDrag(canvas, pointerEvent(50, 12), canvasRefs, setClassName);
 
     // result — the opposite (right) side follows the same value, not just the dragged side
-    const drag = canvasRefs.vectorWidthPointDragRef.current;
+    const drag = canvasRefs.vectorWidth.vectorWidthPointDragRef.current;
 
     expect(drag).not.toBeNull();
     expect(drag?.point.leftOffset).toBeCloseTo(12, 5);
@@ -190,7 +190,7 @@ describe('continueVectorWidthPointDrag', () => {
     const canvasRefs = createCanvasRefs();
     const setClassName = vi.fn();
 
-    canvasRefs.vectorWidthPointDragRef.current = {
+    canvasRefs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 2,
       armWorldPoint: { x: 50, y: -2 },
       groupTargets: [],
@@ -204,7 +204,7 @@ describe('continueVectorWidthPointDrag', () => {
     continueVectorWidthPointDrag(canvas, pointerEvent(50, -15), canvasRefs, setClassName);
 
     // result — the opposite (left) side follows the same value, not just the dragged side
-    const drag = canvasRefs.vectorWidthPointDragRef.current;
+    const drag = canvasRefs.vectorWidth.vectorWidthPointDragRef.current;
 
     expect(drag).not.toBeNull();
     expect(drag?.point.leftOffset).toBeCloseTo(15, 5);
@@ -218,7 +218,7 @@ describe('continueVectorWidthPointDrag', () => {
     const canvasRefs = createCanvasRefs();
     const setClassName = vi.fn();
 
-    canvasRefs.vectorWidthPointDragRef.current = {
+    canvasRefs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 2,
       armWorldPoint: { x: 50, y: 2 },
       groupTargets: [],
@@ -232,7 +232,7 @@ describe('continueVectorWidthPointDrag', () => {
     continueVectorWidthPointDrag(canvas, pointerEvent(50, -12), canvasRefs, setClassName);
 
     // result
-    const drag = canvasRefs.vectorWidthPointDragRef.current;
+    const drag = canvasRefs.vectorWidth.vectorWidthPointDragRef.current;
 
     expect(drag?.point.leftOffset).toBe(0);
     expect(drag?.point.rightOffset).toBe(0);
@@ -245,7 +245,7 @@ describe('continueVectorWidthPointDrag', () => {
     const canvasRefs = createCanvasRefs();
     const setClassName = vi.fn();
 
-    canvasRefs.vectorWidthPointDragRef.current = {
+    canvasRefs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 0,
       armWorldPoint: { x: 0, y: 0 },
       groupTargets: [],
@@ -259,7 +259,7 @@ describe('continueVectorWidthPointDrag', () => {
     continueVectorWidthPointDrag(canvas, pointerEvent(80, 0), canvasRefs, setClassName);
 
     // result — a straight single-segment chain, so position (fraction of total length) equals t exactly
-    const drag = canvasRefs.vectorWidthPointDragRef.current;
+    const drag = canvasRefs.vectorWidth.vectorWidthPointDragRef.current;
 
     expect(drag).not.toBeNull();
     expect(drag?.point.position).toBeCloseTo(0.8, 2);
@@ -277,7 +277,7 @@ describe('continueVectorWidthPointDrag', () => {
     const setClassName = vi.fn();
     const point = { id: 'p1', leftOffset: 3, position: 0.5, rightOffset: 3 };
 
-    canvasRefs.vectorWidthPointDragRef.current = {
+    canvasRefs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 0,
       armWorldPoint: { x: 0, y: 0 },
       groupTargets: [],
@@ -291,7 +291,7 @@ describe('continueVectorWidthPointDrag', () => {
     continueVectorWidthPointDrag(canvas, pointerEvent(50, 10), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.vectorWidthPointDragRef.current?.point).toEqual(point);
+    expect(canvasRefs.vectorWidth.vectorWidthPointDragRef.current?.point).toEqual(point);
     expect(setClassName).toHaveBeenCalledWith('controller');
   });
 
@@ -319,7 +319,7 @@ describe('continueVectorWidthPointDrag', () => {
     const setClassName = vi.fn();
     const point = { id: 'p1', leftOffset: 3, position: 0.5, rightOffset: 3 };
 
-    canvasRefs.vectorWidthPointDragRef.current = {
+    canvasRefs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 0,
       armWorldPoint: { x: 0, y: 0 },
       groupTargets: [],
@@ -333,7 +333,7 @@ describe('continueVectorWidthPointDrag', () => {
     continueVectorWidthPointDrag(canvas, pointerEvent(80, 0), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.vectorWidthPointDragRef.current?.point).toEqual(point);
+    expect(canvasRefs.vectorWidth.vectorWidthPointDragRef.current?.point).toEqual(point);
     expect(setClassName).toHaveBeenCalledWith('controller');
   });
 });

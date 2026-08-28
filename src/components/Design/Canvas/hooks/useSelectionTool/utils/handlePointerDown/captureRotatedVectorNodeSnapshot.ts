@@ -10,6 +10,6 @@ export const captureRotatedVectorNodeSnapshot = (selectedNodes: TSceneNode[], ca
   const [node] = selectedNodes;
 
   if (selectedNodes.length === 1 && node.type === NodeType.vector && !node.widthProfile) {
-    canvasRefs.rotatedVectorNodeSnapshotsRef.current = new Map([[node.id, captureVectorNodeRotateSnapshot(node)]]);
+    canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current = new Map([[node.id, captureVectorNodeRotateSnapshot(node)]]);
   }
 };

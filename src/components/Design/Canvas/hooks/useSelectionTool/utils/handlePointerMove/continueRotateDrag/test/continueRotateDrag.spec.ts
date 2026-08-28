@@ -164,7 +164,7 @@ describe('continueRotateDrag', () => {
       const canvasRefs = createCanvasRefs();
       const snapshot = buildSnapshot();
 
-      canvasRefs.rotatedVectorNodeSnapshotsRef.current = new Map([[idA, snapshot]]);
+      canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current = new Map([[idA, snapshot]]);
 
       const nodeBefore = store.getState().design.nodes[idA];
 
@@ -174,7 +174,7 @@ describe('continueRotateDrag', () => {
       // result — the store node is untouched, but the snapshot itself now reflects the live drag
       expect(store.getState().design.nodes[idA]).toBe(nodeBefore);
       expect(snapshot.deltaDegrees).toBeCloseTo(90);
-      expect(canvasRefs.rotatedNodeIdsRef.current).toEqual(new Set([idA]));
+      expect(canvasRefs.transform.rotatedNodeIdsRef.current).toEqual(new Set([idA]));
     });
 
     it('should not replace an already-initialized rotated-node-ids set on a subsequent pointermove', () => {
@@ -189,17 +189,17 @@ describe('continueRotateDrag', () => {
       });
       const canvasRefs = createCanvasRefs();
 
-      canvasRefs.rotatedVectorNodeSnapshotsRef.current = new Map([[idA, buildSnapshot()]]);
+      canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current = new Map([[idA, buildSnapshot()]]);
 
       const existingSet = new Set(['some-other-id']);
 
-      canvasRefs.rotatedNodeIdsRef.current = existingSet;
+      canvasRefs.transform.rotatedNodeIdsRef.current = existingSet;
 
       // before
       continueRotateDrag(canvas, pointerEvent(50, 150), store.dispatch, rotateDragRef, canvasRefs);
 
       // result
-      expect(canvasRefs.rotatedNodeIdsRef.current).toBe(existingSet);
+      expect(canvasRefs.transform.rotatedNodeIdsRef.current).toBe(existingSet);
     });
 
     it('should still dispatch normally for a non-snapshotted node in the same rotate gesture as a snapshotted one', () => {
@@ -218,7 +218,7 @@ describe('continueRotateDrag', () => {
       });
       const canvasRefs = createCanvasRefs();
 
-      canvasRefs.rotatedVectorNodeSnapshotsRef.current = new Map([[idVector, buildSnapshot()]]);
+      canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current = new Map([[idVector, buildSnapshot()]]);
 
       // before — a 90deg delta
       continueRotateDrag(canvas, pointerEvent(150, 150), store.dispatch, rotateDragRef, canvasRefs);

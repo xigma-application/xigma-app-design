@@ -20,17 +20,17 @@ import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 
 export const useDrawPenTool = (refs: TCanvasRefs): void => {
+  const { canvasRef } = refs;
+  const { vectorAlignmentGuideRef } = refs.vectorEdit;
+  const { hoveredSegmentIdRef } = refs.hover;
   const {
-    canvasRef,
-    hoveredSegmentIdRef,
     penDragOriginRef: dragOriginRef,
     penDraggedHandleIsSnappedRef,
     penDraggedHandlePositionRef,
     penHoveredDragArmableVertexRef,
     penNewVertexPreviewRef,
     penPreviewRef,
-    vectorAlignmentGuideRef,
-  } = refs;
+  } = refs.pen;
   const activeTool = useAppSelector(selectActiveTool);
   const dispatch = useAppDispatch();
   const appStore = useAppStore();

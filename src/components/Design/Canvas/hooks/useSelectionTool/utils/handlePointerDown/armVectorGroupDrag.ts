@@ -22,16 +22,22 @@ export const armVectorGroupDrag = (
 ): void => {
   const state = store.getState();
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
-  const selectedVertexIds = canvasRefs.selectedVectorVertexIdsRef.current;
-  const selectedHandles = canvasRefs.selectedVectorHandlesRef.current;
+  const selectedVertexIds = canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current;
+  const selectedHandles = canvasRefs.vectorEdit.selectedVectorHandlesRef.current;
   const vertexIds = getVectorMultiSelectVertexIds(
     state.design.nodes,
     vectorEditingNodeIds,
     selectedVertexIds,
-    canvasRefs.selectedVectorSegmentIdsRef.current,
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current,
   );
   const box = isVectorMultiSelectBoxEligible(vertexIds, selectedHandles)
-    ? getVectorMultiSelectBox(state.design.nodes, vectorEditingNodeIds, vertexIds, selectedHandles, canvasRefs.vectorMultiSelectBoxRef)
+    ? getVectorMultiSelectBox(
+        state.design.nodes,
+        vectorEditingNodeIds,
+        vertexIds,
+        selectedHandles,
+        canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef,
+      )
     : null;
 
   armVectorMultiDrag(

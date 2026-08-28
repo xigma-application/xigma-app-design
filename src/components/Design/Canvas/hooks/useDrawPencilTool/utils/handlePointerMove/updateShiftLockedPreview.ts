@@ -28,5 +28,5 @@ export const updateShiftLockedPreview = (
   const previewPoint = axis ? getAxisLockedPoint(anchor, currentPoint, axis) : currentPoint;
   const previewTail = simplifyPencilPoints([...tail, previewPoint], tolerance);
 
-  refs.pencilPreviewPointsRef.current = [...committed, ...previewTail.slice(1)];
+  refs.pencil.pencilPreviewPointsRef.current = [...committed, ...previewTail.slice(1)];
 };

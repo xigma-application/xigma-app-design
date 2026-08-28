@@ -41,7 +41,7 @@ export const armVectorWidthPointCreate = (
     const newPointId = nanoid();
     const normal = getVectorSegmentNormalAtT(strokeHit.node, strokeHit.node.segments[strokeHit.hit.segmentId], strokeHit.hit.t);
 
-    canvasRefs.vectorWidthPointDragRef.current = {
+    canvasRefs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: baseOffset,
       armWorldPoint: point,
       groupTargets: [],
@@ -50,12 +50,12 @@ export const armVectorWidthPointCreate = (
       point: { id: newPointId, leftOffset: baseOffset, position, rightOffset: baseOffset },
       target: 'right',
     };
-    canvasRefs.selectedVectorWidthHandlesRef.current = [
+    canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current = [
       { nodeId: strokeHit.node.id, pointId: newPointId, side: 'left' },
       { nodeId: strokeHit.node.id, pointId: newPointId, side: 'right' },
       { nodeId: strokeHit.node.id, pointId: newPointId, side: 'point' },
     ];
-    canvasRefs.lastVectorWidthHandleSideRef.current = { nodeId: strokeHit.node.id, pointId: newPointId, side: 'right' };
+    canvasRefs.vectorEdit.lastVectorWidthHandleSideRef.current = { nodeId: strokeHit.node.id, pointId: newPointId, side: 'right' };
     canvas.setPointerCapture(event.pointerId);
     canvas.style.cursor = getRotatedResizeCursorUrl(getAngleBetweenPoints({ x: 0, y: 0 }, normal)) ?? '';
     setClassName(null);

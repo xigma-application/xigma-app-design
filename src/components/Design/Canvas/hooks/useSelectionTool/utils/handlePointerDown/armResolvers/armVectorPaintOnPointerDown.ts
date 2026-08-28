@@ -53,17 +53,17 @@ export const armVectorPaintOnPointerDown = ({
 
       dispatch(updateNode({ changes, id: node.id }));
       touchedLoopKeys[node.id] = existingLoopKey ? new Set() : new Set([newLoopKey]);
-      canvasRefs.vectorPaintTouchedFacesRef.current = { [node.id]: [face.key] };
-      canvasRefs.isVectorPaintRemoveRef.current = Boolean(existingLoopKey);
+      canvasRefs.vectorPaint.vectorPaintTouchedFacesRef.current = { [node.id]: [face.key] };
+      canvasRefs.vectorPaint.isVectorPaintRemoveRef.current = Boolean(existingLoopKey);
     } else {
-      canvasRefs.vectorPaintTouchedFacesRef.current = {};
-      canvasRefs.isVectorPaintRemoveRef.current = false;
+      canvasRefs.vectorPaint.vectorPaintTouchedFacesRef.current = {};
+      canvasRefs.vectorPaint.isVectorPaintRemoveRef.current = false;
     }
 
-    canvasRefs.vectorPaintPathRef.current = [point];
-    canvasRefs.touchedVectorPaintLoopKeysRef.current = touchedLoopKeys;
+    canvasRefs.vectorPaint.vectorPaintPathRef.current = [point];
+    canvasRefs.vectorPaint.touchedVectorPaintLoopKeysRef.current = touchedLoopKeys;
     canvas.setPointerCapture(event.pointerId);
-    setClassName(canvasRefs.isVectorPaintRemoveRef.current ? 'paint-remove' : 'paint-add');
+    setClassName(canvasRefs.vectorPaint.isVectorPaintRemoveRef.current ? 'paint-remove' : 'paint-add');
 
     return true;
   }

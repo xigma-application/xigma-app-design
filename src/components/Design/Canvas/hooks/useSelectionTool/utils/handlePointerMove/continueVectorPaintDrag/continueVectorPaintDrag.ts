@@ -21,7 +21,7 @@ export const continueVectorPaintDrag = (
   dispatch: AppDispatch,
   canvasRefs: TCanvasRefs,
 ): void => {
-  const path = canvasRefs.vectorPaintPathRef.current;
+  const path = canvasRefs.vectorPaint.vectorPaintPathRef.current;
 
   if (path) {
     const state = store.getState();
@@ -29,7 +29,7 @@ export const continueVectorPaintDrag = (
     const point = screenToWorld(getPointerPosition(canvas, event), viewport);
     const nextPath = [...path, point];
 
-    canvasRefs.vectorPaintPathRef.current = nextPath;
+    canvasRefs.vectorPaint.vectorPaintPathRef.current = nextPath;
 
     const [start] = nextPath;
     const hasDragged = nextPath.some(
@@ -39,8 +39,8 @@ export const continueVectorPaintDrag = (
     if (hasDragged) {
       const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
       const paintColor = selectPaintColor(state);
-      const isRemoveMode = canvasRefs.isVectorPaintRemoveRef.current;
-      const touchedLoopKeys = canvasRefs.touchedVectorPaintLoopKeysRef.current;
+      const isRemoveMode = canvasRefs.vectorPaint.isVectorPaintRemoveRef.current;
+      const touchedLoopKeys = canvasRefs.vectorPaint.touchedVectorPaintLoopKeysRef.current;
       const touchedFaces: TVectorDraggedFillFaces = {};
 
       vectorEditingNodeIds
@@ -50,7 +50,7 @@ export const continueVectorPaintDrag = (
           touchedFaces[node.id] = paintNodeAlongPath(dispatch, node, nextPath, paintColor, isRemoveMode, touchedLoopKeys);
         });
 
-      canvasRefs.vectorPaintTouchedFacesRef.current = touchedFaces;
+      canvasRefs.vectorPaint.vectorPaintTouchedFacesRef.current = touchedFaces;
     }
   }
 };

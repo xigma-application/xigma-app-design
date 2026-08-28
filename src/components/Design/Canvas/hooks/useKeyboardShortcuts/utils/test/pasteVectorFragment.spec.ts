@@ -53,8 +53,8 @@ describe('pasteVectorFragment', () => {
     const node = store.getState().design.nodes[vectorId] as any;
 
     expect(Object.keys(node.vertices)).toHaveLength(2);
-    expect(refs.selectedVectorVertexIdsRef.current).toHaveLength(1);
-    expect(refs.selectedVectorVertexIdsRef.current[0]).not.toBe('copied');
+    expect(refs.vectorEdit.selectedVectorVertexIdsRef.current).toHaveLength(1);
+    expect(refs.vectorEdit.selectedVectorVertexIdsRef.current[0]).not.toBe('copied');
   });
 
   it('should be undoable as a single step', () => {

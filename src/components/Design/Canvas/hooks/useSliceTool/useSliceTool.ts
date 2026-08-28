@@ -15,7 +15,8 @@ import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 
 export const useSliceTool = (refs: TCanvasRefs): void => {
-  const { canvasRef, sliceRef } = refs;
+  const { canvasRef } = refs;
+  const { sliceRef } = refs.slice;
   const activeTool = useAppSelector(selectActiveTool);
   const dispatch = useAppDispatch();
   const drawDragRef = useRef<TSliceDrawDragState | null>(null);

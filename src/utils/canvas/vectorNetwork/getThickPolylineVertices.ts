@@ -10,23 +10,23 @@ export const getThickPolylineVertices = (points: TPoint[], halfWidth: number): n
   const offsets = points.slice(0, -1).map((point, index) => getPolylineSegmentOffset(point, points[index + 1], halfWidth));
 
   const segmentVertices = offsets.flatMap((offset, index) => {
-    if (!offset) {
-      return [];
+    if (offset) {
+      const point = points[index];
+      const next = points[index + 1];
+
+      return getQuadVertices(
+        point.x + offset.x,
+        point.y + offset.y,
+        next.x + offset.x,
+        next.y + offset.y,
+        next.x - offset.x,
+        next.y - offset.y,
+        point.x - offset.x,
+        point.y - offset.y,
+      );
     }
 
-    const point = points[index];
-    const next = points[index + 1];
-
-    return getQuadVertices(
-      point.x + offset.x,
-      point.y + offset.y,
-      next.x + offset.x,
-      next.y + offset.y,
-      next.x - offset.x,
-      next.y - offset.y,
-      point.x - offset.x,
-      point.y - offset.y,
-    );
+    return [];
   });
 
   const joinVertices = offsets.slice(0, -1).flatMap((previousOffset, index) => {

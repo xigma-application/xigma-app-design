@@ -20,5 +20,5 @@ export const hitsSelectedVertex = (context: TArmContext, vectorEditingNodeIds: s
     VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom,
   );
 
-  return Boolean(hit && canvasRefs.selectedVectorVertexIdsRef.current.includes(hit.vertexId));
+  return Boolean(hit && canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current.includes(hit.vertexId));
 };

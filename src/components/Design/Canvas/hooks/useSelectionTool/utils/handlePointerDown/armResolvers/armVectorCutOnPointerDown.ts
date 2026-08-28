@@ -39,7 +39,7 @@ export const armVectorCutOnPointerDown = ({
       lineStart: point,
       status: 'pending',
     };
-    canvasRefs.vectorCutPreviewRef.current = { crossings: [], lineEnd: point, lineStart: point };
+    canvasRefs.vectorCut.vectorCutPreviewRef.current = { crossings: [], lineEnd: point, lineStart: point };
     canvas.setPointerCapture(event.pointerId);
     setClassName('cut-on');
 

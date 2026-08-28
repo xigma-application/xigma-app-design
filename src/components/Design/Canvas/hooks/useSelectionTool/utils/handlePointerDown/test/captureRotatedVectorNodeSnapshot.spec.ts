@@ -46,7 +46,9 @@ describe('captureRotatedVectorNodeSnapshot', () => {
     captureRotatedVectorNodeSnapshot([node], canvasRefs);
 
     // result
-    expect(canvasRefs.rotatedVectorNodeSnapshotsRef.current?.get('vector-1')).toEqual(captureVectorNodeRotateSnapshot(node));
+    expect(canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current?.get('vector-1')).toEqual(
+      captureVectorNodeRotateSnapshot(node),
+    );
   });
 
   it('should leave the snapshot ref untouched when the single selected node isn’t a vector', () => {
@@ -57,7 +59,7 @@ describe('captureRotatedVectorNodeSnapshot', () => {
     captureRotatedVectorNodeSnapshot([frameNode], canvasRefs);
 
     // result
-    expect(canvasRefs.rotatedVectorNodeSnapshotsRef.current).toBeNull();
+    expect(canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current).toBeNull();
   });
 
   it('should leave the snapshot ref untouched for a multi-node selection, even if every node is a vector — group rotate bakes rotation into vertices, which this fast path doesn’t replicate', () => {
@@ -70,7 +72,7 @@ describe('captureRotatedVectorNodeSnapshot', () => {
     captureRotatedVectorNodeSnapshot([nodeA, nodeB], canvasRefs);
 
     // result
-    expect(canvasRefs.rotatedVectorNodeSnapshotsRef.current).toBeNull();
+    expect(canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current).toBeNull();
   });
 
   it('should leave the snapshot ref untouched for a vector node with a variable width profile', () => {
@@ -82,7 +84,7 @@ describe('captureRotatedVectorNodeSnapshot', () => {
     captureRotatedVectorNodeSnapshot([node], canvasRefs);
 
     // result
-    expect(canvasRefs.rotatedVectorNodeSnapshotsRef.current).toBeNull();
+    expect(canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current).toBeNull();
   });
 
   it('should leave the snapshot ref untouched when nothing is selected', () => {
@@ -93,6 +95,6 @@ describe('captureRotatedVectorNodeSnapshot', () => {
     captureRotatedVectorNodeSnapshot([], canvasRefs);
 
     // result
-    expect(canvasRefs.rotatedVectorNodeSnapshotsRef.current).toBeNull();
+    expect(canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current).toBeNull();
   });
 });

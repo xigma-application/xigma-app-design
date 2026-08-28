@@ -8,7 +8,7 @@ import { selectPenActiveVertexId, selectVectorEditingNodeIds } from 'store/desig
 import { AppStore } from 'store';
 
 // types
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { THoverRefs, TPenRefs, TVectorEditRefs } from 'types/design/canvas/types';
 import { TPendingOutgoingTangent } from '../../types';
 import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
@@ -23,14 +23,14 @@ export const updatePenPreview = (
   viewport: TViewport,
   isShiftPressed: boolean,
   appStore: AppStore,
-  penPreviewRef: TCanvasRefs['penPreviewRef'],
-  penNewVertexPreviewRef: TCanvasRefs['penNewVertexPreviewRef'],
-  penDraggedHandlePositionRef: TCanvasRefs['penDraggedHandlePositionRef'],
-  penDraggedHandleIsSnappedRef: TCanvasRefs['penDraggedHandleIsSnappedRef'],
+  penPreviewRef: TPenRefs['penPreviewRef'],
+  penNewVertexPreviewRef: TPenRefs['penNewVertexPreviewRef'],
+  penDraggedHandlePositionRef: TPenRefs['penDraggedHandlePositionRef'],
+  penDraggedHandleIsSnappedRef: TPenRefs['penDraggedHandleIsSnappedRef'],
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
-  hoveredSegmentIdRef: TCanvasRefs['hoveredSegmentIdRef'],
-  penHoveredDragArmableVertexRef: TCanvasRefs['penHoveredDragArmableVertexRef'],
-  vectorAlignmentGuideRef: TCanvasRefs['vectorAlignmentGuideRef'],
+  hoveredSegmentIdRef: THoverRefs['hoveredSegmentIdRef'],
+  penHoveredDragArmableVertexRef: TPenRefs['penHoveredDragArmableVertexRef'],
+  vectorAlignmentGuideRef: TVectorEditRefs['vectorAlignmentGuideRef'],
   setClassName: (className: string | null) => void,
 ): void => {
   const state = appStore.getState();

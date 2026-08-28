@@ -36,7 +36,7 @@ describe('drawVectorWidthPointsPreview', () => {
     // mock
     const refs = createCanvasRefs();
 
-    refs.hoveredVectorWidthPointRef.current = { nodeId: 'node-2', segmentId: 's1', t: 0.5 };
+    refs.hover.hoveredVectorWidthPointRef.current = { nodeId: 'node-2', segmentId: 's1', t: 0.5 };
 
     // before
     drawVectorWidthPointsPreview(
@@ -62,7 +62,7 @@ describe('drawVectorWidthPointsPreview', () => {
       program,
       buffer,
       {},
-      refs.hoveredVectorWidthPointRef.current,
+      refs.hover.hoveredVectorWidthPointRef.current,
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -96,7 +96,7 @@ describe('drawVectorWidthPointsPreview', () => {
     // mock — simulates having just switched away from the tool, before any refs get cleared
     const refs = createCanvasRefs();
 
-    refs.hoveredVectorWidthPointRef.current = { nodeId: 'node-1', segmentId: 's1', t: 0.5 };
+    refs.hover.hoveredVectorWidthPointRef.current = { nodeId: 'node-1', segmentId: 's1', t: 0.5 };
 
     // before
     drawVectorWidthPointsPreview(gl, program, buffer, imageContext, {}, ['node-1'], refs, ToolName.default, 200, 150, IDENTITY_VIEWPORT);

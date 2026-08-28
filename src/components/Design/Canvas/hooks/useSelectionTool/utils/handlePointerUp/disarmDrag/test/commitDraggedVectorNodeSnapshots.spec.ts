@@ -8,7 +8,8 @@ import { TDragState } from 'types/design/selectionTool/types';
 // utils
 import { commitDraggedVectorNodeSnapshots } from '../commitDraggedVectorNodeSnapshots';
 
-const buildCanvasRefs = (): TCanvasRefs => ({ draggedVectorNodeSnapshotsRef: { current: null } }) as unknown as TCanvasRefs;
+const buildCanvasRefs = (): TCanvasRefs =>
+  ({ vectorSnapshots: { draggedVectorNodeSnapshotsRef: { current: null } } }) as unknown as TCanvasRefs;
 
 const buildDragState = (nodeOrigins: TDragState['nodeOrigins']): TDragState =>
   ({
@@ -39,7 +40,7 @@ describe('commitDraggedVectorNodeSnapshots', () => {
     const canvasRefs = buildCanvasRefs();
     const dragState = buildDragState({ 'node-1': { x: 100, y: 100 } });
 
-    canvasRefs.draggedVectorNodeSnapshotsRef.current = new Map([
+    canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current = new Map([
       ['node-1', { deltaX: 5, deltaY: -3, facesByColor: [], strokeColor: '#00ff00', strokeVertices: [] }],
     ]);
 
@@ -49,7 +50,7 @@ describe('commitDraggedVectorNodeSnapshots', () => {
     // result
     expect(dispatch).toHaveBeenCalledTimes(1);
     expect(dispatch).toHaveBeenCalledWith(updateNode({ changes: { x: 105, y: 97 }, id: 'node-1' }));
-    expect(canvasRefs.draggedVectorNodeSnapshotsRef.current).toBeNull();
+    expect(canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current).toBeNull();
   });
 
   it('should skip a snapshotted node whose origin was never captured, without dispatching or throwing', () => {
@@ -58,7 +59,7 @@ describe('commitDraggedVectorNodeSnapshots', () => {
     const canvasRefs = buildCanvasRefs();
     const dragState = buildDragState({});
 
-    canvasRefs.draggedVectorNodeSnapshotsRef.current = new Map([
+    canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current = new Map([
       ['node-1', { deltaX: 5, deltaY: -3, facesByColor: [], strokeColor: '#00ff00', strokeVertices: [] }],
     ]);
 
@@ -67,6 +68,6 @@ describe('commitDraggedVectorNodeSnapshots', () => {
 
     // result
     expect(dispatch).not.toHaveBeenCalled();
-    expect(canvasRefs.draggedVectorNodeSnapshotsRef.current).toBeNull();
+    expect(canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current).toBeNull();
   });
 });

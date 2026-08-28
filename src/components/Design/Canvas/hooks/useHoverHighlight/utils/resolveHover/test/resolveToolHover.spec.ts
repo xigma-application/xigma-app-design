@@ -128,7 +128,7 @@ describe('resolveToolHover', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v3'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v3'];
 
     const canvas = createCanvas();
     const hoverRef: RefObject<string | null> = { current: null };

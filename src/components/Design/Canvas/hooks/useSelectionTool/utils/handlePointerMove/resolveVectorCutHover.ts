@@ -35,10 +35,10 @@ export const resolveVectorCutHover = (
       VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom,
     );
 
-    canvasRefs.hoveredVectorCutSegmentRef.current = edgeHit ? { nodeId: edgeHit.node.id, segmentId: edgeHit.hit.segmentId } : null;
-    canvasRefs.hoveredVectorCutPointRef.current = edgeHit ? edgeHit.hit.point : null;
+    canvasRefs.hover.hoveredVectorCutSegmentRef.current = edgeHit ? { nodeId: edgeHit.node.id, segmentId: edgeHit.hit.segmentId } : null;
+    canvasRefs.hover.hoveredVectorCutPointRef.current = edgeHit ? edgeHit.hit.point : null;
   } else {
-    canvasRefs.hoveredVectorCutSegmentRef.current = null;
-    canvasRefs.hoveredVectorCutPointRef.current = null;
+    canvasRefs.hover.hoveredVectorCutSegmentRef.current = null;
+    canvasRefs.hover.hoveredVectorCutPointRef.current = null;
   }
 };

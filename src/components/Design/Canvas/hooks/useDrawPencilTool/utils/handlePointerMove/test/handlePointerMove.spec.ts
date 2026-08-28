@@ -46,7 +46,7 @@ describe('handlePointerMove', () => {
     );
 
     // result
-    expect(refs.pencilPreviewPointsRef.current).toBeNull();
+    expect(refs.pencil.pencilPreviewPointsRef.current).toBeNull();
   });
 
   it('should do nothing when the raw-points tracker alone is missing', () => {
@@ -68,7 +68,7 @@ describe('handlePointerMove', () => {
     );
 
     // result
-    expect(refs.pencilPreviewPointsRef.current).toBeNull();
+    expect(refs.pencil.pencilPreviewPointsRef.current).toBeNull();
   });
 
   it('should delegate to advancePencilTail for an ordinary (non-Shift) move', () => {
@@ -118,7 +118,7 @@ describe('handlePointerMove', () => {
 
     // result — axis-lock preview only, real tail unchanged (that's advancePencilTail's job)
     expect(tailPointsRef.current).toEqual([{ x: 0, y: 0 }]);
-    expect(refs.pencilPreviewPointsRef.current).toEqual([
+    expect(refs.pencil.pencilPreviewPointsRef.current).toEqual([
       { x: 0, y: 0 },
       { x: 10, y: 0 },
     ]);
@@ -144,7 +144,7 @@ describe('handlePointerMove', () => {
     );
 
     // result
-    expect(refs.pencilShowRawPreviewRef.current).toBe(true);
+    expect(refs.pencil.pencilShowRawPreviewRef.current).toBe(true);
     expect(rawPointsRef.current).toEqual([
       { x: 0, y: 0 },
       { x: 5, y: 0 },

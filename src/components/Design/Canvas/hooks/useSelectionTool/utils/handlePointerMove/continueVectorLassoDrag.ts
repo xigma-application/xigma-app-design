@@ -13,7 +13,7 @@ import { getVectorPointsInPolygon } from 'utils/canvas/vectorNetwork/getVectorPo
 import { screenToWorld } from '../../../../utils/screenToWorld';
 
 export const continueVectorLassoDrag = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs): void => {
-  if (canvasRefs.vectorLassoPathRef.current) {
+  if (canvasRefs.lassoMarquee.vectorLassoPathRef.current) {
     const state = store.getState();
     const openNodes = selectVectorEditingNodeIds(state)
       .map((id) => getVectorEditingNode(state.design.nodes, id))
@@ -21,10 +21,10 @@ export const continueVectorLassoDrag = (canvas: HTMLCanvasElement, event: Pointe
 
     if (openNodes.length > 0) {
       const point = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
-      const path = [...canvasRefs.vectorLassoPathRef.current, point];
+      const path = [...canvasRefs.lassoMarquee.vectorLassoPathRef.current, point];
 
-      canvasRefs.vectorLassoPathRef.current = path;
-      canvasRefs.selectedVectorVertexIdsRef.current = openNodes.flatMap((node) => getVectorPointsInPolygon(node, path));
+      canvasRefs.lassoMarquee.vectorLassoPathRef.current = path;
+      canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = openNodes.flatMap((node) => getVectorPointsInPolygon(node, path));
     }
   }
 };

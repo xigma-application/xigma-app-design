@@ -6,7 +6,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { THoverRefs, TPenRefs, TVectorEditRefs } from 'types/design/canvas/types';
 import { TPenDragOrigin, TPendingOutgoingTangent } from '../../../types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
@@ -27,13 +27,13 @@ const pointerEvent = (x: number, y: number): PointerEvent => new PointerEvent('p
 const createDragOriginRef = (value: TPenDragOrigin | null = null): RefObject<TPenDragOrigin | null> => ({ current: value });
 const createDragStartRef = (value: TPoint | null = null): RefObject<TPoint | null> => ({ current: value });
 const createPendingOutgoingTangentRef = (): RefObject<TPendingOutgoingTangent | null> => ({ current: null });
-const createPenPreviewRef = (): TCanvasRefs['penPreviewRef'] => ({ current: null });
-const createPenNewVertexPreviewRef = (): TCanvasRefs['penNewVertexPreviewRef'] => ({ current: null });
-const createPenDraggedHandlePositionRef = (): TCanvasRefs['penDraggedHandlePositionRef'] => ({ current: null });
-const createPenDraggedHandleIsSnappedRef = (): TCanvasRefs['penDraggedHandleIsSnappedRef'] => ({ current: false });
-const createHoveredSegmentIdRef = (): TCanvasRefs['hoveredSegmentIdRef'] => ({ current: null });
-const createPenHoveredDragArmableVertexRef = (): TCanvasRefs['penHoveredDragArmableVertexRef'] => ({ current: false });
-const createVectorAlignmentGuideRef = (): TCanvasRefs['vectorAlignmentGuideRef'] => ({ current: null });
+const createPenPreviewRef = (): TPenRefs['penPreviewRef'] => ({ current: null });
+const createPenNewVertexPreviewRef = (): TPenRefs['penNewVertexPreviewRef'] => ({ current: null });
+const createPenDraggedHandlePositionRef = (): TPenRefs['penDraggedHandlePositionRef'] => ({ current: null });
+const createPenDraggedHandleIsSnappedRef = (): TPenRefs['penDraggedHandleIsSnappedRef'] => ({ current: false });
+const createHoveredSegmentIdRef = (): THoverRefs['hoveredSegmentIdRef'] => ({ current: null });
+const createPenHoveredDragArmableVertexRef = (): TPenRefs['penHoveredDragArmableVertexRef'] => ({ current: false });
+const createVectorAlignmentGuideRef = (): TVectorEditRefs['vectorAlignmentGuideRef'] => ({ current: null });
 
 const addVectorNodeWithSegment = (): string => {
   store.dispatch(

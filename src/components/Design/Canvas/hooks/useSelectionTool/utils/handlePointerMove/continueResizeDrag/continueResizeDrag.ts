@@ -44,10 +44,10 @@ export const continueResizeDrag = (
     const point = getResizeQueryPoint(rawPoint, bounds, singleRotatableOrigin);
     const { anchors, scaleX, scaleY } = getResizeOrScaleFactors(isScaleTool, handle, bounds, point, aspectRatio, event.shiftKey);
     const rotatedAnchorSolver = getResizeAnchorSolver(bounds, handle, scaleX, scaleY, singleRotatableOrigin);
-    const snapshots = canvasRefs.resizedVectorNodeSnapshotsRef.current;
+    const snapshots = canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current;
 
-    if (snapshots && !canvasRefs.resizedNodeIdsRef.current) {
-      canvasRefs.resizedNodeIdsRef.current = new Set(snapshots.keys());
+    if (snapshots && !canvasRefs.transform.resizedNodeIdsRef.current) {
+      canvasRefs.transform.resizedNodeIdsRef.current = new Set(snapshots.keys());
     }
 
     originEntries.forEach(([id, origin]) => {

@@ -69,12 +69,14 @@ describe('disarmVectorEraseDrag', () => {
     const canvas = createCanvas();
     const setClassName = vi.fn();
     const canvasRefs = createCanvasRefs({
-      eraserDiameterRef: { current: 24 },
-      vectorEraseStrokeRef: {
-        current: [
-          { x: 40, y: 0 },
-          { x: 60, y: 0 },
-        ],
+      vectorErase: {
+        eraserDiameterRef: { current: 24 },
+        vectorEraseStrokeRef: {
+          current: [
+            { x: 40, y: 0 },
+            { x: 60, y: 0 },
+          ],
+        },
       },
     });
     const selectionRefs = createSelectionToolRefs({
@@ -86,7 +88,7 @@ describe('disarmVectorEraseDrag', () => {
 
     // result — the [40, 60] stretch is gone (two stubs), preview + drag cleared
     expect(Object.keys(currentNode(nodeId).segments)).toHaveLength(2);
-    expect(canvasRefs.vectorEraseStrokeRef.current).toBeNull();
+    expect(canvasRefs.vectorErase.vectorEraseStrokeRef.current).toBeNull();
     expect(selectionRefs.vectorEraseDragRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
     expect(setClassName).toHaveBeenCalledWith('erase');

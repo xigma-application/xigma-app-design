@@ -20,16 +20,19 @@ export const armVectorHandleClick = (
   hit: TVectorHandleHit,
   point: TPoint,
 ): void => {
-  const isHitHandleSelected = canvasRefs.selectedVectorHandlesRef.current.some(
+  const isHitHandleSelected = canvasRefs.vectorEdit.selectedVectorHandlesRef.current.some(
     (handle) => handle.end === hit.end && handle.segmentId === hit.segmentId,
   );
 
   switch (true) {
     case event.shiftKey:
-      canvasRefs.selectedVectorHandlesRef.current = toggleVectorHandleSelection(canvasRefs.selectedVectorHandlesRef.current, {
-        end: hit.end,
-        segmentId: hit.segmentId,
-      });
+      canvasRefs.vectorEdit.selectedVectorHandlesRef.current = toggleVectorHandleSelection(
+        canvasRefs.vectorEdit.selectedVectorHandlesRef.current,
+        {
+          end: hit.end,
+          segmentId: hit.segmentId,
+        },
+      );
       break;
     case isPartOfVectorMultiSelection(canvasRefs, isHitHandleSelected):
       armVectorGroupDrag(canvas, event, canvasRefs, point, { end: hit.end, kind: 'handle', segmentId: hit.segmentId });

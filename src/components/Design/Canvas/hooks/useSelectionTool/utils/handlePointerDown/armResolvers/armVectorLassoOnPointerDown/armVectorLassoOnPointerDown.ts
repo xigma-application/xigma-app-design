@@ -14,10 +14,10 @@ export const armVectorLassoOnPointerDown = (context: TArmContext): true | undefi
   const vectorEditingNodeIds = selectVectorEditingNodeIds(store.getState());
 
   if (activeTool === ToolName.lasso && vectorEditingNodeIds.length > 0 && !hitsCurrentVectorSelection(context, vectorEditingNodeIds)) {
-    canvasRefs.selectedVectorVertexIdsRef.current = [];
-    canvasRefs.selectedVectorHandlesRef.current = [];
-    canvasRefs.selectedVectorSegmentIdsRef.current = [];
-    canvasRefs.vectorLassoPathRef.current = [point];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = [];
+    canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [];
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = [];
+    canvasRefs.lassoMarquee.vectorLassoPathRef.current = [point];
     setClassName('lasso');
     canvas.setPointerCapture(event.pointerId);
 

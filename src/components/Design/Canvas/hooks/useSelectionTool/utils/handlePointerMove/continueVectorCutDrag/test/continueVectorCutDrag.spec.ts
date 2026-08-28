@@ -67,7 +67,7 @@ describe('continueVectorCutDrag', () => {
     continueVectorCutDrag(canvas, pointerEvent(50, 0), canvasRefs, vectorCutDragRef);
 
     // result
-    expect(canvasRefs.vectorCutPreviewRef.current).toBeNull();
+    expect(canvasRefs.vectorCut.vectorCutPreviewRef.current).toBeNull();
   });
 
   it('should stay "pending", writing no preview, while the drag has not yet crossed the minimum distance threshold', () => {
@@ -89,7 +89,7 @@ describe('continueVectorCutDrag', () => {
 
     // result
     expect(vectorCutDragRef.current!.status).toBe('pending');
-    expect(canvasRefs.vectorCutPreviewRef.current).toBeNull();
+    expect(canvasRefs.vectorCut.vectorCutPreviewRef.current).toBeNull();
   });
 
   it('should flip to "dividing" and populate live crossing markers once the drag crosses the threshold', () => {
@@ -111,10 +111,10 @@ describe('continueVectorCutDrag', () => {
 
     // result
     expect(vectorCutDragRef.current).toEqual({ lineStart: { x: -20, y: 50 }, status: 'dividing' });
-    expect(canvasRefs.vectorCutPreviewRef.current).toMatchObject({ lineEnd: { x: 60, y: 50 }, lineStart: { x: -20, y: 50 } });
+    expect(canvasRefs.vectorCut.vectorCutPreviewRef.current).toMatchObject({ lineEnd: { x: 60, y: 50 }, lineStart: { x: -20, y: 50 } });
     // crosses the left edge (s4, x=0) — the right edge (s2, x=100) is still ahead of the current pointer
-    expect(canvasRefs.vectorCutPreviewRef.current!.crossings).toHaveLength(1);
-    expect(canvasRefs.vectorCutPreviewRef.current!.crossings[0]).toMatchObject({ nodeId, segmentId: 's4' });
+    expect(canvasRefs.vectorCut.vectorCutPreviewRef.current!.crossings).toHaveLength(1);
+    expect(canvasRefs.vectorCut.vectorCutPreviewRef.current!.crossings[0]).toMatchObject({ nodeId, segmentId: 's4' });
   });
 
   it('should skip an open node id that no longer resolves to a real vector node, without crashing', () => {
@@ -131,8 +131,8 @@ describe('continueVectorCutDrag', () => {
     continueVectorCutDrag(canvas, pointerEvent(60, 50), canvasRefs, vectorCutDragRef);
 
     // result — the real node's crossing is still found, the stale id contributes nothing
-    expect(canvasRefs.vectorCutPreviewRef.current!.crossings).toHaveLength(1);
-    expect(canvasRefs.vectorCutPreviewRef.current!.crossings[0]).toMatchObject({ nodeId, segmentId: 's4' });
+    expect(canvasRefs.vectorCut.vectorCutPreviewRef.current!.crossings).toHaveLength(1);
+    expect(canvasRefs.vectorCut.vectorCutPreviewRef.current!.crossings[0]).toMatchObject({ nodeId, segmentId: 's4' });
   });
 
   it('should keep re-deriving crossings fresh on every subsequent frame once already "dividing"', () => {
@@ -149,6 +149,6 @@ describe('continueVectorCutDrag', () => {
     continueVectorCutDrag(canvas, pointerEvent(120, 50), canvasRefs, vectorCutDragRef);
 
     // result — both edges now crossed
-    expect(canvasRefs.vectorCutPreviewRef.current!.crossings.map((crossing) => crossing.segmentId).sort()).toEqual(['s2', 's4']);
+    expect(canvasRefs.vectorCut.vectorCutPreviewRef.current!.crossings.map((crossing) => crossing.segmentId).sort()).toEqual(['s2', 's4']);
   });
 });

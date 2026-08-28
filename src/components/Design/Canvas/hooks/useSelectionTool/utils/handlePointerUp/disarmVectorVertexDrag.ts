@@ -49,16 +49,16 @@ export const disarmVectorVertexDrag = (
           dispatch(deleteNode(dragState.mergeTarget.nodeId));
         }
 
-        canvasRefs.selectedVectorVertexIdsRef.current = [sourceVertexId];
-        canvasRefs.selectedVectorHandlesRef.current = [];
-        canvasRefs.selectedVectorSegmentIdsRef.current = [];
+        canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = [sourceVertexId];
+        canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [];
+        canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = [];
       }
     }
 
     canvas.releasePointerCapture(event.pointerId);
     selectionRefs.vectorVertexDragRef.current = null;
-    canvasRefs.vectorAlignmentGuideRef.current = null;
-    canvasRefs.draggedVectorFillFacesRef.current = null;
+    canvasRefs.vectorEdit.vectorAlignmentGuideRef.current = null;
+    canvasRefs.vectorSnapshots.draggedVectorFillFacesRef.current = null;
     setClassName(null);
   }
 };

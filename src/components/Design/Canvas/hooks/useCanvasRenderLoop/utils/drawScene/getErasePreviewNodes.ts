@@ -14,13 +14,13 @@ export const getErasePreviewNodes = (
   refs: TCanvasRefs,
   viewport: TViewport,
 ): TSceneNode[] => {
-  const strokePath = refs.vectorEraseStrokeRef.current;
+  const strokePath = refs.vectorErase.vectorEraseStrokeRef.current;
 
   if (activeTool !== ToolName.erase || !strokePath || strokePath.length === 0 || vectorEditingNodeIds.length === 0) {
     return nodes;
   }
 
-  const radius = refs.eraserDiameterRef.current / 2 / viewport.zoom;
+  const radius = refs.vectorErase.eraserDiameterRef.current / 2 / viewport.zoom;
 
   return nodes.map((node) => {
     if (node.type !== NodeType.vector || !vectorEditingNodeIds.includes(node.id)) {

@@ -49,25 +49,35 @@ export const handlePointerUp = (
   disarmEndpointDrag(canvas, event, selectionRefs.endpointDragRef);
   disarmPathOffsetDrag(canvas, event, selectionRefs.pathOffsetDragRef, setClassName);
   disarmResizeDrag(canvas, event, dispatch, selectionRefs.resizeDragRef, canvasRefs);
-  disarmRotateDrag(canvas, event, dispatch, canvasRefs.rotateDragRef, canvasRefs);
-  disarmCornerRadiusDrag(canvas, event, canvasRefs.cornerRadiusDragRef);
-  disarmPolygonCornerRadiusDrag(canvas, event, canvasRefs.polygonCornerRadiusDragRef);
-  disarmStarCornerRadiusDrag(canvas, event, canvasRefs.starCornerRadiusDragRef);
+  disarmRotateDrag(canvas, event, dispatch, canvasRefs.transform.rotateDragRef, canvasRefs);
+  disarmCornerRadiusDrag(canvas, event, canvasRefs.cornerRadius.cornerRadiusDragRef);
+  disarmPolygonCornerRadiusDrag(canvas, event, canvasRefs.cornerRadius.polygonCornerRadiusDragRef);
+  disarmStarCornerRadiusDrag(canvas, event, canvasRefs.cornerRadius.starCornerRadiusDragRef);
   disarmPolygonVertexCountDrag(canvas, event, selectionRefs.polygonVertexCountDragRef);
   disarmStarVertexCountDrag(canvas, event, selectionRefs.starVertexCountDragRef);
   disarmStarRatioDrag(canvas, event, selectionRefs.starRatioDragRef);
-  disarmEllipseArcDrag(canvas, event, canvasRefs.ellipseArcDragRef);
-  disarmEllipseArcRotateDrag(canvas, event, canvasRefs.ellipseArcRotateDragRef);
-  disarmEllipseArcRatioDrag(canvas, event, canvasRefs.ellipseArcRatioDragRef);
-  disarmMarqueeDrag(canvas, event, selectionRefs.marqueeStartRef, canvasRefs.marqueeRef);
+  disarmEllipseArcDrag(canvas, event, canvasRefs.ellipseArc.ellipseArcDragRef);
+  disarmEllipseArcRotateDrag(canvas, event, canvasRefs.ellipseArc.ellipseArcRotateDragRef);
+  disarmEllipseArcRatioDrag(canvas, event, canvasRefs.ellipseArc.ellipseArcRatioDragRef);
+  disarmMarqueeDrag(canvas, event, selectionRefs.marqueeStartRef, canvasRefs.lassoMarquee.marqueeRef);
   disarmVectorVertexDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   disarmVectorHandleDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   disarmVectorLassoDrag(canvas, event, canvasRefs, setClassName);
   disarmVectorPaintDrag(canvas, event, canvasRefs, setClassName);
   disarmVectorShapeBuilderDrag(canvas, event, dispatch, canvasRefs, setClassName);
   disarmVectorMultiDrag(canvas, event, dispatch, canvasRefs, setClassName);
-  disarmVectorMultiSelectResizeDrag(canvas, event, canvasRefs.vectorMultiSelectResizeDragRef, canvasRefs.vectorMultiSelectBoxRef);
-  disarmVectorMultiSelectRotateDrag(canvas, event, canvasRefs.vectorMultiSelectRotateDragRef, canvasRefs.vectorMultiSelectBoxRef);
+  disarmVectorMultiSelectResizeDrag(
+    canvas,
+    event,
+    canvasRefs.vectorMultiSelect.vectorMultiSelectResizeDragRef,
+    canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef,
+  );
+  disarmVectorMultiSelectRotateDrag(
+    canvas,
+    event,
+    canvasRefs.vectorMultiSelect.vectorMultiSelectRotateDragRef,
+    canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef,
+  );
   disarmVectorSegmentBendDrag(canvas, event, dispatch, canvasRefs, selectionRefs.vectorSegmentBendDragRef, setClassName);
   disarmVectorCutDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   disarmVectorEraseDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);

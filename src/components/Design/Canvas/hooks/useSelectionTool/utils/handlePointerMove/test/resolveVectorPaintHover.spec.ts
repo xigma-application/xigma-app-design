@@ -64,7 +64,7 @@ describe('resolveVectorPaintHover', () => {
     resolveVectorPaintHover(canvas, pointerEvent(50, 40), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorPaintFaceKeyRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorPaintFaceKeyRef.current).toBeNull();
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -79,7 +79,7 @@ describe('resolveVectorPaintHover', () => {
     resolveVectorPaintHover(canvas, pointerEvent(50, 40), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorPaintFaceKeyRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorPaintFaceKeyRef.current).toBeNull();
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -96,7 +96,7 @@ describe('resolveVectorPaintHover', () => {
     resolveVectorPaintHover(canvas, pointerEvent(50, 40, 1), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorPaintFaceKeyRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorPaintFaceKeyRef.current).toBeNull();
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -113,7 +113,7 @@ describe('resolveVectorPaintHover', () => {
     resolveVectorPaintHover(canvas, pointerEvent(50, 40), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorPaintFaceKeyRef.current).toEqual({ faceKey: 's1,s2,s3', isFilled: false, nodeId });
+    expect(canvasRefs.hover.hoveredVectorPaintFaceKeyRef.current).toEqual({ faceKey: 's1,s2,s3', isFilled: false, nodeId });
     expect(setClassName).toHaveBeenCalledWith('paint-add');
   });
 
@@ -162,7 +162,7 @@ describe('resolveVectorPaintHover', () => {
     resolveVectorPaintHover(canvas, pointerEvent(550, 540), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorPaintFaceKeyRef.current).toEqual({ faceKey: 's1,s2,s3', isFilled: false, nodeId: secondNodeId });
+    expect(canvasRefs.hover.hoveredVectorPaintFaceKeyRef.current).toEqual({ faceKey: 's1,s2,s3', isFilled: false, nodeId: secondNodeId });
     expect(setClassName).toHaveBeenCalledWith('paint-add');
   });
 
@@ -179,7 +179,7 @@ describe('resolveVectorPaintHover', () => {
     resolveVectorPaintHover(canvas, pointerEvent(500, 500), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorPaintFaceKeyRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorPaintFaceKeyRef.current).toBeNull();
     expect(setClassName).toHaveBeenCalledWith('paint');
   });
 });

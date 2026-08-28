@@ -113,7 +113,7 @@ describe('continueVectorVertexDrag', () => {
       vertices: { v1: { id: 'v1', x: 15, y: 7 }, v2: { id: 'v2', x: 100, y: 0 } },
     });
     expect(setClassName).toHaveBeenCalledWith('move');
-    expect(canvasRefs.vectorAlignmentGuideRef.current).toBeNull();
+    expect(canvasRefs.vectorEdit.vectorAlignmentGuideRef.current).toBeNull();
   });
 
   it('should snap a single dragged vertex onto an alignment guide with a vertex on a completely separate vector node, and record the guide', () => {
@@ -158,7 +158,7 @@ describe('continueVectorVertexDrag', () => {
     const node = store.getState().design.nodes[idA];
 
     expect(node).toMatchObject({ vertices: { v1: { id: 'v1', x: 20, y: 350 } } });
-    expect(canvasRefs.vectorAlignmentGuideRef.current).not.toBeNull();
+    expect(canvasRefs.vectorEdit.vectorAlignmentGuideRef.current).not.toBeNull();
   });
 
   it('should snap the whole dragged group by the same correction when only ONE of several selected vertices touches an alignment guide, keeping the group rigid', () => {
@@ -205,7 +205,7 @@ describe('continueVectorVertexDrag', () => {
     expect(node).toMatchObject({
       vertices: { v1: { id: 'v1', x: 20, y: 350 }, v2: { id: 'v2', x: 120, y: 350 } },
     });
-    expect(canvasRefs.vectorAlignmentGuideRef.current).not.toBeNull();
+    expect(canvasRefs.vectorEdit.vectorAlignmentGuideRef.current).not.toBeNull();
   });
 
   it('should snap a single dragged vertex exactly onto another vertex of the SAME node when within merge tolerance, record the merge target, and switch the cursor to point', () => {
@@ -242,7 +242,7 @@ describe('continueVectorVertexDrag', () => {
 
     expect(node).toMatchObject({ vertices: { v1: { id: 'v1', x: 5100, y: 0 } } });
     expect(selectionRefs.vectorVertexDragRef.current?.mergeTarget).toEqual({ nodeId: idA, vertexId: 'v2' });
-    expect(canvasRefs.vectorAlignmentGuideRef.current).toBeNull();
+    expect(canvasRefs.vectorEdit.vectorAlignmentGuideRef.current).toBeNull();
     expect(setClassName).toHaveBeenCalledWith('point');
   });
 

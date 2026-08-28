@@ -16,7 +16,8 @@ import { resolveHover } from './utils/resolveHover/resolveHover';
 import { setHoverState } from './utils/setHoverState';
 
 export const useHoverHighlight = (refs: TCanvasRefs): void => {
-  const { canvasRef, hoverRef } = refs;
+  const { canvasRef, hover } = refs;
+  const { hoverRef } = hover;
   const activeTool = useAppSelector(selectActiveTool);
   const { setClassName } = useClassNames();
 

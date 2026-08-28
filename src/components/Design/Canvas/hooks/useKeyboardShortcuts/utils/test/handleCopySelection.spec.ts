@@ -95,7 +95,7 @@ describe('handleCopySelection', () => {
 
     store.dispatch(setVectorEditingNodeIds([vectorId]));
 
-    const refs = createCanvasRefs({ selectedVectorVertexIdsRef: { current: ['v1'] } });
+    const refs = createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['v1'] } } });
 
     // action
     handleCopySelection(refs);

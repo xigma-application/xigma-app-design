@@ -663,7 +663,7 @@ describe('continueResizeDrag', () => {
       const canvasRefs = createCanvasRefs();
       const snapshot = buildSnapshot();
 
-      canvasRefs.resizedVectorNodeSnapshotsRef.current = new Map([[idA, snapshot]]);
+      canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current = new Map([[idA, snapshot]]);
 
       const nodeBefore = store.getState().design.nodes[idA];
 
@@ -674,7 +674,7 @@ describe('continueResizeDrag', () => {
       expect(store.getState().design.nodes[idA]).toBe(nodeBefore);
       expect(snapshot.scaleX).toBeCloseTo(1.5);
       expect(snapshot.scaleY).toBeCloseTo(1.6);
-      expect(canvasRefs.resizedNodeIdsRef.current).toEqual(new Set([idA]));
+      expect(canvasRefs.transform.resizedNodeIdsRef.current).toEqual(new Set([idA]));
     });
 
     it('should not replace an already-initialized resized-node-ids set on a subsequent pointermove', () => {
@@ -695,17 +695,17 @@ describe('continueResizeDrag', () => {
       });
       const canvasRefs = createCanvasRefs();
 
-      canvasRefs.resizedVectorNodeSnapshotsRef.current = new Map([[idA, buildSnapshot()]]);
+      canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current = new Map([[idA, buildSnapshot()]]);
 
       const existingSet = new Set(['some-other-id']);
 
-      canvasRefs.resizedNodeIdsRef.current = existingSet;
+      canvasRefs.transform.resizedNodeIdsRef.current = existingSet;
 
       // before
       continueResizeDrag(canvas, pointerEvent(150, 80), store.dispatch, resizeDragRef, canvasRefs);
 
       // result
-      expect(canvasRefs.resizedNodeIdsRef.current).toBe(existingSet);
+      expect(canvasRefs.transform.resizedNodeIdsRef.current).toBe(existingSet);
     });
 
     it('should update a snapshotted SINGLE ROTATED vector node’s pivot/scaledCenter (not just anchor/scale) via the rotated-anchor solver, without touching the store', () => {
@@ -728,7 +728,7 @@ describe('continueResizeDrag', () => {
       const snapshot = buildSnapshot();
 
       snapshot.rotation = 90;
-      canvasRefs.resizedVectorNodeSnapshotsRef.current = new Map([[idA, snapshot]]);
+      canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current = new Map([[idA, snapshot]]);
 
       const nodeBefore = store.getState().design.nodes[idA];
 
@@ -762,7 +762,7 @@ describe('continueResizeDrag', () => {
       });
       const canvasRefs = createCanvasRefs();
 
-      canvasRefs.resizedVectorNodeSnapshotsRef.current = new Map([[idVector, buildSnapshot()]]);
+      canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current = new Map([[idVector, buildSnapshot()]]);
 
       // before
       continueResizeDrag(canvas, pointerEvent(150, 80), store.dispatch, resizeDragRef, canvasRefs);

@@ -61,7 +61,7 @@ describe('armVectorMultiDrag', () => {
     );
 
     // result
-    expect(canvasRefs.vectorMultiDragRef.current).toEqual({
+    expect(canvasRefs.vectorMultiSelect.vectorMultiDragRef.current).toEqual({
       boxOrigin: null,
       dispatchThrottle: { frameId: null, run: null },
       handleOrigins: { 'end:s1': { x: -5, y: 0 }, 'start:s1': { x: 5, y: 0 } },
@@ -85,7 +85,7 @@ describe('armVectorMultiDrag', () => {
     });
 
     // result
-    expect(canvasRefs.vectorMultiDragRef.current?.handleOrigins).toEqual({});
+    expect(canvasRefs.vectorMultiSelect.vectorMultiDragRef.current?.handleOrigins).toEqual({});
   });
 
   it('should default the pending click action to null when none is given, and store one when given', () => {
@@ -110,8 +110,8 @@ describe('armVectorMultiDrag', () => {
     );
 
     // result
-    expect(canvasRefs.vectorMultiDragRef.current?.pendingClickAction).toEqual({ id: 'v1', kind: 'vertex' });
-    expect(canvasRefs.vectorMultiDragRef.current?.hasMoved).toBe(false);
+    expect(canvasRefs.vectorMultiSelect.vectorMultiDragRef.current?.pendingClickAction).toEqual({ id: 'v1', kind: 'vertex' });
+    expect(canvasRefs.vectorMultiSelect.vectorMultiDragRef.current?.hasMoved).toBe(false);
   });
 
   it('should populate draggedVectorFillFacesRef when a dragged vertex touches a filled face', () => {
@@ -143,7 +143,7 @@ describe('armVectorMultiDrag', () => {
     armVectorMultiDrag(canvas, pointerEvent(), canvasRefs, nodes, ['square'], ['v1'], [], { x: 0, y: 0 });
 
     // result
-    expect(canvasRefs.draggedVectorFillFacesRef.current?.square).toHaveLength(1);
+    expect(canvasRefs.vectorSnapshots.draggedVectorFillFacesRef.current?.square).toHaveLength(1);
   });
 
   it('should clear draggedVectorFillFacesRef when nothing dragged touches a filled face', () => {
@@ -155,6 +155,6 @@ describe('armVectorMultiDrag', () => {
     armVectorMultiDrag(canvas, pointerEvent(), canvasRefs, nodes, vectorEditingNodeIds, [], [], { x: 0, y: 0 });
 
     // result
-    expect(canvasRefs.draggedVectorFillFacesRef.current).toBeNull();
+    expect(canvasRefs.vectorSnapshots.draggedVectorFillFacesRef.current).toBeNull();
   });
 });

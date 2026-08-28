@@ -14,7 +14,7 @@ export const commitResizedVectorNodeSnapshots = (
   resizeDragState: TResizeDragState,
   canvasRefs: TCanvasRefs,
 ): void => {
-  const snapshots = canvasRefs.resizedVectorNodeSnapshotsRef.current;
+  const snapshots = canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current;
 
   if (snapshots) {
     const isSingleNodeResize = Object.keys(resizeDragState.nodeOrigins).length === 1;
@@ -40,6 +40,6 @@ export const commitResizedVectorNodeSnapshots = (
       }
     });
 
-    canvasRefs.resizedVectorNodeSnapshotsRef.current = null;
+    canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current = null;
   }
 };

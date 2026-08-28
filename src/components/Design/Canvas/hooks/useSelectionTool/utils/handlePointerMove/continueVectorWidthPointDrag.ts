@@ -27,7 +27,7 @@ export const continueVectorWidthPointDrag = (
   canvasRefs: TCanvasRefs,
   setClassName: (className: string | null) => void,
 ): void => {
-  const drag = canvasRefs.vectorWidthPointDragRef.current;
+  const drag = canvasRefs.vectorWidth.vectorWidthPointDragRef.current;
 
   if (drag) {
     const state = store.getState();

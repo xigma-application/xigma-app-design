@@ -99,7 +99,7 @@ describe('continueVectorHandleDrag', () => {
 
     expect(node).toMatchObject({ segments: { s1: { tangentStart: { x: 20, y: 5 } } } });
     expect(setClassName).toHaveBeenCalledWith('move');
-    expect(canvasRefs.snappedVectorHandleRef.current).toBeNull();
+    expect(canvasRefs.vectorEdit.snappedVectorHandleRef.current).toBeNull();
   });
 
   it('should set the tangentEnd on the dragged segment relative to the vertex when dragging the "end" handle', () => {
@@ -140,7 +140,7 @@ describe('continueVectorHandleDrag', () => {
     const node = store.getState().design.nodes[idA];
 
     expect(node).toMatchObject({ segments: { s1: { tangentStart: { x: 20, y: 0 } } } });
-    expect(canvasRefs.snappedVectorHandleRef.current).toEqual({ end: 'start', segmentId: 's1' });
+    expect(canvasRefs.vectorEdit.snappedVectorHandleRef.current).toEqual({ end: 'start', segmentId: 's1' });
   });
 
   it('should snap the dragged handle tip onto an alignment guide with a vertex on a completely separate vector node, and record the guide', () => {
@@ -179,7 +179,7 @@ describe('continueVectorHandleDrag', () => {
     const node = store.getState().design.nodes[idA];
 
     expect(node).toMatchObject({ segments: { s1: { tangentStart: { x: 20, y: 350 } } } });
-    expect(canvasRefs.vectorAlignmentGuideRef.current).not.toBeNull();
+    expect(canvasRefs.vectorEdit.vectorAlignmentGuideRef.current).not.toBeNull();
   });
 
   it('should clear a previously recorded snapped handle once the drag angle leaves the tolerance again', () => {
@@ -190,12 +190,12 @@ describe('continueVectorHandleDrag', () => {
     const selectionRefs = createSelectionToolRefs();
 
     selectionRefs.vectorHandleDragRef.current = { end: 'start', nodeId: idA, segmentId: 's1', vertexId: 'v1' };
-    canvasRefs.snappedVectorHandleRef.current = { end: 'start', segmentId: 's1' };
+    canvasRefs.vectorEdit.snappedVectorHandleRef.current = { end: 'start', segmentId: 's1' };
 
     // before — atan2(5, 20) ≈ 14deg, outside the tolerance
     continueVectorHandleDrag(canvas, pointerEvent(20, 5), store.dispatch, canvasRefs, selectionRefs, vi.fn());
 
     // result
-    expect(canvasRefs.snappedVectorHandleRef.current).toBeNull();
+    expect(canvasRefs.vectorEdit.snappedVectorHandleRef.current).toBeNull();
   });
 });

@@ -56,14 +56,14 @@ describe('selectToolbarTool', () => {
 
     const refs = createCanvasRefs();
 
-    refs.penNewVertexPreviewRef.current = { x: 5, y: 5 };
+    refs.pen.penNewVertexPreviewRef.current = { x: 5, y: 5 };
 
     // action
     selectToolbarTool(store.dispatch, ToolName.frame, refs);
 
     // result
     expect(store.getState().design.penActiveVertexId).toBeNull();
-    expect(refs.penNewVertexPreviewRef.current).toBeNull();
+    expect(refs.pen.penNewVertexPreviewRef.current).toBeNull();
   });
 
   it('should not touch the active pen vertex when switching within the pen group', () => {

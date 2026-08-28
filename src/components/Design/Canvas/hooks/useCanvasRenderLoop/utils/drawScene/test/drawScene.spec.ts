@@ -203,7 +203,7 @@ describe('drawScene', () => {
     const hoveredId = rootOrder[rootOrder.length - 1];
 
     // before
-    drawScene(gl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ hoverRef: { current: hoveredId } }));
+    drawScene(gl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ hover: { hoverRef: { current: hoveredId } } }));
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 24);
@@ -419,7 +419,7 @@ describe('drawScene', () => {
     const countHoverOutlineDraws = (): number => {
       const gl = createGlMock();
 
-      drawScene(gl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ hoverRef: { current: editingId } }));
+      drawScene(gl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ hover: { hoverRef: { current: editingId } } }));
 
       return (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(
         ([mode, offset, count]) => mode === gl.TRIANGLES && offset === 0 && count === 24,
@@ -526,7 +526,7 @@ describe('drawScene', () => {
     const countTriangleFanDraws = (hoveredNodeId: string | null): number => {
       const gl = createGlMock();
 
-      drawScene(gl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ hoverRef: { current: hoveredNodeId } }));
+      drawScene(gl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ hover: { hoverRef: { current: hoveredNodeId } } }));
 
       return (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLE_FAN).length;
     };
@@ -575,7 +575,7 @@ describe('drawScene', () => {
     const countTriangleFanDraws = (hoveredNodeId: string | null): number => {
       const gl = createGlMock();
 
-      drawScene(gl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ hoverRef: { current: hoveredNodeId } }));
+      drawScene(gl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ hover: { hoverRef: { current: hoveredNodeId } } }));
 
       return (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLE_FAN).length;
     };
@@ -622,7 +622,7 @@ describe('drawScene', () => {
     // before
     const restingGl = createGlMock();
 
-    drawScene(restingGl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ hoverRef: { current: rectId } }));
+    drawScene(restingGl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs({ hover: { hoverRef: { current: rectId } } }));
 
     // action
     const draggingGl = createGlMock();
@@ -634,18 +634,20 @@ describe('drawScene', () => {
       IMAGE_CONTEXT,
       canvas,
       createCanvasRefs({
-        cornerRadiusDragRef: {
-          current: {
-            bounds: { height: 100, width: 100, x: 0, y: 0 },
-            candidates: ['ne'],
-            corner: 'ne',
-            hasMoved: true,
-            nodeId: rectId,
-            pointerStart: { x: 0, y: 0 },
-            rotation: 0,
+        cornerRadius: {
+          cornerRadiusDragRef: {
+            current: {
+              bounds: { height: 100, width: 100, x: 0, y: 0 },
+              candidates: ['ne'],
+              corner: 'ne',
+              hasMoved: true,
+              nodeId: rectId,
+              pointerStart: { x: 0, y: 0 },
+              rotation: 0,
+            },
           },
         },
-        hoverRef: { current: rectId },
+        hover: { hoverRef: { current: rectId } },
       }),
     );
 

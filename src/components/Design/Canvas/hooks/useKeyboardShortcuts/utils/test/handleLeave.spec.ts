@@ -105,13 +105,18 @@ describe('handleLeave', () => {
       const refs = createCanvasRefs();
 
       realStore.dispatch(setPenActiveVertexId('vertex-1'));
-      refs.penPreviewRef.current = { from: { x: 0, y: 0 }, isSnapped: false, tangentFromOffset: { x: 10, y: 10 }, to: { x: 20, y: 20 } };
+      refs.pen.penPreviewRef.current = {
+        from: { x: 0, y: 0 },
+        isSnapped: false,
+        tangentFromOffset: { x: 10, y: 10 },
+        to: { x: 20, y: 20 },
+      };
 
       // action
       handleLeave(realStore.dispatch, refs);
 
       // result
-      expect(refs.penPreviewRef.current).toBeNull();
+      expect(refs.pen.penPreviewRef.current).toBeNull();
     });
 
     it('should delete a dangling, still-unconnected active vertex via handleEscapePenActiveVertex — see its own spec for the full outer/inner-node scenarios', () => {

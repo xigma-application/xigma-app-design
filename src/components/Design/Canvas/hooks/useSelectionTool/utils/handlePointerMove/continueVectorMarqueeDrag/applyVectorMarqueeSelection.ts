@@ -11,23 +11,23 @@ export const applyVectorMarqueeSelection = (
 ): void => {
   switch (mode) {
     case 'handles':
-      canvasRefs.selectedVectorVertexIdsRef.current = [];
-      canvasRefs.selectedVectorHandlesRef.current = handleHits;
-      canvasRefs.selectedVectorSegmentIdsRef.current = [];
+      canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = [];
+      canvasRefs.vectorEdit.selectedVectorHandlesRef.current = handleHits;
+      canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = [];
       break;
     case 'points':
-      canvasRefs.selectedVectorVertexIdsRef.current = vertexIds;
-      canvasRefs.selectedVectorHandlesRef.current = [];
-      canvasRefs.selectedVectorSegmentIdsRef.current = [];
+      canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = vertexIds;
+      canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [];
+      canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = [];
       break;
     case 'everything':
-      canvasRefs.selectedVectorVertexIdsRef.current = [];
-      canvasRefs.selectedVectorHandlesRef.current = [];
-      canvasRefs.selectedVectorSegmentIdsRef.current = segmentHits;
+      canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = [];
+      canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [];
+      canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = segmentHits;
       break;
     default:
-      canvasRefs.selectedVectorVertexIdsRef.current = [];
-      canvasRefs.selectedVectorHandlesRef.current = [];
-      canvasRefs.selectedVectorSegmentIdsRef.current = [];
+      canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = [];
+      canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [];
+      canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = [];
   }
 };

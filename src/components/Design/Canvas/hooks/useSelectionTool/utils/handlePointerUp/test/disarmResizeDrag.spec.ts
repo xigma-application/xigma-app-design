@@ -76,7 +76,7 @@ describe('disarmResizeDrag', () => {
       },
     });
 
-    canvasRefs.resizedVectorNodeSnapshotsRef.current = new Map([
+    canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current = new Map([
       [
         'vector-1',
         {
@@ -102,8 +102,8 @@ describe('disarmResizeDrag', () => {
 
     // result
     expect(dispatch).toHaveBeenCalledTimes(1);
-    expect(canvasRefs.resizedVectorNodeSnapshotsRef.current).toBeNull();
-    expect(canvasRefs.resizedNodeIdsRef.current).toBeNull();
+    expect(canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current).toBeNull();
+    expect(canvasRefs.transform.resizedNodeIdsRef.current).toBeNull();
   });
 
   it('should skip a snapshotted node whose origin was never captured, without dispatching or throwing', () => {
@@ -117,7 +117,7 @@ describe('disarmResizeDrag', () => {
       nodeOrigins: {},
     });
 
-    canvasRefs.resizedVectorNodeSnapshotsRef.current = new Map([
+    canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current = new Map([
       [
         'vector-1',
         {
@@ -143,7 +143,7 @@ describe('disarmResizeDrag', () => {
 
     // result
     expect(dispatch).not.toHaveBeenCalled();
-    expect(canvasRefs.resizedVectorNodeSnapshotsRef.current).toBeNull();
+    expect(canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current).toBeNull();
   });
 
   describe('rotated single vector node, snapshot path vs. direct dispatch', () => {

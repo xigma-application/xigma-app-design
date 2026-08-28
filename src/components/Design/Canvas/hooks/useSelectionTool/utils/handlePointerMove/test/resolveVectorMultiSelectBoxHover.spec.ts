@@ -58,7 +58,7 @@ describe('resolveVectorMultiSelectBoxHover', () => {
     const canvasRefs = createCanvasRefs();
     const setClassName = vi.fn();
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     resolveVectorMultiSelectBoxHover(canvas, pointerEvent(50, 50), canvasRefs, setClassName);
@@ -76,7 +76,7 @@ describe('resolveVectorMultiSelectBoxHover', () => {
     const setClassName = vi.fn();
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
 
     // before
     resolveVectorMultiSelectBoxHover(canvas, pointerEvent(0, 0), canvasRefs, setClassName);
@@ -94,7 +94,7 @@ describe('resolveVectorMultiSelectBoxHover', () => {
     const setClassName = vi.fn();
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     resolveVectorMultiSelectBoxHover(canvas, pointerEvent(98, 98), canvasRefs, setClassName);
@@ -112,7 +112,7 @@ describe('resolveVectorMultiSelectBoxHover', () => {
     const setClassName = vi.fn();
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     resolveVectorMultiSelectBoxHover(canvas, pointerEvent(107, 107), canvasRefs, setClassName);
@@ -130,7 +130,7 @@ describe('resolveVectorMultiSelectBoxHover', () => {
     const setClassName = vi.fn();
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     resolveVectorMultiSelectBoxHover(canvas, pointerEvent(50, 50), canvasRefs, setClassName);
@@ -150,7 +150,7 @@ describe('resolveVectorMultiSelectBoxHover', () => {
     const setClassName = vi.fn();
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     resolveVectorMultiSelectBoxHover(canvas, pointerEvent(98, 98), canvasRefs, setClassName);
@@ -169,7 +169,7 @@ describe('resolveVectorMultiSelectBoxHover', () => {
     const setClassName = vi.fn();
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     resolveVectorMultiSelectBoxHover(canvas, pointerEvent(107, 107), canvasRefs, setClassName);
@@ -186,7 +186,7 @@ describe('resolveVectorMultiSelectBoxHover', () => {
     const setClassName = vi.fn();
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     resolveVectorMultiSelectBoxHover(canvas, pointerEvent(500, 500), canvasRefs, setClassName);

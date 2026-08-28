@@ -55,14 +55,14 @@ describe('armVectorGroupDrag', () => {
     const canvasRefs = createCanvasRefs();
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1', 'v2'];
 
     // before
     armVectorGroupDrag(canvas, pointerEvent(3), canvasRefs, { x: 0, y: 0 }, { id: 'v1', kind: 'vertex' });
 
     // result
-    expect(canvasRefs.vectorMultiDragRef.current?.boxOrigin).toEqual({ height: 100, width: 100, x: 0, y: 0 });
-    expect(canvasRefs.vectorMultiSelectBoxRef.current).toEqual({
+    expect(canvasRefs.vectorMultiSelect.vectorMultiDragRef.current?.boxOrigin).toEqual({ height: 100, width: 100, x: 0, y: 0 });
+    expect(canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef.current).toEqual({
       bounds: { height: 100, width: 100, x: 0, y: 0 },
       rotation: 0,
       selectionKey: 'v1,v2',
@@ -76,14 +76,14 @@ describe('armVectorGroupDrag', () => {
     const canvasRefs = createCanvasRefs();
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
 
     // before
     armVectorGroupDrag(canvas, pointerEvent(3), canvasRefs, { x: 0, y: 0 }, { id: 'v1', kind: 'vertex' });
 
     // result
-    expect(canvasRefs.vectorMultiDragRef.current?.boxOrigin).toBeNull();
-    expect(canvasRefs.vectorMultiSelectBoxRef.current).toBeNull();
+    expect(canvasRefs.vectorMultiSelect.vectorMultiDragRef.current?.boxOrigin).toBeNull();
+    expect(canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef.current).toBeNull();
   });
 
   it('should include vertices reachable through a selected segment in both the drag and the box, since a lone selected segment resolves to its two endpoints', () => {
@@ -94,15 +94,15 @@ describe('armVectorGroupDrag', () => {
     const canvasRefs = createCanvasRefs();
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
-    canvasRefs.selectedVectorSegmentIdsRef.current = ['s1'];
+    canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = ['s1'];
 
     // before
     armVectorGroupDrag(canvas, pointerEvent(3), canvasRefs, { x: 0, y: 0 }, { id: 's1', kind: 'segment' });
 
     // result
-    expect(canvasRefs.vectorMultiDragRef.current?.vertexOrigins).toEqual({ v1: { x: 0, y: 0 }, v2: { x: 100, y: 100 } });
-    expect(canvasRefs.vectorMultiDragRef.current?.boxOrigin).toEqual({ height: 100, width: 100, x: 0, y: 0 });
-    expect(canvasRefs.vectorMultiSelectBoxRef.current).toEqual({
+    expect(canvasRefs.vectorMultiSelect.vectorMultiDragRef.current?.vertexOrigins).toEqual({ v1: { x: 0, y: 0 }, v2: { x: 100, y: 100 } });
+    expect(canvasRefs.vectorMultiSelect.vectorMultiDragRef.current?.boxOrigin).toEqual({ height: 100, width: 100, x: 0, y: 0 });
+    expect(canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef.current).toEqual({
       bounds: { height: 100, width: 100, x: 0, y: 0 },
       rotation: 0,
       selectionKey: 'v1,v2',

@@ -62,7 +62,7 @@ describe('disarmRotateDrag', () => {
       startAngle: 0,
     });
 
-    canvasRefs.rotatedVectorNodeSnapshotsRef.current = new Map([
+    canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current = new Map([
       ['vector-1', { deltaDegrees: 90, facesByColor: [], pivot: { x: 50, y: 50 }, strokeColor: '#000000', strokeVertices: [] }],
     ]);
 
@@ -73,8 +73,8 @@ describe('disarmRotateDrag', () => {
 
     // result
     expect(dispatch).toHaveBeenCalledTimes(1);
-    expect(canvasRefs.rotatedVectorNodeSnapshotsRef.current).toBeNull();
-    expect(canvasRefs.rotatedNodeIdsRef.current).toBeNull();
+    expect(canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current).toBeNull();
+    expect(canvasRefs.transform.rotatedNodeIdsRef.current).toBeNull();
   });
 
   it('should skip a snapshotted node whose origin was never captured, without dispatching or throwing', () => {
@@ -88,7 +88,7 @@ describe('disarmRotateDrag', () => {
       startAngle: 0,
     });
 
-    canvasRefs.rotatedVectorNodeSnapshotsRef.current = new Map([
+    canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current = new Map([
       ['vector-1', { deltaDegrees: 90, facesByColor: [], pivot: { x: 50, y: 50 }, strokeColor: '#000000', strokeVertices: [] }],
     ]);
 
@@ -99,6 +99,6 @@ describe('disarmRotateDrag', () => {
 
     // result
     expect(dispatch).not.toHaveBeenCalled();
-    expect(canvasRefs.rotatedVectorNodeSnapshotsRef.current).toBeNull();
+    expect(canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current).toBeNull();
   });
 });

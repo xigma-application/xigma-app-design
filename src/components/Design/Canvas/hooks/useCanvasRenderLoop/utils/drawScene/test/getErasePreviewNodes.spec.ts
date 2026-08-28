@@ -39,8 +39,10 @@ const otherNode: TSceneNode = { ...vectorNode, id: 'v2' };
 
 const createRefs = (strokePath: TPoint[] | null, diameterPx: number): TCanvasRefs =>
   ({
-    eraserDiameterRef: { current: diameterPx },
-    vectorEraseStrokeRef: { current: strokePath },
+    vectorErase: {
+      eraserDiameterRef: { current: diameterPx },
+      vectorEraseStrokeRef: { current: strokePath },
+    },
   }) as TCanvasRefs;
 
 describe('getErasePreviewNodes', () => {

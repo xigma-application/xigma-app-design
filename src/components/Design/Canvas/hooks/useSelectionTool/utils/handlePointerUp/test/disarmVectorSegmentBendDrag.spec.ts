@@ -118,7 +118,7 @@ describe('disarmVectorSegmentBendDrag', () => {
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
 
     expect(node.segments.s1.tangentStart).not.toBeNull();
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
     expect(vectorSegmentBendDragRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
     expect(setClassName).toHaveBeenCalledWith(null);

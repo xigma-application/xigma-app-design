@@ -7,8 +7,8 @@ describe('getShapeBuilderPreviewFaces', () => {
     // mock
     const touchedFaces = { n1: new Set(['k1', 'k2']) };
     const refs = createCanvasRefs({
-      hoveredVectorShapeBuilderFaceRef: { current: { faceKey: 'other', nodeId: 'n2' } },
-      touchedVectorShapeBuilderFacesRef: { current: touchedFaces },
+      hover: { hoveredVectorShapeBuilderFaceRef: { current: { faceKey: 'other', nodeId: 'n2' } } },
+      shapeBuilder: { touchedVectorShapeBuilderFacesRef: { current: touchedFaces } },
     });
 
     // action
@@ -20,7 +20,7 @@ describe('getShapeBuilderPreviewFaces', () => {
 
   it('should fall back to the single hovered face when no drag is in progress', () => {
     // mock
-    const refs = createCanvasRefs({ hoveredVectorShapeBuilderFaceRef: { current: { faceKey: 'k1', nodeId: 'n1' } } });
+    const refs = createCanvasRefs({ hover: { hoveredVectorShapeBuilderFaceRef: { current: { faceKey: 'k1', nodeId: 'n1' } } } });
 
     // action
     const result = getShapeBuilderPreviewFaces(refs);

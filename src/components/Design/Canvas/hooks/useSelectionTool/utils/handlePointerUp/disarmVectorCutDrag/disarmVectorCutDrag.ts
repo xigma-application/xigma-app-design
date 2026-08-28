@@ -41,7 +41,7 @@ export const disarmVectorCutDrag = (
         dispatch(setActiveTool(ToolName.move));
       }
     } else if (dragState.status === 'dividing') {
-      const lineEnd = canvasRefs.vectorCutPreviewRef.current?.lineEnd ?? dragState.lineStart;
+      const lineEnd = canvasRefs.vectorCut.vectorCutPreviewRef.current?.lineEnd ?? dragState.lineStart;
 
       if (commitVectorDivide(dispatch, dragState.lineStart, lineEnd, vectorEditingNodeIds, canvasRefs)) {
         dispatch(setActiveTool(ToolName.move));
@@ -51,7 +51,7 @@ export const disarmVectorCutDrag = (
     markNewVectorCutVertices(canvasRefs, beforeNodes, vectorEditingNodeIds, selectVectorEditingNodeIds(store.getState()));
     canvas.releasePointerCapture(event.pointerId);
     selectionRefs.vectorCutDragRef.current = null;
-    canvasRefs.vectorCutPreviewRef.current = null;
+    canvasRefs.vectorCut.vectorCutPreviewRef.current = null;
     setClassName('cut-off');
   }
 };

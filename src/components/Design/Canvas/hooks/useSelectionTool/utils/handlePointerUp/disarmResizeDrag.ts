@@ -21,7 +21,7 @@ export const disarmResizeDrag = (
 
   if (resizeDragState) {
     commitResizedVectorNodeSnapshots(dispatch, resizeDragState, canvasRefs);
-    canvasRefs.resizedNodeIdsRef.current = null;
+    canvasRefs.transform.resizedNodeIdsRef.current = null;
     resizeDragRef.current = null;
     canvas.releasePointerCapture(event.pointerId);
   }

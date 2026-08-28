@@ -4,7 +4,7 @@ import { RefObject } from 'react';
 import { AppDispatch, AppStore } from 'store';
 
 // types
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { THoverRefs, TPenRefs, TVectorEditRefs } from 'types/design/canvas/types';
 import { TPenDragOrigin, TPendingOutgoingTangent } from '../../types';
 import { TPoint } from 'types/canvas';
 import { TViewport } from 'types/design/types';
@@ -21,10 +21,10 @@ export const continueVectorHandleDrag = (
   dispatch: AppDispatch,
   appStore: AppStore,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
-  penDraggedHandlePositionRef: TCanvasRefs['penDraggedHandlePositionRef'],
-  penDraggedHandleIsSnappedRef: TCanvasRefs['penDraggedHandleIsSnappedRef'],
-  vectorAlignmentGuideRef: TCanvasRefs['vectorAlignmentGuideRef'],
-  hoveredSegmentIdRef: TCanvasRefs['hoveredSegmentIdRef'],
+  penDraggedHandlePositionRef: TPenRefs['penDraggedHandlePositionRef'],
+  penDraggedHandleIsSnappedRef: TPenRefs['penDraggedHandleIsSnappedRef'],
+  vectorAlignmentGuideRef: TVectorEditRefs['vectorAlignmentGuideRef'],
+  hoveredSegmentIdRef: THoverRefs['hoveredSegmentIdRef'],
   setClassName: (className: string | null) => void,
 ): void => {
   updateVectorHandleDrag(

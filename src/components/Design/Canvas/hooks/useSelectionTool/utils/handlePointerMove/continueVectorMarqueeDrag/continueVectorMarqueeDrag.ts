@@ -39,7 +39,7 @@ export const continueVectorMarqueeDrag = (
       const point = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
       const rect = toDraftRect(vectorMarqueeStartRef.current, point);
       const visualSelectedVertexIds = getVisualSelectedVectorVertexIds(
-        canvasRefs.preVectorMarqueeVertexIdsRef.current,
+        canvasRefs.vectorEdit.preVectorMarqueeVertexIdsRef.current,
         selectPenActiveVertexId(state),
       );
       const vertexIds = openNodes.flatMap((node) => getVectorPointsInRect(node, rect));
@@ -48,7 +48,7 @@ export const continueVectorMarqueeDrag = (
         getVectorMarqueeHandleHitsForNode(node, rect, visualSelectedVertexIds, canvasRefs),
       );
 
-      canvasRefs.marqueeRef.current = rect;
+      canvasRefs.lassoMarquee.marqueeRef.current = rect;
       vectorMarqueeModeRef.current = resolveVectorMarqueeMode(vectorMarqueeModeRef.current, vertexIds, handleHits, segmentHits);
 
       applyVectorMarqueeSelection(canvasRefs, vectorMarqueeModeRef.current, vertexIds, handleHits, segmentHits);

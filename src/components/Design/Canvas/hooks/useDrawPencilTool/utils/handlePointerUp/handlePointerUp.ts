@@ -45,9 +45,9 @@ export const handlePointerUp = (
     axisLockRef.current = null;
     shiftAnchorRef.current = null;
     rawPointsRef.current = null;
-    refs.pencilPreviewPointsRef.current = null;
-    refs.pencilRawPreviewPointsRef.current = null;
-    refs.pencilShowRawPreviewRef.current = false;
+    refs.pencil.pencilPreviewPointsRef.current = null;
+    refs.pencil.pencilRawPreviewPointsRef.current = null;
+    refs.pencil.pencilShowRawPreviewRef.current = false;
     canvas.releasePointerCapture(event.pointerId);
   }
 };

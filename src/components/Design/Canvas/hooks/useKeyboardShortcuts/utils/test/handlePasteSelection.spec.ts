@@ -128,7 +128,7 @@ describe('handlePasteSelection', () => {
 
     store.dispatch(setVectorEditingNodeIds([vectorId]));
 
-    const copyRefs = createCanvasRefs({ selectedVectorVertexIdsRef: { current: ['v1'] } });
+    const copyRefs = createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['v1'] } } });
 
     handleCopySelection(copyRefs);
 
@@ -141,6 +141,6 @@ describe('handlePasteSelection', () => {
     const node = store.getState().design.nodes[vectorId] as any;
 
     expect(Object.keys(node.vertices)).toHaveLength(2);
-    expect(pasteRefs.selectedVectorVertexIdsRef.current).toHaveLength(1);
+    expect(pasteRefs.vectorEdit.selectedVectorVertexIdsRef.current).toHaveLength(1);
   });
 });

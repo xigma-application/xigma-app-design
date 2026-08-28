@@ -14,7 +14,7 @@ export const commitRotatedVectorNodeSnapshots = (
   rotateDragState: TRotateDragState,
   canvasRefs: TCanvasRefs,
 ): void => {
-  const snapshots = canvasRefs.rotatedVectorNodeSnapshotsRef.current;
+  const snapshots = canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current;
 
   if (snapshots) {
     const isSingleNodeRotate = Object.keys(rotateDragState.nodeOrigins).length === 1;
@@ -32,6 +32,6 @@ export const commitRotatedVectorNodeSnapshots = (
       }
     });
 
-    canvasRefs.rotatedVectorNodeSnapshotsRef.current = null;
+    canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current = null;
   }
 };

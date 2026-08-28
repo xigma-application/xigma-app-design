@@ -28,14 +28,14 @@ describe('resolveVectorEraseHover', () => {
 
   it('should clear the brush centre and leave the cursor untouched when Erase is not active', () => {
     // mock
-    const canvasRefs = createCanvasRefs({ eraseBrushCenterRef: { current: { x: 1, y: 1 } } });
+    const canvasRefs = createCanvasRefs({ vectorErase: { eraseBrushCenterRef: { current: { x: 1, y: 1 } } } });
     const setClassName = vi.fn();
 
     // before
     resolveVectorEraseHover(createCanvas(), pointerEvent(20, 0), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.eraseBrushCenterRef.current).toBeNull();
+    expect(canvasRefs.vectorErase.eraseBrushCenterRef.current).toBeNull();
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -49,7 +49,7 @@ describe('resolveVectorEraseHover', () => {
     resolveVectorEraseHover(createCanvas(), pointerEvent(20, 5, 1), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.eraseBrushCenterRef.current).toEqual({ x: 20, y: 5 });
+    expect(canvasRefs.vectorErase.eraseBrushCenterRef.current).toEqual({ x: 20, y: 5 });
     expect(setClassName).toHaveBeenCalledWith('erase');
   });
 
@@ -63,7 +63,7 @@ describe('resolveVectorEraseHover', () => {
     resolveVectorEraseHover(createCanvas(), pointerEvent(30, 40), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.eraseBrushCenterRef.current).toEqual({ x: 30, y: 40 });
+    expect(canvasRefs.vectorErase.eraseBrushCenterRef.current).toEqual({ x: 30, y: 40 });
     expect(setClassName).toHaveBeenCalledWith('erase');
   });
 });

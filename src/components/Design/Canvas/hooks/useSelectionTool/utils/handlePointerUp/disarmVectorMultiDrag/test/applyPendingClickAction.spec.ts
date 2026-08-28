@@ -51,31 +51,31 @@ describe('applyPendingClickAction', () => {
 
   it('should do nothing when there is no pending click action', () => {
     // mock
-    const canvasRefs = createCanvasRefs({ selectedVectorSegmentIdsRef: { current: ['s1'] } });
+    const canvasRefs = createCanvasRefs({ vectorEdit: { selectedVectorSegmentIdsRef: { current: ['s1'] } } });
 
     // before
     applyPendingClickAction(store.dispatch, canvasRefs, baseDragState({ pendingClickAction: null }));
 
     // result
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
   });
 
   it('should select only the pending vertex for a "vertex" action', () => {
     // mock
-    const canvasRefs = createCanvasRefs({ selectedVectorVertexIdsRef: { current: ['v1', 'v2'] } });
+    const canvasRefs = createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['v1', 'v2'] } } });
 
     // before
     applyPendingClickAction(store.dispatch, canvasRefs, baseDragState({ pendingClickAction: { id: 'v2', kind: 'vertex' } }));
 
     // result
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v2']);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v2']);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 
   it('should select only the pending handle for a "handle" action', () => {
     // mock
-    const canvasRefs = createCanvasRefs({ selectedVectorVertexIdsRef: { current: ['v1'] } });
+    const canvasRefs = createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['v1'] } } });
 
     // before
     applyPendingClickAction(
@@ -85,22 +85,22 @@ describe('applyPendingClickAction', () => {
     );
 
     // result
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 
   it('should select only the pending segment for a "segment" action', () => {
     // mock
-    const canvasRefs = createCanvasRefs({ selectedVectorSegmentIdsRef: { current: ['s1', 's2'] } });
+    const canvasRefs = createCanvasRefs({ vectorEdit: { selectedVectorSegmentIdsRef: { current: ['s1', 's2'] } } });
 
     // before
     applyPendingClickAction(store.dispatch, canvasRefs, baseDragState({ pendingClickAction: { id: 's1', kind: 'segment' } }));
 
     // result
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
   });
 
   it('should split the segment and select the new vertex for a "split-segment" action', () => {
@@ -109,7 +109,7 @@ describe('applyPendingClickAction', () => {
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
-    const canvasRefs = createCanvasRefs({ selectedVectorSegmentIdsRef: { current: ['s1'] } });
+    const canvasRefs = createCanvasRefs({ vectorEdit: { selectedVectorSegmentIdsRef: { current: ['s1'] } } });
 
     // before
     applyPendingClickAction(
@@ -120,9 +120,9 @@ describe('applyPendingClickAction', () => {
 
     // result
     const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
-    const [newVertexId] = canvasRefs.selectedVectorVertexIdsRef.current;
+    const [newVertexId] = canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current;
 
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
     expect(updatedNode.vertices[newVertexId]).toEqual({ id: newVertexId, x: 50, y: 0 });
   });
 });

@@ -33,7 +33,7 @@ describe('getVectorWidthLabelTargets', () => {
     const refs = createCanvasRefs();
     const point = { id: 'p1', leftOffset: 4, position: 0.5, rightOffset: 6 };
 
-    refs.vectorWidthPointDragRef.current = {
+    refs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 0,
       armWorldPoint: { x: 0, y: 0 },
       groupTargets: [],
@@ -54,7 +54,7 @@ describe('getVectorWidthLabelTargets', () => {
     const groupPoint2 = { id: 'p2', leftOffset: 4, position: 0.2, rightOffset: 4 };
     const groupPoint3 = { id: 'p3', leftOffset: 4, position: 0.8, rightOffset: 4 };
 
-    refs.vectorWidthPointDragRef.current = {
+    refs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 0,
       armWorldPoint: { x: 0, y: 0 },
       groupTargets: [
@@ -79,7 +79,7 @@ describe('getVectorWidthLabelTargets', () => {
     // mock
     const refs = createCanvasRefs();
 
-    refs.vectorWidthPointDragRef.current = {
+    refs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 0,
       armWorldPoint: { x: 0, y: 0 },
       groupTargets: [{ nodeId: 'node-1', point: { id: 'p2', leftOffset: 4, position: 0.2, rightOffset: 4 } }],
@@ -100,7 +100,7 @@ describe('getVectorWidthLabelTargets', () => {
     const nodes: Record<string, TSceneNode> = { [node.id]: node };
     const refs = createCanvasRefs();
 
-    refs.selectedVectorWidthHandlesRef.current = [{ nodeId: 'node-1', pointId: 'p1', side: 'point' }];
+    refs.vectorEdit.selectedVectorWidthHandlesRef.current = [{ nodeId: 'node-1', pointId: 'p1', side: 'point' }];
 
     // result
     expect(getVectorWidthLabelTargets(refs, nodes)).toEqual([{ nodeId: 'node-1', point, side: 'right' }]);
@@ -113,8 +113,8 @@ describe('getVectorWidthLabelTargets', () => {
     const nodes: Record<string, TSceneNode> = { [node.id]: node };
     const refs = createCanvasRefs();
 
-    refs.selectedVectorWidthHandlesRef.current = [{ nodeId: 'node-1', pointId: 'p1', side: 'point' }];
-    refs.lastVectorWidthHandleSideRef.current = { nodeId: 'node-1', pointId: 'p1', side: 'left' };
+    refs.vectorEdit.selectedVectorWidthHandlesRef.current = [{ nodeId: 'node-1', pointId: 'p1', side: 'point' }];
+    refs.vectorEdit.lastVectorWidthHandleSideRef.current = { nodeId: 'node-1', pointId: 'p1', side: 'left' };
 
     // result
     expect(getVectorWidthLabelTargets(refs, nodes)).toEqual([{ nodeId: 'node-1', point, side: 'left' }]);
@@ -127,8 +127,8 @@ describe('getVectorWidthLabelTargets', () => {
     const nodes: Record<string, TSceneNode> = { [node.id]: node };
     const refs = createCanvasRefs();
 
-    refs.selectedVectorWidthHandlesRef.current = [{ nodeId: 'node-1', pointId: 'p1', side: 'point' }];
-    refs.lastVectorWidthHandleSideRef.current = { nodeId: 'node-1', pointId: 'p2', side: 'left' };
+    refs.vectorEdit.selectedVectorWidthHandlesRef.current = [{ nodeId: 'node-1', pointId: 'p1', side: 'point' }];
+    refs.vectorEdit.lastVectorWidthHandleSideRef.current = { nodeId: 'node-1', pointId: 'p2', side: 'left' };
 
     // result
     expect(getVectorWidthLabelTargets(refs, nodes)).toEqual([{ nodeId: 'node-1', point, side: 'right' }]);
@@ -141,8 +141,8 @@ describe('getVectorWidthLabelTargets', () => {
     const refs = createCanvasRefs();
     const dragPoint = { id: 'p1', leftOffset: 4, position: 0.5, rightOffset: 6 };
 
-    refs.selectedVectorWidthHandlesRef.current = [{ nodeId: 'node-1', pointId: 'p2', side: 'point' }];
-    refs.vectorWidthPointDragRef.current = {
+    refs.vectorEdit.selectedVectorWidthHandlesRef.current = [{ nodeId: 'node-1', pointId: 'p2', side: 'point' }];
+    refs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 0,
       armWorldPoint: { x: 0, y: 0 },
       groupTargets: [],
@@ -160,7 +160,7 @@ describe('getVectorWidthLabelTargets', () => {
     // mock
     const refs = createCanvasRefs();
 
-    refs.selectedVectorWidthHandlesRef.current = [{ nodeId: 'missing-node', pointId: 'p1', side: 'point' }];
+    refs.vectorEdit.selectedVectorWidthHandlesRef.current = [{ nodeId: 'missing-node', pointId: 'p1', side: 'point' }];
 
     // result
     expect(getVectorWidthLabelTargets(refs, {})).toEqual([]);
@@ -172,7 +172,7 @@ describe('getVectorWidthLabelTargets', () => {
     const nodes: Record<string, TSceneNode> = { [node.id]: node };
     const refs = createCanvasRefs();
 
-    refs.selectedVectorWidthHandlesRef.current = [{ nodeId: 'node-1', pointId: 'p1', side: 'point' }];
+    refs.vectorEdit.selectedVectorWidthHandlesRef.current = [{ nodeId: 'node-1', pointId: 'p1', side: 'point' }];
 
     // result
     expect(getVectorWidthLabelTargets(refs, nodes)).toEqual([]);

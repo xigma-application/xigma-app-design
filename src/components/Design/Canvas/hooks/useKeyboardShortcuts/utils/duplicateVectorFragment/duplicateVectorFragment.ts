@@ -29,7 +29,7 @@ export const duplicateVectorFragment = (
   const { newSegmentIds, newVertexIds } = duplicateOwningNodeFragments(dispatch, owningNodesById, selectedVertexIds, selectedSegmentIds);
   dispatch(endHistoryGesture());
 
-  refs.selectedVectorHandlesRef.current = [];
-  refs.selectedVectorSegmentIdsRef.current = newSegmentIds;
-  refs.selectedVectorVertexIdsRef.current = newVertexIds;
+  refs.vectorEdit.selectedVectorHandlesRef.current = [];
+  refs.vectorEdit.selectedVectorSegmentIdsRef.current = newSegmentIds;
+  refs.vectorEdit.selectedVectorVertexIdsRef.current = newVertexIds;
 };

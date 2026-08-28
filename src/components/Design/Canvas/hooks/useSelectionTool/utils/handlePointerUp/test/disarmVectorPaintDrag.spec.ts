@@ -31,17 +31,19 @@ describe('disarmVectorPaintDrag', () => {
     // mock
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs({
-      touchedVectorPaintLoopKeysRef: { current: { 'node-1': new Set(['loop-1']) } },
-      vectorPaintPathRef: {
-        current: [
-          { x: 0, y: 0 },
-          { x: 10, y: 10 },
-        ],
+      vectorPaint: {
+        touchedVectorPaintLoopKeysRef: { current: { 'node-1': new Set(['loop-1']) } },
+        vectorPaintPathRef: {
+          current: [
+            { x: 0, y: 0 },
+            { x: 10, y: 10 },
+          ],
+        },
+        vectorPaintTouchedFacesRef: { current: { 'node-1': ['s1,s2,s3'] } },
       },
-      vectorPaintTouchedFacesRef: { current: { 'node-1': ['s1,s2,s3'] } },
     });
 
-    canvasRefs.isVectorPaintRemoveRef.current = true;
+    canvasRefs.vectorPaint.isVectorPaintRemoveRef.current = true;
 
     const setClassName = vi.fn();
 
@@ -49,10 +51,10 @@ describe('disarmVectorPaintDrag', () => {
     disarmVectorPaintDrag(canvas, pointerEvent(2), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.vectorPaintPathRef.current).toBeNull();
-    expect(canvasRefs.touchedVectorPaintLoopKeysRef.current).toEqual({});
-    expect(canvasRefs.vectorPaintTouchedFacesRef.current).toBeNull();
-    expect(canvasRefs.isVectorPaintRemoveRef.current).toBe(false);
+    expect(canvasRefs.vectorPaint.vectorPaintPathRef.current).toBeNull();
+    expect(canvasRefs.vectorPaint.touchedVectorPaintLoopKeysRef.current).toEqual({});
+    expect(canvasRefs.vectorPaint.vectorPaintTouchedFacesRef.current).toBeNull();
+    expect(canvasRefs.vectorPaint.isVectorPaintRemoveRef.current).toBe(false);
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
     expect(setClassName).toHaveBeenCalledWith('paint');
   });

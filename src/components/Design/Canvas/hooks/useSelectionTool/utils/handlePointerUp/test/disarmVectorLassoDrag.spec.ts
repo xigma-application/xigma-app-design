@@ -31,11 +31,13 @@ describe('disarmVectorLassoDrag', () => {
     // mock
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs({
-      vectorLassoPathRef: {
-        current: [
-          { x: 0, y: 0 },
-          { x: 10, y: 10 },
-        ],
+      lassoMarquee: {
+        vectorLassoPathRef: {
+          current: [
+            { x: 0, y: 0 },
+            { x: 10, y: 10 },
+          ],
+        },
       },
     });
     const setClassName = vi.fn();
@@ -44,7 +46,7 @@ describe('disarmVectorLassoDrag', () => {
     disarmVectorLassoDrag(canvas, pointerEvent(2), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.vectorLassoPathRef.current).toBeNull();
+    expect(canvasRefs.lassoMarquee.vectorLassoPathRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
     expect(setClassName).toHaveBeenCalledWith(null);
   });

@@ -12,6 +12,8 @@ export const captureDraggedVectorNodeSnapshots = (armIds: string[], nodes: Recor
     .filter((node): node is TVectorNode => node.type === NodeType.vector && !node.widthProfile);
 
   if (vectorNodes.length > 0) {
-    canvasRefs.draggedVectorNodeSnapshotsRef.current = new Map(vectorNodes.map((node) => [node.id, captureVectorNodeDragSnapshot(node)]));
+    canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current = new Map(
+      vectorNodes.map((node) => [node.id, captureVectorNodeDragSnapshot(node)]),
+    );
   }
 };

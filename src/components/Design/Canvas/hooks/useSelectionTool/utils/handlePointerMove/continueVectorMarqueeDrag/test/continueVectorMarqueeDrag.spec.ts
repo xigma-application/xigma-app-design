@@ -66,7 +66,7 @@ describe('continueVectorMarqueeDrag', () => {
     continueVectorMarqueeDrag(canvas, pointerEvent(10, 10), canvasRefs, createVectorMarqueeStartRef(), createVectorMarqueeModeRef());
 
     // result
-    expect(canvasRefs.marqueeRef.current).toBeNull();
+    expect(canvasRefs.lassoMarquee.marqueeRef.current).toBeNull();
   });
 
   it('should do nothing when no node is currently in Vector Edit Mode', () => {
@@ -84,7 +84,7 @@ describe('continueVectorMarqueeDrag', () => {
     );
 
     // result
-    expect(canvasRefs.marqueeRef.current).toBeNull();
+    expect(canvasRefs.lassoMarquee.marqueeRef.current).toBeNull();
   });
 
   it('should draw the marquee rect and select the vertex whose point falls inside it, clearing any handle selection', () => {
@@ -106,9 +106,9 @@ describe('continueVectorMarqueeDrag', () => {
     );
 
     // result
-    expect(canvasRefs.marqueeRef.current).toEqual({ height: 0, width: 5, x: 0, y: 0 });
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1']);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.lassoMarquee.marqueeRef.current).toEqual({ height: 0, width: 5, x: 0, y: 0 });
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1']);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
   });
 
   it('should select nothing when the marquee misses every point, handle, and segment', () => {
@@ -130,9 +130,9 @@ describe('continueVectorMarqueeDrag', () => {
     );
 
     // result
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 
   it('should catch a tangent handle once no point is caught, matching Figma — a point catch always wins, but a handle/segment catch unlocks everything', () => {
@@ -164,9 +164,9 @@ describe('continueVectorMarqueeDrag', () => {
     );
 
     // result
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 
   it('should NOT catch a tangent handle that is not currently visible, even though its position falls inside the box', () => {
@@ -194,9 +194,9 @@ describe('continueVectorMarqueeDrag', () => {
     );
 
     // result — nothing caught at all, since the handle isn't visible and no vertex/segment is under the box either
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 
   it('should catch a tangent handle revealed only by the pre-marquee vertex snapshot — the vertex a click already deselected when the marquee was armed, but whose tangents must stay catchable for the rest of the gesture', () => {
@@ -216,7 +216,7 @@ describe('continueVectorMarqueeDrag', () => {
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
-    const canvasRefs = createCanvasRefs({ preVectorMarqueeVertexIdsRef: { current: ['v1'] } });
+    const canvasRefs = createCanvasRefs({ vectorEdit: { preVectorMarqueeVertexIdsRef: { current: ['v1'] } } });
 
     // before — same marquee (3,95) -> (7,105) that caught the handle in the penActiveVertexId test above
     continueVectorMarqueeDrag(
@@ -228,9 +228,9 @@ describe('continueVectorMarqueeDrag', () => {
     );
 
     // result — the handle is caught even though v1 itself is not (and stays) deselected
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 
   it('should catch a tangent handle revealed only by the pre-marquee segment snapshot — a segment a click already deselected when the marquee was armed, but whose tangents must stay catchable for the rest of the gesture', () => {
@@ -249,7 +249,7 @@ describe('continueVectorMarqueeDrag', () => {
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvas = createCanvas();
-    const canvasRefs = createCanvasRefs({ preVectorMarqueeSegmentIdsRef: { current: ['s1'] } });
+    const canvasRefs = createCanvasRefs({ vectorEdit: { preVectorMarqueeSegmentIdsRef: { current: ['s1'] } } });
 
     // before — same marquee (3,95) -> (7,105) that caught the handle in the vertex-snapshot test above
     continueVectorMarqueeDrag(
@@ -261,9 +261,9 @@ describe('continueVectorMarqueeDrag', () => {
     );
 
     // result — the handle is caught even though s1 itself is not (and stays) deselected
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
   });
 
   it('should catch a segment via its own bounding box once no point is caught, even over its middle', () => {
@@ -285,8 +285,8 @@ describe('continueVectorMarqueeDrag', () => {
     );
 
     // result
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
   });
 
   it("should NOT reveal or catch a segment's own tangent handle just because the marquee caught the segment itself, with neither endpoint vertex ever caught", () => {
@@ -314,9 +314,9 @@ describe('continueVectorMarqueeDrag', () => {
     );
 
     // result — the segment itself is caught (unlocking "everything"), but the handle stays excluded
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
   });
 
   it("should NOT reveal or catch a segment's own tangent handle even once the segment is caught first and its own vertex is caught right after — vertex/segment catches never cascade into handles", () => {
@@ -340,7 +340,7 @@ describe('continueVectorMarqueeDrag', () => {
     // before — first frame: box (48,-2)->(52,2) over the segment's own middle only, unlocking "everything"
     continueVectorMarqueeDrag(canvas, pointerEvent(52, 2), canvasRefs, marqueeStartRef, marqueeModeRef);
     expect(marqueeModeRef.current).toBe('everything');
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
 
     // action — grow the box to (0,-2)->(10,2): now covers v1, s1's own body, AND s1's tangentStart
     // handle (5,0) all at once. v1 arriving as the gesture's first point, with exactly one segment (s1)
@@ -350,9 +350,9 @@ describe('continueVectorMarqueeDrag', () => {
 
     // result — v1 is kept, s1 is dropped by the handoff (not just the handle) — the handle was never
     // going to be caught here regardless of the handoff, per this test's own claim
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1']);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1']);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
     expect(marqueeModeRef.current).toBe('points');
   });
 
@@ -370,7 +370,7 @@ describe('continueVectorMarqueeDrag', () => {
     // before — first frame: box over the segment's own middle only, unlocking "everything"
     continueVectorMarqueeDrag(canvas, pointerEvent(55, 5), canvasRefs, marqueeStartRef, marqueeModeRef);
     expect(marqueeModeRef.current).toBe('everything');
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
 
     // action — grow the box to also cover v1(0,0), the gesture's first point
     marqueeStartRef.current = { x: 0, y: -5 };
@@ -378,14 +378,14 @@ describe('continueVectorMarqueeDrag', () => {
 
     // result — the point takes over: s1 is dropped, only v1 stays selected, and the gesture is now
     // locked to points-only for good
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1']);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1']);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
     expect(marqueeModeRef.current).toBe('points');
 
     // and — growing the box further to also cover a second segment must not bring any segment back
     marqueeStartRef.current = { x: -10, y: -110 };
     continueVectorMarqueeDrag(canvas, pointerEvent(60, 5), canvasRefs, marqueeStartRef, marqueeModeRef);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
     expect(marqueeModeRef.current).toBe('points');
   });
 
@@ -429,8 +429,8 @@ describe('continueVectorMarqueeDrag', () => {
     // before — first frame: a tall thin box over both segments' own middles, no vertex touched
     continueVectorMarqueeDrag(canvas, pointerEvent(55, 22), canvasRefs, marqueeStartRef, marqueeModeRef);
     expect(marqueeModeRef.current).toBe('everything');
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current.sort()).toEqual(['s1', 's2']);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current.sort()).toEqual(['s1', 's2']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
 
     // action — grow the box to also cover v1(0,0) and v3(0,20), the gesture's first points
     marqueeStartRef.current = { x: 0, y: -2 };
@@ -438,8 +438,8 @@ describe('continueVectorMarqueeDrag', () => {
 
     // result — the points take over: both segments are dropped regardless of how many were selected,
     // only the newly-caught points stay selected, and the gesture locks to points-only
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current.sort()).toEqual(['v1', 'v3']);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current.sort()).toEqual(['v1', 'v3']);
     expect(marqueeModeRef.current).toBe('points');
   });
 
@@ -462,8 +462,8 @@ describe('continueVectorMarqueeDrag', () => {
     continueVectorMarqueeDrag(canvas, pointerEvent(10, 10), canvasRefs, marqueeStartRef, marqueeModeRef);
 
     // result — still points-only: the handle stays excluded even though it now falls inside the box too
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1']);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1']);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
     expect(marqueeModeRef.current).toBe('points');
   });
 
@@ -500,8 +500,8 @@ describe('continueVectorMarqueeDrag', () => {
     // result — v3 is dropped: once a handle is caught, nothing else may join the selection, not even a
     // point that enters the box afterward ("Jak zaznaczamy tangeny to nic innego nie może wtedy być w tej
     // liście, nawet pointy")
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
     expect(marqueeModeRef.current).toBe('handles');
   });
 
@@ -521,14 +521,14 @@ describe('continueVectorMarqueeDrag', () => {
     // before — first frame: a tiny box that only ever catches v1, locking the gesture to points-only
     continueVectorMarqueeDrag(canvas, pointerEvent(2, 2), canvasRefs, marqueeStartRef, marqueeModeRef);
     expect(marqueeModeRef.current).toBe('points');
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1']);
 
     // action — grow the same box to also cover the handle at (5,0)
     continueVectorMarqueeDrag(canvas, pointerEvent(10, 10), canvasRefs, marqueeStartRef, marqueeModeRef);
 
     // result — the handle outranks the already-locked points mode: v1 is dropped, only the handle stays
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
     expect(marqueeModeRef.current).toBe('handles');
   });
 });

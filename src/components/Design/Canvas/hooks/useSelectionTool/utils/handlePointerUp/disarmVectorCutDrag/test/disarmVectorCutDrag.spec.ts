@@ -123,10 +123,10 @@ describe('disarmVectorCutDrag', () => {
     expect(Object.keys(node.segments)).toHaveLength(5);
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
     expect(selectionRefs.vectorCutDragRef.current).toBeNull();
-    expect(canvasRefs.vectorCutPreviewRef.current).toBeNull();
+    expect(canvasRefs.vectorCut.vectorCutPreviewRef.current).toBeNull();
     expect(setClassNameMock).toHaveBeenCalledWith('cut-off');
     // a plain-click Split severs into two brand-new, disconnected vertex ids at the same point
-    expect(canvasRefs.newVectorCutVertexIdsRef.current.size).toBe(2);
+    expect(canvasRefs.vectorCut.newVectorCutVertexIdsRef.current.size).toBe(2);
     // a completed cut hands control back to the Move tool
     expect(store.getState().design.activeTool).toBe(ToolName.move);
   });
@@ -157,7 +157,7 @@ describe('disarmVectorCutDrag', () => {
     expect(newRootOrder).toHaveLength(1);
     expect([...store.getState().design.vectorEditingNodeIds].sort()).toEqual([nodeId, ...newRootOrder].sort());
     // both the original node's own new vertex AND the brand-new sibling's own new vertex get marked
-    expect(canvasRefs.newVectorCutVertexIdsRef.current.size).toBe(2);
+    expect(canvasRefs.vectorCut.newVectorCutVertexIdsRef.current.size).toBe(2);
     expect(store.getState().design.activeTool).toBe(ToolName.move);
   });
 
@@ -216,7 +216,7 @@ describe('disarmVectorCutDrag', () => {
     const selectionRefs = createSelectionToolRefs();
 
     selectionRefs.vectorCutDragRef.current = { lineStart: { x: 50, y: 0 }, status: 'dividing' };
-    canvasRefs.vectorCutPreviewRef.current = null;
+    canvasRefs.vectorCut.vectorCutPreviewRef.current = null;
 
     // before
     disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, vi.fn());
@@ -268,7 +268,7 @@ describe('disarmVectorCutDrag', () => {
     const selectionRefs = createSelectionToolRefs();
 
     selectionRefs.vectorCutDragRef.current = { lineStart: { x: -20, y: 50 }, status: 'dividing' };
-    canvasRefs.vectorCutPreviewRef.current = { crossings: [], lineEnd: { x: 120, y: 50 }, lineStart: { x: -20, y: 50 } };
+    canvasRefs.vectorCut.vectorCutPreviewRef.current = { crossings: [], lineEnd: { x: 120, y: 50 }, lineStart: { x: -20, y: 50 } };
 
     // before
     disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, vi.fn());
@@ -279,9 +279,9 @@ describe('disarmVectorCutDrag', () => {
     expect(newRootOrder).toHaveLength(1);
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
     expect(selectionRefs.vectorCutDragRef.current).toBeNull();
-    expect(canvasRefs.vectorCutPreviewRef.current).toBeNull();
+    expect(canvasRefs.vectorCut.vectorCutPreviewRef.current).toBeNull();
     // the original node id keeps one of the two divided pieces, gaining new severed vertex ids at its crossings
-    expect(canvasRefs.newVectorCutVertexIdsRef.current.size).toBeGreaterThan(0);
+    expect(canvasRefs.vectorCut.newVectorCutVertexIdsRef.current.size).toBeGreaterThan(0);
     // a completed cut hands control back to the Move tool
     expect(store.getState().design.activeTool).toBe(ToolName.move);
   });

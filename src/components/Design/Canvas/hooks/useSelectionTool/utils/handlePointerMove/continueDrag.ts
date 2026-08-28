@@ -28,12 +28,12 @@ export const continueDrag = (
     const point = screenToWorld(getPointerPosition(canvas, event), selectViewport(store.getState()));
     const deltaX = point.x - dragState.pointerStart.x;
     const deltaY = point.y - dragState.pointerStart.y;
-    const snapshots = canvasRefs.draggedVectorNodeSnapshotsRef.current;
+    const snapshots = canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current;
 
     dragState.hasMoved = true;
 
-    if (!canvasRefs.draggedNodeIdsRef.current) {
-      canvasRefs.draggedNodeIdsRef.current = new Set(Object.keys(dragState.nodeOrigins));
+    if (!canvasRefs.transform.draggedNodeIdsRef.current) {
+      canvasRefs.transform.draggedNodeIdsRef.current = new Set(Object.keys(dragState.nodeOrigins));
     }
 
     snapshots?.forEach((snapshot) => {

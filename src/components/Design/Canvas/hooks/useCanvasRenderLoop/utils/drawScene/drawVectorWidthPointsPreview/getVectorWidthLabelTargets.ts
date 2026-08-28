@@ -8,7 +8,7 @@ import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEd
 export type TVectorWidthLabelTarget = { nodeId: string; point: TVectorWidthPoint; side: 'left' | 'right' };
 
 export const getVectorWidthLabelTargets = (refs: TCanvasRefs, nodes: Record<string, TSceneNode>): TVectorWidthLabelTarget[] => {
-  const drag = refs.vectorWidthPointDragRef.current;
+  const drag = refs.vectorWidth.vectorWidthPointDragRef.current;
 
   if (drag) {
     if (drag.target === 'point') {
@@ -23,10 +23,10 @@ export const getVectorWidthLabelTargets = (refs: TCanvasRefs, nodes: Record<stri
     ];
   }
 
-  const selected = refs.selectedVectorWidthHandlesRef.current[0];
+  const selected = refs.vectorEdit.selectedVectorWidthHandlesRef.current[0];
   const node = selected && getVectorEditingNode(nodes, selected.nodeId);
   const point = selected && node?.widthProfile?.points[selected.pointId];
-  const lastSide = refs.lastVectorWidthHandleSideRef.current;
+  const lastSide = refs.vectorEdit.lastVectorWidthHandleSideRef.current;
   const side =
     selected && lastSide && lastSide.nodeId === selected.nodeId && lastSide.pointId === selected.pointId ? lastSide.side : 'right';
 

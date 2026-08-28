@@ -38,7 +38,7 @@ export const armVectorWidthPointOnPointerDown = ({
       case armVectorWidthPointCreate(canvas, canvasRefs, event, point, setClassName, state, eligibleNodes, viewport):
         return true;
       default:
-        canvasRefs.selectedVectorWidthHandlesRef.current = [];
+        canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current = [];
     }
   }
 };

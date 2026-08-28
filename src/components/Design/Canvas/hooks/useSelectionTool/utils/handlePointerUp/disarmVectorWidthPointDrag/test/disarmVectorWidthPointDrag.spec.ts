@@ -68,7 +68,7 @@ describe('disarmVectorWidthPointDrag', () => {
     const canvasRefs = createCanvasRefs();
     const setClassName = vi.fn();
 
-    canvasRefs.vectorWidthPointDragRef.current = {
+    canvasRefs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 0,
       armWorldPoint: { x: 0, y: 0 },
       groupTargets: [],
@@ -77,7 +77,7 @@ describe('disarmVectorWidthPointDrag', () => {
       point: { id: 'p1', leftOffset: 6, position: 0.5, rightOffset: 6 },
       target: 'right',
     };
-    canvasRefs.selectedVectorWidthHandlesRef.current = [
+    canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current = [
       { nodeId, pointId: 'p1', side: 'left' },
       { nodeId, pointId: 'p1', side: 'right' },
     ];
@@ -89,9 +89,9 @@ describe('disarmVectorWidthPointDrag', () => {
     expect(store.getState().design.nodes[nodeId]).toMatchObject({
       widthProfile: { points: { p1: { id: 'p1', leftOffset: 6, position: 0.5, rightOffset: 6 } } },
     });
-    expect(canvasRefs.vectorWidthPointDragRef.current).toBeNull();
+    expect(canvasRefs.vectorWidth.vectorWidthPointDragRef.current).toBeNull();
     // selection persists after release — it's only cleared by clicking elsewhere or another point
-    expect(canvasRefs.selectedVectorWidthHandlesRef.current).toEqual([
+    expect(canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current).toEqual([
       { nodeId, pointId: 'p1', side: 'left' },
       { nodeId, pointId: 'p1', side: 'right' },
     ]);
@@ -106,7 +106,7 @@ describe('disarmVectorWidthPointDrag', () => {
     const setClassName = vi.fn();
     const dispatch = vi.fn();
 
-    canvasRefs.vectorWidthPointDragRef.current = {
+    canvasRefs.vectorWidth.vectorWidthPointDragRef.current = {
       armMagnitude: 0,
       armWorldPoint: { x: 0, y: 0 },
       groupTargets: [],
@@ -115,15 +115,15 @@ describe('disarmVectorWidthPointDrag', () => {
       point: { id: 'p1', leftOffset: 6, position: 0.5, rightOffset: 6 },
       target: 'right',
     };
-    canvasRefs.selectedVectorWidthHandlesRef.current = [{ nodeId: 'missing-node', pointId: 'p1', side: 'left' }];
+    canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current = [{ nodeId: 'missing-node', pointId: 'p1', side: 'left' }];
 
     // before
     disarmVectorWidthPointDrag(canvas, pointerEvent(), dispatch, canvasRefs, setClassName);
 
     // result
     expect(dispatch).not.toHaveBeenCalled();
-    expect(canvasRefs.vectorWidthPointDragRef.current).toBeNull();
-    expect(canvasRefs.selectedVectorWidthHandlesRef.current).toEqual([{ nodeId: 'missing-node', pointId: 'p1', side: 'left' }]);
+    expect(canvasRefs.vectorWidth.vectorWidthPointDragRef.current).toBeNull();
+    expect(canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current).toEqual([{ nodeId: 'missing-node', pointId: 'p1', side: 'left' }]);
     expect(canvas.releasePointerCapture).toHaveBeenCalled();
     expect(setClassName).toHaveBeenCalledWith(null);
   });

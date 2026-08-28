@@ -165,7 +165,7 @@ describe('continueVectorPaintDrag', () => {
     continueVectorPaintDrag(canvas, pointerEvent(10, 10), dispatch, canvasRefs);
 
     // result
-    expect(canvasRefs.vectorPaintPathRef.current).toBeNull();
+    expect(canvasRefs.vectorPaint.vectorPaintPathRef.current).toBeNull();
     expect(dispatch).not.toHaveBeenCalled();
   });
 
@@ -180,7 +180,7 @@ describe('continueVectorPaintDrag', () => {
     const canvasRefs = createCanvasRefs();
     const dispatch = vi.fn();
 
-    canvasRefs.vectorPaintPathRef.current = [{ x: 66, y: 33 }];
+    canvasRefs.vectorPaint.vectorPaintPathRef.current = [{ x: 66, y: 33 }];
 
     // before — a first real move (past the drag threshold) primes the upper-right triangle as
     // already touched, then the drag proceeds into the lower-left triangle
@@ -189,7 +189,7 @@ describe('continueVectorPaintDrag', () => {
     continueVectorPaintDrag(canvas, pointerEvent(33, 66), dispatch, canvasRefs);
 
     // result
-    expect(canvasRefs.vectorPaintPathRef.current).toEqual([
+    expect(canvasRefs.vectorPaint.vectorPaintPathRef.current).toEqual([
       { x: 66, y: 33 },
       { x: 70, y: 30 },
       { x: 33, y: 66 },
@@ -214,13 +214,13 @@ describe('continueVectorPaintDrag', () => {
     const canvasRefs = createCanvasRefs();
     const dispatch = vi.fn();
 
-    canvasRefs.vectorPaintPathRef.current = [{ x: 66, y: 33 }];
+    canvasRefs.vectorPaint.vectorPaintPathRef.current = [{ x: 66, y: 33 }];
 
     // before — a sub-pixel jitter, well under MIN_DRAG_DISTANCE_PX
     continueVectorPaintDrag(canvas, pointerEvent(67, 34), dispatch, canvasRefs);
 
     // result — the path still tracks the move, but nothing gets painted yet
-    expect(canvasRefs.vectorPaintPathRef.current).toEqual([
+    expect(canvasRefs.vectorPaint.vectorPaintPathRef.current).toEqual([
       { x: 66, y: 33 },
       { x: 67, y: 34 },
     ]);
@@ -238,7 +238,7 @@ describe('continueVectorPaintDrag', () => {
     const canvasRefs = createCanvasRefs();
     const dispatch = vi.fn();
 
-    canvasRefs.vectorPaintPathRef.current = [
+    canvasRefs.vectorPaint.vectorPaintPathRef.current = [
       { x: 66, y: 33 },
       { x: 33, y: 66 },
     ];
@@ -252,9 +252,9 @@ describe('continueVectorPaintDrag', () => {
     const changes = dispatch.mock.calls[0][0].payload.changes as Partial<TVectorNode>;
 
     expect(changes.filledFaceKeys).toHaveLength(2);
-    expect(canvasRefs.touchedVectorPaintLoopKeysRef.current[nodeId].size).toBe(2);
+    expect(canvasRefs.vectorPaint.touchedVectorPaintLoopKeysRef.current[nodeId].size).toBe(2);
     // both faces crossed by the stroke stay in the persistent highlight, keyed by node id
-    expect(canvasRefs.vectorPaintTouchedFacesRef.current![nodeId]).toHaveLength(2);
+    expect(canvasRefs.vectorPaint.vectorPaintTouchedFacesRef.current![nodeId]).toHaveLength(2);
   });
 
   it('should leave an already-filled face filled (not duplicated) when the drag sweeps over it without having touched it yet this stroke', () => {
@@ -270,7 +270,7 @@ describe('continueVectorPaintDrag', () => {
     const canvasRefs = createCanvasRefs();
     const dispatch = vi.fn();
 
-    canvasRefs.vectorPaintPathRef.current = [{ x: 66, y: 33 }];
+    canvasRefs.vectorPaint.vectorPaintPathRef.current = [{ x: 66, y: 33 }];
 
     // before — a real drag that stays inside the already-filled upper-right triangle
     continueVectorPaintDrag(canvas, pointerEvent(80, 20), dispatch, canvasRefs);
@@ -294,8 +294,8 @@ describe('continueVectorPaintDrag', () => {
     const canvasRefs = createCanvasRefs();
     const dispatch = vi.fn();
 
-    canvasRefs.vectorPaintPathRef.current = [{ x: 66, y: 33 }];
-    canvasRefs.isVectorPaintRemoveRef.current = true;
+    canvasRefs.vectorPaint.vectorPaintPathRef.current = [{ x: 66, y: 33 }];
+    canvasRefs.vectorPaint.isVectorPaintRemoveRef.current = true;
 
     // before — a real drag that stays inside the already-filled upper-right triangle
     continueVectorPaintDrag(canvas, pointerEvent(80, 20), dispatch, canvasRefs);
@@ -308,7 +308,7 @@ describe('continueVectorPaintDrag', () => {
     expect(changes.filledFaceKeys).toEqual([]);
     expect(changes.fillColorOverrideByKey).toBeUndefined();
     // the highlight tracks face.key (the render-time walk key), not the loopKey used for filledFaceKeys
-    expect(canvasRefs.vectorPaintTouchedFacesRef.current![nodeId]).toEqual(['diag,s1,s2']);
+    expect(canvasRefs.vectorPaint.vectorPaintTouchedFacesRef.current![nodeId]).toEqual(['diag,s1,s2']);
   });
 
   it('should not fill an untouched-and-unfilled face while remove mode is armed (a remove stroke only ever destroys fill, never adds it)', () => {
@@ -321,8 +321,8 @@ describe('continueVectorPaintDrag', () => {
     const canvasRefs = createCanvasRefs();
     const dispatch = vi.fn();
 
-    canvasRefs.vectorPaintPathRef.current = [{ x: 66, y: 33 }];
-    canvasRefs.isVectorPaintRemoveRef.current = true;
+    canvasRefs.vectorPaint.vectorPaintPathRef.current = [{ x: 66, y: 33 }];
+    canvasRefs.vectorPaint.isVectorPaintRemoveRef.current = true;
 
     // before — a real drag that stays inside the unfilled lower-left triangle
     continueVectorPaintDrag(canvas, pointerEvent(20, 80), dispatch, canvasRefs);
@@ -341,7 +341,7 @@ describe('continueVectorPaintDrag', () => {
     const canvasRefs = createCanvasRefs();
     const dispatch = vi.fn();
 
-    canvasRefs.vectorPaintPathRef.current = [{ x: 66, y: 33 }];
+    canvasRefs.vectorPaint.vectorPaintPathRef.current = [{ x: 66, y: 33 }];
 
     // before — first move touches the upper-right triangle, second move stays inside it
     continueVectorPaintDrag(canvas, pointerEvent(70, 30), dispatch, canvasRefs);
@@ -349,7 +349,7 @@ describe('continueVectorPaintDrag', () => {
 
     // result
     expect(dispatch).toHaveBeenCalledTimes(1);
-    expect(canvasRefs.touchedVectorPaintLoopKeysRef.current[nodeId].size).toBe(1);
+    expect(canvasRefs.vectorPaint.touchedVectorPaintLoopKeysRef.current[nodeId].size).toBe(1);
   });
 
   it('should bake a crossing the newly-touched face depends on into a real, persisted vertex while painting live', () => {
@@ -362,7 +362,7 @@ describe('continueVectorPaintDrag', () => {
     const canvasRefs = createCanvasRefs();
     const dispatch = vi.fn();
 
-    canvasRefs.vectorPaintPathRef.current = [{ x: 500, y: 500 }];
+    canvasRefs.vectorPaint.vectorPaintPathRef.current = [{ x: 500, y: 500 }];
 
     // before — drag into the top half of the square, above the virtual crossing line
     continueVectorPaintDrag(canvas, pointerEvent(50, 25), dispatch, canvasRefs);
@@ -385,7 +385,7 @@ describe('continueVectorPaintDrag', () => {
     const canvasRefs = createCanvasRefs();
     const dispatch = vi.fn();
 
-    canvasRefs.vectorPaintPathRef.current = [{ x: 66, y: 33 }];
+    canvasRefs.vectorPaint.vectorPaintPathRef.current = [{ x: 66, y: 33 }];
 
     // before
     continueVectorPaintDrag(canvas, pointerEvent(70, 30), dispatch, canvasRefs);

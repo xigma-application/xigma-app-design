@@ -36,9 +36,9 @@ export const commitVectorBendSegment = (
 
   dispatch(updateNode({ changes: { segments, vertexHandleModes }, id: node.id }));
 
-  canvasRefs.selectedVectorSegmentIdsRef.current = [segmentId];
-  canvasRefs.selectedVectorVertexIdsRef.current = [];
-  canvasRefs.selectedVectorHandlesRef.current = [];
+  canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = [segmentId];
+  canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = [];
+  canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [];
 
   const committedState: TCommittedVectorSegmentBendDragState = {
     dragStart,

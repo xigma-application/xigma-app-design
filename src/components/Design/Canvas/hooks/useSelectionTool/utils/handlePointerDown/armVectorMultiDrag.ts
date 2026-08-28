@@ -22,7 +22,7 @@ export const armVectorMultiDrag = (
 ): void => {
   const { handleOrigins, vertexOrigins } = getVectorMultiSelectOrigins(nodes, vectorEditingNodeIds, selectedVertexIds, selectedHandles);
 
-  canvasRefs.vectorMultiDragRef.current = {
+  canvasRefs.vectorMultiSelect.vectorMultiDragRef.current = {
     boxOrigin: box?.bounds ?? null,
     dispatchThrottle: { frameId: null, run: null },
     handleOrigins,
@@ -31,6 +31,10 @@ export const armVectorMultiDrag = (
     pointerStart: point,
     vertexOrigins,
   };
-  canvasRefs.draggedVectorFillFacesRef.current = getVectorDraggedFillFaces(nodes, vectorEditingNodeIds, Object.keys(vertexOrigins));
+  canvasRefs.vectorSnapshots.draggedVectorFillFacesRef.current = getVectorDraggedFillFaces(
+    nodes,
+    vectorEditingNodeIds,
+    Object.keys(vertexOrigins),
+  );
   canvas.setPointerCapture(event.pointerId);
 };

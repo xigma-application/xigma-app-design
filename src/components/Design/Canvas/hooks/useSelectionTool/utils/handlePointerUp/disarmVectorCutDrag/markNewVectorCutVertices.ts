@@ -31,7 +31,7 @@ export const markNewVectorCutVertices = (
 
   afterVertexIds.forEach((vertexId) => {
     if (!beforeVertexIds.has(vertexId)) {
-      canvasRefs.newVectorCutVertexIdsRef.current.add(vertexId);
+      canvasRefs.vectorCut.newVectorCutVertexIdsRef.current.add(vertexId);
     }
   });
 };

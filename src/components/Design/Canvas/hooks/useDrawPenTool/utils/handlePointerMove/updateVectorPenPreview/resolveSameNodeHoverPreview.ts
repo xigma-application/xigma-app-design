@@ -1,5 +1,5 @@
 // types
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { THoverRefs, TPenRefs, TVectorEditRefs } from 'types/design/canvas/types';
 import { TPenPointHoverKind } from '../resolvePenPointHover/types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode, TVectorTangent, TVectorVertex, TViewport } from 'types/design/types';
@@ -14,10 +14,10 @@ export const resolveSameNodeHoverPreview = (
   activeVertexId: string,
   tangentFromOffset: TVectorTangent,
   viewport: TViewport,
-  penPreviewRef: TCanvasRefs['penPreviewRef'],
-  hoveredSegmentIdRef: TCanvasRefs['hoveredSegmentIdRef'],
-  penHoveredDragArmableVertexRef: TCanvasRefs['penHoveredDragArmableVertexRef'],
-  vectorAlignmentGuideRef: TCanvasRefs['vectorAlignmentGuideRef'],
+  penPreviewRef: TPenRefs['penPreviewRef'],
+  hoveredSegmentIdRef: THoverRefs['hoveredSegmentIdRef'],
+  penHoveredDragArmableVertexRef: TPenRefs['penHoveredDragArmableVertexRef'],
+  vectorAlignmentGuideRef: TVectorEditRefs['vectorAlignmentGuideRef'],
 ): TPenPointHoverKind | null => {
   const result = findHoverInNode(node, point, viewport, activeVertexId);
 

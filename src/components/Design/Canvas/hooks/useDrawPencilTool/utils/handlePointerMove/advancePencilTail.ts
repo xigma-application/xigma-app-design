@@ -51,5 +51,5 @@ export const advancePencilTail = (
 
   const previewTail = simplifyPencilPoints(latestTail, tolerance);
 
-  refs.pencilPreviewPointsRef.current = [...latestCommitted, ...previewTail.slice(1)];
+  refs.pencil.pencilPreviewPointsRef.current = [...latestCommitted, ...previewTail.slice(1)];
 };

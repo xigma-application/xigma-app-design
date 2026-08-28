@@ -193,7 +193,7 @@ describe('useDrawPenTool behaviors', () => {
     });
 
     // result — not near any other vertex, so the cursor stays the plain pen
-    expect(refs.penPreviewRef.current).toMatchObject({ to: { x: 40, y: 0 } });
+    expect(refs.pen.penPreviewRef.current).toMatchObject({ to: { x: 40, y: 0 } });
     expect(getClassName()).toBe('pen');
   });
 
@@ -269,7 +269,7 @@ describe('useDrawPenTool behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 40, 0));
     });
 
-    expect(refs.penNewVertexPreviewRef.current).toEqual({ x: 40, y: 0 });
+    expect(refs.pen.penNewVertexPreviewRef.current).toEqual({ x: 40, y: 0 });
 
     // action
     act(() => {
@@ -277,7 +277,7 @@ describe('useDrawPenTool behaviors', () => {
     });
 
     // result
-    expect(refs.penNewVertexPreviewRef.current).toBeNull();
+    expect(refs.pen.penNewVertexPreviewRef.current).toBeNull();
   });
 
   it('should switch the cursor to pen-extend and attract the preview onto the segment when hovering its interior with no vertex currently active', () => {
@@ -312,8 +312,8 @@ describe('useDrawPenTool behaviors', () => {
 
     // result
     expect(getClassName()).toBe('pen-extend');
-    expect(refs.penNewVertexPreviewRef.current).toEqual({ x: 90, y: 0 });
-    expect(refs.hoveredSegmentIdRef.current).not.toBeNull();
+    expect(refs.pen.penNewVertexPreviewRef.current).toEqual({ x: 90, y: 0 });
+    expect(refs.hover.hoveredSegmentIdRef.current).not.toBeNull();
   });
 
   it('should switch the cursor to pen-snap and lock the preview onto the exact midpoint when hovering close enough to it', () => {
@@ -348,8 +348,8 @@ describe('useDrawPenTool behaviors', () => {
 
     // result
     expect(getClassName()).toBe('pen-snap');
-    expect(refs.penNewVertexPreviewRef.current).toEqual({ x: 50, y: 0 });
-    expect(refs.hoveredSegmentIdRef.current).not.toBeNull();
+    expect(refs.pen.penNewVertexPreviewRef.current).toEqual({ x: 50, y: 0 });
+    expect(refs.hover.hoveredSegmentIdRef.current).not.toBeNull();
   });
 
   it('should clear the hovered-segment highlight once the tool leaves Pen', () => {
@@ -380,7 +380,7 @@ describe('useDrawPenTool behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 50, 2));
     });
 
-    expect(refs.hoveredSegmentIdRef.current).not.toBeNull();
+    expect(refs.hover.hoveredSegmentIdRef.current).not.toBeNull();
 
     // action
     act(() => {
@@ -388,7 +388,7 @@ describe('useDrawPenTool behaviors', () => {
     });
 
     // result
-    expect(refs.hoveredSegmentIdRef.current).toBeNull();
+    expect(refs.hover.hoveredSegmentIdRef.current).toBeNull();
   });
 
   it('should clear the stale rubber-band preview line as soon as a new point is placed, instead of leaving it pointing at the just-placed vertex', () => {
@@ -410,7 +410,7 @@ describe('useDrawPenTool behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 40, 0));
     });
 
-    expect(refs.penPreviewRef.current).not.toBeNull();
+    expect(refs.pen.penPreviewRef.current).not.toBeNull();
 
     // action — click there to place v2; the old rubber-band must not linger through the click-drag
     act(() => {
@@ -418,7 +418,7 @@ describe('useDrawPenTool behaviors', () => {
     });
 
     // result
-    expect(refs.penPreviewRef.current).toBeNull();
+    expect(refs.pen.penPreviewRef.current).toBeNull();
   });
 
   it('should track the live cursor position for the drag-preview handle while dragging, then clear it on release', () => {
@@ -439,7 +439,7 @@ describe('useDrawPenTool behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 20, 5));
     });
 
-    expect(refs.penDraggedHandlePositionRef.current).toEqual({ x: 20, y: 5 });
+    expect(refs.pen.penDraggedHandlePositionRef.current).toEqual({ x: 20, y: 5 });
 
     // action — release
     act(() => {
@@ -447,7 +447,7 @@ describe('useDrawPenTool behaviors', () => {
     });
 
     // result
-    expect(refs.penDraggedHandlePositionRef.current).toBeNull();
+    expect(refs.pen.penDraggedHandlePositionRef.current).toBeNull();
   });
 
   it('should reset the in-progress drag on pointercancel', () => {
@@ -490,7 +490,7 @@ describe('useDrawPenTool behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 20, 12));
     });
 
-    expect(refs.penPreviewRef.current?.isSnapped).toBe(false);
+    expect(refs.pen.penPreviewRef.current?.isSnapped).toBe(false);
 
     // action — Shift held, no further pointer movement
     act(() => {
@@ -498,8 +498,8 @@ describe('useDrawPenTool behaviors', () => {
     });
 
     // result — hard-constrained to the nearest 15deg increment right away
-    expect(refs.penPreviewRef.current?.isSnapped).toBe(true);
-    expect(refs.penPreviewRef.current?.to).not.toEqual({ x: 20, y: 12 });
+    expect(refs.pen.penPreviewRef.current?.isSnapped).toBe(true);
+    expect(refs.pen.penPreviewRef.current?.to).not.toEqual({ x: 20, y: 12 });
   });
 
   it('should re-evaluate an in-progress tangent-handle drag immediately when Shift is pressed, without a further pointermove', () => {
@@ -525,7 +525,7 @@ describe('useDrawPenTool behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 20, 12));
     });
 
-    expect(refs.penDraggedHandleIsSnappedRef.current).toBe(false);
+    expect(refs.pen.penDraggedHandleIsSnappedRef.current).toBe(false);
 
     // action — Shift held, no further pointer movement
     act(() => {
@@ -533,8 +533,8 @@ describe('useDrawPenTool behaviors', () => {
     });
 
     // result — hard-constrained at the same live position, no additional mouse movement needed
-    expect(refs.penDraggedHandleIsSnappedRef.current).toBe(true);
-    expect(refs.penDraggedHandlePositionRef.current).not.toEqual({ x: 20, y: 12 });
+    expect(refs.pen.penDraggedHandleIsSnappedRef.current).toBe(true);
+    expect(refs.pen.penDraggedHandlePositionRef.current).not.toEqual({ x: 20, y: 12 });
   });
 
   it('should re-evaluate again on keyup once Shift is released, dropping the hard constraint', () => {
@@ -558,7 +558,7 @@ describe('useDrawPenTool behaviors', () => {
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true }));
     });
 
-    expect(refs.penPreviewRef.current?.isSnapped).toBe(true);
+    expect(refs.pen.penPreviewRef.current?.isSnapped).toBe(true);
 
     // action — Shift released, still no further pointer movement
     act(() => {
@@ -566,8 +566,8 @@ describe('useDrawPenTool behaviors', () => {
     });
 
     // result — back to the plain tolerance-based snap, which this diagonal angle falls outside of
-    expect(refs.penPreviewRef.current?.isSnapped).toBe(false);
-    expect(refs.penPreviewRef.current?.to).toEqual({ x: 20, y: 12 });
+    expect(refs.pen.penPreviewRef.current?.isSnapped).toBe(false);
+    expect(refs.pen.penPreviewRef.current?.to).toEqual({ x: 20, y: 12 });
   });
 
   it('should ignore non-Shift keys and do nothing when no pointer position is known yet', () => {
@@ -584,6 +584,6 @@ describe('useDrawPenTool behaviors', () => {
     });
 
     // result
-    expect(refs.penPreviewRef.current).toBeNull();
+    expect(refs.pen.penPreviewRef.current).toBeNull();
   });
 });

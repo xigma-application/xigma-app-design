@@ -72,10 +72,12 @@ describe('disarmVectorShapeBuilderDrag', () => {
     store.dispatch(setVectorEditingNodeIds([nodeId]));
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs({
-      isVectorShapeBuilderBoxModeRef: { current: true },
-      isVectorShapeBuilderSubtractRef: { current: false },
-      touchedVectorShapeBuilderFacesRef: { current: { [nodeId]: new Set(['s1,s2,s3']) } },
-      vectorShapeBuilderPathRef: { current: [{ x: 50, y: 40 }] },
+      shapeBuilder: {
+        isVectorShapeBuilderBoxModeRef: { current: true },
+        isVectorShapeBuilderSubtractRef: { current: false },
+        touchedVectorShapeBuilderFacesRef: { current: { [nodeId]: new Set(['s1,s2,s3']) } },
+        vectorShapeBuilderPathRef: { current: [{ x: 50, y: 40 }] },
+      },
     });
     const setClassName = vi.fn();
 
@@ -83,10 +85,10 @@ describe('disarmVectorShapeBuilderDrag', () => {
     disarmVectorShapeBuilderDrag(canvas, pointerEvent(2), store.dispatch, canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.vectorShapeBuilderPathRef.current).toBeNull();
-    expect(canvasRefs.touchedVectorShapeBuilderFacesRef.current).toEqual({});
-    expect(canvasRefs.isVectorShapeBuilderBoxModeRef.current).toBe(false);
-    expect(canvasRefs.isVectorShapeBuilderSubtractRef.current).toBe(false);
+    expect(canvasRefs.shapeBuilder.vectorShapeBuilderPathRef.current).toBeNull();
+    expect(canvasRefs.shapeBuilder.touchedVectorShapeBuilderFacesRef.current).toEqual({});
+    expect(canvasRefs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current).toBe(false);
+    expect(canvasRefs.shapeBuilder.isVectorShapeBuilderSubtractRef.current).toBe(false);
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
     expect(setClassName).toHaveBeenCalledWith('add');
     expect(store.getState().design.nodes[nodeId]).toMatchObject({ filledFaceKeys: ['s1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]'] });
@@ -130,18 +132,22 @@ describe('disarmVectorShapeBuilderDrag', () => {
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs({
-      isVectorShapeBuilderBoxModeRef: { current: false },
-      isVectorShapeBuilderSubtractRef: { current: false },
-      selectedVectorHandlesRef: { current: [{ end: 'start', segmentId: 's1' }] },
-      selectedVectorSegmentIdsRef: { current: ['s1'] },
-      selectedVectorVertexIdsRef: { current: ['v1'] },
-      touchedVectorShapeBuilderFacesRef: { current: { [idA]: new Set(['as1,as2,as3,as4']), [idB]: new Set(['bs1,bs2,bs3,bs4']) } },
-      vectorShapeBuilderPathRef: {
-        current: [
-          { x: 25, y: 25 },
-          { x: 100, y: 150 },
-          { x: 200, y: 250 },
-        ],
+      shapeBuilder: {
+        isVectorShapeBuilderBoxModeRef: { current: false },
+        isVectorShapeBuilderSubtractRef: { current: false },
+        touchedVectorShapeBuilderFacesRef: { current: { [idA]: new Set(['as1,as2,as3,as4']), [idB]: new Set(['bs1,bs2,bs3,bs4']) } },
+        vectorShapeBuilderPathRef: {
+          current: [
+            { x: 25, y: 25 },
+            { x: 100, y: 150 },
+            { x: 200, y: 250 },
+          ],
+        },
+      },
+      vectorEdit: {
+        selectedVectorHandlesRef: { current: [{ end: 'start', segmentId: 's1' }] },
+        selectedVectorSegmentIdsRef: { current: ['s1'] },
+        selectedVectorVertexIdsRef: { current: ['v1'] },
       },
     });
     const setClassName = vi.fn();
@@ -150,9 +156,9 @@ describe('disarmVectorShapeBuilderDrag', () => {
     disarmVectorShapeBuilderDrag(canvas, pointerEvent(3), store.dispatch, canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
     expect(store.getState().design.nodes[idB]).toBeUndefined(); // absorbed node deleted
     expect(store.getState().design.vectorEditingNodeIds).toEqual([idA]); // pruned
   });

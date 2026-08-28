@@ -11,7 +11,7 @@ export const captureResizedVectorNodeSnapshots = (selectedNodes: TSceneNode[], c
   const vectorNodes = selectedNodes.filter((node): node is TVectorNode => node.type === NodeType.vector && !node.widthProfile);
 
   if (vectorNodes.length > 0) {
-    canvasRefs.resizedVectorNodeSnapshotsRef.current = new Map(
+    canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current = new Map(
       vectorNodes.map((node) => [node.id, captureVectorNodeResizeSnapshot(node, isSingleSelection ? node.rotation : 0)]),
     );
   }

@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // types
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { THoverRefs, TPenRefs, TVectorEditRefs } from 'types/design/canvas/types';
 import { TPendingOutgoingTangent } from '../../types';
 import { TPoint } from 'types/canvas';
 import { TSceneNode, TVectorNode, TViewport } from 'types/design/types';
@@ -17,13 +17,13 @@ export const updateActiveVertexPreview = (
   activeVertexId: string,
   viewport: TViewport,
   isShiftPressed: boolean,
-  penPreviewRef: TCanvasRefs['penPreviewRef'],
+  penPreviewRef: TPenRefs['penPreviewRef'],
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
-  hoveredSegmentIdRef: TCanvasRefs['hoveredSegmentIdRef'],
-  penHoveredDragArmableVertexRef: TCanvasRefs['penHoveredDragArmableVertexRef'],
-  vectorAlignmentGuideRef: TCanvasRefs['vectorAlignmentGuideRef'],
+  hoveredSegmentIdRef: THoverRefs['hoveredSegmentIdRef'],
+  penHoveredDragArmableVertexRef: TPenRefs['penHoveredDragArmableVertexRef'],
+  vectorAlignmentGuideRef: TVectorEditRefs['vectorAlignmentGuideRef'],
   otherOpenNodeIds: string[],
-  penNewVertexPreviewRef: TCanvasRefs['penNewVertexPreviewRef'],
+  penNewVertexPreviewRef: TPenRefs['penNewVertexPreviewRef'],
   setClassName: (className: string | null) => void,
 ): void => {
   const hoverKind = updateVectorPenPreview(

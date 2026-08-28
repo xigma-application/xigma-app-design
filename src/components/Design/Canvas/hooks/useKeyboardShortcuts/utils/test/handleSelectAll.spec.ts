@@ -72,8 +72,8 @@ describe('handleSelectAll', () => {
 
     // result
     expect(store.getState().design.selectedIds).toEqual([]);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
   });
 });

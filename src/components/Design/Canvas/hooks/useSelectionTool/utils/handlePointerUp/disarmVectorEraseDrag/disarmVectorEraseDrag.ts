@@ -17,15 +17,15 @@ export const disarmVectorEraseDrag = (
   selectionRefs: TSelectionToolRefs,
   setClassName: (className: string | null) => void,
 ): void => {
-  const strokePath = canvasRefs.vectorEraseStrokeRef.current;
+  const strokePath = canvasRefs.vectorErase.vectorEraseStrokeRef.current;
 
   if (selectionRefs.vectorEraseDragRef.current && strokePath) {
-    const radius = canvasRefs.eraserDiameterRef.current / 2 / selectViewport(store.getState()).zoom;
+    const radius = canvasRefs.vectorErase.eraserDiameterRef.current / 2 / selectViewport(store.getState()).zoom;
 
     commitVectorErase(dispatch, strokePath, radius);
     canvas.releasePointerCapture(event.pointerId);
     selectionRefs.vectorEraseDragRef.current = null;
-    canvasRefs.vectorEraseStrokeRef.current = null;
+    canvasRefs.vectorErase.vectorEraseStrokeRef.current = null;
     setClassName('erase');
   }
 };

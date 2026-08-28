@@ -41,7 +41,7 @@ describe('commitVectorCornerHandleDrag', () => {
     const canvasRefs = createCanvasRefs();
     const vectorHandleDragRef = { current: null };
 
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
 
     // before
     commitVectorCornerHandleDrag(node, 'v1', { end: 'start', segmentId: 's1' }, store.dispatch, canvasRefs, vectorHandleDragRef);
@@ -50,9 +50,9 @@ describe('commitVectorCornerHandleDrag', () => {
     const updated = store.getState().design.nodes[nodeId] as TVectorNode;
 
     expect(updated.vertexHandleModes).toEqual({ v1: 'symmetric' });
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
     expect(vectorHandleDragRef.current).toEqual({ end: 'start', nodeId, segmentId: 's1', vertexId: 'v1' });
   });
 });

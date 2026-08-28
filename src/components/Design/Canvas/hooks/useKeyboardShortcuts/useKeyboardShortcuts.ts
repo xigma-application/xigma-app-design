@@ -68,7 +68,7 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => handlePasteSelection(dispatch, refs), ...shortcuts.paste },
       ...nudgeMap(dispatch, refs),
     ],
-    [dispatch, refs.selectedVectorVertexIdsRef, refs.selectedVectorHandlesRef],
+    [dispatch, refs.vectorEdit.selectedVectorVertexIdsRef, refs.vectorEdit.selectedVectorHandlesRef],
   );
 
   useKeyboardHandler(true, [], keysMap, undefined, true);

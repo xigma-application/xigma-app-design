@@ -15,7 +15,7 @@ import { getOwningSegmentNodes } from './getOwningSegmentNodes';
 import { getOwningVertexNodes } from './getOwningVertexNodes';
 
 export const handleDeleteSelection = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
-  const { selectedVectorHandlesRef, selectedVectorSegmentIdsRef, selectedVectorVertexIdsRef } = refs;
+  const { selectedVectorHandlesRef, selectedVectorSegmentIdsRef, selectedVectorVertexIdsRef } = refs.vectorEdit;
   const state = store.getState();
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
   const selectedVertexIds = selectedVectorVertexIdsRef.current;

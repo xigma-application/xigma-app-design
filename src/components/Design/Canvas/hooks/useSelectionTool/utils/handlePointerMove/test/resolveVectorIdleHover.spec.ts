@@ -18,13 +18,13 @@ describe('resolveVectorIdleHover', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.hoveredVectorVertexIdRef.current = 'sentinel';
+    canvasRefs.hover.hoveredVectorVertexIdRef.current = 'sentinel';
 
     // before
     resolveVectorIdleHover(canvas, pointerEvent(0, 0), canvasRefs, vi.fn());
 
     // result — overwritten by resolveVectorVertexHover, proving the resolver chain ran
-    expect(canvasRefs.hoveredVectorVertexIdRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorVertexIdRef.current).toBeNull();
   });
 
   it('should skip the vector hover resolvers while a vector multi-select drag (move, resize or rotate) is in progress', () => {
@@ -32,8 +32,8 @@ describe('resolveVectorIdleHover', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.hoveredVectorVertexIdRef.current = 'sentinel';
-    canvasRefs.vectorMultiDragRef.current = {
+    canvasRefs.hover.hoveredVectorVertexIdRef.current = 'sentinel';
+    canvasRefs.vectorMultiSelect.vectorMultiDragRef.current = {
       boxOrigin: null,
       dispatchThrottle: { frameId: null, run: null },
       handleOrigins: {},
@@ -47,6 +47,6 @@ describe('resolveVectorIdleHover', () => {
     resolveVectorIdleHover(canvas, pointerEvent(0, 0), canvasRefs, vi.fn());
 
     // result — untouched, proving the resolver chain never ran
-    expect(canvasRefs.hoveredVectorVertexIdRef.current).toBe('sentinel');
+    expect(canvasRefs.hover.hoveredVectorVertexIdRef.current).toBe('sentinel');
   });
 });

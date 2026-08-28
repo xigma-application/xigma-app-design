@@ -86,7 +86,7 @@ describe('useDrawPencilTool behaviors', () => {
 
     expect(node.type).toBe('vector');
     expect(node.capStyle).toBe('round');
-    expect(refs.pencilPreviewPointsRef.current).toBeNull();
+    expect(refs.pencil.pencilPreviewPointsRef.current).toBeNull();
     expect(canvasRef.current?.releasePointerCapture).toHaveBeenCalledWith(1);
   });
 
@@ -115,7 +115,7 @@ describe('useDrawPencilTool behaviors', () => {
     });
 
     // result — the preview's last point holds the anchor's y (12), not the raw cursor's y (15)
-    const preview = refs.pencilPreviewPointsRef.current as { x: number; y: number }[];
+    const preview = refs.pencil.pencilPreviewPointsRef.current as { x: number; y: number }[];
 
     expect(preview[preview.length - 1]).toEqual({ x: 40, y: 12 });
   });
@@ -136,7 +136,7 @@ describe('useDrawPencilTool behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 20, 12, { shiftKey: true }));
     });
 
-    const previewWhileLocked = refs.pencilPreviewPointsRef.current;
+    const previewWhileLocked = refs.pencil.pencilPreviewPointsRef.current;
 
     // action
     act(() => {
@@ -146,8 +146,8 @@ describe('useDrawPencilTool behaviors', () => {
     // result — the locked axis point gets committed to the tail (holding y at the anchor), then
     // freehand sampling resumes from there, both landing in the same move since the cursor never
     // actually moved between the two — proving the lock dropped, not that it's still constraining
-    expect(refs.pencilPreviewPointsRef.current).not.toEqual(previewWhileLocked);
-    expect(refs.pencilPreviewPointsRef.current).toEqual([
+    expect(refs.pencil.pencilPreviewPointsRef.current).not.toEqual(previewWhileLocked);
+    expect(refs.pencil.pencilPreviewPointsRef.current).toEqual([
       { x: 0, y: 0 },
       { x: 20, y: 0 },
       { x: 20, y: 12 },
@@ -169,7 +169,7 @@ describe('useDrawPencilTool behaviors', () => {
     });
 
     // result
-    expect(refs.pencilPreviewPointsRef.current).toBeNull();
+    expect(refs.pencil.pencilPreviewPointsRef.current).toBeNull();
   });
 
   it('should clear all in-progress stroke state once the tool leaves Pencil', () => {
@@ -188,7 +188,7 @@ describe('useDrawPencilTool behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 30, 0));
     });
 
-    expect(refs.pencilPreviewPointsRef.current).not.toBeNull();
+    expect(refs.pencil.pencilPreviewPointsRef.current).not.toBeNull();
 
     // action
     act(() => {
@@ -196,6 +196,6 @@ describe('useDrawPencilTool behaviors', () => {
     });
 
     // result
-    expect(refs.pencilPreviewPointsRef.current).toBeNull();
+    expect(refs.pencil.pencilPreviewPointsRef.current).toBeNull();
   });
 });

@@ -33,7 +33,7 @@ const pointerEvent = (type: string, x: number, y: number, options: Partial<Point
 const renderSliceTool = (canvasRef: RefObject<HTMLCanvasElement | null>): RefObject<TSliceDraft | null> => {
   const sliceRef: RefObject<TSliceDraft | null> = { current: null };
 
-  renderHook(() => useSliceTool(createCanvasRefs({ canvasRef, sliceRef })), {
+  renderHook(() => useSliceTool(createCanvasRefs({ canvasRef, slice: { sliceRef } })), {
     wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
   });
 

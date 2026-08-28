@@ -12,7 +12,7 @@ export const armRotateOnPointerDown = ({ canvas, canvasRefs, event, point, selec
     armRotateDrag(
       canvas,
       event,
-      canvasRefs.rotateDragRef,
+      canvasRefs.transform.rotateDragRef,
       selectedNodes,
       rotateHandleHit.bounds,
       rotateHandleHit.rotation,

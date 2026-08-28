@@ -17,11 +17,11 @@ export const selectAndArmVectorVertexDrag = (
   vertexId: string,
   point: TPoint,
 ): void => {
-  canvasRefs.selectedVectorVertexIdsRef.current = [vertexId];
-  canvasRefs.selectedVectorHandlesRef.current = [];
-  canvasRefs.selectedVectorSegmentIdsRef.current = [];
+  canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = [vertexId];
+  canvasRefs.vectorEdit.selectedVectorHandlesRef.current = [];
+  canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current = [];
   const touchedFaceKeys = getVectorFilledFacesTouchingVertexIds(node, [vertexId]).map((face) => face.key);
 
-  canvasRefs.draggedVectorFillFacesRef.current = touchedFaceKeys.length ? { [node.id]: touchedFaceKeys } : null;
+  canvasRefs.vectorSnapshots.draggedVectorFillFacesRef.current = touchedFaceKeys.length ? { [node.id]: touchedFaceKeys } : null;
   armVectorVertexDrag(canvas, event, selectionRefs.vectorVertexDragRef, node, vertexId, point);
 };

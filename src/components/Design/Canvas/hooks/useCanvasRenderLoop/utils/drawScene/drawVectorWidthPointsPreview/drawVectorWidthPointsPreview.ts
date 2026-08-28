@@ -32,7 +32,7 @@ export const drawVectorWidthPointsPreview = (
       program,
       buffer,
       nodes,
-      refs.hoveredVectorWidthPointRef.current,
+      refs.hover.hoveredVectorWidthPointRef.current,
       canvasWidth,
       canvasHeight,
       viewport,

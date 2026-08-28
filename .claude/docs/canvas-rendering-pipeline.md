@@ -9,20 +9,29 @@ any of the machinery below — see `design-store-architecture.md`'s "Comment sta
 
 ## 1. Context setup
 
-- `Canvas/Canvas.tsx` owns the single `<canvas>` element (`canvasRef`) plus ten ephemeral
-  `useRef`s (`draftRef`/`marqueeRef`/`hoverRef`/`sliceRef` — see §6 — plus
-  `cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef`, which exist so
-  `useCanvasRenderLoop` can tell a corner-radius drag is actively in progress (see
-  `selection-and-manipulation.md` §13), plus `ellipseArcDragRef`/`ellipseArcRotateDragRef`/
-  `ellipseArcRatioDragRef`, which exist so the Sweep/Start/Ratio handles can render mid-drag at their
-  live pointer-projected position instead of jumping (§19)). All eleven refs (the ten above plus
-  `canvasRef` itself) are created in one place, `Canvas/hooks/useCanvasRefs/useCanvasRefs.ts`, which
-  returns them as a single `TCanvasRefs` object (`types/design/canvas/types.ts` — the drag-state
-  types themselves, e.g. `TCornerRadiusDragState`/`TEllipseArcDragState`, live there too, not under
-  `components/`, since a type consumed from the global `types/` layer can't reach back into a
-  feature folder). `Canvas.tsx` calls `const refs = useCanvasRefs()` once and passes that single
-  `refs` object into every tool hook and into `useCanvasRenderLoop`, instead of threading each ref
-  through as its own positional argument.
+- `Canvas/Canvas.tsx` owns the single `<canvas>` element (`canvasRef`) plus every other ephemeral
+  interaction ref (`draftRef`/`sliceRef` and ~65 more), all assembled by
+  `pages/DesignPage/core/CanvasRefsProvider/CanvasRefsProvider.tsx` into one `TCanvasRefs` object
+  (`types/design/canvas/types.ts` — the drag-state types themselves, e.g. `TCornerRadiusDragState`/
+  `TEllipseArcDragState`, live there too, not under `components/`, since a type consumed from the
+  global `types/` layer can't reach back into a feature folder). `TCanvasRefs` is **not** one flat
+  bag of ~65 keys — it's grouped into ~16 domain sub-objects (`cornerRadius`, `ellipseArc`, `hover`,
+  `pen`, `pencil`, `slice`, `transform`, `vectorEdit`, `vectorMultiSelect`, `vectorSnapshots`, etc.),
+  each with its own `use<Domain>Refs()` hook + `create<Domain>Refs()` test-factory pair under
+  `Canvas/hooks/useCanvasRefs/hooks/use<Domain>Refs/` — e.g. the corner-radius trio
+  (`cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef`, which exist so
+  `useCanvasRenderLoop` can tell a corner-radius drag is actively in progress, see
+  `selection-and-manipulation.md` §13) lives at `refs.cornerRadius.*`, and the ellipse-arc trio
+  (`ellipseArcDragRef`/`ellipseArcRotateDragRef`/`ellipseArcRatioDragRef`, which exist so the
+  Sweep/Start/Ratio handles can render mid-drag at their live pointer-projected position instead of
+  jumping, §19) lives at `refs.ellipseArc.*`. A handful of refs are genuinely cross-domain and get
+  imported across group boundaries by design — `refs.transform.rotateDragRef` is shared by both the
+  Selection tool and `useSliceTool`, and `refs.vectorEdit.vectorAlignmentGuideRef` is written by both
+  vector-drag continuation and the Pen tool's own preview. `CanvasRefsProvider.tsx` calls each
+  `use<Domain>Refs()` once and composes them into a single `refs` object via `useMemo`, which
+  `Canvas.tsx` reads via `useCanvasRefsContext()` and passes into every tool hook and into
+  `useCanvasRenderLoop` as one param, instead of threading each ref through as its own positional
+  argument.
 - The context itself is created in `Canvas/hooks/useCanvasRenderLoop/useCanvasRenderLoop.ts`:
   `canvas.getContext(WEBGL_CONTEXT_ID, WEBGL_CONTEXT_ATTRIBUTES)`, both constants in
   `Canvas/constants.ts`: `WEBGL_CONTEXT_ID = 'webgl2'`,

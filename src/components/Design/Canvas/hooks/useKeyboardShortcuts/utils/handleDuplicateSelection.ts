@@ -18,8 +18,8 @@ import { duplicateVectorFragment } from './duplicateVectorFragment/duplicateVect
 export const handleDuplicateSelection = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
   const state = store.getState();
   const { nodes, selectedIds, vectorEditingNodeIds } = state.design;
-  const selectedVertexIds = refs.selectedVectorVertexIdsRef.current;
-  const selectedSegmentIds = refs.selectedVectorSegmentIdsRef.current;
+  const selectedVertexIds = refs.vectorEdit.selectedVectorVertexIdsRef.current;
+  const selectedSegmentIds = refs.vectorEdit.selectedVectorSegmentIdsRef.current;
 
   if (selectedVertexIds.length > 0 || selectedSegmentIds.length > 0) {
     duplicateVectorFragment(dispatch, refs, nodes, vectorEditingNodeIds, selectedVertexIds, selectedSegmentIds);

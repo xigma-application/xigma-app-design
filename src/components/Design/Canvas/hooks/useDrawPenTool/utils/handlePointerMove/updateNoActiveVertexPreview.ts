@@ -1,5 +1,5 @@
 // types
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { THoverRefs, TPenRefs, TVectorEditRefs } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode, TViewport } from 'types/design/types';
 
@@ -11,11 +11,11 @@ export const updateNoActiveVertexPreview = (
   point: TPoint,
   node: TVectorNode | null,
   viewport: TViewport,
-  penNewVertexPreviewRef: TCanvasRefs['penNewVertexPreviewRef'],
-  hoveredSegmentIdRef: TCanvasRefs['hoveredSegmentIdRef'],
-  penHoveredDragArmableVertexRef: TCanvasRefs['penHoveredDragArmableVertexRef'],
-  penPreviewRef: TCanvasRefs['penPreviewRef'],
-  vectorAlignmentGuideRef: TCanvasRefs['vectorAlignmentGuideRef'],
+  penNewVertexPreviewRef: TPenRefs['penNewVertexPreviewRef'],
+  hoveredSegmentIdRef: THoverRefs['hoveredSegmentIdRef'],
+  penHoveredDragArmableVertexRef: TPenRefs['penHoveredDragArmableVertexRef'],
+  penPreviewRef: TPenRefs['penPreviewRef'],
+  vectorAlignmentGuideRef: TVectorEditRefs['vectorAlignmentGuideRef'],
   setClassName: (className: string | null) => void,
 ): void => {
   const hoverKind = updateNewVertexPreview(

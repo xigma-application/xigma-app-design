@@ -67,7 +67,7 @@ describe('markNewVectorCutVertices', () => {
     markNewVectorCutVertices(canvasRefs, beforeNodes, [nodeId], [nodeId]);
 
     // result — only the two genuinely new ids, not the two that already existed
-    expect(canvasRefs.newVectorCutVertexIdsRef.current).toEqual(new Set(['x1', 'x2']));
+    expect(canvasRefs.vectorCut.newVectorCutVertexIdsRef.current).toEqual(new Set(['x1', 'x2']));
   });
 
   it('should accumulate onto whatever was already marked, not replace it', () => {
@@ -84,13 +84,13 @@ describe('markNewVectorCutVertices', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.newVectorCutVertexIdsRef.current = new Set(['from-an-earlier-cut']);
+    canvasRefs.vectorCut.newVectorCutVertexIdsRef.current = new Set(['from-an-earlier-cut']);
 
     // before
     markNewVectorCutVertices(canvasRefs, beforeNodes, [nodeId], [nodeId]);
 
     // result
-    expect(canvasRefs.newVectorCutVertexIdsRef.current).toEqual(new Set(['from-an-earlier-cut', 'x1']));
+    expect(canvasRefs.vectorCut.newVectorCutVertexIdsRef.current).toEqual(new Set(['from-an-earlier-cut', 'x1']));
   });
 
   it('should mark a brand-new sibling node’s own share of new vertices too, not just the original node’s', () => {
@@ -132,7 +132,7 @@ describe('markNewVectorCutVertices', () => {
     markNewVectorCutVertices(canvasRefs, beforeNodes, [nodeId], [nodeId, newNodeId]);
 
     // result — x1 and x2 are new, a and b already existed (just redistributed across nodes)
-    expect(canvasRefs.newVectorCutVertexIdsRef.current).toEqual(new Set(['x1', 'x2']));
+    expect(canvasRefs.vectorCut.newVectorCutVertexIdsRef.current).toEqual(new Set(['x1', 'x2']));
   });
 
   it('should mark nothing for a node id that no longer exists in either scope', () => {
@@ -145,7 +145,7 @@ describe('markNewVectorCutVertices', () => {
     markNewVectorCutVertices(canvasRefs, beforeNodes, ['stale-id'], ['stale-id']);
 
     // result
-    expect(canvasRefs.newVectorCutVertexIdsRef.current).toEqual(new Set());
+    expect(canvasRefs.vectorCut.newVectorCutVertexIdsRef.current).toEqual(new Set());
     void nodeId;
   });
 
@@ -159,7 +159,7 @@ describe('markNewVectorCutVertices', () => {
     markNewVectorCutVertices(canvasRefs, beforeNodes, [nodeId], [nodeId]);
 
     // result
-    expect(canvasRefs.newVectorCutVertexIdsRef.current).toEqual(new Set());
+    expect(canvasRefs.vectorCut.newVectorCutVertexIdsRef.current).toEqual(new Set());
   });
 
   it('should mark vertices across several open nodes at once', () => {
@@ -191,6 +191,6 @@ describe('markNewVectorCutVertices', () => {
     markNewVectorCutVertices(canvasRefs, beforeNodes, [firstNodeId, secondNodeId], [firstNodeId, secondNodeId]);
 
     // result
-    expect(canvasRefs.newVectorCutVertexIdsRef.current).toEqual(new Set(['extra1', 'extra2']));
+    expect(canvasRefs.vectorCut.newVectorCutVertexIdsRef.current).toEqual(new Set(['extra1', 'extra2']));
   });
 });

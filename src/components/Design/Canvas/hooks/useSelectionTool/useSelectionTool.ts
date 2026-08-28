@@ -49,14 +49,14 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
   };
 
   const onPointerLeave = (canvasRefs: TCanvasRefs): void => {
-    canvasRefs.hoveredVectorVertexIdRef.current = null;
-    canvasRefs.hoveredVectorSegmentIdRef.current = null;
-    canvasRefs.eraseBrushCenterRef.current = null;
+    canvasRefs.hover.hoveredVectorVertexIdRef.current = null;
+    canvasRefs.hover.hoveredVectorSegmentIdRef.current = null;
+    canvasRefs.vectorErase.eraseBrushCenterRef.current = null;
   };
 
   const onKeyDown = (event: KeyboardEvent): void => {
     cancelVectorSegmentBendDrag(event, dispatch, selectionRefs.vectorSegmentBendDragRef, setClassName);
-    adjustEraserDiameter(event, activeTool, refs.eraserDiameterRef);
+    adjustEraserDiameter(event, activeTool, refs.vectorErase.eraserDiameterRef);
   };
 
   const onShiftKeyChange = (
@@ -133,28 +133,28 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         window.removeEventListener('keyup', shiftKeyUpListener);
         window.removeEventListener('keydown', altKeyDownListener);
         window.removeEventListener('keyup', altKeyUpListener);
-        refs.selectedVectorVertexIdsRef.current = [];
-        refs.selectedVectorHandlesRef.current = [];
-        refs.selectedVectorSegmentIdsRef.current = [];
-        refs.snappedVectorHandleRef.current = null;
-        refs.vectorAlignmentGuideRef.current = null;
-        refs.vectorLassoPathRef.current = null;
-        refs.hoveredVectorPaintFaceKeyRef.current = null;
-        refs.hoveredVectorFaceSelectRef.current = null;
-        refs.vectorCutPreviewRef.current = null;
-        refs.vectorPaintPathRef.current = null;
-        refs.touchedVectorPaintLoopKeysRef.current = {};
-        refs.vectorPaintTouchedFacesRef.current = null;
-        refs.isVectorPaintRemoveRef.current = false;
-        refs.vectorShapeBuilderPathRef.current = null;
-        refs.touchedVectorShapeBuilderFacesRef.current = {};
-        refs.hoveredVectorShapeBuilderFaceRef.current = null;
-        refs.isVectorShapeBuilderBoxModeRef.current = false;
-        refs.isVectorShapeBuilderSubtractRef.current = false;
-        refs.hoveredVectorWidthPointRef.current = null;
-        refs.vectorWidthPointDragRef.current = null;
-        refs.selectedVectorWidthHandlesRef.current = [];
-        refs.lastVectorWidthHandleSideRef.current = null;
+        refs.vectorEdit.selectedVectorVertexIdsRef.current = [];
+        refs.vectorEdit.selectedVectorHandlesRef.current = [];
+        refs.vectorEdit.selectedVectorSegmentIdsRef.current = [];
+        refs.vectorEdit.snappedVectorHandleRef.current = null;
+        refs.vectorEdit.vectorAlignmentGuideRef.current = null;
+        refs.lassoMarquee.vectorLassoPathRef.current = null;
+        refs.hover.hoveredVectorPaintFaceKeyRef.current = null;
+        refs.hover.hoveredVectorFaceSelectRef.current = null;
+        refs.vectorCut.vectorCutPreviewRef.current = null;
+        refs.vectorPaint.vectorPaintPathRef.current = null;
+        refs.vectorPaint.touchedVectorPaintLoopKeysRef.current = {};
+        refs.vectorPaint.vectorPaintTouchedFacesRef.current = null;
+        refs.vectorPaint.isVectorPaintRemoveRef.current = false;
+        refs.shapeBuilder.vectorShapeBuilderPathRef.current = null;
+        refs.shapeBuilder.touchedVectorShapeBuilderFacesRef.current = {};
+        refs.hover.hoveredVectorShapeBuilderFaceRef.current = null;
+        refs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current = false;
+        refs.shapeBuilder.isVectorShapeBuilderSubtractRef.current = false;
+        refs.hover.hoveredVectorWidthPointRef.current = null;
+        refs.vectorWidth.vectorWidthPointDragRef.current = null;
+        refs.vectorEdit.selectedVectorWidthHandlesRef.current = [];
+        refs.vectorEdit.lastVectorWidthHandleSideRef.current = null;
         selectionRefs.vectorCutDragRef.current = null;
         lastPointerClientPositionRef.current = null;
       };

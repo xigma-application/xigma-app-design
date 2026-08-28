@@ -70,13 +70,13 @@ export const drawScene = (
   refs: TCanvasRefs,
 ): void => {
   const draftShape = refs.draftRef.current;
-  const marqueeRect = refs.marqueeRef.current;
-  const hoveredNodeId = refs.hoverRef.current;
-  const sliceRect = refs.sliceRef.current;
+  const marqueeRect = refs.lassoMarquee.marqueeRef.current;
+  const hoveredNodeId = refs.hover.hoverRef.current;
+  const sliceRect = refs.slice.sliceRef.current;
   const isDraggingCornerRadius = hasCornerRadiusDragMoved(refs);
-  const ellipseArcDraggedHandlePosition = refs.ellipseArcDragRef.current?.draggedHandlePosition ?? null;
-  const ellipseArcRotateDraggedHandlePosition = refs.ellipseArcRotateDragRef.current?.draggedHandlePosition ?? null;
-  const ellipseArcRatioDraggedHandlePosition = refs.ellipseArcRatioDragRef.current?.draggedHandlePosition ?? null;
+  const ellipseArcDraggedHandlePosition = refs.ellipseArc.ellipseArcDragRef.current?.draggedHandlePosition ?? null;
+  const ellipseArcRotateDraggedHandlePosition = refs.ellipseArc.ellipseArcRotateDragRef.current?.draggedHandlePosition ?? null;
+  const ellipseArcRatioDraggedHandlePosition = refs.ellipseArc.ellipseArcRatioDragRef.current?.draggedHandlePosition ?? null;
   const state = store.getState();
   const activeTool = selectActiveTool(state);
   const viewport = selectViewport(state);
@@ -85,27 +85,27 @@ export const drawScene = (
   const editingTextBox = selectEditingTextBox(state);
   const nodesById = selectNodes(state);
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
-  const hoveredVectorPaintFace = refs.hoveredVectorPaintFaceKeyRef.current;
+  const hoveredVectorPaintFace = refs.hover.hoveredVectorPaintFaceKeyRef.current;
   const shapeBuilderPreviewFaces = getShapeBuilderPreviewFaces(refs);
-  const hoveredVectorFaceSelect = refs.hoveredVectorFaceSelectRef.current;
-  const selectedVectorVertexIds = refs.selectedVectorVertexIdsRef.current;
-  const preMarqueeVectorVertexIds = refs.preVectorMarqueeVertexIdsRef.current;
-  const selectedVectorSegmentIds = refs.selectedVectorSegmentIdsRef.current;
-  const preMarqueeVectorSegmentIds = refs.preVectorMarqueeSegmentIdsRef.current;
-  const hoveredVectorVertexId = refs.hoveredVectorVertexIdRef.current;
-  const hoveredVectorHandle = refs.hoveredVectorHandleRef.current;
-  const selectedVectorHandles = refs.selectedVectorHandlesRef.current;
-  const hoveredSegmentId = refs.hoveredSegmentIdRef.current;
-  const hoveredVectorSegmentId = refs.hoveredVectorSegmentIdRef.current;
-  const hoveredVectorEdgeInsertPoint = refs.hoveredVectorEdgeInsertPointRef.current;
+  const hoveredVectorFaceSelect = refs.hover.hoveredVectorFaceSelectRef.current;
+  const selectedVectorVertexIds = refs.vectorEdit.selectedVectorVertexIdsRef.current;
+  const preMarqueeVectorVertexIds = refs.vectorEdit.preVectorMarqueeVertexIdsRef.current;
+  const selectedVectorSegmentIds = refs.vectorEdit.selectedVectorSegmentIdsRef.current;
+  const preMarqueeVectorSegmentIds = refs.vectorEdit.preVectorMarqueeSegmentIdsRef.current;
+  const hoveredVectorVertexId = refs.hover.hoveredVectorVertexIdRef.current;
+  const hoveredVectorHandle = refs.hover.hoveredVectorHandleRef.current;
+  const selectedVectorHandles = refs.vectorEdit.selectedVectorHandlesRef.current;
+  const hoveredSegmentId = refs.hover.hoveredSegmentIdRef.current;
+  const hoveredVectorSegmentId = refs.hover.hoveredVectorSegmentIdRef.current;
+  const hoveredVectorEdgeInsertPoint = refs.hover.hoveredVectorEdgeInsertPointRef.current;
   const penActiveVertexId = selectPenActiveVertexId(state);
-  const dragOriginVertexId = refs.penDragOriginRef.current?.vertexId ?? null;
-  const penDraggedHandlePosition = refs.penDraggedHandlePositionRef.current;
-  const isPenDraggedHandleSnapped = refs.penDraggedHandleIsSnappedRef.current;
-  const snappedVectorHandle = refs.snappedVectorHandleRef.current;
-  const vectorMultiSelectResizeDrag = refs.vectorMultiSelectResizeDragRef.current;
-  const vectorMultiSelectRotateDrag = refs.vectorMultiSelectRotateDragRef.current;
-  const isVectorMultiDragMoving = Boolean(refs.vectorMultiDragRef.current?.hasMoved);
+  const dragOriginVertexId = refs.pen.penDragOriginRef.current?.vertexId ?? null;
+  const penDraggedHandlePosition = refs.pen.penDraggedHandlePositionRef.current;
+  const isPenDraggedHandleSnapped = refs.pen.penDraggedHandleIsSnappedRef.current;
+  const snappedVectorHandle = refs.vectorEdit.snappedVectorHandleRef.current;
+  const vectorMultiSelectResizeDrag = refs.vectorMultiSelect.vectorMultiSelectResizeDragRef.current;
+  const vectorMultiSelectRotateDrag = refs.vectorMultiSelect.vectorMultiSelectRotateDragRef.current;
+  const isVectorMultiDragMoving = Boolean(refs.vectorMultiSelect.vectorMultiDragRef.current?.hasMoved);
   const previewSceneNodes = getPreviewSceneNodes(selectOrderedNodes(state), editingNodeId, refs);
   const sceneNodes = getErasePreviewNodes(previewSceneNodes, vectorEditingNodeIds, activeTool, refs, viewport);
   const eraseAwareNodesById = getEraseAwareNodesById(nodesById, sceneNodes, vectorEditingNodeIds, activeTool);
@@ -133,9 +133,9 @@ export const drawScene = (
     clientHeight,
     viewport,
     pathOutlineStyles,
-    refs.draggedVectorNodeSnapshotsRef.current,
-    refs.resizedVectorNodeSnapshotsRef.current,
-    refs.rotatedVectorNodeSnapshotsRef.current,
+    refs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current,
+    refs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current,
+    refs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current,
   );
   drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
   drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
@@ -163,7 +163,7 @@ export const drawScene = (
     selectedVectorSegmentIds,
     preMarqueeVectorSegmentIds,
     hoveredVectorVertexId,
-    refs.newVectorCutVertexIdsRef.current,
+    refs.vectorCut.newVectorCutVertexIdsRef.current,
     hoveredSegmentId,
     hoveredVectorSegmentId,
     hoveredVectorEdgeInsertPoint,
@@ -174,7 +174,7 @@ export const drawScene = (
     dragOriginVertexId,
     penDraggedHandlePosition,
     isPenDraggedHandleSnapped,
-    refs.vectorMultiSelectBoxRef,
+    refs.vectorMultiSelect.vectorMultiSelectBoxRef,
     vectorMultiSelectResizeDrag,
     vectorMultiSelectRotateDrag,
     isVectorMultiDragMoving,
@@ -200,9 +200,9 @@ export const drawScene = (
     gl,
     program,
     buffer,
-    refs.penPreviewRef.current,
-    refs.penNewVertexPreviewRef.current,
-    refs.penHoveredDragArmableVertexRef.current,
+    refs.pen.penPreviewRef.current,
+    refs.pen.penNewVertexPreviewRef.current,
+    refs.pen.penHoveredDragArmableVertexRef.current,
     nodesById,
     vectorEditingNodeIds[0] ?? null,
     clientWidth,
@@ -213,9 +213,9 @@ export const drawScene = (
     gl,
     program,
     buffer,
-    refs.pencilPreviewPointsRef.current,
-    refs.pencilRawPreviewPointsRef.current,
-    refs.pencilShowRawPreviewRef.current,
+    refs.pencil.pencilPreviewPointsRef.current,
+    refs.pencil.pencilRawPreviewPointsRef.current,
+    refs.pencil.pencilShowRawPreviewRef.current,
     clientWidth,
     clientHeight,
     viewport,
@@ -235,14 +235,14 @@ export const drawScene = (
     viewport,
   );
   drawEditingPathTextHandle(gl, program, buffer, editingTextBox, clientWidth, clientHeight, viewport);
-  drawVectorAlignmentGuide(gl, program, buffer, refs.vectorAlignmentGuideRef.current, clientWidth, clientHeight, viewport);
-  drawVectorLasso(gl, program, buffer, refs.vectorLassoPathRef.current, clientWidth, clientHeight, viewport);
+  drawVectorAlignmentGuide(gl, program, buffer, refs.vectorEdit.vectorAlignmentGuideRef.current, clientWidth, clientHeight, viewport);
+  drawVectorLasso(gl, program, buffer, refs.lassoMarquee.vectorLassoPathRef.current, clientWidth, clientHeight, viewport);
   drawVectorShapeBuilderPath(
     gl,
     program,
     buffer,
-    refs.vectorShapeBuilderPathRef.current,
-    refs.isVectorShapeBuilderBoxModeRef.current,
+    refs.shapeBuilder.vectorShapeBuilderPathRef.current,
+    refs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current,
     clientWidth,
     clientHeight,
     viewport,
@@ -255,9 +255,9 @@ export const drawScene = (
     state.design.rootOrder,
     vectorEditingNodeIds,
     shapeBuilderPreviewFaces,
-    refs.isVectorShapeBuilderSubtractRef.current,
-    refs.vectorShapeBuilderPathRef.current,
-    refs.isVectorShapeBuilderBoxModeRef.current,
+    refs.shapeBuilder.isVectorShapeBuilderSubtractRef.current,
+    refs.shapeBuilder.vectorShapeBuilderPathRef.current,
+    refs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current,
     clientWidth,
     clientHeight,
     viewport,
@@ -268,15 +268,24 @@ export const drawScene = (
     program,
     buffer,
     nodesById,
-    refs.vectorPaintTouchedFacesRef.current,
-    refs.isVectorPaintRemoveRef.current,
+    refs.vectorPaint.vectorPaintTouchedFacesRef.current,
+    refs.vectorPaint.isVectorPaintRemoveRef.current,
     clientWidth,
     clientHeight,
     viewport,
   );
-  drawVectorPaintPath(gl, program, buffer, refs.vectorPaintPathRef.current, clientWidth, clientHeight, viewport);
+  drawVectorPaintPath(gl, program, buffer, refs.vectorPaint.vectorPaintPathRef.current, clientWidth, clientHeight, viewport);
   drawVectorFaceSelectHoverPreview(gl, program, buffer, nodesById, hoveredVectorFaceSelect, clientWidth, clientHeight, viewport);
-  drawVectorDraggedFillPreview(gl, program, buffer, nodesById, refs.draggedVectorFillFacesRef.current, clientWidth, clientHeight, viewport);
+  drawVectorDraggedFillPreview(
+    gl,
+    program,
+    buffer,
+    nodesById,
+    refs.vectorSnapshots.draggedVectorFillFacesRef.current,
+    clientWidth,
+    clientHeight,
+    viewport,
+  );
   drawVectorSelectedFillPreview(
     gl,
     program,
@@ -293,19 +302,19 @@ export const drawScene = (
     program,
     buffer,
     nodesById,
-    refs.hoveredVectorCutSegmentRef.current,
-    refs.hoveredVectorCutPointRef.current,
+    refs.hover.hoveredVectorCutSegmentRef.current,
+    refs.hover.hoveredVectorCutPointRef.current,
     clientWidth,
     clientHeight,
     viewport,
   );
-  drawVectorCutPreview(gl, program, buffer, refs.vectorCutPreviewRef.current, clientWidth, clientHeight, viewport);
+  drawVectorCutPreview(gl, program, buffer, refs.vectorCut.vectorCutPreviewRef.current, clientWidth, clientHeight, viewport);
   drawVectorEraseBrush(
     gl,
     program,
     buffer,
-    refs.eraseBrushCenterRef.current,
-    refs.eraserDiameterRef.current,
+    refs.vectorErase.eraseBrushCenterRef.current,
+    refs.vectorErase.eraserDiameterRef.current,
     activeTool,
     clientWidth,
     clientHeight,

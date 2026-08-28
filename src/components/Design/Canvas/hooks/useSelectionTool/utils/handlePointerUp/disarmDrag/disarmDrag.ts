@@ -25,7 +25,7 @@ export const disarmDrag = (
     flushThrottledDispatch(dragState.dispatchThrottle);
     commitDraggedVectorNodeSnapshots(dispatch, dragState, canvasRefs);
     applyPendingDragClickAction(dispatch, dragState);
-    canvasRefs.draggedNodeIdsRef.current = null;
+    canvasRefs.transform.draggedNodeIdsRef.current = null;
     dragStateRef.current = null;
     canvas.releasePointerCapture(event.pointerId);
   }

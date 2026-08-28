@@ -57,8 +57,8 @@ describe('continueVectorLassoDrag', () => {
     continueVectorLassoDrag(canvas, pointerEvent(10, 10), canvasRefs);
 
     // result
-    expect(canvasRefs.vectorLassoPathRef.current).toBeNull();
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.lassoMarquee.vectorLassoPathRef.current).toBeNull();
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
   });
 
   it('should do nothing when no node is currently in Vector Edit Mode', () => {
@@ -66,13 +66,13 @@ describe('continueVectorLassoDrag', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.vectorLassoPathRef.current = [{ x: 0, y: 0 }];
+    canvasRefs.lassoMarquee.vectorLassoPathRef.current = [{ x: 0, y: 0 }];
 
     // before
     continueVectorLassoDrag(canvas, pointerEvent(10, 10), canvasRefs);
 
     // result — the in-progress path is left untouched, just never extended/tested this tick
-    expect(canvasRefs.vectorLassoPathRef.current).toEqual([{ x: 0, y: 0 }]);
+    expect(canvasRefs.lassoMarquee.vectorLassoPathRef.current).toEqual([{ x: 0, y: 0 }]);
   });
 
   it('should append the new point to the path and select every vertex now enclosed by it', () => {
@@ -84,7 +84,7 @@ describe('continueVectorLassoDrag', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.vectorLassoPathRef.current = [
+    canvasRefs.lassoMarquee.vectorLassoPathRef.current = [
       { x: 0, y: 0 },
       { x: 100, y: 0 },
       { x: 100, y: 100 },
@@ -94,12 +94,12 @@ describe('continueVectorLassoDrag', () => {
     continueVectorLassoDrag(canvas, pointerEvent(0, 100), canvasRefs);
 
     // result
-    expect(canvasRefs.vectorLassoPathRef.current).toEqual([
+    expect(canvasRefs.lassoMarquee.vectorLassoPathRef.current).toEqual([
       { x: 0, y: 0 },
       { x: 100, y: 0 },
       { x: 100, y: 100 },
       { x: 0, y: 100 },
     ]);
-    expect(canvasRefs.selectedVectorVertexIdsRef.current).toEqual(['v1']);
+    expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1']);
   });
 });

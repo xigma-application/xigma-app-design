@@ -121,7 +121,7 @@ describe('resolveVectorCornerHandleDrag', () => {
     expect(selectionRefs.pendingVectorCornerHandleDragRef.current).toBeNull();
     expect(selectionRefs.vectorHandleDragRef.current).toEqual({ end: 'start', nodeId, segmentId: 's2', vertexId: 'v1' });
     expect(node.vertexHandleModes).toEqual({ v1: 'symmetric' });
-    expect(canvasRefs.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's2' }]);
+    expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's2' }]);
   });
 
   it('should do nothing when the vector-editing node can no longer be found', () => {

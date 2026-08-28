@@ -280,13 +280,17 @@ describe('handlePointerDown', () => {
       pointerEvent(10, 10, { button: 1 }),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -319,13 +323,17 @@ describe('handlePointerDown', () => {
       pointerEvent(105, 105, { shiftKey: true }),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -358,13 +366,17 @@ describe('handlePointerDown', () => {
       pointerEvent(205, 205),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -401,13 +413,17 @@ describe('handlePointerDown', () => {
       pointerEvent(340, 310),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -442,13 +458,17 @@ describe('handlePointerDown', () => {
       pointerEvent(900, 900),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -488,13 +508,17 @@ describe('handlePointerDown', () => {
       pointerEvent(6450, 6450),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -533,13 +557,17 @@ describe('handlePointerDown', () => {
       pointerEvent(6650, 6450),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -576,13 +604,17 @@ describe('handlePointerDown', () => {
       pointerEvent(1300, 1300),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -617,13 +649,17 @@ describe('handlePointerDown', () => {
       pointerEvent(1800, 1800),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -661,13 +697,17 @@ describe('handlePointerDown', () => {
       pointerEvent(500, 500),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -704,13 +744,17 @@ describe('handlePointerDown', () => {
       pointerEvent(750, 700),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -747,13 +791,17 @@ describe('handlePointerDown', () => {
       pointerEvent(2000, 2000),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -791,13 +839,17 @@ describe('handlePointerDown', () => {
       pointerEvent(2500, 2490),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef,
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -835,13 +887,17 @@ describe('handlePointerDown', () => {
       pointerEvent(4080, 4020),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: cornerRadiusDragRef,
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: cornerRadiusDragRef,
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -879,13 +935,17 @@ describe('handlePointerDown', () => {
       pointerEvent(5050, 5030),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: polygonCornerRadiusDragRef,
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: polygonCornerRadiusDragRef,
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -923,13 +983,17 @@ describe('handlePointerDown', () => {
       pointerEvent(5250, 5033.893272),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: starCornerRadiusDragRef,
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: starCornerRadiusDragRef,
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -968,13 +1032,17 @@ describe('handlePointerDown', () => {
       pointerEvent(4200, 4100),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: cornerRadiusDragRef,
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: cornerRadiusDragRef,
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef: createDragStateRef(),
@@ -1011,13 +1079,17 @@ describe('handlePointerDown', () => {
       pointerEvent(3200, 3100),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -1056,13 +1128,17 @@ describe('handlePointerDown', () => {
       pointerEvent(5493.30127, 5075),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -1102,13 +1178,17 @@ describe('handlePointerDown', () => {
       pointerEvent(5700, 5050),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -1146,13 +1226,17 @@ describe('handlePointerDown', () => {
       pointerEvent(5597.552826, 5034.54915),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -1190,13 +1274,17 @@ describe('handlePointerDown', () => {
       pointerEvent(5900, 5050),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: ellipseArcDragRef,
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: ellipseArcDragRef,
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -1235,13 +1323,17 @@ describe('handlePointerDown', () => {
       pointerEvent(6100, 5050),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
-        ellipseArcRotateDragRef: ellipseArcRotateDragRef,
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: ellipseArcRotateDragRef,
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,
@@ -1279,13 +1371,17 @@ describe('handlePointerDown', () => {
       pointerEvent(6250, 5050),
       store.dispatch,
       createCanvasRefs({
-        cornerRadiusDragRef: createCornerRadiusDragRef(),
-        ellipseArcDragRef: createEllipseArcDragRef(),
-        ellipseArcRatioDragRef: ellipseArcRatioDragRef,
-        ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
-        polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
-        rotateDragRef: createRotateDragRef(),
-        starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: ellipseArcRatioDragRef,
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
       }),
       createSelectionToolRefs({
         dragStateRef,

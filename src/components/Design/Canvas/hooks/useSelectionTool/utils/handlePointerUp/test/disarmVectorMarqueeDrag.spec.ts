@@ -38,9 +38,13 @@ describe('disarmVectorMarqueeDrag', () => {
     // mock
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs({
-      marqueeRef: { current: { height: 10, width: 10, x: 0, y: 0 } },
-      preVectorMarqueeSegmentIdsRef: { current: ['segment-1'] },
-      preVectorMarqueeVertexIdsRef: { current: ['vertex-1'] },
+      lassoMarquee: {
+        marqueeRef: { current: { height: 10, width: 10, x: 0, y: 0 } },
+      },
+      vectorEdit: {
+        preVectorMarqueeSegmentIdsRef: { current: ['segment-1'] },
+        preVectorMarqueeVertexIdsRef: { current: ['vertex-1'] },
+      },
     });
     const vectorMarqueeStartRef = createVectorMarqueeStartRef({ x: 5, y: 5 });
     const vectorMarqueeModeRef = createVectorMarqueeModeRef('points');
@@ -51,9 +55,9 @@ describe('disarmVectorMarqueeDrag', () => {
     // result
     expect(vectorMarqueeStartRef.current).toBeNull();
     expect(vectorMarqueeModeRef.current).toBeNull();
-    expect(canvasRefs.marqueeRef.current).toBeNull();
-    expect(canvasRefs.preVectorMarqueeVertexIdsRef.current).toEqual([]);
-    expect(canvasRefs.preVectorMarqueeSegmentIdsRef.current).toEqual([]);
+    expect(canvasRefs.lassoMarquee.marqueeRef.current).toBeNull();
+    expect(canvasRefs.vectorEdit.preVectorMarqueeVertexIdsRef.current).toEqual([]);
+    expect(canvasRefs.vectorEdit.preVectorMarqueeSegmentIdsRef.current).toEqual([]);
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
   });
 });

@@ -30,7 +30,7 @@ export const pasteVectorFragment = (
   dispatch(updateNode({ changes: merged.changes, id: targetNodeId }));
   dispatch(endHistoryGesture());
 
-  refs.selectedVectorHandlesRef.current = [];
-  refs.selectedVectorSegmentIdsRef.current = merged.newSegmentIds;
-  refs.selectedVectorVertexIdsRef.current = merged.newVertexIds;
+  refs.vectorEdit.selectedVectorHandlesRef.current = [];
+  refs.vectorEdit.selectedVectorSegmentIdsRef.current = merged.newSegmentIds;
+  refs.vectorEdit.selectedVectorVertexIdsRef.current = merged.newVertexIds;
 };

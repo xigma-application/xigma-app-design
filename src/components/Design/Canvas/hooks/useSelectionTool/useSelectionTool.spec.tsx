@@ -146,7 +146,7 @@ const renderSelectionTool = (canvasRef: RefObject<HTMLCanvasElement | null>): Re
     ),
   });
 
-  return refs.marqueeRef;
+  return refs.lassoMarquee.marqueeRef;
 };
 
 describe('useSelectionTool behaviors', () => {
@@ -668,7 +668,7 @@ describe('useSelectionTool behaviors', () => {
     const canvasRef = createCanvasRef();
     const refs = createCanvasRefs({ canvasRef });
 
-    refs.hoveredVectorVertexIdRef.current = 'v1';
+    refs.hover.hoveredVectorVertexIdRef.current = 'v1';
 
     // before
     renderHook(() => useSelectionTool(refs), {
@@ -683,7 +683,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(new PointerEvent('pointerleave'));
 
     // result
-    expect(refs.hoveredVectorVertexIdRef.current).toBeNull();
+    expect(refs.hover.hoveredVectorVertexIdRef.current).toBeNull();
   });
 
   it('should clear the hovered vector segment id when the pointer leaves the canvas', () => {
@@ -691,7 +691,7 @@ describe('useSelectionTool behaviors', () => {
     const canvasRef = createCanvasRef();
     const refs = createCanvasRefs({ canvasRef });
 
-    refs.hoveredVectorSegmentIdRef.current = 's1';
+    refs.hover.hoveredVectorSegmentIdRef.current = 's1';
 
     // before
     renderHook(() => useSelectionTool(refs), {
@@ -706,7 +706,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(new PointerEvent('pointerleave'));
 
     // result
-    expect(refs.hoveredVectorSegmentIdRef.current).toBeNull();
+    expect(refs.hover.hoveredVectorSegmentIdRef.current).toBeNull();
   });
 
   it('should clear the selected vector vertex and tangent handle once the tool leaves Move/Scale, instead of leaving a stale "selected" dot behind — e.g. switching back to Pen', () => {
@@ -714,9 +714,9 @@ describe('useSelectionTool behaviors', () => {
     const canvasRef = createCanvasRef();
     const refs = createCanvasRefs({ canvasRef });
 
-    refs.selectedVectorVertexIdsRef.current = ['v1'];
-    refs.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
-    refs.snappedVectorHandleRef.current = { end: 'start', segmentId: 's1' };
+    refs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
+    refs.vectorEdit.selectedVectorHandlesRef.current = [{ end: 'start', segmentId: 's1' }];
+    refs.vectorEdit.snappedVectorHandleRef.current = { end: 'start', segmentId: 's1' };
 
     // before
     renderHook(() => useSelectionTool(refs), {
@@ -733,21 +733,21 @@ describe('useSelectionTool behaviors', () => {
     });
 
     // result
-    expect(refs.selectedVectorVertexIdsRef.current).toEqual([]);
-    expect(refs.selectedVectorHandlesRef.current).toEqual([]);
-    expect(refs.snappedVectorHandleRef.current).toBeNull();
+    expect(refs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
+    expect(refs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
+    expect(refs.vectorEdit.snappedVectorHandleRef.current).toBeNull();
   });
 
-  it('should clear an in-progress paint stroke\'s touched-faces preview once the tool switches away, instead of leaving a stale hatch-fill preview behind', () => {
+  it("should clear an in-progress paint stroke's touched-faces preview once the tool switches away, instead of leaving a stale hatch-fill preview behind", () => {
     // mock — models a paint drag that got interrupted (tool switched mid-drag) without ever
     // reaching disarmVectorPaintDrag's own cleanup
     const canvasRef = createCanvasRef();
     const refs = createCanvasRefs({ canvasRef });
 
-    refs.vectorPaintPathRef.current = [{ x: 0, y: 0 }];
-    refs.touchedVectorPaintLoopKeysRef.current = { 'node-1': new Set(['face-a']) };
-    refs.vectorPaintTouchedFacesRef.current = { 'node-1': ['face-a'] };
-    refs.isVectorPaintRemoveRef.current = true;
+    refs.vectorPaint.vectorPaintPathRef.current = [{ x: 0, y: 0 }];
+    refs.vectorPaint.touchedVectorPaintLoopKeysRef.current = { 'node-1': new Set(['face-a']) };
+    refs.vectorPaint.vectorPaintTouchedFacesRef.current = { 'node-1': ['face-a'] };
+    refs.vectorPaint.isVectorPaintRemoveRef.current = true;
 
     // before
     renderHook(() => useSelectionTool(refs), {
@@ -764,10 +764,10 @@ describe('useSelectionTool behaviors', () => {
     });
 
     // result
-    expect(refs.vectorPaintPathRef.current).toBeNull();
-    expect(refs.touchedVectorPaintLoopKeysRef.current).toEqual({});
-    expect(refs.vectorPaintTouchedFacesRef.current).toBeNull();
-    expect(refs.isVectorPaintRemoveRef.current).toBe(false);
+    expect(refs.vectorPaint.vectorPaintPathRef.current).toBeNull();
+    expect(refs.vectorPaint.touchedVectorPaintLoopKeysRef.current).toEqual({});
+    expect(refs.vectorPaint.vectorPaintTouchedFacesRef.current).toBeNull();
+    expect(refs.vectorPaint.isVectorPaintRemoveRef.current).toBe(false);
   });
 
   it('should re-evaluate an in-progress tangent-handle drag immediately when Shift is pressed, without a further pointermove', () => {
@@ -776,7 +776,7 @@ describe('useSelectionTool behaviors', () => {
     const canvasRef = createCanvasRef();
     const refs = createCanvasRefs({ canvasRef });
 
-    refs.selectedVectorVertexIdsRef.current = ['v1']; // reveals v1's own handle for hit-testing
+    refs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1']; // reveals v1's own handle for hit-testing
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     // before
@@ -797,7 +797,7 @@ describe('useSelectionTool behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 3420, 712));
     });
 
-    expect(refs.snappedVectorHandleRef.current).toBeNull();
+    expect(refs.vectorEdit.snappedVectorHandleRef.current).toBeNull();
 
     // action — Shift held, no further pointer movement
     act(() => {
@@ -805,7 +805,7 @@ describe('useSelectionTool behaviors', () => {
     });
 
     // result — hard-constrained at the same live position, no additional mouse movement needed
-    expect(refs.snappedVectorHandleRef.current).toEqual({ end: 'start', segmentId: 's1' });
+    expect(refs.vectorEdit.snappedVectorHandleRef.current).toEqual({ end: 'start', segmentId: 's1' });
 
     // action — Shift released, still no further pointer movement
     act(() => {
@@ -813,7 +813,7 @@ describe('useSelectionTool behaviors', () => {
     });
 
     // result — back to the plain unsnapped drag at the same diagonal position
-    expect(refs.snappedVectorHandleRef.current).toBeNull();
+    expect(refs.vectorEdit.snappedVectorHandleRef.current).toBeNull();
   });
 
   it('should not react to Shift while no tangent-handle drag is in progress', () => {
@@ -843,7 +843,7 @@ describe('useSelectionTool behaviors', () => {
     });
 
     // result
-    expect(refs.snappedVectorHandleRef.current).toBeNull();
+    expect(refs.vectorEdit.snappedVectorHandleRef.current).toBeNull();
   });
 
   it('should lock the Erase brush path to an axis while Shift is held, and resume freehand immediately once Shift is released', () => {
@@ -877,14 +877,14 @@ describe('useSelectionTool behaviors', () => {
     });
 
     // result — y snaps back to the anchor's 706
-    expect(refs.vectorEraseStrokeRef.current?.at(-1)).toEqual({ x: 3510, y: 706 });
+    expect(refs.vectorErase.vectorEraseStrokeRef.current?.at(-1)).toEqual({ x: 3510, y: 706 });
 
     // action — still holding Shift, drifts more vertically now, but the x lock holds
     act(() => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 3520, 750, { shiftKey: true }));
     });
 
-    expect(refs.vectorEraseStrokeRef.current?.at(-1)).toEqual({ x: 3520, y: 706 });
+    expect(refs.vectorErase.vectorEraseStrokeRef.current?.at(-1)).toEqual({ x: 3520, y: 706 });
 
     // action — Shift released, no further pointer movement
     act(() => {
@@ -892,7 +892,7 @@ describe('useSelectionTool behaviors', () => {
     });
 
     // result — the real, unlocked pointer position is used immediately
-    expect(refs.vectorEraseStrokeRef.current?.at(-1)).toEqual({ x: 3520, y: 750 });
+    expect(refs.vectorErase.vectorEraseStrokeRef.current?.at(-1)).toEqual({ x: 3520, y: 750 });
   });
 
   it('should re-evaluate the Shape Builder hover immediately when Alt is pressed, without a further pointermove', () => {
@@ -917,7 +917,7 @@ describe('useSelectionTool behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 3450, 750));
     });
 
-    expect(refs.isVectorShapeBuilderSubtractRef.current).toBe(false);
+    expect(refs.shapeBuilder.isVectorShapeBuilderSubtractRef.current).toBe(false);
 
     // action — Alt held, no further pointer movement
     act(() => {
@@ -925,8 +925,8 @@ describe('useSelectionTool behaviors', () => {
     });
 
     // result — subtract mode flips on at the same live hover position
-    expect(refs.isVectorShapeBuilderSubtractRef.current).toBe(true);
-    expect(refs.hoveredVectorShapeBuilderFaceRef.current).toEqual({ faceKey: 's1,s2,s3', nodeId });
+    expect(refs.shapeBuilder.isVectorShapeBuilderSubtractRef.current).toBe(true);
+    expect(refs.hover.hoveredVectorShapeBuilderFaceRef.current).toEqual({ faceKey: 's1,s2,s3', nodeId });
 
     // action — Alt released, still no further pointer movement
     act(() => {
@@ -934,7 +934,7 @@ describe('useSelectionTool behaviors', () => {
     });
 
     // result — back to add mode at the same hover position
-    expect(refs.isVectorShapeBuilderSubtractRef.current).toBe(false);
+    expect(refs.shapeBuilder.isVectorShapeBuilderSubtractRef.current).toBe(false);
   });
 
   it('should not react to Alt while Shape Builder is not the active tool', () => {
@@ -965,7 +965,7 @@ describe('useSelectionTool behaviors', () => {
     });
 
     // result
-    expect(refs.isVectorShapeBuilderSubtractRef.current).toBe(false);
+    expect(refs.shapeBuilder.isVectorShapeBuilderSubtractRef.current).toBe(false);
   });
 
   it('should not react to pointer events while a path-text node is being edited', () => {
@@ -1137,7 +1137,7 @@ describe('useSelectionTool behaviors', () => {
     });
 
     // result — a width point was armed for a drag on this node's stroke
-    expect(refs.vectorWidthPointDragRef.current).toMatchObject({ isNewPoint: true, nodeId });
+    expect(refs.vectorWidth.vectorWidthPointDragRef.current).toMatchObject({ isNewPoint: true, nodeId });
 
     // action
     act(() => {
@@ -1148,6 +1148,6 @@ describe('useSelectionTool behaviors', () => {
     const node = store.getState().design.nodes[nodeId] as TVectorNode;
 
     expect(node.widthProfile?.points).toMatchObject({ [Object.keys(node.widthProfile?.points ?? {})[0]]: { position: 0.5 } });
-    expect(refs.vectorWidthPointDragRef.current).toBeNull();
+    expect(refs.vectorWidth.vectorWidthPointDragRef.current).toBeNull();
   });
 });

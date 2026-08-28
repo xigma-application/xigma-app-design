@@ -24,6 +24,6 @@ export const convertLineToVector = (node: TLineNode): TVectorNode => {
     strokeWidth: LINE_RENDER_STROKE_WIDTH,
     type: NodeType.vector,
     vertexHandleModes: {},
-    vertices: { [startId]: { id: startId, x: node.x1, y: node.y1 }, [endId]: { id: endId, x: node.x2, y: node.y2 } },
+    vertices: { [endId]: { id: endId, x: node.x2, y: node.y2 }, [startId]: { id: startId, x: node.x1, y: node.y1 } },
   };
 };

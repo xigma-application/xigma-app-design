@@ -45,15 +45,15 @@ describe('resolveVectorCutMarkConsumption', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.newVectorCutVertexIdsRef.current = new Set(['v1']);
-    canvasRefs.selectedVectorVertexIdsRef.current = [];
+    canvasRefs.vectorCut.newVectorCutVertexIdsRef.current = new Set(['v1']);
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = [];
 
     // before
     resolveVectorCutMarkConsumption(canvasRefs);
 
     // result
-    expect(canvasRefs.newVectorCutVertexIdsRef.current).toEqual(new Set(['v1']));
-    expect(canvasRefs.touchedVectorCutVertexIdsRef.current).toEqual(new Set());
+    expect(canvasRefs.vectorCut.newVectorCutVertexIdsRef.current).toEqual(new Set(['v1']));
+    expect(canvasRefs.vectorCut.touchedVectorCutVertexIdsRef.current).toEqual(new Set());
   });
 
   it('should record a pink vertex as touched once it becomes selected, without unmarking it yet', () => {
@@ -64,15 +64,15 @@ describe('resolveVectorCutMarkConsumption', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.newVectorCutVertexIdsRef.current = new Set(['v1']);
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorCut.newVectorCutVertexIdsRef.current = new Set(['v1']);
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
 
     // before
     resolveVectorCutMarkConsumption(canvasRefs);
 
     // result — still pink while selected, just now flagged as touched
-    expect(canvasRefs.newVectorCutVertexIdsRef.current).toEqual(new Set(['v1']));
-    expect(canvasRefs.touchedVectorCutVertexIdsRef.current).toEqual(new Set(['v1']));
+    expect(canvasRefs.vectorCut.newVectorCutVertexIdsRef.current).toEqual(new Set(['v1']));
+    expect(canvasRefs.vectorCut.touchedVectorCutVertexIdsRef.current).toEqual(new Set(['v1']));
   });
 
   it('should un-mark a pink vertex once it is deselected after having been touched (select-then-deselect)', () => {
@@ -83,18 +83,18 @@ describe('resolveVectorCutMarkConsumption', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.newVectorCutVertexIdsRef.current = new Set(['v1']);
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorCut.newVectorCutVertexIdsRef.current = new Set(['v1']);
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
     resolveVectorCutMarkConsumption(canvasRefs);
 
-    canvasRefs.selectedVectorVertexIdsRef.current = [];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = [];
 
     // before
     resolveVectorCutMarkConsumption(canvasRefs);
 
     // result
-    expect(canvasRefs.newVectorCutVertexIdsRef.current).toEqual(new Set());
-    expect(canvasRefs.touchedVectorCutVertexIdsRef.current).toEqual(new Set());
+    expect(canvasRefs.vectorCut.newVectorCutVertexIdsRef.current).toEqual(new Set());
+    expect(canvasRefs.vectorCut.touchedVectorCutVertexIdsRef.current).toEqual(new Set());
   });
 
   it('should also un-mark a coincident sibling at the exact same point — a Split severs into two disconnected ids at one spot, and the user can only ever click one of them', () => {
@@ -105,18 +105,18 @@ describe('resolveVectorCutMarkConsumption', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.newVectorCutVertexIdsRef.current = new Set(['v1', 'v2']);
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorCut.newVectorCutVertexIdsRef.current = new Set(['v1', 'v2']);
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
     resolveVectorCutMarkConsumption(canvasRefs);
 
-    canvasRefs.selectedVectorVertexIdsRef.current = [];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = [];
 
     // before — only v1 was ever actually selected; v2 (its coincident twin) was never touched directly
     resolveVectorCutMarkConsumption(canvasRefs);
 
     // result — both are consumed together
-    expect(canvasRefs.newVectorCutVertexIdsRef.current).toEqual(new Set());
-    expect(canvasRefs.touchedVectorCutVertexIdsRef.current).toEqual(new Set());
+    expect(canvasRefs.vectorCut.newVectorCutVertexIdsRef.current).toEqual(new Set());
+    expect(canvasRefs.vectorCut.touchedVectorCutVertexIdsRef.current).toEqual(new Set());
   });
 
   it('should not un-mark an unrelated pink vertex that merely sits elsewhere', () => {
@@ -132,17 +132,17 @@ describe('resolveVectorCutMarkConsumption', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.newVectorCutVertexIdsRef.current = new Set(['v1', 'v2', 'v3']);
-    canvasRefs.selectedVectorVertexIdsRef.current = ['v1'];
+    canvasRefs.vectorCut.newVectorCutVertexIdsRef.current = new Set(['v1', 'v2', 'v3']);
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = ['v1'];
     resolveVectorCutMarkConsumption(canvasRefs);
 
-    canvasRefs.selectedVectorVertexIdsRef.current = [];
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = [];
 
     // before
     resolveVectorCutMarkConsumption(canvasRefs);
 
     // result — v1/v2 consumed together, v3 untouched
-    expect(canvasRefs.newVectorCutVertexIdsRef.current).toEqual(new Set(['v3']));
+    expect(canvasRefs.vectorCut.newVectorCutVertexIdsRef.current).toEqual(new Set(['v3']));
   });
 
   it('should not crash when a touched-and-deselected vertex no longer exists in any open node (e.g. deleted via merge)', () => {
@@ -153,16 +153,16 @@ describe('resolveVectorCutMarkConsumption', () => {
 
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.newVectorCutVertexIdsRef.current = new Set(['gone', 'v3']);
-    canvasRefs.touchedVectorCutVertexIdsRef.current = new Set(['gone']);
-    canvasRefs.selectedVectorVertexIdsRef.current = [];
+    canvasRefs.vectorCut.newVectorCutVertexIdsRef.current = new Set(['gone', 'v3']);
+    canvasRefs.vectorCut.touchedVectorCutVertexIdsRef.current = new Set(['gone']);
+    canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = [];
 
     // before
     resolveVectorCutMarkConsumption(canvasRefs);
 
     // result — no crash; the unresolvable id can't match any coincident position, including its own,
     // so it's left as-is (harmless — it no longer corresponds to any real vertex, so nothing renders it)
-    expect(canvasRefs.newVectorCutVertexIdsRef.current).toEqual(new Set(['gone', 'v3']));
+    expect(canvasRefs.vectorCut.newVectorCutVertexIdsRef.current).toEqual(new Set(['gone', 'v3']));
   });
 
   it('should clear both marks entirely once no node is left open for editing', () => {
@@ -170,14 +170,14 @@ describe('resolveVectorCutMarkConsumption', () => {
     store.dispatch(setVectorEditingNodeIds([]));
     const canvasRefs = createCanvasRefs();
 
-    canvasRefs.newVectorCutVertexIdsRef.current = new Set(['v1', 'v2']);
-    canvasRefs.touchedVectorCutVertexIdsRef.current = new Set(['v1']);
+    canvasRefs.vectorCut.newVectorCutVertexIdsRef.current = new Set(['v1', 'v2']);
+    canvasRefs.vectorCut.touchedVectorCutVertexIdsRef.current = new Set(['v1']);
 
     // before
     resolveVectorCutMarkConsumption(canvasRefs);
 
     // result
-    expect(canvasRefs.newVectorCutVertexIdsRef.current).toEqual(new Set());
-    expect(canvasRefs.touchedVectorCutVertexIdsRef.current).toEqual(new Set());
+    expect(canvasRefs.vectorCut.newVectorCutVertexIdsRef.current).toEqual(new Set());
+    expect(canvasRefs.vectorCut.touchedVectorCutVertexIdsRef.current).toEqual(new Set());
   });
 });

@@ -11,8 +11,8 @@ export const armVectorWidthRegulatorShiftToggle = (
   handleHit: TVectorWidthPointHandleHit | null,
 ): true | undefined => {
   if (handleHit && event.shiftKey) {
-    canvasRefs.selectedVectorWidthHandlesRef.current = toggleVectorWidthRegulatorSelection(
-      canvasRefs.selectedVectorWidthHandlesRef.current,
+    canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current = toggleVectorWidthRegulatorSelection(
+      canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current,
       handleHit.nodeId,
       handleHit.point.id,
     );

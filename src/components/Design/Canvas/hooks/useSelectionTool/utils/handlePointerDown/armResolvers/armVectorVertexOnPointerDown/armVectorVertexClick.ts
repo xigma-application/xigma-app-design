@@ -21,9 +21,12 @@ export const armVectorVertexClick = (
 ): void => {
   switch (true) {
     case event.shiftKey:
-      canvasRefs.selectedVectorVertexIdsRef.current = toggleSelection(canvasRefs.selectedVectorVertexIdsRef.current, hit.vertexId);
+      canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current = toggleSelection(
+        canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current,
+        hit.vertexId,
+      );
       break;
-    case isPartOfVectorMultiSelection(canvasRefs, canvasRefs.selectedVectorVertexIdsRef.current.includes(hit.vertexId)):
+    case isPartOfVectorMultiSelection(canvasRefs, canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current.includes(hit.vertexId)):
       armVectorGroupDrag(canvas, event, canvasRefs, point, { id: hit.vertexId, kind: 'vertex' });
       break;
     default:

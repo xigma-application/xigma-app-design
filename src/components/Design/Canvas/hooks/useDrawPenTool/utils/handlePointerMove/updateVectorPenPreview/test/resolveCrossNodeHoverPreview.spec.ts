@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TCanvasRefs } from 'types/design/canvas/types';
+import { THoverRefs, TPenRefs, TVectorEditRefs } from 'types/design/canvas/types';
 import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
@@ -26,10 +26,10 @@ const activeNode: TVectorNode = {
 const otherNode: TVectorNode = { ...activeNode, id: 'vector-2', vertices: { vb: { id: 'vb', x: 500, y: 500 } } };
 const nodes: Record<string, TSceneNode> = { [activeNode.id]: activeNode, [otherNode.id]: otherNode };
 
-const createPenPreviewRef = (): TCanvasRefs['penPreviewRef'] => ({ current: null });
-const createHoveredSegmentIdRef = (): TCanvasRefs['hoveredSegmentIdRef'] => ({ current: null });
-const createPenHoveredDragArmableVertexRef = (): TCanvasRefs['penHoveredDragArmableVertexRef'] => ({ current: true });
-const createVectorAlignmentGuideRef = (): TCanvasRefs['vectorAlignmentGuideRef'] => ({
+const createPenPreviewRef = (): TPenRefs['penPreviewRef'] => ({ current: null });
+const createHoveredSegmentIdRef = (): THoverRefs['hoveredSegmentIdRef'] => ({ current: null });
+const createPenHoveredDragArmableVertexRef = (): TPenRefs['penHoveredDragArmableVertexRef'] => ({ current: true });
+const createVectorAlignmentGuideRef = (): TVectorEditRefs['vectorAlignmentGuideRef'] => ({
   current: { horizontal: null, vertical: { anchor: { x: 0, y: 0 }, match: { x: 0, y: 0 } } },
 });
 

@@ -226,7 +226,7 @@ describe('continueVectorSegmentBendDrag', () => {
     expect(node.segments.s2.tangentEnd).toEqual({ x: 0, y: 50 });
     expect(node.segments.s1.tangentStart).toBeNull();
     expect(node.vertexHandleModes).toEqual({ v1: 'symmetric', v3: 'symmetric' });
-    expect(canvasRefs.selectedVectorSegmentIdsRef.current).toEqual(['s2']);
+    expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s2']);
     expect(setClassName).toHaveBeenCalledWith('bend');
   });
 });

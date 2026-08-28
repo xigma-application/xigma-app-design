@@ -18,7 +18,7 @@ export const continueVectorShapeBuilderDrag = (
   canvasRefs: TCanvasRefs,
   setClassName: (className: string | null) => void,
 ): void => {
-  const path = canvasRefs.vectorShapeBuilderPathRef.current;
+  const path = canvasRefs.shapeBuilder.vectorShapeBuilderPathRef.current;
 
   if (path) {
     const state = store.getState();
@@ -26,15 +26,15 @@ export const continueVectorShapeBuilderDrag = (
     const point = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
     const nextPath = [...path, point];
 
-    canvasRefs.vectorShapeBuilderPathRef.current = nextPath;
-    canvasRefs.isVectorShapeBuilderBoxModeRef.current = event.shiftKey;
-    canvasRefs.isVectorShapeBuilderSubtractRef.current = event.altKey;
+    canvasRefs.shapeBuilder.vectorShapeBuilderPathRef.current = nextPath;
+    canvasRefs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current = event.shiftKey;
+    canvasRefs.shapeBuilder.isVectorShapeBuilderSubtractRef.current = event.altKey;
     setClassName(event.altKey ? 'remove' : 'add');
 
     const hits = event.shiftKey
       ? getVectorFacesInRectAcrossOpenNodes(toDraftRect(nextPath[0], point), vectorEditingNodeIds, state.design.nodes)
       : getVectorFacesOnPathAcrossOpenNodes(nextPath, vectorEditingNodeIds, state.design.nodes);
-    const touchedFaces = canvasRefs.touchedVectorShapeBuilderFacesRef.current;
+    const touchedFaces = canvasRefs.shapeBuilder.touchedVectorShapeBuilderFacesRef.current;
 
     hits.forEach(({ faces, node }) => {
       const faceKeys = touchedFaces[node.id] ?? new Set<string>();

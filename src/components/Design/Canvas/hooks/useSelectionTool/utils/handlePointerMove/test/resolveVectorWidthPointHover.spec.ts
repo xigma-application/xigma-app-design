@@ -60,7 +60,7 @@ describe('resolveVectorWidthPointHover', () => {
     resolveVectorWidthPointHover(canvas, pointerEvent(50, 0), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorWidthPointRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorWidthPointRef.current).toBeNull();
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -75,7 +75,7 @@ describe('resolveVectorWidthPointHover', () => {
     resolveVectorWidthPointHover(canvas, pointerEvent(50, 0), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorWidthPointRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorWidthPointRef.current).toBeNull();
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -92,7 +92,7 @@ describe('resolveVectorWidthPointHover', () => {
     resolveVectorWidthPointHover(canvas, pointerEvent(50, 0, 1), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorWidthPointRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorWidthPointRef.current).toBeNull();
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -109,7 +109,7 @@ describe('resolveVectorWidthPointHover', () => {
     resolveVectorWidthPointHover(canvas, pointerEvent(50, 0), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorWidthPointRef.current).toEqual({ nodeId, segmentId: 's1', t: 0.5 });
+    expect(canvasRefs.hover.hoveredVectorWidthPointRef.current).toEqual({ nodeId, segmentId: 's1', t: 0.5 });
     expect(setClassName).toHaveBeenCalledWith('controller');
   });
 
@@ -133,9 +133,9 @@ describe('resolveVectorWidthPointHover', () => {
     resolveVectorWidthPointHover(canvas, pointerEvent(20, 0), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorWidthPointRef.current?.nodeId).toBe(nodeId);
-    expect(canvasRefs.hoveredVectorWidthPointRef.current?.segmentId).toBe('s1');
-    expect(canvasRefs.hoveredVectorWidthPointRef.current?.t).toBeCloseTo(0.2, 5);
+    expect(canvasRefs.hover.hoveredVectorWidthPointRef.current?.nodeId).toBe(nodeId);
+    expect(canvasRefs.hover.hoveredVectorWidthPointRef.current?.segmentId).toBe('s1');
+    expect(canvasRefs.hover.hoveredVectorWidthPointRef.current?.t).toBeCloseTo(0.2, 5);
     expect(setClassName).toHaveBeenCalledWith('controller');
   });
 
@@ -160,9 +160,9 @@ describe('resolveVectorWidthPointHover', () => {
     resolveVectorWidthPointHover(canvas, pointerEvent(20, 6), canvasRefs, setClassName);
 
     // result — resize-style cursor, not the plain controller class
-    expect(canvasRefs.hoveredVectorWidthPointRef.current?.nodeId).toBe(nodeId);
-    expect(canvasRefs.hoveredVectorWidthPointRef.current?.segmentId).toBe('s1');
-    expect(canvasRefs.hoveredVectorWidthPointRef.current?.t).toBeCloseTo(0.2, 5);
+    expect(canvasRefs.hover.hoveredVectorWidthPointRef.current?.nodeId).toBe(nodeId);
+    expect(canvasRefs.hover.hoveredVectorWidthPointRef.current?.segmentId).toBe('s1');
+    expect(canvasRefs.hover.hoveredVectorWidthPointRef.current?.t).toBeCloseTo(0.2, 5);
     expect(setClassName).toHaveBeenCalledWith(null);
   });
 
@@ -179,7 +179,7 @@ describe('resolveVectorWidthPointHover', () => {
     resolveVectorWidthPointHover(canvas, pointerEvent(500, 500), canvasRefs, setClassName);
 
     // result
-    expect(canvasRefs.hoveredVectorWidthPointRef.current).toBeNull();
+    expect(canvasRefs.hover.hoveredVectorWidthPointRef.current).toBeNull();
     expect(setClassName).toHaveBeenCalledWith(null);
   });
 });

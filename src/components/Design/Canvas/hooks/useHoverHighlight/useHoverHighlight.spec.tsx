@@ -185,7 +185,7 @@ const renderHoverHighlight = (
 
   renderHook(
     () => {
-      useHoverHighlight(createCanvasRefs({ canvasRef, hoverRef }));
+      useHoverHighlight(createCanvasRefs({ canvasRef, hover: { hoverRef } }));
       classNameRef.current = useClassNames().className;
     },
     {

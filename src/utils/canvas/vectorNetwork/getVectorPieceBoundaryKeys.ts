@@ -24,9 +24,7 @@ const getPieceIdGroups = (planarSegments: Record<string, TVectorSegment>): Map<s
       group.push(pieceId);
       groups.set(realSegmentId, group);
     });
-
     groups.forEach((pieceIds) => pieceIds.sort((a, b) => getPieceIndex(a) - getPieceIndex(b)));
-
     pieceIdGroupsCache.set(planarSegments, groups);
 
     return groups;
@@ -48,19 +46,19 @@ const resolveBoundaryKey = (
 
   const cachedKey = keyByVertexId.get(vertexId);
 
-  if (cachedKey) {
-    return cachedKey;
+  if (!cachedKey) {
+    const [, firstId, secondId] = vertexId.split(':');
+    const otherSegmentId = firstId === ownRealSegmentId ? secondId : firstId;
+    const occurrence = occurrenceBySegmentId.get(otherSegmentId) ?? 0;
+    const key = `x:${otherSegmentId}:${occurrence}`;
+
+    occurrenceBySegmentId.set(otherSegmentId, occurrence + 1);
+    keyByVertexId.set(vertexId, key);
+
+    return key;
   }
 
-  const [, firstId, secondId] = vertexId.split(':');
-  const otherSegmentId = firstId === ownRealSegmentId ? secondId : firstId;
-  const occurrence = occurrenceBySegmentId.get(otherSegmentId) ?? 0;
-  const key = `x:${otherSegmentId}:${occurrence}`;
-
-  occurrenceBySegmentId.set(otherSegmentId, occurrence + 1);
-  keyByVertexId.set(vertexId, key);
-
-  return key;
+  return cachedKey;
 };
 
 export const getVectorPieceBoundaryKeys = (
