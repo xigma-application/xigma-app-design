@@ -20,5 +20,5 @@ export const drawVectorStroke = (
 ): void => {
   const vertices = getThickVectorPathVertices(segments, strokeWidth / 2);
 
-  drawVectorThickStrokeVertices(gl, program, buffer, vertices, color, canvasWidth, canvasHeight, viewport, alpha);
+  drawVectorThickStrokeVertices(gl, program, buffer, null, vertices, color, canvasWidth, canvasHeight, viewport, alpha);
 };

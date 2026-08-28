@@ -33,5 +33,15 @@ export const drawVectorNodeRotateSnapshot = (
     rotatedStrokeVertices.push(rotated.x, rotated.y);
   }
 
-  drawVectorThickStrokeVertices(gl, program, buffer, rotatedStrokeVertices, snapshot.strokeColor, canvasWidth, canvasHeight, viewport);
+  drawVectorThickStrokeVertices(
+    gl,
+    program,
+    buffer,
+    null,
+    rotatedStrokeVertices,
+    snapshot.strokeColor,
+    canvasWidth,
+    canvasHeight,
+    viewport,
+  );
 };

@@ -47,6 +47,7 @@ const IMAGE_CONTEXT: TImageRenderContext = {
   msdfBuffer: {} as WebGLBuffer,
   msdfProgram: {} as WebGLProgram,
   program: {} as WebGLProgram,
+  strokeBufferCache: new WeakMap(),
   textGeometryCache: new Map(),
 };
 

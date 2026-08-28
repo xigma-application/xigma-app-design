@@ -33,6 +33,7 @@ export const drawVectorNodeDragSnapshot = (
     gl,
     program,
     buffer,
+    null,
     translateFlatVertices(snapshot.strokeVertices, deltaX, deltaY),
     snapshot.strokeColor,
     canvasWidth,

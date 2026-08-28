@@ -7,6 +7,7 @@ const createGlMock = (): WebGL2RenderingContext =>
     TRIANGLES: 4,
     bindBuffer: vi.fn(),
     bufferData: vi.fn(),
+    createBuffer: vi.fn((): WebGLBuffer => ({}) as WebGLBuffer),
     drawArrays: vi.fn(),
     enableVertexAttribArray: vi.fn(),
     getAttribLocation: vi.fn(() => 0),
@@ -28,7 +29,7 @@ describe('drawVectorThickStrokeVertices', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorThickStrokeVertices(gl, program, buffer, [], '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorThickStrokeVertices(gl, program, buffer, null, [], '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.bufferData).not.toHaveBeenCalled();
@@ -43,7 +44,7 @@ describe('drawVectorThickStrokeVertices', () => {
     const vertices = [0, 0, 10, 0, 10, 1, 0, 0, 10, 1, 0, 1];
 
     // before
-    drawVectorThickStrokeVertices(gl, program, buffer, vertices, '#0d99ff', 200, 150, { x: 5, y: 7, zoom: 2 });
+    drawVectorThickStrokeVertices(gl, program, buffer, null, vertices, '#0d99ff', 200, 150, { x: 5, y: 7, zoom: 2 });
 
     // result
     expect(gl.useProgram).toHaveBeenCalledWith(program);
@@ -65,11 +66,45 @@ describe('drawVectorThickStrokeVertices', () => {
     const vertices = [0, 0, 10, 0, 10, 1];
 
     // before
-    drawVectorThickStrokeVertices(gl, program, buffer, vertices, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
-    drawVectorThickStrokeVertices(gl, program, buffer, vertices, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0.5);
+    drawVectorThickStrokeVertices(gl, program, buffer, null, vertices, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorThickStrokeVertices(gl, program, buffer, null, vertices, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0.5);
 
     // result
     expect(gl.uniform4fv).toHaveBeenNthCalledWith(1, expect.anything(), [13 / 255, 153 / 255, 1, 1]);
     expect(gl.uniform4fv).toHaveBeenNthCalledWith(2, expect.anything(), [13 / 255, 153 / 255, 1, 0.5]);
+  });
+
+  it('should upload the vertices into a persistent buffer on a cache miss when a stroke buffer cache is given', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const strokeBufferCache = new WeakMap<number[], WebGLBuffer>();
+    const vertices = [0, 0, 10, 0, 10, 1];
+
+    // before
+    drawVectorThickStrokeVertices(gl, program, buffer, strokeBufferCache, vertices, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    expect(gl.createBuffer).toHaveBeenCalledTimes(1);
+    expect(gl.bufferData).toHaveBeenCalledTimes(1);
+  });
+
+  it('should reuse the cached buffer for the same vertices reference instead of re-uploading it', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const strokeBufferCache = new WeakMap<number[], WebGLBuffer>();
+    const vertices = [0, 0, 10, 0, 10, 1];
+
+    // before — draw the same node twice, as consecutive render-loop frames would
+    drawVectorThickStrokeVertices(gl, program, buffer, strokeBufferCache, vertices, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorThickStrokeVertices(gl, program, buffer, strokeBufferCache, vertices, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+
+    // result — the stroke buffer is created and uploaded once, never re-uploaded on the second frame
+    expect(gl.createBuffer).toHaveBeenCalledTimes(1);
+    expect(gl.bufferData).toHaveBeenCalledTimes(1);
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
   });
 });

@@ -47,5 +47,5 @@ export const drawVectorNodeResizeSnapshot = (
   }));
   const strokeVertices = getThickVectorPathVertices(scaledSegments, snapshot.strokeWidth / 2);
 
-  drawVectorThickStrokeVertices(gl, program, buffer, strokeVertices, snapshot.strokeColor, canvasWidth, canvasHeight, viewport);
+  drawVectorThickStrokeVertices(gl, program, buffer, null, strokeVertices, snapshot.strokeColor, canvasWidth, canvasHeight, viewport);
 };

@@ -14,5 +14,6 @@ export type TImageRenderContext = {
   msdfBuffer: WebGLBuffer;
   msdfProgram: WebGLProgram;
   program: WebGLProgram;
+  strokeBufferCache: WeakMap<number[], WebGLBuffer>;
   textGeometryCache: Map<string, TTextGeometry>;
 };

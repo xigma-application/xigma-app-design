@@ -2,12 +2,14 @@
 import { TViewport } from 'types/design/types';
 
 // utils
+import { getOrCreateStrokeBuffer } from './getOrCreateStrokeBuffer';
 import { hexToRgbaFloat } from '../hexToRgbaFloat';
 
 export const drawVectorThickStrokeVertices = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
+  strokeBufferCache: WeakMap<number[], WebGLBuffer> | null,
   vertices: number[],
   color: string,
   canvasWidth: number,
@@ -26,11 +28,10 @@ export const drawVectorThickStrokeVertices = (
     gl.uniform2f(viewportOffsetLocation, viewport.x, viewport.y);
     gl.uniform1f(zoomLocation, viewport.zoom);
     gl.uniform2f(resolutionLocation, canvasWidth, canvasHeight);
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.enableVertexAttribArray(positionLocation);
-    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    getOrCreateStrokeBuffer(gl, strokeBufferCache, buffer, vertices);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
     gl.uniform4fv(colorLocation, hexToRgbaFloat(color, alpha));
     gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
   }

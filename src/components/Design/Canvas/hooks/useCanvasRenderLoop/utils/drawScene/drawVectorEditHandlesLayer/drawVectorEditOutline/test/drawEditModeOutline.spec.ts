@@ -48,6 +48,6 @@ describe('drawEditModeOutline', () => {
     // result — HOVER_OUTLINE_WIDTH (2) / zoom (2) / 2 = 0.5 halfWidth
     expect(getVectorNodeThickStrokeVerticesMock).toHaveBeenCalledWith(node, 0.5);
     expect(drawVectorThickStrokeVerticesMock).toHaveBeenCalledTimes(1);
-    expect(drawVectorThickStrokeVerticesMock).toHaveBeenCalledWith({}, {}, {}, [], '#aaaaaa', 200, 150, { x: 0, y: 0, zoom: 2 });
+    expect(drawVectorThickStrokeVerticesMock).toHaveBeenCalledWith({}, {}, {}, null, [], '#aaaaaa', 200, 150, { x: 0, y: 0, zoom: 2 });
   });
 });

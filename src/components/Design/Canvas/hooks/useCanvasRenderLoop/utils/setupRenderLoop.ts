@@ -31,6 +31,7 @@ export const setupRenderLoop = (
     msdfBuffer,
     msdfProgram,
     program: imageProgram,
+    strokeBufferCache: new WeakMap(),
     textGeometryCache: new Map(),
   };
 

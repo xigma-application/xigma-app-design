@@ -14,6 +14,7 @@ export const drawSceneVectorNode = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   faceBufferCache: WeakMap<TPoint[], WebGLBuffer>,
+  strokeBufferCache: WeakMap<number[], WebGLBuffer>,
   node: TVectorNode,
   draggedVectorNodeSnapshots: Map<string, TVectorNodeDragSnapshot> | null,
   resizedVectorNodeSnapshots: Map<string, TVectorNodeResizeSnapshot> | null,
@@ -37,6 +38,6 @@ export const drawSceneVectorNode = (
       drawVectorNodeRotateSnapshot(gl, program, buffer, rotateSnapshot!, canvasWidth, canvasHeight, viewport);
       break;
     default:
-      drawVectorNode(gl, program, buffer, faceBufferCache, node, canvasWidth, canvasHeight, viewport);
+      drawVectorNode(gl, program, buffer, faceBufferCache, strokeBufferCache, node, canvasWidth, canvasHeight, viewport);
   }
 };

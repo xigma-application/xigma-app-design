@@ -178,6 +178,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       gl,
       program,
       buffer,
+      null,
       [1, 2, 3, 4],
       '#0d99ff',
       200,

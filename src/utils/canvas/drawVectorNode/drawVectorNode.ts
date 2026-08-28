@@ -17,6 +17,7 @@ export const drawVectorNode = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   faceBufferCache: WeakMap<TPoint[], WebGLBuffer>,
+  strokeBufferCache: WeakMap<number[], WebGLBuffer>,
   node: TVectorNode,
   canvasWidth: number,
   canvasHeight: number,
@@ -33,7 +34,17 @@ export const drawVectorNode = (
     drawVectorVariableStroke(gl, program, buffer, renderedNode, renderedNode.strokeColor, canvasWidth, canvasHeight, viewport);
   } else {
     const strokeVertices = getVectorNodeThickStrokeVertices(renderedNode, renderedNode.strokeWidth / 2);
-    drawVectorThickStrokeVertices(gl, program, buffer, strokeVertices, renderedNode.strokeColor, canvasWidth, canvasHeight, viewport);
+    drawVectorThickStrokeVertices(
+      gl,
+      program,
+      buffer,
+      strokeBufferCache,
+      strokeVertices,
+      renderedNode.strokeColor,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+    );
   }
 
   drawVectorRoundedCaps(gl, program, buffer, renderedNode, canvasWidth, canvasHeight, viewport);

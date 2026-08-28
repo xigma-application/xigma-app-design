@@ -91,6 +91,7 @@ export const drawSceneNodes = (
           program,
           buffer,
           imageContext.faceBufferCache,
+          imageContext.strokeBufferCache,
           node,
           draggedVectorNodeSnapshots,
           resizedVectorNodeSnapshots,

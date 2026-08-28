@@ -18,5 +18,5 @@ export const drawEditModeOutline = (
   viewport: TViewport,
 ): void => {
   const strokeVertices = getVectorNodeThickStrokeVertices(node, HOVER_OUTLINE_WIDTH / viewport.zoom / 2);
-  drawVectorThickStrokeVertices(gl, program, buffer, strokeVertices, VECTOR_EDIT_OUTLINE_STROKE, canvasWidth, canvasHeight, viewport);
+  drawVectorThickStrokeVertices(gl, program, buffer, null, strokeVertices, VECTOR_EDIT_OUTLINE_STROKE, canvasWidth, canvasHeight, viewport);
 };

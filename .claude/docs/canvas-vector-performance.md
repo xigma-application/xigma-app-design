@@ -395,8 +395,9 @@ a `WeakMap<TPoint[], WebGLBuffer>` (`TImageRenderContext.faceBufferCache`, creat
 `setupRenderLoop.ts`, threaded through `drawSceneNodes.ts` → `drawSceneVectorNode.ts` →
 `drawVectorNode.ts` → `drawVectorFill.ts`). **Deliberately scoped out of this slice**, each for a
 concrete reason:
-- **Stroke tessellation** (`getVectorNodeThickStrokeVertices`) — not touched; still re-uploads every
-  frame through the shared scratch buffer, same as before.
+- **Stroke tessellation** (`getVectorNodeThickStrokeVertices`) — not touched at the time; still
+  re-uploaded every frame through the shared scratch buffer, same as before. **Extended the same day**:
+  see the closing note below.
 - **The three frozen-snapshot draw paths** (`drawVectorNodeDragSnapshot.ts`/`*Resize*`/`*Rotate*`, §4)
   and the lasso preview (`drawVectorLasso.ts`) — these recompute their face arrays fresh every single
   frame via a pointwise transform (translate/scale/rotate) over the frozen origin, so the array reference
@@ -414,6 +415,35 @@ concrete reason:
   confirmed by reading that file directly), so this isn't a new class of problem, just an existing,
   accepted trade-off extended to a second cache. Worth revisiting if GPU memory pressure is ever profiled
   as an issue on the stress scene.
+
+**Second slice, same day: stroke tessellation now buffer-cached too.** `getVectorNodeThickStrokeVertices`
+(§ above) already returns a stable `number[]` reference for an unchanged node+halfWidth (its own
+`WeakMap<TVectorNode, Map<number, number[]>>` CPU cache), giving it the exact same "stable reference
+across idle frames" property the fill faces relied on — so the same pattern applies one level down:
+`drawVectorNode/getOrCreateStrokeBuffer.ts` (mirrors `getOrCreateFaceBuffer.ts` exactly, just keyed on
+`number[]` instead of `TPoint[]`, no `flatMap` needed since the vertices are already flat) gives the
+**committed, non-variable-width** stroke of a stable vector node its own persistent `WebGLBuffer` via
+`TImageRenderContext.strokeBufferCache`, threaded the same route as `faceBufferCache`
+(`setupRenderLoop.ts` → `drawSceneNodes.ts` → `drawSceneVectorNode.ts` → `drawVectorNode.ts` →
+`drawVectorThickStrokeVertices.ts`). Scoped identically to the fill slice, for the identical reasons:
+- **Variable-width strokes** (`drawVectorVariableStroke.ts`, nodes with a `widthProfile`) — left
+  untouched. `getVariableThickVectorPathVertices` has **no CPU-side cache at all**, so it returns a
+  fresh `number[]` every single frame regardless of whether the node changed; a GPU buffer cache keyed
+  on that reference would never hit, so wiring one in would only add a pointless `WeakMap` lookup with
+  zero payoff. Would need a CPU-level tessellation cache first (out of scope here, not requested).
+- **The three frozen-snapshot draw paths, `drawVectorStroke.ts` (hover/pencil/pen-preview overlays),
+  and `drawEditModeOutline.ts`** (the Vector Edit Mode hover/selection outline) all pass `null` for
+  `drawVectorThickStrokeVertices`'s new `strokeBufferCache` param — same "always use the scratch
+  buffer" convention as the fill cache's four `null` call sites. The snapshots recompute a fresh
+  `number[]` every frame by construction (§ above); `drawVectorStroke.ts` re-tessellates fresh on every
+  call with no cache backing it. `drawEditModeOutline.ts` is the one arguable case — it calls the same
+  cached `getVectorNodeThickStrokeVertices` as the committed path, just at a different (zoom-dependent)
+  halfWidth, so its array reference *is* stable while idle — but it wasn't wired to the real cache in
+  this slice, to keep the change to exactly the committed-node render path, matching how narrowly the
+  fill slice was scoped. Worth revisiting together if this area gets touched again.
+- **Eviction** — same accepted gap as `faceBufferCache`/`getOrLoadTexture.ts`: no explicit
+  `gl.deleteBuffer` on cache eviction, relies on the `WeakMap` + GC to drop the wrapper object once the
+  array reference is no longer reachable, GPU-side buffer object itself is never explicitly freed.
 
 **Profiling note (2026-08-28), and a gotcha in the stress-test generator itself**: the user's first
 attempt to profile this fix found almost no difference, which turned out to be because
@@ -531,6 +561,13 @@ freeze to instant.
 - Stress-test generator fill fix + covering-quad cache (§5.7's profiling-note follow-up):
   `scripts/generateStressTestVectorGrid.ts`, `utils/canvas/drawVectorNode/getVectorFillCoveringQuad.ts`,
   reusing the pre-existing `utils/canvas/vectorNetwork/getVectorNodeBounds.ts` (§3.5)
+- GPU-buffer-level caching, second slice — stroke tessellation (§5.7's closing note):
+  `utils/canvas/drawVectorNode/getOrCreateStrokeBuffer.ts`, `useCanvasRenderLoop/types.ts`
+  (`TImageRenderContext.strokeBufferCache`), `useCanvasRenderLoop/utils/setupRenderLoop.ts`,
+  `useCanvasRenderLoop/utils/drawScene/{drawSceneNodes,drawSceneVectorNode}.ts`,
+  `utils/canvas/drawVectorNode/{drawVectorNode,drawVectorThickStrokeVertices,
+  drawVectorNodeDragSnapshot,drawVectorNodeResizeSnapshot,drawVectorNodeRotateSnapshot,drawVectorStroke}.ts`,
+  `useCanvasRenderLoop/utils/drawScene/drawVectorEditHandlesLayer/drawVectorEditOutline/drawEditModeOutline.ts`
 
 ## Related
 

@@ -104,6 +104,7 @@ describe('drawVectorNodeDragSnapshot', () => {
       gl,
       program,
       buffer,
+      null,
       [3, 4, 13, 4, 13, 5, 3, 5],
       '#0d99ff',
       200,

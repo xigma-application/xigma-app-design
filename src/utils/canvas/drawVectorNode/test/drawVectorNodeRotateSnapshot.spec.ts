@@ -99,7 +99,7 @@ describe('drawVectorNodeRotateSnapshot', () => {
     // result
     expect(drawVectorFillMock).not.toHaveBeenCalled();
 
-    const rotatedVertices = drawVectorThickStrokeVerticesMock.mock.calls[0][3] as number[];
+    const rotatedVertices = drawVectorThickStrokeVerticesMock.mock.calls[0][4] as number[];
 
     expect(rotatedVertices[0]).toBeCloseTo(0);
     expect(rotatedVertices[1]).toBeCloseTo(10);
@@ -109,6 +109,7 @@ describe('drawVectorNodeRotateSnapshot', () => {
       gl,
       program,
       buffer,
+      null,
       expect.anything(),
       '#0d99ff',
       200,
