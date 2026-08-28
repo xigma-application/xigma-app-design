@@ -1,7 +1,7 @@
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TDesignSnapshot, TDesignState } from '../../types';
-import { TFrameNode, TRectangleNode, TVectorNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { handleReplaceDesignSnapshot } from '../handleReplaceDesignSnapshot';
@@ -69,14 +69,49 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   ...overrides,
 });
 
-const buildSnapshot = (overrides: Partial<TDesignSnapshot> = {}): TDesignSnapshot => ({
-  nodes: {},
-  rootOrder: [],
-  selectedIds: [],
-  ...overrides,
+type TSnapshotOverrides = {
+  activePageId?: string;
+  nodes?: Record<string, TSceneNode>;
+  rootOrder?: string[];
+  selectedIds?: string[];
+};
+
+const buildSnapshot = ({
+  activePageId = 'page-1',
+  nodes = {},
+  rootOrder = [],
+  selectedIds = [],
+}: TSnapshotOverrides = {}): TDesignSnapshot => ({
+  activePageId,
+  pages: {
+    [activePageId]: {
+      comments: {},
+      id: activePageId,
+      name: 'Page 1',
+      nodes,
+      paintColor: '#d9d9d9',
+      rootOrder,
+      viewport: { x: 0, y: 0, zoom: 1 },
+    },
+  },
+  selectedIds,
 });
 
 describe('handleReplaceDesignSnapshot', () => {
+  it('should restore the whole pages record and the active page id from the snapshot', () => {
+    // mock
+    const state = buildState();
+    const snapshot = buildSnapshot({ activePageId: 'restored-page', nodes: { [frame.id]: frame }, rootOrder: [frame.id] });
+
+    // before
+    handleReplaceDesignSnapshot(state, snapshot);
+
+    // result
+    expect(state.activePageId).toBe('restored-page');
+    expect(Object.keys(state.pages)).toEqual(['restored-page']);
+    expect(state.pages['restored-page'].nodes).toEqual({ [frame.id]: frame });
+  });
+
   it('should restore nodes, rootOrder and selectedIds from the snapshot', () => {
     // mock
     const state = buildState();

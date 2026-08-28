@@ -341,9 +341,16 @@ full isolation — nothing module-level is shared across stores.
 
 Each history entry is a `THistorySnapshot = { design: TDesignSnapshot; vectorSelection:
 TVectorSelectionSnapshot }` (`createHistoryStack.ts`) — **not** just the document any more.
-`TDesignSnapshot` (`{ nodes, rootOrder, selectedIds }`, `store/design/types.ts`) is still deliberately
-narrower than full `TDesignState`: viewport, active tool, comments are UI state, not document state,
-matching Figma's own undo scope. `TVectorSelectionSnapshot` (`types/design/canvas/types.ts`) is the
+`TDesignSnapshot` (`{ activePageId, pages, selectedIds }`, `store/design/types.ts`) captures the **whole
+`pages` record plus which page is active** (not just the active page's `nodes`/`rootOrder`), so
+undo/redo covers page-level operations: `renamePage`, `setActivePage`, `addPage`, `deletePage` all
+joined `UNDOABLE_ACTION_TYPES`, and `handleReplaceDesignSnapshot` now assigns
+`state.pages`/`state.activePageId`/`state.selectedIds` wholesale before the vector-editing cleanup.
+`deletePage` (`handleDeletePage.ts`) is store-only for now (no UI): it no-ops on the last remaining
+page and re-points `activePageId` to the previous page in order when the active one is removed —
+undoing a delete restores the page with all its content because the full `pages` record was
+snapshotted. Still deliberately out of the snapshot: per-page `viewport`/`paintColor`/`comments` and
+`activeTool` are UI state, not document state. `TVectorSelectionSnapshot` (`types/design/canvas/types.ts`) is the
 newer half — `{ selectedVectorVertexIds, selectedVectorSegmentIds, selectedVectorHandles }` — added so
 undo/redo also restores which vertex/segment/tangent-handle was selected inside Vector Edit Mode; see
 [[vector-network]] §8 for why that was a real gap (that state lives entirely in `TCanvasRefs`, outside
@@ -404,9 +411,9 @@ wraps its own pointerdown/pointerup the same way, since it isn't part of `useSel
 through the ordinary injected `dispatch` (re-entering the same middleware's `default` branch harmlessly,
 since `replaceDesignSnapshot.type` isn't in `UNDOABLE_ACTION_TYPES` — no re-push, same
 never-history-the-undo-itself invariant as before, just achieved structurally instead of via a
-`next(...)`-bypass trick). `replaceDesignSnapshot`'s reducer (`handleReplaceDesignSnapshot.ts`) still
-assigns exactly the three `TDesignSnapshot` fields plus its existing `vectorEditingNodeIds`/
-`penActiveVertexId` sanitization — **with one added gotcha worth knowing before touching this function
+`next(...)`-bypass trick). `replaceDesignSnapshot`'s reducer (`handleReplaceDesignSnapshot.ts`) assigns
+the three `TDesignSnapshot` fields (`pages`, `activePageId`, `selectedIds`) plus its existing
+`vectorEditingNodeIds`/`penActiveVertexId` sanitization — **with one added gotcha worth knowing before touching this function
 again**: `state.vectorEditingNodeIds = state.vectorEditingNodeIds.filter(...)` always returns a *new*
 array, even when nothing was actually filtered out, and any component reading `vectorEditingNodeIds` via
 `useSelector` treats that as "changed" (reference equality) and re-renders — which used to spuriously

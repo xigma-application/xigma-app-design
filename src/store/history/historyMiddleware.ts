@@ -2,7 +2,17 @@ import { Middleware, UnknownAction } from '@reduxjs/toolkit';
 
 // store
 import { beginHistoryGesture, endHistoryGesture } from './actions';
-import { addNode, deleteNode, replaceNode, setSelection, updateNode } from 'store/design/slice';
+import {
+  addNode,
+  addPage,
+  deleteNode,
+  deletePage,
+  renamePage,
+  replaceNode,
+  setActivePage,
+  setSelection,
+  updateNode,
+} from 'store/design/slice';
 import { RootState } from 'store';
 
 // others
@@ -12,7 +22,17 @@ import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from './constants';
 import { THistoryStack } from './createHistoryStack';
 import { getDesignSnapshot } from './getDesignSnapshot';
 
-const UNDOABLE_ACTION_TYPES: Set<string> = new Set([addNode.type, updateNode.type, deleteNode.type, replaceNode.type, setSelection.type]);
+const UNDOABLE_ACTION_TYPES: Set<string> = new Set([
+  addNode.type,
+  addPage.type,
+  deleteNode.type,
+  deletePage.type,
+  renamePage.type,
+  replaceNode.type,
+  setActivePage.type,
+  setSelection.type,
+  updateNode.type,
+]);
 
 export const createHistoryMiddleware = (historyStack: THistoryStack): Middleware<object, RootState> => {
   return (store) => (next) => (action) => {

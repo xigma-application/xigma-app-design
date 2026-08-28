@@ -9,6 +9,7 @@ import slice, {
   cancelCommentDraft,
   deleteComment,
   deleteNode,
+  deletePage,
   renamePage,
   replaceDesignSnapshot,
   replaceNode,
@@ -209,9 +210,22 @@ describe('design slice', () => {
   it('should replace the whole design snapshot', () => {
     // mock
     const node = { ...frameNodePayload, id: 'node-1' };
+    const initial = slice(undefined, { type: 'unknown' });
+    const snapshotPage = {
+      ...initial.pages[initial.activePageId],
+      nodes: { [node.id]: node },
+      rootOrder: [node.id],
+    };
 
     // before
-    const state = slice(undefined, replaceDesignSnapshot({ nodes: { [node.id]: node }, rootOrder: [node.id], selectedIds: [node.id] }));
+    const state = slice(
+      initial,
+      replaceDesignSnapshot({
+        activePageId: initial.activePageId,
+        pages: { [initial.activePageId]: snapshotPage },
+        selectedIds: [node.id],
+      }),
+    );
 
     // result
     expect(state.pages[state.activePageId].nodes).toEqual({ [node.id]: node });
@@ -269,6 +283,32 @@ describe('design slice', () => {
 
     // result
     expect(state.pages[initial.activePageId].name).toBe('Renamed page');
+  });
+
+  it('should delete a page and re-point the active page', () => {
+    // mock
+    const initial = slice(undefined, { type: 'unknown' });
+    const firstId = initial.activePageId;
+    const withSecond = slice(initial, addPage());
+    const secondId = withSecond.activePageId;
+
+    // before
+    const state = slice(withSecond, deletePage(secondId));
+
+    // result
+    expect(Object.keys(state.pages)).toEqual([firstId]);
+    expect(state.activePageId).toBe(firstId);
+  });
+
+  it('should not delete the last remaining page', () => {
+    // mock
+    const initial = slice(undefined, { type: 'unknown' });
+
+    // before
+    const state = slice(initial, deletePage(initial.activePageId));
+
+    // result
+    expect(Object.keys(state.pages)).toHaveLength(1);
   });
 
   it('should set the paint color', () => {

@@ -37,8 +37,8 @@ export type TDesignState = {
 };
 
 export type TDesignSnapshot = {
-  nodes: Record<string, TSceneNode>;
-  rootOrder: string[];
+  activePageId: string;
+  pages: Record<string, TDesignPage>;
   selectedIds: string[];
 };
 

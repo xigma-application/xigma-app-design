@@ -6,12 +6,11 @@ import { NodeType, ToolName } from 'types/design/enums';
 import { getActivePage } from './getActivePage';
 
 export const handleReplaceDesignSnapshot = (state: TDesignState, snapshot: TDesignSnapshot): void => {
-  const page = getActivePage(state);
-
-  page.nodes = snapshot.nodes;
-  page.rootOrder = snapshot.rootOrder;
+  state.pages = snapshot.pages;
+  state.activePageId = snapshot.activePageId;
   state.selectedIds = snapshot.selectedIds;
 
+  const page = getActivePage(state);
   const hadVectorEditingNodeIds = state.vectorEditingNodeIds.length > 0;
   const validVectorEditingNodeIds = state.vectorEditingNodeIds.filter((id) => page.nodes[id]?.type === NodeType.vector);
 
