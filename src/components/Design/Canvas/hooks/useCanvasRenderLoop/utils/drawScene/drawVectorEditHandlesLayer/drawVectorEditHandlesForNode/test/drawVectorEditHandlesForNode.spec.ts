@@ -134,7 +134,7 @@ describe('drawVectorEditHandlesForNode', () => {
     expect(drawVectorStrokeMock).not.toHaveBeenCalled();
     expect(getVectorNodeThickStrokeVerticesMock).toHaveBeenCalledWith(vectorNode, 1);
     expect(drawVectorThickStrokeVerticesMock).toHaveBeenCalledTimes(1);
-    expect(drawVectorThickStrokeVerticesMock).toHaveBeenCalledWith({}, {}, {}, [], '#aaaaaa', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorThickStrokeVerticesMock).toHaveBeenCalledWith({}, {}, {}, null, [], '#aaaaaa', 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should draw the hovered segment highlight when a hoveredSegmentId is given', () => {
