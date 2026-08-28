@@ -16,6 +16,14 @@
     width: 16px;
   }
 
+  &__header[aria-expanded='true'] &__toggle {
+    opacity: 0;
+  }
+
+  &__header[aria-expanded='true']:hover &__toggle {
+    opacity: 1;
+  }
+
   &__name {
     flex: 1;
     font-size: 11px;
