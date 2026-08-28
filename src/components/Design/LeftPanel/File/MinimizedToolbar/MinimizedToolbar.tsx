@@ -9,7 +9,7 @@ import MinimizeUiButton from '../Header/MinimizeUiButton/MinimizeUiButton';
 import { Chip } from 'shared';
 
 // hooks
-import { useToggleUiMinimized } from '../Header/MinimizeUiButton/hooks/useToggleUiMinimized';
+import { useExpandUi } from './hooks/useExpandUi';
 
 // others
 import { translationNameSpace } from '../constants';
@@ -22,19 +22,24 @@ import { TMinimizedToolbarProps } from './types';
 
 const MinimizedToolbar: FC<TMinimizedToolbarProps> = ({ name }) => {
   const { t } = useTranslation();
-  const handleExpand = useToggleUiMinimized();
+  const { handleClick: handleExpand, handleKeyDown } = useExpandUi();
 
   return (
     <div className={styles.MinimizedToolbar}>
       <button aria-label="xigma" className={styles.MinimizedToolbar__logo} type="button">
         <XigmaLogoShape />
       </button>
-      <div className={styles.MinimizedToolbar__content}>
-        <button className={styles.MinimizedToolbar__title} onClick={handleExpand} type="button">
-          {name}
-        </button>
+      <div
+        aria-label={name}
+        className={styles.MinimizedToolbar__content}
+        onClick={handleExpand}
+        onKeyDown={handleKeyDown}
+        role="button"
+        tabIndex={0}
+      >
+        <span className={styles.MinimizedToolbar__title}>{name}</span>
         <Chip variant="free">{t(`${translationNameSpace}.subscription.free`)}</Chip>
-        <MinimizeUiButton />
+        <MinimizeUiButton className={styles.MinimizedToolbar__button} />
       </div>
     </div>
   );

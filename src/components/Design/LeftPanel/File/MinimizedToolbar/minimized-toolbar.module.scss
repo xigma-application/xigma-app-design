@@ -39,6 +39,7 @@
     align-items: center;
     border-radius: 5px;
     column-gap: 4px;
+    cursor: pointer;
     display: flex;
     padding-left: 8px;
 
@@ -47,11 +48,12 @@
     }
   }
 
+  &__button {
+    pointer-events: none;
+  }
+
   &__title {
-    background-color: transparent;
-    border: none;
     color: var(--color-neutral-1);
-    cursor: pointer;
     font-size: 13px;
     font-weight: 600;
     max-width: 160px;

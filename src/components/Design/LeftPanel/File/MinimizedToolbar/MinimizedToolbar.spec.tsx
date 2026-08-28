@@ -46,6 +46,17 @@ describe('MinimizedToolbar', () => {
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
 
+  it('should expand the UI when the whole hover area is clicked, not just the title text', () => {
+    // before
+    renderMinimizedToolbar();
+
+    // action
+    fireEvent.click(screen.getByText('Free'));
+
+    // result
+    expect(store.getState().design.isUiMinimized).toBe(false);
+  });
+
   it('should render the collapse toggle showing "Expand UI"', () => {
     // before
     renderMinimizedToolbar();

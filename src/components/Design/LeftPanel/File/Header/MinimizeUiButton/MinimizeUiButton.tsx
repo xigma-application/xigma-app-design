@@ -1,3 +1,4 @@
+import cx from 'classnames';
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -18,7 +19,10 @@ import { useAppSelector } from 'store';
 // styles
 import styles from './minimize-ui-button.module.scss';
 
-const MinimizeUiButton: FC = () => {
+// types
+import { TMinimizeUiButtonProps } from './types';
+
+const MinimizeUiButton: FC<TMinimizeUiButtonProps> = ({ className }) => {
   const { t } = useTranslation();
   const isUiMinimized = useAppSelector(selectIsUiMinimized);
   const handleClick = useToggleUiMinimized();
@@ -34,7 +38,7 @@ const MinimizeUiButton: FC = () => {
         </>
       }
     >
-      <button aria-label={label} className={styles.MinimizeUiButton} onClick={handleClick} type="button">
+      <button aria-label={label} className={cx(styles.MinimizeUiButton, className)} onClick={handleClick} type="button">
         <Icon name="CollapsePanel" size={24} />
       </button>
     </Tooltip>
