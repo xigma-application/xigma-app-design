@@ -1,0 +1,14 @@
+.Chip {
+  align-items: center;
+  border-radius: 4px;
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  padding: 3px 6px;
+
+  &--free {
+    background-color: color-mix(in srgb, var(--color-blue-1) 22%, transparent);
+    color: var(--color-blue-2);
+  }
+}

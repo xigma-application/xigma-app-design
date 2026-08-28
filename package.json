@@ -34,6 +34,7 @@
     "classnames": "^2.5.1",
     "i18next": "^26.3.6",
     "lodash": "^4.18.1",
+    "postinstall": "^0.11.2",
     "react": "^19.2.8",
     "react-device-detect": "^2.2.3",
     "react-dom": "^19.2.8",

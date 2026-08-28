@@ -99,6 +99,10 @@ Zaznaczamy checkboxy w miarę postępu. Każdy etap = osobna, malutka porcja pra
       `activeNavItem` trzymany w `LeftPanel` (kontrolowany `NavRail`), na razie samo przełączanie bez
       podpiętej zawartości paneli. Ikony i logo (`xigma-logo-shape.svg`, statyczny asset poza
       `Icon`) w `@xigma/components`/`@xigma/assets`.
+- [x] **panel File** (`LeftPanel/PanelContent` → `File`) — `Header` z nazwą pliku
+      (`EditableInput` + chevron, `UITools`, domyślnie „Untitled", stan lokalny), `FileMeta` z linkiem
+      „Drafts" i chipem subskrypcji (`Chip` `UITools`, wariant `free`). Ikona `PanelLeft` w
+      `@xigma/components`. Na razie zmiany czysto wizualne — jeden plik, brak persystencji.
 - [ ] panel warstw (drzewo node'ów, reorder, visible/locked)
 - [ ] panel właściwości (X/Y/W/H, Fill, Stroke, Opacity/blend mode)
 - [ ] właściwości tekstu (rozmiar/waga/wyrównanie/line-height/letter-spacing)

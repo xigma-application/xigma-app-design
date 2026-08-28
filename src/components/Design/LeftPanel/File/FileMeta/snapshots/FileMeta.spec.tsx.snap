@@ -1,0 +1,21 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`FileMeta snapshots > should render FileMeta 1`] = `
+<DocumentFragment>
+  <div
+    class="_FileMeta_a83008"
+  >
+    <button
+      class="_FileMeta__drafts_a83008"
+      type="button"
+    >
+      Drafts
+    </button>
+    <span
+      class="_Chip_a724d3 _Chip--free_a724d3"
+    >
+      Free
+    </span>
+  </div>
+</DocumentFragment>
+`;

@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`EditableInput snapshots > should render EditableInput with its value 1`] = `
+<DocumentFragment>
+  <div
+    class="_EditableInput_4a8ec5"
+  >
+    <input
+      class="_EditableInput__field_4a8ec5"
+      type="text"
+      value="Untitled"
+    />
+  </div>
+</DocumentFragment>
+`;

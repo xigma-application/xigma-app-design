@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Chip snapshots > should render Chip with its default (free) variant 1`] = `
+<DocumentFragment>
+  <span
+    class="_Chip_a724d3 _Chip--free_a724d3"
+  >
+    Free
+  </span>
+</DocumentFragment>
+`;

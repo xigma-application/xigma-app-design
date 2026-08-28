@@ -2,6 +2,7 @@ import { FC, useRef, useState } from 'react';
 
 // components
 import NavRail from './NavRail/NavRail';
+import PanelContent from './PanelContent/PanelContent';
 
 // hooks
 import { useHandleResizeMouseDown } from './hooks/useHandleResizeMouseDown';
@@ -25,6 +26,7 @@ const LeftPanel: FC = () => {
   return (
     <div className={styles.LeftPanel} ref={panelRef} style={{ width }}>
       <NavRail activeNavItem={activeNavItem} onSelectNavItem={setActiveNavItem} />
+      <PanelContent activeNavItem={activeNavItem} />
       <div className={styles['LeftPanel__resize-handle']} onMouseDown={handleResizeMouseDown} style={{ cursor: cursorX }} />
     </div>
   );

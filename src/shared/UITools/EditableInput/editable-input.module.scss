@@ -1,0 +1,36 @@
+.EditableInput {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  box-sizing: border-box;
+  column-gap: 2px;
+  display: flex;
+  max-width: 100%;
+  padding: 0 4px;
+
+  &:hover {
+    border-color: var(--color-neutral-3);
+  }
+
+  &:focus-within {
+    border-color: var(--color-blue-2);
+  }
+
+  &__field {
+    background-color: transparent;
+    border: none;
+    color: var(--color-neutral-1);
+    flex: 1;
+    font: inherit;
+    min-width: 0;
+    outline: none;
+    padding: 2px 0;
+    text-overflow: ellipsis;
+  }
+
+  &__action {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+  }
+}

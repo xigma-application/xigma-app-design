@@ -1,0 +1,97 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`PanelContent snapshots > should render nothing for the other nav items 1`] = `
+<DocumentFragment>
+  <div
+    class="_PanelContent_de2b5e"
+  />
+</DocumentFragment>
+`;
+
+exports[`PanelContent snapshots > should render the File panel for the file nav item 1`] = `
+<DocumentFragment>
+  <div
+    class="_PanelContent_de2b5e"
+  >
+    <div
+      class="_File_4aa286"
+    >
+      <div
+        class="_Header_429bc8"
+      >
+        <div
+          class="_EditableInput_4a8ec5 _Header__name_429bc8"
+        >
+          <input
+            aria-label="Rename file"
+            class="_EditableInput__field_4a8ec5"
+            type="text"
+            value="Untitled"
+          />
+          <div
+            class="_EditableInput__action_4a8ec5"
+          >
+            <button
+              aria-label="File menu"
+              class="_Header__menu_429bc8"
+              type="button"
+            >
+              <svg
+                class="Icon"
+                data-fpl-icon-size="16"
+                fill="none"
+                height="12"
+                style="color: var(--color-neutral-1);"
+                viewBox="0 0 16 16"
+                width="12"
+              >
+                <path
+                  d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                  data-svg-property="fill"
+                  fill="white"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <button
+          aria-label="Collapse panel"
+          class="_Header__collapse_429bc8"
+          type="button"
+        >
+          <svg
+            class="Icon"
+            data-fpl-icon-size="24"
+            fill="none"
+            height="24"
+            style="color: var(--color-neutral-1);"
+            viewBox="0 0 24 24"
+            width="24"
+          >
+            <path
+              d="M17.653 7.008A1.5 1.5 0 0 1 19 8.5v7a1.5 1.5 0 0 1-1.347 1.492L17.5 17h-11a1.5 1.5 0 0 1-1.492-1.347L5 15.5v-7A1.5 1.5 0 0 1 6.5 7h11zM6.5 8a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .5.5H9V8zm3.5 8h7.5a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.5-.5H10z"
+              data-svg-property="fill"
+              fill="white"
+            />
+          </svg>
+        </button>
+      </div>
+      <div
+        class="_FileMeta_a83008"
+      >
+        <button
+          class="_FileMeta__drafts_a83008"
+          type="button"
+        >
+          Drafts
+        </button>
+        <span
+          class="_Chip_a724d3 _Chip--free_a724d3"
+        >
+          Free
+        </span>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
