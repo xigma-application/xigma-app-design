@@ -15,7 +15,6 @@ export const handleLockBrowserEvents = (
         secondaryKey === KeyboardKeys.a ||
         secondaryKey === KeyboardKeys.d ||
         secondaryKey === KeyboardKeys.f ||
-        secondaryKey === KeyboardKeys.r ||
         secondaryKey === KeyboardKeys.s)) ||
     event.key === KeyboardKeys.alt
   ) {

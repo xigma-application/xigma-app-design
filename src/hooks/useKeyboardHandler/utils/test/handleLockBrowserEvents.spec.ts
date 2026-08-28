@@ -7,7 +7,7 @@ import { handleLockBrowserEvents } from '../handleLockBrowserEvents';
 const createEvent = (): KeyboardEvent => new KeyboardEvent('keydown');
 
 describe('handleLockBrowserEvents', () => {
-  it.each([KeyboardKeys['+'], KeyboardKeys['-'], KeyboardKeys.a, KeyboardKeys.d, KeyboardKeys.f, KeyboardKeys.r, KeyboardKeys.s])(
+  it.each([KeyboardKeys['+'], KeyboardKeys['-'], KeyboardKeys.a, KeyboardKeys.d, KeyboardKeys.f, KeyboardKeys.s])(
     'should prevent the browser default for ctrl+%s',
     (secondaryKey) => {
       // mock
@@ -53,6 +53,18 @@ describe('handleLockBrowserEvents', () => {
 
     // before
     handleLockBrowserEvents(true, event, KeyboardKeys.c);
+
+    // result
+    expect(preventDefaultSpy).not.toHaveBeenCalled();
+  });
+
+  it('should let ctrl+r through so the browser hard-reload still works', () => {
+    // mock
+    const event = createEvent();
+    const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+
+    // before
+    handleLockBrowserEvents(true, event, KeyboardKeys.r);
 
     // result
     expect(preventDefaultSpy).not.toHaveBeenCalled();
