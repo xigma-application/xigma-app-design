@@ -1,4 +1,3 @@
-import cx from 'classnames';
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -19,17 +18,14 @@ const VectorEditMoreDropdownPlaceholder: FC = () => {
     <ButtonMenu
       className={styles['VectorEditToolbar__more-button-menu']}
       side="top"
-      trigger={(isOpen) => (
+      trigger={
         <div className={styles.VectorEditToolbar__more}>
-          <span
-            className={cx(styles.VectorEditToolbar__label, isOpen && styles['VectorEditToolbar__label--open'])}
-            style={{ padding: '0' }}
-          >
+          <span className={styles.VectorEditToolbar__label} style={{ padding: '0' }}>
             {t(`${translationNameSpace}.more`)}
           </span>
-          <Icon color={isOpen ? 'blue1' : 'neutral1'} name="ChevronDown" size={16} />
+          <Icon name="ChevronDown" size={16} />
         </div>
-      )}
+      }
       triggerAriaLabel={t(`${translationNameSpace}.more`)}
     >
       <VectorEditMoreDropdownItems lastMoreTool={null} />

@@ -1,5 +1,5 @@
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
-import { FC } from 'react';
+import { FC, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // @xigma
@@ -31,16 +31,19 @@ const NavRail: FC<TNavRailProps> = ({ activeNavItem, onSelectNavItem }) => {
       </button>
       <div className={styles.NavRail__spacer} />
       <ToggleGroupPrimitive.Root className={styles.NavRail__items} onValueChange={handleSelectNavItem} type="single" value={activeNavItem}>
-        {NAV_ITEM_ORDER.map((name) => {
-          const isActive = name === activeNavItem;
+        {NAV_ITEM_ORDER.map((name, index) => {
+          const isLast = index === NAV_ITEM_ORDER.length - 1;
 
           return (
-            <div className={styles['NavRail__item-group']} key={name}>
-              <ToggleGroupPrimitive.Item aria-label={name} className={styles.NavRail__button} value={name}>
-                <Icon color={isActive ? 'blue1' : 'neutral1'} name={NAV_ITEM_ICON[name]} size={24} />
-              </ToggleGroupPrimitive.Item>
-              <span className={styles.NavRail__label}>{t(NAV_ITEM_LABEL[name])}</span>
-            </div>
+            <Fragment key={name}>
+              {isLast && <div className={styles.NavRail__spacer} />}
+              <div className={styles['NavRail__item-group']}>
+                <ToggleGroupPrimitive.Item aria-label={name} className={styles.NavRail__button} value={name}>
+                  <Icon name={NAV_ITEM_ICON[name]} size={24} />
+                </ToggleGroupPrimitive.Item>
+                <span className={styles.NavRail__label}>{t(NAV_ITEM_LABEL[name])}</span>
+              </div>
+            </Fragment>
           );
         })}
       </ToggleGroupPrimitive.Root>

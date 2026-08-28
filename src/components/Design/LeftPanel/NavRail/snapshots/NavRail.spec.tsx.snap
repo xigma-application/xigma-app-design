@@ -91,7 +91,7 @@ exports[`NavRail snapshots > should render NavRail 1`] = `
             data-fpl-icon-size="24"
             fill="none"
             height="24"
-            style="color: var(--color-blue-1);"
+            style="color: var(--color-neutral-1);"
             viewBox="0 0 24 24"
             width="24"
           >
@@ -217,6 +217,9 @@ exports[`NavRail snapshots > should render NavRail 1`] = `
           Tools
         </span>
       </div>
+      <div
+        class="_NavRail__spacer_8eca33"
+      />
       <div
         class="_NavRail__item-group_8eca33"
       >

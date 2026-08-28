@@ -1,3 +1,5 @@
+@use '@xigma/scss/mixins/svg-color';
+
 .ButtonMenu {
   align-items: center;
   background-color: transparent;
@@ -13,6 +15,9 @@
   }
 
   &[data-state='open'] {
+    @include svg-color.svg-color(var(--color-blue-2));
+
     background-color: #394360;
+    color: var(--color-blue-2);
   }
 }
