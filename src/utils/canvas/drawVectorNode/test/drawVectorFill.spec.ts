@@ -16,6 +16,7 @@ const createGlMock = (): WebGL2RenderingContext =>
     bufferData: vi.fn(),
     clear: vi.fn(),
     colorMask: vi.fn(),
+    createBuffer: vi.fn((): WebGLBuffer => ({}) as WebGLBuffer),
     disable: vi.fn(),
     drawArrays: vi.fn(),
     enable: vi.fn(),
@@ -41,7 +42,7 @@ describe('drawVectorFill', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVectorFill(gl, program, buffer, [], '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorFill(gl, program, buffer, null, [], '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.clear).not.toHaveBeenCalled();
@@ -64,7 +65,7 @@ describe('drawVectorFill', () => {
     ];
 
     // before
-    drawVectorFill(gl, program, buffer, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorFill(gl, program, buffer, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
 
     // result — stencil setup precedes the per-face fan pass, which precedes the composite pass
     expect(gl.clear).toHaveBeenCalledWith(gl.STENCIL_BUFFER_BIT);
@@ -111,7 +112,7 @@ describe('drawVectorFill', () => {
     ];
 
     // before
-    drawVectorFill(gl, program, buffer, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorFill(gl, program, buffer, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
 
     // result — one TRIANGLE_FAN per face (3 then 4 vertices), plus the final composite TRIANGLES pass
     expect(gl.drawArrays).toHaveBeenCalledTimes(3);
@@ -134,7 +135,7 @@ describe('drawVectorFill', () => {
     ];
 
     // before
-    drawVectorFill(gl, program, buffer, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorFill(gl, program, buffer, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), [13 / 255, 153 / 255, 255 / 255, 1]);
@@ -154,9 +155,54 @@ describe('drawVectorFill', () => {
     ];
 
     // before
-    drawVectorFill(gl, program, buffer, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0.2);
+    drawVectorFill(gl, program, buffer, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT, 0.2);
 
     // result
     expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), [13 / 255, 153 / 255, 255 / 255, 0.2]);
+  });
+
+  it('should upload each face into a persistent buffer on a cache miss when a face buffer cache is given', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const faceBufferCache = new WeakMap<{ x: number; y: number }[], WebGLBuffer>();
+    const faces = [
+      [
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+      ],
+    ];
+
+    // before
+    drawVectorFill(gl, program, buffer, faceBufferCache, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    expect(gl.createBuffer).toHaveBeenCalledTimes(1);
+    expect(gl.bufferData).toHaveBeenCalledTimes(2); // one for the face, one for the covering quad
+  });
+
+  it('should reuse the cached buffer for the same face reference instead of re-uploading it', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const faceBufferCache = new WeakMap<{ x: number; y: number }[], WebGLBuffer>();
+    const faces = [
+      [
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+      ],
+    ];
+
+    // before — draw the same node twice, as consecutive render-loop frames would
+    drawVectorFill(gl, program, buffer, faceBufferCache, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+    drawVectorFill(gl, program, buffer, faceBufferCache, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+
+    // result — the face buffer is created and uploaded once; only the covering quad re-uploads every frame
+    expect(gl.createBuffer).toHaveBeenCalledTimes(1);
+    expect(gl.bufferData).toHaveBeenCalledTimes(3); // face upload (frame 1) + covering quad (frame 1 and 2)
   });
 });

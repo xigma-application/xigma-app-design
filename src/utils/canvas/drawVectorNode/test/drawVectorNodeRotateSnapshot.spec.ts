@@ -37,11 +37,11 @@ describe('drawVectorNodeRotateSnapshot', () => {
     drawVectorNodeRotateSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT);
 
     // result
-    const [[{ x, y }]] = drawVectorFillMock.mock.calls[0][3] as { x: number; y: number }[][];
+    const [[{ x, y }]] = drawVectorFillMock.mock.calls[0][4] as { x: number; y: number }[][];
 
     expect(x).toBeCloseTo(0);
     expect(y).toBeCloseTo(10);
-    expect(drawVectorFillMock).toHaveBeenCalledWith(gl, program, buffer, expect.anything(), '#ff0000', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorFillMock).toHaveBeenCalledWith(gl, program, buffer, null, expect.anything(), '#ff0000', 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should leave the shape untouched when the delta is zero', () => {
@@ -58,7 +58,7 @@ describe('drawVectorNodeRotateSnapshot', () => {
     drawVectorNodeRotateSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT);
 
     // result
-    expect(drawVectorFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 10, y: 5 }]], '#ff0000', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorFillMock).toHaveBeenCalledWith(gl, program, buffer, null, [[{ x: 10, y: 5 }]], '#ff0000', 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should rotate the flat stroke vertex list point-by-point around the pivot', () => {

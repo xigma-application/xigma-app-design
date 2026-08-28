@@ -48,6 +48,7 @@ describe('drawVectorNode', () => {
     const gl = {} as WebGL2RenderingContext;
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const faceBufferCache = {} as WeakMap<{ x: number; y: number }[], WebGLBuffer>;
     const node: TVectorNode = {
       fillColor: '#ff0000',
       filledFaceKeys: ['s1,s2,s3'],
@@ -69,7 +70,7 @@ describe('drawVectorNode', () => {
     getVectorNodeThickStrokeVerticesMock.mockReturnValue(strokeVertices);
 
     // before
-    drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNode(gl, program, buffer, faceBufferCache, node, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(getVectorFillLoopPointsMock).toHaveBeenCalledWith(node, 's1,s2,s3');
@@ -78,6 +79,7 @@ describe('drawVectorNode', () => {
       gl,
       program,
       buffer,
+      faceBufferCache,
       [loopPoints],
       getVectorFillColorForLoopKey('s1,s2,s3'),
       200,
@@ -101,6 +103,7 @@ describe('drawVectorNode', () => {
     const gl = {} as WebGL2RenderingContext;
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const faceBufferCache = {} as WeakMap<{ x: number; y: number }[], WebGLBuffer>;
     const node: TVectorNode = {
       fillColor: '#ff0000',
       filledFaceKeys: ['s1,s2,s3', 's3,s4,s5'],
@@ -121,7 +124,7 @@ describe('drawVectorNode', () => {
     getVectorFillLoopPointsMock.mockImplementation((_node: TVectorNode, key: string) => (key === 's1,s2,s3' ? loopAPoints : loopBPoints));
 
     // before
-    drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNode(gl, program, buffer, faceBufferCache, node, 200, 150, IDENTITY_VIEWPORT);
 
     // result — each loop also gets its own color, derived from its own key, so two loops always differ
     const colorA = getVectorFillColorForLoopKey('s1,s2,s3');
@@ -129,8 +132,30 @@ describe('drawVectorNode', () => {
 
     expect(drawVectorFillMock).toHaveBeenCalledTimes(2);
     expect(colorB).not.toBe(colorA);
-    expect(drawVectorFillMock).toHaveBeenNthCalledWith(1, gl, program, buffer, [loopAPoints], colorA, 200, 150, IDENTITY_VIEWPORT);
-    expect(drawVectorFillMock).toHaveBeenNthCalledWith(2, gl, program, buffer, [loopBPoints], colorB, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorFillMock).toHaveBeenNthCalledWith(
+      1,
+      gl,
+      program,
+      buffer,
+      faceBufferCache,
+      [loopAPoints],
+      colorA,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
+    expect(drawVectorFillMock).toHaveBeenNthCalledWith(
+      2,
+      gl,
+      program,
+      buffer,
+      faceBufferCache,
+      [loopBPoints],
+      colorB,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
   });
 
   it('should skip drawing a fill when a filled loop key no longer resolves to any current points (its segments were deleted)', () => {
@@ -138,6 +163,7 @@ describe('drawVectorNode', () => {
     const gl = {} as WebGL2RenderingContext;
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const faceBufferCache = {} as WeakMap<{ x: number; y: number }[], WebGLBuffer>;
     const node: TVectorNode = {
       fillColor: '#ff0000',
       filledFaceKeys: ['stale-key'],
@@ -156,7 +182,7 @@ describe('drawVectorNode', () => {
     getVectorFillLoopPointsMock.mockReturnValue(null);
 
     // before
-    drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNode(gl, program, buffer, faceBufferCache, node, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(getVectorFillLoopPointsMock).toHaveBeenCalledWith(node, 'stale-key');
@@ -169,6 +195,7 @@ describe('drawVectorNode', () => {
     const gl = {} as WebGL2RenderingContext;
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const faceBufferCache = {} as WeakMap<{ x: number; y: number }[], WebGLBuffer>;
     const node: TVectorNode = {
       fillColor: null,
       filledFaceKeys: [],
@@ -185,7 +212,7 @@ describe('drawVectorNode', () => {
     };
 
     // before
-    drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNode(gl, program, buffer, faceBufferCache, node, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(getVectorFillLoopPointsMock).not.toHaveBeenCalled();
@@ -198,6 +225,7 @@ describe('drawVectorNode', () => {
     const gl = {} as WebGL2RenderingContext;
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const faceBufferCache = {} as WeakMap<{ x: number; y: number }[], WebGLBuffer>;
     const node: TVectorNode = {
       fillColor: null,
       filledFaceKeys: [],
@@ -215,7 +243,7 @@ describe('drawVectorNode', () => {
     };
 
     // before
-    drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNode(gl, program, buffer, faceBufferCache, node, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawVectorVariableStrokeMock).toHaveBeenCalledWith(gl, program, buffer, node, '#00ff00', 200, 150, IDENTITY_VIEWPORT);
@@ -227,6 +255,7 @@ describe('drawVectorNode', () => {
     const gl = {} as WebGL2RenderingContext;
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const faceBufferCache = {} as WeakMap<{ x: number; y: number }[], WebGLBuffer>;
     const node: TVectorNode = {
       fillColor: null,
       filledFaceKeys: [],
@@ -246,7 +275,7 @@ describe('drawVectorNode', () => {
     getRenderedVectorNodeMock.mockReturnValue(renderedNode);
 
     // before
-    drawVectorNode(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorNode(gl, program, buffer, faceBufferCache, node, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(getRenderedVectorNodeMock).toHaveBeenCalledWith(node);

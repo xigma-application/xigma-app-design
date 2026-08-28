@@ -90,6 +90,7 @@ export const drawSceneNodes = (
           gl,
           program,
           buffer,
+          imageContext.faceBufferCache,
           node,
           draggedVectorNodeSnapshots,
           resizedVectorNodeSnapshots,

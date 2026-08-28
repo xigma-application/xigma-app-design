@@ -1,5 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
+import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 import { TVectorNodeDragSnapshot, TVectorNodeResizeSnapshot, TVectorNodeRotateSnapshot } from 'types/design/canvas/types';
 
@@ -54,12 +55,13 @@ describe('drawSceneVectorNode', () => {
     const gl = {} as WebGL2RenderingContext;
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const faceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
 
     // before
-    drawSceneVectorNode(gl, program, buffer, node, null, null, null, 200, 150, IDENTITY_VIEWPORT);
+    drawSceneVectorNode(gl, program, buffer, faceBufferCache, node, null, null, null, 200, 150, IDENTITY_VIEWPORT);
 
     // result
-    expect(drawVectorNodeMock).toHaveBeenCalledWith(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorNodeMock).toHaveBeenCalledWith(gl, program, buffer, faceBufferCache, node, 200, 150, IDENTITY_VIEWPORT);
     expect(drawVectorNodeDragSnapshotMock).not.toHaveBeenCalled();
     expect(drawVectorNodeResizeSnapshotMock).not.toHaveBeenCalled();
     expect(drawVectorNodeRotateSnapshotMock).not.toHaveBeenCalled();
@@ -70,15 +72,28 @@ describe('drawSceneVectorNode', () => {
     const gl = {} as WebGL2RenderingContext;
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const faceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
     const dragSnapshots = new Map<string, TVectorNodeDragSnapshot>();
     const resizeSnapshots = new Map<string, TVectorNodeResizeSnapshot>();
     const rotateSnapshots = new Map<string, TVectorNodeRotateSnapshot>();
 
     // before
-    drawSceneVectorNode(gl, program, buffer, node, dragSnapshots, resizeSnapshots, rotateSnapshots, 200, 150, IDENTITY_VIEWPORT);
+    drawSceneVectorNode(
+      gl,
+      program,
+      buffer,
+      faceBufferCache,
+      node,
+      dragSnapshots,
+      resizeSnapshots,
+      rotateSnapshots,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
-    expect(drawVectorNodeMock).toHaveBeenCalledWith(gl, program, buffer, node, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorNodeMock).toHaveBeenCalledWith(gl, program, buffer, faceBufferCache, node, 200, 150, IDENTITY_VIEWPORT);
     expect(drawVectorNodeDragSnapshotMock).not.toHaveBeenCalled();
     expect(drawVectorNodeResizeSnapshotMock).not.toHaveBeenCalled();
     expect(drawVectorNodeRotateSnapshotMock).not.toHaveBeenCalled();
@@ -89,11 +104,12 @@ describe('drawSceneVectorNode', () => {
     const gl = {} as WebGL2RenderingContext;
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const faceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
     const snapshot: TVectorNodeDragSnapshot = { deltaX: 5, deltaY: 10, facesByColor: [], strokeColor: '#00ff00', strokeVertices: [] };
     const dragSnapshots = new Map([['node-1', snapshot]]);
 
     // before
-    drawSceneVectorNode(gl, program, buffer, node, dragSnapshots, null, null, 200, 150, IDENTITY_VIEWPORT);
+    drawSceneVectorNode(gl, program, buffer, faceBufferCache, node, dragSnapshots, null, null, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawVectorNodeDragSnapshotMock).toHaveBeenCalledWith(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT);
@@ -107,6 +123,7 @@ describe('drawSceneVectorNode', () => {
     const gl = {} as WebGL2RenderingContext;
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const faceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
     const snapshot: TVectorNodeResizeSnapshot = {
       anchorX: 0,
       anchorY: 0,
@@ -123,7 +140,7 @@ describe('drawSceneVectorNode', () => {
     const resizeSnapshots = new Map([['node-1', snapshot]]);
 
     // before
-    drawSceneVectorNode(gl, program, buffer, node, null, resizeSnapshots, null, 200, 150, IDENTITY_VIEWPORT);
+    drawSceneVectorNode(gl, program, buffer, faceBufferCache, node, null, resizeSnapshots, null, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawVectorNodeResizeSnapshotMock).toHaveBeenCalledWith(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT);
@@ -137,6 +154,7 @@ describe('drawSceneVectorNode', () => {
     const gl = {} as WebGL2RenderingContext;
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const faceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
     const snapshot: TVectorNodeRotateSnapshot = {
       deltaDegrees: 45,
       facesByColor: [],
@@ -147,7 +165,7 @@ describe('drawSceneVectorNode', () => {
     const rotateSnapshots = new Map([['node-1', snapshot]]);
 
     // before
-    drawSceneVectorNode(gl, program, buffer, node, null, null, rotateSnapshots, 200, 150, IDENTITY_VIEWPORT);
+    drawSceneVectorNode(gl, program, buffer, faceBufferCache, node, null, null, rotateSnapshots, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawVectorNodeRotateSnapshotMock).toHaveBeenCalledWith(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT);
@@ -162,6 +180,7 @@ describe('drawSceneVectorNode', () => {
     const gl = {} as WebGL2RenderingContext;
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const faceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
     const dragSnapshot: TVectorNodeDragSnapshot = { deltaX: 5, deltaY: 10, facesByColor: [], strokeColor: '#00ff00', strokeVertices: [] };
     const resizeSnapshot: TVectorNodeResizeSnapshot = {
       anchorX: 0,
@@ -180,7 +199,7 @@ describe('drawSceneVectorNode', () => {
     const resizeSnapshots = new Map([['node-1', resizeSnapshot]]);
 
     // before
-    drawSceneVectorNode(gl, program, buffer, node, dragSnapshots, resizeSnapshots, null, 200, 150, IDENTITY_VIEWPORT);
+    drawSceneVectorNode(gl, program, buffer, faceBufferCache, node, dragSnapshots, resizeSnapshots, null, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawVectorNodeDragSnapshotMock).toHaveBeenCalledTimes(1);
@@ -192,6 +211,7 @@ describe('drawSceneVectorNode', () => {
     const gl = {} as WebGL2RenderingContext;
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
+    const faceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
     const resizeSnapshot: TVectorNodeResizeSnapshot = {
       anchorX: 0,
       anchorY: 0,
@@ -216,7 +236,7 @@ describe('drawSceneVectorNode', () => {
     const rotateSnapshots = new Map([['node-1', rotateSnapshot]]);
 
     // before
-    drawSceneVectorNode(gl, program, buffer, node, null, resizeSnapshots, rotateSnapshots, 200, 150, IDENTITY_VIEWPORT);
+    drawSceneVectorNode(gl, program, buffer, faceBufferCache, node, null, resizeSnapshots, rotateSnapshots, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawVectorNodeResizeSnapshotMock).toHaveBeenCalledTimes(1);

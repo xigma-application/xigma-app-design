@@ -54,6 +54,7 @@ describe('drawVectorNodeDragSnapshot', () => {
       gl,
       program,
       buffer,
+      null,
       [
         [
           { x: 5, y: 10 },
@@ -65,7 +66,18 @@ describe('drawVectorNodeDragSnapshot', () => {
       150,
       IDENTITY_VIEWPORT,
     );
-    expect(drawVectorFillMock).toHaveBeenNthCalledWith(2, gl, program, buffer, [[{ x: 7, y: 12 }]], '#00ff00', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorFillMock).toHaveBeenNthCalledWith(
+      2,
+      gl,
+      program,
+      buffer,
+      null,
+      [[{ x: 7, y: 12 }]],
+      '#00ff00',
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
   });
 
   it('should translate the flat stroke vertex list by the delta, alternating x/y offsets by index parity', () => {

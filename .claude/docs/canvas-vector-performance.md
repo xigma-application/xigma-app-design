@@ -382,10 +382,38 @@ Vector Edit Mode on a rotated node" the user reported earlier in this session, b
 caching work (§5) even existed to make the miss expensive. **Fixed**: both now call
 `getRenderedVectorNode(node)` instead, the same swap §3.6 already made at its other ten call sites.
 
-**GPU-buffer-level caching** (skipping `bufferData`/`drawArrays` for an unchanged cluster) remains
-out of scope — no precedent anywhere in the renderer (only 4 shared GL buffers total, app-wide, rebound
-per-primitive every frame, [[canvas-rendering-pipeline]] §3/§8) — a materially larger
-rendering-architecture change than anything in this doc.
+**GPU-buffer-level caching** (skipping `bufferData`/`drawArrays` for an unchanged cluster) remained
+out of scope for a long time — no precedent anywhere in the renderer (only 4 shared GL buffers total,
+app-wide, rebound per-primitive every frame, [[canvas-rendering-pipeline]] §3/§8) — a materially larger
+rendering-architecture change than anything else in this doc. **A first, narrow slice now exists**
+(2026-08-28, Roadmap 2.0.0 Etap 1): `drawVectorNode/getOrCreateFaceBuffer.ts` gives each **stable,
+committed** vector node's fill faces (`groupFilledFacesByColor` → `getVectorFillLoopPoints`, already
+cluster-cached per §5.3, so a face's `TPoint[]` array reference is itself a valid stable-across-frames
+cache key) their own persistent `WebGLBuffer`, uploaded once via `gl.createBuffer`/`bufferData` on first
+draw and just re-bound (no re-upload) on every subsequent frame the face array reference is unchanged —
+a `WeakMap<TPoint[], WebGLBuffer>` (`TImageRenderContext.faceBufferCache`, created once in
+`setupRenderLoop.ts`, threaded through `drawSceneNodes.ts` → `drawSceneVectorNode.ts` →
+`drawVectorNode.ts` → `drawVectorFill.ts`). **Deliberately scoped out of this slice**, each for a
+concrete reason:
+- **Stroke tessellation** (`getVectorNodeThickStrokeVertices`) — not touched; still re-uploads every
+  frame through the shared scratch buffer, same as before.
+- **The three frozen-snapshot draw paths** (`drawVectorNodeDragSnapshot.ts`/`*Resize*`/`*Rotate*`, §4)
+  and the lasso preview (`drawVectorLasso.ts`) — these recompute their face arrays fresh every single
+  frame via a pointwise transform (translate/scale/rotate) over the frozen origin, so the array reference
+  changes every frame *by design*. Wiring the persistent cache into them would create a brand-new
+  `WebGLBuffer` every frame for the duration of a drag instead of reusing one — strictly worse than the
+  pre-existing shared-scratch-buffer behavior. `drawVectorFill.ts`'s `faceBufferCache` param is therefore
+  `WeakMap<TPoint[], WebGLBuffer> | null`; all four of these call sites pass `null`, which
+  `getOrCreateFaceBuffer.ts` treats as "always use the scratch buffer, never cache."
+- **Every non-vector primitive** (rect/ellipse/star/image/text/grid, §8 of the rendering-pipeline doc) —
+  untouched; still one shared 4-buffer pool, re-uploaded every frame.
+- **Eviction** — the cache never explicitly `gl.deleteBuffer`s an entry. A `WeakMap` keyed on the face
+  array reference means an entry becomes unreachable (and the buffer wrapper eligible for GC) once the
+  node/cluster is edited and a fresh face array is derived, but nothing calls `gl.deleteBuffer` at that
+  point — the exact same gap `getOrLoadTexture.ts`'s texture cache already has (§ nowhere in this doc,
+  confirmed by reading that file directly), so this isn't a new class of problem, just an existing,
+  accepted trade-off extended to a second cache. Worth revisiting if GPU memory pressure is ever profiled
+  as an issue on the stress scene.
 
 ## 6. Unrelated find while live-verifying §5.7: `getRemainingVertices` was O(vertices × segments)
 
@@ -442,6 +470,10 @@ freeze to instant.
   `useCanvasRenderLoop/utils/drawScene/drawVectorEditHandlesLayer/drawVectorEditHandlesForNode/
   drawVectorEditHandlesForNode.ts` — both now call `Canvas/utils/getRenderedVectorNode.ts` (§3.6)
 - O(n) segment-deletion fix (§6): `utils/canvas/vectorNetwork/getRemainingVertices.ts`
+- GPU-buffer-level caching, first slice (§5.7's closing note): `utils/canvas/drawVectorNode/
+  getOrCreateFaceBuffer.ts`, `useCanvasRenderLoop/types.ts` (`TImageRenderContext.faceBufferCache`),
+  `useCanvasRenderLoop/utils/setupRenderLoop.ts`, `useCanvasRenderLoop/utils/drawScene/
+  {drawSceneNodes,drawSceneVectorNode}.ts`, `utils/canvas/drawVectorNode/{drawVectorNode,drawVectorFill}.ts`
 
 ## Related
 

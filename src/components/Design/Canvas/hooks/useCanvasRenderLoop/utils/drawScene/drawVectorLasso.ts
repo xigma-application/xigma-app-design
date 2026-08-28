@@ -22,7 +22,7 @@ export const drawVectorLasso = (
     return;
   }
 
-  drawVectorFill(gl, program, buffer, [path], DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport, MARQUEE_FILL_ALPHA);
+  drawVectorFill(gl, program, buffer, null, [path], DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport, MARQUEE_FILL_ALPHA);
   drawDashedPolylineOutline(
     gl,
     program,

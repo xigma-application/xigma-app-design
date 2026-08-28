@@ -52,6 +52,7 @@ const IMAGE_CONTEXT: TImageRenderContext = {
   buffer: {} as WebGLBuffer,
   cache: new Map(),
   ellipseArcLengthCache: new Map(),
+  faceBufferCache: new WeakMap(),
   gridBuffer: {} as WebGLBuffer,
   gridProgram: {} as WebGLProgram,
   msdfBuffer: {} as WebGLBuffer,

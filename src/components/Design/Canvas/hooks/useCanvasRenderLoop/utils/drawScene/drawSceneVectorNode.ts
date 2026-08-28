@@ -1,4 +1,5 @@
 // types
+import { TPoint } from 'types/canvas';
 import { TVectorNode, TViewport } from 'types/design/types';
 import { TVectorNodeDragSnapshot, TVectorNodeResizeSnapshot, TVectorNodeRotateSnapshot } from 'types/design/canvas/types';
 
@@ -12,6 +13,7 @@ export const drawSceneVectorNode = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
+  faceBufferCache: WeakMap<TPoint[], WebGLBuffer>,
   node: TVectorNode,
   draggedVectorNodeSnapshots: Map<string, TVectorNodeDragSnapshot> | null,
   resizedVectorNodeSnapshots: Map<string, TVectorNodeResizeSnapshot> | null,
@@ -35,6 +37,6 @@ export const drawSceneVectorNode = (
       drawVectorNodeRotateSnapshot(gl, program, buffer, rotateSnapshot!, canvasWidth, canvasHeight, viewport);
       break;
     default:
-      drawVectorNode(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
+      drawVectorNode(gl, program, buffer, faceBufferCache, node, canvasWidth, canvasHeight, viewport);
   }
 };

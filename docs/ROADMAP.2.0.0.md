@@ -37,6 +37,16 @@ opis w [[canvas-vector-performance]]. Dwie duże rzeczy zostały świadomie odł
       `drawArrays`). Dotyka całego pipeline'u renderowania, nie tylko wektorów — szerszy zakres niż
       topology tracking, ale mniejsze ryzyko logicznych regresji (bliżej "instalacji/plumbingu" niż
       subtelnej geometrii).
+      **Pierwszy, wąski wycinek zrobiony (2026-08-28)**: `getOrCreateFaceBuffer.ts` daje trwały
+      `WebGLBuffer` na twarz wypełnienia (`fill face`) **stabilnego, zacommitowanego** węzła
+      wektorowego — cache `WeakMap<TPoint[], WebGLBuffer>` na `TImageRenderContext`, re-upload tylko
+      gdy referencja tablicy twarzy faktycznie się zmieni (co i tak już śledzi cache klastrowy z §5
+      [[canvas-vector-performance]]). Świadomie **nieobjęte**: tesselacja obrysu (stroke), wszystkie
+      trzy ścieżki frozen-snapshot (drag/resize/rotate — tam geometria i tak jest przeliczana co klatkę,
+      więc trwały bufor byłby stratą, nie zyskiem), lasso preview, i wszystkie nie-wektorowe prymitywy
+      (rect/ellipse/star/image/text/grid — nadal jeden dzielony scratch-buffer). Bez jawnego
+      `gl.deleteBuffer` przy ewikcji — ten sam, świadomie zaakceptowany kompromis co w
+      `getOrLoadTexture.ts`. Pełny opis w [[canvas-vector-performance]] §5.7's closing note.
 
 Oba punkty są od siebie niezależne — można zrobić jeden, drugi, oba albo żaden; nie ma między nimi
 zależności kolejności.

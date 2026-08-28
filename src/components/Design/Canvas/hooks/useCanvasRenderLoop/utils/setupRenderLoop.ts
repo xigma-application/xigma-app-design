@@ -25,6 +25,7 @@ export const setupRenderLoop = (
     buffer: imageBuffer,
     cache: new Map(),
     ellipseArcLengthCache: new Map(),
+    faceBufferCache: new WeakMap(),
     gridBuffer,
     gridProgram,
     msdfBuffer,

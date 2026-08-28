@@ -1,4 +1,5 @@
 // types
+import { TPoint } from 'types/canvas';
 import { TVectorNode, TViewport } from 'types/design/types';
 
 // utils
@@ -14,6 +15,7 @@ export const drawVectorNode = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
+  faceBufferCache: WeakMap<TPoint[], WebGLBuffer>,
   node: TVectorNode,
   canvasWidth: number,
   canvasHeight: number,
@@ -22,7 +24,7 @@ export const drawVectorNode = (
   const renderedNode = getRenderedVectorNode(node);
 
   groupFilledFacesByColor(renderedNode).forEach((faces, color) => {
-    drawVectorFill(gl, program, buffer, faces, color, canvasWidth, canvasHeight, viewport);
+    drawVectorFill(gl, program, buffer, faceBufferCache, faces, color, canvasWidth, canvasHeight, viewport);
   });
 
   if (renderedNode.widthProfile) {

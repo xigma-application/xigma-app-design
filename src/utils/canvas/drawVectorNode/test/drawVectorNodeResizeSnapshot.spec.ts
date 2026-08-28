@@ -66,6 +66,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       gl,
       program,
       buffer,
+      null,
       [
         [
           { x: 20, y: 10 },
@@ -82,6 +83,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       gl,
       program,
       buffer,
+      null,
       [[{ x: 10, y: 2.5 }]],
       '#00ff00',
       200,
@@ -110,7 +112,17 @@ describe('drawVectorNodeResizeSnapshot', () => {
     drawVectorNodeResizeSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT);
 
     // result — x stays 10 (untouched, no anchor), y scales to 40 around anchor 0
-    expect(drawVectorFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 10, y: 40 }]], '#ff0000', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorFillMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      null,
+      [[{ x: 10, y: 40 }]],
+      '#ff0000',
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
   });
 
   it('should scale every flattened segment’s points and re-derive the thick stroke from the scaled centerline at the node’s own stroke width', () => {
@@ -192,6 +204,16 @@ describe('drawVectorNodeResizeSnapshot', () => {
     drawVectorNodeResizeSnapshot(gl, program, buffer, snapshot, 200, 150, IDENTITY_VIEWPORT);
 
     // result
-    expect(drawVectorFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 110, y: 40 }]], '#ff0000', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorFillMock).toHaveBeenCalledWith(
+      gl,
+      program,
+      buffer,
+      null,
+      [[{ x: 110, y: 40 }]],
+      '#ff0000',
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
   });
 });

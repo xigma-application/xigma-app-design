@@ -322,8 +322,10 @@ Every `src/utils/canvas/draw*.ts` (and `shapes/draw*.ts`) follows the same shape
 5. `bindBuffer`/`enableVertexAttribArray`/`vertexAttribPointer` (interleaved stride for
    image/text primitives, tight `[x,y]` for color primitives).
 6. `bufferData(..., new Float32Array([...]), gl.STATIC_DRAW)` — re-uploads the **entire** buffer
-   every call (no persistent VBO reuse/partial updates anywhere; `STATIC_DRAW` is a slight misnomer
-   since the data changes every frame, but it's what's used throughout).
+   every call (no persistent VBO reuse/partial updates anywhere **except** committed vector nodes' fill
+   faces, `drawVectorFill.ts` via `getOrCreateFaceBuffer.ts` — see [[canvas-vector-performance]] §5.7's
+   closing note; `STATIC_DRAW` is a slight misnomer since the data changes every frame, but it's what's
+   used throughout everywhere else).
 7. Set the fill/stroke/texture uniform (`u_color` via `hexToRgbaFloat`, or bind a texture unit).
 8. `gl.drawArrays(<mode>, 0, <count>)`.
 
@@ -499,6 +501,9 @@ every frame.
 `WEBGL_CONTEXT_ATTRIBUTES`, §1) and a genuinely new WebGL technique (stencil-buffer even-odd fill,
 `drawVectorFill.ts`) not covered by anything else described here.
 [[canvas-vector-performance]] — why `drawSceneVectorNode.ts` (§2/§5) checks a frozen-snapshot map
-before ever calling the plain `drawVectorNode.ts` path, and why GPU-buffer-level caching (never
-attempted — §3/§8's "no persistent VBO reuse anywhere") isn't a quick follow-up for vector nodes at
-scale.
+before ever calling the plain `drawVectorNode.ts` path, and why GPU-buffer-level caching isn't a quick
+follow-up for vector nodes at scale in general (§3/§8's "no persistent VBO reuse anywhere" is still true
+for stroke tessellation and every non-vector primitive) — a first, narrow slice now exists for stable
+committed vector nodes' fill faces specifically (that doc's §5.7 closing note,
+`utils/canvas/drawVectorNode/getOrCreateFaceBuffer.ts`), the one exception to "no persistent VBO reuse
+anywhere" in this codebase so far.
