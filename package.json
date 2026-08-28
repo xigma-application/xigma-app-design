@@ -21,8 +21,9 @@
     "stylelint:fix": "stylelint \"**/*.scss\" --fix",
     "prettier:check": "prettier --check .",
     "prettier:write": "prettier --write .",
-    "postinstall": "node scripts/xigma-pull.cjs",
-    "xigma:pull": "node scripts/xigma-pull.cjs"
+    "clean:vite": "rm -rf node_modules/.vite",
+    "postinstall": "node scripts/xigma-pull.cjs && npm run clean:vite",
+    "xigma:pull": "node scripts/xigma-pull.cjs && npm run clean:vite"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",

@@ -13,11 +13,15 @@ exports[`AlphaField snapshots > should render AlphaField 1`] = `
       type="number"
       value="50"
     />
-    <span
-      class="_AlphaField__unit_59d187"
+    <div
+      class="ScrubbableInput"
     >
-      %
-    </span>
+      <span
+        class="_AlphaField__unit_59d187"
+      >
+        %
+      </span>
+    </div>
   </div>
 </DocumentFragment>
 `;

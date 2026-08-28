@@ -1,6 +1,6 @@
 // @xigma
-export { Icon, Tooltip } from '@xigma/components';
-export type { TIconProps, TTooltipProps } from '@xigma/components';
+export { Icon, ScrubbableInput, Tooltip } from '@xigma/components';
+export type { TIconProps, TScrubbableInputProps, TTooltipProps } from '@xigma/components';
 export { TooltipProvider } from '@xigma/core';
 export type { TTooltipProviderProps } from '@xigma/core';
 

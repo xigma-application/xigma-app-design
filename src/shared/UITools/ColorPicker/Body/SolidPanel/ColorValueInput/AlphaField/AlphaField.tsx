@@ -1,5 +1,8 @@
 import { FC } from 'react';
 
+// @xigma
+import { ScrubbableInput } from '@xigma/components';
+
 // components
 import E2EDataAttribute from 'shared/E2EDataAttributes/E2EDataAttribute';
 
@@ -30,7 +33,9 @@ export const AlphaField: FC<TAlphaFieldProps> = ({ alpha, onCommit }) => {
           onKeyDown={onKeyDown}
           type="number"
         />
-        <span className={styles.AlphaField__unit}>%</span>
+        <ScrubbableInput max={100} min={0} onChange={onCommit} value={Math.round(alpha)}>
+          <span className={styles.AlphaField__unit}>%</span>
+        </ScrubbableInput>
       </div>
     </E2EDataAttribute>
   );

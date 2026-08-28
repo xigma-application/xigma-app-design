@@ -54,3 +54,14 @@ Object.defineProperty(HTMLElement.prototype, 'setPointerCapture', {
   value: (): void => {},
   writable: true,
 });
+
+// jsdom doesn't implement the pointer lock API
+Object.defineProperty(HTMLElement.prototype, 'requestPointerLock', {
+  value: (): void => {},
+  writable: true,
+});
+
+Object.defineProperty(Document.prototype, 'exitPointerLock', {
+  value: (): void => {},
+  writable: true,
+});

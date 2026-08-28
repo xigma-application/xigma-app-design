@@ -53,11 +53,15 @@ exports[`ColorValueInput snapshots > should render ColorValueInput defaulting to
           type="number"
           value="100"
         />
-        <span
-          class="_AlphaField__unit_59d187"
+        <div
+          class="ScrubbableInput"
         >
-          %
-        </span>
+          <span
+            class="_AlphaField__unit_59d187"
+          >
+            %
+          </span>
+        </div>
       </div>
     </div>
   </div>
