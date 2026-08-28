@@ -415,6 +415,38 @@ concrete reason:
   accepted trade-off extended to a second cache. Worth revisiting if GPU memory pressure is ever profiled
   as an issue on the stress scene.
 
+**Profiling note (2026-08-28), and a gotcha in the stress-test generator itself**: the user's first
+attempt to profile this fix found almost no difference, which turned out to be because
+`generateStressTestVectorGrid.ts` shipped `filledFaceKeys: []` — an empty list. `drawVectorFill`
+(and this whole fix) is gated entirely on `filledFaceKeys`; `node.fillColor` alone renders nothing
+(confirmed live: drawing a closed path with the Pen tool shows no fill until the Paint tool is used on
+it, which is what actually populates `filledFaceKeys`). The generator now calls `deriveVectorFaces` +
+`getVectorFillLoopKey` on itself (the same mechanism `getFillDataForClosedLoop.ts` uses for
+Rectangle→Vector conversion) to populate real `filledFaceKeys`, so the stress scene's squares are
+actually filled.
+
+That fix surfaced a second, more interesting one: the *first* re-profile used a distinct random
+`fillColorOverrideByKey` per square. Self-time exploded — `vertexAttribPointer` alone hit 2,224ms/50.4%
+of the capture, with `uniform4fv`/`stencilFunc`/`stencilOp` making up another ~30% — because
+`groupFilledFacesByColor.ts` (§3.3) batches same-color faces into **one** `drawVectorFill` call, and a
+unique color per face defeats that entirely: 3,000 squares became 3,000 separate calls instead of one,
+each re-paying the full per-call stencil-test setup/teardown (`clear`→`enable`→toggle→`disable`) that
+was meant to be paid once per frame, not once per shape. Reverting the generator to one shared fill
+color collapsed the whole profile back down — `vertexAttribPointer` dropped to 28.1ms/2.4%, and no
+single item dominates the capture anymore. This wasn't a flaw in this fix; it was existing batching
+(§3.3, unrelated to §5.7) getting defeated by an unrepresentative stress scene. **Lesson for next time
+this scene is used**: keep the generator's fill on one shared color unless the thing being profiled is
+specifically per-shape-color behavior.
+
+With that fixed, `bufferData` (this fix's actual target) stayed negligible (7.6ms/0.6%) and
+`getOrCreateFaceBuffer` itself cost 6.9ms self/33.4ms total (2.8%) — small and consistent with the
+cache working. The **new largest single item** in the corrected profile is `getVectorFillCoveringQuad`
+(116.4ms self, 9.9%) — it recomputes the covering quad's bounding box from **all** faces on **every**
+frame, uncached, since it isn't wired into any of the §5 cluster caches. Not fixed here; flagged as the
+next concrete candidate if this area gets revisited. Overall: a real, if modest and still not
+formally A/B'd with matched interaction scripts, improvement — not the `977ms → 30.5ms`-grade number
+the rest of this doc holds itself to, but no longer "unquantified noise" either.
+
 ## 6. Unrelated find while live-verifying §5.7: `getRemainingVertices` was O(vertices × segments)
 
 Found live-testing §5.7's fix, not caused by it: deleting a segment on a large multi-shape vector
