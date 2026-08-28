@@ -51,7 +51,7 @@ describe('CommentDraftFooter behaviors', () => {
     fireEvent.click(button);
 
     // result
-    expect(Object.values(store.getState().design.comments)).toHaveLength(1);
+    expect(Object.values(store.getState().design.pages[store.getState().design.activePageId].comments)).toHaveLength(1);
   });
 
   it('should prevent the default mousedown action so the button does not steal focus', () => {

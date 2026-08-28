@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection, updateNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -33,7 +34,7 @@ const addRectangleNode = (x: number, y: number, width: number, height: number): 
     addNode({ fill: '#ff0000', height, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width, x, y }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -51,7 +52,7 @@ describe('continueCornerRadiusDrag', () => {
     continueCornerRadiusDrag(canvas, pointerEvent(10, 10), store.dispatch, createCornerRadiusDragRef());
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
   });
 
   it('should dispatch a rounded cornerRadius derived from the pointer position on every move', () => {
@@ -72,7 +73,7 @@ describe('continueCornerRadiusDrag', () => {
     continueCornerRadiusDrag(canvas, pointerEvent(80, 10), store.dispatch, cornerRadiusDragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TRectangleNode).cornerRadius).toBe(20);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TRectangleNode).cornerRadius).toBe(20);
   });
 
   it('should clamp the dispatched radius to half the smaller dimension', () => {
@@ -93,7 +94,7 @@ describe('continueCornerRadiusDrag', () => {
     continueCornerRadiusDrag(canvas, pointerEvent(0, 0), store.dispatch, cornerRadiusDragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TRectangleNode).cornerRadius).toBe(25);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TRectangleNode).cornerRadius).toBe(25);
   });
 
   it('should land exactly on a fractional max radius instead of a rounding-overshot integer', () => {
@@ -115,7 +116,7 @@ describe('continueCornerRadiusDrag', () => {
     continueCornerRadiusDrag(canvas, pointerEvent(0, 101), store.dispatch, cornerRadiusDragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TRectangleNode).cornerRadius).toBe(50.5);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TRectangleNode).cornerRadius).toBe(50.5);
   });
 
   it('should un-rotate the query point before computing the radius on a rotated node', () => {
@@ -140,7 +141,7 @@ describe('continueCornerRadiusDrag', () => {
     continueCornerRadiusDrag(canvas, pointerEvent(75, 75), store.dispatch, cornerRadiusDragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TRectangleNode).cornerRadius).toBe(0);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TRectangleNode).cornerRadius).toBe(0);
   });
 
   it('should leave the corner unresolved and dispatch nothing while the pointer has not moved yet', () => {
@@ -162,7 +163,7 @@ describe('continueCornerRadiusDrag', () => {
 
     // result
     expect(cornerRadiusDragRef.current?.corner).toBeNull();
-    expect(store.getState().design.nodes[idA]).not.toHaveProperty('cornerRadius');
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).not.toHaveProperty('cornerRadius');
   });
 
   it('should resolve the corner from the first real movement direction, then keep using it for later moves', () => {
@@ -184,14 +185,14 @@ describe('continueCornerRadiusDrag', () => {
 
     // result — resolved to "se"; radius is the absolute inset from the se corner (55, 55)
     expect(cornerRadiusDragRef.current?.corner).toBe('se');
-    expect((store.getState().design.nodes[idA] as TRectangleNode).cornerRadius).toBe(45);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TRectangleNode).cornerRadius).toBe(45);
 
     // action — a later move further along the same quadrant still applies "se" logic, not re-resolved
     continueCornerRadiusDrag(canvas, pointerEvent(40, 40), store.dispatch, cornerRadiusDragRef);
 
     // result
     expect(cornerRadiusDragRef.current?.corner).toBe('se');
-    expect((store.getState().design.nodes[idA] as TRectangleNode).cornerRadius).toBe(50);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TRectangleNode).cornerRadius).toBe(50);
   });
 
   it('should resolve to whichever pair candidate best matches the movement when only 2 handles coincide', () => {

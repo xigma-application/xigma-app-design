@@ -32,8 +32,12 @@ export const continueVectorShapeBuilderDrag = (
     setClassName(event.altKey ? 'remove' : 'add');
 
     const hits = event.shiftKey
-      ? getVectorFacesInRectAcrossOpenNodes(toDraftRect(nextPath[0], point), vectorEditingNodeIds, state.design.nodes)
-      : getVectorFacesOnPathAcrossOpenNodes(nextPath, vectorEditingNodeIds, state.design.nodes);
+      ? getVectorFacesInRectAcrossOpenNodes(
+          toDraftRect(nextPath[0], point),
+          vectorEditingNodeIds,
+          state.design.pages[state.design.activePageId].nodes,
+        )
+      : getVectorFacesOnPathAcrossOpenNodes(nextPath, vectorEditingNodeIds, state.design.pages[state.design.activePageId].nodes);
     const touchedFaces = canvasRefs.shapeBuilder.touchedVectorShapeBuilderFacesRef.current;
 
     hits.forEach(({ faces, node }) => {

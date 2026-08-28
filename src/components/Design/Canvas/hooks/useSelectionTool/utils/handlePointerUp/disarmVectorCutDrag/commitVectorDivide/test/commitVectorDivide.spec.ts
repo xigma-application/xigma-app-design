@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -59,7 +60,7 @@ const addSquareNode = (x: number, filled: boolean): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -77,19 +78,21 @@ describe('commitVectorDivide', () => {
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
-    const rootOrderBefore = [...store.getState().design.rootOrder];
+    const rootOrderBefore = [...store.getState().design.pages[store.getState().design.activePageId].rootOrder];
 
     // before
     commitVectorDivide(store.dispatch, { x: -20, y: 50 }, { x: 120, y: 50 }, [nodeId], canvasRefs);
 
     // result
-    const newRootOrder = store.getState().design.rootOrder.filter((id) => !rootOrderBefore.includes(id));
+    const newRootOrder = store
+      .getState()
+      .design.pages[store.getState().design.activePageId].rootOrder.filter((id) => !rootOrderBefore.includes(id));
     const resultingIds = [nodeId, ...newRootOrder];
 
     expect(resultingIds).toHaveLength(2);
 
     resultingIds.forEach((id) => {
-      const node = store.getState().design.nodes[id] as TVectorNode;
+      const node = store.getState().design.pages[store.getState().design.activePageId].nodes[id] as TVectorNode;
 
       expect(Object.keys(node.vertices)).toHaveLength(4);
       expect(node.filledFaceKeys.length).toBeGreaterThan(0);
@@ -105,16 +108,18 @@ describe('commitVectorDivide', () => {
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
-    const rootOrderBefore = [...store.getState().design.rootOrder];
+    const rootOrderBefore = [...store.getState().design.pages[store.getState().design.activePageId].rootOrder];
 
     // before
     commitVectorDivide(store.dispatch, { x: -20, y: 50 }, { x: 120, y: 50 }, [nodeId], canvasRefs);
 
     // result
-    const newRootOrder = store.getState().design.rootOrder.filter((id) => !rootOrderBefore.includes(id));
+    const newRootOrder = store
+      .getState()
+      .design.pages[store.getState().design.activePageId].rootOrder.filter((id) => !rootOrderBefore.includes(id));
 
     [nodeId, ...newRootOrder].forEach((id) => {
-      const node = store.getState().design.nodes[id] as TVectorNode;
+      const node = store.getState().design.pages[store.getState().design.activePageId].nodes[id] as TVectorNode;
 
       expect(node.filledFaceKeys).toEqual([]);
     });
@@ -123,8 +128,8 @@ describe('commitVectorDivide', () => {
   it('should leave a node completely untouched when the cut line misses its geometry entirely', () => {
     // mock
     const nodeId = addSquareNode(1000, true);
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
-    const rootOrderBefore = [...store.getState().design.rootOrder];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
+    const rootOrderBefore = [...store.getState().design.pages[store.getState().design.activePageId].rootOrder];
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
@@ -134,8 +139,8 @@ describe('commitVectorDivide', () => {
     commitVectorDivide(store.dispatch, { x: -20, y: 50 }, { x: 120, y: 50 }, [nodeId], canvasRefs);
 
     // result
-    expect(store.getState().design.nodes[nodeId]).toEqual(node);
-    expect(store.getState().design.rootOrder).toEqual(rootOrderBefore);
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId]).toEqual(node);
+    expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toEqual(rootOrderBefore);
   });
 
   it('should keep a closed triangle as one node but genuinely sever the one edge the cut line crosses, when it crosses only that edge and no other', () => {
@@ -160,7 +165,7 @@ describe('commitVectorDivide', () => {
       }),
     );
 
-    const { rootOrder: rootOrderBefore } = store.getState().design;
+    const { rootOrder: rootOrderBefore } = selectActivePage(store.getState());
     const nodeId = rootOrderBefore[rootOrderBefore.length - 1];
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
@@ -173,13 +178,13 @@ describe('commitVectorDivide', () => {
     // result — still one connected node (no new node, the other two edges still keep it one piece), but
     // edge a-b is now genuinely severed into two disconnected segments — two new points at the same
     // coordinate, not one shared pass-through vertex, matching a plain Split click
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const newVertexIds = Object.keys(node.vertices).filter((id) => !['a', 'b', 'c'].includes(id));
     const touchingSegments = Object.values(node.segments).filter(
       (segment) => newVertexIds.includes(segment.startId) || newVertexIds.includes(segment.endId),
     );
 
-    expect(store.getState().design.rootOrder).toEqual(rootOrderBefore);
+    expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toEqual(rootOrderBefore);
     expect(Object.keys(node.vertices)).toHaveLength(5);
     expect(Object.keys(node.segments)).toHaveLength(4);
     expect(newVertexIds).toHaveLength(2);
@@ -191,21 +196,23 @@ describe('commitVectorDivide', () => {
     // mock — nodeA at x=0 (crossed), nodeB at x=1000 (missed)
     const nodeAId = addSquareNode(0, true);
     const nodeBId = addSquareNode(1000, true);
-    const nodeBBefore = store.getState().design.nodes[nodeBId] as TVectorNode;
+    const nodeBBefore = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeBId] as TVectorNode;
 
     store.dispatch(setVectorEditingNodeIds([nodeAId, nodeBId]));
 
     const canvasRefs = createCanvasRefs();
-    const rootOrderBefore = [...store.getState().design.rootOrder];
+    const rootOrderBefore = [...store.getState().design.pages[store.getState().design.activePageId].rootOrder];
 
     // before
     commitVectorDivide(store.dispatch, { x: -20, y: 50 }, { x: 120, y: 50 }, [nodeAId, nodeBId], canvasRefs);
 
     // result — nodeA split into 2, nodeB untouched, both still open for editing
-    const newRootOrder = store.getState().design.rootOrder.filter((id) => !rootOrderBefore.includes(id));
+    const newRootOrder = store
+      .getState()
+      .design.pages[store.getState().design.activePageId].rootOrder.filter((id) => !rootOrderBefore.includes(id));
 
     expect(newRootOrder).toHaveLength(1);
-    expect(store.getState().design.nodes[nodeBId]).toEqual(nodeBBefore);
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[nodeBId]).toEqual(nodeBBefore);
     expect(store.getState().design.vectorEditingNodeIds).toContain(nodeBId);
     expect(store.getState().design.vectorEditingNodeIds).toHaveLength(3);
   });
@@ -281,7 +288,7 @@ describe('commitVectorDivide', () => {
       }),
     );
 
-    const { rootOrder: rootOrderBefore } = store.getState().design;
+    const { rootOrder: rootOrderBefore } = selectActivePage(store.getState());
     const nodeId = rootOrderBefore[rootOrderBefore.length - 1];
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
@@ -293,13 +300,15 @@ describe('commitVectorDivide', () => {
 
     // result — a top piece (holding both peaks) and a bottom piece (holding the baseline), each keeping
     // its own 3 sub-fills; none of the three original colors, including the middle one, gets dropped
-    const newRootOrder = store.getState().design.rootOrder.filter((id) => !rootOrderBefore.includes(id));
+    const newRootOrder = store
+      .getState()
+      .design.pages[store.getState().design.activePageId].rootOrder.filter((id) => !rootOrderBefore.includes(id));
     const resultingIds = [nodeId, ...newRootOrder];
 
     expect(resultingIds).toHaveLength(2);
 
     resultingIds.forEach((id) => {
-      const node = store.getState().design.nodes[id] as TVectorNode;
+      const node = store.getState().design.pages[store.getState().design.activePageId].nodes[id] as TVectorNode;
 
       expect(node.filledFaceKeys).toHaveLength(3);
     });
@@ -314,27 +323,31 @@ describe('commitVectorDivide', () => {
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
     const canvasRefs = createCanvasRefs();
-    const rootOrderBeforeAnyCut = [...store.getState().design.rootOrder];
+    const rootOrderBeforeAnyCut = [...store.getState().design.pages[store.getState().design.activePageId].rootOrder];
 
     // before — first cut near the top (y=30), then cut the resulting bottom piece again near its own
     // middle (y=65)
     commitVectorDivide(store.dispatch, { x: -20, y: 30 }, { x: 120, y: 30 }, [nodeId], canvasRefs);
 
-    const afterFirstCutIds = store.getState().design.rootOrder.filter((id) => !rootOrderBeforeAnyCut.includes(id));
+    const afterFirstCutIds = store
+      .getState()
+      .design.pages[store.getState().design.activePageId].rootOrder.filter((id) => !rootOrderBeforeAnyCut.includes(id));
     const bottomPieceId = [nodeId, ...afterFirstCutIds]
-      .map((id) => store.getState().design.nodes[id] as TVectorNode)
+      .map((id) => store.getState().design.pages[store.getState().design.activePageId].nodes[id] as TVectorNode)
       .find((node) => Math.max(...Object.values(node.vertices).map((v) => v.y)) > 30)!.id;
 
     commitVectorDivide(store.dispatch, { x: -20, y: 65 }, { x: 120, y: 65 }, [bottomPieceId], canvasRefs);
 
     // result — three pieces total (top third untouched by the second cut, plus the two the second cut
     // produced), every single one still filled
-    const finalIds = store.getState().design.rootOrder.filter((id) => !rootOrderBeforeAnyCut.includes(id) || id === nodeId);
+    const finalIds = store
+      .getState()
+      .design.pages[store.getState().design.activePageId].rootOrder.filter((id) => !rootOrderBeforeAnyCut.includes(id) || id === nodeId);
 
     expect(finalIds).toHaveLength(3);
 
     finalIds.forEach((id) => {
-      const node = store.getState().design.nodes[id] as TVectorNode;
+      const node = store.getState().design.pages[store.getState().design.activePageId].nodes[id] as TVectorNode;
 
       expect(node.filledFaceKeys.length).toBeGreaterThan(0);
     });
@@ -394,7 +407,7 @@ describe('commitVectorDivide', () => {
       }),
     );
 
-    const { rootOrder: rootOrderBefore } = store.getState().design;
+    const { rootOrder: rootOrderBefore } = selectActivePage(store.getState());
     const nodeId = rootOrderBefore[rootOrderBefore.length - 1];
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
@@ -408,10 +421,10 @@ describe('commitVectorDivide', () => {
     // result — no new node (the bottom face's other two edges keep the outline connected as one piece),
     // the top face's two new pieces both inherit its fill, and the bottom face — never itself re-closed
     // by this cut — isn't among them
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const bottomKey = faces.find((face) => face.pieceKeys.some((key) => key.startsWith('s4[')))!;
 
-    expect(store.getState().design.rootOrder).toEqual(rootOrderBefore);
+    expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toEqual(rootOrderBefore);
     expect(node.filledFaceKeys).toHaveLength(2);
     expect(node.filledFaceKeys).not.toContain(getVectorFillLoopKey(bottomKey.pieceKeys));
     expect(deriveVectorFaces(node)).toHaveLength(2);

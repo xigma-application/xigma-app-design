@@ -16,7 +16,7 @@ export const hitsSelectedVertex = (context: TArmContext, vectorEditingNodeIds: s
   const hit = getVectorVertexAtPointAcrossOpenNodes(
     point,
     vectorEditingNodeIds,
-    state.design.nodes,
+    state.design.pages[state.design.activePageId].nodes,
     VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom,
   );
 

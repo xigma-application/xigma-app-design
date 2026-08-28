@@ -22,11 +22,16 @@ export const armVectorMultiSelectResizeOnPointerDown = (context: TArmContext): t
     const selectedVertexIds = canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current;
     const selectedHandles = canvasRefs.vectorEdit.selectedVectorHandlesRef.current;
     const selectedSegmentIds = canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current;
-    const vertexIds = getVectorMultiSelectVertexIds(state.design.nodes, vectorEditingNodeIds, selectedVertexIds, selectedSegmentIds);
+    const vertexIds = getVectorMultiSelectVertexIds(
+      state.design.pages[state.design.activePageId].nodes,
+      vectorEditingNodeIds,
+      selectedVertexIds,
+      selectedSegmentIds,
+    );
 
     if (isVectorMultiSelectBoxEligible(vertexIds, selectedHandles) && !hitsSelectedSegment(context, vectorEditingNodeIds)) {
       const box = getVectorMultiSelectBox(
-        state.design.nodes,
+        state.design.pages[state.design.activePageId].nodes,
         vectorEditingNodeIds,
         vertexIds,
         selectedHandles,
@@ -40,7 +45,7 @@ export const armVectorMultiSelectResizeOnPointerDown = (context: TArmContext): t
           canvas,
           event,
           canvasRefs.vectorMultiSelect.vectorMultiSelectResizeDragRef,
-          state.design.nodes,
+          state.design.pages[state.design.activePageId].nodes,
           vectorEditingNodeIds,
           vertexIds,
           selectedHandles,

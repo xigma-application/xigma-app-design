@@ -4,10 +4,11 @@ import { NodeType } from 'types/design/enums';
 import { TTextNode } from 'types/design/types';
 
 // utils
+import { getActivePage } from './getActivePage';
 import { syncPathTextNodes } from './syncPathTextNodes';
 
 export const syncPathNodeFromText = (state: TDesignState, textNode: TTextNode): void => {
-  const pathNode = textNode.pathId ? state.nodes[textNode.pathId] : undefined;
+  const pathNode = textNode.pathId ? getActivePage(state).nodes[textNode.pathId] : undefined;
 
   if (pathNode && pathNode.type === NodeType.path) {
     pathNode.height = textNode.height;

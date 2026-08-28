@@ -36,7 +36,7 @@ describe('selectCommittedNode', () => {
       }),
     );
 
-    const [existingId] = store.getState().design.rootOrder;
+    const [existingId] = store.getState().design.pages[store.getState().design.activePageId].rootOrder;
 
     // action
     selectCommittedNode(store.dispatch, store, existingId);
@@ -57,7 +57,9 @@ describe('selectCommittedNode', () => {
     selectCommittedNode(store.dispatch, store, null);
 
     // result
-    const { rootOrder, selectedIds } = store.getState().design;
+    const { design } = store.getState();
+    const { rootOrder } = design.pages[design.activePageId];
+    const { selectedIds } = design;
 
     expect(selectedIds).toEqual([rootOrder[0]]);
   });

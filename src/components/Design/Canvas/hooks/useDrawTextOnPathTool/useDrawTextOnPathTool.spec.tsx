@@ -99,9 +99,10 @@ describe('useDrawTextOnPathTool behaviors', () => {
 
     // result
     const { design } = store.getState();
-    const [pathNodeId] = design.rootOrder;
+    const page = design.pages[design.activePageId];
+    const [pathNodeId] = page.rootOrder;
 
-    expect(design.nodes[pathNodeId]).toMatchObject({ height: 40, pathType: 'ellipse', type: NodeType.path, width: 50, x: 4200, y: 4200 });
+    expect(page.nodes[pathNodeId]).toMatchObject({ height: 40, pathType: 'ellipse', type: NodeType.path, width: 50, x: 4200, y: 4200 });
     expect(design.selectedIds).toEqual([pathNodeId]);
     expect(design.editingTextBox).toMatchObject({ height: 40, pathId: pathNodeId, pathStartOffset: 0.75, width: 50, x: 4200, y: 4200 });
     expect(design.activeTool).toBe(ToolName.default);

@@ -27,7 +27,7 @@ export const armVectorCornerHandleOnPointerDown = ({
     const result = getVectorCornerHandleAtPointAcrossOpenNodes(
       point,
       selectVectorEditingNodeIds(state),
-      state.design.nodes,
+      state.design.pages[state.design.activePageId].nodes,
       VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom,
     );
 

@@ -30,7 +30,7 @@ export const armVectorPaintOnPointerDown = ({
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
 
   if (activeTool === ToolName.paint && vectorEditingNodeIds.length > 0) {
-    const hit = getVectorFaceAtPointAcrossOpenNodes(point, vectorEditingNodeIds, state.design.nodes);
+    const hit = getVectorFaceAtPointAcrossOpenNodes(point, vectorEditingNodeIds, state.design.pages[state.design.activePageId].nodes);
     const touchedLoopKeys: TVectorPaintTouchedLoopKeys = {};
 
     if (hit) {

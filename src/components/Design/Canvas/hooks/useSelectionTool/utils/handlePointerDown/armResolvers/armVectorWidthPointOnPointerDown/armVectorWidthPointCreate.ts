@@ -29,7 +29,7 @@ export const armVectorWidthPointCreate = (
   const strokeHit = getVectorCutHitAcrossOpenNodes(
     point,
     eligibleNodes.map((node) => node.id),
-    state.design.nodes,
+    state.design.pages[state.design.activePageId].nodes,
     VECTOR_EDGE_HIT_TOLERANCE_PX / viewport.zoom,
     VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom,
   );

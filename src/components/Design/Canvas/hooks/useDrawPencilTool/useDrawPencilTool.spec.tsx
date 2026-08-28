@@ -7,6 +7,7 @@ import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useDrawPencilTool } from './useDrawPencilTool';
 
 // store
+import { selectActivePage } from 'store/design/selectors';
 import { setActiveTool, setSelection } from 'store/design/slice';
 import { store } from 'store';
 
@@ -81,7 +82,7 @@ describe('useDrawPencilTool behaviors', () => {
     });
 
     // result
-    const { nodes, rootOrder } = store.getState().design;
+    const { nodes, rootOrder } = selectActivePage(store.getState());
     const node = nodes[rootOrder[rootOrder.length - 1]] as TVectorNode;
 
     expect(node.type).toBe('vector');

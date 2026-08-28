@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -42,7 +43,7 @@ const addEllipseNode = (overrides: Partial<TEllipseNode> = {}): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -62,7 +63,7 @@ describe('continueEllipseArcRotateDrag', () => {
     continueEllipseArcRotateDrag(canvas, pointerEvent(10, 10), store.dispatch, createEllipseArcRotateDragRef());
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
   });
 
   it('should rotate both arcStartAngle and arcEndAngle by the same delta, preserving the sweep width', () => {
@@ -82,7 +83,7 @@ describe('continueEllipseArcRotateDrag', () => {
     continueEllipseArcRotateDrag(canvas, pointerEvent(50, 100), store.dispatch, dragRef);
 
     // result
-    const node = store.getState().design.nodes[idA] as TEllipseNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TEllipseNode;
 
     expect(node.arcStartAngle).toBe(180);
     expect(node.arcEndAngle).toBe(90);
@@ -105,7 +106,7 @@ describe('continueEllipseArcRotateDrag', () => {
     continueEllipseArcRotateDrag(canvas, pointerEvent(50, 100), store.dispatch, dragRef);
 
     // result
-    const node = store.getState().design.nodes[idA] as TEllipseNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TEllipseNode;
 
     expect(node.arcStartAngle).toBe(180);
     expect(dragRef.current?.draggedHandlePosition).toEqual({ x: 50, y: 100 });
@@ -126,7 +127,7 @@ describe('continueEllipseArcRotateDrag', () => {
         y: 0,
       }),
     );
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const idA = rootOrder[rootOrder.length - 1];
     const canvas = createCanvas();
     const dragRef = createEllipseArcRotateDragRef({
@@ -142,7 +143,10 @@ describe('continueEllipseArcRotateDrag', () => {
     continueEllipseArcRotateDrag(canvas, pointerEvent(50, 0), store.dispatch, dragRef);
 
     // result — no crash, both angles default to ELLIPSE_DEFAULT_ARC_ANGLE (90) as if uncut
-    expect(store.getState().design.nodes[idA]).toMatchObject({ arcEndAngle: 0, arcStartAngle: 0 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      arcEndAngle: 0,
+      arcStartAngle: 0,
+    });
   });
 
   it('should wrap a rawDelta greater than 180° to the shorter path in the opposite direction', () => {
@@ -162,7 +166,7 @@ describe('continueEllipseArcRotateDrag', () => {
     continueEllipseArcRotateDrag(canvas, pointerEvent(41.317591, 0.759612), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TEllipseNode).arcStartAngle).toBe(-10);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TEllipseNode).arcStartAngle).toBe(-10);
   });
 
   it('should wrap a rawDelta less than -180° to the shorter path in the opposite direction', () => {
@@ -182,6 +186,6 @@ describe('continueEllipseArcRotateDrag', () => {
     continueEllipseArcRotateDrag(canvas, pointerEvent(58.682409, 0.759612), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TEllipseNode).arcStartAngle).toBe(370);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TEllipseNode).arcStartAngle).toBe(370);
   });
 });

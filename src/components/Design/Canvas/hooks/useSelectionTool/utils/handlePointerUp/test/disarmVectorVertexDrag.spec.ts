@@ -1,5 +1,6 @@
 // store
 import { addNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -38,7 +39,7 @@ const addVectorNode = (vertices: { id: string; x: number; y: number }[], segment
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -134,7 +135,9 @@ describe('disarmVectorVertexDrag', () => {
     disarmVectorVertexDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result
-    expect(store.getState().design.nodes[idA]).toMatchObject({ vertices: { v1: { id: 'v1', x: 200, y: 200 } } });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      vertices: { v1: { id: 'v1', x: 200, y: 200 } },
+    });
     expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
     expect(selectionRefs.vectorVertexDragRef.current).toBeNull();
   });
@@ -169,7 +172,7 @@ describe('disarmVectorVertexDrag', () => {
     disarmVectorVertexDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result
-    const node = store.getState().design.nodes[idA] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TVectorNode;
 
     expect(node.segments).not.toHaveProperty('s1');
     expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
@@ -200,12 +203,12 @@ describe('disarmVectorVertexDrag', () => {
     disarmVectorVertexDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result
-    const node = store.getState().design.nodes[idA] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TVectorNode;
 
     expect(node).toMatchObject({ vertices: { v1: { id: 'v1', x: 100, y: 0 } } });
     expect(Object.keys(node.vertices)).not.toContain('v2');
     expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1']);
-    expect(store.getState().design.nodes[idA]).toBeDefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toBeDefined();
   });
 
   it('should merge onto a target vertex of a DIFFERENT node, absorbing it and deleting that node', () => {
@@ -235,8 +238,10 @@ describe('disarmVectorVertexDrag', () => {
     // result
     const state = store.getState();
 
-    expect(state.design.nodes[idB]).toBeUndefined();
-    expect(state.design.nodes[idA]).toMatchObject({ vertices: { v1: { id: 'v1', x: 200, y: 200 }, v3: { id: 'v3', x: 300, y: 200 } } });
+    expect(state.design.pages[state.design.activePageId].nodes[idB]).toBeUndefined();
+    expect(state.design.pages[state.design.activePageId].nodes[idA]).toMatchObject({
+      vertices: { v1: { id: 'v1', x: 200, y: 200 }, v3: { id: 'v3', x: 300, y: 200 } },
+    });
     expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1']);
   });
 });

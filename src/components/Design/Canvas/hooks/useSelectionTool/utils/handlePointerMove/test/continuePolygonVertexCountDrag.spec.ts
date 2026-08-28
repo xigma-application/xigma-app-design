@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -44,7 +45,7 @@ const addPolygonNode = (x: number, y: number, width: number, height: number, sid
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -62,7 +63,7 @@ describe('continuePolygonVertexCountDrag', () => {
     continuePolygonVertexCountDrag(canvas, pointerEvent(10, 10), store.dispatch, createPolygonVertexCountDragRef());
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
   });
 
   it('should dispatch 4 sides for a pointer due east of the center (target angle 0)', () => {
@@ -81,7 +82,7 @@ describe('continuePolygonVertexCountDrag', () => {
     continuePolygonVertexCountDrag(canvas, pointerEvent(100, 50), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TPolygonNode).sides).toBe(4);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TPolygonNode).sides).toBe(4);
   });
 
   it("should dispatch a sides count snapped to the nearest candidate's own target angle", () => {
@@ -100,7 +101,7 @@ describe('continuePolygonVertexCountDrag', () => {
     continuePolygonVertexCountDrag(canvas, pointerEvent(73.51141, 17.63932), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TPolygonNode).sides).toBe(10);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TPolygonNode).sides).toBe(10);
   });
 
   it('should dispatch the minimum once the pointer crosses past the vertical axis through the center', () => {
@@ -119,7 +120,7 @@ describe('continuePolygonVertexCountDrag', () => {
     continuePolygonVertexCountDrag(canvas, pointerEvent(40, 50), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TPolygonNode).sides).toBe(3);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TPolygonNode).sides).toBe(3);
   });
 
   it('should un-flip the query point before computing the count on a flipped node', () => {
@@ -139,7 +140,7 @@ describe('continuePolygonVertexCountDrag', () => {
     continuePolygonVertexCountDrag(canvas, pointerEvent(26.48859, 17.63932), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TPolygonNode).sides).toBe(10);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TPolygonNode).sides).toBe(10);
   });
 
   it('should un-rotate the query point before computing the count on a rotated node', () => {
@@ -159,6 +160,6 @@ describe('continuePolygonVertexCountDrag', () => {
     continuePolygonVertexCountDrag(canvas, pointerEvent(82.36068, 73.51141), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TPolygonNode).sides).toBe(10);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TPolygonNode).sides).toBe(10);
   });
 });

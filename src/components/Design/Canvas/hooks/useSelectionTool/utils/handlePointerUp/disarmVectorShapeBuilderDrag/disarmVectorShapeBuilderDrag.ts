@@ -22,7 +22,7 @@ export const disarmVectorShapeBuilderDrag = (
     const absorbedNodeIds = commitVectorShapeBuilder(
       dispatch,
       selectNodes(state),
-      state.design.rootOrder,
+      state.design.pages[state.design.activePageId].rootOrder,
       selectVectorEditingNodeIds(state),
       canvasRefs.shapeBuilder.touchedVectorShapeBuilderFacesRef.current,
       canvasRefs.shapeBuilder.isVectorShapeBuilderSubtractRef.current,

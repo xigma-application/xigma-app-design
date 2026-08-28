@@ -34,9 +34,10 @@ describe('commitTextNode', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.rootOrder).toHaveLength(1);
-    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ content: 'curved', pathId: 'ellipse-1' });
+    expect(page.rootOrder).toHaveLength(1);
+    expect(page.nodes[page.rootOrder[0]]).toMatchObject({ content: 'curved', pathId: 'ellipse-1' });
   });
 
   it('should update the existing node in place, not add a new one, when editing an existing node', () => {
@@ -62,7 +63,7 @@ describe('commitTextNode', () => {
       }),
     );
 
-    const [existingId] = store.getState().design.rootOrder;
+    const [existingId] = store.getState().design.pages[store.getState().design.activePageId].rootOrder;
     const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
 
     // action
@@ -70,8 +71,9 @@ describe('commitTextNode', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.rootOrder).toEqual([existingId]);
-    expect(design.nodes[existingId]).toMatchObject({ content: 'replaced' });
+    expect(page.rootOrder).toEqual([existingId]);
+    expect(page.nodes[existingId]).toMatchObject({ content: 'replaced' });
   });
 });

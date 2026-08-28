@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setActiveTool, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -33,7 +34,7 @@ const createResizeDragRef = (resizeDragState: TResizeDragState | null = null): R
 const addFrameNode = (x: number, y: number, width: number, height: number, parentId: string | null = null, rotation = 0): string => {
   store.dispatch(addNode({ fill: '#ff0000', height, name: 'Frame', parentId, rotation, type: NodeType.frame, width, x, y }));
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -41,7 +42,7 @@ const addFrameNode = (x: number, y: number, width: number, height: number, paren
 const addLineNode = (x1: number, y1: number, x2: number, y2: number, parentId: string | null = null): string => {
   store.dispatch(addNode({ name: 'Line', parentId, stroke: '#000000', type: NodeType.line, x1, x2, y1, y2 }));
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -51,7 +52,7 @@ const addMediaNode = (x: number, y: number, width: number, height: number, paren
     addNode({ flipX: false, flipY: false, height, name: 'Image', parentId, rotation, src: 'a.png', type: NodeType.media, width, x, y }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -78,7 +79,7 @@ const addVectorNode = (x: number, y: number, width: number, height: number, rota
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -96,7 +97,7 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(10, 10), store.dispatch, createResizeDragRef(), createCanvasRefs());
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
   });
 
   it('should resize a single node from a corner handle', () => {
@@ -114,7 +115,12 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(150, 80), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result
-    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 80, width: 150, x: 0, y: 0 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      height: 80,
+      width: 150,
+      x: 0,
+      y: 0,
+    });
   });
 
   it('should lock the aspect ratio on a corner handle while Shift is held', () => {
@@ -132,7 +138,12 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(150, 80, { shiftKey: true }), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result — height-driven since raw width (150) is proportionally narrower than the 2:1 ratio needs
-    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 80, width: 160, x: 0, y: 0 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      height: 80,
+      width: 160,
+      x: 0,
+      y: 0,
+    });
   });
 
   it('should ignore Shift on an edge handle, since aspect-lock only applies to corners', () => {
@@ -150,7 +161,12 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(150, 999, { shiftKey: true }), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result — vertical axis untouched, exactly as a plain (unlocked) east-edge resize
-    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 50, width: 150, x: 0, y: 0 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      height: 50,
+      width: 150,
+      x: 0,
+      y: 0,
+    });
   });
 
   it('should scale every selected node — including a line by its endpoints — proportionally to the shared bbox', () => {
@@ -172,8 +188,18 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(200, 200), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result
-    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 200, width: 200, x: 0, y: 0 });
-    expect(store.getState().design.nodes[idLine]).toMatchObject({ x1: 40, x2: 160, y1: 40, y2: 160 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      height: 200,
+      width: 200,
+      x: 0,
+      y: 0,
+    });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idLine]).toMatchObject({
+      x1: 40,
+      x2: 160,
+      y1: 40,
+      y2: 160,
+    });
   });
 
   it('should guard the scale factor instead of dividing by a zero-size origin bounds', () => {
@@ -191,7 +217,12 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(50, 50), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result — without the guard, scale would be Infinity (2 / 0) and 0 * Infinity would produce NaN
-    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 0, width: 0, x: 5, y: 5 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      height: 0,
+      width: 0,
+      x: 5,
+      y: 5,
+    });
   });
 
   it('should mirror a single node when the drag crosses the opposite anchor, instead of sticking at MIN_SHAPE_SIZE', () => {
@@ -209,7 +240,12 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(-30, 500), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result — box now sits to the west of the anchor, growing from it, not stuck at a sliver
-    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 100, width: 30, x: -30, y: 0 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      height: 100,
+      width: 30,
+      x: -30,
+      y: 0,
+    });
   });
 
   it('should swap the relative order of group members when the whole group mirrors, not just scale them in place', () => {
@@ -231,8 +267,8 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(-100, 500), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result — A was on the left, now sits on the RIGHT of the mirrored group (and vice versa for B)
-    expect(store.getState().design.nodes[idA]).toMatchObject({ width: 50, x: -50 });
-    expect(store.getState().design.nodes[idB]).toMatchObject({ width: 50, x: -100 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ width: 50, x: -50 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idB]).toMatchObject({ width: 50, x: -100 });
   });
 
   it('should mirror X and Y independently on a diagonal (corner) crossing', () => {
@@ -250,7 +286,12 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(-20, 50), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result
-    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 50, width: 20, x: -20, y: 0 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      height: 50,
+      width: 20,
+      x: -20,
+      y: 0,
+    });
   });
 
   it('should flip a media node when the drag crosses the anchor, leaving a plain rectangle untouched', () => {
@@ -272,8 +313,8 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(-30, 500), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result
-    expect(store.getState().design.nodes[idMedia]).toMatchObject({ flipX: true, flipY: false });
-    expect(store.getState().design.nodes[idRect]).not.toHaveProperty('flipX');
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idMedia]).toMatchObject({ flipX: true, flipY: false });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idRect]).not.toHaveProperty('flipX');
   });
 
   it('should restore the original flip state when the drag is pulled back past the anchor again', () => {
@@ -289,12 +330,12 @@ describe('continueResizeDrag', () => {
 
     // before — cross the anchor once (flips relative to origin), then move back to the normal side
     continueResizeDrag(canvas, pointerEvent(-30, 500), store.dispatch, resizeDragRef, createCanvasRefs());
-    expect(store.getState().design.nodes[idMedia]).toMatchObject({ flipX: false });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idMedia]).toMatchObject({ flipX: false });
 
     continueResizeDrag(canvas, pointerEvent(30, 500), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result — back on the original side, flip state matches what it was before this drag began
-    expect(store.getState().design.nodes[idMedia]).toMatchObject({ flipX: true });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idMedia]).toMatchObject({ flipX: true });
   });
 
   it("should flip a rotated GROUP MEMBER across its own local axis, not the group's world axis, when the drag crosses", () => {
@@ -315,7 +356,7 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(-50, 500), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result — a world-X crossing projects onto this 90deg member's local Y axis, so flipY (not
-    expect(store.getState().design.nodes[idA]).toMatchObject({ flipX: false, flipY: true });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ flipX: false, flipY: true });
   });
 
   it("should leave an UNROTATED group member's flip axes unchanged from the pre-projection behavior", () => {
@@ -336,7 +377,7 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(-50, 500), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result
-    expect(store.getState().design.nodes[idA]).toMatchObject({ flipX: true, flipY: false });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ flipX: true, flipY: false });
   });
 
   it("should grow a rotated GROUP MEMBER along its own local axes, not the group's world axes, on an anisotropic resize", () => {
@@ -357,7 +398,13 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result — local width unchanged (scaleY=1 projects onto it at 90deg), local height doubled
-    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 100, rotation: 90, width: 100, x: 50, y: -25 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      height: 100,
+      rotation: 90,
+      width: 100,
+      x: 50,
+      y: -25,
+    });
   });
 
   it('should scale a non-axis-aligned GROUP MEMBER on its dominant local axis only, like an unrotated node', () => {
@@ -378,7 +425,13 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result — width doubles with scaleX (and would reach exactly 0 alongside it), height and
-    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 50, rotation: 30, width: 200, x: 0, y: 0 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      height: 50,
+      rotation: 30,
+      width: 200,
+      x: 0,
+      y: 0,
+    });
   });
 
   it('should resize a single, lone-selected rotated node by rotating the pointer back into its own local frame', () => {
@@ -396,7 +449,13 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result — local height untouched, local width grown ×5.25 (the raw world-space drag distance,
-    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 50, rotation: 90, width: 525, x: -212.5, y: 212.5 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      height: 50,
+      rotation: 90,
+      width: 525,
+      x: -212.5,
+      y: 212.5,
+    });
   });
 
   it('should keep the anchor edge fixed in WORLD space when resizing a single rotated node, not just at the same local coordinate', () => {
@@ -417,7 +476,7 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result
-    const node = store.getState().design.nodes[idA] as TFrameNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TFrameNode;
     const newCenter = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
     const anchorWorldAfter = rotatePoint({ x: node.x, y: newCenter.y }, newCenter, 90);
 
@@ -443,7 +502,7 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(-38.388, -169.454), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result
-    const node = store.getState().design.nodes[idA] as TFrameNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TFrameNode;
     const newCenter = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
     const anchorWorldAfter = rotatePoint({ x: node.x + node.width, y: node.y + node.height }, newCenter, 45);
 
@@ -471,7 +530,7 @@ describe('continueResizeDrag', () => {
       continueResizeDrag(canvas, pointerEvent(endX, 500), store.dispatch, resizeDragRef, createCanvasRefs());
 
       // result
-      const node = store.getState().design.nodes[idA] as TFrameNode;
+      const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TFrameNode;
       const newCenter = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
       const anchor = rotatePoint({ x: node.x, y: newCenter.y }, newCenter, 30);
 
@@ -503,7 +562,7 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(500, 200), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result — same size (a true mirror, not a shrink/grow) and NOT back at the original position
-    const node = store.getState().design.nodes[idA] as TFrameNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TFrameNode;
 
     expect(node).toMatchObject({ height: 100, rotation: 90, width: 100 });
     expect(node.x !== 300 || node.y !== 300).toBe(true);
@@ -540,7 +599,7 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result
-    const node = store.getState().design.nodes[idA] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TVectorNode;
     const newBounds = getVectorNodeBounds(node);
     const newCenter = { x: newBounds.x + newBounds.width / 2, y: newBounds.y + newBounds.height / 2 };
     const anchorWorldAfter = rotatePoint({ x: newBounds.x, y: newCenter.y }, newCenter, 90);
@@ -564,7 +623,12 @@ describe('continueResizeDrag', () => {
     continueResizeDrag(canvas, pointerEvent(150, 80), store.dispatch, resizeDragRef, createCanvasRefs());
 
     // result — identical to the very first "resize a single node from a corner handle" test above
-    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 80, width: 150, x: 0, y: 0 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      height: 80,
+      width: 150,
+      x: 0,
+      y: 0,
+    });
   });
 
   describe('Scale tool', () => {
@@ -588,7 +652,12 @@ describe('continueResizeDrag', () => {
       continueResizeDrag(canvas, pointerEvent(50, -50), store.dispatch, resizeDragRef, createCanvasRefs());
 
       // result — height doubles (50→100) and width doubles too (100→200, unlike a plain resize,
-      expect(store.getState().design.nodes[idA]).toMatchObject({ height: 100, width: 200, x: -50, y: -50 });
+      expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+        height: 100,
+        width: 200,
+        x: -50,
+        y: -50,
+      });
     });
 
     it('should pivot at the opposite (bottom-right) corner when grabbing the top-left corner, same anchor as a plain resize', () => {
@@ -607,7 +676,12 @@ describe('continueResizeDrag', () => {
       continueResizeDrag(canvas, pointerEvent(-50, -50), store.dispatch, resizeDragRef, createCanvasRefs());
 
       // result — the bottom-right corner (100, 100) stays fixed while the box grows northwest
-      expect(store.getState().design.nodes[idA]).toMatchObject({ height: 150, width: 150, x: -50, y: -50 });
+      expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+        height: 150,
+        width: 150,
+        x: -50,
+        y: -50,
+      });
     });
 
     it('should NOT force proportional scaling when the Scale tool is inactive, even on the same edge drag', () => {
@@ -625,7 +699,12 @@ describe('continueResizeDrag', () => {
       continueResizeDrag(canvas, pointerEvent(50, -50), store.dispatch, resizeDragRef, createCanvasRefs());
 
       // result
-      expect(store.getState().design.nodes[idA]).toMatchObject({ height: 100, width: 100, x: 0, y: -50 });
+      expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+        height: 100,
+        width: 100,
+        x: 0,
+        y: -50,
+      });
     });
   });
 
@@ -665,13 +744,13 @@ describe('continueResizeDrag', () => {
 
       canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current = new Map([[idA, snapshot]]);
 
-      const nodeBefore = store.getState().design.nodes[idA];
+      const nodeBefore = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
       // before
       continueResizeDrag(canvas, pointerEvent(150, 80), store.dispatch, resizeDragRef, canvasRefs);
 
       // result — the store node is untouched, but the snapshot itself now reflects the live drag
-      expect(store.getState().design.nodes[idA]).toBe(nodeBefore);
+      expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toBe(nodeBefore);
       expect(snapshot.scaleX).toBeCloseTo(1.5);
       expect(snapshot.scaleY).toBeCloseTo(1.6);
       expect(canvasRefs.transform.resizedNodeIdsRef.current).toEqual(new Set([idA]));
@@ -730,14 +809,14 @@ describe('continueResizeDrag', () => {
       snapshot.rotation = 90;
       canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current = new Map([[idA, snapshot]]);
 
-      const nodeBefore = store.getState().design.nodes[idA];
+      const nodeBefore = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
       // before
       continueResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, resizeDragRef, canvasRefs);
 
       // result — the store node is untouched, but the rotated-anchor solver ran and moved the
       // snapshot's pivot/scaledCenter away from their identity-scale capture-time defaults
-      expect(store.getState().design.nodes[idA]).toBe(nodeBefore);
+      expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toBe(nodeBefore);
       expect(snapshot.pivot).not.toEqual({ x: 0, y: 0 });
       expect(snapshot.scaledCenter).not.toEqual({ x: 0, y: 0 });
     });
@@ -768,7 +847,12 @@ describe('continueResizeDrag', () => {
       continueResizeDrag(canvas, pointerEvent(150, 80), store.dispatch, resizeDragRef, canvasRefs);
 
       // result — the frame still resized live through the store, the vector node's store entry is untouched
-      expect(store.getState().design.nodes[idFrame]).toMatchObject({ height: 80, width: 150, x: 0, y: 0 });
+      expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idFrame]).toMatchObject({
+        height: 80,
+        width: 150,
+        x: 0,
+        y: 0,
+      });
     });
   });
 });

@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -40,7 +41,7 @@ const addTriangleVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -91,7 +92,9 @@ describe('disarmVectorShapeBuilderDrag', () => {
     expect(canvasRefs.shapeBuilder.isVectorShapeBuilderSubtractRef.current).toBe(false);
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
     expect(setClassName).toHaveBeenCalledWith('add');
-    expect(store.getState().design.nodes[nodeId]).toMatchObject({ filledFaceKeys: ['s1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]'] });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId]).toMatchObject({
+      filledFaceKeys: ['s1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]'],
+    });
   });
 
   it('should clear vector selection refs and prune the absorbed node id from vectorEditingNodeIds when the drag genuinely crosses and merges two open nodes', () => {
@@ -123,10 +126,16 @@ describe('disarmVectorShapeBuilderDrag', () => {
     });
 
     store.dispatch(addNode(buildRectangleNode('a', 0, 0)));
-    const idA = store.getState().design.rootOrder[store.getState().design.rootOrder.length - 1];
+    const idA =
+      store.getState().design.pages[store.getState().design.activePageId].rootOrder[
+        store.getState().design.pages[store.getState().design.activePageId].rootOrder.length - 1
+      ];
 
     store.dispatch(addNode(buildRectangleNode('b', 75, 100)));
-    const idB = store.getState().design.rootOrder[store.getState().design.rootOrder.length - 1];
+    const idB =
+      store.getState().design.pages[store.getState().design.activePageId].rootOrder[
+        store.getState().design.pages[store.getState().design.activePageId].rootOrder.length - 1
+      ];
 
     store.dispatch(setVectorEditingNodeIds([idA, idB]));
 
@@ -159,7 +168,7 @@ describe('disarmVectorShapeBuilderDrag', () => {
     expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
     expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);
     expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);
-    expect(store.getState().design.nodes[idB]).toBeUndefined(); // absorbed node deleted
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idB]).toBeUndefined(); // absorbed node deleted
     expect(store.getState().design.vectorEditingNodeIds).toEqual([idA]); // pruned
   });
 });

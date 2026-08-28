@@ -32,7 +32,7 @@ export const continueVectorVertexDrag = (
 
   if (dragState) {
     const state = store.getState();
-    const node = getVectorEditingNode(state.design.nodes, dragState.nodeId);
+    const node = getVectorEditingNode(state.design.pages[state.design.activePageId].nodes, dragState.nodeId);
 
     if (node) {
       const viewport = selectViewport(state);
@@ -41,14 +41,22 @@ export const continueVectorVertexDrag = (
       const deltaY = point.y - dragState.pointerStart.y;
       const draggedVertexIds = Object.keys(dragState.origins);
       const draggedPoints = draggedVertexIds.map((id) => ({ x: dragState.origins[id].x + deltaX, y: dragState.origins[id].y + deltaY }));
-      const candidates = getAllVectorVertexPositions(state.design.nodes, draggedVertexIds);
+      const candidates = getAllVectorVertexPositions(state.design.pages[state.design.activePageId].nodes, draggedVertexIds);
       const alignmentTolerance = VECTOR_ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom;
       const { deltaCorrection, guide } = getVectorGroupAlignmentGuide(draggedPoints, candidates, alignmentTolerance);
       const draggedVertices = translateVectorVertices(dragState.origins, deltaX + deltaCorrection.x, deltaY + deltaCorrection.y);
 
       if (draggedVertexIds.length === 1) {
         const mergeTolerance = VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom;
-        resolveVectorVertexMerge(draggedVertices, dragState, state.design.nodes, guide, mergeTolerance, canvasRefs, setClassName);
+        resolveVectorVertexMerge(
+          draggedVertices,
+          dragState,
+          state.design.pages[state.design.activePageId].nodes,
+          guide,
+          mergeTolerance,
+          canvasRefs,
+          setClassName,
+        );
       } else {
         canvasRefs.vectorEdit.vectorAlignmentGuideRef.current = guide;
         setClassName('move');

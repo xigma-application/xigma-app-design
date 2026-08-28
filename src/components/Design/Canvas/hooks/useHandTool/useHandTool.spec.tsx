@@ -77,7 +77,7 @@ describe('useHandTool behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.viewport).toEqual({ x: 30, y: 15, zoom: 1 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].viewport).toEqual({ x: 30, y: 15, zoom: 1 });
   });
 
   it('should not react to a middle-button drag', () => {
@@ -96,7 +96,7 @@ describe('useHandTool behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.viewport).toEqual(DEFAULT_VIEWPORT);
+    expect(store.getState().design.pages[store.getState().design.activePageId].viewport).toEqual(DEFAULT_VIEWPORT);
   });
 
   it('should not attach listeners when the hand tool is not active', () => {
@@ -113,7 +113,7 @@ describe('useHandTool behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.viewport).toEqual(DEFAULT_VIEWPORT);
+    expect(store.getState().design.pages[store.getState().design.activePageId].viewport).toEqual(DEFAULT_VIEWPORT);
     expect(classNameRef.current).not.toBe('hand');
   });
 
@@ -191,7 +191,7 @@ describe('useHandTool behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.viewport).toEqual(DEFAULT_VIEWPORT);
+    expect(store.getState().design.pages[store.getState().design.activePageId].viewport).toEqual(DEFAULT_VIEWPORT);
   });
 
   it('should remove the cursor classes and stop panning once the tool switches away', () => {
@@ -217,6 +217,6 @@ describe('useHandTool behaviors', () => {
     act(() => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 999, 999));
     });
-    expect(store.getState().design.viewport).toEqual(DEFAULT_VIEWPORT);
+    expect(store.getState().design.pages[store.getState().design.activePageId].viewport).toEqual(DEFAULT_VIEWPORT);
   });
 });

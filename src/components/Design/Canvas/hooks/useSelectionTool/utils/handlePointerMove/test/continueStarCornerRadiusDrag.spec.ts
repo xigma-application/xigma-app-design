@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -45,7 +46,7 @@ const addStarNode = (x: number, y: number, width: number, height: number, points
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -63,7 +64,7 @@ describe('continueStarCornerRadiusDrag', () => {
     continueStarCornerRadiusDrag(canvas, pointerEvent(10, 10), store.dispatch, createStarCornerRadiusDragRef());
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
   });
 
   it('should dispatch a rounded cornerRadius derived from the projected pointer position, converted through the setback multiplier', () => {
@@ -85,7 +86,7 @@ describe('continueStarCornerRadiusDrag', () => {
     continueStarCornerRadiusDrag(canvas, pointerEvent(50, 10), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TStarNode).cornerRadius).toBe(4);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TStarNode).cornerRadius).toBe(4);
   });
 
   it('should clamp the dispatched radius to the star max instead of overshooting toward the center', () => {
@@ -107,7 +108,7 @@ describe('continueStarCornerRadiusDrag', () => {
     continueStarCornerRadiusDrag(canvas, pointerEvent(50, 100), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TStarNode).cornerRadius).toBe(13);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TStarNode).cornerRadius).toBe(13);
   });
 
   it('should clamp a negative projection (pointer dragged away from center) to 0', () => {
@@ -129,7 +130,7 @@ describe('continueStarCornerRadiusDrag', () => {
     continueStarCornerRadiusDrag(canvas, pointerEvent(50, -10), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TStarNode).cornerRadius).toBe(0);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TStarNode).cornerRadius).toBe(0);
   });
 
   it('should un-rotate the query point before computing the radius on a rotated node', () => {
@@ -152,6 +153,6 @@ describe('continueStarCornerRadiusDrag', () => {
     continueStarCornerRadiusDrag(canvas, pointerEvent(100, 50), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TStarNode).cornerRadius).toBe(0);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TStarNode).cornerRadius).toBe(0);
   });
 });

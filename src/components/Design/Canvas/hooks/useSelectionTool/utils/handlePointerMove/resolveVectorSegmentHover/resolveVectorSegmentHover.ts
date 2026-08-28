@@ -42,11 +42,11 @@ export const resolveVectorSegmentHover = (
     const edgeHit = getVectorEdgeAtPointAcrossOpenNodes(
       point,
       vectorEditingNodeIds,
-      state.design.nodes,
+      state.design.pages[state.design.activePageId].nodes,
       VECTOR_EDGE_HIT_TOLERANCE_PX / viewport.zoom,
       VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom,
     );
-    const node = edgeHit?.node ?? getVectorEditingNode(state.design.nodes, vectorEditingNodeIds[0]);
+    const node = edgeHit?.node ?? getVectorEditingNode(state.design.pages[state.design.activePageId].nodes, vectorEditingNodeIds[0]);
 
     if (node) {
       resolveVectorSegmentHoverInNode(canvas, event, state, node, hoveredVectorSegmentIdRef, hoveredVectorEdgeInsertPointRef, setClassName);

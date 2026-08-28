@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -37,7 +38,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -58,7 +59,7 @@ describe('continueVectorHandleDrag', () => {
     continueVectorHandleDrag(canvas, pointerEvent(10, 10), store.dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -76,7 +77,7 @@ describe('continueVectorHandleDrag', () => {
     continueVectorHandleDrag(canvas, pointerEvent(10, 10), store.dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -95,7 +96,7 @@ describe('continueVectorHandleDrag', () => {
     continueVectorHandleDrag(canvas, pointerEvent(20, 5), store.dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result
-    const node = store.getState().design.nodes[idA];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
     expect(node).toMatchObject({ segments: { s1: { tangentStart: { x: 20, y: 5 } } } });
     expect(setClassName).toHaveBeenCalledWith('move');
@@ -117,7 +118,7 @@ describe('continueVectorHandleDrag', () => {
     continueVectorHandleDrag(canvas, pointerEvent(120, 15), store.dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result
-    const node = store.getState().design.nodes[idA];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
     expect(node).toMatchObject({ segments: { s1: { tangentEnd: { x: 20, y: 15 } } } });
   });
@@ -137,7 +138,7 @@ describe('continueVectorHandleDrag', () => {
     continueVectorHandleDrag(canvas, pointerEvent(20, 1), store.dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result — pulled onto the exact horizontal axis
-    const node = store.getState().design.nodes[idA];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
     expect(node).toMatchObject({ segments: { s1: { tangentStart: { x: 20, y: 0 } } } });
     expect(canvasRefs.vectorEdit.snappedVectorHandleRef.current).toEqual({ end: 'start', segmentId: 's1' });
@@ -176,7 +177,7 @@ describe('continueVectorHandleDrag', () => {
     continueVectorHandleDrag(canvas, pointerEvent(22, 350), store.dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result — snapped onto x=20, and the alignment guide is recorded
-    const node = store.getState().design.nodes[idA];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
     expect(node).toMatchObject({ segments: { s1: { tangentStart: { x: 20, y: 350 } } } });
     expect(canvasRefs.vectorEdit.vectorAlignmentGuideRef.current).not.toBeNull();

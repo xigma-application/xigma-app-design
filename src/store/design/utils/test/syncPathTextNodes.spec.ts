@@ -1,9 +1,10 @@
 // types
 import { NodeType, PathType, ToolName } from 'types/design/enums';
-import { TDesignState } from '../../types';
+import { TDesignPage, TDesignState } from '../../types';
 import { TPathNode, TTextNode } from 'types/design/types';
 
 // utils
+import { getActivePage } from '../getActivePage';
 import { syncPathTextNodes } from '../syncPathTextNodes';
 
 const buildPathNode = (overrides: Partial<TPathNode> = {}): TPathNode => ({
@@ -41,10 +42,10 @@ const buildPathText = (overrides: Partial<TTextNode> = {}): TTextNode => ({
   ...overrides,
 });
 
-const buildState = (nodes: TDesignState['nodes']): TDesignState => ({
+const buildState = (nodes: TDesignPage['nodes']): TDesignState => ({
+  activePageId: 'page-1',
   activeTool: ToolName.default,
   commentDraftPosition: null,
-  comments: {},
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,
@@ -58,13 +59,20 @@ const buildState = (nodes: TDesignState['nodes']): TDesignState => ({
   lastPenTool: ToolName.pen,
   lastShapeTool: ToolName.rectangle,
   lastTextTool: ToolName.text,
-  nodes,
-  paintColor: '#d9d9d9',
+  pages: {
+    'page-1': {
+      comments: {},
+      id: 'page-1',
+      name: 'Page 1',
+      nodes,
+      paintColor: '#d9d9d9',
+      rootOrder: Object.keys(nodes),
+      viewport: { x: 0, y: 0, zoom: 1 },
+    },
+  },
   penActiveVertexId: null,
-  rootOrder: Object.keys(nodes),
   selectedIds: [],
   vectorEditingNodeIds: [],
-  viewport: { x: 0, y: 0, zoom: 1 },
 });
 
 describe('syncPathTextNodes', () => {
@@ -78,7 +86,7 @@ describe('syncPathTextNodes', () => {
     syncPathTextNodes(state, pathNode);
 
     // result
-    expect(state.nodes[textNode.id]).toMatchObject({ height: 300, rotation: 45, width: 300, x: 10, y: 20 });
+    expect(getActivePage(state).nodes[textNode.id]).toMatchObject({ height: 300, rotation: 45, width: 300, x: 10, y: 20 });
   });
 
   it('should sync every text node bound to the same path', () => {
@@ -92,8 +100,8 @@ describe('syncPathTextNodes', () => {
     syncPathTextNodes(state, pathNode);
 
     // result
-    expect(state.nodes[first.id]).toMatchObject({ height: 300, width: 300, x: 10, y: 20 });
-    expect(state.nodes[second.id]).toMatchObject({ height: 300, width: 300, x: 10, y: 20 });
+    expect(getActivePage(state).nodes[first.id]).toMatchObject({ height: 300, width: 300, x: 10, y: 20 });
+    expect(getActivePage(state).nodes[second.id]).toMatchObject({ height: 300, width: 300, x: 10, y: 20 });
   });
 
   it('should leave text nodes bound to a different path untouched', () => {
@@ -106,7 +114,7 @@ describe('syncPathTextNodes', () => {
     syncPathTextNodes(state, pathNode);
 
     // result
-    expect(state.nodes[unrelated.id]).toMatchObject({ height: 50, width: 50, x: 0, y: 0 });
+    expect(getActivePage(state).nodes[unrelated.id]).toMatchObject({ height: 50, width: 50, x: 0, y: 0 });
   });
 
   it('should leave ordinary (non-path) text nodes untouched', () => {
@@ -119,6 +127,6 @@ describe('syncPathTextNodes', () => {
     syncPathTextNodes(state, pathNode);
 
     // result
-    expect(state.nodes[straight.id]).toMatchObject({ height: 50, width: 50, x: 0, y: 0 });
+    expect(getActivePage(state).nodes[straight.id]).toMatchObject({ height: 50, width: 50, x: 0, y: 0 });
   });
 });

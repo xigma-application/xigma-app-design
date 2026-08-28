@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -36,7 +37,7 @@ const addVectorNode = (vertices: TVectorNode['vertices'], filledFaceKeys: string
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -54,8 +55,8 @@ describe('closeLoopOntoAnotherNode', () => {
     const targetId = addVectorNode({ b1: { id: 'b1', x: 100, y: 100 } }, ['b1,b2,b3']);
     store.dispatch(setVectorEditingNodeIds([sourceId, targetId]));
 
-    const sourceNode = store.getState().design.nodes[sourceId] as TVectorNode;
-    const targetNode = store.getState().design.nodes[targetId] as TVectorNode;
+    const sourceNode = store.getState().design.pages[store.getState().design.activePageId].nodes[sourceId] as TVectorNode;
+    const targetNode = store.getState().design.pages[store.getState().design.activePageId].nodes[targetId] as TVectorNode;
     const dragOriginRef = createDragOriginRef();
     const dragStartRef = createDragStartRef();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef({ tangent: { x: 1, y: 1 }, vertexId: 'a1' });
@@ -78,9 +79,9 @@ describe('closeLoopOntoAnotherNode', () => {
 
     // result
     const state = store.getState();
-    const updatedSource = state.design.nodes[sourceId] as TVectorNode;
+    const updatedSource = state.design.pages[state.design.activePageId].nodes[sourceId] as TVectorNode;
 
-    expect(state.design.nodes[targetId]).toBeUndefined();
+    expect(state.design.pages[state.design.activePageId].nodes[targetId]).toBeUndefined();
     expect(updatedSource.vertices).toHaveProperty('a1');
     expect(updatedSource.vertices).toHaveProperty('b1');
     expect(updatedSource.segments['segment-1']).toMatchObject({ endId: 'b1', startId: 'a1', tangentStart: null });
@@ -98,8 +99,8 @@ describe('closeLoopOntoAnotherNode', () => {
     const targetId = addVectorNode({ b1: { id: 'b1', x: 100, y: 100 } });
     store.dispatch(setVectorEditingNodeIds([sourceId, targetId]));
 
-    const sourceNode = store.getState().design.nodes[sourceId] as TVectorNode;
-    const targetNode = store.getState().design.nodes[targetId] as TVectorNode;
+    const sourceNode = store.getState().design.pages[store.getState().design.activePageId].nodes[sourceId] as TVectorNode;
+    const targetNode = store.getState().design.pages[store.getState().design.activePageId].nodes[targetId] as TVectorNode;
 
     // before
     closeLoopOntoAnotherNode(
@@ -118,7 +119,7 @@ describe('closeLoopOntoAnotherNode', () => {
     );
 
     // result
-    const updatedSource = store.getState().design.nodes[sourceId] as TVectorNode;
+    const updatedSource = store.getState().design.pages[store.getState().design.activePageId].nodes[sourceId] as TVectorNode;
 
     expect(updatedSource.segments['segment-1'].tangentStart).toEqual({ x: 5, y: 5 });
   });

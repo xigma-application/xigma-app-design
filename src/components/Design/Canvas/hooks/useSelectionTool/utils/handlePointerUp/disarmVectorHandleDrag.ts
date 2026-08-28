@@ -20,7 +20,7 @@ export const disarmVectorHandleDrag = (
   const pendingState = selectionRefs.pendingVectorCornerHandleDragRef.current;
 
   if (pendingState) {
-    const node = getVectorEditingNode(store.getState().design.nodes, pendingState.nodeId);
+    const node = getVectorEditingNode(store.getState().design.pages[store.getState().design.activePageId].nodes, pendingState.nodeId);
 
     if (node) {
       commitVectorCornerHandleDrag(

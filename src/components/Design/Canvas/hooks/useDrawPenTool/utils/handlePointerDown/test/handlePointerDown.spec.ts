@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { undo } from 'store/history/actions';
 import { store } from 'store';
 
@@ -50,7 +51,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -155,7 +156,7 @@ describe('handlePointerDown', () => {
     );
 
     // result
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(Object.keys(node.vertices)).toHaveLength(2);
     expect(store.getState().design.penActiveVertexId).not.toBeNull();
@@ -184,7 +185,7 @@ describe('handlePointerDown', () => {
     );
 
     // result
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const [segment] = Object.values(node.segments);
 
     expect(segment).toMatchObject({ startId: 'v1' });

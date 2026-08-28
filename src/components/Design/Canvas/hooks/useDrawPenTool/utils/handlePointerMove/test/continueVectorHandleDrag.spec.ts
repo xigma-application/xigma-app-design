@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -38,7 +39,7 @@ const addVectorNodeWithSegment = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -73,7 +74,7 @@ describe('continueVectorHandleDrag', () => {
     );
 
     // result
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(node.segments.s1.tangentEnd).toEqual({ x: -20, y: -5 });
     expect(hoveredSegmentIdRef.current).toBeNull();

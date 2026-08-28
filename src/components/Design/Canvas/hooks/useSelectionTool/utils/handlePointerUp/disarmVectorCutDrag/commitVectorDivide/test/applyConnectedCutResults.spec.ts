@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -31,7 +32,7 @@ const addTriangleNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -45,26 +46,26 @@ describe('applyConnectedCutResults', () => {
   it('should dispatch nothing when there are no connected cut results', () => {
     // mock
     const nodeId = addTriangleNode();
-    const nodeBefore = store.getState().design.nodes[nodeId];
+    const nodeBefore = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId];
 
     // before
     applyConnectedCutResults(store.dispatch, []);
 
     // result
-    expect(store.getState().design.nodes[nodeId]).toEqual(nodeBefore);
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId]).toEqual(nodeBefore);
   });
 
   it('should update the node with the materialized segments, vertices, and filledFaceKeys, resetting rotation to 0', () => {
     // mock
     const nodeId = addTriangleNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const connectedCutResult = findVectorConnectedCutResult(node, { x: 50, y: -10 }, { x: 50, y: 10 })!;
 
     // before
     applyConnectedCutResults(store.dispatch, [connectedCutResult]);
 
     // result
-    const updated = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updated = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(Object.keys(updated.vertices)).toHaveLength(5);
     expect(Object.keys(updated.segments)).toHaveLength(4);

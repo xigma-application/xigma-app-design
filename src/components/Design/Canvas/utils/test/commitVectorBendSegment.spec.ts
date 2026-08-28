@@ -1,5 +1,6 @@
 // store
 import { addNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -28,7 +29,7 @@ const addVectorNode = (segments: TVectorNode['segments']): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -37,7 +38,7 @@ describe('commitVectorBendSegment', () => {
   it('should write straight-line-equivalent default tangents, mark both endpoints symmetric, and select the segment', () => {
     // mock
     const nodeId = addVectorNode({ s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } });
-    const node = getVectorEditingNode(store.getState().design.nodes, nodeId) as TVectorNode;
+    const node = getVectorEditingNode(store.getState().design.pages[store.getState().design.activePageId].nodes, nodeId) as TVectorNode;
     const canvasRefs = createCanvasRefs();
     const dragRef = { current: null };
 
@@ -48,7 +49,7 @@ describe('commitVectorBendSegment', () => {
     commitVectorBendSegment(node, 's1', { x: 5, y: 5 }, store.dispatch, canvasRefs, dragRef);
 
     // result
-    const updated = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updated = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(updated.segments.s1.tangentStart).toEqual({ x: 30, y: 0 });
     expect(updated.segments.s1.tangentEnd).toEqual({ x: -30, y: 0 });
@@ -73,7 +74,7 @@ describe('commitVectorBendSegment', () => {
     const nodeId = addVectorNode({
       s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: { x: -10, y: 20 }, tangentStart: { x: 10, y: 20 } },
     });
-    const node = getVectorEditingNode(store.getState().design.nodes, nodeId) as TVectorNode;
+    const node = getVectorEditingNode(store.getState().design.pages[store.getState().design.activePageId].nodes, nodeId) as TVectorNode;
     const canvasRefs = createCanvasRefs();
     const dragRef = { current: null };
 
@@ -81,7 +82,7 @@ describe('commitVectorBendSegment', () => {
     commitVectorBendSegment(node, 's1', { x: 0, y: 0 }, store.dispatch, canvasRefs, dragRef);
 
     // result
-    const updated = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updated = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(updated.segments.s1.tangentStart).toEqual({ x: 10, y: 20 });
     expect(updated.segments.s1.tangentEnd).toEqual({ x: -10, y: 20 });

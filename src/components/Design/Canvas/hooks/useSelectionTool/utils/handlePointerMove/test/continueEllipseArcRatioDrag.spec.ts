@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -42,7 +43,7 @@ const addEllipseNode = (overrides: Partial<TEllipseNode> = {}): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -70,7 +71,7 @@ describe('continueEllipseArcRatioDrag', () => {
     continueEllipseArcRatioDrag(canvas, pointerEvent(10, 10), store.dispatch, createEllipseArcRatioDragRef());
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
   });
 
   it('should dispatch arcRatio from the radial distance and leave arcRatioInverted false inside the filled majority', () => {
@@ -83,7 +84,7 @@ describe('continueEllipseArcRatioDrag', () => {
     continueEllipseArcRatioDrag(canvas, pointerEvent(80, 50), store.dispatch, dragRef);
 
     // result
-    const node = store.getState().design.nodes[idA] as TEllipseNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TEllipseNode;
 
     expect(node.arcRatio).toBe(0.6);
     expect(node.arcRatioInverted).toBe(false);
@@ -99,7 +100,7 @@ describe('continueEllipseArcRatioDrag', () => {
     continueEllipseArcRatioDrag(canvas, pointerEvent(85.355339, 14.644661), store.dispatch, dragRef);
 
     // result
-    const node = store.getState().design.nodes[idA] as TEllipseNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TEllipseNode;
 
     expect(node.arcRatio).toBe(1);
     expect(node.arcRatioInverted).toBe(true);
@@ -115,7 +116,7 @@ describe('continueEllipseArcRatioDrag', () => {
     continueEllipseArcRatioDrag(canvas, pointerEvent(110, 50), store.dispatch, dragRef);
 
     // result
-    const node = store.getState().design.nodes[idA] as TEllipseNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TEllipseNode;
 
     expect(node.arcRatio).toBe(1);
     expect(dragRef.current?.draggedHandlePosition).toEqual({ x: 100, y: 50 });
@@ -131,7 +132,7 @@ describe('continueEllipseArcRatioDrag', () => {
     continueEllipseArcRatioDrag(canvas, pointerEvent(50, 50), store.dispatch, dragRef);
 
     // result
-    const node = store.getState().design.nodes[idA] as TEllipseNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TEllipseNode;
 
     expect(node.arcRatio).toBe(0);
     expect(dragRef.current?.draggedHandlePosition).toEqual({ x: 50, y: 50 });
@@ -152,7 +153,7 @@ describe('continueEllipseArcRatioDrag', () => {
         y: 0,
       }),
     );
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const idA = rootOrder[rootOrder.length - 1];
     const canvas = createCanvas();
     const dragRef = createEllipseArcRatioDragRef(dragState(idA));
@@ -161,6 +162,9 @@ describe('continueEllipseArcRatioDrag', () => {
     continueEllipseArcRatioDrag(canvas, pointerEvent(80, 50), store.dispatch, dragRef);
 
     // result — no crash; both angles default to ELLIPSE_DEFAULT_ARC_ANGLE (90), a full circle with no gap
-    expect(store.getState().design.nodes[idA]).toMatchObject({ arcRatio: 0.6, arcRatioInverted: false });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      arcRatio: 0.6,
+      arcRatioInverted: false,
+    });
   });
 });

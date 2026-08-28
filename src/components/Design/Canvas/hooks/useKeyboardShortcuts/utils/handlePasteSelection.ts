@@ -5,6 +5,7 @@ import { DUPLICATE_OFFSET } from 'components/Design/Canvas/constants';
 import { addNode, setSelection } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { getVectorSelectionSnapshot } from 'store/history/getVectorSelectionSnapshot';
+import { selectActivePage } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
@@ -18,7 +19,8 @@ import { pasteVectorFragment } from './pasteVectorFragment';
 
 export const handlePasteSelection = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
   const state = store.getState();
-  const { nodes, vectorEditingNodeIds } = state.design;
+  const { nodes } = selectActivePage(state);
+  const { vectorEditingNodeIds } = state.design;
 
   if (vectorEditingNodeIds.length > 0) {
     const vectorFragment = getVectorClipboardFragment();
@@ -33,7 +35,7 @@ export const handlePasteSelection = (dispatch: AppDispatch, refs: TCanvasRefs): 
       dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
       clipboardNodes.forEach((node) => dispatch(addNode(cloneNodeWithOffset(node, DUPLICATE_OFFSET, DUPLICATE_OFFSET))));
 
-      const { rootOrder } = store.getState().design;
+      const { rootOrder } = selectActivePage(store.getState());
       dispatch(setSelection(rootOrder.slice(rootOrder.length - clipboardNodes.length)));
       dispatch(endHistoryGesture());
     }

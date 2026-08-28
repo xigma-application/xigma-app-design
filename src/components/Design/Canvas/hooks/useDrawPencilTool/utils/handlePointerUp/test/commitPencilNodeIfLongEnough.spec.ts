@@ -1,5 +1,6 @@
 // store
 import { setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -16,18 +17,18 @@ describe('commitPencilNodeIfLongEnough', () => {
 
   it('should not dispatch anything for a single point (nothing to connect)', () => {
     // mock
-    const rootOrderBefore = store.getState().design.rootOrder.length;
+    const rootOrderBefore = store.getState().design.pages[store.getState().design.activePageId].rootOrder.length;
 
     // before
     commitPencilNodeIfLongEnough(store.dispatch, store, [{ x: 0, y: 0 }]);
 
     // result
-    expect(store.getState().design.rootOrder).toHaveLength(rootOrderBefore);
+    expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toHaveLength(rootOrderBefore);
   });
 
   it('should not dispatch anything when the path length is under MIN_SHAPE_SIZE', () => {
     // mock — total path length 0.5
-    const rootOrderBefore = store.getState().design.rootOrder.length;
+    const rootOrderBefore = store.getState().design.pages[store.getState().design.activePageId].rootOrder.length;
 
     // before
     commitPencilNodeIfLongEnough(store.dispatch, store, [
@@ -36,7 +37,7 @@ describe('commitPencilNodeIfLongEnough', () => {
     ]);
 
     // result
-    expect(store.getState().design.rootOrder).toHaveLength(rootOrderBefore);
+    expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toHaveLength(rootOrderBefore);
   });
 
   it('should commit a rounded-cap vector node and select it once the path clears the minimum size', () => {
@@ -47,7 +48,8 @@ describe('commitPencilNodeIfLongEnough', () => {
     ]);
 
     // result
-    const { nodes, rootOrder, selectedIds } = store.getState().design;
+    const { nodes, rootOrder } = selectActivePage(store.getState());
+    const { selectedIds } = store.getState().design;
     const newNodeId = rootOrder[rootOrder.length - 1];
     const node = nodes[newNodeId] as TVectorNode;
 

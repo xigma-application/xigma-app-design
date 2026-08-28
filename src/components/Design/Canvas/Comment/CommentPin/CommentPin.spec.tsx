@@ -19,9 +19,9 @@ const createTestStore = (viewport = { x: 0, y: 0, zoom: 1 }): EnhancedStore<{ de
   configureStore({
     preloadedState: {
       design: {
+        activePageId: 'page-1',
         activeTool: ToolName.comment,
         commentDraftPosition: null,
-        comments: { [comment.id]: comment },
         editingNodeId: null,
         editingSelectionChangedAt: 0,
         editingSelectionEnd: 0,
@@ -35,13 +35,20 @@ const createTestStore = (viewport = { x: 0, y: 0, zoom: 1 }): EnhancedStore<{ de
         lastPenTool: ToolName.pen,
         lastShapeTool: ToolName.rectangle,
         lastTextTool: ToolName.text,
-        nodes: {},
-        paintColor: '#d9d9d9',
+        pages: {
+          'page-1': {
+            comments: { [comment.id]: comment },
+            id: 'page-1',
+            name: 'Page 1',
+            nodes: {},
+            paintColor: '#d9d9d9',
+            rootOrder: [],
+            viewport,
+          },
+        },
         penActiveVertexId: null,
-        rootOrder: [],
         selectedIds: [],
         vectorEditingNodeIds: [],
-        viewport,
       },
     },
     reducer: { design: designReducer },

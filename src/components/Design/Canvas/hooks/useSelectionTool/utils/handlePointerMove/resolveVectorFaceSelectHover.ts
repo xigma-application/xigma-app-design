@@ -19,7 +19,7 @@ export const resolveVectorFaceSelectHover = (canvas: HTMLCanvasElement, event: P
   if (activeTool === ToolName.move && vectorEditingNodeIds.length > 0 && event.buttons === 0) {
     const viewport = selectViewport(state);
     const point = screenToWorld(getPointerPosition(canvas, event), viewport);
-    const hit = getVectorFaceAtPointAcrossOpenNodes(point, vectorEditingNodeIds, state.design.nodes);
+    const hit = getVectorFaceAtPointAcrossOpenNodes(point, vectorEditingNodeIds, state.design.pages[state.design.activePageId].nodes);
 
     canvasRefs.hover.hoveredVectorFaceSelectRef.current = hit ? { faceKey: hit.face.key, nodeId: hit.node.id } : null;
   } else {

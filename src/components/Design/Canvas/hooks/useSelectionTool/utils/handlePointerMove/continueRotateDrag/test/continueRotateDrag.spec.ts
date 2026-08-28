@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -29,7 +30,7 @@ const createRotateDragRef = (rotateDragState: TRotateDragState | null = null): R
 const addFrameNode = (x: number, y: number, width: number, height: number, rotation = 0, parentId: string | null = null): string => {
   store.dispatch(addNode({ fill: '#ff0000', height, name: 'Frame', parentId, rotation, type: NodeType.frame, width, x, y }));
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -37,7 +38,7 @@ const addFrameNode = (x: number, y: number, width: number, height: number, rotat
 const addLineNode = (x1: number, y1: number, x2: number, y2: number, parentId: string | null = null): string => {
   store.dispatch(addNode({ name: 'Line', parentId, stroke: '#000000', type: NodeType.line, x1, x2, y1, y2 }));
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -55,7 +56,7 @@ describe('continueRotateDrag', () => {
     continueRotateDrag(canvas, pointerEvent(10, 10), store.dispatch, createRotateDragRef(), createCanvasRefs());
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
   });
 
   it('should spin a single node in place around its own center, position unchanged', () => {
@@ -73,7 +74,13 @@ describe('continueRotateDrag', () => {
     continueRotateDrag(canvas, pointerEvent(50, 150), store.dispatch, rotateDragRef, createCanvasRefs());
 
     // result — position collapses back to the same x/y, only rotation changes
-    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 100, rotation: 90, width: 100, x: 0, y: 0 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      height: 100,
+      rotation: 90,
+      width: 100,
+      x: 0,
+      y: 0,
+    });
   });
 
   it('should accumulate on top of a node that already had a non-zero rotation', () => {
@@ -91,7 +98,7 @@ describe('continueRotateDrag', () => {
     continueRotateDrag(canvas, pointerEvent(50, 150), store.dispatch, rotateDragRef, createCanvasRefs());
 
     // result
-    expect(store.getState().design.nodes[idA]).toMatchObject({ rotation: 120 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ rotation: 120 });
   });
 
   it('should orbit each member of a group around the shared pivot, spinning each individually', () => {
@@ -115,8 +122,8 @@ describe('continueRotateDrag', () => {
 
     // result — A swings from west to north of the pivot, B swings from east to south; both spin
     // by the same 90deg
-    expect(store.getState().design.nodes[idA]).toMatchObject({ rotation: 90, x: 100, y: -100 });
-    expect(store.getState().design.nodes[idB]).toMatchObject({ rotation: 90, x: 100, y: 100 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ rotation: 90, x: 100, y: -100 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idB]).toMatchObject({ rotation: 90, x: 100, y: 100 });
   });
 
   it('should rotate a line by its endpoints instead of an x/y/rotation triple', () => {
@@ -134,7 +141,12 @@ describe('continueRotateDrag', () => {
     continueRotateDrag(canvas, pointerEvent(100, 150), store.dispatch, rotateDragRef, createCanvasRefs());
 
     // result
-    const line = store.getState().design.nodes[idLine] as { x1: number; x2: number; y1: number; y2: number };
+    const line = store.getState().design.pages[store.getState().design.activePageId].nodes[idLine] as {
+      x1: number;
+      x2: number;
+      y1: number;
+      y2: number;
+    };
 
     expect(line.x1).toBeCloseTo(150);
     expect(line.y1).toBeCloseTo(50);
@@ -166,13 +178,13 @@ describe('continueRotateDrag', () => {
 
       canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current = new Map([[idA, snapshot]]);
 
-      const nodeBefore = store.getState().design.nodes[idA];
+      const nodeBefore = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
       // before — a 90deg delta
       continueRotateDrag(canvas, pointerEvent(50, 150), store.dispatch, rotateDragRef, canvasRefs);
 
       // result — the store node is untouched, but the snapshot itself now reflects the live drag
-      expect(store.getState().design.nodes[idA]).toBe(nodeBefore);
+      expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toBe(nodeBefore);
       expect(snapshot.deltaDegrees).toBeCloseTo(90);
       expect(canvasRefs.transform.rotatedNodeIdsRef.current).toEqual(new Set([idA]));
     });
@@ -224,7 +236,7 @@ describe('continueRotateDrag', () => {
       continueRotateDrag(canvas, pointerEvent(150, 150), store.dispatch, rotateDragRef, canvasRefs);
 
       // result — the frame still rotated live through the store, the vector node's store entry is untouched
-      expect(store.getState().design.nodes[idFrame]).toMatchObject({ rotation: 90 });
+      expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idFrame]).toMatchObject({ rotation: 90 });
     });
   });
 });

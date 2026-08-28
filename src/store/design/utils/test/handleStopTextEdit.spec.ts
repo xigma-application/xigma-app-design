@@ -6,9 +6,9 @@ import { TDesignState } from '../../types';
 import { handleStopTextEdit } from '../handleStopTextEdit';
 
 const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
+  activePageId: 'page-1',
   activeTool: ToolName.default,
   commentDraftPosition: null,
-  comments: {},
   editingNodeId: 'node-1',
   editingSelectionChangedAt: 999,
   editingSelectionEnd: 5,
@@ -22,13 +22,20 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   lastPenTool: ToolName.pen,
   lastShapeTool: ToolName.rectangle,
   lastTextTool: ToolName.text,
-  nodes: {},
-  paintColor: '#d9d9d9',
+  pages: {
+    'page-1': {
+      comments: {},
+      id: 'page-1',
+      name: 'Page 1',
+      nodes: {},
+      paintColor: '#d9d9d9',
+      rootOrder: [],
+      viewport: { x: 0, y: 0, zoom: 1 },
+    },
+  },
   penActiveVertexId: null,
-  rootOrder: [],
   selectedIds: [],
   vectorEditingNodeIds: [],
-  viewport: { x: 0, y: 0, zoom: 1 },
   ...overrides,
 });
 

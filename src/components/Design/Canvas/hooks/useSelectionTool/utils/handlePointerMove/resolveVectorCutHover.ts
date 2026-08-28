@@ -30,7 +30,7 @@ export const resolveVectorCutHover = (
     const edgeHit = getVectorEdgeAtPointAcrossOpenNodes(
       point,
       selectVectorEditingNodeIds(state),
-      state.design.nodes,
+      state.design.pages[state.design.activePageId].nodes,
       VECTOR_EDGE_HIT_TOLERANCE_PX / viewport.zoom,
       VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom,
     );

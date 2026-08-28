@@ -1,5 +1,6 @@
 // store
 import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -28,7 +29,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -50,7 +51,7 @@ const addVectorNodeWithEdge = (vertices: { a: { x: number; y: number }; b: { x: 
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -65,7 +66,7 @@ describe('resolveContinueVectorNetworkHit', () => {
   it("should resolve a 'vertex' hit when clicking near another vertex on the same node", () => {
     // mock
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // before
     const hit = resolveContinueVectorNetworkHit({ x: 100, y: 100 }, node, 'v1', IDENTITY_VIEWPORT, store);
@@ -81,13 +82,13 @@ describe('resolveContinueVectorNetworkHit', () => {
 
     store.dispatch(setVectorEditingNodeIds([sourceId, targetId]));
 
-    const node = store.getState().design.nodes[sourceId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[sourceId] as TVectorNode;
 
     // before
     const hit = resolveContinueVectorNetworkHit({ x: 500, y: 500 }, node, 'v1', IDENTITY_VIEWPORT, store);
 
     // result
-    const targetNode = store.getState().design.nodes[targetId];
+    const targetNode = store.getState().design.pages[store.getState().design.activePageId].nodes[targetId];
 
     expect(hit).toEqual({ kind: 'crossNodeVertex', targetNode, vertexId: 'a' });
   });
@@ -95,7 +96,7 @@ describe('resolveContinueVectorNetworkHit', () => {
   it("should resolve an 'edge' hit when clicking on an existing segment of the same node", () => {
     // mock
     const nodeId = addVectorNodeWithEdge({ a: { x: 200, y: 0 }, b: { x: 300, y: 0 } });
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     store.dispatch(
       addNode({
@@ -127,13 +128,13 @@ describe('resolveContinueVectorNetworkHit', () => {
 
     store.dispatch(setVectorEditingNodeIds([sourceId, targetId]));
 
-    const node = store.getState().design.nodes[sourceId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[sourceId] as TVectorNode;
 
     // before
     const hit = resolveContinueVectorNetworkHit({ x: 500, y: 50 }, node, 'v1', IDENTITY_VIEWPORT, store);
 
     // result
-    const targetNode = store.getState().design.nodes[targetId];
+    const targetNode = store.getState().design.pages[store.getState().design.activePageId].nodes[targetId];
 
     expect(hit).toEqual({ kind: 'crossNodeEdge', segmentId: 'sb', t: 0.5, targetNode });
   });
@@ -141,7 +142,7 @@ describe('resolveContinueVectorNetworkHit', () => {
   it("should resolve an 'extend' hit when the click misses every vertex/edge on every open node", () => {
     // mock
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // before
     const hit = resolveContinueVectorNetworkHit({ x: 5000, y: 5000 }, node, 'v1', IDENTITY_VIEWPORT, store);

@@ -3,10 +3,20 @@ import { ToolName } from 'types/design/enums';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import { TComment, TSceneNode, TViewport } from 'types/design/types';
 
+export type TDesignPage = {
+  comments: Record<string, TComment>;
+  id: string;
+  name: string;
+  nodes: Record<string, TSceneNode>;
+  paintColor: string;
+  rootOrder: string[];
+  viewport: TViewport;
+};
+
 export type TDesignState = {
+  activePageId: string;
   activeTool: ToolName;
   commentDraftPosition: TPoint | null;
-  comments: Record<string, TComment>;
   editingNodeId: string | null;
   editingSelectionChangedAt: number;
   editingSelectionEnd: number;
@@ -20,13 +30,10 @@ export type TDesignState = {
   lastPenTool: ToolName;
   lastShapeTool: ToolName;
   lastTextTool: ToolName;
-  nodes: Record<string, TSceneNode>;
-  paintColor: string;
+  pages: Record<string, TDesignPage>;
   penActiveVertexId: string | null;
-  rootOrder: string[];
   selectedIds: string[];
   vectorEditingNodeIds: string[];
-  viewport: TViewport;
 };
 
 export type TDesignSnapshot = {

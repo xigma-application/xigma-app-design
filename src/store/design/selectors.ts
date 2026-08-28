@@ -5,14 +5,21 @@ import { RootState } from 'store';
 
 // types
 import { ToolName } from 'types/design/enums';
+import { TDesignPage } from './types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import { TComment, TSceneNode, TViewport } from 'types/design/types';
+
+const selectActivePageId = (state: RootState): string => state.design.activePageId;
+
+const selectPages = (state: RootState): Record<string, TDesignPage> => state.design.pages;
+
+export const selectActivePage = createSelector([selectActivePageId, selectPages], (activePageId, pages) => pages[activePageId]);
 
 export const selectActiveTool = (state: RootState): ToolName => state.design.activeTool;
 
 export const selectCommentDraftPosition = (state: RootState): TPoint | null => state.design.commentDraftPosition;
 
-const selectCommentsRecord = (state: RootState): Record<string, TComment> => state.design.comments;
+const selectCommentsRecord = createSelector([selectActivePage], (page): Record<string, TComment> => page.comments);
 
 export const selectComments = createSelector([selectCommentsRecord], (comments) => Object.values(comments));
 
@@ -42,13 +49,13 @@ export const selectLastShapeTool = (state: RootState): ToolName => state.design.
 
 export const selectLastTextTool = (state: RootState): ToolName => state.design.lastTextTool;
 
-export const selectNodes = (state: RootState): Record<string, TSceneNode> => state.design.nodes;
+export const selectNodes = createSelector([selectActivePage], (page): Record<string, TSceneNode> => page.nodes);
 
-export const selectPaintColor = (state: RootState): string => state.design.paintColor;
+export const selectPaintColor = createSelector([selectActivePage], (page): string => page.paintColor);
 
 export const selectPenActiveVertexId = (state: RootState): string | null => state.design.penActiveVertexId;
 
-const selectRootOrder = (state: RootState): string[] => state.design.rootOrder;
+const selectRootOrder = createSelector([selectActivePage], (page): string[] => page.rootOrder);
 
 export const selectOrderedNodes = createSelector([selectRootOrder, selectNodes], (rootOrder, nodes) => rootOrder.map((id) => nodes[id]));
 
@@ -60,4 +67,4 @@ export const selectSelectedNodes = createSelector([selectSelectedIds, selectNode
 
 export const selectVectorEditingNodeIds = (state: RootState): string[] => state.design.vectorEditingNodeIds;
 
-export const selectViewport = (state: RootState): TViewport => state.design.viewport;
+export const selectViewport = createSelector([selectActivePage], (page): TViewport => page.viewport);

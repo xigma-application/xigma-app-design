@@ -1,5 +1,6 @@
 // store
 import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -30,7 +31,7 @@ const addVectorNode = (
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -52,7 +53,7 @@ describe('deleteDanglingActiveVertex', () => {
     store.dispatch(setVectorEditingNodeIds([vectorId]));
     store.dispatch(setPenActiveVertexId('v2'));
 
-    const node = store.getState().design.nodes[vectorId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId] as TVectorNode;
 
     // before
     deleteDanglingActiveVertex(store.dispatch, node, 'v2');
@@ -60,7 +61,7 @@ describe('deleteDanglingActiveVertex', () => {
     // result
     expect(store.getState().design.penActiveVertexId).toBeNull();
     expect(store.getState().design.vectorEditingNodeIds).toEqual([vectorId]);
-    expect(store.getState().design.nodes[vectorId]).toMatchObject({
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId]).toMatchObject({
       segments: { s1: { endId: 'v2', startId: 'v1' } },
       vertices: { v1: { id: 'v1' }, v2: { id: 'v2' } },
     });
@@ -73,13 +74,13 @@ describe('deleteDanglingActiveVertex', () => {
     store.dispatch(setVectorEditingNodeIds([vectorId]));
     store.dispatch(setPenActiveVertexId('v1'));
 
-    const node = store.getState().design.nodes[vectorId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId] as TVectorNode;
 
     // before
     deleteDanglingActiveVertex(store.dispatch, node, 'v1');
 
     // result
-    expect(store.getState().design.nodes[vectorId]).toBeUndefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId]).toBeUndefined();
     expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
     expect(store.getState().design.penActiveVertexId).toBeNull();
   });
@@ -95,13 +96,13 @@ describe('deleteDanglingActiveVertex', () => {
     store.dispatch(setVectorEditingNodeIds([vectorId]));
     store.dispatch(setPenActiveVertexId('v3'));
 
-    const node = store.getState().design.nodes[vectorId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId] as TVectorNode;
 
     // before
     deleteDanglingActiveVertex(store.dispatch, node, 'v3');
 
     // result
-    const updatedNode = store.getState().design.nodes[vectorId] as TVectorNode;
+    const updatedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId] as TVectorNode;
 
     expect(updatedNode.vertices).toEqual({ v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } });
     expect(updatedNode.vertexHandleModes).toEqual({});

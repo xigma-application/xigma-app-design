@@ -122,7 +122,7 @@ describe('useDrawPenTool behaviors', () => {
     });
 
     // result
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(Object.keys(node.vertices)).toHaveLength(2);
     expect(Object.keys(node.segments)).toHaveLength(1);
@@ -164,7 +164,7 @@ describe('useDrawPenTool behaviors', () => {
     });
 
     // result
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(Object.keys(node.vertices)).toHaveLength(2);
     expect(Object.keys(node.segments)).toHaveLength(2);

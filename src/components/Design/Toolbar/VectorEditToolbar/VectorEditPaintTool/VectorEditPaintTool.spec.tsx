@@ -93,6 +93,6 @@ describe('VectorEditPaintTool', () => {
     fireEvent.click(swatch);
 
     // result
-    expect(store.getState().design.paintColor).toBe('#ffffff');
+    expect(store.getState().design.pages[store.getState().design.activePageId].paintColor).toBe('#ffffff');
   });
 });

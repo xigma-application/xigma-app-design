@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -169,7 +170,7 @@ describe('disarmResizeDrag', () => {
         }),
       );
 
-      const { rootOrder } = store.getState().design;
+      const { rootOrder } = selectActivePage(store.getState());
 
       return rootOrder[rootOrder.length - 1];
     };
@@ -225,7 +226,10 @@ describe('disarmResizeDrag', () => {
         current: { aspectRatio: 1, bounds, handle: 'e', nodeOrigins: nodeOriginFor(idSnapshotted) },
       };
 
-      captureResizedVectorNodeSnapshots([store.getState().design.nodes[idSnapshotted] as TVectorNode], snapshotCanvasRefs);
+      captureResizedVectorNodeSnapshots(
+        [store.getState().design.pages[store.getState().design.activePageId].nodes[idSnapshotted] as TVectorNode],
+        snapshotCanvasRefs,
+      );
       continueResizeDrag(
         snapshotCanvas,
         new PointerEvent('pointermove', { clientX: 200, clientY: 500 }),
@@ -236,8 +240,8 @@ describe('disarmResizeDrag', () => {
       disarmResizeDrag(snapshotCanvas, new PointerEvent('pointerup'), store.dispatch, snapshotDragRef, snapshotCanvasRefs);
 
       // result — both nodes end up with the same rotation, segments and vertices
-      const directNode = store.getState().design.nodes[idDirect] as TVectorNode;
-      const snapshottedNode = store.getState().design.nodes[idSnapshotted] as TVectorNode;
+      const directNode = store.getState().design.pages[store.getState().design.activePageId].nodes[idDirect] as TVectorNode;
+      const snapshottedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[idSnapshotted] as TVectorNode;
 
       expect(snapshottedNode.rotation).toBe(directNode.rotation);
       expect(snapshottedNode.segments).toEqual(directNode.segments);

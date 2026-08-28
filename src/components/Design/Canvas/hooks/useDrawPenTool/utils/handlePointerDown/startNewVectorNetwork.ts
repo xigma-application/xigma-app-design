@@ -7,7 +7,7 @@ import { VECTOR_STROKE_WIDTH } from 'constant/canvas';
 
 // store
 import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
-import { selectSelectedIds, selectVectorEditingNodeIds } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds, selectVectorEditingNodeIds } from 'store/design/selectors';
 import { AppDispatch, AppStore } from 'store';
 
 // types
@@ -24,7 +24,7 @@ const activateNewVertex = (
   dragStartRef: RefObject<TPoint | null>,
 ): void => {
   const state = appStore.getState();
-  const { rootOrder } = state.design;
+  const { rootOrder } = selectActivePage(state);
   const newNodeId = rootOrder[rootOrder.length - 1];
 
   dispatch(setSelection([...selectSelectedIds(state), newNodeId]));

@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { undo } from 'store/history/actions';
 import { store } from 'store';
 
@@ -15,7 +16,7 @@ const addFrameNode = (x: number, y: number): string => {
     addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x, y }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -36,7 +37,7 @@ describe('handleNudgeSelection', () => {
     handleNudgeSelection(store.dispatch, createCanvasRefs(), -1, 10);
 
     // result
-    expect(store.getState().design.nodes[frameId]).toMatchObject({ x: 9, y: 20 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[frameId]).toMatchObject({ x: 9, y: 20 });
   });
 
   it('should be undoable as a single step even with multiple selected nodes', () => {
@@ -51,8 +52,8 @@ describe('handleNudgeSelection', () => {
     store.dispatch(undo());
 
     // result
-    expect(store.getState().design.nodes[frameIdA]).toMatchObject({ x: 0, y: 0 });
-    expect(store.getState().design.nodes[frameIdB]).toMatchObject({ x: 100, y: 100 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[frameIdA]).toMatchObject({ x: 0, y: 0 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[frameIdB]).toMatchObject({ x: 100, y: 100 });
   });
 
   it('should do nothing when nothing is selected', () => {
@@ -63,7 +64,7 @@ describe('handleNudgeSelection', () => {
     handleNudgeSelection(store.dispatch, createCanvasRefs(), 1, 1);
 
     // result
-    expect(store.getState().design.nodes[frameId]).toMatchObject({ x: 10, y: 10 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[frameId]).toMatchObject({ x: 10, y: 10 });
   });
 
   it('should do nothing while a vector node is open for editing', () => {
@@ -77,6 +78,6 @@ describe('handleNudgeSelection', () => {
     handleNudgeSelection(store.dispatch, createCanvasRefs(), 1, 1);
 
     // result
-    expect(store.getState().design.nodes[frameId]).toMatchObject({ x: 10, y: 10 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[frameId]).toMatchObject({ x: 10, y: 10 });
   });
 });

@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -36,7 +37,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -50,7 +51,7 @@ describe('extendWithNewVertex', () => {
   it('should add a new vertex and segment from the active vertex, activate it, and arm the drag', () => {
     // mock
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const dragOriginRef = createDragOriginRef();
     const dragStartRef = createDragStartRef();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef({ tangent: { x: 1, y: 1 }, vertexId: 'v1' });
@@ -69,7 +70,7 @@ describe('extendWithNewVertex', () => {
     );
 
     // result
-    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updatedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const newVertexId = store.getState().design.penActiveVertexId as string;
 
     expect(updatedNode.vertices[newVertexId]).toEqual({ id: newVertexId, x: 50, y: 50 });
@@ -82,7 +83,7 @@ describe('extendWithNewVertex', () => {
   it('should carry the given tangentStart onto the new segment', () => {
     // mock
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // before
     extendWithNewVertex(
@@ -98,7 +99,7 @@ describe('extendWithNewVertex', () => {
     );
 
     // result
-    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updatedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(updatedNode.segments['segment-1'].tangentStart).toEqual({ x: 5, y: 5 });
   });

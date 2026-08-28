@@ -1,5 +1,6 @@
 // store
 import { addNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -42,7 +43,7 @@ const addBranchingVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -116,7 +117,7 @@ describe('resolveVectorCornerHandleDrag', () => {
     resolveVectorCornerHandleDrag(canvas, pointerEvent(0, 60), dispatch, canvasRefs, selectionRefs);
 
     // result
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(selectionRefs.pendingVectorCornerHandleDragRef.current).toBeNull();
     expect(selectionRefs.vectorHandleDragRef.current).toEqual({ end: 'start', nodeId, segmentId: 's2', vertexId: 'v1' });

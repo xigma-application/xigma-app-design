@@ -23,7 +23,7 @@ export const disarmVectorSegmentBendDrag = (
 
   if (dragState) {
     if (dragState.status === 'pending') {
-      const node = getVectorEditingNode(store.getState().design.nodes, dragState.nodeId);
+      const node = getVectorEditingNode(store.getState().design.pages[store.getState().design.activePageId].nodes, dragState.nodeId);
 
       if (node) {
         commitVectorBendSegment(

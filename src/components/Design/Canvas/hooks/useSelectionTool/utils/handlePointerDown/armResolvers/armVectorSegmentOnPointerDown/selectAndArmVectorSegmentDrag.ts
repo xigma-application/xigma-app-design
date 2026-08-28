@@ -35,7 +35,7 @@ export const selectAndArmVectorSegmentDrag = (
     canvas,
     event,
     canvasRefs,
-    state.design.nodes,
+    state.design.pages[state.design.activePageId].nodes,
     selectVectorEditingNodeIds(state),
     vertexIds,
     [],

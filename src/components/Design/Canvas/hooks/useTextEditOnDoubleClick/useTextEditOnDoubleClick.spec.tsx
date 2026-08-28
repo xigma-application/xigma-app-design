@@ -8,6 +8,7 @@ import { useTextEditOnDoubleClick } from './useTextEditOnDoubleClick';
 
 // store
 import { addNode, setActiveTool, setSelection, startTextEdit, stopTextEdit } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -43,7 +44,7 @@ const addTextNode = (x: number, y: number, content = 'Hi', size = 500, flipX = f
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -71,7 +72,7 @@ const addPathTextNode = (x: number, y: number, size = 500): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -91,7 +92,7 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };

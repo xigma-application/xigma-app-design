@@ -30,9 +30,9 @@ describe('useSubmitCommentDraft behaviors', () => {
     result.current.onClick();
 
     // result
-    const [id] = Object.keys(store.getState().design.comments);
+    const [id] = Object.keys(store.getState().design.pages[store.getState().design.activePageId].comments);
 
-    expect(store.getState().design.comments[id]).toMatchObject({ content: 'hello' });
+    expect(store.getState().design.pages[store.getState().design.activePageId].comments[id]).toMatchObject({ content: 'hello' });
   });
 
   it('should not add a comment when the value is empty', () => {
@@ -50,7 +50,7 @@ describe('useSubmitCommentDraft behaviors', () => {
     result.current.onClick();
 
     // result
-    expect(store.getState().design.comments).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].comments).toEqual({});
   });
 
   it('should prevent the default mousedown action so the button does not steal focus', () => {

@@ -8,6 +8,7 @@ import { TooltipProvider } from 'shared';
 
 // store
 import { addNode, setActiveTool, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -39,7 +40,7 @@ const addStraightVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };

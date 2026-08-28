@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setActiveTool, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -43,7 +44,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -63,7 +64,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
     const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
     const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef();
@@ -93,7 +94,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
     const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
     const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef();
@@ -121,7 +122,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
     const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
     const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef();
@@ -148,7 +149,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
     const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
     const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef();
@@ -182,7 +183,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
     const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
     const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef({ x: 50, y: 0 });
@@ -212,7 +213,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
     const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
     const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef({ x: 50, y: 0 });
@@ -242,7 +243,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
     store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setActiveTool(ToolName.bend));
 
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
     const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
     const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef({ x: 50, y: 0 });
@@ -273,7 +274,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
     const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
     const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef();
@@ -300,7 +301,7 @@ describe('resolveVectorSegmentHoverInNode', () => {
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const canvas = createCanvas();
     const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
     const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef();

@@ -1,5 +1,5 @@
 // others
-import { DEFAULT_PAINT_COLOR } from '../constants';
+import { DEFAULT_PAGE_NAME, DEFAULT_PAINT_COLOR } from '../constants';
 
 // store
 import slice, {
@@ -43,12 +43,17 @@ const frameNodePayload: Omit<TFrameNode, 'id'> = {
 };
 
 describe('design slice', () => {
-  it('should return the initial state', () => {
-    // result
-    expect(slice(undefined, { type: 'unknown' })).toEqual({
+  it('should return the initial state, with a single generated-id default page', () => {
+    // before
+    const state = slice(undefined, { type: 'unknown' });
+    const { activePageId } = state;
+
+    // result — the default page's id is generated (nanoid), not a fixed constant
+    expect(activePageId).toEqual(expect.any(String));
+    expect(state).toEqual({
+      activePageId,
       activeTool: ToolName.default,
       commentDraftPosition: null,
-      comments: {},
       editingNodeId: null,
       editingSelectionChangedAt: 0,
       editingSelectionEnd: 0,
@@ -62,13 +67,20 @@ describe('design slice', () => {
       lastPenTool: ToolName.pen,
       lastShapeTool: ToolName.rectangle,
       lastTextTool: ToolName.text,
-      nodes: {},
-      paintColor: DEFAULT_PAINT_COLOR,
+      pages: {
+        [activePageId]: {
+          comments: {},
+          id: activePageId,
+          name: DEFAULT_PAGE_NAME,
+          nodes: {},
+          paintColor: DEFAULT_PAINT_COLOR,
+          rootOrder: [],
+          viewport: { x: 0, y: 0, zoom: 1 },
+        },
+      },
       penActiveVertexId: null,
-      rootOrder: [],
       selectedIds: [],
       vectorEditingNodeIds: [],
-      viewport: { x: 0, y: 0, zoom: 1 },
     });
   });
 
@@ -121,23 +133,23 @@ describe('design slice', () => {
   it('should add a node with a generated id', () => {
     // before
     const state = slice(undefined, addNode(frameNodePayload));
-    const [id] = state.rootOrder;
+    const [id] = state.pages[state.activePageId].rootOrder;
 
     // result
-    expect(state.rootOrder).toHaveLength(1);
-    expect(state.nodes[id]).toEqual({ ...frameNodePayload, id });
+    expect(state.pages[state.activePageId].rootOrder).toHaveLength(1);
+    expect(state.pages[state.activePageId].nodes[id]).toEqual({ ...frameNodePayload, id });
   });
 
   it('should update an existing node', () => {
     // before
     const withNode = slice(undefined, addNode(frameNodePayload));
-    const [id] = withNode.rootOrder;
+    const [id] = withNode.pages[withNode.activePageId].rootOrder;
 
     // action
     const state = slice(withNode, updateNode({ changes: { width: 300 }, id }));
 
     // result
-    expect((state.nodes[id] as TFrameNode).width).toBe(300);
+    expect((state.pages[state.activePageId].nodes[id] as TFrameNode).width).toBe(300);
   });
 
   it('should do nothing when updating a node that does not exist', () => {
@@ -145,7 +157,7 @@ describe('design slice', () => {
     const state = slice(undefined, updateNode({ changes: { width: 300 }, id: 'missing' }));
 
     // result
-    expect(state.nodes).toEqual({});
+    expect(state.pages[state.activePageId].nodes).toEqual({});
   });
 
   it('should set the viewport', () => {
@@ -153,7 +165,7 @@ describe('design slice', () => {
     const state = slice(undefined, setViewport({ x: 10, y: 20, zoom: 2 }));
 
     // result
-    expect(state.viewport).toEqual({ x: 10, y: 20, zoom: 2 });
+    expect(state.pages[state.activePageId].viewport).toEqual({ x: 10, y: 20, zoom: 2 });
   });
 
   it('should set the selection', () => {
@@ -167,14 +179,14 @@ describe('design slice', () => {
   it('should delete a node', () => {
     // before
     const withNode = slice(undefined, addNode(frameNodePayload));
-    const [id] = withNode.rootOrder;
+    const [id] = withNode.pages[withNode.activePageId].rootOrder;
 
     // action
     const state = slice(withNode, deleteNode(id));
 
     // result
-    expect(state.nodes[id]).toBeUndefined();
-    expect(state.rootOrder).toEqual([]);
+    expect(state.pages[state.activePageId].nodes[id]).toBeUndefined();
+    expect(state.pages[state.activePageId].rootOrder).toEqual([]);
   });
 
   it('should replace the whole design snapshot', () => {
@@ -185,8 +197,8 @@ describe('design slice', () => {
     const state = slice(undefined, replaceDesignSnapshot({ nodes: { [node.id]: node }, rootOrder: [node.id], selectedIds: [node.id] }));
 
     // result
-    expect(state.nodes).toEqual({ [node.id]: node });
-    expect(state.rootOrder).toEqual([node.id]);
+    expect(state.pages[state.activePageId].nodes).toEqual({ [node.id]: node });
+    expect(state.pages[state.activePageId].rootOrder).toEqual([node.id]);
     expect(state.selectedIds).toEqual([node.id]);
   });
 
@@ -195,7 +207,7 @@ describe('design slice', () => {
     const state = slice(undefined, setPaintColor('#ff0000'));
 
     // result
-    expect(state.paintColor).toBe('#ff0000');
+    expect(state.pages[state.activePageId].paintColor).toBe('#ff0000');
   });
 
   it('should set the pen active vertex id', () => {
@@ -354,10 +366,10 @@ describe('design slice', () => {
 
     // action
     const state = slice(withDraft, addComment('hello'));
-    const [id] = Object.keys(state.comments);
+    const [id] = Object.keys(state.pages[state.activePageId].comments);
 
     // result
-    expect(state.comments[id]).toMatchObject({ content: 'hello', id, x: 10, y: 20 });
+    expect(state.pages[state.activePageId].comments[id]).toMatchObject({ content: 'hello', id, x: 10, y: 20 });
     expect(state.commentDraftPosition).toBeNull();
   });
 
@@ -366,20 +378,20 @@ describe('design slice', () => {
     const state = slice(undefined, addComment('hello'));
 
     // result
-    expect(state.comments).toEqual({});
+    expect(state.pages[state.activePageId].comments).toEqual({});
   });
 
   it('should update an existing comment content', () => {
     // before
     const withDraft = slice(undefined, startCommentDraft({ x: 10, y: 20 }));
     const withComment = slice(withDraft, addComment('hello'));
-    const [id] = Object.keys(withComment.comments);
+    const [id] = Object.keys(withComment.pages[withComment.activePageId].comments);
 
     // action
     const state = slice(withComment, updateCommentContent({ content: 'updated', id }));
 
     // result
-    expect(state.comments[id].content).toBe('updated');
+    expect(state.pages[state.activePageId].comments[id].content).toBe('updated');
   });
 
   it('should do nothing when updating a comment that does not exist', () => {
@@ -387,19 +399,19 @@ describe('design slice', () => {
     const state = slice(undefined, updateCommentContent({ content: 'updated', id: 'missing' }));
 
     // result
-    expect(state.comments).toEqual({});
+    expect(state.pages[state.activePageId].comments).toEqual({});
   });
 
   it('should delete a comment', () => {
     // before
     const withDraft = slice(undefined, startCommentDraft({ x: 10, y: 20 }));
     const withComment = slice(withDraft, addComment('hello'));
-    const [id] = Object.keys(withComment.comments);
+    const [id] = Object.keys(withComment.pages[withComment.activePageId].comments);
 
     // action
     const state = slice(withComment, deleteComment(id));
 
     // result
-    expect(state.comments).toEqual({});
+    expect(state.pages[state.activePageId].comments).toEqual({});
   });
 });

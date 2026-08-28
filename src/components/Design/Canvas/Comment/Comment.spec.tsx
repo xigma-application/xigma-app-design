@@ -16,9 +16,9 @@ const createTestStore = (): EnhancedStore<{ design: TDesignState }> =>
   configureStore({
     preloadedState: {
       design: {
+        activePageId: 'page-1',
         activeTool: ToolName.comment,
         commentDraftPosition: null,
-        comments: { 'comment-1': { author: 'Xigma', content: 'hello', createdAt: 0, id: 'comment-1', x: 100, y: 200 } },
         editingNodeId: null,
         editingSelectionChangedAt: 0,
         editingSelectionEnd: 0,
@@ -32,13 +32,20 @@ const createTestStore = (): EnhancedStore<{ design: TDesignState }> =>
         lastPenTool: ToolName.pen,
         lastShapeTool: ToolName.rectangle,
         lastTextTool: ToolName.text,
-        nodes: {},
-        paintColor: '#d9d9d9',
+        pages: {
+          'page-1': {
+            comments: { 'comment-1': { author: 'Xigma', content: 'hello', createdAt: 0, id: 'comment-1', x: 100, y: 200 } },
+            id: 'page-1',
+            name: 'Page 1',
+            nodes: {},
+            paintColor: '#d9d9d9',
+            rootOrder: [],
+            viewport: { x: 10, y: 20, zoom: 2 },
+          },
+        },
         penActiveVertexId: null,
-        rootOrder: [],
         selectedIds: [],
         vectorEditingNodeIds: [],
-        viewport: { x: 10, y: 20, zoom: 2 },
       },
     },
     reducer: { design: designReducer },

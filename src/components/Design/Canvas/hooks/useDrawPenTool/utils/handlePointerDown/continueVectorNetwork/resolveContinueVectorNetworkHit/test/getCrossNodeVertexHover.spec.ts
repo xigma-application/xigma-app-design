@@ -1,5 +1,6 @@
 // store
 import { addNode, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -38,7 +39,7 @@ describe('getCrossNodeVertexHover', () => {
       }),
     );
 
-    const { rootOrder, nodes } = store.getState().design;
+    const { rootOrder, nodes } = selectActivePage(store.getState());
     const targetId = rootOrder[rootOrder.length - 1];
 
     // before

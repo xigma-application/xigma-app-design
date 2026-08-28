@@ -1,5 +1,6 @@
 // store
 import { addNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -27,7 +28,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -36,7 +37,7 @@ describe('applyVectorSegmentBendOffset', () => {
   it('should offset both tangents by the same 4/3-scaled drag delta and switch the cursor to bend', () => {
     // mock
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const bendState: Extract<TVectorSegmentBendDragState, { status: 'committed' }> = {
       dragStart: { x: 0, y: 0 },
       nodeId,
@@ -53,7 +54,7 @@ describe('applyVectorSegmentBendOffset', () => {
     applyVectorSegmentBendOffset(node, bendState, 30, 60, store.dispatch, setClassName);
 
     // result
-    const updated = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updated = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(updated.segments.s1.tangentStart).toEqual({ x: 70, y: 80 });
     expect(updated.segments.s1.tangentEnd).toEqual({ x: 10, y: 80 });

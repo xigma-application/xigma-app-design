@@ -29,7 +29,7 @@ export const armVectorWidthPointOnPointerDown = ({
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
 
   if (activeTool === ToolName.variableWidth && vectorEditingNodeIds.length > 0) {
-    const eligibleNodes = getEligibleVectorWidthNodes(vectorEditingNodeIds, state.design.nodes);
+    const eligibleNodes = getEligibleVectorWidthNodes(vectorEditingNodeIds, state.design.pages[state.design.activePageId].nodes);
     const handleHit = getVectorWidthPointHandleAtPoint(point, eligibleNodes, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
 
     switch (true) {

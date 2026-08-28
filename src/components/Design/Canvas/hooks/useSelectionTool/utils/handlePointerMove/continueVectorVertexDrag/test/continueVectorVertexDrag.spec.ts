@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection, updateNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -38,7 +39,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -59,7 +60,7 @@ describe('continueVectorVertexDrag', () => {
     continueVectorVertexDrag(canvas, pointerEvent(10, 10), store.dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -82,7 +83,7 @@ describe('continueVectorVertexDrag', () => {
     continueVectorVertexDrag(canvas, pointerEvent(10, 10), store.dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -107,7 +108,7 @@ describe('continueVectorVertexDrag', () => {
     flushThrottledDispatch(selectionRefs.vectorVertexDragRef.current!.dispatchThrottle);
 
     // result
-    const node = store.getState().design.nodes[idA];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
     expect(node).toMatchObject({
       vertices: { v1: { id: 'v1', x: 15, y: 7 }, v2: { id: 'v2', x: 100, y: 0 } },
@@ -155,7 +156,7 @@ describe('continueVectorVertexDrag', () => {
     flushThrottledDispatch(selectionRefs.vectorVertexDragRef.current!.dispatchThrottle);
 
     // result
-    const node = store.getState().design.nodes[idA];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
     expect(node).toMatchObject({ vertices: { v1: { id: 'v1', x: 20, y: 350 } } });
     expect(canvasRefs.vectorEdit.vectorAlignmentGuideRef.current).not.toBeNull();
@@ -200,7 +201,7 @@ describe('continueVectorVertexDrag', () => {
     flushThrottledDispatch(selectionRefs.vectorVertexDragRef.current!.dispatchThrottle);
 
     // result — both vertices shifted by the same -2px x correction, keeping the group rigid
-    const node = store.getState().design.nodes[idA];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
     expect(node).toMatchObject({
       vertices: { v1: { id: 'v1', x: 20, y: 350 }, v2: { id: 'v2', x: 120, y: 350 } },
@@ -238,7 +239,7 @@ describe('continueVectorVertexDrag', () => {
     flushThrottledDispatch(selectionRefs.vectorVertexDragRef.current!.dispatchThrottle);
 
     // result
-    const node = store.getState().design.nodes[idA];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
     expect(node).toMatchObject({ vertices: { v1: { id: 'v1', x: 5100, y: 0 } } });
     expect(selectionRefs.vectorVertexDragRef.current?.mergeTarget).toEqual({ nodeId: idA, vertexId: 'v2' });

@@ -20,7 +20,7 @@ export const cancelVectorSegmentBendDrag = (
 
   if (event.key === 'Escape' && dragState) {
     if (dragState.status === 'committed') {
-      const node = getVectorEditingNode(store.getState().design.nodes, dragState.nodeId);
+      const node = getVectorEditingNode(store.getState().design.pages[store.getState().design.activePageId].nodes, dragState.nodeId);
 
       if (node) {
         const segment = node.segments[dragState.segmentId];

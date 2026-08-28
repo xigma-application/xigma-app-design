@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -38,7 +39,7 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
     addNode({ fill: '#ff0000', height: size, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: size, x, y }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -46,7 +47,7 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
 const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => {
   store.dispatch(addNode({ name: 'Line', parentId: null, stroke: '#000000', type: NodeType.line, x1, x2, y1, y2 }));
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -68,7 +69,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -86,7 +87,7 @@ describe('continueDrag', () => {
     continueDrag(canvas, pointerEvent(10, 10), store.dispatch, createDragStateRef(), createCanvasRefs());
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
   });
 
   it('should move a box node by the pointer delta and mark the drag as moved, dispatching once the throttled frame flushes', () => {
@@ -106,7 +107,7 @@ describe('continueDrag', () => {
     flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
 
     // result
-    const node = store.getState().design.nodes[idA];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
     expect(node).toMatchObject({ x: 110, y: 120 });
     expect(dragStateRef.current?.hasMoved).toBe(true);
@@ -130,7 +131,7 @@ describe('continueDrag', () => {
     flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
 
     // result
-    const node = store.getState().design.nodes[idA];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
     expect(node).toMatchObject({ x1: 205, x2: 255, y1: 205, y2: 205 });
   });
@@ -154,7 +155,7 @@ describe('continueDrag', () => {
     flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
 
     // result
-    const node = store.getState().design.nodes[idA];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
     expect(node).toMatchObject({
       vertices: { v1: { id: 'v1', x: 10, y: 5 }, v2: { id: 'v2', x: 110, y: 5 } },
@@ -208,7 +209,7 @@ describe('continueDrag', () => {
 
     // result
     expect(snapshot).toEqual({ deltaX: 10, deltaY: 5, facesByColor: [], strokeColor: '#000000', strokeVertices: [] });
-    expect(store.getState().design.nodes[idA]).toMatchObject({
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
       vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     });
   });

@@ -29,7 +29,7 @@ export const armVectorCutOnPointerDown = ({
     const result = getVectorCutHitAcrossOpenNodes(
       point,
       vectorEditingNodeIds,
-      state.design.nodes,
+      state.design.pages[state.design.activePageId].nodes,
       VECTOR_EDGE_HIT_TOLERANCE_PX / viewport.zoom,
       VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom,
     );

@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -45,7 +46,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -64,7 +65,7 @@ describe('continueVectorMultiSelectRotateDrag', () => {
     continueVectorMultiSelectRotateDrag(canvas, pointerEvent(10, 10), store.dispatch, createVectorMultiSelectRotateDragRef());
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
   });
 
   it('should do nothing when the drag points at a node that no longer exists', () => {
@@ -85,7 +86,7 @@ describe('continueVectorMultiSelectRotateDrag', () => {
     continueVectorMultiSelectRotateDrag(canvas, pointerEvent(50, 50), store.dispatch, dragRef);
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
   });
 
   it('should rotate every selected vertex around the pivot and every selected tangent offset around the origin, by the same delta angle', () => {
@@ -111,7 +112,7 @@ describe('continueVectorMultiSelectRotateDrag', () => {
     continueVectorMultiSelectRotateDrag(canvas, pointerEvent(50, 50), store.dispatch, dragRef);
 
     // result
-    const node = store.getState().design.nodes[nodeId];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId];
 
     expect(node).toMatchObject({
       segments: { s1: { tangentStart: { x: 0, y: 5 } } },
@@ -144,7 +145,7 @@ describe('continueVectorMultiSelectRotateDrag', () => {
 
     // result — toBeCloseTo, not toMatchObject: cos(90deg) via Math.cos isn't exactly 0, so the
     // untouched axis can come out as a floating-point -0 instead of 0
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(node.segments.s1.tangentEnd?.x).toBeCloseTo(0);
     expect(node.segments.s1.tangentEnd?.y).toBeCloseTo(-5);

@@ -28,9 +28,9 @@ export const disarmVectorVertexDrag = (
 
     if (dragState.mergeTarget) {
       const state = store.getState();
-      const sourceNode = getVectorEditingNode(state.design.nodes, dragState.nodeId);
+      const sourceNode = getVectorEditingNode(state.design.pages[state.design.activePageId].nodes, dragState.nodeId);
       const isSameNode = dragState.mergeTarget.nodeId === sourceNode?.id;
-      const rawTargetNode = state.design.nodes[dragState.mergeTarget.nodeId] as TVectorNode | undefined;
+      const rawTargetNode = state.design.pages[state.design.activePageId].nodes[dragState.mergeTarget.nodeId] as TVectorNode | undefined;
       const targetNode = isSameNode
         ? sourceNode
         : rawTargetNode && {

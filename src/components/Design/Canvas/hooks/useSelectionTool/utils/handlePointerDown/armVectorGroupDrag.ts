@@ -25,14 +25,14 @@ export const armVectorGroupDrag = (
   const selectedVertexIds = canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current;
   const selectedHandles = canvasRefs.vectorEdit.selectedVectorHandlesRef.current;
   const vertexIds = getVectorMultiSelectVertexIds(
-    state.design.nodes,
+    state.design.pages[state.design.activePageId].nodes,
     vectorEditingNodeIds,
     selectedVertexIds,
     canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current,
   );
   const box = isVectorMultiSelectBoxEligible(vertexIds, selectedHandles)
     ? getVectorMultiSelectBox(
-        state.design.nodes,
+        state.design.pages[state.design.activePageId].nodes,
         vectorEditingNodeIds,
         vertexIds,
         selectedHandles,
@@ -44,7 +44,7 @@ export const armVectorGroupDrag = (
     canvas,
     event,
     canvasRefs,
-    state.design.nodes,
+    state.design.pages[state.design.activePageId].nodes,
     vectorEditingNodeIds,
     vertexIds,
     selectedHandles,

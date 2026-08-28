@@ -16,7 +16,7 @@ export const continueVectorLassoDrag = (canvas: HTMLCanvasElement, event: Pointe
   if (canvasRefs.lassoMarquee.vectorLassoPathRef.current) {
     const state = store.getState();
     const openNodes = selectVectorEditingNodeIds(state)
-      .map((id) => getVectorEditingNode(state.design.nodes, id))
+      .map((id) => getVectorEditingNode(state.design.pages[state.design.activePageId].nodes, id))
       .filter((node): node is TVectorNode => node !== null);
 
     if (openNodes.length > 0) {

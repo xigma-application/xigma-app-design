@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -40,7 +41,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -59,7 +60,7 @@ describe('resizeVectorNode', () => {
     resizeVectorNode(id, ORIGIN, store.dispatch, { x: 5, y: 2 }, 2, 3, null);
 
     // result — vertices: anchor + (coord - anchor) * scale, then rounded
-    const node = store.getState().design.nodes[id];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[id];
 
     expect(node).toMatchObject({
       vertices: {
@@ -97,7 +98,7 @@ describe('resizeVectorNode', () => {
 
     // result — the translation stays unrounded (like a rotated box node's x/y), so exact equality would
     // be flaky against floating-point noise from Math.cos/sin(90deg) not being perfectly 0/1
-    const { vertices } = store.getState().design.nodes[id] as TVectorNode;
+    const { vertices } = store.getState().design.pages[store.getState().design.activePageId].nodes[id] as TVectorNode;
 
     expect(vertices.v1.x).toBeCloseTo(-25);
     expect(vertices.v1.y).toBeCloseTo(25);

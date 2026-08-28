@@ -17,7 +17,7 @@ export const applySplitSegmentClickAction = (
   segmentId: string,
   t: number,
 ): void => {
-  const node = getVectorEditingNode(store.getState().design.nodes, nodeId);
+  const node = getVectorEditingNode(store.getState().design.pages[store.getState().design.activePageId].nodes, nodeId);
 
   if (node) {
     const { newVertexId, segments, vertices } = splitVectorSegment(node, segmentId, t);

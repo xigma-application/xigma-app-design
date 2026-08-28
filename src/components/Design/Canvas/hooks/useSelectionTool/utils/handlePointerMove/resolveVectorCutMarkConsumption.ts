@@ -41,10 +41,10 @@ export const resolveVectorCutMarkConsumption = (canvasRefs: TCanvasRefs): void =
 
   touchedIds.forEach((vertexId) => {
     if (!selected.has(vertexId)) {
-      const position = findVectorVertexPosition(state.design.nodes, vectorEditingNodeIds, vertexId);
+      const position = findVectorVertexPosition(state.design.pages[state.design.activePageId].nodes, vectorEditingNodeIds, vertexId);
 
       newIds.forEach((otherId) => {
-        const otherPosition = findVectorVertexPosition(state.design.nodes, vectorEditingNodeIds, otherId);
+        const otherPosition = findVectorVertexPosition(state.design.pages[state.design.activePageId].nodes, vectorEditingNodeIds, otherId);
 
         if (position && otherPosition && position.x === otherPosition.x && position.y === otherPosition.y) {
           newIds.delete(otherId);

@@ -27,7 +27,7 @@ export const continueVectorHandleDrag = (
 
   if (dragState) {
     const state = store.getState();
-    const node = getVectorEditingNode(state.design.nodes, dragState.nodeId);
+    const node = getVectorEditingNode(state.design.pages[state.design.activePageId].nodes, dragState.nodeId);
 
     if (node) {
       const viewport = selectViewport(state);
@@ -37,7 +37,14 @@ export const continueVectorHandleDrag = (
         guide,
         isAngleSnapped,
         point: snappedPoint,
-      } = applyVectorPointSnapping(vertex, point, viewport.zoom, event.shiftKey, state.design.nodes, dragState.vertexId);
+      } = applyVectorPointSnapping(
+        vertex,
+        point,
+        viewport.zoom,
+        event.shiftKey,
+        state.design.pages[state.design.activePageId].nodes,
+        dragState.vertexId,
+      );
       const tangent: TVectorTangent = { x: Math.round(snappedPoint.x - vertex.x), y: Math.round(snappedPoint.y - vertex.y) };
       const field = dragState.end === 'start' ? 'tangentStart' : 'tangentEnd';
       const mode = node.vertexHandleModes[dragState.vertexId] ?? 'corner';

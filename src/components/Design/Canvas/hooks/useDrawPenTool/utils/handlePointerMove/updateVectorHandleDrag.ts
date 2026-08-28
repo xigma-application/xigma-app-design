@@ -31,7 +31,7 @@ export const updateVectorHandleDrag = (
   vectorAlignmentGuideRef: TVectorEditRefs['vectorAlignmentGuideRef'],
 ): void => {
   if (Math.hypot(point.x - dragStart.x, point.y - dragStart.y) >= MIN_DRAG_DISTANCE_PX / viewport.zoom) {
-    const nodes = appStore.getState().design.nodes;
+    const nodes = appStore.getState().design.pages[appStore.getState().design.activePageId].nodes;
     const node = getVectorEditingNode(nodes, dragOrigin.nodeId);
 
     if (node) {

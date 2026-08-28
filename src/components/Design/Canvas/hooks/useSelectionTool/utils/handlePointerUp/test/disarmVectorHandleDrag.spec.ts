@@ -1,5 +1,6 @@
 // store
 import { addNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -41,7 +42,7 @@ const addBranchingVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -108,7 +109,7 @@ describe('disarmVectorHandleDrag', () => {
     disarmVectorHandleDrag(canvas, pointerEvent(2), dispatch, canvasRefs, selectionRefs, setClassName);
 
     // result
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(node.vertexHandleModes).toEqual({ v1: 'symmetric' });
     expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);

@@ -44,7 +44,7 @@ export const continueVectorPaintDrag = (
       const touchedFaces: TVectorDraggedFillFaces = {};
 
       vectorEditingNodeIds
-        .map((nodeId) => getVectorEditingNode(state.design.nodes, nodeId))
+        .map((nodeId) => getVectorEditingNode(state.design.pages[state.design.activePageId].nodes, nodeId))
         .filter((node): node is TVectorNode => node !== null)
         .forEach((node) => {
           touchedFaces[node.id] = paintNodeAlongPath(dispatch, node, nextPath, paintColor, isRemoveMode, touchedLoopKeys);

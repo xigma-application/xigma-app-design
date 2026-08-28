@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds, updateNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -27,7 +28,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -41,7 +42,7 @@ describe('markNewVectorCutVertices', () => {
   it('should mark every vertex id present after the cut but not before, for a node that stayed open', () => {
     // mock — snapshot before, then simulate the cut adding two new vertices at the same node id
     const nodeId = addVectorNode();
-    const beforeNodes = store.getState().design.nodes;
+    const beforeNodes = store.getState().design.pages[store.getState().design.activePageId].nodes;
 
     store.dispatch(
       updateNode({
@@ -73,7 +74,7 @@ describe('markNewVectorCutVertices', () => {
   it('should accumulate onto whatever was already marked, not replace it', () => {
     // mock
     const nodeId = addVectorNode();
-    const beforeNodes = store.getState().design.nodes;
+    const beforeNodes = store.getState().design.pages[store.getState().design.activePageId].nodes;
 
     store.dispatch(
       updateNode({
@@ -97,7 +98,7 @@ describe('markNewVectorCutVertices', () => {
     // mock — a cut that genuinely disconnects the network: the original node keeps 'a' and gains 'x1',
     // while a brand-new sibling node (addNode, no counterpart in beforeNodes) gets 'x2' and keeps 'b'
     const nodeId = addVectorNode();
-    const beforeNodes = store.getState().design.nodes;
+    const beforeNodes = store.getState().design.pages[store.getState().design.activePageId].nodes;
 
     store.dispatch(
       updateNode({
@@ -124,7 +125,7 @@ describe('markNewVectorCutVertices', () => {
       }),
     );
 
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const newNodeId = rootOrder[rootOrder.length - 1];
     const canvasRefs = createCanvasRefs();
 
@@ -138,7 +139,7 @@ describe('markNewVectorCutVertices', () => {
   it('should mark nothing for a node id that no longer exists in either scope', () => {
     // mock
     const nodeId = addVectorNode();
-    const beforeNodes = store.getState().design.nodes;
+    const beforeNodes = store.getState().design.pages[store.getState().design.activePageId].nodes;
     const canvasRefs = createCanvasRefs();
 
     // before — 'stale-id' was never a real node either before or after
@@ -152,7 +153,7 @@ describe('markNewVectorCutVertices', () => {
   it('should mark nothing when the vertex set is unchanged', () => {
     // mock
     const nodeId = addVectorNode();
-    const beforeNodes = store.getState().design.nodes;
+    const beforeNodes = store.getState().design.pages[store.getState().design.activePageId].nodes;
     const canvasRefs = createCanvasRefs();
 
     // before — no dispatch in between, so before/after are identical
@@ -166,7 +167,7 @@ describe('markNewVectorCutVertices', () => {
     // mock — two independently-open nodes, both gain one new vertex
     const firstNodeId = addVectorNode();
     const secondNodeId = addVectorNode();
-    const beforeNodes = store.getState().design.nodes;
+    const beforeNodes = store.getState().design.pages[store.getState().design.activePageId].nodes;
 
     store.dispatch(
       updateNode({

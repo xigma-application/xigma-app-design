@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -44,7 +45,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -71,7 +72,7 @@ const addBranchingVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -140,7 +141,7 @@ describe('continueVectorSegmentBendDrag', () => {
     continueVectorSegmentBendDrag(canvas, pointerEvent(30, 60), dispatch, canvasRefs, dragRef, setClassName);
 
     // result
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(node.segments.s1.tangentStart).toEqual({ x: 70, y: 80 });
     expect(node.segments.s1.tangentEnd).toEqual({ x: 10, y: 80 });
@@ -219,7 +220,7 @@ describe('continueVectorSegmentBendDrag', () => {
     continueVectorSegmentBendDrag(canvas, pointerEvent(0, 60), dispatch, canvasRefs, dragRef, setClassName);
 
     // result
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(dragRef.current).toEqual(expect.objectContaining({ segmentId: 's2', status: 'committed' }));
     expect(node.segments.s2.tangentStart).toEqual({ x: 0, y: 110 });

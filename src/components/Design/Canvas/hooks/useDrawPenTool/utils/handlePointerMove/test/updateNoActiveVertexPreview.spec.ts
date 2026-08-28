@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -73,8 +74,8 @@ describe('updateNoActiveVertexPreview', () => {
       }),
     );
 
-    const { rootOrder } = store.getState().design;
-    const node = store.getState().design.nodes[rootOrder[rootOrder.length - 1]] as TVectorNode;
+    const { rootOrder } = selectActivePage(store.getState());
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[rootOrder[rootOrder.length - 1]] as TVectorNode;
     const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
     const setClassName = vi.fn();
 

@@ -2,8 +2,13 @@
 import { TDesignState } from '../types';
 import { TSceneNode } from 'types/design/types';
 
+// utils
+import { getActivePage } from './getActivePage';
+
 export const handleReplaceNode = (state: TDesignState, payload: { id: string; node: TSceneNode }): void => {
-  if (state.nodes[payload.id]) {
-    state.nodes[payload.id] = payload.node;
+  const page = getActivePage(state);
+
+  if (page.nodes[payload.id]) {
+    page.nodes[payload.id] = payload.node;
   }
 };

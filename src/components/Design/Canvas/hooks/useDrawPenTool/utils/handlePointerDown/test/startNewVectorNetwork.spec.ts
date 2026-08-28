@@ -32,14 +32,15 @@ describe('startNewVectorNetwork', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
     const newNodeId = design.vectorEditingNodeIds[0] as string | undefined;
 
     expect(newNodeId).not.toBeUndefined();
     expect(design.selectedIds).toEqual([newNodeId]);
-    expect(design.nodes[newNodeId as string]).toMatchObject({ fillColor: VECTOR_FILL, segments: {}, type: NodeType.vector });
+    expect(page.nodes[newNodeId as string]).toMatchObject({ fillColor: VECTOR_FILL, segments: {}, type: NodeType.vector });
 
     const vertexId = design.penActiveVertexId as string;
-    const node = design.nodes[newNodeId as string];
+    const node = page.nodes[newNodeId as string];
 
     expect(node).toMatchObject({ vertices: { [vertexId]: { id: vertexId, x: 10, y: 20 } } });
     expect(dragOriginRef.current).toEqual({ nodeId: newNodeId, segmentId: null, vertexId });

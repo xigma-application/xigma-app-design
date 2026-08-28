@@ -45,7 +45,7 @@ export const handlePointerDown = (
     const editingNode = resolvePenTargetNode(
       point,
       vectorEditingNodeIds,
-      state.design.nodes,
+      state.design.pages[state.design.activePageId].nodes,
       penActiveVertexId,
       VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom,
       viewport.zoom,
@@ -54,7 +54,7 @@ export const handlePointerDown = (
     const node = resolvePenTargetNode(
       point,
       vectorEditingNodeIds,
-      appStore.getState().design.nodes,
+      appStore.getState().design.pages[appStore.getState().design.activePageId].nodes,
       penActiveVertexId,
       VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom,
       viewport.zoom,

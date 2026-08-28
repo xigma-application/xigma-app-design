@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { setActiveTool, setViewport } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -107,7 +108,8 @@ describe('handlePointerUp', () => {
 
     // result — the click point (10,10) lands at the center of the 200x100 image, not its corner
     const { design } = store.getState();
-    const placed = design.nodes[design.rootOrder[design.rootOrder.length - 1]];
+    const page = design.pages[design.activePageId];
+    const placed = page.nodes[page.rootOrder[page.rootOrder.length - 1]];
 
     expect(placed).toMatchObject({ height: 100, name: 'Image', src: 'blob:mock-url', type: NodeType.media, width: 200, x: -90, y: -40 });
     expect(startRef.current).toBeNull();
@@ -137,7 +139,8 @@ describe('handlePointerUp', () => {
 
     // result — the raw 50x50 drag does not match the armed file's 2:1 ratio, so it must be locked
     const { design } = store.getState();
-    const placed = design.nodes[design.rootOrder[design.rootOrder.length - 1]];
+    const page = design.pages[design.activePageId];
+    const placed = page.nodes[page.rootOrder[page.rootOrder.length - 1]];
 
     expect(placed).toMatchObject({ height: 50, width: 100, x: 0, y: 0 });
   });
@@ -165,7 +168,7 @@ describe('handlePointerUp', () => {
       'Image',
     );
 
-    const rootOrderAfterFirst = store.getState().design.rootOrder;
+    const rootOrderAfterFirst = store.getState().design.pages[store.getState().design.activePageId].rootOrder;
     const firstId = rootOrderAfterFirst[rootOrderAfterFirst.length - 1];
 
     expect(store.getState().design.selectedIds.slice(selectedBefore)).toEqual([firstId]);
@@ -184,7 +187,8 @@ describe('handlePointerUp', () => {
       'Image',
     );
 
-    const { rootOrder, selectedIds } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
+    const { selectedIds } = store.getState().design;
     const secondId = rootOrder[rootOrder.length - 1];
 
     // result — both files end up selected together, not just the most recent one
@@ -245,7 +249,8 @@ describe('handlePointerUp', () => {
     // matching the recorded start point (zero delta), so this resolves as a click, centered on
     // that world point — proving the viewport was read fresh at call time, not a stale one
     const { design } = store.getState();
-    const placed = design.nodes[design.rootOrder[design.rootOrder.length - 1]];
+    const page = design.pages[design.activePageId];
+    const placed = page.nodes[page.rootOrder[page.rootOrder.length - 1]];
 
     expect(placed).toMatchObject({ x: -240, y: -130 });
   });

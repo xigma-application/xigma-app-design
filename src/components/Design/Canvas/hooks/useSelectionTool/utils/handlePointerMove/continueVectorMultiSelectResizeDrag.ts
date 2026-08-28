@@ -79,7 +79,7 @@ export const continueVectorMultiSelectResizeDrag = (
 
   if (dragState) {
     const state = store.getState();
-    const nodes: Record<string, TSceneNode> = state.design.nodes;
+    const nodes: Record<string, TSceneNode> = state.design.pages[state.design.activePageId].nodes;
     const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
     const viewport = selectViewport(state);
     const point = screenToWorld(getPointerPosition(canvas, event), viewport);

@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -45,7 +46,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -64,7 +65,7 @@ describe('continueVectorMultiSelectResizeDrag', () => {
     continueVectorMultiSelectResizeDrag(canvas, pointerEvent(10, 10), store.dispatch, createVectorMultiSelectResizeDragRef());
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
   });
 
   it('should do nothing when the drag points at a node that no longer exists', () => {
@@ -85,7 +86,7 @@ describe('continueVectorMultiSelectResizeDrag', () => {
     continueVectorMultiSelectResizeDrag(canvas, pointerEvent(200, 200), store.dispatch, dragRef);
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
   });
 
   it('should scale every selected vertex and every selected tangent offset relative to the fixed anchor corner', () => {
@@ -111,7 +112,7 @@ describe('continueVectorMultiSelectResizeDrag', () => {
     continueVectorMultiSelectResizeDrag(canvas, pointerEvent(200, 200), store.dispatch, dragRef);
 
     // result
-    const node = store.getState().design.nodes[nodeId];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId];
 
     expect(node).toMatchObject({
       segments: { s1: { tangentStart: { x: 10, y: 0 } } },
@@ -148,7 +149,7 @@ describe('continueVectorMultiSelectResizeDrag', () => {
     // result — v1 (the anchor) stays put; v2 (the dragged corner) lands exactly on the pointer
     // (toBeCloseTo, not toEqual/toMatchObject: cos(90deg) via Math.cos isn't exactly 0, so the
     // anchor's own untouched axis can come out as a floating-point -0 instead of 0)
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(node.vertices.v1.x).toBeCloseTo(100);
     expect(node.vertices.v1.y).toBeCloseTo(0);
@@ -178,7 +179,7 @@ describe('continueVectorMultiSelectResizeDrag', () => {
     continueVectorMultiSelectResizeDrag(canvas, pointerEvent(200, 500), store.dispatch, dragRef);
 
     // result
-    const node = store.getState().design.nodes[nodeId];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId];
 
     expect(node).toMatchObject({ vertices: { v2: { id: 'v2', x: 200, y: 100 } } });
   });
@@ -206,7 +207,7 @@ describe('continueVectorMultiSelectResizeDrag', () => {
     continueVectorMultiSelectResizeDrag(canvas, pointerEvent(999, -100), store.dispatch, dragRef);
 
     // result
-    const node = store.getState().design.nodes[nodeId];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId];
 
     expect(node).toMatchObject({
       segments: { s1: { tangentEnd: { x: -3, y: 8 } } },

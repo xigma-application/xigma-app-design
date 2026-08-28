@@ -252,7 +252,7 @@ export const drawScene = (
     program,
     buffer,
     nodesById,
-    state.design.rootOrder,
+    state.design.pages[state.design.activePageId].rootOrder,
     vectorEditingNodeIds,
     shapeBuilderPreviewFaces,
     refs.shapeBuilder.isVectorShapeBuilderSubtractRef.current,

@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -36,7 +37,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -53,7 +54,7 @@ describe('closeLoopOntoEdge', () => {
     // lets a click-drag onto the split point also shape the connecting segment's tangentEnd, instead of
     // only ever committing a straight connection and ending the gesture outright
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const dragOriginRef = createDragOriginRef();
     const dragStartRef = createDragStartRef();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef({ tangent: { x: 1, y: 1 }, vertexId: 'v3' });
@@ -74,7 +75,7 @@ describe('closeLoopOntoEdge', () => {
     );
 
     // result
-    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updatedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const newVertexId = updatedNode.segments.s1.endId;
 
     expect(newVertexId).not.toBe('v1');
@@ -90,7 +91,7 @@ describe('closeLoopOntoEdge', () => {
   it('should carry the given tangentStart onto the connecting segment', () => {
     // mock
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // before
     closeLoopOntoEdge(
@@ -108,7 +109,7 @@ describe('closeLoopOntoEdge', () => {
     );
 
     // result
-    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updatedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(updatedNode.segments['segment-connect'].tangentStart).toEqual({ x: 5, y: 5 });
   });

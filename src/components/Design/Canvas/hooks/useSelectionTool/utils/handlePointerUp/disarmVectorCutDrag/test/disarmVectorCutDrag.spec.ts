@@ -1,5 +1,6 @@
 // store
 import { addNode, setActiveTool, setSelection, setVectorEditingNodeIds, updateNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -39,7 +40,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -72,7 +73,7 @@ const addSquareNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -118,7 +119,7 @@ describe('disarmVectorCutDrag', () => {
     disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, setClassNameMock);
 
     // result
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(Object.keys(node.segments)).toHaveLength(5);
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
@@ -135,13 +136,13 @@ describe('disarmVectorCutDrag', () => {
     // mock — the square with its left edge (s4) already severed by an earlier Split, so this second
     // Split (right edge, s2) has nothing left bridging the two halves
     const nodeId = addSquareNode();
-    const preSeveredNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const preSeveredNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const severedChanges = severVectorSegmentAtPoint(preSeveredNode, 's4', 0.5);
 
     store.dispatch(updateNode({ changes: severedChanges, id: nodeId }));
     store.dispatch(setVectorEditingNodeIds([nodeId]));
 
-    const { rootOrder: rootOrderBefore } = store.getState().design;
+    const { rootOrder: rootOrderBefore } = selectActivePage(store.getState());
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
     const selectionRefs = createSelectionToolRefs();
@@ -152,7 +153,9 @@ describe('disarmVectorCutDrag', () => {
     disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, vi.fn());
 
     // result
-    const newRootOrder = store.getState().design.rootOrder.filter((id) => !rootOrderBefore.includes(id));
+    const newRootOrder = store
+      .getState()
+      .design.pages[store.getState().design.activePageId].rootOrder.filter((id) => !rootOrderBefore.includes(id));
 
     expect(newRootOrder).toHaveLength(1);
     expect([...store.getState().design.vectorEditingNodeIds].sort()).toEqual([nodeId, ...newRootOrder].sort());
@@ -170,7 +173,7 @@ describe('disarmVectorCutDrag', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
     const selectionRefs = createSelectionToolRefs();
-    const nodeBefore = store.getState().design.nodes[nodeId] as TVectorNode;
+    const nodeBefore = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     selectionRefs.vectorCutDragRef.current = { hit: null, lineStart: { x: 500, y: 500 }, status: 'pending' };
 
@@ -178,7 +181,7 @@ describe('disarmVectorCutDrag', () => {
     disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, vi.fn());
 
     // result
-    expect(store.getState().design.nodes[nodeId]).toEqual(nodeBefore);
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId]).toEqual(nodeBefore);
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
     expect(selectionRefs.vectorCutDragRef.current).toBeNull();
     // nothing was actually cut, so the tool stays put
@@ -222,7 +225,7 @@ describe('disarmVectorCutDrag', () => {
     disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, vi.fn());
 
     // result — no crash, no dispatch of any kind (a zero-length line crosses nothing)
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(node.segments).toEqual({ s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } });
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
@@ -258,7 +261,7 @@ describe('disarmVectorCutDrag', () => {
       }),
     );
 
-    const { rootOrder: rootOrderBefore } = store.getState().design;
+    const { rootOrder: rootOrderBefore } = selectActivePage(store.getState());
     const nodeId = rootOrderBefore[rootOrderBefore.length - 1];
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
@@ -274,7 +277,9 @@ describe('disarmVectorCutDrag', () => {
     disarmVectorCutDrag(canvas, pointerEvent(), store.dispatch, canvasRefs, selectionRefs, vi.fn());
 
     // result
-    const newRootOrder = store.getState().design.rootOrder.filter((id) => !rootOrderBefore.includes(id));
+    const newRootOrder = store
+      .getState()
+      .design.pages[store.getState().design.activePageId].rootOrder.filter((id) => !rootOrderBefore.includes(id));
 
     expect(newRootOrder).toHaveLength(1);
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);

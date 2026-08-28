@@ -9,6 +9,7 @@ import designReducer, {
   setVectorEditingNodeIds,
   startCommentDraft,
 } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store as realStore } from 'store';
 import { TDesignState } from 'store/design/types';
 
@@ -39,7 +40,7 @@ const addVectorNode = (segments: TVectorNode['segments'], vertices: TVectorNode[
     }),
   );
 
-  const { rootOrder } = realStore.getState().design;
+  const { rootOrder } = selectActivePage(realStore.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -130,7 +131,7 @@ describe('handleLeave', () => {
       handleLeave(realStore.dispatch, createCanvasRefs());
 
       // result
-      expect(realStore.getState().design.nodes[vectorId]).toBeUndefined();
+      expect(realStore.getState().design.pages[realStore.getState().design.activePageId].nodes[vectorId]).toBeUndefined();
       expect(realStore.getState().design.vectorEditingNodeIds).toEqual([]);
       expect(realStore.getState().design.penActiveVertexId).toBeNull();
     });

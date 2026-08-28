@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -36,7 +37,7 @@ const addLineVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -86,7 +87,7 @@ describe('disarmVectorWidthPointDrag', () => {
     disarmVectorWidthPointDrag(canvas, pointerEvent(7), store.dispatch, canvasRefs, setClassName);
 
     // result
-    expect(store.getState().design.nodes[nodeId]).toMatchObject({
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId]).toMatchObject({
       widthProfile: { points: { p1: { id: 'p1', leftOffset: 6, position: 0.5, rightOffset: 6 } } },
     });
     expect(canvasRefs.vectorWidth.vectorWidthPointDragRef.current).toBeNull();

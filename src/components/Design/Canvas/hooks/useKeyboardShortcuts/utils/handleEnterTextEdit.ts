@@ -16,7 +16,7 @@ export const handleEnterTextEdit = (event: KeyboardEvent | ReactKeyboardEvent<HT
   const isVectorEditing = selectVectorEditingNodeIds(state).length > 0;
   const isSelectionTool = activeTool === ToolName.default || activeTool === ToolName.move;
   const [selectedId] = selectedIds;
-  const node = selectedId ? state.design.nodes[selectedId] : undefined;
+  const node = selectedId ? state.design.pages[state.design.activePageId].nodes[selectedId] : undefined;
 
   if (isSelectionTool && !isEditingText && !isVectorEditing && selectedIds.length === 1 && node?.type === NodeType.text) {
     event.preventDefault();

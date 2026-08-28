@@ -7,7 +7,7 @@ import { DEFAULT_SHAPE_SIZE, PATH_NAME, PATH_START_OFFSET_TOP } from '../../cons
 import { addNode, setActiveTool, setSelection, startTextEdit } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { getVectorSelectionSnapshot } from 'store/history/getVectorSelectionSnapshot';
-import { selectActiveTool, selectViewport } from 'store/design/selectors';
+import { selectActivePage, selectActiveTool, selectViewport } from 'store/design/selectors';
 import { store, useAppDispatch, useAppSelector } from 'store';
 
 // types
@@ -58,7 +58,7 @@ export const useDrawTextOnPathTool = (refs: TCanvasRefs): void => {
 
       dispatch(addNode({ ...rect, name: PATH_NAME, parentId: null, pathType: PathType.ellipse, rotation: 0, type: NodeType.path }));
 
-      const { rootOrder } = store.getState().design;
+      const { rootOrder } = selectActivePage(store.getState());
       const pathNodeId = rootOrder[rootOrder.length - 1];
 
       dispatch(setSelection([pathNodeId]));

@@ -1,6 +1,7 @@
 import { RefObject } from 'react';
 
 // store
+import { selectActivePage } from 'store/design/selectors';
 import { setSelection } from 'store/design/slice';
 import { undo } from 'store/history/actions';
 import { store } from 'store';
@@ -41,7 +42,7 @@ describe('handlePointerUp', () => {
   it('should do nothing when there is no stroke in progress', () => {
     // mock
     const canvas = createCanvas();
-    const rootOrderBefore = store.getState().design.rootOrder.length;
+    const rootOrderBefore = store.getState().design.pages[store.getState().design.activePageId].rootOrder.length;
 
     // before
     handlePointerUp(
@@ -58,7 +59,7 @@ describe('handlePointerUp', () => {
     );
 
     // result
-    expect(store.getState().design.rootOrder).toHaveLength(rootOrderBefore);
+    expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toHaveLength(rootOrderBefore);
     expect(canvas.releasePointerCapture).not.toHaveBeenCalled();
   });
 
@@ -90,7 +91,7 @@ describe('handlePointerUp', () => {
     );
 
     // result
-    const { nodes, rootOrder } = store.getState().design;
+    const { nodes, rootOrder } = selectActivePage(store.getState());
     const node = nodes[rootOrder[rootOrder.length - 1]] as TVectorNode;
 
     expect(Object.keys(node.vertices)).toHaveLength(3);
@@ -137,14 +138,14 @@ describe('handlePointerUp', () => {
       createPointsRef(null),
     );
 
-    const rootOrderAfterCommit = store.getState().design.rootOrder.length;
+    const rootOrderAfterCommit = store.getState().design.pages[store.getState().design.activePageId].rootOrder.length;
 
     // action
     const restored = store.dispatch(undo());
 
     // result — one undo reverts both the add and the selection change together, and returns the
     // vector-selection snapshot from the moment the gesture began, not an empty one
-    expect(store.getState().design.rootOrder).toHaveLength(rootOrderAfterCommit - 1);
+    expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toHaveLength(rootOrderAfterCommit - 1);
     expect(restored).toEqual({ selectedVectorHandles: [], selectedVectorSegmentIds: [], selectedVectorVertexIds: ['stale-vertex'] });
   });
 
@@ -169,7 +170,7 @@ describe('handlePointerUp', () => {
     );
 
     // result
-    const { nodes, rootOrder } = store.getState().design;
+    const { nodes, rootOrder } = selectActivePage(store.getState());
     const node = nodes[rootOrder[rootOrder.length - 1]] as TVectorNode;
 
     expect(Object.keys(node.vertices)).toHaveLength(2);

@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -48,7 +49,7 @@ const addPathTextNode = (x: number, y: number, size: number, flipX = false): str
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -58,13 +59,13 @@ describe('continuePathOffsetDrag', () => {
     // mock
     const canvas = createCanvas();
     const id = addPathTextNode(5000, 5000, 200);
-    const before = store.getState().design.nodes[id];
+    const before = store.getState().design.pages[store.getState().design.activePageId].nodes[id];
 
     // before
     continuePathOffsetDrag(canvas, pointerEvent(10, 10), store.dispatch, createPathOffsetDragRef());
 
     // result
-    expect(store.getState().design.nodes[id]).toEqual(before);
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[id]).toEqual(before);
   });
 
   it('should update pathStartOffset to the nearest point on the curve to the pointer', () => {
@@ -77,7 +78,7 @@ describe('continuePathOffsetDrag', () => {
     continuePathOffsetDrag(canvas, pointerEvent(5300, 5400), store.dispatch, pathOffsetDragRef);
 
     // result
-    const node = store.getState().design.nodes[id];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[id];
 
     expect(node).toMatchObject({ pathStartOffset: expect.closeTo(0.25, 2) });
   });
@@ -92,7 +93,7 @@ describe('continuePathOffsetDrag', () => {
     continuePathOffsetDrag(canvas, pointerEvent(5600, 5300), store.dispatch, pathOffsetDragRef);
 
     // result
-    const node = store.getState().design.nodes[id];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[id];
 
     expect(node).toMatchObject({ pathStartOffset: expect.closeTo(0, 2) });
   });
@@ -106,6 +107,6 @@ describe('continuePathOffsetDrag', () => {
     continuePathOffsetDrag(canvas, pointerEvent(10, 10), store.dispatch, pathOffsetDragRef);
 
     // result
-    expect(store.getState().design.nodes.missing).toBeUndefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes.missing).toBeUndefined();
   });
 });

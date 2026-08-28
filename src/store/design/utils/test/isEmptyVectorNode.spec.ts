@@ -1,15 +1,15 @@
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import { TDesignState } from '../../types';
+import { TDesignPage, TDesignState } from '../../types';
 import { TFrameNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { isEmptyVectorNode } from '../isEmptyVectorNode';
 
-const buildState = (nodes: TDesignState['nodes']): TDesignState => ({
+const buildState = (nodes: TDesignPage['nodes']): TDesignState => ({
+  activePageId: 'page-1',
   activeTool: ToolName.default,
   commentDraftPosition: null,
-  comments: {},
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,
@@ -23,13 +23,20 @@ const buildState = (nodes: TDesignState['nodes']): TDesignState => ({
   lastPenTool: ToolName.pen,
   lastShapeTool: ToolName.rectangle,
   lastTextTool: ToolName.text,
-  nodes,
-  paintColor: '#d9d9d9',
+  pages: {
+    'page-1': {
+      comments: {},
+      id: 'page-1',
+      name: 'Page 1',
+      nodes,
+      paintColor: '#d9d9d9',
+      rootOrder: Object.keys(nodes),
+      viewport: { x: 0, y: 0, zoom: 1 },
+    },
+  },
   penActiveVertexId: null,
-  rootOrder: Object.keys(nodes),
   selectedIds: [],
   vectorEditingNodeIds: [],
-  viewport: { x: 0, y: 0, zoom: 1 },
 });
 
 const buildVectorNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({

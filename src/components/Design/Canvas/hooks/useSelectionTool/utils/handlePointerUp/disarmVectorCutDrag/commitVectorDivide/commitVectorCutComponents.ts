@@ -1,5 +1,6 @@
 // store
 import { addNode, updateNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
@@ -51,7 +52,7 @@ export const commitVectorCutComponents = (
         }),
       );
 
-      const { rootOrder } = store.getState().design;
+      const { rootOrder } = selectActivePage(store.getState());
       return rootOrder[rootOrder.length - 1];
     });
   }

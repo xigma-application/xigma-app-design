@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -56,7 +57,7 @@ const addSquareNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -69,32 +70,34 @@ describe('applyDivideResults', () => {
 
   it('should return an empty array and dispatch nothing when there are no divide results', () => {
     // mock
-    const rootOrderBefore = [...store.getState().design.rootOrder];
+    const rootOrderBefore = [...store.getState().design.pages[store.getState().design.activePageId].rootOrder];
 
     // before
     const newNodeIds = applyDivideResults(store.dispatch, []);
 
     // result
     expect(newNodeIds).toEqual([]);
-    expect(store.getState().design.rootOrder).toEqual(rootOrderBefore);
+    expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toEqual(rootOrderBefore);
   });
 
   it('should commit every divide result and return one new node id per extra component, with fill preserved on both halves', () => {
     // mock
     const nodeId = addSquareNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const divideResult = findVectorDivideResult(node, { x: -20, y: 50 }, { x: 120, y: 50 })!;
-    const rootOrderBefore = [...store.getState().design.rootOrder];
+    const rootOrderBefore = [...store.getState().design.pages[store.getState().design.activePageId].rootOrder];
 
     // before
     const newNodeIds = applyDivideResults(store.dispatch, [divideResult]);
 
     // result
     expect(newNodeIds).toHaveLength(1);
-    expect(store.getState().design.rootOrder.filter((id) => !rootOrderBefore.includes(id))).toEqual(newNodeIds);
+    expect(
+      store.getState().design.pages[store.getState().design.activePageId].rootOrder.filter((id) => !rootOrderBefore.includes(id)),
+    ).toEqual(newNodeIds);
 
     [nodeId, ...newNodeIds].forEach((id) => {
-      const resultNode = store.getState().design.nodes[id] as TVectorNode;
+      const resultNode = store.getState().design.pages[store.getState().design.activePageId].nodes[id] as TVectorNode;
 
       expect(resultNode.filledFaceKeys.length).toBeGreaterThan(0);
     });

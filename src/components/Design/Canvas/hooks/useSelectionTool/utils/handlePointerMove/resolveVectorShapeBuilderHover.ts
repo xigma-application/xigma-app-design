@@ -23,7 +23,7 @@ export const resolveVectorShapeBuilderHover = (
 
   if (activeTool === ToolName.shapeBuilder && vectorEditingNodeIds.length > 0 && event.buttons === 0) {
     const point = screenToWorld(getPointerPosition(canvas, event), selectViewport(state));
-    const hit = getVectorFaceAtPointAcrossOpenNodes(point, vectorEditingNodeIds, state.design.nodes);
+    const hit = getVectorFaceAtPointAcrossOpenNodes(point, vectorEditingNodeIds, state.design.pages[state.design.activePageId].nodes);
 
     canvasRefs.hover.hoveredVectorShapeBuilderFaceRef.current = hit ? { faceKey: hit.face.key, nodeId: hit.node.id } : null;
     canvasRefs.shapeBuilder.isVectorShapeBuilderSubtractRef.current = event.altKey;

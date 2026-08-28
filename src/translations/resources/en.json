@@ -30,6 +30,8 @@
   "design.leftPanel.file.expandUiLabel": "Expand UI",
   "design.leftPanel.file.menuAriaLabel": "File menu",
   "design.leftPanel.file.minimizeUiLabel": "Minimize UI",
+  "design.leftPanel.file.pages.addAriaLabel": "Add page",
+  "design.leftPanel.file.pages.searchAriaLabel": "Search pages",
   "design.leftPanel.file.renameAriaLabel": "Rename file",
   "design.leftPanel.file.subscription.free": "Free",
   "design.leftPanel.navRail.item.agents": "Agents",

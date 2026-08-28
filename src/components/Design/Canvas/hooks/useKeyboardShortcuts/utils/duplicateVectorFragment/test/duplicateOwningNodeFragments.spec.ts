@@ -1,5 +1,6 @@
 // store
 import { addNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -31,7 +32,7 @@ const addVectorNode = (idSuffix: string): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -40,14 +41,14 @@ describe('duplicateOwningNodeFragments', () => {
   it('should duplicate a single owning node’s fragment, dispatching its merged changes and returning the new ids', () => {
     // mock
     const nodeId = addVectorNode('A');
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const owningNodesById = new Map([[nodeId, node]]);
 
     // before
     const result = duplicateOwningNodeFragments(store.dispatch, owningNodesById, [], ['sA']);
 
     // result
-    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updatedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(Object.keys(updatedNode.segments)).toHaveLength(2);
     expect(result.newSegmentIds).toHaveLength(1);
@@ -59,8 +60,8 @@ describe('duplicateOwningNodeFragments', () => {
     const nodeAId = addVectorNode('B');
     const nodeBId = addVectorNode('C');
     const owningNodesById = new Map([
-      [nodeAId, store.getState().design.nodes[nodeAId] as TVectorNode],
-      [nodeBId, store.getState().design.nodes[nodeBId] as TVectorNode],
+      [nodeAId, store.getState().design.pages[store.getState().design.activePageId].nodes[nodeAId] as TVectorNode],
+      [nodeBId, store.getState().design.pages[store.getState().design.activePageId].nodes[nodeBId] as TVectorNode],
     ]);
 
     // before
@@ -70,8 +71,8 @@ describe('duplicateOwningNodeFragments', () => {
     expect(result.newSegmentIds).toHaveLength(2);
     expect(result.newVertexIds).toHaveLength(4);
 
-    const updatedNodeA = store.getState().design.nodes[nodeAId] as TVectorNode;
-    const updatedNodeB = store.getState().design.nodes[nodeBId] as TVectorNode;
+    const updatedNodeA = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeAId] as TVectorNode;
+    const updatedNodeB = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeBId] as TVectorNode;
 
     expect(Object.keys(updatedNodeA.segments)).toHaveLength(2);
     expect(Object.keys(updatedNodeB.segments)).toHaveLength(2);

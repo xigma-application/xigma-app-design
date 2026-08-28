@@ -25,6 +25,6 @@ describe('useSetPaintColor', () => {
     result.current({ alpha: 100, hex: '#ff0000' });
 
     // result
-    expect(store.getState().design.paintColor).toBe('#ff0000');
+    expect(store.getState().design.pages[store.getState().design.activePageId].paintColor).toBe('#ff0000');
   });
 });

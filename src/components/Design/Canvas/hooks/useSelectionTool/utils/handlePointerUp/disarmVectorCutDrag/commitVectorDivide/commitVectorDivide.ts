@@ -42,7 +42,10 @@ export const commitVectorDivide = (
   vectorEditingNodeIds: string[],
   canvasRefs: TCanvasRefs,
 ): boolean => {
-  const editingNodes = getVectorDivideEditingNodes(store.getState().design.nodes, vectorEditingNodeIds);
+  const editingNodes = getVectorDivideEditingNodes(
+    store.getState().design.pages[store.getState().design.activePageId].nodes,
+    vectorEditingNodeIds,
+  );
   const divideResults = findAllVectorDivideResults(editingNodes, lineStart, lineEnd);
   const dividedNodeIds = new Set(divideResults.map((result) => result.node.id));
   const connectedCutResults = findAllVectorConnectedCutResults(editingNodes, dividedNodeIds, lineStart, lineEnd);

@@ -1,6 +1,7 @@
 import { RefObject } from 'react';
 
 // store
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -19,7 +20,7 @@ export const armDrag = (
   dragStateRef: RefObject<TDragState | null>,
   canvasRefs: TCanvasRefs,
 ): void => {
-  const { nodes } = store.getState().design;
+  const { nodes } = selectActivePage(store.getState());
 
   dragStateRef.current = {
     dispatchThrottle: { frameId: null, run: null },

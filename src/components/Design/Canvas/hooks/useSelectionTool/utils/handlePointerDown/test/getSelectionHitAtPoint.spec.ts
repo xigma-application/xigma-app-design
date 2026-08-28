@@ -1,6 +1,6 @@
 // store
 import { addNode, setVectorEditingNodeIds } from 'store/design/slice';
-import { selectOrderedNodes } from 'store/design/selectors';
+import { selectActivePage, selectOrderedNodes } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -16,7 +16,7 @@ const addFrameNode = (x: number, y: number, size = 100): string => {
     addNode({ fill: '#ff0000', height: size, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: size, x, y }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -48,7 +48,7 @@ const addClosedSquareVectorNode = (x: number, y: number, size: number): string =
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };

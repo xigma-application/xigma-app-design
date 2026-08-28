@@ -22,14 +22,18 @@ export const handleDeleteSelection = (dispatch: AppDispatch, refs: TCanvasRefs):
   const selectedSegmentIds = selectedVectorSegmentIdsRef.current;
 
   if (selectedVertexIds.length > 0) {
-    const owningNodes = getOwningVertexNodes(vectorEditingNodeIds, state.design.nodes, selectedVertexIds);
+    const owningNodes = getOwningVertexNodes(vectorEditingNodeIds, state.design.pages[state.design.activePageId].nodes, selectedVertexIds);
 
     dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
     deleteSelectedVertices(dispatch, owningNodes, selectedVertexIds);
     dispatch(endHistoryGesture());
     selectedVectorVertexIdsRef.current = [];
   } else if (selectedSegmentIds.length > 0) {
-    const owningNodes = getOwningSegmentNodes(vectorEditingNodeIds, state.design.nodes, selectedSegmentIds);
+    const owningNodes = getOwningSegmentNodes(
+      vectorEditingNodeIds,
+      state.design.pages[state.design.activePageId].nodes,
+      selectedSegmentIds,
+    );
 
     dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
     deleteSelectedSegments(dispatch, owningNodes, selectedSegmentIds);

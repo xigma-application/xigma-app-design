@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -25,7 +26,7 @@ describe('createNudgeKeyMap', () => {
       addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
     );
 
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const frameId = rootOrder[rootOrder.length - 1];
 
     store.dispatch(setSelection([frameId]));
@@ -39,6 +40,6 @@ describe('createNudgeKeyMap', () => {
 
     // result
     expect(preventDefaultSpy).toHaveBeenCalled();
-    expect(store.getState().design.nodes[frameId]).toMatchObject({ x: 1, y: 2 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[frameId]).toMatchObject({ x: 1, y: 2 });
   });
 });

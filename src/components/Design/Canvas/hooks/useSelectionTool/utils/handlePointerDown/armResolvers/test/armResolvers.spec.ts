@@ -9,6 +9,7 @@ import {
   updateNode,
 } from 'store/design/slice';
 import { DEFAULT_PAINT_COLOR } from 'store/design/constants';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -77,7 +78,7 @@ const addRectangleNode = (x: number, y: number, size = 100): TRectangleNode => {
     addNode({ fill: '#ff0000', height: size, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: size, x, y }),
   );
 
-  const { nodes, rootOrder } = store.getState().design;
+  const { nodes, rootOrder } = selectActivePage(store.getState());
 
   return nodes[rootOrder[rootOrder.length - 1]] as TRectangleNode;
 };
@@ -102,7 +103,7 @@ const addTextNode = (x: number, y: number, width = 200, height = 200): TTextNode
     }),
   );
 
-  const { nodes, rootOrder } = store.getState().design;
+  const { nodes, rootOrder } = selectActivePage(store.getState());
 
   return nodes[rootOrder[rootOrder.length - 1]] as TTextNode;
 };
@@ -124,7 +125,7 @@ const addVectorNode = (segments: TVectorNode['segments'], vertices: TVectorNode[
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -643,7 +644,7 @@ describe('armSelectedVectorBoundsOnPointerDown', () => {
   it('should arm a deselect-on-no-move drag and return true when the point lands inside a selected vector box, past its contour', () => {
     // mock — armDrag reads node origins from the real store, so the selected node must exist there
     const nodeId = addVectorNode(vectorNode.segments, vectorNode.vertices);
-    const storedVector = store.getState().design.nodes[nodeId] as TVectorNode;
+    const storedVector = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // before — dead center of the unfilled square, well past its contour
     const ctx = createContext({ currentSelection: [nodeId], point: { x: 50, y: 50 }, selectedNodes: [storedVector] });
@@ -1477,9 +1478,9 @@ describe('armVectorFaceSelectOnPointerDown', () => {
       },
     );
 
-    const filledFaceKeys = deriveVectorFaces(store.getState().design.nodes[nodeId] as TVectorNode).map((face) =>
-      getVectorFillLoopKey(face.pieceKeys),
-    );
+    const filledFaceKeys = deriveVectorFaces(
+      store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode,
+    ).map((face) => getVectorFillLoopKey(face.pieceKeys));
 
     store.dispatch(updateNode({ changes: { filledFaceKeys }, id: nodeId }));
     store.dispatch(setVectorEditingNodeIds([nodeId]));
@@ -1525,9 +1526,9 @@ describe('armVectorFaceSelectOnPointerDown', () => {
       },
     );
 
-    const filledFaceKeys = deriveVectorFaces(store.getState().design.nodes[nodeId] as TVectorNode).map((face) =>
-      getVectorFillLoopKey(face.pieceKeys),
-    );
+    const filledFaceKeys = deriveVectorFaces(
+      store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode,
+    ).map((face) => getVectorFillLoopKey(face.pieceKeys));
 
     store.dispatch(updateNode({ changes: { filledFaceKeys }, id: nodeId }));
     store.dispatch(setVectorEditingNodeIds([nodeId]));
@@ -2294,7 +2295,7 @@ describe('armVectorVertexOnPointerDown', () => {
       v4: { id: 'v4', x: 0, y: 100 },
     };
     const nodeId = addVectorNode(segments, vertices);
-    const bareNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const bareNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const filledFaceKeys = deriveVectorFaces(bareNode).map((face) => getVectorFillLoopKey(face.pieceKeys));
 
     store.dispatch(updateNode({ changes: { filledFaceKeys }, id: nodeId }));

@@ -28,7 +28,7 @@ export const resolveVectorCornerHandleDrag = (
 
   if (pendingState) {
     const state = store.getState();
-    const node = getVectorEditingNode(state.design.nodes, pendingState.nodeId);
+    const node = getVectorEditingNode(state.design.pages[state.design.activePageId].nodes, pendingState.nodeId);
 
     if (node) {
       const viewport = selectViewport(state);

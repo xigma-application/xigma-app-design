@@ -40,7 +40,7 @@ export const continueVectorCutDrag = (
       }
 
       const crossings = selectVectorEditingNodeIds(state).flatMap((nodeId) => {
-        const node = getVectorEditingNode(state.design.nodes, nodeId);
+        const node = getVectorEditingNode(state.design.pages[state.design.activePageId].nodes, nodeId);
         const bakedNode = node && { ...node, ...bakeVectorNodeRotation(node) };
 
         return bakedNode

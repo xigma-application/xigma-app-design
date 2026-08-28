@@ -32,7 +32,7 @@ export const continueVectorSegmentBendDrag = (
 
   if (dragState) {
     const state = store.getState();
-    const node = getVectorEditingNode(state.design.nodes, dragState.nodeId);
+    const node = getVectorEditingNode(state.design.pages[state.design.activePageId].nodes, dragState.nodeId);
 
     if (node) {
       const viewport = selectViewport(state);

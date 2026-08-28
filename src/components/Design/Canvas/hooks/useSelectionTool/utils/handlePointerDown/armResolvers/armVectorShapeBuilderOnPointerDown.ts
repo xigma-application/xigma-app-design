@@ -15,7 +15,7 @@ export const armVectorShapeBuilderOnPointerDown = (context: TArmContext): true |
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
 
   if (activeTool === ToolName.shapeBuilder && vectorEditingNodeIds.length > 0) {
-    const hits = getVectorFacesOnPathAcrossOpenNodes([point], vectorEditingNodeIds, state.design.nodes);
+    const hits = getVectorFacesOnPathAcrossOpenNodes([point], vectorEditingNodeIds, state.design.pages[state.design.activePageId].nodes);
 
     canvasRefs.shapeBuilder.vectorShapeBuilderPathRef.current = [point];
     canvasRefs.shapeBuilder.touchedVectorShapeBuilderFacesRef.current = Object.fromEntries(

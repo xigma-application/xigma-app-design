@@ -23,7 +23,7 @@ export const handleEnterVectorEdit = (dispatch: AppDispatch, refs: TCanvasRefs):
   }
 
   const selectedNodes = selectSelectedIds(state)
-    .map((id) => state.design.nodes[id])
+    .map((id) => state.design.pages[state.design.activePageId].nodes[id])
     .filter((node): node is TSceneNode => Boolean(node));
   const alreadyVectorIds = selectedNodes.filter((node) => node.type === NodeType.vector).map((node) => node.id);
   const nodesToConvert = selectedNodes.filter(isConvertibleToVectorNode);

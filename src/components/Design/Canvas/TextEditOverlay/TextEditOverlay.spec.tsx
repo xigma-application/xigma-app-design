@@ -188,7 +188,7 @@ describe('TextEditOverlay behaviors', () => {
     fireEvent.blur(element);
 
     // result
-    expect(store.getState().design.rootOrder).toHaveLength(0);
+    expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toHaveLength(0);
     expect(store.getState().design.editingTextBox).toBeNull();
   });
 
@@ -209,11 +209,12 @@ describe('TextEditOverlay behaviors', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
     expect(design.editingTextBox).toBeNull();
-    expect(design.rootOrder).toHaveLength(1);
-    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ content: 'hello', type: NodeType.text });
-    expect(design.selectedIds).toEqual([design.rootOrder[0]]);
+    expect(page.rootOrder).toHaveLength(1);
+    expect(page.nodes[page.rootOrder[0]]).toMatchObject({ content: 'hello', type: NodeType.text });
+    expect(design.selectedIds).toEqual([page.rootOrder[0]]);
   });
 
   it('should discard a fresh box with no content when Escape is pressed, same as blurring it away empty', () => {
@@ -230,9 +231,10 @@ describe('TextEditOverlay behaviors', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
     expect(design.editingTextBox).toBeNull();
-    expect(design.rootOrder).toHaveLength(0);
+    expect(page.rootOrder).toHaveLength(0);
     expect(design.selectedIds).toEqual([]);
   });
 

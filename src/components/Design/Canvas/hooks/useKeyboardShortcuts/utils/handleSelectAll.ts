@@ -16,7 +16,7 @@ export const handleSelectAll = (dispatch: AppDispatch, refs: TCanvasRefs): void 
 
   if (vectorEditingNodeIds.length > 0) {
     const editingNodes = vectorEditingNodeIds
-      .map((nodeId) => getVectorEditingNode(state.design.nodes, nodeId))
+      .map((nodeId) => getVectorEditingNode(state.design.pages[state.design.activePageId].nodes, nodeId))
       .filter((node): node is TVectorNode => node !== null);
 
     refs.vectorEdit.selectedVectorVertexIdsRef.current = editingNodes.flatMap((node) => Object.keys(node.vertices));

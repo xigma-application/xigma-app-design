@@ -46,7 +46,7 @@ describe('useCanvasPanZoom behaviors', () => {
     canvasRef.current?.dispatchEvent(wheelEvent(10, 20));
 
     // result
-    expect(store.getState().design.viewport).toEqual({ x: -10, y: -20, zoom: 1 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].viewport).toEqual({ x: -10, y: -20, zoom: 1 });
   });
 
   it('should zoom the viewport on a ctrl+wheel scroll', () => {
@@ -62,7 +62,7 @@ describe('useCanvasPanZoom behaviors', () => {
     canvasRef.current?.dispatchEvent(wheelEvent(0, -100, true));
 
     // result
-    expect(store.getState().design.viewport.zoom).toBeGreaterThan(1);
+    expect(store.getState().design.pages[store.getState().design.activePageId].viewport.zoom).toBeGreaterThan(1);
   });
 
   it('should zoom the viewport on a cmd+wheel scroll (macOS)', () => {
@@ -78,7 +78,7 @@ describe('useCanvasPanZoom behaviors', () => {
     canvasRef.current?.dispatchEvent(wheelEvent(0, -100, false, true));
 
     // result
-    expect(store.getState().design.viewport.zoom).toBeGreaterThan(1);
+    expect(store.getState().design.pages[store.getState().design.activePageId].viewport.zoom).toBeGreaterThan(1);
   });
 
   it('should do nothing when the canvas has no element yet', () => {

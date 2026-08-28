@@ -39,7 +39,7 @@ describe('useCommitTextEdit behaviors', () => {
     result.current(createBlurEvent('hello'));
 
     // result
-    expect(store.getState().design.rootOrder).toHaveLength(0);
+    expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toHaveLength(0);
   });
 
   it('should add a text node with the fixed box size, not the rendered content size, when blurred with content', () => {
@@ -57,9 +57,10 @@ describe('useCommitTextEdit behaviors', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.rootOrder).toHaveLength(1);
-    expect(design.nodes[design.rootOrder[0]]).toMatchObject({
+    expect(page.rootOrder).toHaveLength(1);
+    expect(page.nodes[page.rootOrder[0]]).toMatchObject({
       content: 'hello world',
       height: 20,
       type: NodeType.text,
@@ -84,8 +85,9 @@ describe('useCommitTextEdit behaviors', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ flipX: true, flipY: true, rotation: 30 });
+    expect(page.nodes[page.rootOrder[0]]).toMatchObject({ flipX: true, flipY: true, rotation: 30 });
     expect(design.editingTextBox).toBeNull();
   });
 
@@ -115,8 +117,9 @@ describe('useCommitTextEdit behaviors', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ pathFlip: true, pathId: 'ellipse-1', pathStartOffset: 0.25 });
+    expect(page.nodes[page.rootOrder[0]]).toMatchObject({ pathFlip: true, pathId: 'ellipse-1', pathStartOffset: 0.25 });
   });
 
   it('should collapse a blank line (Enter twice) to a single newline, not the browser doubled one', () => {
@@ -134,8 +137,9 @@ describe('useCommitTextEdit behaviors', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ content: 'first\n\nsecond' });
+    expect(page.nodes[page.rootOrder[0]]).toMatchObject({ content: 'first\n\nsecond' });
   });
 
   it('should keep a whitespace-only value as valid content, not treat it as empty', () => {
@@ -153,9 +157,10 @@ describe('useCommitTextEdit behaviors', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.rootOrder).toHaveLength(1);
-    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ content: ' ' });
+    expect(page.rootOrder).toHaveLength(1);
+    expect(page.nodes[page.rootOrder[0]]).toMatchObject({ content: ' ' });
   });
 
   it('should discard the box without adding a node when blurred with no content', () => {
@@ -173,8 +178,9 @@ describe('useCommitTextEdit behaviors', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.rootOrder).toHaveLength(0);
+    expect(page.rootOrder).toHaveLength(0);
     expect(design.editingTextBox).toBeNull();
     expect(design.selectedIds).toEqual([]);
   });
@@ -202,7 +208,7 @@ describe('useCommitTextEdit behaviors', () => {
       }),
     );
 
-    const [existingId] = store.getState().design.rootOrder;
+    const [existingId] = store.getState().design.pages[store.getState().design.activePageId].rootOrder;
     const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
 
     store.dispatch(setSelection([existingId]));
@@ -217,9 +223,10 @@ describe('useCommitTextEdit behaviors', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.rootOrder).toEqual([existingId]);
-    expect(design.nodes[existingId]).toMatchObject({ content: 'replaced', height: 20, width: 100, x: 10, y: 10 });
+    expect(page.rootOrder).toEqual([existingId]);
+    expect(page.nodes[existingId]).toMatchObject({ content: 'replaced', height: 20, width: 100, x: 10, y: 10 });
     expect(design.editingTextBox).toBeNull();
     // committing always deselects, same as clicking away on empty canvas would — previously this
     // only happened as a side effect of useSelectionTool's own empty-click handler, which is now
@@ -267,7 +274,7 @@ describe('useCommitTextEdit behaviors', () => {
       }),
     );
 
-    const [existingId] = store.getState().design.rootOrder;
+    const [existingId] = store.getState().design.pages[store.getState().design.activePageId].rootOrder;
     const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
 
     store.dispatch(setSelection([existingId]));
@@ -282,9 +289,10 @@ describe('useCommitTextEdit behaviors', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.nodes[existingId]).toBeUndefined();
-    expect(design.rootOrder).toHaveLength(0);
+    expect(page.nodes[existingId]).toBeUndefined();
+    expect(page.rootOrder).toHaveLength(0);
     expect(design.editingTextBox).toBeNull();
     expect(design.selectedIds).toEqual([]);
   });
@@ -307,7 +315,7 @@ describe('useCommitTextEdit behaviors', () => {
       }),
     );
 
-    const [pathId] = store.getState().design.rootOrder;
+    const [pathId] = store.getState().design.pages[store.getState().design.activePageId].rootOrder;
 
     store.dispatch(
       addNode({
@@ -331,7 +339,7 @@ describe('useCommitTextEdit behaviors', () => {
       }),
     );
 
-    const textId = store.getState().design.rootOrder[1];
+    const textId = store.getState().design.pages[store.getState().design.activePageId].rootOrder[1];
     const box = {
       flipX: false,
       flipY: false,
@@ -355,10 +363,11 @@ describe('useCommitTextEdit behaviors', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.nodes[textId]).toBeUndefined();
-    expect(design.nodes[pathId]).toBeUndefined();
-    expect(design.rootOrder).toHaveLength(0);
+    expect(page.nodes[textId]).toBeUndefined();
+    expect(page.nodes[pathId]).toBeUndefined();
+    expect(page.rootOrder).toHaveLength(0);
   });
 
   it('should select the newly created node instead of clearing selection when selectOnCommitRef is set (Escape path)', () => {
@@ -377,8 +386,9 @@ describe('useCommitTextEdit behaviors', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.selectedIds).toEqual([design.rootOrder[0]]);
+    expect(design.selectedIds).toEqual([page.rootOrder[0]]);
     expect(selectOnCommitRef.current).toBe(false);
   });
 
@@ -405,7 +415,7 @@ describe('useCommitTextEdit behaviors', () => {
       }),
     );
 
-    const [existingId] = store.getState().design.rootOrder;
+    const [existingId] = store.getState().design.pages[store.getState().design.activePageId].rootOrder;
     const box = { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 };
 
     // before
@@ -435,8 +445,9 @@ describe('useCommitTextEdit behaviors', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.rootOrder).toHaveLength(0);
+    expect(page.rootOrder).toHaveLength(0);
     expect(design.selectedIds).toEqual([]);
   });
 });

@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -42,7 +43,7 @@ const addEllipseNode = (overrides: Partial<TEllipseNode> = {}): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -62,7 +63,7 @@ describe('continueEllipseArcDrag', () => {
     continueEllipseArcDrag(canvas, pointerEvent(10, 10), store.dispatch, createEllipseArcDragRef());
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
   });
 
   it("should dispatch a new arcEndAngle from the pointer's compass angle relative to center", () => {
@@ -82,7 +83,7 @@ describe('continueEllipseArcDrag', () => {
     continueEllipseArcDrag(canvas, pointerEvent(50, 0), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TEllipseNode).arcEndAngle).toBe(0);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TEllipseNode).arcEndAngle).toBe(0);
   });
 
   it('should snap the sweep to the nearest full-lap multiple once it lands within the snap threshold', () => {
@@ -103,7 +104,7 @@ describe('continueEllipseArcDrag', () => {
     continueEllipseArcDrag(canvas, pointerEvent(48.255025, 0.030459), store.dispatch, dragRef);
 
     // result — snapped exactly onto the lap: arcStartAngle (0) + nearestLapSweep (0)
-    expect((store.getState().design.nodes[idA] as TEllipseNode).arcEndAngle).toBe(0);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TEllipseNode).arcEndAngle).toBe(0);
   });
 
   it('should not divide by zero when arcRatio is 1 (inner and outer band edges coincide)', () => {
@@ -123,7 +124,7 @@ describe('continueEllipseArcDrag', () => {
     continueEllipseArcDrag(canvas, pointerEvent(50, 0), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TEllipseNode).arcEndAngle).toBe(0);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TEllipseNode).arcEndAngle).toBe(0);
     expect(dragRef.current?.draggedHandlePosition).toEqual({ x: 50, y: 0 });
   });
 
@@ -142,7 +143,7 @@ describe('continueEllipseArcDrag', () => {
         y: 0,
       }),
     );
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const idA = rootOrder[rootOrder.length - 1];
     const canvas = createCanvas();
     const dragRef = createEllipseArcDragRef({
@@ -158,7 +159,7 @@ describe('continueEllipseArcDrag', () => {
     continueEllipseArcDrag(canvas, pointerEvent(50, 0), store.dispatch, dragRef);
 
     // result — no crash, and both angles default to ELLIPSE_DEFAULT_ARC_ANGLE (90) as if uncut
-    expect(store.getState().design.nodes[idA]).toMatchObject({ arcEndAngle: 0 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ arcEndAngle: 0 });
   });
 
   it('should wrap a rawDelta greater than 180° to the shorter path in the opposite direction', () => {
@@ -178,7 +179,7 @@ describe('continueEllipseArcDrag', () => {
     continueEllipseArcDrag(canvas, pointerEvent(41.317591, 0.759612), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TEllipseNode).arcEndAngle).toBe(-10);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TEllipseNode).arcEndAngle).toBe(-10);
   });
 
   it('should wrap a rawDelta less than -180° to the shorter path in the opposite direction', () => {
@@ -198,6 +199,6 @@ describe('continueEllipseArcDrag', () => {
     continueEllipseArcDrag(canvas, pointerEvent(58.682409, 0.759612), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TEllipseNode).arcEndAngle).toBe(370);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TEllipseNode).arcEndAngle).toBe(370);
   });
 });

@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { undo } from 'store/history/actions';
 import { store } from 'store';
 
@@ -21,7 +22,7 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
     addNode({ fill: '#ff0000', height: size, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: size, x, y }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -50,7 +51,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -74,7 +75,7 @@ const addSecondVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -100,7 +101,7 @@ const addClosedTriangleVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -122,8 +123,8 @@ describe('handleDeleteSelection', () => {
     handleDeleteSelection(store.dispatch, createRefs());
 
     // result
-    expect(store.getState().design.nodes[idA]).toBeUndefined();
-    expect(store.getState().design.nodes[idB]).toBeUndefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toBeUndefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idB]).toBeUndefined();
   });
 
   it('should not delete the selected node when a tangent handle is selected instead of a vertex', () => {
@@ -138,7 +139,7 @@ describe('handleDeleteSelection', () => {
     handleDeleteSelection(store.dispatch, refs);
 
     // result — deleting the whole node is reserved for when neither a vertex nor a handle is selected
-    expect(store.getState().design.nodes[idA]).toBeDefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toBeDefined();
   });
 
   it('should restore every deleted node with a single undo', () => {
@@ -154,9 +155,9 @@ describe('handleDeleteSelection', () => {
     store.dispatch(undo());
 
     // result
-    expect(store.getState().design.nodes[idA]).toBeDefined();
-    expect(store.getState().design.nodes[idB]).toBeDefined();
-    expect(store.getState().design.nodes[idC]).toBeDefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toBeDefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idB]).toBeDefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idC]).toBeDefined();
   });
 
   it('should restore the deleted vertex selection when a single-owning-node vertex delete is undone', () => {
@@ -174,7 +175,7 @@ describe('handleDeleteSelection', () => {
     const restored = store.dispatch(undo());
 
     // result
-    const vectorNode = store.getState().design.nodes[vectorId] as TVectorNode;
+    const vectorNode = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId] as TVectorNode;
 
     expect(vectorNode.vertices).toHaveProperty('vertex-1');
     expect(restored).toEqual({ selectedVectorHandles: [], selectedVectorSegmentIds: [], selectedVectorVertexIds: ['vertex-1'] });
@@ -195,7 +196,7 @@ describe('handleDeleteSelection', () => {
     const restored = store.dispatch(undo());
 
     // result
-    const vectorNode = store.getState().design.nodes[vectorId] as TVectorNode;
+    const vectorNode = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId] as TVectorNode;
 
     expect(vectorNode.segments).toHaveProperty('segment-1');
     expect(restored).toEqual({ selectedVectorHandles: [], selectedVectorSegmentIds: ['segment-1'], selectedVectorVertexIds: [] });
@@ -213,7 +214,7 @@ describe('handleDeleteSelection', () => {
     handleDeleteSelection(store.dispatch, refs);
 
     // result
-    const vectorNode = store.getState().design.nodes[vectorId];
+    const vectorNode = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId];
 
     expect(vectorNode).toMatchObject({
       segments: { 'segment-2': { endId: 'vertex-3', id: 'segment-2', startId: 'vertex-2' } },
@@ -236,7 +237,7 @@ describe('handleDeleteSelection', () => {
     handleDeleteSelection(store.dispatch, refs);
 
     // result
-    const vectorNode = store.getState().design.nodes[vectorId] as TVectorNode;
+    const vectorNode = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId] as TVectorNode;
 
     expect(vectorNode.segments).toEqual({});
     expect(vectorNode.vertices).toEqual({});
@@ -257,7 +258,7 @@ describe('handleDeleteSelection', () => {
 
     // result — segment-1 (vertex-1 -> vertex-2) is gone along with the now-orphaned vertex-1; segment-2
     // and its two endpoints (vertex-2, vertex-3) are untouched
-    const vectorNode = store.getState().design.nodes[vectorId] as TVectorNode;
+    const vectorNode = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId] as TVectorNode;
 
     expect(Object.keys(vectorNode.segments)).toEqual(['segment-2']);
     expect(Object.keys(vectorNode.vertices)).toEqual(['vertex-2', 'vertex-3']);
@@ -271,7 +272,7 @@ describe('handleDeleteSelection', () => {
     store.dispatch(setVectorEditingNodeIds([vectorId]));
 
     // before — the closed triangle starts out with exactly one fillable face
-    const closedNode = store.getState().design.nodes[vectorId] as TVectorNode;
+    const closedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId] as TVectorNode;
 
     expect(deriveVectorFaces(closedNode)).toHaveLength(1);
 
@@ -279,7 +280,7 @@ describe('handleDeleteSelection', () => {
     handleDeleteSelection(store.dispatch, createRefs(['a']));
 
     // result
-    const brokenNode = store.getState().design.nodes[vectorId] as TVectorNode;
+    const brokenNode = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId] as TVectorNode;
 
     expect(deriveVectorFaces(brokenNode)).toEqual([]);
   });
@@ -297,8 +298,8 @@ describe('handleDeleteSelection', () => {
     handleDeleteSelection(store.dispatch, refs);
 
     // result — each node only lost its own selected vertex/segment, the other node untouched otherwise
-    const nodeA = store.getState().design.nodes[vectorIdA] as TVectorNode;
-    const nodeB = store.getState().design.nodes[vectorIdB] as TVectorNode;
+    const nodeA = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorIdA] as TVectorNode;
+    const nodeB = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorIdB] as TVectorNode;
 
     expect(nodeA.vertices).not.toHaveProperty('vertex-1');
     expect(nodeB.vertices).not.toHaveProperty('vertex-4');
@@ -317,8 +318,8 @@ describe('handleDeleteSelection', () => {
     store.dispatch(undo());
 
     // result
-    const nodeA = store.getState().design.nodes[vectorIdA] as TVectorNode;
-    const nodeB = store.getState().design.nodes[vectorIdB] as TVectorNode;
+    const nodeA = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorIdA] as TVectorNode;
+    const nodeB = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorIdB] as TVectorNode;
 
     expect(nodeA.vertices).toHaveProperty('vertex-1');
     expect(nodeB.vertices).toHaveProperty('vertex-4');
@@ -337,8 +338,8 @@ describe('handleDeleteSelection', () => {
     handleDeleteSelection(store.dispatch, refs);
 
     // result
-    const nodeA = store.getState().design.nodes[vectorIdA] as TVectorNode;
-    const nodeB = store.getState().design.nodes[vectorIdB] as TVectorNode;
+    const nodeA = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorIdA] as TVectorNode;
+    const nodeB = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorIdB] as TVectorNode;
 
     expect(nodeA.segments).not.toHaveProperty('segment-1');
     expect(nodeB.segments).not.toHaveProperty('segment-3');
@@ -359,7 +360,7 @@ describe('handleDeleteSelection', () => {
     handleDeleteSelection(store.dispatch, refs);
 
     // result
-    const vectorNode = store.getState().design.nodes[vectorId] as TVectorNode;
+    const vectorNode = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId] as TVectorNode;
 
     expect(vectorNode.vertices).toHaveProperty('vertex-1');
     expect(refs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual([]);
@@ -379,7 +380,7 @@ describe('handleDeleteSelection', () => {
     handleDeleteSelection(store.dispatch, refs);
 
     // result
-    const vectorNode = store.getState().design.nodes[vectorId] as TVectorNode;
+    const vectorNode = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId] as TVectorNode;
 
     expect(vectorNode.segments).toHaveProperty('segment-1');
     expect(refs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);

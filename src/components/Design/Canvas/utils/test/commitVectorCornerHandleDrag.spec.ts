@@ -1,5 +1,6 @@
 // store
 import { addNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -28,7 +29,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -37,7 +38,7 @@ describe('commitVectorCornerHandleDrag', () => {
   it('should mark the vertex symmetric, select only the new handle, and arm the handle-drag ref', () => {
     // mock
     const nodeId = addVectorNode();
-    const node = getVectorEditingNode(store.getState().design.nodes, nodeId) as TVectorNode;
+    const node = getVectorEditingNode(store.getState().design.pages[store.getState().design.activePageId].nodes, nodeId) as TVectorNode;
     const canvasRefs = createCanvasRefs();
     const vectorHandleDragRef = { current: null };
 
@@ -47,7 +48,7 @@ describe('commitVectorCornerHandleDrag', () => {
     commitVectorCornerHandleDrag(node, 'v1', { end: 'start', segmentId: 's1' }, store.dispatch, canvasRefs, vectorHandleDragRef);
 
     // result
-    const updated = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updated = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(updated.vertexHandleModes).toEqual({ v1: 'symmetric' });
     expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([{ end: 'start', segmentId: 's1' }]);

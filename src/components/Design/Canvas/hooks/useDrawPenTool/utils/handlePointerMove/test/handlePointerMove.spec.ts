@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds, updateNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -52,7 +53,7 @@ const addVectorNodeWithSegment = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -94,7 +95,7 @@ describe('handlePointerMove', () => {
     );
 
     // result
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(node.segments.s1.tangentEnd).toEqual({ x: -20, y: -5 });
     expect(penDraggedHandlePositionRef.current).toEqual({ x: 20, y: 5 });
@@ -446,7 +447,12 @@ describe('handlePointerMove', () => {
 
     store.dispatch(
       updateNode({
-        changes: { vertices: { ...(store.getState().design.nodes[nodeId] as TVectorNode).vertices, v3: { id: 'v3', x: 50, y: 100 } } },
+        changes: {
+          vertices: {
+            ...(store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode).vertices,
+            v3: { id: 'v3', x: 50, y: 100 },
+          },
+        },
         id: nodeId,
       }),
     );
@@ -491,7 +497,12 @@ describe('handlePointerMove', () => {
 
     store.dispatch(
       updateNode({
-        changes: { vertices: { ...(store.getState().design.nodes[nodeId] as TVectorNode).vertices, v3: { id: 'v3', x: 50, y: 100 } } },
+        changes: {
+          vertices: {
+            ...(store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode).vertices,
+            v3: { id: 'v3', x: 50, y: 100 },
+          },
+        },
         id: nodeId,
       }),
     );

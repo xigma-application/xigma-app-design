@@ -1,15 +1,16 @@
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import { TDesignState } from '../../types';
+import { TDesignPage, TDesignState } from '../../types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
+import { getActivePage } from '../getActivePage';
 import { handleSetVectorEditingNodeIds } from '../handleSetVectorEditingNodeIds';
 
-const buildState = (nodes: TDesignState['nodes'], overrides: Partial<TDesignState> = {}): TDesignState => ({
+const buildState = (nodes: TDesignPage['nodes'], overrides: Partial<TDesignState> = {}): TDesignState => ({
+  activePageId: 'page-1',
   activeTool: ToolName.default,
   commentDraftPosition: null,
-  comments: {},
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,
@@ -23,13 +24,20 @@ const buildState = (nodes: TDesignState['nodes'], overrides: Partial<TDesignStat
   lastPenTool: ToolName.pen,
   lastShapeTool: ToolName.rectangle,
   lastTextTool: ToolName.text,
-  nodes,
-  paintColor: '#d9d9d9',
+  pages: {
+    'page-1': {
+      comments: {},
+      id: 'page-1',
+      name: 'Page 1',
+      nodes,
+      paintColor: '#d9d9d9',
+      rootOrder: Object.keys(nodes),
+      viewport: { x: 0, y: 0, zoom: 1 },
+    },
+  },
   penActiveVertexId: null,
-  rootOrder: Object.keys(nodes),
   selectedIds: [],
   vectorEditingNodeIds: [],
-  viewport: { x: 0, y: 0, zoom: 1 },
   ...overrides,
 });
 
@@ -60,7 +68,7 @@ describe('handleSetVectorEditingNodeIds', () => {
 
     // result
     expect(state.vectorEditingNodeIds).toEqual([node.id]);
-    expect(state.nodes[node.id]).toBeDefined();
+    expect(getActivePage(state).nodes[node.id]).toBeDefined();
   });
 
   it('should reset the last More tool when exiting Vector Edit Mode entirely', () => {
@@ -101,7 +109,7 @@ describe('handleSetVectorEditingNodeIds', () => {
 
     // result
     expect(state.vectorEditingNodeIds).toEqual([]);
-    expect(state.nodes[node.id]).toBeUndefined();
+    expect(getActivePage(state).nodes[node.id]).toBeUndefined();
   });
 
   it('should not delete the exited node when it already has a segment', () => {
@@ -117,7 +125,7 @@ describe('handleSetVectorEditingNodeIds', () => {
 
     // result
     expect(state.vectorEditingNodeIds).toEqual([]);
-    expect(state.nodes[node.id]).toBeDefined();
+    expect(getActivePage(state).nodes[node.id]).toBeDefined();
   });
 
   it('should not delete anything when re-entering edit mode on the same still-empty node', () => {
@@ -129,7 +137,7 @@ describe('handleSetVectorEditingNodeIds', () => {
     handleSetVectorEditingNodeIds(state, [node.id]);
 
     // result
-    expect(state.nodes[node.id]).toBeDefined();
+    expect(getActivePage(state).nodes[node.id]).toBeDefined();
   });
 
   it('should delete only the empty node that dropped out when two nodes were open and one exits', () => {
@@ -150,8 +158,8 @@ describe('handleSetVectorEditingNodeIds', () => {
 
     // result
     expect(state.vectorEditingNodeIds).toEqual([populatedNode.id]);
-    expect(state.nodes[emptyNode.id]).toBeUndefined();
-    expect(state.nodes[populatedNode.id]).toBeDefined();
+    expect(getActivePage(state).nodes[emptyNode.id]).toBeUndefined();
+    expect(getActivePage(state).nodes[populatedNode.id]).toBeDefined();
   });
 
   it('should not delete a dropped-out node that already has a segment even alongside another that stays open', () => {
@@ -173,7 +181,7 @@ describe('handleSetVectorEditingNodeIds', () => {
 
     // result
     expect(state.vectorEditingNodeIds).toEqual([nodeB.id]);
-    expect(state.nodes[nodeA.id]).toBeDefined();
-    expect(state.nodes[nodeB.id]).toBeDefined();
+    expect(getActivePage(state).nodes[nodeA.id]).toBeDefined();
+    expect(getActivePage(state).nodes[nodeB.id]).toBeDefined();
   });
 });

@@ -180,7 +180,7 @@ describe('useDrawMediaTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 10, 10));
 
     // result
-    expect(store.getState().design.rootOrder).toHaveLength(0);
+    expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toHaveLength(0);
   });
 
   it('should not react to pointer events before a file is chosen', () => {
@@ -346,9 +346,10 @@ describe('useDrawMediaTool behaviors', () => {
 
     // result — the click point (10,10) lands at the center of the 200x100 image, not its corner
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.rootOrder).toHaveLength(1);
-    expect(design.nodes[design.rootOrder[0]]).toMatchObject({
+    expect(page.rootOrder).toHaveLength(1);
+    expect(page.nodes[page.rootOrder[0]]).toMatchObject({
       height: 100,
       name: 'Image',
       src: 'blob:mock-url',
@@ -382,8 +383,9 @@ describe('useDrawMediaTool behaviors', () => {
 
     // result — the raw 50x50 drag does not match the 2:1 source ratio, so it must be locked
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ height: 50, width: 100, x: 0, y: 0 });
+    expect(page.nodes[page.rootOrder[0]]).toMatchObject({ height: 50, width: 100, x: 0, y: 0 });
   });
 
   it('should place a click natural-size image, then an aspect-locked dragged image, from a multi-file selection', () => {
@@ -413,7 +415,7 @@ describe('useDrawMediaTool behaviors', () => {
     });
 
     // result — one node placed, tool stays on media with the second file now armed
-    expect(store.getState().design.rootOrder).toHaveLength(1);
+    expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toHaveLength(1);
     expect(store.getState().design.activeTool).toBe(ToolName.media);
 
     const secondImage = getLastImage();
@@ -431,15 +433,16 @@ describe('useDrawMediaTool behaviors', () => {
 
     // result — both files placed, tool reverts to default once the queue is empty
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.rootOrder).toHaveLength(2);
-    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ height: 100, width: 200, x: -90, y: -40 });
+    expect(page.rootOrder).toHaveLength(2);
+    expect(page.nodes[page.rootOrder[0]]).toMatchObject({ height: 100, width: 200, x: -90, y: -40 });
     // raw 50x25 drag locked to the second file's 1:2 ratio (twice as tall as wide) — the raw
     // height (25) is far too short for that ratio, so it gets forced up to 100
-    expect(design.nodes[design.rootOrder[1]]).toMatchObject({ height: 100, width: 50, x: 40, y: 40 });
+    expect(page.nodes[page.rootOrder[1]]).toMatchObject({ height: 100, width: 50, x: 40, y: 40 });
     expect(design.activeTool).toBe(ToolName.default);
     // both files from the same multi-file pick end up selected together, not just the last one
-    expect(design.selectedIds).toEqual([design.rootOrder[0], design.rootOrder[1]]);
+    expect(design.selectedIds).toEqual([page.rootOrder[0], page.rootOrder[1]]);
   });
 
   it('should clear a pre-existing selection once when files are picked, then keep every placed file selected as more are placed', () => {
@@ -471,7 +474,9 @@ describe('useDrawMediaTool behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 10, 10));
     });
 
-    const { rootOrder: rootOrderAfterFirst, selectedIds: selectedAfterFirst } = store.getState().design;
+    const designAfterFirst = store.getState().design;
+    const { rootOrder: rootOrderAfterFirst } = designAfterFirst.pages[designAfterFirst.activePageId];
+    const { selectedIds: selectedAfterFirst } = designAfterFirst;
 
     expect(selectedAfterFirst).toEqual([rootOrderAfterFirst[0]]);
 
@@ -488,7 +493,9 @@ describe('useDrawMediaTool behaviors', () => {
     });
 
     // result — the first file's selection is kept, the second is added alongside it
-    const { rootOrder, selectedIds } = store.getState().design;
+    const designAfter = store.getState().design;
+    const { rootOrder } = designAfter.pages[designAfter.activePageId];
+    const { selectedIds } = designAfter;
 
     expect(selectedIds).toEqual([rootOrder[0], rootOrder[1]]);
   });
@@ -517,10 +524,11 @@ describe('useDrawMediaTool behaviors', () => {
     });
 
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.rootOrder).toHaveLength(1);
-    expect(design.viewport).toEqual({ x: 150, y: 90, zoom: 1 });
-    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ x: -240, y: -130 });
+    expect(page.rootOrder).toHaveLength(1);
+    expect(page.viewport).toEqual({ x: 150, y: 90, zoom: 1 });
+    expect(page.nodes[page.rootOrder[0]]).toMatchObject({ x: -240, y: -130 });
   });
 
   it('should not place a stale armed file after the tool is deactivated and reactivated without picking a new one', () => {
@@ -542,6 +550,6 @@ describe('useDrawMediaTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 10, 10));
 
     // result
-    expect(store.getState().design.rootOrder).toHaveLength(0);
+    expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toHaveLength(0);
   });
 });

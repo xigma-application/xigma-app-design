@@ -1,5 +1,6 @@
 // store
 import { addNode, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { undo } from 'store/history/actions';
 import { store } from 'store';
 
@@ -27,7 +28,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -47,10 +48,16 @@ describe('pasteVectorFragment', () => {
     const fragment = { filledFacePieceKeySets: [], segments: [], vertexHandleModes: {}, vertices: [{ id: 'copied', x: 5, y: 5 }] };
 
     // action
-    pasteVectorFragment(store.dispatch, refs, store.getState().design.nodes, [vectorId], fragment);
+    pasteVectorFragment(
+      store.dispatch,
+      refs,
+      store.getState().design.pages[store.getState().design.activePageId].nodes,
+      [vectorId],
+      fragment,
+    );
 
     // result
-    const node = store.getState().design.nodes[vectorId] as any;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId] as any;
 
     expect(Object.keys(node.vertices)).toHaveLength(2);
     expect(refs.vectorEdit.selectedVectorVertexIdsRef.current).toHaveLength(1);
@@ -67,11 +74,17 @@ describe('pasteVectorFragment', () => {
     const fragment = { filledFacePieceKeySets: [], segments: [], vertexHandleModes: {}, vertices: [{ id: 'copied', x: 5, y: 5 }] };
 
     // action
-    pasteVectorFragment(store.dispatch, refs, store.getState().design.nodes, [vectorId], fragment);
+    pasteVectorFragment(
+      store.dispatch,
+      refs,
+      store.getState().design.pages[store.getState().design.activePageId].nodes,
+      [vectorId],
+      fragment,
+    );
     store.dispatch(undo());
 
     // result
-    const node = store.getState().design.nodes[vectorId] as any;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId] as any;
 
     expect(Object.keys(node.vertices)).toHaveLength(1);
   });

@@ -8,6 +8,7 @@ import { useVectorEditOnDoubleClick } from './useVectorEditOnDoubleClick';
 
 // store
 import { addNode, setActiveTool, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -74,7 +75,7 @@ const addTriangleVectorNode = (rotation = 0): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -84,7 +85,7 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
     addNode({ fill: '#ff0000', height: size, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: size, x, y }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -208,7 +209,7 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     // is deferred to the first actual interaction (armBakeVectorRotationOnPointerDown.ts), not entry
     const idA = addTriangleVectorNode(180);
     const canvasRef = createCanvasRef();
-    const originalNode = store.getState().design.nodes[idA];
+    const originalNode = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
     // before
     renderDoubleClickTool(canvasRef);
@@ -220,9 +221,10 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
     expect(design.vectorEditingNodeIds).toEqual([idA]);
-    expect(design.nodes[idA]).toEqual(originalNode);
+    expect(page.nodes[idA]).toEqual(originalNode);
   });
 
   it('should not exit Vector Edit Mode when double-clicking the shape currently being edited', () => {

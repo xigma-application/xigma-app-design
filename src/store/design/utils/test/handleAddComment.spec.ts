@@ -3,12 +3,13 @@ import { ToolName } from 'types/design/enums';
 import { TDesignState } from '../../types';
 
 // utils
+import { getActivePage } from '../getActivePage';
 import { handleAddComment } from '../handleAddComment';
 
 const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
+  activePageId: 'page-1',
   activeTool: ToolName.comment,
   commentDraftPosition: null,
-  comments: {},
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,
@@ -22,13 +23,20 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   lastPenTool: ToolName.pen,
   lastShapeTool: ToolName.rectangle,
   lastTextTool: ToolName.text,
-  nodes: {},
-  paintColor: '#d9d9d9',
+  pages: {
+    'page-1': {
+      comments: {},
+      id: 'page-1',
+      name: 'Page 1',
+      nodes: {},
+      paintColor: '#d9d9d9',
+      rootOrder: [],
+      viewport: { x: 0, y: 0, zoom: 1 },
+    },
+  },
   penActiveVertexId: null,
-  rootOrder: [],
   selectedIds: [],
   vectorEditingNodeIds: [],
-  viewport: { x: 0, y: 0, zoom: 1 },
   ...overrides,
 });
 
@@ -50,7 +58,7 @@ describe('handleAddComment', () => {
     handleAddComment(state, { content: 'hello', id: 'comment-1' });
 
     // result
-    expect(state.comments['comment-1']).toEqual({
+    expect(getActivePage(state).comments['comment-1']).toEqual({
       author: 'Xigma',
       content: 'hello',
       createdAt: 1000,
@@ -69,6 +77,6 @@ describe('handleAddComment', () => {
     handleAddComment(state, { content: 'hello', id: 'comment-1' });
 
     // result
-    expect(state.comments).toEqual({});
+    expect(getActivePage(state).comments).toEqual({});
   });
 });

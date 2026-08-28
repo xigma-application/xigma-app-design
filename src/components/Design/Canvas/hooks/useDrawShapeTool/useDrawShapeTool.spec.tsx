@@ -10,6 +10,7 @@ import { useDrawShapeTool, TShapeToolConfig } from './useDrawShapeTool';
 // store
 import designReducer, { setActiveTool, setSelection } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
+import { selectActivePage } from 'store/design/selectors';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
@@ -105,9 +106,10 @@ describe.each(CONFIGS)('useDrawShapeTool behaviors ($label)', ({ config }) => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.rootOrder).toHaveLength(1);
-    expect(design.nodes[design.rootOrder[0]]).toMatchObject({
+    expect(page.rootOrder).toHaveLength(1);
+    expect(page.nodes[page.rootOrder[0]]).toMatchObject({
       fill: config.fill,
       height: 30,
       name: config.name,
@@ -117,7 +119,7 @@ describe.each(CONFIGS)('useDrawShapeTool behaviors ($label)', ({ config }) => {
       y: 10,
     });
     expect(design.activeTool).toBe(ToolName.default);
-    expect(design.selectedIds).toEqual([design.rootOrder[0]]);
+    expect(design.selectedIds).toEqual([page.rootOrder[0]]);
     expect(draftRef.current).toBeNull();
   });
 
@@ -189,7 +191,7 @@ describe.each(CONFIGS)('useDrawShapeTool behaviors ($label)', ({ config }) => {
     });
 
     // result
-    const { nodes, rootOrder } = store.getState().design;
+    const { nodes, rootOrder } = selectActivePage(store.getState());
 
     expect(rootOrder).toHaveLength(1);
     expect(nodes[rootOrder[0]]).toMatchObject({ height: 100, width: 100, x: -40, y: -40 });
@@ -216,7 +218,7 @@ describe.each(CONFIGS)('useDrawShapeTool behaviors ($label)', ({ config }) => {
     });
 
     // result
-    const { nodes, rootOrder } = store.getState().design;
+    const { nodes, rootOrder } = selectActivePage(store.getState());
 
     expect(rootOrder).toHaveLength(1);
     expect(nodes[rootOrder[0]]).toMatchObject({ height: 100, width: 100, x: -40, y: -40 });
@@ -265,10 +267,11 @@ describe.each(CONFIGS)('useDrawShapeTool behaviors ($label)', ({ config }) => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.rootOrder).toHaveLength(1);
-    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ height: 100, width: 100, x: -40, y: -40 });
+    expect(page.rootOrder).toHaveLength(1);
+    expect(page.nodes[page.rootOrder[0]]).toMatchObject({ height: 100, width: 100, x: -40, y: -40 });
     expect(design.activeTool).toBe(ToolName.default);
-    expect(design.selectedIds).toEqual([design.rootOrder[0]]);
+    expect(design.selectedIds).toEqual([page.rootOrder[0]]);
   });
 });

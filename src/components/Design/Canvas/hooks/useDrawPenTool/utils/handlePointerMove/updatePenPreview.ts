@@ -39,7 +39,7 @@ export const updatePenPreview = (
   const node = resolvePenTargetNode(
     point,
     vectorEditingNodeIds,
-    state.design.nodes,
+    state.design.pages[state.design.activePageId].nodes,
     penActiveVertexId,
     VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom,
     viewport.zoom,
@@ -52,7 +52,7 @@ export const updatePenPreview = (
     updateActiveVertexPreview(
       point,
       node,
-      state.design.nodes,
+      state.design.pages[state.design.activePageId].nodes,
       penActiveVertexId,
       viewport,
       isShiftPressed,

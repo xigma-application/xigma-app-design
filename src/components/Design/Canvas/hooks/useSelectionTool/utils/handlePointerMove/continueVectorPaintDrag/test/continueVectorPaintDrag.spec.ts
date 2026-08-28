@@ -1,5 +1,6 @@
 // store
 import { addNode, setPaintColor, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -52,7 +53,7 @@ const addSplitSquareVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -107,7 +108,7 @@ const addSplitSquareVectorNodeWithUpperRightFilled = (color: string): { nodeId: 
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return { nodeId: rootOrder[rootOrder.length - 1], upperRightKey };
 };
@@ -144,7 +145,7 @@ const addSquareWithVirtualCrossingVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };

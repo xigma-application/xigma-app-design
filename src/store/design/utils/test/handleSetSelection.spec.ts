@@ -1,15 +1,16 @@
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import { TDesignState } from '../../types';
+import { TDesignPage, TDesignState } from '../../types';
 import { TEllipseNode, TFrameNode, TVectorNode } from 'types/design/types';
 
 // utils
+import { getActivePage } from '../getActivePage';
 import { handleSetSelection } from '../handleSetSelection';
 
-const buildState = (nodes: TDesignState['nodes'], selectedIds: string[], overrides: Partial<TDesignState> = {}): TDesignState => ({
+const buildState = (nodes: TDesignPage['nodes'], selectedIds: string[], overrides: Partial<TDesignState> = {}): TDesignState => ({
+  activePageId: 'page-1',
   activeTool: ToolName.default,
   commentDraftPosition: null,
-  comments: {},
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,
@@ -23,13 +24,20 @@ const buildState = (nodes: TDesignState['nodes'], selectedIds: string[], overrid
   lastPenTool: ToolName.pen,
   lastShapeTool: ToolName.rectangle,
   lastTextTool: ToolName.text,
-  nodes,
-  paintColor: '#d9d9d9',
+  pages: {
+    'page-1': {
+      comments: {},
+      id: 'page-1',
+      name: 'Page 1',
+      nodes,
+      paintColor: '#d9d9d9',
+      rootOrder: Object.keys(nodes),
+      viewport: { x: 0, y: 0, zoom: 1 },
+    },
+  },
   penActiveVertexId: null,
-  rootOrder: Object.keys(nodes),
   selectedIds,
   vectorEditingNodeIds: [],
-  viewport: { x: 0, y: 0, zoom: 1 },
   ...overrides,
 });
 
@@ -96,7 +104,7 @@ describe('handleSetSelection', () => {
     handleSetSelection(state, []);
 
     // result
-    expect(state.nodes[frame.id]).toBeDefined();
+    expect(getActivePage(state).nodes[frame.id]).toBeDefined();
   });
 
   it('should not delete a deselected ellipse with no arc angles set (defaults to a full circle)', () => {
@@ -108,7 +116,7 @@ describe('handleSetSelection', () => {
     handleSetSelection(state, []);
 
     // result
-    expect(state.nodes[ellipse.id]).toBeDefined();
+    expect(getActivePage(state).nodes[ellipse.id]).toBeDefined();
   });
 
   it('should delete a deselected ellipse that is fully cut away', () => {
@@ -120,7 +128,7 @@ describe('handleSetSelection', () => {
     handleSetSelection(state, []);
 
     // result
-    expect(state.nodes[ellipse.id]).toBeUndefined();
+    expect(getActivePage(state).nodes[ellipse.id]).toBeUndefined();
   });
 
   it('should not delete a fully cut-away ellipse that stays selected', () => {
@@ -132,7 +140,7 @@ describe('handleSetSelection', () => {
     handleSetSelection(state, [ellipse.id]);
 
     // result
-    expect(state.nodes[ellipse.id]).toBeDefined();
+    expect(getActivePage(state).nodes[ellipse.id]).toBeDefined();
   });
 
   it('should keep vectorEditingNodeIds when the vector node stays the sole selection', () => {
@@ -211,7 +219,7 @@ describe('handleSetSelection', () => {
     handleSetSelection(state, []);
 
     // result
-    expect(state.nodes[node.id]).toBeUndefined();
+    expect(getActivePage(state).nodes[node.id]).toBeUndefined();
   });
 
   it('should not delete a deselected vector node that already has a segment', () => {
@@ -226,7 +234,7 @@ describe('handleSetSelection', () => {
     handleSetSelection(state, []);
 
     // result
-    expect(state.nodes[node.id]).toBeDefined();
+    expect(getActivePage(state).nodes[node.id]).toBeDefined();
   });
 
   it('should delete the vector-editing node once its edit mode exits, when it never got any segments drawn', () => {
@@ -240,7 +248,7 @@ describe('handleSetSelection', () => {
 
     // result
     expect(state.vectorEditingNodeIds).toEqual([]);
-    expect(state.nodes[node.id]).toBeUndefined();
+    expect(getActivePage(state).nodes[node.id]).toBeUndefined();
   });
 
   it('should delete an empty vector-editing node on exit even when it was never part of selectedIds', () => {
@@ -255,7 +263,7 @@ describe('handleSetSelection', () => {
 
     // result
     expect(state.vectorEditingNodeIds).toEqual([]);
-    expect(state.nodes[node.id]).toBeUndefined();
+    expect(getActivePage(state).nodes[node.id]).toBeUndefined();
   });
 
   it('should not delete the vector-editing node once its edit mode exits, when it already has a segment', () => {
@@ -272,6 +280,6 @@ describe('handleSetSelection', () => {
 
     // result
     expect(state.vectorEditingNodeIds).toEqual([]);
-    expect(state.nodes[node.id]).toBeDefined();
+    expect(getActivePage(state).nodes[node.id]).toBeDefined();
   });
 });

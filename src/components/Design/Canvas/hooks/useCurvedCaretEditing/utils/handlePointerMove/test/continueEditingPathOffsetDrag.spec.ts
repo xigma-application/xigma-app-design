@@ -1,5 +1,6 @@
 // store
 import { addNode, startTextEdit, stopTextEdit } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -87,7 +88,7 @@ describe('continueEditingPathOffsetDrag', () => {
       }),
     );
 
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const nodeId = rootOrder[rootOrder.length - 1];
 
     store.dispatch(startTextEdit({ box: CIRCLE_BOX, content: 'Hi', id: nodeId }));
@@ -98,7 +99,9 @@ describe('continueEditingPathOffsetDrag', () => {
     continueEditingPathOffsetDrag(canvas, pointerEvent(BOTTOM.x, BOTTOM.y), store.dispatch);
 
     // result
-    expect(store.getState().design.nodes[nodeId]).toMatchObject({ pathStartOffset: expect.closeTo(0.25, 2) });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId]).toMatchObject({
+      pathStartOffset: expect.closeTo(0.25, 2),
+    });
     expect(store.getState().design.editingTextBox).toMatchObject({ pathStartOffset: expect.closeTo(0.25, 2) });
   });
 });

@@ -13,6 +13,7 @@ import { createHistoryMiddleware } from 'store/history/historyMiddleware';
 import { createHistoryStack } from 'store/history/createHistoryStack';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 import { AppStore, store as realStore } from 'store';
+import { selectActivePage } from 'store/design/selectors';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
@@ -414,7 +415,7 @@ describe('useKeyboardShortcuts behaviors', () => {
     );
     store.dispatch(endHistoryGesture());
 
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const nodeId = rootOrder[rootOrder.length - 1];
 
     store.dispatch(undo());
@@ -426,7 +427,7 @@ describe('useKeyboardShortcuts behaviors', () => {
     fireEvent.keyDown(window, { code: 'KeyZ', metaKey: true, shiftKey: true });
 
     // result
-    expect(store.getState().design.nodes[nodeId]).toBeDefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId]).toBeDefined();
   });
 
   it('should dispatch undo on "Cmd+Z"', () => {
@@ -439,7 +440,7 @@ describe('useKeyboardShortcuts behaviors', () => {
     );
     store.dispatch(endHistoryGesture());
 
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const nodeId = rootOrder[rootOrder.length - 1];
 
     // before
@@ -449,7 +450,7 @@ describe('useKeyboardShortcuts behaviors', () => {
     fireEvent.keyDown(window, { code: 'KeyZ', metaKey: true });
 
     // result
-    expect(store.getState().design.nodes[nodeId]).toBeUndefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId]).toBeUndefined();
   });
 
   it('should toggle the minimized UI flag on "Cmd+Shift+\\"', () => {
@@ -481,7 +482,7 @@ describe('useKeyboardShortcuts delete/backspace behaviors', () => {
       addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
     );
 
-    const { rootOrder } = realStore.getState().design;
+    const { rootOrder } = selectActivePage(realStore.getState());
 
     return rootOrder[rootOrder.length - 1];
   };
@@ -505,7 +506,7 @@ describe('useKeyboardShortcuts delete/backspace behaviors', () => {
     fireEvent.keyDown(window, { code: 'Delete' });
 
     // result
-    expect(realStore.getState().design.nodes[idA]).toBeUndefined();
+    expect(realStore.getState().design.pages[realStore.getState().design.activePageId].nodes[idA]).toBeUndefined();
   });
 
   it('should delete the selected node on "Backspace"', () => {
@@ -523,7 +524,7 @@ describe('useKeyboardShortcuts delete/backspace behaviors', () => {
     fireEvent.keyDown(window, { code: 'Backspace' });
 
     // result
-    expect(realStore.getState().design.nodes[idA]).toBeUndefined();
+    expect(realStore.getState().design.pages[realStore.getState().design.activePageId].nodes[idA]).toBeUndefined();
   });
 });
 
@@ -535,7 +536,7 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
       addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x, y }),
     );
 
-    const { rootOrder } = realStore.getState().design;
+    const { rootOrder } = selectActivePage(realStore.getState());
 
     return rootOrder[rootOrder.length - 1];
   };
@@ -558,7 +559,9 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
     fireEvent.keyDown(window, { code: 'KeyA', metaKey: true });
 
     // result
-    expect(realStore.getState().design.selectedIds).toEqual(realStore.getState().design.rootOrder);
+    expect(realStore.getState().design.selectedIds).toEqual(
+      realStore.getState().design.pages[realStore.getState().design.activePageId].rootOrder,
+    );
   });
 
   it('should duplicate the selected node on "Cmd+D"', () => {
@@ -591,14 +594,16 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
       wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
     });
 
-    const nodeCountBeforePaste = Object.keys(realStore.getState().design.nodes).length;
+    const nodeCountBeforePaste = Object.keys(realStore.getState().design.pages[realStore.getState().design.activePageId].nodes).length;
 
     // action
     fireEvent.keyDown(window, { code: 'KeyC', metaKey: true });
     fireEvent.keyDown(window, { code: 'KeyV', metaKey: true });
 
     // result
-    expect(Object.keys(realStore.getState().design.nodes)).toHaveLength(nodeCountBeforePaste + 1);
+    expect(Object.keys(realStore.getState().design.pages[realStore.getState().design.activePageId].nodes)).toHaveLength(
+      nodeCountBeforePaste + 1,
+    );
   });
 
   it('should duplicate the selected vertex on "Cmd+D" while a vector node is open for editing', () => {
@@ -619,7 +624,7 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
       }),
     );
 
-    const { rootOrder } = realStore.getState().design;
+    const { rootOrder } = selectActivePage(realStore.getState());
     const vectorId = rootOrder[rootOrder.length - 1];
 
     realStore.dispatch(setVectorEditingNodeIds([vectorId]));
@@ -635,7 +640,9 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
     fireEvent.keyDown(window, { code: 'KeyD', metaKey: true });
 
     // result
-    expect(Object.keys((realStore.getState().design.nodes[vectorId] as any).vertices)).toHaveLength(2);
+    expect(
+      Object.keys((realStore.getState().design.pages[realStore.getState().design.activePageId].nodes[vectorId] as any).vertices),
+    ).toHaveLength(2);
 
     // cleanup
     realStore.dispatch(setVectorEditingNodeIds([]));
@@ -656,7 +663,7 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
     fireEvent.keyDown(window, { code: 'ArrowRight' });
 
     // result
-    expect(realStore.getState().design.nodes[idA]).toMatchObject({ x: 11 });
+    expect(realStore.getState().design.pages[realStore.getState().design.activePageId].nodes[idA]).toMatchObject({ x: 11 });
   });
 
   it('should nudge the selected node by 10px on "Shift+ArrowRight"', () => {
@@ -674,7 +681,7 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
     fireEvent.keyDown(window, { code: 'ArrowRight', shiftKey: true });
 
     // result
-    expect(realStore.getState().design.nodes[idA]).toMatchObject({ x: 20 });
+    expect(realStore.getState().design.pages[realStore.getState().design.activePageId].nodes[idA]).toMatchObject({ x: 20 });
   });
 });
 
@@ -723,7 +730,7 @@ describe('useKeyboardShortcuts "Enter" behaviors', () => {
       }),
     );
 
-    const { rootOrder } = realStore.getState().design;
+    const { rootOrder } = selectActivePage(realStore.getState());
 
     return rootOrder[rootOrder.length - 1];
   };
@@ -733,7 +740,7 @@ describe('useKeyboardShortcuts "Enter" behaviors', () => {
       addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
     );
 
-    const { rootOrder } = realStore.getState().design;
+    const { rootOrder } = selectActivePage(realStore.getState());
 
     return rootOrder[rootOrder.length - 1];
   };
@@ -831,7 +838,7 @@ describe('useKeyboardShortcuts "Shift+W" behaviors', () => {
       }),
     );
 
-    const { rootOrder } = realStore.getState().design;
+    const { rootOrder } = selectActivePage(realStore.getState());
     const vectorId = rootOrder[rootOrder.length - 1];
 
     realStore.dispatch(setVectorEditingNodeIds([vectorId]));

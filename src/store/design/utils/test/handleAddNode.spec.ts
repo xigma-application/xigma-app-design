@@ -23,9 +23,9 @@ describe('handleAddNode', () => {
   it('should store the node and append its id to rootOrder', () => {
     // mock
     const state: TDesignState = {
+      activePageId: 'page-1',
       activeTool: ToolName.default,
       commentDraftPosition: null,
-      comments: {},
       editingNodeId: null,
       editingSelectionChangedAt: 0,
       editingSelectionEnd: 0,
@@ -39,29 +39,36 @@ describe('handleAddNode', () => {
       lastPenTool: ToolName.pen,
       lastShapeTool: ToolName.rectangle,
       lastTextTool: ToolName.text,
-      nodes: {},
-      paintColor: '#d9d9d9',
+      pages: {
+        'page-1': {
+          comments: {},
+          id: 'page-1',
+          name: 'Page 1',
+          nodes: {},
+          paintColor: '#d9d9d9',
+          rootOrder: [],
+          viewport: { x: 0, y: 0, zoom: 1 },
+        },
+      },
       penActiveVertexId: null,
-      rootOrder: [],
       selectedIds: [],
       vectorEditingNodeIds: [],
-      viewport: { x: 0, y: 0, zoom: 1 },
     };
 
     // before
     handleAddNode(state, node);
 
     // result
-    expect(state.nodes[node.id]).toEqual(node);
-    expect(state.rootOrder).toEqual([node.id]);
+    expect(state.pages[state.activePageId].nodes[node.id]).toEqual(node);
+    expect(state.pages[state.activePageId].rootOrder).toEqual([node.id]);
   });
 
   it('should append after existing nodes without disturbing them', () => {
     // mock
     const state: TDesignState = {
+      activePageId: 'page-1',
       activeTool: ToolName.default,
       commentDraftPosition: null,
-      comments: {},
       editingNodeId: null,
       editingSelectionChangedAt: 0,
       editingSelectionEnd: 0,
@@ -75,19 +82,26 @@ describe('handleAddNode', () => {
       lastPenTool: ToolName.pen,
       lastShapeTool: ToolName.rectangle,
       lastTextTool: ToolName.text,
-      nodes: { existing: { ...node, id: 'existing' } },
-      paintColor: '#d9d9d9',
+      pages: {
+        'page-1': {
+          comments: {},
+          id: 'page-1',
+          name: 'Page 1',
+          nodes: { existing: { ...node, id: 'existing' } },
+          paintColor: '#d9d9d9',
+          rootOrder: ['existing'],
+          viewport: { x: 0, y: 0, zoom: 1 },
+        },
+      },
       penActiveVertexId: null,
-      rootOrder: ['existing'],
       selectedIds: [],
       vectorEditingNodeIds: [],
-      viewport: { x: 0, y: 0, zoom: 1 },
     };
 
     // before
     handleAddNode(state, node);
 
     // result
-    expect(state.rootOrder).toEqual(['existing', node.id]);
+    expect(state.pages[state.activePageId].rootOrder).toEqual(['existing', node.id]);
   });
 });

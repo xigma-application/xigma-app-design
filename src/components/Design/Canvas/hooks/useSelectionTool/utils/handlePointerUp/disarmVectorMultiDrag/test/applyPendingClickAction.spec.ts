@@ -1,5 +1,6 @@
 // store
 import { addNode, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -39,7 +40,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -119,7 +120,7 @@ describe('applyPendingClickAction', () => {
     );
 
     // result
-    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updatedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const [newVertexId] = canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current;
 
     expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual([]);

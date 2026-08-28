@@ -19,6 +19,7 @@ export default defineConfig({
     tsconfigPaths: true,
   },
   server: {
+    hmr: process.env.STATIC_DEV ? false : undefined,
     watch: {
       ignored: ['**/coverage/**'],
     },

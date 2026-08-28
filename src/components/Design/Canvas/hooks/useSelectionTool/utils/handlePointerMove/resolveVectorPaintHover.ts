@@ -25,7 +25,7 @@ export const resolveVectorPaintHover = (
   if (activeTool === ToolName.paint && vectorEditingNodeIds.length > 0 && event.buttons === 0) {
     const viewport = selectViewport(state);
     const point = screenToWorld(getPointerPosition(canvas, event), viewport);
-    const hit = getVectorFaceAtPointAcrossOpenNodes(point, vectorEditingNodeIds, state.design.nodes);
+    const hit = getVectorFaceAtPointAcrossOpenNodes(point, vectorEditingNodeIds, state.design.pages[state.design.activePageId].nodes);
     const isFilled = Boolean(hit && getVectorFillLoopKeyAtPoint(hit.node, point));
 
     canvasRefs.hover.hoveredVectorPaintFaceKeyRef.current = hit ? { faceKey: hit.face.key, isFilled, nodeId: hit.node.id } : null;

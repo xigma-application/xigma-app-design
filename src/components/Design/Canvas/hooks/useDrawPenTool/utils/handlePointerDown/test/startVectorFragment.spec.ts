@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -38,7 +39,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -60,7 +61,7 @@ const addVectorNodeWithSegment = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -75,7 +76,7 @@ describe('startVectorFragment', () => {
   it('should activate the existing vertex, without adding a new one, when clicking near it', () => {
     // mock
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const dragOriginRef = createDragOriginRef();
     const dragStartRef = createDragStartRef();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
@@ -85,14 +86,16 @@ describe('startVectorFragment', () => {
 
     // result
     expect(store.getState().design.penActiveVertexId).toBe('v1');
-    expect(Object.keys((store.getState().design.nodes[nodeId] as TVectorNode).vertices)).toEqual(['v1']);
+    expect(
+      Object.keys((store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode).vertices),
+    ).toEqual(['v1']);
   });
 
   it('should arm the drag on the resumed vertex, so click-dragging away from it shapes a fresh outgoing tangent', () => {
     // mock — same click-drag-to-curve capability startNewVectorNetwork/the blank-canvas branch already give a
     // brand-new vertex, now also available when resuming an existing one ("od innego punktu startuje")
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const dragOriginRef = createDragOriginRef();
     const dragStartRef = createDragStartRef();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
@@ -112,7 +115,7 @@ describe('startVectorFragment', () => {
     // reset the resumed vertex would silently inherit the old drag's tangent and instantly render/commit a
     // curve on the very next pointermove/click, even though the user only intended a plain click
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const dragOriginRef = createDragOriginRef();
     const dragStartRef = createDragStartRef();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef({ tangent: { x: 40, y: 40 }, vertexId: 'v1' });
@@ -127,7 +130,7 @@ describe('startVectorFragment', () => {
   it('should add a new vertex and arm the drag when clicking away from any existing vertex', () => {
     // mock
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const dragOriginRef = createDragOriginRef();
     const dragStartRef = createDragStartRef();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
@@ -136,7 +139,7 @@ describe('startVectorFragment', () => {
     startVectorFragment({ x: 50, y: 50 }, node, IDENTITY_VIEWPORT, store.dispatch, dragOriginRef, dragStartRef, pendingOutgoingTangentRef);
 
     // result
-    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updatedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const newVertexId = store.getState().design.penActiveVertexId as string;
 
     expect(newVertexId).not.toBe('v1');
@@ -148,7 +151,7 @@ describe('startVectorFragment', () => {
   it('should split the edge and activate the new split point when clicking on an existing segment — starting a fresh branch off it', () => {
     // mock — v1(0,0) to v2(100,0), clicking its midpoint
     const nodeId = addVectorNodeWithSegment();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const dragOriginRef = createDragOriginRef();
     const dragStartRef = createDragStartRef();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef();
@@ -157,7 +160,7 @@ describe('startVectorFragment', () => {
     startVectorFragment({ x: 50, y: 0 }, node, IDENTITY_VIEWPORT, store.dispatch, dragOriginRef, dragStartRef, pendingOutgoingTangentRef);
 
     // result
-    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updatedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const newVertexId = store.getState().design.penActiveVertexId as string;
 
     expect(newVertexId).not.toBe('v1');

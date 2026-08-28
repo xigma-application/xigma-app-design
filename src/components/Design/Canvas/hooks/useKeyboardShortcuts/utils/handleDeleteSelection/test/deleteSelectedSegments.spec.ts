@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -29,7 +30,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -43,13 +44,13 @@ describe('deleteSelectedSegments', () => {
   it('should dispatch one updateNode per owning node, dropping the selected segment and the endpoint it leaves with no segment left', () => {
     // mock — deleting s1 (v1 -> v2) drops v1, which loses its only segment; v2 stays held by s2
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // before
     deleteSelectedSegments(store.dispatch, [node], ['s1']);
 
     // result
-    const updated = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updated = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(Object.keys(updated.segments)).toEqual(['s2']);
     expect(Object.keys(updated.vertices)).toEqual(['v2', 'v3']);

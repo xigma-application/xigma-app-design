@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -36,7 +37,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -58,7 +59,7 @@ const addVectorNodeWithEdge = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -73,7 +74,7 @@ describe('applyContinueVectorNetworkHit', () => {
   it("should close the loop onto the target vertex for a 'vertex' hit", () => {
     // mock
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // before
     applyContinueVectorNetworkHit(
@@ -91,7 +92,7 @@ describe('applyContinueVectorNetworkHit', () => {
     );
 
     // result
-    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updatedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const [segment] = Object.values(updatedNode.segments);
 
     expect(segment).toMatchObject({ endId: 'v2', startId: 'v1' });
@@ -105,8 +106,8 @@ describe('applyContinueVectorNetworkHit', () => {
 
     store.dispatch(setVectorEditingNodeIds([sourceId, targetId]));
 
-    const node = store.getState().design.nodes[sourceId] as TVectorNode;
-    const targetNode = store.getState().design.nodes[targetId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[sourceId] as TVectorNode;
+    const targetNode = store.getState().design.pages[store.getState().design.activePageId].nodes[targetId] as TVectorNode;
 
     // before
     applyContinueVectorNetworkHit(
@@ -125,9 +126,9 @@ describe('applyContinueVectorNetworkHit', () => {
 
     // result
     const state = store.getState();
-    const updatedSource = state.design.nodes[sourceId] as TVectorNode;
+    const updatedSource = state.design.pages[state.design.activePageId].nodes[sourceId] as TVectorNode;
 
-    expect(state.design.nodes[targetId]).toBeUndefined();
+    expect(state.design.pages[state.design.activePageId].nodes[targetId]).toBeUndefined();
     expect(updatedSource.vertices).toHaveProperty('a');
     expect(state.design.vectorEditingNodeIds).toEqual([sourceId]);
   });
@@ -135,7 +136,7 @@ describe('applyContinueVectorNetworkHit', () => {
   it("should split the edge and connect onto the split point for an 'edge' hit", () => {
     // mock
     const nodeId = addVectorNodeWithEdge();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     store.dispatch(setPenActiveVertexId('a'));
 
@@ -155,7 +156,7 @@ describe('applyContinueVectorNetworkHit', () => {
     );
 
     // result
-    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updatedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const newVertexId = updatedNode.segments.sb.endId;
 
     expect(newVertexId).not.toBe('a');
@@ -171,8 +172,8 @@ describe('applyContinueVectorNetworkHit', () => {
 
     store.dispatch(setVectorEditingNodeIds([sourceId, targetId]));
 
-    const node = store.getState().design.nodes[sourceId] as TVectorNode;
-    const targetNode = store.getState().design.nodes[targetId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[sourceId] as TVectorNode;
+    const targetNode = store.getState().design.pages[store.getState().design.activePageId].nodes[targetId] as TVectorNode;
 
     // before
     applyContinueVectorNetworkHit(
@@ -191,10 +192,10 @@ describe('applyContinueVectorNetworkHit', () => {
 
     // result
     const state = store.getState();
-    const updatedSource = state.design.nodes[sourceId] as TVectorNode;
+    const updatedSource = state.design.pages[state.design.activePageId].nodes[sourceId] as TVectorNode;
     const newVertexId = updatedSource.segments.sb.endId;
 
-    expect(state.design.nodes[targetId]).toBeUndefined();
+    expect(state.design.pages[state.design.activePageId].nodes[targetId]).toBeUndefined();
     expect(newVertexId).not.toBe('a');
     expect(newVertexId).not.toBe('b');
     expect(updatedSource.vertices[newVertexId]).toEqual({ id: newVertexId, x: 500, y: 50 });
@@ -204,7 +205,7 @@ describe('applyContinueVectorNetworkHit', () => {
   it("should add a snapped new vertex and segment for an 'extend' hit", () => {
     // mock
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // before — a couple of px off horizontal from v1(0,0), within the angle-snap tolerance
     applyContinueVectorNetworkHit(
@@ -222,7 +223,7 @@ describe('applyContinueVectorNetworkHit', () => {
     );
 
     // result — pulled exactly onto v1's own y, not the raw clicked y
-    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updatedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const newVertexId = store.getState().design.penActiveVertexId as string;
 
     expect(newVertexId).not.toBeNull();

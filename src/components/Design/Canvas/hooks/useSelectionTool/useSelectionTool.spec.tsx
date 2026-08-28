@@ -11,6 +11,7 @@ import { useSelectionTool } from './useSelectionTool';
 
 // store
 import { addNode, setActiveTool, setSelection, setVectorEditingNodeIds, startTextEdit, stopTextEdit } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -48,7 +49,7 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -56,7 +57,7 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
 const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => {
   store.dispatch(addNode({ name: 'Line', parentId: null, stroke: '#000000', type: NodeType.line, x1, x2, y1, y2 }));
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -78,7 +79,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -102,7 +103,7 @@ const addVectorNodeWithTangent = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -130,7 +131,7 @@ const addTriangleVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -335,7 +336,8 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 715, 715));
 
     // result
-    const { nodes, selectedIds } = store.getState().design;
+    const { nodes } = selectActivePage(store.getState());
+    const { selectedIds } = store.getState().design;
 
     expect(selectedIds).toEqual([idA, idB]);
     expect(nodes[idA]).toMatchObject({ x: 710, y: 710 });
@@ -360,7 +362,8 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 1150, 720));
 
     // result
-    const { nodes, selectedIds } = store.getState().design;
+    const { nodes } = selectActivePage(store.getState());
+    const { selectedIds } = store.getState().design;
 
     expect(selectedIds).toEqual([idA, idB]);
     expect(nodes[idA]).toMatchObject({ x: 1110, y: 710 });
@@ -446,7 +449,8 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 1650, 720));
 
     // result - A and B (the actual selection) move together; C (the hit node) is untouched and unselected
-    const { nodes, selectedIds } = store.getState().design;
+    const { nodes } = selectActivePage(store.getState());
+    const { selectedIds } = store.getState().design;
 
     expect(selectedIds).toEqual([idA, idB]);
     expect(nodes[idA]).toMatchObject({ x: 1610, y: 710 });
@@ -489,7 +493,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 825, 815));
 
     // result
-    expect(store.getState().design.nodes[idA]).toMatchObject({ x: 820, y: 810 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ x: 820, y: 810 });
   });
 
   it('should ignore a non-primary button press', () => {
@@ -520,7 +524,7 @@ describe('useSelectionTool behaviors', () => {
     expect(() => canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 1005, 1005))).not.toThrow();
 
     // result
-    expect(store.getState().design.nodes[idA]).toMatchObject({ x: 1000, y: 1000 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ x: 1000, y: 1000 });
   });
 
   it('should ignore a pointer-up that was not preceded by a pointer-down', () => {
@@ -596,7 +600,12 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2260, 710));
 
     // result
-    expect(store.getState().design.nodes[idA]).toMatchObject({ x1: 2210, x2: 2310, y1: 710, y2: 710 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      x1: 2210,
+      x2: 2310,
+      y1: 710,
+      y2: 710,
+    });
   });
 
   it('should move only endpoint A when dragging its handle, leaving endpoint B in place', () => {
@@ -615,7 +624,12 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2420, 760));
 
     // result
-    expect(store.getState().design.nodes[idA]).toMatchObject({ x1: 2420, x2: 2500, y1: 760, y2: 700 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      x1: 2420,
+      x2: 2500,
+      y1: 760,
+      y2: 700,
+    });
   });
 
   it('should move only endpoint B when dragging its handle, leaving endpoint A in place', () => {
@@ -634,7 +648,12 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2720, 760));
 
     // result
-    expect(store.getState().design.nodes[idA]).toMatchObject({ x1: 2600, x2: 2720, y1: 700, y2: 760 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      x1: 2600,
+      x2: 2720,
+      y1: 700,
+      y2: 760,
+    });
   });
 
   it('should release the pointer and stop applying further moves once an endpoint drag is released', () => {
@@ -660,7 +679,12 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2900, 900));
 
     // result
-    expect(store.getState().design.nodes[idA]).toMatchObject({ x1: 2820, x2: 2900, y1: 760, y2: 700 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      x1: 2820,
+      x2: 2900,
+      y1: 760,
+      y2: 700,
+    });
   });
 
   it('should clear the hovered vector vertex id when the pointer leaves the canvas', () => {
@@ -1066,7 +1090,7 @@ describe('useSelectionTool behaviors', () => {
     });
 
     // result — the drag actually changed the tangents away from the straight-line defaults it started at
-    const bentNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const bentNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(bentNode.segments.s1.tangentStart).not.toEqual({ x: 100 / 3, y: 0 });
     expect(bentNode.segments.s1.tangentEnd).not.toEqual({ x: -100 / 3, y: 0 });
@@ -1077,7 +1101,7 @@ describe('useSelectionTool behaviors', () => {
     });
 
     // result — back to null, the segment's state from before the Ctrl+click ever happened
-    const revertedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const revertedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(revertedNode.segments.s1.tangentStart).toBeNull();
     expect(revertedNode.segments.s1.tangentEnd).toBeNull();
@@ -1088,7 +1112,7 @@ describe('useSelectionTool behaviors', () => {
     });
 
     // result
-    const afterFurtherMove = store.getState().design.nodes[nodeId] as TVectorNode;
+    const afterFurtherMove = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(afterFurtherMove.segments.s1.tangentStart).toBeNull();
     expect(afterFurtherMove.segments.s1.tangentEnd).toBeNull();
@@ -1145,7 +1169,7 @@ describe('useSelectionTool behaviors', () => {
     });
 
     // result — committed to the store and the drag ref cleared
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(node.widthProfile?.points).toMatchObject({ [Object.keys(node.widthProfile?.points ?? {})[0]]: { position: 0.5 } });
     expect(refs.vectorWidth.vectorWidthPointDragRef.current).toBeNull();

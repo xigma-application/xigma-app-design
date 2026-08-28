@@ -4,6 +4,7 @@ import { CARET_BLINK_INTERVAL_MS, GRID_MIN_ZOOM } from 'constant/canvas';
 // store
 import { addNode, setSelection, setViewport, startTextEdit, stopTextEdit } from 'store/design/slice';
 import { DEFAULT_VIEWPORT } from 'store/design/constants';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -201,7 +202,7 @@ describe('drawScene', () => {
       }),
     );
 
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const hoveredId = rootOrder[rootOrder.length - 1];
 
     // before
@@ -232,7 +233,7 @@ describe('drawScene', () => {
       }),
     );
 
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const selectedId = rootOrder[rootOrder.length - 1];
 
     // action
@@ -279,7 +280,7 @@ describe('drawScene', () => {
       }),
     );
 
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const [idA, idB] = rootOrder.slice(-2);
 
     // action
@@ -329,7 +330,7 @@ describe('drawScene', () => {
       }),
     );
 
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const [idA, idB] = rootOrder.slice(-2);
 
     // action
@@ -365,7 +366,7 @@ describe('drawScene', () => {
       }),
     );
 
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const editingId = rootOrder[rootOrder.length - 1];
 
     const countFillDraws = (): number => {
@@ -415,7 +416,7 @@ describe('drawScene', () => {
       }),
     );
 
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const editingId = rootOrder[rootOrder.length - 1];
 
     const countHoverOutlineDraws = (): number => {
@@ -469,7 +470,7 @@ describe('drawScene', () => {
       }),
     );
 
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const editingId = rootOrder[rootOrder.length - 1];
 
     const countTriangleFanDraws = (): number => {
@@ -520,7 +521,7 @@ describe('drawScene', () => {
       }),
     );
 
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const rectId = rootOrder[rootOrder.length - 1];
 
     store.dispatch(setSelection([rectId]));
@@ -569,7 +570,7 @@ describe('drawScene', () => {
       }),
     );
 
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const polygonId = rootOrder[rootOrder.length - 1];
 
     store.dispatch(setSelection([polygonId]));
@@ -616,7 +617,7 @@ describe('drawScene', () => {
       }),
     );
 
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const rectId = rootOrder[rootOrder.length - 1];
 
     store.dispatch(setSelection([rectId]));

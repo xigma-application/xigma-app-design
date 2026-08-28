@@ -11,6 +11,7 @@ import { useCurvedCaretEditing } from './useCurvedCaretEditing';
 
 // store
 import { addNode, setSelection, startTextEdit, stopTextEdit } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -290,7 +291,7 @@ describe('useCurvedCaretEditing behaviors', () => {
       }),
     );
 
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const nodeId = rootOrder[rootOrder.length - 1];
 
     store.dispatch(setSelection([nodeId]));
@@ -308,8 +309,9 @@ describe('useCurvedCaretEditing behaviors', () => {
 
     // result — pathStartOffset moved toward BOTTOM (a quarter turn), on both the committed node and
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.nodes[nodeId]).toMatchObject({ pathStartOffset: expect.closeTo(0.25, 2) });
+    expect(page.nodes[nodeId]).toMatchObject({ pathStartOffset: expect.closeTo(0.25, 2) });
     expect(design.editingTextBox).toMatchObject({ pathStartOffset: expect.closeTo(0.25, 2) });
     expect(design.editingSelectionStart).toBe(0);
     expect(design.editingSelectionEnd).toBe(2);
@@ -340,7 +342,7 @@ describe('useCurvedCaretEditing behaviors', () => {
       }),
     );
 
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const nodeId = rootOrder[rootOrder.length - 1];
 
     store.dispatch(setSelection([nodeId]));
@@ -357,7 +359,7 @@ describe('useCurvedCaretEditing behaviors', () => {
     });
 
     // result — released before the move, so pathStartOffset never left its starting value
-    expect(store.getState().design.nodes[nodeId]).toMatchObject({ pathStartOffset: 0 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId]).toMatchObject({ pathStartOffset: 0 });
   });
 
   it('should not attach any listeners, and therefore do nothing, when there is no path-text editing session', () => {

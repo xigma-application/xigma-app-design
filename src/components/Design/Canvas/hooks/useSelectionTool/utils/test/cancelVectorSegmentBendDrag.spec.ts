@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -35,7 +36,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -101,7 +102,7 @@ describe('cancelVectorSegmentBendDrag', () => {
     cancelVectorSegmentBendDrag(keyDownEvent('Escape'), store.dispatch, dragRef, setClassName);
 
     // result
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(node.segments.s1.tangentStart).toEqual({ x: 60, y: 40 });
     expect(node.segments.s1.tangentEnd).toEqual({ x: 20, y: 40 });
@@ -131,7 +132,7 @@ describe('cancelVectorSegmentBendDrag', () => {
     cancelVectorSegmentBendDrag(keyDownEvent('Escape'), store.dispatch, dragRef, setClassName);
 
     // result
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(node.segments.s1.tangentStart).toBeNull();
     expect(node.segments.s1.tangentEnd).toBeNull();

@@ -1,5 +1,6 @@
 // store
 import { addNode, deleteNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { undo } from 'store/history/actions';
 import { store } from 'store';
 
@@ -14,7 +15,7 @@ const addFrameNode = (): string => {
     addNode({ fill: '#ff0000', height: 10, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -33,8 +34,8 @@ describe('dispatchAsOneGestureIfMultiNode', () => {
     store.dispatch(undo());
 
     // result — a single undo only reverses the LAST delete (idB), proving the two were never wrapped together
-    expect(store.getState().design.nodes[idA]).toBeUndefined();
-    expect(store.getState().design.nodes[idB]).toBeDefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toBeUndefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idB]).toBeDefined();
   });
 
   it('should wrap the callback in a single history gesture when more than one node is affected, so one undo reverses every dispatch inside it', () => {
@@ -50,7 +51,7 @@ describe('dispatchAsOneGestureIfMultiNode', () => {
     store.dispatch(undo());
 
     // result — a single undo restores both
-    expect(store.getState().design.nodes[idA]).toBeDefined();
-    expect(store.getState().design.nodes[idB]).toBeDefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toBeDefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idB]).toBeDefined();
   });
 });

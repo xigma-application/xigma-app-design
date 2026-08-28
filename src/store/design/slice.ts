@@ -4,6 +4,7 @@ import { createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit';
 import {
   DEFAULT_FRAME_TOOL,
   DEFAULT_MOUSE_TOOL,
+  DEFAULT_PAGE_NAME,
   DEFAULT_PAINT_COLOR,
   DEFAULT_PEN_TOOL,
   DEFAULT_SHAPE_TOOL,
@@ -19,6 +20,7 @@ import { TPoint } from 'types/canvas';
 import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/design/types';
 
 // utils
+import { getActivePage } from './utils/getActivePage';
 import { handleAddComment } from './utils/handleAddComment';
 import { handleAddNode } from './utils/handleAddNode';
 import { handleDeleteNode } from './utils/handleDeleteNode';
@@ -36,10 +38,12 @@ import { handleUpdateNode } from './utils/handleUpdateNode';
 import { handleUpdateTextEditContent } from './utils/handleUpdateTextEditContent';
 import { handleUpdateTextEditSelection } from './utils/handleUpdateTextEditSelection';
 
+const initialPageId = nanoid();
+
 const initialState: TDesignState = {
+  activePageId: initialPageId,
   activeTool: DEFAULT_TOOL,
   commentDraftPosition: null,
-  comments: {},
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,
@@ -53,13 +57,20 @@ const initialState: TDesignState = {
   lastPenTool: DEFAULT_PEN_TOOL,
   lastShapeTool: DEFAULT_SHAPE_TOOL,
   lastTextTool: DEFAULT_TEXT_TOOL,
-  nodes: {},
-  paintColor: DEFAULT_PAINT_COLOR,
+  pages: {
+    [initialPageId]: {
+      comments: {},
+      id: initialPageId,
+      name: DEFAULT_PAGE_NAME,
+      nodes: {},
+      paintColor: DEFAULT_PAINT_COLOR,
+      rootOrder: [],
+      viewport: DEFAULT_VIEWPORT,
+    },
+  },
   penActiveVertexId: null,
-  rootOrder: [],
   selectedIds: [],
   vectorEditingNodeIds: [],
-  viewport: DEFAULT_VIEWPORT,
 };
 
 const designSlice = createSlice({
@@ -78,14 +89,14 @@ const designSlice = createSlice({
       state.commentDraftPosition = null;
     },
     deleteComment: (state, action: PayloadAction<string>) => {
-      delete state.comments[action.payload];
+      delete getActivePage(state).comments[action.payload];
     },
     deleteNode: (state, action: PayloadAction<string>) => handleDeleteNode(state, action.payload),
     replaceDesignSnapshot: (state, action: PayloadAction<TDesignSnapshot>) => handleReplaceDesignSnapshot(state, action.payload),
     replaceNode: (state, action: PayloadAction<{ id: string; node: TSceneNode }>) => handleReplaceNode(state, action.payload),
     setActiveTool: (state, action: PayloadAction<ToolName>) => handleSetActiveTool(state, action.payload),
     setPaintColor: (state, action: PayloadAction<string>) => {
-      state.paintColor = action.payload;
+      getActivePage(state).paintColor = action.payload;
     },
     setPenActiveVertexId: (state, action: PayloadAction<string | null>) => {
       state.penActiveVertexId = action.payload;

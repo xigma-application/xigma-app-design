@@ -1,5 +1,6 @@
 // store
 import { addNode, setActiveTool, setVectorEditingNodeIds, updateNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -41,7 +42,7 @@ const addTriangleVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };

@@ -1,5 +1,6 @@
 // store
 import { addNode, setActiveTool, setSelection, setVectorEditingNodeIds, startTextEdit, stopTextEdit } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -31,7 +32,7 @@ const addTextNode = (pathId: string | null = null): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -51,7 +52,7 @@ const addRectangleNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };

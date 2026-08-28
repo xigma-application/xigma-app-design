@@ -47,7 +47,7 @@ export const resolveToolHover = (
   const selectedVertexIds = refs.vectorEdit.selectedVectorVertexIdsRef.current;
   const selectedHandles = refs.vectorEdit.selectedVectorHandlesRef.current;
   const vectorMultiSelectBox = getVectorMultiSelectBoxForHover(
-    state.design.nodes,
+    state.design.pages[state.design.activePageId].nodes,
     vectorEditingNodeIds,
     selectedVertexIds,
     selectedHandles,

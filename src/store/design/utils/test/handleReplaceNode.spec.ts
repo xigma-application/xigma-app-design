@@ -1,9 +1,10 @@
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import { TDesignState } from '../../types';
+import { TDesignPage, TDesignState } from '../../types';
 import { TFrameNode, TVectorNode } from 'types/design/types';
 
 // utils
+import { getActivePage } from '../getActivePage';
 import { handleReplaceNode } from '../handleReplaceNode';
 
 const frameNode: TFrameNode = {
@@ -34,10 +35,10 @@ const vectorNode: TVectorNode = {
   vertices: {},
 };
 
-const buildState = (nodes: TDesignState['nodes']): TDesignState => ({
+const buildState = (nodes: TDesignPage['nodes']): TDesignState => ({
+  activePageId: 'page-1',
   activeTool: ToolName.default,
   commentDraftPosition: null,
-  comments: {},
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,
@@ -51,13 +52,20 @@ const buildState = (nodes: TDesignState['nodes']): TDesignState => ({
   lastPenTool: ToolName.pen,
   lastShapeTool: ToolName.rectangle,
   lastTextTool: ToolName.text,
-  nodes,
-  paintColor: '#d9d9d9',
+  pages: {
+    'page-1': {
+      comments: {},
+      id: 'page-1',
+      name: 'Page 1',
+      nodes,
+      paintColor: '#d9d9d9',
+      rootOrder: Object.keys(nodes),
+      viewport: { x: 0, y: 0, zoom: 1 },
+    },
+  },
   penActiveVertexId: null,
-  rootOrder: Object.keys(nodes),
   selectedIds: [],
   vectorEditingNodeIds: [],
-  viewport: { x: 0, y: 0, zoom: 1 },
 });
 
 describe('handleReplaceNode', () => {
@@ -69,9 +77,9 @@ describe('handleReplaceNode', () => {
     handleReplaceNode(state, { id: frameNode.id, node: vectorNode });
 
     // result
-    expect(state.nodes[frameNode.id]).toBe(vectorNode);
-    expect(state.nodes[frameNode.id]).not.toHaveProperty('fill');
-    expect(state.nodes[frameNode.id]).not.toHaveProperty('width');
+    expect(getActivePage(state).nodes[frameNode.id]).toBe(vectorNode);
+    expect(getActivePage(state).nodes[frameNode.id]).not.toHaveProperty('fill');
+    expect(getActivePage(state).nodes[frameNode.id]).not.toHaveProperty('width');
   });
 
   it('should keep the node at its existing rootOrder position', () => {
@@ -83,7 +91,7 @@ describe('handleReplaceNode', () => {
     handleReplaceNode(state, { id: frameNode.id, node: vectorNode });
 
     // result
-    expect(state.rootOrder).toEqual([frameNode.id, 'other']);
+    expect(getActivePage(state).rootOrder).toEqual([frameNode.id, 'other']);
   });
 
   it('should do nothing when the node does not exist', () => {
@@ -94,6 +102,6 @@ describe('handleReplaceNode', () => {
     handleReplaceNode(state, { id: 'missing', node: vectorNode });
 
     // result
-    expect(state.nodes).toEqual({});
+    expect(getActivePage(state).nodes).toEqual({});
   });
 });

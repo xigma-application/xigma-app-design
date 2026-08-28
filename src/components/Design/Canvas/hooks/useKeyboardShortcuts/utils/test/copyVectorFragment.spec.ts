@@ -1,5 +1,6 @@
 // store
 import { addNode, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -26,7 +27,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -47,7 +48,7 @@ describe('copyVectorFragment', () => {
     store.dispatch(setVectorEditingNodeIds([vectorId]));
 
     // action
-    copyVectorFragment(store.getState().design.nodes, [vectorId], [], ['s1']);
+    copyVectorFragment(store.getState().design.pages[store.getState().design.activePageId].nodes, [vectorId], [], ['s1']);
 
     // result
     const fragment = getVectorClipboardFragment();

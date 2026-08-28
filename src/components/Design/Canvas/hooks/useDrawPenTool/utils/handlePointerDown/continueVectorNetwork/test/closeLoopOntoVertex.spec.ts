@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds, updateNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -36,7 +37,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -52,7 +53,7 @@ describe('closeLoopOntoVertex', () => {
     // mock — arming the drag lets a click-drag onto the target vertex also shape the closing segment's
     // tangentEnd, instead of only ever committing a straight closing segment
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const dragOriginRef = createDragOriginRef();
     const dragStartRef = createDragStartRef();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef({ tangent: { x: 1, y: 1 }, vertexId: 'v1' });
@@ -72,7 +73,7 @@ describe('closeLoopOntoVertex', () => {
     );
 
     // result
-    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updatedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(updatedNode.segments['segment-1']).toMatchObject({ endId: 'v2', startId: 'v1', tangentStart: null });
     expect(store.getState().design.penActiveVertexId).toBeNull();
@@ -84,7 +85,7 @@ describe('closeLoopOntoVertex', () => {
   it('should carry the given tangentStart onto the closing segment', () => {
     // mock
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // before
     closeLoopOntoVertex(
@@ -101,7 +102,7 @@ describe('closeLoopOntoVertex', () => {
     );
 
     // result
-    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updatedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(updatedNode.segments['segment-1'].tangentStart).toEqual({ x: 5, y: 5 });
   });
@@ -118,7 +119,7 @@ describe('closeLoopOntoVertex', () => {
       }),
     );
 
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const dragOriginRef = createDragOriginRef();
     const pendingOutgoingTangentRef = createPendingOutgoingTangentRef({ tangent: { x: 1, y: 1 }, vertexId: 'v2' });
 
@@ -137,7 +138,7 @@ describe('closeLoopOntoVertex', () => {
     );
 
     // result
-    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updatedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(updatedNode.segments['segment-2']).toMatchObject({ endId: 'v1', startId: 'v2', tangentStart: null });
     expect(Object.keys(updatedNode.segments)).toEqual(['s1', 'segment-2']);
@@ -157,7 +158,7 @@ describe('closeLoopOntoVertex', () => {
       }),
     );
 
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // before
     closeLoopOntoVertex(
@@ -174,7 +175,7 @@ describe('closeLoopOntoVertex', () => {
     );
 
     // result
-    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updatedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(Object.keys(updatedNode.segments)).toEqual(['s1', 'segment-2']);
   });
@@ -190,7 +191,7 @@ describe('closeLoopOntoVertex', () => {
       }),
     );
 
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // before
     closeLoopOntoVertex(
@@ -207,7 +208,7 @@ describe('closeLoopOntoVertex', () => {
     );
 
     // result
-    const updatedNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updatedNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(Object.keys(updatedNode.segments)).toEqual(['s1', 'segment-2']);
   });

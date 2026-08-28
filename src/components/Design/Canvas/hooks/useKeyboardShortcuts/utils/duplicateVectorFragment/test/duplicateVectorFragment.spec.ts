@@ -1,5 +1,6 @@
 // store
 import { addNode, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { undo } from 'store/history/actions';
 import { store } from 'store';
 
@@ -28,7 +29,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -47,10 +48,17 @@ describe('duplicateVectorFragment', () => {
     const refs = createCanvasRefs();
 
     // action
-    duplicateVectorFragment(store.dispatch, refs, store.getState().design.nodes, [vectorId], [], ['s1']);
+    duplicateVectorFragment(
+      store.dispatch,
+      refs,
+      store.getState().design.pages[store.getState().design.activePageId].nodes,
+      [vectorId],
+      [],
+      ['s1'],
+    );
 
     // result
-    const node = store.getState().design.nodes[vectorId] as any;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId] as any;
 
     expect(Object.keys(node.vertices)).toHaveLength(4);
     expect(Object.keys(node.segments)).toHaveLength(2);
@@ -68,11 +76,18 @@ describe('duplicateVectorFragment', () => {
     const refs = createCanvasRefs();
 
     // action
-    duplicateVectorFragment(store.dispatch, refs, store.getState().design.nodes, [vectorId], ['v1'], ['s1']);
+    duplicateVectorFragment(
+      store.dispatch,
+      refs,
+      store.getState().design.pages[store.getState().design.activePageId].nodes,
+      [vectorId],
+      ['v1'],
+      ['s1'],
+    );
     store.dispatch(undo());
 
     // result
-    const node = store.getState().design.nodes[vectorId] as any;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId] as any;
 
     expect(Object.keys(node.vertices)).toHaveLength(2);
     expect(Object.keys(node.segments)).toHaveLength(1);
@@ -107,7 +122,7 @@ describe('duplicateVectorFragment', () => {
       } as any),
     );
 
-    const { rootOrder } = store.getState().design;
+    const { rootOrder } = selectActivePage(store.getState());
     const vectorId = rootOrder[rootOrder.length - 1];
 
     store.dispatch(setVectorEditingNodeIds([vectorId]));
@@ -115,10 +130,17 @@ describe('duplicateVectorFragment', () => {
     const refs = createCanvasRefs();
 
     // action
-    duplicateVectorFragment(store.dispatch, refs, store.getState().design.nodes, [vectorId], ['v1', 'v2'], []);
+    duplicateVectorFragment(
+      store.dispatch,
+      refs,
+      store.getState().design.pages[store.getState().design.activePageId].nodes,
+      [vectorId],
+      ['v1', 'v2'],
+      [],
+    );
 
     // result
-    const node = store.getState().design.nodes[vectorId] as any;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId] as any;
 
     expect(node.filledFaceKeys).toHaveLength(2);
 

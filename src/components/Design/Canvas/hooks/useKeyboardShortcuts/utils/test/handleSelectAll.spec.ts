@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -14,7 +15,7 @@ const addFrameNode = (): string => {
     addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -36,7 +37,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -56,7 +57,7 @@ describe('handleSelectAll', () => {
     handleSelectAll(store.dispatch, createCanvasRefs());
 
     // result
-    expect(store.getState().design.selectedIds).toEqual(store.getState().design.rootOrder);
+    expect(store.getState().design.selectedIds).toEqual(store.getState().design.pages[store.getState().design.activePageId].rootOrder);
   });
 
   it('should select every vertex and segment of the editing vector node instead of touching the node selection while a vector node is open for editing', () => {

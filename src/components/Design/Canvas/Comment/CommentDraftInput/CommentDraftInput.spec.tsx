@@ -66,9 +66,9 @@ describe('CommentDraftInput behaviors', () => {
     fireEvent.keyDown(input, { ctrlKey: true, key: 'Enter' });
 
     // result
-    const [id] = Object.keys(store.getState().design.comments);
+    const [id] = Object.keys(store.getState().design.pages[store.getState().design.activePageId].comments);
 
-    expect(store.getState().design.comments[id]).toMatchObject({ content: 'hello' });
+    expect(store.getState().design.pages[store.getState().design.activePageId].comments[id]).toMatchObject({ content: 'hello' });
     expect(store.getState().design.commentDraftPosition).toBeNull();
   });
 
@@ -89,7 +89,7 @@ describe('CommentDraftInput behaviors', () => {
     fireEvent.click(container.querySelector('[class*="__button"]') as HTMLButtonElement);
 
     // result
-    expect(Object.values(store.getState().design.comments)).toHaveLength(1);
+    expect(Object.values(store.getState().design.pages[store.getState().design.activePageId].comments)).toHaveLength(1);
   });
 
   it('should keep a constant pixel size regardless of the canvas zoom, since x/y are already world-to-screen', () => {

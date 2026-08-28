@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -27,9 +28,9 @@ const addVectorNode = (): TVectorNode => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
-  return store.getState().design.nodes[rootOrder[rootOrder.length - 1]] as TVectorNode;
+  return store.getState().design.pages[store.getState().design.activePageId].nodes[rootOrder[rootOrder.length - 1]] as TVectorNode;
 };
 
 const identity = (component: TVectorNetworkComponent): TVectorNetworkComponent => component;
@@ -48,14 +49,14 @@ describe('commitVectorCutComponents', () => {
       vertexHandleModes: {},
       vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
     };
-    const rootOrderBefore = store.getState().design.rootOrder.length;
+    const rootOrderBefore = store.getState().design.pages[store.getState().design.activePageId].rootOrder.length;
 
     // before
     const newNodeIds = commitVectorCutComponents(store.dispatch, node, [component], identity);
 
     // result
     expect(newNodeIds).toEqual([]);
-    expect(store.getState().design.rootOrder).toHaveLength(rootOrderBefore);
+    expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toHaveLength(rootOrderBefore);
   });
 
   it('should keep the original node id for the largest component and create a new node for every other one, inheriting style', () => {
@@ -79,12 +80,12 @@ describe('commitVectorCutComponents', () => {
     const newNodeIds = commitVectorCutComponents(store.dispatch, node, [smallComponent, largeComponent], identity);
 
     // result
-    const updatedOriginal = store.getState().design.nodes[node.id] as TVectorNode;
+    const updatedOriginal = store.getState().design.pages[store.getState().design.activePageId].nodes[node.id] as TVectorNode;
 
     expect(Object.keys(updatedOriginal.vertices).sort()).toEqual(['c', 'd', 'e']);
     expect(newNodeIds).toHaveLength(1);
 
-    const newNode = store.getState().design.nodes[newNodeIds[0]] as TVectorNode;
+    const newNode = store.getState().design.pages[store.getState().design.activePageId].nodes[newNodeIds[0]] as TVectorNode;
 
     expect(Object.keys(newNode.vertices).sort()).toEqual(['a', 'b']);
     expect(newNode.fillColor).toBe('#ff0000');
@@ -116,8 +117,8 @@ describe('commitVectorCutComponents', () => {
     const newNodeIds = commitVectorCutComponents(store.dispatch, node, [componentA, componentB], finish);
 
     // result
-    const updatedOriginal = store.getState().design.nodes[node.id] as TVectorNode;
-    const newNode = store.getState().design.nodes[newNodeIds[0]] as TVectorNode;
+    const updatedOriginal = store.getState().design.pages[store.getState().design.activePageId].nodes[node.id] as TVectorNode;
+    const newNode = store.getState().design.pages[store.getState().design.activePageId].nodes[newNodeIds[0]] as TVectorNode;
 
     expect(updatedOriginal.filledFaceKeys).toEqual(['tagged']);
     expect(newNode.filledFaceKeys).toEqual(['tagged']);
@@ -143,8 +144,8 @@ describe('commitVectorCutComponents', () => {
     const newNodeIds = commitVectorCutComponents(store.dispatch, node, [componentA, componentB], identity);
 
     // result
-    const updatedOriginal = store.getState().design.nodes[node.id] as TVectorNode;
-    const newNode = store.getState().design.nodes[newNodeIds[0]] as TVectorNode;
+    const updatedOriginal = store.getState().design.pages[store.getState().design.activePageId].nodes[node.id] as TVectorNode;
+    const newNode = store.getState().design.pages[store.getState().design.activePageId].nodes[newNodeIds[0]] as TVectorNode;
 
     expect(updatedOriginal.fillColorOverrideByKey).toEqual({});
     expect(newNode.fillColorOverrideByKey).toEqual({});

@@ -47,9 +47,9 @@ const comment = { author: 'Xigma', content: 'hello', id: 'comment-1', x: 3, y: 4
 
 const state = {
   design: {
+    activePageId: 'page-1',
     activeTool: ToolName.frame,
     commentDraftPosition: { x: 1, y: 2 },
-    comments: { [comment.id]: comment },
     editingNodeId: 'node-2',
     editingSelectionChangedAt: 42,
     editingSelectionEnd: 8,
@@ -63,13 +63,20 @@ const state = {
     lastPenTool: ToolName.pen,
     lastShapeTool: ToolName.ellipse,
     lastTextTool: ToolName.textOnPath,
-    nodes: { [node.id]: node },
-    paintColor: '#d9d9d9',
+    pages: {
+      'page-1': {
+        comments: { [comment.id]: comment },
+        id: 'page-1',
+        name: 'Page 1',
+        nodes: { [node.id]: node },
+        paintColor: '#d9d9d9',
+        rootOrder: [node.id],
+        viewport: { x: 5, y: 10, zoom: 2 },
+      },
+    },
     penActiveVertexId: 'vertex-1',
-    rootOrder: [node.id],
     selectedIds: [node.id],
     vectorEditingNodeIds: [node.id],
-    viewport: { x: 5, y: 10, zoom: 2 },
   },
 } as any;
 

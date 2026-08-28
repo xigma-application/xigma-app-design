@@ -1,5 +1,6 @@
 // store
 import { addNode, setVectorEditingNodeIds, setViewport } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -38,12 +39,13 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
 
-const currentNode = (id: string): TVectorNode => store.getState().design.nodes[id] as TVectorNode;
+const currentNode = (id: string): TVectorNode =>
+  store.getState().design.pages[store.getState().design.activePageId].nodes[id] as TVectorNode;
 
 describe('disarmVectorEraseDrag', () => {
   beforeEach(() => store.dispatch(setViewport({ x: 0, y: 0, zoom: 1 })));

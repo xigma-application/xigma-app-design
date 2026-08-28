@@ -25,7 +25,7 @@ export const markNewVectorCutVertices = (
   beforeNodeIds: string[],
   afterNodeIds: string[],
 ): void => {
-  const afterNodes = store.getState().design.nodes;
+  const afterNodes = store.getState().design.pages[store.getState().design.activePageId].nodes;
   const beforeVertexIds = collectVectorVertexIds(beforeNodes, beforeNodeIds);
   const afterVertexIds = collectVectorVertexIds(afterNodes, afterNodeIds);
 

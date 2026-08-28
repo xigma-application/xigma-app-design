@@ -12,6 +12,7 @@ import { useHoverHighlight } from './useHoverHighlight';
 
 // store
 import { addNode, setActiveTool, setSelection, startTextEdit, stopTextEdit } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -43,7 +44,7 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -51,7 +52,7 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
 const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => {
   store.dispatch(addNode({ name: 'Line', parentId: null, stroke: '#ffffff', type: NodeType.line, x1, x2, y1, y2 }));
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -72,7 +73,7 @@ const addRectangleNode = (x: number, y: number, size: number, cornerRadius: numb
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -96,7 +97,7 @@ const addPolygonNode = (x: number, y: number, size: number, sides: number, corne
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -121,7 +122,7 @@ const addStarNode = (x: number, y: number, size: number, points: number, ratio: 
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -149,7 +150,7 @@ const addPathTextNode = (x: number, y: number, size = 200): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -172,7 +173,7 @@ const addEllipseNode = (x: number, y: number, size: number, arcStartAngle?: numb
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };

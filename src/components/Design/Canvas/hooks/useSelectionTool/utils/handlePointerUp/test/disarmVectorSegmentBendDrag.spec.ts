@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -47,7 +48,7 @@ const addBranchingVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -115,7 +116,7 @@ describe('disarmVectorSegmentBendDrag', () => {
     disarmVectorSegmentBendDrag(canvas, pointerEvent(2), dispatch, canvasRefs, vectorSegmentBendDragRef, setClassName);
 
     // result
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(node.segments.s1.tangentStart).not.toBeNull();
     expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);

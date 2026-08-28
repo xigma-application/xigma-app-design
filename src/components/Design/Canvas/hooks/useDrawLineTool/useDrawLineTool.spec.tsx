@@ -140,9 +140,10 @@ describe('useDrawLineTool behaviors', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.rootOrder).toHaveLength(1);
-    expect(design.nodes[design.rootOrder[0]]).toMatchObject({
+    expect(page.rootOrder).toHaveLength(1);
+    expect(page.nodes[page.rootOrder[0]]).toMatchObject({
       endPoint: CONFIG.endPoint,
       name: CONFIG.name,
       startPoint: CONFIG.startPoint,
@@ -154,7 +155,7 @@ describe('useDrawLineTool behaviors', () => {
       y2: 40,
     });
     expect(design.activeTool).toBe(ToolName.default);
-    expect(design.selectedIds).toEqual([design.rootOrder[0]]);
+    expect(design.selectedIds).toEqual([page.rootOrder[0]]);
     expect(draftRef.current).toBeNull();
   });
 
@@ -181,8 +182,9 @@ describe('useDrawLineTool behaviors', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.nodes[design.rootOrder[0]]).toMatchObject({ endPoint: 'arrow', startPoint: 'default' });
+    expect(page.nodes[page.rootOrder[0]]).toMatchObject({ endPoint: 'arrow', startPoint: 'default' });
   });
 
   it('should clear any existing selection once drawing actually starts, not just on tool switch', () => {
@@ -254,8 +256,9 @@ describe('useDrawLineTool behaviors', () => {
 
     // result
     const { design } = store.getState();
+    const page = design.pages[design.activePageId];
 
-    expect(design.rootOrder).toHaveLength(0);
+    expect(page.rootOrder).toHaveLength(0);
     expect(design.activeTool).toBe(ToolName.default);
   });
 

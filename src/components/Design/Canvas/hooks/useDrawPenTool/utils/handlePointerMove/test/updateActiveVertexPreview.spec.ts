@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -39,7 +40,7 @@ const addVectorNodeWithSegment = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -53,7 +54,7 @@ describe('updateActiveVertexPreview', () => {
   it('should update the rubber-band pen preview, clear the idle new-vertex preview, and set the matching cursor className', () => {
     // mock
     const nodeId = addVectorNodeWithSegment();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const penPreviewRef = createPenPreviewRef();
     const penNewVertexPreviewRef = createPenNewVertexPreviewRef();
     const setClassName = vi.fn();
@@ -62,7 +63,7 @@ describe('updateActiveVertexPreview', () => {
     updateActiveVertexPreview(
       { x: 500, y: 500 },
       node,
-      store.getState().design.nodes,
+      store.getState().design.pages[store.getState().design.activePageId].nodes,
       'v1',
       IDENTITY_VIEWPORT,
       false,
@@ -85,7 +86,7 @@ describe('updateActiveVertexPreview', () => {
   it('should switch to the pen-snap cursor when the rubber-band preview snaps onto an existing vertex', () => {
     // mock
     const nodeId = addVectorNodeWithSegment();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const penPreviewRef = createPenPreviewRef();
     const setClassName = vi.fn();
 
@@ -93,7 +94,7 @@ describe('updateActiveVertexPreview', () => {
     updateActiveVertexPreview(
       { x: 100, y: 0 },
       node,
-      store.getState().design.nodes,
+      store.getState().design.pages[store.getState().design.activePageId].nodes,
       'v1',
       IDENTITY_VIEWPORT,
       false,

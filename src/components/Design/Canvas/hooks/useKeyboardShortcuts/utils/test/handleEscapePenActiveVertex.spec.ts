@@ -1,5 +1,6 @@
 // store
 import { addNode, setPenActiveVertexId, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -26,7 +27,7 @@ const addVectorNode = (segments: TVectorNode['segments'], vertices: TVectorNode[
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -60,7 +61,7 @@ describe('handleEscapePenActiveVertex', () => {
     handleEscapePenActiveVertex(store.dispatch);
 
     // result
-    expect(store.getState().design.nodes[vectorId]).toBeUndefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId]).toBeUndefined();
     expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
     expect(store.getState().design.penActiveVertexId).toBeNull();
   });
@@ -79,7 +80,9 @@ describe('handleEscapePenActiveVertex', () => {
     handleEscapePenActiveVertex(store.dispatch);
 
     // result
-    expect(store.getState().design.nodes[vectorId]).toMatchObject({ vertices: { v1: { id: 'v1' }, v2: { id: 'v2' } } });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId]).toMatchObject({
+      vertices: { v1: { id: 'v1' }, v2: { id: 'v2' } },
+    });
     expect(store.getState().design.vectorEditingNodeIds).toEqual([vectorId]);
     expect(store.getState().design.penActiveVertexId).toBeNull();
   });
@@ -98,7 +101,7 @@ describe('handleEscapePenActiveVertex', () => {
     handleEscapePenActiveVertex(store.dispatch);
 
     // result
-    expect(store.getState().design.nodes[vectorId]).toMatchObject({
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId]).toMatchObject({
       vertices: { v1: { id: 'v1' }, v2: { id: 'v2' } },
     });
     expect(store.getState().design.penActiveVertexId).toBeNull();

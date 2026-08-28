@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -28,7 +29,7 @@ const createEndpointDragRef = (endpointDragState: TEndpointDragState | null = nu
 const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => {
   store.dispatch(addNode({ name: 'Line', parentId: null, stroke: '#000000', type: NodeType.line, x1, x2, y1, y2 }));
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -46,7 +47,7 @@ describe('continueEndpointDrag', () => {
     continueEndpointDrag(canvas, pointerEvent(10, 10), store.dispatch, createEndpointDragRef());
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
   });
 
   it('should move the "a" endpoint to the pointer position', () => {
@@ -59,7 +60,7 @@ describe('continueEndpointDrag', () => {
     continueEndpointDrag(canvas, pointerEvent(50, 60), store.dispatch, endpointDragRef);
 
     // result
-    const node = store.getState().design.nodes[idA];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
     expect(node).toMatchObject({ x1: 50, x2: 200, y1: 60, y2: 100 });
   });
@@ -74,7 +75,7 @@ describe('continueEndpointDrag', () => {
     continueEndpointDrag(canvas, pointerEvent(250, 260), store.dispatch, endpointDragRef);
 
     // result
-    const node = store.getState().design.nodes[idA];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
     expect(node).toMatchObject({ x1: 100, x2: 250, y1: 100, y2: 260 });
   });

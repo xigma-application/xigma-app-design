@@ -1,5 +1,6 @@
 // store
 import { addNode, setActiveTool, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { undo } from 'store/history/actions';
 import { store } from 'store';
 
@@ -28,7 +29,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -38,7 +39,7 @@ const addFrameNode = (): string => {
     addNode({ fill: '#ff0000', height: 10, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -58,7 +59,7 @@ const addRectangleNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -68,7 +69,7 @@ const addEllipseNode = (): string => {
     addNode({ fill: '#0000ff', height: 30, name: 'Ellipse', parentId: null, rotation: 0, type: NodeType.ellipse, width: 30, x: 0, y: 0 }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -163,14 +164,14 @@ describe('handleEnterVectorEdit', () => {
     handleEnterVectorEdit(store.dispatch, createCanvasRefs());
 
     // result
-    const node = store.getState().design.nodes[rectangleId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[rectangleId] as TVectorNode;
 
     expect(node.type).toBe(NodeType.vector);
     expect(node.fillColor).toBe('#00ff00');
     expect(Object.keys(node.vertices)).toHaveLength(4);
     expect(node.filledFaceKeys).toHaveLength(1);
     expect(store.getState().design.vectorEditingNodeIds).toEqual([rectangleId]);
-    expect(store.getState().design.rootOrder).toContain(rectangleId);
+    expect(store.getState().design.pages[store.getState().design.activePageId].rootOrder).toContain(rectangleId);
   });
 
   it('should convert every eligible shape in a mixed selection, each keeping its own id', () => {
@@ -184,7 +185,8 @@ describe('handleEnterVectorEdit', () => {
     handleEnterVectorEdit(store.dispatch, createCanvasRefs());
 
     // result
-    const { nodes, vectorEditingNodeIds } = store.getState().design;
+    const { nodes } = selectActivePage(store.getState());
+    const { vectorEditingNodeIds } = store.getState().design;
 
     expect(nodes[rectangleId].type).toBe(NodeType.vector);
     expect(nodes[ellipseId].type).toBe(NodeType.vector);
@@ -194,7 +196,7 @@ describe('handleEnterVectorEdit', () => {
   it('should undo a shape-to-vector conversion as a single step, restoring the original shape', () => {
     // mock
     const rectangleId = addRectangleNode();
-    const originalNode = store.getState().design.nodes[rectangleId];
+    const originalNode = store.getState().design.pages[store.getState().design.activePageId].nodes[rectangleId];
 
     store.dispatch(setSelection([rectangleId]));
 
@@ -203,7 +205,7 @@ describe('handleEnterVectorEdit', () => {
     store.dispatch(undo());
 
     // result
-    expect(store.getState().design.nodes[rectangleId]).toEqual(originalNode);
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[rectangleId]).toEqual(originalNode);
   });
 
   it('should do nothing while a different tool than the selection/move tool is active', () => {
@@ -217,7 +219,7 @@ describe('handleEnterVectorEdit', () => {
     handleEnterVectorEdit(store.dispatch, createCanvasRefs());
 
     // result
-    expect(store.getState().design.nodes[rectangleId].type).toBe(NodeType.rectangle);
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[rectangleId].type).toBe(NodeType.rectangle);
     expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
   });
 
@@ -232,6 +234,6 @@ describe('handleEnterVectorEdit', () => {
     handleEnterVectorEdit(store.dispatch, createCanvasRefs());
 
     // result
-    expect(store.getState().design.nodes[rectangleId].type).toBe(NodeType.rectangle);
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[rectangleId].type).toBe(NodeType.rectangle);
   });
 });

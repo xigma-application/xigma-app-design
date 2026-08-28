@@ -31,7 +31,7 @@ export const continueVectorWidthPointDrag = (
 
   if (drag) {
     const state = store.getState();
-    const node = getVectorEditingNode(state.design.nodes, drag.nodeId);
+    const node = getVectorEditingNode(state.design.pages[state.design.activePageId].nodes, drag.nodeId);
     const chainOrder = node && getVectorChainOrder(node);
 
     if (node && chainOrder) {

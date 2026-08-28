@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -45,7 +46,7 @@ const addStarNode = (x: number, y: number, width: number, height: number, points
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -63,7 +64,7 @@ describe('continueStarRatioDrag', () => {
     continueStarRatioDrag(canvas, pointerEvent(10, 10), store.dispatch, createStarRatioDragRef());
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
   });
 
   it("should dispatch a ratio proportional to the pointer's distance along the vertex's own anchor axis", () => {
@@ -84,7 +85,7 @@ describe('continueStarRatioDrag', () => {
     continueStarRatioDrag(canvas, pointerEvent(64.694631, 29.774575), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TStarNode).ratio).toBeCloseTo(0.5, 5);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TStarNode).ratio).toBeCloseTo(0.5, 5);
   });
 
   it('should clamp the ratio to the minimum once the pointer reaches the center', () => {
@@ -104,7 +105,7 @@ describe('continueStarRatioDrag', () => {
     continueStarRatioDrag(canvas, pointerEvent(50, 50), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TStarNode).ratio).toBeCloseTo(0.001, 5);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TStarNode).ratio).toBeCloseTo(0.001, 5);
   });
 
   it('should clamp the ratio to the maximum once the pointer overshoots past the anchor', () => {
@@ -124,7 +125,7 @@ describe('continueStarRatioDrag', () => {
     continueStarRatioDrag(canvas, pointerEvent(94.083894, -10.676275), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TStarNode).ratio).toBe(1);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TStarNode).ratio).toBe(1);
   });
 
   it('should un-flip the query point before computing the ratio on a flipped node', () => {
@@ -145,7 +146,7 @@ describe('continueStarRatioDrag', () => {
     continueStarRatioDrag(canvas, pointerEvent(35.305369, 29.774575), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TStarNode).ratio).toBeCloseTo(0.5, 5);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TStarNode).ratio).toBeCloseTo(0.5, 5);
   });
 
   it('should un-rotate the query point before computing the ratio on a rotated node', () => {
@@ -166,6 +167,6 @@ describe('continueStarRatioDrag', () => {
     continueStarRatioDrag(canvas, pointerEvent(70.225425, 64.694631), store.dispatch, dragRef);
 
     // result
-    expect((store.getState().design.nodes[idA] as TStarNode).ratio).toBeCloseTo(0.5, 5);
+    expect((store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as TStarNode).ratio).toBeCloseTo(0.5, 5);
   });
 });

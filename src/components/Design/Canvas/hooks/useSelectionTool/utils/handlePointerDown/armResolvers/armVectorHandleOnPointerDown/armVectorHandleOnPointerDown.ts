@@ -29,7 +29,7 @@ export const armVectorHandleOnPointerDown = ({
   const result = getVectorHandleAtPointAcrossOpenNodes(
     point,
     selectVectorEditingNodeIds(state),
-    state.design.nodes,
+    state.design.pages[state.design.activePageId].nodes,
     VECTOR_HANDLE_HIT_RADIUS_PX / viewport.zoom,
     visualSelectedVertexIds,
     canvasRefs.vectorEdit.selectedVectorHandlesRef.current,

@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { undo } from 'store/history/actions';
 import { store } from 'store';
 
@@ -15,7 +16,7 @@ const addFrameNode = (): string => {
     addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 5, y: 5 }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -37,7 +38,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -58,7 +59,8 @@ describe('handleDuplicateSelection', () => {
     handleDuplicateSelection(store.dispatch, createCanvasRefs());
 
     // result
-    const { nodes, selectedIds } = store.getState().design;
+    const { nodes } = selectActivePage(store.getState());
+    const { selectedIds } = store.getState().design;
 
     expect(selectedIds).toHaveLength(1);
     expect(selectedIds).not.toEqual([frameId]);
@@ -74,14 +76,14 @@ describe('handleDuplicateSelection', () => {
 
     store.dispatch(setSelection([frameId]));
 
-    const nodeCountBeforeDuplicate = Object.keys(store.getState().design.nodes).length;
+    const nodeCountBeforeDuplicate = Object.keys(store.getState().design.pages[store.getState().design.activePageId].nodes).length;
 
     // action
     handleDuplicateSelection(store.dispatch, createCanvasRefs());
     store.dispatch(undo());
 
     // result
-    expect(Object.keys(store.getState().design.nodes)).toHaveLength(nodeCountBeforeDuplicate);
+    expect(Object.keys(store.getState().design.pages[store.getState().design.activePageId].nodes)).toHaveLength(nodeCountBeforeDuplicate);
     expect(store.getState().design.selectedIds).toEqual([frameId]);
   });
 
@@ -89,13 +91,13 @@ describe('handleDuplicateSelection', () => {
     // mock
     addFrameNode();
 
-    const nodeCountBeforeDuplicate = Object.keys(store.getState().design.nodes).length;
+    const nodeCountBeforeDuplicate = Object.keys(store.getState().design.pages[store.getState().design.activePageId].nodes).length;
 
     // action
     handleDuplicateSelection(store.dispatch, createCanvasRefs());
 
     // result
-    expect(Object.keys(store.getState().design.nodes)).toHaveLength(nodeCountBeforeDuplicate);
+    expect(Object.keys(store.getState().design.pages[store.getState().design.activePageId].nodes)).toHaveLength(nodeCountBeforeDuplicate);
   });
 
   it('should do nothing while a vector node is open for editing with no vertex/segment selected', () => {
@@ -105,13 +107,13 @@ describe('handleDuplicateSelection', () => {
     store.dispatch(setSelection([frameId]));
     store.dispatch(setVectorEditingNodeIds([frameId]));
 
-    const nodeCountBeforeDuplicate = Object.keys(store.getState().design.nodes).length;
+    const nodeCountBeforeDuplicate = Object.keys(store.getState().design.pages[store.getState().design.activePageId].nodes).length;
 
     // action
     handleDuplicateSelection(store.dispatch, createCanvasRefs());
 
     // result
-    expect(Object.keys(store.getState().design.nodes)).toHaveLength(nodeCountBeforeDuplicate);
+    expect(Object.keys(store.getState().design.pages[store.getState().design.activePageId].nodes)).toHaveLength(nodeCountBeforeDuplicate);
   });
 
   it('should duplicate the selected vertex when a vector node is open for editing', () => {
@@ -126,7 +128,7 @@ describe('handleDuplicateSelection', () => {
     handleDuplicateSelection(store.dispatch, refs);
 
     // result
-    const node = store.getState().design.nodes[vectorId] as any;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[vectorId] as any;
 
     expect(Object.keys(node.vertices)).toHaveLength(2);
     expect(refs.vectorEdit.selectedVectorVertexIdsRef.current).toHaveLength(1);

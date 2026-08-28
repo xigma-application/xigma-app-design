@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -14,7 +15,7 @@ const addFrameNode = (): string => {
     addNode({ fill: '#ff0000', height: 50, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 100, x: 0, y: 0 }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -36,7 +37,7 @@ const addMediaNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -63,7 +64,12 @@ describe('resizeBoxNode', () => {
     );
 
     // result
-    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 80, width: 150, x: 0, y: 0 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      height: 80,
+      width: 150,
+      x: 0,
+      y: 0,
+    });
   });
 
   it('should toggle flip when the drag crosses the anchor', () => {
@@ -83,7 +89,7 @@ describe('resizeBoxNode', () => {
     );
 
     // result
-    expect(store.getState().design.nodes[idMedia]).toMatchObject({ flipX: true, flipY: false });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idMedia]).toMatchObject({ flipX: true, flipY: false });
   });
 
   it('should use the rotated anchor solver for a single rotated node, when one is provided', () => {
@@ -104,7 +110,12 @@ describe('resizeBoxNode', () => {
     );
 
     // result — matches getRotatedAnchorSolver's own directly-verified output for these inputs
-    const node = store.getState().design.nodes[idA] as { height: number; width: number; x: number; y: number };
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA] as {
+      height: number;
+      width: number;
+      x: number;
+      y: number;
+    };
 
     expect(node).toMatchObject({ height: 50, width: 200 });
     expect(node.x).toBeCloseTo(-50);
@@ -128,6 +139,11 @@ describe('resizeBoxNode', () => {
     );
 
     // result — matches the end-to-end "grow a rotated GROUP MEMBER..." case in continueResizeDrag.spec.ts
-    expect(store.getState().design.nodes[idA]).toMatchObject({ height: 100, width: 100, x: 50, y: -25 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      height: 100,
+      width: 100,
+      x: 50,
+      y: -25,
+    });
   });
 });

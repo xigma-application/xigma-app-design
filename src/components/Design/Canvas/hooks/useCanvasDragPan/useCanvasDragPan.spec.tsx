@@ -75,7 +75,7 @@ describe('useCanvasDragPan behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.viewport).toEqual({ x: 30, y: 15, zoom: 1 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].viewport).toEqual({ x: 30, y: 15, zoom: 1 });
   });
 
   it('should not react to a left-button drag', () => {
@@ -92,7 +92,7 @@ describe('useCanvasDragPan behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.viewport).toEqual(DEFAULT_VIEWPORT);
+    expect(store.getState().design.pages[store.getState().design.activePageId].viewport).toEqual(DEFAULT_VIEWPORT);
   });
 
   it('should apply the pressing cursor class while dragging and remove it on release', () => {
@@ -158,6 +158,6 @@ describe('useCanvasDragPan behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.viewport).toEqual(DEFAULT_VIEWPORT);
+    expect(store.getState().design.pages[store.getState().design.activePageId].viewport).toEqual(DEFAULT_VIEWPORT);
   });
 });

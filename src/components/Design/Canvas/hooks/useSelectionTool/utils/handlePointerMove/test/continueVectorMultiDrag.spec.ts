@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -39,7 +40,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -60,7 +61,7 @@ describe('continueVectorMultiDrag', () => {
     continueVectorMultiDrag(canvas, pointerEvent(10, 10), store.dispatch, canvasRefs, setClassName);
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -85,7 +86,7 @@ describe('continueVectorMultiDrag', () => {
     continueVectorMultiDrag(canvas, pointerEvent(10, 10), store.dispatch, canvasRefs, setClassName);
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
     expect(setClassName).not.toHaveBeenCalled();
   });
 
@@ -115,7 +116,7 @@ describe('continueVectorMultiDrag', () => {
     flushThrottledDispatch(canvasRefs.vectorMultiSelect.vectorMultiDragRef.current!.dispatchThrottle);
 
     // result
-    const node = store.getState().design.nodes[idA];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
     expect(node).toMatchObject({
       segments: { s1: { tangentEnd: { x: 5, y: 40 }, tangentStart: { x: 15, y: 40 } } },
@@ -249,7 +250,7 @@ describe('continueVectorMultiDrag', () => {
     flushThrottledDispatch(canvasRefs.vectorMultiSelect.vectorMultiDragRef.current!.dispatchThrottle);
 
     // result — every dragged element shifted by the same -2px x correction, keeping the group rigid
-    const node = store.getState().design.nodes[idA];
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
 
     expect(node).toMatchObject({
       segments: { s1: { tangentEnd: { x: 15, y: 350 }, tangentStart: { x: 25, y: 350 } } },

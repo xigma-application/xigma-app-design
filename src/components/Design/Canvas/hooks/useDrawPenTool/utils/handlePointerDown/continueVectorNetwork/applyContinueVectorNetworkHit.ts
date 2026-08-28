@@ -112,7 +112,7 @@ export const applyContinueVectorNetworkHit = (
         point,
         viewport.zoom,
         isShiftPressed,
-        appStore.getState().design.nodes,
+        appStore.getState().design.pages[appStore.getState().design.activePageId].nodes,
       );
       const snappedPoint = roundVectorPoint(snapped);
 

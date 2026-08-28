@@ -1,5 +1,6 @@
 // store
 import { addNode, setVectorEditingNodeIds } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -28,7 +29,7 @@ const addVectorNode = (rotation = 0): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -80,12 +81,13 @@ const addFilledRectNode = (color: string): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
 
-const currentNode = (id: string): TVectorNode => store.getState().design.nodes[id] as TVectorNode;
+const currentNode = (id: string): TVectorNode =>
+  store.getState().design.pages[store.getState().design.activePageId].nodes[id] as TVectorNode;
 
 describe('commitVectorErase', () => {
   afterEach(() => store.dispatch(setVectorEditingNodeIds([])));

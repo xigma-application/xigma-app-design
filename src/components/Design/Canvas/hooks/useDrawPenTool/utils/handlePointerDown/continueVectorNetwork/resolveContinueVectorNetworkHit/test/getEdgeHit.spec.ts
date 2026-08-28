@@ -1,5 +1,6 @@
 // store
 import { addNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -28,7 +29,7 @@ const addVectorNodeWithEdge = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -37,7 +38,7 @@ describe('getEdgeHit', () => {
   it('should return null without hit-testing when a same-node vertex hover already matched', () => {
     // mock
     const nodeId = addVectorNodeWithEdge();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // result
     expect(getEdgeHit({ x: 250, y: 0 }, node, { vertexId: 'a' }, null, IDENTITY_VIEWPORT)).toBeNull();
@@ -46,7 +47,7 @@ describe('getEdgeHit', () => {
   it('should return null without hit-testing when a cross-node vertex hover already matched', () => {
     // mock
     const nodeId = addVectorNodeWithEdge();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const targetNode = node;
 
     // result
@@ -56,7 +57,7 @@ describe('getEdgeHit', () => {
   it('should find the segment under the point when nothing else matched', () => {
     // mock
     const nodeId = addVectorNodeWithEdge();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // before
     const hit = getEdgeHit({ x: 250, y: 0 }, node, null, null, IDENTITY_VIEWPORT);

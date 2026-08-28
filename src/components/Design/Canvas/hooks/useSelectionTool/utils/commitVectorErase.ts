@@ -16,7 +16,7 @@ export const commitVectorErase = (dispatch: AppDispatch, path: TPoint[], radius:
   const state = store.getState();
 
   selectVectorEditingNodeIds(state).forEach((nodeId) => {
-    const node = getVectorEditingNode(state.design.nodes, nodeId);
+    const node = getVectorEditingNode(state.design.pages[state.design.activePageId].nodes, nodeId);
 
     if (node) {
       const baked = { ...node, ...bakeVectorNodeRotation(node) };

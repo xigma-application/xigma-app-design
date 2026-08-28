@@ -1,9 +1,10 @@
 // types
 import { NodeType, PathType, ToolName } from 'types/design/enums';
-import { TDesignState } from '../../types';
+import { TDesignPage, TDesignState } from '../../types';
 import { TFrameNode, TPathNode, TTextNode } from 'types/design/types';
 
 // utils
+import { getActivePage } from '../getActivePage';
 import { handleDeleteNode } from '../handleDeleteNode';
 
 const node: TFrameNode = {
@@ -19,10 +20,10 @@ const node: TFrameNode = {
   y: 0,
 };
 
-const buildState = (nodes: TDesignState['nodes'], selectedIds: string[] = []): TDesignState => ({
+const buildState = (nodes: TDesignPage['nodes'], selectedIds: string[] = []): TDesignState => ({
+  activePageId: 'page-1',
   activeTool: ToolName.default,
   commentDraftPosition: null,
-  comments: {},
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,
@@ -36,13 +37,20 @@ const buildState = (nodes: TDesignState['nodes'], selectedIds: string[] = []): T
   lastPenTool: ToolName.pen,
   lastShapeTool: ToolName.rectangle,
   lastTextTool: ToolName.text,
-  nodes,
-  paintColor: '#d9d9d9',
+  pages: {
+    'page-1': {
+      comments: {},
+      id: 'page-1',
+      name: 'Page 1',
+      nodes,
+      paintColor: '#d9d9d9',
+      rootOrder: Object.keys(nodes),
+      viewport: { x: 0, y: 0, zoom: 1 },
+    },
+  },
   penActiveVertexId: null,
-  rootOrder: Object.keys(nodes),
   selectedIds,
   vectorEditingNodeIds: [],
-  viewport: { x: 0, y: 0, zoom: 1 },
 });
 
 const buildPathNode = (overrides: Partial<TPathNode> = {}): TPathNode => ({
@@ -89,8 +97,8 @@ describe('handleDeleteNode', () => {
     handleDeleteNode(state, node.id);
 
     // result
-    expect(state.nodes[node.id]).toBeUndefined();
-    expect(state.rootOrder).toEqual([]);
+    expect(getActivePage(state).nodes[node.id]).toBeUndefined();
+    expect(getActivePage(state).rootOrder).toEqual([]);
   });
 
   it('should also remove the deleted id from selectedIds when it was selected', () => {
@@ -124,8 +132,8 @@ describe('handleDeleteNode', () => {
     handleDeleteNode(state, 'missing');
 
     // result
-    expect(state.nodes).toEqual({});
-    expect(state.rootOrder).toEqual([]);
+    expect(getActivePage(state).nodes).toEqual({});
+    expect(getActivePage(state).rootOrder).toEqual([]);
   });
 
   it('should cascade-delete the bound path node when deleting a path-text node', () => {
@@ -138,9 +146,9 @@ describe('handleDeleteNode', () => {
     handleDeleteNode(state, textNode.id);
 
     // result
-    expect(state.nodes[textNode.id]).toBeUndefined();
-    expect(state.nodes[pathNode.id]).toBeUndefined();
-    expect(state.rootOrder).toEqual([]);
+    expect(getActivePage(state).nodes[textNode.id]).toBeUndefined();
+    expect(getActivePage(state).nodes[pathNode.id]).toBeUndefined();
+    expect(getActivePage(state).rootOrder).toEqual([]);
   });
 
   it('should cascade-delete the bound text node when deleting a path node directly', () => {
@@ -153,9 +161,9 @@ describe('handleDeleteNode', () => {
     handleDeleteNode(state, pathNode.id);
 
     // result
-    expect(state.nodes[pathNode.id]).toBeUndefined();
-    expect(state.nodes[textNode.id]).toBeUndefined();
-    expect(state.rootOrder).toEqual([]);
+    expect(getActivePage(state).nodes[pathNode.id]).toBeUndefined();
+    expect(getActivePage(state).nodes[textNode.id]).toBeUndefined();
+    expect(getActivePage(state).rootOrder).toEqual([]);
   });
 
   it('should not touch any other node when deleting a plain text node with no path binding', () => {
@@ -168,7 +176,7 @@ describe('handleDeleteNode', () => {
     handleDeleteNode(state, plainText.id);
 
     // result
-    expect(state.nodes[plainText.id]).toBeUndefined();
-    expect(state.nodes.other).toBeDefined();
+    expect(getActivePage(state).nodes[plainText.id]).toBeUndefined();
+    expect(getActivePage(state).nodes.other).toBeDefined();
   });
 });

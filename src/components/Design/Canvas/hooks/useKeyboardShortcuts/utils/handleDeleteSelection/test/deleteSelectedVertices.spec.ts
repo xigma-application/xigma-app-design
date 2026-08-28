@@ -1,5 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds, updateNode } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -31,7 +32,7 @@ const addVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -68,7 +69,7 @@ const addSplitSquareVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -94,7 +95,7 @@ const addClosedTriangleVectorNode = (): string => {
     }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -108,13 +109,13 @@ describe('deleteSelectedVertices', () => {
   it('should dispatch one updateNode per owning node, dropping the selected vertex and any segment it touched', () => {
     // mock — deleting the shared middle vertex v2 removes both segments and leaves v1/v3 dangling
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // before
     deleteSelectedVertices(store.dispatch, [node], ['v2']);
 
     // result
-    const updated = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updated = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(updated.segments).toEqual({});
     expect(updated.vertices).toEqual({});
@@ -123,13 +124,13 @@ describe('deleteSelectedVertices', () => {
   it('should keep a vertex still held by another segment, dropping only the one it lost', () => {
     // mock — deleting v1 only removes s1; v2 stays held by s2, v3 is untouched
     const nodeId = addVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // before
     deleteSelectedVertices(store.dispatch, [node], ['v1']);
 
     // result
-    const updated = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updated = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(Object.keys(updated.segments)).toEqual(['s2']);
     expect(Object.keys(updated.vertices)).toEqual(['v2', 'v3']);
@@ -138,13 +139,13 @@ describe('deleteSelectedVertices', () => {
   it('should delete an isolated selected sector entirely when it has no untouched neighbor', () => {
     // mock — a closed triangle, no neighboring face to protect
     const nodeId = addClosedTriangleVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // before — every vertex of the triangle selected (a "sector" selection)
     deleteSelectedVertices(store.dispatch, [node], ['a', 'b', 'c']);
 
     // result — the whole boundary is gone, nothing left to protect
-    const updated = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updated = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(updated.segments).toEqual({});
     expect(updated.vertices).toEqual({});
@@ -153,14 +154,14 @@ describe('deleteSelectedVertices', () => {
   it('should protect the boundary shared with an untouched neighboring sector when deleting a selected sector', () => {
     // mock — a square split into a top/bottom half by divider s7 (v3<->v6)
     const nodeId = addSplitSquareVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // before — only the top half's vertices selected (v1, v2, v3, v6), bottom half untouched
     deleteSelectedVertices(store.dispatch, [node], ['v1', 'v2', 'v3', 'v6']);
 
     // result — the top's own exclusive edges (s1, s2, s6) are gone, but the divider (s7) and the
     // bottom's own boundary (s3, s4, s5) survive since the bottom half was never touched
-    const updated = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updated = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(Object.keys(updated.segments).sort()).toEqual(['s3', 's4', 's5', 's7']);
     expect(Object.keys(updated.vertices).sort()).toEqual(['v3', 'v4', 'v5', 'v6']);
@@ -169,13 +170,13 @@ describe('deleteSelectedVertices', () => {
   it('should also delete an extra selected vertex outside the sector, on top of protecting the shared boundary', () => {
     // mock — same split square, top half fully selected as a sector plus the unrelated bottom vertex v5
     const nodeId = addSplitSquareVectorNode();
-    const node = store.getState().design.nodes[nodeId] as TVectorNode;
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // before
     deleteSelectedVertices(store.dispatch, [node], ['v1', 'v2', 'v3', 'v6', 'v5']);
 
     // result — the sector subtract protects the divider (s7), but v5 (and its segments s4/s5) still go
-    const updated = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updated = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(Object.keys(updated.segments).sort()).toEqual(['s3', 's7']);
     expect(Object.keys(updated.vertices).sort()).toEqual(['v3', 'v4', 'v6']);
@@ -184,17 +185,17 @@ describe('deleteSelectedVertices', () => {
   it('should drop the deleted sector from filledFaceKeys', () => {
     // mock — the top half painted, then deleted as a sector
     const nodeId = addSplitSquareVectorNode();
-    const bareNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const bareNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
     const topFaceKey = deriveVectorFaces(bareNode).find((face) => getVectorFaceVertexIds(face).sort().join(',') === 'v1,v2,v3,v6')!.key;
 
     store.dispatch(updateNode({ changes: { filledFaceKeys: [topFaceKey] }, id: nodeId }));
-    const filledNode = store.getState().design.nodes[nodeId] as TVectorNode;
+    const filledNode = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     // before
     deleteSelectedVertices(store.dispatch, [filledNode], ['v1', 'v2', 'v3', 'v6']);
 
     // result
-    const updated = store.getState().design.nodes[nodeId] as TVectorNode;
+    const updated = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(updated.filledFaceKeys).not.toContain(topFaceKey);
   });

@@ -1,9 +1,10 @@
 // types
 import { NodeType, PathType, ToolName } from 'types/design/enums';
-import { TDesignState } from '../../types';
+import { TDesignPage, TDesignState } from '../../types';
 import { TFrameNode, TPathNode, TTextNode, TVectorNode, TVectorSegment } from 'types/design/types';
 
 // utils
+import { getActivePage } from '../getActivePage';
 import { handleUpdateNode } from '../handleUpdateNode';
 
 const node: TFrameNode = {
@@ -19,10 +20,10 @@ const node: TFrameNode = {
   y: 0,
 };
 
-const buildState = (nodes: TDesignState['nodes']): TDesignState => ({
+const buildState = (nodes: TDesignPage['nodes']): TDesignState => ({
+  activePageId: 'page-1',
   activeTool: ToolName.default,
   commentDraftPosition: null,
-  comments: {},
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,
@@ -36,13 +37,20 @@ const buildState = (nodes: TDesignState['nodes']): TDesignState => ({
   lastPenTool: ToolName.pen,
   lastShapeTool: ToolName.rectangle,
   lastTextTool: ToolName.text,
-  nodes,
-  paintColor: '#d9d9d9',
+  pages: {
+    'page-1': {
+      comments: {},
+      id: 'page-1',
+      name: 'Page 1',
+      nodes,
+      paintColor: '#d9d9d9',
+      rootOrder: Object.keys(nodes),
+      viewport: { x: 0, y: 0, zoom: 1 },
+    },
+  },
   penActiveVertexId: null,
-  rootOrder: Object.keys(nodes),
   selectedIds: [],
   vectorEditingNodeIds: [],
-  viewport: { x: 0, y: 0, zoom: 1 },
 });
 
 const buildPathNode = (overrides: Partial<TPathNode> = {}): TPathNode => ({
@@ -113,7 +121,7 @@ describe('handleUpdateNode', () => {
     handleUpdateNode(state, { changes: { width: 300 }, id: node.id });
 
     // result
-    expect((state.nodes[node.id] as TFrameNode).width).toBe(300);
+    expect((getActivePage(state).nodes[node.id] as TFrameNode).width).toBe(300);
   });
 
   it('should do nothing when the node does not exist', () => {
@@ -124,7 +132,7 @@ describe('handleUpdateNode', () => {
     handleUpdateNode(state, { changes: { width: 300 }, id: 'missing' });
 
     // result
-    expect(state.nodes).toEqual({});
+    expect(getActivePage(state).nodes).toEqual({});
   });
 
   it('should propagate a path-node resize/rotate to every text node bound to it', () => {
@@ -137,7 +145,7 @@ describe('handleUpdateNode', () => {
     handleUpdateNode(state, { changes: { height: 300, rotation: 45, width: 300, x: 10, y: 20 }, id: pathNode.id });
 
     // result
-    expect(state.nodes[textNode.id]).toMatchObject({ height: 300, rotation: 45, width: 300, x: 10, y: 20 });
+    expect(getActivePage(state).nodes[textNode.id]).toMatchObject({ height: 300, rotation: 45, width: 300, x: 10, y: 20 });
   });
 
   it('should propagate a text-node resize/rotate back onto its source path node', () => {
@@ -150,7 +158,7 @@ describe('handleUpdateNode', () => {
     handleUpdateNode(state, { changes: { height: 300, rotation: 45, width: 300, x: 10, y: 20 }, id: textNode.id });
 
     // result
-    expect(state.nodes[pathNode.id]).toMatchObject({ height: 300, rotation: 45, width: 300, x: 10, y: 20 });
+    expect(getActivePage(state).nodes[pathNode.id]).toMatchObject({ height: 300, rotation: 45, width: 300, x: 10, y: 20 });
   });
 
   it('should discard a width profile when a segments patch makes the network branch', () => {
@@ -168,7 +176,7 @@ describe('handleUpdateNode', () => {
     });
 
     // result
-    expect((state.nodes[vectorNode.id] as TVectorNode).widthProfile).toBeNull();
+    expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).widthProfile).toBeNull();
   });
 
   it('should keep a width profile when a segments patch keeps the network eligible', () => {
@@ -186,7 +194,7 @@ describe('handleUpdateNode', () => {
     });
 
     // result
-    expect((state.nodes[vectorNode.id] as TVectorNode).widthProfile).not.toBeNull();
+    expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).widthProfile).not.toBeNull();
   });
 
   it('should not run the width-profile eligibility check when the patch does not touch segments', () => {
@@ -198,6 +206,6 @@ describe('handleUpdateNode', () => {
     handleUpdateNode(state, { changes: { strokeColor: '#fff' }, id: vectorNode.id });
 
     // result
-    expect((state.nodes[vectorNode.id] as TVectorNode).strokeColor).toBe('#fff');
+    expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).strokeColor).toBe('#fff');
   });
 });

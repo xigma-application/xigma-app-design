@@ -15,7 +15,7 @@ export const armBakeVectorRotationOnPointerDown = ({ dispatch }: TArmContext): u
   const state = store.getState();
 
   selectVectorEditingNodeIds(state)
-    .map((id) => getVectorEditingNode(state.design.nodes, id))
+    .map((id) => getVectorEditingNode(state.design.pages[state.design.activePageId].nodes, id))
     .filter((node): node is TVectorNode => Boolean(node?.rotation))
     .forEach((node) => {
       dispatch(updateNode({ changes: bakeVectorNodeRotation(node), id: node.id }));

@@ -27,7 +27,7 @@ export const armVectorFaceSelectOnPointerDown = ({
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
 
   if (activeTool === ToolName.move && vectorEditingNodeIds.length > 0) {
-    const hit = getVectorFaceAtPointAcrossOpenNodes(point, vectorEditingNodeIds, state.design.nodes);
+    const hit = getVectorFaceAtPointAcrossOpenNodes(point, vectorEditingNodeIds, state.design.pages[state.design.activePageId].nodes);
 
     if (hit) {
       const { segments, vertices } = persistVectorNetworkCrossings(hit.node.segments, hit.node.vertices);

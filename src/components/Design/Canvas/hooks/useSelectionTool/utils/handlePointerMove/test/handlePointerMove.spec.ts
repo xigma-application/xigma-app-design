@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection } from 'store/design/slice';
+import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -80,7 +81,7 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
     addNode({ fill: '#ff0000', height: size, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: size, x, y }),
   );
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -88,7 +89,7 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
 const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => {
   store.dispatch(addNode({ name: 'Line', parentId: null, stroke: '#000000', type: NodeType.line, x1, x2, y1, y2 }));
 
-  const { rootOrder } = store.getState().design;
+  const { rootOrder } = selectActivePage(store.getState());
 
   return rootOrder[rootOrder.length - 1];
 };
@@ -134,7 +135,7 @@ describe('handlePointerMove', () => {
     );
 
     // result
-    expect(store.getState().design.nodes).toEqual({});
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
   });
 
   it('should delegate to continueDrag for a pending drag', () => {
@@ -182,7 +183,7 @@ describe('handlePointerMove', () => {
     flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
 
     // result
-    expect(store.getState().design.nodes[idA]).toMatchObject({ x: 510, y: 520 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ x: 510, y: 520 });
   });
 
   it('should delegate to continueEndpointDrag for a pending endpoint drag', () => {
@@ -223,7 +224,7 @@ describe('handlePointerMove', () => {
     );
 
     // result
-    expect(store.getState().design.nodes[idA]).toMatchObject({ x1: 650, y1: 660 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ x1: 650, y1: 660 });
   });
 
   it('should delegate to continueMarqueeDrag for a pending marquee', () => {

@@ -33,7 +33,7 @@ describe('usePaintColorPickerValue', () => {
     act(() => result.current.onChange({ alpha: 40, hex: '#ff0000' }));
 
     // result
-    expect(store.getState().design.paintColor).toBe('#ff0000');
+    expect(store.getState().design.pages[store.getState().design.activePageId].paintColor).toBe('#ff0000');
     expect(result.current.value).toStrictEqual({ alpha: 40, hex: '#ff0000' });
   });
 });

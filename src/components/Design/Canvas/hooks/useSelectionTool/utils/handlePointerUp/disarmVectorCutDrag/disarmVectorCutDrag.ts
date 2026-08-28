@@ -25,7 +25,7 @@ export const disarmVectorCutDrag = (
   const dragState = selectionRefs.vectorCutDragRef.current;
 
   if (dragState) {
-    const beforeNodes = store.getState().design.nodes;
+    const beforeNodes = store.getState().design.pages[store.getState().design.activePageId].nodes;
     const vectorEditingNodeIds = selectVectorEditingNodeIds(store.getState());
 
     if (dragState.status === 'pending' && dragState.hit) {

@@ -22,7 +22,7 @@ export const armVectorWidthHandleGrab = (
     const groupDrag = resizeSide
       ? getVectorWidthPointGroupDragTargets(
           canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current,
-          state.design.nodes,
+          state.design.pages[state.design.activePageId].nodes,
           handleHit.nodeId,
           handleHit.point.id,
         )

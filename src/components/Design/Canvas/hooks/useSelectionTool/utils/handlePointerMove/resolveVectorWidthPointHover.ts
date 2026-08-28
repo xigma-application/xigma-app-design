@@ -30,14 +30,14 @@ export const resolveVectorWidthPointHover = (
   if (activeTool === ToolName.variableWidth && vectorEditingNodeIds.length > 0 && event.buttons === 0) {
     const viewport = selectViewport(state);
     const point = screenToWorld(getPointerPosition(canvas, event), viewport);
-    const eligibleNodes = getEligibleVectorWidthNodes(vectorEditingNodeIds, state.design.nodes);
+    const eligibleNodes = getEligibleVectorWidthNodes(vectorEditingNodeIds, state.design.pages[state.design.activePageId].nodes);
     const handleHit = getVectorWidthPointHandleAtPoint(point, eligibleNodes, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);
     const strokeHit = handleHit
       ? null
       : getVectorCutHitAcrossOpenNodes(
           point,
           eligibleNodes.map((node) => node.id),
-          state.design.nodes,
+          state.design.pages[state.design.activePageId].nodes,
           VECTOR_EDGE_HIT_TOLERANCE_PX / viewport.zoom,
           VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom,
         );
