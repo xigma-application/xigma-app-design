@@ -32,7 +32,7 @@ const Header: FC<THeaderProps> = ({ name, onRenameFile }) => {
           value={name}
         />
         <button aria-label={t(`${translationNameSpace}.collapseAriaLabel`)} className={styles.Header__collapse} type="button">
-          <Icon name="PanelLeft" size={24} />
+          <Icon name="CollapsePanel" size={24} />
         </button>
       </div>
       <FileMeta />
