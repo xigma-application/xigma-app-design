@@ -165,13 +165,6 @@ Największa pojedyncza strukturalna luka względem Figmy.
       (`fract`/`fwidth`), nie geometria per linia. Pełny opis:
       `.claude/docs/canvas-rendering-pipeline.md` §3, §10
 
-## Etap 14 — Persystencja sceny
-
-Dziś cały `store/design` żyje tylko w pamięci.
-
-- [ ] zapis/odczyt `nodes`/`rootOrder`/`viewport` do `localStorage` (autosave, debounced)
-- [ ] docelowo zapis po stronie serwera — poza scope na razie
-
 ## Etap 15 — Detale UX toolbara i canvasu
 
 - [x] **Comment tool** — klik otwiera `CommentDraftInput`, Ctrl/Cmd+Enter zapisuje `CommentPin`;
