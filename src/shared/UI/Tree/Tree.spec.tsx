@@ -1,121 +1,59 @@
-import { Provider } from 'react-redux';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 // components
 import Tree from './Tree';
 
-// others
-import { TREE_DEFAULT_HEIGHT, TREE_MIN_HEIGHT } from './constants';
-
-// store
-import { addNode, deleteNode } from 'store/design/slice';
-import { selectNodes } from 'store/design/selectors';
-import { store } from 'store';
-
-// types
-import { NodeType } from 'types/design/enums';
-
 // utils
-import { getMaxTreeHeight } from './utils/getMaxTreeHeight';
 import { stubVirtualizerViewport } from 'test/stubVirtualizerViewport';
 
-const renderTree = (): ReturnType<typeof render> =>
-  render(
-    <Provider store={store}>
-      <Tree />
-    </Provider>,
-  );
-
 describe('Tree', () => {
-  let nodeId: string;
-
   beforeEach(() => {
     stubVirtualizerViewport();
-    store.dispatch(
-      addNode({
-        fill: '#ff0000',
-        height: 10,
-        name: 'My Frame',
-        parentId: null,
-        rotation: 0,
-        type: NodeType.frame,
-        width: 10,
-        x: 0,
-        y: 0,
-      }),
-    );
-    nodeId = Object.keys(selectNodes(store.getState())).at(-1) as string;
   });
 
   afterEach(() => {
-    store.dispatch(deleteNode(nodeId));
     vi.restoreAllMocks();
   });
 
-  it('should render one row per node in the active page', () => {
+  it('should render one row per count via renderRow', () => {
     // before
-    renderTree();
+    render(<Tree count={2} height={100} renderRow={(index) => <span>Row {index}</span>} rowHeight={32} />);
 
     // result
-    expect(screen.getByText('My Frame')).toBeInTheDocument();
+    expect(screen.getByText('Row 0')).toBeInTheDocument();
+    expect(screen.getByText('Row 1')).toBeInTheDocument();
   });
 
-  it('should render at its default height', () => {
+  it('should render at the given height', () => {
     // before
-    const { container } = renderTree();
+    const { container } = render(<Tree count={1} height={123} renderRow={() => <span>Row</span>} rowHeight={32} />);
 
     // result
-    expect((container.firstChild as HTMLElement).style.height).toBe(`${TREE_DEFAULT_HEIGHT}px`);
+    expect((container.firstChild as HTMLElement).style.height).toBe('123px');
   });
 
-  it('should grow when the resize handle is dragged down', () => {
+  it('should call onDeselectAll when clicking the empty area, not a row', () => {
     // before
-    const { container } = renderTree();
-    const list = container.firstChild as HTMLElement;
-    const handle = list.querySelector('[class*="resize-handle"]')!;
+    const onDeselectAll = vi.fn();
+    render(<Tree count={1} height={200} onDeselectAll={onDeselectAll} renderRow={() => <span>Row</span>} rowHeight={32} />);
 
-    vi.spyOn(list, 'getBoundingClientRect').mockReturnValue({ top: 100 } as DOMRect);
+    // action — click the row's own content, which should not bubble into a deselect
+    fireEvent.click(screen.getByText('Row'));
+
+    // result
+    expect(onDeselectAll).not.toHaveBeenCalled();
+  });
+
+  it('should call onDeselectAll when the empty scroll area itself is clicked', () => {
+    // before
+    const onDeselectAll = vi.fn();
+    const { container } = render(<Tree count={1} height={200} onDeselectAll={onDeselectAll} renderRow={() => <span>Row</span>} rowHeight={32} />);
+    const rowsContainer = container.querySelector('[class*="Tree__rows"]')!;
 
     // action
-    fireEvent.mouseDown(handle, { button: 0 });
-    fireEvent.mouseMove(document, { clientY: 250 });
-    fireEvent.mouseUp(document);
+    fireEvent.click(rowsContainer);
 
     // result
-    expect(list.style.height).toBe('150px');
-  });
-
-  it('should clamp to the min height when dragged past it', () => {
-    // before
-    const { container } = renderTree();
-    const list = container.firstChild as HTMLElement;
-    const handle = list.querySelector('[class*="resize-handle"]')!;
-
-    vi.spyOn(list, 'getBoundingClientRect').mockReturnValue({ top: 100 } as DOMRect);
-
-    // action
-    fireEvent.mouseDown(handle, { button: 0 });
-    fireEvent.mouseMove(document, { clientY: 100 });
-    fireEvent.mouseUp(document);
-
-    // result
-    expect(list.style.height).toBe(`${TREE_MIN_HEIGHT}px`);
-  });
-
-  it('should clamp to the viewport-based max height when dragged past it', () => {
-    // before
-    const { container } = renderTree();
-    const list = container.firstChild as HTMLElement;
-    const handle = list.querySelector('[class*="resize-handle"]')!;
-
-    vi.spyOn(list, 'getBoundingClientRect').mockReturnValue({ top: 100 } as DOMRect);
-
-    // action
-    fireEvent.mouseDown(handle, { button: 0 });
-    fireEvent.mouseMove(document, { clientY: 100000 });
-    fireEvent.mouseUp(document);
-
-    // result
-    expect(list.style.height).toBe(`${getMaxTreeHeight()}px`);
+    expect(onDeselectAll).toHaveBeenCalledTimes(1);
   });
 });

@@ -16,4 +16,16 @@
   &__header[aria-expanded='true']:hover [data-layers-toggle] {
     opacity: 1;
   }
+
+  &__treeWrapper {
+    position: relative;
+  }
+
+  &__resize-handle {
+    bottom: -3px;
+    height: 6px;
+    left: 0;
+    position: absolute;
+    right: 0;
+  }
 }

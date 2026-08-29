@@ -3,9 +3,10 @@ import { FC } from 'react';
 
 // components
 import TreeItemActions from './TreeItemActions';
-import { Icon } from 'shared';
+import { EditableInput, Icon } from 'shared';
 
 // hooks
+import { useRenameTreeItem } from './hooks/useRenameTreeItem';
 import { useSelectTreeItem } from './hooks/useSelectTreeItem';
 import { useTreeItemActions } from './hooks/useTreeItemActions';
 
@@ -23,8 +24,9 @@ export type TTreeItemProps = {
   node: TSceneNode;
 };
 
-const TreeItem: FC<TTreeItemProps> = ({ isSelected, node }) => {
+export const TreeItem: FC<TTreeItemProps> = ({ isSelected, node }) => {
   const handleSelect = useSelectTreeItem(node.id);
+  const handleRename = useRenameTreeItem(node.id);
   const { handleStopPropagation, handleToggleHidden, handleToggleLocked } = useTreeItemActions(node.id);
 
   return (
@@ -32,7 +34,12 @@ const TreeItem: FC<TTreeItemProps> = ({ isSelected, node }) => {
       <div className={styles.TreeItem__content}>
         <div className={styles.TreeItem__toggle} />
         <Icon className={styles.TreeItem__icon} color="neutral2" name={NODE_TYPE_ICON[node.type]} size={10} />
-        <span className={cx(styles.TreeItem__name, node.hidden && styles['TreeItem__name--hidden'])}>{node.name}</span>
+        <EditableInput
+          className={cx(styles.TreeItem__name, node.hidden && styles['TreeItem__name--hidden'])}
+          editOnDoubleClick
+          onChange={handleRename}
+          value={node.name}
+        />
         <TreeItemActions
           isHidden={Boolean(node.hidden)}
           isLocked={Boolean(node.locked)}

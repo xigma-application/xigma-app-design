@@ -1,64 +1,51 @@
-import { FC, useRef } from 'react';
+import cx from 'classnames';
+import { FC, MouseEvent, ReactNode, RefObject, useRef } from 'react';
 
 // components
 import ScrollThumb from 'shared/ScrollThumb/ScrollThumb';
-import TreeItem from './TreeItem/TreeItem';
 
 // hooks
-import { useDeselectOnEmptyClick } from './hooks/useDeselectOnEmptyClick';
-import { useHandleResizeMouseDown } from './hooks/useHandleResizeMouseDown';
-import { useResizeHandler, useVirtualList } from 'hooks';
-
-// others
-import { TREE_RESIZE_SETTINGS, TREE_ROW_HEIGHT } from './constants';
-
-// store
-import { selectOrderedNodes, selectSelectedIds } from 'store/design/selectors';
-import { useAppSelector } from 'store';
+import { useVirtualList } from 'hooks';
 
 // styles
 import styles from './tree.module.scss';
 
-// utils
-import { getMaxTreeHeight } from './utils/getMaxTreeHeight';
+export type TTreeProps = {
+  className?: string;
+  count: number;
+  height: number;
+  onDeselectAll?: TFunc;
+  renderRow: (index: number) => ReactNode;
+  rowHeight: number;
+  scrollToIndex?: number;
+};
 
-export const Tree: FC = () => {
-  const listRef = useRef<HTMLDivElement>(null);
-  const rowsRef = useRef<HTMLDivElement>(null);
-  const nodes = useAppSelector(selectOrderedNodes);
-  const selectedIds = useAppSelector(selectSelectedIds);
-  const maxHeight = getMaxTreeHeight();
-  const { cursorY, height, onMouseDownY } = useResizeHandler({ ...TREE_RESIZE_SETTINGS, maxHeight }, listRef);
-  const handleResizeMouseDown = useHandleResizeMouseDown(onMouseDownY);
-  const handleDeselectOnEmptyClick = useDeselectOnEmptyClick();
+export const Tree: FC<TTreeProps> = ({ className = '', count, height, onDeselectAll, renderRow, rowHeight, scrollToIndex }) => {
+  const rowsRef: RefObject<HTMLDivElement | null> = useRef(null);
+  const { items, totalSize } = useVirtualList({ count, rowHeight, scrollRef: rowsRef, scrollToIndex });
 
-  const { items, totalSize } = useVirtualList({
-    count: nodes.length,
-    rowHeight: TREE_ROW_HEIGHT,
-    scrollRef: rowsRef,
-  });
+  const handleRowsClick = (event: MouseEvent<HTMLDivElement>): void => {
+    if (onDeselectAll && event.target === event.currentTarget) {
+      onDeselectAll();
+    }
+  };
 
   return (
-    <div className={styles.Tree} ref={listRef} style={{ height }}>
-      <div className={styles.Tree__rows} onClick={handleDeselectOnEmptyClick} ref={rowsRef}>
+    <div className={cx(styles.Tree, className)} style={{ height }}>
+      <div className={styles.Tree__rows} onClick={handleRowsClick} ref={rowsRef}>
         <div className={styles.Tree__viewport} style={{ height: totalSize }}>
-          {items.map((virtualRow) => {
-            const node = nodes[virtualRow.index];
-
-            return (
-              <div
-                className={styles.Tree__row}
-                key={node.id}
-                style={{ height: virtualRow.size, transform: `translateY(${virtualRow.start}px)` }}
-              >
-                <TreeItem isSelected={selectedIds.includes(node.id)} node={node} />
-              </div>
-            );
-          })}
+          {items.map((virtualRow) => (
+            <div
+              className={styles.Tree__row}
+              key={virtualRow.key}
+              style={{ height: virtualRow.size, transform: `translateY(${virtualRow.start}px)` }}
+            >
+              {renderRow(virtualRow.index)}
+            </div>
+          ))}
         </div>
       </div>
       <ScrollThumb className={styles.Tree__scrollThumb} scrollRef={rowsRef} />
-      <div className={styles['Tree__resize-handle']} onMouseDown={handleResizeMouseDown} style={{ cursor: cursorY }} />
     </div>
   );
 };
