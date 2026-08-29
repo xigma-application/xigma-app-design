@@ -26,6 +26,7 @@ import { handleAddNode } from './utils/handleAddNode';
 import { handleAddPage } from './utils/handleAddPage';
 import { handleDeleteNode } from './utils/handleDeleteNode';
 import { handleDeletePage } from './utils/handleDeletePage';
+import { handleDuplicatePage, TDuplicatePagePayload } from './utils/handleDuplicatePage';
 import { handleReplaceDesignSnapshot } from './utils/handleReplaceDesignSnapshot';
 import { handleReplaceNode } from './utils/handleReplaceNode';
 import { handleSetActiveTool } from './utils/handleSetActiveTool';
@@ -99,6 +100,7 @@ const designSlice = createSlice({
     },
     deleteNode: (state, action: PayloadAction<string>) => handleDeleteNode(state, action.payload),
     deletePage: (state, action: PayloadAction<string>) => handleDeletePage(state, action.payload),
+    duplicatePage: (state, action: PayloadAction<TDuplicatePagePayload>) => handleDuplicatePage(state, action.payload),
     renamePage: (state, action: PayloadAction<{ id: string; name: string }>) => {
       state.pages[action.payload.id].name = action.payload.name;
     },
@@ -143,6 +145,7 @@ export const {
   deleteComment,
   deleteNode,
   deletePage,
+  duplicatePage,
   renamePage,
   replaceDesignSnapshot,
   replaceNode,

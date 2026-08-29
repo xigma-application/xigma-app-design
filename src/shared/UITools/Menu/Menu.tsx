@@ -14,6 +14,7 @@ export type TMenuProps = {
   align?: 'center' | 'end' | 'start';
   children: ReactNode;
   className?: string;
+  onCloseAutoFocus?: TFunc<[Event]>;
   onOpenChange?: TFunc<[boolean]>;
   side?: 'bottom' | 'left' | 'right' | 'top';
   sideOffset?: number;
@@ -26,6 +27,7 @@ export const Menu: FC<TMenuProps> = ({
   align = 'start',
   children,
   className = '',
+  onCloseAutoFocus,
   onOpenChange,
   side = 'bottom',
   sideOffset = 8,
@@ -42,6 +44,7 @@ export const Menu: FC<TMenuProps> = ({
         align={align}
         className={cx(styles.Menu, className)}
         collisionPadding={8}
+        onCloseAutoFocus={onCloseAutoFocus}
         side={side}
         sideOffset={sideOffset}
       >

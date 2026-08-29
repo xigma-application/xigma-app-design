@@ -1,5 +1,7 @@
+import { nanoid } from '@reduxjs/toolkit';
+
 // store
-import { addPage, deletePage, renamePage, setActivePage } from 'store/design/slice';
+import { addPage, deletePage, duplicatePage, renamePage, setActivePage } from 'store/design/slice';
 import { redo, undo } from '../actions';
 import { store } from 'store';
 
@@ -66,6 +68,32 @@ describe('historyMiddleware — pages', () => {
     // result
     expect(store.getState().design.pages[addedId]).toBeDefined();
     expect(store.getState().design.activePageId).toBe(addedId);
+  });
+
+  it('should undo a duplicated page by removing the copy again, then redo it back', () => {
+    // mock
+    const sourceId = store.getState().design.activePageId;
+    const countBefore = Object.keys(store.getState().design.pages).length;
+    store.dispatch(duplicatePage({ newPageId: nanoid(), nodeIdMap: {}, sourceId }));
+    const copyId = store.getState().design.activePageId;
+
+    // before
+    expect(copyId).not.toBe(sourceId);
+
+    // action
+    store.dispatch(undo());
+
+    // result
+    expect(Object.keys(store.getState().design.pages)).toHaveLength(countBefore);
+    expect(store.getState().design.pages[copyId]).toBeUndefined();
+    expect(store.getState().design.activePageId).toBe(sourceId);
+
+    // action
+    store.dispatch(redo());
+
+    // result
+    expect(store.getState().design.pages[copyId]).toBeDefined();
+    expect(store.getState().design.activePageId).toBe(copyId);
   });
 
   it('should undo a deleted page by restoring it with its content', () => {

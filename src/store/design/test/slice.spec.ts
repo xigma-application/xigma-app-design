@@ -10,6 +10,7 @@ import slice, {
   deleteComment,
   deleteNode,
   deletePage,
+  duplicatePage,
   renamePage,
   replaceDesignSnapshot,
   replaceNode,
@@ -309,6 +310,30 @@ describe('design slice', () => {
 
     // result
     expect(Object.keys(state.pages)).toHaveLength(1);
+  });
+
+  it('should duplicate a page after the source, remap its node ids and make the copy active', () => {
+    // mock
+    const initial = slice(undefined, { type: 'unknown' });
+    const sourceId = initial.activePageId;
+    const withFrame = slice(initial, addNode(frameNodePayload));
+    const [frameId] = withFrame.pages[sourceId].rootOrder;
+    const withChild = slice(withFrame, addNode({ ...frameNodePayload, name: 'Child', parentId: frameId }));
+    const childId = withChild.pages[sourceId].rootOrder[1];
+
+    // before
+    const state = slice(
+      withChild,
+      duplicatePage({ newPageId: 'copy-1', nodeIdMap: { [childId]: 'child-copy', [frameId]: 'frame-copy' }, sourceId }),
+    );
+
+    // result
+    expect(Object.keys(state.pages)).toEqual([sourceId, 'copy-1']);
+    expect(state.activePageId).toBe('copy-1');
+    expect(state.pages['copy-1'].name).toBe('Page 1 copy');
+    expect(state.pages['copy-1'].rootOrder).toEqual(['frame-copy', 'child-copy']);
+    expect(state.pages['copy-1'].nodes['child-copy'].parentId).toBe('frame-copy');
+    expect(state.pages[sourceId].rootOrder).toEqual([frameId, childId]);
   });
 
   it('should set the paint color', () => {

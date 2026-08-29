@@ -1,3 +1,4 @@
+import { MemoryRouter } from 'react-router';
 import { Provider } from 'react-redux';
 import { render } from '@testing-library/react';
 
@@ -14,7 +15,9 @@ describe('DesignPage snapshots', () => {
     const { asFragment } = render(
       <Provider store={store}>
         <TooltipProvider>
-          <DesignPage />
+          <MemoryRouter>
+            <DesignPage />
+          </MemoryRouter>
         </TooltipProvider>
       </Provider>,
     );

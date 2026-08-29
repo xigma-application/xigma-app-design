@@ -10,20 +10,27 @@ import Toolbar from 'components/Design/Toolbar/Toolbar';
 import CanvasRefsProvider from './core/CanvasRefsProvider/CanvasRefsProvider';
 import ClassNamesProvider from 'components/Design/core/ClassNamesProvider/ClassNamesProvider';
 
+// hooks
+import { useSyncActivePageFromUrl } from './hooks/useSyncActivePageFromUrl';
+
 // styles
 import styles from './design-page.module.scss';
 
-const DesignPage: FC = () => (
-  <CanvasRefsProvider>
-    <main className={styles.DesignPage}>
-      <LeftPanel />
-      <ClassNamesProvider>
-        <Canvas />
-      </ClassNamesProvider>
-      <RightPanel />
-      <Toolbar />
-    </main>
-  </CanvasRefsProvider>
-);
+const DesignPage: FC = () => {
+  useSyncActivePageFromUrl();
+
+  return (
+    <CanvasRefsProvider>
+      <main className={styles.DesignPage}>
+        <LeftPanel />
+        <ClassNamesProvider>
+          <Canvas />
+        </ClassNamesProvider>
+        <RightPanel />
+        <Toolbar />
+      </main>
+    </CanvasRefsProvider>
+  );
+};
 
 export default DesignPage;

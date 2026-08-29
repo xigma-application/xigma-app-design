@@ -1,13 +1,43 @@
 .PageRow {
   align-items: center;
   box-sizing: border-box;
+  column-gap: 4px;
   display: flex;
   height: 32px;
   padding: 0 8px;
 
   &__input {
+    flex: 1;
     font-size: 11px;
     font-weight: 550;
-    width: 100%;
+    min-width: 0;
+  }
+
+  &__menu {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    opacity: 0;
+  }
+
+  &:hover &__menu,
+  &--active &__menu,
+  &__menu:has([data-state='open']) {
+    opacity: 1;
+  }
+
+  &__menu-trigger {
+    align-items: center;
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--color-neutral-3) 50%, transparent);
+    }
   }
 }

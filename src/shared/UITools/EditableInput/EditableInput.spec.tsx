@@ -56,6 +56,20 @@ describe('EditableInput behaviors', () => {
     expect(screen.getByRole('textbox', { name: 'name' })).toHaveValue('Page 2');
   });
 
+  it('should enter edit mode when autoEdit flips to true on an already-mounted field', () => {
+    // before
+    const { rerender } = render(<EditableInput ariaLabel="name" autoEdit={false} onChange={vi.fn()} value="Page 2" />);
+
+    // result
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+
+    // action
+    rerender(<EditableInput ariaLabel="name" autoEdit onChange={vi.fn()} value="Page 2" />);
+
+    // result
+    expect(screen.getByRole('textbox', { name: 'name' })).toHaveValue('Page 2');
+  });
+
   it('should select the whole text when the field is focused', () => {
     // before
     render(<EditableInput ariaLabel="name" onChange={vi.fn()} value="Untitled" />);

@@ -25,6 +25,12 @@ export const useEditableInput = (
     setDraft(value);
   }, [value]);
 
+  useEffect(() => {
+    if (autoEdit) {
+      setIsEditing(true);
+    }
+  }, [autoEdit]);
+
   const setEditing = (editing: boolean): void => {
     setIsEditing(editing);
     onEditingChange(editing);

@@ -1,3 +1,5 @@
+import userEvent from '@testing-library/user-event';
+import { MemoryRouter, Route, Routes } from 'react-router';
 import { Provider } from 'react-redux';
 import { fireEvent, render, screen } from '@testing-library/react';
 
@@ -26,7 +28,11 @@ const buildPage = (overrides: Partial<TDesignPage> = {}): TDesignPage => ({
 const renderPageRow = (page: TDesignPage, autoEdit = false): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <PageRow autoEdit={autoEdit} page={page} />
+      <MemoryRouter initialEntries={['/design/file-1']}>
+        <Routes>
+          <Route element={<PageRow autoEdit={autoEdit} page={page} />} path="/design/:id" />
+        </Routes>
+      </MemoryRouter>
     </Provider>,
   );
 
@@ -103,5 +109,28 @@ describe('PageRow', () => {
 
     // result
     expect(screen.getByRole('textbox')).toHaveValue('Page 2');
+  });
+
+  it('should render a page-options menu button', () => {
+    // before
+    renderPageRow(buildPage({ name: 'Page 1' }));
+
+    // result
+    expect(screen.getByRole('button', { name: 'Page options' })).toBeInTheDocument();
+  });
+
+  it('should enter rename mode when the menu Rename page action is chosen', async () => {
+    // mock
+    const user = userEvent.setup();
+
+    // before
+    renderPageRow(buildPage({ name: 'Page 1' }));
+
+    // action
+    await user.click(screen.getByRole('button', { name: 'Page options' }));
+    await user.click(screen.getByText('Rename page'));
+
+    // result
+    expect(await screen.findByRole('textbox')).toHaveValue('Page 1');
   });
 });

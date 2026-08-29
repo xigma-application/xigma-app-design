@@ -343,13 +343,24 @@ Each history entry is a `THistorySnapshot = { design: TDesignSnapshot; vectorSel
 TVectorSelectionSnapshot }` (`createHistoryStack.ts`) — **not** just the document any more.
 `TDesignSnapshot` (`{ activePageId, pages, selectedIds }`, `store/design/types.ts`) captures the **whole
 `pages` record plus which page is active** (not just the active page's `nodes`/`rootOrder`), so
-undo/redo covers page-level operations: `renamePage`, `setActivePage`, `addPage`, `deletePage` all
-joined `UNDOABLE_ACTION_TYPES`, and `handleReplaceDesignSnapshot` now assigns
+undo/redo covers page-level operations: `renamePage`, `setActivePage`, `addPage`, `deletePage`,
+`duplicatePage` all joined `UNDOABLE_ACTION_TYPES`, and `handleReplaceDesignSnapshot` now assigns
 `state.pages`/`state.activePageId`/`state.selectedIds` wholesale before the vector-editing cleanup.
-`deletePage` (`handleDeletePage.ts`) is store-only for now (no UI): it no-ops on the last remaining
-page and re-points `activePageId` to the previous page in order when the active one is removed —
-undoing a delete restores the page with all its content because the full `pages` record was
-snapshotted. Still deliberately out of the snapshot: per-page `viewport`/`paintColor`/`comments` and
+`deletePage` (`handleDeletePage.ts`) no-ops on the last remaining page and re-points `activePageId`
+to the previous page in order when the active one is removed; `duplicatePage`
+(`handleDuplicatePage.ts`) deep-clones the source page inserted right after it (mirrors
+`handleAddPage`'s insert-after-active ordering) and makes the copy active — undoing either restores
+the prior `pages` record wholesale. Both now have a UI: the `PageRow` "⋯" menu
+(`components/Design/LeftPanel/File/Pages/PagesList/PageRow/PageRowMenu.tsx`). The reducer stays pure
+— `duplicatePage`'s payload carries the pre-generated `newPageId` + a `nodeIdMap` (`nanoid()` per
+source node id, built in `useDuplicatePage.ts`); `handleDuplicatePage` remaps every node `id`,
+`parentId` and text-node `pathId` through that map (vector-internal vertex/segment ids stay
+node-scoped and are not remapped), and calls `getDuplicatePageName` for the `"<name> copy"` /
+`"<name> copy 2"` naming. `getActivePage`/draft note: the util does `current(draftSource)` before
+`structuredClone`, since `structuredClone` throws on an Immer draft. A new page name is generated
+by `getNextPageName` (add) / `getDuplicatePageName` (duplicate). Separately, a `?page=<id>` query
+param on `/design/:id` is read once on mount by `pages/DesignPage/hooks/useSyncActivePageFromUrl.ts`
+→ `setActivePage` if the id resolves (the one history entry this leaves is the accepted tradeoff). Still deliberately out of the snapshot: per-page `viewport`/`paintColor`/`comments` and
 `activeTool` are UI state, not document state. `TVectorSelectionSnapshot` (`types/design/canvas/types.ts`) is the
 newer half — `{ selectedVectorVertexIds, selectedVectorSegmentIds, selectedVectorHandles }` — added so
 undo/redo also restores which vertex/segment/tangent-handle was selected inside Vector Edit Mode; see
