@@ -109,4 +109,31 @@ describe('TreeItem', () => {
     // result
     expect(container.querySelector('[class*="name--hidden"]')).toBeInTheDocument();
   });
+
+  it('should remove the hide/lock buttons from the DOM while the name is being edited, so the input can take their space', () => {
+    // before
+    renderTreeItem(false, node);
+    expect(screen.getByRole('button', { name: 'Hide layer' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Lock layer' })).toBeInTheDocument();
+
+    // action
+    fireEvent.doubleClick(screen.getByText('My Frame'));
+
+    // result
+    expect(screen.queryByRole('button', { name: 'Hide layer' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Lock layer' })).not.toBeInTheDocument();
+  });
+
+  it('should restore the hide/lock buttons once editing ends', () => {
+    // before
+    renderTreeItem(false, node);
+    fireEvent.doubleClick(screen.getByText('My Frame'));
+
+    // action
+    fireEvent.blur(screen.getByRole('textbox'));
+
+    // result
+    expect(screen.getByRole('button', { name: 'Hide layer' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Lock layer' })).toBeInTheDocument();
+  });
 });

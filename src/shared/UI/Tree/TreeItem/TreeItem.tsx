@@ -10,6 +10,7 @@ import { EditableInput } from 'shared';
 import { useRenameTreeItem } from './hooks/useRenameTreeItem';
 import { useSelectTreeItem } from './hooks/useSelectTreeItem';
 import { useTreeItemActions } from './hooks/useTreeItemActions';
+import { useTreeItemNameEditing } from './hooks/useTreeItemNameEditing';
 
 // styles
 import styles from './tree-item.module.scss';
@@ -26,25 +27,29 @@ export const TreeItem: FC<TTreeItemProps> = ({ isSelected, node }) => {
   const handleSelect = useSelectTreeItem(node.id);
   const handleRename = useRenameTreeItem(node.id);
   const { handleStopPropagation, handleToggleHidden, handleToggleLocked } = useTreeItemActions(node.id);
+  const { isEditing, onEditingChange } = useTreeItemNameEditing();
 
   return (
     <div aria-selected={isSelected} className={styles.TreeItem} onClick={handleSelect}>
-      <div className={styles.TreeItem__content}>
+      <div className={cx(styles.TreeItem__content, isEditing && styles['TreeItem__content--editing'])}>
         <div className={styles.TreeItem__toggle} />
         <TreeItemIcon className={styles.TreeItem__icon} node={node} size={10} />
         <EditableInput
           className={cx(styles.TreeItem__name, node.hidden && styles['TreeItem__name--hidden'])}
           editOnDoubleClick
           onChange={handleRename}
+          onEditingChange={onEditingChange}
           value={node.name}
         />
-        <TreeItemActions
-          isHidden={Boolean(node.hidden)}
-          isLocked={Boolean(node.locked)}
-          onStopPropagation={handleStopPropagation}
-          onToggleHidden={handleToggleHidden}
-          onToggleLocked={handleToggleLocked}
-        />
+        {!isEditing && (
+          <TreeItemActions
+            isHidden={Boolean(node.hidden)}
+            isLocked={Boolean(node.locked)}
+            onStopPropagation={handleStopPropagation}
+            onToggleHidden={handleToggleHidden}
+            onToggleLocked={handleToggleLocked}
+          />
+        )}
       </div>
     </div>
   );

@@ -18,6 +18,10 @@
     padding: 0 6px;
   }
 
+  &__content--editing {
+    padding-right: 0;
+  }
+
   &:not([aria-selected='true']):hover &__content {
     background-color: color-mix(in srgb, var(--color-neutral-3) 70%, transparent);
     border-radius: 5px;
