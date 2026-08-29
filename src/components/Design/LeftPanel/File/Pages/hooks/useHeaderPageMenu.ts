@@ -1,10 +1,10 @@
 import { MouseEvent } from 'react';
 
 // hooks
-import { TUsePageRowContextMenuResult, usePageRowContextMenu } from '../PagesList/PageRow/hooks/usePageRowContextMenu';
+import { TUseTreeItemContextMenuResult, useTreeItemContextMenu } from 'shared/UI/Tree/TreeItem/hooks/useTreeItemContextMenu';
 
-export const useHeaderPageMenu = (isCollapsed: boolean): TUsePageRowContextMenuResult => {
-  const menu = usePageRowContextMenu();
+export const useHeaderPageMenu = (isCollapsed: boolean): TUseTreeItemContextMenuResult => {
+  const menu = useTreeItemContextMenu();
 
   const onContextMenu = (event: MouseEvent): void => {
     if (isCollapsed) {

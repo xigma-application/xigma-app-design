@@ -6,10 +6,10 @@ import PageRowMenu from './PageRowMenu';
 import { EditableInput } from 'shared';
 
 // hooks
-import { usePageRowContextMenu } from './hooks/usePageRowContextMenu';
 import { usePageRowRename } from './hooks/usePageRowRename';
 import { useRenamePage } from './hooks/useRenamePage';
 import { useSelectPage } from './hooks/useSelectPage';
+import { useTreeItemContextMenu } from 'shared/UI/Tree/TreeItem/hooks/useTreeItemContextMenu';
 
 // store
 import { selectActivePageId } from 'store/design/selectors';
@@ -32,7 +32,7 @@ const PageRow: FC<TPageRowProps> = ({ autoEdit, onAutoEditDismissed, page }) => 
   const handleRename = useRenamePage(page.id);
   const handleSelect = useSelectPage(page.id);
   const { isRenameRequested, onEditingChange, onRename } = usePageRowRename(autoEdit, onAutoEditDismissed);
-  const { anchorRef, isOpen, onContextMenu, onOpenChange } = usePageRowContextMenu();
+  const { anchorRef, isOpen, onContextMenu, onOpenChange } = useTreeItemContextMenu();
   const isSelected = page.id === activePageId;
 
   return (

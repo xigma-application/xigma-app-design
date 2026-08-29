@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { PopoverCompound } from 'shared';
 
 // hooks
-import { TVirtualAnchor } from './hooks/usePageRowContextMenu';
+import { TVirtualAnchor } from 'shared/UI/Tree/TreeItem/hooks/useTreeItemContextMenu';
 import { useCopyPageLink } from './hooks/useCopyPageLink';
 import { useDeletePage } from './hooks/useDeletePage';
 import { useDuplicatePage } from './hooks/useDuplicatePage';
