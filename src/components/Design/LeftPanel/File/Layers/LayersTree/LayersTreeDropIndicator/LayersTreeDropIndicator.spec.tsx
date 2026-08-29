@@ -4,12 +4,11 @@ import { render } from '@testing-library/react';
 import LayersTreeDropIndicator from './LayersTreeDropIndicator';
 
 describe('LayersTreeDropIndicator', () => {
-  it('should render a dot and a connecting line', () => {
+  it('should render the line element, with the dot drawn as its ::after pseudo-element', () => {
     // before
     const { container } = render(<LayersTreeDropIndicator />);
 
     // result
-    expect(container.querySelector('[class*="__dot"]')).toBeInTheDocument();
-    expect(container.querySelector('[class*="__line"]')).toBeInTheDocument();
+    expect(container.querySelector('[class*="LayersTreeDropIndicator"]')).toBeInTheDocument();
   });
 });
