@@ -1,30 +1,45 @@
 // others
-import { CONTROL, SHIFT } from 'constant/mainKeys';
+import { ALT, CONTROL, SHIFT } from 'constant/mainKeys';
 
 // types
 import { TKeyboardShortcuts } from './types';
 import { ToolName } from 'types/design/enums';
 
 export const KEYBOARD_SHORTCUTS: TKeyboardShortcuts = {
+  addAutoLayout: [SHIFT, 'A'],
   [ToolName.arrow]: [SHIFT, 'L'],
+  bringToFront: [']'],
   [ToolName.comment]: ['C'],
+  copy: [CONTROL, 'C'],
+  createComponent: [ALT, CONTROL, 'K'],
   [ToolName.cut]: ['X'],
   [ToolName.default]: ['V'],
   [ToolName.ellipse]: ['O'],
   [ToolName.erase]: [SHIFT, 'E'],
   find: [CONTROL, 'F'],
+  flatten: [ALT, SHIFT, 'F'],
+  flipHorizontal: [SHIFT, 'H'],
+  flipVertical: [SHIFT, 'V'],
   [ToolName.frame]: ['F'],
+  frameSelection: [ALT, CONTROL, 'G'],
+  groupSelection: [CONTROL, 'G'],
   [ToolName.hand]: ['H'],
+  hideShowLayer: [SHIFT, CONTROL, 'H'],
   [ToolName.lasso]: ['Q'],
   [ToolName.line]: ['L'],
+  lockUnlockLayer: [SHIFT, CONTROL, 'L'],
   [ToolName.media]: [CONTROL, SHIFT, 'K'],
+  outlineStroke: [ALT, CONTROL, 'O'],
   [ToolName.paint]: [SHIFT, 'B'],
+  pasteToReplace: [SHIFT, CONTROL, 'R'],
   [ToolName.pen]: ['P'],
   [ToolName.pencil]: [SHIFT, 'P'],
   [ToolName.polygon]: [],
   [ToolName.rectangle]: ['R'],
+  renameLayer: [CONTROL, 'R'],
   [ToolName.scale]: ['K'],
   [ToolName.section]: [SHIFT, 'S'],
+  sendToBack: ['['],
   [ToolName.slice]: ['S'],
   [ToolName.star]: [],
   [ToolName.text]: ['T'],

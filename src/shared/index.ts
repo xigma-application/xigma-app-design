@@ -9,6 +9,7 @@ export * from './ScrollThumb/ScrollThumb';
 export * from './UI/Menu/Menu';
 export * from './UI/Tree/Tree';
 export * from './UI/Tree/TreeItem/TreeItem';
+export * from './UI/Tree/TreeItem/types';
 export * from './UITools/Button/Button';
 export * from './UITools/ButtonMenu/ButtonMenu';
 export * from './UITools/Chip/Chip';

@@ -1,7 +1,8 @@
 import { FC, ReactNode } from 'react';
 
 // components
-import { Tree, TreeItem } from 'shared';
+import LayerRow from './LayerRow/LayerRow';
+import { Tree } from 'shared';
 
 // hooks
 import { useDeselectOnEmptyClick } from './hooks/useDeselectOnEmptyClick';
@@ -23,7 +24,7 @@ const LayersTree: FC = () => {
   const handleDeselectOnEmptyClick = useDeselectOnEmptyClick();
   const handleReorderNode = useReorderNode();
 
-  const renderRow = (index: number): ReactNode => <TreeItem isSelected={selectedIds.includes(nodes[index].id)} node={nodes[index]} />;
+  const renderRow = (index: number): ReactNode => <LayerRow isSelected={selectedIds.includes(nodes[index].id)} node={nodes[index]} />;
   const isRowSelected = (index: number): boolean => index >= 0 && index < nodes.length && selectedIds.includes(nodes[index].id);
 
   return (
