@@ -13,20 +13,21 @@ import { store } from 'store';
 
 const writeText = vi.fn();
 
+const anchorRef = { current: { getBoundingClientRect: (): DOMRect => new DOMRect(10, 20, 0, 0) } };
+
 const renderPageRowMenu = (id: string, onRename = vi.fn()): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
       <MemoryRouter initialEntries={['/design/file-1']}>
         <Routes>
-          <Route element={<PageRowMenu id={id} onRename={onRename} />} path="/design/:id" />
+          <Route
+            element={<PageRowMenu anchorRef={anchorRef} id={id} isOpen onOpenChange={vi.fn()} onRename={onRename} />}
+            path="/design/:id"
+          />
         </Routes>
       </MemoryRouter>
     </Provider>,
   );
-
-const openMenu = async (user: ReturnType<typeof userEvent.setup>): Promise<void> => {
-  await user.click(screen.getByRole('button', { name: 'Page options' }));
-};
 
 describe('PageRowMenu', () => {
   const initialActivePageId = selectActivePageId(store.getState());
@@ -42,15 +43,9 @@ describe('PageRowMenu', () => {
     store.dispatch(setActivePage(initialActivePageId));
   });
 
-  it('should show all four actions when opened', async () => {
-    // mock
-    const user = userEvent.setup();
-
+  it('should show all four actions when open', () => {
     // before
     renderPageRowMenu(initialActivePageId);
-
-    // action
-    await openMenu(user);
 
     // result
     expect(screen.getByText('Copy link to page')).toBeInTheDocument();
@@ -59,21 +54,15 @@ describe('PageRowMenu', () => {
     expect(screen.getByText('Delete page')).toBeInTheDocument();
   });
 
-  it('should disable Delete page while there is only one page', async () => {
-    // mock
-    const user = userEvent.setup();
-
+  it('should disable Delete page while there is only one page', () => {
     // before
     renderPageRowMenu(initialActivePageId);
 
-    // action
-    await openMenu(user);
-
     // result
-    expect(screen.getByText('Delete page').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Delete page').closest('div')?.className).toMatch(/--disabled/);
   });
 
-  it('should enable Delete page once a second page exists, and delete on click', async () => {
+  it('should delete the page on Delete page click once a second page exists', async () => {
     // mock
     const user = userEvent.setup();
     store.dispatch(addPage());
@@ -81,7 +70,6 @@ describe('PageRowMenu', () => {
 
     // before
     renderPageRowMenu(secondId);
-    await openMenu(user);
 
     // action
     await user.click(screen.getByText('Delete page'));
@@ -97,7 +85,6 @@ describe('PageRowMenu', () => {
 
     // before
     renderPageRowMenu(initialActivePageId);
-    await openMenu(user);
 
     // action
     await user.click(screen.getByText('Duplicate page'));
@@ -113,7 +100,6 @@ describe('PageRowMenu', () => {
 
     // before
     renderPageRowMenu(initialActivePageId);
-    await openMenu(user);
 
     // action
     await user.click(screen.getByText('Copy link to page'));
@@ -129,7 +115,6 @@ describe('PageRowMenu', () => {
 
     // before
     renderPageRowMenu(initialActivePageId, onRename);
-    await openMenu(user);
 
     // action
     await user.click(screen.getByText('Rename page'));

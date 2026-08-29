@@ -3,9 +3,9 @@
 }
 
 .Popover {
-  background-color: var(--color-neutral-5);
+  background-color: var(--color-menu-panel);
   border-radius: 8px;
-  box-shadow: 0 2px 14px rgb(0 0 0 / 20%);
+  box-shadow: var(--elevation-400-menu-panel);
   color: var(--color-neutral-1);
   min-width: 150px;
   padding: 4px;

@@ -48,4 +48,28 @@ describe('PopoverItem behaviors', () => {
     // result
     expect(onClick).toHaveBeenCalledTimes(1);
   });
+
+  it('should reserve the check slot by default', () => {
+    // before
+    render(
+      <PopoverPrimitive.Root open>
+        <PopoverItem label="Frame" selected />
+      </PopoverPrimitive.Root>,
+    );
+
+    // result
+    expect(screen.getByText('Frame').previousElementSibling).toHaveStyle({ opacity: '1' });
+  });
+
+  it('should drop the check slot when withCheck is false', () => {
+    // before
+    render(
+      <PopoverPrimitive.Root open>
+        <PopoverItem label="Frame" selected withCheck={false} />
+      </PopoverPrimitive.Root>,
+    );
+
+    // result — the label is the first child, no check span before it
+    expect(screen.getByText('Frame').previousElementSibling).toBeNull();
+  });
 });

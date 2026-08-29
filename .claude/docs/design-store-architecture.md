@@ -350,8 +350,9 @@ undo/redo covers page-level operations: `renamePage`, `setActivePage`, `addPage`
 to the previous page in order when the active one is removed; `duplicatePage`
 (`handleDuplicatePage.ts`) deep-clones the source page inserted right after it (mirrors
 `handleAddPage`'s insert-after-active ordering) and makes the copy active — undoing either restores
-the prior `pages` record wholesale. Both now have a UI: the `PageRow` "⋯" menu
-(`components/Design/LeftPanel/File/Pages/PagesList/PageRow/PageRowMenu.tsx`). The reducer stays pure
+the prior `pages` record wholesale. Both now have a UI: the `PageRow` right-click menu
+(`PageRowMenu.tsx` — a controlled `@radix-ui/react-popover` positioned at the cursor via a virtual
+anchor from `usePageRowContextMenu.ts`; reuses `PopoverCompound.PopoverItem`). The reducer stays pure
 — `duplicatePage`'s payload carries the pre-generated `newPageId` + a `nodeIdMap` (`nanoid()` per
 source node id, built in `useDuplicatePage.ts`); `handleDuplicatePage` remaps every node `id`,
 `parentId` and text-node `pathId` through that map (vector-internal vertex/segment ids stay

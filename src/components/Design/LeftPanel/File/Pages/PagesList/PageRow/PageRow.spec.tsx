@@ -111,12 +111,15 @@ describe('PageRow', () => {
     expect(screen.getByRole('textbox')).toHaveValue('Page 2');
   });
 
-  it('should render a page-options menu button', () => {
+  it('should open the page menu on right-click', () => {
     // before
     renderPageRow(buildPage({ name: 'Page 1' }));
 
+    // action
+    fireEvent.contextMenu(screen.getByText('Page 1'));
+
     // result
-    expect(screen.getByRole('button', { name: 'Page options' })).toBeInTheDocument();
+    expect(screen.getByText('Delete page')).toBeInTheDocument();
   });
 
   it('should enter rename mode when the menu Rename page action is chosen', async () => {
@@ -127,7 +130,7 @@ describe('PageRow', () => {
     renderPageRow(buildPage({ name: 'Page 1' }));
 
     // action
-    await user.click(screen.getByRole('button', { name: 'Page options' }));
+    fireEvent.contextMenu(screen.getByText('Page 1'));
     await user.click(screen.getByText('Rename page'));
 
     // result

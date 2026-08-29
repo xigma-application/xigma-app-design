@@ -1,12 +1,8 @@
-.DropdownPanel {
+.PageRowMenu {
   background-color: var(--color-menu-panel);
   border-radius: 8px;
   box-shadow: var(--elevation-400-menu-panel);
   color: var(--color-neutral-1);
-  display: flex;
-  flex-direction: column;
-  min-width: 90px;
+  min-width: 150px;
   padding: 4px;
-  row-gap: 1px;
-  width: auto;
 }

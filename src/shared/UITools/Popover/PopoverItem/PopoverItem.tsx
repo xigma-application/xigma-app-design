@@ -19,6 +19,7 @@ export type TPopoverItemProps = {
   selected?: boolean;
   shortcut?: string;
   shortcutClassName?: string;
+  withCheck?: boolean;
 };
 
 export const PopoverItem: FC<TPopoverItemProps> = ({
@@ -32,6 +33,7 @@ export const PopoverItem: FC<TPopoverItemProps> = ({
   selected = false,
   shortcut,
   shortcutClassName = '',
+  withCheck = true,
 }) => {
   const content = useMemo(
     () => (
@@ -39,15 +41,17 @@ export const PopoverItem: FC<TPopoverItemProps> = ({
         className={cx(styles.PopoverItem, disabled && styles['PopoverItem--disabled'], className)}
         onClick={disabled ? undefined : onClick}
       >
-        <span style={{ opacity: selected ? 1 : 0 }}>
-          <Icon name="Check" size={checkIconSize} />
-        </span>
+        {withCheck && (
+          <span style={{ opacity: selected ? 1 : 0 }}>
+            <Icon name="Check" size={checkIconSize} />
+          </span>
+        )}
         {icon && <Icon name={icon} size={iconSize} />}
         <span className={styles.PopoverItem__label}>{label}</span>
         {shortcut && <span className={cx(styles.PopoverItem__shortcut, shortcutClassName)}>{shortcut}</span>}
       </div>
     ),
-    [checkIconSize, className, disabled, icon, iconSize, label, onClick, selected, shortcut, shortcutClassName],
+    [checkIconSize, className, disabled, icon, iconSize, label, onClick, selected, shortcut, shortcutClassName, withCheck],
   );
 
   return disabled ? content : <PopoverPrimitive.Close asChild>{content}</PopoverPrimitive.Close>;
