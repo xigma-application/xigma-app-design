@@ -8,7 +8,7 @@ import { EditableInput } from 'shared';
 
 // hooks
 import { useRenameTreeItem } from './hooks/useRenameTreeItem';
-import { useSelectTreeItem } from './hooks/useSelectTreeItem';
+import { useSelectTreeItem } from './hooks/useSelectTreeItem/useSelectTreeItem';
 import { useTreeItemActions } from './hooks/useTreeItemActions';
 import { useTreeItemNameEditing } from './hooks/useTreeItemNameEditing';
 
