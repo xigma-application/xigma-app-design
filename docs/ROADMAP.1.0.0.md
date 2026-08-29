@@ -1,217 +1,217 @@
 # xigma — Roadmap
 
-Cel: odtworzyć aplikację Figma 1:1, krok po kroku. Silnik rysowania: **Canvas** (nie DOM/SVG).
-Wyjątek: podczas edycji tekstu montowany jest mały DOM overlay (`TextEditOverlay`) — reszta
-(kształty, selekcja, handle'y, guide'y) rysowana jest na canvasie, tak jak w oryginale.
+Goal: recreate the Figma app 1:1, step by step. Drawing engine: **Canvas** (not DOM/SVG).
+Exception: during text editing a small DOM overlay (`TextEditOverlay`) is mounted — everything else
+(shapes, selection, handles, guides) is drawn on the canvas, just like in the original.
 
-**Rendering: WebGL od samego fundamentu**, nie Canvas 2D — zdecydowane świadomie wcześnie, żeby
-uniknąć drugiej migracji renderera później, gdy scena urośnie. C++/WASM (jak w prawdziwej Figmie)
-to osobny, odległy temat, poza scope na razie — dopiero jeśli realny profiling pokaże, że wąskim
-gardłem jest matematyka JS (hit-testing, tesselacja), nie samo rysowanie na GPU.
+**Rendering: WebGL from the very foundation**, not Canvas 2D — decided deliberately early, to avoid a
+second renderer migration later once the scene grows. C++/WASM (like in the real Figma) is a
+separate, distant topic, out of scope for now — only if real profiling shows the bottleneck is the JS
+math (hit-testing, tessellation), not the GPU drawing itself.
 
-Zaznaczamy checkboxy w miarę postępu. Każdy etap = osobna, malutka porcja pracy.
+Checkboxes are ticked as progress is made. Each stage = a separate, tiny chunk of work.
 
-## Etap 0 — Fundament projektu
+## Stage 0 — Project foundation
 
-- [x] `components/Design/Canvas` — jeden `<canvas>` na cały viewport, resize (`devicePixelRatio` +
-      debounce), render loop (`requestAnimationFrame`, WebGL2), teksturowane tło pod canvasem
+- [x] `components/Design/Canvas` — one `<canvas>` for the whole viewport, resize (`devicePixelRatio` +
+      debounce), render loop (`requestAnimationFrame`, WebGL2), textured background behind the canvas
 
-## Etap 1 — Dolny toolbar
+## Stage 1 — Bottom toolbar
 
-- [x] `components/Design/Toolbar` — floating layout, `activeTool` w Redux, ikony wg
+- [x] `components/Design/Toolbar` — floating layout, `activeTool` in Redux, icons per
       [[xigma-icons]]
-- [x] Select/Move, Frame, Comment + dropdown-warianty (Radix `DropdownMenu`)
-- [x] **Hand tool** (`H`) — wariant w dropdownzie Select, reużywa matematykę środkowoprzyciskowego
-      pan
-- [x] dropdown wariantów pod Rectangle (Line/Ellipse/Polygon/Star — szczegóły w Etapie 6)
+- [x] Select/Move, Frame, Comment + dropdown variants (Radix `DropdownMenu`)
+- [x] **Hand tool** (`H`) — a variant in the Select dropdown, reuses the middle-button pan math
+- [x] dropdown of variants under Rectangle (Line/Ellipse/Polygon/Star — details in Stage 6)
 
-## Etap 2 — Model danych sceny
+## Stage 2 — Scene data model
 
-- [x] `TSceneNode` jako discriminated union (`types/design/types.ts`), na start tylko `TFrameNode`
-- [x] store sceny (`store/design`): `nodes: Record<string, TSceneNode>` + `rootOrder: string[]`,
-      reducery `addNode`/`updateNode`
-- [x] `TViewport { x, y, zoom }` w Reduxie — realne pan/zoom w Etapie 4
+- [x] `TSceneNode` as a discriminated union (`types/design/types.ts`), starting with just `TFrameNode`
+- [x] scene store (`store/design`): `nodes: Record<string, TSceneNode>` + `rootOrder: string[]`,
+      reducers `addNode`/`updateNode`
+- [x] `TViewport { x, y, zoom }` in Redux — real pan/zoom in Stage 4
 
-## Etap 3 — Narzędzie Frame
+## Stage 3 — Frame tool
 
-- [x] click-drag tworzy frame, `addNode` na puszczeniu (z minimalnym rozmiarem), narzędzie wraca
-      do Select
-- [x] pierwszy realny WebGL rendering (`drawRect`, prosty shader) — nazwa nad frame'em odłożona do
-      Etapu 6/7 (rendering tekstu)
+- [x] click-drag creates a frame, `addNode` on release (with a minimum size), the tool returns
+      to Select
+- [x] first real WebGL rendering (`drawRect`, a simple shader) — the name above the frame deferred to
+      Stage 6/7 (text rendering)
 
-## Etap 4 — Pan & zoom
+## Stage 4 — Pan & zoom
 
-- [x] scroll = pan, Ctrl/Cmd+scroll (lub pinch) = zoom wokół kursora, zoom w `[ZOOM_MIN, ZOOM_MAX]`
-- [x] transformacja viewportu liczona na GPU (uniformy w shaderze), nie w JS — świadomie, ten sam
-      typ decyzji co WebGL zamiast Canvas 2D
+- [x] scroll = pan, Ctrl/Cmd+scroll (or pinch) = zoom around the cursor, zoom in `[ZOOM_MIN, ZOOM_MAX]`
+- [x] viewport transform computed on the GPU (uniforms in the shader), not in JS — deliberately, the
+      same kind of decision as WebGL instead of Canvas 2D
 
-## Etap 5 — Selekcja
+## Stage 5 — Selection
 
-- [x] hit-testing (AABB, topmost wygrywa) + rysowanie selection outline/resize handles
-- [x] przeciąganie zaznaczonego node'a (lub kilku) — resize uchwytami odłożony do Etapu 10
-- [x] wspólny outline + wspólny bbox dla zaznaczenia 2+ (grupy/nested frames wracają w Etapie 12)
-- [x] zaznaczanie przez marquee (przeciągnięcie ramki), z trybem "dotyka" vs Ctrl/Cmd "pełne
-      zawieranie", live-update podczas przeciągania
-- [x] hover highlight (outline bez uchwytów, pogrubiony przez trik trójkątów, bo `gl.lineWidth()`
-      zablokowany na 1px w tym środowisku)
-- [x] pełna semantyka klik/shift-klik/klik-w-grupie/klik-w-lukę, zgodna z Figmą/x-design (opis w
+- [x] hit-testing (AABB, topmost wins) + drawing the selection outline/resize handles
+- [x] dragging the selected node (or several) — resize by handles deferred to Stage 10
+- [x] shared outline + shared bbox for a selection of 2+ (groups/nested frames return in Stage 12)
+- [x] marquee selection (drag a rectangle), with a "touches" vs Ctrl/Cmd "full containment" mode,
+      live-update while dragging
+- [x] hover highlight (outline without handles, thickened via a triangle trick, because `gl.lineWidth()`
+      is locked to 1px in this environment)
+- [x] full click/shift-click/click-in-group/click-in-gap semantics, matching Figma/x-design (write-up in
       `.claude/docs/selection-and-manipulation.md`)
 
-## Etap 6 — Kolejne narzędzia rysujące
+## Stage 6 — More drawing tools
 
-- [x] **Rectangle**, **Ellipse** — wspólny `useDrawShapeTool.ts`, stały fill per typ (realny
-      color picker to Etap 8)
-- [x] **Line** — własna geometria (`x1/y1/x2/y2`), edytowalne końce po utworzeniu
-- [x] **Polygon** (`sides`), **Star** (`points`, `ratio`) — hover-outline realnie śledzi kształt
-- [x] **Media** (obraz + wideo) — osobny program tekstur, cache, wybór pliku/kolejka, wideo
-      konwertowane do 1 klatki przed umieszczeniem
-- [x] **Text** — tworzenie połączone z edycją treści (pełny opis w Etapie 7)
-- [x] **Text on Path** — tekst wzdłuż krzywej (elipsy), layout z tabeli długości łuku, uchwyt
-      przesuwania startu, flip/mirror respektowane w geometrii glifów
-- [x] **Slice** — zaznaczanie obszaru pod przyszły eksport; świadomie nigdy nie trafia do
-      `store/design` (czysty `useRef`), własny resize/rotate/move
-- [x] **Arrow** — `TLineNode` z opcjonalnym `startPoint`/`endPoint: 'arrow'`, reużywa Line 1:1;
-      grot czysto wizualny (hit-test/bbox bez zmian)
-- [x] **Pen / Vector Network** (`NodeType.vector`) — prawdziwy graf wierzchołków/segmentów z
-      kubicznymi tangentami na segmencie, wieloklikowe/wielosesyjne narzędzie, fill liczony
-      stencil-bufferem. Zbudowano przy okazji Etap 11 (undo/redo) jako fundament. Pełny opis:
+- [x] **Rectangle**, **Ellipse** — shared `useDrawShapeTool.ts`, fixed fill per type (a real
+      color picker is Stage 8)
+- [x] **Line** — its own geometry (`x1/y1/x2/y2`), editable endpoints after creation
+- [x] **Polygon** (`sides`), **Star** (`points`, `ratio`) — the hover outline actually tracks the shape
+- [x] **Media** (image + video) — a separate texture program, cache, file picker/queue, video
+      converted to 1 frame before placement
+- [x] **Text** — creation coupled with content editing (full write-up in Stage 7)
+- [x] **Text on Path** — text along a curve (an ellipse), layout from an arc-length table, a handle
+      to move the start, flip/mirror respected in the glyph geometry
+- [x] **Slice** — selecting an area for a future export; deliberately never reaches
+      `store/design` (pure `useRef`), its own resize/rotate/move
+- [x] **Arrow** — `TLineNode` with optional `startPoint`/`endPoint: 'arrow'`, reuses Line 1:1;
+      the head is purely visual (hit-test/bbox unchanged)
+- [x] **Pen / Vector Network** (`NodeType.vector`) — a real graph of vertices/segments with
+      cubic tangents on the segment, a multi-click/multi-session tool, fill computed with a
+      stencil buffer. Built alongside Stage 11 (undo/redo) as a foundation. Full write-up:
       `.claude/docs/vector-network.md`
-- [x] **Pencil** — jedno przeciągnięcie = jeden `TVectorNode`, progresywne uproszczenie ścieżki +
-      Catmull-Rom, zaokrąglone końce, Shift trzyma oś. Pełny opis: `.claude/docs/pencil-tool.md`
-- [x] klik bez przeciągnięcia stawia element domyślnego rozmiaru 100×100 (wyśrodkowany dla figur,
-      lewy-górny róg w punkcie kliknięcia dla tekstu), próg "za mały ruch" liczony w screen space
+- [x] **Pencil** — one drag = one `TVectorNode`, progressive path simplification +
+      Catmull-Rom, rounded ends, Shift holds the axis. Full write-up: `.claude/docs/pencil-tool.md`
+- [x] a click without a drag places an element of the default 100×100 size (centered for shapes,
+      top-left corner at the click point for text), the "movement too small" threshold measured in
+      screen space
 
-## Etap 7 — Edycja tekstu (DOM overlay) + rendering tekstu w WebGL
+## Stage 7 — Text editing (DOM overlay) + text rendering in WebGL
 
-- [x] `useDrawTextTool.ts` — node trafia do Reduxu dopiero po zakończeniu edycji, i tylko z
-      niepustą treścią
-- [x] `TextEditOverlay` — prawdziwy `contentEditable` div, pozycjonowany przez `worldToScreen`
-- [x] **rendering tekstu — MSDF atlas** (nie bitmapa) — ostre krawędzie na dowolnym zoomie,
-      generowany offline (`msdf-bmfont-xml`, `npm run generate:font-atlas`) z Interu, layout z
-      metryk atlasu (nie `canvas.measureText`), geometria batchowana i cache'owana bez zależności
-      od zoomu/DPI. Dostrojenie wagi atlasu, mipmapy i gamma-correction dla drobnego tekstu — pod
-      spodem, patrz `.claude/docs/canvas-rendering-pipeline.md`
+- [x] `useDrawTextTool.ts` — the node reaches Redux only after editing ends, and only with
+      non-empty content
+- [x] `TextEditOverlay` — a real `contentEditable` div, positioned via `worldToScreen`
+- [x] **text rendering — MSDF atlas** (not a bitmap) — crisp edges at any zoom,
+      generated offline (`msdf-bmfont-xml`, `npm run generate:font-atlas`) from Inter, layout from
+      the atlas metrics (not `canvas.measureText`), geometry batched and cached with no dependency
+      on zoom/DPI. Tuning the atlas weight, mipmaps, and gamma correction for small text — pending,
+      see `.claude/docs/canvas-rendering-pipeline.md`
 
-## Etap 8 — Panele boczne
+## Stage 8 — Side panels
 
-- [x] **pasek nawigacji w `LeftPanel`** (`NavRail`, 56px) — logo + 5 przełączających się ikon
-      (File/Agents/Assets/Tools/Variables), `@radix-ui/react-toggle-group` (jak `MouseModes`), stan
-      `activeNavItem` trzymany w `LeftPanel` (kontrolowany `NavRail`), na razie samo przełączanie bez
-      podpiętej zawartości paneli. Ikony i logo (`xigma-logo-shape.svg`, statyczny asset poza
-      `Icon`) w `@xigma/components`/`@xigma/assets`.
-- [x] **panel File** (`LeftPanel/PanelContent` → `File`) — `Header` z nazwą pliku
-      (`EditableInput` + chevron, `UITools`, domyślnie „Untitled", stan lokalny), `FileMeta` z linkiem
-      „Drafts" i chipem subskrypcji (`Chip` `UITools`, wariant `free`). Ikona `PanelLeft` w
-      `@xigma/components`. Na razie zmiany czysto wizualne — jeden plik, brak persystencji.
-- [ ] panel warstw (drzewo node'ów, reorder, visible/locked)
-- [ ] panel właściwości (X/Y/W/H, Fill, Stroke, Opacity/blend mode)
-- [ ] właściwości tekstu (rozmiar/waga/wyrównanie/line-height/letter-spacing)
-- [ ] Start/End point dropdowny dla Line/Arrow
+- [x] **navigation rail in `LeftPanel`** (`NavRail`, 56px) — logo + 5 toggling icons
+      (File/Agents/Assets/Tools/Variables), `@radix-ui/react-toggle-group` (like `MouseModes`), the
+      `activeNavItem` state held in `LeftPanel` (controlled `NavRail`), for now just toggling with no
+      panel content wired up. Icons and logo (`xigma-logo-shape.svg`, a static asset outside
+      `Icon`) in `@xigma/components`/`@xigma/assets`.
+- [x] **File panel** (`LeftPanel/PanelContent` → `File`) — `Header` with the file name
+      (`EditableInput` + chevron, `UITools`, default "Untitled", local state), `FileMeta` with a
+      "Drafts" link and a subscription chip (`Chip` `UITools`, `free` variant). The `PanelLeft` icon
+      in `@xigma/components`. For now purely visual changes — one file, no persistence.
+- [ ] layers panel (node tree, reorder, visible/locked)
+- [ ] properties panel (X/Y/W/H, Fill, Stroke, Opacity/blend mode)
+- [ ] text properties (size/weight/alignment/line-height/letter-spacing)
+- [ ] Start/End point dropdowns for Line/Arrow
 
-## Etap 9 — Wiele fontów, atlas per font z serwera
+## Stage 9 — Multiple fonts, an atlas per font from the server
 
-Świadomie odłożone do czasu realnego wyboru fontu (część Etapu 8) — dziś jeden font wpieczony w
-bundle.
+Deliberately deferred until a real font choice exists (part of Stage 8) — today one font is baked
+into the bundle.
 
-- [x] atlasy fontów na CDN, ładowane dynamicznie (`fetch`) zamiast statycznego importu
-- [x] cache per `fontFamily`, manifest dostępnych fontów
-- [x] generator atlasów przenosi się do osobnego repo (ściąga TTF na żądanie zamiast trzymać
-      binarki w gicie)
+- [x] font atlases on a CDN, loaded dynamically (`fetch`) instead of a static import
+- [x] cache per `fontFamily`, a manifest of available fonts
+- [x] the atlas generator moves to a separate repo (fetches TTFs on demand instead of keeping
+      binaries in git)
 
-## Etap 10 — Dokończenie manipulacji node'ami
+## Stage 10 — Finishing node manipulation
 
-- [x] **resize uchwytami** — 8 kierunków, pojedynczy node i grupa, Shift = aspect-lock na rogach,
-      obrócony resize liczony przez rzut wektora skali na lokalne osie node'a (rotowany kursor,
-      bez shear'u)
-- [x] **mirror/flip przy przejściu przez zero** — przeciągnięcie "przez" anchor mirror'uje bbox
-      zamiast utykać na minimalnym rozmiarze; Media/Text/Polygon/Star dostały realny
-      `flipX`/`flipY` (UV flip dla Media, geometryczny mirror glifów/wierzchołków dla reszty)
-- [x] **rotacja** — CPU-side post-processing punktów (`rotatePoint`), działa dla pojedynczego
-      node'a i grupy (orbita wokół wspólnego środka), obracające się uchwyty i kursor
-- [x] **dwuklik wchodzi w edycję istniejącego tekstu** — cała treść zaznaczona, edycja obróconego/
-      zmirrorowanego tekstu renderuje się poprawnie (kursor/zaznaczenie rysowane na canvasie, nie
-      natywnym DOM-em, żeby nie rozjeżdżały się z glifami MSDF)
-- [x] **corner radius** dla Rectangle (4 niezależne rogi), Polygon i Star (jeden wspólny promień,
-      też wierzchołki wklęsłe). Pełny opis: `.claude/docs/selection-and-manipulation.md` §11-16
-- [x] **wycinanie fragmentu elipsy** — Sweep/Start/Ratio, 1:1 z narzędziem Arc w Figmie (pierścień,
-      inwersja wypełnienia). Pełny opis: tamże §19
-- [x] **uchwyt Ratio dla Star** (trzeci uchwyt, promień wewnętrzny/zewnętrzny). Tamże §20
-- [x] **Delete/Backspace** — usuwa zaznaczenie (albo pojedynczy wierzchołek w Vector Edit Mode)
-- [x] **pozostałe skróty edycji** — Duplicate, Copy/Paste (też na poziomie wierzchołków/segmentów w
-      Vector Edit Mode), Select All, nudge strzałkami — każda wieloelementowa operacja to jeden
-      krok Ctrl+Z. Pełny opis: `.claude/docs/design-tool-architecture.md` §6,
+- [x] **resize by handles** — 8 directions, single node and group, Shift = aspect-lock on corners,
+      rotated resize computed by projecting the scale vector onto the node's local axes (rotated
+      cursor, no shear)
+- [x] **mirror/flip when crossing zero** — dragging "through" the anchor mirrors the bbox
+      instead of getting stuck at the minimum size; Media/Text/Polygon/Star got a real
+      `flipX`/`flipY` (UV flip for Media, geometric glyph/vertex mirror for the rest)
+- [x] **rotation** — CPU-side post-processing of points (`rotatePoint`), works for a single
+      node and a group (orbit around the shared center), rotating handles and cursor
+- [x] **double-click enters editing an existing text** — all content selected, editing rotated/
+      mirrored text renders correctly (cursor/selection drawn on the canvas, not the
+      native DOM, so it doesn't drift from the MSDF glyphs)
+- [x] **corner radius** for Rectangle (4 independent corners), Polygon and Star (one shared radius,
+      concave vertices too). Full write-up: `.claude/docs/selection-and-manipulation.md` §11-16
+- [x] **cutting a fragment of an ellipse** — Sweep/Start/Ratio, 1:1 with Figma's Arc tool (ring,
+      fill inversion). Full write-up: ibid. §19
+- [x] **Ratio handle for Star** (a third handle, inner/outer radius). Ibid. §20
+- [x] **Delete/Backspace** — removes the selection (or a single vertex in Vector Edit Mode)
+- [x] **remaining editing shortcuts** — Duplicate, Copy/Paste (also at the vertex/segment level in
+      Vector Edit Mode), Select All, arrow-key nudge — every multi-element operation is a single
+      Ctrl+Z step. Full write-up: `.claude/docs/design-tool-architecture.md` §6,
       `.claude/docs/vector-network.md` §65
-- [ ] zoom ze skrótów klawiszowych (Cmd +/−, Shift+0/1/2)
+- [ ] zoom from keyboard shortcuts (Cmd +/−, Shift+0/1/2)
 
-## Etap 11 — Undo / redo
+## Stage 11 — Undo / redo
 
-- [x] zbudowane jako fundament pod Pen Tool (Etap 6) — snapshoty (`nodes`/`rootOrder`/
-      `selectedIds`), nie command-stack; własny `historyMiddleware`, nie `redux-undo`. Cmd/Ctrl+Z,
+- [x] built as a foundation for the Pen Tool (Stage 6) — snapshots (`nodes`/`rootOrder`/
+      `selectedIds`), not a command stack; a custom `historyMiddleware`, not `redux-undo`. Cmd/Ctrl+Z,
       Cmd/Ctrl+Shift+Z
-- [x] `beginHistoryGesture`/`endHistoryGesture` spinają gest tak, że N mutacji w jednym
-      przeciągnięciu (move/resize/rotate/uchwyty) to jeden krok historii. Pełny opis:
+- [x] `beginHistoryGesture`/`endHistoryGesture` bracket a gesture so that N mutations in one
+      drag (move/resize/rotate/handles) are a single history step. Full write-up:
       `.claude/docs/design-store-architecture.md` §8
 
-## Etap 12 — Grupy i zagnieżdżone frame'y
+## Stage 12 — Groups and nested frames
 
-Największa pojedyncza strukturalna luka względem Figmy.
+The single largest structural gap versus Figma.
 
-- [ ] grupowanie/rozgrupowanie (Cmd/Ctrl+G / Shift+G)
-- [ ] realne zagnieżdżanie w `TFrameNode` (`parentId` przez przeciągnięcie, nie tylko wizualne
-      nachodzenie)
-- [ ] hit-testing/selekcja z hierarchią (najgłębiej zagnieżdżony trafiony node, dwuklik "wchodzi"
-      głębiej)
-- [ ] przesuwanie/resize rodzica przesuwa/skaluje dzieci
+- [ ] group/ungroup (Cmd/Ctrl+G / Shift+G)
+- [ ] real nesting in `TFrameNode` (`parentId` via drag, not just visual
+      overlap)
+- [ ] hit-testing/selection with a hierarchy (the deepest nested hit node, double-click "enters"
+      deeper)
+- [ ] moving/resizing a parent moves/scales its children
 
-## Etap 13 — Prowadnice i przyciąganie (smart guides)
+## Stage 13 — Guides and snapping (smart guides)
 
-- [ ] linijki (rulery) skalujące się z zoomem
-- [x] **snap do siatki pikseli** — `x/y/width/height`/`rotation` zaokrąglane na dispatch (tworzenie,
-      przeciąganie, resize, rotacja), nie w obliczeniach pośrednich
-- [ ] smart guides (przyciąganie do krawędzi/środków innych node'ów, z wyświetlaną odległością)
-- [ ] snap do viewportu/frame'a rodzica
-- [x] **pixel grid** na canvasie, widoczny od zoomu 400% — proceduralny fragment shader
-      (`fract`/`fwidth`), nie geometria per linia. Pełny opis:
+- [ ] rulers scaling with zoom
+- [x] **snap to the pixel grid** — `x/y/width/height`/`rotation` rounded on dispatch (creation,
+      drag, resize, rotation), not in intermediate computations
+- [ ] smart guides (snap to edges/centers of other nodes, with the distance shown)
+- [ ] snap to the viewport/parent frame
+- [x] **pixel grid** on the canvas, visible from 400% zoom — a procedural fragment shader
+      (`fract`/`fwidth`), not per-line geometry. Full write-up:
       `.claude/docs/canvas-rendering-pipeline.md` §3, §10
 
-## Etap 15 — Detale UX toolbara i canvasu
+## Stage 15 — Toolbar and canvas UX details
 
-- [x] **Comment tool** — klik otwiera `CommentDraftInput`, Ctrl/Cmd+Enter zapisuje `CommentPin`;
-      piny to DOM overlay (`worldToScreen`), stały rozmiar niezależnie od zoomu. Edycja/usuwanie
-      istniejącego komentarza celowo jeszcze wyłączone
-- [x] **`VectorEditToolbar`** — floating panel (Move/Lasso/Paint/Bend/Cut) widoczny tylko w Vector
+- [x] **Comment tool** — a click opens `CommentDraftInput`, Ctrl/Cmd+Enter saves a `CommentPin`;
+      pins are a DOM overlay (`worldToScreen`), fixed size regardless of zoom. Editing/deleting an
+      existing comment deliberately still disabled
+- [x] **`VectorEditToolbar`** — a floating panel (Move/Lasso/Paint/Bend/Cut) visible only in Vector
       Edit Mode
-- [x] **Lasso tool** (`Q`) — zaznaczanie wierzchołków dowolnym konturem w Vector Edit Mode
-- [x] **Paint tool** (`Shift+B`) — wypełnianie pojedynczych faces sieci wektorowej
-      (`filledFaceKeys`), zamiast całego kształtu naraz. Pełny opis:
+- [x] **Lasso tool** (`Q`) — selecting vertices with a freeform outline in Vector Edit Mode
+- [x] **Paint tool** (`Shift+B`) — filling individual faces of the vector network
+      (`filledFaceKeys`), instead of the whole shape at once. Full write-up:
       `.claude/docs/vector-network.md` §43
-- [x] **wykrywanie regionów przepisane na prawdziwy half-edge (DCEL)** + pełna planaryzacja
-      przecięć segmentów — Figma-parity dla samoprzecinających się kształtów. Tamże §44
-- [x] **przeciąganie wierzchołka na wierzchołek scala je** — w obrębie jednego kształtu i między
-      różnymi wektorami. Tamże §46
-- [x] **Bend** jako trwałe narzędzie w toolbarze (nie tylko modyfikator Ctrl). Tamże §47
-- [x] **edycja kilku wektorów naraz** (`vectorEditingNodeIds: string[]`, wejście przez Enter) —
-      hit-testing/hover/marquee/lasso/Paint działają na całym otwartym zbiorze. Tamże §48, e2e:
+- [x] **region detection rewritten to a real half-edge (DCEL)** + full planarization of
+      segment crossings — Figma parity for self-intersecting shapes. Ibid. §44
+- [x] **dragging a vertex onto a vertex merges them** — within one shape and between
+      different vectors. Ibid. §46
+- [x] **Bend** as a permanent toolbar tool (not just the Ctrl modifier). Ibid. §47
+- [x] **editing several vectors at once** (`vectorEditingNodeIds: string[]`, entered via Enter) —
+      hit-testing/hover/marquee/lasso/Paint work on the whole open set. Ibid. §48, e2e:
       `multi-vector-edit.spec.ts`
-- [x] **klik w wypełniony face zaznacza od razu wszystkie jego wierzchołki** (Move tool). Tamże §56
-- [x] **Shape Builder** (`M`) — łączenie/odejmowanie faces przez realne kasowanie granicznych
-      segmentów (Alt = odejmij), też między różnymi node'ami wektorowymi. Tamże §59-62, e2e:
+- [x] **clicking a filled face immediately selects all its vertices** (Move tool). Ibid. §56
+- [x] **Shape Builder** (`M`) — merging/subtracting faces by actually deleting boundary
+      segments (Alt = subtract), also between different vector nodes. Ibid. §59-62, e2e:
       `vector-shape-builder.spec.ts`
-- [x] **Variable Width** (`Shift+W`) — zmienna grubość konturu, punkty regulacji jako ułamek
-      długości łuku łańcucha; działa tylko na pojedynczym, nierozgałęzionym wektorze. Tamże §63,
+- [x] **Variable Width** (`Shift+W`) — variable stroke thickness, control points as a fraction of
+      the chain's arc length; works only on a single, unbranched vector. Ibid. §63,
       e2e: `vector-variable-width.spec.ts`
-- [x] **Erase tool** (`Shift+E`) — okrągły pędzel, boolean-subtract kapsuły od sieci wektorowej
-      (fill przeżywa muśnięcie granicy, realne wcięcie zamiast zniknięcia); Shift = axis-lock,
-      `[`/`]` = rozmiar pędzla. Ograniczenia v1: rotowany węzeł spłaszczany, brak prawdziwej dziury
-      po wymazaniu czystego wnętrza fillu. Tamże §66, e2e: `vector-erase.spec.ts`,
+- [x] **Erase tool** (`Shift+E`) — a round brush, boolean-subtract of a capsule from the vector
+      network (fill survives brushing the boundary, a real notch instead of disappearing); Shift = axis-lock,
+      `[`/`]` = brush size. v1 limitations: a rotated node is flattened, no real hole
+      after erasing a clean fill interior. Ibid. §66, e2e: `vector-erase.spec.ts`,
       `vector-erase-multi.spec.ts`
-- [ ] menu kontekstowe (prawy klik) na node'ach i pustym canvasie
-- [ ] kontrolka zoomu w rogu canvasu (Zoom to fit/selection/100%)
-- [ ] z-order z UI (Bring to front/Send to back/Forward/Backward)
-- [ ] prawa grupa toolbara (draw/scale/actions/dev mode)
-- [ ] preset rozmiarów we Frame tool
+- [ ] context menu (right-click) on nodes and the empty canvas
+- [ ] zoom control in the canvas corner (Zoom to fit/selection/100%)
+- [ ] z-order from the UI (Bring to front/Send to back/Forward/Backward)
+- [ ] right toolbar group (draw/scale/actions/dev mode)
+- [ ] size presets in the Frame tool
 
 ---
 
-Etapy dalej w przyszłości (komponenty/instancje, auto-layout, efekty typu blur/shadow, multiplayer,
-itd.) — dopiszemy jak dojdziemy do tego miejsca.
+Stages further in the future (components/instances, auto-layout, effects like blur/shadow,
+multiplayer, etc.) — to be added as we get there.

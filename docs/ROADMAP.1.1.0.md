@@ -1,42 +1,43 @@
 # xigma — Roadmap 1.1.0
 
-Kontynuacja [ROADMAP.1.0.0.md](./ROADMAP.1.0.0.md) w tym samym duchu — małe, osobne porcje pracy,
-checkboxy zaznaczane w miarę postępu — ale osobny plik, bo to praca poza samą historią "odtwarzania
-Figmy krok po kroku" z 1.0.0 (ten plik zamyka się na konkretnej, już zaimplementowanej historii) i
-poza dużym, wielosesyjnym etapem performance z [ROADMAP.2.0.0.md](./ROADMAP.2.0.0.md). 1.1.0 zbiera
-kolejne malutkie funkcje UI/narzędziowe w tym samym stylu co 1.0.0.
+Continuation of [ROADMAP.1.0.0.md](./ROADMAP.1.0.0.md) in the same spirit — small, separate chunks
+of work, checkboxes ticked as progress is made — but a separate file, because this is work outside
+the "recreating Figma step by step" history from 1.0.0 (that file closes on a concrete, already
+implemented history) and outside the big, multi-session performance stage in
+[ROADMAP.2.0.0.md](./ROADMAP.2.0.0.md). 1.1.0 collects the next tiny UI/tooling features in the same
+style as 1.0.0.
 
-## Etap 1 — Color Sampler (eyedropper) w ColorPicker
+## Stage 1 — Color Sampler (eyedropper) in the ColorPicker
 
-Przeniesiony z x-design — "lupka" śledząca kursor z podglądem siatki 7×7 px, klik wybiera kolor pod
-środkowym pikselem. Kolor czytany realnie z WebGL (`gl.readPixels` w render loopie, nie
-`html2canvas` jak w x-design), przez generyczny rejestr (`colorPixelSamplerRegistry.ts`) bez
-zależności Design↔ColorPicker w żadną stronę. Sampler chowa się poprawnie nad panelami/popoverem
-(hit-test po `document.elementFromPoint`, nie po geometrii canvasu). Zamyka się na Escape i po
-kliknięciu.
+Ported from x-design — a "loupe" tracking the cursor with a 7×7 px grid preview; a click picks the
+color under the center pixel. The color is read for real from WebGL (`gl.readPixels` in the render
+loop, not `html2canvas` like in x-design), through a generic registry
+(`colorPixelSamplerRegistry.ts`) with no Design↔ColorPicker dependency in either direction. The
+sampler hides correctly over panels/popovers (hit-test via `document.elementFromPoint`, not via
+canvas geometry). It closes on Escape and after a click.
 
-## Etap 2 — Enter: edycja tekstu / konwersja kształtu na wektor
+## Stage 2 — Enter: text editing / converting a shape to vector
 
-Enter na Text/Text-on-path wchodzi w edycję karetki (jak dwuklik). Enter na
-Rectangle/Ellipse/Line/Arrow/Polygon/Star zamienia kształt na `NodeType.vector` (nowy `replaceNode`
-reducer, `utils/canvas/vectorNetwork/convertShapeToVector/`, geometria jako realne krzywe Béziera)
-i od razu otwiera Vector Edit Mode, jednym krokiem undo. Grot strzałki — świadomie utracony, brak
-odpowiednika na wektorze. e2e: `enter-shape-to-vector.spec.ts` + `edit-text.spec.ts`.
+Enter on Text/Text-on-path enters caret editing (like a double-click). Enter on
+Rectangle/Ellipse/Line/Arrow/Polygon/Star converts the shape to `NodeType.vector` (new `replaceNode`
+reducer, `utils/canvas/vectorNetwork/convertShapeToVector/`, geometry as real Bézier curves) and
+immediately opens Vector Edit Mode, in a single undo step. The arrowhead — deliberately lost, no
+equivalent on a vector. e2e: `enter-shape-to-vector.spec.ts` + `edit-text.spec.ts`.
 
-## Etap 3 — Paint: własny kolor i pędzel na przeciąganie
+## Stage 3 — Paint: custom color and a drag brush
 
-Paint dostał realny wybór koloru (ColorPicker w toolbarze zamiast losowego hue z hasha loop-key) i
-`fillColorOverrideByKey` przenoszone dalej przy Erase/Cut/Shape Builder, żeby operacja zmieniająca
-geometrię nie kasowała wybranego koloru. Doszedł też tryb przeciągania — maluje (albo w trybie remove,
-usuwa) każdy nowy face pod pędzlem w jednym strokeu, zamiast tylko jednego face'a na klik; drag
-zaczęty na już wypełnionym face'u zawsze kończy się z tym face'em nadal wypełnionym (nie toggluje jak
-pojedynczy klik). Pełny opis: `.claude/docs/vector-network.md` §67-69.
+Paint got a real color choice (a ColorPicker in the toolbar instead of a random hue from the
+loop-key hash) and `fillColorOverrideByKey` carried forward through Erase/Cut/Shape Builder, so an
+operation that changes geometry doesn't wipe the chosen color. It also gained a drag mode — it paints
+(or, in remove mode, removes) every new face under the brush in one stroke, instead of just one face
+per click; a drag started on an already-filled face always ends with that face still filled (it
+doesn't toggle like a single click). Full write-up: `.claude/docs/vector-network.md` §67-69.
 
-- [x] ColorPicker wpięty w przycisk narzędzia, kolor trzymany w `paintColor` (Redux)
-- [x] kolor przeżywa Erase/Cut/Shape Builder zamiast wracać do losowego hue
-- [x] drag maluje/usuwa wiele faces w jednym strokeu, always-paint-never-remove na starcie drag
+- [x] ColorPicker wired into the tool button, color held in `paintColor` (Redux)
+- [x] color survives Erase/Cut/Shape Builder instead of reverting to a random hue
+- [x] drag paints/removes multiple faces in one stroke, always-paint-never-remove at drag start
 
 ## Related
 
-[[canvas-rendering-pipeline]] — kontekst renderloopu i kontraktu `WEBGL_CONTEXT_ATTRIBUTES`, do
-którego dopięty jest `resolveColorSampleRequest`.
+[[canvas-rendering-pipeline]] — context for the render loop and the `WEBGL_CONTEXT_ATTRIBUTES`
+contract that `resolveColorSampleRequest` is attached to.

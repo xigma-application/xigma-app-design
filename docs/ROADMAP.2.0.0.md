@@ -1,59 +1,58 @@
 # xigma — Roadmap 2.0.0
 
-Kontynuacja [ROADMAP.1.0.0.md](./ROADMAP.1.0.0.md) — tamten dokument kończy się na dokładnej,
-zaimplementowanej historii budowy aplikacji od zera. Ten plik zbiera kolejne, większe etapy pracy,
-każdy wystarczająco duży (wielosesyjny), żeby nie mieścił się już w konwencji "Etap = malutka
-porcja pracy" z 1.0.0.
+Continuation of [ROADMAP.1.0.0.md](./ROADMAP.1.0.0.md) — that document ends on the exact,
+implemented history of building the app from scratch. This file collects the next, larger stages of
+work, each big enough (multi-session) that it no longer fits the "Stage = tiny chunk of work"
+convention from 1.0.0.
 
-## Etap 1 — Performance: skalowanie na duże, wielokształtowe sceny wektorowe
+## Stage 1 — Performance: scaling to large, many-shape vector scenes
 
-Kontekst: sesja profilowania (2026-08-26/27) na stress-teście z tysiącami kształtów w jednym
-`TVectorNode` (`scripts/generateStressTestVectorGrid.ts`) zamknęła cache klastrowy (fill/stroke/
-crossing detection) i kilka konkretnych, punktowych bugów (`getRemainingVertices`, trzy w
-cut-toolu, cache klasyfikacji vertex-dotów, trzy miejsca z bake'em rotacji poza cache'em) — pełny
-opis w [[canvas-vector-performance]]. Dwie duże rzeczy zostały świadomie odłożone, opisane tam w
-§5.6/§5.7 jako jeszcze nie zaczęte:
+Context: a profiling session (2026-08-26/27) on a stress test with thousands of shapes in a single
+`TVectorNode` (`scripts/generateStressTestVectorGrid.ts`) landed the cluster cache (fill/stroke/
+crossing detection) and a few concrete, pointed bugs (`getRemainingVertices`, three in the
+cut tool, the vertex-dot classification cache, three places baking rotation outside the cache) — full
+write-up in [[canvas-vector-performance]]. Two big things were deliberately deferred, described there
+in §5.6/§5.7 as not yet started:
 
-- [ ] **Incremental/differential topology tracking** — dziś każda edycja pojedynczego kształtu w
-      wielokształtowym węźle wciąż przelicza strukturę grafu (`computeClusters`) i wyszukiwanie
-      przecięć (`findAllNetworkCrossings`) po **całym** węźle od zera, nawet gdy edycja dotyka tylko
-      jednego, niewielkiego fragmentu — to architektoniczny sufit, którego żaden z dotychczasowych
-      cache'y (klastrowy ani żaden inny) nie usuwa, bo cache chroni przed powtórnym przeliczeniem
-      tego samego, nie przed przeliczeniem tysiąca różnych rzeczy raz. Cel: śledzić, które konkretnie
-      klastry/wierzchołki/segmenty realnie dotknęła dana edycja, i przeliczać tylko je. Wymaga
-      diffowania starego/nowego grafu (`segments`/`vertices` przed/po edycji) oraz bezpiecznego
-      wykrywania sytuacji, w których edycja scala lub dzieli klastry (np. przesunięcie kształtu tak,
-      że zaczyna dotykać sąsiada, którego wcześniej nie dotykał). Wysokie ryzyko regresji — dotyka
-      rdzenia, na którym stoi cały pipeline wektorowy, a jego historia jest pełna subtelnych bugów
-      dokładnie w tym miejscu (bowtie regression, lens shape, self-intersection fill loss — patrz
-      [[vector-network]]).
-      **Pierwszy, wąski wycinek zrobiony (2026-08-28)**: raw/stroke clustering pomija pełny graph walk
-      dla edycji, które nie zmieniają topologii segmentów (przesunięcie wierzchołka, edycja uchwytu
-      krzywej) — dowodliwie bezpieczne, nie przybliżone. Pełny opis w [[canvas-vector-performance]] §5.8.
-      **Drugi, niezależny wycinek (2026-08-29)**: `getPlanarVectorNetwork.ts` cache'owany po
-      `segments`/`vertices`, nie po całym node'ie — edycje niedotykające geometrii (kolor, grubość
-      obrysu) już nie płacą pełnego crossing detection + clustering. Opis w [[canvas-vector-performance]]
-      §5.9.
-- [ ] **GPU-buffer-level caching** — renderer dziś re-uploaduje geometrię każdego node'a do GPU
-      (`bufferData`) co klatkę, niezależnie czy się faktycznie zmieniła; cała aplikacja dzieli tylko
-      4 bufory GL, rebindowane per-primitive (patrz [[canvas-rendering-pipeline]] §3/§8). Cel: trwałe
-      bufory per-node (`WebGLBuffer` tworzony raz, re-uploadowany tylko gdy geometria realnie się
-      zmieniła) zamiast ciągłego re-upload. Wymaga zarządzania cyklem życia buforów
-      (`gl.createBuffer`/`gl.deleteBuffer` przy tworzeniu/usuwaniu node'a — czego dziś w kodzie
-      nigdzie nie ma) oraz restrukturyzacji samego cyklu rysowania (bind → _warunkowe_ `bufferData` →
-      `drawArrays`). Dotyka całego pipeline'u renderowania, nie tylko wektorów — szerszy zakres niż
-      topology tracking, ale mniejsze ryzyko logicznych regresji (bliżej "instalacji/plumbingu" niż
-      subtelnej geometrii).
-      **Dwa wąskie wycinki zrobione (2026-08-28)**: trwałe bufory dla fill faces
-      (`getOrCreateFaceBuffer.ts`) i dla obrysu o stałej szerokości (`getOrCreateStrokeBuffer.ts`)
-      zacommitowanych, stabilnych węzłów wektorowych. Pełny opis, zakres i świadome wyłączenia w
+- [ ] **Incremental/differential topology tracking** — today every edit of a single shape in a
+      many-shape node still recomputes the graph structure (`computeClusters`) and crossing search
+      (`findAllNetworkCrossings`) over the **whole** node from scratch, even when the edit only
+      touches one small fragment — an architectural ceiling that none of the current caches (cluster
+      or any other) removes, because a cache guards against recomputing the same thing, not against
+      computing a thousand different things once. Goal: track which specific
+      clusters/vertices/segments an edit actually touched, and recompute only those. Requires
+      diffing the old/new graph (`segments`/`vertices` before/after the edit) and safely detecting
+      cases where an edit merges or splits clusters (e.g. moving a shape so it starts touching a
+      neighbour it didn't touch before). High regression risk — it touches the core the whole vector
+      pipeline stands on, and its history is full of subtle bugs in exactly this spot (bowtie
+      regression, lens shape, self-intersection fill loss — see [[vector-network]]).
+      **First, narrow slice done (2026-08-28)**: raw/stroke clustering skips the full graph walk for
+      edits that don't change segment topology (vertex move, curve handle edit) — provably safe, not
+      approximate. Full write-up in [[canvas-vector-performance]] §5.8.
+      **Second, independent slice (2026-08-29)**: `getPlanarVectorNetwork.ts` cached by
+      `segments`/`vertices`, not by the whole node — edits that don't touch geometry (color, stroke
+      width) no longer pay for full crossing detection + clustering. Write-up in
+      [[canvas-vector-performance]] §5.9.
+- [ ] **GPU-buffer-level caching** — the renderer today re-uploads every node's geometry to the GPU
+      (`bufferData`) every frame, whether or not it actually changed; the whole app shares only 4 GL
+      buffers, rebound per-primitive (see [[canvas-rendering-pipeline]] §3/§8). Goal: persistent
+      per-node buffers (`WebGLBuffer` created once, re-uploaded only when the geometry actually
+      changed) instead of constant re-upload. Requires buffer lifecycle management
+      (`gl.createBuffer`/`gl.deleteBuffer` on node create/delete — which nothing in the code does
+      today) and restructuring the draw cycle itself (bind → _conditional_ `bufferData` →
+      `drawArrays`). Touches the whole rendering pipeline, not just vectors — broader scope than
+      topology tracking, but lower risk of logical regressions (closer to "plumbing" than subtle
+      geometry).
+      **Two narrow slices done (2026-08-28)**: persistent buffers for fill faces
+      (`getOrCreateFaceBuffer.ts`) and for fixed-width stroke (`getOrCreateStrokeBuffer.ts`) of
+      committed, stable vector nodes. Full write-up, scope, and deliberate exclusions in
       [[canvas-vector-performance]] §5.7's closing note.
 
-Oba punkty są od siebie niezależne — można zrobić jeden, drugi, oba albo żaden; nie ma między nimi
-zależności kolejności.
+The two items are independent of each other — do one, the other, both, or neither; there is no
+ordering dependency between them.
 
 ## Related
 
-[[canvas-vector-performance]] — pełny opis tego, co już zrobione (cache klastrowy, spatial hash
-zamiast sweep-line, reuse cache'u bake'u rotacji, punktowe fixy w cut-toolu i vertex-dotach) oraz
-dokładniejsze uzasadnienie, dlaczego te dwa punkty zostały odłożone na osobny etap.
+[[canvas-vector-performance]] — full write-up of what's already done (cluster cache, spatial hash
+instead of sweep-line, reusing the rotation-bake cache, pointed fixes in the cut tool and vertex
+dots) plus a more detailed rationale for why these two items were deferred to a separate stage.
