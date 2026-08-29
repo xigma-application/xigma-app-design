@@ -59,7 +59,7 @@ const selectRootOrder = createSelector([selectActivePage], (page): string[] => p
 
 export const selectOrderedNodes = createSelector([selectRootOrder, selectNodes], (rootOrder, nodes) => rootOrder.map((id) => nodes[id]));
 
-export const selectSelectedIds = (state: RootState): string[] => state.design.selectedIds;
+export const selectSelectedIds = createSelector([selectActivePage], (page): string[] => page.selectedIds);
 
 export const selectSelectedNodes = createSelector([selectSelectedIds, selectNodes], (selectedIds, nodes) =>
   selectedIds.map((id) => nodes[id]),

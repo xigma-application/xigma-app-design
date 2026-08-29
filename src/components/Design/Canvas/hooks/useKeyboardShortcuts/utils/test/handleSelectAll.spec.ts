@@ -1,6 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
-import { selectActivePage } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -57,7 +57,7 @@ describe('handleSelectAll', () => {
     handleSelectAll(store.dispatch, createCanvasRefs());
 
     // result
-    expect(store.getState().design.selectedIds).toEqual(store.getState().design.pages[store.getState().design.activePageId].rootOrder);
+    expect(selectSelectedIds(store.getState())).toEqual(store.getState().design.pages[store.getState().design.activePageId].rootOrder);
   });
 
   it('should select every vertex and segment of the editing vector node instead of touching the node selection while a vector node is open for editing', () => {
@@ -72,7 +72,7 @@ describe('handleSelectAll', () => {
     handleSelectAll(store.dispatch, canvasRefs);
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
     expect(canvasRefs.vectorEdit.selectedVectorVertexIdsRef.current).toEqual(['v1', 'v2']);
     expect(canvasRefs.vectorEdit.selectedVectorSegmentIdsRef.current).toEqual(['s1']);
     expect(canvasRefs.vectorEdit.selectedVectorHandlesRef.current).toEqual([]);

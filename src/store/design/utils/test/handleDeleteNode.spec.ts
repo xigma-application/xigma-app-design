@@ -45,11 +45,11 @@ const buildState = (nodes: TDesignPage['nodes'], selectedIds: string[] = []): TD
       nodes,
       paintColor: '#d9d9d9',
       rootOrder: Object.keys(nodes),
+      selectedIds,
       viewport: { x: 0, y: 0, zoom: 1 },
     },
   },
   penActiveVertexId: null,
-  selectedIds,
   vectorEditingNodeIds: [],
 });
 
@@ -109,7 +109,7 @@ describe('handleDeleteNode', () => {
     handleDeleteNode(state, node.id);
 
     // result
-    expect(state.selectedIds).toEqual([]);
+    expect(getActivePage(state).selectedIds).toEqual([]);
   });
 
   it('should leave an unrelated selection untouched', () => {
@@ -121,7 +121,7 @@ describe('handleDeleteNode', () => {
     handleDeleteNode(state, node.id);
 
     // result
-    expect(state.selectedIds).toEqual(['other']);
+    expect(getActivePage(state).selectedIds).toEqual(['other']);
   });
 
   it('should do nothing when the node does not exist', () => {

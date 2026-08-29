@@ -32,11 +32,11 @@ const buildState = (nodes: TDesignPage['nodes']): TDesignState => ({
       nodes,
       paintColor: '#d9d9d9',
       rootOrder: Object.keys(nodes),
+      selectedIds: [],
       viewport: { x: 0, y: 0, zoom: 1 },
     },
   },
   penActiveVertexId: null,
-  selectedIds: [],
   vectorEditingNodeIds: [],
 });
 

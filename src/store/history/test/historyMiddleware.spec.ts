@@ -1,7 +1,7 @@
 // store
 import { addNode, setSelection, toggleNodeHidden, toggleNodeLocked } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture, redo, undo } from '../actions';
-import { selectActivePage } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -84,13 +84,13 @@ describe('historyMiddleware', () => {
     store.dispatch(setSelection([]));
 
     // before
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
 
     // action — undo should only step back through the deselect, restoring the selection, not the node
     store.dispatch(undo());
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([idA]);
+    expect(selectSelectedIds(store.getState())).toEqual([idA]);
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toBeDefined();
   });
 

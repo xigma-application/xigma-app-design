@@ -9,6 +9,7 @@ import { useCommitTextEdit } from '../useCommitTextEdit';
 // store
 import designReducer, { addNode, setSelection } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
+import { selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { NodeType, PathType } from 'types/design/enums';
@@ -182,7 +183,7 @@ describe('useCommitTextEdit behaviors', () => {
 
     expect(page.rootOrder).toHaveLength(0);
     expect(design.editingTextBox).toBeNull();
-    expect(design.selectedIds).toEqual([]);
+    expect(page.selectedIds).toEqual([]);
   });
 
   it('should update the existing node in place, not add a new one, when editing an existing node', () => {
@@ -231,7 +232,7 @@ describe('useCommitTextEdit behaviors', () => {
     // committing always deselects, same as clicking away on empty canvas would — previously this
     // only happened as a side effect of useSelectionTool's own empty-click handler, which is now
     // disabled for the whole duration of any edit session (see useStraightCaretEditing)
-    expect(design.selectedIds).toEqual([]);
+    expect(page.selectedIds).toEqual([]);
   });
 
   it('should clear selection once a new text node is committed with content, even when the box is not attached to a path', () => {
@@ -248,7 +249,7 @@ describe('useCommitTextEdit behaviors', () => {
     result.current(createBlurEvent('hello'));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
   });
 
   it('should delete the existing node when blurred with no content, matching a freshly-drawn box being discarded', () => {
@@ -294,7 +295,7 @@ describe('useCommitTextEdit behaviors', () => {
     expect(page.nodes[existingId]).toBeUndefined();
     expect(page.rootOrder).toHaveLength(0);
     expect(design.editingTextBox).toBeNull();
-    expect(design.selectedIds).toEqual([]);
+    expect(page.selectedIds).toEqual([]);
   });
 
   it('should also delete the bound path node when an existing path-text node is cleared to empty', () => {
@@ -388,7 +389,7 @@ describe('useCommitTextEdit behaviors', () => {
     const { design } = store.getState();
     const page = design.pages[design.activePageId];
 
-    expect(design.selectedIds).toEqual([page.rootOrder[0]]);
+    expect(page.selectedIds).toEqual([page.rootOrder[0]]);
     expect(selectOnCommitRef.current).toBe(false);
   });
 
@@ -427,7 +428,7 @@ describe('useCommitTextEdit behaviors', () => {
     result.current(createBlurEvent('replaced'));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([existingId]);
+    expect(selectSelectedIds(store.getState())).toEqual([existingId]);
   });
 
   it('should still clear selection when selectOnCommitRef is set but the content ends up empty (nothing to select)', () => {
@@ -448,6 +449,6 @@ describe('useCommitTextEdit behaviors', () => {
     const page = design.pages[design.activePageId];
 
     expect(page.rootOrder).toHaveLength(0);
-    expect(design.selectedIds).toEqual([]);
+    expect(page.selectedIds).toEqual([]);
   });
 });

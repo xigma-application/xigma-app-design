@@ -9,7 +9,7 @@ import designReducer, {
   setVectorEditingNodeIds,
   startCommentDraft,
 } from 'store/design/slice';
-import { selectActivePage } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store as realStore } from 'store';
 import { TDesignState } from 'store/design/types';
 
@@ -58,7 +58,7 @@ describe('handleLeave', () => {
 
     // result
     expect(store.getState().design.activeTool).toBe(ToolName.default);
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
   });
 
   it('should cancel an open comment draft', () => {

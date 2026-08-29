@@ -10,6 +10,7 @@ import { useDrawTextTool } from './useDrawTextTool';
 // store
 import designReducer, { setActiveTool, setSelection } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
+import { selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { ToolName } from 'types/design/enums';
@@ -121,13 +122,13 @@ describe('useDrawTextTool behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.selectedIds).toEqual(['existing-node']);
+    expect(selectSelectedIds(store.getState())).toEqual(['existing-node']);
 
     // action
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
   });
 
   it('should ignore a non-primary button press', () => {

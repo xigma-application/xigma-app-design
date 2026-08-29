@@ -32,11 +32,11 @@ const buildState = (nodes: TDesignPage['nodes'], selectedIds: string[], override
       nodes,
       paintColor: '#d9d9d9',
       rootOrder: Object.keys(nodes),
+      selectedIds,
       viewport: { x: 0, y: 0, zoom: 1 },
     },
   },
   penActiveVertexId: null,
-  selectedIds,
   vectorEditingNodeIds: [],
   ...overrides,
 });
@@ -93,7 +93,7 @@ describe('handleSetSelection', () => {
     handleSetSelection(state, []);
 
     // result
-    expect(state.selectedIds).toEqual([]);
+    expect(getActivePage(state).selectedIds).toEqual([]);
   });
 
   it('should not delete a deselected node that is not a fully cut-away ellipse', () => {

@@ -15,6 +15,7 @@ export const handleAddPage = (state: TDesignState, id: string): void => {
     nodes: {},
     paintColor: DEFAULT_PAINT_COLOR,
     rootOrder: [],
+    selectedIds: [],
     viewport: DEFAULT_VIEWPORT,
   };
 

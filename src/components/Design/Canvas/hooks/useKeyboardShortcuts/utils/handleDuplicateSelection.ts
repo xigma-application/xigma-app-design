@@ -5,7 +5,7 @@ import { DUPLICATE_OFFSET } from 'components/Design/Canvas/constants';
 import { addNode, setSelection } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { getVectorSelectionSnapshot } from 'store/history/getVectorSelectionSnapshot';
-import { selectActivePage, selectOrderedNodes } from 'store/design/selectors';
+import { selectActivePage, selectOrderedNodes, selectSelectedIds } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
@@ -18,7 +18,8 @@ import { duplicateVectorFragment } from './duplicateVectorFragment/duplicateVect
 export const handleDuplicateSelection = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
   const state = store.getState();
   const { nodes } = selectActivePage(state);
-  const { selectedIds, vectorEditingNodeIds } = state.design;
+  const selectedIds = selectSelectedIds(state);
+  const { vectorEditingNodeIds } = state.design;
   const selectedVertexIds = refs.vectorEdit.selectedVectorVertexIdsRef.current;
   const selectedSegmentIds = refs.vectorEdit.selectedVectorSegmentIdsRef.current;
 

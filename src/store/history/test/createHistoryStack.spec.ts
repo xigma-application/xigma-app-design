@@ -5,7 +5,7 @@ import { TVectorSelectionSnapshot } from 'types/design/canvas/types';
 // utils
 import { createHistoryStack, THistorySnapshot } from '../createHistoryStack';
 
-const designSnapshot = (id: string): TDesignSnapshot => ({ activePageId: id, pages: {}, selectedIds: [] });
+const designSnapshot = (id: string): TDesignSnapshot => ({ activePageId: id, pages: {} });
 
 const vectorSelectionSnapshot = (id: string): TVectorSelectionSnapshot => ({
   selectedVectorHandles: [],

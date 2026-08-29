@@ -3,6 +3,7 @@ import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
 // store
 import designReducer, { addNode } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
+import { selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { NodeType } from 'types/design/enums';
@@ -42,7 +43,7 @@ describe('selectCommittedNode', () => {
     selectCommittedNode(store.dispatch, store, existingId);
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([existingId]);
+    expect(selectSelectedIds(store.getState())).toEqual([existingId]);
   });
 
   it('should select the most recently created node when editingNodeId is null', () => {
@@ -59,7 +60,7 @@ describe('selectCommittedNode', () => {
     // result
     const { design } = store.getState();
     const { rootOrder } = design.pages[design.activePageId];
-    const { selectedIds } = design;
+    const { selectedIds } = design.pages[design.activePageId];
 
     expect(selectedIds).toEqual([rootOrder[0]]);
   });

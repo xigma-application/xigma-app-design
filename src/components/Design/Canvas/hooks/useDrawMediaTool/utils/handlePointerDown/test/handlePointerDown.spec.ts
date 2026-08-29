@@ -3,6 +3,7 @@ import { RefObject } from 'react';
 // store
 import { setSelection, setViewport } from 'store/design/slice';
 import { store } from 'store';
+import { selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { TArmedMedia } from '../../loadArmedMedia';
@@ -69,7 +70,7 @@ describe('handlePointerDown', () => {
     handlePointerDown(canvas, pointerEvent(10, 10), store, createArmedRef(armed), startRef);
 
     // result — a prior file placed earlier in the same multi-file queue must stay selected
-    expect(store.getState().design.selectedIds).toEqual(['already-placed']);
+    expect(selectSelectedIds(store.getState())).toEqual(['already-placed']);
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(1);
     expect(startRef.current).toEqual({ x: 10, y: 10 });
   });

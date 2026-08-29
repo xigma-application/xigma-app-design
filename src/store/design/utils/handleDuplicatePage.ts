@@ -52,6 +52,7 @@ export const handleDuplicatePage = (state: TDesignState, payload: TDuplicatePage
       nodes,
       paintColor: source.paintColor,
       rootOrder: source.rootOrder.map((id) => remapNodeId(id, nodeIdMap)),
+      selectedIds: [],
       viewport: { ...source.viewport },
     };
 

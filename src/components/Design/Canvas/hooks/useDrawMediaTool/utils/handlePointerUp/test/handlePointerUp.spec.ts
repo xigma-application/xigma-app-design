@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { setActiveTool, setViewport } from 'store/design/slice';
-import { selectActivePage } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -152,7 +152,7 @@ describe('handlePointerUp', () => {
 
     store.dispatch(setViewport({ x: 0, y: 0, zoom: 1 }));
 
-    const selectedBefore = store.getState().design.selectedIds.length;
+    const selectedBefore = selectSelectedIds(store.getState()).length;
 
     // before — place the first file
     handlePointerUp(
@@ -171,7 +171,7 @@ describe('handlePointerUp', () => {
     const rootOrderAfterFirst = store.getState().design.pages[store.getState().design.activePageId].rootOrder;
     const firstId = rootOrderAfterFirst[rootOrderAfterFirst.length - 1];
 
-    expect(store.getState().design.selectedIds.slice(selectedBefore)).toEqual([firstId]);
+    expect(selectSelectedIds(store.getState()).slice(selectedBefore)).toEqual([firstId]);
 
     // action — place a second file from the same queue
     handlePointerUp(
@@ -188,7 +188,7 @@ describe('handlePointerUp', () => {
     );
 
     const { rootOrder } = selectActivePage(store.getState());
-    const { selectedIds } = store.getState().design;
+    const selectedIds = selectSelectedIds(store.getState());
     const secondId = rootOrder[rootOrder.length - 1];
 
     // result — both files end up selected together, not just the most recent one

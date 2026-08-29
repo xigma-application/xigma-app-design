@@ -70,11 +70,11 @@ const initialState: TDesignState = {
       nodes: {},
       paintColor: DEFAULT_PAINT_COLOR,
       rootOrder: [],
+      selectedIds: [],
       viewport: DEFAULT_VIEWPORT,
     },
   },
   penActiveVertexId: null,
-  selectedIds: [],
   vectorEditingNodeIds: [],
 };
 

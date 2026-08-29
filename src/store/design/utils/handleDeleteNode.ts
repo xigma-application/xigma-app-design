@@ -12,7 +12,7 @@ export const handleDeleteNode = (state: TDesignState, id: string): void => {
   if (node) {
     delete page.nodes[id];
     page.rootOrder = page.rootOrder.filter((nodeId) => nodeId !== id);
-    state.selectedIds = state.selectedIds.filter((nodeId) => nodeId !== id);
+    page.selectedIds = page.selectedIds.filter((nodeId) => nodeId !== id);
 
     if (node.type === NodeType.text && node.pathId) {
       handleDeleteNode(state, node.pathId);

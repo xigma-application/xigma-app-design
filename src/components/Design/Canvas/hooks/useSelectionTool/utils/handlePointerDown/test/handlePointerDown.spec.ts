@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
-import { selectActivePage } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -307,7 +307,7 @@ describe('handlePointerDown', () => {
 
     // result
     expect(dragStateRef.current).toBeNull();
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
   });
 
   it('should toggle the hit node into the selection on shift-click', () => {
@@ -349,7 +349,7 @@ describe('handlePointerDown', () => {
     );
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([idA]);
+    expect(selectSelectedIds(store.getState())).toEqual([idA]);
     expect(dragStateRef.current).toBeNull();
   });
 
@@ -392,7 +392,7 @@ describe('handlePointerDown', () => {
     );
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([idA]);
+    expect(selectSelectedIds(store.getState())).toEqual([idA]);
     expect(dragStateRef.current).toMatchObject({ pendingClickAction: null });
   });
 
@@ -484,7 +484,7 @@ describe('handlePointerDown', () => {
     );
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
     expect(dragStateRef.current).toBeNull();
     expect(marqueeStartRef.current).not.toBeNull();
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(1);
@@ -675,7 +675,7 @@ describe('handlePointerDown', () => {
     );
 
     // result — falls through to marquee instead of grabbing the text
-    expect(store.getState().design.selectedIds).not.toContain(idA);
+    expect(selectSelectedIds(store.getState())).not.toContain(idA);
     expect(dragStateRef.current).toBeNull();
     expect(marqueeStartRef.current).not.toBeNull();
   });

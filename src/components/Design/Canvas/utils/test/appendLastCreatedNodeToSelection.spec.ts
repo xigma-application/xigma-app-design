@@ -27,7 +27,7 @@ describe('appendLastCreatedNodeToSelection', () => {
     // result
     const { design } = store.getState();
     const { rootOrder } = design.pages[design.activePageId];
-    const { selectedIds } = design;
+    const { selectedIds } = design.pages[design.activePageId];
 
     expect(selectedIds).toEqual([rootOrder[0]]);
   });
@@ -51,7 +51,7 @@ describe('appendLastCreatedNodeToSelection', () => {
     // result
     const { design } = store.getState();
     const { rootOrder } = design.pages[design.activePageId];
-    const { selectedIds } = design;
+    const { selectedIds } = design.pages[design.activePageId];
 
     expect(selectedIds).toEqual([rootOrder[0], rootOrder[1]]);
   });

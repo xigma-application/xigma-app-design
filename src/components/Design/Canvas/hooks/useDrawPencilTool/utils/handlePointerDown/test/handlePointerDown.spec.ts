@@ -3,6 +3,7 @@ import { RefObject } from 'react';
 // store
 import { setSelection } from 'store/design/slice';
 import { store } from 'store';
+import { selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
@@ -84,7 +85,7 @@ describe('handlePointerDown', () => {
     expect(committedPointsRef.current).toEqual([{ x: 10, y: 20 }]);
     expect(tailPointsRef.current).toEqual([{ x: 10, y: 20 }]);
     expect(rawPointsRef.current).toEqual([{ x: 10, y: 20 }]);
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(1);
   });
 

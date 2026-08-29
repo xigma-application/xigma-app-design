@@ -129,7 +129,7 @@ describe('useTextEditOnDoubleClick behaviors', () => {
     expect(design.editingNodeId).toBe(idA);
     expect(design.editingTextBox).toEqual({ flipX: false, flipY: false, height: 500, rotation: 0, width: 500, x: 2000, y: 2000 });
     expect(design.editingTextContent).toBe('Hi');
-    expect(design.selectedIds).toEqual([idA]);
+    expect(design.pages[design.activePageId].selectedIds).toEqual([idA]);
   });
 
   it('should stop the event from bubbling to document, so a stale document-level dblclick listener (e.g. useStraightCaretEditing selecting a word) cannot immediately narrow the "select all" this same double-click just triggered', () => {

@@ -10,6 +10,7 @@ export type TDesignPage = {
   nodes: Record<string, TSceneNode>;
   paintColor: string;
   rootOrder: string[];
+  selectedIds: string[];
   viewport: TViewport;
 };
 
@@ -32,14 +33,12 @@ export type TDesignState = {
   lastTextTool: ToolName;
   pages: Record<string, TDesignPage>;
   penActiveVertexId: string | null;
-  selectedIds: string[];
   vectorEditingNodeIds: string[];
 };
 
 export type TDesignSnapshot = {
   activePageId: string;
   pages: Record<string, TDesignPage>;
-  selectedIds: string[];
 };
 
 export type TStartTextEditPayload = {

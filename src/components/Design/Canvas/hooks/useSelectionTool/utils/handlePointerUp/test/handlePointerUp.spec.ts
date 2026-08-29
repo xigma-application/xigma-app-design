@@ -3,6 +3,7 @@ import { RefObject } from 'react';
 // store
 import { setSelection } from 'store/design/slice';
 import { store } from 'store';
+import { selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { TDraftRect, TPoint } from 'types/canvas';
@@ -160,7 +161,7 @@ describe('handlePointerUp', () => {
     );
 
     // result
-    expect(store.getState().design.selectedIds).toEqual(['a']);
+    expect(selectSelectedIds(store.getState())).toEqual(['a']);
     expect(dragStateRef.current).toBeNull();
   });
 

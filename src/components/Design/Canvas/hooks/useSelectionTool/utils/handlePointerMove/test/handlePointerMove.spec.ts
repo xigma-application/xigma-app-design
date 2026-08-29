@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection } from 'store/design/slice';
-import { selectActivePage } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -267,6 +267,6 @@ describe('handlePointerMove', () => {
 
     // result
     expect(marqueeRef.current).toEqual({ height: 110, width: 110, x: 0, y: 0 });
-    expect(store.getState().design.selectedIds).toEqual([idA]);
+    expect(selectSelectedIds(store.getState())).toEqual([idA]);
   });
 });

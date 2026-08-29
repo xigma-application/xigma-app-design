@@ -1,6 +1,6 @@
 // store
 import { setSelection } from 'store/design/slice';
-import { selectActivePage } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -49,7 +49,7 @@ describe('commitPencilNodeIfLongEnough', () => {
 
     // result
     const { nodes, rootOrder } = selectActivePage(store.getState());
-    const { selectedIds } = store.getState().design;
+    const selectedIds = selectSelectedIds(store.getState());
     const newNodeId = rootOrder[rootOrder.length - 1];
     const node = nodes[newNodeId] as TVectorNode;
 

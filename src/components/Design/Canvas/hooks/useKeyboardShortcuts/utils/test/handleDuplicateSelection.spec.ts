@@ -1,6 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
-import { selectActivePage } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { undo } from 'store/history/actions';
 import { store } from 'store';
 
@@ -60,7 +60,7 @@ describe('handleDuplicateSelection', () => {
 
     // result
     const { nodes } = selectActivePage(store.getState());
-    const { selectedIds } = store.getState().design;
+    const selectedIds = selectSelectedIds(store.getState());
 
     expect(selectedIds).toHaveLength(1);
     expect(selectedIds).not.toEqual([frameId]);
@@ -84,7 +84,7 @@ describe('handleDuplicateSelection', () => {
 
     // result
     expect(Object.keys(store.getState().design.pages[store.getState().design.activePageId].nodes)).toHaveLength(nodeCountBeforeDuplicate);
-    expect(store.getState().design.selectedIds).toEqual([frameId]);
+    expect(selectSelectedIds(store.getState())).toEqual([frameId]);
   });
 
   it('should do nothing when nothing is selected', () => {

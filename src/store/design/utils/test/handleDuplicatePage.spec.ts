@@ -26,6 +26,7 @@ const buildPage = (id: string, overrides: Partial<TDesignPage> = {}): TDesignPag
   nodes: {},
   paintColor: '#d9d9d9',
   rootOrder: [],
+  selectedIds: [],
   viewport: { x: 0, y: 0, zoom: 1 },
   ...overrides,
 });
@@ -49,7 +50,6 @@ const buildState = (pages: TDesignPage[], activePageId: string): TDesignState =>
   lastTextTool: ToolName.text,
   pages: Object.fromEntries(pages.map((page) => [page.id, page])),
   penActiveVertexId: null,
-  selectedIds: [],
   vectorEditingNodeIds: [],
 });
 
@@ -60,6 +60,7 @@ describe('handleDuplicatePage', () => {
       name: 'Page 1',
       nodes: { child: frame('child', 'parent'), parent: frame('parent') },
       rootOrder: ['parent', 'child'],
+      selectedIds: [],
     });
     const state = buildState([source, buildPage('page-2')], 'page-1');
 

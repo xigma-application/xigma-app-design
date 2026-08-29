@@ -12,6 +12,7 @@ const buildPage = (name: string): TDesignPage => ({
   nodes: {},
   paintColor: '#d9d9d9',
   rootOrder: [],
+  selectedIds: [],
   viewport: { x: 0, y: 0, zoom: 1 },
 });
 
@@ -34,7 +35,6 @@ const buildState = (pageNames: string[], activePageId: string): TDesignState => 
   lastTextTool: ToolName.text,
   pages: Object.fromEntries(pageNames.map((name) => [name, buildPage(name)])),
   penActiveVertexId: null,
-  selectedIds: [],
   vectorEditingNodeIds: [],
 });
 
@@ -54,6 +54,7 @@ describe('handleAddPage', () => {
       nodes: {},
       paintColor: '#D9D9D9',
       rootOrder: [],
+      selectedIds: [],
       viewport: { x: 0, y: 0, zoom: 1 },
     });
     expect(state.activePageId).toBe('new-page');

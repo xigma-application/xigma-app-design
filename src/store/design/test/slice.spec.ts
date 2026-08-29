@@ -83,11 +83,11 @@ describe('design slice', () => {
           nodes: {},
           paintColor: DEFAULT_PAINT_COLOR,
           rootOrder: [],
+          selectedIds: [],
           viewport: { x: 0, y: 0, zoom: 1 },
         },
       },
       penActiveVertexId: null,
-      selectedIds: [],
       vectorEditingNodeIds: [],
     });
   });
@@ -234,7 +234,7 @@ describe('design slice', () => {
     const state = slice(undefined, setSelection(['a', 'b']));
 
     // result
-    expect(state.selectedIds).toEqual(['a', 'b']);
+    expect(state.pages[state.activePageId].selectedIds).toEqual(['a', 'b']);
   });
 
   it('should delete a node', () => {
@@ -258,6 +258,7 @@ describe('design slice', () => {
       ...initial.pages[initial.activePageId],
       nodes: { [node.id]: node },
       rootOrder: [node.id],
+      selectedIds: [node.id],
     };
 
     // before
@@ -266,14 +267,13 @@ describe('design slice', () => {
       replaceDesignSnapshot({
         activePageId: initial.activePageId,
         pages: { [initial.activePageId]: snapshotPage },
-        selectedIds: [node.id],
       }),
     );
 
     // result
     expect(state.pages[state.activePageId].nodes).toEqual({ [node.id]: node });
     expect(state.pages[state.activePageId].rootOrder).toEqual([node.id]);
-    expect(state.selectedIds).toEqual([node.id]);
+    expect(state.pages[state.activePageId].selectedIds).toEqual([node.id]);
   });
 
   it('should set the active page', () => {

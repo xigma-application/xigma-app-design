@@ -124,7 +124,7 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     const { design } = store.getState();
 
     expect(design.vectorEditingNodeIds).toEqual([idA]);
-    expect(design.selectedIds).toEqual([idA]);
+    expect(design.pages[design.activePageId].selectedIds).toEqual([idA]);
   });
 
   it('should not enter Vector Edit Mode when double-clicking a non-vector node', () => {

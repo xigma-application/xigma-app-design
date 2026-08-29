@@ -1,14 +1,33 @@
 .TreeItem {
   align-items: center;
   box-sizing: border-box;
-  column-gap: 8px;
   cursor: default;
   display: flex;
   height: 32px;
   padding: 0 8px;
 
-  &[aria-selected='true'] {
+  &__content {
+    align-items: center;
+    border-radius: 5px;
+    column-gap: 8px;
+    display: flex;
+    flex: 1;
+    height: 24px;
+    min-width: 0;
+    padding: 0 6px;
+  }
+
+  &:hover &__content {
+    background-color: color-mix(in srgb, var(--color-neutral-3) 70%, transparent);
+  }
+
+  &[aria-selected='true'] &__content {
     background-color: var(--color-selected);
+  }
+
+  &__toggle {
+    flex-shrink: 0;
+    width: 16px;
   }
 
   &__icon {

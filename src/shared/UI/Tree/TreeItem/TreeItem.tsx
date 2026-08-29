@@ -29,15 +29,18 @@ const TreeItem: FC<TTreeItemProps> = ({ isSelected, node }) => {
 
   return (
     <div aria-selected={isSelected} className={styles.TreeItem} onClick={handleSelect}>
-      <Icon className={styles.TreeItem__icon} color="neutral2" name={NODE_TYPE_ICON[node.type]} size={16} />
-      <span className={cx(styles.TreeItem__name, node.hidden && styles['TreeItem__name--hidden'])}>{node.name}</span>
-      <TreeItemActions
-        isHidden={Boolean(node.hidden)}
-        isLocked={Boolean(node.locked)}
-        onStopPropagation={handleStopPropagation}
-        onToggleHidden={handleToggleHidden}
-        onToggleLocked={handleToggleLocked}
-      />
+      <div className={styles.TreeItem__content}>
+        <div className={styles.TreeItem__toggle} />
+        <Icon className={styles.TreeItem__icon} color="neutral2" name={NODE_TYPE_ICON[node.type]} size={10} />
+        <span className={cx(styles.TreeItem__name, node.hidden && styles['TreeItem__name--hidden'])}>{node.name}</span>
+        <TreeItemActions
+          isHidden={Boolean(node.hidden)}
+          isLocked={Boolean(node.locked)}
+          onStopPropagation={handleStopPropagation}
+          onToggleHidden={handleToggleHidden}
+          onToggleLocked={handleToggleLocked}
+        />
+      </div>
     </div>
   );
 };

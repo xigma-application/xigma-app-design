@@ -5,6 +5,7 @@ import ScrollThumb from 'shared/ScrollThumb/ScrollThumb';
 import TreeItem from './TreeItem/TreeItem';
 
 // hooks
+import { useDeselectOnEmptyClick } from './hooks/useDeselectOnEmptyClick';
 import { useHandleResizeMouseDown } from './hooks/useHandleResizeMouseDown';
 import { useResizeHandler, useVirtualList } from 'hooks';
 
@@ -29,6 +30,7 @@ export const Tree: FC = () => {
   const maxHeight = getMaxTreeHeight();
   const { cursorY, height, onMouseDownY } = useResizeHandler({ ...TREE_RESIZE_SETTINGS, maxHeight }, listRef);
   const handleResizeMouseDown = useHandleResizeMouseDown(onMouseDownY);
+  const handleDeselectOnEmptyClick = useDeselectOnEmptyClick();
 
   const { items, totalSize } = useVirtualList({
     count: nodes.length,
@@ -38,7 +40,7 @@ export const Tree: FC = () => {
 
   return (
     <div className={styles.Tree} ref={listRef} style={{ height }}>
-      <div className={styles.Tree__rows} ref={rowsRef}>
+      <div className={styles.Tree__rows} onClick={handleDeselectOnEmptyClick} ref={rowsRef}>
         <div className={styles.Tree__viewport} style={{ height: totalSize }}>
           {items.map((virtualRow) => {
             const node = nodes[virtualRow.index];

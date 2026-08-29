@@ -3,6 +3,7 @@ import { RefObject } from 'react';
 // store
 import { setSelection } from 'store/design/slice';
 import { store } from 'store';
+import { selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { TDragState } from 'types/design/selectionTool/types';
@@ -54,7 +55,7 @@ describe('disarmDrag', () => {
     disarmDrag(canvas, pointerEvent(1), store.dispatch, dragStateRef, createCanvasRefs());
 
     // result
-    expect(store.getState().design.selectedIds).toEqual(['a']);
+    expect(selectSelectedIds(store.getState())).toEqual(['a']);
     expect(dragStateRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
   });
@@ -76,7 +77,7 @@ describe('disarmDrag', () => {
     disarmDrag(canvas, pointerEvent(), store.dispatch, dragStateRef, createCanvasRefs());
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
   });
 
   it('should leave the selection untouched once the pointer has actually moved', () => {
@@ -96,7 +97,7 @@ describe('disarmDrag', () => {
     disarmDrag(canvas, pointerEvent(), store.dispatch, dragStateRef, createCanvasRefs());
 
     // result
-    expect(store.getState().design.selectedIds).toEqual(['a', 'b']);
+    expect(selectSelectedIds(store.getState())).toEqual(['a', 'b']);
     expect(dragStateRef.current).toBeNull();
   });
 });

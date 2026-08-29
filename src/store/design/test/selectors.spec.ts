@@ -74,11 +74,11 @@ const state = {
         nodes: { [node.id]: node },
         paintColor: '#d9d9d9',
         rootOrder: [node.id],
+        selectedIds: [node.id],
         viewport: { x: 5, y: 10, zoom: 2 },
       },
     },
     penActiveVertexId: 'vertex-1',
-    selectedIds: [node.id],
     vectorEditingNodeIds: [node.id],
   },
 } as any;

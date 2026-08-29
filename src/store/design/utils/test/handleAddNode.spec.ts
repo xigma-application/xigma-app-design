@@ -47,11 +47,11 @@ describe('handleAddNode', () => {
           nodes: {},
           paintColor: '#d9d9d9',
           rootOrder: [],
+          selectedIds: [],
           viewport: { x: 0, y: 0, zoom: 1 },
         },
       },
       penActiveVertexId: null,
-      selectedIds: [],
       vectorEditingNodeIds: [],
     };
 
@@ -90,11 +90,11 @@ describe('handleAddNode', () => {
           nodes: { existing: { ...node, id: 'existing' } },
           paintColor: '#d9d9d9',
           rootOrder: ['existing'],
+          selectedIds: [],
           viewport: { x: 0, y: 0, zoom: 1 },
         },
       },
       penActiveVertexId: null,
-      selectedIds: [],
       vectorEditingNodeIds: [],
     };
 

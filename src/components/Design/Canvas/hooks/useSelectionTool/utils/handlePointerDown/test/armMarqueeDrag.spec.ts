@@ -3,6 +3,7 @@ import { RefObject } from 'react';
 // store
 import { setSelection } from 'store/design/slice';
 import { store } from 'store';
+import { selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { TPoint } from 'types/canvas';
@@ -27,7 +28,7 @@ describe('armMarqueeDrag', () => {
     armMarqueeDrag(canvas, event, store.dispatch, marqueeStartRef, { x: 15, y: 25 });
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
     expect(marqueeStartRef.current).toEqual({ x: 15, y: 25 });
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(7);
   });

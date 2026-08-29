@@ -60,11 +60,11 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
       nodes: {},
       paintColor: '#d9d9d9',
       rootOrder: [],
+      selectedIds: [],
       viewport: { x: 0, y: 0, zoom: 1 },
     },
   },
   penActiveVertexId: null,
-  selectedIds: [],
   vectorEditingNodeIds: [],
   ...overrides,
 });
@@ -91,10 +91,10 @@ const buildSnapshot = ({
       nodes,
       paintColor: '#d9d9d9',
       rootOrder,
+      selectedIds,
       viewport: { x: 0, y: 0, zoom: 1 },
     },
   },
-  selectedIds,
 });
 
 describe('handleReplaceDesignSnapshot', () => {
@@ -123,7 +123,7 @@ describe('handleReplaceDesignSnapshot', () => {
     // result
     expect(state.pages[state.activePageId].nodes).toEqual({ [frame.id]: frame });
     expect(state.pages[state.activePageId].rootOrder).toEqual([frame.id]);
-    expect(state.selectedIds).toEqual([frame.id]);
+    expect(state.pages[state.activePageId].selectedIds).toEqual([frame.id]);
   });
 
   it('should keep vectorEditingNodeIds and penActiveVertexId when the restored node still has the active vertex', () => {

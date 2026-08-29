@@ -31,11 +31,11 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
       nodes: {},
       paintColor: '#d9d9d9',
       rootOrder: [],
+      selectedIds: [],
       viewport: { x: 0, y: 0, zoom: 1 },
     },
   },
   penActiveVertexId: null,
-  selectedIds: [],
   vectorEditingNodeIds: [],
   ...overrides,
 });

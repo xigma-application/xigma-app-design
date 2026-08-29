@@ -10,6 +10,7 @@ import { useDrawMediaTool, TMediaToolConfig } from './useDrawMediaTool';
 // store
 import designReducer, { setActiveTool, setSelection, setViewport } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
+import { selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
@@ -442,7 +443,7 @@ describe('useDrawMediaTool behaviors', () => {
     expect(page.nodes[page.rootOrder[1]]).toMatchObject({ height: 100, width: 50, x: 40, y: 40 });
     expect(design.activeTool).toBe(ToolName.default);
     // both files from the same multi-file pick end up selected together, not just the last one
-    expect(design.selectedIds).toEqual([page.rootOrder[0], page.rootOrder[1]]);
+    expect(page.selectedIds).toEqual([page.rootOrder[0], page.rootOrder[1]]);
   });
 
   it('should clear a pre-existing selection once when files are picked, then keep every placed file selected as more are placed', () => {
@@ -460,7 +461,7 @@ describe('useDrawMediaTool behaviors', () => {
     // before — pick two files at once; picking must clear the stale pre-existing selection
     selectFile(getInput(), [new File(['a'], 'first.png', { type: 'image/png' }), new File(['b'], 'second.png', { type: 'image/png' })]);
 
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
 
     const firstImage = getLastImage();
 
@@ -476,7 +477,7 @@ describe('useDrawMediaTool behaviors', () => {
 
     const designAfterFirst = store.getState().design;
     const { rootOrder: rootOrderAfterFirst } = designAfterFirst.pages[designAfterFirst.activePageId];
-    const { selectedIds: selectedAfterFirst } = designAfterFirst;
+    const { selectedIds: selectedAfterFirst } = designAfterFirst.pages[designAfterFirst.activePageId];
 
     expect(selectedAfterFirst).toEqual([rootOrderAfterFirst[0]]);
 
@@ -495,7 +496,7 @@ describe('useDrawMediaTool behaviors', () => {
     // result — the first file's selection is kept, the second is added alongside it
     const designAfter = store.getState().design;
     const { rootOrder } = designAfter.pages[designAfter.activePageId];
-    const { selectedIds } = designAfter;
+    const { selectedIds } = designAfter.pages[designAfter.activePageId];
 
     expect(selectedIds).toEqual([rootOrder[0], rootOrder[1]]);
   });

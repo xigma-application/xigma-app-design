@@ -1,5 +1,5 @@
 // store
-import { selectActivePage, selectOrderedNodes } from 'store/design/selectors';
+import { selectActivePage, selectOrderedNodes, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -12,7 +12,8 @@ import { setClipboardNodes } from './clipboard';
 export const handleCopySelection = (refs: TCanvasRefs): void => {
   const state = store.getState();
   const { nodes } = selectActivePage(state);
-  const { selectedIds, vectorEditingNodeIds } = state.design;
+  const selectedIds = selectSelectedIds(state);
+  const { vectorEditingNodeIds } = state.design;
   const selectedVertexIds = refs.vectorEdit.selectedVectorVertexIdsRef.current;
   const selectedSegmentIds = refs.vectorEdit.selectedVectorSegmentIdsRef.current;
 

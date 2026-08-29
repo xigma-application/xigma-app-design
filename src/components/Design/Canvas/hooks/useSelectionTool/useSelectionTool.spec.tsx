@@ -11,7 +11,7 @@ import { useSelectionTool } from './useSelectionTool';
 
 // store
 import { addNode, setActiveTool, setSelection, setVectorEditingNodeIds, startTextEdit, stopTextEdit } from 'store/design/slice';
-import { selectActivePage } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -185,7 +185,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
     expect(idA).toBeTruthy();
   });
 
@@ -201,7 +201,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 110, 110));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([idA]);
+    expect(selectSelectedIds(store.getState())).toEqual([idA]);
   });
 
   it('should deselect everything when clicking empty canvas', () => {
@@ -219,7 +219,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 900, 900));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
   });
 
   it('should not change the selection when shift-clicking empty canvas', () => {
@@ -237,7 +237,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 950, 950, { shiftKey: true }));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([idA]);
+    expect(selectSelectedIds(store.getState())).toEqual([idA]);
   });
 
   it('should add an unselected node to the selection on shift-click', () => {
@@ -256,7 +256,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 345, 305, { shiftKey: true }));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([idA, idB]);
+    expect(selectSelectedIds(store.getState())).toEqual([idA, idB]);
   });
 
   it('should remove an already-selected node on shift-click', () => {
@@ -275,7 +275,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 405, 405, { shiftKey: true }));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([idB]);
+    expect(selectSelectedIds(store.getState())).toEqual([idB]);
   });
 
   it('should replace the selection when plain-clicking a node that was never selected', () => {
@@ -295,7 +295,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 585, 505));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([idC]);
+    expect(selectSelectedIds(store.getState())).toEqual([idC]);
   });
 
   it('should collapse a multi-selection to the clicked node when released without moving', () => {
@@ -315,7 +315,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 605, 605));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([idA]);
+    expect(selectSelectedIds(store.getState())).toEqual([idA]);
   });
 
   it('should keep the multi-selection and move every node together when dragged', () => {
@@ -337,7 +337,7 @@ describe('useSelectionTool behaviors', () => {
 
     // result
     const { nodes } = selectActivePage(store.getState());
-    const { selectedIds } = store.getState().design;
+    const selectedIds = selectSelectedIds(store.getState());
 
     expect(selectedIds).toEqual([idA, idB]);
     expect(nodes[idA]).toMatchObject({ x: 710, y: 710 });
@@ -363,7 +363,7 @@ describe('useSelectionTool behaviors', () => {
 
     // result
     const { nodes } = selectActivePage(store.getState());
-    const { selectedIds } = store.getState().design;
+    const selectedIds = selectSelectedIds(store.getState());
 
     expect(selectedIds).toEqual([idA, idB]);
     expect(nodes[idA]).toMatchObject({ x: 1110, y: 710 });
@@ -387,7 +387,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 1240, 710));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
   });
 
   it('should select an unselected node sitting in the gap instead of deselecting everything', () => {
@@ -408,7 +408,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 1440, 710));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([idC]);
+    expect(selectSelectedIds(store.getState())).toEqual([idC]);
   });
 
   it('should not replace the selection while the button is still pressed on an unselected node in the gap', () => {
@@ -428,7 +428,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 1540, 710));
 
     // result - selection must stay untouched until pointerup decides
-    expect(store.getState().design.selectedIds).toEqual([idA, idB]);
+    expect(selectSelectedIds(store.getState())).toEqual([idA, idB]);
   });
 
   it('should move the whole group together when dragging from an unselected node in the gap', () => {
@@ -450,7 +450,7 @@ describe('useSelectionTool behaviors', () => {
 
     // result - A and B (the actual selection) move together; C (the hit node) is untouched and unselected
     const { nodes } = selectActivePage(store.getState());
-    const { selectedIds } = store.getState().design;
+    const selectedIds = selectSelectedIds(store.getState());
 
     expect(selectedIds).toEqual([idA, idB]);
     expect(nodes[idA]).toMatchObject({ x: 1610, y: 710 });
@@ -474,7 +474,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 1900, 1900));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
   });
 
   it('should move a single selected node while dragging', () => {
@@ -508,7 +508,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 905, 905, { button: 1 }));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
     expect(idA).toBeTruthy();
   });
 
@@ -538,7 +538,7 @@ describe('useSelectionTool behaviors', () => {
     expect(() => canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 10, 10))).not.toThrow();
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
   });
 
   it('should select every node the marquee touches while dragging, and clear the marquee on release', () => {
@@ -556,7 +556,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2060, 730));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([idP, idQ]);
+    expect(selectSelectedIds(store.getState())).toEqual([idP, idQ]);
     expect(marqueeRef.current).toEqual({ height: 40, width: 70, x: 1990, y: 690 });
 
     // action
@@ -581,7 +581,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 2160, 730, { ctrlKey: true }));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([idP]);
+    expect(selectSelectedIds(store.getState())).toEqual([idP]);
   });
 
   it('should move both endpoints together when dragging the body of a selected line', () => {
@@ -1008,7 +1008,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 3005, 705));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
     expect(idA).toBeTruthy();
   });
 
@@ -1029,7 +1029,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 3105, 705));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([idA]);
+    expect(selectSelectedIds(store.getState())).toEqual([idA]);
   });
 
   it('should not react to pointer events while a plain (unrotated, unflipped) straight-text node is being edited, since the overlay itself is pointer-events: none and every click falls through to the canvas', () => {
@@ -1048,7 +1048,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 3155, 705));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
     expect(idA).toBeTruthy();
   });
 
@@ -1068,7 +1068,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 3205, 705));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
     expect(idA).toBeTruthy();
   });
 
@@ -1134,7 +1134,7 @@ describe('useSelectionTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 3305, 705));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
     expect(idA).toBeTruthy();
   });
 

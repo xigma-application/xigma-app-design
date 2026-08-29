@@ -3,6 +3,7 @@ import { RefObject } from 'react';
 // store
 import { setActiveTool, setSelection } from 'store/design/slice';
 import { store } from 'store';
+import { selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { ToolName } from 'types/design/enums';
@@ -85,7 +86,7 @@ describe('handlePointerDown', () => {
     );
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
     expect(refs.drawDragRef.current).toEqual({ start: { x: 10, y: 10 } });
   });
 

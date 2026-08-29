@@ -30,7 +30,7 @@ describe('selectLastCreatedNode', () => {
     // result
     const { design } = store.getState();
     const { rootOrder } = design.pages[design.activePageId];
-    const { selectedIds } = design;
+    const { selectedIds } = design.pages[design.activePageId];
 
     expect(selectedIds).toEqual([rootOrder[1]]);
   });

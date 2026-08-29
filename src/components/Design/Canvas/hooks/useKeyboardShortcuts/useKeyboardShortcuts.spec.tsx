@@ -13,7 +13,7 @@ import { createHistoryMiddleware } from 'store/history/historyMiddleware';
 import { createHistoryStack } from 'store/history/createHistoryStack';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 import { AppStore, store as realStore } from 'store';
-import { selectActivePage } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
@@ -374,7 +374,7 @@ describe('useKeyboardShortcuts behaviors', () => {
     fireEvent.keyDown(window, { code: 'Escape' });
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
   });
 
   it('should ignore unrelated keys', () => {
@@ -559,7 +559,7 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
     fireEvent.keyDown(window, { code: 'KeyA', metaKey: true });
 
     // result
-    expect(realStore.getState().design.selectedIds).toEqual(
+    expect(selectSelectedIds(realStore.getState())).toEqual(
       realStore.getState().design.pages[realStore.getState().design.activePageId].rootOrder,
     );
   });
@@ -579,8 +579,8 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
     fireEvent.keyDown(window, { code: 'KeyD', metaKey: true });
 
     // result
-    expect(realStore.getState().design.selectedIds).toHaveLength(1);
-    expect(realStore.getState().design.selectedIds).not.toEqual([idA]);
+    expect(selectSelectedIds(realStore.getState())).toHaveLength(1);
+    expect(selectSelectedIds(realStore.getState())).not.toEqual([idA]);
   });
 
   it('should copy the selected node on "Cmd+C" and paste a clone of it on "Cmd+V"', () => {

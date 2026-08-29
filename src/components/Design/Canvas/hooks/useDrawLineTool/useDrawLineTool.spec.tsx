@@ -10,6 +10,7 @@ import { useDrawLineTool, TLineToolConfig } from './useDrawLineTool';
 // store
 import designReducer, { setActiveTool, setSelection } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
+import { selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
@@ -155,7 +156,7 @@ describe('useDrawLineTool behaviors', () => {
       y2: 40,
     });
     expect(design.activeTool).toBe(ToolName.default);
-    expect(design.selectedIds).toEqual([page.rootOrder[0]]);
+    expect(page.selectedIds).toEqual([page.rootOrder[0]]);
     expect(draftRef.current).toBeNull();
   });
 
@@ -203,13 +204,13 @@ describe('useDrawLineTool behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.selectedIds).toEqual(['existing-node']);
+    expect(selectSelectedIds(store.getState())).toEqual(['existing-node']);
 
     // action
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
   });
 
   it('should ignore a non-primary button press', () => {

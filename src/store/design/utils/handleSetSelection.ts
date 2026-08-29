@@ -42,10 +42,11 @@ const exitVectorEditingIfNeeded = (state: TDesignState, nextSelectedIds: string[
 };
 
 export const handleSetSelection = (state: TDesignState, nextSelectedIds: string[]): void => {
-  const deselectedIds = state.selectedIds.filter((id) => !nextSelectedIds.includes(id));
+  const page = getActivePage(state);
+  const deselectedIds = page.selectedIds.filter((id) => !nextSelectedIds.includes(id));
 
   deleteDegenerateDeselectedNodes(state, deselectedIds);
   exitVectorEditingIfNeeded(state, nextSelectedIds);
 
-  state.selectedIds = nextSelectedIds;
+  page.selectedIds = nextSelectedIds;
 };

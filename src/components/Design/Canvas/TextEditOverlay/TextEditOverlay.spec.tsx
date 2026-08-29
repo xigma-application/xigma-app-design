@@ -8,6 +8,7 @@ import TextEditOverlay from './TextEditOverlay';
 // store
 import designReducer, { startTextEdit } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
+import { selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { NodeType } from 'types/design/enums';
@@ -214,7 +215,7 @@ describe('TextEditOverlay behaviors', () => {
     expect(design.editingTextBox).toBeNull();
     expect(page.rootOrder).toHaveLength(1);
     expect(page.nodes[page.rootOrder[0]]).toMatchObject({ content: 'hello', type: NodeType.text });
-    expect(design.selectedIds).toEqual([page.rootOrder[0]]);
+    expect(page.selectedIds).toEqual([page.rootOrder[0]]);
   });
 
   it('should discard a fresh box with no content when Escape is pressed, same as blurring it away empty', () => {
@@ -235,7 +236,7 @@ describe('TextEditOverlay behaviors', () => {
 
     expect(design.editingTextBox).toBeNull();
     expect(page.rootOrder).toHaveLength(0);
-    expect(design.selectedIds).toEqual([]);
+    expect(page.selectedIds).toEqual([]);
   });
 
   it('should keep the existing node selected when Escape is pressed while re-editing it, instead of deselecting it', () => {
@@ -257,6 +258,6 @@ describe('TextEditOverlay behaviors', () => {
     fireEvent.keyDown(element, { key: 'Escape' });
 
     // result
-    expect(store.getState().design.selectedIds).toEqual(['node-1']);
+    expect(selectSelectedIds(store.getState())).toEqual(['node-1']);
   });
 });

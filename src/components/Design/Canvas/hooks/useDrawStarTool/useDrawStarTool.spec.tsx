@@ -10,7 +10,7 @@ import { useDrawStarTool, TStarToolConfig } from './useDrawStarTool';
 // store
 import designReducer, { setActiveTool, setSelection } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
-import { selectActivePage } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
@@ -124,7 +124,7 @@ describe('useDrawStarTool behaviors', () => {
       y: 10,
     });
     expect(design.activeTool).toBe(ToolName.default);
-    expect(design.selectedIds).toEqual([page.rootOrder[0]]);
+    expect(page.selectedIds).toEqual([page.rootOrder[0]]);
     expect(draftRef.current).toBeNull();
   });
 
@@ -144,13 +144,13 @@ describe('useDrawStarTool behaviors', () => {
     });
 
     // result
-    expect(store.getState().design.selectedIds).toEqual(['existing-node']);
+    expect(selectSelectedIds(store.getState())).toEqual(['existing-node']);
 
     // action
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
   });
 
   it('should ignore a non-primary button press', () => {
@@ -277,6 +277,6 @@ describe('useDrawStarTool behaviors', () => {
     expect(page.rootOrder).toHaveLength(1);
     expect(page.nodes[page.rootOrder[0]]).toMatchObject({ height: 100, width: 100, x: -40, y: -40 });
     expect(design.activeTool).toBe(ToolName.default);
-    expect(design.selectedIds).toEqual([page.rootOrder[0]]);
+    expect(page.selectedIds).toEqual([page.rootOrder[0]]);
   });
 });

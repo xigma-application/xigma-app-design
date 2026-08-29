@@ -1,6 +1,6 @@
 // store
 import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
-import { selectActivePage } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { undo } from 'store/history/actions';
 import { store } from 'store';
 
@@ -67,7 +67,7 @@ describe('handlePasteSelection', () => {
 
     // result
     const { nodes } = selectActivePage(store.getState());
-    const { selectedIds } = store.getState().design;
+    const selectedIds = selectSelectedIds(store.getState());
 
     expect(selectedIds).toHaveLength(1);
     expect(selectedIds).not.toEqual([frameId]);

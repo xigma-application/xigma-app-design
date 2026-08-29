@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 
 // store
 import { addNode, setSelection } from 'store/design/slice';
-import { selectActivePage } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -67,7 +67,7 @@ describe('armHitDrag', () => {
 
     // result
     expect(dragStateRef.current).toMatchObject({ pendingClickAction: { id: idA, kind: 'collapse' }, pointerStart: { x: 5, y: 5 } });
-    expect(store.getState().design.selectedIds).toEqual([idA, idB]);
+    expect(selectSelectedIds(store.getState())).toEqual([idA, idB]);
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(1);
   });
 
@@ -90,7 +90,7 @@ describe('armHitDrag', () => {
 
     // result
     expect(dragStateRef.current).toMatchObject({ pendingClickAction: { id: idC, kind: 'collapse' }, pointerStart: { x: 125, y: 5 } });
-    expect(store.getState().design.selectedIds).toEqual([idA, idB]);
+    expect(selectSelectedIds(store.getState())).toEqual([idA, idB]);
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(2);
   });
 
@@ -112,7 +112,7 @@ describe('armHitDrag', () => {
     armHitDrag(canvas, event, store.dispatch, dragStateRef, c, [idA, idB], [a, b], { x: 505, y: 505 }, createCanvasRefs());
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([idC]);
+    expect(selectSelectedIds(store.getState())).toEqual([idC]);
     expect(dragStateRef.current).toMatchObject({ pendingClickAction: null, pointerStart: { x: 505, y: 505 } });
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(3);
   });

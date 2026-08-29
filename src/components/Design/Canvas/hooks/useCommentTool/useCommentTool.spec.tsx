@@ -9,6 +9,7 @@ import { useCommentTool } from './useCommentTool';
 // store
 import { cancelCommentDraft, setActiveTool, setSelection } from 'store/design/slice';
 import { store } from 'store';
+import { selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { ToolName } from 'types/design/enums';
@@ -81,7 +82,7 @@ describe('useCommentTool behaviors', () => {
     canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 20));
 
     // result
-    expect(store.getState().design.selectedIds).toEqual([]);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
   });
 
   it('should ignore a non-primary button press', () => {

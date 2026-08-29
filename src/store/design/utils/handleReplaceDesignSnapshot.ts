@@ -8,7 +8,6 @@ import { getActivePage } from './getActivePage';
 export const handleReplaceDesignSnapshot = (state: TDesignState, snapshot: TDesignSnapshot): void => {
   state.pages = snapshot.pages;
   state.activePageId = snapshot.activePageId;
-  state.selectedIds = snapshot.selectedIds;
 
   const page = getActivePage(state);
   const hadVectorEditingNodeIds = state.vectorEditingNodeIds.length > 0;
