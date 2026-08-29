@@ -21,7 +21,7 @@ import styles from './pages.module.scss';
 const Pages: FC = () => {
   const activePage = useAppSelector(selectActivePage);
   const { expand, handleStopPropagation, handleToggleClick, handleToggleKeyDown, isExpanded } = useTogglePagesExpanded();
-  const { handleAddPage, pendingEditPageId } = useAddPage(expand);
+  const { clearPendingEditPageId, handleAddPage, pendingEditPageId } = useAddPage(expand);
   const headerMenu = useHeaderPageMenu(!isExpanded);
 
   return (
@@ -38,7 +38,7 @@ const Pages: FC = () => {
         <PagesHeaderTitle activePageName={activePage.name} isExpanded={isExpanded} />
         <PagesHeaderActions onAddPage={handleAddPage} onStopPropagation={handleStopPropagation} />
       </div>
-      {isExpanded && <PagesList pendingEditPageId={pendingEditPageId} />}
+      {isExpanded && <PagesList onPendingEditFinished={clearPendingEditPageId} pendingEditPageId={pendingEditPageId} />}
       <PageRowMenu
         anchorRef={headerMenu.anchorRef}
         id={activePage.id}

@@ -5,6 +5,7 @@ import { addPage } from 'store/design/slice';
 import { useAppDispatch } from 'store';
 
 export type TUseAddPageResult = {
+  clearPendingEditPageId: TFunc;
   handleAddPage: TFunc;
   pendingEditPageId: string | null;
 };
@@ -20,5 +21,9 @@ export const useAddPage = (onAdded: TFunc): TUseAddPageResult => {
     onAdded();
   };
 
-  return { handleAddPage, pendingEditPageId };
+  const clearPendingEditPageId = (): void => {
+    setPendingEditPageId(null);
+  };
+
+  return { clearPendingEditPageId, handleAddPage, pendingEditPageId };
 };

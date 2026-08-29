@@ -43,4 +43,46 @@ describe('usePageRowRename', () => {
     // result
     expect(result.current.isRenameRequested).toBe(true);
   });
+
+  it('should call onAutoEditDismissed when editing ends and this row was the auto-edit target', () => {
+    // mock
+    const onAutoEditDismissed = vi.fn();
+
+    // before
+    const { result } = renderHook(() => usePageRowRename(true, onAutoEditDismissed));
+
+    // action
+    act(() => result.current.onEditingChange(false));
+
+    // result
+    expect(onAutoEditDismissed).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not call onAutoEditDismissed when editing ends and this row was not the auto-edit target', () => {
+    // mock
+    const onAutoEditDismissed = vi.fn();
+
+    // before
+    const { result } = renderHook(() => usePageRowRename(false, onAutoEditDismissed));
+
+    // action
+    act(() => result.current.onEditingChange(false));
+
+    // result
+    expect(onAutoEditDismissed).not.toHaveBeenCalled();
+  });
+
+  it('should not call onAutoEditDismissed while editing is still active, even for the auto-edit target', () => {
+    // mock
+    const onAutoEditDismissed = vi.fn();
+
+    // before
+    const { result } = renderHook(() => usePageRowRename(true, onAutoEditDismissed));
+
+    // action
+    act(() => result.current.onEditingChange(true));
+
+    // result
+    expect(onAutoEditDismissed).not.toHaveBeenCalled();
+  });
 });

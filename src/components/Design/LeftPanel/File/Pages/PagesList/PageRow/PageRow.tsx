@@ -23,14 +23,15 @@ import { TDesignPage } from 'store/design/types';
 
 export type TPageRowProps = {
   autoEdit: boolean;
+  onAutoEditDismissed?: TFunc;
   page: TDesignPage;
 };
 
-const PageRow: FC<TPageRowProps> = ({ autoEdit, page }) => {
+const PageRow: FC<TPageRowProps> = ({ autoEdit, onAutoEditDismissed, page }) => {
   const activePageId = useAppSelector(selectActivePageId);
   const handleRename = useRenamePage(page.id);
   const handleSelect = useSelectPage(page.id);
-  const { isRenameRequested, onEditingChange, onRename } = usePageRowRename();
+  const { isRenameRequested, onEditingChange, onRename } = usePageRowRename(autoEdit, onAutoEditDismissed);
   const { anchorRef, isOpen, onContextMenu, onOpenChange } = usePageRowContextMenu();
   const isSelected = page.id === activePageId;
 

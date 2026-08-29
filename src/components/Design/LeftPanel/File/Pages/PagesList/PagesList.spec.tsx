@@ -15,10 +15,10 @@ import { store } from 'store';
 import { getMaxPagesListHeight } from './utils/getMaxPagesListHeight';
 import { stubVirtualizerViewport } from 'test/stubVirtualizerViewport';
 
-const renderPagesList = (pendingEditPageId: string | null = null): ReturnType<typeof render> =>
+const renderPagesList = (pendingEditPageId: string | null = null, onPendingEditFinished: TFunc = vi.fn()): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <PagesList pendingEditPageId={pendingEditPageId} />
+      <PagesList onPendingEditFinished={onPendingEditFinished} pendingEditPageId={pendingEditPageId} />
     </Provider>,
   );
 
@@ -52,6 +52,37 @@ describe('PagesList', () => {
 
     // result
     expect(screen.getByRole('textbox')).toHaveValue(firstPage.name);
+  });
+
+  it('should call onPendingEditFinished once the pending-edit row is blurred, so a later remount does not reopen it', () => {
+    // mock
+    const [firstPage] = Object.values(selectPages(store.getState()));
+    const onPendingEditFinished = vi.fn();
+
+    // before
+    renderPagesList(firstPage.id, onPendingEditFinished);
+
+    // action
+    fireEvent.blur(screen.getByRole('textbox'));
+
+    // result
+    expect(onPendingEditFinished).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not call onPendingEditFinished when a row entered edit mode some other way (not the pending-edit one)', () => {
+    // mock
+    const [firstPage] = Object.values(selectPages(store.getState()));
+    const onPendingEditFinished = vi.fn();
+
+    // before
+    renderPagesList(null, onPendingEditFinished);
+    fireEvent.doubleClick(screen.getByText(firstPage.name));
+
+    // action
+    fireEvent.blur(screen.getByRole('textbox'));
+
+    // result
+    expect(onPendingEditFinished).not.toHaveBeenCalled();
   });
 
   it('should render at its default height', () => {

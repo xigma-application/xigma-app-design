@@ -6,7 +6,7 @@ export type TUsePageRowRenameResult = {
   onRename: TFunc;
 };
 
-export const usePageRowRename = (): TUsePageRowRenameResult => {
+export const usePageRowRename = (autoEdit: boolean = false, onAutoEditDismissed?: TFunc): TUsePageRowRenameResult => {
   const [isRenameRequested, setIsRenameRequested] = useState(false);
 
   const onRename = (): void => {
@@ -16,6 +16,10 @@ export const usePageRowRename = (): TUsePageRowRenameResult => {
   const onEditingChange = (editing: boolean): void => {
     if (!editing) {
       setIsRenameRequested(false);
+
+      if (autoEdit) {
+        onAutoEditDismissed?.();
+      }
     }
   };
 

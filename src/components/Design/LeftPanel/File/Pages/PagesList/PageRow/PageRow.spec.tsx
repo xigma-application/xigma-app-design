@@ -26,12 +26,12 @@ const buildPage = (overrides: Partial<TDesignPage> = {}): TDesignPage => ({
   ...overrides,
 });
 
-const renderPageRow = (page: TDesignPage, autoEdit = false): ReturnType<typeof render> =>
+const renderPageRow = (page: TDesignPage, autoEdit = false, onAutoEditDismissed?: TFunc): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
       <MemoryRouter initialEntries={['/design/file-1']}>
         <Routes>
-          <Route element={<PageRow autoEdit={autoEdit} page={page} />} path="/design/:id" />
+          <Route element={<PageRow autoEdit={autoEdit} onAutoEditDismissed={onAutoEditDismissed} page={page} />} path="/design/:id" />
         </Routes>
       </MemoryRouter>
     </Provider>,
@@ -110,6 +110,35 @@ describe('PageRow', () => {
 
     // result
     expect(screen.getByRole('textbox')).toHaveValue('Page 2');
+  });
+
+  it('should call onAutoEditDismissed once the auto-edited row is blurred', () => {
+    // mock
+    const onAutoEditDismissed = vi.fn();
+
+    // before
+    renderPageRow(buildPage({ name: 'Page 2' }), true, onAutoEditDismissed);
+
+    // action
+    fireEvent.blur(screen.getByRole('textbox'));
+
+    // result
+    expect(onAutoEditDismissed).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not call onAutoEditDismissed when a row entered rename mode via double-click, not autoEdit', () => {
+    // mock
+    const onAutoEditDismissed = vi.fn();
+
+    // before
+    renderPageRow(buildPage({ name: 'Page 1' }), false, onAutoEditDismissed);
+    fireEvent.doubleClick(screen.getByText('Page 1'));
+
+    // action
+    fireEvent.blur(screen.getByRole('textbox'));
+
+    // result
+    expect(onAutoEditDismissed).not.toHaveBeenCalled();
   });
 
   it('should open the page menu on right-click', () => {

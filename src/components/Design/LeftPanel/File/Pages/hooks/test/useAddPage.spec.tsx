@@ -34,4 +34,23 @@ describe('useAddPage', () => {
     expect(result.current.pendingEditPageId).toBe(activePageId);
     expect(onAdded).toHaveBeenCalledTimes(1);
   });
+
+  it('should clear pendingEditPageId when clearPendingEditPageId is called', () => {
+    // mock
+    const store = createTestStore();
+    const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
+
+    // before
+    const { rerender, result } = renderHook(() => useAddPage(vi.fn()), { wrapper });
+    act(() => result.current.handleAddPage());
+    rerender();
+    expect(result.current.pendingEditPageId).not.toBeNull();
+
+    // action
+    act(() => result.current.clearPendingEditPageId());
+    rerender();
+
+    // result
+    expect(result.current.pendingEditPageId).toBeNull();
+  });
 });

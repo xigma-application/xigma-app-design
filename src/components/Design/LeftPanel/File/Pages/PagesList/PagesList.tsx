@@ -23,10 +23,11 @@ import styles from './pages-list.module.scss';
 import { getMaxPagesListHeight } from './utils/getMaxPagesListHeight';
 
 export type TPagesListProps = {
+  onPendingEditFinished: TFunc;
   pendingEditPageId: string | null;
 };
 
-const PagesList: FC<TPagesListProps> = ({ pendingEditPageId }) => {
+const PagesList: FC<TPagesListProps> = ({ onPendingEditFinished, pendingEditPageId }) => {
   const listRef = useRef<HTMLDivElement>(null);
   const pages = useAppSelector(selectPages);
   const orderedPages = Object.values(pages);
@@ -37,8 +38,9 @@ const PagesList: FC<TPagesListProps> = ({ pendingEditPageId }) => {
 
   const renderRow = (index: number): ReactNode => {
     const page = orderedPages[index];
+    const autoEdit = page.id === pendingEditPageId;
 
-    return <PageRow autoEdit={page.id === pendingEditPageId} page={page} />;
+    return <PageRow autoEdit={autoEdit} onAutoEditDismissed={autoEdit ? onPendingEditFinished : undefined} page={page} />;
   };
 
   return (
