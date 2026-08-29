@@ -9,7 +9,8 @@ type TWidthProfileSnapshot = { points: Record<string, TWidthPoint> } | null;
 const getRootNodeId = (page: Page): Promise<string> =>
   page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
-    const { rootOrder } = store.getState().design;
+    const { activePageId, pages } = store.getState().design;
+    const { rootOrder } = pages[activePageId];
 
     return rootOrder[rootOrder.length - 1];
   });
@@ -17,7 +18,8 @@ const getRootNodeId = (page: Page): Promise<string> =>
 const readWidthProfile = (page: Page, nodeId: string): Promise<TWidthProfileSnapshot> =>
   page.evaluate(async (id) => {
     const { store } = await import('/src/store/index.ts');
-    const node = store.getState().design.nodes[id] as { widthProfile?: TWidthProfileSnapshot };
+    const { activePageId, pages } = store.getState().design;
+    const node = pages[activePageId].nodes[id] as { widthProfile?: TWidthProfileSnapshot };
 
     return node.widthProfile ?? null;
   }, nodeId);
@@ -25,9 +27,9 @@ const readWidthProfile = (page: Page, nodeId: string): Promise<TWidthProfileSnap
 const readDesignState = (page: Page): Promise<{ activeTool: string; rootOrder: string[]; vectorEditingNodeIds: string[] }> =>
   page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
-    const { activeTool, rootOrder, vectorEditingNodeIds } = store.getState().design;
+    const { activePageId, activeTool, pages, vectorEditingNodeIds } = store.getState().design;
 
-    return { activeTool, rootOrder, vectorEditingNodeIds };
+    return { activeTool, rootOrder: pages[activePageId].rootOrder, vectorEditingNodeIds };
   });
 
 // mirrors vector-edit-more-toolbar.spec.ts's own drawOpenTriangle — v1(900,300) -> v2(1050,300) ->

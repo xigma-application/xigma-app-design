@@ -48,7 +48,8 @@ type TDesignSnapshot = {
 const readDesignState = (page: Page): Promise<TDesignSnapshot> =>
   page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
-    const { nodes, rootOrder, vectorEditingNodeIds } = store.getState().design;
+    const { activePageId, pages, vectorEditingNodeIds } = store.getState().design;
+    const { nodes, rootOrder } = pages[activePageId];
 
     return { nodes, rootOrder, vectorEditingNodeIds };
   });
@@ -402,8 +403,9 @@ test('Paint on two open nodes whose shapes overlap on screen fills the smaller, 
   await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
     const { setVectorEditingNodeIds } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
 
-    store.dispatch(setVectorEditingNodeIds(store.getState().design.rootOrder));
+    store.dispatch(setVectorEditingNodeIds(pages[activePageId].rootOrder));
   });
 
   await page.keyboard.press('Shift+B'); // Paint tool

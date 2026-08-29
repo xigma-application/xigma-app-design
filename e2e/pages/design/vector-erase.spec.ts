@@ -24,7 +24,10 @@ const readEditedVectorNode = (page: import('@playwright/test').Page): Promise<{ 
     const state = store.getState();
     const [id] = state.design.vectorEditingNodeIds;
 
-    return { rootOrder: state.design.rootOrder.length, segmentCount: Object.keys(state.design.nodes[id].segments).length };
+    return {
+      rootOrder: state.design.pages[state.design.activePageId].rootOrder.length,
+      segmentCount: Object.keys(state.design.pages[state.design.activePageId].nodes[id].segments).length,
+    };
   });
 
 const readFillState = (page: import('@playwright/test').Page): Promise<{ filledFaceKeys: string[]; segmentCount: number }> =>
@@ -32,7 +35,10 @@ const readFillState = (page: import('@playwright/test').Page): Promise<{ filledF
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
     const [id] = state.design.vectorEditingNodeIds;
-    const node = state.design.nodes[id] as { filledFaceKeys?: string[]; segments: Record<string, unknown> };
+    const node = state.design.pages[state.design.activePageId].nodes[id] as {
+      filledFaceKeys?: string[];
+      segments: Record<string, unknown>;
+    };
 
     return { filledFaceKeys: node.filledFaceKeys ?? [], segmentCount: Object.keys(node.segments).length };
   });
@@ -119,7 +125,7 @@ test('a wider brush (grown with "]") erases more of the edge in one pass', async
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
     const [id] = state.design.vectorEditingNodeIds;
-    const node = state.design.nodes[id];
+    const node = state.design.pages[state.design.activePageId].nodes[id];
     const xs = Object.values(node.vertices as Record<string, { x: number; y: number }>)
       .filter((vertex) => Math.abs(vertex.y - 300) < 1 && vertex.x > 900 && vertex.x < 1000)
       .map((vertex) => vertex.x)

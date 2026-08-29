@@ -1447,9 +1447,10 @@ test('starting a Lasso drag directly on top of an ALREADY-selected vertex moves 
   const vertices = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
-    const nodeId = state.design.rootOrder[state.design.rootOrder.length - 1];
+    const nodeId =
+      state.design.pages[state.design.activePageId].rootOrder[state.design.pages[state.design.activePageId].rootOrder.length - 1];
 
-    return state.design.nodes[nodeId].vertices;
+    return state.design.pages[state.design.activePageId].nodes[nodeId].vertices;
   });
 
   // v1 and v2, both selected by the lasso, moved together by the same +80 delta; v3, never selected,
@@ -1583,7 +1584,7 @@ const injectSplitRectangle = (page: Page): Promise<string> =>
 
     const state = store.getState();
 
-    return state.design.rootOrder[state.design.rootOrder.length - 1];
+    return state.design.pages[state.design.activePageId].rootOrder[state.design.pages[state.design.activePageId].rootOrder.length - 1];
   });
 
 const enterVectorEditModeFor = (page: Page, nodeIds: string[]): Promise<void> =>
@@ -1597,7 +1598,8 @@ const enterVectorEditModeFor = (page: Page, nodeIds: string[]): Promise<void> =>
 const readVectorNode = (page: Page, nodeId: string): Promise<{ filledFaceKeys: string[] }> =>
   page.evaluate((id) => {
     return import('/src/store/index.ts').then(({ store }) => {
-      const node = store.getState().design.nodes[id] as { filledFaceKeys: string[] };
+      const { activePageId, pages } = store.getState().design;
+      const node = pages[activePageId].nodes[id] as { filledFaceKeys: string[] };
 
       return { filledFaceKeys: node.filledFaceKeys };
     });
@@ -1714,7 +1716,7 @@ test('Paint on a rectangle drawn inside another rectangle fills the smaller, inn
     const { getVectorFillLoopPoints } = await import('/src/utils/canvas/vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints.ts');
 
     const state = store.getState();
-    const node = state.design.nodes[state.design.rootOrder[0]];
+    const node = state.design.pages[state.design.activePageId].nodes[state.design.pages[state.design.activePageId].rootOrder[0]];
     const [filledKey] = node.filledFaceKeys;
     const points = getVectorFillLoopPoints(node, filledKey);
 
@@ -1828,7 +1830,8 @@ test('Paint fills all 3 regions of a curved "egg" network crossed by a triangle 
     );
 
     const state = store.getState();
-    const nodeId = state.design.rootOrder[state.design.rootOrder.length - 1];
+    const nodeId =
+      state.design.pages[state.design.activePageId].rootOrder[state.design.pages[state.design.activePageId].rootOrder.length - 1];
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setActiveTool('paint' as never));
@@ -1910,8 +1913,9 @@ test('dragging one vertex of a closed square onto its adjacent vertex merges the
   const result = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
-    const nodeId = state.design.rootOrder[state.design.rootOrder.length - 1];
-    const node = state.design.nodes[nodeId];
+    const nodeId =
+      state.design.pages[state.design.activePageId].rootOrder[state.design.pages[state.design.activePageId].rootOrder.length - 1];
+    const node = state.design.pages[state.design.activePageId].nodes[nodeId];
 
     return { segmentCount: Object.keys(node.segments).length, vertexCount: Object.keys(node.vertices).length };
   });
@@ -1944,7 +1948,8 @@ test('dragging a vertex of one vector shape onto a vertex of a completely separa
 
   const { idA, idB } = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
-    const { rootOrder } = store.getState().design;
+    const { activePageId, pages } = store.getState().design;
+    const { rootOrder } = pages[activePageId];
 
     return { idA: rootOrder[0], idB: rootOrder[1] };
   });
@@ -1962,10 +1967,10 @@ test('dragging a vertex of one vector shape onto a vertex of a completely separa
     async ([nodeIdA, nodeIdB]) => {
       const { store } = await import('/src/store/index.ts');
       const state = store.getState();
-      const nodeB = state.design.nodes[nodeIdB];
+      const nodeB = state.design.pages[state.design.activePageId].nodes[nodeIdB];
 
       return {
-        nodeAExists: Boolean(state.design.nodes[nodeIdA]),
+        nodeAExists: Boolean(state.design.pages[state.design.activePageId].nodes[nodeIdA]),
         segmentCount: Object.keys(nodeB.segments).length,
         vectorEditingNodeIds: state.design.vectorEditingNodeIds,
         vertexCount: Object.keys(nodeB.vertices).length,
@@ -2005,7 +2010,8 @@ test('a painted face on the absorbed shape survives being merged into a complete
 
   const { idA, idB, faceKeyOnA } = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
-    const { rootOrder, nodes } = store.getState().design;
+    const { activePageId, pages } = store.getState().design;
+    const { rootOrder, nodes } = pages[activePageId];
     const [nodeIdA, nodeIdB] = rootOrder;
 
     return { faceKeyOnA: nodes[nodeIdA].filledFaceKeys, idA: nodeIdA, idB: nodeIdB };
@@ -2026,9 +2032,9 @@ test('a painted face on the absorbed shape survives being merged into a complete
     async ([nodeIdA, nodeIdB]) => {
       const { store } = await import('/src/store/index.ts');
       const state = store.getState();
-      const nodeB = state.design.nodes[nodeIdB];
+      const nodeB = state.design.pages[state.design.activePageId].nodes[nodeIdB];
 
-      return { filledFaceKeys: nodeB.filledFaceKeys, nodeAExists: Boolean(state.design.nodes[nodeIdA]) };
+      return { filledFaceKeys: nodeB.filledFaceKeys, nodeAExists: Boolean(state.design.pages[state.design.activePageId].nodes[nodeIdA]) };
     },
     [idA, idB],
   );
@@ -2055,7 +2061,8 @@ test('a painted square keeps its fill on the region unaffected by the drag after
 
   const { faceKeysBefore, nodeId } = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
-    const { rootOrder, nodes } = store.getState().design;
+    const { activePageId, pages } = store.getState().design;
+    const { rootOrder, nodes } = pages[activePageId];
     const [id] = rootOrder;
 
     return { faceKeysBefore: nodes[id].filledFaceKeys, nodeId: id };
@@ -2072,8 +2079,9 @@ test('a painted square keeps its fill on the region unaffected by the drag after
   const faceKeysAfter = await page.evaluate(
     async ([id]) => {
       const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
 
-      return store.getState().design.nodes[id].filledFaceKeys;
+      return pages[activePageId].nodes[id].filledFaceKeys;
     },
     [nodeId],
   );
@@ -2143,7 +2151,8 @@ test('a painted region bounded by a multiply-crossed segment’s middle piece st
     );
 
     const state = store.getState();
-    const nodeId = state.design.rootOrder[state.design.rootOrder.length - 1];
+    const nodeId =
+      state.design.pages[state.design.activePageId].rootOrder[state.design.pages[state.design.activePageId].rootOrder.length - 1];
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
     store.dispatch(setActiveTool('paint' as never));
@@ -2154,7 +2163,8 @@ test('a painted region bounded by a multiply-crossed segment’s middle piece st
 
   const { faceKeysBefore, nodeId } = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
-    const { rootOrder, nodes } = store.getState().design;
+    const { activePageId, pages } = store.getState().design;
+    const { rootOrder, nodes } = pages[activePageId];
     const id = rootOrder[rootOrder.length - 1];
 
     return { faceKeysBefore: nodes[id].filledFaceKeys, nodeId: id };
@@ -2181,7 +2191,8 @@ test('a painted region bounded by a multiply-crossed segment’s middle piece st
       const { store } = await import('/src/store/index.ts');
       const { getVectorFillLoopPoints } =
         await import('/src/utils/canvas/vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints.ts');
-      const node = store.getState().design.nodes[id];
+      const { activePageId, pages } = store.getState().design;
+      const node = pages[activePageId].nodes[id];
 
       return node.filledFaceKeys.map((key: string) => getVectorFillLoopPoints(node, key) !== null);
     },
@@ -2302,7 +2313,11 @@ test('shift-clicking a second, adjacent filled face keeps its shared divider ver
 
     const state = store.getState();
 
-    store.dispatch(setVectorEditingNodeIds([state.design.rootOrder[state.design.rootOrder.length - 1]]));
+    store.dispatch(
+      setVectorEditingNodeIds([
+        state.design.pages[state.design.activePageId].rootOrder[state.design.pages[state.design.activePageId].rootOrder.length - 1],
+      ]),
+    );
     store.dispatch(setActiveTool('move' as never));
   });
 
@@ -2321,7 +2336,8 @@ test('shift-clicking a second, adjacent filled face keeps its shared divider ver
   // moved, which makes a small screenshot region an unreliable signal for this specific claim
   const { v3, v6 } = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
-    const { rootOrder, nodes } = store.getState().design;
+    const { activePageId, pages } = store.getState().design;
+    const { rootOrder, nodes } = pages[activePageId];
     const node = nodes[rootOrder[rootOrder.length - 1]] as { vertices: Record<string, { x: number; y: number }> };
 
     return { v3: node.vertices.v3, v6: node.vertices.v6 };
@@ -2354,15 +2370,25 @@ test('clicking an unfilled face with the Move tool now selects its vertices too,
 
   const nodeId = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const { rootOrder } = pages[activePageId];
 
-    return store.getState().design.rootOrder[store.getState().design.rootOrder.length - 1];
+    return rootOrder[rootOrder.length - 1];
   });
 
   // action — a plain click inside the still-unfilled face selects its 4 vertices (previously a no-op)
   await designPage.click(950, 350);
   await page.keyboard.press('Delete');
 
-  const node = await page.evaluate((id) => import('/src/store/index.ts').then(({ store }) => store.getState().design.nodes[id]), nodeId);
+  const node = await page.evaluate(
+    (id) =>
+      import('/src/store/index.ts').then(({ store }) => {
+        const { activePageId, pages } = store.getState().design;
+
+        return pages[activePageId].nodes[id];
+      }),
+    nodeId,
+  );
 
   // no neighbor to protect, so the whole boundary is gone, same as Shape Builder's own isolated-face
   // Alt+click case
@@ -2419,7 +2445,7 @@ test('Delete on a selected sector deletes only its own exclusive boundary, leavi
     );
 
     const state = store.getState();
-    const id = state.design.rootOrder[state.design.rootOrder.length - 1];
+    const id = state.design.pages[state.design.activePageId].rootOrder[state.design.pages[state.design.activePageId].rootOrder.length - 1];
 
     store.dispatch(setVectorEditingNodeIds([id]));
     store.dispatch(setActiveTool('move' as never));
@@ -2431,7 +2457,15 @@ test('Delete on a selected sector deletes only its own exclusive boundary, leavi
   await designPage.click(950, 325);
   await page.keyboard.press('Delete');
 
-  const node = await page.evaluate((id) => import('/src/store/index.ts').then(({ store }) => store.getState().design.nodes[id]), nodeId);
+  const node = await page.evaluate(
+    (id) =>
+      import('/src/store/index.ts').then(({ store }) => {
+        const { activePageId, pages } = store.getState().design;
+
+        return pages[activePageId].nodes[id];
+      }),
+    nodeId,
+  );
 
   // the top's own exclusive edges (s1, s2, s6) are gone, but the divider (s7) and the bottom half's
   // own boundary (s3, s4, s5) survive since the bottom half was never touched

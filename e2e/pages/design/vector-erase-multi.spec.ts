@@ -51,7 +51,8 @@ type TDesignSnapshot = {
 const readDesignState = (page: Page): Promise<TDesignSnapshot> =>
   page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
-    const { nodes, rootOrder, vectorEditingNodeIds } = store.getState().design;
+    const { activePageId, pages, vectorEditingNodeIds } = store.getState().design;
+    const { nodes, rootOrder } = pages[activePageId];
 
     return { nodes, rootOrder, vectorEditingNodeIds };
   });

@@ -73,8 +73,9 @@ test('with no node open for editing, dragging with Cut active is a no-op — the
 
   const before = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
+    const { design } = store.getState();
 
-    return store.getState().design;
+    return { ...design, ...design.pages[design.activePageId] };
   });
 
   expect(before.vectorEditingNodeIds).toEqual([]);
@@ -84,8 +85,9 @@ test('with no node open for editing, dragging with Cut active is a no-op — the
 
   const after = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
+    const { design } = store.getState();
 
-    return store.getState().design;
+    return { ...design, ...design.pages[design.activePageId] };
   });
 
   expect(after.activeTool).toBe('cut'); // the shortcut still switches the tool globally
@@ -106,7 +108,9 @@ test('Split: a plain click (no drag) on a segment severs it at that point withou
   const rootOrderBefore = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
 
-    return store.getState().design.rootOrder;
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].rootOrder;
   });
 
   await designPage.click(950, 300); // dead center of the top edge — click, not drag
@@ -115,7 +119,12 @@ test('Split: a plain click (no drag) on a segment severs it at that point withou
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
 
-    return { rootOrder: state.design.rootOrder, vertexCount: Object.keys(state.design.nodes[state.design.rootOrder[0]].vertices).length };
+    return {
+      rootOrder: state.design.pages[state.design.activePageId].rootOrder,
+      vertexCount: Object.keys(
+        state.design.pages[state.design.activePageId].nodes[state.design.pages[state.design.activePageId].rootOrder[0]].vertices,
+      ).length,
+    };
   });
 
   // still one node, but two brand-new vertices sit at the same point (800,300) with no shared segment
@@ -164,13 +173,19 @@ test('Split: clicking on a branch vertex (3+ segments) severs only the clicked s
 
     const state = store.getState();
 
-    store.dispatch(setVectorEditingNodeIds([state.design.rootOrder[state.design.rootOrder.length - 1]]));
+    store.dispatch(
+      setVectorEditingNodeIds([
+        state.design.pages[state.design.activePageId].rootOrder[state.design.pages[state.design.activePageId].rootOrder.length - 1],
+      ]),
+    );
   });
 
   const rootOrderBefore = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
 
-    return store.getState().design.rootOrder;
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].rootOrder;
   });
 
   await page.keyboard.press('x');
@@ -179,14 +194,14 @@ test('Split: clicking on a branch vertex (3+ segments) severs only the clicked s
   const after = await page.evaluate(async (before) => {
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
-    const newIds = state.design.rootOrder.filter((id) => !before.includes(id));
+    const newIds = state.design.pages[state.design.activePageId].rootOrder.filter((id) => !before.includes(id));
     const pieces = [before[0], ...newIds].map((id) => {
-      const node = state.design.nodes[id];
+      const node = state.design.pages[state.design.activePageId].nodes[id];
 
       return { segmentCount: Object.keys(node.segments).length, vertexCount: Object.keys(node.vertices).length };
     });
 
-    return { pieces, rootOrder: state.design.rootOrder };
+    return { pieces, rootOrder: state.design.pages[state.design.activePageId].rootOrder };
   }, rootOrderBefore);
 
   // b's severed branch loses the shared vertex with nothing else to keep it attached, so it splits off
@@ -211,7 +226,9 @@ test('Divide: a real drag that starts and ends outside the shape on both sides s
   const rootOrderBefore = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
 
-    return store.getState().design.rootOrder;
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].rootOrder;
   });
 
   await page.keyboard.press('x');
@@ -221,12 +238,12 @@ test('Divide: a real drag that starts and ends outside the shape on both sides s
   const result = await page.evaluate(async (before) => {
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
-    const newIds = state.design.rootOrder.filter((id) => !before.includes(id));
+    const newIds = state.design.pages[state.design.activePageId].rootOrder.filter((id) => !before.includes(id));
 
     return {
-      pieces: [state.design.rootOrder[0], ...newIds].map((id) => ({
-        filledFaceKeys: state.design.nodes[id].filledFaceKeys.length,
-        vertexCount: Object.keys(state.design.nodes[id].vertices).length,
+      pieces: [state.design.pages[state.design.activePageId].rootOrder[0], ...newIds].map((id) => ({
+        filledFaceKeys: state.design.pages[state.design.activePageId].nodes[id].filledFaceKeys.length,
+        vertexCount: Object.keys(state.design.pages[state.design.activePageId].nodes[id].vertices).length,
       })),
     };
   }, [rootOrderBefore].flat());
@@ -252,7 +269,10 @@ test('Divide: a line that misses the shape entirely leaves it completely untouch
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
 
-    return { node: state.design.nodes[state.design.rootOrder[0]], rootOrder: state.design.rootOrder };
+    return {
+      node: state.design.pages[state.design.activePageId].nodes[state.design.pages[state.design.activePageId].rootOrder[0]],
+      rootOrder: state.design.pages[state.design.activePageId].rootOrder,
+    };
   });
 
   await page.keyboard.press('x');
@@ -262,7 +282,10 @@ test('Divide: a line that misses the shape entirely leaves it completely untouch
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
 
-    return { node: state.design.nodes[state.design.rootOrder[0]], rootOrder: state.design.rootOrder };
+    return {
+      node: state.design.pages[state.design.activePageId].nodes[state.design.pages[state.design.activePageId].rootOrder[0]],
+      rootOrder: state.design.pages[state.design.activePageId].rootOrder,
+    };
   });
 
   expect(after.rootOrder).toEqual(before.rootOrder);
@@ -288,7 +311,9 @@ test('Divide: a line crossing only one edge of a closed triangle leaves it as on
   const rootOrderBefore = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
 
-    return store.getState().design.rootOrder;
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].rootOrder;
   });
 
   await page.keyboard.press('x');
@@ -298,7 +323,9 @@ test('Divide: a line crossing only one edge of a closed triangle leaves it as on
   const rootOrderAfter = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
 
-    return store.getState().design.rootOrder;
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].rootOrder;
   });
 
   // no new node — the triangle's other two edges keep the severed base connected as one piece
@@ -317,7 +344,9 @@ test('Divide: cutting an unfilled square leaves both halves unfilled', async ({ 
   const rootOrderBefore = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
 
-    return store.getState().design.rootOrder;
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].rootOrder;
   });
 
   await page.keyboard.press('x');
@@ -326,9 +355,11 @@ test('Divide: cutting an unfilled square leaves both halves unfilled', async ({ 
   const result = await page.evaluate(async (before) => {
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
-    const newIds = state.design.rootOrder.filter((id) => !before.includes(id));
+    const newIds = state.design.pages[state.design.activePageId].rootOrder.filter((id) => !before.includes(id));
 
-    return [state.design.rootOrder[0], ...newIds].map((id) => state.design.nodes[id].filledFaceKeys);
+    return [state.design.pages[state.design.activePageId].rootOrder[0], ...newIds].map(
+      (id) => state.design.pages[state.design.activePageId].nodes[id].filledFaceKeys,
+    );
   }, [rootOrderBefore].flat());
 
   expect(result).toHaveLength(2);
@@ -401,7 +432,11 @@ test('Regression: cutting a shape with 3 adjacent painted faces keeps every fill
 
     const state = store.getState();
 
-    store.dispatch(setVectorEditingNodeIds([state.design.rootOrder[state.design.rootOrder.length - 1]]));
+    store.dispatch(
+      setVectorEditingNodeIds([
+        state.design.pages[state.design.activePageId].rootOrder[state.design.pages[state.design.activePageId].rootOrder.length - 1],
+      ]),
+    );
   });
 
   await page.keyboard.press('x');
@@ -412,7 +447,7 @@ test('Regression: cutting a shape with 3 adjacent painted faces keeps every fill
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
 
-    return state.design.vectorEditingNodeIds.map((id) => state.design.nodes[id].filledFaceKeys.length);
+    return state.design.vectorEditingNodeIds.map((id) => state.design.pages[state.design.activePageId].nodes[id].filledFaceKeys.length);
   });
 
   expect(filledFaceCounts).toHaveLength(2);
@@ -440,7 +475,7 @@ test('Regression: cutting an already-cut piece a second time keeps its fill (a f
 
     return state.design.vectorEditingNodeIds.map((id) => ({
       id,
-      maxY: Math.max(...Object.values(state.design.nodes[id].vertices).map((v: { y: number }) => v.y)),
+      maxY: Math.max(...Object.values(state.design.pages[state.design.activePageId].nodes[id].vertices).map((v: { y: number }) => v.y)),
     }));
   });
 
@@ -455,8 +490,8 @@ test('Regression: cutting an already-cut piece a second time keeps its fill (a f
     const state = store.getState();
 
     return state.design.vectorEditingNodeIds
-      .filter((id) => id !== touchedId || state.design.nodes[id])
-      .map((id) => state.design.nodes[id].filledFaceKeys.length);
+      .filter((id) => id !== touchedId || state.design.pages[state.design.activePageId].nodes[id])
+      .map((id) => state.design.pages[state.design.activePageId].nodes[id].filledFaceKeys.length);
   }, [bottomPieceId].flat());
 
   // 3 pieces total (untouched top third, plus the 2 the second cut produced) — every single one filled
@@ -494,7 +529,7 @@ test('Regression: a face painted across a Pen-drawn line crossing an existing sh
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
 
-    return state.design.vectorEditingNodeIds.map((id) => state.design.nodes[id].filledFaceKeys.length);
+    return state.design.vectorEditingNodeIds.map((id) => state.design.pages[state.design.activePageId].nodes[id].filledFaceKeys.length);
   });
 
   // the vertical cut only ever splits along ONE line, so it produces 2 nodes (left half, right half) —
@@ -519,7 +554,10 @@ test('a single Undo after a Divide cut restores the original filled square in on
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
 
-    return { node: state.design.nodes[state.design.rootOrder[0]], rootOrder: state.design.rootOrder };
+    return {
+      node: state.design.pages[state.design.activePageId].nodes[state.design.pages[state.design.activePageId].rootOrder[0]],
+      rootOrder: state.design.pages[state.design.activePageId].rootOrder,
+    };
   });
 
   await page.keyboard.press('x');
@@ -528,7 +566,9 @@ test('a single Undo after a Divide cut restores the original filled square in on
   const afterCut = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
 
-    return store.getState().design.rootOrder;
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].rootOrder;
   });
 
   expect(afterCut).toHaveLength(2); // sanity check: the cut actually produced 2 pieces
@@ -539,7 +579,10 @@ test('a single Undo after a Divide cut restores the original filled square in on
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
 
-    return { node: state.design.nodes[state.design.rootOrder[0]], rootOrder: state.design.rootOrder };
+    return {
+      node: state.design.pages[state.design.activePageId].nodes[state.design.pages[state.design.activePageId].rootOrder[0]],
+      rootOrder: state.design.pages[state.design.activePageId].rootOrder,
+    };
   });
 
   expect(afterUndo.rootOrder).toEqual(before.rootOrder);
@@ -566,9 +609,13 @@ test('Divide: a chord that cleanly divides one face of a two-face shape gives bo
   const before = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
-    const node = state.design.nodes[state.design.rootOrder[0]];
+    const node = state.design.pages[state.design.activePageId].nodes[state.design.pages[state.design.activePageId].rootOrder[0]];
 
-    return { filledFaceKeys: node.filledFaceKeys, rootOrder: state.design.rootOrder, vertexCount: Object.keys(node.vertices).length };
+    return {
+      filledFaceKeys: node.filledFaceKeys,
+      rootOrder: state.design.pages[state.design.activePageId].rootOrder,
+      vertexCount: Object.keys(node.vertices).length,
+    };
   });
 
   expect(before.filledFaceKeys).toHaveLength(2); // sanity check: both faces actually got painted
@@ -582,9 +629,13 @@ test('Divide: a chord that cleanly divides one face of a two-face shape gives bo
   const after = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
-    const node = state.design.nodes[state.design.rootOrder[0]];
+    const node = state.design.pages[state.design.activePageId].nodes[state.design.pages[state.design.activePageId].rootOrder[0]];
 
-    return { filledFaceKeys: node.filledFaceKeys, rootOrder: state.design.rootOrder, vertexCount: Object.keys(node.vertices).length };
+    return {
+      filledFaceKeys: node.filledFaceKeys,
+      rootOrder: state.design.pages[state.design.activePageId].rootOrder,
+      vertexCount: Object.keys(node.vertices).length,
+    };
   });
 
   expect(after.rootOrder).toEqual(before.rootOrder); // no new node — the bottom face's other edges keep it one piece
@@ -611,9 +662,9 @@ test('Divide: a drag that crosses only one edge and ends inside the shape genuin
   const before = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
-    const node = state.design.nodes[state.design.rootOrder[0]];
+    const node = state.design.pages[state.design.activePageId].nodes[state.design.pages[state.design.activePageId].rootOrder[0]];
 
-    return { rootOrder: state.design.rootOrder, vertexIds: Object.keys(node.vertices) };
+    return { rootOrder: state.design.pages[state.design.activePageId].rootOrder, vertexIds: Object.keys(node.vertices) };
   });
 
   await page.keyboard.press('x');
@@ -624,13 +675,18 @@ test('Divide: a drag that crosses only one edge and ends inside the shape genuin
   const after = await page.evaluate(async (beforeVertexIds) => {
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
-    const node = state.design.nodes[state.design.rootOrder[0]];
+    const node = state.design.pages[state.design.activePageId].nodes[state.design.pages[state.design.activePageId].rootOrder[0]];
     const newVertexIds = Object.keys(node.vertices).filter((id) => !beforeVertexIds.includes(id));
     const touchingSegments = Object.values(node.segments).filter(
       (segment) => newVertexIds.includes(segment.startId) || newVertexIds.includes(segment.endId),
     ) as { endId: string; id: string; startId: string }[];
 
-    return { filledFaceKeys: node.filledFaceKeys, newVertexIds, rootOrder: state.design.rootOrder, touchingSegments };
+    return {
+      filledFaceKeys: node.filledFaceKeys,
+      newVertexIds,
+      rootOrder: state.design.pages[state.design.activePageId].rootOrder,
+      touchingSegments,
+    };
   }, before.vertexIds);
 
   expect(after.rootOrder).toEqual(before.rootOrder); // still one node
@@ -660,9 +716,9 @@ test('Divide: a dangling crossing that never reaches the internal chord leaves t
   const before = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
-    const node = state.design.nodes[state.design.rootOrder[0]];
+    const node = state.design.pages[state.design.activePageId].nodes[state.design.pages[state.design.activePageId].rootOrder[0]];
 
-    return { filledFaceKeys: node.filledFaceKeys, rootOrder: state.design.rootOrder };
+    return { filledFaceKeys: node.filledFaceKeys, rootOrder: state.design.pages[state.design.activePageId].rootOrder };
   });
 
   await page.keyboard.press('x');
@@ -673,9 +729,9 @@ test('Divide: a dangling crossing that never reaches the internal chord leaves t
   const after = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
-    const node = state.design.nodes[state.design.rootOrder[0]];
+    const node = state.design.pages[state.design.activePageId].nodes[state.design.pages[state.design.activePageId].rootOrder[0]];
 
-    return { filledFaceKeys: node.filledFaceKeys, rootOrder: state.design.rootOrder };
+    return { filledFaceKeys: node.filledFaceKeys, rootOrder: state.design.pages[state.design.activePageId].rootOrder };
   });
 
   expect(after.rootOrder).toEqual(before.rootOrder);
@@ -713,9 +769,9 @@ test('Divide: a genuinely untouched third face elsewhere on the same node keeps 
   const before = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
-    const node = state.design.nodes[state.design.rootOrder[0]];
+    const node = state.design.pages[state.design.activePageId].nodes[state.design.pages[state.design.activePageId].rootOrder[0]];
 
-    return { filledFaceKeys: node.filledFaceKeys, rootOrder: state.design.rootOrder };
+    return { filledFaceKeys: node.filledFaceKeys, rootOrder: state.design.pages[state.design.activePageId].rootOrder };
   });
 
   expect(before.filledFaceKeys).toHaveLength(3); // sanity check: all 3 bands actually got painted
@@ -729,9 +785,9 @@ test('Divide: a genuinely untouched third face elsewhere on the same node keeps 
   const after = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
-    const node = state.design.nodes[state.design.rootOrder[0]];
+    const node = state.design.pages[state.design.activePageId].nodes[state.design.pages[state.design.activePageId].rootOrder[0]];
 
-    return { filledFaceKeys: node.filledFaceKeys, rootOrder: state.design.rootOrder };
+    return { filledFaceKeys: node.filledFaceKeys, rootOrder: state.design.pages[state.design.activePageId].rootOrder };
   });
 
   expect(after.rootOrder).toEqual(before.rootOrder);
@@ -794,7 +850,9 @@ test('Split: severing a second, opposite edge with nothing left to bridge the tw
   const rootOrderBefore = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
 
-    return store.getState().design.rootOrder;
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].rootOrder;
   });
 
   await page.keyboard.press('x');
@@ -803,7 +861,9 @@ test('Split: severing a second, opposite edge with nothing left to bridge the tw
   const afterFirstSplit = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
 
-    return store.getState().design.rootOrder;
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].rootOrder;
   });
 
   expect(afterFirstSplit).toEqual(rootOrderBefore); // no new node yet — the other 3 edges still bridge it
@@ -815,16 +875,16 @@ test('Split: severing a second, opposite edge with nothing left to bridge the tw
   const after = await page.evaluate(async (before) => {
     const { store } = await import('/src/store/index.ts');
     const state = store.getState();
-    const newIds = state.design.rootOrder.filter((id) => !before.includes(id));
+    const newIds = state.design.pages[state.design.activePageId].rootOrder.filter((id) => !before.includes(id));
     const pieceIds = [before[0], ...newIds];
 
     return {
       activeTool: state.design.activeTool,
       pieces: pieceIds.map((id) => ({
-        segmentCount: Object.keys(state.design.nodes[id].segments).length,
-        vertexCount: Object.keys(state.design.nodes[id].vertices).length,
+        segmentCount: Object.keys(state.design.pages[state.design.activePageId].nodes[id].segments).length,
+        vertexCount: Object.keys(state.design.pages[state.design.activePageId].nodes[id].vertices).length,
       })),
-      rootOrder: state.design.rootOrder,
+      rootOrder: state.design.pages[state.design.activePageId].rootOrder,
       vectorEditingNodeIds: [...state.design.vectorEditingNodeIds].sort(),
     };
   }, rootOrderBefore);

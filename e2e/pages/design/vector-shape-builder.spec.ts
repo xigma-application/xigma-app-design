@@ -53,7 +53,7 @@ const injectSplitRectangle = (page: Page, offsetX = 0, offsetY = 0, filled = fal
 
       const state = store.getState();
 
-      return state.design.rootOrder[state.design.rootOrder.length - 1];
+      return state.design.pages[state.design.activePageId].rootOrder[state.design.pages[state.design.activePageId].rootOrder.length - 1];
     },
     { filled, offsetX, offsetY },
   );
@@ -97,7 +97,7 @@ const injectRectangleNode = (page: Page, prefix: string, offsetX: number, offset
 
       const state = store.getState();
 
-      return state.design.rootOrder[state.design.rootOrder.length - 1];
+      return state.design.pages[state.design.activePageId].rootOrder[state.design.pages[state.design.activePageId].rootOrder.length - 1];
     },
     { offsetX, offsetY, prefix },
   );
@@ -113,7 +113,8 @@ const enterVectorEditModeFor = (page: Page, nodeIds: string[]): Promise<void> =>
 const readNode = (page: Page, nodeId: string): Promise<{ filledFaceKeys: string[]; segmentIds: string[] }> =>
   page.evaluate((id) => {
     return import('/src/store/index.ts').then(({ store }) => {
-      const node = store.getState().design.nodes[id];
+      const { activePageId, pages } = store.getState().design;
+      const node = pages[activePageId].nodes[id];
 
       return { filledFaceKeys: node.filledFaceKeys, segmentIds: Object.keys(node.segments) };
     });
@@ -167,7 +168,9 @@ test('a plain click fills a single unfilled face, and Alt+click on that same iso
   const nodeId = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
 
-    return store.getState().design.rootOrder[0];
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].rootOrder[0];
   });
 
   // action â€” plain click, no drag
@@ -267,7 +270,9 @@ test('dragging across two overlapping (crossing) rectangles merges all 3 resulti
   const nodeId = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
 
-    return store.getState().design.rootOrder[0];
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].rootOrder[0];
   });
 
   // sweeps through the rectangle-1-only region, the overlap, then the rectangle-2-only region
@@ -280,7 +285,8 @@ test('dragging across two overlapping (crossing) rectangles merges all 3 resulti
   const faceCount = await page.evaluate(async (id) => {
     const { store } = await import('/src/store/index.ts');
     const { deriveVectorFaces } = await import('/src/utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces.ts');
-    const node = store.getState().design.nodes[id];
+    const { activePageId, pages } = store.getState().design;
+    const node = pages[activePageId].nodes[id];
 
     return deriveVectorFaces({ ...node, filledFaceKeys: [] }).length;
   }, nodeId);
@@ -307,7 +313,9 @@ test('a single drag spanning two disconnected split rectangles merges each oneâ€
   const rootOrderBefore = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
 
-    return store.getState().design.rootOrder;
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].rootOrder;
   });
 
   // one continuous freeform sweep: top-left to bottom-right of A, then the same for B
@@ -321,7 +329,9 @@ test('a single drag spanning two disconnected split rectangles merges each oneâ€
   const rootOrderAfter = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
 
-    return store.getState().design.rootOrder;
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].rootOrder;
   });
   const resultA = await readNode(page, idA);
   const resultB = await readNode(page, idB);
@@ -360,7 +370,7 @@ test('dragging across two genuinely overlapping, separate open nodes merges them
     const { store } = await import('/src/store/index.ts');
     const s = store.getState().design;
 
-    return { rootOrder: s.rootOrder, vectorEditingNodeIds: s.vectorEditingNodeIds };
+    return { rootOrder: s.pages[s.activePageId].rootOrder, vectorEditingNodeIds: s.vectorEditingNodeIds };
   });
   const survivor = await readNode(page, idA);
 
@@ -389,7 +399,9 @@ test('Alt+drag across two overlapping, separate open nodes subtracts only the cr
   const state = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
 
-    return store.getState().design.rootOrder;
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].rootOrder;
   });
   const survivor = await readNode(page, idA);
 
@@ -418,7 +430,9 @@ test('Alt+click on only ONE shapeâ€™s own exclusive corner â€” never touching th
   const state = await page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
 
-    return store.getState().design.rootOrder;
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].rootOrder;
   });
   const survivor = await readNode(page, idA);
 
