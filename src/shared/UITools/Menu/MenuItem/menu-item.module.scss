@@ -1,0 +1,38 @@
+@use '@xigma/scss/mixins/disabled';
+
+.MenuItem {
+  align-items: center;
+  border-radius: 5px;
+  column-gap: 8px;
+  cursor: pointer;
+  display: flex;
+  height: 24px;
+  outline: none;
+  padding: 0 8px;
+
+  &[data-highlighted] {
+    background-color: var(--color-blue-1);
+  }
+
+  &[data-disabled] {
+    @include disabled.disabled;
+
+    cursor: default;
+
+    &[data-highlighted] {
+      background-color: transparent;
+    }
+  }
+
+  &__label {
+    flex: 1;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  &__shortcut {
+    color: var(--color-neutral-2);
+    font-size: 12px;
+    padding-left: 16px;
+  }
+}

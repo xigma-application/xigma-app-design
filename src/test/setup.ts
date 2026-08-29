@@ -65,3 +65,9 @@ Object.defineProperty(Document.prototype, 'exitPointerLock', {
   value: (): void => {},
   writable: true,
 });
+
+// jsdom doesn't implement scrollIntoView (Radix menu/dropdown focuses items with it)
+Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+  value: (): void => {},
+  writable: true,
+});

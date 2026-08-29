@@ -1,0 +1,9 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`MenuSeparator snapshots > should render MenuSeparator 1`] = `
+<div
+  aria-orientation="horizontal"
+  class="_MenuSeparator_a61156"
+  role="separator"
+/>
+`;
