@@ -58,4 +58,31 @@ describe('getPlanarVectorNetwork', () => {
     expect(resultB).not.toBe(resultA);
     expect(resultB).toEqual(resultA);
   });
+
+  it('should reuse the cached result when segments and vertices are unchanged, even for a new node object', () => {
+    // mock
+    const node = buildNode();
+
+    // before
+    const first = getPlanarVectorNetwork(node);
+    const edited: TVectorNode = { ...node, fillColor: '#fff' };
+    const second = getPlanarVectorNetwork(edited);
+
+    // result
+    expect(second).toBe(first);
+  });
+
+  it('should recompute when vertices change even though segments stay the same reference', () => {
+    // mock
+    const node = buildNode();
+
+    // before
+    const first = getPlanarVectorNetwork(node);
+    const moved: TVectorNode = { ...node, vertices: { ...node.vertices, v2: { id: 'v2', x: 20, y: 0 } } };
+    const second = getPlanarVectorNetwork(moved);
+
+    // result
+    expect(second).not.toBe(first);
+    expect(second.vertices.v2).toEqual({ id: 'v2', x: 20, y: 0 });
+  });
 });

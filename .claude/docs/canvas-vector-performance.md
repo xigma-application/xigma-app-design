@@ -555,6 +555,31 @@ segment) — a real "cheap-but-approximate, safe-by-construction-fallback" under
 slice is the "lighter version" the user asked for; the planar/crossing-detection version is the
 acknowledged "droższa" (more expensive) one to follow, only once this slice has proven itself.
 
+### 5.9 — `getPlanarVectorNetwork.ts` re-keyed off `segments`/`vertices`, not the whole node
+
+A second, unrelated gap in the same neighborhood, found while looking at what to do next after §5.8:
+`getPlanarVectorNetwork.ts` (and by extension every fill/stroke call site downstream of it) cached
+purely on the **whole `node` object reference** — so an edit that never touches geometry at all
+(fill color, stroke width, name, any node field outside `segments`/`vertices`) still produced a full
+`findAllNetworkCrossings` + `computeClusters` re-derivation, because Immer/Redux hands back a new
+top-level `node` object on *any* field write, not only geometry writes.
+
+**The fix**: re-key the cache off `node.segments`/`node.vertices` themselves (a nested
+`WeakMap<segments, WeakMap<vertices, TPlanarVectorNetwork>>`) instead of `node`. This is exact, not
+approximate — `planarizeVectorNetwork(segments, vertices)` is a pure function of exactly those two
+arguments, so identical references in guarantee an identical result out, regardless of what else
+changed on the node. It composes for free with everything downstream: `getVectorNodeClusters.ts`'s
+own `WeakMap<planar, ...>` now also hits on repeat calls with the same `planar` object, since
+`planarizeVectorNetwork` is only actually invoked (producing a fresh object) on a genuine cache miss.
+
+**Scope**: unlike §5.8, this does *not* help the live-vertex-drag case — a drag always produces a new
+`node.vertices` reference (the moved vertex's sub-object is new, so the top-level record is too), so
+the cache still misses and a full recompute still runs there, exactly as before. It helps every edit
+that leaves both `segments` and `vertices` untouched — color/width/name changes, and any other node
+mutation unrelated to geometry — which previously paid the full crossing-detection + clustering cost
+for no reason. Complements §5.8 rather than replacing it; the "droższa" incremental-crossing-detection
+work §5.8 deferred is still not started.
+
 ## 6. Unrelated find while live-verifying §5.7: `getRemainingVertices` was O(vertices × segments)
 
 Found live-testing §5.7's fix, not caused by it: deleting a segment on a large multi-shape vector
@@ -626,6 +651,8 @@ freeze to instant.
   `useCanvasRenderLoop/utils/drawScene/drawVectorEditHandlesLayer/drawVectorEditOutline/drawEditModeOutline.ts`
 - Incremental topology tracking, first slice — raw/stroke clustering (§5.8):
   `utils/canvas/vectorNetwork/getVectorNodeClusters/{isRawSegmentTopologyUnchanged,getVectorNodeRawClusters}.ts`
+- `getPlanarVectorNetwork.ts` re-keyed off `segments`/`vertices` (§5.9):
+  `utils/canvas/vectorNetwork/getPlanarVectorNetwork.ts`
 
 ## Related
 

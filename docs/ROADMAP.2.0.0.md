@@ -30,6 +30,10 @@ opis w [[canvas-vector-performance]]. Dwie duże rzeczy zostały świadomie odł
       **Pierwszy, wąski wycinek zrobiony (2026-08-28)**: raw/stroke clustering pomija pełny graph walk
       dla edycji, które nie zmieniają topologii segmentów (przesunięcie wierzchołka, edycja uchwytu
       krzywej) — dowodliwie bezpieczne, nie przybliżone. Pełny opis w [[canvas-vector-performance]] §5.8.
+      **Drugi, niezależny wycinek (2026-08-29)**: `getPlanarVectorNetwork.ts` cache'owany po
+      `segments`/`vertices`, nie po całym node'ie — edycje niedotykające geometrii (kolor, grubość
+      obrysu) już nie płacą pełnego crossing detection + clustering. Opis w [[canvas-vector-performance]]
+      §5.9.
 - [ ] **GPU-buffer-level caching** — renderer dziś re-uploaduje geometrię każdego node'a do GPU
       (`bufferData`) co klatkę, niezależnie czy się faktycznie zmieniła; cała aplikacja dzieli tylko
       4 bufory GL, rebindowane per-primitive (patrz [[canvas-rendering-pipeline]] §3/§8). Cel: trwałe
