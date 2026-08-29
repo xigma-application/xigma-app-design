@@ -4,6 +4,7 @@ import { TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 import { TVectorHandleHover, TVectorMultiSelectBox } from 'types/design/canvas/types';
 import { TVectorMultiSelectResizeDragState, TVectorMultiSelectRotateDragState } from 'types/design/selectionTool/types';
+import { TVertexDotBufferCacheEntry } from '../drawVectorVertexDots/types';
 
 // utils
 import { drawVectorEditHandlesForNode } from '../drawVectorEditHandlesForNode/drawVectorEditHandlesForNode';
@@ -15,6 +16,7 @@ export const drawVectorEditHandlesLayer = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
+  vertexDotBufferCache: WeakMap<TPoint[], TVertexDotBufferCacheEntry[]>,
   nodes: Record<string, TSceneNode>,
   vectorEditingNodeIds: string[],
   selectedVertexIds: string[],
@@ -51,6 +53,7 @@ export const drawVectorEditHandlesLayer = (
         gl,
         program,
         buffer,
+        vertexDotBufferCache,
         editingNode,
         selectedVertexIds,
         preMarqueeVertexIds,

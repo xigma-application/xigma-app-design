@@ -156,6 +156,7 @@ export const drawScene = (
     gl,
     program,
     buffer,
+    imageContext.vertexDotBufferCache,
     eraseAwareNodesById,
     vectorEditingNodeIds,
     selectedVectorVertexIds,

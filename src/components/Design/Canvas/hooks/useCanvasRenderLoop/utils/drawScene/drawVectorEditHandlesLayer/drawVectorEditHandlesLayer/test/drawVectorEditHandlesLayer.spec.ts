@@ -1,8 +1,10 @@
 // types
 import { RefObject } from 'react';
 import { NodeType } from 'types/design/enums';
+import { TPoint } from 'types/canvas';
 import { TSceneNode, TVectorNode } from 'types/design/types';
 import { TVectorMultiSelectBox } from 'types/design/canvas/types';
+import { TVertexDotBufferCacheEntry } from '../../drawVectorVertexDots/types';
 
 // utils
 import { drawVectorEditHandlesLayer } from '../drawVectorEditHandlesLayer';
@@ -19,6 +21,7 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const gl = {} as WebGL2RenderingContext;
 const program = {} as WebGLProgram;
 const buffer = {} as WebGLBuffer;
+const vertexDotBufferCache = new WeakMap<TPoint[], TVertexDotBufferCacheEntry[]>();
 
 const vectorNode: TVectorNode = {
   fillColor: null,
@@ -51,6 +54,7 @@ describe('drawVectorEditHandlesLayer', () => {
       gl,
       program,
       buffer,
+      vertexDotBufferCache,
       nodes,
       [],
       [],
@@ -104,6 +108,7 @@ describe('drawVectorEditHandlesLayer', () => {
       gl,
       program,
       buffer,
+      vertexDotBufferCache,
       frameNodes,
       ['frame-1'],
       [],
@@ -146,6 +151,7 @@ describe('drawVectorEditHandlesLayer', () => {
       gl,
       program,
       buffer,
+      vertexDotBufferCache,
       twoOpenNodes,
       [vectorNode.id, secondNode.id],
       ['v1'],
@@ -179,6 +185,7 @@ describe('drawVectorEditHandlesLayer', () => {
       gl,
       program,
       buffer,
+      vertexDotBufferCache,
       vectorNode,
       ['v1'],
       ['pre-v'],
@@ -204,6 +211,7 @@ describe('drawVectorEditHandlesLayer', () => {
       gl,
       program,
       buffer,
+      vertexDotBufferCache,
       secondNode,
       ['v1'],
       ['pre-v'],
@@ -233,6 +241,7 @@ describe('drawVectorEditHandlesLayer', () => {
       gl,
       program,
       buffer,
+      vertexDotBufferCache,
       nodes,
       [vectorNode.id],
       ['v1', 'v2'],
@@ -272,6 +281,7 @@ describe('drawVectorEditHandlesLayer', () => {
       gl,
       program,
       buffer,
+      vertexDotBufferCache,
       nodes,
       [vectorNode.id],
       ['v1'],

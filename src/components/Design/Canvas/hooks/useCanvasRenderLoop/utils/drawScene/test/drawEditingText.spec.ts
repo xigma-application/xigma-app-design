@@ -47,6 +47,7 @@ const IMAGE_CONTEXT: TImageRenderContext = {
   program: {} as WebGLProgram,
   strokeBufferCache: new WeakMap(),
   textGeometryCache: new Map(),
+  vertexDotBufferCache: new WeakMap(),
 };
 
 describe('drawEditingText', () => {

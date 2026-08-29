@@ -8,8 +8,10 @@ import {
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 import { TVectorHandleHover } from 'types/design/canvas/types';
+import { TVertexDotBufferCacheEntry } from '../../drawVectorVertexDots/types';
 
 // utils
 import { drawVectorEditHandlesForNode } from '../drawVectorEditHandlesForNode';
@@ -85,11 +87,13 @@ const call = (
   const gl = {} as WebGL2RenderingContext;
   const program = {} as WebGLProgram;
   const buffer = {} as WebGLBuffer;
+  const vertexDotBufferCache = new WeakMap<TPoint[], TVertexDotBufferCacheEntry[]>();
 
   drawVectorEditHandlesForNode(
     gl,
     program,
     buffer,
+    vertexDotBufferCache,
     node,
     selectedVertexIds,
     preMarqueeVertexIds,
@@ -202,15 +206,15 @@ describe('drawVectorEditHandlesForNode', () => {
     call(vectorNode, ['v1']);
 
     // result — v1 is selected, batched at the selected outer/inner sizes; v2 stays in the plain batch
-    const plainCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[4] === BASE_SIZE);
-    const selectedOuterCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[4] === SELECTED_OUTER_SIZE);
-    const selectedInnerCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[4] === SELECTED_INNER_SIZE);
+    const plainCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[5] === BASE_SIZE);
+    const selectedOuterCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[5] === SELECTED_OUTER_SIZE);
+    const selectedInnerCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[5] === SELECTED_INNER_SIZE);
 
-    expect(plainCall?.[3]).toEqual([vectorNode.vertices.v2]);
-    expect(selectedOuterCall?.[3]).toEqual([vectorNode.vertices.v1]);
-    expect(selectedOuterCall?.[5]).toBe('#ffffff');
-    expect(selectedInnerCall?.[3]).toEqual([vectorNode.vertices.v1]);
-    expect(selectedInnerCall?.[5]).toBe('#0d99ff');
+    expect(plainCall?.[4]).toEqual([vectorNode.vertices.v2]);
+    expect(selectedOuterCall?.[4]).toEqual([vectorNode.vertices.v1]);
+    expect(selectedOuterCall?.[6]).toBe('#ffffff');
+    expect(selectedInnerCall?.[4]).toEqual([vectorNode.vertices.v1]);
+    expect(selectedInnerCall?.[6]).toBe('#0d99ff');
   });
 
   it('should draw the hovered vertex immediately, larger than its unhovered (plain-batched) neighbor', () => {
@@ -229,9 +233,9 @@ describe('drawVectorEditHandlesForNode', () => {
       0,
     );
 
-    const plainCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[4] === BASE_SIZE);
+    const plainCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[5] === BASE_SIZE);
 
-    expect(plainCall?.[3]).toEqual([vectorNode.vertices.v2]);
+    expect(plainCall?.[4]).toEqual([vectorNode.vertices.v2]);
   });
 
   it('should batch the Pen tool active vertex (the segment being extended from) into the selected-style outer/inner tiers', () => {
@@ -239,13 +243,13 @@ describe('drawVectorEditHandlesForNode', () => {
     call(vectorNode, [], null, null, 'v1');
 
     // result — same rendering as a real selection, even though v1 isn't in selectedVertexIds
-    const selectedOuterCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[4] === SELECTED_OUTER_SIZE);
-    const selectedInnerCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[4] === SELECTED_INNER_SIZE);
+    const selectedOuterCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[5] === SELECTED_OUTER_SIZE);
+    const selectedInnerCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[5] === SELECTED_INNER_SIZE);
 
-    expect(selectedOuterCall?.[3]).toEqual([vectorNode.vertices.v1]);
-    expect(selectedOuterCall?.[5]).toBe('#ffffff');
-    expect(selectedInnerCall?.[3]).toEqual([vectorNode.vertices.v1]);
-    expect(selectedInnerCall?.[5]).toBe('#0d99ff');
+    expect(selectedOuterCall?.[4]).toEqual([vectorNode.vertices.v1]);
+    expect(selectedOuterCall?.[6]).toBe('#ffffff');
+    expect(selectedInnerCall?.[4]).toEqual([vectorNode.vertices.v1]);
+    expect(selectedInnerCall?.[6]).toBe('#0d99ff');
   });
 
   it('should draw a selected tangent handle as a solid-blue line and white-then-blue diamond pair, matching the selected-vertex style', () => {
@@ -354,10 +358,10 @@ describe('drawVectorEditHandlesForNode', () => {
 
     // result — v1 (selected) and v2 (plain) both flow into their respective batches, at their baked (rotated)
     // world positions, not the raw stored coordinates
-    const selectedInnerCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[4] === SELECTED_INNER_SIZE);
-    const plainCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[4] === BASE_SIZE);
-    const [selectedCenter] = selectedInnerCall?.[3] as { x: number; y: number }[];
-    const [plainCenter] = plainCall?.[3] as { x: number; y: number }[];
+    const selectedInnerCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[5] === SELECTED_INNER_SIZE);
+    const plainCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[5] === BASE_SIZE);
+    const [selectedCenter] = selectedInnerCall?.[4] as { x: number; y: number }[];
+    const [plainCenter] = plainCall?.[4] as { x: number; y: number }[];
 
     expect(drawEllipseMock).not.toHaveBeenCalled();
     expect(selectedCenter.x).toBeCloseTo(5);

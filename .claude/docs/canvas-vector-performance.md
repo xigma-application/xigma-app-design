@@ -593,6 +593,71 @@ filtering vertices against it in O(vertices) — same output, `O(vertices + segm
 `O(vertices × segments)`. Confirmed live: segment deletion on the stress node went from a multi-second
 freeze to instant.
 
+## 7. `drawVectorVertexDotBatch.ts` had zero caching — rebuilt every vertex-dot triangle every frame
+
+A user profiling session (2026-08-29) on the stress scene, this time idling in Vector Edit Mode with
+no drag in progress, found `drawVectorVertexDotBatch.ts` as the dominant cost by a wide margin
+(~36% self-time, ~40% with its own callee) — well ahead of any clustering/crossing-detection cost.
+Root cause: it builds a full triangle-fan `Float32Array` (one fan per vertex dot, `ELLIPSE_SEGMENTS`
+triangles each) and re-uploads it via `gl.bufferData` on **every single render-loop frame**,
+regardless of whether anything actually changed — the only caching in this whole draw path was one
+level up, in `collectVertexDotBuckets.ts`'s classification cache (§ its own comment), which decides
+*which* vertex ids land in which bucket but does nothing for the actual triangle geometry or GPU
+buffer built from those buckets' `centers` arrays.
+
+**The fix, first attempt (had a real memory leak, corrected same day)**: a two-tier CPU-cache-feeding-
+a-GPU-buffer-cache shape mirroring §5.7's `getOrCreateFaceBuffer.ts`/`getOrCreateStrokeBuffer.ts` —
+`WeakMap<centers, Map<size, Float32Array>>` feeding `WeakMap<Float32Array, WebGLBuffer>`. Keying on
+`(centers, size)` is exact (`buildDotBatchVertices` is a pure function of its two args, and
+`unitRimPoints` is itself a pure function of `size`), but the `Map<size, ...>` was **unbounded** —
+`size` is derived from `viewport.zoom` (`baseSize = VECTOR_VERTEX_SIZE / viewport.zoom`, dot radius is
+baked directly into the world-space triangle positions so it scales inversely with zoom), so a
+continuous zoom gesture produces a new distinct `size` on nearly every frame. Every one of those sizes
+kept its own multi-MB `Float32Array` **and** its own never-deleted `WebGLBuffer` alive for as long as
+`centers` itself stayed alive (i.e. indefinitely, while idling in Vector Edit Mode). Found live by the
+user within the same session: panning/zooming for a while made the tab progressively, permanently
+laggier — a real, unbounded leak in both the JS heap and GPU memory, not the intended fix at all.
+
+**The corrected fix**: one combined cache, `getOrCreateVertexDotBuffer.ts` —
+`WeakMap<centers, TVertexDotBufferCacheEntry[]>`, entry = `{ buffer, size }`, capped at
+`MAX_ENTRIES_PER_CENTERS = 2`. Two entries, not one, because `selectedVertexCenters` is drawn at two
+different sizes (outer ring + inner dot) **within the same frame** — a single-slot cache would have
+those two calls stomp each other's entry every frame, defeating the cache entirely for the selected-
+vertex case. On a miss beyond the cap, the oldest entry is evicted with its `WebGLBuffer` explicitly
+freed via `gl.deleteBuffer` — not left for the `WeakMap`/GC to maybe eventually reclaim, since garbage
+collection frees the JS wrapper object, not the underlying GPU allocation. `buildDotBatchVertices.ts`
+(the pre-existing triangle-fan builder, extracted to its own file unchanged) is now only ever invoked
+on an actual miss, and its output is a local variable, never retained beyond the immediate
+`gl.bufferData` call — nothing on the JS side holds the large array once upload finishes.
+
+**Why `centers` is a stable key across frames without any drag/edit in progress**: `centers` is
+`plainVertexCenters`/`selectedVertexCenters` from `classifyVertexDots.ts`'s own bucket arrays —
+`collectVertexDotBuckets.ts` already reuses last frame's exact array reference whenever its own
+classification key (selection/new/hover ids, `WeakMap`-keyed on `node`) is unchanged, which is the
+common case while Vector Edit Mode is simply open — idling, panning, or holding a fixed zoom level —
+and nothing is actively being dragged.
+
+**Scope, same shape as §5.9**: this does **not** help while a vertex is actively being dragged —
+`node` (and therefore the classification, and therefore `centers`) gets a new reference on every
+throttled dispatch frame during a live drag, same as everywhere else in this doc. It helps every
+frame where Vector Edit Mode is open but idle relative to the last frame — which, per the profile that
+found this, was by far the dominant real-world cost, since the render loop keeps running every rAF
+tick regardless of whether the user's hand is currently moving. A **separate, unrelated** cost was
+found live in the same profiling round once this one dropped out of the way: `createClusterResultCache`
+(§5.2)'s own `get()` — 51%+ self-time on a profile taken during (or shortly after) a live drag near a
+large cluster count, since `getVectorNodeThickStrokeVertices.ts`'s `wholeNodeCache` misses every frame
+a drag is in progress, forcing a full per-cluster `isStale` walk across every cluster on the node —
+exactly the §5.6 "architectural ceiling" this doc already named, not a regression from this fix and not
+addressed by it.
+
+**Threading**: unlike `faceBufferCache`/`strokeBufferCache` (owned by `TImageRenderContext`, reaching
+`drawVectorNode.ts` through `drawSceneNodes.ts`/`drawSceneVectorNode.ts`), the Vector Edit Mode overlay
+subtree (`drawVectorEditHandlesLayer.ts` → `drawVectorEditHandlesForNode.ts` → `drawVectorVertexDots.ts`
+→ `drawVectorVertexDotBatch.ts`) never received `imageContext` at all before this fix — one new field
+(`vertexDotBufferCache`) was added to `TImageRenderContext` and threaded through as an individual param
+the same way `faceBufferCache`/`strokeBufferCache` are, starting from `drawScene.ts`'s existing
+`imageContext`.
+
 ## File index
 
 - Caching: `utils/canvas/vectorNetwork/getVectorNodeBounds.ts`,
@@ -653,6 +718,12 @@ freeze to instant.
   `utils/canvas/vectorNetwork/getVectorNodeClusters/{isRawSegmentTopologyUnchanged,getVectorNodeRawClusters}.ts`
 - `getPlanarVectorNetwork.ts` re-keyed off `segments`/`vertices` (§5.9):
   `utils/canvas/vectorNetwork/getPlanarVectorNetwork.ts`
+- Vertex-dot batch caching (§7): `useCanvasRenderLoop/utils/drawScene/drawVectorEditHandlesLayer/
+  drawVectorVertexDots/{buildDotBatchVertices,getOrCreateVertexDotBuffer,drawVectorVertexDotBatch,
+  drawVectorVertexDots,types}.ts`, `useCanvasRenderLoop/utils/drawScene/drawVectorEditHandlesLayer/
+  {drawVectorEditHandlesForNode/drawVectorEditHandlesForNode,
+  drawVectorEditHandlesLayer/drawVectorEditHandlesLayer}.ts`, `useCanvasRenderLoop/types.ts`
+  (`vertexDotBufferCache`), `useCanvasRenderLoop/utils/{setupRenderLoop,drawScene/drawScene}.ts`
 
 ## Related
 

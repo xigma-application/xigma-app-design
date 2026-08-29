@@ -1,5 +1,6 @@
 // types
 import { TEllipseArcLengthSample, TPoint } from 'types/canvas';
+import { TVertexDotBufferCacheEntry } from './utils/drawScene/drawVectorEditHandlesLayer/drawVectorVertexDots/types';
 
 // utils
 import { TTextGeometry } from 'utils/canvas/text/getOrBuildTextGeometry';
@@ -16,4 +17,5 @@ export type TImageRenderContext = {
   program: WebGLProgram;
   strokeBufferCache: WeakMap<number[], WebGLBuffer>;
   textGeometryCache: Map<string, TTextGeometry>;
+  vertexDotBufferCache: WeakMap<TPoint[], TVertexDotBufferCacheEntry[]>;
 };

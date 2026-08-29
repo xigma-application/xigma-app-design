@@ -33,6 +33,7 @@ export const setupRenderLoop = (
     program: imageProgram,
     strokeBufferCache: new WeakMap(),
     textGeometryCache: new Map(),
+    vertexDotBufferCache: new WeakMap(),
   };
 
   return startRenderLoop(gl, program, buffer, imageContext, canvas, refs);

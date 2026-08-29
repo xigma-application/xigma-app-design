@@ -2,6 +2,7 @@
 import { TPoint } from 'types/canvas';
 import { TVectorHandleHover } from 'types/design/canvas/types';
 import { TVectorNode, TViewport } from 'types/design/types';
+import { TVertexDotBufferCacheEntry } from '../drawVectorVertexDots/types';
 
 // utils
 import { drawVectorEditOutline } from '../drawVectorEditOutline/drawVectorEditOutline';
@@ -17,6 +18,7 @@ export const drawVectorEditHandlesForNode = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
+  vertexDotBufferCache: WeakMap<TPoint[], TVertexDotBufferCacheEntry[]>,
   editingNode: TVectorNode,
   selectedVertexIds: string[],
   preMarqueeVertexIds: string[],
@@ -79,6 +81,7 @@ export const drawVectorEditHandlesForNode = (
     gl,
     program,
     buffer,
+    vertexDotBufferCache,
     node,
     visualSelectedVertexIds,
     hoveredVertexId,
