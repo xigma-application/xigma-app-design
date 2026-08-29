@@ -24,6 +24,8 @@ import slice, {
   startCommentDraft,
   startTextEdit,
   stopTextEdit,
+  toggleNodeHidden,
+  toggleNodeLocked,
   toggleUiMinimized,
   updateCommentContent,
   updateEditingTextBoxPathStartOffset,
@@ -177,6 +179,46 @@ describe('design slice', () => {
 
     // result
     expect(state.pages[state.activePageId].nodes[id]).toEqual(replacement);
+  });
+
+  it('should toggle a node locked state', () => {
+    // before
+    const withNode = slice(undefined, addNode(frameNodePayload));
+    const [id] = withNode.pages[withNode.activePageId].rootOrder;
+
+    // action
+    const state = slice(withNode, toggleNodeLocked(id));
+
+    // result
+    expect(state.pages[state.activePageId].nodes[id].locked).toBe(true);
+  });
+
+  it('should do nothing when toggling the locked state of a node that does not exist', () => {
+    // before
+    const state = slice(undefined, toggleNodeLocked('missing'));
+
+    // result
+    expect(state.pages[state.activePageId].nodes).toEqual({});
+  });
+
+  it('should toggle a node hidden state', () => {
+    // before
+    const withNode = slice(undefined, addNode(frameNodePayload));
+    const [id] = withNode.pages[withNode.activePageId].rootOrder;
+
+    // action
+    const state = slice(withNode, toggleNodeHidden(id));
+
+    // result
+    expect(state.pages[state.activePageId].nodes[id].hidden).toBe(true);
+  });
+
+  it('should do nothing when toggling the hidden state of a node that does not exist', () => {
+    // before
+    const state = slice(undefined, toggleNodeHidden('missing'));
+
+    // result
+    expect(state.pages[state.activePageId].nodes).toEqual({});
   });
 
   it('should set the viewport', () => {

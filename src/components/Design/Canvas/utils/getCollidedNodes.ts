@@ -12,12 +12,16 @@ export const getCollidedNodes = (nodes: TSceneNode[], area: TDraftRect, requireF
   const y2 = area.y + area.height;
 
   return nodes.filter((node) => {
-    const bounds = getRotatedNodeBounds(node);
-    const nodeX2 = bounds.x + bounds.width;
-    const nodeY2 = bounds.y + bounds.height;
+    if (!node.hidden && !node.locked) {
+      const bounds = getRotatedNodeBounds(node);
+      const nodeX2 = bounds.x + bounds.width;
+      const nodeY2 = bounds.y + bounds.height;
 
-    return requireFullyInside
-      ? x1 <= bounds.x && x2 >= nodeX2 && y1 <= bounds.y && y2 >= nodeY2
-      : !(nodeX2 < x1 || bounds.x > x2 || nodeY2 < y1 || bounds.y > y2);
+      return requireFullyInside
+        ? x1 <= bounds.x && x2 >= nodeX2 && y1 <= bounds.y && y2 >= nodeY2
+        : !(nodeX2 < x1 || bounds.x > x2 || nodeY2 < y1 || bounds.y > y2);
+    }
+
+    return false;
   });
 };

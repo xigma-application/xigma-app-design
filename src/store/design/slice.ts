@@ -35,6 +35,8 @@ import { handleSetVectorEditingNodeIds } from './utils/handleSetVectorEditingNod
 import { handleSetViewport } from './utils/handleSetViewport';
 import { handleStartTextEdit } from './utils/handleStartTextEdit';
 import { handleStopTextEdit } from './utils/handleStopTextEdit';
+import { handleToggleNodeHidden } from './utils/handleToggleNodeHidden';
+import { handleToggleNodeLocked } from './utils/handleToggleNodeLocked';
 import { handleUpdateCommentContent } from './utils/handleUpdateCommentContent';
 import { handleUpdateEditingTextBoxPathStartOffset } from './utils/handleUpdateEditingTextBoxPathStartOffset';
 import { handleUpdateNode } from './utils/handleUpdateNode';
@@ -124,6 +126,8 @@ const designSlice = createSlice({
     },
     startTextEdit: (state, action: PayloadAction<TStartTextEditPayload>) => handleStartTextEdit(state, action.payload),
     stopTextEdit: (state) => handleStopTextEdit(state),
+    toggleNodeHidden: (state, action: PayloadAction<string>) => handleToggleNodeHidden(state, action.payload),
+    toggleNodeLocked: (state, action: PayloadAction<string>) => handleToggleNodeLocked(state, action.payload),
     toggleUiMinimized: (state) => {
       state.isUiMinimized = !state.isUiMinimized;
     },
@@ -159,6 +163,8 @@ export const {
   startCommentDraft,
   startTextEdit,
   stopTextEdit,
+  toggleNodeHidden,
+  toggleNodeLocked,
   toggleUiMinimized,
   updateCommentContent,
   updateEditingTextBoxPathStartOffset,

@@ -2,6 +2,7 @@ import { FC } from 'react';
 
 // components
 import LayersHeaderTitle from './LayersHeaderTitle/LayersHeaderTitle';
+import { Tree } from 'shared';
 
 // hooks
 import { useToggleLayersExpanded } from './hooks/useToggleLayersExpanded';
@@ -24,6 +25,7 @@ const Layers: FC = () => {
       >
         <LayersHeaderTitle isExpanded={isExpanded} />
       </div>
+      {isExpanded && <Tree />}
     </div>
   );
 };

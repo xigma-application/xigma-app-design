@@ -1,0 +1,44 @@
+@use '../../../styles/mixins/scrollbar';
+
+.Tree {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  &__rows {
+    @include scrollbar.scrollbar-hidden;
+
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  &__viewport {
+    position: relative;
+    width: 100%;
+  }
+
+  &__row {
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+  }
+
+  &__scrollThumb {
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  &:hover &__scrollThumb {
+    opacity: 1;
+  }
+
+  &__resize-handle {
+    bottom: -3px;
+    height: 6px;
+    left: 0;
+    position: absolute;
+    right: 0;
+  }
+}

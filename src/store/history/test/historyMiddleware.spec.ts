@@ -1,5 +1,5 @@
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setSelection, toggleNodeHidden, toggleNodeLocked } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture, redo, undo } from '../actions';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
@@ -92,5 +92,23 @@ describe('historyMiddleware', () => {
     // result
     expect(store.getState().design.selectedIds).toEqual([idA]);
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toBeDefined();
+  });
+
+  it("should treat toggling a node's locked/hidden state as its own undo step", () => {
+    // mock
+    const idA = addFrameNode(0, 0);
+
+    store.dispatch(toggleNodeLocked(idA));
+    store.dispatch(toggleNodeHidden(idA));
+
+    // before
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA].hidden).toBe(true);
+
+    // action — undo should only step back through the hidden toggle
+    store.dispatch(undo());
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA].hidden).toBeUndefined();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA].locked).toBe(true);
   });
 });

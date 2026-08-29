@@ -122,7 +122,9 @@ any of the machinery below — see `design-store-architecture.md`'s "Comment sta
   Nodes currently being
   text-edited are filtered out of both `sceneNodes` and `selectedNodes` up front
   (`node.id !== editingNodeId`), so they render exactly once, only through the dedicated editing
-  path.
+  path. A node with `hidden: true` (Layers panel, [[design-store-architecture]]) is filtered out of
+  `sceneNodes` even earlier, straight off `selectOrderedNodes(state)`, before `getPreviewSceneNodes`
+  ever sees it — it never reaches `drawSceneNodes` at all, not even a suppressed/invisible draw.
   `drawSceneBackground.ts` masks the alpha channel back off after clearing
   (`gl.colorMask(true,true,true,false)`) so the canvas's own backing-store alpha stays 1 post-clear
   while per-shape draws still blend on `u_color.a`.

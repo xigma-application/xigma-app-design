@@ -2,7 +2,7 @@
 import { CARET_BLINK_INTERVAL_MS, GRID_MIN_ZOOM } from 'constant/canvas';
 
 // store
-import { addNode, setSelection, setViewport, startTextEdit, stopTextEdit } from 'store/design/slice';
+import { addNode, setSelection, setViewport, startTextEdit, stopTextEdit, toggleNodeHidden } from 'store/design/slice';
 import { DEFAULT_VIEWPORT } from 'store/design/constants';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
@@ -180,6 +180,52 @@ describe('drawScene', () => {
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
+  });
+
+  it('should not draw a hidden node', () => {
+    // mock
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const canvas = document.createElement('canvas');
+
+    store.dispatch(
+      addNode({
+        fill: '#336699',
+        height: 20,
+        name: 'Hidden Frame',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 10,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const { rootOrder } = selectActivePage(store.getState());
+    const hiddenId = rootOrder[rootOrder.length - 1];
+
+    const countFillDraws = (): number => {
+      const gl = createGlMock();
+
+      drawScene(gl, program, buffer, IMAGE_CONTEXT, canvas, createCanvasRefs());
+
+      return (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(
+        ([mode, offset, count]) => mode === gl.TRIANGLES && offset === 0 && count === 6,
+      ).length;
+    };
+
+    // before
+    const baselineCount = countFillDraws();
+
+    // action
+    store.dispatch(toggleNodeHidden(hiddenId));
+
+    // result
+    expect(countFillDraws()).toBe(baselineCount - 1);
+
+    // after
+    store.dispatch(toggleNodeHidden(hiddenId));
   });
 
   it('should draw a hover outline for the given hoveredNodeId', () => {

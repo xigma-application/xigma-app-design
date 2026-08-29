@@ -106,20 +106,15 @@ export const drawScene = (
   const vectorMultiSelectResizeDrag = refs.vectorMultiSelect.vectorMultiSelectResizeDragRef.current;
   const vectorMultiSelectRotateDrag = refs.vectorMultiSelect.vectorMultiSelectRotateDragRef.current;
   const isVectorMultiDragMoving = Boolean(refs.vectorMultiSelect.vectorMultiDragRef.current?.hasMoved);
-  const previewSceneNodes = getPreviewSceneNodes(selectOrderedNodes(state), editingNodeId, refs);
+  const filteredNodes = selectOrderedNodes(state).filter((node) => !node.hidden);
+  const previewSceneNodes = getPreviewSceneNodes(filteredNodes, editingNodeId, refs);
   const sceneNodes = getErasePreviewNodes(previewSceneNodes, vectorEditingNodeIds, activeTool, refs, viewport);
   const eraseAwareNodesById = getEraseAwareNodesById(nodesById, sceneNodes, vectorEditingNodeIds, activeTool);
   const allSelectedNodes = selectSelectedNodes(state);
   const selectedNodes = getVisibleSelectedNodes(allSelectedNodes, editingNodeId, refs);
   const selectedIds = new Set(allSelectedNodes.map((node) => node.id));
   const hoveredNode = getVisibleHoveredNode(nodesById, hoveredNodeId, editingNodeId, refs);
-  const pathOutlineStyles = getPathOutlineStyles(
-    Object.values(nodesById),
-    selectedIds,
-    editingNodeId,
-    hoveredNode?.id ?? null,
-    editingTextBox?.pathId,
-  );
+  const valuesNodeByid = Object.values(nodesById);
 
   drawSceneBackground(gl);
   drawPixelGrid(gl, imageContext.gridProgram, imageContext.gridBuffer, clientWidth, clientHeight, viewport);
@@ -132,7 +127,7 @@ export const drawScene = (
     clientWidth,
     clientHeight,
     viewport,
-    pathOutlineStyles,
+    getPathOutlineStyles(valuesNodeByid, selectedIds, editingNodeId, hoveredNode?.id ?? null, editingTextBox?.pathId),
     refs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current,
     refs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current,
     refs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current,

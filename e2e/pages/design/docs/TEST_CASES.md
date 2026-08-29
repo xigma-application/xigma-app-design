@@ -1982,6 +1982,26 @@ same dashed black trail while the drag is in progress (`drawVectorPaintPath.ts`,
 | 330 | The dashed black trail (same stroke as Shape Builder's own drag) is actually visible on the WebGL canvas while the drag is still in progress — a real repaint only e2e can observe |  ✅  | ✅ `vector-edit.spec.ts` |
 | 331 | A drag starting on an already-filled face arms remove mode for the whole gesture, destroying that face's fill along with every other already-filled face the stroke crosses        |  ✅  | ✅ `vector-edit.spec.ts` |
 
+## Layers panel — lock/visibility
+
+The Layers panel (`LeftPanel/File/Layers`) lists the active page's nodes in root order (flat, no
+nesting yet) with a per-row lock and eye (visibility) toggle. Both are real document state
+(`locked?`/`hidden?` on the node), joined to the undo/redo history the same way `updateNode` is.
+
+| #   | Scenario                                                                                                         | Unit |            E2E            |
+| --- | ---------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------: |
+| 332 | Locking a node from the panel keeps it rendered but excludes it from canvas click hit-testing and marquee-select |  ✅  | ✅ `layers-panel.spec.ts` |
+| 333 | Hiding a node from the panel removes it from rendering and from canvas click hit-testing/marquee-select entirely |  ✅  | ✅ `layers-panel.spec.ts` |
+| 334 | Selecting a node from the panel works regardless of its locked/hidden state (panel selection isn't gated)        |  ✅  |             —             |
+| 335 | Toggling a node's locked or hidden state is its own undo step, independent of any other change                   |  ✅  |             —             |
+
+Scenarios 334-335 are plain synchronous dispatch-and-assert-on-`store.getState()` checks with no
+real timing/rendering stakes, so they're unit-only per the section below. 332-333 get e2e coverage
+because the interesting part is genuinely the browser round-trip: a real DOM click on the panel
+button changing what a _separate_ real canvas click can hit-test, which a synthetic jsdom
+`PointerEvent` can't exercise end-to-end the way the actual `getNodeAtPoint`/`getCollidedNodes`
+filters are wired into the live render+hit-test pipeline.
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

@@ -135,7 +135,11 @@ export const getNodeAtPoint = (point, nodes, viewport) =>
     }
   }) ?? null;
 ```
-Topmost-wins via reversing `selectOrderedNodes` (last-drawn = last in `rootOrder` = topmost).
+Topmost-wins via reversing `selectOrderedNodes` (last-drawn = last in `rootOrder` = topmost). A node
+with `hidden`/`locked` set (Layers panel, [[design-store-architecture]]) is skipped outright before
+any per-type test runs — same one-line guard added to `getCollidedNodes.ts` (marquee) so a
+locked/hidden node can't be acquired that way either. This only gates *acquiring* a node via a canvas
+click/marquee; a node already selected through the Layers panel itself can still be dragged/resized.
 
 **Rotation is handled uniformly, in one place**: `getNodeAtPoint` rotates the *query point* backward
 by `-node.rotation` around the node's own bounds center, then calls the ordinary, rotation-unaware
@@ -571,6 +575,10 @@ e2e (`e2e/pages/design/`):
   and actually rotates the cut (the literal wiring bug §19 describes); dragging Ratio hollows a ring
   even on an uncut ellipse; dragging Ratio into the cut-away gap swaps which side is filled versus
   the identical drag distance into the fill (the inversion feature, §19's `getEffectiveArcAngles`).
+- `layers-panel.spec.ts` — locking a node from the Layers panel keeps it rendered but makes a canvas
+  click/marquee unable to acquire it; hiding one removes it from rendering and hit-testing entirely
+  (canvas screenshots clipped to `canvasSafeArea()`, since a plain `canvas.screenshot()` also captures
+  the LeftPanel overlay drawn on top of it, which changes when the panel expands).
 
 As noted in §3, the pending-click-action collapse/deselect/gap-drag matrix has **no** e2e coverage —
 that correctness relies entirely on the unit suite; e2e here is weighted toward resize/rotate/mirror

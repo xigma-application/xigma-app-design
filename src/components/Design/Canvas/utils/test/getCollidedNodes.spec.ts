@@ -77,6 +77,24 @@ describe('getCollidedNodes', () => {
     expect(getCollidedNodes([node], area, false)).toEqual([node]);
   });
 
+  it('should never collide a hidden node', () => {
+    // mock
+    const node = buildNode({ height: 10, hidden: true, width: 10, x: 5, y: 5 });
+    const area = { height: 50, width: 50, x: 0, y: 0 };
+
+    // result
+    expect(getCollidedNodes([node], area, false)).toEqual([]);
+  });
+
+  it('should never collide a locked node', () => {
+    // mock
+    const node = buildNode({ height: 10, locked: true, width: 10, x: 5, y: 5 });
+    const area = { height: 50, width: 50, x: 0, y: 0 };
+
+    // result
+    expect(getCollidedNodes([node], area, false)).toEqual([]);
+  });
+
   it('should collide a line node using the bounding box derived from its endpoints', () => {
     // mock
     const line: TSceneNode = {

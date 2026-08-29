@@ -1,0 +1,39 @@
+.TreeItem {
+  align-items: center;
+  box-sizing: border-box;
+  column-gap: 8px;
+  cursor: default;
+  display: flex;
+  height: 32px;
+  padding: 0 8px;
+
+  &[aria-selected='true'] {
+    background-color: var(--color-selected);
+  }
+
+  &__icon {
+    flex-shrink: 0;
+  }
+
+  &__name {
+    flex: 1;
+    font-size: 11px;
+    font-weight: 550;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__name--hidden {
+    opacity: 0.5;
+  }
+
+  [data-tree-item-action] {
+    opacity: 0;
+  }
+
+  &:hover [data-tree-item-action],
+  [data-tree-item-action][data-tree-item-action-active] {
+    opacity: 1;
+  }
+}

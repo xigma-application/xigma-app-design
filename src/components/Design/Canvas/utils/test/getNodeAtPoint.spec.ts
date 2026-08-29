@@ -272,6 +272,31 @@ describe('getNodeAtPoint', () => {
     expect(getNodeAtPoint({ x: 0, y: 0 }, [node], IDENTITY_VIEWPORT)).toBeNull();
   });
 
+  it('should never hit a hidden node', () => {
+    // mock
+    const node = buildNode({ hidden: true, id: 'a' });
+
+    // result
+    expect(getNodeAtPoint({ x: 5, y: 5 }, [node], IDENTITY_VIEWPORT)).toBeNull();
+  });
+
+  it('should never hit a locked node', () => {
+    // mock
+    const node = buildNode({ id: 'a', locked: true });
+
+    // result
+    expect(getNodeAtPoint({ x: 5, y: 5 }, [node], IDENTITY_VIEWPORT)).toBeNull();
+  });
+
+  it('should fall through a hidden node to the node underneath it', () => {
+    // mock
+    const hidden = buildNode({ hidden: true, id: 'top' });
+    const bottom = buildNode({ id: 'bottom' });
+
+    // result
+    expect(getNodeAtPoint({ x: 5, y: 5 }, [bottom, hidden], IDENTITY_VIEWPORT)?.id).toBe('bottom');
+  });
+
   it('should widen the line hit-test tolerance in world units as the viewport zooms out', () => {
     // mock
     const line: TSceneNode = { id: 'a', name: 'Line', parentId: null, stroke: '#000000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 0 };

@@ -12,6 +12,8 @@ import {
   replaceNode,
   setActivePage,
   setSelection,
+  toggleNodeHidden,
+  toggleNodeLocked,
   updateNode,
 } from 'store/design/slice';
 import { RootState } from 'store';
@@ -33,6 +35,8 @@ const UNDOABLE_ACTION_TYPES: Set<string> = new Set([
   replaceNode.type,
   setActivePage.type,
   setSelection.type,
+  toggleNodeHidden.type,
+  toggleNodeLocked.type,
   updateNode.type,
 ]);
 

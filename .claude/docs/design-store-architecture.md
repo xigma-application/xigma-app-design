@@ -88,6 +88,19 @@ whether 2+ selected nodes get one shared outline. The field exists purely as for
 scaffolding for Etap 12 (grouping/nested frames) — real nesting is entirely unimplemented; don't
 assume any node is ever actually nested today.
 
+**`locked?: boolean` / `hidden?: boolean`** (added for the Layers panel, `LeftPanel/File/Layers`) —
+optional on every `TSceneNode` variant (added to `TBaseNode`, plus separately to `TLineNode`/
+`TVectorNode` since those two don't extend it), same "retrofit as optional, `?? false`/falsy-check
+at read sites" pattern as `TRectangleNode.cornerRadius?: number`, chosen over `TMediaNode`-style
+required-per-type fields because locked/hidden apply to every node type, not a shape-specific
+feature — making them required would force every node-construction call site to set them. Toggled by
+`toggleNodeLocked`/`toggleNodeHidden` (below). Consumed by `Canvas/utils/getNodeAtPoint.ts` and
+`Canvas/utils/getCollidedNodes.ts` (both skip a `hidden`/`locked` node outright, before the per-type
+test), and by `drawScene.ts` (filters `hidden` nodes out of `sceneNodes` before they ever reach
+`drawSceneNodes`, so they never render). **Deliberately not wired into any `arm*Drag`** — a locked
+node already selected via the panel itself (not clicked on canvas) can still be moved/resized/
+rotated; only *acquiring* a locked/hidden node via a canvas click or marquee is blocked.
+
 ## 3. Reducers — `store/design/slice.ts`
 
 Per the `xigma-store-slice-logic` convention (one-statement bodies stay inline, multi-statement
@@ -106,6 +119,8 @@ bodies delegate to `utils/handle<ReducerName>.ts`):
 | `startCommentDraft` | inline (`state.commentDraftPosition = action.payload`) | |
 | `startTextEdit` | delegated → `handleStartTextEdit.ts` | seeds editing fields, selects all existing content |
 | `stopTextEdit` | delegated → `handleStopTextEdit.ts` | resets all 6 editing fields |
+| `toggleNodeHidden` | delegated → `handleToggleNodeHidden.ts` | flips `hidden` by id (no-op on unknown id) — see above |
+| `toggleNodeLocked` | delegated → `handleToggleNodeLocked.ts` | flips `locked` by id (no-op on unknown id) — see above |
 | `updateCommentContent` | delegated → `handleUpdateCommentContent.ts` | patch by id (no-op on unknown id) — wired to a store action, but no UI dispatches it today, same as `deleteComment` |
 | `updateEditingTextBoxPathStartOffset` | delegated → `handleUpdateEditingTextBoxPathStartOffset.ts` | guarded single-field mutation on nested `editingTextBox` |
 | `updateNode` | delegated → `handleUpdateNode.ts` | patch + path/text sync — see below |
@@ -385,6 +400,11 @@ frame becomes its own undo step" (§5's own dispatch-per-pointermove nuance) is 
   (safe: nothing that reaches this branch is ever a vector-editing mutation — see [[vector-network]] §8).
 - A gesture that opens and closes with no undoable dispatch in between (a plain click, a resolver that
   turned out to be a no-op) pushes nothing — correct empty-undo-step avoidance.
+
+**`toggleNodeLocked`/`toggleNodeHidden` also joined `UNDOABLE_ACTION_TYPES`** (`historyMiddleware.ts`) —
+plain single-dispatch reducers with no gesture of their own (the Layers panel's lock/eye buttons are
+a single click, not a drag), so each toggle is automatically its own undo step with no
+`beginHistoryGesture`/`endHistoryGesture` bracketing needed, unlike `setSelection` below.
 
 **`setSelection` joined `UNDOABLE_ACTION_TYPES`** (asked for directly — plain click-to-select/deselect,
 with no other edit, must be its own undo step, Illustrator/Photoshop-style, not just restored as a

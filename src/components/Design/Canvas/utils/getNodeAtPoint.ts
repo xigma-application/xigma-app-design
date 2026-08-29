@@ -36,28 +36,32 @@ export const getNodeAtPoint = (point: TPoint, nodes: TSceneNode[], viewport: TVi
   const pathTextTolerance = PATH_TEXT_HIT_TOLERANCE_PX / viewport.zoom;
 
   const hit = [...nodes].reverse().find((node) => {
-    const testPoint = getUnrotatedQueryPoint(point, node);
+    if (!node.hidden && !node.locked) {
+      const testPoint = getUnrotatedQueryPoint(point, node);
 
-    switch (node.type) {
-      case NodeType.ellipse:
-        return isPointInEllipse(testPoint, node);
-      case NodeType.polygon:
-        return isPointInPolygon(testPoint, node);
-      case NodeType.star:
-        return isPointInStar(testPoint, node);
-      case NodeType.line:
-        return isPointNearLine(testPoint, node, lineTolerance);
-      case NodeType.text:
-        return node.pathId ? isPointInCurvedText(point, node, pathTextTolerance) : isPointInText(testPoint, node);
-      case NodeType.path:
-        return false;
-      case NodeType.vector: {
-        const bakedNode = getRenderedVectorNode(node);
-        return isPointInVectorRegions(testPoint, bakedNode) || isPointNearVectorPath(testPoint, bakedNode, lineTolerance);
+      switch (node.type) {
+        case NodeType.ellipse:
+          return isPointInEllipse(testPoint, node);
+        case NodeType.polygon:
+          return isPointInPolygon(testPoint, node);
+        case NodeType.star:
+          return isPointInStar(testPoint, node);
+        case NodeType.line:
+          return isPointNearLine(testPoint, node, lineTolerance);
+        case NodeType.text:
+          return node.pathId ? isPointInCurvedText(point, node, pathTextTolerance) : isPointInText(testPoint, node);
+        case NodeType.path:
+          return false;
+        case NodeType.vector: {
+          const bakedNode = getRenderedVectorNode(node);
+          return isPointInVectorRegions(testPoint, bakedNode) || isPointNearVectorPath(testPoint, bakedNode, lineTolerance);
+        }
+        default:
+          return isPointInRect(testPoint, node);
       }
-      default:
-        return isPointInRect(testPoint, node);
     }
+
+    return false;
   });
 
   return hit ?? null;

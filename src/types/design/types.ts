@@ -43,7 +43,9 @@ export type TDraftText = TDraftRect & {
 
 export type TBaseNode = {
   height: number;
+  hidden?: boolean;
   id: string;
+  locked?: boolean;
   name: string;
   parentId: string | null;
   rotation: number;
@@ -153,7 +155,9 @@ export type TVectorNode = {
   fillColor: string | null;
   fillColorOverrideByKey?: Record<string, string>;
   filledFaceKeys: string[];
+  hidden?: boolean;
   id: string;
+  locked?: boolean;
   name: string;
   parentId: string | null;
   rotation: number;
@@ -170,7 +174,9 @@ export type TLineEndpointStyle = 'arrow' | 'default';
 
 export type TLineNode = {
   endPoint?: TLineEndpointStyle;
+  hidden?: boolean;
   id: string;
+  locked?: boolean;
   name: string;
   parentId: string | null;
   startPoint?: TLineEndpointStyle;
