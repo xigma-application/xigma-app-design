@@ -1,17 +1,15 @@
 import { FC } from 'react';
-import { useTranslation } from 'react-i18next';
 
 // components
+import PageRowMenu from './PagesList/PageRow/PageRowMenu';
+import PagesHeaderActions from './PagesHeaderActions/PagesHeaderActions';
+import PagesHeaderTitle from './PagesHeaderTitle/PagesHeaderTitle';
 import PagesList from './PagesList/PagesList';
-import { Icon, Tooltip } from 'shared';
 
 // hooks
 import { useAddPage } from './hooks/useAddPage';
+import { useHeaderPageMenu } from './hooks/useHeaderPageMenu';
 import { useTogglePagesExpanded } from './hooks/useTogglePagesExpanded';
-
-// others
-import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
-import { translationNameSpace } from '../constants';
 
 // store
 import { selectActivePage } from 'store/design/selectors';
@@ -22,12 +20,9 @@ import styles from './pages.module.scss';
 
 const Pages: FC = () => {
   const activePage = useAppSelector(selectActivePage);
-  const { t } = useTranslation();
   const { expand, handleStopPropagation, handleToggleClick, handleToggleKeyDown, isExpanded } = useTogglePagesExpanded();
   const { handleAddPage, pendingEditPageId } = useAddPage(expand);
-  const searchLabel = t(`${translationNameSpace}.pages.searchAriaLabel`);
-  const addLabel = t(`${translationNameSpace}.pages.addAriaLabel`);
-  const findShortcut = KEYBOARD_SHORTCUTS.find.join('');
+  const headerMenu = useHeaderPageMenu(!isExpanded);
 
   return (
     <div className={styles.Pages}>
@@ -35,35 +30,22 @@ const Pages: FC = () => {
         aria-expanded={isExpanded}
         className={styles.Pages__header}
         onClick={handleToggleClick}
+        onContextMenu={headerMenu.onContextMenu}
         onKeyDown={handleToggleKeyDown}
         role="button"
         tabIndex={0}
       >
-        <div className={styles.Pages__toggle}>
-          <Icon color="neutral2" name={isExpanded ? 'ChevronDown' : 'ChevronRight'} size={16} />
-        </div>
-        <span className={styles.Pages__name}>{isExpanded ? t(`${translationNameSpace}.pages.title`) : activePage.name}</span>
-        <div className={styles['Pages__button-group']} onClick={handleStopPropagation}>
-          <Tooltip
-            content={
-              <>
-                {searchLabel}
-                <span className={styles.Pages__shortcut}>{findShortcut}</span>
-              </>
-            }
-          >
-            <button aria-label={searchLabel} className={styles.Pages__action} type="button">
-              <Icon name="Search" size={24} />
-            </button>
-          </Tooltip>
-          <Tooltip content={addLabel}>
-            <button aria-label={addLabel} className={styles.Pages__action} onClick={handleAddPage} type="button">
-              <Icon name="Plus" size={24} />
-            </button>
-          </Tooltip>
-        </div>
+        <PagesHeaderTitle activePageName={activePage.name} isExpanded={isExpanded} />
+        <PagesHeaderActions onAddPage={handleAddPage} onStopPropagation={handleStopPropagation} />
       </div>
       {isExpanded && <PagesList pendingEditPageId={pendingEditPageId} />}
+      <PageRowMenu
+        anchorRef={headerMenu.anchorRef}
+        id={activePage.id}
+        isOpen={headerMenu.isOpen}
+        onOpenChange={headerMenu.onOpenChange}
+        onRename={expand}
+      />
     </div>
   );
 };

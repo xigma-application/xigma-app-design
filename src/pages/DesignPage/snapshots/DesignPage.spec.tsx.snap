@@ -370,36 +370,41 @@ exports[`DesignPage snapshots > should render DesignPage 1`] = `
               tabindex="0"
             >
               <div
-                class="_Pages__toggle_53acda"
+                class="_PagesHeaderTitle_1e8ba9"
               >
-                <svg
-                  aria-hidden="true"
-                  class="Icon"
-                  data-fpl-icon-size="16"
-                  fill="none"
-                  height="16"
-                  style="color: var(--color-neutral-2);"
-                  viewBox="0 0 16 16"
-                  width="16"
+                <div
+                  class="_PagesHeaderTitle__toggle_1e8ba9"
+                  data-page-toggle="true"
                 >
-                  <path
-                    d="M6.768 5.525a.5.5 0 0 1 .707 0l2.121 2.121a.5.5 0 0 1 0 .707l-2.121 2.122a.5.5 0 0 1-.707-.708L8.535 8 6.768 6.232a.5.5 0 0 1 0-.707"
-                    data-svg-property="fill"
-                    fill="white"
-                  />
-                </svg>
+                  <svg
+                    aria-hidden="true"
+                    class="Icon"
+                    data-fpl-icon-size="16"
+                    fill="none"
+                    height="16"
+                    style="color: var(--color-neutral-2);"
+                    viewBox="0 0 16 16"
+                    width="16"
+                  >
+                    <path
+                      d="M6.768 5.525a.5.5 0 0 1 .707 0l2.121 2.121a.5.5 0 0 1 0 .707l-2.121 2.122a.5.5 0 0 1-.707-.708L8.535 8 6.768 6.232a.5.5 0 0 1 0-.707"
+                      data-svg-property="fill"
+                      fill="white"
+                    />
+                  </svg>
+                </div>
+                <span
+                  class="_PagesHeaderTitle__name_1e8ba9"
+                >
+                  Page 1
+                </span>
               </div>
-              <span
-                class="_Pages__name_53acda"
-              >
-                Page 1
-              </span>
               <div
-                class="_Pages__button-group_53acda"
+                class="_PagesHeaderActions_4396dd"
               >
                 <button
                   aria-label="Find"
-                  class="_Pages__action_53acda"
+                  class="_PagesHeaderActions__action_4396dd"
                   data-state="closed"
                   type="button"
                 >
@@ -421,7 +426,7 @@ exports[`DesignPage snapshots > should render DesignPage 1`] = `
                 </button>
                 <button
                   aria-label="Add new page"
-                  class="_Pages__action_53acda"
+                  class="_PagesHeaderActions__action_4396dd"
                   data-state="closed"
                   type="button"
                 >

@@ -1,3 +1,4 @@
+import cx from 'classnames';
 import { FC } from 'react';
 
 // components
@@ -37,7 +38,7 @@ const PageRow: FC<TPageRowProps> = ({ autoEdit, page }) => {
     <div className={styles.PageRow} onClick={handleSelect} onContextMenu={onContextMenu}>
       <EditableInput
         autoEdit={autoEdit || isRenameRequested}
-        className={styles.PageRow__input}
+        className={cx(styles.PageRow__input, isOpen && !isSelected && styles['PageRow__input--menu-open'])}
         editOnDoubleClick
         onChange={handleRename}
         onEditingChange={onEditingChange}

@@ -10,7 +10,7 @@ import { TVirtualAnchor } from './hooks/usePageRowContextMenu';
 import { useCopyPageLink } from './hooks/useCopyPageLink';
 import { useDeletePage } from './hooks/useDeletePage';
 import { useDuplicatePage } from './hooks/useDuplicatePage';
-import { usePreventMenuRefocus } from 'hooks';
+import { usePreventMenuRefocus, useStopClickPropagation } from 'hooks';
 
 // others
 import { PAGE_MENU_COPY_LINK_KEY, PAGE_MENU_DELETE_KEY, PAGE_MENU_DUPLICATE_KEY, PAGE_MENU_RENAME_KEY } from '../../constants';
@@ -39,6 +39,7 @@ const PageRowMenu: FC<TPageRowMenuProps> = ({ anchorRef, id, isOpen, onOpenChang
   const handleDuplicate = useDuplicatePage(id);
   const handleDelete = useDeletePage(id);
   const handlePreventRefocus = usePreventMenuRefocus();
+  const handleStopPropagation = useStopClickPropagation();
   const isOnlyPage = Object.keys(pages).length <= 1;
 
   return (
@@ -48,6 +49,7 @@ const PageRowMenu: FC<TPageRowMenuProps> = ({ anchorRef, id, isOpen, onOpenChang
         <PopoverPrimitive.Content
           align="start"
           className={styles.PageRowMenu}
+          onClick={handleStopPropagation}
           onCloseAutoFocus={handlePreventRefocus}
           side="bottom"
           sideOffset={0}

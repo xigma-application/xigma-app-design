@@ -136,4 +136,32 @@ describe('PageRow', () => {
     // result
     expect(await screen.findByRole('textbox')).toHaveValue('Page 1');
   });
+
+  it('should highlight a non-active row while its menu is open', () => {
+    // before
+    renderPageRow(buildPage({ id: 'not-the-active-page', name: 'Other page' }));
+
+    // result — no highlight yet
+    expect(document.querySelector('[class*="PageRow__input--menu-open"]')).toBeNull();
+
+    // action
+    fireEvent.contextMenu(screen.getByText('Other page'));
+
+    // result
+    expect(document.querySelector('[class*="PageRow__input--menu-open"]')).not.toBeNull();
+  });
+
+  it('should not add the menu-open highlight to the active row', () => {
+    // mock
+    const activePageId = selectActivePageId(store.getState());
+
+    // before
+    renderPageRow(buildPage({ id: activePageId, name: 'Active page' }));
+
+    // action
+    fireEvent.contextMenu(screen.getByText('Active page'));
+
+    // result
+    expect(document.querySelector('[class*="PageRow__input--menu-open"]')).toBeNull();
+  });
 });

@@ -1,5 +1,6 @@
 import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router';
 import { Provider } from 'react-redux';
 
 // components
@@ -24,7 +25,9 @@ const renderPages = (testStore: TStore = store): ReturnType<typeof render> =>
   render(
     <Provider store={testStore}>
       <TooltipProvider>
-        <Pages />
+        <MemoryRouter initialEntries={['/design/file-1']}>
+          <Pages />
+        </MemoryRouter>
       </TooltipProvider>
     </Provider>,
   );
@@ -101,6 +104,29 @@ describe('Pages behaviors', () => {
 
     // result
     expect(screen.getByRole('button', { expanded: false })).toBeInTheDocument();
+  });
+
+  it('should open the active-page menu on right-click of the collapsed header', () => {
+    // before
+    renderPages();
+
+    // action
+    fireEvent.contextMenu(screen.getByRole('button', { expanded: false }));
+
+    // result
+    expect(screen.getByText('Delete page')).toBeInTheDocument();
+  });
+
+  it('should not open the header menu on right-click once expanded', () => {
+    // before
+    renderPages();
+    fireEvent.click(screen.getByRole('button', { expanded: false }));
+
+    // action
+    fireEvent.contextMenu(screen.getByRole('button', { expanded: true }));
+
+    // result
+    expect(screen.queryByText('Delete page')).not.toBeInTheDocument();
   });
 
   it('should add a page, expand the panel, select it and open its name for editing when the add button is clicked', () => {
