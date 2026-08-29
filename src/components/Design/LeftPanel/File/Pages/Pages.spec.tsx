@@ -13,6 +13,9 @@ import { store } from 'store';
 // types
 import { TDesignState } from 'store/design/types';
 
+// utils
+import { stubVirtualizerViewport } from 'test/stubVirtualizerViewport';
+
 type TStore = EnhancedStore<{ design: TDesignState }> | typeof store;
 
 const createTestStore = (): EnhancedStore<{ design: TDesignState }> => configureStore({ reducer: { design: designReducer } });
@@ -37,6 +40,14 @@ describe('Pages snapshots', () => {
 });
 
 describe('Pages behaviors', () => {
+  beforeEach(() => {
+    stubVirtualizerViewport();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('should render the active page name from the store, collapsed by default', () => {
     // before
     renderPages();

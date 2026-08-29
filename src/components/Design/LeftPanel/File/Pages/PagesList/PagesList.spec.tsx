@@ -13,6 +13,7 @@ import { store } from 'store';
 
 // utils
 import { getMaxPagesListHeight } from './utils/getMaxPagesListHeight';
+import { stubVirtualizerViewport } from 'test/stubVirtualizerViewport';
 
 const renderPagesList = (pendingEditPageId: string | null = null): ReturnType<typeof render> =>
   render(
@@ -22,6 +23,13 @@ const renderPagesList = (pendingEditPageId: string | null = null): ReturnType<ty
   );
 
 describe('PagesList', () => {
+  beforeEach(() => {
+    stubVirtualizerViewport();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
   it('should render one row per page in the store', () => {
     // mock
     const pages = Object.values(selectPages(store.getState()));

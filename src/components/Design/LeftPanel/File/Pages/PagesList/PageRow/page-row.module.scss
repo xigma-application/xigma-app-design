@@ -1,7 +1,8 @@
 .PageRow {
   align-items: center;
+  box-sizing: border-box;
   display: flex;
-  min-height: 32px;
+  height: 32px;
   padding: 0 8px;
 
   &__input {

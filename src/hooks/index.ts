@@ -4,3 +4,4 @@ export * from './useResizeHandler/useResizeHandler';
 export * from './useResizeHandler/types';
 export * from './useScrollThumb/useScrollThumb';
 export * from './useTheme/useTheme';
+export * from './useVirtualList/useVirtualList';
