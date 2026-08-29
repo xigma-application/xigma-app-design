@@ -1,13 +1,14 @@
 import { MouseEvent as ReactMouseEvent, RefObject } from 'react';
 
 export type TArmedRowDrag = {
-  index: number;
+  indices: number[];
   startY: number;
 };
 
 export type TUseTreeRowDragOptions = {
   count: number;
-  onReorder?: (fromIndex: number, toIndex: number) => void;
+  isRowSelected?: (index: number) => boolean;
+  onReorder?: (fromIndices: number[], toIndex: number) => void;
   rowHeight: number;
   rowsRef: RefObject<HTMLDivElement | null>;
 };

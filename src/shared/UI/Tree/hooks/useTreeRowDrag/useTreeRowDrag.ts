@@ -7,16 +7,18 @@ import { TREE_ROW_DRAG_THRESHOLD_PX } from './constants';
 import { TArmedRowDrag, TUseTreeRowDragOptions, TUseTreeRowDragResult } from './types';
 
 // utils
+import { getDraggedIndices } from './utils/getDraggedIndices';
 import { getInsertionIndex } from './utils/getInsertionIndex';
-import { getReorderedIndex } from './utils/getReorderedIndex';
+import { getIsReorderNoOp } from './utils/getIsReorderNoOp';
+import { getReorderedInsertionIndex } from './utils/getReorderedInsertionIndex';
 
-export const useTreeRowDrag = ({ count, onReorder, rowHeight, rowsRef }: TUseTreeRowDragOptions): TUseTreeRowDragResult => {
+export const useTreeRowDrag = ({ count, isRowSelected, onReorder, rowHeight, rowsRef }: TUseTreeRowDragOptions): TUseTreeRowDragResult => {
   const [insertionIndex, setInsertionIndex] = useState<number | null>(null);
   const armedRef = useRef<TArmedRowDrag | null>(null);
 
   const handleRowMouseDown = (index: number, event: ReactMouseEvent<HTMLElement>): void => {
     if (event.button === 0) {
-      armedRef.current = { index, startY: event.clientY };
+      armedRef.current = { indices: getDraggedIndices(index, count, isRowSelected), startY: event.clientY };
     }
   };
 
@@ -37,10 +39,10 @@ export const useTreeRowDrag = ({ count, onReorder, rowHeight, rowsRef }: TUseTre
     const armed = armedRef.current;
 
     if (armed && insertionIndex !== null) {
-      const toIndex = getReorderedIndex(armed.index, insertionIndex);
+      const canReorder = !getIsReorderNoOp(armed.indices, insertionIndex);
 
-      if (toIndex !== armed.index) {
-        onReorder?.(armed.index, toIndex);
+      if (canReorder) {
+        onReorder?.(armed.indices, getReorderedInsertionIndex(armed.indices, insertionIndex));
       }
     }
 
@@ -56,7 +58,7 @@ export const useTreeRowDrag = ({ count, onReorder, rowHeight, rowsRef }: TUseTre
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [count, insertionIndex, onReorder, rowHeight, rowsRef]);
+  }, [count, insertionIndex, isRowSelected, onReorder, rowHeight, rowsRef]);
 
   return { handleRowMouseDown, insertionIndex };
 };

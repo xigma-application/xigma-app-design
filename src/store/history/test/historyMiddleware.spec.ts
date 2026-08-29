@@ -119,7 +119,7 @@ describe('historyMiddleware', () => {
     const orderAfterAdd = selectActivePage(store.getState()).rootOrder;
 
     // before
-    store.dispatch(reorderNode({ fromIndex: orderAfterAdd.indexOf(idA), toIndex: orderAfterAdd.indexOf(idB) }));
+    store.dispatch(reorderNode({ fromIndices: [orderAfterAdd.indexOf(idA)], toIndex: orderAfterAdd.indexOf(idB) }));
 
     expect(selectActivePage(store.getState()).rootOrder).not.toEqual(orderAfterAdd);
 

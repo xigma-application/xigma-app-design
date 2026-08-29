@@ -34,11 +34,39 @@ describe('useReorderNode', () => {
     const { result } = renderHook(() => useReorderNode(), { wrapper });
 
     // action
-    result.current(fromIndex, toIndex);
+    result.current([fromIndex], toIndex);
 
     // result
     const rootOrderAfter = selectActivePage(store.getState()).rootOrder;
     expect(rootOrderAfter[fromIndex]).toBe(secondId);
     expect(rootOrderAfter[toIndex]).toBe(firstId);
+  });
+
+  it('should dispatch reorderNode with multiple from-indices, moving the whole group together', () => {
+    // mock
+    store.dispatch(
+      addNode({ fill: '#ff0000', height: 10, name: 'C', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+    );
+    store.dispatch(
+      addNode({ fill: '#ff0000', height: 10, name: 'D', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+    );
+    store.dispatch(
+      addNode({ fill: '#ff0000', height: 10, name: 'E', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+    );
+
+    const rootOrderBefore = selectActivePage(store.getState()).rootOrder;
+    const [firstId, secondId] = rootOrderBefore.slice(-3);
+    const fromIndices = [rootOrderBefore.length - 3, rootOrderBefore.length - 2];
+    const toIndex = rootOrderBefore.length;
+
+    // before
+    const { result } = renderHook(() => useReorderNode(), { wrapper });
+
+    // action
+    result.current(fromIndices, toIndex);
+
+    // result
+    const rootOrderAfter = selectActivePage(store.getState()).rootOrder;
+    expect(rootOrderAfter.slice(-2)).toEqual([firstId, secondId]);
   });
 });

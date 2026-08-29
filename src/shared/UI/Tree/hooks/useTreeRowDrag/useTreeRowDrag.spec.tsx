@@ -82,7 +82,7 @@ describe('useTreeRowDrag', () => {
     fireMouseUp();
 
     // result
-    expect(onReorder).toHaveBeenCalledWith(0, 2);
+    expect(onReorder).toHaveBeenCalledWith([0], 2);
     expect(onReorder).toHaveBeenCalledTimes(1);
     expect(result.current.insertionIndex).toBeNull();
   });
@@ -118,7 +118,7 @@ describe('useTreeRowDrag', () => {
     fireMouseUp();
 
     // result — scrolled down by 2 rows, so the pointer near the top now targets slot 2
-    expect(onReorder).toHaveBeenCalledWith(0, 2);
+    expect(onReorder).toHaveBeenCalledWith([0], 2);
     expect(onReorder).toHaveBeenCalledTimes(1);
   });
 
@@ -135,5 +135,41 @@ describe('useTreeRowDrag', () => {
 
     // result
     expect(onReorder).not.toHaveBeenCalled();
+  });
+
+  it('should drag the whole multi-selection together when starting the drag on a selected row', () => {
+    // mock
+    const onReorder = vi.fn();
+    const isRowSelected = (index: number): boolean => [0, 1].includes(index);
+
+    // before
+    const rowsRef = createRowsRef();
+    const { result } = renderHook(() => useTreeRowDrag({ count: 4, isRowSelected, onReorder, rowHeight: ROW_HEIGHT, rowsRef }));
+
+    // action — drag row 0 (part of the [0,1] selection) down past row 3
+    act(() => result.current.handleRowMouseDown(0, mouseDownEvent(0)));
+    fireMouseMove(ROW_HEIGHT * 4);
+    fireMouseUp();
+
+    // result — both selected rows move together
+    expect(onReorder).toHaveBeenCalledWith([0, 1], 2);
+  });
+
+  it('should only drag the clicked row when it is not part of the current multi-selection', () => {
+    // mock
+    const onReorder = vi.fn();
+    const isRowSelected = (index: number): boolean => [0, 1].includes(index);
+
+    // before
+    const rowsRef = createRowsRef();
+    const { result } = renderHook(() => useTreeRowDrag({ count: 4, isRowSelected, onReorder, rowHeight: ROW_HEIGHT, rowsRef }));
+
+    // action — drag row 3, which is not selected
+    act(() => result.current.handleRowMouseDown(3, mouseDownEvent(0)));
+    fireMouseMove(TREE_ROW_DRAG_THRESHOLD_PX);
+    fireMouseUp();
+
+    // result — only row 3 moves
+    expect(onReorder).toHaveBeenCalledWith([3], 0);
   });
 });

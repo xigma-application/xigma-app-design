@@ -2,10 +2,10 @@
 import { reorderNode } from 'store/design/slice';
 import { useAppDispatch } from 'store';
 
-export const useReorderNode = (): TFunc<[number, number]> => {
+export const useReorderNode = (): TFunc<[number[], number]> => {
   const dispatch = useAppDispatch();
 
-  return (fromIndex: number, toIndex: number): void => {
-    dispatch(reorderNode({ fromIndex, toIndex }));
+  return (fromIndices: number[], toIndex: number): void => {
+    dispatch(reorderNode({ fromIndices, toIndex }));
   };
 };

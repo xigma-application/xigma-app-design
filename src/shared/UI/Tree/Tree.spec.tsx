@@ -71,7 +71,7 @@ describe('Tree', () => {
     fireEvent.mouseUp(document);
 
     // result
-    expect(onReorder).toHaveBeenCalledWith(0, 2);
+    expect(onReorder).toHaveBeenCalledWith([0], 2);
     expect(document.querySelector('[class*="dropIndicator"]')).not.toBeInTheDocument();
     expect(document.querySelector('[class*="viewport--dragging"]')).not.toBeInTheDocument();
   });
@@ -122,5 +122,25 @@ describe('Tree', () => {
     // result
     expect(container.querySelector('[class*="squareTop"]')).toBeInTheDocument();
     expect(container.querySelector('[class*="squareBottom"]')).toBeInTheDocument();
+  });
+
+  it('should drag every selected row together when starting the drag on a row that is part of the current multi-selection', () => {
+    // mock
+    const onReorder = vi.fn();
+    const isRowSelected = (index: number): boolean => index === 0 || index === 1;
+
+    // before
+    render(
+      <Tree count={4} isRowSelected={isRowSelected} onReorder={onReorder} renderRow={(index) => <span>Row {index}</span>} rowHeight={32} />,
+    );
+    const rowZero = screen.getByText('Row 0').parentElement!;
+
+    // action — drag row 0 (part of the [0,1] selection) down past row 3
+    fireEvent.mouseDown(rowZero, { button: 0, clientY: 0 });
+    fireEvent.mouseMove(document, { clientY: 128 });
+    fireEvent.mouseUp(document);
+
+    // result — both selected rows move together
+    expect(onReorder).toHaveBeenCalledWith([0, 1], 2);
   });
 });

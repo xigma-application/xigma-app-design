@@ -46,6 +46,11 @@ export type TReorderPayload = {
   toIndex: number;
 };
 
+export type TReorderNodesPayload = {
+  fromIndices: number[];
+  toIndex: number;
+};
+
 export type TStartTextEditPayload = {
   box: TEditingTextBox;
   content?: string;

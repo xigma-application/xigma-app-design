@@ -22,7 +22,7 @@ export type TTreeProps = {
   count: number;
   isRowSelected?: (index: number) => boolean;
   onDeselectAll?: TFunc;
-  onReorder?: (fromIndex: number, toIndex: number) => void;
+  onReorder?: (fromIndices: number[], toIndex: number) => void;
   renderRow: (index: number) => ReactNode;
   rowHeight: number;
   scrollToIndex?: number;
@@ -40,7 +40,7 @@ export const Tree: FC<TTreeProps> = ({
 }) => {
   const rowsRef: RefObject<HTMLDivElement | null> = useRef(null);
   const { items, totalSize } = useVirtualList({ count, rowHeight, scrollRef: rowsRef, scrollToIndex });
-  const { handleRowMouseDown, insertionIndex } = useTreeRowDrag({ count, onReorder, rowHeight, rowsRef });
+  const { handleRowMouseDown, insertionIndex } = useTreeRowDrag({ count, isRowSelected, onReorder, rowHeight, rowsRef });
   const isDragging = insertionIndex !== null;
   const selectionBackgroundSegments = isRowSelected ? getSelectionBackgroundSegments(items, isRowSelected) : [];
 

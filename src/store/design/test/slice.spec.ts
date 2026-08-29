@@ -249,7 +249,7 @@ describe('design slice', () => {
     const toIndex = rootOrderBefore.length - 1;
 
     // action
-    const state = slice(withSecond, reorderNode({ fromIndex, toIndex }));
+    const state = slice(withSecond, reorderNode({ fromIndices: [fromIndex], toIndex }));
 
     // result
     const rootOrderAfter = state.pages[state.activePageId].rootOrder;

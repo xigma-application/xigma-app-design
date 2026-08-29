@@ -14,7 +14,7 @@ import {
 } from './constants';
 
 // types
-import { TDesignSnapshot, TDesignState, TReorderPayload, TStartTextEditPayload, TTextEditSelection } from './types';
+import { TDesignSnapshot, TDesignState, TReorderNodesPayload, TReorderPayload, TStartTextEditPayload, TTextEditSelection } from './types';
 import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/design/types';
@@ -108,7 +108,7 @@ const designSlice = createSlice({
     renamePage: (state, action: PayloadAction<{ id: string; name: string }>) => {
       state.pages[action.payload.id].name = action.payload.name;
     },
-    reorderNode: (state, action: PayloadAction<TReorderPayload>) => handleReorderNode(state, action.payload),
+    reorderNode: (state, action: PayloadAction<TReorderNodesPayload>) => handleReorderNode(state, action.payload),
     reorderPages: (state, action: PayloadAction<TReorderPayload>) => handleReorderPages(state, action.payload),
     replaceDesignSnapshot: (state, action: PayloadAction<TDesignSnapshot>) => handleReplaceDesignSnapshot(state, action.payload),
     replaceNode: (state, action: PayloadAction<{ id: string; node: TSceneNode }>) => handleReplaceNode(state, action.payload),

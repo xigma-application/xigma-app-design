@@ -27,11 +27,25 @@ describe('useReorderPages', () => {
     const { result } = renderHook(() => useReorderPages(), { wrapper });
 
     // action
-    result.current(fromIndex, toIndex);
+    result.current([fromIndex], toIndex);
 
     // result
     const pagesAfter = Object.keys(selectPages(store.getState()));
     expect(pagesAfter[fromIndex]).toBe(lastId);
     expect(pagesAfter[toIndex]).toBe(secondToLastId);
+  });
+
+  it('should no-op when called with an empty from-indices array', () => {
+    // mock
+    const pagesBefore = Object.keys(selectPages(store.getState()));
+
+    // before
+    const { result } = renderHook(() => useReorderPages(), { wrapper });
+
+    // action
+    result.current([], 0);
+
+    // result
+    expect(Object.keys(selectPages(store.getState()))).toEqual(pagesBefore);
   });
 });
