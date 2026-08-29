@@ -10,7 +10,6 @@
 
   &__content {
     align-items: center;
-    border-radius: 5px;
     column-gap: 8px;
     display: flex;
     flex: 1;
@@ -19,12 +18,9 @@
     padding: 0 6px;
   }
 
-  &:hover &__content {
+  &:not([aria-selected='true']):hover &__content {
     background-color: color-mix(in srgb, var(--color-neutral-3) 70%, transparent);
-  }
-
-  &[aria-selected='true'] &__content {
-    background-color: var(--color-selected);
+    border-radius: 5px;
   }
 
   &__toggle {

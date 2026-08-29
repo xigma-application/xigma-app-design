@@ -1,5 +1,5 @@
 import { Provider } from 'react-redux';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 
 // components
 import LayersTree from './LayersTree';
@@ -67,5 +67,25 @@ describe('LayersTree', () => {
 
     // result
     expect(selectActivePage(store.getState()).rootOrder.indexOf(idA)).not.toBe(indexA);
+  });
+
+  it('should render one merged selection background spanning both rows when two adjacent rows are selected', () => {
+    // before
+    act(() => store.dispatch(setSelection([idA, idB])));
+    const { container } = renderLayersTree();
+
+    // result — a single background element covers both rows, not one per row
+    const mergedSegments = container.querySelectorAll('[class*="Tree__selectionBackground"]');
+    expect(mergedSegments).toHaveLength(1);
+    const mergedHeight = Number((mergedSegments[0] as HTMLElement).style.height.replace('px', ''));
+
+    // action — deselect one row, leaving only a single selected row
+    act(() => store.dispatch(setSelection([idB])));
+
+    // result — the background shrinks to a single row's own height
+    const singleSegments = container.querySelectorAll('[class*="Tree__selectionBackground"]');
+    expect(singleSegments).toHaveLength(1);
+    const singleHeight = Number((singleSegments[0] as HTMLElement).style.height.replace('px', ''));
+    expect(singleHeight).toBeLessThan(mergedHeight);
   });
 });

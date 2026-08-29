@@ -1,0 +1,1 @@
+export const TREE_SELECTION_BACKGROUND_INSET_PX = 4;

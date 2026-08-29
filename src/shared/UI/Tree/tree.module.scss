@@ -37,6 +37,26 @@
     width: 100%;
   }
 
+  &__selectionBackground {
+    background-color: var(--color-selected);
+    border-radius: 5px;
+    left: 8px;
+    pointer-events: none;
+    position: absolute;
+    right: 8px;
+    top: 0;
+  }
+
+  &__selectionBackground--squareTop {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  &__selectionBackground--squareBottom {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
   &__dropIndicator {
     background-color: var(--color-neutral-1);
     height: 2px;

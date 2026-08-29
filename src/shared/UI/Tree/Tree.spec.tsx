@@ -88,4 +88,39 @@ describe('Tree', () => {
     // result
     expect(document.querySelector('[class*="dropIndicator"]')).not.toBeInTheDocument();
   });
+
+  it('should not render a selection background when isRowSelected is not provided', () => {
+    // before
+    const { container } = render(<Tree count={3} renderRow={(index) => <span>Row {index}</span>} rowHeight={32} />);
+
+    // result
+    expect(container.querySelector('[class*="Tree__selectionBackground"]')).not.toBeInTheDocument();
+  });
+
+  it('should render one merged selection background for two adjacent selected rows, distinct from an isolated selected row', () => {
+    // before
+    const isRowSelected = (index: number): boolean => index === 0 || index === 1;
+    const { container } = render(
+      <Tree count={4} isRowSelected={isRowSelected} renderRow={(index) => <span>Row {index}</span>} rowHeight={32} />,
+    );
+
+    // result
+    expect(container.querySelectorAll('[class*="Tree__selectionBackground"]')).toHaveLength(1);
+    expect(container.querySelector('[class*="squareTop"]')).not.toBeInTheDocument();
+    expect(container.querySelector('[class*="squareBottom"]')).not.toBeInTheDocument();
+  });
+
+  it('should square off both edges of the selection background when the selection continues beyond the visible rows', () => {
+    // mock — every index, including out-of-view neighbors, is treated as selected
+    const isRowSelected = (): boolean => true;
+
+    // before
+    const { container } = render(
+      <Tree count={3} isRowSelected={isRowSelected} renderRow={(index) => <span>Row {index}</span>} rowHeight={32} />,
+    );
+
+    // result
+    expect(container.querySelector('[class*="squareTop"]')).toBeInTheDocument();
+    expect(container.querySelector('[class*="squareBottom"]')).toBeInTheDocument();
+  });
 });

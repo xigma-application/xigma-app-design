@@ -24,11 +24,13 @@ const LayersTree: FC = () => {
   const handleReorderNode = useReorderNode();
 
   const renderRow = (index: number): ReactNode => <TreeItem isSelected={selectedIds.includes(nodes[index].id)} node={nodes[index]} />;
+  const isRowSelected = (index: number): boolean => index >= 0 && index < nodes.length && selectedIds.includes(nodes[index].id);
 
   return (
     <div className={styles.LayersTree}>
       <Tree
         count={nodes.length}
+        isRowSelected={isRowSelected}
         onDeselectAll={handleDeselectOnEmptyClick}
         onReorder={handleReorderNode}
         renderRow={renderRow}
