@@ -61,9 +61,9 @@ describe('resolveSurvivingFilledFaceKeys', () => {
     // mock — two independent triangles sharing a hub vertex; component only still has the first one
     const component: TVectorNetworkComponent = {
       segments: {
+        e1: { endId: 'p2', id: 'e1', startId: 'p1', tangentEnd: null, tangentStart: null },
         s1: { endId: 'p1', id: 's1', startId: 'h', tangentEnd: null, tangentStart: null },
         s2: { endId: 'p2', id: 's2', startId: 'h', tangentEnd: null, tangentStart: null },
-        e1: { endId: 'p2', id: 'e1', startId: 'p1', tangentEnd: null, tangentStart: null },
       },
       vertexHandleModes: {},
       vertices: { h: { id: 'h', x: 50, y: 0 }, p1: { id: 'p1', x: 0, y: 100 }, p2: { id: 'p2', x: 100, y: 100 } },

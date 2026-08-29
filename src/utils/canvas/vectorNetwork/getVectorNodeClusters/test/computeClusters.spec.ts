@@ -20,7 +20,10 @@ const seg = (
 
 const vertex = (id: string, x: number, y: number): TVectorVertex => ({ id, x, y });
 
-const toRecords = (vertices: TVectorVertex[], segments: TVectorSegment[]) => ({
+const toRecords = (
+  vertices: TVectorVertex[],
+  segments: TVectorSegment[],
+): { segments: Record<string, TVectorSegment>; vertices: Record<string, TVectorVertex> } => ({
   segments: Object.fromEntries(segments.map((segment) => [segment.id, segment])),
   vertices: Object.fromEntries(vertices.map((vert) => [vert.id, vert])),
 });

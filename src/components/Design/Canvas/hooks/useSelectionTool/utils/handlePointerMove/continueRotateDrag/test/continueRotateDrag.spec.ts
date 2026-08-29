@@ -8,6 +8,7 @@ import { store } from 'store';
 // types
 import { NodeType } from 'types/design/enums';
 import { TRotateDragState } from 'types/design/selectionTool/types';
+import { TVectorNodeRotateSnapshot } from 'types/design/canvas/types';
 
 // utils
 import { continueRotateDrag } from '../continueRotateDrag';
@@ -155,7 +156,7 @@ describe('continueRotateDrag', () => {
   });
 
   describe('vector node rotate snapshots', () => {
-    const buildSnapshot = () => ({
+    const buildSnapshot = (): TVectorNodeRotateSnapshot => ({
       deltaDegrees: 0,
       facesByColor: [],
       pivot: { x: 50, y: 50 },

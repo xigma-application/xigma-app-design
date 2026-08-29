@@ -9,6 +9,7 @@ import { store } from 'store';
 import { NodeType, ToolName } from 'types/design/enums';
 import { TFrameNode, TVectorNode } from 'types/design/types';
 import { TResizeDragState } from 'types/design/selectionTool/types';
+import { TVectorNodeResizeSnapshot } from 'types/design/canvas/types';
 
 // utils
 import { continueResizeDrag } from '../continueResizeDrag';
@@ -709,7 +710,7 @@ describe('continueResizeDrag', () => {
   });
 
   describe('vector node resize snapshots', () => {
-    const buildSnapshot = () => ({
+    const buildSnapshot = (): TVectorNodeResizeSnapshot => ({
       anchorX: null,
       anchorY: null,
       facesByColor: [],

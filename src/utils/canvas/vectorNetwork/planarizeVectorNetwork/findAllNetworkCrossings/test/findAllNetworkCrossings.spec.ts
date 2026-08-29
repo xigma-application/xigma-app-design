@@ -214,14 +214,14 @@ describe('findAllNetworkCrossings', () => {
       // cells (small segments elsewhere keep the derived cell size small), so this only passes if a box
       // spanning several cells is correctly matched against a box in any one of them, exactly once
       const vertices: Record<string, TVectorVertex> = {
+        // a long segment spanning many cells, crossed by a short one near its far end
+        long1: { id: 'long1', x: 0, y: 500 },
+        long2: { id: 'long2', x: 1000, y: 500 },
         // many small, tightly-packed segments elsewhere in the network — keeps the derived cell size small
         s1: { id: 's1', x: 0, y: 0 },
         s2: { id: 's2', x: 1, y: 1 },
         s3: { id: 's3', x: 100, y: 100 },
         s4: { id: 's4', x: 101, y: 101 },
-        // a long segment spanning many cells, crossed by a short one near its far end
-        long1: { id: 'long1', x: 0, y: 500 },
-        long2: { id: 'long2', x: 1000, y: 500 },
         short1: { id: 'short1', x: 950, y: 480 },
         short2: { id: 'short2', x: 950, y: 520 },
       };

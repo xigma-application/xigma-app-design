@@ -15,7 +15,7 @@ const buildPlanar = (vertices: TVectorVertex[], segments: TVectorSegment[]): TPl
   vertices: Object.fromEntries(vertices.map((vert) => [vert.id, vert])),
 });
 
-const buildScene = () => {
+const buildScene = (): { cluster: TVectorNodeCluster; entry: TCacheEntry<string>; planar: TPlanarVectorNetwork } => {
   const planar = buildPlanar([vertex('a', 0, 0), vertex('b', 10, 0)], [seg('s1', 'a', 'b')]);
   const cluster: TVectorNodeCluster = { key: 'a,b', segmentIds: ['s1'], vertexIds: ['a', 'b'] };
   const entry: TCacheEntry<string> = {
