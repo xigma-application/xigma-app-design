@@ -23,6 +23,27 @@ const createEvent = (clientY: number, buttons = 1): ReactPointerEvent<HTMLDivEle
   }) as unknown as ReactPointerEvent<HTMLDivElement>;
 
 describe('useScrollThumb behaviors', () => {
+  let observedElements: Element[];
+  let triggerResize: () => void;
+
+  beforeEach(() => {
+    observedElements = [];
+
+    window.ResizeObserver = class {
+      constructor(callback: ResizeObserverCallback) {
+        triggerResize = (): void => callback([], this as unknown as ResizeObserver);
+      }
+
+      disconnect(): void {}
+
+      observe(element: Element): void {
+        observedElements.push(element);
+      }
+
+      unobserve(): void {}
+    } as unknown as typeof ResizeObserver;
+  });
+
   it('should default to a full-height thumb before the scroll element is attached', () => {
     // mock
     const scrollRef: RefObject<HTMLDivElement | null> = { current: null };
@@ -61,6 +82,38 @@ describe('useScrollThumb behaviors', () => {
 
     // result
     expect(result.current.thumbTopRatio).toBeCloseTo(0.5);
+  });
+
+  it('should re-measure when the scroll container is resized (no scroll event fires)', () => {
+    // mock
+    const scrollElement = createScrollElement(84, 336, 0);
+    const scrollRef: RefObject<HTMLDivElement | null> = { current: scrollElement };
+
+    // before
+    const { result } = renderHook(() => useScrollThumb(scrollRef));
+    expect(result.current.thumbHeightRatio).toBeCloseTo(0.25);
+
+    // action — the panel is dragged taller so all content now fits, without any scroll
+    Object.defineProperty(scrollElement, 'clientHeight', { configurable: true, value: 336 });
+    act(() => triggerResize());
+
+    // result
+    expect(result.current.thumbHeightRatio).toBe(1);
+  });
+
+  it('should also observe the content wrapper so the thumb tracks content that grows', () => {
+    // mock
+    const scrollElement = createScrollElement(84, 336, 0);
+
+    scrollElement.appendChild(document.createElement('div'));
+    const scrollRef: RefObject<HTMLDivElement | null> = { current: scrollElement };
+
+    // before
+    renderHook(() => useScrollThumb(scrollRef));
+
+    // result
+    expect(observedElements).toContain(scrollElement);
+    expect(observedElements).toContain(scrollElement.firstElementChild);
   });
 
   it('should drag the scroll position proportionally to the pointer movement', () => {

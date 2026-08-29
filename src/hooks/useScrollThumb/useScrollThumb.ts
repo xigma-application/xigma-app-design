@@ -32,12 +32,19 @@ export const useScrollThumb = (scrollRef: RefObject<HTMLDivElement | null>): TUs
 
     if (scrollElement) {
       const updateMetrics = (): void => setMetrics(getScrollMetrics(scrollElement));
+      const resizeObserver = new ResizeObserver(updateMetrics);
 
       updateMetrics();
       scrollElement.addEventListener('scroll', updateMetrics);
+      resizeObserver.observe(scrollElement);
+
+      if (scrollElement.firstElementChild) {
+        resizeObserver.observe(scrollElement.firstElementChild);
+      }
 
       return (): void => {
         scrollElement.removeEventListener('scroll', updateMetrics);
+        resizeObserver.disconnect();
       };
     }
   }, [scrollRef]);
