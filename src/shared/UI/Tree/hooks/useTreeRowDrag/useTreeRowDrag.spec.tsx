@@ -39,11 +39,10 @@ describe('useTreeRowDrag', () => {
     fireMouseMove(TREE_ROW_DRAG_THRESHOLD_PX - 1);
 
     // result
-    expect(result.current.dragIndex).toBeNull();
     expect(result.current.insertionIndex).toBeNull();
   });
 
-  it('should start dragging and report the pointer offset once past the threshold', () => {
+  it('should report an insertion index once the pointer moves past the threshold', () => {
     // before
     const rowsRef = createRowsRef();
     const { result } = renderHook(() => useTreeRowDrag({ count: 3, rowHeight: ROW_HEIGHT, rowsRef }));
@@ -53,8 +52,7 @@ describe('useTreeRowDrag', () => {
     fireMouseMove(TREE_ROW_DRAG_THRESHOLD_PX);
 
     // result
-    expect(result.current.dragIndex).toBe(1);
-    expect(result.current.pointerOffsetY).toBe(TREE_ROW_DRAG_THRESHOLD_PX);
+    expect(result.current.insertionIndex).not.toBeNull();
   });
 
   it('should not arm a drag on a non-primary mouse button', () => {
@@ -67,7 +65,7 @@ describe('useTreeRowDrag', () => {
     fireMouseMove(100);
 
     // result
-    expect(result.current.dragIndex).toBeNull();
+    expect(result.current.insertionIndex).toBeNull();
   });
 
   it('should call onReorder with the mapped index once dropped in a new slot', () => {
@@ -86,9 +84,7 @@ describe('useTreeRowDrag', () => {
     // result
     expect(onReorder).toHaveBeenCalledWith(0, 2);
     expect(onReorder).toHaveBeenCalledTimes(1);
-    expect(result.current.dragIndex).toBeNull();
     expect(result.current.insertionIndex).toBeNull();
-    expect(result.current.pointerOffsetY).toBe(0);
   });
 
   it('should not call onReorder when dropped back in the original slot', () => {

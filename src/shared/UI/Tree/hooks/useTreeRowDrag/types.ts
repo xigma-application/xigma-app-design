@@ -13,8 +13,6 @@ export type TUseTreeRowDragOptions = {
 };
 
 export type TUseTreeRowDragResult = {
-  dragIndex: number | null;
   handleRowMouseDown: (index: number, event: ReactMouseEvent<HTMLElement>) => void;
   insertionIndex: number | null;
-  pointerOffsetY: number;
 };

@@ -26,19 +26,15 @@
     width: 100%;
   }
 
+  &__viewport--dragging {
+    pointer-events: none;
+  }
+
   &__row {
     left: 0;
     position: absolute;
     top: 0;
     width: 100%;
-  }
-
-  &__row--dragging {
-    box-shadow: 0 4px 12px rgb(0 0 0 / 30%);
-    cursor: grabbing;
-    opacity: 0.9;
-    pointer-events: none;
-    z-index: 1;
   }
 
   &__dropIndicator {

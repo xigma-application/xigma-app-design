@@ -49,29 +49,31 @@ describe('Tree', () => {
     expect(onDeselectAll).toHaveBeenCalledTimes(1);
   });
 
-  it('should render a lifted row and a drop indicator while dragging, then call onReorder with the mapped index on drop', () => {
+  it('should show only a drop indicator while dragging, with the dragged row staying in place, then call onReorder with the mapped index on drop', () => {
     // mock
     const onReorder = vi.fn();
 
     // before
     render(<Tree count={3} onReorder={onReorder} renderRow={(index) => <span>Row {index}</span>} rowHeight={32} />);
     const rowZero = screen.getByText('Row 0').parentElement!;
+    const initialTransform = (rowZero as HTMLElement).style.transform;
 
     // action
     fireEvent.mouseDown(rowZero, { button: 0, clientY: 0 });
     fireEvent.mouseMove(document, { clientY: 80 });
 
     // result
-    expect(document.querySelector('[class*="row--dragging"]')).toBeInTheDocument();
     expect(document.querySelector('[class*="dropIndicator"]')).toBeInTheDocument();
+    expect((rowZero as HTMLElement).style.transform).toBe(initialTransform);
+    expect(document.querySelector('[class*="viewport--dragging"]')).toBeInTheDocument();
 
     // action
     fireEvent.mouseUp(document);
 
     // result
     expect(onReorder).toHaveBeenCalledWith(0, 2);
-    expect(document.querySelector('[class*="row--dragging"]')).not.toBeInTheDocument();
     expect(document.querySelector('[class*="dropIndicator"]')).not.toBeInTheDocument();
+    expect(document.querySelector('[class*="viewport--dragging"]')).not.toBeInTheDocument();
   });
 
   it('should not wire row dragging when onReorder is not provided', () => {
@@ -84,6 +86,6 @@ describe('Tree', () => {
     fireEvent.mouseMove(document, { clientY: 80 });
 
     // result
-    expect(document.querySelector('[class*="row--dragging"]')).not.toBeInTheDocument();
+    expect(document.querySelector('[class*="dropIndicator"]')).not.toBeInTheDocument();
   });
 });

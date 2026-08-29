@@ -11,9 +11,7 @@ import { getInsertionIndex } from './utils/getInsertionIndex';
 import { getReorderedIndex } from './utils/getReorderedIndex';
 
 export const useTreeRowDrag = ({ count, onReorder, rowHeight, rowsRef }: TUseTreeRowDragOptions): TUseTreeRowDragResult => {
-  const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [insertionIndex, setInsertionIndex] = useState<number | null>(null);
-  const [pointerOffsetY, setPointerOffsetY] = useState(0);
   const armedRef = useRef<TArmedRowDrag | null>(null);
 
   const handleRowMouseDown = (index: number, event: ReactMouseEvent<HTMLElement>): void => {
@@ -29,9 +27,7 @@ export const useTreeRowDrag = ({ count, onReorder, rowHeight, rowsRef }: TUseTre
     if (armed && container) {
       const deltaY = event.clientY - armed.startY;
 
-      if (dragIndex !== null || Math.abs(deltaY) >= TREE_ROW_DRAG_THRESHOLD_PX) {
-        setDragIndex(armed.index);
-        setPointerOffsetY(deltaY);
+      if (insertionIndex !== null || Math.abs(deltaY) >= TREE_ROW_DRAG_THRESHOLD_PX) {
         setInsertionIndex(getInsertionIndex(event.clientY, container.getBoundingClientRect().top, container.scrollTop, rowHeight, count));
       }
     }
@@ -49,9 +45,7 @@ export const useTreeRowDrag = ({ count, onReorder, rowHeight, rowsRef }: TUseTre
     }
 
     armedRef.current = null;
-    setDragIndex(null);
     setInsertionIndex(null);
-    setPointerOffsetY(0);
   };
 
   useEffect(() => {
@@ -62,7 +56,7 @@ export const useTreeRowDrag = ({ count, onReorder, rowHeight, rowsRef }: TUseTre
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [count, dragIndex, insertionIndex, onReorder, rowHeight, rowsRef]);
+  }, [count, insertionIndex, onReorder, rowHeight, rowsRef]);
 
-  return { dragIndex, handleRowMouseDown, insertionIndex, pointerOffsetY };
+  return { handleRowMouseDown, insertionIndex };
 };

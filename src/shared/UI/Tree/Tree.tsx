@@ -24,7 +24,8 @@ export type TTreeProps = {
 export const Tree: FC<TTreeProps> = ({ className = '', count, onDeselectAll, onReorder, renderRow, rowHeight, scrollToIndex }) => {
   const rowsRef: RefObject<HTMLDivElement | null> = useRef(null);
   const { items, totalSize } = useVirtualList({ count, rowHeight, scrollRef: rowsRef, scrollToIndex });
-  const { dragIndex, handleRowMouseDown, insertionIndex, pointerOffsetY } = useTreeRowDrag({ count, onReorder, rowHeight, rowsRef });
+  const { handleRowMouseDown, insertionIndex } = useTreeRowDrag({ count, onReorder, rowHeight, rowsRef });
+  const isDragging = insertionIndex !== null;
 
   const handleRowsClick = (event: MouseEvent<HTMLDivElement>): void => {
     if (onDeselectAll && event.target === event.currentTarget) {
@@ -35,23 +36,18 @@ export const Tree: FC<TTreeProps> = ({ className = '', count, onDeselectAll, onR
   return (
     <div className={cx(styles.Tree, className)}>
       <div className={styles.Tree__rows} onClick={handleRowsClick} ref={rowsRef}>
-        <div className={styles.Tree__viewport} style={{ height: totalSize }}>
-          {items.map((virtualRow) => {
-            const isDragged = virtualRow.index === dragIndex;
-            const translateY = isDragged ? virtualRow.start + pointerOffsetY : virtualRow.start;
-
-            return (
-              <div
-                className={cx(styles.Tree__row, isDragged && styles['Tree__row--dragging'])}
-                key={virtualRow.key}
-                onMouseDown={onReorder ? (event): void => handleRowMouseDown(virtualRow.index, event) : undefined}
-                style={{ height: virtualRow.size, transform: `translateY(${translateY}px)` }}
-              >
-                {renderRow(virtualRow.index)}
-              </div>
-            );
-          })}
-          {insertionIndex !== null && (
+        <div className={cx(styles.Tree__viewport, isDragging && styles['Tree__viewport--dragging'])} style={{ height: totalSize }}>
+          {items.map((virtualRow) => (
+            <div
+              className={styles.Tree__row}
+              key={virtualRow.key}
+              onMouseDown={onReorder ? (event): void => handleRowMouseDown(virtualRow.index, event) : undefined}
+              style={{ height: virtualRow.size, transform: `translateY(${virtualRow.start}px)` }}
+            >
+              {renderRow(virtualRow.index)}
+            </div>
+          ))}
+          {isDragging && (
             <div className={styles.Tree__dropIndicator} style={{ transform: `translateY(${insertionIndex * rowHeight}px)` }} />
           )}
         </div>
