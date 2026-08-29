@@ -1,6 +1,8 @@
 .Layers {
   display: flex;
+  flex: 1;
   flex-direction: column;
+  min-height: 0;
 
   &__header {
     align-items: center;
@@ -15,17 +17,5 @@
 
   &__header[aria-expanded='true']:hover [data-layers-toggle] {
     opacity: 1;
-  }
-
-  &__treeWrapper {
-    position: relative;
-  }
-
-  &__resize-handle {
-    bottom: -3px;
-    height: 6px;
-    left: 0;
-    position: absolute;
-    right: 0;
   }
 }

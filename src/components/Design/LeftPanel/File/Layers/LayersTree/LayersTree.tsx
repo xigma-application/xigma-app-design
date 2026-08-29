@@ -1,0 +1,33 @@
+import { FC, ReactNode } from 'react';
+
+// components
+import { Tree, TreeItem } from 'shared';
+
+// hooks
+import { useDeselectOnEmptyClick } from './hooks/useDeselectOnEmptyClick';
+
+// others
+import { LAYERS_TREE_ROW_HEIGHT } from '../constants';
+
+// store
+import { selectOrderedNodes, selectSelectedIds } from 'store/design/selectors';
+import { useAppSelector } from 'store';
+
+// styles
+import styles from './layers-tree.module.scss';
+
+const LayersTree: FC = () => {
+  const nodes = useAppSelector(selectOrderedNodes);
+  const selectedIds = useAppSelector(selectSelectedIds);
+  const handleDeselectOnEmptyClick = useDeselectOnEmptyClick();
+
+  const renderRow = (index: number): ReactNode => <TreeItem isSelected={selectedIds.includes(nodes[index].id)} node={nodes[index]} />;
+
+  return (
+    <div className={styles.LayersTree}>
+      <Tree count={nodes.length} onDeselectAll={handleDeselectOnEmptyClick} renderRow={renderRow} rowHeight={LAYERS_TREE_ROW_HEIGHT} />
+    </div>
+  );
+};
+
+export default LayersTree;

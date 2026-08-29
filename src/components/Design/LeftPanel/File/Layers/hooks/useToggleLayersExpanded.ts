@@ -7,7 +7,7 @@ export type TUseToggleLayersExpandedResult = {
 };
 
 export const useToggleLayersExpanded = (): TUseToggleLayersExpandedResult => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const handleToggleClick = (): void => {
     setIsExpanded((expanded) => !expanded);

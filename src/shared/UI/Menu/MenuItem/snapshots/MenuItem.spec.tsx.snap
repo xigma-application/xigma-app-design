@@ -3,7 +3,7 @@
 exports[`MenuItem snapshots > should render a disabled MenuItem 1`] = `
 <div
   aria-disabled="true"
-  class="_MenuItem_abf4a8"
+  class="_MenuItem_18161c"
   data-disabled=""
   data-orientation="vertical"
   data-radix-collection-item=""
@@ -47,12 +47,12 @@ exports[`MenuItem snapshots > should render a disabled MenuItem 1`] = `
     />
   </svg>
   <span
-    class="_MenuItem__label_abf4a8"
+    class="_MenuItem__label_18161c"
   >
     Frame
   </span>
   <span
-    class="_MenuItem__shortcut_abf4a8"
+    class="_MenuItem__shortcut_18161c"
   >
     F
   </span>
@@ -61,7 +61,7 @@ exports[`MenuItem snapshots > should render a disabled MenuItem 1`] = `
 
 exports[`MenuItem snapshots > should render a selected MenuItem with an icon and a shortcut 1`] = `
 <div
-  class="_MenuItem_abf4a8"
+  class="_MenuItem_18161c"
   data-orientation="vertical"
   data-radix-collection-item=""
   role="menuitem"
@@ -104,12 +104,12 @@ exports[`MenuItem snapshots > should render a selected MenuItem with an icon and
     />
   </svg>
   <span
-    class="_MenuItem__label_abf4a8"
+    class="_MenuItem__label_18161c"
   >
     Frame
   </span>
   <span
-    class="_MenuItem__shortcut_abf4a8"
+    class="_MenuItem__shortcut_18161c"
   >
     F
   </span>

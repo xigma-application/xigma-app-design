@@ -4,7 +4,7 @@ exports[`MenuSub snapshots > should render a MenuSub trigger 1`] = `
 <div
   aria-expanded="false"
   aria-haspopup="menu"
-  class="_MenuSub_b5f304"
+  class="_MenuSub_a190d9"
   data-orientation="vertical"
   data-radix-collection-item=""
   data-state="closed"
@@ -30,13 +30,13 @@ exports[`MenuSub snapshots > should render a MenuSub trigger 1`] = `
     />
   </svg>
   <span
-    class="_MenuSub__label_b5f304"
+    class="_MenuSub__label_a190d9"
   >
     Copy as
   </span>
   <svg
     aria-hidden="true"
-    class="_MenuSub__chevron_b5f304"
+    class="_MenuSub__chevron_a190d9"
     data-fpl-icon-size="16"
     fill="none"
     height="14"

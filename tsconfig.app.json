@@ -45,5 +45,5 @@
     },
     "types": ["vitest/globals", "@testing-library/jest-dom"]
   },
-  "include": ["src", "scripts/generateStressTestVectorGrid.ts"]
+  "include": ["src", "scripts/generateStressTestVectorGrid.ts", "scripts/generateStressTestRectangleGrid.ts"]
 }

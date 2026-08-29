@@ -448,6 +448,62 @@ exports[`LeftPanel snapshots > should render LeftPanel 1`] = `
             </div>
           </div>
         </div>
+        <div
+          class="_Layers_5f5445"
+        >
+          <div
+            aria-expanded="true"
+            class="_Layers__header_5f5445"
+            role="button"
+            tabindex="0"
+          >
+            <div
+              class="_LayersHeaderTitle_0e7692"
+            >
+              <div
+                class="_LayersHeaderTitle__toggle_0e7692"
+                data-layers-toggle="true"
+              >
+                <svg
+                  class="Icon"
+                  data-fpl-icon-size="16"
+                  fill="none"
+                  height="16"
+                  style="color: var(--color-neutral-2);"
+                  viewBox="0 0 16 16"
+                  width="16"
+                >
+                  <path
+                    d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+                    data-svg-property="fill"
+                    fill="white"
+                  />
+                </svg>
+              </div>
+              <span
+                class="_LayersHeaderTitle__name_0e7692"
+              >
+                Layers
+              </span>
+            </div>
+          </div>
+          <div
+            class="_LayersTree_1413a8"
+          >
+            <div
+              class="_Tree_5bb657"
+            >
+              <div
+                class="_Tree__rows_5bb657"
+              >
+                <div
+                  class="_Tree__viewport_5bb657"
+                  style="height: 0px;"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div

@@ -5,12 +5,12 @@ import { renderHook } from '@testing-library/react';
 import { useToggleLayersExpanded } from '../useToggleLayersExpanded';
 
 describe('useToggleLayersExpanded', () => {
-  it('should start collapsed', () => {
+  it('should start expanded', () => {
     // before
     const { result } = renderHook(() => useToggleLayersExpanded());
 
     // result
-    expect(result.current.isExpanded).toBe(false);
+    expect(result.current.isExpanded).toBe(true);
   });
 
   it('should toggle isExpanded when handleToggleClick is called', () => {
@@ -22,14 +22,14 @@ describe('useToggleLayersExpanded', () => {
     rerender();
 
     // result
-    expect(result.current.isExpanded).toBe(true);
+    expect(result.current.isExpanded).toBe(false);
 
     // action
     result.current.handleToggleClick();
     rerender();
 
     // result
-    expect(result.current.isExpanded).toBe(false);
+    expect(result.current.isExpanded).toBe(true);
   });
 
   it('should toggle isExpanded on Enter', () => {
@@ -43,7 +43,7 @@ describe('useToggleLayersExpanded', () => {
 
     // result
     expect(preventDefault).toHaveBeenCalledTimes(1);
-    expect(result.current.isExpanded).toBe(true);
+    expect(result.current.isExpanded).toBe(false);
   });
 
   it('should toggle isExpanded on Space', () => {
@@ -57,7 +57,7 @@ describe('useToggleLayersExpanded', () => {
 
     // result
     expect(preventDefault).toHaveBeenCalledTimes(1);
-    expect(result.current.isExpanded).toBe(true);
+    expect(result.current.isExpanded).toBe(false);
   });
 
   it('should not toggle isExpanded on other keys', () => {
@@ -71,6 +71,6 @@ describe('useToggleLayersExpanded', () => {
 
     // result
     expect(preventDefault).not.toHaveBeenCalled();
-    expect(result.current.isExpanded).toBe(false);
+    expect(result.current.isExpanded).toBe(true);
   });
 });
