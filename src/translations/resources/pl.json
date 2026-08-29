@@ -40,6 +40,7 @@
   "design.leftPanel.file.defaultName": "Bez nazwy",
   "design.leftPanel.file.drafts": "Szkice",
   "design.leftPanel.file.expandUiLabel": "Rozwiń UI",
+  "design.leftPanel.file.layers.title": "Warstwy",
   "design.leftPanel.file.menuAriaLabel": "Menu pliku",
   "design.leftPanel.file.minimizeUiLabel": "Zwiń UI",
   "design.leftPanel.file.pages.addAriaLabel": "Dodaj nową stronę",

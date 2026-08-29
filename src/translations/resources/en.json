@@ -28,6 +28,7 @@
   "design.leftPanel.file.defaultName": "Untitled",
   "design.leftPanel.file.drafts": "Drafts",
   "design.leftPanel.file.expandUiLabel": "Expand UI",
+  "design.leftPanel.file.layers.title": "Layers",
   "design.leftPanel.file.menuAriaLabel": "File menu",
   "design.leftPanel.file.minimizeUiLabel": "Minimize UI",
   "design.leftPanel.file.pages.addAriaLabel": "Add new page",

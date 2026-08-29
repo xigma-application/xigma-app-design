@@ -1,0 +1,31 @@
+import { FC } from 'react';
+
+// components
+import LayersHeaderTitle from './LayersHeaderTitle/LayersHeaderTitle';
+
+// hooks
+import { useToggleLayersExpanded } from './hooks/useToggleLayersExpanded';
+
+// styles
+import styles from './layers.module.scss';
+
+const Layers: FC = () => {
+  const { handleToggleClick, handleToggleKeyDown, isExpanded } = useToggleLayersExpanded();
+
+  return (
+    <div className={styles.Layers}>
+      <div
+        aria-expanded={isExpanded}
+        className={styles.Layers__header}
+        onClick={handleToggleClick}
+        onKeyDown={handleToggleKeyDown}
+        role="button"
+        tabIndex={0}
+      >
+        <LayersHeaderTitle isExpanded={isExpanded} />
+      </div>
+    </div>
+  );
+};
+
+export default Layers;

@@ -2,6 +2,7 @@ import { FC } from 'react';
 
 // components
 import Header from './Header/Header';
+import Layers from './Layers/Layers';
 import Pages from './Pages/Pages';
 
 // styles
@@ -14,6 +15,7 @@ const File: FC<TFileProps> = ({ name, onRenameFile }) => (
   <div className={styles.File}>
     <Header name={name} onRenameFile={onRenameFile} />
     <Pages />
+    <Layers />
   </div>
 );
 
