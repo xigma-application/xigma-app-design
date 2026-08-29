@@ -3,15 +3,13 @@ import { FC } from 'react';
 
 // components
 import TreeItemActions from './TreeItemActions';
-import { EditableInput, Icon } from 'shared';
+import TreeItemIcon from './TreeItemIcon/TreeItemIcon';
+import { EditableInput } from 'shared';
 
 // hooks
 import { useRenameTreeItem } from './hooks/useRenameTreeItem';
 import { useSelectTreeItem } from './hooks/useSelectTreeItem';
 import { useTreeItemActions } from './hooks/useTreeItemActions';
-
-// others
-import { NODE_TYPE_ICON } from './constants';
 
 // styles
 import styles from './tree-item.module.scss';
@@ -33,7 +31,7 @@ export const TreeItem: FC<TTreeItemProps> = ({ isSelected, node }) => {
     <div aria-selected={isSelected} className={styles.TreeItem} onClick={handleSelect}>
       <div className={styles.TreeItem__content}>
         <div className={styles.TreeItem__toggle} />
-        <Icon className={styles.TreeItem__icon} color="neutral2" name={NODE_TYPE_ICON[node.type]} size={10} />
+        <TreeItemIcon className={styles.TreeItem__icon} node={node} size={10} />
         <EditableInput
           className={cx(styles.TreeItem__name, node.hidden && styles['TreeItem__name--hidden'])}
           editOnDoubleClick
