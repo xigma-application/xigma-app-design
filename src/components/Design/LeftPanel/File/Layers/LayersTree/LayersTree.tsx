@@ -5,6 +5,7 @@ import { Tree, TreeItem } from 'shared';
 
 // hooks
 import { useDeselectOnEmptyClick } from './hooks/useDeselectOnEmptyClick';
+import { useReorderNode } from './hooks/useReorderNode';
 
 // others
 import { LAYERS_TREE_ROW_HEIGHT } from '../constants';
@@ -20,12 +21,19 @@ const LayersTree: FC = () => {
   const nodes = useAppSelector(selectOrderedNodes);
   const selectedIds = useAppSelector(selectSelectedIds);
   const handleDeselectOnEmptyClick = useDeselectOnEmptyClick();
+  const handleReorderNode = useReorderNode();
 
   const renderRow = (index: number): ReactNode => <TreeItem isSelected={selectedIds.includes(nodes[index].id)} node={nodes[index]} />;
 
   return (
     <div className={styles.LayersTree}>
-      <Tree count={nodes.length} onDeselectAll={handleDeselectOnEmptyClick} renderRow={renderRow} rowHeight={LAYERS_TREE_ROW_HEIGHT} />
+      <Tree
+        count={nodes.length}
+        onDeselectAll={handleDeselectOnEmptyClick}
+        onReorder={handleReorderNode}
+        renderRow={renderRow}
+        rowHeight={LAYERS_TREE_ROW_HEIGHT}
+      />
     </div>
   );
 };

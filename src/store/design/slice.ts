@@ -14,7 +14,7 @@ import {
 } from './constants';
 
 // types
-import { TDesignSnapshot, TDesignState, TStartTextEditPayload, TTextEditSelection } from './types';
+import { TDesignSnapshot, TDesignState, TReorderPayload, TStartTextEditPayload, TTextEditSelection } from './types';
 import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/design/types';
@@ -27,6 +27,8 @@ import { handleAddPage } from './utils/handleAddPage';
 import { handleDeleteNode } from './utils/handleDeleteNode';
 import { handleDeletePage } from './utils/handleDeletePage';
 import { handleDuplicatePage, TDuplicatePagePayload } from './utils/handleDuplicatePage';
+import { handleReorderNode } from './utils/handleReorderNode';
+import { handleReorderPages } from './utils/handleReorderPages';
 import { handleReplaceDesignSnapshot } from './utils/handleReplaceDesignSnapshot';
 import { handleReplaceNode } from './utils/handleReplaceNode';
 import { handleSetActiveTool } from './utils/handleSetActiveTool';
@@ -106,6 +108,8 @@ const designSlice = createSlice({
     renamePage: (state, action: PayloadAction<{ id: string; name: string }>) => {
       state.pages[action.payload.id].name = action.payload.name;
     },
+    reorderNode: (state, action: PayloadAction<TReorderPayload>) => handleReorderNode(state, action.payload),
+    reorderPages: (state, action: PayloadAction<TReorderPayload>) => handleReorderPages(state, action.payload),
     replaceDesignSnapshot: (state, action: PayloadAction<TDesignSnapshot>) => handleReplaceDesignSnapshot(state, action.payload),
     replaceNode: (state, action: PayloadAction<{ id: string; node: TSceneNode }>) => handleReplaceNode(state, action.payload),
     setActivePage: (state, action: PayloadAction<string>) => {
@@ -151,6 +155,8 @@ export const {
   deletePage,
   duplicatePage,
   renamePage,
+  reorderNode,
+  reorderPages,
   replaceDesignSnapshot,
   replaceNode,
   setActivePage,

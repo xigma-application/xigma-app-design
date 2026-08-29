@@ -1,12 +1,13 @@
-import { FC, useRef } from 'react';
+import { FC, ReactNode, useRef } from 'react';
 
 // components
 import PageRow from './PageRow/PageRow';
-import ScrollThumb from 'shared/ScrollThumb/ScrollThumb';
+import { Tree } from 'shared';
 
 // hooks
 import { useHandleResizeMouseDown } from './hooks/useHandleResizeMouseDown';
-import { useResizeHandler, useVirtualList } from 'hooks';
+import { useReorderPages } from './hooks/useReorderPages';
+import { useResizeHandler } from 'hooks';
 
 // others
 import { PAGES_LIST_RESIZE_SETTINGS, PAGES_LIST_ROW_HEIGHT } from './constants';
@@ -27,40 +28,28 @@ export type TPagesListProps = {
 
 const PagesList: FC<TPagesListProps> = ({ pendingEditPageId }) => {
   const listRef = useRef<HTMLDivElement>(null);
-  const rowsRef = useRef<HTMLDivElement>(null);
   const pages = useAppSelector(selectPages);
   const orderedPages = Object.values(pages);
   const maxHeight = getMaxPagesListHeight();
   const { cursorY, height, onMouseDownY } = useResizeHandler({ ...PAGES_LIST_RESIZE_SETTINGS, maxHeight }, listRef);
   const handleResizeMouseDown = useHandleResizeMouseDown(onMouseDownY);
+  const handleReorderPages = useReorderPages();
 
-  const { items, totalSize } = useVirtualList({
-    count: orderedPages.length,
-    rowHeight: PAGES_LIST_ROW_HEIGHT,
-    scrollRef: rowsRef,
-    scrollToIndex: orderedPages.findIndex((page) => page.id === pendingEditPageId),
-  });
+  const renderRow = (index: number): ReactNode => {
+    const page = orderedPages[index];
+
+    return <PageRow autoEdit={page.id === pendingEditPageId} page={page} />;
+  };
 
   return (
     <div className={styles.PagesList} ref={listRef} style={{ height }}>
-      <div className={styles.PagesList__rows} ref={rowsRef}>
-        <div className={styles.PagesList__viewport} style={{ height: totalSize }}>
-          {items.map((virtualRow) => {
-            const page = orderedPages[virtualRow.index];
-
-            return (
-              <div
-                className={styles.PagesList__row}
-                key={page.id}
-                style={{ height: virtualRow.size, transform: `translateY(${virtualRow.start}px)` }}
-              >
-                <PageRow autoEdit={page.id === pendingEditPageId} page={page} />
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      <ScrollThumb className={styles.PagesList__scrollThumb} scrollRef={rowsRef} />
+      <Tree
+        count={orderedPages.length}
+        onReorder={handleReorderPages}
+        renderRow={renderRow}
+        rowHeight={PAGES_LIST_ROW_HEIGHT}
+        scrollToIndex={orderedPages.findIndex((page) => page.id === pendingEditPageId)}
+      />
       <div className={styles['PagesList__resize-handle']} onMouseDown={handleResizeMouseDown} style={{ cursor: cursorY }} />
     </div>
   );

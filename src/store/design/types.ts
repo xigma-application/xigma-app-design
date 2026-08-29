@@ -41,6 +41,11 @@ export type TDesignSnapshot = {
   pages: Record<string, TDesignPage>;
 };
 
+export type TReorderPayload = {
+  fromIndex: number;
+  toIndex: number;
+};
+
 export type TStartTextEditPayload = {
   box: TEditingTextBox;
   content?: string;

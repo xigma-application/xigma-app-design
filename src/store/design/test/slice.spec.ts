@@ -12,6 +12,8 @@ import slice, {
   deletePage,
   duplicatePage,
   renamePage,
+  reorderNode,
+  reorderPages,
   replaceDesignSnapshot,
   replaceNode,
   setActivePage,
@@ -237,6 +239,24 @@ describe('design slice', () => {
     expect(state.pages[state.activePageId].selectedIds).toEqual(['a', 'b']);
   });
 
+  it('should reorder nodes in the active page rootOrder', () => {
+    // before — append two fresh nodes so their positions are known regardless of any pre-existing rootOrder
+    const withFirst = slice(undefined, addNode(frameNodePayload));
+    const withSecond = slice(withFirst, addNode(frameNodePayload));
+    const rootOrderBefore = withSecond.pages[withSecond.activePageId].rootOrder;
+    const [firstId, secondId] = rootOrderBefore.slice(-2);
+    const fromIndex = rootOrderBefore.length - 2;
+    const toIndex = rootOrderBefore.length - 1;
+
+    // action
+    const state = slice(withSecond, reorderNode({ fromIndex, toIndex }));
+
+    // result
+    const rootOrderAfter = state.pages[state.activePageId].rootOrder;
+    expect(rootOrderAfter[fromIndex]).toBe(secondId);
+    expect(rootOrderAfter[toIndex]).toBe(firstId);
+  });
+
   it('should delete a node', () => {
     // before
     const withNode = slice(undefined, addNode(frameNodePayload));
@@ -315,6 +335,23 @@ describe('design slice', () => {
 
     // result
     expect(Object.keys(state.pages)).toEqual([firstId, insertedId, secondId, thirdId]);
+  });
+
+  it('should reorder pages', () => {
+    // mock
+    const initial = slice(undefined, { type: 'unknown' });
+    const firstId = initial.activePageId;
+    const withSecond = slice(initial, addPage());
+    const secondId = withSecond.activePageId;
+    const withThird = slice(withSecond, addPage());
+    const thirdId = withThird.activePageId;
+
+    // before
+    const state = slice(withThird, reorderPages({ fromIndex: 0, toIndex: 2 }));
+
+    // result
+    expect(Object.keys(state.pages)).toEqual([secondId, thirdId, firstId]);
+    expect(state.activePageId).toBe(thirdId);
   });
 
   it('should rename a page', () => {

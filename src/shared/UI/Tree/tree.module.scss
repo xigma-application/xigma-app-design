@@ -9,6 +9,10 @@
   overflow: hidden;
   position: relative;
 
+  * {
+    user-select: none;
+  }
+
   &__rows {
     @include scrollbar.scrollbar-hidden;
 
@@ -38,7 +42,7 @@
   }
 
   &__dropIndicator {
-    background-color: var(--color-blue-1);
+    background-color: var(--color-neutral-1);
     height: 2px;
     left: 0;
     pointer-events: none;

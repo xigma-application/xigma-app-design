@@ -1,0 +1,1 @@
+export const TREE_ROW_DRAG_THRESHOLD_PX = 4;

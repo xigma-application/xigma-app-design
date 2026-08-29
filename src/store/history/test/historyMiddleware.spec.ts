@@ -1,5 +1,5 @@
 // store
-import { addNode, setSelection, toggleNodeHidden, toggleNodeLocked } from 'store/design/slice';
+import { addNode, addPage, reorderNode, reorderPages, setSelection, toggleNodeHidden, toggleNodeLocked } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture, redo, undo } from '../actions';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
@@ -110,5 +110,41 @@ describe('historyMiddleware', () => {
     // result
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA].hidden).toBeUndefined();
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA].locked).toBe(true);
+  });
+
+  it('should treat a node reorder as its own undo step', () => {
+    // mock
+    const idA = addFrameNode(0, 0);
+    const idB = addFrameNode(50, 50);
+    const orderAfterAdd = selectActivePage(store.getState()).rootOrder;
+
+    // before
+    store.dispatch(reorderNode({ fromIndex: orderAfterAdd.indexOf(idA), toIndex: orderAfterAdd.indexOf(idB) }));
+
+    expect(selectActivePage(store.getState()).rootOrder).not.toEqual(orderAfterAdd);
+
+    // action — undo should only step back through the reorder
+    store.dispatch(undo());
+
+    // result
+    expect(selectActivePage(store.getState()).rootOrder).toEqual(orderAfterAdd);
+  });
+
+  it('should treat a page reorder as its own undo step', () => {
+    // mock
+    store.dispatch(addPage());
+    const newPageId = store.getState().design.activePageId;
+    const pagesAfterAdd = Object.keys(store.getState().design.pages);
+
+    // before
+    store.dispatch(reorderPages({ fromIndex: pagesAfterAdd.indexOf(newPageId), toIndex: 0 }));
+
+    expect(Object.keys(store.getState().design.pages)[0]).toBe(newPageId);
+
+    // action — undo should only step back through the reorder, not the addPage
+    store.dispatch(undo());
+
+    // result
+    expect(Object.keys(store.getState().design.pages)).toEqual(pagesAfterAdd);
   });
 });

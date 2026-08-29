@@ -48,4 +48,42 @@ describe('Tree', () => {
     // result
     expect(onDeselectAll).toHaveBeenCalledTimes(1);
   });
+
+  it('should render a lifted row and a drop indicator while dragging, then call onReorder with the mapped index on drop', () => {
+    // mock
+    const onReorder = vi.fn();
+
+    // before
+    render(<Tree count={3} onReorder={onReorder} renderRow={(index) => <span>Row {index}</span>} rowHeight={32} />);
+    const rowZero = screen.getByText('Row 0').parentElement!;
+
+    // action
+    fireEvent.mouseDown(rowZero, { button: 0, clientY: 0 });
+    fireEvent.mouseMove(document, { clientY: 80 });
+
+    // result
+    expect(document.querySelector('[class*="row--dragging"]')).toBeInTheDocument();
+    expect(document.querySelector('[class*="dropIndicator"]')).toBeInTheDocument();
+
+    // action
+    fireEvent.mouseUp(document);
+
+    // result
+    expect(onReorder).toHaveBeenCalledWith(0, 2);
+    expect(document.querySelector('[class*="row--dragging"]')).not.toBeInTheDocument();
+    expect(document.querySelector('[class*="dropIndicator"]')).not.toBeInTheDocument();
+  });
+
+  it('should not wire row dragging when onReorder is not provided', () => {
+    // before
+    render(<Tree count={2} renderRow={(index) => <span>Row {index}</span>} rowHeight={32} />);
+    const rowZero = screen.getByText('Row 0').parentElement!;
+
+    // action
+    fireEvent.mouseDown(rowZero, { button: 0, clientY: 0 });
+    fireEvent.mouseMove(document, { clientY: 80 });
+
+    // result
+    expect(document.querySelector('[class*="row--dragging"]')).not.toBeInTheDocument();
+  });
 });
