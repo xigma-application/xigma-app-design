@@ -143,4 +143,37 @@ describe('Tree', () => {
     // result — both selected rows move together
     expect(onReorder).toHaveBeenCalledWith([0, 1], 2);
   });
+
+  it('should render the default plain-line drop indicator when renderDropIndicator is not provided', () => {
+    // before
+    render(<Tree count={2} onReorder={vi.fn()} renderRow={(index) => <span>Row {index}</span>} rowHeight={32} />);
+
+    // action
+    fireEvent.mouseDown(screen.getByText('Row 0').parentElement!, { button: 0, clientY: 0 });
+    fireEvent.mouseMove(document, { clientY: 80 });
+
+    // result
+    expect(document.querySelector('[class*="dropIndicator--default"]')).toBeInTheDocument();
+  });
+
+  it('should render custom drop-indicator content, in place of the default line, when renderDropIndicator is provided', () => {
+    // before
+    render(
+      <Tree
+        count={2}
+        onReorder={vi.fn()}
+        renderDropIndicator={(insertionIndex) => <span>Custom indicator at {insertionIndex}</span>}
+        renderRow={(index) => <span>Row {index}</span>}
+        rowHeight={32}
+      />,
+    );
+
+    // action
+    fireEvent.mouseDown(screen.getByText('Row 0').parentElement!, { button: 0, clientY: 0 });
+    fireEvent.mouseMove(document, { clientY: 80 });
+
+    // result
+    expect(screen.getByText('Custom indicator at 2')).toBeInTheDocument();
+    expect(document.querySelector('[class*="dropIndicator--default"]')).not.toBeInTheDocument();
+  });
 });

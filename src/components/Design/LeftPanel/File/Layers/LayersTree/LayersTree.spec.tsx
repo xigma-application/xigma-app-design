@@ -69,6 +69,23 @@ describe('LayersTree', () => {
     expect(selectActivePage(store.getState()).rootOrder.indexOf(idA)).not.toBe(indexA);
   });
 
+  it('should render the dot-and-line drop indicator, not the default plain-line one, while dragging', () => {
+    // before
+    renderLayersTree();
+    const rowA = screen.getByText('Frame A').closest('[class*="Tree__row"]')!;
+
+    // action
+    fireEvent.mouseDown(rowA, { button: 0, clientY: 0 });
+    fireEvent.mouseMove(document, { clientY: 100 });
+
+    // result
+    expect(document.querySelector('[class*="LayersTreeDropIndicator"]')).toBeInTheDocument();
+    expect(document.querySelector('[class*="Tree__dropIndicator--default"]')).not.toBeInTheDocument();
+
+    // after
+    fireEvent.mouseUp(document);
+  });
+
   it('should drag every row in the current multi-selection together, preserving their relative order', () => {
     // mock — a third node so there is something to drag the [A,B] selection past
     store.dispatch(

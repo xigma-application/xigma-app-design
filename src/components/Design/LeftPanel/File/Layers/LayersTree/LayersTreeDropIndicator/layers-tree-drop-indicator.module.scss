@@ -1,0 +1,21 @@
+.LayersTreeDropIndicator {
+  align-items: center;
+  display: flex;
+  margin: 0 8px;
+  transform: translateY(-50%);
+
+  &__dot {
+    background-color: var(--color-neutral-1);
+    border: 2px solid var(--color-blue-1);
+    border-radius: 50%;
+    flex-shrink: 0;
+    height: 8px;
+    width: 8px;
+  }
+
+  &__line {
+    background-color: var(--color-blue-1);
+    flex: 1;
+    height: 1px;
+  }
+}

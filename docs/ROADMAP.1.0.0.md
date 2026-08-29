@@ -103,7 +103,13 @@ Checkboxes are ticked as progress is made. Each stage = a separate, tiny chunk o
       (`EditableInput` + chevron, `UITools`, default "Untitled", local state), `FileMeta` with a
       "Drafts" link and a subscription chip (`Chip` `UITools`, `free` variant). The `PanelLeft` icon
       in `@xigma/components`. For now purely visual changes — one file, no persistence.
-- [ ] layers panel (node tree, reorder, visible/locked)
+- [x] **Pages** (`LeftPanel/File/Pages`) — collapsible virtualized list, per-page Design state
+      (`activePageId` + a `pages` record), add/select/rename/delete with undo + a right-click menu;
+      reorder and search deferred
+- [x] **layers panel** (`LeftPanel/File/Layers` → `LayersTree`) — virtualized node tree,
+      drag-and-drop reorder (`reorderNode`), per-row hide/lock toggles + a Figma-style right-click
+      menu (rename/hide/lock wired, the rest disabled placeholders), Ctrl/Shift multi-select synced
+      with the canvas selection
 - [ ] properties panel (X/Y/W/H, Fill, Stroke, Opacity/blend mode)
 - [ ] text properties (size/weight/alignment/line-height/letter-spacing)
 - [ ] Start/End point dropdowns for Line/Arrow
@@ -205,7 +211,8 @@ The single largest structural gap versus Figma.
       `[`/`]` = brush size. v1 limitations: a rotated node is flattened, no real hole
       after erasing a clean fill interior. Ibid. §66, e2e: `vector-erase.spec.ts`,
       `vector-erase-multi.spec.ts`
-- [ ] context menu (right-click) on nodes and the empty canvas
+- [ ] context menu (right-click) on nodes and the empty canvas — done for layer/page **rows** in the
+      left panel (`LayerMenu`, `PagesList`); the on-canvas menu is still missing
 - [ ] zoom control in the canvas corner (Zoom to fit/selection/100%)
 - [ ] z-order from the UI (Bring to front/Send to back/Forward/Backward)
 - [ ] right toolbar group (draw/scale/actions/dev mode)

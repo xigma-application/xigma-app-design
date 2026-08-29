@@ -23,6 +23,7 @@ export type TTreeProps = {
   isRowSelected?: (index: number) => boolean;
   onDeselectAll?: TFunc;
   onReorder?: (fromIndices: number[], toIndex: number) => void;
+  renderDropIndicator?: (insertionIndex: number) => ReactNode;
   renderRow: (index: number) => ReactNode;
   rowHeight: number;
   scrollToIndex?: number;
@@ -34,6 +35,7 @@ export const Tree: FC<TTreeProps> = ({
   isRowSelected,
   onDeselectAll,
   onReorder,
+  renderDropIndicator,
   renderRow,
   rowHeight,
   scrollToIndex,
@@ -82,7 +84,12 @@ export const Tree: FC<TTreeProps> = ({
             </div>
           ))}
           {isDragging && (
-            <div className={styles.Tree__dropIndicator} style={{ transform: `translateY(${insertionIndex * rowHeight}px)` }} />
+            <div
+              className={cx(styles.Tree__dropIndicator, !renderDropIndicator && styles['Tree__dropIndicator--default'])}
+              style={{ transform: `translateY(${insertionIndex * rowHeight}px)` }}
+            >
+              {renderDropIndicator?.(insertionIndex)}
+            </div>
           )}
         </div>
       </div>

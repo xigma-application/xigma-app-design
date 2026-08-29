@@ -2,6 +2,7 @@ import { FC, ReactNode } from 'react';
 
 // components
 import LayerRow from './LayerRow/LayerRow';
+import LayersTreeDropIndicator from './LayersTreeDropIndicator/LayersTreeDropIndicator';
 import { Tree } from 'shared';
 
 // hooks
@@ -25,6 +26,7 @@ const LayersTree: FC = () => {
   const handleReorderNode = useReorderNode();
 
   const renderRow = (index: number): ReactNode => <LayerRow isSelected={selectedIds.includes(nodes[index].id)} node={nodes[index]} />;
+  const renderDropIndicator = (): ReactNode => <LayersTreeDropIndicator />;
   const isRowSelected = (index: number): boolean => index >= 0 && index < nodes.length && selectedIds.includes(nodes[index].id);
 
   return (
@@ -34,6 +36,7 @@ const LayersTree: FC = () => {
         isRowSelected={isRowSelected}
         onDeselectAll={handleDeselectOnEmptyClick}
         onReorder={handleReorderNode}
+        renderDropIndicator={renderDropIndicator}
         renderRow={renderRow}
         rowHeight={LAYERS_TREE_ROW_HEIGHT}
       />
