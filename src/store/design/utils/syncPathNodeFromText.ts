@@ -1,7 +1,7 @@
 // types
 import { TDesignState } from '../types';
 import { NodeType } from 'types/design/enums';
-import { TTextNode, TVectorNode } from 'types/design/types';
+import { TTextNode, TVectorNode, TVectorTangent } from 'types/design/types';
 
 // utils
 import { getActivePage } from './getActivePage';
@@ -9,21 +9,24 @@ import { syncPathTextNodes } from './syncPathTextNodes';
 
 export type TTextBoxTransform = { height: number; rotation: number; width: number; x: number; y: number };
 
-const boxCenter = (box: TTextBoxTransform): { x: number; y: number } => ({
-  x: box.x + box.width / 2,
-  y: box.y + box.height / 2,
-});
+const scaleTangent = (tangent: TVectorTangent, scaleX: number, scaleY: number): TVectorTangent =>
+  tangent ? { x: tangent.x * scaleX, y: tangent.y * scaleY } : null;
 
 const syncVectorPathFromText = (vectorNode: TVectorNode, textNode: TTextNode, previous: TTextBoxTransform): void => {
-  const from = boxCenter(previous);
-  const to = boxCenter({ height: textNode.height, rotation: textNode.rotation, width: textNode.width, x: textNode.x, y: textNode.y });
-  const dx = to.x - from.x;
-  const dy = to.y - from.y;
+  const scaleX = previous.width > 0 ? textNode.width / previous.width : 1;
+  const scaleY = previous.height > 0 ? textNode.height / previous.height : 1;
+  const dx = textNode.x - previous.x;
+  const dy = textNode.y - previous.y;
 
-  if (dx !== 0 || dy !== 0) {
+  if (dx !== 0 || dy !== 0 || scaleX !== 1 || scaleY !== 1) {
     Object.values(vectorNode.vertices).forEach((vertex) => {
-      vertex.x = Math.round(vertex.x + dx);
-      vertex.y = Math.round(vertex.y + dy);
+      vertex.x = Math.round(textNode.x + (vertex.x - previous.x) * scaleX);
+      vertex.y = Math.round(textNode.y + (vertex.y - previous.y) * scaleY);
+    });
+
+    Object.values(vectorNode.segments).forEach((segment) => {
+      segment.tangentStart = scaleTangent(segment.tangentStart, scaleX, scaleY);
+      segment.tangentEnd = scaleTangent(segment.tangentEnd, scaleX, scaleY);
     });
   }
 

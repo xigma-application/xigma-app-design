@@ -199,6 +199,25 @@ describe('handleUpdateNode', () => {
     });
   });
 
+  it('should stretch the bound vector when the text box is resized so the glyphs reflow along it', () => {
+    // mock — the text box doubles in width (100 -> 200), top-left anchored
+    const vectorNode = buildVectorNode({
+      segments: { s1: seg('s1', 'a', 'b') },
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    });
+    const textNode = buildPathText({ height: 0, pathId: vectorNode.id, width: 100, x: 0, y: 0 });
+    const state = buildState({ [textNode.id]: textNode, [vectorNode.id]: vectorNode });
+
+    // before
+    handleUpdateNode(state, { changes: { width: 200 }, id: textNode.id });
+
+    // result — the vector's span now matches the resized box (x runs 0..200), not the old 0..100
+    expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).vertices).toEqual({
+      a: { id: 'a', x: 0, y: 0 },
+      b: { id: 'b', x: 200, y: 0 },
+    });
+  });
+
   it('should mirror a text rotation onto its bound vector so the vector line turns with the glyphs', () => {
     // mock — pure rotation: the text box centre is unchanged
     const vectorNode = buildVectorNode({

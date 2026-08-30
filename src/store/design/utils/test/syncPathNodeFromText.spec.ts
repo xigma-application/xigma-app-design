@@ -191,5 +191,57 @@ describe('syncPathNodeFromText', () => {
         v2: { id: 'v2', x: 100, y: 0 },
       });
     });
+
+    it('should scale every vertex with the text box so the path stretches to fill a resized box', () => {
+      // mock — box grows 100x40 -> 150x80 (x1.5 wide, x2 tall), top-left anchored
+      const vectorNode = buildVectorNode({ vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 40 } } });
+      const textNode = buildPathText({ height: 80, width: 150, x: 0, y: 0 });
+      const state = buildState({ [vectorNode.id]: vectorNode, [textNode.id]: textNode });
+
+      // before
+      syncPathNodeFromText(state, textNode, { height: 40, rotation: 0, width: 100, x: 0, y: 0 });
+
+      // result — the vector's bounds now match the resized text box, so the glyphs reflow along it
+      expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).vertices).toEqual({
+        v1: { id: 'v1', x: 0, y: 0 },
+        v2: { id: 'v2', x: 150, y: 80 },
+      });
+    });
+
+    it('should anchor the scale to the box new origin so a left-edge resize keeps the far edge put', () => {
+      // mock — box grows leftward: width 100 -> 200 while the right edge stays at x = 100
+      const vectorNode = buildVectorNode();
+      const textNode = buildPathText({ height: 0, width: 200, x: -100, y: 0 });
+      const state = buildState({ [vectorNode.id]: vectorNode, [textNode.id]: textNode });
+
+      // before
+      syncPathNodeFromText(state, textNode, { height: 0, rotation: 0, width: 100, x: 0, y: 0 });
+
+      // result — v2, on the fixed right edge, does not move; v1 follows the growing left edge
+      expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).vertices).toEqual({
+        v1: { id: 'v1', x: -100, y: 0 },
+        v2: { id: 'v2', x: 100, y: 0 },
+      });
+    });
+
+    it('should scale the segment tangent handles along with the vertices', () => {
+      // mock — a curved segment carrying tangent handles, box scaled x2 wide / x3 tall
+      const vectorNode = buildVectorNode({
+        segments: {
+          s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: { x: -20, y: -10 }, tangentStart: { x: 20, y: 10 } },
+        },
+      });
+      const textNode = buildPathText({ height: 30, width: 200, x: 0, y: 0 });
+      const state = buildState({ [vectorNode.id]: vectorNode, [textNode.id]: textNode });
+
+      // before
+      syncPathNodeFromText(state, textNode, { height: 10, rotation: 0, width: 100, x: 0, y: 0 });
+
+      // result
+      expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).segments.s1).toMatchObject({
+        tangentEnd: { x: -40, y: -30 },
+        tangentStart: { x: 40, y: 30 },
+      });
+    });
   });
 });
