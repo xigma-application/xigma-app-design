@@ -290,6 +290,8 @@
   "design.leftPanel.navRail.logoMenu.viewMenu.zoomToPreviousFrame": "Przybliż do poprzedniej ramki",
   "design.leftPanel.navRail.logoMenu.viewMenu.zoomToSelection": "Przybliż do zaznaczenia",
   "design.leftPanel.navRail.logoMenu.widgets": "Widżety",
+  "design.leftPanel.navRail.logoMenu.widgetsMenu.manageWidgets": "Zarządzaj widżetami...",
+  "design.leftPanel.navRail.logoMenu.widgetsMenu.selectAllWidgets": "Zaznacz wszystkie widżety",
   "design.toolbar.tool.arrow": "Strzałka",
   "design.toolbar.tool.comment": "Komentarz",
   "design.toolbar.tool.default": "Przesuń",

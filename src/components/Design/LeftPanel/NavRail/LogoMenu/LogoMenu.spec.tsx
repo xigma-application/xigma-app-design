@@ -54,11 +54,12 @@ describe('LogoMenu', () => {
 
     // result — disabled
     expect(screen.getByText('Back to files').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
-    expect(screen.getByText('Widgets').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Preferences').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
 
     // result — expandable, not disabled
     expect(screen.getByText('File').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Plugins').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Widgets').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Help and account').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
   });
 });

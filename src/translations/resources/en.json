@@ -278,6 +278,8 @@
   "design.leftPanel.navRail.logoMenu.viewMenu.zoomToPreviousFrame": "Zoom to previous frame",
   "design.leftPanel.navRail.logoMenu.viewMenu.zoomToSelection": "Zoom to selection",
   "design.leftPanel.navRail.logoMenu.widgets": "Widgets",
+  "design.leftPanel.navRail.logoMenu.widgetsMenu.manageWidgets": "Manage widgets...",
+  "design.leftPanel.navRail.logoMenu.widgetsMenu.selectAllWidgets": "Select all widgets",
   "design.toolbar.tool.arrow": "Arrow",
   "design.toolbar.tool.comment": "Comment",
   "design.toolbar.tool.default": "Move",

@@ -13,6 +13,7 @@ import PluginsMenu from './PluginsMenu/PluginsMenu';
 import TextMenu from './TextMenu/TextMenu';
 import VectorMenu from './VectorMenu/VectorMenu';
 import ViewMenu from './ViewMenu/ViewMenu';
+import WidgetsMenu from './WidgetsMenu/WidgetsMenu';
 import { Menu, MenuCompound } from 'shared';
 
 // others
@@ -91,7 +92,9 @@ const LogoMenu: FC = () => {
       <MenuSub label={t(LOGO_MENU_PLUGINS_KEY)} marginTop>
         <PluginsMenu />
       </MenuSub>
-      <MenuItem disabled label={t(LOGO_MENU_WIDGETS_KEY)} withCheck={false} />
+      <MenuSub label={t(LOGO_MENU_WIDGETS_KEY)}>
+        <WidgetsMenu />
+      </MenuSub>
       <MenuItem disabled label={t(LOGO_MENU_PREFERENCES_KEY)} withCheck={false} />
       <MenuItem disabled label={t(LOGO_MENU_LIBRARIES_KEY)} withCheck={false} marginBottom />
       <MenuSeparator />
