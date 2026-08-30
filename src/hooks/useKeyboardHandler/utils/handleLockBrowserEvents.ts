@@ -3,21 +3,24 @@ import { KeyboardEvent as ReactKeyboardEvent } from 'react';
 // types
 import { KeyboardKeys } from 'types/enums';
 
+const RESERVED_CTRL_KEYS: Set<string> = new Set([
+  KeyboardKeys.plus,
+  KeyboardKeys.minus,
+  KeyboardKeys.numpadAdd,
+  KeyboardKeys.numpadSubtract,
+  KeyboardKeys.a,
+  KeyboardKeys.d,
+  KeyboardKeys.f,
+  KeyboardKeys.g,
+  KeyboardKeys.s,
+]);
+
 export const handleLockBrowserEvents = (
   ctrlKey: boolean,
   event: KeyboardEvent | ReactKeyboardEvent<HTMLElement>,
   secondaryKey: string,
 ): void => {
-  if (
-    (ctrlKey &&
-      (secondaryKey === KeyboardKeys['+'] ||
-        secondaryKey === KeyboardKeys['-'] ||
-        secondaryKey === KeyboardKeys.a ||
-        secondaryKey === KeyboardKeys.d ||
-        secondaryKey === KeyboardKeys.f ||
-        secondaryKey === KeyboardKeys.s)) ||
-    event.key === KeyboardKeys.alt
-  ) {
+  if ((ctrlKey && RESERVED_CTRL_KEYS.has(secondaryKey)) || event.key === KeyboardKeys.alt) {
     event.preventDefault();
   }
 };

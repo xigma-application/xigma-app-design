@@ -1,9 +1,11 @@
 import cx from 'classnames';
 import { FC } from 'react';
+import { noop } from 'lodash';
 
 // components
 import TreeItemActions from './TreeItemActions';
 import TreeItemIcon from './TreeItemIcon/TreeItemIcon';
+import TreeItemToggle from './TreeItemToggle/TreeItemToggle';
 import { EditableInput } from 'shared';
 
 // hooks
@@ -13,31 +15,42 @@ import { useTreeItemActions } from './hooks/useTreeItemActions';
 import { useTreeItemContextMenu } from './hooks/useTreeItemContextMenu';
 import { useTreeItemNameEditing } from './hooks/useTreeItemNameEditing';
 
+// others
+import { TREE_ITEM_INDENT_PX } from '../constants';
+
 // styles
 import styles from './tree-item.module.scss';
 
 // types
+import { NodeType } from 'types/design/enums';
 import { TRenderTreeItemMenu } from './types';
 import { TSceneNode } from 'types/design/types';
 
 export type TTreeItemProps = {
+  depth?: number;
+  isExpanded?: boolean;
   isSelected: boolean;
   node: TSceneNode;
+  onToggleExpand?: TFunc;
   renderMenu?: TRenderTreeItemMenu;
 };
 
-export const TreeItem: FC<TTreeItemProps> = ({ isSelected, node, renderMenu }) => {
+export const TreeItem: FC<TTreeItemProps> = ({ depth = 0, isExpanded = false, isSelected, node, onToggleExpand, renderMenu }) => {
   const handleSelect = useSelectTreeItem(node.id);
   const handleRename = useRenameTreeItem(node.id);
   const { handleStopPropagation, handleToggleHidden, handleToggleLocked } = useTreeItemActions(node.id);
   const { isEditing, isRenameRequested, onEditingChange, onRenameRequested } = useTreeItemNameEditing();
   const { anchorRef, isOpen, onContextMenu, onOpenChange } = useTreeItemContextMenu();
+  const isExpandable = node.type === NodeType.group && node.childIds.length > 0;
 
   return (
     <div aria-selected={isSelected} className={styles.TreeItem} onClick={handleSelect} onContextMenu={onContextMenu}>
-      <div className={cx(styles.TreeItem__content, isEditing && styles['TreeItem__content--editing'])}>
-        <div className={styles.TreeItem__toggle} />
-        <TreeItemIcon className={styles.TreeItem__icon} node={node} size={10} />
+      <div
+        className={cx(styles.TreeItem__content, isEditing && styles['TreeItem__content--editing'])}
+        style={{ marginLeft: depth * TREE_ITEM_INDENT_PX }}
+      >
+        <TreeItemToggle isExpandable={isExpandable} isExpanded={isExpanded} onToggleExpand={onToggleExpand ?? noop} />
+        <TreeItemIcon className={styles.TreeItem__icon} node={node} size={12} />
         <EditableInput
           autoEdit={isRenameRequested}
           className={cx(styles.TreeItem__name, node.hidden && styles['TreeItem__name--hidden'])}

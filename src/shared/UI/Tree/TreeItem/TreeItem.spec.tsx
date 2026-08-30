@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // components
-import TreeItem from './TreeItem';
+import TreeItem, { TTreeItemProps } from './TreeItem';
 
 // store
 import { addNode, deleteNode, setSelection } from 'store/design/slice';
@@ -11,14 +11,28 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TFrameNode } from 'types/design/types';
+import { TFrameNode, TGroupNode, TSceneNode } from 'types/design/types';
 
-const renderTreeItem = (isSelected: boolean, node: TFrameNode): ReturnType<typeof render> =>
+const renderTreeItem = (isSelected: boolean, node: TSceneNode, extraProps: Partial<TTreeItemProps> = {}): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <TreeItem isSelected={isSelected} node={node} />
+      <TreeItem isSelected={isSelected} node={node} {...extraProps} />
     </Provider>,
   );
+
+const buildGroupNode = (overrides: Partial<TGroupNode> = {}): TGroupNode => ({
+  childIds: ['child-1'],
+  height: 10,
+  id: 'group-1',
+  name: 'My Group',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.group,
+  width: 10,
+  x: 0,
+  y: 0,
+  ...overrides,
+});
 
 describe('TreeItem', () => {
   let node: TFrameNode;
@@ -135,5 +149,67 @@ describe('TreeItem', () => {
     // result
     expect(screen.getByRole('button', { name: 'Hide layer' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Lock layer' })).toBeInTheDocument();
+  });
+
+  it('should not render an expand toggle for a non-group node', () => {
+    // before
+    renderTreeItem(false, node);
+
+    // result
+    expect(screen.queryByRole('button', { name: 'Expand layer' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Collapse layer' })).not.toBeInTheDocument();
+  });
+
+  it('should not render an expand toggle for a group node with no children', () => {
+    // before
+    renderTreeItem(false, buildGroupNode({ childIds: [] }));
+
+    // result
+    expect(screen.queryByRole('button', { name: 'Expand layer' })).not.toBeInTheDocument();
+  });
+
+  it('should render a collapsed expand toggle, labeled "Expand layer", for a group node with children', () => {
+    // before
+    renderTreeItem(false, buildGroupNode());
+
+    // result
+    expect(screen.getByRole('button', { name: 'Expand layer' })).toBeInTheDocument();
+  });
+
+  it('should label the expand toggle "Collapse layer" once isExpanded is true', () => {
+    // before
+    renderTreeItem(false, buildGroupNode(), { isExpanded: true });
+
+    // result
+    expect(screen.getByRole('button', { name: 'Collapse layer' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Expand layer' })).not.toBeInTheDocument();
+  });
+
+  it('should call onToggleExpand when the expand toggle is clicked, without also selecting the row', () => {
+    // mock
+    const onToggleExpand = vi.fn();
+
+    // before
+    renderTreeItem(false, buildGroupNode(), { onToggleExpand });
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'Expand layer' }));
+
+    // result
+    expect(onToggleExpand).toHaveBeenCalledTimes(1);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
+  });
+
+  it('should indent the row content further to the right as depth increases', () => {
+    // before
+    const { container: atRoot } = renderTreeItem(false, node);
+    const { container: nested } = renderTreeItem(false, { ...node, id: 'nested' }, { depth: 2 });
+
+    // result
+    const rootContent = atRoot.querySelector('[class*="TreeItem__content"]') as HTMLElement;
+    const nestedContent = nested.querySelector('[class*="TreeItem__content"]') as HTMLElement;
+
+    expect(rootContent.style.marginLeft).toBe('0px');
+    expect(nestedContent.style.marginLeft).toBe('32px');
   });
 });

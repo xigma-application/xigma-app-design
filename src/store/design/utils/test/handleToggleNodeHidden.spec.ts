@@ -1,7 +1,7 @@
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../types';
-import { TFrameNode } from 'types/design/types';
+import { TFrameNode, TGroupNode } from 'types/design/types';
 
 // utils
 import { getActivePage } from '../getActivePage';
@@ -89,5 +89,58 @@ describe('handleToggleNodeHidden', () => {
 
     // result
     expect(getActivePage(state).nodes[frame.id].hidden).toBeUndefined();
+  });
+
+  it('should cascade hiding to every child of a group, not just the group node itself', () => {
+    // mock
+    const a = buildFrame({ id: 'a', parentId: 'group-1' });
+    const b = buildFrame({ id: 'b', parentId: 'group-1' });
+    const group: TGroupNode = {
+      childIds: ['a', 'b'],
+      height: 10,
+      id: 'group-1',
+      name: 'Group',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.group,
+      width: 10,
+      x: 0,
+      y: 0,
+    };
+    const state = buildState({ a, b, 'group-1': group });
+
+    // before
+    handleToggleNodeHidden(state, 'group-1');
+
+    // result
+    expect(getActivePage(state).nodes['group-1'].hidden).toBe(true);
+    expect(getActivePage(state).nodes.a.hidden).toBe(true);
+    expect(getActivePage(state).nodes.b.hidden).toBe(true);
+  });
+
+  it('should cascade un-hiding back to every child when toggling an already-hidden group again', () => {
+    // mock
+    const a = buildFrame({ hidden: true, id: 'a', parentId: 'group-1' });
+    const group: TGroupNode = {
+      childIds: ['a'],
+      height: 10,
+      hidden: true,
+      id: 'group-1',
+      name: 'Group',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.group,
+      width: 10,
+      x: 0,
+      y: 0,
+    };
+    const state = buildState({ a, 'group-1': group });
+
+    // before
+    handleToggleNodeHidden(state, 'group-1');
+
+    // result
+    expect(getActivePage(state).nodes['group-1'].hidden).toBe(false);
+    expect(getActivePage(state).nodes.a.hidden).toBe(false);
   });
 });

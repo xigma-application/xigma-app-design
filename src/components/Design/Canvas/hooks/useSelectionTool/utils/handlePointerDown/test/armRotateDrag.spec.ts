@@ -1,5 +1,10 @@
 import { RefObject } from 'react';
 
+// store
+import { addNode, groupNodes, setSelection } from 'store/design/slice';
+import { selectActivePage, selectSelectedIds, selectSelectedNodes } from 'store/design/selectors';
+import { store } from 'store';
+
 // types
 import { NodeType } from 'types/design/enums';
 import { TFrameNode, TLineNode, TVectorNode } from 'types/design/types';
@@ -206,5 +211,41 @@ describe('armRotateDrag', () => {
 
     // result
     expect(rotateDragRef.current?.startAngle).toBe(90);
+  });
+
+  it('should rotate a selected group rigidly — the group node plus every descendant', () => {
+    // mock
+    const canvas = createCanvas();
+    const rotateDragRef = createRotateDragRef();
+
+    store.dispatch(setSelection([]));
+    store.dispatch(
+      addNode({ fill: '#ff0000', height: 20, name: 'A', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+    );
+    store.dispatch(
+      addNode({ fill: '#00ff00', height: 20, name: 'B', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 80, y: 80 }),
+    );
+
+    const childIds = selectActivePage(store.getState()).rootOrder.slice(-2);
+
+    store.dispatch(setSelection(childIds));
+    store.dispatch(groupNodes());
+
+    const [groupId] = selectSelectedIds(store.getState());
+
+    // before
+    armRotateDrag(
+      canvas,
+      pointerEvent(),
+      rotateDragRef,
+      selectSelectedNodes(store.getState()),
+      { height: 100, width: 100, x: 0, y: 0 },
+      0,
+      { x: 100, y: 50 },
+      createCanvasRefs(),
+    );
+
+    // result — the group turns as a rigid body, so its own rotation origin is included, group first
+    expect(Object.keys(rotateDragRef.current?.nodeOrigins ?? {})).toEqual([groupId, ...childIds]);
   });
 });

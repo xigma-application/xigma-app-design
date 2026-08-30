@@ -8,12 +8,22 @@ import { TreeItem } from 'shared';
 import { TSceneNode } from 'types/design/types';
 
 export type TLayerRowProps = {
+  depth?: number;
+  isExpanded?: boolean;
   isSelected: boolean;
   node: TSceneNode;
+  onToggleExpand?: TFunc;
 };
 
-const LayerRow: FC<TLayerRowProps> = ({ isSelected, node }) => (
-  <TreeItem isSelected={isSelected} node={node} renderMenu={(params): ReactNode => <LayerContextMenu {...params} />} />
+const LayerRow: FC<TLayerRowProps> = ({ depth, isExpanded, isSelected, node, onToggleExpand }) => (
+  <TreeItem
+    depth={depth}
+    isExpanded={isExpanded}
+    isSelected={isSelected}
+    node={node}
+    onToggleExpand={onToggleExpand}
+    renderMenu={(params): ReactNode => <LayerContextMenu {...params} />}
+  />
 );
 
 export default LayerRow;

@@ -28,6 +28,8 @@
   "design.leftPanel.file.defaultName": "Untitled",
   "design.leftPanel.file.drafts": "Drafts",
   "design.leftPanel.file.expandUiLabel": "Expand UI",
+  "design.leftPanel.file.layers.collapseAriaLabel": "Collapse layer",
+  "design.leftPanel.file.layers.expandAriaLabel": "Expand layer",
   "design.leftPanel.file.layers.hideAriaLabel": "Hide layer",
   "design.leftPanel.file.layers.lockAriaLabel": "Lock layer",
   "design.leftPanel.file.layers.menu.addAutoLayout": "Add auto layout",

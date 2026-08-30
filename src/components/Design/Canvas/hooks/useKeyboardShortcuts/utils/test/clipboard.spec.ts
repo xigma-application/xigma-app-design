@@ -6,9 +6,9 @@ import { TSceneNode } from 'types/design/types';
 import { getClipboardNodes, setClipboardNodes } from '../clipboard';
 
 describe('clipboard', () => {
-  it('should return an empty array before anything was ever copied', () => {
+  it('should return an empty clipboard before anything was ever copied', () => {
     // result
-    expect(getClipboardNodes()).toEqual([]);
+    expect(getClipboardNodes()).toEqual({ nodes: [], rootIds: [] });
   });
 
   it('should return a snapshot of whatever was last set, independent of later mutation of the source object', () => {
@@ -28,10 +28,10 @@ describe('clipboard', () => {
     const nodes = [node];
 
     // action
-    setClipboardNodes(nodes);
+    setClipboardNodes(nodes, ['n1']);
     node.x = 999;
 
     // result
-    expect(getClipboardNodes()).toEqual([{ ...node, x: 0 }]);
+    expect(getClipboardNodes()).toEqual({ nodes: [{ ...node, x: 0 }], rootIds: ['n1'] });
   });
 });

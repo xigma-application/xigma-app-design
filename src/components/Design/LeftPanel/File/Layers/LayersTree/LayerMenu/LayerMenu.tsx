@@ -47,6 +47,8 @@ export type TLayerMenuProps = {
   isHidden: boolean;
   isLocked: boolean;
   isOpen: boolean;
+  onCopy: TFunc;
+  onGroupSelection: TFunc;
   onOpenChange: TFunc<[boolean]>;
   onRename: TFunc;
   onToggleHidden: TFunc;
@@ -58,6 +60,8 @@ const LayerMenu: FC<TLayerMenuProps> = ({
   isHidden,
   isLocked,
   isOpen,
+  onCopy,
+  onGroupSelection,
   onOpenChange,
   onRename,
   onToggleHidden,
@@ -79,7 +83,7 @@ const LayerMenu: FC<TLayerMenuProps> = ({
           side="bottom"
           sideOffset={0}
         >
-          <PopoverItem disabled label={t(NODE_MENU_COPY_KEY)} shortcut={KEYBOARD_SHORTCUTS.copy.join('')} withCheck={false} />
+          <PopoverItem label={t(NODE_MENU_COPY_KEY)} onClick={onCopy} shortcut={KEYBOARD_SHORTCUTS.copy.join('')} withCheck={false} />
           <PopoverItem
             disabled
             label={t(NODE_MENU_PASTE_TO_REPLACE_KEY)}
@@ -100,8 +104,8 @@ const LayerMenu: FC<TLayerMenuProps> = ({
           <PopoverItem disabled label={t(NODE_MENU_SEND_TO_BACK_KEY)} shortcut={KEYBOARD_SHORTCUTS.sendToBack.join('')} withCheck={false} />
           <PopoverSeparator />
           <PopoverItem
-            disabled
             label={t(NODE_MENU_GROUP_SELECTION_KEY)}
+            onClick={onGroupSelection}
             shortcut={KEYBOARD_SHORTCUTS.groupSelection.join('')}
             withCheck={false}
           />

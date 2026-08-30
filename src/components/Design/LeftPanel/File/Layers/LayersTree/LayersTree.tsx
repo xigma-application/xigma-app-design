@@ -1,43 +1,40 @@
-import { FC, ReactNode } from 'react';
+import { FC } from 'react';
 
 // components
-import LayerRow from './LayerRow/LayerRow';
-import LayersTreeDropIndicator from './LayersTreeDropIndicator/LayersTreeDropIndicator';
 import { Tree } from 'shared';
 
 // hooks
 import { useDeselectOnEmptyClick } from './hooks/useDeselectOnEmptyClick';
-import { useReorderNode } from './hooks/useReorderNode';
+import { useHandleReorder } from './hooks/useHandleReorder';
+import { useIsRowSelected } from './hooks/useIsRowSelected';
+import { useRenderDropIndicator } from './hooks/useRenderDropIndicator';
+import { useRenderRow } from './hooks/useRenderRow';
+import { useTreeSource } from './hooks/useTreeSource';
 
 // others
 import { LAYERS_TREE_ROW_HEIGHT } from '../constants';
-
-// store
-import { selectOrderedNodes, selectSelectedIds } from 'store/design/selectors';
-import { useAppSelector } from 'store';
 
 // styles
 import styles from './layers-tree.module.scss';
 
 const LayersTree: FC = () => {
-  const nodes = useAppSelector(selectOrderedNodes);
-  const selectedIds = useAppSelector(selectSelectedIds);
+  const { getChildren, roots } = useTreeSource();
   const handleDeselectOnEmptyClick = useDeselectOnEmptyClick();
-  const handleReorderNode = useReorderNode();
-
-  const renderRow = (index: number): ReactNode => <LayerRow isSelected={selectedIds.includes(nodes[index].id)} node={nodes[index]} />;
-  const renderDropIndicator = (): ReactNode => <LayersTreeDropIndicator />;
-  const isRowSelected = (index: number): boolean => index >= 0 && index < nodes.length && selectedIds.includes(nodes[index].id);
+  const renderRow = useRenderRow();
+  const renderDropIndicator = useRenderDropIndicator();
+  const isRowSelected = useIsRowSelected();
+  const handleReorder = useHandleReorder();
 
   return (
     <div className={styles.LayersTree}>
       <Tree
-        count={nodes.length}
+        getChildren={getChildren}
         isRowSelected={isRowSelected}
         onDeselectAll={handleDeselectOnEmptyClick}
-        onReorder={handleReorderNode}
+        onReorder={handleReorder}
         renderDropIndicator={renderDropIndicator}
         renderRow={renderRow}
+        roots={roots}
         rowHeight={LAYERS_TREE_ROW_HEIGHT}
       />
     </div>

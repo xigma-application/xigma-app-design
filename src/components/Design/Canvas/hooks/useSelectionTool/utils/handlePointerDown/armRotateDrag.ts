@@ -7,10 +7,15 @@ import { TDraftRect, TPoint } from 'types/canvas';
 import { TRotateDragState, TRotateNodeOrigin } from 'types/design/selectionTool/types';
 import { TSceneNode } from 'types/design/types';
 
+// store
+import { selectActivePage } from 'store/design/selectors';
+import { store } from 'store';
+
 // utils
 import { captureRotatedVectorNodeSnapshot } from './captureRotatedVectorNodeSnapshot';
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
 import { getRotateCursorAngle } from 'utils/math/getRotateCursorAngle';
+import { getRigidTransformNodes } from 'store/design/utils/nodeHierarchy/getRigidTransformNodes';
 
 const getRotateNodeOrigins = (selectedNodes: TSceneNode[]): Record<string, TRotateNodeOrigin> => {
   const nodeOrigins: Record<string, TRotateNodeOrigin> = {};
@@ -61,8 +66,9 @@ export const armRotateDrag = (
   canvasRefs: TCanvasRefs,
 ): void => {
   const pivot: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
-  const nodeOrigins = getRotateNodeOrigins(selectedNodes);
+  const targetNodes = getRigidTransformNodes(selectedNodes, selectActivePage(store.getState()).nodes);
+  const nodeOrigins = getRotateNodeOrigins(targetNodes);
 
   commitRotateDragState(canvas, event, rotateDragRef, point, bounds, rotation, pivot, nodeOrigins);
-  captureRotatedVectorNodeSnapshot(selectedNodes, canvasRefs);
+  captureRotatedVectorNodeSnapshot(targetNodes, canvasRefs);
 };

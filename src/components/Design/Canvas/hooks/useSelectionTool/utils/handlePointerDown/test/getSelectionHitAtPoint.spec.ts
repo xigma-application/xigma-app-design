@@ -1,5 +1,5 @@
 // store
-import { addNode, setVectorEditingNodeIds } from 'store/design/slice';
+import { addNode, groupNodes, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { selectActivePage, selectOrderedNodes } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -56,6 +56,7 @@ const addClosedSquareVectorNode = (x: number, y: number, size: number): string =
 describe('getSelectionHitAtPoint', () => {
   afterEach(() => {
     store.dispatch(setVectorEditingNodeIds([]));
+    store.dispatch(setSelection([]));
   });
 
   it('should return the hit node as-is when it is not the one currently being vector-edited', () => {
@@ -99,5 +100,132 @@ describe('getSelectionHitAtPoint', () => {
 
     // result
     expect(hit).toBeNull();
+  });
+
+  it('should resolve a hit on a child up to its top-level group when none of its children are selected', () => {
+    // mock
+    const idA = addFrameNode(500000, 500000, 20);
+    const idB = addFrameNode(500100, 500000, 20);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+    store.dispatch(setSelection([]));
+
+    // action
+    const hit = getSelectionHitAtPoint({ x: 500010, y: 500010 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+    // result
+    expect(hit?.id).not.toBe(idA);
+    expect(hit?.type).toBe(NodeType.group);
+  });
+
+  it('should bypass the group and return the specific child once one of its children is already selected', () => {
+    // mock
+    const idA = addFrameNode(600000, 600000, 20);
+    const idB = addFrameNode(600100, 600000, 20);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+    store.dispatch(setSelection([idA]));
+
+    // action — hitting the OTHER child while the first one is selected
+    const hit = getSelectionHitAtPoint({ x: 600110, y: 600010 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+    // result
+    expect(hit?.id).toBe(idB);
+  });
+
+  it('should fall back to the group itself when an entered group is hit on empty padding that covers no child', () => {
+    // mock
+    const idA = addFrameNode(610000, 610000, 20);
+    const idB = addFrameNode(610100, 610000, 20);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+    store.dispatch(setSelection([idA]));
+
+    // action — the gap between the two children, still inside the group’s union bounding box
+    const hit = getSelectionHitAtPoint({ x: 610060, y: 610010 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+    // result
+    expect(hit?.id).not.toBe(idA);
+    expect(hit?.id).not.toBe(idB);
+    expect(hit?.type).toBe(NodeType.group);
+  });
+
+  it('should still resolve to the group itself when the group node is selected directly, not one of its children', () => {
+    // mock
+    const idA = addFrameNode(700000, 700000, 20);
+    const idB = addFrameNode(700100, 700000, 20);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+
+    // action — selection now holds the group's own id, not a child
+    const hit = getSelectionHitAtPoint({ x: 700010, y: 700010 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+    // result
+    expect(hit?.id).not.toBe(idA);
+    expect(hit?.type).toBe(NodeType.group);
+  });
+
+  it('should still resolve to the group when a group child is selected together with an unrelated node', () => {
+    // mock — a child dragged together with an unrelated sibling (e.g. [1,2] grouped, 2 and 3 both
+    // selected and moved) must not leave the group permanently "entered" for its other children
+    const idA = addFrameNode(800000, 800000, 20);
+    const idB = addFrameNode(800100, 800000, 20);
+    const idC = addFrameNode(800300, 800000, 20);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+    store.dispatch(setSelection([idB, idC]));
+
+    // action — hitting idA, the group's OTHER (unmoved) child
+    const hit = getSelectionHitAtPoint({ x: 800010, y: 800010 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+    // result
+    expect(hit?.id).not.toBe(idA);
+    expect(hit?.type).toBe(NodeType.group);
+  });
+
+  it('should resolve to the child itself when clicking directly on it, even while selected together with an unrelated node', () => {
+    // mock — [1,2] grouped, 2 and 3 both selected and dragged together; clicking directly on the
+    // already-selected group child 2 again must keep hitting it (so the drag can continue on the
+    // whole [2,3] selection), not jump to the group just because the selection isn’t "entered"
+    const idA = addFrameNode(900000, 900000, 20);
+    const idB = addFrameNode(900100, 900000, 20);
+    const idC = addFrameNode(900300, 900000, 20);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+    store.dispatch(setSelection([idB, idC]));
+
+    // action — hitting idB, the already-selected child, directly
+    const hit = getSelectionHitAtPoint({ x: 900110, y: 900010 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+    // result
+    expect(hit?.id).toBe(idB);
+  });
+
+  it('should resolve to a three-levels-deep nested group when it is selected directly and clicked on its own bounds', () => {
+    // mock — group-3 (containing idA/idB) wrapped in group-2, wrapped again in group-1; group-3 stays
+    // selected the whole time, so clicking its own visible area must keep hitting group-3, not the
+    // outermost group-1 and not one of its own leaf children
+    const idA = addFrameNode(1000000, 1000000, 20);
+    const idB = addFrameNode(1000100, 1000000, 20);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+    const [group3Id] = selectActivePage(store.getState()).selectedIds;
+
+    store.dispatch(groupNodes());
+    store.dispatch(groupNodes());
+    store.dispatch(setSelection([group3Id]));
+
+    // action — click well within group-3's own bounds (idA's own area)
+    const hit = getSelectionHitAtPoint({ x: 1000010, y: 1000010 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+    // result
+    expect(hit?.id).toBe(group3Id);
   });
 });

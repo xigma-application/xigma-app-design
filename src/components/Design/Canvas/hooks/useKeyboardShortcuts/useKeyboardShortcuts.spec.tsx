@@ -583,6 +583,32 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
     expect(selectSelectedIds(realStore.getState())).not.toEqual([idA]);
   });
 
+  it('should group the selection on "Cmd+G" and ungroup it again on "Cmd+Shift+G"', () => {
+    // mock
+    const idA = addFrameNode();
+    const idB = addFrameNode(40, 40);
+
+    realStore.dispatch(setSelection([idA, idB]));
+
+    // before
+    renderHook(() => useKeyboardShortcuts(createCanvasRefs()), {
+      wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
+    });
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyG', metaKey: true });
+
+    // result
+    const [groupId] = selectSelectedIds(realStore.getState());
+    expect(realStore.getState().design.pages[realStore.getState().design.activePageId].nodes[groupId].type).toBe(NodeType.group);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyG', metaKey: true, shiftKey: true });
+
+    // result
+    expect(selectSelectedIds(realStore.getState())).toEqual([idA, idB]);
+  });
+
   it('should copy the selected node on "Cmd+C" and paste a clone of it on "Cmd+V"', () => {
     // mock
     const idA = addFrameNode();

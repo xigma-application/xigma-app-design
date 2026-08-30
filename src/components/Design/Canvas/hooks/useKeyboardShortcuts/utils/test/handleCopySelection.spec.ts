@@ -1,5 +1,5 @@
 // store
-import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { addNode, groupNodes, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -12,9 +12,20 @@ import { getClipboardNodes, setClipboardNodes } from '../clipboard';
 import { getVectorClipboardFragment, setVectorClipboardFragment } from '../vectorClipboard';
 import { handleCopySelection } from '../handleCopySelection';
 
-const addFrameNode = (): string => {
+const addFrameNode = (overrides: { x?: number; y?: number } = {}): string => {
   store.dispatch(
-    addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+    addNode({
+      fill: '#ff0000',
+      height: 20,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 20,
+      x: 0,
+      y: 0,
+      ...overrides,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());
@@ -48,7 +59,7 @@ describe('handleCopySelection', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
     store.dispatch(setVectorEditingNodeIds([]));
-    setClipboardNodes([]);
+    setClipboardNodes([], []);
     setVectorClipboardFragment({ filledFacePieceKeySets: [], segments: [], vertexHandleModes: {}, vertices: [] });
   });
 
@@ -62,7 +73,28 @@ describe('handleCopySelection', () => {
     handleCopySelection(createCanvasRefs());
 
     // result
-    expect(getClipboardNodes().map((node) => node.id)).toEqual([frameId]);
+    expect(getClipboardNodes().nodes.map((node) => node.id)).toEqual([frameId]);
+    expect(getClipboardNodes().rootIds).toEqual([frameId]);
+  });
+
+  it('should copy a group together with all of its children, not just the group node itself', () => {
+    // mock
+    const a = addFrameNode({ x: 0, y: 0 });
+    const b = addFrameNode({ x: 40, y: 0 });
+
+    store.dispatch(setSelection([a, b]));
+    store.dispatch(groupNodes());
+
+    const page = selectActivePage(store.getState());
+    const [groupId] = page.selectedIds;
+
+    // action
+    handleCopySelection(createCanvasRefs());
+
+    // result
+    const clipboard = getClipboardNodes();
+    expect(clipboard.rootIds).toEqual([groupId]);
+    expect(clipboard.nodes.map((node) => node.id).sort()).toEqual([a, b, groupId].sort());
   });
 
   it('should do nothing when nothing is selected', () => {
@@ -73,7 +105,7 @@ describe('handleCopySelection', () => {
     handleCopySelection(createCanvasRefs());
 
     // result
-    expect(getClipboardNodes()).toEqual([]);
+    expect(getClipboardNodes()).toEqual({ nodes: [], rootIds: [] });
   });
 
   it('should do nothing while a vector node is open for editing with no vertex/segment selected', () => {
@@ -87,7 +119,7 @@ describe('handleCopySelection', () => {
     handleCopySelection(createCanvasRefs());
 
     // result
-    expect(getClipboardNodes()).toEqual([]);
+    expect(getClipboardNodes()).toEqual({ nodes: [], rootIds: [] });
   });
 
   it('should copy the selected vertex into the vector clipboard while a vector node is open for editing', () => {

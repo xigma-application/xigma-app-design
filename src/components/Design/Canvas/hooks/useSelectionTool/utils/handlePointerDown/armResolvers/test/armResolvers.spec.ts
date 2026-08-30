@@ -1,6 +1,7 @@
 // store
 import {
   addNode,
+  groupNodes,
   setActiveTool,
   setPaintColor,
   setPenActiveVertexId,
@@ -9,7 +10,7 @@ import {
   updateNode,
 } from 'store/design/slice';
 import { DEFAULT_PAINT_COLOR } from 'store/design/constants';
-import { selectActivePage } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -24,6 +25,7 @@ import { armEllipseArcOnPointerDown } from '../armEllipseArcOnPointerDown';
 import { armEllipseArcRatioOnPointerDown } from '../armEllipseArcRatioOnPointerDown';
 import { armEllipseArcRotateOnPointerDown } from '../armEllipseArcRotateOnPointerDown';
 import { armGroupBoundsOnPointerDown } from '../armGroupBoundsOnPointerDown';
+import { armGroupChildToggleOnPointerDown } from '../armGroupChildToggleOnPointerDown';
 import { armHitOnPointerDown } from '../armHitOnPointerDown';
 import { armLineEndpointOnPointerDown } from '../armLineEndpointOnPointerDown';
 import { armMarqueeOnPointerDown } from '../armMarqueeOnPointerDown';
@@ -3477,5 +3479,121 @@ describe('armVectorWidthPointOnPointerDown', () => {
         { nodeId, pointId: 'p2', side: 'point' },
       ]);
     });
+  });
+});
+
+describe('armGroupChildToggleOnPointerDown', () => {
+  afterEach(() => {
+    store.dispatch(setSelection([]));
+  });
+
+  it('should select the individual child on a plain Ctrl+click, bypassing the group, and arm a drag for it', () => {
+    // mock
+    const a = addRectangleNode(500000, 500000, 20);
+    const b = addRectangleNode(500100, 500000, 20);
+
+    store.dispatch(setSelection([a.id, b.id]));
+    store.dispatch(groupNodes());
+
+    const canvasRefs = createCanvasRefs();
+    const selectionRefs = createSelectionToolRefs();
+    const ctx = createContext({
+      canvasRefs,
+      currentSelection: selectSelectedIds(store.getState()),
+      dispatch: store.dispatch,
+      event: pointerEvent({ ctrlKey: true }),
+      point: { x: 500010, y: 500010 },
+      selectionRefs,
+    });
+
+    // action
+    const resolved = armGroupChildToggleOnPointerDown(ctx);
+
+    // result
+    expect(resolved).toBe(true);
+    expect(selectSelectedIds(store.getState())).toEqual([a.id]);
+    expect(selectionRefs.dragStateRef.current?.nodeOrigins).toEqual({ [a.id]: { x: 500000, y: 500000 } });
+  });
+
+  it('should select the individual child on a plain Cmd/⌘+click too, since macOS treats a physical Ctrl+click as a secondary click', () => {
+    // mock
+    const a = addRectangleNode(500000, 500000, 20);
+    const b = addRectangleNode(500100, 500000, 20);
+
+    store.dispatch(setSelection([a.id, b.id]));
+    store.dispatch(groupNodes());
+
+    const ctx = createContext({
+      currentSelection: selectSelectedIds(store.getState()),
+      dispatch: store.dispatch,
+      event: pointerEvent({ metaKey: true }),
+      point: { x: 500010, y: 500010 },
+    });
+
+    // action
+    const resolved = armGroupChildToggleOnPointerDown(ctx);
+
+    // result
+    expect(resolved).toBe(true);
+    expect(selectSelectedIds(store.getState())).toEqual([a.id]);
+  });
+
+  it('should toggle the individual child in and out of the selection on Ctrl+Shift+click', () => {
+    // mock
+    const a = addRectangleNode(500000, 500000, 20);
+    const b = addRectangleNode(500100, 500000, 20);
+
+    store.dispatch(setSelection([a.id, b.id]));
+    store.dispatch(groupNodes());
+    store.dispatch(setSelection([]));
+
+    // before — first click adds the child
+    armGroupChildToggleOnPointerDown(
+      createContext({
+        currentSelection: selectSelectedIds(store.getState()),
+        dispatch: store.dispatch,
+        event: pointerEvent({ ctrlKey: true, shiftKey: true }),
+        point: { x: 500010, y: 500010 },
+      }),
+    );
+
+    // result
+    expect(selectSelectedIds(store.getState())).toEqual([a.id]);
+
+    // action — second click on the same child removes it again
+    const resolved = armGroupChildToggleOnPointerDown(
+      createContext({
+        currentSelection: selectSelectedIds(store.getState()),
+        dispatch: store.dispatch,
+        event: pointerEvent({ ctrlKey: true, shiftKey: true }),
+        point: { x: 500010, y: 500010 },
+      }),
+    );
+
+    // result
+    expect(resolved).toBe(true);
+    expect(selectSelectedIds(store.getState())).toEqual([]);
+  });
+
+  it('should do nothing when Ctrl is not held', () => {
+    // mock
+    const a = addRectangleNode(500000, 500000, 20);
+    const b = addRectangleNode(500100, 500000, 20);
+
+    store.dispatch(setSelection([a.id, b.id]));
+    store.dispatch(groupNodes());
+
+    const ctx = createContext({ event: pointerEvent(), point: { x: 500010, y: 500010 } });
+
+    // action & result
+    expect(armGroupChildToggleOnPointerDown(ctx)).toBeUndefined();
+  });
+
+  it('should do nothing when Ctrl+click misses every node', () => {
+    // mock
+    const ctx = createContext({ event: pointerEvent({ ctrlKey: true }), point: { x: 9000, y: 9000 } });
+
+    // action & result
+    expect(armGroupChildToggleOnPointerDown(ctx)).toBeUndefined();
   });
 });

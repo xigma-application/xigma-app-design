@@ -2,7 +2,7 @@
 import { DUPLICATE_OFFSET } from 'components/Design/Canvas/constants';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNodes, setSelection } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { getVectorSelectionSnapshot } from 'store/history/getVectorSelectionSnapshot';
 import { selectActivePage } from 'store/design/selectors';
@@ -12,7 +12,7 @@ import { AppDispatch, store } from 'store';
 import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
-import { cloneNodeWithOffset } from './cloneNodeWithOffset';
+import { cloneNodeSubtreeWithOffset } from './cloneNodeSubtreeWithOffset';
 import { getClipboardNodes } from './clipboard';
 import { getVectorClipboardFragment } from './vectorClipboard';
 import { pasteVectorFragment } from './pasteVectorFragment';
@@ -29,14 +29,14 @@ export const handlePasteSelection = (dispatch: AppDispatch, refs: TCanvasRefs): 
       pasteVectorFragment(dispatch, refs, nodes, vectorEditingNodeIds, vectorFragment);
     }
   } else {
-    const clipboardNodes = getClipboardNodes();
+    const clipboard = getClipboardNodes();
 
-    if (clipboardNodes.length > 0) {
+    if (clipboard.nodes.length > 0) {
+      const cloned = cloneNodeSubtreeWithOffset(clipboard.nodes, clipboard.rootIds, DUPLICATE_OFFSET, DUPLICATE_OFFSET);
+
       dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
-      clipboardNodes.forEach((node) => dispatch(addNode(cloneNodeWithOffset(node, DUPLICATE_OFFSET, DUPLICATE_OFFSET))));
-
-      const { rootOrder } = selectActivePage(store.getState());
-      dispatch(setSelection(rootOrder.slice(rootOrder.length - clipboardNodes.length)));
+      dispatch(addNodes({ nodes: cloned.nodes, rootIds: cloned.rootIds }));
+      dispatch(setSelection(cloned.rootIds));
       dispatch(endHistoryGesture());
     }
   }

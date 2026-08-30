@@ -1,12 +1,13 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
-import { selectActivePage } from 'store/design/selectors';
+import { addNode, groupNodes, setSelection } from 'store/design/slice';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TGroupNode } from 'types/design/types';
 import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
@@ -90,6 +91,29 @@ describe('armDrag', () => {
     expect(dragStateRef.current).toMatchObject({
       nodeOrigins: { [idA]: { x1: 200, x2: 250, y1: 200, y2: 200 } },
       pendingClickAction: { id: idA, kind: 'collapse' },
+    });
+  });
+
+  it('should expand a group id into the group itself plus its child origins so the whole group drags together', () => {
+    // mock
+    const idA = addFrameNode(0, 0);
+    const idB = addFrameNode(100, 100);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+
+    const [groupId] = selectSelectedIds(store.getState());
+    const groupOrigin = selectActivePage(store.getState()).nodes[groupId] as TGroupNode;
+    const dragStateRef = createDragStateRef();
+
+    // before
+    armDrag([groupId], null, { x: 0, y: 0 }, dragStateRef, createCanvasRefs());
+
+    // result — the group node's own origin is included so its box (needed while rotated) translates too
+    expect(dragStateRef.current?.nodeOrigins).toEqual({
+      [groupId]: { x: groupOrigin.x, y: groupOrigin.y },
+      [idA]: { x: 0, y: 0 },
+      [idB]: { x: 100, y: 100 },
     });
   });
 

@@ -2,17 +2,18 @@
 import { DUPLICATE_OFFSET } from 'components/Design/Canvas/constants';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNodes, setSelection } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { getVectorSelectionSnapshot } from 'store/history/getVectorSelectionSnapshot';
-import { selectActivePage, selectOrderedNodes, selectSelectedIds } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
-import { cloneNodeWithOffset } from './cloneNodeWithOffset';
+import { cloneNodeSubtreeWithOffset } from './cloneNodeSubtreeWithOffset';
+import { collectSubtreeNodes } from './collectSubtreeNodes';
 import { duplicateVectorFragment } from './duplicateVectorFragment/duplicateVectorFragment';
 
 export const handleDuplicateSelection = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
@@ -26,13 +27,12 @@ export const handleDuplicateSelection = (dispatch: AppDispatch, refs: TCanvasRef
   if (selectedVertexIds.length > 0 || selectedSegmentIds.length > 0) {
     duplicateVectorFragment(dispatch, refs, nodes, vectorEditingNodeIds, selectedVertexIds, selectedSegmentIds);
   } else if (selectedIds.length > 0 && vectorEditingNodeIds.length === 0) {
-    const nodesToDuplicate = selectOrderedNodes(state).filter((node) => selectedIds.includes(node.id));
+    const subtreeNodes = collectSubtreeNodes(nodes, selectedIds);
+    const cloned = cloneNodeSubtreeWithOffset(subtreeNodes, selectedIds, DUPLICATE_OFFSET, DUPLICATE_OFFSET);
 
     dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
-    nodesToDuplicate.forEach((node) => dispatch(addNode(cloneNodeWithOffset(node, DUPLICATE_OFFSET, DUPLICATE_OFFSET))));
-
-    const { rootOrder } = selectActivePage(store.getState());
-    dispatch(setSelection(rootOrder.slice(rootOrder.length - nodesToDuplicate.length)));
+    dispatch(addNodes({ nodes: cloned.nodes, rootIds: cloned.rootIds }));
+    dispatch(setSelection(cloned.rootIds));
     dispatch(endHistoryGesture());
   }
 };

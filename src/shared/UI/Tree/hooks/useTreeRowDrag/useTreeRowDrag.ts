@@ -1,64 +1,41 @@
 import { MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from 'react';
 
-// others
-import { TREE_ROW_DRAG_THRESHOLD_PX } from './constants';
-
 // types
-import { TArmedRowDrag, TUseTreeRowDragOptions, TUseTreeRowDragResult } from './types';
+import { TArmedRowDrag, TTreeDragState, TUseTreeRowDragOptions, TUseTreeRowDragResult } from './types';
+import { TTreeItem } from '../../types';
 
 // utils
-import { getDraggedIndices } from './utils/getDraggedIndices';
-import { getInsertionIndex } from './utils/getInsertionIndex';
-import { getIsReorderNoOp } from './utils/getIsReorderNoOp';
-import { getReorderedInsertionIndex } from './utils/getReorderedInsertionIndex';
+import { handleMouseMove } from './utils/handleMouseMove/handleMouseMove';
+import { handleMouseUp } from './utils/handleMouseUp/handleMouseUp';
+import { handleRowMouseDown } from './utils/handleRowMouseDown/handleRowMouseDown';
 
-export const useTreeRowDrag = ({ count, isRowSelected, onReorder, rowHeight, rowsRef }: TUseTreeRowDragOptions): TUseTreeRowDragResult => {
+export const useTreeRowDrag = <T extends TTreeItem>({
+  isRowSelected,
+  onReorder,
+  rows,
+  rowHeight,
+  rowsRef,
+}: TUseTreeRowDragOptions<T>): TUseTreeRowDragResult => {
   const [insertionIndex, setInsertionIndex] = useState<number | null>(null);
+  const [dropDepth, setDropDepth] = useState<number>(0);
   const armedRef = useRef<TArmedRowDrag | null>(null);
+  const dragState: TTreeDragState = { armedRef, dropDepth, insertionIndex, setDropDepth, setInsertionIndex };
 
-  const handleRowMouseDown = (index: number, event: ReactMouseEvent<HTMLElement>): void => {
-    if (event.button === 0) {
-      armedRef.current = { indices: getDraggedIndices(index, count, isRowSelected), startY: event.clientY };
-    }
-  };
-
-  const handleMouseMove = (event: MouseEvent): void => {
-    const armed = armedRef.current;
-    const container = rowsRef.current;
-
-    if (armed && container) {
-      const deltaY = event.clientY - armed.startY;
-
-      if (insertionIndex !== null || Math.abs(deltaY) >= TREE_ROW_DRAG_THRESHOLD_PX) {
-        setInsertionIndex(getInsertionIndex(event.clientY, container.getBoundingClientRect().top, container.scrollTop, rowHeight, count));
-      }
-    }
-  };
-
-  const handleMouseUp = (): void => {
-    const armed = armedRef.current;
-
-    if (armed && insertionIndex !== null) {
-      const canReorder = !getIsReorderNoOp(armed.indices, insertionIndex);
-
-      if (canReorder) {
-        onReorder?.(armed.indices, getReorderedInsertionIndex(armed.indices, insertionIndex));
-      }
-    }
-
-    armedRef.current = null;
-    setInsertionIndex(null);
-  };
+  const onRowMouseDown = (index: number, event: ReactMouseEvent<HTMLElement>): void =>
+    handleRowMouseDown(index, event, rows, isRowSelected, dragState);
 
   useEffect(() => {
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    const onMouseMove = (event: MouseEvent): void => handleMouseMove(event, rows, rowHeight, rowsRef, dragState);
+    const onMouseUp = (): void => handleMouseUp(rows, dragState, onReorder);
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
 
     return (): void => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
     };
-  }, [count, insertionIndex, isRowSelected, onReorder, rowHeight, rowsRef]);
+  }, [rows, dropDepth, insertionIndex, isRowSelected, onReorder, rowHeight, rowsRef]);
 
-  return { handleRowMouseDown, insertionIndex };
+  return { dropDepth, handleRowMouseDown: onRowMouseDown, insertionIndex };
 };

@@ -1,30 +1,17 @@
 import { RefObject } from 'react';
 
 // store
-import { selectActiveTool, selectViewport } from 'store/design/selectors';
-import { AppDispatch, store } from 'store';
+import { AppDispatch } from 'store';
 
 // types
-import { ToolName } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TResizeDragState, TResizeNodeOrigin } from 'types/design/selectionTool/types';
+import { TResizeDragState } from 'types/design/selectionTool/types';
 
 // utils
-import { getPointerPosition } from '../../../../../utils/getPointerPosition';
-import { getResizeAnchorSolver } from './getResizeAnchorSolver';
-import { getResizeOrScaleFactors } from './getResizeOrScaleFactors';
-import { getResizeQueryPoint } from './getResizeQueryPoint';
-import { resizeNode } from './resizeNode/resizeNode';
-import { screenToWorld } from '../../../../../utils/screenToWorld';
-import { updateResizedVectorNodeSnapshot } from './updateResizedVectorNodeSnapshot';
-
-const getSingleRotatableOrigin = (
-  originEntries: [string, TResizeNodeOrigin][],
-): Exclude<TResizeNodeOrigin, { x1: number; x2: number; y1: number; y2: number }> | null => {
-  const [singleOriginEntry] = originEntries;
-
-  return originEntries.length === 1 && !('x1' in singleOriginEntry[1]) ? singleOriginEntry[1] : null;
-};
+import { applyRotatedGroupChildResize } from './applyRotatedGroupChildResize';
+import { getResizeDragFrame } from './getResizeDragFrame';
+import { getSingleRotatableOrigin } from './getSingleRotatableOrigin';
+import { resizeOriginEntries } from './resizeOriginEntries';
 
 export const continueResizeDrag = (
   canvas: HTMLCanvasElement,
@@ -36,28 +23,22 @@ export const continueResizeDrag = (
   const resizeDragState = resizeDragRef.current;
 
   if (resizeDragState) {
-    const { aspectRatio, bounds, handle, nodeOrigins } = resizeDragState;
+    const { aspectRatio, bounds, handle, nodeOrigins, rotatedGroupChildOrigins } = resizeDragState;
     const originEntries = Object.entries(nodeOrigins);
     const singleRotatableOrigin = getSingleRotatableOrigin(originEntries);
-    const isScaleTool = selectActiveTool(store.getState()) === ToolName.scale;
-    const rawPoint = screenToWorld(getPointerPosition(canvas, event), selectViewport(store.getState()));
-    const point = getResizeQueryPoint(rawPoint, bounds, singleRotatableOrigin);
-    const { anchors, scaleX, scaleY } = getResizeOrScaleFactors(isScaleTool, handle, bounds, point, aspectRatio, event.shiftKey);
-    const rotatedAnchorSolver = getResizeAnchorSolver(bounds, handle, scaleX, scaleY, singleRotatableOrigin);
+    const frame = getResizeDragFrame(canvas, event, bounds, handle, aspectRatio, singleRotatableOrigin);
     const snapshots = canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current;
 
     if (snapshots && !canvasRefs.transform.resizedNodeIdsRef.current) {
       canvasRefs.transform.resizedNodeIdsRef.current = new Set(snapshots.keys());
     }
 
-    originEntries.forEach(([id, origin]) => {
-      const snapshot = snapshots?.get(id);
+    resizeOriginEntries(originEntries, dispatch, frame, Boolean(singleRotatableOrigin), snapshots);
 
-      if (snapshot && 'vertices' in origin) {
-        updateResizedVectorNodeSnapshot(snapshot, origin, anchors, scaleX, scaleY, rotatedAnchorSolver);
-      } else {
-        resizeNode(id, origin, dispatch, anchors, scaleX, scaleY, Boolean(singleRotatableOrigin), rotatedAnchorSolver);
-      }
-    });
+    if (rotatedGroupChildOrigins && singleRotatableOrigin) {
+      const [groupId] = originEntries[0];
+
+      applyRotatedGroupChildResize(groupId, singleRotatableOrigin, rotatedGroupChildOrigins, dispatch);
+    }
   }
 };

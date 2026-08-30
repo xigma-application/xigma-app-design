@@ -13,6 +13,10 @@
     background-color: var(--color-blue-1);
   }
 
+  &:hover &__shortcut {
+    color: var(--color-on-blue-1);
+  }
+
   &--disabled {
     @include disabled.disabled;
 

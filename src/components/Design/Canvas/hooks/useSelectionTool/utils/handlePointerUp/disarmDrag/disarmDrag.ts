@@ -11,6 +11,7 @@ import { TDragState } from 'types/design/selectionTool/types';
 import { applyPendingDragClickAction } from './applyPendingDragClickAction';
 import { commitDraggedVectorNodeSnapshots } from './commitDraggedVectorNodeSnapshots';
 import { flushThrottledDispatch } from 'components/Design/Canvas/utils/flushThrottledDispatch';
+import { resyncRotatedGroupBounds } from './resyncRotatedGroupBounds';
 
 export const disarmDrag = (
   canvas: HTMLCanvasElement,
@@ -24,6 +25,7 @@ export const disarmDrag = (
   if (dragState) {
     flushThrottledDispatch(dragState.dispatchThrottle);
     commitDraggedVectorNodeSnapshots(dispatch, dragState, canvasRefs);
+    resyncRotatedGroupBounds(dispatch, dragState);
     applyPendingDragClickAction(dispatch, dragState);
     canvasRefs.transform.draggedNodeIdsRef.current = null;
     dragStateRef.current = null;

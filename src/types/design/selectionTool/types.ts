@@ -45,6 +45,7 @@ export type TResizeDragState = {
   bounds: TDraftRect;
   handle: TResizeHandle;
   nodeOrigins: Record<string, TResizeNodeOrigin>;
+  rotatedGroupChildOrigins?: Record<string, TResizeNodeOrigin>;
 };
 
 export type TPolygonVertexCountDragState = {

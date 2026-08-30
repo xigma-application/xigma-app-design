@@ -23,7 +23,9 @@ import {
   selectPages,
   selectPaintColor,
   selectPenActiveVertexId,
+  selectRenderOrderedNodes,
   selectSelectedIds,
+  selectSelectedLeafNodes,
   selectSelectedNodes,
   selectVectorEditingNodeIds,
   selectViewport,
@@ -31,7 +33,7 @@ import {
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import { TSceneNode } from 'types/design/types';
+import { TGroupNode, TRectangleNode, TSceneNode } from 'types/design/types';
 
 const node: TSceneNode = {
   fill: '#ff0000',
@@ -232,5 +234,67 @@ describe('design selectors', () => {
   it('should select the selected nodes', () => {
     // result
     expect(selectSelectedNodes(state)).toEqual([node]);
+  });
+});
+
+describe('design selectors — groups', () => {
+  const childA: TRectangleNode = { ...node, id: 'a', parentId: 'group-1', type: NodeType.rectangle };
+  const childB: TRectangleNode = { ...node, id: 'b', parentId: 'group-1', type: NodeType.rectangle };
+  const group: TGroupNode = {
+    childIds: ['a', 'b'],
+    height: 10,
+    id: 'group-1',
+    name: 'Group',
+    parentId: null,
+    rotation: 0,
+    type: NodeType.group,
+    width: 10,
+    x: 0,
+    y: 0,
+  };
+  const loose: TRectangleNode = { ...node, id: 'loose', type: NodeType.rectangle };
+
+  const groupState = {
+    design: {
+      ...state.design,
+      pages: {
+        'page-1': {
+          ...state.design.pages['page-1'],
+          nodes: { 'group-1': group, a: childA, b: childB, loose },
+          rootOrder: ['group-1', 'loose'],
+          selectedIds: ['group-1'],
+        },
+      },
+    },
+  } as any;
+
+  it('should flatten group children into render order behind the group node', () => {
+    // result
+    expect(selectRenderOrderedNodes(groupState).map((sceneNode) => sceneNode.id)).toEqual(['group-1', 'a', 'b', 'loose']);
+  });
+
+  it('should expand a selected group to its leaf nodes', () => {
+    // result
+    expect(selectSelectedLeafNodes(groupState).map((sceneNode) => sceneNode.id)).toEqual(['a', 'b']);
+  });
+
+  it('should skip root-order ids and child ids that no longer resolve', () => {
+    // mock
+    const danglingState = {
+      design: {
+        ...state.design,
+        pages: {
+          'page-1': {
+            ...state.design.pages['page-1'],
+            nodes: { 'group-1': { ...group, childIds: ['a', 'gone'] }, a: childA, loose },
+            rootOrder: ['group-1', 'missing', 'loose'],
+            selectedIds: [],
+          },
+        },
+      },
+    } as any;
+
+    // result
+    expect(selectRenderOrderedNodes(danglingState).map((sceneNode) => sceneNode.id)).toEqual(['group-1', 'a', 'loose']);
   });
 });

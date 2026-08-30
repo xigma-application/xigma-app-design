@@ -12,6 +12,7 @@ import { TDragState, TPendingClickAction } from 'types/design/selectionTool/type
 // utils
 import { captureDraggedVectorNodeSnapshots } from './captureDraggedVectorNodeSnapshots';
 import { getDragNodeOrigins } from './getDragNodeOrigins';
+import { getRigidTransformNodes } from 'store/design/utils/nodeHierarchy/getRigidTransformNodes';
 
 export const armDrag = (
   armIds: string[],
@@ -21,14 +22,16 @@ export const armDrag = (
   canvasRefs: TCanvasRefs,
 ): void => {
   const { nodes } = selectActivePage(store.getState());
+  const armedNodes = armIds.map((id) => nodes[id]).filter(Boolean);
+  const dragIds = getRigidTransformNodes(armedNodes, nodes).map((node) => node.id);
 
   dragStateRef.current = {
     dispatchThrottle: { frameId: null, run: null },
     hasMoved: false,
-    nodeOrigins: getDragNodeOrigins(armIds, nodes),
+    nodeOrigins: getDragNodeOrigins(dragIds, nodes),
     pendingClickAction,
     pointerStart: point,
   };
 
-  captureDraggedVectorNodeSnapshots(armIds, nodes, canvasRefs);
+  captureDraggedVectorNodeSnapshots(dragIds, nodes, canvasRefs);
 };

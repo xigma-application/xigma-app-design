@@ -162,12 +162,14 @@ into the bundle.
 
 The single largest structural gap versus Figma.
 
-- [ ] group/ungroup (Cmd/Ctrl+G / Shift+G)
-- [ ] real nesting in `TFrameNode` (`parentId` via drag, not just visual
-      overlap)
-- [ ] hit-testing/selection with a hierarchy (the deepest nested hit node, double-click "enters"
-      deeper)
-- [ ] moving/resizing a parent moves/scales its children
+- [x] group/ungroup (Cmd/Ctrl+G / Ctrl+Shift+G), click selects the group, Ctrl/⌘+click (+Shift to
+      add/toggle) reaches straight into one specific child, rigid move/resize/rotate, delete/undo
+      cascades. Full write-up: `.claude/docs/group-nodes.md`
+- [ ] real nesting in `TFrameNode`/section (`parentId` via drag onto a frame, not just visual
+      overlap) — only groups nest today, frames/sections still don't
+- [ ] double-click "enters" a group to select a child directly — Ctrl/⌘+click already covers the
+      same outcome without it, so this is polish, not a gap
+- [x] moving/resizing a group moves/scales its children, including while the group is rotated
 
 ## Stage 13 — Guides and snapping (smart guides)
 

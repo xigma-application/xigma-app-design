@@ -343,7 +343,7 @@ describe('drawScene', () => {
     expect(lineLoopDraws).toHaveLength(5);
   });
 
-  it('should fall back to per-node outlines when the selection spans different parents', () => {
+  it('should still render one shared group outline for a multi-selection spanning different parents', () => {
     // mock
     const gl = createGlMock();
     const program = {} as WebGLProgram;
@@ -389,8 +389,9 @@ describe('drawScene', () => {
     // result
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
 
-    // 2 separate node outlines + handles = 10 LINE_LOOP draws, not 5 (one shared box)
-    expect(lineLoopDraws).toHaveLength(10);
+    // parentId isn't a reliable "flat sibling" signal once nodes can sit inside a group — one shared
+    // outline + 4 corner handles = 5 LINE_LOOP draws, not 10 (2 separate per-node outlines)
+    expect(lineLoopDraws).toHaveLength(5);
   });
 
   it('should exclude the node currently being text-edited from its own fill rendering', () => {

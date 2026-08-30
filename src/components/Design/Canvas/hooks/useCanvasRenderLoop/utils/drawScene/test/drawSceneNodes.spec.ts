@@ -109,6 +109,31 @@ describe('drawSceneNodes', () => {
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
   });
 
+  it('should draw nothing for a group node', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const group = {
+      childIds: ['a'],
+      height: 10,
+      id: 'group-1',
+      name: 'Group',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.group,
+      width: 10,
+      x: 0,
+      y: 0,
+    } as TSceneNode;
+
+    // before
+    drawSceneNodes(gl, program, buffer, IMAGE_CONTEXT, [group], 100, 100, IDENTITY_VIEWPORT, new Map(), null, null, null);
+
+    // result
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+  });
+
   it('should draw a filled ellipse for an ellipse node', () => {
     // mock
     const gl = createGlMock();

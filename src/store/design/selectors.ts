@@ -4,10 +4,13 @@ import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from 'store';
 
 // types
-import { ToolName } from 'types/design/enums';
+import { NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage } from './types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import { TComment, TSceneNode, TViewport } from 'types/design/types';
+
+// utils
+import { getTransformTargetNodes } from './utils/nodeHierarchy/getTransformTargetNodes';
 
 export const selectActivePageId = (state: RootState): string => state.design.activePageId;
 
@@ -59,10 +62,23 @@ const selectRootOrder = createSelector([selectActivePage], (page): string[] => p
 
 export const selectOrderedNodes = createSelector([selectRootOrder, selectNodes], (rootOrder, nodes) => rootOrder.map((id) => nodes[id]));
 
+const flattenNode = (node: TSceneNode, nodes: Record<string, TSceneNode>): TSceneNode[] =>
+  node.type === NodeType.group
+    ? [node, ...node.childIds.flatMap((childId) => (nodes[childId] ? flattenNode(nodes[childId], nodes) : []))]
+    : [node];
+
+export const selectRenderOrderedNodes = createSelector([selectRootOrder, selectNodes], (rootOrder, nodes) =>
+  rootOrder.flatMap((id) => (nodes[id] ? flattenNode(nodes[id], nodes) : [])),
+);
+
 export const selectSelectedIds = createSelector([selectActivePage], (page): string[] => page.selectedIds);
 
 export const selectSelectedNodes = createSelector([selectSelectedIds, selectNodes], (selectedIds, nodes) =>
   selectedIds.map((id) => nodes[id]),
+);
+
+export const selectSelectedLeafNodes = createSelector([selectSelectedNodes, selectNodes], (selectedNodes, nodes) =>
+  getTransformTargetNodes(selectedNodes.filter(Boolean), nodes),
 );
 
 export const selectVectorEditingNodeIds = (state: RootState): string[] => state.design.vectorEditingNodeIds;

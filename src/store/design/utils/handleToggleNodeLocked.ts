@@ -2,6 +2,7 @@
 import { TDesignState } from '../types';
 
 // utils
+import { cascadeSetGroupChildrenFlag } from './cascadeSetGroupChildrenFlag';
 import { getActivePage } from './getActivePage';
 
 export const handleToggleNodeLocked = (state: TDesignState, id: string): void => {
@@ -9,5 +10,6 @@ export const handleToggleNodeLocked = (state: TDesignState, id: string): void =>
 
   if (node) {
     node.locked = !node.locked;
+    cascadeSetGroupChildrenFlag(state, node, 'locked', node.locked);
   }
 };

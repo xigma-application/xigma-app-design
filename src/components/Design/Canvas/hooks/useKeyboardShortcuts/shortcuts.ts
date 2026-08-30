@@ -31,6 +31,7 @@ export const shortcuts = {
   copy: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.c },
   duplicate: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.d },
   escape: { secondaryKey: KeyboardKeys.escape },
+  group: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.g },
   nudgeDown: { secondaryKey: KeyboardKeys.arrowDown },
   nudgeDownLarge: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.arrowDown },
   nudgeLeft: { secondaryKey: KeyboardKeys.arrowLeft },
@@ -44,4 +45,5 @@ export const shortcuts = {
   selectAll: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.a },
   toggleUiMinimized: { primaryKeys: [CONTROL_PRIMARY_KEY, 'shift'], secondaryKey: KeyboardKeys.backslash },
   undo: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.z },
+  ungroup: { primaryKeys: [CONTROL_PRIMARY_KEY, 'shift'], secondaryKey: KeyboardKeys.g },
 } satisfies Partial<Record<ToolName, TShortcut>> & TStandardKeyboardShortcuts;

@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setActiveTool, setSelection } from 'store/design/slice';
+import { addNode, groupNodes, setActiveTool, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -20,7 +20,8 @@ const createCanvas = (): HTMLCanvasElement => {
   return canvas;
 };
 
-const pointerEvent = (x: number, y: number): PointerEvent => new PointerEvent('pointermove', { clientX: x, clientY: y });
+const pointerEvent = (x: number, y: number, ctrlKey = false): PointerEvent =>
+  new PointerEvent('pointermove', { clientX: x, clientY: y, ctrlKey });
 
 const addFrameNode = (x: number, y: number, size = 100): string => {
   store.dispatch(
@@ -71,6 +72,25 @@ describe('resolveHover', () => {
     // result
     expect(hoverRef.current).toBe(idA);
     expect(setClassName).toHaveBeenCalledWith(null);
+  });
+
+  it('should bypass a hovered group and resolve to its individual child while Ctrl is held', () => {
+    // mock
+    const idA = addFrameNode(0, 0, 20);
+    const idB = addFrameNode(100, 0, 20);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+    store.dispatch(setSelection([]));
+
+    const canvas = createCanvas();
+    const hoverRef: RefObject<string | null> = { current: null };
+
+    // before
+    resolveHover(canvas, pointerEvent(10, 10, true), hoverRef, vi.fn(), ToolName.default, createCanvasRefs());
+
+    // result
+    expect(hoverRef.current).toBe(idA);
   });
 
   it('should clear the hover when the fallback point misses every node', () => {

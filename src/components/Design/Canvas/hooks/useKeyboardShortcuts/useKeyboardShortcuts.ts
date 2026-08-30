@@ -23,11 +23,13 @@ import { handleDeleteSelection } from './utils/handleDeleteSelection/handleDelet
 import { handleDuplicateSelection } from './utils/handleDuplicateSelection';
 import { handleEnterTextEdit } from './utils/handleEnterTextEdit';
 import { handleEnterVectorEdit } from './utils/handleEnterVectorEdit';
+import { handleGroupSelection } from './utils/handleGroupSelection';
 import { handleLeave } from './utils/handleLeave';
 import { handlePasteSelection } from './utils/handlePasteSelection';
 import { handleRedo } from './utils/handleRedo';
 import { handleSelectAll } from './utils/handleSelectAll';
 import { handleUndo } from './utils/handleUndo';
+import { handleUngroupSelection } from './utils/handleUngroupSelection';
 import { nudgeMap } from './utils/nudgeMap';
 
 export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
@@ -66,6 +68,8 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => handleSelectAll(dispatch, refs), ...shortcuts.selectAll },
       { action: (): any => dispatch(toggleUiMinimized()), ...shortcuts.toggleUiMinimized },
       { action: (): any => handleDuplicateSelection(dispatch, refs), ...shortcuts.duplicate },
+      { action: (): any => handleGroupSelection(dispatch), ...shortcuts.group },
+      { action: (): any => handleUngroupSelection(dispatch), ...shortcuts.ungroup },
       { action: (): any => handleCopySelection(refs), ...shortcuts.copy },
       { action: (): any => handlePasteSelection(dispatch, refs), ...shortcuts.paste },
       ...nudgeMap(dispatch, refs),

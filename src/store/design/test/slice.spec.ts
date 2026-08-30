@@ -11,8 +11,9 @@ import slice, {
   deleteNode,
   deletePage,
   duplicatePage,
+  groupNodes,
+  moveNodes,
   renamePage,
-  reorderNode,
   reorderPages,
   replaceDesignSnapshot,
   replaceNode,
@@ -29,6 +30,7 @@ import slice, {
   toggleNodeHidden,
   toggleNodeLocked,
   toggleUiMinimized,
+  ungroupNodes,
   updateCommentContent,
   updateEditingTextBoxPathStartOffset,
   updateNode,
@@ -203,6 +205,30 @@ describe('design slice', () => {
     expect(state.pages[state.activePageId].nodes).toEqual({});
   });
 
+  it('should group the selected nodes and ungroup them again', () => {
+    // before
+    const withA = slice(undefined, addNode(frameNodePayload));
+    const withB = slice(withA, addNode({ ...frameNodePayload, name: 'Frame 2' }));
+    const ids = withB.pages[withB.activePageId].rootOrder;
+    const selected = slice(withB, setSelection(ids));
+
+    // action
+    const grouped = slice(selected, groupNodes());
+    const page = grouped.pages[grouped.activePageId];
+    const [groupId] = page.selectedIds;
+
+    // result
+    expect(page.nodes[groupId].type).toBe(NodeType.group);
+    expect(page.rootOrder).toEqual([groupId]);
+
+    // action
+    const ungrouped = slice(grouped, ungroupNodes([groupId]));
+
+    // result
+    expect(ungrouped.pages[ungrouped.activePageId].rootOrder).toEqual(ids);
+    expect(ungrouped.pages[ungrouped.activePageId].nodes[groupId]).toBeUndefined();
+  });
+
   it('should toggle a node hidden state', () => {
     // before
     const withNode = slice(undefined, addNode(frameNodePayload));
@@ -239,7 +265,7 @@ describe('design slice', () => {
     expect(state.pages[state.activePageId].selectedIds).toEqual(['a', 'b']);
   });
 
-  it('should reorder nodes in the active page rootOrder', () => {
+  it('should move nodes within the active page rootOrder', () => {
     // before — append two fresh nodes so their positions are known regardless of any pre-existing rootOrder
     const withFirst = slice(undefined, addNode(frameNodePayload));
     const withSecond = slice(withFirst, addNode(frameNodePayload));
@@ -249,7 +275,7 @@ describe('design slice', () => {
     const toIndex = rootOrderBefore.length - 1;
 
     // action
-    const state = slice(withSecond, reorderNode({ fromIndices: [fromIndex], toIndex }));
+    const state = slice(withSecond, moveNodes({ nodeIds: [firstId], targetIndex: toIndex, targetParentId: null }));
 
     // result
     const rootOrderAfter = state.pages[state.activePageId].rootOrder;

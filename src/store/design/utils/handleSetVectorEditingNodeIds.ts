@@ -2,7 +2,7 @@
 import { TDesignState } from '../types';
 
 // utils
-import { handleDeleteNode } from './handleDeleteNode';
+import { handleDeleteNode } from './handleDeleteNode/handleDeleteNode';
 import { isEmptyVectorNode } from './isEmptyVectorNode';
 
 export const handleSetVectorEditingNodeIds = (state: TDesignState, nextVectorEditingNodeIds: string[]): void => {

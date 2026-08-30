@@ -12,6 +12,8 @@ const renderLayerMenu = (
   onRename = vi.fn(),
   onToggleHidden = vi.fn(),
   onToggleLocked = vi.fn(),
+  onGroupSelection = vi.fn(),
+  onCopy = vi.fn(),
 ): ReturnType<typeof render> =>
   render(
     <LayerMenu
@@ -19,6 +21,8 @@ const renderLayerMenu = (
       isHidden={isHidden}
       isLocked={isLocked}
       isOpen
+      onCopy={onCopy}
+      onGroupSelection={onGroupSelection}
       onOpenChange={vi.fn()}
       onRename={onRename}
       onToggleHidden={onToggleHidden}
@@ -44,18 +48,34 @@ describe('LayerMenu', () => {
     renderLayerMenu();
 
     // result
-    expect(screen.getByText('Copy').closest('div')?.className).toMatch(/--disabled/);
     expect(screen.getByText('Flatten').closest('div')?.className).toMatch(/--disabled/);
   });
 
-  it('should not disable Rename, Hide/Show, or Lock/Unlock', () => {
+  it('should not disable Copy, Rename, Hide/Show, Lock/Unlock, or Group selection', () => {
     // before
     renderLayerMenu();
 
     // result
+    expect(screen.getByText('Copy').closest('div')?.className).not.toMatch(/--disabled/);
     expect(screen.getByText('Rename').closest('div')?.className).not.toMatch(/--disabled/);
     expect(screen.getByText('Hide layer').closest('div')?.className).not.toMatch(/--disabled/);
     expect(screen.getByText('Lock layer').closest('div')?.className).not.toMatch(/--disabled/);
+    expect(screen.getByText('Group selection').closest('div')?.className).not.toMatch(/--disabled/);
+  });
+
+  it('should call onCopy on Copy click', async () => {
+    // mock
+    const user = userEvent.setup();
+    const onCopy = vi.fn();
+
+    // before
+    renderLayerMenu(false, false, vi.fn(), vi.fn(), vi.fn(), vi.fn(), onCopy);
+
+    // action
+    await user.click(screen.getByText('Copy'));
+
+    // result
+    expect(onCopy).toHaveBeenCalledTimes(1);
   });
 
   it('should call onRename on Rename click', async () => {
@@ -119,5 +139,20 @@ describe('LayerMenu', () => {
     // result
     expect(screen.getByText('Unlock layer')).toBeInTheDocument();
     expect(screen.queryByText('Lock layer')).not.toBeInTheDocument();
+  });
+
+  it('should call onGroupSelection on Group selection click', async () => {
+    // mock
+    const user = userEvent.setup();
+    const onGroupSelection = vi.fn();
+
+    // before
+    renderLayerMenu(false, false, vi.fn(), vi.fn(), vi.fn(), onGroupSelection);
+
+    // action
+    await user.click(screen.getByText('Group selection'));
+
+    // result
+    expect(onGroupSelection).toHaveBeenCalledTimes(1);
   });
 });

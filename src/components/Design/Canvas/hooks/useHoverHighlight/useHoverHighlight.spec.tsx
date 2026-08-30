@@ -11,7 +11,7 @@ import { useClassNames } from 'components/Design/core/ClassNamesProvider/hooks/u
 import { useHoverHighlight } from './useHoverHighlight';
 
 // store
-import { addNode, setActiveTool, setSelection, startTextEdit, stopTextEdit } from 'store/design/slice';
+import { addNode, groupNodes, setActiveTool, setSelection, startTextEdit, stopTextEdit } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -372,6 +372,65 @@ describe('useHoverHighlight behaviors', () => {
     expect(hoverRef.current).toBe(idA); // still frozen mid-drag
 
     canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 900, 900));
+
+    // result
+    expect(hoverRef.current).toBeNull();
+  });
+
+  it('should re-evaluate the hovered group into its individual child as soon as Control is pressed, without a new pointermove', () => {
+    // mock
+    const idA = addFrameNode(600, 600);
+    const idB = addFrameNode(700, 600);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+    store.dispatch(setSelection([]));
+
+    const canvasRef = createCanvasRef();
+    const { hoverRef } = renderHoverHighlight(canvasRef);
+
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 610, 610));
+    expect(hoverRef.current).not.toBe(idA);
+
+    // action
+    window.dispatchEvent(new KeyboardEvent('keydown', { ctrlKey: true, key: 'Control' }));
+
+    // result
+    expect(hoverRef.current).toBe(idA);
+  });
+
+  it('should re-evaluate the hovered child back to its group as soon as Control is released, without a new pointermove', () => {
+    // mock
+    const idA = addFrameNode(800, 600);
+    const idB = addFrameNode(900, 600);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+    store.dispatch(setSelection([]));
+
+    const canvasRef = createCanvasRef();
+    const { hoverRef } = renderHoverHighlight(canvasRef);
+
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 810, 610, { ctrlKey: true }));
+    expect(hoverRef.current).toBe(idA);
+
+    // action
+    window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Control' }));
+
+    // result
+    expect(hoverRef.current).not.toBe(idA);
+  });
+
+  it('should ignore an unrelated key press and do nothing before the pointer has ever moved over the canvas', () => {
+    // mock
+    addFrameNode(1000, 600);
+
+    const canvasRef = createCanvasRef();
+    const { hoverRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift', shiftKey: true }));
+    window.dispatchEvent(new KeyboardEvent('keydown', { ctrlKey: true, key: 'Control' }));
 
     // result
     expect(hoverRef.current).toBeNull();

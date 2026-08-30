@@ -8,8 +8,8 @@ import {
   selectEditingTextBox,
   selectEditingTextContent,
   selectNodes,
-  selectOrderedNodes,
   selectPenActiveVertexId,
+  selectRenderOrderedNodes,
   selectSelectedNodes,
   selectVectorEditingNodeIds,
   selectViewport,
@@ -106,7 +106,7 @@ export const drawScene = (
   const vectorMultiSelectResizeDrag = refs.vectorMultiSelect.vectorMultiSelectResizeDragRef.current;
   const vectorMultiSelectRotateDrag = refs.vectorMultiSelect.vectorMultiSelectRotateDragRef.current;
   const isVectorMultiDragMoving = Boolean(refs.vectorMultiSelect.vectorMultiDragRef.current?.hasMoved);
-  const filteredNodes = selectOrderedNodes(state).filter((node) => !node.hidden);
+  const filteredNodes = selectRenderOrderedNodes(state).filter((node) => !node.hidden);
   const previewSceneNodes = getPreviewSceneNodes(filteredNodes, editingNodeId, refs);
   const sceneNodes = getErasePreviewNodes(previewSceneNodes, vectorEditingNodeIds, activeTool, refs, viewport);
   const eraseAwareNodesById = getEraseAwareNodesById(nodesById, sceneNodes, vectorEditingNodeIds, activeTool);

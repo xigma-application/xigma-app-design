@@ -10,42 +10,72 @@ import { addPage } from 'store/design/slice';
 import { selectPages } from 'store/design/selectors';
 import { store } from 'store';
 
+// types
+import { TDesignPage } from 'store/design/types';
+
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
+const buildPage = (overrides: Partial<TDesignPage>): TDesignPage => ({
+  comments: {},
+  id: 'page-1',
+  name: 'Page',
+  nodes: {},
+  paintColor: '#d9d9d9',
+  rootOrder: [],
+  selectedIds: [],
+  viewport: { x: 0, y: 0, zoom: 1 },
+  ...overrides,
+});
+
 describe('useReorderPages', () => {
-  it('should dispatch reorderPages with the given from/to indexes', () => {
+  it('should dispatch reorderPages with the dragged page and target index', () => {
     // mock — append two fresh pages so their positions are known regardless of pre-existing page order
     store.dispatch(addPage());
     store.dispatch(addPage());
 
-    const pagesBefore = Object.keys(selectPages(store.getState()));
-    const [secondToLastId, lastId] = pagesBefore.slice(-2);
-    const fromIndex = pagesBefore.length - 2;
-    const toIndex = pagesBefore.length - 1;
+    const pagesBefore = selectPages(store.getState());
+    const idsBefore = Object.keys(pagesBefore);
+    const [secondToLastId, lastId] = idsBefore.slice(-2);
+    const fromIndex = idsBefore.length - 2;
+    const toIndex = idsBefore.length - 1;
 
     // before
     const { result } = renderHook(() => useReorderPages(), { wrapper });
 
     // action
-    result.current([fromIndex], toIndex);
+    result.current([pagesBefore[secondToLastId]], null, toIndex);
 
     // result
-    const pagesAfter = Object.keys(selectPages(store.getState()));
-    expect(pagesAfter[fromIndex]).toBe(lastId);
-    expect(pagesAfter[toIndex]).toBe(secondToLastId);
+    const idsAfter = Object.keys(selectPages(store.getState()));
+    expect(idsAfter[fromIndex]).toBe(lastId);
+    expect(idsAfter[toIndex]).toBe(secondToLastId);
   });
 
-  it('should no-op when called with an empty from-indices array', () => {
+  it('should no-op when called with an empty dragged-items array', () => {
     // mock
-    const pagesBefore = Object.keys(selectPages(store.getState()));
+    const idsBefore = Object.keys(selectPages(store.getState()));
 
     // before
     const { result } = renderHook(() => useReorderPages(), { wrapper });
 
     // action
-    result.current([], 0);
+    result.current([], null, 0);
 
     // result
-    expect(Object.keys(selectPages(store.getState()))).toEqual(pagesBefore);
+    expect(Object.keys(selectPages(store.getState()))).toEqual(idsBefore);
+  });
+
+  it('should no-op when the dragged page no longer exists in the current page order', () => {
+    // mock
+    const idsBefore = Object.keys(selectPages(store.getState()));
+
+    // before
+    const { result } = renderHook(() => useReorderPages(), { wrapper });
+
+    // action
+    result.current([buildPage({ id: 'missing' })], null, 0);
+
+    // result
+    expect(Object.keys(selectPages(store.getState()))).toEqual(idsBefore);
   });
 });

@@ -1,10 +1,20 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { ReactNode } from 'react';
 
 // components
 import Tree from './Tree';
 
+// types
+import { TTreeItem, TTreeRow } from './types';
+
 // utils
 import { stubVirtualizerViewport } from 'test/stubVirtualizerViewport';
+
+type TItem = TTreeItem & { children?: TItem[] };
+
+const buildItem = (id: string, children?: TItem[]): TItem => ({ children, id });
+const getChildren = (item: TItem): TItem[] | undefined => item.children;
+const renderRow = (row: TTreeRow<TItem>): ReactNode => <span>Row {row.item.id}</span>;
 
 describe('Tree', () => {
   beforeEach(() => {
@@ -15,9 +25,9 @@ describe('Tree', () => {
     vi.restoreAllMocks();
   });
 
-  it('should render one row per count via renderRow', () => {
+  it('should render one row per root item via renderRow', () => {
     // before
-    render(<Tree count={2} renderRow={(index) => <span>Row {index}</span>} rowHeight={32} />);
+    render(<Tree getChildren={getChildren} renderRow={renderRow} roots={[buildItem('0'), buildItem('1')]} rowHeight={32} />);
 
     // result
     expect(screen.getByText('Row 0')).toBeInTheDocument();
@@ -27,10 +37,10 @@ describe('Tree', () => {
   it('should call onDeselectAll when clicking the empty area, not a row', () => {
     // before
     const onDeselectAll = vi.fn();
-    render(<Tree count={1} onDeselectAll={onDeselectAll} renderRow={() => <span>Row</span>} rowHeight={32} />);
+    render(<Tree getChildren={getChildren} onDeselectAll={onDeselectAll} renderRow={renderRow} roots={[buildItem('0')]} rowHeight={32} />);
 
     // action — click the row's own content, which should not bubble into a deselect
-    fireEvent.click(screen.getByText('Row'));
+    fireEvent.click(screen.getByText('Row 0'));
 
     // result
     expect(onDeselectAll).not.toHaveBeenCalled();
@@ -39,7 +49,9 @@ describe('Tree', () => {
   it('should call onDeselectAll when the empty scroll area itself is clicked', () => {
     // before
     const onDeselectAll = vi.fn();
-    const { container } = render(<Tree count={1} onDeselectAll={onDeselectAll} renderRow={() => <span>Row</span>} rowHeight={32} />);
+    const { container } = render(
+      <Tree getChildren={getChildren} onDeselectAll={onDeselectAll} renderRow={renderRow} roots={[buildItem('0')]} rowHeight={32} />,
+    );
     const rowsContainer = container.querySelector('[class*="Tree__rows"]')!;
 
     // action
@@ -49,12 +61,13 @@ describe('Tree', () => {
     expect(onDeselectAll).toHaveBeenCalledTimes(1);
   });
 
-  it('should show only a drop indicator while dragging, with the dragged row staying in place, then call onReorder with the mapped index on drop', () => {
+  it('should show only a drop indicator while dragging, with the dragged row staying in place, then call onReorder with the resolved target on drop', () => {
     // mock
     const onReorder = vi.fn();
+    const roots = [buildItem('0'), buildItem('1'), buildItem('2')];
 
     // before
-    render(<Tree count={3} onReorder={onReorder} renderRow={(index) => <span>Row {index}</span>} rowHeight={32} />);
+    render(<Tree getChildren={getChildren} onReorder={onReorder} renderRow={renderRow} roots={roots} rowHeight={32} />);
     const rowZero = screen.getByText('Row 0').parentElement!;
     const initialTransform = (rowZero as HTMLElement).style.transform;
 
@@ -71,14 +84,14 @@ describe('Tree', () => {
     fireEvent.mouseUp(document);
 
     // result
-    expect(onReorder).toHaveBeenCalledWith([0], 2);
+    expect(onReorder).toHaveBeenCalledWith([roots[0]], null, 2);
     expect(document.querySelector('[class*="dropIndicator"]')).not.toBeInTheDocument();
     expect(document.querySelector('[class*="viewport--dragging"]')).not.toBeInTheDocument();
   });
 
   it('should not wire row dragging when onReorder is not provided', () => {
     // before
-    render(<Tree count={2} renderRow={(index) => <span>Row {index}</span>} rowHeight={32} />);
+    render(<Tree getChildren={getChildren} renderRow={renderRow} roots={[buildItem('0'), buildItem('1')]} rowHeight={32} />);
     const rowZero = screen.getByText('Row 0').parentElement!;
 
     // action
@@ -91,7 +104,9 @@ describe('Tree', () => {
 
   it('should not render a selection background when isRowSelected is not provided', () => {
     // before
-    const { container } = render(<Tree count={3} renderRow={(index) => <span>Row {index}</span>} rowHeight={32} />);
+    const { container } = render(
+      <Tree getChildren={getChildren} renderRow={renderRow} roots={[buildItem('0'), buildItem('1'), buildItem('2')]} rowHeight={32} />,
+    );
 
     // result
     expect(container.querySelector('[class*="Tree__selectionBackground"]')).not.toBeInTheDocument();
@@ -99,9 +114,15 @@ describe('Tree', () => {
 
   it('should render one merged selection background for two adjacent selected rows, distinct from an isolated selected row', () => {
     // before
-    const isRowSelected = (index: number): boolean => index === 0 || index === 1;
+    const isRowSelected = (item: TItem): boolean => item.id === '0' || item.id === '1';
     const { container } = render(
-      <Tree count={4} isRowSelected={isRowSelected} renderRow={(index) => <span>Row {index}</span>} rowHeight={32} />,
+      <Tree
+        getChildren={getChildren}
+        isRowSelected={isRowSelected}
+        renderRow={renderRow}
+        roots={[buildItem('0'), buildItem('1'), buildItem('2'), buildItem('3')]}
+        rowHeight={32}
+      />,
     );
 
     // result
@@ -111,13 +132,18 @@ describe('Tree', () => {
   });
 
   it('should square off both edges of the selection background when the selection continues beyond the visible rows', () => {
-    // mock — every index, including out-of-view neighbors, is treated as selected
+    // mock — every item is selected, and the window is scrolled to the middle of a long list, so the rendered
+    // window's own top/bottom edges each still have a real, selected neighbor just outside the window
     const isRowSelected = (): boolean => true;
+    const roots = Array.from({ length: 100 }, (_, index) => buildItem(String(index)));
 
     // before
     const { container } = render(
-      <Tree count={3} isRowSelected={isRowSelected} renderRow={(index) => <span>Row {index}</span>} rowHeight={32} />,
+      <Tree getChildren={getChildren} isRowSelected={isRowSelected} renderRow={renderRow} roots={roots} rowHeight={32} />,
     );
+    const scrollContainer = container.querySelector('[class*="Tree__rows"]')!;
+    Object.defineProperty(scrollContainer, 'scrollTop', { configurable: true, value: 1600 });
+    fireEvent.scroll(scrollContainer);
 
     // result
     expect(container.querySelector('[class*="squareTop"]')).toBeInTheDocument();
@@ -127,11 +153,19 @@ describe('Tree', () => {
   it('should drag every selected row together when starting the drag on a row that is part of the current multi-selection', () => {
     // mock
     const onReorder = vi.fn();
-    const isRowSelected = (index: number): boolean => index === 0 || index === 1;
+    const isRowSelected = (item: TItem): boolean => item.id === '0' || item.id === '1';
+    const roots = [buildItem('0'), buildItem('1'), buildItem('2'), buildItem('3')];
 
     // before
     render(
-      <Tree count={4} isRowSelected={isRowSelected} onReorder={onReorder} renderRow={(index) => <span>Row {index}</span>} rowHeight={32} />,
+      <Tree
+        getChildren={getChildren}
+        isRowSelected={isRowSelected}
+        onReorder={onReorder}
+        renderRow={renderRow}
+        roots={roots}
+        rowHeight={32}
+      />,
     );
     const rowZero = screen.getByText('Row 0').parentElement!;
 
@@ -141,12 +175,14 @@ describe('Tree', () => {
     fireEvent.mouseUp(document);
 
     // result — both selected rows move together
-    expect(onReorder).toHaveBeenCalledWith([0, 1], 2);
+    expect(onReorder).toHaveBeenCalledWith([roots[0], roots[1]], null, 2);
   });
 
   it('should render the default plain-line drop indicator when renderDropIndicator is not provided', () => {
     // before
-    render(<Tree count={2} onReorder={vi.fn()} renderRow={(index) => <span>Row {index}</span>} rowHeight={32} />);
+    render(
+      <Tree getChildren={getChildren} onReorder={vi.fn()} renderRow={renderRow} roots={[buildItem('0'), buildItem('1')]} rowHeight={32} />,
+    );
 
     // action
     fireEvent.mouseDown(screen.getByText('Row 0').parentElement!, { button: 0, clientY: 0 });
@@ -160,10 +196,11 @@ describe('Tree', () => {
     // before
     render(
       <Tree
-        count={2}
+        getChildren={getChildren}
         onReorder={vi.fn()}
-        renderDropIndicator={(insertionIndex) => <span>Custom indicator at {insertionIndex}</span>}
-        renderRow={(index) => <span>Row {index}</span>}
+        renderDropIndicator={(depth) => <span>Custom indicator at depth {depth}</span>}
+        renderRow={renderRow}
+        roots={[buildItem('0'), buildItem('1')]}
         rowHeight={32}
       />,
     );
@@ -173,7 +210,42 @@ describe('Tree', () => {
     fireEvent.mouseMove(document, { clientY: 80 });
 
     // result
-    expect(screen.getByText('Custom indicator at 2')).toBeInTheDocument();
+    expect(screen.getByText('Custom indicator at depth 0')).toBeInTheDocument();
     expect(document.querySelector('[class*="dropIndicator--default"]')).not.toBeInTheDocument();
+  });
+
+  it('should pass the computed drop depth and resolved target parent through to renderDropIndicator and onReorder', () => {
+    // mock
+    const onReorder = vi.fn();
+    const roots = [buildItem('0', [buildItem('0-0')]), buildItem('1')];
+
+    // before
+    render(
+      <Tree
+        getChildren={getChildren}
+        onReorder={onReorder}
+        renderDropIndicator={(depth) => <span>Drop depth {depth}</span>}
+        renderRow={(row, onToggleExpand): ReactNode => <span onClick={onToggleExpand}>Row {row.item.id}</span>}
+        roots={roots}
+        rowHeight={32}
+      />,
+    );
+
+    // action — expand the first group so its child becomes visible: rows are now [0, 0-0, 1]
+    fireEvent.click(screen.getByText('Row 0'));
+    const row1 = screen.getByText('Row 1').parentElement!;
+
+    // action — drag row '1' up onto the gap between '0' and '0-0', shifted right one indent level
+    fireEvent.mouseDown(row1, { button: 0, clientX: 0, clientY: 100 });
+    fireEvent.mouseMove(document, { clientX: 16, clientY: 32 });
+
+    // result
+    expect(screen.getByText('Drop depth 1')).toBeInTheDocument();
+
+    // action
+    fireEvent.mouseUp(document);
+
+    // result — '1' becomes the first child of '0'
+    expect(onReorder).toHaveBeenCalledWith([roots[1]], roots[0], 0);
   });
 });

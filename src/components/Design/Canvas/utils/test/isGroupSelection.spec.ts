@@ -28,6 +28,13 @@ describe('isGroupSelection', () => {
     expect(isGroupSelection([buildNode({ id: 'a' }), buildNode({ id: 'b' })])).toBe(true);
   });
 
+  it('should return true for 2+ nodes with different parents, e.g. a group child selected alongside a top-level sibling', () => {
+    // mock — a multi-selection still gets one combined outline/handles regardless of whether every
+    // member happens to share the exact same parentId (that stopped being a reliable "flat sibling"
+    // signal once nodes could sit inside a group)
+    expect(isGroupSelection([buildNode({ id: 'a', parentId: 'group-1' }), buildNode({ id: 'b', parentId: null })])).toBe(true);
+  });
+
   it('should return false for a single node', () => {
     // result
     expect(isGroupSelection([buildNode({ id: 'a' })])).toBe(false);
@@ -36,10 +43,5 @@ describe('isGroupSelection', () => {
   it('should return false for an empty selection', () => {
     // result
     expect(isGroupSelection([])).toBe(false);
-  });
-
-  it('should return false when parents differ', () => {
-    // result
-    expect(isGroupSelection([buildNode({ id: 'a', parentId: 'frame-1' }), buildNode({ id: 'b', parentId: 'frame-2' })])).toBe(false);
   });
 });

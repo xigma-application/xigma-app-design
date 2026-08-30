@@ -80,13 +80,11 @@ maintenance:
 - No "bring to front/send to back" UI exists yet (Etap 15 backlog) — `rootOrder` today only ever
   changes via creation/deletion order.
 
-**`parentId` is always `null` today** — confirmed by grepping every node-construction call site
-(every `useDraw<X>Tool`, `commitTextNode.ts`, `drawEditingText.ts`) — all hardcode `parentId: null`.
-The only code that reads it is `Canvas/utils/haveSameParent.ts`
-(`nodes.every((n) => n.parentId === nodes[0].parentId)`), used by `isGroupSelection.ts` to decide
-whether 2+ selected nodes get one shared outline. The field exists purely as forward-looking
-scaffolding for Etap 12 (grouping/nested frames) — real nesting is entirely unimplemented; don't
-assume any node is ever actually nested today.
+**`parentId` is real as of Etap 12a (groups)** — no longer the always-`null` scaffolding this note
+used to describe. A node's `parentId` is set to a `TGroupNode`'s id once it joins that group; it
+still holds absolute world coordinates (`x/y/width/height/rotation` are never relative to the
+parent). Full writeup — the group reducers, the click/hover selection-bypass rules, and the group's
+own bounds-sync (including the rotated case) — lives in `group-nodes.md`, not here.
 
 **`locked?: boolean` / `hidden?: boolean`** (added for the Layers panel, `LeftPanel/File/Layers`) —
 optional on every `TSceneNode` variant (added to `TBaseNode`, plus separately to `TLineNode`/
@@ -112,7 +110,8 @@ bodies delegate to `utils/handle<ReducerName>.ts`):
 | `addNode` | delegated → `handleAddNode.ts` | id via `nanoid()` in `prepare`, not the reducer body — see below |
 | `cancelCommentDraft` | inline (`state.commentDraftPosition = null`) | |
 | `deleteComment` | inline (`delete state.comments[action.payload]`) | wired to a store action, but no UI dispatches it today — comment deletion is intentionally disabled in `CommentPin` for now |
-| `deleteNode` | delegated → `handleDeleteNode.ts` | path+text cascade — see below |
+| `deleteNode` | delegated → `handleDeleteNode.ts` | path+text cascade, plus group cascade both directions — see `group-nodes.md` §2 |
+| `groupNodes` | delegated → `handleGroupNodes/handleGroupNodes.ts` | id via `nanoid()` in `prepare`, same pattern as `addNode` — see `group-nodes.md` §2 |
 | `setActiveTool` | delegated → `handleSetActiveTool.ts` | `lastXTool` bucket switch — see below |
 | `setSelection` | inline (`state.selectedIds = action.payload`) | |
 | `setViewport` | inline (`state.viewport = action.payload`) | |
@@ -121,6 +120,7 @@ bodies delegate to `utils/handle<ReducerName>.ts`):
 | `stopTextEdit` | delegated → `handleStopTextEdit.ts` | resets all 6 editing fields |
 | `toggleNodeHidden` | delegated → `handleToggleNodeHidden.ts` | flips `hidden` by id (no-op on unknown id) — see above |
 | `toggleNodeLocked` | delegated → `handleToggleNodeLocked.ts` | flips `locked` by id (no-op on unknown id) — see above |
+| `ungroupNodes` | delegated → `handleUngroupNodes/handleUngroupNodes.ts` | payload is group ids — see `group-nodes.md` §2 |
 | `updateCommentContent` | delegated → `handleUpdateCommentContent.ts` | patch by id (no-op on unknown id) — wired to a store action, but no UI dispatches it today, same as `deleteComment` |
 | `updateEditingTextBoxPathStartOffset` | delegated → `handleUpdateEditingTextBoxPathStartOffset.ts` | guarded single-field mutation on nested `editingTextBox` |
 | `updateNode` | delegated → `handleUpdateNode.ts` | patch + path/text sync — see below |
@@ -469,3 +469,5 @@ drag-state refs) and of `updateNode`/`setSelection` dispatch-per-pointermove —
 consumer, since every one of its drag mechanisms gets undo/redo for free from the same two dispatch
 points.
 [[vector-network]] — the Pen tool / Vector Network feature §8's history middleware was built for.
+[[group-nodes]] — the group reducers, `parentId` reality, and bounds-sync detail this file's §2/§3
+now just point to instead of duplicating.

@@ -1,10 +1,15 @@
 // types
 import { TSceneNode } from 'types/design/types';
 
-let clipboardNodes: TSceneNode[] = [];
-
-export const setClipboardNodes = (nodes: TSceneNode[]): void => {
-  clipboardNodes = structuredClone(nodes);
+export type TClipboardContent = {
+  nodes: TSceneNode[];
+  rootIds: string[];
 };
 
-export const getClipboardNodes = (): TSceneNode[] => clipboardNodes;
+let clipboardContent: TClipboardContent = { nodes: [], rootIds: [] };
+
+export const setClipboardNodes = (nodes: TSceneNode[], rootIds: string[]): void => {
+  clipboardContent = structuredClone({ nodes, rootIds });
+};
+
+export const getClipboardNodes = (): TClipboardContent => clipboardContent;

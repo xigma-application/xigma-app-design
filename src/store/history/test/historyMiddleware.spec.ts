@@ -1,5 +1,15 @@
 // store
-import { addNode, addPage, reorderNode, reorderPages, setSelection, toggleNodeHidden, toggleNodeLocked } from 'store/design/slice';
+import {
+  addNode,
+  addPage,
+  groupNodes,
+  moveNodes,
+  reorderPages,
+  setSelection,
+  toggleNodeHidden,
+  toggleNodeLocked,
+  ungroupNodes,
+} from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture, redo, undo } from '../actions';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
@@ -112,22 +122,56 @@ describe('historyMiddleware', () => {
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA].locked).toBe(true);
   });
 
-  it('should treat a node reorder as its own undo step', () => {
+  it('should treat a node move as its own undo step', () => {
     // mock
     const idA = addFrameNode(0, 0);
-    const idB = addFrameNode(50, 50);
+    addFrameNode(50, 50);
     const orderAfterAdd = selectActivePage(store.getState()).rootOrder;
 
     // before
-    store.dispatch(reorderNode({ fromIndices: [orderAfterAdd.indexOf(idA)], toIndex: orderAfterAdd.indexOf(idB) }));
+    store.dispatch(moveNodes({ nodeIds: [idA], targetIndex: orderAfterAdd.length, targetParentId: null }));
 
     expect(selectActivePage(store.getState()).rootOrder).not.toEqual(orderAfterAdd);
 
-    // action — undo should only step back through the reorder
+    // action — undo should only step back through the move
     store.dispatch(undo());
 
     // result
     expect(selectActivePage(store.getState()).rootOrder).toEqual(orderAfterAdd);
+  });
+
+  it('should treat grouping and ungrouping as their own undo steps', () => {
+    // mock
+    const idA = addFrameNode(0, 0);
+    const idB = addFrameNode(50, 50);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+
+    const groupId = selectSelectedIds(store.getState())[0];
+
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[groupId].type).toBe(NodeType.group);
+
+    store.dispatch(ungroupNodes([groupId]));
+
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[groupId]).toBeUndefined();
+
+    // action — undo the ungroup only
+    store.dispatch(undo());
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[groupId].type).toBe(NodeType.group);
+
+    // action — undo the group too
+    store.dispatch(undo());
+
+    // result
+    const page = store.getState().design.pages[store.getState().design.activePageId];
+    expect(page.nodes[groupId]).toBeUndefined();
+    expect(page.nodes[idA].parentId).toBeNull();
+    expect(page.nodes[idB].parentId).toBeNull();
+    expect(page.rootOrder).toContain(idA);
+    expect(page.rootOrder).toContain(idB);
   });
 
   it('should treat a page reorder as its own undo step', () => {

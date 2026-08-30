@@ -8,15 +8,16 @@ import {
   selectEditingNodeId,
   selectEditingTextBox,
   selectEditingTextContent,
-  selectOrderedNodes,
+  selectNodes,
+  selectRenderOrderedNodes,
   selectSelectedNodes,
   selectVectorEditingNodeIds,
 } from 'store/design/selectors';
 import { RootState } from 'store';
 
 // types
+import { NodeType, ToolName } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 import { THoverResolverContext } from './types';
 import { TViewport } from 'types/design/types';
@@ -36,6 +37,7 @@ export const resolveToolHover = (
   viewport: TViewport,
   state: RootState,
   refs: TCanvasRefs,
+  isControlPressed: boolean,
 ): void => {
   const editingTextBox = selectEditingTextBox(state);
   const isEditingText = Boolean(editingTextBox);
@@ -59,7 +61,9 @@ export const resolveToolHover = (
     editingContent: selectEditingTextContent(state),
     editingNodeId: selectEditingNodeId(state),
     editingTextBox,
-    orderedNodes: selectOrderedNodes(state),
+    isControlPressed,
+    leafNodes: selectRenderOrderedNodes(state).filter((node) => node.type !== NodeType.group),
+    nodesById: selectNodes(state),
     point,
     resizableSelectedNodes,
     resizeHandleHit: getResizeHandleAtPoint(point, resizableSelectedNodes, viewport),

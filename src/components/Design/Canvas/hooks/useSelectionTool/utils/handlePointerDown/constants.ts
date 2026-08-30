@@ -4,6 +4,7 @@ import { armEllipseArcOnPointerDown } from './armResolvers/armEllipseArcOnPointe
 import { armEllipseArcRatioOnPointerDown } from './armResolvers/armEllipseArcRatioOnPointerDown';
 import { armEllipseArcRotateOnPointerDown } from './armResolvers/armEllipseArcRotateOnPointerDown';
 import { armGroupBoundsOnPointerDown } from './armResolvers/armGroupBoundsOnPointerDown';
+import { armGroupChildToggleOnPointerDown } from './armResolvers/armGroupChildToggleOnPointerDown';
 import { armHitOnPointerDown } from './armResolvers/armHitOnPointerDown';
 import { armLineEndpointOnPointerDown } from './armResolvers/armLineEndpointOnPointerDown';
 import { armMarqueeOnPointerDown } from './armResolvers/armMarqueeOnPointerDown';
@@ -66,6 +67,7 @@ export const ARM_RESOLVERS = [
   armStarCornerRadiusOnPointerDown,
   armRotateOnPointerDown,
   armLineEndpointOnPointerDown,
+  armGroupChildToggleOnPointerDown,
   toggleSelectionOnPointerDown,
   armHitOnPointerDown,
   armSelectedTextBoundsOnPointerDown,

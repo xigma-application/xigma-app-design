@@ -11,6 +11,7 @@ import { ToolName } from 'types/design/enums';
 // utils
 import { getNodeAtPoint } from '../../../../utils/getNodeAtPoint';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { isControlPressed } from 'utils/isControlPressed';
 import { resolveToolHover } from './resolveToolHover';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 import { setHoverState } from '../setHoverState';
@@ -31,6 +32,6 @@ export const resolveHover = (
   if (activeTool === ToolName.comment) {
     setHoverState(canvas, hoverRef, setClassName, 'comment', '', hit?.id ?? null);
   } else {
-    resolveToolHover(canvas, hoverRef, setClassName, activeTool, point, viewport, state, refs);
+    resolveToolHover(canvas, hoverRef, setClassName, activeTool, point, viewport, state, refs, isControlPressed(event));
   }
 };

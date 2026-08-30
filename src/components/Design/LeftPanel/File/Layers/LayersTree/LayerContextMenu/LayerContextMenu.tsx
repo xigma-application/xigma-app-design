@@ -4,6 +4,10 @@ import { FC } from 'react';
 import LayerMenu from '../LayerMenu/LayerMenu';
 import { TTreeItemMenuRenderParams } from 'shared';
 
+// hooks
+import { useCopySelection } from './hooks/useCopySelection';
+import { useGroupSelection } from './hooks/useGroupSelection';
+
 const LayerContextMenu: FC<TTreeItemMenuRenderParams> = ({
   anchorRef,
   isHidden,
@@ -13,17 +17,24 @@ const LayerContextMenu: FC<TTreeItemMenuRenderParams> = ({
   onRenameRequested,
   onToggleHidden,
   onToggleLocked,
-}) => (
-  <LayerMenu
-    anchorRef={anchorRef}
-    isHidden={isHidden}
-    isLocked={isLocked}
-    isOpen={isOpen}
-    onOpenChange={onOpenChange}
-    onRename={onRenameRequested}
-    onToggleHidden={onToggleHidden}
-    onToggleLocked={onToggleLocked}
-  />
-);
+}) => {
+  const handleCopySelection = useCopySelection();
+  const handleGroupSelection = useGroupSelection();
+
+  return (
+    <LayerMenu
+      anchorRef={anchorRef}
+      isHidden={isHidden}
+      isLocked={isLocked}
+      isOpen={isOpen}
+      onCopy={handleCopySelection}
+      onGroupSelection={handleGroupSelection}
+      onOpenChange={onOpenChange}
+      onRename={onRenameRequested}
+      onToggleHidden={onToggleHidden}
+      onToggleLocked={onToggleLocked}
+    />
+  );
+};
 
 export default LayerContextMenu;

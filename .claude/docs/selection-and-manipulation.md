@@ -1386,6 +1386,9 @@ pattern is exactly what §13 extends to the three corner-radius drag refs.
 [[vector-network]] — §21 above in full: the Pen tool, the Vector Network data model, and the rest of
 Vector Edit Mode (double-click entry, Delete/Backspace, the Pen-tool-specific pointer handlers) that
 lives outside this subsystem entirely.
+[[group-nodes]] — Etap 12a's group-specific layer on top of this subsystem's hit-testing/arm-resolver
+mechanics: the click-selects-group-vs-Ctrl-bypasses-to-child rules (§3), and the rigid-body/bounds-sync
+invariants a group adds on top of plain multi-select.
 [[canvas-vector-performance]] — the frozen-snapshot arm→continue→disarm variant this subsystem's own
 drag/resize/rotate resolvers grow into for vector nodes specifically (§4), and why it's a `TCanvasRefs`
 snapshot map rather than a Redux dispatch per `pointermove`, same "don't invalidate every downstream

@@ -1,6 +1,6 @@
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import { TEllipseNode, TLineNode, TPolygonNode, TRectangleNode, TStarNode, TTextNode } from 'types/design/types';
+import { TEllipseNode, TGroupNode, TLineNode, TPolygonNode, TRectangleNode, TStarNode, TTextNode } from 'types/design/types';
 import { THoverResolverContext } from '../../types';
 
 // utils
@@ -25,7 +25,9 @@ const createContext = (overrides: Partial<THoverResolverContext>): THoverResolve
   editingContent: '',
   editingNodeId: null,
   editingTextBox: null,
-  orderedNodes: [],
+  isControlPressed: false,
+  leafNodes: [],
+  nodesById: {},
   point: { x: 0, y: 0 },
   resizableSelectedNodes: [],
   resizeHandleHit: null,
@@ -424,7 +426,7 @@ describe('resolveVectorMultiSelectRotateHover', () => {
 describe('resolvePlainNodeHover', () => {
   it("should return the hovered node's own id when the point lands on a node", () => {
     // result
-    expect(resolvePlainNodeHover(createContext({ orderedNodes: [rectangle], point: { x: 50, y: 50 } }))).toEqual({
+    expect(resolvePlainNodeHover(createContext({ leafNodes: [rectangle], point: { x: 50, y: 50 } }))).toEqual({
       className: null,
       cursor: '',
       nodeId: 'rectangle-1',
@@ -433,10 +435,114 @@ describe('resolvePlainNodeHover', () => {
 
   it('should return a null nodeId when the point misses every node', () => {
     // result
-    expect(resolvePlainNodeHover(createContext({ orderedNodes: [rectangle], point: { x: 900, y: 900 } }))).toEqual({
+    expect(resolvePlainNodeHover(createContext({ leafNodes: [rectangle], point: { x: 900, y: 900 } }))).toEqual({
       className: null,
       cursor: '',
       nodeId: null,
     });
+  });
+
+  const group: TGroupNode = {
+    childIds: ['group-child-a', 'group-child-b'],
+    height: 100,
+    id: 'group-1',
+    name: 'Group',
+    parentId: null,
+    rotation: 0,
+    type: NodeType.group,
+    width: 220,
+    x: 0,
+    y: 0,
+  };
+  const child: TRectangleNode = { ...rectangle, id: 'group-child-a', parentId: 'group-1' };
+  const otherChild: TEllipseNode = { ...ellipse, id: 'group-child-b', parentId: 'group-1', x: 120 };
+  const unrelatedNode: TRectangleNode = { ...rectangle, id: 'unrelated-rect', x: 1000, y: 1000 };
+  const nodesById = { 'group-1': group, 'group-child-a': child, 'group-child-b': otherChild };
+
+  it('should resolve a hit on a child to its top-level group, not the child itself, when Ctrl is not held', () => {
+    // result
+    expect(
+      resolvePlainNodeHover(createContext({ isControlPressed: false, leafNodes: [child, otherChild], nodesById, point: { x: 50, y: 50 } })),
+    ).toEqual({ className: null, cursor: '', nodeId: 'group-1' });
+  });
+
+  it('should bypass the group and hit-test its individual child when Ctrl is held', () => {
+    // result
+    expect(
+      resolvePlainNodeHover(createContext({ isControlPressed: true, leafNodes: [child, otherChild], nodesById, point: { x: 50, y: 50 } })),
+    ).toEqual({ className: null, cursor: '', nodeId: 'group-child-a' });
+  });
+
+  it('should show nothing over empty space inside the group’s bounding box that no child actually covers, Ctrl or not', () => {
+    // mock — x:105 sits in the group’s 0..220 bbox but between the two children (rectangle 0..100, ellipse 120..220)
+    const ctx = createContext({ isControlPressed: false, leafNodes: [child, otherChild], nodesById, point: { x: 105, y: 50 } });
+
+    // result
+    expect(resolvePlainNodeHover(ctx)).toEqual({ className: null, cursor: '', nodeId: null });
+    expect(resolvePlainNodeHover({ ...ctx, isControlPressed: true })).toEqual({ className: null, cursor: '', nodeId: null });
+  });
+
+  it('should bypass the group without Ctrl once one of its children is already selected', () => {
+    // result
+    expect(
+      resolvePlainNodeHover(
+        createContext({
+          isControlPressed: false,
+          leafNodes: [child, otherChild],
+          nodesById,
+          point: { x: 50, y: 50 },
+          selectedNodes: [child],
+        }),
+      ),
+    ).toEqual({ className: null, cursor: '', nodeId: 'group-child-a' });
+  });
+
+  it('should still resolve to the group when a different, unrelated node is selected', () => {
+    // result
+    expect(
+      resolvePlainNodeHover(
+        createContext({
+          isControlPressed: false,
+          leafNodes: [child, otherChild],
+          nodesById,
+          point: { x: 50, y: 50 },
+          selectedNodes: [unrelatedNode],
+        }),
+      ),
+    ).toEqual({ className: null, cursor: '', nodeId: 'group-1' });
+  });
+
+  it('should still resolve to the group when a group child is selected together with an unrelated node', () => {
+    // mock — the group must only be treated as "entered" when the selection lies entirely inside
+    // it; a group child dragged together with an unrelated sibling must not hide the group's box
+    // for the rest of its own children
+    expect(
+      resolvePlainNodeHover(
+        createContext({
+          isControlPressed: false,
+          leafNodes: [child, otherChild],
+          nodesById,
+          point: { x: 50, y: 50 },
+          selectedNodes: [otherChild, unrelatedNode],
+        }),
+      ),
+    ).toEqual({ className: null, cursor: '', nodeId: 'group-1' });
+  });
+
+  it('should show a directly-hovered node’s own box when it is itself already selected, even alongside an unrelated node', () => {
+    // mock — [group-child-a, group-child-b] grouped; select group-child-a together with an
+    // unrelated node and drag them; hovering group-child-a itself afterward must keep showing
+    // its own box, not jump to the whole group just because the selection isn’t "entered"
+    expect(
+      resolvePlainNodeHover(
+        createContext({
+          isControlPressed: false,
+          leafNodes: [child, otherChild],
+          nodesById,
+          point: { x: 50, y: 50 },
+          selectedNodes: [child, unrelatedNode],
+        }),
+      ),
+    ).toEqual({ className: null, cursor: '', nodeId: 'group-child-a' });
   });
 });

@@ -101,6 +101,8 @@ export const drawSceneNodes = (
           viewport,
         );
         break;
+      case NodeType.group:
+        break;
       case NodeType.text:
         drawMsdfText(
           gl,

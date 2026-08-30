@@ -1,19 +1,31 @@
 // store
-import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { addNode, groupNodes, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { undo } from 'store/history/actions';
 import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TGroupNode } from 'types/design/types';
 
 // utils
 import { createCanvasRefs } from '../../../useCanvasRefs/createCanvasRefs';
 import { handleDuplicateSelection } from '../handleDuplicateSelection';
 
-const addFrameNode = (): string => {
+const addFrameNode = (overrides: { x?: number; y?: number } = {}): string => {
   store.dispatch(
-    addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 5, y: 5 }),
+    addNode({
+      fill: '#ff0000',
+      height: 20,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 20,
+      x: 5,
+      y: 5,
+      ...overrides,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());
@@ -68,6 +80,43 @@ describe('handleDuplicateSelection', () => {
     const duplicateNode = nodes[selectedIds[0]];
 
     expect(duplicateNode).toMatchObject({ x: 15, y: 15 });
+  });
+
+  it('should duplicate a group as an independent copy with its own cloned children, leaving the original group intact', () => {
+    // mock
+    const a = addFrameNode({ x: 0, y: 0 });
+    const b = addFrameNode({ x: 40, y: 0 });
+
+    store.dispatch(setSelection([a, b]));
+    store.dispatch(groupNodes());
+
+    const originalPage = selectActivePage(store.getState());
+    const [originalGroupId] = originalPage.selectedIds;
+    const originalGroup = originalPage.nodes[originalGroupId] as TGroupNode;
+
+    // action
+    handleDuplicateSelection(store.dispatch, createCanvasRefs());
+
+    // result
+    const page = selectActivePage(store.getState());
+    const selectedIds = selectSelectedIds(store.getState());
+
+    expect(selectedIds).toHaveLength(1);
+    const [duplicateGroupId] = selectedIds;
+    expect(duplicateGroupId).not.toBe(originalGroupId);
+
+    const duplicateGroup = page.nodes[duplicateGroupId] as TGroupNode;
+    expect(duplicateGroup.type).toBe(NodeType.group);
+    expect(duplicateGroup.childIds).toHaveLength(2);
+    expect(duplicateGroup.childIds).not.toEqual(expect.arrayContaining(originalGroup.childIds));
+
+    duplicateGroup.childIds.forEach((childId) => {
+      expect(page.nodes[childId]).toBeDefined();
+      expect(page.nodes[childId].parentId).toBe(duplicateGroupId);
+      expect(page.rootOrder).not.toContain(childId);
+    });
+
+    expect(page.nodes[originalGroupId]).toEqual(originalGroup);
   });
 
   it('should be undoable as a single step even though it dispatches multiple nodes and a selection change', () => {

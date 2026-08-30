@@ -1,6 +1,7 @@
 export enum NodeType {
   ellipse = 'ellipse',
   frame = 'frame',
+  group = 'group',
   line = 'line',
   media = 'media',
   path = 'path',

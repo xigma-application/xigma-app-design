@@ -13,6 +13,7 @@ export const NODE_SHAPE_ICON_REDRAW_DEBOUNCE_MS = 1000;
 export const NODE_TYPE_ICON: Record<NodeType, TIconProps['name']> = {
   [NodeType.ellipse]: 'EllipseTool',
   [NodeType.frame]: 'FrameTool',
+  [NodeType.group]: 'Group',
   [NodeType.line]: 'LineTool',
   [NodeType.media]: 'File',
   [NodeType.path]: 'PenTool',

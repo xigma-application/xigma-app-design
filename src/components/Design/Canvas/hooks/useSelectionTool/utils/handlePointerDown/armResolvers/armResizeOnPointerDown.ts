@@ -2,7 +2,7 @@
 import { TArmContext } from '../types';
 
 // utils
-import { armResizeDrag } from '../armResizeDrag';
+import { armResizeDrag } from '../armResizeDrag/armResizeDrag';
 import { getResizeHandleAtPoint } from '../../../../../utils/getResizeHandleAtPoint/getResizeHandleAtPoint';
 
 export const armResizeOnPointerDown = ({

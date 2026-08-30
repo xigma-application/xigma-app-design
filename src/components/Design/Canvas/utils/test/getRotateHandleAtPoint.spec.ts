@@ -143,13 +143,17 @@ describe('getRotateHandleAtPoint', () => {
     });
   });
 
-  it('should return null when the selected nodes are multiple but do not share a parent', () => {
-    // mock
+  it('should use the combined bounds and zero rotation for a multi-selection even when the nodes do not share a parent', () => {
+    // mock — parentId isn't a reliable "flat sibling" signal once nodes can sit inside a group; any
+    // 2+ selection gets one shared bounding box + handles regardless (see isGroupSelection.spec.ts)
     const nodeA = frame('a', 0, 0, 100, 100, null);
     const nodeB = frame('b', 200, 0, 100, 100, 'other-parent');
 
     // result
-    expect(getRotateHandleAtPoint({ x: 0, y: -10 }, [nodeA, nodeB], IDENTITY_VIEWPORT)).toBeNull();
+    expect(getRotateHandleAtPoint({ x: 0, y: -10 }, [nodeA, nodeB], IDENTITY_VIEWPORT)).toEqual({
+      bounds: { height: 100, width: 300, x: 0, y: 0 },
+      rotation: 0,
+    });
   });
 
   it('should widen the ring in world units as the viewport zooms out', () => {

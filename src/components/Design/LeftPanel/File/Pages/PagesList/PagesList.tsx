@@ -19,8 +19,14 @@ import { useAppSelector } from 'store';
 // styles
 import styles from './pages-list.module.scss';
 
+// types
+import { TDesignPage } from 'store/design/types';
+import { TTreeRow } from 'shared/UI/Tree/types';
+
 // utils
 import { getMaxPagesListHeight } from './utils/getMaxPagesListHeight';
+
+const getPageChildren = (): undefined => undefined;
 
 export type TPagesListProps = {
   onPendingEditFinished: TFunc;
@@ -36,8 +42,8 @@ const PagesList: FC<TPagesListProps> = ({ onPendingEditFinished, pendingEditPage
   const handleResizeMouseDown = useHandleResizeMouseDown(onMouseDownY);
   const handleReorderPages = useReorderPages();
 
-  const renderRow = (index: number): ReactNode => {
-    const page = orderedPages[index];
+  const renderRow = (row: TTreeRow<TDesignPage>): ReactNode => {
+    const { item: page } = row;
     const autoEdit = page.id === pendingEditPageId;
 
     return <PageRow autoEdit={autoEdit} onAutoEditDismissed={autoEdit ? onPendingEditFinished : undefined} page={page} />;
@@ -46,9 +52,10 @@ const PagesList: FC<TPagesListProps> = ({ onPendingEditFinished, pendingEditPage
   return (
     <div className={styles.PagesList} ref={listRef} style={{ height }}>
       <Tree
-        count={orderedPages.length}
+        getChildren={getPageChildren}
         onReorder={handleReorderPages}
         renderRow={renderRow}
+        roots={orderedPages}
         rowHeight={PAGES_LIST_ROW_HEIGHT}
         scrollToIndex={orderedPages.findIndex((page) => page.id === pendingEditPageId)}
       />

@@ -1,7 +1,7 @@
 // types
 import { NodeType, PathType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../types';
-import { TFrameNode, TPathNode, TTextNode, TVectorNode, TVectorSegment } from 'types/design/types';
+import { TFrameNode, TGroupNode, TPathNode, TRectangleNode, TTextNode, TVectorNode, TVectorSegment } from 'types/design/types';
 
 // utils
 import { getActivePage } from '../getActivePage';
@@ -207,5 +207,76 @@ describe('handleUpdateNode', () => {
 
     // result
     expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).strokeColor).toBe('#fff');
+  });
+
+  it('should move a rotated group box directly on a plain x/y update, without scaling its children', () => {
+    // mock
+    const child: TRectangleNode = {
+      fill: '#fff',
+      height: 20,
+      id: 'child',
+      name: 'Rectangle',
+      parentId: 'group-1',
+      rotation: 30,
+      type: NodeType.rectangle,
+      width: 20,
+      x: 40,
+      y: 40,
+    };
+    const group: TGroupNode = {
+      childIds: ['child'],
+      height: 100,
+      id: 'group-1',
+      name: 'Group',
+      parentId: null,
+      rotation: 30,
+      type: NodeType.group,
+      width: 100,
+      x: 0,
+      y: 0,
+    };
+    const state = buildState({ 'group-1': group, child });
+
+    // before — a drag dispatches a plain x/y updateNode, no width/height
+    handleUpdateNode(state, { changes: { x: 50, y: 20 }, id: 'group-1' });
+
+    // result — the box itself moved, the child was left untouched (it gets its own updateNode in the same drag)
+    expect(getActivePage(state).nodes['group-1']).toMatchObject({ x: 50, y: 20, width: 100, height: 100 });
+    expect(getActivePage(state).nodes.child).toMatchObject({ x: 40, y: 40, width: 20, height: 20 });
+  });
+
+  it('should resync the parent group bounds after moving a child node', () => {
+    // mock
+    const child: TRectangleNode = {
+      fill: '#fff',
+      height: 10,
+      id: 'child',
+      name: 'Rectangle',
+      parentId: 'group-1',
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 10,
+      x: 0,
+      y: 0,
+    };
+    const group: TGroupNode = {
+      childIds: ['child'],
+      height: 10,
+      id: 'group-1',
+      name: 'Group',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.group,
+      width: 10,
+      x: 0,
+      y: 0,
+    };
+    const state = buildState({ 'group-1': group, child });
+
+    // before
+    handleUpdateNode(state, { changes: { x: 100, y: 50 }, id: 'child' });
+
+    // result
+    expect(getActivePage(state).nodes['group-1']).toMatchObject({ x: 100, y: 50, width: 10, height: 10 });
   });
 });

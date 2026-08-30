@@ -1,95 +1,80 @@
 import cx from 'classnames';
-import { FC, MouseEvent, ReactNode, RefObject, useRef } from 'react';
+import { ReactElement, ReactNode, RefObject, useMemo, useRef } from 'react';
 
 // components
 import ScrollThumb from 'shared/ScrollThumb/ScrollThumb';
+import TreeDropIndicator from './TreeDropIndicator/TreeDropIndicator';
+import TreeRowList from './TreeRowList/TreeRowList';
+import TreeSelectionBackground from './TreeSelectionBackground/TreeSelectionBackground';
 
 // hooks
+import { useExpandedIds } from './hooks/useExpandedIds';
+import { useHandleRowsClick } from './hooks/useHandleRowsClick';
 import { useTreeRowDrag } from './hooks/useTreeRowDrag/useTreeRowDrag';
 import { useVirtualList } from 'hooks';
-
-// others
-import { TREE_SELECTION_BACKGROUND_INSET_PX } from './constants';
 
 // styles
 import styles from './tree.module.scss';
 
+// types
+import { TTreeItem, TTreeRow } from './types';
+
 // utils
+import { flattenTreeRows } from './utils/flattenTreeRows';
+import { getIsRowSelectedByIndex } from './utils/getIsRowSelectedByIndex';
 import { getSelectionBackgroundSegments } from './utils/getSelectionBackgroundSegments';
 
-export type TTreeProps = {
+export type TTreeProps<T extends TTreeItem> = {
   className?: string;
-  count: number;
-  isRowSelected?: (index: number) => boolean;
+  getChildren: (item: T) => T[] | undefined;
+  isRowSelected?: (item: T) => boolean;
   onDeselectAll?: TFunc;
-  onReorder?: (fromIndices: number[], toIndex: number) => void;
-  renderDropIndicator?: (insertionIndex: number) => ReactNode;
-  renderRow: (index: number) => ReactNode;
+  onReorder?: (draggedItems: T[], targetParentItem: T | null, targetIndex: number) => void;
+  renderDropIndicator?: (depth: number) => ReactNode;
+  renderRow: (row: TTreeRow<T>, onToggleExpand: TFunc) => ReactNode;
+  roots: T[];
   rowHeight: number;
   scrollToIndex?: number;
 };
 
-export const Tree: FC<TTreeProps> = ({
+export const Tree = <T extends TTreeItem>({
   className = '',
-  count,
+  getChildren,
   isRowSelected,
   onDeselectAll,
   onReorder,
   renderDropIndicator,
   renderRow,
+  roots,
   rowHeight,
   scrollToIndex,
-}) => {
+}: TTreeProps<T>): ReactElement => {
   const rowsRef: RefObject<HTMLDivElement | null> = useRef(null);
-  const { items, totalSize } = useVirtualList({ count, rowHeight, scrollRef: rowsRef, scrollToIndex });
-  const { handleRowMouseDown, insertionIndex } = useTreeRowDrag({ count, isRowSelected, onReorder, rowHeight, rowsRef });
+  const { expandedIds, toggleExpanded } = useExpandedIds();
+  const rows = useMemo(() => flattenTreeRows(roots, getChildren, expandedIds), [roots, getChildren, expandedIds]);
+  const { items, totalSize } = useVirtualList({ count: rows.length, rowHeight, scrollRef: rowsRef, scrollToIndex });
+  const { dropDepth, handleRowMouseDown, insertionIndex } = useTreeRowDrag({ isRowSelected, onReorder, rowHeight, rows, rowsRef });
   const isDragging = insertionIndex !== null;
-  const selectionBackgroundSegments = isRowSelected ? getSelectionBackgroundSegments(items, isRowSelected) : [];
-
-  const handleRowsClick = (event: MouseEvent<HTMLDivElement>): void => {
-    if (onDeselectAll && event.target === event.currentTarget) {
-      onDeselectAll();
-    }
-  };
+  const isRowSelectedByIndex = getIsRowSelectedByIndex(rows, isRowSelected);
+  const selectionBackgroundSegments = isRowSelectedByIndex ? getSelectionBackgroundSegments(items, isRowSelectedByIndex) : [];
+  const handleRowsClick = useHandleRowsClick(onDeselectAll);
 
   return (
     <div className={cx(styles.Tree, className)}>
       <div className={styles.Tree__rows} onClick={handleRowsClick} ref={rowsRef}>
         <div className={cx(styles.Tree__viewport, isDragging && styles['Tree__viewport--dragging'])} style={{ height: totalSize }}>
-          {selectionBackgroundSegments.map((segment) => (
-            <div
-              className={cx(
-                styles.Tree__selectionBackground,
-                !segment.isRoundedTop && styles['Tree__selectionBackground--squareTop'],
-                !segment.isRoundedBottom && styles['Tree__selectionBackground--squareBottom'],
-              )}
-              key={segment.start}
-              style={{
-                height:
-                  segment.size -
-                  (segment.isRoundedTop ? TREE_SELECTION_BACKGROUND_INSET_PX : 0) -
-                  (segment.isRoundedBottom ? TREE_SELECTION_BACKGROUND_INSET_PX : 0),
-                transform: `translateY(${segment.start + (segment.isRoundedTop ? TREE_SELECTION_BACKGROUND_INSET_PX : 0)}px)`,
-              }}
-            />
-          ))}
-          {items.map((virtualRow) => (
-            <div
-              className={styles.Tree__row}
-              key={virtualRow.key}
-              onMouseDown={onReorder ? (event): void => handleRowMouseDown(virtualRow.index, event) : undefined}
-              style={{ height: virtualRow.size, transform: `translateY(${virtualRow.start}px)` }}
-            >
-              {renderRow(virtualRow.index)}
-            </div>
-          ))}
+          <TreeSelectionBackground segments={selectionBackgroundSegments} />
+          <TreeRowList
+            items={items}
+            onRowMouseDown={onReorder ? handleRowMouseDown : undefined}
+            renderRow={renderRow}
+            rows={rows}
+            toggleExpanded={toggleExpanded}
+          />
           {isDragging && (
-            <div
-              className={cx(styles.Tree__dropIndicator, !renderDropIndicator && styles['Tree__dropIndicator--default'])}
-              style={{ transform: `translateY(${insertionIndex * rowHeight}px)` }}
-            >
-              {renderDropIndicator?.(insertionIndex)}
-            </div>
+            <TreeDropIndicator insertionIndex={insertionIndex} isDefault={!renderDropIndicator} rowHeight={rowHeight}>
+              {renderDropIndicator?.(dropDepth)}
+            </TreeDropIndicator>
           )}
         </div>
       </div>

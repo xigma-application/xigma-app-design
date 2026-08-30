@@ -14,7 +14,15 @@ import {
 } from './constants';
 
 // types
-import { TDesignSnapshot, TDesignState, TReorderNodesPayload, TReorderPayload, TStartTextEditPayload, TTextEditSelection } from './types';
+import {
+  TAddNodesPayload,
+  TDesignSnapshot,
+  TDesignState,
+  TMoveNodesPayload,
+  TReorderPayload,
+  TStartTextEditPayload,
+  TTextEditSelection,
+} from './types';
 import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/design/types';
@@ -23,22 +31,25 @@ import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/d
 import { getActivePage } from './utils/getActivePage';
 import { handleAddComment } from './utils/handleAddComment';
 import { handleAddNode } from './utils/handleAddNode';
+import { handleAddNodes } from './utils/handleAddNodes';
 import { handleAddPage } from './utils/handleAddPage';
-import { handleDeleteNode } from './utils/handleDeleteNode';
+import { handleDeleteNode } from './utils/handleDeleteNode/handleDeleteNode';
 import { handleDeletePage } from './utils/handleDeletePage';
 import { handleDuplicatePage, TDuplicatePagePayload } from './utils/handleDuplicatePage';
-import { handleReorderNode } from './utils/handleReorderNode';
+import { handleGroupNodes } from './utils/handleGroupNodes/handleGroupNodes';
+import { handleMoveNodes } from './utils/handleMoveNodes/handleMoveNodes';
 import { handleReorderPages } from './utils/handleReorderPages';
 import { handleReplaceDesignSnapshot } from './utils/handleReplaceDesignSnapshot';
 import { handleReplaceNode } from './utils/handleReplaceNode';
 import { handleSetActiveTool } from './utils/handleSetActiveTool';
-import { handleSetSelection } from './utils/handleSetSelection';
+import { handleSetSelection } from './utils/handleSetSelection/handleSetSelection';
 import { handleSetVectorEditingNodeIds } from './utils/handleSetVectorEditingNodeIds';
 import { handleSetViewport } from './utils/handleSetViewport';
 import { handleStartTextEdit } from './utils/handleStartTextEdit';
 import { handleStopTextEdit } from './utils/handleStopTextEdit';
 import { handleToggleNodeHidden } from './utils/handleToggleNodeHidden';
 import { handleToggleNodeLocked } from './utils/handleToggleNodeLocked';
+import { handleUngroupNodes } from './utils/handleUngroupNodes/handleUngroupNodes';
 import { handleUpdateCommentContent } from './utils/handleUpdateCommentContent';
 import { handleUpdateEditingTextBoxPathStartOffset } from './utils/handleUpdateEditingTextBoxPathStartOffset';
 import { handleUpdateNode } from './utils/handleUpdateNode';
@@ -92,6 +103,7 @@ const designSlice = createSlice({
       prepare: (node: TNewSceneNode) => ({ payload: { ...node, id: nanoid() } as TSceneNode }),
       reducer: (state, action: PayloadAction<TSceneNode>) => handleAddNode(state, action.payload),
     },
+    addNodes: (state, action: PayloadAction<TAddNodesPayload>) => handleAddNodes(state, action.payload),
     addPage: {
       prepare: () => ({ payload: { id: nanoid() } }),
       reducer: (state, action: PayloadAction<{ id: string }>) => handleAddPage(state, action.payload.id),
@@ -105,10 +117,14 @@ const designSlice = createSlice({
     deleteNode: (state, action: PayloadAction<string>) => handleDeleteNode(state, action.payload),
     deletePage: (state, action: PayloadAction<string>) => handleDeletePage(state, action.payload),
     duplicatePage: (state, action: PayloadAction<TDuplicatePagePayload>) => handleDuplicatePage(state, action.payload),
+    groupNodes: {
+      prepare: () => ({ payload: { groupId: nanoid() } }),
+      reducer: (state, action: PayloadAction<{ groupId: string }>) => handleGroupNodes(state, action.payload.groupId),
+    },
+    moveNodes: (state, action: PayloadAction<TMoveNodesPayload>) => handleMoveNodes(state, action.payload),
     renamePage: (state, action: PayloadAction<{ id: string; name: string }>) => {
       state.pages[action.payload.id].name = action.payload.name;
     },
-    reorderNode: (state, action: PayloadAction<TReorderNodesPayload>) => handleReorderNode(state, action.payload),
     reorderPages: (state, action: PayloadAction<TReorderPayload>) => handleReorderPages(state, action.payload),
     replaceDesignSnapshot: (state, action: PayloadAction<TDesignSnapshot>) => handleReplaceDesignSnapshot(state, action.payload),
     replaceNode: (state, action: PayloadAction<{ id: string; node: TSceneNode }>) => handleReplaceNode(state, action.payload),
@@ -135,6 +151,7 @@ const designSlice = createSlice({
     toggleUiMinimized: (state) => {
       state.isUiMinimized = !state.isUiMinimized;
     },
+    ungroupNodes: (state, action: PayloadAction<string[]>) => handleUngroupNodes(state, action.payload),
     updateCommentContent: (state, action: PayloadAction<{ content: string; id: string }>) =>
       handleUpdateCommentContent(state, action.payload),
     updateEditingTextBoxPathStartOffset: (state, action: PayloadAction<number>) =>
@@ -148,14 +165,16 @@ const designSlice = createSlice({
 export const {
   addComment,
   addNode,
+  addNodes,
   addPage,
   cancelCommentDraft,
   deleteComment,
   deleteNode,
   deletePage,
   duplicatePage,
+  groupNodes,
+  moveNodes,
   renamePage,
-  reorderNode,
   reorderPages,
   replaceDesignSnapshot,
   replaceNode,
@@ -172,6 +191,7 @@ export const {
   toggleNodeHidden,
   toggleNodeLocked,
   toggleUiMinimized,
+  ungroupNodes,
   updateCommentContent,
   updateEditingTextBoxPathStartOffset,
   updateNode,

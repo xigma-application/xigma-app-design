@@ -7,20 +7,27 @@ import { handleLockBrowserEvents } from '../handleLockBrowserEvents';
 const createEvent = (): KeyboardEvent => new KeyboardEvent('keydown');
 
 describe('handleLockBrowserEvents', () => {
-  it.each([KeyboardKeys['+'], KeyboardKeys['-'], KeyboardKeys.a, KeyboardKeys.d, KeyboardKeys.f, KeyboardKeys.s])(
-    'should prevent the browser default for ctrl+%s',
-    (secondaryKey) => {
-      // mock
-      const event = createEvent();
-      const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+  it.each([
+    KeyboardKeys.plus,
+    KeyboardKeys.minus,
+    KeyboardKeys.numpadAdd,
+    KeyboardKeys.numpadSubtract,
+    KeyboardKeys.a,
+    KeyboardKeys.d,
+    KeyboardKeys.f,
+    KeyboardKeys.g,
+    KeyboardKeys.s,
+  ])('should prevent the browser default for ctrl+%s', (secondaryKey) => {
+    // mock
+    const event = createEvent();
+    const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
 
-      // before
-      handleLockBrowserEvents(true, event, secondaryKey);
+    // before
+    handleLockBrowserEvents(true, event, secondaryKey);
 
-      // result
-      expect(preventDefaultSpy).toHaveBeenCalled();
-    },
-  );
+    // result
+    expect(preventDefaultSpy).toHaveBeenCalled();
+  });
 
   it('should not prevent the browser default when ctrl is not held', () => {
     // mock

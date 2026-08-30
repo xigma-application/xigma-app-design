@@ -1,1 +1,2 @@
+export const TREE_ITEM_INDENT_PX = 16;
 export const TREE_SELECTION_BACKGROUND_INSET_PX = 4;

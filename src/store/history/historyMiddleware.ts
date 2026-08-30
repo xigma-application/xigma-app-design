@@ -4,18 +4,21 @@ import { Middleware, UnknownAction } from '@reduxjs/toolkit';
 import { beginHistoryGesture, endHistoryGesture } from './actions';
 import {
   addNode,
+  addNodes,
   addPage,
   deleteNode,
   deletePage,
   duplicatePage,
+  groupNodes,
+  moveNodes,
   renamePage,
-  reorderNode,
   reorderPages,
   replaceNode,
   setActivePage,
   setSelection,
   toggleNodeHidden,
   toggleNodeLocked,
+  ungroupNodes,
   updateNode,
 } from 'store/design/slice';
 import { RootState } from 'store';
@@ -29,18 +32,21 @@ import { getDesignSnapshot } from './getDesignSnapshot';
 
 const UNDOABLE_ACTION_TYPES: Set<string> = new Set([
   addNode.type,
+  addNodes.type,
   addPage.type,
   deleteNode.type,
   deletePage.type,
   duplicatePage.type,
+  groupNodes.type,
+  moveNodes.type,
   renamePage.type,
-  reorderNode.type,
   reorderPages.type,
   replaceNode.type,
   setActivePage.type,
   setSelection.type,
   toggleNodeHidden.type,
   toggleNodeLocked.type,
+  ungroupNodes.type,
   updateNode.type,
 ]);
 

@@ -1,11 +1,12 @@
 // store
-import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { addNode, groupNodes, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { undo } from 'store/history/actions';
 import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TGroupNode } from 'types/design/types';
 
 // utils
 import { createCanvasRefs } from '../../../useCanvasRefs/createCanvasRefs';
@@ -14,9 +15,20 @@ import { handlePasteSelection } from '../handlePasteSelection';
 import { setClipboardNodes } from '../clipboard';
 import { setVectorClipboardFragment } from '../vectorClipboard';
 
-const addFrameNode = (): string => {
+const addFrameNode = (overrides: { x?: number; y?: number } = {}): string => {
   store.dispatch(
-    addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 5, y: 5 }),
+    addNode({
+      fill: '#ff0000',
+      height: 20,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 20,
+      x: 5,
+      y: 5,
+      ...overrides,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());
@@ -50,7 +62,7 @@ describe('handlePasteSelection', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
     store.dispatch(setVectorEditingNodeIds([]));
-    setClipboardNodes([]);
+    setClipboardNodes([], []);
     setVectorClipboardFragment({ filledFacePieceKeySets: [], segments: [], vertexHandleModes: {}, vertices: [] });
   });
 
@@ -75,6 +87,54 @@ describe('handlePasteSelection', () => {
     const pastedNode = nodes[selectedIds[0]];
 
     expect(pastedNode).toMatchObject({ x: 15, y: 15 });
+  });
+
+  it('should paste a copied group as an independent copy with its own cloned children, leaving the original group intact', () => {
+    // mock
+    const a = addFrameNode({ x: 0, y: 0 });
+    const b = addFrameNode({ x: 40, y: 0 });
+
+    store.dispatch(setSelection([a, b]));
+    store.dispatch(groupNodes());
+
+    const originalPage = selectActivePage(store.getState());
+    const [originalGroupId] = originalPage.selectedIds;
+    const originalGroup = originalPage.nodes[originalGroupId] as TGroupNode;
+
+    handleCopySelection(createCanvasRefs());
+    store.dispatch(setSelection([]));
+
+    // action
+    handlePasteSelection(store.dispatch, createCanvasRefs());
+
+    // result
+    const page = selectActivePage(store.getState());
+    const selectedIds = selectSelectedIds(store.getState());
+
+    expect(selectedIds).toHaveLength(1);
+    const [pastedGroupId] = selectedIds;
+    expect(pastedGroupId).not.toBe(originalGroupId);
+
+    const pastedGroup = page.nodes[pastedGroupId] as TGroupNode;
+    expect(pastedGroup.type).toBe(NodeType.group);
+    expect(pastedGroup.childIds).toHaveLength(2);
+    expect(pastedGroup.childIds).not.toEqual(expect.arrayContaining(originalGroup.childIds));
+
+    // every pasted child must exist, be parented to the NEW group, and not appear in rootOrder
+    pastedGroup.childIds.forEach((childId) => {
+      expect(page.nodes[childId]).toBeDefined();
+      expect(page.nodes[childId].parentId).toBe(pastedGroupId);
+      expect(page.rootOrder).not.toContain(childId);
+    });
+
+    // the original group and its own children are untouched
+    expect(page.nodes[originalGroupId]).toEqual(originalGroup);
+    originalGroup.childIds.forEach((childId) => {
+      expect(page.nodes[childId].parentId).toBe(originalGroupId);
+    });
+
+    // the pasted group is the only new entry in rootOrder
+    expect(page.rootOrder).toEqual([...originalPage.rootOrder, pastedGroupId]);
   });
 
   it('should be undoable as a single step even though it dispatches multiple nodes', () => {

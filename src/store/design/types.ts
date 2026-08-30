@@ -46,9 +46,15 @@ export type TReorderPayload = {
   toIndex: number;
 };
 
-export type TReorderNodesPayload = {
-  fromIndices: number[];
-  toIndex: number;
+export type TMoveNodesPayload = {
+  nodeIds: string[];
+  targetIndex: number;
+  targetParentId: string | null;
+};
+
+export type TAddNodesPayload = {
+  nodes: TSceneNode[];
+  rootIds: string[];
 };
 
 export type TStartTextEditPayload = {

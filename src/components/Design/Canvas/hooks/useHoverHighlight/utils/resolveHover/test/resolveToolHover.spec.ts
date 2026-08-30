@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { addNode, groupNodes, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -87,6 +87,7 @@ describe('resolveToolHover', () => {
       IDENTITY_VIEWPORT,
       store.getState(),
       createCanvasRefs(),
+      false,
     );
 
     // result — resize wins over the plain node-hover fallback: hover clears, no positioning class
@@ -115,6 +116,7 @@ describe('resolveToolHover', () => {
       IDENTITY_VIEWPORT,
       store.getState(),
       createCanvasRefs(),
+      false,
     );
 
     // result — falls through past the (suppressed) resize resolver to plain node hover instead
@@ -136,7 +138,17 @@ describe('resolveToolHover', () => {
     const setClassName = vi.fn();
 
     // before
-    resolveToolHover(canvas, hoverRef, setClassName, ToolName.default, { x: 100, y: 100 }, IDENTITY_VIEWPORT, store.getState(), canvasRefs);
+    resolveToolHover(
+      canvas,
+      hoverRef,
+      setClassName,
+      ToolName.default,
+      { x: 100, y: 100 },
+      IDENTITY_VIEWPORT,
+      store.getState(),
+      canvasRefs,
+      false,
+    );
 
     // result — the resolver's own cursor write lands on the canvas element, independent of setClassName
     // (which stays a no-op throughout Vector Edit Mode)
@@ -162,11 +174,70 @@ describe('resolveToolHover', () => {
       IDENTITY_VIEWPORT,
       store.getState(),
       createCanvasRefs(),
+      false,
     );
 
     // result
     expect(hoverRef.current).toBe(idA);
     expect(setClassName).toHaveBeenCalledWith(null);
+  });
+
+  it('should resolve hover to the top-level group when Ctrl is not held', () => {
+    // mock
+    const idA = addFrameNode(0, 0, 20);
+    const idB = addFrameNode(100, 0, 20);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+    store.dispatch(setSelection([]));
+
+    const canvas = createCanvas();
+    const hoverRef: RefObject<string | null> = { current: null };
+
+    // before
+    resolveToolHover(
+      canvas,
+      hoverRef,
+      vi.fn(),
+      ToolName.default,
+      { x: 10, y: 10 },
+      IDENTITY_VIEWPORT,
+      store.getState(),
+      createCanvasRefs(),
+      false,
+    );
+
+    // result
+    expect(hoverRef.current).not.toBe(idA);
+  });
+
+  it('should bypass the group and resolve hover to the individual child while Ctrl is held', () => {
+    // mock
+    const idA = addFrameNode(0, 0, 20);
+    const idB = addFrameNode(100, 0, 20);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+    store.dispatch(setSelection([]));
+
+    const canvas = createCanvas();
+    const hoverRef: RefObject<string | null> = { current: null };
+
+    // before
+    resolveToolHover(
+      canvas,
+      hoverRef,
+      vi.fn(),
+      ToolName.default,
+      { x: 10, y: 10 },
+      IDENTITY_VIEWPORT,
+      store.getState(),
+      createCanvasRefs(),
+      true,
+    );
+
+    // result
+    expect(hoverRef.current).toBe(idA);
   });
 
   it('should clear the hover when the point misses every resolver and every node', () => {
@@ -187,6 +258,7 @@ describe('resolveToolHover', () => {
       IDENTITY_VIEWPORT,
       store.getState(),
       createCanvasRefs(),
+      false,
     );
 
     // result

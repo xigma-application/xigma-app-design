@@ -15,7 +15,9 @@ export type THoverResolverContext = {
   editingContent: string;
   editingNodeId: string | null;
   editingTextBox: TEditingTextBox | null;
-  orderedNodes: TSceneNode[];
+  isControlPressed: boolean;
+  leafNodes: TSceneNode[];
+  nodesById: Record<string, TSceneNode>;
   point: TPoint;
   resizableSelectedNodes: TSceneNode[];
   resizeHandleHit: { bounds: TDraftRect; handle: TResizeHandle; rotation: number } | null;

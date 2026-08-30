@@ -6,6 +6,7 @@ import { TSceneNodeChanges } from 'types/design/types';
 // utils
 import { getActivePage } from './getActivePage';
 import { isVectorWidthProfileEligible } from './isVectorWidthProfileEligible';
+import { syncGroupBounds } from './syncGroupBounds';
 import { syncPathNodeFromText } from './syncPathNodeFromText';
 import { syncPathTextNodes } from './syncPathTextNodes';
 
@@ -24,5 +25,7 @@ export const handleUpdateNode = (state: TDesignState, payload: { changes: TScene
     if (node.type === NodeType.vector && 'segments' in payload.changes && !isVectorWidthProfileEligible(node)) {
       node.widthProfile = null;
     }
+
+    syncGroupBounds(state, node.parentId);
   }
 };

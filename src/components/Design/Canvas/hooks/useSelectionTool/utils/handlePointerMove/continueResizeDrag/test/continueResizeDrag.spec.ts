@@ -1,8 +1,8 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setActiveTool, setSelection } from 'store/design/slice';
-import { selectActivePage } from 'store/design/selectors';
+import { addNode, groupNodes, setActiveTool, setSelection, updateNode } from 'store/design/slice';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -627,6 +627,99 @@ describe('continueResizeDrag', () => {
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
       height: 80,
       width: 150,
+      x: 0,
+      y: 0,
+    });
+  });
+
+  it('should resize a rotated group without drifting across multiple pointermove frames', () => {
+    // mock — a rotated group of two children; drive continueResizeDrag through two frames on the
+    // SAME resizeDragRef (never recreated, exactly like a real drag), then compare the result
+    // against a single direct call straight to the final pointer position on a fresh, identical setup
+    const buildRotatedGroup = (): { childA: string; childB: string } => {
+      const idA = addFrameNode(0, 0, 20, 20, null, 40);
+      const idB = addFrameNode(60, 60, 20, 20, null, 40);
+
+      store.dispatch(setSelection([idA, idB]));
+      store.dispatch(groupNodes());
+
+      const [groupId] = selectSelectedIds(store.getState());
+
+      store.dispatch(updateNode({ changes: { rotation: 40 }, id: groupId }));
+
+      return { childA: idA, childB: idB };
+    };
+
+    const groupOrigin = { height: 80, rotation: 40, width: 80, x: 0, y: 0 };
+    const bounds = { height: 80, width: 80, x: 0, y: 0 };
+    const buildResizeDragRef = (groupId: string, childA: string, childB: string): RefObject<TResizeDragState | null> =>
+      createResizeDragRef({
+        aspectRatio: 1,
+        bounds,
+        handle: 'se',
+        nodeOrigins: { [groupId]: { flip: null, ...groupOrigin } },
+        rotatedGroupChildOrigins: {
+          [childA]: { flip: null, height: 20, rotation: 40, width: 20, x: 0, y: 0 },
+          [childB]: { flip: null, height: 20, rotation: 40, width: 20, x: 60, y: 60 },
+        },
+      });
+
+    // multi-frame: two continueResizeDrag calls on the same ref object
+    const multiFrame = buildRotatedGroup();
+    const multiFrameRef = buildResizeDragRef(selectSelectedIds(store.getState())[0], multiFrame.childA, multiFrame.childB);
+    const canvas = createCanvas();
+
+    continueResizeDrag(canvas, pointerEvent(300, 200), store.dispatch, multiFrameRef, createCanvasRefs());
+    continueResizeDrag(canvas, pointerEvent(500, 400), store.dispatch, multiFrameRef, createCanvasRefs());
+
+    const multiFrameResult = {
+      a: store.getState().design.pages[store.getState().design.activePageId].nodes[multiFrame.childA],
+      b: store.getState().design.pages[store.getState().design.activePageId].nodes[multiFrame.childB],
+    };
+
+    // single-frame: identical fresh setup, straight to the same final pointer in one call
+    const singleFrame = buildRotatedGroup();
+    const singleFrameRef = buildResizeDragRef(selectSelectedIds(store.getState())[0], singleFrame.childA, singleFrame.childB);
+
+    continueResizeDrag(canvas, pointerEvent(500, 400), store.dispatch, singleFrameRef, createCanvasRefs());
+
+    const singleFrameResult = {
+      a: store.getState().design.pages[store.getState().design.activePageId].nodes[singleFrame.childA],
+      b: store.getState().design.pages[store.getState().design.activePageId].nodes[singleFrame.childB],
+    };
+
+    // result — same final pointer position must land in the same place, no matter how many
+    // intermediate frames the drag passed through on the way there
+    const multiA = multiFrameResult.a as TFrameNode;
+    const multiB = multiFrameResult.b as TFrameNode;
+    const singleA = singleFrameResult.a as TFrameNode;
+    const singleB = singleFrameResult.b as TFrameNode;
+
+    expect(multiA).toMatchObject({ height: singleA.height, width: singleA.width });
+    expect(multiB).toMatchObject({ height: singleB.height, width: singleB.width });
+    expect(multiA.x).toBeCloseTo(singleA.x, 0);
+    expect(multiA.y).toBeCloseTo(singleA.y, 0);
+    expect(multiB.x).toBeCloseTo(singleB.x, 0);
+    expect(multiB.y).toBeCloseTo(singleB.y, 0);
+  });
+
+  it('should skip the rotated-group child pass when the group node no longer resolves', () => {
+    // mock — rotatedGroupChildOrigins is set but the group id itself doesn't exist in the store
+    const idA = addFrameNode(0, 0, 20, 20);
+    const canvas = createCanvas();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 1,
+      bounds: { height: 80, width: 80, x: 0, y: 0 },
+      handle: 'se',
+      nodeOrigins: { missing: { flip: null, height: 80, rotation: 40, width: 80, x: 0, y: 0 } },
+      rotatedGroupChildOrigins: { [idA]: { flip: null, height: 20, rotation: 40, width: 20, x: 0, y: 0 } },
+    });
+
+    // before / result
+    expect(() => continueResizeDrag(canvas, pointerEvent(300, 200), store.dispatch, resizeDragRef, createCanvasRefs())).not.toThrow();
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      height: 20,
+      width: 20,
       x: 0,
       y: 0,
     });

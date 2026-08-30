@@ -70,6 +70,11 @@ export type TFrameNode = TBaseNode & {
   type: NodeType.frame;
 };
 
+export type TGroupNode = TBaseNode & {
+  childIds: string[];
+  type: NodeType.group;
+};
+
 export type TMediaNode = TBaseNode & {
   flipX: boolean;
   flipY: boolean;
@@ -193,13 +198,14 @@ export type TDraftLine = Omit<TLineNode, 'id' | 'name' | 'parentId'>;
 export type TDraftEntity = TDraftShape | TDraftLine | TDraftPath | TDraftPolygon | TDraftStar | TDraftMedia | TDraftText;
 
 export type TBoxSceneNode =
-  TEllipseNode | TFrameNode | TMediaNode | TPathNode | TPolygonNode | TRectangleNode | TSectionNode | TStarNode | TTextNode;
+  TEllipseNode | TFrameNode | TGroupNode | TMediaNode | TPathNode | TPolygonNode | TRectangleNode | TSectionNode | TStarNode | TTextNode;
 
 export type TSceneNode = TBoxSceneNode | TLineNode | TVectorNode;
 
 export type TNewSceneNode =
   | Omit<TEllipseNode, 'id'>
   | Omit<TFrameNode, 'id'>
+  | Omit<TGroupNode, 'id'>
   | Omit<TMediaNode, 'id'>
   | Omit<TPathNode, 'id'>
   | Omit<TPolygonNode, 'id'>
@@ -213,6 +219,7 @@ export type TNewSceneNode =
 export type TSceneNodeChanges =
   | Partial<TEllipseNode>
   | Partial<TFrameNode>
+  | Partial<TGroupNode>
   | Partial<TMediaNode>
   | Partial<TPathNode>
   | Partial<TPolygonNode>
