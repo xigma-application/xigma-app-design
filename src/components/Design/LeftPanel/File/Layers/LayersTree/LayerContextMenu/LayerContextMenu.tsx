@@ -7,6 +7,7 @@ import { TTreeItemMenuRenderParams } from 'shared';
 // hooks
 import { useCopySelection } from './hooks/useCopySelection';
 import { useGroupSelection } from './hooks/useGroupSelection';
+import { usePasteToReplace } from './hooks/usePasteToReplace';
 
 const LayerContextMenu: FC<TTreeItemMenuRenderParams> = ({
   anchorRef,
@@ -20,6 +21,7 @@ const LayerContextMenu: FC<TTreeItemMenuRenderParams> = ({
 }) => {
   const handleCopySelection = useCopySelection();
   const handleGroupSelection = useGroupSelection();
+  const handlePasteToReplace = usePasteToReplace();
 
   return (
     <LayerMenu
@@ -30,6 +32,7 @@ const LayerContextMenu: FC<TTreeItemMenuRenderParams> = ({
       onCopy={handleCopySelection}
       onGroupSelection={handleGroupSelection}
       onOpenChange={onOpenChange}
+      onPasteToReplace={handlePasteToReplace}
       onRename={onRenameRequested}
       onToggleHidden={onToggleHidden}
       onToggleLocked={onToggleLocked}

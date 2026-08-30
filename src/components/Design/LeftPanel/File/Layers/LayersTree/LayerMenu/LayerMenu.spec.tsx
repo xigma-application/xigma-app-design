@@ -14,6 +14,7 @@ const renderLayerMenu = (
   onToggleLocked = vi.fn(),
   onGroupSelection = vi.fn(),
   onCopy = vi.fn(),
+  onPasteToReplace = vi.fn(),
 ): ReturnType<typeof render> =>
   render(
     <LayerMenu
@@ -24,6 +25,7 @@ const renderLayerMenu = (
       onCopy={onCopy}
       onGroupSelection={onGroupSelection}
       onOpenChange={vi.fn()}
+      onPasteToReplace={onPasteToReplace}
       onRename={onRename}
       onToggleHidden={onToggleHidden}
       onToggleLocked={onToggleLocked}
@@ -51,12 +53,13 @@ describe('LayerMenu', () => {
     expect(screen.getByText('Flatten').closest('div')?.className).toMatch(/--disabled/);
   });
 
-  it('should not disable Copy, Rename, Hide/Show, Lock/Unlock, or Group selection', () => {
+  it('should not disable Copy, Paste to replace, Rename, Hide/Show, Lock/Unlock, or Group selection', () => {
     // before
     renderLayerMenu();
 
     // result
     expect(screen.getByText('Copy').closest('div')?.className).not.toMatch(/--disabled/);
+    expect(screen.getByText('Paste to replace').closest('div')?.className).not.toMatch(/--disabled/);
     expect(screen.getByText('Rename').closest('div')?.className).not.toMatch(/--disabled/);
     expect(screen.getByText('Hide layer').closest('div')?.className).not.toMatch(/--disabled/);
     expect(screen.getByText('Lock layer').closest('div')?.className).not.toMatch(/--disabled/);
@@ -76,6 +79,21 @@ describe('LayerMenu', () => {
 
     // result
     expect(onCopy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call onPasteToReplace on Paste to replace click', async () => {
+    // mock
+    const user = userEvent.setup();
+    const onPasteToReplace = vi.fn();
+
+    // before
+    renderLayerMenu(false, false, vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), onPasteToReplace);
+
+    // action
+    await user.click(screen.getByText('Paste to replace'));
+
+    // result
+    expect(onPasteToReplace).toHaveBeenCalledTimes(1);
   });
 
   it('should call onRename on Rename click', async () => {

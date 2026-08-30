@@ -12,6 +12,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TFrameNode } from 'types/design/types';
 
 // utils
 import { getClipboardNodes, setClipboardNodes } from 'components/Design/Canvas/hooks/useKeyboardShortcuts/utils/clipboard';
@@ -83,5 +84,35 @@ describe('LayerContextMenu', () => {
 
     // after
     store.dispatch(deleteNode(idA));
+  });
+
+  it("should overwrite the selected node's content with the clipboard copy on Paste to replace click", async () => {
+    // mock
+    const user = userEvent.setup();
+    store.dispatch(
+      addNode({ fill: '#ff0000', height: 10, name: 'Source', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+    );
+    const [sourceId] = selectActivePage(store.getState()).rootOrder.slice(-1);
+    const sourceNode = selectActivePage(store.getState()).nodes[sourceId] as TFrameNode;
+    setClipboardNodes([{ ...sourceNode, height: 40 }], [sourceId]);
+
+    store.dispatch(
+      addNode({ fill: '#0000ff', height: 10, name: 'Target', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 5, y: 5 }),
+    );
+    const [targetId] = selectActivePage(store.getState()).rootOrder.slice(-1);
+    store.dispatch(setSelection([targetId]));
+
+    // before
+    renderLayerContextMenu();
+
+    // action
+    await user.click(screen.getByText('Paste to replace'));
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[targetId]).toMatchObject({ height: 40, id: targetId, x: 5, y: 5 });
+
+    // after
+    store.dispatch(deleteNode(sourceId));
+    store.dispatch(deleteNode(targetId));
   });
 });

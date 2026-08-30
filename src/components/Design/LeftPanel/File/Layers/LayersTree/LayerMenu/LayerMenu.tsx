@@ -50,6 +50,7 @@ export type TLayerMenuProps = {
   onCopy: TFunc;
   onGroupSelection: TFunc;
   onOpenChange: TFunc<[boolean]>;
+  onPasteToReplace: TFunc;
   onRename: TFunc;
   onToggleHidden: TFunc;
   onToggleLocked: TFunc;
@@ -63,6 +64,7 @@ const LayerMenu: FC<TLayerMenuProps> = ({
   onCopy,
   onGroupSelection,
   onOpenChange,
+  onPasteToReplace,
   onRename,
   onToggleHidden,
   onToggleLocked,
@@ -85,8 +87,8 @@ const LayerMenu: FC<TLayerMenuProps> = ({
         >
           <PopoverItem label={t(NODE_MENU_COPY_KEY)} onClick={onCopy} shortcut={KEYBOARD_SHORTCUTS.copy.join('')} withCheck={false} />
           <PopoverItem
-            disabled
             label={t(NODE_MENU_PASTE_TO_REPLACE_KEY)}
+            onClick={onPasteToReplace}
             shortcut={KEYBOARD_SHORTCUTS.pasteToReplace.join('')}
             withCheck={false}
           />
