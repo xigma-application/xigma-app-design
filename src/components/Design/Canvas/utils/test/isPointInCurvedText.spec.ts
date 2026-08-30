@@ -42,6 +42,16 @@ describe('isPointInCurvedText', () => {
     expect(isPointInCurvedText({ x: 150, y: 100 }, node, 5)).toBe(false);
   });
 
+  it('should reach across the glyph height so a click on the letters, off the path line, still hits', () => {
+    // mock — the glyphs sit off the path (baseline on the line); at fontSize 14 the clickable band
+    // is ~5 + one line height (~17) wide, so a point 10 units off the curve is a hit, 40 is not
+    const node = buildNode();
+
+    // result
+    expect(isPointInCurvedText({ x: 190, y: 100 }, node, 5)).toBe(true);
+    expect(isPointInCurvedText({ x: 160, y: 100 }, node, 5)).toBe(false);
+  });
+
   it('should return false for a point on the curve at an angle the short content never reaches', () => {
     // mock — the leftmost point of the circle, half the circumference away from the content
     const node = buildNode();

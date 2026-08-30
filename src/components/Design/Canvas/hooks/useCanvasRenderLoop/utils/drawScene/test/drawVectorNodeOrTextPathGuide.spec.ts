@@ -147,6 +147,22 @@ describe('drawVectorNodeOrTextPathGuide', () => {
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINES, 0, expect.any(Number));
   });
 
+  it('should draw its own normal stroke — the contour the text rides on — for a bound vector that is not being edited', () => {
+    // mock
+    const gl = createGlMock();
+    const vector = buildVector();
+    const pathText = buildPathText();
+
+    // before — merely selected, not editing: the vector line stays solid
+    draw(gl, vector, new Map([['a', 'selected']]), { a: vector, 'text-1': pathText });
+
+    // result — its filled stroke geometry (TRIANGLES), no dashed LINES
+    const lineDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINES);
+
+    expect(lineDraws).toHaveLength(0);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, expect.any(Number));
+  });
+
   it('should draw only the dashed guide outline for a vector mid-attach, named solely by editingPathId before its text node is committed', () => {
     // mock — attachToVector's startTextEdit fires before any addNode/commitTextNode ever runs
     const gl = createGlMock();
@@ -160,9 +176,8 @@ describe('drawVectorNodeOrTextPathGuide', () => {
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINES, 0, expect.any(Number));
   });
 
-  it('should draw nothing at all for a bound vector once its text is no longer being edited (no interactive style implemented yet)', () => {
-    // mock — mirrors a plain NodeType.path with no outline style: fully invisible until the next
-    // interactive state; hover/selected parity for a bound vector is not implemented yet
+  it('should still draw the bound vector as a normal contour when its text is committed and deselected', () => {
+    // mock — the vector line is the path the text rides on, so it stays visible even at rest
     const gl = createGlMock();
     const vector = buildVector();
     const pathText = buildPathText();
@@ -170,12 +185,15 @@ describe('drawVectorNodeOrTextPathGuide', () => {
     // before — no outline style at all for this id (committed, deselected, unhovered)
     draw(gl, vector, new Map(), { a: vector, 'text-1': pathText });
 
-    // result
-    expect(gl.drawArrays).not.toHaveBeenCalled();
+    // result — its own stroke, not the dashed guide
+    const lineDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINES);
+
+    expect(lineDraws).toHaveLength(0);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, expect.any(Number));
   });
 
-  it('should draw nothing while mid-attach if the vector is not (yet) marked "editing"', () => {
-    // mock — editingPathId alone marks the binding but the dashed guide still gates on style
+  it('should draw the normal contour while mid-attach until the text is actually marked "editing"', () => {
+    // mock — editingPathId names the binding, but the dash only takes over on the 'editing' style
     const gl = createGlMock();
     const vector = buildVector();
 
@@ -183,6 +201,9 @@ describe('drawVectorNodeOrTextPathGuide', () => {
     draw(gl, vector, new Map(), { a: vector }, 'a');
 
     // result
-    expect(gl.drawArrays).not.toHaveBeenCalled();
+    const lineDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINES);
+
+    expect(lineDraws).toHaveLength(0);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, expect.any(Number));
   });
 });

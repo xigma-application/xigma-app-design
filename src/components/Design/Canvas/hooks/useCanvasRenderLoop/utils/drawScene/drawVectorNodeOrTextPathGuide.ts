@@ -29,10 +29,10 @@ export const drawVectorNodeOrTextPathGuide = (
   nodesById: Record<string, TSceneNode>,
   editingPathId?: string | null,
 ): void => {
-  if (isVectorBoundAsTextPath(nodesById, node.id) || node.id === editingPathId) {
-    if (pathOutlineStyles.get(node.id) === 'editing') {
-      drawDashedVectorPathOutline(gl, program, buffer, node, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport);
-    }
+  const isTextBeingEdited = pathOutlineStyles.get(node.id) === 'editing';
+
+  if ((isVectorBoundAsTextPath(nodesById, node.id) || node.id === editingPathId) && isTextBeingEdited) {
+    drawDashedVectorPathOutline(gl, program, buffer, node, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport);
     return;
   }
 

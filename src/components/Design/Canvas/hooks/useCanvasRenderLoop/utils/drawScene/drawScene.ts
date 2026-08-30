@@ -141,7 +141,7 @@ export const drawScene = (
     nodesById,
     editingTextBox?.pathId,
   );
-  drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
+  drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport, vectorEditingNodeIds, nodesById);
   drawSelectionOutline(
     gl,
     program,

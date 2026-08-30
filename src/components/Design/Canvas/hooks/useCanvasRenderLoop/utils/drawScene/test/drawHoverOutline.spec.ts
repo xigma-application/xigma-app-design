@@ -61,7 +61,7 @@ describe('drawHoverOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawHoverOutline(gl, program, buffer, null, 100, 100, IDENTITY_VIEWPORT, []);
+    drawHoverOutline(gl, program, buffer, null, 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -75,7 +75,7 @@ describe('drawHoverOutline', () => {
     const node = buildNode({ height: 20, width: 10, x: 0, y: 0 });
 
     // before
-    drawHoverOutline(gl, program, buffer, node, 100, 100, IDENTITY_VIEWPORT, []);
+    drawHoverOutline(gl, program, buffer, node, 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -90,7 +90,7 @@ describe('drawHoverOutline', () => {
     const node = buildNode({ height: 20, type: NodeType.ellipse, width: 10, x: 0, y: 0 });
 
     // before
-    drawHoverOutline(gl, program, buffer, node, 100, 100, IDENTITY_VIEWPORT, []);
+    drawHoverOutline(gl, program, buffer, node, 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -119,7 +119,7 @@ describe('drawHoverOutline', () => {
     };
 
     // before
-    drawHoverOutline(gl, program, buffer, polygon, 100, 100, IDENTITY_VIEWPORT, []);
+    drawHoverOutline(gl, program, buffer, polygon, 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -149,7 +149,7 @@ describe('drawHoverOutline', () => {
     };
 
     // before
-    drawHoverOutline(gl, program, buffer, star, 100, 100, IDENTITY_VIEWPORT, []);
+    drawHoverOutline(gl, program, buffer, star, 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -180,11 +180,63 @@ describe('drawHoverOutline', () => {
     };
 
     // before
-    drawHoverOutline(gl, program, buffer, text, 100, 100, IDENTITY_VIEWPORT, []);
+    drawHoverOutline(gl, program, buffer, text, 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result — a single thin quad, not the 24-vertex bounding-box ring
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
+  });
+
+  it('should highlight a hovered text-on-path by its vector contour along the curve, not a straight underline', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const vector: TVectorNode = {
+      fillColor: null,
+      filledFaceKeys: [],
+      id: 'vec-1',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {
+        s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+      },
+      strokeColor: '#000000',
+      strokeWidth: 2,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 40, y: 0 }, v3: { id: 'v3', x: 80, y: 30 } },
+    };
+    const text: TSceneNode = {
+      content: 'x',
+      fill: '#ffffff',
+      flipX: false,
+      flipY: false,
+      fontFamily: 'Inter',
+      fontSize: 14,
+      height: 0,
+      id: 'a',
+      name: 'Text',
+      parentId: null,
+      pathId: 'vec-1',
+      rotation: 0,
+      type: NodeType.text,
+      width: 90,
+      x: 0,
+      y: 0,
+    };
+
+    // before
+    drawHoverOutline(gl, program, buffer, text, 100, 100, IDENTITY_VIEWPORT, [], { 'vec-1': vector });
+
+    // result — the multi-segment vector stroke (more than the single 6-vertex quad a text underline
+    // would emit), proving the contour, not the underline, was drawn
+    const [firstCall] = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls;
+
+    expect(firstCall[0]).toBe(gl.TRIANGLES);
+    expect(firstCall[2]).toBeGreaterThan(6);
   });
 
   it('should draw a thin highlight along the segment for a hovered line node, not a bounding-box ring', () => {
@@ -205,7 +257,7 @@ describe('drawHoverOutline', () => {
     };
 
     // before
-    drawHoverOutline(gl, program, buffer, line, 100, 100, IDENTITY_VIEWPORT, []);
+    drawHoverOutline(gl, program, buffer, line, 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -233,7 +285,7 @@ describe('drawHoverOutline', () => {
     };
 
     // before
-    drawHoverOutline(gl, program, buffer, vector, 100, 100, IDENTITY_VIEWPORT, []);
+    drawHoverOutline(gl, program, buffer, vector, 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
@@ -261,7 +313,7 @@ describe('drawHoverOutline', () => {
     };
 
     // before
-    drawHoverOutline(gl, program, buffer, vector, 100, 100, IDENTITY_VIEWPORT, ['a']);
+    drawHoverOutline(gl, program, buffer, vector, 100, 100, IDENTITY_VIEWPORT, ['a'], {});
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -288,7 +340,7 @@ describe('drawHoverOutline', () => {
     };
 
     // before
-    drawHoverOutline(gl, program, buffer, vector, 100, 100, IDENTITY_VIEWPORT, ['a', 'b']);
+    drawHoverOutline(gl, program, buffer, vector, 100, 100, IDENTITY_VIEWPORT, ['a', 'b'], {});
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();

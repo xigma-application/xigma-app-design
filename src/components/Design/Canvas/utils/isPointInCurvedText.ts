@@ -42,6 +42,7 @@ export const isPointInCurvedText = (point: TPoint, node: TTextNode, tolerance: n
     ? [nearestLength - sampler.totalLength, nearestLength, nearestLength + sampler.totalLength]
     : [nearestLength];
   const isAlongContent = wrapCandidates.some((length) => length >= minBoundary - tolerance && length <= maxBoundary + tolerance);
+  const glyphReach = (MSDF_ATLAS_JSON.common.lineHeight * node.fontSize) / MSDF_ATLAS_JSON.info.size;
 
-  return isAlongContent && nearest.distance <= tolerance;
+  return isAlongContent && nearest.distance <= tolerance + glyphReach;
 };

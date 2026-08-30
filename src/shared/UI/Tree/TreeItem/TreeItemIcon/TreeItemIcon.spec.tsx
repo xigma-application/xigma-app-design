@@ -6,7 +6,7 @@ import TreeItemIcon from './TreeItemIcon';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TFrameNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TRectangleNode, TTextNode } from 'types/design/types';
 
 vi.mock('./NodeShapeIcon/NodeShapeIcon', () => ({
   default: ({ className, outline, size }: { className?: string; outline: { d: string }; size: number }): ReactElement => (
@@ -45,7 +45,41 @@ const rectangleNode: TRectangleNode = {
   y: 0,
 };
 
+const plainTextNode: TTextNode = {
+  content: 'Hi',
+  fill: '#ffffff',
+  flipX: false,
+  flipY: false,
+  fontFamily: 'Inter',
+  fontSize: 14,
+  height: 20,
+  id: 'text-1',
+  name: 'Text',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.text,
+  width: 100,
+  x: 0,
+  y: 0,
+};
+
 describe('TreeItemIcon', () => {
+  it('should render the text icon for a plain text node', () => {
+    // before
+    const { getByTestId } = render(<TreeItemIcon node={plainTextNode} size={10} />);
+
+    // result
+    expect(getByTestId('generic-icon')).toHaveAttribute('data-name', 'TextTool');
+  });
+
+  it('should render the text-on-path icon for a text node bound to a path, not the plain text icon', () => {
+    // before
+    const { getByTestId } = render(<TreeItemIcon node={{ ...plainTextNode, pathId: 'vector-1' }} size={10} />);
+
+    // result
+    expect(getByTestId('generic-icon')).toHaveAttribute('data-name', 'TextOnPathTool');
+  });
+
   it('should render the generic tool icon for a node type with no shape outline', () => {
     // before
     const { getByTestId, queryByTestId } = render(<TreeItemIcon node={frameNode} size={10} />);

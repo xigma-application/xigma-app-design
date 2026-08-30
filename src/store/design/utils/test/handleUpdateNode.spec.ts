@@ -180,6 +180,43 @@ describe('handleUpdateNode', () => {
     expect(getActivePage(state).nodes[textNode.id]).toMatchObject({ height: 200, rotation: 0, width: 0, x: 0, y: 0 });
   });
 
+  it('should drag the bound vector along with the text — every vertex shifts by the text box centre delta', () => {
+    // mock — a horizontal line vector bound to a text box moved +30 / +40
+    const vectorNode = buildVectorNode({
+      segments: { s1: seg('s1', 'a', 'b') },
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    });
+    const textNode = buildPathText({ height: 0, pathId: vectorNode.id, width: 100, x: 0, y: 0 });
+    const state = buildState({ [textNode.id]: textNode, [vectorNode.id]: vectorNode });
+
+    // before
+    handleUpdateNode(state, { changes: { x: 30, y: 40 }, id: textNode.id });
+
+    // result
+    expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).vertices).toEqual({
+      a: { id: 'a', x: 30, y: 40 },
+      b: { id: 'b', x: 130, y: 40 },
+    });
+  });
+
+  it('should mirror a text rotation onto its bound vector so the vector line turns with the glyphs', () => {
+    // mock — pure rotation: the text box centre is unchanged
+    const vectorNode = buildVectorNode({
+      segments: { s1: seg('s1', 'a', 'b') },
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    });
+    const textNode = buildPathText({ height: 0, pathId: vectorNode.id, width: 100, x: 0, y: 0 });
+    const state = buildState({ [textNode.id]: textNode, [vectorNode.id]: vectorNode });
+
+    // before
+    handleUpdateNode(state, { changes: { rotation: 37 }, id: textNode.id });
+
+    // result — rotation copied to the vector, vertices untouched (applied once downstream)
+    const synced = getActivePage(state).nodes[vectorNode.id] as TVectorNode;
+    expect(synced.rotation).toBe(37);
+    expect(synced.vertices).toEqual({ a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } });
+  });
+
   it('should leave an unbound vector node update alone, without touching unrelated text nodes', () => {
     // mock
     const vectorNode = buildVectorNode({

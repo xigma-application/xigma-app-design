@@ -28,6 +28,7 @@ export const drawCurvedCaret = (
 ): void => {
   const center: TPoint = { x: editingTextBox.x + editingTextBox.width / 2, y: editingTextBox.y + editingTextBox.height / 2 };
   const lineHeight = (MSDF_ATLAS_JSON.common.lineHeight * TEXT_FONT_SIZE) / MSDF_ATLAS_JSON.info.size;
+  const ascent = (MSDF_ATLAS_JSON.common.base * TEXT_FONT_SIZE) / MSDF_ATLAS_JSON.info.size;
   const sampler = getTextPathSampler(editingTextBox, pathNode);
   const visibleContent = getVisibleCurvedContent(
     MSDF_ATLAS_JSON,
@@ -55,7 +56,7 @@ export const drawCurvedCaret = (
     gl,
     program,
     buffer,
-    { fill: TEXT_FILL, height: lineHeight, width: caretWidth, x: caret.x - caretWidth / 2, y: caret.y - lineHeight / 2 },
+    { fill: TEXT_FILL, height: lineHeight, width: caretWidth, x: caret.x - caretWidth / 2, y: caret.y - ascent },
     canvasWidth,
     canvasHeight,
     viewport,

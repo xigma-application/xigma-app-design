@@ -57,6 +57,24 @@ describe('getCurvedSelectionEdges', () => {
     expect(twoChars[1]).toEqual(secondCharOnly[0]);
   });
 
+  it('should split each edge about the baseline — ascent above the path, descent below — not symmetrically', () => {
+    // before — ATLAS base:30 / lineHeight:40, so ascent:descent is 3:1; the baseline point lies
+    // 75% of the way from top to bottom
+    const [edge] = getCurvedSelectionEdges(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, 0, 1);
+    const baselinePoint = {
+      x: edge.top.x + 0.75 * (edge.bottom.x - edge.top.x),
+      y: edge.top.y + 0.75 * (edge.bottom.y - edge.top.y),
+    };
+
+    // result — that point sits exactly on the sampled path (boundary 0), and the edge still spans a
+    // full line height end to end
+    const sample = SAMPLER.sampleAtLength(0);
+
+    expect(baselinePoint.x).toBeCloseTo(CENTER.x + sample.x);
+    expect(baselinePoint.y).toBeCloseTo(CENTER.y + sample.y);
+    expect(Math.hypot(edge.bottom.x - edge.top.x, edge.bottom.y - edge.top.y)).toBeCloseTo(40);
+  });
+
   it('should never let the span keep growing once it nears a full turn, so text wrapping past it stops advancing instead of overlapping its own start', () => {
     // mock — enough "A"s (12 units advance each) to loop well past the ~629-unit circumference
     const longContent = 'A'.repeat(60);

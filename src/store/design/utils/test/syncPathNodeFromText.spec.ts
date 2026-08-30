@@ -1,7 +1,7 @@
 // types
 import { NodeType, PathType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../types';
-import { TPathNode, TTextNode } from 'types/design/types';
+import { TPathNode, TTextNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getActivePage } from '../getActivePage';
@@ -83,7 +83,7 @@ describe('syncPathNodeFromText', () => {
     const state = buildState({ [pathNode.id]: pathNode, [textNode.id]: textNode });
 
     // before
-    syncPathNodeFromText(state, textNode);
+    syncPathNodeFromText(state, textNode, { height: 200, rotation: 0, width: 200, x: 0, y: 0 });
 
     // result
     expect(getActivePage(state).nodes[pathNode.id]).toMatchObject({ height: 300, rotation: 45, width: 300, x: 10, y: 20 });
@@ -97,7 +97,7 @@ describe('syncPathNodeFromText', () => {
     const state = buildState({ [pathNode.id]: pathNode, [resized.id]: resized, [sibling.id]: sibling });
 
     // before
-    syncPathNodeFromText(state, resized);
+    syncPathNodeFromText(state, resized, { height: 200, rotation: 0, width: 200, x: 0, y: 0 });
 
     // result
     expect(getActivePage(state).nodes[sibling.id]).toMatchObject({ height: 300, width: 300, x: 10, y: 20 });
@@ -110,7 +110,7 @@ describe('syncPathNodeFromText', () => {
     const state = buildState({ [pathNode.id]: pathNode, [textNode.id]: textNode });
 
     // before
-    syncPathNodeFromText(state, textNode);
+    syncPathNodeFromText(state, textNode, { height: 200, rotation: 0, width: 200, x: 0, y: 0 });
 
     // result
     expect(getActivePage(state).nodes[pathNode.id]).toMatchObject({ height: 200, width: 200 });
@@ -122,9 +122,74 @@ describe('syncPathNodeFromText', () => {
     const state = buildState({ [textNode.id]: textNode });
 
     // before
-    syncPathNodeFromText(state, textNode);
+    syncPathNodeFromText(state, textNode, { height: 200, rotation: 0, width: 200, x: 0, y: 0 });
 
     // result
     expect(getActivePage(state).nodes).toEqual({ [textNode.id]: textNode });
+  });
+
+  describe('vector path node', () => {
+    const buildVectorNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
+      fillColor: null,
+      filledFaceKeys: [],
+      id: 'path-1',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
+      ...overrides,
+    });
+
+    it('should translate every vertex by the text box centre delta when the text is dragged', () => {
+      // mock — text box moves +30/+40, so its centre moves the same
+      const vectorNode = buildVectorNode();
+      const textNode = buildPathText({ height: 0, width: 100, x: 30, y: 40 });
+      const state = buildState({ [vectorNode.id]: vectorNode, [textNode.id]: textNode });
+
+      // before
+      syncPathNodeFromText(state, textNode, { height: 0, rotation: 0, width: 100, x: 0, y: 0 });
+
+      // result
+      expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).vertices).toEqual({
+        v1: { id: 'v1', x: 30, y: 40 },
+        v2: { id: 'v2', x: 130, y: 40 },
+      });
+    });
+
+    it('should mirror the text rotation onto the vector so its line turns with the glyphs', () => {
+      // mock — pure rotation: box centre is unchanged, only rotation
+      const vectorNode = buildVectorNode();
+      const textNode = buildPathText({ height: 0, rotation: 37, width: 100, x: 0, y: 0 });
+      const state = buildState({ [vectorNode.id]: vectorNode, [textNode.id]: textNode });
+
+      // before
+      syncPathNodeFromText(state, textNode, { height: 0, rotation: 0, width: 100, x: 0, y: 0 });
+
+      // result — rotation copied, vertices untouched (rotation is applied downstream, not baked here)
+      const synced = getActivePage(state).nodes[vectorNode.id] as TVectorNode;
+      expect(synced.rotation).toBe(37);
+      expect(synced.vertices).toEqual({ v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } });
+    });
+
+    it('should leave the vertices alone when neither the centre nor the rotation moved', () => {
+      // mock
+      const vectorNode = buildVectorNode();
+      const textNode = buildPathText({ height: 0, width: 100, x: 0, y: 0 });
+      const state = buildState({ [vectorNode.id]: vectorNode, [textNode.id]: textNode });
+
+      // before
+      syncPathNodeFromText(state, textNode, { height: 0, rotation: 0, width: 100, x: 0, y: 0 });
+
+      // result
+      expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).vertices).toEqual({
+        v1: { id: 'v1', x: 0, y: 0 },
+        v2: { id: 'v2', x: 100, y: 0 },
+      });
+    });
   });
 });

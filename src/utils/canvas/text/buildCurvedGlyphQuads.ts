@@ -21,7 +21,7 @@ export const buildCurvedGlyphQuads = (
   const direction = flip ? -1 : 1;
   const vertices: number[] = [];
   let cumulativeLength = startOffset * sampler.totalLength;
-  const penY = -(atlas.common.lineHeight * scale) / 2;
+  const penY = -atlas.common.base * scale;
 
   content.split('').forEach((char) => {
     const charCode = char.charCodeAt(0);

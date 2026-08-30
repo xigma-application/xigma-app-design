@@ -92,6 +92,25 @@ describe('getChainSampleData', () => {
     expect(start.x).toBeCloseTo(100);
   });
 
+  it('should sample the vector raw, not rotation-baked — its rotation is applied once downstream', () => {
+    // mock — a horizontal chain carrying a 90deg rotation (mirrored from the text it guides)
+    const node = buildNode({
+      rotation: 90,
+      segments: { s1: seg('s1', 'a', 'b') },
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    });
+    const data = getChainSampleData(node)!;
+
+    // result — the sampled geometry is the untouched node, and table[0] is still the raw (0,0),
+    // not a point rotated by 90deg
+    expect(data.rendered).toBe(node);
+
+    const start = getVectorSegmentPointAtT(data.rendered, data.rendered.segments[data.table[0].segmentId], data.table[0].t);
+
+    expect(start.x).toBeCloseTo(0);
+    expect(start.y).toBeCloseTo(0);
+  });
+
   it('should return null for a branching (ineligible) network', () => {
     // mock — b is a 3-way branch
     const node = buildNode({

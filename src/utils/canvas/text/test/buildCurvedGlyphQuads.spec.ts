@@ -64,4 +64,20 @@ describe('buildCurvedGlyphQuads', () => {
     // result
     expect(atQuarter).not.toEqual(atStart);
   });
+
+  it('should anchor the glyph on its baseline (penY = -base·scale), so a taller base lifts the whole run', () => {
+    // before — scale is 20/20 = 1, so bumping `base` by 5 must shift every glyph vertex by 5 units
+    const withBase30 = buildCurvedGlyphQuads(ATLAS, 'A', 20, CENTER, 0, false, SAMPLER);
+    const withBase35 = buildCurvedGlyphQuads({ ...ATLAS, common: { ...ATLAS.common, base: 35 } }, 'A', 20, CENTER, 0, false, SAMPLER);
+
+    // result — the displacement is purely the baseline shift, same magnitude for every vertex
+    expect(withBase35).not.toEqual(withBase30);
+
+    for (let i = 0; i < withBase30.length; i += 4) {
+      const dx = withBase35[i] - withBase30[i];
+      const dy = withBase35[i + 1] - withBase30[i + 1];
+
+      expect(Math.hypot(dx, dy)).toBeCloseTo(5);
+    }
+  });
 });

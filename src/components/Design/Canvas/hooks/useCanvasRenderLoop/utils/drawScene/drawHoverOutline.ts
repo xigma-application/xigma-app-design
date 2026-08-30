@@ -25,6 +25,7 @@ export const drawHoverOutline = (
   canvasHeight: number,
   viewport: TViewport,
   vectorEditingNodeIds: string[],
+  nodesById: Record<string, TSceneNode>,
 ): void => {
   if (hoveredNode && !vectorEditingNodeIds.includes(hoveredNode.id)) {
     switch (hoveredNode.type) {
@@ -93,9 +94,26 @@ export const drawHoverOutline = (
           viewport,
         );
         break;
-      case NodeType.text:
-        drawTextHoverUnderline(gl, program, buffer, hoveredNode, canvasWidth, canvasHeight, viewport);
+      case NodeType.text: {
+        const textPathNode = hoveredNode.pathId ? nodesById[hoveredNode.pathId] : undefined;
+
+        if (textPathNode?.type === NodeType.vector) {
+          drawVectorStroke(
+            gl,
+            program,
+            buffer,
+            flattenVectorSegments(getRenderedVectorNode(textPathNode)),
+            DRAFT_FRAME_STROKE,
+            HOVER_OUTLINE_WIDTH / viewport.zoom,
+            canvasWidth,
+            canvasHeight,
+            viewport,
+          );
+        } else {
+          drawTextHoverUnderline(gl, program, buffer, hoveredNode, canvasWidth, canvasHeight, viewport);
+        }
         break;
+      }
       case NodeType.vector:
         drawVectorStroke(
           gl,
