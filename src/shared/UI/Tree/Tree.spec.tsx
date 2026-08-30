@@ -330,4 +330,45 @@ describe('Tree', () => {
     // result
     expect(screen.queryByText('Row 0-0')).not.toBeInTheDocument();
   });
+
+  it('should run in controlled mode when expandedIds and onExpandedIdsChange are both provided', () => {
+    // mock
+    const onExpandedIdsChange = vi.fn();
+    const roots = [buildItem('0', [buildItem('0-0')])];
+    const toggleRenderRow = (row: TTreeRow<TItem>, onToggleExpand: () => void): ReactNode => (
+      <span onClick={(): void => onToggleExpand()}>Row {row.item.id}</span>
+    );
+
+    // before — the controlled set says '0' is expanded, so its child renders
+    const { rerender } = render(
+      <Tree
+        expandedIds={new Set(['0'])}
+        getChildren={getChildren}
+        onExpandedIdsChange={onExpandedIdsChange}
+        renderRow={toggleRenderRow}
+        roots={roots}
+        rowHeight={32}
+      />,
+    );
+    expect(screen.getByText('Row 0-0')).toBeInTheDocument();
+
+    // action — toggling routes the next set through the callback, not internal state
+    fireEvent.click(screen.getByText('Row 0'));
+
+    // result
+    expect(onExpandedIdsChange).toHaveBeenCalledWith(new Set());
+
+    // the tree only collapses once the controlled prop actually changes
+    rerender(
+      <Tree
+        expandedIds={new Set()}
+        getChildren={getChildren}
+        onExpandedIdsChange={onExpandedIdsChange}
+        renderRow={toggleRenderRow}
+        roots={roots}
+        rowHeight={32}
+      />,
+    );
+    expect(screen.queryByText('Row 0-0')).not.toBeInTheDocument();
+  });
 });

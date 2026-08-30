@@ -20,7 +20,6 @@ test('hiding a layer from the panel makes it invisible and un-clickable on canva
   await designPage.drawFrame(700, 100, 740, 140);
   await designPage.click(1500, 600); // deselect
 
-  await page.locator('[class*="Layers__header"]').click(); // expand the Layers panel
   await page.locator('[data-tree-item-action="hidden"]').click(); // hide the frame
 
   await designPage.click(720, 120); // click where the (now hidden) frame used to be
@@ -44,7 +43,6 @@ test('locking a layer from the panel keeps it visible but un-clickable on canvas
   const safeArea = await designPage.canvasSafeArea();
   const deselectedVisible = await page.screenshot({ clip: safeArea });
 
-  await page.locator('[class*="Layers__header"]').click(); // expand the Layers panel
   await page.locator('[data-tree-item-action="locked"]').click(); // lock the frame
 
   await designPage.click(720, 120); // click on the (still visible, now locked) frame
@@ -53,4 +51,47 @@ test('locking a layer from the panel keeps it visible but un-clickable on canvas
 
   // the frame still renders, but the click must not select it — no selection outline appears
   expect(afterLockClick.equals(deselectedVisible)).toBe(true);
+});
+
+test('the collapse-all button and Alt+L both fold every expanded group in the Layers panel', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-layers-panel-collapse-all');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 100, 740, 140); // A
+  await designPage.drawRectangle(760, 100, 800, 140); // B — adjacent, auto-selected
+  await designPage.click(720, 120, { shift: true }); // add A back, selection = [B, A]
+  await page.keyboard.press('Control+g'); // group-1 = [A, B]
+  await page.keyboard.press('Control+g'); // group-2 = [group-1] — nesting is g2 > g1 > [A, B]
+  await designPage.click(1500, 600); // deselect
+
+  const layersPanel = page.locator('[class*="Layers_"]').first();
+  const layersTree = page.locator('[class*="LayersTree"]').first();
+  const rows = layersTree.locator('[class*="Tree__row_"]');
+  const collapseAllButton = page.getByRole('button', { exact: true, name: 'Collapse layers' });
+
+  // nothing expanded yet — no collapse-all button
+  await expect(rows).toHaveCount(1);
+  await expect(collapseAllButton).toHaveCount(0);
+
+  // expand both nested groups
+  await rows.nth(0).locator('[class*="TreeItem__toggleButton"]').click();
+  await rows.nth(1).locator('[class*="TreeItem__toggleButton"]').click();
+  await expect(rows).toHaveCount(4); // g2, g1, A, B
+
+  // the collapse-all button appears; clicking it folds everything back
+  await expect(collapseAllButton).toBeVisible();
+  await collapseAllButton.click();
+  await expect(rows).toHaveCount(1);
+  await expect(collapseAllButton).toHaveCount(0);
+
+  // re-expand, then collapse everything again with Alt+L while hovering the panel
+  await rows.nth(0).locator('[class*="TreeItem__toggleButton"]').click();
+  await rows.nth(1).locator('[class*="TreeItem__toggleButton"]').click();
+  await expect(rows).toHaveCount(4);
+
+  await layersPanel.hover();
+  await page.keyboard.press('Alt+l');
+  await expect(rows).toHaveCount(1);
 });

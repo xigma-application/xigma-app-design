@@ -7,6 +7,7 @@ import { translationNameSpace as parentNameSpace } from '../constants';
 export const translationNameSpace = `${parentNameSpace}.layers`;
 
 export const LAYERS_TITLE_KEY = `${translationNameSpace}.title`;
+export const LAYERS_COLLAPSE_ALL_ARIA_LABEL_KEY = `${translationNameSpace}.collapseAllAriaLabel`;
 export const NODE_MENU_ADD_AUTO_LAYOUT_KEY = `${translationNameSpace}.menu.addAutoLayout`;
 export const NODE_MENU_ADD_MOTION_KEY = `${translationNameSpace}.menu.addMotion`;
 export const NODE_MENU_BRING_TO_FRONT_KEY = `${translationNameSpace}.menu.bringToFront`;

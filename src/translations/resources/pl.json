@@ -40,6 +40,7 @@
   "design.leftPanel.file.defaultName": "Bez nazwy",
   "design.leftPanel.file.drafts": "Szkice",
   "design.leftPanel.file.expandUiLabel": "Rozwiń UI",
+  "design.leftPanel.file.layers.collapseAllAriaLabel": "Zwiń warstwy",
   "design.leftPanel.file.layers.collapseAriaLabel": "Zwiń warstwę",
   "design.leftPanel.file.layers.expandAriaLabel": "Rozwiń warstwę",
   "design.leftPanel.file.layers.hideAriaLabel": "Ukryj warstwę",

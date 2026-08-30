@@ -20,3 +20,8 @@ export type TToggleExpandOptions = {
 };
 
 export type TToggleExpand = (options?: TToggleExpandOptions) => void;
+
+export type TExpandedIdsControl = {
+  expandedIds: Set<string>;
+  onExpandedIdsChange: (next: Set<string>) => void;
+};
