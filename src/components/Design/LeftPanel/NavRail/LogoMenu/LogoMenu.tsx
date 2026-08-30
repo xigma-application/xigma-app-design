@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import XigmaLogoShape from '@xigma/assets/xigma-logo-shape.svg?react';
 
 // components
+import ArrangeMenu from './ArrangeMenu/ArrangeMenu';
 import EditMenu from './EditMenu/EditMenu';
 import FileMenu from './FileMenu/FileMenu';
 import ObjectMenu from './ObjectMenu/ObjectMenu';
@@ -78,7 +79,9 @@ const LogoMenu: FC = () => {
       <MenuSub label={t(LOGO_MENU_TEXT_KEY)}>
         <TextMenu />
       </MenuSub>
-      <MenuSub label={t(LOGO_MENU_ARRANGE_KEY)} />
+      <MenuSub label={t(LOGO_MENU_ARRANGE_KEY)}>
+        <ArrangeMenu />
+      </MenuSub>
       <MenuSub label={t(LOGO_MENU_VECTOR_KEY)} marginBottom />
       <MenuSeparator />
       <MenuItem disabled label={t(LOGO_MENU_PLUGINS_KEY)} marginTop withCheck={false} />

@@ -7,6 +7,12 @@ import { ToolName } from 'types/design/enums';
 
 export const KEYBOARD_SHORTCUTS: TKeyboardShortcuts = {
   addAutoLayout: [SHIFT, 'A'],
+  alignBottom: [ALT, 'S'],
+  alignHorizontalCenters: [ALT, 'H'],
+  alignLeft: [ALT, 'A'],
+  alignRight: [ALT, 'D'],
+  alignTop: [ALT, 'W'],
+  alignVerticalCenters: [ALT, 'V'],
   annotations: [SHIFT, 'Y'],
   [ToolName.arrow]: [SHIFT, 'L'],
   bold: [CONTROL, 'B'],
