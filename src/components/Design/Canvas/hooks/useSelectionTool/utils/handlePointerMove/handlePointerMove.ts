@@ -34,6 +34,7 @@ import { continueVectorSegmentBendDrag } from './continueVectorSegmentBendDrag/c
 import { continueVectorShapeBuilderDrag } from './continueVectorShapeBuilderDrag';
 import { continueVectorVertexDrag } from './continueVectorVertexDrag/continueVectorVertexDrag';
 import { continueVectorWidthPointDrag } from './continueVectorWidthPointDrag';
+import { resolveShapeContactGuides } from './resolveShapeContactGuides';
 import { resolveVectorCornerHandleDrag } from './resolveVectorCornerHandleDrag';
 import { resolveVectorIdleHover } from './resolveVectorIdleHover';
 import { resolveVectorShapeBuilderHover } from './resolveVectorShapeBuilderHover';
@@ -79,4 +80,5 @@ export const handlePointerMove = (
   resolveVectorIdleHover(canvas, event, canvasRefs, setClassName);
   resolveVectorShapeBuilderHover(canvas, event, canvasRefs, setClassName);
   resolveVectorWidthPointHover(canvas, event, canvasRefs, setClassName);
+  resolveShapeContactGuides(event, canvasRefs, selectionRefs);
 };

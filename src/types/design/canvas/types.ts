@@ -6,6 +6,7 @@ import { TDraftEntity, TVectorTangent, TVectorWidthPoint } from 'types/design/ty
 import { TColorSampleRequest } from 'utils/canvas/colorPixelSampler/types';
 import { TFlattenedVectorSegment } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
 import { TPenDragOrigin } from 'components/Design/Canvas/hooks/useDrawPenTool/types';
+import { TShapeContactGuide } from 'components/Design/Canvas/utils/getShapeContactGuides';
 import { TVectorAlignmentGuide } from 'components/Design/Canvas/utils/applyVectorPointSnapping';
 import {
   TRotateDragState,
@@ -229,6 +230,7 @@ export type TVectorSnapshotsRefs = {
 };
 
 export type TTransformRefs = {
+  contactGuidesRef: RefObject<TShapeContactGuide[] | null>;
   draggedNodeIdsRef: RefObject<Set<string> | null>;
   resizedNodeIdsRef: RefObject<Set<string> | null>;
   rotateDragRef: RefObject<TRotateDragState | null>;

@@ -1,25 +1,17 @@
-import { RefObject } from 'react';
-
 // types
-import { TVectorMultiSelectBox } from 'types/design/canvas/types';
-import { TVectorMultiSelectResizeDragState } from 'types/design/selectionTool/types';
+import { TCanvasRefs } from 'types/design/canvas/types';
 
-export const disarmVectorMultiSelectResizeDrag = (
-  canvas: HTMLCanvasElement,
-  event: PointerEvent,
-  vectorMultiSelectResizeDragRef: RefObject<TVectorMultiSelectResizeDragState | null>,
-  vectorMultiSelectBoxRef: RefObject<TVectorMultiSelectBox | null>,
-): void => {
-  const dragState = vectorMultiSelectResizeDragRef.current;
+export const disarmVectorMultiSelectResizeDrag = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs): void => {
+  const dragState = canvasRefs.vectorMultiSelect.vectorMultiSelectResizeDragRef.current;
 
   if (dragState) {
-    const box = vectorMultiSelectBoxRef.current;
+    const box = canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef.current;
 
     if (box) {
-      vectorMultiSelectBoxRef.current = { ...box, bounds: dragState.liveBounds };
+      canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef.current = { ...box, bounds: dragState.liveBounds };
     }
 
-    vectorMultiSelectResizeDragRef.current = null;
+    canvasRefs.vectorMultiSelect.vectorMultiSelectResizeDragRef.current = null;
     canvas.releasePointerCapture(event.pointerId);
     canvas.style.cursor = '';
   }

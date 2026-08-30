@@ -19,6 +19,7 @@ import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 // utils
 import { adjustEraserDiameter } from './utils/adjustEraserDiameter';
 import { cancelVectorSegmentBendDrag } from './utils/cancelVectorSegmentBendDrag';
+import { handleAltKeyChange } from './utils/handleAltKeyChange/handleAltKeyChange';
 import { handlePointerDown } from './utils/handlePointerDown/handlePointerDown';
 import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
@@ -52,6 +53,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
     canvasRefs.hover.hoveredVectorVertexIdRef.current = null;
     canvasRefs.hover.hoveredVectorSegmentIdRef.current = null;
     canvasRefs.vectorErase.eraseBrushCenterRef.current = null;
+    canvasRefs.transform.contactGuidesRef.current = null;
   };
 
   const onKeyDown = (event: KeyboardEvent): void => {
@@ -74,16 +76,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
     canvasRefs: TCanvasRefs,
     selectRefs: TSelectionToolRefs,
   ): void => {
-    if (event.key === 'Alt' && activeTool === ToolName.shapeBuilder && lastPointerClientPositionRef.current) {
-      const { x, y } = lastPointerClientPositionRef.current;
-
-      onPointerMove(
-        canvas,
-        new PointerEvent('pointermove', { altKey: event.altKey, clientX: x, clientY: y, pointerId: -1 }),
-        canvasRefs,
-        selectRefs,
-      );
-    }
+    handleAltKeyChange(canvas, event, canvasRefs, selectRefs, activeTool, lastPointerClientPositionRef.current, onPointerMove);
   };
 
   useEffect(() => {
@@ -156,6 +149,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         refs.vectorEdit.selectedVectorWidthHandlesRef.current = [];
         refs.vectorEdit.lastVectorWidthHandleSideRef.current = null;
         selectionRefs.vectorCutDragRef.current = null;
+        refs.transform.contactGuidesRef.current = null;
         lastPointerClientPositionRef.current = null;
       };
     }

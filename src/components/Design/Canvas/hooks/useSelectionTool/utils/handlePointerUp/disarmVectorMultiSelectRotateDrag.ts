@@ -1,25 +1,17 @@
-import { RefObject } from 'react';
-
 // types
-import { TVectorMultiSelectBox } from 'types/design/canvas/types';
-import { TVectorMultiSelectRotateDragState } from 'types/design/selectionTool/types';
+import { TCanvasRefs } from 'types/design/canvas/types';
 
-export const disarmVectorMultiSelectRotateDrag = (
-  canvas: HTMLCanvasElement,
-  event: PointerEvent,
-  vectorMultiSelectRotateDragRef: RefObject<TVectorMultiSelectRotateDragState | null>,
-  vectorMultiSelectBoxRef: RefObject<TVectorMultiSelectBox | null>,
-): void => {
-  const dragState = vectorMultiSelectRotateDragRef.current;
+export const disarmVectorMultiSelectRotateDrag = (canvas: HTMLCanvasElement, event: PointerEvent, canvasRefs: TCanvasRefs): void => {
+  const dragState = canvasRefs.vectorMultiSelect.vectorMultiSelectRotateDragRef.current;
 
   if (dragState) {
-    const box = vectorMultiSelectBoxRef.current;
+    const box = canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef.current;
 
     if (box) {
-      vectorMultiSelectBoxRef.current = { ...box, rotation: dragState.rotation + dragState.deltaDegrees };
+      canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef.current = { ...box, rotation: dragState.rotation + dragState.deltaDegrees };
     }
 
-    vectorMultiSelectRotateDragRef.current = null;
+    canvasRefs.vectorMultiSelect.vectorMultiSelectRotateDragRef.current = null;
     canvas.releasePointerCapture(event.pointerId);
     canvas.style.cursor = '';
   }

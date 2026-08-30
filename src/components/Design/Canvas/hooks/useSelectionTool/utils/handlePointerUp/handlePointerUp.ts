@@ -19,6 +19,7 @@ import { disarmPolygonCornerRadiusDrag } from './disarmPolygonCornerRadiusDrag';
 import { disarmPolygonVertexCountDrag } from './disarmPolygonVertexCountDrag';
 import { disarmResizeDrag } from './disarmResizeDrag';
 import { disarmRotateDrag } from './disarmRotateDrag';
+import { disarmShapeContactGuides } from './disarmShapeContactGuides';
 import { disarmStarCornerRadiusDrag } from './disarmStarCornerRadiusDrag';
 import { disarmStarRatioDrag } from './disarmStarRatioDrag';
 import { disarmStarVertexCountDrag } from './disarmStarVertexCountDrag';
@@ -66,23 +67,14 @@ export const handlePointerUp = (
   disarmVectorPaintDrag(canvas, event, canvasRefs, setClassName);
   disarmVectorShapeBuilderDrag(canvas, event, dispatch, canvasRefs, setClassName);
   disarmVectorMultiDrag(canvas, event, dispatch, canvasRefs, setClassName);
-  disarmVectorMultiSelectResizeDrag(
-    canvas,
-    event,
-    canvasRefs.vectorMultiSelect.vectorMultiSelectResizeDragRef,
-    canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef,
-  );
-  disarmVectorMultiSelectRotateDrag(
-    canvas,
-    event,
-    canvasRefs.vectorMultiSelect.vectorMultiSelectRotateDragRef,
-    canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef,
-  );
+  disarmVectorMultiSelectResizeDrag(canvas, event, canvasRefs);
+  disarmVectorMultiSelectRotateDrag(canvas, event, canvasRefs);
   disarmVectorSegmentBendDrag(canvas, event, dispatch, canvasRefs, selectionRefs.vectorSegmentBendDragRef, setClassName);
   disarmVectorCutDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   disarmVectorEraseDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   disarmVectorMarqueeDrag(canvas, event, canvasRefs, selectionRefs.vectorMarqueeStartRef, selectionRefs.vectorMarqueeModeRef);
   disarmVectorWidthPointDrag(canvas, event, dispatch, canvasRefs, setClassName);
   resolveVectorCutMarkConsumption(canvasRefs);
+  disarmShapeContactGuides(canvasRefs);
   dispatch(endHistoryGesture());
 };
