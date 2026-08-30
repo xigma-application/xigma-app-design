@@ -13,6 +13,7 @@ describe('NodeShapeIcon', () => {
     expect(path).toHaveAttribute('d', 'M0 0 L10 10 Z');
     expect(path).toHaveAttribute('fill', 'none');
     expect(path).toHaveAttribute('stroke', 'currentColor');
+    expect(path).toHaveAttribute('data-svg-property', 'stroke');
     expect(path).toHaveAttribute('stroke-width');
   });
 

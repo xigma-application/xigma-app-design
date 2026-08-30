@@ -38,7 +38,7 @@ const TreeItemActions: FC<TTreeItemActionsProps> = ({ isHidden, isLocked, onStop
         onClick={onToggleHidden}
         type="button"
       >
-        <Icon color="neutral2" name={isHidden ? 'EyesClosed' : 'EyesOpened'} size={16} />
+        <Icon color="neutral1" name={isHidden ? 'EyesClosed' : 'EyesOpened'} size={16} />
       </button>
       <button
         aria-label={lockedLabel}
@@ -48,7 +48,7 @@ const TreeItemActions: FC<TTreeItemActionsProps> = ({ isHidden, isLocked, onStop
         onClick={onToggleLocked}
         type="button"
       >
-        <Icon color="neutral2" name={isLocked ? 'Lock' : 'Unlock'} size={16} />
+        <Icon color="neutral1" name={isLocked ? 'Lock' : 'Unlock'} size={16} />
       </button>
     </div>
   );

@@ -23,6 +23,7 @@ const NodeShapeIcon: FC<TNodeShapeIconProps> = ({ className = '', outline, size 
   >
     <path
       d={outline.d}
+      data-svg-property="stroke"
       fill="none"
       stroke="currentColor"
       strokeLinecap="round"
