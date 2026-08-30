@@ -10,6 +10,7 @@ import EditMenu from './EditMenu/EditMenu';
 import FileMenu from './FileMenu/FileMenu';
 import ObjectMenu from './ObjectMenu/ObjectMenu';
 import PluginsMenu from './PluginsMenu/PluginsMenu';
+import PreferencesMenu from './PreferencesMenu/PreferencesMenu';
 import TextMenu from './TextMenu/TextMenu';
 import VectorMenu from './VectorMenu/VectorMenu';
 import ViewMenu from './ViewMenu/ViewMenu';
@@ -95,7 +96,9 @@ const LogoMenu: FC = () => {
       <MenuSub label={t(LOGO_MENU_WIDGETS_KEY)}>
         <WidgetsMenu />
       </MenuSub>
-      <MenuItem disabled label={t(LOGO_MENU_PREFERENCES_KEY)} withCheck={false} />
+      <MenuSub label={t(LOGO_MENU_PREFERENCES_KEY)}>
+        <PreferencesMenu />
+      </MenuSub>
       <MenuItem disabled label={t(LOGO_MENU_LIBRARIES_KEY)} withCheck={false} marginBottom />
       <MenuSeparator />
       <MenuItem disabled label={t(LOGO_MENU_OPEN_DESKTOP_APP_KEY)} marginTop withCheck={false} />

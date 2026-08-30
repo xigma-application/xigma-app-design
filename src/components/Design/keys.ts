@@ -112,6 +112,7 @@ export const KEYBOARD_SHORTCUTS: TKeyboardShortcuts = {
   showOutlines: [SHIFT, CONTROL, 'O'],
   [ToolName.slice]: ['S'],
   smoothJoinSelection: [SHIFT, CONTROL, 'J'],
+  snapToPixelGrid: [SHIFT, CONTROL, "'"],
   [ToolName.star]: [],
   strikethrough: [SHIFT, CONTROL, 'X'],
   swapFillAndStroke: [SHIFT, 'X'],

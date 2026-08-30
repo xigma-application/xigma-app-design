@@ -1,0 +1,85 @@
+import { FC } from 'react';
+import { useTranslation } from 'react-i18next';
+
+// components
+import { MenuCompound } from 'shared';
+
+// others
+import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
+import {
+  PREFERENCES_MENU_ACCESSIBILITY_SETTINGS_KEY,
+  PREFERENCES_MENU_COLOR_PROFILE_KEY,
+  PREFERENCES_MENU_CTRL_CLICK_OPENS_RIGHT_CLICK_MENUS_KEY,
+  PREFERENCES_MENU_FLIP_OBJECTS_WHILE_RESIZING_KEY,
+  PREFERENCES_MENU_HIDE_CANVAS_UI_DURING_CHANGES_KEY,
+  PREFERENCES_MENU_HIGHLIGHT_LAYERS_ON_HOVER_KEY,
+  PREFERENCES_MENU_INVERT_ZOOM_DIRECTION_KEY,
+  PREFERENCES_MENU_KEEP_TOOL_SELECTED_AFTER_USE_KEY,
+  PREFERENCES_MENU_KEYBOARD_LAYOUT_KEY,
+  PREFERENCES_MENU_KEYBOARD_ZOOMS_INTO_SELECTION_KEY,
+  PREFERENCES_MENU_NUDGE_AMOUNT_KEY,
+  PREFERENCES_MENU_OPEN_LINKS_IN_DESKTOP_APP_KEY,
+  PREFERENCES_MENU_PERMISSIONS_AND_HELPERS_KEY,
+  PREFERENCES_MENU_PLAY_AUDIO_NOTIFICATIONS_KEY,
+  PREFERENCES_MENU_RENAME_DUPLICATED_LAYERS_KEY,
+  PREFERENCES_MENU_RIGHT_CLICK_AND_DRAG_TO_PAN_KEY,
+  PREFERENCES_MENU_ROTATE_LAYERS_SHORTCUT_KEY,
+  PREFERENCES_MENU_SHOW_AGENTS_ON_CANVAS_KEY,
+  PREFERENCES_MENU_SHOW_DIMENSIONS_ON_OBJECTS_KEY,
+  PREFERENCES_MENU_SNAP_TO_GEOMETRY_KEY,
+  PREFERENCES_MENU_SNAP_TO_OBJECTS_KEY,
+  PREFERENCES_MENU_SNAP_TO_PIXEL_GRID_KEY,
+  PREFERENCES_MENU_THEME_KEY,
+  PREFERENCES_MENU_USE_NUMBER_KEYS_FOR_OPACITY_KEY,
+  PREFERENCES_MENU_USE_OLD_SHORTCUTS_FOR_OUTLINES_KEY,
+  PREFERENCES_MENU_USE_SCROLL_WHEEL_ZOOM_KEY,
+  PREFERENCES_MENU_USE_SMART_QUOTES_SYMBOLS_KEY,
+} from './constants';
+
+const { MenuItem, MenuSeparator, MenuSub } = MenuCompound;
+
+const PreferencesMenu: FC = () => {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <MenuItem disabled label={t(PREFERENCES_MENU_SNAP_TO_GEOMETRY_KEY)} selected />
+      <MenuItem disabled label={t(PREFERENCES_MENU_SNAP_TO_OBJECTS_KEY)} selected />
+      <MenuItem
+        disabled
+        label={t(PREFERENCES_MENU_SNAP_TO_PIXEL_GRID_KEY)}
+        selected
+        shortcut={KEYBOARD_SHORTCUTS.snapToPixelGrid.join('')}
+      />
+      <MenuSeparator />
+      <MenuItem disabled label={t(PREFERENCES_MENU_KEEP_TOOL_SELECTED_AFTER_USE_KEY)} />
+      <MenuItem disabled label={t(PREFERENCES_MENU_HIGHLIGHT_LAYERS_ON_HOVER_KEY)} selected />
+      <MenuItem disabled label={t(PREFERENCES_MENU_RENAME_DUPLICATED_LAYERS_KEY)} selected />
+      <MenuItem disabled label={t(PREFERENCES_MENU_SHOW_DIMENSIONS_ON_OBJECTS_KEY)} selected />
+      <MenuItem disabled label={t(PREFERENCES_MENU_HIDE_CANVAS_UI_DURING_CHANGES_KEY)} selected />
+      <MenuItem disabled label={t(PREFERENCES_MENU_USE_SMART_QUOTES_SYMBOLS_KEY)} selected />
+      <MenuItem disabled label={t(PREFERENCES_MENU_FLIP_OBJECTS_WHILE_RESIZING_KEY)} selected />
+      <MenuItem disabled label={t(PREFERENCES_MENU_KEYBOARD_ZOOMS_INTO_SELECTION_KEY)} />
+      <MenuItem disabled label={t(PREFERENCES_MENU_INVERT_ZOOM_DIRECTION_KEY)} />
+      <MenuItem disabled label={t(PREFERENCES_MENU_CTRL_CLICK_OPENS_RIGHT_CLICK_MENUS_KEY)} />
+      <MenuItem disabled label={t(PREFERENCES_MENU_USE_NUMBER_KEYS_FOR_OPACITY_KEY)} selected />
+      <MenuItem disabled label={t(PREFERENCES_MENU_USE_OLD_SHORTCUTS_FOR_OUTLINES_KEY)} />
+      <MenuItem disabled label={t(PREFERENCES_MENU_ROTATE_LAYERS_SHORTCUT_KEY)} />
+      <MenuItem disabled label={t(PREFERENCES_MENU_PLAY_AUDIO_NOTIFICATIONS_KEY)} selected />
+      <MenuItem disabled label={t(PREFERENCES_MENU_OPEN_LINKS_IN_DESKTOP_APP_KEY)} />
+      <MenuItem disabled label={t(PREFERENCES_MENU_SHOW_AGENTS_ON_CANVAS_KEY)} selected />
+      <MenuSeparator />
+      <MenuItem disabled label={t(PREFERENCES_MENU_USE_SCROLL_WHEEL_ZOOM_KEY)} />
+      <MenuItem disabled label={t(PREFERENCES_MENU_RIGHT_CLICK_AND_DRAG_TO_PAN_KEY)} />
+      <MenuSeparator />
+      <MenuSub label={t(PREFERENCES_MENU_THEME_KEY)} />
+      <MenuItem disabled label={t(PREFERENCES_MENU_COLOR_PROFILE_KEY)} withCheck={false} />
+      <MenuItem disabled label={t(PREFERENCES_MENU_KEYBOARD_LAYOUT_KEY)} withCheck={false} />
+      <MenuItem disabled label={t(PREFERENCES_MENU_ACCESSIBILITY_SETTINGS_KEY)} withCheck={false} />
+      <MenuItem disabled label={t(PREFERENCES_MENU_PERMISSIONS_AND_HELPERS_KEY)} withCheck={false} />
+      <MenuItem disabled label={t(PREFERENCES_MENU_NUDGE_AMOUNT_KEY)} withCheck={false} />
+    </>
+  );
+};
+
+export default PreferencesMenu;
