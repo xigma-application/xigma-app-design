@@ -166,11 +166,11 @@ describe('resolveShapeContactGuides', () => {
     expect(refs.transform.contactGuidesRef.current).toBeNull();
   });
 
-  it('should skip non-shape neighbours such as frames', () => {
+  it('should skip non-shape neighbours such as groups', () => {
     // mock
     const activeId = addRect(0, 0);
 
-    addRect(100, 20, 80, 60, { type: NodeType.frame });
+    addRect(100, 20, 80, 60, { type: NodeType.group });
 
     const refs = canvasRefs();
 

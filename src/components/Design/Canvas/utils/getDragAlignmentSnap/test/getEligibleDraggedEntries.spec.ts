@@ -39,9 +39,9 @@ describe('getEligibleDraggedEntries', () => {
     expect(entries).toEqual([]);
   });
 
-  it('should exclude a node whose type is not snap-eligible, such as a frame', () => {
+  it('should exclude a node whose type is not snap-eligible, such as a group', () => {
     // mock
-    const nodes = { a: { ...rect('a'), type: NodeType.frame } as TSceneNode };
+    const nodes = { a: { ...rect('a'), type: NodeType.group } as TSceneNode };
 
     // action
     const entries = getEligibleDraggedEntries(nodes, { a: { x: 0, y: 0 } }, ['a']);

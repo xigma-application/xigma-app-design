@@ -91,9 +91,9 @@ describe('getDragAlignmentSnap', () => {
     expect(result.guide).toBeNull();
   });
 
-  it('should ignore a candidate node that is not snap-eligible, such as a frame', () => {
+  it('should ignore a candidate node that is not snap-eligible, such as a group', () => {
     // mock
-    const nodes = { a: rect('a', 0, 0), b: { ...rect('b', 200, 0), type: NodeType.frame } as TSceneNode };
+    const nodes = { a: rect('a', 0, 0), b: { ...rect('b', 200, 0), type: NodeType.group } as TSceneNode };
 
     // action
     const result = getDragAlignmentSnap(nodes, { a: { x: 0, y: 0 } }, { x: 97, y: 0 }, 5);

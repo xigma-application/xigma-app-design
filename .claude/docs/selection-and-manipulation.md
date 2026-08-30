@@ -1421,9 +1421,11 @@ Same seam, two lengths, so you see the overlap between the two footprints.
   two lines per contacting pair (each shape's own edge) — the switch, not four independent `if`s.
   Overlap ≠ contact: if the shapes actually intersect, no edge is flush, nothing draws.
 - **Eligibility** (`isContactGuideEligibleNode`): `rectangle · ellipse · polygon · star · text ·
-  media` only, not hidden, rotation a multiple of 90°. Excludes `group · frame · section · line ·
-  vector` — "faktycznie figury", and the vector network has its own alignment guide (§21 /
-  [[vector-network]]).
+  media · frame · section` — any node with a fixed x/y/width/height footprint — not hidden, rotation
+  a multiple of 90°. Excludes only `group` (no footprint of its own, just a bounds computed from
+  children) and `line · vector` — the vector network has its own alignment guide (§21 /
+  [[vector-network]]). This same predicate gates both the contact guides above and the shape
+  alignment-snap (§24), so frame/section got both for free once added here.
 - **Trigger** (`resolveShapeContactGuides.ts`, last resolver in the selection-tool `handlePointerMove`
   chain). The "active" shape is: the single node in `resizeDragRef.nodeOrigins` → the single node in a
   moved `dragStateRef` → on `event.altKey`, the single selected node → otherwise none (ref cleared).

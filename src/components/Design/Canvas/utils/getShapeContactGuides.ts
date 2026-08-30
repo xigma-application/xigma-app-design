@@ -20,9 +20,11 @@ export type TContactGuideCandidate = {
 
 const CONTACT_GUIDE_NODE_TYPES: ReadonlySet<NodeType> = new Set([
   NodeType.ellipse,
+  NodeType.frame,
   NodeType.media,
   NodeType.polygon,
   NodeType.rectangle,
+  NodeType.section,
   NodeType.star,
   NodeType.text,
 ]);

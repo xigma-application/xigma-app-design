@@ -134,10 +134,13 @@ describe('isContactGuideEligibleNode', () => {
     expect(isContactGuideEligibleNode(rect({ hidden: true }))).toBe(false);
   });
 
-  it('should reject container node types like frame and group', () => {
-    expect(isContactGuideEligibleNode(rect({ type: NodeType.frame }))).toBe(false);
+  it('should reject group, the one container node type with no fixed footprint', () => {
     expect(isContactGuideEligibleNode(rect({ type: NodeType.group }))).toBe(false);
-    expect(isContactGuideEligibleNode(rect({ type: NodeType.section }))).toBe(false);
+  });
+
+  it('should accept frame and section, same as any other shape', () => {
+    expect(isContactGuideEligibleNode(rect({ type: NodeType.frame }))).toBe(true);
+    expect(isContactGuideEligibleNode(rect({ type: NodeType.section }))).toBe(true);
   });
 
   it('should reject a node without a rotation, such as a line', () => {
