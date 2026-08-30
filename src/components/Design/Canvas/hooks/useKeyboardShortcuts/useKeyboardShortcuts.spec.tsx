@@ -609,6 +609,36 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
     expect(selectSelectedIds(realStore.getState())).toEqual([idA, idB]);
   });
 
+  it('should bring the selection to the front on "]" and send it to the back on "["', () => {
+    // mock — idA drawn before idB, so idA starts behind it
+    const idA = addFrameNode();
+    const idB = addFrameNode(40, 40);
+    const orderOf = (id: string): number => selectActivePage(realStore.getState()).rootOrder.indexOf(id);
+
+    expect(orderOf(idA)).toBeLessThan(orderOf(idB));
+
+    realStore.dispatch(setSelection([idA]));
+
+    // before
+    renderHook(() => useKeyboardShortcuts(createCanvasRefs()), {
+      wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
+    });
+
+    // action — bring idA to front
+    fireEvent.keyDown(window, { code: 'BracketRight' });
+
+    // result — idA is now the very last (front-most) entry, ahead of idB
+    expect(orderOf(idA)).toBe(selectActivePage(realStore.getState()).rootOrder.length - 1);
+    expect(orderOf(idA)).toBeGreaterThan(orderOf(idB));
+
+    // action — send idA back again
+    fireEvent.keyDown(window, { code: 'BracketLeft' });
+
+    // result — idA is now the very first (back-most) entry, behind idB
+    expect(orderOf(idA)).toBe(0);
+    expect(orderOf(idA)).toBeLessThan(orderOf(idB));
+  });
+
   it('should copy the selected node on "Cmd+C" and paste a clone of it on "Cmd+V"', () => {
     // mock
     const idA = addFrameNode();

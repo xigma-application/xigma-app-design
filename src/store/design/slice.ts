@@ -34,6 +34,7 @@ import { handleAddComment } from './utils/handleAddComment';
 import { handleAddNode } from './utils/handleAddNode';
 import { handleAddNodes } from './utils/handleAddNodes';
 import { handleAddPage } from './utils/handleAddPage';
+import { handleBringSelectionToFront } from './utils/handleBringSelectionToFront';
 import { handleDeleteNode } from './utils/handleDeleteNode/handleDeleteNode';
 import { handleDeletePage } from './utils/handleDeletePage';
 import { handleDuplicatePage, TDuplicatePagePayload } from './utils/handleDuplicatePage';
@@ -43,6 +44,7 @@ import { handleMoveNodesToPage } from './utils/handleMoveNodesToPage/handleMoveN
 import { handleReorderPages } from './utils/handleReorderPages';
 import { handleReplaceDesignSnapshot } from './utils/handleReplaceDesignSnapshot';
 import { handleReplaceNode } from './utils/handleReplaceNode';
+import { handleSendSelectionToBack } from './utils/handleSendSelectionToBack';
 import { handleSetActiveTool } from './utils/handleSetActiveTool';
 import { handleSetSelection } from './utils/handleSetSelection/handleSetSelection';
 import { handleSetVectorEditingNodeIds } from './utils/handleSetVectorEditingNodeIds';
@@ -110,6 +112,7 @@ const designSlice = createSlice({
       prepare: () => ({ payload: { id: nanoid() } }),
       reducer: (state, action: PayloadAction<{ id: string }>) => handleAddPage(state, action.payload.id),
     },
+    bringSelectionToFront: (state) => handleBringSelectionToFront(state),
     cancelCommentDraft: (state) => {
       state.commentDraftPosition = null;
     },
@@ -131,6 +134,7 @@ const designSlice = createSlice({
     reorderPages: (state, action: PayloadAction<TReorderPayload>) => handleReorderPages(state, action.payload),
     replaceDesignSnapshot: (state, action: PayloadAction<TDesignSnapshot>) => handleReplaceDesignSnapshot(state, action.payload),
     replaceNode: (state, action: PayloadAction<{ id: string; node: TSceneNode }>) => handleReplaceNode(state, action.payload),
+    sendSelectionToBack: (state) => handleSendSelectionToBack(state),
     setActivePage: (state, action: PayloadAction<string>) => {
       state.activePageId = action.payload;
     },
@@ -170,6 +174,7 @@ export const {
   addNode,
   addNodes,
   addPage,
+  bringSelectionToFront,
   cancelCommentDraft,
   deleteComment,
   deleteNode,
@@ -182,6 +187,7 @@ export const {
   reorderPages,
   replaceDesignSnapshot,
   replaceNode,
+  sendSelectionToBack,
   setActivePage,
   setActiveTool,
   setPaintColor,

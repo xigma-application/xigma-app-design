@@ -2050,6 +2050,29 @@ button changing what a _separate_ real canvas click can hit-test, which a synthe
 `PointerEvent` can't exercise end-to-end the way the actual `getNodeAtPoint`/`getCollidedNodes`
 filters are wired into the live render+hit-test pipeline.
 
+## Layer order — Bring to front / Send to back
+
+`bringSelectionToFront` / `sendSelectionToBack` move the current selection to the front (end) or
+back (start) of its own render-order array — the page's `rootOrder` for a top-level node, or a
+parent group's `childIds` for a nested one (`getSelectionOrderScopes`), never across that boundary.
+Each selected node's relative order among the other selected nodes is preserved, and other nodes
+are left where they were (`moveIdsToEdge`). Wired to the `]` / `[` keyboard shortcuts (global —
+canvas and Layers tree) and the Layers-panel context-menu items; joined to undo/redo like every
+other document mutation.
+
+| #   | Scenario                                                                                                                    | Unit |         E2E          |
+| --- | --------------------------------------------------------------------------------------------------------------------------- | :--: | :------------------: |
+| 336 | `]` brings the selected node to the front and `[` sends it back, visibly changing which of two overlapping shapes is on top |  ✅  | ✅ `z-order.spec.ts` |
+| 337 | A nested node moves only within its own parent group's `childIds`, never in front of / behind nodes outside that group      |  ✅  |          —           |
+| 338 | Multiple selected nodes move together to the edge, keeping their own relative order; unselected nodes stay put              |  ✅  |          —           |
+| 339 | Bring-to-front and send-to-back are each their own undo step                                                                |  ✅  |          —           |
+| 340 | The Layers-panel context-menu "Bring to front" / "Send to back" items fire the same action as the shortcut                  |  ✅  |          —           |
+
+Only #336 gets e2e coverage — it's the one case where the payoff is genuinely a browser
+render round-trip (the shortcut reordering the array, the render loop re-flattening it, and the
+overlap region repainting with a different fill). The rest are exact `store.getState()` assertions
+with no timing/rendering stakes, unit-only per the section below.
+
 ## Why so few scenarios get e2e coverage
 
 Most of the branches above are two-line Redux-state assertions in the unit suite — an e2e

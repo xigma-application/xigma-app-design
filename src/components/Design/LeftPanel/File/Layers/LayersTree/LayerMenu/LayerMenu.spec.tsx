@@ -31,6 +31,8 @@ const renderLayerMenu = (
   onPasteToReplace = vi.fn(),
   otherPages: TDesignPage[] = [],
   onMoveToPage = vi.fn(),
+  onBringToFront = vi.fn(),
+  onSendToBack = vi.fn(),
 ): ReturnType<typeof render> =>
   render(
     <LayerMenu
@@ -38,12 +40,14 @@ const renderLayerMenu = (
       isHidden={isHidden}
       isLocked={isLocked}
       isOpen
+      onBringToFront={onBringToFront}
       onCopy={onCopy}
       onGroupSelection={onGroupSelection}
       onMoveToPage={onMoveToPage}
       onOpenChange={vi.fn()}
       onPasteToReplace={onPasteToReplace}
       onRename={onRename}
+      onSendToBack={onSendToBack}
       onToggleHidden={onToggleHidden}
       onToggleLocked={onToggleLocked}
       otherPages={otherPages}
@@ -71,7 +75,7 @@ describe('LayerMenu', () => {
     expect(screen.getByText('Flatten').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
   });
 
-  it('should not disable Copy, Paste to replace, Rename, Hide/Show, Lock/Unlock, or Group selection', () => {
+  it('should not disable Copy, Paste to replace, Rename, Hide/Show, Lock/Unlock, Group selection, Bring to front, or Send to back', () => {
     // before
     renderLayerMenu();
 
@@ -82,6 +86,26 @@ describe('LayerMenu', () => {
     expect(screen.getByText('Hide layer').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Lock layer').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Group selection').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Bring to front').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Send to back').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+  });
+
+  it('should call onBringToFront on Bring to front click, and onSendToBack on Send to back click', async () => {
+    // mock
+    const user = userEvent.setup();
+    const onBringToFront = vi.fn();
+    const onSendToBack = vi.fn();
+
+    // before
+    renderLayerMenu(false, false, vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), [], vi.fn(), onBringToFront, onSendToBack);
+
+    // action
+    await user.click(screen.getByText('Bring to front'));
+    await user.click(screen.getByText('Send to back'));
+
+    // result
+    expect(onBringToFront).toHaveBeenCalledTimes(1);
+    expect(onSendToBack).toHaveBeenCalledTimes(1);
   });
 
   it('should call onCopy on Copy click', async () => {

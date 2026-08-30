@@ -14,6 +14,7 @@ export type TVectorFragment = {
 };
 
 export type TStandardKeyboardShortcuts = {
+  bringToFront: TShortcut;
   copy: TShortcut;
   duplicate: TShortcut;
   escape: TShortcut;
@@ -29,6 +30,7 @@ export type TStandardKeyboardShortcuts = {
   paste: TShortcut;
   redo: TShortcut;
   selectAll: TShortcut;
+  sendToBack: TShortcut;
   toggleUiMinimized: TShortcut;
   undo: TShortcut;
   ungroup: TShortcut;

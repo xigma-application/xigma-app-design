@@ -2,9 +2,11 @@
 import {
   addNode,
   addPage,
+  bringSelectionToFront,
   groupNodes,
   moveNodes,
   reorderPages,
+  sendSelectionToBack,
   setSelection,
   toggleNodeHidden,
   toggleNodeLocked,
@@ -190,5 +192,33 @@ describe('historyMiddleware', () => {
 
     // result
     expect(Object.keys(store.getState().design.pages)).toEqual(pagesAfterAdd);
+  });
+
+  it('should treat bring-to-front and send-to-back as their own undo steps', () => {
+    // mock
+    const idA = addFrameNode(0, 0);
+    const idB = addFrameNode(50, 50);
+    const orderAfterAdd = selectActivePage(store.getState()).rootOrder;
+
+    store.dispatch(setSelection([idA]));
+    store.dispatch(bringSelectionToFront());
+
+    expect(selectActivePage(store.getState()).rootOrder).toEqual([idB, idA]);
+
+    store.dispatch(sendSelectionToBack());
+
+    expect(selectActivePage(store.getState()).rootOrder).toEqual([idA, idB]);
+
+    // action — undo the send-to-back only
+    store.dispatch(undo());
+
+    // result
+    expect(selectActivePage(store.getState()).rootOrder).toEqual([idB, idA]);
+
+    // action — undo the bring-to-front too
+    store.dispatch(undo());
+
+    // result
+    expect(selectActivePage(store.getState()).rootOrder).toEqual(orderAfterAdd);
   });
 });

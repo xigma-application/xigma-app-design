@@ -49,12 +49,14 @@ export type TLayerMenuProps = {
   isHidden: boolean;
   isLocked: boolean;
   isOpen: boolean;
+  onBringToFront: TFunc;
   onCopy: TFunc;
   onGroupSelection: TFunc;
   onMoveToPage: TFunc<[string]>;
   onOpenChange: TFunc<[boolean]>;
   onPasteToReplace: TFunc;
   onRename: TFunc;
+  onSendToBack: TFunc;
   onToggleHidden: TFunc;
   onToggleLocked: TFunc;
   otherPages: TDesignPage[];
@@ -65,12 +67,14 @@ const LayerMenu: FC<TLayerMenuProps> = ({
   isHidden,
   isLocked,
   isOpen,
+  onBringToFront,
   onCopy,
   onGroupSelection,
   onMoveToPage,
   onOpenChange,
   onPasteToReplace,
   onRename,
+  onSendToBack,
   onToggleHidden,
   onToggleLocked,
   otherPages,
@@ -106,8 +110,18 @@ const LayerMenu: FC<TLayerMenuProps> = ({
           <MenuItem key={page.id} label={page.name} onClick={(): void => onMoveToPage(page.id)} withCheck={false} />
         ))}
       </MenuSub>
-      <MenuItem disabled label={t(NODE_MENU_BRING_TO_FRONT_KEY)} shortcut={KEYBOARD_SHORTCUTS.bringToFront.join('')} withCheck={false} />
-      <MenuItem disabled label={t(NODE_MENU_SEND_TO_BACK_KEY)} shortcut={KEYBOARD_SHORTCUTS.sendToBack.join('')} withCheck={false} />
+      <MenuItem
+        label={t(NODE_MENU_BRING_TO_FRONT_KEY)}
+        onClick={onBringToFront}
+        shortcut={KEYBOARD_SHORTCUTS.bringToFront.join('')}
+        withCheck={false}
+      />
+      <MenuItem
+        label={t(NODE_MENU_SEND_TO_BACK_KEY)}
+        onClick={onSendToBack}
+        shortcut={KEYBOARD_SHORTCUTS.sendToBack.join('')}
+        withCheck={false}
+      />
       <MenuSeparator />
       <MenuItem
         label={t(NODE_MENU_GROUP_SELECTION_KEY)}

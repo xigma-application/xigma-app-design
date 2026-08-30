@@ -18,6 +18,7 @@ import { ToolName } from 'types/design/enums';
 // utils
 import { dispatchTool } from './utils/dispatchTool';
 import { getDefaultMoveTool } from './utils/getDefaultMoveTool';
+import { handleBringToFront } from './utils/handleBringToFront';
 import { handleCopySelection } from './utils/handleCopySelection';
 import { handleDeleteSelection } from './utils/handleDeleteSelection/handleDeleteSelection';
 import { handleDuplicateSelection } from './utils/handleDuplicateSelection';
@@ -28,6 +29,7 @@ import { handleLeave } from './utils/handleLeave';
 import { handlePasteSelection } from './utils/handlePasteSelection';
 import { handleRedo } from './utils/handleRedo';
 import { handleSelectAll } from './utils/handleSelectAll';
+import { handleSendToBack } from './utils/handleSendToBack';
 import { handleUndo } from './utils/handleUndo';
 import { handleUngroupSelection } from './utils/handleUngroupSelection';
 import { nudgeMap } from './utils/nudgeMap';
@@ -70,6 +72,8 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => handleDuplicateSelection(dispatch, refs), ...shortcuts.duplicate },
       { action: (): any => handleGroupSelection(dispatch), ...shortcuts.group },
       { action: (): any => handleUngroupSelection(dispatch), ...shortcuts.ungroup },
+      { action: (): any => handleBringToFront(dispatch), ...shortcuts.bringToFront },
+      { action: (): any => handleSendToBack(dispatch), ...shortcuts.sendToBack },
       { action: (): any => handleCopySelection(refs), ...shortcuts.copy },
       { action: (): any => handlePasteSelection(dispatch, refs), ...shortcuts.paste },
       ...nudgeMap(dispatch, refs),
