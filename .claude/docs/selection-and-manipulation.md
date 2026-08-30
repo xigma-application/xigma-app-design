@@ -1485,7 +1485,7 @@ eligible shapes, some lines/vectors) still snaps as one rigid group — the corr
 from the eligible members only but applied to every dragged node's delta uniformly.
 
 - **The rendered guide line spans the whole matched shape, not just anchor→match.** `getGroupAlignmentGuide`'s own `{anchor, match}` (a short segment between the two specific points that matched) is shape-agnostic — fine for vector vertices, but for shapes `getDragAlignmentSnap` post-processes it: `extendGuideToFullElement` looks up which candidate's 9 snap points contains the matched point (`findMatchedShapeBounds`, exact value match — safe, since every candidate point it can possibly match against was drawn from that same `candidateShapes` list one line above) and stretches the axis line to that shape's full bounds — vertical line running its whole height, horizontal its whole width — rather than a short stub between just the two aligned points. This post-processing is local to the shape path; `drawAlignmentGuide` itself and the vector-drag call sites are untouched.
-- No resize-time or draw-new-shape snap yet (only move) — deliberately deferred.
+- No draw-new-shape snap yet (only move + resize, §25) — deliberately deferred.
 - No modifier bypass — snap is always active during a move, by design (unlike Figma's none-here
   either, per the request this shipped from).
 - Cleared in `disarmDrag.ts`, `onPointerLeave`, and the tool-teardown effect, mirroring §23's
@@ -1493,6 +1493,47 @@ from the eligible members only but applied to every dragged node's delta uniform
 - e2e: `e2e/pages/design/shape-alignment-snap.spec.ts` — screenshot-equality against a control scene
   where the shape is placed directly at the expected snapped/unsnapped position (no drag), the same
   technique §23's e2e already established for proving exact geometry without a state-reading hook.
+
+## 25. Alignment-snap extended to resize
+
+§24's shape snap only fired on move; resize dragging now gets the same treatment, gated much more
+narrowly since resize math already branches hard on rotation/single-vs-multi (§4/§19).
+
+- `getResizeAlignmentSnap.ts` (`components/Design/Canvas/utils/`) — a second, smaller orchestrator
+  next to `getDragAlignmentSnap/` (imports `getCandidateShapes`/`extendGuideToFullElement` from that
+  folder rather than duplicating them). Unlike the move-time snap, resize only ever moves **one**
+  query point (the live pointer position that becomes the resize's free corner/edge), so it goes
+  straight through `getAlignmentGuide` (§24's single-point matcher), not `getGroupAlignmentGuide` —
+  there's no rigid set of dragged points to correct, just the one point whose snapped value then
+  drives `getResizeOrScaleFactors` in place of the raw query point.
+- **Only wired in for the single-box, unrotated case.** `getResizeDragFrame.ts` gates the whole call
+  behind `isSnappableSingleOrigin = !origin || (origin.rotation === 0 && 'width' in origin)` — `origin`
+  here is `getSingleRotatableOrigin(originEntries)` (§4), which is non-null only when there's exactly
+  one resize origin and it isn't a line. So: `null` (multi-node resize, or a line) → world-space query
+  point, always snappable; non-null and `rotation === 0` and it's a box (not a vector) → also
+  snappable; non-null with any rotation → skipped outright, snap never engages. A rotated single node
+  resizes in **unrotated local space** (`getUnrotatedQueryPoint`) specifically so the box math doesn't
+  have to reason about rotation — feeding a world-space-snapped point into that local-space pipeline
+  would silently corrupt the resize, so rotation is a hard bypass rather than something snap tries to
+  reason about. `excludedIds` is every id in `nodeOrigins` (§23's same "never snap a shape against
+  itself/its own selection" rule as move and contact guides).
+- Guide storage/lifecycle mirrors move exactly: `continueResizeDrag.ts` writes the returned guide to
+  the same `refs.transform.alignmentGuideRef` §24 introduced (move and resize never overlap, so one
+  ref suffices), `disarmResizeDrag.ts` clears it alongside `resizedNodeIdsRef`.
+- e2e (`e2e/pages/design/shape-resize-snap.spec.ts`) needed a different control-scene shape than §24's
+  move test: comparing a resize-produced node screenshot against a node placed by the **draw-new-shape**
+  tool at the literal target size is *not* pixel-safe even when the feature is correct — width/height
+  are `Math.round`ed in `resizeBoxNode.ts` but the paired x/y (`getResizedPosition.ts`, built from
+  `transformCoord`'s anchor+scale math) are not, so a resize-derived node can land at a sub-integer
+  screen position a directly-drawn node never would, differing at the byte level despite looking
+  identical (confirmed: two screenshots with matching visible pixels but different PNG byte lengths).
+  This is pre-existing resize behaviour, not a snap bug — `resize.spec.ts`'s own pixel-exact assertion
+  (the rotated-mirror-crossing test) only ever compares two *resize-derived* screenshots against each
+  other, never a resize against a draw-tool placement, for the same reason. Fixed by building the
+  control the same way: drag A's handle to land exactly on B's edge (no snap needed to get there) and
+  compare that against the snap scene's shorter drag that lands 3px short and relies on the snap to
+  reach the identical final point — both sides now go through the resize pipeline, so their sub-pixel
+  output matches byte-for-byte when snap is working.
 
 ## Related
 

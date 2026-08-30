@@ -63,6 +63,17 @@ are deferred. Write-up: `.claude/docs/selection-and-manipulation.md` §24.
 
 - [x] shared alignment-guide core (no behaviour change) + `getDragAlignmentSnap` move-time snap, e2e
 
+## Stage 7 — Shape alignment snap on resize
+
+Dragging a resize handle now snaps that edge/corner onto other shapes' edges within tolerance too,
+reusing §24's same shared core (single-point `getAlignmentGuide`, not the group variant — resize only
+ever moves one query point). Skipped for rotated single-node resizes, where the box math already runs
+in unrotated local space. Draw-new-shape snap is still deferred. Write-up:
+`.claude/docs/selection-and-manipulation.md` §25.
+
+- [x] `getResizeAlignmentSnap` wired into `getResizeDragFrame`, gated to unrotated single/multi-node
+      resizes, e2e
+
 ## Related
 
 [[canvas-rendering-pipeline]] — context for the render loop and the `WEBGL_CONTEXT_ATTRIBUTES`

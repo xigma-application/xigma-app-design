@@ -124,6 +124,79 @@ describe('continueResizeDrag', () => {
     });
   });
 
+  it('should snap a plain resize onto a nearby stationary shape and populate the alignment guide', () => {
+    // mock — the raw drag point (5197,5083) lands 3px short of B's left edge (5200), within
+    // ALIGNMENT_SNAP_TOLERANCE_PX; B's y-range (5200..5240) is nowhere near the drag, so only x snaps
+    const idA = addFrameNode(5000, 5000, 100, 50);
+
+    addFrameNode(5200, 5200, 40, 40);
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 2,
+      bounds: { height: 50, width: 100, x: 5000, y: 5000 },
+      handle: 'se',
+      nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 0, width: 100, x: 5000, y: 5000 } },
+    });
+
+    // before
+    continueResizeDrag(canvas, pointerEvent(5197, 5083), store.dispatch, resizeDragRef, canvasRefs);
+
+    // result — corrected to width 200 (x snapped to 5200) instead of the raw 197
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
+      height: 83,
+      width: 200,
+      x: 5000,
+      y: 5000,
+    });
+    expect(canvasRefs.transform.alignmentGuideRef.current).toEqual({
+      horizontal: null,
+      vertical: { anchor: { x: 5200, y: 5200 }, match: { x: 5200, y: 5240 } },
+    });
+  });
+
+  it('should leave the alignment guide null when a plain resize has nothing within tolerance', () => {
+    // mock
+    const idA = addFrameNode(6000, 6000, 100, 50);
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 2,
+      bounds: { height: 50, width: 100, x: 6000, y: 6000 },
+      handle: 'se',
+      nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 0, width: 100, x: 6000, y: 6000 } },
+    });
+
+    // before
+    continueResizeDrag(canvas, pointerEvent(6150, 6080), store.dispatch, resizeDragRef, canvasRefs);
+
+    // result
+    expect(canvasRefs.transform.alignmentGuideRef.current).toBeNull();
+  });
+
+  it('should not snap a rotated single-node resize, even with a candidate that would otherwise be within tolerance', () => {
+    // mock — same setup as the snapping test above, but idA is rotated
+    const idA = addFrameNode(7000, 7000, 100, 50, null, 90);
+
+    addFrameNode(7200, 7200, 40, 40);
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 2,
+      bounds: { height: 50, width: 100, x: 7000, y: 7000 },
+      handle: 'se',
+      nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 90, width: 100, x: 7000, y: 7000 } },
+    });
+
+    // before
+    continueResizeDrag(canvas, pointerEvent(7197, 7083), store.dispatch, resizeDragRef, canvasRefs);
+
+    // result
+    expect(canvasRefs.transform.alignmentGuideRef.current).toBeNull();
+  });
+
   it('should lock the aspect ratio on a corner handle while Shift is held', () => {
     // mock
     const idA = addFrameNode(0, 0, 100, 50);
@@ -201,6 +274,34 @@ describe('continueResizeDrag', () => {
       y1: 40,
       y2: 160,
     });
+  });
+
+  it('should snap a multi-node resize onto a nearby stationary shape, same as a single-node resize', () => {
+    // mock — a and b (as if a group's members) are resized together; c is stationary, 3px past the
+    // raw drag point on the x axis, within tolerance
+    const idA = addFrameNode(8000, 8000, 100, 50, 'parent-2');
+    const idB = addFrameNode(8000, 8100, 20, 20, 'parent-2');
+
+    addFrameNode(8200, 8200, 40, 40);
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 2,
+      bounds: { height: 120, width: 100, x: 8000, y: 8000 },
+      handle: 'se',
+      nodeOrigins: {
+        [idA]: { flip: null, height: 50, rotation: 0, width: 100, x: 8000, y: 8000 },
+        [idB]: { flip: null, height: 20, rotation: 0, width: 20, x: 8000, y: 8100 },
+      },
+    });
+
+    // before
+    continueResizeDrag(canvas, pointerEvent(8197, 8283), store.dispatch, resizeDragRef, canvasRefs);
+
+    // result — corrected to a shared bbox width of 200 (x snapped to 8200) instead of the raw 197
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ width: 200, x: 8000 });
+    expect(canvasRefs.transform.alignmentGuideRef.current).not.toBeNull();
   });
 
   it('should guard the scale factor instead of dividing by a zero-size origin bounds', () => {

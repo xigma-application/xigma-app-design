@@ -26,8 +26,9 @@ export const continueResizeDrag = (
     const { aspectRatio, bounds, handle, nodeOrigins, rotatedGroupChildOrigins } = resizeDragState;
     const originEntries = Object.entries(nodeOrigins);
     const singleRotatableOrigin = getSingleRotatableOrigin(originEntries);
-    const frame = getResizeDragFrame(canvas, event, bounds, handle, aspectRatio, singleRotatableOrigin);
+    const frame = getResizeDragFrame(canvas, event, bounds, handle, aspectRatio, singleRotatableOrigin, Object.keys(nodeOrigins));
     const snapshots = canvasRefs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current;
+    canvasRefs.transform.alignmentGuideRef.current = frame.alignmentGuide;
 
     if (snapshots && !canvasRefs.transform.resizedNodeIdsRef.current) {
       canvasRefs.transform.resizedNodeIdsRef.current = new Set(snapshots.keys());
