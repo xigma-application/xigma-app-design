@@ -11,6 +11,7 @@ import { TDragState, TPendingClickAction } from 'types/design/selectionTool/type
 
 // utils
 import { captureDraggedVectorNodeSnapshots } from './captureDraggedVectorNodeSnapshots';
+import { getCandidateShapes } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getCandidateShapes';
 import { getDragNodeOrigins } from './getDragNodeOrigins';
 import { getRigidTransformNodes } from 'store/design/utils/nodeHierarchy/getRigidTransformNodes';
 
@@ -26,6 +27,7 @@ export const armDrag = (
   const dragIds = getRigidTransformNodes(armedNodes, nodes).map((node) => node.id);
 
   dragStateRef.current = {
+    candidateShapes: getCandidateShapes(nodes, dragIds),
     dispatchThrottle: { frameId: null, run: null },
     hasMoved: false,
     nodeOrigins: getDragNodeOrigins(dragIds, nodes),

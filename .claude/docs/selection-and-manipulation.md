@@ -1570,6 +1570,51 @@ vector network like line/vector, not a plain box.
   needing `mode: 'serial'` for its own multi-test file is the same underlying class of noise; this file
   sets it too.
 
+## 27. Snap candidate shapes cached per gesture, not rescanned every pointer event
+
+None of §24–26's snap call sites are viewport- or spatially-filtered — `getCandidateShapes` walks
+every eligible node on the active page unconditionally (candidates outside the current view, or far
+from the dragged point, are still iterated; they just never land within `ALIGNMENT_SNAP_TOLERANCE_PX`
+so they have no visible effect). This is deliberate for now: this "full scan, no spatial index" shape
+is the existing norm across this whole subsystem — hit-testing, hover-resolve, marquee-drag, and
+contact guides (§23) all do the same unfiltered `Object.values(nodes)`/ordered-node walk, several of
+them on every `pointermove`. A proper shared spatial index (the vector-network crossing detector
+already proved out a uniform hash-grid approach for exactly this shape of problem — see
+[[canvas-vector-performance]] §5.4) would benefit all of them at once, but that's a separate, larger
+initiative, not started.
+
+What *did* ship here is the cheap, no-new-infrastructure half of that: `getCandidateShapes` was being
+called **on every `pointermove` (and `pointerup`)** of a move/resize/draw gesture, even though the set
+of "other" nodes on the page essentially never changes mid-gesture. Each gesture's arm site now calls
+it exactly **once**, caching the result on the gesture's own state:
+
+- `armDrag.ts` → `TDragState.candidateShapes`, consumed by `getDragAlignmentSnap` (§24) via
+  `continueDrag.ts`.
+- `armPlainResizeDrag.ts`/`armRotatedGroupResizeDrag.ts` → `TResizeDragState.candidateShapes`,
+  consumed by `getResizeDragFrame.ts` (§25) via `continueResizeDrag.ts`. Computed unconditionally in
+  both arm sites even though a rotated group resize's `isSnappableSingleOrigin` gate means it's never
+  actually read — arming is a one-time O(n) cost regardless, and keeping the field non-optional avoids
+  a null-check at every read site for a case that's cheap to just compute anyway.
+- The four draw-tool hooks (§26) have no arm/continue split in the same sense `TCanvasRefs` gives
+  move/resize, so each gets its own **local** `candidateShapesRef = useRef<TCandidateShape[]>([])`,
+  populated in `handlePointerDown` and read (never recomputed) in `handlePointerMove`/`handlePointerUp`.
+- `getResizeAlignmentSnap`/`getPointAlignmentSnap` (§25) and `getDragAlignmentSnap` (§24) themselves
+  were both **narrowed to pure functions over an already-computed `TCandidateShape[]`** — neither takes
+  `nodes`/`excludedIds` for candidates any more (`getDragAlignmentSnap` still takes `nodes` alone, but
+  only to look up the *dragged* nodes' own type/rotation for `getEligibleDraggedEntries`, an O(k) lookup
+  over the handful of dragged ids, not an O(n) scan). This is also why `getResizeAlignmentSnap` was
+  renamed `getPointAlignmentSnap` back in §26 — once it stopped taking `nodes`/`excludedIds`, "resize"
+  was no longer accurate to what the function does.
+- Test fallout: every hand-built `TDragState`/`TResizeDragState` fixture across the affected spec files
+  needed a `candidateShapes` field. The two big shared-store integration specs
+  (`continueDrag.spec.ts`, `continueResizeDrag.spec.ts`) gained a factory default of `candidateShapes: []`
+  (override-able per test) so only the handful of tests that actually exercise snapping need to compute
+  a real value via `getCandidateShapes(...)` themselves — mirroring exactly what the production arm site
+  does, rather than relying on the old "scans the live store" behavior. Two now-redundant assertions
+  (excluded-id and group-type filtering, previously duplicated at the `getDragAlignmentSnap`/
+  `getPointAlignmentSnap` level) were dropped in favor of `getCandidateShapes.spec.ts`'s own dedicated
+  coverage, since that filtering logic now lives in exactly one place.
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.

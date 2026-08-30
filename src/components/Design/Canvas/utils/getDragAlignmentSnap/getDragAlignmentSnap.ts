@@ -5,11 +5,11 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { extendGuideToFullElement } from './extendGuideToFullElement';
-import { getCandidateShapes } from './getCandidateShapes';
 import { getEligibleDraggedEntries } from './getEligibleDraggedEntries';
 import { getGroupAlignmentGuide, type TAlignmentGuide } from '../getGroupAlignmentGuide';
 import { getRotatedNodeBounds } from '../getRotatedNodeBounds';
 import { getShapeSnapPoints } from '../getShapeSnapPoints';
+import { TCandidateShape } from './getCandidateShapes';
 
 export type TDragAlignmentSnap = {
   delta: TPoint;
@@ -21,6 +21,7 @@ export const getDragAlignmentSnap = (
   nodeOrigins: Record<string, TNodeOrigin>,
   rawDelta: TPoint,
   toleranceWorldUnits: number,
+  candidateShapes: TCandidateShape[],
 ): TDragAlignmentSnap => {
   const draggedIds = Object.keys(nodeOrigins);
   const eligibleDraggedEntries = getEligibleDraggedEntries(nodes, nodeOrigins, draggedIds);
@@ -32,7 +33,6 @@ export const getDragAlignmentSnap = (
   const draggedPoints = eligibleDraggedEntries.flatMap(({ node, origin }) =>
     getShapeSnapPoints(getRotatedNodeBounds({ ...node, x: origin.x + rawDelta.x, y: origin.y + rawDelta.y } as TSceneNode)),
   );
-  const candidateShapes = getCandidateShapes(nodes, draggedIds);
   const candidatePoints = candidateShapes.flatMap((candidate) => candidate.points);
   const { deltaCorrection, guide } = getGroupAlignmentGuide(draggedPoints, candidatePoints, toleranceWorldUnits);
 

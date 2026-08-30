@@ -48,6 +48,7 @@ describe('disarmResizeDrag', () => {
     const resizeDragRef = createResizeDragRef({
       aspectRatio: 1,
       bounds: { height: 10, width: 10, x: 0, y: 0 },
+      candidateShapes: [],
       handle: 'se',
       nodeOrigins: {},
     });
@@ -67,6 +68,7 @@ describe('disarmResizeDrag', () => {
     const resizeDragRef = createResizeDragRef({
       aspectRatio: 1,
       bounds: { height: 10, width: 10, x: 0, y: 0 },
+      candidateShapes: [],
       handle: 'se',
       nodeOrigins: {
         'vector-1': {
@@ -114,6 +116,7 @@ describe('disarmResizeDrag', () => {
     const resizeDragRef = createResizeDragRef({
       aspectRatio: 1,
       bounds: { height: 10, width: 10, x: 0, y: 0 },
+      candidateShapes: [],
       handle: 'se',
       nodeOrigins: {},
     });
@@ -208,7 +211,7 @@ describe('disarmResizeDrag', () => {
       // before — direct path: no snapshot ref populated, every pointermove dispatches
       const directCanvas = createCanvasForDrag();
       const directDragRef: RefObject<TResizeDragState | null> = {
-        current: { aspectRatio: 1, bounds, handle: 'e', nodeOrigins: nodeOriginFor(idDirect) },
+        current: { aspectRatio: 1, bounds, candidateShapes: [], handle: 'e', nodeOrigins: nodeOriginFor(idDirect) },
       };
 
       continueResizeDrag(
@@ -223,7 +226,7 @@ describe('disarmResizeDrag', () => {
       const snapshotCanvas = createCanvasForDrag();
       const snapshotCanvasRefs = createCanvasRefs();
       const snapshotDragRef: RefObject<TResizeDragState | null> = {
-        current: { aspectRatio: 1, bounds, handle: 'e', nodeOrigins: nodeOriginFor(idSnapshotted) },
+        current: { aspectRatio: 1, bounds, candidateShapes: [], handle: 'e', nodeOrigins: nodeOriginFor(idSnapshotted) },
       };
 
       captureResizedVectorNodeSnapshots(

@@ -80,6 +80,7 @@ describe('armResizeDrag', () => {
     expect(resizeDragRef.current).toEqual({
       aspectRatio: 2,
       bounds: { height: 50, width: 100, x: 0, y: 0 },
+      candidateShapes: [],
       handle: 'se',
       nodeOrigins: { a: { flip: null, height: 50, rotation: 0, width: 100, x: 0, y: 0 } },
     });

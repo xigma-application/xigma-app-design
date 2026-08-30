@@ -18,6 +18,7 @@ import { MouseButton } from 'types/enums';
 import { TPoint } from 'types/canvas';
 
 // utils
+import { getCandidateShapes, type TCandidateShape } from '../../utils/getDragAlignmentSnap/getCandidateShapes';
 import { getPointAlignmentSnap } from '../../utils/getPointAlignmentSnap';
 import { getPointerPosition } from '../../utils/getPointerPosition';
 import { screenToWorld } from '../../utils/screenToWorld';
@@ -41,12 +42,14 @@ export const useDrawStarTool = (refs: TCanvasRefs, { fill, name, points, ratio, 
   const dispatch = useAppDispatch();
   const appStore = useAppStore();
   const startRef = useRef<TPoint | null>(null);
+  const candidateShapesRef = useRef<TCandidateShape[]>([]);
 
   const handlePointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     if (event.button === MouseButton.primary) {
       dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
       dispatch(setSelection([]));
       startRef.current = screenToWorld(getPointerPosition(canvas, event), viewport);
+      candidateShapesRef.current = getCandidateShapes(selectNodes(appStore.getState()), []);
       canvas.setPointerCapture(event.pointerId);
     }
   };
@@ -54,7 +57,7 @@ export const useDrawStarTool = (refs: TCanvasRefs, { fill, name, points, ratio, 
   const handlePointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     if (startRef.current) {
       const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
-      const snap = getPointAlignmentSnap(rawPoint, selectNodes(appStore.getState()), [], ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
+      const snap = getPointAlignmentSnap(rawPoint, candidateShapesRef.current, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
       const rect = toDraftRect(startRef.current, snap.point);
 
       draftRef.current = { ...rect, fill, points, ratio, type: NodeType.star };
@@ -65,7 +68,7 @@ export const useDrawStarTool = (refs: TCanvasRefs, { fill, name, points, ratio, 
   const handlePointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     if (startRef.current) {
       const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
-      const snap = getPointAlignmentSnap(rawPoint, selectNodes(appStore.getState()), [], ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
+      const snap = getPointAlignmentSnap(rawPoint, candidateShapesRef.current, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
       const rect = toDraftRectWithDefault(startRef.current, snap.point, DEFAULT_SHAPE_SIZE, true, viewport.zoom);
 
       dispatch(

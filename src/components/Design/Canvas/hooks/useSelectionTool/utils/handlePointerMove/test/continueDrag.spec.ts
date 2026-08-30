@@ -13,6 +13,7 @@ import { TDragState } from 'types/design/selectionTool/types';
 // utils
 import { continueDrag } from '../continueDrag';
 import { flushThrottledDispatch } from 'components/Design/Canvas/utils/flushThrottledDispatch';
+import { getCandidateShapes } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getCandidateShapes';
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -24,8 +25,12 @@ const createCanvas = (): HTMLCanvasElement => {
 
 const pointerEvent = (x: number, y: number): PointerEvent => new PointerEvent('pointermove', { clientX: x, clientY: y });
 
-const createDragStateRef = (dragState: Omit<TDragState, 'dispatchThrottle'> | null = null): RefObject<TDragState | null> => ({
-  current: dragState && { ...dragState, dispatchThrottle: { frameId: null, run: null } },
+// candidateShapes defaults to [] (no snap candidates) — the one test that exercises snapping passes
+// its own, computed via getCandidateShapes the same way armDrag.ts does at arm time
+type TDragStateFixture = Omit<TDragState, 'candidateShapes' | 'dispatchThrottle'> & { candidateShapes?: TDragState['candidateShapes'] };
+
+const createDragStateRef = (dragState: TDragStateFixture | null = null): RefObject<TDragState | null> => ({
+  current: dragState && { candidateShapes: [], ...dragState, dispatchThrottle: { frameId: null, run: null } },
 });
 
 const createCanvasRefs = (): TCanvasRefs =>
@@ -136,6 +141,7 @@ describe('continueDrag', () => {
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
     const dragStateRef = createDragStateRef({
+      candidateShapes: getCandidateShapes(selectActivePage(store.getState()).nodes, [idA]),
       hasMoved: false,
       nodeOrigins: { [idA]: { x: 0, y: 0 } },
       pendingClickAction: null,

@@ -1,12 +1,11 @@
 // types
 import { TAlignmentGuide } from './getGroupAlignmentGuide';
+import { TCandidateShape } from './getDragAlignmentSnap/getCandidateShapes';
 import { TPoint } from 'types/canvas';
-import { TSceneNode } from 'types/design/types';
 
 // utils
 import { extendGuideToFullElement } from './getDragAlignmentSnap/extendGuideToFullElement';
 import { getAlignmentGuide } from 'utils/canvas/getAlignmentGuide';
-import { getCandidateShapes } from './getDragAlignmentSnap/getCandidateShapes';
 
 export type TPointAlignmentSnap = {
   guide: TAlignmentGuide | null;
@@ -15,11 +14,9 @@ export type TPointAlignmentSnap = {
 
 export const getPointAlignmentSnap = (
   point: TPoint,
-  nodes: Record<string, TSceneNode>,
-  excludedIds: string[],
+  candidateShapes: TCandidateShape[],
   toleranceWorldUnits: number,
 ): TPointAlignmentSnap => {
-  const candidateShapes = getCandidateShapes(nodes, excludedIds);
   const candidatePoints = candidateShapes.flatMap((candidate) => candidate.points);
   const match = getAlignmentGuide(point, candidatePoints, toleranceWorldUnits);
   const rawGuide: TAlignmentGuide | null =

@@ -143,6 +143,7 @@ describe('handlePointerMove', () => {
     const idA = addFrameNode(500, 500);
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef({
+      candidateShapes: [],
       dispatchThrottle: { frameId: null, run: null },
       hasMoved: false,
       nodeOrigins: { [idA]: { x: 500, y: 500 } },

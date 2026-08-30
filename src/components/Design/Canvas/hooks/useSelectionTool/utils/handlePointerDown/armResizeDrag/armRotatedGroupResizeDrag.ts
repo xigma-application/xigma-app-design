@@ -10,6 +10,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // utils
+import { getCandidateShapes } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getCandidateShapes';
 import { getGroupSubtreeNodes } from 'store/design/utils/nodeHierarchy/getGroupSubtreeNodes';
 import { getResizeNodeOrigin } from './getResizeNodeOrigin';
 
@@ -33,6 +34,7 @@ export const armRotatedGroupResizeDrag = (
   resizeDragRef.current = {
     aspectRatio: bounds.width / bounds.height,
     bounds,
+    candidateShapes: getCandidateShapes(nodes, [group.id]),
     handle,
     nodeOrigins: { [group.id]: getResizeNodeOrigin(group) },
     rotatedGroupChildOrigins,

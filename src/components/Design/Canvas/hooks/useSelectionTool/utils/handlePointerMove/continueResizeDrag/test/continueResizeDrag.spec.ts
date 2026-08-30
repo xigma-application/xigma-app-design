@@ -14,6 +14,7 @@ import { TVectorNodeResizeSnapshot } from 'types/design/canvas/types';
 // utils
 import { continueResizeDrag } from '../continueResizeDrag';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
+import { getCandidateShapes } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getCandidateShapes';
 import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBounds';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
@@ -28,8 +29,12 @@ const createCanvas = (): HTMLCanvasElement => {
 const pointerEvent = (x: number, y: number, options: Partial<PointerEventInit> = {}): PointerEvent =>
   new PointerEvent('pointermove', { clientX: x, clientY: y, ...options });
 
-const createResizeDragRef = (resizeDragState: TResizeDragState | null = null): RefObject<TResizeDragState | null> => ({
-  current: resizeDragState,
+// candidateShapes defaults to [] (no snap candidates) — tests that actually exercise snapping pass
+// their own, computed via getCandidateShapes the same way armPlainResizeDrag.ts does at arm time
+const createResizeDragRef = (
+  resizeDragState: (Omit<TResizeDragState, 'candidateShapes'> & { candidateShapes?: TResizeDragState['candidateShapes'] }) | null = null,
+): RefObject<TResizeDragState | null> => ({
+  current: resizeDragState && { candidateShapes: [], ...resizeDragState },
 });
 
 const addFrameNode = (x: number, y: number, width: number, height: number, parentId: string | null = null, rotation = 0): string => {
@@ -136,6 +141,7 @@ describe('continueResizeDrag', () => {
     const resizeDragRef = createResizeDragRef({
       aspectRatio: 2,
       bounds: { height: 50, width: 100, x: 5000, y: 5000 },
+      candidateShapes: getCandidateShapes(selectActivePage(store.getState()).nodes, [idA]),
       handle: 'se',
       nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 0, width: 100, x: 5000, y: 5000 } },
     });
@@ -186,6 +192,7 @@ describe('continueResizeDrag', () => {
     const resizeDragRef = createResizeDragRef({
       aspectRatio: 2,
       bounds: { height: 50, width: 100, x: 7000, y: 7000 },
+      candidateShapes: getCandidateShapes(selectActivePage(store.getState()).nodes, [idA]),
       handle: 'se',
       nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 90, width: 100, x: 7000, y: 7000 } },
     });
@@ -289,6 +296,7 @@ describe('continueResizeDrag', () => {
     const resizeDragRef = createResizeDragRef({
       aspectRatio: 2,
       bounds: { height: 120, width: 100, x: 8000, y: 8000 },
+      candidateShapes: getCandidateShapes(selectActivePage(store.getState()).nodes, [idA, idB]),
       handle: 'se',
       nodeOrigins: {
         [idA]: { flip: null, height: 50, rotation: 0, width: 100, x: 8000, y: 8000 },

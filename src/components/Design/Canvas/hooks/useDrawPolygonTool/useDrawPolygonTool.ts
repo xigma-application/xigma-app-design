@@ -18,6 +18,7 @@ import { MouseButton } from 'types/enums';
 import { TPoint } from 'types/canvas';
 
 // utils
+import { getCandidateShapes, type TCandidateShape } from '../../utils/getDragAlignmentSnap/getCandidateShapes';
 import { getPointAlignmentSnap } from '../../utils/getPointAlignmentSnap';
 import { getPointerPosition } from '../../utils/getPointerPosition';
 import { screenToWorld } from '../../utils/screenToWorld';
@@ -40,12 +41,14 @@ export const useDrawPolygonTool = (refs: TCanvasRefs, { fill, name, sides, tool 
   const dispatch = useAppDispatch();
   const appStore = useAppStore();
   const startRef = useRef<TPoint | null>(null);
+  const candidateShapesRef = useRef<TCandidateShape[]>([]);
 
   const handlePointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     if (event.button === MouseButton.primary) {
       dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
       dispatch(setSelection([]));
       startRef.current = screenToWorld(getPointerPosition(canvas, event), viewport);
+      candidateShapesRef.current = getCandidateShapes(selectNodes(appStore.getState()), []);
       canvas.setPointerCapture(event.pointerId);
     }
   };
@@ -53,7 +56,7 @@ export const useDrawPolygonTool = (refs: TCanvasRefs, { fill, name, sides, tool 
   const handlePointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     if (startRef.current) {
       const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
-      const snap = getPointAlignmentSnap(rawPoint, selectNodes(appStore.getState()), [], ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
+      const snap = getPointAlignmentSnap(rawPoint, candidateShapesRef.current, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
       const rect = toDraftRect(startRef.current, snap.point);
 
       draftRef.current = { ...rect, fill, sides, type: NodeType.polygon };
@@ -64,7 +67,7 @@ export const useDrawPolygonTool = (refs: TCanvasRefs, { fill, name, sides, tool 
   const handlePointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     if (startRef.current) {
       const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
-      const snap = getPointAlignmentSnap(rawPoint, selectNodes(appStore.getState()), [], ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
+      const snap = getPointAlignmentSnap(rawPoint, candidateShapesRef.current, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
       const rect = toDraftRectWithDefault(startRef.current, snap.point, DEFAULT_SHAPE_SIZE, true, viewport.zoom);
 
       dispatch(addNode({ ...rect, fill, flipX: false, flipY: false, name, parentId: null, rotation: 0, sides, type: NodeType.polygon }));

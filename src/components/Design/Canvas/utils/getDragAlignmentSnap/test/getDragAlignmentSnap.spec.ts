@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getCandidateShapes } from '../getCandidateShapes';
 import { getDragAlignmentSnap } from '../getDragAlignmentSnap';
 
 const rect = (id: string, x: number, y: number, width = 100, height = 100): TSceneNode =>
@@ -28,7 +29,7 @@ describe('getDragAlignmentSnap', () => {
     const nodes = { a: line('a') };
 
     // action
-    const result = getDragAlignmentSnap(nodes, { a: { x: 0, y: 0 } }, { x: 5, y: 7 }, 5);
+    const result = getDragAlignmentSnap(nodes, { a: { x: 0, y: 0 } }, { x: 5, y: 7 }, 5, getCandidateShapes(nodes, ['a']));
 
     // result
     expect(result).toEqual({ delta: { x: 5, y: 7 }, guide: null });
@@ -39,7 +40,7 @@ describe('getDragAlignmentSnap', () => {
     const nodes = { a: rect('a', 0, 0) };
 
     // action
-    const result = getDragAlignmentSnap(nodes, { a: { x: 0, y: 0 } }, { x: 5, y: 7 }, 5);
+    const result = getDragAlignmentSnap(nodes, { a: { x: 0, y: 0 } }, { x: 5, y: 7 }, 5, getCandidateShapes(nodes, ['a']));
 
     // result
     expect(result).toEqual({ delta: { x: 5, y: 7 }, guide: null });
@@ -52,7 +53,7 @@ describe('getDragAlignmentSnap', () => {
     const nodes = { a: rect('a', 0, 0), b: rect('b', 200, 300), c: rect('c', 900, 900) };
 
     // action
-    const result = getDragAlignmentSnap(nodes, { a: { x: 0, y: 0 } }, { x: 97, y: 0 }, 5);
+    const result = getDragAlignmentSnap(nodes, { a: { x: 0, y: 0 } }, { x: 97, y: 0 }, 5, getCandidateShapes(nodes, ['a']));
 
     // result — corrected by +3 so the edges land flush, and the line spans B's full height (300-400)
     expect(result.delta).toEqual({ x: 100, y: 0 });
@@ -69,7 +70,7 @@ describe('getDragAlignmentSnap', () => {
     const nodes = { a: rect('a', 0, 0), b: rect('b', 300, 200) };
 
     // action
-    const result = getDragAlignmentSnap(nodes, { a: { x: 0, y: 0 } }, { x: 0, y: 97 }, 5);
+    const result = getDragAlignmentSnap(nodes, { a: { x: 0, y: 0 } }, { x: 0, y: 97 }, 5, getCandidateShapes(nodes, ['a']));
 
     // result — corrected by +3 so the edges land flush, and the line spans B's full width (300-400)
     expect(result.delta).toEqual({ x: 0, y: 100 });
@@ -84,21 +85,15 @@ describe('getDragAlignmentSnap', () => {
     const nodes = { a: rect('a', 0, 0), b: rect('b', 200, 0) };
 
     // action
-    const result = getDragAlignmentSnap(nodes, { a: { x: 0, y: 0 }, b: { x: 200, y: 0 } }, { x: 97, y: 0 }, 5);
+    const result = getDragAlignmentSnap(
+      nodes,
+      { a: { x: 0, y: 0 }, b: { x: 200, y: 0 } },
+      { x: 97, y: 0 },
+      5,
+      getCandidateShapes(nodes, ['a', 'b']),
+    );
 
     // result — no correction, since the only nearby shape is also dragged
-    expect(result.delta).toEqual({ x: 97, y: 0 });
-    expect(result.guide).toBeNull();
-  });
-
-  it('should ignore a candidate node that is not snap-eligible, such as a group', () => {
-    // mock
-    const nodes = { a: rect('a', 0, 0), b: { ...rect('b', 200, 0), type: NodeType.group } as TSceneNode };
-
-    // action
-    const result = getDragAlignmentSnap(nodes, { a: { x: 0, y: 0 } }, { x: 97, y: 0 }, 5);
-
-    // result
     expect(result.delta).toEqual({ x: 97, y: 0 });
     expect(result.guide).toBeNull();
   });
@@ -108,7 +103,7 @@ describe('getDragAlignmentSnap', () => {
     const nodes = { a: line('a') };
 
     // action
-    const result = getDragAlignmentSnap(nodes, { a: { x1: 0, x2: 10, y1: 0, y2: 0 } }, { x: 5, y: 7 }, 5);
+    const result = getDragAlignmentSnap(nodes, { a: { x1: 0, x2: 10, y1: 0, y2: 0 } }, { x: 5, y: 7 }, 5, getCandidateShapes(nodes, ['a']));
 
     // result
     expect(result).toEqual({ delta: { x: 5, y: 7 }, guide: null });

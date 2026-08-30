@@ -122,6 +122,7 @@ describe('handlePointerUp', () => {
     // mock
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef({
+      candidateShapes: [],
       dispatchThrottle: { frameId: null, run: null },
       hasMoved: false,
       nodeOrigins: {},

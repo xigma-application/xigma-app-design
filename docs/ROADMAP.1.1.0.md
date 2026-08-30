@@ -83,6 +83,20 @@ unchanged (renamed `getResizeAlignmentSnap` → `getPointAlignmentSnap`, now sha
 
 - [x] `getPointAlignmentSnap` wired into all four box-drawing hooks, e2e
 
+## Stage 9 — Snap candidates cached per gesture
+
+`getCandidateShapes` was being recomputed on every `pointermove`/`pointerup` of a move/resize/draw
+gesture despite scanning the whole page each time. Now computed once at arm time and cached on the
+gesture's own state (`TDragState`/`TResizeDragState`, or a local ref for the draw-tool hooks), not
+re-derived until the next gesture starts. No spatial/viewport filtering yet — every eligible node on
+the page is still a candidate regardless of distance, matching the rest of this subsystem's hit-testing/
+hover/marquee/contact-guide code (a real shared spatial index, mirroring the vector-network crossing
+detector's hash-grid, is future work, not started). Write-up:
+`.claude/docs/selection-and-manipulation.md` §27.
+
+- [x] `getCandidateShapes` moved from every pointer event to gesture-arm time across all three snap
+      call sites
+
 ## Related
 
 [[canvas-rendering-pipeline]] — context for the render loop and the `WEBGL_CONTEXT_ATTRIBUTES`

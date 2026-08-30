@@ -44,6 +44,7 @@ describe('disarmDrag', () => {
     // mock
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef({
+      candidateShapes: [],
       dispatchThrottle: { frameId: null, run: null },
       hasMoved: false,
       nodeOrigins: {},
@@ -66,6 +67,7 @@ describe('disarmDrag', () => {
 
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef({
+      candidateShapes: [],
       dispatchThrottle: { frameId: null, run: null },
       hasMoved: false,
       nodeOrigins: {},
@@ -86,6 +88,7 @@ describe('disarmDrag', () => {
 
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef({
+      candidateShapes: [],
       dispatchThrottle: { frameId: null, run: null },
       hasMoved: true,
       nodeOrigins: {},

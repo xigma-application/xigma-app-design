@@ -12,6 +12,7 @@ import { store } from 'store';
 
 // utils
 import { captureResizedVectorNodeSnapshots } from '../captureResizedVectorNodeSnapshots';
+import { getCandidateShapes } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getCandidateShapes';
 import { getResizeNodeOrigin } from './getResizeNodeOrigin';
 import { getTransformTargetNodes } from 'store/design/utils/nodeHierarchy/getTransformTargetNodes';
 
@@ -25,13 +26,20 @@ export const armPlainResizeDrag = (
   canvasRefs: TCanvasRefs,
 ): void => {
   const nodeOrigins: Record<string, TResizeNodeOrigin> = {};
-  const targetNodes = getTransformTargetNodes(selectedNodes, selectActivePage(store.getState()).nodes);
+  const nodes = selectActivePage(store.getState()).nodes;
+  const targetNodes = getTransformTargetNodes(selectedNodes, nodes);
 
   targetNodes.forEach((node) => {
     nodeOrigins[node.id] = getResizeNodeOrigin(node);
   });
 
-  resizeDragRef.current = { aspectRatio: bounds.width / bounds.height, bounds, handle, nodeOrigins };
+  resizeDragRef.current = {
+    aspectRatio: bounds.width / bounds.height,
+    bounds,
+    candidateShapes: getCandidateShapes(nodes, Object.keys(nodeOrigins)),
+    handle,
+    nodeOrigins,
+  };
   captureResizedVectorNodeSnapshots(targetNodes, canvasRefs);
   canvas.setPointerCapture(event.pointerId);
 };

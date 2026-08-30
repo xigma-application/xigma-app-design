@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // types
 import { TAxisLock } from 'components/Design/Canvas/utils/getAxisLockedPoint';
+import { TCandidateShape } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getCandidateShapes';
 import { TDraftRect, TPoint, TResizeHandle } from 'types/canvas';
 import { TVectorSegment } from 'types/design/types';
 
@@ -24,6 +25,7 @@ export type TResizeNodeOrigin =
   | TVectorResizeOrigin;
 
 export type TDragState = {
+  candidateShapes: TCandidateShape[];
   dispatchThrottle: TThrottledDispatchState;
   hasMoved: boolean;
   nodeOrigins: Record<string, TNodeOrigin>;
@@ -43,6 +45,7 @@ export type TPathOffsetDragState = {
 export type TResizeDragState = {
   aspectRatio: number;
   bounds: TDraftRect;
+  candidateShapes: TCandidateShape[];
   handle: TResizeHandle;
   nodeOrigins: Record<string, TResizeNodeOrigin>;
   rotatedGroupChildOrigins?: Record<string, TResizeNodeOrigin>;

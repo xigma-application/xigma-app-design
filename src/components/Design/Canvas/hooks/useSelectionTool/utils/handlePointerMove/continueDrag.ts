@@ -40,6 +40,7 @@ export const continueDrag = (
       dragState.nodeOrigins,
       { x: rawDeltaX, y: rawDeltaY },
       ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom,
+      dragState.candidateShapes,
     );
     const { x: deltaX, y: deltaY } = delta;
 
