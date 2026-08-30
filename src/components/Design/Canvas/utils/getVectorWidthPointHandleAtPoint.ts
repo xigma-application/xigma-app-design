@@ -6,7 +6,7 @@ import { TVectorWidthPointDragTarget } from 'types/design/canvas/types';
 // utils
 import { bakeVectorNodeRotation } from './bakeVectorNodeRotation';
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
-import { getVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder';
+import { getVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder/getVectorChainOrder';
 import { getVectorChainPositionAtFraction } from 'utils/canvas/vectorNetwork/getVectorChainPositionAtFraction';
 import { getVectorSegmentNormalAtT } from 'utils/canvas/vectorNetwork/getVectorSegmentNormalAtT';
 import { getVectorSegmentPointAtT } from 'utils/canvas/vectorNetwork/getVectorSegmentPointAtT';

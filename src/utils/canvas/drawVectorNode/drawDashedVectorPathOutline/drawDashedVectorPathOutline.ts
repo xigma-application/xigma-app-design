@@ -8,7 +8,7 @@ import { TVectorNode, TViewport } from 'types/design/types';
 import { getDashedVectorPathVertices } from './getDashedVectorPathVertices';
 import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
 import { getVectorChainArcLengthTable } from '../../vectorNetwork/getVectorChainArcLengthTable';
-import { getVectorChainOrder } from '../../vectorNetwork/getVectorChainOrder';
+import { getVectorChainOrder } from '../../vectorNetwork/getVectorChainOrder/getVectorChainOrder';
 import { hexToRgbaFloat } from '../../hexToRgbaFloat';
 
 export const drawDashedVectorPathOutline = (

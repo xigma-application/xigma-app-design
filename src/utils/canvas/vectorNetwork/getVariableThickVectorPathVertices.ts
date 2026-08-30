@@ -5,7 +5,7 @@ import { TVectorNode } from 'types/design/types';
 // utils
 import { getVariableThickPolylineVertices } from './getVariableThickPolylineVertices';
 import { getVectorChainArcLengthTable } from './getVectorChainArcLengthTable';
-import { getVectorChainOrder, TVectorChainOrder } from './getVectorChainOrder';
+import { getVectorChainOrder, TVectorChainOrder } from './getVectorChainOrder/getVectorChainOrder';
 import { getVectorChainPositionAtFraction } from './getVectorChainPositionAtFraction';
 import { getVectorSegmentPointAtT } from './getVectorSegmentPointAtT';
 import { getVectorWidthOffsetsAtChainPosition } from './getVectorWidthOffsetsAtChainPosition';

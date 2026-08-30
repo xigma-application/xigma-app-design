@@ -5,7 +5,7 @@ import { TVectorNode, TVectorSegment } from 'types/design/types';
 // utils
 import { createVectorTextPathSampler } from '../createVectorTextPathSampler';
 import { getVectorChainArcLengthTable } from '../../../../vectorNetwork/getVectorChainArcLengthTable';
-import { getVectorChainOrder } from '../../../../vectorNetwork/getVectorChainOrder';
+import { getVectorChainOrder } from '../../../../vectorNetwork/getVectorChainOrder/getVectorChainOrder';
 import { getVectorSegmentPointAtT } from '../../../../vectorNetwork/getVectorSegmentPointAtT';
 
 const seg = (id: string, startId: string, endId: string): TVectorSegment => ({
@@ -65,7 +65,46 @@ describe('createVectorTextPathSampler', () => {
     expect(sample.y).toBeCloseTo(-50);
   });
 
-  it('should return the tangent-facing angle for a left-to-right segment as its own consistent baseline', () => {
+  it('should still start reading at the left (length 0) and point rightward, even when the chain-order tie-break picks the right-hand vertex as the raw start', () => {
+    // mock — 'alpha' sorts before 'zulu' and so gets picked as the chain's raw start by
+    // getVectorChainOrder, even though it sits on the right (100,0); without the reading-direction
+    // correction this would make text start on the right and read backwards
+    const node = buildNode({
+      segments: { s1: seg('s1', 'alpha', 'zulu') },
+      vertices: { alpha: { id: 'alpha', x: 100, y: 0 }, zulu: { id: 'zulu', x: 0, y: 0 } },
+    });
+    const sampler = createVectorTextPathSampler(BOX, node);
+
+    // result — length 0 is the LEFT point (0,0) -> centre-relative (-50,-50), angle pointing +x
+    const start = sampler.sampleAtLength(0);
+    const end = sampler.sampleAtLength(sampler.totalLength);
+
+    expect(start.x).toBeCloseTo(-50);
+    expect(start.y).toBeCloseTo(-50);
+    expect(((start.angleDegrees % 360) + 360) % 360).toBeCloseTo(0);
+    expect(end.x).toBeCloseTo(50);
+    expect(end.y).toBeCloseTo(-50);
+  });
+
+  it('should keep nearestOffsetAtPoint consistent with the reading-corrected sampleAtLength direction', () => {
+    // mock — same right-hand-tie-break chain as above; a point near the LEFT (world) endpoint must
+    // resolve to a fractional offset near 0, matching where sampleAtLength(0) actually renders the
+    // first glyph (nearestOffsetAtPoint's offset is a 0..1 fraction of totalLength, not a length)
+    const node = buildNode({
+      segments: { s1: seg('s1', 'alpha', 'zulu') },
+      vertices: { alpha: { id: 'alpha', x: 100, y: 0 }, zulu: { id: 'zulu', x: 0, y: 0 } },
+    });
+    const sampler = createVectorTextPathSampler(BOX, node);
+
+    // result
+    const nearLeft = sampler.nearestOffsetAtPoint({ x: 5, y: 0 });
+    const nearRight = sampler.nearestOffsetAtPoint({ x: 95, y: 0 });
+
+    expect(nearLeft.offset).toBeCloseTo(0.05);
+    expect(nearRight.offset).toBeCloseTo(0.95);
+  });
+
+  it('should return the same left-to-right tangent angle whether the segment is stored a->b or b->a', () => {
     // mock
     const node = buildNode({
       segments: { s1: seg('s1', 'a', 'b') },
@@ -75,15 +114,17 @@ describe('createVectorTextPathSampler', () => {
     // before — the tangent of a horizontal left-to-right segment
     const forward = createVectorTextPathSampler(BOX, node).sampleAtLength(0).angleDegrees;
 
-    // mock — the reversed segment, b->a
-    const reversedNode = buildNode({
+    // mock — the same physical a(0,0)->b(100,0) line, but the segment itself is stored reversed
+    // (b->a); the chain still walks it starting from 'a', so the reading direction is identical
+    const reversedStorageNode = buildNode({
       segments: { s1: seg('s1', 'b', 'a') },
       vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
     });
-    const backward = createVectorTextPathSampler(BOX, reversedNode).sampleAtLength(0).angleDegrees;
+    const backward = createVectorTextPathSampler(BOX, reversedStorageNode).sampleAtLength(0).angleDegrees;
 
-    // result — the two tangent directions point opposite ways
-    expect(Math.abs(forward - backward)).toBeCloseTo(180);
+    // result — same on-screen line, same reading direction, so the same tangent angle regardless
+    // of which way the segment happens to be stored
+    expect((((forward - backward) % 360) + 360) % 360).toBeCloseTo(0);
   });
 
   it('should clamp beyond the chain end for an open chain instead of wrapping', () => {

@@ -13,7 +13,7 @@ import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
 import { getVectorChainFractionAtPosition } from 'utils/canvas/vectorNetwork/getVectorChainFractionAtPosition';
-import { getVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder';
+import { getVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder/getVectorChainOrder';
 import { getVectorChainPositionAtFraction } from 'utils/canvas/vectorNetwork/getVectorChainPositionAtFraction';
 import { getVectorCutHitAtPoint } from '../../../../utils/getVectorCutHitAtPoint';
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';

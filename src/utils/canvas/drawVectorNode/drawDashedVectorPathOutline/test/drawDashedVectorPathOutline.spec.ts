@@ -8,7 +8,7 @@ import { TVectorNode, TVectorSegment } from 'types/design/types';
 // utils
 import { drawDashedVectorPathOutline } from '../drawDashedVectorPathOutline';
 import { getVectorChainArcLengthTable } from '../../../vectorNetwork/getVectorChainArcLengthTable';
-import { getVectorChainOrder } from '../../../vectorNetwork/getVectorChainOrder';
+import { getVectorChainOrder } from '../../../vectorNetwork/getVectorChainOrder/getVectorChainOrder';
 import { hexToRgbaFloat } from '../../../hexToRgbaFloat';
 
 const createGlMock = (): WebGL2RenderingContext =>

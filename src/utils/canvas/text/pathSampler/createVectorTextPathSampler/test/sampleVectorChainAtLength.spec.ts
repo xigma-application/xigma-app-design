@@ -79,7 +79,7 @@ describe('sampleVectorChainAtLength', () => {
     expect(wrapped.y).toBeCloseTo(direct.y);
   });
 
-  it('should return the tangent-facing angle for a left-to-right segment, opposite for the reversed segment', () => {
+  it('should return the same left-to-right tangent angle whether the segment is stored a->b or b->a', () => {
     // mock
     const node = buildNode({
       segments: { s1: seg('s1', 'a', 'b') },
@@ -87,15 +87,33 @@ describe('sampleVectorChainAtLength', () => {
     });
     const forward = sampleVectorChainAtLength(CENTER, getChainSampleData(node) as TChainSampleData, 0).angleDegrees;
 
-    // mock — the reversed segment, b->a
-    const reversedNode = buildNode({
+    // mock — the same physical a(0,0)->b(100,0) line, but the segment itself is stored reversed
+    // (b->a); the chain still walks it starting from 'a', so the reading direction is identical
+    const reversedStorageNode = buildNode({
       segments: { s1: seg('s1', 'b', 'a') },
       vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
     });
-    const backward = sampleVectorChainAtLength(CENTER, getChainSampleData(reversedNode) as TChainSampleData, 0).angleDegrees;
+    const backward = sampleVectorChainAtLength(CENTER, getChainSampleData(reversedStorageNode) as TChainSampleData, 0).angleDegrees;
 
-    // result — the two tangent directions point opposite ways
-    expect(Math.abs(forward - backward)).toBeCloseTo(180);
+    // result — same on-screen line, same reading direction, so the same tangent angle regardless
+    // of which way the segment happens to be stored
+    expect((((forward - backward) % 360) + 360) % 360).toBeCloseTo(0);
+  });
+
+  it('should sample from the reading-corrected end when the chain-order tie-break picked the right-hand vertex as the raw start', () => {
+    // mock — 'alpha' sorts before 'zulu' and gets picked as the chain's raw start, even though it
+    // sits on the right (100,0) — getChainSampleData re-walks from the other end for this case
+    const node = buildNode({
+      segments: { s1: seg('s1', 'alpha', 'zulu') },
+      vertices: { alpha: { id: 'alpha', x: 100, y: 0 }, zulu: { id: 'zulu', x: 0, y: 0 } },
+    });
+    const data = getChainSampleData(node) as TChainSampleData;
+
+    // result — length 0 lands on the LEFT world point (0,0), centre-relative (-50,-50)
+    const sample = sampleVectorChainAtLength(CENTER, data, 0);
+
+    expect(sample.x).toBeCloseTo(-50);
+    expect(sample.y).toBeCloseTo(-50);
   });
 
   it('should return the zero sample directly for a zero-length (coincident-point) chain instead of dividing by zero', () => {

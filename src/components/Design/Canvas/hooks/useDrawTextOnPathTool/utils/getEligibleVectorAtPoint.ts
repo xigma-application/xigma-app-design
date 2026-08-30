@@ -9,7 +9,7 @@ import { TViewport, TVectorNode } from 'types/design/types';
 
 // utils
 import { getNodeAtPoint } from '../../../utils/getNodeAtPoint/getNodeAtPoint';
-import { getVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder';
+import { getVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder/getVectorChainOrder';
 
 export const getEligibleVectorAtPoint = (point: TPoint, viewport: TViewport): TVectorNode | null => {
   const state = store.getState();

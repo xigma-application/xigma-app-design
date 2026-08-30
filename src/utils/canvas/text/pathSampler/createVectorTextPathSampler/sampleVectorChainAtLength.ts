@@ -25,9 +25,11 @@ export const sampleVectorChainAtLength = (center: TPoint, data: TChainSampleData
   const segment = rendered.segments[segmentId];
   const world = getVectorSegmentPointAtT(rendered, segment, t);
   const normal = getVectorSegmentNormalAtT(rendered, segment, t);
+  const rawAngleDegrees = (Math.atan2(-normal.x, normal.y) * 180) / Math.PI;
+  const walkedReversed = chainOrder.entries.some((entry) => entry.segmentId === segmentId && entry.reversed);
 
   return {
-    angleDegrees: (Math.atan2(-normal.x, normal.y) * 180) / Math.PI,
+    angleDegrees: walkedReversed ? rawAngleDegrees + 180 : rawAngleDegrees,
     x: world.x - center.x,
     y: world.y - center.y,
   };

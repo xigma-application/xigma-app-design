@@ -5,7 +5,7 @@ import { TVectorNode, TVectorSegment } from 'types/design/types';
 // utils
 import { getDashedVectorPathVertices } from '../getDashedVectorPathVertices';
 import { getVectorChainArcLengthTable, TVectorChainArcLengthSample } from '../../../vectorNetwork/getVectorChainArcLengthTable';
-import { getVectorChainOrder } from '../../../vectorNetwork/getVectorChainOrder';
+import { getVectorChainOrder } from '../../../vectorNetwork/getVectorChainOrder/getVectorChainOrder';
 
 const DASH_LENGTH_PX = 8;
 const DASH_GAP_PX = 6;

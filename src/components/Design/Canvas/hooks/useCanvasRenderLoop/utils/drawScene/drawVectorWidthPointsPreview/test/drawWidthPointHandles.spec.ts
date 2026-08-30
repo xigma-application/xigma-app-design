@@ -3,7 +3,7 @@ import { VECTOR_CUT_CROSSING_FILL, VECTOR_EDIT_OUTLINE_STROKE } from 'constant/c
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder';
+import { TVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder/getVectorChainOrder';
 import { TVectorNode } from 'types/design/types';
 
 // utils

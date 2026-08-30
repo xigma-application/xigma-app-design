@@ -1,6 +1,6 @@
 // types
 import { TVectorNode } from 'types/design/types';
-import { TVectorChainOrder } from './getVectorChainOrder';
+import { TVectorChainOrder } from './getVectorChainOrder/getVectorChainOrder';
 
 // utils
 import { getVectorChainArcLengthTable } from './getVectorChainArcLengthTable';

@@ -1,7 +1,7 @@
 // types
 import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
-import { TVectorChainOrder } from './getVectorChainOrder';
+import { TVectorChainOrder } from './getVectorChainOrder/getVectorChainOrder';
 
 // utils
 import { getVectorCurveSegmentCount } from './getVectorCurveSegmentCount';

@@ -12,7 +12,7 @@ import { TVectorNode, TViewport } from 'types/design/types';
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
 import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
 import { getVectorChainFractionAtPosition } from 'utils/canvas/vectorNetwork/getVectorChainFractionAtPosition';
-import { getVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder';
+import { getVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder/getVectorChainOrder';
 import { getVectorCutHitAcrossOpenNodes } from '../../../../../../utils/getVectorCutHitAcrossOpenNodes';
 import { getVectorSegmentNormalAtT } from 'utils/canvas/vectorNetwork/getVectorSegmentNormalAtT';
 

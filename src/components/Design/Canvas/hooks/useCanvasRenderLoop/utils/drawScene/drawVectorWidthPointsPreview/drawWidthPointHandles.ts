@@ -4,7 +4,7 @@ import { VECTOR_CUT_CROSSING_FILL, VECTOR_EDIT_OUTLINE_STROKE, VECTOR_VERTEX_SIZ
 // types
 import { TPoint } from 'types/canvas';
 import { TVectorNode, TVectorWidthPoint, TViewport } from 'types/design/types';
-import { TVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder';
+import { TVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder/getVectorChainOrder';
 
 // utils
 import { drawDefaultWidthHandleDiamond } from './drawDefaultWidthHandleDiamond';

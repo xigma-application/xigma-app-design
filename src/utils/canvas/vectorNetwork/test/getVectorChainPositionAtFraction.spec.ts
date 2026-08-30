@@ -5,7 +5,7 @@ import { TVectorNode, TVectorSegment } from 'types/design/types';
 // utils
 import { getVectorChainArcLengthTable } from '../getVectorChainArcLengthTable';
 import { getVectorChainPositionAtFraction } from '../getVectorChainPositionAtFraction';
-import { TVectorChainOrder } from '../getVectorChainOrder';
+import { TVectorChainOrder } from '../getVectorChainOrder/getVectorChainOrder';
 
 const seg = (id: string, startId: string, endId: string): TVectorSegment => ({
   endId,
