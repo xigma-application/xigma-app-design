@@ -2,6 +2,8 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import OutlinesMenu from './OutlinesMenu/OutlinesMenu';
+import PanelsMenu from './PanelsMenu/PanelsMenu';
 import { MenuCompound } from 'shared';
 
 // others
@@ -53,7 +55,9 @@ const ViewMenu: FC = () => {
       <MenuItem disabled label={t(VIEW_MENU_COMMENTS_KEY)} selected shortcut={KEYBOARD_SHORTCUTS.comments.join('')} />
       <MenuItem disabled label={t(VIEW_MENU_ANNOTATIONS_KEY)} selected shortcut={KEYBOARD_SHORTCUTS.annotations.join('')} />
       <MenuSeparator />
-      <MenuSub label={t(VIEW_MENU_OUTLINES_KEY)} withCheck />
+      <MenuSub label={t(VIEW_MENU_OUTLINES_KEY)} withCheck>
+        <OutlinesMenu />
+      </MenuSub>
       <MenuItem disabled label={t(VIEW_MENU_PIXEL_PREVIEW_KEY)} shortcut={KEYBOARD_SHORTCUTS.pixelPreview.join('')} />
       <MenuItem disabled label={t(VIEW_MENU_MASK_OUTLINES_KEY)} />
       <MenuItem disabled label={t(VIEW_MENU_FRAME_OUTLINES_KEY)} />
@@ -65,7 +69,9 @@ const ViewMenu: FC = () => {
       <MenuItem disabled label={t(VIEW_MENU_MULTIPLAYER_CURSORS_KEY)} selected shortcut={KEYBOARD_SHORTCUTS.multiplayerCursors.join('')} />
       <MenuItem disabled label={t(VIEW_MENU_SWITCH_TO_DRAW_KEY)} />
       <MenuItem disabled label={t(VIEW_MENU_SWITCH_TO_DEV_MODE_KEY)} shortcut={KEYBOARD_SHORTCUTS.switchToDevMode.join('')} />
-      <MenuSub label={t(VIEW_MENU_PANELS_KEY)} withCheck />
+      <MenuSub label={t(VIEW_MENU_PANELS_KEY)} withCheck>
+        <PanelsMenu />
+      </MenuSub>
       <MenuSeparator />
       <MenuItem disabled label={t(VIEW_MENU_ZOOM_IN_KEY)} shortcut={KEYBOARD_SHORTCUTS.zoomIn.join('')} />
       <MenuItem disabled label={t(VIEW_MENU_ZOOM_OUT_KEY)} shortcut={KEYBOARD_SHORTCUTS.zoomOut.join('')} />
