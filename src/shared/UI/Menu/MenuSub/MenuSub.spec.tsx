@@ -1,7 +1,7 @@
 import userEvent from '@testing-library/user-event';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { ReactNode } from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 
 // components
 import MenuSub from './MenuSub';
@@ -50,6 +50,75 @@ describe('MenuSub behaviors', () => {
 
     // result
     expect(screen.getByText('Copy as PNG')).toBeInTheDocument();
+  });
+
+  it('should reveal its children a short beat after the pointer enters the sub-trigger, shorter than Radix’s own built-in hover-intent delay', () => {
+    // mock
+    vi.useFakeTimers();
+
+    // before
+    renderInMenu(
+      <MenuSub label="Copy as">
+        <MenuItem label="Copy as PNG" />
+      </MenuSub>,
+    );
+    expect(screen.queryByText('Copy as PNG')).not.toBeInTheDocument();
+
+    // action
+    fireEvent.pointerEnter(screen.getByText('Copy as'));
+    expect(screen.queryByText('Copy as PNG')).not.toBeInTheDocument();
+    act(() => vi.runAllTimers());
+
+    // result
+    expect(screen.getByText('Copy as PNG')).toBeInTheDocument();
+
+    // after
+    vi.useRealTimers();
+  });
+
+  it('should cancel the pending open when the pointer leaves before the delay elapses, e.g. while just passing over the row on the way elsewhere', () => {
+    // mock
+    vi.useFakeTimers();
+
+    // before
+    renderInMenu(
+      <MenuSub label="Copy as">
+        <MenuItem label="Copy as PNG" />
+      </MenuSub>,
+    );
+
+    // action
+    fireEvent.pointerEnter(screen.getByText('Copy as'));
+    fireEvent.pointerLeave(screen.getByText('Copy as'));
+    act(() => vi.runAllTimers());
+
+    // result
+    expect(screen.queryByText('Copy as PNG')).not.toBeInTheDocument();
+
+    // after
+    vi.useRealTimers();
+  });
+
+  it('should not schedule an open on pointer enter when disabled', () => {
+    // mock
+    vi.useFakeTimers();
+
+    // before
+    renderInMenu(
+      <MenuSub disabled label="Copy as">
+        <MenuItem label="Copy as PNG" />
+      </MenuSub>,
+    );
+
+    // action
+    fireEvent.pointerEnter(screen.getByText('Copy as'));
+    act(() => vi.runAllTimers());
+
+    // result
+    expect(screen.queryByText('Copy as PNG')).not.toBeInTheDocument();
+
+    // after
+    vi.useRealTimers();
   });
 
   it('should open onto an empty panel when no children are given yet', async () => {

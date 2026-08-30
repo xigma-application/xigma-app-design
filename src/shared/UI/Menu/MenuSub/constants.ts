@@ -1,0 +1,1 @@
+export const MENU_SUB_HOVER_OPEN_DELAY_MS = 60;

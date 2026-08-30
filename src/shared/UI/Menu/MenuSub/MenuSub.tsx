@@ -1,9 +1,12 @@
 import cx from 'classnames';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
-import { FC, ReactNode } from 'react';
+import { FC, PointerEvent, ReactNode, useEffect, useRef, useState } from 'react';
 
 // @xigma
 import { Icon, TIconProps } from '@xigma/components';
+
+// others
+import { MENU_SUB_HOVER_OPEN_DELAY_MS } from './constants';
 
 // styles
 import menuStyles from '../menu.module.scss';
@@ -35,31 +38,56 @@ export const MenuSub: FC<TMenuSubProps> = ({
   marginTop = false,
   sideOffset = 4,
   triggerClassName = '',
-}) => (
-  <DropdownMenuPrimitive.Sub>
-    <DropdownMenuPrimitive.SubTrigger
-      className={cx(
-        styles.MenuSub,
-        { [styles['MenuSub--marginBottom']]: marginBottom, [styles['MenuSub--marginTop']]: marginTop },
-        triggerClassName,
-      )}
-      disabled={disabled}
-    >
-      {icon && <Icon name={icon} size={iconSize} />}
-      <span className={styles.MenuSub__label}>{label}</span>
-      <Icon className={styles.MenuSub__chevron} name="ChevronRight" size={14} />
-    </DropdownMenuPrimitive.SubTrigger>
-    <DropdownMenuPrimitive.Portal>
-      <DropdownMenuPrimitive.SubContent
-        alignOffset={alignOffset}
-        className={cx(menuStyles.Menu, className)}
-        collisionPadding={8}
-        sideOffset={sideOffset}
+}) => {
+  const [open, setOpen] = useState(false);
+  const openTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const clearOpenTimer = (): void => {
+    clearTimeout(openTimerRef.current);
+    openTimerRef.current = undefined;
+  };
+
+  useEffect(() => clearOpenTimer, []);
+
+  return (
+    <DropdownMenuPrimitive.Sub onOpenChange={setOpen} open={open}>
+      <DropdownMenuPrimitive.SubTrigger
+        className={cx(
+          styles.MenuSub,
+          { [styles['MenuSub--marginBottom']]: marginBottom, [styles['MenuSub--marginTop']]: marginTop },
+          triggerClassName,
+        )}
+        disabled={disabled}
+        onPointerEnter={(event: PointerEvent<HTMLDivElement>) => {
+          if (disabled) {
+            return;
+          }
+
+          const trigger = event.currentTarget;
+          clearOpenTimer();
+          openTimerRef.current = setTimeout(() => {
+            trigger.focus({ preventScroll: true });
+            setOpen(true);
+          }, MENU_SUB_HOVER_OPEN_DELAY_MS);
+        }}
+        onPointerLeave={clearOpenTimer}
       >
-        {children}
-      </DropdownMenuPrimitive.SubContent>
-    </DropdownMenuPrimitive.Portal>
-  </DropdownMenuPrimitive.Sub>
-);
+        {icon && <Icon name={icon} size={iconSize} />}
+        <span className={styles.MenuSub__label}>{label}</span>
+        <Icon className={styles.MenuSub__chevron} name="ChevronRight" size={14} />
+      </DropdownMenuPrimitive.SubTrigger>
+      <DropdownMenuPrimitive.Portal>
+        <DropdownMenuPrimitive.SubContent
+          alignOffset={alignOffset}
+          className={cx(menuStyles.Menu, className)}
+          collisionPadding={8}
+          sideOffset={sideOffset}
+        >
+          {children}
+        </DropdownMenuPrimitive.SubContent>
+      </DropdownMenuPrimitive.Portal>
+    </DropdownMenuPrimitive.Sub>
+  );
+};
 
 export default MenuSub;
