@@ -14,6 +14,7 @@ import styles from './menu-sub.module.scss';
 
 export type TMenuSubProps = {
   alignOffset?: number;
+  checkIconSize?: number;
   children?: ReactNode;
   className?: string;
   disabled?: boolean;
@@ -24,10 +25,12 @@ export type TMenuSubProps = {
   marginTop?: boolean;
   sideOffset?: number;
   triggerClassName?: string;
+  withCheck?: boolean;
 };
 
 export const MenuSub: FC<TMenuSubProps> = ({
   alignOffset = -4,
+  checkIconSize = 14,
   children,
   className = '',
   disabled = false,
@@ -38,6 +41,7 @@ export const MenuSub: FC<TMenuSubProps> = ({
   marginTop = false,
   sideOffset = 4,
   triggerClassName = '',
+  withCheck = false,
 }) => {
   const { onOpenChange, onPointerEnter, onPointerLeave, open } = useDelayedSubOpen(disabled);
 
@@ -53,6 +57,11 @@ export const MenuSub: FC<TMenuSubProps> = ({
         onPointerEnter={onPointerEnter}
         onPointerLeave={onPointerLeave}
       >
+        {withCheck && (
+          <span style={{ opacity: 0 }}>
+            <Icon name="Check" size={checkIconSize} />
+          </span>
+        )}
         {icon && <Icon name={icon} size={iconSize} />}
         <span className={styles.MenuSub__label}>{label}</span>
         <Icon className={styles.MenuSub__chevron} name="ChevronRight" size={14} />

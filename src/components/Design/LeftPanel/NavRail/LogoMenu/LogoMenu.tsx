@@ -7,6 +7,7 @@ import XigmaLogoShape from '@xigma/assets/xigma-logo-shape.svg?react';
 // components
 import EditMenu from './EditMenu/EditMenu';
 import FileMenu from './FileMenu/FileMenu';
+import ViewMenu from './ViewMenu/ViewMenu';
 import { Menu, MenuCompound } from 'shared';
 
 // others
@@ -66,7 +67,9 @@ const LogoMenu: FC = () => {
       <MenuSub label={t(LOGO_MENU_EDIT_KEY)}>
         <EditMenu />
       </MenuSub>
-      <MenuSub label={t(LOGO_MENU_VIEW_KEY)} />
+      <MenuSub label={t(LOGO_MENU_VIEW_KEY)}>
+        <ViewMenu />
+      </MenuSub>
       <MenuSub label={t(LOGO_MENU_OBJECT_KEY)} />
       <MenuSub label={t(LOGO_MENU_TEXT_KEY)} />
       <MenuSub label={t(LOGO_MENU_ARRANGE_KEY)} />

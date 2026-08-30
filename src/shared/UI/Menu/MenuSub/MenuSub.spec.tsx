@@ -172,6 +172,25 @@ describe('MenuSub behaviors', () => {
     expect(screen.getByRole('menuitem').className).not.toContain('MenuSub--marginBottom');
   });
 
+  it('should reserve an invisible check-icon gutter when withCheck is true, to align with sibling checkbox MenuItems', () => {
+    // before
+    renderInMenu(<MenuSub label="Copy as" withCheck />);
+
+    // result — the check icon plus the chevron icon
+    const icons = screen.getByRole('menuitem').querySelectorAll('svg');
+
+    expect(icons).toHaveLength(2);
+    expect(icons[0].parentElement).toHaveStyle({ opacity: '0' });
+  });
+
+  it('should not reserve a check-icon gutter by default', () => {
+    // before
+    renderInMenu(<MenuSub label="Copy as" />);
+
+    // result — only the chevron icon
+    expect(screen.getByRole('menuitem').querySelectorAll('svg')).toHaveLength(1);
+  });
+
   it('should merge caller-supplied classNames onto the trigger and the sub-panel', async () => {
     // mock
     const user = userEvent.setup();
