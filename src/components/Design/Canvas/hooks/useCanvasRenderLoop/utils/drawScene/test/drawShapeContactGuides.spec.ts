@@ -57,14 +57,14 @@ describe('drawShapeContactGuides', () => {
       150,
       IDENTITY_VIEWPORT,
     );
-    expect(drawXMarkerMock).toHaveBeenNthCalledWith(1, gl, program, buffer, { x: 100, y: 0 }, 4, '#cd7259', 1, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawXMarkerMock).toHaveBeenNthCalledWith(1, gl, program, buffer, { x: 100, y: 0 }, 2, '#cd7259', 1, 200, 150, IDENTITY_VIEWPORT);
     expect(drawXMarkerMock).toHaveBeenNthCalledWith(
       2,
       gl,
       program,
       buffer,
       { x: 100, y: 100 },
-      4,
+      2,
       '#cd7259',
       1,
       200,
@@ -79,7 +79,7 @@ describe('drawShapeContactGuides', () => {
 
     // result
     expect(drawLineMock.mock.calls[0][5]).toBe(0.5);
-    expect(drawXMarkerMock.mock.calls[0][4]).toBe(2);
+    expect(drawXMarkerMock.mock.calls[0][4]).toBe(1);
     expect(drawXMarkerMock.mock.calls[0][6]).toBe(0.5);
   });
 });
