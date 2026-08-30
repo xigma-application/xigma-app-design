@@ -67,18 +67,8 @@ export const handlePointerUp = (
   disarmVectorPaintDrag(canvas, event, canvasRefs, setClassName);
   disarmVectorShapeBuilderDrag(canvas, event, dispatch, canvasRefs, setClassName);
   disarmVectorMultiDrag(canvas, event, dispatch, canvasRefs, setClassName);
-  disarmVectorMultiSelectResizeDrag(
-    canvas,
-    event,
-    canvasRefs.vectorMultiSelect.vectorMultiSelectResizeDragRef,
-    canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef,
-  );
-  disarmVectorMultiSelectRotateDrag(
-    canvas,
-    event,
-    canvasRefs.vectorMultiSelect.vectorMultiSelectRotateDragRef,
-    canvasRefs.vectorMultiSelect.vectorMultiSelectBoxRef,
-  );
+  disarmVectorMultiSelectResizeDrag(canvas, event, canvasRefs);
+  disarmVectorMultiSelectRotateDrag(canvas, event, canvasRefs);
   disarmVectorSegmentBendDrag(canvas, event, dispatch, canvasRefs, selectionRefs.vectorSegmentBendDragRef, setClassName);
   disarmVectorCutDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
   disarmVectorEraseDrag(canvas, event, dispatch, canvasRefs, selectionRefs, setClassName);
