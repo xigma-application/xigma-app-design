@@ -286,6 +286,10 @@ export type TFrameNameRefs = {
   editingLabelRef: RefObject<string | null>;
 };
 
+export type TSectionNameRefs = {
+  editingLabelRef: RefObject<string | null>;
+};
+
 export type TCanvasRefs = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   colorSampleRequestRef: RefObject<TColorSampleRequest | null>;
@@ -297,6 +301,7 @@ export type TCanvasRefs = {
   lassoMarquee: TLassoMarqueeRefs;
   pen: TPenRefs;
   pencil: TPencilRefs;
+  sectionName: TSectionNameRefs;
   shapeBuilder: TShapeBuilderRefs;
   slice: TSliceRefs;
   transform: TTransformRefs;

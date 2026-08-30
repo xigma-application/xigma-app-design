@@ -70,6 +70,14 @@ describe('getRotateHandleAtPoint', () => {
     expect(getRotateHandleAtPoint({ x: 0, y: 0 }, [line], IDENTITY_VIEWPORT)).toBeNull();
   });
 
+  it('should return null when the single selected node is a section — sections can’t be rotated', () => {
+    // mock — same geometry/position as the frame ring test below, which does detect a hit
+    const section = frame('section-1', 0, 0, 100, 100);
+
+    // result
+    expect(getRotateHandleAtPoint({ x: 0, y: -10 }, [{ ...section, type: NodeType.section }], IDENTITY_VIEWPORT)).toBeNull();
+  });
+
   it('should detect the ring just outside a corner handle, on a single selected vector node', () => {
     // result
     expect(getRotateHandleAtPoint({ x: 0, y: -10 }, [vector], IDENTITY_VIEWPORT)).toEqual({

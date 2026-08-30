@@ -54,6 +54,7 @@ describe('createCanvasRefs behaviors', () => {
         pencilRawPreviewPointsRef: { current: null },
         pencilShowRawPreviewRef: { current: false },
       },
+      sectionName: { editingLabelRef: { current: null } },
       shapeBuilder: {
         isVectorShapeBuilderBoxModeRef: { current: false },
         isVectorShapeBuilderSubtractRef: { current: false },

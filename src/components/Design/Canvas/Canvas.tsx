@@ -4,6 +4,7 @@ import { FC } from 'react';
 // components
 import Comment from './Comment/Comment';
 import FrameNameLabelEditOverlay from './FrameNameLabelEditOverlay/FrameNameLabelEditOverlay';
+import SectionNameLabelEditOverlay from './SectionNameLabelEditOverlay/SectionNameLabelEditOverlay';
 import TextEditOverlay from './TextEditOverlay/TextEditOverlay';
 import VectorWidthLabelEditOverlay from './VectorWidthLabelEditOverlay/VectorWidthLabelEditOverlay';
 
@@ -102,6 +103,7 @@ const Canvas: FC = () => {
       <TextEditOverlay />
       <VectorWidthLabelEditOverlay />
       <FrameNameLabelEditOverlay />
+      <SectionNameLabelEditOverlay />
       <Comment />
     </div>
   );

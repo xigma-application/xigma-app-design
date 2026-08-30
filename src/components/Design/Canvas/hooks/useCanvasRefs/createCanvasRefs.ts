@@ -6,6 +6,7 @@ import { createHoverRefs } from './hooks/useHoverRefs/createHoverRefs';
 import { createLassoMarqueeRefs } from './hooks/useLassoMarqueeRefs/createLassoMarqueeRefs';
 import { createPenRefs } from './hooks/usePenRefs/createPenRefs';
 import { createPencilRefs } from './hooks/usePencilRefs/createPencilRefs';
+import { createSectionNameRefs } from './hooks/useSectionNameRefs/createSectionNameRefs';
 import { createShapeBuilderRefs } from './hooks/useShapeBuilderRefs/createShapeBuilderRefs';
 import { createSliceRefs } from './hooks/useSliceRefs/createSliceRefs';
 import { createTransformRefs } from './hooks/useTransformRefs/createTransformRefs';
@@ -32,6 +33,7 @@ export const createCanvasRefs = (overrides: TCanvasRefsOverrides = {}): TCanvasR
   lassoMarquee: createLassoMarqueeRefs(overrides.lassoMarquee),
   pen: createPenRefs(overrides.pen),
   pencil: createPencilRefs(overrides.pencil),
+  sectionName: createSectionNameRefs(overrides.sectionName),
   shapeBuilder: createShapeBuilderRefs(overrides.shapeBuilder),
   slice: createSliceRefs(overrides.slice),
   transform: createTransformRefs(overrides.transform),

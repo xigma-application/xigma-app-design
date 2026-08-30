@@ -43,6 +43,28 @@ describe('FrameNameLabelEditOverlay', () => {
     expect(input).toHaveStyle({ height: '48px', left: '139px', top: '132px' });
   });
 
+  it('should style the input in the frame’s own light-blue edit colors', () => {
+    // mock
+    useFrameNameLabelEditorMock.mockReturnValue({
+      ...IDLE,
+      edit: { angleDeg: 0, centerY: 0, height: 24, left: 0, nodeId: 'frame-1', value: 'Frame 1' },
+      viewport: { x: 0, y: 0, zoom: 1 },
+    });
+
+    // before
+    render(<FrameNameLabelEditOverlay />);
+
+    // result — 1px corner radius, no vertical padding: unchanged from before the section badge
+    // style was introduced
+    expect(screen.getByRole('textbox')).toHaveStyle({
+      backgroundColor: 'rgb(234, 242, 253)',
+      borderColor: 'rgb(51, 122, 225)',
+      borderRadius: '1px',
+      color: 'rgb(0, 0, 0)',
+      padding: '0px 1px',
+    });
+  });
+
   it('should pass the anchor’s angle straight through as the input’s rotation', () => {
     // mock
     useFrameNameLabelEditorMock.mockReturnValue({

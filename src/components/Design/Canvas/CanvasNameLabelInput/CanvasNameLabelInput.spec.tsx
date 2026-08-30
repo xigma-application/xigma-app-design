@@ -18,12 +18,18 @@ const setup = (
   render(
     <CanvasNameLabelInput
       angleDeg={0}
+      background="#eaf2fd"
+      borderColor="#337ae1"
+      borderRadius={1}
+      color="#000000"
       fontSize={FONT_SIZE}
       height={16}
       initialValue="Frame 1"
       left={10}
       onCancel={onCancel}
       onCommit={onCommit}
+      paddingX={1}
+      paddingY={0}
       top={20}
       {...overrides}
     />,
@@ -53,12 +59,48 @@ describe('CanvasNameLabelInput', () => {
     expect(screen.getByRole('textbox')).toHaveStyle({ height: '16px', left: '9px', top: '20px' });
   });
 
+  it('should apply whatever horizontal padding the caller passes, so a section’s roomier badge inset can differ from a frame’s tight one', () => {
+    // before
+    setup({ paddingX: 10 });
+
+    // result
+    expect(screen.getByRole('textbox')).toHaveStyle({ padding: '0px 10px' });
+  });
+
+  it('should apply whatever vertical padding the caller passes, on top and bottom equally', () => {
+    // before
+    setup({ paddingX: 10, paddingY: 2.5 });
+
+    // result
+    expect(screen.getByRole('textbox')).toHaveStyle({ padding: '2.5px 10px' });
+  });
+
+  it('should apply whatever corner radius the caller passes', () => {
+    // before
+    setup({ borderRadius: 2.5 });
+
+    // result
+    expect(screen.getByRole('textbox')).toHaveStyle({ borderRadius: '2.5px' });
+  });
+
   it('should rotate around its own left edge to match a rotated frame, pivoting at the same point the WebGL label rotates around', () => {
     // before
     setup({ angleDeg: 30 });
 
     // result
     expect(screen.getByRole('textbox')).toHaveStyle({ transform: 'translate(0, -50%) rotate(30deg)' });
+  });
+
+  it('should render whatever background/border/text colors the caller passes, so each label style (frame vs section) can match its own display', () => {
+    // before
+    setup({ background: 'rgb(38, 38, 38)', borderColor: 'rgb(38, 38, 38)', color: 'rgb(255, 255, 255)' });
+
+    // result
+    expect(screen.getByRole('textbox')).toHaveStyle({
+      backgroundColor: 'rgb(38, 38, 38)',
+      borderColor: 'rgb(38, 38, 38)',
+      color: 'rgb(255, 255, 255)',
+    });
   });
 
   it('should size itself to the exact MSDF-measured width of the current text, not a character-count guess', () => {

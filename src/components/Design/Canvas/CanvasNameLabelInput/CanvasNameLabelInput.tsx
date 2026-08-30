@@ -14,16 +14,37 @@ import { getTextWidth } from 'utils/canvas/text/getTextWidth';
 
 type TProps = {
   angleDeg: number;
+  background: string;
+  borderColor: string;
+  borderRadius: number;
+  color: string;
   fontSize: number;
   height: number;
   initialValue: string;
   left: number;
   onCancel: TFunc;
   onCommit: TFunc<[string]>;
+  paddingX: number;
+  paddingY: number;
   top: number;
 };
 
-const CanvasNameLabelInput: FC<TProps> = ({ angleDeg, fontSize, height, initialValue, left, onCancel, onCommit, top }) => {
+const CanvasNameLabelInput: FC<TProps> = ({
+  angleDeg,
+  background,
+  borderColor,
+  borderRadius,
+  color,
+  fontSize,
+  height,
+  initialValue,
+  left,
+  onCancel,
+  onCommit,
+  paddingX,
+  paddingY,
+  top,
+}) => {
   const { handleBlur, handleChange, handleKeyDown, inputRef, value } = useCanvasValueLabelInput({ initialValue, onCancel, onCommit });
   const width = Math.max(getTextWidth(value, fontSize), FRAME_NAME_LABEL_INPUT_MIN_WIDTH_PX);
 
@@ -36,9 +57,14 @@ const CanvasNameLabelInput: FC<TProps> = ({ angleDeg, fontSize, height, initialV
       onPointerDown={(event: PointerEvent<HTMLInputElement>): void => event.stopPropagation()}
       ref={inputRef}
       style={{
+        backgroundColor: background,
+        borderColor,
+        borderRadius,
+        color,
         fontSize,
         height,
         left: left - FRAME_NAME_LABEL_INPUT_BORDER_WIDTH_PX,
+        padding: `${paddingY}px ${paddingX}px`,
         top,
         transform: `translate(0, -50%) rotate(${angleDeg}deg)`,
         width,

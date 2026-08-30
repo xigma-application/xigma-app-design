@@ -1,5 +1,5 @@
 // others
-import { BACKGROUND_COLOR } from 'constant/canvas';
+import { SECTION_NAME_LABEL_FILL } from 'constant/canvas';
 import { translationNameSpace as parentNameSpace } from '../constants';
 
 // types
@@ -27,7 +27,7 @@ export const ELLIPSE_FILL = '#D9D9D9';
 export const FRAME_FILL = '#FFFFFF';
 export const LINE_STROKE = '#ffffff';
 export const RECTANGLE_FILL = '#D9D9D9';
-export const SECTION_FILL = BACKGROUND_COLOR;
+export const SECTION_FILL = SECTION_NAME_LABEL_FILL;
 export const RESIZE_DEBOUNCE_MS = 500;
 export const DEFAULT_SHAPE_SIZE = 100;
 export const DUPLICATE_OFFSET = 10;

@@ -24,6 +24,7 @@ import { TImageRenderContext } from '../../types';
 import { drawAlignmentGuide } from './drawAlignmentGuide';
 import { drawCornerRadiusHandlesLayer } from './drawCornerRadiusHandlesLayer';
 import { drawDraftFrameNameLabel } from './drawFrameNameLabels/drawDraftFrameNameLabel';
+import { drawDraftSectionNameLabel } from './drawSectionNameLabels/drawDraftSectionNameLabel';
 import { drawEditingPathTextHandle } from './drawEditingPathTextHandle';
 import { drawEditingText } from './drawEditingText';
 import { drawEllipseArcHandleLayer } from './drawEllipseArcHandleLayer/drawEllipseArcHandleLayer';
@@ -36,6 +37,7 @@ import { drawPenPreview } from './drawPenPreview/drawPenPreview';
 import { drawPixelGrid } from 'utils/canvas/drawPixelGrid';
 import { drawSceneBackground } from 'utils/canvas/drawSceneBackground';
 import { drawSceneNodes } from './drawSceneNodes';
+import { drawSectionNameLabels } from './drawSectionNameLabels/drawSectionNameLabels';
 import { drawSelectionOutline } from './drawSelectionOutline';
 import { drawSelectionSizeLabel } from './drawSelectionSizeLabel';
 import { drawShapeContactGuides } from './drawShapeContactGuides';
@@ -154,6 +156,7 @@ export const drawScene = (
   );
   drawSelectionSizeLabel(gl, program, buffer, imageContext, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
   drawFrameNameLabels(gl, imageContext, filteredNodes, selectedIds, refs, clientWidth, clientHeight, viewport);
+  drawSectionNameLabels(gl, program, buffer, imageContext, filteredNodes, refs, clientWidth, clientHeight, viewport);
   drawCornerRadiusHandlesLayer(
     gl,
     program,
@@ -213,6 +216,7 @@ export const drawScene = (
   );
   drawFrame(gl, program, buffer, imageContext, draftShape, clientWidth, clientHeight, viewport);
   drawDraftFrameNameLabel(gl, imageContext, draftShape, nodesById, clientWidth, clientHeight, viewport);
+  drawDraftSectionNameLabel(gl, program, buffer, imageContext, draftShape, nodesById, clientWidth, clientHeight, viewport);
   drawPenPreview(
     gl,
     program,

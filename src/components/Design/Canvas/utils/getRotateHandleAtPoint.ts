@@ -35,7 +35,7 @@ export const getRotateHandleAtPoint = (
 ): { bounds: TDraftRect; rotation: number } | null => {
   const [singleNode] = selectedNodes;
 
-  if (selectedNodes.length === 1 && singleNode.type !== NodeType.line) {
+  if (selectedNodes.length === 1 && singleNode.type !== NodeType.line && singleNode.type !== NodeType.section) {
     const bounds = getNodeBounds(singleNode);
     const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
     const testPoint = singleNode.rotation === 0 ? point : rotatePoint(point, center, -singleNode.rotation);

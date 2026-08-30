@@ -105,6 +105,48 @@ describe('handleAddNode', () => {
     expect(state.pages['page-1'].nodes[node.id].name).toBe('Frame 2');
   });
 
+  it('should auto-number a new section off the existing sections on the page', () => {
+    // mock
+    const state: TDesignState = {
+      activePageId: 'page-1',
+      activeTool: ToolName.default,
+      commentDraftPosition: null,
+      editingNodeId: null,
+      editingSelectionChangedAt: 0,
+      editingSelectionEnd: 0,
+      editingSelectionStart: 0,
+      editingTextBox: null,
+      editingTextContent: '',
+      isUiMinimized: false,
+      lastFrameTool: ToolName.frame,
+      lastMoreTool: null,
+      lastMouseTool: ToolName.default,
+      lastPenTool: ToolName.pen,
+      lastShapeTool: ToolName.rectangle,
+      lastTextTool: ToolName.text,
+      pages: {
+        'page-1': {
+          comments: {},
+          id: 'page-1',
+          name: 'Page 1',
+          nodes: { 'section-1': { ...node, id: 'section-1', name: 'Section 1', type: NodeType.section } },
+          paintColor: '#d9d9d9',
+          rootOrder: ['section-1'],
+          selectedIds: [],
+          viewport: { x: 0, y: 0, zoom: 1 },
+        },
+      },
+      penActiveVertexId: null,
+      vectorEditingNodeIds: [],
+    };
+
+    // before
+    handleAddNode(state, { ...node, name: 'Section', type: NodeType.section });
+
+    // result
+    expect(state.pages['page-1'].nodes[node.id].name).toBe('Section 2');
+  });
+
   it('should leave a non-frame node name untouched', () => {
     // mock
     const rectangle: TSceneNode = { ...node, id: 'rect-1', name: 'Rectangle', type: NodeType.rectangle };

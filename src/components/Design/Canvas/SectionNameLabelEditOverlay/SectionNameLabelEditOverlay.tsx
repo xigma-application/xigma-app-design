@@ -4,17 +4,16 @@ import { FC } from 'react';
 import CanvasNameLabelInput from '../CanvasNameLabelInput/CanvasNameLabelInput';
 
 // hooks
-import { useFrameNameLabelEditor } from './hooks/useFrameNameLabelEditor';
+import { useSectionNameLabelEditor } from './hooks/useSectionNameLabelEditor';
 
 // others
 import {
   FRAME_NAME_LABEL_FONT_SIZE_PX,
-  FRAME_NAME_LABEL_INPUT_BACKGROUND,
-  FRAME_NAME_LABEL_INPUT_BORDER_COLOR,
-  FRAME_NAME_LABEL_INPUT_BORDER_RADIUS_PX,
-  FRAME_NAME_LABEL_INPUT_PADDING_X_PX,
-  FRAME_NAME_LABEL_INPUT_PADDING_Y_PX,
-  FRAME_NAME_LABEL_INPUT_TEXT_FILL,
+  SECTION_NAME_LABEL_CORNER_RADIUS_PX,
+  SECTION_NAME_LABEL_FILL,
+  SECTION_NAME_LABEL_PADDING_X_PX,
+  SECTION_NAME_LABEL_PADDING_Y_PX,
+  VALUE_LABEL_TEXT_FILL,
 } from 'constant/canvas';
 
 // pages
@@ -23,9 +22,9 @@ import { useCanvasRefsContext } from 'components/App/core/CanvasRefsProvider/hoo
 // utils
 import { worldToScreen } from '../utils/worldToScreen';
 
-const FrameNameLabelEditOverlay: FC = () => {
+const SectionNameLabelEditOverlay: FC = () => {
   const refs = useCanvasRefsContext();
-  const { cancel, commit, edit, viewport } = useFrameNameLabelEditor(refs);
+  const { cancel, commit, edit, viewport } = useSectionNameLabelEditor(refs);
 
   if (edit) {
     const left = worldToScreen({ x: edit.left, y: 0 }, viewport).x;
@@ -33,19 +32,19 @@ const FrameNameLabelEditOverlay: FC = () => {
 
     return (
       <CanvasNameLabelInput
-        angleDeg={edit.angleDeg}
-        background={FRAME_NAME_LABEL_INPUT_BACKGROUND}
-        borderColor={FRAME_NAME_LABEL_INPUT_BORDER_COLOR}
-        borderRadius={FRAME_NAME_LABEL_INPUT_BORDER_RADIUS_PX}
-        color={FRAME_NAME_LABEL_INPUT_TEXT_FILL}
+        angleDeg={0}
+        background={SECTION_NAME_LABEL_FILL}
+        borderColor={SECTION_NAME_LABEL_FILL}
+        borderRadius={SECTION_NAME_LABEL_CORNER_RADIUS_PX}
+        color={VALUE_LABEL_TEXT_FILL}
         fontSize={FRAME_NAME_LABEL_FONT_SIZE_PX}
         height={edit.height * viewport.zoom}
         initialValue={edit.value}
         left={left}
         onCancel={cancel}
         onCommit={commit}
-        paddingX={FRAME_NAME_LABEL_INPUT_PADDING_X_PX}
-        paddingY={FRAME_NAME_LABEL_INPUT_PADDING_Y_PX}
+        paddingX={SECTION_NAME_LABEL_PADDING_X_PX}
+        paddingY={SECTION_NAME_LABEL_PADDING_Y_PX}
         top={top}
       />
     );
@@ -54,4 +53,4 @@ const FrameNameLabelEditOverlay: FC = () => {
   return null;
 };
 
-export default FrameNameLabelEditOverlay;
+export default SectionNameLabelEditOverlay;
