@@ -10,6 +10,7 @@ import EditMenu from './EditMenu/EditMenu';
 import FileMenu from './FileMenu/FileMenu';
 import ObjectMenu from './ObjectMenu/ObjectMenu';
 import TextMenu from './TextMenu/TextMenu';
+import VectorMenu from './VectorMenu/VectorMenu';
 import ViewMenu from './ViewMenu/ViewMenu';
 import { Menu, MenuCompound } from 'shared';
 
@@ -82,7 +83,9 @@ const LogoMenu: FC = () => {
       <MenuSub label={t(LOGO_MENU_ARRANGE_KEY)}>
         <ArrangeMenu />
       </MenuSub>
-      <MenuSub label={t(LOGO_MENU_VECTOR_KEY)} marginBottom />
+      <MenuSub label={t(LOGO_MENU_VECTOR_KEY)} marginBottom>
+        <VectorMenu />
+      </MenuSub>
       <MenuSeparator />
       <MenuItem disabled label={t(LOGO_MENU_PLUGINS_KEY)} marginTop withCheck={false} />
       <MenuItem disabled label={t(LOGO_MENU_WIDGETS_KEY)} withCheck={false} />
