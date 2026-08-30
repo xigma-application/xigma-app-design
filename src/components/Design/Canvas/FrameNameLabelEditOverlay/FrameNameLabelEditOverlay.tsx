@@ -25,6 +25,7 @@ const FrameNameLabelEditOverlay: FC = () => {
 
     return (
       <CanvasNameLabelInput
+        angleDeg={edit.angleDeg}
         fontSize={FRAME_NAME_LABEL_FONT_SIZE_PX}
         height={edit.height * viewport.zoom}
         initialValue={edit.value}

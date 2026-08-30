@@ -40,15 +40,40 @@ describe('getFrameNameLabelAnchor', () => {
     expect(point).toEqual({ x: 10, y: 20 - (FRAME_NAME_LABEL_FONT_SIZE_PX + FRAME_NAME_LABEL_GAP_PX) / 2 });
   });
 
-  it('should rotate the anchor around the node centre for a rotated frame', () => {
-    // before — a square frame rotated 90°: the top-left corner swings to the bottom-left
+  it('should keep the label upright on a rotated square by snapping to whichever corner is now topmost', () => {
+    // before — a square rotated 90° is visually identical to its unrotated self, so the corner
+    // that was bottom-left swings up to occupy the same top-left spot the label already used
     const node = buildFrame({ height: 100, rotation: 90, width: 100, x: 0, y: 0 });
 
     const { angleDeg, point } = getFrameNameLabelAnchor(node, 1);
 
     // result
-    expect(angleDeg).toBe(90);
-    expect(point.x).toBeCloseTo(100 + (FRAME_NAME_LABEL_FONT_SIZE_PX + FRAME_NAME_LABEL_GAP_PX), 5);
-    expect(point.y).toBeCloseTo(0, 5);
+    expect(angleDeg).toBeCloseTo(0, 5);
+    expect(point.x).toBeCloseTo(0, 5);
+    expect(point.y).toBeCloseTo(-(FRAME_NAME_LABEL_FONT_SIZE_PX + FRAME_NAME_LABEL_GAP_PX), 5);
+  });
+
+  it('should never rotate the label itself past a quarter turn, snapping to the next corner instead', () => {
+    // before — a 200x100 rectangle rotated 90° stands up as a 100x200 shape; its new top edge is
+    // the corner that used to be its bottom-left, and the label stays perfectly horizontal above it
+    const node = buildFrame({ height: 100, rotation: 90, width: 200, x: 0, y: 0 });
+
+    const { angleDeg, point } = getFrameNameLabelAnchor(node, 1);
+
+    // result
+    expect(angleDeg).toBeCloseTo(0, 5);
+    expect(point.x).toBeCloseTo(50, 5);
+    expect(point.y).toBeCloseTo(-(50 + FRAME_NAME_LABEL_FONT_SIZE_PX + FRAME_NAME_LABEL_GAP_PX), 5);
+  });
+
+  it('should track the frame smoothly for rotations under the 45° snap threshold', () => {
+    // before
+    const node = buildFrame({ height: 100, rotation: 30, width: 100, x: 0, y: 0 });
+
+    const { angleDeg } = getFrameNameLabelAnchor(node, 1);
+
+    // result — still anchored to the original top-left corner, so the label simply follows the
+    // frame's own rotation
+    expect(angleDeg).toBeCloseTo(30, 5);
   });
 });

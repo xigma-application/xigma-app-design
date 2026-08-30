@@ -30,7 +30,7 @@ describe('FrameNameLabelEditOverlay', () => {
     // mock — left edge at world x=20, vertical centre at world y=-34; viewport pans +100/+200 at 2x zoom
     useFrameNameLabelEditorMock.mockReturnValue({
       ...IDLE,
-      edit: { centerY: -34, height: 24, left: 20, nodeId: 'frame-1', value: 'Frame 1' },
+      edit: { angleDeg: 0, centerY: -34, height: 24, left: 20, nodeId: 'frame-1', value: 'Frame 1' },
       viewport: { x: 100, y: 200, zoom: 2 },
     });
 
@@ -43,6 +43,21 @@ describe('FrameNameLabelEditOverlay', () => {
     expect(input).toHaveStyle({ height: '48px', left: '139px', top: '132px' });
   });
 
+  it('should pass the anchor’s angle straight through as the input’s rotation', () => {
+    // mock
+    useFrameNameLabelEditorMock.mockReturnValue({
+      ...IDLE,
+      edit: { angleDeg: 30, centerY: 0, height: 24, left: 0, nodeId: 'frame-1', value: 'Frame 1' },
+      viewport: { x: 0, y: 0, zoom: 1 },
+    });
+
+    // before
+    render(<FrameNameLabelEditOverlay />);
+
+    // result
+    expect(screen.getByRole('textbox')).toHaveStyle({ transform: 'translate(0, -50%) rotate(30deg)' });
+  });
+
   it('should hand its commit and cancel callbacks straight to the input', async () => {
     // mock
     const commit = vi.fn();
@@ -51,7 +66,7 @@ describe('FrameNameLabelEditOverlay', () => {
     useFrameNameLabelEditorMock.mockReturnValue({
       cancel,
       commit,
-      edit: { centerY: 0, height: 24, left: 0, nodeId: 'frame-1', value: 'Frame 1' },
+      edit: { angleDeg: 0, centerY: 0, height: 24, left: 0, nodeId: 'frame-1', value: 'Frame 1' },
       viewport: { x: 0, y: 0, zoom: 1 },
     });
 

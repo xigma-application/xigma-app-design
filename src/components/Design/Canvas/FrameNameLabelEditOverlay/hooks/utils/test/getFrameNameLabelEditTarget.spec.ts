@@ -21,7 +21,10 @@ vi.mock('../../../../utils/getFrameNameLabelRects', async (importOriginal) => ({
 
 const createTestStore = (): EnhancedStore<RootState> => configureStore({ reducer: { design: designReducer } });
 
-const addFrame = (store: EnhancedStore<RootState>, overrides: { hidden?: boolean } = {}): { id: string; name: string } => {
+const addFrame = (
+  store: EnhancedStore<RootState>,
+  overrides: { hidden?: boolean; rotation?: number } = {},
+): { id: string; name: string } => {
   store.dispatch(
     addNode({
       fill: '#ffffff',
@@ -29,7 +32,7 @@ const addFrame = (store: EnhancedStore<RootState>, overrides: { hidden?: boolean
       hidden: overrides.hidden,
       name: 'Frame',
       parentId: null,
-      rotation: 0,
+      rotation: overrides.rotation ?? 0,
       type: NodeType.frame,
       width: 200,
       x: 0,
@@ -59,12 +62,24 @@ describe('getFrameNameLabelEditTarget', () => {
 
     // result
     expect(getFrameNameLabelEditTarget({ x: 100, y: -20 }, store.getState())).toEqual({
+      angleDeg: 0,
       centerY: -20,
       height: 24,
       left: 0,
       nodeId: frame.id,
       value: frame.name,
     });
+  });
+
+  it('should carry the node’s current rotation through as the target’s angle', () => {
+    // mock
+    const store = createTestStore();
+    const frame = addFrame(store, { rotation: 20 });
+
+    getFrameNameLabelRectsMock.mockReturnValue([rectFor(frame.id)]);
+
+    // result — under the 45° snap threshold, so the label still tracks the frame's own rotation
+    expect(getFrameNameLabelEditTarget({ x: 100, y: -20 }, store.getState())?.angleDeg).toBe(20);
   });
 
   it('should exclude hidden frames from hit-testing', () => {

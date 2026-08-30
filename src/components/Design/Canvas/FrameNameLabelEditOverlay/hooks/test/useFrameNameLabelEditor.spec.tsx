@@ -46,6 +46,7 @@ const addFrame = (): { id: string; name: string } => {
 };
 
 const editFor = (frame: { id: string; name: string }): TFrameNameLabelEdit => ({
+  angleDeg: 0,
   centerY: -20,
   height: 24,
   left: 100,

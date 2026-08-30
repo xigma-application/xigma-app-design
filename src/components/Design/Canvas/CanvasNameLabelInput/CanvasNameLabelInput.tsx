@@ -13,6 +13,7 @@ import styles from './CanvasNameLabelInput.module.scss';
 import { getTextWidth } from 'utils/canvas/text/getTextWidth';
 
 type TProps = {
+  angleDeg: number;
   fontSize: number;
   height: number;
   initialValue: string;
@@ -22,7 +23,7 @@ type TProps = {
   top: number;
 };
 
-const CanvasNameLabelInput: FC<TProps> = ({ fontSize, height, initialValue, left, onCancel, onCommit, top }) => {
+const CanvasNameLabelInput: FC<TProps> = ({ angleDeg, fontSize, height, initialValue, left, onCancel, onCommit, top }) => {
   const { handleBlur, handleChange, handleKeyDown, inputRef, value } = useCanvasValueLabelInput({ initialValue, onCancel, onCommit });
   const width = Math.max(getTextWidth(value, fontSize), FRAME_NAME_LABEL_INPUT_MIN_WIDTH_PX);
 
@@ -34,7 +35,14 @@ const CanvasNameLabelInput: FC<TProps> = ({ fontSize, height, initialValue, left
       onKeyDown={handleKeyDown}
       onPointerDown={(event: PointerEvent<HTMLInputElement>): void => event.stopPropagation()}
       ref={inputRef}
-      style={{ fontSize, height, left: left - FRAME_NAME_LABEL_INPUT_BORDER_WIDTH_PX, top, width }}
+      style={{
+        fontSize,
+        height,
+        left: left - FRAME_NAME_LABEL_INPUT_BORDER_WIDTH_PX,
+        top,
+        transform: `translate(0, -50%) rotate(${angleDeg}deg)`,
+        width,
+      }}
       type="text"
       value={value}
     />

@@ -17,6 +17,7 @@ const setup = (
 
   render(
     <CanvasNameLabelInput
+      angleDeg={0}
       fontSize={FONT_SIZE}
       height={16}
       initialValue="Frame 1"
@@ -50,6 +51,14 @@ describe('CanvasNameLabelInput', () => {
 
     // result
     expect(screen.getByRole('textbox')).toHaveStyle({ height: '16px', left: '9px', top: '20px' });
+  });
+
+  it('should rotate around its own left edge to match a rotated frame, pivoting at the same point the WebGL label rotates around', () => {
+    // before
+    setup({ angleDeg: 30 });
+
+    // result
+    expect(screen.getByRole('textbox')).toHaveStyle({ transform: 'translate(0, -50%) rotate(30deg)' });
   });
 
   it('should size itself to the exact MSDF-measured width of the current text, not a character-count guess', () => {

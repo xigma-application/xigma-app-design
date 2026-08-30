@@ -11,6 +11,7 @@ import { getFrameNameLabelAnchor } from 'components/Design/Canvas/hooks/useCanva
 import { getFrameNameLabelRects, isPointInFrameNameLabelRect } from '../../../utils/getFrameNameLabelRects';
 
 export type TFrameNameLabelEdit = {
+  angleDeg: number;
   centerY: number;
   height: number;
   left: number;
@@ -31,5 +32,12 @@ export const getFrameNameLabelEditTarget = (point: TPoint, state: RootState): TF
 
   const anchor = getFrameNameLabelAnchor(node, zoom);
 
-  return { centerY: rect.center.y, height: rect.height, left: anchor.point.x, nodeId: rect.nodeId, value: node.name };
+  return {
+    angleDeg: anchor.angleDeg,
+    centerY: rect.center.y,
+    height: rect.height,
+    left: anchor.point.x,
+    nodeId: rect.nodeId,
+    value: node.name,
+  };
 };
