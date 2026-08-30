@@ -34,7 +34,7 @@ export const isContactGuideEligibleNode = (node: TSceneNode): boolean =>
 
 const isWithinContactTolerance = (a: number, b: number): boolean => Math.abs(a - b) <= CONTACT_GUIDE_TOLERANCE_PX;
 
-const getPairContactGuide = (active: TDraftRect, candidate: TContactGuideCandidate): TShapeContactGuide | null => {
+const getPairContactGuides = (active: TDraftRect, candidate: TContactGuideCandidate): TShapeContactGuide[] => {
   const aLeft = active.x;
   const aRight = active.x + active.width;
   const aTop = active.y;
@@ -48,19 +48,29 @@ const getPairContactGuide = (active: TDraftRect, candidate: TContactGuideCandida
 
   switch (true) {
     case hasVerticalOverlap && isWithinContactTolerance(aRight, bLeft):
-      return { x1: bLeft, x2: bLeft, y1: aTop, y2: aBottom };
+      return [
+        { x1: aRight, x2: aRight, y1: aTop, y2: aBottom },
+        { x1: bLeft, x2: bLeft, y1: bTop, y2: bBottom },
+      ];
     case hasVerticalOverlap && isWithinContactTolerance(aLeft, bRight):
-      return { x1: bRight, x2: bRight, y1: aTop, y2: aBottom };
+      return [
+        { x1: aLeft, x2: aLeft, y1: aTop, y2: aBottom },
+        { x1: bRight, x2: bRight, y1: bTop, y2: bBottom },
+      ];
     case hasHorizontalOverlap && isWithinContactTolerance(aBottom, bTop):
-      return { x1: aLeft, x2: aRight, y1: bTop, y2: bTop };
+      return [
+        { x1: aLeft, x2: aRight, y1: aBottom, y2: aBottom },
+        { x1: bLeft, x2: bRight, y1: bTop, y2: bTop },
+      ];
     case hasHorizontalOverlap && isWithinContactTolerance(aTop, bBottom):
-      return { x1: aLeft, x2: aRight, y1: bBottom, y2: bBottom };
+      return [
+        { x1: aLeft, x2: aRight, y1: aTop, y2: aTop },
+        { x1: bLeft, x2: bRight, y1: bBottom, y2: bBottom },
+      ];
     default:
-      return null;
+      return [];
   }
 };
 
-const isContactGuide = (guide: TShapeContactGuide | null): guide is TShapeContactGuide => guide !== null;
-
 export const getShapeContactGuides = (active: TDraftRect, candidates: TContactGuideCandidate[]): TShapeContactGuide[] =>
-  candidates.map((candidate) => getPairContactGuide(active, candidate)).filter(isContactGuide);
+  candidates.flatMap((candidate) => getPairContactGuides(active, candidate));

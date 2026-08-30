@@ -1408,18 +1408,18 @@ filter, so it never shows in Vector Edit Mode.
 ## 23. Shape contact guides (red X-capped edge lines)
 
 When a single axis-aligned shape's edge sits exactly flush against another shape's edge, a red
-(`CONTACT_GUIDE_STROKE` `#cd7259`) line is drawn along the neighbour's edge with an `×` marker at each
-end (`drawShapeContactGuides.ts` → `drawXMarker.ts`, right after `drawSelectionSizeLabel` in
-`drawScene`). The line spans the **active** shape's extent along that edge (its width for a horizontal
-seam, height for a vertical one), so it reads as "this is the footprint that's touching".
+(`CONTACT_GUIDE_STROKE` `#cd7259`) line with an `×` marker at each end is drawn **on both shapes'
+touching edges** — one line spanning the active shape's extent, one spanning the neighbour's
+(`drawShapeContactGuides.ts` → `drawXMarker.ts`, right after `drawSelectionSizeLabel` in `drawScene`).
+Same seam, two lengths, so you see the overlap between the two footprints.
 
 - **Detection** (`getShapeContactGuides.ts`, pure). Inputs are already-resolved AABBs
   (`getRotatedNodeBounds`, correct for 0/90/180/270). Per candidate, a `switch (true)` over the four
   edges: `|activeEdge − candidateEdge| ≤ CONTACT_GUIDE_TOLERANCE_PX` (0.5px world) **and** strictly
   positive overlap on the other axis. Two axis-aligned rects can only be flush on one side at a time
-  (a second shared side just meets at a corner, where the perpendicular overlap is 0), so it's ≤ 1
-  guide per pair — the switch, not four independent `if`s. Overlap ≠ contact: if the shapes actually
-  intersect, no edge is flush, nothing draws.
+  (a second shared side just meets at a corner, where the perpendicular overlap is 0), so it's exactly
+  two lines per contacting pair (each shape's own edge) — the switch, not four independent `if`s.
+  Overlap ≠ contact: if the shapes actually intersect, no edge is flush, nothing draws.
 - **Eligibility** (`isContactGuideEligibleNode`): `rectangle · ellipse · polygon · star · text ·
   media` only, not hidden, rotation a multiple of 90°. Excludes `group · frame · section · line ·
   vector` — "faktycznie figury", and the vector network has its own alignment guide (§21 /

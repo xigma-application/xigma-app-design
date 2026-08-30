@@ -23,36 +23,48 @@ const rect = (overrides: Partial<Omit<TRectangleNode, 'type'>> & { type?: NodeTy
 const ACTIVE = { height: 100, width: 100, x: 0, y: 0 };
 
 describe('getShapeContactGuides', () => {
-  it('should draw a guide along the touched right edge, spanning the active shape height, at the neighbour edge', () => {
+  it('should draw a line on both shapes along the touched right edge — each spanning its own height', () => {
     // before — neighbour sits flush to the active shape's right edge, vertically overlapping
     const guides = getShapeContactGuides(ACTIVE, [{ bounds: { height: 60, width: 80, x: 100, y: 20 }, id: 'n' }]);
 
-    // result
-    expect(guides).toEqual([{ x1: 100, x2: 100, y1: 0, y2: 100 }]);
+    // result — active's own right edge (0..100 tall) and the neighbour's left edge (20..80 tall)
+    expect(guides).toEqual([
+      { x1: 100, x2: 100, y1: 0, y2: 100 },
+      { x1: 100, x2: 100, y1: 20, y2: 80 },
+    ]);
   });
 
-  it('should draw a guide along the touched bottom edge, spanning the active shape width, at the neighbour edge', () => {
+  it('should draw a line on both shapes along the touched bottom edge — each spanning its own width', () => {
     // before — neighbour sits flush below, horizontally overlapping
     const guides = getShapeContactGuides(ACTIVE, [{ bounds: { height: 40, width: 40, x: 30, y: 100 }, id: 'n' }]);
 
     // result
-    expect(guides).toEqual([{ x1: 0, x2: 100, y1: 100, y2: 100 }]);
+    expect(guides).toEqual([
+      { x1: 0, x2: 100, y1: 100, y2: 100 },
+      { x1: 30, x2: 70, y1: 100, y2: 100 },
+    ]);
   });
 
-  it('should draw a guide along the touched left edge, at the neighbour edge', () => {
+  it('should draw a line on both shapes along the touched left edge', () => {
     // before — neighbour flush to the active shape's left edge
     const guides = getShapeContactGuides(ACTIVE, [{ bounds: { height: 60, width: 40, x: -40, y: 20 }, id: 'n' }]);
 
     // result
-    expect(guides).toEqual([{ x1: 0, x2: 0, y1: 0, y2: 100 }]);
+    expect(guides).toEqual([
+      { x1: 0, x2: 0, y1: 0, y2: 100 },
+      { x1: 0, x2: 0, y1: 20, y2: 80 },
+    ]);
   });
 
-  it('should draw a guide along the touched top edge, at the neighbour edge', () => {
+  it('should draw a line on both shapes along the touched top edge', () => {
     // before — neighbour flush above
     const guides = getShapeContactGuides(ACTIVE, [{ bounds: { height: 40, width: 40, x: 30, y: -40 }, id: 'n' }]);
 
     // result
-    expect(guides).toEqual([{ x1: 0, x2: 100, y1: 0, y2: 0 }]);
+    expect(guides).toEqual([
+      { x1: 0, x2: 100, y1: 0, y2: 0 },
+      { x1: 30, x2: 70, y1: 0, y2: 0 },
+    ]);
   });
 
   it('should tolerate a sub-pixel gap as contact', () => {
@@ -60,7 +72,7 @@ describe('getShapeContactGuides', () => {
     const guides = getShapeContactGuides(ACTIVE, [{ bounds: { height: 40, width: 40, x: 30, y: 100.4 }, id: 'n' }]);
 
     // result
-    expect(guides).toHaveLength(1);
+    expect(guides).toHaveLength(2);
   });
 
   it('should treat a real gap as no contact', () => {
@@ -87,7 +99,7 @@ describe('getShapeContactGuides', () => {
     expect(guides).toEqual([]);
   });
 
-  it('should emit one guide per touching neighbour', () => {
+  it('should emit a pair of lines per touching neighbour', () => {
     // before — one neighbour flush right, another flush below
     const guides = getShapeContactGuides(ACTIVE, [
       { bounds: { height: 40, width: 40, x: 100, y: 50 }, id: 'right' },
@@ -97,7 +109,9 @@ describe('getShapeContactGuides', () => {
     // result
     expect(guides).toEqual([
       { x1: 100, x2: 100, y1: 0, y2: 100 },
+      { x1: 100, x2: 100, y1: 50, y2: 90 },
       { x1: 0, x2: 100, y1: 100, y2: 100 },
+      { x1: 50, x2: 90, y1: 100, y2: 100 },
     ]);
   });
 });

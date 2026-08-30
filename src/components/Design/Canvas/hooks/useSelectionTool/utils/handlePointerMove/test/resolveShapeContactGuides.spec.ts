@@ -49,8 +49,11 @@ describe('resolveShapeContactGuides', () => {
       selectionRefs({ dragStateRef: { current: { hasMoved: true, nodeOrigins: { [activeId]: {} } } } } as never),
     );
 
-    // result
-    expect(refs.transform.contactGuidesRef.current).toEqual([{ x1: 100, x2: 100, y1: 0, y2: 100 }]);
+    // result — a line on each shape's own edge
+    expect(refs.transform.contactGuidesRef.current).toEqual([
+      { x1: 100, x2: 100, y1: 0, y2: 100 },
+      { x1: 100, x2: 100, y1: 20, y2: 80 },
+    ]);
   });
 
   it('should populate the ref while a single shape is being resized into contact', () => {
@@ -69,7 +72,10 @@ describe('resolveShapeContactGuides', () => {
     );
 
     // result
-    expect(refs.transform.contactGuidesRef.current).toEqual([{ x1: 0, x2: 100, y1: 100, y2: 100 }]);
+    expect(refs.transform.contactGuidesRef.current).toEqual([
+      { x1: 0, x2: 100, y1: 100, y2: 100 },
+      { x1: 0, x2: 40, y1: 100, y2: 100 },
+    ]);
   });
 
   it('should populate the ref for the single selected shape while Alt is held', () => {
@@ -85,7 +91,10 @@ describe('resolveShapeContactGuides', () => {
     resolveShapeContactGuides(pointerEvent(true), refs, selectionRefs());
 
     // result
-    expect(refs.transform.contactGuidesRef.current).toEqual([{ x1: 100, x2: 100, y1: 0, y2: 100 }]);
+    expect(refs.transform.contactGuidesRef.current).toEqual([
+      { x1: 100, x2: 100, y1: 0, y2: 100 },
+      { x1: 100, x2: 100, y1: 0, y2: 40 },
+    ]);
   });
 
   it('should not show a guide on Alt-hover when more than one shape is selected', () => {
