@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import ThemeMenu from './ThemeMenu/ThemeMenu';
 import { MenuCompound } from 'shared';
 
 // others
@@ -72,12 +73,14 @@ const PreferencesMenu: FC = () => {
       <MenuItem disabled label={t(PREFERENCES_MENU_USE_SCROLL_WHEEL_ZOOM_KEY)} />
       <MenuItem disabled label={t(PREFERENCES_MENU_RIGHT_CLICK_AND_DRAG_TO_PAN_KEY)} />
       <MenuSeparator />
-      <MenuSub label={t(PREFERENCES_MENU_THEME_KEY)} />
-      <MenuItem disabled label={t(PREFERENCES_MENU_COLOR_PROFILE_KEY)} withCheck={false} />
-      <MenuItem disabled label={t(PREFERENCES_MENU_KEYBOARD_LAYOUT_KEY)} withCheck={false} />
-      <MenuItem disabled label={t(PREFERENCES_MENU_ACCESSIBILITY_SETTINGS_KEY)} withCheck={false} />
-      <MenuItem disabled label={t(PREFERENCES_MENU_PERMISSIONS_AND_HELPERS_KEY)} withCheck={false} />
-      <MenuItem disabled label={t(PREFERENCES_MENU_NUDGE_AMOUNT_KEY)} withCheck={false} />
+      <MenuSub label={t(PREFERENCES_MENU_THEME_KEY)} withCheck>
+        <ThemeMenu />
+      </MenuSub>
+      <MenuItem disabled label={t(PREFERENCES_MENU_COLOR_PROFILE_KEY)} />
+      <MenuItem disabled label={t(PREFERENCES_MENU_KEYBOARD_LAYOUT_KEY)} />
+      <MenuItem disabled label={t(PREFERENCES_MENU_ACCESSIBILITY_SETTINGS_KEY)} />
+      <MenuItem disabled label={t(PREFERENCES_MENU_PERMISSIONS_AND_HELPERS_KEY)} />
+      <MenuItem disabled label={t(PREFERENCES_MENU_NUDGE_AMOUNT_KEY)} />
     </>
   );
 };
