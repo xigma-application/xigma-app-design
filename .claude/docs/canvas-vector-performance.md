@@ -580,6 +580,61 @@ mutation unrelated to geometry — which previously paid the full crossing-detec
 for no reason. Complements §5.8 rather than replacing it; the "droższa" incremental-crossing-detection
 work §5.8 deferred is still not started.
 
+### 5.10 — §5.8's topology-skip extended to `getVectorNodeClusters.ts` (the planar path), closing the gap that made it a no-op on the disjoint-shapes stress scene
+
+§5.8 only patched `getVectorNodeRawClusters.ts` — used for stroke tessellation's cluster choice, but
+only on the branch `getClustersForStroke.ts` takes when the node has **no** crossings anywhere
+(`planar.segments === node.segments`). The disjoint-squares stress scene (no shape touches another)
+always takes that branch, so §5.8 measurably helped nothing on it — confirmed by live profiling
+during a vertex drag on the 3000-square scene (2026-08-30): `createClusterResultCache.get()` alone
+was 51%+ self-time, `getNodeStrokeVertices` 66%+ total, `planarizeVectorNetwork`/`computeClusters`
+both re-running in full on every single drag frame despite only one of ~3000 clusters ever changing.
+
+**Root cause, once instrumented live**: `getClustersForStroke.ts`'s no-crossings branch calls
+`getVectorNodeClusters(planar)` (the **planar**-path clusters, used for fill derivation too, via
+`deriveVectorFaces.ts`/`getVectorFillLoopPoints.ts`) — and that function's own cache was a plain
+`WeakMap<planar, clusters>`, no last-known-by-node-id fallback at all. Since §5.9 still (correctly)
+produces a brand-new `planar` object on every drag frame (vertices genuinely changed), this WeakMap
+missed every frame too, running `computeClusters` — the full adjacency-graph BFS — completely fresh
+each time, for all ~3000 clusters, even though only the one square touching the dragged vertex could
+possibly have a different result.
+
+**The fix**: the exact same `isRawSegmentTopologyUnchanged` invariant from §5.8, applied one level up.
+`computeClusters` doesn't care whether it's fed "raw" or "planar" segments — it's the *same function*
+either way, reading only `id`/`startId`/`endId`. So `getVectorNodeClusters.ts` gained the identical
+last-known-by-node-id tier §5.8 added to the raw path (reusing `isRawSegmentTopologyUnchanged.ts`
+unchanged): if `planar.segments`'s id set + every id's `startId`/`endId` matches what was last computed
+for this node id, skip `computeClusters` and reuse the stored clusters outright. `getVectorNodeClusters`
+had to gain a `nodeId` parameter to key this (it previously only took `planar`, with no way to
+identify "the same node across a planar-object-reference change") — threaded through its 3 call sites
+(`getClustersForStroke.ts`, `deriveVectorFaces.ts`, `getVectorFillLoopPoints.ts`), all of which already
+had `node.id` in scope.
+
+**Why this is still exact, not approximate, even though `planar.segments` depends on crossing
+detection**: the invariant doesn't need crossing detection to be skipped — only that *if* crossing
+detection still ran (it does, unchanged, every frame — §5.8's crossing-detection deferral is
+untouched) and its output segment topology happens to be unchanged from last time, the clustering
+step downstream of it can skip its own separate walk. A drag that changes which segments cross
+correctly produces a different `planar.segments` id set (crossings split segments into different
+virtual pieces), which correctly fails the topology check and falls through to a full recompute —
+this is the same "safe by construction, real change ⇒ clean miss" property §5.2's `isStale`/§5.8 rely
+on, not a new risk.
+
+**Confirmed live** (2026-08-30, same 3000-square scene, same drag): instrumented `computeClusters` to
+count/time its own calls, reset the counters, then dispatched 40 consecutive vertex-position edits
+(mirroring 40 throttled drag frames) via the store directly. Before this fix, `computeClustersCalls`
+incremented on every single one of the 40 dispatches (~7.5ms each, ~300ms total wasted). After the
+fix, **zero** further calls across all 40 — the counter stayed unset the entire drag, confirmed by
+also checking the dragged vertex's `x` actually advanced 39 times (rendering picked up the real
+position changes; `getVectorNodeThickStrokeVertices.ts`'s existing per-cluster `strokeCache` still
+correctly recomputes just the one touched cluster, everything else stays cached).
+
+**Scope, what's still not done**: `planarizeVectorNetwork`/`findAllNetworkCrossings` itself still
+re-scans the whole node every drag frame — the "droższa" incremental-crossing-detection work is
+unchanged by this slice, still the acknowledged remaining ceiling for the extreme stress case. This
+slice removes the *second* full-node walk (clustering) stacked on top of the first (crossing
+detection); the first one alone (~13ms/frame on the 3000-square scene, profiled) remains.
+
 ## 6. Unrelated find while live-verifying §5.7: `getRemainingVertices` was O(vertices × segments)
 
 Found live-testing §5.7's fix, not caused by it: deleting a segment on a large multi-shape vector
@@ -718,6 +773,11 @@ the same way `faceBufferCache`/`strokeBufferCache` are, starting from `drawScene
   `utils/canvas/vectorNetwork/getVectorNodeClusters/{isRawSegmentTopologyUnchanged,getVectorNodeRawClusters}.ts`
 - `getPlanarVectorNetwork.ts` re-keyed off `segments`/`vertices` (§5.9):
   `utils/canvas/vectorNetwork/getPlanarVectorNetwork.ts`
+- Topology-skip extended to the planar clustering path (§5.10):
+  `utils/canvas/vectorNetwork/getVectorNodeClusters/getVectorNodeClusters.ts`,
+  `utils/canvas/vectorNetwork/getVectorNodeThickStrokeVertices/getClustersForStroke.ts`,
+  `utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces.ts`,
+  `utils/canvas/vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints.ts`
 - Vertex-dot batch caching (§7): `useCanvasRenderLoop/utils/drawScene/drawVectorEditHandlesLayer/
   drawVectorVertexDots/{buildDotBatchVertices,getOrCreateVertexDotBuffer,drawVectorVertexDotBatch,
   drawVectorVertexDots,types}.ts`, `useCanvasRenderLoop/utils/drawScene/drawVectorEditHandlesLayer/

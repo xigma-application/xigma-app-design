@@ -33,6 +33,11 @@ in §5.6/§5.7 as not yet started:
       `segments`/`vertices`, not by the whole node — edits that don't touch geometry (color, stroke
       width) no longer pay for full crossing detection + clustering. Write-up in
       [[canvas-vector-performance]] §5.9.
+      **Third slice (2026-08-30)**: the first slice's skip extended to the planar clustering path
+      (fill derivation + the has-crossings stroke case) — closes the gap that made it a no-op on the
+      disjoint-shapes stress scene, confirmed live (0 further `computeClusters` calls across 40
+      drag frames). Crossing detection itself is still unincremental. Write-up in
+      [[canvas-vector-performance]] §5.10.
 - [ ] **GPU-buffer-level caching** — the renderer today re-uploads every node's geometry to the GPU
       (`bufferData`) every frame, whether or not it actually changed; the whole app shares only 4 GL
       buffers, rebound per-primitive (see [[canvas-rendering-pipeline]] §3/§8). Goal: persistent
@@ -47,6 +52,10 @@ in §5.6/§5.7 as not yet started:
       (`getOrCreateFaceBuffer.ts`) and for fixed-width stroke (`getOrCreateStrokeBuffer.ts`) of
       committed, stable vector nodes. Full write-up, scope, and deliberate exclusions in
       [[canvas-vector-performance]] §5.7's closing note.
+      **Third slice (2026-08-29)**: vertex-dot batch buffers in the Vector Edit Mode overlay, bounded
+      to 2 entries per centers array with explicit `gl.deleteBuffer` on eviction — an earlier unbounded
+      version genuinely leaked JS heap and GPU memory during a zoom/pan session, caught and fixed live
+      the same day. Write-up in [[canvas-vector-performance]] §7.
 
 The two items are independent of each other — do one, the other, both, or neither; there is no
 ordering dependency between them.

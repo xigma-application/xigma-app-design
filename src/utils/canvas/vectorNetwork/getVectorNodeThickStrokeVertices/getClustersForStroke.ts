@@ -8,4 +8,6 @@ import { getVectorNodeClusters } from '../getVectorNodeClusters/getVectorNodeClu
 import { getVectorNodeRawClusters } from '../getVectorNodeClusters/getVectorNodeRawClusters';
 
 export const getClustersForStroke = (node: TVectorNode, planar: TPlanarVectorNetwork): TVectorNodeCluster[] =>
-  planar.segments === node.segments && planar.vertices === node.vertices ? getVectorNodeClusters(planar) : getVectorNodeRawClusters(node);
+  planar.segments === node.segments && planar.vertices === node.vertices
+    ? getVectorNodeClusters(node.id, planar)
+    : getVectorNodeRawClusters(node);

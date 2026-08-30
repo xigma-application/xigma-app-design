@@ -16,7 +16,7 @@ export const deriveVectorFaces = (node: TVectorNode): TVectorFace[] => {
 
   if (!cachedForNode) {
     const planar = getPlanarVectorNetwork(node);
-    const clusters = getVectorNodeClusters(planar);
+    const clusters = getVectorNodeClusters(node.id, planar);
     const faces = clusters.flatMap((cluster) =>
       cache.get(node.id, cluster, '', planar, () => deriveClusterFaces(cluster, planar, node.vertices)),
     );

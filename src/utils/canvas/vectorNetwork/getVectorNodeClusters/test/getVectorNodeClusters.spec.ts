@@ -29,7 +29,7 @@ const buildPlanar = (vertices: TVectorVertex[], segments: TVectorSegment[]): TPl
 describe('getVectorNodeClusters', () => {
   it('should return no clusters for an empty network', () => {
     // result
-    expect(getVectorNodeClusters(buildPlanar([], []))).toEqual([]);
+    expect(getVectorNodeClusters('empty', buildPlanar([], []))).toEqual([]);
   });
 
   it('should skip an isolated vertex with no segments, same as splitVectorNetworkIntoComponents', () => {
@@ -37,7 +37,7 @@ describe('getVectorNodeClusters', () => {
     const planar = buildPlanar([vertex('lonely', 0, 0)], []);
 
     // result
-    expect(getVectorNodeClusters(planar)).toEqual([]);
+    expect(getVectorNodeClusters('isolated-vertex', planar)).toEqual([]);
   });
 
   it('should group one closed triangle into a single cluster covering all its segments/vertices', () => {
@@ -48,7 +48,7 @@ describe('getVectorNodeClusters', () => {
     );
 
     // before
-    const clusters = getVectorNodeClusters(planar);
+    const clusters = getVectorNodeClusters('triangle', planar);
 
     // result
     expect(clusters).toHaveLength(1);
@@ -64,7 +64,7 @@ describe('getVectorNodeClusters', () => {
     );
 
     // before
-    const clusters = getVectorNodeClusters(planar);
+    const clusters = getVectorNodeClusters('two-triangles', planar);
 
     // result
     expect(clusters).toHaveLength(2);
@@ -86,7 +86,7 @@ describe('getVectorNodeClusters', () => {
     );
 
     // before
-    const clusters = getVectorNodeClusters(planar);
+    const clusters = getVectorNodeClusters('crossing-shapes', planar);
 
     // result — one cluster, not two, since the crossing vertex is a real shared endpoint now
     expect(clusters).toHaveLength(1);
@@ -98,10 +98,51 @@ describe('getVectorNodeClusters', () => {
     const planar = buildPlanar([vertex('a', 0, 0), vertex('b', 10, 0)], [seg('ab', 'a', 'b')]);
 
     // before
-    const first = getVectorNodeClusters(planar);
-    const second = getVectorNodeClusters(planar);
+    const first = getVectorNodeClusters('same-reference', planar);
+    const second = getVectorNodeClusters('same-reference', planar);
 
     // result
     expect(second).toBe(first);
+  });
+
+  it('should reuse the last-known clusters (skipping the graph walk) for a new planar reference whose segment topology is unchanged — e.g. a vertex moved without touching connectivity', () => {
+    // mock — same segment id set/startId/endId as the triangle above, but every vertex has moved,
+    // and it's a brand-new planar object (as getPlanarVectorNetwork/planarizeVectorNetwork would hand
+    // back on any edit, since it never returns the exact same object twice)
+    const first = buildPlanar(
+      [vertex('a', 0, 0), vertex('b', 10, 0), vertex('c', 5, 10)],
+      [seg('ab', 'a', 'b'), seg('bc', 'b', 'c'), seg('ca', 'c', 'a')],
+    );
+    const moved = buildPlanar(
+      [vertex('a', 1, 1), vertex('b', 11, 1), vertex('c', 6, 11)],
+      [seg('ab', 'a', 'b'), seg('bc', 'b', 'c'), seg('ca', 'c', 'a')],
+    );
+
+    // before
+    const firstClusters = getVectorNodeClusters('incremental-drag', first);
+    const secondClusters = getVectorNodeClusters('incremental-drag', moved);
+
+    // result — the exact same cluster objects are reused, not recomputed, since topology is identical
+    expect(secondClusters).toBe(firstClusters);
+  });
+
+  it('should recompute when the segment topology genuinely changes between two planar references for the same node id', () => {
+    // mock — first a plain triangle, then a real topology change (a 4th vertex/segment added)
+    const first = buildPlanar(
+      [vertex('a', 0, 0), vertex('b', 10, 0), vertex('c', 5, 10)],
+      [seg('ab', 'a', 'b'), seg('bc', 'b', 'c'), seg('ca', 'c', 'a')],
+    );
+    const withExtraSegment = buildPlanar(
+      [vertex('a', 0, 0), vertex('b', 10, 0), vertex('c', 5, 10), vertex('d', 20, 0)],
+      [seg('ab', 'a', 'b'), seg('bc', 'b', 'c'), seg('ca', 'c', 'a'), seg('bd', 'b', 'd')],
+    );
+
+    // before
+    const firstClusters = getVectorNodeClusters('incremental-recompute', first);
+    const secondClusters = getVectorNodeClusters('incremental-recompute', withExtraSegment);
+
+    // result — genuinely different clusters, not the stale, reused ones
+    expect(secondClusters).not.toBe(firstClusters);
+    expect(secondClusters[0].segmentIds.sort()).toEqual(['ab', 'bc', 'bd', 'ca']);
   });
 });

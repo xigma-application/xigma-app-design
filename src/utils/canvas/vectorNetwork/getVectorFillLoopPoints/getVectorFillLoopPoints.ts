@@ -19,7 +19,7 @@ export const getVectorFillLoopPoints = (node: TVectorNode, loopKey: string): TPo
 
   if (!nodeCache.has(loopKey)) {
     const planar = getPlanarVectorNetwork(node);
-    const cluster = getVectorClusterByRealSegmentId(getVectorNodeClusters(planar)).get(getRealSegmentIdFromLoopKey(loopKey));
+    const cluster = getVectorClusterByRealSegmentId(getVectorNodeClusters(node.id, planar)).get(getRealSegmentIdFromLoopKey(loopKey));
     const result = cluster
       ? cache.get(node.id, cluster, loopKey, planar, () => computeLoopPoints(loopKey, planar, node.vertices))
       : computeLoopPoints(loopKey, planar, node.vertices);
