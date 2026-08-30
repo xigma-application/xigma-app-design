@@ -37,6 +37,15 @@ doesn't toggle like a single click). Full write-up: `.claude/docs/vector-network
 - [x] color survives Erase/Cut/Shape Builder instead of reverting to a random hue
 - [x] drag paints/removes multiple faces in one stroke, always-paint-never-remove at drag start
 
+## Stage 4 — Selection size label (W × H badge)
+
+A blue `W x H` badge just outside the selection, docked to the visually-bottom edge, staying parallel
+to it and hopping edges every 45° of rotation; centred, 5px off the edge, hidden in Vector Edit Mode.
+Reuses the variable-width tool's label; also retunes the shared canvas blue to `#337ae1`. Write-up:
+`.claude/docs/selection-and-manipulation.md` §22.
+
+- [x] rotation-aware placement + edge-hop, blue badge via `drawValueLabel` (`{ angleDeg, edgeGapPx, fill }`)
+
 ## Related
 
 [[canvas-rendering-pipeline]] — context for the render loop and the `WEBGL_CONTEXT_ATTRIBUTES`
