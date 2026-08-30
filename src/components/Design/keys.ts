@@ -98,6 +98,7 @@ export const KEYBOARD_SHORTCUTS: TKeyboardShortcuts = {
   renameLayer: [CONTROL, 'R'],
   resizeToFit: [ALT, SHIFT, CONTROL, 'R'],
   rulers: [SHIFT, 'R'],
+  runLastPlugin: [ALT, CONTROL, 'P'],
   saveToVersionHistory: [ALT, CONTROL, 'S'],
   [ToolName.scale]: ['K'],
   [ToolName.section]: [SHIFT, 'S'],

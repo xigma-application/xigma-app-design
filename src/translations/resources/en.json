@@ -192,6 +192,8 @@
   "design.leftPanel.navRail.logoMenu.objectMenu.wrapInNewSection": "Wrap in new section",
   "design.leftPanel.navRail.logoMenu.openDesktopApp": "Open in desktop app",
   "design.leftPanel.navRail.logoMenu.plugins": "Plugins",
+  "design.leftPanel.navRail.logoMenu.pluginsMenu.managePlugins": "Manage plugins...",
+  "design.leftPanel.navRail.logoMenu.pluginsMenu.runLastPlugin": "Run last plugin",
   "design.leftPanel.navRail.logoMenu.preferences": "Preferences",
   "design.leftPanel.navRail.logoMenu.text": "Text",
   "design.leftPanel.navRail.logoMenu.textMenu.adjust": "Adjust",

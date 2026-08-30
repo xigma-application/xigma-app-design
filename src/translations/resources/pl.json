@@ -204,6 +204,8 @@
   "design.leftPanel.navRail.logoMenu.objectMenu.wrapInNewSection": "Zawiń w nowej sekcji",
   "design.leftPanel.navRail.logoMenu.openDesktopApp": "Otwórz w aplikacji desktopowej",
   "design.leftPanel.navRail.logoMenu.plugins": "Wtyczki",
+  "design.leftPanel.navRail.logoMenu.pluginsMenu.managePlugins": "Zarządzaj wtyczkami...",
+  "design.leftPanel.navRail.logoMenu.pluginsMenu.runLastPlugin": "Uruchom ostatnią wtyczkę",
   "design.leftPanel.navRail.logoMenu.preferences": "Preferencje",
   "design.leftPanel.navRail.logoMenu.text": "Tekst",
   "design.leftPanel.navRail.logoMenu.textMenu.adjust": "Dostosuj",
