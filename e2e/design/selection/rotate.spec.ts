@@ -120,3 +120,35 @@ test('rotating a group selection spins every member around their shared center',
 
   expect(afterRotate.equals(beforeRotate)).toBe(false);
 });
+
+test('a section resists rotation entirely — no rotate cursor, and dragging its corner ring never spins it', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-rotate-section-resists');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawSection(900, 300, 1000, 400);
+  await designPage.click(950, 350); // select it
+
+  // the same ring position that reliably applies a rotate cursor on a rectangle (see above)
+  await designPage.pointerMove(890, 290);
+  const cursor = await designPage.cursorStyle();
+
+  expect(cursor).toBe('');
+
+  await designPage.pointerMove(1500, 900); // neutral resting point, so hover isn't part of the diff
+  const beforeDrag = await designPage.canvas.screenshot();
+
+  await designPage.pointerDown(890, 290);
+  await designPage.pointerMove(1020, 280); // the same swing that visibly spins a rectangle above
+  await designPage.pointerUp();
+
+  // whatever that drag did instead (armRotateOnPointerDown never claiming it, e.g. an empty
+  // marquee), the section itself was never rotated — reselecting it lands on the exact same
+  // pixels as before the drag
+  await designPage.click(950, 350);
+  await designPage.pointerMove(1500, 900);
+  const afterDrag = await designPage.canvas.screenshot();
+
+  expect(afterDrag.equals(beforeDrag)).toBe(true);
+});

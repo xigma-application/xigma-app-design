@@ -35,14 +35,41 @@ mocks the hit-test util; `TreeItem`'s rename spec never touches the canvas).
 | 4   | Ctrl+Z after a canvas-label rename reverts the name (shared `updateNode` history)                                                                                  |  —   |            ✅ `frame-name-label.spec.ts`            |
 | 5   | New frames are auto-numbered "Frame 1", "Frame 2", ... off existing frames on the page                                                                             |  ✅  | — (covered precisely by `getNextFrameName.spec.ts`) |
 | 6   | The would-be name label is already visible above the frame while it is still being dragged out (`drawDraftFrameNameLabel`), not just after the pointer is released |  ✅  |            ✅ `frame-name-label.spec.ts`            |
+| 7   | Clicking a frame's canvas label selects it, landing on pixel-identical output to clicking its body (`getNodeAtPoint`/`isPointInNodeNameLabel`)                     |  ✅  |            ✅ `frame-name-label.spec.ts`            |
+| 8   | Hovering a frame's canvas label shows the same hover highlight as hovering its body                                                                                |  ✅  |            ✅ `frame-name-label.spec.ts`            |
+
+## Section name label
+
+Sections get the same floating name label as frames — same auto-numbering
+(`getNextSectionName`), same double-click-to-rename via `CanvasNameLabelInput`
+(`SectionNameLabelEditOverlay`), same click/hover hit-area (`isPointInNodeNameLabel`) — but
+rendered as a filled, rounded badge (`drawSectionNameLabel`, `SECTION_NAME_LABEL_FILL`) instead of
+plain text, matching the selection size label's visual language rather than the frame label's. The
+badge's colors never change with selection (unlike the frame label's grey/blue text swap), since a
+section can't be rotated and its edit input therefore never needs the frame label's angle-tracking
+logic either.
+
+| #   | Scenario                                                                                                                                               | Unit |                          E2E                          |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | :--: | :---------------------------------------------------: |
+| 1   | Renaming a section via its canvas label updates the Layers panel row                                                                                   |  ✅  |            ✅ `section-name-label.spec.ts`            |
+| 2   | Renaming a section from the Layers panel updates its canvas label                                                                                      |  —   |            ✅ `section-name-label.spec.ts`            |
+| 3   | Pressing Escape while editing the canvas label leaves the name unchanged                                                                               |  ✅  |            ✅ `section-name-label.spec.ts`            |
+| 4   | Ctrl+Z after a canvas-label rename reverts the name (shared `updateNode` history)                                                                      |  —   |            ✅ `section-name-label.spec.ts`            |
+| 5   | New sections are auto-numbered "Section 1", "Section 2", ... off existing sections on the page                                                         |  ✅  | — (covered precisely by `getNextSectionName.spec.ts`) |
+| 6   | The would-be name badge is already visible above the section while it is still being dragged out (`drawDraftSectionNameLabel`), not just after release |  ✅  |            ✅ `section-name-label.spec.ts`            |
+| 7   | Clicking a section's canvas label selects it, landing on pixel-identical output to clicking its body                                                   |  ✅  |            ✅ `section-name-label.spec.ts`            |
+| 8   | Hovering a section's canvas label shows the same hover highlight as hovering its body                                                                  |  ✅  |            ✅ `section-name-label.spec.ts`            |
 
 ## Section drawing
 
 Section is a Frame-like container node: a plain box node (`NodeType.section`) rendered through the
-same generic `useDrawShapeTool`/`drawDraftShape`/`drawSceneNodes` paths as Frame, defaulting to a
-fill equal to the canvas background color (`#444444`) so it's invisible until drawn, same
-fill-less-draft behavior as Frame (`drawDraftShape.ts`'s default case treats `NodeType.frame` and
-`NodeType.section` identically). Section shares Frame's toolbar button/dropdown panel
+same generic `useDrawShapeTool`/`drawDraftShape`/`drawSceneNodes` paths as Frame, defaulting to
+`SECTION_FILL` — the same dark fill its floating name badge uses (`SECTION_NAME_LABEL_FILL`), so the
+section body and its own label read as one consistent color, distinct from the plain canvas
+background behind them. Its draft (while still being dragged) stays fill-less regardless, same as
+Frame's draft (`drawDraftShape.ts`'s default case treats `NodeType.frame` and `NodeType.section`
+identically — the committed fill only applies once the shape lands in the store). Section shares
+Frame's toolbar button/dropdown panel
 (`TOOL_GROUP_ITEMS[frame] = [frame, section]`) instead of getting its own top-level icon — same
 "shared button shows whichever tool was last picked" mechanic as the Rectangle group, backed by its
 own `lastFrameTool` store field (mirroring `lastShapeTool`/`lastMouseTool`).
@@ -229,15 +256,15 @@ have their own near-identical hook. All four now call a shared `selectLastCreate
 generates the id via `nanoid()`, so the caller can't know it ahead of time — same pattern
 `useDrawTextOnPathTool.ts` already established for its own mid-draw path selection).
 
-| #   | Scenario                                                                                                               | Unit |              E2E              |
-| --- | ---------------------------------------------------------------------------------------------------------------------- | :--: | :---------------------------: |
-| 97  | A freshly drawn Frame is selected immediately on release, with no extra click needed                                   |  ✅  |   ✅ `create-frame.spec.ts`   |
-| 98  | A freshly drawn Section is selected immediately on release (proven via its outline alone, since its fill is invisible) |  ✅  |  ✅ `create-section.spec.ts`  |
-| 99  | A freshly drawn Rectangle is selected immediately on release                                                           |  ✅  | ✅ `create-rectangle.spec.ts` |
-| 100 | A freshly drawn Ellipse is selected immediately on release                                                             |  ✅  |  ✅ `create-ellipse.spec.ts`  |
-| 101 | A freshly drawn Polygon is selected immediately on release                                                             |  ✅  |  ✅ `create-polygon.spec.ts`  |
-| 102 | A freshly drawn Star is selected immediately on release                                                                |  ✅  |   ✅ `create-star.spec.ts`    |
-| 103 | A freshly drawn Line is selected immediately on release (its own no-bounding-box selection style, see #28 above)       |  ✅  |   ✅ `create-line.spec.ts`    |
+| #   | Scenario                                                                                                         | Unit |              E2E              |
+| --- | ---------------------------------------------------------------------------------------------------------------- | :--: | :---------------------------: |
+| 97  | A freshly drawn Frame is selected immediately on release, with no extra click needed                             |  ✅  |   ✅ `create-frame.spec.ts`   |
+| 98  | A freshly drawn Section is selected immediately on release, with no extra click needed                           |  ✅  |  ✅ `create-section.spec.ts`  |
+| 99  | A freshly drawn Rectangle is selected immediately on release                                                     |  ✅  | ✅ `create-rectangle.spec.ts` |
+| 100 | A freshly drawn Ellipse is selected immediately on release                                                       |  ✅  |  ✅ `create-ellipse.spec.ts`  |
+| 101 | A freshly drawn Polygon is selected immediately on release                                                       |  ✅  |  ✅ `create-polygon.spec.ts`  |
+| 102 | A freshly drawn Star is selected immediately on release                                                          |  ✅  |   ✅ `create-star.spec.ts`    |
+| 103 | A freshly drawn Line is selected immediately on release (its own no-bounding-box selection style, see #28 above) |  ✅  |   ✅ `create-line.spec.ts`    |
 
 Each hook's own unit spec (`useDrawShapeTool.spec.tsx`, `useDrawPolygonTool.spec.tsx`,
 `useDrawStarTool.spec.tsx`, `useDrawLineTool.spec.tsx`) already asserts `store.getState().design.
@@ -981,15 +1008,16 @@ also isn't just set once at arm time: `continueRotateDrag.ts` recomputes it ever
 `canvas.style.cursor` on every step, so the icon keeps spinning in sync with the node itself for the
 whole drag, not just its start and end.
 
-| #   | Scenario                                                                                             | Unit |         E2E         |
-| --- | ---------------------------------------------------------------------------------------------------- | :--: | :-----------------: |
-| 51  | Hovering the ring just outside a resize handle applies a distinct rotate cursor                      |  —   | ✅ `rotate.spec.ts` |
-| 52  | Dragging the rotate ring visibly spins the node                                                      |  —   | ✅ `rotate.spec.ts` |
-| 53  | A rotated node is hit-tested (and its resize handles found) at its actual rotated position           |  ✅  | ✅ `rotate.spec.ts` |
-| 54  | Rotating a group selection spins every member around their shared center                             |  ✅  | ✅ `rotate.spec.ts` |
-| 55  | An interior click near a corner (within resize+rotate ring distance) is never hijacked into a rotate |  ✅  |          —          |
-| 56  | Marquee selection tests a rotated node's true rotated bounds, not its stale axis-aligned box         |  ✅  |          —          |
-| 57  | The rotate cursor updates live as the drag angle changes, not just once at the start                 |  —   | ✅ `rotate.spec.ts` |
+| #   | Scenario                                                                                                                                                                                      | Unit |         E2E         |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :-----------------: |
+| 51  | Hovering the ring just outside a resize handle applies a distinct rotate cursor                                                                                                               |  —   | ✅ `rotate.spec.ts` |
+| 52  | Dragging the rotate ring visibly spins the node                                                                                                                                               |  —   | ✅ `rotate.spec.ts` |
+| 53  | A rotated node is hit-tested (and its resize handles found) at its actual rotated position                                                                                                    |  ✅  | ✅ `rotate.spec.ts` |
+| 54  | Rotating a group selection spins every member around their shared center                                                                                                                      |  ✅  | ✅ `rotate.spec.ts` |
+| 55  | An interior click near a corner (within resize+rotate ring distance) is never hijacked into a rotate                                                                                          |  ✅  |          —          |
+| 56  | Marquee selection tests a rotated node's true rotated bounds, not its stale axis-aligned box                                                                                                  |  ✅  |          —          |
+| 57  | The rotate cursor updates live as the drag angle changes, not just once at the start                                                                                                          |  —   | ✅ `rotate.spec.ts` |
+| 58  | A section resists rotation entirely — its own rotate ring never applies a rotate cursor or spins it (`getRotateHandleAtPoint` excludes `NodeType.section`, same as it already excluded lines) |  ✅  | ✅ `rotate.spec.ts` |
 
 #51/#52/#57 are e2e-only for the same reason as resize's #43: a live `Image`/canvas-rotate cursor and
 an actual WebGL repaint aren't things a jsdom unit test can observe — #57 specifically needs a real
