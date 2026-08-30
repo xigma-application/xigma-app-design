@@ -45,17 +45,38 @@ describe('getDragAlignmentSnap', () => {
     expect(result).toEqual({ delta: { x: 5, y: 7 }, guide: null });
   });
 
-  it('should correct the delta and produce a guide when the dragged shape lands within tolerance of a stationary one', () => {
+  it('should correct the delta and draw the vertical guide along the whole matched shape, not just a short segment', () => {
     // mock — a dragged rect moving right by 97 lands its right edge (0+100+97=197) 3px short of
-    // the stationary rect's left edge (200)
-    const nodes = { a: rect('a', 0, 0), b: rect('b', 200, 0) };
+    // the stationary rect's left edge (200); B sits far below A so only the x-axis (vertical guide)
+    // ever matches; C is an unrelated shape nowhere near a match, checked and skipped first
+    const nodes = { a: rect('a', 0, 0), b: rect('b', 200, 300), c: rect('c', 900, 900) };
 
     // action
     const result = getDragAlignmentSnap(nodes, { a: { x: 0, y: 0 } }, { x: 97, y: 0 }, 5);
 
-    // result — corrected by +3 so the edges land flush
+    // result — corrected by +3 so the edges land flush, and the line spans B's full height (300-400)
     expect(result.delta).toEqual({ x: 100, y: 0 });
-    expect(result.guide).not.toBeNull();
+    expect(result.guide).toEqual({
+      horizontal: null,
+      vertical: { anchor: { x: 200, y: 300 }, match: { x: 200, y: 400 } },
+    });
+  });
+
+  it('should correct the delta and draw the horizontal guide along the whole matched shape, not just a short segment', () => {
+    // mock — a dragged rect moving down by 97 lands its bottom edge (0+100+97=197) 3px short of the
+    // stationary rect's top edge (200); B sits far to the right so only the y-axis (horizontal guide)
+    // ever matches
+    const nodes = { a: rect('a', 0, 0), b: rect('b', 300, 200) };
+
+    // action
+    const result = getDragAlignmentSnap(nodes, { a: { x: 0, y: 0 } }, { x: 0, y: 97 }, 5);
+
+    // result — corrected by +3 so the edges land flush, and the line spans B's full width (300-400)
+    expect(result.delta).toEqual({ x: 0, y: 100 });
+    expect(result.guide).toEqual({
+      horizontal: { anchor: { x: 300, y: 200 }, match: { x: 400, y: 200 } },
+      vertical: null,
+    });
   });
 
   it('should never snap a dragged shape onto another shape that is also being dragged', () => {

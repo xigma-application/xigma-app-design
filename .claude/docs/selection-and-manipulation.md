@@ -1461,8 +1461,10 @@ dragging:
   fire at once (vector-edit vs. plain selection are mutually exclusive), and `drawScene` draws both
   through the same `drawAlignmentGuide`.
 
-**Shape move-snap** (`getDragAlignmentSnap.ts`, pure, driven from `continueDrag.ts` — the whole-node
-move handler): each dragged node id that both (a) has a plain `{x,y}` origin (i.e. a box node, not a
+**Shape move-snap** (`getDragAlignmentSnap/`, pure, driven from `continueDrag.ts` — the whole-node
+move handler — split into `getDragAlignmentSnap.ts` orchestrator + `getEligibleDraggedEntries.ts` +
+`getCandidateShapes.ts` + `extendGuideToFullElement.ts`, each independently unit-tested): each
+dragged node id that both (a) has a plain `{x,y}` origin (i.e. a box node, not a
 line/vector — those never reach here) and (b) is `isContactGuideEligibleNode` (§23's same
 rectangle/ellipse/polygon/star/text/media + axis-aligned + not-hidden filter) contributes 9
 `getShapeSnapPoints` — the 4 corners, 4 edge midpoints, and centre of its dragged-to bounds — as
@@ -1473,6 +1475,7 @@ onto it, exactly like the vector multi-drag group-snap (§21) it's a sibling of.
 eligible shapes, some lines/vectors) still snaps as one rigid group — the correction is computed
 from the eligible members only but applied to every dragged node's delta uniformly.
 
+- **The rendered guide line spans the whole matched shape, not just anchor→match.** `getGroupAlignmentGuide`'s own `{anchor, match}` (a short segment between the two specific points that matched) is shape-agnostic — fine for vector vertices, but for shapes `getDragAlignmentSnap` post-processes it: `extendGuideToFullElement` looks up which candidate's 9 snap points contains the matched point (`findMatchedShapeBounds`, exact value match — safe, since every candidate point it can possibly match against was drawn from that same `candidateShapes` list one line above) and stretches the axis line to that shape's full bounds — vertical line running its whole height, horizontal its whole width — rather than a short stub between just the two aligned points. This post-processing is local to the shape path; `drawAlignmentGuide` itself and the vector-drag call sites are untouched.
 - No resize-time or draw-new-shape snap yet (only move) — deliberately deferred.
 - No modifier bypass — snap is always active during a move, by design (unlike Figma's none-here
   either, per the request this shipped from).

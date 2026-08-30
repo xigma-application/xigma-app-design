@@ -137,7 +137,6 @@ export const drawScene = (
   drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
   drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
   drawSelectionSizeLabel(gl, program, buffer, imageContext, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
-  drawShapeContactGuides(gl, program, buffer, refs.transform.contactGuidesRef.current, clientWidth, clientHeight, viewport);
   drawCornerRadiusHandlesLayer(
     gl,
     program,
@@ -336,4 +335,5 @@ export const drawScene = (
   );
   drawMarquee(gl, program, buffer, marqueeRect, clientWidth, clientHeight, viewport);
   drawSliceDraft(gl, program, buffer, sliceRect, clientWidth, clientHeight, viewport);
+  drawShapeContactGuides(gl, program, buffer, refs.transform.contactGuidesRef.current, clientWidth, clientHeight, viewport);
 };

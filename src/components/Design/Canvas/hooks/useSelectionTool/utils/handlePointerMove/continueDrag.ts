@@ -13,7 +13,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
-import { getDragAlignmentSnap } from 'components/Design/Canvas/utils/getDragAlignmentSnap';
+import { getDragAlignmentSnap } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getDragAlignmentSnap';
 import { getGeometryDeltaChanges } from '../../../../utils/getGeometryDeltaChanges';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { scheduleThrottledDispatch } from 'components/Design/Canvas/utils/scheduleThrottledDispatch';
