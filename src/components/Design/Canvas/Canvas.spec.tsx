@@ -8,7 +8,7 @@ import Canvas from './Canvas';
 import ClassNamesProvider from '../core/ClassNamesProvider/ClassNamesProvider';
 
 // pages
-import CanvasRefsProvider from 'pages/DesignPage/core/CanvasRefsProvider/CanvasRefsProvider';
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 
 // store
 import { store } from 'store';

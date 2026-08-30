@@ -7,7 +7,7 @@ import MouseModes from './MouseModes';
 import { TooltipProvider } from 'shared';
 
 // core
-import CanvasRefsProvider from 'pages/DesignPage/core/CanvasRefsProvider/CanvasRefsProvider';
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 
 // store
 import { setActiveTool } from 'store/design/slice';

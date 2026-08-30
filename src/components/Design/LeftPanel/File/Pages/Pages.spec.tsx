@@ -1,6 +1,5 @@
 import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router';
 import { Provider } from 'react-redux';
 
 // components
@@ -25,9 +24,7 @@ const renderPages = (testStore: TStore = store): ReturnType<typeof render> =>
   render(
     <Provider store={testStore}>
       <TooltipProvider>
-        <MemoryRouter initialEntries={['/design/file-1']}>
-          <Pages />
-        </MemoryRouter>
+        <Pages />
       </TooltipProvider>
     </Provider>,
   );

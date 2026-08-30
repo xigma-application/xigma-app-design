@@ -11,7 +11,7 @@ any of the machinery below — see `design-store-architecture.md`'s "Comment sta
 
 - `Canvas/Canvas.tsx` owns the single `<canvas>` element (`canvasRef`) plus every other ephemeral
   interaction ref (`draftRef`/`sliceRef` and ~65 more), all assembled by
-  `pages/DesignPage/core/CanvasRefsProvider/CanvasRefsProvider.tsx` into one `TCanvasRefs` object
+  `components/App/core/CanvasRefsProvider/CanvasRefsProvider.tsx` into one `TCanvasRefs` object
   (`types/design/canvas/types.ts` — the drag-state types themselves, e.g. `TCornerRadiusDragState`/
   `TEllipseArcDragState`, live there too, not under `components/`, since a type consumed from the
   global `types/` layer can't reach back into a feature folder). `TCanvasRefs` is **not** one flat

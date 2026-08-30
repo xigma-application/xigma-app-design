@@ -136,7 +136,7 @@ untouched (`advancePencilTail.ts` never runs).
   `constant/canvas.ts` (`PENCIL_CAP_RADIUS_PX`, global-layer only).
 - Refs: `types/design/canvas/types.ts` + both `TCanvasRefs` builders
   (`useCanvasRefs/createCanvasRefs.ts` and the separate manual one in
-  `pages/DesignPage/core/CanvasRefsProvider/CanvasRefsProvider.tsx` — **two places**, easy to update
+  `components/App/core/CanvasRefsProvider/CanvasRefsProvider.tsx` — **two places**, easy to update
   only one) — `pencilPreviewPointsRef`, `pencilRawPreviewPointsRef`, `pencilShowRawPreviewRef`.
 - Hook: `Canvas/hooks/useDrawPencilTool/` — `useDrawPencilTool.ts` (thin listener-wiring shell) →
   `utils/handlePointerDown/`, `utils/handlePointerMove/` (`handlePointerMove.ts` orchestrator +

@@ -6,7 +6,7 @@ import { render, screen } from '@testing-library/react';
 import ToolDropdown from './ToolDropdown';
 
 // core
-import CanvasRefsProvider from 'pages/DesignPage/core/CanvasRefsProvider/CanvasRefsProvider';
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 
 // store
 import { store } from 'store';

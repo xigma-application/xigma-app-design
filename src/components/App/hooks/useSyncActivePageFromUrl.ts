@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
-import { useSearchParams } from 'react-router';
 
 // store
 import { setActivePage } from 'store/design/slice';
 import { selectActivePageId, selectPages } from 'store/design/selectors';
 import { AppDispatch, store, useAppDispatch } from 'store';
+
+// utils
+import { getQueryParam } from '../utils/getQueryParam';
 
 const applyPageParam = (dispatch: AppDispatch, pageParam: string | null): void => {
   const state = store.getState();
@@ -16,10 +18,8 @@ const applyPageParam = (dispatch: AppDispatch, pageParam: string | null): void =
 
 export const useSyncActivePageFromUrl = (): void => {
   const dispatch = useAppDispatch();
-  const [searchParams] = useSearchParams();
-  const pageParam = searchParams.get('page');
 
   useEffect(() => {
-    applyPageParam(dispatch, pageParam);
-  }, [dispatch, pageParam]);
+    applyPageParam(dispatch, getQueryParam('page'));
+  }, [dispatch]);
 };

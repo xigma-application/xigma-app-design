@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import Toolbar from './Toolbar';
 
 // core
-import CanvasRefsProvider from 'pages/DesignPage/core/CanvasRefsProvider/CanvasRefsProvider';
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 import { TooltipProvider } from 'shared';
 
 // store

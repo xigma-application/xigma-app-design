@@ -1,5 +1,4 @@
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Route, Routes } from 'react-router';
 import { Provider } from 'react-redux';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 
@@ -29,11 +28,7 @@ const buildPage = (overrides: Partial<TDesignPage> = {}): TDesignPage => ({
 const renderPageRow = (page: TDesignPage, autoEdit = false, onAutoEditDismissed?: TFunc): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <MemoryRouter initialEntries={['/design/file-1']}>
-        <Routes>
-          <Route element={<PageRow autoEdit={autoEdit} onAutoEditDismissed={onAutoEditDismissed} page={page} />} path="/design/:id" />
-        </Routes>
-      </MemoryRouter>
+      <PageRow autoEdit={autoEdit} onAutoEditDismissed={onAutoEditDismissed} page={page} />
     </Provider>,
   );
 

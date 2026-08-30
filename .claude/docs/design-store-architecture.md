@@ -375,8 +375,10 @@ node-scoped and are not remapped), and calls `getDuplicatePageName` for the `"<n
 `"<name> copy 2"` naming. `getActivePage`/draft note: the util does `current(draftSource)` before
 `structuredClone`, since `structuredClone` throws on an Immer draft. A new page name is generated
 by `getNextPageName` (add) / `getDuplicatePageName` (duplicate). Separately, a `?page=<id>` query
-param on `/design/:id` is read once on mount by `pages/DesignPage/hooks/useSyncActivePageFromUrl.ts`
-→ `setActivePage` if the id resolves (the one history entry this leaves is the accepted tradeoff). Still deliberately out of the snapshot: per-page `viewport`/`paintColor`/`comments` and
+param (the app has no client-side router — every URL param is read directly off
+`window.location.search`, see [[app-shell]]) is read once on mount by
+`components/App/hooks/useSyncActivePageFromUrl.ts` → `setActivePage` if the id resolves (the one
+history entry this leaves is the accepted tradeoff). Still deliberately out of the snapshot: per-page `viewport`/`paintColor`/`comments` and
 `activeTool` are UI state, not document state. `TVectorSelectionSnapshot` (`types/design/canvas/types.ts`) is the
 newer half — `{ selectedVectorVertexIds, selectedVectorSegmentIds, selectedVectorHandles }` — added so
 undo/redo also restores which vertex/segment/tangent-handle was selected inside Vector Edit Mode; see

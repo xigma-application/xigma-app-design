@@ -1,14 +1,11 @@
-import { generatePath, useParams } from 'react-router';
-
-// others
-import { RouteName, ROUTES } from 'core/Routing/constants/routes';
+// utils
+import { getQueryParam } from 'components/App/utils/getQueryParam';
 
 export const useCopyPageLink = (id: string): TFunc => {
-  const { id: fileId = '' } = useParams();
-
   return (): void => {
-    const path = generatePath(ROUTES[RouteName.design], { id: fileId });
+    const projectParam = getQueryParam('project');
+    const projectQuery = projectParam ? `project=${projectParam}&` : '';
 
-    navigator.clipboard.writeText(`${window.location.origin}${path}?page=${id}`);
+    navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?${projectQuery}page=${id}`);
   };
 };

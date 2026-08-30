@@ -55,7 +55,7 @@ export class DesignPage {
   }
 
   async goto(projectId: string): Promise<void> {
-    await this.page.goto(`/design/${projectId}`);
+    await this.page.goto(`/?project=${projectId}`);
   }
 
   toolRadio(tool: TToolName): Locator {

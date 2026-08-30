@@ -1,5 +1,4 @@
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Route, Routes } from 'react-router';
 import { Provider } from 'react-redux';
 import { render, screen } from '@testing-library/react';
 
@@ -18,14 +17,7 @@ const anchorRef = { current: { getBoundingClientRect: (): DOMRect => new DOMRect
 const renderPageRowMenu = (id: string, onRename = vi.fn()): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <MemoryRouter initialEntries={['/design/file-1']}>
-        <Routes>
-          <Route
-            element={<PageRowMenu anchorRef={anchorRef} id={id} isOpen onOpenChange={vi.fn()} onRename={onRename} />}
-            path="/design/:id"
-          />
-        </Routes>
-      </MemoryRouter>
+      <PageRowMenu anchorRef={anchorRef} id={id} isOpen onOpenChange={vi.fn()} onRename={onRename} />
     </Provider>,
   );
 
@@ -105,7 +97,7 @@ describe('PageRowMenu', () => {
     await user.click(screen.getByText('Copy link to page'));
 
     // result
-    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/design/file-1?page=${initialActivePageId}`);
+    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/?page=${initialActivePageId}`);
   });
 
   it('should call onRename on Rename page click', async () => {

@@ -49,7 +49,7 @@ import {
 } from './toolSettings';
 
 // pages
-import { useCanvasRefsContext } from 'pages/DesignPage/core/CanvasRefsProvider/hooks/useCanvasRefsContext';
+import { useCanvasRefsContext } from 'components/App/core/CanvasRefsProvider/hooks/useCanvasRefsContext';
 
 // styles
 import styles from './canvas.module.scss';

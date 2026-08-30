@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 import { renderHook } from '@testing-library/react';
 
 // core
-import CanvasRefsProvider from 'pages/DesignPage/core/CanvasRefsProvider/CanvasRefsProvider';
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 
 // hooks
 import { useSelectTool } from '../useSelectTool';

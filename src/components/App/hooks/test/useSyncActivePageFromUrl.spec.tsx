@@ -1,4 +1,3 @@
-import { MemoryRouter } from 'react-router';
 import { Provider } from 'react-redux';
 import { ReactNode } from 'react';
 import { renderHook } from '@testing-library/react';
@@ -11,12 +10,10 @@ import { addPage, deletePage, setActivePage } from 'store/design/slice';
 import { selectActivePageId, selectPages } from 'store/design/selectors';
 import { store } from 'store';
 
-const renderSync = (entry: string): void => {
-  const wrapper = ({ children }: { children: ReactNode }): ReactNode => (
-    <Provider store={store}>
-      <MemoryRouter initialEntries={[entry]}>{children}</MemoryRouter>
-    </Provider>
-  );
+const renderSync = (search: string): void => {
+  window.history.replaceState({}, '', `/${search}`);
+
+  const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
   renderHook(() => useSyncActivePageFromUrl(), { wrapper });
 };
@@ -25,6 +22,7 @@ describe('useSyncActivePageFromUrl', () => {
   const initialActivePageId = selectActivePageId(store.getState());
 
   afterEach(() => {
+    window.history.replaceState({}, '', '/');
     Object.keys(selectPages(store.getState()))
       .filter((pageId) => pageId !== initialActivePageId)
       .forEach((pageId) => store.dispatch(deletePage(pageId)));
@@ -38,7 +36,7 @@ describe('useSyncActivePageFromUrl', () => {
     store.dispatch(setActivePage(initialActivePageId));
 
     // before
-    renderSync(`/design/file-1?page=${secondId}`);
+    renderSync(`?page=${secondId}`);
 
     // result
     expect(selectActivePageId(store.getState())).toBe(secondId);
@@ -46,7 +44,7 @@ describe('useSyncActivePageFromUrl', () => {
 
   it('should ignore a ?page= that does not match any page', () => {
     // before
-    renderSync('/design/file-1?page=nope');
+    renderSync('?page=nope');
 
     // result
     expect(selectActivePageId(store.getState())).toBe(initialActivePageId);
@@ -54,7 +52,7 @@ describe('useSyncActivePageFromUrl', () => {
 
   it('should do nothing when there is no ?page= param', () => {
     // before
-    renderSync('/design/file-1');
+    renderSync('');
 
     // result
     expect(selectActivePageId(store.getState())).toBe(initialActivePageId);

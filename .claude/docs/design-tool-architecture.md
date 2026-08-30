@@ -1,6 +1,7 @@
 # Design canvas — how a draw tool is built
 
-Reference for adding a new drawing tool to the Design page (`src/pages/DesignPage`). Written from
+Reference for adding a new drawing tool to the Design UI (`src/components/App`, see [[app-shell]] for
+why it's not a routed "page"). Written from
 the Arrow tool implementation (a `TLineNode` variant with an arrowhead), which touched every layer
 described here. Read this before starting instead of re-discovering the architecture via `grep`.
 

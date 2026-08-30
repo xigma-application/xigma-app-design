@@ -1,7 +1,21 @@
+import { Provider } from 'react-redux';
 import { render } from '@testing-library/react';
 
 // components
 import App from './App';
+import { TooltipProvider } from 'shared';
+
+// store
+import { store } from 'store';
+
+const renderApp = (): ReturnType<typeof render> =>
+  render(
+    <Provider store={store}>
+      <TooltipProvider>
+        <App />
+      </TooltipProvider>
+    </Provider>,
+  );
 
 describe('App snapshots', () => {
   afterEach(() => {
@@ -10,15 +24,15 @@ describe('App snapshots', () => {
 
   it('should render App', () => {
     // before
-    const { asFragment } = render(<App />);
+    const { asFragment } = renderApp();
 
     // result
     expect(asFragment()).toMatchSnapshot();
   });
 
-  it('should sync the theme onto the document root on mount, regardless of which page is rendered', () => {
+  it('should sync the theme onto the document root on mount', () => {
     // before
-    render(<App />);
+    renderApp();
 
     // result
     expect(document.documentElement.dataset.theme).toBe('dark');

@@ -100,6 +100,16 @@ detector's hash-grid, is future work, not started). Write-up:
 - [x] `getCandidateShapes` moved from every pointer event to gesture-arm time across all three snap
       call sites
 
+## Stage 10 — Client-side routing removed, single-purpose subdomain app
+
+The app ships behind its own subdomain now, with no multi-route concept to route between —
+`react-router` and `src/core/Routing/` are gone, along with the unreachable `HomePage`/`NotFoundPage`
+starter-template pages. `components/App/App.tsx` absorbed `pages/DesignPage/DesignPage.tsx` directly;
+`src/pages/` no longer exists. Write-up: `.claude/docs/app-shell.md`.
+
+- [x] `CanvasRefsProvider` relocated to `components/App/core/`, `?page=`/`?project=` read via plain
+      `window.location.search` instead of React Router hooks, e2e/`useCopyPageLink` updated to match
+
 ## Related
 
 [[canvas-rendering-pipeline]] — context for the render loop and the `WEBGL_CONTEXT_ATTRIBUTES`
