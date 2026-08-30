@@ -4985,6 +4985,47 @@ glyph translate/rotate/draw). Orchestrator `drawValueLabel.ts` is now just: meas
 Coverage: unit 100% (a spec per split file plus `getVectorWidthLabelAnchor`, `getVectorWidthLabelAtPoint`,
 `resolveVectorWidthLabelHover`).
 
+## 71. Variable Width value label becomes editable — double-click to overtype the total width
+
+Double-clicking the pink value badge opens a DOM `<input>` over it (same `worldToScreen`-positioned
+overlay pattern as `TextEditOverlay`), pre-selected for overtype; Enter/blur commit, Escape cancels.
+The badge text is `round(leftOffset + rightOffset)` — the **total** width — so a committed value `n`
+writes a symmetric taper `leftOffset = rightOffset = n / 2` (matching what every drag gesture
+produces). Empty / non-numeric / negative input, or a value equal to the current total, reverts (no
+dispatch); a real change is one `updateNode` (undoable). Only the one regulator is edited, never the
+selected group.
+
+Pieces:
+
+- **`CanvasValueLabelInput`** (`Canvas/CanvasValueLabelInput/`) — the reusable presentational input:
+  anchored on a screen-space centre (`translate(-50%, -50%)`), controlled value, `size` attribute
+  tracks `value.length` so the pill grows/shrinks with the text while `min-width` keeps it no
+  narrower than the badge, autofocus+select on mount, `settle`-once guard so Enter-then-blur
+  doesn't double-fire, `stopPropagation` on keydown (canvas shortcuts) and pointerdown. Built
+  standalone because it's meant for other on-canvas numeric labels later.
+- **`getVectorWidthLabelRects.ts`** (`Canvas/utils/`) — extracted from §70's `getVectorWidthLabelAtPoint`,
+  which now just point-tests its output. Returns every visible label's world rect
+  (`center`/`badgeWidth`/`badgeHeight`) **plus** the resolving `target` (with `point.id`) and
+  `{segmentId, t}`, so callers that need the width point itself (the editor) and callers that only
+  need a hover key (§70) share one geometry pass. `isPointInVectorWidthLabelRect` is the shared
+  axis-aligned test.
+- **`useVectorWidthLabelEditor.ts`** (`Canvas/VectorWidthLabelEditOverlay/hooks/`) — owns the
+  `edit` state, attaches the `dblclick` listener on the canvas only while `activeTool === variableWidth`
+  (`useDoubleClickActivation` is hard-gated to default/move, so it can't be reused here), and the
+  `commit`/`cancel` callbacks. While an edit is open it writes `refs.vectorWidth.editingWidthLabelRef`,
+  which `getVectorWidthLabelTargets` filters on — so the WebGL-drawn badge is suppressed for exactly
+  that regulator and you don't see the MSDF pill behind the input.
+- **`VectorWidthLabelEditOverlay.tsx`** — mounted in `Canvas.tsx` beside `TextEditOverlay`; thin,
+  just `worldToScreen(edit.center)` × zoom → `CanvasValueLabelInput`.
+- **`armVectorWidthLabelClick.ts`** — new resolver in the `armVectorWidthPointOnPointerDown` `switch`,
+  before the `default:` that clears `selectedVectorWidthHandlesRef`. A single click on the badge
+  (which sits *off* the stroke, so it otherwise hit nothing and the label vanished) is now consumed
+  and the selection kept, making the label "clickable" and the second click of the dbl-click harmless.
+
+`editingWidthLabelRef` lives on `TVectorWidthRefs` and is cleared in `useSelectionTool.ts`'s
+tool-switch cleanup alongside the other width refs. Coverage: unit 100% (component, hook, both utils,
+the arm resolver, plus an integration case in `armResolvers.spec.ts`).
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

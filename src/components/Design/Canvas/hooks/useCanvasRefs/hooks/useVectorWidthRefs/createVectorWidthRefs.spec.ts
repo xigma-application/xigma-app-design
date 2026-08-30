@@ -8,6 +8,7 @@ describe('createVectorWidthRefs behaviors', () => {
 
     // result
     expect(refs).toEqual({
+      editingWidthLabelRef: { current: null },
       vectorWidthPointDragRef: { current: null },
     });
   });

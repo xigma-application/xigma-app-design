@@ -130,6 +130,8 @@ export type TVectorWidthPointDragState = {
 
 export type TVectorWidthHandleSelection = { nodeId: string; pointId: string; side: 'left' | 'point' | 'right' };
 
+export type TVectorWidthLabelEditTarget = { nodeId: string; pointId: string };
+
 export type TVectorWidthLastHandleSide = { nodeId: string; pointId: string; side: 'left' | 'right' };
 
 export type TVectorNodeDragSnapshot = {
@@ -173,6 +175,7 @@ export type TPencilRefs = {
 };
 
 export type TVectorWidthRefs = {
+  editingWidthLabelRef: RefObject<TVectorWidthLabelEditTarget | null>;
   vectorWidthPointDragRef: RefObject<TVectorWidthPointDragState | null>;
 };
 

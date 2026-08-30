@@ -11,6 +11,7 @@ import { ToolName } from 'types/design/enums';
 
 // utils
 import { armVectorWidthHandleGrab } from './armVectorWidthHandleGrab';
+import { armVectorWidthLabelClick } from './armVectorWidthLabelClick';
 import { armVectorWidthPointCreate } from './armVectorWidthPointCreate';
 import { armVectorWidthRegulatorShiftToggle } from './armVectorWidthRegulatorShiftToggle';
 import { getEligibleVectorWidthNodes } from '../../../../../../utils/getEligibleVectorWidthNodes';
@@ -36,6 +37,7 @@ export const armVectorWidthPointOnPointerDown = ({
       case armVectorWidthRegulatorShiftToggle(canvasRefs, event, handleHit):
       case armVectorWidthHandleGrab(canvas, canvasRefs, event, point, setClassName, state, handleHit):
       case armVectorWidthPointCreate(canvas, canvasRefs, event, point, setClassName, state, eligibleNodes, viewport):
+      case armVectorWidthLabelClick(canvasRefs, point, state, viewport):
         return true;
       default:
         canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current = [];

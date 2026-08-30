@@ -4,6 +4,7 @@ import { FC } from 'react';
 // components
 import Comment from './Comment/Comment';
 import TextEditOverlay from './TextEditOverlay/TextEditOverlay';
+import VectorWidthLabelEditOverlay from './VectorWidthLabelEditOverlay/VectorWidthLabelEditOverlay';
 
 // core
 import { useClassNames } from '../core/ClassNamesProvider/hooks/useClassNames';
@@ -98,6 +99,7 @@ const Canvas: FC = () => {
         ref={refs.canvasRef}
       />
       <TextEditOverlay />
+      <VectorWidthLabelEditOverlay />
       <Comment />
     </div>
   );

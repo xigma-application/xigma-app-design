@@ -107,7 +107,7 @@ describe('createCanvasRefs behaviors', () => {
         resizedVectorNodeSnapshotsRef: { current: null },
         rotatedVectorNodeSnapshotsRef: { current: null },
       },
-      vectorWidth: { vectorWidthPointDragRef: { current: null } },
+      vectorWidth: { editingWidthLabelRef: { current: null }, vectorWidthPointDragRef: { current: null } },
     });
   });
 

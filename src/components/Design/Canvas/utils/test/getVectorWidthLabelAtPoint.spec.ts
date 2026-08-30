@@ -1,116 +1,67 @@
 // types
-import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getVectorWidthLabelAtPoint } from '../getVectorWidthLabelAtPoint';
 
-const getVectorWidthLabelTargetsMock = vi.fn();
-const getGlyphQuadBoundsMock = vi.fn();
+const getVectorWidthLabelRectsMock = vi.fn();
 
-vi.mock(
-  'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/drawVectorWidthPointsPreview/getVectorWidthLabelTargets',
-  () => ({
-    getVectorWidthLabelTargets: (...args: unknown[]): unknown => getVectorWidthLabelTargetsMock(...args),
-  }),
-);
-vi.mock('utils/canvas/text/buildGlyphQuads', () => ({
-  buildGlyphQuads: (): number[] => [1, 2, 3, 4],
-}));
-vi.mock('utils/canvas/text/getGlyphQuadBounds', () => ({
-  getGlyphQuadBounds: (...args: unknown[]): unknown => getGlyphQuadBoundsMock(...args),
+vi.mock('../getVectorWidthLabelRects', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../getVectorWidthLabelRects')>()),
+  getVectorWidthLabelRects: (...args: unknown[]): unknown => getVectorWidthLabelRectsMock(...args),
 }));
 
 const refs = {} as TCanvasRefs;
+const nodes = {};
 
-const buildNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
-  fillColor: '#000',
-  filledFaceKeys: [],
-  id: 'node-1',
-  name: 'Vector',
-  parentId: null,
-  rotation: 0,
-  segments: { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
-  strokeColor: '#000',
-  strokeWidth: 4,
-  type: NodeType.vector,
-  vertexHandleModes: {},
-  vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+const rect = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
+  badgeHeight: 24,
+  badgeWidth: 22,
+  center: { x: 20, y: -34 },
+  segmentId: 's1',
+  t: 0.2,
+  target: { nodeId: 'node-1', point: { id: 'p1', leftOffset: 6, position: 0.2, rightOffset: 6 }, side: 'right' },
   ...overrides,
 });
 
-const nodesWith = (node: TVectorNode): Record<string, TSceneNode> => ({ [node.id]: node });
-const RIGHT_TARGET = { point: { id: 'p1', leftOffset: 6, position: 0.2, rightOffset: 6 }, side: 'right' as const };
-
 describe('getVectorWidthLabelAtPoint', () => {
   beforeEach(() => {
-    getVectorWidthLabelTargetsMock.mockReset();
-    // a 12 x 18 glyph box: badge is 22 x 24 at zoom 1 (padding 5 / 3)
-    getGlyphQuadBoundsMock.mockReset().mockReturnValue({ maxX: 6, maxY: 9, minX: -6, minY: -9 });
+    getVectorWidthLabelRectsMock.mockReset();
   });
 
-  it('should return null when there are no visible labels', () => {
+  it('should return null when no label rect contains the point', () => {
     // mock
-    getVectorWidthLabelTargetsMock.mockReturnValue([]);
+    getVectorWidthLabelRectsMock.mockReturnValue([rect()]);
 
     // before
-    const result = getVectorWidthLabelAtPoint({ x: 20, y: -34 }, nodesWith(buildNode()), refs, 1);
+    const result = getVectorWidthLabelAtPoint({ x: 20, y: 100 }, nodes, refs, 1);
 
     // result
     expect(result).toBeNull();
   });
 
-  it('should return the label’s node/segment/t when the point lands inside the badge', () => {
-    // mock — anchor (20,0), right handle (20,-6), label centre 28px further along -normal at (20,-34)
-    const node = buildNode();
-
-    getVectorWidthLabelTargetsMock.mockReturnValue([{ nodeId: node.id, ...RIGHT_TARGET }]);
+  it('should return the containing rect’s node/segment/t when the point is inside the badge', () => {
+    // mock
+    getVectorWidthLabelRectsMock.mockReturnValue([rect()]);
 
     // before
-    const result = getVectorWidthLabelAtPoint({ x: 20, y: -34 }, nodesWith(node), refs, 1);
+    const result = getVectorWidthLabelAtPoint({ x: 20, y: -34 }, nodes, refs, 1);
 
     // result
-    expect(result?.nodeId).toBe(node.id);
-    expect(result?.segmentId).toBe('s1');
-    expect(result?.t).toBeCloseTo(0.2, 5);
+    expect(result).toEqual({ nodeId: 'node-1', segmentId: 's1', t: 0.2 });
   });
 
-  it('should return null when the point is well outside the badge', () => {
+  it('should return the first rect that contains the point', () => {
     // mock
-    const node = buildNode();
-
-    getVectorWidthLabelTargetsMock.mockReturnValue([{ nodeId: node.id, ...RIGHT_TARGET }]);
+    getVectorWidthLabelRectsMock.mockReturnValue([
+      rect({ center: { x: 200, y: 200 } }),
+      rect({ segmentId: 's2', t: 0.7, target: { nodeId: 'node-2', point: { id: 'p2' }, side: 'left' } }),
+    ]);
 
     // before
-    const result = getVectorWidthLabelAtPoint({ x: 20, y: 100 }, nodesWith(node), refs, 1);
+    const result = getVectorWidthLabelAtPoint({ x: 20, y: -34 }, nodes, refs, 1);
 
     // result
-    expect(result).toBeNull();
-  });
-
-  it('should skip a target whose node has gone missing', () => {
-    // mock
-    getVectorWidthLabelTargetsMock.mockReturnValue([{ nodeId: 'gone', ...RIGHT_TARGET }]);
-
-    // before
-    const result = getVectorWidthLabelAtPoint({ x: 20, y: -34 }, nodesWith(buildNode()), refs, 1);
-
-    // result
-    expect(result).toBeNull();
-  });
-
-  it('should skip a target whose text measures to no glyph bounds', () => {
-    // mock
-    const node = buildNode();
-
-    getGlyphQuadBoundsMock.mockReturnValue(null);
-    getVectorWidthLabelTargetsMock.mockReturnValue([{ nodeId: node.id, ...RIGHT_TARGET }]);
-
-    // before
-    const result = getVectorWidthLabelAtPoint({ x: 20, y: -34 }, nodesWith(node), refs, 1);
-
-    // result
-    expect(result).toBeNull();
+    expect(result).toEqual({ nodeId: 'node-2', segmentId: 's2', t: 0.7 });
   });
 });

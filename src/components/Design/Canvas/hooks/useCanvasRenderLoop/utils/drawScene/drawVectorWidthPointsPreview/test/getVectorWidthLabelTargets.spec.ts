@@ -177,4 +177,32 @@ describe('getVectorWidthLabelTargets', () => {
     // result
     expect(getVectorWidthLabelTargets(refs, nodes)).toEqual([]);
   });
+
+  it('should hide the selected regulator’s label while that same regulator’s value is being edited inline', () => {
+    // mock
+    const point = { id: 'p1', leftOffset: 4, position: 0.5, rightOffset: 6 };
+    const node = buildNode({ widthProfile: { points: { p1: point } } });
+    const nodes: Record<string, TSceneNode> = { [node.id]: node };
+    const refs = createCanvasRefs();
+
+    refs.vectorEdit.selectedVectorWidthHandlesRef.current = [{ nodeId: 'node-1', pointId: 'p1', side: 'point' }];
+    refs.vectorWidth.editingWidthLabelRef.current = { nodeId: 'node-1', pointId: 'p1' };
+
+    // result
+    expect(getVectorWidthLabelTargets(refs, nodes)).toEqual([]);
+  });
+
+  it('should still show the label when a different regulator is the one being edited', () => {
+    // mock
+    const point = { id: 'p1', leftOffset: 4, position: 0.5, rightOffset: 6 };
+    const node = buildNode({ widthProfile: { points: { p1: point } } });
+    const nodes: Record<string, TSceneNode> = { [node.id]: node };
+    const refs = createCanvasRefs();
+
+    refs.vectorEdit.selectedVectorWidthHandlesRef.current = [{ nodeId: 'node-1', pointId: 'p1', side: 'point' }];
+    refs.vectorWidth.editingWidthLabelRef.current = { nodeId: 'node-1', pointId: 'p2' };
+
+    // result
+    expect(getVectorWidthLabelTargets(refs, nodes)).toEqual([{ nodeId: 'node-1', point, side: 'right' }]);
+  });
 });

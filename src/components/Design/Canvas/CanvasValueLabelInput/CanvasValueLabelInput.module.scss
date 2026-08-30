@@ -1,0 +1,19 @@
+.CanvasValueLabelInput {
+  background-color: #ffffff;
+  border: 1px solid #ff2fc2;
+  border-radius: 3px;
+  box-sizing: border-box;
+  color: #000000;
+  font-family: inherit;
+  font-weight: 600;
+  outline: none;
+  padding: 0 4px;
+  position: absolute;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  width: auto;
+
+  &::selection {
+    background-color: #afcffd;
+  }
+}

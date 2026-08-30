@@ -148,6 +148,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         refs.hover.hoveredVectorWidthPointRef.current = null;
         refs.hover.hoveredVectorWidthLabelRef.current = null;
         refs.vectorWidth.vectorWidthPointDragRef.current = null;
+        refs.vectorWidth.editingWidthLabelRef.current = null;
         refs.vectorEdit.selectedVectorWidthHandlesRef.current = [];
         refs.vectorEdit.lastVectorWidthHandleSideRef.current = null;
         selectionRefs.vectorCutDragRef.current = null;

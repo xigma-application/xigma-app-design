@@ -29,6 +29,8 @@ export const getVectorWidthLabelTargets = (refs: TCanvasRefs, nodes: Record<stri
   const lastSide = refs.vectorEdit.lastVectorWidthHandleSideRef.current;
   const side =
     selected && lastSide && lastSide.nodeId === selected.nodeId && lastSide.pointId === selected.pointId ? lastSide.side : 'right';
+  const editing = refs.vectorWidth.editingWidthLabelRef.current;
+  const isEditing = Boolean(selected && editing && editing.nodeId === selected.nodeId && editing.pointId === selected.pointId);
 
-  return selected && point ? [{ nodeId: selected.nodeId, point, side }] : [];
+  return selected && point && !isEditing ? [{ nodeId: selected.nodeId, point, side }] : [];
 };

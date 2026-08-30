@@ -3315,6 +3315,34 @@ describe('armVectorWidthPointOnPointerDown', () => {
     expect(canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current).toEqual([]);
   });
 
+  it('should consume the click and keep the selection when it lands on the visible value label, not on the stroke', () => {
+    // mock — a(0,0)->b(100,0), p1 at midpoint; right handle (50,-6), label centre 28px further at (50,-34)
+    const nodeId = addVectorNode(
+      { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+      { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    );
+
+    store.dispatch(
+      updateNode({
+        changes: { widthProfile: { points: { p1: { id: 'p1', leftOffset: 6, position: 0.5, rightOffset: 6 } } } },
+        id: nodeId,
+      }),
+    );
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current = [{ nodeId, pointId: 'p1', side: 'point' }];
+
+    // before — clicking the label badge, which sits off the stroke
+    const ctx = createContext({ activeTool: ToolName.variableWidth, canvasRefs, point: { x: 50, y: -34 } });
+
+    // result — consumed, selection untouched, no drag armed
+    expect(armVectorWidthPointOnPointerDown(ctx)).toBe(true);
+    expect(canvasRefs.vectorWidth.vectorWidthPointDragRef.current).toBeNull();
+    expect(canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current).toEqual([{ nodeId, pointId: 'p1', side: 'point' }]);
+  });
+
   it('should return undefined when the only editing node is a branching network', () => {
     // mock — b is a 3-way branch, ineligible for a width profile
     const nodeId = addVectorNode(
