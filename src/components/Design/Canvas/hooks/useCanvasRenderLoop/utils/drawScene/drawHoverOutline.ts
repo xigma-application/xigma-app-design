@@ -7,7 +7,7 @@ import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
 import { drawLine } from 'utils/canvas/drawLine';
-import { drawTextHoverUnderline } from './drawTextHoverUnderline';
+import { drawTextHoverOutline } from './drawTextHoverOutline';
 import { drawThickEllipseNodeOutline } from 'utils/canvas/shapes/drawThickEllipseNodeOutline';
 import { drawThickOutline } from 'utils/canvas/drawThickOutline/drawThickOutline';
 import { drawThickPolygonOutline } from 'utils/canvas/shapes/drawThickPolygonOutline';
@@ -94,26 +94,9 @@ export const drawHoverOutline = (
           viewport,
         );
         break;
-      case NodeType.text: {
-        const textPathNode = hoveredNode.pathId ? nodesById[hoveredNode.pathId] : undefined;
-
-        if (textPathNode?.type === NodeType.vector) {
-          drawVectorStroke(
-            gl,
-            program,
-            buffer,
-            flattenVectorSegments(getRenderedVectorNode(textPathNode)),
-            DRAFT_FRAME_STROKE,
-            HOVER_OUTLINE_WIDTH / viewport.zoom,
-            canvasWidth,
-            canvasHeight,
-            viewport,
-          );
-        } else {
-          drawTextHoverUnderline(gl, program, buffer, hoveredNode, canvasWidth, canvasHeight, viewport);
-        }
+      case NodeType.text:
+        drawTextHoverOutline(gl, program, buffer, hoveredNode, nodesById, canvasWidth, canvasHeight, viewport);
         break;
-      }
       case NodeType.vector:
         drawVectorStroke(
           gl,

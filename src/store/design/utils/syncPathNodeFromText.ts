@@ -8,16 +8,20 @@ import { getActivePage } from './getActivePage';
 import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBounds';
 import { syncPathTextNodes } from './syncPathTextNodes';
 
+const MIN_SYNC_SPAN = 8;
+
 const scaleTangent = (tangent: TVectorTangent, scaleX: number, scaleY: number): TVectorTangent =>
   tangent ? { x: tangent.x * scaleX, y: tangent.y * scaleY } : null;
 
 const syncVectorPathFromText = (vectorNode: TVectorNode, textNode: TTextNode): void => {
   const bounds = getVectorNodeBounds(vectorNode);
-  const scaleX = bounds.width > 0 ? textNode.width / bounds.width : 1;
-  const scaleY = bounds.height > 0 ? textNode.height / bounds.height : 1;
-  const movedOrScaled = textNode.x !== bounds.x || textNode.y !== bounds.y || scaleX !== 1 || scaleY !== 1;
+  const targetWidth = Math.abs(textNode.width);
+  const targetHeight = Math.abs(textNode.height);
+  const scaleX = bounds.width > 0 && targetWidth >= MIN_SYNC_SPAN ? targetWidth / bounds.width : 1;
+  const scaleY = bounds.height > 0 && targetHeight >= MIN_SYNC_SPAN ? targetHeight / bounds.height : 1;
+  const changed = textNode.x !== bounds.x || textNode.y !== bounds.y || scaleX !== 1 || scaleY !== 1;
 
-  if (movedOrScaled) {
+  if (changed) {
     Object.values(vectorNode.vertices).forEach((vertex) => {
       vertex.x = Math.round(textNode.x + (vertex.x - bounds.x) * scaleX);
       vertex.y = Math.round(textNode.y + (vertex.y - bounds.y) * scaleY);

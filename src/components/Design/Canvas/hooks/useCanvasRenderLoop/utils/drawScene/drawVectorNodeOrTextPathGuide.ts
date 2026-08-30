@@ -11,6 +11,7 @@ import { TVectorNodeDragSnapshot, TVectorNodeResizeSnapshot, TVectorNodeRotateSn
 import { drawDashedVectorPathOutline } from 'utils/canvas/drawVectorNode/drawDashedVectorPathOutline/drawDashedVectorPathOutline';
 import { drawSceneVectorNode } from './drawSceneVectorNode';
 import { isVectorBoundAsTextPath } from 'store/design/utils/isVectorBoundAsTextPath';
+import { mirrorGuideVectorForText } from 'components/Design/Canvas/utils/mirrorGuideVectorForText';
 
 export const drawVectorNodeOrTextPathGuide = (
   gl: WebGL2RenderingContext,
@@ -30,9 +31,10 @@ export const drawVectorNodeOrTextPathGuide = (
   editingPathId?: string | null,
 ): void => {
   const isTextBeingEdited = pathOutlineStyles.get(node.id) === 'editing';
+  const renderNode = mirrorGuideVectorForText(node, nodesById);
 
   if ((isVectorBoundAsTextPath(nodesById, node.id) || node.id === editingPathId) && isTextBeingEdited) {
-    drawDashedVectorPathOutline(gl, program, buffer, node, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport);
+    drawDashedVectorPathOutline(gl, program, buffer, renderNode, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport);
     return;
   }
 
@@ -42,7 +44,7 @@ export const drawVectorNodeOrTextPathGuide = (
     buffer,
     faceBufferCache,
     strokeBufferCache,
-    node,
+    renderNode,
     draggedVectorNodeSnapshots,
     resizedVectorNodeSnapshots,
     rotatedVectorNodeSnapshots,
