@@ -1,10 +1,10 @@
 // utils
-import { getVectorAlignmentGuide } from '../getVectorAlignmentGuide';
+import { getAlignmentGuide } from '../getAlignmentGuide';
 
-describe('getVectorAlignmentGuide', () => {
+describe('getAlignmentGuide', () => {
   it('should return no guide and leave the point untouched when there are no candidates', () => {
     // action
-    const result = getVectorAlignmentGuide({ x: 100, y: 100 }, [], 5);
+    const result = getAlignmentGuide({ x: 100, y: 100 }, [], 5);
 
     // result
     expect(result).toEqual({ horizontal: null, point: { x: 100, y: 100 }, vertical: null });
@@ -12,7 +12,7 @@ describe('getVectorAlignmentGuide', () => {
 
   it('should return no guide when every candidate is outside the tolerance on both axes', () => {
     // action
-    const result = getVectorAlignmentGuide({ x: 100, y: 100 }, [{ x: 200, y: 200 }], 5);
+    const result = getAlignmentGuide({ x: 100, y: 100 }, [{ x: 200, y: 200 }], 5);
 
     // result
     expect(result).toEqual({ horizontal: null, point: { x: 100, y: 100 }, vertical: null });
@@ -20,7 +20,7 @@ describe('getVectorAlignmentGuide', () => {
 
   it('should snap the y onto a horizontally-aligned candidate within tolerance, leaving x untouched', () => {
     // action
-    const result = getVectorAlignmentGuide({ x: 100, y: 103 }, [{ x: 500, y: 100 }], 5);
+    const result = getAlignmentGuide({ x: 100, y: 103 }, [{ x: 500, y: 100 }], 5);
 
     // result
     expect(result).toEqual({ horizontal: { x: 500, y: 100 }, point: { x: 100, y: 100 }, vertical: null });
@@ -28,7 +28,7 @@ describe('getVectorAlignmentGuide', () => {
 
   it('should snap the x onto a vertically-aligned candidate within tolerance, leaving y untouched', () => {
     // action
-    const result = getVectorAlignmentGuide({ x: 103, y: 100 }, [{ x: 100, y: 500 }], 5);
+    const result = getAlignmentGuide({ x: 103, y: 100 }, [{ x: 100, y: 500 }], 5);
 
     // result
     expect(result).toEqual({ horizontal: null, point: { x: 100, y: 100 }, vertical: { x: 100, y: 500 } });
@@ -40,7 +40,7 @@ describe('getVectorAlignmentGuide', () => {
     const columnCandidate = { x: 100, y: 900 };
 
     // action
-    const result = getVectorAlignmentGuide({ x: 102, y: 98 }, [rowCandidate, columnCandidate], 5);
+    const result = getAlignmentGuide({ x: 102, y: 98 }, [rowCandidate, columnCandidate], 5);
 
     // result
     expect(result).toEqual({ horizontal: rowCandidate, point: { x: 100, y: 100 }, vertical: columnCandidate });
@@ -52,7 +52,7 @@ describe('getVectorAlignmentGuide', () => {
     const farther = { x: 600, y: 104 };
 
     // action
-    const result = getVectorAlignmentGuide({ x: 100, y: 100 }, [farther, nearer], 5);
+    const result = getAlignmentGuide({ x: 100, y: 100 }, [farther, nearer], 5);
 
     // result
     expect(result.horizontal).toEqual(nearer);
@@ -60,7 +60,7 @@ describe('getVectorAlignmentGuide', () => {
 
   it('should treat exactly-at-tolerance distance as a match (inclusive boundary)', () => {
     // action
-    const result = getVectorAlignmentGuide({ x: 100, y: 100 }, [{ x: 500, y: 105 }], 5);
+    const result = getAlignmentGuide({ x: 100, y: 100 }, [{ x: 500, y: 105 }], 5);
 
     // result
     expect(result.horizontal).toEqual({ x: 500, y: 105 });
@@ -68,7 +68,7 @@ describe('getVectorAlignmentGuide', () => {
 
   it('should treat just-past-tolerance distance as no match', () => {
     // action
-    const result = getVectorAlignmentGuide({ x: 100, y: 100 }, [{ x: 500, y: 105.1 }], 5);
+    const result = getAlignmentGuide({ x: 100, y: 100 }, [{ x: 500, y: 105.1 }], 5);
 
     // result
     expect(result.horizontal).toBeNull();
@@ -76,7 +76,7 @@ describe('getVectorAlignmentGuide', () => {
 
   it('should let a single candidate satisfy both axes at once when the point is diagonally within tolerance of it on both', () => {
     // action
-    const result = getVectorAlignmentGuide({ x: 103, y: 97 }, [{ x: 100, y: 100 }], 5);
+    const result = getAlignmentGuide({ x: 103, y: 97 }, [{ x: 100, y: 100 }], 5);
 
     // result
     expect(result).toEqual({ horizontal: { x: 100, y: 100 }, point: { x: 100, y: 100 }, vertical: { x: 100, y: 100 } });

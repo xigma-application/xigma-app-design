@@ -1,7 +1,7 @@
 // types
 import { TPoint } from 'types/canvas';
 
-export type TVectorPointAlignmentMatch = {
+export type TPointAlignmentMatch = {
   horizontal: TPoint | null;
   point: TPoint;
   vertical: TPoint | null;
@@ -17,7 +17,7 @@ const getClosestMatch = (current: TClosestMatch, candidate: TPoint, distance: nu
   return current;
 };
 
-export const getVectorAlignmentGuide = (point: TPoint, candidates: TPoint[], toleranceWorldUnits: number): TVectorPointAlignmentMatch => {
+export const getAlignmentGuide = (point: TPoint, candidates: TPoint[], toleranceWorldUnits: number): TPointAlignmentMatch => {
   const { horizontal, vertical } = candidates.reduce(
     (acc, candidate) => ({
       horizontal: getClosestMatch(acc.horizontal, candidate, Math.abs(candidate.y - point.y), toleranceWorldUnits),
@@ -25,7 +25,6 @@ export const getVectorAlignmentGuide = (point: TPoint, candidates: TPoint[], tol
     }),
     { horizontal: null as TClosestMatch, vertical: null as TClosestMatch },
   );
-
   const snappedPoint: TPoint = { x: vertical ? vertical.point.x : point.x, y: horizontal ? horizontal.point.y : point.y };
 
   return { horizontal: horizontal?.point ?? null, point: snappedPoint, vertical: vertical?.point ?? null };

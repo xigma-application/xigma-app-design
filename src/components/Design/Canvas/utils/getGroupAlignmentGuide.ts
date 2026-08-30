@@ -1,13 +1,22 @@
 // types
 import { TPoint } from 'types/canvas';
-import { TVectorAlignmentGuide } from './applyVectorPointSnapping';
 
 // utils
-import { getVectorAlignmentGuide } from 'utils/canvas/vectorNetwork/getVectorAlignmentGuide';
+import { getAlignmentGuide } from 'utils/canvas/getAlignmentGuide';
 
-export type TVectorGroupAlignmentResult = {
+export type TAlignmentAxisGuide = {
+  anchor: TPoint;
+  match: TPoint;
+};
+
+export type TAlignmentGuide = {
+  horizontal: TAlignmentAxisGuide | null;
+  vertical: TAlignmentAxisGuide | null;
+};
+
+export type TGroupAlignmentResult = {
   deltaCorrection: TPoint;
-  guide: TVectorAlignmentGuide | null;
+  guide: TAlignmentGuide | null;
 };
 
 type TBestAxisMatch = { distance: number; match: TPoint; point: TPoint } | null;
@@ -20,14 +29,14 @@ const getBetterMatch = (current: TBestAxisMatch, candidate: TPoint | null, point
   return current;
 };
 
-export const getVectorGroupAlignmentGuide = (
+export const getGroupAlignmentGuide = (
   draggedPoints: TPoint[],
   candidates: TPoint[],
   toleranceWorldUnits: number,
-): TVectorGroupAlignmentResult => {
+): TGroupAlignmentResult => {
   const { bestHorizontal, bestVertical } = draggedPoints.reduce(
     (acc, point) => {
-      const result = getVectorAlignmentGuide(point, candidates, toleranceWorldUnits);
+      const result = getAlignmentGuide(point, candidates, toleranceWorldUnits);
 
       return {
         bestHorizontal: getBetterMatch(acc.bestHorizontal, result.horizontal, point, Math.abs((result.horizontal?.y ?? 0) - point.y)),
@@ -42,7 +51,7 @@ export const getVectorGroupAlignmentGuide = (
     y: bestHorizontal ? bestHorizontal.match.y - bestHorizontal.point.y : 0,
   };
 
-  const guide: TVectorAlignmentGuide | null =
+  const guide: TAlignmentGuide | null =
     bestVertical || bestHorizontal
       ? {
           horizontal: bestHorizontal

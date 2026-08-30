@@ -1,10 +1,10 @@
 // utils
-import { getVectorGroupAlignmentGuide } from '../getVectorGroupAlignmentGuide';
+import { getGroupAlignmentGuide } from '../getGroupAlignmentGuide';
 
-describe('getVectorGroupAlignmentGuide', () => {
+describe('getGroupAlignmentGuide', () => {
   it('should return no guide and a zero correction when there are no candidates', () => {
     // action
-    const result = getVectorGroupAlignmentGuide([{ x: 100, y: 100 }], [], 5);
+    const result = getGroupAlignmentGuide([{ x: 100, y: 100 }], [], 5);
 
     // result
     expect(result).toEqual({ deltaCorrection: { x: 0, y: 0 }, guide: null });
@@ -12,7 +12,7 @@ describe('getVectorGroupAlignmentGuide', () => {
 
   it('should return no guide and a zero correction when every candidate is outside tolerance for every dragged point', () => {
     // action
-    const result = getVectorGroupAlignmentGuide([{ x: 100, y: 100 }], [{ x: 900, y: 900 }], 5);
+    const result = getGroupAlignmentGuide([{ x: 100, y: 100 }], [{ x: 900, y: 900 }], 5);
 
     // result
     expect(result).toEqual({ deltaCorrection: { x: 0, y: 0 }, guide: null });
@@ -24,7 +24,7 @@ describe('getVectorGroupAlignmentGuide', () => {
     const candidate = { x: 100, y: 900 };
 
     // action
-    const result = getVectorGroupAlignmentGuide([draggedPoint], [candidate], 5);
+    const result = getGroupAlignmentGuide([draggedPoint], [candidate], 5);
 
     // result
     expect(result.deltaCorrection).toEqual({ x: -3, y: 0 });
@@ -40,7 +40,7 @@ describe('getVectorGroupAlignmentGuide', () => {
     const candidate = { x: 900, y: 100 };
 
     // action
-    const result = getVectorGroupAlignmentGuide([draggedPoint], [candidate], 5);
+    const result = getGroupAlignmentGuide([draggedPoint], [candidate], 5);
 
     // result
     expect(result.deltaCorrection).toEqual({ x: 0, y: -3 });
@@ -59,7 +59,7 @@ describe('getVectorGroupAlignmentGuide', () => {
     const rowMatch = { x: 900, y: 600 };
 
     // action
-    const result = getVectorGroupAlignmentGuide([vertexA, vertexB], [columnMatch, rowMatch], 5);
+    const result = getGroupAlignmentGuide([vertexA, vertexB], [columnMatch, rowMatch], 5);
 
     // result — deltaCorrection.x (=2) pulls A onto columnMatch.x, deltaCorrection.y (=2) pulls B onto
     // rowMatch.y; both corrections apply to the WHOLE group, so each anchor reflects both
@@ -77,7 +77,7 @@ describe('getVectorGroupAlignmentGuide', () => {
     const candidate = { x: 100, y: 900 };
 
     // action
-    const result = getVectorGroupAlignmentGuide([vertexA, vertexB], [candidate], 5);
+    const result = getGroupAlignmentGuide([vertexA, vertexB], [candidate], 5);
 
     // result — B (distance 1) wins over A (distance 4)
     expect(result.guide?.vertical).toEqual({ anchor: { x: 100, y: 300 }, match: candidate });

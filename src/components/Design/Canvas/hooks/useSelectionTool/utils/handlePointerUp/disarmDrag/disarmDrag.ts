@@ -28,6 +28,7 @@ export const disarmDrag = (
     resyncRotatedGroupBounds(dispatch, dragState);
     applyPendingDragClickAction(dispatch, dragState);
     canvasRefs.transform.draggedNodeIdsRef.current = null;
+    canvasRefs.transform.alignmentGuideRef.current = null;
     dragStateRef.current = null;
     canvas.releasePointerCapture(event.pointerId);
   }

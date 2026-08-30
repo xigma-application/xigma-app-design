@@ -8,6 +8,7 @@ describe('createTransformRefs behaviors', () => {
 
     // result
     expect(refs).toEqual({
+      alignmentGuideRef: { current: null },
       contactGuidesRef: { current: null },
       draggedNodeIdsRef: { current: null },
       resizedNodeIdsRef: { current: null },

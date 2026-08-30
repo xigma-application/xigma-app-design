@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, deleteNode, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -30,13 +30,23 @@ const createDragStateRef = (dragState: Omit<TDragState, 'dispatchThrottle'> | nu
 
 const createCanvasRefs = (): TCanvasRefs =>
   ({
-    transform: { draggedNodeIdsRef: { current: null } },
+    transform: { alignmentGuideRef: { current: null }, draggedNodeIdsRef: { current: null } },
     vectorSnapshots: { draggedVectorNodeSnapshotsRef: { current: null } },
   }) as unknown as TCanvasRefs;
 
 const addFrameNode = (x: number, y: number, size = 20): string => {
   store.dispatch(
     addNode({ fill: '#ff0000', height: size, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: size, x, y }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addRectNode = (x: number, y: number, size = 20): string => {
+  store.dispatch(
+    addNode({ fill: '#00ff00', height: size, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: size, x, y }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());
@@ -76,6 +86,7 @@ const addVectorNode = (): string => {
 
 describe('continueDrag', () => {
   beforeEach(() => {
+    selectActivePage(store.getState()).rootOrder.forEach((id) => store.dispatch(deleteNode(id)));
     store.dispatch(setSelection([]));
   });
 
@@ -112,6 +123,32 @@ describe('continueDrag', () => {
     expect(node).toMatchObject({ x: 110, y: 120 });
     expect(dragStateRef.current?.hasMoved).toBe(true);
     expect(canvasRefs.transform.draggedNodeIdsRef.current).toEqual(new Set([idA]));
+    expect(canvasRefs.transform.alignmentGuideRef.current).toBeNull();
+  });
+
+  it('should snap a dragged box onto a stationary one within tolerance, correcting the dispatched position and populating the guide ref', () => {
+    // mock — a raw +2 delta puts the dragged rect's right edge (0+20+2=22) 1px short of the
+    // stationary rect's left edge (23), within ALIGNMENT_SNAP_TOLERANCE_PX
+    const idA = addRectNode(0, 0);
+
+    addRectNode(23, 0);
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const dragStateRef = createDragStateRef({
+      hasMoved: false,
+      nodeOrigins: { [idA]: { x: 0, y: 0 } },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+    });
+
+    // before
+    continueDrag(canvas, pointerEvent(2, 0), store.dispatch, dragStateRef, canvasRefs);
+    flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
+
+    // result — corrected by +1 so the edges land flush (x: 3, right edge: 23), and the guide is populated
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ x: 3, y: 0 });
+    expect(canvasRefs.transform.alignmentGuideRef.current).not.toBeNull();
   });
 
   it('should move a line node endpoints by the pointer delta', () => {

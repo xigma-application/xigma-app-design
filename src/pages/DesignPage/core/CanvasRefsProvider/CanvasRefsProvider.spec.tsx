@@ -68,6 +68,7 @@ describe('CanvasRefsProvider behaviors', () => {
       },
       slice: { sliceRef: { current: null } },
       transform: {
+        alignmentGuideRef: { current: null },
         contactGuidesRef: { current: null },
         draggedNodeIdsRef: { current: null },
         resizedNodeIdsRef: { current: null },

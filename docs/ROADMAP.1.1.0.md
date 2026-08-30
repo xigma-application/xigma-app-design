@@ -54,6 +54,15 @@ overlaps and off-90° rotations. Write-up: `.claude/docs/selection-and-manipulat
 
 - [x] `getShapeContactGuides` detection + `resolveShapeContactGuides` trigger + `drawShapeContactGuides` render, e2e
 
+## Stage 6 — Shape alignment snap on move
+
+Dragging a shape now snaps its edges/centre onto other shapes' edges/centres within tolerance,
+reusing the vector-edit alignment-guide math (renamed out of its vector-specific naming into shared
+`getAlignmentGuide`/`getGroupAlignmentGuide`/`drawAlignmentGuide`). Resize and draw-new-shape snap
+are deferred. Write-up: `.claude/docs/selection-and-manipulation.md` §24.
+
+- [x] shared alignment-guide core (no behaviour change) + `getDragAlignmentSnap` move-time snap, e2e
+
 ## Related
 
 [[canvas-rendering-pipeline]] — context for the render loop and the `WEBGL_CONTEXT_ATTRIBUTES`

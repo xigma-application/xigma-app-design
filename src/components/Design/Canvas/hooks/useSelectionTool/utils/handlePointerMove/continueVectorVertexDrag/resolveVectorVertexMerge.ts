@@ -1,7 +1,7 @@
 // types
+import { TAlignmentGuide } from '../../../../../utils/getGroupAlignmentGuide';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TSceneNode, TVectorVertex } from 'types/design/types';
-import { TVectorAlignmentGuide } from '../../../../../utils/applyVectorPointSnapping';
 import { TVectorVertexDragState } from 'types/design/selectionTool/types';
 
 // utils
@@ -11,7 +11,7 @@ export const resolveVectorVertexMerge = (
   draggedVertices: Record<string, TVectorVertex>,
   dragState: TVectorVertexDragState,
   nodes: Record<string, TSceneNode>,
-  guide: TVectorAlignmentGuide | null,
+  guide: TAlignmentGuide | null,
   mergeTolerance: number,
   canvasRefs: TCanvasRefs,
   setClassName: (className: string | null) => void,

@@ -1,13 +1,13 @@
 import { RefObject } from 'react';
 
 // types
+import { TAlignmentGuide } from 'components/Design/Canvas/utils/getGroupAlignmentGuide';
 import { TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
 import { TDraftEntity, TVectorTangent, TVectorWidthPoint } from 'types/design/types';
 import { TColorSampleRequest } from 'utils/canvas/colorPixelSampler/types';
 import { TFlattenedVectorSegment } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
 import { TPenDragOrigin } from 'components/Design/Canvas/hooks/useDrawPenTool/types';
 import { TShapeContactGuide } from 'components/Design/Canvas/utils/getShapeContactGuides';
-import { TVectorAlignmentGuide } from 'components/Design/Canvas/utils/applyVectorPointSnapping';
 import {
   TRotateDragState,
   TVectorMultiDragState,
@@ -204,7 +204,7 @@ export type TVectorEditRefs = {
   selectedVectorVertexIdsRef: RefObject<string[]>;
   selectedVectorWidthHandlesRef: RefObject<TVectorWidthHandleSelection[]>;
   snappedVectorHandleRef: RefObject<TVectorHandleHover | null>;
-  vectorAlignmentGuideRef: RefObject<TVectorAlignmentGuide | null>;
+  vectorAlignmentGuideRef: RefObject<TAlignmentGuide | null>;
 };
 
 export type THoverRefs = {
@@ -230,6 +230,7 @@ export type TVectorSnapshotsRefs = {
 };
 
 export type TTransformRefs = {
+  alignmentGuideRef: RefObject<TAlignmentGuide | null>;
   contactGuidesRef: RefObject<TShapeContactGuide[] | null>;
   draggedNodeIdsRef: RefObject<Set<string> | null>;
   resizedNodeIdsRef: RefObject<Set<string> | null>;

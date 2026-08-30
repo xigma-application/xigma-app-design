@@ -1,5 +1,5 @@
 // utils
-import { drawVectorAlignmentGuide } from '../drawVectorAlignmentGuide';
+import { drawAlignmentGuide } from '../drawAlignmentGuide';
 
 const drawLineMock = vi.fn();
 
@@ -7,11 +7,11 @@ vi.mock('utils/canvas/drawLine', () => ({ drawLine: (...args: unknown[]): void =
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
-const call = (guide: Parameters<typeof drawVectorAlignmentGuide>[3]): void => {
-  drawVectorAlignmentGuide({} as WebGL2RenderingContext, {} as WebGLProgram, {} as WebGLBuffer, guide, 200, 150, IDENTITY_VIEWPORT);
+const call = (guide: Parameters<typeof drawAlignmentGuide>[3]): void => {
+  drawAlignmentGuide({} as WebGL2RenderingContext, {} as WebGLProgram, {} as WebGLBuffer, guide, 200, 150, IDENTITY_VIEWPORT);
 };
 
-describe('drawVectorAlignmentGuide', () => {
+describe('drawAlignmentGuide', () => {
   beforeEach(() => {
     drawLineMock.mockClear();
   });
@@ -87,7 +87,7 @@ describe('drawVectorAlignmentGuide', () => {
 
   it('should scale the stroke width down with zoom', () => {
     // before
-    drawVectorAlignmentGuide(
+    drawAlignmentGuide(
       {} as WebGL2RenderingContext,
       {} as WebGLProgram,
       {} as WebGLBuffer,

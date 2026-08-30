@@ -1437,6 +1437,51 @@ Same seam, two lengths, so you see the overlap between the two footprints.
 - **No undo / no store**: purely a render artifact off a ref, like the vector alignment guide.
 - e2e: `e2e/pages/design/shape-contact-guide.spec.ts` (drag-into-contact + Alt-hover).
 
+## 24. Alignment-snap core made shared, and a move-time snap for shapes
+
+The vector-edit point-alignment machinery (§21) was vector-specific in name only — its math never
+touched vector concepts. Renamed/relocated with no behaviour change, then reused for whole-shape
+dragging:
+
+- `getVectorAlignmentGuide` (single point → nearest same-row/same-column candidate) moved
+  `utils/canvas/vectorNetwork/` → `utils/canvas/getAlignmentGuide.ts`, renamed `getAlignmentGuide`.
+- `getVectorGroupAlignmentGuide` (best axis match across a set of dragged points →
+  `deltaCorrection` + render guide) moved to `components/Design/Canvas/utils/getGroupAlignmentGuide.ts`,
+  renamed `getGroupAlignmentGuide` — now also the **home of the `TAlignmentGuide`/
+  `TAlignmentAxisGuide` types** (previously defined in `applyVectorPointSnapping.ts`).
+  `applyVectorPointSnapping.ts` imports both from there unchanged otherwise.
+- `drawVectorAlignmentGuide.ts` → `drawAlignmentGuide.ts` (`drawVectorAlignmentGuide` →
+  `drawAlignmentGuide`), still just draws a `TAlignmentGuide | null` — no vector awareness.
+- Constants `VECTOR_ALIGNMENT_GUIDE_STROKE`/`VECTOR_ALIGNMENT_SNAP_TOLERANCE_PX` →
+  `ALIGNMENT_GUIDE_STROKE`/`ALIGNMENT_SNAP_TOLERANCE_PX` (values unchanged).
+- **`vectorAlignmentGuideRef` itself was deliberately NOT renamed/moved** — it's read by ~15
+  pen/vector-edit files (mostly nulling it on cleanup) and renaming it bought nothing; only its
+  generic type param changed (`TVectorAlignmentGuide` → `TAlignmentGuide`). Shapes get a **separate**
+  ref, `refs.transform.alignmentGuideRef`, sitting next to `contactGuidesRef` (§23) — the two never
+  fire at once (vector-edit vs. plain selection are mutually exclusive), and `drawScene` draws both
+  through the same `drawAlignmentGuide`.
+
+**Shape move-snap** (`getDragAlignmentSnap.ts`, pure, driven from `continueDrag.ts` — the whole-node
+move handler): each dragged node id that both (a) has a plain `{x,y}` origin (i.e. a box node, not a
+line/vector — those never reach here) and (b) is `isContactGuideEligibleNode` (§23's same
+rectangle/ellipse/polygon/star/text/media + axis-aligned + not-hidden filter) contributes 9
+`getShapeSnapPoints` — the 4 corners, 4 edge midpoints, and centre of its dragged-to bounds — as
+`draggedPoints` into `getGroupAlignmentGuide`; every *other* eligible node's 9 points are the
+candidates. The returned `deltaCorrection` is added to the raw pointer delta before it's dispatched,
+so a shape dragged within `ALIGNMENT_SNAP_TOLERANCE_PX` of a candidate point on either axis locks
+onto it, exactly like the vector multi-drag group-snap (§21) it's a sibling of. A mixed drag (some
+eligible shapes, some lines/vectors) still snaps as one rigid group — the correction is computed
+from the eligible members only but applied to every dragged node's delta uniformly.
+
+- No resize-time or draw-new-shape snap yet (only move) — deliberately deferred.
+- No modifier bypass — snap is always active during a move, by design (unlike Figma's none-here
+  either, per the request this shipped from).
+- Cleared in `disarmDrag.ts`, `onPointerLeave`, and the tool-teardown effect, mirroring §23's
+  `contactGuidesRef` cleanup story.
+- e2e: `e2e/pages/design/shape-alignment-snap.spec.ts` — screenshot-equality against a control scene
+  where the shape is placed directly at the expected snapped/unsnapped position (no drag), the same
+  technique §23's e2e already established for proving exact geometry without a state-reading hook.
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.

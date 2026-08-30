@@ -1,5 +1,5 @@
 // others
-import { VECTOR_ALIGNMENT_SNAP_TOLERANCE_PX, VECTOR_VERTEX_HIT_RADIUS_PX } from 'constant/canvas';
+import { ALIGNMENT_SNAP_TOLERANCE_PX, VECTOR_VERTEX_HIT_RADIUS_PX } from 'constant/canvas';
 
 // store
 import { updateNode } from 'store/design/slice';
@@ -12,9 +12,9 @@ import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 // utils
 import { getAllVectorVertexPositions } from '../../../../../utils/getAllVectorVertexPositions';
+import { getGroupAlignmentGuide } from '../../../../../utils/getGroupAlignmentGuide';
 import { getPointerPosition } from '../../../../../utils/getPointerPosition';
 import { getVectorEditingNode } from '../../../../../utils/getVectorEditingNode';
-import { getVectorGroupAlignmentGuide } from '../../../../../utils/getVectorGroupAlignmentGuide';
 import { resolveVectorVertexMerge } from './resolveVectorVertexMerge';
 import { scheduleThrottledDispatch } from 'components/Design/Canvas/utils/scheduleThrottledDispatch';
 import { screenToWorld } from '../../../../../utils/screenToWorld';
@@ -42,8 +42,8 @@ export const continueVectorVertexDrag = (
       const draggedVertexIds = Object.keys(dragState.origins);
       const draggedPoints = draggedVertexIds.map((id) => ({ x: dragState.origins[id].x + deltaX, y: dragState.origins[id].y + deltaY }));
       const candidates = getAllVectorVertexPositions(state.design.pages[state.design.activePageId].nodes, draggedVertexIds);
-      const alignmentTolerance = VECTOR_ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom;
-      const { deltaCorrection, guide } = getVectorGroupAlignmentGuide(draggedPoints, candidates, alignmentTolerance);
+      const alignmentTolerance = ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom;
+      const { deltaCorrection, guide } = getGroupAlignmentGuide(draggedPoints, candidates, alignmentTolerance);
       const draggedVertices = translateVectorVertices(dragState.origins, deltaX + deltaCorrection.x, deltaY + deltaCorrection.y);
 
       if (draggedVertexIds.length === 1) {

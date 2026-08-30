@@ -21,6 +21,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TImageRenderContext } from '../../types';
 
 // utils
+import { drawAlignmentGuide } from './drawAlignmentGuide';
 import { drawCornerRadiusHandlesLayer } from './drawCornerRadiusHandlesLayer';
 import { drawEditingPathTextHandle } from './drawEditingPathTextHandle';
 import { drawEditingText } from './drawEditingText';
@@ -38,7 +39,6 @@ import { drawSelectionSizeLabel } from './drawSelectionSizeLabel';
 import { drawShapeContactGuides } from './drawShapeContactGuides';
 import { drawSliceDraft } from 'utils/canvas/drawSliceDraft';
 import { drawStarRatioHandleLayer } from './drawStarRatioHandleLayer';
-import { drawVectorAlignmentGuide } from './drawVectorAlignmentGuide';
 import { drawVectorDraggedFillPreview } from './drawVectorDraggedFillPreview';
 import { drawVectorEditHandlesLayer } from './drawVectorEditHandlesLayer/drawVectorEditHandlesLayer/drawVectorEditHandlesLayer';
 import { drawVectorFaceSelectHoverPreview } from './drawVectorFaceSelectHoverPreview';
@@ -235,7 +235,8 @@ export const drawScene = (
     viewport,
   );
   drawEditingPathTextHandle(gl, program, buffer, editingTextBox, clientWidth, clientHeight, viewport);
-  drawVectorAlignmentGuide(gl, program, buffer, refs.vectorEdit.vectorAlignmentGuideRef.current, clientWidth, clientHeight, viewport);
+  drawAlignmentGuide(gl, program, buffer, refs.vectorEdit.vectorAlignmentGuideRef.current, clientWidth, clientHeight, viewport);
+  drawAlignmentGuide(gl, program, buffer, refs.transform.alignmentGuideRef.current, clientWidth, clientHeight, viewport);
   drawVectorLasso(gl, program, buffer, refs.lassoMarquee.vectorLassoPathRef.current, clientWidth, clientHeight, viewport);
   drawVectorShapeBuilderPath(
     gl,

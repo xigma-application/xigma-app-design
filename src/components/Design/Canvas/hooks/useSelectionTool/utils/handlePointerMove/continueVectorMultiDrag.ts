@@ -1,5 +1,5 @@
 // others
-import { VECTOR_ALIGNMENT_SNAP_TOLERANCE_PX } from 'constant/canvas';
+import { ALIGNMENT_SNAP_TOLERANCE_PX } from 'constant/canvas';
 
 // store
 import { updateNode } from 'store/design/slice';
@@ -15,8 +15,8 @@ import { TSceneNode, TVectorSegment } from 'types/design/types';
 import { dispatchAsOneGestureIfMultiNode } from '../../../../utils/dispatchAsOneGestureIfMultiNode';
 import { getAllVectorVertexPositions } from '../../../../utils/getAllVectorVertexPositions';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { getGroupAlignmentGuide } from '../../../../utils/getGroupAlignmentGuide';
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
-import { getVectorGroupAlignmentGuide } from '../../../../utils/getVectorGroupAlignmentGuide';
 import { groupVectorMultiSelectOriginsByNode } from '../../../../utils/groupVectorMultiSelectOriginsByNode';
 import { scheduleThrottledDispatch } from 'components/Design/Canvas/utils/scheduleThrottledDispatch';
 import { screenToWorld } from '../../../../utils/screenToWorld';
@@ -70,8 +70,8 @@ export const continueVectorMultiDrag = (
         y: dragState.vertexOrigins[id].y + rawDeltaY,
       }));
       const candidates = getAllVectorVertexPositions(nodes, draggedVertexIds);
-      const alignmentTolerance = VECTOR_ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom;
-      const { deltaCorrection, guide } = getVectorGroupAlignmentGuide(draggedPoints, candidates, alignmentTolerance);
+      const alignmentTolerance = ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom;
+      const { deltaCorrection, guide } = getGroupAlignmentGuide(draggedPoints, candidates, alignmentTolerance);
       const deltaX = rawDeltaX + deltaCorrection.x;
       const deltaY = rawDeltaY + deltaCorrection.y;
 
