@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import NewMenu from './NewMenu/NewMenu';
 import { MenuCompound } from 'shared';
 
 // others
@@ -26,7 +27,9 @@ const FileMenu: FC = () => {
   return (
     <>
       <MenuItem disabled label={t(FILE_MENU_NEW_DESIGN_KEY)} withCheck={false} />
-      <MenuSub label={t(FILE_MENU_NEW_KEY)} />
+      <MenuSub label={t(FILE_MENU_NEW_KEY)}>
+        <NewMenu />
+      </MenuSub>
       <MenuSeparator />
       <MenuItem disabled label={t(FILE_MENU_PLACE_IMAGE_KEY)} shortcut={KEYBOARD_SHORTCUTS.placeImage.join('')} withCheck={false} />
       <MenuSeparator />
