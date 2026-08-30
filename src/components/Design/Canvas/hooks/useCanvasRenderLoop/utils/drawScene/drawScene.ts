@@ -27,6 +27,7 @@ import { drawEditingPathTextHandle } from './drawEditingPathTextHandle';
 import { drawEditingText } from './drawEditingText';
 import { drawEllipseArcHandleLayer } from './drawEllipseArcHandleLayer/drawEllipseArcHandleLayer';
 import { drawFrame } from './drawFrame';
+import { drawFrameNameLabels } from './drawFrameNameLabels/drawFrameNameLabels';
 import { drawHoverOutline } from './drawHoverOutline';
 import { drawMarquee } from 'utils/canvas/drawMarquee';
 import { drawPencilPreview } from './drawPencilPreview/drawPencilPreview';
@@ -117,6 +118,7 @@ export const drawScene = (
   const selectedIds = new Set(allSelectedNodes.map((node) => node.id));
   const hoveredNode = getVisibleHoveredNode(nodesById, hoveredNodeId, editingNodeId, refs);
   const valuesNodeByid = Object.values(nodesById);
+  const editingPathNode = editingTextBox?.pathId ? nodesById[editingTextBox.pathId] : undefined;
 
   drawSceneBackground(gl);
   drawPixelGrid(gl, imageContext.gridProgram, imageContext.gridBuffer, clientWidth, clientHeight, viewport);
@@ -133,10 +135,12 @@ export const drawScene = (
     refs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current,
     refs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current,
     refs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current,
+    nodesById,
   );
   drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
-  drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
+  drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeIds, nodesById);
   drawSelectionSizeLabel(gl, program, buffer, imageContext, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
+  drawFrameNameLabels(gl, imageContext, filteredNodes, selectedIds, refs, clientWidth, clientHeight, viewport);
   drawCornerRadiusHandlesLayer(
     gl,
     program,
@@ -232,8 +236,9 @@ export const drawScene = (
     clientWidth,
     clientHeight,
     viewport,
+    editingPathNode,
   );
-  drawEditingPathTextHandle(gl, program, buffer, editingTextBox, clientWidth, clientHeight, viewport);
+  drawEditingPathTextHandle(gl, program, buffer, editingTextBox, clientWidth, clientHeight, viewport, editingPathNode);
   drawAlignmentGuide(gl, program, buffer, refs.vectorEdit.vectorAlignmentGuideRef.current, clientWidth, clientHeight, viewport);
   drawAlignmentGuide(gl, program, buffer, refs.transform.alignmentGuideRef.current, clientWidth, clientHeight, viewport);
   drawVectorLasso(gl, program, buffer, refs.lassoMarquee.vectorLassoPathRef.current, clientWidth, clientHeight, viewport);

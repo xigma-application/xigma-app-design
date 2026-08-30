@@ -16,6 +16,25 @@ branch.
 | 1   | Drawing a frame with the Frame tool renders it and reverts the active tool to `default`                      |  —   | ✅ `create-frame.spec.ts` |
 | 2   | Releasing without dragging (a plain click) still places a default 100×100 frame, centered on the click point |  —   | ✅ `create-frame.spec.ts` |
 
+## Frame name label
+
+Every `NodeType.frame` node renders its `name` as a small always-on WebGL text label just above its
+top-left corner (`drawFrameNameLabels`), colored `FRAME_NAME_LABEL_SELECTED_FILL` when selected or
+`FRAME_NAME_LABEL_FILL` otherwise. Double-clicking the label (default/move tool) swaps it for a real
+`CanvasNameLabelInput` (`FrameNameLabelEditOverlay`); committing dispatches the same `updateNode`
+action the Layers panel's own rename input uses, so the two stay in sync in both directions — the
+one thing genuinely worth an e2e test here, since it's an integration between the WebGL canvas and
+the DOM Layers tree that unit tests only exercise one side of at a time (`useFrameNameLabelEditor`
+mocks the hit-test util; `TreeItem`'s rename spec never touches the canvas).
+
+| #   | Scenario                                                                               | Unit |                         E2E                         |
+| --- | -------------------------------------------------------------------------------------- | :--: | :-------------------------------------------------: |
+| 1   | Renaming a frame via its canvas label updates the Layers panel row                     |  ✅  |            ✅ `frame-name-label.spec.ts`            |
+| 2   | Renaming a frame from the Layers panel updates its canvas label                        |  —   |            ✅ `frame-name-label.spec.ts`            |
+| 3   | Pressing Escape while editing the canvas label leaves the name unchanged               |  ✅  |            ✅ `frame-name-label.spec.ts`            |
+| 4   | Ctrl+Z after a canvas-label rename reverts the name (shared `updateNode` history)      |  —   |            ✅ `frame-name-label.spec.ts`            |
+| 5   | New frames are auto-numbered "Frame 1", "Frame 2", ... off existing frames on the page |  ✅  | — (covered precisely by `getNextFrameName.spec.ts`) |
+
 ## Section drawing
 
 Section is a Frame-like container node: a plain box node (`NodeType.section`) rendered through the

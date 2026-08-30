@@ -282,12 +282,17 @@ export type TShapeBuilderRefs = {
   vectorShapeBuilderPathRef: RefObject<TPoint[] | null>;
 };
 
+export type TFrameNameRefs = {
+  editingLabelRef: RefObject<string | null>;
+};
+
 export type TCanvasRefs = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   colorSampleRequestRef: RefObject<TColorSampleRequest | null>;
   cornerRadius: TCornerRadiusRefs;
   draftRef: RefObject<TDraftEntity | null>;
   ellipseArc: TEllipseArcRefs;
+  frameName: TFrameNameRefs;
   hover: THoverRefs;
   lassoMarquee: TLassoMarqueeRefs;
   pen: TPenRefs;

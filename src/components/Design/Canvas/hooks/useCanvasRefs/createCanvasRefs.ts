@@ -1,6 +1,7 @@
 // hooks
 import { createCornerRadiusRefs } from './hooks/useCornerRadiusRefs/createCornerRadiusRefs';
 import { createEllipseArcRefs } from './hooks/useEllipseArcRefs/createEllipseArcRefs';
+import { createFrameNameRefs } from './hooks/useFrameNameRefs/createFrameNameRefs';
 import { createHoverRefs } from './hooks/useHoverRefs/createHoverRefs';
 import { createLassoMarqueeRefs } from './hooks/useLassoMarqueeRefs/createLassoMarqueeRefs';
 import { createPenRefs } from './hooks/usePenRefs/createPenRefs';
@@ -26,6 +27,7 @@ export const createCanvasRefs = (overrides: TCanvasRefsOverrides = {}): TCanvasR
   ...overrides,
   cornerRadius: createCornerRadiusRefs(overrides.cornerRadius),
   ellipseArc: createEllipseArcRefs(overrides.ellipseArc),
+  frameName: createFrameNameRefs(overrides.frameName),
   hover: createHoverRefs(overrides.hover),
   lassoMarquee: createLassoMarqueeRefs(overrides.lassoMarquee),
   pen: createPenRefs(overrides.pen),

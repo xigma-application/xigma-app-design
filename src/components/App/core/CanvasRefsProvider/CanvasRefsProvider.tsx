@@ -9,6 +9,7 @@ import { useVectorEraseRefs } from 'components/Design/Canvas/hooks/useCanvasRefs
 import { useVectorMultiSelectRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useVectorMultiSelectRefs/useVectorMultiSelectRefs';
 import { useCornerRadiusRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useCornerRadiusRefs/useCornerRadiusRefs';
 import { useEllipseArcRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useEllipseArcRefs/useEllipseArcRefs';
+import { useFrameNameRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useFrameNameRefs/useFrameNameRefs';
 import { useHoverRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useHoverRefs/useHoverRefs';
 import { useLassoMarqueeRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useLassoMarqueeRefs/useLassoMarqueeRefs';
 import { usePenRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/usePenRefs/usePenRefs';
@@ -30,6 +31,7 @@ import { TDraftEntity } from 'types/design/types';
 const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const cornerRadiusRefs = useCornerRadiusRefs();
   const ellipseArcRefs = useEllipseArcRefs();
+  const frameNameRefs = useFrameNameRefs();
   const hoverRefs = useHoverRefs();
   const lassoMarqueeRefs = useLassoMarqueeRefs();
   const penRefs = usePenRefs();
@@ -55,6 +57,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       cornerRadius: cornerRadiusRefs,
       draftRef,
       ellipseArc: ellipseArcRefs,
+      frameName: frameNameRefs,
       hover: hoverRefs,
       lassoMarquee: lassoMarqueeRefs,
       pen: penRefs,
@@ -73,6 +76,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
     [
       cornerRadiusRefs,
       ellipseArcRefs,
+      frameNameRefs,
       hoverRefs,
       lassoMarqueeRefs,
       penRefs,

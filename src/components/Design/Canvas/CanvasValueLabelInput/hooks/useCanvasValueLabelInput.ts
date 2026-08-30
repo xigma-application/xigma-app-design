@@ -1,7 +1,7 @@
 import { KeyboardEvent, RefObject, useEffect, useRef, useState } from 'react';
 
 type TParams = {
-  initialValue: number;
+  initialValue: number | string;
   onCancel: TFunc;
   onCommit: TFunc<[string]>;
 };

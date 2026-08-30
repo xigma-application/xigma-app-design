@@ -15,16 +15,20 @@ any of the machinery below — see `design-store-architecture.md`'s "Comment sta
   (`types/design/canvas/types.ts` — the drag-state types themselves, e.g. `TCornerRadiusDragState`/
   `TEllipseArcDragState`, live there too, not under `components/`, since a type consumed from the
   global `types/` layer can't reach back into a feature folder). `TCanvasRefs` is **not** one flat
-  bag of ~65 keys — it's grouped into ~16 domain sub-objects (`cornerRadius`, `ellipseArc`, `hover`,
-  `pen`, `pencil`, `slice`, `transform`, `vectorEdit`, `vectorMultiSelect`, `vectorSnapshots`, etc.),
-  each with its own `use<Domain>Refs()` hook + `create<Domain>Refs()` test-factory pair under
-  `Canvas/hooks/useCanvasRefs/hooks/use<Domain>Refs/` — e.g. the corner-radius trio
-  (`cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef`, which exist so
+  bag of ~65 keys — it's grouped into ~16 domain sub-objects (`cornerRadius`, `ellipseArc`,
+  `frameName`, `hover`, `pen`, `pencil`, `slice`, `transform`, `vectorEdit`, `vectorMultiSelect`,
+  `vectorSnapshots`, etc.), each with its own `use<Domain>Refs()` hook + `create<Domain>Refs()`
+  test-factory pair under `Canvas/hooks/useCanvasRefs/hooks/use<Domain>Refs/` — e.g. the corner-radius
+  trio (`cornerRadiusDragRef`/`polygonCornerRadiusDragRef`/`starCornerRadiusDragRef`, which exist so
   `useCanvasRenderLoop` can tell a corner-radius drag is actively in progress, see
   `selection-and-manipulation.md` §13) lives at `refs.cornerRadius.*`, and the ellipse-arc trio
   (`ellipseArcDragRef`/`ellipseArcRotateDragRef`/`ellipseArcRatioDragRef`, which exist so the
   Sweep/Start/Ratio handles can render mid-drag at their live pointer-projected position instead of
-  jumping, §19) lives at `refs.ellipseArc.*`. A handful of refs are genuinely cross-domain and get
+  jumping, §19) lives at `refs.ellipseArc.*`. `frameName.editingLabelRef` (`string | null`, the one
+  frame currently being renamed) is the smallest such domain — a single ref whose only job is to tell
+  `drawFrameNameLabels` (§2) which frame's WebGL label to skip while its DOM rename input is open,
+  same "ref tells the renderer to suppress itself" shape as `vectorWidth.editingWidthLabelRef`. A
+  handful of refs are genuinely cross-domain and get
   imported across group boundaries by design — `refs.transform.rotateDragRef` is shared by both the
   Selection tool and `useSliceTool`, and `refs.vectorEdit.vectorAlignmentGuideRef` is written by both
   vector-drag continuation and the Pen tool's own preview. `CanvasRefsProvider.tsx` calls each
@@ -90,6 +94,8 @@ any of the machinery below — see `design-store-architecture.md`'s "Comment sta
   drawSceneNodes(gl, program, buffer, imageContext, sceneNodes, w, h, viewport, pathOutlineStyles);
   drawHoverOutline(gl, program, buffer, hoveredNode, w, h, viewport);
   drawSelectionOutline(gl, program, buffer, selectedNodes, w, h, viewport);
+  drawSelectionSizeLabel(gl, program, buffer, imageContext, selectedNodes, w, h, viewport);
+  drawFrameNameLabels(gl, imageContext, filteredNodes, selectedIds, refs, w, h, viewport);
   drawCornerRadiusHandlesLayer(gl, program, buffer, hoveredNode, selectedNodes, w, h, viewport, isDraggingCornerRadius);
   drawVertexCountHandlesLayer(gl, program, buffer, hoveredNode, selectedNodes, w, h, viewport);
   drawEllipseArcHandleLayer(gl, program, buffer, hoveredNode, selectedNodes, w, h, viewport, ...draggedPositions);
@@ -99,9 +105,19 @@ any of the machinery below — see `design-store-architecture.md`'s "Comment sta
   drawMarquee(gl, program, buffer, marqueeRect, w, h, viewport);
   drawSliceDraft(gl, program, buffer, sliceRect, w, h, viewport);
   ```
-  **background → committed nodes → hover outline → selection outline → corner-radius handles →
-  vertex-count handles → ellipse arc-cutting handles → in-progress draft → editing-text overlay →
-  path-text offset handle → marquee → slice draft.** `drawCornerRadiusHandlesLayer.ts`/
+  **background → committed nodes → hover outline → selection outline → selection size label →
+  frame name labels → corner-radius handles → vertex-count handles → ellipse arc-cutting handles →
+  in-progress draft → editing-text overlay → path-text offset handle → marquee → slice draft.**
+  `drawFrameNameLabels/` (`drawFrameNameLabels.ts` iterating `filteredNodes` for `NodeType.frame`,
+  `drawFrameNameLabel.ts` drawing one node's `name` via the MSDF pipeline straight — no badge, unlike
+  `drawSelectionSizeLabel.ts` — and `getFrameNameLabelAnchor.ts` for the world-space anchor above the
+  node's top-left corner, rotated with the node) draws every frame's name as a small always-on label,
+  in `FRAME_NAME_LABEL_SELECTED_FILL` when the frame is selected or `FRAME_NAME_LABEL_FILL` otherwise
+  (`constant/canvas.ts`), constant-screen-size the same way `drawValueLabel` is (font size divided by
+  `viewport.zoom`). It skips the one frame whose id sits in `refs.frameName.editingLabelRef.current`,
+  so the WebGL label and the DOM rename input (§9) never render on top of each other. Hit-testing for
+  that input reuses the same anchor math from a sibling, non-drawing file:
+  `Canvas/utils/getFrameNameLabelRects.ts`. `drawCornerRadiusHandlesLayer.ts`/
   `drawVertexCountHandlesLayer.ts`/`drawEllipseArcHandleLayer/drawEllipseArcHandleLayer.ts`
   (`selection-and-manipulation.md` §11/§12/§15, §18, §19) each self-gate (selected+hovered single
   node of the relevant type, large enough on screen) rather than `drawScene.ts` deciding when to call
@@ -420,6 +436,23 @@ whichever word/line sat under the pointer, before the user ever sees the full se
 `preventDefault()`) — the entry-into-edit-mode double-click never reaches the still-editing
 double-click handler at all, regardless of teardown timing.
 
+**A visible sibling pattern: `VectorWidthLabelEditOverlay` / `FrameNameLabelEditOverlay`.**
+`TextEditOverlay` is paint-invisible by design, but the same "swap a WebGL label for a real DOM
+`<input>` on double-click" shape also covers two cases where the input *is* the visible UI:
+`VectorWidthLabelEditOverlay.tsx` (editing a Variable Width point's total width) and
+`FrameNameLabelEditOverlay.tsx` (renaming a frame via its canvas label, §2). Both follow the same
+three-piece shape: a `use<X>LabelEditor.ts` hook holding `{ edit, cancel, commit }` state and mirroring
+which target is being edited into a ref (`refs.vectorWidth.editingWidthLabelRef` /
+`refs.frameName.editingLabelRef`) so `drawScene` suppresses that one WebGL label while the input is
+open; a thin overlay component (mounted in `Canvas.tsx` alongside `TextEditOverlay`) that renders
+`null` when idle and otherwise positions a `CanvasValueLabelInput`/`CanvasNameLabelInput` at
+`worldToScreen(edit.center, viewport)`; and hit-testing that reuses the exact same anchor/measurement
+math the renderer uses (`getVectorWidthLabelRects.ts` / `getFrameNameLabelRects.ts`), so the
+double-click target and the drawn label can never disagree about where the label actually sits.
+`CanvasNameLabelInput` shares its keyboard/commit/cancel plumbing with `CanvasValueLabelInput` via the
+same `useCanvasValueLabelInput` hook (widened to accept a `string` as well as a `number`), differing
+only in its own `.module.scss` shell (left-aligned text, no `inputMode="decimal"`).
+
 ## 10. Pixel grid — a zoom-gated, shader-only full-viewport overlay
 
 `drawPixelGrid.ts` (`utils/canvas/`) draws a helper grid at every integer world coordinate — visible
@@ -477,6 +510,13 @@ where it sits in the paint order.
 - Draft/committed split: `.../drawScene/{drawSceneNodes,drawFrame,drawDraftShape,drawDraftLine}.ts`;
   ephemeral-ref targets: `utils/canvas/drawMarquee.ts`, `.../drawScene/drawHoverOutline.ts`,
   `utils/canvas/drawSliceDraft.ts`, `.../drawScene/drawEditingText.ts` + `drawEditingCaretAndSelection/`
+- Frame name label: `.../drawScene/drawFrameNameLabels/{drawFrameNameLabels,drawFrameNameLabel,
+  getFrameNameLabelAnchor}.ts`, hit-testing `Canvas/utils/getFrameNameLabelRects.ts`, the rename input
+  overlay `Canvas/FrameNameLabelEditOverlay/{FrameNameLabelEditOverlay,hooks/useFrameNameLabelEditor}.ts`
+  + `Canvas/CanvasNameLabelInput/CanvasNameLabelInput.tsx`, the `frameName` ref-domain
+  `Canvas/hooks/useCanvasRefs/hooks/useFrameNameRefs/*.ts`, constants in `constant/canvas.ts`
+  (`FRAME_NAME_LABEL_*`), and auto-numbering `store/design/utils/getNextFrameName.ts` (used from
+  `handleAddNode.ts`)
 - Texture pipeline: `utils/canvas/getOrLoadTexture.ts`, `utils/canvas/drawImage.ts`
 - MSDF pipeline: `utils/canvas/text/{drawMsdfText,getMsdfAtlasTexture,buildGlyphQuads,buildGlyphQuad,
   buildCurvedGlyphQuads,getOrBuildTextGeometry}.ts`, `package.json`'s `generate:font-atlas` script
