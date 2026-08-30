@@ -46,6 +46,14 @@ Reuses the variable-width tool's label; also retunes the shared canvas blue to `
 
 - [x] rotation-aware placement + edge-hop, blue badge via `drawValueLabel` (`{ angleDeg, edgeGapPx, fill }`)
 
+## Stage 5 — Shape contact guides
+
+A red X-capped line along a neighbour's edge when a single axis-aligned shape (not group/frame) sits
+exactly flush against it — shown while dragging, resizing, or Alt-hovering. Figma-style; skips
+overlaps and off-90° rotations. Write-up: `.claude/docs/selection-and-manipulation.md` §23.
+
+- [x] `getShapeContactGuides` detection + `resolveShapeContactGuides` trigger + `drawShapeContactGuides` render, e2e
+
 ## Related
 
 [[canvas-rendering-pipeline]] — context for the render loop and the `WEBGL_CONTEXT_ATTRIBUTES`

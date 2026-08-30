@@ -1405,6 +1405,38 @@ filter, so it never shows in Vector Edit Mode.
 - **Not shown:** `×` (U+00D7) is absent from the Inter MSDF atlas, so the separator is a lowercase
   `x`.
 
+## 23. Shape contact guides (red X-capped edge lines)
+
+When a single axis-aligned shape's edge sits exactly flush against another shape's edge, a red
+(`CONTACT_GUIDE_STROKE` `#cd7259`) line is drawn along the neighbour's edge with an `×` marker at each
+end (`drawShapeContactGuides.ts` → `drawXMarker.ts`, right after `drawSelectionSizeLabel` in
+`drawScene`). The line spans the **active** shape's extent along that edge (its width for a horizontal
+seam, height for a vertical one), so it reads as "this is the footprint that's touching".
+
+- **Detection** (`getShapeContactGuides.ts`, pure). Inputs are already-resolved AABBs
+  (`getRotatedNodeBounds`, correct for 0/90/180/270). Per candidate, a `switch (true)` over the four
+  edges: `|activeEdge − candidateEdge| ≤ CONTACT_GUIDE_TOLERANCE_PX` (0.5px world) **and** strictly
+  positive overlap on the other axis. Two axis-aligned rects can only be flush on one side at a time
+  (a second shared side just meets at a corner, where the perpendicular overlap is 0), so it's ≤ 1
+  guide per pair — the switch, not four independent `if`s. Overlap ≠ contact: if the shapes actually
+  intersect, no edge is flush, nothing draws.
+- **Eligibility** (`isContactGuideEligibleNode`): `rectangle · ellipse · polygon · star · text ·
+  media` only, not hidden, rotation a multiple of 90°. Excludes `group · frame · section · line ·
+  vector` — "faktycznie figury", and the vector network has its own alignment guide (§21 /
+  [[vector-network]]).
+- **Trigger** (`resolveShapeContactGuides.ts`, last resolver in the selection-tool `handlePointerMove`
+  chain). The "active" shape is: the single node in `resizeDragRef.nodeOrigins` → the single node in a
+  moved `dragStateRef` → on `event.altKey`, the single selected node → otherwise none (ref cleared).
+  Multi-node drags/selections are skipped. Writes `refs.transform.contactGuidesRef` (a
+  `TShapeContactGuide[] | null`, sitting in the transform ref group next to the drag/resize id sets).
+- **Clearing**: the resolver nulls the ref whenever the trigger doesn't hold (covers Alt-release,
+  which `handleAltKeyChange` — the `utils/handleAltKeyChange/` sibling of `handleShiftKeyChange`, wired
+  through `useSelectionTool`'s `onAltKeyChange` — re-emits as a synthetic `pointermove` for the
+  default/move/scale/shapeBuilder tools); also nulled explicitly in `handlePointerUp`, `onPointerLeave`
+  and the tool-teardown effect, since no `pointermove` is guaranteed after those.
+- **No undo / no store**: purely a render artifact off a ref, like the vector alignment guide.
+- e2e: `e2e/pages/design/shape-contact-guide.spec.ts` (drag-into-contact + Alt-hover).
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.

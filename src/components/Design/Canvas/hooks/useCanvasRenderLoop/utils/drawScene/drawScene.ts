@@ -35,6 +35,7 @@ import { drawSceneBackground } from 'utils/canvas/drawSceneBackground';
 import { drawSceneNodes } from './drawSceneNodes';
 import { drawSelectionOutline } from './drawSelectionOutline';
 import { drawSelectionSizeLabel } from './drawSelectionSizeLabel';
+import { drawShapeContactGuides } from './drawShapeContactGuides';
 import { drawSliceDraft } from 'utils/canvas/drawSliceDraft';
 import { drawStarRatioHandleLayer } from './drawStarRatioHandleLayer';
 import { drawVectorAlignmentGuide } from './drawVectorAlignmentGuide';
@@ -136,6 +137,7 @@ export const drawScene = (
   drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
   drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
   drawSelectionSizeLabel(gl, program, buffer, imageContext, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
+  drawShapeContactGuides(gl, program, buffer, refs.transform.contactGuidesRef.current, clientWidth, clientHeight, viewport);
   drawCornerRadiusHandlesLayer(
     gl,
     program,

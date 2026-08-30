@@ -19,6 +19,7 @@ import { disarmPolygonCornerRadiusDrag } from './disarmPolygonCornerRadiusDrag';
 import { disarmPolygonVertexCountDrag } from './disarmPolygonVertexCountDrag';
 import { disarmResizeDrag } from './disarmResizeDrag';
 import { disarmRotateDrag } from './disarmRotateDrag';
+import { disarmShapeContactGuides } from './disarmShapeContactGuides';
 import { disarmStarCornerRadiusDrag } from './disarmStarCornerRadiusDrag';
 import { disarmStarRatioDrag } from './disarmStarRatioDrag';
 import { disarmStarVertexCountDrag } from './disarmStarVertexCountDrag';
@@ -84,5 +85,6 @@ export const handlePointerUp = (
   disarmVectorMarqueeDrag(canvas, event, canvasRefs, selectionRefs.vectorMarqueeStartRef, selectionRefs.vectorMarqueeModeRef);
   disarmVectorWidthPointDrag(canvas, event, dispatch, canvasRefs, setClassName);
   resolveVectorCutMarkConsumption(canvasRefs);
+  disarmShapeContactGuides(canvasRefs);
   dispatch(endHistoryGesture());
 };

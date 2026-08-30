@@ -60,6 +60,7 @@ describe('createCanvasRefs behaviors', () => {
       },
       slice: { sliceRef: { current: null } },
       transform: {
+        contactGuidesRef: { current: null },
         draggedNodeIdsRef: { current: null },
         resizedNodeIdsRef: { current: null },
         rotateDragRef: { current: null },
