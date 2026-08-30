@@ -170,6 +170,10 @@ test.describe('During Vector Edit Mode (editing vertices/segments)', () => {
 
     await designPage.click(940, 300); // select the v1-v2 segment (off its own midpoint)
     await designPage.pointerMove(neutral.x, neutral.y);
+    // the layers-tree node icon starts as an empty <path d=""> and only fills in once the vector's
+    // outline is derived a beat later; wait for it so the baseline isn't captured mid-paint —
+    // otherwise Copy's own no-op re-render is what "reveals" the icon
+    await expect(page.locator('svg[class*="TreeItem__icon"] path[d]:not([d=""])')).toBeAttached();
     const beforeCopy = await designPage.canvas.screenshot();
 
     await page.keyboard.press('Control+c'); // writes to an in-memory clipboard only — no dispatch
@@ -189,6 +193,9 @@ test.describe('During Vector Edit Mode (editing vertices/segments)', () => {
     await designPage.selectVectorEditMoveTool();
     await designPage.click(1400, 700); // deselect, keep edit mode open
     await designPage.pointerMove(neutral.x, neutral.y);
+    // wait for the layers-tree node icon's <path d> to fill in, so the baseline isn't captured
+    // mid-paint (see the "Copy alone" test above)
+    await expect(page.locator('svg[class*="TreeItem__icon"] path[d]:not([d=""])')).toBeAttached();
     const baseline = await designPage.canvas.screenshot();
 
     await page.keyboard.press('Control+v'); // nothing was ever copied on this fresh page

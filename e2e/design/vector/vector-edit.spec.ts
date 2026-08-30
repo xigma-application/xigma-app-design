@@ -21,6 +21,10 @@ const drawOpenTriangle = async (designPage: DesignPage): Promise<void> => {
     { x: 1050, y: 300 },
     { x: 1050, y: 450 },
   ]);
+  // the layers-tree node icon starts as an empty <path d=""> and fills in a beat later; wait it out
+  // here so the many "screenshot a baseline, round-trip, compare .toBe(true)" tests below don't
+  // capture their baseline mid-paint and then see the icon "appear" on a later capture
+  await expect(designPage.page.locator('svg[class*="TreeItem__icon"] path[d]:not([d=""])').first()).toBeAttached();
 };
 
 // clicking any main-toolbar tool outside the Pen group (selectToolbarTool.ts) now exits Vector Edit
