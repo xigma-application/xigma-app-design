@@ -151,7 +151,7 @@ describe('drawScene', () => {
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINE_LOOP, 0, 4);
-    expect(gl.drawArrays).toHaveBeenCalledTimes(9);
+    expect(gl.drawArrays).toHaveBeenCalledTimes(10);
   });
 
   it('should draw every node currently in the scene', () => {

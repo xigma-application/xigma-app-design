@@ -23,6 +23,7 @@ import { TImageRenderContext } from '../../types';
 // utils
 import { drawAlignmentGuide } from './drawAlignmentGuide';
 import { drawCornerRadiusHandlesLayer } from './drawCornerRadiusHandlesLayer';
+import { drawDraftFrameNameLabel } from './drawFrameNameLabels/drawDraftFrameNameLabel';
 import { drawEditingPathTextHandle } from './drawEditingPathTextHandle';
 import { drawEditingText } from './drawEditingText';
 import { drawEllipseArcHandleLayer } from './drawEllipseArcHandleLayer/drawEllipseArcHandleLayer';
@@ -199,6 +200,7 @@ export const drawScene = (
     ellipseArcRatioDraggedHandlePosition,
   );
   drawFrame(gl, program, buffer, imageContext, draftShape, clientWidth, clientHeight, viewport);
+  drawDraftFrameNameLabel(gl, imageContext, draftShape, nodesById, clientWidth, clientHeight, viewport);
   drawPenPreview(
     gl,
     program,

@@ -100,6 +100,7 @@ any of the machinery below — see `design-store-architecture.md`'s "Comment sta
   drawVertexCountHandlesLayer(gl, program, buffer, hoveredNode, selectedNodes, w, h, viewport);
   drawEllipseArcHandleLayer(gl, program, buffer, hoveredNode, selectedNodes, w, h, viewport, ...draggedPositions);
   drawFrame(gl, program, buffer, imageContext, draftShape, w, h, viewport);       // dispatcher, despite the name
+  drawDraftFrameNameLabel(gl, imageContext, draftShape, nodesById, w, h, viewport);
   drawEditingText(gl, program, buffer, imageContext, editingTextBox, ...);
   drawEditingPathTextHandle(gl, program, buffer, editingTextBox, w, h, viewport);
   drawMarquee(gl, program, buffer, marqueeRect, w, h, viewport);
@@ -107,7 +108,8 @@ any of the machinery below — see `design-store-architecture.md`'s "Comment sta
   ```
   **background → committed nodes → hover outline → selection outline → selection size label →
   frame name labels → corner-radius handles → vertex-count handles → ellipse arc-cutting handles →
-  in-progress draft → editing-text overlay → path-text offset handle → marquee → slice draft.**
+  in-progress draft → draft frame's own name label → editing-text overlay → path-text offset handle
+  → marquee → slice draft.**
   `drawFrameNameLabels/` (`drawFrameNameLabels.ts` iterating `filteredNodes` for `NodeType.frame`,
   `drawFrameNameLabel.ts` drawing one node's `name` via the MSDF pipeline straight — no badge, unlike
   `drawSelectionSizeLabel.ts` — and `getFrameNameLabelAnchor.ts` for the world-space anchor above the
@@ -117,7 +119,14 @@ any of the machinery below — see `design-store-architecture.md`'s "Comment sta
   `viewport.zoom`). It skips the one frame whose id sits in `refs.frameName.editingLabelRef.current`,
   so the WebGL label and the DOM rename input (§9) never render on top of each other. Hit-testing for
   that input reuses the same anchor math from a sibling, non-drawing file:
-  `Canvas/utils/getFrameNameLabelRects.ts`. `drawCornerRadiusHandlesLayer.ts`/
+  `Canvas/utils/getFrameNameLabelRects.ts`. A frame doesn't need to exist as a committed node to earn
+  a label: `drawDraftFrameNameLabel.ts`, called right after `drawFrame`'s draft-shape dispatch, checks
+  whether `draftRef` is currently a `NodeType.frame` draft and — if so — builds a throwaway
+  `TFrameNode`-shaped object (id `''`, rotation `0`, geometry off the draft rect) named via the same
+  `getNextFrameName` the eventual `addNode` dispatch will use, and feeds it straight through
+  `drawFrameNameLabel` in `FRAME_NAME_LABEL_SELECTED_FILL`. This is what makes the name visible above
+  a frame while it is still being dragged out, not only after the pointer is released.
+  `drawCornerRadiusHandlesLayer.ts`/
   `drawVertexCountHandlesLayer.ts`/`drawEllipseArcHandleLayer/drawEllipseArcHandleLayer.ts`
   (`selection-and-manipulation.md` §11/§12/§15, §18, §19) each self-gate (selected+hovered single
   node of the relevant type, large enough on screen) rather than `drawScene.ts` deciding when to call
@@ -527,7 +536,7 @@ where it sits in the paint order.
   ephemeral-ref targets: `utils/canvas/drawMarquee.ts`, `.../drawScene/drawHoverOutline.ts`,
   `utils/canvas/drawSliceDraft.ts`, `.../drawScene/drawEditingText.ts` + `drawEditingCaretAndSelection/`
 - Frame name label: `.../drawScene/drawFrameNameLabels/{drawFrameNameLabels,drawFrameNameLabel,
-  getFrameNameLabelAnchor}.ts`, hit-testing `Canvas/utils/getFrameNameLabelRects.ts`, the rename input
+  getFrameNameLabelAnchor,drawDraftFrameNameLabel}.ts`, hit-testing `Canvas/utils/getFrameNameLabelRects.ts`, the rename input
   overlay `Canvas/FrameNameLabelEditOverlay/{FrameNameLabelEditOverlay,hooks/useFrameNameLabelEditor}.ts`
   + `Canvas/CanvasNameLabelInput/CanvasNameLabelInput.tsx`, the `frameName` ref-domain
   `Canvas/hooks/useCanvasRefs/hooks/useFrameNameRefs/*.ts`, constants in `constant/canvas.ts`

@@ -61,6 +61,30 @@ test('pressing Escape while editing the canvas label leaves the name unchanged',
   await expect(treeItemName(page)).toHaveText('Frame 1');
 });
 
+test('the auto-numbered label is already visible above a frame while it is still being drawn', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-frame-name-label-during-drag');
+  await expect(designPage.canvas).toBeVisible();
+
+  // a thin strip above the eventual top-left corner (700, 300) — where the label lands, above
+  // where the draft rectangle itself starts — so this only ever captures label pixels
+  const labelArea = { height: 20, width: 70, x: 690, y: 275 };
+  const before = await page.screenshot({ clip: labelArea });
+
+  await designPage.selectTool('frame');
+  await designPage.pointerDown(700, 300);
+  await page.mouse.move(780, 380, { steps: 5 });
+
+  const duringDrag = await page.screenshot({ clip: labelArea });
+
+  await designPage.pointerUp();
+
+  // the "Frame 1" label must render as soon as the frame is being dragged out, before the pointer
+  // is ever released
+  expect(duringDrag.equals(before)).toBe(false);
+});
+
 test('Ctrl+Z after a canvas-label rename reverts the name', async ({ page }) => {
   const designPage = new DesignPage(page);
 

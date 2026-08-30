@@ -27,13 +27,14 @@ one thing genuinely worth an e2e test here, since it's an integration between th
 the DOM Layers tree that unit tests only exercise one side of at a time (`useFrameNameLabelEditor`
 mocks the hit-test util; `TreeItem`'s rename spec never touches the canvas).
 
-| #   | Scenario                                                                               | Unit |                         E2E                         |
-| --- | -------------------------------------------------------------------------------------- | :--: | :-------------------------------------------------: |
-| 1   | Renaming a frame via its canvas label updates the Layers panel row                     |  ✅  |            ✅ `frame-name-label.spec.ts`            |
-| 2   | Renaming a frame from the Layers panel updates its canvas label                        |  —   |            ✅ `frame-name-label.spec.ts`            |
-| 3   | Pressing Escape while editing the canvas label leaves the name unchanged               |  ✅  |            ✅ `frame-name-label.spec.ts`            |
-| 4   | Ctrl+Z after a canvas-label rename reverts the name (shared `updateNode` history)      |  —   |            ✅ `frame-name-label.spec.ts`            |
-| 5   | New frames are auto-numbered "Frame 1", "Frame 2", ... off existing frames on the page |  ✅  | — (covered precisely by `getNextFrameName.spec.ts`) |
+| #   | Scenario                                                                                                                                                           | Unit |                         E2E                         |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :--: | :-------------------------------------------------: |
+| 1   | Renaming a frame via its canvas label updates the Layers panel row                                                                                                 |  ✅  |            ✅ `frame-name-label.spec.ts`            |
+| 2   | Renaming a frame from the Layers panel updates its canvas label                                                                                                    |  —   |            ✅ `frame-name-label.spec.ts`            |
+| 3   | Pressing Escape while editing the canvas label leaves the name unchanged                                                                                           |  ✅  |            ✅ `frame-name-label.spec.ts`            |
+| 4   | Ctrl+Z after a canvas-label rename reverts the name (shared `updateNode` history)                                                                                  |  —   |            ✅ `frame-name-label.spec.ts`            |
+| 5   | New frames are auto-numbered "Frame 1", "Frame 2", ... off existing frames on the page                                                                             |  ✅  | — (covered precisely by `getNextFrameName.spec.ts`) |
+| 6   | The would-be name label is already visible above the frame while it is still being dragged out (`drawDraftFrameNameLabel`), not just after the pointer is released |  ✅  |            ✅ `frame-name-label.spec.ts`            |
 
 ## Section drawing
 
