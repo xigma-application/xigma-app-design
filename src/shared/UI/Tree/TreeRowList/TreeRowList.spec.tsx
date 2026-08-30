@@ -31,7 +31,7 @@ describe('TreeRowList', () => {
         items={[buildVirtualItem(0), buildVirtualItem(1)]}
         renderRow={(row) => <span>Row {row.item.id}</span>}
         rows={rows}
-        toggleExpanded={vi.fn()}
+        onToggleExpand={vi.fn()}
       />,
     );
 
@@ -40,18 +40,18 @@ describe('TreeRowList', () => {
     expect(screen.getByText('Row b')).toBeInTheDocument();
   });
 
-  it('should call toggleExpanded with the row item id when the row calls its onToggleExpand callback', () => {
+  it('should forward the row and the toggle options when the row calls its onToggleExpand callback', () => {
     // mock
-    const toggleExpanded = vi.fn();
+    const onToggleExpand = vi.fn();
     const rows = [buildRow('a')];
 
     // before
     render(
       <TreeRowList
         items={[buildVirtualItem(0)]}
-        renderRow={(row, onToggleExpand) => <button onClick={() => onToggleExpand()}>Toggle {row.item.id}</button>}
+        onToggleExpand={onToggleExpand}
+        renderRow={(row, rowOnToggleExpand) => <button onClick={() => rowOnToggleExpand({ recursive: true })}>Toggle {row.item.id}</button>}
         rows={rows}
-        toggleExpanded={toggleExpanded}
       />,
     );
 
@@ -59,7 +59,7 @@ describe('TreeRowList', () => {
     fireEvent.click(screen.getByText('Toggle a'));
 
     // result
-    expect(toggleExpanded).toHaveBeenCalledWith('a');
+    expect(onToggleExpand).toHaveBeenCalledWith(rows[0], { recursive: true });
   });
 
   it('should wire onMouseDown to onRowMouseDown, with the virtual index, when provided', () => {
@@ -74,7 +74,7 @@ describe('TreeRowList', () => {
         onRowMouseDown={onRowMouseDown}
         renderRow={(row) => <span>Row {row.item.id}</span>}
         rows={rows}
-        toggleExpanded={vi.fn()}
+        onToggleExpand={vi.fn()}
       />,
     );
     const rowElement = container.querySelector('[class*="Tree__row"]')!;
@@ -97,7 +97,7 @@ describe('TreeRowList', () => {
         items={[buildVirtualItem(0)]}
         renderRow={(row) => <span>Row {row.item.id}</span>}
         rows={rows}
-        toggleExpanded={vi.fn()}
+        onToggleExpand={vi.fn()}
       />,
     );
     const rowElement = container.querySelector('[class*="Tree__row"]')!;

@@ -5,22 +5,22 @@ import { VirtualItem } from '@tanstack/react-virtual';
 import styles from '../tree.module.scss';
 
 // types
-import { TTreeItem, TTreeRow } from '../types';
+import { TToggleExpand, TToggleExpandOptions, TTreeItem, TTreeRow } from '../types';
 
 export type TTreeRowListProps<T extends TTreeItem> = {
   items: VirtualItem[];
   onRowMouseDown?: (index: number, event: ReactMouseEvent<HTMLElement>) => void;
-  renderRow: (row: TTreeRow<T>, onToggleExpand: TFunc) => ReactNode;
+  onToggleExpand: (row: TTreeRow<T>, options?: TToggleExpandOptions) => void;
+  renderRow: (row: TTreeRow<T>, onToggleExpand: TToggleExpand) => ReactNode;
   rows: TTreeRow<T>[];
-  toggleExpanded: TFunc<[string]>;
 };
 
 export const TreeRowList = <T extends TTreeItem>({
   items,
   onRowMouseDown,
+  onToggleExpand,
   renderRow,
   rows,
-  toggleExpanded,
 }: TTreeRowListProps<T>): ReactElement => (
   <>
     {items.map((virtualRow) => (
@@ -30,7 +30,7 @@ export const TreeRowList = <T extends TTreeItem>({
         onMouseDown={onRowMouseDown ? (event): void => onRowMouseDown(virtualRow.index, event) : undefined}
         style={{ height: virtualRow.size, transform: `translateY(${virtualRow.start}px)` }}
       >
-        {renderRow(rows[virtualRow.index], (): void => toggleExpanded(rows[virtualRow.index].item.id))}
+        {renderRow(rows[virtualRow.index], (options): void => onToggleExpand(rows[virtualRow.index], options))}
       </div>
     ))}
   </>

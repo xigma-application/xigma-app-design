@@ -1,8 +1,11 @@
 import { MouseEvent } from 'react';
 
-export const useToggleExpandClick = (onToggleExpand: TFunc): TFunc<[MouseEvent<HTMLElement>]> => {
+// types
+import { TToggleExpand } from '../../../types';
+
+export const useToggleExpandClick = (onToggleExpand: TToggleExpand): TFunc<[MouseEvent<HTMLElement>]> => {
   return (event: MouseEvent<HTMLElement>): void => {
     event.stopPropagation();
-    onToggleExpand();
+    onToggleExpand({ recursive: event.ctrlKey || event.metaKey });
   };
 };

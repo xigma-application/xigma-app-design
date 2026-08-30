@@ -282,7 +282,7 @@ describe('Tree', () => {
         getChildren={getChildren}
         onReorder={onReorder}
         renderDropIndicator={(depth) => <span>Drop depth {depth}</span>}
-        renderRow={(row, onToggleExpand): ReactNode => <span onClick={onToggleExpand}>Row {row.item.id}</span>}
+        renderRow={(row, onToggleExpand): ReactNode => <span onClick={(): void => onToggleExpand()}>Row {row.item.id}</span>}
         roots={roots}
         rowHeight={32}
       />,
@@ -304,5 +304,30 @@ describe('Tree', () => {
 
     // result — '1' becomes the first child of '0'
     expect(onReorder).toHaveBeenCalledWith([roots[1]], roots[0], 0);
+  });
+
+  it('should expand or collapse a whole subtree at once when onToggleExpand is called with recursive, keyed off the clicked row', () => {
+    // mock — a 3-level-deep chain: 0 > 0-0 > 0-0-0
+    const roots = [buildItem('0', [buildItem('0-0', [buildItem('0-0-0')])])];
+    const recursiveRenderRow = (row: TTreeRow<TItem>, onToggleExpand: (options?: { recursive?: boolean }) => void): ReactNode => (
+      <span onClick={(): void => onToggleExpand({ recursive: true })}>Row {row.item.id}</span>
+    );
+
+    // before
+    render(<Tree getChildren={getChildren} renderRow={recursiveRenderRow} roots={roots} rowHeight={32} />);
+    expect(screen.queryByText('Row 0-0')).not.toBeInTheDocument();
+
+    // action — recursive-toggle the collapsed root: every descendant becomes visible
+    fireEvent.click(screen.getByText('Row 0'));
+
+    // result
+    expect(screen.getByText('Row 0-0')).toBeInTheDocument();
+    expect(screen.getByText('Row 0-0-0')).toBeInTheDocument();
+
+    // action — recursive-toggle it again: the whole subtree collapses back
+    fireEvent.click(screen.getByText('Row 0'));
+
+    // result
+    expect(screen.queryByText('Row 0-0')).not.toBeInTheDocument();
   });
 });

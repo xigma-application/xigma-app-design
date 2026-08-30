@@ -25,13 +25,14 @@ import styles from './tree-item.module.scss';
 import { NodeType } from 'types/design/enums';
 import { TRenderTreeItemMenu } from './types';
 import { TSceneNode } from 'types/design/types';
+import { TToggleExpand } from '../types';
 
 export type TTreeItemProps = {
   depth?: number;
   isExpanded?: boolean;
   isSelected: boolean;
   node: TSceneNode;
-  onToggleExpand?: TFunc;
+  onToggleExpand?: TToggleExpand;
   renderMenu?: TRenderTreeItemMenu;
 };
 

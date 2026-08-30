@@ -44,7 +44,21 @@ describe('TreeItemToggle', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Expand layer' }));
 
     // result
-    expect(onToggleExpand).toHaveBeenCalledTimes(1);
+    expect(onToggleExpand).toHaveBeenCalledWith({ recursive: false });
     expect(onParentClick).not.toHaveBeenCalled();
+  });
+
+  it('should ask for a recursive toggle when Ctrl/Cmd is held during the click', () => {
+    // mock
+    const onToggleExpand = vi.fn();
+
+    // before
+    render(<TreeItemToggle isExpandable isExpanded={false} onToggleExpand={onToggleExpand} />);
+
+    // action
+    fireEvent.click(screen.getByRole('button', { name: 'Expand layer' }), { ctrlKey: true });
+
+    // result
+    expect(onToggleExpand).toHaveBeenCalledWith({ recursive: true });
   });
 });

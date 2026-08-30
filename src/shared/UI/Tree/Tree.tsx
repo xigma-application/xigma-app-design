@@ -17,12 +17,13 @@ import { useVirtualList } from 'hooks';
 import styles from './tree.module.scss';
 
 // types
-import { TTreeItem, TTreeRow } from './types';
+import { TToggleExpand, TToggleExpandOptions, TTreeItem, TTreeRow } from './types';
 
 // utils
 import { flattenTreeRows } from './utils/flattenTreeRows';
 import { getIsRowSelectedByIndex } from './utils/getIsRowSelectedByIndex';
 import { getSelectionBackgroundSegments } from './utils/getSelectionBackgroundSegments';
+import { handleToggleExpand } from './utils/handleToggleExpand';
 
 export type TTreeProps<T extends TTreeItem> = {
   className?: string;
@@ -32,7 +33,7 @@ export type TTreeProps<T extends TTreeItem> = {
   onDeselectAll?: TFunc;
   onReorder?: (draggedItems: T[], targetParentItem: T | null, targetIndex: number) => void;
   renderDropIndicator?: (depth: number) => ReactNode;
-  renderRow: (row: TTreeRow<T>, onToggleExpand: TFunc) => ReactNode;
+  renderRow: (row: TTreeRow<T>, onToggleExpand: TToggleExpand) => ReactNode;
   roots: T[];
   rowHeight: number;
   scrollToIndex?: number;
@@ -52,7 +53,7 @@ export const Tree = <T extends TTreeItem>({
   scrollToIndex,
 }: TTreeProps<T>): ReactElement => {
   const rowsRef: RefObject<HTMLDivElement | null> = useRef(null);
-  const { expandedIds, toggleExpanded } = useExpandedIds();
+  const { expandedIds, setSubtreeExpanded, toggleExpanded } = useExpandedIds();
   const rows = useMemo(() => flattenTreeRows(roots, getChildren, expandedIds), [roots, getChildren, expandedIds]);
   const { items, totalSize } = useVirtualList({ count: rows.length, rowHeight, scrollRef: rowsRef, scrollToIndex });
   const { dropDepth, handleRowMouseDown, insertionIndex } = useTreeRowDrag({ isRowSelected, onReorder, rowHeight, rows, rowsRef });
@@ -69,6 +70,9 @@ export const Tree = <T extends TTreeItem>({
     : [];
   const handleRowsClick = useHandleRowsClick(onDeselectAll);
 
+  const onToggleExpand = (row: TTreeRow<T>, options?: TToggleExpandOptions): void =>
+    handleToggleExpand({ expandedIds, getChildren, options, row, setSubtreeExpanded, toggleExpanded });
+
   return (
     <div className={cx(styles.Tree, className)}>
       <div className={styles.Tree__rows} onClick={handleRowsClick} ref={rowsRef}>
@@ -78,9 +82,9 @@ export const Tree = <T extends TTreeItem>({
           <TreeRowList
             items={items}
             onRowMouseDown={onReorder ? handleRowMouseDown : undefined}
+            onToggleExpand={onToggleExpand}
             renderRow={renderRow}
             rows={rows}
-            toggleExpanded={toggleExpanded}
           />
           {isDragging && (
             <TreeDropIndicator insertionIndex={insertionIndex} isDefault={!renderDropIndicator} rowHeight={rowHeight}>

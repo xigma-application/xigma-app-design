@@ -14,3 +14,9 @@ export type TDropDepthRange = {
   max: number;
   min: number;
 };
+
+export type TToggleExpandOptions = {
+  recursive?: boolean;
+};
+
+export type TToggleExpand = (options?: TToggleExpandOptions) => void;

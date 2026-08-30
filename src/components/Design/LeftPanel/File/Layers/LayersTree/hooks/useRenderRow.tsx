@@ -9,12 +9,12 @@ import { useAppSelector } from 'store';
 
 // types
 import { TSceneNode } from 'types/design/types';
-import { TTreeRow } from 'shared/UI/Tree/types';
+import { TToggleExpand, TTreeRow } from 'shared/UI/Tree/types';
 
-export const useRenderRow = (): TFunc<[TTreeRow<TSceneNode>, TFunc], ReactNode> => {
+export const useRenderRow = (): TFunc<[TTreeRow<TSceneNode>, TToggleExpand], ReactNode> => {
   const selectedIds = useAppSelector(selectSelectedIds);
 
-  return (row: TTreeRow<TSceneNode>, onToggleExpand: TFunc): ReactNode => (
+  return (row: TTreeRow<TSceneNode>, onToggleExpand: TToggleExpand): ReactNode => (
     <LayerRow
       depth={row.depth}
       isExpanded={row.isExpanded}

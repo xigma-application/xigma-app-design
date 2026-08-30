@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 export type TUseExpandedIdsResult = {
   expandedIds: Set<string>;
+  setSubtreeExpanded: (ids: string[], expanded: boolean) => void;
   toggleExpanded: TFunc<[string]>;
 };
 
@@ -22,5 +23,21 @@ export const useExpandedIds = (): TUseExpandedIdsResult => {
     });
   };
 
-  return { expandedIds, toggleExpanded };
+  const setSubtreeExpanded = (ids: string[], expanded: boolean): void => {
+    setExpandedIds((previous) => {
+      const next = new Set(previous);
+
+      ids.forEach((id) => {
+        if (expanded) {
+          next.add(id);
+        } else {
+          next.delete(id);
+        }
+      });
+
+      return next;
+    });
+  };
+
+  return { expandedIds, setSubtreeExpanded, toggleExpanded };
 };

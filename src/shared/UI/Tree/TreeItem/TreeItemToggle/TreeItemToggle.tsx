@@ -13,10 +13,13 @@ import { NODE_ROW_COLLAPSE_ARIA_LABEL_KEY, NODE_ROW_EXPAND_ARIA_LABEL_KEY } from
 // styles
 import styles from '../tree-item.module.scss';
 
+// types
+import { TToggleExpand } from '../../types';
+
 export type TTreeItemToggleProps = {
   isExpandable: boolean;
   isExpanded: boolean;
-  onToggleExpand: TFunc;
+  onToggleExpand: TToggleExpand;
 };
 
 const TreeItemToggle: FC<TTreeItemToggleProps> = ({ isExpandable, isExpanded, onToggleExpand }) => {

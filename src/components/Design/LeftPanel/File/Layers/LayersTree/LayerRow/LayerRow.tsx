@@ -6,13 +6,14 @@ import { TreeItem } from 'shared';
 
 // types
 import { TSceneNode } from 'types/design/types';
+import { TToggleExpand } from 'shared/UI/Tree/types';
 
 export type TLayerRowProps = {
   depth?: number;
   isExpanded?: boolean;
   isSelected: boolean;
   node: TSceneNode;
-  onToggleExpand?: TFunc;
+  onToggleExpand?: TToggleExpand;
 };
 
 const LayerRow: FC<TLayerRowProps> = ({ depth, isExpanded, isSelected, node, onToggleExpand }) => (

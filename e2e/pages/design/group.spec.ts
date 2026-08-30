@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Locator } from '@playwright/test';
 
 // components
 import { DesignPage } from './model/DesignPage';
@@ -694,4 +694,44 @@ test('Ctrl+clicking a child then its parent group in the Layers panel selects on
   await expect(selectionBackground).not.toHaveClass(/squareTop/);
   await expect(highlightBackground).toHaveClass(/squareTop/);
   await expect(highlightBackground).not.toHaveClass(/squareBottom/);
+});
+
+test('Ctrl+clicking a group row chevron in the Layers panel expands or collapses its whole subtree at once, keyed off that row', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-group-recursive-chevron-toggle');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 100, 740, 140); // A
+  await designPage.drawRectangle(760, 100, 800, 140); // B — adjacent, auto-selected
+  await designPage.click(720, 120, { shift: true }); // add A back, selection = [B, A]
+  await page.keyboard.press('Control+g'); // group-1 = [A, B]
+  await page.keyboard.press('Control+g'); // group-2 = [group-1]
+  await page.keyboard.press('Control+g'); // group-3 = [group-2] — nesting is g3 > g2 > g1 > [A, B]
+
+  await designPage.click(1500, 600); // deselect
+
+  const layersTree = page.locator('[class*="LayersTree"]').first();
+  const rows = layersTree.locator('[class*="Tree__row_"]');
+  const chevronOf = (rowIndex: number): Locator => rows.nth(rowIndex).locator('[class*="TreeItem__toggleButton"]');
+
+  // only the outermost group row shows, still collapsed
+  await expect(rows).toHaveCount(1);
+
+  // Ctrl+click the collapsed outer group's chevron → the entire subtree expands in one go
+  await chevronOf(0).click({ modifiers: ['ControlOrMeta'] });
+  await expect(rows).toHaveCount(5); // g3, g2, g1, A, B
+
+  // Ctrl+click the (now expanded) outer group's chevron again → the whole subtree collapses back
+  await chevronOf(0).click({ modifiers: ['ControlOrMeta'] });
+  await expect(rows).toHaveCount(1);
+
+  // the direction is keyed off the clicked row, not the outermost: expand-all again, then recursively
+  // collapse from the middle group — only its own descendants fold away, g3 stays open
+  await chevronOf(0).click({ modifiers: ['ControlOrMeta'] });
+  await expect(rows).toHaveCount(5);
+  await chevronOf(1).click({ modifiers: ['ControlOrMeta'] }); // g2's chevron, g2 currently expanded
+  await expect(rows).toHaveCount(2); // g3 + g2 (collapsed)
 });
