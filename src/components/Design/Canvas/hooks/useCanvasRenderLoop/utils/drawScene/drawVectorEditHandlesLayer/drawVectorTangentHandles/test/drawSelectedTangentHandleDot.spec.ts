@@ -28,6 +28,6 @@ describe('drawSelectedTangentHandleDot', () => {
     // result
     expect(drawHandleDiamondMock).toHaveBeenCalledTimes(2);
     expect(drawHandleDiamondMock).toHaveBeenNthCalledWith(1, {}, {}, {}, { x: 10, y: 20 }, 8, '#ffffff', 200, 150, IDENTITY_VIEWPORT);
-    expect(drawHandleDiamondMock).toHaveBeenNthCalledWith(2, {}, {}, {}, { x: 10, y: 20 }, 6, '#0d99ff', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawHandleDiamondMock).toHaveBeenNthCalledWith(2, {}, {}, {}, { x: 10, y: 20 }, 6, '#337ae1', 200, 150, IDENTITY_VIEWPORT);
   });
 });

@@ -38,7 +38,7 @@ describe('drawVectorMultiSelectRotateDragBox', () => {
       {},
       {},
       {},
-      { height: 40, stroke: '#0d99ff', width: 100, x: 0, y: 0 },
+      { height: 40, stroke: '#337ae1', width: 100, x: 0, y: 0 },
       200,
       150,
       IDENTITY_VIEWPORT,

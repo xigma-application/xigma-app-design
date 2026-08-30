@@ -139,7 +139,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       program,
       buffer,
       [[{ x: 0, y: 0 }]],
-      '#0d99ff',
+      '#337ae1',
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -150,7 +150,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       program,
       buffer,
       [[{ x: 1, y: 1 }]],
-      '#0d99ff',
+      '#337ae1',
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -266,7 +266,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
     // result
     expect(getVectorFacesOnPathMock).toHaveBeenCalledWith(combinedNode, path);
     expect(getVectorFacesInRectMock).not.toHaveBeenCalled();
-    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 9, y: 9 }]], '#0d99ff', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 9, y: 9 }]], '#337ae1', 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should re-hit-test a box rect (not the raw path) against the combined node when isBoxMode is true', () => {
@@ -302,7 +302,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
     // result
     expect(getVectorFacesOnPathMock).not.toHaveBeenCalled();
     expect(getVectorFacesInRectMock).toHaveBeenCalledWith(combinedNode, { height: 10, width: 10, x: 0, y: 0 });
-    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 5, y: 5 }]], '#0d99ff', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 5, y: 5 }]], '#337ae1', 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should fall back to the plain per-node hatch for a group that turned out to be a singleton (touched nodes that don’t actually cross)', () => {
@@ -371,7 +371,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
     // result
     expect(groupCrossingVectorNodesMock).toHaveBeenCalledWith([node, otherNode]); // grouped over every open node, not just touched
     expect(getVectorFacesOnPathMock).toHaveBeenCalledWith(combinedNode, path);
-    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 9, y: 9 }]], '#0d99ff', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 9, y: 9 }]], '#337ae1', 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should skip a crossing group entirely when none of its members were actually touched, even while a different node elsewhere in the same gesture was', () => {

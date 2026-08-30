@@ -69,7 +69,7 @@ describe('drawPenPreview', () => {
     // result — VECTOR_VERTEX_SIZE (5) / zoom (1), styled like a real vertex dot (white fill, blue
     // border)
     expect(drawEllipseMock).toHaveBeenCalledTimes(1);
-    expect(drawEllipseMock.mock.calls[0][3]).toEqual({ fill: '#ffffff', height: 5, stroke: '#0d99ff', width: 5, x: 2.5, y: 2.5 });
+    expect(drawEllipseMock.mock.calls[0][3]).toEqual({ fill: '#ffffff', height: 5, stroke: '#337ae1', width: 5, x: 2.5, y: 2.5 });
   });
 
   it('should draw both the segment preview and the new-vertex dot independently when both are present', () => {

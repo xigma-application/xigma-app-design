@@ -134,7 +134,7 @@ describe('drawVectorPaintHoverPreview', () => {
     );
 
     // result
-    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 1, y: 1 }]], '#0d99ff', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 1, y: 1 }]], '#337ae1', 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should draw nothing when the hovered node id resolves to a non-vector node', () => {

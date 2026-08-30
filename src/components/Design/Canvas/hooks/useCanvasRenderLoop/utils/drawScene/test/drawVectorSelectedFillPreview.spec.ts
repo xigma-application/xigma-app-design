@@ -82,7 +82,7 @@ describe('drawVectorSelectedFillPreview', () => {
       program,
       buffer,
       [[{ x: 0, y: 0 }], [{ x: 1, y: 1 }]],
-      '#0d99ff',
+      '#337ae1',
       200,
       150,
       IDENTITY_VIEWPORT,

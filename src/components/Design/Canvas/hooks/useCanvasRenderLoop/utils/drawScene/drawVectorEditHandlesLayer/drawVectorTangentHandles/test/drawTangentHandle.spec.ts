@@ -38,7 +38,7 @@ describe('drawTangentHandle', () => {
       {},
       {},
       {},
-      { fill: '#ffffff', height: 4, stroke: '#0d99ff', width: 4, x: 1, y: 2 },
+      { fill: '#ffffff', height: 4, stroke: '#337ae1', width: 4, x: 1, y: 2 },
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -69,7 +69,7 @@ describe('drawTangentHandle', () => {
       {},
       {},
       {},
-      { fill: '#ffffff', height: 5, stroke: '#0d99ff', width: 5, x: 0.5, y: 1.5 },
+      { fill: '#ffffff', height: 5, stroke: '#337ae1', width: 5, x: 0.5, y: 1.5 },
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -95,7 +95,7 @@ describe('drawTangentHandle', () => {
     );
 
     // result — outer white diamond at 4 * 2 = 8, inner blue diamond at 4 * 1.5 = 6, neither with a border
-    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 3, y1: 0, y2: 4 }, '#0d99ff', 1, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 3, y1: 0, y2: 4 }, '#337ae1', 1, 200, 150, IDENTITY_VIEWPORT);
     expect(drawRectMock).toHaveBeenCalledTimes(2);
     expect(drawRectMock).toHaveBeenNthCalledWith(
       1,
@@ -113,7 +113,7 @@ describe('drawTangentHandle', () => {
       {},
       {},
       {},
-      { fill: '#0d99ff', height: 6, width: 6, x: 0, y: 1 },
+      { fill: '#337ae1', height: 6, width: 6, x: 0, y: 1 },
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -139,7 +139,7 @@ describe('drawTangentHandle', () => {
     );
 
     // result — same solid blue line and 8/6-sized diamond pair as the plain-selected case, not hover-scaled
-    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 3, y1: 0, y2: 4 }, '#0d99ff', 1, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 3, y1: 0, y2: 4 }, '#337ae1', 1, 200, 150, IDENTITY_VIEWPORT);
     expect(drawRectMock).toHaveBeenCalledTimes(2);
     expect(drawRectMock.mock.calls.map((args) => args[3].width)).toEqual([8, 6]);
   });

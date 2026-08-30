@@ -38,7 +38,7 @@ describe('drawVectorMultiSelectResizeDragBox', () => {
       {},
       {},
       {},
-      { height: 80, stroke: '#0d99ff', width: 200, x: -16.7, y: 22.3 },
+      { height: 80, stroke: '#337ae1', width: 200, x: -16.7, y: 22.3 },
       200,
       150,
       IDENTITY_VIEWPORT,

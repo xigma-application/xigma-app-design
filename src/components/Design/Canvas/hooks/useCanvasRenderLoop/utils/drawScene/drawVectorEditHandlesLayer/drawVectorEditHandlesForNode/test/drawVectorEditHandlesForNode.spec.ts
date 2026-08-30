@@ -158,7 +158,7 @@ describe('drawVectorEditHandlesForNode', () => {
     // result — the gray outline goes through the thick-stroke-vertices path; the selected segment is
     // still drawn via drawVectorStroke, in the selected-state blue
     expect(drawVectorStrokeMock).toHaveBeenCalledTimes(1);
-    expect(drawVectorStrokeMock).toHaveBeenCalledWith({}, {}, {}, expect.anything(), '#0d99ff', 2, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorStrokeMock).toHaveBeenCalledWith({}, {}, {}, expect.anything(), '#337ae1', 2, 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should draw the hovered-vector-segment highlight in blue at half opacity when a segment is hovered by the Selection tool', () => {
@@ -168,7 +168,7 @@ describe('drawVectorEditHandlesForNode', () => {
     // result — the gray outline goes through the thick-stroke-vertices path; the hovered segment is
     // still drawn via drawVectorStroke, in blue with alpha 0.5
     expect(drawVectorStrokeMock).toHaveBeenCalledTimes(1);
-    expect(drawVectorStrokeMock).toHaveBeenCalledWith({}, {}, {}, expect.anything(), '#0d99ff', 2, 200, 150, IDENTITY_VIEWPORT, 0.5);
+    expect(drawVectorStrokeMock).toHaveBeenCalledWith({}, {}, {}, expect.anything(), '#337ae1', 2, 200, 150, IDENTITY_VIEWPORT, 0.5);
   });
 
   it('should draw nothing for a segment’s tangent handle when its parent vertex is not selected', () => {
@@ -214,7 +214,7 @@ describe('drawVectorEditHandlesForNode', () => {
     expect(selectedOuterCall?.[4]).toEqual([vectorNode.vertices.v1]);
     expect(selectedOuterCall?.[6]).toBe('#ffffff');
     expect(selectedInnerCall?.[4]).toEqual([vectorNode.vertices.v1]);
-    expect(selectedInnerCall?.[6]).toBe('#0d99ff');
+    expect(selectedInnerCall?.[6]).toBe('#337ae1');
   });
 
   it('should draw the hovered vertex immediately, larger than its unhovered (plain-batched) neighbor', () => {
@@ -249,7 +249,7 @@ describe('drawVectorEditHandlesForNode', () => {
     expect(selectedOuterCall?.[4]).toEqual([vectorNode.vertices.v1]);
     expect(selectedOuterCall?.[6]).toBe('#ffffff');
     expect(selectedInnerCall?.[4]).toEqual([vectorNode.vertices.v1]);
-    expect(selectedInnerCall?.[6]).toBe('#0d99ff');
+    expect(selectedInnerCall?.[6]).toBe('#337ae1');
   });
 
   it('should draw a selected tangent handle as a solid-blue line and white-then-blue diamond pair, matching the selected-vertex style', () => {
@@ -257,17 +257,17 @@ describe('drawVectorEditHandlesForNode', () => {
     call(vectorNode, [], null, null, null, null, [{ end: 'start', segmentId: 's1' }]);
 
     // result — the same enlarge/recolor treatment selected vertices get, just diamond-shaped
-    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 5, y1: 0, y2: 0 }, '#0d99ff', 1, 200, 150, IDENTITY_VIEWPORT);
+    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, { x1: 0, x2: 5, y1: 0, y2: 0 }, '#337ae1', 1, 200, 150, IDENTITY_VIEWPORT);
 
     const outerDiamond = drawRectMock.mock.calls.find((args) => args[3].width === SELECTED_OUTER_SIZE)?.[3];
-    const innerDiamond = drawRectMock.mock.calls.find((args) => args[3].fill === '#0d99ff' && args[3].width === SELECTED_INNER_SIZE)?.[3];
+    const innerDiamond = drawRectMock.mock.calls.find((args) => args[3].fill === '#337ae1' && args[3].width === SELECTED_INNER_SIZE)?.[3];
 
     expect(outerDiamond).toMatchObject({ fill: '#ffffff' });
     expect(innerDiamond).toBeDefined();
 
     // result — selecting the handle must NOT make its own parent vertex (v1) render as selected too;
     // only the handle diamond gets the selected treatment, the vertex dot stays plain
-    const selectedVertexDot = drawEllipseMock.mock.calls.find((args) => args[3].fill === '#0d99ff');
+    const selectedVertexDot = drawEllipseMock.mock.calls.find((args) => args[3].fill === '#337ae1');
 
     expect(selectedVertexDot).toBeUndefined();
   });
@@ -295,7 +295,7 @@ describe('drawVectorEditHandlesForNode', () => {
       {},
       {},
       {},
-      { fill: '#ffffff', height: BASE_SIZE, stroke: '#0d99ff', width: BASE_SIZE, x: 2.5, y: -2.5 },
+      { fill: '#ffffff', height: BASE_SIZE, stroke: '#337ae1', width: BASE_SIZE, x: 2.5, y: -2.5 },
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -305,7 +305,7 @@ describe('drawVectorEditHandlesForNode', () => {
       {},
       {},
       {},
-      { fill: '#ffffff', height: BASE_SIZE, stroke: '#0d99ff', width: BASE_SIZE, x: 5, y: -2.5 },
+      { fill: '#ffffff', height: BASE_SIZE, stroke: '#337ae1', width: BASE_SIZE, x: 5, y: -2.5 },
       200,
       150,
       IDENTITY_VIEWPORT,

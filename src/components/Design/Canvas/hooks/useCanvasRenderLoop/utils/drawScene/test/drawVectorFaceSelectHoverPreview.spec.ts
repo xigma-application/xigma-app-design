@@ -84,7 +84,7 @@ describe('drawVectorFaceSelectHoverPreview', () => {
     drawVectorFaceSelectHoverPreview(gl, program, buffer, nodes, { faceKey: 'k1', nodeId: node.id }, 200, 150, IDENTITY_VIEWPORT);
 
     // result
-    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 0, y: 0 }]], '#0d99ff', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 0, y: 0 }]], '#337ae1', 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should draw nothing when the hovered node id resolves to a non-vector node', () => {

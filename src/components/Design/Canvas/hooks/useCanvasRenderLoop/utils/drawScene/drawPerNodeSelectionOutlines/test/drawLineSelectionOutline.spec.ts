@@ -36,7 +36,7 @@ describe('drawLineSelectionOutline', () => {
     drawLineSelectionOutline({} as WebGL2RenderingContext, {} as WebGLProgram, {} as WebGLBuffer, node, 200, 150, { x: 0, y: 0, zoom: 2 });
 
     // result — LINE_SELECTED_STROKE_WIDTH (0.1) / zoom (2) = 0.05
-    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, node, '#0d99ff', 0.05, 200, 150, { x: 0, y: 0, zoom: 2 });
+    expect(drawLineMock).toHaveBeenCalledWith({}, {}, {}, node, '#337ae1', 0.05, 200, 150, { x: 0, y: 0, zoom: 2 });
     expect(drawLineEndpointHandlesMock).toHaveBeenCalledWith(
       {},
       {},
@@ -45,7 +45,7 @@ describe('drawLineSelectionOutline', () => {
         { x: 0, y: 0 },
         { x: 10, y: 20 },
       ],
-      '#0d99ff',
+      '#337ae1',
       200,
       150,
       { x: 0, y: 0, zoom: 2 },

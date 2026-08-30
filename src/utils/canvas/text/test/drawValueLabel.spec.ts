@@ -10,6 +10,7 @@ const getMsdfAtlasTextureMock = vi.fn();
 const buildGlyphQuadsMock = vi.fn();
 const getGlyphQuadBoundsMock = vi.fn();
 const translateGlyphVerticesMock = vi.fn();
+const rotateGlyphVerticesMock = vi.fn();
 
 vi.mock('../../drawRect/drawRect', () => ({
   drawRect: (...args: unknown[]): void => drawRectMock(...args),
@@ -28,6 +29,9 @@ vi.mock('../getGlyphQuadBounds', () => ({
 }));
 vi.mock('../translateGlyphVertices', () => ({
   translateGlyphVertices: (...args: unknown[]): unknown => translateGlyphVerticesMock(...args),
+}));
+vi.mock('../rotateGlyphVertices', () => ({
+  rotateGlyphVertices: (...args: unknown[]): unknown => rotateGlyphVerticesMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -48,6 +52,7 @@ describe('drawValueLabel', () => {
     // a single glyph spanning x:[-6,6], y:[-9,9] around its own local origin
     getGlyphQuadBoundsMock.mockClear().mockReturnValue({ maxX: 6, maxY: 9, minX: -6, minY: -9 });
     translateGlyphVerticesMock.mockClear().mockReturnValue(new Float32Array());
+    rotateGlyphVerticesMock.mockClear().mockImplementation((vertices: Float32Array) => vertices);
   });
 
   it('should draw a pink rounded-rect badge, using the plain flat-color program/buffer (not the image-shader ones from imageContext), sized to the glyphs’ measured bounds plus padding, centered along the offset direction from the anchor', () => {
@@ -126,5 +131,43 @@ describe('drawValueLabel', () => {
     // result
     expect(drawRectMock).not.toHaveBeenCalled();
     expect(drawMsdfGlyphsMock).not.toHaveBeenCalled();
+  });
+
+  it('should paint the badge in the caller-supplied fill colour instead of the default pink', () => {
+    // before
+    drawValueLabel(gl, program, buffer, imageContext, '7', { x: 100, y: 100 }, UP, 200, 150, IDENTITY_VIEWPORT, {
+      fill: '#337ae1',
+    });
+
+    // result
+    const [, , , rect] = drawRectMock.mock.calls[0];
+
+    expect(rect.fill).toBe('#337ae1');
+  });
+
+  it('should rotate the badge and its glyphs by the given angle, spinning the text around the badge centre', () => {
+    // before
+    drawValueLabel(gl, program, buffer, imageContext, '7', { x: 100, y: 100 }, UP, 200, 150, IDENTITY_VIEWPORT, {
+      angleDeg: 30,
+    });
+
+    // result — the rect gets the angle as its rotation argument
+    expect(drawRectMock.mock.calls[0][7]).toBe(30);
+
+    // result — the glyphs are rotated around the badge centre (100, 72) by the same angle
+    expect(rotateGlyphVerticesMock).toHaveBeenCalledWith(translateGlyphVerticesMock.mock.results[0].value, { x: 100, y: 72 }, 30);
+    expect(drawMsdfGlyphsMock.mock.calls[0][5]).toBe(rotateGlyphVerticesMock.mock.results[0].value);
+  });
+
+  it('should sit the badge a fixed screen-px gap off the edge when edgeGapPx is given, not the default centre offset', () => {
+    // before — glyph bounds 18 tall + 3px padding each side => 24px badge, so a 5px edge gap puts the centre 17px out
+    drawValueLabel(gl, program, buffer, imageContext, '7', { x: 100, y: 100 }, UP, 200, 150, IDENTITY_VIEWPORT, {
+      edgeGapPx: 5,
+    });
+
+    // result
+    const [, , , rect] = drawRectMock.mock.calls[0];
+
+    expect(rect.y + rect.height / 2).toBeCloseTo(83, 5);
   });
 });

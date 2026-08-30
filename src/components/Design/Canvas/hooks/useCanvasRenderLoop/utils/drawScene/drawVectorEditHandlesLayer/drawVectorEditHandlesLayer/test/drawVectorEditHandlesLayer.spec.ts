@@ -272,7 +272,7 @@ describe('drawVectorEditHandlesLayer', () => {
     // result — one plain stroke rect over the bounding box of v1(0,0)/v2(10,0)
     const boxRect = drawRectMock.mock.calls.find((args) => args[3].height === 0 && args[3].width === 10)?.[3];
 
-    expect(boxRect).toMatchObject({ stroke: '#0d99ff', x: 0, y: 0 });
+    expect(boxRect).toMatchObject({ stroke: '#337ae1', x: 0, y: 0 });
   });
 
   it('should not draw the multi-select box when only a single vertex is selected', () => {

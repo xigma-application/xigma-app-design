@@ -72,7 +72,7 @@ describe('drawPenSegmentPreview', () => {
 
     // result — the dot previews exactly where the next click will land, same as the very-first-point dot
     expect(drawEllipseMock).toHaveBeenCalledTimes(1);
-    expect(drawEllipseMock.mock.calls[0][3]).toEqual({ fill: '#ffffff', height: 5, stroke: '#0d99ff', width: 5, x: 7.5, y: 7.5 });
+    expect(drawEllipseMock.mock.calls[0][3]).toEqual({ fill: '#ffffff', height: 5, stroke: '#337ae1', width: 5, x: 7.5, y: 7.5 });
 
     // result — no staged tangent, so no persistent handle is drawn
     expect(drawRectMock).not.toHaveBeenCalled();
@@ -179,7 +179,7 @@ describe('drawPenSegmentPreview', () => {
     call(preview, ORIGIN, 0);
 
     // result
-    expect(drawVectorStrokeMock.mock.calls[0][4]).toBe('#0d99ff');
+    expect(drawVectorStrokeMock.mock.calls[0][4]).toBe('#337ae1');
   });
 
   it('should draw the stroke in the orange snap-highlight color when the preview is angle-snapped', () => {

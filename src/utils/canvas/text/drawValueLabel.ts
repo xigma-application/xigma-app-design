@@ -21,9 +21,15 @@ import { drawMsdfGlyphs } from './drawMsdfGlyphs';
 import { drawRect } from '../drawRect/drawRect';
 import { getGlyphQuadBounds } from './getGlyphQuadBounds';
 import { getMsdfAtlasTexture } from './getMsdfAtlasTexture';
+import { rotateGlyphVertices } from './rotateGlyphVertices';
 import { translateGlyphVertices } from './translateGlyphVertices';
 
-// offsetDirection must be a unit vector — the badge sits this far along it, away from the anchor
+export type TValueLabelOptions = {
+  angleDeg?: number;
+  edgeGapPx?: number;
+  fill?: string;
+};
+
 export const drawValueLabel = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
@@ -35,23 +41,25 @@ export const drawValueLabel = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  options: TValueLabelOptions = {},
 ): void => {
+  const { angleDeg = 0, edgeGapPx, fill = VALUE_LABEL_FILL } = options;
   const fontSize = VALUE_LABEL_FONT_SIZE_PX / viewport.zoom;
   const paddingX = VALUE_LABEL_PADDING_X_PX / viewport.zoom;
   const paddingY = VALUE_LABEL_PADDING_Y_PX / viewport.zoom;
   const rawVertices = new Float32Array(buildGlyphQuads(MSDF_ATLAS_JSON, [text], fontSize, 0, 0));
   const bounds = getGlyphQuadBounds(rawVertices);
-  const offset = VALUE_LABEL_OFFSET_PX / viewport.zoom;
-  const center: TPoint = { x: anchor.x + offsetDirection.x * offset, y: anchor.y + offsetDirection.y * offset };
 
   if (bounds) {
     const badgeWidth = bounds.maxX - bounds.minX + paddingX * 2;
     const badgeHeight = bounds.maxY - bounds.minY + paddingY * 2;
+    const offset = edgeGapPx === undefined ? VALUE_LABEL_OFFSET_PX / viewport.zoom : edgeGapPx / viewport.zoom + badgeHeight / 2;
+    const center: TPoint = { x: anchor.x + offsetDirection.x * offset, y: anchor.y + offsetDirection.y * offset };
     const texture = getMsdfAtlasTexture(gl, imageContext.cache);
-    const vertices = translateGlyphVertices(
-      rawVertices,
-      center.x - (bounds.minX + bounds.maxX) / 2,
-      center.y - (bounds.minY + bounds.maxY) / 2,
+    const vertices = rotateGlyphVertices(
+      translateGlyphVertices(rawVertices, center.x - (bounds.minX + bounds.maxX) / 2, center.y - (bounds.minY + bounds.maxY) / 2),
+      center,
+      angleDeg,
     );
 
     drawRect(
@@ -60,7 +68,7 @@ export const drawValueLabel = (
       buffer,
       {
         cornerRadius: VALUE_LABEL_CORNER_RADIUS_PX / viewport.zoom,
-        fill: VALUE_LABEL_FILL,
+        fill,
         height: badgeHeight,
         width: badgeWidth,
         x: center.x - badgeWidth / 2,
@@ -69,7 +77,7 @@ export const drawValueLabel = (
       canvasWidth,
       canvasHeight,
       viewport,
-      0,
+      angleDeg,
     );
     drawMsdfGlyphs(
       gl,

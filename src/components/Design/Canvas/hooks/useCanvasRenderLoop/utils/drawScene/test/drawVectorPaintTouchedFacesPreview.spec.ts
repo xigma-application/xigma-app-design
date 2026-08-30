@@ -62,7 +62,7 @@ describe('drawVectorPaintTouchedFacesPreview', () => {
     drawVectorPaintTouchedFacesPreview(gl, program, buffer, nodes, { missing: ['k1'] }, false, 200, 150, IDENTITY_VIEWPORT);
 
     // result
-    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [], '#0d99ff', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [], '#337ae1', 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should hatch-fill every face the stroke has touched so far across every open node in one call, in the add color while adding fill', () => {
@@ -82,7 +82,7 @@ describe('drawVectorPaintTouchedFacesPreview', () => {
       program,
       buffer,
       [[{ x: 0, y: 0 }], [{ x: 1, y: 1 }]],
-      '#0d99ff',
+      '#337ae1',
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -120,7 +120,7 @@ describe('drawVectorPaintTouchedFacesPreview', () => {
     drawVectorPaintTouchedFacesPreview(gl, program, buffer, mixedNodes, { [frameNode.id]: ['k1'] }, false, 200, 150, IDENTITY_VIEWPORT);
 
     // result
-    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [], '#0d99ff', 200, 150, IDENTITY_VIEWPORT);
+    expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [], '#337ae1', 200, 150, IDENTITY_VIEWPORT);
   });
 
   it('should derive faces from whatever getRenderedVectorNode returns for the touched node, not the raw node itself', () => {

@@ -55,7 +55,7 @@ describe('drawHoveredVectorSegmentHighlight', () => {
       {},
       {},
       [{ endId: 'v2', points: [node.vertices.v1, node.vertices.v2], segmentId: 's1', startId: 'v1' }],
-      '#0d99ff',
+      '#337ae1',
       2,
       200,
       150,

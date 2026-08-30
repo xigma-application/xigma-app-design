@@ -2614,7 +2614,7 @@ idle cursor) when the pointer misses every face.
 
 The same ref drives `drawVectorPaintHoverPreview.ts` (`useCanvasRenderLoop/utils/drawScene/`, called from
 `drawScene.ts` right after `drawVectorLasso`), which draws a preview on the hovered face only. Colors are
-reused, not invented: `DRAFT_FRAME_STROKE` (`#0d99ff`, blue) for "hovering an unfilled face, click would
+reused, not invented: `DRAFT_FRAME_STROKE` (`#337ae1`, blue) for "hovering an unfilled face, click would
 add", `VECTOR_EDGE_HOVER_STROKE` (`#cd4422`, orange) for "hovering an already-filled face, click would
 remove" — asked for directly with two reference screenshots showing exactly this blue/orange
 hover-preview distinction. Because this preview re-derives the face fresh every frame from the live node

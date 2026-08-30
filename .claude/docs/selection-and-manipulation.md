@@ -1372,6 +1372,39 @@ resolver was) and unconditionally claims any qualifying pointerdown while Vector
 state — only one of the two start-refs is ever non-null at a time, by construction, which is what makes
 reusing the single shared `marqueeRef` for the visual safe.
 
+## 22. Selection size label (W × H badge)
+
+A blue rounded badge showing `${round(width)} x ${round(height)}` sits just outside the selection,
+drawn by `drawSelectionSizeLabel.ts` right after `drawSelectionOutline` in `drawScene`. It gets the
+same `selectedNodes` + `vectorEditingNodeIds` and re-applies the same `!vectorEditingNodeIds.includes`
+filter, so it never shows in Vector Edit Mode.
+
+- **What it measures.** Single node → `getNodeBounds(node)` (the node's own unrotated w/h) + its
+  `rotation` (`0` for a line). Multi-select → `getSelectionBounds(nodes)` (axis-aligned union) with
+  `rotation: 0`. This is intentionally the same source the outline uses, so the badge tracks live
+  during resize/rotate (plain box transforms dispatch to Redux per `pointermove`; only vector
+  transforms freeze to snapshot refs — see [[canvas-vector-performance]]).
+- **Placement** (`getSelectionSizeLabelPlacement.ts`, pure/rotation-aware). Take the 4 edge
+  midpoints + outward unit normals, rotate both about the rect centre by `rotation`, then dock to the
+  edge whose rotated normal has the largest screen-`y` (points most "down"). Badge angle =
+  `atan2(normal.y, normal.x)·180/π − 90`. Because the chosen normal always has `y ≥ 0`, the angle
+  stays in `[−45, 45]` — the label is always parallel to its edge and never upside-down, and it
+  *hops* to the next edge every time rotation crosses 45°/135°/… (this is the "gdy przeskoczymy na
+  wyższy kąt zmienia pozycję do linii" behaviour). The badge is always centred on the edge midpoint.
+- **Styling / reuse.** Renders through `drawValueLabel` (the variable-width tool's label util),
+  extended with an optional trailing `{ angleDeg?, edgeGapPx?, fill? }`. `fill` is set to
+  `DRAFT_FRAME_STROKE` (`#337ae1`, the shared canvas/selection blue — same token the outline, handles,
+  marquee and vector-edit dots use) instead of the default pink; `angleDeg` rotates both the badge
+  rect (via `drawRect`'s rotation arg) and the glyph quads (new `rotateGlyphVertices.ts`, mirrors
+  `translateGlyphVertices` with a `degrees === 0` identity fast-path); `edgeGapPx`
+  (`SELECTION_SIZE_LABEL_EDGE_GAP_PX = 5`) makes `drawValueLabel` place the badge's *near edge* that
+  many screen-px off the anchor (`offset = edgeGapPx/zoom + badgeHeight/2`) rather than its default
+  `VALUE_LABEL_OFFSET_PX` centre distance. Padding/font/corner-radius all stay the shared
+  `VALUE_LABEL_*` constants, so the badge is never squeezed — its size is derived from text metrics ÷
+  zoom.
+- **Not shown:** `×` (U+00D7) is absent from the Inter MSDF atlas, so the separator is a lowercase
+  `x`.
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.
