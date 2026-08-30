@@ -12,6 +12,7 @@ export const KEYBOARD_SHORTCUTS: TKeyboardShortcuts = {
   collapseLayers: [ALT, 'L'],
   [ToolName.comment]: ['C'],
   copy: [CONTROL, 'C'],
+  copyAsPng: [SHIFT, CONTROL, 'C'],
   copyProperties: [ALT, CONTROL, 'C'],
   createComponent: [ALT, CONTROL, 'K'],
   [ToolName.cut]: ['X'],

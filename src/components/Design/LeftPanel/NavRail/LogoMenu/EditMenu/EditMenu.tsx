@@ -2,6 +2,8 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import CopyAsMenu from './CopyAsMenu/CopyAsMenu';
+import SelectAllWithMenu from './SelectAllWithMenu/SelectAllWithMenu';
 import { MenuCompound } from 'shared';
 
 // others
@@ -39,7 +41,9 @@ const EditMenu: FC = () => {
       <MenuItem disabled label={t(EDIT_MENU_UNDO_KEY)} shortcut={KEYBOARD_SHORTCUTS.undo.join('')} withCheck={false} />
       <MenuItem disabled label={t(EDIT_MENU_REDO_KEY)} shortcut={KEYBOARD_SHORTCUTS.redo.join('')} withCheck={false} />
       <MenuSeparator />
-      <MenuSub label={t(EDIT_MENU_COPY_AS_KEY)} />
+      <MenuSub label={t(EDIT_MENU_COPY_AS_KEY)}>
+        <CopyAsMenu />
+      </MenuSub>
       <MenuItem
         disabled
         label={t(EDIT_MENU_PASTE_OVER_SELECTION_KEY)}
@@ -80,7 +84,9 @@ const EditMenu: FC = () => {
       />
       <MenuItem disabled label={t(EDIT_MENU_SELECT_NONE_KEY)} shortcut={KEYBOARD_SHORTCUTS.selectNone.join('')} withCheck={false} />
       <MenuItem disabled label={t(EDIT_MENU_SELECT_INVERSE_KEY)} shortcut={KEYBOARD_SHORTCUTS.selectInverse.join('')} withCheck={false} />
-      <MenuSub label={t(EDIT_MENU_SELECT_ALL_WITH_KEY)} />
+      <MenuSub label={t(EDIT_MENU_SELECT_ALL_WITH_KEY)}>
+        <SelectAllWithMenu />
+      </MenuSub>
     </>
   );
 };
