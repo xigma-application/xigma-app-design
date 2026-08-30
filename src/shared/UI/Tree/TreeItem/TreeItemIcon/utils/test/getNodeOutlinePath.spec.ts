@@ -158,7 +158,7 @@ describe('getNodeOutlinePath', () => {
     expect(result?.d).toBe('M2 2 L14 14');
   });
 
-  it('should treat a text-on-path guide node as a full ellipse outline', () => {
+  it('should return null for a text-on-path guide node — a path node is never shown as a layer row', () => {
     // mock
     const node: TPathNode = {
       height: 40,
@@ -177,7 +177,7 @@ describe('getNodeOutlinePath', () => {
     const result = getNodeOutlinePath(node);
 
     // result
-    expect(result?.d).toMatch(/^M/);
+    expect(result).toBeNull();
   });
 
   it('should return null for a frame node', () => {
