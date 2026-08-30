@@ -1427,10 +1427,17 @@ Same seam, two lengths, so you see the overlap between the two footprints.
   [[vector-network]]). This same predicate gates both the contact guides above and the shape
   alignment-snap (§24), so frame/section got both for free once added here.
 - **Trigger** (`resolveShapeContactGuides.ts`, last resolver in the selection-tool `handlePointerMove`
-  chain). The "active" shape is: the single node in `resizeDragRef.nodeOrigins` → the single node in a
-  moved `dragStateRef` → on `event.altKey`, the single selected node → otherwise none (ref cleared).
-  Multi-node drags/selections are skipped. Writes `refs.transform.contactGuidesRef` (a
-  `TShapeContactGuide[] | null`, sitting in the transform ref group next to the drag/resize id sets).
+  chain). The "active" ids are: every key in `resizeDragRef.nodeOrigins` → every key in a moved
+  `dragStateRef.nodeOrigins` → on `event.altKey`, every currently-selected node id → otherwise none
+  (ref cleared). **Multiple active shapes are fully supported** — a multi-selection or a moved/resized
+  group (its rigid-transform id list expands to its individual descendants upstream, in
+  `getRigidTransformNodes`/`getTransformTargetNodes`, same as the alignment-snap side in §24) each
+  contribute their own guides independently, checked against the same candidate set. The group node
+  itself is never active or a candidate — `isContactGuideEligibleNode` excludes it — only its
+  eligible descendants are, and each active shape is excluded from being a candidate for the *other*
+  active shapes (two things moving/selected together never collide with each other). Writes
+  `refs.transform.contactGuidesRef` (a `TShapeContactGuide[] | null`, sitting in the transform ref
+  group next to the drag/resize id sets).
 - **Clearing**: the resolver nulls the ref whenever the trigger doesn't hold (covers Alt-release,
   which `handleAltKeyChange` — the `utils/handleAltKeyChange/` sibling of `handleShiftKeyChange`, wired
   through `useSelectionTool`'s `onAltKeyChange` — re-emits as a synthetic `pointermove` for the

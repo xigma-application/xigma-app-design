@@ -78,6 +78,29 @@ describe('resolveShapeContactGuides', () => {
     ]);
   });
 
+  it('should populate the ref for every node in a multi-node resize — e.g. a resized group', () => {
+    // mock — a and b are both being resized together, only a lands in contact with c
+    const a = addRect(0, 0);
+    const b = addRect(500, 500, 40, 40);
+
+    addRect(0, 100, 40, 40);
+
+    const refs = canvasRefs();
+
+    // action
+    resolveShapeContactGuides(
+      pointerEvent(),
+      refs,
+      selectionRefs({ resizeDragRef: { current: { nodeOrigins: { [a]: {}, [b]: {} } } } } as never),
+    );
+
+    // result
+    expect(refs.transform.contactGuidesRef.current).toEqual([
+      { x1: 0, x2: 100, y1: 100, y2: 100 },
+      { x1: 0, x2: 40, y1: 100, y2: 100 },
+    ]);
+  });
+
   it('should populate the ref for the single selected shape while Alt is held', () => {
     // mock
     const activeId = addRect(0, 0);
@@ -97,11 +120,13 @@ describe('resolveShapeContactGuides', () => {
     ]);
   });
 
-  it('should not show a guide on Alt-hover when more than one shape is selected', () => {
-    // mock
+  it('should show a guide for each selected shape when Alt-hovering multiple selected shapes — e.g. a whole group', () => {
+    // mock — a and b are both selected (as if a group's children), b is nowhere near anything;
+    // c is a third, unselected shape flush against a's right edge
     const a = addRect(0, 0);
-    const b = addRect(100, 0, 40, 40);
+    const b = addRect(500, 500, 40, 40);
 
+    addRect(100, 20, 80, 60);
     store.dispatch(setSelection([a, b]));
 
     const refs = canvasRefs();
@@ -109,8 +134,11 @@ describe('resolveShapeContactGuides', () => {
     // action
     resolveShapeContactGuides(pointerEvent(true), refs, selectionRefs());
 
-    // result
-    expect(refs.transform.contactGuidesRef.current).toBeNull();
+    // result — only a's contact with c shows; b contributes nothing since it touches nothing
+    expect(refs.transform.contactGuidesRef.current).toEqual([
+      { x1: 100, x2: 100, y1: 0, y2: 100 },
+      { x1: 100, x2: 100, y1: 20, y2: 80 },
+    ]);
   });
 
   it('should clear the ref when nothing is dragged, resized, or Alt-hovered', () => {
@@ -129,10 +157,13 @@ describe('resolveShapeContactGuides', () => {
     expect(refs.transform.contactGuidesRef.current).toBeNull();
   });
 
-  it('should ignore a drag that moves more than one node at once', () => {
-    // mock
+  it('should show a guide for each node in a multi-node drag — e.g. a moved group — against stationary shapes, but never between the dragged nodes themselves', () => {
+    // mock — a and b are dragged together (as if a group's children), b is nowhere near anything;
+    // c is a third, stationary shape flush against a's right edge
     const a = addRect(0, 0);
-    const b = addRect(100, 0, 40, 40);
+    const b = addRect(500, 500, 40, 40);
+
+    addRect(100, 20, 80, 60);
 
     const refs = canvasRefs();
 
@@ -143,8 +174,11 @@ describe('resolveShapeContactGuides', () => {
       selectionRefs({ dragStateRef: { current: { hasMoved: true, nodeOrigins: { [a]: {}, [b]: {} } } } } as never),
     );
 
-    // result
-    expect(refs.transform.contactGuidesRef.current).toBeNull();
+    // result — only a's contact with c shows; a and b never collide with each other
+    expect(refs.transform.contactGuidesRef.current).toEqual([
+      { x1: 100, x2: 100, y1: 0, y2: 100 },
+      { x1: 100, x2: 100, y1: 20, y2: 80 },
+    ]);
   });
 
   it('should not consider a rotated-off-grid shape', () => {
