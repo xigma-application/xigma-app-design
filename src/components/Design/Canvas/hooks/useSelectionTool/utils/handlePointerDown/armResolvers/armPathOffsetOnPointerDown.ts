@@ -1,3 +1,7 @@
+// store
+import { selectNodes } from 'store/design/selectors';
+import { store } from 'store';
+
 // types
 import { TArmContext } from '../types';
 
@@ -14,7 +18,7 @@ export const armPathOffsetOnPointerDown = ({
   setClassName,
   viewport,
 }: TArmContext): true | undefined => {
-  const pathOffsetHandleHit = getPathTextOffsetHandleAtPoint(point, selectedNodes, viewport);
+  const pathOffsetHandleHit = getPathTextOffsetHandleAtPoint(point, selectedNodes, viewport, selectNodes(store.getState()));
 
   if (pathOffsetHandleHit) {
     armPathOffsetDrag(canvas, event, selectionRefs.pathOffsetDragRef, pathOffsetHandleHit.nodeId, setClassName);

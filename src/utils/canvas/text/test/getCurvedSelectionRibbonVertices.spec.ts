@@ -2,7 +2,7 @@
 import { TGlyphAtlasJson } from 'types/msdf';
 
 // utils
-import { buildEllipseArcLengthTable } from '../../shapes/buildEllipseArcLengthTable';
+import { createEllipseTextPathSampler } from '../pathSampler/createEllipseTextPathSampler';
 import { getCurvedSelectionRibbonVertices } from '../getCurvedSelectionRibbonVertices';
 
 const ATLAS: TGlyphAtlasJson = {
@@ -15,17 +15,17 @@ const ATLAS: TGlyphAtlasJson = {
 };
 
 const CENTER = { x: 100, y: 100 };
-const TABLE = buildEllipseArcLengthTable(200, 200);
+const SAMPLER = createEllipseTextPathSampler({ height: 200, rotation: 0, width: 200, x: 0, y: 0 });
 
 describe('getCurvedSelectionRibbonVertices', () => {
   it('should return an empty array for a collapsed selection', () => {
     // result
-    expect(getCurvedSelectionRibbonVertices(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, false, TABLE, 40, 1, 1)).toEqual([]);
+    expect(getCurvedSelectionRibbonVertices(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, 1, 1)).toEqual([]);
   });
 
   it('should return one quad (6 vertices, 12 numbers) per selected character', () => {
     // before
-    const vertices = getCurvedSelectionRibbonVertices(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, false, TABLE, 40, 0, 2);
+    const vertices = getCurvedSelectionRibbonVertices(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, 0, 2);
 
     // result — 2 selected characters -> 2 quads * 6 vertices * 2 numbers (x,y) each
     expect(vertices).toHaveLength(24);
@@ -33,7 +33,7 @@ describe('getCurvedSelectionRibbonVertices', () => {
 
   it('should clamp the selection range to the content length', () => {
     // before
-    const vertices = getCurvedSelectionRibbonVertices(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, false, TABLE, 40, -5, 99);
+    const vertices = getCurvedSelectionRibbonVertices(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, -5, 99);
 
     // result — 3 characters -> 3 quads
     expect(vertices).toHaveLength(36);
@@ -41,8 +41,8 @@ describe('getCurvedSelectionRibbonVertices', () => {
 
   it('should reposition the ribbon when flipped', () => {
     // before
-    const normal = getCurvedSelectionRibbonVertices(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, false, TABLE, 40, 0, 1);
-    const flipped = getCurvedSelectionRibbonVertices(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, true, TABLE, 40, 0, 1);
+    const normal = getCurvedSelectionRibbonVertices(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, 0, 1);
+    const flipped = getCurvedSelectionRibbonVertices(ATLAS, 'AAA', 20, CENTER, 0, true, SAMPLER, 40, 0, 1);
 
     // result
     expect(flipped).not.toEqual(normal);
@@ -50,7 +50,7 @@ describe('getCurvedSelectionRibbonVertices', () => {
 
   it('should share the exact boundary vertices between adjacent character quads, leaving no gap or overlap', () => {
     // before — 2 selected characters -> 2 quads, each built as [top_i, top_(i+1), bottom_(i+1), top_i, bottom_(i+1), bottom_i]
-    const vertices = getCurvedSelectionRibbonVertices(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, false, TABLE, 40, 0, 2);
+    const vertices = getCurvedSelectionRibbonVertices(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, 0, 2);
 
     // result — the first quad's "top_(i+1)" vertex (offset 2-3) is the shared boundary with the
     // second quad's "top_i" vertex (offset 12-13, the start of the second quad's own 12 numbers)
@@ -60,7 +60,7 @@ describe('getCurvedSelectionRibbonVertices', () => {
 
   it('should position later characters farther along the curve', () => {
     // before
-    const vertices = getCurvedSelectionRibbonVertices(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, false, TABLE, 40, 0, 3);
+    const vertices = getCurvedSelectionRibbonVertices(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, 0, 3);
 
     // result — the first quad's own leading edge differs from the last quad's own leading edge
     expect([vertices[0], vertices[1]]).not.toEqual([vertices[24], vertices[25]]);

@@ -1,18 +1,18 @@
 // types
 import { TEditingTextBox, TPoint } from 'types/canvas';
+import { TSceneNode } from 'types/design/types';
 
 // utils
-import { buildEllipseArcLengthTable } from './buildEllipseArcLengthTable';
 import { flipTextPoint } from '../text/flipTextPoint';
-import { getNearestEllipsePathOffset } from './getNearestEllipsePathOffset/getNearestEllipsePathOffset';
+import { getTextPathSampler } from '../text/pathSampler/getTextPathSampler';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
-export const getNearestPathOffsetAtPoint = (point: TPoint, box: TEditingTextBox): number => {
-  const table = buildEllipseArcLengthTable(box.width, box.height);
+export const getNearestPathOffsetAtPoint = (point: TPoint, box: TEditingTextBox, pathNode?: TSceneNode): number => {
   const center: TPoint = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
   const unrotated = rotatePoint(point, center, -box.rotation);
   const localPoint = flipTextPoint(unrotated, box);
-  const nearest = getNearestEllipsePathOffset(localPoint, { ...box, rotation: 0 }, table);
+  const sampler = getTextPathSampler(box, pathNode);
+  const nearest = sampler.nearestOffsetAtPoint(localPoint);
 
   return nearest.offset;
 };

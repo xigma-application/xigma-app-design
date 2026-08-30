@@ -95,6 +95,40 @@ describe('handleEnterVectorEdit', () => {
     expect(store.getState().design.activeTool).toBe(ToolName.default);
   });
 
+  it('should exclude a vector node currently bound as a text-on-path guide, even when selected directly', () => {
+    // mock
+    const vectorId = addVectorNode();
+
+    store.dispatch(
+      addNode({
+        content: 'Hi',
+        fill: '#ffffff',
+        flipX: false,
+        flipY: false,
+        fontFamily: 'Inter',
+        fontSize: 14,
+        height: 100,
+        name: 'Text',
+        parentId: null,
+        pathId: vectorId,
+        pathStartOffset: 0,
+        rotation: 0,
+        type: NodeType.text,
+        width: 100,
+        x: 0,
+        y: 0,
+      }),
+    );
+    store.dispatch(setSelection([vectorId]));
+
+    // before
+    handleEnterVectorEdit(store.dispatch, createCanvasRefs());
+
+    // result
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
+    expect(store.getState().design.activeTool).toBe(ToolName.default);
+  });
+
   it('should open a single selected vector node for editing and switch to the Move tool', () => {
     // mock
     const vectorId = addVectorNode();

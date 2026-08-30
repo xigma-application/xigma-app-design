@@ -9,9 +9,10 @@ export const resolvePathOffsetHover = ({
   editingTextBox,
   editingNodeId,
   selectedNodes,
+  nodesById,
   viewport,
 }: THoverResolverContext): THoverResult | undefined => {
-  const pathOffsetHandleHit = getPathOffsetHandleHit(point, editingTextBox, editingNodeId, selectedNodes, viewport);
+  const pathOffsetHandleHit = getPathOffsetHandleHit(point, editingTextBox, editingNodeId, selectedNodes, viewport, nodesById);
 
   if (pathOffsetHandleHit.hit) {
     return { className: 'hand', cursor: '', nodeId: pathOffsetHandleHit.nodeId };

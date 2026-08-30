@@ -2,13 +2,12 @@
 import { MAX_CURVED_SELECTION_SPAN_DEGREES } from 'constant/canvas';
 
 // types
-import { TEllipseArcLengthSample, TPoint } from 'types/canvas';
+import { TPoint } from 'types/canvas';
 import { TGlyphAtlasJson } from 'types/msdf';
+import { TTextPathSampler } from './pathSampler/types';
 
 // utils
 import { getCurvedGlyphBoundaries } from './getCurvedGlyphBoundaries';
-import { getEllipseCircumference } from '../shapes/getEllipseCircumference';
-import { getEllipsePathSample } from '../shapes/getEllipsePathSample';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
 const ORIGIN: TPoint = { x: 0, y: 0 };
@@ -22,31 +21,28 @@ export const getCurvedSelectionEdges = (
   atlas: TGlyphAtlasJson,
   content: string,
   fontSize: number,
-  ellipseWidth: number,
-  ellipseHeight: number,
-  ellipseCenter: TPoint,
+  pathCenter: TPoint,
   startOffset: number,
   flip: boolean,
-  arcLengthTable: TEllipseArcLengthSample[],
+  sampler: TTextPathSampler,
   lineHeight: number,
   start: number,
   end: number,
 ): TCurvedSelectionEdge[] => {
-  const circumference = getEllipseCircumference(arcLengthTable);
-  const boundaries = getCurvedGlyphBoundaries(atlas, content, fontSize, startOffset, flip, circumference);
+  const boundaries = getCurvedGlyphBoundaries(atlas, content, fontSize, startOffset, flip, sampler.totalLength);
   const clampedStart = Math.max(0, Math.min(start, content.length));
   const clampedEnd = Math.max(0, Math.min(end, content.length));
 
   if (clampedEnd > clampedStart) {
     const direction = flip ? -1 : 1;
     const startLength = boundaries[clampedStart];
-    const maxSpan = (MAX_CURVED_SELECTION_SPAN_DEGREES / 360) * circumference;
+    const maxSpan = (MAX_CURVED_SELECTION_SPAN_DEGREES / 360) * sampler.totalLength;
 
     return boundaries.slice(clampedStart, clampedEnd + 1).map((length) => {
       const clampedLength = direction > 0 ? Math.min(length, startLength + maxSpan) : Math.max(length, startLength - maxSpan);
-      const sample = getEllipsePathSample(ellipseWidth, ellipseHeight, arcLengthTable, clampedLength);
+      const sample = sampler.sampleAtLength(clampedLength);
       const angleDegrees = sample.angleDegrees + (flip ? 180 : 0);
-      const anchor: TPoint = { x: ellipseCenter.x + sample.x, y: ellipseCenter.y + sample.y };
+      const anchor: TPoint = { x: pathCenter.x + sample.x, y: pathCenter.y + sample.y };
       const top = rotatePoint({ x: 0, y: -lineHeight / 2 }, ORIGIN, angleDegrees);
       const bottom = rotatePoint({ x: 0, y: lineHeight / 2 }, ORIGIN, angleDegrees);
 

@@ -161,6 +161,41 @@ describe('handleUpdateNode', () => {
     expect(getActivePage(state).nodes[pathNode.id]).toMatchObject({ height: 300, rotation: 45, width: 300, x: 10, y: 20 });
   });
 
+  it('should propagate a vector-node reshape to every text node bound to it as a text path', () => {
+    // mock — a 100x0 line reshaped into a 200-tall L-shape
+    const vectorNode = buildVectorNode({
+      segments: { s1: seg('s1', 'a', 'b') },
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    });
+    const textNode = buildPathText({ pathId: vectorNode.id });
+    const state = buildState({ [textNode.id]: textNode, [vectorNode.id]: vectorNode });
+
+    // before
+    handleUpdateNode(state, {
+      changes: { vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 0, y: 200 } } },
+      id: vectorNode.id,
+    });
+
+    // result — the text box's bounds now match the reshaped vector, not the old ones
+    expect(getActivePage(state).nodes[textNode.id]).toMatchObject({ height: 200, rotation: 0, width: 0, x: 0, y: 0 });
+  });
+
+  it('should leave an unbound vector node update alone, without touching unrelated text nodes', () => {
+    // mock
+    const vectorNode = buildVectorNode({
+      segments: { s1: seg('s1', 'a', 'b') },
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    });
+    const unrelatedText = buildPathText({ height: 50, pathId: 'some-other-path', width: 50, x: 5, y: 5 });
+    const state = buildState({ [unrelatedText.id]: unrelatedText, [vectorNode.id]: vectorNode });
+
+    // before
+    handleUpdateNode(state, { changes: { strokeWidth: 8 }, id: vectorNode.id });
+
+    // result
+    expect(getActivePage(state).nodes[unrelatedText.id]).toMatchObject({ height: 50, width: 50, x: 5, y: 5 });
+  });
+
   it('should discard a width profile when a segments patch makes the network branch', () => {
     // mock
     const vectorNode = buildVectorNode({

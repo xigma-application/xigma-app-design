@@ -9,6 +9,7 @@ import { isVectorWidthProfileEligible } from './isVectorWidthProfileEligible';
 import { syncGroupBounds } from './syncGroupBounds';
 import { syncPathNodeFromText } from './syncPathNodeFromText';
 import { syncPathTextNodes } from './syncPathTextNodes';
+import { syncPathTextNodesFromVector } from './syncPathTextNodesFromVector';
 
 export const handleUpdateNode = (state: TDesignState, payload: { changes: TSceneNodeChanges; id: string }): void => {
   const node = getActivePage(state).nodes[payload.id];
@@ -16,10 +17,20 @@ export const handleUpdateNode = (state: TDesignState, payload: { changes: TScene
   if (node) {
     Object.assign(node, payload.changes);
 
-    if (node.type === NodeType.path) {
-      syncPathTextNodes(state, node);
-    } else if (node.type === NodeType.text && node.pathId) {
-      syncPathNodeFromText(state, node);
+    switch (node.type) {
+      case NodeType.path:
+        syncPathTextNodes(state, node);
+        break;
+      case NodeType.text:
+        if (node.pathId) {
+          syncPathNodeFromText(state, node);
+        }
+        break;
+      case NodeType.vector:
+        syncPathTextNodesFromVector(state, node);
+        break;
+      default:
+        break;
     }
 
     if (node.type === NodeType.vector && 'segments' in payload.changes && !isVectorWidthProfileEligible(node)) {

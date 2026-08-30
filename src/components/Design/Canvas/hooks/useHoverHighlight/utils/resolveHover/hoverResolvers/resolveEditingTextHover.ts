@@ -8,9 +8,12 @@ export const resolveEditingTextHover = ({
   point,
   editingTextBox,
   editingContent,
+  nodesById,
   viewport,
 }: THoverResolverContext): THoverResult | undefined => {
-  if (getCollidesWithEditingText(editingTextBox, editingContent, point, viewport.zoom)) {
+  const pathNode = editingTextBox?.pathId ? nodesById[editingTextBox.pathId] : undefined;
+
+  if (getCollidesWithEditingText(editingTextBox, editingContent, point, viewport.zoom, pathNode)) {
     return { className: null, cursor: 'text', nodeId: null };
   }
 };

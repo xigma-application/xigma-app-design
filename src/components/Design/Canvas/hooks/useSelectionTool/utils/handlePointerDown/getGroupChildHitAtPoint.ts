@@ -8,7 +8,7 @@ import { TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
-import { getNodeAtPoint } from '../../../../utils/getNodeAtPoint';
+import { getNodeAtPoint } from '../../../../utils/getNodeAtPoint/getNodeAtPoint';
 
 export const getGroupChildHitAtPoint = (point: TPoint, viewport: TViewport): TSceneNode | null => {
   const state = store.getState();

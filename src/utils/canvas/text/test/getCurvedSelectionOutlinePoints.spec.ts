@@ -2,7 +2,7 @@
 import { TGlyphAtlasJson } from 'types/msdf';
 
 // utils
-import { buildEllipseArcLengthTable } from '../../shapes/buildEllipseArcLengthTable';
+import { createEllipseTextPathSampler } from '../pathSampler/createEllipseTextPathSampler';
 import { getCurvedSelectionEdges } from '../getCurvedSelectionEdges';
 import { getCurvedSelectionOutlinePoints } from '../getCurvedSelectionOutlinePoints';
 
@@ -16,20 +16,20 @@ const ATLAS: TGlyphAtlasJson = {
 };
 
 const CENTER = { x: 100, y: 100 };
-const TABLE = buildEllipseArcLengthTable(200, 200);
+const SAMPLER = createEllipseTextPathSampler({ height: 200, rotation: 0, width: 200, x: 0, y: 0 });
 
 describe('getCurvedSelectionOutlinePoints', () => {
   it('should return an empty array for a collapsed selection', () => {
     // result
-    expect(getCurvedSelectionOutlinePoints(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, false, TABLE, 40, 1, 1)).toEqual([]);
+    expect(getCurvedSelectionOutlinePoints(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, 1, 1)).toEqual([]);
   });
 
   it('should build the top and bottom curve segments plus start/end caps when the selection ends are far enough apart', () => {
     // before — 10 selected "A"s (12 units advance each) span ~120 units of a ~628-unit
     // circumference, far more than the 40-unit lineHeight, so the two caps can't cross
     const content = 'A'.repeat(20);
-    const edges = getCurvedSelectionEdges(ATLAS, content, 20, 200, 200, CENTER, 0, false, TABLE, 40, 0, 10);
-    const outline = getCurvedSelectionOutlinePoints(ATLAS, content, 20, 200, 200, CENTER, 0, false, TABLE, 40, 0, 10);
+    const edges = getCurvedSelectionEdges(ATLAS, content, 20, CENTER, 0, false, SAMPLER, 40, 0, 10);
+    const outline = getCurvedSelectionOutlinePoints(ATLAS, content, 20, CENTER, 0, false, SAMPLER, 40, 0, 10);
 
     // result — (edges.length - 1) curve segments * 4 points each, plus 4 points for the two caps
     expect(outline).toHaveLength((edges.length - 1) * 4 + 4);
@@ -42,8 +42,8 @@ describe('getCurvedSelectionOutlinePoints', () => {
     // for the real-world case of selecting all of a curved-text node that wraps almost back to its
     // own start — either way, two perpendicular caps this close together would cross into a stray
     // zigzag instead of reading as two separate lines
-    const edges = getCurvedSelectionEdges(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, false, TABLE, 40, 0, 2);
-    const outline = getCurvedSelectionOutlinePoints(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, false, TABLE, 40, 0, 2);
+    const edges = getCurvedSelectionEdges(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, 0, 2);
+    const outline = getCurvedSelectionOutlinePoints(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, 0, 2);
 
     // result — just the curve segments, no trailing cap points
     expect(outline).toHaveLength((edges.length - 1) * 4);

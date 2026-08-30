@@ -6,7 +6,7 @@ import { TEXT_FILL, TEXT_FONT_FAMILY, TEXT_FONT_SIZE, TEXT_NAME } from '../../..
 import { NodeType } from 'types/design/enums';
 import { TEditingTextBox } from 'types/canvas';
 import { TImageRenderContext } from '../../types';
-import { TViewport } from 'types/design/types';
+import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
 import { drawEditingCaretAndSelection } from './drawEditingCaretAndSelection/drawEditingCaretAndSelection';
@@ -27,6 +27,7 @@ export const drawEditingText = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  editingPathNode?: TSceneNode,
 ): void => {
   if (editingTextBox) {
     drawEditingTextBoxOutline(gl, program, buffer, editingTextBox, canvasWidth, canvasHeight, viewport);
@@ -61,6 +62,7 @@ export const drawEditingText = (
       canvasWidth,
       canvasHeight,
       viewport,
+      editingPathNode,
     );
     drawEditingCaretAndSelection(
       gl,
@@ -74,6 +76,7 @@ export const drawEditingText = (
       canvasWidth,
       canvasHeight,
       viewport,
+      editingPathNode,
     );
   }
 };

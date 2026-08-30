@@ -9,7 +9,7 @@ import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
 import { getGroupChildHitAtPoint } from './getGroupChildHitAtPoint';
-import { getNodeAtPoint } from '../../../../utils/getNodeAtPoint';
+import { getNodeAtPoint } from '../../../../utils/getNodeAtPoint/getNodeAtPoint';
 import { isSelectionInsideGroup } from '../../../../utils/isSelectionInsideGroup';
 
 export const getSelectionHitAtPoint = (point: TPoint, orderedNodes: TSceneNode[], viewport: TViewport): TSceneNode | null => {

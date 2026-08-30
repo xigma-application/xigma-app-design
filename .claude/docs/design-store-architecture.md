@@ -152,6 +152,24 @@ export const handleUpdateNode = (state, payload) => {
 bound to it via `pathId`; `syncPathNodeFromText.ts` does the reverse (editing the bound text node's
 box moves/resizes the path it rides on), then re-syncs siblings through `syncPathTextNodes` again.
 
+**A `NodeType.vector` can also be a text-on-path guide** — `text.pathId` may reference either the
+auto-generated ellipse `NodeType.path` (unchanged) or an existing, eligible vector (Text on Path
+tool: a plain click on a vector satisfying `getVectorChainOrder(node) !== null`, the same condition
+Variable Width uses). There is no mode flag on the node; "is this vector bound as a text path?" is
+derived by scanning for a text node whose `pathId` matches (`isVectorBoundAsTextPath.ts`). A third
+`handleUpdateNode.ts` branch, `else if (node.type === NodeType.vector) syncPathTextNodesFromVector`,
+mirrors `syncPathTextNodes` one layer over: it pushes the vector's own `getVectorNodeBounds` (baked
+via `getRenderedVectorNode`) onto every bound text node's box, forcing `rotation: 0` (the vector's
+rotation is already baked into its vertices). Unlike an ellipse path, `syncPathNodeFromText` is
+**not** extended to push the text box back onto a bound vector — a user's vector network is never
+reshaped by dragging its offset handle. On attach, the tool also clears the vector's fill
+(`filledFaceKeys: []`, `fillColorOverrideByKey: {}`, `fillColor: null`) and the vector becomes inert
+as an independent hit-test target (`getNodeAtPoint.ts`'s `case NodeType.vector` returns `false` for
+any id a text node's `pathId` names, the same treatment `case NodeType.path` already got) — so it is
+neither selectable nor re-enterable into Vector Edit Mode while bound; the cascade-delete pair above
+handles it exactly like an ellipse path, no special-casing needed. See `canvas-rendering-pipeline.md`
+for the ellipse-vs-vector curved-text rendering split (`pathSampler` module).
+
 **`deleteNode`** (`handleDeleteNode.ts`) — recursive cascade, one direction only:
 ```ts
 export const handleDeleteNode = (state, id) => {

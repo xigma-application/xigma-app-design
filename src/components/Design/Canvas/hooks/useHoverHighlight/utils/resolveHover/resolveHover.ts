@@ -9,7 +9,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { ToolName } from 'types/design/enums';
 
 // utils
-import { getNodeAtPoint } from '../../../../utils/getNodeAtPoint';
+import { getNodeAtPoint } from '../../../../utils/getNodeAtPoint/getNodeAtPoint';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { isControlPressed } from 'utils/isControlPressed';
 import { resolveToolHover } from './resolveToolHover';

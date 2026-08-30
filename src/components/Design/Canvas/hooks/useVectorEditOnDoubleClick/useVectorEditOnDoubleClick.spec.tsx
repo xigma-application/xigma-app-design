@@ -127,6 +127,89 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
     expect(design.pages[design.activePageId].selectedIds).toEqual([idA]);
   });
 
+  it('should not enter Vector Edit Mode when double-clicking a vector currently bound as a text-on-path guide', () => {
+    // mock — its own unique location, well away from every other fixture in this file, so a
+    // fallthrough hit on a leftover node from an earlier test can't produce a false pass
+    const segments: TVectorNode['segments'] = {
+      ab: { endId: 'b', id: 'ab', startId: 'a', tangentEnd: null, tangentStart: null },
+      bc: { endId: 'c', id: 'bc', startId: 'b', tangentEnd: null, tangentStart: null },
+      ca: { endId: 'a', id: 'ca', startId: 'c', tangentEnd: null, tangentStart: null },
+    };
+    const vertices: TVectorNode['vertices'] = {
+      a: { id: 'a', x: 5000, y: 5000 },
+      b: { id: 'b', x: 5050, y: 5000 },
+      c: { id: 'c', x: 5025, y: 5050 },
+    };
+    const unpaintedNode: TVectorNode = {
+      fillColor: '#ff0000',
+      filledFaceKeys: [],
+      id: 'bound-triangle-face-lookup',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments,
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices,
+    };
+    const [face] = deriveVectorFaces(unpaintedNode);
+
+    store.dispatch(
+      addNode({
+        fillColor: '#ff0000',
+        filledFaceKeys: [getVectorFillLoopKey(face.pieceKeys)],
+        name: 'Vector',
+        parentId: null,
+        rotation: 0,
+        segments,
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: NodeType.vector,
+        vertexHandleModes: {},
+        vertices,
+      }),
+    );
+
+    const { rootOrder } = selectActivePage(store.getState());
+    const idA = rootOrder[rootOrder.length - 1];
+
+    store.dispatch(
+      addNode({
+        content: 'Hi',
+        fill: '#ffffff',
+        flipX: false,
+        flipY: false,
+        fontFamily: 'Inter',
+        fontSize: 14,
+        height: 50,
+        name: 'Text',
+        parentId: null,
+        pathId: idA,
+        pathStartOffset: 0,
+        rotation: 0,
+        type: NodeType.text,
+        width: 50,
+        x: 5000,
+        y: 5000,
+      }),
+    );
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    renderDoubleClickTool(canvasRef);
+
+    // action — inside the triangle's interior, where a plain double-click would otherwise hit it
+    act(() => {
+      canvasRef.current?.dispatchEvent(doubleClickEvent(5025, 5020));
+    });
+
+    // result
+    expect(store.getState().design.vectorEditingNodeIds).toEqual([]);
+  });
+
   it('should not enter Vector Edit Mode when double-clicking a non-vector node', () => {
     // mock
     addFrameNode(2200, 2200);

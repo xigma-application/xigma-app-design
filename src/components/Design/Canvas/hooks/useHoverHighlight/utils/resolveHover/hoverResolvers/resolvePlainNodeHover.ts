@@ -2,7 +2,7 @@
 import { THoverResolverContext, THoverResult } from '../types';
 
 // utils
-import { getNodeAtPoint } from '../../../../../utils/getNodeAtPoint';
+import { getNodeAtPoint } from '../../../../../utils/getNodeAtPoint/getNodeAtPoint';
 import { getTopLevelAncestor } from 'store/design/utils/nodeHierarchy/getTopLevelAncestor';
 import { isSelectionInsideGroup } from '../../../../../utils/isSelectionInsideGroup';
 

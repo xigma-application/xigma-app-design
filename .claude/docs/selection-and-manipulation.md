@@ -141,6 +141,12 @@ any per-type test runs — same one-line guard added to `getCollidedNodes.ts` (m
 locked/hidden node can't be acquired that way either. This only gates *acquiring* a node via a canvas
 click/marquee; a node already selected through the Layers panel itself can still be dragged/resized.
 
+The real `case NodeType.vector` additionally returns `false` outright for any vector id a text
+node's `pathId` currently names — a vector serving as a Text on Path guide is inert as an
+independent hit-test target, the same treatment `case NodeType.path` already gets (both computed via
+a `nodesById`/`textPathBoundVectorIds` pass built once per call, not per node). See
+`design-store-architecture.md`'s text-on-path section for the full vector-as-guide mechanism.
+
 **Rotation is handled uniformly, in one place**: `getNodeAtPoint` rotates the *query point* backward
 by `-node.rotation` around the node's own bounds center, then calls the ordinary, rotation-unaware
 test function. The test functions themselves never know about rotation. The same trick

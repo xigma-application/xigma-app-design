@@ -13,6 +13,7 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { convertNodeToVector, isConvertibleToVectorNode } from 'utils/canvas/vectorNetwork/convertShapeToVector/convertNodeToVector';
 import { enterVectorEditMode } from '../../../utils/enterVectorEditMode';
+import { isVectorBoundAsTextPath } from 'store/design/utils/isVectorBoundAsTextPath';
 
 export const handleEnterVectorEdit = (dispatch: AppDispatch, refs: TCanvasRefs): void => {
   const state = store.getState();
@@ -25,7 +26,10 @@ export const handleEnterVectorEdit = (dispatch: AppDispatch, refs: TCanvasRefs):
   const selectedNodes = selectSelectedIds(state)
     .map((id) => state.design.pages[state.design.activePageId].nodes[id])
     .filter((node): node is TSceneNode => Boolean(node));
-  const alreadyVectorIds = selectedNodes.filter((node) => node.type === NodeType.vector).map((node) => node.id);
+  const nodesById = state.design.pages[state.design.activePageId].nodes;
+  const alreadyVectorIds = selectedNodes
+    .filter((node) => node.type === NodeType.vector && !isVectorBoundAsTextPath(nodesById, node.id))
+    .map((node) => node.id);
   const nodesToConvert = selectedNodes.filter(isConvertibleToVectorNode);
 
   if (nodesToConvert.length > 0) {

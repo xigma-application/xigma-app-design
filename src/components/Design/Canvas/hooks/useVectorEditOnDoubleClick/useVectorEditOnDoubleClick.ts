@@ -17,7 +17,7 @@ import { TPoint } from 'types/canvas';
 // utils
 import { enterVectorEditMode } from '../../utils/enterVectorEditMode';
 import { getDoubleClickedVectorNode } from './utils/getDoubleClickedVectorNode';
-import { getNodeAtPoint } from '../../utils/getNodeAtPoint';
+import { getNodeAtPoint } from '../../utils/getNodeAtPoint/getNodeAtPoint';
 
 export const useVectorEditOnDoubleClick = (refs: TCanvasRefs): void => {
   const { selectedVectorHandlesRef, selectedVectorSegmentIdsRef, selectedVectorVertexIdsRef } = refs.vectorEdit;

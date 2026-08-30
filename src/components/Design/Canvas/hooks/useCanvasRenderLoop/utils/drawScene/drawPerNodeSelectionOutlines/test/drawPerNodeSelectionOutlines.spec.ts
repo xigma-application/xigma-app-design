@@ -64,7 +64,7 @@ describe('drawPerNodeSelectionOutlines', () => {
     const nodes = [buildNode({ id: 'a', parentId: 'frame-a', x: 0, y: 0 }), buildNode({ id: 'b', parentId: 'frame-b', x: 40, y: 0 })];
 
     // before
-    drawPerNodeSelectionOutlines(gl, program, buffer, nodes, 100, 100, IDENTITY_VIEWPORT, []);
+    drawPerNodeSelectionOutlines(gl, program, buffer, nodes, 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
@@ -90,7 +90,7 @@ describe('drawPerNodeSelectionOutlines', () => {
     };
 
     // before
-    drawPerNodeSelectionOutlines(gl, program, buffer, [line], 100, 100, IDENTITY_VIEWPORT, []);
+    drawPerNodeSelectionOutlines(gl, program, buffer, [line], 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result — 1 segment fill + 2 endpoint-handle fills = 3 TRIANGLES draws, 2 endpoint-handle
     const trianglesDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLES);
@@ -126,7 +126,7 @@ describe('drawPerNodeSelectionOutlines', () => {
     };
 
     // before
-    drawPerNodeSelectionOutlines(gl, program, buffer, [pathText], 100, 100, IDENTITY_VIEWPORT, []);
+    drawPerNodeSelectionOutlines(gl, program, buffer, [pathText], 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result
     const fanDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLE_FAN);
@@ -160,7 +160,7 @@ describe('drawPerNodeSelectionOutlines', () => {
     };
 
     // before
-    drawPerNodeSelectionOutlines(gl, program, buffer, [pathText], 100, 100, IDENTITY_VIEWPORT, []);
+    drawPerNodeSelectionOutlines(gl, program, buffer, [pathText], 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result
     const lineDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINES);
@@ -194,7 +194,7 @@ describe('drawPerNodeSelectionOutlines', () => {
     };
 
     // before
-    drawPerNodeSelectionOutlines(gl, program, buffer, [vector], 100, 100, IDENTITY_VIEWPORT, []);
+    drawPerNodeSelectionOutlines(gl, program, buffer, [vector], 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result — 1 outline rect + 4 corner handles = 5 LINE_LOOP draws
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
@@ -228,7 +228,7 @@ describe('drawPerNodeSelectionOutlines', () => {
     };
 
     // before
-    drawPerNodeSelectionOutlines(gl, program, buffer, [vector], 100, 100, IDENTITY_VIEWPORT, []);
+    drawPerNodeSelectionOutlines(gl, program, buffer, [vector], 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result — 1 outline rect + 4 corner handles = 5 LINE_LOOP draws, unaffected by rotation
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
@@ -263,7 +263,7 @@ describe('drawPerNodeSelectionOutlines', () => {
     };
 
     // before
-    drawPerNodeSelectionOutlines(gl, program, buffer, [vector], 100, 100, IDENTITY_VIEWPORT, ['a']);
+    drawPerNodeSelectionOutlines(gl, program, buffer, [vector], 100, 100, IDENTITY_VIEWPORT, ['a'], {});
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -289,7 +289,7 @@ describe('drawPerNodeSelectionOutlines', () => {
     };
 
     // before
-    drawPerNodeSelectionOutlines(gl, program, buffer, [path], 100, 100, IDENTITY_VIEWPORT, []);
+    drawPerNodeSelectionOutlines(gl, program, buffer, [path], 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -319,7 +319,7 @@ describe('drawPerNodeSelectionOutlines', () => {
     };
 
     // before
-    drawPerNodeSelectionOutlines(gl, program, buffer, [straightText], 100, 100, IDENTITY_VIEWPORT, []);
+    drawPerNodeSelectionOutlines(gl, program, buffer, [straightText], 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result
     const fanDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLE_FAN);

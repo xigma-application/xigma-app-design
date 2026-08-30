@@ -1,97 +1,41 @@
 import { useEffect, useRef } from 'react';
 
-// others
-import { DEFAULT_SHAPE_SIZE, PATH_NAME, PATH_START_OFFSET_TOP } from '../../constants';
+// core
+import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
 
 // store
-import { addNode, setActiveTool, setSelection, startTextEdit } from 'store/design/slice';
-import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
-import { getVectorSelectionSnapshot } from 'store/history/getVectorSelectionSnapshot';
-import { selectActivePage, selectActiveTool, selectViewport } from 'store/design/selectors';
-import { store, useAppDispatch, useAppSelector } from 'store';
+import { selectActiveTool, selectViewport } from 'store/design/selectors';
+import { useAppDispatch, useAppSelector } from 'store';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { NodeType, PathType, ToolName } from 'types/design/enums';
-import { MouseButton } from 'types/enums';
+import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 
 // utils
-import { getPointerPosition } from '../../utils/getPointerPosition';
-import { screenToWorld } from '../../utils/screenToWorld';
-import { toDraftRect } from '../../utils/toDraftRect';
-import { toDraftRectWithDefault } from '../../utils/toDraftRectWithDefault';
+import { handlePointerDown } from './utils/handlePointerDown/handlePointerDown';
+import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
+import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 
 export const useDrawTextOnPathTool = (refs: TCanvasRefs): void => {
   const { canvasRef, draftRef } = refs;
   const activeTool = useAppSelector(selectActiveTool);
   const viewport = useAppSelector(selectViewport);
   const dispatch = useAppDispatch();
+  const { setClassName } = useClassNames();
   const startRef = useRef<TPoint | null>(null);
-
-  const handlePointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
-    if (event.button === MouseButton.primary) {
-      dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
-      dispatch(setSelection([]));
-      startRef.current = screenToWorld(getPointerPosition(canvas, event), viewport);
-      canvas.setPointerCapture(event.pointerId);
-    }
-  };
-
-  const handlePointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
-    if (startRef.current) {
-      const rect = toDraftRect(startRef.current, screenToWorld(getPointerPosition(canvas, event), viewport));
-
-      draftRef.current = { ...rect, pathType: PathType.ellipse, type: NodeType.path };
-    }
-  };
-
-  const handlePointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
-    if (startRef.current) {
-      const rect = toDraftRectWithDefault(
-        startRef.current,
-        screenToWorld(getPointerPosition(canvas, event), viewport),
-        DEFAULT_SHAPE_SIZE,
-        true,
-        viewport.zoom,
-      );
-
-      dispatch(addNode({ ...rect, name: PATH_NAME, parentId: null, pathType: PathType.ellipse, rotation: 0, type: NodeType.path }));
-
-      const { rootOrder } = selectActivePage(store.getState());
-      const pathNodeId = rootOrder[rootOrder.length - 1];
-
-      dispatch(setSelection([pathNodeId]));
-      dispatch(
-        startTextEdit({
-          box: {
-            ...rect,
-            flipX: false,
-            flipY: false,
-            pathFlip: false,
-            pathId: pathNodeId,
-            pathStartOffset: PATH_START_OFFSET_TOP,
-            rotation: 0,
-          },
-        }),
-      );
-
-      startRef.current = null;
-      draftRef.current = null;
-      canvas.releasePointerCapture(event.pointerId);
-      dispatch(setActiveTool(ToolName.default));
-    }
-
-    dispatch(endHistoryGesture());
-  };
+  const attachTargetIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
 
     if (canvas && activeTool === ToolName.textOnPath) {
-      const onPointerDown = (event: PointerEvent): void => handlePointerDown(canvas, event);
-      const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event);
-      const onPointerUp = (event: PointerEvent): void => handlePointerUp(canvas, event);
+      const onPointerDown = (event: PointerEvent): void =>
+        handlePointerDown(canvas, event, dispatch, refs, viewport, startRef, attachTargetIdRef);
+      const onPointerMove = (event: PointerEvent): void =>
+        handlePointerMove(canvas, event, viewport, draftRef, startRef, attachTargetIdRef, setClassName);
+      const onPointerUp = (event: PointerEvent): void =>
+        handlePointerUp(canvas, event, dispatch, viewport, draftRef, startRef, attachTargetIdRef);
 
       canvas.addEventListener('pointerdown', onPointerDown);
       canvas.addEventListener('pointermove', onPointerMove);
@@ -103,5 +47,5 @@ export const useDrawTextOnPathTool = (refs: TCanvasRefs): void => {
         canvas.removeEventListener('pointerup', onPointerUp);
       };
     }
-  }, [activeTool, canvasRef, dispatch, draftRef, refs, viewport]);
+  }, [activeTool, canvasRef, dispatch, draftRef, refs, setClassName, viewport]);
 };

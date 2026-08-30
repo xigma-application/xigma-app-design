@@ -29,7 +29,8 @@ export const continuePathOffsetDrag = (
     if (node && node.type === NodeType.text) {
       const viewport = selectViewport(state);
       const point = screenToWorld(getPointerPosition(canvas, event), viewport);
-      const offset = getNearestPathOffsetAtPoint(point, node);
+      const pathNode = node.pathId ? selectNodes(state)[node.pathId] : undefined;
+      const offset = getNearestPathOffsetAtPoint(point, node, pathNode);
 
       dispatch(updateNode({ changes: { pathStartOffset: offset }, id: dragState.nodeId }));
     }

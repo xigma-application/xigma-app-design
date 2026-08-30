@@ -322,6 +322,22 @@ fragment shader (§3) reconstructs a crisp edge procedurally at *any* zoom via
   **without** zoom/DPI — MSDF geometry stays correct at any zoom without rebuilding, unlike the old
   bitmap approach. A parallel `buildCurvedGlyphQuads.ts` handles text-on-a-path (arc-length table
   instead of a straight baseline) — start there for curved-text work specifically.
+- **`text/pathSampler/`** — the ellipse-vs-vector split behind curved text. Every curved-text
+  primitive (`buildCurvedGlyphQuads`, `getCurvedCaretPoint`, `getCurvedSelectionEdges`,
+  `getCurvedCaretIndexAtPoint`, `isPointInCurvedText`, `getPathTextHandlePoint`,
+  `getNearestPathOffsetAtPoint`, the `drawCurved*`/`drawEditingCaretAndSelection` render-side
+  files) takes a `TTextPathSampler` (`{ isClosed, totalLength, sampleAtLength, nearestOffsetAtPoint }`)
+  instead of raw ellipse width/height/table — `getTextPathSampler(box, pathNode)` is the one factory:
+  a `NodeType.vector` `pathNode` builds `createVectorTextPathSampler` (arc-length table over
+  `getVectorChainOrder`/`getVectorChainArcLengthTable`/`getVectorSegmentPointAtT`, points returned
+  relative to the text box's own centre so a vector-bound text node's forced `rotation: 0`/no-flip
+  makes the caller's rotate/flip step a no-op); anything else — a real ellipse path node, or
+  `pathNode: undefined` at call sites that only hold the box — falls back to
+  `createEllipseTextPathSampler`, a literal delegation to the pre-existing `buildEllipseArcLengthTable`/
+  `getEllipsePathSample`/`getNearestEllipsePathOffset` helpers (byte-identical behaviour for ellipse
+  paths). `getOrBuildTextGeometry.ts`'s cache key gains a `getVectorChainGeometrySignature(pathNode)`
+  suffix (WeakMap-cached structural fingerprint) so vector-bound text re-renders on reshape even when
+  the vector's bbox happens not to change.
 - `text/drawMsdfText.ts` is the runtime entry point — computes
   `u_screenPxRange = distanceRange * effectiveFontSize * zoom / atlas.info.size` per draw (this is
   what keeps edges pixel-sharp across zoom), otherwise follows the same boilerplate as `drawImage.ts`.

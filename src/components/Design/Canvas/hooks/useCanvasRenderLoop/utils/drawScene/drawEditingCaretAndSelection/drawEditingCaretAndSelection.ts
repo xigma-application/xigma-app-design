@@ -1,6 +1,6 @@
 // types
 import { TEditingTextBox } from 'types/canvas';
-import { TViewport } from 'types/design/types';
+import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
 import { drawCurvedEditingCaretAndSelection } from './drawCurvedEditingCaretAndSelection';
@@ -18,20 +18,36 @@ export const drawEditingCaretAndSelection = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  editingPathNode?: TSceneNode,
 ): void => {
-  const draw = editingTextBox.pathId ? drawCurvedEditingCaretAndSelection : drawStraightEditingCaretAndSelection;
-
-  draw(
-    gl,
-    program,
-    buffer,
-    editingTextBox,
-    editingTextContent,
-    selectionStart,
-    selectionEnd,
-    selectionChangedAt,
-    canvasWidth,
-    canvasHeight,
-    viewport,
-  );
+  if (editingTextBox.pathId) {
+    drawCurvedEditingCaretAndSelection(
+      gl,
+      program,
+      buffer,
+      editingTextBox,
+      editingTextContent,
+      selectionStart,
+      selectionEnd,
+      selectionChangedAt,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+      editingPathNode,
+    );
+  } else {
+    drawStraightEditingCaretAndSelection(
+      gl,
+      program,
+      buffer,
+      editingTextBox,
+      editingTextContent,
+      selectionStart,
+      selectionEnd,
+      selectionChangedAt,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+    );
+  }
 };

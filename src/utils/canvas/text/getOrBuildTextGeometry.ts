@@ -1,13 +1,14 @@
 // types
 import { TEllipseArcLengthSample } from 'types/canvas';
 import { TGlyphAtlasJson } from 'types/msdf';
-import { TTextNode } from 'types/design/types';
+import { NodeType } from 'types/design/enums';
+import { TSceneNode, TTextNode } from 'types/design/types';
 
 // utils
 import { buildCurvedGlyphQuads } from './buildCurvedGlyphQuads';
-import { buildEllipseArcLengthTable } from '../shapes/buildEllipseArcLengthTable';
 import { buildGlyphQuads } from './buildGlyphQuads';
-import { getEllipseCircumference } from '../shapes/getEllipseCircumference';
+import { getTextPathSampler } from './pathSampler/getTextPathSampler';
+import { getVectorChainGeometrySignature } from '../vectorNetwork/getVectorChainGeometrySignature';
 import { getVisibleCurvedContent } from './getVisibleCurvedContent';
 import { getWrappedTextLines } from './getWrappedTextLines';
 
@@ -16,34 +17,26 @@ export type TTextGeometry = {
   vertices: Float32Array;
 };
 
-const getOrBuildEllipseArcLengthTable = (
-  ellipseArcLengthCache: Map<string, TEllipseArcLengthSample[]>,
-  width: number,
-  height: number,
-): TEllipseArcLengthSample[] => {
-  const tableKey = `${width}:${height}`;
-  const cachedTable = ellipseArcLengthCache.get(tableKey);
-  const table = cachedTable ?? buildEllipseArcLengthTable(width, height);
-
-  if (!cachedTable) {
-    ellipseArcLengthCache.set(tableKey, table);
-  }
-
-  return table;
-};
-
 const buildPathTextGeometry = (
   atlas: TGlyphAtlasJson,
   node: TTextNode,
+  pathNode: TSceneNode | undefined,
   ellipseArcLengthCache: Map<string, TEllipseArcLengthSample[]>,
 ): TTextGeometry => {
   const { content, fontSize, height, pathFlip, pathStartOffset, width, x, y } = node;
-  const table = getOrBuildEllipseArcLengthTable(ellipseArcLengthCache, width, height);
-  const circumference = getEllipseCircumference(table);
-  const visibleContent = getVisibleCurvedContent(atlas, content, fontSize, pathStartOffset ?? 0, pathFlip ?? false, circumference);
+  const sampler = getTextPathSampler({ height, rotation: node.rotation, width, x, y }, pathNode, ellipseArcLengthCache);
+  const visibleContent = getVisibleCurvedContent(
+    atlas,
+    content,
+    fontSize,
+    pathStartOffset ?? 0,
+    pathFlip ?? false,
+    sampler.totalLength,
+    sampler.isClosed,
+  );
   const center = { x: x + width / 2, y: y + height / 2 };
   const vertices = new Float32Array(
-    buildCurvedGlyphQuads(atlas, visibleContent, fontSize, width, height, center, pathStartOffset ?? 0, pathFlip ?? false, table),
+    buildCurvedGlyphQuads(atlas, visibleContent, fontSize, center, pathStartOffset ?? 0, pathFlip ?? false, sampler),
   );
 
   return { effectiveFontSize: fontSize, vertices };
@@ -62,9 +55,11 @@ export const getOrBuildTextGeometry = (
   cache: Map<string, TTextGeometry>,
   node: TTextNode,
   ellipseArcLengthCache: Map<string, TEllipseArcLengthSample[]>,
+  pathNode?: TSceneNode,
 ): TTextGeometry => {
   const { content, fontFamily, fontSize, height, id, pathFlip, pathId, pathStartOffset, width, x, y } = node;
-  const pathKeySuffix = pathId ? `:${pathId}:${pathStartOffset ?? 0}:${pathFlip ?? false}` : '';
+  const vectorSignatureSuffix = pathNode?.type === NodeType.vector ? `:${getVectorChainGeometrySignature(pathNode)}` : '';
+  const pathKeySuffix = pathId ? `:${pathId}:${pathStartOffset ?? 0}:${pathFlip ?? false}${vectorSignatureSuffix}` : '';
   const key = `${id}:${content}:${width}:${height}:${fontSize}:${fontFamily}:${x}:${y}${pathKeySuffix}`;
   const cached = cache.get(key);
 
@@ -72,7 +67,7 @@ export const getOrBuildTextGeometry = (
     return cached;
   }
 
-  const geometry = pathId ? buildPathTextGeometry(atlas, node, ellipseArcLengthCache) : buildStraightTextGeometry(atlas, node);
+  const geometry = pathId ? buildPathTextGeometry(atlas, node, pathNode, ellipseArcLengthCache) : buildStraightTextGeometry(atlas, node);
 
   cache.set(key, geometry);
 

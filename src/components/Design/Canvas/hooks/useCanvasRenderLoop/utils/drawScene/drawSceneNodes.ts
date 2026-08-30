@@ -36,6 +36,7 @@ export const drawSceneNodes = (
   draggedVectorNodeSnapshots: Map<string, TVectorNodeDragSnapshot> | null,
   resizedVectorNodeSnapshots: Map<string, TVectorNodeResizeSnapshot> | null,
   rotatedVectorNodeSnapshots: Map<string, TVectorNodeRotateSnapshot> | null,
+  nodesById: Record<string, TSceneNode>,
 ): void => {
   nodes.forEach((node) => {
     switch (node.type) {
@@ -116,6 +117,7 @@ export const drawSceneNodes = (
           canvasWidth,
           canvasHeight,
           viewport,
+          node.pathId ? nodesById[node.pathId] : undefined,
         );
         break;
       default:

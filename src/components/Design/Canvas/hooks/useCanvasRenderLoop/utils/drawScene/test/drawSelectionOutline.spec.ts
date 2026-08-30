@@ -51,7 +51,7 @@ describe('drawSelectionOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawSelectionOutline(gl, program, buffer, [], 100, 100, IDENTITY_VIEWPORT, []);
+    drawSelectionOutline(gl, program, buffer, [], 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -65,7 +65,7 @@ describe('drawSelectionOutline', () => {
     const nodes = [buildNode({ id: 'a', x: 0, y: 0 }), buildNode({ id: 'b', x: 40, y: 0 })];
 
     // before
-    drawSelectionOutline(gl, program, buffer, nodes, 100, 100, IDENTITY_VIEWPORT, []);
+    drawSelectionOutline(gl, program, buffer, nodes, 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
@@ -81,7 +81,7 @@ describe('drawSelectionOutline', () => {
     const nodes = [buildNode({ id: 'a', x: 0, y: 0 })];
 
     // before
-    drawSelectionOutline(gl, program, buffer, nodes, 100, 100, IDENTITY_VIEWPORT, []);
+    drawSelectionOutline(gl, program, buffer, nodes, 100, 100, IDENTITY_VIEWPORT, [], {});
 
     // result
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
@@ -97,7 +97,7 @@ describe('drawSelectionOutline', () => {
     const nodes = [buildNode({ id: 'a', x: 0, y: 0 }), buildNode({ id: 'b', x: 40, y: 0 })];
 
     // before
-    drawSelectionOutline(gl, program, buffer, nodes, 100, 100, IDENTITY_VIEWPORT, ['a', 'b']);
+    drawSelectionOutline(gl, program, buffer, nodes, 100, 100, IDENTITY_VIEWPORT, ['a', 'b'], {});
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -111,7 +111,7 @@ describe('drawSelectionOutline', () => {
     const nodes = [buildNode({ id: 'a', x: 0, y: 0 }), buildNode({ id: 'b', x: 40, y: 0 })];
 
     // before
-    drawSelectionOutline(gl, program, buffer, nodes, 100, 100, IDENTITY_VIEWPORT, ['a']);
+    drawSelectionOutline(gl, program, buffer, nodes, 100, 100, IDENTITY_VIEWPORT, ['a'], {});
 
     // result
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);

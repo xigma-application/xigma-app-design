@@ -10,12 +10,17 @@ export const getPathTextOffsetHandleAtPoint = (
   point: TPoint,
   selectedNodes: TSceneNode[],
   viewport: TViewport,
+  nodesById: Record<string, TSceneNode>,
 ): { nodeId: string } | null => {
   const [node] = selectedNodes;
   let hit: { nodeId: string } | null = null;
 
-  if (selectedNodes.length === 1 && node.type === NodeType.text && node.pathId && isPointOnPathTextHandle(point, node, viewport)) {
-    hit = { nodeId: node.id };
+  if (selectedNodes.length === 1 && node.type === NodeType.text && node.pathId) {
+    const pathNode = nodesById[node.pathId];
+
+    if (isPointOnPathTextHandle(point, node, viewport, pathNode)) {
+      hit = { nodeId: node.id };
+    }
   }
 
   return hit;

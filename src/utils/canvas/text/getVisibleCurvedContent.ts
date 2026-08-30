@@ -10,14 +10,18 @@ export const getVisibleCurvedContent = (
   fontSize: number,
   startOffset: number,
   flip: boolean,
-  circumference: number,
+  pathLength: number,
+  isClosed: boolean = true,
 ): string => {
-  const boundaries = getCurvedGlyphBoundaries(atlas, content, fontSize, startOffset, flip, circumference);
+  const boundaries = getCurvedGlyphBoundaries(atlas, content, fontSize, startOffset, flip, pathLength);
   const start = boundaries[0];
   let visibleLength = 0;
 
   for (let index = 1; index < boundaries.length; index++) {
-    if (Math.abs(boundaries[index] - start) > circumference) {
+    const boundary = boundaries[index];
+    const overflows = isClosed ? Math.abs(boundary - start) > pathLength : boundary < 0 || boundary > pathLength;
+
+    if (overflows) {
       break;
     }
 

@@ -31,28 +31,28 @@ const buildPathText = (overrides: Partial<TTextNode> = {}): TTextNode => ({
 describe('getPathTextOffsetHandleAtPoint', () => {
   it('should return null when nothing is selected', () => {
     // result
-    expect(getPathTextOffsetHandleAtPoint({ x: 200, y: 100 }, [], IDENTITY_VIEWPORT)).toBeNull();
+    expect(getPathTextOffsetHandleAtPoint({ x: 200, y: 100 }, [], IDENTITY_VIEWPORT, {})).toBeNull();
   });
 
   it('should return null when more than one node is selected', () => {
     // result
     expect(
-      getPathTextOffsetHandleAtPoint({ x: 200, y: 100 }, [buildPathText(), buildPathText({ id: 'text-2' })], IDENTITY_VIEWPORT),
+      getPathTextOffsetHandleAtPoint({ x: 200, y: 100 }, [buildPathText(), buildPathText({ id: 'text-2' })], IDENTITY_VIEWPORT, {}),
     ).toBeNull();
   });
 
   it('should return null for a selected node that is not a path-text node', () => {
     // result
-    expect(getPathTextOffsetHandleAtPoint({ x: 200, y: 100 }, [buildPathText({ pathId: null })], IDENTITY_VIEWPORT)).toBeNull();
+    expect(getPathTextOffsetHandleAtPoint({ x: 200, y: 100 }, [buildPathText({ pathId: null })], IDENTITY_VIEWPORT, {})).toBeNull();
   });
 
   it('should return the node id when the point lands on the handle', () => {
     // result
-    expect(getPathTextOffsetHandleAtPoint({ x: 200, y: 100 }, [buildPathText()], IDENTITY_VIEWPORT)?.nodeId).toBe('text-1');
+    expect(getPathTextOffsetHandleAtPoint({ x: 200, y: 100 }, [buildPathText()], IDENTITY_VIEWPORT, {})?.nodeId).toBe('text-1');
   });
 
   it('should return null when the point is far from the handle', () => {
     // result
-    expect(getPathTextOffsetHandleAtPoint({ x: 9000, y: 9000 }, [buildPathText()], IDENTITY_VIEWPORT)).toBeNull();
+    expect(getPathTextOffsetHandleAtPoint({ x: 9000, y: 9000 }, [buildPathText()], IDENTITY_VIEWPORT, {})).toBeNull();
   });
 });

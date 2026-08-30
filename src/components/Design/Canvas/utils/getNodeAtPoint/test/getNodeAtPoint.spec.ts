@@ -272,6 +272,68 @@ describe('getNodeAtPoint', () => {
     expect(getNodeAtPoint({ x: 0, y: 0 }, [node], IDENTITY_VIEWPORT)).toBeNull();
   });
 
+  it('should never hit a vector node currently bound as a text-on-path guide, even for a point squarely on its stroke', () => {
+    // mock — a horizontal a(0,0)->b(100,0) vector, with a text node bound to it as its path
+    const vector: TSceneNode = {
+      fillColor: '#ff0000',
+      filledFaceKeys: [],
+      id: 'vector-1',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+      strokeColor: '#000000',
+      strokeWidth: 4,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    };
+    const pathText: TSceneNode = {
+      content: 'Hi',
+      fill: '#ffffff',
+      flipX: false,
+      flipY: false,
+      fontFamily: 'Inter',
+      fontSize: 14,
+      height: 0,
+      id: 'text-1',
+      name: 'Text',
+      parentId: null,
+      pathId: 'vector-1',
+      rotation: 0,
+      type: NodeType.text,
+      width: 100,
+      x: 0,
+      y: -50,
+    };
+
+    // result — the point sits squarely on the vector's own stroke, but the vector is inert as a
+    // hit-test target while a text node rides it as a path (the text's own curved hit-test — a
+    // miss here, far from "Hi" — is what governs instead)
+    expect(getNodeAtPoint({ x: 50, y: 0 }, [vector, pathText], IDENTITY_VIEWPORT)).toBeNull();
+  });
+
+  it('should still hit an eligible vector node normally when no text node is bound to it', () => {
+    // mock — same vector as above, no bound text this time
+    const vector: TSceneNode = {
+      fillColor: '#ff0000',
+      filledFaceKeys: [],
+      id: 'vector-1',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+      strokeColor: '#000000',
+      strokeWidth: 4,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    };
+
+    // result
+    expect(getNodeAtPoint({ x: 50, y: 0 }, [vector], IDENTITY_VIEWPORT)).toEqual(vector);
+  });
+
   it('should never hit a hidden node', () => {
     // mock
     const node = buildNode({ hidden: true, id: 'a' });

@@ -1,6 +1,6 @@
 // types
 import { TEditingTextBox } from 'types/canvas';
-import { TViewport } from 'types/design/types';
+import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
 import { drawCurvedCaret } from './drawCurvedCaret';
@@ -20,6 +20,7 @@ export const drawCurvedEditingCaretAndSelection = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  pathNode?: TSceneNode,
 ): void => {
   if (selectionStart !== selectionEnd) {
     drawCurvedSelectionHighlight(
@@ -33,12 +34,13 @@ export const drawCurvedEditingCaretAndSelection = (
       canvasWidth,
       canvasHeight,
       viewport,
+      pathNode,
     );
   } else {
-    drawCurvedEditingOutline(gl, program, buffer, editingTextBox, editingTextContent, canvasWidth, canvasHeight, viewport);
+    drawCurvedEditingOutline(gl, program, buffer, editingTextBox, editingTextContent, canvasWidth, canvasHeight, viewport, pathNode);
 
     if (isCaretBlinkedOn(selectionChangedAt)) {
-      drawCurvedCaret(gl, program, buffer, editingTextBox, editingTextContent, selectionEnd, canvasWidth, canvasHeight, viewport);
+      drawCurvedCaret(gl, program, buffer, editingTextBox, editingTextContent, selectionEnd, canvasWidth, canvasHeight, viewport, pathNode);
     }
   }
 };

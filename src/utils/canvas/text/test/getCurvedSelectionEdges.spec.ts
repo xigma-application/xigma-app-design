@@ -2,7 +2,7 @@
 import { TGlyphAtlasJson } from 'types/msdf';
 
 // utils
-import { buildEllipseArcLengthTable } from '../../shapes/buildEllipseArcLengthTable';
+import { createEllipseTextPathSampler } from '../pathSampler/createEllipseTextPathSampler';
 import { getCurvedSelectionEdges } from '../getCurvedSelectionEdges';
 
 const ATLAS: TGlyphAtlasJson = {
@@ -15,17 +15,17 @@ const ATLAS: TGlyphAtlasJson = {
 };
 
 const CENTER = { x: 100, y: 100 };
-const TABLE = buildEllipseArcLengthTable(200, 200);
+const SAMPLER = createEllipseTextPathSampler({ height: 200, rotation: 0, width: 200, x: 0, y: 0 });
 
 describe('getCurvedSelectionEdges', () => {
   it('should return an empty array for a collapsed selection', () => {
     // result
-    expect(getCurvedSelectionEdges(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, false, TABLE, 40, 1, 1)).toEqual([]);
+    expect(getCurvedSelectionEdges(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, 1, 1)).toEqual([]);
   });
 
   it('should return one more edge than the number of selected characters, one per boundary', () => {
     // before
-    const edges = getCurvedSelectionEdges(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, false, TABLE, 40, 0, 2);
+    const edges = getCurvedSelectionEdges(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, 0, 2);
 
     // result — 2 selected characters share 3 boundary points (start, middle, end)
     expect(edges).toHaveLength(3);
@@ -33,7 +33,7 @@ describe('getCurvedSelectionEdges', () => {
 
   it('should clamp the selection range to the content length', () => {
     // before
-    const edges = getCurvedSelectionEdges(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, false, TABLE, 40, -5, 99);
+    const edges = getCurvedSelectionEdges(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, -5, 99);
 
     // result
     expect(edges).toHaveLength(4);
@@ -41,8 +41,8 @@ describe('getCurvedSelectionEdges', () => {
 
   it('should reposition the edges when flipped', () => {
     // before
-    const normal = getCurvedSelectionEdges(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, false, TABLE, 40, 0, 1);
-    const flipped = getCurvedSelectionEdges(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, true, TABLE, 40, 0, 1);
+    const normal = getCurvedSelectionEdges(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, 0, 1);
+    const flipped = getCurvedSelectionEdges(ATLAS, 'AAA', 20, CENTER, 0, true, SAMPLER, 40, 0, 1);
 
     // result
     expect(flipped).not.toEqual(normal);
@@ -50,8 +50,8 @@ describe('getCurvedSelectionEdges', () => {
 
   it('should share the exact same edge between two adjacent characters', () => {
     // before — the boundary between the first and second "A" is shared by both characters
-    const twoChars = getCurvedSelectionEdges(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, false, TABLE, 40, 0, 2);
-    const secondCharOnly = getCurvedSelectionEdges(ATLAS, 'AAA', 20, 200, 200, CENTER, 0, false, TABLE, 40, 1, 2);
+    const twoChars = getCurvedSelectionEdges(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, 0, 2);
+    const secondCharOnly = getCurvedSelectionEdges(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, 1, 2);
 
     // result
     expect(twoChars[1]).toEqual(secondCharOnly[0]);
@@ -62,7 +62,7 @@ describe('getCurvedSelectionEdges', () => {
     const longContent = 'A'.repeat(60);
 
     // before
-    const edges = getCurvedSelectionEdges(ATLAS, longContent, 20, 200, 200, CENTER, 0, false, TABLE, 40, 0, 60);
+    const edges = getCurvedSelectionEdges(ATLAS, longContent, 20, CENTER, 0, false, SAMPLER, 40, 0, 60);
     const lastEdge = edges[edges.length - 1];
     const secondToLastEdge = edges[edges.length - 2];
 

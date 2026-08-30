@@ -4,6 +4,7 @@ import { TEXT_FONT_SIZE } from '../../../constants';
 
 // types
 import { TEditingTextBox, TPoint } from 'types/canvas';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getCurvedCaretIndexAtPoint, TCurvedCaretHit } from 'utils/canvas/text/getCurvedCaretIndexAtPoint';
@@ -13,10 +14,11 @@ export const getEditingCaretHit = (
   editingTextBox: TEditingTextBox | null,
   editingContent: string,
   point: TPoint,
+  pathNode?: TSceneNode,
 ): TCurvedCaretHit | TStraightCaretHit | null => {
   if (editingTextBox) {
     return editingTextBox.pathId
-      ? getCurvedCaretIndexAtPoint(MSDF_ATLAS_JSON, editingContent, TEXT_FONT_SIZE, editingTextBox, point)
+      ? getCurvedCaretIndexAtPoint(MSDF_ATLAS_JSON, editingContent, TEXT_FONT_SIZE, editingTextBox, point, pathNode)
       : getStraightCaretIndexAtPoint(MSDF_ATLAS_JSON, editingContent, TEXT_FONT_SIZE, editingTextBox, point);
   }
 

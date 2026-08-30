@@ -56,6 +56,18 @@ describe('getCollidesWithEditingText', () => {
     getCollidesWithEditingText(BOX, 'Hi', POINT, 1);
 
     // result
-    expect(getEditingCaretHit).toHaveBeenCalledWith(BOX, 'Hi', POINT);
+    expect(getEditingCaretHit).toHaveBeenCalledWith(BOX, 'Hi', POINT, undefined);
+  });
+
+  it('should forward a resolved path node through to getEditingCaretHit', () => {
+    // mock
+    vi.mocked(getEditingCaretHit).mockReturnValue(null);
+    const pathNode = { id: 'vector-1' } as never;
+
+    // before
+    getCollidesWithEditingText(BOX, 'Hi', POINT, 1, pathNode);
+
+    // result
+    expect(getEditingCaretHit).toHaveBeenCalledWith(BOX, 'Hi', POINT, pathNode);
   });
 });

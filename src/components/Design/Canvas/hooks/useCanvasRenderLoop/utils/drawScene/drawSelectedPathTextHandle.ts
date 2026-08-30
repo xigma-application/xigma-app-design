@@ -17,9 +17,10 @@ export const drawSelectedPathTextHandle = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  pathNode?: TSceneNode,
 ): void => {
   if (node.type === NodeType.text) {
-    const handlePoint = getPathTextHandlePoint(node);
+    const handlePoint = getPathTextHandlePoint(node, pathNode);
 
     if (handlePoint) {
       drawPathTextOffsetHandle(gl, program, buffer, handlePoint, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport);

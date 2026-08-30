@@ -15,12 +15,23 @@ export const drawSelectionOutline = (
   canvasHeight: number,
   viewport: TViewport,
   vectorEditingNodeIds: string[],
+  nodesById: Record<string, TSceneNode>,
 ): void => {
   const nonVectorEditingNodes = selectedNodes.filter((node) => !vectorEditingNodeIds.includes(node.id));
 
   if (isGroupSelection(nonVectorEditingNodes)) {
     drawGroupSelectionOutline(gl, program, buffer, nonVectorEditingNodes, canvasWidth, canvasHeight, viewport);
   } else {
-    drawPerNodeSelectionOutlines(gl, program, buffer, nonVectorEditingNodes, canvasWidth, canvasHeight, viewport, vectorEditingNodeIds);
+    drawPerNodeSelectionOutlines(
+      gl,
+      program,
+      buffer,
+      nonVectorEditingNodes,
+      canvasWidth,
+      canvasHeight,
+      viewport,
+      vectorEditingNodeIds,
+      nodesById,
+    );
   }
 };

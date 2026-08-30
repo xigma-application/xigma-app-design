@@ -23,7 +23,7 @@ describe('getPathOffsetHandleHit', () => {
     vi.mocked(isPointOnPathTextHandle).mockReturnValue(true);
 
     // result
-    expect(getPathOffsetHandleHit(POINT, BOX, 'editing-id', [], VIEWPORT)).toEqual({ hit: true, nodeId: 'editing-id' });
+    expect(getPathOffsetHandleHit(POINT, BOX, 'editing-id', [], VIEWPORT, {})).toEqual({ hit: true, nodeId: 'editing-id' });
     expect(getPathTextOffsetHandleAtPoint).not.toHaveBeenCalled();
   });
 
@@ -32,7 +32,7 @@ describe('getPathOffsetHandleHit', () => {
     vi.mocked(isPointOnPathTextHandle).mockReturnValue(false);
 
     // result
-    expect(getPathOffsetHandleHit(POINT, BOX, 'editing-id', [], VIEWPORT)).toEqual({ hit: false, nodeId: 'editing-id' });
+    expect(getPathOffsetHandleHit(POINT, BOX, 'editing-id', [], VIEWPORT, {})).toEqual({ hit: false, nodeId: 'editing-id' });
   });
 
   it('should fall back to hit-testing every selected node when nothing is being edited', () => {
@@ -40,7 +40,7 @@ describe('getPathOffsetHandleHit', () => {
     vi.mocked(getPathTextOffsetHandleAtPoint).mockReturnValue({ nodeId: 'node-a' });
 
     // result
-    expect(getPathOffsetHandleHit(POINT, null, null, [], VIEWPORT)).toEqual({ hit: true, nodeId: 'node-a' });
+    expect(getPathOffsetHandleHit(POINT, null, null, [], VIEWPORT, {})).toEqual({ hit: true, nodeId: 'node-a' });
     expect(isPointOnPathTextHandle).not.toHaveBeenCalled();
   });
 
@@ -49,6 +49,6 @@ describe('getPathOffsetHandleHit', () => {
     vi.mocked(getPathTextOffsetHandleAtPoint).mockReturnValue(null);
 
     // result
-    expect(getPathOffsetHandleHit(POINT, null, null, [], VIEWPORT)).toEqual({ hit: false, nodeId: null });
+    expect(getPathOffsetHandleHit(POINT, null, null, [], VIEWPORT, {})).toEqual({ hit: false, nodeId: null });
   });
 });

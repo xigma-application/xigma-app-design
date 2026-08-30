@@ -1,7 +1,7 @@
 // types
 import { TEllipseArcLengthSample, TPoint } from 'types/canvas';
 import { TGlyphAtlasJson } from 'types/msdf';
-import { TTextNode, TViewport } from 'types/design/types';
+import { TSceneNode, TTextNode, TViewport } from 'types/design/types';
 
 // utils
 import { drawMsdfGlyphs } from './drawMsdfGlyphs';
@@ -21,10 +21,11 @@ export const drawMsdfText = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  pathNode?: TSceneNode,
 ): void => {
   if (texture) {
     const center: TPoint = { x: node.x + node.width / 2, y: node.y + node.height / 2 };
-    const geometry = getOrBuildTextGeometry(atlas, cache, node, ellipseArcLengthCache);
+    const geometry = getOrBuildTextGeometry(atlas, cache, node, ellipseArcLengthCache, pathNode);
     const vertices = rotateVertices(flipGlyphVertices(geometry.vertices, node), center, node.rotation);
 
     drawMsdfGlyphs(

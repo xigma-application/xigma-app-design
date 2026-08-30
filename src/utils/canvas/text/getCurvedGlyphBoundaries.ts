@@ -10,10 +10,10 @@ export const getCurvedGlyphBoundaries = (
   fontSize: number,
   startOffset: number,
   flip: boolean,
-  circumference: number,
+  pathLength: number,
 ): number[] => {
   const direction = flip ? -1 : 1;
-  const boundaries: number[] = [startOffset * circumference];
+  const boundaries: number[] = [startOffset * pathLength];
 
   content.split('').forEach((char, index) => {
     const advance = getGlyphAdvance(atlas, char.charCodeAt(0), fontSize);

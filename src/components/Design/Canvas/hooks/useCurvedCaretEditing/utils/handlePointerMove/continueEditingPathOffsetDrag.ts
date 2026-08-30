@@ -1,5 +1,5 @@
 // store
-import { selectEditingNodeId, selectEditingTextBox, selectViewport } from 'store/design/selectors';
+import { selectEditingNodeId, selectEditingTextBox, selectNodes, selectViewport } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 import { updateEditingTextBoxPathStartOffset, updateNode } from 'store/design/slice';
 
@@ -15,7 +15,8 @@ export const continueEditingPathOffsetDrag = (canvas: HTMLCanvasElement, event: 
   if (box) {
     const viewport = selectViewport(state);
     const point = screenToWorld(getPointerPosition(canvas, event), viewport);
-    const offset = getNearestPathOffsetAtPoint(point, box);
+    const pathNode = box.pathId ? selectNodes(state)[box.pathId] : undefined;
+    const offset = getNearestPathOffsetAtPoint(point, box, pathNode);
     const editingNodeId = selectEditingNodeId(state);
 
     dispatch(updateEditingTextBoxPathStartOffset(offset));

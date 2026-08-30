@@ -37,7 +37,19 @@ describe('getEditingCaretHit', () => {
 
     // result
     expect(getEditingCaretHit(curvedBox, 'Hi', POINT)).toEqual({ distance: 1, index: 1 });
-    expect(getCurvedCaretIndexAtPoint).toHaveBeenCalledWith(expect.anything(), 'Hi', expect.anything(), curvedBox, POINT);
+    expect(getCurvedCaretIndexAtPoint).toHaveBeenCalledWith(expect.anything(), 'Hi', expect.anything(), curvedBox, POINT, undefined);
     expect(getStraightCaretIndexAtPoint).not.toHaveBeenCalled();
+  });
+
+  it('should forward a resolved path node through to getCurvedCaretIndexAtPoint', () => {
+    // mock
+    const curvedBox: TEditingTextBox = { ...BOX, pathId: 'vector-1' };
+    const pathNode = { id: 'vector-1' } as never;
+
+    // before
+    getEditingCaretHit(curvedBox, 'Hi', POINT, pathNode);
+
+    // result
+    expect(getCurvedCaretIndexAtPoint).toHaveBeenCalledWith(expect.anything(), 'Hi', expect.anything(), curvedBox, POINT, pathNode);
   });
 });
