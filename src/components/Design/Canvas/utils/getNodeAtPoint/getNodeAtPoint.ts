@@ -7,11 +7,14 @@ import { TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
+import { getFrameNameLabelRects } from '../getFrameNameLabelRects';
 import { getNodesById } from './getNodesById';
+import { getSectionNameLabelRects } from '../getSectionNameLabelRects';
 import { getTextPathBoundVectorIds } from './getTextPathBoundVectorIds';
 import { getUnrotatedNodeQueryPoint } from './getUnrotatedNodeQueryPoint';
 import { isPointInCurvedText } from '../isPointInCurvedText';
 import { isPointInEllipse } from '../isPointInEllipse';
+import { isPointInNodeNameLabel } from './isPointInNodeNameLabel';
 import { isPointInPolygon } from '../isPointInPolygon';
 import { isPointInRect } from '../isPointInRect';
 import { isPointInStar } from '../isPointInStar';
@@ -24,9 +27,15 @@ export const getNodeAtPoint = (point: TPoint, nodes: TSceneNode[], viewport: TVi
   const pathTextTolerance = PATH_TEXT_HIT_TOLERANCE_PX / viewport.zoom;
   const nodesById = getNodesById(nodes);
   const textPathBoundVectorIds = getTextPathBoundVectorIds(nodes);
+  const frameNameLabelRects = getFrameNameLabelRects(nodes, viewport.zoom);
+  const sectionNameLabelRects = getSectionNameLabelRects(nodes, viewport.zoom);
 
   const hit = [...nodes].reverse().find((node) => {
     if (!node.hidden && !node.locked) {
+      if (isPointInNodeNameLabel(point, node, frameNameLabelRects, sectionNameLabelRects)) {
+        return true;
+      }
+
       const testPoint = getUnrotatedNodeQueryPoint(point, node);
 
       switch (node.type) {

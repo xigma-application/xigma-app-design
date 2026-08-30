@@ -3,7 +3,9 @@ import { NodeType, PathType } from 'types/design/enums';
 import { TBoxSceneNode, TMediaNode, TPathNode, TPolygonNode, TSceneNode, TSectionNode, TStarNode, TTextNode } from 'types/design/types';
 
 // utils
+import { getFrameNameLabelRects } from '../../getFrameNameLabelRects';
 import { getNodeAtPoint } from '../getNodeAtPoint';
+import { getSectionNameLabelRects } from '../../getSectionNameLabelRects';
 
 const buildNode = (
   overrides: Partial<Exclude<TBoxSceneNode, TPathNode | TPolygonNode | TSectionNode | TStarNode | TMediaNode | TTextNode>>,
@@ -332,6 +334,48 @@ describe('getNodeAtPoint', () => {
 
     // result
     expect(getNodeAtPoint({ x: 50, y: 0 }, [vector], IDENTITY_VIEWPORT)).toEqual(vector);
+  });
+
+  it('should hit a frame through its floating name label, well outside the frame’s own body', () => {
+    // mock — the label floats above the frame's top edge, never overlapping the frame's own
+    // y:100..150 range
+    const frame = buildNode({ height: 50, id: 'frame-a', name: 'Frame 1', width: 80, x: 0, y: 100 });
+    const [labelRect] = getFrameNameLabelRects([frame], IDENTITY_VIEWPORT.zoom);
+
+    // result
+    expect(labelRect.center.y).toBeLessThan(100);
+    expect(getNodeAtPoint(labelRect.center, [frame], IDENTITY_VIEWPORT)).toEqual(frame);
+  });
+
+  it('should not hit a locked frame through its label either', () => {
+    // mock
+    const frame = buildNode({ height: 50, id: 'frame-a', locked: true, name: 'Frame 1', width: 80, x: 0, y: 100 });
+    const [labelRect] = getFrameNameLabelRects([frame], IDENTITY_VIEWPORT.zoom);
+
+    // result
+    expect(getNodeAtPoint(labelRect.center, [frame], IDENTITY_VIEWPORT)).toBeNull();
+  });
+
+  it('should hit a section through its floating name label the same way', () => {
+    // mock
+    const section: TSectionNode = {
+      fill: '#444444',
+      height: 50,
+      id: 'section-a',
+      name: 'Section 1',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.section,
+      width: 80,
+      x: 0,
+      y: 100,
+    };
+    const [labelRect] = getSectionNameLabelRects([section], IDENTITY_VIEWPORT.zoom);
+    const labelCenter = { x: labelRect.x + labelRect.width / 2, y: labelRect.y + labelRect.height / 2 };
+
+    // result
+    expect(labelRect.y + labelRect.height).toBeLessThan(100);
+    expect(getNodeAtPoint(labelCenter, [section], IDENTITY_VIEWPORT)).toEqual(section);
   });
 
   it('should never hit a hidden node', () => {
