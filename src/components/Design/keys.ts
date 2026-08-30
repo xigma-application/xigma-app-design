@@ -9,6 +9,7 @@ export const KEYBOARD_SHORTCUTS: TKeyboardShortcuts = {
   addAutoLayout: [SHIFT, 'A'],
   [ToolName.arrow]: [SHIFT, 'L'],
   bringToFront: [']'],
+  collapseLayers: [ALT, 'L'],
   [ToolName.comment]: ['C'],
   copy: [CONTROL, 'C'],
   createComponent: [ALT, CONTROL, 'K'],

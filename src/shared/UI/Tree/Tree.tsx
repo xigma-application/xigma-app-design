@@ -8,8 +8,8 @@ import TreeRowList from './TreeRowList/TreeRowList';
 import TreeSelectionBackground from './TreeSelectionBackground/TreeSelectionBackground';
 
 // hooks
-import { useExpandedIds } from './hooks/useExpandedIds';
 import { useHandleRowsClick } from './hooks/useHandleRowsClick';
+import { useTreeExpansion } from './hooks/useTreeExpansion';
 import { useTreeRowDrag } from './hooks/useTreeRowDrag/useTreeRowDrag';
 import { useVirtualList } from 'hooks';
 
@@ -17,20 +17,20 @@ import { useVirtualList } from 'hooks';
 import styles from './tree.module.scss';
 
 // types
-import { TToggleExpand, TToggleExpandOptions, TTreeItem, TTreeRow } from './types';
+import { TToggleExpand, TTreeItem, TTreeRow } from './types';
 
 // utils
 import { flattenTreeRows } from './utils/flattenTreeRows';
-import { getIsRowSelectedByIndex } from './utils/getIsRowSelectedByIndex';
-import { getSelectionBackgroundSegments } from './utils/getSelectionBackgroundSegments';
-import { handleToggleExpand } from './utils/handleToggleExpand';
+import { getTreeBackgroundSegments } from './utils/getTreeBackgroundSegments';
 
 export type TTreeProps<T extends TTreeItem> = {
   className?: string;
+  expandedIds?: Set<string>;
   getChildren: (item: T) => T[] | undefined;
   isRowHighlighted?: (item: T) => boolean;
   isRowSelected?: (item: T) => boolean;
   onDeselectAll?: TFunc;
+  onExpandedIdsChange?: (next: Set<string>) => void;
   onReorder?: (draggedItems: T[], targetParentItem: T | null, targetIndex: number) => void;
   renderDropIndicator?: (depth: number) => ReactNode;
   renderRow: (row: TTreeRow<T>, onToggleExpand: TToggleExpand) => ReactNode;
@@ -41,10 +41,12 @@ export type TTreeProps<T extends TTreeItem> = {
 
 export const Tree = <T extends TTreeItem>({
   className = '',
+  expandedIds: controlledExpandedIds,
   getChildren,
   isRowHighlighted,
   isRowSelected,
   onDeselectAll,
+  onExpandedIdsChange,
   onReorder,
   renderDropIndicator,
   renderRow,
@@ -53,25 +55,18 @@ export const Tree = <T extends TTreeItem>({
   scrollToIndex,
 }: TTreeProps<T>): ReactElement => {
   const rowsRef: RefObject<HTMLDivElement | null> = useRef(null);
-  const { expandedIds, setSubtreeExpanded, toggleExpanded } = useExpandedIds();
+  const { expandedIds, onToggleExpand } = useTreeExpansion(controlledExpandedIds, onExpandedIdsChange, getChildren);
   const rows = useMemo(() => flattenTreeRows(roots, getChildren, expandedIds), [roots, getChildren, expandedIds]);
   const { items, totalSize } = useVirtualList({ count: rows.length, rowHeight, scrollRef: rowsRef, scrollToIndex });
   const { dropDepth, handleRowMouseDown, insertionIndex } = useTreeRowDrag({ isRowSelected, onReorder, rowHeight, rows, rowsRef });
   const isDragging = insertionIndex !== null;
-  const isRowSelectedByIndex = getIsRowSelectedByIndex(rows, isRowSelected);
-  const isRowHighlightedByIndex = getIsRowSelectedByIndex(rows, isRowHighlighted);
-  const isRowFilledByIndex = (index: number): boolean =>
-    Boolean(isRowSelectedByIndex?.(index)) || Boolean(isRowHighlightedByIndex?.(index));
-  const selectionBackgroundSegments = isRowSelectedByIndex
-    ? getSelectionBackgroundSegments(items, isRowSelectedByIndex, isRowFilledByIndex)
-    : [];
-  const highlightBackgroundSegments = isRowHighlightedByIndex
-    ? getSelectionBackgroundSegments(items, isRowHighlightedByIndex, isRowFilledByIndex)
-    : [];
   const handleRowsClick = useHandleRowsClick(onDeselectAll);
-
-  const onToggleExpand = (row: TTreeRow<T>, options?: TToggleExpandOptions): void =>
-    handleToggleExpand({ expandedIds, getChildren, options, row, setSubtreeExpanded, toggleExpanded });
+  const { highlightBackgroundSegments, selectionBackgroundSegments } = getTreeBackgroundSegments(
+    items,
+    rows,
+    isRowSelected,
+    isRowHighlighted,
+  );
 
   return (
     <div className={cx(styles.Tree, className)}>

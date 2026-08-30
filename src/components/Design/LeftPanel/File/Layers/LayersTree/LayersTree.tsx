@@ -18,7 +18,12 @@ import { LAYERS_TREE_ROW_HEIGHT } from '../constants';
 // styles
 import styles from './layers-tree.module.scss';
 
-const LayersTree: FC = () => {
+export type TLayersTreeProps = {
+  expandedIds?: Set<string>;
+  onExpandedIdsChange?: (next: Set<string>) => void;
+};
+
+const LayersTree: FC<TLayersTreeProps> = ({ expandedIds, onExpandedIdsChange }) => {
   const { getChildren, roots } = useTreeSource();
   const handleDeselectOnEmptyClick = useDeselectOnEmptyClick();
   const renderRow = useRenderRow();
@@ -30,10 +35,12 @@ const LayersTree: FC = () => {
   return (
     <div className={styles.LayersTree}>
       <Tree
+        expandedIds={expandedIds}
         getChildren={getChildren}
         isRowHighlighted={isRowHighlighted}
         isRowSelected={isRowSelected}
         onDeselectAll={handleDeselectOnEmptyClick}
+        onExpandedIdsChange={onExpandedIdsChange}
         onReorder={handleReorder}
         renderDropIndicator={renderDropIndicator}
         renderRow={renderRow}
