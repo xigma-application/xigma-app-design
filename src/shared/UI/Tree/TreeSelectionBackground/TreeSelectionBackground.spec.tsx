@@ -23,6 +23,22 @@ describe('TreeSelectionBackground', () => {
     expect(container.querySelectorAll('[class*="Tree__selectionBackground"]')).toHaveLength(2);
   });
 
+  it('should add the highlight modifier class when the variant is highlight', () => {
+    // before
+    const { container } = render(<TreeSelectionBackground segments={[buildSegment()]} variant="highlight" />);
+
+    // result
+    expect(container.querySelector('[class*="Tree__selectionBackground--highlight"]')).toBeInTheDocument();
+  });
+
+  it('should not add the highlight modifier class for the default selected variant', () => {
+    // before
+    const { container } = render(<TreeSelectionBackground segments={[buildSegment()]} />);
+
+    // result
+    expect(container.querySelector('[class*="Tree__selectionBackground--highlight"]')).not.toBeInTheDocument();
+  });
+
   it('should render nothing when there are no segments', () => {
     // before
     const { container } = render(<TreeSelectionBackground segments={[]} />);

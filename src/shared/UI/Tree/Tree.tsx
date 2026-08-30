@@ -27,6 +27,7 @@ import { getSelectionBackgroundSegments } from './utils/getSelectionBackgroundSe
 export type TTreeProps<T extends TTreeItem> = {
   className?: string;
   getChildren: (item: T) => T[] | undefined;
+  isRowHighlighted?: (item: T) => boolean;
   isRowSelected?: (item: T) => boolean;
   onDeselectAll?: TFunc;
   onReorder?: (draggedItems: T[], targetParentItem: T | null, targetIndex: number) => void;
@@ -40,6 +41,7 @@ export type TTreeProps<T extends TTreeItem> = {
 export const Tree = <T extends TTreeItem>({
   className = '',
   getChildren,
+  isRowHighlighted,
   isRowSelected,
   onDeselectAll,
   onReorder,
@@ -56,13 +58,22 @@ export const Tree = <T extends TTreeItem>({
   const { dropDepth, handleRowMouseDown, insertionIndex } = useTreeRowDrag({ isRowSelected, onReorder, rowHeight, rows, rowsRef });
   const isDragging = insertionIndex !== null;
   const isRowSelectedByIndex = getIsRowSelectedByIndex(rows, isRowSelected);
-  const selectionBackgroundSegments = isRowSelectedByIndex ? getSelectionBackgroundSegments(items, isRowSelectedByIndex) : [];
+  const isRowHighlightedByIndex = getIsRowSelectedByIndex(rows, isRowHighlighted);
+  const isRowFilledByIndex = (index: number): boolean =>
+    Boolean(isRowSelectedByIndex?.(index)) || Boolean(isRowHighlightedByIndex?.(index));
+  const selectionBackgroundSegments = isRowSelectedByIndex
+    ? getSelectionBackgroundSegments(items, isRowSelectedByIndex, isRowFilledByIndex)
+    : [];
+  const highlightBackgroundSegments = isRowHighlightedByIndex
+    ? getSelectionBackgroundSegments(items, isRowHighlightedByIndex, isRowFilledByIndex)
+    : [];
   const handleRowsClick = useHandleRowsClick(onDeselectAll);
 
   return (
     <div className={cx(styles.Tree, className)}>
       <div className={styles.Tree__rows} onClick={handleRowsClick} ref={rowsRef}>
         <div className={cx(styles.Tree__viewport, isDragging && styles['Tree__viewport--dragging'])} style={{ height: totalSize }}>
+          <TreeSelectionBackground segments={highlightBackgroundSegments} variant="highlight" />
           <TreeSelectionBackground segments={selectionBackgroundSegments} />
           <TreeRowList
             items={items}

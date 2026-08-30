@@ -631,3 +631,67 @@ test('hiding a group in the Layers panel cascades to hide every one of its child
 
   expect(selectedIds).toEqual([]);
 });
+
+test('Ctrl+clicking a child then its parent group in the Layers panel selects only the group, and highlights every child without selecting them', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-group-child-then-parent-highlight');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 100, 740, 140); // A
+  await designPage.drawRectangle(900, 100, 940, 140); // B — auto-selected, replacing A's selection
+  await designPage.click(720, 120, { shift: true }); // add A back, selection = [B, A]
+  await page.keyboard.press('Control+g'); // group = [A, B], auto-selected
+
+  const before = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const page = pages[activePageId];
+    const [groupId] = page.selectedIds;
+
+    return { childIds: page.nodes[groupId].childIds as string[], groupId };
+  });
+
+  await designPage.click(1500, 600); // deselect everything — start from a clean slate
+
+  // the group row is expanded by default only for the panel, not the row — reveal its two children
+  await page.getByRole('button', { name: 'Expand layer' }).click();
+
+  // scope every row/background lookup to the LayersTree wrapper: PagesList renders the same shared
+  // Tree component (same "Tree__row_"/"Tree__selectionBackground" CSS Modules classes) on this page
+  const layersTree = page.locator('[class*="LayersTree"]').first();
+  const rows = layersTree.locator('[class*="Tree__row_"]');
+  await expect(rows).toHaveCount(3); // group + its two children
+
+  await rows.nth(1).click({ modifiers: ['ControlOrMeta'] }); // Ctrl+click the first child → selection = [child]
+  await rows.nth(0).click({ modifiers: ['ControlOrMeta'] }); // Ctrl+click the parent group
+
+  const selectedIds = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].selectedIds;
+  });
+
+  // the child drops out of the selection — a node and its ancestor group are never selected together
+  expect(selectedIds).toEqual([before.groupId]);
+
+  // structure: only the group row reads as selected; both children read as not-selected
+  await expect(rows.nth(0).locator('[aria-selected="true"]')).toHaveCount(1);
+  await expect(rows.nth(1).locator('[aria-selected="false"]')).toHaveCount(1);
+  await expect(rows.nth(2).locator('[aria-selected="false"]')).toHaveCount(1);
+
+  // the children still get a distinct highlight background, meeting the group's selection background
+  // flush — the touching edges are squared so there is no gap between the two blocks
+  const selectionBackground = layersTree.locator('[class*="Tree__selectionBackground"]:not([class*="--highlight"])');
+  const highlightBackground = layersTree.locator('[class*="Tree__selectionBackground--highlight"]');
+
+  await expect(selectionBackground).toHaveCount(1);
+  await expect(highlightBackground).toHaveCount(1);
+  await expect(selectionBackground).toHaveClass(/squareBottom/);
+  await expect(selectionBackground).not.toHaveClass(/squareTop/);
+  await expect(highlightBackground).toHaveClass(/squareTop/);
+  await expect(highlightBackground).not.toHaveClass(/squareBottom/);
+});

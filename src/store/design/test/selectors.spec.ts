@@ -5,6 +5,7 @@ import {
   selectActiveTool,
   selectCommentDraftPosition,
   selectComments,
+  selectDescendantIdsOfSelected,
   selectEditingNodeId,
   selectEditingSelectionChangedAt,
   selectEditingSelectionEnd,
@@ -276,6 +277,37 @@ describe('design selectors — groups', () => {
   it('should expand a selected group to its leaf nodes', () => {
     // result
     expect(selectSelectedLeafNodes(groupState).map((sceneNode) => sceneNode.id)).toEqual(['a', 'b']);
+  });
+
+  it('should collect every descendant id of a selected group', () => {
+    // result
+    expect([...selectDescendantIdsOfSelected(groupState)]).toEqual(['a', 'b']);
+  });
+
+  it('should collect descendants across nested groups and ignore non-group selections', () => {
+    // mock
+    const innerGroup: TGroupNode = { ...group, childIds: ['a'], id: 'inner', parentId: 'group-1' };
+    const nestedState = {
+      design: {
+        ...state.design,
+        pages: {
+          'page-1': {
+            ...state.design.pages['page-1'],
+            nodes: { a: { ...childA, parentId: 'inner' }, 'group-1': { ...group, childIds: ['inner'] }, inner: innerGroup, loose },
+            rootOrder: ['group-1', 'loose'],
+            selectedIds: ['group-1', 'loose'],
+          },
+        },
+      },
+    } as any;
+
+    // result
+    expect([...selectDescendantIdsOfSelected(nestedState)]).toEqual(['inner', 'a']);
+  });
+
+  it('should return an empty set when no group is selected', () => {
+    // result
+    expect(selectDescendantIdsOfSelected(state).size).toBe(0);
   });
 
   it('should skip root-order ids and child ids that no longer resolve', () => {

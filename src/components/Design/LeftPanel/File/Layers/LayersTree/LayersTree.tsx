@@ -6,6 +6,7 @@ import { Tree } from 'shared';
 // hooks
 import { useDeselectOnEmptyClick } from './hooks/useDeselectOnEmptyClick';
 import { useHandleReorder } from './hooks/useHandleReorder';
+import { useIsRowHighlighted } from './hooks/useIsRowHighlighted';
 import { useIsRowSelected } from './hooks/useIsRowSelected';
 import { useRenderDropIndicator } from './hooks/useRenderDropIndicator';
 import { useRenderRow } from './hooks/useRenderRow';
@@ -23,12 +24,14 @@ const LayersTree: FC = () => {
   const renderRow = useRenderRow();
   const renderDropIndicator = useRenderDropIndicator();
   const isRowSelected = useIsRowSelected();
+  const isRowHighlighted = useIsRowHighlighted();
   const handleReorder = useHandleReorder();
 
   return (
     <div className={styles.LayersTree}>
       <Tree
         getChildren={getChildren}
+        isRowHighlighted={isRowHighlighted}
         isRowSelected={isRowSelected}
         onDeselectAll={handleDeselectOnEmptyClick}
         onReorder={handleReorder}

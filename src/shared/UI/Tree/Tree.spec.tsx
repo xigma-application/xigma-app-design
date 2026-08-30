@@ -112,6 +112,63 @@ describe('Tree', () => {
     expect(container.querySelector('[class*="Tree__selectionBackground"]')).not.toBeInTheDocument();
   });
 
+  it('should render a distinct highlight background for the rows flagged by isRowHighlighted', () => {
+    // before
+    const isRowHighlighted = (item: TItem): boolean => item.id === '1' || item.id === '2';
+    const { container } = render(
+      <Tree
+        getChildren={getChildren}
+        isRowHighlighted={isRowHighlighted}
+        isRowSelected={(item: TItem): boolean => item.id === '0'}
+        renderRow={renderRow}
+        roots={[buildItem('0'), buildItem('1'), buildItem('2'), buildItem('3')]}
+        rowHeight={32}
+      />,
+    );
+
+    // result
+    expect(container.querySelectorAll('[class*="Tree__selectionBackground--highlight"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[class*="Tree__selectionBackground"]:not([class*="highlight"])')).toHaveLength(1);
+  });
+
+  it('should square the touching edges so the selected and highlight backgrounds meet with no gap', () => {
+    // before — group (selected) sits directly above its highlighted children
+    const { container } = render(
+      <Tree
+        getChildren={getChildren}
+        isRowHighlighted={(item: TItem): boolean => item.id === '1' || item.id === '2'}
+        isRowSelected={(item: TItem): boolean => item.id === '0'}
+        renderRow={renderRow}
+        roots={[buildItem('0'), buildItem('1'), buildItem('2'), buildItem('3')]}
+        rowHeight={32}
+      />,
+    );
+    const selectionBackground = container.querySelector('[class*="Tree__selectionBackground"]:not([class*="highlight"])')!;
+    const highlightBackground = container.querySelector('[class*="Tree__selectionBackground--highlight"]')!;
+
+    // result
+    expect(selectionBackground.className).toContain('squareBottom');
+    expect(selectionBackground.className).not.toContain('squareTop');
+    expect(highlightBackground.className).toContain('squareTop');
+    expect(highlightBackground.className).not.toContain('squareBottom');
+  });
+
+  it('should not render a highlight background when isRowHighlighted is not provided', () => {
+    // before
+    const { container } = render(
+      <Tree
+        getChildren={getChildren}
+        isRowSelected={(item: TItem): boolean => item.id === '0'}
+        renderRow={renderRow}
+        roots={[buildItem('0'), buildItem('1')]}
+        rowHeight={32}
+      />,
+    );
+
+    // result
+    expect(container.querySelector('[class*="Tree__selectionBackground--highlight"]')).not.toBeInTheDocument();
+  });
+
   it('should render one merged selection background for two adjacent selected rows, distinct from an isolated selected row', () => {
     // before
     const isRowSelected = (item: TItem): boolean => item.id === '0' || item.id === '1';

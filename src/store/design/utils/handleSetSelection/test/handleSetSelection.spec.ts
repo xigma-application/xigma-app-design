@@ -1,7 +1,7 @@
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../../types';
-import { TEllipseNode, TFrameNode, TVectorNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TGroupNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getActivePage } from '../../getActivePage';
@@ -84,6 +84,32 @@ const buildVectorNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => (
   ...overrides,
 });
 
+const groupChild: TRectangleNode = {
+  fill: '#ff0000',
+  height: 10,
+  id: 'child-1',
+  name: 'Rectangle',
+  parentId: 'group-1',
+  rotation: 0,
+  type: NodeType.rectangle,
+  width: 10,
+  x: 0,
+  y: 0,
+};
+
+const group: TGroupNode = {
+  childIds: ['child-1'],
+  height: 10,
+  id: 'group-1',
+  name: 'Group',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.group,
+  width: 10,
+  x: 0,
+  y: 0,
+};
+
 describe('handleSetSelection', () => {
   it('should update selectedIds to the given list', () => {
     // mock
@@ -94,6 +120,17 @@ describe('handleSetSelection', () => {
 
     // result
     expect(getActivePage(state).selectedIds).toEqual([]);
+  });
+
+  it('should drop a child from the selection when its ancestor group is also being selected', () => {
+    // mock
+    const state = buildState({ [group.id]: group, [groupChild.id]: groupChild }, [groupChild.id]);
+
+    // before
+    handleSetSelection(state, [groupChild.id, group.id]);
+
+    // result
+    expect(getActivePage(state).selectedIds).toEqual([group.id]);
   });
 
   it('should not delete a deselected node that is not a fully cut-away ellipse', () => {

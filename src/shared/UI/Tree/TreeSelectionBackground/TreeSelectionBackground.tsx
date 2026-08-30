@@ -12,14 +12,16 @@ import { TSelectionBackgroundSegment } from '../utils/getSelectionBackgroundSegm
 
 export type TTreeSelectionBackgroundProps = {
   segments: TSelectionBackgroundSegment[];
+  variant?: 'highlight' | 'selected';
 };
 
-const TreeSelectionBackground: FC<TTreeSelectionBackgroundProps> = ({ segments }) => (
+const TreeSelectionBackground: FC<TTreeSelectionBackgroundProps> = ({ segments, variant = 'selected' }) => (
   <>
     {segments.map((segment) => (
       <div
         className={cx(
           styles.Tree__selectionBackground,
+          variant === 'highlight' && styles['Tree__selectionBackground--highlight'],
           !segment.isRoundedTop && styles['Tree__selectionBackground--squareTop'],
           !segment.isRoundedBottom && styles['Tree__selectionBackground--squareBottom'],
         )}

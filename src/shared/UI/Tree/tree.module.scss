@@ -47,6 +47,10 @@
     top: 0;
   }
 
+  &__selectionBackground--highlight {
+    background-color: color-mix(in srgb, var(--color-selected) 50%, transparent);
+  }
+
   &__selectionBackground--squareTop {
     border-top-left-radius: 0;
     border-top-right-radius: 0;

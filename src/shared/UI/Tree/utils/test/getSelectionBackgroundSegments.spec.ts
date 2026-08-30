@@ -88,6 +88,19 @@ describe('getSelectionBackgroundSegments', () => {
     expect(result).toEqual([{ isRoundedBottom: false, isRoundedTop: true, size: ROW_HEIGHT * 2, start: 0 }]);
   });
 
+  it('should square an edge against an adjacent row that belongs to a different filled block', () => {
+    // mock — row 0 is in this segment, row 1 is not part of it but is still "filled" (e.g. a neighbouring highlight block)
+    const items = buildItems(3);
+    const isRowInSegment = (index: number): boolean => index === 0;
+    const isRowAdjacent = (index: number): boolean => index === 0 || index === 1;
+
+    // action
+    const result = getSelectionBackgroundSegments(items, isRowInSegment, isRowAdjacent);
+
+    // result
+    expect(result).toEqual([{ isRoundedBottom: false, isRoundedTop: true, size: ROW_HEIGHT, start: 0 }]);
+  });
+
   it('should close a still-open segment that runs through the last item', () => {
     // mock
     const items = buildItems(3);

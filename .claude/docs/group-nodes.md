@@ -107,6 +107,24 @@ on: it hit-tests `selectRenderOrderedNodes` (the flattened render list, §5) fil
 rect — critically, this means clicking/hovering **empty space inside a group's bounding box (between
 two children) never matches anything**, Ctrl held or not; only where a real child shape actually is.
 
+### 3.1 Selection invariant + the Layers-tree "selected group" highlight
+
+`handleSetSelection` runs `dropDescendantsOfSelected` (`store/design/utils/handleSetSelection/`,
+built on `getGroupSubtreeNodes`) on every `setSelection` payload: **a node and one of its ancestor
+groups are never both in `selectedIds` at once** — the descendant is dropped. So Ctrl-clicking a
+child in the Layers panel and then Ctrl-clicking its parent group collapses the selection to just
+`[groupId]` (and, conversely, Ctrl-clicking into an already-selected group is a no-op). `groupNodes`/
+`ungroupNodes` set `page.selectedIds` directly and are not affected; `handleSelectAll` already only
+takes `rootOrder`, so it's a no-op there too.
+
+The Layers tree then paints those hidden-but-implied descendants: `selectDescendantIdsOfSelected`
+(selector) returns every descendant id of a selected group, `useIsRowHighlighted` feeds it to the
+shared `Tree`'s new `isRowHighlighted` prop, and `Tree` renders a second `TreeSelectionBackground`
+layer (`variant="highlight"`, weaker `--color-selected` mix). `getSelectionBackgroundSegments` took
+an optional third `isRowAdjacent` arg so the selected block and the highlight block square the edge
+where they touch (`isRowFilled = selected || highlighted`) and meet flush instead of leaving the
+two rounded-inset pills with a gap between them.
+
 ## 4. Bounds sync — `syncGroupBounds`
 
 `store/design/utils/syncGroupBounds.ts`, called from `handleUpdateNode` after every `updateNode`
@@ -227,7 +245,10 @@ once a group already exists: plain-click-selects-group vs. Ctrl-click-selects-ch
 Ctrl+Shift-toggle, rigid move/resize/rotate, mixed-selection drag/resize (§5) including starting the
 drag from the empty gap between the two selected nodes, delete-shrinks-the-group and
 delete-last-child-removes-it (including while rotated, §4.2), marquee touching one child selecting the
-whole group, and undo of a rigid-body-breaking child move.
+whole group, and undo of a rigid-body-breaking child move. `group.spec.ts` also covers the §3.1
+invariant: Ctrl-click a child then its parent in the Layers panel → selection collapses to
+`[groupId]`, the group row alone reads `aria-selected`, and the children get the flush highlight
+background.
 
 ## Related
 

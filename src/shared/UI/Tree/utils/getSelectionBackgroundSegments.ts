@@ -14,8 +14,8 @@ type TOpenSegment = {
   start: number;
 };
 
-const closeSegment = (segment: TOpenSegment, isRowSelected: (index: number) => boolean): TSelectionBackgroundSegment => ({
-  isRoundedBottom: !isRowSelected(segment.endIndex + 1),
+const closeSegment = (segment: TOpenSegment, isRowAdjacent: (index: number) => boolean): TSelectionBackgroundSegment => ({
+  isRoundedBottom: !isRowAdjacent(segment.endIndex + 1),
   isRoundedTop: segment.isRoundedTop,
   size: segment.size,
   start: segment.start,
@@ -23,24 +23,25 @@ const closeSegment = (segment: TOpenSegment, isRowSelected: (index: number) => b
 
 export const getSelectionBackgroundSegments = (
   items: VirtualItem[],
-  isRowSelected: (index: number) => boolean,
+  isRowInSegment: (index: number) => boolean,
+  isRowAdjacent: (index: number) => boolean = isRowInSegment,
 ): TSelectionBackgroundSegment[] => {
   const segments: TSelectionBackgroundSegment[] = [];
   let openSegment: TOpenSegment | null = null;
 
   items.forEach((item) => {
-    if (isRowSelected(item.index)) {
+    if (isRowInSegment(item.index)) {
       openSegment = openSegment
         ? { ...openSegment, endIndex: item.index, size: openSegment.size + item.size }
-        : { endIndex: item.index, isRoundedTop: !isRowSelected(item.index - 1), size: item.size, start: item.start };
+        : { endIndex: item.index, isRoundedTop: !isRowAdjacent(item.index - 1), size: item.size, start: item.start };
     } else if (openSegment) {
-      segments.push(closeSegment(openSegment, isRowSelected));
+      segments.push(closeSegment(openSegment, isRowAdjacent));
       openSegment = null;
     }
   });
 
   if (openSegment) {
-    segments.push(closeSegment(openSegment, isRowSelected));
+    segments.push(closeSegment(openSegment, isRowAdjacent));
   }
 
   return segments;

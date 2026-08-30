@@ -10,6 +10,7 @@ import { TEditingTextBox, TPoint } from 'types/canvas';
 import { TComment, TSceneNode, TViewport } from 'types/design/types';
 
 // utils
+import { getGroupSubtreeNodes } from './utils/nodeHierarchy/getGroupSubtreeNodes';
 import { getTransformTargetNodes } from './utils/nodeHierarchy/getTransformTargetNodes';
 
 export const selectActivePageId = (state: RootState): string => state.design.activePageId;
@@ -80,6 +81,18 @@ export const selectSelectedNodes = createSelector([selectSelectedIds, selectNode
 export const selectSelectedLeafNodes = createSelector([selectSelectedNodes, selectNodes], (selectedNodes, nodes) =>
   getTransformTargetNodes(selectedNodes.filter(Boolean), nodes),
 );
+
+export const selectDescendantIdsOfSelected = createSelector([selectSelectedNodes, selectNodes], (selectedNodes, nodes) => {
+  const descendantIds = new Set<string>();
+
+  selectedNodes.filter(Boolean).forEach((node) => {
+    getGroupSubtreeNodes(node, nodes)
+      .slice(1)
+      .forEach((descendant) => descendantIds.add(descendant.id));
+  });
+
+  return descendantIds;
+});
 
 export const selectVectorEditingNodeIds = (state: RootState): string[] => state.design.vectorEditingNodeIds;
 
