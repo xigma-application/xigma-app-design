@@ -71,3 +71,9 @@ Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
   value: (): void => {},
   writable: true,
 });
+
+// jsdom doesn't implement SVGGraphicsElement.getBBox
+Object.defineProperty(SVGGraphicsElement.prototype, 'getBBox', {
+  value: (): DOMRect => new DOMRect(),
+  writable: true,
+});

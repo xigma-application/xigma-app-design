@@ -2,8 +2,8 @@ import debounce from 'lodash/debounce';
 import { FC, useEffect, useRef, useState } from 'react';
 
 // components
+import BaseNodeIcon from './BaseNodeIcon/BaseNodeIcon';
 import NodeShapeIcon from './NodeShapeIcon/NodeShapeIcon';
-import { Icon } from 'shared';
 
 // others
 import { NODE_SHAPE_ICON_REDRAW_DEBOUNCE_MS, NODE_TYPE_ICON } from './constants';
@@ -41,7 +41,7 @@ const TreeItemIcon: FC<TTreeItemIconProps> = ({ className, node, size }) => {
   return outline ? (
     <NodeShapeIcon className={className} outline={outline} size={size} />
   ) : (
-    <Icon className={className} color="neutral2" name={NODE_TYPE_ICON[node.type]} size={size} />
+    <BaseNodeIcon className={className} name={NODE_TYPE_ICON[node.type]} size={size} />
   );
 };
 
