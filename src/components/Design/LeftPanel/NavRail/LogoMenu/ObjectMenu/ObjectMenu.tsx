@@ -2,6 +2,8 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import BooleanGroupsMenu from './BooleanGroupsMenu/BooleanGroupsMenu';
+import MainComponentMenu from './MainComponentMenu/MainComponentMenu';
 import MoreLayoutOptionsMenu from './MoreLayoutOptionsMenu/MoreLayoutOptionsMenu';
 import SlotsMenu from './SlotsMenu/SlotsMenu';
 import { MenuCompound } from 'shared';
@@ -97,7 +99,9 @@ const ObjectMenu: FC = () => {
         shortcut={KEYBOARD_SHORTCUTS.detachInstance.join('')}
         withCheck={false}
       />
-      <MenuSub label={t(OBJECT_MENU_MAIN_COMPONENT_KEY)} />
+      <MenuSub label={t(OBJECT_MENU_MAIN_COMPONENT_KEY)}>
+        <MainComponentMenu />
+      </MenuSub>
       <MenuSeparator />
       <MenuItem disabled label={t(NODE_MENU_BRING_TO_FRONT_KEY)} shortcut={KEYBOARD_SHORTCUTS.bringToFront.join('')} withCheck={false} />
       <MenuItem disabled label={t(OBJECT_MENU_BRING_FORWARD_KEY)} shortcut={KEYBOARD_SHORTCUTS.bringForward.join('')} withCheck={false} />
@@ -112,7 +116,9 @@ const ObjectMenu: FC = () => {
       <MenuSeparator />
       <MenuItem disabled label={t(NODE_MENU_FLATTEN_KEY)} shortcut={KEYBOARD_SHORTCUTS.flatten.join('')} withCheck={false} />
       <MenuItem disabled label={t(NODE_MENU_OUTLINE_STROKE_KEY)} shortcut={KEYBOARD_SHORTCUTS.outlineStroke.join('')} withCheck={false} />
-      <MenuSub label={t(OBJECT_MENU_BOOLEAN_GROUPS_KEY)} />
+      <MenuSub label={t(OBJECT_MENU_BOOLEAN_GROUPS_KEY)}>
+        <BooleanGroupsMenu />
+      </MenuSub>
       <MenuSeparator />
       <MenuItem
         disabled
