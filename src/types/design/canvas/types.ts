@@ -219,6 +219,7 @@ export type THoverRefs = {
   hoveredVectorSegmentIdRef: RefObject<string | null>;
   hoveredVectorShapeBuilderFaceRef: RefObject<TVectorFaceHover | null>;
   hoveredVectorVertexIdRef: RefObject<string | null>;
+  hoveredVectorWidthLabelRef: RefObject<TVectorWidthPointHover | null>;
   hoveredVectorWidthPointRef: RefObject<TVectorWidthPointHover | null>;
 };
 

@@ -9,7 +9,7 @@ import { drawVectorWidthValueLabel } from '../drawVectorWidthValueLabel';
 const drawValueLabelMock = vi.fn();
 const getVectorWidthLabelTargetsMock = vi.fn();
 
-vi.mock('utils/canvas/text/drawValueLabel', () => ({
+vi.mock('utils/canvas/text/drawValueLabel/drawValueLabel', () => ({
   drawValueLabel: (...args: unknown[]): void => drawValueLabelMock(...args),
 }));
 vi.mock('../getVectorWidthLabelTargets', () => ({
@@ -108,6 +108,7 @@ describe('drawVectorWidthValueLabel', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      { isHovered: false },
     );
   });
 
@@ -136,7 +137,44 @@ describe('drawVectorWidthValueLabel', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      { isHovered: false },
     );
+  });
+
+  it('should mark the label hovered when the hovered-label ref matches its node, segment and t', () => {
+    // mock — midpoint of the single segment resolves to { segmentId: 's1', t: 0.5 }
+    const node = buildNode();
+    const nodes: Record<string, TSceneNode> = { [node.id]: node };
+    const refs = createCanvasRefs();
+
+    refs.hover.hoveredVectorWidthLabelRef.current = { nodeId: node.id, segmentId: 's1', t: 0.5 };
+    getVectorWidthLabelTargetsMock.mockReturnValue([
+      { nodeId: node.id, point: { id: 'p1', leftOffset: 4, position: 0.5, rightOffset: 6 }, side: 'right' },
+    ]);
+
+    // before
+    drawVectorWidthValueLabel(gl, program, buffer, imageContext, nodes, refs, 200, 150, IDENTITY_VIEWPORT);
+
+    // result
+    expect(drawValueLabelMock.mock.calls[0][10]).toEqual({ isHovered: true });
+  });
+
+  it('should not mark the label hovered when the hovered-label ref points at a different width point', () => {
+    // mock
+    const node = buildNode();
+    const nodes: Record<string, TSceneNode> = { [node.id]: node };
+    const refs = createCanvasRefs();
+
+    refs.hover.hoveredVectorWidthLabelRef.current = { nodeId: node.id, segmentId: 's1', t: 0.2 };
+    getVectorWidthLabelTargetsMock.mockReturnValue([
+      { nodeId: node.id, point: { id: 'p1', leftOffset: 4, position: 0.5, rightOffset: 6 }, side: 'right' },
+    ]);
+
+    // before
+    drawVectorWidthValueLabel(gl, program, buffer, imageContext, nodes, refs, 200, 150, IDENTITY_VIEWPORT);
+
+    // result
+    expect(drawValueLabelMock.mock.calls[0][10]).toEqual({ isHovered: false });
   });
 
   it('should draw one label per target when the resolver returns a whole synced group', () => {
@@ -168,6 +206,7 @@ describe('drawVectorWidthValueLabel', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      { isHovered: false },
     );
     expect(drawValueLabelMock).toHaveBeenNthCalledWith(
       2,
@@ -181,6 +220,7 @@ describe('drawVectorWidthValueLabel', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      { isHovered: false },
     );
   });
 });

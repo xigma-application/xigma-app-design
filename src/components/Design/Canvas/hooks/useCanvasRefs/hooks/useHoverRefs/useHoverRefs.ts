@@ -23,6 +23,7 @@ export const useHoverRefs = (): THoverRefs => {
   const hoveredVectorSegmentIdRef = useRef<string | null>(null);
   const hoveredVectorShapeBuilderFaceRef = useRef<TVectorFaceHover | null>(null);
   const hoveredVectorVertexIdRef = useRef<string | null>(null);
+  const hoveredVectorWidthLabelRef = useRef<TVectorWidthPointHover | null>(null);
   const hoveredVectorWidthPointRef = useRef<TVectorWidthPointHover | null>(null);
   const hoverRefsRef = useRef<THoverRefs | null>(null);
 
@@ -39,6 +40,7 @@ export const useHoverRefs = (): THoverRefs => {
       hoveredVectorSegmentIdRef,
       hoveredVectorShapeBuilderFaceRef,
       hoveredVectorVertexIdRef,
+      hoveredVectorWidthLabelRef,
       hoveredVectorWidthPointRef,
     };
   }

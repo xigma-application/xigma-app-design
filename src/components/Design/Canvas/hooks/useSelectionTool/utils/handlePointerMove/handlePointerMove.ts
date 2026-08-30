@@ -38,6 +38,7 @@ import { resolveShapeContactGuides } from './resolveShapeContactGuides';
 import { resolveVectorCornerHandleDrag } from './resolveVectorCornerHandleDrag';
 import { resolveVectorIdleHover } from './resolveVectorIdleHover';
 import { resolveVectorShapeBuilderHover } from './resolveVectorShapeBuilderHover';
+import { resolveVectorWidthLabelHover } from './resolveVectorWidthLabelHover';
 import { resolveVectorWidthPointHover } from './resolveVectorWidthPointHover';
 
 export const handlePointerMove = (
@@ -80,5 +81,6 @@ export const handlePointerMove = (
   resolveVectorIdleHover(canvas, event, canvasRefs, setClassName);
   resolveVectorShapeBuilderHover(canvas, event, canvasRefs, setClassName);
   resolveVectorWidthPointHover(canvas, event, canvasRefs, setClassName);
+  resolveVectorWidthLabelHover(canvas, event, canvasRefs);
   resolveShapeContactGuides(event, canvasRefs, selectionRefs);
 };

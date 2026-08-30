@@ -13,6 +13,7 @@ export const createHoverRefs = (overrides: Partial<THoverRefs> = {}): THoverRefs
   hoveredVectorSegmentIdRef: { current: null },
   hoveredVectorShapeBuilderFaceRef: { current: null },
   hoveredVectorVertexIdRef: { current: null },
+  hoveredVectorWidthLabelRef: { current: null },
   hoveredVectorWidthPointRef: { current: null },
   ...overrides,
 });

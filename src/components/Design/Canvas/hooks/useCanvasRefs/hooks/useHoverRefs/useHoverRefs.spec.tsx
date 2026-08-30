@@ -21,6 +21,7 @@ describe('useHoverRefs behaviors', () => {
       hoveredVectorSegmentIdRef: { current: null },
       hoveredVectorShapeBuilderFaceRef: { current: null },
       hoveredVectorVertexIdRef: { current: null },
+      hoveredVectorWidthLabelRef: { current: null },
       hoveredVectorWidthPointRef: { current: null },
     });
   });

@@ -10,7 +10,7 @@ import { drawSelectionSizeLabel } from '../drawSelectionSizeLabel';
 
 const drawValueLabelMock = vi.fn();
 
-vi.mock('utils/canvas/text/drawValueLabel', () => ({
+vi.mock('utils/canvas/text/drawValueLabel/drawValueLabel', () => ({
   drawValueLabel: (...args: unknown[]): void => drawValueLabelMock(...args),
 }));
 

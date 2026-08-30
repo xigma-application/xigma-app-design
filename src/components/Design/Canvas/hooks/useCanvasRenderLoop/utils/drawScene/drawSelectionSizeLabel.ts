@@ -7,7 +7,7 @@ import { TImageRenderContext } from '../../types';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
-import { drawValueLabel } from 'utils/canvas/text/drawValueLabel';
+import { drawValueLabel } from 'utils/canvas/text/drawValueLabel/drawValueLabel';
 import { getNodeBounds } from '../../../../utils/getNodeBounds';
 import { getSelectionBounds } from '../../../../utils/getSelectionBounds';
 import { getSelectionSizeLabelPlacement, TSelectionSizeLabelRect } from './getSelectionSizeLabelPlacement';

@@ -4949,6 +4949,42 @@ Coverage: unit (100%, including a dedicated spec per split file, not just the or
 (`vector-edit.spec.ts` — a drag starting on an already-filled face keeps it filled while still painting
 every new face the stroke crosses).
 
+## 70. Variable Width value label gets a hover border — keyed on hovering the label rect, not the width point
+
+§63's pink value badge (`drawValueLabel`) now thickens to a white border while the pointer is over
+**the badge itself**, not over the width point/handle on the curve. Those are two independent hover
+states with two independent refs:
+
+- `hoveredVectorWidthPointRef` (unchanged) — the width point/handle on the stroke; drives the
+  `controller`/resize cursor and `drawVectorWidthPointHoverMarker`'s cut-point marker on the curve.
+- `hoveredVectorWidthLabelRef` (new, same `TVectorWidthPointHover = {nodeId, segmentId, t}` shape) —
+  the value badge's screen rect. Set by `resolveVectorWidthLabelHover.ts` (added to
+  `handlePointerMove.ts`, and to `useSelectionTool.ts`'s tool-switch cleanup), which mirrors
+  `resolveVectorWidthPointHover`'s guards (`variableWidth` active, a node in edit mode, `buttons === 0`)
+  and hit-tests via `getVectorWidthLabelAtPoint.ts`.
+
+`getVectorWidthLabelAtPoint` walks the same `getVectorWidthLabelTargets(refs, nodes)` the renderer
+draws, so only an on-screen label can be hovered, and rebuilds each badge's world rect from the exact
+draw-path math: `getVectorWidthLabelAnchor.ts` (extracted from `drawVectorWidthValueLabel.ts` — the
+anchor/normal/side calc both now share) then `getValueLabelBadgeGeometry` for centre + width/height,
+then an axis-aligned point-in-rect test (labels are never rotated for this tool). A match writes the
+resolved `{nodeId, segmentId, t}`; `isVectorWidthPointHovered` then compares that to each label
+target's freshly recomputed `{segmentId, t}` inside `drawVectorWidthValueLabel` — exact float equality
+is safe because both sides run the identical `getVectorChainPositionAtFraction` call.
+
+**`drawValueLabel.ts` split into `drawValueLabel/`** (same "own folder + focused siblings" convention
+as `handleMoveNodesToPage/`, `continueVectorPaintDrag/`): `getValueLabelBadgeGeometry.ts` (pure
+centre/size math, reused by the hit-test above), `drawValueLabelBorder.ts` (the hover border rect —
+`VALUE_LABEL_HOVER_BORDER_PX`/`VALUE_LABEL_HOVER_STROKE`, drawn as a larger rounded rect *behind* the
+badge, the same double-draw trick as `drawSelectedWidthHandleDiamond.ts` rather than `drawRect`'s
+unreliable native stroke), `drawValueLabelBadge.ts` (the fill rect), `drawValueLabelText.ts` (MSDF
+glyph translate/rotate/draw). Orchestrator `drawValueLabel.ts` is now just: measure text → geometry
+→ border if `isHovered` → badge → text. `drawSelectionSizeLabel.ts` (the other consumer) and
+`drawVectorWidthValueLabel.ts` both import from `.../drawValueLabel/drawValueLabel` now.
+
+Coverage: unit 100% (a spec per split file plus `getVectorWidthLabelAnchor`, `getVectorWidthLabelAtPoint`,
+`resolveVectorWidthLabelHover`).
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows
