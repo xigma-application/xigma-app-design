@@ -8,6 +8,7 @@ import XigmaLogoShape from '@xigma/assets/xigma-logo-shape.svg?react';
 import ArrangeMenu from './ArrangeMenu/ArrangeMenu';
 import EditMenu from './EditMenu/EditMenu';
 import FileMenu from './FileMenu/FileMenu';
+import HelpAndAccountMenu from './HelpAndAccountMenu/HelpAndAccountMenu';
 import ObjectMenu from './ObjectMenu/ObjectMenu';
 import PluginsMenu from './PluginsMenu/PluginsMenu';
 import PreferencesMenu from './PreferencesMenu/PreferencesMenu';
@@ -102,8 +103,10 @@ const LogoMenu: FC = () => {
       <MenuItem disabled label={t(LOGO_MENU_LIBRARIES_KEY)} withCheck={false} marginBottom />
       <MenuSeparator />
       <MenuItem disabled label={t(LOGO_MENU_OPEN_DESKTOP_APP_KEY)} marginTop withCheck={false} />
-      <MenuSub label={t(LOGO_MENU_AI_BALANCE_KEY)} />
-      <MenuSub label={t(LOGO_MENU_HELP_AND_ACCOUNT_KEY)} />
+      <MenuItem disabled label={t(LOGO_MENU_AI_BALANCE_KEY)} withCheck={false} />
+      <MenuSub label={t(LOGO_MENU_HELP_AND_ACCOUNT_KEY)}>
+        <HelpAndAccountMenu />
+      </MenuSub>
     </Menu>
   );
 };

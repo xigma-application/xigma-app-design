@@ -10,8 +10,12 @@ exports[`LeftPanel snapshots > should render LeftPanel 1`] = `
       class="_NavRail_8eca33"
     >
       <button
+        aria-expanded="false"
+        aria-haspopup="menu"
         aria-label="xigma"
         class="_NavRail__logo_8eca33"
+        data-state="closed"
+        id="radix-_r_0_"
         type="button"
       >
         <svg

@@ -55,6 +55,7 @@ describe('LogoMenu', () => {
     // result — disabled
     expect(screen.getByText('Back to files').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
     expect(screen.getByText('Libraries').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('AI balance').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
 
     // result — expandable, not disabled
     expect(screen.getByText('File').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');

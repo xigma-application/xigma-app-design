@@ -44,6 +44,7 @@ describe('CanvasRefsProvider behaviors', () => {
         hoveredVectorSegmentIdRef: { current: null },
         hoveredVectorShapeBuilderFaceRef: { current: null },
         hoveredVectorVertexIdRef: { current: null },
+        hoveredVectorWidthLabelRef: { current: null },
         hoveredVectorWidthPointRef: { current: null },
       },
       lassoMarquee: { marqueeRef: { current: null }, vectorLassoPathRef: { current: null } },
