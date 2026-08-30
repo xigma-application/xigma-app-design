@@ -5,23 +5,22 @@ import { TTextNode, TVectorNode, TVectorTangent } from 'types/design/types';
 
 // utils
 import { getActivePage } from './getActivePage';
+import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBounds';
 import { syncPathTextNodes } from './syncPathTextNodes';
-
-export type TTextBoxTransform = { height: number; rotation: number; width: number; x: number; y: number };
 
 const scaleTangent = (tangent: TVectorTangent, scaleX: number, scaleY: number): TVectorTangent =>
   tangent ? { x: tangent.x * scaleX, y: tangent.y * scaleY } : null;
 
-const syncVectorPathFromText = (vectorNode: TVectorNode, textNode: TTextNode, previous: TTextBoxTransform): void => {
-  const scaleX = previous.width > 0 ? textNode.width / previous.width : 1;
-  const scaleY = previous.height > 0 ? textNode.height / previous.height : 1;
-  const dx = textNode.x - previous.x;
-  const dy = textNode.y - previous.y;
+const syncVectorPathFromText = (vectorNode: TVectorNode, textNode: TTextNode): void => {
+  const bounds = getVectorNodeBounds(vectorNode);
+  const scaleX = bounds.width > 0 ? textNode.width / bounds.width : 1;
+  const scaleY = bounds.height > 0 ? textNode.height / bounds.height : 1;
+  const movedOrScaled = textNode.x !== bounds.x || textNode.y !== bounds.y || scaleX !== 1 || scaleY !== 1;
 
-  if (dx !== 0 || dy !== 0 || scaleX !== 1 || scaleY !== 1) {
+  if (movedOrScaled) {
     Object.values(vectorNode.vertices).forEach((vertex) => {
-      vertex.x = Math.round(textNode.x + (vertex.x - previous.x) * scaleX);
-      vertex.y = Math.round(textNode.y + (vertex.y - previous.y) * scaleY);
+      vertex.x = Math.round(textNode.x + (vertex.x - bounds.x) * scaleX);
+      vertex.y = Math.round(textNode.y + (vertex.y - bounds.y) * scaleY);
     });
 
     Object.values(vectorNode.segments).forEach((segment) => {
@@ -33,7 +32,7 @@ const syncVectorPathFromText = (vectorNode: TVectorNode, textNode: TTextNode, pr
   vectorNode.rotation = textNode.rotation;
 };
 
-export const syncPathNodeFromText = (state: TDesignState, textNode: TTextNode, previous: TTextBoxTransform): void => {
+export const syncPathNodeFromText = (state: TDesignState, textNode: TTextNode): void => {
   const pathNode = textNode.pathId ? getActivePage(state).nodes[textNode.pathId] : undefined;
 
   if (pathNode?.type === NodeType.path) {
@@ -44,6 +43,6 @@ export const syncPathNodeFromText = (state: TDesignState, textNode: TTextNode, p
     pathNode.y = textNode.y;
     syncPathTextNodes(state, pathNode);
   } else if (pathNode?.type === NodeType.vector) {
-    syncVectorPathFromText(pathNode, textNode, previous);
+    syncVectorPathFromText(pathNode, textNode);
   }
 };

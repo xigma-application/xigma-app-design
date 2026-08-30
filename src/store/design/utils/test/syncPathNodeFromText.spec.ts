@@ -83,7 +83,7 @@ describe('syncPathNodeFromText', () => {
     const state = buildState({ [pathNode.id]: pathNode, [textNode.id]: textNode });
 
     // before
-    syncPathNodeFromText(state, textNode, { height: 200, rotation: 0, width: 200, x: 0, y: 0 });
+    syncPathNodeFromText(state, textNode);
 
     // result
     expect(getActivePage(state).nodes[pathNode.id]).toMatchObject({ height: 300, rotation: 45, width: 300, x: 10, y: 20 });
@@ -97,7 +97,7 @@ describe('syncPathNodeFromText', () => {
     const state = buildState({ [pathNode.id]: pathNode, [resized.id]: resized, [sibling.id]: sibling });
 
     // before
-    syncPathNodeFromText(state, resized, { height: 200, rotation: 0, width: 200, x: 0, y: 0 });
+    syncPathNodeFromText(state, resized);
 
     // result
     expect(getActivePage(state).nodes[sibling.id]).toMatchObject({ height: 300, width: 300, x: 10, y: 20 });
@@ -110,7 +110,7 @@ describe('syncPathNodeFromText', () => {
     const state = buildState({ [pathNode.id]: pathNode, [textNode.id]: textNode });
 
     // before
-    syncPathNodeFromText(state, textNode, { height: 200, rotation: 0, width: 200, x: 0, y: 0 });
+    syncPathNodeFromText(state, textNode);
 
     // result
     expect(getActivePage(state).nodes[pathNode.id]).toMatchObject({ height: 200, width: 200 });
@@ -122,7 +122,7 @@ describe('syncPathNodeFromText', () => {
     const state = buildState({ [textNode.id]: textNode });
 
     // before
-    syncPathNodeFromText(state, textNode, { height: 200, rotation: 0, width: 200, x: 0, y: 0 });
+    syncPathNodeFromText(state, textNode);
 
     // result
     expect(getActivePage(state).nodes).toEqual({ [textNode.id]: textNode });
@@ -152,7 +152,7 @@ describe('syncPathNodeFromText', () => {
       const state = buildState({ [vectorNode.id]: vectorNode, [textNode.id]: textNode });
 
       // before
-      syncPathNodeFromText(state, textNode, { height: 0, rotation: 0, width: 100, x: 0, y: 0 });
+      syncPathNodeFromText(state, textNode);
 
       // result
       expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).vertices).toEqual({
@@ -168,7 +168,7 @@ describe('syncPathNodeFromText', () => {
       const state = buildState({ [vectorNode.id]: vectorNode, [textNode.id]: textNode });
 
       // before
-      syncPathNodeFromText(state, textNode, { height: 0, rotation: 0, width: 100, x: 0, y: 0 });
+      syncPathNodeFromText(state, textNode);
 
       // result — rotation copied, vertices untouched (rotation is applied downstream, not baked here)
       const synced = getActivePage(state).nodes[vectorNode.id] as TVectorNode;
@@ -183,7 +183,7 @@ describe('syncPathNodeFromText', () => {
       const state = buildState({ [vectorNode.id]: vectorNode, [textNode.id]: textNode });
 
       // before
-      syncPathNodeFromText(state, textNode, { height: 0, rotation: 0, width: 100, x: 0, y: 0 });
+      syncPathNodeFromText(state, textNode);
 
       // result
       expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).vertices).toEqual({
@@ -199,7 +199,7 @@ describe('syncPathNodeFromText', () => {
       const state = buildState({ [vectorNode.id]: vectorNode, [textNode.id]: textNode });
 
       // before
-      syncPathNodeFromText(state, textNode, { height: 40, rotation: 0, width: 100, x: 0, y: 0 });
+      syncPathNodeFromText(state, textNode);
 
       // result — the vector's bounds now match the resized text box, so the glyphs reflow along it
       expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).vertices).toEqual({
@@ -215,7 +215,7 @@ describe('syncPathNodeFromText', () => {
       const state = buildState({ [vectorNode.id]: vectorNode, [textNode.id]: textNode });
 
       // before
-      syncPathNodeFromText(state, textNode, { height: 0, rotation: 0, width: 100, x: 0, y: 0 });
+      syncPathNodeFromText(state, textNode);
 
       // result — v2, on the fixed right edge, does not move; v1 follows the growing left edge
       expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).vertices).toEqual({
@@ -225,7 +225,9 @@ describe('syncPathNodeFromText', () => {
     });
 
     it('should scale the segment tangent handles along with the vertices', () => {
-      // mock — a curved segment carrying tangent handles, box scaled x2 wide / x3 tall
+      // mock — a curved segment whose tangent handles reach to y = ±10, so the vector's measured
+      // bounds are 100 wide x 20 tall (handles included, the same box attach measures). Growing the
+      // text box to 200 x 30 is therefore x2 wide / x1.5 tall.
       const vectorNode = buildVectorNode({
         segments: {
           s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: { x: -20, y: -10 }, tangentStart: { x: 20, y: 10 } },
@@ -235,13 +237,28 @@ describe('syncPathNodeFromText', () => {
       const state = buildState({ [vectorNode.id]: vectorNode, [textNode.id]: textNode });
 
       // before
-      syncPathNodeFromText(state, textNode, { height: 10, rotation: 0, width: 100, x: 0, y: 0 });
+      syncPathNodeFromText(state, textNode);
 
       // result
       expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).segments.s1).toMatchObject({
-        tangentEnd: { x: -40, y: -30 },
-        tangentStart: { x: 40, y: 30 },
+        tangentEnd: { x: -40, y: -15 },
+        tangentStart: { x: 40, y: 15 },
       });
+    });
+
+    it('should re-fit from the vector own bounds each call, so a resize cannot drift the vector off the box', () => {
+      // mock — the vector already sits slightly off the text box (as rounding during a drag would
+      // leave it); the next sync must snap it back, not compound the offset
+      const vectorNode = buildVectorNode({ vertices: { v1: { id: 'v1', x: 3, y: 2 }, v2: { id: 'v2', x: 97, y: 2 } } });
+      const textNode = buildPathText({ height: 0, width: 200, x: 0, y: 0 });
+      const state = buildState({ [vectorNode.id]: vectorNode, [textNode.id]: textNode });
+
+      // before
+      syncPathNodeFromText(state, textNode);
+
+      // result — vector bounds land exactly on the text box (x 0..200), regardless of the stale offset
+      const synced = getActivePage(state).nodes[vectorNode.id] as TVectorNode;
+      expect(synced.vertices).toEqual({ v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 200, y: 0 } });
     });
   });
 });

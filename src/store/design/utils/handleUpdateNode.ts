@@ -15,8 +15,6 @@ export const handleUpdateNode = (state: TDesignState, payload: { changes: TScene
   const node = getActivePage(state).nodes[payload.id];
 
   if (node) {
-    const previousTextBox =
-      node.type === NodeType.text ? { height: node.height, rotation: node.rotation, width: node.width, x: node.x, y: node.y } : null;
     Object.assign(node, payload.changes);
 
     switch (node.type) {
@@ -24,8 +22,8 @@ export const handleUpdateNode = (state: TDesignState, payload: { changes: TScene
         syncPathTextNodes(state, node);
         break;
       case NodeType.text:
-        if (node.pathId && previousTextBox) {
-          syncPathNodeFromText(state, node, previousTextBox);
+        if (node.pathId) {
+          syncPathNodeFromText(state, node);
         }
         break;
       case NodeType.vector:
