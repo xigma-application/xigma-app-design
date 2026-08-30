@@ -1535,6 +1535,41 @@ narrowly since resize math already branches hard on rotation/single-vs-multi (§
   reach the identical final point — both sides now go through the resize pipeline, so their sub-pixel
   output matches byte-for-byte when snap is working.
 
+## 26. Alignment-snap extended to drawing a new shape
+
+The final leg of the phased snap rollout (§24 move, §25 resize): the live free corner of a
+draft rect being drawn from scratch (Rectangle/Frame/Section/Ellipse via `useDrawShapeTool`, plus
+`useDrawStarTool`/`useDrawPolygonTool`/`useDrawTextTool`) now snaps against existing shapes too.
+`useDrawTextOnPathTool` is deliberately excluded — it creates a `NodeType.path` node, which is a
+vector network like line/vector, not a plain box.
+
+- Reuses §25's `getPointAlignmentSnap` directly rather than adding a third orchestrator — draw-tool
+  geometry is exactly resize's shape: one live point being dragged, matched against the same
+  `getCandidateShapes`/`extendGuideToFullElement` pipeline. `getResizeAlignmentSnap` was renamed to
+  `getPointAlignmentSnap` (and `TResizeAlignmentSnap` → `TPointAlignmentSnap`) to reflect that it's now
+  shared, the same rename-out-of-a-specific-name move §24 made for the vector-alignment core.
+- Each of the four hooks calls it identically in both `handlePointerMove` (to snap the live preview
+  written to `draftRef`) and `handlePointerUp` (recomputed from the up-event's point, so the committed
+  node matches the last preview exactly) — `excludedIds` is always `[]` since the shape being drawn
+  doesn't exist as a node yet, so there's nothing to exclude. The guide goes through the same
+  `refs.transform.alignmentGuideRef` §24/§25 already use (draw, move, and resize are mutually
+  exclusive gestures), set on every move and cleared alongside `draftRef.current = null` on commit —
+  mirroring `draftRef`'s own set/clear lifecycle in each hook rather than introducing a new cleanup
+  path.
+- Unlike §25, there's no rotation/single-vs-multi gate to worry about here — a draft rect is always a
+  single, unrotated box by construction, so every one of the four hooks snaps unconditionally.
+- `toDraftRect` already rounds its corners via `Math.round`, so unlike §25's resize case there's no
+  sub-pixel x/y mismatch between a snapped draft and a directly-drawn one — both go through the exact
+  same rounding.
+- e2e (`e2e/pages/design/shape-draw-snap.spec.ts`, rectangle only — the other three hooks are proven at
+  the unit level, one set of alignment-snap tests added per hook's own spec file) clips the comparison
+  screenshot to just the drawn shapes' bounding box (`page.screenshot({ clip })`, the same technique
+  `resize.spec.ts`'s mirror tests use) instead of comparing the full `canvas.screenshot()` — a
+  full-canvas capture intermittently picked up a few antialiasing-level pixels differing near the
+  toolbar corner, unrelated to either shape, under heavy parallel test-worker/GPU load. `resize.spec.ts`
+  needing `mode: 'serial'` for its own multi-test file is the same underlying class of noise; this file
+  sets it too.
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.

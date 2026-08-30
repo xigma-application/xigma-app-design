@@ -68,11 +68,20 @@ are deferred. Write-up: `.claude/docs/selection-and-manipulation.md` §24.
 Dragging a resize handle now snaps that edge/corner onto other shapes' edges within tolerance too,
 reusing §24's same shared core (single-point `getAlignmentGuide`, not the group variant — resize only
 ever moves one query point). Skipped for rotated single-node resizes, where the box math already runs
-in unrotated local space. Draw-new-shape snap is still deferred. Write-up:
-`.claude/docs/selection-and-manipulation.md` §25.
+in unrotated local space. Write-up: `.claude/docs/selection-and-manipulation.md` §25.
 
 - [x] `getResizeAlignmentSnap` wired into `getResizeDragFrame`, gated to unrotated single/multi-node
       resizes, e2e
+
+## Stage 8 — Shape alignment snap on draw
+
+Drawing a new shape from scratch now snaps its live free corner onto other shapes' edges within
+tolerance too — the third and final leg of the phased snap rollout. Reuses Stage 7's single-point core
+unchanged (renamed `getResizeAlignmentSnap` → `getPointAlignmentSnap`, now shared by both), wired into
+`useDrawShapeTool`/`useDrawStarTool`/`useDrawPolygonTool`/`useDrawTextTool`. Write-up:
+`.claude/docs/selection-and-manipulation.md` §26.
+
+- [x] `getPointAlignmentSnap` wired into all four box-drawing hooks, e2e
 
 ## Related
 

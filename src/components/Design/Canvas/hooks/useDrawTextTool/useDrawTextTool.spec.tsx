@@ -8,12 +8,12 @@ import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useDrawTextTool } from './useDrawTextTool';
 
 // store
-import designReducer, { setActiveTool, setSelection } from 'store/design/slice';
+import designReducer, { addNode, setActiveTool, setSelection } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
 import { selectSelectedIds } from 'store/design/selectors';
 
 // types
-import { ToolName } from 'types/design/enums';
+import { NodeType, ToolName } from 'types/design/enums';
 import { TDraftEntity } from 'types/design/types';
 
 const createTestStore = (): EnhancedStore<{ design: TDesignState }> => configureStore({ reducer: { design: designReducer } });
@@ -247,5 +247,84 @@ describe('useDrawTextTool behaviors', () => {
 
     expect(design.editingTextBox).toMatchObject({ height: 100, width: 100, x: 10, y: 10 });
     expect(design.activeTool).toBe(ToolName.default);
+  });
+});
+
+describe('useDrawTextTool alignment snap', () => {
+  it('should snap the drafted text box onto a nearby existing shape while dragging, populating the alignment guide', () => {
+    // mock — a candidate rect whose left edge (63) sits 3px past the raw drag endpoint (60), within tolerance
+    const store = createTestStore();
+
+    store.dispatch(
+      addNode({
+        fill: '#000000',
+        height: 20,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 20,
+        x: 63,
+        y: 0,
+      }),
+    );
+    store.dispatch(setActiveTool(ToolName.text));
+
+    const canvasRef = createCanvasRef();
+    const draftRef: RefObject<TDraftEntity | null> = { current: null };
+    const refs = createCanvasRefs({ canvasRef, draftRef });
+
+    // before
+    renderHook(() => useDrawTextTool(refs), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 60, 40));
+
+    // result — corrected so the right edge lands flush at 63 (width 53), and the guide is populated
+    expect(draftRef.current).toMatchObject({ width: 53, x: 10 });
+    expect(refs.transform.alignmentGuideRef.current).not.toBeNull();
+  });
+
+  it('should commit the snapped box and clear the alignment guide on pointer up', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(
+      addNode({
+        fill: '#000000',
+        height: 20,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 20,
+        x: 63,
+        y: 0,
+      }),
+    );
+    store.dispatch(setActiveTool(ToolName.text));
+
+    const canvasRef = createCanvasRef();
+    const draftRef: RefObject<TDraftEntity | null> = { current: null };
+    const refs = createCanvasRefs({ canvasRef, draftRef });
+
+    // before
+    renderHook(() => useDrawTextTool(refs), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 60, 40));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 60, 40));
+    });
+
+    // result
+    expect(store.getState().design.editingTextBox).toMatchObject({ width: 53, x: 10 });
+    expect(refs.transform.alignmentGuideRef.current).toBeNull();
   });
 });

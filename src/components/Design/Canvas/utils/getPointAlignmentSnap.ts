@@ -8,17 +8,17 @@ import { extendGuideToFullElement } from './getDragAlignmentSnap/extendGuideToFu
 import { getAlignmentGuide } from 'utils/canvas/getAlignmentGuide';
 import { getCandidateShapes } from './getDragAlignmentSnap/getCandidateShapes';
 
-export type TResizeAlignmentSnap = {
+export type TPointAlignmentSnap = {
   guide: TAlignmentGuide | null;
   point: TPoint;
 };
 
-export const getResizeAlignmentSnap = (
+export const getPointAlignmentSnap = (
   point: TPoint,
   nodes: Record<string, TSceneNode>,
   excludedIds: string[],
   toleranceWorldUnits: number,
-): TResizeAlignmentSnap => {
+): TPointAlignmentSnap => {
   const candidateShapes = getCandidateShapes(nodes, excludedIds);
   const candidatePoints = candidateShapes.flatMap((candidate) => candidate.points);
   const match = getAlignmentGuide(point, candidatePoints, toleranceWorldUnits);

@@ -3,15 +3,15 @@ import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
 // utils
-import { getResizeAlignmentSnap } from '../getResizeAlignmentSnap';
+import { getPointAlignmentSnap } from '../getPointAlignmentSnap';
 
 const rect = (id: string, x: number, y: number, width = 100, height = 100): TSceneNode =>
   ({ fill: '#000', height, id, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width, x, y }) as TSceneNode;
 
-describe('getResizeAlignmentSnap', () => {
+describe('getPointAlignmentSnap', () => {
   it('should return the raw point and no guide when nothing is within tolerance', () => {
     // action
-    const result = getResizeAlignmentSnap({ x: 197, y: 50 }, {}, [], 5);
+    const result = getPointAlignmentSnap({ x: 197, y: 50 }, {}, [], 5);
 
     // result
     expect(result).toEqual({ guide: null, point: { x: 197, y: 50 } });
@@ -22,7 +22,7 @@ describe('getResizeAlignmentSnap', () => {
     const nodes = { b: rect('b', 200, 300, 100, 100) };
 
     // action
-    const result = getResizeAlignmentSnap({ x: 197, y: 50 }, nodes, [], 5);
+    const result = getPointAlignmentSnap({ x: 197, y: 50 }, nodes, [], 5);
 
     // result — x snaps to 200, y is untouched (no candidate point near y:50); the guide spans b's
     // full height (300..400)
@@ -35,7 +35,7 @@ describe('getResizeAlignmentSnap', () => {
     const nodes = { b: rect('b', 300, 200, 100, 100) };
 
     // action
-    const result = getResizeAlignmentSnap({ x: 50, y: 197 }, nodes, [], 5);
+    const result = getPointAlignmentSnap({ x: 50, y: 197 }, nodes, [], 5);
 
     // result — y snaps to 200, x is untouched; the guide spans b's full width (300..400)
     expect(result.point).toEqual({ x: 50, y: 200 });
@@ -47,7 +47,7 @@ describe('getResizeAlignmentSnap', () => {
     const nodes = { a: rect('a', 200, 300, 100, 100) };
 
     // action
-    const result = getResizeAlignmentSnap({ x: 197, y: 50 }, nodes, ['a'], 5);
+    const result = getPointAlignmentSnap({ x: 197, y: 50 }, nodes, ['a'], 5);
 
     // result
     expect(result).toEqual({ guide: null, point: { x: 197, y: 50 } });
@@ -58,7 +58,7 @@ describe('getResizeAlignmentSnap', () => {
     const nodes = { b: { ...rect('b', 200, 300), type: NodeType.group } as TSceneNode };
 
     // action
-    const result = getResizeAlignmentSnap({ x: 197, y: 50 }, nodes, [], 5);
+    const result = getPointAlignmentSnap({ x: 197, y: 50 }, nodes, [], 5);
 
     // result
     expect(result).toEqual({ guide: null, point: { x: 197, y: 50 } });

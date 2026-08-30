@@ -8,7 +8,7 @@ import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useDrawStarTool, TStarToolConfig } from './useDrawStarTool';
 
 // store
-import designReducer, { setActiveTool, setSelection } from 'store/design/slice';
+import designReducer, { addNode, setActiveTool, setSelection } from 'store/design/slice';
 import { TDesignState } from 'store/design/types';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 
@@ -278,5 +278,88 @@ describe('useDrawStarTool behaviors', () => {
     expect(page.nodes[page.rootOrder[0]]).toMatchObject({ height: 100, width: 100, x: -40, y: -40 });
     expect(design.activeTool).toBe(ToolName.default);
     expect(page.selectedIds).toEqual([page.rootOrder[0]]);
+  });
+});
+
+describe('useDrawStarTool alignment snap', () => {
+  it('should snap the drafted star onto a nearby existing shape while dragging, populating the alignment guide', () => {
+    // mock — a candidate rect whose left edge (63) sits 3px past the raw drag endpoint (60), within tolerance
+    const store = createTestStore();
+
+    store.dispatch(
+      addNode({
+        fill: '#000000',
+        height: 20,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 20,
+        x: 63,
+        y: 0,
+      }),
+    );
+    store.dispatch(setActiveTool(CONFIG.tool));
+
+    const canvasRef = createCanvasRef();
+    const draftRef: RefObject<TDraftEntity | null> = { current: null };
+    const refs = createCanvasRefs({ canvasRef, draftRef });
+
+    // before
+    renderHook(() => useDrawStarTool(refs, CONFIG), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 60, 40));
+
+    // result — corrected so the right edge lands flush at 63 (width 53), and the guide is populated
+    expect(draftRef.current).toMatchObject({ width: 53, x: 10 });
+    expect(refs.transform.alignmentGuideRef.current).not.toBeNull();
+  });
+
+  it('should commit the snapped size and clear the alignment guide on pointer up', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(
+      addNode({
+        fill: '#000000',
+        height: 20,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 20,
+        x: 63,
+        y: 0,
+      }),
+    );
+    store.dispatch(setActiveTool(CONFIG.tool));
+
+    const canvasRef = createCanvasRef();
+    const draftRef: RefObject<TDraftEntity | null> = { current: null };
+    const refs = createCanvasRefs({ canvasRef, draftRef });
+
+    // before
+    renderHook(() => useDrawStarTool(refs, CONFIG), {
+      wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+    });
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 60, 40));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 60, 40));
+    });
+
+    // result
+    const { design } = store.getState();
+    const page = design.pages[design.activePageId];
+    const created = page.nodes[page.rootOrder[page.rootOrder.length - 1]];
+
+    expect(created).toMatchObject({ width: 53, x: 10 });
+    expect(refs.transform.alignmentGuideRef.current).toBeNull();
   });
 });
