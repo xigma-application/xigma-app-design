@@ -19,6 +19,7 @@ import {
   TDesignSnapshot,
   TDesignState,
   TMoveNodesPayload,
+  TMoveNodesToPagePayload,
   TReorderPayload,
   TStartTextEditPayload,
   TTextEditSelection,
@@ -38,6 +39,7 @@ import { handleDeletePage } from './utils/handleDeletePage';
 import { handleDuplicatePage, TDuplicatePagePayload } from './utils/handleDuplicatePage';
 import { handleGroupNodes } from './utils/handleGroupNodes/handleGroupNodes';
 import { handleMoveNodes } from './utils/handleMoveNodes/handleMoveNodes';
+import { handleMoveNodesToPage } from './utils/handleMoveNodesToPage/handleMoveNodesToPage';
 import { handleReorderPages } from './utils/handleReorderPages';
 import { handleReplaceDesignSnapshot } from './utils/handleReplaceDesignSnapshot';
 import { handleReplaceNode } from './utils/handleReplaceNode';
@@ -122,6 +124,7 @@ const designSlice = createSlice({
       reducer: (state, action: PayloadAction<{ groupId: string }>) => handleGroupNodes(state, action.payload.groupId),
     },
     moveNodes: (state, action: PayloadAction<TMoveNodesPayload>) => handleMoveNodes(state, action.payload),
+    moveNodesToPage: (state, action: PayloadAction<TMoveNodesToPagePayload>) => handleMoveNodesToPage(state, action.payload),
     renamePage: (state, action: PayloadAction<{ id: string; name: string }>) => {
       state.pages[action.payload.id].name = action.payload.name;
     },
@@ -174,6 +177,7 @@ export const {
   duplicatePage,
   groupNodes,
   moveNodes,
+  moveNodesToPage,
   renamePage,
   reorderPages,
   replaceDesignSnapshot,

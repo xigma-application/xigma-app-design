@@ -1,13 +1,13 @@
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 
 // components
 import LayerContextMenu from './LayerContextMenu';
 
 // store
-import { addNode, deleteNode, setSelection } from 'store/design/slice';
-import { selectActivePage } from 'store/design/selectors';
+import { addNode, addPage, deleteNode, deletePage, setActivePage, setSelection } from 'store/design/slice';
+import { selectActivePage, selectActivePageId } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -114,5 +114,43 @@ describe('LayerContextMenu', () => {
     // after
     store.dispatch(deleteNode(sourceId));
     store.dispatch(deleteNode(targetId));
+  });
+
+  it('should move the selected node to another page via the "Move to page" submenu', () => {
+    // mock
+    vi.useFakeTimers();
+    const firstPageId = selectActivePageId(store.getState());
+
+    store.dispatch(
+      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+    );
+
+    const [idA] = selectActivePage(store.getState()).rootOrder.slice(-1);
+
+    store.dispatch(setSelection([idA]));
+    store.dispatch(addPage());
+
+    const secondPageId = selectActivePageId(store.getState());
+
+    store.dispatch(setActivePage(firstPageId));
+
+    // before
+    renderLayerContextMenu();
+
+    // action
+    fireEvent.pointerEnter(screen.getByText('Move to page'));
+    act(() => vi.runAllTimers());
+    fireEvent.click(screen.getByText(store.getState().design.pages[secondPageId].name));
+
+    // result
+    expect(store.getState().design.pages[firstPageId].nodes[idA]).toBeUndefined();
+    expect(store.getState().design.pages[secondPageId].nodes[idA]).toBeDefined();
+
+    // after
+    store.dispatch(setActivePage(secondPageId));
+    store.dispatch(deleteNode(idA));
+    store.dispatch(setActivePage(firstPageId));
+    store.dispatch(deletePage(secondPageId));
+    vi.useRealTimers();
   });
 });

@@ -36,10 +36,13 @@ import {
   NODE_ROW_UNLOCK_ARIA_LABEL_KEY,
 } from '../../constants';
 
+// store
+import { TDesignPage } from 'store/design/types';
+
 // styles
 import styles from './layer-menu.module.scss';
 
-const { MenuItem, MenuSeparator } = MenuCompound;
+const { MenuItem, MenuSeparator, MenuSub } = MenuCompound;
 
 export type TLayerMenuProps = {
   anchorRef: RefObject<TVirtualAnchor>;
@@ -48,11 +51,13 @@ export type TLayerMenuProps = {
   isOpen: boolean;
   onCopy: TFunc;
   onGroupSelection: TFunc;
+  onMoveToPage: TFunc<[string]>;
   onOpenChange: TFunc<[boolean]>;
   onPasteToReplace: TFunc;
   onRename: TFunc;
   onToggleHidden: TFunc;
   onToggleLocked: TFunc;
+  otherPages: TDesignPage[];
 };
 
 const LayerMenu: FC<TLayerMenuProps> = ({
@@ -62,11 +67,13 @@ const LayerMenu: FC<TLayerMenuProps> = ({
   isOpen,
   onCopy,
   onGroupSelection,
+  onMoveToPage,
   onOpenChange,
   onPasteToReplace,
   onRename,
   onToggleHidden,
   onToggleLocked,
+  otherPages,
 }) => {
   const { t } = useTranslation();
   const handlePreventRefocus = usePreventMenuRefocus();
@@ -94,7 +101,11 @@ const LayerMenu: FC<TLayerMenuProps> = ({
       <MenuItem disabled label={t(NODE_MENU_SEND_TO_MAKE_KEY)} withCheck={false} />
       <MenuItem disabled label={t(NODE_MENU_ADD_MOTION_KEY)} withCheck={false} />
       <MenuSeparator />
-      <MenuItem disabled label={t(NODE_MENU_MOVE_TO_PAGE_KEY)} withCheck={false} />
+      <MenuSub disabled={otherPages.length === 0} label={t(NODE_MENU_MOVE_TO_PAGE_KEY)} withCheck={false}>
+        {otherPages.map((page) => (
+          <MenuItem key={page.id} label={page.name} onClick={(): void => onMoveToPage(page.id)} withCheck={false} />
+        ))}
+      </MenuSub>
       <MenuItem disabled label={t(NODE_MENU_BRING_TO_FRONT_KEY)} shortcut={KEYBOARD_SHORTCUTS.bringToFront.join('')} withCheck={false} />
       <MenuItem disabled label={t(NODE_MENU_SEND_TO_BACK_KEY)} shortcut={KEYBOARD_SHORTCUTS.sendToBack.join('')} withCheck={false} />
       <MenuSeparator />

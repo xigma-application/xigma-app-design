@@ -52,6 +52,11 @@ export type TMoveNodesPayload = {
   targetParentId: string | null;
 };
 
+export type TMoveNodesToPagePayload = {
+  nodeIds: string[];
+  targetPageId: string;
+};
+
 export type TAddNodesPayload = {
   nodes: TSceneNode[];
   rootIds: string[];

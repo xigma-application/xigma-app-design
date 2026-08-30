@@ -13,6 +13,7 @@ import slice, {
   duplicatePage,
   groupNodes,
   moveNodes,
+  moveNodesToPage,
   renamePage,
   reorderPages,
   replaceDesignSnapshot,
@@ -281,6 +282,25 @@ describe('design slice', () => {
     const rootOrderAfter = state.pages[state.activePageId].rootOrder;
     expect(rootOrderAfter[fromIndex]).toBe(secondId);
     expect(rootOrderAfter[toIndex]).toBe(firstId);
+  });
+
+  it('should move a node to another page, removing it from the source page and appending it to the target', () => {
+    // mock — add a node on the first page, then a second page (which becomes active)
+    const withNode = slice(undefined, addNode(frameNodePayload));
+    const firstPageId = withNode.activePageId;
+    const [nodeId] = withNode.pages[firstPageId].rootOrder;
+    const withSecondPage = slice(withNode, addPage());
+    const secondPageId = withSecondPage.activePageId;
+    const backOnFirstPage = slice(withSecondPage, setActivePage(firstPageId));
+
+    // action
+    const state = slice(backOnFirstPage, moveNodesToPage({ nodeIds: [nodeId], targetPageId: secondPageId }));
+
+    // result
+    expect(state.pages[firstPageId].nodes[nodeId]).toBeUndefined();
+    expect(state.pages[firstPageId].rootOrder).not.toContain(nodeId);
+    expect(state.pages[secondPageId].nodes[nodeId]).toMatchObject(frameNodePayload);
+    expect(state.pages[secondPageId].rootOrder).toContain(nodeId);
   });
 
   it('should delete a node', () => {

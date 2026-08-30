@@ -1,10 +1,24 @@
 import userEvent from '@testing-library/user-event';
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 
 // components
 import LayerMenu from './LayerMenu';
 
+// types
+import { TDesignPage } from 'store/design/types';
+
 const anchorRef = { current: { getBoundingClientRect: (): DOMRect => new DOMRect(10, 20, 0, 0) } };
+
+const buildPage = (id: string, name: string): TDesignPage => ({
+  comments: {},
+  id,
+  name,
+  nodes: {},
+  paintColor: '#d9d9d9',
+  rootOrder: [],
+  selectedIds: [],
+  viewport: { x: 0, y: 0, zoom: 1 },
+});
 
 const renderLayerMenu = (
   isHidden = false,
@@ -15,6 +29,8 @@ const renderLayerMenu = (
   onGroupSelection = vi.fn(),
   onCopy = vi.fn(),
   onPasteToReplace = vi.fn(),
+  otherPages: TDesignPage[] = [],
+  onMoveToPage = vi.fn(),
 ): ReturnType<typeof render> =>
   render(
     <LayerMenu
@@ -24,11 +40,13 @@ const renderLayerMenu = (
       isOpen
       onCopy={onCopy}
       onGroupSelection={onGroupSelection}
+      onMoveToPage={onMoveToPage}
       onOpenChange={vi.fn()}
       onPasteToReplace={onPasteToReplace}
       onRename={onRename}
       onToggleHidden={onToggleHidden}
       onToggleLocked={onToggleLocked}
+      otherPages={otherPages}
     />,
   );
 
@@ -172,5 +190,39 @@ describe('LayerMenu', () => {
 
     // result
     expect(onGroupSelection).toHaveBeenCalledTimes(1);
+  });
+
+  it('should disable "Move to page" when there are no other pages to move to', () => {
+    // before
+    renderLayerMenu();
+
+    // result
+    expect(screen.getByText('Move to page').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+  });
+
+  it('should list every other page under "Move to page" and call onMoveToPage with the clicked page’s id', () => {
+    // mock
+    vi.useFakeTimers();
+    const onMoveToPage = vi.fn();
+    const otherPages = [buildPage('page-2', 'Page 2'), buildPage('page-3', 'Page 3')];
+
+    // before
+    renderLayerMenu(false, false, vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), otherPages, onMoveToPage);
+
+    // result — enabled, and not itself listing the active page
+    expect(screen.getByText('Move to page').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+
+    // action
+    fireEvent.pointerEnter(screen.getByText('Move to page'));
+    act(() => vi.runAllTimers());
+    expect(screen.getByText('Page 2')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Page 3'));
+
+    // result
+    expect(onMoveToPage).toHaveBeenCalledTimes(1);
+    expect(onMoveToPage).toHaveBeenCalledWith('page-3');
+
+    // after
+    vi.useRealTimers();
   });
 });
