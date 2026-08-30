@@ -10,9 +10,12 @@
   outline: none;
   padding: 0 8px;
 
-  &[data-highlighted],
-  &[data-state='open'] {
+  &[data-highlighted] {
     background-color: var(--color-blue-1);
+  }
+
+  &[data-state='open']:not([data-highlighted]) {
+    background-color: color-mix(in srgb, var(--color-neutral-3) 50%, transparent);
   }
 
   &[data-disabled] {
