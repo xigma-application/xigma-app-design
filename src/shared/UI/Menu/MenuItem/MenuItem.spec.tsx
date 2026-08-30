@@ -64,6 +64,14 @@ describe('MenuItem behaviors', () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
+  it('should drop the check slot when withCheck is false', () => {
+    // before
+    renderInMenu(<MenuItem label="Frame" selected withCheck={false} />);
+
+    // result — the label is the first child, no check span before it
+    expect(screen.getByText('Frame').previousElementSibling).toBeNull();
+  });
+
   it('should merge a caller-supplied shortcutClassName onto the shortcut element', () => {
     // before
     renderInMenu(<MenuItem label="Frame" shortcut="F" shortcutClassName="custom-shortcut" />);

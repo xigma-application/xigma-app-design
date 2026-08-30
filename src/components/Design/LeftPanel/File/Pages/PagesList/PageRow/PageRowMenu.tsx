@@ -1,9 +1,8 @@
-import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { FC, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
-import { PopoverCompound } from 'shared';
+import { Menu, MenuCompound } from 'shared';
 
 // hooks
 import { TVirtualAnchor } from 'shared/UI/Tree/TreeItem/hooks/useTreeItemContextMenu';
@@ -19,10 +18,7 @@ import { PAGE_MENU_COPY_LINK_KEY, PAGE_MENU_DELETE_KEY, PAGE_MENU_DUPLICATE_KEY,
 import { selectPages } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
-// styles
-import styles from './page-row-menu.module.scss';
-
-const { PopoverItem, PopoverSeparator } = PopoverCompound;
+const { MenuItem, MenuSeparator } = MenuCompound;
 
 export type TPageRowMenuProps = {
   anchorRef: RefObject<TVirtualAnchor>;
@@ -43,26 +39,22 @@ const PageRowMenu: FC<TPageRowMenuProps> = ({ anchorRef, id, isOpen, onOpenChang
   const isOnlyPage = Object.keys(pages).length <= 1;
 
   return (
-    <PopoverPrimitive.Root onOpenChange={onOpenChange} open={isOpen}>
-      <PopoverPrimitive.Anchor virtualRef={anchorRef} />
-      <PopoverPrimitive.Portal>
-        <PopoverPrimitive.Content
-          align="start"
-          className={styles.PageRowMenu}
-          onClick={handleStopPropagation}
-          onCloseAutoFocus={handlePreventRefocus}
-          side="bottom"
-          sideOffset={0}
-        >
-          <PopoverItem label={t(PAGE_MENU_COPY_LINK_KEY)} onClick={handleCopyLink} withCheck={false} />
-          <PopoverSeparator />
-          <PopoverItem label={t(PAGE_MENU_RENAME_KEY)} onClick={onRename} withCheck={false} />
-          <PopoverItem label={t(PAGE_MENU_DUPLICATE_KEY)} onClick={handleDuplicate} withCheck={false} />
-          <PopoverSeparator />
-          <PopoverItem disabled={isOnlyPage} label={t(PAGE_MENU_DELETE_KEY)} onClick={handleDelete} withCheck={false} />
-        </PopoverPrimitive.Content>
-      </PopoverPrimitive.Portal>
-    </PopoverPrimitive.Root>
+    <Menu
+      anchorRef={anchorRef}
+      onClick={handleStopPropagation}
+      onCloseAutoFocus={handlePreventRefocus}
+      onOpenChange={onOpenChange}
+      open={isOpen}
+      side="bottom"
+      sideOffset={0}
+    >
+      <MenuItem label={t(PAGE_MENU_COPY_LINK_KEY)} onClick={handleCopyLink} withCheck={false} />
+      <MenuSeparator />
+      <MenuItem label={t(PAGE_MENU_RENAME_KEY)} onClick={onRename} withCheck={false} />
+      <MenuItem label={t(PAGE_MENU_DUPLICATE_KEY)} onClick={handleDuplicate} withCheck={false} />
+      <MenuSeparator />
+      <MenuItem disabled={isOnlyPage} label={t(PAGE_MENU_DELETE_KEY)} onClick={handleDelete} withCheck={false} />
+    </Menu>
   );
 };
 

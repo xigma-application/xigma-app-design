@@ -1,7 +1,7 @@
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { Provider } from 'react-redux';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 
 // components
 import PageRow from './PageRow';
@@ -142,14 +142,22 @@ describe('PageRow', () => {
   });
 
   it('should open the page menu on right-click', () => {
+    // mock — the menu opens a tick after the right-click, deferred to dodge radix's own
+    // outside-interaction detection racing the tail of the same gesture
+    vi.useFakeTimers();
+
     // before
     renderPageRow(buildPage({ name: 'Page 1' }));
 
     // action
     fireEvent.contextMenu(screen.getByText('Page 1'));
+    act(() => vi.runAllTimers());
 
     // result
     expect(screen.getByText('Delete page')).toBeInTheDocument();
+
+    // after
+    vi.useRealTimers();
   });
 
   it('should enter rename mode when the menu Rename page action is chosen', async () => {
@@ -161,6 +169,7 @@ describe('PageRow', () => {
 
     // action
     fireEvent.contextMenu(screen.getByText('Page 1'));
+    await screen.findByText('Rename page');
     await user.click(screen.getByText('Rename page'));
 
     // result
@@ -168,6 +177,9 @@ describe('PageRow', () => {
   });
 
   it('should highlight a non-active row while its menu is open', () => {
+    // mock
+    vi.useFakeTimers();
+
     // before
     renderPageRow(buildPage({ id: 'not-the-active-page', name: 'Other page' }));
 
@@ -176,9 +188,13 @@ describe('PageRow', () => {
 
     // action
     fireEvent.contextMenu(screen.getByText('Other page'));
+    act(() => vi.runAllTimers());
 
     // result
     expect(document.querySelector('[class*="PageRow__input--menu-open"]')).not.toBeNull();
+
+    // after
+    vi.useRealTimers();
   });
 
   it('should not add the menu-open highlight to the active row', () => {

@@ -59,7 +59,7 @@ describe('PageRowMenu', () => {
     renderPageRowMenu(initialActivePageId);
 
     // result
-    expect(screen.getByText('Delete page').closest('div')?.className).toMatch(/--disabled/);
+    expect(screen.getByText('Delete page').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
   });
 
   it('should delete the page on Delete page click once a second page exists', async () => {

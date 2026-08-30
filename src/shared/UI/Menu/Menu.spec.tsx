@@ -84,4 +84,43 @@ describe('Menu behaviors', () => {
     // result
     expect(onOpenChange).toHaveBeenLastCalledWith(false);
   });
+
+  it('should open at the given anchorRef position when open is controlled, with no visible/real trigger element', () => {
+    // mock
+    const anchorRef = { current: { getBoundingClientRect: (): DOMRect => new DOMRect(10, 20, 0, 0) } };
+
+    // before
+    render(
+      <Menu anchorRef={anchorRef} onOpenChange={vi.fn()} open>
+        <MenuItem label="Undo" />
+      </Menu>,
+    );
+
+    // result
+    expect(screen.getByText('Undo')).toBeInTheDocument();
+    expect(screen.queryByText('Open')).not.toBeInTheDocument();
+  });
+
+  it('should close when open flips to false, without the caller having clicked anything', () => {
+    // mock
+    const anchorRef = { current: { getBoundingClientRect: (): DOMRect => new DOMRect(10, 20, 0, 0) } };
+
+    // before
+    const { rerender } = render(
+      <Menu anchorRef={anchorRef} onOpenChange={vi.fn()} open>
+        <MenuItem label="Undo" />
+      </Menu>,
+    );
+    expect(screen.getByText('Undo')).toBeInTheDocument();
+
+    // action
+    rerender(
+      <Menu anchorRef={anchorRef} onOpenChange={vi.fn()} open={false}>
+        <MenuItem label="Undo" />
+      </Menu>,
+    );
+
+    // result
+    expect(screen.queryByText('Undo')).not.toBeInTheDocument();
+  });
 });

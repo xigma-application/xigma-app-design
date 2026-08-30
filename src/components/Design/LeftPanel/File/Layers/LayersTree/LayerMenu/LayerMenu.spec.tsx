@@ -50,7 +50,7 @@ describe('LayerMenu', () => {
     renderLayerMenu();
 
     // result
-    expect(screen.getByText('Flatten').closest('div')?.className).toMatch(/--disabled/);
+    expect(screen.getByText('Flatten').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
   });
 
   it('should not disable Copy, Paste to replace, Rename, Hide/Show, Lock/Unlock, or Group selection', () => {
@@ -58,12 +58,12 @@ describe('LayerMenu', () => {
     renderLayerMenu();
 
     // result
-    expect(screen.getByText('Copy').closest('div')?.className).not.toMatch(/--disabled/);
-    expect(screen.getByText('Paste to replace').closest('div')?.className).not.toMatch(/--disabled/);
-    expect(screen.getByText('Rename').closest('div')?.className).not.toMatch(/--disabled/);
-    expect(screen.getByText('Hide layer').closest('div')?.className).not.toMatch(/--disabled/);
-    expect(screen.getByText('Lock layer').closest('div')?.className).not.toMatch(/--disabled/);
-    expect(screen.getByText('Group selection').closest('div')?.className).not.toMatch(/--disabled/);
+    expect(screen.getByText('Copy').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Paste to replace').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Rename').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Hide layer').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Lock layer').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Group selection').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
   });
 
   it('should call onCopy on Copy click', async () => {

@@ -1,5 +1,5 @@
 import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { Provider } from 'react-redux';
 
@@ -107,14 +107,21 @@ describe('Pages behaviors', () => {
   });
 
   it('should open the active-page menu on right-click of the collapsed header', () => {
+    // mock
+    vi.useFakeTimers();
+
     // before
     renderPages();
 
     // action
     fireEvent.contextMenu(screen.getByRole('button', { expanded: false }));
+    act(() => vi.runAllTimers());
 
     // result
     expect(screen.getByText('Delete page')).toBeInTheDocument();
+
+    // after
+    vi.useRealTimers();
   });
 
   it('should not open the header menu on right-click once expanded', () => {

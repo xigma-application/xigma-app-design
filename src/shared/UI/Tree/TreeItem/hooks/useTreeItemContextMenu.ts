@@ -18,7 +18,7 @@ export const useTreeItemContextMenu = (): TUseTreeItemContextMenuResult => {
     event.preventDefault();
     anchorRef.current = { getBoundingClientRect: (): DOMRect => new DOMRect(clientX, clientY, 0, 0) };
 
-    setIsOpen(true);
+    setTimeout(() => setIsOpen(true), 0);
   };
 
   const onOpenChange = (open: boolean): void => {

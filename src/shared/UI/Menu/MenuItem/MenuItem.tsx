@@ -19,6 +19,7 @@ export type TMenuItemProps = {
   selected?: boolean;
   shortcut?: string;
   shortcutClassName?: string;
+  withCheck?: boolean;
 };
 
 export const MenuItem: FC<TMenuItemProps> = ({
@@ -32,11 +33,14 @@ export const MenuItem: FC<TMenuItemProps> = ({
   selected = false,
   shortcut,
   shortcutClassName = '',
+  withCheck = true,
 }) => (
   <DropdownMenuPrimitive.Item className={cx(styles.MenuItem, className)} disabled={disabled} onSelect={onClick}>
-    <span style={{ opacity: selected ? 1 : 0 }}>
-      <Icon name="Check" size={checkIconSize} />
-    </span>
+    {withCheck && (
+      <span style={{ opacity: selected ? 1 : 0 }}>
+        <Icon name="Check" size={checkIconSize} />
+      </span>
+    )}
     {icon && <Icon name={icon} size={iconSize} />}
     <span className={styles.MenuItem__label}>{label}</span>
     {shortcut && <span className={cx(styles.MenuItem__shortcut, shortcutClassName)}>{shortcut}</span>}
