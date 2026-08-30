@@ -40,10 +40,10 @@ in `UNDOABLE_ACTION_TYPES`.
 old group's last member, pruning the old group entirely — same code path as `pruneParentGroup`,
 below), and the new group forms either at the top level or nested *inside* an existing group, matching
 wherever the selection's members actually sit. `getIsDescendantOfMovedNodes` guards against forming a
-cycle (grouping a group with one of its own descendants). See `e2e/pages/design/group.spec.ts` for the
+cycle (grouping a group with one of its own descendants). See `e2e/design/selection/group.spec.ts` for the
 worked-out scenarios (steal-from-existing-group, member-selected-first vs outsider-selected-first,
 3-levels-deep nesting) — that file owns grouping/ungrouping *mechanics*; this doc and
-`e2e/pages/design/group-nodes.spec.ts` own group-node *behavior* once a group already exists.
+`e2e/design/selection/group-nodes.spec.ts` own group-node *behavior* once a group already exists.
 
 **Delete cascades in both directions**, unlike the plain parent→child-only cascade described in
 `design-store-architecture.md` §3:
@@ -96,7 +96,7 @@ Both apply this priority, highest first:
    treated as "entered" for its *other*, still-unselected children — hovering/clicking them should
    still resolve to the group as a whole. (`isGroupChildSelected`, an earlier `.some()`-based version
    of this same file, was replaced after exactly this mixed-selection case regressed — see the
-   `e2e/pages/design/group-nodes.spec.ts` "mixed selection" tests.)
+   `e2e/design/selection/group-nodes.spec.ts` "mixed selection" tests.)
 4. **Otherwise** — resolve up to the top-level ancestor (`getTopLevelAncestor`, walking `parentId`),
    i.e. the outermost group. A plain, un-modified click/hover on any group member selects the whole
    group.
@@ -238,9 +238,9 @@ selection resizes/rotates/drags as one unit exactly like any other 2+ selection.
 
 ## 6. e2e coverage
 
-`e2e/pages/design/group.spec.ts` — grouping/ungrouping mechanics (Ctrl+G, Ctrl+Shift+G, stealing a
+`e2e/design/selection/group.spec.ts` — grouping/ungrouping mechanics (Ctrl+G, Ctrl+Shift+G, stealing a
 member from an existing group in both selection orderings, nesting, Layers-panel drag in/out, delete
-cascades, deep-nesting click-select). `e2e/pages/design/group-nodes.spec.ts` — node-level *behavior*
+cascades, deep-nesting click-select). `e2e/design/selection/group-nodes.spec.ts` — node-level *behavior*
 once a group already exists: plain-click-selects-group vs. Ctrl-click-selects-child vs.
 Ctrl+Shift-toggle, rigid move/resize/rotate, mixed-selection drag/resize (§5) including starting the
 drag from the empty gap between the two selected nodes, delete-shrinks-the-group and

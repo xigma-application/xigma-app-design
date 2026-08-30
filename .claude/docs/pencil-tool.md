@@ -162,11 +162,11 @@ test (it's an emergent property of chunk length interacting with real stroke sha
 function's branch) — it was verified numerically via a throwaway `tsx` script, and is covered
 going forward by e2e's Shift/regression scenarios plus manual live testing, not a unit assertion.
 
-e2e: `e2e/pages/design/pencil.spec.ts` — a plain drag draws and the tool stays active for an
+e2e: `e2e/design/vector/pencil.spec.ts` — a plain drag draws and the tool stays active for an
 immediate second stroke, a too-short drag discards, Shift locks an axis and holds it through a
 direction reversal, releasing Shift mid-drag resumes freehand, the mouse-released-while-Shift-held
 regression, and Vector Edit Mode entry via double-click with a vertex drag proving it behaves like
-an ordinary node. See `e2e/pages/design/docs/TEST_CASES.md`'s "Pencil drawing" section for the
+an ordinary node. See `e2e/design/docs/TEST_CASES.md`'s "Pencil drawing" section for the
 scenario table.
 
 ## Related

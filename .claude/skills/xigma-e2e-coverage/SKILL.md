@@ -1,6 +1,6 @@
 ---
 name: xigma-e2e-coverage
-description: When a change to Design-canvas interaction (new tool, gesture, or selection rule) needs a Playwright e2e test in e2e/pages/design/, not just unit tests or a one-off MCP demo. Load before calling any change to canvas interaction "done" — right after implementation, before reporting completion.
+description: When a change to Design-canvas interaction (new tool, gesture, or selection rule) needs a Playwright e2e test in e2e/design/, not just unit tests or a one-off MCP demo. Load before calling any change to canvas interaction "done" — right after implementation, before reporting completion.
 ---
 
 # xigma e2e Coverage
@@ -9,7 +9,7 @@ description: When a change to Design-canvas interaction (new tool, gesture, or s
 
 Finishing a change that adds or modifies **interactive Design-canvas behavior** — a new tool, a
 new pointer gesture, a new selection rule, anything a user does with the mouse/keyboard on the
-canvas — is not complete until `e2e/pages/design/` has a test that would fail if the behavior
+canvas — is not complete until `e2e/design/` has a test that would fail if the behavior
 regressed. Write it in the **same change**, not as a follow-up the user has to ask for.
 
 This was missed for real: the marquee-selection feature (touch-vs-Control-containment drag-select)
@@ -33,7 +33,7 @@ Does not need a new e2e test:
 - A pure refactor with no behavior change.
 - A new branch in logic already exhaustively covered by the unit suite, where the e2e assertion
   would just be "prove *something* changed" duplicating what `store.getState()` already asserts
-  precisely in the unit test — see `e2e/pages/design/TEST_CASES.md`'s own "Why so few scenarios get
+  precisely in the unit test — see `e2e/design/docs/TEST_CASES.md`'s own "Why so few scenarios get
   e2e coverage" section for the standing rationale and its worked examples (most of the 18
   cataloged selection scenarios are unit-only for exactly this reason).
 
@@ -41,9 +41,9 @@ The bar is "would a real browser catch something a unit test can't", not "did an
 
 ## How
 
-1. Add the test to the most relevant existing file under `e2e/pages/design/` (e.g. `selection.spec.ts`
+1. Add the test to the most relevant existing file under `e2e/design/` (e.g. `selection.spec.ts`
    for selection-related behavior) or create a new `<feature>.spec.ts` there if none fits.
-2. Use the `DesignPage` page object (`e2e/pages/design/model/DesignPage.ts`) — `goto`, `selectTool`,
+2. Use the `DesignPage` page object (`e2e/design/model/DesignPage.ts`) — `goto`, `selectTool`,
    `drawFrame`, `click`, `pointerDown`/`pointerMove`/`pointerUp`, `panBy`, `zoomAt`. Extend it with a
    new helper method if the gesture needs one not yet covered, following the existing methods'
    shape (thin wrappers over `page.mouse`/`page.keyboard`).
@@ -53,7 +53,7 @@ The bar is "would a real browser catch something a unit test can't", not "did an
    Prefer comparing two *of your own* screenshots (before/after, mode-A/mode-B) over asserting an
    exact pixel pattern — see `selection.spec.ts`'s Control-vs-touch marquee test for the pattern:
    drag the identical box twice, once per mode, and assert the two results differ.
-4. Update the scenario table in `e2e/pages/design/TEST_CASES.md` in the same change: add a numbered
+4. Update the scenario table in `e2e/design/docs/TEST_CASES.md` in the same change: add a numbered
    row, mark Unit/E2E coverage with ✅/—, and if e2e is deliberately skipped for that scenario, say
    why inline (matching the existing entries' style) rather than leaving the reader to guess.
 5. Run `npx playwright test` before reporting the change done.

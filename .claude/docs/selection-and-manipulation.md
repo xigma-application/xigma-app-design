@@ -551,7 +551,7 @@ surrounding orchestrator wiring.
 `useSelectionTool.spec.tsx` (~30 `it` blocks) is effectively the canonical enumeration of the state
 machine in §3 — good source list if re-deriving the decision tree from scratch.
 
-e2e (`e2e/pages/design/`):
+e2e (`e2e/design/`):
 - `selection.spec.ts` — shift-click, Escape-deselects, multi-selection-not-replaced-until-release,
   survives-pan/zoom, marquee live-select + persists + touch-vs-Control, text hit past/within bounds.
 - `resize.spec.ts` — rotated cursor per handle, corner-anchors-opposite-corner, Shift aspect-lock,
@@ -1465,7 +1465,7 @@ across that gap, so the guide doesn't look like it just stops short at each shap
   default/move/scale/shapeBuilder tools); also nulled explicitly in `handlePointerUp`, `onPointerLeave`
   and the tool-teardown effect, since no `pointermove` is guaranteed after those.
 - **No undo / no store**: purely a render artifact off a ref, like the vector alignment guide.
-- e2e: `e2e/pages/design/shape-contact-guide.spec.ts` (drag-into-contact + Alt-hover).
+- e2e: `e2e/design/selection/shape-contact-guide.spec.ts` (drag-into-contact + Alt-hover).
 
 ## 24. Alignment-snap core made shared, and a move-time snap for shapes
 
@@ -1511,7 +1511,7 @@ from the eligible members only but applied to every dragged node's delta uniform
   either, per the request this shipped from).
 - Cleared in `disarmDrag.ts`, `onPointerLeave`, and the tool-teardown effect, mirroring §23's
   `contactGuidesRef` cleanup story.
-- e2e: `e2e/pages/design/shape-alignment-snap.spec.ts` — screenshot-equality against a control scene
+- e2e: `e2e/design/selection/shape-alignment-snap.spec.ts` — screenshot-equality against a control scene
   where the shape is placed directly at the expected snapped/unsnapped position (no drag), the same
   technique §23's e2e already established for proving exact geometry without a state-reading hook.
 
@@ -1541,7 +1541,7 @@ narrowly since resize math already branches hard on rotation/single-vs-multi (§
 - Guide storage/lifecycle mirrors move exactly: `continueResizeDrag.ts` writes the returned guide to
   the same `refs.transform.alignmentGuideRef` §24 introduced (move and resize never overlap, so one
   ref suffices), `disarmResizeDrag.ts` clears it alongside `resizedNodeIdsRef`.
-- e2e (`e2e/pages/design/shape-resize-snap.spec.ts`) needed a different control-scene shape than §24's
+- e2e (`e2e/design/selection/shape-resize-snap.spec.ts`) needed a different control-scene shape than §24's
   move test: comparing a resize-produced node screenshot against a node placed by the **draw-new-shape**
   tool at the literal target size is *not* pixel-safe even when the feature is correct — width/height
   are `Math.round`ed in `resizeBoxNode.ts` but the paired x/y (`getResizedPosition.ts`, built from
@@ -1582,7 +1582,7 @@ vector network like line/vector, not a plain box.
 - `toDraftRect` already rounds its corners via `Math.round`, so unlike §25's resize case there's no
   sub-pixel x/y mismatch between a snapped draft and a directly-drawn one — both go through the exact
   same rounding.
-- e2e (`e2e/pages/design/shape-draw-snap.spec.ts`, rectangle only — the other three hooks are proven at
+- e2e (`e2e/design/selection/shape-draw-snap.spec.ts`, rectangle only — the other three hooks are proven at
   the unit level, one set of alignment-snap tests added per hook's own spec file) clips the comparison
   screenshot to just the drawn shapes' bounding box (`page.screenshot({ clip })`, the same technique
   `resize.spec.ts`'s mirror tests use) instead of comparing the full `canvas.screenshot()` — a

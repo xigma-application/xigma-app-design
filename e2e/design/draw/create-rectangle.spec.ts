@@ -1,0 +1,146 @@
+import { test, expect } from '@playwright/test';
+
+// components
+import { DesignPage } from '../model/DesignPage';
+
+test('draws a new rectangle on the canvas using the Rectangle tool', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-project');
+  await expect(designPage.canvas).toBeVisible();
+
+  const box = await designPage.canvasSafeArea();
+
+  const before = await designPage.canvas.screenshot();
+
+  const rectangleTool = designPage.toolRadio('rectangle');
+  await expect(rectangleTool).toBeVisible();
+  await designPage.selectTool('rectangle');
+  await expect(rectangleTool).toHaveAttribute('aria-checked', 'true');
+
+  const startX = box.x + box.width * 0.3;
+  const startY = box.y + box.height * 0.3;
+  const endX = box.x + box.width * 0.6;
+  const endY = box.y + box.height * 0.6;
+
+  await designPage.pointerDown(startX, startY);
+  await designPage.pointerMove(endX, endY);
+  await designPage.pointerUp();
+
+  const defaultTool = designPage.toolRadio('default');
+  await expect(defaultTool).toHaveAttribute('aria-checked', 'true');
+
+  const after = await designPage.canvas.screenshot();
+  expect(after.equals(before)).toBe(false);
+});
+
+test('draws a rectangle with the "R" keyboard shortcut', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-project');
+  await expect(designPage.canvas).toBeVisible();
+
+  const box = await designPage.canvasSafeArea();
+
+  const before = await designPage.canvas.screenshot();
+
+  await page.keyboard.press('r');
+
+  const rectangleTool = designPage.toolRadio('rectangle');
+  await expect(rectangleTool).toHaveAttribute('aria-checked', 'true');
+
+  const startX = box.x + box.width * 0.3;
+  const startY = box.y + box.height * 0.3;
+  const endX = box.x + box.width * 0.6;
+  const endY = box.y + box.height * 0.6;
+
+  await designPage.pointerDown(startX, startY);
+  await designPage.pointerMove(endX, endY);
+  await designPage.pointerUp();
+
+  const after = await designPage.canvas.screenshot();
+  expect(after.equals(before)).toBe(false);
+});
+
+test('places a default 100x100 rectangle centered on the click point when released without dragging', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-project');
+  await expect(designPage.canvas).toBeVisible();
+
+  const box = await designPage.canvasSafeArea();
+
+  const before = await designPage.canvas.screenshot();
+
+  await designPage.selectTool('rectangle');
+
+  const clickX = box.x + box.width * 0.5;
+  const clickY = box.y + box.height * 0.5;
+
+  await designPage.click(clickX, clickY);
+
+  const defaultTool = designPage.toolRadio('default');
+  await expect(defaultTool).toHaveAttribute('aria-checked', 'true');
+
+  const after = await designPage.canvas.screenshot();
+  expect(after.equals(before)).toBe(false);
+});
+
+test('starts selected immediately after being drawn, without an extra click', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-project');
+  await expect(designPage.canvas).toBeVisible();
+
+  const box = await designPage.canvasSafeArea();
+
+  const startX = box.x + box.width * 0.3;
+  const startY = box.y + box.height * 0.3;
+  const endX = box.x + box.width * 0.6;
+  const endY = box.y + box.height * 0.6;
+
+  await designPage.selectTool('rectangle');
+  await designPage.pointerDown(startX, startY);
+  await designPage.pointerMove(endX, endY);
+  await designPage.pointerUp();
+
+  const selected = await designPage.canvas.screenshot();
+
+  await designPage.click(box.x + box.width * 0.05, box.y + box.height * 0.05); // empty canvas, well outside the rectangle — deselects
+  const deselected = await designPage.canvas.screenshot();
+
+  expect(selected.equals(deselected)).toBe(false);
+});
+
+test("shows the rectangle's fill live while dragging, unlike the fill-less Frame draft", async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-project');
+  await expect(designPage.canvas).toBeVisible();
+
+  const box = await designPage.canvasSafeArea();
+
+  const startX = box.x + box.width * 0.3;
+  const startY = box.y + box.height * 0.3;
+  const endX = box.x + box.width * 0.6;
+  const endY = box.y + box.height * 0.6;
+
+  await designPage.selectTool('frame');
+  await designPage.pointerDown(startX, startY);
+  await designPage.pointerMove(endX, endY);
+  const frameMidDrag = await designPage.canvas.screenshot();
+  await designPage.pointerUp();
+
+  // reload for a clean canvas, then drag the exact same box with the Rectangle tool
+  await designPage.goto('e2e-test-project');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.selectTool('rectangle');
+  await designPage.pointerDown(startX, startY);
+  await designPage.pointerMove(endX, endY);
+  const rectangleMidDrag = await designPage.canvas.screenshot();
+  await designPage.pointerUp();
+
+  // same box, same outline and corner handles — only the rectangle's own fill should differ them
+  expect(rectangleMidDrag.equals(frameMidDrag)).toBe(false);
+});

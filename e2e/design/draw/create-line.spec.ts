@@ -1,0 +1,91 @@
+import { test, expect } from '@playwright/test';
+
+// components
+import { DesignPage } from '../model/DesignPage';
+
+test('draws a new line on the canvas using the Line option from the Rectangle dropdown', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-project');
+  await expect(designPage.canvas).toBeVisible();
+
+  const box = await designPage.canvasSafeArea();
+
+  const before = await designPage.canvas.screenshot();
+
+  await designPage.selectToolFromDropdown('rectangle', 'Line');
+
+  const lineTool = designPage.toolRadio('line');
+  await expect(lineTool).toHaveAttribute('aria-checked', 'true');
+
+  const startX = box.x + box.width * 0.3;
+  const startY = box.y + box.height * 0.3;
+  const endX = box.x + box.width * 0.6;
+  const endY = box.y + box.height * 0.5;
+
+  await designPage.pointerDown(startX, startY);
+  await designPage.pointerMove(endX, endY);
+  await designPage.pointerUp();
+
+  const defaultTool = designPage.toolRadio('default');
+  await expect(defaultTool).toHaveAttribute('aria-checked', 'true');
+
+  const after = await designPage.canvas.screenshot();
+  expect(after.equals(before)).toBe(false);
+});
+
+test('starts selected immediately after being drawn, without an extra click', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-project');
+  await expect(designPage.canvas).toBeVisible();
+
+  const box = await designPage.canvasSafeArea();
+
+  const startX = box.x + box.width * 0.3;
+  const startY = box.y + box.height * 0.3;
+  const endX = box.x + box.width * 0.6;
+  const endY = box.y + box.height * 0.5;
+
+  await designPage.selectToolFromDropdown('rectangle', 'Line');
+  await designPage.pointerDown(startX, startY);
+  await designPage.pointerMove(endX, endY);
+  await designPage.pointerUp();
+
+  // a line's selected state has no bounding-box outline, just a thin highlight along the segment
+  // plus its two endpoint handles — this diff can only come from that
+  const selected = await designPage.canvas.screenshot();
+
+  await designPage.click(box.x + box.width * 0.05, box.y + box.height * 0.9); // empty canvas, well outside the line — deselects
+  const deselected = await designPage.canvas.screenshot();
+
+  expect(selected.equals(deselected)).toBe(false);
+});
+
+test('draws a line with the "L" keyboard shortcut', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-project');
+  await expect(designPage.canvas).toBeVisible();
+
+  const box = await designPage.canvasSafeArea();
+
+  const before = await designPage.canvas.screenshot();
+
+  await page.keyboard.press('l');
+
+  const lineTool = designPage.toolRadio('line');
+  await expect(lineTool).toHaveAttribute('aria-checked', 'true');
+
+  const startX = box.x + box.width * 0.3;
+  const startY = box.y + box.height * 0.3;
+  const endX = box.x + box.width * 0.6;
+  const endY = box.y + box.height * 0.5;
+
+  await designPage.pointerDown(startX, startY);
+  await designPage.pointerMove(endX, endY);
+  await designPage.pointerUp();
+
+  const after = await designPage.canvas.screenshot();
+  expect(after.equals(before)).toBe(false);
+});

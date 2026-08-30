@@ -660,7 +660,7 @@ genuinely per-end, never per-segment.
   without this merge, a handle shaped mid-draw and left as-is after switching to the Selection tool would
   render (correctly, via the renderer's own merge) but be un-draggable (hit-test only seeing the empty ref),
   a visible-but-dead control. Feeding the same merged set into both layers is what keeps that handle
-  interactive immediately after the tool switch, matching `e2e/pages/design/vector-edit.spec.ts`'s "dragging
+  interactive immediately after the tool switch, matching `e2e/design/vector/vector-edit.spec.ts`'s "dragging
   an existing tangent handle" test, which grabs a just-drawn handle right after switching off Pen with no
   intervening vertex click.
 - **The default-preview mechanism (§9) is now symmetric — `getEffectiveTangentEnd.ts` mirrors
@@ -1473,7 +1473,7 @@ arms on) first: `setClassName(vertexHit ? 'segment' : hit ? 'bend' : null)`. The
 className/asset (`canvas.module.scss`, `assets/icons/cursors/segment.png`) already existed structurally
 alongside `'bend'` before this — this wiring is what actually makes it switch on hover.
 
-Covered by `e2e/pages/design/vector-edit.spec.ts` (rows 213-215, `TEST_CASES.md`): a differential
+Covered by `e2e/design/vector/vector-edit.spec.ts` (rows 213-215, `TEST_CASES.md`): a differential
 regression test for the visibility fix (Ctrl-click's own screenshot must already match a known-good
 plain-reselect of the same segment, not just "some pixel changed" — a plain before/after diff turned
 out to pass even against the buggy clear-selection version, since writing the tangents alone already
@@ -3153,7 +3153,7 @@ above already follows. `handlePointerMove.ts`'s two `if` branches (drag-continua
 now each live in their own function — the drag branch was already `continueVectorHandleDrag.ts`
 unchanged, the preview branch is the new `updatePenPreview.ts`.
 
-**e2e**: `e2e/pages/design/multi-vector-edit.spec.ts` (10 scenarios — Enter opens both nodes, cross-node
+**e2e**: `e2e/design/vector/vector-edit-multi.spec.ts` (10 scenarios — Enter opens both nodes, cross-node
 drag isolation, cross-node marquee union, grouped delete + single Undo, Escape closes both, Pen click-merge
 onto a vertex, onto an edge, the pre-click snap cursor, blank-click vector-C creation, Paint on the
 non-primary node), `TEST_CASES.md` rows 250-259. Full live-verified scenario log, including the
@@ -4036,7 +4036,7 @@ a real bounded face).
 
 Live-verified end-to-end via Playwright MCP direct `store.dispatch`/`page.evaluate` throughout
 implementation (faster and more reliable than driving the Pen tool through raw clicks to build exact
-test topologies), then locked in permanently as `e2e/pages/design/vector-shape-builder.spec.ts`
+test topologies), then locked in permanently as `e2e/design/vector/vector-shape-builder.spec.ts`
 (TEST_CASES.md #294-299) once the tool stopped actively changing shape: freeform merge across a
 split rectangle, plain-click fill, Alt+click subtract on an isolated face (no neighbor to protect,
 so the whole boundary goes) vs. on a face with an untouched filled neighbor (only the exclusive

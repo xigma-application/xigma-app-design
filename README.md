@@ -73,7 +73,6 @@ and what's next (side panels, resize/rotate handles, undo/redo, groups, snapping
 | Bundler / dev server | Vite                                                |
 | Rendering engine     | Raw WebGL2 (no engine/framework on top)             |
 | State                | Redux Toolkit                                       |
-| Routing              | React Router                                        |
 | Styling              | CSS Modules (SCSS) + BEM                            |
 | UI primitives        | Radix UI (dropdown, toggle group, popover, tooltip) |
 | i18n                 | i18next / react-i18next                             |
@@ -91,8 +90,9 @@ npm install
 npm run dev
 ```
 
-Vite starts on `http://localhost:5173`. The editor itself lives at `/design/:id` (any id works,
-e.g. `http://localhost:5173/design/my-file`) — the root route is just the Vite-starter home page.
+Vite starts on `http://localhost:5173`. There's no client-side router — the editor is the whole app,
+served at the root; an optional `?project=<id>` query param is carried through for link-sharing (see
+`.claude/docs/app-shell.md`).
 
 ## Shared package (`@xigma/*`)
 
@@ -153,13 +153,13 @@ Modules are organized as flat, top-level folders under `src/`, imported by bare 
   All editor UI lives under `components/Design/...` (`Canvas`, `Toolbar`)
 - `store/` — Redux Toolkit slices, one feature folder per slice (`store/design`)
 - `types/` — shared TS types and enums (`types/design`)
-- `hooks/`, `shared/`, `utils/`, `constant/`, `core/`, `config/` — cross-cutting code, following
-  the same alias pattern
+- `hooks/`, `shared/`, `utils/`, `constant/`, `config/` — cross-cutting code, following the same
+  alias pattern
 - `assets/` — SVG icons (recolored at runtime via a `data-svg-property` convention + the shared
   `Icon` component) and font sources for the MSDF atlas
 - `styles/` — global styles and theming (CSS custom properties, light/dark)
 - `translations/` — i18next resource files
-- `e2e/` — Playwright specs (`e2e/pages/design/...`), one file per tool/interaction
+- `e2e/` — Playwright specs (`e2e/design/...`), one file per tool/interaction
 - `docs/` — `ROADMAP.md` (the source of truth for progress and what's next)
 
 ## Testing
@@ -169,7 +169,7 @@ Two independent layers:
 - **Unit** (Vitest + Testing Library) — `npm run test:coverage` enforces **100%** branch/function/
   line/statement coverage (`vite.config.ts`, `coverage.thresholds`). This is a hard gate, not a
   soft target.
-- **E2E** (Playwright) — `e2e/pages/design/*.spec.ts`, one spec per canvas tool/interaction
+- **E2E** (Playwright) — `e2e/design/**/*.spec.ts`, one spec per canvas tool/interaction
   (creating each shape type, hover, selection, hand-tool pan, line-endpoint dragging, …). The
   Playwright config auto-starts the dev server if it isn't already running.
 

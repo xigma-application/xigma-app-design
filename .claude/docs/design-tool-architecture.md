@@ -208,7 +208,7 @@ Two independent render passes, both need updating for a visual change to show up
   state. Copy an existing sibling test file's mock rather than writing one from scratch.
 - Optional fields (§1) mean most existing tests need **zero** changes when adding a style field to
   an existing node type — only the new tool's own dedicated tests need to set it.
-- e2e (`e2e/pages/design/`): only owed when the change is genuine browser+rendering+timing behavior
+- e2e (`e2e/design/`): only owed when the change is genuine browser+rendering+timing behavior
   a unit test can't see (see the `xigma-e2e-coverage` skill for the exact bar). Use the shared
   `DesignPage.ts` page object; a new tool usually needs 2-4 tests — draw-and-verify-toolbar-state,
   a visual diff proving the new rendering actually differs from the closest existing tool (compare
@@ -244,7 +244,7 @@ above: `ToolName.arrow`, `TLineNode.startPoint`/`endPoint` (optional, `'default'
 `ARROW_TOOL_SETTINGS` reusing `useDrawLineTool`, joining Line's slot in the Rectangle dropdown,
 `Shift+L`, a new `drawArrowhead.ts` primitive composed from `drawLine`/`drawEllipse`, wired into
 `drawSceneNodes.ts` and `drawDraftLine.ts` via a shared `drawLineEndpointArrowheads.ts` helper, zero
-changes to hit-testing, and `e2e/pages/design/create-arrow.spec.ts`. Read that commit's diff
+changes to hit-testing, and `e2e/design/draw/create-arrow.spec.ts`. Read that commit's diff
 alongside this doc for the concrete shape of every piece described here.
 
 ## A one-shot tool that doesn't fit this checklist: Comment
