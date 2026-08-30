@@ -16,6 +16,7 @@ export const drawSelectionOutline = (
   viewport: TViewport,
   vectorEditingNodeIds: string[],
   nodesById: Record<string, TSceneNode>,
+  editingPathId?: string | null,
 ): void => {
   const nonVectorEditingNodes = selectedNodes.filter((node) => !vectorEditingNodeIds.includes(node.id));
 
@@ -32,6 +33,7 @@ export const drawSelectionOutline = (
       viewport,
       vectorEditingNodeIds,
       nodesById,
+      editingPathId,
     );
   }
 };

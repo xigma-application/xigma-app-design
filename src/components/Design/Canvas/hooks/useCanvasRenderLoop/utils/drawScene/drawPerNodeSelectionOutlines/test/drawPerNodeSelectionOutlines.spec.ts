@@ -100,73 +100,8 @@ describe('drawPerNodeSelectionOutlines', () => {
     expect(lineLoopDraws).toHaveLength(2);
   });
 
-  it('should additionally draw the start-offset handle for a selected path-text node', () => {
-    // mock
-    const gl = createGlMock();
-    const program = {} as WebGLProgram;
-    const buffer = {} as WebGLBuffer;
-    const pathText: TTextNode = {
-      content: 'Hi',
-      fill: '#ffffff',
-      flipX: false,
-      flipY: false,
-      fontFamily: 'Inter',
-      fontSize: 14,
-      height: 200,
-      id: 'a',
-      name: 'Text',
-      parentId: null,
-      pathId: 'ellipse-1',
-      pathStartOffset: 0,
-      rotation: 0,
-      type: NodeType.text,
-      width: 200,
-      x: 0,
-      y: 0,
-    };
-
-    // before
-    drawPerNodeSelectionOutlines(gl, program, buffer, [pathText], 100, 100, IDENTITY_VIEWPORT, [], {});
-
-    // result
-    const fanDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLE_FAN);
-
-    expect(fanDraws).toHaveLength(1);
-  });
-
-  it('should additionally draw a dashed font-size guide outline for a selected path-text node', () => {
-    // mock
-    const gl = createGlMock();
-    const program = {} as WebGLProgram;
-    const buffer = {} as WebGLBuffer;
-    const pathText: TTextNode = {
-      content: 'Hi',
-      fill: '#ffffff',
-      flipX: false,
-      flipY: false,
-      fontFamily: 'Inter',
-      fontSize: 14,
-      height: 200,
-      id: 'a',
-      name: 'Text',
-      parentId: null,
-      pathId: 'ellipse-1',
-      pathStartOffset: 0,
-      rotation: 0,
-      type: NodeType.text,
-      width: 200,
-      x: 0,
-      y: 0,
-    };
-
-    // before
-    drawPerNodeSelectionOutlines(gl, program, buffer, [pathText], 100, 100, IDENTITY_VIEWPORT, [], {});
-
-    // result
-    const lineDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINES);
-
-    expect(lineDraws).toHaveLength(1);
-  });
+  // the default-case rendering (bounding box, corner handles, path-text handle, font-size guide)
+  // lives in drawDefaultSelectionOutline.ts — see its own spec for that behavior in detail.
 
   it('should draw a bounding-box outline and 4 corner handles for a selected vector node, using its computed bounds', () => {
     // mock
@@ -201,6 +136,9 @@ describe('drawPerNodeSelectionOutlines', () => {
 
     expect(lineLoopDraws).toHaveLength(5);
   });
+
+  // the vector-as-text-path-guide suppression (no selection chrome while bound) lives in
+  // drawVectorSelectionOutlineUnlessTextPathGuide.ts — see its own spec for that branching.
 
   it('should draw a rotated bounding-box outline for a selected vector node with a persisted rotation', () => {
     // mock
@@ -293,37 +231,5 @@ describe('drawPerNodeSelectionOutlines', () => {
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
-  });
-
-  it('should not draw the start-offset handle for an ordinary (non-path) text node', () => {
-    // mock
-    const gl = createGlMock();
-    const program = {} as WebGLProgram;
-    const buffer = {} as WebGLBuffer;
-    const straightText: TTextNode = {
-      content: 'Hi',
-      fill: '#ffffff',
-      flipX: false,
-      flipY: false,
-      fontFamily: 'Inter',
-      fontSize: 14,
-      height: 200,
-      id: 'a',
-      name: 'Text',
-      parentId: null,
-      rotation: 0,
-      type: NodeType.text,
-      width: 200,
-      x: 0,
-      y: 0,
-    };
-
-    // before
-    drawPerNodeSelectionOutlines(gl, program, buffer, [straightText], 100, 100, IDENTITY_VIEWPORT, [], {});
-
-    // result
-    const fanDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.TRIANGLE_FAN);
-
-    expect(fanDraws).toHaveLength(0);
   });
 });

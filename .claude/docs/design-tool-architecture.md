@@ -170,6 +170,20 @@ hover cursor directly rather than through `useHoverHighlight`'s resolver chain, 
 the `default`/`scale`/`comment` tools (see `canvas-rendering-pipeline.md`/`selection-and-manipulation.md`
 for the render/hit-test side of a vector acting as a text path).
 
+**Editing-state dashed guide**: `getPathOutlineStyles.ts` already keys its `'editing'/'hover'/
+'selected'` map by `pathId` regardless of the target node's type (id-only lookup), so a bound
+vector's id lands in the same map an ellipse path's id would. `drawSceneNodes.ts`'s
+`case NodeType.vector` draws the vector's own stroke as always, then — only when
+`pathOutlineStyles.get(node.id) === 'editing'` — an extra dashed overlay via
+`drawDashedVectorPathOutline.ts` (`utils/canvas/drawVectorNode/`), the vector-chain counterpart to
+`drawDashedEllipseOutline.ts`: same even-dash-count-over-arc-length walk, sampling world points via
+`getVectorChainOrder`/`getVectorChainArcLengthTable`/`getVectorChainPositionAtLength` (relocated
+next to its sibling `getVectorChainPositionAtFraction.ts` in `vectorNetwork/`, since the text-only
+`pathSampler` module was the wrong layer for a general chain-position helper) +
+`getVectorSegmentPointAtT`, against the rotation-baked (`getRenderedVectorNode`) node. Hover
+(thick outline) and selected (thin solid) parity for a bound vector — the two other states
+`drawPathOutline.ts` handles for an ellipse path — are not yet implemented.
+
 ## 7. Canvas interaction (the actual drag gesture)
 
 - `Canvas/Canvas.tsx` — one `useDraw*Tool(refs, <TOOL>_SETTINGS)` call per tool, where `refs` is the

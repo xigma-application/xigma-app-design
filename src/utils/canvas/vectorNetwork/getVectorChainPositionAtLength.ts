@@ -1,7 +1,9 @@
 // types
-import { TVectorChainArcLengthSample } from '../../../vectorNetwork/getVectorChainArcLengthTable';
+import { TVectorChainArcLengthSample } from './getVectorChainArcLengthTable';
 
-export const getChainPositionAtLength = (table: TVectorChainArcLengthSample[], length: number): { segmentId: string; t: number } => {
+export type TVectorChainPosition = { segmentId: string; t: number };
+
+export const getVectorChainPositionAtLength = (table: TVectorChainArcLengthSample[], length: number): TVectorChainPosition => {
   const upperIndex = Math.max(
     table.findIndex((sample) => sample.length >= length),
     1,

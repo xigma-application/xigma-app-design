@@ -18,6 +18,7 @@ import { drawSceneNodes } from '../drawSceneNodes';
 
 const createGlMock = (): WebGL2RenderingContext =>
   ({
+    LINES: 1,
     LINE_LOOP: 2,
     RGBA: 6408,
     STATIC_DRAW: 35044,
@@ -443,4 +444,7 @@ describe('drawSceneNodes', () => {
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, expect.any(Number));
   });
+
+  // the vector-as-text-path-guide decision (dashed outline vs. own stroke vs. nothing) lives in
+  // drawVectorNodeOrTextPathGuide.ts — see its own spec for that branching in detail.
 });

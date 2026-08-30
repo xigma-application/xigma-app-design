@@ -1,17 +1,11 @@
-// others
-import { DRAFT_FRAME_STROKE } from 'constant/canvas';
-
 // types
 import { NodeType } from 'types/design/enums';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
-import { drawCornerHandles } from 'utils/canvas/drawCornerHandles';
+import { drawDefaultSelectionOutline } from './drawDefaultSelectionOutline';
 import { drawLineSelectionOutline } from './drawLineSelectionOutline';
-import { drawPathTextFontSizeGuide } from '../drawPathTextFontSizeGuide';
-import { drawRect } from 'utils/canvas/drawRect/drawRect';
-import { drawSelectedPathTextHandle } from '../drawSelectedPathTextHandle';
-import { drawVectorSelectionOutline } from './drawVectorSelectionOutline';
+import { drawVectorSelectionOutlineUnlessTextPathGuide } from './drawVectorSelectionOutlineUnlessTextPathGuide';
 
 export const drawPerNodeSelectionOutlines = (
   gl: WebGL2RenderingContext,
@@ -23,6 +17,7 @@ export const drawPerNodeSelectionOutlines = (
   viewport: TViewport,
   vectorEditingNodeIds: string[],
   nodesById: Record<string, TSceneNode>,
+  editingPathId?: string | null,
 ): void => {
   selectedNodes.forEach((node) => {
     switch (node.type) {
@@ -32,17 +27,21 @@ export const drawPerNodeSelectionOutlines = (
       case NodeType.path:
         break;
       case NodeType.vector:
-        drawVectorSelectionOutline(gl, program, buffer, node, vectorEditingNodeIds, canvasWidth, canvasHeight, viewport);
+        drawVectorSelectionOutlineUnlessTextPathGuide(
+          gl,
+          program,
+          buffer,
+          node,
+          canvasWidth,
+          canvasHeight,
+          viewport,
+          vectorEditingNodeIds,
+          nodesById,
+          editingPathId,
+        );
         break;
-      default: {
-        const { height, rotation, width, x, y } = node;
-        const pathNode = node.type === NodeType.text && node.pathId ? nodesById[node.pathId] : undefined;
-
-        drawRect(gl, program, buffer, { height, stroke: DRAFT_FRAME_STROKE, width, x, y }, canvasWidth, canvasHeight, viewport, rotation);
-        drawCornerHandles(gl, program, buffer, node, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport, rotation);
-        drawSelectedPathTextHandle(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, pathNode);
-        drawPathTextFontSizeGuide(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
-      }
+      default:
+        drawDefaultSelectionOutline(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, nodesById);
     }
   });
 };

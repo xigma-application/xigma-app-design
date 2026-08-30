@@ -5,7 +5,7 @@ import { TPoint } from 'types/canvas';
 
 // utils
 import { clamp } from 'utils/math/clamp';
-import { getChainPositionAtLength } from './getChainPositionAtLength';
+import { getVectorChainPositionAtLength } from '../../../vectorNetwork/getVectorChainPositionAtLength';
 import { getVectorSegmentNormalAtT } from '../../../vectorNetwork/getVectorSegmentNormalAtT';
 import { getVectorSegmentPointAtT } from '../../../vectorNetwork/getVectorSegmentPointAtT';
 
@@ -21,7 +21,7 @@ export const sampleVectorChainAtLength = (center: TPoint, data: TChainSampleData
   }
 
   const wrapped = wrapOrClampLength(length, totalLength, chainOrder.isClosed);
-  const { segmentId, t } = getChainPositionAtLength(table, wrapped);
+  const { segmentId, t } = getVectorChainPositionAtLength(table, wrapped);
   const segment = rendered.segments[segmentId];
   const world = getVectorSegmentPointAtT(rendered, segment, t);
   const normal = getVectorSegmentNormalAtT(rendered, segment, t);

@@ -3,9 +3,9 @@ import { NodeType } from 'types/design/enums';
 import { TVectorNode, TVectorSegment } from 'types/design/types';
 
 // utils
-import { getChainPositionAtLength } from '../getChainPositionAtLength';
-import { getVectorChainArcLengthTable } from '../../../../vectorNetwork/getVectorChainArcLengthTable';
-import { getVectorChainOrder } from '../../../../vectorNetwork/getVectorChainOrder';
+import { getVectorChainPositionAtLength } from '../getVectorChainPositionAtLength';
+import { getVectorChainArcLengthTable } from '../getVectorChainArcLengthTable';
+import { getVectorChainOrder } from '../getVectorChainOrder';
 
 const seg = (id: string, startId: string, endId: string): TVectorSegment => ({
   endId,
@@ -31,7 +31,7 @@ const buildNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
   ...overrides,
 });
 
-describe('getChainPositionAtLength', () => {
+describe('getVectorChainPositionAtLength', () => {
   it('should resolve length 0 to the exact chain start', () => {
     // mock — a(0,0)->b(100,0)
     const node = buildNode({
@@ -42,7 +42,7 @@ describe('getChainPositionAtLength', () => {
     const table = getVectorChainArcLengthTable(node, chainOrder);
 
     // result
-    expect(getChainPositionAtLength(table, 0)).toEqual({ segmentId: 's1', t: 0 });
+    expect(getVectorChainPositionAtLength(table, 0)).toEqual({ segmentId: 's1', t: 0 });
   });
 
   it('should resolve the total chain length to the exact chain end', () => {
@@ -55,7 +55,7 @@ describe('getChainPositionAtLength', () => {
     const table = getVectorChainArcLengthTable(node, chainOrder);
 
     // result
-    const position = getChainPositionAtLength(table, 100);
+    const position = getVectorChainPositionAtLength(table, 100);
 
     expect(position.segmentId).toBe('s1');
     expect(position.t).toBeCloseTo(1, 5);
@@ -71,7 +71,7 @@ describe('getChainPositionAtLength', () => {
     const table = getVectorChainArcLengthTable(node, chainOrder);
 
     // result
-    const position = getChainPositionAtLength(table, 30);
+    const position = getVectorChainPositionAtLength(table, 30);
 
     expect(position.segmentId).toBe('s1');
     expect(position.t).toBeCloseTo(0.3, 5);
@@ -91,7 +91,7 @@ describe('getChainPositionAtLength', () => {
 
     // before — a target length exactly between the two samples straddling the s1/s2 boundary
     const targetLength = (lower.length + upper.length) / 2;
-    const position = getChainPositionAtLength(table, targetLength);
+    const position = getVectorChainPositionAtLength(table, targetLength);
 
     // result
     expect(position).toEqual({ segmentId: upper.segmentId, t: upper.t });
@@ -104,7 +104,7 @@ describe('getChainPositionAtLength', () => {
     const table = getVectorChainArcLengthTable(node, chainOrder);
 
     // result
-    const position = getChainPositionAtLength(table, 0);
+    const position = getVectorChainPositionAtLength(table, 0);
 
     expect(position.segmentId).toBe('s1');
     expect(Number.isFinite(position.t)).toBe(true);

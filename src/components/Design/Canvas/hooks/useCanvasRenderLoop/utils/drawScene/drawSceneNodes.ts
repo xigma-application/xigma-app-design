@@ -18,8 +18,8 @@ import { drawMsdfText } from 'utils/canvas/text/drawMsdfText';
 import { drawPathOutline } from './drawPathOutline';
 import { drawPolygon } from 'utils/canvas/drawPolygon/drawPolygon';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
-import { drawSceneVectorNode } from './drawSceneVectorNode';
 import { drawStar } from 'utils/canvas/drawStar/drawStar';
+import { drawVectorNodeOrTextPathGuide } from './drawVectorNodeOrTextPathGuide';
 import { getMsdfAtlasTexture } from 'utils/canvas/text/getMsdfAtlasTexture';
 import { getOrLoadTexture } from 'utils/canvas/getOrLoadTexture';
 
@@ -37,6 +37,7 @@ export const drawSceneNodes = (
   resizedVectorNodeSnapshots: Map<string, TVectorNodeResizeSnapshot> | null,
   rotatedVectorNodeSnapshots: Map<string, TVectorNodeRotateSnapshot> | null,
   nodesById: Record<string, TSceneNode>,
+  editingPathId?: string | null,
 ): void => {
   nodes.forEach((node) => {
     switch (node.type) {
@@ -87,7 +88,7 @@ export const drawSceneNodes = (
         drawPathOutline(gl, program, buffer, node, pathOutlineStyles.get(node.id), canvasWidth, canvasHeight, viewport);
         break;
       case NodeType.vector:
-        drawSceneVectorNode(
+        drawVectorNodeOrTextPathGuide(
           gl,
           program,
           buffer,
@@ -100,6 +101,9 @@ export const drawSceneNodes = (
           canvasWidth,
           canvasHeight,
           viewport,
+          pathOutlineStyles,
+          nodesById,
+          editingPathId,
         );
         break;
       case NodeType.group:

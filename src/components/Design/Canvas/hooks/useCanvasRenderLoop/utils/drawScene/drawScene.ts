@@ -137,9 +137,21 @@ export const drawScene = (
     refs.vectorSnapshots.resizedVectorNodeSnapshotsRef.current,
     refs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current,
     nodesById,
+    editingTextBox?.pathId,
   );
   drawHoverOutline(gl, program, buffer, hoveredNode, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
-  drawSelectionOutline(gl, program, buffer, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeIds, nodesById);
+  drawSelectionOutline(
+    gl,
+    program,
+    buffer,
+    selectedNodes,
+    clientWidth,
+    clientHeight,
+    viewport,
+    vectorEditingNodeIds,
+    nodesById,
+    editingTextBox?.pathId,
+  );
   drawSelectionSizeLabel(gl, program, buffer, imageContext, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
   drawFrameNameLabels(gl, imageContext, filteredNodes, selectedIds, refs, clientWidth, clientHeight, viewport);
   drawCornerRadiusHandlesLayer(
