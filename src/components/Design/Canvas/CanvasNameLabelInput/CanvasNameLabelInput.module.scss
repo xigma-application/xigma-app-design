@@ -1,16 +1,16 @@
 .CanvasNameLabelInput {
   background-color: #eaf2fd;
   border: 1px solid #337ae1;
-  border-radius: 3px;
-  box-sizing: border-box;
+  border-radius: 1px;
+  box-sizing: content-box;
   color: #000000;
   font-family: inherit;
-  font-weight: 600;
+  font-weight: 400;
   outline: none;
-  padding: 0 4px;
+  padding: 0 1px;
   position: absolute;
   text-align: left;
-  transform: translate(-50%, -50%);
+  transform: translate(0, -50%);
   width: auto;
 
   &::selection {

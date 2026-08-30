@@ -3,22 +3,28 @@ import { FC, PointerEvent } from 'react';
 // hooks
 import { useCanvasValueLabelInput } from '../CanvasValueLabelInput/hooks/useCanvasValueLabelInput';
 
+// others
+import { FRAME_NAME_LABEL_INPUT_BORDER_WIDTH_PX, FRAME_NAME_LABEL_INPUT_MIN_WIDTH_PX } from 'constant/canvas';
+
 // styles
 import styles from './CanvasNameLabelInput.module.scss';
 
+// utils
+import { getTextWidth } from 'utils/canvas/text/getTextWidth';
+
 type TProps = {
-  centerX: number;
-  centerY: number;
   fontSize: number;
   height: number;
   initialValue: string;
-  minWidth: number;
+  left: number;
   onCancel: TFunc;
   onCommit: TFunc<[string]>;
+  top: number;
 };
 
-const CanvasNameLabelInput: FC<TProps> = ({ centerX, centerY, fontSize, height, initialValue, minWidth, onCancel, onCommit }) => {
+const CanvasNameLabelInput: FC<TProps> = ({ fontSize, height, initialValue, left, onCancel, onCommit, top }) => {
   const { handleBlur, handleChange, handleKeyDown, inputRef, value } = useCanvasValueLabelInput({ initialValue, onCancel, onCommit });
+  const width = Math.max(getTextWidth(value, fontSize), FRAME_NAME_LABEL_INPUT_MIN_WIDTH_PX);
 
   return (
     <input
@@ -28,8 +34,7 @@ const CanvasNameLabelInput: FC<TProps> = ({ centerX, centerY, fontSize, height, 
       onKeyDown={handleKeyDown}
       onPointerDown={(event: PointerEvent<HTMLInputElement>): void => event.stopPropagation()}
       ref={inputRef}
-      size={Math.max(value.length, 1)}
-      style={{ fontSize, height, left: centerX, minWidth, top: centerY }}
+      style={{ fontSize, height, left: left - FRAME_NAME_LABEL_INPUT_BORDER_WIDTH_PX, top, width }}
       type="text"
       value={value}
     />

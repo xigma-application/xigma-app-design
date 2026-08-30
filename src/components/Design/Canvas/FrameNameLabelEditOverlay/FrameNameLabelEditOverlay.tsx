@@ -20,18 +20,18 @@ const FrameNameLabelEditOverlay: FC = () => {
   const { cancel, commit, edit, viewport } = useFrameNameLabelEditor(refs);
 
   if (edit) {
-    const screen = worldToScreen(edit.center, viewport);
+    const left = worldToScreen({ x: edit.left, y: 0 }, viewport).x;
+    const top = worldToScreen({ x: 0, y: edit.centerY }, viewport).y;
 
     return (
       <CanvasNameLabelInput
-        centerX={screen.x}
-        centerY={screen.y}
         fontSize={FRAME_NAME_LABEL_FONT_SIZE_PX}
         height={edit.height * viewport.zoom}
         initialValue={edit.value}
-        minWidth={edit.width * viewport.zoom}
+        left={left}
         onCancel={cancel}
         onCommit={commit}
+        top={top}
       />
     );
   }

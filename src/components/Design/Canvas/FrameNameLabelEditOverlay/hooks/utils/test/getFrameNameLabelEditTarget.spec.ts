@@ -50,8 +50,8 @@ describe('getFrameNameLabelEditTarget', () => {
     getFrameNameLabelRectsMock.mockReset().mockReturnValue([]);
   });
 
-  it('should return the target seeded with the hit node’s current name', () => {
-    // mock
+  it('should return the target seeded with the hit node’s current name; left comes from the exact anchor, centerY from the hit rect', () => {
+    // mock — an unrotated frame at world x=0, so its exact (unpadded) label left edge is also x=0
     const store = createTestStore();
     const frame = addFrame(store);
 
@@ -59,11 +59,11 @@ describe('getFrameNameLabelEditTarget', () => {
 
     // result
     expect(getFrameNameLabelEditTarget({ x: 100, y: -20 }, store.getState())).toEqual({
-      center: { x: 100, y: -20 },
+      centerY: -20,
       height: 24,
+      left: 0,
       nodeId: frame.id,
       value: frame.name,
-      width: 60,
     });
   });
 
@@ -98,5 +98,33 @@ describe('getFrameNameLabelEditTarget', () => {
 
     // result
     expect(getFrameNameLabelEditTarget({ x: 100, y: -20 }, store.getState())).toBeNull();
+  });
+
+  it('should return null when the hit rect points at a node that is no longer a frame', () => {
+    // mock — a rectangle that happens to sit where a frame's rect id would point
+    const store = createTestStore();
+
+    store.dispatch(
+      addNode({
+        fill: '#ffffff',
+        height: 100,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 200,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const { nodes, rootOrder } = selectActivePage(store.getState());
+    const id = rootOrder[rootOrder.length - 1];
+
+    getFrameNameLabelRectsMock.mockReturnValue([rectFor(id)]);
+
+    // result
+    expect(getFrameNameLabelEditTarget({ x: 100, y: -20 }, store.getState())).toBeNull();
+    expect(nodes[id].type).toBe(NodeType.rectangle);
   });
 });

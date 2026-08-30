@@ -46,11 +46,11 @@ const addFrame = (): { id: string; name: string } => {
 };
 
 const editFor = (frame: { id: string; name: string }): TFrameNameLabelEdit => ({
-  center: { x: 100, y: -20 },
+  centerY: -20,
   height: 24,
+  left: 100,
   nodeId: frame.id,
   value: frame.name,
-  width: 60,
 });
 
 const renderEditor = (): {

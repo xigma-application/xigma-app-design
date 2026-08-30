@@ -4,6 +4,11 @@ import userEvent from '@testing-library/user-event';
 // components
 import CanvasNameLabelInput from './CanvasNameLabelInput';
 
+// utils
+import { getTextWidth } from 'utils/canvas/text/getTextWidth';
+
+const FONT_SIZE = 12;
+
 const setup = (
   overrides: Partial<Parameters<typeof CanvasNameLabelInput>[0]> = {},
 ): { onCancel: ReturnType<typeof vi.fn>; onCommit: ReturnType<typeof vi.fn> } => {
@@ -12,14 +17,13 @@ const setup = (
 
   render(
     <CanvasNameLabelInput
-      centerX={10}
-      centerY={20}
-      fontSize={12}
+      fontSize={FONT_SIZE}
       height={16}
       initialValue="Frame 1"
-      minWidth={50}
+      left={10}
       onCancel={onCancel}
       onCommit={onCommit}
+      top={20}
       {...overrides}
     />,
   );
@@ -40,31 +44,47 @@ describe('CanvasNameLabelInput', () => {
     expect(input.selectionEnd).toBe(7);
   });
 
-  it('should anchor itself on the given screen centre, with the label size as a floor', () => {
+  it('should anchor its vertical centre via translate(0, -50%), nudged 1px left of `left` so the text (not the border) lands there', () => {
     // before
-    setup({ centerX: 10, centerY: 20, height: 16, minWidth: 50 });
+    setup({ height: 16, left: 10, top: 20 });
 
-    // result — centred via a translate(-50%, -50%), never narrower than the label
-    expect(screen.getByRole('textbox')).toHaveStyle({ height: '16px', left: '10px', minWidth: '50px', top: '20px' });
+    // result
+    expect(screen.getByRole('textbox')).toHaveStyle({ height: '16px', left: '9px', top: '20px' });
   });
 
-  it('should grow and shrink its character size with the typed text', async () => {
+  it('should size itself to the exact MSDF-measured width of the current text, not a character-count guess', () => {
+    // before — this is what keeps the DOM input aligned with the WebGL-drawn label it replaces
+    setup();
+    const input = screen.getByRole<HTMLInputElement>('textbox');
+
+    expect(input).toHaveStyle({ width: `${getTextWidth('Frame 1', FONT_SIZE)}px` });
+  });
+
+  it('should grow and shrink its measured width with the typed text', async () => {
     // before
     setup();
     const input = screen.getByRole<HTMLInputElement>('textbox');
 
-    // result — starts hugging "Frame 1"
-    expect(input).toHaveAttribute('size', '7');
-
     // action — a longer value
     await userEvent.clear(input);
     await userEvent.type(input, 'Header section');
-    expect(input).toHaveAttribute('size', '14');
+    expect(input).toHaveStyle({ width: `${getTextWidth('Header section', FONT_SIZE)}px` });
 
     // action — back down to a short value
     await userEvent.clear(input);
     await userEvent.type(input, 'A');
-    expect(input).toHaveAttribute('size', '1');
+    expect(input).toHaveStyle({ width: `${getTextWidth('A', FONT_SIZE)}px` });
+  });
+
+  it('should floor an empty value at a small, still-visible width', async () => {
+    // before
+    setup();
+    const input = screen.getByRole<HTMLInputElement>('textbox');
+
+    await userEvent.clear(input);
+
+    // result
+    expect(input.style.width).not.toBe('0px');
   });
 
   it('should commit the current text on Enter', async () => {

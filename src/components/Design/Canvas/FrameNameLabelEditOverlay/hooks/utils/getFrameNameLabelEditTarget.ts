@@ -3,26 +3,33 @@ import { selectNodes, selectViewport } from 'store/design/selectors';
 import { RootState } from 'store';
 
 // types
+import { NodeType } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 
 // utils
+import { getFrameNameLabelAnchor } from 'components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/drawFrameNameLabels/getFrameNameLabelAnchor';
 import { getFrameNameLabelRects, isPointInFrameNameLabelRect } from '../../../utils/getFrameNameLabelRects';
 
 export type TFrameNameLabelEdit = {
-  center: TPoint;
+  centerY: number;
   height: number;
+  left: number;
   nodeId: string;
   value: string;
-  width: number;
 };
 
 export const getFrameNameLabelEditTarget = (point: TPoint, state: RootState): TFrameNameLabelEdit | null => {
   const nodes = selectNodes(state);
+  const zoom = selectViewport(state).zoom;
   const visibleNodes = Object.values(nodes).filter((node) => !node.hidden);
-  const rect = getFrameNameLabelRects(visibleNodes, selectViewport(state).zoom).find((candidate) =>
-    isPointInFrameNameLabelRect(point, candidate),
-  );
+  const rect = getFrameNameLabelRects(visibleNodes, zoom).find((candidate) => isPointInFrameNameLabelRect(point, candidate));
   const node = rect ? nodes[rect.nodeId] : null;
 
-  return rect && node ? { center: rect.center, height: rect.height, nodeId: rect.nodeId, value: node.name, width: rect.width } : null;
+  if (!rect || !node || node.type !== NodeType.frame) {
+    return null;
+  }
+
+  const anchor = getFrameNameLabelAnchor(node, zoom);
+
+  return { centerY: rect.center.y, height: rect.height, left: anchor.point.x, nodeId: rect.nodeId, value: node.name };
 };

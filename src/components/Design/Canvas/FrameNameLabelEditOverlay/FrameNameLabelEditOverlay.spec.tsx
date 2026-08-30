@@ -26,11 +26,11 @@ describe('FrameNameLabelEditOverlay', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('should anchor the name input on the label’s screen centre, scaled by the viewport zoom', () => {
-    // mock — label box 60 x 24 world units centred at (100, -20); viewport pans +100/+200 at 2x zoom
+  it('should anchor its left edge on the label’s exact screen left, and vertically centre on the hit rect’s screen centre, scaled by the viewport zoom', () => {
+    // mock — left edge at world x=20, vertical centre at world y=-34; viewport pans +100/+200 at 2x zoom
     useFrameNameLabelEditorMock.mockReturnValue({
       ...IDLE,
-      edit: { center: { x: 100, y: -20 }, height: 24, nodeId: 'frame-1', value: 'Frame 1', width: 60 },
+      edit: { centerY: -34, height: 24, left: 20, nodeId: 'frame-1', value: 'Frame 1' },
       viewport: { x: 100, y: 200, zoom: 2 },
     });
 
@@ -38,9 +38,9 @@ describe('FrameNameLabelEditOverlay', () => {
     render(<FrameNameLabelEditOverlay />);
     const input = screen.getByRole<HTMLInputElement>('textbox');
 
-    // result — screen centre (100*2+100, -20*2+200) = (300, 160); floor 120 x 48
+    // result — left (20*2+100)=140, nudged 1px by the input's own border; top/centreY (-34*2+200)=132
     expect(input).toHaveValue('Frame 1');
-    expect(input).toHaveStyle({ height: '48px', left: '300px', minWidth: '120px', top: '160px' });
+    expect(input).toHaveStyle({ height: '48px', left: '139px', top: '132px' });
   });
 
   it('should hand its commit and cancel callbacks straight to the input', async () => {
@@ -51,7 +51,7 @@ describe('FrameNameLabelEditOverlay', () => {
     useFrameNameLabelEditorMock.mockReturnValue({
       cancel,
       commit,
-      edit: { center: { x: 0, y: 0 }, height: 24, nodeId: 'frame-1', value: 'Frame 1', width: 60 },
+      edit: { centerY: 0, height: 24, left: 0, nodeId: 'frame-1', value: 'Frame 1' },
       viewport: { x: 0, y: 0, zoom: 1 },
     });
 
