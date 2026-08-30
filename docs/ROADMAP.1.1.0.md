@@ -53,6 +53,9 @@ exactly flush against it — shown while dragging, resizing, or Alt-hovering. Fi
 overlaps and off-90° rotations. Write-up: `.claude/docs/selection-and-manipulation.md` §23.
 
 - [x] `getShapeContactGuides` detection + `resolveShapeContactGuides` trigger + `drawShapeContactGuides` render, e2e
+- [x] extended to diagonal placements (matching edge, no overlap): a bridge segment now connects the
+      nearest corners across the gap instead of drawing nothing
+- [x] extended to same-side matches too (both tops/bottoms/lefts/rights aligned, not just facing edges)
 
 ## Stage 6 — Shape alignment snap on move
 

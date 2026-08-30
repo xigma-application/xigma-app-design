@@ -1407,19 +1407,40 @@ filter, so it never shows in Vector Edit Mode.
 
 ## 23. Shape contact guides (red X-capped edge lines)
 
-When a single axis-aligned shape's edge sits exactly flush against another shape's edge, a red
-(`CONTACT_GUIDE_STROKE` `#cd7259`) line with an `×` marker at each end is drawn **on both shapes'
-touching edges** — one line spanning the active shape's extent, one spanning the neighbour's
-(`drawShapeContactGuides.ts` → `drawXMarker.ts`, right after `drawSelectionSizeLabel` in `drawScene`).
-Same seam, two lengths, so you see the overlap between the two footprints.
+When a single axis-aligned shape's edge value matches another shape's opposite edge value (within
+tolerance), a red (`CONTACT_GUIDE_STROKE` `#cd7259`) line with an `×` marker at each end is drawn **on
+both shapes' matching edges** — one line spanning the active shape's extent, one spanning the
+neighbour's (`drawShapeContactGuides.ts` → `drawXMarker.ts`, right after `drawSelectionSizeLabel` in
+`drawScene`). Same seam, two lengths, so you see the overlap between the two footprints. When the two
+shapes sit diagonally rather than side by side — same edge value, but no overlap on the other axis, so
+there's a real gap between their footprints — a third **bridge** segment connects their nearest corners
+across that gap, so the guide doesn't look like it just stops short at each shape independently.
 
 - **Detection** (`getShapeContactGuides.ts`, pure). Inputs are already-resolved AABBs
-  (`getRotatedNodeBounds`, correct for 0/90/180/270). Per candidate, a `switch (true)` over the four
-  edges: `|activeEdge − candidateEdge| ≤ CONTACT_GUIDE_TOLERANCE_PX` (0.5px world) **and** strictly
-  positive overlap on the other axis. Two axis-aligned rects can only be flush on one side at a time
-  (a second shared side just meets at a corner, where the perpendicular overlap is 0), so it's exactly
-  two lines per contacting pair (each shape's own edge) — the switch, not four independent `if`s.
-  Overlap ≠ contact: if the shapes actually intersect, no edge is flush, nothing draws.
+  (`getRotatedNodeBounds`, correct for 0/90/180/270). Per candidate, a `switch (true)` over eight edge
+  pairs, in two families:
+  - **Facing** (right↔left, bottom↔top, and their mirrors) — the classic "touching neighbour" case.
+    Fires when `|activeEdge − candidateEdge| ≤ CONTACT_GUIDE_TOLERANCE_PX` (0.5px world) **and** the
+    other axis's overlap amount is non-zero. Positive (genuinely overlapping) is the normal flush-edge
+    case: each shape gets its own full-edge guide, no bridge. Negative (a real gap) means the shapes sit
+    diagonally rather than side by side: `getVerticalBridge`/`getHorizontalBridge` add a third segment
+    connecting the two shapes' nearest corners across the gap, so the guide doesn't look like it just
+    stops short at each shape independently.
+  - **Same-side** (top↔top, bottom↔bottom, left↔left, right↔right) — both shapes aligned to the same
+    value rather than touching. Fires on the same tolerance check, but only when the other axis's
+    overlap is **negative** (a real gap) — unlike the facing family, positive overlap here means the two
+    footprints genuinely intersect (both start from the identical matched edge), so — same principle as
+    "if the shapes actually intersect, nothing draws" — it's suppressed rather than treated as a flush
+    match. When it fires, the guide/bridge shape is identical to the facing family's gap case, just
+    reusing the same two bridge helpers with both edges' values passed in.
+
+  Either way, the one thing excluded everywhere is overlap of exactly zero — two shapes that merely
+  touch or align at a single corner point — since there's no real "nearest corner" there and a
+  full-length guide would overstate a single-point coincidence into a match. Two axis-aligned rects can
+  only match on one side at a time (a second shared side just meets at that same corner, excluded per
+  above), so it's exactly one `switch` case per contacting pair, never more than one firing per
+  candidate. Overlap large enough that the shapes actually intersect on a *facing* pair never reaches
+  here either: no edge value is flush in the first place, so nothing draws regardless of the check.
 - **Eligibility** (`isContactGuideEligibleNode`): `rectangle · ellipse · polygon · star · text ·
   media · frame · section` — any node with a fixed x/y/width/height footprint — not hidden, rotation
   a multiple of 90°. Excludes only `group` (no footprint of its own, just a bounds computed from

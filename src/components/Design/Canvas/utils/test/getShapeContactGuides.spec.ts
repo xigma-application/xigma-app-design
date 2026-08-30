@@ -99,6 +99,117 @@ describe('getShapeContactGuides', () => {
     expect(guides).toEqual([]);
   });
 
+  it('should bridge two shapes whose horizontal edges align but sit diagonally apart with a real gap', () => {
+    // before — active's bottom (100) matches the neighbour's top, but the neighbour sits well to the
+    // right with no horizontal overlap at all (a genuine gap, not just a touching corner)
+    const guides = getShapeContactGuides(ACTIVE, [{ bounds: { height: 40, width: 40, x: 150, y: 100 }, id: 'n' }]);
+
+    // result — each shape's own full edge, plus a bridge connecting the two nearest corners across the gap
+    expect(guides).toEqual([
+      { x1: 0, x2: 100, y1: 100, y2: 100 },
+      { x1: 150, x2: 190, y1: 100, y2: 100 },
+      { x1: 100, x2: 150, y1: 100, y2: 100 },
+    ]);
+  });
+
+  it('should bridge two shapes whose vertical edges align but sit diagonally apart with a real gap', () => {
+    // before — active's right edge (100) matches the neighbour's left edge, but the neighbour sits
+    // well below with no vertical overlap at all
+    const guides = getShapeContactGuides(ACTIVE, [{ bounds: { height: 40, width: 40, x: 100, y: 150 }, id: 'n' }]);
+
+    // result
+    expect(guides).toEqual([
+      { x1: 100, x2: 100, y1: 0, y2: 100 },
+      { x1: 100, x2: 100, y1: 150, y2: 190 },
+      { x1: 100, x2: 100, y1: 100, y2: 150 },
+    ]);
+  });
+
+  it('should bridge from the neighbour’s side when it sits above instead of below', () => {
+    // before — active's left edge (0) matches the neighbour's right edge, but the neighbour sits
+    // well above with no vertical overlap
+    const guides = getShapeContactGuides(ACTIVE, [{ bounds: { height: 40, width: 40, x: -40, y: -150 }, id: 'n' }]);
+
+    // result — the bridge runs from the neighbour's bottom corner up to the active shape's top corner
+    expect(guides).toEqual([
+      { x1: 0, x2: 0, y1: 0, y2: 100 },
+      { x1: 0, x2: 0, y1: -150, y2: -110 },
+      { x1: 0, x2: 0, y1: 0, y2: -110 },
+    ]);
+  });
+
+  it('should bridge from the neighbour’s side when it sits to the left instead of the right', () => {
+    // before — active's top edge (0) matches the neighbour's bottom edge (-40+40=0), but the neighbour
+    // sits well to the left with no horizontal overlap
+    const guides = getShapeContactGuides(ACTIVE, [{ bounds: { height: 40, width: 40, x: -90, y: -40 }, id: 'n' }]);
+
+    // result — the bridge runs from the neighbour's right corner over to the active shape's left corner
+    expect(guides).toEqual([
+      { x1: 0, x2: 100, y1: 0, y2: 0 },
+      { x1: -90, x2: -50, y1: 0, y2: 0 },
+      { x1: 0, x2: -50, y1: 0, y2: 0 },
+    ]);
+  });
+
+  it('should bridge two shapes whose top edges align and sit side by side with a real gap', () => {
+    // before — active's top (0) matches the neighbour's top; the neighbour sits well to the right,
+    // no horizontal overlap — this is a same-side alignment (both top-aligned), not a touching pair
+    const guides = getShapeContactGuides(ACTIVE, [{ bounds: { height: 40, width: 40, x: 150, y: 0 }, id: 'n' }]);
+
+    // result — each shape's own full top edge, plus a bridge connecting the two nearest corners
+    expect(guides).toEqual([
+      { x1: 0, x2: 100, y1: 0, y2: 0 },
+      { x1: 150, x2: 190, y1: 0, y2: 0 },
+      { x1: 100, x2: 150, y1: 0, y2: 0 },
+    ]);
+  });
+
+  it('should bridge two shapes whose bottom edges align and sit side by side with a real gap', () => {
+    // before — active's bottom (100) matches the neighbour's bottom
+    const guides = getShapeContactGuides(ACTIVE, [{ bounds: { height: 40, width: 40, x: 150, y: 60 }, id: 'n' }]);
+
+    // result
+    expect(guides).toEqual([
+      { x1: 0, x2: 100, y1: 100, y2: 100 },
+      { x1: 150, x2: 190, y1: 100, y2: 100 },
+      { x1: 100, x2: 150, y1: 100, y2: 100 },
+    ]);
+  });
+
+  it('should bridge two shapes whose left edges align and sit stacked with a real gap', () => {
+    // before — active's left (0) matches the neighbour's left; the neighbour sits well below, no
+    // vertical overlap
+    const guides = getShapeContactGuides(ACTIVE, [{ bounds: { height: 40, width: 40, x: 0, y: 150 }, id: 'n' }]);
+
+    // result
+    expect(guides).toEqual([
+      { x1: 0, x2: 0, y1: 0, y2: 100 },
+      { x1: 0, x2: 0, y1: 150, y2: 190 },
+      { x1: 0, x2: 0, y1: 100, y2: 150 },
+    ]);
+  });
+
+  it('should bridge two shapes whose right edges align and sit stacked with a real gap', () => {
+    // before — active's right (100) matches the neighbour's right
+    const guides = getShapeContactGuides(ACTIVE, [{ bounds: { height: 40, width: 40, x: 60, y: 150 }, id: 'n' }]);
+
+    // result
+    expect(guides).toEqual([
+      { x1: 100, x2: 100, y1: 0, y2: 100 },
+      { x1: 100, x2: 100, y1: 150, y2: 190 },
+      { x1: 100, x2: 100, y1: 100, y2: 150 },
+    ]);
+  });
+
+  it('should not report contact for same-side edges whose footprints actually overlap', () => {
+    // before — both top-aligned (0), but the neighbour overlaps the active shape horizontally, so
+    // their footprints genuinely intersect rather than sitting cleanly side by side
+    const guides = getShapeContactGuides(ACTIVE, [{ bounds: { height: 50, width: 100, x: 50, y: 0 }, id: 'n' }]);
+
+    // result
+    expect(guides).toEqual([]);
+  });
+
   it('should emit a pair of lines per touching neighbour', () => {
     // before — one neighbour flush right, another flush below
     const guides = getShapeContactGuides(ACTIVE, [
