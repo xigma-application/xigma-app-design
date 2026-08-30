@@ -196,7 +196,9 @@ describe('drawScene', () => {
         parentId: null,
         rotation: 0,
         type: NodeType.frame,
-        width: 10,
+        // wide enough that its name label isn't ellipsis-truncated down to a single glyph, which
+        // would coincidentally match countFillDraws' (TRIANGLES, 0, 6) signature below
+        width: 300,
         x: 0,
         y: 0,
       }),

@@ -32,6 +32,20 @@ describe('getFrameNameLabelAnchor', () => {
     expect(point).toEqual({ x: 10, y: 20 - (FRAME_NAME_LABEL_FONT_SIZE_PX + FRAME_NAME_LABEL_GAP_PX) });
   });
 
+  it('should cap the label at the frame’s width when anchored to its top or bottom edge', () => {
+    // result
+    expect(getFrameNameLabelAnchor(buildFrame({ height: 100, width: 200 }), 1).maxWidth).toBe(200);
+  });
+
+  it('should cap the label at the frame’s height once rotation snaps it to a side edge', () => {
+    // before — past the 45° threshold, the label anchors to what used to be the left edge, whose
+    // available run is the frame's height, not its width
+    const node = buildFrame({ height: 100, rotation: 90, width: 200, x: 0, y: 0 });
+
+    // result
+    expect(getFrameNameLabelAnchor(node, 1).maxWidth).toBe(100);
+  });
+
   it('should shrink the world-space gap as zoom increases, keeping it constant on screen', () => {
     // before
     const { point } = getFrameNameLabelAnchor(buildFrame(), 2);

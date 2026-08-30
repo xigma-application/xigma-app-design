@@ -14,6 +14,7 @@ import { getGlyphQuadBounds } from 'utils/canvas/text/getGlyphQuadBounds';
 import { getMsdfAtlasTexture } from 'utils/canvas/text/getMsdfAtlasTexture';
 import { rotateGlyphVertices } from 'utils/canvas/text/rotateGlyphVertices';
 import { translateGlyphVertices } from 'utils/canvas/text/translateGlyphVertices';
+import { truncateTextToWidth } from 'utils/canvas/text/truncateTextToWidth';
 
 export const drawFrameNameLabel = (
   gl: WebGL2RenderingContext,
@@ -26,11 +27,12 @@ export const drawFrameNameLabel = (
 ): void => {
   if (node.name.length > 0) {
     const fontSize = FRAME_NAME_LABEL_FONT_SIZE_PX / viewport.zoom;
-    const rawVertices = new Float32Array(buildGlyphQuads(MSDF_ATLAS_JSON, [node.name], fontSize, 0, 0));
+    const { angleDeg, maxWidth, point } = getFrameNameLabelAnchor(node, viewport.zoom);
+    const text = truncateTextToWidth(node.name, maxWidth, fontSize);
+    const rawVertices = new Float32Array(buildGlyphQuads(MSDF_ATLAS_JSON, [text], fontSize, 0, 0));
     const bounds = getGlyphQuadBounds(rawVertices);
 
     if (bounds) {
-      const { angleDeg, point } = getFrameNameLabelAnchor(node, viewport.zoom);
       const vertices = rotateGlyphVertices(
         translateGlyphVertices(rawVertices, point.x - bounds.minX, point.y - bounds.minY),
         point,

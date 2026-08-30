@@ -113,14 +113,25 @@ any of the machinery below — see `design-store-architecture.md`'s "Comment sta
   `drawFrameNameLabels/` (`drawFrameNameLabels.ts` iterating `filteredNodes` for `NodeType.frame`,
   `drawFrameNameLabel.ts` drawing one node's `name` via the MSDF pipeline straight — no badge, unlike
   `drawSelectionSizeLabel.ts` — and `getFrameNameLabelAnchor.ts` for the world-space anchor above the
-  node's top-left corner, rotated with the node) draws every frame's name as a small always-on label,
-  in `FRAME_NAME_LABEL_SELECTED_FILL` when the frame is selected or `FRAME_NAME_LABEL_FILL` otherwise
+  node's top-left corner) draws every frame's name as a small always-on label, in
+  `FRAME_NAME_LABEL_SELECTED_FILL` when the frame is selected or `FRAME_NAME_LABEL_FILL` otherwise
   (`constant/canvas.ts`), constant-screen-size the same way `drawValueLabel` is (font size divided by
-  `viewport.zoom`). It skips the one frame whose id sits in `refs.frameName.editingLabelRef.current`,
-  so the WebGL label and the DOM rename input (§9) never render on top of each other. Hit-testing for
-  that input reuses the same anchor math from a sibling, non-drawing file:
-  `Canvas/utils/getFrameNameLabelRects.ts`. A frame doesn't need to exist as a committed node to earn
-  a label: `drawDraftFrameNameLabel.ts`, called right after `drawFrame`'s draft-shape dispatch, checks
+  `viewport.zoom`). `getFrameNameLabelAnchor.ts` doesn't just rotate the anchor rigidly with the
+  node — same trick as `getSelectionSizeLabelPlacement`'s bottom-edge pick, but keyed off corners
+  (for left-aligned text) instead of edge midpoints: of the frame's 4 corners, it picks whichever is
+  currently pointing most "up" after rotation, so the label snaps to the next corner every 90°
+  instead of ever rendering sideways or upside-down. Each corner also carries which frame dimension
+  its edge runs along (`width` for the top/bottom corners, `height` for the left/right ones), which
+  the anchor returns as `maxWidth` — `drawFrameNameLabel.ts` (and `getFrameNameLabelRects.ts`'s
+  hit-test) run the name through `utils/canvas/text/truncateTextToWidth.ts` against that value
+  first, so a name too long for a squeezed frame ellipsizes (CSS `text-overflow: ellipsis`'s
+  behavior, hand-rolled for MSDF text) against whichever dimension is currently along the label's
+  edge — width normally, height once a strong rotation has snapped the corner. It skips the one
+  frame whose id sits in `refs.frameName.editingLabelRef.current`, so the WebGL label and the DOM
+  rename input (§9) never render on top of each other (that input always shows the untruncated
+  name, same as a real `<input>` would). Hit-testing for that input reuses the same anchor math from
+  a sibling, non-drawing file: `Canvas/utils/getFrameNameLabelRects.ts`. A frame doesn't need to
+  exist as a committed node to earn a label: `drawDraftFrameNameLabel.ts`, called right after `drawFrame`'s draft-shape dispatch, checks
   whether `draftRef` is currently a `NodeType.frame` draft and — if so — builds a throwaway
   `TFrameNode`-shaped object (id `''`, rotation `0`, geometry off the draft rect) named via the same
   `getNextFrameName` the eventual `addNode` dispatch will use, and feeds it straight through

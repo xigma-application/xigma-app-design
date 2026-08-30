@@ -7,6 +7,7 @@ import { getFrameNameLabelRects, isPointInFrameNameLabelRect } from '../getFrame
 
 const getFrameNameLabelAnchorMock = vi.fn();
 const getGlyphQuadBoundsMock = vi.fn();
+const truncateTextToWidthMock = vi.fn();
 
 vi.mock('components/Design/Canvas/hooks/useCanvasRenderLoop/utils/drawScene/drawFrameNameLabels/getFrameNameLabelAnchor', () => ({
   getFrameNameLabelAnchor: (...args: unknown[]): unknown => getFrameNameLabelAnchorMock(...args),
@@ -16,6 +17,9 @@ vi.mock('utils/canvas/text/buildGlyphQuads', () => ({
 }));
 vi.mock('utils/canvas/text/getGlyphQuadBounds', () => ({
   getGlyphQuadBounds: (...args: unknown[]): unknown => getGlyphQuadBoundsMock(...args),
+}));
+vi.mock('utils/canvas/text/truncateTextToWidth', () => ({
+  truncateTextToWidth: (...args: unknown[]): unknown => truncateTextToWidthMock(...args),
 }));
 
 const buildFrame = (overrides: Partial<TSceneNode> = {}): TSceneNode =>
@@ -49,9 +53,10 @@ const buildRectangle = (): TSceneNode =>
 
 describe('getFrameNameLabelRects', () => {
   beforeEach(() => {
-    getFrameNameLabelAnchorMock.mockReset().mockReturnValue({ angleDeg: 0, point: { x: 10, y: -20 } });
+    getFrameNameLabelAnchorMock.mockReset().mockReturnValue({ angleDeg: 0, maxWidth: 200, point: { x: 10, y: -20 } });
     // a 12 x 18 glyph box, no hit padding at zoom 1 adds 3px each side -> width/height +6
     getGlyphQuadBoundsMock.mockReset().mockReturnValue({ maxX: 6, maxY: 9, minX: -6, minY: -9 });
+    truncateTextToWidthMock.mockReset().mockImplementation((text: string) => text);
   });
 
   it('should return no rects when there are no nodes', () => {
@@ -78,6 +83,17 @@ describe('getFrameNameLabelRects', () => {
     expect(rect.width).toBe(18);
     expect(rect.height).toBe(24);
     expect(rect.center).toEqual({ x: 16, y: -11 });
+  });
+
+  it('should truncate the name to the anchor’s maxWidth before measuring it', () => {
+    // mock
+    getFrameNameLabelAnchorMock.mockReturnValue({ angleDeg: 0, maxWidth: 40, point: { x: 10, y: -20 } });
+
+    // before
+    getFrameNameLabelRects([buildFrame()], 1);
+
+    // result
+    expect(truncateTextToWidthMock).toHaveBeenCalledWith('Frame 1', 40, 11);
   });
 
   it('should skip a node whose name measures to no glyph bounds', () => {
