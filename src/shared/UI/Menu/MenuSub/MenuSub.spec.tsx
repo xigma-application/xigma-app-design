@@ -85,6 +85,24 @@ describe('MenuSub behaviors', () => {
     expect(screen.queryByText('Copy as PNG')).not.toBeInTheDocument();
   });
 
+  it('should apply the marginTop and marginBottom modifier classes when requested', () => {
+    // before
+    renderInMenu(<MenuSub label="Copy as" marginBottom marginTop />);
+
+    // result
+    expect(screen.getByRole('menuitem').className).toContain('MenuSub--marginTop');
+    expect(screen.getByRole('menuitem').className).toContain('MenuSub--marginBottom');
+  });
+
+  it('should not apply the marginTop and marginBottom modifier classes by default', () => {
+    // before
+    renderInMenu(<MenuSub label="Copy as" />);
+
+    // result
+    expect(screen.getByRole('menuitem').className).not.toContain('MenuSub--marginTop');
+    expect(screen.getByRole('menuitem').className).not.toContain('MenuSub--marginBottom');
+  });
+
   it('should merge caller-supplied classNames onto the trigger and the sub-panel', async () => {
     // mock
     const user = userEvent.setup();

@@ -15,6 +15,8 @@ export type TMenuItemProps = {
   icon?: TIconProps['name'];
   iconSize?: number;
   label: string;
+  marginBottom?: boolean;
+  marginTop?: boolean;
   onClick?: TFunc<[Event]>;
   selected?: boolean;
   shortcut?: string;
@@ -29,13 +31,23 @@ export const MenuItem: FC<TMenuItemProps> = ({
   icon,
   iconSize = 14,
   label,
+  marginBottom = false,
+  marginTop = false,
   onClick,
   selected = false,
   shortcut,
   shortcutClassName = '',
   withCheck = true,
 }) => (
-  <DropdownMenuPrimitive.Item className={cx(styles.MenuItem, className)} disabled={disabled} onSelect={onClick}>
+  <DropdownMenuPrimitive.Item
+    className={cx(
+      styles.MenuItem,
+      { [styles['MenuItem--marginBottom']]: marginBottom, [styles['MenuItem--marginTop']]: marginTop },
+      className,
+    )}
+    disabled={disabled}
+    onSelect={onClick}
+  >
     {withCheck && (
       <span style={{ opacity: selected ? 1 : 0 }}>
         <Icon name="Check" size={checkIconSize} />

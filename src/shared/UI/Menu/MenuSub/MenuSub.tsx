@@ -17,6 +17,8 @@ export type TMenuSubProps = {
   icon?: TIconProps['name'];
   iconSize?: number;
   label: string;
+  marginBottom?: boolean;
+  marginTop?: boolean;
   sideOffset?: number;
   triggerClassName?: string;
 };
@@ -29,11 +31,20 @@ export const MenuSub: FC<TMenuSubProps> = ({
   icon,
   iconSize = 14,
   label,
+  marginBottom = false,
+  marginTop = false,
   sideOffset = 4,
   triggerClassName = '',
 }) => (
   <DropdownMenuPrimitive.Sub>
-    <DropdownMenuPrimitive.SubTrigger className={cx(styles.MenuSub, triggerClassName)} disabled={disabled}>
+    <DropdownMenuPrimitive.SubTrigger
+      className={cx(
+        styles.MenuSub,
+        { [styles['MenuSub--marginBottom']]: marginBottom, [styles['MenuSub--marginTop']]: marginTop },
+        triggerClassName,
+      )}
+      disabled={disabled}
+    >
       {icon && <Icon name={icon} size={iconSize} />}
       <span className={styles.MenuSub__label}>{label}</span>
       <Icon className={styles.MenuSub__chevron} name="ChevronRight" size={14} />

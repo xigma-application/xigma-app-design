@@ -72,6 +72,28 @@ describe('MenuItem behaviors', () => {
     expect(screen.getByText('Frame').previousElementSibling).toBeNull();
   });
 
+  it('should apply the marginTop and marginBottom modifier classes when requested', () => {
+    // before
+    renderInMenu(<MenuItem label="Frame" marginBottom marginTop />);
+
+    // result
+    const item = screen.getByRole('menuitem');
+
+    expect(item.className).toContain('MenuItem--marginTop');
+    expect(item.className).toContain('MenuItem--marginBottom');
+  });
+
+  it('should not apply the marginTop and marginBottom modifier classes by default', () => {
+    // before
+    renderInMenu(<MenuItem label="Frame" />);
+
+    // result
+    const item = screen.getByRole('menuitem');
+
+    expect(item.className).not.toContain('MenuItem--marginTop');
+    expect(item.className).not.toContain('MenuItem--marginBottom');
+  });
+
   it('should merge a caller-supplied shortcutClassName onto the shortcut element', () => {
     // before
     renderInMenu(<MenuItem label="Frame" shortcut="F" shortcutClassName="custom-shortcut" />);
