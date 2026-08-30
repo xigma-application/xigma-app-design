@@ -2,6 +2,11 @@ import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
+import AdjustMenu from './AdjustMenu/AdjustMenu';
+import AlignmentMenu from './AlignmentMenu/AlignmentMenu';
+import CaseMenu from './CaseMenu/CaseMenu';
+import SpellCheckMenu from './SpellCheckMenu/SpellCheckMenu';
+import TextDirectionMenu from './TextDirectionMenu/TextDirectionMenu';
 import { MenuCompound } from 'shared';
 
 // others
@@ -37,12 +42,22 @@ const TextMenu: FC = () => {
       <MenuItem disabled label={t(TEXT_MENU_BULLETED_LIST_KEY)} shortcut={KEYBOARD_SHORTCUTS.bulletedList.join('')} withCheck={false} />
       <MenuItem disabled label={t(TEXT_MENU_NUMBERED_LIST_KEY)} shortcut={KEYBOARD_SHORTCUTS.numberedList.join('')} withCheck={false} />
       <MenuSeparator />
-      <MenuSub label={t(TEXT_MENU_ALIGNMENT_KEY)} />
-      <MenuSub label={t(TEXT_MENU_ADJUST_KEY)} />
-      <MenuSub label={t(TEXT_MENU_CASE_KEY)} />
-      <MenuSub label={t(TEXT_MENU_TEXT_DIRECTION_KEY)} />
+      <MenuSub label={t(TEXT_MENU_ALIGNMENT_KEY)}>
+        <AlignmentMenu />
+      </MenuSub>
+      <MenuSub label={t(TEXT_MENU_ADJUST_KEY)}>
+        <AdjustMenu />
+      </MenuSub>
+      <MenuSub label={t(TEXT_MENU_CASE_KEY)}>
+        <CaseMenu />
+      </MenuSub>
+      <MenuSub label={t(TEXT_MENU_TEXT_DIRECTION_KEY)}>
+        <TextDirectionMenu />
+      </MenuSub>
       <MenuSeparator />
-      <MenuSub label={t(TEXT_MENU_SPELL_CHECK_KEY)} />
+      <MenuSub label={t(TEXT_MENU_SPELL_CHECK_KEY)}>
+        <SpellCheckMenu />
+      </MenuSub>
     </>
   );
 };
