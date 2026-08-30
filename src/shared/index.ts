@@ -1,12 +1,20 @@
 // @xigma
-export { Icon, ScrubbableInput, Tooltip } from '@xigma/components';
-export type { TIconProps, TScrubbableInputProps, TTooltipProps } from '@xigma/components';
+export { Icon, Menu, MenuCompound, ScrubbableInput, Tooltip } from '@xigma/components';
+export type {
+  TIconProps,
+  TMenuItemProps,
+  TMenuProps,
+  TMenuSeparatorProps,
+  TMenuSubProps,
+  TMenuTriggerProps,
+  TScrubbableInputProps,
+  TTooltipProps,
+} from '@xigma/components';
 export { TooltipProvider } from '@xigma/core';
 export type { TTooltipProviderProps } from '@xigma/core';
 
 // components
 export * from './ScrollThumb/ScrollThumb';
-export * from './UI/Menu/Menu';
 export * from './UI/Tree/Tree';
 export * from './UI/Tree/TreeItem/TreeItem';
 export * from './UI/Tree/TreeItem/types';
