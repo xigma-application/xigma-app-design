@@ -52,6 +52,21 @@ describe('MenuSub behaviors', () => {
     expect(screen.getByText('Copy as PNG')).toBeInTheDocument();
   });
 
+  it('should open onto an empty panel when no children are given yet', async () => {
+    // mock
+    const user = userEvent.setup();
+
+    // before
+    renderInMenu(<MenuSub label="Copy as" />);
+    expect(screen.getAllByRole('menuitem')).toHaveLength(1);
+
+    // action
+    await user.click(screen.getByText('Copy as'));
+
+    // result — only the trigger itself, no items appeared inside the empty panel
+    expect(screen.getAllByRole('menuitem')).toHaveLength(1);
+  });
+
   it('should not open when disabled', async () => {
     // mock
     const user = userEvent.setup();

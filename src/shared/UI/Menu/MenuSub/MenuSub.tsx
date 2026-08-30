@@ -11,7 +11,7 @@ import styles from './menu-sub.module.scss';
 
 export type TMenuSubProps = {
   alignOffset?: number;
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
   disabled?: boolean;
   icon?: TIconProps['name'];

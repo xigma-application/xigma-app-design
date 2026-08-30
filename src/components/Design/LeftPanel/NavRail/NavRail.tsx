@@ -2,10 +2,8 @@ import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
 import { FC, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
-// @xigma
-import XigmaLogoShape from '@xigma/assets/xigma-logo-shape.svg?react';
-
 // components
+import LogoMenu from './LogoMenu/LogoMenu';
 import { Icon } from 'shared';
 
 // hooks
@@ -26,9 +24,7 @@ const NavRail: FC<TNavRailProps> = ({ activeNavItem, onSelectNavItem }) => {
 
   return (
     <div className={styles.NavRail}>
-      <button aria-label="xigma" className={styles.NavRail__logo} type="button">
-        <XigmaLogoShape />
-      </button>
+      <LogoMenu />
       <div className={styles.NavRail__spacer} />
       <ToggleGroupPrimitive.Root className={styles.NavRail__items} onValueChange={handleSelectNavItem} type="single" value={activeNavItem}>
         {NAV_ITEM_ORDER.map((name, index) => {

@@ -25,6 +25,10 @@
       background-color: color-mix(in srgb, var(--color-neutral-3) 50%, transparent);
     }
 
+    &[data-state='open'] {
+      background-color: var(--color-blue-1);
+    }
+
     svg {
       height: 20px;
       width: 20px;

@@ -30,6 +30,7 @@ export const KEYBOARD_SHORTCUTS: TKeyboardShortcuts = {
   [ToolName.line]: ['L'],
   lockUnlockLayer: [SHIFT, CONTROL, 'L'],
   [ToolName.media]: [CONTROL, SHIFT, 'K'],
+  openActions: [CONTROL, 'K'],
   outlineStroke: [ALT, CONTROL, 'O'],
   [ToolName.paint]: [SHIFT, 'B'],
   pasteToReplace: [SHIFT, CONTROL, 'R'],
