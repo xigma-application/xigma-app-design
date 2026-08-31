@@ -38,17 +38,19 @@ const TRIANGLE = [
   { end: { x: 5, y: 10 }, start: { x: 10, y: 0 }, tangentEnd: null, tangentStart: null },
   { end: { x: 0, y: 0 }, start: { x: 5, y: 10 }, tangentEnd: null, tangentStart: null },
 ];
+// offset well clear of TRIANGLE — like "I" and "o" sitting side by side in real text, distinct
+// glyphs never spatially overlap, so their loops must not cross when merged into one vector
 const SQUARE = [
-  { end: { x: 10, y: 0 }, start: { x: 0, y: 0 }, tangentEnd: null, tangentStart: null },
-  { end: { x: 10, y: 10 }, start: { x: 10, y: 0 }, tangentEnd: null, tangentStart: null },
-  { end: { x: 0, y: 10 }, start: { x: 10, y: 10 }, tangentEnd: null, tangentStart: null },
-  { end: { x: 0, y: 0 }, start: { x: 0, y: 10 }, tangentEnd: null, tangentStart: null },
+  { end: { x: 30, y: 0 }, start: { x: 20, y: 0 }, tangentEnd: null, tangentStart: null },
+  { end: { x: 30, y: 10 }, start: { x: 30, y: 0 }, tangentEnd: null, tangentStart: null },
+  { end: { x: 20, y: 10 }, start: { x: 30, y: 10 }, tangentEnd: null, tangentStart: null },
+  { end: { x: 20, y: 0 }, start: { x: 20, y: 10 }, tangentEnd: null, tangentStart: null },
 ];
 const HOLE = [
-  { end: { x: 8, y: 2 }, start: { x: 2, y: 2 }, tangentEnd: null, tangentStart: null },
-  { end: { x: 8, y: 8 }, start: { x: 8, y: 2 }, tangentEnd: null, tangentStart: null },
-  { end: { x: 2, y: 8 }, start: { x: 8, y: 8 }, tangentEnd: null, tangentStart: null },
-  { end: { x: 2, y: 2 }, start: { x: 2, y: 8 }, tangentEnd: null, tangentStart: null },
+  { end: { x: 28, y: 2 }, start: { x: 22, y: 2 }, tangentEnd: null, tangentStart: null },
+  { end: { x: 28, y: 8 }, start: { x: 28, y: 2 }, tangentEnd: null, tangentStart: null },
+  { end: { x: 22, y: 8 }, start: { x: 28, y: 8 }, tangentEnd: null, tangentStart: null },
+  { end: { x: 22, y: 2 }, start: { x: 22, y: 8 }, tangentEnd: null, tangentStart: null },
 ];
 
 describe('getTextFlattenVector', () => {
