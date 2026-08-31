@@ -30,26 +30,29 @@ export const drawVectorNodeOrTextPathGuide = (
   nodesById: Record<string, TSceneNode>,
   editingPathId?: string | null,
 ): void => {
-  const isTextBeingEdited = pathOutlineStyles.get(node.id) === 'editing';
-  const renderNode = mirrorGuideVectorForText(node, nodesById);
+  const outlineStyle = pathOutlineStyles.get(node.id);
+  const isBoundAsTextPath = isVectorBoundAsTextPath(nodesById, node.id) || node.id === editingPathId;
 
-  if ((isVectorBoundAsTextPath(nodesById, node.id) || node.id === editingPathId) && isTextBeingEdited) {
-    drawDashedVectorPathOutline(gl, program, buffer, renderNode, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport);
-    return;
+  if (!isBoundAsTextPath || outlineStyle) {
+    const renderNode = mirrorGuideVectorForText(node, nodesById);
+
+    if (isBoundAsTextPath) {
+      drawDashedVectorPathOutline(gl, program, buffer, renderNode, DRAFT_FRAME_STROKE, canvasWidth, canvasHeight, viewport);
+    } else {
+      drawSceneVectorNode(
+        gl,
+        program,
+        buffer,
+        faceBufferCache,
+        strokeBufferCache,
+        renderNode,
+        draggedVectorNodeSnapshots,
+        resizedVectorNodeSnapshots,
+        rotatedVectorNodeSnapshots,
+        canvasWidth,
+        canvasHeight,
+        viewport,
+      );
+    }
   }
-
-  drawSceneVectorNode(
-    gl,
-    program,
-    buffer,
-    faceBufferCache,
-    strokeBufferCache,
-    renderNode,
-    draggedVectorNodeSnapshots,
-    resizedVectorNodeSnapshots,
-    rotatedVectorNodeSnapshots,
-    canvasWidth,
-    canvasHeight,
-    viewport,
-  );
 };

@@ -20,6 +20,26 @@ const LEFT = { x: 0, y: 100 };
 const BOTTOM = { x: 100, y: 200 };
 
 describe('getCurvedCaretIndexAtPoint', () => {
+  it('should register a click anywhere inside the ascent/descent band as ~on the path, not just exactly on the bare guide line', () => {
+    // mock — 15px off the path (toward the ellipse centre) from RIGHT; the koryto for this atlas
+    // reaches 30px above the path (lineHeight 40 * baseRatio 0.75), well past that 15px offset
+    const nearButOffPath = { x: 185, y: 100 };
+
+    // result
+    expect(getCurvedCaretIndexAtPoint(ATLAS, 'AAAAAAAA', 20, { ...BOX, pathStartOffset: 0 }, nearButOffPath)).toEqual({
+      distance: expect.closeTo(0, 5),
+      index: 0,
+    });
+  });
+
+  it('should still report the excess distance past the ascent/descent band for a click well outside it', () => {
+    // mock — 50px off the path (toward the ellipse centre), past the 30px band
+    const farOffPath = { x: 150, y: 100 };
+
+    // result — 50 - 30 (halfBand) = 20 excess
+    expect(getCurvedCaretIndexAtPoint(ATLAS, 'AAAAAAAA', 20, { ...BOX, pathStartOffset: 0 }, farOffPath).distance).toBeCloseTo(20, 1);
+  });
+
   it("should return index 0 with ~zero distance for a point at the content's start on the path", () => {
     // result
     expect(getCurvedCaretIndexAtPoint(ATLAS, 'AAAAAAAA', 20, { ...BOX, pathStartOffset: 0 }, RIGHT)).toEqual({

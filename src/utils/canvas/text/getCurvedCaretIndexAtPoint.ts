@@ -23,6 +23,9 @@ export const getCurvedCaretIndexAtPoint = (
   point: TPoint,
   pathNode?: TSceneNode,
 ): TCurvedCaretHit => {
+  const lineHeight = (atlas.common.lineHeight * fontSize) / atlas.info.size;
+  const baseRatio = atlas.common.base / atlas.common.lineHeight;
+  const halfBand = Math.max(lineHeight * baseRatio, lineHeight * (1 - baseRatio));
   const sampler = getTextPathSampler(box, pathNode);
   const visibleContent = getVisibleCurvedContent(
     atlas,
@@ -55,7 +58,6 @@ export const getCurvedCaretIndexAtPoint = (
   );
 
   const clampedLength = Math.min(Math.max(nearestLength, minBoundary), maxBoundary);
-
   let bestIndex = 0;
   let bestDistance = Infinity;
 
@@ -68,7 +70,7 @@ export const getCurvedCaretIndexAtPoint = (
     }
   });
 
-  const distance = nearest.distance + distanceToRange(nearestLength);
+  const distance = Math.max(nearest.distance - halfBand, 0) + distanceToRange(nearestLength);
 
   return { distance, index: bestIndex };
 };
