@@ -4,7 +4,7 @@ import { renderHook } from '@testing-library/react';
 import { useRegisterColorPixelSampler } from './useRegisterColorPixelSampler';
 
 // others
-import { COLOR_SAMPLE_PASSTHROUGH_ATTRIBUTE } from 'utils/canvas/colorPixelSampler/constants';
+import { COLOR_SAMPLE_PASSTHROUGH_ATTRIBUTE } from 'constant/canvas';
 
 // utils
 import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';

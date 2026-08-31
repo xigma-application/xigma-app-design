@@ -4,8 +4,10 @@ import { useEffect } from 'react';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TRgba } from 'types/color';
 
+// others
+import { COLOR_SAMPLE_PASSTHROUGH_ATTRIBUTE } from 'constant/canvas';
+
 // utils
-import { COLOR_SAMPLE_PASSTHROUGH_ATTRIBUTE } from 'utils/canvas/colorPixelSampler/constants';
 import { registerColorPixelSampler } from 'utils/canvas/colorPixelSampler/colorPixelSamplerRegistry';
 
 const isPointOverCanvas = (canvas: HTMLCanvasElement, x: number, y: number): boolean => {

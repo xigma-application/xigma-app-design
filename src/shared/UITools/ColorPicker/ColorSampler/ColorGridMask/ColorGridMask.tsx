@@ -5,7 +5,7 @@ import { FC } from 'react';
 import { usePickSampledColor } from './hooks/usePickSampledColor';
 
 // others
-import { COLOR_SAMPLE_PASSTHROUGH_ATTRIBUTE } from 'utils/canvas/colorPixelSampler/constants';
+import { COLOR_SAMPLE_PASSTHROUGH_ATTRIBUTE } from 'constant/canvas';
 
 // styles
 import styles from './color-grid-mask.module.scss';

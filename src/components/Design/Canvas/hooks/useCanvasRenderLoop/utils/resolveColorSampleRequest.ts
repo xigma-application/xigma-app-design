@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // others
-import { COLOR_SAMPLE_GRID_SIZE } from 'utils/canvas/colorPixelSampler/constants';
+import { COLOR_SAMPLE_GRID_SIZE } from 'constant/canvas';
 
 // types
 import { TColorSampleRequest } from 'utils/canvas/colorPixelSampler/types';
