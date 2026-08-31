@@ -95,3 +95,53 @@ test('the collapse-all button and Alt+L both fold every expanded group in the La
   await page.keyboard.press('Alt+l');
   await expect(rows).toHaveCount(1);
 });
+
+test('right-clicking an unselected layer selects it and opens its own context menu', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-layers-panel-context-menu-select');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 100, 740, 140); // A, row 0
+  await designPage.drawRectangle(760, 100, 800, 140); // B, row 1 — drawn last, so it starts selected instead of A
+
+  const layersTree = page.locator('[class*="LayersTree"]').first();
+  const rows = layersTree.locator('[class*="Tree__row_"]');
+  const rowA = rows.nth(0);
+  const rowB = rows.nth(1);
+
+  await expect(rowA.locator('[aria-selected="true"]')).toHaveCount(0); // A starts unselected
+
+  await rowA.click({ button: 'right' }); // no prior left-click on A at all
+
+  // right-clicking replaced the selection, so the menu that opened acts on A, not the previously-selected B
+  await expect(rowA.locator('[aria-selected="true"]')).toHaveCount(1);
+  await expect(rowB.locator('[aria-selected="true"]')).toHaveCount(0);
+  await expect(page.getByRole('menuitem', { name: 'Rename' })).toBeVisible();
+});
+
+test('right-clicking a layer already part of a multi-selection keeps the whole selection intact', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-layers-panel-context-menu-keep-multiselect');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 100, 740, 140); // A, row 0
+  await designPage.drawRectangle(760, 100, 800, 140); // B, row 1 — drawn last, adjacent, auto-selected
+  await designPage.click(720, 120, { shift: true }); // shift-click A on canvas, selection becomes [B, A]
+
+  const layersTree = page.locator('[class*="LayersTree"]').first();
+  const rows = layersTree.locator('[class*="Tree__row_"]');
+  const rowA = rows.nth(0);
+  const rowB = rows.nth(1);
+
+  await expect(rowA.locator('[aria-selected="true"]')).toHaveCount(1);
+  await expect(rowB.locator('[aria-selected="true"]')).toHaveCount(1);
+
+  await rowB.click({ button: 'right' }); // right-clicking a row already in the selection
+
+  // the multi-selection survives, unlike right-clicking a row outside it
+  await expect(rowA.locator('[aria-selected="true"]')).toHaveCount(1);
+  await expect(rowB.locator('[aria-selected="true"]')).toHaveCount(1);
+  await expect(page.getByRole('menuitem', { name: 'Rename' })).toBeVisible();
+});

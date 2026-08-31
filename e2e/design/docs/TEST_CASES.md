@@ -2053,12 +2053,14 @@ The Layers panel (`LeftPanel/File/Layers`) lists the active page's nodes in root
 nesting yet) with a per-row lock and eye (visibility) toggle. Both are real document state
 (`locked?`/`hidden?` on the node), joined to the undo/redo history the same way `updateNode` is.
 
-| #   | Scenario                                                                                                         | Unit |            E2E            |
-| --- | ---------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------: |
-| 332 | Locking a node from the panel keeps it rendered but excludes it from canvas click hit-testing and marquee-select |  ✅  | ✅ `layers-panel.spec.ts` |
-| 333 | Hiding a node from the panel removes it from rendering and from canvas click hit-testing/marquee-select entirely |  ✅  | ✅ `layers-panel.spec.ts` |
-| 334 | Selecting a node from the panel works regardless of its locked/hidden state (panel selection isn't gated)        |  ✅  |             —             |
-| 335 | Toggling a node's locked or hidden state is its own undo step, independent of any other change                   |  ✅  |             —             |
+| #   | Scenario                                                                                                                                                                            | Unit |            E2E            |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------: |
+| 332 | Locking a node from the panel keeps it rendered but excludes it from canvas click hit-testing and marquee-select                                                                    |  ✅  | ✅ `layers-panel.spec.ts` |
+| 333 | Hiding a node from the panel removes it from rendering and from canvas click hit-testing/marquee-select entirely                                                                    |  ✅  | ✅ `layers-panel.spec.ts` |
+| 334 | Selecting a node from the panel works regardless of its locked/hidden state (panel selection isn't gated)                                                                           |  ✅  |             —             |
+| 335 | Toggling a node's locked or hidden state is its own undo step, independent of any other change                                                                                      |  ✅  |             —             |
+| 342 | Right-clicking a row that isn't currently selected replaces the selection with it, so the context menu that opens acts on the right-clicked node instead of a stale prior selection |  ✅  | ✅ `layers-panel.spec.ts` |
+| 343 | Right-clicking a row already part of a multi-selection leaves the whole selection intact, so bulk actions (Copy, Bring to front, ...) keep applying to every selected node          |  ✅  | ✅ `layers-panel.spec.ts` |
 
 Scenarios 334-335 are plain synchronous dispatch-and-assert-on-`store.getState()` checks with no
 real timing/rendering stakes, so they're unit-only per the section below. 332-333 get e2e coverage
@@ -2066,6 +2068,20 @@ because the interesting part is genuinely the browser round-trip: a real DOM cli
 button changing what a _separate_ real canvas click can hit-test, which a synthetic jsdom
 `PointerEvent` can't exercise end-to-end the way the actual `getNodeAtPoint`/`getCollidedNodes`
 filters are wired into the live render+hit-test pipeline.
+
+#342/#343 are a real, reported regression: `TreeItem.tsx` opened its context menu straight off
+`onContextMenu` (`useTreeItemContextMenu.ts`) without ever touching selection, so right-clicking a
+row that wasn't already selected opened a menu whose actions (`useNodeMenuActions.ts` — Copy, Group
+selection, Bring to front, Send to back, Move to page) all operate on the Redux _selection_, not on
+the row's own node — they silently acted on whatever was selected elsewhere instead. Fixed by
+having `useTreeItemContextMenu` select the right-clicked id first, unless it's already part of the
+current selection (mirroring the standard convention: right-clicking a member of a multi-selection
+must not collapse it down to just that one row, or bulk actions would break). The unit suite
+(`useTreeItemContextMenu.spec.tsx`) asserts `store.getState().design.selectedIds` directly for both
+branches; the e2e versions prove the actual observable symptom via each row's own `aria-selected`
+DOM state and the real menu that opens, the same "real browser + rendering" category as #90/#341
+above. `move-to-page.spec.ts`'s own scenario no longer needs a throwaway left-click before the
+right-click for exactly this reason.
 
 ## Layer order — Bring to front / Send to back
 

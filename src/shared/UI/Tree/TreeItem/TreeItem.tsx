@@ -41,7 +41,7 @@ export const TreeItem: FC<TTreeItemProps> = ({ depth = 0, isExpanded = false, is
   const handleRename = useRenameTreeItem(node.id);
   const { handleStopPropagation, handleToggleHidden, handleToggleLocked } = useTreeItemActions(node.id);
   const { isEditing, isRenameRequested, onEditingChange, onRenameRequested } = useTreeItemNameEditing();
-  const { anchorRef, isOpen, onContextMenu, onOpenChange } = useTreeItemContextMenu();
+  const { anchorRef, isOpen, onContextMenu, onOpenChange } = useTreeItemContextMenu(node.id);
   const isExpandable = node.type === NodeType.group && node.childIds.length > 0;
 
   return (

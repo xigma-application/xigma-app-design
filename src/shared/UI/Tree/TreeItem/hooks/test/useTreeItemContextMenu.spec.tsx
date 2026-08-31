@@ -1,24 +1,52 @@
-import { MouseEvent } from 'react';
+import { MouseEvent, ReactNode } from 'react';
+import { Provider } from 'react-redux';
 import { act, renderHook } from '@testing-library/react';
 
 // hooks
 import { useTreeItemContextMenu } from '../useTreeItemContextMenu';
 
+// store
+import { addNode, deleteNode, setSelection } from 'store/design/slice';
+import { selectOrderedNodes, selectSelectedIds } from 'store/design/selectors';
+import { store } from 'store';
+
+// types
+import { NodeType } from 'types/design/enums';
+
+// utils
+import { setSelectionAnchorId } from '../useSelectTreeItem/utils/selectionAnchor';
+
+const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
+
 const contextMenuEvent = (x: number, y: number): MouseEvent =>
   ({ clientX: x, clientY: y, preventDefault: vi.fn() }) as unknown as MouseEvent;
 
 describe('useTreeItemContextMenu', () => {
+  let idA: string;
+  let idB: string;
+
   beforeEach(() => {
     vi.useFakeTimers();
+
+    [idA, idB] = ['A', 'B'].map((name) => {
+      store.dispatch(
+        addNode({ fill: '#ff0000', height: 10, name, parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      );
+
+      return selectOrderedNodes(store.getState()).at(-1)!.id;
+    });
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    setSelectionAnchorId(null);
+    store.dispatch(setSelection([]));
+    [idA, idB].forEach((id) => store.dispatch(deleteNode(id)));
   });
 
   it('should start closed with a zeroed anchor rect', () => {
     // before
-    const { result } = renderHook(() => useTreeItemContextMenu());
+    const { result } = renderHook(() => useTreeItemContextMenu(idA), { wrapper });
 
     // result
     const rect = result.current.anchorRef.current.getBoundingClientRect();
@@ -32,7 +60,7 @@ describe('useTreeItemContextMenu', () => {
     const event = contextMenuEvent(120, 240);
 
     // before
-    const { result } = renderHook(() => useTreeItemContextMenu());
+    const { result } = renderHook(() => useTreeItemContextMenu(idA), { wrapper });
 
     // result — closed initially
     expect(result.current.isOpen).toBe(false);
@@ -58,7 +86,7 @@ describe('useTreeItemContextMenu', () => {
 
   it('should close through onOpenChange', () => {
     // before
-    const { result } = renderHook(() => useTreeItemContextMenu());
+    const { result } = renderHook(() => useTreeItemContextMenu(idA), { wrapper });
     act(() => result.current.onContextMenu(contextMenuEvent(0, 0)));
     act(() => vi.runAllTimers());
 
@@ -67,5 +95,29 @@ describe('useTreeItemContextMenu', () => {
 
     // result
     expect(result.current.isOpen).toBe(false);
+  });
+
+  it('should select the right-clicked row when it is not already selected', () => {
+    // before
+    store.dispatch(setSelection([idA]));
+    const { result } = renderHook(() => useTreeItemContextMenu(idB), { wrapper });
+
+    // action
+    act(() => result.current.onContextMenu(contextMenuEvent(0, 0)));
+
+    // result
+    expect(selectSelectedIds(store.getState())).toEqual([idB]);
+  });
+
+  it('should keep an existing multi-selection intact when right-clicking a row already part of it', () => {
+    // before
+    store.dispatch(setSelection([idA, idB]));
+    const { result } = renderHook(() => useTreeItemContextMenu(idB), { wrapper });
+
+    // action
+    act(() => result.current.onContextMenu(contextMenuEvent(0, 0)));
+
+    // result
+    expect(selectSelectedIds(store.getState())).toEqual([idA, idB]);
   });
 });

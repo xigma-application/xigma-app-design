@@ -21,8 +21,7 @@ test('moving a selected layer to another page removes it from the current pageâ€
 
   await expect(row).toHaveCount(1);
 
-  await row.click(); // select the layer â€” right-click alone only opens the menu, it doesn't select
-  await row.click({ button: 'right' }); // open the layer's context menu
+  await row.click({ button: 'right' }); // right-click alone selects the row and opens its context menu
   await page.getByText('Move to page').hover();
   await page.getByRole('menuitem', { name: 'Page 2' }).click();
 
