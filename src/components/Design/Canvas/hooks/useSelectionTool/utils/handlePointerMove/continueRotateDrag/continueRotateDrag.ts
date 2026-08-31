@@ -2,12 +2,13 @@ import { RefObject } from 'react';
 
 // store
 import { updateNode } from 'store/design/slice';
-import { selectViewport } from 'store/design/selectors';
+import { selectActivePage, selectViewport } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
+import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TRotateDragState } from 'types/design/selectionTool/types';
+import { TRotateDragState, TRotateNodeOrigin } from 'types/design/selectionTool/types';
 
 // utils
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
@@ -15,6 +16,16 @@ import { getPointerPosition } from '../../../../../utils/getPointerPosition';
 import { getRotatedNodeChanges } from './getRotatedNodeChanges';
 import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
 import { screenToWorld } from '../../../../../utils/screenToWorld';
+
+const pinRotatedGroupBounds = (dispatch: AppDispatch, nodeOrigins: Record<string, TRotateNodeOrigin>): void => {
+  const { nodes } = selectActivePage(store.getState());
+
+  Object.entries(nodeOrigins).forEach(([id, origin]) => {
+    if (nodes[id]?.type === NodeType.group && 'width' in origin) {
+      dispatch(updateNode({ changes: { height: origin.height, width: origin.width }, id }));
+    }
+  });
+};
 
 export const continueRotateDrag = (
   canvas: HTMLCanvasElement,
@@ -47,5 +58,7 @@ export const continueRotateDrag = (
         dispatch(updateNode({ changes: getRotatedNodeChanges(origin, pivot, deltaDegrees, isSingleNodeRotate), id }));
       }
     });
+
+    pinRotatedGroupBounds(dispatch, nodeOrigins);
   }
 };

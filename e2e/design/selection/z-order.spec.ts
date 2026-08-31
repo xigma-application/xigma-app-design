@@ -13,6 +13,18 @@ test('"]" brings the selected node to the front and "[" sends it back, changing 
   await designPage.drawRectangle(700, 300, 820, 420);
   await designPage.drawRectangle(760, 360, 880, 480);
 
+  // give A and B distinct fills — every rectangle shares the same default fill, so without this
+  // the overlap region would render pixel-identical no matter which one is stacked on top
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { updateNode } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+    const [idA, idB] = pages[activePageId].rootOrder;
+
+    store.dispatch(updateNode({ changes: { fill: '#FF0000' }, id: idA }));
+    store.dispatch(updateNode({ changes: { fill: '#0000FF' }, id: idB }));
+  });
+
   await designPage.click(1500, 700); // deselect
   await designPage.pointerMove(1500, 700); // neutral rest, no hover outline
   const bOnTop = await designPage.canvas.screenshot();

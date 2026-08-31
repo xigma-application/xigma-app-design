@@ -997,9 +997,15 @@ test('Ctrl/Cmd+clicking a segment (no drag yet) reveals its default straight-lin
   // which would confound the second click below
   const onSegment = { x: 940, y: 300 };
 
+  // clipped to the segment's own neighborhood — the Layers panel row for this node redraws its live
+  // shape-preview thumbnail on a debounced delay (NODE_SHAPE_ICON_REDRAW_DEBOUNCE_MS) after the first
+  // click writes its tangents, so a full-canvas capture can catch that thumbnail mid-transition and
+  // differ from the second capture for a reason with nothing to do with the canvas handles under test
+  const region = { height: 300, width: 300, x: 850, y: 200 };
+
   await designPage.click(onSegment.x, onSegment.y, { ctrl: true }); // down+up, no movement — arms the bend, writes default tangents
   await designPage.pointerMove(1400, 700);
-  const afterCtrlClick = await designPage.canvas.screenshot();
+  const afterCtrlClick = await page.screenshot({ clip: region });
 
   // a plain click on the very same, already-tangented segment goes through the ordinary, known-good
   // segment-selection path (selectAndArmVectorSegmentDrag.ts) — it can only ever reveal the handles
@@ -1007,7 +1013,7 @@ test('Ctrl/Cmd+clicking a segment (no drag yet) reveals its default straight-lin
   // above already showed them this second click changes nothing further
   await designPage.click(onSegment.x, onSegment.y);
   await designPage.pointerMove(1400, 700);
-  const afterPlainReselect = await designPage.canvas.screenshot();
+  const afterPlainReselect = await page.screenshot({ clip: region });
 
   expect(afterCtrlClick.equals(afterPlainReselect)).toBe(true);
 });
