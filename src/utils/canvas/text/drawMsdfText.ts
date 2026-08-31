@@ -40,6 +40,8 @@ export const drawMsdfText = (
       canvasWidth,
       canvasHeight,
       viewport,
+      node.strokeColor,
+      node.strokeWidth,
     );
   }
 };

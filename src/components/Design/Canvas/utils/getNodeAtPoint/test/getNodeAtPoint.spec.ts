@@ -411,4 +411,58 @@ describe('getNodeAtPoint', () => {
     expect(getNodeAtPoint({ x: 5, y: 6 }, [line], IDENTITY_VIEWPORT)).toBeNull();
     expect(getNodeAtPoint({ x: 5, y: 6 }, [line], { x: 0, y: 0, zoom: 0.5 })).toEqual(line);
   });
+
+  it('should widen a line’s hit-test tolerance to match its own strokeWidth when that exceeds the default', () => {
+    // mock — 6 world units off the segment, well past the 4px default line tolerance
+    const line: TSceneNode = {
+      id: 'a',
+      name: 'Line',
+      parentId: null,
+      stroke: '#000000',
+      strokeWidth: 16,
+      type: NodeType.line,
+      x1: 0,
+      x2: 10,
+      y1: 0,
+      y2: 0,
+    };
+
+    // result
+    expect(getNodeAtPoint({ x: 5, y: 6 }, [line], IDENTITY_VIEWPORT)).toEqual(line);
+  });
+
+  it('should extend a rectangle’s clickable area outward by half its stroke width', () => {
+    // mock — a point just outside the nominal 10x10 box, on the visible stroke ring
+    const node = buildNode({ height: 10, id: 'a', strokeColor: '#000000', strokeWidth: 8, width: 10, x: 0, y: 0 });
+
+    // result
+    expect(getNodeAtPoint({ x: 12, y: 5 }, [node], IDENTITY_VIEWPORT)).toEqual(node);
+    expect(getNodeAtPoint({ x: 20, y: 5 }, [node], IDENTITY_VIEWPORT)).toBeNull();
+  });
+
+  it('should not extend a rectangle’s clickable area when it has no stroke', () => {
+    // mock
+    const node = buildNode({ height: 10, id: 'a', width: 10, x: 0, y: 0 });
+
+    // result
+    expect(getNodeAtPoint({ x: 12, y: 5 }, [node], IDENTITY_VIEWPORT)).toBeNull();
+  });
+
+  it('should extend an ellipse’s clickable area outward by half its stroke width', () => {
+    // mock — a point just past the inscribed ellipse's rightmost edge (radiusX 5), on the stroke
+    const node = buildNode({
+      height: 10,
+      id: 'a',
+      strokeColor: '#000000',
+      strokeWidth: 8,
+      type: NodeType.ellipse,
+      width: 10,
+      x: 0,
+      y: 0,
+    });
+
+    // result
+    expect(getNodeAtPoint({ x: 8, y: 5 }, [node], IDENTITY_VIEWPORT)).toEqual(node);
+    expect(getNodeAtPoint({ x: 20, y: 5 }, [node], IDENTITY_VIEWPORT)).toBeNull();
+  });
 });

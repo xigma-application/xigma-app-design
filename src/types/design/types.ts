@@ -62,11 +62,15 @@ export type TEllipseNode = TBaseNode & {
   fill: string;
   flipX?: boolean;
   flipY?: boolean;
+  strokeColor?: string;
+  strokeWidth?: number;
   type: NodeType.ellipse;
 };
 
 export type TFrameNode = TBaseNode & {
   fill: string;
+  strokeColor?: string;
+  strokeWidth?: number;
   type: NodeType.frame;
 };
 
@@ -99,6 +103,8 @@ export type TPolygonNode = TBaseNode & {
 export type TRectangleNode = TBaseNode & {
   cornerRadius?: number;
   fill: string;
+  strokeColor?: string;
+  strokeWidth?: number;
   type: NodeType.rectangle;
 };
 
@@ -127,6 +133,8 @@ export type TTextNode = TBaseNode & {
   pathFlip?: boolean;
   pathId?: string | null;
   pathStartOffset?: number;
+  strokeColor?: string;
+  strokeWidth?: number;
   type: NodeType.text;
 };
 
@@ -186,6 +194,7 @@ export type TLineNode = {
   parentId: string | null;
   startPoint?: TLineEndpointStyle;
   stroke: string;
+  strokeWidth?: number;
   type: NodeType.line;
   x1: number;
   x2: number;

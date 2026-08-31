@@ -24,8 +24,10 @@ import { handleDeleteSelection } from './utils/handleDeleteSelection/handleDelet
 import { handleDuplicateSelection } from './utils/handleDuplicateSelection';
 import { handleEnterTextEdit } from './utils/handleEnterTextEdit';
 import { handleEnterVectorEdit } from './utils/handleEnterVectorEdit';
+import { handleFlattenSelection } from './utils/handleFlattenSelection';
 import { handleGroupSelection } from './utils/handleGroupSelection';
 import { handleLeave } from './utils/handleLeave';
+import { handleOutlineStroke } from './utils/handleOutlineStroke/handleOutlineStroke';
 import { handlePasteSelection } from './utils/handlePasteSelection';
 import { handleRedo } from './utils/handleRedo';
 import { handleSelectAll } from './utils/handleSelectAll';
@@ -72,6 +74,8 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => handleDuplicateSelection(dispatch, refs), ...shortcuts.duplicate },
       { action: (): any => handleGroupSelection(dispatch), ...shortcuts.group },
       { action: (): any => handleUngroupSelection(dispatch), ...shortcuts.ungroup },
+      { action: (): any => handleFlattenSelection(dispatch), ...shortcuts.flatten },
+      { action: (): any => handleOutlineStroke(dispatch), ...shortcuts.outlineStroke },
       { action: (): any => handleBringToFront(dispatch), ...shortcuts.bringToFront },
       { action: (): any => handleSendToBack(dispatch), ...shortcuts.sendToBack },
       { action: (): any => handleCopySelection(refs), ...shortcuts.copy },

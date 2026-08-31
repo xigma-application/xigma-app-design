@@ -56,9 +56,11 @@ const renderNodeContextMenu = (props: Partial<TNodeContextMenuProps> = {}): Retu
       node={buildRectangleNode()}
       onBringToFront={vi.fn()}
       onCopy={vi.fn()}
+      onFlatten={vi.fn()}
       onGroupSelection={vi.fn()}
       onMoveToPage={vi.fn()}
       onOpenChange={vi.fn()}
+      onOutlineStroke={vi.fn()}
       onPasteToReplace={vi.fn()}
       onRename={vi.fn()}
       onSendToBack={vi.fn()}
@@ -87,7 +89,7 @@ describe('NodeContextMenu', () => {
     renderNodeContextMenu();
 
     // result
-    expect(screen.getByText('Flatten').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Use as mask').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
   });
 
   it('should not disable Copy, Paste to replace, Rename, Show/Hide, Lock/Unlock, Group selection, Bring to front, or Send to back', () => {
@@ -103,6 +105,51 @@ describe('NodeContextMenu', () => {
     expect(screen.getByText('Group selection').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Bring to front').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Send to back').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+  });
+
+  it('should enable Flatten for a shape convertible to a vector, and call onFlatten on click', async () => {
+    // mock
+    const user = userEvent.setup();
+    const onFlatten = vi.fn();
+
+    // before
+    renderNodeContextMenu({ node: buildRectangleNode(), onFlatten });
+
+    // result
+    expect(screen.getByText('Flatten').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+
+    // action
+    await user.click(screen.getByText('Flatten'));
+
+    // result
+    expect(onFlatten).toHaveBeenCalledTimes(1);
+  });
+
+  it('should keep Outline stroke disabled for a shape with no stroke set', () => {
+    // before
+    renderNodeContextMenu({ node: buildRectangleNode() });
+
+    // result
+    expect(screen.getByText('Outline stroke').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+  });
+
+  it('should enable Outline stroke for a shape with a stroke, and call onOutlineStroke on click', async () => {
+    // mock
+    const user = userEvent.setup();
+    const onOutlineStroke = vi.fn();
+    const node = { ...buildRectangleNode(), strokeColor: '#000000', strokeWidth: 2 };
+
+    // before
+    renderNodeContextMenu({ node, onOutlineStroke });
+
+    // result
+    expect(screen.getByText('Outline stroke').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+
+    // action
+    await user.click(screen.getByText('Outline stroke'));
+
+    // result
+    expect(onOutlineStroke).toHaveBeenCalledTimes(1);
   });
 
   it('should call onBringToFront on Bring to front click, and onSendToBack on Send to back click', async () => {

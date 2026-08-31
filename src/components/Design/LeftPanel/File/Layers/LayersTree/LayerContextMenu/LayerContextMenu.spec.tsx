@@ -1,6 +1,6 @@
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 // components
 import LayerContextMenu from './LayerContextMenu';
@@ -12,7 +12,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TFrameNode } from 'types/design/types';
+import { TFrameNode, TSceneNode } from 'types/design/types';
 
 // utils
 import { getClipboardNodes, setClipboardNodes } from 'components/Design/Canvas/hooks/useKeyboardShortcuts/utils/clipboard';
@@ -32,13 +32,13 @@ const menuNode: TFrameNode = {
   y: 0,
 };
 
-const renderLayerContextMenu = (): ReturnType<typeof render> =>
+const renderLayerContextMenu = (node: TSceneNode = menuNode): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
       <LayerContextMenu
         anchorRef={anchorRef}
         isOpen
-        node={menuNode}
+        node={node}
         onOpenChange={vi.fn()}
         onRenameRequested={vi.fn()}
         onToggleHidden={vi.fn()}
@@ -164,5 +164,72 @@ describe('LayerContextMenu', () => {
     store.dispatch(setActivePage(firstPageId));
     store.dispatch(deletePage(secondPageId));
     vi.useRealTimers();
+  });
+
+  it('should replace a rectangle with its vector equivalent on Flatten click', async () => {
+    // mock
+    const user = userEvent.setup();
+    store.dispatch(
+      addNode({ fill: '#ff0000', height: 20, name: 'Rect', parentId: null, rotation: 0, type: NodeType.rectangle, width: 20, x: 0, y: 0 }),
+    );
+    const [rectId] = selectActivePage(store.getState()).rootOrder.slice(-1);
+    const rectNode = selectActivePage(store.getState()).nodes[rectId];
+    store.dispatch(setSelection([rectId]));
+
+    // before
+    renderLayerContextMenu(rectNode);
+
+    // action
+    await user.click(screen.getByText('Flatten'));
+
+    // result — the click handler is fire-and-forget, so the store update lands asynchronously
+    await waitFor(() => expect(selectActivePage(store.getState()).nodes[rectId].type).toBe(NodeType.vector));
+
+    // after
+    store.dispatch(deleteNode(rectId));
+  });
+
+  it('should replace the original shape in place with a single vector combining its fill and stroke outline, on Outline stroke click', async () => {
+    // mock
+    const user = userEvent.setup();
+    store.dispatch(
+      addNode({
+        fill: '#ff0000',
+        height: 20,
+        name: 'Rect',
+        parentId: null,
+        rotation: 0,
+        strokeColor: '#000000',
+        strokeWidth: 4,
+        type: NodeType.rectangle,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const [rectId] = selectActivePage(store.getState()).rootOrder.slice(-1);
+    const rectNode = selectActivePage(store.getState()).nodes[rectId];
+    store.dispatch(setSelection([rectId]));
+
+    // before
+    renderLayerContextMenu(rectNode);
+
+    // action
+    await user.click(screen.getByText('Outline stroke'));
+
+    // result — no group: same id, now a vector with both the original fill face and the new
+    // stroke-outline face; fire-and-forget, so this lands asynchronously
+    await waitFor(() => {
+      const node = selectActivePage(store.getState()).nodes[rectId];
+
+      expect(node.type).toBe(NodeType.vector);
+      expect(node.type === NodeType.vector ? node.filledFaceKeys.length : 0).toBeGreaterThanOrEqual(2);
+      expect(node.type === NodeType.vector ? Object.values(node.fillColorOverrideByKey ?? {}) : []).toEqual(
+        expect.arrayContaining(['#ff0000', '#000000']),
+      );
+    });
+
+    // after
+    store.dispatch(deleteNode(rectId));
   });
 });

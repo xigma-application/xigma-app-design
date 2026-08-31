@@ -18,6 +18,7 @@ export type TStandardKeyboardShortcuts = {
   copy: TShortcut;
   duplicate: TShortcut;
   escape: TShortcut;
+  flatten: TShortcut;
   group: TShortcut;
   nudgeDown: TShortcut;
   nudgeDownLarge: TShortcut;
@@ -27,6 +28,7 @@ export type TStandardKeyboardShortcuts = {
   nudgeRightLarge: TShortcut;
   nudgeUp: TShortcut;
   nudgeUpLarge: TShortcut;
+  outlineStroke: TShortcut;
   paste: TShortcut;
   redo: TShortcut;
   selectAll: TShortcut;

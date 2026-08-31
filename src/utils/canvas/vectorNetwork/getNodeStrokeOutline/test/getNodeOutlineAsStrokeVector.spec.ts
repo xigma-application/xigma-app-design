@@ -1,0 +1,94 @@
+// types
+import { NodeType } from 'types/design/enums';
+import { TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
+
+// utils
+import { getNodeOutlineAsStrokeVector } from '../getNodeOutlineAsStrokeVector';
+
+const buildRectangle = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
+  fill: '#ff0000',
+  height: 20,
+  id: 'rect-1',
+  name: 'Rectangle',
+  parentId: 'frame-1',
+  rotation: 0,
+  type: NodeType.rectangle,
+  width: 20,
+  x: 0,
+  y: 0,
+  ...overrides,
+});
+
+describe('getNodeOutlineAsStrokeVector', () => {
+  it('should return null when the node has no stroke', () => {
+    // result
+    expect(getNodeOutlineAsStrokeVector(buildRectangle())).toBeNull();
+  });
+
+  it('should merge a shape’s fill and its stroke outline into one replacement vector, keeping the source id', () => {
+    // mock
+    const node = buildRectangle({ strokeColor: '#000000', strokeWidth: 4 });
+
+    // action
+    const result = getNodeOutlineAsStrokeVector(node);
+
+    // result — id/name/parent/rotation carried over for a direct replaceNode; fill face (from
+    // convertNodeToVector) and the new stroke ring face are both present
+    expect(result?.type).toBe(NodeType.vector);
+    expect(result?.id).toBe('rect-1');
+    expect(result?.name).toBe('Rectangle');
+    expect(result?.parentId).toBe('frame-1');
+    expect(result?.filledFaceKeys.length).toBeGreaterThanOrEqual(2);
+    expect(Object.values(result?.fillColorOverrideByKey ?? {})).toEqual(expect.arrayContaining(['#ff0000', '#000000']));
+  });
+
+  it('should merge an existing Vector’s own geometry (unchanged) with its stroke outline', () => {
+    // mock — a simple open 2-point vector path
+    const node: TVectorNode = {
+      fillColor: '#ff0000',
+      filledFaceKeys: [],
+      id: 'vector-1',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+      strokeColor: '#000000',
+      strokeWidth: 4,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    };
+
+    // action
+    const result = getNodeOutlineAsStrokeVector(node);
+
+    // result — the original 2 vertices are still present, plus new ones for the stroke band
+    expect(result?.id).toBe('vector-1');
+    expect(Object.keys(result?.vertices ?? {})).toEqual(expect.arrayContaining(['a', 'b']));
+    expect(Object.keys(result?.vertices ?? {}).length).toBeGreaterThan(2);
+  });
+
+  it('should return the stroke outline vector alone for a Line, since it has no fill of its own', () => {
+    // mock
+    const node: TLineNode = {
+      id: 'line-1',
+      name: 'Line',
+      parentId: 'frame-1',
+      stroke: '#000000',
+      strokeWidth: 4,
+      type: NodeType.line,
+      x1: 0,
+      x2: 100,
+      y1: 0,
+      y2: 0,
+    };
+
+    // action
+    const result = getNodeOutlineAsStrokeVector(node);
+
+    // result
+    expect(result?.id).toBe('line-1');
+    expect(result?.fillColor).toBe('#000000');
+    expect(Object.keys(result?.vertices ?? {})).toHaveLength(4);
+  });
+});

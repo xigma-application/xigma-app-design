@@ -23,7 +23,8 @@ const LayerContextMenu: FC<TLayerContextMenuProps> = ({
   onToggleHidden,
   onToggleLocked,
 }) => {
-  const { onBringToFront, onCopy, onGroupSelection, onMoveToPage, onPasteToReplace, onSendToBack, otherPages } = useNodeMenuActions();
+  const { onBringToFront, onCopy, onFlatten, onGroupSelection, onMoveToPage, onOutlineStroke, onPasteToReplace, onSendToBack, otherPages } =
+    useNodeMenuActions();
 
   return (
     <NodeContextMenu
@@ -32,9 +33,11 @@ const LayerContextMenu: FC<TLayerContextMenuProps> = ({
       node={node}
       onBringToFront={onBringToFront}
       onCopy={onCopy}
+      onFlatten={onFlatten}
       onGroupSelection={onGroupSelection}
       onMoveToPage={onMoveToPage}
       onOpenChange={onOpenChange}
+      onOutlineStroke={onOutlineStroke}
       onPasteToReplace={onPasteToReplace}
       onRename={onRenameRequested}
       onSendToBack={onSendToBack}

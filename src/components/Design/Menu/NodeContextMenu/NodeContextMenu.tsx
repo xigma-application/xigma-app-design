@@ -50,6 +50,9 @@ import styles from './node-context-menu.module.scss';
 import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
+// utils
+import { isConvertibleToVectorNode } from 'utils/canvas/vectorNetwork/convertShapeToVector/convertNodeToVector';
+
 const { MenuItem, MenuSeparator, MenuSub } = MenuCompound;
 
 export type TNodeContextMenuProps = {
@@ -58,9 +61,11 @@ export type TNodeContextMenuProps = {
   node: TSceneNode;
   onBringToFront: TFunc;
   onCopy: TFunc;
+  onFlatten: TFunc;
   onGroupSelection: TFunc;
   onMoveToPage: TFunc<[string]>;
   onOpenChange: TFunc<[boolean]>;
+  onOutlineStroke: TFunc;
   onPasteToReplace: TFunc;
   onRename: TFunc;
   onSendToBack: TFunc;
@@ -75,9 +80,11 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   node,
   onBringToFront,
   onCopy,
+  onFlatten,
   onGroupSelection,
   onMoveToPage,
   onOpenChange,
+  onOutlineStroke,
   onPasteToReplace,
   onRename,
   onSendToBack,
@@ -91,6 +98,10 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   const isFrame = node.type === NodeType.frame;
   const isSection = node.type === NodeType.section;
   const isTextOnPath = node.type === NodeType.text && Boolean(node.pathId);
+  const canFlatten = isConvertibleToVectorNode(node) || (node.type === NodeType.text && !isTextOnPath);
+  const hasStrokeWidth = 'strokeWidth' in node && Boolean(node.strokeWidth);
+  const hasStrokeColor = node.type === NodeType.line ? Boolean(node.stroke) : 'strokeColor' in node && Boolean(node.strokeColor);
+  const canOutlineStroke = !isTextOnPath && hasStrokeWidth && hasStrokeColor;
 
   return (
     <Menu
@@ -155,11 +166,23 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
       )}
       <MenuItem label={t(NODE_MENU_RENAME_KEY)} onClick={onRename} shortcut={KEYBOARD_SHORTCUTS.renameLayer.join('')} withCheck={false} />
       {!isFrame && !isSection && (
-        <MenuItem disabled label={t(NODE_MENU_FLATTEN_KEY)} shortcut={KEYBOARD_SHORTCUTS.flatten.join('')} withCheck={false} />
+        <MenuItem
+          disabled={!canFlatten}
+          label={t(NODE_MENU_FLATTEN_KEY)}
+          onClick={onFlatten}
+          shortcut={KEYBOARD_SHORTCUTS.flatten.join('')}
+          withCheck={false}
+        />
       )}
       {isTextOnPath && <MenuItem disabled label={t(NODE_MENU_CREATE_SEPARATE_LAYERS_KEY)} withCheck={false} />}
       {!isFrame && !isSection && (
-        <MenuItem disabled label={t(NODE_MENU_OUTLINE_STROKE_KEY)} shortcut={KEYBOARD_SHORTCUTS.outlineStroke.join('')} withCheck={false} />
+        <MenuItem
+          disabled={!canOutlineStroke}
+          label={t(NODE_MENU_OUTLINE_STROKE_KEY)}
+          onClick={onOutlineStroke}
+          shortcut={KEYBOARD_SHORTCUTS.outlineStroke.join('')}
+          withCheck={false}
+        />
       )}
       {!isSection && (
         <MenuItem disabled label={t(NODE_MENU_USE_AS_MASK_KEY)} shortcut={KEYBOARD_SHORTCUTS.useAsMask.join('')} withCheck={false} />
