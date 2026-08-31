@@ -13,6 +13,7 @@ import {
   NODE_MENU_ADD_AUTO_LAYOUT_KEY,
   NODE_MENU_ADD_MOTION_KEY,
   NODE_MENU_BRING_TO_FRONT_KEY,
+  NODE_MENU_CONVERT_TO_FRAME_KEY,
   NODE_MENU_CONVERT_TO_SECTION_KEY,
   NODE_MENU_COPY_KEY,
   NODE_MENU_COPY_PASTE_AS_KEY,
@@ -86,6 +87,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   const handlePreventRefocus = usePreventMenuRefocus();
   const handleStopPropagation = useStopClickPropagation();
   const isFrame = nodeType === NodeType.frame;
+  const isSection = nodeType === NodeType.section;
 
   return (
     <Menu
@@ -106,8 +108,8 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
         withCheck={false}
       />
       <MenuItem disabled label={t(NODE_MENU_COPY_PASTE_AS_KEY)} withCheck={false} />
-      <MenuItem disabled label={t(NODE_MENU_SEND_TO_MAKE_KEY)} withCheck={false} />
-      <MenuItem disabled label={t(NODE_MENU_ADD_MOTION_KEY)} withCheck={false} />
+      {!isSection && <MenuItem disabled label={t(NODE_MENU_SEND_TO_MAKE_KEY)} withCheck={false} />}
+      {!isSection && <MenuItem disabled label={t(NODE_MENU_ADD_MOTION_KEY)} withCheck={false} />}
       <MenuSeparator />
       <MenuSub disabled={otherPages.length === 0} label={t(NODE_MENU_MOVE_TO_PAGE_KEY)} withCheck={false}>
         {otherPages.map((page) => (
@@ -128,32 +130,55 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
       />
       <MenuSeparator />
       {isFrame && <MenuItem disabled label={t(NODE_MENU_CONVERT_TO_SECTION_KEY)} withCheck={false} />}
-      <MenuItem
-        label={t(NODE_MENU_GROUP_SELECTION_KEY)}
-        onClick={onGroupSelection}
-        shortcut={KEYBOARD_SHORTCUTS.groupSelection.join('')}
-        withCheck={false}
-      />
-      <MenuItem disabled label={t(NODE_MENU_FRAME_SELECTION_KEY)} shortcut={KEYBOARD_SHORTCUTS.frameSelection.join('')} withCheck={false} />
-      {isFrame && (
+      {isSection && <MenuItem disabled label={t(NODE_MENU_CONVERT_TO_FRAME_KEY)} withCheck={false} />}
+      {!isSection && (
+        <MenuItem
+          label={t(NODE_MENU_GROUP_SELECTION_KEY)}
+          onClick={onGroupSelection}
+          shortcut={KEYBOARD_SHORTCUTS.groupSelection.join('')}
+          withCheck={false}
+        />
+      )}
+      {!isSection && (
+        <MenuItem
+          disabled
+          label={t(NODE_MENU_FRAME_SELECTION_KEY)}
+          shortcut={KEYBOARD_SHORTCUTS.frameSelection.join('')}
+          withCheck={false}
+        />
+      )}
+      {(isFrame || isSection) && (
         <MenuItem disabled label={t(NODE_MENU_UNGROUP_KEY)} shortcut={KEYBOARD_SHORTCUTS.ungroupSelection.join('')} withCheck={false} />
       )}
       <MenuItem label={t(NODE_MENU_RENAME_KEY)} onClick={onRename} shortcut={KEYBOARD_SHORTCUTS.renameLayer.join('')} withCheck={false} />
-      {!isFrame && <MenuItem disabled label={t(NODE_MENU_FLATTEN_KEY)} shortcut={KEYBOARD_SHORTCUTS.flatten.join('')} withCheck={false} />}
-      {!isFrame && (
+      {!isFrame && !isSection && (
+        <MenuItem disabled label={t(NODE_MENU_FLATTEN_KEY)} shortcut={KEYBOARD_SHORTCUTS.flatten.join('')} withCheck={false} />
+      )}
+      {!isFrame && !isSection && (
         <MenuItem disabled label={t(NODE_MENU_OUTLINE_STROKE_KEY)} shortcut={KEYBOARD_SHORTCUTS.outlineStroke.join('')} withCheck={false} />
       )}
-      <MenuItem disabled label={t(NODE_MENU_USE_AS_MASK_KEY)} shortcut={KEYBOARD_SHORTCUTS.useAsMask.join('')} withCheck={false} />
-      {isFrame && <MenuItem disabled label={t(NODE_MENU_SET_AS_THUMBNAIL_KEY)} withCheck={false} />}
+      {!isSection && (
+        <MenuItem disabled label={t(NODE_MENU_USE_AS_MASK_KEY)} shortcut={KEYBOARD_SHORTCUTS.useAsMask.join('')} withCheck={false} />
+      )}
+      {(isFrame || isSection) && <MenuItem disabled label={t(NODE_MENU_SET_AS_THUMBNAIL_KEY)} withCheck={false} />}
       <MenuSeparator />
-      <MenuItem disabled label={t(NODE_MENU_ADD_AUTO_LAYOUT_KEY)} shortcut={KEYBOARD_SHORTCUTS.addAutoLayout.join('')} withCheck={false} />
-      {isFrame && <MenuSub disabled label={t(NODE_MENU_MORE_LAYOUT_OPTIONS_KEY)} withCheck={false} />}
-      <MenuItem
-        disabled
-        label={t(NODE_MENU_CREATE_COMPONENT_KEY)}
-        shortcut={KEYBOARD_SHORTCUTS.createComponent.join('')}
-        withCheck={false}
-      />
+      {!isSection && (
+        <MenuItem
+          disabled
+          label={t(NODE_MENU_ADD_AUTO_LAYOUT_KEY)}
+          shortcut={KEYBOARD_SHORTCUTS.addAutoLayout.join('')}
+          withCheck={false}
+        />
+      )}
+      {(isFrame || isSection) && <MenuSub disabled label={t(NODE_MENU_MORE_LAYOUT_OPTIONS_KEY)} withCheck={false} />}
+      {!isSection && (
+        <MenuItem
+          disabled
+          label={t(NODE_MENU_CREATE_COMPONENT_KEY)}
+          shortcut={KEYBOARD_SHORTCUTS.createComponent.join('')}
+          withCheck={false}
+        />
+      )}
       <MenuItem disabled label={t(NODE_MENU_PLUGINS_KEY)} withCheck={false} />
       <MenuItem disabled label={t(NODE_MENU_WIDGETS_KEY)} withCheck={false} />
       <MenuSeparator />
@@ -169,9 +194,18 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
         shortcut={KEYBOARD_SHORTCUTS.lockUnlockLayer.join('')}
         withCheck={false}
       />
-      <MenuSeparator />
-      <MenuItem disabled label={t(NODE_MENU_FLIP_HORIZONTAL_KEY)} shortcut={KEYBOARD_SHORTCUTS.flipHorizontal.join('')} withCheck={false} />
-      <MenuItem disabled label={t(NODE_MENU_FLIP_VERTICAL_KEY)} shortcut={KEYBOARD_SHORTCUTS.flipVertical.join('')} withCheck={false} />
+      {!isSection && (
+        <>
+          <MenuSeparator />
+          <MenuItem
+            disabled
+            label={t(NODE_MENU_FLIP_HORIZONTAL_KEY)}
+            shortcut={KEYBOARD_SHORTCUTS.flipHorizontal.join('')}
+            withCheck={false}
+          />
+          <MenuItem disabled label={t(NODE_MENU_FLIP_VERTICAL_KEY)} shortcut={KEYBOARD_SHORTCUTS.flipVertical.join('')} withCheck={false} />
+        </>
+      )}
     </Menu>
   );
 };

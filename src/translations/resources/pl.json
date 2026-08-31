@@ -314,6 +314,7 @@
   "design.menu.addAutoLayout": "Dodaj auto layout",
   "design.menu.addMotion": "Dodaj ruch",
   "design.menu.bringToFront": "Przenieś na wierzch",
+  "design.menu.convertToFrame": "Konwertuj na ramkę",
   "design.menu.convertToSection": "Konwertuj na sekcję",
   "design.menu.copy": "Kopiuj",
   "design.menu.copyPasteAs": "Kopiuj/Wklej jako",
