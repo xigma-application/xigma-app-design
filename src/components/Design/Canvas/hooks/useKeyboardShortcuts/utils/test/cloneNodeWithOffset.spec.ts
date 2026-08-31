@@ -50,7 +50,7 @@ describe('cloneNodeWithOffset', () => {
     expect(node).toMatchObject({ x: 10, y: 10 });
   });
 
-  it('should detach a duplicated text-on-path node from its original path', () => {
+  it('should leave a text-on-path node’s pathId as-is — remapping it to the cloned guide is cloneNodeSubtreeWithOffset’s job', () => {
     // mock
     const node: TTextNode = {
       content: 'hello',
@@ -74,7 +74,8 @@ describe('cloneNodeWithOffset', () => {
     // action
     const clone = cloneNodeWithOffset(node, 5, 5) as TTextNode;
 
-    // result
-    expect(clone.pathId).toBeNull();
+    // result — cloneNodeWithOffset alone has no id map to remap pathId with, so it's untouched
+    // here; cloneNodeSubtreeWithOffset's own remapClonedNode is what points it at the new guide
+    expect(clone.pathId).toBe('path-1');
   });
 });

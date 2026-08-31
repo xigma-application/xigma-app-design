@@ -12,6 +12,8 @@ const visitSubtreeNode = (nodes: Record<string, TSceneNode>, id: string, visited
 
     if (node.type === NodeType.group) {
       node.childIds.forEach((childId) => visitSubtreeNode(nodes, childId, visited, result));
+    } else if (node.type === NodeType.text && node.pathId) {
+      visitSubtreeNode(nodes, node.pathId, visited, result);
     }
   }
 };

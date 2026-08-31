@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TFrameNode, TGroupNode, TSceneNode } from 'types/design/types';
+import { TFrameNode, TGroupNode, TSceneNode, TTextNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { collectSubtreeNodes } from '../collectSubtreeNodes';
@@ -87,5 +87,77 @@ describe('collectSubtreeNodes', () => {
   it('should return an empty array for a root id that does not resolve to a node', () => {
     // action & result
     expect(collectSubtreeNodes({}, ['missing'])).toEqual([]);
+  });
+
+  it("should also collect a selected text's text-on-path guide, even though the guide itself was never selected", () => {
+    // mock — a Text on Path bound to a vector guide via pathId; only the text is selected
+    const vector: TVectorNode = {
+      fillColor: null,
+      filledFaceKeys: [],
+      id: 'vector-1',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {},
+      strokeColor: '#000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: {},
+    };
+    const text: TTextNode = {
+      content: 'hi',
+      fill: '#fff',
+      flipX: false,
+      flipY: false,
+      fontFamily: 'Inter',
+      fontSize: 14,
+      height: 20,
+      id: 'text-1',
+      name: 'Text',
+      parentId: null,
+      pathId: vector.id,
+      rotation: 0,
+      type: NodeType.text,
+      width: 100,
+      x: 0,
+      y: 0,
+    };
+    const nodes: Record<string, TSceneNode> = { [text.id]: text, [vector.id]: vector };
+
+    // action
+    const result = collectSubtreeNodes(nodes, [text.id]);
+
+    // result
+    expect(result.map((node) => node.id).sort()).toEqual([text.id, vector.id].sort());
+  });
+
+  it('should tolerate a text-on-path whose pathId no longer resolves to a node', () => {
+    // mock
+    const text: TTextNode = {
+      content: 'hi',
+      fill: '#fff',
+      flipX: false,
+      flipY: false,
+      fontFamily: 'Inter',
+      fontSize: 14,
+      height: 20,
+      id: 'text-1',
+      name: 'Text',
+      parentId: null,
+      pathId: 'gone',
+      rotation: 0,
+      type: NodeType.text,
+      width: 100,
+      x: 0,
+      y: 0,
+    };
+    const nodes: Record<string, TSceneNode> = { [text.id]: text };
+
+    // action
+    const result = collectSubtreeNodes(nodes, [text.id]);
+
+    // result
+    expect(result.map((node) => node.id)).toEqual([text.id]);
   });
 });

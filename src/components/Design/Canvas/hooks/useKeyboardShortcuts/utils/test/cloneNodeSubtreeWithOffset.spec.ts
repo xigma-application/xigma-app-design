@@ -1,6 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
-import { TFrameNode, TGroupNode } from 'types/design/types';
+import { TFrameNode, TGroupNode, TTextNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { cloneNodeSubtreeWithOffset } from '../cloneNodeSubtreeWithOffset';
@@ -28,6 +28,41 @@ const buildGroup = (overrides: Partial<TGroupNode>): TGroupNode => ({
   rotation: 0,
   type: NodeType.group,
   width: 10,
+  x: 0,
+  y: 0,
+  ...overrides,
+});
+
+const buildVector = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
+  fillColor: null,
+  filledFaceKeys: [],
+  id: 'vector-1',
+  name: 'Vector',
+  parentId: null,
+  rotation: 0,
+  segments: {},
+  strokeColor: '#000',
+  strokeWidth: 1,
+  type: NodeType.vector,
+  vertexHandleModes: {},
+  vertices: {},
+  ...overrides,
+});
+
+const buildText = (overrides: Partial<TTextNode> = {}): TTextNode => ({
+  content: 'hi',
+  fill: '#fff',
+  flipX: false,
+  flipY: false,
+  fontFamily: 'Inter',
+  fontSize: 14,
+  height: 20,
+  id: 'text-1',
+  name: 'Text',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.text,
+  width: 100,
   x: 0,
   y: 0,
   ...overrides,
@@ -93,5 +128,36 @@ describe('cloneNodeSubtreeWithOffset', () => {
 
     // result
     expect(result.nodes[0].parentId).toBeNull();
+  });
+
+  it('should point a cloned text-on-path at its own cloned guide, and add that guide as an extra root', () => {
+    // mock — the guide travels in the same batch (collectSubtreeNodes pulls it in) even though it
+    // was never one of the original selected roots
+    const vector = buildVector();
+    const text = buildText({ pathId: vector.id });
+
+    // action
+    const result = cloneNodeSubtreeWithOffset([text, vector], [text.id], 0, 0);
+
+    // result — one extra root (the guide) beyond the text's own
+    expect(result.rootIds).toHaveLength(2);
+    const clonedText = result.nodes.find((node) => node.type === NodeType.text) as TTextNode;
+    const clonedVector = result.nodes.find((node) => node.type === NodeType.vector) as TVectorNode;
+
+    expect(clonedText.pathId).toBe(clonedVector.id);
+    expect(result.rootIds).toEqual(expect.arrayContaining([clonedText.id, clonedVector.id]));
+  });
+
+  it('should fall back the cloned pathId to null when the guide was not part of the cloned batch', () => {
+    // mock — a text-on-path cloned on its own, its guide never collected alongside it
+    const text = buildText({ pathId: 'not-in-batch' });
+
+    // action
+    const result = cloneNodeSubtreeWithOffset([text], [text.id], 0, 0);
+
+    // result — no dangling reference to an id that doesn't exist in this clone batch
+    const [clonedText] = result.nodes as [TTextNode];
+    expect(clonedText.pathId).toBeNull();
+    expect(result.rootIds).toEqual([clonedText.id]);
   });
 });
