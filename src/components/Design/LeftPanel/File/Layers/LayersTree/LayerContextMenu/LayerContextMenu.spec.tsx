@@ -24,9 +24,8 @@ const renderLayerContextMenu = (): ReturnType<typeof render> =>
     <Provider store={store}>
       <LayerContextMenu
         anchorRef={anchorRef}
-        isHidden={false}
-        isLocked={false}
         isOpen
+        nodeType={NodeType.frame}
         onOpenChange={vi.fn()}
         onRenameRequested={vi.fn()}
         onToggleHidden={vi.fn()}

@@ -7,8 +7,6 @@ export type { TVirtualAnchor };
 
 export type TTreeItemMenuRenderParams = {
   anchorRef: RefObject<TVirtualAnchor>;
-  isHidden: boolean;
-  isLocked: boolean;
   isOpen: boolean;
   onOpenChange: TFunc<[boolean]>;
   onRenameRequested: TFunc;

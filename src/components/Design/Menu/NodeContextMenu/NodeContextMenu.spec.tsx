@@ -2,9 +2,10 @@ import userEvent from '@testing-library/user-event';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 
 // components
-import LayerMenu from './LayerMenu';
+import NodeContextMenu, { TNodeContextMenuProps } from './NodeContextMenu';
 
 // types
+import { NodeType } from 'types/design/enums';
 import { TDesignPage } from 'store/design/types';
 
 const anchorRef = { current: { getBoundingClientRect: (): DOMRect => new DOMRect(10, 20, 0, 0) } };
@@ -20,44 +21,31 @@ const buildPage = (id: string, name: string): TDesignPage => ({
   viewport: { x: 0, y: 0, zoom: 1 },
 });
 
-const renderLayerMenu = (
-  isHidden = false,
-  isLocked = false,
-  onRename = vi.fn(),
-  onToggleHidden = vi.fn(),
-  onToggleLocked = vi.fn(),
-  onGroupSelection = vi.fn(),
-  onCopy = vi.fn(),
-  onPasteToReplace = vi.fn(),
-  otherPages: TDesignPage[] = [],
-  onMoveToPage = vi.fn(),
-  onBringToFront = vi.fn(),
-  onSendToBack = vi.fn(),
-): ReturnType<typeof render> =>
+const renderNodeContextMenu = (props: Partial<TNodeContextMenuProps> = {}): ReturnType<typeof render> =>
   render(
-    <LayerMenu
+    <NodeContextMenu
       anchorRef={anchorRef}
-      isHidden={isHidden}
-      isLocked={isLocked}
       isOpen
-      onBringToFront={onBringToFront}
-      onCopy={onCopy}
-      onGroupSelection={onGroupSelection}
-      onMoveToPage={onMoveToPage}
+      nodeType={NodeType.rectangle}
+      onBringToFront={vi.fn()}
+      onCopy={vi.fn()}
+      onGroupSelection={vi.fn()}
+      onMoveToPage={vi.fn()}
       onOpenChange={vi.fn()}
-      onPasteToReplace={onPasteToReplace}
-      onRename={onRename}
-      onSendToBack={onSendToBack}
-      onToggleHidden={onToggleHidden}
-      onToggleLocked={onToggleLocked}
-      otherPages={otherPages}
+      onPasteToReplace={vi.fn()}
+      onRename={vi.fn()}
+      onSendToBack={vi.fn()}
+      onToggleHidden={vi.fn()}
+      onToggleLocked={vi.fn()}
+      otherPages={[]}
+      {...props}
     />,
   );
 
-describe('LayerMenu', () => {
+describe('NodeContextMenu', () => {
   it('should show every menu item when open', () => {
     // before
-    renderLayerMenu();
+    renderNodeContextMenu();
 
     // result
     expect(screen.getByText('Copy')).toBeInTheDocument();
@@ -69,22 +57,22 @@ describe('LayerMenu', () => {
 
   it('should disable the not-yet-implemented actions', () => {
     // before
-    renderLayerMenu();
+    renderNodeContextMenu();
 
     // result
     expect(screen.getByText('Flatten').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
   });
 
-  it('should not disable Copy, Paste to replace, Rename, Hide/Show, Lock/Unlock, Group selection, Bring to front, or Send to back', () => {
+  it('should not disable Copy, Paste to replace, Rename, Show/Hide, Lock/Unlock, Group selection, Bring to front, or Send to back', () => {
     // before
-    renderLayerMenu();
+    renderNodeContextMenu();
 
     // result
     expect(screen.getByText('Copy').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Paste to replace').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Rename').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
-    expect(screen.getByText('Hide layer').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
-    expect(screen.getByText('Lock layer').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Show/Hide').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Lock/Unlock').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Group selection').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Bring to front').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Send to back').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
@@ -97,7 +85,7 @@ describe('LayerMenu', () => {
     const onSendToBack = vi.fn();
 
     // before
-    renderLayerMenu(false, false, vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), [], vi.fn(), onBringToFront, onSendToBack);
+    renderNodeContextMenu({ onBringToFront, onSendToBack });
 
     // action
     await user.click(screen.getByText('Bring to front'));
@@ -114,7 +102,7 @@ describe('LayerMenu', () => {
     const onCopy = vi.fn();
 
     // before
-    renderLayerMenu(false, false, vi.fn(), vi.fn(), vi.fn(), vi.fn(), onCopy);
+    renderNodeContextMenu({ onCopy });
 
     // action
     await user.click(screen.getByText('Copy'));
@@ -129,7 +117,7 @@ describe('LayerMenu', () => {
     const onPasteToReplace = vi.fn();
 
     // before
-    renderLayerMenu(false, false, vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), onPasteToReplace);
+    renderNodeContextMenu({ onPasteToReplace });
 
     // action
     await user.click(screen.getByText('Paste to replace'));
@@ -144,7 +132,7 @@ describe('LayerMenu', () => {
     const onRename = vi.fn();
 
     // before
-    renderLayerMenu(false, false, onRename);
+    renderNodeContextMenu({ onRename });
 
     // action
     await user.click(screen.getByText('Rename'));
@@ -153,52 +141,34 @@ describe('LayerMenu', () => {
     expect(onRename).toHaveBeenCalledTimes(1);
   });
 
-  it('should label the visibility action "Hide layer" and call onToggleHidden when the node is visible', async () => {
+  it('should call onToggleHidden on Show/Hide click', async () => {
     // mock
     const user = userEvent.setup();
     const onToggleHidden = vi.fn();
 
     // before
-    renderLayerMenu(false, false, vi.fn(), onToggleHidden);
+    renderNodeContextMenu({ onToggleHidden });
 
     // action
-    await user.click(screen.getByText('Hide layer'));
+    await user.click(screen.getByText('Show/Hide'));
 
     // result
     expect(onToggleHidden).toHaveBeenCalledTimes(1);
   });
 
-  it('should label the visibility action "Show layer" when the node is already hidden', () => {
-    // before
-    renderLayerMenu(true);
-
-    // result
-    expect(screen.getByText('Show layer')).toBeInTheDocument();
-    expect(screen.queryByText('Hide layer')).not.toBeInTheDocument();
-  });
-
-  it('should label the lock action "Lock layer" and call onToggleLocked when the node is unlocked', async () => {
+  it('should call onToggleLocked on Lock/Unlock click', async () => {
     // mock
     const user = userEvent.setup();
     const onToggleLocked = vi.fn();
 
     // before
-    renderLayerMenu(false, false, vi.fn(), vi.fn(), onToggleLocked);
+    renderNodeContextMenu({ onToggleLocked });
 
     // action
-    await user.click(screen.getByText('Lock layer'));
+    await user.click(screen.getByText('Lock/Unlock'));
 
     // result
     expect(onToggleLocked).toHaveBeenCalledTimes(1);
-  });
-
-  it('should label the lock action "Unlock layer" when the node is already locked', () => {
-    // before
-    renderLayerMenu(false, true);
-
-    // result
-    expect(screen.getByText('Unlock layer')).toBeInTheDocument();
-    expect(screen.queryByText('Lock layer')).not.toBeInTheDocument();
   });
 
   it('should call onGroupSelection on Group selection click', async () => {
@@ -207,7 +177,7 @@ describe('LayerMenu', () => {
     const onGroupSelection = vi.fn();
 
     // before
-    renderLayerMenu(false, false, vi.fn(), vi.fn(), vi.fn(), onGroupSelection);
+    renderNodeContextMenu({ onGroupSelection });
 
     // action
     await user.click(screen.getByText('Group selection'));
@@ -218,7 +188,7 @@ describe('LayerMenu', () => {
 
   it('should disable "Move to page" when there are no other pages to move to', () => {
     // before
-    renderLayerMenu();
+    renderNodeContextMenu();
 
     // result
     expect(screen.getByText('Move to page').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
@@ -231,7 +201,7 @@ describe('LayerMenu', () => {
     const otherPages = [buildPage('page-2', 'Page 2'), buildPage('page-3', 'Page 3')];
 
     // before
-    renderLayerMenu(false, false, vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), otherPages, onMoveToPage);
+    renderNodeContextMenu({ onMoveToPage, otherPages });
 
     // result — enabled, and not itself listing the active page
     expect(screen.getByText('Move to page').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
@@ -248,5 +218,31 @@ describe('LayerMenu', () => {
 
     // after
     vi.useRealTimers();
+  });
+
+  it('should show the frame-only items and hide Flatten / Outline stroke for a frame node', () => {
+    // before
+    renderNodeContextMenu({ nodeType: NodeType.frame });
+
+    // result
+    expect(screen.getByText('Convert to section')).toBeInTheDocument();
+    expect(screen.getByText('Ungroup')).toBeInTheDocument();
+    expect(screen.getByText('Set as thumbnail')).toBeInTheDocument();
+    expect(screen.getByText('More layout options')).toBeInTheDocument();
+    expect(screen.queryByText('Flatten')).not.toBeInTheDocument();
+    expect(screen.queryByText('Outline stroke')).not.toBeInTheDocument();
+  });
+
+  it('should hide the frame-only items and show Flatten / Outline stroke for a non-frame node', () => {
+    // before
+    renderNodeContextMenu({ nodeType: NodeType.rectangle });
+
+    // result
+    expect(screen.getByText('Flatten')).toBeInTheDocument();
+    expect(screen.getByText('Outline stroke')).toBeInTheDocument();
+    expect(screen.queryByText('Convert to section')).not.toBeInTheDocument();
+    expect(screen.queryByText('Ungroup')).not.toBeInTheDocument();
+    expect(screen.queryByText('Set as thumbnail')).not.toBeInTheDocument();
+    expect(screen.queryByText('More layout options')).not.toBeInTheDocument();
   });
 });

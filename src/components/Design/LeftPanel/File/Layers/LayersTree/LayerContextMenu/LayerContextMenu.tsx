@@ -1,55 +1,43 @@
 import { FC } from 'react';
 
 // components
-import LayerMenu from '../LayerMenu/LayerMenu';
+import NodeContextMenu from 'components/Design/Menu/NodeContextMenu/NodeContextMenu';
 import { TTreeItemMenuRenderParams } from 'shared';
 
 // hooks
-import { useBringSelectionToFront } from './hooks/useBringSelectionToFront';
-import { useCopySelection } from './hooks/useCopySelection';
-import { useGroupSelection } from './hooks/useGroupSelection';
-import { useMoveSelectionToPage } from './hooks/useMoveSelectionToPage';
-import { usePasteToReplace } from './hooks/usePasteToReplace';
-import { useSendSelectionToBack } from './hooks/useSendSelectionToBack';
+import { useNodeMenuActions } from 'components/Design/Menu/hooks/useNodeMenuActions';
 
-// store
-import { selectActivePageId, selectPages } from 'store/design/selectors';
-import { useAppSelector } from 'store';
+// types
+import { NodeType } from 'types/design/enums';
 
-const LayerContextMenu: FC<TTreeItemMenuRenderParams> = ({
+export type TLayerContextMenuProps = TTreeItemMenuRenderParams & {
+  nodeType: NodeType;
+};
+
+const LayerContextMenu: FC<TLayerContextMenuProps> = ({
   anchorRef,
-  isHidden,
-  isLocked,
   isOpen,
+  nodeType,
   onOpenChange,
   onRenameRequested,
   onToggleHidden,
   onToggleLocked,
 }) => {
-  const activePageId = useAppSelector(selectActivePageId);
-  const pages = useAppSelector(selectPages);
-  const otherPages = Object.values(pages).filter((page) => page.id !== activePageId);
-  const handleBringSelectionToFront = useBringSelectionToFront();
-  const handleCopySelection = useCopySelection();
-  const handleGroupSelection = useGroupSelection();
-  const handleMoveSelectionToPage = useMoveSelectionToPage();
-  const handlePasteToReplace = usePasteToReplace();
-  const handleSendSelectionToBack = useSendSelectionToBack();
+  const { onBringToFront, onCopy, onGroupSelection, onMoveToPage, onPasteToReplace, onSendToBack, otherPages } = useNodeMenuActions();
 
   return (
-    <LayerMenu
+    <NodeContextMenu
       anchorRef={anchorRef}
-      isHidden={isHidden}
-      isLocked={isLocked}
       isOpen={isOpen}
-      onBringToFront={handleBringSelectionToFront}
-      onCopy={handleCopySelection}
-      onGroupSelection={handleGroupSelection}
-      onMoveToPage={handleMoveSelectionToPage}
+      nodeType={nodeType}
+      onBringToFront={onBringToFront}
+      onCopy={onCopy}
+      onGroupSelection={onGroupSelection}
+      onMoveToPage={onMoveToPage}
       onOpenChange={onOpenChange}
-      onPasteToReplace={handlePasteToReplace}
+      onPasteToReplace={onPasteToReplace}
       onRename={onRenameRequested}
-      onSendToBack={handleSendSelectionToBack}
+      onSendToBack={onSendToBack}
       onToggleHidden={onToggleHidden}
       onToggleLocked={onToggleLocked}
       otherPages={otherPages}

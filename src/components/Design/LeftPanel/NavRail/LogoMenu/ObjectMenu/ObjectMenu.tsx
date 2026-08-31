@@ -10,8 +10,8 @@ import { MenuCompound } from 'shared';
 
 // others
 import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
+import { LAYERS_COLLAPSE_ALL_ARIA_LABEL_KEY } from 'components/Design/LeftPanel/File/Layers/constants';
 import {
-  LAYERS_COLLAPSE_ALL_ARIA_LABEL_KEY,
   NODE_MENU_ADD_AUTO_LAYOUT_KEY,
   NODE_MENU_BRING_TO_FRONT_KEY,
   NODE_MENU_CREATE_COMPONENT_KEY,
@@ -23,7 +23,7 @@ import {
   NODE_MENU_OUTLINE_STROKE_KEY,
   NODE_MENU_SEND_TO_BACK_KEY,
   NODE_MENU_USE_AS_MASK_KEY,
-} from 'components/Design/LeftPanel/File/Layers/constants';
+} from 'components/Design/Menu/constants';
 import {
   OBJECT_MENU_BOOLEAN_GROUPS_KEY,
   OBJECT_MENU_BRING_FORWARD_KEY,
@@ -76,7 +76,7 @@ const ObjectMenu: FC = () => {
       <MenuItem disabled label={t(OBJECT_MENU_CONVERT_TO_SECTION_KEY)} withCheck={false} />
       <MenuItem disabled label={t(OBJECT_MENU_CONVERT_TO_FRAME_KEY)} withCheck={false} />
       <MenuSeparator />
-      <MenuItem disabled label={t(NODE_MENU_USE_AS_MASK_KEY)} shortcut="⌃⌘M" withCheck={false} />
+      <MenuItem disabled label={t(NODE_MENU_USE_AS_MASK_KEY)} shortcut={KEYBOARD_SHORTCUTS.useAsMask.join('')} withCheck={false} />
       <MenuItem disabled label={t(OBJECT_MENU_SET_AS_THUMBNAIL_KEY)} withCheck={false} />
       <MenuSeparator />
       <MenuItem disabled label={t(NODE_MENU_ADD_AUTO_LAYOUT_KEY)} shortcut={KEYBOARD_SHORTCUTS.addAutoLayout.join('')} withCheck={false} />

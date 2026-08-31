@@ -13,6 +13,7 @@ import {
   NODE_MENU_ADD_AUTO_LAYOUT_KEY,
   NODE_MENU_ADD_MOTION_KEY,
   NODE_MENU_BRING_TO_FRONT_KEY,
+  NODE_MENU_CONVERT_TO_SECTION_KEY,
   NODE_MENU_COPY_KEY,
   NODE_MENU_COPY_PASTE_AS_KEY,
   NODE_MENU_CREATE_COMPONENT_KEY,
@@ -21,6 +22,8 @@ import {
   NODE_MENU_FLIP_VERTICAL_KEY,
   NODE_MENU_FRAME_SELECTION_KEY,
   NODE_MENU_GROUP_SELECTION_KEY,
+  NODE_MENU_LOCK_UNLOCK_KEY,
+  NODE_MENU_MORE_LAYOUT_OPTIONS_KEY,
   NODE_MENU_MOVE_TO_PAGE_KEY,
   NODE_MENU_OUTLINE_STROKE_KEY,
   NODE_MENU_PASTE_TO_REPLACE_KEY,
@@ -28,27 +31,28 @@ import {
   NODE_MENU_RENAME_KEY,
   NODE_MENU_SEND_TO_BACK_KEY,
   NODE_MENU_SEND_TO_MAKE_KEY,
+  NODE_MENU_SET_AS_THUMBNAIL_KEY,
+  NODE_MENU_SHOW_HIDE_KEY,
+  NODE_MENU_UNGROUP_KEY,
   NODE_MENU_USE_AS_MASK_KEY,
   NODE_MENU_WIDGETS_KEY,
-  NODE_ROW_HIDE_ARIA_LABEL_KEY,
-  NODE_ROW_LOCK_ARIA_LABEL_KEY,
-  NODE_ROW_SHOW_ARIA_LABEL_KEY,
-  NODE_ROW_UNLOCK_ARIA_LABEL_KEY,
-} from '../../constants';
+} from '../constants';
 
 // store
 import { TDesignPage } from 'store/design/types';
 
 // styles
-import styles from './layer-menu.module.scss';
+import styles from './node-context-menu.module.scss';
+
+// types
+import { NodeType } from 'types/design/enums';
 
 const { MenuItem, MenuSeparator, MenuSub } = MenuCompound;
 
-export type TLayerMenuProps = {
+export type TNodeContextMenuProps = {
   anchorRef: RefObject<TVirtualAnchor>;
-  isHidden: boolean;
-  isLocked: boolean;
   isOpen: boolean;
+  nodeType: NodeType;
   onBringToFront: TFunc;
   onCopy: TFunc;
   onGroupSelection: TFunc;
@@ -62,11 +66,10 @@ export type TLayerMenuProps = {
   otherPages: TDesignPage[];
 };
 
-const LayerMenu: FC<TLayerMenuProps> = ({
+const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   anchorRef,
-  isHidden,
-  isLocked,
   isOpen,
+  nodeType,
   onBringToFront,
   onCopy,
   onGroupSelection,
@@ -82,11 +85,12 @@ const LayerMenu: FC<TLayerMenuProps> = ({
   const { t } = useTranslation();
   const handlePreventRefocus = usePreventMenuRefocus();
   const handleStopPropagation = useStopClickPropagation();
+  const isFrame = nodeType === NodeType.frame;
 
   return (
     <Menu
       anchorRef={anchorRef}
-      className={styles.LayerMenu}
+      className={styles.NodeContextMenu}
       onClick={handleStopPropagation}
       onCloseAutoFocus={handlePreventRefocus}
       onOpenChange={onOpenChange}
@@ -123,6 +127,7 @@ const LayerMenu: FC<TLayerMenuProps> = ({
         withCheck={false}
       />
       <MenuSeparator />
+      {isFrame && <MenuItem disabled label={t(NODE_MENU_CONVERT_TO_SECTION_KEY)} withCheck={false} />}
       <MenuItem
         label={t(NODE_MENU_GROUP_SELECTION_KEY)}
         onClick={onGroupSelection}
@@ -130,12 +135,19 @@ const LayerMenu: FC<TLayerMenuProps> = ({
         withCheck={false}
       />
       <MenuItem disabled label={t(NODE_MENU_FRAME_SELECTION_KEY)} shortcut={KEYBOARD_SHORTCUTS.frameSelection.join('')} withCheck={false} />
+      {isFrame && (
+        <MenuItem disabled label={t(NODE_MENU_UNGROUP_KEY)} shortcut={KEYBOARD_SHORTCUTS.ungroupSelection.join('')} withCheck={false} />
+      )}
       <MenuItem label={t(NODE_MENU_RENAME_KEY)} onClick={onRename} shortcut={KEYBOARD_SHORTCUTS.renameLayer.join('')} withCheck={false} />
-      <MenuItem disabled label={t(NODE_MENU_FLATTEN_KEY)} shortcut={KEYBOARD_SHORTCUTS.flatten.join('')} withCheck={false} />
-      <MenuItem disabled label={t(NODE_MENU_OUTLINE_STROKE_KEY)} shortcut={KEYBOARD_SHORTCUTS.outlineStroke.join('')} withCheck={false} />
-      <MenuItem disabled label={t(NODE_MENU_USE_AS_MASK_KEY)} withCheck={false} />
+      {!isFrame && <MenuItem disabled label={t(NODE_MENU_FLATTEN_KEY)} shortcut={KEYBOARD_SHORTCUTS.flatten.join('')} withCheck={false} />}
+      {!isFrame && (
+        <MenuItem disabled label={t(NODE_MENU_OUTLINE_STROKE_KEY)} shortcut={KEYBOARD_SHORTCUTS.outlineStroke.join('')} withCheck={false} />
+      )}
+      <MenuItem disabled label={t(NODE_MENU_USE_AS_MASK_KEY)} shortcut={KEYBOARD_SHORTCUTS.useAsMask.join('')} withCheck={false} />
+      {isFrame && <MenuItem disabled label={t(NODE_MENU_SET_AS_THUMBNAIL_KEY)} withCheck={false} />}
       <MenuSeparator />
       <MenuItem disabled label={t(NODE_MENU_ADD_AUTO_LAYOUT_KEY)} shortcut={KEYBOARD_SHORTCUTS.addAutoLayout.join('')} withCheck={false} />
+      {isFrame && <MenuSub disabled label={t(NODE_MENU_MORE_LAYOUT_OPTIONS_KEY)} withCheck={false} />}
       <MenuItem
         disabled
         label={t(NODE_MENU_CREATE_COMPONENT_KEY)}
@@ -146,13 +158,13 @@ const LayerMenu: FC<TLayerMenuProps> = ({
       <MenuItem disabled label={t(NODE_MENU_WIDGETS_KEY)} withCheck={false} />
       <MenuSeparator />
       <MenuItem
-        label={t(isHidden ? NODE_ROW_SHOW_ARIA_LABEL_KEY : NODE_ROW_HIDE_ARIA_LABEL_KEY)}
+        label={t(NODE_MENU_SHOW_HIDE_KEY)}
         onClick={onToggleHidden}
         shortcut={KEYBOARD_SHORTCUTS.hideShowLayer.join('')}
         withCheck={false}
       />
       <MenuItem
-        label={t(isLocked ? NODE_ROW_UNLOCK_ARIA_LABEL_KEY : NODE_ROW_LOCK_ARIA_LABEL_KEY)}
+        label={t(NODE_MENU_LOCK_UNLOCK_KEY)}
         onClick={onToggleLocked}
         shortcut={KEYBOARD_SHORTCUTS.lockUnlockLayer.join('')}
         withCheck={false}
@@ -164,4 +176,4 @@ const LayerMenu: FC<TLayerMenuProps> = ({
   );
 };
 
-export default LayerMenu;
+export default NodeContextMenu;

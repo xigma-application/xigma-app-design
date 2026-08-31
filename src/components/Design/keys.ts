@@ -1,5 +1,5 @@
 // others
-import { ALT, CONTROL, SHIFT } from 'constant/mainKeys';
+import { ALT, CONTROL, CTRL, SHIFT } from 'constant/mainKeys';
 
 // types
 import { TKeyboardShortcuts } from './types';
@@ -127,6 +127,7 @@ export const KEYBOARD_SHORTCUTS: TKeyboardShortcuts = {
   underline: [CONTROL, 'U'],
   undo: [CONTROL, 'Z'],
   ungroupSelection: [CONTROL, '⌫'],
+  useAsMask: [CTRL, CONTROL, 'M'],
   wrapInNewSection: [CONTROL, 'S'],
   zoomIn: [CONTROL, '+'],
   zoomOut: [CONTROL, '-'],

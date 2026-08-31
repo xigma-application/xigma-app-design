@@ -72,8 +72,6 @@ export const TreeItem: FC<TTreeItemProps> = ({ depth = 0, isExpanded = false, is
       </div>
       {renderMenu?.({
         anchorRef,
-        isHidden: Boolean(node.hidden),
-        isLocked: Boolean(node.locked),
         isOpen,
         onOpenChange,
         onRenameRequested,

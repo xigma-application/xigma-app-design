@@ -8,7 +8,7 @@ import { MenuCompound } from 'shared';
 
 // others
 import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
-import { NODE_MENU_PASTE_TO_REPLACE_KEY } from 'components/Design/LeftPanel/File/Layers/constants';
+import { NODE_MENU_PASTE_TO_REPLACE_KEY } from 'components/Design/Menu/constants';
 import {
   EDIT_MENU_COPY_AS_KEY,
   EDIT_MENU_COPY_PROPERTIES_KEY,
