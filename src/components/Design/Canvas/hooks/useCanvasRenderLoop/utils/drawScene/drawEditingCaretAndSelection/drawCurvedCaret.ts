@@ -8,11 +8,11 @@ import { TEditingTextBox, TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
-import { drawRect } from 'utils/canvas/drawRect/drawRect';
+import { drawFilledQuad } from 'utils/canvas/drawFilledQuad';
 import { getCurvedCaretPoint } from 'utils/canvas/text/getCurvedCaretPoint';
+import { getCurvedCaretQuadCorners } from './getCurvedCaretQuadCorners';
 import { getTextPathSampler } from 'utils/canvas/text/pathSampler/getTextPathSampler';
 import { getVisibleCurvedContent } from 'utils/canvas/text/getVisibleCurvedContent';
-import { transformCurvedPoint } from './transformCurvedPoint';
 
 export const drawCurvedCaret = (
   gl: WebGL2RenderingContext,
@@ -29,6 +29,7 @@ export const drawCurvedCaret = (
   const center: TPoint = { x: editingTextBox.x + editingTextBox.width / 2, y: editingTextBox.y + editingTextBox.height / 2 };
   const lineHeight = (MSDF_ATLAS_JSON.common.lineHeight * TEXT_FONT_SIZE) / MSDF_ATLAS_JSON.info.size;
   const ascent = (MSDF_ATLAS_JSON.common.base * TEXT_FONT_SIZE) / MSDF_ATLAS_JSON.info.size;
+  const descent = lineHeight - ascent;
   const sampler = getTextPathSampler(editingTextBox, pathNode);
   const visibleContent = getVisibleCurvedContent(
     MSDF_ATLAS_JSON,
@@ -49,18 +50,8 @@ export const drawCurvedCaret = (
     sampler,
     caretIndex,
   );
-  const caret = transformCurvedPoint(localCaret, editingTextBox);
   const caretWidth = CARET_WIDTH_PX / viewport.zoom;
+  const corners = getCurvedCaretQuadCorners(localCaret, caretWidth, ascent, descent, editingTextBox);
 
-  drawRect(
-    gl,
-    program,
-    buffer,
-    { fill: TEXT_FILL, height: lineHeight, width: caretWidth, x: caret.x - caretWidth / 2, y: caret.y - ascent },
-    canvasWidth,
-    canvasHeight,
-    viewport,
-    caret.angleDegrees,
-    caret,
-  );
+  drawFilledQuad(gl, program, buffer, corners, TEXT_FILL, canvasWidth, canvasHeight, viewport);
 };

@@ -1,7 +1,7 @@
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { NodeType, PathType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../../types';
-import { TEllipseNode, TFrameNode, TGroupNode, TRectangleNode, TVectorNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TGroupNode, TPathNode, TRectangleNode, TTextNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getActivePage } from '../../getActivePage';
@@ -81,6 +81,39 @@ const buildVectorNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => (
   type: NodeType.vector,
   vertexHandleModes: {},
   vertices: { v1: { id: 'v1', x: 0, y: 0 } },
+  ...overrides,
+});
+
+const buildPathNode = (overrides: Partial<TPathNode> = {}): TPathNode => ({
+  height: 10,
+  id: 'path-1',
+  name: 'Path',
+  parentId: null,
+  pathType: PathType.ellipse,
+  rotation: 0,
+  type: NodeType.path,
+  width: 10,
+  x: 0,
+  y: 0,
+  ...overrides,
+});
+
+const buildTextNode = (overrides: Partial<TTextNode> = {}): TTextNode => ({
+  content: 'Hi',
+  fill: '#ffffff',
+  flipX: false,
+  flipY: false,
+  fontFamily: 'Inter',
+  fontSize: 14,
+  height: 20,
+  id: 'text-1',
+  name: 'Text',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.text,
+  width: 100,
+  x: 0,
+  y: 0,
   ...overrides,
 });
 
@@ -318,5 +351,58 @@ describe('handleSetSelection', () => {
     // result
     expect(state.vectorEditingNodeIds).toEqual([]);
     expect(getActivePage(state).nodes[node.id]).toBeDefined();
+  });
+
+  it('should drop an ellipse text-path guide from the selection when its bound text is also selected, keeping just the text', () => {
+    // mock — a Text on Path bound to an ellipse `NodeType.path` guide
+    const path = buildPathNode();
+    const text = buildTextNode({ pathId: path.id });
+    const state = buildState({ [path.id]: path, [text.id]: text }, []);
+
+    // before — a resize/drag gesture landed both the guide and its text in the same selection
+    handleSetSelection(state, [path.id, text.id]);
+
+    // result — only the text remains, so the renderer still sees a single-node (not group) selection
+    expect(getActivePage(state).selectedIds).toEqual([text.id]);
+  });
+
+  it('should drop a vector text-path guide from the selection when its bound text is also selected, keeping just the text', () => {
+    // mock — a Text on Path attached to an existing vector
+    const vector = buildVectorNode();
+    const text = buildTextNode({ pathId: vector.id });
+    const state = buildState({ [vector.id]: vector, [text.id]: text }, []);
+
+    // before
+    handleSetSelection(state, [vector.id, text.id]);
+
+    // result
+    expect(getActivePage(state).selectedIds).toEqual([text.id]);
+  });
+
+  it('should leave an ordinary, unbound vector selectable alongside other nodes', () => {
+    // mock — this vector is not any text's pathId, so it's a real, selectable shape
+    const vector = buildVectorNode({
+      segments: { s1: { endId: 'v2', id: 's1', startId: 'v1', tangentEnd: null, tangentStart: null } },
+      vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 10, y: 0 } },
+    });
+    const state = buildState({ [vector.id]: vector, [frame.id]: frame }, []);
+
+    // before
+    handleSetSelection(state, [vector.id, frame.id]);
+
+    // result
+    expect(getActivePage(state).selectedIds).toEqual([vector.id, frame.id]);
+  });
+
+  it('should drop an orphaned ellipse guide (no text references it) too — a `NodeType.path` id is never a real selectable shape', () => {
+    // mock
+    const path = buildPathNode();
+    const state = buildState({ [path.id]: path }, []);
+
+    // before
+    handleSetSelection(state, [path.id]);
+
+    // result
+    expect(getActivePage(state).selectedIds).toEqual([]);
   });
 });
