@@ -44,15 +44,36 @@ describe('getTextFlattenVector — determinism across repeated calls with the re
     vi.unstubAllGlobals();
   });
 
-  // KNOWN BUG, not yet fixed: getVectorFillLoopPoints/computeLoopPoints resolves a random subset
+  // KNOWN BUG, partially fixed: getVectorFillLoopPoints/computeLoopPoints resolves a random subset
   // of an otherwise-stable filledFaceKeys list to real points when many glyphs' crossings are
-  // planarized together (isolated single letters are always stable). Root cause narrowed to an
-  // id-order-dependent tie-break somewhere in crossing/junction resolution — attempting to key
-  // findAllNetworkCrossings' virtual vertices by point instead of by sorted segment id reduced but
-  // did not eliminate the variance, and also broke groupCrossingVectorNodes (that id ordering is
-  // relied on elsewhere), so it was reverted. Kept as `it.fails` so this stays documented and
-  // CI-visible without blocking the suite; once genuinely fixed, this will start failing because
-  // it unexpectedly passes — remove `.fails` at that point.
+  // planarized together (isolated single letters are always stable).
+  //
+  // Root cause: a self-touching glyph contour (e.g. Inter's "e") legitimately visits one crossing
+  // vertex TWICE in its face boundary — that vertex has degree 4 within the stored loop key's own
+  // piece set (2 edges in, 2 out), not the usual degree 2. getVectorFillLoopKey stores that
+  // boundary as an unordered, alphabetically-sorted set of piece keys, discarding the original walk
+  // order recorded at build time by walkVectorFace. chainIntoSteps has to reconstruct an ordered
+  // walk from that unordered set, and at a degree-4 vertex there are two candidate continuations.
+  //
+  // Fixed: chainIntoSteps/buildUnitHalfEdgeAdjacency now disambiguate a degree-4 vertex by real
+  // departure angle (the same convention walkVectorFace's half-edge adjacency uses at build time),
+  // built from just this loop's own resolved units — order-independent, and safe for a stored
+  // self-intersecting shape (e.g. a dragged bowtie), since that kind of shape's internal crossing
+  // lives inside one unit's own multi-piece run and is never a decision point here.
+  //
+  // Not fixed: the angle sort is built from only this loop's own units, not the full planar
+  // network — at a self-touching vertex that's also incident to OTHER faces' edges (a different,
+  // unresolved face sharing the same physical crossing), the true build-time "predecessor of twin"
+  // order can differ from what this reduced subset computes. Rebuilding on the full network fixes
+  // that but breaks the self-intersecting-shape case above (verified: it makes the dragged-bowtie
+  // test fail, since it forces one single non-overlapping "proper face" reconstruction instead of
+  // reconnecting stored piece identities) — a real fix needs to use the full adjacency for ordering
+  // while still tolerating self-intersection, which needs more design than this session had room
+  // for. Reduced the failure rate measurably (resolvedFaceCount now ranges ~60–63 out of 63, up
+  // from ~58–61 before), but does not eliminate it.
+  //
+  // Kept as `it.fails` so this stays documented and CI-visible without blocking the suite; once
+  // genuinely fixed, this will start failing because it unexpectedly passes — remove `.fails` then.
   it.fails('should resolve the exact same set of visible faces every time for the same full-alphabet input', async () => {
     const node = buildNode();
     const summaries = [];
