@@ -1,6 +1,6 @@
 .MinimizedToolbar {
   align-items: center;
-  background-color: color-mix(in srgb, var(--color-neutral-5) 70%, transparent);
+  background-color: var(--color-neutral-5);
   border-radius: 8px;
   box-shadow: var(--elevation-100-canvas);
   box-sizing: border-box;
@@ -12,10 +12,6 @@
   position: absolute;
   top: 12px;
   z-index: 1;
-
-  &:hover {
-    background-color: var(--color-neutral-5);
-  }
 
   &__logo {
     align-items: center;

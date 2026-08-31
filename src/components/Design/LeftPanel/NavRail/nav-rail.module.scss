@@ -71,7 +71,7 @@
     }
 
     &[data-state='on'] {
-      background-color: #394360;
+      background-color: var(--color-selected);
     }
 
     &[data-state='on'].NavRail__button {

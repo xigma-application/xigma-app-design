@@ -17,7 +17,7 @@
   &[data-state='open'] {
     @include svg-color.svg-color(var(--color-blue-2));
 
-    background-color: #394360;
-    color: var(--color-blue-2);
+    background-color: var(--color-selected);
+    color: var(--color-blue-1);
   }
 }
