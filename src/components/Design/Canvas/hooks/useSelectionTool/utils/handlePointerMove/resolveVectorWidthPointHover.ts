@@ -12,7 +12,7 @@ import { ToolName } from 'types/design/enums';
 // utils
 import { getEligibleVectorWidthNodes } from '../../../../utils/getEligibleVectorWidthNodes';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { getVectorCutHitAcrossOpenNodes } from '../../../../utils/getVectorCutHitAcrossOpenNodes';
 import { getVectorWidthPointHandleAtPoint } from '../../../../utils/getVectorWidthPointHandleAtPoint';
 import { screenToWorld } from '../../../../utils/screenToWorld';
@@ -48,7 +48,7 @@ export const resolveVectorWidthPointHover = (
         segmentId: handleHit.segmentId,
         t: handleHit.t,
       };
-      canvas.style.cursor = getRotatedResizeCursorUrl(handleHit.angle) ?? '';
+      canvas.style.cursor = getRotatedCursorUrl('resize', handleHit.angle) ?? '';
       setClassName(null);
     } else if (handleHit) {
       canvasRefs.hover.hoveredVectorWidthPointRef.current = {

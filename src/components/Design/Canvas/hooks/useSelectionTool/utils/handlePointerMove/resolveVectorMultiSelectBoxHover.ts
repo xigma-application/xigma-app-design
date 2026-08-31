@@ -9,8 +9,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getResizeCursorAngle } from 'utils/math/getResizeCursorAngle';
 import { getRotateCursorAngle } from 'utils/math/getRotateCursorAngle';
-import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
-import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { getVectorMultiSelectBox } from '../../../../utils/getVectorMultiSelectBox';
 import { getVectorMultiSelectResizeHandle } from '../../../../utils/getVectorMultiSelectResizeHandle';
 import { getVectorMultiSelectVertexIds } from '../../../../utils/getVectorMultiSelectVertexIds';
@@ -56,10 +55,10 @@ export const resolveVectorMultiSelectBoxHover = (
       const localPoint = rotatePoint(point, pivot, -box.rotation);
 
       if (resizeHandle) {
-        canvas.style.cursor = getRotatedResizeCursorUrl(getResizeCursorAngle(resizeHandle, box.rotation)) ?? '';
+        canvas.style.cursor = getRotatedCursorUrl('resize', getResizeCursorAngle(resizeHandle, box.rotation)) ?? '';
         setClassName(null);
       } else if (isInVectorMultiSelectRotateRing(point, box.bounds, viewport, box.rotation)) {
-        canvas.style.cursor = getRotatedRotateCursorUrl(getRotateCursorAngle(point, box.bounds, box.rotation)) ?? '';
+        canvas.style.cursor = getRotatedCursorUrl('rotate', getRotateCursorAngle(point, box.bounds, box.rotation)) ?? '';
         setClassName(null);
       } else if (isPointInRect(localPoint, box.bounds)) {
         canvas.style.cursor = '';

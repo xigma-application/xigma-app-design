@@ -4,13 +4,12 @@ import { THoverResolverContext, THoverResult } from '../types';
 
 // utils
 import { getResizeCursorAngle } from 'utils/math/getResizeCursorAngle';
-import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
-import { getRotatedScaleCursorUrl } from 'utils/canvas/getRotatedScaleCursorUrl';
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 
 export const resolveResizeHover = ({ resizeHandleHit, activeTool }: THoverResolverContext): THoverResult | undefined => {
   if (resizeHandleHit) {
-    const getCursorUrl = activeTool === ToolName.scale ? getRotatedScaleCursorUrl : getRotatedResizeCursorUrl;
-    const cursor = getCursorUrl(getResizeCursorAngle(resizeHandleHit.handle, resizeHandleHit.rotation)) ?? '';
+    const cursorKind = activeTool === ToolName.scale ? 'scale' : 'resize';
+    const cursor = getRotatedCursorUrl(cursorKind, getResizeCursorAngle(resizeHandleHit.handle, resizeHandleHit.rotation)) ?? '';
 
     return { className: null, cursor, nodeId: null };
   }

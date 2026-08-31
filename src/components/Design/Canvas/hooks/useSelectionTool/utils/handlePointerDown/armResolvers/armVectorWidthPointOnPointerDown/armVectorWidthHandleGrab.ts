@@ -5,7 +5,7 @@ import { TPoint } from 'types/canvas';
 import { TVectorWidthPointHandleHit } from '../../../../../../utils/getVectorWidthPointHandleAtPoint';
 
 // utils
-import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { getVectorWidthPointGroupDragTargets } from '../../../../../../utils/getVectorWidthPointGroupDragTargets';
 
 export const armVectorWidthHandleGrab = (
@@ -46,7 +46,7 @@ export const armVectorWidthHandleGrab = (
         pointId: handleHit.point.id,
         side: resizeSide,
       };
-      canvas.style.cursor = getRotatedResizeCursorUrl(handleHit.angle) ?? '';
+      canvas.style.cursor = getRotatedCursorUrl('resize', handleHit.angle) ?? '';
       setClassName(null);
     } else {
       const isAlreadySelected = canvasRefs.vectorEdit.selectedVectorWidthHandlesRef.current.some(

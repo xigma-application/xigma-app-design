@@ -6,9 +6,9 @@ import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { continueRotateDrag } from '../continueRotateDrag';
-import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 
-vi.mock('utils/canvas/getRotatedRotateCursorUrl', () => ({ getRotatedRotateCursorUrl: vi.fn() }));
+vi.mock('utils/canvas/createCursorRotator/getRotatedCursorUrl', () => ({ getRotatedCursorUrl: vi.fn() }));
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -68,7 +68,7 @@ describe('continueRotateDrag', () => {
 
   it('should update the canvas cursor to follow the rotation when a rotated cursor image is available', () => {
     // mock
-    vi.mocked(getRotatedRotateCursorUrl).mockReturnValue('url(rotate.png), auto');
+    vi.mocked(getRotatedCursorUrl).mockReturnValue('url(rotate.png), auto');
 
     const canvas = createCanvas();
     const sliceRef: RefObject<TSliceDraft | null> = { current: null };
@@ -86,7 +86,7 @@ describe('continueRotateDrag', () => {
 
   it('should keep the previous cursor when no rotated cursor image is available yet', () => {
     // mock
-    vi.mocked(getRotatedRotateCursorUrl).mockReturnValue(null);
+    vi.mocked(getRotatedCursorUrl).mockReturnValue(null);
 
     const canvas = createCanvas();
     const sliceRef: RefObject<TSliceDraft | null> = { current: null };

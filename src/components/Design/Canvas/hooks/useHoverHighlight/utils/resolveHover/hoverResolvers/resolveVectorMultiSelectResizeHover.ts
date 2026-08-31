@@ -3,7 +3,7 @@ import { THoverResolverContext, THoverResult } from '../types';
 
 // utils
 import { getResizeCursorAngle } from 'utils/math/getResizeCursorAngle';
-import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 
 export const resolveVectorMultiSelectResizeHover = ({
   vectorMultiSelectBox,
@@ -12,7 +12,7 @@ export const resolveVectorMultiSelectResizeHover = ({
   if (vectorMultiSelectResizeHandle && vectorMultiSelectBox) {
     return {
       className: null,
-      cursor: getRotatedResizeCursorUrl(getResizeCursorAngle(vectorMultiSelectResizeHandle, vectorMultiSelectBox.rotation)) ?? '',
+      cursor: getRotatedCursorUrl('resize', getResizeCursorAngle(vectorMultiSelectResizeHandle, vectorMultiSelectBox.rotation)) ?? '',
       nodeId: null,
     };
   }

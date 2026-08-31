@@ -5,11 +5,12 @@ import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
 import { DEFAULT_CURSOR } from 'utils/canvas/defaultCursor';
-import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { updateHoverCursor } from '../updateHoverCursor';
 
-vi.mock('utils/canvas/getRotatedResizeCursorUrl', () => ({ getRotatedResizeCursorUrl: vi.fn(() => 'url(resize.png), auto') }));
-vi.mock('utils/canvas/getRotatedRotateCursorUrl', () => ({ getRotatedRotateCursorUrl: vi.fn(() => 'url(rotate.png), auto') }));
+vi.mock('utils/canvas/createCursorRotator/getRotatedCursorUrl', () => ({
+  getRotatedCursorUrl: vi.fn((kind: string) => (kind === 'resize' ? 'url(resize.png), auto' : 'url(rotate.png), auto')),
+}));
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -76,7 +77,7 @@ describe('updateHoverCursor', () => {
 
   it('should clear the cursor over the rotate ring when no rotated cursor image is available yet', () => {
     // mock
-    vi.mocked(getRotatedRotateCursorUrl).mockReturnValueOnce(null);
+    vi.mocked(getRotatedCursorUrl).mockReturnValueOnce(null);
 
     const canvas = createCanvas();
     const sliceRef = createSliceRef({ height: 100, rotation: 0, width: 100, x: 0, y: 0 });

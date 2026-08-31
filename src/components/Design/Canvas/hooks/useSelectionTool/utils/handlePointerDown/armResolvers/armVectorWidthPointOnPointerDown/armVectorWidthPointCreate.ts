@@ -10,7 +10,7 @@ import { TVectorNode, TViewport } from 'types/design/types';
 
 // utils
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
-import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { getVectorChainFractionAtPosition } from 'utils/canvas/vectorNetwork/getVectorChainFractionAtPosition';
 import { getVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder/getVectorChainOrder';
 import { getVectorCutHitAcrossOpenNodes } from '../../../../../../utils/getVectorCutHitAcrossOpenNodes';
@@ -57,7 +57,7 @@ export const armVectorWidthPointCreate = (
     ];
     canvasRefs.vectorEdit.lastVectorWidthHandleSideRef.current = { nodeId: strokeHit.node.id, pointId: newPointId, side: 'right' };
     canvas.setPointerCapture(event.pointerId);
-    canvas.style.cursor = getRotatedResizeCursorUrl(getAngleBetweenPoints({ x: 0, y: 0 }, normal)) ?? '';
+    canvas.style.cursor = getRotatedCursorUrl('resize', getAngleBetweenPoints({ x: 0, y: 0 }, normal)) ?? '';
     setClassName(null);
 
     return true;

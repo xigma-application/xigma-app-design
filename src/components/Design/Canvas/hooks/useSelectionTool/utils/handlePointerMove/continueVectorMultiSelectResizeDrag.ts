@@ -19,7 +19,7 @@ import {
   getVectorMultiSelectResizeScale,
   repositionRotatedVectorMultiSelectBounds,
 } from '../../../../utils/getVectorMultiSelectResizeTransform';
-import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
 import { groupVectorMultiSelectOriginsByNode } from '../../../../utils/groupVectorMultiSelectOriginsByNode';
 import { rotatePoint } from 'utils/math/rotatePoint';
@@ -106,6 +106,6 @@ export const continueVectorMultiSelectResizeDrag = (
     const scaledBounds = getScaledVectorMultiSelectBounds(bounds, anchor, scaleX, scaleY);
 
     dragState.liveBounds = repositionRotatedVectorMultiSelectBounds(scaledBounds, dragState.anchor, dragState.anchorWorld, rotation);
-    canvas.style.cursor = getRotatedResizeCursorUrl(getResizeCursorAngle(handle, rotation)) ?? canvas.style.cursor;
+    canvas.style.cursor = getRotatedCursorUrl('resize', getResizeCursorAngle(handle, rotation)) ?? canvas.style.cursor;
   }
 };

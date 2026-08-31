@@ -11,7 +11,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 // utils
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { getVectorChainFractionAtPosition } from 'utils/canvas/vectorNetwork/getVectorChainFractionAtPosition';
 import { getVectorChainOrder } from 'utils/canvas/vectorNetwork/getVectorChainOrder/getVectorChainOrder';
 import { getVectorChainPositionAtFraction } from 'utils/canvas/vectorNetwork/getVectorChainPositionAtFraction';
@@ -63,7 +63,7 @@ export const continueVectorWidthPointDrag = (
           target.point.leftOffset = distance;
           target.point.rightOffset = distance;
         });
-        canvas.style.cursor = getRotatedResizeCursorUrl(getAngleBetweenPoints({ x: 0, y: 0 }, normal)) ?? canvas.style.cursor;
+        canvas.style.cursor = getRotatedCursorUrl('resize', getAngleBetweenPoints({ x: 0, y: 0 }, normal)) ?? canvas.style.cursor;
         setClassName(null);
       }
     } else {

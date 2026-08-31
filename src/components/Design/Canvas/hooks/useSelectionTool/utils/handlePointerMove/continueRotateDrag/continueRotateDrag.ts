@@ -14,7 +14,7 @@ import { TRotateDragState, TRotateNodeOrigin } from 'types/design/selectionTool/
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
 import { getPointerPosition } from '../../../../../utils/getPointerPosition';
 import { getRotatedNodeChanges } from './getRotatedNodeChanges';
-import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { screenToWorld } from '../../../../../utils/screenToWorld';
 
 const pinRotatedGroupBounds = (dispatch: AppDispatch, nodeOrigins: Record<string, TRotateNodeOrigin>): void => {
@@ -43,7 +43,7 @@ export const continueRotateDrag = (
     const isSingleNodeRotate = Object.keys(nodeOrigins).length === 1;
     const snapshots = canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current;
 
-    canvas.style.cursor = getRotatedRotateCursorUrl(cursorAngle + deltaDegrees) ?? canvas.style.cursor;
+    canvas.style.cursor = getRotatedCursorUrl('rotate', cursorAngle + deltaDegrees) ?? canvas.style.cursor;
 
     if (snapshots && !canvasRefs.transform.rotatedNodeIdsRef.current) {
       canvasRefs.transform.rotatedNodeIdsRef.current = new Set(snapshots.keys());

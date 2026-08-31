@@ -8,12 +8,12 @@ import { NodeType } from 'types/design/enums';
 
 // utils
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
-import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
-import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { resolveVectorMultiSelectBoxHover } from '../resolveVectorMultiSelectBoxHover';
 
-vi.mock('utils/canvas/getRotatedResizeCursorUrl', () => ({ getRotatedResizeCursorUrl: vi.fn(() => 'url(resize.png), auto') }));
-vi.mock('utils/canvas/getRotatedRotateCursorUrl', () => ({ getRotatedRotateCursorUrl: vi.fn(() => 'url(rotate.png), auto') }));
+vi.mock('utils/canvas/createCursorRotator/getRotatedCursorUrl', () => ({
+  getRotatedCursorUrl: vi.fn((kind: string) => (kind === 'resize' ? 'url(resize.png), auto' : 'url(rotate.png), auto')),
+}));
 
 const createCanvas = (): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
@@ -143,7 +143,7 @@ describe('resolveVectorMultiSelectBoxHover', () => {
 
   it('should fall back to an empty cursor when no rotated resize cursor image is available yet', () => {
     // mock
-    vi.mocked(getRotatedResizeCursorUrl).mockReturnValueOnce(null);
+    vi.mocked(getRotatedCursorUrl).mockReturnValueOnce(null);
 
     const nodeId = addVectorNode();
     const canvas = createCanvas();
@@ -162,7 +162,7 @@ describe('resolveVectorMultiSelectBoxHover', () => {
 
   it('should fall back to an empty cursor when no rotated rotate cursor image is available yet', () => {
     // mock
-    vi.mocked(getRotatedRotateCursorUrl).mockReturnValueOnce(null);
+    vi.mocked(getRotatedCursorUrl).mockReturnValueOnce(null);
 
     const nodeId = addVectorNode();
     const canvas = createCanvas();

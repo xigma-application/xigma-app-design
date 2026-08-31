@@ -12,8 +12,7 @@ import { DEFAULT_CURSOR } from 'utils/canvas/defaultCursor';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getResizeCursorAngle } from 'utils/math/getResizeCursorAngle';
 import { getRotateCursorAngle } from 'utils/math/getRotateCursorAngle';
-import { getRotatedResizeCursorUrl } from 'utils/canvas/getRotatedResizeCursorUrl';
-import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { getSliceResizeHandleAtPoint } from '../getSliceResizeHandleAtPoint';
 import { getSliceRotateHandleAtPoint } from '../getSliceRotateHandleAtPoint';
 import { screenToWorld } from '../../../../utils/screenToWorld';
@@ -29,10 +28,10 @@ export const updateHoverCursor = (canvas: HTMLCanvasElement, event: PointerEvent
 
     switch (true) {
       case Boolean(resizeHandle):
-        canvas.style.cursor = getRotatedResizeCursorUrl(getResizeCursorAngle(resizeHandle!, slice.rotation)) ?? '';
+        canvas.style.cursor = getRotatedCursorUrl('resize', getResizeCursorAngle(resizeHandle!, slice.rotation)) ?? '';
         break;
       case rotateHit:
-        canvas.style.cursor = getRotatedRotateCursorUrl(getRotateCursorAngle(point, slice, slice.rotation)) ?? '';
+        canvas.style.cursor = getRotatedCursorUrl('rotate', getRotateCursorAngle(point, slice, slice.rotation)) ?? '';
         break;
       default:
         canvas.style.cursor = DEFAULT_CURSOR;

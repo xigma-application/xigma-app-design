@@ -14,7 +14,7 @@ import { TSceneNode, TVectorSegment, TVectorVertex } from 'types/design/types';
 import { dispatchAsOneGestureIfMultiNode } from '../../../../utils/dispatchAsOneGestureIfMultiNode';
 import { getAngleBetweenPoints } from 'utils/math/getAngleBetweenPoints';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { getVectorEditingNode } from '../../../../utils/getVectorEditingNode';
 import { groupVectorMultiSelectOriginsByNode } from '../../../../utils/groupVectorMultiSelectOriginsByNode';
 import { rotatePoint } from 'utils/math/rotatePoint';
@@ -65,7 +65,7 @@ export const continueVectorMultiSelectRotateDrag = (
     const deltaDegrees = getAngleBetweenPoints(dragState.pivot, point) - dragState.startAngle;
 
     dragState.deltaDegrees = deltaDegrees;
-    canvas.style.cursor = getRotatedRotateCursorUrl(dragState.cursorAngle + deltaDegrees) ?? canvas.style.cursor;
+    canvas.style.cursor = getRotatedCursorUrl('rotate', dragState.cursorAngle + deltaDegrees) ?? canvas.style.cursor;
 
     const groups = groupVectorMultiSelectOriginsByNode(nodes, vectorEditingNodeIds, dragState.vertexOrigins, dragState.handleOrigins);
 

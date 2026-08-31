@@ -3,7 +3,7 @@ import { THoverResolverContext, THoverResult } from '../types';
 
 // utils
 import { getRotateCursorAngle } from 'utils/math/getRotateCursorAngle';
-import { getRotatedRotateCursorUrl } from 'utils/canvas/getRotatedRotateCursorUrl';
+import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { isInVectorMultiSelectRotateRing } from '../../../../../utils/isInVectorMultiSelectRotateRing';
 
 export const resolveVectorMultiSelectRotateHover = ({
@@ -17,7 +17,7 @@ export const resolveVectorMultiSelectRotateHover = ({
   ) {
     return {
       className: null,
-      cursor: getRotatedRotateCursorUrl(getRotateCursorAngle(point, vectorMultiSelectBox.bounds, vectorMultiSelectBox.rotation)) ?? '',
+      cursor: getRotatedCursorUrl('rotate', getRotateCursorAngle(point, vectorMultiSelectBox.bounds, vectorMultiSelectBox.rotation)) ?? '',
       nodeId: null,
     };
   }

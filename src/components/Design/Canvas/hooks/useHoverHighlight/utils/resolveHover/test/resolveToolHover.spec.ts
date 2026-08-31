@@ -12,7 +12,9 @@ import { NodeType, ToolName } from 'types/design/enums';
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { resolveToolHover } from '../resolveToolHover';
 
-vi.mock('utils/canvas/getRotatedResizeCursorUrl', () => ({ getRotatedResizeCursorUrl: vi.fn(() => 'url(resize.png), auto') }));
+vi.mock('utils/canvas/createCursorRotator/getRotatedCursorUrl', () => ({
+  getRotatedCursorUrl: vi.fn(() => 'url(resize.png), auto'),
+}));
 
 const createCanvas = (): HTMLCanvasElement => document.createElement('canvas');
 
