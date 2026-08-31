@@ -4,6 +4,7 @@ import { TGlyphAtlasJson } from 'types/msdf';
 // utils
 import { createEllipseTextPathSampler } from '../pathSampler/createEllipseTextPathSampler';
 import { getCurvedSelectionRibbonVertices } from '../getCurvedSelectionRibbonVertices';
+import { getCurvedTunnelPath } from '../getCurvedTunnelPath/getCurvedTunnelPath';
 
 const ATLAS: TGlyphAtlasJson = {
   chars: [{ height: 10, id: 65, width: 8, x: 0, xadvance: 12, xoffset: 1, y: 0, yoffset: 2 }],
@@ -23,20 +24,23 @@ describe('getCurvedSelectionRibbonVertices', () => {
     expect(getCurvedSelectionRibbonVertices(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, 1, 1)).toEqual([]);
   });
 
-  it('should return one quad (6 vertices, 12 numbers) per selected character', () => {
-    // before
+  it('should return one quad (6 vertices, 12 numbers) per dense tunnel-centerline segment covering the selection', () => {
+    // before — the ribbon subdivides at every dense centerline sample the tunnel builds (not just at
+    // character boundaries), so its quad count comes straight from the tunnel's own `top` polyline
+    const { top } = getCurvedTunnelPath(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, 0, 2);
     const vertices = getCurvedSelectionRibbonVertices(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, 0, 2);
 
-    // result — 2 selected characters -> 2 quads * 6 vertices * 2 numbers (x,y) each
-    expect(vertices).toHaveLength(24);
+    // result — (top.length - 1) quads * 6 vertices * 2 numbers (x,y) each
+    expect(vertices).toHaveLength((top.length - 1) * 12);
   });
 
   it('should clamp the selection range to the content length', () => {
     // before
+    const { top } = getCurvedTunnelPath(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, -5, 99);
     const vertices = getCurvedSelectionRibbonVertices(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, -5, 99);
 
-    // result — 3 characters -> 3 quads
-    expect(vertices).toHaveLength(36);
+    // result — clamped to all 3 characters, quad count still follows the tunnel's own sampling
+    expect(vertices).toHaveLength((top.length - 1) * 12);
   });
 
   it('should reposition the ribbon when flipped', () => {

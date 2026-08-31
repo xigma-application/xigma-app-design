@@ -99,6 +99,29 @@ describe('getVectorChainPositionAtLength', () => {
     expect(position.t).toBeCloseTo(upper.t / 2, 10);
   });
 
+  it('should keep walking forward across a boundary into a reversed segment, instead of jumping to its far end', () => {
+    // mock — a(0,0)->b(10,0), then c(110,0)->b(10,0) stored backwards but walked b->c (reversed)
+    const node = buildNode({
+      segments: { s1: seg('s1', 'a', 'b'), s2: seg('s2', 'c', 'b') },
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 10, y: 0 }, c: { id: 'c', x: 110, y: 0 } },
+    });
+    const chainOrder: TVectorChainOrder = {
+      entries: [
+        { reversed: false, segmentId: 's1' },
+        { reversed: true, segmentId: 's2' },
+      ],
+      isClosed: false,
+    };
+    const table = getVectorChainArcLengthTable(node, chainOrder);
+
+    // before — halfway into s2 (length 60 = vertex b at 10, plus half of s2's 100px), so the point
+    // should sit at (60,0): halfway between b and c, i.e. s2's t=0.5, not snapped to its t=0 end (c)
+    const position = getVectorChainPositionAtLength(table, 60);
+
+    expect(position.segmentId).toBe('s2');
+    expect(position.t).toBeCloseTo(0.5, 5);
+  });
+
   it('should fall back to ratio 0 without dividing by zero when a segment-boundary sample has a zero-length span', () => {
     // mock — a hand-built table: two different segments whose recorded samples land at the exact
     // same cumulative length (a zero-length span straddling the boundary)
