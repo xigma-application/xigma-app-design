@@ -148,6 +148,13 @@ export class DesignPage {
     await this.pointerUp();
   }
 
+  // a plain click (no drag) with the Text on Path tool — attaches to whatever eligible vector or
+  // convertible shape sits under the point instead of drawing a fresh default ellipse there
+  async attachTextOnPath(x: number, y: number): Promise<void> {
+    await this.selectToolFromDropdown('text', 'Text on path');
+    await this.click(x, y);
+  }
+
   // clicks each point in turn with the Pen tool active — every click places (or re-visits) a
   // straight-segment vertex, so this covers any plain-click vector path, including closing a loop
   // by passing the first point's coordinates again as the last entry
