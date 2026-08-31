@@ -11,10 +11,13 @@ import { ToolName } from 'types/design/enums';
 
 // utils
 import { bakeVectorNodeRotation } from '../../../../../utils/bakeVectorNodeRotation';
+import { getEffectiveVectorFillColor } from 'utils/canvas/vectorNetwork/getEffectiveVectorFillColor';
+import { getNestedUnfilledLoopKeys } from 'utils/canvas/vectorNetwork/getNestedUnfilledLoopKeys';
 import { getVectorFaceAtPoint } from '../../../../../utils/getVectorFaceAtPoint';
 import { getVectorFaceAtPointAcrossOpenNodes } from '../../../../../utils/getVectorFaceAtPointAcrossOpenNodes';
 import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
 import { getVectorFillLoopKeyAtPoint } from 'utils/canvas/vectorNetwork/getVectorFillLoopKeyAtPoint';
+import { getVectorFillLoopPoints } from 'utils/canvas/vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints';
 import { persistVectorNetworkCrossings } from 'utils/canvas/vectorNetwork/planarizeVectorNetwork/persistVectorNetworkCrossings';
 
 export const armVectorPaintOnPointerDown = ({
@@ -41,11 +44,18 @@ export const armVectorPaintOnPointerDown = ({
       const face = getVectorFaceAtPoint(point, bakedNode)!;
       const existingLoopKey = getVectorFillLoopKeyAtPoint(node, point);
       const newLoopKey = getVectorFillLoopKey(face.pieceKeys);
+      const removedFacePoints = existingLoopKey ? getVectorFillLoopPoints(node, existingLoopKey) : null;
+      const inheritingLoopKeys = removedFacePoints ? getNestedUnfilledLoopKeys(node, removedFacePoints) : [];
       const filledFaceKeys = existingLoopKey
-        ? node.filledFaceKeys.filter((key) => key !== existingLoopKey)
+        ? [...node.filledFaceKeys.filter((key) => key !== existingLoopKey), ...inheritingLoopKeys]
         : [...node.filledFaceKeys, newLoopKey];
       const fillColorOverrideByKey = existingLoopKey
-        ? node.fillColorOverrideByKey
+        ? inheritingLoopKeys.length > 0
+          ? {
+              ...node.fillColorOverrideByKey,
+              ...Object.fromEntries(inheritingLoopKeys.map((key) => [key, getEffectiveVectorFillColor(node, existingLoopKey)])),
+            }
+          : node.fillColorOverrideByKey
         : { ...node.fillColorOverrideByKey, [newLoopKey]: selectPaintColor(state) };
       const changes: Partial<TVectorNode> = geometryChanged
         ? { fillColorOverrideByKey, filledFaceKeys, segments, vertices }

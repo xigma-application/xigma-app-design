@@ -121,4 +121,53 @@ describe('getVectorFillLoopKeyAtPoint', () => {
     // result — (100,100) sits inside all 3 rectangles; the smallest, innermost one wins
     expect(getVectorFillLoopKeyAtPoint(filledNode, { x: 100, y: 100 })).toBe(innerKey);
   });
+
+  it('should return null for a point inside an unfilled loop nested in a filled outer one, not the outer’s key', () => {
+    // mock — a filled outer square with a smaller, completely unfilled square nested inside it (two
+    // disjoint loops, no shared vertex/segment — a shape dragged inside another). The paint tool must
+    // recognize the inner loop as its own (currently unfilled) face, not read every point inside it
+    // as "the outer fill is here", or it could only ever remove the outer fill and never paint —
+    // or later toggle — the inner loop on its own.
+    const node: TVectorNode = {
+      fillColor: '#000000',
+      filledFaceKeys: [],
+      id: '1',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {
+        inner1: { endId: 'i2', id: 'inner1', startId: 'i1', tangentEnd: null, tangentStart: null },
+        inner2: { endId: 'i3', id: 'inner2', startId: 'i2', tangentEnd: null, tangentStart: null },
+        inner3: { endId: 'i4', id: 'inner3', startId: 'i3', tangentEnd: null, tangentStart: null },
+        inner4: { endId: 'i1', id: 'inner4', startId: 'i4', tangentEnd: null, tangentStart: null },
+        outer1: { endId: 'o2', id: 'outer1', startId: 'o1', tangentEnd: null, tangentStart: null },
+        outer2: { endId: 'o3', id: 'outer2', startId: 'o2', tangentEnd: null, tangentStart: null },
+        outer3: { endId: 'o4', id: 'outer3', startId: 'o3', tangentEnd: null, tangentStart: null },
+        outer4: { endId: 'o1', id: 'outer4', startId: 'o4', tangentEnd: null, tangentStart: null },
+      },
+      strokeColor: '#ffffff',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: {
+        i1: { id: 'i1', x: 20, y: 20 },
+        i2: { id: 'i2', x: 80, y: 20 },
+        i3: { id: 'i3', x: 80, y: 80 },
+        i4: { id: 'i4', x: 20, y: 80 },
+        o1: { id: 'o1', x: 0, y: 0 },
+        o2: { id: 'o2', x: 100, y: 0 },
+        o3: { id: 'o3', x: 100, y: 100 },
+        o4: { id: 'o4', x: 0, y: 100 },
+      },
+    };
+    const faces = deriveVectorFaces(node);
+    const outerFace = faces.find((face) => face.points.some((point) => point.x === 100))!;
+    const outerKey = getVectorFillLoopKey(outerFace.pieceKeys);
+    const filledNode = { ...node, filledFaceKeys: [outerKey] };
+
+    // result — (50,50) is inside the unfilled inner square, not the outer's key
+    expect(getVectorFillLoopKeyAtPoint(filledNode, { x: 50, y: 50 })).toBeNull();
+    // result — (10,50) is in the frame area, only inside the outer's own polygon
+    expect(getVectorFillLoopKeyAtPoint(filledNode, { x: 10, y: 50 })).toBe(outerKey);
+  });
 });
