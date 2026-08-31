@@ -58,7 +58,7 @@ describe('drawSectionNameLabels', () => {
 
   it('should draw nothing when there are no section nodes', () => {
     // before
-    drawSectionNameLabels(gl, program, buffer, imageContext, [buildFrame()], refsWith(null), 200, 150, IDENTITY_VIEWPORT);
+    drawSectionNameLabels({ buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT }, [buildFrame()], refsWith(null), 200, 150);
 
     // result
     expect(drawSectionNameLabelMock).not.toHaveBeenCalled();
@@ -68,7 +68,7 @@ describe('drawSectionNameLabels', () => {
     // before
     const section = buildSection();
 
-    drawSectionNameLabels(gl, program, buffer, imageContext, [section], refsWith(null), 200, 150, IDENTITY_VIEWPORT);
+    drawSectionNameLabels({ buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT }, [section], refsWith(null), 200, 150);
 
     // result
     expect(drawSectionNameLabelMock).toHaveBeenCalledWith(gl, program, buffer, imageContext, section, 200, 150, IDENTITY_VIEWPORT);
@@ -78,7 +78,7 @@ describe('drawSectionNameLabels', () => {
     // before
     const section = buildSection();
 
-    drawSectionNameLabels(gl, program, buffer, imageContext, [section], refsWith(section.id), 200, 150, IDENTITY_VIEWPORT);
+    drawSectionNameLabels({ buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT }, [section], refsWith(section.id), 200, 150);
 
     // result
     expect(drawSectionNameLabelMock).not.toHaveBeenCalled();

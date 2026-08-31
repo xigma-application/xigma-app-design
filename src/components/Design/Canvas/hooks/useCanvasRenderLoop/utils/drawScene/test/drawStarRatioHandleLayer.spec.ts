@@ -80,7 +80,7 @@ describe('drawStarRatioHandleLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawStarRatioHandleLayer(gl, program, buffer, null, [], 100, 100, IDENTITY_VIEWPORT);
+    drawStarRatioHandleLayer({ buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT }, null, [], 100, 100);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -93,7 +93,7 @@ describe('drawStarRatioHandleLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawStarRatioHandleLayer(gl, program, buffer, null, [star], 100, 100, IDENTITY_VIEWPORT);
+    drawStarRatioHandleLayer({ buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT }, null, [star], 100, 100);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -106,7 +106,7 @@ describe('drawStarRatioHandleLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawStarRatioHandleLayer(gl, program, buffer, ellipse, [star], 100, 100, IDENTITY_VIEWPORT);
+    drawStarRatioHandleLayer({ buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT }, ellipse, [star], 100, 100);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -119,7 +119,13 @@ describe('drawStarRatioHandleLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawStarRatioHandleLayer(gl, program, buffer, star, [star, { ...star, id: 'star-2' }], 100, 100, IDENTITY_VIEWPORT);
+    drawStarRatioHandleLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      star,
+      [star, { ...star, id: 'star-2' }],
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -132,7 +138,7 @@ describe('drawStarRatioHandleLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawStarRatioHandleLayer(gl, program, buffer, polygon, [polygon], 100, 100, IDENTITY_VIEWPORT);
+    drawStarRatioHandleLayer({ buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT }, polygon, [polygon], 100, 100);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -145,7 +151,13 @@ describe('drawStarRatioHandleLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawStarRatioHandleLayer(gl, program, buffer, star, [star], 100, 100, { x: 0, y: 0, zoom: 0.9 });
+    drawStarRatioHandleLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 0.9 } },
+      star,
+      [star],
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -158,7 +170,7 @@ describe('drawStarRatioHandleLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawStarRatioHandleLayer(gl, program, buffer, star, [star], 100, 100, IDENTITY_VIEWPORT);
+    drawStarRatioHandleLayer({ buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT }, star, [star], 100, 100);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);

@@ -7,21 +7,20 @@ import { getNextFrameName } from 'store/design/utils/getNextFrameName';
 // types
 import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TFrameNode, TSceneNode, TViewport } from 'types/design/types';
-import { TImageRenderContext } from '../../../types';
+import { TDrawSceneContext } from '../types';
+import { TFrameNode, TSceneNode } from 'types/design/types';
 
 // utils
 import { drawFrameNameLabel } from './drawFrameNameLabel';
 
 export const drawDraftFrameNameLabel = (
-  gl: WebGL2RenderingContext,
-  imageContext: TImageRenderContext,
+  context: TDrawSceneContext,
   refs: TCanvasRefs,
   nodes: Record<string, TSceneNode>,
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
 ): void => {
+  const { gl, imageContext, viewport } = context;
   const draftShape = refs.draftRef.current;
 
   if (draftShape?.type === NodeType.frame) {

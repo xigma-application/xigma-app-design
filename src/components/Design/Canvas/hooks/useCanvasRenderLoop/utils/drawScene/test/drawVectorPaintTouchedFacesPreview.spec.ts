@@ -61,7 +61,13 @@ describe('drawVectorPaintTouchedFacesPreview', () => {
 
   it('should draw nothing while no paint stroke is in progress', () => {
     // before
-    drawVectorPaintTouchedFacesPreview(gl, program, buffer, nodes, refsFor(null, false), 200, 150, IDENTITY_VIEWPORT);
+    drawVectorPaintTouchedFacesPreview(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      nodes,
+      refsFor(null, false),
+      200,
+      150,
+    );
 
     // result
     expect(drawVectorHatchFillMock).not.toHaveBeenCalled();
@@ -69,7 +75,13 @@ describe('drawVectorPaintTouchedFacesPreview', () => {
 
   it('should skip a node id that no longer resolves to any node, without calling drawVectorHatchFill for it', () => {
     // before
-    drawVectorPaintTouchedFacesPreview(gl, program, buffer, nodes, refsFor({ missing: ['k1'] }, false), 200, 150, IDENTITY_VIEWPORT);
+    drawVectorPaintTouchedFacesPreview(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      nodes,
+      refsFor({ missing: ['k1'] }, false),
+      200,
+      150,
+    );
 
     // result
     expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [], '#337ae1', 200, 150, IDENTITY_VIEWPORT);
@@ -85,14 +97,11 @@ describe('drawVectorPaintTouchedFacesPreview', () => {
 
     // before
     drawVectorPaintTouchedFacesPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       refsFor({ [node.id]: ['k1', 'k2'] }, false),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result — only the touched faces (k1, k2), not the untouched k3
@@ -113,7 +122,13 @@ describe('drawVectorPaintTouchedFacesPreview', () => {
     deriveVectorFacesMock.mockReturnValue([{ key: 'k1', points: [{ x: 0, y: 0 }] }]);
 
     // before
-    drawVectorPaintTouchedFacesPreview(gl, program, buffer, nodes, refsFor({ [node.id]: ['k1'] }, true), 200, 150, IDENTITY_VIEWPORT);
+    drawVectorPaintTouchedFacesPreview(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      nodes,
+      refsFor({ [node.id]: ['k1'] }, true),
+      200,
+      150,
+    );
 
     // result
     expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 0, y: 0 }]], '#cd4422', 200, 150, IDENTITY_VIEWPORT);
@@ -137,14 +152,11 @@ describe('drawVectorPaintTouchedFacesPreview', () => {
 
     // before
     drawVectorPaintTouchedFacesPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       mixedNodes,
       refsFor({ [frameNode.id]: ['k1'] }, false),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -162,14 +174,11 @@ describe('drawVectorPaintTouchedFacesPreview', () => {
 
     // before
     drawVectorPaintTouchedFacesPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       rotatedNodes,
       refsFor({ [rotatedNode.id]: ['k1'] }, false),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result

@@ -42,7 +42,7 @@ describe('drawSelectionSizeLabel', () => {
 
   it('should draw nothing when there is no selection', () => {
     // before
-    drawSelectionSizeLabel(gl, program, buffer, imageContext, [], 200, 150, IDENTITY_VIEWPORT, []);
+    drawSelectionSizeLabel({ buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT }, [], 200, 150, []);
 
     // result
     expect(drawValueLabelMock).not.toHaveBeenCalled();
@@ -50,7 +50,7 @@ describe('drawSelectionSizeLabel', () => {
 
   it('should draw nothing when every selected node is being vector-edited', () => {
     // before
-    drawSelectionSizeLabel(gl, program, buffer, imageContext, [buildNode()], 200, 150, IDENTITY_VIEWPORT, ['node-1']);
+    drawSelectionSizeLabel({ buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT }, [buildNode()], 200, 150, ['node-1']);
 
     // result
     expect(drawValueLabelMock).not.toHaveBeenCalled();
@@ -58,7 +58,7 @@ describe('drawSelectionSizeLabel', () => {
 
   it('should draw nothing when the only selected node is the path being text-edited', () => {
     // before
-    drawSelectionSizeLabel(gl, program, buffer, imageContext, [buildNode()], 200, 150, IDENTITY_VIEWPORT, [], 'node-1');
+    drawSelectionSizeLabel({ buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT }, [buildNode()], 200, 150, [], 'node-1');
 
     // result
     expect(drawValueLabelMock).not.toHaveBeenCalled();
@@ -66,7 +66,7 @@ describe('drawSelectionSizeLabel', () => {
 
   it('should draw a blue "W x H" badge below an unrotated single node', () => {
     // before
-    drawSelectionSizeLabel(gl, program, buffer, imageContext, [buildNode()], 200, 150, IDENTITY_VIEWPORT, []);
+    drawSelectionSizeLabel({ buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT }, [buildNode()], 200, 150, []);
 
     // result
     const [, , , , text, anchor, offsetDirection, , , , options] = drawValueLabelMock.mock.calls[0];
@@ -80,7 +80,7 @@ describe('drawSelectionSizeLabel', () => {
 
   it('should keep the badge parallel to the edge when the single node is rotated', () => {
     // before
-    drawSelectionSizeLabel(gl, program, buffer, imageContext, [buildNode({ rotation: 30 })], 200, 150, IDENTITY_VIEWPORT, []);
+    drawSelectionSizeLabel({ buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT }, [buildNode({ rotation: 30 })], 200, 150, []);
 
     // result
     const [, , , , text, , , , , , options] = drawValueLabelMock.mock.calls[0];
@@ -103,7 +103,7 @@ describe('drawSelectionSizeLabel', () => {
       y2: 20,
     } as TSceneNode;
 
-    drawSelectionSizeLabel(gl, program, buffer, imageContext, [line], 200, 150, IDENTITY_VIEWPORT, []);
+    drawSelectionSizeLabel({ buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT }, [line], 200, 150, []);
 
     // result
     const [, , , , text, , , , , , options] = drawValueLabelMock.mock.calls[0];
@@ -116,7 +116,7 @@ describe('drawSelectionSizeLabel', () => {
     // before
     const nodes = [buildNode({ id: 'a', width: 100, x: 0 }), buildNode({ id: 'b', width: 100, x: 300 })];
 
-    drawSelectionSizeLabel(gl, program, buffer, imageContext, nodes, 200, 150, IDENTITY_VIEWPORT, []);
+    drawSelectionSizeLabel({ buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT }, nodes, 200, 150, []);
 
     // result — bounds span x:[0,400], y:[0,100]
     const [, , , , text, anchor, , , , , options] = drawValueLabelMock.mock.calls[0];

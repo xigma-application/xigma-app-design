@@ -1,5 +1,6 @@
 // types
-import { TSceneNode, TViewport } from 'types/design/types';
+import { TDrawSceneContext } from './types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { drawGroupSelectionOutline } from './drawGroupSelectionOutline';
@@ -7,17 +8,15 @@ import { drawPerNodeSelectionOutlines } from './drawPerNodeSelectionOutlines/dra
 import { isGroupSelection } from '../../../../utils/isGroupSelection';
 
 export const drawSelectionOutline = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
+  context: TDrawSceneContext,
   selectedNodes: TSceneNode[],
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
   vectorEditingNodeIds: string[],
   nodesById: Record<string, TSceneNode>,
   editingPathId?: string | null,
 ): void => {
+  const { buffer, gl, program, viewport } = context;
   const nonVectorEditingNodes = selectedNodes.filter((node) => !vectorEditingNodeIds.includes(node.id));
 
   if (isGroupSelection(nonVectorEditingNodes)) {

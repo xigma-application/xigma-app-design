@@ -40,17 +40,13 @@ describe('drawVectorWidthPointsPreview', () => {
 
     // before
     drawVectorWidthPointsPreview(
-      gl,
-      program,
-      buffer,
-      imageContext,
+      { buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       {},
       ['node-1', 'node-2'],
       refs,
       ToolName.variableWidth,
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -73,17 +69,13 @@ describe('drawVectorWidthPointsPreview', () => {
   it('should draw nothing per-node when there are no editing nodes, but still check the hover marker and value label', () => {
     // before
     drawVectorWidthPointsPreview(
-      gl,
-      program,
-      buffer,
-      imageContext,
+      { buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       {},
       [],
       createCanvasRefs(),
       ToolName.variableWidth,
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -99,7 +91,15 @@ describe('drawVectorWidthPointsPreview', () => {
     refs.hover.hoveredVectorWidthPointRef.current = { nodeId: 'node-1', segmentId: 's1', t: 0.5 };
 
     // before
-    drawVectorWidthPointsPreview(gl, program, buffer, imageContext, {}, ['node-1'], refs, ToolName.default, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorWidthPointsPreview(
+      { buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
+      {},
+      ['node-1'],
+      refs,
+      ToolName.default,
+      200,
+      150,
+    );
 
     // result
     expect(drawVectorWidthPointsForNodeMock).not.toHaveBeenCalled();

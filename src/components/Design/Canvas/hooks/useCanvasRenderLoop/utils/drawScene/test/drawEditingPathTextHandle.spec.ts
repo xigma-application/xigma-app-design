@@ -44,7 +44,12 @@ describe('drawEditingPathTextHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawEditingPathTextHandle(gl, program, buffer, buildEditingTextBox(), 100, 100, IDENTITY_VIEWPORT);
+    drawEditingPathTextHandle(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      buildEditingTextBox(),
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLE_FAN, 0, expect.any(Number));
@@ -57,7 +62,12 @@ describe('drawEditingPathTextHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawEditingPathTextHandle(gl, program, buffer, buildEditingTextBox({ pathId: null }), 100, 100, IDENTITY_VIEWPORT);
+    drawEditingPathTextHandle(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      buildEditingTextBox({ pathId: null }),
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -70,7 +80,7 @@ describe('drawEditingPathTextHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawEditingPathTextHandle(gl, program, buffer, null, 100, 100, IDENTITY_VIEWPORT);
+    drawEditingPathTextHandle({ buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT }, null, 100, 100);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();

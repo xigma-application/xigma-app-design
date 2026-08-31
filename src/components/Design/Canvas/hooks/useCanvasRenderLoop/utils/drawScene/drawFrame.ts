@@ -1,23 +1,14 @@
 // types
 import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TImageRenderContext } from '../../types';
-import { TViewport } from 'types/design/types';
+import { TDrawSceneContext } from './types';
 
 // utils
 import { drawDraftLine } from './drawDraftLine';
 import { drawDraftShape } from './drawDraftShape';
 
-export const drawFrame = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
-  imageContext: TImageRenderContext,
-  refs: TCanvasRefs,
-  canvasWidth: number,
-  canvasHeight: number,
-  viewport: TViewport,
-): void => {
+export const drawFrame = (context: TDrawSceneContext, refs: TCanvasRefs, canvasWidth: number, canvasHeight: number): void => {
+  const { buffer, gl, imageContext, program, viewport } = context;
   const draftShape = refs.draftRef.current;
 
   if (draftShape) {

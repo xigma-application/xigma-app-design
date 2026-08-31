@@ -4,7 +4,8 @@ import { ELLIPSE_ARC_MAX_RATIO, ELLIPSE_DEFAULT_ARC_ANGLE } from 'constant/canva
 // types
 import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TSceneNode, TViewport } from 'types/design/types';
+import { TDrawSceneContext } from '../types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { drawArcRatioGuide } from './drawArcRatioGuide';
@@ -15,16 +16,14 @@ import { getNodeBounds } from '../../../../../utils/getNodeBounds';
 import { shouldShowEllipseArcHandle } from 'utils/canvas/ellipseArc/shouldShowEllipseArcHandle';
 
 export const drawEllipseArcHandleLayer = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
+  context: TDrawSceneContext,
   hoveredNode: TSceneNode | null | undefined,
   selectedNodes: TSceneNode[],
   refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
 ): void => {
+  const { buffer, gl, program, viewport } = context;
   const endHandleDraggedPosition = refs.ellipseArc.ellipseArcDragRef.current?.draggedHandlePosition ?? null;
   const rotateHandleDraggedPosition = refs.ellipseArc.ellipseArcRotateDragRef.current?.draggedHandlePosition ?? null;
   const ratioHandleDraggedPosition = refs.ellipseArc.ellipseArcRatioDragRef.current?.draggedHandlePosition ?? null;

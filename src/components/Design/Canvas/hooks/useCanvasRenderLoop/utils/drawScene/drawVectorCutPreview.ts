@@ -3,21 +3,14 @@ import { VECTOR_CUT_LINE_STROKE, VECTOR_CUT_LINE_STROKE_WIDTH } from 'constant/c
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TViewport } from 'types/design/types';
+import { TDrawSceneContext } from './types';
 
 // utils
 import { drawLine } from 'utils/canvas/drawLine';
 import { drawVectorCutPointMarker } from './drawVectorCutPointMarker';
 
-export const drawVectorCutPreview = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
-  refs: TCanvasRefs,
-  canvasWidth: number,
-  canvasHeight: number,
-  viewport: TViewport,
-): void => {
+export const drawVectorCutPreview = (context: TDrawSceneContext, refs: TCanvasRefs, canvasWidth: number, canvasHeight: number): void => {
+  const { buffer, gl, program, viewport } = context;
   const preview = refs.vectorCut.vectorCutPreviewRef.current;
 
   if (preview) {

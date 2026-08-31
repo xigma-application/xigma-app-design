@@ -93,7 +93,7 @@ describe('drawVertexCountHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVertexCountHandlesLayer(gl, program, buffer, null, [], 100, 100, IDENTITY_VIEWPORT);
+    drawVertexCountHandlesLayer({ buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT }, null, [], 100, 100);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -106,7 +106,7 @@ describe('drawVertexCountHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVertexCountHandlesLayer(gl, program, buffer, null, [polygon], 100, 100, IDENTITY_VIEWPORT);
+    drawVertexCountHandlesLayer({ buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT }, null, [polygon], 100, 100);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -119,7 +119,13 @@ describe('drawVertexCountHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVertexCountHandlesLayer(gl, program, buffer, ellipse, [polygon], 100, 100, IDENTITY_VIEWPORT);
+    drawVertexCountHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      ellipse,
+      [polygon],
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -132,7 +138,13 @@ describe('drawVertexCountHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVertexCountHandlesLayer(gl, program, buffer, polygon, [polygon, { ...polygon, id: 'polygon-2' }], 100, 100, IDENTITY_VIEWPORT);
+    drawVertexCountHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      polygon,
+      [polygon, { ...polygon, id: 'polygon-2' }],
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -145,7 +157,13 @@ describe('drawVertexCountHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVertexCountHandlesLayer(gl, program, buffer, rectangle, [rectangle], 100, 100, IDENTITY_VIEWPORT);
+    drawVertexCountHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      rectangle,
+      [rectangle],
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -158,7 +176,13 @@ describe('drawVertexCountHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVertexCountHandlesLayer(gl, program, buffer, polygon, [polygon], 100, 100, { x: 0, y: 0, zoom: 0.9 });
+    drawVertexCountHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 0.9 } },
+      polygon,
+      [polygon],
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -171,7 +195,13 @@ describe('drawVertexCountHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVertexCountHandlesLayer(gl, program, buffer, polygon, [polygon], 100, 100, IDENTITY_VIEWPORT);
+    drawVertexCountHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      polygon,
+      [polygon],
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
@@ -184,7 +214,7 @@ describe('drawVertexCountHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVertexCountHandlesLayer(gl, program, buffer, star, [star], 100, 100, IDENTITY_VIEWPORT);
+    drawVertexCountHandlesLayer({ buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT }, star, [star], 100, 100);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
@@ -197,7 +227,13 @@ describe('drawVertexCountHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawVertexCountHandlesLayer(gl, program, buffer, star, [star], 100, 100, { x: 0, y: 0, zoom: 0.9 });
+    drawVertexCountHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 0.9 } },
+      star,
+      [star],
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();

@@ -1,6 +1,7 @@
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TSceneNode, TViewport } from 'types/design/types';
+import { TDrawSceneContext } from '../types';
+import { TSceneNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
@@ -12,16 +13,14 @@ import { getVectorNodeBounds } from 'utils/canvas/vectorNetwork/getVectorNodeBou
 const ORIGIN: TPoint = { x: 0, y: 0 };
 
 export const drawPenPreview = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
+  context: TDrawSceneContext,
   refs: TCanvasRefs,
   nodes: Record<string, TSceneNode>,
   vectorEditingNodeId: string | null,
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
 ): void => {
+  const { buffer, gl, program, viewport } = context;
   const preview = refs.pen.penPreviewRef.current;
   const newVertexPreview = refs.pen.penNewVertexPreviewRef.current;
   const isDragArmable = refs.pen.penHoveredDragArmableVertexRef.current;

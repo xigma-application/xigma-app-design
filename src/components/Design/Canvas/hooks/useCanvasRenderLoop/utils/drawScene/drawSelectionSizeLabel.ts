@@ -3,8 +3,8 @@ import { DRAFT_FRAME_STROKE, SELECTION_SIZE_LABEL_EDGE_GAP_PX } from 'constant/c
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TImageRenderContext } from '../../types';
-import { TSceneNode, TViewport } from 'types/design/types';
+import { TDrawSceneContext } from './types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { drawValueLabel } from 'utils/canvas/text/drawValueLabel/drawValueLabel';
@@ -23,17 +23,14 @@ const getSizeLabelRect = (nodes: TSceneNode[]): TSelectionSizeLabelRect => {
 };
 
 export const drawSelectionSizeLabel = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
-  imageContext: TImageRenderContext,
+  context: TDrawSceneContext,
   selectedNodes: TSceneNode[],
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
   vectorEditingNodeIds: string[],
   editingPathId?: string | null,
 ): void => {
+  const { buffer, gl, imageContext, program, viewport } = context;
   const nodes = selectedNodes.filter((node) => !vectorEditingNodeIds.includes(node.id) && node.id !== editingPathId);
 
   if (nodes.length > 0) {

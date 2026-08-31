@@ -3,6 +3,7 @@ import { CONTACT_GUIDE_STROKE, CONTACT_GUIDE_X_MARKER_SIZE_PX } from 'constant/c
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
+import { TDrawSceneContext } from './types';
 import { TShapeContactGuide } from 'components/Design/Canvas/utils/getShapeContactGuides';
 import { TViewport } from 'types/design/types';
 
@@ -49,15 +50,9 @@ const drawContactGuide = (
   );
 };
 
-export const drawShapeContactGuides = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
-  refs: TCanvasRefs,
-  canvasWidth: number,
-  canvasHeight: number,
-  viewport: TViewport,
-): void => {
+export const drawShapeContactGuides = (context: TDrawSceneContext, refs: TCanvasRefs, canvasWidth: number, canvasHeight: number): void => {
+  const { buffer, gl, program, viewport } = context;
+
   refs.transform.contactGuidesRef.current?.forEach((guide) =>
     drawContactGuide(gl, program, buffer, guide, canvasWidth, canvasHeight, viewport),
   );

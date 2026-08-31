@@ -2,23 +2,23 @@
 import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 
 // types
+import { TDrawSceneContext } from './types';
 import { TEditingTextBox } from 'types/canvas';
-import { TSceneNode, TViewport } from 'types/design/types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { drawPathTextOffsetHandle } from 'utils/canvas/drawPathTextOffsetHandle';
 import { getPathTextHandlePoint } from '../../../../utils/getPathTextHandlePoint';
 
 export const drawEditingPathTextHandle = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
+  context: TDrawSceneContext,
   editingTextBox: TEditingTextBox | null,
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
   pathNode?: TSceneNode,
 ): void => {
+  const { buffer, gl, program, viewport } = context;
+
   if (editingTextBox) {
     const handlePoint = getPathTextHandlePoint(editingTextBox, pathNode);
 

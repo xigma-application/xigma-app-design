@@ -78,9 +78,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
   it('should draw nothing when nothing is touched', () => {
     // before
     drawVectorShapeBuilderHoverPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       [node.id],
       [node.id],
@@ -88,7 +86,6 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       refsFor(false, null, false),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -98,9 +95,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
   it('should draw nothing for a touched node id that no longer resolves to any node', () => {
     // before
     drawVectorShapeBuilderHoverPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       [node.id],
       [node.id],
@@ -108,7 +103,6 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       refsFor(false, null, false),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -124,9 +118,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       [node.id],
       [node.id],
@@ -134,7 +126,6 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       refsFor(false, null, false),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -169,9 +160,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       [node.id],
       [node.id],
@@ -179,7 +168,6 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       refsFor(true, null, false),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -192,9 +180,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       [node.id],
       [node.id],
@@ -202,7 +188,6 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       refsFor(false, null, false),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -218,9 +203,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       twoNodes,
       [node.id, otherNode.id],
       [node.id, otherNode.id],
@@ -228,7 +211,6 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       refsFor(false, null, false),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result — plain per-node hatch ran twice (once per node), not the grouping path
@@ -248,9 +230,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       twoNodes,
       [node.id, otherNode.id],
       [node.id, otherNode.id],
@@ -258,7 +238,6 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       refsFor(false, path, false),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -282,9 +261,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       twoNodes,
       [node.id, otherNode.id],
       [node.id, otherNode.id],
@@ -292,7 +269,6 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       refsFor(false, path, true),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -316,9 +292,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       twoNodes,
       [node.id, otherNode.id],
       [node.id, otherNode.id],
@@ -326,7 +300,6 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       refsFor(false, path, false),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result — the grouping path ran, but each singleton falls back to the plain per-node hatch
@@ -347,9 +320,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       twoNodes,
       [node.id, otherNode.id],
       [node.id, otherNode.id],
@@ -357,7 +328,6 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       refsFor(false, path, false),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -383,9 +353,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before — only node.id appears in touchedFaces
     drawVectorShapeBuilderHoverPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       threeNodes,
       [node.id, otherNode.id, thirdNode.id],
       [node.id, otherNode.id, thirdNode.id],
@@ -393,7 +361,6 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       refsFor(false, path, false),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result — the touched singleton group hatches normally; the untouched crossing pair is skipped

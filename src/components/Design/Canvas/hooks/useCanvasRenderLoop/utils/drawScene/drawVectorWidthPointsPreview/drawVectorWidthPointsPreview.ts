@@ -1,7 +1,7 @@
 // types
-import { TSceneNode, TViewport } from 'types/design/types';
+import { TSceneNode } from 'types/design/types';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TImageRenderContext } from '../../../types';
+import { TDrawSceneContext } from '../types';
 import { ToolName } from 'types/design/enums';
 
 // utils
@@ -10,18 +10,16 @@ import { drawVectorWidthPointsForNode } from './drawVectorWidthPointsForNode';
 import { drawVectorWidthValueLabel } from './drawVectorWidthValueLabel';
 
 export const drawVectorWidthPointsPreview = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
-  imageContext: TImageRenderContext,
+  context: TDrawSceneContext,
   nodes: Record<string, TSceneNode>,
   vectorEditingNodeIds: string[],
   refs: TCanvasRefs,
   activeTool: ToolName,
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
 ): void => {
+  const { buffer, gl, imageContext, program, viewport } = context;
+
   if (activeTool === ToolName.variableWidth) {
     vectorEditingNodeIds.forEach((nodeId) => {
       drawVectorWidthPointsForNode(gl, program, buffer, nodes, nodeId, refs, canvasWidth, canvasHeight, viewport);

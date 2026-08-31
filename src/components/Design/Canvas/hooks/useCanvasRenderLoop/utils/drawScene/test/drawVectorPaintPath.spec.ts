@@ -15,13 +15,16 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const call = (path: TPoint[] | null): void => {
   drawVectorPaintPath(
-    {} as WebGL2RenderingContext,
-    {} as WebGLProgram,
-    {} as WebGLBuffer,
+    {
+      buffer: {} as WebGLBuffer,
+      gl: {} as WebGL2RenderingContext,
+      imageContext: {} as never,
+      program: {} as WebGLProgram,
+      viewport: IDENTITY_VIEWPORT,
+    },
     createCanvasRefs({ vectorPaint: { vectorPaintPathRef: { current: path } } }),
     200,
     150,
-    IDENTITY_VIEWPORT,
   );
 };
 

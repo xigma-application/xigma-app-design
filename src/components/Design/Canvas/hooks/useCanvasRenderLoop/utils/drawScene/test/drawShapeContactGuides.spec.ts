@@ -21,7 +21,7 @@ describe('drawShapeContactGuides', () => {
 
   it('should draw nothing when there are no guides', () => {
     // before
-    drawShapeContactGuides(gl, program, buffer, createCanvasRefs(), 200, 150, IDENTITY_VIEWPORT);
+    drawShapeContactGuides({ buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT }, createCanvasRefs(), 200, 150);
 
     // result
     expect(drawLineMock).not.toHaveBeenCalled();
@@ -31,9 +31,7 @@ describe('drawShapeContactGuides', () => {
   it('should draw one line plus an X marker at each end of every guide', () => {
     // before
     drawShapeContactGuides(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       createCanvasRefs({
         transform: {
           contactGuidesRef: {
@@ -46,7 +44,6 @@ describe('drawShapeContactGuides', () => {
       }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -83,13 +80,10 @@ describe('drawShapeContactGuides', () => {
   it('should scale the stroke width and marker size down with zoom', () => {
     // before
     drawShapeContactGuides(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 2 } },
       createCanvasRefs({ transform: { contactGuidesRef: { current: [{ x1: 0, x2: 10, y1: 0, y2: 0 }] } } }),
       200,
       150,
-      { x: 0, y: 0, zoom: 2 },
     );
 
     // result

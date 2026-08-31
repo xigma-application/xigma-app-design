@@ -28,7 +28,7 @@ describe('drawVectorCutPreview', () => {
 
   it('should draw nothing when there is no active preview', () => {
     // before
-    drawVectorCutPreview(gl, program, buffer, createCanvasRefs(), 200, 150, IDENTITY_VIEWPORT);
+    drawVectorCutPreview({ buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT }, createCanvasRefs(), 200, 150);
 
     // result
     expect(drawLineMock).not.toHaveBeenCalled();
@@ -41,13 +41,10 @@ describe('drawVectorCutPreview', () => {
 
     // before
     drawVectorCutPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       createCanvasRefs({ vectorCut: { vectorCutPreviewRef: { current: preview } } }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -78,13 +75,10 @@ describe('drawVectorCutPreview', () => {
 
     // before
     drawVectorCutPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       createCanvasRefs({ vectorCut: { vectorCutPreviewRef: { current: preview } } }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result

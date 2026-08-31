@@ -4,9 +4,9 @@ import { TEXT_FILL, TEXT_FONT_FAMILY, TEXT_FONT_SIZE, TEXT_NAME } from '../../..
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TDrawSceneContext } from './types';
 import { TEditingTextBox } from 'types/canvas';
-import { TImageRenderContext } from '../../types';
-import { TSceneNode, TViewport } from 'types/design/types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { drawEditingCaretAndSelection } from './drawEditingCaretAndSelection/drawEditingCaretAndSelection';
@@ -15,10 +15,7 @@ import { drawMsdfText } from 'utils/canvas/text/drawMsdfText';
 import { getMsdfAtlasTexture } from 'utils/canvas/text/getMsdfAtlasTexture';
 
 export const drawEditingText = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
-  imageContext: TImageRenderContext,
+  context: TDrawSceneContext,
   editingTextBox: TEditingTextBox | null,
   editingTextContent: string,
   selectionStart: number,
@@ -26,9 +23,10 @@ export const drawEditingText = (
   selectionChangedAt: number,
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
   editingPathNode?: TSceneNode,
 ): void => {
+  const { buffer, gl, imageContext, program, viewport } = context;
+
   if (editingTextBox) {
     drawEditingTextBoxOutline(gl, program, buffer, editingTextBox, canvasWidth, canvasHeight, viewport);
     drawMsdfText(

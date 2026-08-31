@@ -59,7 +59,14 @@ describe('drawFrameNameLabels', () => {
 
   it('should draw nothing when there are no frame nodes', () => {
     // before
-    drawFrameNameLabels(gl, imageContext, [buildRectangle()], new Set(), refsWith(null), 200, 150, IDENTITY_VIEWPORT);
+    drawFrameNameLabels(
+      { buffer: {} as never, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
+      [buildRectangle()],
+      new Set(),
+      refsWith(null),
+      200,
+      150,
+    );
 
     // result
     expect(drawFrameNameLabelMock).not.toHaveBeenCalled();
@@ -69,7 +76,14 @@ describe('drawFrameNameLabels', () => {
     // before
     const frame = buildFrame();
 
-    drawFrameNameLabels(gl, imageContext, [frame], new Set(), refsWith(null), 200, 150, IDENTITY_VIEWPORT);
+    drawFrameNameLabels(
+      { buffer: {} as never, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
+      [frame],
+      new Set(),
+      refsWith(null),
+      200,
+      150,
+    );
 
     // result
     expect(drawFrameNameLabelMock).toHaveBeenCalledWith(gl, imageContext, frame, FRAME_NAME_LABEL_FILL, 200, 150, IDENTITY_VIEWPORT);
@@ -79,7 +93,14 @@ describe('drawFrameNameLabels', () => {
     // before
     const frame = buildFrame();
 
-    drawFrameNameLabels(gl, imageContext, [frame], new Set([frame.id]), refsWith(null), 200, 150, IDENTITY_VIEWPORT);
+    drawFrameNameLabels(
+      { buffer: {} as never, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
+      [frame],
+      new Set([frame.id]),
+      refsWith(null),
+      200,
+      150,
+    );
 
     // result
     expect(drawFrameNameLabelMock).toHaveBeenCalledWith(
@@ -97,7 +118,14 @@ describe('drawFrameNameLabels', () => {
     // before
     const frame = buildFrame();
 
-    drawFrameNameLabels(gl, imageContext, [frame], new Set(), refsWith(frame.id), 200, 150, IDENTITY_VIEWPORT);
+    drawFrameNameLabels(
+      { buffer: {} as never, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
+      [frame],
+      new Set(),
+      refsWith(frame.id),
+      200,
+      150,
+    );
 
     // result
     expect(drawFrameNameLabelMock).not.toHaveBeenCalled();

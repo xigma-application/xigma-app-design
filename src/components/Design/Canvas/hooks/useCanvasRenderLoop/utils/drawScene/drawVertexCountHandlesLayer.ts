@@ -3,7 +3,8 @@ import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TSceneNode, TViewport } from 'types/design/types';
+import { TDrawSceneContext } from './types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { drawPolygonVertexCountHandle } from 'utils/canvas/drawPolygonVertexCountHandle';
@@ -14,15 +15,13 @@ import { shouldShowVertexCountHandle } from 'utils/canvas/vertexCount/shouldShow
 const hasVertexCount = (node: TSceneNode): boolean => node.type === NodeType.polygon || node.type === NodeType.star;
 
 export const drawVertexCountHandlesLayer = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
+  context: TDrawSceneContext,
   hoveredNode: TSceneNode | null | undefined,
   selectedNodes: TSceneNode[],
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
 ): void => {
+  const { buffer, gl, program, viewport } = context;
   const [selectedNode] = selectedNodes;
 
   if (selectedNodes.length === 1 && hoveredNode?.id === selectedNode.id && hasVertexCount(selectedNode)) {

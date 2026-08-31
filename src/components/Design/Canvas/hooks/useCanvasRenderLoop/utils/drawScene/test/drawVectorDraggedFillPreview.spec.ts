@@ -53,14 +53,11 @@ describe('drawVectorDraggedFillPreview', () => {
   it('should draw nothing when nothing is currently being dragged', () => {
     // before
     drawVectorDraggedFillPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       createCanvasRefs({ vectorSnapshots: { draggedVectorFillFacesRef: { current: null } } }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -70,14 +67,11 @@ describe('drawVectorDraggedFillPreview', () => {
   it('should skip a node id that no longer resolves to any node, without calling drawVectorHatchFill for it', () => {
     // before
     drawVectorDraggedFillPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       createCanvasRefs({ vectorSnapshots: { draggedVectorFillFacesRef: { current: { missing: ['k1'] } } } }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -94,14 +88,11 @@ describe('drawVectorDraggedFillPreview', () => {
 
     // before
     drawVectorDraggedFillPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       createCanvasRefs({ vectorSnapshots: { draggedVectorFillFacesRef: { current: { [node.id]: ['k1', 'k2'] } } } }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result — only the touched faces (k1, k2), not the untouched k3
@@ -135,14 +126,11 @@ describe('drawVectorDraggedFillPreview', () => {
 
     // before
     drawVectorDraggedFillPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       mixedNodes,
       createCanvasRefs({ vectorSnapshots: { draggedVectorFillFacesRef: { current: { [frameNode.id]: ['k1'] } } } }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -160,14 +148,11 @@ describe('drawVectorDraggedFillPreview', () => {
 
     // before
     drawVectorDraggedFillPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       rotatedNodes,
       createCanvasRefs({ vectorSnapshots: { draggedVectorFillFacesRef: { current: { [rotatedNode.id]: ['k1'] } } } }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result

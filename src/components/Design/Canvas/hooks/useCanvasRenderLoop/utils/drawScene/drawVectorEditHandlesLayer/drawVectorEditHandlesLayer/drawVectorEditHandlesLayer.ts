@@ -1,7 +1,8 @@
 // types
 import { TPoint } from 'types/canvas';
-import { TSceneNode, TViewport } from 'types/design/types';
+import { TSceneNode } from 'types/design/types';
 import { TCanvasRefs } from 'types/design/canvas/types';
+import { TDrawSceneContext } from '../../types';
 import { TVertexDotBufferCacheEntry } from '../drawVectorVertexDots/types';
 
 // utils
@@ -11,9 +12,7 @@ import { getBakedVectorEditingNodes } from '../getBakedVectorEditingNodes';
 import { getVectorEditingNode } from '../../../../../../utils/getVectorEditingNode';
 
 export const drawVectorEditHandlesLayer = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
+  context: TDrawSceneContext,
   vertexDotBufferCache: WeakMap<TPoint[], TVertexDotBufferCacheEntry[]>,
   nodes: Record<string, TSceneNode>,
   vectorEditingNodeIds: string[],
@@ -21,8 +20,8 @@ export const drawVectorEditHandlesLayer = (
   penActiveVertexId: string | null,
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
 ): void => {
+  const { buffer, gl, program, viewport } = context;
   const selectedVertexIds = refs.vectorEdit.selectedVectorVertexIdsRef.current;
   const preMarqueeVertexIds = refs.vectorEdit.preVectorMarqueeVertexIdsRef.current;
   const selectedSegmentIds = refs.vectorEdit.selectedVectorSegmentIdsRef.current;

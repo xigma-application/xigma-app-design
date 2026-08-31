@@ -3,7 +3,8 @@ import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TPolygonNode, TRectangleNode, TSceneNode, TStarNode, TViewport } from 'types/design/types';
+import { TDrawSceneContext } from './types';
+import { TPolygonNode, TRectangleNode, TSceneNode, TStarNode } from 'types/design/types';
 
 // utils
 import { drawCornerRadiusHandles } from 'utils/canvas/drawCornerRadiusHandles';
@@ -20,16 +21,14 @@ const hasAnyCornerRadius = (node: TSceneNode): node is TRectangleNode | TPolygon
   hasCornerRadius(node) || hasPolygonCornerRadius(node) || hasStarCornerRadius(node);
 
 export const drawCornerRadiusHandlesLayer = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
+  context: TDrawSceneContext,
   hoveredNode: TSceneNode | null | undefined,
   selectedNodes: TSceneNode[],
   refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
 ): void => {
+  const { buffer, gl, program, viewport } = context;
   const isDraggingCornerRadius = hasCornerRadiusDragMoved(refs);
   const [selectedNode] = selectedNodes;
 

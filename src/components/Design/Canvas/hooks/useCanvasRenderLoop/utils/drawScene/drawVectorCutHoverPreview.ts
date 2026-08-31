@@ -3,7 +3,8 @@ import { HOVER_OUTLINE_WIDTH, VECTOR_CUT_LINE_STROKE } from 'constant/canvas';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TSceneNode, TViewport } from 'types/design/types';
+import { TDrawSceneContext } from './types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { drawVectorCutPointMarker } from './drawVectorCutPointMarker';
@@ -13,15 +14,13 @@ import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRendere
 import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';
 
 export const drawVectorCutHoverPreview = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
+  context: TDrawSceneContext,
   nodes: Record<string, TSceneNode>,
   refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
 ): void => {
+  const { buffer, gl, program, viewport } = context;
   const hoveredSegment = refs.hover.hoveredVectorCutSegmentRef.current;
   const hoveredPoint = refs.hover.hoveredVectorCutPointRef.current;
   const node = hoveredSegment ? getVectorEditingNode(nodes, hoveredSegment.nodeId) : null;

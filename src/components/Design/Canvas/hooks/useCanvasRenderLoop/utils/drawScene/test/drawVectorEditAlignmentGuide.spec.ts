@@ -27,13 +27,10 @@ describe('drawVectorEditAlignmentGuide', () => {
 
     // before
     drawVectorEditAlignmentGuide(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       createCanvasRefs({ vectorEdit: { vectorAlignmentGuideRef: { current: guide } } }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -42,7 +39,12 @@ describe('drawVectorEditAlignmentGuide', () => {
 
   it('should forward null when there is no vector-edit alignment guide', () => {
     // before
-    drawVectorEditAlignmentGuide(gl, program, buffer, createCanvasRefs(), 200, 150, IDENTITY_VIEWPORT);
+    drawVectorEditAlignmentGuide(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      createCanvasRefs(),
+      200,
+      150,
+    );
 
     // result
     expect(drawAlignmentGuideMock).toHaveBeenCalledWith(gl, program, buffer, null, 200, 150, IDENTITY_VIEWPORT);

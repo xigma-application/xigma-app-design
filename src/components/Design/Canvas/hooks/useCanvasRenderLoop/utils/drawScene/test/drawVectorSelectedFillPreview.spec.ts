@@ -53,15 +53,12 @@ describe('drawVectorSelectedFillPreview', () => {
   it('should draw nothing when nothing is selected', () => {
     // before
     drawVectorSelectedFillPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       [node.id],
       createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: [] } } }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -72,15 +69,12 @@ describe('drawVectorSelectedFillPreview', () => {
   it('should draw nothing when a node id no longer resolves to any node', () => {
     // before
     drawVectorSelectedFillPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       ['missing'],
       createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['v1'] } } }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -96,15 +90,12 @@ describe('drawVectorSelectedFillPreview', () => {
 
     // before
     drawVectorSelectedFillPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       [node.id],
       createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['v1', 'v2', 'v3'] } } }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -126,15 +117,12 @@ describe('drawVectorSelectedFillPreview', () => {
 
     // before
     drawVectorSelectedFillPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       [node.id],
       createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['v1'] } } }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -159,15 +147,12 @@ describe('drawVectorSelectedFillPreview', () => {
 
     // before
     drawVectorSelectedFillPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       mixedNodes,
       [frameNode.id],
       createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['v1'] } } }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -186,15 +171,12 @@ describe('drawVectorSelectedFillPreview', () => {
 
     // before
     drawVectorSelectedFillPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       rotatedNodes,
       [rotatedNode.id],
       createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['v1'] } } }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result

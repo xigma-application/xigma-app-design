@@ -60,15 +60,18 @@ describe('drawEllipseArcHandleLayer', () => {
   it('should draw nothing when nothing is selected', () => {
     // before
     drawEllipseArcHandleLayer(
-      {} as WebGL2RenderingContext,
-      {} as WebGLProgram,
-      {} as WebGLBuffer,
+      {
+        buffer: {} as WebGLBuffer,
+        gl: {} as WebGL2RenderingContext,
+        imageContext: {} as never,
+        program: {} as WebGLProgram,
+        viewport: IDENTITY_VIEWPORT,
+      },
       null,
       [],
       createCanvasRefs(),
       100,
       100,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -78,15 +81,18 @@ describe('drawEllipseArcHandleLayer', () => {
   it('should draw nothing for a multi-node selection', () => {
     // before
     drawEllipseArcHandleLayer(
-      {} as WebGL2RenderingContext,
-      {} as WebGLProgram,
-      {} as WebGLBuffer,
+      {
+        buffer: {} as WebGLBuffer,
+        gl: {} as WebGL2RenderingContext,
+        imageContext: {} as never,
+        program: {} as WebGLProgram,
+        viewport: IDENTITY_VIEWPORT,
+      },
       null,
       [ellipse(), ellipse({ id: 'ellipse-2' })],
       createCanvasRefs(),
       100,
       100,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -96,15 +102,18 @@ describe('drawEllipseArcHandleLayer', () => {
   it('should draw nothing when the selected node is not an ellipse', () => {
     // before
     drawEllipseArcHandleLayer(
-      {} as WebGL2RenderingContext,
-      {} as WebGLProgram,
-      {} as WebGLBuffer,
+      {
+        buffer: {} as WebGLBuffer,
+        gl: {} as WebGL2RenderingContext,
+        imageContext: {} as never,
+        program: {} as WebGLProgram,
+        viewport: IDENTITY_VIEWPORT,
+      },
       null,
       [rectangle],
       createCanvasRefs(),
       100,
       100,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -114,19 +123,22 @@ describe('drawEllipseArcHandleLayer', () => {
   it('should draw nothing once the shape renders too small on screen', () => {
     // before
     drawEllipseArcHandleLayer(
-      {} as WebGL2RenderingContext,
-      {} as WebGLProgram,
-      {} as WebGLBuffer,
+      {
+        buffer: {} as WebGLBuffer,
+        gl: {} as WebGL2RenderingContext,
+        imageContext: {} as never,
+        program: {} as WebGLProgram,
+        viewport: {
+          x: 0,
+          y: 0,
+          zoom: 0.9,
+        },
+      },
       null,
       [ellipse()],
       createCanvasRefs(),
       100,
       100,
-      {
-        x: 0,
-        y: 0,
-        zoom: 0.9,
-      },
     );
 
     // result
@@ -140,15 +152,18 @@ describe('drawEllipseArcHandleLayer', () => {
 
     // before
     drawEllipseArcHandleLayer(
-      {} as WebGL2RenderingContext,
-      {} as WebGLProgram,
-      {} as WebGLBuffer,
+      {
+        buffer: {} as WebGLBuffer,
+        gl: {} as WebGL2RenderingContext,
+        imageContext: {} as never,
+        program: {} as WebGLProgram,
+        viewport: IDENTITY_VIEWPORT,
+      },
       null,
       [node],
       createCanvasRefs(),
       100,
       100,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -159,15 +174,18 @@ describe('drawEllipseArcHandleLayer', () => {
   it('should not draw the fully-cut-away guide line for a normal partial cut', () => {
     // before
     drawEllipseArcHandleLayer(
-      {} as WebGL2RenderingContext,
-      {} as WebGLProgram,
-      {} as WebGLBuffer,
+      {
+        buffer: {} as WebGLBuffer,
+        gl: {} as WebGL2RenderingContext,
+        imageContext: {} as never,
+        program: {} as WebGLProgram,
+        viewport: IDENTITY_VIEWPORT,
+      },
       null,
       [ellipse({ arcEndAngle: 0 })],
       createCanvasRefs(),
       100,
       100,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -177,15 +195,18 @@ describe('drawEllipseArcHandleLayer', () => {
   it('should draw the ratio guide arc once arcRatio reaches its max on a genuinely cut shape', () => {
     // before
     drawEllipseArcHandleLayer(
-      {} as WebGL2RenderingContext,
-      {} as WebGLProgram,
-      {} as WebGLBuffer,
+      {
+        buffer: {} as WebGLBuffer,
+        gl: {} as WebGL2RenderingContext,
+        imageContext: {} as never,
+        program: {} as WebGLProgram,
+        viewport: IDENTITY_VIEWPORT,
+      },
       null,
       [ellipse({ arcEndAngle: 0, arcRatio: 1 })],
       createCanvasRefs(),
       100,
       100,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -195,15 +216,18 @@ describe('drawEllipseArcHandleLayer', () => {
   it('should not draw the ratio guide arc on a full circle even at max arcRatio', () => {
     // before
     drawEllipseArcHandleLayer(
-      {} as WebGL2RenderingContext,
-      {} as WebGLProgram,
-      {} as WebGLBuffer,
+      {
+        buffer: {} as WebGLBuffer,
+        gl: {} as WebGL2RenderingContext,
+        imageContext: {} as never,
+        program: {} as WebGLProgram,
+        viewport: IDENTITY_VIEWPORT,
+      },
       null,
       [ellipse({ arcRatio: 1 })],
       createCanvasRefs(),
       100,
       100,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -213,15 +237,18 @@ describe('drawEllipseArcHandleLayer', () => {
   it('should not draw any handles when the shape is selected but not hovered', () => {
     // before
     drawEllipseArcHandleLayer(
-      {} as WebGL2RenderingContext,
-      {} as WebGLProgram,
-      {} as WebGLBuffer,
+      {
+        buffer: {} as WebGLBuffer,
+        gl: {} as WebGL2RenderingContext,
+        imageContext: {} as never,
+        program: {} as WebGLProgram,
+        viewport: IDENTITY_VIEWPORT,
+      },
       null,
       [ellipse({ arcEndAngle: 0 })],
       createCanvasRefs(),
       100,
       100,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -234,15 +261,18 @@ describe('drawEllipseArcHandleLayer', () => {
 
     // before
     drawEllipseArcHandleLayer(
-      {} as WebGL2RenderingContext,
-      {} as WebGLProgram,
-      {} as WebGLBuffer,
+      {
+        buffer: {} as WebGLBuffer,
+        gl: {} as WebGL2RenderingContext,
+        imageContext: {} as never,
+        program: {} as WebGLProgram,
+        viewport: IDENTITY_VIEWPORT,
+      },
       node,
       [node],
       createCanvasRefs(),
       100,
       100,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -255,15 +285,18 @@ describe('drawEllipseArcHandleLayer', () => {
 
     // before
     drawEllipseArcHandleLayer(
-      {} as WebGL2RenderingContext,
-      {} as WebGLProgram,
-      {} as WebGLBuffer,
+      {
+        buffer: {} as WebGLBuffer,
+        gl: {} as WebGL2RenderingContext,
+        imageContext: {} as never,
+        program: {} as WebGLProgram,
+        viewport: IDENTITY_VIEWPORT,
+      },
       node,
       [node],
       createCanvasRefs(),
       100,
       100,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -276,15 +309,18 @@ describe('drawEllipseArcHandleLayer', () => {
 
     // before
     drawEllipseArcHandleLayer(
-      {} as WebGL2RenderingContext,
-      {} as WebGLProgram,
-      {} as WebGLBuffer,
+      {
+        buffer: {} as WebGLBuffer,
+        gl: {} as WebGL2RenderingContext,
+        imageContext: {} as never,
+        program: {} as WebGLProgram,
+        viewport: IDENTITY_VIEWPORT,
+      },
       node,
       [node],
       createCanvasRefs(),
       100,
       100,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -297,9 +333,13 @@ describe('drawEllipseArcHandleLayer', () => {
 
     // before
     drawEllipseArcHandleLayer(
-      {} as WebGL2RenderingContext,
-      {} as WebGLProgram,
-      {} as WebGLBuffer,
+      {
+        buffer: {} as WebGLBuffer,
+        gl: {} as WebGL2RenderingContext,
+        imageContext: {} as never,
+        program: {} as WebGLProgram,
+        viewport: IDENTITY_VIEWPORT,
+      },
       node,
       [node],
       createCanvasRefs({
@@ -311,7 +351,6 @@ describe('drawEllipseArcHandleLayer', () => {
       }),
       100,
       100,
-      IDENTITY_VIEWPORT,
     );
 
     // result

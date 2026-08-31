@@ -1,23 +1,20 @@
 // types
 import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TSceneNode, TViewport } from 'types/design/types';
-import { TImageRenderContext } from '../../../types';
+import { TDrawSceneContext } from '../types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { drawSectionNameLabel } from './drawSectionNameLabel';
 
 export const drawSectionNameLabels = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
-  imageContext: TImageRenderContext,
+  context: TDrawSceneContext,
   nodes: TSceneNode[],
   refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
 ): void => {
+  const { buffer, gl, imageContext, program, viewport } = context;
   const editingNodeId = refs.sectionName.editingLabelRef.current;
 
   nodes

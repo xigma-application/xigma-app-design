@@ -27,13 +27,10 @@ describe('drawTransformAlignmentGuide', () => {
 
     // before
     drawTransformAlignmentGuide(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       createCanvasRefs({ transform: { alignmentGuideRef: { current: guide } } }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -42,7 +39,12 @@ describe('drawTransformAlignmentGuide', () => {
 
   it('should forward null when there is no transform alignment guide', () => {
     // before
-    drawTransformAlignmentGuide(gl, program, buffer, createCanvasRefs(), 200, 150, IDENTITY_VIEWPORT);
+    drawTransformAlignmentGuide(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      createCanvasRefs(),
+      200,
+      150,
+    );
 
     // result
     expect(drawAlignmentGuideMock).toHaveBeenCalledWith(gl, program, buffer, null, 200, 150, IDENTITY_VIEWPORT);

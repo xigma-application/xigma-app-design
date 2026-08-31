@@ -52,7 +52,13 @@ describe('drawVectorPaintHoverPreview', () => {
 
   it('should draw nothing when nothing is hovered', () => {
     // before
-    drawVectorPaintHoverPreview(gl, program, buffer, nodes, createCanvasRefs(), 200, 150, IDENTITY_VIEWPORT);
+    drawVectorPaintHoverPreview(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      nodes,
+      createCanvasRefs(),
+      200,
+      150,
+    );
 
     // result
     expect(drawVectorHatchFillMock).not.toHaveBeenCalled();
@@ -61,14 +67,11 @@ describe('drawVectorPaintHoverPreview', () => {
   it('should draw nothing when the hovered node id no longer resolves to any node', () => {
     // before
     drawVectorPaintHoverPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       createCanvasRefs({ hover: { hoveredVectorPaintFaceKeyRef: { current: { faceKey: 'k1', isFilled: true, nodeId: 'missing' } } } }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -81,14 +84,11 @@ describe('drawVectorPaintHoverPreview', () => {
 
     // before
     drawVectorPaintHoverPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       createCanvasRefs({ hover: { hoveredVectorPaintFaceKeyRef: { current: { faceKey: 'stale-key', isFilled: true, nodeId: node.id } } } }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -101,14 +101,11 @@ describe('drawVectorPaintHoverPreview', () => {
 
     // before
     drawVectorPaintHoverPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       createCanvasRefs({ hover: { hoveredVectorPaintFaceKeyRef: { current: { faceKey: 'k1', isFilled: true, nodeId: node.id } } } }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -124,16 +121,13 @@ describe('drawVectorPaintHoverPreview', () => {
 
     // before
     drawVectorPaintHoverPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       unfilledNodes,
       createCanvasRefs({
         hover: { hoveredVectorPaintFaceKeyRef: { current: { faceKey: 'k2', isFilled: false, nodeId: unfilledNode.id } } },
       }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -158,16 +152,13 @@ describe('drawVectorPaintHoverPreview', () => {
 
     // before
     drawVectorPaintHoverPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       mixedNodes,
       createCanvasRefs({
         hover: { hoveredVectorPaintFaceKeyRef: { current: { faceKey: 'k1', isFilled: true, nodeId: frameNode.id } } },
       }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -185,16 +176,13 @@ describe('drawVectorPaintHoverPreview', () => {
 
     // before
     drawVectorPaintHoverPreview(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       rotatedNodes,
       createCanvasRefs({
         hover: { hoveredVectorPaintFaceKeyRef: { current: { faceKey: 'k1', isFilled: true, nodeId: rotatedNode.id } } },
       }),
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result

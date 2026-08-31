@@ -50,7 +50,7 @@ describe('drawFrame', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawFrame(gl, program, buffer, IMAGE_CONTEXT, createCanvasRefs(), 100, 100, IDENTITY_VIEWPORT);
+    drawFrame({ buffer, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT }, createCanvasRefs(), 100, 100);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -64,14 +64,10 @@ describe('drawFrame', () => {
 
     // before
     drawFrame(
-      gl,
-      program,
-      buffer,
-      IMAGE_CONTEXT,
+      { buffer, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       createCanvasRefs({ draftRef: { current: { stroke: '#000000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 10 } } }),
       100,
       100,
-      IDENTITY_VIEWPORT,
     );
 
     // result — 1 segment fill + 2 endpoint-handle fills = 3 TRIANGLES draws, 2 endpoint-handle
@@ -91,14 +87,10 @@ describe('drawFrame', () => {
 
     // before
     drawFrame(
-      gl,
-      program,
-      buffer,
-      IMAGE_CONTEXT,
+      { buffer, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       createCanvasRefs({ draftRef: { current: { fill: '#D9D9D9', height: 20, type: NodeType.rectangle, width: 10, x: 0, y: 0 } } }),
       100,
       100,
-      IDENTITY_VIEWPORT,
     );
 
     // result — its outline + 4 corner handles

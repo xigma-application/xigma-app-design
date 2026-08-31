@@ -32,9 +32,13 @@ const call = (
   isDragArmable = false,
 ): void => {
   drawPenPreview(
-    {} as WebGL2RenderingContext,
-    {} as WebGLProgram,
-    {} as WebGLBuffer,
+    {
+      buffer: {} as WebGLBuffer,
+      gl: {} as WebGL2RenderingContext,
+      imageContext: {} as never,
+      program: {} as WebGLProgram,
+      viewport: IDENTITY_VIEWPORT,
+    },
     createCanvasRefs({
       pen: {
         penHoveredDragArmableVertexRef: { current: isDragArmable },
@@ -46,7 +50,6 @@ const call = (
     vectorEditingNodeId,
     100,
     100,
-    IDENTITY_VIEWPORT,
   );
 };
 

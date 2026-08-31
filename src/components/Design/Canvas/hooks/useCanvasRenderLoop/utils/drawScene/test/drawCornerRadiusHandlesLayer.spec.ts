@@ -98,7 +98,14 @@ describe('drawCornerRadiusHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawCornerRadiusHandlesLayer(gl, program, buffer, null, [], createCanvasRefs(), 100, 100, IDENTITY_VIEWPORT);
+    drawCornerRadiusHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      null,
+      [],
+      createCanvasRefs(),
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -111,7 +118,14 @@ describe('drawCornerRadiusHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawCornerRadiusHandlesLayer(gl, program, buffer, null, [rectangle], createCanvasRefs(), 100, 100, IDENTITY_VIEWPORT);
+    drawCornerRadiusHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      null,
+      [rectangle],
+      createCanvasRefs(),
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -124,7 +138,14 @@ describe('drawCornerRadiusHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawCornerRadiusHandlesLayer(gl, program, buffer, ellipse, [rectangle], createCanvasRefs(), 100, 100, IDENTITY_VIEWPORT);
+    drawCornerRadiusHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      ellipse,
+      [rectangle],
+      createCanvasRefs(),
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -138,15 +159,12 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       rectangle,
       [rectangle, { ...rectangle, id: 'rect-2' }],
       createCanvasRefs(),
       100,
       100,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -160,7 +178,14 @@ describe('drawCornerRadiusHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawCornerRadiusHandlesLayer(gl, program, buffer, ellipse, [ellipse], createCanvasRefs(), 100, 100, IDENTITY_VIEWPORT);
+    drawCornerRadiusHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      ellipse,
+      [ellipse],
+      createCanvasRefs(),
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -173,7 +198,14 @@ describe('drawCornerRadiusHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawCornerRadiusHandlesLayer(gl, program, buffer, rectangle, [rectangle], createCanvasRefs(), 100, 100, IDENTITY_VIEWPORT);
+    drawCornerRadiusHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      rectangle,
+      [rectangle],
+      createCanvasRefs(),
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(8);
@@ -186,7 +218,14 @@ describe('drawCornerRadiusHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawCornerRadiusHandlesLayer(gl, program, buffer, rectangle, [rectangle], createCanvasRefs(), 100, 100, { x: 0, y: 0, zoom: 0.9 });
+    drawCornerRadiusHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 0.9 } },
+      rectangle,
+      [rectangle],
+      createCanvasRefs(),
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -200,7 +239,14 @@ describe('drawCornerRadiusHandlesLayer', () => {
     const freshRectangle = { ...rectangle, cornerRadius: undefined };
 
     // before
-    drawCornerRadiusHandlesLayer(gl, program, buffer, freshRectangle, [freshRectangle], createCanvasRefs(), 100, 100, IDENTITY_VIEWPORT);
+    drawCornerRadiusHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      freshRectangle,
+      [freshRectangle],
+      createCanvasRefs(),
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(8);
@@ -213,7 +259,14 @@ describe('drawCornerRadiusHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawCornerRadiusHandlesLayer(gl, program, buffer, polygon, [polygon], createCanvasRefs(), 100, 100, IDENTITY_VIEWPORT);
+    drawCornerRadiusHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      polygon,
+      [polygon],
+      createCanvasRefs(),
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
@@ -226,7 +279,14 @@ describe('drawCornerRadiusHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawCornerRadiusHandlesLayer(gl, program, buffer, polygon, [polygon], createCanvasRefs(), 100, 100, { x: 0, y: 0, zoom: 0.9 });
+    drawCornerRadiusHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 0.9 } },
+      polygon,
+      [polygon],
+      createCanvasRefs(),
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -240,7 +300,14 @@ describe('drawCornerRadiusHandlesLayer', () => {
     const freshPolygon = { ...polygon, cornerRadius: undefined };
 
     // before
-    drawCornerRadiusHandlesLayer(gl, program, buffer, freshPolygon, [freshPolygon], createCanvasRefs(), 100, 100, IDENTITY_VIEWPORT);
+    drawCornerRadiusHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      freshPolygon,
+      [freshPolygon],
+      createCanvasRefs(),
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
@@ -256,15 +323,12 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       zeroRadiusRectangle,
       [zeroRadiusRectangle],
       createCanvasRefs({ cornerRadius: { cornerRadiusDragRef: { current: { hasMoved: true } as TCornerRadiusDragState } } }),
       100,
       100,
-      IDENTITY_VIEWPORT,
     );
 
     // result — the ne handle fill is the first draw call; its fan center sits right on the corner (100, 0)
@@ -284,15 +348,12 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       zeroRadiusPolygon,
       [zeroRadiusPolygon],
       createCanvasRefs({ cornerRadius: { cornerRadiusDragRef: { current: { hasMoved: true } as TCornerRadiusDragState } } }),
       100,
       100,
-      IDENTITY_VIEWPORT,
     );
 
     // result — the handle fill is the first draw call; its fan center sits right on the top vertex (50, 0)
@@ -310,7 +371,14 @@ describe('drawCornerRadiusHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawCornerRadiusHandlesLayer(gl, program, buffer, star, [star], createCanvasRefs(), 100, 100, IDENTITY_VIEWPORT);
+    drawCornerRadiusHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      star,
+      [star],
+      createCanvasRefs(),
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
@@ -323,7 +391,14 @@ describe('drawCornerRadiusHandlesLayer', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawCornerRadiusHandlesLayer(gl, program, buffer, star, [star], createCanvasRefs(), 100, 100, { x: 0, y: 0, zoom: 0.9 });
+    drawCornerRadiusHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 0.9 } },
+      star,
+      [star],
+      createCanvasRefs(),
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -337,7 +412,14 @@ describe('drawCornerRadiusHandlesLayer', () => {
     const freshStar = { ...star, cornerRadius: undefined };
 
     // before
-    drawCornerRadiusHandlesLayer(gl, program, buffer, freshStar, [freshStar], createCanvasRefs(), 100, 100, IDENTITY_VIEWPORT);
+    drawCornerRadiusHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      freshStar,
+      [freshStar],
+      createCanvasRefs(),
+      100,
+      100,
+    );
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
@@ -352,15 +434,12 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       zeroRadiusStar,
       [zeroRadiusStar],
       createCanvasRefs({ cornerRadius: { cornerRadiusDragRef: { current: { hasMoved: true } as TCornerRadiusDragState } } }),
       100,
       100,
-      IDENTITY_VIEWPORT,
     );
 
     // result — the handle fill is the first draw call; its fan center sits right on the top vertex (50, 0)

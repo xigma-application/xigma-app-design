@@ -2,8 +2,9 @@
 import { DRAFT_FRAME_STROKE, VECTOR_EDGE_HOVER_STROKE } from 'constant/canvas';
 
 // types
-import { TSceneNode, TVectorNode, TViewport } from 'types/design/types';
+import { TSceneNode, TVectorNode } from 'types/design/types';
 import { TCanvasRefs, TVectorShapeBuilderTouchedFaces } from 'types/design/canvas/types';
+import { TDrawSceneContext } from './types';
 
 // utils
 import { drawShapeBuilderNodeFacesHatch } from './drawShapeBuilderNodeFacesHatch';
@@ -15,9 +16,7 @@ import { groupCrossingVectorNodes } from 'utils/canvas/vectorNetwork/mergeVector
 import { toDraftRect } from 'components/Design/Canvas/utils/toDraftRect';
 
 export const drawVectorShapeBuilderHoverPreview = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
+  context: TDrawSceneContext,
   nodes: Record<string, TSceneNode>,
   rootOrder: string[],
   vectorEditingNodeIds: string[],
@@ -25,8 +24,8 @@ export const drawVectorShapeBuilderHoverPreview = (
   refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
 ): void => {
+  const { buffer, gl, program, viewport } = context;
   const isSubtract = refs.shapeBuilder.isVectorShapeBuilderSubtractRef.current;
   const path = refs.shapeBuilder.vectorShapeBuilderPathRef.current;
   const isBoxMode = refs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current;

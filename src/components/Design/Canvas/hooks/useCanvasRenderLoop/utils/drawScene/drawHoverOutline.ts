@@ -3,7 +3,8 @@ import { DRAFT_FRAME_STROKE, ELLIPSE_DEFAULT_ARC_ANGLE, HOVER_OUTLINE_WIDTH, LIN
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TSceneNode, TViewport } from 'types/design/types';
+import { TDrawSceneContext } from './types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { drawLine } from 'utils/canvas/drawLine';
@@ -17,16 +18,15 @@ import { flattenVectorSegments } from 'utils/canvas/vectorNetwork/flattenVectorS
 import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
 
 export const drawHoverOutline = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
+  context: TDrawSceneContext,
   hoveredNode: TSceneNode | null | undefined,
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
   vectorEditingNodeIds: string[],
   nodesById: Record<string, TSceneNode>,
 ): void => {
+  const { buffer, gl, program, viewport } = context;
+
   if (hoveredNode && !vectorEditingNodeIds.includes(hoveredNode.id)) {
     switch (hoveredNode.type) {
       case NodeType.ellipse:

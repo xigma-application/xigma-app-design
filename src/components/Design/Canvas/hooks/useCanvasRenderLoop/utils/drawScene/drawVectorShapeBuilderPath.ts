@@ -3,7 +3,7 @@ import { VECTOR_LASSO_DASH_GAP_PX, VECTOR_LASSO_DASH_LENGTH_PX, VECTOR_SHAPE_BUI
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TViewport } from 'types/design/types';
+import { TDrawSceneContext } from './types';
 
 // utils
 import { drawDashedPolylineOutline } from 'utils/canvas/drawDashedPolylineOutline/drawDashedPolylineOutline';
@@ -11,14 +11,12 @@ import { getRectCorners } from 'utils/canvas/getRectCorners';
 import { toDraftRect } from 'components/Design/Canvas/utils/toDraftRect';
 
 export const drawVectorShapeBuilderPath = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
+  context: TDrawSceneContext,
   refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
 ): void => {
+  const { buffer, gl, program, viewport } = context;
   const path = refs.shapeBuilder.vectorShapeBuilderPathRef.current;
   const isBoxMode = refs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current;
 

@@ -3,7 +3,8 @@ import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TSceneNode, TViewport } from 'types/design/types';
+import { TDrawSceneContext } from './types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { drawVectorHatchFill } from 'utils/canvas/drawVectorNode/drawVectorHatchFill';
@@ -12,16 +13,14 @@ import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEd
 import { getVectorFullySelectedFaces } from 'utils/canvas/vectorNetwork/getVectorFullySelectedFaces';
 
 export const drawVectorSelectedFillPreview = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
+  context: TDrawSceneContext,
   nodes: Record<string, TSceneNode>,
   vectorEditingNodeIds: string[],
   refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
 ): void => {
+  const { buffer, gl, program, viewport } = context;
   const selectedVertexIds = refs.vectorEdit.selectedVectorVertexIdsRef.current;
 
   if (selectedVertexIds.length > 0) {

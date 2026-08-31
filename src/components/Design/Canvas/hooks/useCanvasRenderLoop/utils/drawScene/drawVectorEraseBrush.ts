@@ -3,22 +3,20 @@ import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TViewport } from 'types/design/types';
+import { TDrawSceneContext } from './types';
 import { ToolName } from 'types/design/enums';
 
 // utils
 import { drawEllipse } from 'utils/canvas/shapes/drawEllipse';
 
 export const drawVectorEraseBrush = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
+  context: TDrawSceneContext,
   refs: TCanvasRefs,
   activeTool: ToolName,
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
 ): void => {
+  const { buffer, gl, program, viewport } = context;
   const brushCenter = refs.vectorErase.eraseBrushCenterRef.current;
   const diameterPx = refs.vectorErase.eraserDiameterRef.current;
 

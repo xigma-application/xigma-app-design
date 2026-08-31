@@ -4,23 +4,20 @@ import { getNextSectionName } from 'store/design/utils/getNextSectionName';
 // types
 import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TSceneNode, TSectionNode, TViewport } from 'types/design/types';
-import { TImageRenderContext } from '../../../types';
+import { TDrawSceneContext } from '../types';
+import { TSceneNode, TSectionNode } from 'types/design/types';
 
 // utils
 import { drawSectionNameLabel } from './drawSectionNameLabel';
 
 export const drawDraftSectionNameLabel = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
-  imageContext: TImageRenderContext,
+  context: TDrawSceneContext,
   refs: TCanvasRefs,
   nodes: Record<string, TSceneNode>,
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
 ): void => {
+  const { buffer, gl, imageContext, program, viewport } = context;
   const draftShape = refs.draftRef.current;
 
   if (draftShape?.type === NodeType.section) {

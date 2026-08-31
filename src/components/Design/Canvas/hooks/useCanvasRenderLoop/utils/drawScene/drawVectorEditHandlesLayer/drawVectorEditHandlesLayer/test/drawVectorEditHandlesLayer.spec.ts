@@ -48,7 +48,16 @@ describe('drawVectorEditHandlesLayer', () => {
 
   it('should call drawVectorEditHandlesForNode for no node when vectorEditingNodeIds is empty', () => {
     // before
-    drawVectorEditHandlesLayer(gl, program, buffer, vertexDotBufferCache, nodes, [], createCanvasRefs(), null, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorEditHandlesLayer(
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      vertexDotBufferCache,
+      nodes,
+      [],
+      createCanvasRefs(),
+      null,
+      200,
+      150,
+    );
 
     // result
     expect(drawVectorEditHandlesForNodeMock).not.toHaveBeenCalled();
@@ -73,9 +82,7 @@ describe('drawVectorEditHandlesLayer', () => {
 
     // before
     drawVectorEditHandlesLayer(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       vertexDotBufferCache,
       frameNodes,
       ['frame-1'],
@@ -83,7 +90,6 @@ describe('drawVectorEditHandlesLayer', () => {
       null,
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
@@ -98,9 +104,7 @@ describe('drawVectorEditHandlesLayer', () => {
 
     // before
     drawVectorEditHandlesLayer(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       vertexDotBufferCache,
       twoOpenNodes,
       [vectorNode.id, secondNode.id],
@@ -130,7 +134,6 @@ describe('drawVectorEditHandlesLayer', () => {
       'v1',
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result — one call per open node, with every argument forwarded through as-is
@@ -192,9 +195,7 @@ describe('drawVectorEditHandlesLayer', () => {
   it('should draw the multi-select box when 2+ vertices are selected together, with no corner handles', () => {
     // before
     drawVectorEditHandlesLayer(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       vertexDotBufferCache,
       nodes,
       [vectorNode.id],
@@ -202,7 +203,6 @@ describe('drawVectorEditHandlesLayer', () => {
       null,
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result — one plain stroke rect over the bounding box of v1(0,0)/v2(10,0)
@@ -214,9 +214,7 @@ describe('drawVectorEditHandlesLayer', () => {
   it('should not draw the multi-select box when only a single vertex is selected', () => {
     // before
     drawVectorEditHandlesLayer(
-      gl,
-      program,
-      buffer,
+      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       vertexDotBufferCache,
       nodes,
       [vectorNode.id],
@@ -224,7 +222,6 @@ describe('drawVectorEditHandlesLayer', () => {
       null,
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result

@@ -5,9 +5,9 @@ import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
 // types
 import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TImageRenderContext } from '../../types';
+import { TDrawSceneContext } from './types';
 import { TPathOutlineStyle } from './getPathOutlineStyles';
-import { TSceneNode, TViewport } from 'types/design/types';
+import { TSceneNode } from 'types/design/types';
 
 // utils
 import { drawEllipseNode } from 'utils/canvas/drawEllipseNode';
@@ -26,19 +26,16 @@ import { getMsdfAtlasTexture } from 'utils/canvas/text/getMsdfAtlasTexture';
 import { getOrLoadTexture } from 'utils/canvas/getOrLoadTexture';
 
 export const drawSceneNodes = (
-  gl: WebGL2RenderingContext,
-  program: WebGLProgram,
-  buffer: WebGLBuffer,
-  imageContext: TImageRenderContext,
+  context: TDrawSceneContext,
   nodes: TSceneNode[],
   canvasWidth: number,
   canvasHeight: number,
-  viewport: TViewport,
   pathOutlineStyles: Map<string, TPathOutlineStyle>,
   refs: TCanvasRefs,
   nodesById: Record<string, TSceneNode>,
   editingPathId?: string | null,
 ): void => {
+  const { buffer, gl, imageContext, program, viewport } = context;
   const { vectorSnapshots } = refs;
   const draggedVectorNodeSnapshots = vectorSnapshots.draggedVectorNodeSnapshotsRef.current;
   const resizedVectorNodeSnapshots = vectorSnapshots.resizedVectorNodeSnapshotsRef.current;

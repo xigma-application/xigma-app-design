@@ -35,7 +35,13 @@ describe('drawDraftFrameNameLabel', () => {
 
   it('should draw the would-be name, in the selection blue, for a frame being drawn', () => {
     // before
-    drawDraftFrameNameLabel(gl, imageContext, createCanvasRefs({ draftRef: { current: draftFrame } }), nodes, 200, 150, IDENTITY_VIEWPORT);
+    drawDraftFrameNameLabel(
+      { buffer: {} as never, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
+      createCanvasRefs({ draftRef: { current: draftFrame } }),
+      nodes,
+      200,
+      150,
+    );
 
     // result
     expect(getNextFrameNameMock).toHaveBeenCalledWith(nodes);
@@ -63,7 +69,13 @@ describe('drawDraftFrameNameLabel', () => {
 
   it('should draw nothing when there is no draft shape', () => {
     // before
-    drawDraftFrameNameLabel(gl, imageContext, createCanvasRefs(), nodes, 200, 150, IDENTITY_VIEWPORT);
+    drawDraftFrameNameLabel(
+      { buffer: {} as never, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
+      createCanvasRefs(),
+      nodes,
+      200,
+      150,
+    );
 
     // result
     expect(drawFrameNameLabelMock).not.toHaveBeenCalled();
@@ -72,13 +84,11 @@ describe('drawDraftFrameNameLabel', () => {
   it('should draw nothing when the draft shape is not a frame', () => {
     // before
     drawDraftFrameNameLabel(
-      gl,
-      imageContext,
+      { buffer: {} as never, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
       createCanvasRefs({ draftRef: { current: { ...draftFrame, type: NodeType.rectangle } } }),
       nodes,
       200,
       150,
-      IDENTITY_VIEWPORT,
     );
 
     // result
