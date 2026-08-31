@@ -23,7 +23,7 @@ const LayerRow: FC<TLayerRowProps> = ({ depth, isExpanded, isSelected, node, onT
     isSelected={isSelected}
     node={node}
     onToggleExpand={onToggleExpand}
-    renderMenu={(params): ReactNode => <LayerContextMenu {...params} nodeType={node.type} />}
+    renderMenu={(params): ReactNode => <LayerContextMenu {...params} node={node} />}
   />
 );
 

@@ -18,6 +18,7 @@ import {
   NODE_MENU_COPY_KEY,
   NODE_MENU_COPY_PASTE_AS_KEY,
   NODE_MENU_CREATE_COMPONENT_KEY,
+  NODE_MENU_CREATE_SEPARATE_LAYERS_KEY,
   NODE_MENU_FLATTEN_KEY,
   NODE_MENU_FLIP_HORIZONTAL_KEY,
   NODE_MENU_FLIP_VERTICAL_KEY,
@@ -47,13 +48,14 @@ import styles from './node-context-menu.module.scss';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TSceneNode } from 'types/design/types';
 
 const { MenuItem, MenuSeparator, MenuSub } = MenuCompound;
 
 export type TNodeContextMenuProps = {
   anchorRef: RefObject<TVirtualAnchor>;
   isOpen: boolean;
-  nodeType: NodeType;
+  node: TSceneNode;
   onBringToFront: TFunc;
   onCopy: TFunc;
   onGroupSelection: TFunc;
@@ -70,7 +72,7 @@ export type TNodeContextMenuProps = {
 const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   anchorRef,
   isOpen,
-  nodeType,
+  node,
   onBringToFront,
   onCopy,
   onGroupSelection,
@@ -86,8 +88,9 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   const { t } = useTranslation();
   const handlePreventRefocus = usePreventMenuRefocus();
   const handleStopPropagation = useStopClickPropagation();
-  const isFrame = nodeType === NodeType.frame;
-  const isSection = nodeType === NodeType.section;
+  const isFrame = node.type === NodeType.frame;
+  const isSection = node.type === NodeType.section;
+  const isTextOnPath = node.type === NodeType.text && Boolean(node.pathId);
 
   return (
     <Menu
@@ -108,7 +111,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
         withCheck={false}
       />
       <MenuItem disabled label={t(NODE_MENU_COPY_PASTE_AS_KEY)} withCheck={false} />
-      {!isSection && <MenuItem disabled label={t(NODE_MENU_SEND_TO_MAKE_KEY)} withCheck={false} />}
+      {!isSection && !isTextOnPath && <MenuItem disabled label={t(NODE_MENU_SEND_TO_MAKE_KEY)} withCheck={false} />}
       {!isSection && <MenuItem disabled label={t(NODE_MENU_ADD_MOTION_KEY)} withCheck={false} />}
       <MenuSeparator />
       <MenuSub disabled={otherPages.length === 0} label={t(NODE_MENU_MOVE_TO_PAGE_KEY)} withCheck={false}>
@@ -154,6 +157,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
       {!isFrame && !isSection && (
         <MenuItem disabled label={t(NODE_MENU_FLATTEN_KEY)} shortcut={KEYBOARD_SHORTCUTS.flatten.join('')} withCheck={false} />
       )}
+      {isTextOnPath && <MenuItem disabled label={t(NODE_MENU_CREATE_SEPARATE_LAYERS_KEY)} withCheck={false} />}
       {!isFrame && !isSection && (
         <MenuItem disabled label={t(NODE_MENU_OUTLINE_STROKE_KEY)} shortcut={KEYBOARD_SHORTCUTS.outlineStroke.join('')} withCheck={false} />
       )}

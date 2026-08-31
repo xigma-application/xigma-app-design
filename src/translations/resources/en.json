@@ -307,6 +307,7 @@
   "design.menu.copy": "Copy",
   "design.menu.copyPasteAs": "Copy/Paste as",
   "design.menu.createComponent": "Create component",
+  "design.menu.createSeparateLayers": "Create separate layers",
   "design.menu.flatten": "Flatten",
   "design.menu.flipHorizontal": "Flip horizontal",
   "design.menu.flipVertical": "Flip vertical",

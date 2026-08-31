@@ -11,6 +11,7 @@ export const NODE_MENU_CONVERT_TO_SECTION_KEY = `${translationNameSpace}.convert
 export const NODE_MENU_COPY_KEY = `${translationNameSpace}.copy`;
 export const NODE_MENU_COPY_PASTE_AS_KEY = `${translationNameSpace}.copyPasteAs`;
 export const NODE_MENU_CREATE_COMPONENT_KEY = `${translationNameSpace}.createComponent`;
+export const NODE_MENU_CREATE_SEPARATE_LAYERS_KEY = `${translationNameSpace}.createSeparateLayers`;
 export const NODE_MENU_FLATTEN_KEY = `${translationNameSpace}.flatten`;
 export const NODE_MENU_FLIP_HORIZONTAL_KEY = `${translationNameSpace}.flipHorizontal`;
 export const NODE_MENU_FLIP_VERTICAL_KEY = `${translationNameSpace}.flipVertical`;

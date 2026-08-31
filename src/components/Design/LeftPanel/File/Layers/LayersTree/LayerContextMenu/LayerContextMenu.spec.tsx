@@ -19,13 +19,26 @@ import { getClipboardNodes, setClipboardNodes } from 'components/Design/Canvas/h
 
 const anchorRef = { current: { getBoundingClientRect: (): DOMRect => new DOMRect(10, 20, 0, 0) } };
 
+const menuNode: TFrameNode = {
+  fill: '#000000',
+  height: 10,
+  id: 'menu-node',
+  name: 'Node',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.frame,
+  width: 10,
+  x: 0,
+  y: 0,
+};
+
 const renderLayerContextMenu = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
       <LayerContextMenu
         anchorRef={anchorRef}
         isOpen
-        nodeType={NodeType.frame}
+        node={menuNode}
         onOpenChange={vi.fn()}
         onRenameRequested={vi.fn()}
         onToggleHidden={vi.fn()}

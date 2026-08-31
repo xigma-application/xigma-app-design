@@ -7,8 +7,35 @@ import NodeContextMenu, { TNodeContextMenuProps } from './NodeContextMenu';
 // types
 import { NodeType } from 'types/design/enums';
 import { TDesignPage } from 'store/design/types';
+import { TFrameNode, TRectangleNode, TSectionNode, TTextNode } from 'types/design/types';
 
 const anchorRef = { current: { getBoundingClientRect: (): DOMRect => new DOMRect(10, 20, 0, 0) } };
+
+const BASE_NODE = {
+  height: 100,
+  id: 'node-1',
+  name: 'Node',
+  parentId: null,
+  rotation: 0,
+  width: 100,
+  x: 0,
+  y: 0,
+};
+
+const buildRectangleNode = (): TRectangleNode => ({ ...BASE_NODE, fill: '#000000', type: NodeType.rectangle });
+const buildFrameNode = (): TFrameNode => ({ ...BASE_NODE, fill: '#000000', type: NodeType.frame });
+const buildSectionNode = (): TSectionNode => ({ ...BASE_NODE, fill: '#000000', type: NodeType.section });
+const buildTextNode = (pathId: string | null = null): TTextNode => ({
+  ...BASE_NODE,
+  content: 'Hello',
+  fill: '#000000',
+  flipX: false,
+  flipY: false,
+  fontFamily: 'Inter',
+  fontSize: 16,
+  pathId,
+  type: NodeType.text,
+});
 
 const buildPage = (id: string, name: string): TDesignPage => ({
   comments: {},
@@ -26,7 +53,7 @@ const renderNodeContextMenu = (props: Partial<TNodeContextMenuProps> = {}): Retu
     <NodeContextMenu
       anchorRef={anchorRef}
       isOpen
-      nodeType={NodeType.rectangle}
+      node={buildRectangleNode()}
       onBringToFront={vi.fn()}
       onCopy={vi.fn()}
       onGroupSelection={vi.fn()}
@@ -222,7 +249,7 @@ describe('NodeContextMenu', () => {
 
   it('should show the frame-only items and hide Flatten / Outline stroke for a frame node', () => {
     // before
-    renderNodeContextMenu({ nodeType: NodeType.frame });
+    renderNodeContextMenu({ node: buildFrameNode() });
 
     // result
     expect(screen.getByText('Convert to section')).toBeInTheDocument();
@@ -235,7 +262,7 @@ describe('NodeContextMenu', () => {
 
   it('should hide the frame-only items and show Flatten / Outline stroke for a non-frame node', () => {
     // before
-    renderNodeContextMenu({ nodeType: NodeType.rectangle });
+    renderNodeContextMenu({ node: buildRectangleNode() });
 
     // result
     expect(screen.getByText('Flatten')).toBeInTheDocument();
@@ -248,7 +275,7 @@ describe('NodeContextMenu', () => {
 
   it('should show the section-only items (Convert to frame, Ungroup, Set as thumbnail, More layout options) for a section node', () => {
     // before
-    renderNodeContextMenu({ nodeType: NodeType.section });
+    renderNodeContextMenu({ node: buildSectionNode() });
 
     // result
     expect(screen.getByText('Convert to frame')).toBeInTheDocument();
@@ -259,7 +286,7 @@ describe('NodeContextMenu', () => {
 
   it('should hide Frame/Group/Flatten/Use-as-mask/Auto-layout/Create-component/Flip and the Send-to-Make/Add-motion items for a section node', () => {
     // before
-    renderNodeContextMenu({ nodeType: NodeType.section });
+    renderNodeContextMenu({ node: buildSectionNode() });
 
     // result
     expect(screen.queryByText('Send to Make')).not.toBeInTheDocument();
@@ -274,5 +301,23 @@ describe('NodeContextMenu', () => {
     expect(screen.queryByText('Create component')).not.toBeInTheDocument();
     expect(screen.queryByText('Flip horizontal')).not.toBeInTheDocument();
     expect(screen.queryByText('Flip vertical')).not.toBeInTheDocument();
+  });
+
+  it('should show "Create separate layers" and hide "Send to Figma Make" for a text node attached to a path', () => {
+    // before
+    renderNodeContextMenu({ node: buildTextNode('path-1') });
+
+    // result
+    expect(screen.getByText('Create separate layers')).toBeInTheDocument();
+    expect(screen.queryByText('Send to Make')).not.toBeInTheDocument();
+  });
+
+  it('should hide "Create separate layers" and show "Send to Figma Make" for a plain text node not on a path', () => {
+    // before
+    renderNodeContextMenu({ node: buildTextNode(null) });
+
+    // result
+    expect(screen.queryByText('Create separate layers')).not.toBeInTheDocument();
+    expect(screen.getByText('Send to Make')).toBeInTheDocument();
   });
 });

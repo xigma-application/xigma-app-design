@@ -8,16 +8,16 @@ import { TTreeItemMenuRenderParams } from 'shared';
 import { useNodeMenuActions } from 'components/Design/Menu/hooks/useNodeMenuActions';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { TSceneNode } from 'types/design/types';
 
 export type TLayerContextMenuProps = TTreeItemMenuRenderParams & {
-  nodeType: NodeType;
+  node: TSceneNode;
 };
 
 const LayerContextMenu: FC<TLayerContextMenuProps> = ({
   anchorRef,
   isOpen,
-  nodeType,
+  node,
   onOpenChange,
   onRenameRequested,
   onToggleHidden,
@@ -29,7 +29,7 @@ const LayerContextMenu: FC<TLayerContextMenuProps> = ({
     <NodeContextMenu
       anchorRef={anchorRef}
       isOpen={isOpen}
-      nodeType={nodeType}
+      node={node}
       onBringToFront={onBringToFront}
       onCopy={onCopy}
       onGroupSelection={onGroupSelection}
