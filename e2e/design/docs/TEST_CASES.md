@@ -1063,6 +1063,7 @@ box, never a separate node lookup.
 | 94  | Double-clicking a word while actively composing path-text selects that word (via `useCurvedCaretEditing.ts`'s own `handleDoubleClick.ts`, sharing `getWordRangeAtIndex.ts` with the straight-text case — see #92 above)                                |  ✅  | ✅ `text-on-path.spec.ts` |
 | 95  | Typing path-text with no active selection shows a fill-less ribbon outline around the whole typed content (`drawCurvedEditingOutline.ts`), not just around an actively-dragged selection                                                               |  —   | ✅ `text-on-path.spec.ts` |
 | 96  | Releasing without dragging (a plain click) still creates a default 100×100 path, top-left anchored at the click point, and starts editing on it                                                                                                        |  —   | ✅ `text-on-path.spec.ts` |
+| 341 | The container's own "W x H" size badge stays hidden while actively typing fresh path-text, instead of rendering below the still-selected draft path for as long as typing continues                                                                    |  ✅  | ✅ `text-on-path.spec.ts` |
 
 #77/#78 stay unit-only: `getVisibleCurvedContent.spec.ts` and `continuePathOffsetDrag.spec.ts` already
 assert the exact resulting visible content / offset value via direct function calls and
@@ -1141,6 +1142,22 @@ equivalent straight-text scenario uses), clicks the screen point where "H" now a
 compares against clicking that identical screen point on an unrotated reference — any pixel
 difference can only come from the caret genuinely landing on the rotated content, not the pre-fix
 rotation-0 assumption.
+
+#341 is the same class of real, reported regression as #90 above, and shares its root cause:
+`drawEllipsePath.ts`/`attachToVector.ts` select the draft path node purely so the dashed "editing"
+outline can resolve before the real text node exists yet, and `startTextEdit` dispatches with no
+`id` for a brand-new path-text node, so `editingNodeId` stays `null` for as long as typing
+continues. `drawSelectionOutline.ts` already knew to skip the path being text-edited (its own
+`editingPathId` param, threaded from `editingTextBox?.pathId`), but `drawSelectionSizeLabel.ts`
+never got the same treatment — it only ever excluded vector-editing nodes, so the still-selected
+draft path kept getting handed straight to it, and the container's own "200 x 200"-style badge
+rendered below the box for the entire time content was being typed. Fixed by threading the same
+`editingTextBox?.pathId` into `drawSelectionSizeLabel` and excluding that id, exactly mirroring
+`drawSelectionOutline`'s existing `editingPathId` filter. `drawSelectionSizeLabel.spec.ts` asserts
+`drawValueLabel` is never called when the only selected node is the path being text-edited; the e2e
+version proves the actual pixels: a strip of canvas just below a freshly-drawn, actively-typed
+path's bounding box must differ from the same strip below a plain rectangle drawn at the identical
+box and left selected (a control proving the strip really does capture the badge when one exists).
 
 ## Text on Path outline visibility (hidden / hover / selected)
 

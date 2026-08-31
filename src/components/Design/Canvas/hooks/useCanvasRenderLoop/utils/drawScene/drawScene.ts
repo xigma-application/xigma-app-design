@@ -154,7 +154,18 @@ export const drawScene = (
     nodesById,
     editingTextBox?.pathId,
   );
-  drawSelectionSizeLabel(gl, program, buffer, imageContext, selectedNodes, clientWidth, clientHeight, viewport, vectorEditingNodeIds);
+  drawSelectionSizeLabel(
+    gl,
+    program,
+    buffer,
+    imageContext,
+    selectedNodes,
+    clientWidth,
+    clientHeight,
+    viewport,
+    vectorEditingNodeIds,
+    editingTextBox?.pathId,
+  );
   drawFrameNameLabels(gl, imageContext, filteredNodes, selectedIds, refs, clientWidth, clientHeight, viewport);
   drawSectionNameLabels(gl, program, buffer, imageContext, filteredNodes, refs, clientWidth, clientHeight, viewport);
   drawCornerRadiusHandlesLayer(

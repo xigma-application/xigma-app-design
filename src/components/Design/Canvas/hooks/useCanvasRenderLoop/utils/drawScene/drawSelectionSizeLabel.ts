@@ -32,8 +32,9 @@ export const drawSelectionSizeLabel = (
   canvasHeight: number,
   viewport: TViewport,
   vectorEditingNodeIds: string[],
+  editingPathId?: string | null,
 ): void => {
-  const nodes = selectedNodes.filter((node) => !vectorEditingNodeIds.includes(node.id));
+  const nodes = selectedNodes.filter((node) => !vectorEditingNodeIds.includes(node.id) && node.id !== editingPathId);
 
   if (nodes.length > 0) {
     const rect = getSizeLabelRect(nodes);

@@ -56,6 +56,14 @@ describe('drawSelectionSizeLabel', () => {
     expect(drawValueLabelMock).not.toHaveBeenCalled();
   });
 
+  it('should draw nothing when the only selected node is the path being text-edited', () => {
+    // before
+    drawSelectionSizeLabel(gl, program, buffer, imageContext, [buildNode()], 200, 150, IDENTITY_VIEWPORT, [], 'node-1');
+
+    // result
+    expect(drawValueLabelMock).not.toHaveBeenCalled();
+  });
+
   it('should draw a blue "W x H" badge below an unrotated single node', () => {
     // before
     drawSelectionSizeLabel(gl, program, buffer, imageContext, [buildNode()], 200, 150, IDENTITY_VIEWPORT, []);

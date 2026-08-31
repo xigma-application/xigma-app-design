@@ -572,3 +572,33 @@ test('typing path-text with no active selection shows a ribbon outline around th
 
   expect(afterTyping.equals(beforeTyping)).toBe(false);
 });
+
+test('does not show the container "W x H" size badge while actively typing fresh path-text', async ({ page }) => {
+  // useDrawTextOnPathTool.ts selects the draft path node (setSelection([pathNodeId])) purely so the
+  // dashed "editing" outline above can resolve before the real text node exists yet — drawScene.ts
+  // used to hand that still-selected path straight to drawSelectionSizeLabel, so the container's own
+  // "W x H" badge kept rendering below it for as long as typing continued, a real reported regression
+  const designPage = new DesignPage(page);
+
+  // a strip a few pixels below the 200x200 draft box's bottom edge (700,300)-(1100,500) — clear of
+  // both the box body/outline and the corner resize handles, wide enough to catch the badge centered
+  // under the box but narrow enough to skip everything else
+  const belowBoxArea = { height: 40, width: 100, x: 950, y: 510 };
+
+  await designPage.goto('e2e-test-text-on-path-no-size-badge');
+  await designPage.drawTextOnPath(900, 300, 1100, 500);
+  await designPage.typeText('Hi');
+
+  const whileEditing = await page.screenshot({ clip: belowBoxArea });
+
+  // control: a plain rectangle drawn at the exact same box, left selected — its own "200 x 200"
+  // badge renders in this same strip, proving the strip really does capture the badge when one exists
+  const control = new DesignPage(page);
+
+  await control.goto('e2e-test-text-on-path-no-size-badge-control');
+  await control.drawRectangle(900, 300, 1100, 500);
+
+  const controlWithBadge = await page.screenshot({ clip: belowBoxArea });
+
+  expect(whileEditing.equals(controlWithBadge)).toBe(false);
+});
