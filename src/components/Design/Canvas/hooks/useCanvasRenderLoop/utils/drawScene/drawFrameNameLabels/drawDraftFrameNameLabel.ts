@@ -13,14 +13,8 @@ import { TFrameNode, TSceneNode } from 'types/design/types';
 // utils
 import { drawFrameNameLabel } from './drawFrameNameLabel';
 
-export const drawDraftFrameNameLabel = (
-  context: TDrawSceneContext,
-  refs: TCanvasRefs,
-  nodes: Record<string, TSceneNode>,
-  canvasWidth: number,
-  canvasHeight: number,
-): void => {
-  const { gl, imageContext, viewport } = context;
+export const drawDraftFrameNameLabel = (context: TDrawSceneContext, refs: TCanvasRefs, nodes: Record<string, TSceneNode>): void => {
+  const { canvasHeight, canvasWidth, gl, imageContext, viewport } = context;
   const draftShape = refs.draftRef.current;
 
   if (draftShape?.type === NodeType.frame) {

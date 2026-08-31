@@ -13,11 +13,9 @@ import { getPathTextHandlePoint } from '../../../../utils/getPathTextHandlePoint
 export const drawEditingPathTextHandle = (
   context: TDrawSceneContext,
   editingTextBox: TEditingTextBox | null,
-  canvasWidth: number,
-  canvasHeight: number,
   pathNode?: TSceneNode,
 ): void => {
-  const { buffer, gl, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
 
   if (editingTextBox) {
     const handlePoint = getPathTextHandlePoint(editingTextBox, pathNode);

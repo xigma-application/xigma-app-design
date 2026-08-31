@@ -45,10 +45,8 @@ describe('drawEditingPathTextHandle', () => {
 
     // before
     drawEditingPathTextHandle(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       buildEditingTextBox(),
-      100,
-      100,
     );
 
     // result
@@ -63,10 +61,8 @@ describe('drawEditingPathTextHandle', () => {
 
     // before
     drawEditingPathTextHandle(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       buildEditingTextBox({ pathId: null }),
-      100,
-      100,
     );
 
     // result
@@ -80,7 +76,10 @@ describe('drawEditingPathTextHandle', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawEditingPathTextHandle({ buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT }, null, 100, 100);
+    drawEditingPathTextHandle(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      null,
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();

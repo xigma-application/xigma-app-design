@@ -20,10 +20,8 @@ export const drawEllipseArcHandleLayer = (
   hoveredNode: TSceneNode | null | undefined,
   selectedNodes: TSceneNode[],
   refs: TCanvasRefs,
-  canvasWidth: number,
-  canvasHeight: number,
 ): void => {
-  const { buffer, gl, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const endHandleDraggedPosition = refs.ellipseArc.ellipseArcDragRef.current?.draggedHandlePosition ?? null;
   const rotateHandleDraggedPosition = refs.ellipseArc.ellipseArcRotateDragRef.current?.draggedHandlePosition ?? null;
   const ratioHandleDraggedPosition = refs.ellipseArc.ellipseArcRatioDragRef.current?.draggedHandlePosition ?? null;

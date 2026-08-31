@@ -17,6 +17,8 @@ const call = (path: TPoint[] | null, isBoxMode: boolean): void => {
   drawVectorShapeBuilderPath(
     {
       buffer: {} as WebGLBuffer,
+      canvasHeight: 150,
+      canvasWidth: 200,
       gl: {} as WebGL2RenderingContext,
       imageContext: {} as never,
       program: {} as WebGLProgram,
@@ -25,8 +27,6 @@ const call = (path: TPoint[] | null, isBoxMode: boolean): void => {
     createCanvasRefs({
       shapeBuilder: { isVectorShapeBuilderBoxModeRef: { current: isBoxMode }, vectorShapeBuilderPathRef: { current: path } },
     }),
-    200,
-    150,
   );
 };
 

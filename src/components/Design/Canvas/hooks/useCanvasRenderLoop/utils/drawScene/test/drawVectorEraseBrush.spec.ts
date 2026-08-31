@@ -31,11 +31,9 @@ describe('drawVectorEraseBrush', () => {
   it('should draw nothing when the Erase tool is not active', () => {
     // before
     drawVectorEraseBrush(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       refsFor({ x: 10, y: 10 }, 10),
       ToolName.default,
-      200,
-      150,
     );
 
     // result
@@ -45,11 +43,9 @@ describe('drawVectorEraseBrush', () => {
   it('should draw nothing when there is no brush centre to draw at', () => {
     // before
     drawVectorEraseBrush(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       refsFor(null, 10),
       ToolName.erase,
-      200,
-      150,
     );
 
     // result
@@ -59,11 +55,9 @@ describe('drawVectorEraseBrush', () => {
   it('should stroke a circle of the eraser diameter centred on the brush point', () => {
     // before
     drawVectorEraseBrush(
-      { buffer, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 2 } },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 2 } },
       refsFor({ x: 40, y: 60 }, 20),
       ToolName.erase,
-      200,
-      150,
     );
 
     // result — radius = 20 / 2 / zoom(2) = 5, so a 10×10 box at (35, 55)

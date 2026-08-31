@@ -22,10 +22,8 @@ export const drawVectorShapeBuilderHoverPreview = (
   vectorEditingNodeIds: string[],
   touchedFaces: TVectorShapeBuilderTouchedFaces,
   refs: TCanvasRefs,
-  canvasWidth: number,
-  canvasHeight: number,
 ): void => {
-  const { buffer, gl, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const isSubtract = refs.shapeBuilder.isVectorShapeBuilderSubtractRef.current;
   const path = refs.shapeBuilder.vectorShapeBuilderPathRef.current;
   const isBoxMode = refs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current;

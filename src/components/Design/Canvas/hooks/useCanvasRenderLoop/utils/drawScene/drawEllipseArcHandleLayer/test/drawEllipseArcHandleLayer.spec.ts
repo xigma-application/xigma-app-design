@@ -62,6 +62,8 @@ describe('drawEllipseArcHandleLayer', () => {
     drawEllipseArcHandleLayer(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 100,
+        canvasWidth: 100,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
@@ -70,8 +72,6 @@ describe('drawEllipseArcHandleLayer', () => {
       null,
       [],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -83,6 +83,8 @@ describe('drawEllipseArcHandleLayer', () => {
     drawEllipseArcHandleLayer(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 100,
+        canvasWidth: 100,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
@@ -91,8 +93,6 @@ describe('drawEllipseArcHandleLayer', () => {
       null,
       [ellipse(), ellipse({ id: 'ellipse-2' })],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -104,6 +104,8 @@ describe('drawEllipseArcHandleLayer', () => {
     drawEllipseArcHandleLayer(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 100,
+        canvasWidth: 100,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
@@ -112,8 +114,6 @@ describe('drawEllipseArcHandleLayer', () => {
       null,
       [rectangle],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -125,6 +125,8 @@ describe('drawEllipseArcHandleLayer', () => {
     drawEllipseArcHandleLayer(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 100,
+        canvasWidth: 100,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
@@ -137,8 +139,6 @@ describe('drawEllipseArcHandleLayer', () => {
       null,
       [ellipse()],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -154,6 +154,8 @@ describe('drawEllipseArcHandleLayer', () => {
     drawEllipseArcHandleLayer(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 100,
+        canvasWidth: 100,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
@@ -162,8 +164,6 @@ describe('drawEllipseArcHandleLayer', () => {
       null,
       [node],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -176,6 +176,8 @@ describe('drawEllipseArcHandleLayer', () => {
     drawEllipseArcHandleLayer(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 100,
+        canvasWidth: 100,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
@@ -184,8 +186,6 @@ describe('drawEllipseArcHandleLayer', () => {
       null,
       [ellipse({ arcEndAngle: 0 })],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -197,6 +197,8 @@ describe('drawEllipseArcHandleLayer', () => {
     drawEllipseArcHandleLayer(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 100,
+        canvasWidth: 100,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
@@ -205,8 +207,6 @@ describe('drawEllipseArcHandleLayer', () => {
       null,
       [ellipse({ arcEndAngle: 0, arcRatio: 1 })],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -218,6 +218,8 @@ describe('drawEllipseArcHandleLayer', () => {
     drawEllipseArcHandleLayer(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 100,
+        canvasWidth: 100,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
@@ -226,8 +228,6 @@ describe('drawEllipseArcHandleLayer', () => {
       null,
       [ellipse({ arcRatio: 1 })],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -239,6 +239,8 @@ describe('drawEllipseArcHandleLayer', () => {
     drawEllipseArcHandleLayer(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 100,
+        canvasWidth: 100,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
@@ -247,8 +249,6 @@ describe('drawEllipseArcHandleLayer', () => {
       null,
       [ellipse({ arcEndAngle: 0 })],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -263,6 +263,8 @@ describe('drawEllipseArcHandleLayer', () => {
     drawEllipseArcHandleLayer(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 100,
+        canvasWidth: 100,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
@@ -271,8 +273,6 @@ describe('drawEllipseArcHandleLayer', () => {
       node,
       [node],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -287,6 +287,8 @@ describe('drawEllipseArcHandleLayer', () => {
     drawEllipseArcHandleLayer(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 100,
+        canvasWidth: 100,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
@@ -295,8 +297,6 @@ describe('drawEllipseArcHandleLayer', () => {
       node,
       [node],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -311,6 +311,8 @@ describe('drawEllipseArcHandleLayer', () => {
     drawEllipseArcHandleLayer(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 100,
+        canvasWidth: 100,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
@@ -319,8 +321,6 @@ describe('drawEllipseArcHandleLayer', () => {
       node,
       [node],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -335,6 +335,8 @@ describe('drawEllipseArcHandleLayer', () => {
     drawEllipseArcHandleLayer(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 100,
+        canvasWidth: 100,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
@@ -349,8 +351,6 @@ describe('drawEllipseArcHandleLayer', () => {
           ellipseArcRotateDragRef: { current: { draggedHandlePosition: { x: 3, y: 4 } } as TEllipseArcRotateDragState },
         },
       }),
-      100,
-      100,
     );
 
     // result

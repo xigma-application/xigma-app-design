@@ -28,14 +28,12 @@ import { getOrLoadTexture } from 'utils/canvas/getOrLoadTexture';
 export const drawSceneNodes = (
   context: TDrawSceneContext,
   nodes: TSceneNode[],
-  canvasWidth: number,
-  canvasHeight: number,
   pathOutlineStyles: Map<string, TPathOutlineStyle>,
   refs: TCanvasRefs,
   nodesById: Record<string, TSceneNode>,
   editingPathId?: string | null,
 ): void => {
-  const { buffer, gl, imageContext, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
   const { vectorSnapshots } = refs;
   const draggedVectorNodeSnapshots = vectorSnapshots.draggedVectorNodeSnapshotsRef.current;
   const resizedVectorNodeSnapshots = vectorSnapshots.resizedVectorNodeSnapshotsRef.current;

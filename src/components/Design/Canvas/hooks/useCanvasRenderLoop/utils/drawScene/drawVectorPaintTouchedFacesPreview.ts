@@ -16,10 +16,8 @@ export const drawVectorPaintTouchedFacesPreview = (
   context: TDrawSceneContext,
   nodes: Record<string, TSceneNode>,
   refs: TCanvasRefs,
-  canvasWidth: number,
-  canvasHeight: number,
 ): void => {
-  const { buffer, gl, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const touchedFaces = refs.vectorPaint.vectorPaintTouchedFacesRef.current;
   const isRemoveMode = refs.vectorPaint.isVectorPaintRemoveRef.current;
 

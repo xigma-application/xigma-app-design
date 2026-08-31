@@ -15,10 +15,8 @@ export const drawStarRatioHandleLayer = (
   context: TDrawSceneContext,
   hoveredNode: TSceneNode | null | undefined,
   selectedNodes: TSceneNode[],
-  canvasWidth: number,
-  canvasHeight: number,
 ): void => {
-  const { buffer, gl, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const [selectedNode] = selectedNodes;
 
   if (selectedNodes.length === 1 && hoveredNode?.id === selectedNode.id && selectedNode.type === NodeType.star) {

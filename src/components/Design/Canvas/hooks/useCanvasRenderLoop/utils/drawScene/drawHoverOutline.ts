@@ -20,12 +20,10 @@ import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRendere
 export const drawHoverOutline = (
   context: TDrawSceneContext,
   hoveredNode: TSceneNode | null | undefined,
-  canvasWidth: number,
-  canvasHeight: number,
   vectorEditingNodeIds: string[],
   nodesById: Record<string, TSceneNode>,
 ): void => {
-  const { buffer, gl, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
 
   if (hoveredNode && !vectorEditingNodeIds.includes(hoveredNode.id)) {
     switch (hoveredNode.type) {

@@ -78,14 +78,12 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
   it('should draw nothing when nothing is touched', () => {
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       [node.id],
       [node.id],
       {},
       refsFor(false, null, false),
-      200,
-      150,
     );
 
     // result
@@ -95,14 +93,12 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
   it('should draw nothing for a touched node id that no longer resolves to any node', () => {
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       [node.id],
       [node.id],
       { missing: new Set(['k1']) },
       refsFor(false, null, false),
-      200,
-      150,
     );
 
     // result
@@ -118,14 +114,12 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       [node.id],
       [node.id],
       { [node.id]: new Set(['k1', 'k2']) },
       refsFor(false, null, false),
-      200,
-      150,
     );
 
     // result
@@ -160,14 +154,12 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       [node.id],
       [node.id],
       { [node.id]: new Set(['k1']) },
       refsFor(true, null, false),
-      200,
-      150,
     );
 
     // result
@@ -180,14 +172,12 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       [node.id],
       [node.id],
       { [node.id]: new Set(['stale']) },
       refsFor(false, null, false),
-      200,
-      150,
     );
 
     // result
@@ -203,14 +193,12 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       twoNodes,
       [node.id, otherNode.id],
       [node.id, otherNode.id],
       { [node.id]: new Set(['k1']), [otherNode.id]: new Set(['k1']) },
       refsFor(false, null, false),
-      200,
-      150,
     );
 
     // result — plain per-node hatch ran twice (once per node), not the grouping path
@@ -230,14 +218,12 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       twoNodes,
       [node.id, otherNode.id],
       [node.id, otherNode.id],
       { [node.id]: new Set(['k1']), [otherNode.id]: new Set(['k1']) },
       refsFor(false, path, false),
-      200,
-      150,
     );
 
     // result
@@ -261,14 +247,12 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       twoNodes,
       [node.id, otherNode.id],
       [node.id, otherNode.id],
       { [node.id]: new Set(['k1']), [otherNode.id]: new Set(['k1']) },
       refsFor(false, path, true),
-      200,
-      150,
     );
 
     // result
@@ -292,14 +276,12 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       twoNodes,
       [node.id, otherNode.id],
       [node.id, otherNode.id],
       { [node.id]: new Set(['k1']), [otherNode.id]: new Set(['k1']) },
       refsFor(false, path, false),
-      200,
-      150,
     );
 
     // result — the grouping path ran, but each singleton falls back to the plain per-node hatch
@@ -320,14 +302,12 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before
     drawVectorShapeBuilderHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       twoNodes,
       [node.id, otherNode.id],
       [node.id, otherNode.id],
       { [node.id]: new Set(['k1']) },
       refsFor(false, path, false),
-      200,
-      150,
     );
 
     // result
@@ -353,14 +333,12 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
 
     // before — only node.id appears in touchedFaces
     drawVectorShapeBuilderHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       threeNodes,
       [node.id, otherNode.id, thirdNode.id],
       [node.id, otherNode.id, thirdNode.id],
       { [node.id]: new Set(['k1']) },
       refsFor(false, path, false),
-      200,
-      150,
     );
 
     // result — the touched singleton group hatches normally; the untouched crossing pair is skipped

@@ -21,14 +21,14 @@ const call = (path: TPoint[] | null): void => {
   drawVectorLasso(
     {
       buffer: {} as WebGLBuffer,
+      canvasHeight: 150,
+      canvasWidth: 200,
       gl: {} as WebGL2RenderingContext,
       imageContext: {} as never,
       program: {} as WebGLProgram,
       viewport: IDENTITY_VIEWPORT,
     },
     createCanvasRefs({ lassoMarquee: { vectorLassoPathRef: { current: path } } }),
-    200,
-    150,
   );
 };
 

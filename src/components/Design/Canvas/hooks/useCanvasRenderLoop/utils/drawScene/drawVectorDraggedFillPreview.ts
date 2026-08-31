@@ -12,14 +12,8 @@ import { drawVectorHatchFill } from 'utils/canvas/drawVectorNode/drawVectorHatch
 import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
 import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';
 
-export const drawVectorDraggedFillPreview = (
-  context: TDrawSceneContext,
-  nodes: Record<string, TSceneNode>,
-  refs: TCanvasRefs,
-  canvasWidth: number,
-  canvasHeight: number,
-): void => {
-  const { buffer, gl, program, viewport } = context;
+export const drawVectorDraggedFillPreview = (context: TDrawSceneContext, nodes: Record<string, TSceneNode>, refs: TCanvasRefs): void => {
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const draggedFillFaces = refs.vectorSnapshots.draggedVectorFillFacesRef.current;
 
   if (draggedFillFaces) {

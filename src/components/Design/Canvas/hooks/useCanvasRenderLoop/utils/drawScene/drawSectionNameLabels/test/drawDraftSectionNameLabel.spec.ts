@@ -35,11 +35,9 @@ describe('drawDraftSectionNameLabel', () => {
   it('should draw the would-be name for a section being drawn', () => {
     // before
     drawDraftSectionNameLabel(
-      { buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       createCanvasRefs({ draftRef: { current: draftSection } }),
       nodes,
-      200,
-      150,
     );
 
     // result
@@ -69,7 +67,11 @@ describe('drawDraftSectionNameLabel', () => {
 
   it('should draw nothing when there is no draft shape', () => {
     // before
-    drawDraftSectionNameLabel({ buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT }, createCanvasRefs(), nodes, 200, 150);
+    drawDraftSectionNameLabel(
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
+      createCanvasRefs(),
+      nodes,
+    );
 
     // result
     expect(drawSectionNameLabelMock).not.toHaveBeenCalled();
@@ -78,11 +80,9 @@ describe('drawDraftSectionNameLabel', () => {
   it('should draw nothing when the draft shape is not a section', () => {
     // before
     drawDraftSectionNameLabel(
-      { buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       createCanvasRefs({ draftRef: { current: { ...draftSection, type: NodeType.frame } } }),
       nodes,
-      200,
-      150,
     );
 
     // result

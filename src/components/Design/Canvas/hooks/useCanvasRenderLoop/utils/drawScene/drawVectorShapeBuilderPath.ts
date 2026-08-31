@@ -10,13 +10,8 @@ import { drawDashedPolylineOutline } from 'utils/canvas/drawDashedPolylineOutlin
 import { getRectCorners } from 'utils/canvas/getRectCorners';
 import { toDraftRect } from 'components/Design/Canvas/utils/toDraftRect';
 
-export const drawVectorShapeBuilderPath = (
-  context: TDrawSceneContext,
-  refs: TCanvasRefs,
-  canvasWidth: number,
-  canvasHeight: number,
-): void => {
-  const { buffer, gl, program, viewport } = context;
+export const drawVectorShapeBuilderPath = (context: TDrawSceneContext, refs: TCanvasRefs): void => {
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const path = refs.shapeBuilder.vectorShapeBuilderPathRef.current;
   const isBoxMode = refs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current;
 

@@ -7,8 +7,8 @@ import { TDrawSceneContext } from './types';
 import { drawDraftLine } from './drawDraftLine';
 import { drawDraftShape } from './drawDraftShape';
 
-export const drawFrame = (context: TDrawSceneContext, refs: TCanvasRefs, canvasWidth: number, canvasHeight: number): void => {
-  const { buffer, gl, imageContext, program, viewport } = context;
+export const drawFrame = (context: TDrawSceneContext, refs: TCanvasRefs): void => {
+  const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
   const draftShape = refs.draftRef.current;
 
   if (draftShape) {

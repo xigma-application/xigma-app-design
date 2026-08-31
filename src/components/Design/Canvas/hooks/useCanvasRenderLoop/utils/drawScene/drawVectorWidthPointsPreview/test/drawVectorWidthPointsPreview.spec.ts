@@ -40,13 +40,11 @@ describe('drawVectorWidthPointsPreview', () => {
 
     // before
     drawVectorWidthPointsPreview(
-      { buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       {},
       ['node-1', 'node-2'],
       refs,
       ToolName.variableWidth,
-      200,
-      150,
     );
 
     // result
@@ -69,13 +67,11 @@ describe('drawVectorWidthPointsPreview', () => {
   it('should draw nothing per-node when there are no editing nodes, but still check the hover marker and value label', () => {
     // before
     drawVectorWidthPointsPreview(
-      { buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       {},
       [],
       createCanvasRefs(),
       ToolName.variableWidth,
-      200,
-      150,
     );
 
     // result
@@ -92,13 +88,11 @@ describe('drawVectorWidthPointsPreview', () => {
 
     // before
     drawVectorWidthPointsPreview(
-      { buffer, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       {},
       ['node-1'],
       refs,
       ToolName.default,
-      200,
-      150,
     );
 
     // result

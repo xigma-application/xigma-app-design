@@ -27,10 +27,8 @@ describe('drawTransformAlignmentGuide', () => {
 
     // before
     drawTransformAlignmentGuide(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       createCanvasRefs({ transform: { alignmentGuideRef: { current: guide } } }),
-      200,
-      150,
     );
 
     // result
@@ -40,10 +38,8 @@ describe('drawTransformAlignmentGuide', () => {
   it('should forward null when there is no transform alignment guide', () => {
     // before
     drawTransformAlignmentGuide(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       createCanvasRefs(),
-      200,
-      150,
     );
 
     // result

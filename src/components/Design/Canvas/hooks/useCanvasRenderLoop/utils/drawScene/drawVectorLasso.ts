@@ -9,8 +9,8 @@ import { TDrawSceneContext } from './types';
 import { drawDashedPolylineOutline } from 'utils/canvas/drawDashedPolylineOutline/drawDashedPolylineOutline';
 import { drawVectorFill } from 'utils/canvas/drawVectorNode/drawVectorFill';
 
-export const drawVectorLasso = (context: TDrawSceneContext, refs: TCanvasRefs, canvasWidth: number, canvasHeight: number): void => {
-  const { buffer, gl, program, viewport } = context;
+export const drawVectorLasso = (context: TDrawSceneContext, refs: TCanvasRefs): void => {
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const path = refs.lassoMarquee.vectorLassoPathRef.current;
 
   if (!path || path.length < 2) {

@@ -25,10 +25,8 @@ export const drawCornerRadiusHandlesLayer = (
   hoveredNode: TSceneNode | null | undefined,
   selectedNodes: TSceneNode[],
   refs: TCanvasRefs,
-  canvasWidth: number,
-  canvasHeight: number,
 ): void => {
-  const { buffer, gl, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const isDraggingCornerRadius = hasCornerRadiusDragMoved(refs);
   const [selectedNode] = selectedNodes;
 

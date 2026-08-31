@@ -5,13 +5,8 @@ import { TDrawSceneContext } from './types';
 // utils
 import { drawAlignmentGuide } from './drawAlignmentGuide';
 
-export const drawVectorEditAlignmentGuide = (
-  context: TDrawSceneContext,
-  refs: TCanvasRefs,
-  canvasWidth: number,
-  canvasHeight: number,
-): void => {
-  const { buffer, gl, program, viewport } = context;
+export const drawVectorEditAlignmentGuide = (context: TDrawSceneContext, refs: TCanvasRefs): void => {
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
 
   drawAlignmentGuide(gl, program, buffer, refs.vectorEdit.vectorAlignmentGuideRef.current, canvasWidth, canvasHeight, viewport);
 };

@@ -62,11 +62,9 @@ describe('drawVectorPaintTouchedFacesPreview', () => {
   it('should draw nothing while no paint stroke is in progress', () => {
     // before
     drawVectorPaintTouchedFacesPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       refsFor(null, false),
-      200,
-      150,
     );
 
     // result
@@ -76,11 +74,9 @@ describe('drawVectorPaintTouchedFacesPreview', () => {
   it('should skip a node id that no longer resolves to any node, without calling drawVectorHatchFill for it', () => {
     // before
     drawVectorPaintTouchedFacesPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       refsFor({ missing: ['k1'] }, false),
-      200,
-      150,
     );
 
     // result
@@ -97,11 +93,9 @@ describe('drawVectorPaintTouchedFacesPreview', () => {
 
     // before
     drawVectorPaintTouchedFacesPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       refsFor({ [node.id]: ['k1', 'k2'] }, false),
-      200,
-      150,
     );
 
     // result — only the touched faces (k1, k2), not the untouched k3
@@ -123,11 +117,9 @@ describe('drawVectorPaintTouchedFacesPreview', () => {
 
     // before
     drawVectorPaintTouchedFacesPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       refsFor({ [node.id]: ['k1'] }, true),
-      200,
-      150,
     );
 
     // result
@@ -152,11 +144,9 @@ describe('drawVectorPaintTouchedFacesPreview', () => {
 
     // before
     drawVectorPaintTouchedFacesPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       mixedNodes,
       refsFor({ [frameNode.id]: ['k1'] }, false),
-      200,
-      150,
     );
 
     // result
@@ -174,11 +164,9 @@ describe('drawVectorPaintTouchedFacesPreview', () => {
 
     // before
     drawVectorPaintTouchedFacesPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       rotatedNodes,
       refsFor({ [rotatedNode.id]: ['k1'] }, false),
-      200,
-      150,
     );
 
     // result

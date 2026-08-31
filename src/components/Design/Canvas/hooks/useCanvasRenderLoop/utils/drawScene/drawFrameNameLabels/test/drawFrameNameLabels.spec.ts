@@ -60,12 +60,10 @@ describe('drawFrameNameLabels', () => {
   it('should draw nothing when there are no frame nodes', () => {
     // before
     drawFrameNameLabels(
-      { buffer: {} as never, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
+      { buffer: {} as never, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
       [buildRectangle()],
       new Set(),
       refsWith(null),
-      200,
-      150,
     );
 
     // result
@@ -77,12 +75,10 @@ describe('drawFrameNameLabels', () => {
     const frame = buildFrame();
 
     drawFrameNameLabels(
-      { buffer: {} as never, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
+      { buffer: {} as never, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
       [frame],
       new Set(),
       refsWith(null),
-      200,
-      150,
     );
 
     // result
@@ -94,12 +90,10 @@ describe('drawFrameNameLabels', () => {
     const frame = buildFrame();
 
     drawFrameNameLabels(
-      { buffer: {} as never, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
+      { buffer: {} as never, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
       [frame],
       new Set([frame.id]),
       refsWith(null),
-      200,
-      150,
     );
 
     // result
@@ -119,12 +113,10 @@ describe('drawFrameNameLabels', () => {
     const frame = buildFrame();
 
     drawFrameNameLabels(
-      { buffer: {} as never, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
+      { buffer: {} as never, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
       [frame],
       new Set(),
       refsWith(frame.id),
-      200,
-      150,
     );
 
     // result

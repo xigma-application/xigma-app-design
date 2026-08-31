@@ -6,8 +6,8 @@ import { TDrawSceneContext } from '../types';
 import { drawRawPencilPreview } from './drawRawPencilPreview';
 import { drawSmoothedPencilPreview } from './drawSmoothedPencilPreview';
 
-export const drawPencilPreview = (context: TDrawSceneContext, refs: TCanvasRefs, canvasWidth: number, canvasHeight: number): void => {
-  const { buffer, gl, program, viewport } = context;
+export const drawPencilPreview = (context: TDrawSceneContext, refs: TCanvasRefs): void => {
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const previewPoints = refs.pencil.pencilPreviewPointsRef.current;
   const rawPreviewPoints = refs.pencil.pencilRawPreviewPointsRef.current;
   const showRawPreview = refs.pencil.pencilShowRawPreviewRef.current;

@@ -25,12 +25,10 @@ const getSizeLabelRect = (nodes: TSceneNode[]): TSelectionSizeLabelRect => {
 export const drawSelectionSizeLabel = (
   context: TDrawSceneContext,
   selectedNodes: TSceneNode[],
-  canvasWidth: number,
-  canvasHeight: number,
   vectorEditingNodeIds: string[],
   editingPathId?: string | null,
 ): void => {
-  const { buffer, gl, imageContext, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
   const nodes = selectedNodes.filter((node) => !vectorEditingNodeIds.includes(node.id) && node.id !== editingPathId);
 
   if (nodes.length > 0) {

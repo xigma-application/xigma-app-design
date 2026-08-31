@@ -10,15 +10,8 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { drawFrameNameLabel } from './drawFrameNameLabel';
 
-export const drawFrameNameLabels = (
-  context: TDrawSceneContext,
-  nodes: TSceneNode[],
-  selectedIds: Set<string>,
-  refs: TCanvasRefs,
-  canvasWidth: number,
-  canvasHeight: number,
-): void => {
-  const { gl, imageContext, viewport } = context;
+export const drawFrameNameLabels = (context: TDrawSceneContext, nodes: TSceneNode[], selectedIds: Set<string>, refs: TCanvasRefs): void => {
+  const { canvasHeight, canvasWidth, gl, imageContext, viewport } = context;
   const editingNodeId = refs.frameName.editingLabelRef.current;
 
   nodes

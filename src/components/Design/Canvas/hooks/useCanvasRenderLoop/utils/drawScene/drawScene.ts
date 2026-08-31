@@ -109,6 +109,8 @@ export const drawScene = (
   const vertexDotBufferCache = imageContext.vertexDotBufferCache;
   const ctx: TDrawSceneContext = {
     buffer,
+    canvasHeight: clientHeight,
+    canvasWidth: clientWidth,
     gl,
     imageContext,
     program,
@@ -117,68 +119,40 @@ export const drawScene = (
 
   drawSceneBackground(gl);
   drawPixelGrid(gl, imageContext.gridProgram, imageContext.gridBuffer, clientWidth, clientHeight, viewport);
-  drawSceneNodes(ctx, sceneNodes, clientWidth, clientHeight, pathOutlineStyles, refs, nodesById, pathId);
-  drawHoverOutline(ctx, hoveredNode, clientWidth, clientHeight, vectorEditingNodeIds, nodesById);
-  drawSelectionOutline(ctx, selectedNodes, clientWidth, clientHeight, vectorEditingNodeIds, nodesById, pathId);
-  drawSelectionSizeLabel(ctx, selectedNodes, clientWidth, clientHeight, vectorEditingNodeIds, pathId);
-  drawFrameNameLabels(ctx, filteredNodes, selectedIds, refs, clientWidth, clientHeight);
-  drawSectionNameLabels(ctx, filteredNodes, refs, clientWidth, clientHeight);
-  drawCornerRadiusHandlesLayer(ctx, hoveredNode, selectedNodes, refs, clientWidth, clientHeight);
-  drawVertexCountHandlesLayer(ctx, hoveredNode, selectedNodes, clientWidth, clientHeight);
-  drawStarRatioHandleLayer(ctx, hoveredNode, selectedNodes, clientWidth, clientHeight);
-  drawVectorEditHandlesLayer(
-    ctx,
-    vertexDotBufferCache,
-    eraseAwareNodesById,
-    vectorEditingNodeIds,
-    refs,
-    penActiveVertexId,
-    clientWidth,
-    clientHeight,
-  );
-  drawEllipseArcHandleLayer(ctx, hoveredNode, selectedNodes, refs, clientWidth, clientHeight);
-  drawFrame(ctx, refs, clientWidth, clientHeight);
-  drawDraftFrameNameLabel(ctx, refs, nodesById, clientWidth, clientHeight);
-  drawDraftSectionNameLabel(ctx, refs, nodesById, clientWidth, clientHeight);
-  drawPenPreview(ctx, refs, nodesById, vectorEditingNodeIds[0] ?? null, clientWidth, clientHeight);
-  drawPencilPreview(ctx, refs, clientWidth, clientHeight);
-  drawEditingText(
-    ctx,
-    editingTextBox,
-    editingTextContent,
-    selectionStart,
-    selectionEnd,
-    selectionChangedAt,
-    clientWidth,
-    clientHeight,
-    editingPathNode,
-  );
-  drawEditingPathTextHandle(ctx, editingTextBox, clientWidth, clientHeight, editingPathNode);
-  drawVectorEditAlignmentGuide(ctx, refs, clientWidth, clientHeight);
-  drawTransformAlignmentGuide(ctx, refs, clientWidth, clientHeight);
-  drawVectorLasso(ctx, refs, clientWidth, clientHeight);
-  drawVectorShapeBuilderPath(ctx, refs, clientWidth, clientHeight);
-  drawVectorShapeBuilderHoverPreview(
-    ctx,
-    nodesById,
-    rootOrder,
-    vectorEditingNodeIds,
-    shapeBuilderPreviewFaces,
-    refs,
-    clientWidth,
-    clientHeight,
-  );
-  drawVectorPaintHoverPreview(ctx, nodesById, refs, clientWidth, clientHeight);
-  drawVectorPaintTouchedFacesPreview(ctx, nodesById, refs, clientWidth, clientHeight);
-  drawVectorPaintPath(ctx, refs, clientWidth, clientHeight);
-  drawVectorFaceSelectHoverPreview(ctx, nodesById, refs, clientWidth, clientHeight);
-  drawVectorDraggedFillPreview(ctx, nodesById, refs, clientWidth, clientHeight);
-  drawVectorSelectedFillPreview(ctx, nodesById, vectorEditingNodeIds, refs, clientWidth, clientHeight);
-  drawVectorCutHoverPreview(ctx, nodesById, refs, clientWidth, clientHeight);
-  drawVectorCutPreview(ctx, refs, clientWidth, clientHeight);
-  drawVectorEraseBrush(ctx, refs, activeTool, clientWidth, clientHeight);
-  drawVectorWidthPointsPreview(ctx, nodesById, vectorEditingNodeIds, refs, activeTool, clientWidth, clientHeight);
+  drawSceneNodes(ctx, sceneNodes, pathOutlineStyles, refs, nodesById, pathId);
+  drawHoverOutline(ctx, hoveredNode, vectorEditingNodeIds, nodesById);
+  drawSelectionOutline(ctx, selectedNodes, vectorEditingNodeIds, nodesById, pathId);
+  drawSelectionSizeLabel(ctx, selectedNodes, vectorEditingNodeIds, pathId);
+  drawFrameNameLabels(ctx, filteredNodes, selectedIds, refs);
+  drawSectionNameLabels(ctx, filteredNodes, refs);
+  drawCornerRadiusHandlesLayer(ctx, hoveredNode, selectedNodes, refs);
+  drawVertexCountHandlesLayer(ctx, hoveredNode, selectedNodes);
+  drawStarRatioHandleLayer(ctx, hoveredNode, selectedNodes);
+  drawVectorEditHandlesLayer(ctx, vertexDotBufferCache, eraseAwareNodesById, vectorEditingNodeIds, refs, penActiveVertexId);
+  drawEllipseArcHandleLayer(ctx, hoveredNode, selectedNodes, refs);
+  drawFrame(ctx, refs);
+  drawDraftFrameNameLabel(ctx, refs, nodesById);
+  drawDraftSectionNameLabel(ctx, refs, nodesById);
+  drawPenPreview(ctx, refs, nodesById, vectorEditingNodeIds[0] ?? null);
+  drawPencilPreview(ctx, refs);
+  drawEditingText(ctx, editingTextBox, editingTextContent, selectionStart, selectionEnd, selectionChangedAt, editingPathNode);
+  drawEditingPathTextHandle(ctx, editingTextBox, editingPathNode);
+  drawVectorEditAlignmentGuide(ctx, refs);
+  drawTransformAlignmentGuide(ctx, refs);
+  drawVectorLasso(ctx, refs);
+  drawVectorShapeBuilderPath(ctx, refs);
+  drawVectorShapeBuilderHoverPreview(ctx, nodesById, rootOrder, vectorEditingNodeIds, shapeBuilderPreviewFaces, refs);
+  drawVectorPaintHoverPreview(ctx, nodesById, refs);
+  drawVectorPaintTouchedFacesPreview(ctx, nodesById, refs);
+  drawVectorPaintPath(ctx, refs);
+  drawVectorFaceSelectHoverPreview(ctx, nodesById, refs);
+  drawVectorDraggedFillPreview(ctx, nodesById, refs);
+  drawVectorSelectedFillPreview(ctx, nodesById, vectorEditingNodeIds, refs);
+  drawVectorCutHoverPreview(ctx, nodesById, refs);
+  drawVectorCutPreview(ctx, refs);
+  drawVectorEraseBrush(ctx, refs, activeTool);
+  drawVectorWidthPointsPreview(ctx, nodesById, vectorEditingNodeIds, refs, activeTool);
   drawMarquee(gl, program, buffer, marqueeRect, clientWidth, clientHeight, viewport);
   drawSliceDraft(gl, program, buffer, sliceRect, clientWidth, clientHeight, viewport);
-  drawShapeContactGuides(ctx, refs, clientWidth, clientHeight);
+  drawShapeContactGuides(ctx, refs);
 };

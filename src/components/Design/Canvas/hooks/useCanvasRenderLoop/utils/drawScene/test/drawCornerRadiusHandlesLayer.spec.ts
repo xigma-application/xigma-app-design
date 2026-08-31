@@ -99,12 +99,10 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       null,
       [],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -119,12 +117,10 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       null,
       [rectangle],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -139,12 +135,10 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       ellipse,
       [rectangle],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -159,12 +153,10 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       rectangle,
       [rectangle, { ...rectangle, id: 'rect-2' }],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -179,12 +171,10 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       ellipse,
       [ellipse],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -199,12 +189,10 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       rectangle,
       [rectangle],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -219,12 +207,10 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      { buffer, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 0.9 } },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 0.9 } },
       rectangle,
       [rectangle],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -240,12 +226,10 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       freshRectangle,
       [freshRectangle],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -260,12 +244,10 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       polygon,
       [polygon],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -280,12 +262,10 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      { buffer, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 0.9 } },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 0.9 } },
       polygon,
       [polygon],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -301,12 +281,10 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       freshPolygon,
       [freshPolygon],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -323,12 +301,10 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       zeroRadiusRectangle,
       [zeroRadiusRectangle],
       createCanvasRefs({ cornerRadius: { cornerRadiusDragRef: { current: { hasMoved: true } as TCornerRadiusDragState } } }),
-      100,
-      100,
     );
 
     // result — the ne handle fill is the first draw call; its fan center sits right on the corner (100, 0)
@@ -348,12 +324,10 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       zeroRadiusPolygon,
       [zeroRadiusPolygon],
       createCanvasRefs({ cornerRadius: { cornerRadiusDragRef: { current: { hasMoved: true } as TCornerRadiusDragState } } }),
-      100,
-      100,
     );
 
     // result — the handle fill is the first draw call; its fan center sits right on the top vertex (50, 0)
@@ -372,12 +346,10 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       star,
       [star],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -392,12 +364,10 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      { buffer, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 0.9 } },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 0.9 } },
       star,
       [star],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -413,12 +383,10 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       freshStar,
       [freshStar],
       createCanvasRefs(),
-      100,
-      100,
     );
 
     // result
@@ -434,12 +402,10 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     // before
     drawCornerRadiusHandlesLayer(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       zeroRadiusStar,
       [zeroRadiusStar],
       createCanvasRefs({ cornerRadius: { cornerRadiusDragRef: { current: { hasMoved: true } as TCornerRadiusDragState } } }),
-      100,
-      100,
     );
 
     // result — the handle fill is the first draw call; its fan center sits right on the top vertex (50, 0)

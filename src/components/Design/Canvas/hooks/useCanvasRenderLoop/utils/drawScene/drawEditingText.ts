@@ -21,11 +21,9 @@ export const drawEditingText = (
   selectionStart: number,
   selectionEnd: number,
   selectionChangedAt: number,
-  canvasWidth: number,
-  canvasHeight: number,
   editingPathNode?: TSceneNode,
 ): void => {
-  const { buffer, gl, imageContext, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
 
   if (editingTextBox) {
     drawEditingTextBoxOutline(gl, program, buffer, editingTextBox, canvasWidth, canvasHeight, viewport);

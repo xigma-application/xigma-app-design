@@ -13,14 +13,8 @@ import { flattenVectorSegments } from 'utils/canvas/vectorNetwork/flattenVectorS
 import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
 import { getVectorEditingNode } from 'components/Design/Canvas/utils/getVectorEditingNode';
 
-export const drawVectorCutHoverPreview = (
-  context: TDrawSceneContext,
-  nodes: Record<string, TSceneNode>,
-  refs: TCanvasRefs,
-  canvasWidth: number,
-  canvasHeight: number,
-): void => {
-  const { buffer, gl, program, viewport } = context;
+export const drawVectorCutHoverPreview = (context: TDrawSceneContext, nodes: Record<string, TSceneNode>, refs: TCanvasRefs): void => {
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const hoveredSegment = refs.hover.hoveredVectorCutSegmentRef.current;
   const hoveredPoint = refs.hover.hoveredVectorCutPointRef.current;
   const node = hoveredSegment ? getVectorEditingNode(nodes, hoveredSegment.nodeId) : null;

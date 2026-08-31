@@ -68,11 +68,9 @@ describe('drawVectorCutHoverPreview', () => {
   it('should draw nothing when neither a hovered segment nor a hovered point is given', () => {
     // before
     drawVectorCutHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       refsFor(null, null),
-      200,
-      150,
     );
 
     // result
@@ -83,11 +81,9 @@ describe('drawVectorCutHoverPreview', () => {
   it('should draw nothing for the segment highlight when the hovered node id no longer resolves to any node', () => {
     // before
     drawVectorCutHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       refsFor({ nodeId: 'missing', segmentId: 's1' }, null),
-      200,
-      150,
     );
 
     // result
@@ -100,11 +96,9 @@ describe('drawVectorCutHoverPreview', () => {
 
     // before
     drawVectorCutHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       refsFor({ nodeId: node.id, segmentId: 'stale' }, null),
-      200,
-      150,
     );
 
     // result
@@ -125,11 +119,9 @@ describe('drawVectorCutHoverPreview', () => {
 
     // before
     drawVectorCutHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       refsFor({ nodeId: node.id, segmentId: 's1' }, null),
-      200,
-      150,
     );
 
     // result
@@ -150,11 +142,9 @@ describe('drawVectorCutHoverPreview', () => {
 
     // before
     drawVectorCutHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 2 } },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 2 } },
       nodes,
       refsFor({ nodeId: node.id, segmentId: 's1' }, null),
-      200,
-      150,
     );
 
     // result
@@ -168,11 +158,9 @@ describe('drawVectorCutHoverPreview', () => {
   it('should draw the point marker at the hovered point, independent of whether a segment is also hovered', () => {
     // before
     drawVectorCutHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       refsFor(null, { x: 25, y: 50 }),
-      200,
-      150,
     );
 
     // result
@@ -197,11 +185,9 @@ describe('drawVectorCutHoverPreview', () => {
 
     // before
     drawVectorCutHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       mixedNodes,
       refsFor({ nodeId: frameNode.id, segmentId: 's1' }, null),
-      200,
-      150,
     );
 
     // result
@@ -219,11 +205,9 @@ describe('drawVectorCutHoverPreview', () => {
 
     // before
     drawVectorCutHoverPreview(
-      { buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       rotatedNodes,
       refsFor({ nodeId: rotatedNode.id, segmentId: 's1' }, null),
-      200,
-      150,
     );
 
     // result

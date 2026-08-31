@@ -15,10 +15,8 @@ export const drawVectorWidthPointsPreview = (
   vectorEditingNodeIds: string[],
   refs: TCanvasRefs,
   activeTool: ToolName,
-  canvasWidth: number,
-  canvasHeight: number,
 ): void => {
-  const { buffer, gl, imageContext, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
 
   if (activeTool === ToolName.variableWidth) {
     vectorEditingNodeIds.forEach((nodeId) => {

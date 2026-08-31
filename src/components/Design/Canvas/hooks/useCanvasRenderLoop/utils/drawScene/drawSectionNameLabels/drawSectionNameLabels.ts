@@ -7,14 +7,8 @@ import { TSceneNode } from 'types/design/types';
 // utils
 import { drawSectionNameLabel } from './drawSectionNameLabel';
 
-export const drawSectionNameLabels = (
-  context: TDrawSceneContext,
-  nodes: TSceneNode[],
-  refs: TCanvasRefs,
-  canvasWidth: number,
-  canvasHeight: number,
-): void => {
-  const { buffer, gl, imageContext, program, viewport } = context;
+export const drawSectionNameLabels = (context: TDrawSceneContext, nodes: TSceneNode[], refs: TCanvasRefs): void => {
+  const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
   const editingNodeId = refs.sectionName.editingLabelRef.current;
 
   nodes

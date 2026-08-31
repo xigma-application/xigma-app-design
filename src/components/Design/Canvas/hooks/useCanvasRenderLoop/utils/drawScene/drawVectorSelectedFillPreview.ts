@@ -17,10 +17,8 @@ export const drawVectorSelectedFillPreview = (
   nodes: Record<string, TSceneNode>,
   vectorEditingNodeIds: string[],
   refs: TCanvasRefs,
-  canvasWidth: number,
-  canvasHeight: number,
 ): void => {
-  const { buffer, gl, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const selectedVertexIds = refs.vectorEdit.selectedVectorVertexIdsRef.current;
 
   if (selectedVertexIds.length > 0) {

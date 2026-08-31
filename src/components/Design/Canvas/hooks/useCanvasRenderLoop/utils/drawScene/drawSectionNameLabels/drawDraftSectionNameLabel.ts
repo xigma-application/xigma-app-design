@@ -10,14 +10,8 @@ import { TSceneNode, TSectionNode } from 'types/design/types';
 // utils
 import { drawSectionNameLabel } from './drawSectionNameLabel';
 
-export const drawDraftSectionNameLabel = (
-  context: TDrawSceneContext,
-  refs: TCanvasRefs,
-  nodes: Record<string, TSceneNode>,
-  canvasWidth: number,
-  canvasHeight: number,
-): void => {
-  const { buffer, gl, imageContext, program, viewport } = context;
+export const drawDraftSectionNameLabel = (context: TDrawSceneContext, refs: TCanvasRefs, nodes: Record<string, TSceneNode>): void => {
+  const { buffer, canvasHeight, canvasWidth, gl, imageContext, program, viewport } = context;
   const draftShape = refs.draftRef.current;
 
   if (draftShape?.type === NodeType.section) {

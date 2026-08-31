@@ -16,10 +16,8 @@ export const drawVectorFaceSelectHoverPreview = (
   context: TDrawSceneContext,
   nodes: Record<string, TSceneNode>,
   refs: TCanvasRefs,
-  canvasWidth: number,
-  canvasHeight: number,
 ): void => {
-  const { buffer, gl, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const hoveredFace = refs.hover.hoveredVectorFaceSelectRef.current;
   const node = hoveredFace ? getVectorEditingNode(nodes, hoveredFace.nodeId) : null;
 

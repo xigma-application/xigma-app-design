@@ -50,8 +50,8 @@ const drawContactGuide = (
   );
 };
 
-export const drawShapeContactGuides = (context: TDrawSceneContext, refs: TCanvasRefs, canvasWidth: number, canvasHeight: number): void => {
-  const { buffer, gl, program, viewport } = context;
+export const drawShapeContactGuides = (context: TDrawSceneContext, refs: TCanvasRefs): void => {
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
 
   refs.transform.contactGuidesRef.current?.forEach((guide) =>
     drawContactGuide(gl, program, buffer, guide, canvasWidth, canvasHeight, viewport),

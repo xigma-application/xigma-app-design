@@ -51,7 +51,12 @@ describe('drawSelectionOutline', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawSelectionOutline({ buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT }, [], 100, 100, [], {});
+    drawSelectionOutline(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      [],
+      [],
+      {},
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -65,7 +70,12 @@ describe('drawSelectionOutline', () => {
     const nodes = [buildNode({ id: 'a', x: 0, y: 0 }), buildNode({ id: 'b', x: 40, y: 0 })];
 
     // before
-    drawSelectionOutline({ buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT }, nodes, 100, 100, [], {});
+    drawSelectionOutline(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      nodes,
+      [],
+      {},
+    );
 
     // result
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
@@ -81,7 +91,12 @@ describe('drawSelectionOutline', () => {
     const nodes = [buildNode({ id: 'a', x: 0, y: 0 })];
 
     // before
-    drawSelectionOutline({ buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT }, nodes, 100, 100, [], {});
+    drawSelectionOutline(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      nodes,
+      [],
+      {},
+    );
 
     // result
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);
@@ -97,7 +112,12 @@ describe('drawSelectionOutline', () => {
     const nodes = [buildNode({ id: 'a', x: 0, y: 0 }), buildNode({ id: 'b', x: 40, y: 0 })];
 
     // before
-    drawSelectionOutline({ buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT }, nodes, 100, 100, ['a', 'b'], {});
+    drawSelectionOutline(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      nodes,
+      ['a', 'b'],
+      {},
+    );
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -111,7 +131,12 @@ describe('drawSelectionOutline', () => {
     const nodes = [buildNode({ id: 'a', x: 0, y: 0 }), buildNode({ id: 'b', x: 40, y: 0 })];
 
     // before
-    drawSelectionOutline({ buffer, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT }, nodes, 100, 100, ['a'], {});
+    drawSelectionOutline(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      nodes,
+      ['a'],
+      {},
+    );
 
     // result
     const lineLoopDraws = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.calls.filter(([mode]) => mode === gl.LINE_LOOP);

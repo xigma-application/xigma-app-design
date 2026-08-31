@@ -34,6 +34,8 @@ const call = (
   drawPenPreview(
     {
       buffer: {} as WebGLBuffer,
+      canvasHeight: 100,
+      canvasWidth: 100,
       gl: {} as WebGL2RenderingContext,
       imageContext: {} as never,
       program: {} as WebGLProgram,
@@ -48,8 +50,6 @@ const call = (
     }),
     nodes,
     vectorEditingNodeId,
-    100,
-    100,
   );
 };
 

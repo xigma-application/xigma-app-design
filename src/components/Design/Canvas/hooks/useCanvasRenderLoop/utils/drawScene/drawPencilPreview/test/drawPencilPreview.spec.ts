@@ -38,14 +38,14 @@ describe('drawPencilPreview', () => {
     drawPencilPreview(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 100,
+        canvasWidth: 100,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
         viewport: IDENTITY_VIEWPORT,
       },
       refsFor(null, null, false),
-      100,
-      100,
     );
 
     // result
@@ -58,14 +58,14 @@ describe('drawPencilPreview', () => {
     drawPencilPreview(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 100,
+        canvasWidth: 100,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
         viewport: IDENTITY_VIEWPORT,
       },
       refsFor([{ x: 0, y: 0 }], null, false),
-      100,
-      100,
     );
 
     // result
@@ -85,14 +85,14 @@ describe('drawPencilPreview', () => {
     drawPencilPreview(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 200,
+        canvasWidth: 200,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
         viewport: IDENTITY_VIEWPORT,
       },
       refsFor(points, null, false),
-      200,
-      200,
     );
 
     // result
@@ -117,14 +117,14 @@ describe('drawPencilPreview', () => {
     drawPencilPreview(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 200,
+        canvasWidth: 200,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
         viewport: IDENTITY_VIEWPORT,
       },
       refsFor(points, null, false),
-      200,
-      200,
     );
 
     // result
@@ -160,14 +160,14 @@ describe('drawPencilPreview', () => {
     drawPencilPreview(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 200,
+        canvasWidth: 200,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
         viewport: IDENTITY_VIEWPORT,
       },
       refsFor(points, null, false),
-      200,
-      200,
     );
 
     // result — every sampled point must lie exactly on the vertex chain's start/end for each segment,
@@ -199,14 +199,14 @@ describe('drawPencilPreview', () => {
     drawPencilPreview(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 200,
+        canvasWidth: 200,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
         viewport: IDENTITY_VIEWPORT,
       },
       refsFor(smoothedPoints, rawPoints, true),
-      200,
-      200,
     );
 
     // result
@@ -225,6 +225,8 @@ describe('drawPencilPreview', () => {
     drawPencilPreview(
       {
         buffer: {} as WebGLBuffer,
+        canvasHeight: 200,
+        canvasWidth: 200,
         gl: {} as WebGL2RenderingContext,
         imageContext: {} as never,
         program: {} as WebGLProgram,
@@ -238,8 +240,6 @@ describe('drawPencilPreview', () => {
         [{ x: 0, y: 0 }],
         true,
       ),
-      200,
-      200,
     );
 
     // result

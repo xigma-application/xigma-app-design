@@ -17,10 +17,8 @@ export const drawPenPreview = (
   refs: TCanvasRefs,
   nodes: Record<string, TSceneNode>,
   vectorEditingNodeId: string | null,
-  canvasWidth: number,
-  canvasHeight: number,
 ): void => {
-  const { buffer, gl, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const preview = refs.pen.penPreviewRef.current;
   const newVertexPreview = refs.pen.penNewVertexPreviewRef.current;
   const isDragArmable = refs.pen.penHoveredDragArmableVertexRef.current;

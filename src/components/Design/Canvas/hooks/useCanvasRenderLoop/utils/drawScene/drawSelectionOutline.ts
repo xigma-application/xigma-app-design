@@ -10,13 +10,11 @@ import { isGroupSelection } from '../../../../utils/isGroupSelection';
 export const drawSelectionOutline = (
   context: TDrawSceneContext,
   selectedNodes: TSceneNode[],
-  canvasWidth: number,
-  canvasHeight: number,
   vectorEditingNodeIds: string[],
   nodesById: Record<string, TSceneNode>,
   editingPathId?: string | null,
 ): void => {
-  const { buffer, gl, program, viewport } = context;
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const nonVectorEditingNodes = selectedNodes.filter((node) => !vectorEditingNodeIds.includes(node.id));
 
   if (isGroupSelection(nonVectorEditingNodes)) {

@@ -36,11 +36,9 @@ describe('drawDraftFrameNameLabel', () => {
   it('should draw the would-be name, in the selection blue, for a frame being drawn', () => {
     // before
     drawDraftFrameNameLabel(
-      { buffer: {} as never, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
+      { buffer: {} as never, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
       createCanvasRefs({ draftRef: { current: draftFrame } }),
       nodes,
-      200,
-      150,
     );
 
     // result
@@ -70,11 +68,9 @@ describe('drawDraftFrameNameLabel', () => {
   it('should draw nothing when there is no draft shape', () => {
     // before
     drawDraftFrameNameLabel(
-      { buffer: {} as never, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
+      { buffer: {} as never, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
       createCanvasRefs(),
       nodes,
-      200,
-      150,
     );
 
     // result
@@ -84,11 +80,9 @@ describe('drawDraftFrameNameLabel', () => {
   it('should draw nothing when the draft shape is not a frame', () => {
     // before
     drawDraftFrameNameLabel(
-      { buffer: {} as never, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
+      { buffer: {} as never, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
       createCanvasRefs({ draftRef: { current: { ...draftFrame, type: NodeType.rectangle } } }),
       nodes,
-      200,
-      150,
     );
 
     // result

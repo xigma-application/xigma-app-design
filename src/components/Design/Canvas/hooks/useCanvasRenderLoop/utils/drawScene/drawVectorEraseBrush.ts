@@ -9,14 +9,8 @@ import { ToolName } from 'types/design/enums';
 // utils
 import { drawEllipse } from 'utils/canvas/shapes/drawEllipse';
 
-export const drawVectorEraseBrush = (
-  context: TDrawSceneContext,
-  refs: TCanvasRefs,
-  activeTool: ToolName,
-  canvasWidth: number,
-  canvasHeight: number,
-): void => {
-  const { buffer, gl, program, viewport } = context;
+export const drawVectorEraseBrush = (context: TDrawSceneContext, refs: TCanvasRefs, activeTool: ToolName): void => {
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const brushCenter = refs.vectorErase.eraseBrushCenterRef.current;
   const diameterPx = refs.vectorErase.eraserDiameterRef.current;
 

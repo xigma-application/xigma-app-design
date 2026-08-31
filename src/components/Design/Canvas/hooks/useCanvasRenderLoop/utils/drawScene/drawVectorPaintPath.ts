@@ -8,8 +8,8 @@ import { TDrawSceneContext } from './types';
 // utils
 import { drawDashedPolylineOutline } from 'utils/canvas/drawDashedPolylineOutline/drawDashedPolylineOutline';
 
-export const drawVectorPaintPath = (context: TDrawSceneContext, refs: TCanvasRefs, canvasWidth: number, canvasHeight: number): void => {
-  const { buffer, gl, program, viewport } = context;
+export const drawVectorPaintPath = (context: TDrawSceneContext, refs: TCanvasRefs): void => {
+  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const path = refs.vectorPaint.vectorPaintPathRef.current;
 
   if (path) {

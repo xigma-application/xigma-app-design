@@ -91,10 +91,8 @@ describe('drawSceneNodes', () => {
 
     // before
     drawSceneNodes(
-      { buffer, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [],
-      100,
-      100,
       new Map(),
       createCanvasRefs(),
       {},
@@ -113,10 +111,8 @@ describe('drawSceneNodes', () => {
 
     // before
     drawSceneNodes(
-      { buffer, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       nodes,
-      100,
-      100,
       new Map(),
       createCanvasRefs(),
       {},
@@ -147,10 +143,8 @@ describe('drawSceneNodes', () => {
 
     // before
     drawSceneNodes(
-      { buffer, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [group],
-      100,
-      100,
       new Map(),
       createCanvasRefs(),
       {},
@@ -169,10 +163,8 @@ describe('drawSceneNodes', () => {
 
     // before
     drawSceneNodes(
-      { buffer, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       nodes,
-      100,
-      100,
       new Map(),
       createCanvasRefs(),
       {},
@@ -205,10 +197,8 @@ describe('drawSceneNodes', () => {
 
     // before
     drawSceneNodes(
-      { buffer, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [polygon],
-      100,
-      100,
       new Map(),
       createCanvasRefs(),
       {},
@@ -242,10 +232,8 @@ describe('drawSceneNodes', () => {
 
     // before
     drawSceneNodes(
-      { buffer, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [star],
-      100,
-      100,
       new Map(),
       createCanvasRefs(),
       {},
@@ -277,10 +265,8 @@ describe('drawSceneNodes', () => {
 
     // before
     drawSceneNodes(
-      { buffer, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [media],
-      100,
-      100,
       new Map(),
       createCanvasRefs(),
       {},
@@ -315,10 +301,8 @@ describe('drawSceneNodes', () => {
 
     // before
     drawSceneNodes(
-      { buffer, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [text],
-      100,
-      100,
       new Map(),
       createCanvasRefs(),
       {},
@@ -348,10 +332,8 @@ describe('drawSceneNodes', () => {
 
     // before
     drawSceneNodes(
-      { buffer, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [path],
-      100,
-      100,
       new Map(),
       createCanvasRefs(),
       {},
@@ -381,10 +363,8 @@ describe('drawSceneNodes', () => {
 
     // before
     drawSceneNodes(
-      { buffer, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [path],
-      100,
-      100,
       new Map([['a', 'selected']]),
       createCanvasRefs(),
       {},
@@ -415,10 +395,8 @@ describe('drawSceneNodes', () => {
 
     // before
     drawSceneNodes(
-      { buffer, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [path],
-      100,
-      100,
       new Map([['a', 'hover']]),
       createCanvasRefs(),
       {},
@@ -447,10 +425,8 @@ describe('drawSceneNodes', () => {
 
     // before
     drawSceneNodes(
-      { buffer, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [line],
-      100,
-      100,
       new Map(),
       createCanvasRefs(),
       {},
@@ -481,10 +457,8 @@ describe('drawSceneNodes', () => {
 
     // before
     drawSceneNodes(
-      { buffer, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [line],
-      100,
-      100,
       new Map(),
       createCanvasRefs(),
       {},
@@ -516,10 +490,8 @@ describe('drawSceneNodes', () => {
 
     // before
     drawSceneNodes(
-      { buffer, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [vector],
-      100,
-      100,
       new Map(),
       createCanvasRefs(),
       {},
