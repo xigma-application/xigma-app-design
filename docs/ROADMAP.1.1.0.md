@@ -110,6 +110,29 @@ starter-template pages. `components/App/App.tsx` absorbed `pages/DesignPage/Desi
 - [x] `CanvasRefsProvider` relocated to `components/App/core/`, `?page=`/`?project=` read via plain
       `window.location.search` instead of React Router hooks, e2e/`useCopyPageLink` updated to match
 
+## Stage 11 — Text on Path: attach to an existing vector or shape
+
+Text on Path no longer only draws a fresh ellipse — clicking an existing eligible vector chain (the
+same `getVectorChainOrder(node) !== null` condition Variable Width uses) or a plain convertible
+shape (Rectangle/Ellipse/Polygon/Star/Line/Arrow, auto-converted via the existing `Enter`
+shape-to-vector machinery) attaches the text to it on the spot, reading from wherever the user
+actually clicked rather than always the chain's own start. The bound guide now behaves as one unit
+with its text through drag/rotate/resize/mirror, carries along through copy/duplicate/paste, hides
+its own stroke while idle (dashed blue on hover/selected/editing), and no longer produces a stray
+second selection box. Write-up: `.claude/docs/design-tool-architecture.md`,
+`.claude/docs/design-store-architecture.md`, `.claude/docs/selection-and-manipulation.md`,
+`.claude/docs/canvas-rendering-pipeline.md`.
+
+- [x] click-to-attach on an eligible vector or a convertible shape, `pathStartOffset` from the click
+      point, `text-on-path` hover cursor, still falls back to drag-a-new-ellipse past the attach slop
+- [x] guide vector carried as one unit through move/rotate/resize/mirror-resize, dropped from the
+      Layers tree, dashed guide shown only on hover/selected/editing instead of always
+- [x] guide dropped from `selectedIds` so it can never trigger the group (two-box) selection-outline
+      mode instead of the correct per-node rotated outline
+- [x] guide cloned alongside its text on copy/duplicate/paste instead of pasting as plain straight text
+- [x] fixed `getVectorChainPositionAtLength` snapping text to the wrong end of a segment right after
+      a corner when the chain has to walk that segment in reverse to stay continuous
+
 ## Related
 
 [[canvas-rendering-pipeline]] — context for the render loop and the `WEBGL_CONTEXT_ATTRIBUTES`
