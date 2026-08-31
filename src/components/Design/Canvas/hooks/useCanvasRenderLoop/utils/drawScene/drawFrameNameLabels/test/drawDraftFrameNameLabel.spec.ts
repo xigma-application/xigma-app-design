@@ -7,6 +7,7 @@ import { TDraftEntity, TSceneNode } from 'types/design/types';
 import { TImageRenderContext } from '../../../../types';
 
 // utils
+import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { drawDraftFrameNameLabel } from '../drawDraftFrameNameLabel';
 
 const drawFrameNameLabelMock = vi.fn();
@@ -34,7 +35,7 @@ describe('drawDraftFrameNameLabel', () => {
 
   it('should draw the would-be name, in the selection blue, for a frame being drawn', () => {
     // before
-    drawDraftFrameNameLabel(gl, imageContext, draftFrame, nodes, 200, 150, IDENTITY_VIEWPORT);
+    drawDraftFrameNameLabel(gl, imageContext, createCanvasRefs({ draftRef: { current: draftFrame } }), nodes, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(getNextFrameNameMock).toHaveBeenCalledWith(nodes);
@@ -62,7 +63,7 @@ describe('drawDraftFrameNameLabel', () => {
 
   it('should draw nothing when there is no draft shape', () => {
     // before
-    drawDraftFrameNameLabel(gl, imageContext, null, nodes, 200, 150, IDENTITY_VIEWPORT);
+    drawDraftFrameNameLabel(gl, imageContext, createCanvasRefs(), nodes, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawFrameNameLabelMock).not.toHaveBeenCalled();
@@ -70,7 +71,15 @@ describe('drawDraftFrameNameLabel', () => {
 
   it('should draw nothing when the draft shape is not a frame', () => {
     // before
-    drawDraftFrameNameLabel(gl, imageContext, { ...draftFrame, type: NodeType.rectangle }, nodes, 200, 150, IDENTITY_VIEWPORT);
+    drawDraftFrameNameLabel(
+      gl,
+      imageContext,
+      createCanvasRefs({ draftRef: { current: { ...draftFrame, type: NodeType.rectangle } } }),
+      nodes,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawFrameNameLabelMock).not.toHaveBeenCalled();

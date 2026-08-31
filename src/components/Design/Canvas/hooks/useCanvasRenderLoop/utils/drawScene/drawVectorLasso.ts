@@ -2,7 +2,7 @@
 import { DRAFT_FRAME_STROKE, MARQUEE_FILL_ALPHA, VECTOR_LASSO_DASH_GAP_PX, VECTOR_LASSO_DASH_LENGTH_PX } from 'constant/canvas';
 
 // types
-import { TPoint } from 'types/canvas';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TViewport } from 'types/design/types';
 
 // utils
@@ -13,11 +13,13 @@ export const drawVectorLasso = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
-  path: TPoint[] | null,
+  refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
+  const path = refs.lassoMarquee.vectorLassoPathRef.current;
+
   if (!path || path.length < 2) {
     return;
   }

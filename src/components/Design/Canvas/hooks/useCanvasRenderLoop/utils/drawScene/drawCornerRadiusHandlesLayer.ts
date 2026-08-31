@@ -2,6 +2,7 @@
 import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPolygonNode, TRectangleNode, TSceneNode, TStarNode, TViewport } from 'types/design/types';
 
 // utils
@@ -10,6 +11,7 @@ import { drawPolygonCornerRadiusHandle } from 'utils/canvas/drawPolygonCornerRad
 import { drawStarCornerRadiusHandle } from 'utils/canvas/drawStarCornerRadiusHandle';
 import { getNodeBounds } from '../../../../utils/getNodeBounds';
 import { hasCornerRadius } from 'utils/canvas/cornerRadius/hasCornerRadius';
+import { hasCornerRadiusDragMoved } from './hasCornerRadiusDragMoved';
 import { hasPolygonCornerRadius } from 'utils/canvas/cornerRadius/polygon/hasPolygonCornerRadius';
 import { hasStarCornerRadius } from 'utils/canvas/cornerRadius/star/hasStarCornerRadius';
 import { shouldShowCornerRadiusHandles } from 'utils/canvas/cornerRadius/shouldShowCornerRadiusHandles';
@@ -23,11 +25,12 @@ export const drawCornerRadiusHandlesLayer = (
   buffer: WebGLBuffer,
   hoveredNode: TSceneNode | null | undefined,
   selectedNodes: TSceneNode[],
+  refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
-  isDraggingCornerRadius = false,
 ): void => {
+  const isDraggingCornerRadius = hasCornerRadiusDragMoved(refs);
   const [selectedNode] = selectedNodes;
 
   if (selectedNodes.length === 1 && hoveredNode?.id === selectedNode.id && hasAnyCornerRadius(selectedNode)) {

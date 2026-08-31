@@ -4,6 +4,7 @@ import { TDraftEntity, TSceneNode } from 'types/design/types';
 import { TImageRenderContext } from '../../../../types';
 
 // utils
+import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { drawDraftSectionNameLabel } from '../drawDraftSectionNameLabel';
 
 const drawSectionNameLabelMock = vi.fn();
@@ -33,7 +34,17 @@ describe('drawDraftSectionNameLabel', () => {
 
   it('should draw the would-be name for a section being drawn', () => {
     // before
-    drawDraftSectionNameLabel(gl, program, buffer, imageContext, draftSection, nodes, 200, 150, IDENTITY_VIEWPORT);
+    drawDraftSectionNameLabel(
+      gl,
+      program,
+      buffer,
+      imageContext,
+      createCanvasRefs({ draftRef: { current: draftSection } }),
+      nodes,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(getNextSectionNameMock).toHaveBeenCalledWith(nodes);
@@ -62,7 +73,7 @@ describe('drawDraftSectionNameLabel', () => {
 
   it('should draw nothing when there is no draft shape', () => {
     // before
-    drawDraftSectionNameLabel(gl, program, buffer, imageContext, null, nodes, 200, 150, IDENTITY_VIEWPORT);
+    drawDraftSectionNameLabel(gl, program, buffer, imageContext, createCanvasRefs(), nodes, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawSectionNameLabelMock).not.toHaveBeenCalled();
@@ -75,7 +86,7 @@ describe('drawDraftSectionNameLabel', () => {
       program,
       buffer,
       imageContext,
-      { ...draftSection, type: NodeType.frame },
+      createCanvasRefs({ draftRef: { current: { ...draftSection, type: NodeType.frame } } }),
       nodes,
       200,
       150,

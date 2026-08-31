@@ -2,9 +2,8 @@
 import { DRAFT_FRAME_STROKE, VECTOR_EDGE_HOVER_STROKE } from 'constant/canvas';
 
 // types
-import { TPoint } from 'types/canvas';
 import { TSceneNode, TVectorNode, TViewport } from 'types/design/types';
-import { TVectorShapeBuilderTouchedFaces } from 'types/design/canvas/types';
+import { TCanvasRefs, TVectorShapeBuilderTouchedFaces } from 'types/design/canvas/types';
 
 // utils
 import { drawShapeBuilderNodeFacesHatch } from './drawShapeBuilderNodeFacesHatch';
@@ -23,13 +22,14 @@ export const drawVectorShapeBuilderHoverPreview = (
   rootOrder: string[],
   vectorEditingNodeIds: string[],
   touchedFaces: TVectorShapeBuilderTouchedFaces,
-  isSubtract: boolean,
-  path: TPoint[] | null,
-  isBoxMode: boolean,
+  refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
+  const isSubtract = refs.shapeBuilder.isVectorShapeBuilderSubtractRef.current;
+  const path = refs.shapeBuilder.vectorShapeBuilderPathRef.current;
+  const isBoxMode = refs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current;
   const color = isSubtract ? VECTOR_EDGE_HOVER_STROKE : DRAFT_FRAME_STROKE;
   const touchedNodeIds = Object.keys(touchedFaces).filter((nodeId) => touchedFaces[nodeId].size > 0);
 

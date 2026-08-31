@@ -1,9 +1,21 @@
 // types
 import { NodeType } from 'types/design/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
+import { TPoint } from 'types/canvas';
 import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { drawVectorShapeBuilderHoverPreview } from '../drawVectorShapeBuilderHoverPreview';
+
+const refsFor = (isSubtract: boolean, path: TPoint[] | null, isBoxMode: boolean): TCanvasRefs =>
+  createCanvasRefs({
+    shapeBuilder: {
+      isVectorShapeBuilderBoxModeRef: { current: isBoxMode },
+      isVectorShapeBuilderSubtractRef: { current: isSubtract },
+      vectorShapeBuilderPathRef: { current: path },
+    },
+  });
 
 const bakeVectorNodeRotationMock = vi.fn();
 const deriveVectorFacesMock = vi.fn();
@@ -73,9 +85,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       [node.id],
       [node.id],
       {},
-      false,
-      null,
-      false,
+      refsFor(false, null, false),
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -95,9 +105,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       [node.id],
       [node.id],
       { missing: new Set(['k1']) },
-      false,
-      null,
-      false,
+      refsFor(false, null, false),
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -123,9 +131,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       [node.id],
       [node.id],
       { [node.id]: new Set(['k1', 'k2']) },
-      false,
-      null,
-      false,
+      refsFor(false, null, false),
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -170,9 +176,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       [node.id],
       [node.id],
       { [node.id]: new Set(['k1']) },
-      true,
-      null,
-      false,
+      refsFor(true, null, false),
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -195,9 +199,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       [node.id],
       [node.id],
       { [node.id]: new Set(['stale']) },
-      false,
-      null,
-      false,
+      refsFor(false, null, false),
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -223,9 +225,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       [node.id, otherNode.id],
       [node.id, otherNode.id],
       { [node.id]: new Set(['k1']), [otherNode.id]: new Set(['k1']) },
-      false,
-      null,
-      false,
+      refsFor(false, null, false),
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -255,9 +255,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       [node.id, otherNode.id],
       [node.id, otherNode.id],
       { [node.id]: new Set(['k1']), [otherNode.id]: new Set(['k1']) },
-      false,
-      path,
-      false,
+      refsFor(false, path, false),
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -291,9 +289,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       [node.id, otherNode.id],
       [node.id, otherNode.id],
       { [node.id]: new Set(['k1']), [otherNode.id]: new Set(['k1']) },
-      false,
-      path,
-      true,
+      refsFor(false, path, true),
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -327,9 +323,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       [node.id, otherNode.id],
       [node.id, otherNode.id],
       { [node.id]: new Set(['k1']), [otherNode.id]: new Set(['k1']) },
-      false,
-      path,
-      false,
+      refsFor(false, path, false),
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -360,9 +354,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       [node.id, otherNode.id],
       [node.id, otherNode.id],
       { [node.id]: new Set(['k1']) },
-      false,
-      path,
-      false,
+      refsFor(false, path, false),
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -398,9 +390,7 @@ describe('drawVectorShapeBuilderHoverPreview', () => {
       [node.id, otherNode.id, thirdNode.id],
       [node.id, otherNode.id, thirdNode.id],
       { [node.id]: new Set(['k1']) },
-      false,
-      path,
-      false,
+      refsFor(false, path, false),
       200,
       150,
       IDENTITY_VIEWPORT,

@@ -1,7 +1,8 @@
 // types
 import { NodeType } from 'types/design/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TImageRenderContext } from '../../types';
-import { TDraftEntity, TViewport } from 'types/design/types';
+import { TViewport } from 'types/design/types';
 
 // utils
 import { drawDraftLine } from './drawDraftLine';
@@ -12,11 +13,13 @@ export const drawFrame = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   imageContext: TImageRenderContext,
-  draftShape: TDraftEntity | null | undefined,
+  refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
+  const draftShape = refs.draftRef.current;
+
   if (draftShape) {
     if (draftShape.type === NodeType.line) {
       drawDraftLine(gl, program, buffer, draftShape, canvasWidth, canvasHeight, viewport);

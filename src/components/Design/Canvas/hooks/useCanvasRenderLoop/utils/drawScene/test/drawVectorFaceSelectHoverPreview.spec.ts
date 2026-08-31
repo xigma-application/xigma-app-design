@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { drawVectorFaceSelectHoverPreview } from '../drawVectorFaceSelectHoverPreview';
 
 const getRenderedVectorNodeMock = vi.fn();
@@ -51,7 +52,7 @@ describe('drawVectorFaceSelectHoverPreview', () => {
 
   it('should draw nothing when nothing is hovered', () => {
     // before
-    drawVectorFaceSelectHoverPreview(gl, program, buffer, nodes, null, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorFaceSelectHoverPreview(gl, program, buffer, nodes, createCanvasRefs(), 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawVectorHatchFillMock).not.toHaveBeenCalled();
@@ -59,7 +60,16 @@ describe('drawVectorFaceSelectHoverPreview', () => {
 
   it('should draw nothing when the hovered node id no longer resolves to any node', () => {
     // before
-    drawVectorFaceSelectHoverPreview(gl, program, buffer, nodes, { faceKey: 'k1', nodeId: 'missing' }, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorFaceSelectHoverPreview(
+      gl,
+      program,
+      buffer,
+      nodes,
+      createCanvasRefs({ hover: { hoveredVectorFaceSelectRef: { current: { faceKey: 'k1', nodeId: 'missing' } } } }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorHatchFillMock).not.toHaveBeenCalled();
@@ -70,7 +80,16 @@ describe('drawVectorFaceSelectHoverPreview', () => {
     deriveVectorFacesMock.mockReturnValue([]);
 
     // before
-    drawVectorFaceSelectHoverPreview(gl, program, buffer, nodes, { faceKey: 'stale-key', nodeId: node.id }, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorFaceSelectHoverPreview(
+      gl,
+      program,
+      buffer,
+      nodes,
+      createCanvasRefs({ hover: { hoveredVectorFaceSelectRef: { current: { faceKey: 'stale-key', nodeId: node.id } } } }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorHatchFillMock).not.toHaveBeenCalled();
@@ -81,7 +100,16 @@ describe('drawVectorFaceSelectHoverPreview', () => {
     deriveVectorFacesMock.mockReturnValue([{ key: 'k1', points: [{ x: 0, y: 0 }] }]);
 
     // before
-    drawVectorFaceSelectHoverPreview(gl, program, buffer, nodes, { faceKey: 'k1', nodeId: node.id }, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorFaceSelectHoverPreview(
+      gl,
+      program,
+      buffer,
+      nodes,
+      createCanvasRefs({ hover: { hoveredVectorFaceSelectRef: { current: { faceKey: 'k1', nodeId: node.id } } } }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [[{ x: 0, y: 0 }]], '#337ae1', 200, 150, IDENTITY_VIEWPORT);
@@ -104,7 +132,16 @@ describe('drawVectorFaceSelectHoverPreview', () => {
     const mixedNodes: Record<string, TSceneNode> = { [frameNode.id]: frameNode };
 
     // before
-    drawVectorFaceSelectHoverPreview(gl, program, buffer, mixedNodes, { faceKey: 'k1', nodeId: frameNode.id }, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorFaceSelectHoverPreview(
+      gl,
+      program,
+      buffer,
+      mixedNodes,
+      createCanvasRefs({ hover: { hoveredVectorFaceSelectRef: { current: { faceKey: 'k1', nodeId: frameNode.id } } } }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorHatchFillMock).not.toHaveBeenCalled();
@@ -125,7 +162,7 @@ describe('drawVectorFaceSelectHoverPreview', () => {
       program,
       buffer,
       rotatedNodes,
-      { faceKey: 'k1', nodeId: rotatedNode.id },
+      createCanvasRefs({ hover: { hoveredVectorFaceSelectRef: { current: { faceKey: 'k1', nodeId: rotatedNode.id } } } }),
       200,
       150,
       IDENTITY_VIEWPORT,

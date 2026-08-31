@@ -1,5 +1,5 @@
 // types
-import { TPoint } from 'types/canvas';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TViewport } from 'types/design/types';
 
 // utils
@@ -10,13 +10,15 @@ export const drawPencilPreview = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
-  previewPoints: TPoint[] | null,
-  rawPreviewPoints: TPoint[] | null,
-  showRawPreview: boolean,
+  refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
+  const previewPoints = refs.pencil.pencilPreviewPointsRef.current;
+  const rawPreviewPoints = refs.pencil.pencilRawPreviewPointsRef.current;
+  const showRawPreview = refs.pencil.pencilShowRawPreviewRef.current;
+
   if (showRawPreview) {
     drawRawPencilPreview(gl, program, buffer, rawPreviewPoints, canvasWidth, canvasHeight, viewport);
   } else {

@@ -2,7 +2,7 @@
 import { VECTOR_LASSO_DASH_GAP_PX, VECTOR_LASSO_DASH_LENGTH_PX, VECTOR_SHAPE_BUILDER_STROKE } from 'constant/canvas';
 
 // types
-import { TPoint } from 'types/canvas';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TViewport } from 'types/design/types';
 
 // utils
@@ -14,12 +14,14 @@ export const drawVectorShapeBuilderPath = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
-  path: TPoint[] | null,
-  isBoxMode: boolean,
+  refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
+  const path = refs.shapeBuilder.vectorShapeBuilderPathRef.current;
+  const isBoxMode = refs.shapeBuilder.isVectorShapeBuilderBoxModeRef.current;
+
   if (path) {
     const points = isBoxMode ? getRectCorners(toDraftRect(path[0], path[path.length - 1])) : path;
 

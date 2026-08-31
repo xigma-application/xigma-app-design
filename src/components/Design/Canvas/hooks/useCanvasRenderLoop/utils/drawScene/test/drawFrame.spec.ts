@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TImageRenderContext } from '../../../types';
 
 // utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { drawFrame } from '../drawFrame';
 
 const createGlMock = (): WebGL2RenderingContext =>
@@ -49,7 +50,7 @@ describe('drawFrame', () => {
     const buffer = {} as WebGLBuffer;
 
     // before
-    drawFrame(gl, program, buffer, IMAGE_CONTEXT, null, 100, 100, IDENTITY_VIEWPORT);
+    drawFrame(gl, program, buffer, IMAGE_CONTEXT, createCanvasRefs(), 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.drawArrays).not.toHaveBeenCalled();
@@ -67,7 +68,7 @@ describe('drawFrame', () => {
       program,
       buffer,
       IMAGE_CONTEXT,
-      { stroke: '#000000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 10 },
+      createCanvasRefs({ draftRef: { current: { stroke: '#000000', type: NodeType.line, x1: 0, x2: 10, y1: 0, y2: 10 } } }),
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -94,7 +95,7 @@ describe('drawFrame', () => {
       program,
       buffer,
       IMAGE_CONTEXT,
-      { fill: '#D9D9D9', height: 20, type: NodeType.rectangle, width: 10, x: 0, y: 0 },
+      createCanvasRefs({ draftRef: { current: { fill: '#D9D9D9', height: 20, type: NodeType.rectangle, width: 10, x: 0, y: 0 } } }),
       100,
       100,
       IDENTITY_VIEWPORT,

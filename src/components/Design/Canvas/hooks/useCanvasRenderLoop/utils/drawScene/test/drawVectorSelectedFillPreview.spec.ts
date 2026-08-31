@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { drawVectorSelectedFillPreview } from '../drawVectorSelectedFillPreview';
 
 const getRenderedVectorNodeMock = vi.fn();
@@ -51,7 +52,17 @@ describe('drawVectorSelectedFillPreview', () => {
 
   it('should draw nothing when nothing is selected', () => {
     // before
-    drawVectorSelectedFillPreview(gl, program, buffer, nodes, [node.id], [], 200, 150, IDENTITY_VIEWPORT);
+    drawVectorSelectedFillPreview(
+      gl,
+      program,
+      buffer,
+      nodes,
+      [node.id],
+      createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: [] } } }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorHatchFillMock).not.toHaveBeenCalled();
@@ -60,7 +71,17 @@ describe('drawVectorSelectedFillPreview', () => {
 
   it('should draw nothing when a node id no longer resolves to any node', () => {
     // before
-    drawVectorSelectedFillPreview(gl, program, buffer, nodes, ['missing'], ['v1'], 200, 150, IDENTITY_VIEWPORT);
+    drawVectorSelectedFillPreview(
+      gl,
+      program,
+      buffer,
+      nodes,
+      ['missing'],
+      createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['v1'] } } }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorHatchFillMock).not.toHaveBeenCalled();
@@ -74,7 +95,17 @@ describe('drawVectorSelectedFillPreview', () => {
     ]);
 
     // before
-    drawVectorSelectedFillPreview(gl, program, buffer, nodes, [node.id], ['v1', 'v2', 'v3'], 200, 150, IDENTITY_VIEWPORT);
+    drawVectorSelectedFillPreview(
+      gl,
+      program,
+      buffer,
+      nodes,
+      [node.id],
+      createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['v1', 'v2', 'v3'] } } }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorHatchFillMock).toHaveBeenCalledWith(
@@ -94,7 +125,17 @@ describe('drawVectorSelectedFillPreview', () => {
     getVectorFullySelectedFacesMock.mockReturnValue([]);
 
     // before
-    drawVectorSelectedFillPreview(gl, program, buffer, nodes, [node.id], ['v1'], 200, 150, IDENTITY_VIEWPORT);
+    drawVectorSelectedFillPreview(
+      gl,
+      program,
+      buffer,
+      nodes,
+      [node.id],
+      createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['v1'] } } }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorHatchFillMock).not.toHaveBeenCalled();
@@ -117,7 +158,17 @@ describe('drawVectorSelectedFillPreview', () => {
     const mixedNodes: Record<string, TSceneNode> = { [frameNode.id]: frameNode };
 
     // before
-    drawVectorSelectedFillPreview(gl, program, buffer, mixedNodes, [frameNode.id], ['v1'], 200, 150, IDENTITY_VIEWPORT);
+    drawVectorSelectedFillPreview(
+      gl,
+      program,
+      buffer,
+      mixedNodes,
+      [frameNode.id],
+      createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['v1'] } } }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorHatchFillMock).not.toHaveBeenCalled();
@@ -134,7 +185,17 @@ describe('drawVectorSelectedFillPreview', () => {
     getVectorFullySelectedFacesMock.mockReturnValue([]);
 
     // before
-    drawVectorSelectedFillPreview(gl, program, buffer, rotatedNodes, [rotatedNode.id], ['v1'], 200, 150, IDENTITY_VIEWPORT);
+    drawVectorSelectedFillPreview(
+      gl,
+      program,
+      buffer,
+      rotatedNodes,
+      [rotatedNode.id],
+      createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['v1'] } } }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(getRenderedVectorNodeMock).toHaveBeenCalledWith(rotatedNode);

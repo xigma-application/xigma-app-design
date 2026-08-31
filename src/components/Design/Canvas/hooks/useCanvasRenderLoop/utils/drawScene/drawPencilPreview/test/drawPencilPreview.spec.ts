@@ -1,5 +1,19 @@
+// types
+import { TCanvasRefs } from 'types/design/canvas/types';
+import { TPoint } from 'types/canvas';
+
 // utils
+import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { drawPencilPreview } from '../drawPencilPreview';
+
+const refsFor = (previewPoints: TPoint[] | null, rawPreviewPoints: TPoint[] | null, showRawPreview: boolean): TCanvasRefs =>
+  createCanvasRefs({
+    pencil: {
+      pencilPreviewPointsRef: { current: previewPoints },
+      pencilRawPreviewPointsRef: { current: rawPreviewPoints },
+      pencilShowRawPreviewRef: { current: showRawPreview },
+    },
+  });
 
 const drawVectorStrokeMock = vi.fn();
 const drawVectorRoundedCapsMock = vi.fn();
@@ -21,7 +35,15 @@ describe('drawPencilPreview', () => {
 
   it('should draw nothing when there are no points', () => {
     // before
-    drawPencilPreview({} as WebGL2RenderingContext, {} as WebGLProgram, {} as WebGLBuffer, null, null, false, 100, 100, IDENTITY_VIEWPORT);
+    drawPencilPreview(
+      {} as WebGL2RenderingContext,
+      {} as WebGLProgram,
+      {} as WebGLBuffer,
+      refsFor(null, null, false),
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorStrokeMock).not.toHaveBeenCalled();
@@ -34,9 +56,7 @@ describe('drawPencilPreview', () => {
       {} as WebGL2RenderingContext,
       {} as WebGLProgram,
       {} as WebGLBuffer,
-      [{ x: 0, y: 0 }],
-      null,
-      false,
+      refsFor([{ x: 0, y: 0 }], null, false),
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -60,9 +80,7 @@ describe('drawPencilPreview', () => {
       {} as WebGL2RenderingContext,
       {} as WebGLProgram,
       {} as WebGLBuffer,
-      points,
-      null,
-      false,
+      refsFor(points, null, false),
       200,
       200,
       IDENTITY_VIEWPORT,
@@ -91,9 +109,7 @@ describe('drawPencilPreview', () => {
       {} as WebGL2RenderingContext,
       {} as WebGLProgram,
       {} as WebGLBuffer,
-      points,
-      null,
-      false,
+      refsFor(points, null, false),
       200,
       200,
       IDENTITY_VIEWPORT,
@@ -133,9 +149,7 @@ describe('drawPencilPreview', () => {
       {} as WebGL2RenderingContext,
       {} as WebGLProgram,
       {} as WebGLBuffer,
-      points,
-      null,
-      false,
+      refsFor(points, null, false),
       200,
       200,
       IDENTITY_VIEWPORT,
@@ -171,9 +185,7 @@ describe('drawPencilPreview', () => {
       {} as WebGL2RenderingContext,
       {} as WebGLProgram,
       {} as WebGLBuffer,
-      smoothedPoints,
-      rawPoints,
-      true,
+      refsFor(smoothedPoints, rawPoints, true),
       200,
       200,
       IDENTITY_VIEWPORT,
@@ -196,12 +208,14 @@ describe('drawPencilPreview', () => {
       {} as WebGL2RenderingContext,
       {} as WebGLProgram,
       {} as WebGLBuffer,
-      [
-        { x: 0, y: 0 },
-        { x: 100, y: 0 },
-      ],
-      [{ x: 0, y: 0 }],
-      true,
+      refsFor(
+        [
+          { x: 0, y: 0 },
+          { x: 100, y: 0 },
+        ],
+        [{ x: 0, y: 0 }],
+        true,
+      ),
       200,
       200,
       IDENTITY_VIEWPORT,

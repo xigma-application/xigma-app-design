@@ -2,6 +2,7 @@
 import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
@@ -16,11 +17,13 @@ export const drawVectorSelectedFillPreview = (
   buffer: WebGLBuffer,
   nodes: Record<string, TSceneNode>,
   vectorEditingNodeIds: string[],
-  selectedVertexIds: string[],
+  refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
+  const selectedVertexIds = refs.vectorEdit.selectedVectorVertexIdsRef.current;
+
   if (selectedVertexIds.length > 0) {
     const faces = vectorEditingNodeIds.flatMap((nodeId) => {
       const node = getVectorEditingNode(nodes, nodeId);

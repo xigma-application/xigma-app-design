@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
+import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { drawPenPreview } from '../drawPenPreview';
 
 const drawVectorStrokeMock = vi.fn();
@@ -34,9 +35,13 @@ const call = (
     {} as WebGL2RenderingContext,
     {} as WebGLProgram,
     {} as WebGLBuffer,
-    preview && { ...preview, isSnapped: preview.isSnapped ?? false },
-    newVertexPreview,
-    isDragArmable,
+    createCanvasRefs({
+      pen: {
+        penHoveredDragArmableVertexRef: { current: isDragArmable },
+        penNewVertexPreviewRef: { current: newVertexPreview },
+        penPreviewRef: { current: preview && { ...preview, isSnapped: preview.isSnapped ?? false } },
+      },
+    }),
     nodes,
     vectorEditingNodeId,
     100,

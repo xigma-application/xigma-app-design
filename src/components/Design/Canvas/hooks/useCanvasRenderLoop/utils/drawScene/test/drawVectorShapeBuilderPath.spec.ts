@@ -1,4 +1,8 @@
+// types
+import { TPoint } from 'types/canvas';
+
 // utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { drawVectorShapeBuilderPath } from '../drawVectorShapeBuilderPath';
 
 const drawDashedPolylineOutlineMock = vi.fn();
@@ -9,13 +13,14 @@ vi.mock('utils/canvas/drawDashedPolylineOutline/drawDashedPolylineOutline', () =
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
-const call = (path: Parameters<typeof drawVectorShapeBuilderPath>[3], isBoxMode: boolean): void => {
+const call = (path: TPoint[] | null, isBoxMode: boolean): void => {
   drawVectorShapeBuilderPath(
     {} as WebGL2RenderingContext,
     {} as WebGLProgram,
     {} as WebGLBuffer,
-    path,
-    isBoxMode,
+    createCanvasRefs({
+      shapeBuilder: { isVectorShapeBuilderBoxModeRef: { current: isBoxMode }, vectorShapeBuilderPathRef: { current: path } },
+    }),
     200,
     150,
     IDENTITY_VIEWPORT,

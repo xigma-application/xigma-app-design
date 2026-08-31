@@ -1,9 +1,20 @@
 // types
 import { NodeType } from 'types/design/enums';
+import { TCanvasRefs, TVectorCutSegmentHover } from 'types/design/canvas/types';
+import { TPoint } from 'types/canvas';
 import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { drawVectorCutHoverPreview } from '../drawVectorCutHoverPreview';
+
+const refsFor = (hoveredSegment: TVectorCutSegmentHover | null, hoveredPoint: TPoint | null): TCanvasRefs =>
+  createCanvasRefs({
+    hover: {
+      hoveredVectorCutPointRef: { current: hoveredPoint },
+      hoveredVectorCutSegmentRef: { current: hoveredSegment },
+    },
+  });
 
 const getRenderedVectorNodeMock = vi.fn();
 const flattenVectorSegmentsMock = vi.fn();
@@ -56,7 +67,7 @@ describe('drawVectorCutHoverPreview', () => {
 
   it('should draw nothing when neither a hovered segment nor a hovered point is given', () => {
     // before
-    drawVectorCutHoverPreview(gl, program, buffer, nodes, null, null, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorCutHoverPreview(gl, program, buffer, nodes, refsFor(null, null), 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawVectorStrokeMock).not.toHaveBeenCalled();
@@ -65,7 +76,16 @@ describe('drawVectorCutHoverPreview', () => {
 
   it('should draw nothing for the segment highlight when the hovered node id no longer resolves to any node', () => {
     // before
-    drawVectorCutHoverPreview(gl, program, buffer, nodes, { nodeId: 'missing', segmentId: 's1' }, null, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorCutHoverPreview(
+      gl,
+      program,
+      buffer,
+      nodes,
+      refsFor({ nodeId: 'missing', segmentId: 's1' }, null),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorStrokeMock).not.toHaveBeenCalled();
@@ -76,7 +96,16 @@ describe('drawVectorCutHoverPreview', () => {
     flattenVectorSegmentsMock.mockReturnValue([]);
 
     // before
-    drawVectorCutHoverPreview(gl, program, buffer, nodes, { nodeId: node.id, segmentId: 'stale' }, null, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorCutHoverPreview(
+      gl,
+      program,
+      buffer,
+      nodes,
+      refsFor({ nodeId: node.id, segmentId: 'stale' }, null),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorStrokeMock).not.toHaveBeenCalled();
@@ -95,7 +124,7 @@ describe('drawVectorCutHoverPreview', () => {
     flattenVectorSegmentsMock.mockReturnValue([flattenedSegment]);
 
     // before
-    drawVectorCutHoverPreview(gl, program, buffer, nodes, { nodeId: node.id, segmentId: 's1' }, null, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorCutHoverPreview(gl, program, buffer, nodes, refsFor({ nodeId: node.id, segmentId: 's1' }, null), 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawVectorStrokeMock).toHaveBeenCalledWith(gl, program, buffer, [flattenedSegment], '#ff2fc2', 2, 200, 150, IDENTITY_VIEWPORT);
@@ -114,7 +143,11 @@ describe('drawVectorCutHoverPreview', () => {
     flattenVectorSegmentsMock.mockReturnValue([flattenedSegment]);
 
     // before
-    drawVectorCutHoverPreview(gl, program, buffer, nodes, { nodeId: node.id, segmentId: 's1' }, null, 200, 150, { x: 0, y: 0, zoom: 2 });
+    drawVectorCutHoverPreview(gl, program, buffer, nodes, refsFor({ nodeId: node.id, segmentId: 's1' }, null), 200, 150, {
+      x: 0,
+      y: 0,
+      zoom: 2,
+    });
 
     // result
     expect(drawVectorStrokeMock).toHaveBeenCalledWith(gl, program, buffer, [flattenedSegment], '#ff2fc2', 1, 200, 150, {
@@ -126,7 +159,7 @@ describe('drawVectorCutHoverPreview', () => {
 
   it('should draw the point marker at the hovered point, independent of whether a segment is also hovered', () => {
     // before
-    drawVectorCutHoverPreview(gl, program, buffer, nodes, null, { x: 25, y: 50 }, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorCutHoverPreview(gl, program, buffer, nodes, refsFor(null, { x: 25, y: 50 }), 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawVectorCutPointMarkerMock).toHaveBeenCalledWith(gl, program, buffer, { x: 25, y: 50 }, 200, 150, IDENTITY_VIEWPORT);
@@ -154,8 +187,7 @@ describe('drawVectorCutHoverPreview', () => {
       program,
       buffer,
       mixedNodes,
-      { nodeId: frameNode.id, segmentId: 's1' },
-      null,
+      refsFor({ nodeId: frameNode.id, segmentId: 's1' }, null),
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -180,8 +212,7 @@ describe('drawVectorCutHoverPreview', () => {
       program,
       buffer,
       rotatedNodes,
-      { nodeId: rotatedNode.id, segmentId: 's1' },
-      null,
+      refsFor({ nodeId: rotatedNode.id, segmentId: 's1' }, null),
       200,
       150,
       IDENTITY_VIEWPORT,

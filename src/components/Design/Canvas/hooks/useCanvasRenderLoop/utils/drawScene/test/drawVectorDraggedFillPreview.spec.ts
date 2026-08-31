@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TSceneNode, TVectorNode } from 'types/design/types';
 
 // utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { drawVectorDraggedFillPreview } from '../drawVectorDraggedFillPreview';
 
 const getRenderedVectorNodeMock = vi.fn();
@@ -51,7 +52,16 @@ describe('drawVectorDraggedFillPreview', () => {
 
   it('should draw nothing when nothing is currently being dragged', () => {
     // before
-    drawVectorDraggedFillPreview(gl, program, buffer, nodes, null, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorDraggedFillPreview(
+      gl,
+      program,
+      buffer,
+      nodes,
+      createCanvasRefs({ vectorSnapshots: { draggedVectorFillFacesRef: { current: null } } }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorHatchFillMock).not.toHaveBeenCalled();
@@ -59,7 +69,16 @@ describe('drawVectorDraggedFillPreview', () => {
 
   it('should skip a node id that no longer resolves to any node, without calling drawVectorHatchFill for it', () => {
     // before
-    drawVectorDraggedFillPreview(gl, program, buffer, nodes, { missing: ['k1'] }, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorDraggedFillPreview(
+      gl,
+      program,
+      buffer,
+      nodes,
+      createCanvasRefs({ vectorSnapshots: { draggedVectorFillFacesRef: { current: { missing: ['k1'] } } } }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [], '#cd4422', 200, 150, IDENTITY_VIEWPORT);
@@ -74,7 +93,16 @@ describe('drawVectorDraggedFillPreview', () => {
     ]);
 
     // before
-    drawVectorDraggedFillPreview(gl, program, buffer, nodes, { [node.id]: ['k1', 'k2'] }, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorDraggedFillPreview(
+      gl,
+      program,
+      buffer,
+      nodes,
+      createCanvasRefs({ vectorSnapshots: { draggedVectorFillFacesRef: { current: { [node.id]: ['k1', 'k2'] } } } }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result — only the touched faces (k1, k2), not the untouched k3
     expect(drawVectorHatchFillMock).toHaveBeenCalledWith(
@@ -106,7 +134,16 @@ describe('drawVectorDraggedFillPreview', () => {
     const mixedNodes: Record<string, TSceneNode> = { [frameNode.id]: frameNode };
 
     // before
-    drawVectorDraggedFillPreview(gl, program, buffer, mixedNodes, { [frameNode.id]: ['k1'] }, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorDraggedFillPreview(
+      gl,
+      program,
+      buffer,
+      mixedNodes,
+      createCanvasRefs({ vectorSnapshots: { draggedVectorFillFacesRef: { current: { [frameNode.id]: ['k1'] } } } }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorHatchFillMock).toHaveBeenCalledWith(gl, program, buffer, [], '#cd4422', 200, 150, IDENTITY_VIEWPORT);
@@ -122,7 +159,16 @@ describe('drawVectorDraggedFillPreview', () => {
     deriveVectorFacesMock.mockReturnValue([]);
 
     // before
-    drawVectorDraggedFillPreview(gl, program, buffer, rotatedNodes, { [rotatedNode.id]: ['k1'] }, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorDraggedFillPreview(
+      gl,
+      program,
+      buffer,
+      rotatedNodes,
+      createCanvasRefs({ vectorSnapshots: { draggedVectorFillFacesRef: { current: { [rotatedNode.id]: ['k1'] } } } }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(getRenderedVectorNodeMock).toHaveBeenCalledWith(rotatedNode);

@@ -1,8 +1,10 @@
 // types
 import { NodeType } from 'types/design/enums';
+import { TEllipseArcDragState, TEllipseArcRatioDragState, TEllipseArcRotateDragState } from 'types/design/canvas/types';
 import { TEllipseNode, TRectangleNode } from 'types/design/types';
 
 // utils
+import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { drawEllipseArcHandleLayer } from '../drawEllipseArcHandleLayer';
 
 const drawEllipseArcGuideLineMock = vi.fn();
@@ -57,7 +59,17 @@ describe('drawEllipseArcHandleLayer', () => {
 
   it('should draw nothing when nothing is selected', () => {
     // before
-    drawEllipseArcHandleLayer({} as WebGL2RenderingContext, {} as WebGLProgram, {} as WebGLBuffer, null, [], 100, 100, IDENTITY_VIEWPORT);
+    drawEllipseArcHandleLayer(
+      {} as WebGL2RenderingContext,
+      {} as WebGLProgram,
+      {} as WebGLBuffer,
+      null,
+      [],
+      createCanvasRefs(),
+      100,
+      100,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawEllipseArcHandleMock).not.toHaveBeenCalled();
@@ -71,6 +83,7 @@ describe('drawEllipseArcHandleLayer', () => {
       {} as WebGLBuffer,
       null,
       [ellipse(), ellipse({ id: 'ellipse-2' })],
+      createCanvasRefs(),
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -88,6 +101,7 @@ describe('drawEllipseArcHandleLayer', () => {
       {} as WebGLBuffer,
       null,
       [rectangle],
+      createCanvasRefs(),
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -99,11 +113,21 @@ describe('drawEllipseArcHandleLayer', () => {
 
   it('should draw nothing once the shape renders too small on screen', () => {
     // before
-    drawEllipseArcHandleLayer({} as WebGL2RenderingContext, {} as WebGLProgram, {} as WebGLBuffer, null, [ellipse()], 100, 100, {
-      x: 0,
-      y: 0,
-      zoom: 0.9,
-    });
+    drawEllipseArcHandleLayer(
+      {} as WebGL2RenderingContext,
+      {} as WebGLProgram,
+      {} as WebGLBuffer,
+      null,
+      [ellipse()],
+      createCanvasRefs(),
+      100,
+      100,
+      {
+        x: 0,
+        y: 0,
+        zoom: 0.9,
+      },
+    );
 
     // result
     expect(drawEllipseArcHandleMock).not.toHaveBeenCalled();
@@ -121,6 +145,7 @@ describe('drawEllipseArcHandleLayer', () => {
       {} as WebGLBuffer,
       null,
       [node],
+      createCanvasRefs(),
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -139,6 +164,7 @@ describe('drawEllipseArcHandleLayer', () => {
       {} as WebGLBuffer,
       null,
       [ellipse({ arcEndAngle: 0 })],
+      createCanvasRefs(),
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -156,6 +182,7 @@ describe('drawEllipseArcHandleLayer', () => {
       {} as WebGLBuffer,
       null,
       [ellipse({ arcEndAngle: 0, arcRatio: 1 })],
+      createCanvasRefs(),
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -173,6 +200,7 @@ describe('drawEllipseArcHandleLayer', () => {
       {} as WebGLBuffer,
       null,
       [ellipse({ arcRatio: 1 })],
+      createCanvasRefs(),
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -190,6 +218,7 @@ describe('drawEllipseArcHandleLayer', () => {
       {} as WebGLBuffer,
       null,
       [ellipse({ arcEndAngle: 0 })],
+      createCanvasRefs(),
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -210,6 +239,7 @@ describe('drawEllipseArcHandleLayer', () => {
       {} as WebGLBuffer,
       node,
       [node],
+      createCanvasRefs(),
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -230,6 +260,7 @@ describe('drawEllipseArcHandleLayer', () => {
       {} as WebGLBuffer,
       node,
       [node],
+      createCanvasRefs(),
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -250,6 +281,7 @@ describe('drawEllipseArcHandleLayer', () => {
       {} as WebGLBuffer,
       node,
       [node],
+      createCanvasRefs(),
       100,
       100,
       IDENTITY_VIEWPORT,
@@ -270,12 +302,16 @@ describe('drawEllipseArcHandleLayer', () => {
       {} as WebGLBuffer,
       node,
       [node],
+      createCanvasRefs({
+        ellipseArc: {
+          ellipseArcDragRef: { current: { draggedHandlePosition: { x: 1, y: 2 } } as TEllipseArcDragState },
+          ellipseArcRatioDragRef: { current: { draggedHandlePosition: { x: 5, y: 6 } } as TEllipseArcRatioDragState },
+          ellipseArcRotateDragRef: { current: { draggedHandlePosition: { x: 3, y: 4 } } as TEllipseArcRotateDragState },
+        },
+      }),
       100,
       100,
       IDENTITY_VIEWPORT,
-      { x: 1, y: 2 },
-      { x: 3, y: 4 },
-      { x: 5, y: 6 },
     );
 
     // result

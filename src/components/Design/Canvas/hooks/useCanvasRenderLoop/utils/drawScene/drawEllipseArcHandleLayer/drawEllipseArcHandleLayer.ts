@@ -3,7 +3,7 @@ import { ELLIPSE_ARC_MAX_RATIO, ELLIPSE_DEFAULT_ARC_ANGLE } from 'constant/canva
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TPoint } from 'types/canvas';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TSceneNode, TViewport } from 'types/design/types';
 
 // utils
@@ -20,13 +20,14 @@ export const drawEllipseArcHandleLayer = (
   buffer: WebGLBuffer,
   hoveredNode: TSceneNode | null | undefined,
   selectedNodes: TSceneNode[],
+  refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
-  endHandleDraggedPosition?: TPoint | null,
-  rotateHandleDraggedPosition?: TPoint | null,
-  ratioHandleDraggedPosition?: TPoint | null,
 ): void => {
+  const endHandleDraggedPosition = refs.ellipseArc.ellipseArcDragRef.current?.draggedHandlePosition ?? null;
+  const rotateHandleDraggedPosition = refs.ellipseArc.ellipseArcRotateDragRef.current?.draggedHandlePosition ?? null;
+  const ratioHandleDraggedPosition = refs.ellipseArc.ellipseArcRatioDragRef.current?.draggedHandlePosition ?? null;
   const [selectedNode] = selectedNodes;
 
   if (selectedNodes.length === 1 && selectedNode.type === NodeType.ellipse) {

@@ -1,12 +1,12 @@
 // types
-import { RefObject } from 'react';
 import { NodeType } from 'types/design/enums';
+import { TPenDragOrigin } from 'components/Design/Canvas/hooks/useDrawPenTool/types';
 import { TPoint } from 'types/canvas';
 import { TSceneNode, TVectorNode } from 'types/design/types';
-import { TVectorMultiSelectBox } from 'types/design/canvas/types';
 import { TVertexDotBufferCacheEntry } from '../../drawVectorVertexDots/types';
 
 // utils
+import { createCanvasRefs } from '../../../../../../useCanvasRefs/createCanvasRefs';
 import { drawVectorEditHandlesLayer } from '../drawVectorEditHandlesLayer';
 
 const drawVectorEditHandlesForNodeMock = vi.fn();
@@ -40,8 +40,6 @@ const vectorNode: TVectorNode = {
 
 const nodes: Record<string, TSceneNode> = { [vectorNode.id]: vectorNode };
 
-const createVectorMultiSelectBoxRef = (): RefObject<TVectorMultiSelectBox | null> => ({ current: null });
-
 describe('drawVectorEditHandlesLayer', () => {
   beforeEach(() => {
     drawVectorEditHandlesForNodeMock.mockClear();
@@ -50,37 +48,7 @@ describe('drawVectorEditHandlesLayer', () => {
 
   it('should call drawVectorEditHandlesForNode for no node when vectorEditingNodeIds is empty', () => {
     // before
-    drawVectorEditHandlesLayer(
-      gl,
-      program,
-      buffer,
-      vertexDotBufferCache,
-      nodes,
-      [],
-      [],
-      [],
-      [],
-      [],
-      null,
-      new Set(),
-      null,
-      null,
-      null,
-      null,
-      [],
-      null,
-      null,
-      null,
-      null,
-      false,
-      createVectorMultiSelectBoxRef(),
-      null,
-      null,
-      false,
-      200,
-      150,
-      IDENTITY_VIEWPORT,
-    );
+    drawVectorEditHandlesLayer(gl, program, buffer, vertexDotBufferCache, nodes, [], createCanvasRefs(), null, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawVectorEditHandlesForNodeMock).not.toHaveBeenCalled();
@@ -111,26 +79,8 @@ describe('drawVectorEditHandlesLayer', () => {
       vertexDotBufferCache,
       frameNodes,
       ['frame-1'],
-      [],
-      [],
-      [],
-      [],
+      createCanvasRefs(),
       null,
-      new Set(),
-      null,
-      null,
-      null,
-      null,
-      [],
-      null,
-      null,
-      null,
-      null,
-      false,
-      createVectorMultiSelectBoxRef(),
-      null,
-      null,
-      false,
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -154,26 +104,30 @@ describe('drawVectorEditHandlesLayer', () => {
       vertexDotBufferCache,
       twoOpenNodes,
       [vectorNode.id, secondNode.id],
-      ['v1'],
-      ['pre-v'],
-      ['s1'],
-      ['pre-s'],
+      createCanvasRefs({
+        hover: {
+          hoveredSegmentIdRef: { current: 'hover-s' },
+          hoveredVectorEdgeInsertPointRef: { current: { x: 1, y: 2 } },
+          hoveredVectorHandleRef: { current: { end: 'start', segmentId: 's1' } },
+          hoveredVectorSegmentIdRef: { current: 'hover-vs' },
+          hoveredVectorVertexIdRef: { current: 'v1' },
+        },
+        pen: {
+          penDragOriginRef: { current: { nodeId: '', segmentId: null, vertexId: 'v1' } as TPenDragOrigin },
+          penDraggedHandleIsSnappedRef: { current: true },
+          penDraggedHandlePositionRef: { current: { x: 3, y: 4 } },
+        },
+        vectorCut: { newVectorCutVertexIdsRef: { current: newVertexIds } },
+        vectorEdit: {
+          preVectorMarqueeSegmentIdsRef: { current: ['pre-s'] },
+          preVectorMarqueeVertexIdsRef: { current: ['pre-v'] },
+          selectedVectorHandlesRef: { current: [{ end: 'end', segmentId: 's1' }] },
+          selectedVectorSegmentIdsRef: { current: ['s1'] },
+          selectedVectorVertexIdsRef: { current: ['v1'] },
+          snappedVectorHandleRef: { current: { end: 'start', segmentId: 's1' } },
+        },
+      }),
       'v1',
-      newVertexIds,
-      'hover-s',
-      'hover-vs',
-      { x: 1, y: 2 },
-      { end: 'start', segmentId: 's1' },
-      [{ end: 'end', segmentId: 's1' }],
-      { end: 'start', segmentId: 's1' },
-      'v1',
-      'v1',
-      { x: 3, y: 4 },
-      true,
-      createVectorMultiSelectBoxRef(),
-      null,
-      null,
-      false,
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -244,26 +198,8 @@ describe('drawVectorEditHandlesLayer', () => {
       vertexDotBufferCache,
       nodes,
       [vectorNode.id],
-      ['v1', 'v2'],
-      [],
-      [],
-      [],
+      createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['v1', 'v2'] } } }),
       null,
-      new Set(),
-      null,
-      null,
-      null,
-      null,
-      [],
-      null,
-      null,
-      null,
-      null,
-      false,
-      createVectorMultiSelectBoxRef(),
-      null,
-      null,
-      false,
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -284,26 +220,8 @@ describe('drawVectorEditHandlesLayer', () => {
       vertexDotBufferCache,
       nodes,
       [vectorNode.id],
-      ['v1'],
-      [],
-      [],
-      [],
+      createCanvasRefs({ vectorEdit: { selectedVectorVertexIdsRef: { current: ['v1'] } } }),
       null,
-      new Set(),
-      null,
-      null,
-      null,
-      null,
-      [],
-      null,
-      null,
-      null,
-      null,
-      false,
-      createVectorMultiSelectBoxRef(),
-      null,
-      null,
-      false,
       200,
       150,
       IDENTITY_VIEWPORT,

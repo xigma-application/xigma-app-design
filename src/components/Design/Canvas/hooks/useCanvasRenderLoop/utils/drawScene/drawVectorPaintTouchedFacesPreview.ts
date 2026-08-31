@@ -2,8 +2,8 @@
 import { DRAFT_FRAME_STROKE, VECTOR_EDGE_HOVER_STROKE } from 'constant/canvas';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TSceneNode, TViewport } from 'types/design/types';
-import { TVectorDraggedFillFaces } from 'types/design/canvas/types';
 
 // utils
 import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
@@ -16,12 +16,14 @@ export const drawVectorPaintTouchedFacesPreview = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   nodes: Record<string, TSceneNode>,
-  touchedFaces: TVectorDraggedFillFaces | null,
-  isRemoveMode: boolean,
+  refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
+  const touchedFaces = refs.vectorPaint.vectorPaintTouchedFacesRef.current;
+  const isRemoveMode = refs.vectorPaint.isVectorPaintRemoveRef.current;
+
   if (touchedFaces) {
     const faces = Object.entries(touchedFaces).flatMap(([nodeId, faceKeys]) => {
       const node = getVectorEditingNode(nodes, nodeId);

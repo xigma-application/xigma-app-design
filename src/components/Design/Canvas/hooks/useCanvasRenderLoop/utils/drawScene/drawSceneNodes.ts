@@ -4,10 +4,10 @@ import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TImageRenderContext } from '../../types';
 import { TPathOutlineStyle } from './getPathOutlineStyles';
 import { TSceneNode, TViewport } from 'types/design/types';
-import { TVectorNodeDragSnapshot, TVectorNodeResizeSnapshot, TVectorNodeRotateSnapshot } from 'types/design/canvas/types';
 
 // utils
 import { drawEllipseNode } from 'utils/canvas/drawEllipseNode';
@@ -19,6 +19,8 @@ import { drawPathOutline } from './drawPathOutline';
 import { drawPolygon } from 'utils/canvas/drawPolygon/drawPolygon';
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
 import { drawStar } from 'utils/canvas/drawStar/drawStar';
+import { drawThickEllipseOutline } from 'utils/canvas/shapes/drawThickEllipseOutline';
+import { drawThickOutline } from 'utils/canvas/drawThickOutline/drawThickOutline';
 import { drawVectorNodeOrTextPathGuide } from './drawVectorNodeOrTextPathGuide';
 import { getMsdfAtlasTexture } from 'utils/canvas/text/getMsdfAtlasTexture';
 import { getOrLoadTexture } from 'utils/canvas/getOrLoadTexture';
@@ -33,12 +35,15 @@ export const drawSceneNodes = (
   canvasHeight: number,
   viewport: TViewport,
   pathOutlineStyles: Map<string, TPathOutlineStyle>,
-  draggedVectorNodeSnapshots: Map<string, TVectorNodeDragSnapshot> | null,
-  resizedVectorNodeSnapshots: Map<string, TVectorNodeResizeSnapshot> | null,
-  rotatedVectorNodeSnapshots: Map<string, TVectorNodeRotateSnapshot> | null,
+  refs: TCanvasRefs,
   nodesById: Record<string, TSceneNode>,
   editingPathId?: string | null,
 ): void => {
+  const { vectorSnapshots } = refs;
+  const draggedVectorNodeSnapshots = vectorSnapshots.draggedVectorNodeSnapshotsRef.current;
+  const resizedVectorNodeSnapshots = vectorSnapshots.resizedVectorNodeSnapshotsRef.current;
+  const rotatedVectorNodeSnapshots = vectorSnapshots.rotatedVectorNodeSnapshotsRef.current;
+
   nodes.forEach((node) => {
     switch (node.type) {
       case NodeType.ellipse:
@@ -58,6 +63,20 @@ export const drawSceneNodes = (
           node.flipY ?? false,
           node.rotation,
         );
+        if (node.strokeColor && node.strokeWidth) {
+          drawThickEllipseOutline(
+            gl,
+            program,
+            buffer,
+            node,
+            node.strokeColor,
+            node.strokeWidth,
+            canvasWidth,
+            canvasHeight,
+            viewport,
+            node.rotation,
+          );
+        }
         break;
       case NodeType.polygon:
         drawPolygon(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, node.flipX, node.flipY, node.rotation);
@@ -81,7 +100,7 @@ export const drawSceneNodes = (
         );
         break;
       case NodeType.line:
-        drawLine(gl, program, buffer, node, node.stroke, LINE_RENDER_STROKE_WIDTH, canvasWidth, canvasHeight, viewport);
+        drawLine(gl, program, buffer, node, node.stroke, node.strokeWidth ?? LINE_RENDER_STROKE_WIDTH, canvasWidth, canvasHeight, viewport);
         drawLineEndpointArrowheads(gl, program, buffer, node, canvasWidth, canvasHeight, viewport);
         break;
       case NodeType.path:
@@ -126,6 +145,20 @@ export const drawSceneNodes = (
         break;
       default:
         drawRect(gl, program, buffer, node, canvasWidth, canvasHeight, viewport, node.rotation);
+        if ('strokeColor' in node && node.strokeColor && node.strokeWidth) {
+          drawThickOutline(
+            gl,
+            program,
+            buffer,
+            node,
+            node.strokeColor,
+            node.strokeWidth,
+            canvasWidth,
+            canvasHeight,
+            viewport,
+            node.rotation,
+          );
+        }
     }
   });
 };

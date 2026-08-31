@@ -2,6 +2,7 @@
 import { TVectorCutPreview } from 'types/design/canvas/types';
 
 // utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { drawVectorCutPreview } from '../drawVectorCutPreview';
 
 const drawLineMock = vi.fn();
@@ -27,7 +28,7 @@ describe('drawVectorCutPreview', () => {
 
   it('should draw nothing when there is no active preview', () => {
     // before
-    drawVectorCutPreview(gl, program, buffer, null, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorCutPreview(gl, program, buffer, createCanvasRefs(), 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawLineMock).not.toHaveBeenCalled();
@@ -39,7 +40,15 @@ describe('drawVectorCutPreview', () => {
     const preview: TVectorCutPreview = { crossings: [], lineEnd: { x: 100, y: 50 }, lineStart: { x: 0, y: 50 } };
 
     // before
-    drawVectorCutPreview(gl, program, buffer, preview, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorCutPreview(
+      gl,
+      program,
+      buffer,
+      createCanvasRefs({ vectorCut: { vectorCutPreviewRef: { current: preview } } }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawLineMock).toHaveBeenCalledWith(
@@ -68,7 +77,15 @@ describe('drawVectorCutPreview', () => {
     };
 
     // before
-    drawVectorCutPreview(gl, program, buffer, preview, 200, 150, IDENTITY_VIEWPORT);
+    drawVectorCutPreview(
+      gl,
+      program,
+      buffer,
+      createCanvasRefs({ vectorCut: { vectorCutPreviewRef: { current: preview } } }),
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result
     expect(drawVectorCutPointMarkerMock).toHaveBeenCalledTimes(2);

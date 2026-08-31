@@ -1,4 +1,5 @@
 // utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { drawShapeContactGuides } from '../drawShapeContactGuides';
 
 const drawLineMock = vi.fn();
@@ -20,7 +21,7 @@ describe('drawShapeContactGuides', () => {
 
   it('should draw nothing when there are no guides', () => {
     // before
-    drawShapeContactGuides(gl, program, buffer, null, 200, 150, IDENTITY_VIEWPORT);
+    drawShapeContactGuides(gl, program, buffer, createCanvasRefs(), 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawLineMock).not.toHaveBeenCalled();
@@ -33,10 +34,16 @@ describe('drawShapeContactGuides', () => {
       gl,
       program,
       buffer,
-      [
-        { x1: 100, x2: 100, y1: 0, y2: 100 },
-        { x1: 0, x2: 100, y1: 100, y2: 100 },
-      ],
+      createCanvasRefs({
+        transform: {
+          contactGuidesRef: {
+            current: [
+              { x1: 100, x2: 100, y1: 0, y2: 100 },
+              { x1: 0, x2: 100, y1: 100, y2: 100 },
+            ],
+          },
+        },
+      }),
       200,
       150,
       IDENTITY_VIEWPORT,
@@ -75,7 +82,15 @@ describe('drawShapeContactGuides', () => {
 
   it('should scale the stroke width and marker size down with zoom', () => {
     // before
-    drawShapeContactGuides(gl, program, buffer, [{ x1: 0, x2: 10, y1: 0, y2: 0 }], 200, 150, { x: 0, y: 0, zoom: 2 });
+    drawShapeContactGuides(
+      gl,
+      program,
+      buffer,
+      createCanvasRefs({ transform: { contactGuidesRef: { current: [{ x1: 0, x2: 10, y1: 0, y2: 0 }] } } }),
+      200,
+      150,
+      { x: 0, y: 0, zoom: 2 },
+    );
 
     // result
     expect(drawLineMock.mock.calls[0][5]).toBe(0.5);

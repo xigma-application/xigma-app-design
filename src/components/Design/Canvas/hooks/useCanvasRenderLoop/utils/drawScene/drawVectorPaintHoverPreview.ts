@@ -2,8 +2,8 @@
 import { DRAFT_FRAME_STROKE, VECTOR_EDGE_HOVER_STROKE } from 'constant/canvas';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TSceneNode, TViewport } from 'types/design/types';
-import { TVectorPaintFaceHover } from 'types/design/canvas/types';
 
 // utils
 import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
@@ -16,11 +16,12 @@ export const drawVectorPaintHoverPreview = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   nodes: Record<string, TSceneNode>,
-  hoveredFace: TVectorPaintFaceHover | null,
+  refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
+  const hoveredFace = refs.hover.hoveredVectorPaintFaceKeyRef.current;
   const node = hoveredFace ? getVectorEditingNode(nodes, hoveredFace.nodeId) : null;
 
   if (node && hoveredFace) {

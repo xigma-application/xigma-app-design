@@ -2,7 +2,7 @@
 import { VECTOR_CUT_LINE_STROKE, VECTOR_CUT_LINE_STROKE_WIDTH } from 'constant/canvas';
 
 // types
-import { TVectorCutPreview } from 'types/design/canvas/types';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TViewport } from 'types/design/types';
 
 // utils
@@ -13,11 +13,13 @@ export const drawVectorCutPreview = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
-  preview: TVectorCutPreview | null,
+  refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
+  const preview = refs.vectorCut.vectorCutPreviewRef.current;
+
   if (preview) {
     drawLine(
       gl,

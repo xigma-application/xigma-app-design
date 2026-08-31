@@ -2,8 +2,8 @@
 import { VECTOR_EDGE_HOVER_STROKE } from 'constant/canvas';
 
 // types
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TSceneNode, TViewport } from 'types/design/types';
-import { TVectorDraggedFillFaces } from 'types/design/canvas/types';
 
 // utils
 import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
@@ -16,11 +16,13 @@ export const drawVectorDraggedFillPreview = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   nodes: Record<string, TSceneNode>,
-  draggedFillFaces: TVectorDraggedFillFaces | null,
+  refs: TCanvasRefs,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
+  const draggedFillFaces = refs.vectorSnapshots.draggedVectorFillFacesRef.current;
+
   if (draggedFillFaces) {
     const faces = Object.entries(draggedFillFaces).flatMap(([nodeId, faceKeys]) => {
       const node = getVectorEditingNode(nodes, nodeId);

@@ -2,7 +2,7 @@
 import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 
 // types
-import { TPoint } from 'types/canvas';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TViewport } from 'types/design/types';
 import { ToolName } from 'types/design/enums';
 
@@ -13,13 +13,15 @@ export const drawVectorEraseBrush = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
-  brushCenter: TPoint | null,
-  diameterPx: number,
+  refs: TCanvasRefs,
   activeTool: ToolName,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
+  const brushCenter = refs.vectorErase.eraseBrushCenterRef.current;
+  const diameterPx = refs.vectorErase.eraserDiameterRef.current;
+
   if (activeTool === ToolName.erase && brushCenter) {
     const radius = diameterPx / 2 / viewport.zoom;
 

@@ -3,7 +3,8 @@ import { getNextSectionName } from 'store/design/utils/getNextSectionName';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TDraftEntity, TSceneNode, TSectionNode, TViewport } from 'types/design/types';
+import { TCanvasRefs } from 'types/design/canvas/types';
+import { TSceneNode, TSectionNode, TViewport } from 'types/design/types';
 import { TImageRenderContext } from '../../../types';
 
 // utils
@@ -14,12 +15,14 @@ export const drawDraftSectionNameLabel = (
   program: WebGLProgram,
   buffer: WebGLBuffer,
   imageContext: TImageRenderContext,
-  draftShape: TDraftEntity | null | undefined,
+  refs: TCanvasRefs,
   nodes: Record<string, TSceneNode>,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
+  const draftShape = refs.draftRef.current;
+
   if (draftShape?.type === NodeType.section) {
     const draftSection: TSectionNode = {
       fill: draftShape.fill,
