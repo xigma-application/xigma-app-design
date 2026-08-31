@@ -1,10 +1,12 @@
 // types
-import { TPoint } from 'types/canvas';
 import { TGlyphAtlasJson } from 'types/msdf';
+import { TPoint } from 'types/canvas';
 import { TTextPathSampler } from './pathSampler/types';
 
 // utils
-import { getCurvedSelectionEdges } from './getCurvedSelectionEdges';
+import { getCurvedTunnelPath } from './getCurvedTunnelPath/getCurvedTunnelPath';
+
+const polyline = (points: TPoint[]): TPoint[] => points.slice(0, -1).flatMap((point, index) => [point, points[index + 1]]);
 
 export const getCurvedSelectionOutlinePoints = (
   atlas: TGlyphAtlasJson,
@@ -18,24 +20,18 @@ export const getCurvedSelectionOutlinePoints = (
   start: number,
   end: number,
 ): TPoint[] => {
-  const edges = getCurvedSelectionEdges(atlas, content, fontSize, pathCenter, startOffset, flip, sampler, lineHeight, start, end);
+  const { bottom, top } = getCurvedTunnelPath(atlas, content, fontSize, pathCenter, startOffset, flip, sampler, lineHeight, start, end);
 
-  if (edges.length < 2) {
-    return [];
+  if (top.length !== 0) {
+    const includeCaps = Math.hypot(top[top.length - 1].x - top[0].x, top[top.length - 1].y - top[0].y) >= lineHeight;
+    const segments = [...polyline(top), ...polyline(bottom)];
+
+    if (includeCaps) {
+      segments.push(top[0], bottom[0], top[top.length - 1], bottom[bottom.length - 1]);
+    }
+
+    return segments;
   }
 
-  const first = edges[0];
-  const last = edges[edges.length - 1];
-  const includeCaps = Math.hypot(last.top.x - first.top.x, last.top.y - first.top.y) >= lineHeight;
-  const segments: TPoint[] = [];
-
-  for (let index = 0; index < edges.length - 1; index++) {
-    segments.push(edges[index].top, edges[index + 1].top, edges[index].bottom, edges[index + 1].bottom);
-  }
-
-  if (includeCaps) {
-    segments.push(first.top, first.bottom, last.top, last.bottom);
-  }
-
-  return segments;
+  return [];
 };

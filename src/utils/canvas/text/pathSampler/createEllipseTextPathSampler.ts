@@ -18,6 +18,7 @@ export const createEllipseTextPathSampler = (
     : buildEllipseArcLengthTable(box.width, box.height);
 
   return {
+    cornerLengths: [],
     isClosed: true,
     nearestOffsetAtPoint: (worldPoint) => getNearestEllipsePathOffset(worldPoint, { ...box, rotation: 0 }, table),
     sampleAtLength: (length) => getEllipsePathSample(box.width, box.height, table, length),

@@ -1,10 +1,10 @@
 // types
-import { TPoint } from 'types/canvas';
 import { TGlyphAtlasJson } from 'types/msdf';
+import { TPoint } from 'types/canvas';
 import { TTextPathSampler } from './pathSampler/types';
 
 // utils
-import { getCurvedSelectionEdges } from './getCurvedSelectionEdges';
+import { getCurvedTunnelPath } from './getCurvedTunnelPath/getCurvedTunnelPath';
 import { getQuadVertices } from '../getQuadVertices';
 
 export const getCurvedSelectionRibbonVertices = (
@@ -19,10 +19,12 @@ export const getCurvedSelectionRibbonVertices = (
   start: number,
   end: number,
 ): number[] => {
-  const edges = getCurvedSelectionEdges(atlas, content, fontSize, pathCenter, startOffset, flip, sampler, lineHeight, start, end);
+  const { bottom, top } = getCurvedTunnelPath(atlas, content, fontSize, pathCenter, startOffset, flip, sampler, lineHeight, start, end);
 
-  return edges.slice(0, -1).flatMap((edge, index) => {
-    const next = edges[index + 1];
-    return getQuadVertices(edge.top.x, edge.top.y, next.top.x, next.top.y, next.bottom.x, next.bottom.y, edge.bottom.x, edge.bottom.y);
+  return top.slice(0, -1).flatMap((point, index) => {
+    const nextTop = top[index + 1];
+    const nextBottom = bottom[index + 1];
+
+    return getQuadVertices(point.x, point.y, nextTop.x, nextTop.y, nextBottom.x, nextBottom.y, bottom[index].x, bottom[index].y);
   });
 };

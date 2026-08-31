@@ -13,7 +13,7 @@ const seg = (id: string, startId: string, endId: string): TVectorSegment => ({
   tangentStart: null,
 });
 
-const buildNode = (segments: TVectorSegment[]): TVectorNode => ({
+const buildNode = (segments: TVectorSegment[], vertexIds: string[] = []): TVectorNode => ({
   fillColor: '#000',
   filledFaceKeys: [],
   id: '1',
@@ -25,13 +25,15 @@ const buildNode = (segments: TVectorSegment[]): TVectorNode => ({
   strokeWidth: 1,
   type: NodeType.vector,
   vertexHandleModes: {},
-  vertices: {},
+  vertices: Object.fromEntries(vertexIds.map((id) => [id, { id, x: 0, y: 0 }])),
 });
 
 describe('getVectorChainOrder', () => {
-  it('should order an open a-b-c chain starting from the lexicographically-smaller open end', () => {
-    // mock
-    const node = buildNode([seg('s2', 'b', 'c'), seg('s1', 'a', 'b')]);
+  it('should order an open chain starting from whichever open end was drawn first, regardless of how the segments themselves are stored', () => {
+    // mock — segments stored out of draw order (s2 before s1), but the vertices map says 'a' was
+    // placed before 'c' — the walk must follow that draw order, not the segment storage order or
+    // the ids' own alphabetical order
+    const node = buildNode([seg('s2', 'b', 'c'), seg('s1', 'a', 'b')], ['a', 'b', 'c']);
 
     // before
     const order = getVectorChainOrder(node);
@@ -46,9 +48,18 @@ describe('getVectorChainOrder', () => {
     });
   });
 
+  it('should start an open chain from the first-drawn open end even when its id sorts *after* the other end', () => {
+    // mock — 'z' was drawn first (the chain's actual "A"), 'a' second, but 'a' < 'z' alphabetically;
+    // a naive id sort would start the walk from 'a' and read the chain backwards
+    const node = buildNode([seg('s1', 'z', 'a')], ['z', 'a']);
+
+    // result
+    expect(getVectorChainOrder(node)).toEqual({ entries: [{ reversed: false, segmentId: 's1' }], isClosed: false });
+  });
+
   it('should order a closed a-b-c-a triangle deterministically and report isClosed', () => {
     // mock
-    const node = buildNode([seg('s3', 'c', 'a'), seg('s1', 'a', 'b'), seg('s2', 'b', 'c')]);
+    const node = buildNode([seg('s3', 'c', 'a'), seg('s1', 'a', 'b'), seg('s2', 'b', 'c')], ['a', 'b', 'c']);
 
     // before
     const order = getVectorChainOrder(node);
@@ -66,7 +77,7 @@ describe('getVectorChainOrder', () => {
 
   it('should walk a segment in reverse when its stored direction opposes the chain-walk direction', () => {
     // mock — b->a instead of a->b
-    const node = buildNode([seg('s1', 'b', 'a'), seg('s2', 'b', 'c')]);
+    const node = buildNode([seg('s1', 'b', 'a'), seg('s2', 'b', 'c')], ['a', 'b', 'c']);
 
     // before
     const order = getVectorChainOrder(node);

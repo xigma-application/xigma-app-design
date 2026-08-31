@@ -4329,8 +4329,14 @@ needed, so nothing has to stay in sync when a vertex moves.
 `getVectorNetworkOpenEndpointIds.ts` share one degree-counting source of truth) feeds
 `getVectorChainOrder.ts`, which returns `null` on any vertex with degree > 2 (branching) or when the
 segment set isn't one connected walk (e.g. two disjoint loops in one node), and otherwise a
-canonical, deterministic traversal order (lexicographically-smallest starting vertex, so "left"/
-"right" never flip frame-to-frame for a profile that hasn't itself changed).
+canonical, deterministic traversal order — starting from whichever open end (or, for a closed loop,
+whichever vertex) was drawn *first*, per `node.vertices`'s own key insertion order, not an
+alphabetical id sort. That sort used to pick whichever endpoint's id happened to come first
+alphabetically — effectively random relative to draw order, so a Text on Path guide could read
+starting from its *last*-drawn point instead of its first, sometimes even flipping mid-edit as
+`vertices` keys shifted. Draw order is just as stable frame-to-frame as an id sort (it doesn't
+change unless the chain's own vertices do), but it also matches what a user actually expects "start
+of the path" to mean.
 `getEligibleVectorWidthNodes.ts` filters a list of node ids down to just the vector nodes with a
 valid chain order — the single function both the pointer-gesture arm resolver and the toolbar gate
 call into.

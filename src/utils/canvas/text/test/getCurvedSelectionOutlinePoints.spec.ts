@@ -24,16 +24,16 @@ describe('getCurvedSelectionOutlinePoints', () => {
     expect(getCurvedSelectionOutlinePoints(ATLAS, 'AAA', 20, CENTER, 0, false, SAMPLER, 40, 1, 1)).toEqual([]);
   });
 
-  it('should build the top and bottom curve segments plus start/end caps when the selection ends are far enough apart', () => {
+  it('should build one continuous top polyline, one continuous bottom polyline, plus start/end caps when the selection ends are far enough apart', () => {
     // before — 10 selected "A"s (12 units advance each) span ~120 units of a ~628-unit
     // circumference, far more than the 40-unit lineHeight, so the two caps can't cross
     const content = 'A'.repeat(20);
     const edges = getCurvedSelectionEdges(ATLAS, content, 20, CENTER, 0, false, SAMPLER, 40, 0, 10);
     const outline = getCurvedSelectionOutlinePoints(ATLAS, content, 20, CENTER, 0, false, SAMPLER, 40, 0, 10);
 
-    // result — (edges.length - 1) curve segments * 4 points each, plus 4 points for the two caps
+    // result — top polyline (edges.length - 1 pairs) then bottom polyline (same), plus 4 cap points
     expect(outline).toHaveLength((edges.length - 1) * 4 + 4);
-    expect(outline.slice(0, 4)).toEqual([edges[0].top, edges[1].top, edges[0].bottom, edges[1].bottom]);
+    expect(outline.slice(0, 4)).toEqual([edges[0].top, edges[1].top, edges[1].top, edges[2].top]);
     expect(outline.slice(-4)).toEqual([edges[0].top, edges[0].bottom, edges[edges.length - 1].top, edges[edges.length - 1].bottom]);
   });
 

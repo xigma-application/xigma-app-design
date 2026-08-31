@@ -100,19 +100,19 @@ describe('sampleVectorChainAtLength', () => {
     expect((((forward - backward) % 360) + 360) % 360).toBeCloseTo(0);
   });
 
-  it('should sample from the reading-corrected end when the chain-order tie-break picked the right-hand vertex as the raw start', () => {
-    // mock — 'alpha' sorts before 'zulu' and gets picked as the chain's raw start, even though it
-    // sits on the right (100,0) — getChainSampleData re-walks from the other end for this case
+  it('should sample from the first-drawn vertex at length 0, even when it sits on the right', () => {
+    // mock — 'alpha' (100,0) was drawn before 'zulu' (0,0); length 0 must land on 'alpha'
+    // regardless of it sitting on the right — draw order decides the start, not screen position
     const node = buildNode({
       segments: { s1: seg('s1', 'alpha', 'zulu') },
       vertices: { alpha: { id: 'alpha', x: 100, y: 0 }, zulu: { id: 'zulu', x: 0, y: 0 } },
     });
     const data = getChainSampleData(node) as TChainSampleData;
 
-    // result — length 0 lands on the LEFT world point (0,0), centre-relative (-50,-50)
+    // result — length 0 lands on 'alpha' (100,0), centre-relative (50,-50)
     const sample = sampleVectorChainAtLength(CENTER, data, 0);
 
-    expect(sample.x).toBeCloseTo(-50);
+    expect(sample.x).toBeCloseTo(50);
     expect(sample.y).toBeCloseTo(-50);
   });
 

@@ -2,10 +2,8 @@
 import { TVectorNode } from 'types/design/types';
 
 // utils
-import { getIsChainReadingReversed } from './getIsChainReadingReversed';
 import { getVectorChainArcLengthTable, type TVectorChainArcLengthSample } from '../../../vectorNetwork/getVectorChainArcLengthTable';
 import { getVectorChainOrder, type TVectorChainOrder } from '../../../vectorNetwork/getVectorChainOrder/getVectorChainOrder';
-import { walkVectorChainFrom } from '../../../vectorNetwork/getVectorChainOrder/walkVectorChainFrom';
 
 export type TChainSampleData = {
   chainOrder: TVectorChainOrder;
@@ -15,36 +13,13 @@ export type TChainSampleData = {
 
 const cache = new WeakMap<TVectorNode, TChainSampleData | null>();
 
-const getChainEndVertexId = (rendered: TVectorNode, chainOrder: TVectorChainOrder): string => {
-  const lastEntry = chainOrder.entries[chainOrder.entries.length - 1];
-  const segment = rendered.segments[lastEntry.segmentId];
-
-  return lastEntry.reversed ? segment.startId : segment.endId;
-};
-
 export const getChainSampleData = (vectorNode: TVectorNode): TChainSampleData | null => {
   const cached = cache.get(vectorNode);
 
   if (!cached) {
     const rendered = vectorNode;
     const chainOrder = getVectorChainOrder(rendered);
-    let data: TChainSampleData | null = null;
-
-    if (chainOrder) {
-      const table = getVectorChainArcLengthTable(rendered, chainOrder);
-
-      if (getIsChainReadingReversed(rendered, chainOrder.isClosed, table)) {
-        const reversedChainOrder: TVectorChainOrder = {
-          entries: walkVectorChainFrom(rendered, getChainEndVertexId(rendered, chainOrder)),
-          isClosed: chainOrder.isClosed,
-        };
-
-        data = { chainOrder: reversedChainOrder, rendered, table: getVectorChainArcLengthTable(rendered, reversedChainOrder) };
-      } else {
-        data = { chainOrder, rendered, table };
-      }
-    }
-
+    const data = chainOrder ? { chainOrder, rendered, table: getVectorChainArcLengthTable(rendered, chainOrder) } : null;
     cache.set(vectorNode, data);
 
     return data;

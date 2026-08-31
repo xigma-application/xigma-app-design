@@ -343,7 +343,7 @@ fragment shader (§3) reconstructs a crisp edge procedurally at *any* zoom via
   bitmap approach. A parallel `buildCurvedGlyphQuads.ts` handles text-on-a-path (arc-length table
   instead of a straight baseline) — start there for curved-text work specifically.
 - **`text/pathSampler/`** — the ellipse-vs-vector split behind curved text. Every curved-text
-  primitive (`buildCurvedGlyphQuads`, `getCurvedCaretPoint`, `getCurvedSelectionEdges`,
+  primitive (`buildCurvedGlyphQuads`, `getCurvedCaretPoint`, `getCurvedTunnelPath` (below),
   `getCurvedCaretIndexAtPoint`, `isPointInCurvedText`, `getPathTextHandlePoint`,
   `getNearestPathOffsetAtPoint`, the `drawCurved*`/`drawEditingCaretAndSelection` render-side
   files) takes a `TTextPathSampler` (`{ isClosed, totalLength, sampleAtLength, nearestOffsetAtPoint }`)
@@ -357,7 +357,24 @@ fragment shader (§3) reconstructs a crisp edge procedurally at *any* zoom via
   `getEllipsePathSample`/`getNearestEllipsePathOffset` helpers (byte-identical behaviour for ellipse
   paths). `getOrBuildTextGeometry.ts`'s cache key gains a `getVectorChainGeometrySignature(pathNode)`
   suffix (WeakMap-cached structural fingerprint) so vector-bound text re-renders on reshape even when
-  the vector's bbox happens not to change.
+  the vector's bbox happens not to change. `createVectorTextPathSampler` reads the chain's own
+  `getVectorChainOrder` walk as-is — text always starts reading from whichever vertex was drawn
+  first, no separate "prefer rightward" correction on top (§ vector-network.md's chain-order note).
+- **`text/getCurvedTunnelPath/`** — the "koryto" (tunnel): the selection-highlight ribbon and
+  editing outline for curved text, built from the **guide path itself**, not from glyph boundaries,
+  so it keeps a clean shape through a sharp corner instead of inheriting a kink from wherever a
+  glyph happened to straddle it. `buildTunnelCenterline.ts` walks the path in dense
+  `CURVED_TUNNEL_SAMPLE_STEP_PX` steps between two arc-lengths, forcing an exact sample at every
+  `sampler.cornerLengths` entry in range; `offsetBoundary.ts` shifts that centerline `width` px
+  along its own normal and reconnects each pair of shifted segments with a full line-line
+  intersection miter (`intersectOffsetLines.ts`) — never a bevel, so a sharp-enough corner is
+  allowed to self-intersect for a moment, matching Figma's own reference rather than clipping it.
+  The dense samples nearest a concave corner would otherwise draw as a stray backtrack past the
+  miter (their naive per-sample offset was placed before the fold was known) —
+  `offsetBoundary` **freezes** those points onto the miter's own coordinates *in place* instead of
+  removing them, so `top` and `bottom` always end up the same length (`2 * centerline.length - 2`,
+  regardless of width or which side of a corner is concave) and stay index-aligned with each other;
+  a caller zipping `top[i]`/`bottom[i]` into a quad strip depends on that.
 - `text/drawMsdfText.ts` is the runtime entry point — computes
   `u_screenPxRange = distanceRange * effectiveFontSize * zoom / atlas.info.size` per draw (this is
   what keeps edges pixel-sharp across zoom), otherwise follows the same boilerplate as `drawImage.ts`.

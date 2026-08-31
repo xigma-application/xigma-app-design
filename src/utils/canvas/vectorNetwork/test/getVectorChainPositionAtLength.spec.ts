@@ -77,7 +77,7 @@ describe('getVectorChainPositionAtLength', () => {
     expect(position.t).toBeCloseTo(0.3, 5);
   });
 
-  it('should snap to the next segment sample when the target falls between two samples that straddle a segment boundary', () => {
+  it('should interpolate from the vertex (t=0) up to the next segment sample when the target falls between two samples that straddle a segment boundary', () => {
     // mock — a(0,0)->b(10,0)->c(110,0), two straight segments of very different lengths
     const node = buildNode({
       segments: { s1: seg('s1', 'a', 'b'), s2: seg('s2', 'b', 'c') },
@@ -89,12 +89,28 @@ describe('getVectorChainPositionAtLength', () => {
     const lower = table[boundaryIndex - 1];
     const upper = table[boundaryIndex];
 
-    // before — a target length exactly between the two samples straddling the s1/s2 boundary
+    // before — a target length exactly halfway from the vertex (lower.length) to the next recorded
+    // s2 sample — `lower` itself is s1's own last sample, filed under s1's t, not s2's implicit t=0
     const targetLength = (lower.length + upper.length) / 2;
     const position = getVectorChainPositionAtLength(table, targetLength);
 
+    // result — halfway from the vertex's implicit t=0 to upper.t, not frozen at upper.t
+    expect(position.segmentId).toBe(upper.segmentId);
+    expect(position.t).toBeCloseTo(upper.t / 2, 10);
+  });
+
+  it('should fall back to ratio 0 without dividing by zero when a segment-boundary sample has a zero-length span', () => {
+    // mock — a hand-built table: two different segments whose recorded samples land at the exact
+    // same cumulative length (a zero-length span straddling the boundary)
+    const table = [
+      { length: 0, segmentId: 's1', t: 0 },
+      { length: 0, segmentId: 's2', t: 1 },
+    ];
+
     // result
-    expect(position).toEqual({ segmentId: upper.segmentId, t: upper.t });
+    const position = getVectorChainPositionAtLength(table, 0);
+
+    expect(position).toEqual({ segmentId: 's2', t: 0 });
   });
 
   it('should fall back to the lower sample without dividing by zero when two same-segment samples share a length', () => {

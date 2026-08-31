@@ -15,14 +15,16 @@ export const getVectorChainOrder = (node: TVectorNode): TVectorChainOrder | null
     const degreeByVertexId = getVectorVertexDegrees(node.segments);
 
     if ([...degreeByVertexId.values()].every((degree) => degree <= 2)) {
+      const vertexIds = Object.keys(node.vertices);
+      const byDrawOrder = (a: string, b: string): number => vertexIds.indexOf(a) - vertexIds.indexOf(b);
       const openEndpointIds = [...degreeByVertexId.entries()]
         .filter(([, degree]) => degree === 1)
         .map(([vertexId]) => vertexId)
-        .sort();
+        .sort(byDrawOrder);
       const isClosed = openEndpointIds.length === 0;
 
       if (isClosed || openEndpointIds.length === 2) {
-        const startVertexId = isClosed ? [...degreeByVertexId.keys()].sort()[0] : openEndpointIds[0];
+        const startVertexId = isClosed ? [...degreeByVertexId.keys()].sort(byDrawOrder)[0] : openEndpointIds[0];
         const entries = walkVectorChain(segments, buildSegmentsByVertex(segments), startVertexId);
 
         if (entries.length === segments.length) {

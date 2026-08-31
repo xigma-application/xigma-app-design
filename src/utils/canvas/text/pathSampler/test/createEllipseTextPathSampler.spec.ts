@@ -13,6 +13,11 @@ describe('createEllipseTextPathSampler', () => {
     expect(createEllipseTextPathSampler(BOX).isClosed).toBe(true);
   });
 
+  it('should report no corner lengths — an ellipse has no sharp vertices to fold a join at', () => {
+    // result
+    expect(createEllipseTextPathSampler(BOX).cornerLengths).toEqual([]);
+  });
+
   it('should report the same totalLength as getEllipseCircumference', () => {
     // mock
     const table = buildEllipseArcLengthTable(BOX.width, BOX.height);

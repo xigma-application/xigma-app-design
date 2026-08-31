@@ -65,31 +65,29 @@ describe('createVectorTextPathSampler', () => {
     expect(sample.y).toBeCloseTo(-50);
   });
 
-  it('should still start reading at the left (length 0) and point rightward, even when the chain-order tie-break picks the right-hand vertex as the raw start', () => {
-    // mock — 'alpha' sorts before 'zulu' and so gets picked as the chain's raw start by
-    // getVectorChainOrder, even though it sits on the right (100,0); without the reading-direction
-    // correction this would make text start on the right and read backwards
+  it('should start reading from the first-drawn vertex regardless of whether it sits on the left or right', () => {
+    // mock — 'alpha' (100,0) was drawn before 'zulu' (0,0); with no left/right correction, text
+    // starts at alpha and reads back toward zulu (leftward), not the other way around
     const node = buildNode({
       segments: { s1: seg('s1', 'alpha', 'zulu') },
       vertices: { alpha: { id: 'alpha', x: 100, y: 0 }, zulu: { id: 'zulu', x: 0, y: 0 } },
     });
     const sampler = createVectorTextPathSampler(BOX, node);
 
-    // result — length 0 is the LEFT point (0,0) -> centre-relative (-50,-50), angle pointing +x
+    // result — length 0 is 'alpha' (100,0) -> centre-relative (50,-50), angle pointing -x (toward zulu)
     const start = sampler.sampleAtLength(0);
     const end = sampler.sampleAtLength(sampler.totalLength);
 
-    expect(start.x).toBeCloseTo(-50);
+    expect(start.x).toBeCloseTo(50);
     expect(start.y).toBeCloseTo(-50);
-    expect(((start.angleDegrees % 360) + 360) % 360).toBeCloseTo(0);
-    expect(end.x).toBeCloseTo(50);
+    expect(((start.angleDegrees % 360) + 360) % 360).toBeCloseTo(180);
+    expect(end.x).toBeCloseTo(-50);
     expect(end.y).toBeCloseTo(-50);
   });
 
-  it('should keep nearestOffsetAtPoint consistent with the reading-corrected sampleAtLength direction', () => {
-    // mock — same right-hand-tie-break chain as above; a point near the LEFT (world) endpoint must
-    // resolve to a fractional offset near 0, matching where sampleAtLength(0) actually renders the
-    // first glyph (nearestOffsetAtPoint's offset is a 0..1 fraction of totalLength, not a length)
+  it("should keep nearestOffsetAtPoint consistent with sampleAtLength's draw-order start", () => {
+    // mock — same chain as above: 'alpha' (100,0), drawn first, is the start (offset 0); 'zulu'
+    // (0,0) is the end (offset 1) — nearestOffsetAtPoint's offset is a 0..1 fraction of totalLength
     const node = buildNode({
       segments: { s1: seg('s1', 'alpha', 'zulu') },
       vertices: { alpha: { id: 'alpha', x: 100, y: 0 }, zulu: { id: 'zulu', x: 0, y: 0 } },
@@ -97,11 +95,11 @@ describe('createVectorTextPathSampler', () => {
     const sampler = createVectorTextPathSampler(BOX, node);
 
     // result
-    const nearLeft = sampler.nearestOffsetAtPoint({ x: 5, y: 0 });
-    const nearRight = sampler.nearestOffsetAtPoint({ x: 95, y: 0 });
+    const nearAlpha = sampler.nearestOffsetAtPoint({ x: 95, y: 0 });
+    const nearZulu = sampler.nearestOffsetAtPoint({ x: 5, y: 0 });
 
-    expect(nearLeft.offset).toBeCloseTo(0.05);
-    expect(nearRight.offset).toBeCloseTo(0.95);
+    expect(nearAlpha.offset).toBeCloseTo(0.05);
+    expect(nearZulu.offset).toBeCloseTo(0.95);
   });
 
   it('should return the same left-to-right tangent angle whether the segment is stored a->b or b->a', () => {
@@ -191,7 +189,7 @@ describe('createVectorTextPathSampler', () => {
     expect(second).toEqual(first);
   });
 
-  it('should snap to the next segment own sample when a length falls between two samples that straddle a segment boundary', () => {
+  it('should interpolate from the vertex (t=0) up to the next segment sample when a length falls between two samples that straddle a segment boundary', () => {
     // mock — a(0,0)->b(10,0)->c(110,0), two straight segments of very different lengths (mirrors
     // the equivalent getVectorChainPositionAtFraction case)
     const node = buildNode({
@@ -208,9 +206,9 @@ describe('createVectorTextPathSampler', () => {
     // before — a length exactly between the two samples straddling the s1/s2 boundary
     const targetLength = (lower.length + upper.length) / 2;
     const sample = sampler.sampleAtLength(targetLength);
-    const expectedWorld = getVectorSegmentPointAtT(node, node.segments[upper.segmentId], upper.t);
+    const expectedWorld = getVectorSegmentPointAtT(node, node.segments[upper.segmentId], upper.t / 2);
 
-    // result — snaps to the upper (next-segment) sample, not an interpolation across the boundary
+    // result — halfway from the vertex's implicit t=0 up to upper.t, not snapped straight to upper.t
     expect(sample.x).toBeCloseTo(expectedWorld.x - BOX.width / 2);
     expect(sample.y).toBeCloseTo(expectedWorld.y - BOX.height / 2);
   });
@@ -245,6 +243,39 @@ describe('createVectorTextPathSampler', () => {
     expect(sampler.sampleAtLength(10)).toEqual({ angleDegrees: 0, x: 0, y: 0 });
   });
 
+  it('should report no corner lengths for a single-segment chain (nothing to fold at)', () => {
+    // mock
+    const node = buildNode({
+      segments: { s1: seg('s1', 'a', 'b') },
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    });
+
+    // result
+    expect(createVectorTextPathSampler(BOX, node).cornerLengths).toEqual([]);
+  });
+
+  it('should report the shared vertex between two segments as a corner length', () => {
+    // mock — a(0,0)->b(10,0)->c(110,0), the chain's own vertex at b sits 10 units in
+    const node = buildNode({
+      segments: { s1: seg('s1', 'a', 'b'), s2: seg('s2', 'b', 'c') },
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 10, y: 0 }, c: { id: 'c', x: 110, y: 0 } },
+    });
+
+    // result
+    expect(createVectorTextPathSampler(BOX, node).cornerLengths).toEqual([10]);
+  });
+
+  it('should also report the seam at length 0 as a corner for a closed loop', () => {
+    // mock — a(0,0)->b(100,0)->a, a closed 2-segment loop
+    const node = buildNode({
+      segments: { s1: seg('s1', 'a', 'b'), s2: seg('s2', 'b', 'a') },
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
+    });
+
+    // result — the vertex at b (length 100) plus the wrap-around seam back to a (length 0)
+    expect(createVectorTextPathSampler(BOX, node).cornerLengths).toEqual([0, 100]);
+  });
+
   it('should fall back to a degenerate zero-length sampler for a branching (ineligible) network', () => {
     // mock — b is a 3-way branch, getVectorChainOrder returns null
     const node = buildNode({
@@ -261,6 +292,7 @@ describe('createVectorTextPathSampler', () => {
     // result
     expect(sampler.isClosed).toBe(false);
     expect(sampler.totalLength).toBe(0);
+    expect(sampler.cornerLengths).toEqual([]);
     expect(sampler.sampleAtLength(10)).toEqual({ angleDegrees: 0, x: 0, y: 0 });
     expect(sampler.nearestOffsetAtPoint({ x: 999, y: 999 })).toEqual({ distance: Infinity, offset: 0, point: { x: 50, y: 50 } });
   });
