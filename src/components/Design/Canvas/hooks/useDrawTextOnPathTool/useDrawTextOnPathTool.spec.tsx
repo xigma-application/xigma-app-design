@@ -232,7 +232,7 @@ describe('useDrawTextOnPathTool behaviors', () => {
     expect(design.activeTool).toBe(ToolName.default);
   });
 
-  it('should attach text to an eligible vector on a plain click, clearing its fill and skipping the ellipse path', () => {
+  it('should attach text to an eligible vector on a plain click, clearing its fill, skipping the ellipse path, and starting right at the clicked point', () => {
     // mock — a straight a(6000,6000)->b(6100,6000) open chain
     store.dispatch(setActiveTool(ToolName.textOnPath));
 
@@ -243,19 +243,21 @@ describe('useDrawTextOnPathTool behaviors', () => {
     // before
     renderTextOnPathTool(canvasRef, draftRef);
 
-    // action — a plain click directly on the stroke, no drag
+    // action — a plain click at the chain's own midpoint, no drag
     act(() => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 6050, 6000));
       canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 6050, 6000));
     });
 
-    // result — no new path node was created; the vector itself became the path
+    // result — no new path node was created; the vector itself became the path, reading starts
+    // from the clicked midpoint (offset 0.5) instead of always the chain's own start
     const { design } = store.getState();
     const page = design.pages[design.activePageId];
 
     expect(page.nodes[vectorId]).toMatchObject({ fillColor: null, fillColorOverrideByKey: {}, filledFaceKeys: [] });
     expect(page.selectedIds).toEqual([vectorId]);
-    expect(design.editingTextBox).toMatchObject({ pathFlip: false, pathId: vectorId, pathStartOffset: 0, rotation: 0 });
+    expect(design.editingTextBox).toMatchObject({ pathFlip: false, pathId: vectorId, rotation: 0 });
+    expect(design.editingTextBox?.pathStartOffset).toBeCloseTo(0.5, 5);
     expect(design.activeTool).toBe(ToolName.default);
     expect(draftRef.current).toBeNull();
   });

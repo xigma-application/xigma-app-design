@@ -31,7 +31,7 @@ export const handlePointerUp = (
 ): void => {
   if (startRef.current) {
     if (attachTargetIdRef.current) {
-      attachToVector(attachTargetIdRef.current, dispatch);
+      attachToVector(attachTargetIdRef.current, startRef.current, dispatch);
     } else {
       const rect = toDraftRectWithDefault(
         startRef.current,

@@ -3,17 +3,13 @@ import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
 export const dropTextPathGuides = (selectedIds: string[], nodes: Record<string, TSceneNode>): string[] => {
-  const boundVectorIds = new Set<string>();
+  const boundGuideIds = new Set<string>();
 
   Object.values(nodes).forEach((node) => {
     if (node.type === NodeType.text && node.pathId) {
-      boundVectorIds.add(node.pathId);
+      boundGuideIds.add(node.pathId);
     }
   });
 
-  return selectedIds.filter((id) => {
-    const node = nodes[id];
-
-    return !node || (node.type !== NodeType.path && !boundVectorIds.has(id));
-  });
+  return selectedIds.filter((id) => !boundGuideIds.has(id));
 };

@@ -394,8 +394,9 @@ describe('handleSetSelection', () => {
     expect(getActivePage(state).selectedIds).toEqual([vector.id, frame.id]);
   });
 
-  it('should drop an orphaned ellipse guide (no text references it) too — a `NodeType.path` id is never a real selectable shape', () => {
-    // mock
+  it('should keep a freshly drawn ellipse guide selected while no text has bound to it yet', () => {
+    // mock — the moment right after drawing a text-on-path ellipse, before startTextEdit's draft
+    // ever becomes a real committed text node — the guide is legitimately the thing selected here
     const path = buildPathNode();
     const state = buildState({ [path.id]: path }, []);
 
@@ -403,6 +404,6 @@ describe('handleSetSelection', () => {
     handleSetSelection(state, [path.id]);
 
     // result
-    expect(getActivePage(state).selectedIds).toEqual([]);
+    expect(getActivePage(state).selectedIds).toEqual([path.id]);
   });
 });
