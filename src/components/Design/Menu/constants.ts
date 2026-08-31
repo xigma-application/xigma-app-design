@@ -6,7 +6,6 @@ export const translationNameSpace = `${parentNameSpace}.menu`;
 export const NODE_MENU_ADD_AUTO_LAYOUT_KEY = `${translationNameSpace}.addAutoLayout`;
 export const NODE_MENU_ADD_MOTION_KEY = `${translationNameSpace}.addMotion`;
 export const NODE_MENU_BRING_TO_FRONT_KEY = `${translationNameSpace}.bringToFront`;
-export const NODE_MENU_CONVERT_TO_FRAME_KEY = `${translationNameSpace}.convertToFrame`;
 export const NODE_MENU_CONVERT_TO_SECTION_KEY = `${translationNameSpace}.convertToSection`;
 export const NODE_MENU_COPY_KEY = `${translationNameSpace}.copy`;
 export const NODE_MENU_COPY_PASTE_AS_KEY = `${translationNameSpace}.copyPasteAs`;

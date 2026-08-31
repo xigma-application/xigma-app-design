@@ -245,34 +245,4 @@ describe('NodeContextMenu', () => {
     expect(screen.queryByText('Set as thumbnail')).not.toBeInTheDocument();
     expect(screen.queryByText('More layout options')).not.toBeInTheDocument();
   });
-
-  it('should show the section-only items (Convert to frame, Ungroup, Set as thumbnail, More layout options) for a section node', () => {
-    // before
-    renderNodeContextMenu({ nodeType: NodeType.section });
-
-    // result
-    expect(screen.getByText('Convert to frame')).toBeInTheDocument();
-    expect(screen.getByText('Ungroup')).toBeInTheDocument();
-    expect(screen.getByText('Set as thumbnail')).toBeInTheDocument();
-    expect(screen.getByText('More layout options')).toBeInTheDocument();
-  });
-
-  it('should hide Frame/Group/Flatten/Use-as-mask/Auto-layout/Create-component/Flip and the Send-to-Make/Add-motion items for a section node', () => {
-    // before
-    renderNodeContextMenu({ nodeType: NodeType.section });
-
-    // result
-    expect(screen.queryByText('Send to Make')).not.toBeInTheDocument();
-    expect(screen.queryByText('Add motion')).not.toBeInTheDocument();
-    expect(screen.queryByText('Convert to section')).not.toBeInTheDocument();
-    expect(screen.queryByText('Group selection')).not.toBeInTheDocument();
-    expect(screen.queryByText('Frame selection')).not.toBeInTheDocument();
-    expect(screen.queryByText('Flatten')).not.toBeInTheDocument();
-    expect(screen.queryByText('Outline stroke')).not.toBeInTheDocument();
-    expect(screen.queryByText('Use as mask')).not.toBeInTheDocument();
-    expect(screen.queryByText('Add auto layout')).not.toBeInTheDocument();
-    expect(screen.queryByText('Create component')).not.toBeInTheDocument();
-    expect(screen.queryByText('Flip horizontal')).not.toBeInTheDocument();
-    expect(screen.queryByText('Flip vertical')).not.toBeInTheDocument();
-  });
 });
