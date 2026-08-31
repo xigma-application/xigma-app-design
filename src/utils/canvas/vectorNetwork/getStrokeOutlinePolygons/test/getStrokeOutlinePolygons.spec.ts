@@ -75,4 +75,36 @@ describe('getStrokeOutlinePolygons', () => {
     expect(result.inner).toBeNull();
     expect(result.outer).toHaveLength(6);
   });
+
+  it('should drop a vertex with no valid offset on either side, for a closed loop with a duplicated point', () => {
+    // mock — a square with its first point repeated, producing one zero-length segment
+    const square = [
+      { x: 0, y: 0 },
+      { x: 0, y: 0 },
+      { x: 10, y: 0 },
+      { x: 10, y: 10 },
+      { x: 0, y: 10 },
+    ];
+
+    // action
+    const result = getStrokeOutlinePolygons(square, 1, true);
+
+    // result — the duplicated vertex contributes no join point on either side, the other 4 do
+    expect(result.outer.length).toBeLessThan(10);
+  });
+
+  it('should drop a vertex with no valid offset on either side, for a degenerate open path', () => {
+    // mock — two coincident points, so the only segment has zero length
+    const result = getStrokeOutlinePolygons(
+      [
+        { x: 5, y: 5 },
+        { x: 5, y: 5 },
+      ],
+      1,
+      false,
+    );
+
+    // result — no valid offset anywhere, so no band points at all
+    expect(result.outer).toEqual([]);
+  });
 });

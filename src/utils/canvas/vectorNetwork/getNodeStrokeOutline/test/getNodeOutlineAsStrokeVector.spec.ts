@@ -4,6 +4,7 @@ import { TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getNodeOutlineAsStrokeVector } from '../getNodeOutlineAsStrokeVector';
+import { groupFilledFacesByColor } from 'utils/canvas/drawVectorNode/groupFilledFacesByColor';
 
 const buildRectangle = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
   fill: '#ff0000',
@@ -40,6 +41,13 @@ describe('getNodeOutlineAsStrokeVector', () => {
     expect(result?.parentId).toBe('frame-1');
     expect(result?.filledFaceKeys.length).toBeGreaterThanOrEqual(2);
     expect(Object.values(result?.fillColorOverrideByKey ?? {})).toEqual(expect.arrayContaining(['#ff0000', '#000000']));
+
+    // every declared face must actually resolve back to real points, not just exist as a key —
+    // this is exactly the check that would have caught the bridged-ring rendering bug
+    const facesByColor = groupFilledFacesByColor(result!);
+    const totalResolvedFaces = [...facesByColor.values()].reduce((sum, faces) => sum + faces.length, 0);
+
+    expect(totalResolvedFaces).toBe(result?.filledFaceKeys.length);
   });
 
   it('should merge an existing Vector’s own geometry (unchanged) with its stroke outline', () => {
@@ -66,6 +74,34 @@ describe('getNodeOutlineAsStrokeVector', () => {
     expect(result?.id).toBe('vector-1');
     expect(Object.keys(result?.vertices ?? {})).toEqual(expect.arrayContaining(['a', 'b']));
     expect(Object.keys(result?.vertices ?? {}).length).toBeGreaterThan(2);
+  });
+
+  it('should fall back to an empty fill color when merging a Vector with no fillColor of its own', () => {
+    // mock — a closed 3-point vector path with no fill set (fillColor: null)
+    const node: TVectorNode = {
+      fillColor: null,
+      filledFaceKeys: [],
+      id: 'vector-2',
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {
+        s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null },
+        s2: { endId: 'c', id: 's2', startId: 'b', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'a', id: 's3', startId: 'c', tangentEnd: null, tangentStart: null },
+      },
+      strokeColor: '#000000',
+      strokeWidth: 4,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 10, y: 0 }, c: { id: 'c', x: 0, y: 10 } },
+    };
+
+    // action
+    const result = getNodeOutlineAsStrokeVector(node);
+
+    // result
+    expect(result?.fillColor).toBe('');
   });
 
   it('should return the stroke outline vector alone for a Line, since it has no fill of its own', () => {

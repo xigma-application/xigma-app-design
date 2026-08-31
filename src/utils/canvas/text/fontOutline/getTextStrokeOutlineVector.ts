@@ -16,11 +16,7 @@ const getContourStrokeBand = (edges: TLoopEdge[], halfWidth: number, strokeColor
   const points = flattenEdgeLoop(edges);
   const { inner, outer } = getStrokeOutlinePolygons(points, halfWidth, true);
 
-  return buildVectorNodeFromLoops(
-    inner ? [outer, inner] : [outer],
-    { id: nanoid(), name: 'Contour', parentId: null, rotation: 0 },
-    strokeColor,
-  );
+  return buildVectorNodeFromLoops([outer, inner], { id: nanoid(), name: 'Contour', parentId: null, rotation: 0 }, strokeColor);
 };
 
 export const getTextStrokeOutlineVector = async (atlas: TGlyphAtlasJson, node: TTextNode): Promise<TVectorNode | null> => {

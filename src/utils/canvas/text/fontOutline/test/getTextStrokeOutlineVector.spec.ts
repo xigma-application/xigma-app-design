@@ -9,6 +9,7 @@ vi.mock('../getTextGlyphContours', () => ({ getTextGlyphContours }));
 
 // utils
 import { getTextStrokeOutlineVector } from '../getTextStrokeOutlineVector';
+import { groupFilledFacesByColor } from 'utils/canvas/drawVectorNode/groupFilledFacesByColor';
 
 const ATLAS = {} as TGlyphAtlasJson;
 
@@ -51,6 +52,15 @@ describe('getTextStrokeOutlineVector', () => {
     expect(getTextGlyphContours).not.toHaveBeenCalled();
   });
 
+  it('should return null when the node has no strokeWidth set at all', async () => {
+    // action
+    const result = await getTextStrokeOutlineVector(ATLAS, buildNode({ strokeWidth: undefined }));
+
+    // result
+    expect(result).toBeNull();
+    expect(getTextGlyphContours).not.toHaveBeenCalled();
+  });
+
   it('should return null for text bound to a path', async () => {
     // action
     const result = await getTextStrokeOutlineVector(ATLAS, buildNode({ pathId: 'path-1' }));
@@ -71,8 +81,9 @@ describe('getTextStrokeOutlineVector', () => {
     expect(result?.fillColor).toBe('#000000');
     expect(result?.name).toBe('Text outline');
     expect(result?.parentId).toBe('frame-1');
-    // one contour, well within the shape's bounds -> one ring-shaped stroke band
-    expect(result?.filledFaceKeys).toHaveLength(1);
+    // one contour -> a ring-shaped stroke band, its outer and inner edge each their own face
+    expect(result?.filledFaceKeys).toHaveLength(2);
+    expect(groupFilledFacesByColor(result!).get('#000000')).toHaveLength(2);
   });
 
   it('should return null when there are no visible glyph contours', async () => {

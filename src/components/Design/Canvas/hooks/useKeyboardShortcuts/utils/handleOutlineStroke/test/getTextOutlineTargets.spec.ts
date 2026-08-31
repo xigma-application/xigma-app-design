@@ -22,7 +22,7 @@ const buildOutline = (): TVectorNode => ({
   parentId: null,
   rotation: 0,
   segments: {},
-  strokeColor: null,
+  strokeColor: '',
   strokeWidth: 0,
   type: NodeType.vector,
   vertexHandleModes: {},

@@ -84,4 +84,20 @@ describe('getTextGlyphContours', () => {
     expect(edges[0].end).toEqual({ x: 10, y: 0 });
     expect(edges[0].tangentStart).toEqual({ x: -2, y: -4 });
   });
+
+  it('should mirror every point and negate the matching tangent axis when flipY is set', async () => {
+    // mock — same curved contour, mirrored vertically this time
+    getPath.mockReturnValueOnce({
+      commands: [{ type: 'M', x: 0, y: 0 }, { type: 'C', x: 10, x1: 2, x2: 8, y: 0, y1: -4, y2: 4 }, { type: 'Z' }],
+    });
+    const node = buildNode({ flipY: true, height: 20 });
+
+    // action
+    const [[edges]] = await getTextGlyphContours(ATLAS, node);
+
+    // result — flipTextPoint mirrors y around (2*node.y + node.height); tangent's y axis negates
+    expect(edges[0].start).toEqual({ x: 0, y: 20 });
+    expect(edges[0].end).toEqual({ x: 10, y: 20 });
+    expect(edges[0].tangentStart).toEqual({ x: 2, y: 4 });
+  });
 });

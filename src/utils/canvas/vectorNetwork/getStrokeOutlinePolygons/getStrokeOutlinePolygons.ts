@@ -41,7 +41,11 @@ const getOpenPathSide = (points: TPoint[], halfWidth: number, sign: 1 | -1): TPo
   });
 };
 
-export const getStrokeOutlinePolygons = (points: TPoint[], halfWidth: number, closed: boolean): TStrokeOutlineLoops =>
-  closed
+export function getStrokeOutlinePolygons(points: TPoint[], halfWidth: number, closed: true): { inner: TPoint[]; outer: TPoint[] };
+export function getStrokeOutlinePolygons(points: TPoint[], halfWidth: number, closed: false): { inner: null; outer: TPoint[] };
+export function getStrokeOutlinePolygons(points: TPoint[], halfWidth: number, closed: boolean): TStrokeOutlineLoops;
+export function getStrokeOutlinePolygons(points: TPoint[], halfWidth: number, closed: boolean): TStrokeOutlineLoops {
+  return closed
     ? { inner: getClosedLoopSide(points, halfWidth, -1), outer: getClosedLoopSide(points, halfWidth, 1) }
     : { inner: null, outer: [...getOpenPathSide(points, halfWidth, 1), ...getOpenPathSide(points, halfWidth, -1).reverse()] };
+}
