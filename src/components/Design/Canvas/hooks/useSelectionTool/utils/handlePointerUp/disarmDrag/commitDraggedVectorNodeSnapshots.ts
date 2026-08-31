@@ -13,13 +13,15 @@ export const commitDraggedVectorNodeSnapshots = (dispatch: AppDispatch, dragStat
   const snapshots = canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current;
 
   if (snapshots) {
-    snapshots.forEach((snapshot, id) => {
-      const origin = dragState.nodeOrigins[id];
+    if (dragState.hasMoved) {
+      snapshots.forEach((snapshot, id) => {
+        const origin = dragState.nodeOrigins[id];
 
-      if (origin) {
-        dispatch(updateNode({ changes: getGeometryDeltaChanges(origin, snapshot.deltaX, snapshot.deltaY), id }));
-      }
-    });
+        if (origin) {
+          dispatch(updateNode({ changes: getGeometryDeltaChanges(origin, snapshot.deltaX, snapshot.deltaY), id }));
+        }
+      });
+    }
 
     canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current = null;
   }

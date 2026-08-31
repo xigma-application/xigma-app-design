@@ -11,10 +11,10 @@ import { commitDraggedVectorNodeSnapshots } from '../commitDraggedVectorNodeSnap
 const buildCanvasRefs = (): TCanvasRefs =>
   ({ vectorSnapshots: { draggedVectorNodeSnapshotsRef: { current: null } } }) as unknown as TCanvasRefs;
 
-const buildDragState = (nodeOrigins: TDragState['nodeOrigins']): TDragState =>
+const buildDragState = (nodeOrigins: TDragState['nodeOrigins'], hasMoved = true): TDragState =>
   ({
     dispatchThrottle: { frameId: null, run: null },
-    hasMoved: true,
+    hasMoved,
     nodeOrigins,
     pendingClickAction: null,
     pointerStart: { x: 0, y: 0 },
@@ -50,6 +50,27 @@ describe('commitDraggedVectorNodeSnapshots', () => {
     // result
     expect(dispatch).toHaveBeenCalledTimes(1);
     expect(dispatch).toHaveBeenCalledWith(updateNode({ changes: { x: 105, y: 97 }, id: 'node-1' }));
+    expect(canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current).toBeNull();
+  });
+
+  it('should not dispatch (and not round any vertex) for a plain click with no real movement, just clear the snapshot map', () => {
+    // mock — a click that never moved the pointer must not touch geometry at all, since
+    // getGeometryDeltaChanges/translateVectorVertices round every vertex to the nearest pixel;
+    // running that on a zero-delta click would silently destroy sub-pixel curve precision
+    // (e.g. real font-glyph bezier data from Flatten) even though nothing was ever dragged
+    const dispatch = vi.fn();
+    const canvasRefs = buildCanvasRefs();
+    const dragState = buildDragState({ 'node-1': { x: 100.25, y: 100.75 } }, false);
+
+    canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current = new Map([
+      ['node-1', { deltaX: 0, deltaY: 0, facesByColor: [], strokeColor: '#00ff00', strokeVertices: [] }],
+    ]);
+
+    // before
+    commitDraggedVectorNodeSnapshots(dispatch, dragState, canvasRefs);
+
+    // result
+    expect(dispatch).not.toHaveBeenCalled();
     expect(canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current).toBeNull();
   });
 
