@@ -20,6 +20,11 @@ const unit = (id: string, startId: string, endId: string): TResolvedPieceUnit =>
   startId,
 });
 
+// The full planar network chainIntoSteps disambiguates against — by default, just the union of the
+// given units' own pieces (i.e. no foreign edges at all), matching what a fully-isolated loop sees.
+const planarSegmentsOf = (units: TResolvedPieceUnit[]): Record<string, TResolvedPieceUnit['pieces'][number]> =>
+  Object.fromEntries(units.flatMap((unit) => unit.pieces).map((piece) => [piece.id, piece]));
+
 describe('chainIntoSteps', () => {
   it('should chain multiple units into one closed loop of steps', () => {
     // mock — a(0,0)->b(10,0)->c(5,10)->a, a real (non-degenerate) triangle
@@ -31,7 +36,7 @@ describe('chainIntoSteps', () => {
     };
 
     // before
-    const steps = chainIntoSteps(units, vertices);
+    const steps = chainIntoSteps(units, vertices, planarSegmentsOf(units));
 
     // result
     expect(steps).toEqual([
@@ -47,7 +52,7 @@ describe('chainIntoSteps', () => {
     const vertices: Record<string, TVectorVertex> = { a: { id: 'a', x: 0, y: 0 } };
 
     // before
-    const steps = chainIntoSteps(units, vertices);
+    const steps = chainIntoSteps(units, vertices, planarSegmentsOf(units));
 
     // result
     expect(steps).toEqual([{ fromId: 'a', segmentId: 's1', toId: 'a' }]);
@@ -59,7 +64,7 @@ describe('chainIntoSteps', () => {
     const vertices: Record<string, TVectorVertex> = { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 10, y: 0 } };
 
     // before / result
-    expect(chainIntoSteps(units, vertices)).toBeNull();
+    expect(chainIntoSteps(units, vertices, planarSegmentsOf(units))).toBeNull();
   });
 
   it('should return null when the units don’t all connect (a disconnected member breaks the walk)', () => {
@@ -73,7 +78,7 @@ describe('chainIntoSteps', () => {
     };
 
     // before / result
-    expect(chainIntoSteps(units, vertices)).toBeNull();
+    expect(chainIntoSteps(units, vertices, planarSegmentsOf(units))).toBeNull();
   });
 
   it('should return null when the chain connects but ends open instead of closing back to the start', () => {
@@ -86,7 +91,7 @@ describe('chainIntoSteps', () => {
     };
 
     // before / result
-    expect(chainIntoSteps(units, vertices)).toBeNull();
+    expect(chainIntoSteps(units, vertices, planarSegmentsOf(units))).toBeNull();
   });
 
   it('should reconstruct a self-touching loop (one shared vertex, two sub-loops) the same way regardless of input order', () => {
@@ -113,7 +118,7 @@ describe('chainIntoSteps', () => {
 
     shuffledOrders.forEach((orderedUnits) => {
       // before
-      const steps = chainIntoSteps(orderedUnits, vertices);
+      const steps = chainIntoSteps(orderedUnits, vertices, planarSegmentsOf(orderedUnits));
 
       // result — every unit used exactly once, and consecutive steps genuinely connect end-to-end
       expect(steps).not.toBeNull();
@@ -123,5 +128,33 @@ describe('chainIntoSteps', () => {
         expect(step.toId).toBe(next.fromId);
       });
     });
+  });
+
+  it('should skip past a foreign edge from a different, separately-resolved face sharing the same vertex — the "x" crossing case', () => {
+    // mock — a real closed triangle a->v->b->a. Vertex "v" has degree 4: s1 (arriving) and s2
+    // (departing) belong to our loop, but f1/f2 are a completely different face's own boundary
+    // crossing through that exact same point (e.g. the other diagonal stroke of an "x"). f1/f2 are
+    // NOT part of `units` at all — chainIntoSteps only ever knows about them through
+    // `planarSegments`, and must never treat either as a real step of this loop.
+    const units = [unit('s1', 'a', 'v'), unit('s2', 'v', 'b'), unit('s3', 'b', 'a')];
+    const foreignPieces = [straightPiece('f1', 'left', 'v'), straightPiece('f2', 'v', 'right')];
+    const vertices: Record<string, TVectorVertex> = {
+      a: { id: 'a', x: -10, y: -10 },
+      v: { id: 'v', x: 0, y: 0 },
+      b: { id: 'b', x: 10, y: -10 },
+      left: { id: 'left', x: -10, y: 10 },
+      right: { id: 'right', x: 10, y: 10 },
+    };
+    const planarSegments = { ...planarSegmentsOf(units), ...Object.fromEntries(foreignPieces.map((piece) => [piece.id, piece])) };
+
+    // before
+    const steps = chainIntoSteps(units, vertices, planarSegments);
+
+    // result — closes back through s1/s2/s3 only, never touching f1/f2
+    expect(steps).toEqual([
+      { fromId: 'a', segmentId: 's1', toId: 'v' },
+      { fromId: 'v', segmentId: 's2', toId: 'b' },
+      { fromId: 'b', segmentId: 's3', toId: 'a' },
+    ]);
   });
 });

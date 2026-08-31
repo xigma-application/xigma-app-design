@@ -19,7 +19,7 @@ export const computeLoopPoints = (
   const boundaryKeysByRealSegmentId = new Map<string, Record<string, TVectorPieceBoundaries>>();
   const units = resolveUnits(loopKey, planar.segments, vertices, boundaryKeysByRealSegmentId);
   const hasEveryUnit = units.every((unit): unit is TResolvedPieceUnit => unit !== null);
-  const outerSteps = hasEveryUnit ? chainIntoSteps(units, planar.vertices) : null;
+  const outerSteps = hasEveryUnit ? chainIntoSteps(units, planar.vertices, planar.segments) : null;
   const unitsById = hasEveryUnit ? new Map(units.map((unit) => [unit.id, unit])) : null;
   const atomicSteps = outerSteps && unitsById ? outerSteps.flatMap((step) => expandUnitStep(step, unitsById)) : null;
 

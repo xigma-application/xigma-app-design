@@ -46,9 +46,10 @@ export const armVectorPaintOnPointerDown = ({
       const newLoopKey = getVectorFillLoopKey(face.pieceKeys);
       const removedFacePoints = existingLoopKey ? getVectorFillLoopPoints(node, existingLoopKey) : null;
       const inheritingLoopKeys = removedFacePoints ? getNestedUnfilledLoopKeys(node, removedFacePoints) : [];
+      const paintingLoopKeys = existingLoopKey ? [] : getNestedUnfilledLoopKeys(node, face.points);
       const filledFaceKeys = existingLoopKey
         ? [...node.filledFaceKeys.filter((key) => key !== existingLoopKey), ...inheritingLoopKeys]
-        : [...node.filledFaceKeys, newLoopKey];
+        : [...node.filledFaceKeys, newLoopKey, ...paintingLoopKeys];
       const fillColorOverrideByKey = existingLoopKey
         ? inheritingLoopKeys.length > 0
           ? {
@@ -56,7 +57,11 @@ export const armVectorPaintOnPointerDown = ({
               ...Object.fromEntries(inheritingLoopKeys.map((key) => [key, getEffectiveVectorFillColor(node, existingLoopKey)])),
             }
           : node.fillColorOverrideByKey
-        : { ...node.fillColorOverrideByKey, [newLoopKey]: selectPaintColor(state) };
+        : {
+            ...node.fillColorOverrideByKey,
+            [newLoopKey]: selectPaintColor(state),
+            ...Object.fromEntries(paintingLoopKeys.map((key) => [key, selectPaintColor(state)])),
+          };
       const changes: Partial<TVectorNode> = geometryChanged
         ? { fillColorOverrideByKey, filledFaceKeys, segments, vertices }
         : { fillColorOverrideByKey, filledFaceKeys };
