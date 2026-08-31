@@ -1,3 +1,6 @@
+// assets
+import defaultCursorUrl from 'assets/icons/cursors/default.png';
+
 export const ALIGNMENT_GUIDE_STROKE = '#cd4422';
 export const ALIGNMENT_SNAP_TOLERANCE_PX = 4;
 export const ARROWHEAD_LENGTH = 6;
@@ -14,6 +17,7 @@ export const CORNER_HANDLE_SIZE = 6;
 export const CORNER_HANDLE_FILL = '#ffffff';
 export const DASH_GAP_PX = 4;
 export const DASH_LENGTH_PX = 4;
+export const DEFAULT_CURSOR = `url(${defaultCursorUrl}), auto`;
 export const DRAFT_FRAME_STROKE = '#337ae1';
 export const ELLIPSE_ARC_LENGTH_SEGMENTS = 360;
 export const ELLIPSE_ARC_MAX_RATIO = 1;

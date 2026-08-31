@@ -1,5 +1,8 @@
 import { RefObject } from 'react';
 
+// others
+import { DEFAULT_CURSOR } from 'constant/canvas';
+
 // store
 import { selectViewport } from 'store/design/selectors';
 import { store } from 'store';
@@ -8,7 +11,6 @@ import { store } from 'store';
 import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
-import { DEFAULT_CURSOR } from 'utils/canvas/defaultCursor';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getResizeCursorAngle } from 'utils/math/getResizeCursorAngle';
 import { getRotateCursorAngle } from 'utils/math/getRotateCursorAngle';

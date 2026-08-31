@@ -1,10 +1,12 @@
 import { RefObject } from 'react';
 
+// others
+import { DEFAULT_CURSOR } from 'constant/canvas';
+
 // types
 import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
-import { DEFAULT_CURSOR } from 'utils/canvas/defaultCursor';
 import { getRotatedCursorUrl } from 'utils/canvas/createCursorRotator/getRotatedCursorUrl';
 import { updateHoverCursor } from '../updateHoverCursor';
 

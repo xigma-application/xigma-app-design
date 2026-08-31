@@ -6,6 +6,9 @@ import { RefObject } from 'react';
 import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useSliceTool } from './useSliceTool';
 
+// others
+import { DEFAULT_CURSOR } from 'constant/canvas';
+
 // store
 import { setActiveTool } from 'store/design/slice';
 import { store } from 'store';
@@ -13,9 +16,6 @@ import { store } from 'store';
 // types
 import { ToolName } from 'types/design/enums';
 import { TSliceDraft } from 'types/design/canvas/types';
-
-// utils
-import { DEFAULT_CURSOR } from 'utils/canvas/defaultCursor';
 
 const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
   const canvas = document.createElement('canvas');

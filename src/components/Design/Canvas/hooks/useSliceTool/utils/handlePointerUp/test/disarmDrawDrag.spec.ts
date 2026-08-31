@@ -1,6 +1,7 @@
 import { RefObject } from 'react';
 
 // others
+import { DEFAULT_CURSOR } from 'constant/canvas';
 import { DEFAULT_SHAPE_SIZE } from '../../../../../constants';
 
 // types
@@ -8,7 +9,6 @@ import { TSliceDrawDragState } from '../../../types';
 import { TSliceDraft } from 'types/design/canvas/types';
 
 // utils
-import { DEFAULT_CURSOR } from 'utils/canvas/defaultCursor';
 import { disarmDrawDrag } from '../disarmDrawDrag';
 
 const createCanvas = (): HTMLCanvasElement => {
