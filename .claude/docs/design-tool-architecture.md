@@ -155,20 +155,28 @@ delta switch, on `x`/`y` vs `x1..y2` vs `vertices`, now reused a third way for t
 One deliberate node-shape special-case: cloning a text-on-path node clears its `pathId` — leaving it
 attached would mean two text nodes both bound to (and repositioned by) the *same* original path.
 
-**Text on Path can also attach to an existing eligible vector**, not just draw a fresh ellipse:
-`useDrawTextOnPathTool.ts`'s `pointerdown` hit-tests via `getNodeAtPoint`; a `NodeType.vector` with
-`getVectorChainOrder(node) !== null` (the exact Variable Width eligibility condition) arms an attach
-target instead of starting a drag. `pointerup` with the target still armed skips `addNode` entirely —
-`updateNode` clears the vector's fill, `setSelection`/`startTextEdit` bind `pathId` straight to the
-vector id (`pathStartOffset` defaults to `0`, the chain's own start, vs. the ellipse's `0.75` "12
-o'clock"). Moving the pointer past `TEXT_ON_PATH_ATTACH_SLOP_PX` before release disarms it back to
-the ordinary ellipse-drag flow, so a genuine drag on/near a vector still draws a new ellipse. While
-idle (not dragging) the hook also hit-tests on every `pointermove` to preview a dedicated
-`text-on-path` cursor class (`canvas.module.scss`) over an eligible vector, falling back to the
-tool's own static `'drawing'` class elsewhere — this is one of the few tools that manages its own
-hover cursor directly rather than through `useHoverHighlight`'s resolver chain, which only runs for
-the `default`/`scale`/`comment` tools (see `canvas-rendering-pipeline.md`/`selection-and-manipulation.md`
-for the render/hit-test side of a vector acting as a text path).
+**Text on Path can also attach to an existing eligible vector — or a plain shape it converts on the
+spot**, not just draw a fresh ellipse: `useDrawTextOnPathTool.ts`'s `pointerdown` hit-tests via
+`getNodeAtPoint`; `getEligibleVectorAtPoint.ts` arms an attach target (instead of starting a drag)
+for either a `NodeType.vector` with `getVectorChainOrder(node) !== null` (the exact Variable Width
+eligibility condition) or a plain rectangle/ellipse/polygon/star/line —
+`isConvertibleToVectorNode.ts`, the same convertible set `Enter`'s `handleEnterVectorEdit.ts` runs
+through `convertNodeToVector.ts`. `pointerup` with the target still armed skips `addNode` entirely:
+`attachToVector.ts` first dispatches `replaceNode` with `convertNodeToVector(target)` when the
+target isn't already a vector, then `updateNode` clears the (now-vector) node's fill,
+`setSelection`/`startTextEdit` bind `pathId` straight to its id — with `pathStartOffset` set by
+projecting the actual click point onto the chain (`sampler.nearestOffsetAtPoint`, the same
+mechanism the offset drag handle uses) rather than always the chain's own start, so text starts
+reading from wherever the user clicked (falls back to the chain start only for a degenerate
+zero-length chain). Moving the pointer past `TEXT_ON_PATH_ATTACH_SLOP_PX` before release disarms it
+back to the ordinary ellipse-drag flow, so a genuine drag on/near a vector or shape still draws a
+new ellipse. While idle (not dragging) the hook also hit-tests on every `pointermove` to preview a
+dedicated `text-on-path` cursor class (`canvas.module.scss`) over an eligible target, falling back
+to the tool's own static `'drawing'` class elsewhere — this is one of the few tools that manages its
+own hover cursor directly rather than through `useHoverHighlight`'s resolver chain, which only runs
+for the `default`/`scale`/`comment` tools (see
+`canvas-rendering-pipeline.md`/`selection-and-manipulation.md` for the render/hit-test side of a
+vector acting as a text path).
 
 **Editing-state dashed guide**: `getPathOutlineStyles.ts` already keys its `'editing'/'hover'/
 'selected'` map by `pathId` regardless of the target node's type (id-only lookup), so a bound

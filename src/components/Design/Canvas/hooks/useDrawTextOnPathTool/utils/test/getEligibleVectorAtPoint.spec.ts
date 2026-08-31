@@ -67,6 +67,26 @@ describe('getEligibleVectorAtPoint', () => {
     expect(getEligibleVectorAtPoint({ x: 3050, y: 50 }, IDENTITY_VIEWPORT)).toBeNull();
   });
 
+  it("should return a plain rectangle too — Enter's same convertible-shape set, not just an already-real vector", () => {
+    // mock
+    store.dispatch(
+      addNode({
+        fill: '#ffffff',
+        height: 100,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 100,
+        x: 5000,
+        y: 0,
+      }),
+    );
+
+    // result
+    expect(getEligibleVectorAtPoint({ x: 5050, y: 50 }, IDENTITY_VIEWPORT)?.name).toBe('Rectangle');
+  });
+
   it('should return null for a vector with no segments to form a chain', () => {
     // mock
     store.dispatch(

@@ -78,6 +78,36 @@ describe('attachToVector', () => {
     expect(selectEditingTextBox(store.getState())?.pathStartOffset).toBeCloseTo(0.5, 5);
   });
 
+  it('should convert a plain shape to a vector on the spot, then attach text to the result', () => {
+    // mock — a rectangle, not yet any kind of vector
+    store.dispatch(
+      addNode({
+        fill: '#ff0000',
+        height: 50,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 100,
+        x: 6700,
+        y: 0,
+      }),
+    );
+    const { rootOrder } = selectActivePage(store.getState());
+    const rectangleId = rootOrder[rootOrder.length - 1];
+
+    // before — clicked along its top edge
+    attachToVector(rectangleId, { x: 6750, y: 0 }, store.dispatch);
+
+    // result — the same id is now a real vector node, fill stripped, bound to the new text edit
+    const converted = selectActivePage(store.getState()).nodes[rectangleId];
+
+    expect(converted.type).toBe(NodeType.vector);
+    expect(converted).toMatchObject({ fillColor: null, fillColorOverrideByKey: {}, filledFaceKeys: [] });
+    expect(selectActivePage(store.getState()).selectedIds).toEqual([rectangleId]);
+    expect(selectEditingTextBox(store.getState())).toMatchObject({ pathFlip: false, pathId: rectangleId, rotation: 0 });
+  });
+
   it('should fall back to the chain start for a degenerate (zero-length) vector instead of dividing by zero', () => {
     // mock — a and b coincide, so the chain has no meaningful length to project a click onto
     store.dispatch(
