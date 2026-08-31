@@ -34,11 +34,12 @@ describe('drawCurvedSelectionHighlight', () => {
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
-    // before — 3 selected characters -> 3 quads sharing vertices at their boundaries, 6 verts each
+    // before — the selected range's arc is walked in fixed-length steps (not one quad per
+    // character), each step contributing a quad sharing vertices with its neighbors, 6 verts each
     drawCurvedSelectionHighlight(gl, program, buffer, PATH_BOX, 'hello', 0, 3, 100, 100, IDENTITY_VIEWPORT);
 
     // result
-    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 18);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 54);
   });
 
   it('should also stroke a 1px outline around the whole ribbon as disconnected top/bottom curve segments plus end caps', () => {
@@ -47,14 +48,14 @@ describe('drawCurvedSelectionHighlight', () => {
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
 
-    // before — 3 selected characters -> 4 boundary points -> 3 top + 3 bottom curve segments (4
-    // points each), plus the 2 perpendicular end caps (2 points each) since they're far enough
-    // apart not to cross
+    // before — the fixed-step centerline now has many more points than there are characters, so
+    // the top/bottom curve segments plus the 2 perpendicular end caps carry far more than the old
+    // one-segment-per-character count
     drawCurvedSelectionHighlight(gl, program, buffer, PATH_BOX, 'hello', 0, 3, 100, 100, IDENTITY_VIEWPORT);
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
-    expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINES, 0, 16);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINES, 0, 40);
   });
 
   it('should fill the ribbon at the selection alpha, but stroke the outline at full opacity', () => {

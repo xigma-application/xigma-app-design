@@ -21,7 +21,17 @@ describe('useRenderRow', () => {
 
   beforeEach(() => {
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'Frame A', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({
+        fill: '#ff0000',
+        height: 10,
+        name: 'Frame A',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 10,
+        x: 0,
+        y: 0,
+      }),
     );
     [idA] = selectActivePage(store.getState()).rootOrder.slice(-1);
   });

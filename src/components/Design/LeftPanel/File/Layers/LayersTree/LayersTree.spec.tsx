@@ -29,10 +29,30 @@ describe('LayersTree', () => {
   beforeEach(() => {
     stubVirtualizerViewport(5000);
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'Frame A', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({
+        fill: '#ff0000',
+        height: 10,
+        name: 'Frame A',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 10,
+        x: 0,
+        y: 0,
+      }),
     );
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'Frame B', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({
+        fill: '#ff0000',
+        height: 10,
+        name: 'Frame B',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 10,
+        x: 0,
+        y: 0,
+      }),
     );
     [idA, idB] = selectActivePage(store.getState()).rootOrder.slice(-2);
   });
@@ -89,7 +109,17 @@ describe('LayersTree', () => {
   it('should drag every row in the current multi-selection together, preserving their relative order', () => {
     // mock — a third node so there is something to drag the [A,B] selection past
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'Frame C', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({
+        fill: '#ff0000',
+        height: 10,
+        name: 'Frame C',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 10,
+        x: 0,
+        y: 0,
+      }),
     );
     const [idC] = selectActivePage(store.getState()).rootOrder.slice(-1);
     act(() => store.dispatch(setSelection([idA, idB])));
@@ -152,7 +182,17 @@ describe('LayersTree', () => {
       act(() => store.dispatch(setSelection([idA, idB])));
       store.dispatch(groupNodes());
       store.dispatch(
-        addNode({ fill: '#ff0000', height: 10, name: 'Frame C', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+        addNode({
+          fill: '#ff0000',
+          height: 10,
+          name: 'Frame C',
+          parentId: null,
+          rotation: 0,
+          type: NodeType.rectangle,
+          width: 10,
+          x: 0,
+          y: 0,
+        }),
       );
       const [idC] = selectActivePage(store.getState()).rootOrder.slice(-1);
 
@@ -197,7 +237,17 @@ describe('LayersTree', () => {
       store.dispatch(groupNodes());
       const [groupId] = selectActivePage(store.getState()).selectedIds;
       store.dispatch(
-        addNode({ fill: '#ff0000', height: 10, name: 'Frame C', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+        addNode({
+          fill: '#ff0000',
+          height: 10,
+          name: 'Frame C',
+          parentId: null,
+          rotation: 0,
+          type: NodeType.rectangle,
+          width: 10,
+          x: 0,
+          y: 0,
+        }),
       );
       const [idC] = selectActivePage(store.getState()).rootOrder.slice(-1);
 
@@ -269,7 +319,17 @@ describe('LayersTree', () => {
       store.dispatch(groupNodes());
       const [groupId] = selectActivePage(store.getState()).selectedIds;
       store.dispatch(
-        addNode({ fill: '#ff0000', height: 10, name: 'Frame C', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+        addNode({
+          fill: '#ff0000',
+          height: 10,
+          name: 'Frame C',
+          parentId: null,
+          rotation: 0,
+          type: NodeType.rectangle,
+          width: 10,
+          x: 0,
+          y: 0,
+        }),
       );
       const [idC] = selectActivePage(store.getState()).rootOrder.slice(-1);
 
@@ -300,7 +360,17 @@ describe('LayersTree', () => {
       store.dispatch(groupNodes());
       const [groupId] = selectActivePage(store.getState()).selectedIds;
       store.dispatch(
-        addNode({ fill: '#ff0000', height: 10, name: 'Frame C', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+        addNode({
+          fill: '#ff0000',
+          height: 10,
+          name: 'Frame C',
+          parentId: null,
+          rotation: 0,
+          type: NodeType.rectangle,
+          width: 10,
+          x: 0,
+          y: 0,
+        }),
       );
       const [idC] = selectActivePage(store.getState()).rootOrder.slice(-1);
       act(() => store.dispatch(setSelection([idA, idC])));

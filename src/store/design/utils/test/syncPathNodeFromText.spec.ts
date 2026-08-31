@@ -192,6 +192,22 @@ describe('syncPathNodeFromText', () => {
       });
     });
 
+    it('should skip scaling the x axis when the text box width collapses below the sync threshold, only scaling y', () => {
+      // mock — width shrinks to 0 (below MIN_SYNC_SPAN), so x is left as-is while height still scales
+      const vectorNode = buildVectorNode({ vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 40 } } });
+      const textNode = buildPathText({ height: 80, width: 0, x: 0, y: 0 });
+      const state = buildState({ [vectorNode.id]: vectorNode, [textNode.id]: textNode });
+
+      // before
+      syncPathNodeFromText(state, textNode);
+
+      // result — y doubles (40 -> 80), x is untouched (100 stays 100, not scaled toward the collapsed box)
+      expect((getActivePage(state).nodes[vectorNode.id] as TVectorNode).vertices).toEqual({
+        v1: { id: 'v1', x: 0, y: 0 },
+        v2: { id: 'v2', x: 100, y: 80 },
+      });
+    });
+
     it('should scale every vertex with the text box so the path stretches to fill a resized box', () => {
       // mock — box grows 100x40 -> 150x80 (x1.5 wide, x2 tall), top-left anchored
       const vectorNode = buildVectorNode({ vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 40 } } });

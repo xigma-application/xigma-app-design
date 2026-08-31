@@ -11,7 +11,7 @@ import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
+import { NodeType, PathType } from 'types/design/enums';
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
@@ -70,13 +70,10 @@ describe('useTreeSource', () => {
     // mock
     store.dispatch(
       addNode({
-        arcRatioInverted: false,
-        fill: '#ffffff',
-        flipX: false,
-        flipY: false,
         height: 100,
         name: 'Ellipse Path',
         parentId: null,
+        pathType: PathType.ellipse,
         rotation: 0,
         type: NodeType.path,
         width: 100,

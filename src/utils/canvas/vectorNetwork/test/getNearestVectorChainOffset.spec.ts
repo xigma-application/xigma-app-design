@@ -80,6 +80,14 @@ describe('getNearestVectorChainOffset', () => {
     expect(nearest.distance).toBeCloseTo(30, 2);
   });
 
+  it('should fall back to a zero total length for an empty arc-length table', () => {
+    // mock — an empty table has no last sample to read a length from
+    const node = buildNode();
+
+    // result
+    expect(() => getNearestVectorChainOffset(node, [], { x: 0, y: 0 })).toThrow();
+  });
+
   it('should return offset 0 for a degenerate zero-length chain instead of dividing by zero', () => {
     // mock — a self-closing zero-length segment
     const node = buildNode({ segments: { s1: seg('s1', 'a', 'a') }, vertices: { a: { id: 'a', x: 5, y: 5 } } });

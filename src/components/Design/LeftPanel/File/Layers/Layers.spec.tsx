@@ -27,10 +27,10 @@ const renderLayers = (): ReturnType<typeof render> =>
 
 const buildGroupWithChildren = (): string => {
   store.dispatch(
-    addNode({ fill: '#ff0000', height: 10, name: 'Frame A', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+    addNode({ fill: '#ff0000', height: 10, name: 'Frame A', parentId: null, rotation: 0, type: NodeType.rectangle, width: 10, x: 0, y: 0 }),
   );
   store.dispatch(
-    addNode({ fill: '#ff0000', height: 10, name: 'Frame B', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+    addNode({ fill: '#ff0000', height: 10, name: 'Frame B', parentId: null, rotation: 0, type: NodeType.rectangle, width: 10, x: 0, y: 0 }),
   );
   const [idA, idB] = selectActivePage(store.getState()).rootOrder.slice(-2);
   act(() => store.dispatch(setSelection([idA, idB])));

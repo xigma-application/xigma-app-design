@@ -26,7 +26,7 @@ const createPathOffsetDragRef = (dragState: TPathOffsetDragState | null = null):
   current: dragState,
 });
 
-const addPathTextNode = (x: number, y: number, size: number, flipX = false): string => {
+const addPathTextNode = (x: number, y: number, size: number, flipX: boolean, pathId: string | undefined): string => {
   store.dispatch(
     addNode({
       content: 'Hi',
@@ -39,7 +39,7 @@ const addPathTextNode = (x: number, y: number, size: number, flipX = false): str
       name: 'Text',
       parentId: null,
       pathFlip: false,
-      pathId: 'ellipse-1',
+      pathId,
       pathStartOffset: 0,
       rotation: 0,
       type: NodeType.text,
@@ -58,7 +58,7 @@ describe('continuePathOffsetDrag', () => {
   it('should do nothing when no path-offset drag is in progress', () => {
     // mock
     const canvas = createCanvas();
-    const id = addPathTextNode(5000, 5000, 200);
+    const id = addPathTextNode(5000, 5000, 200, false, 'ellipse-1');
     const before = store.getState().design.pages[store.getState().design.activePageId].nodes[id];
 
     // before
@@ -71,7 +71,7 @@ describe('continuePathOffsetDrag', () => {
   it('should update pathStartOffset to the nearest point on the curve to the pointer', () => {
     // mock
     const canvas = createCanvas();
-    const id = addPathTextNode(5200, 5200, 200);
+    const id = addPathTextNode(5200, 5200, 200, false, 'ellipse-1');
     const pathOffsetDragRef = createPathOffsetDragRef({ nodeId: id });
 
     // before — bottom of the ellipse (center 5300,5300, radius 100) is a quarter turn from the right edge (offset 0)
@@ -86,7 +86,7 @@ describe('continuePathOffsetDrag', () => {
   it('should follow the mirrored curve when dragging a horizontally flipped path-text node', () => {
     // mock
     const canvas = createCanvas();
-    const id = addPathTextNode(5600, 5200, 200, true);
+    const id = addPathTextNode(5600, 5200, 200, true, 'ellipse-1');
     const pathOffsetDragRef = createPathOffsetDragRef({ nodeId: id });
 
     // before — flipped, the leftmost point of the ellipse (center 5700,5300, radius 100) is now
@@ -96,6 +96,51 @@ describe('continuePathOffsetDrag', () => {
     const node = store.getState().design.pages[store.getState().design.activePageId].nodes[id];
 
     expect(node).toMatchObject({ pathStartOffset: expect.closeTo(0, 2) });
+  });
+
+  it('should still resolve an offset for a plain ellipse path with no bound vector (no pathId)', () => {
+    // mock — an ellipse-drawn text path never gets a pathId unless it's attached to a vector
+    const canvas = createCanvas();
+    const id = addPathTextNode(5200, 5200, 200, false, undefined);
+    const pathOffsetDragRef = createPathOffsetDragRef({ nodeId: id });
+
+    // before — bottom of the ellipse (center 5300,5300, radius 100) is a quarter turn from the right edge (offset 0)
+    continuePathOffsetDrag(canvas, pointerEvent(5300, 5400), store.dispatch, pathOffsetDragRef);
+
+    // result
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[id];
+
+    expect(node).toMatchObject({ pathStartOffset: expect.closeTo(0.25, 2) });
+  });
+
+  it('should do nothing when the dragged node exists but is not a text node', () => {
+    // mock
+    const canvas = createCanvas();
+
+    store.dispatch(
+      addNode({
+        fill: '#ffffff',
+        height: 100,
+        name: 'Rect',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 100,
+        x: 0,
+        y: 0,
+      }),
+    );
+
+    const { rootOrder } = selectActivePage(store.getState());
+    const id = rootOrder[rootOrder.length - 1];
+    const before = store.getState().design.pages[store.getState().design.activePageId].nodes[id];
+    const pathOffsetDragRef = createPathOffsetDragRef({ nodeId: id });
+
+    // before
+    continuePathOffsetDrag(canvas, pointerEvent(10, 10), store.dispatch, pathOffsetDragRef);
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[id]).toEqual(before);
   });
 
   it('should do nothing when the dragged node no longer exists', () => {

@@ -2,7 +2,7 @@
 import { NodeType } from 'types/design/enums';
 import { TEllipseArcLengthSample } from 'types/canvas';
 import { TGlyphAtlasJson } from 'types/msdf';
-import { TTextNode } from 'types/design/types';
+import { TTextNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getOrBuildTextGeometry, TTextGeometry } from '../getOrBuildTextGeometry';
@@ -35,6 +35,22 @@ const createNode = (overrides: Partial<TTextNode> = {}): TTextNode => ({
   width: 100,
   x: 0,
   y: 0,
+  ...overrides,
+});
+
+const createVector = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
+  fillColor: '#000',
+  filledFaceKeys: [],
+  id: 'vector-1',
+  name: 'Vector',
+  parentId: null,
+  rotation: 0,
+  segments: { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+  strokeColor: '#000',
+  strokeWidth: 1,
+  type: NodeType.vector,
+  vertexHandleModes: {},
+  vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 } },
   ...overrides,
 });
 
@@ -122,6 +138,26 @@ describe('getOrBuildTextGeometry', () => {
 
     // result
     expect(ellipseArcLengthCache.size).toBe(1);
+  });
+
+  it('should key the cache off a bound vector’s own geometry, not just its pathId', () => {
+    // mock
+    const cache = new Map<string, TTextGeometry>();
+    const ellipseArcLengthCache = new Map<string, TEllipseArcLengthSample[]>();
+    const node = createNode({ height: 100, pathId: 'vector-1', width: 100 });
+
+    // before — same node/pathId, but the vector's own vertices moved
+    getOrBuildTextGeometry(ATLAS, cache, node, ellipseArcLengthCache, createVector());
+    getOrBuildTextGeometry(
+      ATLAS,
+      cache,
+      node,
+      ellipseArcLengthCache,
+      createVector({ vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 200, y: 0 } } }),
+    );
+
+    // result — the reshaped vector invalidates the cache even though nothing else changed
+    expect(cache.size).toBe(2);
   });
 
   it('should rebuild path-text geometry when the start offset changes', () => {

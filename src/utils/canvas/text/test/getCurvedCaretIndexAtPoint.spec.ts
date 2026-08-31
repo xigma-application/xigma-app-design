@@ -1,6 +1,8 @@
 // types
+import { NodeType } from 'types/design/enums';
 import { TEditingTextBox } from 'types/canvas';
 import { TGlyphAtlasJson } from 'types/msdf';
+import { TVectorNode } from 'types/design/types';
 
 // utils
 import { getCurvedCaretIndexAtPoint } from '../getCurvedCaretIndexAtPoint';
@@ -18,6 +20,21 @@ const BOX: TEditingTextBox = { flipX: false, flipY: false, height: 200, rotation
 const RIGHT = { x: 200, y: 100 };
 const LEFT = { x: 0, y: 100 };
 const BOTTOM = { x: 100, y: 200 };
+
+const OPEN_VECTOR: TVectorNode = {
+  fillColor: '#000',
+  filledFaceKeys: [],
+  id: 'vec-1',
+  name: 'Vector',
+  parentId: null,
+  rotation: 0,
+  segments: { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+  strokeColor: '#000',
+  strokeWidth: 1,
+  type: NodeType.vector,
+  vertexHandleModes: {},
+  vertices: { a: { id: 'a', x: 0, y: 100 }, b: { id: 'b', x: 200, y: 100 } },
+};
 
 describe('getCurvedCaretIndexAtPoint', () => {
   it('should register a click anywhere inside the ascent/descent band as ~on the path, not just exactly on the bare guide line', () => {
@@ -99,6 +116,19 @@ describe('getCurvedCaretIndexAtPoint', () => {
     // result
     expect(atLeft).toEqual({ distance: expect.closeTo(0, 5), index: 0 });
     expect(atRight.distance).toBeGreaterThan(50);
+  });
+
+  it('should not wrap the hit-test range around the seam for an open vector-bound path', () => {
+    // mock — an open two-point vector, unlike the always-closed ellipse path; the point sits
+    // exactly on the segment (offset 0.75 of its 200-unit length = x150) but well past the short
+    // 4-char content's own boundaries, so it should clamp to the last index rather than wrap
+    const point = { x: 150, y: 100 };
+
+    // result
+    expect(getCurvedCaretIndexAtPoint(ATLAS, 'AAAA', 20, { ...BOX, pathStartOffset: 0 }, point, OPEN_VECTOR)).toEqual({
+      distance: expect.closeTo(102, 1),
+      index: 4,
+    });
   });
 
   it('should follow the content to its mirrored position when the box is flipped horizontally', () => {

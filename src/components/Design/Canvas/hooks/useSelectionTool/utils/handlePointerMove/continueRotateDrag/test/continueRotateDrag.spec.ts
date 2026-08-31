@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, groupNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -153,6 +153,43 @@ describe('continueRotateDrag', () => {
     expect(line.y1).toBeCloseTo(50);
     expect(line.x2).toBeCloseTo(50);
     expect(line.y2).toBeCloseTo(50);
+  });
+
+  it('should re-pin a rotated group’s height/width to its own origin instead of letting them drift', () => {
+    // mock — a group whose own id is among the rotated origins (the group itself was selected and
+    // dragged by its rotate handle, not just an individual child)
+    const idA = addFrameNode(0, 0, 100, 100, 0, 'parent-1');
+    const idB = addFrameNode(200, 0, 100, 100, 0, 'parent-1');
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+
+    const [groupId] = selectActivePage(store.getState()).selectedIds;
+    const group = selectActivePage(store.getState()).nodes[groupId] as { height: number; width: number; x: number; y: number };
+    const canvas = createCanvas();
+    const rotateDragRef = createRotateDragRef({
+      cursorAngle: 0,
+      nodeOrigins: { [groupId]: { height: group.height, rotation: 0, width: group.width, x: group.x, y: group.y } },
+      pivot: { x: group.x + group.width / 2, y: group.y + group.height / 2 },
+      startAngle: 0,
+    });
+
+    // before — spin the group 90deg in place around its own center
+    continueRotateDrag(
+      canvas,
+      pointerEvent(group.x + group.width / 2, group.y + group.height / 2 + 100),
+      store.dispatch,
+      rotateDragRef,
+      createCanvasRefs(),
+    );
+
+    // result — height/width land back on the origin's own values, not whatever the generic
+    // rotation math produced for them
+    expect(selectActivePage(store.getState()).nodes[groupId]).toMatchObject({
+      height: group.height,
+      rotation: 90,
+      width: group.width,
+    });
   });
 
   describe('vector node rotate snapshots', () => {

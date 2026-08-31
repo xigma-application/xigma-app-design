@@ -76,10 +76,11 @@ describe('drawCurvedEditingCaretAndSelection', () => {
     // before
     drawCurvedEditingCaretAndSelection(gl, program, buffer, PATH_BOX, 'hello', 0, 3, 0, 100, 100, IDENTITY_VIEWPORT);
 
-    // result — 3 selected characters -> 3 quads sharing vertices at their boundaries, plus its own
-    // outline stroke around just the selected range (not a separate full-content outline on top)
+    // result — the selected range's arc is walked in fixed-length steps (not one quad per
+    // character), plus its own outline stroke around just the selected range (not a separate
+    // full-content outline on top)
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
-    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 18);
-    expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINES, 0, 16);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 54);
+    expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINES, 0, 40);
   });
 });

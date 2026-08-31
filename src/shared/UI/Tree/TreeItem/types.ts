@@ -1,7 +1,7 @@
 import { ReactNode, RefObject } from 'react';
 
 // hooks
-import { TVirtualAnchor } from './hooks/useTreeItemContextMenu';
+import { TVirtualAnchor } from '../hooks/useContextMenu';
 
 export type { TVirtualAnchor };
 

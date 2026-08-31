@@ -64,7 +64,7 @@ describe('getCurvedTunnelPath', () => {
         c: { id: 'c', x: 1287.5, y: 701 },
       },
     };
-    const box = { flipX: false, flipY: false, height: 69, pathFlip: false, width: 62, x: 1225.5, y: 701 };
+    const box = { flipX: false, flipY: false, height: 69, pathFlip: false, rotation: 0, width: 62, x: 1225.5, y: 701 };
     const center = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
     const sampler = createVectorTextPathSampler(box, node);
     const content = 'dsadsaasdaddsdddddd';

@@ -11,7 +11,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TFrameNode, TGroupNode, TSceneNode } from 'types/design/types';
+import { TGroupNode, TRectangleNode, TSceneNode } from 'types/design/types';
 
 const renderTreeItem = (isSelected: boolean, node: TSceneNode, extraProps: Partial<TTreeItemProps> = {}): ReturnType<typeof render> =>
   render(
@@ -35,7 +35,7 @@ const buildGroupNode = (overrides: Partial<TGroupNode> = {}): TGroupNode => ({
 });
 
 describe('TreeItem', () => {
-  let node: TFrameNode;
+  let node: TRectangleNode;
 
   beforeEach(() => {
     store.dispatch(
@@ -45,13 +45,13 @@ describe('TreeItem', () => {
         name: 'My Frame',
         parentId: null,
         rotation: 0,
-        type: NodeType.frame,
+        type: NodeType.rectangle,
         width: 10,
         x: 0,
         y: 0,
       }),
     );
-    node = Object.values(selectNodes(store.getState())).at(-1) as TFrameNode;
+    node = Object.values(selectNodes(store.getState())).at(-1) as TRectangleNode;
   });
 
   afterEach(() => {

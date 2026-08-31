@@ -90,6 +90,32 @@ describe('mirrorGuideVectorForText', () => {
     expect(mirrored.segments.s1).toMatchObject({ tangentEnd: { x: 8, y: 3 }, tangentStart: { x: -8, y: -3 } });
   });
 
+  it('should only negate the flipped x axis of a tangent, leaving y untouched', () => {
+    const vector = buildVector({
+      segments: {
+        s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: { x: -8, y: -3 }, tangentStart: { x: 8, y: 3 } },
+      },
+    });
+    const text = buildText({ flipX: true, flipY: false });
+
+    const mirrored = mirrorGuideVectorForText(vector, byId(vector, text));
+
+    expect(mirrored.segments.s1).toMatchObject({ tangentEnd: { x: 8, y: -3 }, tangentStart: { x: -8, y: 3 } });
+  });
+
+  it('should only negate the flipped y axis of a tangent, leaving x untouched', () => {
+    const vector = buildVector({
+      segments: {
+        s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: { x: -8, y: -3 }, tangentStart: { x: 8, y: 3 } },
+      },
+    });
+    const text = buildText({ flipX: false, flipY: true });
+
+    const mirrored = mirrorGuideVectorForText(vector, byId(vector, text));
+
+    expect(mirrored.segments.s1).toMatchObject({ tangentEnd: { x: -8, y: 3 }, tangentStart: { x: 8, y: -3 } });
+  });
+
   it('should leave a null tangent as null', () => {
     const vector = buildVector();
     const text = buildText({ flipX: true });

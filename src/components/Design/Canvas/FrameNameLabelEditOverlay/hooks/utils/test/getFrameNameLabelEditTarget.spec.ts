@@ -115,6 +115,19 @@ describe('getFrameNameLabelEditTarget', () => {
     expect(getFrameNameLabelEditTarget({ x: 100, y: -20 }, store.getState())).toBeNull();
   });
 
+  it('should pick the specific rect that was hit when several frame label rects are on offer', () => {
+    // mock — two frames, each with their own label rect; the point only lands inside the second one
+    const store = createTestStore();
+    const first = addFrame(store);
+    const second = addFrame(store);
+    const missedRect: TFrameNameLabelRect = { center: { x: 400, y: -20 }, height: 24, nodeId: first.id, width: 60 };
+
+    getFrameNameLabelRectsMock.mockReturnValue([missedRect, rectFor(second.id)]);
+
+    // result — the hit target is the second frame, not the first one offered
+    expect(getFrameNameLabelEditTarget({ x: 100, y: -20 }, store.getState())?.nodeId).toBe(second.id);
+  });
+
   it('should return null when the hit rect points at a node that is no longer a frame', () => {
     // mock — a rectangle that happens to sit where a frame's rect id would point
     const store = createTestStore();

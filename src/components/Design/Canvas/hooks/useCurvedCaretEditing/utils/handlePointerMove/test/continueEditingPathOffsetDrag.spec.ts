@@ -64,6 +64,19 @@ describe('continueEditingPathOffsetDrag', () => {
     expect(store.getState().design.editingTextBox).toMatchObject({ pathStartOffset: expect.closeTo(0.25, 2) });
   });
 
+  it('should still resolve an offset for a plain ellipse path with no bound vector (no pathId)', () => {
+    // mock — an ellipse-drawn text path never gets a pathId unless it's attached to a vector
+    store.dispatch(startTextEdit({ box: { ...CIRCLE_BOX, pathId: undefined }, content: 'Hi' }));
+
+    const canvas = createCanvas();
+
+    // before — bottom of the ellipse is a quarter turn from the right edge (offset 0)
+    continueEditingPathOffsetDrag(canvas, pointerEvent(BOTTOM.x, BOTTOM.y), store.dispatch);
+
+    // result
+    expect(store.getState().design.editingTextBox).toMatchObject({ pathStartOffset: expect.closeTo(0.25, 2) });
+  });
+
   it('should update both the committed node and the editing box when a node already exists', () => {
     // mock
     store.dispatch(

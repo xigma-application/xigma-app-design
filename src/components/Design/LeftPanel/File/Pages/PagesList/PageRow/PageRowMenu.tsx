@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Menu, MenuCompound } from 'shared';
 
 // hooks
-import { TVirtualAnchor } from 'shared/UI/Tree/TreeItem/hooks/useTreeItemContextMenu';
+import { TVirtualAnchor } from 'shared/UI/Tree/hooks/useContextMenu';
 import { useCopyPageLink } from './hooks/useCopyPageLink';
 import { useDeletePage } from './hooks/useDeletePage';
 import { useDuplicatePage } from './hooks/useDuplicatePage';
