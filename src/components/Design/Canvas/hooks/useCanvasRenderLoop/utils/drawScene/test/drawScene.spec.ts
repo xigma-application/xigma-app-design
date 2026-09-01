@@ -152,9 +152,9 @@ describe('drawScene', () => {
       createCanvasRefs({ draftRef: { current: { fill: '#FFFFFF', height: 20, type: NodeType.frame, width: 10, x: 0, y: 0 } } }),
     );
 
-    // result
+    // result — the 4 corner handles plus the draft's own "W x H" size label (badge + text)
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.LINE_LOOP, 0, 4);
-    expect(gl.drawArrays).toHaveBeenCalledTimes(10);
+    expect(gl.drawArrays).toHaveBeenCalledTimes(12);
   });
 
   it('should draw every node currently in the scene', () => {

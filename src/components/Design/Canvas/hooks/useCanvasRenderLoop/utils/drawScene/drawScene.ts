@@ -26,6 +26,7 @@ import { drawCornerRadiusHandlesLayer } from './drawCornerRadiusHandlesLayer/dra
 import { drawDraftFrameNameLabel } from './drawFrameNameLabels/drawDraftFrameNameLabel';
 import { drawDistanceGuides } from './drawDistanceGuides/drawDistanceGuides';
 import { drawDraftSectionNameLabel } from './drawSectionNameLabels/drawDraftSectionNameLabel';
+import { drawDraftSizeLabel } from './drawDraftSizeLabel';
 import { drawEditingPathTextHandle } from './drawEditingPathTextHandle';
 import { drawEditingText } from './drawEditingText';
 import { drawEllipseArcHandleLayer } from './drawEllipseArcHandleLayer/drawEllipseArcHandleLayer';
@@ -132,6 +133,7 @@ export const drawScene = (
   drawVectorEditHandlesLayer(ctx, vertexDotBufferCache, eraseAwareNodesById, vectorEditingNodeIds, refs, penActiveVertexId);
   drawEllipseArcHandleLayer(ctx, hoveredNode, selectedNodes, refs);
   drawFrame(ctx, refs);
+  drawDraftSizeLabel(ctx, refs);
   drawDraftFrameNameLabel(ctx, refs, nodesById);
   drawDraftSectionNameLabel(ctx, refs, nodesById);
   drawPenPreview(ctx, refs, nodesById, vectorEditingNodeIds[0] ?? null);
