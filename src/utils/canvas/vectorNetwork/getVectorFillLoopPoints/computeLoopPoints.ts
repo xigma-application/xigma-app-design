@@ -6,7 +6,7 @@ import { TVectorPieceBoundaries } from '../getVectorPieceBoundaryKeys';
 import { TVectorVertex } from 'types/design/types';
 
 // utils
-import { chainIntoSteps } from './chainIntoSteps';
+import { chainIntoSteps } from './chainIntoSteps/chainIntoSteps';
 import { expandUnitStep } from './expandUnitStep';
 import { flattenVectorFaceSteps } from '../flattenVectorFaceSteps';
 import { resolveUnits } from './resolveUnits';

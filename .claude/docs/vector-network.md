@@ -5121,6 +5121,134 @@ parent's group, a hole isolated once no longer nested in its parent, a hole isol
 color has drifted), plus an `armResolvers.spec.ts` case asserting the inherited color and the recorded
 `holeParentByKey` entry end to end against a real disjoint-cluster A/B fixture.
 
+## 74. "D" (and other multi-contour glyphs whose contours genuinely overlap) rendered as a near-solid
+blob — fixed by processing each contour independently and re-joining them via winding-direction hole
+detection, not by patching the half-edge walk itself
+
+**Symptom**: flattening the "D" glyph produced one giant face spanning almost the entire glyph bbox, with
+two tiny notch-shaped holes right where the bowl's own hole-bridging slit crosses the stem — instead of a
+proper stem + a properly-holed bowl. Not font-atlas-specific: reproduced from the real Inter TTF.
+
+**Root cause, confirmed via `opentype.js`'s raw path commands (not this codebase's own pipeline)**: Inter's
+"D" is two *separate* subpaths — (1) the bowl, encoded as one continuous path that already correctly cuts
+its own counter via an internal keyhole slit, and (2) the stem, a completely separate simple rectangle.
+The slit in (1) physically crosses the stem's own left edge at two points — a legitimate, harmless overlap
+in the font's own encoding that a real nonzero-winding rasterizer never notices, because it never merges
+independent subpaths into one shared graph before rasterizing. This codebase used to merge *every*
+contour of a glyph into one shared cluster before deriving faces, turning that harmless overlap into a
+real, shared crossing point. Three attempts at patching the half-edge walk itself (dropping the sign
+pre-filter, summing all raw candidates' signed areas) were tried and rigorously disproven by grid-sampling
+against ground-truth nonzero-winding — confirmed empirically that the standard "always continue via
+twin-1" DCEL rule does not, by itself, guarantee a genuinely non-overlapping plane partition once one real
+segment is crossed twice by geometry belonging to a second, originally-independent closed contour (unlike
+a plain self-crossing within *one* contour, e.g. "x" §72, which that rule already handles correctly).
+
+**Actual fix — process each contour on its own, then re-join with explicit hole detection**:
+`getTextFlattenVector.ts` now calls `buildVectorNodeFromEdgeLoops` once *per contour* (never combining a
+glyph's own sibling contours before face derivation — each contour's own harmless self-touching or
+cross-contour-overlapping geometry is resolved in total isolation), then recombines a glyph's own
+already-correct contours via the new `mergeVectorNodeGeometriesWithHoleDetection.ts`. That function
+classifies every pair of a glyph's own derived faces (regardless of whether they came from the same
+contour, e.g. "R"'s self-crossing bowl, or different contours, e.g. "D"'s stem vs. bowl):
+
+- **Nested + opposite winding direction** → a genuine hole (e.g. "o"'s counter inside its outer ring):
+  recorded as an explicit `holeParentByKey` entry, so it cancels via the renderer's existing same-color
+  XOR (§73) exactly like a user-painted hole does.
+- **Nested or boundary-crossing but *same* winding direction** → not a hole at all, just two independent
+  solid regions that happen to share area (e.g. "D"'s stem sitting inside where the bowl's slit crosses
+  it, "A"'s crossbar sitting inside the outer silhouette's own already-solid ink) — isolated into its own
+  private render group (a dangling, never-resolving `holeParentByKey` key) so it always renders as
+  independent ink and can never accidentally XOR-cancel against an unrelated same-colored face.
+- **Neither nested nor crossing** → left completely alone (e.g. "x"'s three non-overlapping pieces from
+  its own single self-crossing contour).
+
+The winding-direction check is the load-bearing discriminator, not geometric nesting alone: TrueType/
+OpenType fonts always encode a counter/hole with the *opposite* winding direction from the solid ink it
+cuts from (a hard format convention, not a heuristic) — plain nesting alone wrongly classified "A"'s
+crossbar as a hole of the outer silhouette, since both wind the *same* direction and the crossbar is
+already just sitting inside solid ink at that height. Containment itself is tested by requiring **every**
+vertex of the candidate hole to fall inside the container (`isFullyContained`), not a single "representative
+interior point" sample (`getPointInsideFace`) — a thin, elongated shape (e.g. "Q"'s tail, which touches its
+ring at one point and extends far outside it) can have that one sampled point land right at the touching
+point, giving a false "fully contained" reading. Verified against ~27 real Inter-font characters via a
+ground-truth grid-sampling methodology (raw `opentype.js` path commands → hand-computed nonzero-winding,
+independent of this codebase's own pipeline), all within 0.0–0.1% mismatch.
+
+## 75. `getVectorFillLoopPoints` non-deterministically lost an entire face on repeated, byte-identical
+input — root-caused to a greedy walk reconstructing a self-touching vertex's continuation, fixed by
+backtracking instead of guessing
+
+**Symptom, found live**: typing a multi-character string (e.g. the full alphabet, or "men") and repeating
+the exact same Flatten call would occasionally render a self-crossing letter ("e", "n", "x") with a chunk
+of its own fill missing — non-deterministically, on an otherwise byte-identical rebuild. A 500-iteration
+stress test on "men" measured a **31% failure rate** (155/500). Initially suspected to be a cross-glyph
+contamination bug (only manifesting with multiple glyphs present) — disproven by the same stress
+methodology applied to a *single* glyph in total isolation: "e" alone, 300 iterations, failed **43/300
+(14%)** of the time. The bug is purely per-glyph; multi-glyph text just gives more chances to hit it.
+
+**Root cause**: this is a *render-time* bug, not a face-derivation bug — §74's `filledFaceKeys` list
+itself is stable. The bug lives in `getVectorFillLoopPoints`/`chainIntoSteps`, which resolves a *stored*
+loop key (an unordered, alphabetically-sorted set of piece-key strings, per `getVectorFillLoopKey`) back
+into an ordered walk of points for rendering. A self-touching glyph contour (e.g. "e") legitimately visits
+one crossing vertex *twice* in its own face boundary — degree 4 there, not the usual degree 2 — so there
+are two candidate continuations at that vertex, and the old code (`getNextUnitHalfEdge`) took a single
+greedy guess: walk outward from the arriving piece's twin edge and commit to the *first* neighbour
+recognized as one of this loop's own units. On the wrong branch, that guess closes the walk back to its
+start early, using only some of the loop's units — a shorter, internally self-consistent loop silently
+missing the pieces it skipped past, and the old code simply returned `null` for the whole face the moment
+that happened, with no way to recover.
+
+The determinism angle: *which* candidate got tried first depended on the real geometric departure angle at
+that vertex (correct and stable for a fixed shape) **and** on which unit `chainIntoSteps` started its walk
+from — `first = units[0]`, where `units` comes straight from splitting the loop key's own comma-joined,
+alphabetically-sorted piece-key string. Piece keys embed real segment/vertex ids, freshly generated via
+`nanoid()` on *every* call to `getTextFlattenVector` — so for the exact same glyph shape, the alphabetical
+sort order (and so the walk's starting point) was different on every single rebuild, occasionally landing
+on a starting point whose first-tried branch happened to be the wrong one.
+
+**Fix**: `chainIntoSteps` now backtracks instead of guessing. `getNextUnitHalfEdgeCandidates` (renamed
+from `getNextUnitHalfEdge`) returns *every* recognized candidate at a branch point, still in twin-1
+priority order for the common (non-ambiguous) case. `chainIntoSteps` tries them in order, and if a branch
+can't be extended into a closed loop using every one of the loop's units exactly once, it undoes that
+choice and tries the branch's next candidate — bounded by a fixed search budget to guard against
+pathological blowup on arbitrary user-drawn networks, though a genuine branch point is rare (at most one
+or two per glyph) so this stays cheap in practice. This is correct by construction rather than by luck of
+the id draw: re-verified via the same stress methodology at **0/500** on "men" and **0/300** on "e" alone.
+See `getTextFlattenVector.determinism.spec.ts` (now a real, passing test — previously kept as `it.fails`
+while this was unresolved) and the synthetic backtracking regression in `chainIntoSteps.spec.ts`.
+
+## 76. "(" and ")" rendered as a spiked, twisted shape instead of a smooth bracket curve — a font-cusp
+miter-point collapse with no distance limit
+
+**Symptom**: flattening "(" or ")" alone (no other characters involved — this is unrelated to §75's
+multi-glyph non-determinism) produced a shape with a sharp spike shooting out well past the glyph's own
+natural bounding box, instead of a smooth crescent. Reproduced with the real Inter TTF; deterministic
+(same wrong shape every time, for either character alone).
+
+**Root cause**: `getGlyphEdgeLoops`'s `collapseCuspEdges` (added for a different, earlier fix — collapsing
+a short "blunted" straight bridge at a genuine sharp cusp into a single true miter point, computed via
+`getMiterPoint`'s line-intersection of the two flanking curves' tangent directions) had no limit on how
+far that computed point could land. Both "(" and ")" have exactly this "blunted tip" pattern at their
+top and bottom cusps — opentype.js represents each tip as a short (~3.4 unit), near-flat straight segment
+between two long, shallow-angle curves — but for this specific glyph, the two flanking tangent lines are
+close enough to parallel that their line-intersection lands **tens of units away**, over 10x the length
+of the tiny bridge it's meant to replace. `collapseBridgeRun` unconditionally snapped both flanking edges
+onto that far-off point, producing the spike. This is the same class of instability
+`getPolylineJoinVertices`/`getStrokeJoinPoints` already guard against with `MITER_LIMIT = 4` for real
+stroke joins — `getMiterPoint` had no equivalent safety check at all.
+
+**Fix**: `getMiterPoint` now rejects (returns `null`, same as the existing "parallel lines" case) any
+computed point farther from the bridge than `MITER_LIMIT` (4) times the bridge's own gap length (the
+distance between the two points being bridged) — not the flanking curves' own lengths, which was tried
+first and rejected: it let one of "("'s two symmetric tips scrape just under the limit while landing
+~10x farther from the bridge than the bridge itself was long, precisely because a short bridge can sit
+between arbitrarily long flanking curves with no relationship to how far a *sane* correction should
+reach. When rejected, `collapseCuspEdges` simply leaves the original short straight run in place
+(a very slightly blunted tip) instead of collapsing it — a safe, visually negligible fallback, verified
+against real ground truth: "(" and ")" now render with matching, correct dimensions (mirror images, as
+they should be) instead of differing by 30–60%. See `getMiterPoint.spec.ts`'s real-glyph-data regression
+and `getTextFlattenVector.determinism.spec.ts`'s bracket-symmetry test.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

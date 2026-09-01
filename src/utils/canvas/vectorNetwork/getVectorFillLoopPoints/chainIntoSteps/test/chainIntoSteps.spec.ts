@@ -1,5 +1,5 @@
 // types
-import { TResolvedPieceUnit } from '../types';
+import { TResolvedPieceUnit } from '../../types';
 import { TVectorVertex } from 'types/design/types';
 
 // utils
@@ -127,6 +127,44 @@ describe('chainIntoSteps', () => {
         const next = steps![(index + 1) % steps!.length];
         expect(step.toId).toBe(next.fromId);
       });
+    });
+  });
+
+  it('should backtrack past a premature self-closure at a self-touching vertex instead of giving up — the real-world "e" glyph regression', () => {
+    // mock — the same figure-eight as above, but with "p1" angularly placed just past "p2" (from
+    // v's point of view) instead of on the far side near "q2": at the shared vertex "v", walking
+    // twin-1 from the arriving piece "s3" now lands on "s1" (this loop's OWN first unit) BEFORE it
+    // reaches "s4" (the real continuation). Taking that first match closes the walk back to
+    // startKey after only 3 of the 6 units — a valid-looking but incomplete loop a plain greedy walk
+    // has no way to recover from. This is exactly what made a real self-crossing glyph (Inter's "e")
+    // non-deterministically lose its own face: whichever piece key's random id happened to sort
+    // first decided which vertex the walk started from, and for an unlucky starting point the first
+    // candidate tried was this kind of dead end.
+    const units = [
+      unit('s1', 'v', 'p1'),
+      unit('s2', 'p1', 'p2'),
+      unit('s3', 'p2', 'v'),
+      unit('s4', 'v', 'q1'),
+      unit('s5', 'q1', 'q2'),
+      unit('s6', 'q2', 'v'),
+    ];
+    const vertices: Record<string, TVectorVertex> = {
+      v: { id: 'v', x: 0, y: 0 },
+      p1: { id: 'p1', x: -2, y: -10 },
+      p2: { id: 'p2', x: 0, y: -10 },
+      q1: { id: 'q1', x: -10, y: 0 },
+      q2: { id: 'q2', x: 0, y: 10 },
+    };
+
+    // before
+    const steps = chainIntoSteps(units, vertices, planarSegmentsOf(units));
+
+    // result — recovers the full 6-unit loop instead of returning null on the premature 3-unit closure
+    expect(steps).not.toBeNull();
+    expect(steps!.map((step) => step.segmentId).sort()).toEqual(['s1', 's2', 's3', 's4', 's5', 's6']);
+    steps!.forEach((step, index) => {
+      const next = steps![(index + 1) % steps!.length];
+      expect(step.toId).toBe(next.fromId);
     });
   });
 

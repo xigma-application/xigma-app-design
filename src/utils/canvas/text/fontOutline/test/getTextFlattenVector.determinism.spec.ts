@@ -44,37 +44,24 @@ describe('getTextFlattenVector — determinism across repeated calls with the re
     vi.unstubAllGlobals();
   });
 
-  // KNOWN BUG, partially fixed: getVectorFillLoopPoints/computeLoopPoints resolves a random subset
-  // of an otherwise-stable filledFaceKeys list to real points when many glyphs' crossings are
-  // planarized together (isolated single letters are always stable).
+  // Formerly a KNOWN BUG (kept as `it.fails` while unresolved): getVectorFillLoopPoints's
+  // chainIntoSteps resolves a stored loop key's unordered, alphabetically-sorted piece set back into
+  // an ordered walk. A self-touching glyph contour (e.g. Inter's "e") legitimately visits one
+  // crossing vertex TWICE in its face boundary — that vertex has degree 4 within the loop's own
+  // piece set (2 edges in, 2 out), not the usual degree 2 — so there are two candidate
+  // continuations at that point, and a plain greedy walk (take the first twin-1 neighbour
+  // recognized as one of this loop's own units) had no way to know which one was right. The wrong
+  // guess silently closed early on a shorter, internally self-consistent loop missing the units it
+  // skipped past — and *which* guess got tried first was itself random, since it depended on which
+  // piece key's own (randomly nanoid-generated) id happened to sort first in the stored key.
   //
-  // Root cause: a self-touching glyph contour (e.g. Inter's "e") legitimately visits one crossing
-  // vertex TWICE in its face boundary — that vertex has degree 4 within the stored loop key's own
-  // piece set (2 edges in, 2 out), not the usual degree 2. getVectorFillLoopKey stores that
-  // boundary as an unordered, alphabetically-sorted set of piece keys, discarding the original walk
-  // order recorded at build time by walkVectorFace. chainIntoSteps has to reconstruct an ordered
-  // walk from that unordered set, and at a degree-4 vertex there are two candidate continuations.
-  //
-  // Fixed: chainIntoSteps/buildUnitHalfEdgeAdjacency now disambiguate a degree-4 vertex by real
-  // departure angle (the same convention walkVectorFace's half-edge adjacency uses at build time),
-  // built from just this loop's own resolved units — order-independent, and safe for a stored
-  // self-intersecting shape (e.g. a dragged bowtie), since that kind of shape's internal crossing
-  // lives inside one unit's own multi-piece run and is never a decision point here.
-  //
-  // Not fixed: the angle sort is built from only this loop's own units, not the full planar
-  // network — at a self-touching vertex that's also incident to OTHER faces' edges (a different,
-  // unresolved face sharing the same physical crossing), the true build-time "predecessor of twin"
-  // order can differ from what this reduced subset computes. Rebuilding on the full network fixes
-  // that but breaks the self-intersecting-shape case above (verified: it makes the dragged-bowtie
-  // test fail, since it forces one single non-overlapping "proper face" reconstruction instead of
-  // reconnecting stored piece identities) — a real fix needs to use the full adjacency for ordering
-  // while still tolerating self-intersection, which needs more design than this session had room
-  // for. Reduced the failure rate measurably (resolvedFaceCount now ranges ~60–63 out of 63, up
-  // from ~58–61 before), but does not eliminate it.
-  //
-  // Kept as `it.fails` so this stays documented and CI-visible without blocking the suite; once
-  // genuinely fixed, this will start failing because it unexpectedly passes — remove `.fails` then.
-  it.fails('should resolve the exact same set of visible faces every time for the same full-alphabet input', async () => {
+  // Fixed: chainIntoSteps now backtracks — try a branch, and if it can't be extended into a closed
+  // loop using every one of the loop's units exactly once, undo it and try the branch's next
+  // candidate (see getNextUnitHalfEdgeCandidates). This is correct by construction rather than by
+  // luck of the id draw: verified via a 500x stress run on "men" (0/500 failures, was 155/500) and
+  // a 300x run on "e" alone (0/300, was 43/300 — isolated single letters were never actually 100%
+  // stable, just far less likely to hit the ambiguous branch than a longer multi-glyph string).
+  it('should resolve the exact same set of visible faces every time for the same full-alphabet input', async () => {
     const node = buildNode();
     const summaries = [];
 
@@ -99,5 +86,76 @@ describe('getTextFlattenVector — determinism across repeated calls with the re
 
     expect(summaries[0]).not.toBeNull();
     summaries.forEach((summary) => expect(summary).toEqual(summaries[0]));
+  });
+});
+
+describe('getTextFlattenVector — glyph outline integrity with the real Inter font', () => {
+  beforeAll(() => {
+    const buffer = readFileSync(resolve(__dirname, '../../../../../assets/fonts/inter/source/Inter-Regular.ttf'));
+    const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (): Promise<{ arrayBuffer: () => Promise<ArrayBuffer> }> => ({ arrayBuffer: async (): Promise<ArrayBuffer> => arrayBuffer })),
+    );
+  });
+
+  afterAll(() => {
+    vi.unstubAllGlobals();
+  });
+
+  const buildSingleCharNode = (content: string): TTextNode => ({
+    content,
+    fill: '#123456',
+    flipX: false,
+    flipY: false,
+    fontFamily: 'Inter',
+    fontSize: 40,
+    height: 40,
+    id: 'text-1',
+    name: 'Text',
+    parentId: null,
+    pathId: null,
+    rotation: 0,
+    type: NodeType.text,
+    width: 600,
+    x: 0,
+    y: 0,
+  });
+
+  // Regression for a real bug: collapseCuspEdges' miter-point collapse (see getMiterPoint.ts) had no
+  // limit on how far a computed miter point could land — a short, near-flat straight bridge flanked
+  // by two long, shallow-angle curves (exactly the shape of "("'s and ")"'s own blunted tips) makes
+  // the flanking tangent lines cross tens of units away, well outside the glyph's own bounding box.
+  // Caught live: "(" and ")" rendered as a twisted, spiked shape instead of a smooth bracket curve.
+  it('should render "(" and ")" as smooth, mirror-matching brackets instead of a spiked cusp collapse', async () => {
+    const openResult = await getTextFlattenVector(MSDF_ATLAS_JSON, buildSingleCharNode('('));
+    const closeResult = await getTextFlattenVector(MSDF_ATLAS_JSON, buildSingleCharNode(')'));
+
+    const openPolygon = openResult && groupFilledFacesForRendering(openResult)[0]?.polygons[0];
+    const closePolygon = closeResult && groupFilledFacesForRendering(closeResult)[0]?.polygons[0];
+
+    expect(openPolygon).toBeTruthy();
+    expect(closePolygon).toBeTruthy();
+
+    const bboxOf = (points: { x: number; y: number }[]): { h: number; w: number } => {
+      const xs = points.map((p) => p.x);
+      const ys = points.map((p) => p.y);
+
+      return { h: Math.max(...ys) - Math.min(...ys), w: Math.max(...xs) - Math.min(...xs) };
+    };
+
+    const openBox = bboxOf(openPolygon!);
+    const closeBox = bboxOf(closePolygon!);
+
+    // "(" and ")" are horizontal mirror images in Inter — their outlines must match almost exactly,
+    // not differ by the 30-60% a spurious spike would introduce
+    expect(openBox.w).toBeCloseTo(closeBox.w, 1);
+    expect(openBox.h).toBeCloseTo(closeBox.h, 1);
+    // sanity floor: a collapsed spike pushed the bbox to 3-4x the glyph's real ~8.5 x 36 size at this
+    // fontSize — assert against real ground truth (opentype.js's own bounding box) instead of just
+    // each other, so a bug that shifts both equally wouldn't slip through
+    expect(openBox.w).toBeLessThan(15);
+    expect(openBox.h).toBeLessThan(45);
   });
 });

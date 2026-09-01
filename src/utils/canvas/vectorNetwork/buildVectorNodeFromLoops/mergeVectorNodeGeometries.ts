@@ -14,18 +14,21 @@ export const mergeVectorNodeGeometries = (nodes: TVectorNode[], base: TVectorNod
   const segments: Record<string, TVectorSegment> = {};
   const filledFaceKeys: string[] = [];
   const fillColorOverrideByKey: Record<string, string> = {};
+  const holeParentByKey: Record<string, string> = {};
 
   nodes.forEach((node) => {
     Object.assign(vertices, node.vertices);
     Object.assign(segments, node.segments);
     filledFaceKeys.push(...node.filledFaceKeys);
     Object.assign(fillColorOverrideByKey, node.fillColorOverrideByKey);
+    Object.assign(holeParentByKey, node.holeParentByKey);
   });
 
   return {
     fillColor,
     fillColorOverrideByKey,
     filledFaceKeys,
+    holeParentByKey,
     id: base.id,
     name: base.name,
     parentId: base.parentId,

@@ -8,6 +8,7 @@ import { TTextNode, TVectorNode } from 'types/design/types';
 import { buildVectorNodeFromEdgeLoops } from 'utils/canvas/vectorNetwork/buildVectorNodeFromLoops/buildVectorNodeFromEdgeLoops';
 import { getTextGlyphContours } from './getTextGlyphContours';
 import { mergeVectorNodeGeometries } from 'utils/canvas/vectorNetwork/buildVectorNodeFromLoops/mergeVectorNodeGeometries';
+import { mergeVectorNodeGeometriesWithHoleDetection } from 'utils/canvas/vectorNetwork/buildVectorNodeFromLoops/mergeVectorNodeGeometriesWithHoleDetection/mergeVectorNodeGeometriesWithHoleDetection';
 
 export const getTextFlattenVector = async (atlas: TGlyphAtlasJson, node: TTextNode): Promise<TVectorNode | null> => {
   if (node.pathId) {
@@ -16,7 +17,19 @@ export const getTextFlattenVector = async (atlas: TGlyphAtlasJson, node: TTextNo
 
   const glyphContours = await getTextGlyphContours(atlas, node);
   const glyphVectors = glyphContours
-    .map((contours) => buildVectorNodeFromEdgeLoops(contours, { id: nanoid(), name: node.name, parentId: null, rotation: 0 }, node.fill))
+    .map((contours) => {
+      const contourVectors = contours
+        .map((contour) =>
+          buildVectorNodeFromEdgeLoops([contour], { id: nanoid(), name: node.name, parentId: null, rotation: 0 }, node.fill),
+        )
+        .filter((vector): vector is TVectorNode => vector !== null);
+
+      return mergeVectorNodeGeometriesWithHoleDetection(
+        contourVectors,
+        { id: nanoid(), name: node.name, parentId: null, rotation: 0 },
+        node.fill,
+      );
+    })
     .filter((vector): vector is TVectorNode => vector !== null);
 
   return mergeVectorNodeGeometries(

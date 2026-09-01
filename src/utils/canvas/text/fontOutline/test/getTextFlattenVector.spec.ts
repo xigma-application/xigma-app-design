@@ -46,11 +46,14 @@ const SQUARE = [
   { end: { x: 20, y: 10 }, start: { x: 30, y: 10 }, tangentEnd: null, tangentStart: null },
   { end: { x: 20, y: 0 }, start: { x: 20, y: 10 }, tangentEnd: null, tangentStart: null },
 ];
+// wound opposite to SQUARE (real TrueType/OpenType convention for a counter cut from solid ink) so
+// mergeVectorNodeGeometriesWithHoleDetection records it as a genuine active hole of SQUARE, joining
+// its color group, instead of an independent same-direction overlap that renders on its own
 const HOLE = [
-  { end: { x: 28, y: 2 }, start: { x: 22, y: 2 }, tangentEnd: null, tangentStart: null },
-  { end: { x: 28, y: 8 }, start: { x: 28, y: 2 }, tangentEnd: null, tangentStart: null },
-  { end: { x: 22, y: 8 }, start: { x: 28, y: 8 }, tangentEnd: null, tangentStart: null },
-  { end: { x: 22, y: 2 }, start: { x: 22, y: 8 }, tangentEnd: null, tangentStart: null },
+  { end: { x: 22, y: 8 }, start: { x: 22, y: 2 }, tangentEnd: null, tangentStart: null },
+  { end: { x: 28, y: 8 }, start: { x: 22, y: 8 }, tangentEnd: null, tangentStart: null },
+  { end: { x: 28, y: 2 }, start: { x: 28, y: 8 }, tangentEnd: null, tangentStart: null },
+  { end: { x: 22, y: 2 }, start: { x: 28, y: 2 }, tangentEnd: null, tangentStart: null },
 ];
 
 describe('getTextFlattenVector', () => {
