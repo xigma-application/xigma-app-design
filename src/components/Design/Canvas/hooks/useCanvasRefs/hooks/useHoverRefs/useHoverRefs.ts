@@ -13,6 +13,7 @@ import { TPoint } from 'types/canvas';
 
 export const useHoverRefs = (): THoverRefs => {
   const hoverRef = useRef<string | null>(null);
+  const hoveredEllipseArcHandleRef = useRef<string | null>(null);
   const hoveredSegmentIdRef = useRef<string | null>(null);
   const hoveredVectorCutPointRef = useRef<TPoint | null>(null);
   const hoveredVectorCutSegmentRef = useRef<TVectorCutSegmentHover | null>(null);
@@ -30,6 +31,7 @@ export const useHoverRefs = (): THoverRefs => {
   if (hoverRefsRef.current === null) {
     hoverRefsRef.current = {
       hoverRef,
+      hoveredEllipseArcHandleRef,
       hoveredSegmentIdRef,
       hoveredVectorCutPointRef,
       hoveredVectorCutSegmentRef,

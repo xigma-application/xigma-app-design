@@ -10,6 +10,7 @@ import { drawEllipseArcHandleLayer } from '../drawEllipseArcHandleLayer';
 const drawEllipseArcGuideLineMock = vi.fn();
 const drawEllipseArcRatioGuideArcMock = vi.fn();
 const drawEllipseArcHandleMock = vi.fn();
+const drawHoveredEllipseArcValueLabelMock = vi.fn();
 
 vi.mock('utils/canvas/drawEllipseArcGuideLine', () => ({
   drawEllipseArcGuideLine: (...args: unknown[]): void => drawEllipseArcGuideLineMock(...args),
@@ -19,6 +20,9 @@ vi.mock('utils/canvas/drawEllipseArcRatioGuideArc', () => ({
 }));
 vi.mock('utils/canvas/drawEllipseArcHandle', () => ({
   drawEllipseArcHandle: (...args: unknown[]): void => drawEllipseArcHandleMock(...args),
+}));
+vi.mock('../drawHoveredEllipseArcValueLabel', () => ({
+  drawHoveredEllipseArcValueLabel: (...args: unknown[]): void => drawHoveredEllipseArcValueLabelMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -55,6 +59,7 @@ describe('drawEllipseArcHandleLayer', () => {
     drawEllipseArcGuideLineMock.mockClear();
     drawEllipseArcRatioGuideArcMock.mockClear();
     drawEllipseArcHandleMock.mockClear();
+    drawHoveredEllipseArcValueLabelMock.mockClear();
   });
 
   it('should draw nothing when nothing is selected', () => {
@@ -251,7 +256,8 @@ describe('drawEllipseArcHandleLayer', () => {
       createCanvasRefs(),
     );
 
-    // result
+    // result — drawHoveredEllipseArcValueLabel is still called unconditionally here; it owns the
+    // hovered/dragging decision itself (see its own spec)
     expect(drawEllipseArcHandleMock).not.toHaveBeenCalled();
   });
 
@@ -277,6 +283,33 @@ describe('drawEllipseArcHandleLayer', () => {
 
     // result
     expect(drawEllipseArcHandleMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('should hand the Sweep handle value label off to drawHoveredEllipseArcValueLabel, which owns whether it actually draws', () => {
+    // mock
+    const node = ellipse({ arcEndAngle: 0, arcRatio: 0.4, rotation: 15 });
+    const bounds = { height: 100, width: 100, x: 0, y: 0 };
+    const refs = createCanvasRefs();
+
+    // before
+    drawEllipseArcHandleLayer(
+      {
+        buffer: {} as WebGLBuffer,
+        canvasHeight: 100,
+        canvasWidth: 100,
+        gl: {} as WebGL2RenderingContext,
+        imageContext: {} as never,
+        program: {} as WebGLProgram,
+        viewport: IDENTITY_VIEWPORT,
+      },
+      node,
+      [node],
+      refs,
+    );
+
+    // result
+    expect(drawHoveredEllipseArcValueLabelMock).toHaveBeenCalledTimes(1);
+    expect(drawHoveredEllipseArcValueLabelMock).toHaveBeenCalledWith(expect.anything(), refs, bounds, 90, 0, 0.4, node, null);
   });
 
   it('should draw all three handles once a cut exists and the shape is hovered', () => {

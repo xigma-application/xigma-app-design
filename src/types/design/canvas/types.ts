@@ -213,6 +213,7 @@ export type TVectorEditRefs = {
 
 export type THoverRefs = {
   hoverRef: RefObject<string | null>;
+  hoveredEllipseArcHandleRef: RefObject<string | null>;
   hoveredSegmentIdRef: RefObject<string | null>;
   hoveredVectorCutPointRef: RefObject<TPoint | null>;
   hoveredVectorCutSegmentRef: RefObject<TVectorCutSegmentHover | null>;

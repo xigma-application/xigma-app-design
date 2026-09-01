@@ -3,6 +3,7 @@ import { THoverRefs } from 'types/design/canvas/types';
 
 export const createHoverRefs = (overrides: Partial<THoverRefs> = {}): THoverRefs => ({
   hoverRef: { current: null },
+  hoveredEllipseArcHandleRef: { current: null },
   hoveredSegmentIdRef: { current: null },
   hoveredVectorCutPointRef: { current: null },
   hoveredVectorCutSegmentRef: { current: null },

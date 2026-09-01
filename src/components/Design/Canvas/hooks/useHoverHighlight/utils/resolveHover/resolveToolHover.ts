@@ -26,6 +26,7 @@ import { TViewport } from 'types/design/types';
 import { getResizeHandleAtPoint } from '../../../../utils/getResizeHandleAtPoint/getResizeHandleAtPoint';
 import { getVectorMultiSelectBoxForHover } from './getVectorMultiSelectBoxForHover';
 import { getVectorMultiSelectResizeHandle } from '../../../../utils/getVectorMultiSelectResizeHandle';
+import { resolveEllipseArcHandleHover } from './resolveEllipseArcHandleHover';
 import { setHoverState } from '../setHoverState';
 
 export const resolveToolHover = (
@@ -73,6 +74,8 @@ export const resolveToolHover = (
       vectorMultiSelectBox && getVectorMultiSelectResizeHandle(point, vectorMultiSelectBox.bounds, viewport, vectorMultiSelectBox.rotation),
     viewport,
   };
+
+  resolveEllipseArcHandleHover(point, resizableSelectedNodes, viewport, refs);
 
   for (const resolve of HOVER_RESOLVERS) {
     const result = resolve(ctx);

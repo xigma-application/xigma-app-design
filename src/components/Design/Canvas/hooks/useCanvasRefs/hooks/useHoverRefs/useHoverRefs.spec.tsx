@@ -11,6 +11,7 @@ describe('useHoverRefs behaviors', () => {
     // result
     expect(result.current).toEqual({
       hoverRef: { current: null },
+      hoveredEllipseArcHandleRef: { current: null },
       hoveredSegmentIdRef: { current: null },
       hoveredVectorCutPointRef: { current: null },
       hoveredVectorCutSegmentRef: { current: null },
