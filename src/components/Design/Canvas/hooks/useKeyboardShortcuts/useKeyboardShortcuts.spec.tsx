@@ -651,7 +651,7 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
     const page = realStore.getState().design.pages[realStore.getState().design.activePageId];
     expect(page.nodes[groupId].type).toBe(NodeType.group);
     expect(page.nodes[groupId].name).toBe('Mask group');
-    expect(page.nodes[(page.nodes[groupId] as { childIds: string[] }).childIds[0]].isMask).toBe(true);
+    expect(page.nodes[(page.nodes[groupId] as { childIds: string[] }).childIds.at(-1)!].isMask).toBe(true);
   });
 
   it('should bring the selection to the front on "]" and send it to the back on "["', () => {

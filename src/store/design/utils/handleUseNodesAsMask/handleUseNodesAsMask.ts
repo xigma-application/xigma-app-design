@@ -17,6 +17,6 @@ export const handleUseNodesAsMask = (state: TDesignState, groupId: string): void
 
   if (group?.type === NodeType.group) {
     group.name = DEFAULT_MASK_GROUP_NAME;
-    page.nodes[group.childIds[0]].isMask = true;
+    page.nodes[group.childIds[group.childIds.length - 1]].isMask = true;
   }
 };

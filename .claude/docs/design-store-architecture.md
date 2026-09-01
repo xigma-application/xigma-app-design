@@ -109,7 +109,7 @@ bodies delegate to `utils/handle<ReducerName>.ts`):
 | `addComment` | delegated → `handleAddComment.ts` | id via `nanoid()` in `prepare` (same pattern as `addNode`) — see below |
 | `addNode` | delegated → `handleAddNode.ts` | id via `nanoid()` in `prepare`, not the reducer body — see below |
 | `cancelCommentDraft` | inline (`state.commentDraftPosition = null`) | |
-| `createMaskGroup` | delegated → `handleUseNodesAsMask/handleUseNodesAsMask.ts` | id via `nanoid()` in `prepare`; runs `handleGroupNodes` then renames the group `'Mask group'` and sets `isMask` on `childIds[0]` — see `masks.md` |
+| `createMaskGroup` | delegated → `handleUseNodesAsMask/handleUseNodesAsMask.ts` | id via `nanoid()` in `prepare`; runs `handleGroupNodes` then renames the group `'Mask group'` and sets `isMask` on the **last** `childIds` entry — see `masks.md` |
 | `deleteComment` | inline (`delete state.comments[action.payload]`) | wired to a store action, but no UI dispatches it today — comment deletion is intentionally disabled in `CommentPin` for now |
 | `deleteNode` | delegated → `handleDeleteNode.ts` | path+text cascade, plus group cascade both directions — see `group-nodes.md` §2 |
 | `groupNodes` | delegated → `handleGroupNodes/handleGroupNodes.ts` | id via `nanoid()` in `prepare`, same pattern as `addNode` — see `group-nodes.md` §2 |

@@ -557,7 +557,8 @@ node in the scene it is the exact old flat `sceneNodes.forEach` over `drawLeafNo
 per-`NodeType` switch, extracted verbatim), touching no framebuffer/viewport/blend/colour-mask
 state. With one present it walks the tree from `rootOrder` (`drawSceneNodes/` folder,
 `TMaskRenderer`-threaded helpers), and for each group whose first `isMask` child opens a scope it:
-renders the mask's later siblings into `contentTarget`, the mask node into `maskTarget` (both from
+renders the siblings *before* the mask (the rows above it in the Layers panel) into `contentTarget`,
+the mask node into `maskTarget` (both from
 `createRenderTargetPool`, drawing-buffer-sized, packed depth/stencil so a vector mask's own
 `drawVectorFill` stencil pass still works), then `compositeMask` draws a full-screen quad
 `content.rgb, content.a * mask.a` back onto the framebuffer that group was being drawn into — the

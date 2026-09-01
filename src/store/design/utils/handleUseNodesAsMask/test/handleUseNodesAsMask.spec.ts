@@ -59,7 +59,7 @@ const buildState = (page: Partial<TDesignPage>): TDesignState => ({
 });
 
 describe('handleUseNodesAsMask', () => {
-  it('should wrap the selection in a "Mask group" and flag its lowest child as the mask', () => {
+  it('should wrap the selection in a "Mask group" and flag its last child (bottom of the panel) as the mask', () => {
     // mock
     const a = buildRect({ id: 'a' });
     const b = buildRect({ id: 'b', x: 40 });
@@ -74,8 +74,8 @@ describe('handleUseNodesAsMask', () => {
     expect(group.type).toBe(NodeType.group);
     expect(group.name).toBe(DEFAULT_MASK_GROUP_NAME);
     expect(group.childIds).toEqual(['a', 'b']);
-    expect(page.nodes.a.isMask).toBe(true);
-    expect(page.nodes.b.isMask).toBeUndefined();
+    expect(page.nodes.b.isMask).toBe(true);
+    expect(page.nodes.a.isMask).toBeUndefined();
     expect(page.selectedIds).toEqual(['group-1']);
   });
 

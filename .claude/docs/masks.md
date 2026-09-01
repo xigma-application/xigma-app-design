@@ -1,9 +1,10 @@
 # Masks — data model + offscreen alpha compositing
 
 Figma-style masks. "Use as mask" always wraps the selection in a group ("Mask group"); the group's
-lowest child becomes the mask and clips its later siblings to its own painted alpha (fill **and**
-stroke for a vector, glyph coverage for live text, image alpha, gradients). Nesting groups scopes
-the effect; moving the mask above its siblings makes it a no-op.
+**last** child (bottom row of the group in the Layers panel) becomes the mask and clips the
+siblings **above it** to its own painted alpha (fill **and** stroke for a vector, glyph coverage
+for live text, image alpha, gradients). Nesting groups scopes the effect; dragging the mask to the
+top of the panel makes it a no-op.
 
 ## 1. Data model
 
@@ -12,18 +13,24 @@ the effect; moving the mask above its siblings makes it a no-op.
 "Mask group" is a plain `TGroupNode` named `DEFAULT_MASK_GROUP_NAME` (`'Mask group'`,
 `store/design/constants.ts`).
 
-**Mask-scope rule** (within a group's `childIds`, stored bottom→top): the first `isMask` child
-opens a scope covering every sibling **after** it in `childIds`. Those siblings are the masked
-content; the `isMask` child is the alpha source and is never painted to screen directly. Children
-before the mask (rare) render plain. A mask that is the last child (top of the layers tree) has an
-empty scope → paints nothing, masks nothing. Only the *first* `isMask` child in a group is treated
-as a mask — multiple masks in one group are not v1 (the creation flow never produces that).
+**Mask-scope rule.** `LayersTree` renders `childIds` in array order with no reversal, so
+`childIds[0]` is the **top** row of the group in the panel and `childIds[last]` is the **bottom**
+row. The first `isMask` child (`findIndex`) opens a scope covering every sibling **before** it in
+`childIds` (`childIds[0 .. maskIndex-1]` — the rows shown *above* it in the panel). Those siblings
+are the masked content; the `isMask` child is the alpha source and is never painted to screen
+directly. Siblings *after* the mask (rare) render plain, unmasked. A mask that is `childIds[0]`
+(top of the panel) has an empty scope → paints nothing, masks nothing. Only the first `isMask`
+child in a group is honored — multiple masks per group are not v1 (the creation flow never
+produces that). NB: `childIds`/`rootOrder` are z-ordered last-on-top, so this panel ordering is
+inverted from Figma's (panel-bottom = frontmost here), but the *visual* result — mask at the
+bottom of its rows, clipping the rows above it — matches Figma.
 
 ## 2. Store
 
 - `createMaskGroup` (`slice.ts`, `prepare` → `{ groupId: nanoid() }`) → `handleUseNodesAsMask`
   (`store/design/utils/handleUseNodesAsMask/`): calls `handleGroupNodes` verbatim, then renames the
-  group to `DEFAULT_MASK_GROUP_NAME` and sets `isMask = true` on `group.childIds[0]`. No-ops on an
+  group to `DEFAULT_MASK_GROUP_NAME` and sets `isMask = true` on
+  `group.childIds[group.childIds.length - 1]` (the last child / bottom panel row). No-ops on an
   empty selection (no group gets built).
 - `toggleNodeMask` (payload = node id) → `handleToggleNodeMask` (mirrors `handleToggleNodeHidden`,
   no cascade). This is what the menu's "Remove mask" dispatches — it clears the flag only, the
@@ -73,11 +80,13 @@ New 5th GL program + a framebuffer pool, both built once and carried on `TImageR
   each `TMaskRenderer`-threaded, per `xigma-function-style`'s split-heavy-branching rule). Nodes
   absent from `sceneNodes` (hidden / the editing text node) are skipped — a hidden group already
   cascades `hidden` to its children, so subtree consistency holds.
-  - `renderMaskGroup`: render the mask's later siblings into `contentTarget`
-    (`pool.acquire()`), the mask node into `maskTarget`, then `bindTarget(previous)` and
-    `compositeMask(content, mask)` — a full-screen quad multiplying content by mask alpha onto
+  - `renderMaskGroup`: render `childIds[0 .. maskIndex-1]` (the siblings *before* the mask) into
+    `contentTarget` (`pool.acquire()`), the mask node into `maskTarget`, then `bindTarget(previous)`
+    and `compositeMask(content, mask)` — a full-screen quad multiplying content by mask alpha onto
     whatever framebuffer the group was being drawn into (screen, or an outer mask's content target
-    when nested). `pool.release` both.
+    when nested). `pool.release` both. Siblings *after* the mask (`childIds[maskIndex+1 ..]`) are
+    then rendered plain on top. An empty content slice (mask is `childIds[0]`) skips the whole
+    offscreen dance.
   - `bindTarget(null)` restores the screen: default framebuffer, `viewport` back to
     `drawingBufferWidth/Height`, `colorMask(t,t,t,false)` (the alpha-locked state
     `drawSceneBackground` establishes). `bindTarget(target)` flips `colorMask` to `(t,t,t,true)` so

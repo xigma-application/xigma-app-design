@@ -38,6 +38,6 @@ describe('useUseSelectionAsMask', () => {
     const [groupId] = page.selectedIds;
     expect(page.nodes[groupId].type).toBe(NodeType.group);
     expect(page.nodes[groupId].name).toBe('Mask group');
-    expect(page.nodes[(page.nodes[groupId] as { childIds: string[] }).childIds[0]].isMask).toBe(true);
+    expect(page.nodes[(page.nodes[groupId] as { childIds: string[] }).childIds.at(-1)!].isMask).toBe(true);
   });
 });

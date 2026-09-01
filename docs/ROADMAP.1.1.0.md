@@ -161,14 +161,14 @@ ROADMAP.2.0.0.md Stage 2.
 
 ## Stage 13 — Masks (Figma-style)
 
-Any layer can clip its later siblings within a group to its own painted alpha. "Use as mask" (⌃⌘M)
-always wraps the selection in a "Mask group" and flags the lowest child as the mask. Every node type
-works as a mask source — shape / frame / group / image / live text / vector (fill _and_ stroke) —
-because the clip is a real offscreen alpha composite (a 5th `maskComposite` GL program + a
-resize-aware framebuffer pool), not a 1-bit stencil. `drawSceneNodes` stays byte-identical for any
-scene with no mask node; only a scene that has one walks the tree and runs the offscreen pass.
-Nesting groups scopes the effect; moving a mask above its siblings makes it a no-op. Full write-up:
-`.claude/docs/masks.md`.
+A layer clips the sibling rows **above it** within its group to its own painted alpha. "Use as
+mask" (⌃⌘M) always wraps the selection in a "Mask group" and flags the **last** child (bottom row
+of the group in the Layers panel) as the mask. Every node type works as a mask source — shape /
+frame / group / image / live text / vector (fill _and_ stroke) — because the clip is a real
+offscreen alpha composite (a 5th `maskComposite` GL program + a resize-aware framebuffer pool), not
+a 1-bit stencil. `drawSceneNodes` stays byte-identical for any scene with no mask node; only a
+scene that has one walks the tree and runs the offscreen pass. Nesting groups scopes the effect;
+dragging the mask to the top of the panel makes it a no-op. Full write-up: `.claude/docs/masks.md`.
 
 - [x] `isMask?` retrofit on the node types; `createMaskGroup` / `toggleNodeMask` reducers reusing
       the existing group machinery (`handleGroupNodes` + `buildGroupNode` `name` param); both in

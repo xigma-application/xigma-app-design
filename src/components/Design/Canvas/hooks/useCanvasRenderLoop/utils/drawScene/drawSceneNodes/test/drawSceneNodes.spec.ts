@@ -609,10 +609,10 @@ describe('drawSceneNodes', () => {
 
   describe('mask groups', () => {
     const buildMaskScene = (): { nodes: TSceneNode[]; nodesById: Record<string, TSceneNode>; rootOrder: string[] } => {
-      const mask = buildNode({ id: 'mask', isMask: true, parentId: 'group' });
       const content = buildNode({ id: 'content', parentId: 'group' });
+      const mask = buildNode({ id: 'mask', isMask: true, parentId: 'group' });
       const group: TGroupNode = {
-        childIds: ['mask', 'content'],
+        childIds: ['content', 'mask'],
         height: 10,
         id: 'group',
         name: 'Mask group',
@@ -624,7 +624,7 @@ describe('drawSceneNodes', () => {
         y: 0,
       };
 
-      return { nodes: [group, mask, content], nodesById: { content, group, mask }, rootOrder: ['group'] };
+      return { nodes: [group, content, mask], nodesById: { content, group, mask }, rootOrder: ['group'] };
     };
 
     it('should render masked content and the mask into two offscreen targets and composite them back', () => {
@@ -664,14 +664,14 @@ describe('drawSceneNodes', () => {
       expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
     });
 
-    it('should mask nothing when the mask sits above its siblings (last child)', () => {
+    it('should mask nothing when the mask is the first child (top of the panel, nothing above it)', () => {
       // mock
       const gl = createGlMock();
       const pool = createPoolStub();
       const content = buildNode({ id: 'content', parentId: 'group' });
       const mask = buildNode({ id: 'mask', isMask: true, parentId: 'group' });
       const group: TGroupNode = {
-        childIds: ['content', 'mask'],
+        childIds: ['mask', 'content'],
         height: 10,
         id: 'group',
         name: 'Mask group',
@@ -741,10 +741,10 @@ describe('drawSceneNodes', () => {
       // mock
       const gl = createGlMock();
       const pool = createPoolStub();
-      const mask = buildNode({ id: 'mask', isMask: true, parentId: 'group' });
       const visible = buildNode({ id: 'visible', parentId: 'group' });
+      const mask = buildNode({ id: 'mask', isMask: true, parentId: 'group' });
       const group: TGroupNode = {
-        childIds: ['mask', 'hidden-child', 'visible'],
+        childIds: ['hidden-child', 'visible', 'mask'],
         height: 10,
         id: 'group',
         name: 'Mask group',
@@ -783,9 +783,9 @@ describe('drawSceneNodes', () => {
       // mock
       const gl = createGlMock();
       const pool = createPoolStub();
-      const mask = buildNode({ id: 'mask', isMask: true, parentId: 'group' });
       const leafA = buildNode({ id: 'leaf-a', parentId: 'inner' });
       const leafB = buildNode({ id: 'leaf-b', parentId: 'inner' });
+      const mask = buildNode({ id: 'mask', isMask: true, parentId: 'group' });
       const inner: TGroupNode = {
         childIds: ['leaf-a', 'leaf-b'],
         height: 10,
@@ -799,7 +799,7 @@ describe('drawSceneNodes', () => {
         y: 0,
       };
       const group: TGroupNode = {
-        childIds: ['mask', 'inner'],
+        childIds: ['inner', 'mask'],
         height: 10,
         id: 'group',
         name: 'Mask group',

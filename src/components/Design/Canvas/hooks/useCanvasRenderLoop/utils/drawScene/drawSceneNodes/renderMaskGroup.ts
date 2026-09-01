@@ -12,8 +12,7 @@ import { TRenderTarget } from 'utils/canvas/renderTarget/createRenderTargetPool/
 
 export const renderMaskGroup = (renderer: TMaskRenderer, group: TGroupNode, maskIndex: number, target: TRenderTarget | null): void => {
   const { context, pool } = renderer;
-  renderIds(renderer, group.childIds.slice(0, maskIndex), target);
-  const contentIds = group.childIds.slice(maskIndex + 1);
+  const contentIds = group.childIds.slice(0, maskIndex);
 
   if (contentIds.length > 0) {
     const contentTarget = pool.acquire();
@@ -27,4 +26,6 @@ export const renderMaskGroup = (renderer: TMaskRenderer, group: TGroupNode, mask
     pool.release(contentTarget);
     pool.release(maskTarget);
   }
+
+  renderIds(renderer, group.childIds.slice(maskIndex + 1), target);
 };

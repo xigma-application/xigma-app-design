@@ -26,10 +26,10 @@ A group's own `x/y/width/height` is a derived, cached value — the tight boundi
 one field on a group that is **not derived** — it's a real, user-set value (via the rotate handle,
 rigid-body — §3), and it changes what "tight bounding box" even means (§4.2).
 
-A **"Mask group"** (Figma's "Use as mask") is just a plain `TGroupNode` named `'Mask group'` with
-one child carrying `isMask: true` — `createMaskGroup` runs `handleGroupNodes` verbatim then sets
-those two fields. Nothing about grouping/ungrouping/bounds-sync is mask-aware; the mask flag only
-affects rendering (`masks.md`).
+A **"Mask group"** (Figma's "Use as mask") is just a plain `TGroupNode` named `'Mask group'` whose
+**last** `childIds` entry (bottom row in the panel) carries `isMask: true` — `createMaskGroup` runs
+`handleGroupNodes` verbatim then sets those two fields. Nothing about grouping/ungrouping/bounds-sync
+is mask-aware; the mask flag only affects rendering (`masks.md`).
 
 ## 2. Reducers — `groupNodes` / `ungroupNodes` / delete cascade
 
