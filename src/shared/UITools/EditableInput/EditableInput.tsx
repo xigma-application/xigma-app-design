@@ -19,6 +19,7 @@ export type TEditableInputProps = {
   autoEdit?: boolean;
   className?: string;
   editOnDoubleClick?: boolean;
+  fitContent?: boolean;
   onChange: TFunc<[string]>;
   onEditingChange?: TFunc<[boolean]>;
   placeholder?: string;
@@ -34,6 +35,7 @@ export const EditableInput = forwardRef<HTMLInputElement, TEditableInputProps>(
       autoEdit = false,
       className = '',
       editOnDoubleClick = false,
+      fitContent = false,
       onChange,
       onEditingChange = noop,
       placeholder = '',
@@ -66,7 +68,10 @@ export const EditableInput = forwardRef<HTMLInputElement, TEditableInputProps>(
     ) : (
       <EditableInputDisplay
         ariaLabel={ariaLabel}
-        className={cx(action ? '' : className, { [styles['EditableInput--selected']]: selected })}
+        className={cx(action ? '' : className, {
+          [styles['EditableInput--fit-content']]: fitContent,
+          [styles['EditableInput--selected']]: selected,
+        })}
         onClick={editOnDoubleClick ? undefined : startEditing}
         onDoubleClick={editOnDoubleClick ? startEditing : undefined}
         onKeyDown={handleDisplayKeyDown}

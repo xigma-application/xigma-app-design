@@ -7,19 +7,32 @@ import { useScrollThumb } from 'hooks';
 // styles
 import styles from './scroll-thumb.module.scss';
 
-export type TScrollThumbProps = { className?: string; scrollRef: RefObject<HTMLDivElement | null> };
+// types
+import { TScrollThumbOrientation } from './types';
 
-export const ScrollThumb: FC<TScrollThumbProps> = ({ className = '', scrollRef }) => {
-  const { onPointerDown, onPointerMove, onPointerUp, thumbHeightRatio, thumbTopRatio } = useScrollThumb(scrollRef);
+// utils
+import { getThumbStyle } from './utils/getThumbStyle';
 
-  return thumbHeightRatio < 1 ? (
+export type TScrollThumbProps = {
+  className?: string;
+  orientation?: TScrollThumbOrientation;
+  scrollRef: RefObject<HTMLDivElement | null>;
+};
+
+export const ScrollThumb: FC<TScrollThumbProps> = ({ className = '', orientation = 'vertical', scrollRef }) => {
+  const { onPointerDown, onPointerMove, onPointerUp, thumbSizeRatio, thumbStartRatio } = useScrollThumb(
+    scrollRef,
+    orientation === 'horizontal' ? 'x' : 'y',
+  );
+
+  return thumbSizeRatio < 1 ? (
     <div
-      className={cx(styles.ScrollThumb, className)}
+      className={cx(styles.ScrollThumb, orientation === 'horizontal' && styles['ScrollThumb--horizontal'], className)}
       data-no-drag
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
-      style={{ height: `${thumbHeightRatio * 100}%`, top: `${thumbTopRatio * (100 - thumbHeightRatio * 100)}%` }}
+      style={getThumbStyle(orientation, thumbSizeRatio, thumbStartRatio)}
     />
   ) : null;
 };

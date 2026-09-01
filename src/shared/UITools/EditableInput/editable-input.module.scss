@@ -47,8 +47,22 @@
     flex: 0 1 auto;
   }
 
+  &--fit-content {
+    flex: 0 0 auto;
+    max-width: none;
+  }
+
+  &--fit-content &__text {
+    overflow: visible;
+    text-overflow: clip;
+  }
+
   &--display#{&}--display:hover {
     background-color: color-mix(in srgb, var(--color-neutral-3) 70%, transparent);
+  }
+
+  &--fit-content#{&}--fit-content:hover {
+    background-color: transparent;
   }
 
   &--selected {

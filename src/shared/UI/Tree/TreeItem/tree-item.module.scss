@@ -8,6 +8,7 @@
   display: flex;
   height: 32px;
   padding: 0 8px;
+  position: relative;
 
   &__content {
     align-items: center;
@@ -18,15 +19,18 @@
     min-width: 0;
     padding: 0 6px;
     position: relative;
+    z-index: 1;
   }
 
   &__content--editing {
     padding-right: 0;
   }
 
-  &:not([aria-selected='true']):hover &__content {
+  &:not([aria-selected='true']):hover::before {
     background-color: color-mix(in srgb, var(--color-neutral-3) 70%, transparent);
-    border-radius: 5px;
+    content: '';
+    inset: 0;
+    position: absolute;
   }
 
   &[aria-selected='true'] &__toggleButton,
@@ -69,9 +73,6 @@
   &__name {
     @include tree-item-text.tree-item-text;
 
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
   }
 

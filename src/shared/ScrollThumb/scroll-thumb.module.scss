@@ -5,4 +5,11 @@
   right: 2px;
   touch-action: none;
   width: 6px;
+
+  &--horizontal {
+    bottom: 2px;
+    height: 6px;
+    right: auto;
+    width: auto;
+  }
 }

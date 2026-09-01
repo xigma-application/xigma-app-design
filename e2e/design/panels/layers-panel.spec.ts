@@ -145,3 +145,36 @@ test('right-clicking a layer already part of a multi-selection keeps the whole s
   await expect(rowB.locator('[aria-selected="true"]')).toHaveCount(1);
   await expect(page.getByRole('menuitem', { name: 'Rename' })).toBeVisible();
 });
+
+test('a layer name too long for the panel makes the Layers tree scroll horizontally', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-layers-panel-horizontal-scroll');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 100, 740, 140);
+
+  const treeName = page.locator('[class*="TreeItem__name"]').first();
+
+  await treeName.dblclick();
+  await page.keyboard.type('This is a deliberately very long layer name that will never fit the panel width');
+  await page.keyboard.press('Enter');
+
+  const rowsContainer = page.locator('[class*="Tree__rows"]').first();
+
+  // the content is now wider than the viewport, so the container has real horizontal scroll room
+  const overflow = await rowsContainer.evaluate((el) => el.scrollWidth - el.clientWidth);
+  expect(overflow).toBeGreaterThan(0);
+
+  // and scrolling it actually moves
+  await rowsContainer.evaluate((el) => {
+    el.scrollLeft = 40;
+  });
+  await expect(async () => {
+    expect(await rowsContainer.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  }).toPass();
+
+  // our horizontal scroll thumb shows while the panel is hovered
+  await page.locator('[class*="Layers_"]').first().hover();
+  await expect(page.locator('[class*="ScrollThumb--horizontal"]')).toBeVisible();
+});

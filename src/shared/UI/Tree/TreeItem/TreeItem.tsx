@@ -68,6 +68,7 @@ export const TreeItem: FC<TTreeItemProps> = ({
           autoEdit={isRenameRequested}
           className={cx(styles.TreeItem__name, node.hidden && styles['TreeItem__name--hidden'])}
           editOnDoubleClick
+          fitContent
           onChange={handleRename}
           onEditingChange={onEditingChange}
           value={node.name}

@@ -375,6 +375,25 @@ describe('Tree', () => {
     expect(screen.queryByText('Row 0-0')).not.toBeInTheDocument();
   });
 
+  it('should show a horizontal scroll thumb once the rows overflow the viewport width', () => {
+    // before
+    const { container } = render(
+      <Tree getChildren={getChildren} renderRow={renderRow} roots={[buildItem('0'), buildItem('1')]} rowHeight={32} />,
+    );
+    const rowsContainer = container.querySelector('[class*="Tree__rows"]') as HTMLElement;
+
+    // nothing overflows yet — no horizontal thumb
+    expect(container.querySelector('[class*="scrollThumbHorizontal"], [class*="ScrollThumb--horizontal"]')).not.toBeInTheDocument();
+
+    // action — the flattened rows are now wider than the viewport
+    Object.defineProperty(rowsContainer, 'clientWidth', { configurable: true, value: 100 });
+    Object.defineProperty(rowsContainer, 'scrollWidth', { configurable: true, value: 400 });
+    fireEvent.scroll(rowsContainer);
+
+    // result
+    expect(container.querySelector('[class*="ScrollThumb--horizontal"]')).toBeInTheDocument();
+  });
+
   it('should run in controlled mode when expandedIds and onExpandedIdsChange are both provided', () => {
     // mock
     const onExpandedIdsChange = vi.fn();

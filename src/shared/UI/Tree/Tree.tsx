@@ -101,6 +101,7 @@ export const Tree = <T extends TTreeItem>({
         </div>
       </div>
       <ScrollThumb className={styles.Tree__scrollThumb} scrollRef={rowsRef} />
+      <ScrollThumb className={styles.Tree__scrollThumbHorizontal} orientation="horizontal" scrollRef={rowsRef} />
     </div>
   );
 };
