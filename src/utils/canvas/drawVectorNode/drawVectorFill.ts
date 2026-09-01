@@ -33,9 +33,6 @@ export const drawVectorFill = (
     gl.uniform2f(resolutionLocation, canvasWidth, canvasHeight);
     gl.enableVertexAttribArray(positionLocation);
 
-    // the caller (bindTarget) may have alpha writes enabled — an offscreen mask target relies on
-    // it to carry the mask's alpha into the composite — so capture it instead of hardcoding false
-    // when color writes are re-enabled below, or an offscreen mask render loses its alpha channel
     const [, , , alphaWriteEnabled] = gl.getParameter(gl.COLOR_WRITEMASK) as [boolean, boolean, boolean, boolean];
 
     gl.clear(gl.STENCIL_BUFFER_BIT);
