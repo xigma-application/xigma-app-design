@@ -1,11 +1,9 @@
 import cx from 'classnames';
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import { noop } from 'lodash';
-import { useTranslation } from 'react-i18next';
 
 // components
 import TreeItemActions from './TreeItemActions';
-import TreeItemIcon from './TreeItemIcon/TreeItemIcon';
 import TreeItemToggle from './TreeItemToggle/TreeItemToggle';
 import { EditableInput } from 'shared';
 
@@ -17,7 +15,6 @@ import { useTreeItemContextMenu } from './hooks/useTreeItemContextMenu';
 import { useTreeItemNameEditing } from './hooks/useTreeItemNameEditing';
 
 // others
-import { NODE_ROW_MASK_BADGE_KEY } from 'components/Design/LeftPanel/File/Layers/constants';
 import { TREE_ITEM_INDENT_PX } from '../constants';
 
 // styles
@@ -30,16 +27,28 @@ import { TSceneNode } from 'types/design/types';
 import { TToggleExpand } from '../types';
 
 export type TTreeItemProps = {
+  children?: ReactNode;
   depth?: number;
+  hideActions?: boolean;
   isExpanded?: boolean;
   isSelected: boolean;
   node: TSceneNode;
   onToggleExpand?: TToggleExpand;
+  renderIcon: (node: TSceneNode) => ReactNode;
   renderMenu?: TRenderTreeItemMenu;
 };
 
-export const TreeItem: FC<TTreeItemProps> = ({ depth = 0, isExpanded = false, isSelected, node, onToggleExpand, renderMenu }) => {
-  const { t } = useTranslation();
+export const TreeItem: FC<TTreeItemProps> = ({
+  children,
+  depth = 0,
+  hideActions = false,
+  isExpanded = false,
+  isSelected,
+  node,
+  onToggleExpand,
+  renderIcon,
+  renderMenu,
+}) => {
   const handleSelect = useSelectTreeItem(node.id);
   const handleRename = useRenameTreeItem(node.id);
   const { handleStopPropagation, handleToggleHidden, handleToggleLocked } = useTreeItemActions(node.id);
@@ -54,7 +63,7 @@ export const TreeItem: FC<TTreeItemProps> = ({ depth = 0, isExpanded = false, is
         style={{ marginLeft: depth * TREE_ITEM_INDENT_PX }}
       >
         <TreeItemToggle isExpandable={isExpandable} isExpanded={isExpanded} onToggleExpand={onToggleExpand ?? noop} />
-        <TreeItemIcon className={styles.TreeItem__icon} node={node} size={12} />
+        <span className={styles.TreeItem__icon}>{renderIcon(node)}</span>
         <EditableInput
           autoEdit={isRenameRequested}
           className={cx(styles.TreeItem__name, node.hidden && styles['TreeItem__name--hidden'])}
@@ -63,8 +72,8 @@ export const TreeItem: FC<TTreeItemProps> = ({ depth = 0, isExpanded = false, is
           onEditingChange={onEditingChange}
           value={node.name}
         />
-        {node.isMask && !isEditing && <span className={styles['TreeItem__mask-badge']}>{t(NODE_ROW_MASK_BADGE_KEY)}</span>}
-        {!isEditing && (
+        {!isEditing && children}
+        {!isEditing && !hideActions && (
           <TreeItemActions
             isHidden={Boolean(node.hidden)}
             isLocked={Boolean(node.locked)}

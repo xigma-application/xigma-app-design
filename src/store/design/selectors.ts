@@ -4,14 +4,19 @@ import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from 'store';
 
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { ToolName } from 'types/design/enums';
 import { TDesignPage } from './types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import { TComment, TSceneNode, TViewport } from 'types/design/types';
 
 // utils
-import { getGroupSubtreeNodes } from './utils/nodeHierarchy/getGroupSubtreeNodes';
+import { collectDescendantIdsOfSelected } from './utils/collectDescendantIdsOfSelected';
+import { getRenderOrderedNodes } from './utils/getRenderOrderedNodes';
 import { getTransformTargetNodes } from './utils/nodeHierarchy/getTransformTargetNodes';
+import { resolveMaskConnectorRoles } from './utils/maskConnector/resolveMaskConnectorRoles';
+
+// types
+export type { TMaskConnectorInfo, TMaskConnectorLine, TMaskConnectorRole } from './types';
 
 export const selectActivePageId = (state: RootState): string => state.design.activePageId;
 
@@ -63,14 +68,11 @@ const selectRootOrder = createSelector([selectActivePage], (page): string[] => p
 
 export const selectOrderedNodes = createSelector([selectRootOrder, selectNodes], (rootOrder, nodes) => rootOrder.map((id) => nodes[id]));
 
-const flattenNode = (node: TSceneNode, nodes: Record<string, TSceneNode>): TSceneNode[] =>
-  node.type === NodeType.group
-    ? [node, ...node.childIds.flatMap((childId) => (nodes[childId] ? flattenNode(nodes[childId], nodes) : []))]
-    : [node];
-
 export const selectRenderOrderedNodes = createSelector([selectRootOrder, selectNodes], (rootOrder, nodes) =>
-  rootOrder.flatMap((id) => (nodes[id] ? flattenNode(nodes[id], nodes) : [])),
+  getRenderOrderedNodes(rootOrder, nodes),
 );
+
+export const selectMaskConnectorRoleById = createSelector([selectNodes], (nodes) => resolveMaskConnectorRoles(nodes));
 
 export const selectSelectedIds = createSelector([selectActivePage], (page): string[] => page.selectedIds);
 
@@ -82,17 +84,9 @@ export const selectSelectedLeafNodes = createSelector([selectSelectedNodes, sele
   getTransformTargetNodes(selectedNodes.filter(Boolean), nodes),
 );
 
-export const selectDescendantIdsOfSelected = createSelector([selectSelectedNodes, selectNodes], (selectedNodes, nodes) => {
-  const descendantIds = new Set<string>();
-
-  selectedNodes.filter(Boolean).forEach((node) => {
-    getGroupSubtreeNodes(node, nodes)
-      .slice(1)
-      .forEach((descendant) => descendantIds.add(descendant.id));
-  });
-
-  return descendantIds;
-});
+export const selectDescendantIdsOfSelected = createSelector([selectSelectedNodes, selectNodes], (selectedNodes, nodes) =>
+  collectDescendantIdsOfSelected(selectedNodes, nodes),
+);
 
 export const selectVectorEditingNodeIds = (state: RootState): string[] => state.design.vectorEditingNodeIds;
 

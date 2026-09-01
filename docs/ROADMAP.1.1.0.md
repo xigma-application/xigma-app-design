@@ -179,9 +179,12 @@ dragging the mask to the top of the panel makes it a no-op. Full write-up: `.cla
       (`drawSceneNodes/` folder), nested mask groups via a target stack, `blendFuncSeparate` +
       `colorMask` handling so straight alpha accumulates correctly into the offscreen textures
 - [x] Layers tree "Mask" badge on the flagged row
-- [ ] dedicated `Mask` / `MaskGroup` (`mask-group.svg`) icons — blocked on adding the SVGs to
-      `xigma-app-shared`; the `getNodeTypeIconName` branch and the mask→masked-rows connector arrow
-      land with them
+- [x] `MaskGroup`/`LeadArrow` icons added to `xigma-app-shared` and pulled; `TreeItemIcon` moved out
+      of `shared/UI/Tree/` entirely into `LayersTree/LayerRow/LayerRowIcon` (renamed), since it's
+      Design-domain logic (node-type/mask branching), not generic tree UI — `TreeItem` now takes a
+      `renderIcon`/`children` slot instead. `LayerRowMaskDecorations` (badge + `LeadArrow` + the
+      connector line, driven by the new `selectMaskConnectorRoleById` selector) is the same kind of
+      Design-side injection. Connector CSS offsets are a first pass, not yet visually verified.
 - [ ] `e2e/design/selection/mask.spec.ts` — screenshot-diff proof that content is actually clipped
       (rect / image-alpha / live-text / vector-stroke masks + nested groups), ⌃⌘M, remove-mask
       restores, undo/redo. The GL call sequence is unit-tested; pixel correctness is not yet.

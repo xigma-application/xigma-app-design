@@ -1,0 +1,51 @@
+@use '@xigma/scss/mixins/svg-color';
+
+.LayerRowMaskDecorations {
+  &__badge {
+    color: var(--color-neutral-1);
+    flex-shrink: 0;
+    font-size: 11px;
+    margin-left: auto;
+    opacity: 0.6;
+  }
+
+  &__line--start {
+    background: var(--color-ramp-300);
+    bottom: -10px;
+    height: 15px;
+    left: 26.5px;
+    pointer-events: none;
+    position: absolute;
+    width: 1px;
+  }
+
+  &__line--continue {
+    background: var(--color-ramp-300);
+    bottom: -15px;
+    height: 15px;
+    left: 26.5px;
+    pointer-events: none;
+    position: absolute;
+    width: 1px;
+  }
+
+  &__line--continue-child {
+    background: var(--color-ramp-300);
+    bottom: -10px;
+    height: 32px;
+    left: 26.5px;
+    pointer-events: none;
+    position: absolute;
+    width: 1px;
+  }
+
+  &__lead {
+    @include svg-color.svg-color(var(--color-ramp-300));
+
+    left: 27px;
+    pointer-events: none;
+    position: absolute;
+    top: -2.5px;
+    transform: translateX(-50%);
+  }
+}

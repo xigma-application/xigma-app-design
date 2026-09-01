@@ -19,6 +19,7 @@ import {
   selectLastPenTool,
   selectLastShapeTool,
   selectLastTextTool,
+  selectMaskConnectorRoleById,
   selectNodes,
   selectOrderedNodes,
   selectPages,
@@ -328,5 +329,166 @@ describe('design selectors — groups', () => {
 
     // result
     expect(selectRenderOrderedNodes(danglingState).map((sceneNode) => sceneNode.id)).toEqual(['group-1', 'a', 'loose']);
+  });
+
+  it('should mark the last isMask child as "mask" and its one earlier sibling as "masked-start"', () => {
+    // mock
+    const maskState = {
+      design: {
+        ...state.design,
+        pages: {
+          'page-1': {
+            ...state.design.pages['page-1'],
+            nodes: { a: childA, b: { ...childB, isMask: true }, 'group-1': group, loose },
+            rootOrder: ['group-1', 'loose'],
+            selectedIds: [],
+          },
+        },
+      },
+    } as any;
+
+    // result
+    const roles = selectMaskConnectorRoleById(maskState);
+    expect(roles.get('b')).toEqual([{ depthOffset: 0, role: 'mask' }]);
+    expect(roles.get('a')).toEqual([{ depthOffset: 0, role: 'masked-start' }]);
+    expect(roles.has('loose')).toBe(false);
+  });
+
+  it('should mark the first of several masked siblings "masked-start" and the rest "masked-continue"', () => {
+    // mock
+    const c: TRectangleNode = { ...node, id: 'c', parentId: 'group-1', type: NodeType.rectangle };
+    const threeChildGroup: TGroupNode = { ...group, childIds: ['a', 'c', 'b'] };
+    const maskState = {
+      design: {
+        ...state.design,
+        pages: {
+          'page-1': {
+            ...state.design.pages['page-1'],
+            nodes: { a: childA, b: { ...childB, isMask: true }, c, 'group-1': threeChildGroup, loose },
+            rootOrder: ['group-1', 'loose'],
+            selectedIds: [],
+          },
+        },
+      },
+    } as any;
+
+    // result — both are direct children of the same mask-group, so neither is inherited: depthOffset 0
+    const roles = selectMaskConnectorRoleById(maskState);
+    expect(roles.get('a')).toEqual([{ depthOffset: 0, role: 'masked-start' }]);
+    expect(roles.get('c')).toEqual([{ depthOffset: 0, role: 'masked-continue' }]);
+    expect(roles.get('b')).toEqual([{ depthOffset: 0, role: 'mask' }]);
+  });
+
+  it('should propagate "masked-continue" onto every descendant of a masked, expanded group — not just its direct children', () => {
+    // mock — inner group "a" is masked; its own child "c" (and c's child "d") should inherit the role
+    const c: TRectangleNode = { ...node, id: 'c', parentId: 'a', type: NodeType.rectangle };
+    const d: TRectangleNode = { ...node, id: 'd', parentId: 'c-group', type: NodeType.rectangle };
+    const cGroup: TGroupNode = { ...group, childIds: ['d'], id: 'c-group', parentId: 'a' };
+    const innerGroup: TGroupNode = { ...group, childIds: ['c', 'c-group'], id: 'a' };
+    const maskState = {
+      design: {
+        ...state.design,
+        pages: {
+          'page-1': {
+            ...state.design.pages['page-1'],
+            nodes: { a: innerGroup, b: { ...childB, isMask: true }, c, 'c-group': cGroup, d, 'group-1': group, loose },
+            rootOrder: ['group-1', 'loose'],
+            selectedIds: [],
+          },
+        },
+      },
+    } as any;
+
+    // result — "a" is the direct masked sibling (masked-start, depthOffset 0); its own descendants
+    // only ever continue, and depthOffset counts nesting levels below "a" so the connector line can
+    // be pulled back into "a"'s own column instead of drifting right with each indent level
+    const roles = selectMaskConnectorRoleById(maskState);
+    expect(roles.get('a')).toEqual([{ depthOffset: 0, role: 'masked-start' }]);
+    expect(roles.get('c')).toEqual([{ depthOffset: 1, role: 'masked-continue' }]);
+    expect(roles.get('c-group')).toEqual([{ depthOffset: 1, role: 'masked-continue' }]);
+    expect(roles.get('d')).toEqual([{ depthOffset: 2, role: 'masked-continue' }]);
+  });
+
+  it('should carry both its own scope role AND the outer chain\'s passthrough when a masked descendant is itself a masked member of a nested mask group', () => {
+    // mock — "a" is masked content of the outer group-1/b chain; "a" also contains its own
+    // nested mask scope (x masks y). "x" must show both: the outer passthrough (depthOffset 1,
+    // continuing group-1's chain) AND its own inner scope role (depthOffset 0, masked-start)
+    const x: TRectangleNode = { ...node, id: 'x', parentId: 'a', type: NodeType.rectangle };
+    const y: TRectangleNode = { ...node, id: 'y', isMask: true, parentId: 'a', type: NodeType.rectangle };
+    const innerMaskGroup: TGroupNode = { ...group, childIds: ['x', 'y'], id: 'a', parentId: 'group-1' };
+    const maskState = {
+      design: {
+        ...state.design,
+        pages: {
+          'page-1': {
+            ...state.design.pages['page-1'],
+            nodes: { a: innerMaskGroup, b: { ...childB, isMask: true }, 'group-1': group, loose, x, y },
+            rootOrder: ['group-1', 'loose'],
+            selectedIds: [],
+          },
+        },
+      },
+    } as any;
+
+    // result
+    const roles = selectMaskConnectorRoleById(maskState);
+    expect(roles.get('a')).toEqual([{ depthOffset: 0, role: 'masked-start' }]);
+    expect(roles.get('x')).toEqual([
+      { depthOffset: 0, role: 'masked-start' },
+      { depthOffset: 1, role: 'masked-continue' },
+    ]);
+    expect(roles.get('y')).toEqual([
+      { depthOffset: 0, role: 'mask' },
+      { depthOffset: 1, role: 'masked-continue' },
+    ]);
+  });
+
+  it('should not propagate any role onto descendants of the mask node itself', () => {
+    // mock — "b" is the mask and is also a group; its child "e" must stay unmarked
+    const e: TRectangleNode = { ...node, id: 'e', parentId: 'b', type: NodeType.rectangle };
+    const maskGroupB: TGroupNode = { ...group, childIds: ['e'], id: 'b', isMask: true };
+    const maskState = {
+      design: {
+        ...state.design,
+        pages: {
+          'page-1': {
+            ...state.design.pages['page-1'],
+            nodes: { a: childA, b: maskGroupB, e, 'group-1': group, loose },
+            rootOrder: ['group-1', 'loose'],
+            selectedIds: [],
+          },
+        },
+      },
+    } as any;
+
+    // result
+    const roles = selectMaskConnectorRoleById(maskState);
+    expect(roles.get('b')).toEqual([{ depthOffset: 0, role: 'mask' }]);
+    expect(roles.has('e')).toBe(false);
+  });
+
+  it('should leave no roles when the mask has nothing above it (childIds[0])', () => {
+    // mock
+    const topMaskState = {
+      design: {
+        ...state.design,
+        pages: {
+          'page-1': {
+            ...state.design.pages['page-1'],
+            nodes: { a: { ...childA, isMask: true }, b: childB, 'group-1': group, loose },
+            rootOrder: ['group-1', 'loose'],
+            selectedIds: [],
+          },
+        },
+      },
+    } as any;
+
+    // result
+    expect(selectMaskConnectorRoleById(topMaskState).size).toBe(0);
+  });
+
+  it('should leave no roles for a group with no mask child', () => {
+    // result
+    expect(selectMaskConnectorRoleById(groupState).size).toBe(0);
   });
 });

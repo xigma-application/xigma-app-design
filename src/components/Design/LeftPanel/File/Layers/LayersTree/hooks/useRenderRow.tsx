@@ -4,7 +4,7 @@ import { ReactNode } from 'react';
 import LayerRow from '../LayerRow/LayerRow';
 
 // store
-import { selectSelectedIds } from 'store/design/selectors';
+import { selectMaskConnectorRoleById, selectSelectedIds } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // types
@@ -13,12 +13,14 @@ import { TToggleExpand, TTreeRow } from 'shared/UI/Tree/types';
 
 export const useRenderRow = (): TFunc<[TTreeRow<TSceneNode>, TToggleExpand], ReactNode> => {
   const selectedIds = useAppSelector(selectSelectedIds);
+  const maskConnectorRoleById = useAppSelector(selectMaskConnectorRoleById);
 
   return (row: TTreeRow<TSceneNode>, onToggleExpand: TToggleExpand): ReactNode => (
     <LayerRow
       depth={row.depth}
       isExpanded={row.isExpanded}
       isSelected={selectedIds.includes(row.item.id)}
+      maskConnectorInfo={maskConnectorRoleById.get(row.item.id)}
       node={row.item}
       onToggleExpand={onToggleExpand}
     />

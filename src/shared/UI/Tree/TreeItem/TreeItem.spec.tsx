@@ -16,7 +16,7 @@ import { TGroupNode, TRectangleNode, TSceneNode } from 'types/design/types';
 const renderTreeItem = (isSelected: boolean, node: TSceneNode, extraProps: Partial<TTreeItemProps> = {}): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <TreeItem isSelected={isSelected} node={node} {...extraProps} />
+      <TreeItem isSelected={isSelected} node={node} renderIcon={(): null => null} {...extraProps} />
     </Provider>,
   );
 
@@ -65,6 +65,18 @@ describe('TreeItem', () => {
 
     // result
     expect(screen.getByText('My Frame')).toBeInTheDocument();
+  });
+
+  it('should call renderIcon with the row’s own node and render whatever it returns', () => {
+    // mock
+    const renderIcon = vi.fn(() => <span data-testid="row-icon">icon</span>);
+
+    // before
+    renderTreeItem(false, node, { renderIcon });
+
+    // result
+    expect(renderIcon).toHaveBeenCalledWith(node);
+    expect(screen.getByTestId('row-icon')).toBeInTheDocument();
   });
 
   it('should mark the row as selected when isSelected is true', () => {
@@ -151,6 +163,15 @@ describe('TreeItem', () => {
     expect(screen.getByRole('button', { name: 'Lock layer' })).toBeInTheDocument();
   });
 
+  it('should hide the hide/lock buttons entirely when hideActions is set', () => {
+    // before
+    renderTreeItem(false, node, { hideActions: true });
+
+    // result
+    expect(screen.queryByRole('button', { name: 'Hide layer' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Lock layer' })).not.toBeInTheDocument();
+  });
+
   it('should not render an expand toggle for a non-group node', () => {
     // before
     renderTreeItem(false, node);
@@ -210,22 +231,25 @@ describe('TreeItem', () => {
     const nestedContent = nested.querySelector('[class*="TreeItem__content"]') as HTMLElement;
 
     expect(rootContent.style.marginLeft).toBe('0px');
-    expect(nestedContent.style.marginLeft).toBe('32px');
+    expect(nestedContent.style.marginLeft).toBe('42px');
   });
 
-  it('should show a "Mask" badge on a node flagged as a mask', () => {
+  it('should render row-decoration children inside the content row', () => {
     // before
-    renderTreeItem(false, { ...node, isMask: true });
+    renderTreeItem(false, node, { children: <span data-testid="row-extra">extra</span> });
 
     // result
-    expect(screen.getByText('Mask')).toBeInTheDocument();
+    expect(screen.getByTestId('row-extra')).toBeInTheDocument();
   });
 
-  it('should not show the "Mask" badge on an ordinary node', () => {
+  it('should hide the row-decoration children while the name is being edited', () => {
     // before
-    renderTreeItem(false, node);
+    renderTreeItem(false, node, { children: <span data-testid="row-extra">extra</span> });
+
+    // action
+    fireEvent.doubleClick(screen.getByText('My Frame'));
 
     // result
-    expect(screen.queryByText('Mask')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('row-extra')).not.toBeInTheDocument();
   });
 });

@@ -14,6 +14,22 @@ export type TDesignPage = {
   viewport: TViewport;
 };
 
+export type TMaskConnectorRole = 'mask' | 'masked-continue' | 'masked-start';
+
+export type TMaskConnectorLine = {
+  depthOffset: number;
+  role: TMaskConnectorRole;
+};
+
+// A single row can carry more than one connector line at once: its own role inside its own
+// parent's mask scope (always depthOffset 0), *and* one passthrough line for every ancestor
+// scope still open above it (depthOffset counts nesting levels below that ancestor's own
+// column, so the line can be pulled back left by that many indent-widths and stay in the
+// anchor's column instead of drifting right with each nested level). Both can be true at once
+// — e.g. a row that is itself masked content of an outer group, while also being a plain
+// descendant nested a few levels below that.
+export type TMaskConnectorInfo = TMaskConnectorLine[];
+
 export type TDesignState = {
   activePageId: string;
   activeTool: ToolName;

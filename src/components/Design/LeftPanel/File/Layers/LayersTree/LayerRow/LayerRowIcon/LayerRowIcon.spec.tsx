@@ -2,7 +2,7 @@ import { act, render } from '@testing-library/react';
 import { ReactElement } from 'react';
 
 // components
-import TreeItemIcon from './TreeItemIcon';
+import LayerRowIcon from './LayerRowIcon';
 
 // types
 import { NodeType } from 'types/design/enums';
@@ -63,10 +63,10 @@ const plainTextNode: TTextNode = {
   y: 0,
 };
 
-describe('TreeItemIcon', () => {
+describe('LayerRowIcon', () => {
   it('should render the text icon for a plain text node', () => {
     // before
-    const { getByTestId } = render(<TreeItemIcon node={plainTextNode} size={10} />);
+    const { getByTestId } = render(<LayerRowIcon node={plainTextNode} size={10} />);
 
     // result
     expect(getByTestId('generic-icon')).toHaveAttribute('data-name', 'TextTool');
@@ -74,7 +74,7 @@ describe('TreeItemIcon', () => {
 
   it('should render the text-on-path icon for a text node bound to a path, not the plain text icon', () => {
     // before
-    const { getByTestId } = render(<TreeItemIcon node={{ ...plainTextNode, pathId: 'vector-1' }} size={10} />);
+    const { getByTestId } = render(<LayerRowIcon node={{ ...plainTextNode, pathId: 'vector-1' }} size={10} />);
 
     // result
     expect(getByTestId('generic-icon')).toHaveAttribute('data-name', 'TextOnPathTool');
@@ -82,7 +82,7 @@ describe('TreeItemIcon', () => {
 
   it('should render the generic tool icon for a node type with no shape outline', () => {
     // before
-    const { getByTestId, queryByTestId } = render(<TreeItemIcon node={frameNode} size={10} />);
+    const { getByTestId, queryByTestId } = render(<LayerRowIcon node={frameNode} size={10} />);
 
     // result
     expect(getByTestId('generic-icon')).toHaveAttribute('data-name', 'FrameTool');
@@ -91,30 +91,45 @@ describe('TreeItemIcon', () => {
 
   it('should render the shape-outline icon for a node type that supports it', () => {
     // before
-    const { getByTestId, queryByTestId } = render(<TreeItemIcon node={rectangleNode} size={10} />);
+    const { getByTestId, queryByTestId } = render(<LayerRowIcon node={rectangleNode} size={10} />);
 
     // result
     expect(getByTestId('shape-icon')).toBeInTheDocument();
     expect(queryByTestId('generic-icon')).not.toBeInTheDocument();
   });
 
-  it('should forward className and size to the rendered icon', () => {
+  it('should render the MaskGroup icon instead of the shape outline for a node flagged as a mask', () => {
     // before
-    const { getByTestId } = render(<TreeItemIcon className="my-icon" node={rectangleNode} size={14} />);
+    const { getByTestId, queryByTestId } = render(<LayerRowIcon node={{ ...rectangleNode, isMask: true }} size={10} />);
 
     // result
-    const icon = getByTestId('shape-icon');
-    expect(icon).toHaveClass('my-icon');
-    expect(icon).toHaveAttribute('data-size', '14');
+    expect(getByTestId('generic-icon')).toHaveAttribute('data-name', 'MaskGroup');
+    expect(queryByTestId('shape-icon')).not.toBeInTheDocument();
+  });
+
+  it('should forward size to the rendered icon', () => {
+    // before
+    const { getByTestId } = render(<LayerRowIcon node={rectangleNode} size={14} />);
+
+    // result
+    expect(getByTestId('shape-icon')).toHaveAttribute('data-size', '14');
+  });
+
+  it('should default to size 12 when none is given', () => {
+    // before
+    const { getByTestId } = render(<LayerRowIcon node={rectangleNode} />);
+
+    // result
+    expect(getByTestId('shape-icon')).toHaveAttribute('data-size', '12');
   });
 
   it('should redraw immediately when the node id changes, e.g. after a drag-and-drop reorder swaps which node a row renders', () => {
     // before
-    const { getByTestId, queryByTestId, rerender } = render(<TreeItemIcon node={frameNode} size={10} />);
+    const { getByTestId, queryByTestId, rerender } = render(<LayerRowIcon node={frameNode} size={10} />);
     expect(getByTestId('generic-icon')).toBeInTheDocument();
 
     // action
-    rerender(<TreeItemIcon node={rectangleNode} size={10} />);
+    rerender(<LayerRowIcon node={rectangleNode} size={10} />);
 
     // result
     expect(getByTestId('shape-icon')).toBeInTheDocument();
@@ -126,11 +141,11 @@ describe('TreeItemIcon', () => {
     vi.useFakeTimers();
 
     // before
-    const { getByTestId, rerender } = render(<TreeItemIcon node={rectangleNode} size={10} />);
+    const { getByTestId, rerender } = render(<LayerRowIcon node={rectangleNode} size={10} />);
     const initialD = getByTestId('shape-icon').getAttribute('data-d');
 
     // action
-    rerender(<TreeItemIcon node={{ ...rectangleNode, width: 40 }} size={10} />);
+    rerender(<LayerRowIcon node={{ ...rectangleNode, width: 40 }} size={10} />);
 
     // result
     expect(getByTestId('shape-icon').getAttribute('data-d')).toBe(initialD);

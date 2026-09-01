@@ -109,14 +109,29 @@ masked-sibling hit region to mask coverage is a follow-up.
 
 ## 6. Layers tree
 
-`TreeItem.tsx` renders a right-aligned "Mask" badge (`&__mask-badge`,
-`NODE_ROW_MASK_BADGE_KEY` = `design.leftPanel.file.layers.maskBadge`) on any `node.isMask` row.
+The icon/badge/connector logic for a row lives entirely in
+`components/Design/LeftPanel/File/Layers/LayersTree/LayerRow/` — the shared `TreeItem` (`shared/UI/Tree/`)
+knows nothing about node types or masks. It takes two render-prop-style slots: `renderIcon: (node) =>
+ReactNode` (required — `LayerRow` supplies `LayerRowIcon`) and `children` (optional row decorations,
+hidden while the row is being renamed; `LayerRow` supplies `LayerRowMaskDecorations`).
 
-**Not done yet — needs an asset in `xigma-app-shared`**: dedicated `Mask` / `MaskGroup`
-(`mask-group.svg`) icons for the mask child row and the "Mask group" container row
-(`getNodeTypeIconName.ts` would branch on `node.isMask` / "group contains an `isMask` child" once
-those names exist in `@xigma/components`'s `Icons`). The connector arrow between a mask row and the
-rows it masks (Figma's down-arrow) is also deferred.
+- **`LayerRowIcon`** (moved out of shared as `TreeItemIcon` → `LayerRowIcon`, same folder shape:
+  `NodeShapeIcon`/`BaseNodeIcon`/`getNodeOutlinePath`/`getNodeTypeIconName`/`constants.ts`) — its
+  `getNodeTypeIconName` returns the `MaskGroup` icon (`@xigma/components`, `mask-group.svg`) for any
+  `node.isMask` row, and the component skips the shape-outline preview (`NodeShapeIcon`) for a mask
+  even when one would otherwise be drawable.
+- **`LayerRowMaskDecorations`** — renders the "Mask" badge (`node.isMask`) plus the connector: a
+  `LeadArrow` (`lead-arrow.svg`) arrowhead above the mask's icon when `selectMaskConnectorRoleById`
+  (`store/design/selectors.ts`) marks it `'mask'`, and a 1px gradient line (breaking around each
+  row's own icon, `--fpl-tree-grid-icon-size`-style) on every row `selectMaskConnectorRoleById` marks
+  `'masked'` (the rows the mask actually clips — `childIds[0 .. maskIndex-1]`, same rule as rendering,
+  §1). `useRenderRow.tsx` reads the selector once per render pass and passes each row's role down
+  through `LayerRow`.
+- Both icons live in `xigma-app-shared` (`packages/components/src/Icon/svg/{mask-group,lead-arrow}.svg`,
+  registered in `Icon/constants.ts` as `MaskGroup`/`LeadArrow`) — pulled via `npm run xigma:pull`.
+- The line/arrowhead offsets (`left: 36px` etc., `layer-row-mask-decorations.module.scss`) were set
+  from the row's known layout constants (`TREE_ITEM_INDENT_PX`, `LAYERS_TREE_ROW_HEIGHT`, icon size
+  12px) without a live visual check — treat as a starting point to tune once the app is running.
 
 ## 7. Not covered by unit tests — needs the running app
 

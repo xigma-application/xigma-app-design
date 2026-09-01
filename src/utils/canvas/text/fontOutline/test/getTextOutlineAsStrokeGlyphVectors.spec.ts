@@ -29,7 +29,7 @@ const buildNode = (overrides: Partial<TTextNode> = {}): TTextNode => ({
   parentId: 'frame-1',
   pathId: null,
   rotation: 0,
-  strokeColor: null,
+  strokeColor: undefined,
   strokeWidth: 0,
   type: NodeType.text,
   width: 200,

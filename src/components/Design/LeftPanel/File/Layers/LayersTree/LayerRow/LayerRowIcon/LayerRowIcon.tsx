@@ -15,13 +15,12 @@ import { TSceneNode } from 'types/design/types';
 import { getNodeOutlinePath } from './utils/getNodeOutlinePath';
 import { getNodeTypeIconName } from './utils/getNodeTypeIconName';
 
-export type TTreeItemIconProps = {
-  className?: string;
+export type TLayerRowIconProps = {
   node: TSceneNode;
-  size: number;
+  size?: number;
 };
 
-const TreeItemIcon: FC<TTreeItemIconProps> = ({ className, node, size }) => {
+const LayerRowIcon: FC<TLayerRowIconProps> = ({ node, size = 12 }) => {
   const [outline, setOutline] = useState(() => getNodeOutlinePath(node));
   const previousNodeIdRef = useRef(node.id);
 
@@ -39,11 +38,11 @@ const TreeItemIcon: FC<TTreeItemIconProps> = ({ className, node, size }) => {
     setOutline(getNodeOutlinePath(node));
   }, [node]);
 
-  return outline ? (
-    <NodeShapeIcon className={className} outline={outline} size={size} />
+  return outline && !node.isMask ? (
+    <NodeShapeIcon outline={outline} size={size} />
   ) : (
-    <BaseNodeIcon className={className} name={getNodeTypeIconName(node)} size={size} />
+    <BaseNodeIcon name={getNodeTypeIconName(node)} size={size} />
   );
 };
 
-export default TreeItemIcon;
+export default LayerRowIcon;
