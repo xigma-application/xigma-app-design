@@ -16,13 +16,14 @@ import { NodeType } from 'types/design/enums';
 // utils
 import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 
-const buildContextMenuEvent = (clientX: number, clientY: number): ReactMouseEvent<HTMLElement> =>
+const buildContextMenuEvent = (clientX: number, clientY: number, shiftKey = false): ReactMouseEvent<HTMLElement> =>
   ({
     button: 2,
     clientX,
     clientY,
     nativeEvent: { clientX, clientY } as MouseEvent,
     preventDefault: vi.fn(),
+    shiftKey,
   }) as unknown as ReactMouseEvent<HTMLElement>;
 
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
@@ -110,6 +111,35 @@ describe('useCanvasContextMenu', () => {
 
     // result
     await waitFor(() => expect(result.current.isOpen).toBe(true));
+    expect(result.current.hitNode).toBeNull();
+    expect(selectSelectedIds(store.getState())).toEqual([]);
+  });
+
+  it("should leave selection and hitNode untouched, and never open, for a Shift-held contextmenu event — macOS's own Ctrl+click-as-right-click alias for the Ctrl+Shift+click group-child toggle shortcut", () => {
+    // mock — a group child that isn't in the current selection yet
+    store.dispatch(
+      addNode({
+        fill: '#ff0000',
+        height: 20,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const refs = createCanvasRefs({ canvasRef: { current: canvas } });
+
+    // before
+    const { result } = renderHook(() => useCanvasContextMenu(refs), { wrapper });
+
+    // action
+    result.current.onContextMenu(buildContextMenuEvent(10, 10, true));
+
+    // result — no selection clobbered, no menu opened to swallow the click that actually toggled it
+    expect(result.current.isOpen).toBe(false);
     expect(result.current.hitNode).toBeNull();
     expect(selectSelectedIds(store.getState())).toEqual([]);
   });

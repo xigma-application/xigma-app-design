@@ -26,6 +26,8 @@ export const applyRotatedGroupChildResize = (
 
         dispatch(updateNode({ changes, id: childId }));
       });
+
+      dispatch(updateNode({ changes: newGroupBox, id: groupId }));
     }
   }
 };

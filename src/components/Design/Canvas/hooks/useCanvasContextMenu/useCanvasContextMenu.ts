@@ -29,7 +29,12 @@ export const useCanvasContextMenu = (refs: TCanvasRefs): TUseCanvasContextMenuRe
   const onContextMenu = (event: MouseEvent): void => {
     const canvas = refs.canvasRef.current;
 
-    if (canvas) {
+    // macOS translates a Ctrl+primary-click into a native contextmenu event, so this also fires for
+    // Ctrl+Shift+click — the shortcut for toggling a group child in/out of the selection. That combo
+    // is never a "right-click this node to open its menu" gesture, so let it through untouched:
+    // opening the menu here would swallow the very next click as a dismiss instead of a toggle, and
+    // force-selecting just the hit node would clobber the toggle's own (more specific) result.
+    if (canvas && !event.shiftKey) {
       const state = store.getState();
       const viewport = selectViewport(state);
       const point = screenToWorld(getPointerPosition(canvas, event.nativeEvent), viewport);

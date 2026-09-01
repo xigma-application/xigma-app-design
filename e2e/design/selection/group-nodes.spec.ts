@@ -814,3 +814,89 @@ test('deleting one child of a rotated group shrinks the group’s box to tightly
   // inflated to cover the deleted B as well
   expect(after.group.width * after.group.height).toBeLessThan(rotated.width * rotated.height * 0.6);
 });
+
+test("resizing a rotated group from an edge handle keeps the untouched axis of the group's own box rock steady, not jittering frame to frame", async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-group-nodes-rotated-resize-no-jitter');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 300, 780, 340); // A
+  await designPage.drawRectangle(820, 300, 900, 340); // B — auto-selected, replacing A's selection
+  await designPage.click(740, 320, { shift: true }); // add A back, selection = [B, A]
+  await page.keyboard.press('Control+g'); // group = [A, B], auto-selected
+
+  const before = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const page = pages[activePageId];
+    const [groupId] = page.selectedIds;
+
+    return { group: page.nodes[groupId], groupId };
+  });
+
+  // rotate the group as a rigid body — same thin-ring technique as the sibling rotate test
+  await designPage.pointerDown(before.group.x + before.group.width + 8, before.group.y - 8);
+  await page.mouse.move(before.group.x + before.group.width + 8, before.group.y - 60, { steps: 10 });
+  await designPage.pointerUp();
+
+  const rotated = await page.evaluate(
+    async ({ groupId }) => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+
+      return pages[activePageId].nodes[groupId];
+    },
+    { groupId: before.groupId },
+  );
+
+  expect(rotated.rotation).not.toBe(0);
+
+  // the "e" (right-edge, horizontal-only) handle sits at the rotated box's own local (x+width, midY)
+  const handle = await page.evaluate(
+    async ({ groupId }) => {
+      const { store } = await import('/src/store/index.ts');
+      const { activePageId, pages } = store.getState().design;
+      const group = pages[activePageId].nodes[groupId];
+      const cx = group.x + group.width / 2;
+      const cy = group.y + group.height / 2;
+      const rad = (group.rotation * Math.PI) / 180;
+      const localX = group.x + group.width;
+
+      return { x: cx + (localX - cx) * Math.cos(rad), y: cy + (localX - cx) * Math.sin(rad) };
+    },
+    { groupId: before.groupId },
+  );
+
+  await designPage.pointerDown(handle.x, handle.y);
+
+  const heights: number[] = [];
+
+  for (let step = 1; step <= 15; step++) {
+    await designPage.pointerMove(handle.x + (step * 120) / 15, handle.y);
+
+    const height = await page.evaluate(
+      async ({ groupId }) => {
+        const { store } = await import('/src/store/index.ts');
+        const { activePageId, pages } = store.getState().design;
+
+        return pages[activePageId].nodes[groupId].height;
+      },
+      { groupId: before.groupId },
+    );
+
+    heights.push(height);
+  }
+
+  await designPage.pointerUp();
+
+  // dragging the "e" handle only ever scales width — the height axis is untouched (anchor.y is
+  // null for this handle) and must stay pinned to the pre-drag value on every single frame. Before
+  // the fix, each child's resize dispatch ran syncGroupBounds, which recomputed the group's own box
+  // as an approximate AABB over the children's now-rounded corners — fighting the exact box already
+  // set for it that same frame and making this height visibly jitter step to step instead of holding still.
+  heights.forEach((height) => expect(height).toBeCloseTo(rotated.height, 0));
+  expect(new Set(heights).size).toBe(1);
+});
