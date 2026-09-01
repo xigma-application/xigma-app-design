@@ -9,7 +9,14 @@ import { TTreeItem, TTreeRow } from '../types';
 
 type TItem = TTreeItem;
 
-const buildRow = (id: string): TTreeRow<TItem> => ({ depth: 0, hasChildren: false, isExpanded: false, item: { id }, parentItem: null });
+const buildRow = (id: string): TTreeRow<TItem> => ({
+  canHaveChildren: false,
+  depth: 0,
+  hasChildren: false,
+  isExpanded: false,
+  item: { id },
+  parentItem: null,
+});
 
 const buildVirtualItem = (index: number): VirtualItem => ({
   end: index * 32 + 32,

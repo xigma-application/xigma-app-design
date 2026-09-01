@@ -5,7 +5,7 @@ import { MouseEvent as ReactMouseEvent, RefObject } from 'react';
 import { useTreeRowDrag } from './useTreeRowDrag';
 
 // others
-import { TREE_ROW_DRAG_THRESHOLD_PX } from './constants';
+import { TREE_ROW_DRAG_THRESHOLD_PX, TREE_SPRING_LOAD_DELAY_MS } from './constants';
 
 // types
 import { TTreeItem, TTreeRow } from '../../types';
@@ -14,12 +14,14 @@ const ROW_HEIGHT = 32;
 
 type TItem = TTreeItem;
 
-const buildRow = (id: string, depth = 0, parentItem: TItem | null = null): TTreeRow<TItem> => ({
+const buildRow = (id: string, depth = 0, parentItem: TItem | null = null, overrides: Partial<TTreeRow<TItem>> = {}): TTreeRow<TItem> => ({
+  canHaveChildren: false,
   depth,
   hasChildren: false,
   isExpanded: false,
   item: { id },
   parentItem,
+  ...overrides,
 });
 
 const flatRows = (count: number): TTreeRow<TItem>[] => Array.from({ length: count }, (_, index) => buildRow(String(index)));
@@ -219,6 +221,74 @@ describe('useTreeRowDrag', () => {
 
     // result
     expect(result.current.dropDepth).toBe(2);
+  });
+
+  it('should nest the dragged row into a collapsed container dropped onto its middle', () => {
+    // mock
+    const onReorder = vi.fn();
+    const rows = [buildRow('a'), buildRow('g', 0, null, { canHaveChildren: true })];
+
+    // before
+    const rowsRef = createRowsRef();
+    const { result } = renderHook(() => useTreeRowDrag({ onReorder, rowHeight: ROW_HEIGHT, rows, rowsRef }));
+
+    // action — drag row 0 onto the middle of the collapsed group row
+    act(() => result.current.handleRowMouseDown(0, mouseDownEvent(0)));
+    fireMouseMove(ROW_HEIGHT + ROW_HEIGHT / 2);
+
+    // result — the row reports drop-inside mode
+    expect(result.current.dropInsideIndex).toBe(1);
+
+    fireMouseUp();
+    expect(onReorder).toHaveBeenCalledWith([rows[0].item], rows[1].item, 0);
+  });
+
+  it('should auto-expand a collapsed container after hovering it for the spring-load delay', () => {
+    // mock
+    vi.useFakeTimers();
+    const onSpringLoadExpand = vi.fn();
+    const rows = [buildRow('a'), buildRow('g', 0, null, { canHaveChildren: true })];
+
+    // before
+    const rowsRef = createRowsRef();
+    const { result } = renderHook(() => useTreeRowDrag({ onSpringLoadExpand, rowHeight: ROW_HEIGHT, rows, rowsRef }));
+
+    // action
+    act(() => result.current.handleRowMouseDown(0, mouseDownEvent(0)));
+    fireMouseMove(ROW_HEIGHT + ROW_HEIGHT / 2);
+    act(() => vi.advanceTimersByTime(TREE_SPRING_LOAD_DELAY_MS));
+
+    // result
+    expect(onSpringLoadExpand).toHaveBeenCalledWith('g');
+
+    vi.useRealTimers();
+  });
+
+  it('should still drop into a container that spring-load just expanded, even without any further pointer move', () => {
+    // mock — root is [group, dragged rect]; expanding the group pushes the rect from index 1 to index 2
+    const onReorder = vi.fn();
+    const collapsed = [buildRow('g', 0, null, { canHaveChildren: true, hasChildren: true }), buildRow('c')];
+    const expanded = [
+      buildRow('g', 0, null, { canHaveChildren: true, hasChildren: true, isExpanded: true }),
+      buildRow('g-0', 1, { id: 'g' }),
+      buildRow('c'),
+    ];
+
+    // before
+    const rowsRef = createRowsRef();
+    const { result, rerender } = renderHook(({ rows }) => useTreeRowDrag({ onReorder, rowHeight: ROW_HEIGHT, rows, rowsRef }), {
+      initialProps: { rows: collapsed },
+    });
+
+    // action — drag "c" onto the middle of the collapsed group row, then the group expands under a motionless pointer
+    act(() => result.current.handleRowMouseDown(1, mouseDownEvent(0)));
+    fireMouseMove(ROW_HEIGHT / 2);
+    expect(result.current.dropInsideIndex).toBe(0);
+    rerender({ rows: expanded });
+    fireMouseUp();
+
+    // result — "c" lands inside the group, not the child row that slid under the pointer
+    expect(onReorder).toHaveBeenCalledWith([expanded[2].item], expanded[0].item, 0);
   });
 
   it('should not treat a same-slot drop as a no-op once the drop depth changed', () => {

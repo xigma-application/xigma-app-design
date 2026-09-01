@@ -6,7 +6,14 @@ import { getIsRowSelectedByIndex } from '../getIsRowSelectedByIndex';
 
 type TItem = TTreeItem;
 
-const buildRow = (id: string): TTreeRow<TItem> => ({ depth: 0, hasChildren: false, isExpanded: false, item: { id }, parentItem: null });
+const buildRow = (id: string): TTreeRow<TItem> => ({
+  canHaveChildren: false,
+  depth: 0,
+  hasChildren: false,
+  isExpanded: false,
+  item: { id },
+  parentItem: null,
+});
 
 describe('getIsRowSelectedByIndex', () => {
   it('should return undefined when isRowSelected is not provided', () => {

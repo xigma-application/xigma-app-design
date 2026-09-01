@@ -7,6 +7,7 @@ import { resolveTreeDrop } from '../resolveTreeDrop';
 type TItem = TTreeItem;
 
 const buildRow = (id: string, depth = 0, parentItem: TItem | null = null): TTreeRow<TItem> => ({
+  canHaveChildren: false,
   depth,
   hasChildren: false,
   isExpanded: false,

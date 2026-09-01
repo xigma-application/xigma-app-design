@@ -241,11 +241,28 @@ splintering a perfectly normal mixed selection (one group's child + an unrelated
 two independent per-node outlines/transforms instead of one combined box. Dropped entirely; a mixed
 selection resizes/rotates/drags as one unit exactly like any other 2+ selection.
 
+## 5.1 Layers-panel drop-into and spring-load
+
+The shared tree (`src/shared/UI/Tree`) supports dropping a dragged row **inside** a container row, not
+just between rows. A row is a container when `getChildren` returns an array (even empty) —
+`flattenTreeRows` records this as `TTreeRow.canHaveChildren`; for the Layers panel that is exactly
+`NodeType.group` (see `useTreeSource`). `useTreeRowDrag`'s hit-test (`handleMouseMove/getDropInsideIndex`)
+switches to drop-inside mode while the pointer is over the middle band (`TREE_DROP_INSIDE_EDGE_RATIO`)
+of any container row — collapsed or expanded — that is not the dragged row or one of its descendants
+(`getDraggedBlockRange`). In that mode the whole row gets a blue outline (`Tree__dropInsideOutline`)
+instead of the insertion line, and release calls `onReorder(items, container, 0)` — first child.
+
+Spring-load: holding the drag over a **collapsed** container for `TREE_SPRING_LOAD_DELAY_MS` (3 s)
+auto-expands it via `useSpringLoadExpand`, after which normal between-row reordering takes over. The
+timer lives in a ref (`utils/springLoad/`) so it survives the drag listener effect re-subscribing on
+every pointer move; it is cleared on leave, drop, and unmount.
+
 ## 6. e2e coverage
 
 `e2e/design/selection/group.spec.ts` — grouping/ungrouping mechanics (Ctrl+G, Ctrl+Shift+G, stealing a
 member from an existing group in both selection orderings, nesting, Layers-panel drag in/out, delete
-cascades, deep-nesting click-select). `e2e/design/selection/group-nodes.spec.ts` — node-level *behavior*
+cascades, deep-nesting click-select). `e2e/design/panels/layers-drag-drop.spec.ts` — drop-into-collapsed-group
+and spring-load auto-expand (§5.1). `e2e/design/selection/group-nodes.spec.ts` — node-level *behavior*
 once a group already exists: plain-click-selects-group vs. Ctrl-click-selects-child vs.
 Ctrl+Shift-toggle, rigid move/resize/rotate, mixed-selection drag/resize (§5) including starting the
 drag from the empty gap between the two selected nodes, delete-shrinks-the-group and

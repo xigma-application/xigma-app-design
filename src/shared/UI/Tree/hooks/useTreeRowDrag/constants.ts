@@ -1,1 +1,3 @@
 export const TREE_ROW_DRAG_THRESHOLD_PX = 4;
+export const TREE_SPRING_LOAD_DELAY_MS = 2000;
+export const TREE_DROP_INSIDE_EDGE_RATIO = 0.25;

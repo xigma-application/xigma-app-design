@@ -16,7 +16,14 @@ type TSetup = {
 
 const buildItem = (id: string, children?: TItem[]): TItem => ({ children, id });
 const getChildren = (item: TItem): TItem[] | undefined => item.children;
-const buildRow = (item: TItem): TTreeRow<TItem> => ({ depth: 0, hasChildren: true, isExpanded: false, item, parentItem: null });
+const buildRow = (item: TItem): TTreeRow<TItem> => ({
+  canHaveChildren: true,
+  depth: 0,
+  hasChildren: true,
+  isExpanded: false,
+  item,
+  parentItem: null,
+});
 
 const setup = (item: TItem, expandedIds: Set<string> = new Set()): TSetup => {
   const setSubtreeExpanded = vi.fn();

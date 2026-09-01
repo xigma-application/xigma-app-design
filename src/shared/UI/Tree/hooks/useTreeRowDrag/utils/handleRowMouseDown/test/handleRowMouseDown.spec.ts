@@ -10,6 +10,7 @@ import { handleRowMouseDown } from '../handleRowMouseDown';
 type TItem = TTreeItem;
 
 const buildRow = (id: string, depth = 0): TTreeRow<TItem> => ({
+  canHaveChildren: false,
   depth,
   hasChildren: false,
   isExpanded: false,
@@ -20,9 +21,13 @@ const buildRow = (id: string, depth = 0): TTreeRow<TItem> => ({
 const buildDragState = (): TTreeDragState => ({
   armedRef: { current: null },
   dropDepth: 0,
+  dropInsideIndex: null,
   insertionIndex: null,
+  onSpringLoadExpandRef: { current: undefined },
   setDropDepth: vi.fn(),
+  setDropInsideIndex: vi.fn(),
   setInsertionIndex: vi.fn(),
+  springLoadRef: { current: null },
 });
 
 const mouseDownEvent = (button: number, clientY: number): ReactMouseEvent<HTMLElement> =>
@@ -38,7 +43,7 @@ describe('handleRowMouseDown', () => {
     handleRowMouseDown(0, mouseDownEvent(0, 42), rows, undefined, dragState);
 
     // result
-    expect(dragState.armedRef.current).toEqual<TArmedRowDrag>({ depth: 1, indices: [0], startY: 42 });
+    expect(dragState.armedRef.current).toEqual<TArmedRowDrag>({ depth: 1, ids: ['a'], indices: [0], startY: 42 });
   });
 
   it('should not arm the drag on a non-primary mouse button', () => {

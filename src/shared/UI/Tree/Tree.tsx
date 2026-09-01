@@ -3,12 +3,13 @@ import { ReactElement, ReactNode, RefObject, useMemo, useRef } from 'react';
 
 // components
 import ScrollThumb from 'shared/ScrollThumb/ScrollThumb';
-import TreeDropIndicator from './TreeDropIndicator/TreeDropIndicator';
+import TreeDropOverlay from './TreeDropOverlay/TreeDropOverlay';
 import TreeRowList from './TreeRowList/TreeRowList';
 import TreeSelectionBackground from './TreeSelectionBackground/TreeSelectionBackground';
 
 // hooks
 import { useHandleRowsClick } from './hooks/useHandleRowsClick';
+import { useSpringLoadExpand } from './hooks/useSpringLoadExpand';
 import { useTreeExpansion } from './hooks/useTreeExpansion';
 import { useTreeRowDrag } from './hooks/useTreeRowDrag/useTreeRowDrag';
 import { useVirtualList } from 'hooks';
@@ -58,7 +59,15 @@ export const Tree = <T extends TTreeItem>({
   const { expandedIds, onToggleExpand } = useTreeExpansion(controlledExpandedIds, onExpandedIdsChange, getChildren);
   const rows = useMemo(() => flattenTreeRows(roots, getChildren, expandedIds), [roots, getChildren, expandedIds]);
   const { items, totalSize } = useVirtualList({ count: rows.length, rowHeight, scrollRef: rowsRef, scrollToIndex });
-  const { dropDepth, handleRowMouseDown, insertionIndex } = useTreeRowDrag({ isRowSelected, onReorder, rowHeight, rows, rowsRef });
+  const onSpringLoadExpand = useSpringLoadExpand(rows, onToggleExpand);
+  const { dropDepth, dropInsideIndex, handleRowMouseDown, insertionIndex } = useTreeRowDrag({
+    isRowSelected,
+    onReorder,
+    onSpringLoadExpand,
+    rowHeight,
+    rows,
+    rowsRef,
+  });
   const isDragging = insertionIndex !== null;
   const handleRowsClick = useHandleRowsClick(onDeselectAll);
   const { highlightBackgroundSegments, selectionBackgroundSegments } = getTreeBackgroundSegments(
@@ -81,11 +90,14 @@ export const Tree = <T extends TTreeItem>({
             renderRow={renderRow}
             rows={rows}
           />
-          {isDragging && (
-            <TreeDropIndicator insertionIndex={insertionIndex} isDefault={!renderDropIndicator} rowHeight={rowHeight}>
-              {renderDropIndicator?.(dropDepth)}
-            </TreeDropIndicator>
-          )}
+          <TreeDropOverlay
+            dropDepth={dropDepth}
+            dropInsideIndex={dropInsideIndex}
+            insertionIndex={insertionIndex}
+            isDefault={!renderDropIndicator}
+            renderDropIndicator={renderDropIndicator}
+            rowHeight={rowHeight}
+          />
         </div>
       </div>
       <ScrollThumb className={styles.Tree__scrollThumb} scrollRef={rowsRef} />

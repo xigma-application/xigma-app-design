@@ -10,10 +10,11 @@ const visitTreeRow = <T extends TTreeItem>(
   rows: TTreeRow<T>[],
 ): void => {
   const children = getChildren(item);
+  const canHaveChildren = Array.isArray(children);
   const hasChildren = Boolean(children && children.length > 0);
   const isExpanded = hasChildren && expandedIds.has(item.id);
 
-  rows.push({ depth, hasChildren, isExpanded, item, parentItem });
+  rows.push({ canHaveChildren, depth, hasChildren, isExpanded, item, parentItem });
 
   if (isExpanded && children) {
     children.forEach((child) => visitTreeRow(child, depth + 1, item, getChildren, expandedIds, rows));

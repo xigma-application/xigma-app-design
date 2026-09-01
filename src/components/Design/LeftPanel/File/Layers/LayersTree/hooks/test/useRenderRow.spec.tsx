@@ -44,7 +44,14 @@ describe('useRenderRow', () => {
   it('should render the row for the given tree row', () => {
     // mock
     const node = selectActivePage(store.getState()).nodes[idA];
-    const row: TTreeRow<typeof node> = { depth: 0, hasChildren: false, isExpanded: false, item: node, parentItem: null };
+    const row: TTreeRow<typeof node> = {
+      canHaveChildren: false,
+      depth: 0,
+      hasChildren: false,
+      isExpanded: false,
+      item: node,
+      parentItem: null,
+    };
 
     // before
     const { result } = renderHook(() => useRenderRow(), { wrapper });
@@ -57,7 +64,14 @@ describe('useRenderRow', () => {
   it('should forward the given onToggleExpand callback to the row', () => {
     // mock
     const node = selectActivePage(store.getState()).nodes[idA];
-    const row: TTreeRow<typeof node> = { depth: 0, hasChildren: false, isExpanded: false, item: node, parentItem: null };
+    const row: TTreeRow<typeof node> = {
+      canHaveChildren: false,
+      depth: 0,
+      hasChildren: false,
+      isExpanded: false,
+      item: node,
+      parentItem: null,
+    };
     const onToggleExpand = vi.fn();
 
     // before

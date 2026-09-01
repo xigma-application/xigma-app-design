@@ -9,7 +9,7 @@ import { getTreeBackgroundSegments } from '../getTreeBackgroundSegments';
 const ROW_HEIGHT = 32;
 
 const buildRows = (ids: string[]): TTreeRow<TTreeItem>[] =>
-  ids.map((id) => ({ depth: 0, hasChildren: false, isExpanded: false, item: { id }, parentItem: null }));
+  ids.map((id) => ({ canHaveChildren: false, depth: 0, hasChildren: false, isExpanded: false, item: { id }, parentItem: null }));
 
 const buildItems = (count: number): VirtualItem[] =>
   Array.from({ length: count }, (_, index) => ({

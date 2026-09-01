@@ -3,6 +3,7 @@ export type TTreeItem = {
 };
 
 export type TTreeRow<T extends TTreeItem> = {
+  canHaveChildren: boolean;
   depth: number;
   hasChildren: boolean;
   isExpanded: boolean;

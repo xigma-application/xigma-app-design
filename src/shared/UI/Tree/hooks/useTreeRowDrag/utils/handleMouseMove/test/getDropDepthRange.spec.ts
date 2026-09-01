@@ -7,6 +7,7 @@ import { getDropDepthRange } from '../getDropDepthRange';
 type TItem = TTreeItem;
 
 const buildRow = (depth: number, id: string): TTreeRow<TItem> => ({
+  canHaveChildren: false,
   depth,
   hasChildren: false,
   isExpanded: false,

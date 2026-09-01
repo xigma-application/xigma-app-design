@@ -16,9 +16,12 @@ export const handleRowMouseDown = <T extends TTreeItem>(
   dragState: TTreeDragState,
 ): void => {
   if (event.button === 0) {
+    const indices = getDraggedIndices(index, rows.length, getIsRowSelectedByIndex(rows, isRowSelected));
+
     dragState.armedRef.current = {
       depth: rows[index].depth,
-      indices: getDraggedIndices(index, rows.length, getIsRowSelectedByIndex(rows, isRowSelected)),
+      ids: indices.map((draggedIndex) => rows[draggedIndex].item.id),
+      indices,
       startY: event.clientY,
     };
   }

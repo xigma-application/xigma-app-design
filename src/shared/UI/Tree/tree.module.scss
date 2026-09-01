@@ -69,6 +69,17 @@
     width: 100%;
   }
 
+  &__dropInsideOutline {
+    border: 1px solid var(--color-blue-1);
+    border-radius: 5px;
+    box-sizing: border-box;
+    left: 8px;
+    pointer-events: none;
+    position: absolute;
+    right: 8px;
+    top: 0;
+  }
+
   &__dropIndicator--default {
     background-color: var(--color-neutral-1);
     height: 2px;

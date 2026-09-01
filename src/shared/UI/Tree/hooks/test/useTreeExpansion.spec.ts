@@ -9,7 +9,14 @@ import { TTreeItem, TTreeRow } from '../../types';
 type TItem = TTreeItem & { children?: TItem[] };
 
 const getChildren = (item: TItem): TItem[] | undefined => item.children;
-const buildRow = (item: TItem): TTreeRow<TItem> => ({ depth: 0, hasChildren: true, isExpanded: false, item, parentItem: null });
+const buildRow = (item: TItem): TTreeRow<TItem> => ({
+  canHaveChildren: true,
+  depth: 0,
+  hasChildren: true,
+  isExpanded: false,
+  item,
+  parentItem: null,
+});
 
 describe('useTreeExpansion', () => {
   it('should manage its own set when uncontrolled', () => {

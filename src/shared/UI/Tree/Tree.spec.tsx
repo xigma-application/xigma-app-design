@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { ReactNode } from 'react';
 
 // components
@@ -304,6 +304,50 @@ describe('Tree', () => {
 
     // result — '1' becomes the first child of '0'
     expect(onReorder).toHaveBeenCalledWith([roots[1]], roots[0], 0);
+  });
+
+  it('should show a full-row outline instead of the line while a drag hovers the middle of a collapsed container, then nest on drop', () => {
+    // mock
+    const onReorder = vi.fn();
+    const roots = [buildItem('0'), buildItem('g', [buildItem('g-0')])];
+
+    // before
+    render(<Tree getChildren={getChildren} onReorder={onReorder} renderRow={renderRow} roots={roots} rowHeight={32} />);
+    const rowZero = screen.getByText('Row 0').parentElement!;
+
+    // action — drag row 0 onto the middle of the collapsed group row (index 1, y 32..64)
+    fireEvent.mouseDown(rowZero, { button: 0, clientY: 0 });
+    fireEvent.mouseMove(document, { clientY: 48 });
+
+    // result
+    expect(document.querySelector('[class*="dropInsideOutline"]')).toBeInTheDocument();
+    expect(document.querySelector('[class*="dropIndicator"]')).not.toBeInTheDocument();
+
+    // action
+    fireEvent.mouseUp(document);
+
+    // result
+    expect(onReorder).toHaveBeenCalledWith([roots[0]], roots[1], 0);
+  });
+
+  it('should auto-expand a collapsed container after a drag hovers it for the spring-load delay', () => {
+    // mock
+    vi.useFakeTimers();
+    const roots = [buildItem('0'), buildItem('g', [buildItem('g-0')])];
+
+    // before
+    render(<Tree getChildren={getChildren} onReorder={vi.fn()} renderRow={renderRow} roots={roots} rowHeight={32} />);
+    expect(screen.queryByText('Row g-0')).not.toBeInTheDocument();
+
+    // action — start dragging row 0 and hold over the middle of the collapsed group
+    fireEvent.mouseDown(screen.getByText('Row 0').parentElement!, { button: 0, clientY: 0 });
+    fireEvent.mouseMove(document, { clientY: 48 });
+    act(() => vi.advanceTimersByTime(3000));
+
+    // result — the group expanded on its own
+    expect(screen.getByText('Row g-0')).toBeInTheDocument();
+
+    vi.useRealTimers();
   });
 
   it('should expand or collapse a whole subtree at once when onToggleExpand is called with recursive, keyed off the clicked row', () => {
