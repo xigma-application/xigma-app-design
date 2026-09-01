@@ -19,6 +19,8 @@ export type TStandardKeyboardShortcuts = {
   duplicate: TShortcut;
   escape: TShortcut;
   flatten: TShortcut;
+  flipHorizontal: TShortcut;
+  flipVertical: TShortcut;
   group: TShortcut;
   nudgeDown: TShortcut;
   nudgeDownLarge: TShortcut;

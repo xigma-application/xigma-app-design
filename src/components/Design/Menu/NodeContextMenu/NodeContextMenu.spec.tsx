@@ -70,6 +70,8 @@ const renderNodeContextMenu = (props: Partial<TNodeContextMenuProps> = {}): Retu
       onBringToFront={vi.fn()}
       onCopy={vi.fn()}
       onFlatten={vi.fn()}
+      onFlipHorizontal={vi.fn()}
+      onFlipVertical={vi.fn()}
       onGroupSelection={vi.fn()}
       onMoveToPage={vi.fn()}
       onOpenChange={vi.fn()}
@@ -185,6 +187,27 @@ describe('NodeContextMenu', () => {
 
     // result
     expect(onFlatten).toHaveBeenCalledTimes(1);
+  });
+
+  it('should enable Flip horizontal/vertical and call the matching handler on click', async () => {
+    // mock
+    const user = userEvent.setup();
+    const onFlipHorizontal = vi.fn();
+    const onFlipVertical = vi.fn();
+
+    // before
+    renderNodeContextMenu({ onFlipHorizontal, onFlipVertical });
+
+    // result
+    expect(screen.getByText('Flip horizontal').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Flip vertical').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+
+    // action
+    await user.click(screen.getByText('Flip horizontal'));
+
+    // result
+    expect(onFlipHorizontal).toHaveBeenCalledTimes(1);
+    expect(onFlipVertical).not.toHaveBeenCalled();
   });
 
   it('should keep Outline stroke disabled for a shape with no stroke set', () => {

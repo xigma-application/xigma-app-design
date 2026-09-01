@@ -28,6 +28,8 @@ const LayerContextMenu: FC<TLayerContextMenuProps> = ({
     onBringToFront,
     onCopy,
     onFlatten,
+    onFlipHorizontal,
+    onFlipVertical,
     onGroupSelection,
     onMoveToPage,
     onOutlineStroke,
@@ -46,6 +48,8 @@ const LayerContextMenu: FC<TLayerContextMenuProps> = ({
       onBringToFront={onBringToFront}
       onCopy={onCopy}
       onFlatten={onFlatten}
+      onFlipHorizontal={onFlipHorizontal}
+      onFlipVertical={onFlipVertical}
       onGroupSelection={onGroupSelection}
       onMoveToPage={onMoveToPage}
       onOpenChange={onOpenChange}

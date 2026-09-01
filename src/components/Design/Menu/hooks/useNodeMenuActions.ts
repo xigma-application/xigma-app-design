@@ -2,6 +2,7 @@
 import { useBringSelectionToFront } from './useBringSelectionToFront';
 import { useCopySelection } from './useCopySelection';
 import { useFlattenSelection } from './useFlattenSelection';
+import { useFlipSelection } from './useFlipSelection';
 import { useGroupSelection } from './useGroupSelection';
 import { useMoveSelectionToPage } from './useMoveSelectionToPage';
 import { useOutlineStrokeSelection } from './useOutlineStrokeSelection';
@@ -20,6 +21,8 @@ export type TNodeMenuActions = {
   onBringToFront: TFunc;
   onCopy: TFunc;
   onFlatten: TFunc;
+  onFlipHorizontal: TFunc;
+  onFlipVertical: TFunc;
   onGroupSelection: TFunc;
   onMoveToPage: TFunc<[string]>;
   onOutlineStroke: TFunc;
@@ -36,6 +39,7 @@ export const useNodeMenuActions = (): TNodeMenuActions => {
   const onBringToFront = useBringSelectionToFront();
   const onCopy = useCopySelection();
   const onFlatten = useFlattenSelection();
+  const onFlipSelection = useFlipSelection();
   const onGroupSelection = useGroupSelection();
   const onMoveToPage = useMoveSelectionToPage();
   const onOutlineStroke = useOutlineStrokeSelection();
@@ -47,6 +51,8 @@ export const useNodeMenuActions = (): TNodeMenuActions => {
     onBringToFront,
     onCopy,
     onFlatten,
+    onFlipHorizontal: onFlipSelection.onFlipHorizontal,
+    onFlipVertical: onFlipSelection.onFlipVertical,
     onGroupSelection,
     onMoveToPage,
     onOutlineStroke,

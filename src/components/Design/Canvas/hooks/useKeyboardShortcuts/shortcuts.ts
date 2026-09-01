@@ -33,6 +33,8 @@ export const shortcuts = {
   duplicate: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.d },
   escape: { secondaryKey: KeyboardKeys.escape },
   flatten: { primaryKeys: ['alt', 'shift'], secondaryKey: KeyboardKeys.f },
+  flipHorizontal: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.h },
+  flipVertical: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.v },
   group: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.g },
   nudgeDown: { secondaryKey: KeyboardKeys.arrowDown },
   nudgeDownLarge: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.arrowDown },

@@ -63,6 +63,8 @@ export type TNodeContextMenuProps = {
   onBringToFront: TFunc;
   onCopy: TFunc;
   onFlatten: TFunc;
+  onFlipHorizontal: TFunc;
+  onFlipVertical: TFunc;
   onGroupSelection: TFunc;
   onMoveToPage: TFunc<[string]>;
   onOpenChange: TFunc<[boolean]>;
@@ -84,6 +86,8 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   onBringToFront,
   onCopy,
   onFlatten,
+  onFlipHorizontal,
+  onFlipVertical,
   onGroupSelection,
   onMoveToPage,
   onOpenChange,
@@ -243,12 +247,17 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
         <>
           <MenuSeparator />
           <MenuItem
-            disabled
             label={t(NODE_MENU_FLIP_HORIZONTAL_KEY)}
+            onClick={onFlipHorizontal}
             shortcut={KEYBOARD_SHORTCUTS.flipHorizontal.join('')}
             withCheck={false}
           />
-          <MenuItem disabled label={t(NODE_MENU_FLIP_VERTICAL_KEY)} shortcut={KEYBOARD_SHORTCUTS.flipVertical.join('')} withCheck={false} />
+          <MenuItem
+            label={t(NODE_MENU_FLIP_VERTICAL_KEY)}
+            onClick={onFlipVertical}
+            shortcut={KEYBOARD_SHORTCUTS.flipVertical.join('')}
+            withCheck={false}
+          />
         </>
       )}
     </Menu>
