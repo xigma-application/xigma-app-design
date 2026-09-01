@@ -222,4 +222,35 @@ test.describe('Flatten — text', () => {
       realSegmentIds.forEach((segmentId) => expect(segmentIds.has(segmentId)).toBe(true));
     });
   });
+
+  // matches Figma: flattening text-on-path bakes the glyphs into real, independent vector geometry
+  // and gets rid of the path it was bound to — nothing is left still relying on it afterwards
+  test('flattens text-on-path into a real vector and deletes the now-orphaned path node', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-flatten-text-on-path');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawTextOnPath(900, 300, 1050, 420);
+    await designPage.typeText('Hi');
+    await page.keyboard.press('Escape'); // commits, stays selected
+
+    const before = await readDesignState(page);
+
+    expect(before.rootOrder).toHaveLength(2); // the path node and the text node bound to it
+
+    await page.keyboard.press(FLATTEN_SHORTCUT);
+
+    const after = await readDesignState(page);
+
+    // only the flattened text remains — its own path is gone from rootOrder entirely
+    expect(after.rootOrder).toHaveLength(1);
+    expect(after.rootOrder).toEqual(before.rootOrder.filter((id) => id !== before.rootOrder[0]));
+
+    const node = after.nodes[after.rootOrder[0]];
+
+    expect(node.type).toBe('vector');
+    expect(Object.keys(node.segments ?? {}).length).toBeGreaterThan(0);
+    expect(node.filledFaceKeys?.length ?? 0).toBeGreaterThan(0);
+  });
 });

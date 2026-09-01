@@ -68,6 +68,59 @@ describe('handleFlattenSelection', () => {
     expect(page.nodes[textId].id).toBe(textId);
   });
 
+  it('should replace text bound to a path with its flattened outline and delete the now-orphaned path vector, matching Figma', async () => {
+    // mock — a simple straight vector path the text is attached to via pathId
+    store.dispatch(
+      addNode({
+        fillColor: null,
+        filledFaceKeys: [],
+        name: 'Path',
+        parentId: null,
+        rotation: 0,
+        segments: { s1: { endId: 'b', id: 's1', startId: 'a', tangentEnd: null, tangentStart: null } },
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: NodeType.vector,
+        vertexHandleModes: {},
+        vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 200, y: 0 } },
+      }),
+    );
+    const [pathId] = selectActivePage(store.getState()).rootOrder.slice(-1);
+
+    store.dispatch(
+      addNode({
+        content: 'Hi',
+        fill: '#ffffff',
+        flipX: false,
+        flipY: false,
+        fontFamily: 'Inter',
+        fontSize: 14,
+        height: 40,
+        name: 'Text',
+        parentId: null,
+        pathId,
+        rotation: 0,
+        type: NodeType.text,
+        width: 200,
+        x: 0,
+        y: 0,
+      }),
+    );
+    const [textId] = selectActivePage(store.getState()).rootOrder.slice(-1);
+    store.dispatch(setSelection([textId]));
+
+    getTextFlattenVector.mockResolvedValue(buildFlattenedVector());
+
+    // action
+    await handleFlattenSelection(store.dispatch);
+
+    // result
+    const page = selectActivePage(store.getState());
+    expect(page.nodes[textId].type).toBe(NodeType.vector);
+    expect(page.nodes[pathId]).toBeUndefined();
+    expect(page.rootOrder).not.toContain(pathId);
+  });
+
   it('should do nothing when the selection has no node convertible to a vector', async () => {
     // mock
     store.dispatch(setSelection([]));

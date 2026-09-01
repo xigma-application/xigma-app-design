@@ -98,7 +98,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   const isFrame = node.type === NodeType.frame;
   const isSection = node.type === NodeType.section;
   const isTextOnPath = node.type === NodeType.text && Boolean(node.pathId);
-  const canFlatten = isConvertibleToVectorNode(node) || (node.type === NodeType.text && !isTextOnPath);
+  const canFlatten = isConvertibleToVectorNode(node) || node.type === NodeType.text;
   const hasStrokeWidth = 'strokeWidth' in node && Boolean(node.strokeWidth);
   const hasStrokeColor = node.type === NodeType.line ? Boolean(node.stroke) : 'strokeColor' in node && Boolean(node.strokeColor);
   const canOutlineStroke = !isTextOnPath && hasStrokeWidth && hasStrokeColor;

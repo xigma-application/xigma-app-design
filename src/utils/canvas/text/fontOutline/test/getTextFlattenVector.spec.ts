@@ -1,10 +1,14 @@
 // types
 import { NodeType } from 'types/design/enums';
 import { TGlyphAtlasJson } from 'types/msdf';
-import { TTextNode } from 'types/design/types';
+import { TTextNode, TVectorNode } from 'types/design/types';
 
-const { getTextGlyphContours } = vi.hoisted(() => ({ getTextGlyphContours: vi.fn() }));
+const { getCurvedTextGlyphContours, getTextGlyphContours } = vi.hoisted(() => ({
+  getCurvedTextGlyphContours: vi.fn(),
+  getTextGlyphContours: vi.fn(),
+}));
 
+vi.mock('../getCurvedTextGlyphContours', () => ({ getCurvedTextGlyphContours }));
 vi.mock('../getTextGlyphContours', () => ({ getTextGlyphContours }));
 
 // utils
@@ -57,13 +61,29 @@ const HOLE = [
 ];
 
 describe('getTextFlattenVector', () => {
-  it('should return null for text bound to a path', async () => {
-    // action
+  it('should return null for text bound to a path whose path node can’t be resolved', async () => {
+    // action — no pathNode argument passed at all
     const result = await getTextFlattenVector(ATLAS, buildNode({ pathId: 'path-1' }));
 
     // result
     expect(result).toBeNull();
     expect(getTextGlyphContours).not.toHaveBeenCalled();
+    expect(getCurvedTextGlyphContours).not.toHaveBeenCalled();
+  });
+
+  it('should flatten text bound to a resolvable path via the curved contour builder, not the straight one', async () => {
+    // mock
+    const pathNode = { id: 'path-1', type: NodeType.vector } as TVectorNode;
+
+    getCurvedTextGlyphContours.mockResolvedValueOnce([[TRIANGLE]]);
+
+    // action
+    const result = await getTextFlattenVector(ATLAS, buildNode({ pathId: 'path-1' }), pathNode);
+
+    // result
+    expect(getCurvedTextGlyphContours).toHaveBeenCalledWith(ATLAS, expect.objectContaining({ pathId: 'path-1' }), pathNode);
+    expect(getTextGlyphContours).not.toHaveBeenCalled();
+    expect(result?.filledFaceKeys).toHaveLength(1);
   });
 
   it('should merge every glyph’s own outline (each independently faced) into one vector using the text’s fill', async () => {

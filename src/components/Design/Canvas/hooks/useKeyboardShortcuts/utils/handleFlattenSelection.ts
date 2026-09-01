@@ -3,9 +3,9 @@ import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
 
 // store
-import { replaceNode } from 'store/design/slice';
+import { deleteNode, replaceNode } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
-import { selectSelectedNodes } from 'store/design/selectors';
+import { selectActivePage, selectSelectedNodes } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
@@ -19,8 +19,14 @@ import { getTextFlattenVector } from 'utils/canvas/text/fontOutline/getTextFlatt
 type TTextFlattenTarget = { node: TTextNode; vector: TVectorNode };
 
 const getTextFlattenTargets = async (): Promise<TTextFlattenTarget[]> => {
-  const textNodes = selectSelectedNodes(store.getState()).filter((node): node is TTextNode => node.type === NodeType.text && !node.pathId);
-  const targets = await Promise.all(textNodes.map(async (node) => ({ node, vector: await getTextFlattenVector(MSDF_ATLAS_JSON, node) })));
+  const { nodes } = selectActivePage(store.getState());
+  const textNodes = selectSelectedNodes(store.getState()).filter((node): node is TTextNode => node.type === NodeType.text);
+  const targets = await Promise.all(
+    textNodes.map(async (node) => ({
+      node,
+      vector: await getTextFlattenVector(MSDF_ATLAS_JSON, node, node.pathId ? nodes[node.pathId] : undefined),
+    })),
+  );
 
   return targets.filter((target): target is TTextFlattenTarget => target.vector !== null);
 };
@@ -36,5 +42,10 @@ export const handleFlattenSelection = async (dispatch: AppDispatch): Promise<voi
   dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
   shapeNodes.forEach((node) => dispatch(replaceNode({ id: node.id, node: convertNodeToVector(node) })));
   textTargets.forEach(({ node, vector }) => dispatch(replaceNode({ id: node.id, node: { ...vector, id: node.id } })));
+  textTargets.forEach(({ node }) => {
+    if (node.pathId) {
+      dispatch(deleteNode(node.pathId));
+    }
+  });
   dispatch(endHistoryGesture());
 };

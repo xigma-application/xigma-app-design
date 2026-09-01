@@ -396,4 +396,20 @@ describe('NodeContextMenu', () => {
     expect(screen.queryByText('Create separate layers')).not.toBeInTheDocument();
     expect(screen.getByText('Send to Make')).toBeInTheDocument();
   });
+
+  it('should enable Flatten for a text node attached to a path, matching Figma’s own text-on-path support', () => {
+    // before
+    renderNodeContextMenu({ node: buildTextNode('path-1') });
+
+    // result
+    expect(screen.getByText('Flatten').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+  });
+
+  it('should still disable Outline stroke for a text node attached to a path — not supported yet', () => {
+    // before
+    renderNodeContextMenu({ node: buildTextNode('path-1') });
+
+    // result
+    expect(screen.getByText('Outline stroke').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+  });
 });
