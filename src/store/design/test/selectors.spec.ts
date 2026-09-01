@@ -261,7 +261,7 @@ describe('design selectors — groups', () => {
       pages: {
         'page-1': {
           ...state.design.pages['page-1'],
-          nodes: { 'group-1': group, a: childA, b: childB, loose },
+          nodes: { a: childA, b: childB, 'group-1': group, loose },
           rootOrder: ['group-1', 'loose'],
           selectedIds: ['group-1'],
         },
@@ -318,7 +318,7 @@ describe('design selectors — groups', () => {
         pages: {
           'page-1': {
             ...state.design.pages['page-1'],
-            nodes: { 'group-1': { ...group, childIds: ['a', 'gone'] }, a: childA, loose },
+            nodes: { a: childA, 'group-1': { ...group, childIds: ['a', 'gone'] }, loose },
             rootOrder: ['group-1', 'missing', 'loose'],
             selectedIds: [],
           },

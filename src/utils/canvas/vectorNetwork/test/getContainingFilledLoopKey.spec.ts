@@ -64,8 +64,8 @@ describe('getContainingFilledLoopKey', () => {
     const node: TVectorNode = { ...baseNode, filledFaceKeys: ['A', 'D'] };
 
     getVectorFillLoopPointsMock.mockImplementation((_n: TVectorNode, key: string) => {
-      if (key === 'A') return square(0, 0, 100);
-      if (key === 'D') return square(10, 10, 50);
+      if (key === 'A') {return square(0, 0, 100);}
+      if (key === 'D') {return square(10, 10, 50);}
       return null;
     });
 
@@ -79,9 +79,9 @@ describe('getContainingFilledLoopKey', () => {
     const node: TVectorNode = { ...baseNode, filledFaceKeys: ['A', 'D', 'E'] };
 
     getVectorFillLoopPointsMock.mockImplementation((_n: TVectorNode, key: string) => {
-      if (key === 'A') return square(0, 0, 100);
-      if (key === 'D') return square(10, 10, 50);
-      if (key === 'E') return square(0, 0, 70);
+      if (key === 'A') {return square(0, 0, 100);}
+      if (key === 'D') {return square(10, 10, 50);}
+      if (key === 'E') {return square(0, 0, 70);}
       return null;
     });
 

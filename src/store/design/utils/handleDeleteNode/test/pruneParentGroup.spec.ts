@@ -90,7 +90,7 @@ describe('pruneParentGroup', () => {
   it('should drop the child id and resync bounds when the group still has children', () => {
     // mock
     const state = buildState({
-      nodes: { 'group-1': group(['a', 'b']), b: rect('b', 'group-1', 90) },
+      nodes: { b: rect('b', 'group-1', 90), 'group-1': group(['a', 'b']) },
     });
 
     // action
@@ -99,7 +99,7 @@ describe('pruneParentGroup', () => {
     // result
     const parent = getActivePage(state).nodes['group-1'] as TGroupNode;
     expect(parent.childIds).toEqual(['b']);
-    expect(parent).toMatchObject({ x: 90, width: 10 });
+    expect(parent).toMatchObject({ width: 10, x: 90 });
   });
 
   it('should delete the parent group when its last child was removed', () => {

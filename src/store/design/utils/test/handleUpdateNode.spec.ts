@@ -326,14 +326,14 @@ describe('handleUpdateNode', () => {
       x: 0,
       y: 0,
     };
-    const state = buildState({ 'group-1': group, child });
+    const state = buildState({ child, 'group-1': group });
 
     // before — a drag dispatches a plain x/y updateNode, no width/height
     handleUpdateNode(state, { changes: { x: 50, y: 20 }, id: 'group-1' });
 
     // result — the box itself moved, the child was left untouched (it gets its own updateNode in the same drag)
-    expect(getActivePage(state).nodes['group-1']).toMatchObject({ x: 50, y: 20, width: 100, height: 100 });
-    expect(getActivePage(state).nodes.child).toMatchObject({ x: 40, y: 40, width: 20, height: 20 });
+    expect(getActivePage(state).nodes['group-1']).toMatchObject({ height: 100, width: 100, x: 50, y: 20 });
+    expect(getActivePage(state).nodes.child).toMatchObject({ height: 20, width: 20, x: 40, y: 40 });
   });
 
   it('should resync the parent group bounds after moving a child node', () => {
@@ -362,12 +362,12 @@ describe('handleUpdateNode', () => {
       x: 0,
       y: 0,
     };
-    const state = buildState({ 'group-1': group, child });
+    const state = buildState({ child, 'group-1': group });
 
     // before
     handleUpdateNode(state, { changes: { x: 100, y: 50 }, id: 'child' });
 
     // result
-    expect(getActivePage(state).nodes['group-1']).toMatchObject({ x: 100, y: 50, width: 10, height: 10 });
+    expect(getActivePage(state).nodes['group-1']).toMatchObject({ height: 10, width: 10, x: 100, y: 50 });
   });
 });

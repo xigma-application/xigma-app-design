@@ -6,8 +6,8 @@ import { collapseBridgeRun } from '../collapseBridgeRun';
 
 describe('collapseBridgeRun', () => {
   it('snaps both edges to their true miter point and returns true', () => {
-    const prevEdge: TLoopEdge = { start: { x: -1, y: 0 }, end: { x: 0, y: 0 }, tangentStart: null, tangentEnd: null };
-    const nextEdge: TLoopEdge = { start: { x: 2, y: -2 }, end: { x: 2, y: -1 }, tangentStart: null, tangentEnd: null };
+    const prevEdge: TLoopEdge = { end: { x: 0, y: 0 }, start: { x: -1, y: 0 }, tangentEnd: null, tangentStart: null };
+    const nextEdge: TLoopEdge = { end: { x: 2, y: -1 }, start: { x: 2, y: -2 }, tangentEnd: null, tangentStart: null };
 
     const result = collapseBridgeRun(prevEdge, nextEdge);
 
@@ -17,8 +17,8 @@ describe('collapseBridgeRun', () => {
   });
 
   it('leaves both edges untouched and returns false when there is no miter point (parallel edges)', () => {
-    const prevEdge: TLoopEdge = { start: { x: -1, y: 0 }, end: { x: 0, y: 0 }, tangentStart: null, tangentEnd: null };
-    const nextEdge: TLoopEdge = { start: { x: 2, y: -2 }, end: { x: 3, y: -2 }, tangentStart: null, tangentEnd: null };
+    const prevEdge: TLoopEdge = { end: { x: 0, y: 0 }, start: { x: -1, y: 0 }, tangentEnd: null, tangentStart: null };
+    const nextEdge: TLoopEdge = { end: { x: 3, y: -2 }, start: { x: 2, y: -2 }, tangentEnd: null, tangentStart: null };
     const originalPrevEnd = prevEdge.end;
     const originalNextStart = nextEdge.start;
 

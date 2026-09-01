@@ -77,7 +77,7 @@ describe('handleUngroupNodes', () => {
     const other = buildRect({ id: 'other' });
     const group = buildGroup({ childIds: ['a', 'b'] });
     const state = buildState({
-      nodes: { other, 'group-1': group, a, b },
+      nodes: { a, b, 'group-1': group, other },
       rootOrder: ['other', 'group-1'],
       selectedIds: ['group-1'],
     });
@@ -97,10 +97,10 @@ describe('handleUngroupNodes', () => {
   it('should splice children back into a parent group when the group was nested', () => {
     // mock
     const a = buildRect({ id: 'a', parentId: 'inner' });
-    const inner = buildGroup({ id: 'inner', childIds: ['a'], parentId: 'outer' });
-    const outer = buildGroup({ id: 'outer', childIds: ['inner'] });
+    const inner = buildGroup({ childIds: ['a'], id: 'inner', parentId: 'outer' });
+    const outer = buildGroup({ childIds: ['inner'], id: 'outer' });
     const state = buildState({
-      nodes: { outer, inner, a },
+      nodes: { a, inner, outer },
       rootOrder: ['outer'],
       selectedIds: ['inner'],
     });
@@ -118,7 +118,7 @@ describe('handleUngroupNodes', () => {
     // mock
     const a = buildRect({ id: 'a', parentId: 'group-1' });
     const group = buildGroup({ childIds: ['a', 'gone'] });
-    const state = buildState({ nodes: { 'group-1': group, a }, rootOrder: ['group-1'], selectedIds: ['group-1'] });
+    const state = buildState({ nodes: { a, 'group-1': group }, rootOrder: ['group-1'], selectedIds: ['group-1'] });
 
     // action
     handleUngroupNodes(state, ['group-1']);

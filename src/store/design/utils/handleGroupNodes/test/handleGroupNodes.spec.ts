@@ -58,8 +58,8 @@ const buildState = (page: Partial<TDesignPage>): TDesignState => ({
 describe('handleGroupNodes', () => {
   it('should wrap the selected top-level nodes into a group at the topmost member slot', () => {
     // mock
-    const a = buildRect({ id: 'a', x: 0, y: 0, width: 20, height: 20 });
-    const b = buildRect({ id: 'b', x: 40, y: 30, width: 10, height: 10 });
+    const a = buildRect({ height: 20, id: 'a', width: 20, x: 0, y: 0 });
+    const b = buildRect({ height: 10, id: 'b', width: 10, x: 40, y: 30 });
     const c = buildRect({ id: 'c', x: 100, y: 100 });
     const state = buildState({
       nodes: { a, b, c },
@@ -79,7 +79,7 @@ describe('handleGroupNodes', () => {
     expect(page.nodes.c.parentId).toBe('group-1');
     expect(page.rootOrder).toEqual(['b', 'group-1']);
     expect(page.selectedIds).toEqual(['group-1']);
-    expect(group).toMatchObject({ x: 0, y: 0, width: 110, height: 110 });
+    expect(group).toMatchObject({ height: 110, width: 110, x: 0, y: 0 });
   });
 
   it('should wrap a single selected node in a new group by itself', () => {
@@ -221,7 +221,7 @@ describe('handleGroupNodes', () => {
       y: 0,
     };
     const state = buildState({
-      nodes: { outer, a, b },
+      nodes: { a, b, outer },
       rootOrder: ['outer'],
       selectedIds: ['a', 'b'],
     });

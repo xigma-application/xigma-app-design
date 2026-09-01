@@ -107,11 +107,11 @@ describe('chainIntoSteps', () => {
       unit('s6', 'q2', 'v'),
     ];
     const vertices: Record<string, TVectorVertex> = {
-      v: { id: 'v', x: 0, y: 0 },
       p1: { id: 'p1', x: 10, y: 0 },
       p2: { id: 'p2', x: 0, y: -10 },
       q1: { id: 'q1', x: -10, y: 0 },
       q2: { id: 'q2', x: 0, y: 10 },
+      v: { id: 'v', x: 0, y: 0 },
     };
     const allIds = units.map((u) => u.id);
     const shuffledOrders = [units, [...units].reverse(), [units[3], units[4], units[5], units[0], units[1], units[2]]];
@@ -149,11 +149,11 @@ describe('chainIntoSteps', () => {
       unit('s6', 'q2', 'v'),
     ];
     const vertices: Record<string, TVectorVertex> = {
-      v: { id: 'v', x: 0, y: 0 },
       p1: { id: 'p1', x: -2, y: -10 },
       p2: { id: 'p2', x: 0, y: -10 },
       q1: { id: 'q1', x: -10, y: 0 },
       q2: { id: 'q2', x: 0, y: 10 },
+      v: { id: 'v', x: 0, y: 0 },
     };
 
     // before
@@ -178,10 +178,10 @@ describe('chainIntoSteps', () => {
     const foreignPieces = [straightPiece('f1', 'left', 'v'), straightPiece('f2', 'v', 'right')];
     const vertices: Record<string, TVectorVertex> = {
       a: { id: 'a', x: -10, y: -10 },
-      v: { id: 'v', x: 0, y: 0 },
       b: { id: 'b', x: 10, y: -10 },
       left: { id: 'left', x: -10, y: 10 },
       right: { id: 'right', x: 10, y: 10 },
+      v: { id: 'v', x: 0, y: 0 },
     };
     const planarSegments = { ...planarSegmentsOf(units), ...Object.fromEntries(foreignPieces.map((piece) => [piece.id, piece])) };
 

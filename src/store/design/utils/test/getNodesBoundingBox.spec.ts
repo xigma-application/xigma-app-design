@@ -22,15 +22,15 @@ const rect = (overrides: Partial<TRectangleNode>): TRectangleNode => ({
 describe('getNodesBoundingBox', () => {
   it('should union the axis-aligned bounds of plain box nodes', () => {
     // action
-    const bounds = getNodesBoundingBox([rect({ id: 'a', x: 0, y: 0 }), rect({ id: 'b', x: 40, y: 20, width: 10, height: 10 })]);
+    const bounds = getNodesBoundingBox([rect({ id: 'a', x: 0, y: 0 }), rect({ height: 10, id: 'b', width: 10, x: 40, y: 20 })]);
 
     // result
-    expect(bounds).toEqual({ x: 0, y: 0, width: 50, height: 30 });
+    expect(bounds).toEqual({ height: 30, width: 50, x: 0, y: 0 });
   });
 
   it('should account for a rotated node by using its rotated bounding box', () => {
     // action
-    const bounds = getNodesBoundingBox([rect({ id: 'a', x: 0, y: 0, width: 10, height: 10, rotation: 45 })]);
+    const bounds = getNodesBoundingBox([rect({ height: 10, id: 'a', rotation: 45, width: 10, x: 0, y: 0 })]);
 
     // result
     expect(bounds.width).toBeCloseTo(Math.SQRT2 * 10, 5);
@@ -56,7 +56,7 @@ describe('getNodesBoundingBox', () => {
     const bounds = getNodesBoundingBox([line]);
 
     // result
-    expect(bounds).toEqual({ x: 10, y: 5, width: 20, height: 20 });
+    expect(bounds).toEqual({ height: 20, width: 20, x: 10, y: 5 });
   });
 
   it('should use the vector network extents for a vector node', () => {
@@ -80,6 +80,6 @@ describe('getNodesBoundingBox', () => {
     const bounds = getNodesBoundingBox([vector]);
 
     // result
-    expect(bounds).toEqual({ x: 0, y: 0, width: 12, height: 8 });
+    expect(bounds).toEqual({ height: 8, width: 12, x: 0, y: 0 });
   });
 });

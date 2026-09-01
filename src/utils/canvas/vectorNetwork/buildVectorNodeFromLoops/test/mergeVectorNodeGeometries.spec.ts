@@ -9,8 +9,8 @@ const BASE = { id: 'merged-1', name: 'Text outline', parentId: 'page-1', rotatio
 
 const buildGlyphVector = (id: string): TVectorNode => ({
   fillColor: '#ff0000',
-  filledFaceKeys: [`face-${id}`],
   fillColorOverrideByKey: { [`face-${id}`]: '#ff0000' },
+  filledFaceKeys: [`face-${id}`],
   id,
   name: id,
   parentId: null,

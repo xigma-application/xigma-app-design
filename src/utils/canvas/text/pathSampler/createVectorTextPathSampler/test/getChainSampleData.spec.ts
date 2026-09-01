@@ -64,6 +64,7 @@ describe('getChainSampleData', () => {
   it('should start an open chain at its first-drawn vertex regardless of the order its two segments were stored in', () => {
     // mock — a(0,0)->b(50,0)->c(100,0), but 's2' (the second-drawn segment) is stored first
     const node = buildNode({
+      // eslint-disable-next-line sort-keys -- s2-before-s1 insertion order is the point of this test
       segments: { s2: seg('s2', 'b', 'c'), s1: seg('s1', 'a', 'b') },
       vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 50, y: 0 }, c: { id: 'c', x: 100, y: 0 } },
     });
@@ -79,6 +80,7 @@ describe('getChainSampleData', () => {
     // mock — a closed 2-segment loop; 'zulu' (100,0) was drawn before 'alpha' (0,0)
     const node = buildNode({
       segments: { s1: seg('s1', 'zulu', 'alpha'), s2: seg('s2', 'alpha', 'zulu') },
+      // eslint-disable-next-line sort-keys -- zulu-before-alpha insertion order is the point of this test
       vertices: { zulu: { id: 'zulu', x: 100, y: 0 }, alpha: { id: 'alpha', x: 0, y: 0 } },
     });
     const data = getChainSampleData(node)!;

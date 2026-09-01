@@ -72,18 +72,18 @@ const buildState = (page: Partial<TDesignPage>): TDesignState => ({
 describe('syncGroupBounds', () => {
   it('should recompute the group box from its children and bubble up to ancestor groups', () => {
     // mock
-    const a = rect({ id: 'a', parentId: 'inner', x: 0, y: 0, width: 20, height: 20 });
-    const b = rect({ id: 'b', parentId: 'inner', x: 60, y: 40, width: 10, height: 10 });
-    const inner = group({ id: 'inner', childIds: ['a', 'b'], parentId: 'outer' });
-    const outer = group({ id: 'outer', childIds: ['inner'] });
-    const state = buildState({ nodes: { outer, inner, a, b } });
+    const a = rect({ height: 20, id: 'a', parentId: 'inner', width: 20, x: 0, y: 0 });
+    const b = rect({ height: 10, id: 'b', parentId: 'inner', width: 10, x: 60, y: 40 });
+    const inner = group({ childIds: ['a', 'b'], id: 'inner', parentId: 'outer' });
+    const outer = group({ childIds: ['inner'], id: 'outer' });
+    const state = buildState({ nodes: { a, b, inner, outer } });
 
     // action
     syncGroupBounds(state, 'inner');
 
     // result
-    expect(getActivePage(state).nodes.inner).toMatchObject({ x: 0, y: 0, width: 70, height: 50 });
-    expect(getActivePage(state).nodes.outer).toMatchObject({ x: 0, y: 0, width: 70, height: 50 });
+    expect(getActivePage(state).nodes.inner).toMatchObject({ height: 50, width: 70, x: 0, y: 0 });
+    expect(getActivePage(state).nodes.outer).toMatchObject({ height: 50, width: 70, x: 0, y: 0 });
   });
 
   it('should no-op for a null id', () => {
@@ -103,7 +103,7 @@ describe('syncGroupBounds', () => {
     syncGroupBounds(state, 'a');
 
     // result
-    expect(getActivePage(state).nodes.a).toMatchObject({ width: 10, height: 10 });
+    expect(getActivePage(state).nodes.a).toMatchObject({ height: 10, width: 10 });
   });
 
   it('should recompute a rotated group box in its own local (unrotated) frame via getRotatedGroupBounds', () => {
@@ -112,9 +112,9 @@ describe('syncGroupBounds', () => {
     // so the ROTATED shape still world-encloses that child — this is the behavior resyncRotatedGroupBounds
     // already relies on for the drag-a-child-within-a-rotated-group case; syncGroupBounds must agree
     // with it for the structural add/remove-child case (grouping, moveNodes, ungroup)
-    const a = rect({ id: 'a', parentId: 'group-1', x: 0, y: 0, width: 20, height: 20 });
-    const rotatedGroup = group({ childIds: ['a'], rotation: 90, x: 5, y: 5, width: 5, height: 5 });
-    const state = buildState({ nodes: { 'group-1': rotatedGroup, a } });
+    const a = rect({ height: 20, id: 'a', parentId: 'group-1', width: 20, x: 0, y: 0 });
+    const rotatedGroup = group({ childIds: ['a'], height: 5, rotation: 90, width: 5, x: 5, y: 5 });
+    const state = buildState({ nodes: { a, 'group-1': rotatedGroup } });
 
     // action
     syncGroupBounds(state, 'group-1');
@@ -127,13 +127,13 @@ describe('syncGroupBounds', () => {
 
   it('should leave the box untouched when the group has no resolvable children', () => {
     // mock
-    const emptyGroup = group({ childIds: ['gone'], width: 5, height: 5 });
+    const emptyGroup = group({ childIds: ['gone'], height: 5, width: 5 });
     const state = buildState({ nodes: { 'group-1': emptyGroup } });
 
     // action
     syncGroupBounds(state, 'group-1');
 
     // result
-    expect(getActivePage(state).nodes['group-1']).toMatchObject({ width: 5, height: 5 });
+    expect(getActivePage(state).nodes['group-1']).toMatchObject({ height: 5, width: 5 });
   });
 });

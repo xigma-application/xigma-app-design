@@ -67,7 +67,7 @@ describe('getTextFlattenVector — determinism across repeated calls with the re
 
     for (let run = 0; run < 5; run += 1) {
       // sequential, not parallel — mirrors how the real "flatten selection" action calls this once per click
-      // eslint-disable-next-line no-await-in-loop
+       
       const result = await getTextFlattenVector(MSDF_ATLAS_JSON, node);
 
       if (!result) {

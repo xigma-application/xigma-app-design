@@ -195,7 +195,7 @@ describe('handleDeleteNode', () => {
       x: 0,
       y: 0,
     };
-    const state = buildState({ 'group-1': group, child });
+    const state = buildState({ child, 'group-1': group });
 
     // before
     handleDeleteNode(state, 'group-1');
@@ -220,7 +220,7 @@ describe('handleDeleteNode', () => {
       x: 0,
       y: 0,
     };
-    const state = buildState({ 'group-1': group, child });
+    const state = buildState({ child, 'group-1': group });
 
     // before
     handleDeleteNode(state, 'child');
@@ -232,8 +232,8 @@ describe('handleDeleteNode', () => {
 
   it('should keep the parent group and resync its bounds when a non-last child is deleted', () => {
     // mock
-    const first: TRectangleNode = { ...node, id: 'first', parentId: 'group-1', type: NodeType.rectangle, x: 0, width: 10 };
-    const second: TRectangleNode = { ...node, id: 'second', parentId: 'group-1', type: NodeType.rectangle, x: 90, width: 10 };
+    const first: TRectangleNode = { ...node, id: 'first', parentId: 'group-1', type: NodeType.rectangle, width: 10, x: 0 };
+    const second: TRectangleNode = { ...node, id: 'second', parentId: 'group-1', type: NodeType.rectangle, width: 10, x: 90 };
     const group: TGroupNode = {
       childIds: ['first', 'second'],
       height: 10,
@@ -246,7 +246,7 @@ describe('handleDeleteNode', () => {
       x: 0,
       y: 0,
     };
-    const state = buildState({ 'group-1': group, first, second });
+    const state = buildState({ first, 'group-1': group, second });
 
     // before
     handleDeleteNode(state, 'first');
@@ -254,6 +254,6 @@ describe('handleDeleteNode', () => {
     // result
     const remaining = getActivePage(state).nodes['group-1'] as TGroupNode;
     expect(remaining.childIds).toEqual(['second']);
-    expect(remaining).toMatchObject({ x: 90, width: 10 });
+    expect(remaining).toMatchObject({ width: 10, x: 90 });
   });
 });

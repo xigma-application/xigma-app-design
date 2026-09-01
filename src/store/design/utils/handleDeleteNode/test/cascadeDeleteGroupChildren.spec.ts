@@ -71,7 +71,7 @@ describe('cascadeDeleteGroupChildren', () => {
   it('should delete every child of a group node', () => {
     // mock
     const state = buildState({
-      nodes: { 'group-1': group('group-1', ['a', 'b']), a: rect('a', 'group-1'), b: rect('b', 'group-1') },
+      nodes: { a: rect('a', 'group-1'), b: rect('b', 'group-1'), 'group-1': group('group-1', ['a', 'b']) },
     });
 
     // action

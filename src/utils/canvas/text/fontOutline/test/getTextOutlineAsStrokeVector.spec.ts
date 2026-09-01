@@ -39,8 +39,8 @@ const buildNode = (overrides: Partial<TTextNode> = {}): TTextNode => ({
 
 const buildVector = (id: string): TVectorNode => ({
   fillColor: '#000000',
-  filledFaceKeys: [`face-${id}`],
   fillColorOverrideByKey: { [`face-${id}`]: '#000000' },
+  filledFaceKeys: [`face-${id}`],
   id,
   name: id,
   parentId: null,

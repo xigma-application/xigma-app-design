@@ -39,8 +39,8 @@ const contextFor = (units: TResolvedPieceUnit[], vertices: Record<string, TVecto
       vertices,
     ),
     startKey: `${first.id}:${first.startId}`,
-    unitById,
     unitByBoundaryPieceId,
+    unitById,
     unitsCount: units.length,
   };
 };
@@ -109,11 +109,11 @@ describe('searchClosedStepChain', () => {
       unit('s6', 'q2', 'v'),
     ];
     const vertices: Record<string, TVectorVertex> = {
-      v: { id: 'v', x: 0, y: 0 },
       p1: { id: 'p1', x: -2, y: -10 },
       p2: { id: 'p2', x: 0, y: -10 },
       q1: { id: 'q1', x: -10, y: 0 },
       q2: { id: 'q2', x: 0, y: 10 },
+      v: { id: 'v', x: 0, y: 0 },
     };
     const context = contextFor(units, vertices);
 

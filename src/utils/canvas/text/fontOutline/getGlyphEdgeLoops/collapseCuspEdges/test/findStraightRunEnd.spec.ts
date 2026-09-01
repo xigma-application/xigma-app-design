@@ -4,8 +4,8 @@ import { TLoopEdge } from 'utils/canvas/vectorNetwork/convertShapeToVector/utils
 // utils
 import { findStraightRunEnd } from '../findStraightRunEnd';
 
-const straight: TLoopEdge = { start: { x: 0, y: 0 }, end: { x: 1, y: 0 }, tangentStart: null, tangentEnd: null };
-const curve: TLoopEdge = { start: { x: 0, y: 0 }, end: { x: 1, y: 0 }, tangentStart: { x: 1, y: 1 }, tangentEnd: { x: -1, y: -1 } };
+const straight: TLoopEdge = { end: { x: 1, y: 0 }, start: { x: 0, y: 0 }, tangentEnd: null, tangentStart: null };
+const curve: TLoopEdge = { end: { x: 1, y: 0 }, start: { x: 0, y: 0 }, tangentEnd: { x: -1, y: -1 }, tangentStart: { x: 1, y: 1 } };
 
 describe('findStraightRunEnd', () => {
   it('returns the same index when the edge at start is not followed by another straight edge', () => {

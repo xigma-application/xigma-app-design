@@ -32,7 +32,7 @@ const rect: TRectangleNode = {
 };
 
 describe('getUngroupableGroups', () => {
-  const nodes: Record<string, TSceneNode> = { 'group-1': group, a: rect };
+  const nodes: Record<string, TSceneNode> = { a: rect, 'group-1': group };
 
   it('should keep only the ids that resolve to a group node', () => {
     // action & result

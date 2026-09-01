@@ -77,7 +77,7 @@ describe('releaseGroup', () => {
     const other = buildRect({ id: 'other' });
     const group = buildGroup({ childIds: ['a', 'b'] });
     const state = buildState({
-      nodes: { other, 'group-1': group, a, b },
+      nodes: { a, b, 'group-1': group, other },
       rootOrder: ['other', 'group-1'],
     });
 
@@ -96,9 +96,9 @@ describe('releaseGroup', () => {
   it('should splice the children into the parent group when the group was nested, reparenting them to it', () => {
     // mock
     const a = buildRect({ id: 'a', parentId: 'inner' });
-    const inner = buildGroup({ id: 'inner', childIds: ['a'], parentId: 'outer' });
-    const outer = buildGroup({ id: 'outer', childIds: ['inner'] });
-    const state = buildState({ nodes: { outer, inner, a }, rootOrder: ['outer'] });
+    const inner = buildGroup({ childIds: ['a'], id: 'inner', parentId: 'outer' });
+    const outer = buildGroup({ childIds: ['inner'], id: 'outer' });
+    const state = buildState({ nodes: { a, inner, outer }, rootOrder: ['outer'] });
 
     // action
     releaseGroup(state, inner);
@@ -113,7 +113,7 @@ describe('releaseGroup', () => {
     // mock
     const a = buildRect({ id: 'a', parentId: 'group-1' });
     const group = buildGroup({ childIds: ['a', 'gone'] });
-    const state = buildState({ nodes: { 'group-1': group, a }, rootOrder: ['group-1'] });
+    const state = buildState({ nodes: { a, 'group-1': group }, rootOrder: ['group-1'] });
 
     // action
     const releasedIds = releaseGroup(state, group);
@@ -127,10 +127,10 @@ describe('releaseGroup', () => {
 
   it('should resync the released parent group’s bounds to its remaining children', () => {
     // mock
-    const a = buildRect({ id: 'a', height: 20, parentId: 'inner', width: 20, x: 0, y: 0 });
-    const inner = buildGroup({ id: 'inner', childIds: ['a'], height: 20, parentId: 'outer', width: 20, x: 0, y: 0 });
-    const outer = buildGroup({ id: 'outer', childIds: ['inner'], height: 20, width: 20, x: 0, y: 0 });
-    const state = buildState({ nodes: { outer, inner, a }, rootOrder: ['outer'] });
+    const a = buildRect({ height: 20, id: 'a', parentId: 'inner', width: 20, x: 0, y: 0 });
+    const inner = buildGroup({ childIds: ['a'], height: 20, id: 'inner', parentId: 'outer', width: 20, x: 0, y: 0 });
+    const outer = buildGroup({ childIds: ['inner'], height: 20, id: 'outer', width: 20, x: 0, y: 0 });
+    const state = buildState({ nodes: { a, inner, outer }, rootOrder: ['outer'] });
 
     // action
     releaseGroup(state, inner);

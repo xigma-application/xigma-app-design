@@ -81,7 +81,12 @@ describe('splitVectorSegment', () => {
     };
 
     // before
-    const { fillColorOverrideByKey, filledFaceKeys, newVertexId, newSegmentId } = (() => {
+    const { fillColorOverrideByKey, filledFaceKeys, newVertexId, newSegmentId } = ((): {
+      fillColorOverrideByKey: Record<string, string>;
+      filledFaceKeys: string[];
+      newSegmentId: string;
+      newVertexId: string;
+    } => {
       const result = splitVectorSegment(filledNode, 's1', 0.5);
       const splitOffId = Object.keys(result.segments).find((id) => id !== 's1' && id !== 's2' && id !== 's3') as string;
 

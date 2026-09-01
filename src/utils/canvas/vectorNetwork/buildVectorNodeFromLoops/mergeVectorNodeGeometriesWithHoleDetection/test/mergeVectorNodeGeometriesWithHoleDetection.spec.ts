@@ -74,8 +74,8 @@ describe('mergeVectorNodeGeometriesWithHoleDetection', () => {
   });
 
   it('should isolate a same-direction overlap on both sides instead of treating it as a hole — the "D" stem/bowl case', () => {
-    const bowl = buildNode({ id: 'bowl-node', filledFaceKeys: ['bowl'] });
-    const stem = buildNode({ id: 'stem-node', filledFaceKeys: ['stem'] });
+    const bowl = buildNode({ filledFaceKeys: ['bowl'], id: 'bowl-node' });
+    const stem = buildNode({ filledFaceKeys: ['stem'], id: 'stem-node' });
 
     // stem sits fully inside the bowl's own bbox, but winds the SAME direction — not a real hole, so
     // neither can rely on cancelling against the other: both must render as independent ink
