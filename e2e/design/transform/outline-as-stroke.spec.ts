@@ -14,7 +14,7 @@ const DESELECT_POINT = { x: 1500, y: 700 };
 const SHAPE_REGION = { height: 350, width: 350, x: 800, y: 200 };
 
 type TDesignSnapshot = {
-  nodes: Record<string, { type: string }>;
+  nodes: Record<string, { childIds?: string[]; type: string }>;
   rootOrder: string[];
 };
 
@@ -138,5 +138,79 @@ test.describe('Outline as stroke', () => {
     const [id] = state.rootOrder;
 
     expect(state.nodes[id].type).toBe('vector');
+  });
+});
+
+// unlike shapes, text has no real stroke band to speak of yet (no properties-panel UI to ever set
+// one) — its "Outline as stroke" is per-letter flatten + group instead, matching Figma: every
+// letter stays its own independent vector rather than fusing into one shape
+test.describe('Outline as stroke — text', () => {
+  test('outlines a multi-letter text into a group of independent letter vectors', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-outline-stroke-text-multi-letter');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawTextBox(600, 200, 1600, 500);
+    await designPage.typeText('Hi');
+    await page.keyboard.press('Escape'); // commits, stays selected
+
+    await page.keyboard.press(OUTLINE_STROKE_SHORTCUT);
+
+    const state = await readDesignState(page);
+    const [groupId] = state.rootOrder;
+    const group = state.nodes[groupId];
+
+    expect(state.rootOrder).toHaveLength(1);
+    expect(group.type).toBe('group');
+    expect(group.childIds).toHaveLength(2);
+    group.childIds?.forEach((childId) => expect(state.nodes[childId].type).toBe('vector'));
+  });
+
+  test('outlines a single-letter text directly into one vector, with no group wrapper', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-outline-stroke-text-single-letter');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawTextBox(600, 200, 1600, 500);
+    await designPage.typeText('I');
+    await page.keyboard.press('Escape');
+
+    await page.keyboard.press(OUTLINE_STROKE_SHORTCUT);
+
+    const state = await readDesignState(page);
+    const [id] = state.rootOrder;
+
+    expect(state.rootOrder).toHaveLength(1);
+    expect(state.nodes[id].type).toBe('vector');
+  });
+
+  // matches Figma: outlining text-on-path bakes the glyphs into real, independent vector geometry
+  // and gets rid of the path it was bound to, same as Flatten already does for text-on-path
+  test('outlines text-on-path into a group and deletes the now-orphaned path node', async ({ page }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-outline-stroke-text-on-path');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawTextOnPath(900, 300, 1050, 420);
+    await designPage.typeText('Hi');
+    await page.keyboard.press('Escape');
+
+    const before = await readDesignState(page);
+
+    expect(before.rootOrder).toHaveLength(2); // the path node and the text node bound to it
+
+    await page.keyboard.press(OUTLINE_STROKE_SHORTCUT);
+
+    const after = await readDesignState(page);
+    const [groupId] = after.rootOrder;
+    const group = after.nodes[groupId];
+
+    // only the new group remains — the path it was bound to is gone from rootOrder entirely
+    expect(after.rootOrder).toHaveLength(1);
+    expect(group.type).toBe('group');
+    expect(group.childIds).toHaveLength(2);
   });
 });

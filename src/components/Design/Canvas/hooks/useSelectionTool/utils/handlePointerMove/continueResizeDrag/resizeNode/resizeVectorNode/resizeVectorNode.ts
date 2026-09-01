@@ -22,7 +22,7 @@ export const resizeVectorNode = (
   rotatedAnchorSolver: ((width: number, height: number) => TPoint) | null,
 ): void => {
   const segments = resizeVectorSegments(origin.segments, scaleX, scaleY);
-  const vertices = resizeVectorVertices(origin.vertices, anchors, scaleX, scaleY, !rotatedAnchorSolver);
+  const vertices = resizeVectorVertices(origin.vertices, anchors, scaleX, scaleY);
 
   if (rotatedAnchorSolver) {
     const delta = getAnchorCorrectionDelta(origin, segments, vertices, scaleX, scaleY, rotatedAnchorSolver);

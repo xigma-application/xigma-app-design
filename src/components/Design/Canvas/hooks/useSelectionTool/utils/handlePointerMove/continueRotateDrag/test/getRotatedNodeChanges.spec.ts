@@ -34,8 +34,11 @@ describe('getRotatedNodeChanges', () => {
     // before
     const changes = getRotatedNodeChanges(origin, { x: 50, y: 50 }, 90, false);
 
-    // result
-    expect(changes).toMatchObject({ rotation: 0, vertices: { v1: { id: 'v1', x: 50, y: 100 } } });
+    // result — not rounded, so checked with a tolerance for floating-point noise from
+    // Math.cos(90deg) not being an exact 0
+    expect(changes.rotation).toBe(0);
+    expect((changes as { vertices: Record<string, { x: number; y: number }> }).vertices.v1.x).toBeCloseTo(50);
+    expect((changes as { vertices: Record<string, { x: number; y: number }> }).vertices.v1.y).toBeCloseTo(100);
   });
 
   it('should fold a group-selected vector origin’s own rotation in around its own bounds before rotating it around the external group pivot', () => {

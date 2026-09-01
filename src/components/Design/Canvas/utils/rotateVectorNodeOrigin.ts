@@ -25,7 +25,7 @@ export const rotateVectorNodeOrigin = (
   vertices: Object.fromEntries(
     Object.entries(origin.vertices).map(([vertexId, vertex]) => {
       const rotated = rotatePoint(vertex, pivot, degrees);
-      return [vertexId, { id: vertexId, x: Math.round(rotated.x), y: Math.round(rotated.y) }];
+      return [vertexId, { id: vertexId, x: rotated.x, y: rotated.y }];
     }),
   ),
 });

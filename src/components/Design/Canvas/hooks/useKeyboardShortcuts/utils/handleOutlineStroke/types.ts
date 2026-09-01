@@ -3,4 +3,4 @@ import { TStrokeableNode } from 'utils/canvas/vectorNetwork/getNodeStrokeOutline
 import { TTextNode, TVectorNode } from 'types/design/types';
 
 export type TShapeOutlineTarget = { node: TStrokeableNode; outline: TVectorNode };
-export type TTextOutlineTarget = { node: TTextNode; outline: TVectorNode };
+export type TTextOutlineTarget = { letters: TVectorNode[]; node: TTextNode };

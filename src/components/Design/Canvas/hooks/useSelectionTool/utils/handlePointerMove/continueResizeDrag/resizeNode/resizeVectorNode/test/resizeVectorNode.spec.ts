@@ -59,7 +59,7 @@ describe('resizeVectorNode', () => {
     // accidentally agree by coincidence
     resizeVectorNode(id, ORIGIN, store.dispatch, { x: 5, y: 2 }, 2, 3, null);
 
-    // result — vertices: anchor + (coord - anchor) * scale, then rounded
+    // result — vertices: anchor + (coord - anchor) * scale
     const node = store.getState().design.pages[store.getState().design.activePageId].nodes[id];
 
     expect(node).toMatchObject({

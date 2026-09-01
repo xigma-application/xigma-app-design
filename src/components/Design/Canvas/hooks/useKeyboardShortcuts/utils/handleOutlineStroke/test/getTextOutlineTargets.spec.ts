@@ -2,9 +2,9 @@
 import { NodeType } from 'types/design/enums';
 import { TTextNode, TVectorNode } from 'types/design/types';
 
-const { getTextOutlineAsStrokeVector } = vi.hoisted(() => ({ getTextOutlineAsStrokeVector: vi.fn() }));
+const { getTextOutlineAsStrokeGlyphVectors } = vi.hoisted(() => ({ getTextOutlineAsStrokeGlyphVectors: vi.fn() }));
 
-vi.mock('utils/canvas/text/fontOutline/getTextOutlineAsStrokeVector', () => ({ getTextOutlineAsStrokeVector }));
+vi.mock('utils/canvas/text/fontOutline/getTextOutlineAsStrokeGlyphVectors', () => ({ getTextOutlineAsStrokeGlyphVectors }));
 
 // store
 import { addNode, setSelection } from 'store/design/slice';
@@ -14,11 +14,11 @@ import { store } from 'store';
 // utils
 import { getTextOutlineTargets } from '../getTextOutlineTargets';
 
-const buildOutline = (): TVectorNode => ({
+const buildLetter = (): TVectorNode => ({
   fillColor: '#000000',
   filledFaceKeys: [],
-  id: 'outline',
-  name: 'Text outline',
+  id: 'letter',
+  name: 'Text',
   parentId: null,
   rotation: 0,
   segments: {},
@@ -62,10 +62,10 @@ describe('getTextOutlineTargets', () => {
     vi.clearAllMocks();
   });
 
-  it('should return a target for each selected stroked text node with a resolvable outline', async () => {
+  it('should return a target for each selected stroked text node with at least one resolvable letter', async () => {
     // mock
     const id = addSelectedText();
-    getTextOutlineAsStrokeVector.mockResolvedValue(buildOutline());
+    getTextOutlineAsStrokeGlyphVectors.mockResolvedValue([buildLetter(), buildLetter()]);
 
     // action
     const targets = await getTextOutlineTargets();
@@ -73,13 +73,13 @@ describe('getTextOutlineTargets', () => {
     // result
     expect(targets).toHaveLength(1);
     expect(targets[0].node.id).toBe(id);
-    expect(targets[0].outline.type).toBe(NodeType.vector);
+    expect(targets[0].letters).toHaveLength(2);
   });
 
-  it('should drop a text node whose outline could not be built', async () => {
+  it('should drop a text node whose outline resolved to no letters at all', async () => {
     // mock
     addSelectedText();
-    getTextOutlineAsStrokeVector.mockResolvedValue(null);
+    getTextOutlineAsStrokeGlyphVectors.mockResolvedValue([]);
 
     // action
     const targets = await getTextOutlineTargets();
@@ -88,27 +88,52 @@ describe('getTextOutlineTargets', () => {
     expect(targets).toEqual([]);
   });
 
-  it('should ignore text bound to a path', async () => {
-    // mock
-    addSelectedText({ pathId: 'path-1' });
-    getTextOutlineAsStrokeVector.mockResolvedValue(buildOutline());
+  it('should still return a target for text with no stroke set at all — it just becomes per-letter flatten + group', async () => {
+    // mock — there's no properties-panel UI to ever set a real stroke on text yet, so this must
+    // stay available the same way Flatten always is
+    const id = addSelectedText({ strokeColor: undefined, strokeWidth: undefined });
+
+    getTextOutlineAsStrokeGlyphVectors.mockResolvedValue([buildLetter()]);
 
     // action
     const targets = await getTextOutlineTargets();
 
     // result
-    expect(targets).toEqual([]);
+    expect(targets).toHaveLength(1);
+    expect(targets[0].node.id).toBe(id);
   });
 
-  it('should ignore text with no stroke set', async () => {
-    // mock
-    addSelectedText({ strokeColor: undefined, strokeWidth: undefined });
-    getTextOutlineAsStrokeVector.mockResolvedValue(buildOutline());
+  it('should pass the bound path node through for a stroked text attached to a path', async () => {
+    // mock — a resolvable path node the text is attached to via pathId
+    store.dispatch(
+      addNode({
+        fillColor: null,
+        filledFaceKeys: [],
+        name: 'Path',
+        parentId: null,
+        rotation: 0,
+        segments: {},
+        strokeColor: '#000000',
+        strokeWidth: 1,
+        type: NodeType.vector,
+        vertexHandleModes: {},
+        vertices: {},
+      }),
+    );
+    const [pathId] = selectActivePage(store.getState()).rootOrder.slice(-1);
+
+    addSelectedText({ pathId });
+    getTextOutlineAsStrokeGlyphVectors.mockResolvedValue([buildLetter()]);
 
     // action
     const targets = await getTextOutlineTargets();
 
     // result
-    expect(targets).toEqual([]);
+    expect(targets).toHaveLength(1);
+    expect(getTextOutlineAsStrokeGlyphVectors).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pathId }),
+      expect.objectContaining({ id: pathId }),
+    );
   });
 });

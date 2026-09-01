@@ -405,11 +405,12 @@ describe('NodeContextMenu', () => {
     expect(screen.getByText('Flatten').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
   });
 
-  it('should still disable Outline stroke for a text node attached to a path — not supported yet', () => {
-    // before
+  it('should enable Outline stroke for a text node attached to a path even with no stroke set, same as Flatten', () => {
+    // before — there's no properties-panel UI to ever set a real stroke on text yet, so this stays
+    // available unconditionally: it's really per-letter flatten + group, not a real stroke band
     renderNodeContextMenu({ node: buildTextNode('path-1') });
 
     // result
-    expect(screen.getByText('Outline stroke').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Outline stroke').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
   });
 });

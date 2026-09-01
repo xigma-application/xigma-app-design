@@ -12,8 +12,11 @@ describe('rotateVectorNodeOrigin', () => {
     // before
     const rotated = rotateVectorNodeOrigin(origin, { x: 10, y: 10 }, 90);
 
-    // result
-    expect(rotated.vertices).toEqual({ v1: { id: 'v1', x: 10, y: 15 } });
+    // result — not rounded, so checked with a tolerance for floating-point noise from
+    // Math.cos(90deg) not being an exact 0
+    expect(rotated.vertices.v1.id).toBe('v1');
+    expect(rotated.vertices.v1.x).toBeCloseTo(10);
+    expect(rotated.vertices.v1.y).toBeCloseTo(15);
   });
 
   it('should rotate tangents as free vectors around the origin (0,0), not around the group pivot', () => {

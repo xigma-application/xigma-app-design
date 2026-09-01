@@ -42,15 +42,17 @@ describe('bakeVectorNodeRotation', () => {
     // before
     const baked = bakeVectorNodeRotation(node);
 
-    // result — tangents aren't rounded, so the near-zero x component is checked with a tolerance for
-    // floating-point noise from Math.cos(180deg) not being an exact -1
+    // result — nothing is rounded (vertices or tangents), so every component is checked with a
+    // tolerance for floating-point noise from Math.cos/sin(180deg) not being exactly -1/0
     expect(baked.rotation).toBe(0);
-    expect(baked.vertices).toEqual({
-      v1: { id: 'v1', x: 110, y: 110 },
-      v2: { id: 'v2', x: 10, y: 110 },
-      v3: { id: 'v3', x: 10, y: 10 },
-      v4: { id: 'v4', x: 110, y: 10 },
-    });
+    expect(baked.vertices.v1.x).toBeCloseTo(110);
+    expect(baked.vertices.v1.y).toBeCloseTo(110);
+    expect(baked.vertices.v2.x).toBeCloseTo(10);
+    expect(baked.vertices.v2.y).toBeCloseTo(110);
+    expect(baked.vertices.v3.x).toBeCloseTo(10);
+    expect(baked.vertices.v3.y).toBeCloseTo(10);
+    expect(baked.vertices.v4.x).toBeCloseTo(110);
+    expect(baked.vertices.v4.y).toBeCloseTo(10);
     expect(baked.segments.s1.tangentStart?.x).toBeCloseTo(-5);
     expect(baked.segments.s1.tangentStart?.y).toBeCloseTo(0);
   });
