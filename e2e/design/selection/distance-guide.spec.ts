@@ -81,6 +81,30 @@ test('a distance guide appears for a diagonally separated shape, with no overlap
   expect(altHovered.equals(away)).toBe(false);
 });
 
+test('a distance guide appears for a diagonal pair whose ranges genuinely overlap on one axis (regression)', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-distance-guide-diagonal-overlap');
+  await expect(designPage.canvas).toBeVisible();
+
+  // A (top-left) and B (bottom-right, selected) have no x overlap, but their y-ranges cross by a
+  // sliver (neither contains the other) — this used to render a negative/misplaced measurement
+  await designPage.drawRectangle(700, 150, 900, 400);
+  await designPage.drawRectangle(1000, 350, 1150, 550);
+  await designPage.selectTool('default');
+  await designPage.click(1075, 450); // select B
+
+  await designPage.pointerMove(1400, 800);
+  const away = await designPage.canvas.screenshot();
+
+  await page.keyboard.down('Alt');
+  await designPage.pointerMove(800, 275); // hover A
+  const altHovered = await designPage.canvas.screenshot();
+  await page.keyboard.up('Alt');
+
+  expect(altHovered.equals(away)).toBe(false);
+});
+
 test('side inset guides appear on both sides when the hovered shape directly below is narrower than the selected shape', async ({
   page,
 }) => {

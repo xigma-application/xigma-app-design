@@ -9,6 +9,7 @@ import { getEdges } from './getEdges';
 import { getHorizontalOverlapGuides } from './getHorizontalOverlapGuides';
 import { getOverlap } from './getOverlap';
 import { getVerticalOverlapGuides } from './getVerticalOverlapGuides';
+import { isAxisContained } from './isAxisContained';
 
 export const getDistanceGuides = (activeRect: TDraftRect, targetRect: TDraftRect): TDistanceGuides => {
   const active = getEdges(activeRect);
@@ -20,9 +21,9 @@ export const getDistanceGuides = (activeRect: TDraftRect, targetRect: TDraftRect
     switch (true) {
       case horizontalOverlap > 0 && verticalOverlap > 0:
         return getContainmentBranchGuides(active, target, activeRect, targetRect);
-      case verticalOverlap > 0:
+      case isAxisContained(active.top, active.bottom, target.top, target.bottom):
         return getVerticalOverlapGuides(active, target, activeRect);
-      case horizontalOverlap > 0:
+      case isAxisContained(active.left, active.right, target.left, target.right):
         return getHorizontalOverlapGuides(active, target, activeRect);
       default:
         return getDiagonalGuides(active, target, activeRect);

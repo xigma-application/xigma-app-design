@@ -9,10 +9,10 @@ import { getVerticalGuide } from './getVerticalGuide';
 export const getDiagonalGuides = (active: TEdges, target: TEdges, activeRect: TDraftRect): TDistanceGuides => {
   const anchorX = activeRect.x + activeRect.width / 2;
   const anchorY = activeRect.y + activeRect.height / 2;
-  const targetFacingX = active.right <= target.left ? target.left : target.right;
-  const targetFacingY = active.bottom <= target.top ? target.top : target.bottom;
   const horizontal = getHorizontalGuide(active, target, anchorY);
   const vertical = getVerticalGuide(active, target, anchorX);
+  const targetFacingX = horizontal.targetX;
+  const targetFacingY = vertical.targetY;
 
   return {
     labels: [horizontal.label, vertical.label],

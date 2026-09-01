@@ -64,4 +64,22 @@ describe('getDistanceGuides', () => {
     // result — the diagonal branch's own signature: a dashed corner bracket alongside the two solid measurements
     expect(guides.lines.filter((line) => line.dashed)).toHaveLength(2);
   });
+
+  it('should dispatch to the diagonal branch (not the direct-gap branch) when the vertical ranges only partially overlap, with neither containing the other', () => {
+    // before — active sits below-right of target with a real x gap; their y-ranges cross by a
+    // sliver (verticalOverlap > 0) but neither range contains the other, so this must read as a
+    // diagonal separation rather than a same-row direct gap with side insets — matching Figma
+    const guides = getDistanceGuides({ height: 150, width: 150, x: 200, y: 150 }, { height: 170, width: 150, x: 0, y: 0 });
+
+    // result — the diagonal branch's own signature
+    expect(guides.lines.filter((line) => line.dashed)).toHaveLength(2);
+  });
+
+  it('should dispatch to the diagonal branch (not the direct-gap branch) when the horizontal ranges only partially overlap, with neither containing the other', () => {
+    // before — the transpose of the case above
+    const guides = getDistanceGuides({ height: 150, width: 150, x: 150, y: 200 }, { height: 150, width: 170, x: 0, y: 0 });
+
+    // result
+    expect(guides.lines.filter((line) => line.dashed)).toHaveLength(2);
+  });
 });
