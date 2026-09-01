@@ -1,9 +1,10 @@
 // utils
 import { drawVectorHatchFill } from '../drawVectorHatchFill';
 
-const createGlMock = (): WebGL2RenderingContext =>
+const createGlMock = (ambientColorWriteMask: [boolean, boolean, boolean, boolean] = [true, true, true, false]): WebGL2RenderingContext =>
   ({
     ALWAYS: 519,
+    COLOR_WRITEMASK: 3107,
     INVERT: 5386,
     KEEP: 7680,
     LINES: 1,
@@ -21,6 +22,7 @@ const createGlMock = (): WebGL2RenderingContext =>
     enable: vi.fn(),
     enableVertexAttribArray: vi.fn(),
     getAttribLocation: vi.fn(() => 0),
+    getParameter: vi.fn(() => ambientColorWriteMask),
     getUniformLocation: vi.fn(() => ({})),
     stencilFunc: vi.fn(),
     stencilOp: vi.fn(),
@@ -136,5 +138,25 @@ describe('drawVectorHatchFill', () => {
 
     // result
     expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), [13 / 255, 153 / 255, 255 / 255, 1]);
+  });
+
+  it('should restore alpha writes rather than force them off, when the ambient state has them enabled', () => {
+    // mock
+    const gl = createGlMock([true, true, true, true]);
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const faces = [
+      [
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+      ],
+    ];
+
+    // before
+    drawVectorHatchFill(gl, program, buffer, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    expect(gl.colorMask).toHaveBeenNthCalledWith(2, true, true, true, true);
   });
 });

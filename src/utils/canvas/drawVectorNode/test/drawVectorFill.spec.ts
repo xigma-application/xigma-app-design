@@ -1,9 +1,10 @@
 // utils
 import { drawVectorFill } from '../drawVectorFill';
 
-const createGlMock = (): WebGL2RenderingContext =>
+const createGlMock = (ambientColorWriteMask: [boolean, boolean, boolean, boolean] = [true, true, true, false]): WebGL2RenderingContext =>
   ({
     ALWAYS: 519,
+    COLOR_WRITEMASK: 3107,
     INVERT: 5386,
     KEEP: 7680,
     NOTEQUAL: 517,
@@ -22,6 +23,7 @@ const createGlMock = (): WebGL2RenderingContext =>
     enable: vi.fn(),
     enableVertexAttribArray: vi.fn(),
     getAttribLocation: vi.fn(() => 0),
+    getParameter: vi.fn(() => ambientColorWriteMask),
     getUniformLocation: vi.fn(() => ({})),
     stencilFunc: vi.fn(),
     stencilOp: vi.fn(),
@@ -76,8 +78,8 @@ describe('drawVectorFill', () => {
 
     expect(gl.drawArrays).toHaveBeenNthCalledWith(1, gl.TRIANGLE_FAN, 0, 3);
 
-    // alpha stays masked off — the canvas's own alpha channel must stay locked opaque, see
-    // drawVectorFill.ts's own comment on why
+    // alpha writes are restored to whatever the ambient (pre-call) state was — here the default
+    // mock ambient state has alpha writes off, matching drawing straight to the main canvas
     expect(gl.colorMask).toHaveBeenNthCalledWith(2, true, true, true, false);
     expect(gl.stencilFunc).toHaveBeenNthCalledWith(2, gl.NOTEQUAL, 0, 0xff);
     expect(gl.stencilOp).toHaveBeenNthCalledWith(2, gl.KEEP, gl.KEEP, gl.KEEP);
@@ -90,6 +92,28 @@ describe('drawVectorFill', () => {
     const secondDrawOrder = (gl.drawArrays as ReturnType<typeof vi.fn>).mock.invocationCallOrder[1];
 
     expect(disableOrder).toBeGreaterThan(secondDrawOrder);
+  });
+
+  it('should restore alpha writes rather than force them off, when the ambient state (e.g. an offscreen mask render target) has them enabled', () => {
+    // mock — bindTarget enables alpha writes while rendering into an offscreen mask target; the
+    // fill's own stencil trick must hand that back afterward instead of hardcoding it off, or the
+    // mask's alpha channel — the only thing the composite shader reads — never gets painted
+    const gl = createGlMock([true, true, true, true]);
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const faces = [
+      [
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+      ],
+    ];
+
+    // before
+    drawVectorFill(gl, program, buffer, null, null, faces, '#0d99ff', 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    expect(gl.colorMask).toHaveBeenNthCalledWith(2, true, true, true, true);
   });
 
   it('should draw one triangle-fan per face when there are multiple faces', () => {
