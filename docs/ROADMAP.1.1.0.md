@@ -133,7 +133,36 @@ second selection box. Write-up: `.claude/docs/design-tool-architecture.md`,
 - [x] fixed `getVectorChainPositionAtLength` snapping text to the wrong end of a segment right after
       a corner when the chain has to walk that segment in reverse to stay continuous
 
+## Stage 12 — Flatten and Outline as stroke for text
+
+Text can now be destructively converted to real vector geometry via opentype.js font-outline
+extraction (parsing the bundled Inter TTF at runtime), not just the pre-baked MSDF atlas it renders
+from normally. Flatten fuses a whole text node into one vector, matching Figma; Outline as stroke
+keeps every letter its own independent vector and groups them instead, also matching Figma, so
+individual letters stay selectable/recolorable afterward. Both support text-on-path (bakes the
+glyphs, deletes the now-orphaned path node) and both stay available on text unconditionally, since
+there's still no properties-panel UI to ever set a real stroke on a text node. Full write-up:
+`.claude/docs/text-flatten-and-outline.md`; performance follow-up tracked separately in
+ROADMAP.2.0.0.md Stage 2.
+
+- [x] font-outline extraction pipeline (`fontOutline/`): TTF parsing, quadratic→cubic tangent
+      upconversion, per-glyph fill/stroke vector builders, and a rigid per-glyph transform for
+      text-on-path so the flattened result lines up with the on-path MSDF preview
+- [x] fixed a real cusp-collapse regression (glyphs like "(" and ")" rendering as spiked/twisted
+      shapes) and a non-determinism bug in the shared DCEL face-derivation search that randomly
+      dropped letter faces on multi-character flatten
+- [x] Outline as stroke splits each glyph into its own vector and groups them via the same
+      select-and-`groupNodes` mechanism a manual multi-select-group gesture uses, instead of fusing
+      the whole word — including a shared-pivot rotation bake so a rotated multi-letter group stays
+      rigid instead of each letter spinning around its own center
+- [x] fixed `rotateVectorNodeOrigin`/`resizeVectorVertices` rounding each vertex independently after
+      a rotate or resize, which was distorting flattened glyph curves — same bug class already fixed
+      for plain node drag
+
 ## Related
 
 [[canvas-rendering-pipeline]] — context for the render loop and the `WEBGL_CONTEXT_ATTRIBUTES`
 contract that `resolveColorSampleRequest` is attached to.
+
+[[text-flatten-and-outline]] — full pipeline behind Stage 12: font extraction, per-glyph vector
+assembly, and the two destructive commands built on top of them.
