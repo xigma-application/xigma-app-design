@@ -7,6 +7,7 @@ import {
   addNodes,
   addPage,
   bringSelectionToFront,
+  createMaskGroup,
   deleteNode,
   deletePage,
   duplicatePage,
@@ -21,6 +22,7 @@ import {
   setSelection,
   toggleNodeHidden,
   toggleNodeLocked,
+  toggleNodeMask,
   ungroupNodes,
   updateNode,
 } from 'store/design/slice';
@@ -38,6 +40,7 @@ const UNDOABLE_ACTION_TYPES: Set<string> = new Set([
   addNodes.type,
   addPage.type,
   bringSelectionToFront.type,
+  createMaskGroup.type,
   deleteNode.type,
   deletePage.type,
   duplicatePage.type,
@@ -52,6 +55,7 @@ const UNDOABLE_ACTION_TYPES: Set<string> = new Set([
   setSelection.type,
   toggleNodeHidden.type,
   toggleNodeLocked.type,
+  toggleNodeMask.type,
   ungroupNodes.type,
   updateNode.type,
 ]);

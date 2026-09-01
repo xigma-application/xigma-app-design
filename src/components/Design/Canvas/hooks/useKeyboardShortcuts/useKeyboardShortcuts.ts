@@ -34,6 +34,7 @@ import { handleSelectAll } from './utils/handleSelectAll';
 import { handleSendToBack } from './utils/handleSendToBack';
 import { handleUndo } from './utils/handleUndo';
 import { handleUngroupSelection } from './utils/handleUngroupSelection';
+import { handleUseSelectionAsMask } from './utils/handleUseSelectionAsMask';
 import { nudgeMap } from './utils/nudgeMap';
 
 export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
@@ -74,6 +75,7 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => handleDuplicateSelection(dispatch, refs), ...shortcuts.duplicate },
       { action: (): any => handleGroupSelection(dispatch), ...shortcuts.group },
       { action: (): any => handleUngroupSelection(dispatch), ...shortcuts.ungroup },
+      { action: (): any => handleUseSelectionAsMask(dispatch), ...shortcuts.useAsMask },
       { action: (): any => handleFlattenSelection(dispatch), ...shortcuts.flatten },
       { action: (): any => handleOutlineStroke(dispatch), ...shortcuts.outlineStroke },
       { action: (): any => handleBringToFront(dispatch), ...shortcuts.bringToFront },

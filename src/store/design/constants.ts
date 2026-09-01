@@ -12,4 +12,5 @@ export const DEFAULT_TEXT_TOOL = ToolName.text;
 export const DEFAULT_VIEWPORT: TViewport = { x: 0, y: 0, zoom: 1 };
 export const DEFAULT_PAGE_NAME = 'Page 1';
 export const DEFAULT_GROUP_NAME = 'Group';
+export const DEFAULT_MASK_GROUP_NAME = 'Mask group';
 export const MOCK_COMMENT_AUTHOR = 'Xigma';

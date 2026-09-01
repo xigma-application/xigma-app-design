@@ -1,6 +1,7 @@
 import cx from 'classnames';
 import { FC } from 'react';
 import { noop } from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 // components
 import TreeItemActions from './TreeItemActions';
@@ -16,6 +17,7 @@ import { useTreeItemContextMenu } from './hooks/useTreeItemContextMenu';
 import { useTreeItemNameEditing } from './hooks/useTreeItemNameEditing';
 
 // others
+import { NODE_ROW_MASK_BADGE_KEY } from 'components/Design/LeftPanel/File/Layers/constants';
 import { TREE_ITEM_INDENT_PX } from '../constants';
 
 // styles
@@ -37,6 +39,7 @@ export type TTreeItemProps = {
 };
 
 export const TreeItem: FC<TTreeItemProps> = ({ depth = 0, isExpanded = false, isSelected, node, onToggleExpand, renderMenu }) => {
+  const { t } = useTranslation();
   const handleSelect = useSelectTreeItem(node.id);
   const handleRename = useRenameTreeItem(node.id);
   const { handleStopPropagation, handleToggleHidden, handleToggleLocked } = useTreeItemActions(node.id);
@@ -60,6 +63,7 @@ export const TreeItem: FC<TTreeItemProps> = ({ depth = 0, isExpanded = false, is
           onEditingChange={onEditingChange}
           value={node.name}
         />
+        {node.isMask && !isEditing && <span className={styles['TreeItem__mask-badge']}>{t(NODE_ROW_MASK_BADGE_KEY)}</span>}
         {!isEditing && (
           <TreeItemActions
             isHidden={Boolean(node.hidden)}

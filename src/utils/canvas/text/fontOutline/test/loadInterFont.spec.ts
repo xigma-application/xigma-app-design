@@ -9,9 +9,9 @@ describe('loadInterFont', () => {
   it('should fetch and parse the bundled Inter TTF file into a Font', async () => {
     // mock
     const arrayBuffer = new ArrayBuffer(8);
-    const fetchMock = vi.fn(
-      async (): Promise<{ arrayBuffer: () => Promise<ArrayBuffer> }> => ({ arrayBuffer: async (): Promise<ArrayBuffer> => arrayBuffer }),
-    );
+    const fetchMock = vi.fn(async (): Promise<{ arrayBuffer: () => Promise<ArrayBuffer> }> => ({
+      arrayBuffer: async (): Promise<ArrayBuffer> => arrayBuffer,
+    }));
     vi.stubGlobal('fetch', fetchMock);
 
     // action
@@ -28,9 +28,9 @@ describe('loadInterFont', () => {
 
   it('should only fetch and parse once, caching the promise across calls', async () => {
     // mock
-    const fetchMock = vi.fn(
-      async (): Promise<{ arrayBuffer: () => Promise<ArrayBuffer> }> => ({ arrayBuffer: async (): Promise<ArrayBuffer> => new ArrayBuffer(8) }),
-    );
+    const fetchMock = vi.fn(async (): Promise<{ arrayBuffer: () => Promise<ArrayBuffer> }> => ({
+      arrayBuffer: async (): Promise<ArrayBuffer> => new ArrayBuffer(8),
+    }));
     vi.stubGlobal('fetch', fetchMock);
     parse.mockClear();
     fetchMock.mockClear();

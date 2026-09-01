@@ -61,6 +61,8 @@ describe('setupRenderLoop', () => {
       msdfBuffer,
       gridProgram,
       gridBuffer,
+      {} as WebGLProgram,
+      {} as WebGLBuffer,
       canvas,
       createCanvasRefs(),
     );
@@ -94,6 +96,8 @@ describe('setupRenderLoop', () => {
       msdfBuffer,
       gridProgram,
       gridBuffer,
+      {} as WebGLProgram,
+      {} as WebGLBuffer,
       canvas,
       createCanvasRefs(),
     );

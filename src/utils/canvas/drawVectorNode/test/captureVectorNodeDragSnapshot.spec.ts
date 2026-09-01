@@ -101,7 +101,12 @@ describe('captureVectorNodeDragSnapshot', () => {
 
     // result
     expect(bakeVectorNodeRotationMock).toHaveBeenCalledWith(node);
-    expect(groupFilledFacesForRenderingMock).toHaveBeenCalledWith({ ...node, rotation: 0, segments: bakedSegments, vertices: bakedVertices });
+    expect(groupFilledFacesForRenderingMock).toHaveBeenCalledWith({
+      ...node,
+      rotation: 0,
+      segments: bakedSegments,
+      vertices: bakedVertices,
+    });
     expect(flattenVectorSegmentsMock).toHaveBeenCalledWith({ ...node, rotation: 0, segments: bakedSegments, vertices: bakedVertices });
     expect(node.rotation).toBe(45);
   });

@@ -112,6 +112,33 @@ describe('getCurvedTextGlyphContours', () => {
     expect(secondEdges[0].start).toEqual({ x: 12, y: 0 });
   });
 
+  it('should skip a character that has no atlas glyph (e.g. a space) while still advancing past it', async () => {
+    // ATLAS only knows 'A' (id 65); the space (id 32) has no glyph, so it contributes no contour
+    // set but its fallback advance still moves the next glyph further along the path
+    const node = buildNode({ content: 'A A' });
+
+    const result = await getCurvedTextGlyphContours(ATLAS, node, buildStraightPathNode(400, 0));
+
+    expect(result).toHaveLength(2);
+    // second 'A' sits one 'A'-advance (12) plus one fallback space-advance (fontSize * 0.6 = 12) along
+    expect(result[1][0][0].start).toEqual({ x: 24, y: 0 });
+  });
+
+  it('should rotate a glyph edge’s own Bézier tangents into the path’s frame, not just its endpoints', async () => {
+    // a glyph outline with a real curve segment — its edge carries non-null tangents, which the
+    // straight-line mock never produces, so this is what exercises the tangent-rotation path
+    getPath.mockReturnValueOnce({
+      commands: [{ type: 'M', x: 0, y: 0 }, { type: 'C', x: 10, x1: 3, x2: 7, y: 0, y1: 6, y2: 6 }, { type: 'Z' }],
+    });
+    const node = buildNode();
+
+    const [[edges]] = await getCurvedTextGlyphContours(ATLAS, node, buildStraightPathNode(0, 200));
+
+    // the curved edge came through with rotated tangents attached (vertical path ⇒ 90° frame)
+    const curved = edges.find((edge) => edge.tangentStart || edge.tangentEnd);
+    expect(curved).toBeDefined();
+  });
+
   it('should walk the path backwards and add a 180° flip when pathFlip is set', async () => {
     const node = buildNode({ pathFlip: true, pathStartOffset: 1 });
 

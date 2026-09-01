@@ -23,6 +23,7 @@ export const NODE_MENU_MOVE_TO_PAGE_KEY = `${translationNameSpace}.moveToPage`;
 export const NODE_MENU_OUTLINE_STROKE_KEY = `${translationNameSpace}.outlineStroke`;
 export const NODE_MENU_PASTE_TO_REPLACE_KEY = `${translationNameSpace}.pasteToReplace`;
 export const NODE_MENU_PLUGINS_KEY = `${translationNameSpace}.plugins`;
+export const NODE_MENU_REMOVE_MASK_KEY = `${translationNameSpace}.removeMask`;
 export const NODE_MENU_RENAME_KEY = `${translationNameSpace}.rename`;
 export const NODE_MENU_SEND_TO_BACK_KEY = `${translationNameSpace}.sendToBack`;
 export const NODE_MENU_SEND_TO_MAKE_KEY = `${translationNameSpace}.sendToMake`;

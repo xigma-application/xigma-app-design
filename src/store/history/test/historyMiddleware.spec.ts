@@ -3,6 +3,7 @@ import {
   addNode,
   addPage,
   bringSelectionToFront,
+  createMaskGroup,
   groupNodes,
   moveNodes,
   reorderPages,
@@ -10,6 +11,7 @@ import {
   setSelection,
   toggleNodeHidden,
   toggleNodeLocked,
+  toggleNodeMask,
   ungroupNodes,
 } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture, redo, undo } from '../actions';
@@ -174,6 +176,38 @@ describe('historyMiddleware', () => {
     expect(page.nodes[idB].parentId).toBeNull();
     expect(page.rootOrder).toContain(idA);
     expect(page.rootOrder).toContain(idB);
+  });
+
+  it('should treat creating a mask group and removing the mask flag as their own undo steps', () => {
+    // mock
+    const idA = addFrameNode(0, 0);
+    const idB = addFrameNode(50, 50);
+
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(createMaskGroup());
+
+    const groupId = selectSelectedIds(store.getState())[0];
+    const maskChildId = (store.getState().design.pages[store.getState().design.activePageId].nodes[groupId] as { childIds: string[] })
+      .childIds[0];
+
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[maskChildId].isMask).toBe(true);
+
+    store.dispatch(toggleNodeMask(maskChildId));
+
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[maskChildId].isMask).toBe(false);
+
+    // action — undo the flag removal only
+    store.dispatch(undo());
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[maskChildId].isMask).toBe(true);
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[groupId].type).toBe(NodeType.group);
+
+    // action — undo the mask-group creation too
+    store.dispatch(undo());
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[groupId]).toBeUndefined();
   });
 
   it('should treat a page reorder as its own undo step', () => {

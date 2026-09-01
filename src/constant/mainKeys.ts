@@ -8,4 +8,5 @@ export const CONTROL = isMacOs ? '⌘' : 'Ctrl';
 export const CONTROL_PRIMARY_KEY: TPrimaryKey = isMacOs ? 'meta' : 'control';
 export const CTRL = isMacOs ? '⌃' : 'Ctrl';
 export const GLOBE = '🌐';
+export const MASK_MODIFIER_KEY: TPrimaryKey = isMacOs ? 'control' : 'alt';
 export const SHIFT = isMacOs ? '⇧' : 'Shift';

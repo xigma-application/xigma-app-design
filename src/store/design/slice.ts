@@ -53,7 +53,9 @@ import { handleStartTextEdit } from './utils/handleStartTextEdit';
 import { handleStopTextEdit } from './utils/handleStopTextEdit';
 import { handleToggleNodeHidden } from './utils/handleToggleNodeHidden';
 import { handleToggleNodeLocked } from './utils/handleToggleNodeLocked';
+import { handleToggleNodeMask } from './utils/handleToggleNodeMask/handleToggleNodeMask';
 import { handleUngroupNodes } from './utils/handleUngroupNodes/handleUngroupNodes';
+import { handleUseNodesAsMask } from './utils/handleUseNodesAsMask/handleUseNodesAsMask';
 import { handleUpdateCommentContent } from './utils/handleUpdateCommentContent';
 import { handleUpdateEditingTextBoxPathStartOffset } from './utils/handleUpdateEditingTextBoxPathStartOffset';
 import { handleUpdateNode } from './utils/handleUpdateNode';
@@ -116,6 +118,10 @@ const designSlice = createSlice({
     cancelCommentDraft: (state) => {
       state.commentDraftPosition = null;
     },
+    createMaskGroup: {
+      prepare: () => ({ payload: { groupId: nanoid() } }),
+      reducer: (state, action: PayloadAction<{ groupId: string }>) => handleUseNodesAsMask(state, action.payload.groupId),
+    },
     deleteComment: (state, action: PayloadAction<string>) => {
       delete getActivePage(state).comments[action.payload];
     },
@@ -155,6 +161,7 @@ const designSlice = createSlice({
     stopTextEdit: (state) => handleStopTextEdit(state),
     toggleNodeHidden: (state, action: PayloadAction<string>) => handleToggleNodeHidden(state, action.payload),
     toggleNodeLocked: (state, action: PayloadAction<string>) => handleToggleNodeLocked(state, action.payload),
+    toggleNodeMask: (state, action: PayloadAction<string>) => handleToggleNodeMask(state, action.payload),
     toggleUiMinimized: (state) => {
       state.isUiMinimized = !state.isUiMinimized;
     },
@@ -176,6 +183,7 @@ export const {
   addPage,
   bringSelectionToFront,
   cancelCommentDraft,
+  createMaskGroup,
   deleteComment,
   deleteNode,
   deletePage,
@@ -200,6 +208,7 @@ export const {
   stopTextEdit,
   toggleNodeHidden,
   toggleNodeLocked,
+  toggleNodeMask,
   toggleUiMinimized,
   ungroupNodes,
   updateCommentContent,

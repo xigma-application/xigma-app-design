@@ -7,16 +7,28 @@ import { TLoopEdge } from 'utils/canvas/vectorNetwork/convertShapeToVector/utils
 // Reproduces the exact W pinch pattern from a real dump: curve -> zero-length line -> short line -> curve
 const loop: TLoopEdge[] = [
   {
-    end: { x: 1179.9716796875, y: 573.7763671875 }, start: { x: 1179.7666015625, y: 572.68603515625 }, tangentEnd: { x: -0.06380208333333333, y: -0.37369791666666663 }, tangentStart: { x: 0.07291666666666666, y: -0.35319010416666663 },
+    end: { x: 1179.9716796875, y: 573.7763671875 },
+    start: { x: 1179.7666015625, y: 572.68603515625 },
+    tangentEnd: { x: -0.06380208333333333, y: -0.37369791666666663 },
+    tangentStart: { x: 0.07291666666666666, y: -0.35319010416666663 },
   },
   {
-    end: { x: 1179.9716796875, y: 573.7763671875 }, start: { x: 1179.9716796875, y: 573.7763671875 }, tangentEnd: null, tangentStart: null,
+    end: { x: 1179.9716796875, y: 573.7763671875 },
+    start: { x: 1179.9716796875, y: 573.7763671875 },
+    tangentEnd: null,
+    tangentStart: null,
   },
   {
-    end: { x: 1179.814453125, y: 573.7763671875 }, start: { x: 1179.9716796875, y: 573.7763671875 }, tangentEnd: null, tangentStart: null,
+    end: { x: 1179.814453125, y: 573.7763671875 },
+    start: { x: 1179.9716796875, y: 573.7763671875 },
+    tangentEnd: null,
+    tangentStart: null,
   },
   {
-    end: { x: 1180.0263671875, y: 572.68603515625 }, start: { x: 1179.814453125, y: 573.7763671875 }, tangentEnd: { x: -0.07291666666666666, y: 0.35319010416666663 }, tangentStart: { x: 0.068359375, y: -0.37369791666666663 },
+    end: { x: 1180.0263671875, y: 572.68603515625 },
+    start: { x: 1179.814453125, y: 573.7763671875 },
+    tangentEnd: { x: -0.07291666666666666, y: 0.35319010416666663 },
+    tangentStart: { x: 0.068359375, y: -0.37369791666666663 },
   },
   // a few more edges of typical W-stroke scale, to mimic a real ~30-40 edge glyph loop where the
   // cusp bridge is a small minority rather than half the loop (not geometrically closed, doesn't

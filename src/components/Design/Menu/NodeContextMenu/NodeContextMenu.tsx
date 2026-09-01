@@ -30,6 +30,7 @@ import {
   NODE_MENU_OUTLINE_STROKE_KEY,
   NODE_MENU_PASTE_TO_REPLACE_KEY,
   NODE_MENU_PLUGINS_KEY,
+  NODE_MENU_REMOVE_MASK_KEY,
   NODE_MENU_RENAME_KEY,
   NODE_MENU_SEND_TO_BACK_KEY,
   NODE_MENU_SEND_TO_MAKE_KEY,
@@ -67,10 +68,12 @@ export type TNodeContextMenuProps = {
   onOpenChange: TFunc<[boolean]>;
   onOutlineStroke: TFunc;
   onPasteToReplace: TFunc;
+  onRemoveMask: TFunc;
   onRename: TFunc;
   onSendToBack: TFunc;
   onToggleHidden: TFunc;
   onToggleLocked: TFunc;
+  onUseAsMask: TFunc;
   otherPages: TDesignPage[];
 };
 
@@ -86,10 +89,12 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   onOpenChange,
   onOutlineStroke,
   onPasteToReplace,
+  onRemoveMask,
   onRename,
   onSendToBack,
   onToggleHidden,
   onToggleLocked,
+  onUseAsMask,
   otherPages,
 }) => {
   const { t } = useTranslation();
@@ -184,8 +189,21 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
           withCheck={false}
         />
       )}
-      {!isSection && (
-        <MenuItem disabled label={t(NODE_MENU_USE_AS_MASK_KEY)} shortcut={KEYBOARD_SHORTCUTS.useAsMask.join('')} withCheck={false} />
+      {!isSection && !node.isMask && (
+        <MenuItem
+          label={t(NODE_MENU_USE_AS_MASK_KEY)}
+          onClick={onUseAsMask}
+          shortcut={KEYBOARD_SHORTCUTS.useAsMask.join('')}
+          withCheck={false}
+        />
+      )}
+      {!isSection && node.isMask && (
+        <MenuItem
+          label={t(NODE_MENU_REMOVE_MASK_KEY)}
+          onClick={onRemoveMask}
+          shortcut={KEYBOARD_SHORTCUTS.useAsMask.join('')}
+          withCheck={false}
+        />
       )}
       {(isFrame || isSection) && <MenuItem disabled label={t(NODE_MENU_SET_AS_THUMBNAIL_KEY)} withCheck={false} />}
       <MenuSeparator />

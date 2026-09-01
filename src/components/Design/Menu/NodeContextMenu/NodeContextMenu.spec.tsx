@@ -75,10 +75,12 @@ const renderNodeContextMenu = (props: Partial<TNodeContextMenuProps> = {}): Retu
       onOpenChange={vi.fn()}
       onOutlineStroke={vi.fn()}
       onPasteToReplace={vi.fn()}
+      onRemoveMask={vi.fn()}
       onRename={vi.fn()}
       onSendToBack={vi.fn()}
       onToggleHidden={vi.fn()}
       onToggleLocked={vi.fn()}
+      onUseAsMask={vi.fn()}
       otherPages={[]}
       {...props}
     />,
@@ -102,7 +104,54 @@ describe('NodeContextMenu', () => {
     renderNodeContextMenu();
 
     // result
-    expect(screen.getByText('Use as mask').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Plugins').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+  });
+
+  it('should enable Use as mask for a non-mask node, and call onUseAsMask on click', async () => {
+    // mock
+    const user = userEvent.setup();
+    const onUseAsMask = vi.fn();
+
+    // before
+    renderNodeContextMenu({ node: buildRectangleNode(), onUseAsMask });
+
+    // result
+    expect(screen.getByText('Use as mask').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.queryByText('Remove mask')).not.toBeInTheDocument();
+
+    // action
+    await user.click(screen.getByText('Use as mask'));
+
+    // result
+    expect(onUseAsMask).toHaveBeenCalledTimes(1);
+  });
+
+  it('should show Remove mask instead of Use as mask for a mask node, and call onRemoveMask on click', async () => {
+    // mock
+    const user = userEvent.setup();
+    const onRemoveMask = vi.fn();
+
+    // before
+    renderNodeContextMenu({ node: { ...buildRectangleNode(), isMask: true }, onRemoveMask });
+
+    // result
+    expect(screen.queryByText('Use as mask')).not.toBeInTheDocument();
+    expect(screen.getByText('Remove mask').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+
+    // action
+    await user.click(screen.getByText('Remove mask'));
+
+    // result
+    expect(onRemoveMask).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not show Use as mask or Remove mask for a section', () => {
+    // before
+    renderNodeContextMenu({ node: buildSectionNode() });
+
+    // result
+    expect(screen.queryByText('Use as mask')).not.toBeInTheDocument();
+    expect(screen.queryByText('Remove mask')).not.toBeInTheDocument();
   });
 
   it('should not disable Copy, Paste to replace, Rename, Show/Hide, Lock/Unlock, Group selection, Bring to front, or Send to back', () => {

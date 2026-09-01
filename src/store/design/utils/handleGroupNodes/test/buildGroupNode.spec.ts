@@ -65,4 +65,16 @@ describe('buildGroupNode', () => {
     // result
     expect(group.parentId).toBe('outer');
   });
+
+  it('should use the given name when one is passed', () => {
+    // mock
+    const a = buildRect({ id: 'a' });
+    const nodes: Record<string, TSceneNode> = { a };
+
+    // action
+    const group = buildGroupNode('group-1', null, ['a'], nodes, 'Mask group');
+
+    // result
+    expect(group.name).toBe('Mask group');
+  });
 });

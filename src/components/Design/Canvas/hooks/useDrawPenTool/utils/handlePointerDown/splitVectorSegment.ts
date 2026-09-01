@@ -44,13 +44,17 @@ export const splitVectorSegment = (
     },
   };
   const vertices = { ...node.vertices, [newVertexId]: { id: newVertexId, ...roundVectorPoint(split.point) } };
-  const { fillColorOverrideByKey, filledFaceKeys } = remapFilledFaceKeysAfterSegmentSplit(node.filledFaceKeys, node.fillColorOverrideByKey, {
-    newSegmentId,
-    newVertexId,
-    originalEndId: segment.endId,
-    originalSegmentId: segmentId,
-    originalStartId: segment.startId,
-  });
+  const { fillColorOverrideByKey, filledFaceKeys } = remapFilledFaceKeysAfterSegmentSplit(
+    node.filledFaceKeys,
+    node.fillColorOverrideByKey,
+    {
+      newSegmentId,
+      newVertexId,
+      originalEndId: segment.endId,
+      originalSegmentId: segmentId,
+      originalStartId: segment.startId,
+    },
+  );
 
   return { fillColorOverrideByKey, filledFaceKeys, newVertexId, segments, vertices };
 };

@@ -631,6 +631,29 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
     expect(selectSelectedIds(realStore.getState())).toEqual([idA, idB]);
   });
 
+  it('should wrap the selection into a mask group on "Ctrl+Cmd+M"', () => {
+    // mock
+    const idA = addFrameNode();
+    const idB = addFrameNode(40, 40);
+
+    realStore.dispatch(setSelection([idA, idB]));
+
+    // before
+    renderHook(() => useKeyboardShortcuts(createCanvasRefs()), {
+      wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
+    });
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyM', ctrlKey: true, metaKey: true });
+
+    // result
+    const [groupId] = selectSelectedIds(realStore.getState());
+    const page = realStore.getState().design.pages[realStore.getState().design.activePageId];
+    expect(page.nodes[groupId].type).toBe(NodeType.group);
+    expect(page.nodes[groupId].name).toBe('Mask group');
+    expect(page.nodes[(page.nodes[groupId] as { childIds: string[] }).childIds[0]].isMask).toBe(true);
+  });
+
   it('should bring the selection to the front on "]" and send it to the back on "["', () => {
     // mock — idA drawn before idB, so idA starts behind it
     const idA = addFrameNode();

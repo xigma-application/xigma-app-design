@@ -5,11 +5,17 @@ import { TLoopEdge } from 'utils/canvas/vectorNetwork/convertShapeToVector/utils
 import { isDegenerateBridgeRun } from '../isDegenerateBridgeRun';
 
 const makeCurve = (length: number): TLoopEdge => ({
-  end: { x: length, y: 0 }, start: { x: 0, y: 0 }, tangentEnd: { x: -1, y: -1 }, tangentStart: { x: 1, y: 1 },
+  end: { x: length, y: 0 },
+  start: { x: 0, y: 0 },
+  tangentEnd: { x: -1, y: -1 },
+  tangentStart: { x: 1, y: 1 },
 });
 
 const makeStraight = (length: number): TLoopEdge => ({
-  end: { x: length, y: 0 }, start: { x: 0, y: 0 }, tangentEnd: null, tangentStart: null,
+  end: { x: length, y: 0 },
+  start: { x: 0, y: 0 },
+  tangentEnd: null,
+  tangentStart: null,
 });
 
 describe('isDegenerateBridgeRun', () => {

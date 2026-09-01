@@ -36,7 +36,9 @@ describe('getTextFlattenVector — determinism across repeated calls with the re
 
     vi.stubGlobal(
       'fetch',
-      vi.fn(async (): Promise<{ arrayBuffer: () => Promise<ArrayBuffer> }> => ({ arrayBuffer: async (): Promise<ArrayBuffer> => arrayBuffer })),
+      vi.fn(async (): Promise<{ arrayBuffer: () => Promise<ArrayBuffer> }> => ({
+        arrayBuffer: async (): Promise<ArrayBuffer> => arrayBuffer,
+      })),
     );
   });
 
@@ -67,7 +69,7 @@ describe('getTextFlattenVector — determinism across repeated calls with the re
 
     for (let run = 0; run < 5; run += 1) {
       // sequential, not parallel — mirrors how the real "flatten selection" action calls this once per click
-       
+
       const result = await getTextFlattenVector(MSDF_ATLAS_JSON, node);
 
       if (!result) {
@@ -96,7 +98,9 @@ describe('getTextFlattenVector — glyph outline integrity with the real Inter f
 
     vi.stubGlobal(
       'fetch',
-      vi.fn(async (): Promise<{ arrayBuffer: () => Promise<ArrayBuffer> }> => ({ arrayBuffer: async (): Promise<ArrayBuffer> => arrayBuffer })),
+      vi.fn(async (): Promise<{ arrayBuffer: () => Promise<ArrayBuffer> }> => ({
+        arrayBuffer: async (): Promise<ArrayBuffer> => arrayBuffer,
+      })),
     );
   });
 

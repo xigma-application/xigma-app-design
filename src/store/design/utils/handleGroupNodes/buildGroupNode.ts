@@ -13,6 +13,7 @@ export const buildGroupNode = (
   parentId: string | null,
   orderedMemberIds: string[],
   nodes: Record<string, TSceneNode>,
+  name: string = DEFAULT_GROUP_NAME,
 ): TGroupNode => {
   const bounds = getNodesBoundingBox(orderedMemberIds.map((id) => nodes[id]));
 
@@ -20,7 +21,7 @@ export const buildGroupNode = (
     childIds: orderedMemberIds,
     height: bounds.height,
     id: groupId,
-    name: DEFAULT_GROUP_NAME,
+    name,
     parentId,
     rotation: 0,
     type: NodeType.group,

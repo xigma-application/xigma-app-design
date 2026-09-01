@@ -1,0 +1,36 @@
+export const createGlMock = (width = 800, height = 600): WebGL2RenderingContext => {
+  let created = 0;
+
+  return {
+    CLAMP_TO_EDGE: 33071,
+    COLOR_ATTACHMENT0: 36064,
+    DEPTH24_STENCIL8: 35056,
+    DEPTH_STENCIL_ATTACHMENT: 33306,
+    FRAMEBUFFER: 36160,
+    LINEAR: 9729,
+    RENDERBUFFER: 36161,
+    RGBA: 6408,
+    TEXTURE_2D: 3553,
+    TEXTURE_MAG_FILTER: 10240,
+    TEXTURE_MIN_FILTER: 10241,
+    TEXTURE_WRAP_S: 10242,
+    TEXTURE_WRAP_T: 10243,
+    UNSIGNED_BYTE: 5121,
+    bindFramebuffer: vi.fn(),
+    bindRenderbuffer: vi.fn(),
+    bindTexture: vi.fn(),
+    createFramebuffer: vi.fn(() => ({ id: `framebuffer-${(created += 1)}` })),
+    createRenderbuffer: vi.fn(() => ({ id: `renderbuffer-${created}` })),
+    createTexture: vi.fn(() => ({ id: `texture-${created}` })),
+    deleteFramebuffer: vi.fn(),
+    deleteRenderbuffer: vi.fn(),
+    deleteTexture: vi.fn(),
+    drawingBufferHeight: height,
+    drawingBufferWidth: width,
+    framebufferRenderbuffer: vi.fn(),
+    framebufferTexture2D: vi.fn(),
+    renderbufferStorage: vi.fn(),
+    texImage2D: vi.fn(),
+    texParameteri: vi.fn(),
+  } as unknown as WebGL2RenderingContext;
+};

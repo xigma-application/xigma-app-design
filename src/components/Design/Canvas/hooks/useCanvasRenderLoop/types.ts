@@ -3,6 +3,7 @@ import { TEllipseArcLengthSample, TPoint } from 'types/canvas';
 import { TVertexDotBufferCacheEntry } from './utils/drawScene/drawVectorEditHandlesLayer/drawVectorVertexDots/types';
 
 // utils
+import { TRenderTargetPool } from 'utils/canvas/renderTarget/createRenderTargetPool/types';
 import { TTextGeometry } from 'utils/canvas/text/getOrBuildTextGeometry';
 
 export type TImageRenderContext = {
@@ -12,9 +13,12 @@ export type TImageRenderContext = {
   faceBufferCache: WeakMap<TPoint[], WebGLBuffer>;
   gridBuffer: WebGLBuffer;
   gridProgram: WebGLProgram;
+  maskCompositeBuffer: WebGLBuffer;
+  maskCompositeProgram: WebGLProgram;
   msdfBuffer: WebGLBuffer;
   msdfProgram: WebGLProgram;
   program: WebGLProgram;
+  renderTargetPool: TRenderTargetPool;
   strokeBufferCache: WeakMap<number[], WebGLBuffer>;
   textGeometryCache: Map<string, TTextGeometry>;
   vertexDotBufferCache: WeakMap<TPoint[], TVertexDotBufferCacheEntry[]>;

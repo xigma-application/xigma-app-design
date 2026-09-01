@@ -167,7 +167,8 @@ any of the machinery below — see `design-store-architecture.md`'s "Comment sta
 
 ## 3. Shader programs
 
-Four GLSL `#version 300 es` programs, all built via `createProgram.ts`/`createShader.ts`:
+Five GLSL `#version 300 es` programs, all built via `createProgram.ts`/`createShader.ts` (the 5th,
+`maskComposite`, was added for masks — see §11):
 
 | Program | Vertex source | Fragment source | Extra attrib | Used by |
 |---|---|---|---|---|
@@ -175,6 +176,7 @@ Four GLSL `#version 300 es` programs, all built via `createProgram.ts`/`createSh
 | image/texture | `imageVertexShaderSource.ts` | `imageFragmentShaderSource.ts` | `a_texCoord` | `drawImage.ts` (Media nodes + draft media) |
 | MSDF text | **same vertex source as image** (reused, not a 4th file) | `msdfFragmentShaderSource.ts` | `a_texCoord` | `drawMsdfText.ts` |
 | pixel grid | `gridVertexShaderSource.ts` (not world-space like the other three — see §10) | `gridFragmentShaderSource.ts` | — | `drawPixelGrid.ts` |
+| mask composite | `maskCompositeVertexShaderSource.ts` (passthrough clip-space quad + texcoords) | `maskCompositeFragmentShaderSource.ts` (`content.rgb, content.a * mask.a`) | — | `compositeMask.ts` (masks, §11) |
 
 Plain-color vertex shader (every program's transform math is identical, only the fragment stage
 differs per program):
@@ -547,6 +549,25 @@ opposite direction) — every pointer interaction resolves via math against node
 (`getNodeAtPoint.ts` and friends), so the grid can never intercept or shadow a click regardless of
 where it sits in the paint order.
 
+## 11. Mask compositing — the one offscreen-framebuffer pass
+
+Masks (`masks.md`) are the only thing in this renderer that renders to an offscreen framebuffer
+instead of straight to the default one. `drawSceneNodes.ts` is now two paths: with **no** `isMask`
+node in the scene it is the exact old flat `sceneNodes.forEach` over `drawLeafNode` (the old
+per-`NodeType` switch, extracted verbatim), touching no framebuffer/viewport/blend/colour-mask
+state. With one present it walks the tree from `rootOrder` (`drawSceneNodes/` folder,
+`TMaskRenderer`-threaded helpers), and for each group whose first `isMask` child opens a scope it:
+renders the mask's later siblings into `contentTarget`, the mask node into `maskTarget` (both from
+`createRenderTargetPool`, drawing-buffer-sized, packed depth/stencil so a vector mask's own
+`drawVectorFill` stencil pass still works), then `compositeMask` draws a full-screen quad
+`content.rgb, content.a * mask.a` back onto the framebuffer that group was being drawn into — the
+screen, or an outer scope's `contentTarget` when nested. The pass runs under
+`blendFuncSeparate(SRC_ALPHA, ONE_MINUS_SRC_ALPHA, ONE, ONE_MINUS_SRC_ALPHA)` and toggles
+`colorMask`'s alpha bit on for offscreen targets / off for the screen (the state
+`drawSceneBackground` leaves), restoring the plain `blendFunc` and rebinding the default
+framebuffer at the end. Only pixel fills go through this — selection/hover/handle layers still draw
+in screen space afterwards, unchanged.
+
 ## File index
 
 - Context/setup: `Canvas/Canvas.tsx`, `Canvas/constants.ts`,
@@ -603,3 +624,5 @@ for variable-width strokes, the frozen-snapshot/overlay draw paths, and every no
 two narrow slices now exist for stable committed vector nodes: fill faces and fixed-width strokes (that
 doc's §5.7 closing note, `utils/canvas/drawVectorNode/{getOrCreateFaceBuffer,getOrCreateStrokeBuffer}.ts`),
 the only exceptions to "no persistent VBO reuse anywhere" in this codebase so far.
+[[masks]] — the only feature that renders to an offscreen framebuffer (§11): a 5th `maskComposite`
+program and `createRenderTargetPool`, used only when the scene actually contains a mask node.

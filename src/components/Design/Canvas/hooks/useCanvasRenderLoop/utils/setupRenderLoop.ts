@@ -3,6 +3,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TImageRenderContext } from '../types';
 
 // utils
+import { createRenderTargetPool } from 'utils/canvas/renderTarget/createRenderTargetPool/createRenderTargetPool';
 import { startRenderLoop } from './startRenderLoop';
 
 export const setupRenderLoop = (
@@ -15,6 +16,8 @@ export const setupRenderLoop = (
   msdfBuffer: WebGLBuffer,
   gridProgram: WebGLProgram,
   gridBuffer: WebGLBuffer,
+  maskCompositeProgram: WebGLProgram,
+  maskCompositeBuffer: WebGLBuffer,
   canvas: HTMLCanvasElement,
   refs: TCanvasRefs,
 ): (() => void) => {
@@ -28,13 +31,21 @@ export const setupRenderLoop = (
     faceBufferCache: new WeakMap(),
     gridBuffer,
     gridProgram,
+    maskCompositeBuffer,
+    maskCompositeProgram,
     msdfBuffer,
     msdfProgram,
     program: imageProgram,
+    renderTargetPool: createRenderTargetPool(gl),
     strokeBufferCache: new WeakMap(),
     textGeometryCache: new Map(),
     vertexDotBufferCache: new WeakMap(),
   };
 
-  return startRenderLoop(gl, program, buffer, imageContext, canvas, refs);
+  const stopRenderLoop = startRenderLoop(gl, program, buffer, imageContext, canvas, refs);
+
+  return (): void => {
+    stopRenderLoop();
+    imageContext.renderTargetPool.dispose();
+  };
 };

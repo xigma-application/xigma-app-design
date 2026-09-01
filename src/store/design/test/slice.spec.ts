@@ -7,6 +7,7 @@ import slice, {
   addNode,
   addPage,
   cancelCommentDraft,
+  createMaskGroup,
   deleteComment,
   deleteNode,
   deletePage,
@@ -30,6 +31,7 @@ import slice, {
   stopTextEdit,
   toggleNodeHidden,
   toggleNodeLocked,
+  toggleNodeMask,
   toggleUiMinimized,
   ungroupNodes,
   updateCommentContent,
@@ -228,6 +230,39 @@ describe('design slice', () => {
     // result
     expect(ungrouped.pages[ungrouped.activePageId].rootOrder).toEqual(ids);
     expect(ungrouped.pages[ungrouped.activePageId].nodes[groupId]).toBeUndefined();
+  });
+
+  it('should wrap the selection in a mask group and toggle the mask flag off again', () => {
+    // before
+    const withA = slice(undefined, addNode(frameNodePayload));
+    const withB = slice(withA, addNode({ ...frameNodePayload, name: 'Frame 2' }));
+    const ids = withB.pages[withB.activePageId].rootOrder;
+    const selected = slice(withB, setSelection(ids));
+
+    // action
+    const masked = slice(selected, createMaskGroup());
+    const page = masked.pages[masked.activePageId];
+    const [groupId] = page.selectedIds;
+
+    // result
+    expect(page.nodes[groupId].type).toBe(NodeType.group);
+    expect(page.nodes[groupId].name).toBe('Mask group');
+    const maskChildId = (page.nodes[groupId] as { childIds: string[] }).childIds[0];
+    expect(page.nodes[maskChildId].isMask).toBe(true);
+
+    // action
+    const unmasked = slice(masked, toggleNodeMask(maskChildId));
+
+    // result
+    expect(unmasked.pages[unmasked.activePageId].nodes[maskChildId].isMask).toBe(false);
+  });
+
+  it('should do nothing when toggling the mask state of a node that does not exist', () => {
+    // before
+    const state = slice(undefined, toggleNodeMask('missing'));
+
+    // result
+    expect(state.pages[state.activePageId].nodes).toEqual({});
   });
 
   it('should toggle a node hidden state', () => {

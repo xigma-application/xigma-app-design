@@ -70,7 +70,9 @@ describe('getNodeFaces', () => {
     const nodeA = buildNode({ filledFaceKeys: ['a'], id: 'a-node' });
     const nodeB = buildNode({ filledFaceKeys: ['b'], id: 'b-node' });
 
-    getVectorFillLoopPointsMock.mockImplementation((_n: TVectorNode, key: string) => (key === 'a' ? square(0, 0, 10) : square(100, 100, 10)));
+    getVectorFillLoopPointsMock.mockImplementation((_n: TVectorNode, key: string) =>
+      key === 'a' ? square(0, 0, 10) : square(100, 100, 10),
+    );
 
     expect(getNodeFaces([nodeA, nodeB]).map((face) => face.key)).toEqual(['a', 'b']);
   });

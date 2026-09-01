@@ -77,6 +77,13 @@
     opacity: 0.5;
   }
 
+  &__mask-badge {
+    color: var(--color-neutral-1);
+    flex-shrink: 0;
+    font-size: 11px;
+    opacity: 0.6;
+  }
+
   [data-tree-item-action] {
     opacity: 0;
   }

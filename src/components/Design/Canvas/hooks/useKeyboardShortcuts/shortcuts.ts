@@ -1,5 +1,5 @@
 // others
-import { CONTROL_PRIMARY_KEY } from 'constant/mainKeys';
+import { CONTROL_PRIMARY_KEY, MASK_MODIFIER_KEY } from 'constant/mainKeys';
 
 // types
 import { KeyboardKeys } from 'types/enums';
@@ -50,4 +50,5 @@ export const shortcuts = {
   toggleUiMinimized: { primaryKeys: [CONTROL_PRIMARY_KEY, 'shift'], secondaryKey: KeyboardKeys.backslash },
   undo: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.z },
   ungroup: { primaryKeys: [CONTROL_PRIMARY_KEY, 'shift'], secondaryKey: KeyboardKeys.g },
+  useAsMask: { primaryKeys: [CONTROL_PRIMARY_KEY, MASK_MODIFIER_KEY], secondaryKey: KeyboardKeys.m },
 } satisfies Partial<Record<ToolName, TShortcut>> & TStandardKeyboardShortcuts;

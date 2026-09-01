@@ -12,7 +12,10 @@ describe('getEdgeLength', () => {
 
   it('ignores tangents — it measures the endpoints, not the curve', () => {
     const edge = {
-      end: { x: 1, y: 0 }, start: { x: 0, y: 0 }, tangentEnd: { x: -5, y: -5 }, tangentStart: { x: 5, y: 5 },
+      end: { x: 1, y: 0 },
+      start: { x: 0, y: 0 },
+      tangentEnd: { x: -5, y: -5 },
+      tangentStart: { x: 5, y: 5 },
     };
 
     expect(getEdgeLength(edge)).toBe(1);

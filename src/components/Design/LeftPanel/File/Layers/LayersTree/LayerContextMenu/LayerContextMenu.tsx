@@ -6,6 +6,7 @@ import { TTreeItemMenuRenderParams } from 'shared';
 
 // hooks
 import { useNodeMenuActions } from 'components/Design/Menu/hooks/useNodeMenuActions';
+import { useRemoveNodeMask } from 'components/Design/Menu/hooks/useRemoveNodeMask';
 
 // types
 import { TSceneNode } from 'types/design/types';
@@ -23,8 +24,19 @@ const LayerContextMenu: FC<TLayerContextMenuProps> = ({
   onToggleHidden,
   onToggleLocked,
 }) => {
-  const { onBringToFront, onCopy, onFlatten, onGroupSelection, onMoveToPage, onOutlineStroke, onPasteToReplace, onSendToBack, otherPages } =
-    useNodeMenuActions();
+  const {
+    onBringToFront,
+    onCopy,
+    onFlatten,
+    onGroupSelection,
+    onMoveToPage,
+    onOutlineStroke,
+    onPasteToReplace,
+    onSendToBack,
+    onUseAsMask,
+    otherPages,
+  } = useNodeMenuActions();
+  const onRemoveMask = useRemoveNodeMask(node.id);
 
   return (
     <NodeContextMenu
@@ -39,10 +51,12 @@ const LayerContextMenu: FC<TLayerContextMenuProps> = ({
       onOpenChange={onOpenChange}
       onOutlineStroke={onOutlineStroke}
       onPasteToReplace={onPasteToReplace}
+      onRemoveMask={onRemoveMask}
       onRename={onRenameRequested}
       onSendToBack={onSendToBack}
       onToggleHidden={onToggleHidden}
       onToggleLocked={onToggleLocked}
+      onUseAsMask={onUseAsMask}
       otherPages={otherPages}
     />
   );

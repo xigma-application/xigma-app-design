@@ -109,6 +109,7 @@ bodies delegate to `utils/handle<ReducerName>.ts`):
 | `addComment` | delegated → `handleAddComment.ts` | id via `nanoid()` in `prepare` (same pattern as `addNode`) — see below |
 | `addNode` | delegated → `handleAddNode.ts` | id via `nanoid()` in `prepare`, not the reducer body — see below |
 | `cancelCommentDraft` | inline (`state.commentDraftPosition = null`) | |
+| `createMaskGroup` | delegated → `handleUseNodesAsMask/handleUseNodesAsMask.ts` | id via `nanoid()` in `prepare`; runs `handleGroupNodes` then renames the group `'Mask group'` and sets `isMask` on `childIds[0]` — see `masks.md` |
 | `deleteComment` | inline (`delete state.comments[action.payload]`) | wired to a store action, but no UI dispatches it today — comment deletion is intentionally disabled in `CommentPin` for now |
 | `deleteNode` | delegated → `handleDeleteNode.ts` | path+text cascade, plus group cascade both directions — see `group-nodes.md` §2 |
 | `groupNodes` | delegated → `handleGroupNodes/handleGroupNodes.ts` | id via `nanoid()` in `prepare`, same pattern as `addNode` — see `group-nodes.md` §2 |
@@ -120,6 +121,7 @@ bodies delegate to `utils/handle<ReducerName>.ts`):
 | `stopTextEdit` | delegated → `handleStopTextEdit.ts` | resets all 6 editing fields |
 | `toggleNodeHidden` | delegated → `handleToggleNodeHidden.ts` | flips `hidden` by id (no-op on unknown id) — see above |
 | `toggleNodeLocked` | delegated → `handleToggleNodeLocked.ts` | flips `locked` by id (no-op on unknown id) — see above |
+| `toggleNodeMask` | delegated → `handleToggleNodeMask/handleToggleNodeMask.ts` | flips `isMask` by id (no-op on unknown id); the menu's "Remove mask" — see `masks.md` |
 | `ungroupNodes` | delegated → `handleUngroupNodes/handleUngroupNodes.ts` | payload is group ids — see `group-nodes.md` §2 |
 | `updateCommentContent` | delegated → `handleUpdateCommentContent.ts` | patch by id (no-op on unknown id) — wired to a store action, but no UI dispatches it today, same as `deleteComment` |
 | `updateEditingTextBoxPathStartOffset` | delegated → `handleUpdateEditingTextBoxPathStartOffset.ts` | guarded single-field mutation on nested `editingTextBox` |
@@ -425,6 +427,8 @@ frame becomes its own undo step" (§5's own dispatch-per-pointermove nuance) is 
 plain single-dispatch reducers with no gesture of their own (the Layers panel's lock/eye buttons are
 a single click, not a drag), so each toggle is automatically its own undo step with no
 `beginHistoryGesture`/`endHistoryGesture` bracketing needed, unlike `setSelection` below.
+`createMaskGroup` and `toggleNodeMask` (masks, `masks.md`) joined the same way — each is one
+dispatch from a menu click / shortcut, so each is its own undo step with no bracketing.
 
 **`setSelection` joined `UNDOABLE_ACTION_TYPES`** (asked for directly — plain click-to-select/deselect,
 with no other edit, must be its own undo step, Illustrator/Photoshop-style, not just restored as a

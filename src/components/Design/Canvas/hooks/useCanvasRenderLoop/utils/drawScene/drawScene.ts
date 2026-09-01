@@ -36,7 +36,7 @@ import { drawPencilPreview } from './drawPencilPreview/drawPencilPreview';
 import { drawPenPreview } from './drawPenPreview/drawPenPreview';
 import { drawPixelGrid } from 'utils/canvas/drawPixelGrid';
 import { drawSceneBackground } from 'utils/canvas/drawSceneBackground';
-import { drawSceneNodes } from './drawSceneNodes';
+import { drawSceneNodes } from './drawSceneNodes/drawSceneNodes';
 import { drawSectionNameLabels } from './drawSectionNameLabels/drawSectionNameLabels';
 import { drawSelectionOutline } from './drawSelectionOutline';
 import { drawSelectionSizeLabel } from './drawSelectionSizeLabel';
@@ -119,7 +119,7 @@ export const drawScene = (
 
   drawSceneBackground(gl);
   drawPixelGrid(gl, imageContext.gridProgram, imageContext.gridBuffer, clientWidth, clientHeight, viewport);
-  drawSceneNodes(ctx, sceneNodes, pathOutlineStyles, refs, nodesById, pathId);
+  drawSceneNodes(ctx, sceneNodes, rootOrder, pathOutlineStyles, refs, nodesById, pathId);
   drawHoverOutline(ctx, hoveredNode, vectorEditingNodeIds, nodesById);
   drawSelectionOutline(ctx, selectedNodes, vectorEditingNodeIds, nodesById, pathId);
   drawSelectionSizeLabel(ctx, selectedNodes, vectorEditingNodeIds, pathId);

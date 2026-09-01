@@ -159,6 +159,35 @@ ROADMAP.2.0.0.md Stage 2.
       a rotate or resize, which was distorting flattened glyph curves — same bug class already fixed
       for plain node drag
 
+## Stage 13 — Masks (Figma-style)
+
+Any layer can clip its later siblings within a group to its own painted alpha. "Use as mask" (⌃⌘M)
+always wraps the selection in a "Mask group" and flags the lowest child as the mask. Every node type
+works as a mask source — shape / frame / group / image / live text / vector (fill _and_ stroke) —
+because the clip is a real offscreen alpha composite (a 5th `maskComposite` GL program + a
+resize-aware framebuffer pool), not a 1-bit stencil. `drawSceneNodes` stays byte-identical for any
+scene with no mask node; only a scene that has one walks the tree and runs the offscreen pass.
+Nesting groups scopes the effect; moving a mask above its siblings makes it a no-op. Full write-up:
+`.claude/docs/masks.md`.
+
+- [x] `isMask?` retrofit on the node types; `createMaskGroup` / `toggleNodeMask` reducers reusing
+      the existing group machinery (`handleGroupNodes` + `buildGroupNode` `name` param); both in
+      `UNDOABLE_ACTION_TYPES`; "Use as mask" / "Remove mask" menu items + ⌃⌘M shortcut
+- [x] offscreen render subsystem: `maskComposite{Vertex,Fragment}ShaderSource`,
+      `createRenderTargetPool` (framebuffer + packed depth/stencil, drawing-buffer-sized),
+      `drawSceneNodes` split into the flat no-mask pass and a `TMaskRenderer`-threaded tree pass
+      (`drawSceneNodes/` folder), nested mask groups via a target stack, `blendFuncSeparate` +
+      `colorMask` handling so straight alpha accumulates correctly into the offscreen textures
+- [x] Layers tree "Mask" badge on the flagged row
+- [ ] dedicated `Mask` / `MaskGroup` (`mask-group.svg`) icons — blocked on adding the SVGs to
+      `xigma-app-shared`; the `getNodeTypeIconName` branch and the mask→masked-rows connector arrow
+      land with them
+- [ ] `e2e/design/selection/mask.spec.ts` — screenshot-diff proof that content is actually clipped
+      (rect / image-alpha / live-text / vector-stroke masks + nested groups), ⌃⌘M, remove-mask
+      restores, undo/redo. The GL call sequence is unit-tested; pixel correctness is not yet.
+- [ ] follow-ups: clip the masked-sibling _hit region_ to mask coverage; dashed outline on a
+      selected mask node; multiple masks per group; luminance / vector / image `maskType` modes
+
 ## Related
 
 [[canvas-rendering-pipeline]] — context for the render loop and the `WEBGL_CONTEXT_ATTRIBUTES`
@@ -166,3 +195,6 @@ contract that `resolveColorSampleRequest` is attached to.
 
 [[text-flatten-and-outline]] — full pipeline behind Stage 12: font extraction, per-glyph vector
 assembly, and the two destructive commands built on top of them.
+
+[[masks]] — Stage 13: the `isMask` data model, the group-scoped mask rule, and the offscreen
+alpha-compositing render pass.

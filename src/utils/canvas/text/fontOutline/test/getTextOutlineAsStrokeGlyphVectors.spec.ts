@@ -110,6 +110,17 @@ describe('getTextOutlineAsStrokeGlyphVectors', () => {
     expect(result[0].filledFaceKeys).toHaveLength(1);
   });
 
+  it('should treat a missing strokeWidth as zero (no stroke band)', async () => {
+    // mock
+    getTextGlyphContours.mockResolvedValueOnce([[GLYPH_A]]);
+
+    // action — strokeColor set but strokeWidth left undefined
+    const result = await getTextOutlineAsStrokeGlyphVectors(ATLAS, buildNode({ strokeColor: '#000000', strokeWidth: undefined }));
+
+    // result — still just the fill face, the undefined width falls back to 0
+    expect(result[0].filledFaceKeys).toHaveLength(1);
+  });
+
   it('should return an empty list for a path-bound text whose path node can’t be resolved', async () => {
     // action — no pathNode argument passed at all
     const result = await getTextOutlineAsStrokeGlyphVectors(ATLAS, buildNode({ pathId: 'path-1' }));
@@ -144,6 +155,17 @@ describe('getTextOutlineAsStrokeGlyphVectors', () => {
 
     // result
     expect(result).toEqual([]);
+  });
+
+  it('should drop a glyph that produces no fill and no stroke geometry (e.g. a space between letters)', async () => {
+    // mock — middle "glyph" (a space) has no contours, so it yields neither a fill nor a stroke vector
+    getTextGlyphContours.mockResolvedValueOnce([[GLYPH_A], [], [GLYPH_B]]);
+
+    // action
+    const result = await getTextOutlineAsStrokeGlyphVectors(ATLAS, buildNode({ content: 'H a' }));
+
+    // result — only the two real letters survive
+    expect(result).toHaveLength(2);
   });
 
   it('should rotate every letter rigidly around one shared pivot instead of each around its own center', async () => {

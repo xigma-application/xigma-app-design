@@ -42,10 +42,16 @@ describe('getMiterPoint', () => {
     // outside the glyph's own bounding box entirely (caught live: "(" rendering with a spike sticking
     // out past its own selection frame; verified this exact data reproduces (26.75, -20.74))
     const prevEdge = {
-      end: { x: 9.2969, y: 7.8711 }, start: { x: 6.6992, y: 13.5059 }, tangentEnd: { x: -0.9766, y: 1.6016 }, tangentStart: null,
+      end: { x: 9.2969, y: 7.8711 },
+      start: { x: 6.6992, y: 13.5059 },
+      tangentEnd: { x: -0.9766, y: 1.6016 },
+      tangentStart: null,
     };
     const nextEdge = {
-      end: { x: 10.1074, y: 14.2578 }, start: { x: 12.7148, y: 7.8711 }, tangentEnd: null, tangentStart: { x: -1.0026, y: 2.0443 },
+      end: { x: 10.1074, y: 14.2578 },
+      start: { x: 12.7148, y: 7.8711 },
+      tangentEnd: null,
+      tangentStart: { x: -1.0026, y: 2.0443 },
     };
 
     expect(getMiterPoint(prevEdge, nextEdge)).toBeNull();

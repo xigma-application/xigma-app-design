@@ -1,8 +1,9 @@
 // types
 import { NodeType, PathType } from 'types/design/enums';
-import { TImageRenderContext } from '../../../types';
+import { TImageRenderContext } from '../../../../types';
 import {
   TBoxSceneNode,
+  TGroupNode,
   TMediaNode,
   TPathNode,
   TPolygonNode,
@@ -14,27 +15,42 @@ import {
 } from 'types/design/types';
 
 // utils
-import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
+import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { drawSceneNodes } from '../drawSceneNodes';
 
 const createGlMock = (): WebGL2RenderingContext =>
   ({
+    COLOR_BUFFER_BIT: 16384,
+    FRAMEBUFFER: 36160,
     LINES: 1,
     LINE_LOOP: 2,
+    ONE: 1,
+    ONE_MINUS_SRC_ALPHA: 771,
     RGBA: 6408,
+    SRC_ALPHA: 770,
     STATIC_DRAW: 35044,
+    STENCIL_BUFFER_BIT: 1024,
     TEXTURE0: 33984,
+    TEXTURE1: 33985,
     TEXTURE_2D: 3553,
     TRIANGLES: 4,
     TRIANGLE_FAN: 6,
     UNSIGNED_BYTE: 5121,
     activeTexture: vi.fn(),
     bindBuffer: vi.fn(),
+    bindFramebuffer: vi.fn(),
     bindTexture: vi.fn(),
+    blendFunc: vi.fn(),
+    blendFuncSeparate: vi.fn(),
     bufferData: vi.fn(),
+    clear: vi.fn(),
+    clearColor: vi.fn(),
+    colorMask: vi.fn(),
     createBuffer: vi.fn(() => ({})),
     createTexture: vi.fn(() => ({})),
     drawArrays: vi.fn(),
+    drawingBufferHeight: 200,
+    drawingBufferWidth: 200,
     enableVertexAttribArray: vi.fn(),
     generateMipmap: vi.fn(),
     getAttribLocation: vi.fn(() => 0),
@@ -47,6 +63,7 @@ const createGlMock = (): WebGL2RenderingContext =>
     uniform4fv: vi.fn(),
     useProgram: vi.fn(),
     vertexAttribPointer: vi.fn(),
+    viewport: vi.fn(),
   }) as unknown as WebGL2RenderingContext;
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -57,13 +74,42 @@ const IMAGE_CONTEXT: TImageRenderContext = {
   faceBufferCache: new WeakMap(),
   gridBuffer: {} as WebGLBuffer,
   gridProgram: {} as WebGLProgram,
+  maskCompositeBuffer: {} as WebGLBuffer,
+  maskCompositeProgram: {} as WebGLProgram,
   msdfBuffer: {} as WebGLBuffer,
   msdfProgram: {} as WebGLProgram,
   program: {} as WebGLProgram,
+  renderTargetPool: {} as TImageRenderContext['renderTargetPool'],
   strokeBufferCache: new WeakMap(),
   textGeometryCache: new Map(),
   vertexDotBufferCache: new WeakMap(),
 };
+
+type TTargetStub = { framebuffer: object; height: number; stencil: object; texture: object; width: number };
+
+type TPoolStub = {
+  acquire: ReturnType<typeof vi.fn>;
+  dispose: ReturnType<typeof vi.fn>;
+  release: ReturnType<typeof vi.fn>;
+  targets: TTargetStub[];
+};
+
+const createPoolStub = (): TPoolStub => {
+  const targets: TTargetStub[] = [];
+  const acquire = vi.fn(() => {
+    const target = { framebuffer: {}, height: 200, stencil: {}, texture: {}, width: 200 };
+    targets.push(target);
+
+    return target;
+  });
+
+  return { acquire, dispose: vi.fn(), release: vi.fn(), targets };
+};
+
+const withPool = (pool: ReturnType<typeof createPoolStub>): TImageRenderContext => ({
+  ...IMAGE_CONTEXT,
+  renderTargetPool: pool as unknown as TImageRenderContext['renderTargetPool'],
+});
 
 const buildNode = (
   overrides: Partial<Exclude<TBoxSceneNode, TPathNode | TPolygonNode | TSectionNode | TStarNode | TMediaNode | TTextNode>>,
@@ -93,6 +139,7 @@ describe('drawSceneNodes', () => {
     drawSceneNodes(
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [],
+      [],
       new Map(),
       createCanvasRefs(),
       {},
@@ -113,6 +160,7 @@ describe('drawSceneNodes', () => {
     drawSceneNodes(
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       nodes,
+      [],
       new Map(),
       createCanvasRefs(),
       {},
@@ -134,6 +182,7 @@ describe('drawSceneNodes', () => {
     drawSceneNodes(
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       nodes,
+      [],
       new Map(),
       createCanvasRefs(),
       {},
@@ -165,6 +214,7 @@ describe('drawSceneNodes', () => {
     drawSceneNodes(
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [group],
+      [],
       new Map(),
       createCanvasRefs(),
       {},
@@ -185,6 +235,7 @@ describe('drawSceneNodes', () => {
     drawSceneNodes(
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       nodes,
+      [],
       new Map(),
       createCanvasRefs(),
       {},
@@ -205,6 +256,7 @@ describe('drawSceneNodes', () => {
     drawSceneNodes(
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       nodes,
+      [],
       new Map(),
       createCanvasRefs(),
       {},
@@ -239,6 +291,7 @@ describe('drawSceneNodes', () => {
     drawSceneNodes(
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [polygon],
+      [],
       new Map(),
       createCanvasRefs(),
       {},
@@ -274,6 +327,7 @@ describe('drawSceneNodes', () => {
     drawSceneNodes(
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [star],
+      [],
       new Map(),
       createCanvasRefs(),
       {},
@@ -307,6 +361,7 @@ describe('drawSceneNodes', () => {
     drawSceneNodes(
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [media],
+      [],
       new Map(),
       createCanvasRefs(),
       {},
@@ -343,6 +398,7 @@ describe('drawSceneNodes', () => {
     drawSceneNodes(
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [text],
+      [],
       new Map(),
       createCanvasRefs(),
       {},
@@ -374,6 +430,7 @@ describe('drawSceneNodes', () => {
     drawSceneNodes(
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [path],
+      [],
       new Map(),
       createCanvasRefs(),
       {},
@@ -405,6 +462,7 @@ describe('drawSceneNodes', () => {
     drawSceneNodes(
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [path],
+      [],
       new Map([['a', 'selected']]),
       createCanvasRefs(),
       {},
@@ -437,6 +495,7 @@ describe('drawSceneNodes', () => {
     drawSceneNodes(
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [path],
+      [],
       new Map([['a', 'hover']]),
       createCanvasRefs(),
       {},
@@ -467,6 +526,7 @@ describe('drawSceneNodes', () => {
     drawSceneNodes(
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [line],
+      [],
       new Map(),
       createCanvasRefs(),
       {},
@@ -499,6 +559,7 @@ describe('drawSceneNodes', () => {
     drawSceneNodes(
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [line],
+      [],
       new Map(),
       createCanvasRefs(),
       {},
@@ -532,6 +593,7 @@ describe('drawSceneNodes', () => {
     drawSceneNodes(
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
       [vector],
+      [],
       new Map(),
       createCanvasRefs(),
       {},
@@ -544,4 +606,236 @@ describe('drawSceneNodes', () => {
 
   // the vector-as-text-path-guide decision (dashed outline vs. own stroke vs. nothing) lives in
   // drawVectorNodeOrTextPathGuide.ts — see its own spec for that branching in detail.
+
+  describe('mask groups', () => {
+    const buildMaskScene = (): { nodes: TSceneNode[]; nodesById: Record<string, TSceneNode>; rootOrder: string[] } => {
+      const mask = buildNode({ id: 'mask', isMask: true, parentId: 'group' });
+      const content = buildNode({ id: 'content', parentId: 'group' });
+      const group: TGroupNode = {
+        childIds: ['mask', 'content'],
+        height: 10,
+        id: 'group',
+        name: 'Mask group',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.group,
+        width: 10,
+        x: 0,
+        y: 0,
+      };
+
+      return { nodes: [group, mask, content], nodesById: { content, group, mask }, rootOrder: ['group'] };
+    };
+
+    it('should render masked content and the mask into two offscreen targets and composite them back', () => {
+      // mock
+      const gl = createGlMock();
+      const pool = createPoolStub();
+      const { nodes, nodesById, rootOrder } = buildMaskScene();
+
+      // action
+      drawSceneNodes(
+        {
+          buffer: {} as WebGLBuffer,
+          canvasHeight: 100,
+          canvasWidth: 100,
+          gl,
+          imageContext: withPool(pool),
+          program: {} as WebGLProgram,
+          viewport: IDENTITY_VIEWPORT,
+        },
+        nodes,
+        rootOrder,
+        new Map(),
+        createCanvasRefs(),
+        nodesById,
+      );
+
+      // result
+      expect(pool.acquire).toHaveBeenCalledTimes(2);
+      expect(pool.release).toHaveBeenCalledTimes(2);
+      expect(gl.blendFuncSeparate).toHaveBeenCalledWith(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      // two offscreen binds (content + mask), then a final rebind to the default framebuffer
+      expect(gl.bindFramebuffer).toHaveBeenCalledWith(gl.FRAMEBUFFER, pool.targets[0].framebuffer);
+      expect(gl.bindFramebuffer).toHaveBeenCalledWith(gl.FRAMEBUFFER, pool.targets[1].framebuffer);
+      expect(gl.bindFramebuffer).toHaveBeenLastCalledWith(gl.FRAMEBUFFER, null);
+      // the composite pass draws its full-screen quad
+      expect(gl.useProgram).toHaveBeenCalledWith(IMAGE_CONTEXT.maskCompositeProgram);
+      expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
+    });
+
+    it('should mask nothing when the mask sits above its siblings (last child)', () => {
+      // mock
+      const gl = createGlMock();
+      const pool = createPoolStub();
+      const content = buildNode({ id: 'content', parentId: 'group' });
+      const mask = buildNode({ id: 'mask', isMask: true, parentId: 'group' });
+      const group: TGroupNode = {
+        childIds: ['content', 'mask'],
+        height: 10,
+        id: 'group',
+        name: 'Mask group',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.group,
+        width: 10,
+        x: 0,
+        y: 0,
+      };
+
+      // action
+      drawSceneNodes(
+        {
+          buffer: {} as WebGLBuffer,
+          canvasHeight: 100,
+          canvasWidth: 100,
+          gl,
+          imageContext: withPool(pool),
+          program: {} as WebGLProgram,
+          viewport: IDENTITY_VIEWPORT,
+        },
+        [group, content, mask],
+        ['group'],
+        new Map(),
+        createCanvasRefs(),
+        { content, group, mask },
+      );
+
+      // result
+      expect(pool.acquire).not.toHaveBeenCalled();
+      expect(gl.drawArrays).toHaveBeenCalledTimes(1); // just the plain content rect
+    });
+
+    it('should never touch framebuffer or pool state for a scene with no mask node', () => {
+      // mock
+      const gl = createGlMock();
+      const pool = createPoolStub();
+      const a = buildNode({ id: 'a' });
+      const b = buildNode({ id: 'b' });
+
+      // action
+      drawSceneNodes(
+        {
+          buffer: {} as WebGLBuffer,
+          canvasHeight: 100,
+          canvasWidth: 100,
+          gl,
+          imageContext: withPool(pool),
+          program: {} as WebGLProgram,
+          viewport: IDENTITY_VIEWPORT,
+        },
+        [a, b],
+        ['a', 'b'],
+        new Map(),
+        createCanvasRefs(),
+        { a, b },
+      );
+
+      // result
+      expect(pool.acquire).not.toHaveBeenCalled();
+      expect(gl.bindFramebuffer).not.toHaveBeenCalled();
+      expect(gl.blendFuncSeparate).not.toHaveBeenCalled();
+    });
+
+    it('should silently skip a child id that is not in the visible scene (e.g. hidden)', () => {
+      // mock
+      const gl = createGlMock();
+      const pool = createPoolStub();
+      const mask = buildNode({ id: 'mask', isMask: true, parentId: 'group' });
+      const visible = buildNode({ id: 'visible', parentId: 'group' });
+      const group: TGroupNode = {
+        childIds: ['mask', 'hidden-child', 'visible'],
+        height: 10,
+        id: 'group',
+        name: 'Mask group',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.group,
+        width: 10,
+        x: 0,
+        y: 0,
+      };
+
+      // action — 'hidden-child' is in childIds but absent from the scene node list
+      drawSceneNodes(
+        {
+          buffer: {} as WebGLBuffer,
+          canvasHeight: 100,
+          canvasWidth: 100,
+          gl,
+          imageContext: withPool(pool),
+          program: {} as WebGLProgram,
+          viewport: IDENTITY_VIEWPORT,
+        },
+        [group, mask, visible],
+        ['group'],
+        new Map(),
+        createCanvasRefs(),
+        { group, mask, visible },
+      );
+
+      // result — still composites, only the one visible content child is drawn
+      expect(pool.acquire).toHaveBeenCalledTimes(2);
+      expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
+    });
+
+    it('should recurse into a plain (non-mask) nested group inside masked content', () => {
+      // mock
+      const gl = createGlMock();
+      const pool = createPoolStub();
+      const mask = buildNode({ id: 'mask', isMask: true, parentId: 'group' });
+      const leafA = buildNode({ id: 'leaf-a', parentId: 'inner' });
+      const leafB = buildNode({ id: 'leaf-b', parentId: 'inner' });
+      const inner: TGroupNode = {
+        childIds: ['leaf-a', 'leaf-b'],
+        height: 10,
+        id: 'inner',
+        name: 'Group',
+        parentId: 'group',
+        rotation: 0,
+        type: NodeType.group,
+        width: 10,
+        x: 0,
+        y: 0,
+      };
+      const group: TGroupNode = {
+        childIds: ['mask', 'inner'],
+        height: 10,
+        id: 'group',
+        name: 'Mask group',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.group,
+        width: 10,
+        x: 0,
+        y: 0,
+      };
+
+      // action
+      drawSceneNodes(
+        {
+          buffer: {} as WebGLBuffer,
+          canvasHeight: 100,
+          canvasWidth: 100,
+          gl,
+          imageContext: withPool(pool),
+          program: {} as WebGLProgram,
+          viewport: IDENTITY_VIEWPORT,
+        },
+        [group, mask, inner, leafA, leafB],
+        ['group'],
+        new Map(),
+        createCanvasRefs(),
+        { group, inner, 'leaf-a': leafA, 'leaf-b': leafB, mask },
+      );
+
+      // result — the nested plain group is recursed into (both leaves drawn) and the scope
+      // still composites: two targets + the mask + the two content leaves all produce draws
+      expect(pool.acquire).toHaveBeenCalledTimes(2);
+      expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
+      const rectDraws = (gl.drawArrays as unknown as { mock: { calls: unknown[][] } }).mock.calls.filter(([, , count]) => count === 6);
+      // leaf-a, leaf-b, mask (each a 6-vertex rect) + the composite quad
+      expect(rectDraws.length).toBeGreaterThanOrEqual(4);
+    });
+  });
 });

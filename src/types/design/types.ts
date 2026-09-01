@@ -45,6 +45,7 @@ export type TBaseNode = {
   height: number;
   hidden?: boolean;
   id: string;
+  isMask?: boolean;
   locked?: boolean;
   name: string;
   parentId: string | null;
@@ -171,6 +172,7 @@ export type TVectorNode = {
   hidden?: boolean;
   holeParentByKey?: Record<string, string>;
   id: string;
+  isMask?: boolean;
   locked?: boolean;
   name: string;
   parentId: string | null;
@@ -190,6 +192,7 @@ export type TLineNode = {
   endPoint?: TLineEndpointStyle;
   hidden?: boolean;
   id: string;
+  isMask?: boolean;
   locked?: boolean;
   name: string;
   parentId: string | null;

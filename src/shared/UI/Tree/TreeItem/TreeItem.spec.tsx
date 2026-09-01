@@ -212,4 +212,20 @@ describe('TreeItem', () => {
     expect(rootContent.style.marginLeft).toBe('0px');
     expect(nestedContent.style.marginLeft).toBe('32px');
   });
+
+  it('should show a "Mask" badge on a node flagged as a mask', () => {
+    // before
+    renderTreeItem(false, { ...node, isMask: true });
+
+    // result
+    expect(screen.getByText('Mask')).toBeInTheDocument();
+  });
+
+  it('should not show the "Mask" badge on an ordinary node', () => {
+    // before
+    renderTreeItem(false, node);
+
+    // result
+    expect(screen.queryByText('Mask')).not.toBeInTheDocument();
+  });
 });
