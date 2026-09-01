@@ -22,7 +22,7 @@ import { TDrawSceneContext } from './types';
 import { TImageRenderContext } from '../../types';
 
 // utils
-import { drawCornerRadiusHandlesLayer } from './drawCornerRadiusHandlesLayer';
+import { drawCornerRadiusHandlesLayer } from './drawCornerRadiusHandlesLayer/drawCornerRadiusHandlesLayer';
 import { drawDraftFrameNameLabel } from './drawFrameNameLabels/drawDraftFrameNameLabel';
 import { drawDistanceGuides } from './drawDistanceGuides/drawDistanceGuides';
 import { drawDraftSectionNameLabel } from './drawSectionNameLabels/drawDraftSectionNameLabel';

@@ -1,5 +1,5 @@
 // utils
-import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
+import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { hasCornerRadiusDragMoved } from '../hasCornerRadiusDragMoved';
 
 describe('hasCornerRadiusDragMoved', () => {

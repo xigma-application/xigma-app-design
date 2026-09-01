@@ -1,11 +1,20 @@
+// others
+import { DRAFT_FRAME_STROKE } from 'constant/canvas';
+
 // types
 import { NodeType } from 'types/design/enums';
 import { TCornerRadiusDragState } from 'types/design/canvas/types';
 import { TEllipseNode, TPolygonNode, TRectangleNode, TStarNode } from 'types/design/types';
 
 // utils
-import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
+import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { drawCornerRadiusHandlesLayer } from '../drawCornerRadiusHandlesLayer';
+
+const drawValueLabelMock = vi.fn();
+
+vi.mock('utils/canvas/text/drawValueLabel/drawValueLabel', () => ({
+  drawValueLabel: (...args: unknown[]): void => drawValueLabelMock(...args),
+}));
 
 const createGlMock = (): WebGL2RenderingContext =>
   ({
@@ -91,6 +100,10 @@ const ellipse: TEllipseNode = {
 };
 
 describe('drawCornerRadiusHandlesLayer', () => {
+  beforeEach(() => {
+    drawValueLabelMock.mockClear();
+  });
+
   it('should draw nothing when nothing is selected', () => {
     // mock
     const gl = createGlMock();
@@ -313,6 +326,69 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     expect(vertices[0]).toBeCloseTo(100);
     expect(vertices[1]).toBeCloseTo(0);
+    expect(drawValueLabelMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw a blue "Radius N" value label anchored clear of the corner being dragged', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCornerRadiusHandlesLayer(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      rectangle,
+      [rectangle],
+      createCanvasRefs({ cornerRadius: { cornerRadiusDragRef: { current: { corner: 'nw', hasMoved: true } as TCornerRadiusDragState } } }),
+    );
+
+    // result
+    expect(drawValueLabelMock).toHaveBeenCalledTimes(1);
+    const [, , , , text, anchor, , , , , options] = drawValueLabelMock.mock.calls[0];
+
+    // the nw handle itself sits at (15, 15) — the anchor sits a further margin above it, clear of
+    // both the handle and the pointer dragging it
+    expect(text).toBe('Radius 15');
+    expect(anchor.x).toBeCloseTo(15);
+    expect(anchor.y).toBeLessThan(15);
+    expect(options).toEqual({ fill: DRAFT_FRAME_STROKE });
+  });
+
+  it('should draw no value label while dragging but before a corner is resolved', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCornerRadiusHandlesLayer(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      rectangle,
+      [rectangle],
+      createCanvasRefs({ cornerRadius: { cornerRadiusDragRef: { current: { corner: null, hasMoved: true } as TCornerRadiusDragState } } }),
+    );
+
+    // result
+    expect(drawValueLabelMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw no value label when the corner-radius handles are shown but not being dragged', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCornerRadiusHandlesLayer(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      rectangle,
+      [rectangle],
+      createCanvasRefs(),
+    );
+
+    // result
+    expect(drawValueLabelMock).not.toHaveBeenCalled();
   });
 
   it('should draw the polygon handle exactly on the top vertex at radius 0 while isDraggingCornerRadius is true', () => {

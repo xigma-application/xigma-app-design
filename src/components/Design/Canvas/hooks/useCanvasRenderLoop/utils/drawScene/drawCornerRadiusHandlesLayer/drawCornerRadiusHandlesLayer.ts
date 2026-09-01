@@ -3,14 +3,15 @@ import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TDrawSceneContext } from './types';
+import { TDrawSceneContext } from '../types';
 import { TPolygonNode, TRectangleNode, TSceneNode, TStarNode } from 'types/design/types';
 
 // utils
 import { drawCornerRadiusHandles } from 'utils/canvas/drawCornerRadiusHandles';
+import { drawDraggedCornerRadiusValueLabel } from './drawDraggedCornerRadiusValueLabel';
 import { drawPolygonCornerRadiusHandle } from 'utils/canvas/drawPolygonCornerRadiusHandle';
 import { drawStarCornerRadiusHandle } from 'utils/canvas/drawStarCornerRadiusHandle';
-import { getNodeBounds } from '../../../../utils/getNodeBounds';
+import { getNodeBounds } from '../../../../../utils/getNodeBounds';
 import { hasCornerRadius } from 'utils/canvas/cornerRadius/hasCornerRadius';
 import { hasCornerRadiusDragMoved } from './hasCornerRadiusDragMoved';
 import { hasPolygonCornerRadius } from 'utils/canvas/cornerRadius/polygon/hasPolygonCornerRadius';
@@ -53,6 +54,7 @@ export const drawCornerRadiusHandlesLayer = (
           selectedNode.rotation,
           isDraggingCornerRadius,
         );
+        drawDraggedCornerRadiusValueLabel(context, refs, isDraggingCornerRadius, bounds, cornerRadius, selectedNode.rotation);
         break;
       case hasPolygonCornerRadius(selectedNode):
         drawPolygonCornerRadiusHandle(
