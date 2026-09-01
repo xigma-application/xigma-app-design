@@ -54,7 +54,7 @@ describe('drawDistanceGuideLine', () => {
       150,
       IDENTITY_VIEWPORT,
       3,
-      3,
+      4.5,
     );
   });
 

@@ -16,14 +16,18 @@ export const getDistanceGuides = (activeRect: TDraftRect, targetRect: TDraftRect
   const horizontalOverlap = getOverlap(active.left, active.right, target.left, target.right);
   const verticalOverlap = getOverlap(active.top, active.bottom, target.top, target.bottom);
 
-  switch (true) {
-    case horizontalOverlap > 0 && verticalOverlap > 0:
-      return getContainmentBranchGuides(active, target, activeRect, targetRect);
-    case verticalOverlap > 0:
-      return getVerticalOverlapGuides(active, target, activeRect);
-    case horizontalOverlap > 0:
-      return getHorizontalOverlapGuides(active, target, activeRect);
-    default:
-      return getDiagonalGuides(active, target, activeRect);
-  }
+  const guides = ((): TDistanceGuides => {
+    switch (true) {
+      case horizontalOverlap > 0 && verticalOverlap > 0:
+        return getContainmentBranchGuides(active, target, activeRect, targetRect);
+      case verticalOverlap > 0:
+        return getVerticalOverlapGuides(active, target, activeRect);
+      case horizontalOverlap > 0:
+        return getHorizontalOverlapGuides(active, target, activeRect);
+      default:
+        return getDiagonalGuides(active, target, activeRect);
+    }
+  })();
+
+  return { ...guides, activeRect, targetRect };
 };

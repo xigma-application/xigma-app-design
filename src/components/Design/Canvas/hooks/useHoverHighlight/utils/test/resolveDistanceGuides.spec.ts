@@ -45,6 +45,9 @@ describe('resolveDistanceGuides', () => {
     // result
     expect(refs.transform.distanceGuidesRef.current).not.toBeNull();
     expect(setClassName).toHaveBeenCalledWith('distance-measure');
+    // the active/target rects ride along so the outline overlay can highlight both shapes
+    expect(refs.transform.distanceGuidesRef.current?.activeRect).toEqual({ height: 100, width: 100, x: 0, y: 0 });
+    expect(refs.transform.distanceGuidesRef.current?.targetRect).toEqual({ height: 60, width: 80, x: 150, y: 20 });
   });
 
   it('should clear the ref and leave the cursor class alone when Alt is not held', () => {

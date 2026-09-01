@@ -17,8 +17,10 @@ describe('getDistanceGuides', () => {
     const containerSelected = getDistanceGuides({ height: 100, width: 100, x: 0, y: 0 }, { height: 30, width: 50, x: 20, y: 20 });
     const elementSelected = getDistanceGuides({ height: 30, width: 50, x: 20, y: 20 }, { height: 100, width: 100, x: 0, y: 0 });
 
-    // result
-    expect(containerSelected).toEqual(elementSelected);
+    // result — the lines/labels are identical either way; activeRect/targetRect naturally swap
+    // along with which side is selected, so those aren't compared here
+    expect(containerSelected.lines).toEqual(elementSelected.lines);
+    expect(containerSelected.labels).toEqual(elementSelected.labels);
   });
 
   it('should report no guides for two identical, fully overlapping rects', () => {
@@ -26,7 +28,17 @@ describe('getDistanceGuides', () => {
     const guides = getDistanceGuides({ height: 100, width: 100, x: 0, y: 0 }, { height: 100, width: 100, x: 0, y: 0 });
 
     // result
-    expect(guides).toEqual({ labels: [], lines: [] });
+    expect(guides.lines).toEqual([]);
+    expect(guides.labels).toEqual([]);
+  });
+
+  it('should always carry the active and target rects along for the outline overlay, regardless of branch', () => {
+    // before
+    const activeRect = { height: 100, width: 100, x: 0, y: 0 };
+    const targetRect = { height: 40, width: 50, x: 200, y: 300 };
+
+    // result
+    expect(getDistanceGuides(activeRect, targetRect)).toMatchObject({ activeRect, targetRect });
   });
 
   it('should dispatch to the vertical-overlap branch when only the vertical ranges overlap', () => {
