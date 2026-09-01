@@ -529,6 +529,42 @@ describe('resolvePlainNodeHover', () => {
     ).toEqual({ className: null, cursor: '', nodeId: 'group-1' });
   });
 
+  it('should hand the hover to an unselected sibling drawn on top of the selected node', () => {
+    // mock — a big selected rect with a smaller sibling fully inside it; the small one paints last
+    const bigRect: TRectangleNode = { ...rectangle, cornerRadius: 0, height: 200, id: 'big-rect', width: 200 };
+    const smallRect: TRectangleNode = { ...rectangle, cornerRadius: 0, height: 40, id: 'small-rect', width: 40, x: 20, y: 20 };
+
+    // result — the point sits where both overlap, so the top-most sibling wins the hover
+    expect(
+      resolvePlainNodeHover(
+        createContext({
+          leafNodes: [bigRect, smallRect],
+          nodesById: { 'big-rect': bigRect, 'small-rect': smallRect },
+          point: { x: 30, y: 30 },
+          selectedNodes: [bigRect],
+        }),
+      ),
+    ).toEqual({ className: null, cursor: '', nodeId: 'small-rect' });
+  });
+
+  it('should keep the hover on the selected node on a spot no sibling covers', () => {
+    // mock — same layout, hovering the selected rect where the smaller sibling does not reach
+    const bigRect: TRectangleNode = { ...rectangle, cornerRadius: 0, height: 200, id: 'big-rect', width: 200 };
+    const smallRect: TRectangleNode = { ...rectangle, cornerRadius: 0, height: 40, id: 'small-rect', width: 40, x: 20, y: 20 };
+
+    // result
+    expect(
+      resolvePlainNodeHover(
+        createContext({
+          leafNodes: [bigRect, smallRect],
+          nodesById: { 'big-rect': bigRect, 'small-rect': smallRect },
+          point: { x: 5, y: 5 },
+          selectedNodes: [bigRect],
+        }),
+      ),
+    ).toEqual({ className: null, cursor: '', nodeId: 'big-rect' });
+  });
+
   it('should show a directly-hovered node’s own box when it is itself already selected, even alongside an unrelated node', () => {
     // mock — [group-child-a, group-child-b] grouped; select group-child-a together with an
     // unrelated node and drag them; hovering group-child-a itself afterward must keep showing

@@ -207,6 +207,34 @@ describe('getSelectionHitAtPoint', () => {
     expect(hit?.id).toBe(idB);
   });
 
+  it('should let a plain click fall through to an unselected sibling drawn on top of the selected node', () => {
+    // mock — a big A with a small B fully inside it; B is added last, so it paints on top of A
+    const idA = addFrameNode(1100000, 1100000, 200);
+    const idB = addFrameNode(1100050, 1100050, 40);
+
+    store.dispatch(setSelection([idA]));
+
+    // action — the point lands where both A and B sit, but B is the top-most node there
+    const hit = getSelectionHitAtPoint({ x: 1100070, y: 1100070 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+    // result — the already-selected A no longer swallows the click
+    expect(hit?.id).toBe(idB);
+  });
+
+  it('should still return the selected node for a plain click on a spot no other node covers', () => {
+    // mock — same layout, but this time we click A where the smaller B does not reach
+    const idA = addFrameNode(1200000, 1200000, 200);
+    addFrameNode(1200050, 1200050, 40);
+
+    store.dispatch(setSelection([idA]));
+
+    // action
+    const hit = getSelectionHitAtPoint({ x: 1200010, y: 1200010 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+    // result
+    expect(hit?.id).toBe(idA);
+  });
+
   it('should resolve to a three-levels-deep nested group when it is selected directly and clicked on its own bounds', () => {
     // mock — group-3 (containing idA/idB) wrapped in group-2, wrapped again in group-1; group-3 stays
     // selected the whole time, so clicking its own visible area must keep hitting group-3, not the

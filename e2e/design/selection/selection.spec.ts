@@ -298,3 +298,36 @@ test('clicking (without dragging) a selected vector node past its own contour de
 
   expect(afterClick.equals(selected)).toBe(false);
 });
+
+test('a plain click on an unselected shape stacked on top of the selected one selects the top shape', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-selection-click-through-selected');
+  await expect(designPage.canvas).toBeVisible();
+
+  // A big, then B small and fully inside A — B is drawn last, so it stacks on top of A
+  await designPage.drawRectangle(700, 200, 900, 400); // A
+  await designPage.drawRectangle(760, 260, 820, 320); // B
+
+  await designPage.click(710, 210); // select A by its exposed top-left corner, clear of B
+
+  const beforeIds = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    return { rootOrder: pages[activePageId].rootOrder, selectedIds: pages[activePageId].selectedIds };
+  });
+  expect(beforeIds.selectedIds).toEqual([beforeIds.rootOrder[0]]); // A selected
+
+  await designPage.click(790, 290); // plain click squarely on B, which overlaps A there
+
+  const afterIds = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].selectedIds;
+  });
+
+  // the already-selected A must not swallow the click — B, the top-most shape, gets selected
+  expect(afterIds).toEqual([beforeIds.rootOrder[1]]);
+});
