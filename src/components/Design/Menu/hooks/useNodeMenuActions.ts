@@ -8,6 +8,7 @@ import { useMoveSelectionToPage } from './useMoveSelectionToPage';
 import { useOutlineStrokeSelection } from './useOutlineStrokeSelection';
 import { usePasteToReplace } from './usePasteToReplace';
 import { useSendSelectionToBack } from './useSendSelectionToBack';
+import { useUngroupSelection } from './useUngroupSelection';
 import { useUseSelectionAsMask } from './useUseSelectionAsMask';
 
 // store
@@ -28,6 +29,7 @@ export type TNodeMenuActions = {
   onOutlineStroke: TFunc;
   onPasteToReplace: TFunc;
   onSendToBack: TFunc;
+  onUngroupSelection: TFunc;
   onUseAsMask: TFunc;
   otherPages: TDesignPage[];
 };
@@ -45,6 +47,7 @@ export const useNodeMenuActions = (): TNodeMenuActions => {
   const onOutlineStroke = useOutlineStrokeSelection();
   const onPasteToReplace = usePasteToReplace();
   const onSendToBack = useSendSelectionToBack();
+  const onUngroupSelection = useUngroupSelection();
   const onUseAsMask = useUseSelectionAsMask();
 
   return {
@@ -58,6 +61,7 @@ export const useNodeMenuActions = (): TNodeMenuActions => {
     onOutlineStroke,
     onPasteToReplace,
     onSendToBack,
+    onUngroupSelection,
     onUseAsMask,
     otherPages,
   };

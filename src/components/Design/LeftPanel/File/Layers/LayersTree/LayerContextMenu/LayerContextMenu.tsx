@@ -35,6 +35,7 @@ const LayerContextMenu: FC<TLayerContextMenuProps> = ({
     onOutlineStroke,
     onPasteToReplace,
     onSendToBack,
+    onUngroupSelection,
     onUseAsMask,
     otherPages,
   } = useNodeMenuActions();
@@ -60,6 +61,7 @@ const LayerContextMenu: FC<TLayerContextMenuProps> = ({
       onSendToBack={onSendToBack}
       onToggleHidden={onToggleHidden}
       onToggleLocked={onToggleLocked}
+      onUngroupSelection={onUngroupSelection}
       onUseAsMask={onUseAsMask}
       otherPages={otherPages}
     />

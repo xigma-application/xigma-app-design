@@ -6,7 +6,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import LayerContextMenu from './LayerContextMenu';
 
 // store
-import { addNode, addPage, deleteNode, deletePage, setActivePage, setSelection } from 'store/design/slice';
+import { addNode, addPage, deleteNode, deletePage, groupNodes, setActivePage, setSelection } from 'store/design/slice';
 import { selectActivePage, selectActivePageId } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -73,6 +73,39 @@ describe('LayerContextMenu', () => {
 
     // after
     store.dispatch(deleteNode(groupId));
+  });
+
+  it('should ungroup a selected group node into its own children on Ungroup click', async () => {
+    // mock
+    const user = userEvent.setup();
+    store.dispatch(
+      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+    );
+    store.dispatch(
+      addNode({ fill: '#ff0000', height: 10, name: 'B', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+    );
+    const [idA, idB] = selectActivePage(store.getState()).rootOrder.slice(-2);
+    store.dispatch(setSelection([idA, idB]));
+    store.dispatch(groupNodes());
+
+    const [groupId] = selectActivePage(store.getState()).selectedIds;
+    const groupNode = selectActivePage(store.getState()).nodes[groupId];
+
+    // before
+    renderLayerContextMenu(groupNode);
+
+    // action
+    await user.click(screen.getByText('Ungroup'));
+
+    // result
+    const page = selectActivePage(store.getState());
+    expect(page.nodes[groupId]).toBeUndefined();
+    expect(page.nodes[idA]?.parentId).toBeNull();
+    expect(page.nodes[idB]?.parentId).toBeNull();
+
+    // after
+    store.dispatch(deleteNode(idA));
+    store.dispatch(deleteNode(idB));
   });
 
   it('should copy the selected node into the clipboard on Copy click', async () => {

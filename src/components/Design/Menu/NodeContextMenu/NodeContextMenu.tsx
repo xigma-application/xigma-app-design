@@ -75,6 +75,7 @@ export type TNodeContextMenuProps = {
   onSendToBack: TFunc;
   onToggleHidden: TFunc;
   onToggleLocked: TFunc;
+  onUngroupSelection: TFunc;
   onUseAsMask: TFunc;
   otherPages: TDesignPage[];
 };
@@ -98,6 +99,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   onSendToBack,
   onToggleHidden,
   onToggleLocked,
+  onUngroupSelection,
   onUseAsMask,
   otherPages,
 }) => {
@@ -105,6 +107,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   const handlePreventRefocus = usePreventMenuRefocus();
   const handleStopPropagation = useStopClickPropagation();
   const isFrame = node.type === NodeType.frame;
+  const isGroup = node.type === NodeType.group;
   const isSection = node.type === NodeType.section;
   const isTextOnPath = node.type === NodeType.text && Boolean(node.pathId);
   const canFlatten = isConvertibleToVectorNode(node) || node.type === NodeType.text;
@@ -152,7 +155,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
         withCheck={false}
       />
       <MenuSeparator />
-      {isFrame && <MenuItem disabled label={t(NODE_MENU_CONVERT_TO_SECTION_KEY)} withCheck={false} />}
+      {(isFrame || isGroup) && <MenuItem disabled label={t(NODE_MENU_CONVERT_TO_SECTION_KEY)} withCheck={false} />}
       {isSection && <MenuItem disabled label={t(NODE_MENU_CONVERT_TO_FRAME_KEY)} withCheck={false} />}
       {!isSection && (
         <MenuItem
@@ -170,8 +173,14 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
           withCheck={false}
         />
       )}
-      {(isFrame || isSection) && (
-        <MenuItem disabled label={t(NODE_MENU_UNGROUP_KEY)} shortcut={KEYBOARD_SHORTCUTS.ungroupSelection.join('')} withCheck={false} />
+      {(isFrame || isGroup || isSection) && (
+        <MenuItem
+          disabled={!isGroup}
+          label={t(NODE_MENU_UNGROUP_KEY)}
+          onClick={onUngroupSelection}
+          shortcut={KEYBOARD_SHORTCUTS.ungroupSelection.join('')}
+          withCheck={false}
+        />
       )}
       {onRename && (
         <MenuItem label={t(NODE_MENU_RENAME_KEY)} onClick={onRename} shortcut={KEYBOARD_SHORTCUTS.renameLayer.join('')} withCheck={false} />
@@ -221,7 +230,7 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
           withCheck={false}
         />
       )}
-      {(isFrame || isSection) && <MenuSub disabled label={t(NODE_MENU_MORE_LAYOUT_OPTIONS_KEY)} withCheck={false} />}
+      {(isFrame || isGroup || isSection) && <MenuSub disabled label={t(NODE_MENU_MORE_LAYOUT_OPTIONS_KEY)} withCheck={false} />}
       {!isSection && (
         <MenuItem
           disabled

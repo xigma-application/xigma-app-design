@@ -7,7 +7,7 @@ import NodeContextMenu, { TNodeContextMenuProps } from './NodeContextMenu';
 // types
 import { NodeType } from 'types/design/enums';
 import { TDesignPage } from 'store/design/types';
-import { TFrameNode, TLineNode, TRectangleNode, TSectionNode, TTextNode } from 'types/design/types';
+import { TFrameNode, TGroupNode, TLineNode, TRectangleNode, TSectionNode, TTextNode } from 'types/design/types';
 
 const anchorRef = { current: { getBoundingClientRect: (): DOMRect => new DOMRect(10, 20, 0, 0) } };
 
@@ -25,6 +25,7 @@ const BASE_NODE = {
 const buildRectangleNode = (): TRectangleNode => ({ ...BASE_NODE, fill: '#000000', type: NodeType.rectangle });
 const buildFrameNode = (): TFrameNode => ({ ...BASE_NODE, fill: '#000000', type: NodeType.frame });
 const buildSectionNode = (): TSectionNode => ({ ...BASE_NODE, fill: '#000000', type: NodeType.section });
+const buildGroupNode = (): TGroupNode => ({ ...BASE_NODE, childIds: [], type: NodeType.group });
 const buildLineNode = (overrides: Partial<TLineNode> = {}): TLineNode => ({
   id: 'node-1',
   name: 'Line',
@@ -82,6 +83,7 @@ const renderNodeContextMenu = (props: Partial<TNodeContextMenuProps> = {}): Retu
       onSendToBack={vi.fn()}
       onToggleHidden={vi.fn()}
       onToggleLocked={vi.fn()}
+      onUngroupSelection={vi.fn()}
       onUseAsMask={vi.fn()}
       otherPages={[]}
       {...props}
@@ -427,6 +429,58 @@ describe('NodeContextMenu', () => {
     expect(screen.queryByText('Ungroup')).not.toBeInTheDocument();
     expect(screen.queryByText('Set as thumbnail')).not.toBeInTheDocument();
     expect(screen.queryByText('More layout options')).not.toBeInTheDocument();
+  });
+
+  it('should show Convert to section, Ungroup (enabled) and More layout options for a group node, but not Set as thumbnail or Convert to frame', () => {
+    // before
+    renderNodeContextMenu({ node: buildGroupNode() });
+
+    // result
+    expect(screen.getByText('Convert to section')).toBeInTheDocument();
+    expect(screen.getByText('Ungroup').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('More layout options')).toBeInTheDocument();
+    expect(screen.queryByText('Set as thumbnail')).not.toBeInTheDocument();
+    expect(screen.queryByText('Convert to frame')).not.toBeInTheDocument();
+  });
+
+  it('should call onUngroupSelection on Ungroup click for a group node', async () => {
+    // mock
+    const user = userEvent.setup();
+    const onUngroupSelection = vi.fn();
+
+    // before
+    renderNodeContextMenu({ node: buildGroupNode(), onUngroupSelection });
+
+    // action
+    await user.click(screen.getByText('Ungroup'));
+
+    // result
+    expect(onUngroupSelection).toHaveBeenCalledTimes(1);
+  });
+
+  it('should keep Ungroup disabled for a frame node, unlike a group node', () => {
+    // before
+    renderNodeContextMenu({ node: buildFrameNode() });
+
+    // result
+    expect(screen.getByText('Ungroup').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+  });
+
+  it('should keep Ungroup disabled for a section node, unlike a group node', () => {
+    // before
+    renderNodeContextMenu({ node: buildSectionNode() });
+
+    // result
+    expect(screen.getByText('Ungroup').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+  });
+
+  it('should show Flatten and Outline stroke, disabled, for a group node — the underlying operation only supports single shapes so far', () => {
+    // before
+    renderNodeContextMenu({ node: buildGroupNode() });
+
+    // result
+    expect(screen.getByText('Flatten').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Outline stroke').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
   });
 
   it('should show the section-only items (Convert to frame, Ungroup, Set as thumbnail, More layout options) for a section node', () => {
