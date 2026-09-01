@@ -155,6 +155,57 @@ describe('handleFlipSelection', () => {
     expect(nodes[groupId]).toEqual(groupBefore); // the group's own record is untouched
   });
 
+  it('should negate a rotated node’s rotation on top of the usual flip, matching Figma’s "flip reflects the tilt too" behavior', () => {
+    // mock — flipPoint (mirror) runs before rotatePoint at render time, so mirroring a rotated
+    // node's world appearance needs its stored angle negated too, or the tilt direction is wrong
+    const id = addRectangleNode({ rotation: 20 });
+    store.dispatch(setSelection([id]));
+
+    // action
+    handleFlipSelection(store.dispatch, 'horizontal');
+
+    // result
+    expect((selectNodes(store.getState())[id] as TRectangleNode).rotation).toBe(340);
+  });
+
+  it('should negate rotation the same way for a vertical flip too', () => {
+    // mock
+    const id = addRectangleNode({ rotation: 20 });
+    store.dispatch(setSelection([id]));
+
+    // action
+    handleFlipSelection(store.dispatch, 'vertical');
+
+    // result
+    expect((selectNodes(store.getState())[id] as TRectangleNode).rotation).toBe(340);
+  });
+
+  it('should leave rotation untouched (no extra dispatch) when the node has no rotation', () => {
+    // mock
+    const id = addRectangleNode({ rotation: 0 });
+    store.dispatch(setSelection([id]));
+
+    // action
+    handleFlipSelection(store.dispatch, 'horizontal');
+
+    // result
+    expect((selectNodes(store.getState())[id] as TRectangleNode).rotation).toBe(0);
+  });
+
+  it('should not touch rotation for a line node (it has none)', () => {
+    // mock
+    store.dispatch(addNode({ name: 'Line', parentId: null, stroke: '#000000', type: NodeType.line, x1: 0, x2: 20, y1: 0, y2: 0 }));
+    const { rootOrder } = selectActivePage(store.getState());
+    const id = rootOrder[rootOrder.length - 1];
+    store.dispatch(setSelection([id]));
+
+    // action
+    handleFlipSelection(store.dispatch, 'horizontal');
+
+    // result — no throw, and the node still exists with no rotation field
+    expect(selectNodes(store.getState())[id]).not.toHaveProperty('rotation');
+  });
+
   it('should undo the whole flip (every touched node) in a single step', () => {
     // mock
     const idA = addRectangleNode({ x: 0, y: 0 });

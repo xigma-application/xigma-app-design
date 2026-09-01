@@ -4,6 +4,7 @@ import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 // store
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { selectNodes, selectSelectedIds } from 'store/design/selectors';
+import { updateNode } from 'store/design/slice';
 import { AppDispatch, store } from 'store';
 
 // types
@@ -35,6 +36,10 @@ export const handleFlipSelection = (dispatch: AppDispatch, axis: 'horizontal' | 
       const origin = getResizeNodeOrigin(leaf);
 
       resizeNode(leaf.id, origin, dispatch, anchors, scaleX, scaleY, isSingleBoxOrigin, null);
+
+      if (leaf.type !== NodeType.line && leaf.rotation !== 0) {
+        dispatch(updateNode({ changes: { rotation: (360 - (leaf.rotation % 360)) % 360 }, id: leaf.id }));
+      }
     });
     dispatch(endHistoryGesture());
   }
