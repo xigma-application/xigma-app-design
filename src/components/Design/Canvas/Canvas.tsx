@@ -2,6 +2,7 @@ import cx from 'classnames';
 import { FC } from 'react';
 
 // components
+import CanvasContextMenuPanel from './CanvasContextMenuPanel/CanvasContextMenuPanel';
 import Comment from './Comment/Comment';
 import FrameNameLabelEditOverlay from './FrameNameLabelEditOverlay/FrameNameLabelEditOverlay';
 import SectionNameLabelEditOverlay from './SectionNameLabelEditOverlay/SectionNameLabelEditOverlay';
@@ -59,7 +60,9 @@ import styles from './canvas.module.scss';
 
 const Canvas: FC = () => {
   const { className } = useClassNames();
+  const composedClassName = styles[`Canvas__canvas-element--${className}`];
   const refs = useCanvasRefsContext();
+  const cursor = { [composedClassName]: Boolean(className) };
 
   useCanvasResize(refs);
   useCanvasPanZoom(refs);
@@ -92,20 +95,15 @@ const Canvas: FC = () => {
   useRegisterColorPixelSampler(refs);
 
   return (
-    <div className={styles.Canvas}>
+    <CanvasContextMenuPanel className={styles.Canvas} refs={refs}>
       <div className={styles.Canvas__texture} />
-      <canvas
-        className={cx(styles['Canvas__canvas-element'], {
-          [styles[`Canvas__canvas-element--${className}`]]: Boolean(className),
-        })}
-        ref={refs.canvasRef}
-      />
+      <canvas className={cx(styles['Canvas__canvas-element'], cursor)} ref={refs.canvasRef} />
       <TextEditOverlay />
       <VectorWidthLabelEditOverlay />
       <FrameNameLabelEditOverlay />
       <SectionNameLabelEditOverlay />
       <Comment />
-    </div>
+    </CanvasContextMenuPanel>
   );
 };
 

@@ -71,7 +71,7 @@ export type TNodeContextMenuProps = {
   onOutlineStroke: TFunc;
   onPasteToReplace: TFunc;
   onRemoveMask: TFunc;
-  onRename: TFunc;
+  onRename?: TFunc;
   onSendToBack: TFunc;
   onToggleHidden: TFunc;
   onToggleLocked: TFunc;
@@ -173,7 +173,9 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
       {(isFrame || isSection) && (
         <MenuItem disabled label={t(NODE_MENU_UNGROUP_KEY)} shortcut={KEYBOARD_SHORTCUTS.ungroupSelection.join('')} withCheck={false} />
       )}
-      <MenuItem label={t(NODE_MENU_RENAME_KEY)} onClick={onRename} shortcut={KEYBOARD_SHORTCUTS.renameLayer.join('')} withCheck={false} />
+      {onRename && (
+        <MenuItem label={t(NODE_MENU_RENAME_KEY)} onClick={onRename} shortcut={KEYBOARD_SHORTCUTS.renameLayer.join('')} withCheck={false} />
+      )}
       {!isFrame && !isSection && (
         <MenuItem
           disabled={!canFlatten}

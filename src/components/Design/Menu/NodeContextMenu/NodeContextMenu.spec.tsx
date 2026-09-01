@@ -101,6 +101,14 @@ describe('NodeContextMenu', () => {
     expect(screen.getByText('Flip vertical')).toBeInTheDocument();
   });
 
+  it('should hide Rename when onRename is not given (e.g. triggered from the canvas, which has no rename affordance, matching Figma)', () => {
+    // before
+    renderNodeContextMenu({ onRename: undefined });
+
+    // result
+    expect(screen.queryByText('Rename')).not.toBeInTheDocument();
+  });
+
   it('should disable the not-yet-implemented actions', () => {
     // before
     renderNodeContextMenu();

@@ -3,6 +3,11 @@ import { translationNameSpace as parentNameSpace } from '../constants';
 
 export const translationNameSpace = `${parentNameSpace}.menu`;
 
+export const CANVAS_MENU_ACTIONS_KEY = `${translationNameSpace}.actions`;
+export const CANVAS_MENU_CURSOR_CHAT_KEY = `${translationNameSpace}.cursorChat`;
+export const CANVAS_MENU_PASTE_HERE_KEY = `${translationNameSpace}.pasteHere`;
+export const CANVAS_MENU_SHOW_HIDE_COMMENTS_KEY = `${translationNameSpace}.showHideComments`;
+export const CANVAS_MENU_SHOW_HIDE_UI_KEY = `${translationNameSpace}.showHideUi`;
 export const NODE_MENU_ADD_AUTO_LAYOUT_KEY = `${translationNameSpace}.addAutoLayout`;
 export const NODE_MENU_ADD_MOTION_KEY = `${translationNameSpace}.addMotion`;
 export const NODE_MENU_BRING_TO_FRONT_KEY = `${translationNameSpace}.bringToFront`;

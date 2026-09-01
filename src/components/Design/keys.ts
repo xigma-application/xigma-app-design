@@ -32,6 +32,7 @@ export const KEYBOARD_SHORTCUTS: TKeyboardShortcuts = {
   copyProperties: [ALT, CONTROL, 'C'],
   createComponent: [ALT, CONTROL, 'K'],
   createLink: [SHIFT, CONTROL, 'U'],
+  cursorChat: ['/'],
   [ToolName.cut]: ['X'],
   decreaseFontSize: [SHIFT, CONTROL, '<'],
   decreaseFontWeight: [ALT, CONTROL, '<'],
