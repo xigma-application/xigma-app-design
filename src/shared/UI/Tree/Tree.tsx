@@ -9,6 +9,7 @@ import TreeSelectionBackground from './TreeSelectionBackground/TreeSelectionBack
 
 // hooks
 import { useHandleRowsClick } from './hooks/useHandleRowsClick';
+import { useScrollContentWidth } from './hooks/useScrollContentWidth';
 import { useSpringLoadExpand } from './hooks/useSpringLoadExpand';
 import { useTreeExpansion } from './hooks/useTreeExpansion';
 import { useTreeRowDrag } from './hooks/useTreeRowDrag/useTreeRowDrag';
@@ -59,6 +60,7 @@ export const Tree = <T extends TTreeItem>({
   const { expandedIds, onToggleExpand } = useTreeExpansion(controlledExpandedIds, onExpandedIdsChange, getChildren);
   const rows = useMemo(() => flattenTreeRows(roots, getChildren, expandedIds), [roots, getChildren, expandedIds]);
   const { items, totalSize } = useVirtualList({ count: rows.length, rowHeight, scrollRef: rowsRef, scrollToIndex });
+  const contentWidth = useScrollContentWidth(rowsRef, rows);
   const onSpringLoadExpand = useSpringLoadExpand(rows, onToggleExpand);
   const { dropDepth, dropInsideIndex, handleRowMouseDown, insertionIndex } = useTreeRowDrag({
     isRowSelected,
@@ -80,7 +82,10 @@ export const Tree = <T extends TTreeItem>({
   return (
     <div className={cx(styles.Tree, className)}>
       <div className={styles.Tree__rows} onClick={handleRowsClick} ref={rowsRef}>
-        <div className={cx(styles.Tree__viewport, isDragging && styles['Tree__viewport--dragging'])} style={{ height: totalSize }}>
+        <div
+          className={cx(styles.Tree__viewport, isDragging && styles['Tree__viewport--dragging'])}
+          style={{ height: totalSize, width: contentWidth }}
+        >
           <TreeSelectionBackground segments={highlightBackgroundSegments} variant="highlight" />
           <TreeSelectionBackground segments={selectionBackgroundSegments} />
           <TreeRowList

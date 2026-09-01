@@ -28,9 +28,13 @@
 
   &:not([aria-selected='true']):hover::before {
     background-color: color-mix(in srgb, var(--color-neutral-3) 70%, transparent);
+    border-radius: 5px;
+    bottom: 4px;
     content: '';
-    inset: 0;
+    left: 8px;
     position: absolute;
+    right: 8px;
+    top: 4px;
   }
 
   &[aria-selected='true'] &__toggleButton,

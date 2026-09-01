@@ -350,6 +350,23 @@ describe('Tree', () => {
     vi.useRealTimers();
   });
 
+  it('should size the viewport (and so the selection/hover backgrounds it anchors) to the true scrollable content width, not just the visible one', () => {
+    // before — the viewport starts at whatever the (unmeasured, jsdom-default) scroll width is
+    const { container, rerender } = render(
+      <Tree getChildren={getChildren} renderRow={renderRow} roots={[buildItem('0'), buildItem('1')]} rowHeight={32} />,
+    );
+    const rowsContainer = container.querySelector('[class*="Tree__rows"]') as HTMLElement;
+    const viewport = container.querySelector('[class*="Tree__viewport"]') as HTMLElement;
+
+    // action — a deeply-nested row makes the true content wider than the panel; re-render (new
+    // `rows` reference) is what re-triggers the measurement, exactly like an expand/rename would
+    Object.defineProperty(rowsContainer, 'scrollWidth', { configurable: true, value: 640 });
+    rerender(<Tree getChildren={getChildren} renderRow={renderRow} roots={[buildItem('0'), buildItem('1'), buildItem('2')]} rowHeight={32} />);
+
+    // result
+    expect(viewport.style.width).toBe('640px');
+  });
+
   it('should expand or collapse a whole subtree at once when onToggleExpand is called with recursive, keyed off the clicked row', () => {
     // mock — a 3-level-deep chain: 0 > 0-0 > 0-0-0
     const roots = [buildItem('0', [buildItem('0-0', [buildItem('0-0-0')])])];
