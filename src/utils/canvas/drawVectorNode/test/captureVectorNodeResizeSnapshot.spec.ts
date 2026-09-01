@@ -5,11 +5,11 @@ import { TVectorNode } from 'types/design/types';
 // utils
 import { captureVectorNodeResizeSnapshot } from '../captureVectorNodeResizeSnapshot';
 
-const groupFilledFacesByColorMock = vi.fn();
+const groupFilledFacesForRenderingMock = vi.fn();
 const flattenVectorSegmentsMock = vi.fn();
 
-vi.mock('../groupFilledFacesByColor', () => ({
-  groupFilledFacesByColor: (...args: unknown[]): unknown => groupFilledFacesByColorMock(...args),
+vi.mock('../groupFilledFacesForRendering', () => ({
+  groupFilledFacesForRendering: (...args: unknown[]): unknown => groupFilledFacesForRenderingMock(...args),
 }));
 vi.mock('../../vectorNetwork/flattenVectorSegments', () => ({
   flattenVectorSegments: (...args: unknown[]): unknown => flattenVectorSegmentsMock(...args),
@@ -32,9 +32,9 @@ const baseNode: TVectorNode = {
 
 describe('captureVectorNodeResizeSnapshot', () => {
   beforeEach(() => {
-    groupFilledFacesByColorMock.mockReset();
+    groupFilledFacesForRenderingMock.mockReset();
     flattenVectorSegmentsMock.mockReset();
-    groupFilledFacesByColorMock.mockReturnValue(new Map());
+    groupFilledFacesForRenderingMock.mockReturnValue([]);
     flattenVectorSegmentsMock.mockReturnValue([]);
   });
 
@@ -43,14 +43,14 @@ describe('captureVectorNodeResizeSnapshot', () => {
     const points = [[{ x: 0, y: 0 }]];
     const flattened = [{ endId: 'v2', points: [{ x: 0, y: 0 }], segmentId: 's1', startId: 'v1' }];
 
-    groupFilledFacesByColorMock.mockReturnValue(new Map([['#ff0000', points]]));
+    groupFilledFacesForRenderingMock.mockReturnValue([{ color: '#ff0000', polygons: points }]);
     flattenVectorSegmentsMock.mockReturnValue(flattened);
 
     // before
     const snapshot = captureVectorNodeResizeSnapshot(baseNode, 0);
 
     // result
-    expect(groupFilledFacesByColorMock).toHaveBeenCalledWith(baseNode);
+    expect(groupFilledFacesForRenderingMock).toHaveBeenCalledWith(baseNode);
     expect(flattenVectorSegmentsMock).toHaveBeenCalledWith(baseNode);
     expect(snapshot).toEqual({
       anchorX: null,

@@ -7,11 +7,11 @@ import { flattenVectorSegments } from '../vectorNetwork/flattenVectorSegments';
 import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
 import { getThickVectorPathVertices } from '../vectorNetwork/getThickVectorPathVertices/getThickVectorPathVertices';
 import { getVectorNodeBounds } from '../vectorNetwork/getVectorNodeBounds';
-import { groupFilledFacesByColor } from './groupFilledFacesByColor';
+import { groupFilledFacesForRendering } from './groupFilledFacesForRendering';
 
 export const captureVectorNodeRotateSnapshot = (node: TVectorNode): TVectorNodeRotateSnapshot => {
   const renderedNode = getRenderedVectorNode(node);
-  const facesByColor = [...groupFilledFacesByColor(renderedNode)].map(([color, points]) => ({ color, points }));
+  const facesByColor = groupFilledFacesForRendering(renderedNode).map(({ color, polygons }) => ({ color, points: polygons }));
   const strokeVertices = renderedNode.widthProfile
     ? []
     : getThickVectorPathVertices(flattenVectorSegments(renderedNode), renderedNode.strokeWidth / 2);

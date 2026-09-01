@@ -5,10 +5,10 @@ import { TVectorNodeResizeSnapshot } from 'types/design/canvas/types';
 // utils
 import { flattenVectorSegments } from '../vectorNetwork/flattenVectorSegments';
 import { getVectorNodeBounds } from '../vectorNetwork/getVectorNodeBounds';
-import { groupFilledFacesByColor } from './groupFilledFacesByColor';
+import { groupFilledFacesForRendering } from './groupFilledFacesForRendering';
 
 export const captureVectorNodeResizeSnapshot = (node: TVectorNode, rotation: number): TVectorNodeResizeSnapshot => {
-  const facesByColor = [...groupFilledFacesByColor(node)].map(([color, points]) => ({ color, points }));
+  const facesByColor = groupFilledFacesForRendering(node).map(({ color, polygons }) => ({ color, points: polygons }));
   const bounds = getVectorNodeBounds(node);
   const center = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
 

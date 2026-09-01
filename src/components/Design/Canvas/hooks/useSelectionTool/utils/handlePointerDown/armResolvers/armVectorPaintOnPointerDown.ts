@@ -11,6 +11,7 @@ import { ToolName } from 'types/design/enums';
 
 // utils
 import { bakeVectorNodeRotation } from '../../../../../utils/bakeVectorNodeRotation';
+import { getContainingFilledLoopKey } from 'utils/canvas/vectorNetwork/getContainingFilledLoopKey';
 import { getEffectiveVectorFillColor } from 'utils/canvas/vectorNetwork/getEffectiveVectorFillColor';
 import { getNestedUnfilledLoopKeys } from 'utils/canvas/vectorNetwork/getNestedUnfilledLoopKeys';
 import { getVectorFaceAtPoint } from '../../../../../utils/getVectorFaceAtPoint';
@@ -47,6 +48,8 @@ export const armVectorPaintOnPointerDown = ({
       const removedFacePoints = existingLoopKey ? getVectorFillLoopPoints(node, existingLoopKey) : null;
       const inheritingLoopKeys = removedFacePoints ? getNestedUnfilledLoopKeys(node, removedFacePoints) : [];
       const paintingLoopKeys = existingLoopKey ? [] : getNestedUnfilledLoopKeys(node, face.points);
+      const holeParentKey = existingLoopKey ? null : getContainingFilledLoopKey(node, face.points);
+      const paintColor = holeParentKey ? getEffectiveVectorFillColor(node, holeParentKey) : selectPaintColor(state);
       const filledFaceKeys = existingLoopKey
         ? [...node.filledFaceKeys.filter((key) => key !== existingLoopKey), ...inheritingLoopKeys]
         : [...node.filledFaceKeys, newLoopKey, ...paintingLoopKeys];
@@ -59,12 +62,13 @@ export const armVectorPaintOnPointerDown = ({
           : node.fillColorOverrideByKey
         : {
             ...node.fillColorOverrideByKey,
-            [newLoopKey]: selectPaintColor(state),
-            ...Object.fromEntries(paintingLoopKeys.map((key) => [key, selectPaintColor(state)])),
+            [newLoopKey]: paintColor,
+            ...Object.fromEntries(paintingLoopKeys.map((key) => [key, paintColor])),
           };
+      const holeParentByKey = holeParentKey ? { ...node.holeParentByKey, [newLoopKey]: holeParentKey } : node.holeParentByKey;
       const changes: Partial<TVectorNode> = geometryChanged
-        ? { fillColorOverrideByKey, filledFaceKeys, segments, vertices }
-        : { fillColorOverrideByKey, filledFaceKeys };
+        ? { fillColorOverrideByKey, filledFaceKeys, holeParentByKey, segments, vertices }
+        : { fillColorOverrideByKey, filledFaceKeys, holeParentByKey };
 
       dispatch(updateNode({ changes, id: node.id }));
       touchedLoopKeys[node.id] = existingLoopKey ? new Set() : new Set([newLoopKey]);

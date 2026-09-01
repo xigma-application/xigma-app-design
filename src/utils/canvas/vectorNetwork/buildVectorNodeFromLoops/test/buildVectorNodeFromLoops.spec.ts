@@ -3,7 +3,7 @@ import { NodeType } from 'types/design/enums';
 
 // utils
 import { buildVectorNodeFromLoops } from '../buildVectorNodeFromLoops';
-import { groupFilledFacesByColor } from 'utils/canvas/drawVectorNode/groupFilledFacesByColor';
+import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 
 const BASE = { id: 'outline-1', name: 'Rectangle outline', parentId: 'frame-1', rotation: 12 };
 
@@ -45,14 +45,14 @@ describe('buildVectorNodeFromLoops', () => {
 
     // result — outer and inner loop each stay their own independent face (no bridge segment);
     // `drawVectorFill`'s stencil pass XORs their overlap into a ring, so both must independently
-    // resolve back to real points via `groupFilledFacesByColor`, not just report a key
+    // resolve back to real points via `groupFilledFacesForRendering`, not just report a key
     expect(Object.keys(result?.vertices ?? {})).toHaveLength(8);
     expect(Object.keys(result?.segments ?? {})).toHaveLength(8);
     expect(result?.filledFaceKeys).toHaveLength(2);
 
-    const facesByColor = groupFilledFacesByColor(result!);
+    const facesByColor = groupFilledFacesForRendering(result!);
 
-    expect(facesByColor.get('#ff0000')).toHaveLength(2);
+    expect(facesByColor.find((group) => group.color === '#ff0000')?.polygons).toHaveLength(2);
   });
 
   it('should drop a degenerate loop with fewer than 3 points', () => {

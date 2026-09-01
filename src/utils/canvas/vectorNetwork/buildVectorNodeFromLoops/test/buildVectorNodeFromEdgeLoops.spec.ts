@@ -3,7 +3,7 @@ import { NodeType } from 'types/design/enums';
 
 // utils
 import { buildVectorNodeFromEdgeLoops } from '../buildVectorNodeFromEdgeLoops';
-import { groupFilledFacesByColor } from 'utils/canvas/drawVectorNode/groupFilledFacesByColor';
+import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 import { TLoopEdge } from 'utils/canvas/vectorNetwork/convertShapeToVector/utils/buildClosedVectorLoop';
 
 const BASE = { id: 'glyph-1', name: 'o', parentId: 'text-1', rotation: 0 };
@@ -51,7 +51,7 @@ describe('buildVectorNodeFromEdgeLoops', () => {
     // result — outer and inner loop each stay their own independent, independently-resolvable face
     expect(Object.keys(result?.vertices ?? {})).toHaveLength(8);
     expect(result?.filledFaceKeys).toHaveLength(2);
-    expect(groupFilledFacesByColor(result!).get('#ff0000')).toHaveLength(2);
+    expect(groupFilledFacesForRendering(result!).find((group) => group.color === '#ff0000')?.polygons).toHaveLength(2);
   });
 
   it('should drop a degenerate loop with fewer than 3 edges', () => {

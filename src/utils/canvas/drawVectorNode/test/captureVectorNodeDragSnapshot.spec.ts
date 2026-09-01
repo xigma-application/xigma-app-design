@@ -6,15 +6,15 @@ import { TVectorNode } from 'types/design/types';
 import { captureVectorNodeDragSnapshot } from '../captureVectorNodeDragSnapshot';
 
 const bakeVectorNodeRotationMock = vi.fn();
-const groupFilledFacesByColorMock = vi.fn();
+const groupFilledFacesForRenderingMock = vi.fn();
 const flattenVectorSegmentsMock = vi.fn();
 const getThickVectorPathVerticesMock = vi.fn();
 
 vi.mock('components/Design/Canvas/utils/bakeVectorNodeRotation', () => ({
   bakeVectorNodeRotation: (...args: unknown[]): unknown => bakeVectorNodeRotationMock(...args),
 }));
-vi.mock('../groupFilledFacesByColor', () => ({
-  groupFilledFacesByColor: (...args: unknown[]): unknown => groupFilledFacesByColorMock(...args),
+vi.mock('../groupFilledFacesForRendering', () => ({
+  groupFilledFacesForRendering: (...args: unknown[]): unknown => groupFilledFacesForRenderingMock(...args),
 }));
 vi.mock('../../vectorNetwork/flattenVectorSegments', () => ({
   flattenVectorSegments: (...args: unknown[]): unknown => flattenVectorSegmentsMock(...args),
@@ -41,10 +41,10 @@ const baseNode: TVectorNode = {
 describe('captureVectorNodeDragSnapshot', () => {
   beforeEach(() => {
     bakeVectorNodeRotationMock.mockClear();
-    groupFilledFacesByColorMock.mockClear();
+    groupFilledFacesForRenderingMock.mockClear();
     flattenVectorSegmentsMock.mockClear();
     getThickVectorPathVerticesMock.mockClear();
-    groupFilledFacesByColorMock.mockReturnValue(new Map());
+    groupFilledFacesForRenderingMock.mockReturnValue([]);
     flattenVectorSegmentsMock.mockReturnValue([]);
     getThickVectorPathVerticesMock.mockReturnValue([]);
   });
@@ -53,7 +53,7 @@ describe('captureVectorNodeDragSnapshot', () => {
     // mock
     const points = [[{ x: 0, y: 0 }]];
 
-    groupFilledFacesByColorMock.mockReturnValue(new Map([['#ff0000', points]]));
+    groupFilledFacesForRenderingMock.mockReturnValue([{ color: '#ff0000', polygons: points }]);
     getThickVectorPathVerticesMock.mockReturnValue([0, 0, 10, 0, 10, 1]);
 
     // before
@@ -61,7 +61,7 @@ describe('captureVectorNodeDragSnapshot', () => {
 
     // result
     expect(bakeVectorNodeRotationMock).not.toHaveBeenCalled();
-    expect(groupFilledFacesByColorMock.mock.calls[0][0]).toBe(baseNode);
+    expect(groupFilledFacesForRenderingMock.mock.calls[0][0]).toBe(baseNode);
     expect(flattenVectorSegmentsMock.mock.calls[0][0]).toBe(baseNode);
     expect(getThickVectorPathVerticesMock).toHaveBeenCalledWith([], 2);
     expect(snapshot).toEqual({
@@ -101,7 +101,7 @@ describe('captureVectorNodeDragSnapshot', () => {
 
     // result
     expect(bakeVectorNodeRotationMock).toHaveBeenCalledWith(node);
-    expect(groupFilledFacesByColorMock).toHaveBeenCalledWith({ ...node, rotation: 0, segments: bakedSegments, vertices: bakedVertices });
+    expect(groupFilledFacesForRenderingMock).toHaveBeenCalledWith({ ...node, rotation: 0, segments: bakedSegments, vertices: bakedVertices });
     expect(flattenVectorSegmentsMock).toHaveBeenCalledWith({ ...node, rotation: 0, segments: bakedSegments, vertices: bakedVertices });
     expect(node.rotation).toBe(45);
   });

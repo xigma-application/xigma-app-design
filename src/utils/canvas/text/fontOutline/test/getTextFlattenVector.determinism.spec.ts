@@ -7,7 +7,7 @@ import { TTextNode } from 'types/design/types';
 
 // utils
 import { getTextFlattenVector } from '../getTextFlattenVector';
-import { groupFilledFacesByColor } from 'utils/canvas/drawVectorNode/groupFilledFacesByColor';
+import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
 
 const buildNode = (): TTextNode => ({
@@ -88,7 +88,7 @@ describe('getTextFlattenVector — determinism across repeated calls with the re
         continue;
       }
 
-      const resolvedFaces = groupFilledFacesByColor(result).get('#123456') ?? [];
+      const resolvedFaces = groupFilledFacesForRendering(result).find((group) => group.color === '#123456')?.polygons ?? [];
 
       summaries.push({
         filledFaceKeyCount: result.filledFaceKeys.length,

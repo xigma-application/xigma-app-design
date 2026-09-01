@@ -65,8 +65,9 @@ derivation pipeline hundreds of times for a single mouse gesture.
 
 ### 3.3 — Thick-stroke caching, a first (partial) node-bounds fix, same-color fill batching (`75de2da`)
 
-`getThickVectorPathVertices.ts` gained its first cache; `groupFilledFacesByColor.ts` (new) batches
-same-color faces into one `drawVectorFill` call instead of one per face, used by `drawVectorNode.ts`.
+`getThickVectorPathVertices.ts` gained its first cache; `groupFilledFacesByColor.ts` (new, later renamed
+`groupFilledFacesForRendering.ts` — see [[vector-network]] §73) batches same-color faces into one
+`drawVectorFill` call instead of one per face, used by `drawVectorNode.ts`.
 `getVectorNodeBounds.ts` got a partial fix at this point (still not the full WeakMap it needed — that
 came in §3.5).
 
@@ -387,7 +388,7 @@ out of scope for a long time — no precedent anywhere in the renderer (only 4 s
 app-wide, rebound per-primitive every frame, [[canvas-rendering-pipeline]] §3/§8) — a materially larger
 rendering-architecture change than anything else in this doc. **A first, narrow slice now exists**
 (2026-08-28, Roadmap 2.0.0 Etap 1): `drawVectorNode/getOrCreateFaceBuffer.ts` gives each **stable,
-committed** vector node's fill faces (`groupFilledFacesByColor` → `getVectorFillLoopPoints`, already
+committed** vector node's fill faces (`groupFilledFacesForRendering` → `getVectorFillLoopPoints`, already
 cluster-cached per §5.3, so a face's `TPoint[]` array reference is itself a valid stable-across-frames
 cache key) their own persistent `WebGLBuffer`, uploaded once via `gl.createBuffer`/`bufferData` on first
 draw and just re-bound (no re-upload) on every subsequent frame the face array reference is unchanged —
@@ -458,7 +459,7 @@ actually filled.
 That fix surfaced a second, more interesting one: the *first* re-profile used a distinct random
 `fillColorOverrideByKey` per square. Self-time exploded — `vertexAttribPointer` alone hit 2,224ms/50.4%
 of the capture, with `uniform4fv`/`stencilFunc`/`stencilOp` making up another ~30% — because
-`groupFilledFacesByColor.ts` (§3.3) batches same-color faces into **one** `drawVectorFill` call, and a
+`groupFilledFacesForRendering.ts` (§3.3, since renamed — [[vector-network]] §73) batches same-color faces into **one** `drawVectorFill` call, and a
 unique color per face defeats that entirely: 3,000 squares became 3,000 separate calls instead of one,
 each re-paying the full per-call stencil-test setup/teardown (`clear`→`enable`→toggle→`disable`) that
 was meant to be paid once per frame, not once per shape. Reverting the generator to one shared fill
@@ -716,7 +717,7 @@ the same way `faceBufferCache`/`strokeBufferCache` are, starting from `drawScene
 ## File index
 
 - Caching: `utils/canvas/vectorNetwork/getVectorNodeBounds.ts`,
-  `Canvas/utils/getRenderedVectorNode.ts`, `utils/canvas/drawVectorNode/groupFilledFacesByColor.ts`,
+  `Canvas/utils/getRenderedVectorNode.ts`, `utils/canvas/drawVectorNode/groupFilledFacesForRendering.ts`,
   `utils/canvas/vectorNetwork/getThickVectorPathVertices/getThickVectorPathVertices.ts`
 - Throttled dispatch: `Canvas/utils/{scheduleThrottledDispatch,flushThrottledDispatch}.ts`
 - Drag snapshot: `useSelectionTool/utils/handlePointerDown/armDrag/{armDrag,captureDraggedVectorNodeSnapshots,getDragNodeOrigins}.ts`,

@@ -169,6 +169,7 @@ export type TVectorNode = {
   fillColorOverrideByKey?: Record<string, string>;
   filledFaceKeys: string[];
   hidden?: boolean;
+  holeParentByKey?: Record<string, string>;
   id: string;
   locked?: boolean;
   name: string;

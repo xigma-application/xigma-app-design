@@ -27,7 +27,13 @@ export const closeLoopOntoAnotherNodeEdge = (
   dragStartRef: RefObject<TPoint | null>,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
 ): void => {
-  const { newVertexId, segments: targetSegments, vertices: targetVertices } = splitVectorSegment(targetNode, targetEdgeSegmentId, t);
+  const {
+    fillColorOverrideByKey: targetFillColorOverrideByKey,
+    filledFaceKeys: targetFilledFaceKeys,
+    newVertexId,
+    segments: targetSegments,
+    vertices: targetVertices,
+  } = splitVectorSegment(targetNode, targetEdgeSegmentId, t);
   const connectingSegment: TVectorSegment = {
     endId: newVertexId,
     id: connectingSegmentId,
@@ -38,9 +44,10 @@ export const closeLoopOntoAnotherNodeEdge = (
   const vertices = { ...sourceNode.vertices, ...targetVertices };
   const segments = { ...sourceNode.segments, ...targetSegments, [connectingSegmentId]: connectingSegment };
   const vertexHandleModes = { ...sourceNode.vertexHandleModes, ...targetNode.vertexHandleModes };
-  const filledFaceKeys = Array.from(new Set([...sourceNode.filledFaceKeys, ...targetNode.filledFaceKeys]));
+  const filledFaceKeys = Array.from(new Set([...sourceNode.filledFaceKeys, ...targetFilledFaceKeys]));
+  const fillColorOverrideByKey = { ...sourceNode.fillColorOverrideByKey, ...targetFillColorOverrideByKey };
 
-  dispatch(updateNode({ changes: { filledFaceKeys, segments, vertexHandleModes, vertices }, id: sourceNode.id }));
+  dispatch(updateNode({ changes: { fillColorOverrideByKey, filledFaceKeys, segments, vertexHandleModes, vertices }, id: sourceNode.id }));
   dispatch(deleteNode(targetNode.id));
   dispatch(setVectorEditingNodeIds(vectorEditingNodeIds.filter((id) => id !== targetNode.id)));
   dispatch(setPenActiveVertexId(null));

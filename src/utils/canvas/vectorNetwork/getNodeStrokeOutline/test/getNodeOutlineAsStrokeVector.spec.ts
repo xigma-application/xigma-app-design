@@ -4,7 +4,7 @@ import { TLineNode, TRectangleNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getNodeOutlineAsStrokeVector } from '../getNodeOutlineAsStrokeVector';
-import { groupFilledFacesByColor } from 'utils/canvas/drawVectorNode/groupFilledFacesByColor';
+import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 
 const buildRectangle = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
   fill: '#ff0000',
@@ -44,8 +44,8 @@ describe('getNodeOutlineAsStrokeVector', () => {
 
     // every declared face must actually resolve back to real points, not just exist as a key —
     // this is exactly the check that would have caught the bridged-ring rendering bug
-    const facesByColor = groupFilledFacesByColor(result!);
-    const totalResolvedFaces = [...facesByColor.values()].reduce((sum, faces) => sum + faces.length, 0);
+    const facesByColor = groupFilledFacesForRendering(result!);
+    const totalResolvedFaces = facesByColor.reduce((sum, group) => sum + group.polygons.length, 0);
 
     expect(totalResolvedFaces).toBe(result?.filledFaceKeys.length);
   });

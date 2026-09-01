@@ -4666,10 +4666,12 @@ per resulting piece.
      *only* of capsule segments — a brush stroke that never touched any boundary, floating disjoint
      inside a fill. Filling that in would need it to render in the *same* color as the shape it's
      meant to punch a hole in, but each loop's color is an independent hash of its own key
-     (`getVectorFillColorForLoopKey` — see `groupFilledFacesByColor.ts`) with no shared-color
+     (`getVectorFillColorForLoopKey` — see `groupFilledFacesForRendering.ts`) with no shared-color
      mechanism between two unrelated loops; counting it as a survivor paints a solid, wrong-colored
      blob instead of a hole. Until the color model supports a real hole, a fully-interior stroke stays
-     bare unfilled geometry — a real, undoable cut, just not a filled one.
+     bare unfilled geometry — a real, undoable cut, just not a filled one. (§73 later adds a real,
+     explicitly-tracked hole↔parent relationship, but only wired into the Paint click path — this
+     erase/capsule pipeline was never revisited to use it.)
   4. Return `null` (the pipeline's "no-op" contract) when nothing was dropped and nothing new was
      kept — the brush genuinely missed everything.
 - **`severVectorSegmentAtPoint.ts`** (`cutVectorNetwork/`, shared with Cut) — no longer touched by
@@ -4743,7 +4745,7 @@ Two problems surfaced only by *watching a real drag*, not by unit tests:
   whole color wheel for as long as the mouse was held — even on a node with a perfectly stable,
   already-established color. The fix is a render-only color pin, not a data change:
   `TVectorNode.fillColorOverrideByKey?: Record<string, string>` (a new, always-optional field — no
-  real, persisted node ever sets it) and `groupFilledFacesByColor.ts` checks
+  real, persisted node ever sets it) and `groupFilledFacesForRendering.ts` checks
   `renderedNode.fillColorOverrideByKey?.[key] ?? getVectorFillColorForLoopKey(key)` before falling
   back to the hash. `getErasePreviewNodes.ts` builds that map from `erased.survivingFaces`'s
   `{ key, originalKey }` pairs — each surviving face is pinned to *its own* original counterpart's
@@ -4860,7 +4862,7 @@ pieces bound a face produces a **new** key, and nothing was carrying the old key
 
 **One shared primitive added first**: `getEffectiveVectorFillColor(node, loopKey)`
 (`utils/canvas/vectorNetwork/getEffectiveVectorFillColor.ts`) — exactly the `?? getVectorFillColorForLoopKey(key)`
-fallback `groupFilledFacesByColor.ts` (the renderer) and `armVectorPaintOnPointerDown.ts` already did
+fallback `groupFilledFacesForRendering.ts` (the renderer) and `armVectorPaintOnPointerDown.ts` already did
 inline, now the one canonical way to ask "what color does this face actually render as right now,
 override or hash." The renderer was switched to call it instead of repeating the `??` itself.
 
@@ -5031,6 +5033,93 @@ Pieces:
 `editingWidthLabelRef` lives on `TVectorWidthRefs` and is cleared in `useSelectionTool.ts`'s
 tool-switch cleanup alongside the other width refs. Coverage: unit 100% (component, hook, both utils,
 the arm resolver, plus an integration case in `armResolvers.spec.ts`).
+
+## 72. Pen-tool mid-segment split left a stale `filledFaceKeys` entry — §51's piece-identity resolver only covers virtual crossing splits, not a literal new-segment-id split
+
+Live-reported: attaching a fresh Pen stroke to the *middle* of an already-painted triangle's side made
+the whole face's fill vanish. §51's piece-identity mechanism is designed exactly for "a segment gets
+subdivided out from under a stored key" — but it only covers subdivision via `splitSegmentAtCrossings.ts`
+(§44), which keeps the **same real segment id** for every sub-piece (`` `${segment.id}#${index}` ``) so
+`getVectorPieceBoundaryKeys.ts` can still group them and walk between two stored boundaries. `splitVectorSegment.ts`
+(`Canvas/hooks/useDrawPenTool/utils/handlePointerDown/`) — used whenever a new fragment/segment is started
+or closed onto the *middle* of an existing edge (`startVectorFragment.ts`, `continueVectorNetwork/closeLoopOntoEdge.ts`,
+`closeLoopOntoAnotherNodeEdge.ts`) — does something different: it keeps the original segment's own id for
+the first half but mints a brand-new, unrelated nanoid for the second half. A stored piece key like
+`` `${segmentId}[v:${originalStart}|v:${originalEnd}]` `` now names a segment id that only reaches a new
+midpoint vertex directly; the far endpoint is a *different* segment id's problem, entirely outside
+`getVectorPieceBoundaryKeys`'s same-real-id grouping — `resolvePieceKeyToUnit.ts` can't find a run
+containing both boundaries and returns `null`, and `computeLoopPoints.ts`'s `hasEveryUnit` check then
+nukes the whole face.
+
+Fixed at the source of the split, not in the resolver: `remapFilledFaceKeysAfterSegmentSplit.ts`
+(`utils/canvas/vectorNetwork/`) rewrites any stale piece — one whose boundaries are exactly the original
+segment's own two real vertices — into the two real pieces the split just produced (`originalId[v:start|v:new]`
++ `newId[v:new|v:end]`), recomputes that loop's key via `getVectorFillLoopKey`, and carries any
+`fillColorOverrideByKey` entry across to the new key. `splitVectorSegment.ts` now returns
+`filledFaceKeys`/`fillColorOverrideByKey` alongside `segments`/`vertices`, and all three call sites thread
+them into their `updateNode` dispatch (`closeLoopOntoAnotherNodeEdge.ts` splits the *target* node, so its
+remapped output merges into the survivor's own maps, fixing a pre-existing gap where the target's
+`fillColorOverrideByKey` wasn't merged at all). Scoped deliberately to the one case that actually occurs
+here — a piece whose boundaries are two plain real vertices (`v:...`) — not a piece already mid-crossing
+(a `x:...` boundary), since a segment reaching this literal record-level split with pre-existing virtual
+crossings on it isn't a case this pen-tool path produces today.
+
+Coverage: `remapFilledFaceKeysAfterSegmentSplit.spec.ts` (stale-key rewrite, color carry-over, an
+unrelated key left untouched, an already-migrated key left untouched), a `splitVectorSegment.spec.ts` case
+exercising the real triangle-side-split scenario end to end (matching pieces as a set, since the new
+vertex/segment ids are random nanoids).
+
+## 73. An explicit hole↔parent relationship — the same-color XOR trick made deliberate instead of coincidental
+
+Live-reported, in three parts: (1) painting a face nested inside an already-filled ancestor of the exact
+same color correctly read as "cut a hole" (§67's same-color-cancels mechanism, also how a glyph's "o"
+gets its counter — a plain solid outer face and a plain solid inner face of one color, XORed by
+`drawVectorNode.ts`'s per-color stencil grouping); (2) but the click that produced it was really "add B to
+`filledFaceKeys` with whatever `selectPaintColor(state)` the palette currently has" — the hole was a
+coincidence of that color happening to equal the ancestor's, not anything tracked; (3) dragging that same
+now-filled B into a *different* shape C reproduced the exact same accidental hole whenever C happened to
+share that literal color too (overwhelmingly likely in practice, since every new fill defaults to the same
+palette swatch) — even though B's fill was never meant to relate to C at all.
+
+**New tracked relationship, not a change to the general color-grouping mechanism.** `TVectorNode` gains
+`holeParentByKey?: Record<string, string>` (child loop key → parent loop key). Painting a face already
+recognizes its own further-nested unfilled children (§ the A/B nested-paint feature preceding this one,
+`getNestedUnfilledLoopKeys`); it now also checks the *other* direction —
+`getContainingFilledLoopKey.ts` (`utils/canvas/vectorNetwork/`) finds whether the clicked face itself sits
+inside some other already-filled face (smallest of any matching ancestors, for a face nested several
+levels deep), reusing the exact same containment heuristic as `getNestedUnfilledLoopKeys` (`getPolygonArea`
+strict-larger filter + one `getPointInsideFace` interior point tested via `isPointInPolygonVertices`, not a
+full polygon-clip test). When found, `armVectorPaintOnPointerDown.ts` inherits **the parent's own current
+color** (not the palette's `selectPaintColor`) and records `holeParentByKey[newLoopKey] = parentKey`.
+
+**Rendering only ever cancels a tracked hole against its own specific parent — never against an unrelated
+face of the same literal color.** `groupFilledFacesByColor.ts` is replaced by
+`groupFilledFacesForRendering.ts` (`utils/canvas/drawVectorNode/`, same folder, new name since the return
+shape changed to `{color, polygons}[]` instead of `Map<color, points[]>` — every caller updated:
+`drawVectorNode.ts`, and the three snapshot builders, `captureVectorNode{Drag,Resize,Rotate}Snapshot.ts`).
+A face with a `holeParentByKey` entry only joins its parent's own color-keyed render group (so it actually
+cancels against it, indistinguishable from §67's original coincidental case) while **all three** of these
+still hold, re-checked fresh every render, nothing pre-computed or invalidated eagerly: the parent is still
+in `filledFaceKeys` and resolvable, the child is still geometrically nested inside the parent's *current*
+polygon (same `getPointInsideFace`/`isPointInPolygonVertices` test), and the child's effective color still
+equals the parent's. The moment any one breaks — the child was dragged out of the parent, or either side's
+color changed — the child gets its **own, unique** render group (keyed by its loop key, not by color), so
+it renders independently with whatever color it currently has instead of silently cancelling against
+whatever unrelated face happens to share that hex value now. A plain face with no `holeParentByKey` entry
+at all (every glyph counter, every ordinary manually-painted fill) is completely unaffected — still grouped
+by literal color exactly as before, which is what keeps §67's original mechanism and every font-outline
+face (§ font-outline docs) working unchanged.
+
+**Deliberately single-level.** The active-hole check only looks at one parent hop; a hole nested inside
+another hole isn't resolved recursively. Nothing in this feature's actual scope produces that shape yet, so
+it's left as a known, called-out limitation rather than over-built ahead of a real case.
+
+Coverage: `getContainingFilledLoopKey.spec.ts` (finds the containing key, null when none contains it, picks
+the smallest of several nested ancestors, rejects a same-or-smaller-area candidate), `groupFilledFacesForRendering.spec.ts`
+(ordinary same-color merge unchanged, different colors stay separate, an active hole merges into its
+parent's group, a hole isolated once no longer nested in its parent, a hole isolated once its parent's
+color has drifted), plus an `armResolvers.spec.ts` case asserting the inherited color and the recorded
+`holeParentByKey` entry end to end against a real disjoint-cluster A/B fixture.
 
 ## Related
 

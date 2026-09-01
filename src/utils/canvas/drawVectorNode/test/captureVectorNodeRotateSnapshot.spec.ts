@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { captureVectorNodeRotateSnapshot } from '../captureVectorNodeRotateSnapshot';
 
 const getRenderedVectorNodeMock = vi.fn();
-const groupFilledFacesByColorMock = vi.fn();
+const groupFilledFacesForRenderingMock = vi.fn();
 const flattenVectorSegmentsMock = vi.fn();
 const getThickVectorPathVerticesMock = vi.fn();
 const getVectorNodeBoundsMock = vi.fn();
@@ -14,8 +14,8 @@ const getVectorNodeBoundsMock = vi.fn();
 vi.mock('components/Design/Canvas/utils/getRenderedVectorNode', () => ({
   getRenderedVectorNode: (...args: unknown[]): unknown => getRenderedVectorNodeMock(...args),
 }));
-vi.mock('../groupFilledFacesByColor', () => ({
-  groupFilledFacesByColor: (...args: unknown[]): unknown => groupFilledFacesByColorMock(...args),
+vi.mock('../groupFilledFacesForRendering', () => ({
+  groupFilledFacesForRendering: (...args: unknown[]): unknown => groupFilledFacesForRenderingMock(...args),
 }));
 vi.mock('../../vectorNetwork/flattenVectorSegments', () => ({
   flattenVectorSegments: (...args: unknown[]): unknown => flattenVectorSegmentsMock(...args),
@@ -45,11 +45,11 @@ const baseNode: TVectorNode = {
 describe('captureVectorNodeRotateSnapshot', () => {
   beforeEach(() => {
     getRenderedVectorNodeMock.mockReset();
-    groupFilledFacesByColorMock.mockReset();
+    groupFilledFacesForRenderingMock.mockReset();
     flattenVectorSegmentsMock.mockReset();
     getThickVectorPathVerticesMock.mockReset();
     getVectorNodeBoundsMock.mockReset();
-    groupFilledFacesByColorMock.mockReturnValue(new Map());
+    groupFilledFacesForRenderingMock.mockReturnValue([]);
     flattenVectorSegmentsMock.mockReturnValue([]);
     getThickVectorPathVerticesMock.mockReturnValue([]);
     getVectorNodeBoundsMock.mockReturnValue({ height: 0, width: 0, x: 0, y: 0 });
@@ -61,7 +61,7 @@ describe('captureVectorNodeRotateSnapshot', () => {
     const points = [[{ x: 0, y: 0 }]];
 
     getRenderedVectorNodeMock.mockReturnValue(renderedNode);
-    groupFilledFacesByColorMock.mockReturnValue(new Map([['#ff0000', points]]));
+    groupFilledFacesForRenderingMock.mockReturnValue([{ color: '#ff0000', polygons: points }]);
     getThickVectorPathVerticesMock.mockReturnValue([0, 0, 10, 0, 10, 1]);
     getVectorNodeBoundsMock.mockReturnValue({ height: 20, width: 40, x: 10, y: 10 });
 
@@ -70,7 +70,7 @@ describe('captureVectorNodeRotateSnapshot', () => {
 
     // result
     expect(getRenderedVectorNodeMock).toHaveBeenCalledWith(baseNode);
-    expect(groupFilledFacesByColorMock).toHaveBeenCalledWith(renderedNode);
+    expect(groupFilledFacesForRenderingMock).toHaveBeenCalledWith(renderedNode);
     expect(flattenVectorSegmentsMock).toHaveBeenCalledWith(renderedNode);
     expect(getVectorNodeBoundsMock).toHaveBeenCalledWith(baseNode);
     expect(snapshot).toEqual({

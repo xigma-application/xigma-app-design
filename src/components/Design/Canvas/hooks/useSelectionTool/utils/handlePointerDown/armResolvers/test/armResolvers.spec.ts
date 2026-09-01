@@ -1251,6 +1251,53 @@ describe('armVectorPaintOnPointerDown', () => {
     expect(ctx.canvasRefs.vectorPaint.isVectorPaintRemoveRef.current).toBe(false);
   });
 
+  it('should record the clicked face as an explicit hole of the already-filled ancestor it sits inside, inheriting that ancestor’s color instead of the palette’s current paint color', () => {
+    // mock — A is a big filled square; B is a smaller, fully disjoint square nested inside it, unfilled.
+    // A spot that already looks filled (because A covers it) must cut a real, tracked hole rather than
+    // just adding B with whatever color happens to be selected in the palette.
+    const nodeId = addVectorNode(
+      {
+        sa1: { endId: 'a2', id: 'sa1', startId: 'a1', tangentEnd: null, tangentStart: null },
+        sa2: { endId: 'a3', id: 'sa2', startId: 'a2', tangentEnd: null, tangentStart: null },
+        sa3: { endId: 'a4', id: 'sa3', startId: 'a3', tangentEnd: null, tangentStart: null },
+        sa4: { endId: 'a1', id: 'sa4', startId: 'a4', tangentEnd: null, tangentStart: null },
+        sb1: { endId: 'b2', id: 'sb1', startId: 'b1', tangentEnd: null, tangentStart: null },
+        sb2: { endId: 'b3', id: 'sb2', startId: 'b2', tangentEnd: null, tangentStart: null },
+        sb3: { endId: 'b4', id: 'sb3', startId: 'b3', tangentEnd: null, tangentStart: null },
+        sb4: { endId: 'b1', id: 'sb4', startId: 'b4', tangentEnd: null, tangentStart: null },
+      },
+      {
+        a1: { id: 'a1', x: 0, y: 0 },
+        a2: { id: 'a2', x: 200, y: 0 },
+        a3: { id: 'a3', x: 200, y: 200 },
+        a4: { id: 'a4', x: 0, y: 200 },
+        b1: { id: 'b1', x: 50, y: 50 },
+        b2: { id: 'b2', x: 100, y: 50 },
+        b3: { id: 'b3', x: 100, y: 100 },
+        b4: { id: 'b4', x: 50, y: 100 },
+      },
+    );
+    const aKey = 'sa1[v:a1|v:a2],sa2[v:a2|v:a3],sa3[v:a3|v:a4],sa4[v:a1|v:a4]';
+    const bKey = 'sb1[v:b1|v:b2],sb2[v:b2|v:b3],sb3[v:b3|v:b4],sb4[v:b1|v:b4]';
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+    store.dispatch(updateNode({ changes: { fillColorOverrideByKey: { [aKey]: '#d9d9d9' }, filledFaceKeys: [aKey] }, id: nodeId }));
+    store.dispatch(setPaintColor('#ff0000'));
+
+    // before — click inside B, which sits fully inside A's already-filled area
+    const ctx = createContext({ activeTool: ToolName.paint, point: { x: 75, y: 75 } });
+
+    // result
+    expect(armVectorPaintOnPointerDown(ctx)).toBe(true);
+
+    const action = (ctx.dispatch as ReturnType<typeof vi.fn>).mock.calls[0][0] as ReturnType<typeof updateNode>;
+    const changes = action.payload.changes as Partial<TVectorNode>;
+
+    expect(changes.filledFaceKeys).toEqual(expect.arrayContaining([aKey, bKey]));
+    expect(changes.fillColorOverrideByKey?.[bKey]).toBe('#d9d9d9');
+    expect(changes.holeParentByKey).toEqual({ [bKey]: aKey });
+  });
+
   it('should bake a crossing the clicked face depends on into a real, persisted vertex (regression: painting across a crossing that only existed virtually made the fill disappear the moment the node was cut later)', () => {
     // mock — a square (a-b-c-d) plus a separate horizontal line crossing its left and right edges, both
     // living in the same node's segments/vertices, exactly like drawing a second Pen stroke across an

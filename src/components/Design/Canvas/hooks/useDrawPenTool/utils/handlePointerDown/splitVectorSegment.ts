@@ -4,6 +4,7 @@ import { nanoid } from '@reduxjs/toolkit';
 import { TVectorNode, TVectorSegment, TVectorVertex } from 'types/design/types';
 
 // utils
+import { remapFilledFaceKeysAfterSegmentSplit } from 'utils/canvas/vectorNetwork/remapFilledFaceKeysAfterSegmentSplit';
 import { roundVectorPoint } from 'utils/canvas/vectorNetwork/roundVectorPoint';
 import { splitCubicBezier } from 'utils/canvas/vectorNetwork/splitCubicBezier';
 
@@ -11,7 +12,13 @@ export const splitVectorSegment = (
   node: TVectorNode,
   segmentId: string,
   t: number,
-): { newVertexId: string; segments: Record<string, TVectorSegment>; vertices: Record<string, TVectorVertex> } => {
+): {
+  fillColorOverrideByKey: Record<string, string>;
+  filledFaceKeys: string[];
+  newVertexId: string;
+  segments: Record<string, TVectorSegment>;
+  vertices: Record<string, TVectorVertex>;
+} => {
   const segment = node.segments[segmentId];
   const start = node.vertices[segment.startId];
   const end = node.vertices[segment.endId];
@@ -37,6 +44,13 @@ export const splitVectorSegment = (
     },
   };
   const vertices = { ...node.vertices, [newVertexId]: { id: newVertexId, ...roundVectorPoint(split.point) } };
+  const { fillColorOverrideByKey, filledFaceKeys } = remapFilledFaceKeysAfterSegmentSplit(node.filledFaceKeys, node.fillColorOverrideByKey, {
+    newSegmentId,
+    newVertexId,
+    originalEndId: segment.endId,
+    originalSegmentId: segmentId,
+    originalStartId: segment.startId,
+  });
 
-  return { newVertexId, segments, vertices };
+  return { fillColorOverrideByKey, filledFaceKeys, newVertexId, segments, vertices };
 };

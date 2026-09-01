@@ -10,7 +10,7 @@ import { drawVectorVariableStroke } from './drawVectorVariableStroke';
 import { getRenderedVectorNode } from 'components/Design/Canvas/utils/getRenderedVectorNode';
 import { getVectorNodeBounds } from '../vectorNetwork/getVectorNodeBounds';
 import { getVectorNodeThickStrokeVertices } from '../vectorNetwork/getVectorNodeThickStrokeVertices/getVectorNodeThickStrokeVertices';
-import { groupFilledFacesByColor } from './groupFilledFacesByColor';
+import { groupFilledFacesForRendering } from './groupFilledFacesForRendering';
 
 export const drawVectorNode = (
   gl: WebGL2RenderingContext,
@@ -26,8 +26,8 @@ export const drawVectorNode = (
   const renderedNode = getRenderedVectorNode(node);
   const nodeBounds = getVectorNodeBounds(renderedNode);
 
-  groupFilledFacesByColor(renderedNode).forEach((faces, color) => {
-    drawVectorFill(gl, program, buffer, faceBufferCache, nodeBounds, faces, color, canvasWidth, canvasHeight, viewport);
+  groupFilledFacesForRendering(renderedNode).forEach(({ color, polygons }) => {
+    drawVectorFill(gl, program, buffer, faceBufferCache, nodeBounds, polygons, color, canvasWidth, canvasHeight, viewport);
   });
 
   if (renderedNode.widthProfile) {

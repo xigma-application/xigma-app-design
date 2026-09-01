@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TVectorNode } from 'types/design/types';
 
 // utils
+import { getVectorFillPieceKey } from 'utils/canvas/vectorNetwork/getVectorFillPieceKey';
 import { splitVectorSegment } from '../splitVectorSegment';
 
 const node: TVectorNode = {
@@ -64,5 +65,43 @@ describe('splitVectorSegment', () => {
     expect(segments.s1).toMatchObject({ tangentEnd: { x: -23.75, y: 0 }, tangentStart: { x: 2.5, y: 0 } });
     expect(segments[newSegmentId]).toMatchObject({ tangentEnd: { x: -2.5, y: 0 }, tangentStart: { x: 23.75, y: 0 } });
     expect(segments[newSegmentId].startId).toBe(newVertexId);
+  });
+
+  it('should remap a filled face whose stored key spans the whole segment being split, so the fill does not go stale', () => {
+    // mock — v1(0,0) to v2(100,0) is one side of an already-filled triangle
+    const filledNode: TVectorNode = {
+      ...node,
+      fillColorOverrideByKey: { 's1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]': '#D9D9D9' },
+      filledFaceKeys: ['s1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]'],
+      segments: {
+        ...node.segments,
+        s2: { endId: 'v3', id: 's2', startId: 'v2', tangentEnd: null, tangentStart: null },
+        s3: { endId: 'v3', id: 's3', startId: 'v1', tangentEnd: null, tangentStart: null },
+      },
+    };
+
+    // before
+    const { fillColorOverrideByKey, filledFaceKeys, newVertexId, newSegmentId } = (() => {
+      const result = splitVectorSegment(filledNode, 's1', 0.5);
+      const splitOffId = Object.keys(result.segments).find((id) => id !== 's1' && id !== 's2' && id !== 's3') as string;
+
+      return { ...result, newSegmentId: splitOffId };
+    })();
+
+    // result — the old key referencing s1's full v1->v2 span is gone; the recomputed key threads the
+    // new midpoint vertex through both halves, and the color rides along to the new key. Both piece
+    // order and each piece's internal boundary order are alphabetical (see getVectorFillPieceKey/
+    // getVectorFillLoopKey) and newVertexId/newSegmentId are random nanoids, so build the expected
+    // pieces with the same helper rather than assuming where they sort relative to v1/v2/s1-s3.
+    const expectedPieces = [
+      getVectorFillPieceKey('s1', { end: `v:${newVertexId}`, start: 'v:v1' }),
+      getVectorFillPieceKey('s2', { end: 'v:v3', start: 'v:v2' }),
+      getVectorFillPieceKey('s3', { end: 'v:v3', start: 'v:v1' }),
+      getVectorFillPieceKey(newSegmentId, { end: `v:${newVertexId}`, start: 'v:v2' }),
+    ];
+
+    expect(filledFaceKeys).toHaveLength(1);
+    expect(new Set(filledFaceKeys[0].split(','))).toEqual(new Set(expectedPieces));
+    expect(fillColorOverrideByKey).toEqual({ [filledFaceKeys[0]]: '#D9D9D9' });
   });
 });

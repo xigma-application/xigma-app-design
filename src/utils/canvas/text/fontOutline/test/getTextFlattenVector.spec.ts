@@ -9,7 +9,7 @@ vi.mock('../getTextGlyphContours', () => ({ getTextGlyphContours }));
 
 // utils
 import { getTextFlattenVector } from '../getTextFlattenVector';
-import { groupFilledFacesByColor } from 'utils/canvas/drawVectorNode/groupFilledFacesByColor';
+import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 
 const ATLAS = {} as TGlyphAtlasJson;
 
@@ -78,7 +78,7 @@ describe('getTextFlattenVector', () => {
     // "I" contributes 1 face, "o" contributes 2 (outer + its own hole) — 3 faces total, all
     // independently resolvable back to real points (not just present as keys)
     expect(result?.filledFaceKeys).toHaveLength(3);
-    expect(groupFilledFacesByColor(result!).get('#123456')).toHaveLength(3);
+    expect(groupFilledFacesForRendering(result!).find((group) => group.color === '#123456')?.polygons).toHaveLength(3);
   });
 
   it('should return null when there are no visible glyphs', async () => {
