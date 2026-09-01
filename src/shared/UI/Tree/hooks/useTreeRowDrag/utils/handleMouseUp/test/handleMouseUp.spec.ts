@@ -99,8 +99,8 @@ describe('handleMouseUp', () => {
     expect(dragState.setDropInsideIndex).toHaveBeenCalledWith(null);
   });
 
-  it('should nest the dragged items as the first child of the drop-inside container', () => {
-    // mock
+  it('should nest the dragged items into an empty/collapsed drop-inside container at index 0', () => {
+    // mock — 'g' has no rendered children, so the front position is index 0
     const onReorder = vi.fn();
     const rows = [buildRow('a'), buildRow('g')];
     const dragState = buildDragState({
@@ -113,6 +113,24 @@ describe('handleMouseUp', () => {
 
     // result
     expect(onReorder).toHaveBeenCalledWith([{ id: 'a' }], { id: 'g' }, 0);
+  });
+
+  it('should nest the dragged items at the front (after its current children) of an expanded drop-inside container', () => {
+    // mock — 'g' already shows two children, so the dragged row lands in front of them (index 2
+    // in the back-to-front array they get spliced into)
+    const onReorder = vi.fn();
+    const group = { id: 'g' };
+    const rows = [buildRow('a'), buildRow('g'), buildRow('x', 1, group), buildRow('y', 1, group)];
+    const dragState = buildDragState({
+      armedRef: { current: { depth: 0, ids: ['a'], indices: [0], startY: 0 } },
+      dropInsideIndex: 1,
+    });
+
+    // action
+    handleMouseUp(rows, dragState, onReorder);
+
+    // result
+    expect(onReorder).toHaveBeenCalledWith([{ id: 'a' }], { id: 'g' }, 2);
   });
 
   it('should ignore a drop-inside that resolves to no dragged rows', () => {

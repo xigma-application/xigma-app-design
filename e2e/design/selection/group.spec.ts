@@ -228,7 +228,9 @@ test('dragging a group child out in the Layers panel moves it back to the top le
   // from before the virtualizer re-measured the newly-expanded row count
   await expect(rows).toHaveCount(3);
 
-  const startBox = await rows.nth(1).boundingBox(); // depth-1 row for the group's first child
+  // rows are [group, childB, childA] (children shown front-most first); nth(2) is the bottom
+  // child row, which is childIds[0]
+  const startBox = await rows.nth(2).boundingBox();
   const lastRowBox = await rows.nth(2).boundingBox();
   const containerBox = await rowsContainer.boundingBox();
 
@@ -380,11 +382,12 @@ test('dragging a top-level rectangle into a group in the Layers panel reparents 
   const layersTree = page.locator('[class*="LayersTree"]').first();
   const rows = layersTree.locator('[class*="Tree__row_"]');
 
-  // rows are now [group(depth0), A(depth1), B(depth1), C(depth0)] — 4 total
+  // rows are now [C(depth0), group(depth0), B(depth1), A(depth1)] — 4 total (children shown
+  // front-most first)
   await expect(rows).toHaveCount(4);
 
-  const cRowBox = await rows.nth(3).boundingBox();
-  const bRowBox = await rows.nth(2).boundingBox(); // the gap right before B pins the drop depth to 1
+  const cRowBox = await rows.nth(0).boundingBox();
+  const bRowBox = await rows.nth(2).boundingBox(); // its indented x pins the drop depth to 1
 
   if (!cRowBox || !bRowBox) {
     throw new Error('Layers tree rows not found');
@@ -392,7 +395,7 @@ test('dragging a top-level rectangle into a group in the Layers panel reparents 
 
   await page.mouse.move(cRowBox.x + cRowBox.width / 2, cRowBox.y + cRowBox.height / 2);
   await page.mouse.down();
-  await page.mouse.move(bRowBox.x + bRowBox.width / 2, bRowBox.y, { steps: 10 }); // land right at B's own top edge
+  await page.mouse.move(bRowBox.x + bRowBox.width / 2, bRowBox.y + bRowBox.height, { steps: 10 }); // land at the gap after B, before A
   await page.waitForTimeout(100); // let useTreeRowDrag's mouseup listener resubscribe to the final drop state
   await page.mouse.up();
 

@@ -23,7 +23,8 @@ export const useTreeSource = (): TUseTreeSourceResult => {
   const getChildren = useCallback(
     (item: TSceneNode): TSceneNode[] | undefined => {
       if (item.type === NodeType.group) {
-        return item.childIds
+        return [...item.childIds]
+          .reverse()
           .map((id) => nodes[id])
           .filter((node): node is TSceneNode => Boolean(node) && !isTextPathGuideNode(node, nodes));
       }
@@ -34,7 +35,11 @@ export const useTreeSource = (): TUseTreeSourceResult => {
   );
 
   const roots = useMemo(
-    () => rootOrder.map((id) => nodes[id]).filter((node): node is TSceneNode => Boolean(node) && !isTextPathGuideNode(node, nodes)),
+    () =>
+      [...rootOrder]
+        .reverse()
+        .map((id) => nodes[id])
+        .filter((node): node is TSceneNode => Boolean(node) && !isTextPathGuideNode(node, nodes)),
     [nodes, rootOrder],
   );
 

@@ -102,13 +102,13 @@ test('right-clicking an unselected layer selects it and opens its own context me
   await designPage.goto('e2e-test-layers-panel-context-menu-select');
   await expect(designPage.canvas).toBeVisible();
 
-  await designPage.drawRectangle(700, 100, 740, 140); // A, row 0
-  await designPage.drawRectangle(760, 100, 800, 140); // B, row 1 — drawn last, so it starts selected instead of A
+  await designPage.drawRectangle(700, 100, 740, 140); // A — drawn first, so it sits at the bottom of the list
+  await designPage.drawRectangle(760, 100, 800, 140); // B — drawn last, so it sits at the top row and starts selected
 
   const layersTree = page.locator('[class*="LayersTree"]').first();
   const rows = layersTree.locator('[class*="Tree__row_"]');
-  const rowA = rows.nth(0);
-  const rowB = rows.nth(1);
+  const rowB = rows.nth(0);
+  const rowA = rows.nth(1);
 
   await expect(rowA.locator('[aria-selected="true"]')).toHaveCount(0); // A starts unselected
 

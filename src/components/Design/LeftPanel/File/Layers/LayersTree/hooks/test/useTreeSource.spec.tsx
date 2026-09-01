@@ -43,8 +43,17 @@ describe('useTreeSource', () => {
     expect(result.current.roots.map((node) => node.id)).toEqual(expect.arrayContaining([idA, idB]));
   });
 
-  it("should return a group's children for a group node", () => {
-    // mock
+  it('should list roots front-most (last in rootOrder) first, reversed relative to rootOrder', () => {
+    // before — idA was added before idB, so rootOrder ends with [..., idA, idB] (idB in front)
+    const { result } = renderHook(() => useTreeSource(), { wrapper });
+    const rootIds = result.current.roots.map((node) => node.id);
+
+    // result
+    expect(rootIds.indexOf(idB)).toBeLessThan(rootIds.indexOf(idA));
+  });
+
+  it("should return a group's children for a group node, front-most (last in childIds) first", () => {
+    // mock — idA was added before idB, so childIds ends up [idA, idB] (idB in front)
     store.dispatch(setSelection([idA, idB]));
     store.dispatch(groupNodes());
     const [groupId] = selectActivePage(store.getState()).selectedIds;
@@ -53,8 +62,8 @@ describe('useTreeSource', () => {
     const { result } = renderHook(() => useTreeSource(), { wrapper });
     const groupNode = selectActivePage(store.getState()).nodes[groupId];
 
-    // result
-    expect(result.current.getChildren(groupNode)?.map((node) => node.id)).toEqual([idA, idB]);
+    // result — reversed relative to childIds, so the front-most child (idB) lists first
+    expect(result.current.getChildren(groupNode)?.map((node) => node.id)).toEqual([idB, idA]);
   });
 
   it('should return undefined for a non-group node, since it has no expandable children', () => {

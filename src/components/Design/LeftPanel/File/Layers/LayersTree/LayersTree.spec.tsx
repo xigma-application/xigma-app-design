@@ -74,19 +74,19 @@ describe('LayersTree', () => {
   });
 
   it('should reorder the active page rootOrder when a row is dragged past another', () => {
-    // before
+    // before — B is added last, so it sits at the top of the list; drag it down past A
     renderLayersTree();
-    const rowA = screen.getByText('Frame A').closest('[class*="Tree__row"]')!;
+    const rowB = screen.getByText('Frame B').closest('[class*="Tree__row"]')!;
     const rootOrderBefore = selectActivePage(store.getState()).rootOrder;
-    const indexA = rootOrderBefore.indexOf(idA);
+    const indexB = rootOrderBefore.indexOf(idB);
 
-    // action — drag row A down past row B
-    fireEvent.mouseDown(rowA, { button: 0, clientY: 0 });
+    // action — drag row B down past row A
+    fireEvent.mouseDown(rowB, { button: 0, clientY: 0 });
     fireEvent.mouseMove(document, { clientY: 100 });
     fireEvent.mouseUp(document);
 
     // result
-    expect(selectActivePage(store.getState()).rootOrder.indexOf(idA)).not.toBe(indexA);
+    expect(selectActivePage(store.getState()).rootOrder.indexOf(idB)).not.toBe(indexB);
   });
 
   it('should render the dot-and-line drop indicator, not the default plain-line one, while dragging', () => {
@@ -132,8 +132,9 @@ describe('LayersTree', () => {
     fireEvent.mouseMove(document, { clientY: 100000 });
     fireEvent.mouseUp(document);
 
-    // result — A and B land together at the end, in their original relative order
-    expect(selectActivePage(store.getState()).rootOrder.slice(-2)).toEqual([idA, idB]);
+    // result — dragged to the bottom of the list = the back of the array, A and B land together
+    // at the start of rootOrder, keeping their original relative order
+    expect(selectActivePage(store.getState()).rootOrder.slice(0, 2)).toEqual([idA, idB]);
 
     // after
     store.dispatch(deleteNode(idC));
@@ -147,9 +148,10 @@ describe('LayersTree', () => {
     const rootOrderBefore = selectActivePage(store.getState()).rootOrder;
     const indexA = rootOrderBefore.indexOf(idA);
 
-    // action — drag the unselected row B
+    // action — drag the unselected row B up to the top of the list (front of the array), which
+    // leaves A's absolute rootOrder index untouched
     fireEvent.mouseDown(rowB, { button: 0, clientY: 0 });
-    fireEvent.mouseMove(document, { clientY: 100000 });
+    fireEvent.mouseMove(document, { clientY: -100000 });
     fireEvent.mouseUp(document);
 
     // result — A never moved, only B did
@@ -255,12 +257,14 @@ describe('LayersTree', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Expand layer' }));
       const rowC = screen.getByText('Frame C').closest('[class*="Tree__row"]')!;
 
-      // action — drag the top-level row C (visible below the group's two expanded children) up above the group
+      // action — drag the top-level row C (at the top of the list) down past the group and its two
+      // expanded children, landing it at the back of the array
       fireEvent.mouseDown(rowC, { button: 0, clientY: 0 });
-      fireEvent.mouseMove(document, { clientY: -100000 });
+      fireEvent.mouseMove(document, { clientY: 100000 });
       fireEvent.mouseUp(document);
 
-      // result — rootOrder reflects C moving before the group, unaffected by the nested rows in between
+      // result — rootOrder reflects C moving to the back (before the group), unaffected by the
+      // nested rows in between
       expect(selectActivePage(store.getState()).rootOrder).toEqual([idC, groupId]);
 
       // after
@@ -337,10 +341,11 @@ describe('LayersTree', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Expand layer' }));
       const rowC = screen.getByText('Frame C').closest('[class*="Tree__row"]')!;
 
-      // action — drag row C ('group', 'A', 'B', 'C' visible in that order) up onto the group's first child slot,
-      // shifted right by one indent level so it resolves to depth 1 (a child of the group)
-      fireEvent.mouseDown(rowC, { button: 0, clientX: 0, clientY: 96 });
-      fireEvent.mouseMove(document, { clientX: 16, clientY: 32 });
+      // action — row C sits at the top of the list ('C', 'group', 'B', 'A' visible in that order);
+      // drag it down onto the group's expanded children, shifted right by one indent level so it
+      // resolves to depth 1 (a child of the group)
+      fireEvent.mouseDown(rowC, { button: 0, clientX: 0, clientY: 0 });
+      fireEvent.mouseMove(document, { clientX: 16, clientY: 80 });
       fireEvent.mouseUp(document);
 
       // result — C is now a child of the group instead of a top-level node

@@ -24,7 +24,8 @@ const handleDropInside = <T extends TTreeItem>(
     .map((row) => row.item);
 
   if (container && draggedItems.length > 0) {
-    onReorder?.(draggedItems, container.item, 0);
+    const childCount = rows.filter((row) => row.parentItem?.id === container.item.id).length;
+    onReorder?.(draggedItems, container.item, childCount);
   }
 };
 

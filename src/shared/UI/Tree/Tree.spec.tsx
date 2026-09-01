@@ -84,7 +84,8 @@ describe('Tree', () => {
     fireEvent.mouseUp(document);
 
     // result
-    expect(onReorder).toHaveBeenCalledWith([roots[0]], null, 2);
+    // rows are front-to-back, the array is back-to-front, so the ui slot mirrors to array index 0
+    expect(onReorder).toHaveBeenCalledWith([roots[0]], null, 0);
     expect(document.querySelector('[class*="dropIndicator"]')).not.toBeInTheDocument();
     expect(document.querySelector('[class*="viewport--dragging"]')).not.toBeInTheDocument();
   });
@@ -231,8 +232,9 @@ describe('Tree', () => {
     fireEvent.mouseMove(document, { clientY: 128 });
     fireEvent.mouseUp(document);
 
-    // result — both selected rows move together
-    expect(onReorder).toHaveBeenCalledWith([roots[0], roots[1]], null, 2);
+    // result — both selected rows move together, reversed into array (back-to-front) order and
+    // landing at array index 0 (the very back) since dropped past the last row
+    expect(onReorder).toHaveBeenCalledWith([roots[1], roots[0]], null, 0);
   });
 
   it('should render the default plain-line drop indicator when renderDropIndicator is not provided', () => {
@@ -302,8 +304,9 @@ describe('Tree', () => {
     // action
     fireEvent.mouseUp(document);
 
-    // result — '1' becomes the first child of '0'
-    expect(onReorder).toHaveBeenCalledWith([roots[1]], roots[0], 0);
+    // result — '1' becomes the first (front-most) child row of '0', i.e. index 1 in the
+    // back-to-front childIds array, after the one existing child '0-0'
+    expect(onReorder).toHaveBeenCalledWith([roots[1]], roots[0], 1);
   });
 
   it('should show a full-row outline instead of the line while a drag hovers the middle of a collapsed container, then nest on drop', () => {
@@ -361,7 +364,9 @@ describe('Tree', () => {
     // action — a deeply-nested row makes the true content wider than the panel; re-render (new
     // `rows` reference) is what re-triggers the measurement, exactly like an expand/rename would
     Object.defineProperty(rowsContainer, 'scrollWidth', { configurable: true, value: 640 });
-    rerender(<Tree getChildren={getChildren} renderRow={renderRow} roots={[buildItem('0'), buildItem('1'), buildItem('2')]} rowHeight={32} />);
+    rerender(
+      <Tree getChildren={getChildren} renderRow={renderRow} roots={[buildItem('0'), buildItem('1'), buildItem('2')]} rowHeight={32} />,
+    );
 
     // result
     expect(viewport.style.width).toBe('640px');

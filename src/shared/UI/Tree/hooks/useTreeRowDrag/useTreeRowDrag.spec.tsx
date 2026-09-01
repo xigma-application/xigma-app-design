@@ -99,8 +99,8 @@ describe('useTreeRowDrag', () => {
     fireMouseMove(ROW_HEIGHT * 2 + ROW_HEIGHT / 2);
     fireMouseUp();
 
-    // result
-    expect(onReorder).toHaveBeenCalledWith([rows[0].item], null, 2);
+    // result — rows are front-to-back, the array is back-to-front, so the ui slot (2) mirrors to array index 1
+    expect(onReorder).toHaveBeenCalledWith([rows[0].item], null, 1);
     expect(onReorder).toHaveBeenCalledTimes(1);
     expect(result.current.insertionIndex).toBeNull();
   });
@@ -136,8 +136,9 @@ describe('useTreeRowDrag', () => {
     fireMouseMove(ROW_HEIGHT / 2);
     fireMouseUp();
 
-    // result — scrolled down by 2 rows, so the pointer near the top now targets slot 2
-    expect(onReorder).toHaveBeenCalledWith([rows[0].item], null, 2);
+    // result — scrolled down by 2 rows, so the pointer near the top targets ui slot 2, which
+    // mirrors to array index 3 among the 5 remaining top-level rows
+    expect(onReorder).toHaveBeenCalledWith([rows[0].item], null, 3);
     expect(onReorder).toHaveBeenCalledTimes(1);
   });
 
@@ -171,8 +172,9 @@ describe('useTreeRowDrag', () => {
     fireMouseMove(ROW_HEIGHT * 4);
     fireMouseUp();
 
-    // result — both selected rows move together
-    expect(onReorder).toHaveBeenCalledWith([rows[0].item, rows[1].item], null, 2);
+    // result — both selected rows move together, as a block reversed into array (back-to-front)
+    // order, landing at array index 0 (the very back) since they were dropped past the last row
+    expect(onReorder).toHaveBeenCalledWith([rows[1].item, rows[0].item], null, 0);
   });
 
   it('should only drag the clicked row when it is not part of the current multi-selection', () => {
@@ -190,8 +192,9 @@ describe('useTreeRowDrag', () => {
     fireMouseMove(TREE_ROW_DRAG_THRESHOLD_PX);
     fireMouseUp();
 
-    // result — only row 3 moves
-    expect(onReorder).toHaveBeenCalledWith([rows[3].item], null, 0);
+    // result — only row 3 moves; dropped at the top of the list (front-most) it mirrors to array
+    // index 3 (the very front) among the 3 remaining top-level rows
+    expect(onReorder).toHaveBeenCalledWith([rows[3].item], null, 3);
   });
 
   it('should keep dropDepth at 0 for a flat tree, regardless of pointer X', () => {
@@ -287,8 +290,9 @@ describe('useTreeRowDrag', () => {
     rerender({ rows: expanded });
     fireMouseUp();
 
-    // result — "c" lands inside the group, not the child row that slid under the pointer
-    expect(onReorder).toHaveBeenCalledWith([expanded[2].item], expanded[0].item, 0);
+    // result — "c" lands inside the group as its new front-most child (after the one existing
+    // child 'g-0'), not the child row that slid under the pointer
+    expect(onReorder).toHaveBeenCalledWith([expanded[2].item], expanded[0].item, 1);
   });
 
   it('should not treat a same-slot drop as a no-op once the drop depth changed', () => {

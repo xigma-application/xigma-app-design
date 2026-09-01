@@ -75,11 +75,14 @@ test('dropping a layer onto the middle of an already-expanded group also nests i
 
   await expect(rows).toHaveCount(2);
 
-  // expand the group first — rows become [group, A, B, C]
+  // C is the front-most root node, so it stays at row 0 even after the group below it expands —
+  // rows become [C, group, B, A]
+  const rectC = rows.nth(0);
+
   await rows.filter({ hasText: 'Group' }).locator('[class*="TreeItem__toggleButton"]').click();
   await expect(rows).toHaveCount(4);
 
-  await dragRowOnto(rows.filter({ hasText: 'Rectangle' }).last(), rows.filter({ hasText: 'Group' }));
+  await dragRowOnto(rectC, rows.filter({ hasText: 'Group' }));
 
   // the group still holds 4 rows (group + 3 children) and C is no longer a root row —
   // collapsing the group now folds C away too

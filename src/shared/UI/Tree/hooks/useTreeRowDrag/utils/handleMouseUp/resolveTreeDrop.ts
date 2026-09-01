@@ -33,9 +33,12 @@ export const resolveTreeDrop = <T extends TTreeItem>(
 
     if (toDepth === 0 || targetParentItem) {
       const targetParentId = targetParentItem?.id ?? null;
-      const targetIndex = remainingRows.slice(0, toIndex).filter((row) => (row.parentItem?.id ?? null) === targetParentId).length;
+      const isTargetSibling = (row: TTreeRow<T>): boolean => (row.parentItem?.id ?? null) === targetParentId;
+      const totalSiblingCount = remainingRows.filter(isTargetSibling).length;
+      const uiOrderIndex = remainingRows.slice(0, toIndex).filter(isTargetSibling).length;
+      const targetIndex = totalSiblingCount - uiOrderIndex;
 
-      return { draggedItems: draggedRows.map((row) => row.item), targetIndex, targetParentItem };
+      return { draggedItems: draggedRows.map((row) => row.item).reverse(), targetIndex, targetParentItem };
     }
   }
 
