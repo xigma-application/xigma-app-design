@@ -14,6 +14,7 @@ import { TPoint } from 'types/canvas';
 
 // utils
 import { handleModifierKeyChange } from './utils/handleModifierKeyChange';
+import { resolveDistanceGuides } from './utils/resolveDistanceGuides';
 import { resolveHover } from './utils/resolveHover/resolveHover';
 import { setHoverState } from './utils/setHoverState';
 
@@ -28,11 +29,13 @@ export const useHoverHighlight = (refs: TCanvasRefs): void => {
     if (event.buttons === 0) {
       lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
       resolveHover(canvas, event, hoverRef, setClassName, activeTool, refs);
+      resolveDistanceGuides(event, activeTool, refs, setClassName);
     }
   };
 
   const handlePointerLeave = (canvas: HTMLCanvasElement): void => {
     lastPointerClientPositionRef.current = null;
+    refs.transform.distanceGuidesRef.current = null;
     setHoverState(canvas, hoverRef, setClassName, activeTool === ToolName.comment ? 'comment' : null, '', null);
   };
 
@@ -60,6 +63,7 @@ export const useHoverHighlight = (refs: TCanvasRefs): void => {
         window.removeEventListener('keydown', onModifierKeyDown);
         window.removeEventListener('keyup', onModifierKeyUp);
         lastPointerClientPositionRef.current = null;
+        refs.transform.distanceGuidesRef.current = null;
         setHoverState(canvas, hoverRef, setClassName, null, '', null);
       };
     }

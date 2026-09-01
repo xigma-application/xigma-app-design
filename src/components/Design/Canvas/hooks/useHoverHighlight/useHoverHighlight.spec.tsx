@@ -17,6 +17,7 @@ import { store } from 'store';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
+import { TDistanceGuides } from '../../utils/getDistanceGuides/types';
 
 const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
   const canvas = document.createElement('canvas');
@@ -180,13 +181,14 @@ const addEllipseNode = (x: number, y: number, size: number, arcStartAngle?: numb
 
 const renderHoverHighlight = (
   canvasRef: RefObject<HTMLCanvasElement | null>,
-): { classNameRef: RefObject<string | null>; hoverRef: RefObject<string | null> } => {
+): { classNameRef: RefObject<string | null>; distanceGuidesRef: RefObject<TDistanceGuides | null>; hoverRef: RefObject<string | null> } => {
   const hoverRef: RefObject<string | null> = { current: null };
   const classNameRef: RefObject<string | null> = { current: null };
+  const distanceGuidesRef: RefObject<TDistanceGuides | null> = { current: null };
 
   renderHook(
     () => {
-      useHoverHighlight(createCanvasRefs({ canvasRef, hover: { hoverRef } }));
+      useHoverHighlight(createCanvasRefs({ canvasRef, hover: { hoverRef }, transform: { distanceGuidesRef } }));
       classNameRef.current = useClassNames().className;
     },
     {
@@ -198,7 +200,7 @@ const renderHoverHighlight = (
     },
   );
 
-  return { classNameRef, hoverRef };
+  return { classNameRef, distanceGuidesRef, hoverRef };
 };
 
 describe('useHoverHighlight behaviors', () => {
@@ -947,5 +949,95 @@ describe('useHoverHighlight behaviors', () => {
     // result
     expect(canvasRef.current?.style.cursor).toBe('text');
     expect(classNameRef.current).toBeNull();
+  });
+
+  it('should show distance guides and the shadow-cursor class when Alt-hovering another node while one is selected', () => {
+    // mock
+    const idA = addFrameNode(7000, 7000);
+    const idB = addFrameNode(7100, 7000);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { classNameRef, distanceGuidesRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 7110, 7010, { altKey: true }));
+    });
+
+    // result
+    expect(classNameRef.current).toBe('distance-measure');
+    expect(distanceGuidesRef.current).not.toBeNull();
+    expect(idB).toBeTruthy();
+  });
+
+  it('should clear distance guides when Alt is not held', () => {
+    // mock
+    const idA = addFrameNode(7200, 7000);
+
+    addFrameNode(7300, 7000);
+    store.dispatch(setSelection([idA]));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { distanceGuidesRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 7310, 7010));
+    });
+
+    // result
+    expect(distanceGuidesRef.current).toBeNull();
+  });
+
+  it('should not show distance guides when Alt-hovering the already-selected node itself', () => {
+    // mock
+    const idA = addFrameNode(7400, 7000);
+
+    store.dispatch(setSelection([idA]));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { distanceGuidesRef } = renderHoverHighlight(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 7410, 7010, { altKey: true }));
+    });
+
+    // result
+    expect(distanceGuidesRef.current).toBeNull();
+  });
+
+  it('should clear distance guides when the pointer leaves the canvas', () => {
+    // mock
+    const idA = addFrameNode(7500, 7000);
+
+    addFrameNode(7600, 7000);
+    store.dispatch(setSelection([idA]));
+
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { distanceGuidesRef } = renderHoverHighlight(canvasRef);
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 7610, 7010, { altKey: true }));
+    });
+    expect(distanceGuidesRef.current).not.toBeNull();
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerleave', 7610, 7010));
+    });
+
+    // result
+    expect(distanceGuidesRef.current).toBeNull();
   });
 });

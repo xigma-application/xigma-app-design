@@ -9,9 +9,12 @@ export const handleModifierKeyChange = (
   lastPointerClientPositionRef: RefObject<TPoint | null>,
   onPointerMove: (canvas: HTMLCanvasElement, event: PointerEvent) => void,
 ): void => {
-  if ((event.key === 'Control' || event.key === 'Meta') && lastPointerClientPositionRef.current) {
+  if ((event.key === 'Control' || event.key === 'Meta' || event.key === 'Alt') && lastPointerClientPositionRef.current) {
     const { x, y } = lastPointerClientPositionRef.current;
 
-    onPointerMove(canvas, new PointerEvent('pointermove', { clientX: x, clientY: y, ctrlKey: event.ctrlKey, metaKey: event.metaKey }));
+    onPointerMove(
+      canvas,
+      new PointerEvent('pointermove', { altKey: event.altKey, clientX: x, clientY: y, ctrlKey: event.ctrlKey, metaKey: event.metaKey }),
+    );
   }
 };

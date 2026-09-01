@@ -52,6 +52,26 @@ describe('handleModifierKeyChange', () => {
     expect(syntheticEvent.metaKey).toBe(true);
   });
 
+  it('should re-run the pointer-move handler when Alt changes', () => {
+    // mock
+    const canvas = createCanvas();
+    const lastPointerClientPositionRef: RefObject<TPoint | null> = { current: { x: 50, y: 60 } };
+    const onPointerMove = vi.fn();
+
+    // action
+    handleModifierKeyChange(
+      canvas,
+      new KeyboardEvent('keydown', { altKey: true, key: 'Alt' }),
+      lastPointerClientPositionRef,
+      onPointerMove,
+    );
+
+    // result
+    expect(onPointerMove).toHaveBeenCalledTimes(1);
+    const [, syntheticEvent] = onPointerMove.mock.calls[0] as [HTMLCanvasElement, PointerEvent];
+    expect(syntheticEvent.altKey).toBe(true);
+  });
+
   it('should do nothing for an unrelated key', () => {
     // mock
     const canvas = createCanvas();

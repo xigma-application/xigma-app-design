@@ -3,6 +3,7 @@ import { RefObject } from 'react';
 // types
 import { TAlignmentGuide } from 'components/Design/Canvas/utils/getGroupAlignmentGuide';
 import { TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
+import { TDistanceGuides } from 'components/Design/Canvas/utils/getDistanceGuides/types';
 import { TDraftEntity, TVectorTangent, TVectorWidthPoint } from 'types/design/types';
 import { TColorSampleRequest } from 'utils/canvas/colorPixelSampler/types';
 import { TFlattenedVectorSegment } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
@@ -236,6 +237,7 @@ export type TVectorSnapshotsRefs = {
 export type TTransformRefs = {
   alignmentGuideRef: RefObject<TAlignmentGuide | null>;
   contactGuidesRef: RefObject<TShapeContactGuide[] | null>;
+  distanceGuidesRef: RefObject<TDistanceGuides | null>;
   draggedNodeIdsRef: RefObject<Set<string> | null>;
   resizedNodeIdsRef: RefObject<Set<string> | null>;
   rotateDragRef: RefObject<TRotateDragState | null>;

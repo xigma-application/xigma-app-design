@@ -24,6 +24,7 @@ import { TImageRenderContext } from '../../types';
 // utils
 import { drawCornerRadiusHandlesLayer } from './drawCornerRadiusHandlesLayer';
 import { drawDraftFrameNameLabel } from './drawFrameNameLabels/drawDraftFrameNameLabel';
+import { drawDistanceGuides } from './drawDistanceGuides/drawDistanceGuides';
 import { drawDraftSectionNameLabel } from './drawSectionNameLabels/drawDraftSectionNameLabel';
 import { drawEditingPathTextHandle } from './drawEditingPathTextHandle';
 import { drawEditingText } from './drawEditingText';
@@ -155,4 +156,5 @@ export const drawScene = (
   drawMarquee(gl, program, buffer, marqueeRect, clientWidth, clientHeight, viewport);
   drawSliceDraft(gl, program, buffer, sliceRect, clientWidth, clientHeight, viewport);
   drawShapeContactGuides(ctx, refs);
+  drawDistanceGuides(ctx, refs);
 };
