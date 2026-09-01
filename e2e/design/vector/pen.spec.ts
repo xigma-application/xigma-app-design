@@ -333,12 +333,18 @@ test('after finishing a fragment, clicking elsewhere still adds to the same vect
   await designPage.selectTool('default');
   await designPage.doubleClick(1400, 700); // empty space — exits vector edit mode
 
+  // clipped to the canvas's own safe area, excluding the LeftPanel: canvas.screenshot() composites
+  // that overlaying panel in too, and its layers-row icon can repaint on a slightly different frame
+  // between these two click sequences (deselect-then-select vs a direct click) — a UI-timing detail
+  // of the panel, unrelated to what this test actually checks (the canvas selection outline itself)
+  const canvasArea = await designPage.canvasSafeArea();
+
   await designPage.click(775, 300); // midpoint of loop A's top edge
-  const selectedViaA = await designPage.canvas.screenshot();
+  const selectedViaA = await page.screenshot({ clip: canvasArea });
 
   await designPage.click(1500, 900); // deselect
   await designPage.click(1175, 300); // midpoint of fragment B's segment
-  const selectedViaB = await designPage.canvas.screenshot();
+  const selectedViaB = await page.screenshot({ clip: canvasArea });
 
   // both clicks select the exact same shared-node outline, proving A and B are one node
   expect(selectedViaA.equals(selectedViaB)).toBe(true);
@@ -419,15 +425,20 @@ test('undo steps back through vertex placements one click at a time', async ({ p
   await designPage.goto('e2e-test-pen-undo');
   await expect(designPage.canvas).toBeVisible();
 
+  // clipped to the canvas's own safe area, excluding the LeftPanel: canvas.screenshot() composites
+  // that overlaying panel in too, and its layers-row icon can repaint on a slightly different frame
+  // depending on timing unrelated to what this test actually checks (the canvas drawing itself)
+  const canvasArea = await designPage.canvasSafeArea();
+
   await designPage.selectTool('pen');
   await designPage.click(700, 300);
-  const afterV1 = await designPage.canvas.screenshot();
+  const afterV1 = await page.screenshot({ clip: canvasArea });
 
   await designPage.click(850, 300);
-  const afterV2 = await designPage.canvas.screenshot();
+  const afterV2 = await page.screenshot({ clip: canvasArea });
 
   await designPage.click(850, 450);
-  const afterV3 = await designPage.canvas.screenshot();
+  const afterV3 = await page.screenshot({ clip: canvasArea });
 
   expect(afterV2.equals(afterV1)).toBe(false);
   expect(afterV3.equals(afterV2)).toBe(false);
@@ -440,17 +451,17 @@ test('undo steps back through vertex placements one click at a time', async ({ p
   await page.keyboard.press('Escape');
   await designPage.pointerMove(1500, 900);
 
-  const state3 = await designPage.canvas.screenshot();
+  const state3 = await page.screenshot({ clip: canvasArea });
 
   await page.keyboard.press('Control+z');
   await designPage.pointerMove(1500, 900);
-  const state2 = await designPage.canvas.screenshot();
+  const state2 = await page.screenshot({ clip: canvasArea });
 
   expect(state2.equals(state3)).toBe(false);
 
   await page.keyboard.press('Control+z');
   await designPage.pointerMove(1500, 900);
-  const state1 = await designPage.canvas.screenshot();
+  const state1 = await page.screenshot({ clip: canvasArea });
 
   expect(state1.equals(state2)).toBe(false);
 
@@ -463,7 +474,7 @@ test('undo steps back through vertex placements one click at a time', async ({ p
   await designPage.click(850, 300);
   await page.keyboard.press('Escape');
   await designPage.pointerMove(1500, 900);
-  const referenceTwoVertices = await designPage.canvas.screenshot();
+  const referenceTwoVertices = await page.screenshot({ clip: canvasArea });
 
   expect(state2.equals(referenceTwoVertices)).toBe(true);
 
@@ -485,7 +496,7 @@ test('undo steps back through vertex placements one click at a time', async ({ p
   await page.keyboard.press('Escape');
   await page.keyboard.press('Control+z'); // undoes the v2 placement, leaving v1 alone
   await designPage.pointerMove(1500, 900);
-  const referenceOneVertex = await designPage.canvas.screenshot();
+  const referenceOneVertex = await page.screenshot({ clip: canvasArea });
 
   expect(state1.equals(referenceOneVertex)).toBe(true);
 });
