@@ -183,13 +183,27 @@ dragging the mask to the top of the panel makes it a no-op. Full write-up: `.cla
       of `shared/UI/Tree/` entirely into `LayersTree/LayerRow/LayerRowIcon` (renamed), since it's
       Design-domain logic (node-type/mask branching), not generic tree UI — `TreeItem` now takes a
       `renderIcon`/`children` slot instead. `LayerRowMaskDecorations` (badge + `LeadArrow` + the
-      connector line, driven by the new `selectMaskConnectorRoleById` selector) is the same kind of
-      Design-side injection. Connector CSS offsets are a first pass, not yet visually verified.
-- [ ] `e2e/design/selection/mask.spec.ts` — screenshot-diff proof that content is actually clipped
-      (rect / image-alpha / live-text / vector-stroke masks + nested groups), ⌃⌘M, remove-mask
-      restores, undo/redo. The GL call sequence is unit-tested; pixel correctness is not yet.
-- [ ] follow-ups: clip the masked-sibling _hit region_ to mask coverage; dashed outline on a
-      selected mask node; multiple masks per group; luminance / vector / image `maskType` modes
+      connector line, driven by `selectMaskConnectorRoleById`) is the same kind of Design-side
+      injection; visually verified against real nested/expanded groups
+- [x] `selectMaskConnectorRoleById` rewritten as a top-down tree walk (`maskConnector/` folder:
+      `resolveMaskConnectorRoles` + small pure helpers) so a row can carry both its own mask-scope
+      role _and_ any number of inherited passthrough lines from ancestor scopes at once — a row can
+      simultaneously be masked content of an outer group and own a nested mask scope of its own.
+      Fixes the connector line vanishing for masked content that itself contains a nested mask group
+- [x] fixed `drawVectorFill`/`drawVectorHatchFill` hardcoding `colorMask(true,true,true,false)`
+      after their even-odd stencil pass, on the assumption they always draw straight to the main
+      canvas. Rendering a mask into an offscreen target relies on alpha writes being **on** (the
+      composite shader only reads the target's alpha channel) — forcing them off there zeroed the
+      fill's alpha, and left alpha writes disabled for every subsequent draw in that target too
+      (including the mask's own stroke), so a masking vector going blank the moment it gained a
+      fill. Now captures the ambient `COLOR_WRITEMASK` and restores that instead of hardcoding it
+- [x] `e2e/design/selection/mask.spec.ts` — real render-pipeline screenshots (not just store
+      assertions): basic two-rectangle clip, the vector-fill colorMask regression above (reproduced
+      end to end and confirmed to fail against the pre-fix behavior), remove-mask restores
+      visibility without ungrouping, undo restores the exact pre-mask state in one step
+- [ ] follow-ups: image-alpha / live-text / nested-group mask e2e coverage; clip the masked-sibling
+      _hit region_ to mask coverage; dashed outline on a selected mask node; multiple masks per
+      group; luminance / vector / image `maskType` modes
 
 ## Related
 
