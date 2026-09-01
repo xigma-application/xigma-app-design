@@ -22,7 +22,7 @@ import styles from './minimize-ui-button.module.scss';
 // types
 import { TMinimizeUiButtonProps } from './types';
 
-const MinimizeUiButton: FC<TMinimizeUiButtonProps> = ({ className }) => {
+const MinimizeUiButton: FC<TMinimizeUiButtonProps> = ({ className, withTooltip = true }) => {
   const { t } = useTranslation();
   const isUiMinimized = useAppSelector(selectIsUiMinimized);
   const handleClick = useToggleUiMinimized();
@@ -32,10 +32,12 @@ const MinimizeUiButton: FC<TMinimizeUiButtonProps> = ({ className }) => {
   return (
     <Tooltip
       content={
-        <>
-          {label}
-          <span className={styles.MinimizeUiButton__shortcut}>{shortcut}</span>
-        </>
+        withTooltip && (
+          <>
+            {label}
+            <span className={styles.MinimizeUiButton__shortcut}>{shortcut}</span>
+          </>
+        )
       }
     >
       <button aria-label={label} className={cx(styles.MinimizeUiButton, className)} onClick={handleClick} type="button">

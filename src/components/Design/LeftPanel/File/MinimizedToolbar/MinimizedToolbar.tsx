@@ -6,12 +6,13 @@ import XigmaLogoShape from '@xigma/assets/xigma-logo-shape.svg?react';
 
 // components
 import MinimizeUiButton from '../Header/MinimizeUiButton/MinimizeUiButton';
-import { Chip } from 'shared';
+import { Chip, Tooltip } from 'shared';
 
 // hooks
 import { useExpandUi } from './hooks/useExpandUi';
 
 // others
+import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
 import { translationNameSpace } from '../constants';
 
 // styles
@@ -29,18 +30,27 @@ const MinimizedToolbar: FC<TMinimizedToolbarProps> = ({ name }) => {
       <button aria-label="xigma" className={styles.MinimizedToolbar__logo} type="button">
         <XigmaLogoShape />
       </button>
-      <div
-        aria-label={name}
-        className={styles.MinimizedToolbar__content}
-        onClick={handleExpand}
-        onKeyDown={handleKeyDown}
-        role="button"
-        tabIndex={0}
+      <Tooltip
+        content={
+          <>
+            {t(`${translationNameSpace}.expandUiLabel`)}
+            <span className={styles.MinimizedToolbar__shortcut}>{KEYBOARD_SHORTCUTS.toggleUiMinimized.join('')}</span>
+          </>
+        }
       >
-        <span className={styles.MinimizedToolbar__title}>{name}</span>
-        <Chip variant="free">{t(`${translationNameSpace}.subscription.free`)}</Chip>
-        <MinimizeUiButton className={styles.MinimizedToolbar__button} />
-      </div>
+        <div
+          aria-label={name}
+          className={styles.MinimizedToolbar__content}
+          onClick={handleExpand}
+          onKeyDown={handleKeyDown}
+          role="button"
+          tabIndex={0}
+        >
+          <span className={styles.MinimizedToolbar__title}>{name}</span>
+          <Chip variant="free">{t(`${translationNameSpace}.subscription.free`)}</Chip>
+          <MinimizeUiButton className={styles.MinimizedToolbar__button} withTooltip={false} />
+        </div>
+      </Tooltip>
     </div>
   );
 };
