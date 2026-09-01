@@ -99,6 +99,39 @@ describe('drawMsdfGlyphs', () => {
     expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), [1, 0, 0, 1]);
   });
 
+  it('should upload the given stroke color and a non-zero stroke-width uniform when a positive stroke width is set', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const texture = {} as WebGLTexture;
+    const vertices = new Float32Array(24);
+
+    // before — screenPxRange = distanceRange (4) * effectiveFontSize (20) * zoom (1) / atlas size (20) = 4,
+    // so strokeWidthUniform = strokeWidth (2) * zoom (1) / screenPxRange (4) = 0.5
+    drawMsdfGlyphs(gl, program, buffer, texture, ATLAS, vertices, '#ffffff', 20, 100, 100, IDENTITY_VIEWPORT, '#ff0000', 2);
+
+    // result
+    expect(gl.uniform4fv).toHaveBeenNthCalledWith(2, expect.anything(), [1, 0, 0, 1]);
+    expect(gl.uniform1f).toHaveBeenCalledWith(expect.anything(), 0.5);
+  });
+
+  it('should treat a zero stroke width as no stroke, falling back to the fill color and a zero stroke-width uniform', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const texture = {} as WebGLTexture;
+    const vertices = new Float32Array(24);
+
+    // before
+    drawMsdfGlyphs(gl, program, buffer, texture, ATLAS, vertices, '#ffffff', 20, 100, 100, IDENTITY_VIEWPORT, '#ff0000', 0);
+
+    // result — the stroke uniform mirrors the fill color, not the given stroke color
+    expect(gl.uniform4fv).toHaveBeenNthCalledWith(2, expect.anything(), [1, 1, 1, 1]);
+    expect(gl.uniform1f).toHaveBeenCalledWith(expect.anything(), 0);
+  });
+
   it('should compute screenPxRange from the atlas distance range, effective font size, and zoom', () => {
     // mock
     const gl = createGlMock();

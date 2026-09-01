@@ -10,12 +10,11 @@ import { isPointInPolygonVertices } from 'components/Design/Canvas/utils/isPoint
 
 export type TFillRenderGroup = { color: string; polygons: TPoint[][] };
 
-const getActiveHoleParentKey = (node: TVectorNode, key: string, pointsByKey: Map<string, TPoint[]>): string | null => {
-  const parentKey = node.holeParentByKey?.[key];
+const getActiveHoleParentKey = (node: TVectorNode, key: string, parentKey: string, pointsByKey: Map<string, TPoint[]>): string | null => {
   const points = pointsByKey.get(key);
-  const parentPoints = parentKey ? pointsByKey.get(parentKey) : undefined;
+  const parentPoints = pointsByKey.get(parentKey);
 
-  if (!parentKey || !points || !parentPoints) {
+  if (!points || !parentPoints) {
     return null;
   }
 
@@ -45,8 +44,9 @@ export const groupFilledFacesForRendering = (renderedNode: TVectorNode): TFillRe
       return;
     }
 
-    const isFormerHole = Boolean(renderedNode.holeParentByKey?.[key]);
-    const activeParentKey = isFormerHole ? getActiveHoleParentKey(renderedNode, key, pointsByKey) : null;
+    const parentKey = renderedNode.holeParentByKey?.[key];
+    const isFormerHole = Boolean(parentKey);
+    const activeParentKey = parentKey ? getActiveHoleParentKey(renderedNode, key, parentKey, pointsByKey) : null;
     const color = getEffectiveVectorFillColor(renderedNode, activeParentKey ?? key);
     const groupKey = isFormerHole && !activeParentKey ? key : color;
     const group = groups.get(groupKey) ?? { color, polygons: [] };

@@ -453,6 +453,28 @@ describe('useKeyboardShortcuts behaviors', () => {
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId]).toBeUndefined();
   });
 
+  it('should flatten the selection on "Alt+Shift+F" without throwing when nothing is selected', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    expect(() => fireEvent.keyDown(window, { altKey: true, code: 'KeyF', shiftKey: true })).not.toThrow();
+  });
+
+  it('should outline the selection stroke on "Alt+Control+O" without throwing when nothing is selected', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    expect(() => fireEvent.keyDown(window, { altKey: true, code: 'KeyO', ctrlKey: true })).not.toThrow();
+  });
+
   it('should toggle the minimized UI flag on "Cmd+Shift+\\"', () => {
     // mock
     const store = createTestStore();

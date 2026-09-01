@@ -73,6 +73,22 @@ describe('getContainingFilledLoopKey', () => {
     expect(getContainingFilledLoopKey(node, square(20, 20, 10))).toBe('D');
   });
 
+  it('should keep the running-smallest ancestor when a later, larger candidate also contains the face', () => {
+    // mock — A is the largest filled square, D is the true (medium) immediate ancestor, E is a third
+    // filled square larger than D but still smaller than A — the reduce must not let E replace D
+    const node: TVectorNode = { ...baseNode, filledFaceKeys: ['A', 'D', 'E'] };
+
+    getVectorFillLoopPointsMock.mockImplementation((_n: TVectorNode, key: string) => {
+      if (key === 'A') return square(0, 0, 100);
+      if (key === 'D') return square(10, 10, 50);
+      if (key === 'E') return square(0, 0, 70);
+      return null;
+    });
+
+    // result
+    expect(getContainingFilledLoopKey(node, square(20, 20, 10))).toBe('D');
+  });
+
   it('should not match a candidate whose area is not strictly larger than the face being tested', () => {
     // mock — a candidate the exact same size/position as the face itself should never count as its parent
     const node: TVectorNode = { ...baseNode, filledFaceKeys: ['A'] };

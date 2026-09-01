@@ -7,7 +7,7 @@ import NodeContextMenu, { TNodeContextMenuProps } from './NodeContextMenu';
 // types
 import { NodeType } from 'types/design/enums';
 import { TDesignPage } from 'store/design/types';
-import { TFrameNode, TRectangleNode, TSectionNode, TTextNode } from 'types/design/types';
+import { TFrameNode, TLineNode, TRectangleNode, TSectionNode, TTextNode } from 'types/design/types';
 
 const anchorRef = { current: { getBoundingClientRect: (): DOMRect => new DOMRect(10, 20, 0, 0) } };
 
@@ -25,6 +25,19 @@ const BASE_NODE = {
 const buildRectangleNode = (): TRectangleNode => ({ ...BASE_NODE, fill: '#000000', type: NodeType.rectangle });
 const buildFrameNode = (): TFrameNode => ({ ...BASE_NODE, fill: '#000000', type: NodeType.frame });
 const buildSectionNode = (): TSectionNode => ({ ...BASE_NODE, fill: '#000000', type: NodeType.section });
+const buildLineNode = (overrides: Partial<TLineNode> = {}): TLineNode => ({
+  id: 'node-1',
+  name: 'Line',
+  parentId: null,
+  stroke: '#000000',
+  type: NodeType.line,
+  x1: 0,
+  x2: 100,
+  y1: 0,
+  y2: 0,
+  ...overrides,
+});
+
 const buildTextNode = (pathId: string | null = null): TTextNode => ({
   ...BASE_NODE,
   content: 'Hello',
@@ -150,6 +163,22 @@ describe('NodeContextMenu', () => {
 
     // result
     expect(onOutlineStroke).toHaveBeenCalledTimes(1);
+  });
+
+  it('should enable Outline stroke for a line node with its own stroke set (checked via "stroke", not "strokeColor")', () => {
+    // before
+    renderNodeContextMenu({ node: buildLineNode({ strokeWidth: 2 }) });
+
+    // result
+    expect(screen.getByText('Outline stroke').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+  });
+
+  it('should keep Outline stroke disabled for a line node with no stroke color set', () => {
+    // before
+    renderNodeContextMenu({ node: buildLineNode({ stroke: '', strokeWidth: 2 }) });
+
+    // result
+    expect(screen.getByText('Outline stroke').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
   });
 
   it('should call onBringToFront on Bring to front click, and onSendToBack on Send to back click', async () => {

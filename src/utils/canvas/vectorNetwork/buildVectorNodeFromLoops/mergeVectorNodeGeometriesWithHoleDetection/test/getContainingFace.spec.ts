@@ -38,6 +38,17 @@ describe('getContainingFace', () => {
     expect(getContainingFace(inner, [outer, middle, inner])).toBe(middle);
   });
 
+  it('should keep the running-smallest container when a later, larger opposite-wound candidate also contains the face', () => {
+    // mock — large and extra both contain inner, but extra is bigger than the true (medium) container,
+    // so the reduce must not let it replace medium as the running-smallest candidate
+    const large = face(reversed(square(0, 0, 100)), 'large', -1);
+    const medium = face(reversed(square(10, 10, 50)), 'medium', -1);
+    const extra = face(reversed(square(5, 5, 70)), 'extra', -1);
+    const inner = face(square(20, 20, 10), 'inner', 1);
+
+    expect(getContainingFace(inner, [large, medium, extra, inner])).toBe(medium);
+  });
+
   it('should exclude itself and any candidate that isn’t strictly larger in area', () => {
     const a = face(square(0, 0, 10), 'a', 1);
     const sameAreaOpposite = face(reversed(square(0, 0, 10)), 'b', -1);

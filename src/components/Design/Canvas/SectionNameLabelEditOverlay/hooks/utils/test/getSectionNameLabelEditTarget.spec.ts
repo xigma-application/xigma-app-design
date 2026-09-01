@@ -9,7 +9,7 @@ import { getSectionNameLabelEditTarget } from '../getSectionNameLabelEditTarget'
 import { TSectionNameLabelRect } from '../../../../utils/getSectionNameLabelRects';
 
 // store
-import designReducer, { addNode } from 'store/design/slice';
+import designReducer, { addNode, updateNode } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { RootState } from 'store';
 
@@ -72,6 +72,21 @@ describe('getSectionNameLabelEditTarget', () => {
 
     expect(target).toMatchObject({ left: 0, nodeId: section.id, value: section.name });
     expect(target?.height).toBeCloseTo((badge?.height ?? 0) - SECTION_NAME_LABEL_PADDING_Y_PX * 2, 5);
+  });
+
+  it('should return null when the hit section has no badge geometry to seed the target from', () => {
+    // mock — addNode always assigns a section its own auto-generated name, so the name is overridden
+    // afterward to a glyph absent from the MSDF atlas, which renders zero vertices and never resolves
+    // a badge rect
+    const store = createTestStore();
+    const section = addSection(store);
+
+    store.dispatch(updateNode({ changes: { name: '🎉' }, id: section.id }));
+
+    getSectionNameLabelRectsMock.mockReturnValue([rectFor(section.id)]);
+
+    // result
+    expect(getSectionNameLabelEditTarget({ x: 30, y: -20 }, store.getState())).toBeNull();
   });
 
   it('should exclude hidden sections from hit-testing', () => {

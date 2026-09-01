@@ -123,6 +123,26 @@ describe('drawSceneNodes', () => {
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
   });
 
+  it('should also draw a thick stroke outline for a default-shape node with a stroke color and width', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const nodes = [buildNode({ id: 'a', strokeColor: '#000000', strokeWidth: 2 })];
+
+    // before
+    drawSceneNodes(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
+      nodes,
+      new Map(),
+      createCanvasRefs(),
+      {},
+    );
+
+    // result — one fill + one thick-outline draw call
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+  });
+
   it('should draw nothing for a group node', () => {
     // mock
     const gl = createGlMock();
@@ -172,6 +192,26 @@ describe('drawSceneNodes', () => {
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLE_FAN, 0, expect.any(Number));
+  });
+
+  it('should also draw a thick stroke outline for an ellipse node with a stroke color and width', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const nodes = [buildNode({ id: 'a', strokeColor: '#000000', strokeWidth: 2, type: NodeType.ellipse })];
+
+    // before
+    drawSceneNodes(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: IMAGE_CONTEXT, program, viewport: IDENTITY_VIEWPORT },
+      nodes,
+      new Map(),
+      createCanvasRefs(),
+      {},
+    );
+
+    // result — one fill + one thick-outline draw call
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
   });
 
   it('should draw a filled polygon for a polygon node', () => {
