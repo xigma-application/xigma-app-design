@@ -266,6 +266,15 @@ boolean parameter entirely rather than always passing `false`.
   uniformly on both the outer and inner loop of a closed contour, so a very sharp inward (reflex)
   corner can self-overlap slightly on the inner loop — accepted, not something typical glyph curves
   hit.
+- **Performance**: confirmed noticeably slow in practice on real multi-letter text (2026-09-01), not
+  yet optimized. The whole pipeline — opentype.js parsing, per-glyph edge-loop extraction, hole
+  detection (§2), and the `chainIntoSteps` backtracking search (§2.1) — runs synchronously on the main
+  thread on every single Flatten/Outline-as-stroke call, and nothing is cached: the same
+  character+fontSize gets its glyph outline re-extracted and re-assembled from scratch every time,
+  even across repeated calls in the same session. The two real levers, neither started: (1) cache
+  parsed/assembled glyph outlines keyed by character+fontSize instead of recomputing per call, and
+  (2) move extraction/assembly off the main thread (Web Worker), since it currently blocks. Tracked
+  in ROADMAP.2.0.0.md Stage 2.
 
 ## 8. Test coverage map
 

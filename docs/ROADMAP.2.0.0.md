@@ -60,8 +60,23 @@ in §5.6/§5.7 as not yet started:
 The two items are independent of each other — do one, the other, both, or neither; there is no
 ordering dependency between them.
 
+## Stage 2 — Performance: text Flatten / Outline as stroke
+
+Confirmed noticeably slow in practice on real multi-letter text (2026-09-01), right after the
+Flatten/Outline-as-stroke-for-text feature itself landed. Not yet started. Full pipeline + rationale
+in [[text-flatten-and-outline]] §7 — in short: opentype.js parsing, per-glyph edge-loop extraction,
+hole detection, and the `chainIntoSteps` backtracking search all run synchronously on the main thread
+with nothing cached across calls.
+
+- [ ] **Cache parsed/assembled glyph outlines** keyed by character+fontSize, instead of
+      re-extracting and re-assembling from scratch on every Flatten/Outline-as-stroke call.
+- [ ] **Move extraction/assembly off the main thread** (Web Worker) — it currently blocks.
+
 ## Related
 
 [[canvas-vector-performance]] — full write-up of what's already done (cluster cache, spatial hash
 instead of sweep-line, reusing the rotation-bake cache, pointed fixes in the cut tool and vertex
 dots) plus a more detailed rationale for why these two items were deferred to a separate stage.
+
+[[text-flatten-and-outline]] — the text Flatten/Outline-as-stroke pipeline Stage 2 targets: font
+extraction, per-glyph vector assembly, and the destructive commands built on top of them.
