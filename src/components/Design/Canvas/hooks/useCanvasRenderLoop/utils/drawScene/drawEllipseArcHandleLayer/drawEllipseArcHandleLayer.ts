@@ -11,6 +11,7 @@ import { TSceneNode } from 'types/design/types';
 import { drawArcRatioGuide } from './drawArcRatioGuide';
 import { drawFullyCutAwayGuideLine } from './drawFullyCutAwayGuideLine';
 import { drawHoveredArcHandles } from './drawHoveredArcHandles';
+import { drawHoveredEllipseArcRatioValueLabel } from './drawHoveredEllipseArcRatioValueLabel';
 import { drawHoveredEllipseArcStartValueLabel } from './drawHoveredEllipseArcStartValueLabel';
 import { drawHoveredEllipseArcValueLabel } from './drawHoveredEllipseArcValueLabel';
 import { getEllipseArcMajorArc } from 'utils/canvas/ellipseArc/getEllipseArcMajorArc';
@@ -85,6 +86,16 @@ export const drawEllipseArcHandleLayer = (
       );
       drawHoveredEllipseArcValueLabel(context, refs, bounds, arcStartAngle, arcEndAngle, arcRatio, selectedNode, endHandleDraggedPosition);
       drawHoveredEllipseArcStartValueLabel(context, refs, bounds, arcStartAngle, arcRatio, selectedNode, rotateHandleDraggedPosition);
+      drawHoveredEllipseArcRatioValueLabel(
+        context,
+        refs,
+        bounds,
+        arcStartAngle,
+        arcEndAngle,
+        arcRatio,
+        selectedNode,
+        ratioHandleDraggedPosition,
+      );
     }
   }
 };

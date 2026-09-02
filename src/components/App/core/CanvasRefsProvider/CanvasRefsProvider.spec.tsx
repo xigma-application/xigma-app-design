@@ -36,6 +36,7 @@ describe('CanvasRefsProvider behaviors', () => {
       hover: {
         hoverRef: { current: null },
         hoveredEllipseArcHandleRef: { current: null },
+        hoveredEllipseArcRatioHandleRef: { current: null },
         hoveredEllipseArcRotateHandleRef: { current: null },
         hoveredSegmentIdRef: { current: null },
         hoveredVectorCutPointRef: { current: null },
