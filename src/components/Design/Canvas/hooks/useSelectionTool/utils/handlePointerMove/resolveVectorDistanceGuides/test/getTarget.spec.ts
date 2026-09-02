@@ -24,20 +24,24 @@ const node: TVectorNode = {
 };
 
 describe('getTarget', () => {
-  it('should target a hovered vertex that is not the anchor', () => {
-    expect(getTarget([node], 'v1', 'v3', null)).toEqual({ kind: 'vertex', point: { id: 'v3', x: 100, y: 100 } });
+  it('should target a hovered vertex that is not excluded', () => {
+    expect(getTarget([node], ['v1'], 'v3', null)).toEqual({ kind: 'vertex', point: { id: 'v3', x: 100, y: 100 } });
   });
 
-  it('should return null when the only hovered vertex is the anchor itself', () => {
-    expect(getTarget([node], 'v1', 'v1', null)).toBeNull();
+  it('should return null when the only hovered vertex is excluded', () => {
+    expect(getTarget([node], ['v1'], 'v1', null)).toBeNull();
+  });
+
+  it('should return null when the hovered vertex is excluded as part of a multi-vertex (box) anchor', () => {
+    expect(getTarget([node], ['v1', 'v2'], 'v2', null)).toBeNull();
   });
 
   it('should return null when the hovered vertex is in none of the nodes', () => {
-    expect(getTarget([node], 'v1', 'ghost', null)).toBeNull();
+    expect(getTarget([node], ['v1'], 'ghost', null)).toBeNull();
   });
 
-  it('should target a hovered non-incident segment as its sampled polyline', () => {
-    expect(getTarget([node], 'v1', null, 's2')).toEqual({
+  it('should target a hovered segment whose endpoints are not excluded, as its sampled polyline', () => {
+    expect(getTarget([node], ['v1'], null, 's2')).toEqual({
       kind: 'segment',
       polyline: [
         { x: 100, y: 0 },
@@ -46,15 +50,19 @@ describe('getTarget', () => {
     });
   });
 
-  it('should return null when the hovered segment meets the anchor vertex', () => {
-    expect(getTarget([node], 'v1', null, 's1')).toBeNull();
+  it('should return null when the hovered segment meets an excluded vertex', () => {
+    expect(getTarget([node], ['v1'], null, 's1')).toBeNull();
+  });
+
+  it('should return null when the hovered segment meets a vertex excluded as part of a box anchor', () => {
+    expect(getTarget([node], ['v1', 'v3'], null, 's2')).toBeNull();
   });
 
   it('should return null when the hovered segment is in none of the nodes', () => {
-    expect(getTarget([node], 'v1', null, 'ghost')).toBeNull();
+    expect(getTarget([node], ['v1'], null, 'ghost')).toBeNull();
   });
 
   it('should return null when nothing is hovered', () => {
-    expect(getTarget([node], 'v1', null, null)).toBeNull();
+    expect(getTarget([node], ['v1'], null, null)).toBeNull();
   });
 });

@@ -8,6 +8,7 @@ import { NodeType, ToolName } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
+import { getDistanceGuides } from '../../../../../../utils/getDistanceGuides/getDistanceGuides';
 import { resolveVectorDistanceGuides } from '../resolveVectorDistanceGuides';
 
 const SENTINEL = { sentinel: true } as unknown as TCanvasRefs['transform']['distanceGuidesRef']['current'];
@@ -140,6 +141,25 @@ describe('resolveVectorDistanceGuides', () => {
 
   it('should treat unset selection refs as empty and clear the ref', () => {
     const refs = makeRefs({ hoveredVertexId: 'v3', nullSelectionRefs: true });
+
+    resolveVectorDistanceGuides(altMove(), refs, vi.fn());
+
+    expect(refs.transform.distanceGuidesRef.current).toBeNull();
+  });
+
+  it('should anchor on the bounding box of two selected vertices and measure against a third, hovered vertex', () => {
+    const refs = makeRefs({ hoveredVertexId: 'v3', selectedVertexIds: ['v1', 'v2'] });
+
+    resolveVectorDistanceGuides(altMove(), refs, vi.fn());
+
+    // v1 (0,0) + v2 (100,0) box vs. v3 (100,100) — reuses Stage 1's rect-vs-rect distance guides
+    const { labels, lines } = getDistanceGuides({ height: 0, width: 100, x: 0, y: 0 }, { height: 0, width: 0, x: 100, y: 100 });
+
+    expect(refs.transform.distanceGuidesRef.current).toEqual({ labels, lines });
+  });
+
+  it('should clear the ref when the only hovered vertex is itself part of the box selection', () => {
+    const refs = makeRefs({ hoveredVertexId: 'v2', selectedVertexIds: ['v1', 'v2'] });
 
     resolveVectorDistanceGuides(altMove(), refs, vi.fn());
 

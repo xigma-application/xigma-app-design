@@ -1,4 +1,4 @@
 // types
-import { TPoint } from 'types/canvas';
+import { TVectorDistanceAnchor } from '../../../../../utils/getVectorDistanceGuides/types';
 
-export type TVectorDistanceAnchorResult = { anchorVertexId: string | null; point: TPoint };
+export type TVectorDistanceAnchorResult = TVectorDistanceAnchor & { excludeVertexIds: string[] };

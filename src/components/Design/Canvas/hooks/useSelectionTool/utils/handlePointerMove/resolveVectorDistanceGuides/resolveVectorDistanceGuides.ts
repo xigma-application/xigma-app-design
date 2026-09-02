@@ -33,14 +33,14 @@ export const resolveVectorDistanceGuides = (
     const target = anchor
       ? getTarget(
           bakedNodes,
-          anchor.anchorVertexId,
+          anchor.excludeVertexIds,
           canvasRefs.hover.hoveredVectorVertexIdRef.current,
           canvasRefs.hover.hoveredVectorSegmentIdRef.current,
         )
       : null;
 
     if (anchor && target) {
-      canvasRefs.transform.distanceGuidesRef.current = getVectorDistanceGuides({ point: anchor.point }, target);
+      canvasRefs.transform.distanceGuidesRef.current = getVectorDistanceGuides(anchor, target);
       setClassName('distance-measure');
     } else {
       canvasRefs.transform.distanceGuidesRef.current = null;

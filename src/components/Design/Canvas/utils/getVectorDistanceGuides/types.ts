@@ -1,8 +1,8 @@
 // types
 import { TDistanceGuideLabel, TDistanceGuideLine } from '../getDistanceGuides/types';
-import { TPoint } from 'types/canvas';
+import { TDraftRect, TPoint } from 'types/canvas';
 
-export type TVectorDistanceAnchor = { point: TPoint };
+export type TVectorDistanceAnchor = { kind: 'point'; point: TPoint } | { kind: 'box'; rect: TDraftRect };
 
 export type TVectorDistanceTarget = { kind: 'vertex'; point: TPoint } | { kind: 'segment'; polyline: TPoint[] };
 
