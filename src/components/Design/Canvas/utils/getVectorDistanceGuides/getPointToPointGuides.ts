@@ -24,16 +24,19 @@ export const getPointToPointGuides = (a: TPoint, b: TPoint): TVectorDistanceGuid
     };
   }
 
-  const corner = { x: b.x, y: a.y };
+  const cornerOnARow = { x: b.x, y: a.y }; // shares a's row, b's column
+  const cornerOnACol = { x: a.x, y: b.y }; // shares a's column, b's row
 
   return {
     labels: [
-      getLabel(a.x, a.y, corner.x, corner.y, { x: 0, y: -1 }, Math.abs(dx)),
-      getLabel(corner.x, corner.y, b.x, b.y, { x: 1, y: 0 }, Math.abs(dy)),
+      getLabel(a.x, a.y, cornerOnARow.x, cornerOnARow.y, { x: 0, y: -Math.sign(dy) }, Math.abs(dx)),
+      getLabel(a.x, a.y, cornerOnACol.x, cornerOnACol.y, { x: -Math.sign(dx), y: 0 }, Math.abs(dy)),
     ],
     lines: [
-      { dashed: false, x1: a.x, x2: corner.x, y1: a.y, y2: corner.y },
-      { dashed: false, x1: corner.x, x2: b.x, y1: corner.y, y2: b.y },
+      { dashed: false, x1: a.x, x2: cornerOnARow.x, y1: a.y, y2: cornerOnARow.y },
+      { dashed: true, x1: cornerOnARow.x, x2: b.x, y1: cornerOnARow.y, y2: b.y },
+      { dashed: false, x1: a.x, x2: cornerOnACol.x, y1: a.y, y2: cornerOnACol.y },
+      { dashed: true, x1: cornerOnACol.x, x2: b.x, y1: cornerOnACol.y, y2: b.y },
     ],
   };
 };

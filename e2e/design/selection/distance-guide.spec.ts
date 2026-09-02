@@ -227,6 +227,45 @@ test('a vector point-to-point measurement appears while Alt-hovering another ver
   expect(altReleased.equals(altHovered)).toBe(false);
 });
 
+test('a diagonal vector point-to-point measurement follows the selected vertex — swapping which end is selected renders a different box', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-distance-guide-vector-point-swap');
+  await expect(designPage.canvas).toBeVisible();
+
+  // same two diagonal points (v1, v3) both times — only which one is selected changes
+  const captureWithSelected = async (selected: { x: number; y: number }, hovered: { x: number; y: number }): Promise<Buffer> => {
+    await designPage.drawVectorPath([
+      { x: 1300, y: 550 },
+      { x: 1450, y: 550 },
+      { x: 1450, y: 700 },
+    ]);
+    await designPage.selectVectorEditMoveTool();
+    await designPage.click(selected.x, selected.y);
+
+    await page.keyboard.down('Alt');
+    await designPage.pointerMove(hovered.x, hovered.y);
+    const shot = await designPage.canvas.screenshot();
+    await page.keyboard.up('Alt');
+
+    return shot;
+  };
+
+  const v1 = { x: 1300, y: 550 };
+  const v3 = { x: 1450, y: 700 };
+
+  const v1SelectedHoveringV3 = await captureWithSelected(v1, v3);
+
+  await designPage.goto('e2e-test-distance-guide-vector-point-swap-reverse');
+  const v3SelectedHoveringV1 = await captureWithSelected(v3, v1);
+
+  // the box's own two solid, labelled legs sit at the selected vertex's row/column each time, so
+  // reversing which point is selected must move them — the two captures cannot be pixel-identical
+  expect(v3SelectedHoveringV1.equals(v1SelectedHoveringV3)).toBe(false);
+});
+
 test('a vector point-to-point measurement appears for two vertices aligned on the same row (the single axis-aligned run branch)', async ({
   page,
 }) => {

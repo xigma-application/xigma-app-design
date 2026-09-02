@@ -89,7 +89,9 @@ describe('resolveVectorDistanceGuides', () => {
 
     expect(refs.transform.distanceGuidesRef.current?.lines).toEqual([
       { dashed: false, x1: 0, x2: 100, y1: 0, y2: 0 },
-      { dashed: false, x1: 100, x2: 100, y1: 0, y2: 100 },
+      { dashed: true, x1: 100, x2: 100, y1: 0, y2: 100 },
+      { dashed: false, x1: 0, x2: 0, y1: 0, y2: 100 },
+      { dashed: true, x1: 0, x2: 100, y1: 100, y2: 100 },
     ]);
     expect(setClassName).toHaveBeenCalledWith('distance-measure');
   });
