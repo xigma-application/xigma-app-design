@@ -116,7 +116,7 @@
     }
 
     &[data-state='open'] {
-      background-color: #394360;
+      background-color: var(--color-selected);
 
       @include svg-color.svg-color(var(--color-blue-2));
     }

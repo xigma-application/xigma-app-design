@@ -31,7 +31,12 @@ exports[`Header snapshots > should render Header with the file name 1`] = `
             data-state="closed"
           >
             <button
+              aria-expanded="false"
+              aria-haspopup="menu"
               aria-label="File menu"
+              class=""
+              data-state="closed"
+              id="radix-_r_0_"
               type="button"
             >
               <svg

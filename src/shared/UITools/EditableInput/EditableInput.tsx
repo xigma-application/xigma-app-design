@@ -15,11 +15,13 @@ import styles from './editable-input.module.scss';
 
 export type TEditableInputProps = {
   action?: ReactNode;
+  actionOpen?: boolean;
   ariaLabel?: string;
   autoEdit?: boolean;
   className?: string;
   editOnDoubleClick?: boolean;
   fitContent?: boolean;
+  onActionOpenChange?: TFunc<[boolean]>;
   onChange: TFunc<[string]>;
   onEditingChange?: TFunc<[boolean]>;
   placeholder?: string;
@@ -31,11 +33,13 @@ export const EditableInput = forwardRef<HTMLInputElement, TEditableInputProps>(
   (
     {
       action,
+      actionOpen,
       ariaLabel,
       autoEdit = false,
       className = '',
       editOnDoubleClick = false,
       fitContent = false,
+      onActionOpenChange,
       onChange,
       onEditingChange = noop,
       placeholder = '',
@@ -83,7 +87,16 @@ export const EditableInput = forwardRef<HTMLInputElement, TEditableInputProps>(
       return field;
     }
 
-    return <EditableInputGroup action={action} className={className} field={field} isEditing={isEditing} />;
+    return (
+      <EditableInputGroup
+        action={action}
+        actionOpen={actionOpen}
+        className={className}
+        field={field}
+        isEditing={isEditing}
+        onActionOpenChange={onActionOpenChange}
+      />
+    );
   },
 );
 

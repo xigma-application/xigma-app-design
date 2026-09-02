@@ -1,3 +1,4 @@
+import userEvent from '@testing-library/user-event';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
@@ -94,5 +95,30 @@ describe('Header behaviors', () => {
     // result
     expect(screen.queryByRole('button', { name: 'File menu' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Minimize UI' })).toBeInTheDocument();
+  });
+
+  it('should keep the trigger highlight in sync when the menu closes on its own (Escape), not just on click', async () => {
+    // mock
+    const user = userEvent.setup();
+
+    // before
+    renderHeader({ name: 'Untitled', onRenameFile: vi.fn() });
+    const trigger = screen.getByRole('button', { name: 'File menu' });
+    const actionWrapper = trigger.parentElement as HTMLElement;
+
+    // action
+    await user.click(trigger);
+
+    // result — both the trigger and its highlight wrapper agree it's open
+    expect(trigger).toHaveAttribute('data-state', 'open');
+    expect(actionWrapper).toHaveAttribute('data-state', 'open');
+
+    // action
+    await user.keyboard('{Escape}');
+
+    // result — Radix closes the menu on Escape without going through the wrapper's own
+    // click/outside-click handling, so the highlight must still follow it
+    expect(trigger).toHaveAttribute('data-state', 'closed');
+    expect(actionWrapper).toHaveAttribute('data-state', 'closed');
   });
 });

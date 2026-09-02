@@ -34,7 +34,12 @@ exports[`File snapshots > should render File 1`] = `
               data-state="closed"
             >
               <button
+                aria-expanded="false"
+                aria-haspopup="menu"
                 aria-label="File menu"
+                class=""
+                data-state="closed"
+                id="radix-_r_0_"
                 type="button"
               >
                 <svg
@@ -236,7 +241,7 @@ exports[`File snapshots > should render File 1`] = `
           >
             <div
               class="_Tree__viewport_5bb657"
-              style="height: 0px;"
+              style="height: 0px; width: 0px;"
             />
           </div>
         </div>

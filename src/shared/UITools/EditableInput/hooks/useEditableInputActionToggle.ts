@@ -6,12 +6,22 @@ export type TUseEditableInputActionToggleResult = {
   toggleAction: TFunc;
 };
 
-export const useEditableInputActionToggle = (): TUseEditableInputActionToggleResult => {
-  const [isActionOpen, setIsActionOpen] = useState(false);
+export const useEditableInputActionToggle = (openProp?: boolean, onOpenChange?: TFunc<[boolean]>): TUseEditableInputActionToggleResult => {
+  const isControlled = openProp !== undefined;
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const actionRef = useRef<HTMLDivElement>(null);
+  const isActionOpen = isControlled ? openProp : uncontrolledOpen;
+
+  const setIsActionOpen = (open: boolean): void => {
+    if (isControlled) {
+      onOpenChange?.(open);
+    } else {
+      setUncontrolledOpen(open);
+    }
+  };
 
   const toggleAction = (): void => {
-    setIsActionOpen((open) => !open);
+    setIsActionOpen(!isActionOpen);
   };
 
   const handleOutsideClick = (event: MouseEvent): void => {
@@ -21,14 +31,14 @@ export const useEditableInputActionToggle = (): TUseEditableInputActionToggleRes
   };
 
   useEffect(() => {
-    if (isActionOpen) {
+    if (isActionOpen && !isControlled) {
       window.addEventListener('mousedown', handleOutsideClick);
     }
 
     return (): void => {
       window.removeEventListener('mousedown', handleOutsideClick);
     };
-  }, [isActionOpen]);
+  }, [isActionOpen, isControlled]);
 
   return { actionRef, isActionOpen, toggleAction };
 };

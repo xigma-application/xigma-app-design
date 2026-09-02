@@ -369,4 +369,65 @@ describe('EditableInput action slot', () => {
     // result
     expect(actionWrapper).toHaveAttribute('data-state', 'closed');
   });
+
+  it('should reflect a controlled actionOpen prop as the data-state, without needing a click', () => {
+    // before
+    render(<EditableInput action={<span>menu</span>} actionOpen ariaLabel="name" onChange={vi.fn()} value="Untitled" />);
+
+    // result
+    expect(screen.getByText('menu').parentElement).toHaveAttribute('data-state', 'open');
+  });
+
+  it('should leave opening to the controlled action itself, instead of also toggling on the wrapper click', () => {
+    // mock
+    const onActionOpenChange = vi.fn();
+
+    // before
+    render(
+      <EditableInput
+        action={
+          <button onClick={(): void => onActionOpenChange(true)} type="button">
+            menu
+          </button>
+        }
+        actionOpen={false}
+        ariaLabel="name"
+        onActionOpenChange={onActionOpenChange}
+        onChange={vi.fn()}
+        value="Untitled"
+      />,
+    );
+
+    // action
+    fireEvent.click(screen.getByText('menu'));
+
+    // result — a controlled action owns its own open click; the wrapper doesn't
+    // independently re-toggle on the same click and undo it
+    expect(onActionOpenChange).toHaveBeenCalledTimes(1);
+    expect(onActionOpenChange).toHaveBeenCalledWith(true);
+  });
+
+  it('should not auto-close a controlled action on outside click, leaving that to its own trigger', () => {
+    // mock
+    const onActionOpenChange = vi.fn();
+
+    // before
+    render(
+      <EditableInput
+        action={<span>menu</span>}
+        actionOpen
+        ariaLabel="name"
+        onActionOpenChange={onActionOpenChange}
+        onChange={vi.fn()}
+        value="Untitled"
+      />,
+    );
+
+    // action
+    fireEvent.mouseDown(document.body);
+
+    // result
+    expect(onActionOpenChange).not.toHaveBeenCalled();
+    expect(screen.getByText('menu').parentElement).toHaveAttribute('data-state', 'open');
+  });
 });
