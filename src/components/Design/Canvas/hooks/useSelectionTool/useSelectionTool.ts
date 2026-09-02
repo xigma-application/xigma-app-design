@@ -57,6 +57,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
     canvasRefs.transform.alignmentGuideRef.current = null;
     canvasRefs.transform.distanceGuidesRef.current = null;
     canvasRefs.transform.equalSpacingGuidesRef.current = null;
+    canvasRefs.transform.matchedPairGuidesRef.current = null;
   };
 
   const onKeyDown = (event: KeyboardEvent): void => {
@@ -158,6 +159,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         refs.transform.alignmentGuideRef.current = null;
         refs.transform.distanceGuidesRef.current = null;
         refs.transform.equalSpacingGuidesRef.current = null;
+        refs.transform.matchedPairGuidesRef.current = null;
         lastPointerClientPositionRef.current = null;
       };
     }

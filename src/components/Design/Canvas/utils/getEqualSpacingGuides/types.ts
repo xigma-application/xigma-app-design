@@ -1,6 +1,6 @@
 // types
 import { TDistanceGuideLabel, TDistanceGuideLine } from '../getDistanceGuides/types';
-import { TDraftRect } from 'types/canvas';
+import { TDraftRect, TPoint } from 'types/canvas';
 
 export type TEqualSpacingCandidate = {
   bounds: TDraftRect;
@@ -9,4 +9,9 @@ export type TEqualSpacingCandidate = {
 export type TEqualSpacingGuides = {
   labels: TDistanceGuideLabel[];
   lines: TDistanceGuideLine[];
+};
+
+export type TMatchedPairGuides = {
+  lines: TDistanceGuideLine[];
+  markers: TPoint[];
 };

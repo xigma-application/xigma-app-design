@@ -3,7 +3,7 @@ import { useRef } from 'react';
 // types
 import { TAlignmentGuide } from 'components/Design/Canvas/utils/getGroupAlignmentGuide';
 import { TDistanceGuides } from 'components/Design/Canvas/utils/getDistanceGuides/types';
-import { TEqualSpacingGuides } from 'components/Design/Canvas/utils/getEqualSpacingGuides/types';
+import { TEqualSpacingGuides, TMatchedPairGuides } from 'components/Design/Canvas/utils/getEqualSpacingGuides/types';
 import { TShapeContactGuide } from 'components/Design/Canvas/utils/getShapeContactGuides';
 import { TTransformRefs } from 'types/design/canvas/types';
 import { TRotateDragState } from 'types/design/selectionTool/types';
@@ -14,6 +14,7 @@ export const useTransformRefs = (): TTransformRefs => {
   const distanceGuidesRef = useRef<TDistanceGuides | null>(null);
   const draggedNodeIdsRef = useRef<Set<string> | null>(null);
   const equalSpacingGuidesRef = useRef<TEqualSpacingGuides | null>(null);
+  const matchedPairGuidesRef = useRef<TMatchedPairGuides | null>(null);
   const resizedNodeIdsRef = useRef<Set<string> | null>(null);
   const rotateDragRef = useRef<TRotateDragState | null>(null);
   const rotatedNodeIdsRef = useRef<Set<string> | null>(null);
@@ -26,6 +27,7 @@ export const useTransformRefs = (): TTransformRefs => {
       distanceGuidesRef,
       draggedNodeIdsRef,
       equalSpacingGuidesRef,
+      matchedPairGuidesRef,
       resizedNodeIdsRef,
       rotateDragRef,
       rotatedNodeIdsRef,

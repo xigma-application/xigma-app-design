@@ -35,6 +35,7 @@ import { drawFrame } from './drawFrame';
 import { drawFrameNameLabels } from './drawFrameNameLabels/drawFrameNameLabels';
 import { drawHoverOutline } from './drawHoverOutline';
 import { drawMarquee } from 'utils/canvas/drawMarquee';
+import { drawMatchedPairGuides } from './drawMatchedPairGuides';
 import { drawPencilPreview } from './drawPencilPreview/drawPencilPreview';
 import { drawPenPreview } from './drawPenPreview/drawPenPreview';
 import { drawPixelGrid } from 'utils/canvas/drawPixelGrid';
@@ -161,4 +162,5 @@ export const drawScene = (
   drawShapeContactGuides(ctx, refs);
   drawDistanceGuides(ctx, refs);
   drawEqualSpacingGuides(ctx, refs);
+  drawMatchedPairGuides(ctx, refs);
 };

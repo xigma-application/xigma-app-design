@@ -1751,6 +1751,34 @@ row has one of *its own* further out):
     guide-building doesn't care whether the *found* neighbour came via overlap or a clean gap, so no
     other code needed to change).
 
+### 28a. Matched-pair guides — the "same size + centred on a neighbour" affordance
+
+A separate, **display-only** mechanism (no snap delta of its own — the alignment snap already does the
+centring). While dragging a single eligible shape, if it has a neighbour (across a real gap, not
+flush) that is the **same size** (`GRID_CELL_SIZE_MATCH_TOLERANCE_PX`, tight) **and** centred on it
+(`ALIGNMENT_SNAP_TOLERANCE_PX` on the perpendicular axis), draw: a centre-axis line from the dragged
+shape's centre through the whole neighbour to its far edge, the two shared edge lines spanning both
+shapes, and an × at every endpoint/corner — all in `DISTANCE_GUIDE_STROKE` orange (`drawXMarker` for
+the ×, same as §23's contact guides).
+
+- `getEqualSpacingGuides/getMatchedPairGuides/` — `getVerticalMatchedPair.ts` / `getHorizontalMatchedPair.ts`
+  (one per stacking direction) + `getMatchedPairGuides.ts` orchestrator (vertical tried first).
+  `TMatchedPairGuides = { lines, markers }` (new type next to `TEqualSpacingGuides`).
+- `continueDrag/getMatchedPairDragGuides.ts` — the drag-time gate (single eligible plain-origin node,
+  same pattern as `getChainGapDragSnap.ts`), called from `continueDrag.ts`. **When it returns
+  non-null, `continueDrag.ts` writes `null` to `alignmentGuideRef`** for that frame — the matched-pair
+  guides are the richer version of the alignment guide for this exact case (same edge positions plus
+  the centre line and ×), and drawing both stacked on the same x/y just doubles the strokes.
+- `matchedPairGuidesRef` (`TTransformRefs`, next to `equalSpacingGuidesRef`), cleared in the same
+  three places `equalSpacingGuidesRef` is (`disarmDrag.ts`, `useSelectionTool.ts` leave/teardown).
+- Render: `drawMatchedPairGuides.ts` (`drawScene.ts`, right after `drawEqualSpacingGuides`).
+- **`continueDrag.ts` and its drag-only helpers moved into a `continueDrag/` subfolder** at the same
+  time, on request — nothing else imports them. The subfolder holds `getChainGapDragSnap.ts`,
+  `getMatchedPairDragGuides.ts`, plus three plain extracted steps `continueDrag.ts` now just calls in
+  sequence: `initDraggedNodeIds.ts` (populate `draggedNodeIdsRef` once), `updateDragSnapshotDeltas.ts`
+  (write the delta onto frozen vector snapshots), `dispatchDraggedNodeUpdates.ts` (throttled
+  `updateNode` dispatch, skipping snapshotted nodes).
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.

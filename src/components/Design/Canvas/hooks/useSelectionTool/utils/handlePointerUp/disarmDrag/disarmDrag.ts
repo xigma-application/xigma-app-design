@@ -30,6 +30,7 @@ export const disarmDrag = (
     canvasRefs.transform.draggedNodeIdsRef.current = null;
     canvasRefs.transform.alignmentGuideRef.current = null;
     canvasRefs.transform.equalSpacingGuidesRef.current = null;
+    canvasRefs.transform.matchedPairGuidesRef.current = null;
     dragStateRef.current = null;
     canvas.releasePointerCapture(event.pointerId);
   }

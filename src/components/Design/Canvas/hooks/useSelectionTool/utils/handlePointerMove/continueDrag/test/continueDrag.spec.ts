@@ -39,6 +39,7 @@ const createCanvasRefs = (): TCanvasRefs =>
       alignmentGuideRef: { current: null },
       draggedNodeIdsRef: { current: null },
       equalSpacingGuidesRef: { current: null },
+      matchedPairGuidesRef: { current: null },
     },
     vectorSnapshots: { draggedVectorNodeSnapshotsRef: { current: null } },
   }) as unknown as TCanvasRefs;
@@ -187,6 +188,29 @@ describe('continueDrag', () => {
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idC]).toMatchObject({ x: 100, y: 0 });
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ x: 0, y: 0 });
     expect(canvasRefs.transform.equalSpacingGuidesRef.current?.lines).toHaveLength(2);
+  });
+
+  it('should populate the matched-pair guide ref and suppress the alignment guide when the dragged box lands centred on a same-size neighbour', () => {
+    // mock — a 40x40 stationary box, and a same-size box dragged to sit centred below it with a gap
+    addRectNode(0, 0, 40);
+
+    const idB = addRectNode(0, 80, 40);
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const dragStateRef = createDragStateRef({
+      candidateShapes: getCandidateShapes(selectActivePage(store.getState()).nodes, [idB]),
+      hasMoved: false,
+      nodeOrigins: { [idB]: { x: 0, y: 80 } },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 80 },
+    });
+
+    // before — no movement; the box already sits centred (same x) below the stationary one
+    continueDrag(canvas, pointerEvent(0, 80), store.dispatch, dragStateRef, canvasRefs);
+
+    // result — matched-pair guides drawn (centre line + 2 edges), alignment guide left blank
+    expect(canvasRefs.transform.matchedPairGuidesRef.current?.lines).toHaveLength(3);
+    expect(canvasRefs.transform.alignmentGuideRef.current).toBeNull();
   });
 
   it('should move a line node endpoints by the pointer delta', () => {

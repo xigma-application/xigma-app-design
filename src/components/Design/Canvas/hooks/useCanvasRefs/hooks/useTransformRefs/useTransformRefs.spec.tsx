@@ -15,6 +15,7 @@ describe('useTransformRefs behaviors', () => {
       distanceGuidesRef: { current: null },
       draggedNodeIdsRef: { current: null },
       equalSpacingGuidesRef: { current: null },
+      matchedPairGuidesRef: { current: null },
       resizedNodeIdsRef: { current: null },
       rotateDragRef: { current: null },
       rotatedNodeIdsRef: { current: null },

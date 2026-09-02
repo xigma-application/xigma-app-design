@@ -16,11 +16,9 @@
     left 80ms ease-out;
   z-index: 1;
 
-  // clears the ruler strips instead of sitting on top of them
-
   &--withRulers {
-    left: 44px;
-    top: 44px;
+    left: 32px;
+    top: 32px;
   }
 
   &__logo {

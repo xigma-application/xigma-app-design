@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 // components
 import { DesignPage } from '../model/DesignPage';
 
-// four screenshot-equality tests sharing GPU/WebGL contention across workers is flaky — pin this
+// several screenshot-equality tests sharing GPU/WebGL contention across workers is flaky — pin this
 // file to one worker (see shape-draw-snap.spec.ts's own identical rationale)
 test.describe.configure({ mode: 'serial' });
 
@@ -121,6 +121,8 @@ test('dragging a shape back between two flanking neighbours snaps it to the cent
 test('dragging a shape into a grid slot snaps to match both its row (same height) and column (same width) gaps at once, rendering identically to placing it there directly', async ({
   page,
 }) => {
+  test.slow(); // draws two full 3x3 grids — comfortably over the default budget once the file's other tests have warmed the worker
+
   const snapped = new DesignPage(page);
 
   await snapped.goto('e2e-test-guide-smart-grid-dragged');
@@ -165,4 +167,30 @@ test('dragging a shape into a grid slot snaps to match both its row (same height
   const controlShot = await page.screenshot({ clip: { height: 350, width: 400, x: 650, y: 150 } });
 
   expect(snappedShot.equals(controlShot)).toBe(true);
+});
+
+test('dragging a shape to sit centred below a same-size neighbour draws the matched-pair guides (centre line + both edges + × corners) instead of a plain alignment guide', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-guide-smart-matched-pair');
+  await expect(designPage.canvas).toBeVisible();
+
+  // two same-size 200x150 rects, one stationary and one dragged to sit centred below it with a gap
+  await designPage.drawRectangle(700, 200, 900, 350);
+  await designPage.drawRectangle(700, 500, 900, 650);
+
+  await designPage.pointerDown(800, 575); // its centre
+  await page.mouse.move(802, 452, { steps: 6 }); // 2px off centred x, a gap below the stationary one
+
+  const withGuides = await page.screenshot({ clip: { height: 540, width: 360, x: 620, y: 130 } });
+
+  await designPage.pointerUp();
+  await designPage.pointerMove(1400, 800);
+
+  const withoutGuides = await page.screenshot({ clip: { height: 540, width: 360, x: 620, y: 130 } });
+
+  // the guides only show mid-drag — the two frames must differ
+  expect(withGuides.equals(withoutGuides)).toBe(false);
 });

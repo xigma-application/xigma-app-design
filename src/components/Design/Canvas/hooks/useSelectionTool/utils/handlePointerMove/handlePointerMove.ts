@@ -7,7 +7,7 @@ import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 // utils
 import { continueCornerRadiusDrag } from './continueCornerRadiusDrag';
-import { continueDrag } from './continueDrag';
+import { continueDrag } from './continueDrag/continueDrag';
 import { continueEllipseArcDrag } from './continueEllipseArcDrag';
 import { continueEllipseArcRatioDrag } from './continueEllipseArcRatioDrag';
 import { continueEllipseArcRotateDrag } from './continueEllipseArcRotateDrag';
