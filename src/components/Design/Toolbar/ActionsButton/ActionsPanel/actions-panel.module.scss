@@ -20,11 +20,11 @@
   }
 
   &__list {
-    @include scrollbar.scrollbar-thin;
+    @include scrollbar.scrollbar-hidden;
 
     display: flex;
     flex-direction: column;
-    max-height: 400px;
+    max-height: min(400px, var(--radix-popper-available-height, 400px));
     overflow-y: auto;
     row-gap: 2px;
   }
