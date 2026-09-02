@@ -3,12 +3,22 @@ import { act, renderHook } from '@testing-library/react';
 // hooks
 import { usePopoverDrag } from '../usePopoverDrag';
 
-const createPointerDownEvent = (target: HTMLElement, clientX: number, clientY: number): React.PointerEvent<HTMLDivElement> =>
+const createPointerDownEvent = (
+  target: HTMLElement,
+  clientX: number,
+  clientY: number,
+  containsTarget = true,
+): React.PointerEvent<HTMLDivElement> =>
   ({
     buttons: 1,
     clientX,
     clientY,
-    currentTarget: { hasPointerCapture: () => false, releasePointerCapture: vi.fn(), setPointerCapture: vi.fn() },
+    currentTarget: {
+      contains: () => containsTarget,
+      hasPointerCapture: () => false,
+      releasePointerCapture: vi.fn(),
+      setPointerCapture: vi.fn(),
+    },
     pointerId: 1,
     target,
   }) as unknown as React.PointerEvent<HTMLDivElement>;
@@ -49,6 +59,26 @@ describe('usePopoverDrag', () => {
     act(() => result.current.onPointerMove(createPointerDownEvent(button, 130, 90)));
 
     // result
+    expect(result.current.offset).toEqual({ x: 0, y: 0 });
+  });
+
+  it('should not start a drag when the pointerdown target only bubbled here via a portal (not a real DOM descendant)', () => {
+    // mock — a node from an unrelated portal (e.g. the color sampler's mask), which
+    // still reaches this handler through React's tree even though it isn't physically
+    // inside the panel
+    const portalledNode = document.createElement('div');
+    const downEvent = createPointerDownEvent(portalledNode, 100, 100, false);
+
+    // before
+    const { result } = renderHook(() => usePopoverDrag(true));
+
+    // action
+    act(() => result.current.onPointerDown(downEvent));
+    act(() => result.current.onPointerMove(createPointerDownEvent(portalledNode, 130, 90, false)));
+
+    // result — never captured the pointer onto this panel, so a later pointerup/click
+    // triggered by that portalled node's own gesture isn't redirected here instead
+    expect(downEvent.currentTarget.setPointerCapture).not.toHaveBeenCalled();
     expect(result.current.offset).toEqual({ x: 0, y: 0 });
   });
 

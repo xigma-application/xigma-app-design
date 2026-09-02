@@ -8,9 +8,9 @@ import styles from './body.module.scss';
 
 export type TBodyProps = TSolidPanelProps;
 
-export const Body: FC<TBodyProps> = ({ alpha, colorModel, onOpenSampler }) => (
+export const Body: FC<TBodyProps> = ({ alpha, colorModel, onCloseSampler, onOpenSampler }) => (
   <div className={styles.Body}>
-    <SolidPanel alpha={alpha} colorModel={colorModel} onOpenSampler={onOpenSampler} />
+    <SolidPanel alpha={alpha} colorModel={colorModel} onCloseSampler={onCloseSampler} onOpenSampler={onOpenSampler} />
   </div>
 );
 

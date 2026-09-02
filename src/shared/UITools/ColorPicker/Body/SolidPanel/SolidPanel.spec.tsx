@@ -86,4 +86,32 @@ describe('SolidPanel behaviors', () => {
     // result
     expect(onOpenSampler).toHaveBeenCalledTimes(1);
   });
+
+  it('should call onCloseSampler when the sampler button is clicked again while open', () => {
+    // mock
+    const colorModel = {
+      hex: '#ff0000',
+      hsv: { h: 0, s: 100, v: 100 },
+      setAlpha: vi.fn(),
+      setHex: vi.fn(),
+      setHsv: vi.fn(),
+      setPreset: vi.fn(),
+    };
+    const onCloseSampler = vi.fn();
+
+    // before
+    const { container } = render(
+      <TooltipProvider>
+        <SolidPanel alpha={100} colorModel={colorModel} onCloseSampler={onCloseSampler} onOpenSampler={vi.fn()} />
+      </TooltipProvider>,
+    );
+    const samplerButton = container.querySelector('[class*="Sampler__button"]') as HTMLButtonElement;
+
+    // action
+    fireEvent.click(samplerButton);
+    fireEvent.click(samplerButton);
+
+    // result
+    expect(onCloseSampler).toHaveBeenCalledTimes(1);
+  });
 });

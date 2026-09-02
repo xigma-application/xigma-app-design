@@ -5,17 +5,17 @@ import { useTranslation } from 'react-i18next';
 import { ButtonMenu, Icon } from 'shared';
 
 // hooks
-import { useOpenSampler } from './hooks/useOpenSampler';
+import { useToggleSampler } from './hooks/useToggleSampler';
 
 // styles
 import styles from './sampler.module.scss';
 
-export type TSamplerProps = { onClick?: TFunc };
+export type TSamplerProps = { onClose?: TFunc; onOpen?: TFunc };
 
-export const Sampler: FC<TSamplerProps> = ({ onClick }) => {
+export const Sampler: FC<TSamplerProps> = ({ onClose, onOpen }) => {
   const { t } = useTranslation();
   const label = t('colorPicker.sampler.tooltip');
-  const handleOpenChange = useOpenSampler(onClick);
+  const handleOpenChange = useToggleSampler(onOpen, onClose);
 
   return (
     <div className={styles.Sampler}>

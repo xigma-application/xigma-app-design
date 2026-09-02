@@ -4,10 +4,10 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import Sampler from './Sampler';
 import { TooltipProvider } from 'shared';
 
-const renderSampler = (onClick?: TFunc): ReturnType<typeof render> =>
+const renderSampler = (onOpen?: TFunc, onClose?: TFunc): ReturnType<typeof render> =>
   render(
     <TooltipProvider>
-      <Sampler onClick={onClick} />
+      <Sampler onClose={onClose} onOpen={onOpen} />
     </TooltipProvider>,
   );
 
@@ -22,18 +22,34 @@ describe('Sampler snapshots', () => {
 });
 
 describe('Sampler behaviors', () => {
-  it('should call onClick when clicked', () => {
+  it('should call onOpen when clicked', () => {
     // mock
-    const onClick = vi.fn();
+    const onOpen = vi.fn();
 
     // before
-    renderSampler(onClick);
+    renderSampler(onOpen);
 
     // action
     fireEvent.click(screen.getByRole('button'));
 
     // result
-    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(onOpen).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call onClose when clicked again while open', () => {
+    // mock
+    const onOpen = vi.fn();
+    const onClose = vi.fn();
+
+    // before
+    renderSampler(onOpen, onClose);
+
+    // action
+    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByRole('button'));
+
+    // result
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('should render the icon in blue once opened', () => {

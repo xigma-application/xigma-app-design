@@ -5,6 +5,10 @@
   width: 240px;
 
   &__popover {
+    // stays interactive even while the sampler sets body { pointer-events: none } to
+    // route canvas clicks to its own mask — otherwise the whole picker (including the
+    // sampler's own toggle button) goes dead until you pick a color or hit Escape
     padding: 0;
+    pointer-events: auto;
   }
 }

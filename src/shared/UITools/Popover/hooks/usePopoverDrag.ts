@@ -29,6 +29,14 @@ export const usePopoverDrag = (moveable: boolean, onOpenChange?: TFunc<[boolean]
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>): void => {
     const target = event.target as HTMLElement;
 
+    // a target rendered through its own portal (e.g. the color sampler's mask) still
+    // bubbles this event here via React's tree, even though it isn't actually part of
+    // this panel's own DOM surface — starting a drag for it would capture the pointer
+    // onto this panel and steal its later pointerup/click from wherever it really landed.
+    if (!event.currentTarget.contains(target)) {
+      return;
+    }
+
     if (!target.closest(INTERACTIVE_SELECTOR)) {
       event.currentTarget.setPointerCapture(event.pointerId);
       dragStartRef.current = { originX: offset.x, originY: offset.y, startX: event.clientX, startY: event.clientY };

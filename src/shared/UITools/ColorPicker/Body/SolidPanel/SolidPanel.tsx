@@ -16,15 +16,16 @@ import { TUseColorModelResult } from '../../hooks/useColorModel';
 export type TSolidPanelProps = {
   alpha: number;
   colorModel: TUseColorModelResult;
+  onCloseSampler?: TFunc;
   onOpenSampler?: TFunc;
 };
 
-export const SolidPanel: FC<TSolidPanelProps> = ({ alpha, colorModel, onOpenSampler }) => (
+export const SolidPanel: FC<TSolidPanelProps> = ({ alpha, colorModel, onCloseSampler, onOpenSampler }) => (
   <div className={styles.SolidPanel}>
     <SaturationMap hsv={colorModel.hsv} onChange={colorModel.setHsv} />
     <div className={styles.SolidPanel__controls}>
       <div className={styles.SolidPanel__switchers}>
-        <Sampler onClick={onOpenSampler} />
+        <Sampler onClose={onCloseSampler} onOpen={onOpenSampler} />
         <div className={styles.SolidPanel__inputs}>
           <HueSlider hue={colorModel.hsv.h} onChange={colorModel.setHsv} />
           <AlphaSlider alpha={alpha} color={colorModel.hex} onChange={colorModel.setAlpha} />

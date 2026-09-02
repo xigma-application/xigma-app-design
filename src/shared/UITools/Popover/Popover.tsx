@@ -17,6 +17,7 @@ export type TPopoverProps = {
   children: ReactNode;
   className?: string;
   moveable?: boolean;
+  onInteractOutside?: (event: Event) => void;
   onOpenChange?: (open: boolean) => void;
   side?: 'bottom' | 'left' | 'right' | 'top';
   sideOffset?: number;
@@ -30,6 +31,7 @@ export const Popover: FC<TPopoverProps> = ({
   children,
   className = '',
   moveable = false,
+  onInteractOutside,
   onOpenChange,
   side = 'bottom',
   sideOffset = 8,
@@ -48,6 +50,7 @@ export const Popover: FC<TPopoverProps> = ({
         <PopoverPrimitive.Content
           align={align}
           className={cx(styles.Popover, className)}
+          onInteractOutside={onInteractOutside}
           onPointerDown={moveable ? onPointerDown : undefined}
           onPointerMove={moveable ? onPointerMove : undefined}
           onPointerUp={moveable ? onPointerUp : undefined}

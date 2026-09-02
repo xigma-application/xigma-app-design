@@ -11,6 +11,8 @@ import Popover from 'shared/UITools/Popover/Popover';
 // hooks
 import { useColorModel } from './hooks/useColorModel';
 import { useColorSampler } from './hooks/useColorSampler';
+import { useIgnoreSamplerInteractOutside } from './hooks/useIgnoreSamplerInteractOutside';
+import { usePopoverOpenChange } from './hooks/usePopoverOpenChange';
 import { useSetActiveTab } from './hooks/useSetActiveTab';
 
 // others
@@ -40,13 +42,16 @@ export const ColorPicker: FC<TColorPickerProps> = ({
   const handleSetActiveTab = useSetActiveTab(setActiveTab);
   const colorModel = useColorModel(value, onChange);
   const colorSampler = useColorSampler(colorModel.setHex);
+  const handleInteractOutside = useIgnoreSamplerInteractOutside(colorSampler.isActive);
+  const handleOpenChange = usePopoverOpenChange(colorSampler.close, onOpenChange);
 
   return (
     <Popover
       align={align}
       className={styles.ColorPicker__popover}
       moveable={moveable}
-      onOpenChange={onOpenChange}
+      onInteractOutside={handleInteractOutside}
+      onOpenChange={handleOpenChange}
       side={side}
       sideOffset={sideOffset}
       trigger={trigger}
@@ -55,7 +60,7 @@ export const ColorPicker: FC<TColorPickerProps> = ({
     >
       <div className={cx(styles.ColorPicker, className)}>
         <Header activeTab={activeTab} setActiveTab={handleSetActiveTab} />
-        <Body alpha={value.alpha} colorModel={colorModel} onOpenSampler={colorSampler.open} />
+        <Body alpha={value.alpha} colorModel={colorModel} onCloseSampler={colorSampler.close} onOpenSampler={colorSampler.open} />
         <Footer onSelectPreset={colorModel.setPreset} presets={presets} />
       </div>
       {colorSampler.isActive && <ColorSampler onClose={colorSampler.close} onPick={colorSampler.pick} />}
