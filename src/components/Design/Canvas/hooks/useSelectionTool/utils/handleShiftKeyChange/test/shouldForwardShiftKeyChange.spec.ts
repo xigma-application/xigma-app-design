@@ -7,9 +7,22 @@ import { shouldForwardShiftKeyChange } from '../shouldForwardShiftKeyChange';
 const POSITION = { x: 10, y: 20 };
 
 const createSelectRefs = (overrides: Partial<TSelectionToolRefs>): TSelectionToolRefs =>
-  ({ vectorEraseDragRef: { current: null }, vectorHandleDragRef: { current: null }, ...overrides }) as TSelectionToolRefs;
+  ({
+    dragStateRef: { current: null },
+    vectorEraseDragRef: { current: null },
+    vectorHandleDragRef: { current: null },
+    ...overrides,
+  }) as TSelectionToolRefs;
 
 describe('shouldForwardShiftKeyChange', () => {
+  it('should forward when Shift changes while a plain selection drag is in progress', () => {
+    // mock
+    const selectRefs = createSelectRefs({ dragStateRef: { current: {} } as TSelectionToolRefs['dragStateRef'] });
+
+    // result
+    expect(shouldForwardShiftKeyChange(new KeyboardEvent('keydown', { key: 'Shift' }), selectRefs, POSITION)).toBe(true);
+  });
+
   it('should forward when Shift changes while a vector handle drag is in progress', () => {
     // mock
     const selectRefs = createSelectRefs({ vectorHandleDragRef: { current: {} } as TSelectionToolRefs['vectorHandleDragRef'] });

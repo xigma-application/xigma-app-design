@@ -19,6 +19,7 @@ export const disarmDrag = (
   dispatch: AppDispatch,
   dragStateRef: RefObject<TDragState | null>,
   canvasRefs: TCanvasRefs,
+  setClassName: (className: string | null) => void,
 ): void => {
   const dragState = dragStateRef.current;
 
@@ -27,6 +28,7 @@ export const disarmDrag = (
     commitDraggedVectorNodeSnapshots(dispatch, dragState, canvasRefs);
     resyncRotatedGroupBounds(dispatch, dragState);
     applyPendingDragClickAction(dispatch, dragState);
+    setClassName(null);
     canvasRefs.transform.draggedNodeIdsRef.current = null;
     canvasRefs.transform.alignmentGuideRef.current = null;
     canvasRefs.transform.equalSpacingGuidesRef.current = null;

@@ -8,5 +8,5 @@ export const shouldForwardShiftKeyChange = (
   lastPointerClientPosition: TPoint | null,
 ): lastPointerClientPosition is TPoint =>
   event.key === 'Shift' &&
-  Boolean(selectRefs.vectorHandleDragRef.current || selectRefs.vectorEraseDragRef.current) &&
+  Boolean(selectRefs.dragStateRef.current || selectRefs.vectorHandleDragRef.current || selectRefs.vectorEraseDragRef.current) &&
   lastPointerClientPosition !== null;

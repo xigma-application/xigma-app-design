@@ -26,7 +26,7 @@ describe('handlePointerMove', () => {
     }
   });
 
-  it("should live-update a dragging guide's world position and set the resize-x class name", () => {
+  it("should live-update a dragging guide's world position and set the move-x class name", () => {
     // mock
     const canvas = createCanvas();
     const refs = createCanvasRefs({
@@ -41,7 +41,7 @@ describe('handlePointerMove', () => {
 
     // result
     expect(refs.guides.draggingGuideRef.current).toEqual({ axis: 'x', frameId: null, hasMoved: true, id: null, position: 120 });
-    expect(setClassName).toHaveBeenCalledWith('resize-x');
+    expect(setClassName).toHaveBeenCalledWith('move-x');
     expect(stopImmediatePropagationSpy).toHaveBeenCalled();
   });
 
@@ -72,10 +72,10 @@ describe('handlePointerMove', () => {
     handlePointerMove(canvas, pointerEvent(5, 200), refs, setClassName);
 
     // result
-    expect(setClassName).toHaveBeenCalledWith('resize-x');
+    expect(setClassName).toHaveBeenCalledWith('move-x');
   });
 
-  it('should set the resize-y class name while dragging a horizontal (y-axis) guide', () => {
+  it('should set the move-y class name while dragging a horizontal (y-axis) guide', () => {
     // mock
     const canvas = createCanvas();
     const refs = createCanvasRefs({
@@ -87,10 +87,10 @@ describe('handlePointerMove', () => {
     handlePointerMove(canvas, pointerEvent(0, 90), refs, setClassName);
 
     // result
-    expect(setClassName).toHaveBeenCalledWith('resize-y');
+    expect(setClassName).toHaveBeenCalledWith('move-y');
   });
 
-  it('should set the resize-y class name while merely hovering the top gutter, without arming anything', () => {
+  it('should set the move-y class name while merely hovering the top gutter, without arming anything', () => {
     // mock
     const canvas = createCanvas();
     const refs = createCanvasRefs();
@@ -102,7 +102,7 @@ describe('handlePointerMove', () => {
     handlePointerMove(canvas, event, refs, setClassName);
 
     // result
-    expect(setClassName).toHaveBeenCalledWith('resize-y');
+    expect(setClassName).toHaveBeenCalledWith('move-y');
     expect(refs.guides.draggingGuideRef.current).toBeNull();
     expect(stopImmediatePropagationSpy).toHaveBeenCalled();
   });
@@ -123,10 +123,10 @@ describe('handlePointerMove', () => {
     handlePointerMove(canvas, pointerEvent(310, 200), refs, setClassName);
 
     // result
-    expect(setClassName).toHaveBeenCalledWith('resize-x');
+    expect(setClassName).toHaveBeenCalledWith('move-x');
   });
 
-  it('should set the resize-x class name while hovering an existing guide outside the gutter', () => {
+  it('should set the move-x class name while hovering an existing guide outside the gutter', () => {
     // mock
     store.dispatch(addGuide({ axis: 'x', frameId: null, position: 50 }));
     const canvas = createCanvas();
@@ -137,7 +137,7 @@ describe('handlePointerMove', () => {
     handlePointerMove(canvas, pointerEvent(51, 200), refs, setClassName);
 
     // result
-    expect(setClassName).toHaveBeenCalledWith('resize-x');
+    expect(setClassName).toHaveBeenCalledWith('move-x');
   });
 
   it('should leave the class name untouched and let the event through when nothing guide-related is under the pointer', () => {

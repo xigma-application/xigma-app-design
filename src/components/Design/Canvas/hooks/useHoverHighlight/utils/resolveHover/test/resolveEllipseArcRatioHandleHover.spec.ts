@@ -45,7 +45,7 @@ const rectangle: TRectangleNode = {
 const restHandlePosition = getEllipseArcRatioHandlePosition(BOUNDS, 90, 0, 0.5);
 
 describe('resolveEllipseArcRatioHandleHover', () => {
-  it('should mark the ellipse\'s own id when the point sits precisely on its Ratio handle dot', () => {
+  it("should mark the ellipse's own id when the point sits precisely on its Ratio handle dot", () => {
     // mock
     const refs = createCanvasRefs();
 

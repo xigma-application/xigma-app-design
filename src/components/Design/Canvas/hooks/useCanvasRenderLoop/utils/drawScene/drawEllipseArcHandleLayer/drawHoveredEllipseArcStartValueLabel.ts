@@ -17,8 +17,7 @@ export const drawHoveredEllipseArcStartValueLabel = (
   node: TEllipseNode,
   rotateHandleDraggedPosition: TPoint | null,
 ): void => {
-  const isRotateHandleHovered =
-    Boolean(rotateHandleDraggedPosition) || refs.hover.hoveredEllipseArcRotateHandleRef.current === node.id;
+  const isRotateHandleHovered = Boolean(rotateHandleDraggedPosition) || refs.hover.hoveredEllipseArcRotateHandleRef.current === node.id;
 
   if (isRotateHandleHovered) {
     const rotateHandlePosition = rotateHandleDraggedPosition ?? getEllipseArcRotateHandlePosition(bounds, arcStartAngle, node, arcRatio);

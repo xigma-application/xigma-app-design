@@ -5,7 +5,12 @@ import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 import { handleShiftKeyChange } from '../handleShiftKeyChange';
 
 const createSelectRefs = (overrides: Partial<TSelectionToolRefs>): TSelectionToolRefs =>
-  ({ vectorEraseDragRef: { current: null }, vectorHandleDragRef: { current: null }, ...overrides }) as TSelectionToolRefs;
+  ({
+    dragStateRef: { current: null },
+    vectorEraseDragRef: { current: null },
+    vectorHandleDragRef: { current: null },
+    ...overrides,
+  }) as TSelectionToolRefs;
 
 describe('handleShiftKeyChange', () => {
   it('should forward a synthetic pointermove at the last known position when a vector drag is in progress', () => {

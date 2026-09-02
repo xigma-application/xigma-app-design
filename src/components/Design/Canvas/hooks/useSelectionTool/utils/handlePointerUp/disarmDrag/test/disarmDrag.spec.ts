@@ -25,8 +25,11 @@ const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointeru
 const createDragStateRef = (dragState: TDragState | null = null): RefObject<TDragState | null> => ({ current: dragState });
 
 describe('disarmDrag', () => {
+  const setClassName = vi.fn();
+
   beforeEach(() => {
     store.dispatch(setSelection([]));
+    setClassName.mockClear();
   });
 
   it('should do nothing when no drag is in progress', () => {
@@ -34,10 +37,11 @@ describe('disarmDrag', () => {
     const canvas = createCanvas();
 
     // before
-    disarmDrag(canvas, pointerEvent(), store.dispatch, createDragStateRef(), createCanvasRefs());
+    disarmDrag(canvas, pointerEvent(), store.dispatch, createDragStateRef(), createCanvasRefs(), setClassName);
 
     // result
     expect(canvas.releasePointerCapture).not.toHaveBeenCalled();
+    expect(setClassName).not.toHaveBeenCalled();
   });
 
   it('should collapse the selection to a single node on an unmoved collapse click', () => {
@@ -53,12 +57,13 @@ describe('disarmDrag', () => {
     });
 
     // before
-    disarmDrag(canvas, pointerEvent(1), store.dispatch, dragStateRef, createCanvasRefs());
+    disarmDrag(canvas, pointerEvent(1), store.dispatch, dragStateRef, createCanvasRefs(), setClassName);
 
     // result
     expect(selectSelectedIds(store.getState())).toEqual(['a']);
     expect(dragStateRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
+    expect(setClassName).toHaveBeenCalledWith(null);
   });
 
   it('should clear the selection on an unmoved deselect click', () => {
@@ -76,7 +81,7 @@ describe('disarmDrag', () => {
     });
 
     // before
-    disarmDrag(canvas, pointerEvent(), store.dispatch, dragStateRef, createCanvasRefs());
+    disarmDrag(canvas, pointerEvent(), store.dispatch, dragStateRef, createCanvasRefs(), setClassName);
 
     // result
     expect(selectSelectedIds(store.getState())).toEqual([]);
@@ -97,7 +102,7 @@ describe('disarmDrag', () => {
     });
 
     // before
-    disarmDrag(canvas, pointerEvent(), store.dispatch, dragStateRef, createCanvasRefs());
+    disarmDrag(canvas, pointerEvent(), store.dispatch, dragStateRef, createCanvasRefs(), setClassName);
 
     // result
     expect(selectSelectedIds(store.getState())).toEqual(['a', 'b']);

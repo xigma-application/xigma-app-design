@@ -11,7 +11,7 @@ import { getGutterAxis } from './getGutterAxis';
 import { getPointerPosition } from '../../../utils/getPointerPosition';
 import { screenToWorld } from '../../../utils/screenToWorld';
 
-const CLASS_NAME_BY_AXIS = { x: 'resize-x', y: 'resize-y' } as const;
+const CLASS_NAME_BY_AXIS = { x: 'move-x', y: 'move-y' } as const;
 
 export const handlePointerMove = (
   canvas: HTMLCanvasElement,

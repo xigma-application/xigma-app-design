@@ -36,7 +36,7 @@ describe('getCornerRadiusValueLabelAnchor', () => {
     expect(anchor.y).toBeCloseTo(-4);
   });
 
-  it('should track the handle\'s actual (inset) rest position at radius 0 while merely hovering, not dragging', () => {
+  it("should track the handle's actual (inset) rest position at radius 0 while merely hovering, not dragging", () => {
     // before — not dragging: the "ne" handle sits at its zero-state offset, not right on the corner
     const dragging = getCornerRadiusValueLabelAnchor(BOUNDS, 0, 0, IDENTITY_VIEWPORT, 'ne', true);
     const hovering = getCornerRadiusValueLabelAnchor(BOUNDS, 0, 0, IDENTITY_VIEWPORT, 'ne', false);

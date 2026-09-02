@@ -46,7 +46,7 @@ export const handlePointerUp = (
   selectionRefs: TSelectionToolRefs,
   setClassName: (className: string | null) => void,
 ): void => {
-  disarmDrag(canvas, event, dispatch, selectionRefs.dragStateRef, canvasRefs);
+  disarmDrag(canvas, event, dispatch, selectionRefs.dragStateRef, canvasRefs, setClassName);
   disarmEndpointDrag(canvas, event, selectionRefs.endpointDragRef);
   disarmPathOffsetDrag(canvas, event, selectionRefs.pathOffsetDragRef, setClassName);
   disarmResizeDrag(canvas, event, dispatch, selectionRefs.resizeDragRef, canvasRefs);

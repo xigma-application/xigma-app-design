@@ -49,7 +49,7 @@ const restHandlePosition = getPolygonCornerRadiusHandlePosition(
 );
 
 describe('resolvePolygonCornerRadiusHandleHover', () => {
-  it('should mark the polygon\'s own id when the point sits precisely on its top-vertex handle dot', () => {
+  it("should mark the polygon's own id when the point sits precisely on its top-vertex handle dot", () => {
     // mock
     const refs = createCanvasRefs();
 

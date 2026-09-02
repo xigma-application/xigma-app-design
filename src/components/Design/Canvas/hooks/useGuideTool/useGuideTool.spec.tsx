@@ -137,7 +137,7 @@ describe('useGuideTool behaviors', () => {
     expect(guideRefs.draggingGuideRef.current).toBeNull();
   });
 
-  it('should set the resize-x class name while hovering the left gutter', () => {
+  it('should set the move-x class name while hovering the left gutter', () => {
     // mock
     const canvasRef = createCanvasRef();
 
@@ -150,7 +150,7 @@ describe('useGuideTool behaviors', () => {
     });
 
     // result
-    expect(capturedClassName).toBe('resize-x');
+    expect(capturedClassName).toBe('move-x');
   });
 
   it('should clear the class name when the tool switches away', () => {
@@ -162,7 +162,7 @@ describe('useGuideTool behaviors', () => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 5, 100));
     });
 
-    expect(capturedClassName).toBe('resize-x');
+    expect(capturedClassName).toBe('move-x');
 
     // action
     act(() => store.dispatch(setActiveTool(ToolName.hand)));

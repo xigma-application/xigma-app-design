@@ -35,7 +35,7 @@ const rectangle: TRectangleNode = {
 };
 
 describe('resolveEllipseArcHandleHover', () => {
-  it('should mark the ellipse\'s own id when the point sits precisely on its Sweep handle dot', () => {
+  it("should mark the ellipse's own id when the point sits precisely on its Sweep handle dot", () => {
     // mock — a 100x100 ellipse at (0,0): the Sweep handle rests at (100, 50), straight right of center
     const refs = createCanvasRefs();
 

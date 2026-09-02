@@ -23,7 +23,8 @@ const createCanvas = (): HTMLCanvasElement => {
   return canvas;
 };
 
-const pointerEvent = (x: number, y: number): PointerEvent => new PointerEvent('pointermove', { clientX: x, clientY: y });
+const pointerEvent = (x: number, y: number, options: Partial<PointerEventInit> = {}): PointerEvent =>
+  new PointerEvent('pointermove', { clientX: x, clientY: y, ...options });
 
 // candidateShapes defaults to [] (no snap candidates) — the one test that exercises snapping passes
 // its own, computed via getCandidateShapes the same way armDrag.ts does at arm time
@@ -95,9 +96,12 @@ const addVectorNode = (): string => {
 };
 
 describe('continueDrag', () => {
+  const setClassName = vi.fn();
+
   beforeEach(() => {
     selectActivePage(store.getState()).rootOrder.forEach((id) => store.dispatch(deleteNode(id)));
     store.dispatch(setSelection([]));
+    setClassName.mockClear();
   });
 
   it('should do nothing when no drag is in progress', () => {
@@ -105,7 +109,7 @@ describe('continueDrag', () => {
     const canvas = createCanvas();
 
     // before
-    continueDrag(canvas, pointerEvent(10, 10), store.dispatch, createDragStateRef(), createCanvasRefs());
+    continueDrag(canvas, pointerEvent(10, 10), store.dispatch, createDragStateRef(), createCanvasRefs(), setClassName);
 
     // result
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes).toEqual({});
@@ -124,7 +128,7 @@ describe('continueDrag', () => {
     });
 
     // before
-    continueDrag(canvas, pointerEvent(10, 20), store.dispatch, dragStateRef, canvasRefs);
+    continueDrag(canvas, pointerEvent(10, 20), store.dispatch, dragStateRef, canvasRefs, setClassName);
     flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
 
     // result
@@ -133,6 +137,128 @@ describe('continueDrag', () => {
     expect(node).toMatchObject({ x: 110, y: 120 });
     expect(dragStateRef.current?.hasMoved).toBe(true);
     expect(canvasRefs.transform.draggedNodeIdsRef.current).toEqual(new Set([idA]));
+    expect(canvasRefs.transform.alignmentGuideRef.current).toBeNull();
+  });
+
+  it('should lock movement to the horizontal axis while Shift is held on a predominantly horizontal drag, switching the cursor to move-x', () => {
+    // mock
+    const idA = addFrameNode(100, 100);
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const dragStateRef = createDragStateRef({
+      hasMoved: false,
+      nodeOrigins: { [idA]: { x: 100, y: 100 } },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+    });
+
+    // before
+    continueDrag(canvas, pointerEvent(30, 10, { shiftKey: true }), store.dispatch, dragStateRef, canvasRefs, setClassName);
+    flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
+
+    // result — the vertical component is dropped entirely, not just reduced
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
+
+    expect(node).toMatchObject({ x: 130, y: 100 });
+    expect(setClassName).toHaveBeenCalledWith('move-x');
+  });
+
+  it('should lock movement to the vertical axis while Shift is held on a predominantly vertical drag, switching the cursor to move-y', () => {
+    // mock
+    const idA = addFrameNode(100, 100);
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const dragStateRef = createDragStateRef({
+      hasMoved: false,
+      nodeOrigins: { [idA]: { x: 100, y: 100 } },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+    });
+
+    // before
+    continueDrag(canvas, pointerEvent(10, 30, { shiftKey: true }), store.dispatch, dragStateRef, canvasRefs, setClassName);
+    flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
+
+    // result
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
+
+    expect(node).toMatchObject({ x: 100, y: 130 });
+    expect(setClassName).toHaveBeenCalledWith('move-y');
+  });
+
+  it('should move freely on both axes while Shift is held below the axis-lock threshold, not yet committing to either axis', () => {
+    // mock
+    const idA = addFrameNode(100, 100);
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const dragStateRef = createDragStateRef({
+      hasMoved: false,
+      nodeOrigins: { [idA]: { x: 100, y: 100 } },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+    });
+
+    // before
+    continueDrag(canvas, pointerEvent(2, 1, { shiftKey: true }), store.dispatch, dragStateRef, canvasRefs, setClassName);
+    flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
+
+    // result
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
+
+    expect(node).toMatchObject({ x: 102, y: 101 });
+    expect(setClassName).toHaveBeenCalledWith(null);
+  });
+
+  it('should clear the axis-lock cursor and resume free movement the instant Shift is released mid-drag', () => {
+    // mock
+    const idA = addFrameNode(100, 100);
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const dragStateRef = createDragStateRef({
+      hasMoved: false,
+      nodeOrigins: { [idA]: { x: 100, y: 100 } },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+    });
+
+    // before
+    continueDrag(canvas, pointerEvent(30, 10, { shiftKey: true }), store.dispatch, dragStateRef, canvasRefs, setClassName);
+
+    expect(setClassName).toHaveBeenLastCalledWith('move-x');
+
+    // action — Shift released, still moving
+    continueDrag(canvas, pointerEvent(30, 10, { shiftKey: false }), store.dispatch, dragStateRef, canvasRefs, setClassName);
+    flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
+
+    // result — both axes move again, and the cursor reverts
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[idA];
+
+    expect(node).toMatchObject({ x: 130, y: 110 });
+    expect(setClassName).toHaveBeenLastCalledWith(null);
+  });
+
+  it('should suppress the alignment guide and keep the locked axis exactly at the anchor while Shift is held, even when it would otherwise have snapped', () => {
+    // mock — idB's center-x (22) sits 2px off idA's own center-x (20), well within tolerance: an
+    // un-locked vertical drag would pull it in and center it exactly, snapping x from 2 down to 0
+    addRectNode(0, 0, 40);
+
+    const idB = addRectNode(2, 80, 40);
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const dragStateRef = createDragStateRef({
+      candidateShapes: getCandidateShapes(selectActivePage(store.getState()).nodes, [idB]),
+      hasMoved: false,
+      nodeOrigins: { [idB]: { x: 2, y: 80 } },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+    });
+
+    // before — predominantly vertical, so the axis lock should keep x pinned at 2 regardless
+    continueDrag(canvas, pointerEvent(1, 30, { shiftKey: true }), store.dispatch, dragStateRef, canvasRefs, setClassName);
+    flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idB]).toMatchObject({ x: 2, y: 110 });
     expect(canvasRefs.transform.alignmentGuideRef.current).toBeNull();
   });
 
@@ -154,7 +280,7 @@ describe('continueDrag', () => {
     });
 
     // before
-    continueDrag(canvas, pointerEvent(2, 0), store.dispatch, dragStateRef, canvasRefs);
+    continueDrag(canvas, pointerEvent(2, 0), store.dispatch, dragStateRef, canvasRefs, setClassName);
     flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
 
     // result — corrected by +1 so the edges land flush (x: 3, right edge: 23), and the guide is populated
@@ -181,7 +307,7 @@ describe('continueDrag', () => {
     });
 
     // before
-    continueDrag(canvas, pointerEvent(98, 0), store.dispatch, dragStateRef, canvasRefs);
+    continueDrag(canvas, pointerEvent(98, 0), store.dispatch, dragStateRef, canvasRefs, setClassName);
     flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
 
     // result — corrected to x:100 so the gap matches, and the guide ref is populated with both gaps
@@ -206,7 +332,7 @@ describe('continueDrag', () => {
     });
 
     // before — no movement; the box already sits centred (same x) below the stationary one
-    continueDrag(canvas, pointerEvent(0, 80), store.dispatch, dragStateRef, canvasRefs);
+    continueDrag(canvas, pointerEvent(0, 80), store.dispatch, dragStateRef, canvasRefs, setClassName);
 
     // result — matched-pair guides drawn (centre line + 2 edges), alignment guide left blank
     expect(canvasRefs.transform.matchedPairGuidesRef.current?.lines).toHaveLength(3);
@@ -226,7 +352,7 @@ describe('continueDrag', () => {
     });
 
     // before
-    continueDrag(canvas, pointerEvent(5, 5), store.dispatch, dragStateRef, canvasRefs);
+    continueDrag(canvas, pointerEvent(5, 5), store.dispatch, dragStateRef, canvasRefs, setClassName);
     flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
 
     // result
@@ -250,7 +376,7 @@ describe('continueDrag', () => {
     });
 
     // before
-    continueDrag(canvas, pointerEvent(10, 5), store.dispatch, dragStateRef, canvasRefs);
+    continueDrag(canvas, pointerEvent(10, 5), store.dispatch, dragStateRef, canvasRefs, setClassName);
     flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
 
     // result
@@ -278,7 +404,7 @@ describe('continueDrag', () => {
     });
 
     // before
-    continueDrag(canvas, pointerEvent(10, 20), store.dispatch, dragStateRef, canvasRefs);
+    continueDrag(canvas, pointerEvent(10, 20), store.dispatch, dragStateRef, canvasRefs, setClassName);
 
     // result
     expect(canvasRefs.transform.draggedNodeIdsRef.current).toBe(existingSet);
@@ -303,7 +429,7 @@ describe('continueDrag', () => {
     });
 
     // before
-    continueDrag(canvas, pointerEvent(10, 5), store.dispatch, dragStateRef, canvasRefs);
+    continueDrag(canvas, pointerEvent(10, 5), store.dispatch, dragStateRef, canvasRefs, setClassName);
     flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
 
     // result

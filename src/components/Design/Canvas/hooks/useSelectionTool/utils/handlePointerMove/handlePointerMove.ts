@@ -50,7 +50,7 @@ export const handlePointerMove = (
   selectionRefs: TSelectionToolRefs,
   setClassName: (className: string | null) => void,
 ): void => {
-  continueDrag(canvas, event, dispatch, selectionRefs.dragStateRef, canvasRefs);
+  continueDrag(canvas, event, dispatch, selectionRefs.dragStateRef, canvasRefs, setClassName);
   continueEndpointDrag(canvas, event, dispatch, selectionRefs.endpointDragRef);
   continuePathOffsetDrag(canvas, event, dispatch, selectionRefs.pathOffsetDragRef);
   continueResizeDrag(canvas, event, dispatch, selectionRefs.resizeDragRef, canvasRefs);

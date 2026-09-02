@@ -10,7 +10,11 @@ const USE_AS_MASK_SHORTCUT = 'Alt+Control+M';
 
 const readDesignState = (
   page: Page,
-): Promise<{ nodes: Record<string, { childIds?: string[]; isMask?: boolean; name: string; type: string }>; rootOrder: string[]; selectedIds: string[] }> =>
+): Promise<{
+  nodes: Record<string, { childIds?: string[]; isMask?: boolean; name: string; type: string }>;
+  rootOrder: string[];
+  selectedIds: string[];
+}> =>
   page.evaluate(async () => {
     const { store } = await import('/src/store/index.ts');
     const { activePageId, pages } = store.getState().design;

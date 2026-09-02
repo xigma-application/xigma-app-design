@@ -40,7 +40,7 @@ const rectangle: TRectangleNode = {
 };
 
 describe('resolveEllipseArcRotateHandleHover', () => {
-  it('should mark the ellipse\'s own id when the point sits precisely on its Start handle dot', () => {
+  it("should mark the ellipse's own id when the point sits precisely on its Start handle dot", () => {
     // mock — arcStartAngle stays at its default (90), whose rest position is (100, 50)
     const refs = createCanvasRefs();
 

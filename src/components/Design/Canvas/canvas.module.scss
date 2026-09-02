@@ -244,17 +244,17 @@
         auto;
     }
 
-    &--resize-x {
+    &--move-x {
       cursor:
         /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
-        -webkit-image-set(url('../../../assets/icons/cursors/resize-x.png') 8x) 16 16,
+        -webkit-image-set(url('../../../assets/icons/cursors/move-x.png') 8x) 16 16,
         col-resize;
     }
 
-    &--resize-y {
+    &--move-y {
       cursor:
         /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
-        -webkit-image-set(url('../../../assets/icons/cursors/resize-y.png') 8x) 16 16,
+        -webkit-image-set(url('../../../assets/icons/cursors/move-y.png') 8x) 16 16,
         row-resize;
     }
 

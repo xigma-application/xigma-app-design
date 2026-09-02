@@ -18,7 +18,7 @@ describe('getPolygonCornerRadiusValueLabelAnchor', () => {
     expect(direction.y).toBeCloseTo(-1);
   });
 
-  it('should track the handle\'s actual (inset) rest position at radius 0 while merely hovering, not dragging', () => {
+  it("should track the handle's actual (inset) rest position at radius 0 while merely hovering, not dragging", () => {
     // before — not dragging: the handle sits at its zero-state offset from the top vertex, not right on it
     const dragging = getPolygonCornerRadiusValueLabelAnchor(BOUNDS, 5, 0, 0, IDENTITY_VIEWPORT, false, false, true);
     const hovering = getPolygonCornerRadiusValueLabelAnchor(BOUNDS, 5, 0, 0, IDENTITY_VIEWPORT, false, false, false);

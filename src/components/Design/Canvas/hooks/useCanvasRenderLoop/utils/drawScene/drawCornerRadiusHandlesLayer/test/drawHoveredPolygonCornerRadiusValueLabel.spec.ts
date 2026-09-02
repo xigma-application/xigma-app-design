@@ -39,7 +39,7 @@ describe('drawHoveredPolygonCornerRadiusValueLabel', () => {
     expect(drawPolygonCornerRadiusValueLabelMock).not.toHaveBeenCalled();
   });
 
-  it('should draw nothing while some OTHER shape\'s corner-radius handle is being dragged (no polygon drag ref of its own)', () => {
+  it("should draw nothing while some OTHER shape's corner-radius handle is being dragged (no polygon drag ref of its own)", () => {
     // mock
     const refs = createCanvasRefs();
 
@@ -61,7 +61,7 @@ describe('drawHoveredPolygonCornerRadiusValueLabel', () => {
     expect(drawPolygonCornerRadiusValueLabelMock).not.toHaveBeenCalled();
   });
 
-  it('should draw the value label while actively dragging the polygon\'s own handle', () => {
+  it("should draw the value label while actively dragging the polygon's own handle", () => {
     // mock
     const refs = createCanvasRefs({
       cornerRadius: { polygonCornerRadiusDragRef: { current: { hasMoved: true } as TPolygonCornerRadiusDragState } },
