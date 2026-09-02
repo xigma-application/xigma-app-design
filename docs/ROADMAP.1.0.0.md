@@ -222,8 +222,7 @@ The single largest structural gap versus Figma.
       wired via `CanvasContextMenuPanel`) — most items still disabled placeholders pending their own
       features (see `components/Design/Menu/constants.ts`)
 - [ ] zoom control in the canvas corner (Zoom to fit/selection/100%)
-- [ ] z-order from the UI — Bring to front/Send to back done (`NodeContextMenu`); Forward/Backward
-      (single-step reorder) still missing
+- [x] z-order from the UI — Bring to front/Send to back and Forward/Backward (single-step reorder)
 - [ ] right toolbar group (draw/scale/actions/dev mode)
 - [ ] size presets in the Frame tool
 
