@@ -1700,8 +1700,13 @@ row has one of *its own* further out):
     again.
 - **Trigger**: `getChainGapDragSnap.ts` (`useSelectionTool/utils/handlePointerMove/`), called from
   `continueDrag.ts` right after §24's `getDragAlignmentSnap`, its delta composing on top exactly the
-  same way. Gated to **exactly one** dragged, `isContactGuideEligibleNode`, plain-`{x, y}`-origin node
-  — a single-shape-in-a-row concept, matching §24-27's own gating pattern.
+  same way. Walks `getEligibleDraggedEntries` (every dragged, `isContactGuideEligibleNode`,
+  plain-`{x, y}`-origin node) in order and runs `getChainSnap` against **each member's own bounds**;
+  the first member that produces any lines wins — its delta moves the whole selection and its guides
+  are the ones drawn. A single dragged shape is just the one-member case of the same loop. Zero
+  eligible members, or no member matching anything, → zero delta, no guides. (An earlier version
+  reduced the drag to one union bounding box across all members instead — reverted, see
+  `smart-guides.md`'s History §4 for why.)
 - Writes `refs.transform.equalSpacingGuidesRef` (`TEqualSpacingGuides | null`, back in `TTransformRefs`
   next to `contactGuidesRef`/`distanceGuidesRef`) — `continueDrag.ts` sets it unconditionally every
   frame, same as `alignmentGuideRef`. **Cleared** in `disarmDrag.ts` (right next to where it already
@@ -1754,8 +1759,16 @@ row has one of *its own* further out):
 ### 28a. Matched-pair guides — the "same size + centred on a neighbour" affordance
 
 A separate, **display-only** mechanism (no snap delta of its own — the alignment snap already does the
-centring). While dragging a single eligible shape, if it has a neighbour (across a real gap, not
-flush) that is the **same size** (`GRID_CELL_SIZE_MATCH_TOLERANCE_PX`, tight) **and** centred on it
+centring). Unlike §27's chain-gap snap, a multi-shape selection is **not** reduced to a combined
+bounding box here — `getMatchedPairDragGuides.ts` runs the match **per eligible dragged member**
+(each one's own size/position) and merges every member's guides, the same per-node pattern
+`resolveShapeContactGuides.ts` already uses for contact guides (§23). This is deliberate: matched-pair
+is display-only, so nothing forces one shared reference box the way chain-gap's single delta does; a
+multi-select where only one member matches a candidate still shows that member's guide, and other,
+non-matching members riding along in the same selection never suppress it. (An earlier version *did*
+reduce to the combined box via `getDraggedGroupBounds.ts` — reverted, see `smart-guides.md`'s History
+§4 for why.) While dragging a shape — or one member of a multi-selection — if it has a neighbour (across a
+real gap, not flush) that is the **same size** (`GRID_CELL_SIZE_MATCH_TOLERANCE_PX`, tight) **and** centred on it
 (`ALIGNMENT_SNAP_TOLERANCE_PX` on the perpendicular axis), the match **walks the whole chain** of
 consecutive same-size + centred shapes outward from the dragged one **in both directions**, then
 draws: a centre-axis line spanning the **whole chain** (full `spanNear`→`spanFar`, both ways from the
@@ -1778,8 +1791,10 @@ contact guides).
     chain: `getChainGeometry.ts` (`activeCross` + chain span + per-gap array → `TChainGeometry`),
     `getChainGapLabels.ts` (equal-run gaps only), `getChainGuideLines.ts` (3 full-span lines — centre
     axis + 2 side edges), `getChainMarkers.ts` (corner × + the 2 centre-axis span ends).
-- `continueDrag/getMatchedPairDragGuides.ts` — the drag-time gate (single eligible plain-origin node,
-  same pattern as `getChainGapDragSnap.ts`), called from `continueDrag.ts`. **When it returns
+- `continueDrag/getMatchedPairDragGuides.ts` — the drag-time gate: `getEligibleDraggedEntries` for
+  the current member list, `getRotatedNodeBounds` per member (with the live delta applied), one
+  `getMatchedPairGuides` call per member, then `labels`/`lines`/`markers` concatenated across all
+  members whose call returned any lines. Called from `continueDrag.ts`. **When it returns
   non-null, `continueDrag.ts` writes `null` to BOTH `alignmentGuideRef` and `equalSpacingGuidesRef`**
   for that frame — the matched-chain lines/labels are the richer version of both the alignment guide
   and the chain-gap equal-spacing guides for this case (same edge/centre/gap positions), and drawing

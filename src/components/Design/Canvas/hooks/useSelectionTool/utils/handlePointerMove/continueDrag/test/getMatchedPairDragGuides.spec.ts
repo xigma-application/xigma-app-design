@@ -63,7 +63,66 @@ describe('getMatchedPairDragGuides', () => {
     expect(guides?.lines).toHaveLength(3);
   });
 
-  it('should return null for a multi-node drag', () => {
+  it('should match each multi-selected child against candidates individually, not the combined selection box', () => {
+    // mock — two 100x100 members forming a 200x100 combined box; neither the combined box nor a single
+    // 100x100 member matches the 130x100 candidate, so this must NOT produce guides via box-matching
+    const a = addRect(0, 200, 100, 100);
+    const b = addRect(100, 200, 100, 100);
+    const candidateShapes = [{ bounds: { height: 100, width: 130, x: 0, y: 0 }, points: [] }];
+
+    const noMatch = getMatchedPairDragGuides(
+      selectNodes(store.getState()),
+      dragState({ [a]: { x: 0, y: 200 }, [b]: { x: 100, y: 200 } }, candidateShapes),
+      { x: 0, y: 0 },
+      0.5,
+      4,
+    );
+
+    // result — no per-child match either (130 ≠ 100), and the box itself is never compared
+    expect(noMatch).toBeNull();
+  });
+
+  it('should produce guides when at least one multi-selected child individually matches a candidate', () => {
+    // mock — member A is 200x100 (matches the candidate); member B is a different size and drags along
+    // but doesn't itself match anything — its presence must not suppress A's match
+    const a = addRect(0, 200, 200, 100);
+    const b = addRect(0, 320, 50, 50);
+    const candidateShapes = [{ bounds: { height: 100, width: 200, x: 0, y: 0 }, points: [] }];
+
+    const guides = getMatchedPairDragGuides(
+      selectNodes(store.getState()),
+      dragState({ [a]: { x: 0, y: 200 }, [b]: { x: 0, y: 320 } }, candidateShapes),
+      { x: 0, y: 0 },
+      0.5,
+      4,
+    );
+
+    // result — A's own match still produces the usual 3-line matched-pair guide
+    expect(guides?.lines).toHaveLength(3);
+  });
+
+  it('should merge guides when multiple multi-selected children each match a different candidate', () => {
+    // mock — A matches candidate1 vertically, B matches candidate2 vertically, each independently
+    const a = addRect(0, 200, 100, 100);
+    const b = addRect(200, 200, 100, 100);
+    const candidateShapes = [
+      { bounds: { height: 100, width: 100, x: 0, y: 0 }, points: [] },
+      { bounds: { height: 100, width: 100, x: 200, y: 0 }, points: [] },
+    ];
+
+    const guides = getMatchedPairDragGuides(
+      selectNodes(store.getState()),
+      dragState({ [a]: { x: 0, y: 200 }, [b]: { x: 200, y: 200 } }, candidateShapes),
+      { x: 0, y: 0 },
+      0.5,
+      4,
+    );
+
+    // result — two independent 3-line matches merged into one guides object
+    expect(guides?.lines).toHaveLength(6);
+  });
+
+  it('should return null for a multi-node drag with no matching candidates', () => {
     const a = addRect(0, 0, 20, 20);
     const b = addRect(100, 100, 20, 20);
 

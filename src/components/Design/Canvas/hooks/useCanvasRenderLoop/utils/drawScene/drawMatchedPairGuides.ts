@@ -1,5 +1,10 @@
 // others
-import { CONTACT_GUIDE_X_MARKER_SIZE_PX, DISTANCE_GUIDE_LABEL_FILL, DISTANCE_GUIDE_LABEL_GAP_PX, DISTANCE_GUIDE_STROKE } from 'constant/canvas';
+import {
+  CONTACT_GUIDE_X_MARKER_SIZE_PX,
+  DISTANCE_GUIDE_LABEL_FILL,
+  DISTANCE_GUIDE_LABEL_GAP_PX,
+  DISTANCE_GUIDE_STROKE,
+} from 'constant/canvas';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';

@@ -255,3 +255,68 @@ test('dragging a shape to the crossing of a vertical and a horizontal run draws 
   // both chains' guides only show mid-drag — the two frames must differ
   expect(withGuides.equals(withoutGuides)).toBe(false);
 });
+
+test('dragging a multi-shape selection matches each member against candidates individually, not the combined selection box', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-guide-smart-matched-pair-multi');
+  await expect(designPage.canvas).toBeVisible();
+
+  // a 200x150 neighbour; the dragged selection is member A (200x150, matches the neighbour on its own)
+  // plus member B (100x50, a different size that matches nothing) riding along in the same multi-select —
+  // B's presence must not suppress A's own match
+  await designPage.drawRectangle(700, 200, 900, 350);
+  await designPage.drawRectangle(700, 500, 900, 650); // selection member A — same size as the neighbour
+  await designPage.drawRectangle(700, 660, 800, 710); // selection member B — different size, matches nothing
+
+  await designPage.click(800, 575); // select A
+  await designPage.click(750, 685, { shift: true }); // add B
+
+  await designPage.pointerDown(800, 575); // grab inside A, drags the whole selection
+  await page.mouse.move(802, 452, { steps: 6 }); // 2px off centred x, a gap below the neighbour
+
+  const withGuides = await page.screenshot({ clip: { height: 540, width: 360, x: 620, y: 130 } });
+
+  await designPage.pointerUp();
+  await designPage.pointerMove(1400, 800);
+
+  const withoutGuides = await page.screenshot({ clip: { height: 540, width: 360, x: 620, y: 130 } });
+
+  // the guides only show mid-drag — the two frames must differ
+  expect(withGuides.equals(withoutGuides)).toBe(false);
+});
+
+test('dragging a multi-shape selection snaps to an established gap via the member that matches it, not a combined selection box that includes an unrelated decoy', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-guide-smart-chain-gap-multi');
+  await expect(designPage.canvas).toBeVisible();
+
+  // same established-gap scenario as the single-shape chain-gap test, but square3 is now member A of a
+  // multi-select riding along with decoy member B, which sits far away and matches nothing on its own —
+  // the snap must still key off A's own position, not a combined selection box that includes B
+  await designPage.drawRectangle(700, 300, 760, 360);
+  await designPage.drawRectangle(790, 250, 890, 350);
+  await designPage.drawRectangle(922, 305, 962, 345); // member A (square3)
+  await designPage.drawRectangle(700, 600, 740, 640); // member B (decoy, far away, matches nothing)
+
+  await designPage.click(942, 325); // select A
+  await designPage.click(720, 620, { shift: true }); // add B
+
+  await designPage.pointerDown(942, 325); // grab inside A
+  await page.mouse.move(943, 325, { steps: 3 }); // raw +1px — the snap closes the remaining mismatch
+
+  const withGuides = await page.screenshot({ clip: { height: 250, width: 400, x: 650, y: 200 } });
+
+  await designPage.pointerUp();
+  await designPage.pointerMove(1400, 800);
+
+  const withoutGuides = await page.screenshot({ clip: { height: 250, width: 400, x: 650, y: 200 } });
+
+  // the chain-gap guides only show mid-drag — the two frames must differ
+  expect(withGuides.equals(withoutGuides)).toBe(false);
+});

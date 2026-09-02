@@ -5,9 +5,11 @@ import { TPoint } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getEligibleDraggedEntries } from '../../../../../utils/getDragAlignmentSnap/getEligibleDraggedEntries';
 import { getMatchedPairGuides } from '../../../../../utils/getEqualSpacingGuides/getMatchedPairGuides/getMatchedPairGuides';
 import { getRotatedNodeBounds } from '../../../../../utils/getRotatedNodeBounds';
-import { isContactGuideEligibleNode } from '../../../../../utils/getShapeContactGuides';
+
+const NO_MATCH: TMatchedPairGuides = { labels: [], lines: [], markers: [] };
 
 export const getMatchedPairDragGuides = (
   nodes: Record<string, TSceneNode>,
@@ -16,20 +18,20 @@ export const getMatchedPairDragGuides = (
   sizeToleranceWorldUnits: number,
   centreToleranceWorldUnits: number,
 ): TMatchedPairGuides | null => {
-  const draggedIds = Object.keys(dragState.nodeOrigins);
+  const entries = getEligibleDraggedEntries(nodes, dragState.nodeOrigins, Object.keys(dragState.nodeOrigins));
+  const perChildGuides = entries.map(({ node, origin }) => {
+    const bounds = getRotatedNodeBounds({ ...node, x: origin.x + delta.x, y: origin.y + delta.y } as TSceneNode);
 
-  if (draggedIds.length === 1) {
-    const [id] = draggedIds;
-    const node = nodes[id];
-    const origin = dragState.nodeOrigins[id];
+    return getMatchedPairGuides(bounds, dragState.candidateShapes, sizeToleranceWorldUnits, centreToleranceWorldUnits);
+  });
+  const merged = perChildGuides.reduce(
+    (acc, guides) => ({
+      labels: acc.labels.concat(guides.labels),
+      lines: acc.lines.concat(guides.lines),
+      markers: acc.markers.concat(guides.markers),
+    }),
+    NO_MATCH,
+  );
 
-    if (!(!node || !isContactGuideEligibleNode(node) || !('x' in origin))) {
-      const draggedBounds = getRotatedNodeBounds({ ...node, x: origin.x + delta.x, y: origin.y + delta.y } as TSceneNode);
-      const guides = getMatchedPairGuides(draggedBounds, dragState.candidateShapes, sizeToleranceWorldUnits, centreToleranceWorldUnits);
-
-      return guides.lines.length > 0 ? guides : null;
-    }
-  }
-
-  return null;
+  return merged.lines.length > 0 ? merged : null;
 };

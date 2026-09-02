@@ -6,12 +6,13 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getChainSnap } from '../../../../../utils/getEqualSpacingGuides/getChainSnap';
+import { getEligibleDraggedEntries } from '../../../../../utils/getDragAlignmentSnap/getEligibleDraggedEntries';
 import { getRotatedNodeBounds } from '../../../../../utils/getRotatedNodeBounds';
-import { isContactGuideEligibleNode } from '../../../../../utils/getShapeContactGuides';
 
 export type TChainGapDragSnap = { delta: TPoint; guides: TEqualSpacingGuides | null };
 
 const ZERO_DELTA: TPoint = { x: 0, y: 0 };
+const NO_SNAP: TChainGapDragSnap = { delta: ZERO_DELTA, guides: null };
 
 export const getChainGapDragSnap = (
   nodes: Record<string, TSceneNode>,
@@ -19,20 +20,16 @@ export const getChainGapDragSnap = (
   delta: TPoint,
   toleranceWorldUnits: number,
 ): TChainGapDragSnap => {
-  const draggedIds = Object.keys(dragState.nodeOrigins);
+  const entries = getEligibleDraggedEntries(nodes, dragState.nodeOrigins, Object.keys(dragState.nodeOrigins));
 
-  if (draggedIds.length === 1) {
-    const [id] = draggedIds;
-    const node = nodes[id];
-    const origin = dragState.nodeOrigins[id];
+  for (const { node, origin } of entries) {
+    const bounds = getRotatedNodeBounds({ ...node, x: origin.x + delta.x, y: origin.y + delta.y } as TSceneNode);
+    const snap = getChainSnap(bounds, dragState.candidateShapes, toleranceWorldUnits);
 
-    if (node && isContactGuideEligibleNode(node) && 'x' in origin) {
-      const draggedBounds = getRotatedNodeBounds({ ...node, x: origin.x + delta.x, y: origin.y + delta.y } as TSceneNode);
-      const snap = getChainSnap(draggedBounds, dragState.candidateShapes, toleranceWorldUnits);
-
-      return { delta: snap.delta, guides: snap.guides.lines.length > 0 ? snap.guides : null };
+    if (snap.guides.lines.length > 0) {
+      return { delta: snap.delta, guides: snap.guides };
     }
   }
 
-  return { delta: ZERO_DELTA, guides: null };
+  return NO_SNAP;
 };

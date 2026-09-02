@@ -20,6 +20,18 @@ describe('getVerticalMatchedPair', () => {
     expect(guides.lines[1]).toEqual({ dashed: false, x1: 0, x2: 0, y1: 20, y2: 400 });
   });
 
+  it('should walk a same-size, centred neighbour below just as well as one above', () => {
+    // mock — one same-size shape below active (y:440, 40px gap) — no shape above at all
+    const below = { bounds: { height: 100, width: 200, x: 0, y: 440 } };
+
+    // action
+    const guides = getVerticalMatchedPair(ACTIVE, [below], 0.5, 4);
+
+    // result — chain of 2 (active + below), spanning active's own top to below's bottom
+    expect(guides.lines).toHaveLength(3);
+    expect(guides.lines[1]).toEqual({ dashed: false, x1: 0, x2: 0, y1: 300, y2: 540 });
+  });
+
   it('should return nothing when the only neighbour is a different size', () => {
     const guides = getVerticalMatchedPair(ACTIVE, [{ bounds: { height: 120, width: 200, x: 0, y: 0 } }], 0.5, 4);
 

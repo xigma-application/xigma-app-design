@@ -67,7 +67,30 @@ describe('getChainGapDragSnap', () => {
     expect(snap.guides?.lines).toHaveLength(2);
   });
 
-  it('should return a zero delta and null guides for a multi-node drag', () => {
+  it('should match each multi-selected member against candidates individually, using the first member that snaps', () => {
+    // mock — member A is a decoy far from anything and matches nothing; member B is positioned exactly
+    // like the single-node case above and is the one that actually snaps
+    const a = addRect(500, 500, 20); // decoy, no nearby candidates
+    const b = addRect(98, 0, 20); // same scenario as the single-node test
+    const candidateShapes = [
+      { bounds: { height: 30, width: 30, x: 0, y: 0 }, points: [] },
+      { bounds: { height: 50, width: 50, x: 40, y: 0 }, points: [] },
+    ];
+
+    // action
+    const snap = getChainGapDragSnap(
+      selectNodes(store.getState()),
+      dragState({ [a]: { x: 500, y: 500 }, [b]: { x: 98, y: 0 } }, candidateShapes),
+      { x: 0, y: 0 },
+      8,
+    );
+
+    // result — B's own match drives the snap; A's presence (and lack of a match) doesn't block it
+    expect(snap.delta).toEqual({ x: 2, y: 0 });
+    expect(snap.guides?.lines).toHaveLength(2);
+  });
+
+  it('should return a zero delta and null guides for a multi-node drag with no matching candidates', () => {
     // mock
     const a = addRect(0, 0);
     const b = addRect(100, 100);
