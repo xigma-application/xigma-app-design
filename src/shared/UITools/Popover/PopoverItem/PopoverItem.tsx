@@ -52,7 +52,12 @@ export const PopoverItem: FC<TPopoverItemProps> = ({
             <Icon name="Check" size={checkIconSize} />
           </span>
         )}
-        {icon && <Icon name={icon} size={iconSize} />}
+        {withCheck && icon && <Icon name={icon} size={iconSize} />}
+        {!withCheck && (
+          <span className={styles.PopoverItem__iconSlot} style={{ width: iconSize }}>
+            {icon && <Icon name={icon} size={iconSize} />}
+          </span>
+        )}
         <span className={styles.PopoverItem__label}>{label}</span>
         {shortcut && <span className={cx(styles.PopoverItem__shortcut, shortcutClassName)}>{shortcut}</span>}
       </div>

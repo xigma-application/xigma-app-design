@@ -30,6 +30,13 @@
     }
   }
 
+  &__iconSlot {
+    align-items: center;
+    display: inline-flex;
+    flex-shrink: 0;
+    justify-content: center;
+  }
+
   &__label {
     flex: 1;
     font-size: 12px;

@@ -61,7 +61,7 @@ describe('PopoverItem behaviors', () => {
     expect(screen.getByText('Frame').previousElementSibling).toHaveStyle({ opacity: '1' });
   });
 
-  it('should drop the check slot when withCheck is false', () => {
+  it('should replace the check slot with a reserved icon slot when withCheck is false', () => {
     // before
     render(
       <PopoverPrimitive.Root open>
@@ -69,8 +69,34 @@ describe('PopoverItem behaviors', () => {
       </PopoverPrimitive.Root>,
     );
 
-    // result — the label is the first child, no check span before it
-    expect(screen.getByText('Frame').previousElementSibling).toBeNull();
+    // result — an empty icon slot takes the check span's place, so rows without an icon still align
+    const iconSlot = screen.getByText('Frame').previousElementSibling;
+    expect(iconSlot).not.toBeNull();
+    expect(iconSlot?.querySelector('svg')).not.toBeInTheDocument();
+  });
+
+  it('should reserve iconSize width on the icon slot regardless of whether an icon is given', () => {
+    // before
+    render(
+      <PopoverPrimitive.Root open>
+        <PopoverItem iconSize={20} label="Frame" withCheck={false} />
+      </PopoverPrimitive.Root>,
+    );
+
+    // result
+    expect(screen.getByText('Frame').previousElementSibling).toHaveStyle({ width: '20px' });
+  });
+
+  it('should render the icon inside the icon slot when withCheck is false and an icon is given', () => {
+    // before
+    const { container } = render(
+      <PopoverPrimitive.Root open>
+        <PopoverItem icon="FrameTool" label="Frame" withCheck={false} />
+      </PopoverPrimitive.Root>,
+    );
+
+    // result
+    expect(container.querySelector('svg')).toBeInTheDocument();
   });
 
   it('should render a checkbox indicator instead of the check glyph when checkVariant is checkbox', () => {
