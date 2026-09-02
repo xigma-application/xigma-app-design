@@ -11,6 +11,7 @@ import type { TRulerBand } from '../getRulerBands';
 import { bandLabelFill } from './bandLabelFill';
 import { getHighlightedRulerTick, getRulerTicks } from '../getRulerTicks';
 import { getRulerStep } from '../getRulerStep';
+import { labelFade } from './labelFade';
 import { paintHighlightedLeftTick } from './paintHighlightedLeftTick';
 import { paintHighlightedTopTick } from './paintHighlightedTopTick';
 import { paintLeftBand } from './paintLeftBand';
@@ -58,22 +59,28 @@ export const drawRuler = (
   ctx.strokeStyle = RULER_TICK_STROKE;
 
   const stepPx = getRulerStep(viewport.zoom) * viewport.zoom;
+  const topGuideTick =
+    highlightedGuide?.axis === 'x' ? getHighlightedRulerTick(highlightedGuide.worldPosition, viewport.x, viewport.zoom, origin.x) : null;
+  const leftGuideTick =
+    highlightedGuide?.axis === 'y' ? getHighlightedRulerTick(highlightedGuide.worldPosition, viewport.y, viewport.zoom, origin.y) : null;
 
   getRulerTicks(rulerRight, viewport.x, viewport.zoom, origin.x).forEach((tick) => {
     const style = bandLabelFill(topBand, tick.screenPos, stepPx);
+    const guideFade = topGuideTick ? labelFade(Math.abs(tick.screenPos - topGuideTick.screenPos), stepPx) : 1;
 
-    if (style !== null) {
+    if (style !== null && guideFade !== null) {
       ctx.fillStyle = style.fill;
-      ctx.globalAlpha = style.alpha;
+      ctx.globalAlpha = style.alpha * guideFade;
       paintTopTick(ctx, tick, leftInset);
     }
   });
   getRulerTicks(height, viewport.y, viewport.zoom, origin.y).forEach((tick) => {
     const style = bandLabelFill(leftBand, tick.screenPos, stepPx);
+    const guideFade = leftGuideTick ? labelFade(Math.abs(tick.screenPos - leftGuideTick.screenPos), stepPx) : 1;
 
-    if (style !== null) {
+    if (style !== null && guideFade !== null) {
       ctx.fillStyle = style.fill;
-      ctx.globalAlpha = style.alpha;
+      ctx.globalAlpha = style.alpha * guideFade;
       paintLeftTick(ctx, tick, leftInset);
     }
   });
@@ -81,16 +88,16 @@ export const drawRuler = (
   ctx.globalAlpha = 1;
 
   if (topBand?.edges) {
-    paintTopBandEdges(ctx, topBand, leftInset, rulerRight);
+    paintTopBandEdges(ctx, topBand, leftInset, rulerRight, topGuideTick?.screenPos ?? null, stepPx);
   }
 
   if (leftBand?.edges) {
-    paintLeftBandEdges(ctx, leftBand, leftInset, height);
+    paintLeftBandEdges(ctx, leftBand, leftInset, height, leftGuideTick?.screenPos ?? null, stepPx);
   }
 
-  if (highlightedGuide?.axis === 'x') {
-    paintHighlightedTopTick(ctx, getHighlightedRulerTick(highlightedGuide.worldPosition, viewport.x, viewport.zoom, origin.x), leftInset);
-  } else if (highlightedGuide?.axis === 'y') {
-    paintHighlightedLeftTick(ctx, getHighlightedRulerTick(highlightedGuide.worldPosition, viewport.y, viewport.zoom, origin.y), leftInset);
+  if (topGuideTick) {
+    paintHighlightedTopTick(ctx, topGuideTick, leftInset);
+  } else if (leftGuideTick) {
+    paintHighlightedLeftTick(ctx, leftGuideTick, leftInset);
   }
 };

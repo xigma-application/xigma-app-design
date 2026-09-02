@@ -142,9 +142,21 @@ describe('drawRuler', () => {
     // action
     drawRuler(ctx as unknown as CanvasRenderingContext2D, params({ leftBand, topBand }));
 
-    // result
-    expect(paintTopBandEdgesMock).toHaveBeenCalledWith(ctx, topBand, 0, 800);
-    expect(paintLeftBandEdgesMock).toHaveBeenCalledWith(ctx, leftBand, 0, 600);
+    // result — no highlighted guide, so no proximity screenPos, step 100
+    expect(paintTopBandEdgesMock).toHaveBeenCalledWith(ctx, topBand, 0, 800, null, 100);
+    expect(paintLeftBandEdgesMock).toHaveBeenCalledWith(ctx, leftBand, 0, 600, null, 100);
+  });
+
+  it('should pass the highlighted guide position to the edge painters so they can hide behind it', () => {
+    // mock
+    const ctx = createFakeContext();
+    const topBand = { edges: { fromLabel: '0', toLabel: '9735' }, fill: 'rgba(0, 0, 0, 0.2)', fromPx: 100, toPx: 300 };
+
+    // action
+    drawRuler(ctx as unknown as CanvasRenderingContext2D, params({ highlightedGuide: { axis: 'x', worldPosition: 250 }, topBand }));
+
+    // result — guide value screenPos is 250 (origin 0, zoom 1)
+    expect(paintTopBandEdgesMock).toHaveBeenCalledWith(ctx, topBand, 0, 800, 250, 100);
   });
 
   it('should mute mid-band labels, drop the ones on the edges, and ramp alpha on both sides of each edge', () => {
@@ -255,5 +267,24 @@ describe('drawRuler', () => {
     // result
     expect(paintHighlightedTopTickMock).not.toHaveBeenCalled();
     expect(paintHighlightedLeftTickMock).not.toHaveBeenCalled();
+  });
+
+  it('should fade the scale labels around the highlighted guide value and drop the one it lands on', () => {
+    // mock — origin 0, step 100 → ticks at screenPos 0,100,…,800; guide value sits at screenPos 500
+    const ctx = createFakeContext();
+    const drawnAt: Array<{ alpha: number; screenPos: number }> = [];
+
+    paintTopTickMock.mockImplementation((_ctx, tick) => drawnAt.push({ alpha: ctx.globalAlpha, screenPos: tick.screenPos }));
+
+    // action
+    drawRuler(ctx as unknown as CanvasRenderingContext2D, params({ highlightedGuide: { axis: 'x', worldPosition: 500 } }));
+
+    // result
+    const drawnPositions = drawnAt.map((entry) => entry.screenPos);
+
+    expect(drawnPositions).not.toContain(500); // the tick under the guide value — dropped
+    expect(drawnAt.find((entry) => entry.screenPos === 400)!.alpha).toBeLessThan(1); // one step away — fading
+    expect(drawnAt.find((entry) => entry.screenPos === 200)!.alpha).toBe(1); // far enough — untouched
+    expect(ctx.globalAlpha).toBe(1); // reset once the ticks are done
   });
 });
