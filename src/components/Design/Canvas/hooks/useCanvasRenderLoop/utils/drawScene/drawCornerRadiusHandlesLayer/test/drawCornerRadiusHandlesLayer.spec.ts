@@ -3,12 +3,13 @@ import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TCornerRadiusDragState } from 'types/design/canvas/types';
+import { TCornerRadiusDragState, TPolygonCornerRadiusDragState } from 'types/design/canvas/types';
 import { TEllipseNode, TPolygonNode, TRectangleNode, TStarNode } from 'types/design/types';
 
 // utils
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { drawCornerRadiusHandlesLayer } from '../drawCornerRadiusHandlesLayer';
+import { getPolygonCornerRadiusHandlePosition } from 'utils/canvas/cornerRadius/polygon/getPolygonCornerRadiusHandlePosition';
 
 const drawValueLabelMock = vi.fn();
 
@@ -391,6 +392,27 @@ describe('drawCornerRadiusHandlesLayer', () => {
     expect(drawValueLabelMock).not.toHaveBeenCalled();
   });
 
+  it('should draw a blue "Radius N" value label when precisely hovering a rectangle corner handle, without dragging', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCornerRadiusHandlesLayer(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      rectangle,
+      [rectangle],
+      createCanvasRefs({ hover: { hoveredCornerRadiusHandleRef: { current: { corner: 'nw', nodeId: rectangle.id } } } }),
+    );
+
+    // result
+    expect(drawValueLabelMock).toHaveBeenCalledTimes(1);
+    const [, , , , text] = drawValueLabelMock.mock.calls[0];
+
+    expect(text).toBe('Radius 15');
+  });
+
   it('should draw the polygon handle exactly on the top vertex at radius 0 while isDraggingCornerRadius is true', () => {
     // mock
     const gl = createGlMock();
@@ -412,6 +434,71 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     expect(vertices[0]).toBeCloseTo(50);
     expect(vertices[1]).toBeCloseTo(0);
+  });
+
+  it('should draw no value label for a polygon when merely hovered, not dragging', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCornerRadiusHandlesLayer(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      polygon,
+      [polygon],
+      createCanvasRefs(),
+    );
+
+    // result
+    expect(drawValueLabelMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw a blue "Radius N" value label above the polygon\'s top-vertex handle while dragging it', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCornerRadiusHandlesLayer(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      polygon,
+      [polygon],
+      createCanvasRefs({
+        cornerRadius: { polygonCornerRadiusDragRef: { current: { hasMoved: true } as TPolygonCornerRadiusDragState } },
+      }),
+    );
+
+    // result — the handle sits inset from the top vertex toward center; the anchor sits a further margin above it
+    expect(drawValueLabelMock).toHaveBeenCalledTimes(1);
+    const [, , , , text, anchor] = drawValueLabelMock.mock.calls[0];
+    const handlePosition = getPolygonCornerRadiusHandlePosition({ height: 100, width: 100, x: 0, y: 0 }, 3, 15, IDENTITY_VIEWPORT, false, false, true);
+
+    expect(text).toBe('Radius 15');
+    expect(anchor.x).toBeCloseTo(handlePosition.x);
+    expect(anchor.y).toBeLessThan(handlePosition.y);
+  });
+
+  it('should draw a blue "Radius N" value label when precisely hovering the polygon\'s handle, without dragging', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCornerRadiusHandlesLayer(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      polygon,
+      [polygon],
+      createCanvasRefs({ hover: { hoveredPolygonCornerRadiusHandleRef: { current: polygon.id } } }),
+    );
+
+    // result
+    expect(drawValueLabelMock).toHaveBeenCalledTimes(1);
+    const [, , , , text] = drawValueLabelMock.mock.calls[0];
+
+    expect(text).toBe('Radius 15');
   });
 
   it('should draw the single corner-radius handle when a star is both selected and hovered', () => {

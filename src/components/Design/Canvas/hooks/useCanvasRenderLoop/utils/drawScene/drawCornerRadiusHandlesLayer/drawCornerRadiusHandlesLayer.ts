@@ -8,7 +8,8 @@ import { TPolygonNode, TRectangleNode, TSceneNode, TStarNode } from 'types/desig
 
 // utils
 import { drawCornerRadiusHandles } from 'utils/canvas/drawCornerRadiusHandles';
-import { drawDraggedCornerRadiusValueLabel } from './drawDraggedCornerRadiusValueLabel';
+import { drawHoveredCornerRadiusValueLabel } from './drawHoveredCornerRadiusValueLabel';
+import { drawHoveredPolygonCornerRadiusValueLabel } from './drawHoveredPolygonCornerRadiusValueLabel';
 import { drawPolygonCornerRadiusHandle } from 'utils/canvas/drawPolygonCornerRadiusHandle';
 import { drawStarCornerRadiusHandle } from 'utils/canvas/drawStarCornerRadiusHandle';
 import { getNodeBounds } from '../../../../../utils/getNodeBounds';
@@ -54,7 +55,7 @@ export const drawCornerRadiusHandlesLayer = (
           selectedNode.rotation,
           isDraggingCornerRadius,
         );
-        drawDraggedCornerRadiusValueLabel(context, refs, isDraggingCornerRadius, bounds, cornerRadius, selectedNode.rotation);
+        drawHoveredCornerRadiusValueLabel(context, refs, isDraggingCornerRadius, bounds, cornerRadius, selectedNode.rotation, selectedNode.id);
         break;
       case hasPolygonCornerRadius(selectedNode):
         drawPolygonCornerRadiusHandle(
@@ -72,6 +73,18 @@ export const drawCornerRadiusHandlesLayer = (
           selectedNode.flipX,
           selectedNode.flipY,
           isDraggingCornerRadius,
+        );
+        drawHoveredPolygonCornerRadiusValueLabel(
+          context,
+          refs,
+          isDraggingCornerRadius,
+          bounds,
+          selectedNode.sides,
+          cornerRadius,
+          selectedNode.rotation,
+          selectedNode.flipX,
+          selectedNode.flipY,
+          selectedNode.id,
         );
         break;
       case hasStarCornerRadius(selectedNode):

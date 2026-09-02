@@ -2,6 +2,7 @@ import { useRef } from 'react';
 
 // types
 import {
+  TCornerRadiusHandleHover,
   THoverRefs,
   TVectorCutSegmentHover,
   TVectorFaceHover,
@@ -13,9 +14,11 @@ import { TPoint } from 'types/canvas';
 
 export const useHoverRefs = (): THoverRefs => {
   const hoverRef = useRef<string | null>(null);
+  const hoveredCornerRadiusHandleRef = useRef<TCornerRadiusHandleHover | null>(null);
   const hoveredEllipseArcHandleRef = useRef<string | null>(null);
   const hoveredEllipseArcRatioHandleRef = useRef<string | null>(null);
   const hoveredEllipseArcRotateHandleRef = useRef<string | null>(null);
+  const hoveredPolygonCornerRadiusHandleRef = useRef<string | null>(null);
   const hoveredSegmentIdRef = useRef<string | null>(null);
   const hoveredVectorCutPointRef = useRef<TPoint | null>(null);
   const hoveredVectorCutSegmentRef = useRef<TVectorCutSegmentHover | null>(null);
@@ -33,9 +36,11 @@ export const useHoverRefs = (): THoverRefs => {
   if (hoverRefsRef.current === null) {
     hoverRefsRef.current = {
       hoverRef,
+      hoveredCornerRadiusHandleRef,
       hoveredEllipseArcHandleRef,
       hoveredEllipseArcRatioHandleRef,
       hoveredEllipseArcRotateHandleRef,
+      hoveredPolygonCornerRadiusHandleRef,
       hoveredSegmentIdRef,
       hoveredVectorCutPointRef,
       hoveredVectorCutSegmentRef,

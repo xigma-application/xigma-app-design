@@ -27,9 +27,11 @@ describe('createCanvasRefs behaviors', () => {
       frameName: { editingLabelRef: { current: null } },
       hover: {
         hoverRef: { current: null },
+        hoveredCornerRadiusHandleRef: { current: null },
         hoveredEllipseArcHandleRef: { current: null },
         hoveredEllipseArcRatioHandleRef: { current: null },
         hoveredEllipseArcRotateHandleRef: { current: null },
+        hoveredPolygonCornerRadiusHandleRef: { current: null },
         hoveredSegmentIdRef: { current: null },
         hoveredVectorCutPointRef: { current: null },
         hoveredVectorCutSegmentRef: { current: null },

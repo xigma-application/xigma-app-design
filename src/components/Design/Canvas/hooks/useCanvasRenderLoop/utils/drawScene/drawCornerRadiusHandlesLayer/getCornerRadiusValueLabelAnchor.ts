@@ -27,9 +27,10 @@ export const getCornerRadiusValueLabelAnchor = (
   rotation: number,
   viewport: TViewport,
   corner: TCornerRadiusHandle,
+  isDragging: boolean,
 ): TCornerRadiusValueLabelAnchor => {
   const center: TPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
-  const handlePosition = getCornerRadiusHandlePositions(bounds, cornerRadius, viewport, true)[corner];
+  const handlePosition = getCornerRadiusHandlePositions(bounds, cornerRadius, viewport, isDragging)[corner];
   const outward = CORNER_OUTWARD_DIRECTIONS[corner];
   const extraMargin = EXTRA_MARGIN_PX / viewport.zoom;
   const localAnchor: TPoint = { x: handlePosition.x + outward.x * extraMargin, y: handlePosition.y + outward.y * extraMargin };

@@ -26,6 +26,8 @@ export type TCornerRadiusDragState = {
   rotation: number;
 };
 
+export type TCornerRadiusHandleHover = { corner: TCornerRadiusHandle; nodeId: string };
+
 export type TPolygonCornerRadiusDragState = {
   bounds: TDraftRect;
   flipX: boolean;
@@ -213,9 +215,11 @@ export type TVectorEditRefs = {
 
 export type THoverRefs = {
   hoverRef: RefObject<string | null>;
+  hoveredCornerRadiusHandleRef: RefObject<TCornerRadiusHandleHover | null>;
   hoveredEllipseArcHandleRef: RefObject<string | null>;
   hoveredEllipseArcRatioHandleRef: RefObject<string | null>;
   hoveredEllipseArcRotateHandleRef: RefObject<string | null>;
+  hoveredPolygonCornerRadiusHandleRef: RefObject<string | null>;
   hoveredSegmentIdRef: RefObject<string | null>;
   hoveredVectorCutPointRef: RefObject<TPoint | null>;
   hoveredVectorCutSegmentRef: RefObject<TVectorCutSegmentHover | null>;
