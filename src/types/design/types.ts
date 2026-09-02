@@ -1,6 +1,7 @@
 // types
 import { NodeType, PathType } from './enums';
 import { TDraftRect, TPoint } from 'types/canvas';
+import { TGuide } from 'types/design/guides/types';
 
 export type TComment = TPoint & {
   author: string;
@@ -70,6 +71,7 @@ export type TEllipseNode = TBaseNode & {
 
 export type TFrameNode = TBaseNode & {
   fill: string;
+  guides?: TGuide[];
   strokeColor?: string;
   strokeWidth?: number;
   type: NodeType.frame;

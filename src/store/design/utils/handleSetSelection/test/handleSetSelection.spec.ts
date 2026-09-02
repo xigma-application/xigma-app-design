@@ -30,6 +30,7 @@ const buildState = (nodes: TDesignPage['nodes'], selectedIds: string[], override
   pages: {
     'page-1': {
       comments: {},
+      guides: [],
       id: 'page-1',
       name: 'Page 1',
       nodes,

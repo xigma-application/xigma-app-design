@@ -43,6 +43,7 @@ const buildState = (nodes: TDesignPage['nodes'], selectedIds: string[] = []): TD
   pages: {
     'page-1': {
       comments: {},
+      guides: [],
       id: 'page-1',
       name: 'Page 1',
       nodes,

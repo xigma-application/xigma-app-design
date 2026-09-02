@@ -3,6 +3,7 @@ import {
   selectActivePage,
   selectActivePageId,
   selectActiveTool,
+  selectAllGuideLines,
   selectAreRulersVisible,
   selectCommentDraftPosition,
   selectComments,
@@ -13,6 +14,7 @@ import {
   selectEditingSelectionStart,
   selectEditingTextBox,
   selectEditingTextContent,
+  selectFrameGuides,
   selectIsActionsPanelOpen,
   selectIsUiHidden,
   selectIsUiMinimized,
@@ -25,6 +27,7 @@ import {
   selectMaskConnectorRoleById,
   selectNodes,
   selectOrderedNodes,
+  selectPageGuides,
   selectPages,
   selectPaintColor,
   selectPenActiveVertexId,
@@ -42,6 +45,7 @@ import { TGroupNode, TRectangleNode, TSceneNode } from 'types/design/types';
 
 const node: TSceneNode = {
   fill: '#ff0000',
+  guides: [{ axis: 'y', id: 'frame-guide', position: 5 }],
   height: 10,
   id: 'node-1',
   name: 'Frame 1',
@@ -79,6 +83,7 @@ const state = {
     pages: {
       'page-1': {
         comments: { [comment.id]: comment },
+        guides: [{ axis: 'x', id: 'page-guide', position: 50 }],
         id: 'page-1',
         name: 'Page 1',
         nodes: { [node.id]: node },
@@ -227,6 +232,26 @@ describe('design selectors', () => {
   it('should select the nodes record', () => {
     // result
     expect(selectNodes(state)).toEqual({ [node.id]: node });
+  });
+
+  it('should select the active page guides', () => {
+    // result
+    expect(selectPageGuides(state)).toEqual([{ axis: 'x', id: 'page-guide', position: 50 }]);
+  });
+
+  it("should select world-space lines for every unrotated frame's own guides", () => {
+    // result
+    expect(selectFrameGuides(state)).toEqual([
+      { axis: 'y', frameId: node.id, id: 'frame-guide', span: { from: 0, to: 10 }, worldPosition: 5 },
+    ]);
+  });
+
+  it('should select the union of page and frame guides, normalised to world-space lines', () => {
+    // result
+    expect(selectAllGuideLines(state)).toEqual([
+      { axis: 'x', frameId: null, id: 'page-guide', span: null, worldPosition: 50 },
+      { axis: 'y', frameId: node.id, id: 'frame-guide', span: { from: 0, to: 10 }, worldPosition: 5 },
+    ]);
   });
 
   it('should select the nodes in root order', () => {

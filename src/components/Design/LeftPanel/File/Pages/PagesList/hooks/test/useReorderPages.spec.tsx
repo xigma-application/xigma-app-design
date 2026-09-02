@@ -17,6 +17,7 @@ const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider 
 
 const buildPage = (overrides: Partial<TDesignPage>): TDesignPage => ({
   comments: {},
+  guides: [],
   id: 'page-1',
   name: 'Page',
   nodes: {},

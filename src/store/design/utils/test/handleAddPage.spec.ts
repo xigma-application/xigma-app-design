@@ -7,6 +7,7 @@ import { handleAddPage } from '../handleAddPage';
 
 const buildPage = (name: string): TDesignPage => ({
   comments: {},
+  guides: [],
   id: name,
   name,
   nodes: {},
@@ -52,6 +53,7 @@ describe('handleAddPage', () => {
     // result
     expect(state.pages['new-page']).toEqual({
       comments: {},
+      guides: [],
       id: 'new-page',
       name: 'Page 2',
       nodes: {},

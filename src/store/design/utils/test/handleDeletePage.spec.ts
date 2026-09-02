@@ -7,6 +7,7 @@ import { handleDeletePage } from '../handleDeletePage';
 
 const buildPage = (name: string): TDesignPage => ({
   comments: {},
+  guides: [],
   id: name,
   name,
   nodes: {},

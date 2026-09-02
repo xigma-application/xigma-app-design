@@ -8,7 +8,17 @@ const buildPages = (names: string[]): Record<string, TDesignPage> =>
   Object.fromEntries(
     names.map((name) => [
       name,
-      { comments: {}, id: name, name, nodes: {}, paintColor: '#d9d9d9', rootOrder: [], selectedIds: [], viewport: { x: 0, y: 0, zoom: 1 } },
+      {
+        comments: {},
+        guides: [],
+        id: name,
+        name,
+        nodes: {},
+        paintColor: '#d9d9d9',
+        rootOrder: [],
+        selectedIds: [],
+        viewport: { x: 0, y: 0, zoom: 1 },
+      },
     ]),
   );
 

@@ -58,6 +58,7 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   pages: {
     'page-1': {
       comments: {},
+      guides: [],
       id: 'page-1',
       name: 'Page 1',
       nodes: {},
@@ -89,6 +90,7 @@ const buildSnapshot = ({
   pages: {
     [activePageId]: {
       comments: {},
+      guides: [],
       id: activePageId,
       name: 'Page 1',
       nodes,

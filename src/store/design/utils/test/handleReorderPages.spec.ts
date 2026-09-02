@@ -7,6 +7,7 @@ import { handleReorderPages } from '../handleReorderPages';
 
 const buildPage = (name: string): TDesignPage => ({
   comments: {},
+  guides: [],
   id: name,
   name,
   nodes: {},

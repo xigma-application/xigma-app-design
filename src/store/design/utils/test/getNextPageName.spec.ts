@@ -6,6 +6,7 @@ import { getNextPageName } from '../getNextPageName';
 
 const buildPage = (name: string): TDesignPage => ({
   comments: {},
+  guides: [],
   id: name,
   name,
   nodes: {},

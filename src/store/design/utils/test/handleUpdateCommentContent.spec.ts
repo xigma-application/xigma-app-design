@@ -29,6 +29,7 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   pages: {
     'page-1': {
       comments: {},
+      guides: [],
       id: 'page-1',
       name: 'Page 1',
       nodes: {},
@@ -50,6 +51,7 @@ describe('handleUpdateCommentContent', () => {
       pages: {
         'page-1': {
           comments: { 'comment-1': { author: 'Xigma', content: 'hello', createdAt: 0, id: 'comment-1', x: 0, y: 0 } },
+          guides: [],
           id: 'page-1',
           name: 'Page 1',
           nodes: {},

@@ -38,6 +38,7 @@ const createTestStore = (): EnhancedStore<{ design: TDesignState }> =>
         pages: {
           'page-1': {
             comments: { 'comment-1': { author: 'Xigma', content: 'hello', createdAt: 0, id: 'comment-1', x: 100, y: 200 } },
+            guides: [],
             id: 'page-1',
             name: 'Page 1',
             nodes: {},

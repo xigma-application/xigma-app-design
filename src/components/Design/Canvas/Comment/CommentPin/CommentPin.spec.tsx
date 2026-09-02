@@ -41,6 +41,7 @@ const createTestStore = (viewport = { x: 0, y: 0, zoom: 1 }): EnhancedStore<{ de
         pages: {
           'page-1': {
             comments: { [comment.id]: comment },
+            guides: [],
             id: 'page-1',
             name: 'Page 1',
             nodes: {},

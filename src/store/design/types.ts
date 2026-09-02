@@ -2,9 +2,11 @@
 import { ToolName } from 'types/design/enums';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import { TComment, TSceneNode, TViewport } from 'types/design/types';
+import { TGuide, TGuideAxis } from 'types/design/guides/types';
 
 export type TDesignPage = {
   comments: Record<string, TComment>;
+  guides: TGuide[];
   id: string;
   name: string;
   nodes: Record<string, TSceneNode>;
@@ -83,4 +85,22 @@ export type TStartTextEditPayload = {
 export type TTextEditSelection = {
   end: number;
   start: number;
+};
+
+export type TAddGuidePayload = {
+  axis: TGuideAxis;
+  frameId: string | null;
+  id: string;
+  position: number;
+};
+
+export type TUpdateGuidePayload = {
+  frameId: string | null;
+  id: string;
+  position: number;
+};
+
+export type TDeleteGuidePayload = {
+  frameId: string | null;
+  id: string;
 };

@@ -53,6 +53,7 @@ const buildTextNode = (pathId: string | null = null): TTextNode => ({
 
 const buildPage = (id: string, name: string): TDesignPage => ({
   comments: {},
+  guides: [],
   id,
   name,
   nodes: {},

@@ -1,9 +1,11 @@
 // store
 import {
+  addGuide,
   addNode,
   addPage,
   bringSelectionToFront,
   createMaskGroup,
+  deleteGuide,
   groupNodes,
   moveNodes,
   reorderPages,
@@ -13,6 +15,7 @@ import {
   toggleNodeLocked,
   toggleNodeMask,
   ungroupNodes,
+  updateGuide,
 } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture, redo, undo } from '../actions';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
@@ -255,5 +258,35 @@ describe('historyMiddleware', () => {
 
     // result
     expect(selectActivePage(store.getState()).rootOrder).toEqual(orderAfterAdd);
+  });
+
+  it('should treat adding, moving, and deleting a guide as their own undo steps', () => {
+    // mock
+    store.dispatch(addGuide({ axis: 'x', frameId: null, position: 100 }));
+    const [{ id: guideId }] = selectActivePage(store.getState()).guides;
+
+    store.dispatch(updateGuide({ frameId: null, id: guideId, position: 250 }));
+    store.dispatch(deleteGuide({ frameId: null, id: guideId }));
+
+    // before
+    expect(selectActivePage(store.getState()).guides).toEqual([]);
+
+    // action — undo the delete only
+    store.dispatch(undo());
+
+    // result
+    expect(selectActivePage(store.getState()).guides).toEqual([{ axis: 'x', id: guideId, position: 250 }]);
+
+    // action — undo the move too
+    store.dispatch(undo());
+
+    // result
+    expect(selectActivePage(store.getState()).guides).toEqual([{ axis: 'x', id: guideId, position: 100 }]);
+
+    // action — undo the add too
+    store.dispatch(undo());
+
+    // result
+    expect(selectActivePage(store.getState()).guides).toEqual([]);
   });
 });

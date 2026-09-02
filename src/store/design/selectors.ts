@@ -8,9 +8,12 @@ import { ToolName } from 'types/design/enums';
 import { TDesignPage } from './types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import { TComment, TSceneNode, TViewport } from 'types/design/types';
+import { TGuide, TGuideLine } from 'types/design/guides/types';
 
 // utils
 import { collectDescendantIdsOfSelected } from './utils/collectDescendantIdsOfSelected';
+import { getAllGuideLines } from './utils/getAllGuideLines';
+import { getFrameGuideLines } from './utils/getFrameGuideLines';
 import { getRenderOrderedNodes } from './utils/getRenderOrderedNodes';
 import { getTransformTargetNodes } from './utils/nodeHierarchy/getTransformTargetNodes';
 import { resolveMaskConnectorRoles } from './utils/maskConnector/resolveMaskConnectorRoles';
@@ -65,6 +68,14 @@ export const selectLastShapeTool = (state: RootState): ToolName => state.design.
 export const selectLastTextTool = (state: RootState): ToolName => state.design.lastTextTool;
 
 export const selectNodes = createSelector([selectActivePage], (page): Record<string, TSceneNode> => page.nodes);
+
+export const selectPageGuides = createSelector([selectActivePage], (page): TGuide[] => page.guides);
+
+export const selectFrameGuides = createSelector([selectNodes], (nodes): TGuideLine[] => getFrameGuideLines(nodes));
+
+export const selectAllGuideLines = createSelector([selectPageGuides, selectFrameGuides], (pageGuides, frameGuides): TGuideLine[] =>
+  getAllGuideLines(pageGuides, frameGuides),
+);
 
 export const selectPaintColor = createSelector([selectActivePage], (page): string => page.paintColor);
 

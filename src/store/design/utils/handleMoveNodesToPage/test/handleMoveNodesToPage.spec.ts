@@ -36,6 +36,7 @@ const buildGroup = (overrides: Partial<TGroupNode>): TGroupNode => ({
 
 const buildPage = (id: string, overrides: Partial<TDesignPage> = {}): TDesignPage => ({
   comments: {},
+  guides: [],
   id,
   name: id,
   nodes: {},

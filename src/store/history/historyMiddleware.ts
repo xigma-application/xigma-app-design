@@ -3,11 +3,13 @@ import { Middleware, UnknownAction } from '@reduxjs/toolkit';
 // store
 import { beginHistoryGesture, endHistoryGesture } from './actions';
 import {
+  addGuide,
   addNode,
   addNodes,
   addPage,
   bringSelectionToFront,
   createMaskGroup,
+  deleteGuide,
   deleteNode,
   deletePage,
   duplicatePage,
@@ -24,6 +26,7 @@ import {
   toggleNodeLocked,
   toggleNodeMask,
   ungroupNodes,
+  updateGuide,
   updateNode,
 } from 'store/design/slice';
 import { RootState } from 'store';
@@ -36,11 +39,13 @@ import { THistoryStack } from './createHistoryStack';
 import { getDesignSnapshot } from './getDesignSnapshot';
 
 const UNDOABLE_ACTION_TYPES: Set<string> = new Set([
+  addGuide.type,
   addNode.type,
   addNodes.type,
   addPage.type,
   bringSelectionToFront.type,
   createMaskGroup.type,
+  deleteGuide.type,
   deleteNode.type,
   deletePage.type,
   duplicatePage.type,
@@ -57,6 +62,7 @@ const UNDOABLE_ACTION_TYPES: Set<string> = new Set([
   toggleNodeLocked.type,
   toggleNodeMask.type,
   ungroupNodes.type,
+  updateGuide.type,
   updateNode.type,
 ]);
 

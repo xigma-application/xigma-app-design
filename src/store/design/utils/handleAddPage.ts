@@ -10,6 +10,7 @@ import { getNextPageName } from './getNextPageName';
 export const handleAddPage = (state: TDesignState, id: string): void => {
   const newPage: TDesignPage = {
     comments: {},
+    guides: [],
     id,
     name: getNextPageName(state.pages),
     nodes: {},

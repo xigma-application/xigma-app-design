@@ -15,7 +15,9 @@ import {
 
 // types
 import {
+  TAddGuidePayload,
   TAddNodesPayload,
+  TDeleteGuidePayload,
   TDesignSnapshot,
   TDesignState,
   TMoveNodesPayload,
@@ -23,6 +25,7 @@ import {
   TReorderPayload,
   TStartTextEditPayload,
   TTextEditSelection,
+  TUpdateGuidePayload,
 } from './types';
 import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
@@ -31,10 +34,12 @@ import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/d
 // utils
 import { getActivePage } from './utils/getActivePage';
 import { handleAddComment } from './utils/handleAddComment';
+import { handleAddGuide } from './utils/handleAddGuide';
 import { handleAddNode } from './utils/handleAddNode';
 import { handleAddNodes } from './utils/handleAddNodes';
 import { handleAddPage } from './utils/handleAddPage';
 import { handleBringSelectionToFront } from './utils/handleBringSelectionToFront';
+import { handleDeleteGuide } from './utils/handleDeleteGuide';
 import { handleDeleteNode } from './utils/handleDeleteNode/handleDeleteNode';
 import { handleDeletePage } from './utils/handleDeletePage';
 import { handleDuplicatePage, TDuplicatePagePayload } from './utils/handleDuplicatePage';
@@ -58,6 +63,7 @@ import { handleUngroupNodes } from './utils/handleUngroupNodes/handleUngroupNode
 import { handleUseNodesAsMask } from './utils/handleUseNodesAsMask/handleUseNodesAsMask';
 import { handleUpdateCommentContent } from './utils/handleUpdateCommentContent';
 import { handleUpdateEditingTextBoxPathStartOffset } from './utils/handleUpdateEditingTextBoxPathStartOffset';
+import { handleUpdateGuide } from './utils/handleUpdateGuide';
 import { handleUpdateNode } from './utils/handleUpdateNode';
 import { handleUpdateTextEditContent } from './utils/handleUpdateTextEditContent';
 import { handleUpdateTextEditSelection } from './utils/handleUpdateTextEditSelection';
@@ -87,6 +93,7 @@ const initialState: TDesignState = {
   pages: {
     [initialPageId]: {
       comments: {},
+      guides: [],
       id: initialPageId,
       name: DEFAULT_PAGE_NAME,
       nodes: {},
@@ -108,6 +115,10 @@ const designSlice = createSlice({
       prepare: (content: string) => ({ payload: { content, id: nanoid() } }),
       reducer: (state, action: PayloadAction<{ content: string; id: string }>) => handleAddComment(state, action.payload),
     },
+    addGuide: {
+      prepare: (payload: Omit<TAddGuidePayload, 'id'>) => ({ payload: { ...payload, id: nanoid() } }),
+      reducer: (state, action: PayloadAction<TAddGuidePayload>) => handleAddGuide(state, action.payload),
+    },
     addNode: {
       prepare: (node: TNewSceneNode) => ({ payload: { ...node, id: nanoid() } as TSceneNode }),
       reducer: (state, action: PayloadAction<TSceneNode>) => handleAddNode(state, action.payload),
@@ -128,6 +139,7 @@ const designSlice = createSlice({
     deleteComment: (state, action: PayloadAction<string>) => {
       delete getActivePage(state).comments[action.payload];
     },
+    deleteGuide: (state, action: PayloadAction<TDeleteGuidePayload>) => handleDeleteGuide(state, action.payload),
     deleteNode: (state, action: PayloadAction<string>) => handleDeleteNode(state, action.payload),
     deletePage: (state, action: PayloadAction<string>) => handleDeletePage(state, action.payload),
     duplicatePage: (state, action: PayloadAction<TDuplicatePagePayload>) => handleDuplicatePage(state, action.payload),
@@ -185,6 +197,7 @@ const designSlice = createSlice({
       handleUpdateCommentContent(state, action.payload),
     updateEditingTextBoxPathStartOffset: (state, action: PayloadAction<number>) =>
       handleUpdateEditingTextBoxPathStartOffset(state, action.payload),
+    updateGuide: (state, action: PayloadAction<TUpdateGuidePayload>) => handleUpdateGuide(state, action.payload),
     updateNode: (state, action: PayloadAction<{ changes: TSceneNodeChanges; id: string }>) => handleUpdateNode(state, action.payload),
     updateTextEditContent: (state, action: PayloadAction<string>) => handleUpdateTextEditContent(state, action.payload),
     updateTextEditSelection: (state, action: PayloadAction<TTextEditSelection>) => handleUpdateTextEditSelection(state, action.payload),
@@ -193,6 +206,7 @@ const designSlice = createSlice({
 
 export const {
   addComment,
+  addGuide,
   addNode,
   addNodes,
   addPage,
@@ -200,6 +214,7 @@ export const {
   cancelCommentDraft,
   createMaskGroup,
   deleteComment,
+  deleteGuide,
   deleteNode,
   deletePage,
   duplicatePage,
@@ -232,6 +247,7 @@ export const {
   ungroupNodes,
   updateCommentContent,
   updateEditingTextBoxPathStartOffset,
+  updateGuide,
   updateNode,
   updateTextEditContent,
   updateTextEditSelection,

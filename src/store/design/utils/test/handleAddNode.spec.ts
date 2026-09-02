@@ -45,6 +45,7 @@ describe('handleAddNode', () => {
       pages: {
         'page-1': {
           comments: {},
+          guides: [],
           id: 'page-1',
           name: 'Page 1',
           nodes: {},
@@ -91,6 +92,7 @@ describe('handleAddNode', () => {
       pages: {
         'page-1': {
           comments: {},
+          guides: [],
           id: 'page-1',
           name: 'Page 1',
           nodes: { 'frame-1': { ...node, id: 'frame-1', name: 'Frame 1' } },
@@ -136,6 +138,7 @@ describe('handleAddNode', () => {
       pages: {
         'page-1': {
           comments: {},
+          guides: [],
           id: 'page-1',
           name: 'Page 1',
           nodes: { 'section-1': { ...node, id: 'section-1', name: 'Section 1', type: NodeType.section } },
@@ -182,6 +185,7 @@ describe('handleAddNode', () => {
       pages: {
         'page-1': {
           comments: {},
+          guides: [],
           id: 'page-1',
           name: 'Page 1',
           nodes: {},
@@ -227,6 +231,7 @@ describe('handleAddNode', () => {
       pages: {
         'page-1': {
           comments: {},
+          guides: [],
           id: 'page-1',
           name: 'Page 1',
           nodes: { existing: { ...node, id: 'existing' } },

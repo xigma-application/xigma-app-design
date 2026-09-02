@@ -21,6 +21,7 @@ const frame = (id: string, parentId: string | null = null): TSceneNode => ({
 
 const buildPage = (id: string, overrides: Partial<TDesignPage> = {}): TDesignPage => ({
   comments: {},
+  guides: [],
   id,
   name: id,
   nodes: {},
@@ -135,6 +136,19 @@ describe('handleDuplicatePage', () => {
     // result
     expect(state.pages.copy.nodes['a-2'].parentId).toBe('ghost-parent');
     expect(state.pages.copy.rootOrder).toEqual(['a-2', 'stale']);
+  });
+
+  it('should deep-clone page-level guides so edits to the copy do not leak into the source', () => {
+    // mock
+    const source = buildPage('page-1', { guides: [{ axis: 'x', id: 'guide-1', position: 100 }] });
+    const state = buildState([source], 'page-1');
+
+    // before
+    handleDuplicatePage(state, { newPageId: 'copy', nodeIdMap: {}, sourceId: 'page-1' });
+    state.pages.copy.guides[0].position = 999;
+
+    // result
+    expect(state.pages['page-1'].guides[0].position).toBe(100);
   });
 
   it('should do nothing when the source page does not exist', () => {

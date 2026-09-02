@@ -15,6 +15,7 @@ import { TDesignPage } from 'store/design/types';
 
 const buildPage = (overrides: Partial<TDesignPage> = {}): TDesignPage => ({
   comments: {},
+  guides: [],
   id: 'page-1',
   name: 'Page 1',
   nodes: {},

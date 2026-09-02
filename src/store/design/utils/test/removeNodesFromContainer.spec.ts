@@ -8,6 +8,7 @@ import { removeNodesFromContainer } from '../removeNodesFromContainer';
 
 const buildPage = (overrides: Partial<TDesignPage>): TDesignPage => ({
   comments: {},
+  guides: [],
   id: 'page-1',
   name: 'Page 1',
   nodes: {},

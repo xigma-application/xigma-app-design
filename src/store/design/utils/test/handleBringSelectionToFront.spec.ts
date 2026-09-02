@@ -35,6 +35,7 @@ const buildState = (page: Partial<TDesignPage>): TDesignState => ({
   pages: {
     'page-1': {
       comments: {},
+      guides: [],
       id: 'page-1',
       name: 'Page 1',
       nodes: {},

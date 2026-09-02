@@ -4,11 +4,13 @@ import { DEFAULT_PAGE_NAME, DEFAULT_PAINT_COLOR } from '../constants';
 // store
 import slice, {
   addComment,
+  addGuide,
   addNode,
   addPage,
   cancelCommentDraft,
   createMaskGroup,
   deleteComment,
+  deleteGuide,
   deleteNode,
   deletePage,
   duplicatePage,
@@ -40,6 +42,7 @@ import slice, {
   ungroupNodes,
   updateCommentContent,
   updateEditingTextBoxPathStartOffset,
+  updateGuide,
   updateNode,
   updateTextEditContent,
   updateTextEditSelection,
@@ -92,6 +95,7 @@ describe('design slice', () => {
       pages: {
         [activePageId]: {
           comments: {},
+          guides: [],
           id: activePageId,
           name: DEFAULT_PAGE_NAME,
           nodes: {},
@@ -770,5 +774,51 @@ describe('design slice', () => {
 
     // result
     expect(state.pages[state.activePageId].comments).toEqual({});
+  });
+
+  it('should add a page guide with a generated id', () => {
+    // before
+    const state = slice(undefined, addGuide({ axis: 'x', frameId: null, position: 100 }));
+    const [guide] = state.pages[state.activePageId].guides;
+
+    // result
+    expect(guide).toEqual({ axis: 'x', id: expect.any(String), position: 100 });
+  });
+
+  it("should add a guide to a frame's own list", () => {
+    // before
+    const withFrame = slice(undefined, addNode(frameNodePayload));
+    const [frameId] = withFrame.pages[withFrame.activePageId].rootOrder;
+
+    // action
+    const state = slice(withFrame, addGuide({ axis: 'y', frameId, position: 40 }));
+    const node = state.pages[state.activePageId].nodes[frameId];
+
+    // result
+    expect(node.type === NodeType.frame && node.guides).toEqual([{ axis: 'y', id: expect.any(String), position: 40 }]);
+  });
+
+  it('should move a guide', () => {
+    // before
+    const withGuide = slice(undefined, addGuide({ axis: 'x', frameId: null, position: 100 }));
+    const [{ id }] = withGuide.pages[withGuide.activePageId].guides;
+
+    // action
+    const state = slice(withGuide, updateGuide({ frameId: null, id, position: 250 }));
+
+    // result
+    expect(state.pages[state.activePageId].guides).toEqual([{ axis: 'x', id, position: 250 }]);
+  });
+
+  it('should delete a guide', () => {
+    // before
+    const withGuide = slice(undefined, addGuide({ axis: 'x', frameId: null, position: 100 }));
+    const [{ id }] = withGuide.pages[withGuide.activePageId].guides;
+
+    // action
+    const state = slice(withGuide, deleteGuide({ frameId: null, id }));
+
+    // result
+    expect(state.pages[state.activePageId].guides).toEqual([]);
   });
 });
