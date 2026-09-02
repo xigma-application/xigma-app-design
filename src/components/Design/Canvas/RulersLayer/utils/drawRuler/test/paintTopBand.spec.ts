@@ -11,7 +11,8 @@ type TFakeContext = {
 
 const createFakeContext = (): TFakeContext => ({ fillRect: vi.fn(), fillStyle: '' });
 
-const band = (fromPx: number, toPx: number): { fill: string; fromPx: number; toPx: number } => ({
+const band = (fromPx: number, toPx: number): { edges: null; fill: string; fromPx: number; toPx: number } => ({
+  edges: null,
   fill: 'rgba(0, 0, 0, 0.2)',
   fromPx,
   toPx,

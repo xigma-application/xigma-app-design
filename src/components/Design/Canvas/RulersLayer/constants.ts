@@ -8,3 +8,5 @@ export const HIGHLIGHT_SHADOW_COLOR = 'rgba(44, 44, 44, 0.7)';
 export const HIGHLIGHT_SHADOW_EDGE = 'rgba(44, 44, 44, 0.5)';
 export const HIGHLIGHT_TEXT_COLOR = '#F19E8E';
 export const HIGHLIGHT_TEXT_GAP_PX = 5;
+export const EDGE_LABEL_GAP_PX = 3;
+export const EDGE_LABEL_NUDGE_PX = 10;

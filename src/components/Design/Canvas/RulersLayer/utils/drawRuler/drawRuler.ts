@@ -1,5 +1,5 @@
 // others
-import { RULER_BACKGROUND, RULER_TEXT_FILL, RULER_TICK_STROKE } from 'constant/canvas';
+import { RULER_BACKGROUND, RULER_TICK_STROKE } from 'constant/canvas';
 import { RULER_FONT, RULER_SIZE_PX } from '../../constants';
 
 // types
@@ -8,12 +8,16 @@ import { THighlightedRulerGuide } from '../getHighlightedRulerGuide';
 import type { TRulerBand } from '../getRulerBands';
 
 // utils
+import { bandLabelFill } from './bandLabelFill';
 import { getHighlightedRulerTick, getRulerTicks } from '../getRulerTicks';
+import { getRulerStep } from '../getRulerStep';
 import { paintHighlightedLeftTick } from './paintHighlightedLeftTick';
 import { paintHighlightedTopTick } from './paintHighlightedTopTick';
 import { paintLeftBand } from './paintLeftBand';
+import { paintLeftBandEdges } from './paintLeftBandEdges';
 import { paintLeftTick } from './paintLeftTick';
 import { paintTopBand } from './paintTopBand';
+import { paintTopBandEdges } from './paintTopBandEdges';
 import { paintTopTick } from './paintTopTick';
 
 export type TDrawRulerParams = {
@@ -52,10 +56,37 @@ export const drawRuler = (
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
   ctx.strokeStyle = RULER_TICK_STROKE;
-  ctx.fillStyle = RULER_TEXT_FILL;
 
-  getRulerTicks(rulerRight, viewport.x, viewport.zoom, origin.x).forEach((tick) => paintTopTick(ctx, tick, leftInset));
-  getRulerTicks(height, viewport.y, viewport.zoom, origin.y).forEach((tick) => paintLeftTick(ctx, tick, leftInset));
+  const stepPx = getRulerStep(viewport.zoom) * viewport.zoom;
+
+  getRulerTicks(rulerRight, viewport.x, viewport.zoom, origin.x).forEach((tick) => {
+    const style = bandLabelFill(topBand, tick.screenPos, stepPx);
+
+    if (style !== null) {
+      ctx.fillStyle = style.fill;
+      ctx.globalAlpha = style.alpha;
+      paintTopTick(ctx, tick, leftInset);
+    }
+  });
+  getRulerTicks(height, viewport.y, viewport.zoom, origin.y).forEach((tick) => {
+    const style = bandLabelFill(leftBand, tick.screenPos, stepPx);
+
+    if (style !== null) {
+      ctx.fillStyle = style.fill;
+      ctx.globalAlpha = style.alpha;
+      paintLeftTick(ctx, tick, leftInset);
+    }
+  });
+
+  ctx.globalAlpha = 1;
+
+  if (topBand?.edges) {
+    paintTopBandEdges(ctx, topBand, leftInset, rulerRight);
+  }
+
+  if (leftBand?.edges) {
+    paintLeftBandEdges(ctx, leftBand, leftInset, height);
+  }
 
   if (highlightedGuide?.axis === 'x') {
     paintHighlightedTopTick(ctx, getHighlightedRulerTick(highlightedGuide.worldPosition, viewport.x, viewport.zoom, origin.x), leftInset);

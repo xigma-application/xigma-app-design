@@ -20,13 +20,13 @@ describe('getRulerTicks', () => {
     expect(ticks[0]).toEqual({ label: '0', screenPos: 30 });
   });
 
-  it('should shift the printed labels by the origin without moving the ticks', () => {
-    // action
+  it('should re-base the whole tick grid onto the origin so a tick sits exactly at it', () => {
+    // action — origin 50 (a frame edge), step 100
     const ticks = getRulerTicks(800, 0, 1, 50);
 
-    // result
-    expect(ticks[0]).toEqual({ label: '-50', screenPos: 0 });
-    expect(ticks[1]).toEqual({ label: '50', screenPos: 100 });
+    // result — ticks now land at world 50, 150, 250… so "0" sits at the frame edge
+    expect(ticks[0]).toEqual({ label: '0', screenPos: 50 });
+    expect(ticks[1]).toEqual({ label: '100', screenPos: 150 });
   });
 
   it('should keep meaningful decimals for a sub-unit step', () => {

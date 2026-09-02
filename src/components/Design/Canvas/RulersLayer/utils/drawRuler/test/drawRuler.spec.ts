@@ -1,4 +1,5 @@
 // others
+import { RULER_FRAME_EXTENT_TICK_FILL, RULER_TEXT_FILL } from 'constant/canvas';
 import { RULER_SIZE_PX } from '../../../constants';
 
 // utils
@@ -19,14 +20,20 @@ vi.mock('../paintHighlightedTopTick', () => ({
 vi.mock('../paintHighlightedLeftTick', () => ({
   paintHighlightedLeftTick: (...args: unknown[]): void => paintHighlightedLeftTickMock(...args),
 }));
+const paintTopBandEdgesMock = vi.fn();
+const paintLeftBandEdgesMock = vi.fn();
+
 vi.mock('../paintTopBand', () => ({ paintTopBand: (...args: unknown[]): void => paintTopBandMock(...args) }));
 vi.mock('../paintLeftBand', () => ({ paintLeftBand: (...args: unknown[]): void => paintLeftBandMock(...args) }));
+vi.mock('../paintTopBandEdges', () => ({ paintTopBandEdges: (...args: unknown[]): void => paintTopBandEdgesMock(...args) }));
+vi.mock('../paintLeftBandEdges', () => ({ paintLeftBandEdges: (...args: unknown[]): void => paintLeftBandEdgesMock(...args) }));
 
 type TFakeContext = {
   clearRect: ReturnType<typeof vi.fn>;
   fillRect: ReturnType<typeof vi.fn>;
   fillStyle: string;
   font: string;
+  globalAlpha: number;
   strokeStyle: string;
   textAlign: string;
   textBaseline: string;
@@ -37,6 +44,7 @@ const createFakeContext = (): TFakeContext => ({
   fillRect: vi.fn(),
   fillStyle: '',
   font: '',
+  globalAlpha: 1,
   strokeStyle: '',
   textAlign: '',
   textBaseline: '',
@@ -57,12 +65,14 @@ const params = (overrides: Partial<TDrawRulerParams> = {}): TDrawRulerParams => 
 
 describe('drawRuler', () => {
   beforeEach(() => {
-    paintTopTickMock.mockClear();
-    paintLeftTickMock.mockClear();
-    paintHighlightedTopTickMock.mockClear();
-    paintHighlightedLeftTickMock.mockClear();
-    paintTopBandMock.mockClear();
-    paintLeftBandMock.mockClear();
+    paintTopTickMock.mockReset();
+    paintLeftTickMock.mockReset();
+    paintHighlightedTopTickMock.mockReset();
+    paintHighlightedLeftTickMock.mockReset();
+    paintTopBandMock.mockReset();
+    paintLeftBandMock.mockReset();
+    paintTopBandEdgesMock.mockReset();
+    paintLeftBandEdgesMock.mockReset();
   });
 
   it('should clear the overlay and paint the top strip, left strip, and every tick', () => {
@@ -107,11 +117,11 @@ describe('drawRuler', () => {
     expect(ctx.fillRect).toHaveBeenCalledWith(0, 0, 600, RULER_SIZE_PX);
   });
 
-  it('should paint a selection band on both rulers when one is supplied, before the ticks', () => {
+  it('should paint a selection band on both rulers when one is supplied, without edge markers', () => {
     // mock
     const ctx = createFakeContext();
-    const topBand = { fill: 'rgba(0, 0, 0, 0.2)', fromPx: 100, toPx: 300 };
-    const leftBand = { fill: 'rgba(0, 0, 0, 0.2)', fromPx: 40, toPx: 120 };
+    const topBand = { edges: null, fill: 'rgba(0, 0, 0, 0.2)', fromPx: 100, toPx: 300 };
+    const leftBand = { edges: null, fill: 'rgba(0, 0, 0, 0.2)', fromPx: 40, toPx: 120 };
 
     // action
     drawRuler(ctx as unknown as CanvasRenderingContext2D, params({ leftBand, topBand }));
@@ -119,6 +129,81 @@ describe('drawRuler', () => {
     // result
     expect(paintTopBandMock).toHaveBeenCalledWith(ctx, topBand, 0, 800);
     expect(paintLeftBandMock).toHaveBeenCalledWith(ctx, leftBand, 0, 600);
+    expect(paintTopBandEdgesMock).not.toHaveBeenCalled();
+    expect(paintLeftBandEdgesMock).not.toHaveBeenCalled();
+  });
+
+  it('should mark the frame extent edges after the ticks when the band carries edge labels', () => {
+    // mock
+    const ctx = createFakeContext();
+    const topBand = { edges: { fromLabel: '0', toLabel: '9735' }, fill: 'rgba(0, 0, 0, 0.2)', fromPx: 100, toPx: 300 };
+    const leftBand = { edges: { fromLabel: '0', toLabel: '2356' }, fill: 'rgba(0, 0, 0, 0.2)', fromPx: 40, toPx: 120 };
+
+    // action
+    drawRuler(ctx as unknown as CanvasRenderingContext2D, params({ leftBand, topBand }));
+
+    // result
+    expect(paintTopBandEdgesMock).toHaveBeenCalledWith(ctx, topBand, 0, 800);
+    expect(paintLeftBandEdgesMock).toHaveBeenCalledWith(ctx, leftBand, 0, 600);
+  });
+
+  it('should mute mid-band labels, drop the ones on the edges, and ramp alpha on both sides of each edge', () => {
+    // mock — origin 0, step 100 → ticks at screenPos 0,100,…,1200; band edges at 400 and 800
+    const ctx = createFakeContext();
+    const drawnAt: Array<{ alpha: number; fill: string; screenPos: number }> = [];
+
+    paintTopTickMock.mockImplementation((_ctx, tick) =>
+      drawnAt.push({ alpha: ctx.globalAlpha, fill: ctx.fillStyle, screenPos: tick.screenPos }),
+    );
+    const topBand = { edges: { fromLabel: '0', toLabel: '388' }, fill: '#333954', fromPx: 400, toPx: 800 };
+
+    // action
+    drawRuler(ctx as unknown as CanvasRenderingContext2D, params({ topBand, width: 1200 }));
+
+    // result
+    const drawnPositions = drawnAt.map((entry) => entry.screenPos);
+    const at = (screenPos: number): { alpha: number; fill: string } | undefined => drawnAt.find((entry) => entry.screenPos === screenPos);
+
+    expect(drawnPositions).not.toContain(400); // on the left edge — dropped
+    expect(drawnPositions).not.toContain(800); // on the right edge — dropped
+    expect(at(600)).toMatchObject({ alpha: 1, fill: RULER_FRAME_EXTENT_TICK_FILL }); // mid-band, muted
+    expect(at(0)).toMatchObject({ alpha: 1, fill: RULER_TEXT_FILL }); // far outside
+    expect(at(300)!.alpha).toBeGreaterThan(0); // approaching the left edge from outside
+    expect(at(300)!.alpha).toBeLessThan(1);
+    expect(at(300)!.fill).toBe(RULER_TEXT_FILL);
+    expect(at(900)!.alpha).toBeLessThan(1); // approaching the right edge from outside
+    expect(ctx.globalAlpha).toBe(1); // reset once the ticks are done
+  });
+
+  it('should also skip the left-ruler tick that lands on a frame band edge', () => {
+    // mock — left ticks at screenPos 0,100,…,600; band edge at 200
+    const ctx = createFakeContext();
+    const drawnPositions: number[] = [];
+
+    paintLeftTickMock.mockImplementation((_ctx, tick) => drawnPositions.push(tick.screenPos));
+    const leftBand = { edges: { fromLabel: '0', toLabel: '150' }, fill: '#333954', fromPx: 200, toPx: 400 };
+
+    // action
+    drawRuler(ctx as unknown as CanvasRenderingContext2D, params({ leftBand }));
+
+    // result
+    expect(drawnPositions).not.toContain(200);
+    expect(drawnPositions).toContain(100);
+  });
+
+  it('should keep the regular tick label colour under a plain selection band (no edges)', () => {
+    // mock
+    const ctx = createFakeContext();
+    const fillAtTick: string[] = [];
+
+    paintTopTickMock.mockImplementation(() => fillAtTick.push(ctx.fillStyle));
+    const topBand = { edges: null, fill: 'rgba(0, 0, 0, 0.2)', fromPx: 100, toPx: 700 };
+
+    // action
+    drawRuler(ctx as unknown as CanvasRenderingContext2D, params({ topBand }));
+
+    // result
+    expect(fillAtTick.every((fill) => fill === RULER_TEXT_FILL)).toBe(true);
   });
 
   it('should rebase the tick labels to the given origin', () => {

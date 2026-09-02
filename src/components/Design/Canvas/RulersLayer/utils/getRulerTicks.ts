@@ -6,7 +6,7 @@ export type TRulerTick = {
   screenPos: number;
 };
 
-const formatRulerLabel = (value: number, step: number): string => {
+export const formatRulerLabel = (value: number, step: number): string => {
   const decimals = step < 1 ? 2 : 0;
   return String(Number(value.toFixed(decimals)));
 };
@@ -20,7 +20,7 @@ export const getRulerTicks = (lengthPx: number, viewportOffset: number, zoom: nu
   const step = getRulerStep(zoom);
   const worldStart = -viewportOffset / zoom;
   const worldEnd = (lengthPx - viewportOffset) / zoom;
-  const firstTick = Math.ceil(worldStart / step) * step;
+  const firstTick = Math.ceil((worldStart - origin) / step) * step + origin;
   const count = Math.max(0, Math.floor((worldEnd - firstTick) / step) + 1);
   const ticks: TRulerTick[] = [];
 

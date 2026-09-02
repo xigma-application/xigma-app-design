@@ -51,9 +51,9 @@ describe('getRulerBands', () => {
     // action
     const { leftBand, topBand } = getRulerBands(nodes, { x: 5, y: 7, zoom: 2 });
 
-    // result — screenPx = world * zoom + viewportOffset
-    expect(topBand).toEqual({ fill: RULER_SELECTION_BAND_FILL, fromPx: 20 * 2 + 5, toPx: 80 * 2 + 5 });
-    expect(leftBand).toEqual({ fill: RULER_SELECTION_BAND_FILL, fromPx: 10 * 2 + 7, toPx: 50 * 2 + 7 });
+    // result — screenPx = world * zoom + viewportOffset; no edge markers for a plain selection
+    expect(topBand).toEqual({ edges: null, fill: RULER_SELECTION_BAND_FILL, fromPx: 20 * 2 + 5, toPx: 80 * 2 + 5 });
+    expect(leftBand).toEqual({ edges: null, fill: RULER_SELECTION_BAND_FILL, fromPx: 10 * 2 + 7, toPx: 50 * 2 + 7 });
   });
 
   it('should keep a world-zero origin for a plain multi-node selection', () => {
@@ -64,24 +64,27 @@ describe('getRulerBands', () => {
     expect(getRulerBands(nodes, IDENTITY).origin).toEqual({ x: 0, y: 0 });
   });
 
-  it('should rebase the origin and brighten the band for a single unrotated frame', () => {
+  it('should rebase the origin, brighten the band, and label its edges for a single unrotated frame', () => {
     // mock
-    const nodes: TSceneNode[] = [frame({ x: 100, y: 50 })];
+    const nodes: TSceneNode[] = [frame({ height: 2356, width: 9735, x: 100, y: 50 })];
 
     // action
-    const { origin, topBand } = getRulerBands(nodes, IDENTITY);
+    const { leftBand, origin, topBand } = getRulerBands(nodes, IDENTITY);
 
     // result
     expect(origin).toEqual({ x: 100, y: 50 });
     expect(topBand?.fill).toBe(RULER_FRAME_EXTENT_FILL);
+    expect(topBand?.edges).toEqual({ fromLabel: '0', toLabel: '9735' });
+    expect(leftBand?.edges).toEqual({ fromLabel: '0', toLabel: '2356' });
   });
 
-  it('should not rebase for a rotated frame', () => {
+  it('should not rebase or label edges for a rotated frame', () => {
     // mock
     const nodes: TSceneNode[] = [frame({ rotation: 20 })];
 
     // result
     expect(getRulerBands(nodes, IDENTITY).origin).toEqual({ x: 0, y: 0 });
     expect(getRulerBands(nodes, IDENTITY).topBand?.fill).toBe(RULER_SELECTION_BAND_FILL);
+    expect(getRulerBands(nodes, IDENTITY).topBand?.edges).toBeNull();
   });
 });
