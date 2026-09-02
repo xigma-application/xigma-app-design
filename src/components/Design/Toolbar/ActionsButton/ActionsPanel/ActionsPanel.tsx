@@ -13,7 +13,7 @@ import { useFilteredActionsPanelSections } from './hooks/useFilteredActionsPanel
 import { ITEM_ICON_SIZE, SECTION_LABEL_KEY, TABS, translationNameSpace } from './constants';
 
 // store
-import { selectIsUiMinimized } from 'store/design/selectors';
+import { selectIsUiHidden, selectIsUiMinimized } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // styles
@@ -30,8 +30,9 @@ export const ActionsPanel: FC = () => {
   const [activeTab, setActiveTab] = useState<TTab['name']>('all');
   const sections = useFilteredActionsPanelSections(query);
   const handleItemClick = useActionsPanelItemClick();
+  const isUiHidden = useAppSelector(selectIsUiHidden);
   const isUiMinimized = useAppSelector(selectIsUiMinimized);
-  const selectedById: Record<string, boolean> = { minimizeUi: isUiMinimized };
+  const selectedById: Record<string, boolean> = { minimizeUi: isUiMinimized, showHideUi: isUiHidden };
 
   return (
     <PopoverPrimitive.Portal>

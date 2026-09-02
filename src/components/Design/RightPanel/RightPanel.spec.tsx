@@ -8,7 +8,7 @@ import RightPanel from './RightPanel';
 import { RIGHT_PANEL_DEFAULT_WIDTH, RIGHT_PANEL_MAX_WIDTH, RIGHT_PANEL_MIN_WIDTH } from './constants';
 
 // store
-import { toggleUiMinimized } from 'store/design/slice';
+import { toggleUiHidden, toggleUiMinimized } from 'store/design/slice';
 import { store } from 'store';
 
 const renderRightPanel = (): ReturnType<typeof render> =>
@@ -107,5 +107,17 @@ describe('RightPanel behaviors', () => {
 
     // result
     expect(container.firstChild).toBeNull();
+  });
+
+  it('should render nothing while the UI is hidden', () => {
+    // before
+    store.dispatch(toggleUiHidden());
+    const { container } = renderRightPanel();
+
+    // result
+    expect(container.firstChild).toBeNull();
+
+    // cleanup
+    store.dispatch(toggleUiHidden());
   });
 });

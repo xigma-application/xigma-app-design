@@ -34,6 +34,7 @@ import slice, {
   toggleNodeHidden,
   toggleNodeLocked,
   toggleNodeMask,
+  toggleUiHidden,
   toggleUiMinimized,
   ungroupNodes,
   updateCommentContent,
@@ -78,6 +79,7 @@ describe('design slice', () => {
       editingTextBox: null,
       editingTextContent: '',
       isActionsPanelOpen: false,
+      isUiHidden: false,
       isUiMinimized: false,
       lastFrameTool: ToolName.frame,
       lastMoreTool: null,
@@ -604,6 +606,20 @@ describe('design slice', () => {
 
     // result
     expect(expanded.isUiMinimized).toBe(false);
+  });
+
+  it('should toggle the hidden UI flag', () => {
+    // action
+    const hidden = slice(undefined, toggleUiHidden());
+
+    // result
+    expect(hidden.isUiHidden).toBe(true);
+
+    // action
+    const shown = slice(hidden, toggleUiHidden());
+
+    // result
+    expect(shown.isUiHidden).toBe(false);
   });
 
   it('should update the live text edit content', () => {

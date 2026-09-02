@@ -9,7 +9,7 @@ import { TooltipProvider } from 'shared';
 import { LEFT_PANEL_MAX_WIDTH, LEFT_PANEL_MIN_WIDTH } from './constants';
 
 // store
-import { toggleUiMinimized } from 'store/design/slice';
+import { toggleUiHidden, toggleUiMinimized } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -126,6 +126,18 @@ describe('LeftPanel behaviors', () => {
     // result
     expect(screen.getByRole('button', { name: 'xigma' })).toBeInTheDocument();
     expect(screen.queryByRole('radio', { name: NavItemName.file })).not.toBeInTheDocument();
+  });
+
+  it('should render nothing when the UI is hidden', () => {
+    // before
+    store.dispatch(toggleUiHidden());
+    const { container } = renderLeftPanel();
+
+    // result
+    expect(container.firstChild).toBeNull();
+
+    // cleanup
+    store.dispatch(toggleUiHidden());
   });
 
   it('should keep the same file name across expand/minimize', () => {

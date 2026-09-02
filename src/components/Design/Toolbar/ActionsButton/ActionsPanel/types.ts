@@ -3,7 +3,7 @@ import { TIconProps } from '@xigma/components';
 
 export type TActionsPanelSection = 'commonSettings' | 'recents' | 'suggestions';
 
-export type TActionsPanelAction = 'selectAll' | 'toggleUiMinimized' | 'undo';
+export type TActionsPanelAction = 'selectAll' | 'toggleUiHidden' | 'toggleUiMinimized' | 'undo';
 
 export type TActionsPanelItem = {
   action?: TActionsPanelAction;

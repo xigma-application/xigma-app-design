@@ -26,6 +26,7 @@ const createTestStore = (): EnhancedStore<{ design: TDesignState }> =>
         editingTextBox: null,
         editingTextContent: '',
         isActionsPanelOpen: false,
+        isUiHidden: false,
         isUiMinimized: false,
         lastFrameTool: ToolName.frame,
         lastMoreTool: null,

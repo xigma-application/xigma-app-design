@@ -10,8 +10,8 @@ import { TooltipProvider } from 'shared';
 import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 
 // store
-import { addNode, setSelection, toggleUiMinimized } from 'store/design/slice';
-import { selectActivePage, selectIsUiMinimized, selectSelectedIds } from 'store/design/selectors';
+import { addNode, setSelection, toggleUiHidden, toggleUiMinimized } from 'store/design/slice';
+import { selectActivePage, selectIsUiHidden, selectIsUiMinimized, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -36,6 +36,10 @@ describe('ActionsPanel', () => {
 
     if (selectIsUiMinimized(store.getState())) {
       store.dispatch(toggleUiMinimized());
+    }
+
+    if (selectIsUiHidden(store.getState())) {
+      store.dispatch(toggleUiHidden());
     }
   });
 
@@ -122,5 +126,29 @@ describe('ActionsPanel', () => {
 
     // result
     expect(selectIsUiMinimized(store.getState())).toBe(true);
+  });
+
+  it('should toggle isUiHidden when the "Show/Hide UI" row is clicked', () => {
+    // before
+    renderActionsPanel();
+    expect(selectIsUiHidden(store.getState())).toBe(false);
+
+    // action
+    fireEvent.click(screen.getByText('Show/Hide UI'));
+
+    // result
+    expect(selectIsUiHidden(store.getState())).toBe(true);
+  });
+
+  it('should show the "Show/Hide UI" checkbox as checked while the UI is hidden', () => {
+    // mock
+    store.dispatch(toggleUiHidden());
+
+    // before
+    renderActionsPanel();
+
+    // result — the row's leading checkbox indicator renders its check icon
+    const row = screen.getByText('Show/Hide UI').closest('div');
+    expect(row?.querySelector('svg')).toBeInTheDocument();
   });
 });

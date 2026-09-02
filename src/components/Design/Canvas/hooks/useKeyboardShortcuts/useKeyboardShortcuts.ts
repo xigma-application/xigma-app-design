@@ -7,7 +7,7 @@ import { TKeysMap, useKeyboardHandler } from 'hooks';
 import { shortcuts } from './shortcuts';
 
 // store
-import { toggleActionsPanelOpen, toggleUiMinimized } from 'store/design/slice';
+import { toggleActionsPanelOpen, toggleUiHidden, toggleUiMinimized } from 'store/design/slice';
 import { useAppDispatch } from 'store';
 
 // types
@@ -72,6 +72,7 @@ export const useKeyboardShortcuts = (refs: TCanvasRefs): void => {
       { action: (): any => handleDeleteSelection(dispatch, refs), secondaryKey: KeyboardKeys.delete },
       { action: (): any => handleDeleteSelection(dispatch, refs), secondaryKey: KeyboardKeys.backspace },
       { action: (): any => handleSelectAll(dispatch, refs), ...shortcuts.selectAll },
+      { action: (): any => dispatch(toggleUiHidden()), ...shortcuts.toggleUiHidden },
       { action: (): any => dispatch(toggleUiMinimized()), ...shortcuts.toggleUiMinimized },
       { action: (): any => dispatch(toggleActionsPanelOpen()), ...shortcuts.openActions },
       { action: (): any => handleDuplicateSelection(dispatch, refs), ...shortcuts.duplicate },

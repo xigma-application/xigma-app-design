@@ -13,6 +13,7 @@ import {
   selectEditingTextBox,
   selectEditingTextContent,
   selectIsActionsPanelOpen,
+  selectIsUiHidden,
   selectIsUiMinimized,
   selectLastFrameTool,
   selectLastMoreTool,
@@ -65,6 +66,7 @@ const state = {
     editingTextBox: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 },
     editingTextContent: 'hello',
     isActionsPanelOpen: true,
+    isUiHidden: false,
     isUiMinimized: true,
     lastFrameTool: ToolName.section,
     lastMoreTool: ToolName.shapeBuilder,
@@ -163,6 +165,11 @@ describe('design selectors', () => {
   it('should select the minimized UI flag', () => {
     // result
     expect(selectIsUiMinimized(state)).toBe(true);
+  });
+
+  it('should select the hidden UI flag', () => {
+    // result
+    expect(selectIsUiHidden(state)).toBe(false);
   });
 
   it('should select the last shape tool', () => {

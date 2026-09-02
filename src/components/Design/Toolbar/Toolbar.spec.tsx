@@ -10,7 +10,7 @@ import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRef
 import { TooltipProvider } from 'shared';
 
 // store
-import { setActionsPanelOpen } from 'store/design/slice';
+import { setActionsPanelOpen, toggleUiHidden } from 'store/design/slice';
 import { store } from 'store';
 
 const renderToolbar = (): ReturnType<typeof render> =>
@@ -80,5 +80,19 @@ describe('Toolbar behaviors', () => {
 
     // result
     expect(store.getState().design.isActionsPanelOpen).toBe(false);
+  });
+
+  it('should render nothing when the UI is hidden', () => {
+    // mock
+    store.dispatch(toggleUiHidden());
+
+    // before
+    const { container } = renderToolbar();
+
+    // result
+    expect(container.firstChild).toBeNull();
+
+    // cleanup
+    store.dispatch(toggleUiHidden());
   });
 });

@@ -8,7 +8,7 @@ import MouseModes from './MouseModes/MouseModes';
 import VectorEditToolbar from './VectorEditToolbar/VectorEditToolbar';
 
 // store
-import { selectIsActionsPanelOpen } from 'store/design/selectors';
+import { selectIsActionsPanelOpen, selectIsUiHidden } from 'store/design/selectors';
 import { setActionsPanelOpen } from 'store/design/slice';
 import { useAppDispatch, useAppSelector } from 'store';
 
@@ -18,10 +18,15 @@ import styles from './toolbar.module.scss';
 const Toolbar: FC = () => {
   const dispatch = useAppDispatch();
   const isActionsPanelOpen = useAppSelector(selectIsActionsPanelOpen);
+  const isUiHidden = useAppSelector(selectIsUiHidden);
 
   const handleActionsPanelOpenChange = (open: boolean): void => {
     dispatch(setActionsPanelOpen(open));
   };
+
+  if (isUiHidden) {
+    return null;
+  }
 
   return (
     <PopoverPrimitive.Root onOpenChange={handleActionsPanelOpenChange} open={isActionsPanelOpen}>

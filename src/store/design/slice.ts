@@ -75,6 +75,7 @@ const initialState: TDesignState = {
   editingTextBox: null,
   editingTextContent: '',
   isActionsPanelOpen: false,
+  isUiHidden: false,
   isUiMinimized: false,
   lastFrameTool: DEFAULT_FRAME_TOOL,
   lastMoreTool: null,
@@ -169,6 +170,9 @@ const designSlice = createSlice({
     toggleNodeHidden: (state, action: PayloadAction<string>) => handleToggleNodeHidden(state, action.payload),
     toggleNodeLocked: (state, action: PayloadAction<string>) => handleToggleNodeLocked(state, action.payload),
     toggleNodeMask: (state, action: PayloadAction<string>) => handleToggleNodeMask(state, action.payload),
+    toggleUiHidden: (state) => {
+      state.isUiHidden = !state.isUiHidden;
+    },
     toggleUiMinimized: (state) => {
       state.isUiMinimized = !state.isUiMinimized;
     },
@@ -218,6 +222,7 @@ export const {
   toggleNodeHidden,
   toggleNodeLocked,
   toggleNodeMask,
+  toggleUiHidden,
   toggleUiMinimized,
   ungroupNodes,
   updateCommentContent,

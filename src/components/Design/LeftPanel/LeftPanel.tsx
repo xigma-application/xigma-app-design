@@ -15,7 +15,7 @@ import { DEFAULT_FILE_NAME_KEY } from './File/constants';
 import { LEFT_PANEL_RESIZE_SETTINGS } from './constants';
 
 // store
-import { selectIsUiMinimized } from 'store/design/selectors';
+import { selectIsUiHidden, selectIsUiMinimized } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // styles
@@ -29,9 +29,14 @@ const LeftPanel: FC = () => {
   const panelRef = useRef<HTMLDivElement>(null);
   const [activeNavItem, setActiveNavItem] = useState<NavItemName>(NavItemName.file);
   const [fileName, setFileName] = useState(() => t(DEFAULT_FILE_NAME_KEY));
+  const isUiHidden = useAppSelector(selectIsUiHidden);
   const isUiMinimized = useAppSelector(selectIsUiMinimized);
   const { cursorX, onMouseDownX, width } = useResizeHandler(LEFT_PANEL_RESIZE_SETTINGS, panelRef);
   const handleResizeMouseDown = useHandleResizeMouseDown(onMouseDownX);
+
+  if (isUiHidden) {
+    return null;
+  }
 
   if (isUiMinimized) {
     return <MinimizedToolbar name={fileName} />;

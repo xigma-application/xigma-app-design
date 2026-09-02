@@ -50,6 +50,7 @@ export const shortcuts = {
   redo: { primaryKeys: [CONTROL_PRIMARY_KEY, 'shift'], secondaryKey: KeyboardKeys.z },
   selectAll: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.a },
   sendToBack: { secondaryKey: KeyboardKeys.bracketLeft },
+  toggleUiHidden: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.backslash },
   toggleUiMinimized: { primaryKeys: [CONTROL_PRIMARY_KEY, 'shift'], secondaryKey: KeyboardKeys.backslash },
   undo: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.z },
   ungroup: { primaryKeys: [CONTROL_PRIMARY_KEY, 'shift'], secondaryKey: KeyboardKeys.g },

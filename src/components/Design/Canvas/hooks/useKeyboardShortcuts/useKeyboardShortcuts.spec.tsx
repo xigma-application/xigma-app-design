@@ -475,6 +475,28 @@ describe('useKeyboardShortcuts behaviors', () => {
     expect(() => fireEvent.keyDown(window, { altKey: true, code: 'KeyO', ctrlKey: true })).not.toThrow();
   });
 
+  it('should flip the selection horizontally on "Shift+H" without throwing when nothing is selected', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    expect(() => fireEvent.keyDown(window, { code: 'KeyH', shiftKey: true })).not.toThrow();
+  });
+
+  it('should flip the selection vertically on "Shift+V" without throwing when nothing is selected', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    expect(() => fireEvent.keyDown(window, { code: 'KeyV', shiftKey: true })).not.toThrow();
+  });
+
   it('should toggle the minimized UI flag on "Cmd+Shift+\\"', () => {
     // mock
     const store = createTestStore();
@@ -493,6 +515,26 @@ describe('useKeyboardShortcuts behaviors', () => {
 
     // result
     expect(store.getState().design.isUiMinimized).toBe(false);
+  });
+
+  it('should toggle the hidden UI flag on "Cmd+\\"', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    fireEvent.keyDown(window, { code: 'Backslash', metaKey: true });
+
+    // result
+    expect(store.getState().design.isUiHidden).toBe(true);
+
+    // action
+    fireEvent.keyDown(window, { code: 'Backslash', metaKey: true });
+
+    // result
+    expect(store.getState().design.isUiHidden).toBe(false);
   });
 
   it('should toggle the Actions panel on "Cmd+K"', () => {

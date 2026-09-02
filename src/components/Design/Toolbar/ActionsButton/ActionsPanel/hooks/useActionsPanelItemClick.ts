@@ -7,11 +7,15 @@ import { handleUndo } from 'components/Design/Canvas/hooks/useKeyboardShortcuts/
 
 // store
 import { AppDispatch, useAppDispatch } from 'store';
-import { toggleUiMinimized } from 'store/design/slice';
+import { toggleUiHidden, toggleUiMinimized } from 'store/design/slice';
 
 // types
 import { TActionsPanelAction } from '../types';
 import { TCanvasRefs } from 'types/design/canvas/types';
+
+const handleToggleUiHidden = (dispatch: AppDispatch): void => {
+  dispatch(toggleUiHidden());
+};
 
 const handleToggleUiMinimized = (dispatch: AppDispatch): void => {
   dispatch(toggleUiMinimized());
@@ -19,6 +23,7 @@ const handleToggleUiMinimized = (dispatch: AppDispatch): void => {
 
 const ACTION_HANDLERS: Record<TActionsPanelAction, TFunc<[AppDispatch, TCanvasRefs]>> = {
   selectAll: handleSelectAll,
+  toggleUiHidden: handleToggleUiHidden,
   toggleUiMinimized: handleToggleUiMinimized,
   undo: handleUndo,
 };

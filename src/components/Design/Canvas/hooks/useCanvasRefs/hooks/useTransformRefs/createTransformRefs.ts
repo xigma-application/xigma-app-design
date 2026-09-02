@@ -6,6 +6,7 @@ export const createTransformRefs = (overrides: Partial<TTransformRefs> = {}): TT
   contactGuidesRef: { current: null },
   distanceGuidesRef: { current: null },
   draggedNodeIdsRef: { current: null },
+  equalSpacingGuidesRef: { current: null },
   resizedNodeIdsRef: { current: null },
   rotateDragRef: { current: null },
   rotatedNodeIdsRef: { current: null },

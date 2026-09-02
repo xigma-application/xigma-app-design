@@ -7,7 +7,7 @@ import CanvasContextMenu, { TCanvasContextMenuProps } from './CanvasContextMenu'
 const anchorRef = { current: { getBoundingClientRect: (): DOMRect => new DOMRect(10, 20, 0, 0) } };
 
 const renderCanvasContextMenu = (props: Partial<TCanvasContextMenuProps> = {}): ReturnType<typeof render> =>
-  render(<CanvasContextMenu anchorRef={anchorRef} isOpen onOpenChange={vi.fn()} onToggleUiMinimized={vi.fn()} {...props} />);
+  render(<CanvasContextMenu anchorRef={anchorRef} isOpen onOpenChange={vi.fn()} onToggleUiHidden={vi.fn()} {...props} />);
 
 describe('CanvasContextMenu', () => {
   it('should show every menu item when open', () => {
@@ -37,13 +37,13 @@ describe('CanvasContextMenu', () => {
     expect(screen.getByText('Widgets').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
   });
 
-  it('should enable Show/Hide UI, and call onToggleUiMinimized on click', async () => {
+  it('should enable Show/Hide UI, and call onToggleUiHidden on click', async () => {
     // mock
     const user = userEvent.setup();
-    const onToggleUiMinimized = vi.fn();
+    const onToggleUiHidden = vi.fn();
 
     // before
-    renderCanvasContextMenu({ onToggleUiMinimized });
+    renderCanvasContextMenu({ onToggleUiHidden });
 
     // result
     expect(screen.getByText('Show/Hide UI').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
@@ -52,6 +52,6 @@ describe('CanvasContextMenu', () => {
     await user.click(screen.getByText('Show/Hide UI'));
 
     // result
-    expect(onToggleUiMinimized).toHaveBeenCalledTimes(1);
+    expect(onToggleUiHidden).toHaveBeenCalledTimes(1);
   });
 });

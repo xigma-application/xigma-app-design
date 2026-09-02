@@ -28,10 +28,10 @@ export type TCanvasContextMenuProps = {
   anchorRef: RefObject<TVirtualAnchor>;
   isOpen: boolean;
   onOpenChange: TFunc<[boolean]>;
-  onToggleUiMinimized: TFunc;
+  onToggleUiHidden: TFunc;
 };
 
-const CanvasContextMenu: FC<TCanvasContextMenuProps> = ({ anchorRef, isOpen, onOpenChange, onToggleUiMinimized }) => {
+const CanvasContextMenu: FC<TCanvasContextMenuProps> = ({ anchorRef, isOpen, onOpenChange, onToggleUiHidden }) => {
   const { t } = useTranslation();
   const handlePreventRefocus = usePreventMenuRefocus();
   const handleStopPropagation = useStopClickPropagation();
@@ -51,7 +51,7 @@ const CanvasContextMenu: FC<TCanvasContextMenuProps> = ({ anchorRef, isOpen, onO
       <MenuSeparator />
       <MenuItem
         label={t(CANVAS_MENU_SHOW_HIDE_UI_KEY)}
-        onClick={onToggleUiMinimized}
+        onClick={onToggleUiHidden}
         shortcut={KEYBOARD_SHORTCUTS.showHideUi.join('')}
         withCheck={false}
       />

@@ -9,7 +9,7 @@ import { useCanvasContextMenu } from '../hooks/useCanvasContextMenu/useCanvasCon
 import { useNodeMenuActions } from 'components/Design/Menu/hooks/useNodeMenuActions';
 
 // store
-import { toggleNodeHidden, toggleNodeLocked, toggleNodeMask, toggleUiMinimized } from 'store/design/slice';
+import { toggleNodeHidden, toggleNodeLocked, toggleNodeMask, toggleUiHidden } from 'store/design/slice';
 import { useAppDispatch } from 'store';
 
 // types
@@ -51,8 +51,8 @@ const CanvasContextMenuPanel: FC<TCanvasContextMenuPanelProps> = ({ children, cl
           anchorRef={anchorRef}
           isOpen={isOpen}
           onOpenChange={onOpenChange}
-          onToggleUiMinimized={(): void => {
-            dispatch(toggleUiMinimized());
+          onToggleUiHidden={(): void => {
+            dispatch(toggleUiHidden());
           }}
         />
       )}

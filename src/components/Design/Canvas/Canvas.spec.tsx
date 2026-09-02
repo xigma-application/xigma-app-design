@@ -12,7 +12,7 @@ import ClassNamesProvider from '../core/ClassNamesProvider/ClassNamesProvider';
 import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setSelection, toggleUiHidden } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -155,10 +155,10 @@ describe('Canvas context menu', () => {
     expect(selectActivePage(store.getState()).nodes[nodeId].locked).toBe(true);
   });
 
-  it('should dispatch toggleUiMinimized via CanvasContextMenu’s Show/Hide UI', async () => {
+  it('should dispatch toggleUiHidden via CanvasContextMenu’s Show/Hide UI', async () => {
     // mock
     const user = userEvent.setup();
-    const isUiMinimizedBefore = store.getState().design.isUiMinimized;
+    const isUiHiddenBefore = store.getState().design.isUiHidden;
 
     // before
     const { container } = renderCanvas();
@@ -170,7 +170,10 @@ describe('Canvas context menu', () => {
     await user.click(screen.getByText('Show/Hide UI'));
 
     // result
-    expect(store.getState().design.isUiMinimized).toBe(!isUiMinimizedBefore);
+    expect(store.getState().design.isUiHidden).toBe(!isUiHiddenBefore);
+
+    // cleanup
+    store.dispatch(toggleUiHidden());
   });
 
   it('should toggle isMask off via Remove mask on a masked hit node', async () => {

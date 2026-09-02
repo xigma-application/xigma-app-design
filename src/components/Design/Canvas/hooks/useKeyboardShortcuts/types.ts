@@ -36,6 +36,7 @@ export type TStandardKeyboardShortcuts = {
   redo: TShortcut;
   selectAll: TShortcut;
   sendToBack: TShortcut;
+  toggleUiHidden: TShortcut;
   toggleUiMinimized: TShortcut;
   undo: TShortcut;
   ungroup: TShortcut;

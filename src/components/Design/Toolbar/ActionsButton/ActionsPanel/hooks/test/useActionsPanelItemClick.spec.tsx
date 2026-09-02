@@ -8,10 +8,10 @@ import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRef
 import { useActionsPanelItemClick } from '../useActionsPanelItemClick';
 
 // store
-import { addNode, setSelection, toggleUiMinimized } from 'store/design/slice';
+import { addNode, setSelection, toggleUiHidden, toggleUiMinimized } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
-import { selectActivePage, selectIsUiMinimized, selectSelectedIds } from 'store/design/selectors';
+import { selectActivePage, selectIsUiHidden, selectIsUiMinimized, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -29,6 +29,10 @@ describe('useActionsPanelItemClick', () => {
 
     if (selectIsUiMinimized(store.getState())) {
       store.dispatch(toggleUiMinimized());
+    }
+
+    if (selectIsUiHidden(store.getState())) {
+      store.dispatch(toggleUiHidden());
     }
   });
 
@@ -96,6 +100,17 @@ describe('useActionsPanelItemClick', () => {
 
     // result
     expect(selectIsUiMinimized(store.getState())).toBe(true);
+  });
+
+  it('should toggle isUiHidden for the "toggleUiHidden" action', () => {
+    // before
+    const { result } = renderHook(() => useActionsPanelItemClick(), { wrapper });
+
+    // action
+    act(() => result.current('toggleUiHidden'));
+
+    // result
+    expect(selectIsUiHidden(store.getState())).toBe(true);
   });
 
   it('should do nothing for an undefined action', () => {

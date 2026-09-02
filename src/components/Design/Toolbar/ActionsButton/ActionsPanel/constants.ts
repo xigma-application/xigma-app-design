@@ -71,6 +71,7 @@ export const ITEMS: TActionsPanelItem[] = [
     withCheck: true,
   },
   {
+    action: 'toggleUiHidden',
     id: 'showHideUi',
     labelKey: 'design.leftPanel.navRail.logoMenu.viewMenu.showHideUi',
     section: 'commonSettings',

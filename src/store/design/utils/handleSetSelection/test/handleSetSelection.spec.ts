@@ -18,6 +18,7 @@ const buildState = (nodes: TDesignPage['nodes'], selectedIds: string[], override
   editingTextBox: null,
   editingTextContent: '',
   isActionsPanelOpen: false,
+  isUiHidden: false,
   isUiMinimized: false,
   lastFrameTool: ToolName.frame,
   lastMoreTool: null,
