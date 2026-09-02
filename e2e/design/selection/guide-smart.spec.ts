@@ -3,6 +3,10 @@ import { test, expect } from '@playwright/test';
 // components
 import { DesignPage } from '../model/DesignPage';
 
+// four screenshot-equality tests sharing GPU/WebGL contention across workers is flaky — pin this
+// file to one worker (see shape-draw-snap.spec.ts's own identical rationale)
+test.describe.configure({ mode: 'serial' });
+
 test("dragging a shape near its neighbour's own established gap to a third shape snaps to match it, rendering identically to placing it there directly", async ({
   page,
 }) => {
@@ -110,6 +114,55 @@ test('dragging a shape back between two flanking neighbours snaps it to the cent
   await control.pointerMove(1400, 800);
 
   const controlShot = await page.screenshot({ clip: { height: 350, width: 450, x: 650, y: 150 } });
+
+  expect(snappedShot.equals(controlShot)).toBe(true);
+});
+
+test('dragging a shape into a grid slot snaps to match both its row (same height) and column (same width) gaps at once, rendering identically to placing it there directly', async ({
+  page,
+}) => {
+  const snapped = new DesignPage(page);
+
+  await snapped.goto('e2e-test-guide-smart-grid-dragged');
+  await expect(snapped.canvas).toBeVisible();
+
+  // a 3x3 grid with the centre cell (col2/row2) missing: row1/row3 are height 50, row2 is height 80;
+  // col1 is width 80, col2/col3 are width 60 — all 10px gaps
+  await snapped.drawRectangle(700, 200, 780, 250); // col1 row1
+  await snapped.drawRectangle(790, 200, 850, 250); // col2 row1
+  await snapped.drawRectangle(860, 200, 920, 250); // col3 row1
+  await snapped.drawRectangle(700, 260, 780, 340); // col1 row2
+  await snapped.drawRectangle(860, 260, 920, 340); // col3 row2
+  await snapped.drawRectangle(700, 350, 780, 400); // col1 row3
+  await snapped.drawRectangle(790, 350, 850, 400); // col2 row3
+  await snapped.drawRectangle(860, 350, 920, 400); // col3 row3
+  await snapped.drawRectangle(790, 450, 850, 530); // col2/row2 candidate (60x80), drawn elsewhere first
+
+  await snapped.pointerDown(820, 490); // its centre
+  await page.mouse.move(822, 302, { steps: 6 }); // target centre (820,300) for x790-850,y260-340; 2px off
+  await snapped.pointerUp();
+  await snapped.pointerMove(1400, 800); // move away so no hover artifacts differ from the control
+
+  const snappedShot = await page.screenshot({ clip: { height: 350, width: 400, x: 650, y: 150 } });
+
+  const control = new DesignPage(page);
+
+  await control.goto('e2e-test-guide-smart-grid-control');
+  await expect(control.canvas).toBeVisible();
+
+  await control.drawRectangle(700, 200, 780, 250);
+  await control.drawRectangle(790, 200, 850, 250);
+  await control.drawRectangle(860, 200, 920, 250);
+  await control.drawRectangle(700, 260, 780, 340);
+  await control.drawRectangle(860, 260, 920, 340);
+  await control.drawRectangle(700, 350, 780, 400);
+  await control.drawRectangle(790, 350, 850, 400);
+  await control.drawRectangle(860, 350, 920, 400);
+  await control.drawRectangle(790, 260, 850, 340); // col2/row2 placed directly at the snapped grid slot
+  await control.click(820, 300); // re-select it, matching the drag scenario's end state
+  await control.pointerMove(1400, 800);
+
+  const controlShot = await page.screenshot({ clip: { height: 350, width: 400, x: 650, y: 150 } });
 
   expect(snappedShot.equals(controlShot)).toBe(true);
 });

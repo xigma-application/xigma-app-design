@@ -1717,9 +1717,31 @@ row has one of *its own* further out):
 - **Verified via a real Playwright screenshot before presenting it**, not just the unit suite — this
   is the concrete lesson from this session's false starts: a jsdom `renderHook` test had already
   "proven" an earlier, subtly-wrong version worked, and only a real rendered frame against the actual
-  dev server exposed the gap. `e2e/design/selection/shape-chain-gap-drag-snap.spec.ts`
-  (screenshot-equality against a control scene placed directly at the snapped position, matching +
-  non-matching cases, §24's technique).
+  dev server exposed the gap. `e2e/design/selection/guide-smart.spec.ts` (screenshot-equality against
+  a control scene placed directly at the snapped position, matching + non-matching cases, §24's
+  technique) — one file, all three mechanisms below, per explicit request rather than one spec file
+  per mechanism.
+- **Grid gaps** (`filterRowCandidates.ts`/`filterColumnCandidates.ts` + `getChainSnap.ts`) — a fourth
+  refinement, added after direct feedback that a *literal* grid (rows of cells sharing a height,
+  columns sharing a width, both varying freely between rows/columns) wasn't handled: dragging a cell
+  into an empty grid slot should match **both** the row's gap (needs a same-height neighbour) and the
+  column's gap (needs a same-width neighbour) at once. Implemented as a **candidate pre-filter**, not
+  a fourth parallel mechanism — `getChainSnap.ts` now tries `getHorizontalChainSnap`/
+  `getVerticalChainSnap` (which already contain chain+flanked) against a same-height/same-width
+  filtered candidate list *first*, falling back to the full, size-agnostic candidate list if the
+  filtered one finds nothing. `GRID_CELL_SIZE_MATCH_TOLERANCE_PX` (0.5, deliberately tight — "size
+  must be *exact*") gates the filter, separate from `EQUAL_SPACING_SNAP_TOLERANCE_PX` (the existing,
+  more generous drag-catchment radius for the *position* match itself). Backward compatible by
+  construction: the reverted-to-full-candidates fallback is exactly the pre-grid behaviour, so the
+  original "three differently-sized squares in a row" chain-gap case (deliberately no height in
+  common) still works unchanged.
+  - Known limitation surfaced while verifying this live (shared by chain/flanked too, not new):
+    `findHorizontalNeighbors.ts`/`findVerticalNeighbors.ts` only count a shape as a neighbour if the
+    *raw, pre-snap* drag position doesn't yet overlap it (`edges.top >= active.bottom`, strict). A
+    drag whose raw position happens to overlap a target by even 1-2px — plausible mid-gesture, not
+    just at rest — fails to find that neighbour at all that frame, even though the corrected position
+    would be well within tolerance. Not fixed here (touches the shared neighbour-finder all three
+    mechanisms depend on); worth a tolerance-aware rewrite if this turns out to bite in practice.
 
 ## Related
 
