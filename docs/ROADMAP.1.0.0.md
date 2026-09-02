@@ -173,7 +173,9 @@ The single largest structural gap versus Figma.
 
 ## Stage 13 — Guides and snapping (smart guides)
 
-- [ ] rulers scaling with zoom
+- [x] **rulers** — top/left rulers that scale with zoom, show a band and re-zero to a selected
+      frame, and can be dragged from to drop page or frame guides (movable, deletable, with a
+      right-click menu to clear all guides on an axis or hide the rulers)
 - [x] **snap to the pixel grid** — `x/y/width/height`/`rotation` rounded on dispatch (creation,
       drag, resize, rotation), not in intermediate computations
 - [x] **smart guides** — snap to edges/centers of other nodes while dragging/resizing/drawing, plus
