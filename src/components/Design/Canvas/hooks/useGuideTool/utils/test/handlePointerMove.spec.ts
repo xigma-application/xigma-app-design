@@ -45,6 +45,36 @@ describe('handlePointerMove', () => {
     expect(stopImmediatePropagationSpy).toHaveBeenCalled();
   });
 
+  it('should show the trash cursor while dragging an existing guide back over a gutter (release deletes it)', () => {
+    // mock
+    const canvas = createCanvas();
+    const refs = createCanvasRefs({
+      guides: { draggingGuideRef: { current: { axis: 'x', frameId: null, hasMoved: false, id: 'guide-1', position: 300 } } },
+    });
+    const setClassName = vi.fn();
+
+    // before — screen x 5 is inside the left gutter
+    handlePointerMove(canvas, pointerEvent(5, 200), refs, setClassName);
+
+    // result
+    expect(setClassName).toHaveBeenCalledWith('trash');
+  });
+
+  it('should keep the resize cursor while dragging a brand-new guide out over a gutter (release just cancels it)', () => {
+    // mock
+    const canvas = createCanvas();
+    const refs = createCanvasRefs({
+      guides: { draggingGuideRef: { current: { axis: 'x', frameId: null, hasMoved: false, id: null, position: 300 } } },
+    });
+    const setClassName = vi.fn();
+
+    // before — screen x 5 is inside the left gutter, but there's nothing to delete yet
+    handlePointerMove(canvas, pointerEvent(5, 200), refs, setClassName);
+
+    // result
+    expect(setClassName).toHaveBeenCalledWith('resize-x');
+  });
+
   it('should set the resize-y class name while dragging a horizontal (y-axis) guide', () => {
     // mock
     const canvas = createCanvas();

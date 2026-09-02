@@ -323,10 +323,7 @@ export type TFrameNameRefs = {
 export type TGuideDragState = {
   axis: TGuideAxis;
   frameId: string | null;
-  // whether any pointermove has landed since arming — a plain click (still false on pointerup)
-  // selects the guide instead of committing a no-op move.
   hasMoved: boolean;
-  // `null` while the guide is still being dragged out of a ruler gutter and hasn't been committed.
   id: string | null;
   position: number;
 };

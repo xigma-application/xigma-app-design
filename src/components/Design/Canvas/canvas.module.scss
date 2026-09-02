@@ -257,5 +257,12 @@
         -webkit-image-set(url('../../../assets/icons/cursors/resize-y.png') 8x) 16 16,
         row-resize;
     }
+
+    &--trash {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/trash.png') 8x) 4 4,
+        auto;
+    }
   }
 }
