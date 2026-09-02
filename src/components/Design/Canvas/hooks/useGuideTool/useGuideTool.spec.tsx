@@ -1,9 +1,13 @@
 import { act, renderHook } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { RefObject } from 'react';
+import { FC, RefObject } from 'react';
+
+// components
+import ClassNamesProvider from '../../../core/ClassNamesProvider/ClassNamesProvider';
 
 // hooks
 import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
+import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
 import { useGuideTool } from './useGuideTool';
 
 // store
@@ -27,16 +31,33 @@ const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
 
 const pointerEvent = (type: string, x: number, y: number): PointerEvent => new PointerEvent(type, { clientX: x, clientY: y, pointerId: 1 });
 
+let capturedClassName: string | null = null;
+
+const ClassNameProbe: FC = () => {
+  capturedClassName = useClassNames().className;
+  return null;
+};
+
 const renderGuideTool = (canvasRef: RefObject<HTMLCanvasElement | null>): TGuideRefs => {
   const refs: TCanvasRefs = createCanvasRefs({ canvasRef });
 
-  renderHook(() => useGuideTool(refs), { wrapper: ({ children }) => <Provider store={store}>{children}</Provider> });
+  renderHook(() => useGuideTool(refs), {
+    wrapper: ({ children }) => (
+      <Provider store={store}>
+        <ClassNamesProvider>
+          {children}
+          <ClassNameProbe />
+        </ClassNamesProvider>
+      </Provider>
+    ),
+  });
 
   return refs.guides;
 };
 
 describe('useGuideTool behaviors', () => {
   beforeEach(() => {
+    capturedClassName = null;
     store.dispatch(setActiveTool(ToolName.default));
     store.dispatch(setViewport({ x: 0, y: 0, zoom: 1 }));
 
@@ -113,5 +134,39 @@ describe('useGuideTool behaviors', () => {
 
     // result
     expect(guideRefs.draggingGuideRef.current).toBeNull();
+  });
+
+  it('should set the resize-x class name while hovering the left gutter', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    // before
+    renderGuideTool(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 5, 100));
+    });
+
+    // result
+    expect(capturedClassName).toBe('resize-x');
+  });
+
+  it('should clear the class name when the tool switches away', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+    renderGuideTool(canvasRef);
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 5, 100));
+    });
+
+    expect(capturedClassName).toBe('resize-x');
+
+    // action
+    act(() => store.dispatch(setActiveTool(ToolName.hand)));
+
+    // result
+    expect(capturedClassName).toBeNull();
   });
 });

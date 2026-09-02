@@ -11,9 +11,14 @@ import { getGutterAxis } from './getGutterAxis';
 import { getPointerPosition } from '../../../utils/getPointerPosition';
 import { screenToWorld } from '../../../utils/screenToWorld';
 
-const CURSOR_BY_AXIS = { x: 'col-resize', y: 'row-resize' } as const;
+const CLASS_NAME_BY_AXIS = { x: 'resize-x', y: 'resize-y' } as const;
 
-export const handlePointerMove = (canvas: HTMLCanvasElement, event: PointerEvent, refs: TCanvasRefs): void => {
+export const handlePointerMove = (
+  canvas: HTMLCanvasElement,
+  event: PointerEvent,
+  refs: TCanvasRefs,
+  setClassName: (className: string | null) => void,
+): void => {
   const pointer = getPointerPosition(canvas, event);
   const state = store.getState();
   const viewport = selectViewport(state);
@@ -23,15 +28,15 @@ export const handlePointerMove = (canvas: HTMLCanvasElement, event: PointerEvent
     const worldPoint = screenToWorld(pointer, viewport);
 
     dragging.position = dragging.axis === 'x' ? worldPoint.x : worldPoint.y;
-    canvas.style.cursor = CURSOR_BY_AXIS[dragging.axis];
+    setClassName(CLASS_NAME_BY_AXIS[dragging.axis]);
     event.stopImmediatePropagation();
     return;
   }
 
-  const gutterAxis = getGutterAxis(pointer, selectAreRulersVisible(state));
+  const gutterAxis = getGutterAxis(pointer, selectAreRulersVisible(state), refs.layout.leftPanelWidthRef.current);
 
   if (gutterAxis) {
-    canvas.style.cursor = CURSOR_BY_AXIS[gutterAxis];
+    setClassName(CLASS_NAME_BY_AXIS[gutterAxis]);
     event.stopImmediatePropagation();
     return;
   }
@@ -39,7 +44,7 @@ export const handlePointerMove = (canvas: HTMLCanvasElement, event: PointerEvent
   const hitGuide = getGuideAtPoint(pointer, selectAllGuideLines(state), viewport);
 
   if (hitGuide) {
-    canvas.style.cursor = CURSOR_BY_AXIS[hitGuide.axis];
+    setClassName(CLASS_NAME_BY_AXIS[hitGuide.axis]);
     event.stopImmediatePropagation();
   }
 };

@@ -68,6 +68,24 @@ describe('handlePointerDown', () => {
     expect(refs.guides.draggingGuideRef.current).toEqual({ axis: 'x', frameId: null, id: null, position: -7.5 });
   });
 
+  it("should shift the left gutter past LeftPanel's live width instead of the true screen edge", () => {
+    // mock
+    const canvas = createCanvas();
+    const refs = createCanvasRefs({ layout: { leftPanelWidthRef: { current: 300 } } });
+
+    // before — screen x 5 is now under LeftPanel, not the ruler; screen x 310 is inside it
+    handlePointerDown(canvas, pointerEvent(5, 200), store.dispatch, refs);
+
+    // result
+    expect(refs.guides.draggingGuideRef.current).toBeNull();
+
+    // action
+    handlePointerDown(canvas, pointerEvent(310, 200), store.dispatch, refs);
+
+    // result
+    expect(refs.guides.draggingGuideRef.current).toEqual({ axis: 'x', frameId: null, id: null, position: 310 });
+  });
+
   it('should not arm a drag-out from the gutter while rulers are hidden', () => {
     // mock
     store.dispatch(toggleRulers());

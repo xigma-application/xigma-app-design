@@ -20,7 +20,7 @@ export const handlePointerUp = (canvas: HTMLCanvasElement, event: PointerEvent, 
 
   const pointer = getPointerPosition(canvas, event);
   const areRulersVisible = selectAreRulersVisible(store.getState());
-  const droppedInGutter = getGutterAxis(pointer, areRulersVisible) !== null;
+  const droppedInGutter = getGutterAxis(pointer, areRulersVisible, refs.layout.leftPanelWidthRef.current) !== null;
 
   if (dragging.id === null) {
     if (!droppedInGutter) {

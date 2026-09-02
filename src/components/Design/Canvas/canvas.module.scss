@@ -243,5 +243,19 @@
         -webkit-image-set(url('../../../assets/icons/cursors/text-on-path.png') 8x) 4 4,
         auto;
     }
+
+    &--resize-x {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/resize-x.png') 8x) 16 16,
+        col-resize;
+    }
+
+    &--resize-y {
+      cursor:
+        /* stylelint-disable-next-line value-no-vendor-prefix, unit-allowed-list */
+        -webkit-image-set(url('../../../assets/icons/cursors/resize-y.png') 8x) 16 16,
+        row-resize;
+    }
   }
 }

@@ -19,7 +19,7 @@ export const handlePointerDown = (canvas: HTMLCanvasElement, event: PointerEvent
   const pointer = getPointerPosition(canvas, event);
   const state = store.getState();
   const viewport = selectViewport(state);
-  const gutterAxis = getGutterAxis(pointer, selectAreRulersVisible(state));
+  const gutterAxis = getGutterAxis(pointer, selectAreRulersVisible(state), refs.layout.leftPanelWidthRef.current);
 
   if (gutterAxis) {
     const worldPoint = screenToWorld(pointer, viewport);

@@ -26,75 +26,99 @@ describe('handlePointerMove', () => {
     }
   });
 
-  it("should live-update a dragging guide's world position and set the resize cursor", () => {
+  it("should live-update a dragging guide's world position and set the resize-x class name", () => {
     // mock
     const canvas = createCanvas();
     const refs = createCanvasRefs({ guides: { draggingGuideRef: { current: { axis: 'x', frameId: null, id: null, position: 5 } } } });
     const event = pointerEvent(120, 200);
     const stopImmediatePropagationSpy = vi.spyOn(event, 'stopImmediatePropagation');
+    const setClassName = vi.fn();
 
     // before
-    handlePointerMove(canvas, event, refs);
+    handlePointerMove(canvas, event, refs, setClassName);
 
     // result
     expect(refs.guides.draggingGuideRef.current).toEqual({ axis: 'x', frameId: null, id: null, position: 120 });
-    expect(canvas.style.cursor).toBe('col-resize');
+    expect(setClassName).toHaveBeenCalledWith('resize-x');
     expect(stopImmediatePropagationSpy).toHaveBeenCalled();
   });
 
-  it('should set the row-resize cursor while dragging a horizontal (y-axis) guide', () => {
+  it('should set the resize-y class name while dragging a horizontal (y-axis) guide', () => {
     // mock
     const canvas = createCanvas();
     const refs = createCanvasRefs({ guides: { draggingGuideRef: { current: { axis: 'y', frameId: null, id: null, position: 5 } } } });
+    const setClassName = vi.fn();
 
     // before
-    handlePointerMove(canvas, pointerEvent(0, 90), refs);
+    handlePointerMove(canvas, pointerEvent(0, 90), refs, setClassName);
 
     // result
-    expect(canvas.style.cursor).toBe('row-resize');
+    expect(setClassName).toHaveBeenCalledWith('resize-y');
   });
 
-  it('should show the resize cursor while merely hovering the top gutter, without arming anything', () => {
+  it('should set the resize-y class name while merely hovering the top gutter, without arming anything', () => {
     // mock
     const canvas = createCanvas();
     const refs = createCanvasRefs();
     const event = pointerEvent(100, 5);
     const stopImmediatePropagationSpy = vi.spyOn(event, 'stopImmediatePropagation');
+    const setClassName = vi.fn();
 
     // before
-    handlePointerMove(canvas, event, refs);
+    handlePointerMove(canvas, event, refs, setClassName);
 
     // result
-    expect(canvas.style.cursor).toBe('row-resize');
+    expect(setClassName).toHaveBeenCalledWith('resize-y');
     expect(refs.guides.draggingGuideRef.current).toBeNull();
     expect(stopImmediatePropagationSpy).toHaveBeenCalled();
   });
 
-  it('should show the resize cursor while hovering an existing guide outside the gutter', () => {
+  it("should shift the gutter zone past LeftPanel's live width", () => {
+    // mock
+    const canvas = createCanvas();
+    const refs = createCanvasRefs({ layout: { leftPanelWidthRef: { current: 300 } } });
+    const setClassName = vi.fn();
+
+    // before — screen x 5 is under LeftPanel, not the ruler
+    handlePointerMove(canvas, pointerEvent(5, 200), refs, setClassName);
+
+    // result
+    expect(setClassName).not.toHaveBeenCalled();
+
+    // action — screen x 310 is inside the shifted ruler strip
+    handlePointerMove(canvas, pointerEvent(310, 200), refs, setClassName);
+
+    // result
+    expect(setClassName).toHaveBeenCalledWith('resize-x');
+  });
+
+  it('should set the resize-x class name while hovering an existing guide outside the gutter', () => {
     // mock
     store.dispatch(addGuide({ axis: 'x', frameId: null, position: 50 }));
     const canvas = createCanvas();
     const refs = createCanvasRefs();
+    const setClassName = vi.fn();
 
     // before
-    handlePointerMove(canvas, pointerEvent(51, 200), refs);
+    handlePointerMove(canvas, pointerEvent(51, 200), refs, setClassName);
 
     // result
-    expect(canvas.style.cursor).toBe('col-resize');
+    expect(setClassName).toHaveBeenCalledWith('resize-x');
   });
 
-  it('should leave the cursor untouched and let the event through when nothing guide-related is under the pointer', () => {
+  it('should leave the class name untouched and let the event through when nothing guide-related is under the pointer', () => {
     // mock
     const canvas = createCanvas();
     const refs = createCanvasRefs();
     const event = pointerEvent(300, 300);
     const stopImmediatePropagationSpy = vi.spyOn(event, 'stopImmediatePropagation');
+    const setClassName = vi.fn();
 
     // before
-    handlePointerMove(canvas, event, refs);
+    handlePointerMove(canvas, event, refs, setClassName);
 
     // result
-    expect(canvas.style.cursor).toBe('');
+    expect(setClassName).not.toHaveBeenCalled();
     expect(stopImmediatePropagationSpy).not.toHaveBeenCalled();
   });
 });

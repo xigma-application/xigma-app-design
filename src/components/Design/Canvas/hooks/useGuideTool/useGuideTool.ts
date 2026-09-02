@@ -1,5 +1,8 @@
 import { useEffect } from 'react';
 
+// core
+import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
+
 // store
 import { selectActiveTool } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector } from 'store';
@@ -16,13 +19,14 @@ import { handlePointerUp } from './utils/handlePointerUp';
 export const useGuideTool = (refs: TCanvasRefs): void => {
   const activeTool = useAppSelector(selectActiveTool);
   const dispatch = useAppDispatch();
+  const { setClassName } = useClassNames();
 
   useEffect(() => {
     const canvas = refs.canvasRef.current;
 
     if (canvas && (activeTool === ToolName.default || activeTool === ToolName.scale)) {
       const onPointerDown = (event: PointerEvent): void => handlePointerDown(canvas, event, dispatch, refs);
-      const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event, refs);
+      const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event, refs, setClassName);
       const onPointerUp = (event: PointerEvent): void => handlePointerUp(canvas, event, dispatch, refs);
 
       canvas.addEventListener('pointerdown', onPointerDown);
@@ -34,7 +38,8 @@ export const useGuideTool = (refs: TCanvasRefs): void => {
         canvas.removeEventListener('pointermove', onPointerMove);
         canvas.removeEventListener('pointerup', onPointerUp);
         refs.guides.draggingGuideRef.current = null;
+        setClassName(null);
       };
     }
-  }, [activeTool, dispatch, refs]);
+  }, [activeTool, dispatch, refs, setClassName]);
 };
