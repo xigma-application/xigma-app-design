@@ -13,6 +13,7 @@ import { disarmEllipseArcDrag } from './disarmEllipseArcDrag';
 import { disarmEllipseArcRatioDrag } from './disarmEllipseArcRatioDrag';
 import { disarmEllipseArcRotateDrag } from './disarmEllipseArcRotateDrag';
 import { disarmEndpointDrag } from './disarmEndpointDrag';
+import { disarmEqualSpacingGuides } from './disarmEqualSpacingGuides';
 import { disarmMarqueeDrag } from './disarmMarqueeDrag';
 import { disarmPathOffsetDrag } from './disarmPathOffsetDrag';
 import { disarmPolygonCornerRadiusDrag } from './disarmPolygonCornerRadiusDrag';
@@ -76,5 +77,6 @@ export const handlePointerUp = (
   disarmVectorWidthPointDrag(canvas, event, dispatch, canvasRefs, setClassName);
   resolveVectorCutMarkConsumption(canvasRefs);
   disarmShapeContactGuides(canvasRefs);
+  disarmEqualSpacingGuides(canvasRefs);
   dispatch(endHistoryGesture());
 };

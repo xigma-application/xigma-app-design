@@ -1,0 +1,40 @@
+// types
+import { TDragState } from 'types/design/selectionTool/types';
+import { TEqualSpacingGuides } from '../../../../utils/getEqualSpacingGuides/types';
+import { TPoint } from 'types/canvas';
+import { TSceneNode } from 'types/design/types';
+
+// utils
+import { getEqualSpacingSnap } from '../../../../utils/getEqualSpacingGuides/getEqualSpacingSnap';
+import { getRotatedNodeBounds } from '../../../../utils/getRotatedNodeBounds';
+import { isContactGuideEligibleNode } from '../../../../utils/getShapeContactGuides';
+
+export type TEqualSpacingDragSnap = { delta: TPoint; guides: TEqualSpacingGuides | null };
+
+const ZERO_DELTA: TPoint = { x: 0, y: 0 };
+
+export const getEqualSpacingDragSnap = (
+  nodes: Record<string, TSceneNode>,
+  dragState: TDragState,
+  delta: TPoint,
+  toleranceWorldUnits: number,
+): TEqualSpacingDragSnap => {
+  const draggedIds = Object.keys(dragState.nodeOrigins);
+
+  if (draggedIds.length !== 1) {
+    return { delta: ZERO_DELTA, guides: null };
+  }
+
+  const [id] = draggedIds;
+  const node = nodes[id];
+  const origin = dragState.nodeOrigins[id];
+
+  if (!node || !isContactGuideEligibleNode(node) || !('x' in origin)) {
+    return { delta: ZERO_DELTA, guides: null };
+  }
+
+  const draggedBounds = getRotatedNodeBounds({ ...node, x: origin.x + delta.x, y: origin.y + delta.y } as TSceneNode);
+  const snap = getEqualSpacingSnap(draggedBounds, dragState.candidateShapes, toleranceWorldUnits);
+
+  return { delta: snap.delta, guides: snap.guides.lines.length > 0 ? snap.guides : null };
+};

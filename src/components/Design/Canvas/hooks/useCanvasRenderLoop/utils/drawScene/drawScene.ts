@@ -30,6 +30,7 @@ import { drawDraftSizeLabel } from './drawDraftSizeLabel';
 import { drawEditingPathTextHandle } from './drawEditingPathTextHandle';
 import { drawEditingText } from './drawEditingText';
 import { drawEllipseArcHandleLayer } from './drawEllipseArcHandleLayer/drawEllipseArcHandleLayer';
+import { drawEqualSpacingGuides } from './drawEqualSpacingGuides';
 import { drawFrame } from './drawFrame';
 import { drawFrameNameLabels } from './drawFrameNameLabels/drawFrameNameLabels';
 import { drawHoverOutline } from './drawHoverOutline';
@@ -158,5 +159,6 @@ export const drawScene = (
   drawMarquee(gl, program, buffer, marqueeRect, clientWidth, clientHeight, viewport);
   drawSliceDraft(gl, program, buffer, sliceRect, clientWidth, clientHeight, viewport);
   drawShapeContactGuides(ctx, refs);
+  drawEqualSpacingGuides(ctx, refs);
   drawDistanceGuides(ctx, refs);
 };

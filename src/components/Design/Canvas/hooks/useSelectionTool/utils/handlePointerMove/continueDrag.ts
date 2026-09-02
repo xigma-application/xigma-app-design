@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // others
-import { ALIGNMENT_SNAP_TOLERANCE_PX } from 'constant/canvas';
+import { ALIGNMENT_SNAP_TOLERANCE_PX, EQUAL_SPACING_SNAP_TOLERANCE_PX } from 'constant/canvas';
 
 // store
 import { updateNode } from 'store/design/slice';
@@ -14,6 +14,7 @@ import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { getDragAlignmentSnap } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getDragAlignmentSnap';
+import { getEqualSpacingDragSnap } from './getEqualSpacingDragSnap';
 import { getGeometryDeltaChanges } from '../../../../utils/getGeometryDeltaChanges';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { scheduleThrottledDispatch } from 'components/Design/Canvas/utils/scheduleThrottledDispatch';
@@ -35,17 +36,21 @@ export const continueDrag = (
     const rawDeltaX = point.x - dragState.pointerStart.x;
     const rawDeltaY = point.y - dragState.pointerStart.y;
     const snapshots = canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current;
-    const { delta, guide } = getDragAlignmentSnap(
-      selectNodes(state),
+    const nodes = selectNodes(state);
+    const { delta: alignmentDelta, guide } = getDragAlignmentSnap(
+      nodes,
       dragState.nodeOrigins,
       { x: rawDeltaX, y: rawDeltaY },
       ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom,
       dragState.candidateShapes,
     );
-    const { x: deltaX, y: deltaY } = delta;
+    const equalSpacingSnap = getEqualSpacingDragSnap(nodes, dragState, alignmentDelta, EQUAL_SPACING_SNAP_TOLERANCE_PX / viewport.zoom);
+    const deltaX = alignmentDelta.x + equalSpacingSnap.delta.x;
+    const deltaY = alignmentDelta.y + equalSpacingSnap.delta.y;
 
     dragState.hasMoved = true;
     canvasRefs.transform.alignmentGuideRef.current = guide;
+    canvasRefs.transform.equalSpacingGuidesRef.current = equalSpacingSnap.guides;
 
     if (!canvasRefs.transform.draggedNodeIdsRef.current) {
       canvasRefs.transform.draggedNodeIdsRef.current = new Set(Object.keys(dragState.nodeOrigins));
