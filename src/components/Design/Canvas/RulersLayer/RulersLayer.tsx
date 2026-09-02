@@ -17,10 +17,10 @@ import styles from './rulers-layer.module.scss';
 const RulersLayer: FC = () => {
   const areRulersVisible = useAppSelector(selectAreRulersVisible);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { layout } = useCanvasRefsContext();
+  const { guides, layout } = useCanvasRefsContext();
 
   useRulerCanvas(canvasRef, areRulersVisible);
-  useRulerRenderLoop(canvasRef, areRulersVisible, layout);
+  useRulerRenderLoop(canvasRef, areRulersVisible, layout, guides);
 
   if (areRulersVisible) {
     return <canvas className={styles.RulersLayer} ref={canvasRef} />;

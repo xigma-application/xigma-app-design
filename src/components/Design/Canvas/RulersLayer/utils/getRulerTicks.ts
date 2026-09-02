@@ -11,6 +11,11 @@ const formatRulerLabel = (value: number, step: number): string => {
   return String(Number(value.toFixed(decimals)));
 };
 
+export const getHighlightedRulerTick = (worldPosition: number, viewportOffset: number, zoom: number): TRulerTick => ({
+  label: formatRulerLabel(worldPosition, getRulerStep(zoom)),
+  screenPos: worldPosition * zoom + viewportOffset,
+});
+
 export const getRulerTicks = (lengthPx: number, viewportOffset: number, zoom: number, origin = 0): TRulerTick[] => {
   const step = getRulerStep(zoom);
   const worldStart = -viewportOffset / zoom;

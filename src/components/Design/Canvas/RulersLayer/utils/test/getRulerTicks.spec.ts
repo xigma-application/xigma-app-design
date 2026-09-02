@@ -1,5 +1,5 @@
 // utils
-import { getRulerTicks } from '../getRulerTicks';
+import { getHighlightedRulerTick, getRulerTicks } from '../getRulerTicks';
 
 describe('getRulerTicks', () => {
   it('should place a tick at every step across the strip, labelled with the world coordinate', () => {
@@ -44,5 +44,31 @@ describe('getRulerTicks', () => {
 
     // result
     expect(ticks).toEqual([]);
+  });
+});
+
+describe('getHighlightedRulerTick', () => {
+  it('should place the tick exactly at the given world position, regardless of the nice-step grid', () => {
+    // action
+    const tick = getHighlightedRulerTick(69830, 0, 1);
+
+    // result
+    expect(tick).toEqual({ label: '69830', screenPos: 69830 });
+  });
+
+  it('should account for pan and zoom', () => {
+    // action
+    const tick = getHighlightedRulerTick(50, 100, 2);
+
+    // result
+    expect(tick).toEqual({ label: '50', screenPos: 200 });
+  });
+
+  it('should keep meaningful decimals for a sub-unit step, matching the regular ticks', () => {
+    // action — step 0.5 at zoom 200
+    const tick = getHighlightedRulerTick(0.25, 0, 200);
+
+    // result
+    expect(tick).toEqual({ label: '0.25', screenPos: 50 });
   });
 });

@@ -2,6 +2,7 @@ import { renderHook } from '@testing-library/react';
 import { RefObject } from 'react';
 
 // hooks
+import { createGuideRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useGuideRefs/createGuideRefs';
 import { useRulerRenderLoop } from '../useRulerRenderLoop';
 
 // others
@@ -57,7 +58,7 @@ describe('useRulerRenderLoop', () => {
     const canvasRef: RefObject<HTMLCanvasElement | null> = { current: document.createElement('canvas') };
 
     // before — mount only schedules the first frame
-    renderHook(() => useRulerRenderLoop(canvasRef, true, createInsetRefs()));
+    renderHook(() => useRulerRenderLoop(canvasRef, true, createInsetRefs(), createGuideRefs()));
     expect(rafCallbacks).toHaveLength(1);
 
     // action — run the first scheduled frame
@@ -80,7 +81,7 @@ describe('useRulerRenderLoop', () => {
     const insetRefs = createInsetRefs(300, 0);
 
     // before
-    renderHook(() => useRulerRenderLoop(canvasRef, true, insetRefs));
+    renderHook(() => useRulerRenderLoop(canvasRef, true, insetRefs, createGuideRefs()));
     rafCallbacks[rafCallbacks.length - 1](0);
 
     // result — left strip painted starting at the reported leftPanelWidth, not 0
@@ -99,7 +100,7 @@ describe('useRulerRenderLoop', () => {
     const canvasRef: RefObject<HTMLCanvasElement | null> = { current: document.createElement('canvas') };
 
     // before
-    const { unmount } = renderHook(() => useRulerRenderLoop(canvasRef, true, createInsetRefs()));
+    const { unmount } = renderHook(() => useRulerRenderLoop(canvasRef, true, createInsetRefs(), createGuideRefs()));
 
     // action
     unmount();
@@ -113,7 +114,7 @@ describe('useRulerRenderLoop', () => {
     const canvasRef: RefObject<HTMLCanvasElement | null> = { current: document.createElement('canvas') };
 
     // before
-    renderHook(() => useRulerRenderLoop(canvasRef, false, createInsetRefs()));
+    renderHook(() => useRulerRenderLoop(canvasRef, false, createInsetRefs(), createGuideRefs()));
 
     // result
     expect(fakeContext.clearRect).not.toHaveBeenCalled();
@@ -124,7 +125,7 @@ describe('useRulerRenderLoop', () => {
     const canvasRef: RefObject<HTMLCanvasElement | null> = { current: null };
 
     // result
-    expect(() => renderHook(() => useRulerRenderLoop(canvasRef, true, createInsetRefs()))).not.toThrow();
+    expect(() => renderHook(() => useRulerRenderLoop(canvasRef, true, createInsetRefs(), createGuideRefs()))).not.toThrow();
   });
 
   it('should fall back to a device pixel ratio of 1 when the browser reports none', () => {
@@ -133,7 +134,7 @@ describe('useRulerRenderLoop', () => {
     const canvasRef: RefObject<HTMLCanvasElement | null> = { current: document.createElement('canvas') };
 
     // before
-    renderHook(() => useRulerRenderLoop(canvasRef, true, createInsetRefs()));
+    renderHook(() => useRulerRenderLoop(canvasRef, true, createInsetRefs(), createGuideRefs()));
     rafCallbacks[rafCallbacks.length - 1](0);
 
     // result
