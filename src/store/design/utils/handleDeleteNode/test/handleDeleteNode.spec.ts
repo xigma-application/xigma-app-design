@@ -105,6 +105,18 @@ describe('handleDeleteNode', () => {
     expect(getActivePage(state).rootOrder).toEqual([]);
   });
 
+  it('should drop a frame’s guides along with the frame', () => {
+    // mock
+    const framed: TFrameNode = { ...node, guides: [{ axis: 'x', id: 'g1', position: 5 }] };
+    const state = buildState({ [framed.id]: framed });
+
+    // before
+    handleDeleteNode(state, framed.id);
+
+    // result
+    expect(getActivePage(state).nodes[framed.id]).toBeUndefined();
+  });
+
   it('should also remove the deleted id from selectedIds when it was selected', () => {
     // mock
     const state = buildState({ [node.id]: { ...node } }, [node.id]);

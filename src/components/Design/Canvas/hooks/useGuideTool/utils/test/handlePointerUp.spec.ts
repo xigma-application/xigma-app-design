@@ -1,10 +1,12 @@
 // store
-import { addGuide, setViewport, toggleRulers } from 'store/design/slice';
+import { addGuide, addNode, setViewport, toggleRulers } from 'store/design/slice';
 import { selectActivePage, selectAreRulersVisible } from 'store/design/selectors';
 import { store } from 'store';
 import { undo } from 'store/history/actions';
 
 // types
+import { NodeType } from 'types/design/enums';
+import { TFrameNode } from 'types/design/types';
 import { TGuideDragState } from 'types/design/canvas/types';
 
 // utils
@@ -124,6 +126,66 @@ describe('handlePointerUp', () => {
     // result
     expect(selectActivePage(store.getState()).guides).toEqual(guidesBefore);
     expect(draggingGuideRef.current).toBeNull();
+  });
+
+  it('should attach a new guide to the frame under the drop point, stored frame-relative', () => {
+    // mock
+    const frameId = store.dispatch(
+      addNode({ fill: '#fff', height: 400, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 400, x: 100, y: 100 }),
+    ).payload.id;
+    const pageGuidesBefore = selectActivePage(store.getState()).guides;
+    const canvas = createCanvas();
+    const draggingGuideRef = { current: { axis: 'x', frameId: null, hasMoved: true, id: null, position: 200 } as TGuideDragState | null };
+    const refs = createCanvasRefs({ guides: { draggingGuideRef } });
+
+    // before — drop at world (200, 200), inside the frame whose origin is (100, 100)
+    handlePointerUp(canvas, pointerEvent(200, 200), store.dispatch, refs);
+
+    // result
+    const frame = selectActivePage(store.getState()).nodes[frameId] as TFrameNode;
+
+    expect(frame.guides).toContainEqual({ axis: 'x', id: expect.any(String), position: 100 });
+    expect(selectActivePage(store.getState()).guides).toEqual(pageGuidesBefore);
+  });
+
+  it('should store a y-axis frame guide relative to the frame’s top edge', () => {
+    // mock
+    const frameId = store.dispatch(
+      addNode({ fill: '#fff', height: 400, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 400, x: 100, y: 100 }),
+    ).payload.id;
+    const canvas = createCanvas();
+    const draggingGuideRef = { current: { axis: 'y', frameId: null, hasMoved: true, id: null, position: 250 } as TGuideDragState | null };
+    const refs = createCanvasRefs({ guides: { draggingGuideRef } });
+
+    // before — drop at world (200, 250), inside the frame whose origin is (100, 100)
+    handlePointerUp(canvas, pointerEvent(200, 250), store.dispatch, refs);
+
+    // result
+    expect((selectActivePage(store.getState()).nodes[frameId] as TFrameNode).guides).toContainEqual({
+      axis: 'y',
+      id: expect.any(String),
+      position: 150,
+    });
+  });
+
+  it('should commit the moved position of a frame guide frame-relative', () => {
+    // mock
+    const frameId = store.dispatch(
+      addNode({ fill: '#fff', height: 400, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 400, x: 100, y: 100 }),
+    ).payload.id;
+    store.dispatch(addGuide({ axis: 'x', frameId, position: 50 }));
+    const guideId = (selectActivePage(store.getState()).nodes[frameId] as TFrameNode).guides![0].id;
+    const canvas = createCanvas();
+    const draggingGuideRef = {
+      current: { axis: 'x', frameId, hasMoved: true, id: guideId, position: 300 } as TGuideDragState | null,
+    };
+    const refs = createCanvasRefs({ guides: { draggingGuideRef } });
+
+    // before — released at world x 300; frame origin x is 100
+    handlePointerUp(canvas, pointerEvent(300, 200), store.dispatch, refs);
+
+    // result
+    expect((selectActivePage(store.getState()).nodes[frameId] as TFrameNode).guides![0].position).toBe(200);
   });
 
   it('should bracket the commit in a single undo step', () => {

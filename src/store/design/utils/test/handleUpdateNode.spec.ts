@@ -128,6 +128,18 @@ describe('handleUpdateNode', () => {
     expect((getActivePage(state).nodes[node.id] as TFrameNode).width).toBe(300);
   });
 
+  it('should keep a frame’s guides when a drag patches only x/y', () => {
+    // mock
+    const framed: TFrameNode = { ...node, guides: [{ axis: 'x', id: 'g1', position: 10 }] };
+    const state = buildState({ [framed.id]: framed });
+
+    // before
+    handleUpdateNode(state, { changes: { x: 40, y: 60 }, id: framed.id });
+
+    // result
+    expect((getActivePage(state).nodes[framed.id] as TFrameNode).guides).toEqual([{ axis: 'x', id: 'g1', position: 10 }]);
+  });
+
   it('should do nothing when the node does not exist', () => {
     // mock
     const state = buildState({});
