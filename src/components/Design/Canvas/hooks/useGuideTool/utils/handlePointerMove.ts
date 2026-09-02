@@ -37,6 +37,7 @@ export const handlePointerMove = (
   }
 
   if (gutterAxis) {
+    refs.guides.hoveredGuideRef.current = null;
     setClassName(CLASS_NAME_BY_AXIS[gutterAxis]);
     event.stopImmediatePropagation();
     return;
@@ -45,7 +46,10 @@ export const handlePointerMove = (
   const hitGuide = getGuideAtPoint(pointer, selectAllGuideLines(state), viewport);
 
   if (hitGuide) {
+    refs.guides.hoveredGuideRef.current = { frameId: hitGuide.frameId, id: hitGuide.id };
     setClassName(CLASS_NAME_BY_AXIS[hitGuide.axis]);
     event.stopImmediatePropagation();
+  } else {
+    refs.guides.hoveredGuideRef.current = null;
   }
 };

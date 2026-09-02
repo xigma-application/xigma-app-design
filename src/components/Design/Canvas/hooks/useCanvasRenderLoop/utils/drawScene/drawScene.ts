@@ -34,7 +34,7 @@ import { drawEllipseArcHandleLayer } from './drawEllipseArcHandleLayer/drawEllip
 import { drawEqualSpacingGuides } from './drawEqualSpacingGuides';
 import { drawFrame } from './drawFrame';
 import { drawFrameNameLabels } from './drawFrameNameLabels/drawFrameNameLabels';
-import { drawGuides } from './drawGuides';
+import { drawGuides } from './drawGuides/drawGuides';
 import { drawHoverOutline } from './drawHoverOutline';
 import { drawMarquee } from 'utils/canvas/drawMarquee';
 import { drawMatchedPairGuides } from './drawMatchedPairGuides';

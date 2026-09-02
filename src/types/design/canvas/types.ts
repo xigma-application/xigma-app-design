@@ -328,8 +328,15 @@ export type TGuideDragState = {
   position: number;
 };
 
+export type TGuideIdentity = {
+  frameId: string | null;
+  id: string;
+};
+
 export type TGuideRefs = {
   draggingGuideRef: RefObject<TGuideDragState | null>;
+  hoveredGuideRef: RefObject<TGuideIdentity | null>;
+  selectedGuideRef: RefObject<TGuideIdentity | null>;
 };
 
 export type TSectionNameRefs = {

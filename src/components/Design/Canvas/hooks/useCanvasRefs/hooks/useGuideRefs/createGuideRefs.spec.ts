@@ -7,7 +7,7 @@ describe('createGuideRefs behaviors', () => {
     const refs = createGuideRefs();
 
     // result
-    expect(refs).toEqual({ draggingGuideRef: { current: null } });
+    expect(refs).toEqual({ draggingGuideRef: { current: null }, hoveredGuideRef: { current: null }, selectedGuideRef: { current: null } });
   });
 
   it('should apply overrides on top of the defaults', () => {

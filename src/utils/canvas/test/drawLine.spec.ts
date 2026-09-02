@@ -75,6 +75,32 @@ describe('drawLine', () => {
     expect(xValues.every((x) => x === 0 || x === 10)).toBe(true);
   });
 
+  it('should default to fully opaque when no alpha is given', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawLine(gl, program, buffer, { x1: 0, x2: 10, y1: 0, y2: 0 }, '#0d99ff', 2, 100, 100, IDENTITY_VIEWPORT);
+
+    // result
+    expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), [expect.any(Number), expect.any(Number), expect.any(Number), 1]);
+  });
+
+  it('should pass a given alpha through to the color uniform', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawLine(gl, program, buffer, { x1: 0, x2: 10, y1: 0, y2: 0 }, '#0d99ff', 2, 100, 100, IDENTITY_VIEWPORT, 0.5);
+
+    // result
+    expect(gl.uniform4fv).toHaveBeenCalledWith(expect.anything(), [expect.any(Number), expect.any(Number), expect.any(Number), 0.5]);
+  });
+
   it('should not draw a degenerate zero-length segment', () => {
     // mock
     const gl = createGlMock();

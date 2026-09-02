@@ -9,7 +9,11 @@ describe('useGuideRefs behaviors', () => {
     const { result } = renderHook(() => useGuideRefs());
 
     // result
-    expect(result.current).toEqual({ draggingGuideRef: { current: null } });
+    expect(result.current).toEqual({
+      draggingGuideRef: { current: null },
+      hoveredGuideRef: { current: null },
+      selectedGuideRef: { current: null },
+    });
   });
 
   it('should keep returning the same refs object across re-renders', () => {

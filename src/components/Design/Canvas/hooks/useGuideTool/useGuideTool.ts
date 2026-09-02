@@ -14,6 +14,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TSelectedGuide, TUseGuideTool } from './types';
 
 // utils
+import { handleContextMenu } from './utils/handleContextMenu';
 import { handlePointerDown } from './utils/handlePointerDown';
 import { handlePointerMove } from './utils/handlePointerMove';
 import { handlePointerUp } from './utils/handlePointerUp';
@@ -25,6 +26,10 @@ export const useGuideTool = (refs: TCanvasRefs): TUseGuideTool => {
   const [selectedGuide, setSelectedGuide] = useState<TSelectedGuide | null>(null);
 
   useEffect(() => {
+    refs.guides.selectedGuideRef.current = selectedGuide ? { frameId: selectedGuide.frameId, id: selectedGuide.id } : null;
+  }, [selectedGuide, refs]);
+
+  useEffect(() => {
     const canvas = refs.canvasRef.current;
 
     if (canvas && (activeTool === ToolName.default || activeTool === ToolName.scale)) {
@@ -33,17 +38,21 @@ export const useGuideTool = (refs: TCanvasRefs): TUseGuideTool => {
         handlePointerDown(canvas, event, dispatch, refs);
       };
       const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event, refs, setClassName);
-      const onPointerUp = (event: PointerEvent): void => handlePointerUp(canvas, event, dispatch, refs, setSelectedGuide);
+      const onPointerUp = (event: PointerEvent): void => handlePointerUp(canvas, event, dispatch, refs);
+      const onContextMenu = (event: MouseEvent): void => handleContextMenu(canvas, event, setSelectedGuide);
 
       canvas.addEventListener('pointerdown', onPointerDown);
       canvas.addEventListener('pointermove', onPointerMove);
       canvas.addEventListener('pointerup', onPointerUp);
+      canvas.addEventListener('contextmenu', onContextMenu);
 
       return (): void => {
         canvas.removeEventListener('pointerdown', onPointerDown);
         canvas.removeEventListener('pointermove', onPointerMove);
         canvas.removeEventListener('pointerup', onPointerUp);
+        canvas.removeEventListener('contextmenu', onContextMenu);
         refs.guides.draggingGuideRef.current = null;
+        refs.guides.hoveredGuideRef.current = null;
         setClassName(null);
         setSelectedGuide(null);
       };

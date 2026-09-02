@@ -35,14 +35,12 @@ describe('handlePointerUp', () => {
     // mock
     const canvas = createCanvas();
     const refs = createCanvasRefs();
-    const setSelectedGuide = vi.fn();
 
     // before
-    handlePointerUp(canvas, pointerEvent(200, 200), store.dispatch, refs, setSelectedGuide);
+    handlePointerUp(canvas, pointerEvent(200, 200), store.dispatch, refs);
 
     // result
     expect(canvas.releasePointerCapture).not.toHaveBeenCalled();
-    expect(setSelectedGuide).not.toHaveBeenCalled();
   });
 
   it('should commit a new page guide dropped outside the gutter', () => {
@@ -50,10 +48,9 @@ describe('handlePointerUp', () => {
     const canvas = createCanvas();
     const draggingGuideRef = { current: { axis: 'x', frameId: null, hasMoved: true, id: null, position: 50 } as TGuideDragState | null };
     const refs = createCanvasRefs({ guides: { draggingGuideRef } });
-    const setSelectedGuide = vi.fn();
 
     // before
-    handlePointerUp(canvas, pointerEvent(200, 200), store.dispatch, refs, setSelectedGuide);
+    handlePointerUp(canvas, pointerEvent(200, 200), store.dispatch, refs);
 
     // result
     expect(selectActivePage(store.getState()).guides).toContainEqual({ axis: 'x', id: expect.any(String), position: 50 });
@@ -67,10 +64,9 @@ describe('handlePointerUp', () => {
     const guidesBefore = selectActivePage(store.getState()).guides;
     const draggingGuideRef = { current: { axis: 'x', frameId: null, hasMoved: true, id: null, position: 50 } as TGuideDragState | null };
     const refs = createCanvasRefs({ guides: { draggingGuideRef } });
-    const setSelectedGuide = vi.fn();
 
     // before
-    handlePointerUp(canvas, pointerEvent(5, 200), store.dispatch, refs, setSelectedGuide);
+    handlePointerUp(canvas, pointerEvent(5, 200), store.dispatch, refs);
 
     // result
     expect(selectActivePage(store.getState()).guides).toEqual(guidesBefore);
@@ -86,14 +82,12 @@ describe('handlePointerUp', () => {
       current: { axis: 'x', frameId: null, hasMoved: true, id: guide.id, position: 250 } as TGuideDragState | null,
     };
     const refs = createCanvasRefs({ guides: { draggingGuideRef } });
-    const setSelectedGuide = vi.fn();
 
     // before
-    handlePointerUp(canvas, pointerEvent(200, 200), store.dispatch, refs, setSelectedGuide);
+    handlePointerUp(canvas, pointerEvent(200, 200), store.dispatch, refs);
 
     // result
     expect(selectActivePage(store.getState()).guides.find((candidate) => candidate.id === guide.id)?.position).toBe(250);
-    expect(setSelectedGuide).not.toHaveBeenCalled();
   });
 
   it('should delete a moved guide dropped onto a gutter', () => {
@@ -105,33 +99,30 @@ describe('handlePointerUp', () => {
       current: { axis: 'x', frameId: null, hasMoved: true, id: guide.id, position: 250 } as TGuideDragState | null,
     };
     const refs = createCanvasRefs({ guides: { draggingGuideRef } });
-    const setSelectedGuide = vi.fn();
 
     // before
-    handlePointerUp(canvas, pointerEvent(5, 200), store.dispatch, refs, setSelectedGuide);
+    handlePointerUp(canvas, pointerEvent(5, 200), store.dispatch, refs);
 
     // result
     expect(selectActivePage(store.getState()).guides.find((candidate) => candidate.id === guide.id)).toBeUndefined();
   });
 
-  it('should select an existing guide on a plain click (no movement) instead of committing a no-op move', () => {
+  it('should do nothing to the store on a plain click (no movement) on an existing guide', () => {
     // mock
     store.dispatch(addGuide({ axis: 'x', frameId: null, position: 80 }));
-    const [guide] = selectActivePage(store.getState()).guides.filter((candidate) => candidate.position === 80);
     const guidesBefore = selectActivePage(store.getState()).guides;
+    const [guide] = guidesBefore.filter((candidate) => candidate.position === 80);
     const canvas = createCanvas();
     const draggingGuideRef = {
       current: { axis: 'x', frameId: null, hasMoved: false, id: guide.id, position: 80 } as TGuideDragState | null,
     };
     const refs = createCanvasRefs({ guides: { draggingGuideRef } });
-    const setSelectedGuide = vi.fn();
 
     // before
-    handlePointerUp(canvas, pointerEvent(80, 200), store.dispatch, refs, setSelectedGuide);
+    handlePointerUp(canvas, pointerEvent(80, 200), store.dispatch, refs);
 
-    // result — nothing was mutated, but the guide is now selected
+    // result
     expect(selectActivePage(store.getState()).guides).toEqual(guidesBefore);
-    expect(setSelectedGuide).toHaveBeenCalledWith({ frameId: null, id: guide.id, worldPoint: { x: 80, y: 200 } });
     expect(draggingGuideRef.current).toBeNull();
   });
 
@@ -141,10 +132,9 @@ describe('handlePointerUp', () => {
     const canvas = createCanvas();
     const draggingGuideRef = { current: { axis: 'x', frameId: null, hasMoved: true, id: null, position: 70 } as TGuideDragState | null };
     const refs = createCanvasRefs({ guides: { draggingGuideRef } });
-    const setSelectedGuide = vi.fn();
 
     // before
-    handlePointerUp(canvas, pointerEvent(200, 200), store.dispatch, refs, setSelectedGuide);
+    handlePointerUp(canvas, pointerEvent(200, 200), store.dispatch, refs);
     store.dispatch(undo());
 
     // result

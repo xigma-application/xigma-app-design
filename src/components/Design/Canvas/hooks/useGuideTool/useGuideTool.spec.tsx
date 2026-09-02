@@ -171,7 +171,7 @@ describe('useGuideTool behaviors', () => {
     expect(capturedClassName).toBeNull();
   });
 
-  it('should select an existing guide on a plain click, then remove it via removeSelectedGuide', () => {
+  it('should select an existing guide via right-click, then remove it via removeSelectedGuide', () => {
     // mock
     store.dispatch(addGuide({ axis: 'x', frameId: null, position: 40 }));
     const [guide] = selectActivePage(store.getState()).guides.filter((candidate) => candidate.position === 40);
@@ -180,10 +180,9 @@ describe('useGuideTool behaviors', () => {
     // before
     const { result } = renderGuideTool(canvasRef);
 
-    // action — a plain click, no movement in between
+    // action
     act(() => {
-      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 40, 200));
-      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 40, 200));
+      canvasRef.current?.dispatchEvent(new MouseEvent('contextmenu', { clientX: 40, clientY: 200 }));
     });
 
     // result
@@ -194,6 +193,24 @@ describe('useGuideTool behaviors', () => {
 
     // result
     expect(selectActivePage(store.getState()).guides.find((candidate) => candidate.id === guide.id)).toBeUndefined();
+    expect(result.current.selectedGuide).toBeNull();
+  });
+
+  it('should not select a guide on a plain left-click (no drag) — only right-click does', () => {
+    // mock
+    store.dispatch(addGuide({ axis: 'x', frameId: null, position: 40 }));
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { result } = renderGuideTool(canvasRef);
+
+    // action — a plain left click, no movement in between
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 40, 200));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 40, 200));
+    });
+
+    // result
     expect(result.current.selectedGuide).toBeNull();
   });
 
@@ -220,8 +237,7 @@ describe('useGuideTool behaviors', () => {
     const { result } = renderGuideTool(canvasRef);
 
     act(() => {
-      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 40, 200));
-      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 40, 200));
+      canvasRef.current?.dispatchEvent(new MouseEvent('contextmenu', { clientX: 40, clientY: 200 }));
     });
 
     expect(result.current.selectedGuide).not.toBeNull();

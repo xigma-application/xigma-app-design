@@ -16,7 +16,8 @@ const createCanvas = (): HTMLCanvasElement => {
   return canvas;
 };
 
-const pointerEvent = (x: number, y: number): PointerEvent => new PointerEvent('pointerdown', { clientX: x, clientY: y, pointerId: 1 });
+const pointerEvent = (x: number, y: number, button = 0): PointerEvent =>
+  new PointerEvent('pointerdown', { button, clientX: x, clientY: y, pointerId: 1 });
 
 describe('handlePointerDown', () => {
   beforeEach(() => {
@@ -113,6 +114,19 @@ describe('handlePointerDown', () => {
     expect(refs.guides.draggingGuideRef.current).toMatchObject({ axis: 'x', frameId: null, position: 50 });
     expect(refs.guides.draggingGuideRef.current?.id).toEqual(expect.any(String));
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(1);
+  });
+
+  it('should ignore a non-primary button press, even inside the gutter', () => {
+    // mock
+    const canvas = createCanvas();
+    const refs = createCanvasRefs();
+
+    // before
+    handlePointerDown(canvas, pointerEvent(5, 200, 2), store.dispatch, refs);
+
+    // result
+    expect(refs.guides.draggingGuideRef.current).toBeNull();
+    expect(canvas.setPointerCapture).not.toHaveBeenCalled();
   });
 
   it('should not arm anything when the pointer is neither in a gutter nor on a guide', () => {
