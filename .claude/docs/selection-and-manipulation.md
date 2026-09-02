@@ -1645,9 +1645,9 @@ it exactly **once**, caching the result on the gesture's own state:
 ## 28. Chain-gap drag snap — matching a single existing neighbour's own established gap, not a full Smart Selection
 
 Roadmap Stage 13's "smart guides ... with the distance shown" gap, take two. **v1 (an earlier attempt
-this session) got the underlying feature wrong**: it modelled "equal spacing" as *centring the active
-shape between two flanking neighbours*, which structurally cannot fire for the actual, most common
-case — dragging the *last* shape in a row, which only ever has a neighbour on one side. It also copied
+this session) got the underlying feature wrong**: it modelled "equal spacing" as *only* centring the
+active shape between two flanking neighbours, which structurally cannot fire for the most common case
+— dragging the *last* shape in a row, which only ever has a neighbour on one side. It also copied
 Figma's real Smart Selection (pink centre-dots + a draggable handle between selected layers,
 triggered by *selection*, not proximity) closely enough in an intermediate doodle to cause real
 confusion before being corrected back to what was actually asked for. Both false starts were reverted
@@ -1655,10 +1655,25 @@ in full before this version was built. **This version only handles a plain move-
 existing shape** — no draw-tool integration, no resize integration, no passive/Alt-hover display;
 those are unbuilt, deliberately out of scope unless asked for.
 
-- **The actual rule**: shape1 and shape2 already sit some distance apart (the "established gap").
-  Dragging shape3 so its gap to shape2 is *close* to that established gap snaps it to match exactly,
-  and draws **two** distance-guide lines (the established gap and the newly-matched one) so both read
-  the same number. Sizes are irrelevant — only the gap distance matters. No modifier key.
+Two genuinely different cases, both real (found the second — flanked-centring — was still needed via
+direct user feedback right after v2 shipped drag-only-chain: "1 2 3 ułożone, zabieram 2 i wracam do
+środka" doesn't fire on the one-sided model at all, since neither flanking neighbour in a plain 3-shape
+row has one of *its own* further out):
+
+- **Chain** (`getLeftChainSnap.ts`/`getRightChainSnap.ts` — one-sided): shape1 and shape2 already sit
+  some distance apart (the "established gap"). Dragging shape3 so its gap to shape2 is *close* to that
+  established gap snaps it to match exactly. Needs only a neighbour-of-a-neighbour, not a neighbour on
+  both sides — this is what a shape at the *end* of a row needs.
+- **Flanked** (`getFlankedChainSnap.ts` — two-sided): the active shape has a neighbour on *both* sides
+  — e.g. shape2 of a 1-2-3 row, dragged away and back — regardless of whether either of those two has
+  one of its own further out. Centres it so both gaps are equal: `idealGap = (rightNeighbour.left -
+  leftNeighbour.right - activeWidth) / 2`, snap if the current position is close to that ideal.
+  Checked **first** (the orchestrator tries flanked, then left, then right/top/bottom) since it only
+  applies when both an immediate left/top *and* right/bottom neighbour exist at once — a strict subset
+  of when the chain checks would even be attempted.
+- Both draw **two** distance-guide lines (each read the same matched number) reusing the same
+  `getHorizontalGuide`/`getVerticalGuide` primitives. Sizes are irrelevant — only the gap distance
+  matters. No modifier key.
 - **File layout** — `Canvas/utils/getEqualSpacingGuides/`, one small file per concern, split further
   into a subfolder per axis (each direction gets its own file rather than one function with two large
   symmetric `if` blocks — this codebase's usual instinct once a function has two near-duplicate halves):

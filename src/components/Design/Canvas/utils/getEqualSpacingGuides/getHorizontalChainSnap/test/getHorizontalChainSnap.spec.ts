@@ -38,4 +38,33 @@ describe('getHorizontalChainSnap', () => {
     // result
     expect(snap.deltaX).toBe(2);
   });
+
+  it('should return the flanked snap when a neighbour sits on both sides and the centred position matches', () => {
+    // mock — left (0..80) and right (220..270) leave a 140px span for a 100-wide active shape, so the
+    // ideal centred gap is 20px each side; active sits at x:102, 2px short of the centred x:100
+    const left = { bounds: { height: 100, width: 80, x: 0, y: 0 } };
+    const right = { bounds: { height: 100, width: 50, x: 220, y: 0 } };
+    const active = getEdges({ height: 100, width: 100, x: 102, y: 0 });
+
+    // action
+    const snap = getHorizontalChainSnap(active, [left, right], 4);
+
+    // result
+    expect(snap.deltaX).toBe(-2);
+  });
+
+  it('should fall back to a one-sided chain snap when a neighbour sits on both sides but flanked-centring does not match', () => {
+    // mock — shape0 (0..30) and shape1 (40..60) sit with a 10px gap; active (68..78) is 2px short of
+    // matching that same 10px gap to shape1, but far from centred against the distant shape3 (500..520)
+    const shape0 = { bounds: { height: 20, width: 30, x: 0, y: 0 } };
+    const shape1 = { bounds: { height: 20, width: 20, x: 40, y: 0 } };
+    const shape3 = { bounds: { height: 20, width: 20, x: 500, y: 0 } };
+    const active = getEdges({ height: 10, width: 10, x: 68, y: 0 });
+
+    // action
+    const snap = getHorizontalChainSnap(active, [shape0, shape1, shape3], 8);
+
+    // result
+    expect(snap.deltaX).toBe(2);
+  });
 });
