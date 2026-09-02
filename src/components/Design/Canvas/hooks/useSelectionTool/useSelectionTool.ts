@@ -55,6 +55,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
     canvasRefs.vectorErase.eraseBrushCenterRef.current = null;
     canvasRefs.transform.contactGuidesRef.current = null;
     canvasRefs.transform.alignmentGuideRef.current = null;
+    canvasRefs.transform.distanceGuidesRef.current = null;
   };
 
   const onKeyDown = (event: KeyboardEvent): void => {
@@ -154,6 +155,7 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         selectionRefs.vectorCutDragRef.current = null;
         refs.transform.contactGuidesRef.current = null;
         refs.transform.alignmentGuideRef.current = null;
+        refs.transform.distanceGuidesRef.current = null;
         lastPointerClientPositionRef.current = null;
       };
     }

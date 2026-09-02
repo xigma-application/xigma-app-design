@@ -51,6 +51,11 @@ export const resolveVectorSegmentHoverInNode = (
 
   hoveredVectorSegmentIdRef.current = hit?.segmentId ?? null;
 
+  if (event.altKey && event.buttons === 0) {
+    hoveredVectorEdgeInsertPointRef.current = null;
+    return;
+  }
+
   if (event.buttons === 0 && (event.ctrlKey || event.metaKey || selectActiveTool(state) === ToolName.bend)) {
     hoveredVectorEdgeInsertPointRef.current = null;
     const vertexHit = getVectorCornerHandleAtPoint(point, bakedNode, VECTOR_VERTEX_HIT_RADIUS_PX / viewport.zoom);

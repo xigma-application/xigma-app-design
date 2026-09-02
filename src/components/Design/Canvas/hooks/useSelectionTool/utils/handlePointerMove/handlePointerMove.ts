@@ -36,6 +36,7 @@ import { continueVectorVertexDrag } from './continueVectorVertexDrag/continueVec
 import { continueVectorWidthPointDrag } from './continueVectorWidthPointDrag';
 import { resolveShapeContactGuides } from './resolveShapeContactGuides';
 import { resolveVectorCornerHandleDrag } from './resolveVectorCornerHandleDrag';
+import { resolveVectorDistanceGuides } from './resolveVectorDistanceGuides/resolveVectorDistanceGuides';
 import { resolveVectorIdleHover } from './resolveVectorIdleHover';
 import { resolveVectorShapeBuilderHover } from './resolveVectorShapeBuilderHover';
 import { resolveVectorWidthLabelHover } from './resolveVectorWidthLabelHover';
@@ -83,4 +84,5 @@ export const handlePointerMove = (
   resolveVectorWidthPointHover(canvas, event, canvasRefs, setClassName);
   resolveVectorWidthLabelHover(canvas, event, canvasRefs);
   resolveShapeContactGuides(event, canvasRefs, selectionRefs);
+  resolveVectorDistanceGuides(event, canvasRefs, setClassName);
 };

@@ -88,6 +88,34 @@ describe('resolveVectorSegmentHoverInNode', () => {
     expect(setClassName).toHaveBeenCalledWith(null);
   });
 
+  it('should still record the hovered segment but leave the cursor alone while Alt is held (distance measurement)', () => {
+    // mock — Alt+hover drives resolveVectorDistanceGuides, which owns the cursor
+    const nodeId = addVectorNode();
+
+    store.dispatch(setVectorEditingNodeIds([nodeId]));
+
+    const node = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
+    const canvas = createCanvas();
+    const hoveredVectorSegmentIdRef = createHoveredVectorSegmentIdRef();
+    const hoveredVectorEdgeInsertPointRef = createHoveredVectorEdgeInsertPointRef({ x: 50, y: 0 });
+    const setClassName = vi.fn();
+
+    resolveVectorSegmentHoverInNode(
+      canvas,
+      new PointerEvent('pointermove', { altKey: true, buttons: 0, clientX: 50, clientY: 0 }),
+      store.getState(),
+      node,
+      hoveredVectorSegmentIdRef,
+      hoveredVectorEdgeInsertPointRef,
+      setClassName,
+    );
+
+    // segment id still tracked, edge insert-point cleared, cursor untouched
+    expect(hoveredVectorSegmentIdRef.current).toBe('s1');
+    expect(hoveredVectorEdgeInsertPointRef.current).toBeNull();
+    expect(setClassName).not.toHaveBeenCalled();
+  });
+
   it('should switch the cursor to pen-extend once the pointer is precisely over the fixed midpoint', () => {
     // mock
     const nodeId = addVectorNode();

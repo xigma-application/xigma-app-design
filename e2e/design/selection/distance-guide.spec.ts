@@ -194,3 +194,67 @@ test('no distance guide appears while Alt-hovering the shape that is already sel
   // separate target to measure against), so the frame is identical to the plain hover
   expect(altHoveredSelf.equals(hoveredSelf)).toBe(true);
 });
+
+test('a vector point-to-point measurement appears while Alt-hovering another vertex with one vertex selected, in Vector Edit Mode', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-distance-guide-vector-point');
+  await expect(designPage.canvas).toBeVisible();
+
+  // v1 (1300,300) -> v2 (1450,300) -> v3 (1450,450), left open
+  await designPage.drawVectorPath([
+    { x: 1300, y: 300 },
+    { x: 1450, y: 300 },
+    { x: 1450, y: 450 },
+  ]);
+  await designPage.selectVectorEditMoveTool();
+  await designPage.click(1300, 300); // select v1
+
+  await designPage.pointerMove(1900, 800); // rest away
+  const away = await designPage.canvas.screenshot();
+
+  await page.keyboard.down('Alt');
+  await designPage.pointerMove(1450, 450); // hover v3 while Alt is held
+  const altHovered = await designPage.canvas.screenshot();
+
+  expect(altHovered.equals(away)).toBe(false);
+
+  await page.keyboard.up('Alt');
+  const altReleased = await designPage.canvas.screenshot();
+
+  expect(altReleased.equals(altHovered)).toBe(false);
+});
+
+test('a vector point-to-segment measurement appears while Alt-hovering a non-incident segment, and shows the shadow cursor', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-distance-guide-vector-segment');
+  await expect(designPage.canvas).toBeVisible();
+
+  // v1 (1300,600) -> v2 (1450,600) -> v3 (1450,750); segment v2->v3 does not touch v1
+  await designPage.drawVectorPath([
+    { x: 1300, y: 600 },
+    { x: 1450, y: 600 },
+    { x: 1450, y: 750 },
+  ]);
+  await designPage.selectVectorEditMoveTool();
+  await designPage.click(1300, 600); // select v1
+
+  await designPage.pointerMove(1900, 900); // rest away
+  const away = await designPage.canvas.screenshot();
+
+  await page.keyboard.down('Alt');
+  await designPage.pointerMove(1450, 675); // hover the midpoint of segment v2->v3
+  const altHovered = await designPage.canvas.screenshot();
+
+  expect(altHovered.equals(away)).toBe(false);
+  await expect.poll(() => designPage.canvas.evaluate((el) => getComputedStyle(el).cursor)).toContain('shadow-cursor.png');
+
+  await page.keyboard.up('Alt');
+
+  await expect.poll(() => designPage.canvas.evaluate((el) => getComputedStyle(el).cursor)).not.toContain('shadow-cursor.png');
+});
