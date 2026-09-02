@@ -72,4 +72,17 @@ describe('PopoverItem behaviors', () => {
     // result — the label is the first child, no check span before it
     expect(screen.getByText('Frame').previousElementSibling).toBeNull();
   });
+
+  it('should render a checkbox indicator instead of the check glyph when checkVariant is checkbox', () => {
+    // before
+    const { container } = render(
+      <PopoverPrimitive.Root open>
+        <PopoverItem checkVariant="checkbox" label="Show rulers" selected />
+      </PopoverPrimitive.Root>,
+    );
+
+    // result
+    expect(container.querySelector('svg')).toBeInTheDocument();
+    expect(screen.getByText('Show rulers').previousElementSibling).not.toBeNull();
+  });
 });

@@ -5,11 +5,15 @@ import * as PopoverPrimitive from '@radix-ui/react-popover';
 // @xigma
 import { Icon, TIconProps } from '@xigma/components';
 
+// components
+import CheckboxIndicator from '../../Checkbox/CheckboxIndicator/CheckboxIndicator';
+
 // styles
 import styles from './popover-item.module.scss';
 
 export type TPopoverItemProps = {
   checkIconSize?: number;
+  checkVariant?: 'check' | 'checkbox';
   className?: string;
   disabled?: boolean;
   icon?: TIconProps['name'];
@@ -24,6 +28,7 @@ export type TPopoverItemProps = {
 
 export const PopoverItem: FC<TPopoverItemProps> = ({
   checkIconSize = 14,
+  checkVariant = 'check',
   className = '',
   disabled = false,
   icon,
@@ -41,7 +46,8 @@ export const PopoverItem: FC<TPopoverItemProps> = ({
         className={cx(styles.PopoverItem, disabled && styles['PopoverItem--disabled'], className)}
         onClick={disabled ? undefined : onClick}
       >
-        {withCheck && (
+        {withCheck && checkVariant === 'checkbox' && <CheckboxIndicator value={selected} />}
+        {withCheck && checkVariant === 'check' && (
           <span style={{ opacity: selected ? 1 : 0 }}>
             <Icon name="Check" size={checkIconSize} />
           </span>
@@ -51,7 +57,7 @@ export const PopoverItem: FC<TPopoverItemProps> = ({
         {shortcut && <span className={cx(styles.PopoverItem__shortcut, shortcutClassName)}>{shortcut}</span>}
       </div>
     ),
-    [checkIconSize, className, disabled, icon, iconSize, label, onClick, selected, shortcut, shortcutClassName, withCheck],
+    [checkIconSize, checkVariant, className, disabled, icon, iconSize, label, onClick, selected, shortcut, shortcutClassName, withCheck],
   );
 
   return disabled ? content : <PopoverPrimitive.Close asChild>{content}</PopoverPrimitive.Close>;
