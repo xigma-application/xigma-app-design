@@ -6,7 +6,7 @@ import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { Icon, TIconProps } from '@xigma/components';
 
 // components
-import CheckboxIndicator from '../../Checkbox/CheckboxIndicator/CheckboxIndicator';
+import CheckboxIndicator from '../../../UI/Checkbox/CheckboxIndicator/CheckboxIndicator';
 
 // styles
 import styles from './popover-item.module.scss';

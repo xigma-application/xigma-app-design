@@ -18,7 +18,6 @@
 
   &__tabs {
     padding: 8px;
-    padding-bottom: 0;
   }
 
   &__list {
@@ -26,8 +25,8 @@
 
     display: flex;
     flex-direction: column;
-
     overflow-y: auto;
+    padding-bottom: 8px;
     row-gap: 2px;
   }
 
@@ -36,5 +35,22 @@
     font-size: 11px;
     font-weight: 550;
     padding: 8px 8px 4px;
+  }
+
+  &__item {
+    height: 32px;
+    margin: 0 8px;
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--color-neutral-3) 70%, transparent) !important;
+
+      [data-svg-property='fill'] {
+        fill: currentcolor !important;
+      }
+
+      span {
+        color: inherit !important;
+      }
+    }
   }
 }

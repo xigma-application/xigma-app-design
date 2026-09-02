@@ -53,6 +53,7 @@ export const ActionsPanel: FC = () => {
               {items.map((item) => (
                 <PopoverItem
                   checkVariant="checkbox"
+                  className={styles.ActionsPanel__item}
                   disabled={!item.action}
                   icon={item.icon}
                   iconSize={ITEM_ICON_SIZE}
