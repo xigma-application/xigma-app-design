@@ -9,6 +9,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
 import { getDistanceGuides } from '../../../../../../utils/getDistanceGuides/getDistanceGuides';
+import { getPointToPointGuides } from '../../../../../../utils/getVectorDistanceGuides/getPointToPointGuides';
 import { resolveVectorDistanceGuides } from '../resolveVectorDistanceGuides';
 
 const SENTINEL = { sentinel: true } as unknown as TCanvasRefs['transform']['distanceGuidesRef']['current'];
@@ -33,7 +34,17 @@ const makeRefs = (over: TRefOverrides = {}): TCanvasRefs =>
     },
   }) as unknown as TCanvasRefs;
 
-const altMove = (altKey = true, buttons = 0): PointerEvent => new PointerEvent('pointermove', { altKey, buttons });
+const createCanvas = (): HTMLCanvasElement => {
+  const canvas = document.createElement('canvas');
+
+  vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({ left: 0, top: 0 } as DOMRect);
+
+  return canvas;
+};
+
+// identity viewport + a canvas pinned at (0,0) means clientX/clientY land as-is in world space
+const altMove = (x = 0, y = 0, altKey = true, buttons = 0): PointerEvent =>
+  new PointerEvent('pointermove', { altKey, buttons, clientX: x, clientY: y });
 
 const addVectorNode = (): string => {
   store.dispatch(
@@ -61,6 +72,8 @@ const addVectorNode = (): string => {
 };
 
 describe('resolveVectorDistanceGuides', () => {
+  const canvas = createCanvas();
+
   beforeEach(() => {
     selectActivePage(store.getState()).rootOrder.forEach((id) => store.dispatch(deleteNode(id)));
     store.dispatch(setVectorEditingNodeIds([addVectorNode()]));
@@ -77,7 +90,7 @@ describe('resolveVectorDistanceGuides', () => {
 
     const refs = makeRefs({ hoveredVertexId: 'v3', selectedVertexIds: ['v1'] });
 
-    resolveVectorDistanceGuides(altMove(), refs, vi.fn());
+    resolveVectorDistanceGuides(canvas, altMove(), refs, vi.fn());
 
     expect(refs.transform.distanceGuidesRef.current).toBe(SENTINEL);
   });
@@ -86,7 +99,7 @@ describe('resolveVectorDistanceGuides', () => {
     const refs = makeRefs({ hoveredVertexId: 'v3', selectedVertexIds: ['v1'] });
     const setClassName = vi.fn();
 
-    resolveVectorDistanceGuides(altMove(), refs, setClassName);
+    resolveVectorDistanceGuides(canvas, altMove(), refs, setClassName);
 
     expect(refs.transform.distanceGuidesRef.current?.lines).toEqual([
       { dashed: false, x1: 0, x2: 100, y1: 0, y2: 0 },
@@ -97,18 +110,34 @@ describe('resolveVectorDistanceGuides', () => {
     expect(setClassName).toHaveBeenCalledWith('distance-measure');
   });
 
-  it('should route a hovered segment through to a point-to-segment measurement', () => {
+  it('should snap to the point on a hovered segment nearest the cursor, riding along it as the cursor moves', () => {
     const refs = makeRefs({ hoveredSegmentId: 's2', selectedVertexIds: ['v1'] });
 
-    resolveVectorDistanceGuides(altMove(), refs, vi.fn());
+    // s2 runs from v2 (100,0) to v3 (100,100); the cursor sits partway down it
+    resolveVectorDistanceGuides(canvas, altMove(150, 30), refs, vi.fn());
 
-    expect(refs.transform.distanceGuidesRef.current?.lines).toEqual([{ dashed: false, x1: 0, x2: 100, y1: 0, y2: 0 }]);
+    expect(refs.transform.distanceGuidesRef.current).toEqual(getPointToPointGuides({ x: 0, y: 0 }, { x: 100, y: 30 }));
+
+    // moving the cursor further down the same segment tracks a different point — no new vertex,
+    // just the live measurement following the cursor like riding along a rail
+    resolveVectorDistanceGuides(canvas, altMove(150, 80), refs, vi.fn());
+
+    expect(refs.transform.distanceGuidesRef.current).toEqual(getPointToPointGuides({ x: 0, y: 0 }, { x: 100, y: 80 }));
+  });
+
+  it('should ride along the anchor vertex’s own connected segment too, away from the vertex itself', () => {
+    const refs = makeRefs({ hoveredSegmentId: 's1', selectedVertexIds: ['v1'] });
+
+    // s1 runs from the selected v1 (0,0) to v2 (100,0) — its own edge, not a foreign one
+    resolveVectorDistanceGuides(canvas, altMove(50, 10), refs, vi.fn());
+
+    expect(refs.transform.distanceGuidesRef.current).toEqual(getPointToPointGuides({ x: 0, y: 0 }, { x: 50, y: 0 }));
   });
 
   it('should clear the ref when Alt is not held', () => {
     const refs = makeRefs({ hoveredVertexId: 'v3', selectedVertexIds: ['v1'] });
 
-    resolveVectorDistanceGuides(altMove(false), refs, vi.fn());
+    resolveVectorDistanceGuides(canvas, altMove(0, 0, false), refs, vi.fn());
 
     expect(refs.transform.distanceGuidesRef.current).toBeNull();
   });
@@ -116,7 +145,7 @@ describe('resolveVectorDistanceGuides', () => {
   it('should clear the ref while a drag is in progress', () => {
     const refs = makeRefs({ hoveredVertexId: 'v3', selectedVertexIds: ['v1'] });
 
-    resolveVectorDistanceGuides(altMove(true, 1), refs, vi.fn());
+    resolveVectorDistanceGuides(canvas, altMove(0, 0, true, 1), refs, vi.fn());
 
     expect(refs.transform.distanceGuidesRef.current).toBeNull();
   });
@@ -126,7 +155,7 @@ describe('resolveVectorDistanceGuides', () => {
 
     const refs = makeRefs({ hoveredVertexId: 'v3', selectedVertexIds: ['v1'] });
 
-    resolveVectorDistanceGuides(altMove(), refs, vi.fn());
+    resolveVectorDistanceGuides(canvas, altMove(), refs, vi.fn());
 
     expect(refs.transform.distanceGuidesRef.current).toBeNull();
   });
@@ -134,7 +163,7 @@ describe('resolveVectorDistanceGuides', () => {
   it('should clear the ref when there is no hovered target', () => {
     const refs = makeRefs({ selectedVertexIds: ['v1'] });
 
-    resolveVectorDistanceGuides(altMove(), refs, vi.fn());
+    resolveVectorDistanceGuides(canvas, altMove(), refs, vi.fn());
 
     expect(refs.transform.distanceGuidesRef.current).toBeNull();
   });
@@ -142,7 +171,7 @@ describe('resolveVectorDistanceGuides', () => {
   it('should treat unset selection refs as empty and clear the ref', () => {
     const refs = makeRefs({ hoveredVertexId: 'v3', nullSelectionRefs: true });
 
-    resolveVectorDistanceGuides(altMove(), refs, vi.fn());
+    resolveVectorDistanceGuides(canvas, altMove(), refs, vi.fn());
 
     expect(refs.transform.distanceGuidesRef.current).toBeNull();
   });
@@ -150,7 +179,7 @@ describe('resolveVectorDistanceGuides', () => {
   it('should anchor on the bounding box of two selected vertices and measure against a third, hovered vertex', () => {
     const refs = makeRefs({ hoveredVertexId: 'v3', selectedVertexIds: ['v1', 'v2'] });
 
-    resolveVectorDistanceGuides(altMove(), refs, vi.fn());
+    resolveVectorDistanceGuides(canvas, altMove(), refs, vi.fn());
 
     // v1 (0,0) + v2 (100,0) box vs. v3 (100,100) — reuses Stage 1's rect-vs-rect distance guides
     const { labels, lines } = getDistanceGuides({ height: 0, width: 100, x: 0, y: 0 }, { height: 0, width: 0, x: 100, y: 100 });
@@ -161,7 +190,7 @@ describe('resolveVectorDistanceGuides', () => {
   it('should clear the ref when the only hovered vertex is itself part of the box selection', () => {
     const refs = makeRefs({ hoveredVertexId: 'v2', selectedVertexIds: ['v1', 'v2'] });
 
-    resolveVectorDistanceGuides(altMove(), refs, vi.fn());
+    resolveVectorDistanceGuides(canvas, altMove(), refs, vi.fn());
 
     expect(refs.transform.distanceGuidesRef.current).toBeNull();
   });

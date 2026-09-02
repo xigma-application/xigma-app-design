@@ -1,28 +1,30 @@
 // types
-import { TVectorDistanceTarget } from '../../../../../utils/getVectorDistanceGuides/types';
+import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
 // utils
 import { getSegmentPolyline } from '../../../../../utils/getVectorDistanceGuides/getSegmentPolyline';
+import { projectPointOntoPolyline } from '../../../../../utils/getVectorDistanceGuides/projectPointOntoPolyline';
 
 export const getTarget = (
   bakedNodes: TVectorNode[],
   excludeVertexIds: string[],
   hoveredVertexId: string | null,
   hoveredSegmentId: string | null,
-): TVectorDistanceTarget | null => {
+  cursorPoint: TPoint,
+): TPoint | null => {
   if (hoveredVertexId && !excludeVertexIds.includes(hoveredVertexId)) {
     const node = bakedNodes.find((candidate) => candidate.vertices[hoveredVertexId]);
 
-    return node ? { kind: 'vertex', point: node.vertices[hoveredVertexId] } : null;
+    return node ? node.vertices[hoveredVertexId] : null;
   }
 
   if (hoveredSegmentId) {
     const node = bakedNodes.find((candidate) => candidate.segments[hoveredSegmentId]);
     const segment = node?.segments[hoveredSegmentId];
 
-    if (node && segment && !excludeVertexIds.includes(segment.startId) && !excludeVertexIds.includes(segment.endId)) {
-      return { kind: 'segment', polyline: getSegmentPolyline(node, hoveredSegmentId) };
+    if (node && segment) {
+      return projectPointOntoPolyline(cursorPoint, getSegmentPolyline(node, hoveredSegmentId)).foot;
     }
   }
 

@@ -84,5 +84,5 @@ export const handlePointerMove = (
   resolveVectorWidthPointHover(canvas, event, canvasRefs, setClassName);
   resolveVectorWidthLabelHover(canvas, event, canvasRefs);
   resolveShapeContactGuides(event, canvasRefs, selectionRefs);
-  resolveVectorDistanceGuides(event, canvasRefs, setClassName);
+  resolveVectorDistanceGuides(canvas, event, canvasRefs, setClassName);
 };

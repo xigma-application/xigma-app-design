@@ -1,5 +1,5 @@
 // store
-import { selectActiveTool, selectNodes, selectVectorEditingNodeIds } from 'store/design/selectors';
+import { selectActiveTool, selectNodes, selectVectorEditingNodeIds, selectViewport } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -9,10 +9,13 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 // utils
 import { getAnchor } from './getAnchor';
 import { getBakedEditingNodes } from './getBakedEditingNodes';
+import { getPointerPosition } from '../../../../../utils/getPointerPosition';
 import { getTarget } from './getTarget';
 import { getVectorDistanceGuides } from '../../../../../utils/getVectorDistanceGuides/getVectorDistanceGuides';
+import { screenToWorld } from '../../../../../utils/screenToWorld';
 
 export const resolveVectorDistanceGuides = (
+  canvas: HTMLCanvasElement,
   event: PointerEvent,
   canvasRefs: TCanvasRefs,
   setClassName: (className: string | null) => void,
@@ -36,6 +39,7 @@ export const resolveVectorDistanceGuides = (
           anchor.excludeVertexIds,
           canvasRefs.hover.hoveredVectorVertexIdRef.current,
           canvasRefs.hover.hoveredVectorSegmentIdRef.current,
+          screenToWorld(getPointerPosition(canvas, event), selectViewport(state)),
         )
       : null;
 
