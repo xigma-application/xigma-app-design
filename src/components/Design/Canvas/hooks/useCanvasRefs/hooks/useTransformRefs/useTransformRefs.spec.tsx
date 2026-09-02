@@ -11,6 +11,7 @@ describe('useTransformRefs behaviors', () => {
     // result
     expect(result.current).toEqual({
       alignmentGuideRef: { current: null },
+      aspectRatioLockGuideRef: { current: null },
       contactGuidesRef: { current: null },
       distanceGuidesRef: { current: null },
       draggedNodeIdsRef: { current: null },

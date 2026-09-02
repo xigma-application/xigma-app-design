@@ -13,8 +13,8 @@ import { AppDispatch, AppStore } from 'store';
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TArmedMedia } from '../loadArmedMedia';
+import { TAspectRatioLockGuide, TPoint } from 'types/canvas';
 import { TDraftEntity } from 'types/design/types';
-import { TPoint } from 'types/canvas';
 
 // utils
 import { appendLastCreatedNodeToSelection } from '../../../../utils/appendLastCreatedNodeToSelection';
@@ -34,6 +34,7 @@ export const handlePointerUp = (
   draftRef: RefObject<TDraftEntity | null>,
   queueRef: RefObject<File[]>,
   name: string,
+  aspectRatioLockGuideRef: RefObject<TAspectRatioLockGuide | null>,
 ): void => {
   const armed = armedRef.current;
 
@@ -49,6 +50,7 @@ export const handlePointerUp = (
 
     startRef.current = null;
     draftRef.current = null;
+    aspectRatioLockGuideRef.current = null;
     canvas.releasePointerCapture(event.pointerId);
 
     if (queueRef.current.length > 0) {

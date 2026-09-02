@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 
 // types
 import { TAlignmentGuide } from 'components/Design/Canvas/utils/getGroupAlignmentGuide';
-import { TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
+import { TAspectRatioLockGuide, TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
 import { TDistanceGuides } from 'components/Design/Canvas/utils/getDistanceGuides/types';
 import { TEqualSpacingGuides, TMatchedPairGuides } from 'components/Design/Canvas/utils/getEqualSpacingGuides/types';
 import { TDraftEntity, TVectorTangent, TVectorWidthPoint } from 'types/design/types';
@@ -252,6 +252,7 @@ export type TVectorSnapshotsRefs = {
 
 export type TTransformRefs = {
   alignmentGuideRef: RefObject<TAlignmentGuide | null>;
+  aspectRatioLockGuideRef: RefObject<TAspectRatioLockGuide | null>;
   contactGuidesRef: RefObject<TShapeContactGuide[] | null>;
   distanceGuidesRef: RefObject<TDistanceGuides | null>;
   draggedNodeIdsRef: RefObject<Set<string> | null>;

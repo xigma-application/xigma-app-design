@@ -9,6 +9,7 @@ import { TResizeDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { applyRotatedGroupChildResize } from './applyRotatedGroupChildResize';
+import { getAspectRatioLockGuide } from './getAspectRatioLockGuide';
 import { getResizeDragFrame } from './getResizeDragFrame';
 import { getSingleRotatableOrigin } from './getSingleRotatableOrigin';
 import { resizeOriginEntries } from './resizeOriginEntries';
@@ -41,5 +42,11 @@ export const continueResizeDrag = (
 
       applyRotatedGroupChildResize(groupId, singleRotatableOrigin, rotatedGroupChildOrigins, dispatch);
     }
+
+    canvasRefs.transform.aspectRatioLockGuideRef.current = getAspectRatioLockGuide(
+      frame.isAspectLocked,
+      singleRotatableOrigin,
+      originEntries.length === 1 ? originEntries[0][0] : undefined,
+    );
   }
 };

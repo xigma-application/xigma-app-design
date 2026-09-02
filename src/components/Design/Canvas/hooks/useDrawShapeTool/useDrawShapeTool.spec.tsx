@@ -83,6 +83,34 @@ describe.each(CONFIGS)('useDrawShapeTool behaviors ($label)', ({ config }) => {
     expect(draftRef.current).toEqual({ fill: config.fill, height: 30, type: config.type, width: 50, x: 10, y: 10 });
   });
 
+  it('should lock to a 1:1 square and populate the aspect-ratio-lock guide while Shift is held, clearing both on release', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(setActiveTool(config.tool));
+
+    const canvasRef = createCanvasRef();
+    const draftRef: RefObject<TDraftEntity | null> = { current: null };
+    const refs = createCanvasRefs({ canvasRef, draftRef });
+
+    // before
+    renderHook(() => useDrawShapeTool(refs, config), { wrapper: ({ children }) => <Provider store={store}>{children}</Provider> });
+
+    // action
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+    canvasRef.current?.dispatchEvent(new PointerEvent('pointermove', { clientX: 60, clientY: 40, shiftKey: true }));
+
+    // result — width (50) drives, since it exceeds height (30)
+    expect(draftRef.current).toEqual({ fill: config.fill, height: 50, type: config.type, width: 50, x: 10, y: 10 });
+    expect(refs.transform.aspectRatioLockGuideRef.current).toEqual({ height: 50, rotation: 0, width: 50, x: 10, y: 10 });
+
+    // action — releasing on pointer up clears the guide again
+    act(() => canvasRef.current?.dispatchEvent(new PointerEvent('pointerup', { clientX: 60, clientY: 40, shiftKey: true })));
+
+    // result
+    expect(refs.transform.aspectRatioLockGuideRef.current).toBeNull();
+  });
+
   it('should commit a node with the configured fill and switch back to the default tool on pointer up', () => {
     // mock
     const store = createTestStore();

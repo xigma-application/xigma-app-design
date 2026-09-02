@@ -21,9 +21,9 @@ import { TPoint } from 'types/canvas';
 import { getCandidateShapes, type TCandidateShape } from '../../utils/getDragAlignmentSnap/getCandidateShapes';
 import { getPointAlignmentSnap } from '../../utils/getPointAlignmentSnap';
 import { getPointerPosition } from '../../utils/getPointerPosition';
+import { getShapeDraftRect } from '../../utils/getShapeDraftRect';
 import { screenToWorld } from '../../utils/screenToWorld';
 import { selectLastCreatedNode } from '../../utils/selectLastCreatedNode';
-import { toDraftRect } from '../../utils/toDraftRect';
 import { toDraftRectWithDefault } from '../../utils/toDraftRectWithDefault';
 
 export type TStarToolConfig = {
@@ -36,7 +36,7 @@ export type TStarToolConfig = {
 
 export const useDrawStarTool = (refs: TCanvasRefs, { fill, name, points, ratio, tool }: TStarToolConfig): void => {
   const { canvasRef, draftRef } = refs;
-  const { alignmentGuideRef } = refs.transform;
+  const { alignmentGuideRef, aspectRatioLockGuideRef } = refs.transform;
   const activeTool = useAppSelector(selectActiveTool);
   const viewport = useAppSelector(selectViewport);
   const dispatch = useAppDispatch();
@@ -58,10 +58,11 @@ export const useDrawStarTool = (refs: TCanvasRefs, { fill, name, points, ratio, 
     if (startRef.current) {
       const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
       const snap = getPointAlignmentSnap(rawPoint, candidateShapesRef.current, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
-      const rect = toDraftRect(startRef.current, snap.point);
+      const rect = getShapeDraftRect(startRef.current, snap.point, event.shiftKey);
 
       draftRef.current = { ...rect, fill, points, ratio, type: NodeType.star };
       alignmentGuideRef.current = snap.guide;
+      aspectRatioLockGuideRef.current = event.shiftKey ? { ...rect, rotation: 0 } : null;
     }
   };
 
@@ -69,7 +70,7 @@ export const useDrawStarTool = (refs: TCanvasRefs, { fill, name, points, ratio, 
     if (startRef.current) {
       const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
       const snap = getPointAlignmentSnap(rawPoint, candidateShapesRef.current, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
-      const rect = toDraftRectWithDefault(startRef.current, snap.point, DEFAULT_SHAPE_SIZE, true, viewport.zoom);
+      const rect = toDraftRectWithDefault(startRef.current, snap.point, DEFAULT_SHAPE_SIZE, true, viewport.zoom, event.shiftKey);
 
       dispatch(
         addNode({ ...rect, fill, flipX: false, flipY: false, name, parentId: null, points, ratio, rotation: 0, type: NodeType.star }),
@@ -79,6 +80,7 @@ export const useDrawStarTool = (refs: TCanvasRefs, { fill, name, points, ratio, 
       startRef.current = null;
       draftRef.current = null;
       alignmentGuideRef.current = null;
+      aspectRatioLockGuideRef.current = null;
       canvas.releasePointerCapture(event.pointerId);
       dispatch(setActiveTool(ToolName.default));
     }
@@ -104,5 +106,20 @@ export const useDrawStarTool = (refs: TCanvasRefs, { fill, name, points, ratio, 
         canvas.removeEventListener('pointerup', onPointerUp);
       };
     }
-  }, [activeTool, alignmentGuideRef, appStore, canvasRef, dispatch, draftRef, fill, name, points, ratio, refs, tool, viewport]);
+  }, [
+    activeTool,
+    alignmentGuideRef,
+    appStore,
+    aspectRatioLockGuideRef,
+    canvasRef,
+    dispatch,
+    draftRef,
+    fill,
+    name,
+    points,
+    ratio,
+    refs,
+    tool,
+    viewport,
+  ]);
 };

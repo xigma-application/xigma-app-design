@@ -5,6 +5,10 @@ export type TDraftRect = {
   y: number;
 };
 
+export type TAspectRatioLockGuide = TDraftRect & {
+  rotation: number;
+};
+
 export type TEditingTextBox = TDraftRect & {
   flipX: boolean;
   flipY: boolean;

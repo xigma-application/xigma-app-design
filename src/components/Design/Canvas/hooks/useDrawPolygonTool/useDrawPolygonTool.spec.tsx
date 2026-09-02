@@ -85,6 +85,28 @@ describe('useDrawPolygonTool behaviors', () => {
     });
   });
 
+  it('should lock to a 1:1 square and populate the aspect-ratio-lock guide while Shift is held', () => {
+    // mock
+    const store = createTestStore();
+
+    store.dispatch(setActiveTool(CONFIG.tool));
+
+    const canvasRef = createCanvasRef();
+    const draftRef: RefObject<TDraftEntity | null> = { current: null };
+    const refs = createCanvasRefs({ canvasRef, draftRef });
+
+    // before
+    renderHook(() => useDrawPolygonTool(refs, CONFIG), { wrapper: ({ children }) => <Provider store={store}>{children}</Provider> });
+
+    // action
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+    canvasRef.current?.dispatchEvent(new PointerEvent('pointermove', { clientX: 60, clientY: 40, shiftKey: true }));
+
+    // result — width (50) drives, since it exceeds height (30)
+    expect(draftRef.current).toMatchObject({ height: 50, width: 50, x: 10, y: 10 });
+    expect(refs.transform.aspectRatioLockGuideRef.current).toEqual({ height: 50, rotation: 0, width: 50, x: 10, y: 10 });
+  });
+
   it('should commit a polygon node with the configured fill and sides, then switch back to the default tool', () => {
     // mock
     const store = createTestStore();

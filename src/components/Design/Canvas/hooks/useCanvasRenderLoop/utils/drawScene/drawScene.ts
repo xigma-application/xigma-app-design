@@ -23,6 +23,7 @@ import { TDrawSceneContext } from './types';
 import { TImageRenderContext } from '../../types';
 
 // utils
+import { drawAspectRatioLockGuide } from './drawAspectRatioLockGuide';
 import { drawCornerRadiusHandlesLayer } from './drawCornerRadiusHandlesLayer/drawCornerRadiusHandlesLayer';
 import { drawDraftFrameNameLabel } from './drawFrameNameLabels/drawDraftFrameNameLabel';
 import { drawDistanceGuides } from './drawDistanceGuides/drawDistanceGuides';
@@ -147,6 +148,7 @@ export const drawScene = (
   drawEditingPathTextHandle(ctx, editingTextBox, editingPathNode);
   drawVectorEditAlignmentGuide(ctx, refs);
   drawTransformAlignmentGuide(ctx, refs);
+  drawAspectRatioLockGuide(ctx, refs);
   drawVectorLasso(ctx, refs);
   drawVectorShapeBuilderPath(ctx, refs);
   drawVectorShapeBuilderHoverPreview(ctx, nodesById, rootOrder, vectorEditingNodeIds, shapeBuilderPreviewFaces, refs);

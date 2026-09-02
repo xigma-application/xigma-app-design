@@ -7,8 +7,8 @@ import { AppStore } from 'store';
 // types
 import { NodeType } from 'types/design/enums';
 import { TArmedMedia } from '../loadArmedMedia';
+import { TAspectRatioLockGuide, TPoint } from 'types/canvas';
 import { TDraftEntity } from 'types/design/types';
-import { TPoint } from 'types/canvas';
 
 // utils
 import { getAspectRatioLockedRect } from 'utils/math/getAspectRatioLockedRect';
@@ -23,6 +23,7 @@ export const handlePointerMove = (
   armedRef: RefObject<TArmedMedia | null>,
   startRef: RefObject<TPoint | null>,
   draftRef: RefObject<TDraftEntity | null>,
+  aspectRatioLockGuideRef: RefObject<TAspectRatioLockGuide | null>,
 ): void => {
   const armed = armedRef.current;
 
@@ -31,5 +32,6 @@ export const handlePointerMove = (
     const rect = roundRect(getAspectRatioLockedRect(startRef.current, current, armed.naturalWidth / armed.naturalHeight));
 
     draftRef.current = { ...rect, src: armed.src, type: NodeType.media };
+    aspectRatioLockGuideRef.current = { ...rect, rotation: 0 };
   }
 };

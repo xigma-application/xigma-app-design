@@ -14,6 +14,7 @@ import { selectSelectedIds } from 'store/design/selectors';
 
 // types
 import { NodeType, ToolName } from 'types/design/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDraftEntity } from 'types/design/types';
 
 type TFakeImage = { naturalHeight: number; naturalWidth: number; onload: (() => void) | null; src: string };
@@ -99,10 +100,12 @@ const renderMediaTool = (
   canvasRef: RefObject<HTMLCanvasElement | null>,
   draftRef: RefObject<TDraftEntity | null>,
   store: EnhancedStore<{ design: TDesignState }>,
-): void => {
-  renderHook(() => useDrawMediaTool(createCanvasRefs({ canvasRef, draftRef }), CONFIG), {
-    wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-  });
+): TCanvasRefs => {
+  const refs = createCanvasRefs({ canvasRef, draftRef });
+
+  renderHook(() => useDrawMediaTool(refs, CONFIG), { wrapper: ({ children }) => <Provider store={store}>{children}</Provider> });
+
+  return refs;
 };
 
 describe('useDrawMediaTool behaviors', () => {
@@ -316,7 +319,8 @@ describe('useDrawMediaTool behaviors', () => {
     const { getInput } = captureInput();
 
     store.dispatch(setActiveTool(CONFIG.tool));
-    renderMediaTool(canvasRef, draftRef, store);
+    const refs = renderMediaTool(canvasRef, draftRef, store);
+
     armMedia(getInput(), getLastImage, 200, 100);
 
     // action
@@ -325,6 +329,8 @@ describe('useDrawMediaTool behaviors', () => {
 
     // result — raw 50x50 drag locked to a 2:1 ratio, driven by the taller raw axis
     expect(draftRef.current).toEqual({ height: 50, src: 'blob:mock-url', type: NodeType.media, width: 100, x: 0, y: 0 });
+    // the lock is shown unconditionally for Media — no Shift needed
+    expect(refs.transform.aspectRatioLockGuideRef.current).toEqual({ height: 50, rotation: 0, width: 100, x: 0, y: 0 });
   });
 
   it('should place the image at its natural size centered on a plain click', () => {
@@ -336,7 +342,8 @@ describe('useDrawMediaTool behaviors', () => {
     const { getInput } = captureInput();
 
     store.dispatch(setActiveTool(CONFIG.tool));
-    renderMediaTool(canvasRef, draftRef, store);
+    const refs = renderMediaTool(canvasRef, draftRef, store);
+
     armMedia(getInput(), getLastImage, 200, 100);
 
     // action
@@ -361,6 +368,7 @@ describe('useDrawMediaTool behaviors', () => {
     });
     expect(design.activeTool).toBe(ToolName.default);
     expect(draftRef.current).toBeNull();
+    expect(refs.transform.aspectRatioLockGuideRef.current).toBeNull();
   });
 
   it('should place an aspect-ratio-locked custom size on a drag', () => {

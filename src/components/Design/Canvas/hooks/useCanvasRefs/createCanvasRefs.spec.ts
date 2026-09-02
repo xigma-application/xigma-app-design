@@ -76,6 +76,7 @@ describe('createCanvasRefs behaviors', () => {
       starRatio: { starRatioDragRef: { current: null } },
       transform: {
         alignmentGuideRef: { current: null },
+        aspectRatioLockGuideRef: { current: null },
         contactGuidesRef: { current: null },
         distanceGuidesRef: { current: null },
         draggedNodeIdsRef: { current: null },

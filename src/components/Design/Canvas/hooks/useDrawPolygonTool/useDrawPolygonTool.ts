@@ -21,9 +21,9 @@ import { TPoint } from 'types/canvas';
 import { getCandidateShapes, type TCandidateShape } from '../../utils/getDragAlignmentSnap/getCandidateShapes';
 import { getPointAlignmentSnap } from '../../utils/getPointAlignmentSnap';
 import { getPointerPosition } from '../../utils/getPointerPosition';
+import { getShapeDraftRect } from '../../utils/getShapeDraftRect';
 import { screenToWorld } from '../../utils/screenToWorld';
 import { selectLastCreatedNode } from '../../utils/selectLastCreatedNode';
-import { toDraftRect } from '../../utils/toDraftRect';
 import { toDraftRectWithDefault } from '../../utils/toDraftRectWithDefault';
 
 export type TPolygonToolConfig = {
@@ -35,7 +35,7 @@ export type TPolygonToolConfig = {
 
 export const useDrawPolygonTool = (refs: TCanvasRefs, { fill, name, sides, tool }: TPolygonToolConfig): void => {
   const { canvasRef, draftRef } = refs;
-  const { alignmentGuideRef } = refs.transform;
+  const { alignmentGuideRef, aspectRatioLockGuideRef } = refs.transform;
   const activeTool = useAppSelector(selectActiveTool);
   const viewport = useAppSelector(selectViewport);
   const dispatch = useAppDispatch();
@@ -57,10 +57,11 @@ export const useDrawPolygonTool = (refs: TCanvasRefs, { fill, name, sides, tool 
     if (startRef.current) {
       const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
       const snap = getPointAlignmentSnap(rawPoint, candidateShapesRef.current, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
-      const rect = toDraftRect(startRef.current, snap.point);
+      const rect = getShapeDraftRect(startRef.current, snap.point, event.shiftKey);
 
       draftRef.current = { ...rect, fill, sides, type: NodeType.polygon };
       alignmentGuideRef.current = snap.guide;
+      aspectRatioLockGuideRef.current = event.shiftKey ? { ...rect, rotation: 0 } : null;
     }
   };
 
@@ -68,7 +69,7 @@ export const useDrawPolygonTool = (refs: TCanvasRefs, { fill, name, sides, tool 
     if (startRef.current) {
       const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
       const snap = getPointAlignmentSnap(rawPoint, candidateShapesRef.current, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
-      const rect = toDraftRectWithDefault(startRef.current, snap.point, DEFAULT_SHAPE_SIZE, true, viewport.zoom);
+      const rect = toDraftRectWithDefault(startRef.current, snap.point, DEFAULT_SHAPE_SIZE, true, viewport.zoom, event.shiftKey);
 
       dispatch(addNode({ ...rect, fill, flipX: false, flipY: false, name, parentId: null, rotation: 0, sides, type: NodeType.polygon }));
       selectLastCreatedNode(dispatch, appStore);
@@ -76,6 +77,7 @@ export const useDrawPolygonTool = (refs: TCanvasRefs, { fill, name, sides, tool 
       startRef.current = null;
       draftRef.current = null;
       alignmentGuideRef.current = null;
+      aspectRatioLockGuideRef.current = null;
       canvas.releasePointerCapture(event.pointerId);
       dispatch(setActiveTool(ToolName.default));
     }
@@ -101,5 +103,19 @@ export const useDrawPolygonTool = (refs: TCanvasRefs, { fill, name, sides, tool 
         canvas.removeEventListener('pointerup', onPointerUp);
       };
     }
-  }, [activeTool, alignmentGuideRef, appStore, canvasRef, dispatch, draftRef, fill, name, refs, sides, tool, viewport]);
+  }, [
+    activeTool,
+    alignmentGuideRef,
+    appStore,
+    aspectRatioLockGuideRef,
+    canvasRef,
+    dispatch,
+    draftRef,
+    fill,
+    name,
+    refs,
+    sides,
+    tool,
+    viewport,
+  ]);
 };

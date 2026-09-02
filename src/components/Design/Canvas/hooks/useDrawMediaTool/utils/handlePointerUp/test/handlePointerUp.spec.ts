@@ -8,8 +8,8 @@ import { store } from 'store';
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TArmedMedia } from '../../loadArmedMedia';
+import { TAspectRatioLockGuide, TPoint } from 'types/canvas';
 import { TDraftEntity } from 'types/design/types';
-import { TPoint } from 'types/canvas';
 
 // utils
 import { handlePointerUp } from '../handlePointerUp';
@@ -29,6 +29,9 @@ const createArmedRef = (armed: TArmedMedia | null): RefObject<TArmedMedia | null
 const createStartRef = (point: TPoint | null): RefObject<TPoint | null> => ({ current: point });
 const createDraftRef = (): RefObject<TDraftEntity | null> => ({ current: null });
 const createQueueRef = (files: File[] = []): RefObject<File[]> => ({ current: files });
+const createAspectRatioLockGuideRef = (): RefObject<TAspectRatioLockGuide | null> => ({
+  current: { height: 1, rotation: 0, width: 1, x: 0, y: 0 },
+});
 
 const armed: TArmedMedia = { naturalHeight: 100, naturalWidth: 200, src: 'blob:mock-url' };
 
@@ -54,6 +57,7 @@ describe('handlePointerUp', () => {
       createDraftRef(),
       createQueueRef(),
       'Image',
+      createAspectRatioLockGuideRef(),
     );
 
     // result
@@ -77,6 +81,7 @@ describe('handlePointerUp', () => {
       createDraftRef(),
       createQueueRef(),
       'Image',
+      createAspectRatioLockGuideRef(),
     );
 
     // result
@@ -89,6 +94,7 @@ describe('handlePointerUp', () => {
     const canvasRef = { current: canvas };
     const draftRef = createDraftRef();
     const startRef = createStartRef({ x: 10, y: 10 });
+    const aspectRatioLockGuideRef = createAspectRatioLockGuideRef();
 
     draftRef.current = { height: 1, src: 'stale', type: NodeType.media, width: 1, x: 0, y: 0 };
 
@@ -104,6 +110,7 @@ describe('handlePointerUp', () => {
       draftRef,
       createQueueRef(),
       'Image',
+      aspectRatioLockGuideRef,
     );
 
     // result — the click point (10,10) lands at the center of the 200x100 image, not its corner
@@ -114,6 +121,7 @@ describe('handlePointerUp', () => {
     expect(placed).toMatchObject({ height: 100, name: 'Image', src: 'blob:mock-url', type: NodeType.media, width: 200, x: -90, y: -40 });
     expect(startRef.current).toBeNull();
     expect(draftRef.current).toBeNull();
+    expect(aspectRatioLockGuideRef.current).toBeNull();
     expect(canvas.releasePointerCapture).toHaveBeenCalledWith(1);
     expect(design.activeTool).toBe(ToolName.default);
   });
@@ -135,6 +143,7 @@ describe('handlePointerUp', () => {
       createDraftRef(),
       createQueueRef(),
       'Image',
+      createAspectRatioLockGuideRef(),
     );
 
     // result — the raw 50x50 drag does not match the armed file's 2:1 ratio, so it must be locked
@@ -166,6 +175,7 @@ describe('handlePointerUp', () => {
       createDraftRef(),
       createQueueRef(),
       'Image',
+      createAspectRatioLockGuideRef(),
     );
 
     const rootOrderAfterFirst = store.getState().design.pages[store.getState().design.activePageId].rootOrder;
@@ -185,6 +195,7 @@ describe('handlePointerUp', () => {
       createDraftRef(),
       createQueueRef(),
       'Image',
+      createAspectRatioLockGuideRef(),
     );
 
     const { rootOrder } = selectActivePage(store.getState());
@@ -216,6 +227,7 @@ describe('handlePointerUp', () => {
       createDraftRef(),
       createQueueRef([nextFile]),
       'Image',
+      createAspectRatioLockGuideRef(),
     );
 
     // result — armedRef is reassigned asynchronously by armNextFile once the next file's Image
@@ -243,6 +255,7 @@ describe('handlePointerUp', () => {
       createDraftRef(),
       createQueueRef(),
       'Image',
+      createAspectRatioLockGuideRef(),
     );
 
     // result — screen (10,10) under viewport {x:150,y:90} converts to world (-140,-80), exactly

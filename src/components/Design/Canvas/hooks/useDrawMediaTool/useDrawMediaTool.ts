@@ -24,6 +24,7 @@ export type TMediaToolConfig = {
 
 export const useDrawMediaTool = (refs: TCanvasRefs, { name, tool }: TMediaToolConfig): void => {
   const { canvasRef, draftRef } = refs;
+  const { aspectRatioLockGuideRef } = refs.transform;
   const activeTool = useAppSelector(selectActiveTool);
   const dispatch = useAppDispatch();
   const appStore = useAppStore();
@@ -47,9 +48,22 @@ export const useDrawMediaTool = (refs: TCanvasRefs, { name, tool }: TMediaToolCo
     if (canvas && activeTool === tool) {
       const input = document.createElement('input');
       const onPointerDown = (event: PointerEvent): void => handlePointerDown(canvas, event, appStore, armedRef, startRef);
-      const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event, appStore, armedRef, startRef, draftRef);
+      const onPointerMove = (event: PointerEvent): void =>
+        handlePointerMove(canvas, event, appStore, armedRef, startRef, draftRef, aspectRatioLockGuideRef);
       const onPointerUp = (event: PointerEvent): void =>
-        handlePointerUp(canvas, event, dispatch, appStore, canvasRef, armedRef, startRef, draftRef, queueRef, name);
+        handlePointerUp(
+          canvas,
+          event,
+          dispatch,
+          appStore,
+          canvasRef,
+          armedRef,
+          startRef,
+          draftRef,
+          queueRef,
+          name,
+          aspectRatioLockGuideRef,
+        );
 
       input.type = 'file';
       input.accept = 'image/*,video/*';
@@ -71,8 +85,9 @@ export const useDrawMediaTool = (refs: TCanvasRefs, { name, tool }: TMediaToolCo
         armedRef.current = null;
         queueRef.current = [];
         draftRef.current = null;
+        aspectRatioLockGuideRef.current = null;
         canvas.style.cursor = '';
       };
     }
-  }, [activeTool, appStore, canvasRef, dispatch, draftRef, name, tool]);
+  }, [activeTool, appStore, aspectRatioLockGuideRef, canvasRef, dispatch, draftRef, name, tool]);
 };

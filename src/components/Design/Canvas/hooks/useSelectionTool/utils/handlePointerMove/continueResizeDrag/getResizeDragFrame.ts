@@ -15,6 +15,7 @@ import { TResizeNodeOrigin } from 'types/design/selectionTool/types';
 // utils
 import { getPointAlignmentSnap } from 'components/Design/Canvas/utils/getPointAlignmentSnap';
 import { getPointerPosition } from '../../../../../utils/getPointerPosition';
+import { getResizeAnchorPoint } from '../../../../../utils/getResizeAnchorPoint';
 import { getResizeAnchorSolver } from './getResizeAnchorSolver';
 import { getResizeOrScaleFactors } from './getResizeOrScaleFactors';
 import { getResizeQueryPoint } from './getResizeQueryPoint';
@@ -23,6 +24,7 @@ import { screenToWorld } from '../../../../../utils/screenToWorld';
 export type TResizeDragFrame = {
   alignmentGuide: TAlignmentGuide | null;
   anchors: { x: number | null; y: number | null };
+  isAspectLocked: boolean;
   rotatedAnchorSolver: ((width: number, height: number) => TPoint) | null;
   scaleX: number;
   scaleY: number;
@@ -50,6 +52,7 @@ export const getResizeDragFrame = (
     : { guide: null, point: queryPoint };
   const { anchors, scaleX, scaleY } = getResizeOrScaleFactors(isScaleTool, handle, bounds, snap.point, aspectRatio, event.shiftKey);
   const rotatedAnchorSolver = getResizeAnchorSolver(bounds, handle, scaleX, scaleY, singleRotatableOrigin);
+  const isAspectLocked = isScaleTool || (getResizeAnchorPoint(handle, bounds) !== null && event.shiftKey);
 
-  return { alignmentGuide: snap.guide, anchors, rotatedAnchorSolver, scaleX, scaleY };
+  return { alignmentGuide: snap.guide, anchors, isAspectLocked, rotatedAnchorSolver, scaleX, scaleY };
 };

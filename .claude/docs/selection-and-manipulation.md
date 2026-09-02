@@ -1810,6 +1810,61 @@ contact guides).
   (write the delta onto frozen vector snapshots), `dispatchDraggedNodeUpdates.ts` (throttled
   `updateNode` dispatch, skipping snapshotted nodes).
 
+## 29. Shift aspect-ratio lock while drawing a new shape — and its blue diagonal guide
+
+Holding Shift while dragging out a new Rectangle/Ellipse/Frame/Section/Polygon/Star locks the drag
+to a 1:1 square (driven by whichever raw axis is larger), read live off `event.shiftKey` on every
+`pointermove` — release Shift mid-drag and the next frame goes back to a free-form rect, hold it
+again and it re-locks, exactly like §5's existing resize-corner Shift-lock one level up. Media
+always draws at its own file aspect ratio regardless of Shift (unchanged, pre-existing behavior —
+see `design-tool-architecture.md` §7's media drag flow); this feature is genuinely new only for the
+plain-rect-drag tools.
+
+- `Canvas/utils/getShapeDraftRect.ts` — `shiftKey ? roundRect(getAspectRatioLockedRect(start,
+  current, 1)) : toDraftRect(start, current)`. Reuses `getAspectRatioLockedRect` (already existed,
+  for Media's own natural-ratio lock) with a literal `1` ratio instead of a new square-specific
+  helper. `useDrawShapeTool.ts`/`useDrawPolygonTool.ts`/`useDrawStarTool.ts` (the three hooks that
+  previously called `toDraftRect` directly during `pointermove`) now call this instead, threading
+  `event.shiftKey` through; `toDraftRectWithDefault.ts` (the `pointerup` commit path, shared by the
+  same three hooks) grew a new optional `shiftKey = false` last parameter for the same reason, so a
+  released-while-still-a-click-sized drag also respects the lock. `toDraftRect.ts` itself is
+  untouched — still the plain free-form path, still used standalone by non-shape callers (marquee,
+  vector shape-builder, ...) that have no Shift concept at all.
+- **A new guide ref, `refs.transform.aspectRatioLockGuideRef` (`TAspectRatioLockGuide | null` =
+  `TDraftRect & { rotation }`)**, sits next to `alignmentGuideRef` in `TTransformRefs` — same
+  "parent-owned ephemeral render ref" shape as everything else in this file. Drawn by a new
+  `drawAspectRatioLockGuide.ts` (`drawScene.ts`, right after `drawTransformAlignmentGuide`): a single
+  dashed line from the guide rect's top-left to bottom-right corner (rotated into place via
+  `rotatePoint` around the rect's own center for the resize case below), reusing the shared
+  `drawDashedLine` primitive `drawDistanceGuideLine.ts` already established the pattern for — its own
+  tighter `ASPECT_RATIO_LOCK_GUIDE_DASH_LENGTH_PX`/`_GAP_PX` (2px/2px, denser than the generic
+  `DASH_LENGTH_PX`/`DASH_GAP_PX` = 4px/4px) keep the diagonal legible at the shape's own scale rather
+  than looking sparse. The three draw-tool hooks above set it to `{ ...rect, rotation: 0 }` whenever
+  `event.shiftKey` is true (a fresh, unrotated draft always has `rotation: 0`) and `null` otherwise,
+  clearing it again on `pointerup` alongside `alignmentGuideRef`.
+- **Extended to the existing corner-handle resize Shift-lock too** (§5), not just drawing a new
+  shape — the user's own framing was "Shift lock decides whether the element resizes
+  proportionally," i.e. one mental model covering both gestures. `getResizeDragFrame.ts`'s returned
+  `TResizeDragFrame` grew an `isAspectLocked` field (`isScaleTool || (cornerAnchor !== null &&
+  event.shiftKey)` — Scale tool is *always* aspect-locked regardless of Shift, matching §5's own
+  `getScaleFactors` having no `shiftKey` parameter at all). `continueResizeDrag.ts` feeds that,
+  together with the single-node's frozen drag-start origin and its id, into a new
+  `getAspectRatioLockGuide.ts`: returns `null` for any multi-node/rotated-group/vector-node/no-origin
+  case (only a single plain box resize ever shows the guide), otherwise re-reads the node **fresh
+  from the live store** (not the frozen origin) so the guide's rect/rotation track the resize as it
+  happens rather than staying pinned at the pre-drag geometry. `disarmResizeDrag.ts` clears the ref
+  alongside `alignmentGuideRef` on release.
+- Tests: `getShapeDraftRect.spec.ts`, `getAspectRatioLockGuide.spec.ts`,
+  `drawAspectRatioLockGuide.spec.ts`, plus the Shift branch added to each of
+  `useDrawShapeTool.spec.tsx`/`useDrawPolygonTool.spec.tsx`/`useDrawStarTool.spec.tsx` and to
+  `toDraftRectWithDefault.spec.ts`. e2e: `e2e/design/draw/shift-aspect-lock.spec.ts` — square-lock
+  differs from a free drag, the diagonal guide appears/disappears exactly on Shift press/release
+  (isolated from the rect-shape difference by using an already-square drag, so the *only* pixel
+  difference between the two screenshots is the guide itself — an earlier version of this test used
+  a non-square drag and kept "passing" even with the guide ref deliberately disabled, because the
+  rect-lock alone was still enough to make the screenshots differ), and toggling Shift mid-drag
+  toggles the lock live.
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.
