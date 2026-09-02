@@ -60,7 +60,7 @@ export const handlePointerMove = (
   continueStarCornerRadiusDrag(canvas, event, dispatch, canvasRefs.cornerRadius.starCornerRadiusDragRef);
   continuePolygonVertexCountDrag(canvas, event, dispatch, canvasRefs.vertexCount.polygonVertexCountDragRef);
   continueStarVertexCountDrag(canvas, event, dispatch, canvasRefs.vertexCount.starVertexCountDragRef);
-  continueStarRatioDrag(canvas, event, dispatch, selectionRefs.starRatioDragRef);
+  continueStarRatioDrag(canvas, event, dispatch, canvasRefs.starRatio.starRatioDragRef);
   continueEllipseArcDrag(canvas, event, dispatch, canvasRefs.ellipseArc.ellipseArcDragRef);
   continueEllipseArcRotateDrag(canvas, event, dispatch, canvasRefs.ellipseArc.ellipseArcRotateDragRef);
   continueEllipseArcRatioDrag(canvas, event, dispatch, canvasRefs.ellipseArc.ellipseArcRatioDragRef);

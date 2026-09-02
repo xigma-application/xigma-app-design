@@ -3,6 +3,7 @@ import { FC, useMemo, useRef } from 'react';
 // hooks
 import { usePencilRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/usePencilRefs/usePencilRefs';
 import { useSliceRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useSliceRefs/useSliceRefs';
+import { useStarRatioRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useStarRatioRefs/useStarRatioRefs';
 import { useVectorCutRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useVectorCutRefs/useVectorCutRefs';
 import { useVectorEditRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useVectorEditRefs/useVectorEditRefs';
 import { useVectorEraseRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useVectorEraseRefs/useVectorEraseRefs';
@@ -42,6 +43,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const pencilRefs = usePencilRefs();
   const shapeBuilderRefs = useShapeBuilderRefs();
   const sliceRefs = useSliceRefs();
+  const starRatioRefs = useStarRatioRefs();
   const vectorCutRefs = useVectorCutRefs();
   const vectorEditRefs = useVectorEditRefs();
   const vectorEraseRefs = useVectorEraseRefs();
@@ -69,6 +71,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       sectionName: sectionNameRefs,
       shapeBuilder: shapeBuilderRefs,
       slice: sliceRefs,
+      starRatio: starRatioRefs,
       transform: transformRefs,
       vectorCut: vectorCutRefs,
       vectorEdit: vectorEditRefs,
@@ -90,6 +93,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       sectionNameRefs,
       shapeBuilderRefs,
       sliceRefs,
+      starRatioRefs,
       transformRefs,
       vectorCutRefs,
       vectorEditRefs,

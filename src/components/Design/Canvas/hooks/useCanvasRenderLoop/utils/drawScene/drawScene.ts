@@ -129,7 +129,7 @@ export const drawScene = (
   drawSectionNameLabels(ctx, filteredNodes, refs);
   drawCornerRadiusHandlesLayer(ctx, hoveredNode, selectedNodes, refs);
   drawVertexCountHandlesLayer(ctx, hoveredNode, selectedNodes, refs);
-  drawStarRatioHandleLayer(ctx, hoveredNode, selectedNodes);
+  drawStarRatioHandleLayer(ctx, hoveredNode, selectedNodes, refs);
   drawVectorEditHandlesLayer(ctx, vertexDotBufferCache, eraseAwareNodesById, vectorEditingNodeIds, refs, penActiveVertexId);
   drawEllipseArcHandleLayer(ctx, hoveredNode, selectedNodes, refs);
   drawFrame(ctx, refs);

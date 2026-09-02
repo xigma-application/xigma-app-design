@@ -22,6 +22,7 @@ export const useHoverRefs = (): THoverRefs => {
   const hoveredPolygonVertexCountHandleRef = useRef<string | null>(null);
   const hoveredSegmentIdRef = useRef<string | null>(null);
   const hoveredStarCornerRadiusHandleRef = useRef<string | null>(null);
+  const hoveredStarRatioHandleRef = useRef<string | null>(null);
   const hoveredStarVertexCountHandleRef = useRef<string | null>(null);
   const hoveredVectorCutPointRef = useRef<TPoint | null>(null);
   const hoveredVectorCutSegmentRef = useRef<TVectorCutSegmentHover | null>(null);
@@ -47,6 +48,7 @@ export const useHoverRefs = (): THoverRefs => {
       hoveredPolygonVertexCountHandleRef,
       hoveredSegmentIdRef,
       hoveredStarCornerRadiusHandleRef,
+      hoveredStarRatioHandleRef,
       hoveredStarVertexCountHandleRef,
       hoveredVectorCutPointRef,
       hoveredVectorCutSegmentRef,

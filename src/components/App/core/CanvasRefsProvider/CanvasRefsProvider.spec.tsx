@@ -43,6 +43,7 @@ describe('CanvasRefsProvider behaviors', () => {
         hoveredPolygonVertexCountHandleRef: { current: null },
         hoveredSegmentIdRef: { current: null },
         hoveredStarCornerRadiusHandleRef: { current: null },
+        hoveredStarRatioHandleRef: { current: null },
         hoveredStarVertexCountHandleRef: { current: null },
         hoveredVectorCutPointRef: { current: null },
         hoveredVectorCutSegmentRef: { current: null },
@@ -78,6 +79,7 @@ describe('CanvasRefsProvider behaviors', () => {
         vectorShapeBuilderPathRef: { current: null },
       },
       slice: { sliceRef: { current: null } },
+      starRatio: { starRatioDragRef: { current: null } },
       transform: {
         alignmentGuideRef: { current: null },
         contactGuidesRef: { current: null },

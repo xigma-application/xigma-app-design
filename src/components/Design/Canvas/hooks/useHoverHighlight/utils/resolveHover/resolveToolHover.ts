@@ -33,6 +33,7 @@ import { resolveEllipseArcRotateHandleHover } from './resolveEllipseArcRotateHan
 import { resolvePolygonCornerRadiusHandleHover } from './resolvePolygonCornerRadiusHandleHover';
 import { resolvePolygonVertexCountHandleHover } from './resolvePolygonVertexCountHandleHover';
 import { resolveStarCornerRadiusHandleHover } from './resolveStarCornerRadiusHandleHover';
+import { resolveStarRatioHandleHover } from './resolveStarRatioHandleHover';
 import { resolveStarVertexCountHandleHover } from './resolveStarVertexCountHandleHover';
 import { setHoverState } from '../setHoverState';
 
@@ -89,6 +90,7 @@ export const resolveToolHover = (
   resolvePolygonCornerRadiusHandleHover(point, resizableSelectedNodes, viewport, refs);
   resolvePolygonVertexCountHandleHover(point, resizableSelectedNodes, viewport, refs);
   resolveStarCornerRadiusHandleHover(point, resizableSelectedNodes, viewport, refs);
+  resolveStarRatioHandleHover(point, resizableSelectedNodes, viewport, refs);
   resolveStarVertexCountHandleHover(point, resizableSelectedNodes, viewport, refs);
 
   for (const resolve of HOVER_RESOLVERS) {

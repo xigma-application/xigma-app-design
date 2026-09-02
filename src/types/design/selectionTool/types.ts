@@ -183,7 +183,6 @@ export type TSelectionToolRefs = {
   pathOffsetDragRef: RefObject<TPathOffsetDragState | null>;
   pendingVectorCornerHandleDragRef: RefObject<TPendingVectorCornerHandleDragState | null>;
   resizeDragRef: RefObject<TResizeDragState | null>;
-  starRatioDragRef: RefObject<TStarRatioDragState | null>;
   vectorCutDragRef: RefObject<TVectorCutDragState | null>;
   vectorEraseDragRef: RefObject<TVectorEraseDragState | null>;
   vectorHandleDragRef: RefObject<TVectorHandleDragState | null>;

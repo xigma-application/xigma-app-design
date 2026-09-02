@@ -17,6 +17,7 @@ describe('createHoverRefs behaviors', () => {
       hoveredPolygonVertexCountHandleRef: { current: null },
       hoveredSegmentIdRef: { current: null },
       hoveredStarCornerRadiusHandleRef: { current: null },
+      hoveredStarRatioHandleRef: { current: null },
       hoveredStarVertexCountHandleRef: { current: null },
       hoveredVectorCutPointRef: { current: null },
       hoveredVectorCutSegmentRef: { current: null },

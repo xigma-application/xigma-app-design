@@ -344,7 +344,7 @@ describe('armStarRatioOnPointerDown', () => {
 
     // result
     expect(armStarRatioOnPointerDown(ctx)).toBe(true);
-    expect(ctx.selectionRefs.starRatioDragRef.current).toMatchObject({ nodeId: 'star-1' });
+    expect(ctx.canvasRefs.starRatio.starRatioDragRef.current).toMatchObject({ nodeId: 'star-1' });
   });
 
   it('should return undefined when the point misses the handle', () => {
@@ -353,7 +353,7 @@ describe('armStarRatioOnPointerDown', () => {
 
     // result
     expect(armStarRatioOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.selectionRefs.starRatioDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.starRatio.starRatioDragRef.current).toBeNull();
   });
 });
 

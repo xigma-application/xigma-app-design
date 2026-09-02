@@ -12,6 +12,7 @@ import { TShapeContactGuide } from 'components/Design/Canvas/utils/getShapeConta
 import {
   TPolygonVertexCountDragState,
   TRotateDragState,
+  TStarRatioDragState,
   TStarVertexCountDragState,
   TVectorMultiDragState,
   TVectorMultiSelectResizeDragState,
@@ -225,6 +226,7 @@ export type THoverRefs = {
   hoveredPolygonVertexCountHandleRef: RefObject<string | null>;
   hoveredSegmentIdRef: RefObject<string | null>;
   hoveredStarCornerRadiusHandleRef: RefObject<string | null>;
+  hoveredStarRatioHandleRef: RefObject<string | null>;
   hoveredStarVertexCountHandleRef: RefObject<string | null>;
   hoveredVectorCutPointRef: RefObject<TPoint | null>;
   hoveredVectorCutSegmentRef: RefObject<TVectorCutSegmentHover | null>;
@@ -282,6 +284,10 @@ export type TVertexCountRefs = {
   starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>;
 };
 
+export type TStarRatioRefs = {
+  starRatioDragRef: RefObject<TStarRatioDragState | null>;
+};
+
 export type TVectorMultiSelectRefs = {
   vectorMultiDragRef: RefObject<TVectorMultiDragState | null>;
   vectorMultiSelectBoxRef: RefObject<TVectorMultiSelectBox | null>;
@@ -323,6 +329,7 @@ export type TCanvasRefs = {
   sectionName: TSectionNameRefs;
   shapeBuilder: TShapeBuilderRefs;
   slice: TSliceRefs;
+  starRatio: TStarRatioRefs;
   transform: TTransformRefs;
   vectorCut: TVectorCutRefs;
   vectorEdit: TVectorEditRefs;

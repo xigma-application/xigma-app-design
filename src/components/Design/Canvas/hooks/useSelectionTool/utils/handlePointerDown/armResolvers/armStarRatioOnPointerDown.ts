@@ -5,21 +5,14 @@ import { TArmContext } from '../types';
 import { armStarRatioDrag } from '../armStarRatioDrag';
 import { getStarRatioHandleAtPoint } from '../../../../../utils/getStarRatioHandleAtPoint';
 
-export const armStarRatioOnPointerDown = ({
-  canvas,
-  event,
-  point,
-  selectedNodes,
-  selectionRefs,
-  viewport,
-}: TArmContext): true | undefined => {
+export const armStarRatioOnPointerDown = ({ canvas, canvasRefs, event, point, selectedNodes, viewport }: TArmContext): true | undefined => {
   const starRatioHandleHit = getStarRatioHandleAtPoint(point, selectedNodes, viewport);
 
   if (starRatioHandleHit) {
     armStarRatioDrag(
       canvas,
       event,
-      selectionRefs.starRatioDragRef,
+      canvasRefs.starRatio.starRatioDragRef,
       starRatioHandleHit.bounds,
       starRatioHandleHit.nodeId,
       starRatioHandleHit.rotation,

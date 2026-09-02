@@ -3,7 +3,14 @@ import { NodeType } from 'types/design/enums';
 import { TEllipseNode, TPolygonNode, TStarNode } from 'types/design/types';
 
 // utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { drawStarRatioHandleLayer } from '../drawStarRatioHandleLayer';
+
+const drawValueLabelMock = vi.fn();
+
+vi.mock('utils/canvas/text/drawValueLabel/drawValueLabel', () => ({
+  drawValueLabel: (...args: unknown[]): void => drawValueLabelMock(...args),
+}));
 
 const createGlMock = (): WebGL2RenderingContext =>
   ({
@@ -73,6 +80,10 @@ const ellipse: TEllipseNode = {
 };
 
 describe('drawStarRatioHandleLayer', () => {
+  beforeEach(() => {
+    drawValueLabelMock.mockClear();
+  });
+
   it('should draw nothing when nothing is selected', () => {
     // mock
     const gl = createGlMock();
@@ -84,6 +95,7 @@ describe('drawStarRatioHandleLayer', () => {
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       null,
       [],
+      createCanvasRefs(),
     );
 
     // result
@@ -101,6 +113,7 @@ describe('drawStarRatioHandleLayer', () => {
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       null,
       [star],
+      createCanvasRefs(),
     );
 
     // result
@@ -118,6 +131,7 @@ describe('drawStarRatioHandleLayer', () => {
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       ellipse,
       [star],
+      createCanvasRefs(),
     );
 
     // result
@@ -135,6 +149,7 @@ describe('drawStarRatioHandleLayer', () => {
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       star,
       [star, { ...star, id: 'star-2' }],
+      createCanvasRefs(),
     );
 
     // result
@@ -152,6 +167,7 @@ describe('drawStarRatioHandleLayer', () => {
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       polygon,
       [polygon],
+      createCanvasRefs(),
     );
 
     // result
@@ -169,6 +185,7 @@ describe('drawStarRatioHandleLayer', () => {
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 0.9 } },
       star,
       [star],
+      createCanvasRefs(),
     );
 
     // result
@@ -186,9 +203,50 @@ describe('drawStarRatioHandleLayer', () => {
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       star,
       [star],
+      createCanvasRefs(),
     );
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+    expect(drawValueLabelMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw a blue "Ratio N%" value label when precisely hovering the star\'s ratio handle', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawStarRatioHandleLayer(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      star,
+      [star],
+      createCanvasRefs({ hover: { hoveredStarRatioHandleRef: { current: star.id } } }),
+    );
+
+    // result — star.ratio 0.382 -> "Ratio 38.2%"
+    expect(drawValueLabelMock).toHaveBeenCalledTimes(1);
+    const [, , , , text] = drawValueLabelMock.mock.calls[0];
+
+    expect(text).toBe('Ratio 38.2%');
+  });
+
+  it('should draw the "Ratio N%" value label while actively dragging the star\'s ratio handle', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawStarRatioHandleLayer(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      star,
+      [star],
+      createCanvasRefs({ starRatio: { starRatioDragRef: { current: { nodeId: star.id } as never } } }),
+    );
+
+    // result
+    expect(drawValueLabelMock).toHaveBeenCalledTimes(1);
   });
 });

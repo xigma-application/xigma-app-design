@@ -14,7 +14,6 @@ describe('createSelectionToolRefs behaviors', () => {
       pathOffsetDragRef: { current: null },
       pendingVectorCornerHandleDragRef: { current: null },
       resizeDragRef: { current: null },
-      starRatioDragRef: { current: null },
       vectorCutDragRef: { current: null },
       vectorEraseDragRef: { current: null },
       vectorHandleDragRef: { current: null },

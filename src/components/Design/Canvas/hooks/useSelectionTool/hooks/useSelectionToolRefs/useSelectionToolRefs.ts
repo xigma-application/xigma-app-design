@@ -8,7 +8,6 @@ import {
   TPendingVectorCornerHandleDragState,
   TResizeDragState,
   TSelectionToolRefs,
-  TStarRatioDragState,
   TVectorCutDragState,
   TVectorEraseDragState,
   TVectorHandleDragState,
@@ -25,7 +24,6 @@ export const useSelectionToolRefs = (): TSelectionToolRefs => {
   const pathOffsetDragRef = useRef<TPathOffsetDragState | null>(null);
   const pendingVectorCornerHandleDragRef = useRef<TPendingVectorCornerHandleDragState | null>(null);
   const resizeDragRef = useRef<TResizeDragState | null>(null);
-  const starRatioDragRef = useRef<TStarRatioDragState | null>(null);
   const vectorCutDragRef = useRef<TVectorCutDragState | null>(null);
   const vectorEraseDragRef = useRef<TVectorEraseDragState | null>(null);
   const vectorHandleDragRef = useRef<TVectorHandleDragState | null>(null);
@@ -43,7 +41,6 @@ export const useSelectionToolRefs = (): TSelectionToolRefs => {
       pathOffsetDragRef,
       pendingVectorCornerHandleDragRef,
       resizeDragRef,
-      starRatioDragRef,
       vectorCutDragRef,
       vectorEraseDragRef,
       vectorHandleDragRef,
