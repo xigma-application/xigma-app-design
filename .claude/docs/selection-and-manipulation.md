@@ -1735,13 +1735,21 @@ row has one of *its own* further out):
   construction: the reverted-to-full-candidates fallback is exactly the pre-grid behaviour, so the
   original "three differently-sized squares in a row" chain-gap case (deliberately no height in
   common) still works unchanged.
-  - Known limitation surfaced while verifying this live (shared by chain/flanked too, not new):
-    `findHorizontalNeighbors.ts`/`findVerticalNeighbors.ts` only count a shape as a neighbour if the
-    *raw, pre-snap* drag position doesn't yet overlap it (`edges.top >= active.bottom`, strict). A
-    drag whose raw position happens to overlap a target by even 1-2px — plausible mid-gesture, not
-    just at rest — fails to find that neighbour at all that frame, even though the corrected position
-    would be well within tolerance. Not fixed here (touches the shared neighbour-finder all three
-    mechanisms depend on); worth a tolerance-aware rewrite if this turns out to bite in practice.
+  - **Fixed** (same day, on request): `findHorizontalNeighbors.ts`/`findVerticalNeighbors.ts` used to
+    only count a shape as a neighbour if the *raw, pre-snap* drag position didn't yet overlap it
+    (`edges.top >= active.bottom`, strict) — a drag whose raw position happens to overlap a target by
+    even 1-2px (plausible mid-gesture, not just at rest) failed to find that neighbour at all for that
+    frame, even when the corrected position would land well within tolerance. Both functions now take
+    a `toleranceWorldUnits` param (threaded through from every call site, including the "look one hop
+    further" calls inside `getLeftChainSnap.ts`/`getRightChainSnap.ts`/`getTopChainSnap.ts`/
+    `getBottomChainSnap.ts`) and loosen the edge comparison by that amount:
+    `edges.right <= active.left + toleranceWorldUnits`. This only widens *neighbour eligibility* — the
+    actual snap's own mismatch-vs-tolerance check is unchanged and still gates whether a correction
+    applies, so a genuinely-too-far overlap still correctly finds no match. Verified live with a
+    realistic small (3px) established gap where the raw drag momentarily overlapped the target by 2px
+    — undetectable before, snaps correctly now (the reused `getHorizontalGuide`/`getVerticalGuide`
+    guide-building doesn't care whether the *found* neighbour came via overlap or a clean gap, so no
+    other code needed to change).
 
 ## Related
 

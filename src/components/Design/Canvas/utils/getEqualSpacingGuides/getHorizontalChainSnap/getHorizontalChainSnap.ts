@@ -17,7 +17,7 @@ export const getHorizontalChainSnap = (
   candidates: TEqualSpacingCandidate[],
   toleranceWorldUnits: number,
 ): THorizontalChainSnap => {
-  const { left, right } = findHorizontalNeighbors(active, candidates);
+  const { left, right } = findHorizontalNeighbors(active, candidates, toleranceWorldUnits);
   const flankedSnap = left && right ? getFlankedChainSnap(active, left, right, toleranceWorldUnits) : NO_SNAP;
   const leftSnap = left ? getLeftChainSnap(active, left, candidates, toleranceWorldUnits) : NO_SNAP;
   const rightSnap = right ? getRightChainSnap(active, right, candidates, toleranceWorldUnits) : NO_SNAP;

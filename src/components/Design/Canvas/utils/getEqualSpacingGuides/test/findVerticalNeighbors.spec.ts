@@ -13,7 +13,7 @@ describe('findVerticalNeighbors', () => {
     const farBottom = { bounds: { height: 20, width: 20, x: 0, y: 200 } };
 
     // action
-    const neighbors = findVerticalNeighbors(ACTIVE, [farTop, nearTop, farBottom, nearBottom]);
+    const neighbors = findVerticalNeighbors(ACTIVE, [farTop, nearTop, farBottom, nearBottom], 4);
 
     // result
     expect(neighbors.top).toBe(nearTop);
@@ -25,7 +25,7 @@ describe('findVerticalNeighbors', () => {
     const candidate = { bounds: { height: 20, width: 20, x: 200, y: 60 } };
 
     // action
-    const neighbors = findVerticalNeighbors(ACTIVE, [candidate]);
+    const neighbors = findVerticalNeighbors(ACTIVE, [candidate], 4);
 
     // result
     expect(neighbors).toEqual({ bottom: null, top: null });
@@ -33,7 +33,29 @@ describe('findVerticalNeighbors', () => {
 
   it('should return nulls when there are no candidates', () => {
     // action
-    const neighbors = findVerticalNeighbors(ACTIVE, []);
+    const neighbors = findVerticalNeighbors(ACTIVE, [], 4);
+
+    // result
+    expect(neighbors).toEqual({ bottom: null, top: null });
+  });
+
+  it('should still register a candidate whose raw position overlaps active by up to the tolerance', () => {
+    // mock — bottom edge at 102, 2px past active.top (100) — a live drag routinely overshoots like this
+    const overlapping = { bounds: { height: 20, width: 20, x: 0, y: 82 } };
+
+    // action
+    const neighbors = findVerticalNeighbors(ACTIVE, [overlapping], 4);
+
+    // result
+    expect(neighbors.top).toBe(overlapping);
+  });
+
+  it('should not register a candidate that overlaps active by more than the tolerance', () => {
+    // mock — bottom edge at 110, 10px past active.top (100) — well beyond the 4px tolerance
+    const overlapping = { bounds: { height: 20, width: 20, x: 0, y: 90 } };
+
+    // action
+    const neighbors = findVerticalNeighbors(ACTIVE, [overlapping], 4);
 
     // result
     expect(neighbors).toEqual({ bottom: null, top: null });

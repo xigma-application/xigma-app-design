@@ -8,7 +8,13 @@ import { getOverlap } from '../getDistanceGuides/getOverlap';
 
 export type TVerticalNeighbors = { bottom: TEqualSpacingCandidate | null; top: TEqualSpacingCandidate | null };
 
-export const findVerticalNeighbors = (active: TEdges, candidates: TEqualSpacingCandidate[]): TVerticalNeighbors => {
+// `toleranceWorldUnits` lets a candidate register even if `active`'s raw (pre-snap) position overlaps
+// it by up to that amount on the parallel axis — see findHorizontalNeighbors.ts's comment for why.
+export const findVerticalNeighbors = (
+  active: TEdges,
+  candidates: TEqualSpacingCandidate[],
+  toleranceWorldUnits: number,
+): TVerticalNeighbors => {
   let top: TEqualSpacingCandidate | null = null;
   let topEdges: TEdges | null = null;
   let bottom: TEqualSpacingCandidate | null = null;
@@ -21,12 +27,12 @@ export const findVerticalNeighbors = (active: TEdges, candidates: TEqualSpacingC
       return;
     }
 
-    if (edges.bottom <= active.top && (!topEdges || edges.bottom > topEdges.bottom)) {
+    if (edges.bottom <= active.top + toleranceWorldUnits && (!topEdges || edges.bottom > topEdges.bottom)) {
       top = candidate;
       topEdges = edges;
     }
 
-    if (edges.top >= active.bottom && (!bottomEdges || edges.top < bottomEdges.top)) {
+    if (edges.top >= active.bottom - toleranceWorldUnits && (!bottomEdges || edges.top < bottomEdges.top)) {
       bottom = candidate;
       bottomEdges = edges;
     }

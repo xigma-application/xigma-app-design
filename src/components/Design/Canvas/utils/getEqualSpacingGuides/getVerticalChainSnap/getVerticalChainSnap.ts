@@ -17,7 +17,7 @@ export const getVerticalChainSnap = (
   candidates: TEqualSpacingCandidate[],
   toleranceWorldUnits: number,
 ): TVerticalChainSnap => {
-  const { bottom, top } = findVerticalNeighbors(active, candidates);
+  const { bottom, top } = findVerticalNeighbors(active, candidates, toleranceWorldUnits);
   const flankedSnap = top && bottom ? getFlankedChainSnap(active, top, bottom, toleranceWorldUnits) : NO_SNAP;
   const topSnap = top ? getTopChainSnap(active, top, candidates, toleranceWorldUnits) : NO_SNAP;
   const bottomSnap = bottom ? getBottomChainSnap(active, bottom, candidates, toleranceWorldUnits) : NO_SNAP;

@@ -23,6 +23,7 @@ export const getLeftChainSnap = (
   const { left: left2 } = findHorizontalNeighbors(
     leftEdges,
     candidates.filter((candidate) => candidate !== left),
+    toleranceWorldUnits,
   );
 
   if (!left2) {

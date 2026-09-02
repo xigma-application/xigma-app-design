@@ -49,7 +49,10 @@ describe('getChainGapDragSnap', () => {
     // mock — shape1 (0..30) and shape2 (40..90) sit with a 10px gap; active dragged from x:98 with a
     // 0 delta lands 2px short of the x:100 that would give it the same 10px gap to shape2
     const activeId = addRect(98, 0, 20);
-    const candidateShapes = [{ bounds: { height: 30, width: 30, x: 0, y: 0 } }, { bounds: { height: 50, width: 50, x: 40, y: 0 } }];
+    const candidateShapes = [
+      { bounds: { height: 30, width: 30, x: 0, y: 0 }, points: [] },
+      { bounds: { height: 50, width: 50, x: 40, y: 0 }, points: [] },
+    ];
 
     // action
     const snap = getChainGapDragSnap(

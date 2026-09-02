@@ -23,6 +23,7 @@ export const getTopChainSnap = (
   const { top: top2 } = findVerticalNeighbors(
     topEdges,
     candidates.filter((candidate) => candidate !== top),
+    toleranceWorldUnits,
   );
 
   if (!top2) {
