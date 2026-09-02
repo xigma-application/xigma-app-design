@@ -27,7 +27,7 @@ export const SearchInput: FC<TSearchInputProps> = ({ ariaLabel, autoFocus = fals
 
   return (
     <div className={cx(styles.SearchInput, className)}>
-      <Icon color="neutral2" name="Search" size={16} />
+      <Icon color="ramp400" name="Search" size={32} />
       <E2EDataAttribute type={E2EAttribute.bypassGlobalShortcuts} value="true">
         <input
           aria-label={ariaLabel}

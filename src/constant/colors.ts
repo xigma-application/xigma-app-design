@@ -6,4 +6,5 @@ export const colors = {
   neutral4: 'var(--color-neutral-4)',
   neutral5: 'var(--color-neutral-5)',
   onBlue1: 'var(--color-on-blue-1)',
+  ramp400: 'var(--color-ramp-400)',
 } as const;
