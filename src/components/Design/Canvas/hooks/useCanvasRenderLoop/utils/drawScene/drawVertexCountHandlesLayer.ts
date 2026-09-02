@@ -9,6 +9,7 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { drawHoveredPolygonVertexCountValueLabel } from './drawHoveredPolygonVertexCountValueLabel';
+import { drawHoveredStarVertexCountValueLabel } from './drawHoveredStarVertexCountValueLabel';
 import { drawPolygonVertexCountHandle } from 'utils/canvas/drawPolygonVertexCountHandle';
 import { drawStarVertexCountHandle } from 'utils/canvas/drawStarVertexCountHandle';
 import { getNodeBounds } from '../../../../utils/getNodeBounds';
@@ -76,6 +77,18 @@ export const drawVertexCountHandlesLayer = (
           selectedNode.rotation,
           selectedNode.flipX,
           selectedNode.flipY,
+        );
+        drawHoveredStarVertexCountValueLabel(
+          context,
+          refs,
+          bounds,
+          selectedNode.points,
+          selectedNode.ratio,
+          selectedNode.cornerRadius ?? 0,
+          selectedNode.rotation,
+          selectedNode.flipX,
+          selectedNode.flipY,
+          selectedNode.id,
         );
         break;
     }

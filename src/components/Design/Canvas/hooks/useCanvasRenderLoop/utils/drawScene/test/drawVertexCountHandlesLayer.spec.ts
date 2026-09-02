@@ -3,7 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TEllipseNode, TPolygonNode, TRectangleNode, TStarNode } from 'types/design/types';
 
 // types
-import { TPolygonVertexCountDragState } from 'types/design/selectionTool/types';
+import { TPolygonVertexCountDragState, TStarVertexCountDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
@@ -286,6 +286,50 @@ describe('drawVertexCountHandlesLayer', () => {
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+    expect(drawValueLabelMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw a blue "Count N" value label (the star\'s point count) when precisely hovering the star\'s vertex-count handle', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawVertexCountHandlesLayer(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      star,
+      [star],
+      createCanvasRefs({ hover: { hoveredStarVertexCountHandleRef: { current: star.id } } }),
+    );
+
+    // result
+    expect(drawValueLabelMock).toHaveBeenCalledTimes(1);
+    const [, , , , text] = drawValueLabelMock.mock.calls[0];
+
+    expect(text).toBe('Count 5');
+  });
+
+  it('should draw the "Count N" value label while actively dragging the star\'s vertex-count handle', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawVertexCountHandlesLayer(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      star,
+      [star],
+      createCanvasRefs({
+        vertexCount: {
+          starVertexCountDragRef: { current: { nodeId: star.id } as TStarVertexCountDragState },
+        },
+      }),
+    );
+
+    // result
+    expect(drawValueLabelMock).toHaveBeenCalledTimes(1);
   });
 
   it('should draw nothing for a star once the shape renders too small on screen', () => {

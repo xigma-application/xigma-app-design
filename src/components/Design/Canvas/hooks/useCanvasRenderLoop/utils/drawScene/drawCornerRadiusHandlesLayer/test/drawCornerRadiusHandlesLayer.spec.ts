@@ -3,7 +3,7 @@ import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TCornerRadiusDragState, TPolygonCornerRadiusDragState } from 'types/design/canvas/types';
+import { TCornerRadiusDragState, TPolygonCornerRadiusDragState, TStarCornerRadiusDragState } from 'types/design/canvas/types';
 import { TEllipseNode, TPolygonNode, TRectangleNode, TStarNode } from 'types/design/types';
 
 // utils
@@ -473,7 +473,15 @@ describe('drawCornerRadiusHandlesLayer', () => {
     // result — the handle sits inset from the top vertex toward center; the anchor sits a further margin above it
     expect(drawValueLabelMock).toHaveBeenCalledTimes(1);
     const [, , , , text, anchor] = drawValueLabelMock.mock.calls[0];
-    const handlePosition = getPolygonCornerRadiusHandlePosition({ height: 100, width: 100, x: 0, y: 0 }, 3, 15, IDENTITY_VIEWPORT, false, false, true);
+    const handlePosition = getPolygonCornerRadiusHandlePosition(
+      { height: 100, width: 100, x: 0, y: 0 },
+      3,
+      15,
+      IDENTITY_VIEWPORT,
+      false,
+      false,
+      true,
+    );
 
     expect(text).toBe('Radius 15');
     expect(anchor.x).toBeCloseTo(handlePosition.x);
@@ -577,5 +585,64 @@ describe('drawCornerRadiusHandlesLayer', () => {
 
     expect(vertices[0]).toBeCloseTo(50);
     expect(vertices[1]).toBeCloseTo(0);
+  });
+
+  it('should draw a blue "Radius N" value label when precisely hovering the star\'s handle, without dragging', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCornerRadiusHandlesLayer(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      star,
+      [star],
+      createCanvasRefs({ hover: { hoveredStarCornerRadiusHandleRef: { current: star.id } } }),
+    );
+
+    // result
+    expect(drawValueLabelMock).toHaveBeenCalledTimes(1);
+    const [, , , , text] = drawValueLabelMock.mock.calls[0];
+
+    expect(text).toBe('Radius 15');
+  });
+
+  it('should draw the "Radius N" value label while actively dragging the star\'s handle', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCornerRadiusHandlesLayer(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      star,
+      [star],
+      createCanvasRefs({
+        cornerRadius: { starCornerRadiusDragRef: { current: { hasMoved: true } as TStarCornerRadiusDragState } },
+      }),
+    );
+
+    // result
+    expect(drawValueLabelMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should draw no value label for a star when merely hovered, not dragging or over the handle', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawCornerRadiusHandlesLayer(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      star,
+      [star],
+      createCanvasRefs(),
+    );
+
+    // result
+    expect(drawValueLabelMock).not.toHaveBeenCalled();
   });
 });

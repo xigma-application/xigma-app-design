@@ -34,6 +34,8 @@ describe('createCanvasRefs behaviors', () => {
         hoveredPolygonCornerRadiusHandleRef: { current: null },
         hoveredPolygonVertexCountHandleRef: { current: null },
         hoveredSegmentIdRef: { current: null },
+        hoveredStarCornerRadiusHandleRef: { current: null },
+        hoveredStarVertexCountHandleRef: { current: null },
         hoveredVectorCutPointRef: { current: null },
         hoveredVectorCutSegmentRef: { current: null },
         hoveredVectorEdgeInsertPointRef: { current: null },

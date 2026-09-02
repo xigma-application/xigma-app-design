@@ -224,6 +224,8 @@ export type THoverRefs = {
   hoveredPolygonCornerRadiusHandleRef: RefObject<string | null>;
   hoveredPolygonVertexCountHandleRef: RefObject<string | null>;
   hoveredSegmentIdRef: RefObject<string | null>;
+  hoveredStarCornerRadiusHandleRef: RefObject<string | null>;
+  hoveredStarVertexCountHandleRef: RefObject<string | null>;
   hoveredVectorCutPointRef: RefObject<TPoint | null>;
   hoveredVectorCutSegmentRef: RefObject<TVectorCutSegmentHover | null>;
   hoveredVectorEdgeInsertPointRef: RefObject<TPoint | null>;
