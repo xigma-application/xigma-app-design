@@ -15,6 +15,7 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   editingSelectionStart: 2,
   editingTextBox: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 },
   editingTextContent: 'hello',
+  isActionsPanelOpen: false,
   isUiMinimized: false,
   lastFrameTool: ToolName.frame,
   lastMoreTool: null,

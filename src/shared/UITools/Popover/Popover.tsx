@@ -19,6 +19,7 @@ export type TPopoverProps = {
   moveable?: boolean;
   onInteractOutside?: (event: Event) => void;
   onOpenChange?: (open: boolean) => void;
+  open?: boolean;
   side?: 'bottom' | 'left' | 'right' | 'top';
   sideOffset?: number;
   trigger: ReactNode;
@@ -33,6 +34,7 @@ export const Popover: FC<TPopoverProps> = ({
   moveable = false,
   onInteractOutside,
   onOpenChange,
+  open,
   side = 'bottom',
   sideOffset = 8,
   trigger,
@@ -42,7 +44,7 @@ export const Popover: FC<TPopoverProps> = ({
   const { handleOpenChange, offset, onPointerDown, onPointerMove, onPointerUp } = usePopoverDrag(moveable, onOpenChange);
 
   return (
-    <PopoverPrimitive.Root onOpenChange={handleOpenChange}>
+    <PopoverPrimitive.Root onOpenChange={handleOpenChange} open={open}>
       <PopoverPrimitive.Trigger aria-label={triggerAriaLabel} className={triggerClassName}>
         {trigger}
       </PopoverPrimitive.Trigger>

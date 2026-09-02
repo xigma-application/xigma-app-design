@@ -44,6 +44,7 @@ export const shortcuts = {
   nudgeRightLarge: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.arrowRight },
   nudgeUp: { secondaryKey: KeyboardKeys.arrowUp },
   nudgeUpLarge: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.arrowUp },
+  openActions: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.k },
   outlineStroke: { primaryKeys: ['alt', 'control'], secondaryKey: KeyboardKeys.o },
   paste: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.v },
   redo: { primaryKeys: [CONTROL_PRIMARY_KEY, 'shift'], secondaryKey: KeyboardKeys.z },

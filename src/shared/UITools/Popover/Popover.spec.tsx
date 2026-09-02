@@ -74,6 +74,18 @@ describe('Popover behaviors', () => {
     expect(content).toHaveStyle({ transform: 'translate(30px, -10px)' });
   });
 
+  it('should render as open when a controlled open prop is true, without needing a trigger click', () => {
+    // before
+    render(
+      <Popover open trigger={<span>Open</span>}>
+        Popover content
+      </Popover>,
+    );
+
+    // result
+    expect(screen.getByText('Popover content')).toBeInTheDocument();
+  });
+
   it('should not add drag handlers or a transform when not moveable', async () => {
     // mock
     const user = userEvent.setup();

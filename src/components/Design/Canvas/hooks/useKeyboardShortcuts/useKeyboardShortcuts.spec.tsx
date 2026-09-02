@@ -494,6 +494,26 @@ describe('useKeyboardShortcuts behaviors', () => {
     // result
     expect(store.getState().design.isUiMinimized).toBe(false);
   });
+
+  it('should toggle the Actions panel on "Cmd+K"', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyK', metaKey: true });
+
+    // result
+    expect(store.getState().design.isActionsPanelOpen).toBe(true);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyK', metaKey: true });
+
+    // result
+    expect(store.getState().design.isActionsPanelOpen).toBe(false);
+  });
 });
 
 // handleDeleteSelection reads/writes the real store singleton directly (not whatever store wraps the

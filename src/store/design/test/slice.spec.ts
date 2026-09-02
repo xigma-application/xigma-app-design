@@ -19,6 +19,7 @@ import slice, {
   reorderPages,
   replaceDesignSnapshot,
   replaceNode,
+  setActionsPanelOpen,
   setActivePage,
   setActiveTool,
   setPaintColor,
@@ -29,6 +30,7 @@ import slice, {
   startCommentDraft,
   startTextEdit,
   stopTextEdit,
+  toggleActionsPanelOpen,
   toggleNodeHidden,
   toggleNodeLocked,
   toggleNodeMask,
@@ -75,6 +77,7 @@ describe('design slice', () => {
       editingSelectionStart: 0,
       editingTextBox: null,
       editingTextContent: '',
+      isActionsPanelOpen: false,
       isUiMinimized: false,
       lastFrameTool: ToolName.frame,
       lastMoreTool: null,
@@ -559,6 +562,34 @@ describe('design slice', () => {
     // result
     expect(state.editingTextBox).toBeNull();
     expect(state.editingTextContent).toBe('');
+  });
+
+  it('should set the Actions panel open flag', () => {
+    // action
+    const opened = slice(undefined, setActionsPanelOpen(true));
+
+    // result
+    expect(opened.isActionsPanelOpen).toBe(true);
+
+    // action
+    const closed = slice(opened, setActionsPanelOpen(false));
+
+    // result
+    expect(closed.isActionsPanelOpen).toBe(false);
+  });
+
+  it('should toggle the Actions panel open flag', () => {
+    // action
+    const opened = slice(undefined, toggleActionsPanelOpen());
+
+    // result
+    expect(opened.isActionsPanelOpen).toBe(true);
+
+    // action
+    const closed = slice(opened, toggleActionsPanelOpen());
+
+    // result
+    expect(closed.isActionsPanelOpen).toBe(false);
   });
 
   it('should toggle the minimized UI flag', () => {

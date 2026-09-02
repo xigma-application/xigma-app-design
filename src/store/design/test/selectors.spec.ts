@@ -12,6 +12,7 @@ import {
   selectEditingSelectionStart,
   selectEditingTextBox,
   selectEditingTextContent,
+  selectIsActionsPanelOpen,
   selectIsUiMinimized,
   selectLastFrameTool,
   selectLastMoreTool,
@@ -63,6 +64,7 @@ const state = {
     editingSelectionStart: 3,
     editingTextBox: { flipX: false, flipY: false, height: 20, rotation: 0, width: 100, x: 10, y: 10 },
     editingTextContent: 'hello',
+    isActionsPanelOpen: true,
     isUiMinimized: true,
     lastFrameTool: ToolName.section,
     lastMoreTool: ToolName.shapeBuilder,
@@ -151,6 +153,11 @@ describe('design selectors', () => {
   it('should select the editing text content', () => {
     // result
     expect(selectEditingTextContent(state)).toBe('hello');
+  });
+
+  it('should select the Actions panel open flag', () => {
+    // result
+    expect(selectIsActionsPanelOpen(state)).toBe(true);
   });
 
   it('should select the minimized UI flag', () => {
@@ -409,7 +416,7 @@ describe('design selectors — groups', () => {
     expect(roles.get('d')).toEqual([{ depthOffset: 2, role: 'masked-continue' }]);
   });
 
-  it('should carry both its own scope role AND the outer chain\'s passthrough when a masked descendant is itself a masked member of a nested mask group', () => {
+  it("should carry both its own scope role AND the outer chain's passthrough when a masked descendant is itself a masked member of a nested mask group", () => {
     // mock — "a" is masked content of the outer group-1/b chain; "a" also contains its own
     // nested mask scope (x masks y). "x" must show both: the outer passthrough (depthOffset 1,
     // continuing group-1's chain) AND its own inner scope role (depthOffset 0, masked-start)

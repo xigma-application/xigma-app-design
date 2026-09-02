@@ -31,6 +31,7 @@ const buildState = (page: Partial<TDesignPage>): TDesignState => ({
   editingSelectionStart: 0,
   editingTextBox: null,
   editingTextContent: '',
+  isActionsPanelOpen: false,
   isUiMinimized: false,
   lastFrameTool: ToolName.frame,
   lastMoreTool: null,

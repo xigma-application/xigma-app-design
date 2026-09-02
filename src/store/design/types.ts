@@ -40,6 +40,7 @@ export type TDesignState = {
   editingSelectionStart: number;
   editingTextBox: TEditingTextBox | null;
   editingTextContent: string;
+  isActionsPanelOpen: boolean;
   isUiMinimized: boolean;
   lastFrameTool: ToolName;
   lastMoreTool: ToolName | null;

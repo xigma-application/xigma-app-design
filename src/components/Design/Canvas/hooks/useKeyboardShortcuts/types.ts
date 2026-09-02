@@ -30,6 +30,7 @@ export type TStandardKeyboardShortcuts = {
   nudgeRightLarge: TShortcut;
   nudgeUp: TShortcut;
   nudgeUpLarge: TShortcut;
+  openActions: TShortcut;
   outlineStroke: TShortcut;
   paste: TShortcut;
   redo: TShortcut;

@@ -74,6 +74,7 @@ const initialState: TDesignState = {
   editingSelectionStart: 0,
   editingTextBox: null,
   editingTextContent: '',
+  isActionsPanelOpen: false,
   isUiMinimized: false,
   lastFrameTool: DEFAULT_FRAME_TOOL,
   lastMoreTool: null,
@@ -141,6 +142,9 @@ const designSlice = createSlice({
     replaceDesignSnapshot: (state, action: PayloadAction<TDesignSnapshot>) => handleReplaceDesignSnapshot(state, action.payload),
     replaceNode: (state, action: PayloadAction<{ id: string; node: TSceneNode }>) => handleReplaceNode(state, action.payload),
     sendSelectionToBack: (state) => handleSendSelectionToBack(state),
+    setActionsPanelOpen: (state, action: PayloadAction<boolean>) => {
+      state.isActionsPanelOpen = action.payload;
+    },
     setActivePage: (state, action: PayloadAction<string>) => {
       state.activePageId = action.payload;
     },
@@ -159,6 +163,9 @@ const designSlice = createSlice({
     },
     startTextEdit: (state, action: PayloadAction<TStartTextEditPayload>) => handleStartTextEdit(state, action.payload),
     stopTextEdit: (state) => handleStopTextEdit(state),
+    toggleActionsPanelOpen: (state) => {
+      state.isActionsPanelOpen = !state.isActionsPanelOpen;
+    },
     toggleNodeHidden: (state, action: PayloadAction<string>) => handleToggleNodeHidden(state, action.payload),
     toggleNodeLocked: (state, action: PayloadAction<string>) => handleToggleNodeLocked(state, action.payload),
     toggleNodeMask: (state, action: PayloadAction<string>) => handleToggleNodeMask(state, action.payload),
@@ -196,6 +203,7 @@ export const {
   replaceDesignSnapshot,
   replaceNode,
   sendSelectionToBack,
+  setActionsPanelOpen,
   setActivePage,
   setActiveTool,
   setPaintColor,
@@ -206,6 +214,7 @@ export const {
   startCommentDraft,
   startTextEdit,
   stopTextEdit,
+  toggleActionsPanelOpen,
   toggleNodeHidden,
   toggleNodeLocked,
   toggleNodeMask,
