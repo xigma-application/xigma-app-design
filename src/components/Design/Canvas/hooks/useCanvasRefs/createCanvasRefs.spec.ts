@@ -32,6 +32,7 @@ describe('createCanvasRefs behaviors', () => {
         hoveredEllipseArcRatioHandleRef: { current: null },
         hoveredEllipseArcRotateHandleRef: { current: null },
         hoveredPolygonCornerRadiusHandleRef: { current: null },
+        hoveredPolygonVertexCountHandleRef: { current: null },
         hoveredSegmentIdRef: { current: null },
         hoveredVectorCutPointRef: { current: null },
         hoveredVectorCutSegmentRef: { current: null },
@@ -116,6 +117,7 @@ describe('createCanvasRefs behaviors', () => {
         rotatedVectorNodeSnapshotsRef: { current: null },
       },
       vectorWidth: { editingWidthLabelRef: { current: null }, vectorWidthPointDragRef: { current: null } },
+      vertexCount: { polygonVertexCountDragRef: { current: null }, starVertexCountDragRef: { current: null } },
     });
   });
 

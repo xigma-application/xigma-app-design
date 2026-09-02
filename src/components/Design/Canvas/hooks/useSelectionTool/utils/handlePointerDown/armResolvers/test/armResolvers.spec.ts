@@ -299,7 +299,7 @@ describe('armPolygonVertexCountOnPointerDown', () => {
 
     // result
     expect(armPolygonVertexCountOnPointerDown(ctx)).toBe(true);
-    expect(ctx.selectionRefs.polygonVertexCountDragRef.current).toMatchObject({ nodeId: 'polygon-1' });
+    expect(ctx.canvasRefs.vertexCount.polygonVertexCountDragRef.current).toMatchObject({ nodeId: 'polygon-1' });
   });
 
   it('should return undefined when the point misses the handle', () => {
@@ -308,7 +308,7 @@ describe('armPolygonVertexCountOnPointerDown', () => {
 
     // result
     expect(armPolygonVertexCountOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.selectionRefs.polygonVertexCountDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.vertexCount.polygonVertexCountDragRef.current).toBeNull();
   });
 });
 
@@ -321,7 +321,7 @@ describe('armStarVertexCountOnPointerDown', () => {
 
     // result
     expect(armStarVertexCountOnPointerDown(ctx)).toBe(true);
-    expect(ctx.selectionRefs.starVertexCountDragRef.current).toMatchObject({ nodeId: 'star-1' });
+    expect(ctx.canvasRefs.vertexCount.starVertexCountDragRef.current).toMatchObject({ nodeId: 'star-1' });
   });
 
   it('should return undefined when the point misses the handle', () => {
@@ -330,7 +330,7 @@ describe('armStarVertexCountOnPointerDown', () => {
 
     // result
     expect(armStarVertexCountOnPointerDown(ctx)).toBeUndefined();
-    expect(ctx.selectionRefs.starVertexCountDragRef.current).toBeNull();
+    expect(ctx.canvasRefs.vertexCount.starVertexCountDragRef.current).toBeNull();
   });
 });
 

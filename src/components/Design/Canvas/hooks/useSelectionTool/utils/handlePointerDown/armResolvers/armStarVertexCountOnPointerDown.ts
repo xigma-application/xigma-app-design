@@ -7,10 +7,10 @@ import { getStarVertexCountHandleAtPoint } from '../../../../../utils/getStarVer
 
 export const armStarVertexCountOnPointerDown = ({
   canvas,
+  canvasRefs,
   event,
   point,
   selectedNodes,
-  selectionRefs,
   viewport,
 }: TArmContext): true | undefined => {
   const starVertexCountHandleHit = getStarVertexCountHandleAtPoint(point, selectedNodes, viewport);
@@ -19,7 +19,7 @@ export const armStarVertexCountOnPointerDown = ({
     armStarVertexCountDrag(
       canvas,
       event,
-      selectionRefs.starVertexCountDragRef,
+      canvasRefs.vertexCount.starVertexCountDragRef,
       starVertexCountHandleHit.bounds,
       starVertexCountHandleHit.nodeId,
       starVertexCountHandleHit.rotation,

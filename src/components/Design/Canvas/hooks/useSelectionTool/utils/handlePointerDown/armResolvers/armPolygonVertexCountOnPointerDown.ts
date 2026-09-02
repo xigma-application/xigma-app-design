@@ -7,10 +7,10 @@ import { getPolygonVertexCountHandleAtPoint } from '../../../../../utils/getPoly
 
 export const armPolygonVertexCountOnPointerDown = ({
   canvas,
+  canvasRefs,
   event,
   point,
   selectedNodes,
-  selectionRefs,
   viewport,
 }: TArmContext): true | undefined => {
   const polygonVertexCountHandleHit = getPolygonVertexCountHandleAtPoint(point, selectedNodes, viewport);
@@ -19,7 +19,7 @@ export const armPolygonVertexCountOnPointerDown = ({
     armPolygonVertexCountDrag(
       canvas,
       event,
-      selectionRefs.polygonVertexCountDragRef,
+      canvasRefs.vertexCount.polygonVertexCountDragRef,
       polygonVertexCountHandleHit.bounds,
       polygonVertexCountHandleHit.nodeId,
       polygonVertexCountHandleHit.rotation,

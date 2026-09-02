@@ -19,6 +19,7 @@ import { useShapeBuilderRefs } from 'components/Design/Canvas/hooks/useCanvasRef
 import { useVectorPaintRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useVectorPaintRefs/useVectorPaintRefs';
 import { useVectorSnapshotsRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useVectorSnapshotsRefs/useVectorSnapshotsRefs';
 import { useVectorWidthRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useVectorWidthRefs/useVectorWidthRefs';
+import { useVertexCountRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useVertexCountRefs/useVertexCountRefs';
 
 // others
 import { CanvasRefsContext } from './context';
@@ -48,6 +49,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const vectorPaintRefs = useVectorPaintRefs();
   const vectorSnapshotsRefs = useVectorSnapshotsRefs();
   const vectorWidthRefs = useVectorWidthRefs();
+  const vertexCountRefs = useVertexCountRefs();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const colorSampleRequestRef = useRef<TColorSampleRequest | null>(null);
   const draftRef = useRef<TDraftEntity | null>(null);
@@ -75,6 +77,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       vectorPaint: vectorPaintRefs,
       vectorSnapshots: vectorSnapshotsRefs,
       vectorWidth: vectorWidthRefs,
+      vertexCount: vertexCountRefs,
     }),
     [
       cornerRadiusRefs,
@@ -95,6 +98,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       vectorPaintRefs,
       vectorSnapshotsRefs,
       vectorWidthRefs,
+      vertexCountRefs,
     ],
   );
 

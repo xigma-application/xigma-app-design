@@ -16,15 +16,7 @@ import {
   TPolygonCornerRadiusDragState,
   TStarCornerRadiusDragState,
 } from 'types/design/canvas/types';
-import {
-  TDragState,
-  TEndpointDragState,
-  TPathOffsetDragState,
-  TPolygonVertexCountDragState,
-  TResizeDragState,
-  TRotateDragState,
-  TStarVertexCountDragState,
-} from 'types/design/selectionTool/types';
+import { TDragState, TEndpointDragState, TPathOffsetDragState, TResizeDragState, TRotateDragState } from 'types/design/selectionTool/types';
 
 // utils
 import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
@@ -64,12 +56,6 @@ const createPolygonCornerRadiusDragRef = (
 const createStarCornerRadiusDragRef = (
   starCornerRadiusDragState: TStarCornerRadiusDragState | null = null,
 ): RefObject<TStarCornerRadiusDragState | null> => ({ current: starCornerRadiusDragState });
-const createPolygonVertexCountDragRef = (
-  polygonVertexCountDragState: TPolygonVertexCountDragState | null = null,
-): RefObject<TPolygonVertexCountDragState | null> => ({ current: polygonVertexCountDragState });
-const createStarVertexCountDragRef = (
-  starVertexCountDragState: TStarVertexCountDragState | null = null,
-): RefObject<TStarVertexCountDragState | null> => ({ current: starVertexCountDragState });
 const createEllipseArcDragRef = (): RefObject<TEllipseArcDragState | null> => ({ current: null });
 const createEllipseArcRotateDragRef = (): RefObject<TEllipseArcRotateDragState | null> => ({ current: null });
 const createEllipseArcRatioDragRef = (): RefObject<TEllipseArcRatioDragState | null> => ({ current: null });
@@ -127,9 +113,7 @@ describe('handlePointerMove', () => {
         endpointDragRef: createEndpointDragRef(),
         marqueeStartRef: createMarqueeStartRef(),
         pathOffsetDragRef: createPathOffsetDragRef(),
-        polygonVertexCountDragRef: createPolygonVertexCountDragRef(),
         resizeDragRef: createResizeDragRef(),
-        starVertexCountDragRef: createStarVertexCountDragRef(),
       }),
       vi.fn(),
     );
@@ -175,9 +159,7 @@ describe('handlePointerMove', () => {
         endpointDragRef: createEndpointDragRef(),
         marqueeStartRef: createMarqueeStartRef(),
         pathOffsetDragRef: createPathOffsetDragRef(),
-        polygonVertexCountDragRef: createPolygonVertexCountDragRef(),
         resizeDragRef: createResizeDragRef(),
-        starVertexCountDragRef: createStarVertexCountDragRef(),
       }),
       vi.fn(),
     );
@@ -217,9 +199,7 @@ describe('handlePointerMove', () => {
         endpointDragRef,
         marqueeStartRef: createMarqueeStartRef(),
         pathOffsetDragRef: createPathOffsetDragRef(),
-        polygonVertexCountDragRef: createPolygonVertexCountDragRef(),
         resizeDragRef: createResizeDragRef(),
-        starVertexCountDragRef: createStarVertexCountDragRef(),
       }),
       vi.fn(),
     );
@@ -259,9 +239,7 @@ describe('handlePointerMove', () => {
         endpointDragRef: createEndpointDragRef(),
         marqueeStartRef,
         pathOffsetDragRef: createPathOffsetDragRef(),
-        polygonVertexCountDragRef: createPolygonVertexCountDragRef(),
         resizeDragRef: createResizeDragRef(),
-        starVertexCountDragRef: createStarVertexCountDragRef(),
       }),
       vi.fn(),
     );

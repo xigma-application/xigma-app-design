@@ -14,6 +14,7 @@ describe('createHoverRefs behaviors', () => {
       hoveredEllipseArcRatioHandleRef: { current: null },
       hoveredEllipseArcRotateHandleRef: { current: null },
       hoveredPolygonCornerRadiusHandleRef: { current: null },
+      hoveredPolygonVertexCountHandleRef: { current: null },
       hoveredSegmentIdRef: { current: null },
       hoveredVectorCutPointRef: { current: null },
       hoveredVectorCutSegmentRef: { current: null },

@@ -2,8 +2,18 @@
 import { NodeType } from 'types/design/enums';
 import { TEllipseNode, TPolygonNode, TRectangleNode, TStarNode } from 'types/design/types';
 
+// types
+import { TPolygonVertexCountDragState } from 'types/design/selectionTool/types';
+
 // utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { drawVertexCountHandlesLayer } from '../drawVertexCountHandlesLayer';
+
+const drawValueLabelMock = vi.fn();
+
+vi.mock('utils/canvas/text/drawValueLabel/drawValueLabel', () => ({
+  drawValueLabel: (...args: unknown[]): void => drawValueLabelMock(...args),
+}));
 
 const createGlMock = (): WebGL2RenderingContext =>
   ({
@@ -86,6 +96,10 @@ const ellipse: TEllipseNode = {
 };
 
 describe('drawVertexCountHandlesLayer', () => {
+  beforeEach(() => {
+    drawValueLabelMock.mockClear();
+  });
+
   it('should draw nothing when nothing is selected', () => {
     // mock
     const gl = createGlMock();
@@ -97,6 +111,7 @@ describe('drawVertexCountHandlesLayer', () => {
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       null,
       [],
+      createCanvasRefs(),
     );
 
     // result
@@ -114,6 +129,7 @@ describe('drawVertexCountHandlesLayer', () => {
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       null,
       [polygon],
+      createCanvasRefs(),
     );
 
     // result
@@ -131,6 +147,7 @@ describe('drawVertexCountHandlesLayer', () => {
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       ellipse,
       [polygon],
+      createCanvasRefs(),
     );
 
     // result
@@ -148,6 +165,7 @@ describe('drawVertexCountHandlesLayer', () => {
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       polygon,
       [polygon, { ...polygon, id: 'polygon-2' }],
+      createCanvasRefs(),
     );
 
     // result
@@ -165,6 +183,7 @@ describe('drawVertexCountHandlesLayer', () => {
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       rectangle,
       [rectangle],
+      createCanvasRefs(),
     );
 
     // result
@@ -182,6 +201,7 @@ describe('drawVertexCountHandlesLayer', () => {
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 0.9 } },
       polygon,
       [polygon],
+      createCanvasRefs(),
     );
 
     // result
@@ -199,10 +219,55 @@ describe('drawVertexCountHandlesLayer', () => {
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       polygon,
       [polygon],
+      createCanvasRefs(),
     );
 
     // result
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+    expect(drawValueLabelMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw a blue "Count N" value label when precisely hovering the polygon\'s vertex-count handle', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawVertexCountHandlesLayer(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      polygon,
+      [polygon],
+      createCanvasRefs({ hover: { hoveredPolygonVertexCountHandleRef: { current: polygon.id } } }),
+    );
+
+    // result
+    expect(drawValueLabelMock).toHaveBeenCalledTimes(1);
+    const [, , , , text] = drawValueLabelMock.mock.calls[0];
+
+    expect(text).toBe('Count 3');
+  });
+
+  it('should draw the "Count N" value label while actively dragging the polygon\'s vertex-count handle', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawVertexCountHandlesLayer(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      polygon,
+      [polygon],
+      createCanvasRefs({
+        vertexCount: {
+          polygonVertexCountDragRef: { current: { nodeId: polygon.id } as TPolygonVertexCountDragState },
+        },
+      }),
+    );
+
+    // result
+    expect(drawValueLabelMock).toHaveBeenCalledTimes(1);
   });
 
   it('should draw the single vertex-count handle when a star is both selected and hovered', () => {
@@ -216,6 +281,7 @@ describe('drawVertexCountHandlesLayer', () => {
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
       star,
       [star],
+      createCanvasRefs(),
     );
 
     // result
@@ -233,6 +299,7 @@ describe('drawVertexCountHandlesLayer', () => {
       { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: { x: 0, y: 0, zoom: 0.9 } },
       star,
       [star],
+      createCanvasRefs(),
     );
 
     // result

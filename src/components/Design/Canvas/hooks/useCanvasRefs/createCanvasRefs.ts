@@ -17,6 +17,7 @@ import { createVectorMultiSelectRefs } from './hooks/useVectorMultiSelectRefs/cr
 import { createVectorPaintRefs } from './hooks/useVectorPaintRefs/createVectorPaintRefs';
 import { createVectorSnapshotsRefs } from './hooks/useVectorSnapshotsRefs/createVectorSnapshotsRefs';
 import { createVectorWidthRefs } from './hooks/useVectorWidthRefs/createVectorWidthRefs';
+import { createVertexCountRefs } from './hooks/useVertexCountRefs/createVertexCountRefs';
 
 // types
 import { TCanvasRefs, TCanvasRefsOverrides } from 'types/design/canvas/types';
@@ -44,4 +45,5 @@ export const createCanvasRefs = (overrides: TCanvasRefsOverrides = {}): TCanvasR
   vectorPaint: createVectorPaintRefs(overrides.vectorPaint),
   vectorSnapshots: createVectorSnapshotsRefs(overrides.vectorSnapshots),
   vectorWidth: createVectorWidthRefs(overrides.vectorWidth),
+  vertexCount: createVertexCountRefs(overrides.vertexCount),
 });

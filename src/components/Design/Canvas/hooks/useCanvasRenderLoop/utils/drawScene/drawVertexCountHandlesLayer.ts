@@ -3,10 +3,12 @@ import { DRAFT_FRAME_STROKE } from 'constant/canvas';
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDrawSceneContext } from './types';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { drawHoveredPolygonVertexCountValueLabel } from './drawHoveredPolygonVertexCountValueLabel';
 import { drawPolygonVertexCountHandle } from 'utils/canvas/drawPolygonVertexCountHandle';
 import { drawStarVertexCountHandle } from 'utils/canvas/drawStarVertexCountHandle';
 import { getNodeBounds } from '../../../../utils/getNodeBounds';
@@ -18,6 +20,7 @@ export const drawVertexCountHandlesLayer = (
   context: TDrawSceneContext,
   hoveredNode: TSceneNode | null | undefined,
   selectedNodes: TSceneNode[],
+  refs: TCanvasRefs,
 ): void => {
   const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
   const [selectedNode] = selectedNodes;
@@ -44,6 +47,17 @@ export const drawVertexCountHandlesLayer = (
           selectedNode.rotation,
           selectedNode.flipX,
           selectedNode.flipY,
+        );
+        drawHoveredPolygonVertexCountValueLabel(
+          context,
+          refs,
+          bounds,
+          selectedNode.sides,
+          selectedNode.cornerRadius ?? 0,
+          selectedNode.rotation,
+          selectedNode.flipX,
+          selectedNode.flipY,
+          selectedNode.id,
         );
         break;
       case selectedNode.type === NodeType.star:

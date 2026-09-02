@@ -10,7 +10,9 @@ import { TFlattenedVectorSegment } from 'utils/canvas/vectorNetwork/flattenVecto
 import { TPenDragOrigin } from 'components/Design/Canvas/hooks/useDrawPenTool/types';
 import { TShapeContactGuide } from 'components/Design/Canvas/utils/getShapeContactGuides';
 import {
+  TPolygonVertexCountDragState,
   TRotateDragState,
+  TStarVertexCountDragState,
   TVectorMultiDragState,
   TVectorMultiSelectResizeDragState,
   TVectorMultiSelectRotateDragState,
@@ -220,6 +222,7 @@ export type THoverRefs = {
   hoveredEllipseArcRatioHandleRef: RefObject<string | null>;
   hoveredEllipseArcRotateHandleRef: RefObject<string | null>;
   hoveredPolygonCornerRadiusHandleRef: RefObject<string | null>;
+  hoveredPolygonVertexCountHandleRef: RefObject<string | null>;
   hoveredSegmentIdRef: RefObject<string | null>;
   hoveredVectorCutPointRef: RefObject<TPoint | null>;
   hoveredVectorCutSegmentRef: RefObject<TVectorCutSegmentHover | null>;
@@ -272,6 +275,11 @@ export type TCornerRadiusRefs = {
   starCornerRadiusDragRef: RefObject<TStarCornerRadiusDragState | null>;
 };
 
+export type TVertexCountRefs = {
+  polygonVertexCountDragRef: RefObject<TPolygonVertexCountDragState | null>;
+  starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>;
+};
+
 export type TVectorMultiSelectRefs = {
   vectorMultiDragRef: RefObject<TVectorMultiDragState | null>;
   vectorMultiSelectBoxRef: RefObject<TVectorMultiSelectBox | null>;
@@ -321,6 +329,7 @@ export type TCanvasRefs = {
   vectorPaint: TVectorPaintRefs;
   vectorSnapshots: TVectorSnapshotsRefs;
   vectorWidth: TVectorWidthRefs;
+  vertexCount: TVertexCountRefs;
 };
 
 export type TCanvasRefsOverrides = {

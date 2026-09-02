@@ -182,10 +182,8 @@ export type TSelectionToolRefs = {
   marqueeStartRef: RefObject<TPoint | null>;
   pathOffsetDragRef: RefObject<TPathOffsetDragState | null>;
   pendingVectorCornerHandleDragRef: RefObject<TPendingVectorCornerHandleDragState | null>;
-  polygonVertexCountDragRef: RefObject<TPolygonVertexCountDragState | null>;
   resizeDragRef: RefObject<TResizeDragState | null>;
   starRatioDragRef: RefObject<TStarRatioDragState | null>;
-  starVertexCountDragRef: RefObject<TStarVertexCountDragState | null>;
   vectorCutDragRef: RefObject<TVectorCutDragState | null>;
   vectorEraseDragRef: RefObject<TVectorEraseDragState | null>;
   vectorHandleDragRef: RefObject<TVectorHandleDragState | null>;
