@@ -1,14 +1,14 @@
 @use '../../../../../styles/mixins/scrollbar';
 
 .ActionsPanel {
-  background-color: var(--color-menu-panel);
+  background-color: var(--color-neutral-5);
   border-radius: 8px;
   box-shadow: var(--elevation-400-menu-panel);
   box-sizing: border-box;
   color: var(--color-neutral-1);
   display: flex;
-  height: min(calc(max(100vh, 256px) - 68px), 354px);
   flex-direction: column;
+  height: min(calc(max(100vh, 256px) - 68px), 354px);
   max-height: min(calc(max(100vh, 256px) - 68px), 354px);
   width: var(--radix-popper-anchor-width);
 
