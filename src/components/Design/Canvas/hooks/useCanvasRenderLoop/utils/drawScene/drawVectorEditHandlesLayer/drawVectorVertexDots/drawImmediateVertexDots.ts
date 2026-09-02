@@ -4,12 +4,8 @@ import { TVectorNode, TViewport } from 'types/design/types';
 // utils
 import { drawHoveredVertexDot } from './drawHoveredVertexDot';
 import { drawNewVertexDot } from './drawNewVertexDot';
-import { drawSelectedVertexDot } from './drawSelectedVertexDot';
+import { drawSelectedVertexDot } from './drawSelectedVertexDot/drawSelectedVertexDot';
 
-// Only a vertex that is new (cut-marked) or hovered can ever need an immediate (non-batched) draw —
-// a merely-selected vertex always lands in classifyVertexDots' selected batch instead, hover or not
-// (selection outranks hover, matching the original combined switch's case order). So this only ever
-// has to visit the small newVertexIds/hoveredVertexId set, never every vertex on the node.
 export const drawImmediateVertexDots = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
@@ -18,6 +14,7 @@ export const drawImmediateVertexDots = (
   selectedVertexIds: ReadonlySet<string>,
   newVertexIds: ReadonlySet<string>,
   hoveredVertexId: string | null,
+  isMeasuring: boolean,
   baseSize: number,
   canvasWidth: number,
   canvasHeight: number,
@@ -41,7 +38,7 @@ export const drawImmediateVertexDots = (
     const isHovered = id === hoveredVertexId;
 
     if (isSelected && isNew) {
-      drawSelectedVertexDot(gl, program, buffer, vertex, isNew, baseSize, canvasWidth, canvasHeight, viewport);
+      drawSelectedVertexDot(gl, program, buffer, vertex, isNew, isMeasuring, baseSize, canvasWidth, canvasHeight, viewport);
     } else if (isNew) {
       drawNewVertexDot(gl, program, buffer, vertex, isHovered, baseSize, canvasWidth, canvasHeight, viewport);
     } else if (isHovered && !isSelected) {

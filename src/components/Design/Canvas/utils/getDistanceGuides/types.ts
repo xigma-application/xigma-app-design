@@ -9,6 +9,7 @@ export type TDistanceGuides = {
   activeRect?: TDraftRect;
   labels: TDistanceGuideLabel[];
   lines: TDistanceGuideLine[];
+  targetPoint?: TPoint;
   targetRect?: TDraftRect;
 };
 

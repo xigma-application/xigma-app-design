@@ -144,6 +144,7 @@ describe('drawVectorEditHandlesLayer', () => {
       ['pre-s'],
       'v1',
       newVertexIds,
+      false,
       'hover-s',
       'hover-vs',
       { x: 1, y: 2 },
@@ -170,6 +171,7 @@ describe('drawVectorEditHandlesLayer', () => {
       ['pre-s'],
       'v1',
       newVertexIds,
+      false,
       'hover-s',
       'hover-vs',
       { x: 1, y: 2 },
@@ -184,6 +186,21 @@ describe('drawVectorEditHandlesLayer', () => {
       150,
       IDENTITY_VIEWPORT,
     );
+  });
+
+  it('should derive isMeasuring from a non-null distanceGuidesRef and forward it to drawVectorEditHandlesForNode', () => {
+    // before
+    drawVectorEditHandlesLayer(
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      vertexDotBufferCache,
+      nodes,
+      [vectorNode.id],
+      createCanvasRefs({ transform: { distanceGuidesRef: { current: { labels: [], lines: [] } } } }),
+      null,
+    );
+
+    // result
+    expect(drawVectorEditHandlesForNodeMock.mock.calls[0]?.[11]).toBe(true);
   });
 
   it('should draw the multi-select box when 2+ vertices are selected together, with no corner handles', () => {

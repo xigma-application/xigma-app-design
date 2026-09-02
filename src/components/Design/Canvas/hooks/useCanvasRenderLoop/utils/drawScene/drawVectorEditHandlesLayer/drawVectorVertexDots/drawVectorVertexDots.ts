@@ -1,5 +1,6 @@
 // others
 import {
+  DISTANCE_GUIDE_STROKE,
   VECTOR_VERTEX_FILL,
   VECTOR_VERTEX_SELECTED_FILL,
   VECTOR_VERTEX_SELECTED_INNER_SCALE,
@@ -25,6 +26,7 @@ export const drawVectorVertexDots = (
   selectedVertexIds: string[],
   hoveredVertexId: string | null,
   newVertexIds: Set<string>,
+  isMeasuring: boolean,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
@@ -39,6 +41,7 @@ export const drawVectorVertexDots = (
     selected,
     newVertexIds,
     hoveredVertexId,
+    isMeasuring,
     baseSize,
     canvasWidth,
     canvasHeight,
@@ -76,7 +79,7 @@ export const drawVectorVertexDots = (
     vertexDotBufferCache,
     selectedVertexCenters,
     baseSize * VECTOR_VERTEX_SELECTED_INNER_SCALE,
-    VECTOR_VERTEX_SELECTED_FILL,
+    isMeasuring ? DISTANCE_GUIDE_STROKE : VECTOR_VERTEX_SELECTED_FILL,
     canvasWidth,
     canvasHeight,
     viewport,

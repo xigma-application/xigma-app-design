@@ -4,11 +4,15 @@ import { drawDistanceGuides } from '../drawDistanceGuides';
 
 const drawDistanceGuideLineMock = vi.fn();
 const drawDistanceGuideOutlinesMock = vi.fn();
+const drawDistanceGuideTargetDotMock = vi.fn();
 const drawValueLabelMock = vi.fn();
 
 vi.mock('../drawDistanceGuideLine', () => ({ drawDistanceGuideLine: (...args: unknown[]): void => drawDistanceGuideLineMock(...args) }));
 vi.mock('../drawDistanceGuideOutlines', () => ({
   drawDistanceGuideOutlines: (...args: unknown[]): void => drawDistanceGuideOutlinesMock(...args),
+}));
+vi.mock('../drawDistanceGuideTargetDot', () => ({
+  drawDistanceGuideTargetDot: (...args: unknown[]): void => drawDistanceGuideTargetDotMock(...args),
 }));
 vi.mock('utils/canvas/text/drawValueLabel/drawValueLabel', () => ({
   drawValueLabel: (...args: unknown[]): void => drawValueLabelMock(...args),
@@ -24,6 +28,7 @@ describe('drawDistanceGuides', () => {
   beforeEach(() => {
     drawDistanceGuideLineMock.mockClear();
     drawDistanceGuideOutlinesMock.mockClear();
+    drawDistanceGuideTargetDotMock.mockClear();
     drawValueLabelMock.mockClear();
   });
 
@@ -37,6 +42,7 @@ describe('drawDistanceGuides', () => {
     // result
     expect(drawDistanceGuideLineMock).not.toHaveBeenCalled();
     expect(drawDistanceGuideOutlinesMock).not.toHaveBeenCalled();
+    expect(drawDistanceGuideTargetDotMock).not.toHaveBeenCalled();
     expect(drawValueLabelMock).not.toHaveBeenCalled();
   });
 
@@ -78,5 +84,19 @@ describe('drawDistanceGuides', () => {
       IDENTITY_VIEWPORT,
       { edgeGapPx: 5, fill: '#cd4422' },
     );
+    expect(drawDistanceGuideTargetDotMock).not.toHaveBeenCalled();
+  });
+
+  it('should also draw the ride-along target dot when the guides carry a targetPoint', () => {
+    // before
+    const guides = { labels: [], lines: [], targetPoint: { x: 30, y: 40 } };
+
+    drawDistanceGuides(
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
+      createCanvasRefs({ transform: { distanceGuidesRef: { current: guides } } }),
+    );
+
+    // result
+    expect(drawDistanceGuideTargetDotMock).toHaveBeenCalledWith(gl, program, buffer, { x: 30, y: 40 }, 200, 150, IDENTITY_VIEWPORT);
   });
 });

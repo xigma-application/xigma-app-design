@@ -1,17 +1,12 @@
 // others
-import {
-  VECTOR_CUT_CROSSING_FILL,
-  VECTOR_VERTEX_FILL,
-  VECTOR_VERTEX_SELECTED_FILL,
-  VECTOR_VERTEX_SELECTED_INNER_SCALE,
-  VECTOR_VERTEX_SELECTED_SCALE,
-} from 'constant/canvas';
+import { VECTOR_VERTEX_FILL, VECTOR_VERTEX_SELECTED_INNER_SCALE, VECTOR_VERTEX_SELECTED_SCALE } from 'constant/canvas';
 
 // types
 import { TVectorVertex, TViewport } from 'types/design/types';
 
 // utils
-import { drawVertexDot } from './drawVertexDot';
+import { drawVertexDot } from '../drawVertexDot';
+import { getSelectedVertexInnerFill } from './getSelectedVertexInnerFill';
 
 export const drawSelectedVertexDot = (
   gl: WebGL2RenderingContext,
@@ -19,6 +14,7 @@ export const drawSelectedVertexDot = (
   buffer: WebGLBuffer,
   vertex: TVectorVertex,
   isNew: boolean,
+  isMeasuring: boolean,
   baseSize: number,
   canvasWidth: number,
   canvasHeight: number,
@@ -43,7 +39,7 @@ export const drawSelectedVertexDot = (
     vertex.x,
     vertex.y,
     baseSize * VECTOR_VERTEX_SELECTED_INNER_SCALE,
-    isNew ? VECTOR_CUT_CROSSING_FILL : VECTOR_VERTEX_SELECTED_FILL,
+    getSelectedVertexInnerFill(isNew, isMeasuring),
     canvasWidth,
     canvasHeight,
     viewport,

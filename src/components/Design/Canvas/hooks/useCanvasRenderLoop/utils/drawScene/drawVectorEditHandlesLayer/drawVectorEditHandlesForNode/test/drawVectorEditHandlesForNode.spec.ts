@@ -83,6 +83,7 @@ const call = (
   snappedHandle: TVectorHandleHover | null = null,
   isPenDraggedHandleSnapped = false,
   newVertexIds: Set<string> = new Set(),
+  isMeasuring = false,
 ): void => {
   const gl = {} as WebGL2RenderingContext;
   const program = {} as WebGLProgram;
@@ -101,6 +102,7 @@ const call = (
     preMarqueeSegmentIds,
     hoveredVertexId,
     newVertexIds,
+    isMeasuring,
     hoveredSegmentId,
     hoveredVectorSegmentId,
     hoveredVectorEdgeInsertPoint,
@@ -215,6 +217,16 @@ describe('drawVectorEditHandlesForNode', () => {
     expect(selectedOuterCall?.[6]).toBe('#ffffff');
     expect(selectedInnerCall?.[4]).toEqual([vectorNode.vertices.v1]);
     expect(selectedInnerCall?.[6]).toBe('#337ae1');
+  });
+
+  it('should recolor the selected vertex’s inner dot orange instead of blue while a distance measurement is in progress', () => {
+    // before
+    call(vectorNode, ['v1'], null, null, null, null, [], null, null, [], null, [], [], null, null, false, new Set(), true);
+
+    // result
+    const selectedInnerCall = drawVectorVertexDotBatchMock.mock.calls.find((args) => args[5] === SELECTED_INNER_SIZE);
+
+    expect(selectedInnerCall?.[6]).toBe('#cd4422');
   });
 
   it('should draw the hovered vertex immediately, larger than its unhovered (plain-batched) neighbor', () => {

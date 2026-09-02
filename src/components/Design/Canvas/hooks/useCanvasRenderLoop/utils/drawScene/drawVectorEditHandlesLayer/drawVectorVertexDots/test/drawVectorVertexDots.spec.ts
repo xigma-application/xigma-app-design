@@ -1,5 +1,6 @@
 // others
 import {
+  DISTANCE_GUIDE_STROKE,
   VECTOR_CUT_CROSSING_FILL,
   VECTOR_VERTEX_FILL,
   VECTOR_VERTEX_HOVER_SCALE,
@@ -60,7 +61,7 @@ describe('drawVectorVertexDots', () => {
 
   it('should batch every unselected, unhovered vertex into a single plain-dot draw call at the base size', () => {
     // before
-    drawVectorVertexDots(gl, program, buffer, vertexDotBufferCache, node, [], null, new Set(), 200, 150, IDENTITY_VIEWPORT);
+    drawVectorVertexDots(gl, program, buffer, vertexDotBufferCache, node, [], null, new Set(), false, 200, 150, IDENTITY_VIEWPORT);
 
     // result — plain batch carries both vertices; the two selected-tier batches still fire, empty
     expect(drawEllipseMock).not.toHaveBeenCalled();
@@ -108,7 +109,7 @@ describe('drawVectorVertexDots', () => {
 
   it('should draw the hovered vertex immediately at VECTOR_VERTEX_HOVER_SCALE times the base size, and leave the other vertex in the plain batch', () => {
     // before
-    drawVectorVertexDots(gl, program, buffer, vertexDotBufferCache, node, [], 'v1', new Set(), 200, 150, IDENTITY_VIEWPORT);
+    drawVectorVertexDots(gl, program, buffer, vertexDotBufferCache, node, [], 'v1', new Set(), false, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawEllipseMock).toHaveBeenCalledTimes(1);
@@ -139,7 +140,7 @@ describe('drawVectorVertexDots', () => {
 
   it('should batch a selected vertex into both the outer-ring and inner-dot selected batches, at their own scaled sizes', () => {
     // before
-    drawVectorVertexDots(gl, program, buffer, vertexDotBufferCache, node, ['v1'], null, new Set(), 200, 150, IDENTITY_VIEWPORT);
+    drawVectorVertexDots(gl, program, buffer, vertexDotBufferCache, node, ['v1'], null, new Set(), false, 200, 150, IDENTITY_VIEWPORT);
 
     // result — v1 lands in the selected batches, v2 stays in the plain batch
     expect(drawEllipseMock).not.toHaveBeenCalled();
@@ -184,9 +185,42 @@ describe('drawVectorVertexDots', () => {
     );
   });
 
+  it('should recolor the selected vertex’s inner dot orange instead of blue while a distance measurement is in progress', () => {
+    // before
+    drawVectorVertexDots(gl, program, buffer, vertexDotBufferCache, node, ['v1'], null, new Set(), true, 200, 150, IDENTITY_VIEWPORT);
+
+    // result — outer ring stays white, only the inner dot swaps to the distance-guide orange
+    expect(drawVectorVertexDotBatchMock).toHaveBeenNthCalledWith(
+      2,
+      gl,
+      program,
+      buffer,
+      vertexDotBufferCache,
+      [node.vertices.v1],
+      SELECTED_OUTER_SIZE,
+      VECTOR_VERTEX_FILL,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
+    expect(drawVectorVertexDotBatchMock).toHaveBeenNthCalledWith(
+      3,
+      gl,
+      program,
+      buffer,
+      vertexDotBufferCache,
+      [node.vertices.v1],
+      SELECTED_INNER_SIZE,
+      DISTANCE_GUIDE_STROKE,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
+  });
+
   it('should ignore the hovered id when that vertex is also selected — selection wins over hover sizing', () => {
     // before
-    drawVectorVertexDots(gl, program, buffer, vertexDotBufferCache, node, ['v1'], 'v1', new Set(), 200, 150, IDENTITY_VIEWPORT);
+    drawVectorVertexDots(gl, program, buffer, vertexDotBufferCache, node, ['v1'], 'v1', new Set(), false, 200, 150, IDENTITY_VIEWPORT);
 
     // result — v1 still lands in the selected batches (its own scaled sizes), never drawn at the hover size
     expect(drawEllipseMock).not.toHaveBeenCalled();
@@ -208,7 +242,7 @@ describe('drawVectorVertexDots', () => {
 
   it('should draw a new (cut-marked), unselected, unhovered vertex immediately as a white dot with a pink border, at the same size as a plain idle vertex, and leave the other vertex batched', () => {
     // before
-    drawVectorVertexDots(gl, program, buffer, vertexDotBufferCache, node, [], null, new Set(['v1']), 200, 150, IDENTITY_VIEWPORT);
+    drawVectorVertexDots(gl, program, buffer, vertexDotBufferCache, node, [], null, new Set(['v1']), false, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawEllipseMock).toHaveBeenCalledTimes(1);
@@ -246,7 +280,7 @@ describe('drawVectorVertexDots', () => {
 
   it('should draw a new (cut-marked), hovered vertex immediately as a white-with-pink-border dot at the enlarged hover size', () => {
     // before
-    drawVectorVertexDots(gl, program, buffer, vertexDotBufferCache, node, [], 'v1', new Set(['v1']), 200, 150, IDENTITY_VIEWPORT);
+    drawVectorVertexDots(gl, program, buffer, vertexDotBufferCache, node, [], 'v1', new Set(['v1']), false, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawEllipseMock).toHaveBeenCalledWith(
@@ -270,7 +304,20 @@ describe('drawVectorVertexDots', () => {
 
   it('should draw a new (cut-marked), selected vertex immediately with the same white outer ring but a pink inner dot instead of blue', () => {
     // before
-    drawVectorVertexDots(gl, program, buffer, vertexDotBufferCache, node, ['v1'], null, new Set(['v1']), 200, 150, IDENTITY_VIEWPORT);
+    drawVectorVertexDots(
+      gl,
+      program,
+      buffer,
+      vertexDotBufferCache,
+      node,
+      ['v1'],
+      null,
+      new Set(['v1']),
+      false,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     // result — drawn once immediately (both rings), not through either batch
     expect(drawEllipseMock).toHaveBeenCalledTimes(2);

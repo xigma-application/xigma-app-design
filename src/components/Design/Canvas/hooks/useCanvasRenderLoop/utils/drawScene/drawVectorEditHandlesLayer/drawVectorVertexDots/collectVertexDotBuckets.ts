@@ -10,10 +10,6 @@ type TVertexDotClassificationCacheEntry = { classification: TVertexDotBuckets; k
 
 const classificationCache = new WeakMap<TVectorNode, TVertexDotClassificationCacheEntry>();
 
-// The classification (which vertex lands in which batch) never depends on baseSize/viewport/canvas
-// size — only on the node's own topology plus selection/new/hover state — so a pan- or zoom-only
-// frame (the common case while idling in Vector Edit Mode) can reuse last frame's arrays wholesale
-// instead of re-walking every vertex on the node.
 const buildClassificationKey = (
   selectedVertexIds: ReadonlySet<string>,
   newVertexIds: ReadonlySet<string>,
@@ -28,6 +24,7 @@ export const collectVertexDotBuckets = (
   selectedVertexIds: ReadonlySet<string>,
   newVertexIds: ReadonlySet<string>,
   hoveredVertexId: string | null,
+  isMeasuring: boolean,
   baseSize: number,
   canvasWidth: number,
   canvasHeight: number,
@@ -50,6 +47,7 @@ export const collectVertexDotBuckets = (
     selectedVertexIds,
     newVertexIds,
     hoveredVertexId,
+    isMeasuring,
     baseSize,
     canvasWidth,
     canvasHeight,

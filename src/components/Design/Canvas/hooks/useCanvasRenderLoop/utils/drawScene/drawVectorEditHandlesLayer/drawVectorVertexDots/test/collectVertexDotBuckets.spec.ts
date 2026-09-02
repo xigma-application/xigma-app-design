@@ -46,7 +46,7 @@ describe('collectVertexDotBuckets', () => {
   it('should compute and return the classification on a first call', () => {
     const node = buildNode('a');
 
-    const result = collectVertexDotBuckets(gl, program, buffer, node, new Set(), new Set(), null, 6, 200, 150, IDENTITY_VIEWPORT);
+    const result = collectVertexDotBuckets(gl, program, buffer, node, new Set(), new Set(), null, false, 6, 200, 150, IDENTITY_VIEWPORT);
 
     expect(result.plainVertexCenters).toHaveLength(2);
     expect(classifyVertexDots).toHaveBeenCalledTimes(1);
@@ -55,8 +55,34 @@ describe('collectVertexDotBuckets', () => {
   it('should reuse the cached classification on a second call with the same node and unchanged selection/new/hover state', () => {
     const node = buildNode('b');
 
-    const first = collectVertexDotBuckets(gl, program, buffer, node, new Set(['v1']), new Set(), null, 6, 200, 150, IDENTITY_VIEWPORT);
-    const second = collectVertexDotBuckets(gl, program, buffer, node, new Set(['v1']), new Set(), null, 6, 200, 150, IDENTITY_VIEWPORT);
+    const first = collectVertexDotBuckets(
+      gl,
+      program,
+      buffer,
+      node,
+      new Set(['v1']),
+      new Set(),
+      null,
+      false,
+      6,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
+    const second = collectVertexDotBuckets(
+      gl,
+      program,
+      buffer,
+      node,
+      new Set(['v1']),
+      new Set(),
+      null,
+      false,
+      6,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
 
     expect(second).toBe(first);
     expect(classifyVertexDots).toHaveBeenCalledTimes(1);
@@ -65,8 +91,8 @@ describe('collectVertexDotBuckets', () => {
   it('should not depend on baseSize/canvas size/viewport — a pan/zoom-only frame still hits the cache', () => {
     const node = buildNode('c');
 
-    collectVertexDotBuckets(gl, program, buffer, node, new Set(['v1']), new Set(), null, 6, 200, 150, IDENTITY_VIEWPORT);
-    collectVertexDotBuckets(gl, program, buffer, node, new Set(['v1']), new Set(), null, 12, 400, 300, { x: 50, y: 50, zoom: 2 });
+    collectVertexDotBuckets(gl, program, buffer, node, new Set(['v1']), new Set(), null, false, 6, 200, 150, IDENTITY_VIEWPORT);
+    collectVertexDotBuckets(gl, program, buffer, node, new Set(['v1']), new Set(), null, false, 12, 400, 300, { x: 50, y: 50, zoom: 2 });
 
     expect(classifyVertexDots).toHaveBeenCalledTimes(1);
   });
@@ -74,8 +100,8 @@ describe('collectVertexDotBuckets', () => {
   it('should recompute when the selection changes', () => {
     const node = buildNode('d');
 
-    collectVertexDotBuckets(gl, program, buffer, node, new Set(['v1']), new Set(), null, 6, 200, 150, IDENTITY_VIEWPORT);
-    collectVertexDotBuckets(gl, program, buffer, node, new Set(['v2']), new Set(), null, 6, 200, 150, IDENTITY_VIEWPORT);
+    collectVertexDotBuckets(gl, program, buffer, node, new Set(['v1']), new Set(), null, false, 6, 200, 150, IDENTITY_VIEWPORT);
+    collectVertexDotBuckets(gl, program, buffer, node, new Set(['v2']), new Set(), null, false, 6, 200, 150, IDENTITY_VIEWPORT);
 
     expect(classifyVertexDots).toHaveBeenCalledTimes(2);
   });
@@ -84,8 +110,8 @@ describe('collectVertexDotBuckets', () => {
     const nodeA = buildNode('e');
     const nodeB = buildNode('f');
 
-    collectVertexDotBuckets(gl, program, buffer, nodeA, new Set(), new Set(), null, 6, 200, 150, IDENTITY_VIEWPORT);
-    collectVertexDotBuckets(gl, program, buffer, nodeB, new Set(), new Set(), null, 6, 200, 150, IDENTITY_VIEWPORT);
+    collectVertexDotBuckets(gl, program, buffer, nodeA, new Set(), new Set(), null, false, 6, 200, 150, IDENTITY_VIEWPORT);
+    collectVertexDotBuckets(gl, program, buffer, nodeB, new Set(), new Set(), null, false, 6, 200, 150, IDENTITY_VIEWPORT);
 
     expect(classifyVertexDots).toHaveBeenCalledTimes(2);
   });
@@ -93,8 +119,8 @@ describe('collectVertexDotBuckets', () => {
   it('should always call drawImmediateVertexDots, even on a classification cache hit', () => {
     const node = buildNode('g');
 
-    collectVertexDotBuckets(gl, program, buffer, node, new Set(), new Set(), null, 6, 200, 150, IDENTITY_VIEWPORT);
-    collectVertexDotBuckets(gl, program, buffer, node, new Set(), new Set(), null, 6, 200, 150, IDENTITY_VIEWPORT);
+    collectVertexDotBuckets(gl, program, buffer, node, new Set(), new Set(), null, false, 6, 200, 150, IDENTITY_VIEWPORT);
+    collectVertexDotBuckets(gl, program, buffer, node, new Set(), new Set(), null, false, 6, 200, 150, IDENTITY_VIEWPORT);
 
     expect(drawImmediateVertexDotsMock).toHaveBeenCalledTimes(2);
   });

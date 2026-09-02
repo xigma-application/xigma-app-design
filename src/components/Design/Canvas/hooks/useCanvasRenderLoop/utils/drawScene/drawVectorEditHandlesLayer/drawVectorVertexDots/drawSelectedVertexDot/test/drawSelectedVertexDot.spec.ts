@@ -1,5 +1,5 @@
 // others
-import { VECTOR_CUT_CROSSING_FILL, VECTOR_VERTEX_FILL, VECTOR_VERTEX_SELECTED_FILL } from 'constant/canvas';
+import { DISTANCE_GUIDE_STROKE, VECTOR_CUT_CROSSING_FILL, VECTOR_VERTEX_FILL, VECTOR_VERTEX_SELECTED_FILL } from 'constant/canvas';
 
 // types
 import { TVectorVertex } from 'types/design/types';
@@ -9,7 +9,7 @@ import { drawSelectedVertexDot } from '../drawSelectedVertexDot';
 
 const drawVertexDotMock = vi.fn();
 
-vi.mock('../drawVertexDot', () => ({ drawVertexDot: (...args: unknown[]): void => drawVertexDotMock(...args) }));
+vi.mock('../../drawVertexDot', () => ({ drawVertexDot: (...args: unknown[]): void => drawVertexDotMock(...args) }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const gl = {} as WebGL2RenderingContext;
@@ -24,7 +24,7 @@ describe('drawSelectedVertexDot', () => {
 
   it('should draw the outer ring in the plain vertex fill and the inner dot in the selected fill for an ordinary selected vertex', () => {
     // before
-    drawSelectedVertexDot(gl, program, buffer, vertex, false, 6, 200, 150, IDENTITY_VIEWPORT);
+    drawSelectedVertexDot(gl, program, buffer, vertex, false, false, 6, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawVertexDotMock).toHaveBeenCalledTimes(2);
@@ -58,7 +58,47 @@ describe('drawSelectedVertexDot', () => {
 
   it('should draw the inner dot in the cut-crossing fill instead when the vertex is a brand-new one', () => {
     // before
-    drawSelectedVertexDot(gl, program, buffer, vertex, true, 6, 200, 150, IDENTITY_VIEWPORT);
+    drawSelectedVertexDot(gl, program, buffer, vertex, true, false, 6, 200, 150, IDENTITY_VIEWPORT);
+
+    // result
+    expect(drawVertexDotMock).toHaveBeenNthCalledWith(
+      2,
+      gl,
+      program,
+      buffer,
+      10,
+      20,
+      expect.any(Number),
+      VECTOR_CUT_CROSSING_FILL,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
+  });
+
+  it('should draw the inner dot in the distance-guide orange instead of blue while this vertex is the anchor of an in-progress measurement', () => {
+    // before
+    drawSelectedVertexDot(gl, program, buffer, vertex, false, true, 6, 200, 150, IDENTITY_VIEWPORT);
+
+    // result
+    expect(drawVertexDotMock).toHaveBeenNthCalledWith(
+      2,
+      gl,
+      program,
+      buffer,
+      10,
+      20,
+      expect.any(Number),
+      DISTANCE_GUIDE_STROKE,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
+  });
+
+  it('should keep the cut-crossing fill even while measuring — a brand-new vertex is never the measurement anchor', () => {
+    // before
+    drawSelectedVertexDot(gl, program, buffer, vertex, true, true, 6, 200, 150, IDENTITY_VIEWPORT);
 
     // result
     expect(drawVertexDotMock).toHaveBeenNthCalledWith(

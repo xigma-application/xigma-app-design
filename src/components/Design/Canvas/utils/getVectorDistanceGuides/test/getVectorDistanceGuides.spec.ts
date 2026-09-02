@@ -4,17 +4,22 @@ import { getPointToPointGuides } from '../getPointToPointGuides';
 import { getVectorDistanceGuides } from '../getVectorDistanceGuides';
 
 describe('getVectorDistanceGuides', () => {
-  it('should measure point-to-point when both ends are single points', () => {
-    expect(getVectorDistanceGuides({ kind: 'point', point: { x: 0, y: 0 } }, { kind: 'point', point: { x: 30, y: 40 } })).toEqual(
-      getPointToPointGuides({ x: 0, y: 0 }, { x: 30, y: 40 }),
-    );
+  it('should measure point-to-point when both ends are single points, and expose the target point for the ride-along dot', () => {
+    expect(getVectorDistanceGuides({ kind: 'point', point: { x: 0, y: 0 } }, { kind: 'point', point: { x: 30, y: 40 } })).toEqual({
+      ...getPointToPointGuides({ x: 0, y: 0 }, { x: 30, y: 40 }),
+      targetPoint: { x: 30, y: 40 },
+    });
   });
 
   it('should reuse the rect-vs-rect distance guides, against a zero-size target rect, when the anchor is a box and the target a point', () => {
     const rect = { height: 50, width: 100, x: 0, y: 0 };
     const { labels, lines } = getDistanceGuides(rect, { height: 0, width: 0, x: 300, y: 25 });
 
-    expect(getVectorDistanceGuides({ kind: 'box', rect }, { kind: 'point', point: { x: 300, y: 25 } })).toEqual({ labels, lines });
+    expect(getVectorDistanceGuides({ kind: 'box', rect }, { kind: 'point', point: { x: 300, y: 25 } })).toEqual({
+      labels,
+      lines,
+      targetPoint: { x: 300, y: 25 },
+    });
   });
 
   it('should reuse the rect-vs-rect distance guides, against a zero-size anchor rect, when the anchor is a point and the target a box', () => {

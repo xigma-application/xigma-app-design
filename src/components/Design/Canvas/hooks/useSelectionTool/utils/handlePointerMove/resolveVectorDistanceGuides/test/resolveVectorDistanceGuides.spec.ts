@@ -153,13 +153,19 @@ describe('resolveVectorDistanceGuides', () => {
     // s2 runs from v2 (100,0) to v3 (100,100); the cursor sits partway down it
     resolveVectorDistanceGuides(canvas, altMove(150, 30), refs, vi.fn());
 
-    expect(refs.transform.distanceGuidesRef.current).toEqual(getPointToPointGuides({ x: 0, y: 0 }, { x: 100, y: 30 }));
+    expect(refs.transform.distanceGuidesRef.current).toEqual({
+      ...getPointToPointGuides({ x: 0, y: 0 }, { x: 100, y: 30 }),
+      targetPoint: { x: 100, y: 30 },
+    });
 
     // moving the cursor further down the same segment tracks a different point — no new vertex,
     // just the live measurement following the cursor like riding along a rail
     resolveVectorDistanceGuides(canvas, altMove(150, 80), refs, vi.fn());
 
-    expect(refs.transform.distanceGuidesRef.current).toEqual(getPointToPointGuides({ x: 0, y: 0 }, { x: 100, y: 80 }));
+    expect(refs.transform.distanceGuidesRef.current).toEqual({
+      ...getPointToPointGuides({ x: 0, y: 0 }, { x: 100, y: 80 }),
+      targetPoint: { x: 100, y: 80 },
+    });
   });
 
   it('should ride along the anchor vertex’s own connected segment too, away from the vertex itself', () => {
@@ -168,7 +174,10 @@ describe('resolveVectorDistanceGuides', () => {
     // s1 runs from the selected v1 (0,0) to v2 (100,0) — its own edge, not a foreign one
     resolveVectorDistanceGuides(canvas, altMove(50, 10), refs, vi.fn());
 
-    expect(refs.transform.distanceGuidesRef.current).toEqual(getPointToPointGuides({ x: 0, y: 0 }, { x: 50, y: 0 }));
+    expect(refs.transform.distanceGuidesRef.current).toEqual({
+      ...getPointToPointGuides({ x: 0, y: 0 }, { x: 50, y: 0 }),
+      targetPoint: { x: 50, y: 0 },
+    });
   });
 
   it('should clear the ref when Alt is not held', () => {
@@ -221,7 +230,7 @@ describe('resolveVectorDistanceGuides', () => {
     // v1 (0,0) + v2 (100,0) box vs. v3 (100,100) — reuses Stage 1's rect-vs-rect distance guides
     const { labels, lines } = getDistanceGuides({ height: 0, width: 100, x: 0, y: 0 }, { height: 0, width: 0, x: 100, y: 100 });
 
-    expect(refs.transform.distanceGuidesRef.current).toEqual({ labels, lines });
+    expect(refs.transform.distanceGuidesRef.current).toEqual({ labels, lines, targetPoint: { id: 'v3', x: 100, y: 100 } });
   });
 
   it('should clear the ref when the only hovered vertex is itself part of the box selection', () => {
@@ -247,6 +256,6 @@ describe('resolveVectorDistanceGuides', () => {
     // its bounding box's top-left corner (500,50), which sits in empty space above the apex
     const { labels, lines } = getDistanceGuides({ height: 0, width: 100, x: 0, y: 0 }, { height: 0, width: 0, x: 500, y: 100 });
 
-    expect(refs.transform.distanceGuidesRef.current).toEqual({ labels, lines });
+    expect(refs.transform.distanceGuidesRef.current).toEqual({ labels, lines, targetPoint: { x: 500, y: 100 } });
   });
 });

@@ -26,6 +26,7 @@ export const drawVectorEditHandlesLayer = (
   const preMarqueeSegmentIds = refs.vectorEdit.preVectorMarqueeSegmentIdsRef.current;
   const hoveredVertexId = refs.hover.hoveredVectorVertexIdRef.current;
   const newVertexIds = refs.vectorCut.newVectorCutVertexIdsRef.current;
+  const isMeasuring = Boolean(refs.transform.distanceGuidesRef.current);
   const hoveredSegmentId = refs.hover.hoveredSegmentIdRef.current;
   const hoveredVectorSegmentId = refs.hover.hoveredVectorSegmentIdRef.current;
   const hoveredVectorEdgeInsertPoint = refs.hover.hoveredVectorEdgeInsertPointRef.current;
@@ -57,6 +58,7 @@ export const drawVectorEditHandlesLayer = (
         preMarqueeSegmentIds,
         hoveredVertexId,
         newVertexIds,
+        isMeasuring,
         hoveredSegmentId,
         hoveredVectorSegmentId,
         hoveredVectorEdgeInsertPoint,
