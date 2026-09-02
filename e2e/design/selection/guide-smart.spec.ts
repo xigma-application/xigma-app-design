@@ -194,3 +194,31 @@ test('dragging a shape to sit centred below a same-size neighbour draws the matc
   // the guides only show mid-drag — the two frames must differ
   expect(withGuides.equals(withoutGuides)).toBe(false);
 });
+
+test('dragging a shape onto the end of a run of same-size, equally-spaced neighbours walks the whole chain: centre line + edges + × through every shape, and a gap label in each equal gap', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-guide-smart-matched-chain');
+  await expect(designPage.canvas).toBeVisible();
+
+  // three stationary 160x120 rects stacked with equal 40px gaps, plus a fourth dragged onto the end of the run
+  await designPage.drawRectangle(700, 180, 860, 300);
+  await designPage.drawRectangle(700, 340, 860, 460);
+  await designPage.drawRectangle(700, 500, 860, 620);
+  await designPage.drawRectangle(700, 720, 860, 840);
+
+  await designPage.pointerDown(780, 780); // its centre
+  await page.mouse.move(782, 722, { steps: 6 }); // 2px off centred x, a ~40px gap below the run
+
+  const withGuides = await page.screenshot({ clip: { height: 760, width: 320, x: 640, y: 120 } });
+
+  await designPage.pointerUp();
+  await designPage.pointerMove(1400, 900);
+
+  const withoutGuides = await page.screenshot({ clip: { height: 760, width: 320, x: 640, y: 120 } });
+
+  // the chain guides only show mid-drag — the two frames must differ
+  expect(withGuides.equals(withoutGuides)).toBe(false);
+});

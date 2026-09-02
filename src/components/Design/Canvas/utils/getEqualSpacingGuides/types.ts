@@ -12,6 +12,7 @@ export type TEqualSpacingGuides = {
 };
 
 export type TMatchedPairGuides = {
+  labels: TDistanceGuideLabel[];
   lines: TDistanceGuideLine[];
   markers: TPoint[];
 };

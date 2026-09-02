@@ -58,7 +58,7 @@ export const continueDrag = (
 
     dragState.hasMoved = true;
     canvasRefs.transform.alignmentGuideRef.current = matchedPairGuides ? null : guide;
-    canvasRefs.transform.equalSpacingGuidesRef.current = chainGapSnap.guides;
+    canvasRefs.transform.equalSpacingGuidesRef.current = matchedPairGuides ? null : chainGapSnap.guides;
     canvasRefs.transform.matchedPairGuidesRef.current = matchedPairGuides;
 
     initDraggedNodeIds(canvasRefs, dragState);
