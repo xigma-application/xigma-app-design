@@ -5,6 +5,7 @@ import { FC } from 'react';
 import CanvasContextMenuPanel from './CanvasContextMenuPanel/CanvasContextMenuPanel';
 import Comment from './Comment/Comment';
 import FrameNameLabelEditOverlay from './FrameNameLabelEditOverlay/FrameNameLabelEditOverlay';
+import RulersLayer from './RulersLayer/RulersLayer';
 import SectionNameLabelEditOverlay from './SectionNameLabelEditOverlay/SectionNameLabelEditOverlay';
 import TextEditOverlay from './TextEditOverlay/TextEditOverlay';
 import VectorWidthLabelEditOverlay from './VectorWidthLabelEditOverlay/VectorWidthLabelEditOverlay';
@@ -98,6 +99,7 @@ const Canvas: FC = () => {
     <CanvasContextMenuPanel className={styles.Canvas} refs={refs}>
       <div className={styles.Canvas__texture} />
       <canvas className={cx(styles['Canvas__canvas-element'], cursor)} ref={refs.canvasRef} />
+      <RulersLayer />
       <TextEditOverlay />
       <VectorWidthLabelEditOverlay />
       <FrameNameLabelEditOverlay />

@@ -50,6 +50,7 @@ describe('createCanvasRefs behaviors', () => {
         hoveredVectorWidthPointRef: { current: null },
       },
       lassoMarquee: { marqueeRef: { current: null }, vectorLassoPathRef: { current: null } },
+      layout: { leftPanelWidthRef: { current: 0 }, rightPanelWidthRef: { current: 0 } },
       pen: {
         penDragOriginRef: { current: null },
         penDraggedHandleIsSnappedRef: { current: false },
@@ -78,6 +79,7 @@ describe('createCanvasRefs behaviors', () => {
         distanceGuidesRef: { current: null },
         draggedNodeIdsRef: { current: null },
         equalSpacingGuidesRef: { current: null },
+        matchedPairGuidesRef: { current: null },
         resizedNodeIdsRef: { current: null },
         rotateDragRef: { current: null },
         rotatedNodeIdsRef: { current: null },

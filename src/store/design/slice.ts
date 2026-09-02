@@ -67,6 +67,7 @@ const initialPageId = nanoid();
 const initialState: TDesignState = {
   activePageId: initialPageId,
   activeTool: DEFAULT_TOOL,
+  areRulersVisible: false,
   commentDraftPosition: null,
   editingNodeId: null,
   editingSelectionChangedAt: 0,
@@ -170,6 +171,9 @@ const designSlice = createSlice({
     toggleNodeHidden: (state, action: PayloadAction<string>) => handleToggleNodeHidden(state, action.payload),
     toggleNodeLocked: (state, action: PayloadAction<string>) => handleToggleNodeLocked(state, action.payload),
     toggleNodeMask: (state, action: PayloadAction<string>) => handleToggleNodeMask(state, action.payload),
+    toggleRulers: (state) => {
+      state.areRulersVisible = !state.areRulersVisible;
+    },
     toggleUiHidden: (state) => {
       state.isUiHidden = !state.isUiHidden;
     },
@@ -222,6 +226,7 @@ export const {
   toggleNodeHidden,
   toggleNodeLocked,
   toggleNodeMask,
+  toggleRulers,
   toggleUiHidden,
   toggleUiMinimized,
   ungroupNodes,

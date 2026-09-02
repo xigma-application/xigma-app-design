@@ -10,8 +10,8 @@ import { TooltipProvider } from 'shared';
 import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 
 // store
-import { addNode, setSelection, toggleUiHidden, toggleUiMinimized } from 'store/design/slice';
-import { selectActivePage, selectIsUiHidden, selectIsUiMinimized, selectSelectedIds } from 'store/design/selectors';
+import { addNode, setSelection, toggleRulers, toggleUiHidden, toggleUiMinimized } from 'store/design/slice';
+import { selectActivePage, selectAreRulersVisible, selectIsUiHidden, selectIsUiMinimized, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -40,6 +40,10 @@ describe('ActionsPanel', () => {
 
     if (selectIsUiHidden(store.getState())) {
       store.dispatch(toggleUiHidden());
+    }
+
+    if (selectAreRulersVisible(store.getState())) {
+      store.dispatch(toggleRulers());
     }
   });
 
@@ -138,6 +142,18 @@ describe('ActionsPanel', () => {
 
     // result
     expect(selectIsUiHidden(store.getState())).toBe(true);
+  });
+
+  it('should toggle areRulersVisible when the "Show rulers" row is clicked', () => {
+    // before
+    renderActionsPanel();
+    expect(selectAreRulersVisible(store.getState())).toBe(false);
+
+    // action
+    fireEvent.click(screen.getByText('Show rulers'));
+
+    // result
+    expect(selectAreRulersVisible(store.getState())).toBe(true);
   });
 
   it('should show the "Show/Hide UI" checkbox as checked while the UI is hidden', () => {

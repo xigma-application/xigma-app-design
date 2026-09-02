@@ -1,3 +1,4 @@
+import cx from 'classnames';
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -15,6 +16,10 @@ import { useExpandUi } from './hooks/useExpandUi';
 import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
 import { translationNameSpace } from '../constants';
 
+// store
+import { selectAreRulersVisible } from 'store/design/selectors';
+import { useAppSelector } from 'store';
+
 // styles
 import styles from './minimized-toolbar.module.scss';
 
@@ -24,9 +29,10 @@ import { TMinimizedToolbarProps } from './types';
 const MinimizedToolbar: FC<TMinimizedToolbarProps> = ({ name }) => {
   const { t } = useTranslation();
   const { handleClick: handleExpand, handleKeyDown } = useExpandUi();
+  const areRulersVisible = useAppSelector(selectAreRulersVisible);
 
   return (
-    <div className={styles.MinimizedToolbar}>
+    <div className={cx(styles.MinimizedToolbar, { [styles['MinimizedToolbar--withRulers']]: areRulersVisible })}>
       <button aria-label="xigma" className={styles.MinimizedToolbar__logo} type="button">
         <XigmaLogoShape />
       </button>

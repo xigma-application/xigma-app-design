@@ -1,7 +1,11 @@
 import { FC, useRef } from 'react';
 
+// core
+import { useCanvasRefsContext } from 'components/App/core/CanvasRefsProvider/hooks/useCanvasRefsContext';
+
 // hooks
 import { useHandleResizeMouseDown } from './hooks/useHandleResizeMouseDown';
+import { useReportPanelWidth } from 'components/Design/hooks/useReportPanelWidth/useReportPanelWidth';
 import { useResizeHandler } from 'hooks';
 
 // others
@@ -20,6 +24,9 @@ const RightPanel: FC = () => {
   const isUiMinimized = useAppSelector(selectIsUiMinimized);
   const { cursorX, onMouseDownX, width } = useResizeHandler(RIGHT_PANEL_RESIZE_SETTINGS, panelRef);
   const handleResizeMouseDown = useHandleResizeMouseDown(onMouseDownX);
+  const { layout } = useCanvasRefsContext();
+
+  useReportPanelWidth(layout.rightPanelWidthRef, width, !isUiHidden && !isUiMinimized);
 
   if (isUiHidden || isUiMinimized) {
     return null;

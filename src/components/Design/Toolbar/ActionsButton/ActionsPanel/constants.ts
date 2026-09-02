@@ -49,6 +49,7 @@ export const ITEMS: TActionsPanelItem[] = [
     shortcut: KEYBOARD_SHORTCUTS.undo.join(''),
   },
   {
+    action: 'toggleRulers',
     id: 'showRulers',
     labelKey: `${translationNameSpace}.showRulers`,
     section: 'commonSettings',

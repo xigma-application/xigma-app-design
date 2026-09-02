@@ -537,6 +537,26 @@ describe('useKeyboardShortcuts behaviors', () => {
     expect(store.getState().design.isUiHidden).toBe(false);
   });
 
+  it('should toggle the rulers visibility flag on "Shift+R"', () => {
+    // mock
+    const store = createTestStore();
+
+    // before
+    renderShortcuts(store);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyR', shiftKey: true });
+
+    // result
+    expect(store.getState().design.areRulersVisible).toBe(true);
+
+    // action
+    fireEvent.keyDown(window, { code: 'KeyR', shiftKey: true });
+
+    // result
+    expect(store.getState().design.areRulersVisible).toBe(false);
+  });
+
   it('should toggle the Actions panel on "Cmd+K"', () => {
     // mock
     const store = createTestStore();

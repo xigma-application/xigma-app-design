@@ -1,20 +1,34 @@
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { ReactNode } from 'react';
-import { render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 // components
 import ViewMenu from './ViewMenu';
 
+// store
+import { selectAreRulersVisible } from 'store/design/selectors';
+import { store } from 'store';
+import { toggleRulers } from 'store/design/slice';
+
 const renderInMenu = (children: ReactNode): ReturnType<typeof render> =>
   render(
-    <DropdownMenuPrimitive.Root open>
-      <DropdownMenuPrimitive.Portal>
-        <DropdownMenuPrimitive.Content>{children}</DropdownMenuPrimitive.Content>
-      </DropdownMenuPrimitive.Portal>
-    </DropdownMenuPrimitive.Root>,
+    <Provider store={store}>
+      <DropdownMenuPrimitive.Root open>
+        <DropdownMenuPrimitive.Portal>
+          <DropdownMenuPrimitive.Content>{children}</DropdownMenuPrimitive.Content>
+        </DropdownMenuPrimitive.Portal>
+      </DropdownMenuPrimitive.Root>
+    </Provider>,
   );
 
 describe('ViewMenu', () => {
+  beforeEach(() => {
+    if (selectAreRulersVisible(store.getState())) {
+      store.dispatch(toggleRulers());
+    }
+  });
+
   it('should render every row with its label', () => {
     // before
     renderInMenu(<ViewMenu />);
@@ -64,7 +78,7 @@ describe('ViewMenu', () => {
     expect(screen.getByText('🌐↓')).toBeInTheDocument();
   });
 
-  it('should leave the Outlines and Panels submenus enabled while every flat row stays disabled', () => {
+  it('should keep the Outlines and Panels submenus and the Rulers row enabled while every other flat row stays disabled', () => {
     // before
     renderInMenu(<ViewMenu />);
 
@@ -72,5 +86,18 @@ describe('ViewMenu', () => {
     expect(screen.getByText('Pixel grid').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
     expect(screen.getByText('Outlines').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Panels').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Rulers').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+  });
+
+  it('should toggle rulers visibility when the Rulers row is selected', () => {
+    // before
+    renderInMenu(<ViewMenu />);
+    expect(selectAreRulersVisible(store.getState())).toBe(false);
+
+    // action
+    fireEvent.click(screen.getByText('Rulers'));
+
+    // result
+    expect(selectAreRulersVisible(store.getState())).toBe(true);
   });
 });

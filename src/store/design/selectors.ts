@@ -26,6 +26,8 @@ export const selectActivePage = createSelector([selectActivePageId, selectPages]
 
 export const selectActiveTool = (state: RootState): ToolName => state.design.activeTool;
 
+export const selectAreRulersVisible = (state: RootState): boolean => state.design.areRulersVisible;
+
 export const selectCommentDraftPosition = (state: RootState): TPoint | null => state.design.commentDraftPosition;
 
 const selectCommentsRecord = createSelector([selectActivePage], (page): Record<string, TComment> => page.comments);

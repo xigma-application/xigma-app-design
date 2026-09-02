@@ -10,6 +10,7 @@ import { handleSetVectorEditingNodeIds } from '../handleSetVectorEditingNodeIds'
 const buildState = (nodes: TDesignPage['nodes'], overrides: Partial<TDesignState> = {}): TDesignState => ({
   activePageId: 'page-1',
   activeTool: ToolName.default,
+  areRulersVisible: false,
   commentDraftPosition: null,
   editingNodeId: null,
   editingSelectionChangedAt: 0,

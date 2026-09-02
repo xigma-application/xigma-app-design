@@ -3,6 +3,7 @@ import {
   selectActivePage,
   selectActivePageId,
   selectActiveTool,
+  selectAreRulersVisible,
   selectCommentDraftPosition,
   selectComments,
   selectDescendantIdsOfSelected,
@@ -58,6 +59,7 @@ const state = {
   design: {
     activePageId: 'page-1',
     activeTool: ToolName.frame,
+    areRulersVisible: true,
     commentDraftPosition: { x: 1, y: 2 },
     editingNodeId: 'node-2',
     editingSelectionChangedAt: 42,
@@ -110,6 +112,11 @@ describe('design selectors', () => {
   it('should select the active tool', () => {
     // result
     expect(selectActiveTool(state)).toBe(ToolName.frame);
+  });
+
+  it('should select the rulers visibility flag', () => {
+    // result
+    expect(selectAreRulersVisible(state)).toBe(true);
   });
 
   it('should select the comment draft position', () => {

@@ -569,8 +569,63 @@ screen, or an outer scope's `contentTarget` when nested. The pass runs under
 framebuffer at the end. Only pixel fills go through this — selection/hover/handle layers still draw
 in screen space afterwards, unchanged.
 
+## 12. Rulers — the one non-WebGL rendering surface
+
+`Canvas/RulersLayer/` is a second `<canvas>` element, absolutely positioned over the WebGL one
+(`pointer-events: none`, always — it is paint-only, never sees a pointer event), drawn with the
+plain **2D context**, not WebGL. It is the only rendering surface in the Design canvas that isn't
+either the WebGL scene or a positioned DOM `<div>` (Comment pins, §intro). It renders `null` unless
+`state.design.areRulersVisible` (toggled by `toggleRulers` — `Shift+R`, the Actions-panel "Show
+rulers" row, the View-menu "Rulers" item; a plain UI bool like `isUiHidden`, **not** undoable).
+
+- `useRulerCanvas.ts` keeps the backing store at `clientRect × devicePixelRatio` via a debounced
+  `ResizeObserver` — a direct mirror of `useCanvasResize/utils/resizeCanvas.ts`, in its own
+  `utils/sizeRulerCanvas.ts`.
+- `useRulerRenderLoop.ts` is a **second, independent `requestAnimationFrame` loop** (the WebGL
+  `startRenderLoop` is the first). Each frame it re-applies the DPR transform
+  (`ctx.setTransform(dpr,0,0,dpr,0,0)`) and calls `drawRuler`, reading `viewport` fresh from
+  `store.getState()` — same "no dirty-checking, the viewport pans without a React re-render" reason
+  as the WebGL loop. Both hooks take an `enabled` flag so the loop/observer tear down when rulers
+  are hidden. Folding this into the WebGL tick is a possible later optimisation, deliberately not
+  done now.
+- `utils/getRulerStep.ts` picks a `1 / 2 / 5 × 10ⁿ` world-space tick step targeting
+  `RULER_TICK_TARGET_SPACING_PX` (~80) on screen; `utils/getRulerTicks.ts` turns that into
+  `{ label, screenPos }[]` for one axis (`screenPos = world * zoom + viewport.<x|y>`), with an
+  `origin` param that shifts only the printed label, never the tick position (reserved for
+  Figma-style frame rebasing). `utils/drawRuler.ts` paints the two strips + corner and the tick
+  marks/labels, half-pixel-snapping the tick strokes.
+- **Staying flush against LeftPanel/RightPanel.** LeftPanel/RightPanel are resizable
+  (`useResizeHandler`) and their live width is private React state — nothing else previously read
+  it. Each panel now mirrors its *effective* on-screen width (0 while `isUiHidden`/`isUiMinimized`,
+  the panel doesn't occupy any space then) into a shared ref via
+  `Design/hooks/useReportPanelWidth/useReportPanelWidth.ts`, called from `LeftPanel.tsx`/
+  `RightPanel.tsx`. Those refs (`refs.layout.leftPanelWidthRef`/`rightPanelWidthRef`, the `layout`
+  domain in `TCanvasRefs` — see §1's ref-domain table) are read fresh every frame by
+  `useRulerRenderLoop` and passed into `drawRuler` as `leftInset`/`rightInset`: the left strip and
+  corner square are drawn starting at `x = leftInset` instead of `x = 0` (so they sit flush against
+  the panel's edge — both are otherwise `z-index:1` above the canvas and would fully hide a strip
+  drawn at the true screen edge), the top strip stops at `width - rightInset`, and ticks under
+  either inset are skipped. World coordinates (`screenPos`) never change — only how much of the
+  drawn strip is visible/where it starts. This is the same "ref tells the renderer, no
+  cross-tree re-render" shape as every other `TCanvasRefs` domain, just written by a component
+  outside `Canvas/` for once (LeftPanel/RightPanel are `CanvasRefsProvider` siblings of `Canvas` in
+  `App.tsx`, not descendants of it). `MinimizedToolbar` (LeftPanel's collapsed state,
+  `left-panel/File/MinimizedToolbar/`) gets the same treatment on the CSS side instead: a
+  `--withRulers` BEM modifier (`selectAreRulersVisible`, `cx`) shifts it from `left/top: 12px` to
+  `44px` so it clears the ruler strips, with `transition: top 80ms ease-out, left 80ms ease-out`
+  on the base class so toggling rulers while minimized animates instead of jumping.
+- Colours (`RULER_BACKGROUND`/`RULER_TEXT_FILL`/`RULER_TICK_STROKE`) live in `constant/canvas.ts`;
+  sizes/fonts in `RulersLayer/constants.ts`.
+
 ## File index
 
+- Rulers (§12): `Canvas/RulersLayer/{RulersLayer.tsx,rulers-layer.module.scss,constants.ts}`,
+  `.../hooks/{useRulerCanvas,useRulerRenderLoop}.ts`,
+  `.../utils/{sizeRulerCanvas,getRulerStep,getRulerTicks,drawRuler}.ts`, `store/design` `areRulersVisible`
+  + `toggleRulers`, `constant/canvas.ts` `RULER_*`; the panel-inset plumbing:
+  `Design/hooks/useReportPanelWidth/useReportPanelWidth.ts` (called from `LeftPanel.tsx`/
+  `RightPanel.tsx`), the `layout` domain (`Canvas/hooks/useCanvasRefs/hooks/useLayoutRefs/*.ts`,
+  `TLayoutRefs` in `types/design/canvas/types.ts`)
 - Context/setup: `Canvas/Canvas.tsx`, `Canvas/constants.ts`,
   `Canvas/hooks/useCanvasRenderLoop/useCanvasRenderLoop.ts`,
   `Canvas/hooks/useCanvasResize/{useCanvasResize,utils/resizeCanvas}.ts`

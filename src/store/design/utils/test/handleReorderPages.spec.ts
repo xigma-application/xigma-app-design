@@ -19,6 +19,7 @@ const buildPage = (name: string): TDesignPage => ({
 const buildState = (pageNames: string[], activePageId: string): TDesignState => ({
   activePageId,
   activeTool: ToolName.default,
+  areRulersVisible: false,
   commentDraftPosition: null,
   editingNodeId: null,
   editingSelectionChangedAt: 0,

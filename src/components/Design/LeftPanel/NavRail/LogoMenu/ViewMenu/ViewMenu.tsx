@@ -6,6 +6,13 @@ import OutlinesMenu from './OutlinesMenu/OutlinesMenu';
 import PanelsMenu from './PanelsMenu/PanelsMenu';
 import { MenuCompound } from 'shared';
 
+// hooks
+import { useViewMenuRulersClick } from './hooks/useViewMenuRulersClick';
+
+// store
+import { selectAreRulersVisible } from 'store/design/selectors';
+import { useAppSelector } from 'store';
+
 // others
 import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
 import { GLOBE } from 'constant/mainKeys';
@@ -45,12 +52,19 @@ const { MenuItem, MenuSeparator, MenuSub } = MenuCompound;
 
 const ViewMenu: FC = () => {
   const { t } = useTranslation();
+  const areRulersVisible = useAppSelector(selectAreRulersVisible);
+  const handleRulersClick = useViewMenuRulersClick();
 
   return (
     <>
       <MenuItem disabled label={t(VIEW_MENU_PIXEL_GRID_KEY)} selected shortcut={KEYBOARD_SHORTCUTS.pixelGrid.join('')} />
       <MenuItem disabled label={t(VIEW_MENU_LAYOUT_GUIDES_KEY)} selected shortcut={KEYBOARD_SHORTCUTS.layoutGuides.join('')} />
-      <MenuItem disabled label={t(VIEW_MENU_RULERS_KEY)} shortcut={KEYBOARD_SHORTCUTS.rulers.join('')} />
+      <MenuItem
+        label={t(VIEW_MENU_RULERS_KEY)}
+        onClick={handleRulersClick}
+        selected={areRulersVisible}
+        shortcut={KEYBOARD_SHORTCUTS.rulers.join('')}
+      />
       <MenuItem disabled label={t(VIEW_MENU_SHOW_SLICES_KEY)} selected />
       <MenuItem disabled label={t(VIEW_MENU_COMMENTS_KEY)} selected shortcut={KEYBOARD_SHORTCUTS.comments.join('')} />
       <MenuItem disabled label={t(VIEW_MENU_ANNOTATIONS_KEY)} selected shortcut={KEYBOARD_SHORTCUTS.annotations.join('')} />

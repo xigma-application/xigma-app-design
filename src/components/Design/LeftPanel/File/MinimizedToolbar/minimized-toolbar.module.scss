@@ -11,7 +11,17 @@
   padding: 8px;
   position: absolute;
   top: 12px;
+  transition:
+    top 80ms ease-out,
+    left 80ms ease-out;
   z-index: 1;
+
+  // clears the ruler strips instead of sitting on top of them
+
+  &--withRulers {
+    left: 44px;
+    top: 44px;
+  }
 
   &__logo {
     align-items: center;

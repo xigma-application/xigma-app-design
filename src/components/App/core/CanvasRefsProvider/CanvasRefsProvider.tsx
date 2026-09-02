@@ -13,6 +13,7 @@ import { useEllipseArcRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/
 import { useFrameNameRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useFrameNameRefs/useFrameNameRefs';
 import { useHoverRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useHoverRefs/useHoverRefs';
 import { useLassoMarqueeRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useLassoMarqueeRefs/useLassoMarqueeRefs';
+import { useLayoutRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useLayoutRefs/useLayoutRefs';
 import { usePenRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/usePenRefs/usePenRefs';
 import { useSectionNameRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useSectionNameRefs/useSectionNameRefs';
 import { useTransformRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useTransformRefs/useTransformRefs';
@@ -37,6 +38,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const frameNameRefs = useFrameNameRefs();
   const hoverRefs = useHoverRefs();
   const lassoMarqueeRefs = useLassoMarqueeRefs();
+  const layoutRefs = useLayoutRefs();
   const penRefs = usePenRefs();
   const sectionNameRefs = useSectionNameRefs();
   const transformRefs = useTransformRefs();
@@ -66,6 +68,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       frameName: frameNameRefs,
       hover: hoverRefs,
       lassoMarquee: lassoMarqueeRefs,
+      layout: layoutRefs,
       pen: penRefs,
       pencil: pencilRefs,
       sectionName: sectionNameRefs,
@@ -88,6 +91,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       frameNameRefs,
       hoverRefs,
       lassoMarqueeRefs,
+      layoutRefs,
       penRefs,
       pencilRefs,
       sectionNameRefs,

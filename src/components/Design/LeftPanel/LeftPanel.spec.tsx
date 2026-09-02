@@ -1,9 +1,14 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import { FC } from 'react';
 import { Provider } from 'react-redux';
 
 // components
 import LeftPanel from './LeftPanel';
 import { TooltipProvider } from 'shared';
+
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+import { useCanvasRefsContext } from 'components/App/core/CanvasRefsProvider/hooks/useCanvasRefsContext';
 
 // others
 import { LEFT_PANEL_MAX_WIDTH, LEFT_PANEL_MIN_WIDTH } from './constants';
@@ -15,12 +20,23 @@ import { store } from 'store';
 // types
 import { NavItemName } from './NavRail/types';
 
+let capturedLeftPanelWidthRef: { current: number } | null = null;
+
+const RefsProbe: FC = () => {
+  capturedLeftPanelWidthRef = useCanvasRefsContext().layout.leftPanelWidthRef;
+
+  return null;
+};
+
 const renderLeftPanel = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <TooltipProvider>
-        <LeftPanel />
-      </TooltipProvider>
+      <CanvasRefsProvider>
+        <TooltipProvider>
+          <LeftPanel />
+        </TooltipProvider>
+        <RefsProbe />
+      </CanvasRefsProvider>
     </Provider>,
   );
 
@@ -138,6 +154,35 @@ describe('LeftPanel behaviors', () => {
 
     // cleanup
     store.dispatch(toggleUiHidden());
+  });
+
+  it('should report its rendered width into layout.leftPanelWidthRef, for RulersLayer to stay flush against it', () => {
+    // before
+    renderLeftPanel();
+
+    // result
+    expect(capturedLeftPanelWidthRef?.current).toBe(LEFT_PANEL_MAX_WIDTH);
+  });
+
+  it('should report 0 while the UI is hidden, since the panel takes up no space', () => {
+    // before
+    store.dispatch(toggleUiHidden());
+    renderLeftPanel();
+
+    // result
+    expect(capturedLeftPanelWidthRef?.current).toBe(0);
+
+    // cleanup
+    store.dispatch(toggleUiHidden());
+  });
+
+  it('should report 0 while minimized, since the floating toolbar isn’t anchored like the full panel', () => {
+    // before
+    store.dispatch(toggleUiMinimized());
+    renderLeftPanel();
+
+    // result
+    expect(capturedLeftPanelWidthRef?.current).toBe(0);
   });
 
   it('should keep the same file name across expand/minimize', () => {

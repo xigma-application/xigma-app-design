@@ -6,8 +6,9 @@ import MinimizedToolbar from './MinimizedToolbar';
 import { TooltipProvider } from 'shared';
 
 // store
-import { toggleUiMinimized } from 'store/design/slice';
+import { selectAreRulersVisible } from 'store/design/selectors';
 import { store } from 'store';
+import { toggleRulers, toggleUiMinimized } from 'store/design/slice';
 
 const renderMinimizedToolbar = (): ReturnType<typeof render> =>
   render(
@@ -22,6 +23,10 @@ describe('MinimizedToolbar', () => {
   beforeEach(() => {
     if (!store.getState().design.isUiMinimized) {
       store.dispatch(toggleUiMinimized());
+    }
+
+    if (selectAreRulersVisible(store.getState())) {
+      store.dispatch(toggleRulers());
     }
   });
 
@@ -71,5 +76,24 @@ describe('MinimizedToolbar', () => {
 
     // result
     expect(screen.getByText('Free')).toBeInTheDocument();
+  });
+
+  it('should shift clear of the rulers when they are visible', () => {
+    // mock
+    store.dispatch(toggleRulers());
+
+    // before
+    const { container } = renderMinimizedToolbar();
+
+    // result
+    expect((container.firstChild as HTMLElement).className).toMatch(/withRulers/);
+  });
+
+  it('should sit at its default position while the rulers are hidden', () => {
+    // before
+    const { container } = renderMinimizedToolbar();
+
+    // result
+    expect((container.firstChild as HTMLElement).className).not.toMatch(/withRulers/);
   });
 });

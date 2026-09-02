@@ -8,10 +8,10 @@ import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRef
 import { useActionsPanelItemClick } from '../useActionsPanelItemClick';
 
 // store
-import { addNode, setSelection, toggleUiHidden, toggleUiMinimized } from 'store/design/slice';
+import { addNode, setSelection, toggleRulers, toggleUiHidden, toggleUiMinimized } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
-import { selectActivePage, selectIsUiHidden, selectIsUiMinimized, selectSelectedIds } from 'store/design/selectors';
+import { selectActivePage, selectAreRulersVisible, selectIsUiHidden, selectIsUiMinimized, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -33,6 +33,10 @@ describe('useActionsPanelItemClick', () => {
 
     if (selectIsUiHidden(store.getState())) {
       store.dispatch(toggleUiHidden());
+    }
+
+    if (selectAreRulersVisible(store.getState())) {
+      store.dispatch(toggleRulers());
     }
   });
 
@@ -111,6 +115,17 @@ describe('useActionsPanelItemClick', () => {
 
     // result
     expect(selectIsUiHidden(store.getState())).toBe(true);
+  });
+
+  it('should toggle areRulersVisible for the "toggleRulers" action', () => {
+    // before
+    const { result } = renderHook(() => useActionsPanelItemClick(), { wrapper });
+
+    // action
+    act(() => result.current('toggleRulers'));
+
+    // result
+    expect(selectAreRulersVisible(store.getState())).toBe(true);
   });
 
   it('should do nothing for an undefined action', () => {

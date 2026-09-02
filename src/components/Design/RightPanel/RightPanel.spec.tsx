@@ -1,8 +1,13 @@
 import { fireEvent, render } from '@testing-library/react';
+import { FC } from 'react';
 import { Provider } from 'react-redux';
 
 // components
 import RightPanel from './RightPanel';
+
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+import { useCanvasRefsContext } from 'components/App/core/CanvasRefsProvider/hooks/useCanvasRefsContext';
 
 // others
 import { RIGHT_PANEL_DEFAULT_WIDTH, RIGHT_PANEL_MAX_WIDTH, RIGHT_PANEL_MIN_WIDTH } from './constants';
@@ -11,10 +16,21 @@ import { RIGHT_PANEL_DEFAULT_WIDTH, RIGHT_PANEL_MAX_WIDTH, RIGHT_PANEL_MIN_WIDTH
 import { toggleUiHidden, toggleUiMinimized } from 'store/design/slice';
 import { store } from 'store';
 
+let capturedRightPanelWidthRef: { current: number } | null = null;
+
+const RefsProbe: FC = () => {
+  capturedRightPanelWidthRef = useCanvasRefsContext().layout.rightPanelWidthRef;
+
+  return null;
+};
+
 const renderRightPanel = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <RightPanel />
+      <CanvasRefsProvider>
+        <RightPanel />
+        <RefsProbe />
+      </CanvasRefsProvider>
     </Provider>,
   );
 
@@ -119,5 +135,34 @@ describe('RightPanel behaviors', () => {
 
     // cleanup
     store.dispatch(toggleUiHidden());
+  });
+
+  it('should report its rendered width into layout.rightPanelWidthRef, for RulersLayer to stay flush against it', () => {
+    // before
+    renderRightPanel();
+
+    // result
+    expect(capturedRightPanelWidthRef?.current).toBe(RIGHT_PANEL_DEFAULT_WIDTH);
+  });
+
+  it('should report 0 while the UI is hidden, since the panel takes up no space', () => {
+    // before
+    store.dispatch(toggleUiHidden());
+    renderRightPanel();
+
+    // result
+    expect(capturedRightPanelWidthRef?.current).toBe(0);
+
+    // cleanup
+    store.dispatch(toggleUiHidden());
+  });
+
+  it('should report 0 while minimized', () => {
+    // before
+    store.dispatch(toggleUiMinimized());
+    renderRightPanel();
+
+    // result
+    expect(capturedRightPanelWidthRef?.current).toBe(0);
   });
 });

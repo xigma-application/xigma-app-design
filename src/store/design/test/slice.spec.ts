@@ -34,6 +34,7 @@ import slice, {
   toggleNodeHidden,
   toggleNodeLocked,
   toggleNodeMask,
+  toggleRulers,
   toggleUiHidden,
   toggleUiMinimized,
   ungroupNodes,
@@ -71,6 +72,7 @@ describe('design slice', () => {
     expect(state).toEqual({
       activePageId,
       activeTool: ToolName.default,
+      areRulersVisible: false,
       commentDraftPosition: null,
       editingNodeId: null,
       editingSelectionChangedAt: 0,
@@ -620,6 +622,20 @@ describe('design slice', () => {
 
     // result
     expect(shown.isUiHidden).toBe(false);
+  });
+
+  it('should toggle the rulers visibility flag', () => {
+    // action
+    const visible = slice(undefined, toggleRulers());
+
+    // result
+    expect(visible.areRulersVisible).toBe(true);
+
+    // action
+    const hiddenAgain = slice(visible, toggleRulers());
+
+    // result
+    expect(hiddenAgain.areRulersVisible).toBe(false);
   });
 
   it('should update the live text edit content', () => {

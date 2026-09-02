@@ -6,8 +6,12 @@ import MinimizedToolbar from './File/MinimizedToolbar/MinimizedToolbar';
 import NavRail from './NavRail/NavRail';
 import PanelContent from './PanelContent/PanelContent';
 
+// core
+import { useCanvasRefsContext } from 'components/App/core/CanvasRefsProvider/hooks/useCanvasRefsContext';
+
 // hooks
 import { useHandleResizeMouseDown } from './hooks/useHandleResizeMouseDown';
+import { useReportPanelWidth } from 'components/Design/hooks/useReportPanelWidth/useReportPanelWidth';
 import { useResizeHandler } from 'hooks';
 
 // others
@@ -33,6 +37,9 @@ const LeftPanel: FC = () => {
   const isUiMinimized = useAppSelector(selectIsUiMinimized);
   const { cursorX, onMouseDownX, width } = useResizeHandler(LEFT_PANEL_RESIZE_SETTINGS, panelRef);
   const handleResizeMouseDown = useHandleResizeMouseDown(onMouseDownX);
+  const { layout } = useCanvasRefsContext();
+
+  useReportPanelWidth(layout.leftPanelWidthRef, width, !isUiHidden && !isUiMinimized);
 
   if (isUiHidden) {
     return null;

@@ -36,6 +36,7 @@ const group = (childIds: string[]): TGroupNode => ({
 const buildState = (page: Partial<TDesignPage>): TDesignState => ({
   activePageId: 'page-1',
   activeTool: ToolName.default,
+  areRulersVisible: false,
   commentDraftPosition: null,
   editingNodeId: null,
   editingSelectionChangedAt: 0,

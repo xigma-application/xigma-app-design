@@ -58,6 +58,7 @@ describe('CanvasRefsProvider behaviors', () => {
         hoveredVectorWidthPointRef: { current: null },
       },
       lassoMarquee: { marqueeRef: { current: null }, vectorLassoPathRef: { current: null } },
+      layout: { leftPanelWidthRef: { current: 0 }, rightPanelWidthRef: { current: 0 } },
       pen: {
         penDragOriginRef: { current: null },
         penDraggedHandleIsSnappedRef: { current: false },

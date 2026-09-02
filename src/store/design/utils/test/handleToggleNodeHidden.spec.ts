@@ -10,6 +10,7 @@ import { handleToggleNodeHidden } from '../handleToggleNodeHidden';
 const buildState = (nodes: TDesignPage['nodes']): TDesignState => ({
   activePageId: 'page-1',
   activeTool: ToolName.default,
+  areRulersVisible: false,
   commentDraftPosition: null,
   editingNodeId: null,
   editingSelectionChangedAt: 0,
