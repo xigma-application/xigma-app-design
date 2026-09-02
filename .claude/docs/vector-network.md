@@ -5269,6 +5269,67 @@ against real ground truth: "(" and ")" now render with matching, correct dimensi
 they should be) instead of differing by 30–60%. See `getMiterPoint.spec.ts`'s real-glyph-data regression
 and `getTextFlattenVector.determinism.spec.ts`'s bracket-symmetry test.
 
+## 77. Vector fill becomes a paint model — `TPaint[]` instead of a bare color string, opacity finally reaching the GPU, gradients/images left as stubs for the next feature
+
+The Paint tool's `ColorPicker` (§67) had shipped a real alpha slider from day one, but nothing behind
+it read the value: `usePaintColorPickerValue.ts` kept `alpha` in a local `useState` that never left the
+component, and `useSetPaintColor.ts` dispatched only `value.hex`. Fixing that honestly meant fixing the
+data model first — `fillColor`/`fillColorOverrideByKey` (§66-§76) were bare hex strings with nowhere to
+put an opacity, and the user's own framing of the ask ("gradients and media are coming too") ruled out
+bolting an `opacity` field onto the string in place — that doesn't extend to a gradient or an image fill.
+Landed in six small, independently-tested steps rather than one large one, each committed and pushed on
+its own:
+
+1. **The model** (`types/design/paint/types.ts`, new) — `TPaint = TSolidPaint | TGradientPaint | TImagePaint`,
+   a discriminated union on `type`, each variant carrying its own `opacity` (0-100, matching the picker's
+   own alpha scale) and `visible`. Only `TSolidPaint` is rendered today; gradient/image are typed now so
+   the *next* feature is a render-dispatch addition, not another data-model migration. `makeSolidPaint`,
+   `paintGroupKey` (a structural cache/dedupe key for a paint stack), `getSolidPaintColor` round out the
+   util layer.
+2. **Rendering** — `drawVectorFill`'s `alpha` parameter existed already (nothing had ever passed it);
+   `drawVectorFillPaints.ts` (new) iterates a `TPaint[]` stack bottom-to-top and calls it per solid layer
+   with `paint.opacity / 100`, skipping gradient/image for now. `groupFilledFacesForRendering.ts` groups
+   by `paintGroupKey(paint)` instead of the raw color string — same batching behavior for the all-solid
+   case §66's fix depended on, now paint-shaped. All three drag/resize/rotate snapshot capture+draw pairs
+   (`captureVectorNode*Snapshot.ts`/`drawVectorNode*Snapshot.ts`) carry `facesByPaint` the same way.
+3. **The `TVectorNode` fields** — `fillColor: string | null` → `defaultFill: TPaint[] | null`;
+   `fillColorOverrideByKey?: Record<string, string>` → `fillByKey?: Record<string, TPaint[]>`.
+   `getEffectiveVectorFillColor` retired outright — `getEffectiveVectorFill` reads `fillByKey` directly
+   (`node.fillByKey?.[loopKey] ?? [makeSolidPaint(hash-derived color)]`), no adapter layer left over. Every
+   site that previously wrote a bare color into these fields now wraps it (`[makeSolidPaint(color)]`);
+   every site that only merges/copies the map (§68's erase/cut/shape-builder color-forwarding, §73's hole
+   detection, §76-adjacent geometry merges) needed no logic change at all — the value type rode through
+   unchanged. TS forced this one atomic (a field rename can't compile half-migrated), which is also why
+   its test-fixture churn was the widest of the six: every spec building a bare `TVectorNode` literal for
+   any reason had a `fillColor:`/`fillColorOverrideByKey:` line to update.
+4. **The store** — `TDesignPage.paintColor: string` → `paint: TSolidPaint`; `setPaintColor`/`selectPaintColor`
+   → `setPaint`/`selectPaint`. The paint-tool call chain (`armVectorPaintOnPointerDown.ts`,
+   `continueVectorPaintDrag.ts` → `paintNodeAlongPath.ts` → `addNodeAlongPath.ts`) now threads a `TPaint`
+   through instead of a color string, so a painted face inherits the tool's full paint, opacity included.
+5. **The actual fix** — `useSetPaintColor.ts` → `useSetPaint.ts`, dispatching
+   `{ color: value.hex, opacity: value.alpha, type: 'solid' }` (the picker's `alpha` and a solid paint's
+   `opacity` are both already 0-100, so no rescaling); `usePaintColorPickerValue.ts` now derives `value`
+   straight from `selectPaint(state)` instead of the dead local `useState`. Opacity picked in the panel now
+   round-trips through the store and reaches `drawVectorFillPaints` via step 2's plumbing — end to end,
+   not just "the slider moves."
+6. **Everything downstream verified rather than touched** — `page.paint` stays outside the undo/redo
+   snapshot (§8/[[design-store-architecture]], unchanged: it's tool UI state, same as `paintColor` was);
+   `TPaint[]` is plain nested data with no special classes, so Immer/the history middleware handle it
+   exactly like any other nested array already in `TVectorNode`. No persistence layer exists in this app
+   yet (`?project=` is stamped onto a `data-project-id` attribute and nothing else — no localStorage, no
+   backend fetch), so there was no saved-document migration to write; if one lands later, `defaultFill`/
+   `fillByKey`/`page.paint` are the fields a loader would need to backfill from the old string shape.
+
+Gradient and image paints are the deliberately-deferred next steps: a `GradientPanel` alongside
+`ColorPicker`'s existing (still-disabled) gradient tab, on-canvas direction/stop handles, a
+`drawVectorGradientFill` shader dispatch in `drawVectorFillPaints.ts`, and — for images — texture
+upload/caching plus a scale-mode picker panel. Both slot into the union and the render-dispatch switch
+without another `TVectorNode` field migration.
+
+Coverage: unit (every step kept `tsc --build --force` at the pre-existing baseline and the full touched-file
+test set green before committing — no fixed percentage claimed here since the churn was fixture-rename
+volume, not new branches). e2e untouched — no vector-fill e2e spec exists yet to extend.
+
 ## Related
 
 [[design-tool-architecture]] — the generic tool-assembly checklist this feature only partially follows

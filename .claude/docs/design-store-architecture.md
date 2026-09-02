@@ -165,7 +165,7 @@ via `getRenderedVectorNode`) onto every bound text node's box, forcing `rotation
 rotation is already baked into its vertices). Unlike an ellipse path, `syncPathNodeFromText` is
 **not** extended to push the text box back onto a bound vector — a user's vector network is never
 reshaped by dragging its offset handle. On attach, the tool also clears the vector's fill
-(`filledFaceKeys: []`, `fillColorOverrideByKey: {}`, `fillColor: null`) and the vector becomes inert
+(`filledFaceKeys: []`, `fillByKey: {}`, `defaultFill: null`) and the vector becomes inert
 as an independent hit-test target (`getNodeAtPoint.ts`'s `case NodeType.vector` returns `false` for
 any id a text node's `pathId` names, the same treatment `case NodeType.path` already got) — so it is
 neither selectable nor re-enterable into Vector Edit Mode while bound; the cascade-delete pair above
@@ -398,7 +398,7 @@ by `getNextPageName` (add) / `getDuplicatePageName` (duplicate). Separately, a `
 param (the app has no client-side router — every URL param is read directly off
 `window.location.search`, see [[app-shell]]) is read once on mount by
 `components/App/hooks/useSyncActivePageFromUrl.ts` → `setActivePage` if the id resolves (the one
-history entry this leaves is the accepted tradeoff). Still deliberately out of the snapshot: per-page `viewport`/`paintColor`/`comments` and
+history entry this leaves is the accepted tradeoff). Still deliberately out of the snapshot: per-page `viewport`/`paint`/`comments` and
 `activeTool` are UI state, not document state. `TVectorSelectionSnapshot` (`types/design/canvas/types.ts`) is the
 newer half — `{ selectedVectorVertexIds, selectedVectorSegmentIds, selectedVectorHandles }` — added so
 undo/redo also restores which vertex/segment/tangent-handle was selected inside Vector Edit Mode; see

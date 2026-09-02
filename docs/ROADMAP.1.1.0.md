@@ -22,6 +22,7 @@ face the brush crosses in one stroke, instead of one click per face. Write-up:
 
 - [x] color picker on the tool, survives Erase/Cut/Shape Builder
 - [x] drag paints/removes multiple faces at once
+- [x] the picker's opacity slider actually does something now — a painted face can be see-through
 
 ## Stage 4 — Selection size label
 
