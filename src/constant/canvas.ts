@@ -53,6 +53,7 @@ export const FRAME_NAME_LABEL_SELECTED_FILL = '#7EB8F4';
 export const GRID_CELL_SIZE_MATCH_TOLERANCE_PX = 0.5;
 export const GRID_COLOR = '#535353';
 export const GRID_MIN_ZOOM = 4;
+export const GUIDE_STROKE = '#ff3b30';
 export const MARQUEE_FILL_ALPHA = 0.2;
 export const SLICE_BOUNDING_BOX_DASH_GAP_PX = 6;
 export const SLICE_BOUNDING_BOX_DASH_LENGTH_PX = 8;

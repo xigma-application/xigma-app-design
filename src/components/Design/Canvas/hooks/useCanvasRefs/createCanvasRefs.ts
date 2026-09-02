@@ -2,6 +2,7 @@
 import { createCornerRadiusRefs } from './hooks/useCornerRadiusRefs/createCornerRadiusRefs';
 import { createEllipseArcRefs } from './hooks/useEllipseArcRefs/createEllipseArcRefs';
 import { createFrameNameRefs } from './hooks/useFrameNameRefs/createFrameNameRefs';
+import { createGuideRefs } from './hooks/useGuideRefs/createGuideRefs';
 import { createHoverRefs } from './hooks/useHoverRefs/createHoverRefs';
 import { createLassoMarqueeRefs } from './hooks/useLassoMarqueeRefs/createLassoMarqueeRefs';
 import { createLayoutRefs } from './hooks/useLayoutRefs/createLayoutRefs';
@@ -32,6 +33,7 @@ export const createCanvasRefs = (overrides: TCanvasRefsOverrides = {}): TCanvasR
   cornerRadius: createCornerRadiusRefs(overrides.cornerRadius),
   ellipseArc: createEllipseArcRefs(overrides.ellipseArc),
   frameName: createFrameNameRefs(overrides.frameName),
+  guides: createGuideRefs(overrides.guides),
   hover: createHoverRefs(overrides.hover),
   lassoMarquee: createLassoMarqueeRefs(overrides.lassoMarquee),
   layout: createLayoutRefs(overrides.layout),

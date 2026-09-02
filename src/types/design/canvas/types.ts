@@ -6,6 +6,7 @@ import { TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
 import { TDistanceGuides } from 'components/Design/Canvas/utils/getDistanceGuides/types';
 import { TEqualSpacingGuides, TMatchedPairGuides } from 'components/Design/Canvas/utils/getEqualSpacingGuides/types';
 import { TDraftEntity, TVectorTangent, TVectorWidthPoint } from 'types/design/types';
+import { TGuideAxis } from 'types/design/guides/types';
 import { TColorSampleRequest } from 'utils/canvas/colorPixelSampler/types';
 import { TFlattenedVectorSegment } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
 import { TPenDragOrigin } from 'components/Design/Canvas/hooks/useDrawPenTool/types';
@@ -319,6 +320,18 @@ export type TFrameNameRefs = {
   editingLabelRef: RefObject<string | null>;
 };
 
+export type TGuideDragState = {
+  axis: TGuideAxis;
+  frameId: string | null;
+  // `null` while the guide is still being dragged out of a ruler gutter and hasn't been committed.
+  id: string | null;
+  position: number;
+};
+
+export type TGuideRefs = {
+  draggingGuideRef: RefObject<TGuideDragState | null>;
+};
+
 export type TSectionNameRefs = {
   editingLabelRef: RefObject<string | null>;
 };
@@ -330,6 +343,7 @@ export type TCanvasRefs = {
   draftRef: RefObject<TDraftEntity | null>;
   ellipseArc: TEllipseArcRefs;
   frameName: TFrameNameRefs;
+  guides: TGuideRefs;
   hover: THoverRefs;
   lassoMarquee: TLassoMarqueeRefs;
   layout: TLayoutRefs;

@@ -33,6 +33,7 @@ describe('CanvasRefsProvider behaviors', () => {
         ellipseArcRotateDragRef: { current: null },
       },
       frameName: { editingLabelRef: { current: null } },
+      guides: { draggingGuideRef: { current: null } },
       hover: {
         hoverRef: { current: null },
         hoveredCornerRadiusHandleRef: { current: null },

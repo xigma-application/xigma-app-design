@@ -3,6 +3,9 @@ import { NodeType } from 'types/design/enums';
 import { TGuideLine } from 'types/design/guides/types';
 import { TSceneNode } from 'types/design/types';
 
+// utils
+import { getFrameGuideSpan } from './getFrameGuideSpan';
+
 export const getFrameGuideLines = (nodes: Record<string, TSceneNode>): TGuideLine[] => {
   const lines: TGuideLine[] = [];
 
@@ -13,7 +16,7 @@ export const getFrameGuideLines = (nodes: Record<string, TSceneNode>): TGuideLin
           axis: guide.axis,
           frameId: node.id,
           id: guide.id,
-          span: guide.axis === 'x' ? { from: node.y, to: node.y + node.height } : { from: node.x, to: node.x + node.width },
+          span: getFrameGuideSpan(node, guide.axis),
           worldPosition: guide.axis === 'x' ? node.x + guide.position : node.y + guide.position,
         });
       });

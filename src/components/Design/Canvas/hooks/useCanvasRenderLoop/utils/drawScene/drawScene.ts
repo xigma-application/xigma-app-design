@@ -1,6 +1,7 @@
 // store
 import {
   selectActiveTool,
+  selectAllGuideLines,
   selectEditingNodeId,
   selectEditingSelectionChangedAt,
   selectEditingSelectionEnd,
@@ -33,6 +34,7 @@ import { drawEllipseArcHandleLayer } from './drawEllipseArcHandleLayer/drawEllip
 import { drawEqualSpacingGuides } from './drawEqualSpacingGuides';
 import { drawFrame } from './drawFrame';
 import { drawFrameNameLabels } from './drawFrameNameLabels/drawFrameNameLabels';
+import { drawGuides } from './drawGuides';
 import { drawHoverOutline } from './drawHoverOutline';
 import { drawMarquee } from 'utils/canvas/drawMarquee';
 import { drawMatchedPairGuides } from './drawMatchedPairGuides';
@@ -89,6 +91,7 @@ export const drawScene = (
   const { clientHeight, clientWidth } = canvas;
   const editingNodeId = selectEditingNodeId(state);
   const editingTextBox = selectEditingTextBox(state);
+  const guideLines = selectAllGuideLines(state);
   const nodesById = selectNodes(state);
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
   const shapeBuilderPreviewFaces = getShapeBuilderPreviewFaces(refs);
@@ -163,4 +166,5 @@ export const drawScene = (
   drawDistanceGuides(ctx, refs);
   drawEqualSpacingGuides(ctx, refs);
   drawMatchedPairGuides(ctx, refs);
+  drawGuides(ctx, guideLines, nodesById, refs);
 };
