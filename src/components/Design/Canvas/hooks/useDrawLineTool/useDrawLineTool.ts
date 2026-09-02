@@ -18,6 +18,7 @@ import { TLineEndpointStyle } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
+import { getAngleSnappedVectorPoint } from 'utils/canvas/vectorNetwork/getAngleSnappedVectorPoint';
 import { getPointerPosition } from '../../utils/getPointerPosition';
 import { screenToWorld } from '../../utils/screenToWorld';
 import { selectLastCreatedNode } from '../../utils/selectLastCreatedNode';
@@ -37,8 +38,11 @@ export const useDrawLineTool = (refs: TCanvasRefs, { endPoint, name, startPoint,
   const dispatch = useAppDispatch();
   const appStore = useAppStore();
   const startRef = useRef<TPoint | null>(null);
+  const lastPointerClientPositionRef = useRef<TPoint | null>(null);
 
   const handlePointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
+    lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
+
     if (event.button === MouseButton.primary) {
       dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
       dispatch(setSelection([]));
@@ -48,8 +52,11 @@ export const useDrawLineTool = (refs: TCanvasRefs, { endPoint, name, startPoint,
   };
 
   const handlePointerMove = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
+    lastPointerClientPositionRef.current = { x: event.clientX, y: event.clientY };
+
     if (startRef.current) {
       const current = screenToWorld(getPointerPosition(canvas, event), viewport);
+      const { point } = getAngleSnappedVectorPoint(startRef.current, current, viewport.zoom, event.shiftKey);
 
       draftRef.current = {
         endPoint,
@@ -57,9 +64,9 @@ export const useDrawLineTool = (refs: TCanvasRefs, { endPoint, name, startPoint,
         stroke,
         type: NodeType.line,
         x1: Math.round(startRef.current.x),
-        x2: Math.round(current.x),
+        x2: Math.round(point.x),
         y1: Math.round(startRef.current.y),
-        y2: Math.round(current.y),
+        y2: Math.round(point.y),
       };
     }
   };
@@ -67,7 +74,8 @@ export const useDrawLineTool = (refs: TCanvasRefs, { endPoint, name, startPoint,
   const handlePointerUp = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     if (startRef.current) {
       const current = screenToWorld(getPointerPosition(canvas, event), viewport);
-      const length = Math.hypot(current.x - startRef.current.x, current.y - startRef.current.y);
+      const { point } = getAngleSnappedVectorPoint(startRef.current, current, viewport.zoom, event.shiftKey);
+      const length = Math.hypot(point.x - startRef.current.x, point.y - startRef.current.y);
 
       if (length >= MIN_SHAPE_SIZE) {
         dispatch(
@@ -79,9 +87,9 @@ export const useDrawLineTool = (refs: TCanvasRefs, { endPoint, name, startPoint,
             stroke,
             type: NodeType.line,
             x1: Math.round(startRef.current.x),
-            x2: Math.round(current.x),
+            x2: Math.round(point.x),
             y1: Math.round(startRef.current.y),
-            y2: Math.round(current.y),
+            y2: Math.round(point.y),
           }),
         );
         selectLastCreatedNode(dispatch, appStore);
@@ -96,6 +104,14 @@ export const useDrawLineTool = (refs: TCanvasRefs, { endPoint, name, startPoint,
     dispatch(endHistoryGesture());
   };
 
+  const onShiftKeyChange = (canvas: HTMLCanvasElement, event: KeyboardEvent): void => {
+    if (event.key === 'Shift' && startRef.current && lastPointerClientPositionRef.current) {
+      const { x, y } = lastPointerClientPositionRef.current;
+
+      handlePointerMove(canvas, new PointerEvent('pointermove', { clientX: x, clientY: y, pointerId: -1, shiftKey: event.shiftKey }));
+    }
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
 
@@ -103,15 +119,22 @@ export const useDrawLineTool = (refs: TCanvasRefs, { endPoint, name, startPoint,
       const onPointerDown = (event: PointerEvent): void => handlePointerDown(canvas, event);
       const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event);
       const onPointerUp = (event: PointerEvent): void => handlePointerUp(canvas, event);
+      const shiftKeyDownListener = (event: KeyboardEvent): void => onShiftKeyChange(canvas, event);
+      const shiftKeyUpListener = (event: KeyboardEvent): void => onShiftKeyChange(canvas, event);
 
       canvas.addEventListener('pointerdown', onPointerDown);
       canvas.addEventListener('pointermove', onPointerMove);
       canvas.addEventListener('pointerup', onPointerUp);
+      window.addEventListener('keydown', shiftKeyDownListener);
+      window.addEventListener('keyup', shiftKeyUpListener);
 
       return (): void => {
         canvas.removeEventListener('pointerdown', onPointerDown);
         canvas.removeEventListener('pointermove', onPointerMove);
         canvas.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('keydown', shiftKeyDownListener);
+        window.removeEventListener('keyup', shiftKeyUpListener);
+        lastPointerClientPositionRef.current = null;
       };
     }
   }, [activeTool, appStore, canvasRef, dispatch, draftRef, endPoint, name, refs, startPoint, stroke, tool, viewport]);

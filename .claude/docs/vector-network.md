@@ -2138,6 +2138,26 @@ screenshot taken right after `page.keyboard.down('Shift')` — with **zero** int
 movement — already differs from the screenshot taken just before it. A new `shiftDragVectorPoint`
 helper was added to `DesignPage.ts`, mirroring the existing `ctrlDragVectorPoint` shape exactly.
 
+**Reused as-is for the plain Line/Arrow draw tool**, a later, unrelated ask ("Linia z shiftem — można
+ją prowadzić po prostej pod różnym kątem, działa to już budując wektor... tam jest wzór" — the Line
+tool should snap to angles under Shift the same way vector-building already does, pointing at this
+exact formula as the thing to reuse). `useDrawLineTool.ts` (`Canvas/hooks/`, shared by both Line and
+Arrow, see `design-tool-architecture.md` §7) had no angle-snapping at all until then — every
+`pointermove`/`pointerup` now runs its raw endpoint through `getAngleSnappedVectorPoint(startRef.current,
+current, viewport.zoom, event.shiftKey)` exactly as-is, no Line-specific variant. This also means the
+un-shifted soft cardinal-magnet (§37) now applies to a plain line drag too, not just Shift — accepted
+as correct parity rather than trimmed down, since the user's own framing ("it already works this way
+building a vector") was for full behavioral reuse, not just the Shift branch. The same
+`lastPointerClientPositionRef` + window-level `keydown`/`keyup` replay this section's own "immediate
+re-evaluation" fix established (just above) was ported into `useDrawLineTool.ts` too, gated on
+`startRef.current` (mirroring `useSelectionTool.ts`'s "only replay while armed" gate, not the Pen
+tool's unconditional one, since there's no idle-preview state to keep live before a drag starts) — so
+pressing Shift mid-drag with the cursor stationary snaps immediately here as well, not just in Vector
+Edit Mode. Tests: the Shift-branch additions to `useDrawLineTool.spec.tsx`, and
+`e2e/design/draw/line-angle-snap.spec.ts` (hard 15° snap differs from a free drag, Arrow reuses the
+same snap, and the zero-pointer-movement immediate-reevaluation-on-keydown/keyup scenario, mirroring
+this section's own e2e shape above).
+
 ## 40. Smart alignment guides — Figma-style row/column snapping against every vertex on the scene, for both Pen drawing and Vector Edit Mode dragging
 
 Asked for directly, with two reference screenshots of Figma's own behavior: a thin orange/coral guide
