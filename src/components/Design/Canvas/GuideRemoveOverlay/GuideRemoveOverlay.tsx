@@ -33,14 +33,11 @@ const GuideRemoveOverlay: FC = () => {
   const screenPoint = worldToScreen(selectedGuide.worldPoint, viewport);
 
   return (
-    <button
-      className={styles.GuideRemoveOverlay}
-      onClick={removeSelectedGuide}
-      style={{ left: screenPoint.x, top: screenPoint.y }}
-      type="button"
-    >
-      {t(`${translationNameSpace}.remove`)}
-    </button>
+    <div className={styles.GuideRemoveOverlay} style={{ left: screenPoint.x, top: screenPoint.y }}>
+      <button className={styles.GuideRemoveOverlay__button} onClick={removeSelectedGuide} type="button">
+        {t(`${translationNameSpace}.remove`)}
+      </button>
+    </div>
   );
 };
 

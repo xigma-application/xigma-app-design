@@ -35,7 +35,7 @@ describe('GuideRemoveOverlay', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('should position the button at the selected guide’s screen point, accounting for pan and zoom', () => {
+  it('should position the pill at the selected guide’s screen point, accounting for pan and zoom', () => {
     // mock
     store.dispatch(setViewport({ x: 100, y: 200, zoom: 2 }));
     useGuideToolMock.mockReturnValue({
@@ -44,10 +44,10 @@ describe('GuideRemoveOverlay', () => {
     });
 
     // before
-    renderOverlay();
+    const { container } = renderOverlay();
 
     // result — screen point (50*2+100, -34*2+200) = (200, 132)
-    expect(screen.getByRole('button')).toHaveStyle({ left: '200px', top: '132px' });
+    expect(container.firstChild).toHaveStyle({ left: '200px', top: '132px' });
   });
 
   it('should show the translated remove label', () => {
