@@ -1,4 +1,4 @@
 // types
-import { TVectorDistanceAnchor } from '../../../../../utils/getVectorDistanceGuides/types';
+import { TVectorDistanceEndpoint } from '../../../../../utils/getVectorDistanceGuides/types';
 
-export type TVectorDistanceAnchorResult = TVectorDistanceAnchor & { excludeVertexIds: string[] };
+export type TVectorDistanceAnchorResult = TVectorDistanceEndpoint & { excludeVertexIds: string[] };

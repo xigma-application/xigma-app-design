@@ -6,8 +6,10 @@ import { store } from 'store';
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
+import { TVectorNode } from 'types/design/types';
 
 // utils
+import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/deriveVectorFaces';
 import { getDistanceGuides } from '../../../../../../utils/getDistanceGuides/getDistanceGuides';
 import { getPointToPointGuides } from '../../../../../../utils/getVectorDistanceGuides/getPointToPointGuides';
 import { resolveVectorDistanceGuides } from '../resolveVectorDistanceGuides';
@@ -15,6 +17,7 @@ import { resolveVectorDistanceGuides } from '../resolveVectorDistanceGuides';
 const SENTINEL = { sentinel: true } as unknown as TCanvasRefs['transform']['distanceGuidesRef']['current'];
 
 type TRefOverrides = {
+  hoveredFace?: { faceKey: string; nodeId: string } | null;
   hoveredSegmentId?: string | null;
   hoveredVertexId?: string | null;
   nullSelectionRefs?: boolean;
@@ -24,6 +27,7 @@ type TRefOverrides = {
 const makeRefs = (over: TRefOverrides = {}): TCanvasRefs =>
   ({
     hover: {
+      hoveredVectorFaceSelectRef: { current: over.hoveredFace ?? null },
       hoveredVectorSegmentIdRef: { current: over.hoveredSegmentId ?? null },
       hoveredVectorVertexIdRef: { current: over.hoveredVertexId ?? null },
     },
@@ -71,12 +75,45 @@ const addVectorNode = (): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
+// a closed triangle in a separate node, elsewhere on the canvas, so deriveVectorFaces has a real
+// face to find — the "measure a whole shape against another" scenario
+const addClosedTriangleFaceNode = (): string => {
+  store.dispatch(
+    addNode({
+      fillColor: null,
+      filledFaceKeys: [],
+      name: 'Vector',
+      parentId: null,
+      rotation: 0,
+      segments: {
+        fs1: { endId: 'fv2', id: 'fs1', startId: 'fv1', tangentEnd: null, tangentStart: null },
+        fs2: { endId: 'fv3', id: 'fs2', startId: 'fv2', tangentEnd: null, tangentStart: null },
+        fs3: { endId: 'fv1', id: 'fs3', startId: 'fv3', tangentEnd: null, tangentStart: null },
+      },
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      type: NodeType.vector,
+      vertexHandleModes: {},
+      // apex-up, so the triangle's own bounding-box top-left corner (500,50) is empty space —
+      // nowhere near the actual outline — proving a measurement lands on the real shape, not a
+      // possibly-empty bbox corner
+      vertices: { fv1: { id: 'fv1', x: 500, y: 100 }, fv2: { id: 'fv2', x: 700, y: 100 }, fv3: { id: 'fv3', x: 600, y: 50 } },
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 describe('resolveVectorDistanceGuides', () => {
   const canvas = createCanvas();
+  let vectorNodeId: string;
 
   beforeEach(() => {
     selectActivePage(store.getState()).rootOrder.forEach((id) => store.dispatch(deleteNode(id)));
-    store.dispatch(setVectorEditingNodeIds([addVectorNode()]));
+    vectorNodeId = addVectorNode();
+    store.dispatch(setVectorEditingNodeIds([vectorNodeId]));
     store.dispatch(setActiveTool(ToolName.move));
   });
 
@@ -193,5 +230,23 @@ describe('resolveVectorDistanceGuides', () => {
     resolveVectorDistanceGuides(canvas, altMove(), refs, vi.fn());
 
     expect(refs.transform.distanceGuidesRef.current).toBeNull();
+  });
+
+  it('should measure a whole hovered face against a box anchor — shape-to-shape, landing on the face’s real outline', () => {
+    const faceNodeId = addClosedTriangleFaceNode();
+
+    store.dispatch(setVectorEditingNodeIds([vectorNodeId, faceNodeId]));
+
+    const faceNode = store.getState().design.pages[store.getState().design.activePageId].nodes[faceNodeId];
+    const [face] = deriveVectorFaces(faceNode as TVectorNode);
+    const refs = makeRefs({ hoveredFace: { faceKey: face.key, nodeId: faceNodeId }, selectedVertexIds: ['v1', 'v2'] });
+
+    resolveVectorDistanceGuides(canvas, altMove(), refs, vi.fn());
+
+    // v1 (0,0) + v2 (100,0) box (center 50,0) vs. the triangle's nearest own vertex (500,100) — not
+    // its bounding box's top-left corner (500,50), which sits in empty space above the apex
+    const { labels, lines } = getDistanceGuides({ height: 0, width: 100, x: 0, y: 0 }, { height: 0, width: 0, x: 500, y: 100 });
+
+    expect(refs.transform.distanceGuidesRef.current).toEqual({ labels, lines });
   });
 });

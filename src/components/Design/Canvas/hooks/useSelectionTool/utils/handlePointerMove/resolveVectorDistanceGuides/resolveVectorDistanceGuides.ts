@@ -8,6 +8,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
 import { getAnchor } from './getAnchor';
+import { getAnchorReferencePoint } from './getAnchorReferencePoint';
 import { getBakedEditingNodes } from './getBakedEditingNodes';
 import { getPointerPosition } from '../../../../../utils/getPointerPosition';
 import { getTarget } from './getTarget';
@@ -39,7 +40,9 @@ export const resolveVectorDistanceGuides = (
           anchor.excludeVertexIds,
           canvasRefs.hover.hoveredVectorVertexIdRef.current,
           canvasRefs.hover.hoveredVectorSegmentIdRef.current,
+          canvasRefs.hover.hoveredVectorFaceSelectRef.current,
           screenToWorld(getPointerPosition(canvas, event), selectViewport(state)),
+          getAnchorReferencePoint(anchor),
         )
       : null;
 

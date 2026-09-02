@@ -2,6 +2,9 @@
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
+// utils
+import { getPointsBounds } from '../../../../../utils/getVectorDistanceGuides/getPointsBounds';
+
 export const getSelectedVerticesRect = (bakedNodes: TVectorNode[], vertexIds: string[]): TDraftRect | null => {
   const points: TPoint[] = [];
 
@@ -15,16 +18,5 @@ export const getSelectedVerticesRect = (bakedNodes: TVectorNode[], vertexIds: st
     });
   });
 
-  if (points.length !== 0) {
-    const xs = points.map((point) => point.x);
-    const ys = points.map((point) => point.y);
-    const minX = Math.min(...xs);
-    const maxX = Math.max(...xs);
-    const minY = Math.min(...ys);
-    const maxY = Math.max(...ys);
-
-    return { height: maxY - minY, width: maxX - minX, x: minX, y: minY };
-  }
-
-  return null;
+  return getPointsBounds(points);
 };

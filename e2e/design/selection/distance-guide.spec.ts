@@ -334,3 +334,54 @@ test('a vector point-to-segment measurement appears while Alt-hovering a non-inc
 
   await expect.poll(() => designPage.canvas.evaluate((el) => getComputedStyle(el).cursor)).not.toContain('shadow-cursor.png');
 });
+
+test('measures a whole hovered face against a box anchor from another selected shape — plane-to-plane', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-distance-guide-vector-face');
+  await expect(designPage.canvas).toBeVisible();
+
+  // two separate closed triangles, A and B, each drawn and closed with the Pen tool. Freshly-drawn
+  // vector shapes default to filledColor but an empty filledFaceKeys, so their interior is NOT
+  // hit-testable at the top (non-Vector-Edit) level — only the outline is, hence clicking an edge
+  // below rather than the interior for the initial multi-select
+  await designPage.drawVectorPath([
+    { x: 650, y: 300 },
+    { x: 800, y: 300 },
+    { x: 725, y: 400 },
+    { x: 650, y: 300 }, // closes the loop back onto v1
+  ]);
+  await designPage.selectTool('default'); // exits Vector Edit Mode, A stays selected
+
+  await designPage.drawVectorPath([
+    { x: 1000, y: 300 },
+    { x: 1150, y: 300 },
+    { x: 1075, y: 400 },
+    { x: 1000, y: 300 },
+  ]);
+  await designPage.selectTool('default'); // B stays selected
+
+  await designPage.click(725, 300); // A's top edge
+  await designPage.click(1075, 300, { shift: true }); // B's top edge — both selected
+
+  await page.keyboard.press('Enter'); // enters Vector Edit Mode for both A and B at once
+  await designPage.selectVectorEditMoveTool();
+
+  // inside Vector Edit Mode, clicking a face's interior does hit-test regardless of fill state
+  await designPage.click(1075, 333); // click B's face — selects all of its vertices (a box anchor)
+
+  await designPage.pointerMove(1500, 700); // rest away
+  const away = await designPage.canvas.screenshot();
+
+  await page.keyboard.down('Alt');
+  await designPage.pointerMove(725, 333); // hover A's face
+  const altHovered = await designPage.canvas.screenshot();
+
+  expect(altHovered.equals(away)).toBe(false);
+  await expect.poll(() => designPage.canvas.evaluate((el) => getComputedStyle(el).cursor)).toContain('shadow-cursor.png');
+
+  await page.keyboard.up('Alt');
+  const altReleased = await designPage.canvas.screenshot();
+
+  expect(altReleased.equals(altHovered)).toBe(false);
+});
