@@ -6,6 +6,9 @@ import { NodeType } from 'types/design/enums';
 import { TDraftRect } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
+// utils
+import { isAxisAlignedRotation } from './isAxisAlignedRotation';
+
 export type TShapeContactGuide = {
   x1: number;
   x2: number;
@@ -28,8 +31,6 @@ const CONTACT_GUIDE_NODE_TYPES: ReadonlySet<NodeType> = new Set([
   NodeType.star,
   NodeType.text,
 ]);
-
-const isAxisAlignedRotation = (rotation: number): boolean => Number.isFinite(rotation) && ((rotation % 90) + 90) % 90 === 0;
 
 export const isContactGuideEligibleNode = (node: TSceneNode): boolean =>
   'rotation' in node && CONTACT_GUIDE_NODE_TYPES.has(node.type) && !node.hidden && isAxisAlignedRotation(node.rotation);

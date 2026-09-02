@@ -49,6 +49,7 @@ import { drawSelectionOutline } from './drawSelectionOutline';
 import { drawSelectionSizeLabel } from './drawSelectionSizeLabel';
 import { drawShapeContactGuides } from './drawShapeContactGuides';
 import { drawSliceDraft } from 'utils/canvas/drawSliceDraft';
+import { drawSmartSelectionHandles } from './drawSmartSelectionHandles/drawSmartSelectionHandles';
 import { drawStarRatioHandleLayer } from './drawStarRatioHandleLayer';
 import { drawTransformAlignmentGuide } from './drawTransformAlignmentGuide';
 import { drawVectorDraggedFillPreview } from './drawVectorDraggedFillPreview';
@@ -131,6 +132,7 @@ export const drawScene = (
   drawHoverOutline(ctx, hoveredNode, vectorEditingNodeIds, nodesById);
   drawSelectionOutline(ctx, selectedNodes, vectorEditingNodeIds, nodesById, pathId);
   drawSelectionSizeLabel(ctx, selectedNodes, vectorEditingNodeIds, pathId);
+  drawSmartSelectionHandles(ctx, selectedNodes);
   drawFrameNameLabels(ctx, filteredNodes, selectedIds, refs);
   drawSectionNameLabels(ctx, filteredNodes, refs);
   drawCornerRadiusHandlesLayer(ctx, hoveredNode, selectedNodes, refs);
