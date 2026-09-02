@@ -1,217 +1,90 @@
 # xigma — Roadmap 1.1.0
 
-Continuation of [ROADMAP.1.0.0.md](./ROADMAP.1.0.0.md) in the same spirit — small, separate chunks
-of work, checkboxes ticked as progress is made — but a separate file, because this is work outside
-the "recreating Figma step by step" history from 1.0.0 (that file closes on a concrete, already
-implemented history) and outside the big, multi-session performance stage in
-[ROADMAP.2.0.0.md](./ROADMAP.2.0.0.md). 1.1.0 collects the next tiny UI/tooling features in the same
-style as 1.0.0.
+Continuation of [ROADMAP.1.0.0.md](./ROADMAP.1.0.0.md) — small, separate features, checked off as
+they land. Kept apart from the big performance stage in [ROADMAP.2.0.0.md](./ROADMAP.2.0.0.md).
 
-## Stage 1 — Color Sampler (eyedropper) in the ColorPicker
+## Stage 1 — Color Sampler (eyedropper)
 
-Ported from x-design — a "loupe" tracking the cursor with a 7×7 px grid preview; a click picks the
-color under the center pixel. The color is read for real from WebGL (`gl.readPixels` in the render
-loop, not `html2canvas` like in x-design), through a generic registry
-(`colorPixelSamplerRegistry.ts`) with no Design↔ColorPicker dependency in either direction. The
-sampler hides correctly over panels/popovers (hit-test via `document.elementFromPoint`, not via
-canvas geometry). It closes on Escape and after a click.
+A loupe follows the cursor with a zoomed pixel preview; click to pick the color under it. Reads the
+real rendered color, not a screenshot approximation. Closes on Escape or after picking.
 
-## Stage 2 — Enter: text editing / converting a shape to vector
+## Stage 2 — Enter: text editing / shape → vector
 
-Enter on Text/Text-on-path enters caret editing (like a double-click). Enter on
-Rectangle/Ellipse/Line/Arrow/Polygon/Star converts the shape to `NodeType.vector` (new `replaceNode`
-reducer, `utils/canvas/vectorNetwork/convertShapeToVector/`, geometry as real Bézier curves) and
-immediately opens Vector Edit Mode, in a single undo step. The arrowhead — deliberately lost, no
-equivalent on a vector. e2e: `enter-shape-to-vector.spec.ts` + `edit-text.spec.ts`.
+Enter on a text node starts editing it. Enter on a Rectangle/Ellipse/Line/Arrow/Polygon/Star turns
+it into an editable vector shape and opens Vector Edit Mode right away, in one undo step.
+(Arrowheads are lost on conversion — no vector equivalent.)
 
 ## Stage 3 — Paint: custom color and a drag brush
 
-Paint got a real color choice (a ColorPicker in the toolbar instead of a random hue from the
-loop-key hash) and `fillColorOverrideByKey` carried forward through Erase/Cut/Shape Builder, so an
-operation that changes geometry doesn't wipe the chosen color. It also gained a drag mode — it paints
-(or, in remove mode, removes) every new face under the brush in one stroke, instead of just one face
-per click; a drag started on an already-filled face always ends with that face still filled (it
-doesn't toggle like a single click). Full write-up: `.claude/docs/vector-network.md` §67-69.
+Paint now uses a real color you pick, instead of a random one. Dragging paints (or removes) every
+face the brush crosses in one stroke, instead of one click per face. Write-up:
+`.claude/docs/vector-network.md` §67-69.
 
-- [x] ColorPicker wired into the tool button, color held in `paintColor` (Redux)
-- [x] color survives Erase/Cut/Shape Builder instead of reverting to a random hue
-- [x] drag paints/removes multiple faces in one stroke, always-paint-never-remove at drag start
+- [x] color picker on the tool, survives Erase/Cut/Shape Builder
+- [x] drag paints/removes multiple faces at once
 
-## Stage 4 — Selection size label (W × H badge)
+## Stage 4 — Selection size label
 
-A blue `W x H` badge just outside the selection, docked to the visually-bottom edge, staying parallel
-to it and hopping edges every 45° of rotation; centred, 5px off the edge, hidden in Vector Edit Mode.
-Reuses the variable-width tool's label; also retunes the shared canvas blue to `#337ae1`. Write-up:
-`.claude/docs/selection-and-manipulation.md` §22.
-
-- [x] rotation-aware placement + edge-hop, blue badge via `drawValueLabel` (`{ angleDeg, edgeGapPx, fill }`)
+A blue `W x H` badge sits just outside the selection, following its edge as it rotates. Hidden in
+Vector Edit Mode.
 
 ## Stage 5 — Shape contact guides
 
-A red X-capped line along a neighbour's edge when a single axis-aligned shape (not group/frame) sits
-exactly flush against it — shown while dragging, resizing, or Alt-hovering. Figma-style; skips
-overlaps and off-90° rotations. Write-up: `.claude/docs/selection-and-manipulation.md` §23.
-
-- [x] `getShapeContactGuides` detection + `resolveShapeContactGuides` trigger + `drawShapeContactGuides` render, e2e
-- [x] extended to diagonal placements (matching edge, no overlap): a bridge segment now connects the
-      nearest corners across the gap instead of drawing nothing
-- [x] extended to same-side matches too (both tops/bottoms/lefts/rights aligned, not just facing edges)
+When a shape sits flush against a neighbor, a red line marks the touching edge — while dragging,
+resizing, or Alt-hovering. Figma-style. Now also works for diagonal and same-side placements.
 
 ## Stage 6 — Shape alignment snap on move
 
-Dragging a shape now snaps its edges/centre onto other shapes' edges/centres within tolerance,
-reusing the vector-edit alignment-guide math (renamed out of its vector-specific naming into shared
-`getAlignmentGuide`/`getGroupAlignmentGuide`/`drawAlignmentGuide`). Resize and draw-new-shape snap
-are deferred. Write-up: `.claude/docs/selection-and-manipulation.md` §24.
-
-- [x] shared alignment-guide core (no behaviour change) + `getDragAlignmentSnap` move-time snap, e2e
+Dragging a shape snaps its edges/center onto other shapes' edges/centers.
 
 ## Stage 7 — Shape alignment snap on resize
 
-Dragging a resize handle now snaps that edge/corner onto other shapes' edges within tolerance too,
-reusing §24's same shared core (single-point `getAlignmentGuide`, not the group variant — resize only
-ever moves one query point). Skipped for rotated single-node resizes, where the box math already runs
-in unrotated local space. Write-up: `.claude/docs/selection-and-manipulation.md` §25.
-
-- [x] `getResizeAlignmentSnap` wired into `getResizeDragFrame`, gated to unrotated single/multi-node
-      resizes, e2e
+Same snapping, now while resizing.
 
 ## Stage 8 — Shape alignment snap on draw
 
-Drawing a new shape from scratch now snaps its live free corner onto other shapes' edges within
-tolerance too — the third and final leg of the phased snap rollout. Reuses Stage 7's single-point core
-unchanged (renamed `getResizeAlignmentSnap` → `getPointAlignmentSnap`, now shared by both), wired into
-`useDrawShapeTool`/`useDrawStarTool`/`useDrawPolygonTool`/`useDrawTextTool`. Write-up:
-`.claude/docs/selection-and-manipulation.md` §26.
+Same snapping, now while drawing a brand-new shape.
 
-- [x] `getPointAlignmentSnap` wired into all four box-drawing hooks, e2e
+## Stage 9 — Snap performance fix
 
-## Stage 9 — Snap candidates cached per gesture
+Snapping was rescanning every shape on the page on every mouse move during a drag/resize/draw.
+Now it scans once per gesture instead.
 
-`getCandidateShapes` was being recomputed on every `pointermove`/`pointerup` of a move/resize/draw
-gesture despite scanning the whole page each time. Now computed once at arm time and cached on the
-gesture's own state (`TDragState`/`TResizeDragState`, or a local ref for the draw-tool hooks), not
-re-derived until the next gesture starts. No spatial/viewport filtering yet — every eligible node on
-the page is still a candidate regardless of distance, matching the rest of this subsystem's hit-testing/
-hover/marquee/contact-guide code (a real shared spatial index, mirroring the vector-network crossing
-detector's hash-grid, is future work, not started). Write-up:
-`.claude/docs/selection-and-manipulation.md` §27.
+## Stage 10 — Single-purpose app, no more routing
 
-- [x] `getCandidateShapes` moved from every pointer event to gesture-arm time across all three snap
-      call sites
+The app dropped client-side routing — it lives on its own subdomain with nothing else to route to.
+Removed `react-router` and the old starter-template pages.
 
-## Stage 10 — Client-side routing removed, single-purpose subdomain app
+## Stage 11 — Text on Path: attach to an existing shape
 
-The app ships behind its own subdomain now, with no multi-route concept to route between —
-`react-router` and `src/core/Routing/` are gone, along with the unreachable `HomePage`/`NotFoundPage`
-starter-template pages. `components/App/App.tsx` absorbed `pages/DesignPage/DesignPage.tsx` directly;
-`src/pages/` no longer exists. Write-up: `.claude/docs/app-shell.md`.
-
-- [x] `CanvasRefsProvider` relocated to `components/App/core/`, `?page=`/`?project=` read via plain
-      `window.location.search` instead of React Router hooks, e2e/`useCopyPageLink` updated to match
-
-## Stage 11 — Text on Path: attach to an existing vector or shape
-
-Text on Path no longer only draws a fresh ellipse — clicking an existing eligible vector chain (the
-same `getVectorChainOrder(node) !== null` condition Variable Width uses) or a plain convertible
-shape (Rectangle/Ellipse/Polygon/Star/Line/Arrow, auto-converted via the existing `Enter`
-shape-to-vector machinery) attaches the text to it on the spot, reading from wherever the user
-actually clicked rather than always the chain's own start. The bound guide now behaves as one unit
-with its text through drag/rotate/resize/mirror, carries along through copy/duplicate/paste, hides
-its own stroke while idle (dashed blue on hover/selected/editing), and no longer produces a stray
-second selection box. Write-up: `.claude/docs/design-tool-architecture.md`,
-`.claude/docs/design-store-architecture.md`, `.claude/docs/selection-and-manipulation.md`,
-`.claude/docs/canvas-rendering-pipeline.md`.
-
-- [x] click-to-attach on an eligible vector or a convertible shape, `pathStartOffset` from the click
-      point, `text-on-path` hover cursor, still falls back to drag-a-new-ellipse past the attach slop
-- [x] guide vector carried as one unit through move/rotate/resize/mirror-resize, dropped from the
-      Layers tree, dashed guide shown only on hover/selected/editing instead of always
-- [x] guide dropped from `selectedIds` so it can never trigger the group (two-box) selection-outline
-      mode instead of the correct per-node rotated outline
-- [x] guide cloned alongside its text on copy/duplicate/paste instead of pasting as plain straight text
-- [x] fixed `getVectorChainPositionAtLength` snapping text to the wrong end of a segment right after
-      a corner when the chain has to walk that segment in reverse to stay continuous
+Text on Path can now attach to an existing vector or shape instead of always drawing a fresh curve
+— click where you want the text to start. The attached path now moves, rotates, resizes, copies,
+and pastes as one unit with its text, and shows its own dashed outline only when relevant.
 
 ## Stage 12 — Flatten and Outline as stroke for text
 
-Text can now be destructively converted to real vector geometry via opentype.js font-outline
-extraction (parsing the bundled Inter TTF at runtime), not just the pre-baked MSDF atlas it renders
-from normally. Flatten fuses a whole text node into one vector, matching Figma; Outline as stroke
-keeps every letter its own independent vector and groups them instead, also matching Figma, so
-individual letters stay selectable/recolorable afterward. Both support text-on-path (bakes the
-glyphs, deletes the now-orphaned path node) and both stay available on text unconditionally, since
-there's still no properties-panel UI to ever set a real stroke on a text node. Full write-up:
-`.claude/docs/text-flatten-and-outline.md`; performance follow-up tracked separately in
-ROADMAP.2.0.0.md Stage 2.
-
-- [x] font-outline extraction pipeline (`fontOutline/`): TTF parsing, quadratic→cubic tangent
-      upconversion, per-glyph fill/stroke vector builders, and a rigid per-glyph transform for
-      text-on-path so the flattened result lines up with the on-path MSDF preview
-- [x] fixed a real cusp-collapse regression (glyphs like "(" and ")" rendering as spiked/twisted
-      shapes) and a non-determinism bug in the shared DCEL face-derivation search that randomly
-      dropped letter faces on multi-character flatten
-- [x] Outline as stroke splits each glyph into its own vector and groups them via the same
-      select-and-`groupNodes` mechanism a manual multi-select-group gesture uses, instead of fusing
-      the whole word — including a shared-pivot rotation bake so a rotated multi-letter group stays
-      rigid instead of each letter spinning around its own center
-- [x] fixed `rotateVectorNodeOrigin`/`resizeVectorVertices` rounding each vertex independently after
-      a rotate or resize, which was distorting flattened glyph curves — same bug class already fixed
-      for plain node drag
+Two new destructive text commands: Flatten turns a whole text node into one vector shape; Outline
+as stroke keeps every letter as its own selectable vector instead. Full write-up:
+`.claude/docs/text-flatten-and-outline.md`. (Performance follow-up tracked in ROADMAP.2.0.0.md.)
 
 ## Stage 13 — Masks (Figma-style)
 
-A layer clips the sibling rows **above it** within its group to its own painted alpha. "Use as
-mask" (⌃⌘M) always wraps the selection in a "Mask group" and flags the **last** child (bottom row
-of the group in the Layers panel) as the mask. Every node type works as a mask source — shape /
-frame / group / image / live text / vector (fill _and_ stroke) — because the clip is a real
-offscreen alpha composite (a 5th `maskComposite` GL program + a resize-aware framebuffer pool), not
-a 1-bit stencil. `drawSceneNodes` stays byte-identical for any scene with no mask node; only a
-scene that has one walks the tree and runs the offscreen pass. Nesting groups scopes the effect;
-dragging the mask to the top of the panel makes it a no-op. Full write-up: `.claude/docs/masks.md`.
+A layer can now clip the layers above it in its group to its own painted shape — "Use as mask"
+(⌃⌘M). Works with every layer type, including strokes. Full write-up: `.claude/docs/masks.md`.
 
-- [x] `isMask?` retrofit on the node types; `createMaskGroup` / `toggleNodeMask` reducers reusing
-      the existing group machinery (`handleGroupNodes` + `buildGroupNode` `name` param); both in
-      `UNDOABLE_ACTION_TYPES`; "Use as mask" / "Remove mask" menu items + ⌃⌘M shortcut
-- [x] offscreen render subsystem: `maskComposite{Vertex,Fragment}ShaderSource`,
-      `createRenderTargetPool` (framebuffer + packed depth/stencil, drawing-buffer-sized),
-      `drawSceneNodes` split into the flat no-mask pass and a `TMaskRenderer`-threaded tree pass
-      (`drawSceneNodes/` folder), nested mask groups via a target stack, `blendFuncSeparate` +
-      `colorMask` handling so straight alpha accumulates correctly into the offscreen textures
-- [x] Layers tree "Mask" badge on the flagged row
-- [x] `MaskGroup`/`LeadArrow` icons added to `xigma-app-shared` and pulled; `TreeItemIcon` moved out
-      of `shared/UI/Tree/` entirely into `LayersTree/LayerRow/LayerRowIcon` (renamed), since it's
-      Design-domain logic (node-type/mask branching), not generic tree UI — `TreeItem` now takes a
-      `renderIcon`/`children` slot instead. `LayerRowMaskDecorations` (badge + `LeadArrow` + the
-      connector line, driven by `selectMaskConnectorRoleById`) is the same kind of Design-side
-      injection; visually verified against real nested/expanded groups
-- [x] `selectMaskConnectorRoleById` rewritten as a top-down tree walk (`maskConnector/` folder:
-      `resolveMaskConnectorRoles` + small pure helpers) so a row can carry both its own mask-scope
-      role _and_ any number of inherited passthrough lines from ancestor scopes at once — a row can
-      simultaneously be masked content of an outer group and own a nested mask scope of its own.
-      Fixes the connector line vanishing for masked content that itself contains a nested mask group
-- [x] fixed `drawVectorFill`/`drawVectorHatchFill` hardcoding `colorMask(true,true,true,false)`
-      after their even-odd stencil pass, on the assumption they always draw straight to the main
-      canvas. Rendering a mask into an offscreen target relies on alpha writes being **on** (the
-      composite shader only reads the target's alpha channel) — forcing them off there zeroed the
-      fill's alpha, and left alpha writes disabled for every subsequent draw in that target too
-      (including the mask's own stroke), so a masking vector going blank the moment it gained a
-      fill. Now captures the ambient `COLOR_WRITEMASK` and restores that instead of hardcoding it
-- [x] `e2e/design/selection/mask.spec.ts` — real render-pipeline screenshots (not just store
-      assertions): basic two-rectangle clip, the vector-fill colorMask regression above (reproduced
-      end to end and confirmed to fail against the pre-fix behavior), remove-mask restores
-      visibility without ungrouping, undo restores the exact pre-mask state in one step
-- [ ] follow-ups: image-alpha / live-text / nested-group mask e2e coverage; clip the masked-sibling
-      _hit region_ to mask coverage; dashed outline on a selected mask node; multiple masks per
-      group; luminance / vector / image `maskType` modes
+- [ ] follow-ups: broader e2e coverage, mask hit-region clipping, multiple masks per group, other
+      mask blend modes
+
+## Stage 14 — Figma-style distance measurement (Alt+hover)
+
+Select something, hold Alt, hover another shape — orange dashed lines with the distance in px show
+the gap, like Figma. Now also works inside Vector Edit Mode: select a point, segment, or a few
+points at once, then Alt-hover another point, segment, or whole face to measure against it.
 
 ## Related
 
-[[canvas-rendering-pipeline]] — context for the render loop and the `WEBGL_CONTEXT_ATTRIBUTES`
-contract that `resolveColorSampleRequest` is attached to.
+[[canvas-rendering-pipeline]] — the render loop this app's tools plug into.
 
-[[text-flatten-and-outline]] — full pipeline behind Stage 12: font extraction, per-glyph vector
-assembly, and the two destructive commands built on top of them.
+[[text-flatten-and-outline]] — full pipeline behind Stage 12.
 
-[[masks]] — Stage 13: the `isMask` data model, the group-scoped mask rule, and the offscreen
-alpha-compositing render pass.
+[[masks]] — full pipeline behind Stage 13.
