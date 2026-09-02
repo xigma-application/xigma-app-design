@@ -40,6 +40,42 @@ describe('handleNudgeSelection', () => {
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[frameId]).toMatchObject({ x: 9, y: 20 });
   });
 
+  it('should update the distance guide against the currently hovered node when nudged with Alt held', () => {
+    // mock — a nudged 20x20 frame and an unrelated 20x20 target 30px to its right
+    const frameId = addFrameNode(0, 0);
+    const targetId = addFrameNode(50, 0);
+
+    store.dispatch(setSelection([frameId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.hover.hoverRef.current = targetId;
+
+    // action — nudge right by 1, closing the gap from 30 to 29
+    handleNudgeSelection(store.dispatch, canvasRefs, 1, 0, true);
+
+    // result
+    expect(canvasRefs.transform.distanceGuidesRef.current?.lines).toEqual([{ dashed: false, x1: 21, x2: 50, y1: 10, y2: 10 }]);
+  });
+
+  it('should not touch the distance guide ref when nudged without Alt held', () => {
+    // mock
+    const frameId = addFrameNode(0, 0);
+    const targetId = addFrameNode(50, 0);
+
+    store.dispatch(setSelection([frameId]));
+
+    const canvasRefs = createCanvasRefs();
+
+    canvasRefs.hover.hoverRef.current = targetId;
+
+    // action
+    handleNudgeSelection(store.dispatch, canvasRefs, 1, 0);
+
+    // result
+    expect(canvasRefs.transform.distanceGuidesRef.current).toBeNull();
+  });
+
   it('should be undoable as a single step even with multiple selected nodes', () => {
     // mock
     const frameIdA = addFrameNode(0, 0);

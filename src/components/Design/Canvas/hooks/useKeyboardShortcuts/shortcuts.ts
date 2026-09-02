@@ -37,12 +37,24 @@ export const shortcuts = {
   flipVertical: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.v },
   group: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.g },
   nudgeDown: { secondaryKey: KeyboardKeys.arrowDown },
+  // Alt on its own isn't a nudge modifier (same step as the plain shortcut) — it's here so nudging
+  // still fires while Alt is held for a live distance measurement (see updateNudgeDistanceGuide.ts);
+  // triggerActions.ts requires an exact modifier-count match, so the plain shortcut alone never fires
+  // with Alt held
+  nudgeDownAlt: { primaryKeys: ['alt'], secondaryKey: KeyboardKeys.arrowDown },
+  nudgeDownAltLarge: { primaryKeys: ['alt', 'shift'], secondaryKey: KeyboardKeys.arrowDown },
   nudgeDownLarge: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.arrowDown },
   nudgeLeft: { secondaryKey: KeyboardKeys.arrowLeft },
+  nudgeLeftAlt: { primaryKeys: ['alt'], secondaryKey: KeyboardKeys.arrowLeft },
+  nudgeLeftAltLarge: { primaryKeys: ['alt', 'shift'], secondaryKey: KeyboardKeys.arrowLeft },
   nudgeLeftLarge: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.arrowLeft },
   nudgeRight: { secondaryKey: KeyboardKeys.arrowRight },
+  nudgeRightAlt: { primaryKeys: ['alt'], secondaryKey: KeyboardKeys.arrowRight },
+  nudgeRightAltLarge: { primaryKeys: ['alt', 'shift'], secondaryKey: KeyboardKeys.arrowRight },
   nudgeRightLarge: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.arrowRight },
   nudgeUp: { secondaryKey: KeyboardKeys.arrowUp },
+  nudgeUpAlt: { primaryKeys: ['alt'], secondaryKey: KeyboardKeys.arrowUp },
+  nudgeUpAltLarge: { primaryKeys: ['alt', 'shift'], secondaryKey: KeyboardKeys.arrowUp },
   nudgeUpLarge: { primaryKeys: ['shift'], secondaryKey: KeyboardKeys.arrowUp },
   openActions: { primaryKeys: [CONTROL_PRIMARY_KEY], secondaryKey: KeyboardKeys.k },
   outlineStroke: { primaryKeys: ['alt', 'control'], secondaryKey: KeyboardKeys.o },

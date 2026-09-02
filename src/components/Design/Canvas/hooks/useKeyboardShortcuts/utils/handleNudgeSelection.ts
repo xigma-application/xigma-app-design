@@ -11,7 +11,10 @@ import { AppDispatch, store } from 'store';
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 
-export const handleNudgeSelection = (dispatch: AppDispatch, refs: TCanvasRefs, deltaX: number, deltaY: number): void => {
+// utils
+import { updateNudgeDistanceGuide } from './updateNudgeDistanceGuide';
+
+export const handleNudgeSelection = (dispatch: AppDispatch, refs: TCanvasRefs, deltaX: number, deltaY: number, altKey = false): void => {
   const state = store.getState();
   const selectedIds = selectSelectedIds(state);
   const { vectorEditingNodeIds } = state.design;
@@ -22,5 +25,6 @@ export const handleNudgeSelection = (dispatch: AppDispatch, refs: TCanvasRefs, d
     dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
     nodesToMove.forEach((node) => dispatch(updateNode({ changes: getGeometryDeltaChanges(node, deltaX, deltaY), id: node.id })));
     dispatch(endHistoryGesture());
+    updateNudgeDistanceGuide(store.getState(), refs, altKey);
   }
 };

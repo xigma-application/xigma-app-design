@@ -38,31 +38,60 @@ const triggerAndReadDelta = (keyMap: TKeyMap, id: string): { x: number; y: numbe
 };
 
 describe('nudgeMap', () => {
-  it('should build exactly 8 key map entries — one plain and one Shift-modified per arrow direction', () => {
+  it('should build exactly 16 key map entries — plain, Alt-modified, Shift-modified and Alt+Shift-modified per arrow direction', () => {
     // action
     const keyMaps = nudgeMap(store.dispatch, createCanvasRefs());
 
     // result
-    expect(keyMaps).toHaveLength(8);
-    expect(keyMaps.filter((keyMap) => (keyMap.primaryKeys as string[] | undefined)?.includes('shift'))).toHaveLength(4);
+    expect(keyMaps).toHaveLength(16);
+    expect(keyMaps.filter((keyMap) => (keyMap.primaryKeys as string[] | undefined)?.includes('shift'))).toHaveLength(8);
+    expect(keyMaps.filter((keyMap) => (keyMap.primaryKeys as string[] | undefined)?.includes('alt'))).toHaveLength(8);
   });
 
-  it('should nudge by 1px on the plain arrows and by 10px on the Shift-modified arrows, in the correct direction', () => {
+  it('should nudge by 1px on the plain/Alt arrows and by 10px on the Shift/Alt+Shift arrows, in the correct direction', () => {
     // mock
     const frameId = addFrameNode();
 
     store.dispatch(setSelection([frameId]));
 
-    const [left, right, up, down, leftLarge, rightLarge, upLarge, downLarge] = nudgeMap(store.dispatch, createCanvasRefs());
+    const [
+      left,
+      right,
+      up,
+      down,
+      leftAlt,
+      rightAlt,
+      upAlt,
+      downAlt,
+      leftLarge,
+      rightLarge,
+      upLarge,
+      downLarge,
+      leftAltLarge,
+      rightAltLarge,
+      upAltLarge,
+      downAltLarge,
+    ] = nudgeMap(store.dispatch, createCanvasRefs());
 
     // result
     expect(triggerAndReadDelta(left, frameId)).toEqual({ x: -1, y: 0 });
     expect(triggerAndReadDelta(right, frameId)).toEqual({ x: 1, y: 0 });
     expect(triggerAndReadDelta(up, frameId)).toEqual({ x: 0, y: -1 });
     expect(triggerAndReadDelta(down, frameId)).toEqual({ x: 0, y: 1 });
+    // Alt-modified variants nudge the same amount as their non-Alt counterpart — Alt isn't a step
+    // modifier here, it exists only so nudging still fires while Alt is held (see shortcuts.ts's
+    // nudge*Alt comment)
+    expect(triggerAndReadDelta(leftAlt, frameId)).toEqual({ x: -1, y: 0 });
+    expect(triggerAndReadDelta(rightAlt, frameId)).toEqual({ x: 1, y: 0 });
+    expect(triggerAndReadDelta(upAlt, frameId)).toEqual({ x: 0, y: -1 });
+    expect(triggerAndReadDelta(downAlt, frameId)).toEqual({ x: 0, y: 1 });
     expect(triggerAndReadDelta(leftLarge, frameId)).toEqual({ x: -10, y: 0 });
     expect(triggerAndReadDelta(rightLarge, frameId)).toEqual({ x: 10, y: 0 });
     expect(triggerAndReadDelta(upLarge, frameId)).toEqual({ x: 0, y: -10 });
     expect(triggerAndReadDelta(downLarge, frameId)).toEqual({ x: 0, y: 10 });
+    expect(triggerAndReadDelta(leftAltLarge, frameId)).toEqual({ x: -10, y: 0 });
+    expect(triggerAndReadDelta(rightAltLarge, frameId)).toEqual({ x: 10, y: 0 });
+    expect(triggerAndReadDelta(upAltLarge, frameId)).toEqual({ x: 0, y: -10 });
+    expect(triggerAndReadDelta(downAltLarge, frameId)).toEqual({ x: 0, y: 10 });
   });
 });

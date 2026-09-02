@@ -385,3 +385,31 @@ test('measures a whole hovered face against a box anchor from another selected s
 
   expect(altReleased.equals(altHovered)).toBe(false);
 });
+
+test('Alt+arrow-key nudging keeps the distance measurement live, updating the gap label as the selection moves', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-distance-guide-nudge');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 150, 900, 300); // A — selected, nudged
+  await designPage.drawRectangle(950, 180, 1050, 260); // B — hover target, 50px gap to A's right edge
+  await designPage.selectTool('default');
+  await designPage.click(800, 220); // select A
+
+  await page.keyboard.down('Alt');
+  await designPage.pointerMove(1000, 220); // hover B — the cursor stays here for the rest of the test
+  const beforeNudge = await designPage.canvas.screenshot();
+
+  await page.keyboard.press('ArrowRight'); // Alt is already physically down, so this nudge carries altKey:true
+  const afterNudge = await designPage.canvas.screenshot();
+
+  // the gap closed by 1px (50 -> 49) — the live-updated label makes this frame differ from the one above
+  expect(afterNudge.equals(beforeNudge)).toBe(false);
+
+  await page.keyboard.up('Alt');
+  const afterAltReleased = await designPage.canvas.screenshot();
+
+  // releasing Alt (still without moving the mouse) clears the measurement on the next resolved frame
+  expect(afterAltReleased.equals(afterNudge)).toBe(false);
+});

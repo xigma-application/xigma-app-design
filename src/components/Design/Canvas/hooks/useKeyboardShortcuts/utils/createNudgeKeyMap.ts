@@ -20,7 +20,7 @@ export const createNudgeKeyMap = (
 ): TKeyMap => ({
   action: (event): any => {
     event.preventDefault();
-    handleNudgeSelection(dispatch, refs, deltaX, deltaY);
+    handleNudgeSelection(dispatch, refs, deltaX, deltaY, event.altKey);
   },
   ...shortcut,
 });
