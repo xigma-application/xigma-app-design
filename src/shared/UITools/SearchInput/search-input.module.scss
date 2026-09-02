@@ -1,16 +1,10 @@
 .SearchInput {
   align-items: center;
   background-color: var(--color-neutral-4);
-  border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: 5px;
   box-sizing: border-box;
-  column-gap: 8px;
   display: flex;
   height: 32px;
-
-  &:focus-within {
-    border-color: var(--color-blue-1);
-  }
 
   &__field {
     background-color: transparent;
