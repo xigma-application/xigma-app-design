@@ -48,7 +48,7 @@ describe('dispatchDraggedNodeUpdates', () => {
     const id = addRect(100, 100);
     const state = dragState({ [id]: { x: 100, y: 100 } });
     const snapshots = new Map<string, TVectorNodeDragSnapshot>([
-      [id, { deltaX: 0, deltaY: 0, facesByColor: [], strokeColor: '#000', strokeVertices: [] }],
+      [id, { deltaX: 0, deltaY: 0, facesByPaint: [], strokeColor: '#000', strokeVertices: [] }],
     ]);
 
     // action

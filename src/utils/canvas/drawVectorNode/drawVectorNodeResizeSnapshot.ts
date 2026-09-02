@@ -4,7 +4,7 @@ import { TViewport } from 'types/design/types';
 import { TVectorNodeResizeSnapshot } from 'types/design/canvas/types';
 
 // utils
-import { drawVectorFill } from './drawVectorFill';
+import { drawVectorFillPaints } from './drawVectorFillPaints';
 import { drawVectorThickStrokeVertices } from './drawVectorThickStrokeVertices';
 import { getThickVectorPathVertices } from '../vectorNetwork/getThickVectorPathVertices/getThickVectorPathVertices';
 import { rotatePoint } from 'utils/math/rotatePoint';
@@ -36,9 +36,9 @@ export const drawVectorNodeResizeSnapshot = (
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  snapshot.facesByColor.forEach(({ color, points }) => {
+  snapshot.facesByPaint.forEach(({ paint, points }) => {
     const scaledFaces = points.map((face) => face.map((point) => scalePoint(point, snapshot)));
-    drawVectorFill(gl, program, buffer, null, null, scaledFaces, color, canvasWidth, canvasHeight, viewport);
+    drawVectorFillPaints(gl, program, buffer, null, null, scaledFaces, paint, canvasWidth, canvasHeight, viewport);
   });
 
   const scaledSegments = snapshot.flattenedSegments.map((segment) => ({

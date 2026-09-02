@@ -41,7 +41,7 @@ describe('commitDraggedVectorNodeSnapshots', () => {
     const dragState = buildDragState({ 'node-1': { x: 100, y: 100 } });
 
     canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current = new Map([
-      ['node-1', { deltaX: 5, deltaY: -3, facesByColor: [], strokeColor: '#00ff00', strokeVertices: [] }],
+      ['node-1', { deltaX: 5, deltaY: -3, facesByPaint: [], strokeColor: '#00ff00', strokeVertices: [] }],
     ]);
 
     // before
@@ -63,7 +63,7 @@ describe('commitDraggedVectorNodeSnapshots', () => {
     const dragState = buildDragState({ 'node-1': { x: 100.25, y: 100.75 } }, false);
 
     canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current = new Map([
-      ['node-1', { deltaX: 0, deltaY: 0, facesByColor: [], strokeColor: '#00ff00', strokeVertices: [] }],
+      ['node-1', { deltaX: 0, deltaY: 0, facesByPaint: [], strokeColor: '#00ff00', strokeVertices: [] }],
     ]);
 
     // before
@@ -81,7 +81,7 @@ describe('commitDraggedVectorNodeSnapshots', () => {
     const dragState = buildDragState({});
 
     canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current = new Map([
-      ['node-1', { deltaX: 5, deltaY: -3, facesByColor: [], strokeColor: '#00ff00', strokeVertices: [] }],
+      ['node-1', { deltaX: 5, deltaY: -3, facesByPaint: [], strokeColor: '#00ff00', strokeVertices: [] }],
     ]);
 
     // before

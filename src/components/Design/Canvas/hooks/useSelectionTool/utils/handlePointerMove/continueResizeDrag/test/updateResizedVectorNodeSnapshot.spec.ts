@@ -13,7 +13,7 @@ describe('updateResizedVectorNodeSnapshot', () => {
     const snapshot: TVectorNodeResizeSnapshot = {
       anchorX: null,
       anchorY: null,
-      facesByColor: [],
+      facesByPaint: [],
       flattenedSegments: [],
       pivot: { x: 0, y: 0 },
       rotation: 0,
@@ -31,7 +31,7 @@ describe('updateResizedVectorNodeSnapshot', () => {
     expect(snapshot).toEqual({
       anchorX: 10,
       anchorY: 20,
-      facesByColor: [],
+      facesByPaint: [],
       flattenedSegments: [],
       pivot: { x: 0, y: 0 },
       rotation: 0,
@@ -48,7 +48,7 @@ describe('updateResizedVectorNodeSnapshot', () => {
     const snapshot: TVectorNodeResizeSnapshot = {
       anchorX: 10,
       anchorY: 20,
-      facesByColor: [],
+      facesByPaint: [],
       flattenedSegments: [],
       pivot: { x: 0, y: 0 },
       rotation: 0,
@@ -72,7 +72,7 @@ describe('updateResizedVectorNodeSnapshot', () => {
     const snapshot: TVectorNodeResizeSnapshot = {
       anchorX: null,
       anchorY: null,
-      facesByColor: [],
+      facesByPaint: [],
       flattenedSegments: [],
       pivot: { x: 7, y: 7 },
       rotation: 0,
@@ -98,7 +98,7 @@ describe('updateResizedVectorNodeSnapshot', () => {
     const snapshot: TVectorNodeResizeSnapshot = {
       anchorX: null,
       anchorY: null,
-      facesByColor: [],
+      facesByPaint: [],
       flattenedSegments: [],
       pivot: { x: 0, y: 0 },
       rotation: 90,

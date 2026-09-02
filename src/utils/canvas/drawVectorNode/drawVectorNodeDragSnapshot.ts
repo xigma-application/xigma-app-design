@@ -4,7 +4,7 @@ import { TViewport } from 'types/design/types';
 import { TVectorNodeDragSnapshot } from 'types/design/canvas/types';
 
 // utils
-import { drawVectorFill } from './drawVectorFill';
+import { drawVectorFillPaints } from './drawVectorFillPaints';
 import { drawVectorThickStrokeVertices } from './drawVectorThickStrokeVertices';
 
 const translatePoints = (points: TPoint[], deltaX: number, deltaY: number): TPoint[] =>
@@ -24,9 +24,9 @@ export const drawVectorNodeDragSnapshot = (
 ): void => {
   const { deltaX, deltaY } = snapshot;
 
-  snapshot.facesByColor.forEach(({ color, points }) => {
+  snapshot.facesByPaint.forEach(({ paint, points }) => {
     const translatedFaces = points.map((face) => translatePoints(face, deltaX, deltaY));
-    drawVectorFill(gl, program, buffer, null, null, translatedFaces, color, canvasWidth, canvasHeight, viewport);
+    drawVectorFillPaints(gl, program, buffer, null, null, translatedFaces, paint, canvasWidth, canvasHeight, viewport);
   });
 
   drawVectorThickStrokeVertices(

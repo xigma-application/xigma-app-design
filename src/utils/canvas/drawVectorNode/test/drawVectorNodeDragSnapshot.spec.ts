@@ -20,7 +20,7 @@ describe('drawVectorNodeDragSnapshot', () => {
     drawVectorThickStrokeVerticesMock.mockClear();
   });
 
-  it('should translate each color group’s faces by the snapshot delta then draw one fill call per color', () => {
+  it('should translate each paint group’s faces by the snapshot delta then draw one fill call per group', () => {
     // mock
     const gl = {} as WebGL2RenderingContext;
     const program = {} as WebGLProgram;
@@ -28,9 +28,9 @@ describe('drawVectorNodeDragSnapshot', () => {
     const snapshot: TVectorNodeDragSnapshot = {
       deltaX: 5,
       deltaY: 10,
-      facesByColor: [
+      facesByPaint: [
         {
-          color: '#ff0000',
+          paint: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
           points: [
             [
               { x: 0, y: 0 },
@@ -38,7 +38,7 @@ describe('drawVectorNodeDragSnapshot', () => {
             ],
           ],
         },
-        { color: '#00ff00', points: [[{ x: 2, y: 2 }]] },
+        { paint: [{ color: '#00ff00', opacity: 100, type: 'solid' }], points: [[{ x: 2, y: 2 }]] },
       ],
       strokeColor: '#0d99ff',
       strokeVertices: [],
@@ -66,6 +66,7 @@ describe('drawVectorNodeDragSnapshot', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      1,
     );
     expect(drawVectorFillMock).toHaveBeenNthCalledWith(
       2,
@@ -79,6 +80,7 @@ describe('drawVectorNodeDragSnapshot', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      1,
     );
   });
 
@@ -90,7 +92,7 @@ describe('drawVectorNodeDragSnapshot', () => {
     const snapshot: TVectorNodeDragSnapshot = {
       deltaX: 3,
       deltaY: 4,
-      facesByColor: [],
+      facesByPaint: [],
       strokeColor: '#0d99ff',
       strokeVertices: [0, 0, 10, 0, 10, 1, 0, 1],
     };

@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 
 // utils
 import { buildVectorNodeFromEdgeLoops } from '../buildVectorNodeFromEdgeLoops';
+import { getSolidPaintColor } from 'utils/design/paint/getSolidPaintColor';
 import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 import { TLoopEdge } from 'utils/canvas/vectorNetwork/convertShapeToVector/utils/buildClosedVectorLoop';
 
@@ -51,7 +52,7 @@ describe('buildVectorNodeFromEdgeLoops', () => {
     // result — outer and inner loop each stay their own independent, independently-resolvable face
     expect(Object.keys(result?.vertices ?? {})).toHaveLength(8);
     expect(result?.filledFaceKeys).toHaveLength(2);
-    expect(groupFilledFacesForRendering(result!).find((group) => group.color === '#ff0000')?.polygons).toHaveLength(2);
+    expect(groupFilledFacesForRendering(result!).find((group) => getSolidPaintColor(group.paint) === '#ff0000')?.polygons).toHaveLength(2);
   });
 
   it('should drop a degenerate loop with fewer than 3 edges', () => {

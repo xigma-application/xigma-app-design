@@ -1,5 +1,6 @@
 // utils
 import { getGlyphFillVectors } from '../getGlyphFillVectors';
+import { getSolidPaintColor } from 'utils/design/paint/getSolidPaintColor';
 import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 
 const TRIANGLE = [
@@ -35,7 +36,9 @@ describe('getGlyphFillVectors', () => {
     // "o" contributes 2 faces (outer + its own hole), same as the whole-text merge already verified
     // in getTextFlattenVector.spec.ts
     expect(result[1]?.filledFaceKeys).toHaveLength(2);
-    expect(groupFilledFacesForRendering(result[1]!).find((group) => group.color === '#123456')?.polygons).toHaveLength(2);
+    expect(groupFilledFacesForRendering(result[1]!).find((group) => getSolidPaintColor(group.paint) === '#123456')?.polygons).toHaveLength(
+      2,
+    );
   });
 
   it('should return null in place of a glyph with no resolvable contours, keeping index alignment', () => {

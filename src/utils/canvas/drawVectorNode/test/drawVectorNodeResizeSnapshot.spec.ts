@@ -29,14 +29,14 @@ describe('drawVectorNodeResizeSnapshot', () => {
     getThickVectorPathVerticesMock.mockReturnValue([]);
   });
 
-  it('should scale each color group’s face points around the anchor by the current scale, then draw one fill call per color', () => {
+  it('should scale each paint group’s face points around the anchor by the current scale, then draw one fill call per group', () => {
     // mock
     const snapshot: TVectorNodeResizeSnapshot = {
       anchorX: 0,
       anchorY: 0,
-      facesByColor: [
+      facesByPaint: [
         {
-          color: '#ff0000',
+          paint: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
           points: [
             [
               { x: 10, y: 20 },
@@ -44,7 +44,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
             ],
           ],
         },
-        { color: '#00ff00', points: [[{ x: 5, y: 5 }]] },
+        { paint: [{ color: '#00ff00', opacity: 100, type: 'solid' }], points: [[{ x: 5, y: 5 }]] },
       ],
       flattenedSegments: [],
       pivot: { x: 0, y: 0 },
@@ -78,6 +78,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      1,
     );
     expect(drawVectorFillMock).toHaveBeenNthCalledWith(
       2,
@@ -91,6 +92,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      1,
     );
   });
 
@@ -99,7 +101,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
     const snapshot: TVectorNodeResizeSnapshot = {
       anchorX: null,
       anchorY: 0,
-      facesByColor: [{ color: '#ff0000', points: [[{ x: 10, y: 20 }]] }],
+      facesByPaint: [{ paint: [{ color: '#ff0000', opacity: 100, type: 'solid' }], points: [[{ x: 10, y: 20 }]] }],
       flattenedSegments: [],
       pivot: { x: 0, y: 0 },
       rotation: 0,
@@ -125,6 +127,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      1,
     );
   });
 
@@ -133,7 +136,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
     const snapshot: TVectorNodeResizeSnapshot = {
       anchorX: 0,
       anchorY: 0,
-      facesByColor: [],
+      facesByPaint: [],
       flattenedSegments: [
         {
           endId: 'v2',
@@ -193,7 +196,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
     const snapshot: TVectorNodeResizeSnapshot = {
       anchorX: 0,
       anchorY: 0,
-      facesByColor: [{ color: '#ff0000', points: [[{ x: 0, y: 0 }]] }],
+      facesByPaint: [{ paint: [{ color: '#ff0000', opacity: 100, type: 'solid' }], points: [[{ x: 0, y: 0 }]] }],
       flattenedSegments: [],
       pivot: { x: 100, y: 50 },
       rotation: 90,
@@ -219,6 +222,7 @@ describe('drawVectorNodeResizeSnapshot', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      1,
     );
   });
 });

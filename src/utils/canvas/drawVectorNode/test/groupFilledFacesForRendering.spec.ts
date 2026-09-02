@@ -1,5 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
+import { TPaint } from 'types/design/paint/types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
@@ -39,6 +40,8 @@ const setPoints = (byKey: Record<string, TPoint[]>): void => {
   getVectorFillLoopPointsMock.mockImplementation((_n: TVectorNode, key: string) => byKey[key] ?? null);
 };
 
+const solid = (color: string): TPaint[] => [{ color, opacity: 100, type: 'solid' }];
+
 describe('groupFilledFacesForRendering', () => {
   beforeEach(() => {
     getVectorFillLoopPointsMock.mockReset();
@@ -61,7 +64,7 @@ describe('groupFilledFacesForRendering', () => {
     // result
     const result = groupFilledFacesForRendering(node);
 
-    expect(result).toEqual([{ color: '#111111', polygons: [square(0, 0, 100), square(20, 20, 10)] }]);
+    expect(result).toEqual([{ paint: solid('#111111'), polygons: [square(0, 0, 100), square(20, 20, 10)] }]);
   });
 
   it('should keep two ordinary faces of different colors in separate groups', () => {
@@ -78,8 +81,8 @@ describe('groupFilledFacesForRendering', () => {
     const result = groupFilledFacesForRendering(node);
 
     expect(result).toEqual([
-      { color: '#111111', polygons: [square(0, 0, 10)] },
-      { color: '#222222', polygons: [square(200, 200, 10)] },
+      { paint: solid('#111111'), polygons: [square(0, 0, 10)] },
+      { paint: solid('#222222'), polygons: [square(200, 200, 10)] },
     ]);
   });
 
@@ -97,7 +100,7 @@ describe('groupFilledFacesForRendering', () => {
     // result
     const result = groupFilledFacesForRendering(node);
 
-    expect(result).toEqual([{ color: '#d9d9d9', polygons: [square(0, 0, 100), square(20, 20, 10)] }]);
+    expect(result).toEqual([{ paint: solid('#d9d9d9'), polygons: [square(0, 0, 100), square(20, 20, 10)] }]);
   });
 
   it('should isolate a former hole into its own group once it is no longer geometrically nested in its recorded parent', () => {
@@ -116,8 +119,8 @@ describe('groupFilledFacesForRendering', () => {
     const result = groupFilledFacesForRendering(node);
 
     expect(result).toEqual([
-      { color: '#d9d9d9', polygons: [square(0, 0, 100)] },
-      { color: '#d9d9d9', polygons: [square(500, 500, 10)] },
+      { paint: solid('#d9d9d9'), polygons: [square(0, 0, 100)] },
+      { paint: solid('#d9d9d9'), polygons: [square(500, 500, 10)] },
     ]);
   });
 
@@ -137,8 +140,8 @@ describe('groupFilledFacesForRendering', () => {
     const result = groupFilledFacesForRendering(node);
 
     expect(result).toEqual([
-      { color: '#222222', polygons: [square(0, 0, 100)] },
-      { color: '#d9d9d9', polygons: [square(20, 20, 10)] },
+      { paint: solid('#222222'), polygons: [square(0, 0, 100)] },
+      { paint: solid('#d9d9d9'), polygons: [square(20, 20, 10)] },
     ]);
   });
 

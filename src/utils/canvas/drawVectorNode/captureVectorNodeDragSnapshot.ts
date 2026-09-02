@@ -10,10 +10,10 @@ import { groupFilledFacesForRendering } from './groupFilledFacesForRendering';
 
 export const captureVectorNodeDragSnapshot = (node: TVectorNode): TVectorNodeDragSnapshot => {
   const renderedNode: TVectorNode = node.rotation ? { ...node, ...bakeVectorNodeRotation(node) } : node;
-  const facesByColor = groupFilledFacesForRendering(renderedNode).map(({ color, polygons }) => ({ color, points: polygons }));
+  const facesByPaint = groupFilledFacesForRendering(renderedNode).map(({ paint, polygons }) => ({ paint, points: polygons }));
   const strokeVertices = renderedNode.widthProfile
     ? []
     : getThickVectorPathVertices(flattenVectorSegments(renderedNode), renderedNode.strokeWidth / 2);
 
-  return { deltaX: 0, deltaY: 0, facesByColor, strokeColor: renderedNode.strokeColor, strokeVertices };
+  return { deltaX: 0, deltaY: 0, facesByPaint, strokeColor: renderedNode.strokeColor, strokeVertices };
 };

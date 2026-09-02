@@ -6,6 +6,7 @@ import { NodeType } from 'types/design/enums';
 import { TTextNode } from 'types/design/types';
 
 // utils
+import { getSolidPaintColor } from 'utils/design/paint/getSolidPaintColor';
 import { getTextFlattenVector } from '../getTextFlattenVector';
 import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 import { MSDF_ATLAS_JSON } from 'constant/webgl/msdfAtlas';
@@ -77,7 +78,8 @@ describe('getTextFlattenVector — determinism across repeated calls with the re
         continue;
       }
 
-      const resolvedFaces = groupFilledFacesForRendering(result).find((group) => group.color === '#123456')?.polygons ?? [];
+      const resolvedFaces =
+        groupFilledFacesForRendering(result).find((group) => getSolidPaintColor(group.paint) === '#123456')?.polygons ?? [];
 
       summaries.push({
         filledFaceKeyCount: result.filledFaceKeys.length,

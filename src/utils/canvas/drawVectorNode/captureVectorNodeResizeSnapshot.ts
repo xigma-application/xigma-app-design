@@ -8,14 +8,14 @@ import { getVectorNodeBounds } from '../vectorNetwork/getVectorNodeBounds';
 import { groupFilledFacesForRendering } from './groupFilledFacesForRendering';
 
 export const captureVectorNodeResizeSnapshot = (node: TVectorNode, rotation: number): TVectorNodeResizeSnapshot => {
-  const facesByColor = groupFilledFacesForRendering(node).map(({ color, polygons }) => ({ color, points: polygons }));
+  const facesByPaint = groupFilledFacesForRendering(node).map(({ paint, polygons }) => ({ paint, points: polygons }));
   const bounds = getVectorNodeBounds(node);
   const center = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
 
   return {
     anchorX: null,
     anchorY: null,
-    facesByColor,
+    facesByPaint,
     flattenedSegments: flattenVectorSegments(node),
     pivot: center,
     rotation,

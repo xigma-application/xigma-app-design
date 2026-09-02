@@ -4,7 +4,7 @@ import { TVectorNodeDragSnapshot } from 'types/design/canvas/types';
 // utils
 import { updateDragSnapshotDeltas } from '../updateDragSnapshotDeltas';
 
-const snapshot = (): TVectorNodeDragSnapshot => ({ deltaX: 0, deltaY: 0, facesByColor: [], strokeColor: '#000', strokeVertices: [] });
+const snapshot = (): TVectorNodeDragSnapshot => ({ deltaX: 0, deltaY: 0, facesByPaint: [], strokeColor: '#000', strokeVertices: [] });
 
 describe('updateDragSnapshotDeltas', () => {
   it('should write the delta onto every snapshot', () => {

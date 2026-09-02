@@ -23,11 +23,11 @@ describe('drawVectorNodeRotateSnapshot', () => {
     drawVectorThickStrokeVerticesMock.mockClear();
   });
 
-  it('should rotate each color group’s face points around the pivot by the current delta, then draw one fill call per color', () => {
+  it('should rotate each paint group’s face points around the pivot by the current delta, then draw one fill call per group', () => {
     // mock — a 90° turn around (0,0): (10,0) -> (0,10)
     const snapshot: TVectorNodeRotateSnapshot = {
       deltaDegrees: 90,
-      facesByColor: [{ color: '#ff0000', points: [[{ x: 10, y: 0 }]] }],
+      facesByPaint: [{ paint: [{ color: '#ff0000', opacity: 100, type: 'solid' }], points: [[{ x: 10, y: 0 }]] }],
       pivot: { x: 0, y: 0 },
       strokeColor: '#0d99ff',
       strokeVertices: [],
@@ -52,6 +52,7 @@ describe('drawVectorNodeRotateSnapshot', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      1,
     );
   });
 
@@ -59,7 +60,7 @@ describe('drawVectorNodeRotateSnapshot', () => {
     // mock
     const snapshot: TVectorNodeRotateSnapshot = {
       deltaDegrees: 0,
-      facesByColor: [{ color: '#ff0000', points: [[{ x: 10, y: 5 }]] }],
+      facesByPaint: [{ paint: [{ color: '#ff0000', opacity: 100, type: 'solid' }], points: [[{ x: 10, y: 5 }]] }],
       pivot: { x: 0, y: 0 },
       strokeColor: '#0d99ff',
       strokeVertices: [],
@@ -80,6 +81,7 @@ describe('drawVectorNodeRotateSnapshot', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      1,
     );
   });
 
@@ -87,7 +89,7 @@ describe('drawVectorNodeRotateSnapshot', () => {
     // mock — a 90° turn around (0,0): (10,0) -> (0,10), (0,10) -> (-10,0)
     const snapshot: TVectorNodeRotateSnapshot = {
       deltaDegrees: 90,
-      facesByColor: [],
+      facesByPaint: [],
       pivot: { x: 0, y: 0 },
       strokeColor: '#0d99ff',
       strokeVertices: [10, 0, 0, 10],

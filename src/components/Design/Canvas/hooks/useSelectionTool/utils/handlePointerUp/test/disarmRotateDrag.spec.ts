@@ -63,7 +63,7 @@ describe('disarmRotateDrag', () => {
     });
 
     canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current = new Map([
-      ['vector-1', { deltaDegrees: 90, facesByColor: [], pivot: { x: 50, y: 50 }, strokeColor: '#000000', strokeVertices: [] }],
+      ['vector-1', { deltaDegrees: 90, facesByPaint: [], pivot: { x: 50, y: 50 }, strokeColor: '#000000', strokeVertices: [] }],
     ]);
 
     const dispatch = vi.fn();
@@ -89,7 +89,7 @@ describe('disarmRotateDrag', () => {
     });
 
     canvasRefs.vectorSnapshots.rotatedVectorNodeSnapshotsRef.current = new Map([
-      ['vector-1', { deltaDegrees: 90, facesByColor: [], pivot: { x: 50, y: 50 }, strokeColor: '#000000', strokeVertices: [] }],
+      ['vector-1', { deltaDegrees: 90, facesByPaint: [], pivot: { x: 50, y: 50 }, strokeColor: '#000000', strokeVertices: [] }],
     ]);
 
     const dispatch = vi.fn();

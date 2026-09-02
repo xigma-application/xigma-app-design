@@ -11,12 +11,12 @@ import { groupFilledFacesForRendering } from './groupFilledFacesForRendering';
 
 export const captureVectorNodeRotateSnapshot = (node: TVectorNode): TVectorNodeRotateSnapshot => {
   const renderedNode = getRenderedVectorNode(node);
-  const facesByColor = groupFilledFacesForRendering(renderedNode).map(({ color, polygons }) => ({ color, points: polygons }));
+  const facesByPaint = groupFilledFacesForRendering(renderedNode).map(({ paint, polygons }) => ({ paint, points: polygons }));
   const strokeVertices = renderedNode.widthProfile
     ? []
     : getThickVectorPathVertices(flattenVectorSegments(renderedNode), renderedNode.strokeWidth / 2);
   const bounds = getVectorNodeBounds(node);
   const pivot = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
 
-  return { deltaDegrees: 0, facesByColor, pivot, strokeColor: renderedNode.strokeColor, strokeVertices };
+  return { deltaDegrees: 0, facesByPaint, pivot, strokeColor: renderedNode.strokeColor, strokeVertices };
 };

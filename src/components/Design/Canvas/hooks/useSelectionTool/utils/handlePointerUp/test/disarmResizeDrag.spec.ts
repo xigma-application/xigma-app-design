@@ -85,7 +85,7 @@ describe('disarmResizeDrag', () => {
         {
           anchorX: 0,
           anchorY: 0,
-          facesByColor: [],
+          facesByPaint: [],
           flattenedSegments: [],
           pivot: { x: 0, y: 0 },
           rotation: 0,
@@ -127,7 +127,7 @@ describe('disarmResizeDrag', () => {
         {
           anchorX: 0,
           anchorY: 0,
-          facesByColor: [],
+          facesByPaint: [],
           flattenedSegments: [],
           pivot: { x: 0, y: 0 },
           rotation: 0,

@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 
 // utils
 import { buildVectorNodeFromLoops } from '../buildVectorNodeFromLoops';
+import { getSolidPaintColor } from 'utils/design/paint/getSolidPaintColor';
 import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 
 const BASE = { id: 'outline-1', name: 'Rectangle outline', parentId: 'frame-1', rotation: 12 };
@@ -50,9 +51,9 @@ describe('buildVectorNodeFromLoops', () => {
     expect(Object.keys(result?.segments ?? {})).toHaveLength(8);
     expect(result?.filledFaceKeys).toHaveLength(2);
 
-    const facesByColor = groupFilledFacesForRendering(result!);
+    const facesByRender = groupFilledFacesForRendering(result!);
 
-    expect(facesByColor.find((group) => group.color === '#ff0000')?.polygons).toHaveLength(2);
+    expect(facesByRender.find((group) => getSolidPaintColor(group.paint) === '#ff0000')?.polygons).toHaveLength(2);
   });
 
   it('should drop a degenerate loop with fewer than 3 points', () => {

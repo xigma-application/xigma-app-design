@@ -94,6 +94,7 @@ describe('drawVectorNode', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      1,
     );
     expect(drawVectorThickStrokeVerticesMock).toHaveBeenCalledWith(
       gl,
@@ -155,6 +156,7 @@ describe('drawVectorNode', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      1,
     );
     expect(drawVectorFillMock).toHaveBeenNthCalledWith(
       2,
@@ -168,6 +170,7 @@ describe('drawVectorNode', () => {
       200,
       150,
       IDENTITY_VIEWPORT,
+      1,
     );
   });
 

@@ -3,7 +3,7 @@ import { TPoint } from 'types/canvas';
 import { TVectorNode, TViewport } from 'types/design/types';
 
 // utils
-import { drawVectorFill } from './drawVectorFill';
+import { drawVectorFillPaints } from './drawVectorFillPaints';
 import { drawVectorRoundedCaps } from './drawVectorRoundedCaps';
 import { drawVectorThickStrokeVertices } from './drawVectorThickStrokeVertices';
 import { drawVectorVariableStroke } from './drawVectorVariableStroke';
@@ -26,8 +26,8 @@ export const drawVectorNode = (
   const renderedNode = getRenderedVectorNode(node);
   const nodeBounds = getVectorNodeBounds(renderedNode);
 
-  groupFilledFacesForRendering(renderedNode).forEach(({ color, polygons }) => {
-    drawVectorFill(gl, program, buffer, faceBufferCache, nodeBounds, polygons, color, canvasWidth, canvasHeight, viewport);
+  groupFilledFacesForRendering(renderedNode).forEach(({ paint, polygons }) => {
+    drawVectorFillPaints(gl, program, buffer, faceBufferCache, nodeBounds, polygons, paint, canvasWidth, canvasHeight, viewport);
   });
 
   if (renderedNode.widthProfile) {

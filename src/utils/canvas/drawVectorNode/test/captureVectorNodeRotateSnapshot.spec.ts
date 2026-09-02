@@ -1,5 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
+import { TPaint } from 'types/design/paint/types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
@@ -60,8 +61,10 @@ describe('captureVectorNodeRotateSnapshot', () => {
     const renderedNode: TVectorNode = { ...baseNode, rotation: 0 };
     const points = [[{ x: 0, y: 0 }]];
 
+    const paint: TPaint[] = [{ color: '#ff0000', opacity: 100, type: 'solid' }];
+
     getRenderedVectorNodeMock.mockReturnValue(renderedNode);
-    groupFilledFacesForRenderingMock.mockReturnValue([{ color: '#ff0000', polygons: points }]);
+    groupFilledFacesForRenderingMock.mockReturnValue([{ paint, polygons: points }]);
     getThickVectorPathVerticesMock.mockReturnValue([0, 0, 10, 0, 10, 1]);
     getVectorNodeBoundsMock.mockReturnValue({ height: 20, width: 40, x: 10, y: 10 });
 
@@ -75,7 +78,7 @@ describe('captureVectorNodeRotateSnapshot', () => {
     expect(getVectorNodeBoundsMock).toHaveBeenCalledWith(baseNode);
     expect(snapshot).toEqual({
       deltaDegrees: 0,
-      facesByColor: [{ color: '#ff0000', points }],
+      facesByPaint: [{ paint, points }],
       pivot: { x: 30, y: 20 },
       strokeColor: '#00ff00',
       strokeVertices: [0, 0, 10, 0, 10, 1],

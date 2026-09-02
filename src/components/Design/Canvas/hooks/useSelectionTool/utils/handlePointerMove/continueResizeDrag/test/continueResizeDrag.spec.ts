@@ -915,7 +915,7 @@ describe('continueResizeDrag', () => {
     const buildSnapshot = (): TVectorNodeResizeSnapshot => ({
       anchorX: null,
       anchorY: null,
-      facesByColor: [],
+      facesByPaint: [],
       flattenedSegments: [],
       pivot: { x: 0, y: 0 },
       rotation: 0,

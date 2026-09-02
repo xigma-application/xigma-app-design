@@ -1,5 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
+import { TPaint } from 'types/design/paint/types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
@@ -43,7 +44,9 @@ describe('captureVectorNodeResizeSnapshot', () => {
     const points = [[{ x: 0, y: 0 }]];
     const flattened = [{ endId: 'v2', points: [{ x: 0, y: 0 }], segmentId: 's1', startId: 'v1' }];
 
-    groupFilledFacesForRenderingMock.mockReturnValue([{ color: '#ff0000', polygons: points }]);
+    const paint: TPaint[] = [{ color: '#ff0000', opacity: 100, type: 'solid' }];
+
+    groupFilledFacesForRenderingMock.mockReturnValue([{ paint, polygons: points }]);
     flattenVectorSegmentsMock.mockReturnValue(flattened);
 
     // before
@@ -55,7 +58,7 @@ describe('captureVectorNodeResizeSnapshot', () => {
     expect(snapshot).toEqual({
       anchorX: null,
       anchorY: null,
-      facesByColor: [{ color: '#ff0000', points }],
+      facesByPaint: [{ paint, points }],
       flattenedSegments: flattened,
       pivot: { x: 0, y: 0 },
       rotation: 0,

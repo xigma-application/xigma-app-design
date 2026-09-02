@@ -129,7 +129,7 @@ describe('drawSceneVectorNode', () => {
     const buffer = {} as WebGLBuffer;
     const faceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
     const strokeBufferCache = new WeakMap<number[], WebGLBuffer>();
-    const snapshot: TVectorNodeDragSnapshot = { deltaX: 5, deltaY: 10, facesByColor: [], strokeColor: '#00ff00', strokeVertices: [] };
+    const snapshot: TVectorNodeDragSnapshot = { deltaX: 5, deltaY: 10, facesByPaint: [], strokeColor: '#00ff00', strokeVertices: [] };
     const dragSnapshots = new Map([['node-1', snapshot]]);
 
     // before
@@ -165,7 +165,7 @@ describe('drawSceneVectorNode', () => {
     const snapshot: TVectorNodeResizeSnapshot = {
       anchorX: 0,
       anchorY: 0,
-      facesByColor: [],
+      facesByPaint: [],
       flattenedSegments: [],
       pivot: { x: 0, y: 0 },
       rotation: 0,
@@ -209,7 +209,7 @@ describe('drawSceneVectorNode', () => {
     const strokeBufferCache = new WeakMap<number[], WebGLBuffer>();
     const snapshot: TVectorNodeRotateSnapshot = {
       deltaDegrees: 45,
-      facesByColor: [],
+      facesByPaint: [],
       pivot: { x: 0, y: 0 },
       strokeColor: '#00ff00',
       strokeVertices: [],
@@ -247,11 +247,11 @@ describe('drawSceneVectorNode', () => {
     const buffer = {} as WebGLBuffer;
     const faceBufferCache = new WeakMap<TPoint[], WebGLBuffer>();
     const strokeBufferCache = new WeakMap<number[], WebGLBuffer>();
-    const dragSnapshot: TVectorNodeDragSnapshot = { deltaX: 5, deltaY: 10, facesByColor: [], strokeColor: '#00ff00', strokeVertices: [] };
+    const dragSnapshot: TVectorNodeDragSnapshot = { deltaX: 5, deltaY: 10, facesByPaint: [], strokeColor: '#00ff00', strokeVertices: [] };
     const resizeSnapshot: TVectorNodeResizeSnapshot = {
       anchorX: 0,
       anchorY: 0,
-      facesByColor: [],
+      facesByPaint: [],
       flattenedSegments: [],
       pivot: { x: 0, y: 0 },
       rotation: 0,
@@ -295,7 +295,7 @@ describe('drawSceneVectorNode', () => {
     const resizeSnapshot: TVectorNodeResizeSnapshot = {
       anchorX: 0,
       anchorY: 0,
-      facesByColor: [],
+      facesByPaint: [],
       flattenedSegments: [],
       pivot: { x: 0, y: 0 },
       rotation: 0,
@@ -307,7 +307,7 @@ describe('drawSceneVectorNode', () => {
     };
     const rotateSnapshot: TVectorNodeRotateSnapshot = {
       deltaDegrees: 45,
-      facesByColor: [],
+      facesByPaint: [],
       pivot: { x: 0, y: 0 },
       strokeColor: '#00ff00',
       strokeVertices: [],

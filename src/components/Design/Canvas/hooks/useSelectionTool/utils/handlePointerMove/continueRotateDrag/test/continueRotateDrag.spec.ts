@@ -195,7 +195,7 @@ describe('continueRotateDrag', () => {
   describe('vector node rotate snapshots', () => {
     const buildSnapshot = (): TVectorNodeRotateSnapshot => ({
       deltaDegrees: 0,
-      facesByColor: [],
+      facesByPaint: [],
       pivot: { x: 50, y: 50 },
       strokeColor: '#000000',
       strokeVertices: [],

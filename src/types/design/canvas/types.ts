@@ -9,6 +9,7 @@ import { TDraftEntity, TVectorTangent, TVectorWidthPoint } from 'types/design/ty
 import { TGuideAxis } from 'types/design/guides/types';
 import { TColorSampleRequest } from 'utils/canvas/colorPixelSampler/types';
 import { TFlattenedVectorSegment } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
+import { TPaint } from 'types/design/paint/types';
 import { TPenDragOrigin } from 'components/Design/Canvas/hooks/useDrawPenTool/types';
 import { TShapeContactGuide } from 'components/Design/Canvas/utils/getShapeContactGuides';
 import {
@@ -145,7 +146,7 @@ export type TVectorWidthLastHandleSide = { nodeId: string; pointId: string; side
 export type TVectorNodeDragSnapshot = {
   deltaX: number;
   deltaY: number;
-  facesByColor: { color: string; points: TPoint[][] }[];
+  facesByPaint: { paint: TPaint[]; points: TPoint[][] }[];
   strokeColor: string;
   strokeVertices: number[];
 };
@@ -153,7 +154,7 @@ export type TVectorNodeDragSnapshot = {
 export type TVectorNodeResizeSnapshot = {
   anchorX: number | null;
   anchorY: number | null;
-  facesByColor: { color: string; points: TPoint[][] }[];
+  facesByPaint: { paint: TPaint[]; points: TPoint[][] }[];
   flattenedSegments: TFlattenedVectorSegment[];
   pivot: TPoint;
   rotation: number;
@@ -166,7 +167,7 @@ export type TVectorNodeResizeSnapshot = {
 
 export type TVectorNodeRotateSnapshot = {
   deltaDegrees: number;
-  facesByColor: { color: string; points: TPoint[][] }[];
+  facesByPaint: { paint: TPaint[]; points: TPoint[][] }[];
   pivot: TPoint;
   strokeColor: string;
   strokeVertices: number[];

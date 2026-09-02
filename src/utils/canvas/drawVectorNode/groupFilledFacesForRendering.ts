@@ -1,14 +1,17 @@
 // types
+import { TPaint } from 'types/design/paint/types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
 // utils
+import { getEffectiveVectorFill } from '../vectorNetwork/getEffectiveVectorFill';
 import { getEffectiveVectorFillColor } from '../vectorNetwork/getEffectiveVectorFillColor';
 import { getPointInsideFace } from '../vectorNetwork/buildVectorNodeFromLoops/assembleVectorNodeFromLoopGeometries/getPointInsideFace';
 import { getVectorFillLoopPoints } from '../vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints';
 import { isPointInPolygonVertices } from 'components/Design/Canvas/utils/isPointInPolygonVertices';
+import { paintGroupKey } from 'utils/design/paint/paintGroupKey';
 
-export type TFillRenderGroup = { color: string; polygons: TPoint[][] };
+export type TFillRenderGroup = { paint: TPaint[]; polygons: TPoint[][] };
 
 const getActiveHoleParentKey = (node: TVectorNode, key: string, parentKey: string, pointsByKey: Map<string, TPoint[]>): string | null => {
   const points = pointsByKey.get(key);
@@ -40,19 +43,17 @@ export const groupFilledFacesForRendering = (renderedNode: TVectorNode): TFillRe
   renderedNode.filledFaceKeys.forEach((key) => {
     const points = pointsByKey.get(key);
 
-    if (!points) {
-      return;
+    if (points) {
+      const parentKey = renderedNode.holeParentByKey?.[key];
+      const isFormerHole = Boolean(parentKey);
+      const activeParentKey = parentKey ? getActiveHoleParentKey(renderedNode, key, parentKey, pointsByKey) : null;
+      const paint = getEffectiveVectorFill(renderedNode, activeParentKey ?? key);
+      const groupKey = isFormerHole && !activeParentKey ? key : paintGroupKey(paint);
+      const group = groups.get(groupKey) ?? { paint, polygons: [] };
+
+      group.polygons.push(points);
+      groups.set(groupKey, group);
     }
-
-    const parentKey = renderedNode.holeParentByKey?.[key];
-    const isFormerHole = Boolean(parentKey);
-    const activeParentKey = parentKey ? getActiveHoleParentKey(renderedNode, key, parentKey, pointsByKey) : null;
-    const color = getEffectiveVectorFillColor(renderedNode, activeParentKey ?? key);
-    const groupKey = isFormerHole && !activeParentKey ? key : color;
-    const group = groups.get(groupKey) ?? { color, polygons: [] };
-
-    group.polygons.push(points);
-    groups.set(groupKey, group);
   });
 
   return Array.from(groups.values());

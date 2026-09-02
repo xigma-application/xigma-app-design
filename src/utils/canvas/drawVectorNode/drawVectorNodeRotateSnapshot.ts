@@ -4,7 +4,7 @@ import { TViewport } from 'types/design/types';
 import { TVectorNodeRotateSnapshot } from 'types/design/canvas/types';
 
 // utils
-import { drawVectorFill } from './drawVectorFill';
+import { drawVectorFillPaints } from './drawVectorFillPaints';
 import { drawVectorThickStrokeVertices } from './drawVectorThickStrokeVertices';
 import { rotatePoint } from 'utils/math/rotatePoint';
 
@@ -20,16 +20,15 @@ export const drawVectorNodeRotateSnapshot = (
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  snapshot.facesByColor.forEach(({ color, points }) => {
-    const rotatedFaces = points.map((face) => face.map((point) => rotateSnapshotPoint(point, snapshot)));
-    drawVectorFill(gl, program, buffer, null, null, rotatedFaces, color, canvasWidth, canvasHeight, viewport);
-  });
-
   const rotatedStrokeVertices: number[] = [];
+
+  snapshot.facesByPaint.forEach(({ paint, points }) => {
+    const rotatedFaces = points.map((face) => face.map((point) => rotateSnapshotPoint(point, snapshot)));
+    drawVectorFillPaints(gl, program, buffer, null, null, rotatedFaces, paint, canvasWidth, canvasHeight, viewport);
+  });
 
   for (let index = 0; index < snapshot.strokeVertices.length; index += 2) {
     const rotated = rotateSnapshotPoint({ x: snapshot.strokeVertices[index], y: snapshot.strokeVertices[index + 1] }, snapshot);
-
     rotatedStrokeVertices.push(rotated.x, rotated.y);
   }
 

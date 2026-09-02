@@ -44,8 +44,8 @@ describe('getNodeOutlineAsStrokeVector', () => {
 
     // every declared face must actually resolve back to real points, not just exist as a key —
     // this is exactly the check that would have caught the bridged-ring rendering bug
-    const facesByColor = groupFilledFacesForRendering(result!);
-    const totalResolvedFaces = facesByColor.reduce((sum, group) => sum + group.polygons.length, 0);
+    const facesByRender = groupFilledFacesForRendering(result!);
+    const totalResolvedFaces = facesByRender.reduce((sum, group) => sum + group.polygons.length, 0);
 
     expect(totalResolvedFaces).toBe(result?.filledFaceKeys.length);
   });

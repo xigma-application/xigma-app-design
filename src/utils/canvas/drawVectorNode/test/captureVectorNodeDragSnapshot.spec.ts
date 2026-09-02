@@ -1,5 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
+import { TPaint } from 'types/design/paint/types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
@@ -53,7 +54,9 @@ describe('captureVectorNodeDragSnapshot', () => {
     // mock
     const points = [[{ x: 0, y: 0 }]];
 
-    groupFilledFacesForRenderingMock.mockReturnValue([{ color: '#ff0000', polygons: points }]);
+    const paint: TPaint[] = [{ color: '#ff0000', opacity: 100, type: 'solid' }];
+
+    groupFilledFacesForRenderingMock.mockReturnValue([{ paint, polygons: points }]);
     getThickVectorPathVerticesMock.mockReturnValue([0, 0, 10, 0, 10, 1]);
 
     // before
@@ -67,7 +70,7 @@ describe('captureVectorNodeDragSnapshot', () => {
     expect(snapshot).toEqual({
       deltaX: 0,
       deltaY: 0,
-      facesByColor: [{ color: '#ff0000', points }],
+      facesByPaint: [{ paint, points }],
       strokeColor: '#00ff00',
       strokeVertices: [0, 0, 10, 0, 10, 1],
     });

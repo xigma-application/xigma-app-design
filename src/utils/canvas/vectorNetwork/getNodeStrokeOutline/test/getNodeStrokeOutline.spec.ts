@@ -4,6 +4,7 @@ import { TEllipseNode, TLineNode, TRectangleNode, TVectorNode } from 'types/desi
 
 // utils
 import { getNodeStrokeOutline } from '../getNodeStrokeOutline';
+import { getSolidPaintColor } from 'utils/design/paint/getSolidPaintColor';
 import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 
 const buildRectangle = (overrides: Partial<TRectangleNode> = {}): TRectangleNode => ({
@@ -49,7 +50,7 @@ describe('getNodeStrokeOutline', () => {
     expect(result?.fillColor).toBe('#123456');
     expect(result?.name).toBe('Rectangle outline');
     expect(result?.filledFaceKeys).toHaveLength(2);
-    expect(groupFilledFacesForRendering(result!).find((group) => group.color === '#123456')?.polygons).toHaveLength(2);
+    expect(groupFilledFacesForRendering(result!).find((group) => getSolidPaintColor(group.paint) === '#123456')?.polygons).toHaveLength(2);
   });
 
   it('should build a solid (hole-less) outline when the stroke is thick enough to fully cover the rectangle', () => {
@@ -86,7 +87,7 @@ describe('getNodeStrokeOutline', () => {
     // result
     expect(result?.type).toBe(NodeType.vector);
     expect(result?.filledFaceKeys).toHaveLength(2);
-    expect(groupFilledFacesForRendering(result!).find((group) => group.color === '#000000')?.polygons).toHaveLength(2);
+    expect(groupFilledFacesForRendering(result!).find((group) => getSolidPaintColor(group.paint) === '#000000')?.polygons).toHaveLength(2);
   });
 
   it('should build a single-band outline for a line with a stroke', () => {

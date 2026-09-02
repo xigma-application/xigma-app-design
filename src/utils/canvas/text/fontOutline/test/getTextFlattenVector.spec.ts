@@ -12,6 +12,7 @@ vi.mock('../getCurvedTextGlyphContours', () => ({ getCurvedTextGlyphContours }))
 vi.mock('../getTextGlyphContours', () => ({ getTextGlyphContours }));
 
 // utils
+import { getSolidPaintColor } from 'utils/design/paint/getSolidPaintColor';
 import { getTextFlattenVector } from '../getTextFlattenVector';
 import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 
@@ -101,7 +102,7 @@ describe('getTextFlattenVector', () => {
     // "I" contributes 1 face, "o" contributes 2 (outer + its own hole) — 3 faces total, all
     // independently resolvable back to real points (not just present as keys)
     expect(result?.filledFaceKeys).toHaveLength(3);
-    expect(groupFilledFacesForRendering(result!).find((group) => group.color === '#123456')?.polygons).toHaveLength(3);
+    expect(groupFilledFacesForRendering(result!).find((group) => getSolidPaintColor(group.paint) === '#123456')?.polygons).toHaveLength(3);
   });
 
   it('should return null when there are no visible glyphs', async () => {

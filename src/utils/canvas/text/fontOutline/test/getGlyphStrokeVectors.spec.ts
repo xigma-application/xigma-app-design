@@ -1,5 +1,6 @@
 // utils
 import { getGlyphStrokeVectors } from '../getGlyphStrokeVectors';
+import { getSolidPaintColor } from 'utils/design/paint/getSolidPaintColor';
 import { groupFilledFacesForRendering } from 'utils/canvas/drawVectorNode/groupFilledFacesForRendering';
 
 const SQUARE = [
@@ -35,7 +36,9 @@ describe('getGlyphStrokeVectors', () => {
     expect(result).toHaveLength(2);
     expect(result[0]?.filledFaceKeys).toHaveLength(2);
     expect(result[1]?.filledFaceKeys).toHaveLength(4);
-    expect(groupFilledFacesForRendering(result[1]!).find((group) => group.color === '#000000')?.polygons).toHaveLength(4);
+    expect(groupFilledFacesForRendering(result[1]!).find((group) => getSolidPaintColor(group.paint) === '#000000')?.polygons).toHaveLength(
+      4,
+    );
   });
 
   it('should return null in place of a glyph with no contours, keeping index alignment', () => {
