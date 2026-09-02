@@ -30,6 +30,7 @@ import { drawDraftSizeLabel } from './drawDraftSizeLabel';
 import { drawEditingPathTextHandle } from './drawEditingPathTextHandle';
 import { drawEditingText } from './drawEditingText';
 import { drawEllipseArcHandleLayer } from './drawEllipseArcHandleLayer/drawEllipseArcHandleLayer';
+import { drawEqualSpacingGuides } from './drawEqualSpacingGuides';
 import { drawFrame } from './drawFrame';
 import { drawFrameNameLabels } from './drawFrameNameLabels/drawFrameNameLabels';
 import { drawHoverOutline } from './drawHoverOutline';
@@ -159,4 +160,5 @@ export const drawScene = (
   drawSliceDraft(gl, program, buffer, sliceRect, clientWidth, clientHeight, viewport);
   drawShapeContactGuides(ctx, refs);
   drawDistanceGuides(ctx, refs);
+  drawEqualSpacingGuides(ctx, refs);
 };

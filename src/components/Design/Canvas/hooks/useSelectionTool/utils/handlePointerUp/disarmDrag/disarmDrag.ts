@@ -29,6 +29,7 @@ export const disarmDrag = (
     applyPendingDragClickAction(dispatch, dragState);
     canvasRefs.transform.draggedNodeIdsRef.current = null;
     canvasRefs.transform.alignmentGuideRef.current = null;
+    canvasRefs.transform.equalSpacingGuidesRef.current = null;
     dragStateRef.current = null;
     canvas.releasePointerCapture(event.pointerId);
   }

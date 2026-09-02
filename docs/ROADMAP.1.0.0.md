@@ -176,7 +176,10 @@ The single largest structural gap versus Figma.
 - [ ] rulers scaling with zoom
 - [x] **snap to the pixel grid** — `x/y/width/height`/`rotation` rounded on dispatch (creation,
       drag, resize, rotation), not in intermediate computations
-- [ ] smart guides (snap to edges/centers of other nodes, with the distance shown)
+- [x] **smart guides** — snap to edges/centers of other nodes while dragging/resizing/drawing, plus
+      snapping a dragged shape to match a neighbour's own established gap to a third shape, with both
+      distances shown. Full write-up: `.claude/docs/selection-and-manipulation.md` §24-27 (edge
+      snap), §28 (chain-gap snap — drag only so far, no draw/resize integration yet)
 - [ ] snap to the viewport/parent frame
 - [x] **pixel grid** on the canvas, visible from 400% zoom — a procedural fragment shader
       (`fract`/`fwidth`), not per-line geometry. Full write-up:

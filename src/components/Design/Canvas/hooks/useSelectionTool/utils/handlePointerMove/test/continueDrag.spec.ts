@@ -35,7 +35,11 @@ const createDragStateRef = (dragState: TDragStateFixture | null = null): RefObje
 
 const createCanvasRefs = (): TCanvasRefs =>
   ({
-    transform: { alignmentGuideRef: { current: null }, draggedNodeIdsRef: { current: null } },
+    transform: {
+      alignmentGuideRef: { current: null },
+      draggedNodeIdsRef: { current: null },
+      equalSpacingGuidesRef: { current: null },
+    },
     vectorSnapshots: { draggedVectorNodeSnapshotsRef: { current: null } },
   }) as unknown as TCanvasRefs;
 
@@ -155,6 +159,34 @@ describe('continueDrag', () => {
     // result — corrected by +1 so the edges land flush (x: 3, right edge: 23), and the guide is populated
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ x: 3, y: 0 });
     expect(canvasRefs.transform.alignmentGuideRef.current).not.toBeNull();
+  });
+
+  it("should snap a dragged box onto matching its neighbour's own established gap to a third, differently-sized box, populating the guide ref", () => {
+    // mock — square1 (30x30) and square2 (50x50) sit with a 10px gap; square3 (20x20) is dragged to
+    // x:98, 2px short of the x:100 that would give it the same 10px gap to square2
+    const idA = addRectNode(0, 0, 30);
+
+    addRectNode(40, 0, 50);
+
+    const idC = addRectNode(98, 0, 20);
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const dragStateRef = createDragStateRef({
+      candidateShapes: getCandidateShapes(selectActivePage(store.getState()).nodes, [idC]),
+      hasMoved: false,
+      nodeOrigins: { [idC]: { x: 98, y: 0 } },
+      pendingClickAction: null,
+      pointerStart: { x: 98, y: 0 },
+    });
+
+    // before
+    continueDrag(canvas, pointerEvent(98, 0), store.dispatch, dragStateRef, canvasRefs);
+    flushThrottledDispatch(dragStateRef.current!.dispatchThrottle);
+
+    // result — corrected to x:100 so the gap matches, and the guide ref is populated with both gaps
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idC]).toMatchObject({ x: 100, y: 0 });
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ x: 0, y: 0 });
+    expect(canvasRefs.transform.equalSpacingGuidesRef.current?.lines).toHaveLength(2);
   });
 
   it('should move a line node endpoints by the pointer delta', () => {

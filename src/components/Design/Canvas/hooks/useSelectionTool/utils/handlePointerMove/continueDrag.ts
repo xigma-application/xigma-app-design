@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // others
-import { ALIGNMENT_SNAP_TOLERANCE_PX } from 'constant/canvas';
+import { ALIGNMENT_SNAP_TOLERANCE_PX, EQUAL_SPACING_SNAP_TOLERANCE_PX } from 'constant/canvas';
 
 // store
 import { updateNode } from 'store/design/slice';
@@ -13,6 +13,7 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
+import { getChainGapDragSnap } from './getChainGapDragSnap';
 import { getDragAlignmentSnap } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getDragAlignmentSnap';
 import { getGeometryDeltaChanges } from '../../../../utils/getGeometryDeltaChanges';
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
@@ -35,17 +36,21 @@ export const continueDrag = (
     const rawDeltaX = point.x - dragState.pointerStart.x;
     const rawDeltaY = point.y - dragState.pointerStart.y;
     const snapshots = canvasRefs.vectorSnapshots.draggedVectorNodeSnapshotsRef.current;
-    const { delta, guide } = getDragAlignmentSnap(
-      selectNodes(state),
+    const nodes = selectNodes(state);
+    const { delta: alignmentDelta, guide } = getDragAlignmentSnap(
+      nodes,
       dragState.nodeOrigins,
       { x: rawDeltaX, y: rawDeltaY },
       ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom,
       dragState.candidateShapes,
     );
-    const { x: deltaX, y: deltaY } = delta;
+    const chainGapSnap = getChainGapDragSnap(nodes, dragState, alignmentDelta, EQUAL_SPACING_SNAP_TOLERANCE_PX / viewport.zoom);
+    const deltaX = alignmentDelta.x + chainGapSnap.delta.x;
+    const deltaY = alignmentDelta.y + chainGapSnap.delta.y;
 
     dragState.hasMoved = true;
     canvasRefs.transform.alignmentGuideRef.current = guide;
+    canvasRefs.transform.equalSpacingGuidesRef.current = chainGapSnap.guides;
 
     if (!canvasRefs.transform.draggedNodeIdsRef.current) {
       canvasRefs.transform.draggedNodeIdsRef.current = new Set(Object.keys(dragState.nodeOrigins));

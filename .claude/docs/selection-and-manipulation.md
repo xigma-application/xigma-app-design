@@ -1642,6 +1642,70 @@ it exactly **once**, caching the result on the gesture's own state:
   `getPointAlignmentSnap` level) were dropped in favor of `getCandidateShapes.spec.ts`'s own dedicated
   coverage, since that filtering logic now lives in exactly one place.
 
+## 28. Chain-gap drag snap — matching a single existing neighbour's own established gap, not a full Smart Selection
+
+Roadmap Stage 13's "smart guides ... with the distance shown" gap, take two. **v1 (an earlier attempt
+this session) got the underlying feature wrong**: it modelled "equal spacing" as *centring the active
+shape between two flanking neighbours*, which structurally cannot fire for the actual, most common
+case — dragging the *last* shape in a row, which only ever has a neighbour on one side. It also copied
+Figma's real Smart Selection (pink centre-dots + a draggable handle between selected layers,
+triggered by *selection*, not proximity) closely enough in an intermediate doodle to cause real
+confusion before being corrected back to what was actually asked for. Both false starts were reverted
+in full before this version was built. **This version only handles a plain move-drag of a single
+existing shape** — no draw-tool integration, no resize integration, no passive/Alt-hover display;
+those are unbuilt, deliberately out of scope unless asked for.
+
+- **The actual rule**: shape1 and shape2 already sit some distance apart (the "established gap").
+  Dragging shape3 so its gap to shape2 is *close* to that established gap snaps it to match exactly,
+  and draws **two** distance-guide lines (the established gap and the newly-matched one) so both read
+  the same number. Sizes are irrelevant — only the gap distance matters. No modifier key.
+- **File layout** — `Canvas/utils/getEqualSpacingGuides/`, one small file per concern, split further
+  into a subfolder per axis (each direction gets its own file rather than one function with two large
+  symmetric `if` blocks — this codebase's usual instinct once a function has two near-duplicate halves):
+  - `findHorizontalNeighbors.ts`/`findVerticalNeighbors.ts` — nearest candidate on each side with
+    positive overlap on the perpendicular axis (identical shape to §23-27's own neighbour-finding),
+    but returns the **candidate itself**, not just its edges — needed so a caller can exclude it by
+    reference when looking one hop further out.
+  - `getHorizontalChainSnap/getLeftChainSnap.ts` / `getRightChainSnap.ts` (and the vertical mirrors
+    `getVerticalChainSnap/getTopChainSnap.ts` / `getBottomChainSnap.ts`) — each takes the active
+    shape's edges plus **one already-found neighbour**, looks past that neighbour for *its own*
+    further neighbour on the same side, and if found, treats the gap between those two as the
+    reference: `mismatch = (active's current gap to the neighbour) - referenceGap`; within tolerance,
+    corrects by `-mismatch` (or `+mismatch` on the far side — same idea, opposite sign since the
+    neighbour is on the opposite side of the shape). This is a **fundamentally different shape of
+    correction** than §24's alignment-snap or the old, reverted centring model: it solves for one
+    single-sided constraint, not a two-sided split.
+  - `getHorizontalChainSnap/getHorizontalChainSnap.ts` / `getVerticalChainSnap/getVerticalChainSnap.ts`
+    — thin per-axis orchestrators: find both neighbours, try the left/top snap first, fall back to
+    right/bottom if it didn't match (a real drag essentially never matches both sides of the same axis
+    at once, so simple sequential priority is enough — no need to pick the smaller mismatch).
+  - `getChainSnap.ts` — combines both axes into one `{delta: {x, y}, guides}`.
+  - Both guide lines for a match reuse `getDistanceGuides/getHorizontalGuide.ts`/`getVerticalGuide.ts`
+    directly (same reuse §23-27 established) rather than reimplementing "which shape is closer" logic
+    again.
+- **Trigger**: `getChainGapDragSnap.ts` (`useSelectionTool/utils/handlePointerMove/`), called from
+  `continueDrag.ts` right after §24's `getDragAlignmentSnap`, its delta composing on top exactly the
+  same way. Gated to **exactly one** dragged, `isContactGuideEligibleNode`, plain-`{x, y}`-origin node
+  — a single-shape-in-a-row concept, matching §24-27's own gating pattern.
+- Writes `refs.transform.equalSpacingGuidesRef` (`TEqualSpacingGuides | null`, back in `TTransformRefs`
+  next to `contactGuidesRef`/`distanceGuidesRef`) — `continueDrag.ts` sets it unconditionally every
+  frame, same as `alignmentGuideRef`. **Cleared** in `disarmDrag.ts` (right next to where it already
+  clears `alignmentGuideRef` — no separate disarm file needed this time, unlike the reverted v1) and
+  in `useSelectionTool.ts`'s `onPointerLeave`/tool-teardown effect.
+- **Render**: `drawEqualSpacingGuides.ts` (`drawScene.ts`, right after `drawDistanceGuides`) —
+  deliberately **reuses `drawDistanceGuideLine.ts` and `drawValueLabel` with `DISTANCE_GUIDE_STROKE`/
+  `DISTANCE_GUIDE_LABEL_FILL` directly**, not a new colour. The reverted v1 invented its own pink
+  (`EQUAL_SPACING_GUIDE_STROKE`) that didn't match anything else on screen — corrected after the user
+  showed a reference screenshot of Figma's own orange/red distance-guide styling.
+- **No undo/no store**: purely a render artifact off a ref, like §23/§24 — the snap *delta* itself
+  flows through the same `updateNode`/history machinery any other drag already uses.
+- **Verified via a real Playwright screenshot before presenting it**, not just the unit suite — this
+  is the concrete lesson from this session's false starts: a jsdom `renderHook` test had already
+  "proven" an earlier, subtly-wrong version worked, and only a real rendered frame against the actual
+  dev server exposed the gap. `e2e/design/selection/shape-chain-gap-drag-snap.spec.ts`
+  (screenshot-equality against a control scene placed directly at the snapped position, matching +
+  non-matching cases, §24's technique).
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.
