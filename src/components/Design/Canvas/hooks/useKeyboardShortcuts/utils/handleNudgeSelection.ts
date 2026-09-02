@@ -12,14 +12,21 @@ import { AppDispatch, store } from 'store';
 import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
+import { handleNudgeVectorEdit } from './handleNudgeVectorEdit';
 import { updateNudgeDistanceGuide } from './updateNudgeDistanceGuide';
 
 export const handleNudgeSelection = (dispatch: AppDispatch, refs: TCanvasRefs, deltaX: number, deltaY: number, altKey = false): void => {
   const state = store.getState();
-  const selectedIds = selectSelectedIds(state);
   const { vectorEditingNodeIds } = state.design;
 
-  if (selectedIds.length > 0 && vectorEditingNodeIds.length === 0) {
+  if (vectorEditingNodeIds.length > 0) {
+    handleNudgeVectorEdit(dispatch, refs, deltaX, deltaY, altKey);
+    return;
+  }
+
+  const selectedIds = selectSelectedIds(state);
+
+  if (selectedIds.length > 0) {
     const nodesToMove = selectOrderedNodes(state).filter((node) => selectedIds.includes(node.id));
 
     dispatch(beginHistoryGesture(getVectorSelectionSnapshot(refs)));
