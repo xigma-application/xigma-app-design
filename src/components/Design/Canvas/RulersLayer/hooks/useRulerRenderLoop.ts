@@ -1,7 +1,7 @@
 import { RefObject, useEffect } from 'react';
 
 // store
-import { selectAllGuideLines, selectSelectedNodes, selectViewport } from 'store/design/selectors';
+import { selectAllGuideLines, selectViewport } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -10,7 +10,6 @@ import { TGuideRefs } from 'types/design/canvas/types';
 // utils
 import { drawRuler } from '../utils/drawRuler/drawRuler';
 import { getHighlightedRulerGuide } from '../utils/getHighlightedRulerGuide';
-import { getRulerBands } from '../utils/getRulerBands';
 
 type TInsetRefs = {
   leftPanelWidthRef: RefObject<number>;
@@ -20,19 +19,14 @@ type TInsetRefs = {
 const renderFrame = (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, insetRefs: TInsetRefs, guides: TGuideRefs): void => {
   const dpr = window.devicePixelRatio || 1;
   const state = store.getState();
-  const viewport = selectViewport(state);
-  const { leftBand, origin, topBand } = getRulerBands(selectSelectedNodes(state), viewport);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   drawRuler(ctx, {
     height: canvas.clientHeight,
     highlightedGuide: getHighlightedRulerGuide(guides, selectAllGuideLines(state)),
-    leftBand,
     leftInset: insetRefs.leftPanelWidthRef.current,
-    origin,
     rightInset: insetRefs.rightPanelWidthRef.current,
-    topBand,
-    viewport,
+    viewport: selectViewport(state),
     width: canvas.clientWidth,
   });
 };
