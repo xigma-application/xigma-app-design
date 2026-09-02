@@ -1,6 +1,6 @@
 // others
 import { RULER_BACKGROUND, RULER_TEXT_FILL, RULER_TICK_STROKE } from 'constant/canvas';
-import { RULER_FONT, RULER_LABEL_OFFSET_PX, RULER_SIZE_PX, RULER_TICK_LENGTH_PX } from '../constants';
+import { RULER_FONT, RULER_SIZE_PX, RULER_TICK_LENGTH_PX } from '../constants';
 
 // types
 import { TViewport } from 'types/design/types';
@@ -24,7 +24,7 @@ const paintTopTick = (ctx: CanvasRenderingContext2D, { label, screenPos }: TRule
     ctx.moveTo(crisp(screenPos), RULER_SIZE_PX);
     ctx.lineTo(crisp(screenPos), RULER_SIZE_PX - RULER_TICK_LENGTH_PX);
     ctx.stroke();
-    ctx.fillText(label, screenPos + RULER_LABEL_OFFSET_PX, RULER_SIZE_PX / 2);
+    ctx.fillText(label, screenPos, RULER_SIZE_PX / 2);
   }
 };
 
@@ -37,7 +37,7 @@ const paintLeftTick = (ctx: CanvasRenderingContext2D, { label, screenPos }: TRul
     ctx.lineTo(x - RULER_TICK_LENGTH_PX, crisp(screenPos));
     ctx.stroke();
     ctx.save();
-    ctx.translate(x - RULER_SIZE_PX / 2, screenPos + RULER_LABEL_OFFSET_PX);
+    ctx.translate(x - RULER_SIZE_PX / 2, screenPos);
     ctx.rotate(-Math.PI / 2);
     ctx.fillText(label, 0, 0);
     ctx.restore();
@@ -55,7 +55,7 @@ export const drawRuler = (ctx: CanvasRenderingContext2D, { height, leftInset, ri
 
   ctx.font = RULER_FONT;
   ctx.textBaseline = 'middle';
-  ctx.textAlign = 'left';
+  ctx.textAlign = 'center';
   ctx.strokeStyle = RULER_TICK_STROKE;
   ctx.fillStyle = RULER_TEXT_FILL;
 
