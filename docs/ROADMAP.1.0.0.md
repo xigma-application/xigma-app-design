@@ -176,11 +176,7 @@ The single largest structural gap versus Figma.
 - [ ] rulers scaling with zoom
 - [x] **snap to the pixel grid** — `x/y/width/height`/`rotation` rounded on dispatch (creation,
       drag, resize, rotation), not in intermediate computations
-- [x] **smart guides** — snap to edges/centers of other nodes while dragging/resizing, plus an
-      equal-spacing gap indicator (pink line + px label) that both displays an existing pattern
-      (resize/Alt-hover) and actively snaps a single dragged shape into it. Full write-up:
-      `.claude/docs/selection-and-manipulation.md` §24-27 (edge snap), §28 (equal-spacing — v1, no
-      full Smart Selection drag-to-reorder mode yet)
+- [ ] smart guides (snap to edges/centers of other nodes, with the distance shown)
 - [ ] snap to the viewport/parent frame
 - [x] **pixel grid** on the canvas, visible from 400% zoom — a procedural fragment shader
       (`fract`/`fwidth`), not per-line geometry. Full write-up:
@@ -217,7 +213,7 @@ The single largest structural gap versus Figma.
       `[`/`]` = brush size. v1 limitations: a rotated node is flattened, no real hole
       after erasing a clean fill interior. Ibid. §66, e2e: `vector-erase.spec.ts`,
       `vector-erase-multi.spec.ts`
-- [x] context menu (right-click) on nodes and the empty canvas (`NodeContextMenu`/`CanvasContextMenu`,
+- [x] context menu (right-click) on nodes and the empty canvas (`NodeContextMenu`/`CanvasContextMenuPanel`,
       wired via `CanvasContextMenuPanel`) — most items still disabled placeholders pending their own
       features (see `components/Design/Menu/constants.ts`)
 - [ ] zoom control in the canvas corner (Zoom to fit/selection/100%)

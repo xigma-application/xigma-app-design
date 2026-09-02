@@ -12,7 +12,6 @@ describe('createTransformRefs behaviors', () => {
       contactGuidesRef: { current: null },
       distanceGuidesRef: { current: null },
       draggedNodeIdsRef: { current: null },
-      equalSpacingGuidesRef: { current: null },
       resizedNodeIdsRef: { current: null },
       rotateDragRef: { current: null },
       rotatedNodeIdsRef: { current: null },

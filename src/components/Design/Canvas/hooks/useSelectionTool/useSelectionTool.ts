@@ -54,7 +54,6 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
     canvasRefs.hover.hoveredVectorSegmentIdRef.current = null;
     canvasRefs.vectorErase.eraseBrushCenterRef.current = null;
     canvasRefs.transform.contactGuidesRef.current = null;
-    canvasRefs.transform.equalSpacingGuidesRef.current = null;
     canvasRefs.transform.alignmentGuideRef.current = null;
     canvasRefs.transform.distanceGuidesRef.current = null;
   };
@@ -155,7 +154,6 @@ export const useSelectionTool = (refs: TCanvasRefs): void => {
         refs.vectorEdit.lastVectorWidthHandleSideRef.current = null;
         selectionRefs.vectorCutDragRef.current = null;
         refs.transform.contactGuidesRef.current = null;
-        refs.transform.equalSpacingGuidesRef.current = null;
         refs.transform.alignmentGuideRef.current = null;
         refs.transform.distanceGuidesRef.current = null;
         lastPointerClientPositionRef.current = null;

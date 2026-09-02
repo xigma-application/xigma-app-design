@@ -5,7 +5,6 @@ import { TAlignmentGuide } from 'components/Design/Canvas/utils/getGroupAlignmen
 import { TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
 import { TDistanceGuides } from 'components/Design/Canvas/utils/getDistanceGuides/types';
 import { TDraftEntity, TVectorTangent, TVectorWidthPoint } from 'types/design/types';
-import { TEqualSpacingGuides } from 'components/Design/Canvas/utils/getEqualSpacingGuides/types';
 import { TColorSampleRequest } from 'utils/canvas/colorPixelSampler/types';
 import { TFlattenedVectorSegment } from 'utils/canvas/vectorNetwork/flattenVectorSegments';
 import { TPenDragOrigin } from 'components/Design/Canvas/hooks/useDrawPenTool/types';
@@ -254,7 +253,6 @@ export type TTransformRefs = {
   contactGuidesRef: RefObject<TShapeContactGuide[] | null>;
   distanceGuidesRef: RefObject<TDistanceGuides | null>;
   draggedNodeIdsRef: RefObject<Set<string> | null>;
-  equalSpacingGuidesRef: RefObject<TEqualSpacingGuides | null>;
   resizedNodeIdsRef: RefObject<Set<string> | null>;
   rotateDragRef: RefObject<TRotateDragState | null>;
   rotatedNodeIdsRef: RefObject<Set<string> | null>;

@@ -35,11 +35,7 @@ const createDragStateRef = (dragState: TDragStateFixture | null = null): RefObje
 
 const createCanvasRefs = (): TCanvasRefs =>
   ({
-    transform: {
-      alignmentGuideRef: { current: null },
-      draggedNodeIdsRef: { current: null },
-      equalSpacingGuidesRef: { current: null },
-    },
+    transform: { alignmentGuideRef: { current: null }, draggedNodeIdsRef: { current: null } },
     vectorSnapshots: { draggedVectorNodeSnapshotsRef: { current: null } },
   }) as unknown as TCanvasRefs;
 
