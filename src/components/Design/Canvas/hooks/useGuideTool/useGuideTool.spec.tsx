@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { FC, RefObject } from 'react';
 
@@ -65,6 +65,17 @@ describe('useGuideTool behaviors', () => {
     if (!selectAreRulersVisible(store.getState())) {
       store.dispatch(toggleRulers());
     }
+  });
+
+  it('should start with a placeholder anchor before any context menu has opened', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { result } = renderGuideTool(canvasRef);
+
+    // result
+    expect(result.current.anchorRef.current.getBoundingClientRect()).toBeInstanceOf(DOMRect);
   });
 
   it('should drag a new page guide out of the top ruler gutter and commit it on release', () => {
@@ -186,7 +197,7 @@ describe('useGuideTool behaviors', () => {
     });
 
     // result
-    expect(result.current.selectedGuide).toEqual({ frameId: null, id: guide.id, worldPoint: { x: 40, y: 200 } });
+    expect(result.current.selectedGuide).toEqual({ frameId: null, id: guide.id });
 
     // action
     act(() => result.current.removeSelectedGuide());
@@ -194,6 +205,71 @@ describe('useGuideTool behaviors', () => {
     // result
     expect(selectActivePage(store.getState()).guides.find((candidate) => candidate.id === guide.id)).toBeUndefined();
     expect(result.current.selectedGuide).toBeNull();
+  });
+
+  it('should open the ruler menu on right-click over the gutter, then remove all guides on that axis via removeAllGuides', () => {
+    // mock
+    store.dispatch(addGuide({ axis: 'x', frameId: null, position: 40 }));
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { result } = renderGuideTool(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(new MouseEvent('contextmenu', { clientX: 100, clientY: 5 }));
+    });
+
+    // result
+    expect(result.current.rulerMenu).toEqual({ axis: 'x' });
+    expect(result.current.selectedGuide).toBeNull();
+
+    // action
+    act(() => result.current.removeAllGuides());
+
+    // result
+    expect(selectActivePage(store.getState()).guides.some((guide) => guide.axis === 'x')).toBe(false);
+    expect(result.current.rulerMenu).toBeNull();
+  });
+
+  it('should do nothing when removeAllGuides is called without an open ruler menu', () => {
+    // mock
+    store.dispatch(addGuide({ axis: 'x', frameId: null, position: 40 }));
+    const guidesBefore = selectActivePage(store.getState()).guides;
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { result } = renderGuideTool(canvasRef);
+
+    // action
+    act(() => result.current.removeAllGuides());
+
+    // result
+    expect(selectActivePage(store.getState()).guides).toEqual(guidesBefore);
+  });
+
+  it('should position the virtual anchor at the click point and open the menu asynchronously', async () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { result } = renderGuideTool(canvasRef);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(new MouseEvent('contextmenu', { clientX: 100, clientY: 5 }));
+    });
+
+    // result
+    expect(result.current.anchorRef.current.getBoundingClientRect()).toMatchObject({ x: 100, y: 5 });
+
+    await waitFor(() => expect(result.current.isMenuOpen).toBe(true));
+
+    // action
+    act(() => result.current.onMenuOpenChange(false));
+
+    // result
+    expect(result.current.isMenuOpen).toBe(false);
   });
 
   it('should not select a guide on a plain left-click (no drag) — only right-click does', () => {

@@ -5,6 +5,7 @@ import {
   addPage,
   bringSelectionToFront,
   createMaskGroup,
+  deleteAllGuides,
   deleteGuide,
   groupNodes,
   moveNodes,
@@ -288,5 +289,25 @@ describe('historyMiddleware', () => {
 
     // result
     expect(selectActivePage(store.getState()).guides).toEqual([]);
+  });
+
+  it('should treat removing every guide on an axis as its own undo step', () => {
+    // mock
+    store.dispatch(addGuide({ axis: 'x', frameId: null, position: 10 }));
+    store.dispatch(addGuide({ axis: 'y', frameId: null, position: 20 }));
+
+    store.dispatch(deleteAllGuides({ axis: 'x' }));
+
+    // before
+    expect(selectActivePage(store.getState()).guides).toEqual([{ axis: 'y', id: expect.any(String), position: 20 }]);
+
+    // action
+    store.dispatch(undo());
+
+    // result
+    expect(selectActivePage(store.getState()).guides).toEqual([
+      { axis: 'x', id: expect.any(String), position: 10 },
+      { axis: 'y', id: expect.any(String), position: 20 },
+    ]);
   });
 });

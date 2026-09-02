@@ -17,6 +17,7 @@ import {
 import {
   TAddGuidePayload,
   TAddNodesPayload,
+  TDeleteAllGuidesPayload,
   TDeleteGuidePayload,
   TDesignSnapshot,
   TDesignState,
@@ -39,6 +40,7 @@ import { handleAddNode } from './utils/handleAddNode';
 import { handleAddNodes } from './utils/handleAddNodes';
 import { handleAddPage } from './utils/handleAddPage';
 import { handleBringSelectionToFront } from './utils/handleBringSelectionToFront';
+import { handleDeleteAllGuides } from './utils/handleDeleteAllGuides';
 import { handleDeleteGuide } from './utils/handleDeleteGuide';
 import { handleDeleteNode } from './utils/handleDeleteNode/handleDeleteNode';
 import { handleDeletePage } from './utils/handleDeletePage';
@@ -136,6 +138,7 @@ const designSlice = createSlice({
       prepare: () => ({ payload: { groupId: nanoid() } }),
       reducer: (state, action: PayloadAction<{ groupId: string }>) => handleUseNodesAsMask(state, action.payload.groupId),
     },
+    deleteAllGuides: (state, action: PayloadAction<TDeleteAllGuidesPayload>) => handleDeleteAllGuides(state, action.payload),
     deleteComment: (state, action: PayloadAction<string>) => {
       delete getActivePage(state).comments[action.payload];
     },
@@ -213,6 +216,7 @@ export const {
   bringSelectionToFront,
   cancelCommentDraft,
   createMaskGroup,
+  deleteAllGuides,
   deleteComment,
   deleteGuide,
   deleteNode,

@@ -104,3 +104,7 @@ export type TDeleteGuidePayload = {
   frameId: string | null;
   id: string;
 };
+
+export type TDeleteAllGuidesPayload = {
+  axis: TGuideAxis;
+};
