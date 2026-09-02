@@ -12,6 +12,10 @@ import { useFilteredActionsPanelSections } from './hooks/useFilteredActionsPanel
 // others
 import { ITEM_ICON_SIZE, SECTION_LABEL_KEY, TABS, translationNameSpace } from './constants';
 
+// store
+import { selectIsUiMinimized } from 'store/design/selectors';
+import { useAppSelector } from 'store';
+
 // styles
 import styles from './actions-panel.module.scss';
 
@@ -26,6 +30,8 @@ export const ActionsPanel: FC = () => {
   const [activeTab, setActiveTab] = useState<TTab['name']>('all');
   const sections = useFilteredActionsPanelSections(query);
   const handleItemClick = useActionsPanelItemClick();
+  const isUiMinimized = useAppSelector(selectIsUiMinimized);
+  const selectedById: Record<string, boolean> = { minimizeUi: isUiMinimized };
 
   return (
     <PopoverPrimitive.Portal>
@@ -53,6 +59,7 @@ export const ActionsPanel: FC = () => {
                   key={item.id}
                   label={t(item.labelKey)}
                   onClick={item.action ? (): void => handleItemClick(item.action) : undefined}
+                  selected={selectedById[item.id]}
                   shortcut={item.shortcut}
                   withCheck={Boolean(item.withCheck)}
                 />

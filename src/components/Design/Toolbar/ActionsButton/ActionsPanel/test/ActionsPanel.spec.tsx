@@ -10,8 +10,8 @@ import { TooltipProvider } from 'shared';
 import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
-import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
+import { addNode, setSelection, toggleUiMinimized } from 'store/design/slice';
+import { selectActivePage, selectIsUiMinimized, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -33,6 +33,10 @@ const renderActionsPanel = (): ReturnType<typeof render> =>
 describe('ActionsPanel', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
+
+    if (selectIsUiMinimized(store.getState())) {
+      store.dispatch(toggleUiMinimized());
+    }
   });
 
   it('should render the search input, the tab row, and every section with its items', () => {
@@ -51,6 +55,11 @@ describe('ActionsPanel', () => {
     expect(screen.getByText('Select all')).toBeInTheDocument();
     expect(screen.getByText('Undo')).toBeInTheDocument();
     expect(screen.getByText('Show rulers')).toBeInTheDocument();
+    expect(screen.getByText('Snap to pixel grid')).toBeInTheDocument();
+    expect(screen.getByText('Minimize UI')).toBeInTheDocument();
+    expect(screen.getByText('Show/Hide UI')).toBeInTheDocument();
+    expect(screen.getByText('Multiplayer cursors')).toBeInTheDocument();
+    expect(screen.getByText('Keyboard shortcuts')).toBeInTheDocument();
   });
 
   it('should filter the list down to matching items as the user types', () => {
@@ -101,5 +110,17 @@ describe('ActionsPanel', () => {
 
     // result
     expect(selectSelectedIds(store.getState())).toEqual([]);
+  });
+
+  it('should toggle isUiMinimized when the "Minimize UI" row is clicked', () => {
+    // before
+    renderActionsPanel();
+    expect(selectIsUiMinimized(store.getState())).toBe(false);
+
+    // action
+    fireEvent.click(screen.getByText('Minimize UI'));
+
+    // result
+    expect(selectIsUiMinimized(store.getState())).toBe(true);
   });
 });

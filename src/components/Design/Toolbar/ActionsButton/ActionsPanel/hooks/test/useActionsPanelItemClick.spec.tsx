@@ -8,10 +8,10 @@ import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRef
 import { useActionsPanelItemClick } from '../useActionsPanelItemClick';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, setSelection, toggleUiMinimized } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture } from 'store/history/actions';
 import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
-import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
+import { selectActivePage, selectIsUiMinimized, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -26,6 +26,10 @@ const wrapper = ({ children }: { children: React.ReactNode }): React.ReactNode =
 describe('useActionsPanelItemClick', () => {
   beforeEach(() => {
     store.dispatch(setSelection([]));
+
+    if (selectIsUiMinimized(store.getState())) {
+      store.dispatch(toggleUiMinimized());
+    }
   });
 
   it('should select every node on the page for the "selectAll" action', () => {
@@ -81,6 +85,17 @@ describe('useActionsPanelItemClick', () => {
 
     // result
     expect(selectActivePage(store.getState()).nodes[nodeId]).toBeUndefined();
+  });
+
+  it('should toggle isUiMinimized for the "toggleUiMinimized" action', () => {
+    // before
+    const { result } = renderHook(() => useActionsPanelItemClick(), { wrapper });
+
+    // action
+    act(() => result.current('toggleUiMinimized'));
+
+    // result
+    expect(selectIsUiMinimized(store.getState())).toBe(true);
   });
 
   it('should do nothing for an undefined action', () => {
