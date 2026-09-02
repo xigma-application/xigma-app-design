@@ -5,6 +5,10 @@ import { NodeType } from 'types/design/enums';
 import { TFrameNode, TLineNode, TVectorNode } from 'types/design/types';
 import { TResizeDragState } from 'types/design/selectionTool/types';
 
+// store
+import { addGuide } from 'store/design/slice';
+import { store } from 'store';
+
 // utils
 import { armPlainResizeDrag } from '../armPlainResizeDrag';
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
@@ -103,6 +107,27 @@ describe('armPlainResizeDrag', () => {
 
     // result
     expect(resizeDragRef.current?.nodeOrigins).toEqual({ [line.id]: { x1: 0, x2: 10, y1: 0, y2: 10 } });
+  });
+
+  it('should include a candidate shape for every guide', () => {
+    // mock
+    const canvas = createCanvas();
+
+    Object.defineProperty(canvas, 'clientWidth', { value: 800 });
+    Object.defineProperty(canvas, 'clientHeight', { value: 600 });
+    store.dispatch(addGuide({ axis: 'y', frameId: null, position: 30 }));
+
+    const resizeDragRef = createResizeDragRef();
+    const nodeA = frame('a', 0, 0, 100, 50);
+
+    // before
+    armPlainResizeDrag(canvas, pointerEvent(), resizeDragRef, [nodeA], 'se', { height: 50, width: 100, x: 0, y: 0 }, createCanvasRefs());
+
+    // result
+    expect(resizeDragRef.current?.candidateShapes).toContainEqual({
+      bounds: { height: 0, width: 800, x: 0, y: 30 },
+      points: expect.any(Array),
+    });
   });
 
   it('should capture a resize snapshot for a selected vector node', () => {

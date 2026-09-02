@@ -6,13 +6,15 @@ import { TGroupNode } from 'types/design/types';
 import { TResizeDragState, TResizeNodeOrigin } from 'types/design/selectionTool/types';
 
 // store
-import { selectActivePage } from 'store/design/selectors';
+import { selectActivePage, selectAllGuideLines, selectViewport } from 'store/design/selectors';
 import { store } from 'store';
 
 // utils
 import { getCandidateShapes } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getCandidateShapes';
 import { getGroupSubtreeNodes } from 'store/design/utils/nodeHierarchy/getGroupSubtreeNodes';
+import { getGuideCandidateShapes } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getGuideCandidateShapes';
 import { getResizeNodeOrigin } from './getResizeNodeOrigin';
+import { getViewportWorldRect } from 'components/Design/Canvas/utils/getViewportWorldRect';
 
 export const armRotatedGroupResizeDrag = (
   canvas: HTMLCanvasElement,
@@ -22,7 +24,8 @@ export const armRotatedGroupResizeDrag = (
   handle: TResizeHandle,
   bounds: TDraftRect,
 ): void => {
-  const nodes = selectActivePage(store.getState()).nodes;
+  const state = store.getState();
+  const nodes = selectActivePage(state).nodes;
   const rotatedGroupChildOrigins: Record<string, TResizeNodeOrigin> = {};
 
   getGroupSubtreeNodes(group, nodes)
@@ -31,10 +34,12 @@ export const armRotatedGroupResizeDrag = (
       rotatedGroupChildOrigins[node.id] = getResizeNodeOrigin(node);
     });
 
+  const guideCandidateShapes = getGuideCandidateShapes(selectAllGuideLines(state), getViewportWorldRect(canvas, selectViewport(state)));
+
   resizeDragRef.current = {
     aspectRatio: bounds.width / bounds.height,
     bounds,
-    candidateShapes: getCandidateShapes(nodes, [group.id]),
+    candidateShapes: getCandidateShapes(nodes, [group.id]).concat(guideCandidateShapes),
     handle,
     nodeOrigins: { [group.id]: getResizeNodeOrigin(group) },
     rotatedGroupChildOrigins,

@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, groupNodes, setSelection } from 'store/design/slice';
+import { addGuide, addNode, groupNodes, setSelection, setViewport } from 'store/design/slice';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -116,6 +116,43 @@ describe('armDrag', () => {
       [idA]: { x: 0, y: 0 },
       [idB]: { x: 100, y: 100 },
     });
+  });
+
+  it('should include a candidate shape for every guide, when the canvas ref is available', () => {
+    // mock
+    const idA = addFrameNode(100, 100);
+    const dragStateRef = createDragStateRef();
+    const canvas = document.createElement('canvas');
+
+    Object.defineProperty(canvas, 'clientWidth', { value: 800 });
+    Object.defineProperty(canvas, 'clientHeight', { value: 600 });
+    store.dispatch(setViewport({ x: 0, y: 0, zoom: 1 }));
+    store.dispatch(addGuide({ axis: 'x', frameId: null, position: 40 }));
+
+    // before
+    armDrag([idA], null, { x: 5, y: 5 }, dragStateRef, createCanvasRefs({ canvasRef: { current: canvas } }));
+
+    // result
+    expect(dragStateRef.current?.candidateShapes).toContainEqual({
+      bounds: { height: 600, width: 0, x: 40, y: 0 },
+      points: expect.any(Array),
+    });
+  });
+
+  it('should not include any guide candidate shapes when the canvas ref is not available yet', () => {
+    // mock
+    const idA = addFrameNode(100, 100);
+    const dragStateRef = createDragStateRef();
+
+    store.dispatch(addGuide({ axis: 'x', frameId: null, position: 999 }));
+
+    // before
+    armDrag([idA], null, { x: 5, y: 5 }, dragStateRef, createCanvasRefs());
+
+    // result
+    expect(dragStateRef.current?.candidateShapes).not.toContainEqual(
+      expect.objectContaining({ bounds: expect.objectContaining({ x: 999 }) }),
+    );
   });
 
   it('should snapshot a vector node origin as its vertices and segments', () => {

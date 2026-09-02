@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, groupNodes, setSelection, updateNode } from 'store/design/slice';
+import { addGuide, addNode, groupNodes, setSelection, updateNode } from 'store/design/slice';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -77,6 +77,40 @@ describe('armRotatedGroupResizeDrag', () => {
         x: outerGroup.x,
         y: outerGroup.y,
       },
+    });
+  });
+
+  it('should include a candidate shape for every guide', () => {
+    // mock
+    const idA = addFrameNode(0, 0);
+
+    store.dispatch(setSelection([idA]));
+    store.dispatch(groupNodes());
+
+    const [groupId] = selectSelectedIds(store.getState());
+
+    store.dispatch(updateNode({ changes: { rotation: 25 }, id: groupId }));
+
+    const group = selectActivePage(store.getState()).nodes[groupId] as TGroupNode;
+    const resizeDragRef = createResizeDragRef();
+    const canvas = createCanvas();
+
+    Object.defineProperty(canvas, 'clientWidth', { value: 800 });
+    Object.defineProperty(canvas, 'clientHeight', { value: 600 });
+    store.dispatch(addGuide({ axis: 'x', frameId: null, position: 15 }));
+
+    // action
+    armRotatedGroupResizeDrag(canvas, new PointerEvent('pointerdown', { pointerId: 1 }), resizeDragRef, group, 'se', {
+      height: group.height,
+      width: group.width,
+      x: group.x,
+      y: group.y,
+    });
+
+    // result
+    expect(resizeDragRef.current?.candidateShapes).toContainEqual({
+      bounds: { height: 600, width: 0, x: 15, y: 0 },
+      points: expect.any(Array),
     });
   });
 });
