@@ -71,4 +71,12 @@ describe('getHighlightedRulerTick', () => {
     // result
     expect(tick).toEqual({ label: '0.25', screenPos: 50 });
   });
+
+  it('should rebase the label to the given origin while leaving the screen position alone', () => {
+    // action
+    const tick = getHighlightedRulerTick(500, 0, 1, 200);
+
+    // result
+    expect(tick).toEqual({ label: '300', screenPos: 500 });
+  });
 });
