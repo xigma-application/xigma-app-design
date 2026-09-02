@@ -32,7 +32,7 @@ const commitSingleNode = (
 // mock — a 100x100 rectangle split in half by a horizontal "divider" segment (e-f), forming a top
 // and a bottom face that share exactly that one segment
 const splitRectangleNode: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'n1',
   name: 'Vector',
@@ -164,7 +164,7 @@ describe('commitVectorShapeBuilder', () => {
   // globally unique across every node in the scene; reusing 's1'/'v1' etc. for two different nodes
   // here would silently collide when their segments/vertices get unioned for crossing detection
   const buildRectangleNode = (id: string, offsetX: number, offsetY: number): TVectorNode => ({
-    fillColor: null,
+    defaultFill: null,
     filledFaceKeys: [],
     id,
     name: 'Vector',

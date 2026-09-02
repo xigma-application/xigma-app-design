@@ -21,8 +21,8 @@ const square = (x: number, y: number, size: number): TPoint[] => [
 const reversed = (points: TPoint[]): TPoint[] => [...points].reverse();
 
 const buildNode = (overrides: Partial<TVectorNode>): TVectorNode => ({
-  fillColor: '#123456',
-  fillColorOverrideByKey: {},
+  defaultFill: [{ color: '#123456', opacity: 100, type: 'solid' }],
+  fillByKey: {},
   filledFaceKeys: [],
   id: 'node-1',
   name: 'Contour',

@@ -36,7 +36,7 @@ const createCanvas = (): HTMLCanvasElement => {
 const addWidthPointVectorNode = (leftOffset = 6, rightOffset = 6): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

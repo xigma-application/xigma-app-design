@@ -19,7 +19,7 @@ describe('resolveSurvivingFilledFaceKeys', () => {
       vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 100, y: 0 }, c: { id: 'c', x: 50, y: 100 } },
     };
     const [face] = deriveVectorFaces({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'probe',
       name: '',
@@ -69,7 +69,7 @@ describe('resolveSurvivingFilledFaceKeys', () => {
       vertices: { h: { id: 'h', x: 50, y: 0 }, p1: { id: 'p1', x: 0, y: 100 }, p2: { id: 'p2', x: 100, y: 100 } },
     };
     const [face] = deriveVectorFaces({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'probe',
       name: '',

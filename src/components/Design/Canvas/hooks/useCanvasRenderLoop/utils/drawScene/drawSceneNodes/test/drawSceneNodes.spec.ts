@@ -575,7 +575,7 @@ describe('drawSceneNodes', () => {
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
     const vector: TVectorNode = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'a',
       name: 'Vector',

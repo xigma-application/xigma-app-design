@@ -3,10 +3,11 @@ import { TVectorNode } from 'types/design/types';
 import { NodeType } from 'types/design/enums';
 
 // utils
-import { TVectorNodeLoopsBase } from '../assembleVectorNodeFromLoopGeometries/assembleVectorNodeFromLoopGeometries';
 import { getHoleParentByKey } from './getHoleParentByKey';
 import { getNodeFaces } from './getNodeFaces';
+import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
 import { mergeNodeFields } from './mergeNodeFields';
+import { TVectorNodeLoopsBase } from '../assembleVectorNodeFromLoopGeometries/assembleVectorNodeFromLoopGeometries';
 
 export const mergeVectorNodeGeometriesWithHoleDetection = (
   nodes: TVectorNode[],
@@ -19,11 +20,11 @@ export const mergeVectorNodeGeometriesWithHoleDetection = (
 
   const faces = getNodeFaces(nodes);
   const holeParentByKey = getHoleParentByKey(faces);
-  const { fillColorOverrideByKey, filledFaceKeys, segments, vertices } = mergeNodeFields(nodes);
+  const { fillByKey, filledFaceKeys, segments, vertices } = mergeNodeFields(nodes);
 
   return {
-    fillColor,
-    fillColorOverrideByKey,
+    defaultFill: [makeSolidPaint(fillColor)],
+    fillByKey,
     filledFaceKeys,
     holeParentByKey,
     id: base.id,

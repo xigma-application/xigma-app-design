@@ -5,7 +5,6 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { getEffectiveVectorFill } from '../vectorNetwork/getEffectiveVectorFill';
-import { getEffectiveVectorFillColor } from '../vectorNetwork/getEffectiveVectorFillColor';
 import { getPointInsideFace } from '../vectorNetwork/buildVectorNodeFromLoops/assembleVectorNodeFromLoopGeometries/getPointInsideFace';
 import { getVectorFillLoopPoints } from '../vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints';
 import { isPointInPolygonVertices } from 'components/Design/Canvas/utils/isPointInPolygonVertices';
@@ -21,7 +20,7 @@ const getActiveHoleParentKey = (node: TVectorNode, key: string, parentKey: strin
     return null;
   }
 
-  const colorsStillMatch = getEffectiveVectorFillColor(node, key) === getEffectiveVectorFillColor(node, parentKey);
+  const colorsStillMatch = paintGroupKey(getEffectiveVectorFill(node, key)) === paintGroupKey(getEffectiveVectorFill(node, parentKey));
   const isStillNested = isPointInPolygonVertices(getPointInsideFace(points), parentPoints);
 
   return colorsStillMatch && isStillNested ? parentKey : null;

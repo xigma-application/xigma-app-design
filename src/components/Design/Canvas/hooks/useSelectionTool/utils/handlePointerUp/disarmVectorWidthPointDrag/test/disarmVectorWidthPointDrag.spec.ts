@@ -23,7 +23,7 @@ const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointeru
 const addLineVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

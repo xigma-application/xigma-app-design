@@ -44,7 +44,7 @@ const addTriangleVectorNode = (rotation = 0): string => {
 
   // its interior only counts as a hit once it's actually painted, matching a real drawn-then-filled shape
   const unpaintedNode: TVectorNode = {
-    fillColor: '#ff0000',
+    defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
     filledFaceKeys: [],
     id: 'triangle-face-lookup',
     name: 'Vector',
@@ -61,7 +61,7 @@ const addTriangleVectorNode = (rotation = 0): string => {
 
   store.dispatch(
     addNode({
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [getVectorFillLoopKey(face.pieceKeys)],
       name: 'Vector',
       parentId: null,
@@ -141,7 +141,7 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
       c: { id: 'c', x: 5025, y: 5050 },
     };
     const unpaintedNode: TVectorNode = {
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       id: 'bound-triangle-face-lookup',
       name: 'Vector',
@@ -158,7 +158,7 @@ describe('useVectorEditOnDoubleClick behaviors', () => {
 
     store.dispatch(
       addNode({
-        fillColor: '#ff0000',
+        defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         filledFaceKeys: [getVectorFillLoopKey(face.pieceKeys)],
         name: 'Vector',
         parentId: null,

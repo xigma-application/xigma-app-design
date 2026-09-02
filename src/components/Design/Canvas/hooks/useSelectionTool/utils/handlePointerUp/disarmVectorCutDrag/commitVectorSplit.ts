@@ -8,7 +8,7 @@ import { TVectorNode } from 'types/design/types';
 // utils
 import { bakeVectorNodeRotation } from 'components/Design/Canvas/utils/bakeVectorNodeRotation';
 import { commitVectorCutComponents } from './commitVectorDivide/commitVectorCutComponents';
-import { getEffectiveVectorFillColor } from 'utils/canvas/vectorNetwork/getEffectiveVectorFillColor';
+import { getEffectiveVectorFill } from 'utils/canvas/vectorNetwork/getEffectiveVectorFill';
 import { resolveSurvivingFilledFaceKeys } from 'utils/canvas/vectorNetwork/cutVectorNetwork/resolveSurvivingFilledFaceKeys';
 import { resolveVectorCutFilledFaceKeys } from 'utils/canvas/vectorNetwork/cutVectorNetwork/materializeVectorNetworkCut/resolveVectorCutFilledFaceKeys';
 import { severVectorSegmentAtPoint } from 'utils/canvas/vectorNetwork/cutVectorNetwork/severVectorSegmentAtPoint';
@@ -36,7 +36,7 @@ export const commitVectorSplit = (dispatch: AppDispatch, node: TVectorNode, segm
 
       return {
         ...component,
-        fillColorOverrideByKey: Object.fromEntries(filledFaceKeys.map((key) => [key, getEffectiveVectorFillColor(node, key)])),
+        fillByKey: Object.fromEntries(filledFaceKeys.map((key) => [key, getEffectiveVectorFill(node, key)])),
         filledFaceKeys,
       };
     });
@@ -46,13 +46,11 @@ export const commitVectorSplit = (dispatch: AppDispatch, node: TVectorNode, segm
 
   const resultNode = { ...node, segments: severed.segments, vertices: severed.vertices };
   const survivingFaces = resolveVectorCutFilledFaceKeys(resultNode, node, new Set());
-  const fillColorOverrideByKey = Object.fromEntries(
-    survivingFaces.map(({ key, originalKey }) => [key, getEffectiveVectorFillColor(node, originalKey)]),
-  );
+  const fillByKey = Object.fromEntries(survivingFaces.map(({ key, originalKey }) => [key, getEffectiveVectorFill(node, originalKey)]));
 
   dispatch(
     updateNode({
-      changes: { ...severed, fillColorOverrideByKey, filledFaceKeys: survivingFaces.map((face) => face.key) },
+      changes: { ...severed, fillByKey, filledFaceKeys: survivingFaces.map((face) => face.key) },
       id: node.id,
     }),
   );

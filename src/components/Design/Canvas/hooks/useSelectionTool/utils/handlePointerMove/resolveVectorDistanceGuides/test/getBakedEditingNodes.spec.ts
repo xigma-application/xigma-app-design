@@ -6,7 +6,7 @@ import { TFrameNode, TSceneNode, TVectorNode } from 'types/design/types';
 import { getBakedEditingNodes } from '../getBakedEditingNodes';
 
 const vector = (id: string, rotation = 0): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id,
   name: 'Vector',

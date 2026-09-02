@@ -33,7 +33,7 @@ const createStringRef = (): RefObject<string | null> => ({ current: null });
 const addStraightVector = (offsetX: number): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

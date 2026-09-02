@@ -25,13 +25,7 @@ export const closeLoopOntoEdge = (
   dragStartRef: RefObject<TPoint | null>,
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
 ): void => {
-  const {
-    fillColorOverrideByKey,
-    filledFaceKeys,
-    newVertexId,
-    segments: splitSegments,
-    vertices,
-  } = splitVectorSegment(node, edgeSegmentId, t);
+  const { fillByKey, filledFaceKeys, newVertexId, segments: splitSegments, vertices } = splitVectorSegment(node, edgeSegmentId, t);
   const connectingSegment: TVectorSegment = {
     endId: newVertexId,
     id: connectingSegmentId,
@@ -41,7 +35,7 @@ export const closeLoopOntoEdge = (
   };
   const segments = { ...splitSegments, [connectingSegmentId]: connectingSegment };
 
-  dispatch(updateNode({ changes: { fillColorOverrideByKey, filledFaceKeys, segments, vertices }, id: node.id }));
+  dispatch(updateNode({ changes: { fillByKey, filledFaceKeys, segments, vertices }, id: node.id }));
   dispatch(setPenActiveVertexId(null));
 
   dragOriginRef.current = { nodeId: node.id, segmentId: connectingSegmentId, vertexId: newVertexId };

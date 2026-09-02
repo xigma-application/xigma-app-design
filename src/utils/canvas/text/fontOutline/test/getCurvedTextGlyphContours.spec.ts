@@ -48,7 +48,7 @@ const buildNode = (overrides: Partial<TTextNode> = {}): TTextNode => ({
 
 // a plain 2-vertex, 1-segment straight chain the path sampler can walk
 const buildStraightPathNode = (endX: number, endY: number): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'path-1',
   name: 'Path',

@@ -6,7 +6,7 @@ import { TSceneNode, TTextNode, TVectorNode } from 'types/design/types';
 import { mirrorGuideVectorForText } from '../mirrorGuideVectorForText';
 
 const buildVector = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vec-1',
   name: 'Vector',

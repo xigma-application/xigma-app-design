@@ -26,7 +26,7 @@ const pointerEvent = (x: number, y: number): PointerEvent => new PointerEvent('p
 const addBranchingVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

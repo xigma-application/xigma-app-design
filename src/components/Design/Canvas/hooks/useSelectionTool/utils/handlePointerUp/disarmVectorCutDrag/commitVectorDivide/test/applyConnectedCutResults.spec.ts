@@ -14,7 +14,7 @@ import { findVectorConnectedCutResult } from '../findVectorConnectedCutResult';
 const addTriangleNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

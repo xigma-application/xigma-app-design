@@ -73,7 +73,7 @@ const buildEllipse = (overrides: Partial<TEllipseNode> = {}): TEllipseNode => ({
 });
 
 const buildVectorNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

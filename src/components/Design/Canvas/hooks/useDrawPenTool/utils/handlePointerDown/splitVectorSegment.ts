@@ -1,6 +1,7 @@
 import { nanoid } from '@reduxjs/toolkit';
 
 // types
+import { TPaint } from 'types/design/paint/types';
 import { TVectorNode, TVectorSegment, TVectorVertex } from 'types/design/types';
 
 // utils
@@ -13,7 +14,7 @@ export const splitVectorSegment = (
   segmentId: string,
   t: number,
 ): {
-  fillColorOverrideByKey: Record<string, string>;
+  fillByKey: Record<string, TPaint[]>;
   filledFaceKeys: string[];
   newVertexId: string;
   segments: Record<string, TVectorSegment>;
@@ -44,17 +45,13 @@ export const splitVectorSegment = (
     },
   };
   const vertices = { ...node.vertices, [newVertexId]: { id: newVertexId, ...roundVectorPoint(split.point) } };
-  const { fillColorOverrideByKey, filledFaceKeys } = remapFilledFaceKeysAfterSegmentSplit(
-    node.filledFaceKeys,
-    node.fillColorOverrideByKey,
-    {
-      newSegmentId,
-      newVertexId,
-      originalEndId: segment.endId,
-      originalSegmentId: segmentId,
-      originalStartId: segment.startId,
-    },
-  );
+  const { fillByKey, filledFaceKeys } = remapFilledFaceKeysAfterSegmentSplit(node.filledFaceKeys, node.fillByKey, {
+    newSegmentId,
+    newVertexId,
+    originalEndId: segment.endId,
+    originalSegmentId: segmentId,
+    originalStartId: segment.startId,
+  });
 
-  return { fillColorOverrideByKey, filledFaceKeys, newVertexId, segments, vertices };
+  return { fillByKey, filledFaceKeys, newVertexId, segments, vertices };
 };

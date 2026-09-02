@@ -94,7 +94,7 @@ describe('drawPenPreview', () => {
     // drawPenSegmentPreview.spec.ts for the full rotation/tangent math coverage — this only checks that
     // drawPenPreview actually derives the pivot/rotation from the editing node and forwards them
     const rotatedVectorNode: TVectorNode = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'vector-1',
       name: 'Vector',

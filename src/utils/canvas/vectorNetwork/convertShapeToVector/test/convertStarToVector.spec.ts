@@ -34,10 +34,10 @@ describe('convertStarToVector', () => {
     // result
     expect(result.type).toBe(NodeType.vector);
     expect(result.id).toBe('star-1');
-    expect(result.fillColor).toBe('#654321');
+    expect(result.defaultFill).toEqual([{ color: '#654321', opacity: 100, type: 'solid' }]);
     expect(Object.keys(result.vertices)).toHaveLength(10);
     expect(result.filledFaceKeys).toHaveLength(1);
-    expect(result.fillColorOverrideByKey?.[result.filledFaceKeys[0]]).toBe('#654321');
+    expect(result.fillByKey?.[result.filledFaceKeys[0]]).toEqual([{ color: '#654321', opacity: 100, type: 'solid' }]);
   });
 
   it('should round every corner into a curve when cornerRadius is set', () => {

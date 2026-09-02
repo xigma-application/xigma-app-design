@@ -6,6 +6,7 @@ import { TVectorNode } from 'types/design/types';
 // utils
 import { convertNodeToVector } from 'utils/canvas/vectorNetwork/convertShapeToVector/convertNodeToVector';
 import { getNodeStrokeOutline } from './getNodeStrokeOutline';
+import { getSolidPaintColor } from 'utils/design/paint/getSolidPaintColor';
 import { mergeVectorNodeGeometries } from 'utils/canvas/vectorNetwork/buildVectorNodeFromLoops/mergeVectorNodeGeometries';
 
 export const getNodeOutlineAsStrokeVector = (node: TStrokeableNode): TVectorNode | null => {
@@ -21,7 +22,7 @@ export const getNodeOutlineAsStrokeVector = (node: TStrokeableNode): TVectorNode
     return mergeVectorNodeGeometries(
       [fillVector, strokeVector],
       { id: node.id, name: node.name, parentId: node.parentId, rotation: node.rotation },
-      fillVector.fillColor ?? '',
+      getSolidPaintColor(fillVector.defaultFill ?? []) ?? '',
     );
   }
 

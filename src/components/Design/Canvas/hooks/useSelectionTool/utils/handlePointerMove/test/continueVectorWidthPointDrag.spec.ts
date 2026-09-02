@@ -23,7 +23,7 @@ const pointerEvent = (x: number, y: number): PointerEvent => new PointerEvent('p
 const addLineVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -300,7 +300,7 @@ describe('continueVectorWidthPointDrag', () => {
     // mock — a vector node with no segments at all has no chain to resolve against
     store.dispatch(
       addNode({
-        fillColor: null,
+        defaultFill: null,
         filledFaceKeys: [],
         name: 'Vector',
         parentId: null,

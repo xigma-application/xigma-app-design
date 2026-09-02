@@ -15,7 +15,7 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const addVectorNodeWithEdge = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

@@ -7,7 +7,7 @@ import { buildClosedVectorLoop } from '../buildClosedVectorLoop';
 import { getFillDataForClosedLoop } from '../getFillDataForClosedLoop';
 
 const buildVectorNode = (segments: TVectorNode['segments'], vertices: TVectorNode['vertices']): TVectorNode => ({
-  fillColor: '#ff0000',
+  defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: 'node-1',
   name: 'Vector',
@@ -53,10 +53,10 @@ describe('getFillDataForClosedLoop', () => {
     const node = buildVectorNode(segments, vertices);
 
     // action
-    const { fillColorOverrideByKey, filledFaceKeys } = getFillDataForClosedLoop(node, '#00ff00');
+    const { fillByKey, filledFaceKeys } = getFillDataForClosedLoop(node, '#00ff00');
 
     // result
-    expect(fillColorOverrideByKey[filledFaceKeys[0]]).toBe('#00ff00');
+    expect(fillByKey[filledFaceKeys[0]]).toEqual([{ color: '#00ff00', opacity: 100, type: 'solid' }]);
   });
 
   it('should return no face keys or overrides for an open, unclosed path', () => {
@@ -67,10 +67,10 @@ describe('getFillDataForClosedLoop', () => {
     );
 
     // action
-    const { fillColorOverrideByKey, filledFaceKeys } = getFillDataForClosedLoop(node, '#00ff00');
+    const { fillByKey, filledFaceKeys } = getFillDataForClosedLoop(node, '#00ff00');
 
     // result
     expect(filledFaceKeys).toHaveLength(0);
-    expect(fillColorOverrideByKey).toEqual({});
+    expect(fillByKey).toEqual({});
   });
 });

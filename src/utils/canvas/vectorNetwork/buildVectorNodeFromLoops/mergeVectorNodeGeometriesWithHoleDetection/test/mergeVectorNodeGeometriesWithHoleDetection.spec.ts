@@ -21,8 +21,8 @@ const square = (x: number, y: number, size: number): TPoint[] => [
 const reversed = (points: TPoint[]): TPoint[] => [...points].reverse();
 
 const buildNode = (overrides: Partial<TVectorNode>): TVectorNode => ({
-  fillColor: '#123456',
-  fillColorOverrideByKey: {},
+  defaultFill: [{ color: '#123456', opacity: 100, type: 'solid' }],
+  fillByKey: {},
   filledFaceKeys: [],
   id: 'node-1',
   name: 'Contour',
@@ -97,16 +97,16 @@ describe('mergeVectorNodeGeometriesWithHoleDetection', () => {
     expect(result?.holeParentByKey).toEqual({});
   });
 
-  it('should merge vertices, segments and fillColorOverrideByKey across every node', () => {
+  it('should merge vertices, segments and fillByKey across every node', () => {
     const nodeA = buildNode({
-      fillColorOverrideByKey: { a: '#111' },
+      fillByKey: { a: [{ color: '#111', opacity: 100, type: 'solid' }] },
       filledFaceKeys: ['a'],
       id: 'node-a',
       segments: { sa: { endId: 'b', id: 'sa', startId: 'a', tangentEnd: null, tangentStart: null } },
       vertices: { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 1, y: 1 } },
     });
     const nodeB = buildNode({
-      fillColorOverrideByKey: { c: '#222' },
+      fillByKey: { c: [{ color: '#222', opacity: 100, type: 'solid' }] },
       filledFaceKeys: ['c'],
       id: 'node-b',
       segments: { sc: { endId: 'd', id: 'sc', startId: 'c', tangentEnd: null, tangentStart: null } },
@@ -117,13 +117,16 @@ describe('mergeVectorNodeGeometriesWithHoleDetection', () => {
 
     const result = mergeVectorNodeGeometriesWithHoleDetection([nodeA, nodeB], base, '#123456');
 
-    expect(result?.fillColorOverrideByKey).toEqual({ a: '#111', c: '#222' });
+    expect(result?.fillByKey).toEqual({
+      a: [{ color: '#111', opacity: 100, type: 'solid' }],
+      c: [{ color: '#222', opacity: 100, type: 'solid' }],
+    });
     expect(Object.keys(result!.vertices).sort()).toEqual(['a', 'b', 'c', 'd']);
     expect(Object.keys(result!.segments).sort()).toEqual(['sa', 'sc']);
     expect(result?.id).toBe(base.id);
     expect(result?.name).toBe(base.name);
     expect(result?.parentId).toBe(base.parentId);
-    expect(result?.fillColor).toBe('#123456');
+    expect(result?.defaultFill).toEqual([{ color: '#123456', opacity: 100, type: 'solid' }]);
   });
 
   it('should skip a face key that no longer resolves to any points instead of throwing', () => {

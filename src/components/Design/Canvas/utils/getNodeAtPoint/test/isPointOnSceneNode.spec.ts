@@ -191,7 +191,7 @@ describe('isPointOnSceneNode', () => {
   it('should route a vector node through vector hit-testing, honouring the text-path bound set', () => {
     // mock
     const node: TSceneNode = {
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       id: 'vector-1',
       name: 'Vector',

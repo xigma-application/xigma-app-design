@@ -8,7 +8,7 @@ import { getVectorFillLoopKey } from '../../getVectorFillLoopKey';
 import { groupCrossingVectorNodes } from '../groupCrossingVectorNodes';
 
 const buildRectangleNode = (id: string, x: number, y: number, width: number, height: number): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id,
   name: 'Vector',
@@ -67,13 +67,16 @@ describe('groupCrossingVectorNodes', () => {
     const [faceB] = deriveVectorFaces(bareB);
     const keyA = getVectorFillLoopKey(faceA.pieceKeys);
     const keyB = getVectorFillLoopKey(faceB.pieceKeys);
-    const nodeA = { ...bareA, fillColorOverrideByKey: { [keyA]: '#ff0000' }, filledFaceKeys: [keyA] };
-    const nodeB = { ...bareB, fillColorOverrideByKey: { [keyB]: '#00ff00' }, filledFaceKeys: [keyB] };
+    const nodeA = { ...bareA, fillByKey: { [keyA]: [{ color: '#ff0000', opacity: 100, type: 'solid' as const }] }, filledFaceKeys: [keyA] };
+    const nodeB = { ...bareB, fillByKey: { [keyB]: [{ color: '#00ff00', opacity: 100, type: 'solid' as const }] }, filledFaceKeys: [keyB] };
 
     // result
     const groups = groupCrossingVectorNodes([nodeA, nodeB]);
 
-    expect(groups[0].combinedNode.fillColorOverrideByKey).toEqual({ [keyA]: '#ff0000', [keyB]: '#00ff00' });
+    expect(groups[0].combinedNode.fillByKey).toEqual({
+      [keyA]: [{ color: '#ff0000', opacity: 100, type: 'solid' as const }],
+      [keyB]: [{ color: '#00ff00', opacity: 100, type: 'solid' as const }],
+    });
   });
 
   it('should return two independent singleton groups for two nodes that never cross', () => {

@@ -13,7 +13,7 @@ import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLo
 // mock — a 100x100 rectangle split in half by a horizontal "divider" segment (e-f), forming a top
 // and a bottom face that share exactly that one segment
 const splitRectangleNode: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'n1',
   name: 'Vector',
@@ -67,7 +67,7 @@ describe('commitSingleVectorShapeBuilderNode', () => {
     const [topFace] = deriveVectorFaces(splitRectangleNode).filter((face) => face.key === 'divider,leftUpper,rightUpper,top');
     const paintedNode: TVectorNode = {
       ...splitRectangleNode,
-      fillColorOverrideByKey: { [getVectorFillLoopKey(topFace.pieceKeys)]: '#00ff00' },
+      fillByKey: { [getVectorFillLoopKey(topFace.pieceKeys)]: [{ color: '#00ff00', opacity: 100, type: 'solid' }] },
     };
     const dispatch = vi.fn();
     const faceKeys = new Set(['bottom,divider,leftLower,rightLower', 'divider,leftUpper,rightUpper,top']);
@@ -80,7 +80,7 @@ describe('commitSingleVectorShapeBuilderNode', () => {
     const changes = action.payload.changes as Partial<TVectorNode>;
 
     expect(changes.filledFaceKeys).toHaveLength(1);
-    expect(changes.fillColorOverrideByKey?.[changes.filledFaceKeys![0]]).toBe('#00ff00');
+    expect(changes.fillByKey?.[changes.filledFaceKeys![0]]).toEqual([{ color: '#00ff00', opacity: 100, type: 'solid' }]);
   });
 
   it('should not dispatch when the touched face-key set matches nothing on the node', () => {

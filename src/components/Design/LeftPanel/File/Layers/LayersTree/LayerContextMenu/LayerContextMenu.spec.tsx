@@ -257,8 +257,8 @@ describe('LayerContextMenu', () => {
 
       expect(node.type).toBe(NodeType.vector);
       expect(node.type === NodeType.vector ? node.filledFaceKeys.length : 0).toBeGreaterThanOrEqual(2);
-      expect(node.type === NodeType.vector ? Object.values(node.fillColorOverrideByKey ?? {}) : []).toEqual(
-        expect.arrayContaining(['#ff0000', '#000000']),
+      expect(node.type === NodeType.vector ? Object.values(node.fillByKey ?? {}) : []).toEqual(
+        expect.arrayContaining([[{ color: '#ff0000', opacity: 100, type: 'solid' }], [{ color: '#000000', opacity: 100, type: 'solid' }]]),
       );
     });
 

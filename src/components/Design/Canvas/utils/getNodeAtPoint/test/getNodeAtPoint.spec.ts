@@ -244,7 +244,7 @@ describe('getNodeAtPoint', () => {
     // mock — a 20x10 rect rotated 90deg around its own center (10, 5); once baked, its edges span
     // x:5..15 / y:-5..15, so a click at (15, 5) lands on the (now-vertical) rotated east edge
     const node: TSceneNode = {
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       id: 'a',
       name: 'Vector',
@@ -277,7 +277,7 @@ describe('getNodeAtPoint', () => {
   it('should never hit a vector node currently bound as a text-on-path guide, even for a point squarely on its stroke', () => {
     // mock — a horizontal a(0,0)->b(100,0) vector, with a text node bound to it as its path
     const vector: TSceneNode = {
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       id: 'vector-1',
       name: 'Vector',
@@ -318,7 +318,7 @@ describe('getNodeAtPoint', () => {
   it('should still hit an eligible vector node normally when no text node is bound to it', () => {
     // mock — same vector as above, no bound text this time
     const vector: TSceneNode = {
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       id: 'vector-1',
       name: 'Vector',

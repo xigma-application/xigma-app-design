@@ -21,7 +21,7 @@ const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointerd
 const createVectorMultiSelectResizeDragRef = (): RefObject<TVectorMultiSelectResizeDragState | null> => ({ current: null });
 
 const vector: TVectorNode = {
-  fillColor: '#000000',
+  defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

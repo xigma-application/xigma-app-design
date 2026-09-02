@@ -62,7 +62,7 @@ describe('getNodesBoundingBox', () => {
   it('should use the vector network extents for a vector node', () => {
     // mock
     const vector: TVectorNode = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'v',
       name: 'Vector',

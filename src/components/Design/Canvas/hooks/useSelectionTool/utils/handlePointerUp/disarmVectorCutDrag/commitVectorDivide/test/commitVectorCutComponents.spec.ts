@@ -14,7 +14,7 @@ import { commitVectorCutComponents } from '../commitVectorCutComponents';
 const addVectorNode = (): TVectorNode => {
   store.dispatch(
     addNode({
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -88,7 +88,7 @@ describe('commitVectorCutComponents', () => {
     const newNode = store.getState().design.pages[store.getState().design.activePageId].nodes[newNodeIds[0]] as TVectorNode;
 
     expect(Object.keys(newNode.vertices).sort()).toEqual(['a', 'b']);
-    expect(newNode.fillColor).toBe('#ff0000');
+    expect(newNode.defaultFill).toEqual([{ color: '#ff0000', opacity: 100, type: 'solid' }]);
     expect(newNode.strokeColor).toBe('#00ff00');
     expect(newNode.strokeWidth).toBe(3);
     expect(newNode.rotation).toBe(0);
@@ -109,7 +109,7 @@ describe('commitVectorCutComponents', () => {
     };
     const finish = (component: TVectorNetworkComponent): TVectorNetworkComponent => ({
       ...component,
-      fillColorOverrideByKey: { tagged: '#ff0000' },
+      fillByKey: { tagged: [{ color: '#ff0000', opacity: 100, type: 'solid' }] },
       filledFaceKeys: ['tagged'],
     });
 
@@ -122,8 +122,8 @@ describe('commitVectorCutComponents', () => {
 
     expect(updatedOriginal.filledFaceKeys).toEqual(['tagged']);
     expect(newNode.filledFaceKeys).toEqual(['tagged']);
-    expect(updatedOriginal.fillColorOverrideByKey).toEqual({ tagged: '#ff0000' });
-    expect(newNode.fillColorOverrideByKey).toEqual({ tagged: '#ff0000' });
+    expect(updatedOriginal.fillByKey).toEqual({ tagged: [{ color: '#ff0000', opacity: 100, type: 'solid' }] });
+    expect(newNode.fillByKey).toEqual({ tagged: [{ color: '#ff0000', opacity: 100, type: 'solid' }] });
   });
 
   it('should default to an empty color override map when the finish step omits one', () => {
@@ -147,7 +147,7 @@ describe('commitVectorCutComponents', () => {
     const updatedOriginal = store.getState().design.pages[store.getState().design.activePageId].nodes[node.id] as TVectorNode;
     const newNode = store.getState().design.pages[store.getState().design.activePageId].nodes[newNodeIds[0]] as TVectorNode;
 
-    expect(updatedOriginal.fillColorOverrideByKey).toEqual({});
-    expect(newNode.fillColorOverrideByKey).toEqual({});
+    expect(updatedOriginal.fillByKey).toEqual({});
+    expect(newNode.fillByKey).toEqual({});
   });
 });

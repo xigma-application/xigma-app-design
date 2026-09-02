@@ -8,7 +8,7 @@ import { getVectorFillLoopKey } from '../getVectorFillLoopKey';
 import { getVectorFillLoopKeyAtPoint } from '../getVectorFillLoopKeyAtPoint';
 
 const buildTriangleNode = (filledFaceKeys: string[]): TVectorNode => ({
-  fillColor: '#000000',
+  defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
   filledFaceKeys,
   id: '1',
   name: 'Vector',
@@ -68,7 +68,7 @@ describe('getVectorFillLoopKeyAtPoint', () => {
     // middle rectangle also exercises the reduce's "candidate isn't smaller, keep the current
     // smallest" branch, not just "found a new smallest" every time
     const node: TVectorNode = {
-      fillColor: '#000000',
+      defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       id: '1',
       name: 'Vector',
@@ -129,7 +129,7 @@ describe('getVectorFillLoopKeyAtPoint', () => {
     // as "the outer fill is here", or it could only ever remove the outer fill and never paint —
     // or later toggle — the inner loop on its own.
     const node: TVectorNode = {
-      fillColor: '#000000',
+      defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       id: '1',
       name: 'Vector',

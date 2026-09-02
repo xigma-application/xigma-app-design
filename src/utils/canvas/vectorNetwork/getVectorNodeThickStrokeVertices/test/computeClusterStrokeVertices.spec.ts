@@ -10,7 +10,7 @@ const vertex = (id: string, x: number, y: number): TVectorVertex => ({ id, x, y 
 const seg = (id: string, startId: string, endId: string): TVectorSegment => ({ endId, id, startId, tangentEnd: null, tangentStart: null });
 
 const buildNode = (vertices: TVectorVertex[], segments: TVectorSegment[]): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: '1',
   name: 'Vector',

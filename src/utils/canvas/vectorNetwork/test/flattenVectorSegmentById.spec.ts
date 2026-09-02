@@ -9,7 +9,7 @@ const seg = (id: string, startId: string, endId: string): TVectorSegment => ({ e
 const vertex = (id: string, x: number, y: number): TVectorVertex => ({ id, x, y });
 
 const buildNode = (vertices: TVectorVertex[], segments: TVectorSegment[]): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: '1',
   name: 'Vector',

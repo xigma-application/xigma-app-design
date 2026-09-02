@@ -21,7 +21,7 @@ vi.mock('components/Design/Canvas/utils/getRenderedVectorNode', () => ({
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const vectorNode: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'v1',
   name: 'Vector',
@@ -85,7 +85,7 @@ describe('getErasePreviewNodes', () => {
     // mock
     const bakedNode = { ...vectorNode, rotation: 0 };
     const erased = {
-      fillColorOverrideByKey: { 'new-key': getVectorFillColorForLoopKey('old-key') },
+      fillByKey: { 'new-key': getVectorFillColorForLoopKey('old-key') },
       filledFaceKeys: ['new-key'],
       segments: { s1: {} },
       survivingFaces: [{ key: 'new-key', originalKey: 'old-key' }],

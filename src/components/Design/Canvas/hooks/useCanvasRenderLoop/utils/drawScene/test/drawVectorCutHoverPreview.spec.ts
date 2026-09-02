@@ -40,7 +40,7 @@ const program = {} as WebGLProgram;
 const buffer = {} as WebGLBuffer;
 
 const node: TVectorNode = {
-  fillColor: '#000000',
+  defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: '1',
   name: 'Vector',

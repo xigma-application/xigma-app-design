@@ -17,7 +17,7 @@ describe('getNodeAxisAlignedBounds', () => {
   it('should return the vector node’s own bounds for a vector', () => {
     // mock
     const vector: TVectorNode = {
-      fillColor: '#fff',
+      defaultFill: [{ color: '#fff', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       id: 'v',
       name: 'Vector',

@@ -17,7 +17,7 @@ describe('getResizeNodeOrigin', () => {
   it('should capture vertices/segments/rotation for a vector node', () => {
     // mock
     const vector: TVectorNode = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'v',
       name: 'Vector',

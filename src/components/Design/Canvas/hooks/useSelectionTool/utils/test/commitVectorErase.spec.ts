@@ -15,7 +15,7 @@ import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLo
 const addVectorNode = (rotation = 0): string => {
   store.dispatch(
     addNode({
-      fillColor: '#000000',
+      defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -49,7 +49,7 @@ const addFilledRectNode = (color: string): string => {
   };
   const key = getVectorFillLoopKey(
     deriveVectorFaces({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'probe',
       name: 'Vector',
@@ -66,8 +66,8 @@ const addFilledRectNode = (color: string): string => {
 
   store.dispatch(
     addNode({
-      fillColor: null,
-      fillColorOverrideByKey: { [key]: color },
+      defaultFill: null,
+      fillByKey: { [key]: [{ color, opacity: 100, type: 'solid' }] },
       filledFaceKeys: [key],
       name: 'Vector',
       parentId: null,
@@ -111,7 +111,7 @@ describe('commitVectorErase', () => {
     const node = currentNode(nodeId);
 
     expect(node.filledFaceKeys).toHaveLength(1);
-    expect(node.fillColorOverrideByKey?.[node.filledFaceKeys[0]]).toBe('#ff0000');
+    expect(node.fillByKey?.[node.filledFaceKeys[0]]).toEqual([{ color: '#ff0000', opacity: 100, type: 'solid' }]);
   });
 
   it('should commit a mid-segment gap for a single-point (click) stroke that straddles the segment', () => {

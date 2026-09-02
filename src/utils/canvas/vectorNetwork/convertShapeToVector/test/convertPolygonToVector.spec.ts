@@ -33,10 +33,10 @@ describe('convertPolygonToVector', () => {
     // result
     expect(result.type).toBe(NodeType.vector);
     expect(result.id).toBe('polygon-1');
-    expect(result.fillColor).toBe('#123456');
+    expect(result.defaultFill).toEqual([{ color: '#123456', opacity: 100, type: 'solid' }]);
     expect(Object.keys(result.vertices)).toHaveLength(6);
     expect(result.filledFaceKeys).toHaveLength(1);
-    expect(result.fillColorOverrideByKey?.[result.filledFaceKeys[0]]).toBe('#123456');
+    expect(result.fillByKey?.[result.filledFaceKeys[0]]).toEqual([{ color: '#123456', opacity: 100, type: 'solid' }]);
   });
 
   it('should round every corner into a curve when cornerRadius is set', () => {

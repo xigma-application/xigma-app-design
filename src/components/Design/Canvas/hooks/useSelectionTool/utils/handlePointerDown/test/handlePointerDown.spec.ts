@@ -206,7 +206,7 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => 
 const addClosedSquareVectorNode = (x: number, y: number, size: number): string => {
   store.dispatch(
     addNode({
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

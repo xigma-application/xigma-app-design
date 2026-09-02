@@ -30,7 +30,7 @@ const addSquareNode = (x: number, filled: boolean): string => {
   // filledFaceKeys entry itself (which real segments it borders) to decide where to close, so a
   // placeholder string no longer round-trips
   const [face] = deriveVectorFaces({
-    fillColor: null,
+    defaultFill: null,
     filledFaceKeys: [],
     id: `probe-${x}`,
     name: '',
@@ -46,7 +46,7 @@ const addSquareNode = (x: number, filled: boolean): string => {
 
   store.dispatch(
     addNode({
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: filled ? [getVectorFillLoopKey(face.pieceKeys)] : [],
       name: 'Vector',
       parentId: null,
@@ -147,7 +147,7 @@ describe('commitVectorDivide', () => {
     // mock — triangle a(0,0)-b(100,0)-c(50,100); cut line crosses only edge a-b, near its midpoint
     store.dispatch(
       addNode({
-        fillColor: null,
+        defaultFill: null,
         filledFaceKeys: [],
         name: 'Vector',
         parentId: null,
@@ -256,7 +256,7 @@ describe('commitVectorDivide', () => {
       tr: { id: 'tr', x: 150, y: 0 },
     };
     const faces = deriveVectorFaces({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'tent-probe',
       name: '',
@@ -274,7 +274,7 @@ describe('commitVectorDivide', () => {
 
     store.dispatch(
       addNode({
-        fillColor: '#ff0000',
+        defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         filledFaceKeys: faces.map((face) => getVectorFillLoopKey(face.pieceKeys)),
         name: 'Vector',
         parentId: null,
@@ -375,7 +375,7 @@ describe('commitVectorDivide', () => {
       v4: { id: 'v4', x: 0, y: 100 },
     };
     const faces = deriveVectorFaces({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'chord-probe',
       name: '',
@@ -393,7 +393,7 @@ describe('commitVectorDivide', () => {
 
     store.dispatch(
       addNode({
-        fillColor: '#ff0000',
+        defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         filledFaceKeys: faces.map((face) => getVectorFillLoopKey(face.pieceKeys)),
         name: 'Vector',
         parentId: null,

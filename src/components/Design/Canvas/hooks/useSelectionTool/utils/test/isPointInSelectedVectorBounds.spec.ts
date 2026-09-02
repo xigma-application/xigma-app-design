@@ -6,7 +6,7 @@ import { TSceneNode, TVectorNode } from 'types/design/types';
 import { isPointInSelectedVectorBounds } from '../isPointInSelectedVectorBounds';
 
 const buildVectorNode = (id = 'a', rotation = 0, width = 100, height = 100): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id,
   name: 'Vector',

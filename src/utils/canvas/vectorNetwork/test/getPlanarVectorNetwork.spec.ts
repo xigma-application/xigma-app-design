@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { getPlanarVectorNetwork } from '../getPlanarVectorNetwork';
 
 const buildNode = (): TVectorNode => ({
-  fillColor: '#000',
+  defaultFill: [{ color: '#000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: '1',
   name: 'Vector',
@@ -65,7 +65,7 @@ describe('getPlanarVectorNetwork', () => {
 
     // before
     const first = getPlanarVectorNetwork(node);
-    const edited: TVectorNode = { ...node, fillColor: '#fff' };
+    const edited: TVectorNode = { ...node, defaultFill: [{ color: '#fff', opacity: 100, type: 'solid' }] };
     const second = getPlanarVectorNetwork(edited);
 
     // result

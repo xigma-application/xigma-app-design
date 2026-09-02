@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { getSelectedVerticesRect } from '../getSelectedVerticesRect';
 
 const nodeA: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-a',
   name: 'Vector',

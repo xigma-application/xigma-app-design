@@ -76,7 +76,7 @@ const addLineNode = (x1: number, y1: number, x2: number, y2: number): string => 
 const addVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

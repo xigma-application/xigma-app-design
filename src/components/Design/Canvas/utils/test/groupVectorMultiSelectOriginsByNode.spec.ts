@@ -6,7 +6,7 @@ import { TSceneNode, TVectorNode } from 'types/design/types';
 import { groupVectorMultiSelectOriginsByNode } from '../groupVectorMultiSelectOriginsByNode';
 
 const buildNode = (id: string, segments: TVectorNode['segments'], vertices: TVectorNode['vertices']): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id,
   name: 'Vector',

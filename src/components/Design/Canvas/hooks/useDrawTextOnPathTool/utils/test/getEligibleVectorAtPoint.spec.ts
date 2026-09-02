@@ -15,7 +15,7 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const addStraightVector = (offsetX: number): void => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -91,7 +91,7 @@ describe('getEligibleVectorAtPoint', () => {
     // mock
     store.dispatch(
       addNode({
-        fillColor: null,
+        defaultFill: null,
         filledFaceKeys: [],
         name: 'Vector',
         parentId: null,

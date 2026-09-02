@@ -27,7 +27,7 @@ const addSquareNode = (): string => {
     d: { id: 'd', x: 0, y: 100 },
   };
   const [face] = deriveVectorFaces({
-    fillColor: null,
+    defaultFill: null,
     filledFaceKeys: [],
     id: 'probe',
     name: '',
@@ -43,7 +43,7 @@ const addSquareNode = (): string => {
 
   store.dispatch(
     addNode({
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [getVectorFillLoopKey(face.pieceKeys)],
       name: 'Vector',
       parentId: null,

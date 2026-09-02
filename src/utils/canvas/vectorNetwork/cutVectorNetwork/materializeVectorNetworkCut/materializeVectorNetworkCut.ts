@@ -1,11 +1,12 @@
 // types
+import { TPaint } from 'types/design/paint/types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode, TVectorSegment, TVectorVertex } from 'types/design/types';
 
 // utils
 import { buildVectorCutChordSegments } from './buildVectorCutChordSegments';
 import { findLineNetworkCrossings } from '../findLineNetworkCrossings';
-import { getEffectiveVectorFillColor } from '../../getEffectiveVectorFillColor';
+import { getEffectiveVectorFill } from '../../getEffectiveVectorFill';
 import { getIsolatedVectorCutStubIds } from './getIsolatedVectorCutStubIds';
 import { resolveVectorCutFilledFaceKeys } from './resolveVectorCutFilledFaceKeys';
 import { severVectorCutCrossings } from './severVectorCutCrossings';
@@ -15,7 +16,7 @@ export const materializeVectorNetworkCut = (
   lineStart: TPoint,
   lineEnd: TPoint,
 ): {
-  fillColorOverrideByKey: Record<string, string>;
+  fillByKey: Record<string, TPaint[]>;
   filledFaceKeys: string[];
   segments: Record<string, TVectorSegment>;
   vertices: Record<string, TVectorVertex>;
@@ -31,11 +32,9 @@ export const materializeVectorNetworkCut = (
     const segments = { ...severed.segments, ...chordSegments };
     const resultNode = { ...node, segments, vertices: severed.vertices };
     const survivingFaces = resolveVectorCutFilledFaceKeys(resultNode, node, isolatedStubIds);
-    const fillColorOverrideByKey = Object.fromEntries(
-      survivingFaces.map(({ key, originalKey }) => [key, getEffectiveVectorFillColor(node, originalKey)]),
-    );
+    const fillByKey = Object.fromEntries(survivingFaces.map(({ key, originalKey }) => [key, getEffectiveVectorFill(node, originalKey)]));
 
-    return { fillColorOverrideByKey, filledFaceKeys: survivingFaces.map((face) => face.key), segments, vertices: severed.vertices };
+    return { fillByKey, filledFaceKeys: survivingFaces.map((face) => face.key), segments, vertices: severed.vertices };
   }
 
   return null;

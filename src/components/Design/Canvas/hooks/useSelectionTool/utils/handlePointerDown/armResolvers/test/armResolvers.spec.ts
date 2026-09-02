@@ -113,7 +113,7 @@ const addTextNode = (x: number, y: number, width = 200, height = 200): TTextNode
 const addVectorNode = (segments: TVectorNode['segments'], vertices: TVectorNode['vertices'], rotation = 0): string => {
   store.dispatch(
     addNode({
-      fillColor: '#000000',
+      defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -244,7 +244,7 @@ const line: TLineNode = {
 };
 
 const vectorNode: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',
@@ -1105,7 +1105,7 @@ describe('armVectorPaintOnPointerDown', () => {
 
     expect(action.payload.id).toBe(nodeId);
     expect(action.payload.changes).toEqual({
-      fillColorOverrideByKey: { 's1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]': DEFAULT_PAINT_COLOR },
+      fillByKey: { 's1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]': [{ color: DEFAULT_PAINT_COLOR, opacity: 100, type: 'solid' }] },
       filledFaceKeys: ['s1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]'],
     });
   });
@@ -1177,7 +1177,7 @@ describe('armVectorPaintOnPointerDown', () => {
     const action = (ctx.dispatch as ReturnType<typeof vi.fn>).mock.calls[0][0] as ReturnType<typeof updateNode>;
 
     expect(action.payload.changes).toEqual({
-      fillColorOverrideByKey: { 's1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]': '#ff0000' },
+      fillByKey: { 's1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]': [{ color: '#ff0000', opacity: 100, type: 'solid' }] },
       filledFaceKeys: ['s1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]'],
     });
   });
@@ -1281,7 +1281,12 @@ describe('armVectorPaintOnPointerDown', () => {
     const bKey = 'sb1[v:b1|v:b2],sb2[v:b2|v:b3],sb3[v:b3|v:b4],sb4[v:b1|v:b4]';
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
-    store.dispatch(updateNode({ changes: { fillColorOverrideByKey: { [aKey]: '#d9d9d9' }, filledFaceKeys: [aKey] }, id: nodeId }));
+    store.dispatch(
+      updateNode({
+        changes: { fillByKey: { [aKey]: [{ color: '#d9d9d9', opacity: 100, type: 'solid' }] }, filledFaceKeys: [aKey] },
+        id: nodeId,
+      }),
+    );
     store.dispatch(setPaintColor('#ff0000'));
 
     // before — click inside B, which sits fully inside A's already-filled area
@@ -1294,7 +1299,7 @@ describe('armVectorPaintOnPointerDown', () => {
     const changes = action.payload.changes as Partial<TVectorNode>;
 
     expect(changes.filledFaceKeys).toEqual(expect.arrayContaining([aKey, bKey]));
-    expect(changes.fillColorOverrideByKey?.[bKey]).toBe('#d9d9d9');
+    expect(changes.fillByKey?.[bKey]).toEqual([{ color: '#d9d9d9', opacity: 100, type: 'solid' }]);
     expect(changes.holeParentByKey).toEqual({ [bKey]: aKey });
   });
 
@@ -1328,7 +1333,12 @@ describe('armVectorPaintOnPointerDown', () => {
     const bKey = 'sb1[v:b1|v:b2],sb2[v:b2|v:b3],sb3[v:b3|v:b4],sb4[v:b1|v:b4]';
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
-    store.dispatch(updateNode({ changes: { fillColorOverrideByKey: { [aKey]: '#d9d9d9' }, filledFaceKeys: [aKey] }, id: nodeId }));
+    store.dispatch(
+      updateNode({
+        changes: { fillByKey: { [aKey]: [{ color: '#d9d9d9', opacity: 100, type: 'solid' }] }, filledFaceKeys: [aKey] },
+        id: nodeId,
+      }),
+    );
 
     // before — click inside A but outside B, on the already-filled face itself
     const ctx = createContext({ activeTool: ToolName.paint, point: { x: 25, y: 25 } });
@@ -1340,7 +1350,7 @@ describe('armVectorPaintOnPointerDown', () => {
     const changes = action.payload.changes as Partial<TVectorNode>;
 
     expect(changes.filledFaceKeys).toEqual([bKey]);
-    expect(changes.fillColorOverrideByKey?.[bKey]).toBe('#d9d9d9');
+    expect(changes.fillByKey?.[bKey]).toEqual([{ color: '#d9d9d9', opacity: 100, type: 'solid' }]);
   });
 
   it('should also paint every unfilled loop nested inside the clicked face with the same new color, when the clicked face itself contains further unfilled loops', () => {
@@ -1384,8 +1394,8 @@ describe('armVectorPaintOnPointerDown', () => {
     const changes = action.payload.changes as Partial<TVectorNode>;
 
     expect(changes.filledFaceKeys).toEqual(expect.arrayContaining([mKey, iKey]));
-    expect(changes.fillColorOverrideByKey?.[mKey]).toBe('#ff0000');
-    expect(changes.fillColorOverrideByKey?.[iKey]).toBe('#ff0000');
+    expect(changes.fillByKey?.[mKey]).toEqual([{ color: '#ff0000', opacity: 100, type: 'solid' }]);
+    expect(changes.fillByKey?.[iKey]).toEqual([{ color: '#ff0000', opacity: 100, type: 'solid' }]);
   });
 
   it('should bake a crossing the clicked face depends on into a real, persisted vertex (regression: painting across a crossing that only existed virtually made the fill disappear the moment the node was cut later)', () => {

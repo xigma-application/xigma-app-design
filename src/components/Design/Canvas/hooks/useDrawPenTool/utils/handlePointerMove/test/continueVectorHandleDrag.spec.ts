@@ -25,7 +25,7 @@ const createHoveredSegmentIdRef = (): THoverRefs['hoveredSegmentIdRef'] => ({ cu
 const addVectorNodeWithSegment = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

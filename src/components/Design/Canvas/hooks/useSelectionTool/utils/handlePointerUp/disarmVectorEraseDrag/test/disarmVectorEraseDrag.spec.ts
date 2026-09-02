@@ -25,7 +25,7 @@ const pointerUp = (): PointerEvent => new PointerEvent('pointerup', { pointerId:
 const addVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: '#000000',
+      defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

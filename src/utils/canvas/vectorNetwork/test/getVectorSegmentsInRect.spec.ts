@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { getVectorSegmentsInRect } from '../getVectorSegmentsInRect';
 
 const buildNode = (segments: TVectorNode['segments']): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

@@ -7,6 +7,7 @@ import { TRectangleNode, TVectorNode } from 'types/design/types';
 import { buildClosedVectorLoop } from './utils/buildClosedVectorLoop';
 import { getFillDataForClosedLoop } from './utils/getFillDataForClosedLoop';
 import { getMaxCornerRadius } from 'utils/canvas/cornerRadius/getMaxCornerRadius';
+import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
 
 const SHAPE_VECTOR_STROKE_WIDTH = 0;
 
@@ -21,7 +22,7 @@ export const convertRectangleToVector = (node: TRectangleNode): TVectorNode => {
   const radius = Math.min(Math.max(node.cornerRadius ?? 0, 0), getMaxCornerRadius(node));
   const { segments, vertices } = buildClosedVectorLoop(getRectangleCorners(node), radius);
   const base: TVectorNode = {
-    fillColor: node.fill,
+    defaultFill: [makeSolidPaint(node.fill)],
     filledFaceKeys: [],
     id: node.id,
     name: node.name,

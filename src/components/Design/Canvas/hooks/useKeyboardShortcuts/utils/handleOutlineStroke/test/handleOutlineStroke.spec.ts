@@ -15,8 +15,8 @@ import { store } from 'store';
 import { handleOutlineStroke } from '../handleOutlineStroke';
 
 const buildLetter = (id: string): TVectorNode => ({
-  fillColor: '#000000',
-  fillColorOverrideByKey: { [`face-${id}`]: '#000000' },
+  defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
+  fillByKey: { [`face-${id}`]: [{ color: '#000000', opacity: 100, type: 'solid' }] },
   filledFaceKeys: [`face-${id}`],
   id,
   name: id,
@@ -185,7 +185,7 @@ describe('handleOutlineStroke', () => {
     // mock — a simple path the text is attached to
     store.dispatch(
       addNode({
-        fillColor: null,
+        defaultFill: null,
         filledFaceKeys: [],
         name: 'Path',
         parentId: null,

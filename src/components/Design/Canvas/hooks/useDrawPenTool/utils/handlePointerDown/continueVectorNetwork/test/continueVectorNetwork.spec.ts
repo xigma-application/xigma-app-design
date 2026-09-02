@@ -27,7 +27,7 @@ const createVectorAlignmentGuideRef = (): TVectorEditRefs['vectorAlignmentGuideR
 const addVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -49,7 +49,7 @@ const addVectorNode = (): string => {
 const addVectorNodeWithEdge = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -456,7 +456,7 @@ describe('continueVectorNetwork', () => {
 
     store.dispatch(
       addNode({
-        fillColor: null,
+        defaultFill: null,
         filledFaceKeys: [],
         name: 'Vector',
         parentId: null,
@@ -510,7 +510,7 @@ describe('continueVectorNetwork', () => {
 
     store.dispatch(
       addNode({
-        fillColor: null,
+        defaultFill: null,
         filledFaceKeys: [],
         name: 'Vector',
         parentId: null,
@@ -567,7 +567,7 @@ describe('continueVectorNetwork', () => {
 
     store.dispatch(
       addNode({
-        fillColor: null,
+        defaultFill: null,
         filledFaceKeys: [],
         name: 'Vector',
         parentId: null,

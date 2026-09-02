@@ -1,5 +1,6 @@
 // types
 import { TLineNetworkCrossing, TVectorNetworkComponent } from 'utils/canvas/vectorNetwork/cutVectorNetwork/types';
+import { TPaint } from 'types/design/paint/types';
 import { TVectorNode, TVectorSegment, TVectorVertex } from 'types/design/types';
 
 export type TVectorDivideResult = {
@@ -10,7 +11,7 @@ export type TVectorDivideResult = {
 };
 
 export type TVectorConnectedCutResult = {
-  fillColorOverrideByKey: Record<string, string>;
+  fillByKey: Record<string, TPaint[]>;
   filledFaceKeys: string[];
   node: TVectorNode;
   segments: Record<string, TVectorSegment>;

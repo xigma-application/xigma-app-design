@@ -26,7 +26,7 @@ describe('buildVectorNodeFromLoops', () => {
     expect(result?.name).toBe('Rectangle outline');
     expect(result?.parentId).toBe('frame-1');
     expect(result?.rotation).toBe(12);
-    expect(result?.fillColor).toBe('#ff0000');
+    expect(result?.defaultFill).toEqual([{ color: '#ff0000', opacity: 100, type: 'solid' }]);
     expect(result?.strokeWidth).toBe(0);
     expect(Object.keys(result?.vertices ?? {})).toHaveLength(4);
     expect(result?.filledFaceKeys).toHaveLength(1);

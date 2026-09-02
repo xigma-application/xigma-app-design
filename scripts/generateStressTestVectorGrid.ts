@@ -44,7 +44,7 @@ export const generateStressTestVectorGrid = (count = 100): TVectorNode => {
   }
 
   const unfilledNode: TVectorNode = {
-    fillColor: FILL_COLOR,
+    defaultFill: [{ color: FILL_COLOR, opacity: 100, type: 'solid' }],
     filledFaceKeys: [],
     id: nanoid(),
     name: 'Vector',
@@ -58,7 +58,7 @@ export const generateStressTestVectorGrid = (count = 100): TVectorNode => {
     vertices,
   };
   const filledFaceKeys = deriveVectorFaces(unfilledNode).map((face) => getVectorFillLoopKey(face.pieceKeys));
-  const fillColorOverrideByKey = Object.fromEntries(filledFaceKeys.map((key) => [key, FILL_COLOR]));
+  const fillByKey = Object.fromEntries(filledFaceKeys.map((key) => [key, [{ color: FILL_COLOR, opacity: 100, type: 'solid' as const }]]));
 
-  return { ...unfilledNode, fillColorOverrideByKey, filledFaceKeys };
+  return { ...unfilledNode, fillByKey, filledFaceKeys };
 };

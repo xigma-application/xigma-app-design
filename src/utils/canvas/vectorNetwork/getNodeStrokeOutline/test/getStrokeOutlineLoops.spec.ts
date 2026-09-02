@@ -33,7 +33,7 @@ const LINE: TLineNode = {
 };
 
 const VECTOR: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

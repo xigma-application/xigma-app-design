@@ -20,7 +20,7 @@ const frame: TFrameNode = {
 };
 
 const buildVectorNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
-  fillColor: '#ff0000',
+  defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

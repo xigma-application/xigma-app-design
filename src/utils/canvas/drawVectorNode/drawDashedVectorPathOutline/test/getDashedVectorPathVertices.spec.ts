@@ -20,7 +20,7 @@ const seg = (id: string, startId: string, endId: string): TVectorSegment => ({
 
 // a straight 200-unit horizontal segment
 const straightNode: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: '1',
   name: 'Vector',

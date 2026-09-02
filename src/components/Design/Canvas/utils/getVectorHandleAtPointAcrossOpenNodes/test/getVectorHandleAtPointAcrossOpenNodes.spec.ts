@@ -6,7 +6,7 @@ import { TSceneNode, TVectorNode } from 'types/design/types';
 import { getVectorHandleAtPointAcrossOpenNodes } from '../getVectorHandleAtPointAcrossOpenNodes';
 
 const buildVectorNode = (overrides: Partial<TVectorNode>): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

@@ -23,7 +23,7 @@ const program = {} as WebGLProgram;
 const buffer = {} as WebGLBuffer;
 
 const buildNode = (idSuffix: string): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: `vector-${idSuffix}`,
   name: 'Vector',

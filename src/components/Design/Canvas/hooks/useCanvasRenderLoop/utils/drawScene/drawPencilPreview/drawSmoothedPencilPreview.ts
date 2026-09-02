@@ -25,7 +25,7 @@ export const drawSmoothedPencilPreview = (
     const { segments, vertexHandleModes, vertices } = buildVectorNetworkFromPoints(points, PENCIL_TANGENT_TENSION);
     const previewNode: TVectorNode = {
       capStyle: 'round',
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'pencil-preview',
       name: PENCIL_NAME,

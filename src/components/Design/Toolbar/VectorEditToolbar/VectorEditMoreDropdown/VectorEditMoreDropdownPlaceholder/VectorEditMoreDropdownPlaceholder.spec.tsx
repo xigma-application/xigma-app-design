@@ -23,7 +23,7 @@ const renderVectorEditMoreDropdownPlaceholder = (): ReturnType<typeof render> =>
 const addStraightVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

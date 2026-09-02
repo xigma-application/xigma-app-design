@@ -1,5 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
+import { TPaint } from 'types/design/paint/types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
@@ -7,7 +8,7 @@ import { getVectorFillPieceKey } from 'utils/canvas/vectorNetwork/getVectorFillP
 import { splitVectorSegment } from '../splitVectorSegment';
 
 const node: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',
@@ -71,7 +72,7 @@ describe('splitVectorSegment', () => {
     // mock — v1(0,0) to v2(100,0) is one side of an already-filled triangle
     const filledNode: TVectorNode = {
       ...node,
-      fillColorOverrideByKey: { 's1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]': '#D9D9D9' },
+      fillByKey: { 's1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]': [{ color: '#D9D9D9', opacity: 100, type: 'solid' }] },
       filledFaceKeys: ['s1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]'],
       segments: {
         ...node.segments,
@@ -81,8 +82,8 @@ describe('splitVectorSegment', () => {
     };
 
     // before
-    const { fillColorOverrideByKey, filledFaceKeys, newVertexId, newSegmentId } = ((): {
-      fillColorOverrideByKey: Record<string, string>;
+    const { fillByKey, filledFaceKeys, newVertexId, newSegmentId } = ((): {
+      fillByKey: Record<string, TPaint[]>;
       filledFaceKeys: string[];
       newSegmentId: string;
       newVertexId: string;
@@ -107,6 +108,6 @@ describe('splitVectorSegment', () => {
 
     expect(filledFaceKeys).toHaveLength(1);
     expect(new Set(filledFaceKeys[0].split(','))).toEqual(new Set(expectedPieces));
-    expect(fillColorOverrideByKey).toEqual({ [filledFaceKeys[0]]: '#D9D9D9' });
+    expect(fillByKey).toEqual({ [filledFaceKeys[0]]: [{ color: '#D9D9D9', opacity: 100, type: 'solid' }] });
   });
 });

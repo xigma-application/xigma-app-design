@@ -793,7 +793,7 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
     // mock
     realStore.dispatch(
       addNode({
-        fillColor: null,
+        defaultFill: null,
         filledFaceKeys: [],
         name: 'Vector',
         parentId: null,
@@ -899,7 +899,7 @@ describe('useKeyboardShortcuts "Enter" behaviors', () => {
   const addVectorNode = (): string => {
     realStore.dispatch(
       addNode({
-        fillColor: null,
+        defaultFill: null,
         filledFaceKeys: [],
         name: 'Vector',
         parentId: null,
@@ -1007,7 +1007,7 @@ describe('useKeyboardShortcuts "Shift+W" behaviors', () => {
     // mock
     realStore.dispatch(
       addNode({
-        fillColor: null,
+        defaultFill: null,
         filledFaceKeys: [],
         name: 'Vector',
         parentId: null,

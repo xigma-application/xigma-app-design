@@ -9,7 +9,7 @@ import { TSceneNode, TVectorNode } from 'types/design/types';
 import { getVectorMultiSelectBoxForHover } from '../getVectorMultiSelectBoxForHover';
 
 const node: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

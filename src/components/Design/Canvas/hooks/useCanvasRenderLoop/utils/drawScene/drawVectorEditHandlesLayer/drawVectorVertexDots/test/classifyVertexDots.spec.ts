@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { classifyVertexDots } from '../classifyVertexDots';
 
 const buildNode = (): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

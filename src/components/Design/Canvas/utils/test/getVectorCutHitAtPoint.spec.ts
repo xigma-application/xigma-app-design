@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { getVectorCutHitAtPoint } from '../getVectorCutHitAtPoint';
 
 const buildNode = (segments: TVectorNode['segments'], vertices: TVectorNode['vertices']): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'node-1',
   name: 'Vector',

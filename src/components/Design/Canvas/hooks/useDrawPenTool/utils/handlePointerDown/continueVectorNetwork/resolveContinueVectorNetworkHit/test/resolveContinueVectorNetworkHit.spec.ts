@@ -15,7 +15,7 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 const addVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -37,7 +37,7 @@ const addVectorNode = (): string => {
 const addVectorNodeWithEdge = (vertices: { a: { x: number; y: number }; b: { x: number; y: number } }): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -100,7 +100,7 @@ describe('resolveContinueVectorNetworkHit', () => {
 
     store.dispatch(
       addNode({
-        fillColor: null,
+        defaultFill: null,
         filledFaceKeys: [],
         name: 'Vector',
         parentId: null,

@@ -28,7 +28,7 @@ export const closeLoopOntoAnotherNodeEdge = (
   pendingOutgoingTangentRef: RefObject<TPendingOutgoingTangent | null>,
 ): void => {
   const {
-    fillColorOverrideByKey: targetFillColorOverrideByKey,
+    fillByKey: targetFillByKey,
     filledFaceKeys: targetFilledFaceKeys,
     newVertexId,
     segments: targetSegments,
@@ -45,9 +45,9 @@ export const closeLoopOntoAnotherNodeEdge = (
   const segments = { ...sourceNode.segments, ...targetSegments, [connectingSegmentId]: connectingSegment };
   const vertexHandleModes = { ...sourceNode.vertexHandleModes, ...targetNode.vertexHandleModes };
   const filledFaceKeys = Array.from(new Set([...sourceNode.filledFaceKeys, ...targetFilledFaceKeys]));
-  const fillColorOverrideByKey = { ...sourceNode.fillColorOverrideByKey, ...targetFillColorOverrideByKey };
+  const fillByKey = { ...sourceNode.fillByKey, ...targetFillByKey };
 
-  dispatch(updateNode({ changes: { fillColorOverrideByKey, filledFaceKeys, segments, vertexHandleModes, vertices }, id: sourceNode.id }));
+  dispatch(updateNode({ changes: { fillByKey, filledFaceKeys, segments, vertexHandleModes, vertices }, id: sourceNode.id }));
   dispatch(deleteNode(targetNode.id));
   dispatch(setVectorEditingNodeIds(vectorEditingNodeIds.filter((id) => id !== targetNode.id)));
   dispatch(setPenActiveVertexId(null));

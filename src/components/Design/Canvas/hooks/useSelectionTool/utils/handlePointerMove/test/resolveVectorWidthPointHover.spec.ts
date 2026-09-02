@@ -24,7 +24,7 @@ const pointerEvent = (x: number, y: number, buttons = 0): PointerEvent =>
 const addLineVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

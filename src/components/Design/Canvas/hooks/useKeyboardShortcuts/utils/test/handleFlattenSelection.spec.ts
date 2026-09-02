@@ -15,7 +15,7 @@ import { store } from 'store';
 import { handleFlattenSelection } from '../handleFlattenSelection';
 
 const buildFlattenedVector = (): TVectorNode => ({
-  fillColor: '#000000',
+  defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: 'flattened',
   name: 'Text',
@@ -72,7 +72,7 @@ describe('handleFlattenSelection', () => {
     // mock — a simple straight vector path the text is attached to via pathId
     store.dispatch(
       addNode({
-        fillColor: null,
+        defaultFill: null,
         filledFaceKeys: [],
         name: 'Path',
         parentId: null,

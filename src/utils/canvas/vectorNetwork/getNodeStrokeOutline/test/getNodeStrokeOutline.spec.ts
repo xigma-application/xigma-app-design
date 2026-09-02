@@ -47,7 +47,7 @@ describe('getNodeStrokeOutline', () => {
 
     // result
     expect(result?.type).toBe(NodeType.vector);
-    expect(result?.fillColor).toBe('#123456');
+    expect(result?.defaultFill).toEqual([{ color: '#123456', opacity: 100, type: 'solid' }]);
     expect(result?.name).toBe('Rectangle outline');
     expect(result?.filledFaceKeys).toHaveLength(2);
     expect(groupFilledFacesForRendering(result!).find((group) => getSolidPaintColor(group.paint) === '#123456')?.polygons).toHaveLength(2);
@@ -135,7 +135,7 @@ describe('getNodeStrokeOutline', () => {
   it('should delegate to the general chain outline for a simple open vector path', () => {
     // mock — a straight two-point vector path
     const node: TVectorNode = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'vector-1',
       name: 'Vector',
@@ -160,7 +160,7 @@ describe('getNodeStrokeOutline', () => {
   it('should return null for a vector network too complex for a simple chain (a branch point)', () => {
     // mock
     const node: TVectorNode = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'vector-1',
       name: 'Vector',

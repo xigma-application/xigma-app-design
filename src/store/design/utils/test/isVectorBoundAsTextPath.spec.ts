@@ -6,7 +6,7 @@ import { TSceneNode } from 'types/design/types';
 import { isVectorBoundAsTextPath } from '../isVectorBoundAsTextPath';
 
 const VECTOR: TSceneNode = {
-  fillColor: '#000',
+  defaultFill: [{ color: '#000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

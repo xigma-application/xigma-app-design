@@ -15,7 +15,7 @@ import { getVectorFillLoopPoints } from 'utils/canvas/vectorNetwork/getVectorFil
 const addVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -108,7 +108,7 @@ describe('duplicateVectorFragment', () => {
 
     store.dispatch(
       addNode({
-        fillColor: '#d9d9d9',
+        defaultFill: [{ color: '#d9d9d9', opacity: 100, type: 'solid' }],
         filledFaceKeys,
         name: 'Vector',
         parentId: null,

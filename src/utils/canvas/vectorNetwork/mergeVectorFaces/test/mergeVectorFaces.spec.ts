@@ -10,7 +10,7 @@ import { mergeVectorFaces } from '../mergeVectorFaces';
 // mock — a 100x100 rectangle split in half by a horizontal "divider" segment (e-f), forming a top
 // and a bottom face that share exactly that one segment
 const splitRectangleNode: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',
@@ -46,7 +46,7 @@ const splitRectangleNode: TVectorNode = {
 // Pre-split exactly as persistVectorNetworkCrossings would leave it — real crossing vertices x/y,
 // real per-piece segments — since mergeVectorFaces is only ever called post-persistence.
 const crossingRectanglesNode: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-2',
   name: 'Vector',
@@ -120,9 +120,9 @@ describe('mergeVectorFaces', () => {
     const [topFace, bottomFace] = faces;
     const paintedNode = {
       ...splitRectangleNode,
-      fillColorOverrideByKey: {
-        [getVectorFillLoopKey(topFace.pieceKeys)]: '#00ff00',
-        [getVectorFillLoopKey(bottomFace.pieceKeys)]: '#0000ff',
+      fillByKey: {
+        [getVectorFillLoopKey(topFace.pieceKeys)]: [{ color: '#00ff00', opacity: 100, type: 'solid' as const }],
+        [getVectorFillLoopKey(bottomFace.pieceKeys)]: [{ color: '#0000ff', opacity: 100, type: 'solid' as const }],
       },
     };
 
@@ -131,7 +131,7 @@ describe('mergeVectorFaces', () => {
 
     // result — the single merged face takes the FIRST touched face's color
     expect(merged.filledFaceKeys).toHaveLength(1);
-    expect(merged.fillColorOverrideByKey?.[merged.filledFaceKeys[0]]).toBe('#00ff00');
+    expect(merged.fillByKey?.[merged.filledFaceKeys[0]]).toEqual([{ color: '#00ff00', opacity: 100, type: 'solid' as const }]);
   });
 
   it('should keep the divider segment and only fill the touched face, when just one face is touched', () => {

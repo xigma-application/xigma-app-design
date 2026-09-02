@@ -35,7 +35,7 @@ describe('getCrossNodeEdgeHit', () => {
     // mock
     store.dispatch(
       addNode({
-        fillColor: null,
+        defaultFill: null,
         filledFaceKeys: [],
         name: 'Vector',
         parentId: null,

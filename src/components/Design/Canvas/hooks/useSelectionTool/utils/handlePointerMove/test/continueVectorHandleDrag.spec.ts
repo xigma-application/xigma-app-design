@@ -24,7 +24,7 @@ const pointerEvent = (x: number, y: number): PointerEvent => new PointerEvent('p
 const addVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -151,7 +151,7 @@ describe('continueVectorHandleDrag', () => {
 
     store.dispatch(
       addNode({
-        fillColor: null,
+        defaultFill: null,
         filledFaceKeys: [],
         name: 'Vector',
         parentId: null,

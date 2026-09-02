@@ -19,7 +19,7 @@ const buildSquareNode = (): TVectorNode => {
   const segments = Object.fromEntries([seg('s1', 'v1', 'v2'), seg('s2', 'v2', 'v3'), seg('s3', 'v3', 'v4'), seg('s4', 'v4', 'v1')]);
 
   return {
-    fillColor: null,
+    defaultFill: null,
     filledFaceKeys: [],
     id: 'n1',
     name: 'square',

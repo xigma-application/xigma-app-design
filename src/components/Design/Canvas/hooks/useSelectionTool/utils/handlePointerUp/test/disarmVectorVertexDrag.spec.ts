@@ -25,7 +25,7 @@ const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointeru
 const addVectorNode = (vertices: { id: string; x: number; y: number }[], segments: Record<string, TVectorSegment> = {}): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

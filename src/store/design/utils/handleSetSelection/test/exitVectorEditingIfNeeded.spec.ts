@@ -60,7 +60,7 @@ const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
 });
 
 const buildVectorNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

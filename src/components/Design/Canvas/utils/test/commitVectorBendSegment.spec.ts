@@ -15,7 +15,7 @@ import { getVectorEditingNode } from '../getVectorEditingNode';
 const addVectorNode = (segments: TVectorNode['segments']): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

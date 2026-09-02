@@ -33,11 +33,11 @@ describe('convertRectangleToVector', () => {
     expect(result.name).toBe('Rectangle 1');
     expect(result.parentId).toBe('frame-1');
     expect(result.rotation).toBe(15);
-    expect(result.fillColor).toBe('#00ff00');
+    expect(result.defaultFill).toEqual([{ color: '#00ff00', opacity: 100, type: 'solid' }]);
     expect(result.strokeWidth).toBe(0);
     expect(Object.keys(result.vertices)).toHaveLength(4);
     expect(result.filledFaceKeys).toHaveLength(1);
-    expect(result.fillColorOverrideByKey?.[result.filledFaceKeys[0]]).toBe('#00ff00');
+    expect(result.fillByKey?.[result.filledFaceKeys[0]]).toEqual([{ color: '#00ff00', opacity: 100, type: 'solid' }]);
   });
 
   it('should round every corner into a curve when cornerRadius is set', () => {

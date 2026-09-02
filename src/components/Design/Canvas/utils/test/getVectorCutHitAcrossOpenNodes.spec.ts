@@ -6,7 +6,7 @@ import { TSceneNode, TVectorNode } from 'types/design/types';
 import { getVectorCutHitAcrossOpenNodes } from '../getVectorCutHitAcrossOpenNodes';
 
 const buildNode = (id: string, x: number): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id,
   name: 'Vector',

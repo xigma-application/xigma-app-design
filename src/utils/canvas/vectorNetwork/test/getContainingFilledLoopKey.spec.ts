@@ -20,7 +20,7 @@ const square = (x: number, y: number, size: number): TPoint[] => [
 ];
 
 const baseNode: TVectorNode = {
-  fillColor: '#ffffff',
+  defaultFill: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: '1',
   name: 'Vector',

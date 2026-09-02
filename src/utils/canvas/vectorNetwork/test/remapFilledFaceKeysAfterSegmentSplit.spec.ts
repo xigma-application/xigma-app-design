@@ -17,12 +17,12 @@ describe('remapFilledFaceKeysAfterSegmentSplit', () => {
   it('should move a fill-color override from the stale loop key to the recomputed loop key', () => {
     // mock
     const filledFaceKeys = ['s1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]'];
-    const fillColorOverrideByKey = { 's1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]': '#D9D9D9' };
+    const fillByKey = { 's1[v:v1|v:v2],s2[v:v2|v:v3],s3[v:v1|v:v3]': [{ color: '#D9D9D9', opacity: 100, type: 'solid' as const }] };
 
     // result
-    const result = remapFilledFaceKeysAfterSegmentSplit(filledFaceKeys, fillColorOverrideByKey, split);
+    const result = remapFilledFaceKeysAfterSegmentSplit(filledFaceKeys, fillByKey, split);
 
-    expect(result.fillColorOverrideByKey).toEqual({ [result.filledFaceKeys[0]]: '#D9D9D9' });
+    expect(result.fillByKey).toEqual({ [result.filledFaceKeys[0]]: [{ color: '#D9D9D9', opacity: 100, type: 'solid' }] });
   });
 
   it('should leave a loop key untouched when it does not reference the split segment', () => {

@@ -10,7 +10,7 @@ import { bakeEditingNodeRotation } from '../bakeEditingNodeRotation';
 import { bakeVectorNodeRotation } from '../../../../../utils/bakeVectorNodeRotation';
 
 const node: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

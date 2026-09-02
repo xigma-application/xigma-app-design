@@ -5,7 +5,7 @@ import { TVectorNode } from 'types/design/types';
 
 // utils
 import { addCutClosingSegment } from 'utils/canvas/vectorNetwork/cutVectorNetwork/addCutClosingSegment/addCutClosingSegment';
-import { getEffectiveVectorFillColor } from 'utils/canvas/vectorNetwork/getEffectiveVectorFillColor';
+import { getEffectiveVectorFill } from 'utils/canvas/vectorNetwork/getEffectiveVectorFill';
 import { resolveVectorCutFilledFaceKeys } from 'utils/canvas/vectorNetwork/cutVectorNetwork/materializeVectorNetworkCut/resolveVectorCutFilledFaceKeys';
 
 export const finishDividedComponent = (
@@ -16,7 +16,7 @@ export const finishDividedComponent = (
 ): TVectorNetworkComponent => {
   const closed = node.filledFaceKeys.length > 0 ? addCutClosingSegment(component, vertexLineT, node.filledFaceKeys, crossings) : component;
   const resultNode: TVectorNode = {
-    fillColor: null,
+    defaultFill: null,
     filledFaceKeys: [],
     id: '__divide-fill-probe',
     name: '',
@@ -30,13 +30,11 @@ export const finishDividedComponent = (
     vertices: closed.vertices,
   };
   const survivingFaces = resolveVectorCutFilledFaceKeys(resultNode, node, new Set());
-  const fillColorOverrideByKey = Object.fromEntries(
-    survivingFaces.map(({ key, originalKey }) => [key, getEffectiveVectorFillColor(node, originalKey)]),
-  );
+  const fillByKey = Object.fromEntries(survivingFaces.map(({ key, originalKey }) => [key, getEffectiveVectorFill(node, originalKey)]));
 
   return {
     ...closed,
-    fillColorOverrideByKey,
+    fillByKey,
     filledFaceKeys: survivingFaces.map((face) => face.key),
   };
 };

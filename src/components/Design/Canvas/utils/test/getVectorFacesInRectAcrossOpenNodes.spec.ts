@@ -6,7 +6,7 @@ import { TSceneNode, TVectorNode } from 'types/design/types';
 import { getVectorFacesInRectAcrossOpenNodes } from '../getVectorFacesInRectAcrossOpenNodes';
 
 const buildTriangleNode = (id: string, offsetX: number): TVectorNode => ({
-  fillColor: '#000000',
+  defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id,
   name: 'Vector',

@@ -31,7 +31,7 @@ describe('buildVectorNodeFromEdgeLoops', () => {
 
     // result
     expect(result?.type).toBe(NodeType.vector);
-    expect(result?.fillColor).toBe('#ff0000');
+    expect(result?.defaultFill).toEqual([{ color: '#ff0000', opacity: 100, type: 'solid' }]);
     expect(Object.keys(result?.vertices ?? {})).toHaveLength(4);
     expect(Object.values(result?.segments ?? {}).some((segment) => segment.tangentStart !== null)).toBe(true);
     expect(result?.filledFaceKeys).toHaveLength(1);

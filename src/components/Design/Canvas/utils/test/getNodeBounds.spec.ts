@@ -44,7 +44,7 @@ describe('getNodeBounds', () => {
   it('should delegate to getVectorNodeBounds for a vector node', () => {
     // mock
     const vector: TVectorNode = {
-      fillColor: '#000',
+      defaultFill: [{ color: '#000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       id: '1',
       name: 'Vector',

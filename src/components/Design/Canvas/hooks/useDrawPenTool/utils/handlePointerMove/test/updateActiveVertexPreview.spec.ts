@@ -26,7 +26,7 @@ const createVectorAlignmentGuideRef = (): TVectorEditRefs['vectorAlignmentGuideR
 const addVectorNodeWithSegment = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

@@ -9,7 +9,7 @@ import { getExclusiveSegmentIds } from '../getExclusiveSegmentIds';
 // mock — a 100x100 rectangle split in half by a horizontal "divider" segment (e-f), forming a top
 // and a bottom face that share exactly that one segment
 const splitRectangleNode: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

@@ -137,7 +137,7 @@ describe('getNodeOutlinePath', () => {
   it('should return an outline built directly from a vector node’s own vertices/segments', () => {
     // mock
     const node: TVectorNode = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'vector-1',
       name: 'Vector',

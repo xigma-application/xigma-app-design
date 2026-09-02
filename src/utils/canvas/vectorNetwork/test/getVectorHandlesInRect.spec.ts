@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { getVectorHandlesInRect } from '../getVectorHandlesInRect';
 
 const node: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

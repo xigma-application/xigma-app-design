@@ -96,7 +96,7 @@ describe('getTextFlattenVector', () => {
 
     // result
     expect(result?.type).toBe(NodeType.vector);
-    expect(result?.fillColor).toBe('#123456');
+    expect(result?.defaultFill).toEqual([{ color: '#123456', opacity: 100, type: 'solid' }]);
     expect(result?.parentId).toBe('frame-1');
     expect(result?.rotation).toBe(10);
     // "I" contributes 1 face, "o" contributes 2 (outer + its own hole) — 3 faces total, all

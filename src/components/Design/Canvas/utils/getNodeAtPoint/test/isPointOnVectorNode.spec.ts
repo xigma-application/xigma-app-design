@@ -8,7 +8,7 @@ import { isPointOnVectorNode } from '../isPointOnVectorNode';
 const IDENTITY_LINE_TOLERANCE = 4;
 
 const buildVector = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
-  fillColor: '#ff0000',
+  defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

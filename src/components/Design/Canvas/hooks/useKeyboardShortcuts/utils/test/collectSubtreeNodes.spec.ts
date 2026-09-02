@@ -92,7 +92,7 @@ describe('collectSubtreeNodes', () => {
   it("should also collect a selected text's text-on-path guide, even though the guide itself was never selected", () => {
     // mock — a Text on Path bound to a vector guide via pathId; only the text is selected
     const vector: TVectorNode = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'vector-1',
       name: 'Vector',

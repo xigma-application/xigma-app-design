@@ -24,7 +24,7 @@ const pointerEvent = (x: number, y: number, options: Partial<PointerEventInit> =
 const addTriangleVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

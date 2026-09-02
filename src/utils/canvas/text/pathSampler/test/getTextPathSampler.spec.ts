@@ -21,7 +21,7 @@ const ELLIPSE_PATH_NODE: TPathNode = {
 };
 
 const VECTOR_NODE: TVectorNode = {
-  fillColor: '#000',
+  defaultFill: [{ color: '#000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

@@ -15,7 +15,7 @@ import { store } from 'store';
 import { getTextOutlineTargets } from '../getTextOutlineTargets';
 
 const buildLetter = (): TVectorNode => ({
-  fillColor: '#000000',
+  defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: 'letter',
   name: 'Text',
@@ -107,7 +107,7 @@ describe('getTextOutlineTargets', () => {
     // mock — a resolvable path node the text is attached to via pathId
     store.dispatch(
       addNode({
-        fillColor: null,
+        defaultFill: null,
         filledFaceKeys: [],
         name: 'Path',
         parentId: null,

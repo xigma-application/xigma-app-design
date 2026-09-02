@@ -23,7 +23,7 @@ const createPendingOutgoingTangentRef = (value: TPendingOutgoingTangent | null =
 const addVectorNode = (vertices: TVectorNode['vertices'], filledFaceKeys: string[] = []): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys,
       name: 'Vector',
       parentId: null,

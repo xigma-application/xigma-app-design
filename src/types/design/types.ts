@@ -2,6 +2,7 @@
 import { NodeType, PathType } from './enums';
 import { TDraftRect, TPoint } from 'types/canvas';
 import { TGuide } from 'types/design/guides/types';
+import { TPaint } from 'types/design/paint/types';
 
 export type TComment = TPoint & {
   author: string;
@@ -168,8 +169,8 @@ export type TVectorWidthProfile = {
 
 export type TVectorNode = {
   capStyle?: 'round';
-  fillColor: string | null;
-  fillColorOverrideByKey?: Record<string, string>;
+  defaultFill: TPaint[] | null;
+  fillByKey?: Record<string, TPaint[]>;
   filledFaceKeys: string[];
   hidden?: boolean;
   holeParentByKey?: Record<string, string>;

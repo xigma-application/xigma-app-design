@@ -58,7 +58,7 @@ describe('drawVectorNode', () => {
     const faceBufferCache = {} as WeakMap<{ x: number; y: number }[], WebGLBuffer>;
     const strokeBufferCache = {} as WeakMap<number[], WebGLBuffer>;
     const node: TVectorNode = {
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: ['s1,s2,s3'],
       id: '1',
       name: 'Vector',
@@ -117,7 +117,7 @@ describe('drawVectorNode', () => {
     const faceBufferCache = {} as WeakMap<{ x: number; y: number }[], WebGLBuffer>;
     const strokeBufferCache = {} as WeakMap<number[], WebGLBuffer>;
     const node: TVectorNode = {
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: ['s1,s2,s3', 's3,s4,s5'],
       id: '1',
       name: 'Vector',
@@ -182,7 +182,7 @@ describe('drawVectorNode', () => {
     const faceBufferCache = {} as WeakMap<{ x: number; y: number }[], WebGLBuffer>;
     const strokeBufferCache = {} as WeakMap<number[], WebGLBuffer>;
     const node: TVectorNode = {
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: ['stale-key'],
       id: '1',
       name: 'Vector',
@@ -215,7 +215,7 @@ describe('drawVectorNode', () => {
     const faceBufferCache = {} as WeakMap<{ x: number; y: number }[], WebGLBuffer>;
     const strokeBufferCache = {} as WeakMap<number[], WebGLBuffer>;
     const node: TVectorNode = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: '1',
       name: 'Vector',
@@ -246,7 +246,7 @@ describe('drawVectorNode', () => {
     const faceBufferCache = {} as WeakMap<{ x: number; y: number }[], WebGLBuffer>;
     const strokeBufferCache = {} as WeakMap<number[], WebGLBuffer>;
     const node: TVectorNode = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: '1',
       name: 'Vector',
@@ -277,7 +277,7 @@ describe('drawVectorNode', () => {
     const faceBufferCache = {} as WeakMap<{ x: number; y: number }[], WebGLBuffer>;
     const strokeBufferCache = {} as WeakMap<number[], WebGLBuffer>;
     const node: TVectorNode = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: '1',
       name: 'Vector',

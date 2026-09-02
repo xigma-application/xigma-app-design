@@ -13,7 +13,7 @@ import { handleEscapePenActiveVertex } from '../handleEscapePenActiveVertex';
 const addVectorNode = (segments: TVectorNode['segments'], vertices: TVectorNode['vertices']): string => {
   store.dispatch(
     addNode({
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

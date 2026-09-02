@@ -25,7 +25,7 @@ const createPendingOutgoingTangentRef = (pending: TPendingOutgoingTangent | null
 const addVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -47,7 +47,7 @@ const addVectorNode = (): string => {
 const addVectorNodeWithSegment = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

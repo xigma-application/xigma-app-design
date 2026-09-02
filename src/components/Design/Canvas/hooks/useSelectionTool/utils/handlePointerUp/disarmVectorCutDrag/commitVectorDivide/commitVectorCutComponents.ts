@@ -21,7 +21,7 @@ export const commitVectorCutComponents = (
     dispatch(
       updateNode({
         changes: {
-          fillColorOverrideByKey: finishedPrimary.fillColorOverrideByKey ?? {},
+          fillByKey: finishedPrimary.fillByKey ?? {},
           filledFaceKeys: finishedPrimary.filledFaceKeys ?? [],
           rotation: 0,
           segments: finishedPrimary.segments,
@@ -37,8 +37,8 @@ export const commitVectorCutComponents = (
 
       dispatch(
         addNode({
-          fillColor: originalNode.fillColor,
-          fillColorOverrideByKey: finished.fillColorOverrideByKey ?? {},
+          defaultFill: originalNode.defaultFill,
+          fillByKey: finished.fillByKey ?? {},
           filledFaceKeys: finished.filledFaceKeys ?? [],
           name: originalNode.name,
           parentId: originalNode.parentId,

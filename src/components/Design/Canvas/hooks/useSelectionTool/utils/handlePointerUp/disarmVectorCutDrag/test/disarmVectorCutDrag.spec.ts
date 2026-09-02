@@ -26,7 +26,7 @@ const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointeru
 const addVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -49,7 +49,7 @@ const addVectorNode = (): string => {
 const addSquareNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -237,7 +237,7 @@ describe('disarmVectorCutDrag', () => {
     // mock — square crossed by a horizontal line through the middle
     store.dispatch(
       addNode({
-        fillColor: null,
+        defaultFill: null,
         filledFaceKeys: [],
         name: 'Vector',
         parentId: null,

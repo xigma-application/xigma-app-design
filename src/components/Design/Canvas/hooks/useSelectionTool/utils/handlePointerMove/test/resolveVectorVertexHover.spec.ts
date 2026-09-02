@@ -26,7 +26,7 @@ const createHoveredVectorVertexIdRef = (): RefObject<string | null> => ({ curren
 const addVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

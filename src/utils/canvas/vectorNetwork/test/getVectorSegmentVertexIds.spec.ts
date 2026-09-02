@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { getVectorSegmentVertexIds } from '../getVectorSegmentVertexIds';
 
 const node: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

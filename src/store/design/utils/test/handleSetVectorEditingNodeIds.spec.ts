@@ -46,7 +46,7 @@ const buildState = (nodes: TDesignPage['nodes'], overrides: Partial<TDesignState
 });
 
 const buildVectorNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

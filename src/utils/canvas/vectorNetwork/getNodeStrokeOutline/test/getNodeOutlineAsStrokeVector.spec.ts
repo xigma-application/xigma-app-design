@@ -40,7 +40,9 @@ describe('getNodeOutlineAsStrokeVector', () => {
     expect(result?.name).toBe('Rectangle');
     expect(result?.parentId).toBe('frame-1');
     expect(result?.filledFaceKeys.length).toBeGreaterThanOrEqual(2);
-    expect(Object.values(result?.fillColorOverrideByKey ?? {})).toEqual(expect.arrayContaining(['#ff0000', '#000000']));
+    expect(Object.values(result?.fillByKey ?? {})).toEqual(
+      expect.arrayContaining([[{ color: '#ff0000', opacity: 100, type: 'solid' }], [{ color: '#000000', opacity: 100, type: 'solid' }]]),
+    );
 
     // every declared face must actually resolve back to real points, not just exist as a key —
     // this is exactly the check that would have caught the bridged-ring rendering bug
@@ -53,7 +55,7 @@ describe('getNodeOutlineAsStrokeVector', () => {
   it('should merge an existing Vector’s own geometry (unchanged) with its stroke outline', () => {
     // mock — a simple open 2-point vector path
     const node: TVectorNode = {
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       id: 'vector-1',
       name: 'Vector',
@@ -79,7 +81,7 @@ describe('getNodeOutlineAsStrokeVector', () => {
   it('should fall back to an empty fill color when merging a Vector with no fillColor of its own', () => {
     // mock — a closed 3-point vector path with no fill set (fillColor: null)
     const node: TVectorNode = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'vector-2',
       name: 'Vector',
@@ -101,7 +103,7 @@ describe('getNodeOutlineAsStrokeVector', () => {
     const result = getNodeOutlineAsStrokeVector(node);
 
     // result
-    expect(result?.fillColor).toBe('');
+    expect(result?.defaultFill).toEqual([{ color: '', opacity: 100, type: 'solid' }]);
   });
 
   it('should return the stroke outline vector alone for a Line, since it has no fill of its own', () => {
@@ -124,7 +126,7 @@ describe('getNodeOutlineAsStrokeVector', () => {
 
     // result
     expect(result?.id).toBe('line-1');
-    expect(result?.fillColor).toBe('#000000');
+    expect(result?.defaultFill).toEqual([{ color: '#000000', opacity: 100, type: 'solid' }]);
     expect(Object.keys(result?.vertices ?? {})).toHaveLength(4);
   });
 });

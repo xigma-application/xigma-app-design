@@ -40,13 +40,9 @@ export const startVectorFragment = (
     dragOriginRef.current = { nodeId: node.id, segmentId: null, vertexId: hover.vertexId };
     dragStartRef.current = point;
   } else if (edgeHit) {
-    const { fillColorOverrideByKey, filledFaceKeys, newVertexId, segments, vertices } = splitVectorSegment(
-      node,
-      edgeHit.segmentId,
-      edgeHit.t,
-    );
+    const { fillByKey, filledFaceKeys, newVertexId, segments, vertices } = splitVectorSegment(node, edgeHit.segmentId, edgeHit.t);
 
-    dispatch(updateNode({ changes: { fillColorOverrideByKey, filledFaceKeys, segments, vertices }, id: node.id }));
+    dispatch(updateNode({ changes: { fillByKey, filledFaceKeys, segments, vertices }, id: node.id }));
     dispatch(setPenActiveVertexId(newVertexId));
 
     dragOriginRef.current = { nodeId: node.id, segmentId: null, vertexId: newVertexId };

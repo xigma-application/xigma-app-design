@@ -6,7 +6,7 @@ import { TVectorNode, TVectorSegment } from 'types/design/types';
 import { getVectorSegmentNormalAtT } from '../getVectorSegmentNormalAtT';
 
 const buildNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
-  fillColor: '#000',
+  defaultFill: [{ color: '#000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: '1',
   name: 'Vector',

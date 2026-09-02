@@ -8,7 +8,7 @@ import { getOriginalFillPolygons } from '../getOriginalFillPolygons';
 import { getVectorFillLoopKey } from '../../../getVectorFillLoopKey';
 
 const buildSquareNode = (filledFaceKeys: string[]): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys,
   id: 'node-1',
   name: 'Vector',

@@ -6,7 +6,7 @@ import { TVectorNode, TVectorSegment, TVectorVertex } from 'types/design/types';
 import { getVectorCornerHandleAtPoint } from '../getVectorCornerHandleAtPoint';
 
 const buildNode = (vertices: Record<string, TVectorVertex>, segments: Record<string, TVectorSegment>): TVectorNode => ({
-  fillColor: '#000000',
+  defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: '1',
   name: 'Vector',

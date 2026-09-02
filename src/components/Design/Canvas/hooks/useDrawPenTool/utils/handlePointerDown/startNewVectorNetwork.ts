@@ -15,6 +15,9 @@ import { NodeType } from 'types/design/enums';
 import { TPenDragOrigin } from '../../types';
 import { TPoint } from 'types/canvas';
 
+// utils
+import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
+
 const activateNewVertex = (
   appStore: AppStore,
   vertexId: string,
@@ -46,7 +49,7 @@ export const startNewVectorNetwork = (
 
   dispatch(
     addNode({
-      fillColor: VECTOR_FILL,
+      defaultFill: [makeSolidPaint(VECTOR_FILL)],
       filledFaceKeys: [],
       name: VECTOR_NAME,
       parentId: null,

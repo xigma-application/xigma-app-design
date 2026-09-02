@@ -22,7 +22,7 @@ const seg = (
 const vertex = (id: string, x: number, y: number): TVectorVertex => ({ id, x, y });
 
 const buildNode = (vertices: TVectorVertex[], segments: TVectorSegment[], id = '1'): TVectorNode => ({
-  fillColor: '#000',
+  defaultFill: [{ color: '#000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id,
   name: 'Vector',

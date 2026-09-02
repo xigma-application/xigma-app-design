@@ -9,7 +9,7 @@ import { subtractVectorFaces } from '../subtractVectorFaces';
 
 // mock — a simple closed triangle with a single derivable face, no neighbors
 const triangleNode: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',
@@ -34,7 +34,7 @@ const triangleNode: TVectorNode = {
 // mock — a 100x100 rectangle split in half by a horizontal "divider" segment, forming a top and a
 // bottom face that share exactly that one segment
 const splitRectangleNode: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-2',
   name: 'Vector',

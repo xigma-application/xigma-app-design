@@ -5,6 +5,9 @@ import { AppDispatch } from 'store';
 // types
 import { TVectorNode } from 'types/design/types';
 
+// utils
+import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
+
 export const addNodeAlongPath = (
   dispatch: AppDispatch,
   persistedNode: TVectorNode,
@@ -17,15 +20,15 @@ export const addNodeAlongPath = (
   if (loopKeysOnPath.length > 0) {
     const alreadyFilledKeys = new Set(persistedNode.filledFaceKeys);
     const newLoopKeys = loopKeysOnPath.filter((key) => !alreadyFilledKeys.has(key));
-    const fillColorOverrideByKey = { ...persistedNode.fillColorOverrideByKey };
+    const fillByKey = { ...persistedNode.fillByKey };
 
     loopKeysOnPath.forEach((key) => {
-      fillColorOverrideByKey[key] = paintColor;
+      fillByKey[key] = [makeSolidPaint(paintColor)];
     });
 
     const changes: Partial<TVectorNode> = geometryChanged
-      ? { fillColorOverrideByKey, filledFaceKeys: [...persistedNode.filledFaceKeys, ...newLoopKeys], segments, vertices }
-      : { fillColorOverrideByKey, filledFaceKeys: [...persistedNode.filledFaceKeys, ...newLoopKeys] };
+      ? { fillByKey, filledFaceKeys: [...persistedNode.filledFaceKeys, ...newLoopKeys], segments, vertices }
+      : { fillByKey, filledFaceKeys: [...persistedNode.filledFaceKeys, ...newLoopKeys] };
 
     dispatch(updateNode({ changes, id: persistedNode.id }));
   }

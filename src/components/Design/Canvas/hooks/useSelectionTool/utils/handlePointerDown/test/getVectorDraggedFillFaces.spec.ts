@@ -27,7 +27,7 @@ const buildSquare = (id: string, offsetX: number, filled: boolean, vertexPrefix 
     seg('s4', v('v4'), v('v1')),
   ]);
   const bareNode: TVectorNode = {
-    fillColor: null,
+    defaultFill: null,
     filledFaceKeys: [],
     id,
     name: 'square',

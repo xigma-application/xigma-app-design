@@ -33,12 +33,12 @@ const buildCombinedNode = (nodeIds: string[], bakedById: Map<string, TVectorNode
   const rawVertices = Object.assign({}, ...members.map((member) => member.vertices));
   const vertexHandleModes = Object.assign({}, ...members.map((member) => member.vertexHandleModes));
   const filledFaceKeys = [...new Set(members.flatMap((member) => member.filledFaceKeys))];
-  const fillColorOverrideByKey = Object.assign({}, ...members.map((member) => member.fillColorOverrideByKey ?? {}));
+  const fillByKey = Object.assign({}, ...members.map((member) => member.fillByKey ?? {}));
   const persisted = persistVectorNetworkCrossings(segments, rawVertices);
 
   return {
     ...survivor,
-    fillColorOverrideByKey,
+    fillByKey,
     filledFaceKeys,
     rotation: 0,
     segments: persisted.segments,

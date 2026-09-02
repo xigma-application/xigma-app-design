@@ -13,7 +13,7 @@ export const convertLineToVector = (node: TLineNode): TVectorNode => {
   const segmentId = nanoid();
 
   return {
-    fillColor: null,
+    defaultFill: null,
     filledFaceKeys: [],
     id: node.id,
     name: node.name,

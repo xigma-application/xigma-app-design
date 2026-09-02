@@ -8,7 +8,7 @@ import { buildCapsuleNetwork } from '../buildCapsuleNetwork/buildCapsuleNetwork'
 import { deriveFilledFaceKeys } from './deriveFilledFaceKeys';
 import { deriveVectorFaces } from '../../deriveVectorFaces/deriveVectorFaces';
 import { filterKeptSegments } from './filterKeptSegments';
-import { getEffectiveVectorFillColor } from '../../getEffectiveVectorFillColor';
+import { getEffectiveVectorFill } from '../../getEffectiveVectorFill';
 import { getOriginalFillPolygons } from './getOriginalFillPolygons';
 import { getRemainingVertices } from '../../getRemainingVertices';
 import { planarizeVectorNetwork } from '../../planarizeVectorNetwork/planarizeVectorNetwork';
@@ -32,12 +32,10 @@ export const subtractCapsuleFromVectorNetwork = (node: TVectorNode, path: TPoint
   const keptVertices = getRemainingVertices(planar.vertices, keptSegments);
   const newFaces = deriveVectorFaces({ ...node, segments: keptSegments, vertices: keptVertices });
   const survivingFaces = deriveFilledFaceKeys(newFaces, originalFillPolygons, capsuleSegmentIds);
-  const fillColorOverrideByKey = Object.fromEntries(
-    survivingFaces.map(({ key, originalKey }) => [key, getEffectiveVectorFillColor(node, originalKey)]),
-  );
+  const fillByKey = Object.fromEntries(survivingFaces.map(({ key, originalKey }) => [key, getEffectiveVectorFill(node, originalKey)]));
 
   return {
-    fillColorOverrideByKey,
+    fillByKey,
     filledFaceKeys: survivingFaces.map((face) => face.key),
     segments: keptSegments,
     survivingFaces,

@@ -49,7 +49,7 @@ const SELECTED_OUTER_SIZE = VECTOR_VERTEX_SIZE * VECTOR_VERTEX_SELECTED_SCALE;
 const SELECTED_INNER_SIZE = VECTOR_VERTEX_SIZE * VECTOR_VERTEX_SELECTED_INNER_SCALE;
 
 const vectorNode: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',
@@ -387,7 +387,7 @@ describe('drawVectorEditHandlesForNode', () => {
     // tangent of its own on s1, but must still count as a revealed neighbor of A so s2's handles (which
     // don't touch A directly) become visible too, matching Figma
     const chainNode: TVectorNode = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'chain-1',
       name: 'Vector',

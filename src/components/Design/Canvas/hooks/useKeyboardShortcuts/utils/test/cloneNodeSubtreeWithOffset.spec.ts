@@ -34,7 +34,7 @@ const buildGroup = (overrides: Partial<TGroupNode>): TGroupNode => ({
 });
 
 const buildVector = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

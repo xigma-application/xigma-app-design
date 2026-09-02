@@ -1,9 +1,10 @@
 // types
+import { TPaint } from 'types/design/paint/types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
 export type TVectorNetworkComponent = Pick<TVectorNode, 'segments' | 'vertexHandleModes' | 'vertices'> & {
-  fillColorOverrideByKey?: Record<string, string>;
+  fillByKey?: Record<string, TPaint[]>;
   filledFaceKeys?: string[];
 };
 

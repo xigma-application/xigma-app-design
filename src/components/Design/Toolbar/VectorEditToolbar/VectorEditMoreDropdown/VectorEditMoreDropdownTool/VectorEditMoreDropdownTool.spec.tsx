@@ -26,7 +26,7 @@ const renderVectorEditMoreDropdownTool = (toolName: ToolName.shapeBuilder | Tool
 const addStraightVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

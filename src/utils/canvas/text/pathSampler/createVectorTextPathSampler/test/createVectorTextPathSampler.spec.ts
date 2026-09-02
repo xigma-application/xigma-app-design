@@ -17,7 +17,7 @@ const seg = (id: string, startId: string, endId: string): TVectorSegment => ({
 });
 
 const buildNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
-  fillColor: '#000',
+  defaultFill: [{ color: '#000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: '1',
   name: 'Vector',

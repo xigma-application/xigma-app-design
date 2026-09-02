@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { getVectorStrokeOutlineLoops } from '../getVectorStrokeOutlineLoops';
 
 const buildVector = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

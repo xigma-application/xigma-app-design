@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { getVectorVertexAtPoint } from '../getVectorVertexAtPoint';
 
 const buildNode = (vertices: TVectorNode['vertices']): TVectorNode => ({
-  fillColor: '#000000',
+  defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: '1',
   name: 'Vector',

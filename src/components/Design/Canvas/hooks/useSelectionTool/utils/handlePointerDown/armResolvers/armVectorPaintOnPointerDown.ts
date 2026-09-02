@@ -12,13 +12,14 @@ import { ToolName } from 'types/design/enums';
 // utils
 import { bakeVectorNodeRotation } from '../../../../../utils/bakeVectorNodeRotation';
 import { getContainingFilledLoopKey } from 'utils/canvas/vectorNetwork/getContainingFilledLoopKey';
-import { getEffectiveVectorFillColor } from 'utils/canvas/vectorNetwork/getEffectiveVectorFillColor';
+import { getEffectiveVectorFill } from 'utils/canvas/vectorNetwork/getEffectiveVectorFill';
 import { getNestedUnfilledLoopKeys } from 'utils/canvas/vectorNetwork/getNestedUnfilledLoopKeys';
 import { getVectorFaceAtPoint } from '../../../../../utils/getVectorFaceAtPoint';
 import { getVectorFaceAtPointAcrossOpenNodes } from '../../../../../utils/getVectorFaceAtPointAcrossOpenNodes';
 import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
 import { getVectorFillLoopKeyAtPoint } from 'utils/canvas/vectorNetwork/getVectorFillLoopKeyAtPoint';
 import { getVectorFillLoopPoints } from 'utils/canvas/vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints';
+import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
 import { persistVectorNetworkCrossings } from 'utils/canvas/vectorNetwork/planarizeVectorNetwork/persistVectorNetworkCrossings';
 
 export const armVectorPaintOnPointerDown = ({
@@ -49,26 +50,26 @@ export const armVectorPaintOnPointerDown = ({
       const inheritingLoopKeys = removedFacePoints ? getNestedUnfilledLoopKeys(node, removedFacePoints) : [];
       const paintingLoopKeys = existingLoopKey ? [] : getNestedUnfilledLoopKeys(node, face.points);
       const holeParentKey = existingLoopKey ? null : getContainingFilledLoopKey(node, face.points);
-      const paintColor = holeParentKey ? getEffectiveVectorFillColor(node, holeParentKey) : selectPaintColor(state);
+      const paint = holeParentKey ? getEffectiveVectorFill(node, holeParentKey) : [makeSolidPaint(selectPaintColor(state))];
       const filledFaceKeys = existingLoopKey
         ? [...node.filledFaceKeys.filter((key) => key !== existingLoopKey), ...inheritingLoopKeys]
         : [...node.filledFaceKeys, newLoopKey, ...paintingLoopKeys];
-      const fillColorOverrideByKey = existingLoopKey
+      const fillByKey = existingLoopKey
         ? inheritingLoopKeys.length > 0
           ? {
-              ...node.fillColorOverrideByKey,
-              ...Object.fromEntries(inheritingLoopKeys.map((key) => [key, getEffectiveVectorFillColor(node, existingLoopKey)])),
+              ...node.fillByKey,
+              ...Object.fromEntries(inheritingLoopKeys.map((key) => [key, getEffectiveVectorFill(node, existingLoopKey)])),
             }
-          : node.fillColorOverrideByKey
+          : node.fillByKey
         : {
-            ...node.fillColorOverrideByKey,
-            [newLoopKey]: paintColor,
-            ...Object.fromEntries(paintingLoopKeys.map((key) => [key, paintColor])),
+            ...node.fillByKey,
+            [newLoopKey]: paint,
+            ...Object.fromEntries(paintingLoopKeys.map((key) => [key, paint])),
           };
       const holeParentByKey = holeParentKey ? { ...node.holeParentByKey, [newLoopKey]: holeParentKey } : node.holeParentByKey;
       const changes: Partial<TVectorNode> = geometryChanged
-        ? { fillColorOverrideByKey, filledFaceKeys, holeParentByKey, segments, vertices }
-        : { fillColorOverrideByKey, filledFaceKeys, holeParentByKey };
+        ? { fillByKey, filledFaceKeys, holeParentByKey, segments, vertices }
+        : { fillByKey, filledFaceKeys, holeParentByKey };
 
       dispatch(updateNode({ changes, id: node.id }));
       touchedLoopKeys[node.id] = existingLoopKey ? new Set() : new Set([newLoopKey]);

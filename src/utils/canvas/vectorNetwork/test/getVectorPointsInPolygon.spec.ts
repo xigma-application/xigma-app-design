@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { getVectorPointsInPolygon } from '../getVectorPointsInPolygon';
 
 const buildNode = (vertices: TVectorNode['vertices']): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

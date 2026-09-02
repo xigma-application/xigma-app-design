@@ -15,7 +15,7 @@ import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLo
 const addVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -50,7 +50,7 @@ const addSquareNode = (filled: boolean, rotation = 0): string => {
     d: { id: 'd', x: 0, y: 100 },
   };
   const [face] = deriveVectorFaces({
-    fillColor: null,
+    defaultFill: null,
     filledFaceKeys: [],
     id: 'probe',
     name: '',
@@ -66,7 +66,7 @@ const addSquareNode = (filled: boolean, rotation = 0): string => {
 
   store.dispatch(
     addNode({
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: filled ? [getVectorFillLoopKey(face.pieceKeys)] : [],
       name: 'Vector',
       parentId: null,
@@ -103,7 +103,7 @@ const addSquareWithTailNode = (color: string): string => {
     e: { id: 'e', x: -50, y: 100 },
   };
   const [face] = deriveVectorFaces({
-    fillColor: null,
+    defaultFill: null,
     filledFaceKeys: [],
     id: 'probe',
     name: '',
@@ -120,8 +120,8 @@ const addSquareWithTailNode = (color: string): string => {
 
   store.dispatch(
     addNode({
-      fillColor: '#ff0000',
-      fillColorOverrideByKey: { [key]: color },
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+      fillByKey: { [key]: [{ color, opacity: 100, type: 'solid' }] },
       filledFaceKeys: [key],
       name: 'Vector',
       parentId: null,
@@ -201,7 +201,7 @@ describe('commitVectorSplit', () => {
       d: { id: 'd', x: 0, y: 100 },
     };
     const [face] = deriveVectorFaces({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'probe',
       name: '',
@@ -218,8 +218,8 @@ describe('commitVectorSplit', () => {
 
     store.dispatch(
       addNode({
-        fillColor: '#ff0000',
-        fillColorOverrideByKey: { [originalKey]: '#00ff00' },
+        defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+        fillByKey: { [originalKey]: [{ color: '#00ff00', opacity: 100, type: 'solid' }] },
         filledFaceKeys: [originalKey],
         name: 'Vector',
         parentId: null,
@@ -247,7 +247,7 @@ describe('commitVectorSplit', () => {
 
     expect(updatedNode.filledFaceKeys).toHaveLength(1);
     expect(updatedNode.filledFaceKeys[0]).not.toBe(originalKey); // the key really did change
-    expect(updatedNode.fillColorOverrideByKey?.[updatedNode.filledFaceKeys[0]]).toBe('#00ff00');
+    expect(updatedNode.fillByKey?.[updatedNode.filledFaceKeys[0]]).toEqual([{ color: '#00ff00', opacity: 100, type: 'solid' }]);
   });
 
   it('should split into two separate nodes once a second, opposite edge is severed with nothing left to bridge the two halves', () => {
@@ -312,7 +312,7 @@ describe('commitVectorSplit', () => {
     const updatedOriginal = store.getState().design.pages[store.getState().design.activePageId].nodes[nodeId] as TVectorNode;
 
     expect(updatedOriginal.filledFaceKeys).toHaveLength(1);
-    expect(updatedOriginal.fillColorOverrideByKey?.[updatedOriginal.filledFaceKeys[0]]).toBe('#ff0000');
+    expect(updatedOriginal.fillByKey?.[updatedOriginal.filledFaceKeys[0]]).toEqual([{ color: '#ff0000', opacity: 100, type: 'solid' }]);
   });
 
   it('should bake a rotated node’s geometry to world space before splitting it into two nodes, resetting rotation on both', () => {

@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { getOpenVectorEndpoints } from '../getOpenVectorEndpoints';
 
 const baseNode: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: '1',
   name: 'Vector',

@@ -134,7 +134,7 @@ describe('syncPathNodeFromText', () => {
 
   describe('vector path node', () => {
     const buildVectorNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'path-1',
       name: 'Vector',

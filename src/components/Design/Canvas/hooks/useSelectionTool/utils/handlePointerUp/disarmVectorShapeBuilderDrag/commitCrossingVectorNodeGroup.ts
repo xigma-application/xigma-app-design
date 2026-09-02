@@ -34,7 +34,7 @@ export const commitCrossingVectorNodeGroup = (
   dispatch(
     updateNode({
       changes: {
-        fillColorOverrideByKey: mutatedNode.fillColorOverrideByKey,
+        fillByKey: mutatedNode.fillByKey,
         filledFaceKeys: mutatedNode.filledFaceKeys,
         rotation: 0,
         segments: mutatedNode.segments,

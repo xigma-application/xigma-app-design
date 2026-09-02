@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { getVertexIdSet } from '../getVertexIdSet';
 
 const buildNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

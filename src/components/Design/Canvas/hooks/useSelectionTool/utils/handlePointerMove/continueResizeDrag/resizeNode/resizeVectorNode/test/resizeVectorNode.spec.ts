@@ -23,7 +23,7 @@ const ORIGIN: TVectorNodeOrigin = {
 const addVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: '#ffffff',
+      defaultFill: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

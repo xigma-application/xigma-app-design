@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { getPreviewWidthPoints } from '../getPreviewWidthPoints';
 
 const buildNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
-  fillColor: '#000',
+  defaultFill: [{ color: '#000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: 'node-1',
   name: 'Vector',

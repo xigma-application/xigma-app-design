@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { getRemainingSegments } from '../getRemainingSegments';
 
 const buildVectorNode = (overrides: Partial<TVectorNode>): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

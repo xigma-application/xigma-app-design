@@ -8,7 +8,7 @@ import { getFaceNearestPoint } from '../getFaceNearestPoint';
 
 // a closed triangle: fv1 (500,500) -> fv2 (600,500) -> fv3 (550,550) -> back to fv1
 const node: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

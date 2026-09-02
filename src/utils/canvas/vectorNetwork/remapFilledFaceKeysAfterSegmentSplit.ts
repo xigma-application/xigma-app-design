@@ -1,4 +1,5 @@
 // types
+import { TPaint } from 'types/design/paint/types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
@@ -39,21 +40,21 @@ const splitStalePieceKey = (pieceKey: string, split: TSegmentSplitInfo): string[
 
 export const remapFilledFaceKeysAfterSegmentSplit = (
   filledFaceKeys: string[],
-  fillColorOverrideByKey: Record<string, string>,
+  fillByKey: Record<string, TPaint[]>,
   split: TSegmentSplitInfo,
-): Pick<TVectorNode, 'filledFaceKeys' | 'fillColorOverrideByKey'> => {
-  const nextFillColorOverrideByKey = { ...fillColorOverrideByKey };
+): Pick<TVectorNode, 'filledFaceKeys' | 'fillByKey'> => {
+  const nextFillByKey = { ...fillByKey };
 
   const nextFilledFaceKeys = filledFaceKeys.map((loopKey) => {
     const nextLoopKey = getVectorFillLoopKey(loopKey.split(',').flatMap((pieceKey) => splitStalePieceKey(pieceKey, split)));
 
-    if (nextLoopKey !== loopKey && loopKey in nextFillColorOverrideByKey) {
-      nextFillColorOverrideByKey[nextLoopKey] = nextFillColorOverrideByKey[loopKey];
-      delete nextFillColorOverrideByKey[loopKey];
+    if (nextLoopKey !== loopKey && loopKey in nextFillByKey) {
+      nextFillByKey[nextLoopKey] = nextFillByKey[loopKey];
+      delete nextFillByKey[loopKey];
     }
 
     return nextLoopKey;
   });
 
-  return { fillColorOverrideByKey: nextFillColorOverrideByKey, filledFaceKeys: nextFilledFaceKeys };
+  return { fillByKey: nextFillByKey, filledFaceKeys: nextFilledFaceKeys };
 };

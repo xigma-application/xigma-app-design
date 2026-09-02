@@ -22,7 +22,7 @@ const buildSquareNode = (filled: boolean): TVectorNode => {
     d: { id: 'd', x: 0, y: 100 },
   };
   const node: TVectorNode = {
-    fillColor: '#ff0000',
+    defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' as const }],
     filledFaceKeys: [],
     id: 'square',
     name: 'Vector',
@@ -63,7 +63,7 @@ const buildSquareWithTailNode = (color: string): TVectorNode => {
     e: { id: 'e', x: -100, y: 100 },
   };
   const node: TVectorNode = {
-    fillColor: '#ff0000',
+    defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' as const }],
     filledFaceKeys: [],
     id: 'square',
     name: 'Vector',
@@ -79,7 +79,7 @@ const buildSquareWithTailNode = (color: string): TVectorNode => {
   const [face] = deriveVectorFaces(node);
   const key = getVectorFillLoopKey(face.pieceKeys);
 
-  return { ...node, fillColorOverrideByKey: { [key]: color }, filledFaceKeys: [key] };
+  return { ...node, fillByKey: { [key]: [{ color, opacity: 100, type: 'solid' as const }] }, filledFaceKeys: [key] };
 };
 
 describe('finishDividedComponent', () => {
@@ -116,7 +116,7 @@ describe('finishDividedComponent', () => {
     // both are a real, clean chord split of the same original face, so both should inherit its color
     const node = buildSquareNode(true);
     const [originalKey] = node.filledFaceKeys;
-    const paintedNode = { ...node, fillColorOverrideByKey: { [originalKey]: '#ff0000' } };
+    const paintedNode = { ...node, fillByKey: { [originalKey]: [{ color: '#ff0000', opacity: 100, type: 'solid' as const }] } };
     const divideResult = findVectorDivideResult(paintedNode, { x: -20, y: 50 }, { x: 120, y: 50 })!;
 
     // before
@@ -127,7 +127,7 @@ describe('finishDividedComponent', () => {
     // result — every resulting half is filled with the original picked color, not a hash-derived one
     finishedHalves.forEach((finished) => {
       expect(finished.filledFaceKeys!.length).toBeGreaterThan(0);
-      expect(finished.fillColorOverrideByKey![finished.filledFaceKeys![0]]).toBe('#ff0000');
+      expect(finished.fillByKey![finished.filledFaceKeys![0]]).toEqual([{ color: '#ff0000', opacity: 100, type: 'solid' as const }]);
     });
   });
 
@@ -143,6 +143,6 @@ describe('finishDividedComponent', () => {
 
     // result — the square's own loop survives geometrically untouched, so it keeps its picked color
     expect(finished.filledFaceKeys).toEqual([originalKey]);
-    expect(finished.fillColorOverrideByKey![originalKey]).toBe('#00ff00');
+    expect(finished.fillByKey![originalKey]).toEqual([{ color: '#00ff00', opacity: 100, type: 'solid' as const }]);
   });
 });

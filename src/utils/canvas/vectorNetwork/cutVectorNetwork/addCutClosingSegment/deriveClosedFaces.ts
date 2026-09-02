@@ -10,7 +10,7 @@ export const deriveClosedFaces = (
   component: Pick<TVectorNetworkComponent, 'vertexHandleModes' | 'vertices'>,
 ): TVectorFace[] =>
   deriveVectorFaces({
-    fillColor: null,
+    defaultFill: null,
     filledFaceKeys: [],
     id: '__cut-fill-probe',
     name: '',

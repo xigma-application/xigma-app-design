@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { removeNodeAlongPath } from '../removeNodeAlongPath';
 
 const buildNode = (filledFaceKeys: string[]): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys,
   id: 'node-1',
   name: 'Vector',

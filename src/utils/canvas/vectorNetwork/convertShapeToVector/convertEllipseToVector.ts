@@ -12,6 +12,7 @@ import { getEffectiveArcAngles } from 'utils/canvas/ellipseArc/getEffectiveArcAn
 import { getEllipseArcPoints } from 'utils/canvas/shapes/getEllipseArcPoints';
 import { getFillDataForClosedLoop } from './utils/getFillDataForClosedLoop';
 import { hasEllipseArc } from 'utils/canvas/ellipseArc/hasEllipseArc';
+import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
 import { flipPoint } from 'utils/math/flipPoint';
 
 const SHAPE_VECTOR_STROKE_WIDTH = 0;
@@ -79,7 +80,7 @@ export const convertEllipseToVector = (node: TEllipseNode): TVectorNode => {
     : getArcCutEdges(node, arcStartAngle, arcEndAngle);
   const { segments, vertices } = buildClosedLoopFromEdges(edges);
   const base: TVectorNode = {
-    fillColor: node.fill,
+    defaultFill: [makeSolidPaint(node.fill)],
     filledFaceKeys: [],
     id: node.id,
     name: node.name,

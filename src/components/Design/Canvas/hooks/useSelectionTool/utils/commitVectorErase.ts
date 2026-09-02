@@ -25,14 +25,14 @@ export const commitVectorErase = (dispatch: AppDispatch, path: TPoint[], radius:
       if (result) {
         const changes: Partial<TVectorNode> = node.rotation
           ? {
-              fillColorOverrideByKey: result.fillColorOverrideByKey,
+              fillByKey: result.fillByKey,
               filledFaceKeys: result.filledFaceKeys,
               rotation: 0,
               segments: result.segments,
               vertices: result.vertices,
             }
           : {
-              fillColorOverrideByKey: result.fillColorOverrideByKey,
+              fillByKey: result.fillByKey,
               filledFaceKeys: result.filledFaceKeys,
               segments: result.segments,
               vertices: result.vertices,

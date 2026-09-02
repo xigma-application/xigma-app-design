@@ -9,7 +9,7 @@ describe('getVectorNodeOrigin', () => {
   it('should snapshot vertices as plain {x,y} points and segments as full records, both keyed by id', () => {
     // mock
     const node: TVectorNode = {
-      fillColor: '#000',
+      defaultFill: [{ color: '#000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       id: '1',
       name: 'Vector',

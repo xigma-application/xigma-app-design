@@ -30,11 +30,11 @@ describe('convertEllipseToVector', () => {
     // result
     expect(result.type).toBe(NodeType.vector);
     expect(result.id).toBe('ellipse-1');
-    expect(result.fillColor).toBe('#0000ff');
+    expect(result.defaultFill).toEqual([{ color: '#0000ff', opacity: 100, type: 'solid' }]);
     expect(Object.keys(result.vertices)).toHaveLength(4);
     expect(Object.values(result.segments).every((segment) => segment.tangentStart !== null)).toBe(true);
     expect(result.filledFaceKeys).toHaveLength(1);
-    expect(result.fillColorOverrideByKey?.[result.filledFaceKeys[0]]).toBe('#0000ff');
+    expect(result.fillByKey?.[result.filledFaceKeys[0]]).toEqual([{ color: '#0000ff', opacity: 100, type: 'solid' }]);
   });
 
   it('should fall back to a straight-segment polyline when an arc cut is active', () => {

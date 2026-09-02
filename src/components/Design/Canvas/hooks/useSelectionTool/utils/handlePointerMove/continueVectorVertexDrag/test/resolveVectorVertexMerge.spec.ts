@@ -8,7 +8,7 @@ import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs'
 import { resolveVectorVertexMerge } from '../resolveVectorVertexMerge';
 
 const buildVectorNode = (overrides: Partial<TVectorNode>): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

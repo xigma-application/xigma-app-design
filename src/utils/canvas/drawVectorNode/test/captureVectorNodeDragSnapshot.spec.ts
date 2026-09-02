@@ -25,7 +25,7 @@ vi.mock('../../vectorNetwork/getThickVectorPathVertices/getThickVectorPathVertic
 }));
 
 const baseNode: TVectorNode = {
-  fillColor: '#ff0000',
+  defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   filledFaceKeys: ['s1,s2,s3'],
   id: '1',
   name: 'Vector',

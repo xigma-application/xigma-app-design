@@ -15,7 +15,7 @@ import { attachToVector } from '../attachToVector';
 const addStraightVector = (offsetX: number): string => {
   store.dispatch(
     addNode({
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: ['face-1'],
       name: 'Vector',
       parentId: null,
@@ -44,8 +44,8 @@ describe('attachToVector', () => {
 
     // result
     expect(selectActivePage(store.getState()).nodes[vectorId]).toMatchObject({
-      fillColor: null,
-      fillColorOverrideByKey: {},
+      defaultFill: null,
+      fillByKey: {},
       filledFaceKeys: [],
     });
   });
@@ -103,7 +103,7 @@ describe('attachToVector', () => {
     const converted = selectActivePage(store.getState()).nodes[rectangleId];
 
     expect(converted.type).toBe(NodeType.vector);
-    expect(converted).toMatchObject({ fillColor: null, fillColorOverrideByKey: {}, filledFaceKeys: [] });
+    expect(converted).toMatchObject({ defaultFill: null, fillByKey: {}, filledFaceKeys: [] });
     expect(selectActivePage(store.getState()).selectedIds).toEqual([rectangleId]);
     expect(selectEditingTextBox(store.getState())).toMatchObject({ pathFlip: false, pathId: rectangleId, rotation: 0 });
   });
@@ -112,7 +112,7 @@ describe('attachToVector', () => {
     // mock — a and b coincide, so the chain has no meaningful length to project a click onto
     store.dispatch(
       addNode({
-        fillColor: '#ff0000',
+        defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         filledFaceKeys: ['face-1'],
         name: 'Vector',
         parentId: null,

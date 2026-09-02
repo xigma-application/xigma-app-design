@@ -21,7 +21,7 @@ export const commitPencilNodeIfLongEnough = (dispatch: AppDispatch, appStore: Ap
     dispatch(
       addNode({
         capStyle: 'round',
-        fillColor: null,
+        defaultFill: null,
         filledFaceKeys: [],
         name: PENCIL_NAME,
         parentId: null,

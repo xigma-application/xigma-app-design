@@ -31,7 +31,7 @@ const createDraftRef = (value: TDraftEntity | null = null): RefObject<TDraftEnti
 const addStraightVector = (offsetX: number): string => {
   store.dispatch(
     addNode({
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -67,7 +67,7 @@ describe('handlePointerUp', () => {
     handlePointerUp(canvas, pointerEvent(8050, 0), store.dispatch, { x: 0, y: 0, zoom: 1 }, draftRef, startRef, attachTargetIdRef);
 
     // result
-    expect(selectActivePage(store.getState()).nodes[vectorId]).toMatchObject({ fillColor: null });
+    expect(selectActivePage(store.getState()).nodes[vectorId]).toMatchObject({ defaultFill: null });
     expect(startRef.current).toBeNull();
     expect(attachTargetIdRef.current).toBeNull();
     expect(draftRef.current).toBeNull();

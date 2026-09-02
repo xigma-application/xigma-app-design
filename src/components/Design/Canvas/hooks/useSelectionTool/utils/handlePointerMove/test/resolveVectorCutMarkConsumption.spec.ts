@@ -13,7 +13,7 @@ import { resolveVectorCutMarkConsumption } from '../resolveVectorCutMarkConsumpt
 const addVectorNode = (vertices: Record<string, { id: string; x: number; y: number }>): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

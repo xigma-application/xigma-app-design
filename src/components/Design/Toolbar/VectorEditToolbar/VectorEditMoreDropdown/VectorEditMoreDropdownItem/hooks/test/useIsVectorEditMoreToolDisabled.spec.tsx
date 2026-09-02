@@ -22,7 +22,7 @@ const renderUseIsVectorEditMoreToolDisabled = (
 const addStraightVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -44,7 +44,7 @@ const addStraightVectorNode = (): string => {
 const addBranchingVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

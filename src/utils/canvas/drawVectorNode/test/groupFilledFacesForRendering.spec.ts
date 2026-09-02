@@ -21,8 +21,8 @@ const square = (x: number, y: number, size: number): TPoint[] => [
 ];
 
 const baseNode: TVectorNode = {
-  fillColor: '#ffffff',
-  fillColorOverrideByKey: {},
+  defaultFill: [{ color: '#ffffff', opacity: 100, type: 'solid' }],
+  fillByKey: {},
   filledFaceKeys: [],
   id: '1',
   name: 'Vector',
@@ -55,7 +55,7 @@ describe('groupFilledFacesForRendering', () => {
     // mock — neither face carries a holeParentByKey entry, so this is the plain, pre-existing mechanism
     const node: TVectorNode = {
       ...baseNode,
-      fillColorOverrideByKey: { inner: '#111111', outer: '#111111' },
+      fillByKey: { inner: solid('#111111'), outer: solid('#111111') },
       filledFaceKeys: ['outer', 'inner'],
     };
 
@@ -71,7 +71,7 @@ describe('groupFilledFacesForRendering', () => {
     // mock
     const node: TVectorNode = {
       ...baseNode,
-      fillColorOverrideByKey: { a: '#111111', c: '#222222' },
+      fillByKey: { a: solid('#111111'), c: solid('#222222') },
       filledFaceKeys: ['a', 'c'],
     };
 
@@ -90,7 +90,7 @@ describe('groupFilledFacesForRendering', () => {
     // mock — B is nested inside A, both the same color, and holeParentByKey records B as A's hole
     const node: TVectorNode = {
       ...baseNode,
-      fillColorOverrideByKey: { a: '#d9d9d9', b: '#d9d9d9' },
+      fillByKey: { a: solid('#d9d9d9'), b: solid('#d9d9d9') },
       filledFaceKeys: ['a', 'b'],
       holeParentByKey: { b: 'a' },
     };
@@ -108,7 +108,7 @@ describe('groupFilledFacesForRendering', () => {
     // which is exactly the coincidence that must NOT cause B to cancel out against A or anything else
     const node: TVectorNode = {
       ...baseNode,
-      fillColorOverrideByKey: { a: '#d9d9d9', b: '#d9d9d9' },
+      fillByKey: { a: solid('#d9d9d9'), b: solid('#d9d9d9') },
       filledFaceKeys: ['a', 'b'],
       holeParentByKey: { b: 'a' },
     };
@@ -129,7 +129,7 @@ describe('groupFilledFacesForRendering', () => {
     // color as a plain, independent fill instead of remaining tied to A's new color
     const node: TVectorNode = {
       ...baseNode,
-      fillColorOverrideByKey: { a: '#222222', b: '#d9d9d9' },
+      fillByKey: { a: solid('#222222'), b: solid('#d9d9d9') },
       filledFaceKeys: ['a', 'b'],
       holeParentByKey: { b: 'a' },
     };

@@ -7,7 +7,7 @@ import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/
 import { getTarget } from '../getTarget';
 
 const node: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

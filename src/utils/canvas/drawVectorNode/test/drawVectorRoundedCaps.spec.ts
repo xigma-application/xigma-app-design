@@ -17,7 +17,7 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const baseNode: TVectorNode = {
   capStyle: 'round',
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: '1',
   name: 'Vector',

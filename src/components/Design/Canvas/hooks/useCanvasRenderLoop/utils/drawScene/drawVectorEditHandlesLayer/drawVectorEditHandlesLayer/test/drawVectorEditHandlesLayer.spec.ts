@@ -24,7 +24,7 @@ const buffer = {} as WebGLBuffer;
 const vertexDotBufferCache = new WeakMap<TPoint[], TVertexDotBufferCacheEntry[]>();
 
 const vectorNode: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

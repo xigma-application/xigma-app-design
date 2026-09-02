@@ -62,8 +62,8 @@ const addOpenLineVectorNode = (a: { x: number; y: number }, b: { x: number; y: n
 
   store.dispatch(
     addNode({
-      fillColor: '#ff0000',
-      fillColorOverrideByKey: { face: '#ffffff' },
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+      fillByKey: { face: [{ color: '#ffffff', opacity: 100, type: 'solid' }] },
       filledFaceKeys: ['face'],
       name: 'Vector',
       parentId: null,
@@ -91,7 +91,7 @@ const addBranchingVectorNode = (hub: { x: number; y: number }): string => {
 
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -254,7 +254,7 @@ describe('useDrawTextOnPathTool behaviors', () => {
     const { design } = store.getState();
     const page = design.pages[design.activePageId];
 
-    expect(page.nodes[vectorId]).toMatchObject({ fillColor: null, fillColorOverrideByKey: {}, filledFaceKeys: [] });
+    expect(page.nodes[vectorId]).toMatchObject({ defaultFill: null, fillByKey: {}, filledFaceKeys: [] });
     expect(page.selectedIds).toEqual([vectorId]);
     expect(design.editingTextBox).toMatchObject({ pathFlip: false, pathId: vectorId, rotation: 0 });
     expect(design.editingTextBox?.pathStartOffset).toBeCloseTo(0.5, 5);
@@ -283,7 +283,7 @@ describe('useDrawTextOnPathTool behaviors', () => {
     const { design } = store.getState();
     const page = design.pages[design.activePageId];
 
-    expect(page.nodes[vectorId]).toMatchObject({ fillColor: null, filledFaceKeys: [] });
+    expect(page.nodes[vectorId]).toMatchObject({ defaultFill: null, filledFaceKeys: [] });
     expect(design.editingTextBox).toMatchObject({ pathStartOffset: 0.75, width: 100, x: 6250, y: 6250 });
     expect(design.editingTextBox?.pathId).not.toBe(vectorId);
   });

@@ -37,7 +37,11 @@ describe('startNewVectorNetwork', () => {
 
     expect(newNodeId).not.toBeUndefined();
     expect(page.selectedIds).toEqual([newNodeId]);
-    expect(page.nodes[newNodeId as string]).toMatchObject({ fillColor: VECTOR_FILL, segments: {}, type: NodeType.vector });
+    expect(page.nodes[newNodeId as string]).toMatchObject({
+      defaultFill: [{ color: VECTOR_FILL, opacity: 100, type: 'solid' }],
+      segments: {},
+      type: NodeType.vector,
+    });
 
     const vertexId = design.penActiveVertexId as string;
     const node = page.nodes[newNodeId as string];

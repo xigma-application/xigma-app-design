@@ -17,7 +17,7 @@ const buildNode = (
   vertices: Record<string, TVectorVertex>,
   filledFaceKeys: string[],
 ): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys,
   id: 'n1',
   name: 'node',

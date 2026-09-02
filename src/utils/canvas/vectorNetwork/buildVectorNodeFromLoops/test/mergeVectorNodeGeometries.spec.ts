@@ -8,8 +8,8 @@ import { mergeVectorNodeGeometries } from '../mergeVectorNodeGeometries';
 const BASE = { id: 'merged-1', name: 'Text outline', parentId: 'page-1', rotation: 5 };
 
 const buildGlyphVector = (id: string): TVectorNode => ({
-  fillColor: '#ff0000',
-  fillColorOverrideByKey: { [`face-${id}`]: '#ff0000' },
+  defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+  fillByKey: { [`face-${id}`]: [{ color: '#ff0000', opacity: 100, type: 'solid' }] },
   filledFaceKeys: [`face-${id}`],
   id,
   name: id,
@@ -45,6 +45,9 @@ describe('mergeVectorNodeGeometries', () => {
     expect(Object.keys(result?.vertices ?? {})).toHaveLength(4);
     expect(Object.keys(result?.segments ?? {})).toHaveLength(2);
     expect(result?.filledFaceKeys).toEqual(['face-a', 'face-b']);
-    expect(result?.fillColorOverrideByKey).toEqual({ 'face-a': '#ff0000', 'face-b': '#ff0000' });
+    expect(result?.fillByKey).toEqual({
+      'face-a': [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+      'face-b': [{ color: '#ff0000', opacity: 100, type: 'solid' }],
+    });
   });
 });

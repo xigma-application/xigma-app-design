@@ -6,7 +6,7 @@ import { TSceneNode, TVectorNode } from 'types/design/types';
 import { getVectorFaceAtPointAcrossOpenNodes } from '../getVectorFaceAtPointAcrossOpenNodes';
 
 const buildTriangleNode = (id: string, offsetX: number): TVectorNode => ({
-  fillColor: '#000000',
+  defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id,
   name: 'Vector',
@@ -111,7 +111,7 @@ describe('getVectorFaceAtPointAcrossOpenNodes', () => {
     // entirely inside n1's own on-screen bounds — two different nodes overlapping on screen, unlike
     // getVectorFaceAtPoint.spec.ts's own single-node nested-loops case
     const bigSquare: TVectorNode = {
-      fillColor: '#000000',
+      defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       id: 'n1',
       name: 'Vector',
@@ -135,7 +135,7 @@ describe('getVectorFaceAtPointAcrossOpenNodes', () => {
       },
     };
     const smallSquare: TVectorNode = {
-      fillColor: '#000000',
+      defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       id: 'n2',
       name: 'Vector',
@@ -162,7 +162,7 @@ describe('getVectorFaceAtPointAcrossOpenNodes', () => {
     // face, so checking it exercises the reduce's "candidate isn't smaller, keep the current smallest"
     // branch too, not just "found a new smallest" every time
     const mediumSquare: TVectorNode = {
-      fillColor: '#000000',
+      defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       id: 'n3',
       name: 'Vector',

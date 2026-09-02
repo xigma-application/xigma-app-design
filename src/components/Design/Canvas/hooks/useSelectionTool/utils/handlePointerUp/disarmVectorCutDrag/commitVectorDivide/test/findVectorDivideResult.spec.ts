@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { findVectorDivideResult } from '../findVectorDivideResult';
 
 const buildSquareNode = (x: number): TVectorNode => ({
-  fillColor: '#ff0000',
+  defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: 'square',
   name: 'Vector',
@@ -26,7 +26,7 @@ const buildSquareNode = (x: number): TVectorNode => ({
 });
 
 const buildTriangleNode = (): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'triangle',
   name: 'Vector',

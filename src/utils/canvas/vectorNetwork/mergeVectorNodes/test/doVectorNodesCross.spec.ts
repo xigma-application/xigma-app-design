@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { doVectorNodesCross } from '../doVectorNodesCross';
 
 const buildRectangleNode = (id: string, x: number, y: number, width: number, height: number): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id,
   name: 'Vector',
@@ -53,7 +53,7 @@ describe('doVectorNodesCross', () => {
     // mock — nodeA is an L-shape (6 vertices) whose notch cutout exactly avoids nodeB, even though
     // their AABBs overlap
     const nodeA: TVectorNode = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'a',
       name: 'Vector',

@@ -28,7 +28,7 @@ export const attachToVector = (nodeId: string, point: TPoint, dispatch: AppDispa
   const sampler = createVectorTextPathSampler({ ...bounds, rotation: 0 }, vector);
   const pathStartOffset = sampler.totalLength > 0 ? sampler.nearestOffsetAtPoint(point).offset : VECTOR_PATH_START_OFFSET_START;
 
-  dispatch(updateNode({ changes: { fillColor: null, fillColorOverrideByKey: {}, filledFaceKeys: [] }, id: nodeId }));
+  dispatch(updateNode({ changes: { defaultFill: null, fillByKey: {}, filledFaceKeys: [] }, id: nodeId }));
   dispatch(setSelection([nodeId]));
   dispatch(
     startTextEdit({

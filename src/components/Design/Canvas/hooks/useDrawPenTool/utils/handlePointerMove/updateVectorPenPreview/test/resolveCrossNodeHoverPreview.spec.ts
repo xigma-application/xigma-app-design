@@ -9,7 +9,7 @@ import { resolveCrossNodeHoverPreview } from '../resolveCrossNodeHoverPreview';
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const activeNode: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

@@ -28,7 +28,7 @@ const pointerEvent = (x: number, y: number): PointerEvent => new PointerEvent('p
 const addSplitSquareVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -76,7 +76,7 @@ const addSplitSquareVectorNodeWithUpperRightFilled = (color: string): { nodeId: 
     d: { id: 'd', x: 0, y: 100 },
   };
   const upperRightFace = deriveVectorFaces({
-    fillColor: null,
+    defaultFill: null,
     filledFaceKeys: [],
     id: 'probe',
     name: '',
@@ -93,8 +93,8 @@ const addSplitSquareVectorNodeWithUpperRightFilled = (color: string): { nodeId: 
 
   store.dispatch(
     addNode({
-      fillColor: null,
-      fillColorOverrideByKey: { [upperRightKey]: color },
+      defaultFill: null,
+      fillByKey: { [upperRightKey]: [{ color, opacity: 100, type: 'solid' }] },
       filledFaceKeys: [upperRightKey],
       name: 'Vector',
       parentId: null,
@@ -118,7 +118,7 @@ const addSplitSquareVectorNodeWithUpperRightFilled = (color: string): { nodeId: 
 const addSquareWithVirtualCrossingVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -202,7 +202,7 @@ describe('continueVectorPaintDrag', () => {
 
     expect(action.payload.id).toBe(nodeId);
     expect(changes.filledFaceKeys).toHaveLength(1);
-    expect(Object.values(changes.fillColorOverrideByKey!)).toEqual(['#00ff00']);
+    expect(Object.values(changes.fillByKey!)).toEqual([[{ color: '#00ff00', opacity: 100, type: 'solid' }]]);
   });
 
   it('should track the path but not paint anything while movement stays under the drag threshold', () => {
@@ -282,7 +282,7 @@ describe('continueVectorPaintDrag', () => {
     const changes = dispatch.mock.calls[0][0].payload.changes as Partial<TVectorNode>;
 
     expect(changes.filledFaceKeys).toEqual([upperRightKey]);
-    expect(changes.fillColorOverrideByKey![upperRightKey]).toBe('#00ff00');
+    expect(changes.fillByKey![upperRightKey]).toEqual([{ color: '#00ff00', opacity: 100, type: 'solid' }]);
   });
 
   it('should destroy the fill of every already-filled face the drag sweeps over while remove mode is armed', () => {
@@ -307,7 +307,7 @@ describe('continueVectorPaintDrag', () => {
     const changes = dispatch.mock.calls[0][0].payload.changes as Partial<TVectorNode>;
 
     expect(changes.filledFaceKeys).toEqual([]);
-    expect(changes.fillColorOverrideByKey).toBeUndefined();
+    expect(changes.fillByKey).toBeUndefined();
     // the highlight tracks face.key (the render-time walk key), not the loopKey used for filledFaceKeys
     expect(canvasRefs.vectorPaint.vectorPaintTouchedFacesRef.current![nodeId]).toEqual(['diag,s1,s2']);
   });

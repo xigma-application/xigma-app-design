@@ -30,7 +30,7 @@ const createHoveredVectorEdgeInsertPointRef = (value: TPoint | null = null): Ref
 const addVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

@@ -19,7 +19,7 @@ const createCanvas = (): HTMLCanvasElement => {
 const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointerdown', { pointerId });
 
 const vector: TVectorNode = {
-  fillColor: '#000000',
+  defaultFill: [{ color: '#000000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

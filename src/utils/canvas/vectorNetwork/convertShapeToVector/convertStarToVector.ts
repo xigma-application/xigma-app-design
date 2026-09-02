@@ -7,6 +7,7 @@ import { buildClosedVectorLoop } from './utils/buildClosedVectorLoop';
 import { getFillDataForClosedLoop } from './utils/getFillDataForClosedLoop';
 import { getMaxStarCornerRadius } from 'utils/canvas/cornerRadius/star/getMaxStarCornerRadius';
 import { getStarPoints } from 'utils/canvas/shapes/getStarPoints';
+import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
 import { flipPoint } from 'utils/math/flipPoint';
 
 const SHAPE_VECTOR_STROKE_WIDTH = 0;
@@ -17,7 +18,7 @@ export const convertStarToVector = (node: TStarNode): TVectorNode => {
   const radius = Math.min(Math.max(node.cornerRadius ?? 0, 0), getMaxStarCornerRadius(node, node.points, node.ratio));
   const { segments, vertices } = buildClosedVectorLoop(sharpVertices, radius);
   const base: TVectorNode = {
-    fillColor: node.fill,
+    defaultFill: [makeSolidPaint(node.fill)],
     filledFaceKeys: [],
     id: node.id,
     name: node.name,

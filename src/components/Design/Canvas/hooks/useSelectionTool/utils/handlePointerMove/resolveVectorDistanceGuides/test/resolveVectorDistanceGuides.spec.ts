@@ -53,7 +53,7 @@ const altMove = (x = 0, y = 0, altKey = true, buttons = 0): PointerEvent =>
 const addVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -80,7 +80,7 @@ const addVectorNode = (): string => {
 const addClosedTriangleFaceNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

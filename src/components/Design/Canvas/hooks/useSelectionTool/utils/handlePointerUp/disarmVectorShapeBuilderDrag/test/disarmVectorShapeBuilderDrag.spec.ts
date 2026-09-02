@@ -23,7 +23,7 @@ const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointeru
 const addTriangleVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -102,7 +102,7 @@ describe('disarmVectorShapeBuilderDrag', () => {
     // vertex ids are prefixed per rectangle — addNode stores them verbatim (only the node's own top-
     // level id is nanoid()-generated), so two literal 's1'/'v1' sets would collide once unioned
     const buildRectangleNode = (prefix: string, offsetX: number, offsetY: number): Parameters<typeof addNode>[0] => ({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

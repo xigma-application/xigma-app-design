@@ -1,5 +1,6 @@
 // types
 import { NodeType } from 'types/design/enums';
+import { TPaint } from 'types/design/paint/types';
 import { TVectorPaintTouchedLoopKeys } from 'types/design/canvas/types';
 import { TVectorNode } from 'types/design/types';
 
@@ -8,11 +9,13 @@ import { deriveVectorFaces } from 'utils/canvas/vectorNetwork/deriveVectorFaces/
 import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
 import { paintNodeAlongPath } from '../paintNodeAlongPath';
 
+const solid = (color: string): TPaint[] => [{ color, opacity: 100, type: 'solid' }];
+
 // a square (a-b-c-d) split by the a-c diagonal into two triangular faces: the upper-right (a,b,c) and
 // the lower-left (a,c,d) — enough to prove a single stroke can paint more than one face
-const buildSplitSquareVectorNode = (filledFaceKeys: string[] = [], fillColorOverrideByKey: Record<string, string> = {}): TVectorNode => ({
-  fillColor: null,
-  fillColorOverrideByKey,
+const buildSplitSquareVectorNode = (filledFaceKeys: string[] = [], fillByKey: Record<string, TPaint[]> = {}): TVectorNode => ({
+  defaultFill: null,
+  fillByKey,
   filledFaceKeys,
   id: 'node-1',
   name: 'Vector',
@@ -40,7 +43,7 @@ const buildSplitSquareVectorNode = (filledFaceKeys: string[] = [], fillColorOver
 // a square (a-b-c-d) plus a separate horizontal line crossing its left and right edges, both living in
 // the same node — the crossing only exists virtually (render-time planarization) until it gets baked
 const buildSquareWithVirtualCrossingVectorNode = (): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'node-1',
   name: 'Vector',
@@ -84,7 +87,7 @@ describe('paintNodeAlongPath behaviors', () => {
     const changes = dispatch.mock.calls[0][0].payload.changes as Partial<TVectorNode>;
 
     expect(changes.filledFaceKeys).toHaveLength(1);
-    expect(Object.values(changes.fillColorOverrideByKey!)).toEqual(['#00ff00']);
+    expect(Object.values(changes.fillByKey!)).toEqual([solid('#00ff00')]);
     expect(touchedLoopKeys['node-1'].size).toBe(1);
   });
 
@@ -111,7 +114,7 @@ describe('paintNodeAlongPath behaviors', () => {
       face.pieceKeys.some((key) => key.startsWith('s1[')),
     )!;
     const upperRightKey = getVectorFillLoopKey(upperRightFace.pieceKeys);
-    const node = buildSplitSquareVectorNode([upperRightKey], { [upperRightKey]: '#ff0000' });
+    const node = buildSplitSquareVectorNode([upperRightKey], { [upperRightKey]: solid('#ff0000') });
     const touchedLoopKeys: TVectorPaintTouchedLoopKeys = {};
 
     // before

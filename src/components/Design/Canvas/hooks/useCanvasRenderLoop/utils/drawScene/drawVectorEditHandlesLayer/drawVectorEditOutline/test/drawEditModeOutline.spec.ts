@@ -16,7 +16,7 @@ vi.mock('utils/canvas/vectorNetwork/getVectorNodeThickStrokeVertices/getVectorNo
 }));
 
 const node: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

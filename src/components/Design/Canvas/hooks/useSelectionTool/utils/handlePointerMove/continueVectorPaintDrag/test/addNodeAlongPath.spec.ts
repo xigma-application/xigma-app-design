@@ -1,13 +1,16 @@
 // types
 import { NodeType } from 'types/design/enums';
+import { TPaint } from 'types/design/paint/types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
 import { addNodeAlongPath } from '../addNodeAlongPath';
 
-const buildNode = (filledFaceKeys: string[], fillColorOverrideByKey: Record<string, string> = {}): TVectorNode => ({
-  fillColor: null,
-  fillColorOverrideByKey,
+const solid = (color: string): TPaint[] => [{ color, opacity: 100, type: 'solid' }];
+
+const buildNode = (filledFaceKeys: string[], fillByKey: Record<string, TPaint[]> = {}): TVectorNode => ({
+  defaultFill: null,
+  fillByKey,
   filledFaceKeys,
   id: 'node-1',
   name: 'Vector',
@@ -37,7 +40,7 @@ describe('addNodeAlongPath behaviors', () => {
   it('should append a newly-crossed face and set its color, without duplicating an already-filled entry', () => {
     // mock
     const dispatch = vi.fn();
-    const node = buildNode(['face-a'], { 'face-a': '#ff0000' });
+    const node = buildNode(['face-a'], { 'face-a': solid('#ff0000') });
 
     // before
     addNodeAlongPath(dispatch, node, ['face-a', 'face-b'], '#00ff00', false, {}, {});
@@ -47,7 +50,7 @@ describe('addNodeAlongPath behaviors', () => {
 
     expect(dispatch.mock.calls[0][0].payload.id).toBe('node-1');
     expect(changes.filledFaceKeys).toEqual(['face-a', 'face-b']);
-    expect(changes.fillColorOverrideByKey).toEqual({ 'face-a': '#00ff00', 'face-b': '#00ff00' });
+    expect(changes.fillByKey).toEqual({ 'face-a': solid('#00ff00'), 'face-b': solid('#00ff00') });
   });
 
   it('should include the baked segments/vertices in the dispatched changes when the geometry changed', () => {
@@ -64,7 +67,7 @@ describe('addNodeAlongPath behaviors', () => {
     const changes = dispatch.mock.calls[0][0].payload.changes as Partial<TVectorNode>;
 
     expect(changes).toEqual({
-      fillColorOverrideByKey: { 'face-a': '#00ff00' },
+      fillByKey: { 'face-a': solid('#00ff00') },
       filledFaceKeys: ['face-a'],
       segments,
       vertices,

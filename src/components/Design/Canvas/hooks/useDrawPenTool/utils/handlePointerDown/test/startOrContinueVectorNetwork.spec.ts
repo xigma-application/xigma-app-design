@@ -40,7 +40,7 @@ const createVectorAlignmentGuideRef = (): TVectorEditRefs['vectorAlignmentGuideR
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const node: TVectorNode = {
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

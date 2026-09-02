@@ -109,7 +109,7 @@ describe('drawPerNodeSelectionOutlines', () => {
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
     const vector: TVectorNode = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'a',
       name: 'Vector',
@@ -146,7 +146,7 @@ describe('drawPerNodeSelectionOutlines', () => {
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
     const vector: TVectorNode = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'a',
       name: 'Vector',
@@ -181,7 +181,7 @@ describe('drawPerNodeSelectionOutlines', () => {
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
     const vector: TVectorNode = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'a',
       name: 'Vector',

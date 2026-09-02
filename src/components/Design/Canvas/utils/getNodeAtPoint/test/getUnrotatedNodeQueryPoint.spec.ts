@@ -64,7 +64,7 @@ describe('getUnrotatedNodeQueryPoint', () => {
     // mock
     const point = { x: 5, y: 5 };
     const vector: TSceneNode = {
-      fillColor: '#000',
+      defaultFill: [{ color: '#000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       id: 'a',
       name: 'Vector',

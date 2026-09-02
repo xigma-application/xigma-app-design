@@ -8,7 +8,7 @@ import { getVectorFillLoopPoints } from '../getVectorFillLoopPoints/getVectorFil
 
 export const resolveSurvivingFilledFaceKeys = (originalKeys: string[], component: TVectorNetworkComponent): string[] => {
   const probeNode: TVectorNode = {
-    fillColor: null,
+    defaultFill: null,
     filledFaceKeys: [],
     id: '__cut-fill-survivor-probe',
     name: '',

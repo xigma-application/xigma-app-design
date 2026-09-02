@@ -27,7 +27,7 @@ export const commitSingleVectorShapeBuilderNode = (
     dispatch(
       updateNode({
         changes: {
-          fillColorOverrideByKey: mutatedNode.fillColorOverrideByKey,
+          fillByKey: mutatedNode.fillByKey,
           filledFaceKeys: mutatedNode.filledFaceKeys,
           segments: mutatedNode.segments,
           vertices: mutatedNode.vertices,

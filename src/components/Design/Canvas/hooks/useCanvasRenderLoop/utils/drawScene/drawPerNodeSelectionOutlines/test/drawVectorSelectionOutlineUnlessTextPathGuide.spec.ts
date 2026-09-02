@@ -26,7 +26,7 @@ const createGlMock = (): WebGL2RenderingContext =>
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const buildVector = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'a',
   name: 'Vector',

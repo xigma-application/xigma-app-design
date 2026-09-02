@@ -32,7 +32,7 @@ const buildRectSegments = (
 const buildRectNode = (x1: number, y1: number, x2: number, y2: number, filled: boolean): TVectorNode => {
   const { segments, vertices } = buildRectSegments(x1, y1, x2, y2);
   const base: TVectorNode = {
-    fillColor: null,
+    defaultFill: null,
     filledFaceKeys: [],
     id: 'node-1',
     name: 'Vector',
@@ -68,7 +68,7 @@ const buildStraightDipPath = (x: number, topY: number, bottomY: number): { x: nu
 };
 
 const buildOpenSegmentNode = (): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'node-1',
   name: 'Vector',
@@ -132,14 +132,16 @@ describe('subtractCapsuleFromVectorNetwork', () => {
 
     // result — the surviving face is pinned to the hash color of the ORIGINAL key, not its own new key
     const originalKey = node.filledFaceKeys[0];
-    expect(result.fillColorOverrideByKey[result.filledFaceKeys[0]]).toBe(getVectorFillColorForLoopKey(originalKey));
+    expect(result.fillByKey[result.filledFaceKeys[0]]).toEqual([
+      { color: getVectorFillColorForLoopKey(originalKey), opacity: 100, type: 'solid' as const },
+    ]);
   });
 
   it('should keep a real user-picked fill color across the carve instead of falling back to a hash color', () => {
     // mock — same 40x40 rectangle, but with an explicit paint-tool color override on its original key
     const node = buildRectNode(0, 0, 40, 40, true);
     const originalKey = node.filledFaceKeys[0];
-    const paintedNode = { ...node, fillColorOverrideByKey: { [originalKey]: '#ff0000' } };
+    const paintedNode = { ...node, fillByKey: { [originalKey]: [{ color: '#ff0000', opacity: 100, type: 'solid' as const }] } };
     const path = buildStraightDipPath(20, -5.13, 15.13);
 
     // action
@@ -147,7 +149,7 @@ describe('subtractCapsuleFromVectorNetwork', () => {
 
     // result
     expect(result.filledFaceKeys).toHaveLength(1);
-    expect(result.fillColorOverrideByKey[result.filledFaceKeys[0]]).toBe('#ff0000');
+    expect(result.fillByKey[result.filledFaceKeys[0]]).toEqual([{ color: '#ff0000', opacity: 100, type: 'solid' as const }]);
   });
 
   it('should leave the fill exactly as-is (no fake hole) when the brush never touches the boundary', () => {

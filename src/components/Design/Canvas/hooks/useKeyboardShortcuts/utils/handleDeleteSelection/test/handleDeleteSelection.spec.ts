@@ -30,7 +30,7 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
 const addVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -59,7 +59,7 @@ const addVectorNode = (): string => {
 const addSecondVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -83,7 +83,7 @@ const addSecondVectorNode = (): string => {
 const addClosedTriangleVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,

@@ -14,7 +14,7 @@ import { groupCrossingVectorNodes } from 'utils/canvas/vectorNetwork/mergeVector
 // two 150x200 rectangles staggered by (75,100) — proven (mergeVectorFaces.spec.ts's own
 // crossingRectanglesNode fixture) to planarize into exactly 3 faces once combined
 const buildRectangleNode = (id: string, offsetX: number, offsetY: number): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id,
   name: 'Vector',
@@ -71,7 +71,7 @@ describe('commitCrossingVectorNodeGroup', () => {
     const [faceN1] = deriveVectorFaces(bareN1);
     const paintedN1 = {
       ...bareN1,
-      fillColorOverrideByKey: { [getVectorFillLoopKey(faceN1.pieceKeys)]: '#00ff00' },
+      fillByKey: { [getVectorFillLoopKey(faceN1.pieceKeys)]: [{ color: '#00ff00', opacity: 100, type: 'solid' as const }] },
       filledFaceKeys: [getVectorFillLoopKey(faceN1.pieceKeys)],
     };
     const [group] = groupCrossingVectorNodes([paintedN1, buildRectangleNode('n2', 75, 100)]);
@@ -91,7 +91,7 @@ describe('commitCrossingVectorNodeGroup', () => {
     const changes = updateAction.payload.changes as Partial<TVectorNode>;
 
     expect(changes.filledFaceKeys!.length).toBeGreaterThan(0);
-    expect(Object.values(changes.fillColorOverrideByKey ?? {})).toContain('#00ff00');
+    expect(Object.values(changes.fillByKey ?? {})).toContainEqual([{ color: '#00ff00', opacity: 100, type: 'solid' as const }]);
   });
 
   it('should merge via a box (isBoxMode) instead of the freeform path, using only the path’s first/last point as corners', () => {

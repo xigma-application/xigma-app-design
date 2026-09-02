@@ -78,14 +78,14 @@ describe('materializeVectorNetworkCut', () => {
     // mock — same rectangle, but the untouched bottom face has an explicit paint-tool color override
     const node = buildNode();
     const [, bottomKey] = node.filledFaceKeys!;
-    const paintedNode = { ...node, fillColorOverrideByKey: { [bottomKey]: '#ff0000' } };
+    const paintedNode = { ...node, fillByKey: { [bottomKey]: [{ color: '#ff0000', opacity: 100, type: 'solid' as const }] } };
 
     // before — a single crossing on the top edge, leaving the bottom face untouched
     const result = materializeVectorNetworkCut(paintedNode, { x: 950, y: 250 }, { x: 950, y: 320 });
 
     // result
     expect(result!.filledFaceKeys).toEqual([bottomKey]);
-    expect(result!.fillColorOverrideByKey[bottomKey]).toBe('#ff0000');
+    expect(result!.fillByKey[bottomKey]).toEqual([{ color: '#ff0000', opacity: 100, type: 'solid' as const }]);
   });
 
   it('should keep both new pieces filled when a chord cleanly divides one face in two, Figma-style — even though the crossed segments are still genuinely severed, not shared', () => {
@@ -154,7 +154,7 @@ describe('materializeVectorNetworkCut', () => {
       seg('sb4', 'b4', 'b1'),
     ]);
     const node = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'n1',
       name: 'two-squares',

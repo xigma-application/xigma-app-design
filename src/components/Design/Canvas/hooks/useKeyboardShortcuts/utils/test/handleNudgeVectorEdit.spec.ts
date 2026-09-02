@@ -15,7 +15,7 @@ import { handleNudgeVectorEdit } from '../handleNudgeVectorEdit';
 const addVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -40,7 +40,7 @@ const addVectorNode = (): string => {
 const addSecondVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: '#ff0000',
+      defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -178,7 +178,7 @@ describe('handleNudgeVectorEdit', () => {
     // sb's mirrored tangent
     store.dispatch(
       addNode({
-        fillColor: '#ff0000',
+        defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
         filledFaceKeys: [],
         name: 'Vector',
         parentId: null,

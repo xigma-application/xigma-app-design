@@ -22,7 +22,7 @@ const LEFT = { x: 0, y: 100 };
 const BOTTOM = { x: 100, y: 200 };
 
 const OPEN_VECTOR: TVectorNode = {
-  fillColor: '#000',
+  defaultFill: [{ color: '#000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: 'vec-1',
   name: 'Vector',

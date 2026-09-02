@@ -46,7 +46,7 @@ const buildText = (overrides: Partial<TTextNode> = {}): TTextNode => ({
 });
 
 const buildVector = (overrides: Partial<TVectorNode> = {}): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vec-1',
   name: 'Vector',

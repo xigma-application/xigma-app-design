@@ -29,7 +29,7 @@ describe('convertLineToVector', () => {
     // result
     expect(result.type).toBe(NodeType.vector);
     expect(result.id).toBe('line-1');
-    expect(result.fillColor).toBeNull();
+    expect(result.defaultFill).toBeNull();
     expect(result.filledFaceKeys).toEqual([]);
     expect(result.strokeColor).toBe('#ff00ff');
     expect(result.strokeWidth).toBe(LINE_RENDER_STROKE_WIDTH);

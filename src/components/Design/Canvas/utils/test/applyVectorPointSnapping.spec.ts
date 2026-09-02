@@ -6,7 +6,7 @@ import { TSceneNode, TVectorNode } from 'types/design/types';
 import { applyVectorPointSnapping } from '../applyVectorPointSnapping';
 
 const buildVectorNode = (overrides: Partial<TVectorNode>): TVectorNode => ({
-  fillColor: null,
+  defaultFill: null,
   filledFaceKeys: [],
   id: 'vector-1',
   name: 'Vector',

@@ -12,7 +12,7 @@ describe('flattenVectorSegments', () => {
   it('should flatten every segment on the node and preserve each one’s segmentId', () => {
     // mock
     const node: TVectorNode = {
-      fillColor: '#000',
+      defaultFill: [{ color: '#000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       id: '1',
       name: 'Vector',
@@ -56,7 +56,7 @@ describe('flattenVectorSegments', () => {
   it('should return the same cached result for the same node reference instead of recomputing', () => {
     // mock
     const node: TVectorNode = {
-      fillColor: '#000',
+      defaultFill: [{ color: '#000', opacity: 100, type: 'solid' }],
       filledFaceKeys: [],
       id: '1',
       name: 'Vector',

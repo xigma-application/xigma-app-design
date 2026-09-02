@@ -6,7 +6,7 @@ import { TVectorNode } from 'types/design/types';
 import { isPointNearVectorPath } from '../isPointNearVectorPath';
 
 const buildNode = (segments: TVectorNode['segments'], vertices: TVectorNode['vertices']): TVectorNode => ({
-  fillColor: '#000',
+  defaultFill: [{ color: '#000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: '1',
   name: 'Vector',

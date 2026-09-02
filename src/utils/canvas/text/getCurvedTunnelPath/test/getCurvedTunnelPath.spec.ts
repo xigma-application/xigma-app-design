@@ -44,7 +44,7 @@ describe('getCurvedTunnelPath', () => {
     // mock — an "L"-shaped chain a(1225.5,770)->b(1287.5,770)->c(1287.5,701), the exact real-world
     // 90° corner this behavior was built and hand-verified against
     const node: TVectorNode = {
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       id: 'v',
       name: 'Vector',

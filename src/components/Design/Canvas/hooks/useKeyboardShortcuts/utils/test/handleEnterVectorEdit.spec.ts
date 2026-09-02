@@ -15,7 +15,7 @@ import { handleEnterVectorEdit } from '../handleEnterVectorEdit';
 const addVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -201,7 +201,7 @@ describe('handleEnterVectorEdit', () => {
     const node = store.getState().design.pages[store.getState().design.activePageId].nodes[rectangleId] as TVectorNode;
 
     expect(node.type).toBe(NodeType.vector);
-    expect(node.fillColor).toBe('#00ff00');
+    expect(node.defaultFill).toEqual([{ color: '#00ff00', opacity: 100, type: 'solid' }]);
     expect(Object.keys(node.vertices)).toHaveLength(4);
     expect(node.filledFaceKeys).toHaveLength(1);
     expect(store.getState().design.vectorEditingNodeIds).toEqual([rectangleId]);

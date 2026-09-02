@@ -1,9 +1,10 @@
 // types
+import { TPaint } from 'types/design/paint/types';
 import { TSurvivingFace } from '../types';
 import { TVectorSegment, TVectorVertex } from 'types/design/types';
 
 export type TErasedNetwork = {
-  fillColorOverrideByKey: Record<string, string>;
+  fillByKey: Record<string, TPaint[]>;
   filledFaceKeys: string[];
   segments: Record<string, TVectorSegment>;
   survivingFaces: TSurvivingFace[];

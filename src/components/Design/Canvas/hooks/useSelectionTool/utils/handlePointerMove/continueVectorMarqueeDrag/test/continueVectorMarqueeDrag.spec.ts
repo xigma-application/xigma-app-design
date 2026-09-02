@@ -30,7 +30,7 @@ const createVectorMarqueeModeRef = (mode: TVectorMarqueeMode | null = null): Ref
 const addVectorNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: [],
       name: 'Vector',
       parentId: null,
@@ -395,7 +395,7 @@ describe('continueVectorMarqueeDrag', () => {
     // (x 45-55) without ever touching any of their four endpoint vertices
     store.dispatch(
       addNode({
-        fillColor: null,
+        defaultFill: null,
         filledFaceKeys: [],
         name: 'Vector',
         parentId: null,

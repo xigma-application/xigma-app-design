@@ -23,7 +23,7 @@ const createPendingOutgoingTangentRef = (value: TPendingOutgoingTangent | null =
 const addSourceNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: ['a1,a2,a3'],
       name: 'Vector',
       parentId: null,
@@ -45,7 +45,7 @@ const addSourceNode = (): string => {
 const addTargetNode = (): string => {
   store.dispatch(
     addNode({
-      fillColor: null,
+      defaultFill: null,
       filledFaceKeys: ['b1,b2,b3'],
       name: 'Vector',
       parentId: null,

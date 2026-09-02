@@ -21,7 +21,7 @@ const frameNode: TFrameNode = {
 };
 
 const vectorNode: TVectorNode = {
-  fillColor: '#ff0000',
+  defaultFill: [{ color: '#ff0000', opacity: 100, type: 'solid' }],
   filledFaceKeys: [],
   id: 'node-1',
   name: 'Frame',

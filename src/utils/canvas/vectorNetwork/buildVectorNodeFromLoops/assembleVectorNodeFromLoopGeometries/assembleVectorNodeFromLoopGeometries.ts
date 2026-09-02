@@ -5,6 +5,7 @@ import { TLoopGeometry, TVectorNodeLoopsBase } from './types';
 
 // utils
 import { getAllLoopFilledFaceKeys } from './getAllLoopFilledFaceKeys';
+import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
 
 export const assembleVectorNodeFromLoopGeometries = (
   loopGeometries: TLoopGeometry[],
@@ -21,7 +22,7 @@ export const assembleVectorNodeFromLoopGeometries = (
     });
 
     const withoutFillData: TVectorNode = {
-      fillColor,
+      defaultFill: [makeSolidPaint(fillColor)],
       filledFaceKeys: [],
       id: base.id,
       name: base.name,
@@ -39,7 +40,7 @@ export const assembleVectorNodeFromLoopGeometries = (
 
     return {
       ...withoutFillData,
-      fillColorOverrideByKey: Object.fromEntries(filledFaceKeys.map((key) => [key, fillColor])),
+      fillByKey: Object.fromEntries(filledFaceKeys.map((key) => [key, [makeSolidPaint(fillColor)]])),
       filledFaceKeys,
     };
   }

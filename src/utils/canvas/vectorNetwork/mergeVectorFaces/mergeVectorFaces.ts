@@ -1,9 +1,10 @@
 // types
+import { TPaint } from 'types/design/paint/types';
 import { TVectorNode } from 'types/design/types';
 
 // utils
 import { deriveVectorFaces, TVectorFace } from '../deriveVectorFaces/deriveVectorFaces';
-import { getEffectiveVectorFillColor } from '../getEffectiveVectorFillColor';
+import { getEffectiveVectorFill } from '../getEffectiveVectorFill';
 import { getInteriorSegmentIds } from './getInteriorSegmentIds';
 import { getRemainingVertices } from '../getRemainingVertices';
 import { getVectorFillLoopKey } from '../getVectorFillLoopKey';
@@ -18,12 +19,12 @@ export const mergeVectorFaces = (node: TVectorNode, touchedFaces: TVectorFace[])
   const filledFaceKeys = [...new Set([...node.filledFaceKeys, ...resultingFaces.map((face) => getVectorFillLoopKey(face.pieceKeys))])];
   const [firstTouchedFace] = touchedFaces;
   const newFaceEntries = firstTouchedFace
-    ? resultingFaces.map((face): [string, string] => [
+    ? resultingFaces.map((face): [string, TPaint[]] => [
         getVectorFillLoopKey(face.pieceKeys),
-        getEffectiveVectorFillColor(node, getVectorFillLoopKey(firstTouchedFace.pieceKeys)),
+        getEffectiveVectorFill(node, getVectorFillLoopKey(firstTouchedFace.pieceKeys)),
       ])
     : [];
-  const fillColorOverrideByKey = { ...node.fillColorOverrideByKey, ...Object.fromEntries(newFaceEntries) };
+  const fillByKey = { ...node.fillByKey, ...Object.fromEntries(newFaceEntries) };
 
-  return { ...mergedNode, fillColorOverrideByKey, filledFaceKeys };
+  return { ...mergedNode, fillByKey, filledFaceKeys };
 };
