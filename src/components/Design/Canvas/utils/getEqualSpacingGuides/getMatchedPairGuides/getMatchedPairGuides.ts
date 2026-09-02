@@ -15,10 +15,12 @@ export const getMatchedPairGuides = (
 ): TMatchedPairGuides => {
   const active = getEdges(activeRect);
   const vertical = getVerticalMatchedPair(active, candidates, sizeToleranceWorldUnits, centreToleranceWorldUnits);
+  const horizontal = getHorizontalMatchedPair(active, candidates, sizeToleranceWorldUnits, centreToleranceWorldUnits);
 
-  if (vertical.lines.length > 0) {
-    return vertical;
-  }
-
-  return getHorizontalMatchedPair(active, candidates, sizeToleranceWorldUnits, centreToleranceWorldUnits);
+  // a shape sitting at the crossing of a vertical AND a horizontal chain gets both sets of guides
+  return {
+    labels: [...vertical.labels, ...horizontal.labels],
+    lines: [...vertical.lines, ...horizontal.lines],
+    markers: [...vertical.markers, ...horizontal.markers],
+  };
 };

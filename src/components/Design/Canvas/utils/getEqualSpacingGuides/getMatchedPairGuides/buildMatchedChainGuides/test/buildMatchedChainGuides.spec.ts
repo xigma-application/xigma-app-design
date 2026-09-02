@@ -13,9 +13,9 @@ describe('buildMatchedChainGuides', () => {
     // action
     const guides = buildMatchedChainGuides(active, chain, 'vertical', 0.5);
 
-    // result
+    // result — all three lines run the full chain span (top y:0 → bottom y:550)
     expect(guides.lines).toEqual([
-      { dashed: false, x1: 100, x2: 100, y1: 500, y2: 0 }, // centre: active centre up to the chain's far edge
+      { dashed: false, x1: 100, x2: 100, y1: 0, y2: 550 }, // centre axis, full chain
       { dashed: false, x1: 0, x2: 0, y1: 0, y2: 550 }, // left edge, full chain
       { dashed: false, x1: 200, x2: 200, y1: 0, y2: 550 }, // right edge, full chain
     ]);
@@ -35,7 +35,7 @@ describe('buildMatchedChainGuides', () => {
     expect(guides.labels).toHaveLength(0);
   });
 
-  it('should run the centre line through the whole chain when active is in the middle', () => {
+  it('should run the centre line the whole chain span when active is in the middle', () => {
     // mock — active is chain[1] of 3
     const chain = [rect(0), rect(150), rect(300)];
     const active = chain[1];
@@ -43,8 +43,8 @@ describe('buildMatchedChainGuides', () => {
     // action
     const guides = buildMatchedChainGuides(active, chain, 'vertical', 0.5);
 
-    // result — active centre y:200, more shapes below (index 1, 3-1-1=1, 1>=1 true → far = near edge = 0)
-    expect(guides.lines[0]).toEqual({ dashed: false, x1: 100, x2: 100, y1: 200, y2: 0 });
+    // result — centre line spans both ways from the middle: top y:0 → bottom y:400
+    expect(guides.lines[0]).toEqual({ dashed: false, x1: 100, x2: 100, y1: 0, y2: 400 });
   });
 
   it('should mirror onto the horizontal axis', () => {
@@ -56,8 +56,8 @@ describe('buildMatchedChainGuides', () => {
     // action
     const guides = buildMatchedChainGuides(active, chain, 'horizontal', 0.5);
 
-    // result — centre line is horizontal, edges are horizontal
-    expect(guides.lines[0]).toEqual({ dashed: false, x1: 350, x2: 0, y1: 100, y2: 100 });
+    // result — centre line is horizontal and spans the full chain (left x:0 → right x:400)
+    expect(guides.lines[0]).toEqual({ dashed: false, x1: 0, x2: 400, y1: 100, y2: 100 });
     expect(guides.labels).toHaveLength(2);
   });
 });

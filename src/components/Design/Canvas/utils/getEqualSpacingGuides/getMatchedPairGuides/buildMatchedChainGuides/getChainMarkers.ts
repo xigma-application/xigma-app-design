@@ -6,7 +6,7 @@ import { TPoint } from 'types/canvas';
 
 export const getChainMarkers = (chain: TEdges[], geometry: TChainGeometry, axis: TMatchedChainAxis): TPoint[] => {
   const vertical = axis === 'vertical';
-  const { activeCentre, activeCross, centreLineFar } = geometry;
+  const { activeCross, spanFar, spanNear } = geometry;
 
   const markers = chain.flatMap((edges) => [
     { x: edges.left, y: edges.top },
@@ -16,8 +16,8 @@ export const getChainMarkers = (chain: TEdges[], geometry: TChainGeometry, axis:
   ]);
 
   markers.push(
-    vertical ? { x: activeCross, y: activeCentre } : { x: activeCentre, y: activeCross },
-    vertical ? { x: activeCross, y: centreLineFar } : { x: centreLineFar, y: activeCross },
+    vertical ? { x: activeCross, y: spanNear } : { x: spanNear, y: activeCross },
+    vertical ? { x: activeCross, y: spanFar } : { x: spanFar, y: activeCross },
   );
 
   return markers;

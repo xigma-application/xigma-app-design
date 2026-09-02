@@ -222,3 +222,36 @@ test('dragging a shape onto the end of a run of same-size, equally-spaced neighb
   // the chain guides only show mid-drag — the two frames must differ
   expect(withGuides.equals(withoutGuides)).toBe(false);
 });
+
+test('dragging a shape to the crossing of a vertical and a horizontal run draws both chains at once (a + of guides through it)', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-guide-smart-matched-cross');
+  await expect(designPage.canvas).toBeVisible();
+
+  // a + of same-size 90x90 rects: two above, two below, two left, two right of the centre slot (equal gaps)
+  await designPage.drawRectangle(760, 200, 850, 290); // above 2
+  await designPage.drawRectangle(760, 320, 850, 410); // above 1
+  await designPage.drawRectangle(760, 560, 850, 650); // below 1
+  await designPage.drawRectangle(760, 680, 850, 770); // below 2
+  await designPage.drawRectangle(520, 440, 610, 530); // left 2
+  await designPage.drawRectangle(640, 440, 730, 530); // left 1
+  await designPage.drawRectangle(880, 440, 970, 530); // right 1
+  await designPage.drawRectangle(1000, 440, 1090, 530); // right 2
+  await designPage.drawRectangle(760, 900, 850, 990); // the shape to drag into the centre
+
+  await designPage.pointerDown(805, 945); // its centre
+  await page.mouse.move(806, 486, { steps: 8 }); // into the empty centre slot of the +
+
+  const withGuides = await page.screenshot({ clip: { height: 640, width: 640, x: 480, y: 160 } });
+
+  await designPage.pointerUp();
+  await designPage.pointerMove(1400, 900);
+
+  const withoutGuides = await page.screenshot({ clip: { height: 640, width: 640, x: 480, y: 160 } });
+
+  // both chains' guides only show mid-drag — the two frames must differ
+  expect(withGuides.equals(withoutGuides)).toBe(false);
+});

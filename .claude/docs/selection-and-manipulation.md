@@ -1757,24 +1757,27 @@ A separate, **display-only** mechanism (no snap delta of its own — the alignme
 centring). While dragging a single eligible shape, if it has a neighbour (across a real gap, not
 flush) that is the **same size** (`GRID_CELL_SIZE_MATCH_TOLERANCE_PX`, tight) **and** centred on it
 (`ALIGNMENT_SNAP_TOLERANCE_PX` on the perpendicular axis), the match **walks the whole chain** of
-consecutive same-size + centred shapes outward from the dragged one, then draws: a centre-axis line
-from the dragged shape's centre running through the entire chain to its far edge, the two shared edge
-lines spanning the **whole chain**, an × at every corner of every chain shape, and — in **each gap
-that belongs to a run of ≥2 equal gaps** — a px label (`drawValueLabel`, same orange). A lone odd gap
-gets no label. All lines/× in `DISTANCE_GUIDE_STROKE` orange (`drawXMarker` for the ×, same as §23's
+consecutive same-size + centred shapes outward from the dragged one **in both directions**, then
+draws: a centre-axis line spanning the **whole chain** (full `spanNear`→`spanFar`, both ways from the
+dragged shape — same extent as the edge lines, not stopping at the dragged shape's own centre), the
+two shared edge lines also spanning the whole chain, an × at every corner of every chain shape plus
+the two centre-axis ends, and — in **each gap that belongs to a run of ≥2 equal gaps** — a px label
+(`drawValueLabel`, same orange). A lone odd gap gets no label. All lines/× in `DISTANCE_GUIDE_STROKE` orange (`drawXMarker` for the ×, same as §23's
 contact guides).
 
 - `getEqualSpacingGuides/getMatchedPairGuides/` — `getVerticalMatchedPair.ts` / `getHorizontalMatchedPair.ts`
-  (one per stacking direction) + `getMatchedPairGuides.ts` orchestrator (vertical tried first).
-  `TMatchedPairGuides = { labels, lines, markers }` (new type next to `TEqualSpacingGuides`).
+  (one per stacking direction) + `getMatchedPairGuides.ts` orchestrator, which runs **both** axes
+  (each with its own independent `used` set) and **concatenates** their `labels`/`lines`/`markers` —
+  so a shape at the crossing of a vertical and a horizontal run (a `+` layout) shows both chains at
+  once. `TMatchedPairGuides = { labels, lines, markers }` (new type next to `TEqualSpacingGuides`).
   - `walkMatchedChain/` subfolder — `walkMatchedChain.ts` (step outward via `sign` −1/+1),
     `pickNextChainLink.ts` (nearest unused same-size + centred candidate beyond the cursor),
     `getAxisEdges.ts` (axis-agnostic near/far/centre/length/breadth view of a `TEdges`), `types.ts`
     (`TMatchedChainAxis`).
   - `buildMatchedChainGuides/` subfolder — `buildMatchedChainGuides.ts` orchestrates over the ordered
-    chain: `getChainGeometry.ts` (shared scalars + per-gap array → `TChainGeometry`),
-    `getChainGapLabels.ts` (equal-run gaps only), `getChainGuideLines.ts` (centre + 2 span edges),
-    `getChainMarkers.ts` (corner × + centre-line ends).
+    chain: `getChainGeometry.ts` (`activeCross` + chain span + per-gap array → `TChainGeometry`),
+    `getChainGapLabels.ts` (equal-run gaps only), `getChainGuideLines.ts` (3 full-span lines — centre
+    axis + 2 side edges), `getChainMarkers.ts` (corner × + the 2 centre-axis span ends).
 - `continueDrag/getMatchedPairDragGuides.ts` — the drag-time gate (single eligible plain-origin node,
   same pattern as `getChainGapDragSnap.ts`), called from `continueDrag.ts`. **When it returns
   non-null, `continueDrag.ts` writes `null` to BOTH `alignmentGuideRef` and `equalSpacingGuidesRef`**

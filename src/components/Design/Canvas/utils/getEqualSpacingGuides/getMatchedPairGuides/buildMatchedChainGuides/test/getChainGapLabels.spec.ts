@@ -8,9 +8,7 @@ import { getEdges } from '../../../../getDistanceGuides/getEdges';
 const rect = (y: number): ReturnType<typeof getEdges> => getEdges({ height: 100, width: 200, x: 0, y });
 
 const geometry = (gaps: number[]): TChainGeometry => ({
-  activeCentre: 0,
   activeCross: 100,
-  centreLineFar: 0,
   gaps,
   spanFar: 0,
   spanNear: 0,

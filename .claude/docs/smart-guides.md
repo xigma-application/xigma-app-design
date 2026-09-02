@@ -52,7 +52,7 @@ confirmation of it.
 
 | Name | File | Fires when | Draws |
 |------|------|-----------|-------|
-| **Matched pair / chain** | `getVerticalMatchedPair.ts` / `getHorizontalMatchedPair.ts`, orchestrated by `getMatchedPairGuides.ts` (vertical tried first); drag gate `continueDrag/getMatchedPairDragGuides.ts` | the dragged shape has at least one neighbour, across a **real gap** (not flush contact), that is the **exact same size** (both W and H, `GRID_CELL_SIZE_MATCH_TOLERANCE_PX`) **and** centred on it (`ALIGNMENT_SNAP_TOLERANCE_PX` on the perpendicular axis) | a centre-axis line from the dragged shape's centre running through the whole chain to its far edge, the two shared edge lines spanning the **entire chain**, an × at every corner of every chain shape, and — in **each gap that is part of a run of ≥2 equal gaps** — a px label |
+| **Matched pair / chain** | `getVerticalMatchedPair.ts` / `getHorizontalMatchedPair.ts`, **both** run by `getMatchedPairGuides.ts` and their outputs concatenated; drag gate `continueDrag/getMatchedPairDragGuides.ts` | the dragged shape has at least one neighbour, across a **real gap** (not flush contact), that is the **exact same size** (both W and H, `GRID_CELL_SIZE_MATCH_TOLERANCE_PX`) **and** centred on it (`ALIGNMENT_SNAP_TOLERANCE_PX` on the perpendicular axis) | a centre-axis line spanning the **entire chain** (both ways from the dragged shape — full `spanNear`→`spanFar`, same extent as the edge lines), the two shared edge lines also spanning the entire chain, an × at every corner of every chain shape plus the two centre-axis ends, and — in **each gap that is part of a run of ≥2 equal gaps** — a px label. A shape at the **crossing of a vertical and a horizontal run** (a `+` layout) draws **both** chains at once — `getMatchedPairGuides.ts` runs each axis with its own independent `used` set and merges `labels`/`lines`/`markers` |
 
 The match is a **chain walk**, not a single neighbour:
 
@@ -61,10 +61,11 @@ The match is a **chain walk**, not a single neighbour:
   candidate beyond the cursor) until the run breaks. `getAxisEdges.ts` is the axis-agnostic view of a
   `TEdges` (near/far/centre/length/breadth) both files share; `types.ts` holds `TMatchedChainAxis`.
 - `buildMatchedChainGuides/` — `buildMatchedChainGuides.ts` orchestrates over the ordered chain
-  `[...beforeReversed, active, ...after]`: `getChainGeometry.ts` (shared scalars + the per-gap array),
-  then `getChainGapLabels.ts` (label only gaps in an equal run — a lone odd gap gets none),
-  `getChainGuideLines.ts` (centre line + 2 span edges), `getChainMarkers.ts` (corner × + centre-line
-  ends). `types.ts` holds `TChainGeometry`.
+  `[...beforeReversed, active, ...after]`: `getChainGeometry.ts` (`activeCross` + chain span
+  `spanNear`/`spanFar` + the per-gap array), then `getChainGapLabels.ts` (label only gaps in an equal
+  run — a lone odd gap gets none), `getChainGuideLines.ts` (3 lines all spanning the full chain —
+  centre axis + 2 side edges), `getChainMarkers.ts` (corner × + the 2 centre-axis span ends).
+  `types.ts` holds `TChainGeometry`.
 
 **When matched-pair fires, `continueDrag.ts` suppresses BOTH the alignment guide and the chain-gap
 equal-spacing guides for that frame** (`alignmentGuideRef = null`, `equalSpacingGuidesRef = null`) —
