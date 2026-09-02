@@ -25,6 +25,7 @@
   "common.timeAgo.years_one": "{{count}} year ago",
   "common.timeAgo.years_other": "{{count}} years ago",
   "design.canvas.comment.placeholder": "Leave a comment",
+  "design.canvas.guide.remove": "Remove guide",
   "design.leftPanel.file.defaultName": "Untitled",
   "design.leftPanel.file.drafts": "Drafts",
   "design.leftPanel.file.expandUiLabel": "Expand UI",

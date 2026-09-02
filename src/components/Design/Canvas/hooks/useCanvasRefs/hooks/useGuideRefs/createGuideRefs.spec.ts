@@ -12,7 +12,7 @@ describe('createGuideRefs behaviors', () => {
 
   it('should apply overrides on top of the defaults', () => {
     // mock
-    const draggingGuideRef = { current: { axis: 'x' as const, frameId: null, id: null, position: 100 } };
+    const draggingGuideRef = { current: { axis: 'x' as const, frameId: null, hasMoved: false, id: null, position: 100 } };
 
     // before
     const refs = createGuideRefs({ draggingGuideRef });

@@ -29,7 +29,9 @@ describe('handlePointerMove', () => {
   it("should live-update a dragging guide's world position and set the resize-x class name", () => {
     // mock
     const canvas = createCanvas();
-    const refs = createCanvasRefs({ guides: { draggingGuideRef: { current: { axis: 'x', frameId: null, id: null, position: 5 } } } });
+    const refs = createCanvasRefs({
+      guides: { draggingGuideRef: { current: { axis: 'x', frameId: null, hasMoved: false, id: null, position: 5 } } },
+    });
     const event = pointerEvent(120, 200);
     const stopImmediatePropagationSpy = vi.spyOn(event, 'stopImmediatePropagation');
     const setClassName = vi.fn();
@@ -38,7 +40,7 @@ describe('handlePointerMove', () => {
     handlePointerMove(canvas, event, refs, setClassName);
 
     // result
-    expect(refs.guides.draggingGuideRef.current).toEqual({ axis: 'x', frameId: null, id: null, position: 120 });
+    expect(refs.guides.draggingGuideRef.current).toEqual({ axis: 'x', frameId: null, hasMoved: true, id: null, position: 120 });
     expect(setClassName).toHaveBeenCalledWith('resize-x');
     expect(stopImmediatePropagationSpy).toHaveBeenCalled();
   });
@@ -46,7 +48,9 @@ describe('handlePointerMove', () => {
   it('should set the resize-y class name while dragging a horizontal (y-axis) guide', () => {
     // mock
     const canvas = createCanvas();
-    const refs = createCanvasRefs({ guides: { draggingGuideRef: { current: { axis: 'y', frameId: null, id: null, position: 5 } } } });
+    const refs = createCanvasRefs({
+      guides: { draggingGuideRef: { current: { axis: 'y', frameId: null, hasMoved: false, id: null, position: 5 } } },
+    });
     const setClassName = vi.fn();
 
     // before

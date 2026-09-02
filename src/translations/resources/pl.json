@@ -37,6 +37,7 @@
   "common.timeAgo.years_one": "{{count}} rok temu",
   "common.timeAgo.years_other": "{{count}} lat temu",
   "design.canvas.comment.placeholder": "Zostaw komentarz",
+  "design.canvas.guide.remove": "Usuń prowadnicę",
   "design.leftPanel.file.defaultName": "Bez nazwy",
   "design.leftPanel.file.drafts": "Szkice",
   "design.leftPanel.file.expandUiLabel": "Rozwiń UI",

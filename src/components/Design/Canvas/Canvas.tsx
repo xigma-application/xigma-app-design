@@ -5,6 +5,7 @@ import { FC } from 'react';
 import CanvasContextMenuPanel from './CanvasContextMenuPanel/CanvasContextMenuPanel';
 import Comment from './Comment/Comment';
 import FrameNameLabelEditOverlay from './FrameNameLabelEditOverlay/FrameNameLabelEditOverlay';
+import GuideRemoveOverlay from './GuideRemoveOverlay/GuideRemoveOverlay';
 import RulersLayer from './RulersLayer/RulersLayer';
 import SectionNameLabelEditOverlay from './SectionNameLabelEditOverlay/SectionNameLabelEditOverlay';
 import TextEditOverlay from './TextEditOverlay/TextEditOverlay';
@@ -30,7 +31,6 @@ import { useDrawShapeTool } from './hooks/useDrawShapeTool/useDrawShapeTool';
 import { useDrawStarTool } from './hooks/useDrawStarTool/useDrawStarTool';
 import { useDrawTextOnPathTool } from './hooks/useDrawTextOnPathTool/useDrawTextOnPathTool';
 import { useDrawTextTool } from './hooks/useDrawTextTool/useDrawTextTool';
-import { useGuideTool } from './hooks/useGuideTool/useGuideTool';
 import { useHandTool } from './hooks/useHandTool/useHandTool';
 import { useHoverHighlight } from './hooks/useHoverHighlight/useHoverHighlight';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts/useKeyboardShortcuts';
@@ -84,7 +84,6 @@ const Canvas: FC = () => {
   useDrawTextTool(refs);
   useDrawTextOnPathTool(refs);
   useCommentTool(refs);
-  useGuideTool(refs);
   useSelectionTool(refs);
   useSliceTool(refs);
   useTextEditOnDoubleClick(refs);
@@ -102,6 +101,7 @@ const Canvas: FC = () => {
       <div className={styles.Canvas__texture} />
       <canvas className={cx(styles['Canvas__canvas-element'], cursor)} ref={refs.canvasRef} />
       <RulersLayer />
+      <GuideRemoveOverlay />
       <TextEditOverlay />
       <VectorWidthLabelEditOverlay />
       <FrameNameLabelEditOverlay />

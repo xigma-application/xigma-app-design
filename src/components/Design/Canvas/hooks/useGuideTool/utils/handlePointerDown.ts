@@ -27,6 +27,7 @@ export const handlePointerDown = (canvas: HTMLCanvasElement, event: PointerEvent
     refs.guides.draggingGuideRef.current = {
       axis: gutterAxis,
       frameId: null,
+      hasMoved: false,
       id: null,
       position: gutterAxis === 'x' ? worldPoint.x : worldPoint.y,
     };
@@ -42,6 +43,7 @@ export const handlePointerDown = (canvas: HTMLCanvasElement, event: PointerEvent
     refs.guides.draggingGuideRef.current = {
       axis: hitGuide.axis,
       frameId: hitGuide.frameId,
+      hasMoved: false,
       id: hitGuide.id,
       position: hitGuide.worldPosition,
     };

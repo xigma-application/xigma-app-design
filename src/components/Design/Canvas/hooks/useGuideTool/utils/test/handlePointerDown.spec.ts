@@ -38,7 +38,7 @@ describe('handlePointerDown', () => {
     handlePointerDown(canvas, event, store.dispatch, refs);
 
     // result
-    expect(refs.guides.draggingGuideRef.current).toEqual({ axis: 'y', frameId: null, id: null, position: 5 });
+    expect(refs.guides.draggingGuideRef.current).toEqual({ axis: 'y', frameId: null, hasMoved: false, id: null, position: 5 });
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(1);
     expect(stopImmediatePropagationSpy).toHaveBeenCalled();
   });
@@ -52,7 +52,7 @@ describe('handlePointerDown', () => {
     handlePointerDown(canvas, pointerEvent(5, 200), store.dispatch, refs);
 
     // result
-    expect(refs.guides.draggingGuideRef.current).toEqual({ axis: 'x', frameId: null, id: null, position: 5 });
+    expect(refs.guides.draggingGuideRef.current).toEqual({ axis: 'x', frameId: null, hasMoved: false, id: null, position: 5 });
   });
 
   it('should account for pan/zoom when computing the drag-out world position', () => {
@@ -65,7 +65,7 @@ describe('handlePointerDown', () => {
     handlePointerDown(canvas, pointerEvent(5, 200), store.dispatch, refs);
 
     // result
-    expect(refs.guides.draggingGuideRef.current).toEqual({ axis: 'x', frameId: null, id: null, position: -7.5 });
+    expect(refs.guides.draggingGuideRef.current).toEqual({ axis: 'x', frameId: null, hasMoved: false, id: null, position: -7.5 });
   });
 
   it("should shift the left gutter past LeftPanel's live width instead of the true screen edge", () => {
@@ -83,7 +83,7 @@ describe('handlePointerDown', () => {
     handlePointerDown(canvas, pointerEvent(310, 200), store.dispatch, refs);
 
     // result
-    expect(refs.guides.draggingGuideRef.current).toEqual({ axis: 'x', frameId: null, id: null, position: 310 });
+    expect(refs.guides.draggingGuideRef.current).toEqual({ axis: 'x', frameId: null, hasMoved: false, id: null, position: 310 });
   });
 
   it('should not arm a drag-out from the gutter while rulers are hidden', () => {

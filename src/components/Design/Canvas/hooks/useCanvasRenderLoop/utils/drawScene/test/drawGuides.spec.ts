@@ -131,7 +131,9 @@ describe('drawGuides', () => {
 
   it('should overlay a frame guide being dragged out (uncommitted, id null) clipped to that frame', () => {
     // mock
-    const refs = createCanvasRefs({ guides: { draggingGuideRef: { current: { axis: 'y', frameId: 'frame', id: null, position: 60 } } } });
+    const refs = createCanvasRefs({
+      guides: { draggingGuideRef: { current: { axis: 'y', frameId: 'frame', hasMoved: false, id: null, position: 60 } } },
+    });
 
     // before
     drawGuides(context, [], { frame }, refs);
@@ -152,7 +154,9 @@ describe('drawGuides', () => {
 
   it('should overlay a page guide being dragged out (uncommitted, id null) spanning the viewport', () => {
     // mock
-    const refs = createCanvasRefs({ guides: { draggingGuideRef: { current: { axis: 'x', frameId: null, id: null, position: 75 } } } });
+    const refs = createCanvasRefs({
+      guides: { draggingGuideRef: { current: { axis: 'x', frameId: null, hasMoved: false, id: null, position: 75 } } },
+    });
 
     // before
     drawGuides(context, [], {}, refs);
@@ -174,7 +178,7 @@ describe('drawGuides', () => {
   it('should clip a dragged frame guide to that frame, looked up by id', () => {
     // mock
     const refs = createCanvasRefs({
-      guides: { draggingGuideRef: { current: { axis: 'y', frameId: 'frame', id: 'guide-1', position: 60 } } },
+      guides: { draggingGuideRef: { current: { axis: 'y', frameId: 'frame', hasMoved: false, id: 'guide-1', position: 60 } } },
     });
 
     // before
@@ -197,7 +201,7 @@ describe('drawGuides', () => {
   it('should fall back to spanning the viewport when the dragged guide names a frame that no longer exists', () => {
     // mock
     const refs = createCanvasRefs({
-      guides: { draggingGuideRef: { current: { axis: 'y', frameId: 'missing', id: 'guide-1', position: 60 } } },
+      guides: { draggingGuideRef: { current: { axis: 'y', frameId: 'missing', hasMoved: false, id: 'guide-1', position: 60 } } },
     });
 
     // before
@@ -220,7 +224,9 @@ describe('drawGuides', () => {
   it('should draw the moved guide only once, replacing its committed (pre-drag) line with the live preview', () => {
     // mock
     const guideLines: TGuideLine[] = [{ axis: 'x', frameId: null, id: 'guide-1', span: null, worldPosition: 50 }];
-    const refs = createCanvasRefs({ guides: { draggingGuideRef: { current: { axis: 'x', frameId: null, id: 'guide-1', position: 90 } } } });
+    const refs = createCanvasRefs({
+      guides: { draggingGuideRef: { current: { axis: 'x', frameId: null, hasMoved: false, id: 'guide-1', position: 90 } } },
+    });
 
     // before
     drawGuides(context, guideLines, {}, refs);

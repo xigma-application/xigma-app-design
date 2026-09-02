@@ -12,12 +12,13 @@ import { useGuideTool } from './useGuideTool';
 
 // store
 import { selectActivePage, selectAreRulersVisible } from 'store/design/selectors';
-import { setActiveTool, setViewport, toggleRulers } from 'store/design/slice';
+import { addGuide, setActiveTool, setViewport, toggleRulers } from 'store/design/slice';
 import { store } from 'store';
 
 // types
 import { ToolName } from 'types/design/enums';
 import { TCanvasRefs, TGuideRefs } from 'types/design/canvas/types';
+import { TUseGuideTool } from './types';
 
 const createCanvasRef = (): RefObject<HTMLCanvasElement | null> => {
   const canvas = document.createElement('canvas');
@@ -38,10 +39,10 @@ const ClassNameProbe: FC = () => {
   return null;
 };
 
-const renderGuideTool = (canvasRef: RefObject<HTMLCanvasElement | null>): TGuideRefs => {
+const renderGuideTool = (canvasRef: RefObject<HTMLCanvasElement | null>): { guideRefs: TGuideRefs; result: { current: TUseGuideTool } } => {
   const refs: TCanvasRefs = createCanvasRefs({ canvasRef });
 
-  renderHook(() => useGuideTool(refs), {
+  const { result } = renderHook(() => useGuideTool(refs), {
     wrapper: ({ children }) => (
       <Provider store={store}>
         <ClassNamesProvider>
@@ -52,7 +53,7 @@ const renderGuideTool = (canvasRef: RefObject<HTMLCanvasElement | null>): TGuide
     ),
   });
 
-  return refs.guides;
+  return { guideRefs: refs.guides, result };
 };
 
 describe('useGuideTool behaviors', () => {
@@ -71,7 +72,7 @@ describe('useGuideTool behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    const guideRefs = renderGuideTool(canvasRef);
+    const { guideRefs } = renderGuideTool(canvasRef);
 
     // action
     act(() => {
@@ -107,7 +108,7 @@ describe('useGuideTool behaviors', () => {
     const canvasRef = createCanvasRef();
 
     // before
-    const guideRefs = renderGuideTool(canvasRef);
+    const { guideRefs } = renderGuideTool(canvasRef);
 
     // action
     act(() => {
@@ -115,13 +116,13 @@ describe('useGuideTool behaviors', () => {
     });
 
     // result
-    expect(guideRefs.draggingGuideRef.current).toEqual({ axis: 'x', frameId: null, id: null, position: 5 });
+    expect(guideRefs.draggingGuideRef.current).toEqual({ axis: 'x', frameId: null, hasMoved: false, id: null, position: 5 });
   });
 
   it('should abandon an in-progress drag when the tool switches away mid-gesture', () => {
     // mock
     const canvasRef = createCanvasRef();
-    const guideRefs = renderGuideTool(canvasRef);
+    const { guideRefs } = renderGuideTool(canvasRef);
 
     act(() => {
       canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 100, 5));
@@ -168,5 +169,69 @@ describe('useGuideTool behaviors', () => {
 
     // result
     expect(capturedClassName).toBeNull();
+  });
+
+  it('should select an existing guide on a plain click, then remove it via removeSelectedGuide', () => {
+    // mock
+    store.dispatch(addGuide({ axis: 'x', frameId: null, position: 40 }));
+    const [guide] = selectActivePage(store.getState()).guides.filter((candidate) => candidate.position === 40);
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { result } = renderGuideTool(canvasRef);
+
+    // action — a plain click, no movement in between
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 40, 200));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 40, 200));
+    });
+
+    // result
+    expect(result.current.selectedGuide).toEqual({ frameId: null, id: guide.id, worldPoint: { x: 40, y: 200 } });
+
+    // action
+    act(() => result.current.removeSelectedGuide());
+
+    // result
+    expect(selectActivePage(store.getState()).guides.find((candidate) => candidate.id === guide.id)).toBeUndefined();
+    expect(result.current.selectedGuide).toBeNull();
+  });
+
+  it('should do nothing when removeSelectedGuide is called without a selection', () => {
+    // mock
+    store.dispatch(addGuide({ axis: 'x', frameId: null, position: 40 }));
+    const guidesBefore = selectActivePage(store.getState()).guides;
+    const canvasRef = createCanvasRef();
+
+    // before
+    const { result } = renderGuideTool(canvasRef);
+
+    // action
+    act(() => result.current.removeSelectedGuide());
+
+    // result
+    expect(selectActivePage(store.getState()).guides).toEqual(guidesBefore);
+  });
+
+  it('should deselect the guide when starting a new pointerdown elsewhere', () => {
+    // mock
+    store.dispatch(addGuide({ axis: 'x', frameId: null, position: 40 }));
+    const canvasRef = createCanvasRef();
+    const { result } = renderGuideTool(canvasRef);
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 40, 200));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 40, 200));
+    });
+
+    expect(result.current.selectedGuide).not.toBeNull();
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 300, 300));
+    });
+
+    // result
+    expect(result.current.selectedGuide).toBeNull();
   });
 });

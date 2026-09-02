@@ -28,6 +28,7 @@ export const handlePointerMove = (
     const worldPoint = screenToWorld(pointer, viewport);
 
     dragging.position = dragging.axis === 'x' ? worldPoint.x : worldPoint.y;
+    dragging.hasMoved = true;
     setClassName(CLASS_NAME_BY_AXIS[dragging.axis]);
     event.stopImmediatePropagation();
     return;
