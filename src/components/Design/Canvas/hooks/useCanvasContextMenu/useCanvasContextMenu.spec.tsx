@@ -6,7 +6,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useCanvasContextMenu } from './useCanvasContextMenu';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, deleteNode, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -34,7 +34,9 @@ describe('useCanvasContextMenu', () => {
   beforeEach(() => {
     canvas = document.createElement('canvas');
     vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({ left: 0, top: 0 } as DOMRect);
+    selectActivePage(store.getState()).rootOrder.forEach((id) => store.dispatch(deleteNode(id)));
     store.dispatch(setSelection([]));
+    store.dispatch(setVectorEditingNodeIds([]));
   });
 
   it('should select the hit node and expose it as hitNode when right-clicking on top of it', async () => {
@@ -139,6 +141,36 @@ describe('useCanvasContextMenu', () => {
     result.current.onContextMenu(buildContextMenuEvent(10, 10, true));
 
     // result — no selection clobbered, no menu opened to swallow the click that actually toggled it
+    expect(result.current.isOpen).toBe(false);
+    expect(result.current.hitNode).toBeNull();
+    expect(selectSelectedIds(store.getState())).toEqual([]);
+  });
+
+  it("should leave selection and hitNode untouched, and never open, while a vector node is open for editing — macOS's own Ctrl+click-as-right-click alias for every Vector Edit Mode Ctrl+click gesture (arming a bend, pulling a handle, ...)", () => {
+    // mock — a node sitting under the click point, which a real right-click would otherwise hit
+    store.dispatch(
+      addNode({
+        fill: '#ff0000',
+        height: 20,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
+    );
+    store.dispatch(setVectorEditingNodeIds(['some-vector-node']));
+    const refs = createCanvasRefs({ canvasRef: { current: canvas } });
+
+    // before
+    const { result } = renderHook(() => useCanvasContextMenu(refs), { wrapper });
+
+    // action — a plain (no Shift) Ctrl+click, which macOS also delivers as this contextmenu event
+    result.current.onContextMenu(buildContextMenuEvent(10, 10));
+
+    // result
     expect(result.current.isOpen).toBe(false);
     expect(result.current.hitNode).toBeNull();
     expect(selectSelectedIds(store.getState())).toEqual([]);

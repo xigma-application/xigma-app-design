@@ -11,7 +11,7 @@
 
   &__line--start {
     background: var(--color-ramp-300);
-    bottom: -10px;
+    top: -10px;
     height: 15px;
     left: 26.5px;
     pointer-events: none;
@@ -21,7 +21,7 @@
 
   &__line--continue {
     background: var(--color-ramp-300);
-    bottom: -15px;
+    top: -10px;
     height: 15px;
     left: 26.5px;
     pointer-events: none;
@@ -31,7 +31,7 @@
 
   &__line--continue-child {
     background: var(--color-ramp-300);
-    bottom: -10px;
+    top: -10px;
     height: 32px;
     left: 26.5px;
     pointer-events: none;
@@ -45,7 +45,7 @@
     left: 27px;
     pointer-events: none;
     position: absolute;
-    top: -2.5px;
-    transform: translateX(-50%);
+    bottom: -2.5px;
+    transform: translateX(-50%) rotate(180deg);
   }
 }

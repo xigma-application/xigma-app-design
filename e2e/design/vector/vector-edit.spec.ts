@@ -23,8 +23,9 @@ const drawOpenTriangle = async (designPage: DesignPage): Promise<void> => {
   ]);
   // the layers-tree node icon starts as an empty <path d=""> and fills in a beat later; wait it out
   // here so the many "screenshot a baseline, round-trip, compare .toBe(true)" tests below don't
-  // capture their baseline mid-paint and then see the icon "appear" on a later capture
-  await expect(designPage.page.locator('svg[class*="TreeItem__icon"] path[d]:not([d=""])').first()).toBeAttached();
+  // capture their baseline mid-paint and then see the icon "appear" on a later capture. The
+  // TreeItem__icon class lands on the <span> wrapper, not the <svg> itself, hence scoping there.
+  await expect(designPage.page.locator('span[class*="TreeItem__icon"] path[d]:not([d=""])').first()).toBeAttached();
 };
 
 // clicking any main-toolbar tool outside the Pen group (selectToolbarTool.ts) now exits Vector Edit
