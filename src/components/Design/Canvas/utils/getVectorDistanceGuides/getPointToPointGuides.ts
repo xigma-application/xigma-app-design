@@ -20,7 +20,7 @@ export const getPointToPointGuides = (a: TPoint, b: TPoint): TVectorDistanceGuid
 
     return {
       labels: [getLabel(a.x, a.y, b.x, b.y, offsetDirection, Math.hypot(dx, dy))],
-      lines: [{ dashed: true, x1: a.x, x2: b.x, y1: a.y, y2: b.y }],
+      lines: [{ dashed: false, x1: a.x, x2: b.x, y1: a.y, y2: b.y }],
     };
   }
 
@@ -32,8 +32,8 @@ export const getPointToPointGuides = (a: TPoint, b: TPoint): TVectorDistanceGuid
       getLabel(corner.x, corner.y, b.x, b.y, { x: 1, y: 0 }, Math.abs(dy)),
     ],
     lines: [
-      { dashed: true, x1: a.x, x2: corner.x, y1: a.y, y2: corner.y },
-      { dashed: true, x1: corner.x, x2: b.x, y1: corner.y, y2: b.y },
+      { dashed: false, x1: a.x, x2: corner.x, y1: a.y, y2: corner.y },
+      { dashed: false, x1: corner.x, x2: b.x, y1: corner.y, y2: b.y },
     ],
   };
 };

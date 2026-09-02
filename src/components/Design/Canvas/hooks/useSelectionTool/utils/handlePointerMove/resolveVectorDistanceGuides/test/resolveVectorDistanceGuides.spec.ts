@@ -88,8 +88,8 @@ describe('resolveVectorDistanceGuides', () => {
     resolveVectorDistanceGuides(altMove(), refs, setClassName);
 
     expect(refs.transform.distanceGuidesRef.current?.lines).toEqual([
-      { dashed: true, x1: 0, x2: 100, y1: 0, y2: 0 },
-      { dashed: true, x1: 100, x2: 100, y1: 0, y2: 100 },
+      { dashed: false, x1: 0, x2: 100, y1: 0, y2: 0 },
+      { dashed: false, x1: 100, x2: 100, y1: 0, y2: 100 },
     ]);
     expect(setClassName).toHaveBeenCalledWith('distance-measure');
   });
@@ -99,7 +99,7 @@ describe('resolveVectorDistanceGuides', () => {
 
     resolveVectorDistanceGuides(altMove(), refs, vi.fn());
 
-    expect(refs.transform.distanceGuidesRef.current?.lines).toEqual([{ dashed: true, x1: 0, x2: 100, y1: 0, y2: 0 }]);
+    expect(refs.transform.distanceGuidesRef.current?.lines).toEqual([{ dashed: false, x1: 0, x2: 100, y1: 0, y2: 0 }]);
   });
 
   it('should clear the ref when Alt is not held', () => {

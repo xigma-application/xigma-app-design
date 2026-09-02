@@ -227,6 +227,43 @@ test('a vector point-to-point measurement appears while Alt-hovering another ver
   expect(altReleased.equals(altHovered)).toBe(false);
 });
 
+test('a vector point-to-point measurement appears for two vertices aligned on the same row (the single axis-aligned run branch)', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-distance-guide-vector-point-aligned');
+  await expect(designPage.canvas).toBeVisible();
+
+  // v1 (1300,300) -> v2 (1450,300): same row, so the measurement collapses to one axis-aligned run
+  await designPage.drawVectorPath([
+    { x: 1300, y: 300 },
+    { x: 1450, y: 300 },
+    { x: 1450, y: 450 },
+  ]);
+  await designPage.selectVectorEditMoveTool();
+  await designPage.click(1300, 300); // select v1
+
+  await designPage.pointerMove(1900, 800); // rest away
+  const away = await designPage.canvas.screenshot();
+
+  await page.keyboard.down('Alt');
+  await designPage.pointerMove(1450, 300); // hover v2, directly to the right of v1
+  const altHovered = await designPage.canvas.screenshot();
+
+  expect(altHovered.equals(away)).toBe(false);
+
+  await page.keyboard.up('Alt');
+  const altReleased = await designPage.canvas.screenshot();
+
+  expect(altReleased.equals(altHovered)).toBe(false);
+
+  // solid vs. dashed is a pixel-level rendering detail already pinned by
+  // getPointToPointGuides.spec.ts ("dashed: false" for two same-row/column points) — this e2e only
+  // needs to prove the real hover→resolve→render pipeline exercises that aligned branch at all,
+  // matching the presence/absence checks the rest of this file uses for every other guide shape
+});
+
 test('a vector point-to-segment measurement appears while Alt-hovering a non-incident segment, and shows the shadow cursor', async ({
   page,
 }) => {
