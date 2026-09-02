@@ -15,11 +15,13 @@ const renderInMenu = (children: ReactNode): ReturnType<typeof render> =>
   );
 
 describe('FileColorProfileMenu', () => {
-  it('should render a single disabled placeholder row', () => {
+  it('should render every profile option, disabled, with the preferred one selected', () => {
     // before
     renderInMenu(<FileColorProfileMenu />);
 
     // result
-    expect(screen.getByText('Coming soon').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Same as preferred profile (sRGB)').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Assign to sRGB').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Assign to Display P3').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
   });
 });

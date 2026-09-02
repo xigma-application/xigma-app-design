@@ -5,14 +5,14 @@ import { useTranslation } from 'react-i18next';
 import { MenuCompound } from 'shared';
 
 // others
-import { ADD_TO_SIDEBAR_MENU_PLACEHOLDER_KEY } from './constants';
+import { ADD_TO_SIDEBAR_MENU_STARRED_KEY } from './constants';
 
 const { MenuItem } = MenuCompound;
 
 const AddToSidebarMenu: FC = () => {
   const { t } = useTranslation();
 
-  return <MenuItem disabled label={t(ADD_TO_SIDEBAR_MENU_PLACEHOLDER_KEY)} withCheck={false} />;
+  return <MenuItem disabled label={t(ADD_TO_SIDEBAR_MENU_STARRED_KEY)} withCheck={false} />;
 };
 
 export default AddToSidebarMenu;

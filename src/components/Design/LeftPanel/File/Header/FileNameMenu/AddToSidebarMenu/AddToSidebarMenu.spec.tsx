@@ -15,11 +15,11 @@ const renderInMenu = (children: ReactNode): ReturnType<typeof render> =>
   );
 
 describe('AddToSidebarMenu', () => {
-  it('should render a single disabled placeholder row', () => {
+  it('should render a disabled Starred row', () => {
     // before
     renderInMenu(<AddToSidebarMenu />);
 
     // result
-    expect(screen.getByText('Coming soon').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Starred').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
   });
 });
