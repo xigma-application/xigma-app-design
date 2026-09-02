@@ -5,7 +5,7 @@ import {
   DEFAULT_FRAME_TOOL,
   DEFAULT_MOUSE_TOOL,
   DEFAULT_PAGE_NAME,
-  DEFAULT_PAINT_COLOR,
+  DEFAULT_PAINT,
   DEFAULT_PEN_TOOL,
   DEFAULT_SHAPE_TOOL,
   DEFAULT_TEXT_TOOL,
@@ -30,6 +30,7 @@ import {
 } from './types';
 import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
+import { TSolidPaint } from 'types/design/paint/types';
 import { TNewSceneNode, TSceneNode, TSceneNodeChanges, TViewport } from 'types/design/types';
 
 // utils
@@ -99,7 +100,7 @@ const initialState: TDesignState = {
       id: initialPageId,
       name: DEFAULT_PAGE_NAME,
       nodes: {},
-      paintColor: DEFAULT_PAINT_COLOR,
+      paint: DEFAULT_PAINT,
       rootOrder: [],
       selectedIds: [],
       viewport: DEFAULT_VIEWPORT,
@@ -166,8 +167,8 @@ const designSlice = createSlice({
       state.activePageId = action.payload;
     },
     setActiveTool: (state, action: PayloadAction<ToolName>) => handleSetActiveTool(state, action.payload),
-    setPaintColor: (state, action: PayloadAction<string>) => {
-      getActivePage(state).paintColor = action.payload;
+    setPaint: (state, action: PayloadAction<TSolidPaint>) => {
+      getActivePage(state).paint = action.payload;
     },
     setPenActiveVertexId: (state, action: PayloadAction<string | null>) => {
       state.penActiveVertexId = action.payload;
@@ -233,7 +234,7 @@ export const {
   setActionsPanelOpen,
   setActivePage,
   setActiveTool,
-  setPaintColor,
+  setPaint,
   setPenActiveVertexId,
   setSelection,
   setVectorEditingNodeIds,

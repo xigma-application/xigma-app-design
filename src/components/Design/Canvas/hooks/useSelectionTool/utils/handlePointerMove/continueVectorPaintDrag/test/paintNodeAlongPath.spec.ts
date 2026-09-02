@@ -78,7 +78,7 @@ describe('paintNodeAlongPath behaviors', () => {
     const touchedLoopKeys: TVectorPaintTouchedLoopKeys = {};
 
     // before
-    const faceKeys = paintNodeAlongPath(dispatch, node, [{ x: 70, y: 30 }], '#00ff00', false, touchedLoopKeys);
+    const faceKeys = paintNodeAlongPath(dispatch, node, [{ x: 70, y: 30 }], solid('#00ff00')[0], false, touchedLoopKeys);
 
     // result
     expect(faceKeys).toHaveLength(1);
@@ -98,9 +98,9 @@ describe('paintNodeAlongPath behaviors', () => {
     const touchedLoopKeys: TVectorPaintTouchedLoopKeys = {};
 
     // before
-    paintNodeAlongPath(dispatch, node, [{ x: 70, y: 30 }], '#00ff00', false, touchedLoopKeys);
+    paintNodeAlongPath(dispatch, node, [{ x: 70, y: 30 }], solid('#00ff00')[0], false, touchedLoopKeys);
     dispatch.mockClear();
-    paintNodeAlongPath(dispatch, node, [{ x: 75, y: 25 }], '#00ff00', false, touchedLoopKeys);
+    paintNodeAlongPath(dispatch, node, [{ x: 75, y: 25 }], solid('#00ff00')[0], false, touchedLoopKeys);
 
     // result
     expect(dispatch).not.toHaveBeenCalled();
@@ -118,7 +118,7 @@ describe('paintNodeAlongPath behaviors', () => {
     const touchedLoopKeys: TVectorPaintTouchedLoopKeys = {};
 
     // before
-    paintNodeAlongPath(dispatch, node, [{ x: 70, y: 30 }], '#00ff00', true, touchedLoopKeys);
+    paintNodeAlongPath(dispatch, node, [{ x: 70, y: 30 }], solid('#00ff00')[0], true, touchedLoopKeys);
 
     // result
     const changes = dispatch.mock.calls[0][0].payload.changes as Partial<TVectorNode>;
@@ -133,7 +133,7 @@ describe('paintNodeAlongPath behaviors', () => {
     const touchedLoopKeys: TVectorPaintTouchedLoopKeys = {};
 
     // before
-    const faceKeys = paintNodeAlongPath(dispatch, node, [{ x: 50, y: 25 }], '#00ff00', false, touchedLoopKeys);
+    const faceKeys = paintNodeAlongPath(dispatch, node, [{ x: 50, y: 25 }], solid('#00ff00')[0], false, touchedLoopKeys);
 
     // result
     expect(faceKeys).toHaveLength(1);

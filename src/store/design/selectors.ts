@@ -9,6 +9,7 @@ import { TDesignPage } from './types';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import { TComment, TSceneNode, TViewport } from 'types/design/types';
 import { TGuide, TGuideLine } from 'types/design/guides/types';
+import { TSolidPaint } from 'types/design/paint/types';
 
 // utils
 import { collectDescendantIdsOfSelected } from './utils/collectDescendantIdsOfSelected';
@@ -77,7 +78,7 @@ export const selectAllGuideLines = createSelector([selectPageGuides, selectFrame
   getAllGuideLines(pageGuides, frameGuides),
 );
 
-export const selectPaintColor = createSelector([selectActivePage], (page): string => page.paintColor);
+export const selectPaint = createSelector([selectActivePage], (page): TSolidPaint => page.paint);
 
 export const selectPenActiveVertexId = (state: RootState): string | null => state.design.penActiveVertexId;
 

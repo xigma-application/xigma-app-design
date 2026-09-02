@@ -3,6 +3,7 @@ import { AppDispatch } from 'store';
 
 // types
 import { TVectorPaintTouchedLoopKeys } from 'types/design/canvas/types';
+import { TPaint } from 'types/design/paint/types';
 import { TPoint } from 'types/canvas';
 import { TVectorNode } from 'types/design/types';
 
@@ -18,7 +19,7 @@ export const paintNodeAlongPath = (
   dispatch: AppDispatch,
   node: TVectorNode,
   path: TPoint[],
-  paintColor: string,
+  paint: TPaint,
   isRemoveMode: boolean,
   touchedLoopKeys: TVectorPaintTouchedLoopKeys,
 ): string[] => {
@@ -36,7 +37,7 @@ export const paintNodeAlongPath = (
   if (isRemoveMode) {
     removeNodeAlongPath(dispatch, persistedNode, loopKeysOnPath, geometryChanged, segments, vertices);
   } else {
-    addNodeAlongPath(dispatch, persistedNode, loopKeysOnPath, paintColor, geometryChanged, segments, vertices);
+    addNodeAlongPath(dispatch, persistedNode, loopKeysOnPath, paint, geometryChanged, segments, vertices);
   }
 
   return facesOnPath.map((face) => face.key);

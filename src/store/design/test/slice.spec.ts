@@ -1,5 +1,5 @@
 // others
-import { DEFAULT_PAGE_NAME, DEFAULT_PAINT_COLOR } from '../constants';
+import { DEFAULT_PAGE_NAME, DEFAULT_PAINT } from '../constants';
 
 // store
 import slice, {
@@ -24,7 +24,7 @@ import slice, {
   setActionsPanelOpen,
   setActivePage,
   setActiveTool,
-  setPaintColor,
+  setPaint,
   setPenActiveVertexId,
   setSelection,
   setVectorEditingNodeIds,
@@ -99,7 +99,7 @@ describe('design slice', () => {
           id: activePageId,
           name: DEFAULT_PAGE_NAME,
           nodes: {},
-          paintColor: DEFAULT_PAINT_COLOR,
+          paint: DEFAULT_PAINT,
           rootOrder: [],
           selectedIds: [],
           viewport: { x: 0, y: 0, zoom: 1 },
@@ -507,12 +507,12 @@ describe('design slice', () => {
     expect(state.pages[sourceId].rootOrder).toEqual([frameId, childId]);
   });
 
-  it('should set the paint color', () => {
+  it('should set the paint', () => {
     // before
-    const state = slice(undefined, setPaintColor('#ff0000'));
+    const state = slice(undefined, setPaint({ color: '#ff0000', opacity: 50, type: 'solid' }));
 
     // result
-    expect(state.pages[state.activePageId].paintColor).toBe('#ff0000');
+    expect(state.pages[state.activePageId].paint).toEqual({ color: '#ff0000', opacity: 50, type: 'solid' });
   });
 
   it('should set the pen active vertex id', () => {

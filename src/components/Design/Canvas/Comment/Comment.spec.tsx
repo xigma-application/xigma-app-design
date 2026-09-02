@@ -42,7 +42,7 @@ const createTestStore = (): EnhancedStore<{ design: TDesignState }> =>
             id: 'page-1',
             name: 'Page 1',
             nodes: {},
-            paintColor: '#d9d9d9',
+            paint: { color: '#d9d9d9', opacity: 100, type: 'solid' as const },
             rootOrder: [],
             selectedIds: [],
             viewport: { x: 10, y: 20, zoom: 2 },

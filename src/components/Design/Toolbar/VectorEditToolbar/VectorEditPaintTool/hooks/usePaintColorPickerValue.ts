@@ -1,16 +1,12 @@
-import { useState } from 'react';
-
 // hooks
-import { useSetPaintColor } from './useSetPaintColor';
+import { useSetPaint } from './useSetPaint';
 
 // store
-import { selectPaintColor } from 'store/design/selectors';
+import { selectPaint } from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // types
 import { TColorPickerValue } from 'shared/UITools/ColorPicker/types';
-
-const DEFAULT_PAINT_ALPHA = 100;
 
 export type TUsePaintColorPickerValueResult = {
   onChange: TFunc<[TColorPickerValue]>;
@@ -18,14 +14,8 @@ export type TUsePaintColorPickerValueResult = {
 };
 
 export const usePaintColorPickerValue = (): TUsePaintColorPickerValueResult => {
-  const hex = useAppSelector(selectPaintColor);
-  const setPaintColor = useSetPaintColor();
-  const [alpha, setAlpha] = useState(DEFAULT_PAINT_ALPHA);
+  const paint = useAppSelector(selectPaint);
+  const setPaint = useSetPaint();
 
-  const onChange = (next: TColorPickerValue): void => {
-    setAlpha(next.alpha);
-    setPaintColor(next);
-  };
-
-  return { onChange, value: { alpha, hex } };
+  return { onChange: setPaint, value: { alpha: paint.opacity, hex: paint.color } };
 };

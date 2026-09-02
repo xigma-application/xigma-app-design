@@ -1,5 +1,5 @@
 // store
-import { addNode, setPaintColor, setVectorEditingNodeIds } from 'store/design/slice';
+import { addNode, setPaint, setVectorEditingNodeIds } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -153,7 +153,7 @@ const addSquareWithVirtualCrossingVectorNode = (): string => {
 describe('continueVectorPaintDrag', () => {
   afterEach(() => {
     store.dispatch(setVectorEditingNodeIds([]));
-    store.dispatch(setPaintColor('#D9D9D9'));
+    store.dispatch(setPaint({ color: '#D9D9D9', opacity: 100, type: 'solid' }));
   });
 
   it('should do nothing when no paint stroke is in progress', () => {
@@ -175,7 +175,7 @@ describe('continueVectorPaintDrag', () => {
     const nodeId = addSplitSquareVectorNode();
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
-    store.dispatch(setPaintColor('#00ff00'));
+    store.dispatch(setPaint({ color: '#00ff00', opacity: 100, type: 'solid' }));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
@@ -265,7 +265,7 @@ describe('continueVectorPaintDrag', () => {
     const { nodeId, upperRightKey } = addSplitSquareVectorNodeWithUpperRightFilled('#ff0000');
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
-    store.dispatch(setPaintColor('#00ff00'));
+    store.dispatch(setPaint({ color: '#00ff00', opacity: 100, type: 'solid' }));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();

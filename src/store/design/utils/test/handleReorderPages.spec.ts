@@ -11,7 +11,7 @@ const buildPage = (name: string): TDesignPage => ({
   id: name,
   name,
   nodes: {},
-  paintColor: '#d9d9d9',
+  paint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
   rootOrder: [],
   selectedIds: [],
   viewport: { x: 0, y: 0, zoom: 1 },

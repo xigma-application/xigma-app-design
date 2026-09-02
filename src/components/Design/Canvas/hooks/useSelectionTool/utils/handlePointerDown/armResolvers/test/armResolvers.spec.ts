@@ -3,13 +3,13 @@ import {
   addNode,
   groupNodes,
   setActiveTool,
-  setPaintColor,
+  setPaint,
   setPenActiveVertexId,
   setSelection,
   setVectorEditingNodeIds,
   updateNode,
 } from 'store/design/slice';
-import { DEFAULT_PAINT_COLOR } from 'store/design/constants';
+import { DEFAULT_PAINT, DEFAULT_PAINT_COLOR } from 'store/design/constants';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -1078,7 +1078,7 @@ describe('armVectorLassoOnPointerDown', () => {
 describe('armVectorPaintOnPointerDown', () => {
   afterEach(() => {
     store.dispatch(setVectorEditingNodeIds([]));
-    store.dispatch(setPaintColor(DEFAULT_PAINT_COLOR));
+    store.dispatch(setPaint(DEFAULT_PAINT));
   });
 
   it('should add the clicked face to filledFaceKeys and claim the pointerdown, when the face is not yet filled', () => {
@@ -1166,7 +1166,7 @@ describe('armVectorPaintOnPointerDown', () => {
     );
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
-    store.dispatch(setPaintColor('#ff0000'));
+    store.dispatch(setPaint({ color: '#ff0000', opacity: 100, type: 'solid' }));
 
     // before — a point inside the triangle
     const ctx = createContext({ activeTool: ToolName.paint, point: { x: 50, y: 40 } });
@@ -1287,7 +1287,7 @@ describe('armVectorPaintOnPointerDown', () => {
         id: nodeId,
       }),
     );
-    store.dispatch(setPaintColor('#ff0000'));
+    store.dispatch(setPaint({ color: '#ff0000', opacity: 100, type: 'solid' }));
 
     // before — click inside B, which sits fully inside A's already-filled area
     const ctx = createContext({ activeTool: ToolName.paint, point: { x: 75, y: 75 } });
@@ -1382,7 +1382,7 @@ describe('armVectorPaintOnPointerDown', () => {
     const iKey = 'si1[v:i1|v:i2],si2[v:i2|v:i3],si3[v:i3|v:i4],si4[v:i1|v:i4]';
 
     store.dispatch(setVectorEditingNodeIds([nodeId]));
-    store.dispatch(setPaintColor('#ff0000'));
+    store.dispatch(setPaint({ color: '#ff0000', opacity: 100, type: 'solid' }));
 
     // before — click inside M but outside I
     const ctx = createContext({ activeTool: ToolName.paint, point: { x: 10, y: 10 } });

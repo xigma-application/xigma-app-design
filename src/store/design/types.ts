@@ -3,6 +3,7 @@ import { ToolName } from 'types/design/enums';
 import { TEditingTextBox, TPoint } from 'types/canvas';
 import { TComment, TSceneNode, TViewport } from 'types/design/types';
 import { TGuide, TGuideAxis } from 'types/design/guides/types';
+import { TSolidPaint } from 'types/design/paint/types';
 
 export type TDesignPage = {
   comments: Record<string, TComment>;
@@ -10,7 +11,7 @@ export type TDesignPage = {
   id: string;
   name: string;
   nodes: Record<string, TSceneNode>;
-  paintColor: string;
+  paint: TSolidPaint;
   rootOrder: string[];
   selectedIds: string[];
   viewport: TViewport;

@@ -31,7 +31,7 @@ describe('addNodeAlongPath behaviors', () => {
     const node = buildNode([]);
 
     // before
-    addNodeAlongPath(dispatch, node, [], '#00ff00', false, {}, {});
+    addNodeAlongPath(dispatch, node, [], solid('#00ff00')[0], false, {}, {});
 
     // result
     expect(dispatch).not.toHaveBeenCalled();
@@ -43,7 +43,7 @@ describe('addNodeAlongPath behaviors', () => {
     const node = buildNode(['face-a'], { 'face-a': solid('#ff0000') });
 
     // before
-    addNodeAlongPath(dispatch, node, ['face-a', 'face-b'], '#00ff00', false, {}, {});
+    addNodeAlongPath(dispatch, node, ['face-a', 'face-b'], solid('#00ff00')[0], false, {}, {});
 
     // result
     const changes = dispatch.mock.calls[0][0].payload.changes as Partial<TVectorNode>;
@@ -61,7 +61,7 @@ describe('addNodeAlongPath behaviors', () => {
     const vertices = { a: { id: 'a', x: 0, y: 0 }, b: { id: 'b', x: 1, y: 1 } };
 
     // before
-    addNodeAlongPath(dispatch, node, ['face-a'], '#00ff00', true, segments, vertices);
+    addNodeAlongPath(dispatch, node, ['face-a'], solid('#00ff00')[0], true, segments, vertices);
 
     // result
     const changes = dispatch.mock.calls[0][0].payload.changes as Partial<TVectorNode>;

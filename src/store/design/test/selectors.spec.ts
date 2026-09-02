@@ -29,7 +29,7 @@ import {
   selectOrderedNodes,
   selectPageGuides,
   selectPages,
-  selectPaintColor,
+  selectPaint,
   selectPenActiveVertexId,
   selectRenderOrderedNodes,
   selectSelectedIds,
@@ -87,7 +87,7 @@ const state = {
         id: 'page-1',
         name: 'Page 1',
         nodes: { [node.id]: node },
-        paintColor: '#d9d9d9',
+        paint: { color: '#d9d9d9', opacity: 100, type: 'solid' },
         rootOrder: [node.id],
         selectedIds: [node.id],
         viewport: { x: 5, y: 10, zoom: 2 },
@@ -214,9 +214,9 @@ describe('design selectors', () => {
     expect(selectLastTextTool(state)).toBe(ToolName.textOnPath);
   });
 
-  it('should select the paint color', () => {
+  it('should select the paint', () => {
     // result
-    expect(selectPaintColor(state)).toBe('#d9d9d9');
+    expect(selectPaint(state)).toEqual({ color: '#d9d9d9', opacity: 100, type: 'solid' });
   });
 
   it('should select the pen active vertex id', () => {

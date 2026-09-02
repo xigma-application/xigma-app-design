@@ -6,8 +6,8 @@ import VectorEditPaintTool from './VectorEditPaintTool';
 import { TooltipProvider } from 'shared';
 
 // store
-import { setPaintColor } from 'store/design/slice';
-import { DEFAULT_PAINT_COLOR } from 'store/design/constants';
+import { DEFAULT_PAINT } from 'store/design/constants';
+import { setPaint } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -31,7 +31,7 @@ const renderVectorEditPaintTool = (isActive: boolean): ReturnType<typeof render>
 
 describe('VectorEditPaintTool', () => {
   beforeEach(() => {
-    store.dispatch(setPaintColor(DEFAULT_PAINT_COLOR));
+    store.dispatch(setPaint(DEFAULT_PAINT));
   });
 
   it('should render the static icon and label when inactive', () => {
@@ -81,7 +81,7 @@ describe('VectorEditPaintTool', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('should dispatch setPaintColor when a preset is picked from the open panel', () => {
+  it('should dispatch setPaint when a preset is picked from the open panel', () => {
     // before
     renderVectorEditPaintTool(true);
     fireEvent.click(screen.getByRole('button', { name: 'Paint' }));
@@ -93,6 +93,10 @@ describe('VectorEditPaintTool', () => {
     fireEvent.click(swatch);
 
     // result
-    expect(store.getState().design.pages[store.getState().design.activePageId].paintColor).toBe('#ffffff');
+    expect(store.getState().design.pages[store.getState().design.activePageId].paint).toEqual({
+      color: '#ffffff',
+      opacity: 100,
+      type: 'solid',
+    });
   });
 });

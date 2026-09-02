@@ -1,14 +1,14 @@
 // store
-import { setPaintColor } from 'store/design/slice';
+import { setPaint } from 'store/design/slice';
 import { useAppDispatch } from 'store';
 
 // types
 import { TColorPickerValue } from 'shared/UITools/ColorPicker/types';
 
-export const useSetPaintColor = (): TFunc<[TColorPickerValue]> => {
+export const useSetPaint = (): TFunc<[TColorPickerValue]> => {
   const dispatch = useAppDispatch();
 
   return (value: TColorPickerValue): void => {
-    dispatch(setPaintColor(value.hex));
+    dispatch(setPaint({ color: value.hex, opacity: value.alpha, type: 'solid' }));
   };
 };

@@ -5,8 +5,8 @@ import { act, renderHook } from '@testing-library/react';
 import { usePaintColorPickerValue } from '../usePaintColorPickerValue';
 
 // store
-import { setPaintColor } from 'store/design/slice';
-import { DEFAULT_PAINT_COLOR } from 'store/design/constants';
+import { DEFAULT_PAINT } from 'store/design/constants';
+import { setPaint } from 'store/design/slice';
 import { store } from 'store';
 
 const renderUsePaintColorPickerValue = (): ReturnType<typeof renderHook<ReturnType<typeof usePaintColorPickerValue>, unknown>> =>
@@ -14,18 +14,18 @@ const renderUsePaintColorPickerValue = (): ReturnType<typeof renderHook<ReturnTy
 
 describe('usePaintColorPickerValue', () => {
   beforeEach(() => {
-    store.dispatch(setPaintColor(DEFAULT_PAINT_COLOR));
+    store.dispatch(setPaint(DEFAULT_PAINT));
   });
 
-  it('should expose the store hex with a full-opacity alpha by default', () => {
+  it('should expose the store paint’s own color and opacity by default', () => {
     // before
     const { result } = renderUsePaintColorPickerValue();
 
     // result
-    expect(result.current.value).toStrictEqual({ alpha: 100, hex: DEFAULT_PAINT_COLOR });
+    expect(result.current.value).toStrictEqual({ alpha: DEFAULT_PAINT.opacity, hex: DEFAULT_PAINT.color });
   });
 
-  it('should dispatch the hex and keep the picked alpha locally on change', () => {
+  it('should dispatch the picked hex and alpha into the store as a solid paint, both persisted, not just the color', () => {
     // before
     const { result } = renderUsePaintColorPickerValue();
 
@@ -33,7 +33,11 @@ describe('usePaintColorPickerValue', () => {
     act(() => result.current.onChange({ alpha: 40, hex: '#ff0000' }));
 
     // result
-    expect(store.getState().design.pages[store.getState().design.activePageId].paintColor).toBe('#ff0000');
+    expect(store.getState().design.pages[store.getState().design.activePageId].paint).toEqual({
+      color: '#ff0000',
+      opacity: 40,
+      type: 'solid',
+    });
     expect(result.current.value).toStrictEqual({ alpha: 40, hex: '#ff0000' });
   });
 });

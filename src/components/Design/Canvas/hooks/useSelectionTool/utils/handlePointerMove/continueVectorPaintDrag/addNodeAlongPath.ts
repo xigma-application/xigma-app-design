@@ -3,16 +3,14 @@ import { updateNode } from 'store/design/slice';
 import { AppDispatch } from 'store';
 
 // types
+import { TPaint } from 'types/design/paint/types';
 import { TVectorNode } from 'types/design/types';
-
-// utils
-import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
 
 export const addNodeAlongPath = (
   dispatch: AppDispatch,
   persistedNode: TVectorNode,
   loopKeysOnPath: string[],
-  paintColor: string,
+  paint: TPaint,
   geometryChanged: boolean,
   segments: TVectorNode['segments'],
   vertices: TVectorNode['vertices'],
@@ -23,7 +21,7 @@ export const addNodeAlongPath = (
     const fillByKey = { ...persistedNode.fillByKey };
 
     loopKeysOnPath.forEach((key) => {
-      fillByKey[key] = [makeSolidPaint(paintColor)];
+      fillByKey[key] = [paint];
     });
 
     const changes: Partial<TVectorNode> = geometryChanged

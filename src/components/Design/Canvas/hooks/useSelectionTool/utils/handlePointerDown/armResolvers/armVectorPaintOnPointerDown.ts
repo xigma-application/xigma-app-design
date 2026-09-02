@@ -1,5 +1,5 @@
 // store
-import { selectPaintColor, selectVectorEditingNodeIds } from 'store/design/selectors';
+import { selectPaint, selectVectorEditingNodeIds } from 'store/design/selectors';
 import { updateNode } from 'store/design/slice';
 import { store } from 'store';
 
@@ -19,7 +19,6 @@ import { getVectorFaceAtPointAcrossOpenNodes } from '../../../../../utils/getVec
 import { getVectorFillLoopKey } from 'utils/canvas/vectorNetwork/getVectorFillLoopKey';
 import { getVectorFillLoopKeyAtPoint } from 'utils/canvas/vectorNetwork/getVectorFillLoopKeyAtPoint';
 import { getVectorFillLoopPoints } from 'utils/canvas/vectorNetwork/getVectorFillLoopPoints/getVectorFillLoopPoints';
-import { makeSolidPaint } from 'utils/design/paint/makeSolidPaint';
 import { persistVectorNetworkCrossings } from 'utils/canvas/vectorNetwork/planarizeVectorNetwork/persistVectorNetworkCrossings';
 
 export const armVectorPaintOnPointerDown = ({
@@ -50,7 +49,7 @@ export const armVectorPaintOnPointerDown = ({
       const inheritingLoopKeys = removedFacePoints ? getNestedUnfilledLoopKeys(node, removedFacePoints) : [];
       const paintingLoopKeys = existingLoopKey ? [] : getNestedUnfilledLoopKeys(node, face.points);
       const holeParentKey = existingLoopKey ? null : getContainingFilledLoopKey(node, face.points);
-      const paint = holeParentKey ? getEffectiveVectorFill(node, holeParentKey) : [makeSolidPaint(selectPaintColor(state))];
+      const paint = holeParentKey ? getEffectiveVectorFill(node, holeParentKey) : [selectPaint(state)];
       const filledFaceKeys = existingLoopKey
         ? [...node.filledFaceKeys.filter((key) => key !== existingLoopKey), ...inheritingLoopKeys]
         : [...node.filledFaceKeys, newLoopKey, ...paintingLoopKeys];

@@ -1,5 +1,5 @@
 // others
-import { DEFAULT_PAINT_COLOR, DEFAULT_VIEWPORT } from '../constants';
+import { DEFAULT_PAINT, DEFAULT_VIEWPORT } from '../constants';
 
 // types
 import { TDesignPage, TDesignState } from '../types';
@@ -14,7 +14,7 @@ export const handleAddPage = (state: TDesignState, id: string): void => {
     id,
     name: getNextPageName(state.pages),
     nodes: {},
-    paintColor: DEFAULT_PAINT_COLOR,
+    paint: DEFAULT_PAINT,
     rootOrder: [],
     selectedIds: [],
     viewport: DEFAULT_VIEWPORT,
