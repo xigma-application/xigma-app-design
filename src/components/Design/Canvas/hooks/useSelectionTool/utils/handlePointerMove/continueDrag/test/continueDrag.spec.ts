@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, deleteNode, setSelection } from 'store/design/slice';
+import { addNode, deleteNode, moveNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -452,7 +452,7 @@ describe('continueDrag', () => {
     });
   });
 
-  it('should populate the drop-target frame ref once the pointer moves over a frame', () => {
+  it('should reparent the dragged node into the frame under the pointer in real time, before pointer-up', () => {
     // mock — a 20x20 rect being dragged with the pointer landing inside a 300x300 frame
     const rectId = addRectNode(0, 0, 20);
     const frameId = addFrameNode(200, 0, 300);
@@ -471,30 +471,68 @@ describe('continueDrag', () => {
     // before
     continueDrag(canvas, pointerEvent(300, 50), store.dispatch, dragStateRef, canvasRefs, setClassName);
 
-    // result
+    // result — highlighted, and already reparented in the store
+    const page = selectActivePage(store.getState());
     expect(canvasRefs.transform.dropTargetFrameIdRef.current).toBe(frameId);
+    expect(page.nodes[rectId].parentId).toBe(frameId);
+    expect((page.nodes[frameId] as { childIds: string[] }).childIds).toContain(rectId);
+    expect(page.rootOrder).not.toContain(rectId);
   });
 
-  it('should clear the drop-target frame ref once the pointer moves back over empty canvas', () => {
-    // mock
-    const rectId = addRectNode(0, 0, 20);
-    addFrameNode(2000, 2000, 300);
+  it('should reparent the dragged node back to the root in real time once the pointer leaves the frame', () => {
+    // mock — rect starts life inside the frame
+    const frameId = addFrameNode(0, 0, 100);
+    const rectId = addRectNode(20, 20, 20);
 
+    store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: frameId }));
     store.dispatch(setSelection([rectId]));
 
     const canvas = createCanvas();
     const canvasRefs = createCanvasRefs();
     const dragStateRef = createDragStateRef({
       hasMoved: false,
-      nodeOrigins: { [rectId]: { x: 0, y: 0 } },
+      nodeOrigins: { [rectId]: { x: 20, y: 20 } },
       pendingClickAction: null,
       pointerStart: { x: 0, y: 0 },
     });
 
-    // before — dragged far from the frame
-    continueDrag(canvas, pointerEvent(10, 10), store.dispatch, dragStateRef, canvasRefs, setClassName);
+    // before — pointer dragged out onto empty canvas
+    continueDrag(canvas, pointerEvent(400, 400), store.dispatch, dragStateRef, canvasRefs, setClassName);
 
     // result
+    const page = selectActivePage(store.getState());
     expect(canvasRefs.transform.dropTargetFrameIdRef.current).toBeNull();
+    expect(page.nodes[rectId].parentId).toBeNull();
+    expect((page.nodes[frameId] as { childIds: string[] }).childIds).not.toContain(rectId);
+    expect(page.rootOrder).toContain(rectId);
+  });
+
+  it('should not re-dispatch a reparent while the pointer keeps moving inside the frame it is already parented to', () => {
+    // mock
+    const frameId = addFrameNode(0, 0, 300);
+    const rectId = addRectNode(20, 20, 20);
+
+    store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: frameId }));
+    store.dispatch(setSelection([rectId]));
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const dragStateRef = createDragStateRef({
+      hasMoved: false,
+      nodeOrigins: { [rectId]: { x: 20, y: 20 } },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+    });
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+
+    // before — two moves, both landing inside the same frame
+    continueDrag(canvas, pointerEvent(100, 100), store.dispatch, dragStateRef, canvasRefs, setClassName);
+    continueDrag(canvas, pointerEvent(150, 150), store.dispatch, dragStateRef, canvasRefs, setClassName);
+
+    // result — no moveNodes action was dispatched
+    expect(dispatchSpy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
+    expect(selectActivePage(store.getState()).nodes[rectId].parentId).toBe(frameId);
+
+    dispatchSpy.mockRestore();
   });
 });

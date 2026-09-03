@@ -14,8 +14,7 @@ const frame = (
   y: number,
   width: number,
   height: number,
-  childIds: string[] = [],
-  parentId: string | null = null,
+  { childIds = [], parentId = null, rotation = 0 }: { childIds?: string[]; parentId?: string | null; rotation?: number } = {},
 ): TSceneNode =>
   ({
     childIds,
@@ -25,15 +24,12 @@ const frame = (
     id,
     name: 'Frame',
     parentId,
-    rotation: 0,
+    rotation,
     type: NodeType.frame,
     width,
     x,
     y,
   }) as TSceneNode;
-
-const section = (id: string, x: number, y: number): TSceneNode =>
-  ({ fill: '#000', height: 50, id, name: 'Section', parentId: null, rotation: 0, type: NodeType.section, width: 50, x, y }) as TSceneNode;
 
 describe('getDragDropTargetFrame', () => {
   it('should return the frame under the pointer, anywhere inside its bounds', () => {
@@ -42,47 +38,61 @@ describe('getDragDropTargetFrame', () => {
     const nodesById = { a: draggedNode, f1: targetFrame };
 
     // pointer well inside f1's interior, nowhere near its outline
-    const result = getDragDropTargetFrame([draggedNode], { x: 180, y: 90 }, [draggedNode, targetFrame], nodesById);
+    const result = getDragDropTargetFrame(['a'], { x: 180, y: 90 }, [draggedNode, targetFrame], nodesById);
 
     expect(result).toBe('f1');
   });
 
-  it('should return null when the pointer is outside any frame', () => {
+  it('should return null when the pointer is over empty canvas', () => {
     const draggedNode = rect('a', 0, 0);
     const targetFrame = frame('f1', 1000, 1000, 200, 200);
     const nodesById = { a: draggedNode, f1: targetFrame };
 
-    const result = getDragDropTargetFrame([draggedNode], { x: 10, y: 10 }, [draggedNode, targetFrame], nodesById);
+    const result = getDragDropTargetFrame(['a'], { x: 10, y: 10 }, [draggedNode, targetFrame], nodesById);
 
     expect(result).toBeNull();
   });
 
-  it('should reject a frame that is itself part of the dragged selection', () => {
-    const draggedFrame = frame('f1', 100, 0, 200, 200);
-    const nodesById = { f1: draggedFrame };
+  it('should return the deepest (front-most) frame when frames overlap under the pointer', () => {
+    const draggedNode = rect('a', 0, 0);
+    const outer = frame('outer', 0, 0, 500, 500);
+    const inner = frame('inner', 100, 100, 200, 200, { parentId: 'outer' });
+    const nodesById = { a: draggedNode, inner, outer };
 
-    const result = getDragDropTargetFrame([draggedFrame], { x: 150, y: 100 }, [draggedFrame], nodesById);
+    // inner is listed after outer in render order → front-most
+    const result = getDragDropTargetFrame(['a'], { x: 150, y: 150 }, [draggedNode, outer, inner], nodesById);
+
+    expect(result).toBe('inner');
+  });
+
+  it('should skip a frame in the moved set and fall through to the outer frame under the pointer', () => {
+    const outer = frame('outer', 0, 0, 500, 500, { childIds: ['inner'] });
+    const inner = frame('inner', 100, 100, 200, 200, { parentId: 'outer' });
+    const nodesById = { inner, outer };
+
+    // dragging `inner`, pointer still over its own body — should resolve to `outer`, not `inner`
+    const result = getDragDropTargetFrame(['inner'], { x: 150, y: 150 }, [outer, inner], nodesById);
+
+    expect(result).toBe('outer');
+  });
+
+  it('should skip a frame that is a descendant of a moved node', () => {
+    const outer = frame('outer', 0, 0, 500, 500, { childIds: ['inner'] });
+    const inner = frame('inner', 100, 100, 200, 200, { parentId: 'outer' });
+    const nodesById = { inner, outer };
+
+    // dragging `outer`, pointer over the nested `inner` — inner is a descendant, so no valid target
+    const result = getDragDropTargetFrame(['outer'], { x: 150, y: 150 }, [outer, inner], nodesById);
 
     expect(result).toBeNull();
   });
 
-  it('should reject a frame that is a descendant of the dragged selection', () => {
-    const outerFrame = frame('outer', 0, 0, 500, 500, ['inner']);
-    const innerFrame = frame('inner', 100, 100, 200, 200, [], 'outer');
-    const nodesById = { inner: innerFrame, outer: outerFrame };
+  it('should ignore rotated frames', () => {
+    const draggedNode = rect('a', 0, 0);
+    const rotatedFrame = frame('f1', 0, 0, 200, 200, { rotation: 20 });
+    const nodesById = { a: draggedNode, f1: rotatedFrame };
 
-    // pointer over the nested inner frame while dragging its own ancestor
-    const result = getDragDropTargetFrame([outerFrame], { x: 200, y: 200 }, [outerFrame, innerFrame], nodesById);
-
-    expect(result).toBeNull();
-  });
-
-  it('should reject any drop when the dragged selection includes a section', () => {
-    const draggedSection = section('s1', 0, 0);
-    const targetFrame = frame('f1', 0, 0, 200, 200);
-    const nodesById = { f1: targetFrame, s1: draggedSection };
-
-    const result = getDragDropTargetFrame([draggedSection], { x: 100, y: 100 }, [draggedSection, targetFrame], nodesById);
+    const result = getDragDropTargetFrame(['a'], { x: 100, y: 100 }, [draggedNode, rotatedFrame], nodesById);
 
     expect(result).toBeNull();
   });
