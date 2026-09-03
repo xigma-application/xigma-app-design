@@ -6,10 +6,14 @@ import { TSceneNode } from 'types/design/types';
 import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { drawSmartSelectionHandles } from '../drawSmartSelectionHandles';
 
+const drawSmartSelectionGapFillPreviewMock = vi.fn();
 const drawSmartSelectionGapHandlesMock = vi.fn();
 const drawSmartSelectionGapHoverLabelMock = vi.fn();
 const drawSmartSelectionSwapHandlesMock = vi.fn();
 
+vi.mock('../drawSmartSelectionGapFillPreview', () => ({
+  drawSmartSelectionGapFillPreview: (...args: unknown[]): void => drawSmartSelectionGapFillPreviewMock(...args),
+}));
 vi.mock('../drawSmartSelectionGapHandles', () => ({
   drawSmartSelectionGapHandles: (...args: unknown[]): void => drawSmartSelectionGapHandlesMock(...args),
 }));
@@ -41,6 +45,7 @@ const rect = (id: string, x: number): TSceneNode =>
 
 describe('drawSmartSelectionHandles', () => {
   beforeEach(() => {
+    drawSmartSelectionGapFillPreviewMock.mockClear();
     drawSmartSelectionGapHandlesMock.mockClear();
     drawSmartSelectionGapHoverLabelMock.mockClear();
     drawSmartSelectionSwapHandlesMock.mockClear();
@@ -55,10 +60,11 @@ describe('drawSmartSelectionHandles', () => {
 
     expect(drawSmartSelectionGapHandlesMock).not.toHaveBeenCalled();
     expect(drawSmartSelectionSwapHandlesMock).not.toHaveBeenCalled();
+    expect(drawSmartSelectionGapFillPreviewMock).not.toHaveBeenCalled();
     expect(drawSmartSelectionGapHoverLabelMock).toHaveBeenCalledTimes(1);
   });
 
-  it('should draw gap and swap handles for a valid row selection', () => {
+  it('should draw gap and swap handles for a valid row selection, without the fill preview while not dragging', () => {
     drawSmartSelectionHandles(
       { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
       [rect('a', 0), rect('b', 100)],
@@ -67,5 +73,38 @@ describe('drawSmartSelectionHandles', () => {
 
     expect(drawSmartSelectionGapHandlesMock).toHaveBeenCalledTimes(1);
     expect(drawSmartSelectionSwapHandlesMock).toHaveBeenCalledTimes(1);
+    expect(drawSmartSelectionGapFillPreviewMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw the fill preview for every gap on the dragged axis while a gap drag is in progress', () => {
+    const refs = createCanvasRefs({
+      smartSelection: {
+        gapDragRef: {
+          current: {
+            anchorPosition: 0,
+            anchorSize: 50,
+            axis: 'x',
+            badgeAnchor: { x: 0, y: 0 },
+            cascadeGroups: [],
+            currentGapValue: 50,
+            dispatchThrottle: { frameId: null, run: null },
+            gapIndex: 0,
+            hasMoved: true,
+            nodeOrigins: {},
+            originalGapValue: 50,
+            pointerStart: { x: 0, y: 0 },
+          },
+        },
+      },
+    });
+
+    drawSmartSelectionHandles(
+      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
+      [rect('a', 0), rect('b', 100)],
+      refs,
+    );
+
+    expect(drawSmartSelectionGapFillPreviewMock).toHaveBeenCalledTimes(1);
+    expect(drawSmartSelectionGapFillPreviewMock.mock.calls[0][4]).toBe('x');
   });
 });
