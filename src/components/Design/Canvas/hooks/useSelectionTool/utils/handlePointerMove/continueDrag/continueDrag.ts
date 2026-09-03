@@ -70,7 +70,7 @@ export const continueDrag = (
     canvasRefs.transform.alignmentGuideRef.current = axisLock || matchedPairGuides ? null : guide;
     canvasRefs.transform.equalSpacingGuidesRef.current = axisLock || matchedPairGuides ? null : chainGapSnap.guides;
     canvasRefs.transform.matchedPairGuidesRef.current = axisLock ? null : matchedPairGuides;
-    canvasRefs.transform.dropTargetFrameIdRef.current = getDragDropTargetFrame(selectedNodes, deltaX, deltaY, renderOrderedNodes, nodes);
+    canvasRefs.transform.dropTargetFrameIdRef.current = getDragDropTargetFrame(selectedNodes, rawPoint, renderOrderedNodes, nodes);
 
     setClassName(axisLock && AXIS_LOCK_CLASS_NAME[axisLock]);
     initDraggedNodeIds(canvasRefs, dragState);

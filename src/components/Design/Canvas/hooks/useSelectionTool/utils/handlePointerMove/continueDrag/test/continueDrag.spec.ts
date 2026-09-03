@@ -452,8 +452,8 @@ describe('continueDrag', () => {
     });
   });
 
-  it('should populate the drop-target frame ref once the dragged selection lands over a frame', () => {
-    // mock — a 20x20 rect dragged so its centre lands inside a 300x300 frame
+  it('should populate the drop-target frame ref once the pointer moves over a frame', () => {
+    // mock — a 20x20 rect being dragged with the pointer landing inside a 300x300 frame
     const rectId = addRectNode(0, 0, 20);
     const frameId = addFrameNode(200, 0, 300);
 
@@ -475,7 +475,7 @@ describe('continueDrag', () => {
     expect(canvasRefs.transform.dropTargetFrameIdRef.current).toBe(frameId);
   });
 
-  it('should clear the drop-target frame ref once the dragged selection moves back over empty canvas', () => {
+  it('should clear the drop-target frame ref once the pointer moves back over empty canvas', () => {
     // mock
     const rectId = addRectNode(0, 0, 20);
     addFrameNode(2000, 2000, 300);

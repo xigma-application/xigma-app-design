@@ -36,23 +36,23 @@ const section = (id: string, x: number, y: number): TSceneNode =>
   ({ fill: '#000', height: 50, id, name: 'Section', parentId: null, rotation: 0, type: NodeType.section, width: 50, x, y }) as TSceneNode;
 
 describe('getDragDropTargetFrame', () => {
-  it('should return the frame the dragged selection lands inside, after applying the delta', () => {
+  it('should return the frame under the pointer, anywhere inside its bounds', () => {
     const draggedNode = rect('a', 0, 0);
     const targetFrame = frame('f1', 100, 0, 200, 200);
     const nodesById = { a: draggedNode, f1: targetFrame };
 
-    // dragged from (0,0) by (150,50) lands its centre (25+150,25+50)=(175,75), inside f1
-    const result = getDragDropTargetFrame([draggedNode], 150, 50, [draggedNode, targetFrame], nodesById);
+    // pointer well inside f1's interior, nowhere near its outline
+    const result = getDragDropTargetFrame([draggedNode], { x: 180, y: 90 }, [draggedNode, targetFrame], nodesById);
 
     expect(result).toBe('f1');
   });
 
-  it('should return null when the delta lands outside any frame', () => {
+  it('should return null when the pointer is outside any frame', () => {
     const draggedNode = rect('a', 0, 0);
     const targetFrame = frame('f1', 1000, 1000, 200, 200);
     const nodesById = { a: draggedNode, f1: targetFrame };
 
-    const result = getDragDropTargetFrame([draggedNode], 0, 0, [draggedNode, targetFrame], nodesById);
+    const result = getDragDropTargetFrame([draggedNode], { x: 10, y: 10 }, [draggedNode, targetFrame], nodesById);
 
     expect(result).toBeNull();
   });
@@ -61,7 +61,7 @@ describe('getDragDropTargetFrame', () => {
     const draggedFrame = frame('f1', 100, 0, 200, 200);
     const nodesById = { f1: draggedFrame };
 
-    const result = getDragDropTargetFrame([draggedFrame], 0, 0, [draggedFrame], nodesById);
+    const result = getDragDropTargetFrame([draggedFrame], { x: 150, y: 100 }, [draggedFrame], nodesById);
 
     expect(result).toBeNull();
   });
@@ -71,8 +71,8 @@ describe('getDragDropTargetFrame', () => {
     const innerFrame = frame('inner', 100, 100, 200, 200, [], 'outer');
     const nodesById = { inner: innerFrame, outer: outerFrame };
 
-    // dragging the outer frame so its centre lands over its own nested inner frame
-    const result = getDragDropTargetFrame([outerFrame], 100, 100, [outerFrame, innerFrame], nodesById);
+    // pointer over the nested inner frame while dragging its own ancestor
+    const result = getDragDropTargetFrame([outerFrame], { x: 200, y: 200 }, [outerFrame, innerFrame], nodesById);
 
     expect(result).toBeNull();
   });
@@ -82,7 +82,7 @@ describe('getDragDropTargetFrame', () => {
     const targetFrame = frame('f1', 0, 0, 200, 200);
     const nodesById = { f1: targetFrame, s1: draggedSection };
 
-    const result = getDragDropTargetFrame([draggedSection], 0, 0, [draggedSection, targetFrame], nodesById);
+    const result = getDragDropTargetFrame([draggedSection], { x: 100, y: 100 }, [draggedSection, targetFrame], nodesById);
 
     expect(result).toBeNull();
   });
