@@ -23,6 +23,7 @@ import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 // utils
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
 import { getSelectionHitAtPoint } from './getSelectionHitAtPoint/getSelectionHitAtPoint';
+import { isControlPressed } from 'utils/isControlPressed';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 
 export const handlePointerDown = (
@@ -60,6 +61,10 @@ export const handlePointerDown = (
 
     for (const resolve of ARM_RESOLVERS) {
       if (resolve(ctx)) {
+        if (isControlPressed(event) && selectionRefs.dragStateRef.current) {
+          selectionRefs.dragStateRef.current.ctrlMarqueeFallback = ctx.currentSelection;
+        }
+
         return;
       }
     }

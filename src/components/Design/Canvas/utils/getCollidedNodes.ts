@@ -1,12 +1,17 @@
 // types
-import { NodeType } from 'types/design/enums';
 import { TDraftRect } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getRotatedNodeBounds } from './getRotatedNodeBounds';
+import { isClickThroughFrame } from 'store/design/utils/nodeHierarchy/isClickThroughFrame';
 
-export const getCollidedNodes = (nodes: TSceneNode[], area: TDraftRect, requireFullyInside: boolean): TSceneNode[] => {
+export const getCollidedNodes = (
+  nodes: TSceneNode[],
+  area: TDraftRect,
+  requireFullyInside: boolean,
+  nodesById: Record<string, TSceneNode>,
+): TSceneNode[] => {
   const x1 = area.x;
   const y1 = area.y;
   const x2 = area.x + area.width;
@@ -17,7 +22,7 @@ export const getCollidedNodes = (nodes: TSceneNode[], area: TDraftRect, requireF
       const bounds = getRotatedNodeBounds(node);
       const nodeX2 = bounds.x + bounds.width;
       const nodeY2 = bounds.y + bounds.height;
-      const mustEncloseFully = requireFullyInside || (node.type === NodeType.frame && node.childIds.length > 0);
+      const mustEncloseFully = requireFullyInside || isClickThroughFrame(node, nodesById);
 
       return mustEncloseFully
         ? x1 <= bounds.x && x2 >= nodeX2 && y1 <= bounds.y && y2 >= nodeY2

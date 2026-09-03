@@ -9,6 +9,7 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { drawFrameNameLabel } from './drawFrameNameLabel';
+import { isNestedFrame } from 'store/design/utils/nodeHierarchy/isNestedFrame';
 
 export const drawFrameNameLabels = (
   context: TDrawSceneContext,
@@ -16,6 +17,7 @@ export const drawFrameNameLabels = (
   selectedIds: Set<string>,
   hoveredNodeId: string | null,
   refs: TCanvasRefs,
+  nodesById: Record<string, TSceneNode>,
 ): void => {
   const { canvasHeight, canvasWidth, gl, imageContext, viewport } = context;
   const editingNodeId = refs.frameName.editingLabelRef.current;
@@ -23,7 +25,7 @@ export const drawFrameNameLabels = (
   nodes
     .filter(
       (node): node is TSceneNode & { childIds: []; clipContent: true; type: NodeType.frame } =>
-        node.type === NodeType.frame && node.id !== editingNodeId,
+        node.type === NodeType.frame && node.id !== editingNodeId && !isNestedFrame(node, nodesById),
     )
     .forEach((node) => {
       const isHighlighted = selectedIds.has(node.id) || node.id === hoveredNodeId;

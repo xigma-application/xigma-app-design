@@ -9,7 +9,6 @@ import {
   selectEditingTextBox,
   selectEditingTextContent,
   selectNodes,
-  selectRenderOrderedNodes,
   selectSelectedNodes,
   selectSmartSelectionNodes,
   selectVectorEditingNodeIds,
@@ -24,10 +23,10 @@ import { THoverResolverContext } from './types';
 import { TViewport } from 'types/design/types';
 
 // utils
+import { getHoverLeafNodes } from './getHoverLeafNodes';
 import { getResizeHandleAtPoint } from '../../../../utils/getResizeHandleAtPoint/getResizeHandleAtPoint';
 import { getVectorMultiSelectBoxForHover } from './getVectorMultiSelectBoxForHover';
 import { getVectorMultiSelectResizeHandle } from '../../../../utils/getVectorMultiSelectResizeHandle';
-import { isContainerNode } from 'store/design/utils/nodeHierarchy/isContainerNode';
 import { resolveCornerRadiusHandleHover } from './resolveCornerRadiusHandleHover';
 import { resolveEllipseArcHandleHover } from './resolveEllipseArcHandleHover';
 import { resolveEllipseArcRatioHandleHover } from './resolveEllipseArcRatioHandleHover';
@@ -54,6 +53,7 @@ export const resolveToolHover = (
   const isEditingText = Boolean(editingTextBox);
   const vectorEditingNodeIds = selectVectorEditingNodeIds(state);
   const isEditingVector = vectorEditingNodeIds.length > 0;
+  const nodesById = selectNodes(state);
   const selectedNodes = selectSelectedNodes(state);
   const resizableSelectedNodes = isEditingText || isEditingVector ? [] : selectedNodes;
   const applyClassName = isEditingVector ? (): void => {} : setClassName;
@@ -73,8 +73,8 @@ export const resolveToolHover = (
     editingNodeId: selectEditingNodeId(state),
     editingTextBox,
     isControlPressed,
-    leafNodes: selectRenderOrderedNodes(state).filter((node) => !isContainerNode(node) || node.childIds.length === 0),
-    nodesById: selectNodes(state),
+    leafNodes: getHoverLeafNodes(state, nodesById, isControlPressed),
+    nodesById,
     point,
     refs,
     resizableSelectedNodes,

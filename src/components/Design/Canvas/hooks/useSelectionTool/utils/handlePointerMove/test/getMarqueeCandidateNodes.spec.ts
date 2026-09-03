@@ -51,14 +51,42 @@ describe('getMarqueeCandidateNodes', () => {
     expect(getMarqueeCandidateNodes(['frame'], nodesById).map((node) => node.id)).toEqual(['frame', 'child1', 'child2']);
   });
 
-  it('should descend recursively through nested frames with children', () => {
+  it('should treat a frame nested directly inside another frame as an atomic candidate, not descending into its own children', () => {
+    // a frame's direct parent being a frame makes it behave like a normal node, not a click-through one
     const nodesById = {
       inner: frame('inner', ['leaf'], 'outer'),
       leaf: rect('leaf', 'inner'),
       outer: frame('outer', ['inner']),
     };
 
-    expect(getMarqueeCandidateNodes(['outer'], nodesById).map((node) => node.id)).toEqual(['outer', 'inner', 'leaf']);
+    expect(getMarqueeCandidateNodes(['outer'], nodesById).map((node) => node.id)).toEqual(['outer', 'inner']);
+  });
+
+  it('should still descend into a frame with children whose own parent is a section, not a frame', () => {
+    // only a direct *frame* parent turns a frame's children into atomic candidates — a section parent doesn't
+    const section = {
+      childIds: ['outer'],
+      id: 'section',
+      name: 'Section',
+      parentId: null,
+      type: NodeType.section,
+    } as unknown as TSceneNode;
+    const nodesById = { child: rect('child', 'outer'), outer: frame('outer', ['child'], 'section'), section };
+
+    expect(getMarqueeCandidateNodes(['outer'], nodesById).map((node) => node.id)).toEqual(['outer', 'child']);
+  });
+
+  it('should keep every frame in a three-levels-deep nesting chain as its own candidate, but never its non-frame content', () => {
+    // outer(click-through) > frame2 > frame3 > rect — each frame is individually marquee-touchable at any
+    // depth, only the deepest actual content (the rect) is excluded, since it sits inside an opaque frame
+    const nodesById = {
+      frame2: frame('frame2', ['frame3'], 'outer'),
+      frame3: frame('frame3', ['rect'], 'frame2'),
+      outer: frame('outer', ['frame2']),
+      rect: rect('rect', 'frame3'),
+    };
+
+    expect(getMarqueeCandidateNodes(['outer'], nodesById).map((node) => node.id)).toEqual(['outer', 'frame2', 'frame3']);
   });
 
   it('should not descend into a group, keeping its children out of the marquee', () => {

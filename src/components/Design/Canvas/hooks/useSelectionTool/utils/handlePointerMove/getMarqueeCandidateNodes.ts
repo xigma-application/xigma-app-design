@@ -2,17 +2,22 @@
 import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
-const collectFrom = (id: string, nodesById: Record<string, TSceneNode>): TSceneNode[] => {
+// utils
+import { isClickThroughFrame } from 'store/design/utils/nodeHierarchy/isClickThroughFrame';
+
+const collectFrom = (id: string, nodesById: Record<string, TSceneNode>, includeLeaves: boolean): TSceneNode[] => {
   const node = nodesById[id];
 
-  if (node) {
-    return node.type === NodeType.frame && node.childIds.length > 0
-      ? [node, ...node.childIds.flatMap((childId) => collectFrom(childId, nodesById))]
-      : [node];
+  if (!node) {
+    return [];
+  }
+  if (node.type === NodeType.frame) {
+    const isCT = isClickThroughFrame(node, nodesById);
+    return [node, ...node.childIds.flatMap((childId) => collectFrom(childId, nodesById, isCT))];
   }
 
-  return [];
+  return includeLeaves ? [node] : [];
 };
 
 export const getMarqueeCandidateNodes = (rootOrder: string[], nodesById: Record<string, TSceneNode>): TSceneNode[] =>
-  rootOrder.flatMap((id) => collectFrom(id, nodesById));
+  rootOrder.flatMap((id) => collectFrom(id, nodesById, true));

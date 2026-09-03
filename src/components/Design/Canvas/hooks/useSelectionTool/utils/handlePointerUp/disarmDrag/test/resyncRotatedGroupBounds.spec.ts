@@ -35,6 +35,7 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
 
 const dragState = (nodeIds: string[]): TDragState => ({
   candidateShapes: [],
+  ctrlMarqueeFallback: null,
   dispatchThrottle: { frameId: null, run: null },
   hasMoved: true,
   nodeOrigins: Object.fromEntries(nodeIds.map((id) => [id, { x: 0, y: 0 }])),

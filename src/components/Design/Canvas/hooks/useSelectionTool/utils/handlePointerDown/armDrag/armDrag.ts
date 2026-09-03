@@ -35,6 +35,7 @@ export const armDrag = (
 
   dragStateRef.current = {
     candidateShapes: getCandidateShapes(nodes, dragIds).concat(guideCandidateShapes),
+    ctrlMarqueeFallback: null,
     dispatchThrottle: { frameId: null, run: null },
     hasMoved: false,
     nodeOrigins: getDragNodeOrigins(dragIds, nodes),

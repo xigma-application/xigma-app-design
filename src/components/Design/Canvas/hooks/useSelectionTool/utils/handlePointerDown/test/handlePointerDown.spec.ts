@@ -392,6 +392,89 @@ describe('handlePointerDown', () => {
     expect(dragStateRef.current).toMatchObject({ pendingClickAction: null });
   });
 
+  it('should tag a Ctrl-held drag with a marquee fallback, so a subsequent move draws a marquee instead of moving the hit node', () => {
+    // mock — Ctrl is held but there is nothing for armGroupChildToggleOnPointerDown to deep-select here,
+    // so it falls through to the plain armHitOnPointerDown path, which still must not ignore Ctrl
+    const idA = addFrameNode(200, 200);
+    const canvas = createCanvas();
+    const dragStateRef = createDragStateRef();
+    const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
+
+    // before — nothing selected beforehand (this suite's beforeEach already clears selection)
+    handlePointerDown(
+      canvas,
+      pointerEvent(205, 205, { ctrlKey: true }),
+      store.dispatch,
+      createCanvasRefs({
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
+      }),
+      createSelectionToolRefs({
+        dragStateRef,
+        endpointDragRef: createEndpointDragRef(),
+        marqueeStartRef,
+        pathOffsetDragRef: createPathOffsetDragRef(),
+        resizeDragRef: createResizeDragRef(),
+      }),
+      setClassName,
+    );
+
+    // result
+    expect(selectSelectedIds(store.getState())).toEqual([idA]);
+    expect(dragStateRef.current?.ctrlMarqueeFallback).toEqual([]);
+  });
+
+  it('should leave the marquee fallback unset for the same drag when Ctrl is not held', () => {
+    // mock
+    const idA = addFrameNode(200, 200);
+    const canvas = createCanvas();
+    const dragStateRef = createDragStateRef();
+    const marqueeStartRef = createMarqueeStartRef();
+    const setClassName = vi.fn();
+
+    // before
+    handlePointerDown(
+      canvas,
+      pointerEvent(205, 205),
+      store.dispatch,
+      createCanvasRefs({
+        cornerRadius: {
+          cornerRadiusDragRef: createCornerRadiusDragRef(),
+          polygonCornerRadiusDragRef: createPolygonCornerRadiusDragRef(),
+          starCornerRadiusDragRef: createStarCornerRadiusDragRef(),
+        },
+        ellipseArc: {
+          ellipseArcDragRef: createEllipseArcDragRef(),
+          ellipseArcRatioDragRef: createEllipseArcRatioDragRef(),
+          ellipseArcRotateDragRef: createEllipseArcRotateDragRef(),
+        },
+        transform: { rotateDragRef: createRotateDragRef() },
+      }),
+      createSelectionToolRefs({
+        dragStateRef,
+        endpointDragRef: createEndpointDragRef(),
+        marqueeStartRef,
+        pathOffsetDragRef: createPathOffsetDragRef(),
+        resizeDragRef: createResizeDragRef(),
+      }),
+      setClassName,
+    );
+
+    // result
+    expect(selectSelectedIds(store.getState())).toEqual([idA]);
+    expect(dragStateRef.current?.ctrlMarqueeFallback).toBeNull();
+  });
+
   it('should delegate to armGroupBoundsDrag when clicking the gap inside a shared multi-selection', () => {
     // mock
     const idA = addFrameNode(300, 300, 20);

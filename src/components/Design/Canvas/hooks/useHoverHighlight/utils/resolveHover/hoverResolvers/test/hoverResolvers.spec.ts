@@ -740,4 +740,46 @@ describe('resolvePlainNodeHover', () => {
       ),
     ).toEqual({ className: null, cursor: '', nodeId: 'frame-1' });
   });
+
+  const outerFrame: TFrameNode = { ...frameWithChild, childIds: ['nested-frame'], id: 'outer-frame' };
+  const nestedFrame: TFrameNode = {
+    ...frameWithChild,
+    childIds: ['nested-child'],
+    height: 100,
+    id: 'nested-frame',
+    parentId: 'outer-frame',
+    width: 100,
+    x: 20,
+    y: 20,
+  };
+  const nestedChild: TRectangleNode = { ...frameChild, id: 'nested-child', parentId: 'nested-frame', x: 40, y: 40 };
+  const nestedNodesById = { 'nested-child': nestedChild, 'nested-frame': nestedFrame, 'outer-frame': outerFrame };
+
+  it('should highlight a frame nested directly inside another frame, not the outer frame, when hovering its empty body', () => {
+    // a nested frame is not click-through — its own body behaves like a normal node
+    expect(resolvePlainNodeHover(createContext({ leafNodes: [nestedFrame], nodesById: nestedNodesById, point: { x: 90, y: 90 } }))).toEqual(
+      { className: null, cursor: '', nodeId: 'nested-frame' },
+    );
+  });
+
+  it('should highlight a frame nested directly inside another frame, not its own child, when hovering that child', () => {
+    // the nested frame's own child is excluded from the click-through leaf set (opaque ancestor), so the
+    // nested frame itself is what actually gets hit here
+    expect(resolvePlainNodeHover(createContext({ leafNodes: [nestedFrame], nodesById: nestedNodesById, point: { x: 50, y: 50 } }))).toEqual(
+      { className: null, cursor: '', nodeId: 'nested-frame' },
+    );
+  });
+
+  it('should bypass a nested frame and hit-test its child directly when Ctrl is held', () => {
+    expect(
+      resolvePlainNodeHover(
+        createContext({
+          isControlPressed: true,
+          leafNodes: [nestedChild],
+          nodesById: nestedNodesById,
+          point: { x: 50, y: 50 },
+        }),
+      ),
+    ).toEqual({ className: null, cursor: '', nodeId: 'nested-child' });
+  });
 });

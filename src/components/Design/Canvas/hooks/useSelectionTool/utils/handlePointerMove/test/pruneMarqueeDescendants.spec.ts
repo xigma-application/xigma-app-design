@@ -69,4 +69,15 @@ describe('pruneMarqueeDescendants', () => {
 
     expect(pruneMarqueeDescendants([a, b], { a, b }).map((node) => node.id)).toEqual(['a', 'b']);
   });
+
+  it('should not prune the children of a frame nested directly inside another frame, since it is not click-through itself', () => {
+    // inner's own parent is a frame, so inner is not a click-through frame and does not force full
+    // enclosure on its own children the way a click-through frame would
+    const outer = frame('outer', ['inner']);
+    const inner = frame('inner', ['leaf'], 'outer');
+    const leaf = rect('leaf', 'inner');
+    const nodesById = { inner, leaf, outer };
+
+    expect(pruneMarqueeDescendants([inner, leaf], nodesById).map((node) => node.id)).toEqual(['inner', 'leaf']);
+  });
 });

@@ -61,12 +61,15 @@ describe('drawFrameNameLabels', () => {
 
   it('should draw nothing when there are no frame nodes', () => {
     // before
+    const rectangle = buildRectangle();
+
     drawFrameNameLabels(
       { buffer: {} as never, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
-      [buildRectangle()],
+      [rectangle],
       new Set(),
       null,
       refsWith(null),
+      { [rectangle.id]: rectangle },
     );
 
     // result
@@ -83,6 +86,7 @@ describe('drawFrameNameLabels', () => {
       new Set(),
       null,
       refsWith(null),
+      { [frame.id]: frame },
     );
 
     // result
@@ -99,6 +103,7 @@ describe('drawFrameNameLabels', () => {
       new Set([frame.id]),
       null,
       refsWith(null),
+      { [frame.id]: frame },
     );
 
     // result
@@ -123,6 +128,7 @@ describe('drawFrameNameLabels', () => {
       new Set(),
       null,
       refsWith(frame.id),
+      { [frame.id]: frame },
     );
 
     // result
@@ -139,6 +145,7 @@ describe('drawFrameNameLabels', () => {
       new Set(),
       frame.id,
       refsWith(null),
+      { [frame.id]: frame },
     );
 
     // result
@@ -151,5 +158,48 @@ describe('drawFrameNameLabels', () => {
       150,
       IDENTITY_VIEWPORT,
     );
+  });
+
+  it('should skip a frame whose direct parent is another frame', () => {
+    // before
+    const outer = buildFrame({ childIds: ['nested'], id: 'outer' });
+    const nested = buildFrame({ id: 'nested', parentId: 'outer' });
+
+    drawFrameNameLabels(
+      { buffer: {} as never, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
+      [outer, nested],
+      new Set(),
+      null,
+      refsWith(null),
+      { [nested.id]: nested, [outer.id]: outer },
+    );
+
+    // result — only the top-level frame gets a label, the one nested inside it does not
+    expect(drawFrameNameLabelMock).toHaveBeenCalledTimes(1);
+    expect(drawFrameNameLabelMock).toHaveBeenCalledWith(gl, imageContext, outer, FRAME_NAME_LABEL_FILL, 200, 150, IDENTITY_VIEWPORT);
+  });
+
+  it('should still draw the label for a frame whose direct parent is a section, not a frame', () => {
+    // before
+    const section = {
+      childIds: ['frame-1'],
+      id: 'section-1',
+      name: 'Section',
+      parentId: null,
+      type: NodeType.section,
+    } as unknown as TSceneNode;
+    const frame = buildFrame({ parentId: 'section-1' });
+
+    drawFrameNameLabels(
+      { buffer: {} as never, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
+      [section, frame],
+      new Set(),
+      null,
+      refsWith(null),
+      { [frame.id]: frame, [section.id]: section },
+    );
+
+    // result
+    expect(drawFrameNameLabelMock).toHaveBeenCalledWith(gl, imageContext, frame, FRAME_NAME_LABEL_FILL, 200, 150, IDENTITY_VIEWPORT);
   });
 });

@@ -107,6 +107,7 @@ describe('handlePointerUp', () => {
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef({
       candidateShapes: [],
+      ctrlMarqueeFallback: null,
       dispatchThrottle: { frameId: null, run: null },
       hasMoved: false,
       nodeOrigins: {},

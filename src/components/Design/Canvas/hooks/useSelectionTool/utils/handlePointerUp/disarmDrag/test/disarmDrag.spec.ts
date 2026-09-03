@@ -59,6 +59,7 @@ const addRectNode = (x: number, y: number, size = 20): string => {
 
 const movedDragState = (): TDragState => ({
   candidateShapes: [],
+  ctrlMarqueeFallback: null,
   dispatchThrottle: { frameId: null, run: null },
   hasMoved: true,
   nodeOrigins: {},
@@ -91,6 +92,7 @@ describe('disarmDrag', () => {
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef({
       candidateShapes: [],
+      ctrlMarqueeFallback: null,
       dispatchThrottle: { frameId: null, run: null },
       hasMoved: false,
       nodeOrigins: {},
@@ -115,6 +117,7 @@ describe('disarmDrag', () => {
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef({
       candidateShapes: [],
+      ctrlMarqueeFallback: null,
       dispatchThrottle: { frameId: null, run: null },
       hasMoved: false,
       nodeOrigins: {},
@@ -136,6 +139,7 @@ describe('disarmDrag', () => {
     const canvas = createCanvas();
     const dragStateRef = createDragStateRef({
       candidateShapes: [],
+      ctrlMarqueeFallback: null,
       dispatchThrottle: { frameId: null, run: null },
       hasMoved: true,
       nodeOrigins: {},

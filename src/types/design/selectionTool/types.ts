@@ -26,6 +26,7 @@ export type TResizeNodeOrigin =
 
 export type TDragState = {
   candidateShapes: TCandidateShape[];
+  ctrlMarqueeFallback: string[] | null;
   dispatchThrottle: TThrottledDispatchState;
   hasMoved: boolean;
   nodeOrigins: Record<string, TNodeOrigin>;

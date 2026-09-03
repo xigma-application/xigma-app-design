@@ -45,6 +45,7 @@ const addRectNode = (x: number, y: number, size = 20): string => {
 
 const dragState = (hasMoved: boolean): TDragState => ({
   candidateShapes: [],
+  ctrlMarqueeFallback: null,
   dispatchThrottle: { frameId: null, run: null },
   hasMoved,
   nodeOrigins: {},

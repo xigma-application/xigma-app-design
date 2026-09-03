@@ -10,8 +10,10 @@ import { AppDispatch, store } from 'store';
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDragState } from 'types/design/selectionTool/types';
+import { TPoint } from 'types/canvas';
 
 // utils
+import { convertCtrlDragToMarquee } from './convertCtrlDragToMarquee';
 import { dispatchDraggedNodeUpdates } from './dispatchDraggedNodeUpdates';
 import { getAxisLockedPoint } from 'components/Design/Canvas/utils/getAxisLockedPoint';
 import { getChainGapDragSnap } from './getChainGapDragSnap';
@@ -33,10 +35,13 @@ export const continueDrag = (
   dragStateRef: RefObject<TDragState | null>,
   canvasRefs: TCanvasRefs,
   setClassName: (className: string | null) => void,
+  marqueeStartRef: RefObject<TPoint | null>,
 ): void => {
   const dragState = dragStateRef.current;
 
-  if (dragState) {
+  if (dragState && dragState.ctrlMarqueeFallback && !dragState.hasMoved) {
+    convertCtrlDragToMarquee(dragState, dragStateRef, marqueeStartRef, canvasRefs);
+  } else if (dragState) {
     const state = store.getState();
     const viewport = selectViewport(state);
     const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);

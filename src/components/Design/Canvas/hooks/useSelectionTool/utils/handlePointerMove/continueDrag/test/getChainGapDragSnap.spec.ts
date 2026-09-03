@@ -33,6 +33,7 @@ const addRect = (x: number, y: number, size = 20, overrides: Record<string, unkn
 
 const dragState = (nodeOrigins: TDragState['nodeOrigins'], candidateShapes: TDragState['candidateShapes'] = []): TDragState => ({
   candidateShapes,
+  ctrlMarqueeFallback: null,
   dispatchThrottle: { frameId: null, run: null },
   hasMoved: true,
   nodeOrigins,

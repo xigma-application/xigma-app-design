@@ -31,7 +31,7 @@ describe('getCollidedNodes', () => {
     const area = { height: 10, width: 10, x: 0, y: 0 };
 
     // result
-    expect(getCollidedNodes([node], area, false)).toEqual([node]);
+    expect(getCollidedNodes([node], area, false, { [node.id]: node })).toEqual([node]);
   });
 
   it('should not return a node the area only partially overlaps, when full containment is required', () => {
@@ -40,7 +40,7 @@ describe('getCollidedNodes', () => {
     const area = { height: 10, width: 10, x: 0, y: 0 };
 
     // result
-    expect(getCollidedNodes([node], area, true)).toEqual([]);
+    expect(getCollidedNodes([node], area, true, { [node.id]: node })).toEqual([]);
   });
 
   it('should return a node fully inside the area regardless of the containment mode', () => {
@@ -48,8 +48,8 @@ describe('getCollidedNodes', () => {
     const node = buildNode({ height: 10, width: 10, x: 5, y: 5 });
     const area = { height: 50, width: 50, x: 0, y: 0 };
 
-    expect(getCollidedNodes([node], area, false)).toEqual([node]);
-    expect(getCollidedNodes([node], area, true)).toEqual([node]);
+    expect(getCollidedNodes([node], area, false, { [node.id]: node })).toEqual([node]);
+    expect(getCollidedNodes([node], area, true, { [node.id]: node })).toEqual([node]);
   });
 
   it('should not return a node entirely outside the area', () => {
@@ -57,8 +57,8 @@ describe('getCollidedNodes', () => {
     const node = buildNode({ height: 10, width: 10, x: 100, y: 100 });
     const area = { height: 10, width: 10, x: 0, y: 0 };
 
-    expect(getCollidedNodes([node], area, false)).toEqual([]);
-    expect(getCollidedNodes([node], area, true)).toEqual([]);
+    expect(getCollidedNodes([node], area, false, { [node.id]: node })).toEqual([]);
+    expect(getCollidedNodes([node], area, true, { [node.id]: node })).toEqual([]);
   });
 
   it('should return a node whose edge exactly touches the area boundary', () => {
@@ -67,7 +67,7 @@ describe('getCollidedNodes', () => {
     const area = { height: 10, width: 10, x: 0, y: 0 };
 
     // result
-    expect(getCollidedNodes([node], area, false)).toEqual([node]);
+    expect(getCollidedNodes([node], area, false, { [node.id]: node })).toEqual([node]);
   });
 
   it('should collide against the rotated bounding box, not the unrotated one', () => {
@@ -76,7 +76,7 @@ describe('getCollidedNodes', () => {
     const area = { height: 2, width: 2, x: 12, y: -4 };
 
     // result
-    expect(getCollidedNodes([node], area, false)).toEqual([node]);
+    expect(getCollidedNodes([node], area, false, { [node.id]: node })).toEqual([node]);
   });
 
   it('should never collide a hidden node', () => {
@@ -85,7 +85,7 @@ describe('getCollidedNodes', () => {
     const area = { height: 50, width: 50, x: 0, y: 0 };
 
     // result
-    expect(getCollidedNodes([node], area, false)).toEqual([]);
+    expect(getCollidedNodes([node], area, false, { [node.id]: node })).toEqual([]);
   });
 
   it('should never collide a locked node', () => {
@@ -94,16 +94,16 @@ describe('getCollidedNodes', () => {
     const area = { height: 50, width: 50, x: 0, y: 0 };
 
     // result
-    expect(getCollidedNodes([node], area, false)).toEqual([]);
+    expect(getCollidedNodes([node], area, false, { [node.id]: node })).toEqual([]);
   });
 
-  it('should require full enclosure for a frame that has children, even in touch mode', () => {
+  it('should require full enclosure for a top-level frame that has children, even in touch mode', () => {
     // mock — a frame with a child, only partially inside the area
     const frame = buildNode({ childIds: ['child-1'], height: 20, width: 20, x: 10, y: 10 });
     const area = { height: 10, width: 10, x: 0, y: 0 };
 
-    // result — touch mode would normally include it, but a frame-with-children needs full enclosure
-    expect(getCollidedNodes([frame], area, false)).toEqual([]);
+    // result — touch mode would normally include it, but a top-level frame-with-children needs full enclosure
+    expect(getCollidedNodes([frame], area, false, { [frame.id]: frame })).toEqual([]);
   });
 
   it('should collide a fully-enclosed frame that has children', () => {
@@ -112,7 +112,7 @@ describe('getCollidedNodes', () => {
     const area = { height: 50, width: 50, x: 0, y: 0 };
 
     // result
-    expect(getCollidedNodes([frame], area, false)).toEqual([frame]);
+    expect(getCollidedNodes([frame], area, false, { [frame.id]: frame })).toEqual([frame]);
   });
 
   it('should still include a partially-overlapped empty frame in touch mode', () => {
@@ -121,7 +121,17 @@ describe('getCollidedNodes', () => {
     const area = { height: 10, width: 10, x: 0, y: 0 };
 
     // result
-    expect(getCollidedNodes([frame], area, false)).toEqual([frame]);
+    expect(getCollidedNodes([frame], area, false, { [frame.id]: frame })).toEqual([frame]);
+  });
+
+  it('should apply the normal touch rule to a frame nested directly inside another frame', () => {
+    // mock — a frame with children, but its own parent is a frame, so it is not click-through
+    const outer = buildNode({ childIds: ['nested'], id: 'outer', x: 0, y: 0 });
+    const nested = buildNode({ childIds: ['child-1'], height: 20, id: 'nested', parentId: 'outer', width: 20, x: 10, y: 10 });
+    const area = { height: 10, width: 10, x: 0, y: 0 };
+
+    // result — only partially overlapped, but selectable like any normal node since it isn't click-through
+    expect(getCollidedNodes([nested], area, false, { [outer.id]: outer, [nested.id]: nested })).toEqual([nested]);
   });
 
   it('should collide a line node using the bounding box derived from its endpoints', () => {
@@ -140,7 +150,7 @@ describe('getCollidedNodes', () => {
     const area = { height: 10, width: 10, x: 0, y: 0 };
 
     // result
-    expect(getCollidedNodes([line], area, false)).toEqual([line]);
-    expect(getCollidedNodes([line], area, true)).toEqual([]);
+    expect(getCollidedNodes([line], area, false, { [line.id]: line })).toEqual([line]);
+    expect(getCollidedNodes([line], area, true, { [line.id]: line })).toEqual([]);
   });
 });

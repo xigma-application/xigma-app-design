@@ -351,4 +351,75 @@ describe('getSelectionHitAtPoint', () => {
       expect(hit?.id).toBe(frameId);
     });
   });
+
+  describe('a frame nested directly inside another frame', () => {
+    const addRectNodeAt = (x: number, y: number, size: number): string => {
+      store.dispatch(
+        addNode({
+          fill: '#00ff00',
+          height: size,
+          name: 'Rectangle',
+          parentId: null,
+          rotation: 0,
+          type: NodeType.rectangle,
+          width: size,
+          x,
+          y,
+        }),
+      );
+
+      return selectActivePage(store.getState()).rootOrder.at(-1) as string;
+    };
+
+    const buildNestedFrame = (): { deeperFrameId: string; nestedFrameId: string; outerFrameId: string } => {
+      const outerFrameId = addFrameNode(22000, 22000, 400);
+      const nestedFrameId = addFrameNode(22020, 22020, 200);
+      const deeperFrameId = addFrameNode(22040, 22040, 40);
+
+      store.dispatch(moveNodes({ nodeIds: [nestedFrameId], targetIndex: 0, targetParentId: outerFrameId }));
+      store.dispatch(moveNodes({ nodeIds: [deeperFrameId], targetIndex: 0, targetParentId: nestedFrameId }));
+      store.dispatch(setSelection([]));
+
+      return { deeperFrameId, nestedFrameId, outerFrameId };
+    };
+
+    it('should select the nested frame directly from a plain click on its empty body, unlike a top-level frame', () => {
+      const { nestedFrameId } = buildNestedFrame();
+
+      // the nested frame's empty body, away from the deeper frame nested inside it
+      const hit = getSelectionHitAtPoint({ x: 22190, y: 22190 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit?.id).toBe(nestedFrameId);
+    });
+
+    it('should select a frame nested two levels deep directly on a plain click, without needing Control — every frame is its own parent', () => {
+      const { deeperFrameId } = buildNestedFrame();
+
+      const hit = getSelectionHitAtPoint({ x: 22055, y: 22055 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit?.id).toBe(deeperFrameId);
+    });
+
+    it('should still reach the frame nested two levels deep on a plain click, even while the frame one level up is already selected', () => {
+      const { deeperFrameId, nestedFrameId } = buildNestedFrame();
+
+      store.dispatch(setSelection([nestedFrameId]));
+      const hit = getSelectionHitAtPoint({ x: 22055, y: 22055 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit?.id).toBe(deeperFrameId);
+    });
+
+    it('should not reach actual (non-frame) content nested inside a two-levels-deep frame via a plain click', () => {
+      const { deeperFrameId } = buildNestedFrame();
+      const rectId = addRectNodeAt(22045, 22045, 10);
+
+      store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: deeperFrameId }));
+      store.dispatch(setSelection([]));
+
+      // the click lands on the rect itself, but plain click can never reach past an opaque frame's own body
+      const hit = getSelectionHitAtPoint({ x: 22048, y: 22048 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit?.id).toBe(deeperFrameId);
+    });
+  });
 });
