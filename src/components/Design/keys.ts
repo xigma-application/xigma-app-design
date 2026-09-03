@@ -91,6 +91,8 @@ export const KEYBOARD_SHORTCUTS: TKeyboardShortcuts = {
   pixelPreview: [SHIFT, CONTROL, 'P'],
   placeImage: [SHIFT, CONTROL, 'K'],
   [ToolName.polygon]: [],
+  present: [ALT, CONTROL, '↩'],
+  preview: [SHIFT, 'Space'],
   previousPage: ['↑'],
   [ToolName.rectangle]: ['R'],
   redo: [SHIFT, CONTROL, 'Z'],

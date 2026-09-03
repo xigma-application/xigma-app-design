@@ -1,6 +1,11 @@
 // hooks
 import { TResizeHandlerSettings } from 'hooks';
 
+// others
+import { translationNameSpace as parentNameSpace } from '../constants';
+
+export const translationNameSpace = `${parentNameSpace}.rightPanel`;
+
 export const RIGHT_PANEL_DEFAULT_WIDTH = 241;
 export const RIGHT_PANEL_MAX_WIDTH = 500;
 export const RIGHT_PANEL_MIN_WIDTH = 241;

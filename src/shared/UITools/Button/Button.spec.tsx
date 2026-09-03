@@ -35,6 +35,14 @@ describe('Button snapshots', () => {
     // result
     expect(asFragment()).toMatchSnapshot();
   });
+
+  it('should render Button in its medium size', () => {
+    // before
+    const { asFragment } = render(<Button size="medium">Click</Button>);
+
+    // result
+    expect(asFragment()).toMatchSnapshot();
+  });
 });
 
 describe('Button behaviors', () => {

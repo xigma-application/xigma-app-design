@@ -1,0 +1,70 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`PresentShare snapshots > should render PresentShare 1`] = `
+<DocumentFragment>
+  <div
+    class="_PresentShare_ba683c"
+  >
+    <div
+      class="_PresentShare__group_ba683c"
+    >
+      <button
+        aria-label="Present"
+        aria-pressed="false"
+        class="_Button_b88d2e _PresentShare__present_ba683c"
+        data-state="closed"
+        type="button"
+      >
+        <svg
+          class="Icon"
+          data-fpl-icon-size="24L"
+          fill="none"
+          height="24"
+          style="color: var(--color-neutral-1);"
+          viewBox="0 0 24 24"
+          width="24"
+        >
+          <path
+            clip-rule="evenodd"
+            d="M6 5.903C6 4.43 7.604 3.517 8.87 4.269l10.15 6.028c1.307.776 1.305 2.669-.003 3.442l-10.15 5.995c-1.228.724-2.768-.11-2.863-1.5L6 18.098zm1 12.195a.9.9 0 0 0 1.357.774l10.152-5.995a1 1 0 0 0 .002-1.72L8.359 5.129A.9.9 0 0 0 7 5.903z"
+            data-svg-property="fill"
+            fill="white"
+            fill-rule="evenodd"
+          />
+        </svg>
+      </button>
+      <button
+        aria-expanded="false"
+        aria-haspopup="dialog"
+        aria-label="Present options"
+        class="_ButtonMenu_7516ba _PresentShare__present-options_ba683c"
+        data-state="closed"
+        type="button"
+      >
+        <svg
+          class="Icon"
+          data-fpl-icon-size="16"
+          fill="none"
+          height="16"
+          style="color: var(--color-neutral-1);"
+          viewBox="0 0 16 16"
+          width="16"
+        >
+          <path
+            d="M9.768 6.768a.5.5 0 0 1 .707.707l-2.12 2.121a.5.5 0 0 1-.708 0L5.525 7.475a.5.5 0 0 1 .708-.707l1.768 1.767z"
+            data-svg-property="fill"
+            fill="white"
+          />
+        </svg>
+      </button>
+    </div>
+    <button
+      aria-pressed="false"
+      class="_Button_b88d2e _Button--medium_b88d2e _PresentShare__share_ba683c"
+      type="button"
+    >
+      Share
+    </button>
+  </div>
+</DocumentFragment>
+`;

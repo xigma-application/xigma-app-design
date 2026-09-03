@@ -1,0 +1,56 @@
+.PresentShare {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+
+  &__group {
+    align-items: center;
+    border-radius: var(--radius-medium);
+    display: flex;
+    height: 32px;
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--color-neutral-3) 50%, transparent);
+    }
+
+    &:has([data-state='open']):hover {
+      background-color: transparent;
+    }
+  }
+
+  &__present {
+    align-items: center;
+    border-bottom-right-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    display: flex;
+    justify-content: center;
+    width: 32px;
+
+    &:hover {
+      background-color: transparent !important;
+    }
+  }
+
+  &__present-options {
+    border-bottom-left-radius: 0 !important;
+    border-left: 1px solid var(--color-neutral-4) !important;
+    border-top-left-radius: 0 !important;
+    height: 100% !important;
+    padding: 0 !important;
+    width: 16px;
+
+    &:hover:not([data-state='open']) {
+      background-color: transparent !important;
+    }
+  }
+
+  &__share {
+    background-color: var(--color-blue-1);
+    color: var(--color-on-blue-1);
+    font-weight: 600;
+
+    &:hover {
+      background-color: var(--color-blue-1);
+    }
+  }
+}

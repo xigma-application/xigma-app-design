@@ -1,0 +1,13 @@
+@use '@xigma/scss/mixins/svg-color';
+
+.Avatar {
+  border-radius: 999px;
+  padding: 0;
+  width: 42px;
+
+  &[data-state='open'] {
+    background-color: var(--color-blue-1);
+
+    @include svg-color.svg-color(var(--color-on-blue-1), true);
+  }
+}

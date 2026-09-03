@@ -4,6 +4,7 @@ import { Provider } from 'react-redux';
 
 // components
 import RightPanel from './RightPanel';
+import { TooltipProvider } from 'shared';
 
 // core
 import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
@@ -27,10 +28,12 @@ const RefsProbe: FC = () => {
 const renderRightPanel = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <CanvasRefsProvider>
-        <RightPanel />
-        <RefsProbe />
-      </CanvasRefsProvider>
+      <TooltipProvider>
+        <CanvasRefsProvider>
+          <RightPanel />
+          <RefsProbe />
+        </CanvasRefsProvider>
+      </TooltipProvider>
     </Provider>,
   );
 
