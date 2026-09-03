@@ -650,17 +650,25 @@ rulers" row, the View-menu "Rulers" item; a plain UI bool like `isUiHidden`, **n
 `Canvas/ScrollbarsLayer/` is a third overlay (after the WebGL scene and the 2D ruler canvas), but
 unlike either it's **plain absolutely-positioned `<div>`s**, not a canvas — a horizontal bar along
 the bottom edge (drags pan `viewport.x`) and a vertical one along the right edge (drags pan
-`viewport.y`), rendered regardless of `areRulersVisible` but conditionally `null` (same shape as
-`RulersLayer` itself) while the active page's `selectOrderedNodes` is empty — an empty canvas has
-nothing to scroll to, so nothing to show. DOM was the right call here (unlike rotated ruler tick
-text, thumb size/position is just numbers) because it gets real, pixel-precise pointer hit-testing
-for free — no hand-rolled hit-test against a drawn rect the way guides/handles need.
+`viewport.y`), rendered regardless of `areRulersVisible`. DOM was the right call here (unlike
+rotated ruler tick text, thumb size/position is just numbers) because it gets real, pixel-precise
+pointer hit-testing for free — no hand-rolled hit-test against a drawn rect the way guides/handles
+need.
 
+- **Each bar shows only when its own axis actually overflows the view**, toggled per frame — not a
+  React `null` (an earlier version gated the whole component on `selectOrderedNodes.length`, which
+  was too coarse: it showed both bars the instant *any* node existed, even a rectangle dropped dead
+  centre with nothing off-screen). `getScrollGeometry` now also returns `overflow: { x, y }` —
+  content bounds transformed to screen space (unpadded, unlike `range`), compared against
+  `visibleRect` per axis with a 1px epsilon — and `useScrollbarsRenderLoop` writes
+  `track.style.display = overflow.<axis> ? '' : 'none'` each frame. Kept in the rAF loop (not a
+  reactive `useAppSelector(selectViewport)` re-render) for the same reason the positioning is:
+  overflow flips as you pan, and this app deliberately never re-renders React on a viewport change.
 - `hooks/useScrollbarsRenderLoop.ts` is a **third independent `requestAnimationFrame` loop**, same
   shape as `useRulerRenderLoop` and the WebGL one: reads `viewport` + `selectOrderedNodes` fresh
   from `store.getState()` every frame (same "pans without a React re-render" reason), writes
-  `style.left/width` (horizontal) / `style.top/height` (vertical) directly onto plain DOM refs — no
-  React state, so a drag doesn't re-render the tree.
+  `style.display` + `style.left/width` (horizontal) / `style.top/height` (vertical) directly onto
+  plain DOM refs — no React state, so a drag doesn't re-render the tree.
 - `utils/getScrollGeometry.ts` composes the pipeline: `getVisibleCanvasRect` (existing,
   panel-inset-aware, shared with Zoom to Fit/Selection) → content world bounds
   (`Canvas/utils/getSelectionBounds.ts` over all nodes, falling back to the visible rect itself in

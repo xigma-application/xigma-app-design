@@ -5,10 +5,12 @@ import { RefObject } from 'react';
 import { useScrollbarsRenderLoop } from '../useScrollbarsRenderLoop';
 
 // store
-import { selectOrderedNodes, selectViewport } from 'store/design/selectors';
+import { addNode, deleteNode } from 'store/design/slice';
+import { selectActivePage, selectOrderedNodes, selectViewport } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
+import { NodeType } from 'types/design/enums';
 import { TLayoutRefs } from 'types/design/canvas/types';
 import { TScrollbarElementRefs } from '../../types';
 
@@ -88,6 +90,53 @@ describe('useScrollbarsRenderLoop', () => {
     expect(elements.verticalTrackRef.current?.style.height).toBe(`${visibleRect.height}px`);
     expect(elements.verticalThumbRef.current?.style.top).toBe(`${vertical.offset}px`);
     expect(elements.verticalThumbRef.current?.style.height).toBe(`${vertical.size}px`);
+  });
+
+  it('should hide both tracks while nothing overflows the visible area', () => {
+    // mock — empty page, viewport at origin: content fallback exactly fills the view
+    const canvasRef: RefObject<HTMLCanvasElement | null> = { current: createCanvas(800, 600) };
+    const elements = createElements();
+
+    // before
+    renderHook(() => useScrollbarsRenderLoop(canvasRef, createLayout(), elements));
+    rafCallbacks[rafCallbacks.length - 1](0);
+
+    // result
+    expect(elements.horizontalTrackRef.current?.style.display).toBe('none');
+    expect(elements.verticalTrackRef.current?.style.display).toBe('none');
+  });
+
+  it('should show each track again once its own axis overflows the visible area', () => {
+    // mock — a node far past both the right and bottom edges of an 800×600 view
+    const canvasRef: RefObject<HTMLCanvasElement | null> = { current: createCanvas(800, 600) };
+    const elements = createElements();
+    const nodeId = store.dispatch(
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#ff0000',
+        height: 100,
+        name: 'Frame',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 100,
+        x: 5000,
+        y: 5000,
+      }),
+    ).payload.id;
+
+    // before
+    renderHook(() => useScrollbarsRenderLoop(canvasRef, createLayout(), elements));
+    rafCallbacks[rafCallbacks.length - 1](0);
+
+    // result
+    expect(elements.horizontalTrackRef.current?.style.display).toBe('');
+    expect(elements.verticalTrackRef.current?.style.display).toBe('');
+
+    // after — restore the shared store
+    store.dispatch(deleteNode(nodeId));
+    expect(selectActivePage(store.getState()).rootOrder).toEqual([]);
   });
 
   it('should read the current panel widths on every frame, without needing a re-render', () => {

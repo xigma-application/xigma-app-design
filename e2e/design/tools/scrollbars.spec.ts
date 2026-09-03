@@ -3,6 +3,16 @@ import { test, expect, Locator, Page } from '@playwright/test';
 // components
 import { DesignPage } from '../model/DesignPage';
 
+// draws a frame large enough that a few zoom-in steps push its on-screen extent past the viewport
+// on both axes, then deselects — leaving genuine overflow for the scrollbars to represent
+const setUpOverflow = async (designPage: DesignPage, page: Page): Promise<void> => {
+  await designPage.drawFrame(600, 200, 1000, 600);
+  await designPage.click(1500, 700); // deselect so the selection outline doesn't affect the screenshot
+  await page.keyboard.press('Control+Equal');
+  await page.keyboard.press('Control+Equal');
+  await page.keyboard.press('Control+Equal');
+};
+
 const dragThumb = async (page: Page, thumb: Locator, dx: number, dy: number): Promise<void> => {
   const box = await thumb.boundingBox();
 
@@ -19,18 +29,34 @@ const dragThumb = async (page: Page, thumb: Locator, dx: number, dy: number): Pr
   await page.mouse.up();
 };
 
+test('the scrollbars stay hidden while all content fits within the view', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-scrollbar-hidden');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawFrame(850, 450, 950, 550); // small, centered, nowhere near an edge
+  await designPage.click(1500, 700);
+
+  await expect(page.locator('[class*="horizontal-thumb"]')).toBeHidden();
+  await expect(page.locator('[class*="vertical-thumb"]')).toBeHidden();
+});
+
 test('dragging the horizontal scrollbar thumb pans the canvas', async ({ page }) => {
   const designPage = new DesignPage(page);
 
   await designPage.goto('e2e-test-scrollbar-horizontal');
   await expect(designPage.canvas).toBeVisible();
 
-  await designPage.drawFrame(700, 300, 900, 400);
-  await designPage.click(1500, 700); // deselect so the selection outline doesn't affect the screenshot
+  await setUpOverflow(designPage, page);
+
+  const thumb = page.locator('[class*="horizontal-thumb"]');
+
+  await expect(thumb).toBeVisible();
 
   const before = await designPage.canvas.screenshot();
 
-  await dragThumb(page, page.locator('[class*="horizontal-thumb"]'), 200, 0);
+  await dragThumb(page, thumb, 200, 0);
 
   const after = await designPage.canvas.screenshot();
 
@@ -43,12 +69,15 @@ test('dragging the vertical scrollbar thumb pans the canvas', async ({ page }) =
   await designPage.goto('e2e-test-scrollbar-vertical');
   await expect(designPage.canvas).toBeVisible();
 
-  await designPage.drawFrame(700, 300, 900, 400);
-  await designPage.click(1500, 700); // deselect so the selection outline doesn't affect the screenshot
+  await setUpOverflow(designPage, page);
+
+  const thumb = page.locator('[class*="vertical-thumb"]');
+
+  await expect(thumb).toBeVisible();
 
   const before = await designPage.canvas.screenshot();
 
-  await dragThumb(page, page.locator('[class*="vertical-thumb"]'), 0, 150);
+  await dragThumb(page, thumb, 0, 150);
 
   const after = await designPage.canvas.screenshot();
 

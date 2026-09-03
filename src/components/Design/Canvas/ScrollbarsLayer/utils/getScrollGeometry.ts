@@ -7,7 +7,10 @@ import { getScrollRange } from './getScrollRange';
 import { getSelectionBounds } from '../../utils/getSelectionBounds';
 import { getVisibleCanvasRect } from '../../utils/getVisibleCanvasRect';
 
+const OVERFLOW_EPSILON_PX = 1;
+
 export type TScrollGeometry = {
+  overflow: { x: boolean; y: boolean };
   range: TDraftRect;
   visibleRect: TDraftRect;
 };
@@ -35,6 +38,20 @@ export const getScrollGeometry = (
   const visibleRect = getVisibleCanvasRect(canvasRect, leftPanelWidth, rightPanelWidth);
   const contentBoundsWorld = getContentBoundsWorld(nodes, viewport, visibleRect);
   const range = getScrollRange(contentBoundsWorld, viewport, visibleRect);
+  const contentScreen: TDraftRect = {
+    height: contentBoundsWorld.height * viewport.zoom,
+    width: contentBoundsWorld.width * viewport.zoom,
+    x: contentBoundsWorld.x * viewport.zoom + viewport.x,
+    y: contentBoundsWorld.y * viewport.zoom + viewport.y,
+  };
+  const overflow = {
+    x:
+      contentScreen.x < visibleRect.x - OVERFLOW_EPSILON_PX ||
+      contentScreen.x + contentScreen.width > visibleRect.x + visibleRect.width + OVERFLOW_EPSILON_PX,
+    y:
+      contentScreen.y < visibleRect.y - OVERFLOW_EPSILON_PX ||
+      contentScreen.y + contentScreen.height > visibleRect.y + visibleRect.height + OVERFLOW_EPSILON_PX,
+  };
 
-  return { range, visibleRect };
+  return { overflow, range, visibleRect };
 };
