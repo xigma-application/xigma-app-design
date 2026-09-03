@@ -27,7 +27,19 @@ describe('useViewMenuZoomToFitClick', () => {
   it('should fit all nodes when called with nothing selected', () => {
     // mock
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 100, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 100, x: 0, y: 0 }),
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#ff0000',
+        height: 100,
+        name: 'Frame',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 100,
+        x: 0,
+        y: 0,
+      }),
     );
     const canvas = document.createElement('canvas');
     vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({ height: 600, width: 1000 } as DOMRect);

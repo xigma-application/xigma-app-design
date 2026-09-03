@@ -6,13 +6,15 @@ import { TFrameNode, TGroupNode } from 'types/design/types';
 import { buildReplacementNodes } from '../buildReplacementNodes';
 
 const buildFrame = (overrides: Partial<TFrameNode>): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
   fill: '#ff0000',
   height: 10,
   id: 'frame-1',
   name: 'Frame',
   parentId: null,
   rotation: 0,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  type: NodeType.frame,
   width: 10,
   x: 0,
   y: 0,

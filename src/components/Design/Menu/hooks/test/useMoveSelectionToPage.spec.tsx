@@ -19,7 +19,19 @@ describe('useMoveSelectionToPage', () => {
   it('should move the currently selected nodes to the target page', () => {
     // mock — a node on the first page, plus a second page to move it to
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#ff0000',
+        height: 10,
+        name: 'A',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 10,
+        x: 0,
+        y: 0,
+      }),
     );
 
     const firstPageId = selectActivePageId(store.getState());

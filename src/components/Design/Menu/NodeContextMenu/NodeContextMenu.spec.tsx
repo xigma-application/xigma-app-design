@@ -23,7 +23,7 @@ const BASE_NODE = {
 };
 
 const buildRectangleNode = (): TRectangleNode => ({ ...BASE_NODE, fill: '#000000', type: NodeType.rectangle });
-const buildFrameNode = (): TFrameNode => ({ ...BASE_NODE, fill: '#000000', childIds: [], clipContent: true, type: NodeType.frame });
+const buildFrameNode = (): TFrameNode => ({ ...BASE_NODE, childIds: [], clipContent: true, fill: '#000000', type: NodeType.frame });
 const buildSectionNode = (): TSectionNode => ({ ...BASE_NODE, fill: '#000000', type: NodeType.section });
 const buildGroupNode = (): TGroupNode => ({ ...BASE_NODE, childIds: [], type: NodeType.group });
 const buildLineNode = (overrides: Partial<TLineNode> = {}): TLineNode => ({

@@ -17,12 +17,14 @@ import { TFrameNode } from 'types/design/types';
 const wrapper = ({ children }: { children: ReactNode }): ReactNode => <Provider store={store}>{children}</Provider>;
 
 const framePayload: Omit<TFrameNode, 'id'> = {
+  childIds: [],
+  clipContent: true,
   fill: '#ff0000',
   height: 10,
   name: 'Frame',
   parentId: null,
   rotation: 0,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  type: NodeType.frame,
   width: 10,
   x: 0,
   y: 0,

@@ -51,12 +51,14 @@ describe('getEligibleVectorAtPoint', () => {
     // mock
     store.dispatch(
       addNode({
+        childIds: [],
+        clipContent: true,
         fill: '#ffffff',
         height: 100,
         name: 'Frame',
         parentId: null,
         rotation: 0,
-        childIds: [], clipContent: true, type: NodeType.frame,
+        type: NodeType.frame,
         width: 100,
         x: 3000,
         y: 0,

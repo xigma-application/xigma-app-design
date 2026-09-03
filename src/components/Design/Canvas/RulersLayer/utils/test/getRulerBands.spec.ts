@@ -11,13 +11,15 @@ import { getRulerBands } from '../getRulerBands';
 const IDENTITY = { x: 0, y: 0, zoom: 1 };
 
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
   fill: '#fff',
   height: 100,
   id: 'frame-1',
   name: 'Frame',
   parentId: null,
   rotation: 0,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  type: NodeType.frame,
   width: 200,
   x: 100,
   y: 50,

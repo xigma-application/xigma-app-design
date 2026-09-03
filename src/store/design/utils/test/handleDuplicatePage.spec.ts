@@ -7,13 +7,15 @@ import { TFrameNode, TSceneNode } from 'types/design/types';
 import { handleDuplicatePage } from '../handleDuplicatePage';
 
 const frame = (id: string, parentId: string | null = null): TSceneNode => ({
+  childIds: [],
+  clipContent: true,
   fill: '#ff0000',
   height: 10,
   id,
   name: id,
   parentId,
   rotation: 0,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  type: NodeType.frame,
   width: 10,
   x: 0,
   y: 0,

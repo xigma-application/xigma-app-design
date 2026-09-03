@@ -15,12 +15,14 @@ import { setClipboardNodes } from '../clipboard';
 const addFrameNode = (overrides: { x?: number; y?: number } = {}): string => {
   store.dispatch(
     addNode({
+      childIds: [],
+      clipContent: true,
       fill: '#ff0000',
       height: 20,
       name: 'Frame',
       parentId: null,
       rotation: 0,
-      childIds: [], clipContent: true, type: NodeType.frame,
+      type: NodeType.frame,
       width: 20,
       x: 5,
       y: 5,
@@ -99,7 +101,7 @@ describe('handlePasteToReplace', () => {
 
     // result — the group id now holds a frame, and its old children are gone
     const page = selectActivePage(store.getState());
-    expect(page.nodes[groupId]).toMatchObject({ id: groupId, childIds: [], clipContent: true, type: NodeType.frame });
+    expect(page.nodes[groupId]).toMatchObject({ childIds: [], clipContent: true, id: groupId, type: NodeType.frame });
     oldGroup.childIds.forEach((childId) => expect(page.nodes[childId]).toBeUndefined());
 
     // result — deleting the group's last child must not also prune the group's own rootOrder slot out

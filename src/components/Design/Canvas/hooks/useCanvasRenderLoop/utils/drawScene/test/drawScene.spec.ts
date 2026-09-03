@@ -166,12 +166,14 @@ describe('drawScene', () => {
 
     store.dispatch(
       addNode({
+        childIds: [],
+        clipContent: true,
         fill: '#ff0000',
         height: 20,
         name: 'Frame 1',
         parentId: null,
         rotation: 0,
-        childIds: [], clipContent: true, type: NodeType.frame,
+        type: NodeType.frame,
         width: 10,
         x: 0,
         y: 0,
@@ -193,12 +195,14 @@ describe('drawScene', () => {
 
     store.dispatch(
       addNode({
+        childIds: [],
+        clipContent: true,
         fill: '#336699',
         height: 20,
         name: 'Hidden Frame',
         parentId: null,
         rotation: 0,
-        childIds: [], clipContent: true, type: NodeType.frame,
+        type: NodeType.frame,
         // wide enough that its name label isn't ellipsis-truncated down to a single glyph, which
         // would coincidentally match countFillDraws' (TRIANGLES, 0, 6) signature below
         width: 300,
@@ -242,12 +246,14 @@ describe('drawScene', () => {
 
     store.dispatch(
       addNode({
+        childIds: [],
+        clipContent: true,
         fill: '#ff9900',
         height: 20,
         name: 'Frame 3',
         parentId: null,
         rotation: 0,
-        childIds: [], clipContent: true, type: NodeType.frame,
+        type: NodeType.frame,
         width: 10,
         x: 0,
         y: 0,
@@ -273,12 +279,14 @@ describe('drawScene', () => {
 
     store.dispatch(
       addNode({
+        childIds: [],
+        clipContent: true,
         fill: '#00ff00',
         height: 20,
         name: 'Frame 2',
         parentId: null,
         rotation: 0,
-        childIds: [], clipContent: true, type: NodeType.frame,
+        type: NodeType.frame,
         width: 10,
         x: 0,
         y: 0,
@@ -307,12 +315,14 @@ describe('drawScene', () => {
 
     store.dispatch(
       addNode({
+        childIds: [],
+        clipContent: true,
         fill: '#0000ff',
         height: 10,
         name: 'Group A',
         parentId: null,
         rotation: 0,
-        childIds: [], clipContent: true, type: NodeType.frame,
+        type: NodeType.frame,
         width: 10,
         x: 100,
         y: 100,
@@ -320,12 +330,14 @@ describe('drawScene', () => {
     );
     store.dispatch(
       addNode({
+        childIds: [],
+        clipContent: true,
         fill: '#0000ff',
         height: 10,
         name: 'Group B',
         parentId: null,
         rotation: 0,
-        childIds: [], clipContent: true, type: NodeType.frame,
+        type: NodeType.frame,
         width: 10,
         x: 200,
         y: 100,
@@ -357,12 +369,14 @@ describe('drawScene', () => {
 
     store.dispatch(
       addNode({
+        childIds: [],
+        clipContent: true,
         fill: '#ff00ff',
         height: 10,
         name: 'Child of A',
         parentId: 'frame-a',
         rotation: 0,
-        childIds: [], clipContent: true, type: NodeType.frame,
+        type: NodeType.frame,
         width: 10,
         x: 300,
         y: 100,
@@ -370,12 +384,14 @@ describe('drawScene', () => {
     );
     store.dispatch(
       addNode({
+        childIds: [],
+        clipContent: true,
         fill: '#ff00ff',
         height: 10,
         name: 'Child of B',
         parentId: 'frame-b',
         rotation: 0,
-        childIds: [], clipContent: true, type: NodeType.frame,
+        type: NodeType.frame,
         width: 10,
         x: 400,
         y: 100,
@@ -407,12 +423,14 @@ describe('drawScene', () => {
 
     store.dispatch(
       addNode({
+        childIds: [],
+        clipContent: true,
         fill: '#123456',
         height: 20,
         name: 'Editing Frame',
         parentId: null,
         rotation: 0,
-        childIds: [], clipContent: true, type: NodeType.frame,
+        type: NodeType.frame,
         width: 10,
         x: 0,
         y: 0,
@@ -457,12 +475,14 @@ describe('drawScene', () => {
 
     store.dispatch(
       addNode({
+        childIds: [],
+        clipContent: true,
         fill: '#654321',
         height: 20,
         name: 'Editing Frame 2',
         parentId: null,
         rotation: 0,
-        childIds: [], clipContent: true, type: NodeType.frame,
+        type: NodeType.frame,
         width: 10,
         x: 0,
         y: 0,

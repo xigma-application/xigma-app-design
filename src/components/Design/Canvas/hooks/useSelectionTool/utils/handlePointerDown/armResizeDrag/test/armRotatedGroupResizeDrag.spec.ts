@@ -25,7 +25,19 @@ const createResizeDragRef = (): RefObject<TResizeDragState | null> => ({ current
 
 const addFrameNode = (x: number, y: number): string => {
   store.dispatch(
-    addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x, y }),
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ff0000',
+      height: 20,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 20,
+      x,
+      y,
+    }),
   );
 
   return selectActivePage(store.getState()).rootOrder.at(-1) as string;

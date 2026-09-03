@@ -53,7 +53,7 @@ describe('handleConvertSelectionToFrame', () => {
     // result
     const page = selectActivePage(store.getState());
 
-    expect(page.nodes[sectionId]).toMatchObject({ id: sectionId, childIds: [], clipContent: true, type: NodeType.frame, x: 5, y: 5 });
+    expect(page.nodes[sectionId]).toMatchObject({ childIds: [], clipContent: true, id: sectionId, type: NodeType.frame, x: 5, y: 5 });
     expect(page.rootOrder).toEqual(rootOrderBefore);
   });
 

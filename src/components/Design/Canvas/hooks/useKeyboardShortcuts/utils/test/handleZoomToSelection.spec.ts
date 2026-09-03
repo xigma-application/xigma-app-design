@@ -18,7 +18,19 @@ import { handleZoomToSelection } from '../handleZoomToSelection';
 
 const addFrameNode = (x: number): string => {
   store.dispatch(
-    addNode({ fill: '#ff0000', height: 100, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 100, x, y: 0 }),
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ff0000',
+      height: 100,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 100,
+      x,
+      y: 0,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());

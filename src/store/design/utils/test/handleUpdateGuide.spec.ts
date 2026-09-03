@@ -8,13 +8,15 @@ import { getActivePage } from '../getActivePage';
 import { handleUpdateGuide } from '../handleUpdateGuide';
 
 const frame = (id: string): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
   fill: '#ff0000',
   height: 100,
   id,
   name: id,
   parentId: null,
   rotation: 0,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  type: NodeType.frame,
   width: 100,
   x: 0,
   y: 0,

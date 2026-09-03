@@ -48,13 +48,15 @@ describe('getLineEndpointAtPoint', () => {
   it('should return null when the selected node is not a line', () => {
     // mock
     const frame: TFrameNode = {
+      childIds: [],
+      clipContent: true,
       fill: '#fff',
       height: 10,
       id: 'frame-1',
       name: 'Frame',
       parentId: null,
       rotation: 0,
-      childIds: [], clipContent: true, type: NodeType.frame,
+      type: NodeType.frame,
       width: 10,
       x: 0,
       y: 0,

@@ -6,7 +6,20 @@ import { TSceneNode } from 'types/design/types';
 import { getNextFrameName } from '../getNextFrameName';
 
 const buildFrame = (name: string): TSceneNode =>
-  ({ fill: '#fff', height: 10, id: name, name, parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }) as TSceneNode;
+  ({
+    childIds: [],
+    clipContent: true,
+    fill: '#fff',
+    height: 10,
+    id: name,
+    name,
+    parentId: null,
+    rotation: 0,
+    type: NodeType.frame,
+    width: 10,
+    x: 0,
+    y: 0,
+  }) as TSceneNode;
 
 const buildRect = (name: string): TSceneNode =>
   ({

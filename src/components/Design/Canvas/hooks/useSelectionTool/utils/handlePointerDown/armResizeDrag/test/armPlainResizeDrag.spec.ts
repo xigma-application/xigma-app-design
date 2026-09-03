@@ -26,13 +26,15 @@ const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointerd
 const createResizeDragRef = (): RefObject<TResizeDragState | null> => ({ current: null });
 
 const frame = (id: string, x: number, y: number, width: number, height: number): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
   fill: '#ff0000',
   height,
   id,
   name: 'Frame',
   parentId: null,
   rotation: 0,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  type: NodeType.frame,
   width,
   x,
   y,

@@ -27,13 +27,15 @@ const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointerd
 const createRotateDragRef = (): RefObject<TRotateDragState | null> => ({ current: null });
 
 const frame = (id: string, x: number, y: number, width: number, height: number, rotation = 0): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
   fill: '#ff0000',
   height,
   id,
   name: 'Frame',
   parentId: null,
   rotation,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  type: NodeType.frame,
   width,
   x,
   y,
@@ -220,10 +222,34 @@ describe('armRotateDrag', () => {
 
     store.dispatch(setSelection([]));
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 20, name: 'A', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#ff0000',
+        height: 20,
+        name: 'A',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
     );
     store.dispatch(
-      addNode({ fill: '#00ff00', height: 20, name: 'B', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x: 80, y: 80 }),
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#00ff00',
+        height: 20,
+        name: 'B',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 20,
+        x: 80,
+        y: 80,
+      }),
     );
 
     const childIds = selectActivePage(store.getState()).rootOrder.slice(-2);

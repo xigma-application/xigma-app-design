@@ -9,13 +9,15 @@ import { TFrameNode } from 'types/design/types';
 import { getFrameNameLabelAnchor } from '../getFrameNameLabelAnchor';
 
 const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
   fill: '#ffffff',
   height: 100,
   id: 'frame-1',
   name: 'Frame 1',
   parentId: null,
   rotation: 0,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  type: NodeType.frame,
   width: 200,
   x: 10,
   y: 20,

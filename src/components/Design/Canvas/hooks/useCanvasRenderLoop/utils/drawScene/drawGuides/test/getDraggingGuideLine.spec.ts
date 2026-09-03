@@ -7,13 +7,15 @@ import { TSceneNode } from 'types/design/types';
 import { getDraggingGuideLine } from '../getDraggingGuideLine';
 
 const frame: TSceneNode = {
+  childIds: [],
+  clipContent: true,
   fill: '#ff0000',
   height: 100,
   id: 'frame',
   name: 'frame',
   parentId: null,
   rotation: 0,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  type: NodeType.frame,
   width: 200,
   x: 10,
   y: 20,

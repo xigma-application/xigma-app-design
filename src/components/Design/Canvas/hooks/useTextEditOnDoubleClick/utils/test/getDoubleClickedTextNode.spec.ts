@@ -26,13 +26,15 @@ const textNode: TTextNode = {
 };
 
 const frameNode: TFrameNode = {
+  childIds: [],
+  clipContent: true,
   fill: '#ff0000',
   height: 100,
   id: 'frame-1',
   name: 'Frame',
   parentId: null,
   rotation: 0,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  type: NodeType.frame,
   width: 100,
   x: 1000,
   y: 1000,

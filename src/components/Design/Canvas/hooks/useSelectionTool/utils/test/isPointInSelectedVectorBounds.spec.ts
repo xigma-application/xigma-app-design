@@ -31,13 +31,15 @@ const buildVectorNode = (id = 'a', rotation = 0, width = 100, height = 100): TVe
 });
 
 const buildFrameNode = (): TSceneNode => ({
+  childIds: [],
+  clipContent: true,
   fill: '#ff0000',
   height: 10,
   id: 'b',
   name: 'Frame',
   parentId: null,
   rotation: 0,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  type: NodeType.frame,
   width: 10,
   x: 0,
   y: 0,

@@ -53,13 +53,15 @@ describe('getEligibleVectorWidthNodes', () => {
   it('should drop a non-vector node', () => {
     // mock
     const frameNode: TFrameNode = {
+      childIds: [],
+      clipContent: true,
       fill: '#fff',
       height: 10,
       id: 'frame-1',
       name: 'Frame',
       parentId: null,
       rotation: 0,
-      childIds: [], clipContent: true, type: NodeType.frame,
+      type: NodeType.frame,
       width: 10,
       x: 0,
       y: 0,

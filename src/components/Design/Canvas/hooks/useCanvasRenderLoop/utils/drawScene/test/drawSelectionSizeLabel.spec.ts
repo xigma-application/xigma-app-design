@@ -23,13 +23,15 @@ const imageContext = {} as never;
 
 const buildNode = (overrides: Partial<TBoxSceneNode> = {}): TSceneNode =>
   ({
+    childIds: [],
+    clipContent: true,
     fill: '#ff0000',
     height: 100,
     id: 'node-1',
     name: 'Frame',
     parentId: null,
     rotation: 0,
-    childIds: [], clipContent: true, type: NodeType.frame,
+    type: NodeType.frame,
     width: 200,
     x: 0,
     y: 0,

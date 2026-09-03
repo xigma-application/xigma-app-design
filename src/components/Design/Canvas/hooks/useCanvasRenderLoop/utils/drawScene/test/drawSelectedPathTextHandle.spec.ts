@@ -78,13 +78,15 @@ describe('drawSelectedPathTextHandle', () => {
     const program = {} as WebGLProgram;
     const buffer = {} as WebGLBuffer;
     const frame: TSceneNode = {
+      childIds: [],
+      clipContent: true,
       fill: '#ff0000',
       height: 10,
       id: 'a',
       name: 'Frame',
       parentId: null,
       rotation: 0,
-      childIds: [], clipContent: true, type: NodeType.frame,
+      type: NodeType.frame,
       width: 10,
       x: 0,
       y: 0,

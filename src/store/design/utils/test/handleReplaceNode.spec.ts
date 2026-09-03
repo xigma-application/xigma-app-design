@@ -8,13 +8,15 @@ import { getActivePage } from '../getActivePage';
 import { handleReplaceNode } from '../handleReplaceNode';
 
 const frameNode: TFrameNode = {
+  childIds: [],
+  clipContent: true,
   fill: '#ff0000',
   height: 10,
   id: 'node-1',
   name: 'Frame',
   parentId: null,
   rotation: 0,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  type: NodeType.frame,
   width: 10,
   x: 0,
   y: 0,

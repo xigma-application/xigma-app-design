@@ -21,12 +21,14 @@ describe('useTreeItemActions', () => {
   beforeEach(() => {
     store.dispatch(
       addNode({
+        childIds: [],
+        clipContent: true,
         fill: '#ff0000',
         height: 10,
         name: 'Frame',
         parentId: null,
         rotation: 0,
-        childIds: [], clipContent: true, type: NodeType.frame,
+        type: NodeType.frame,
         width: 10,
         x: 0,
         y: 0,

@@ -67,12 +67,14 @@ describe('getShapeOutlineTargets', () => {
   it('should ignore selected nodes that are not strokeable at all', () => {
     // mock
     addSelectedNode({
+      childIds: [],
+      clipContent: true,
       fill: '#ffffff',
       height: 20,
       name: 'Frame',
       parentId: null,
       rotation: 0,
-      childIds: [], clipContent: true, type: NodeType.frame,
+      type: NodeType.frame,
       width: 20,
       x: 0,
       y: 0,

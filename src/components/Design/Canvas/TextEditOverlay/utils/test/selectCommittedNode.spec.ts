@@ -51,7 +51,19 @@ describe('selectCommittedNode', () => {
     const store = createTestStore();
 
     store.dispatch(
-      addNode({ fill: '#fff', height: 100, name: 'Frame 1', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 100, x: 0, y: 0 }),
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#fff',
+        height: 100,
+        name: 'Frame 1',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 100,
+        x: 0,
+        y: 0,
+      }),
     );
 
     // action

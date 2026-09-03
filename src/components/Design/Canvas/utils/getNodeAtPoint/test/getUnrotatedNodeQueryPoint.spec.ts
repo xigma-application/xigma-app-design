@@ -7,13 +7,15 @@ import { getUnrotatedNodeQueryPoint } from '../getUnrotatedNodeQueryPoint';
 
 const buildNode = (overrides: Partial<TSceneNode> = {}): TSceneNode =>
   ({
+    childIds: [],
+    clipContent: true,
     fill: '#ff0000',
     height: 100,
     id: 'a',
     name: 'Frame',
     parentId: null,
     rotation: 0,
-    childIds: [], clipContent: true, type: NodeType.frame,
+    type: NodeType.frame,
     width: 100,
     x: 0,
     y: 0,

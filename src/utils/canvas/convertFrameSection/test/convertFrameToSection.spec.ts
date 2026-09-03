@@ -6,13 +6,15 @@ import { TFrameNode } from 'types/design/types';
 import { convertFrameToSection } from '../convertFrameToSection';
 
 const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
   fill: '#ff0000',
   height: 100,
   id: 'frame-1',
   name: 'Frame',
   parentId: 'parent-1',
   rotation: 0,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  type: NodeType.frame,
   width: 200,
   x: 10,
   y: 20,

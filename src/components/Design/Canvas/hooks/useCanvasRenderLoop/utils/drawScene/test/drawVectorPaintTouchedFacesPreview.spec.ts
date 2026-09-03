@@ -129,13 +129,15 @@ describe('drawVectorPaintTouchedFacesPreview', () => {
   it('should skip a node id that resolves to a non-vector node', () => {
     // mock
     const frameNode = {
+      childIds: [],
+      clipContent: true,
       fill: '#ff0000',
       height: 10,
       id: '3',
       name: 'Frame',
       parentId: null,
       rotation: 0,
-      childIds: [], clipContent: true, type: NodeType.frame,
+      type: NodeType.frame,
       width: 10,
       x: 0,
       y: 0,

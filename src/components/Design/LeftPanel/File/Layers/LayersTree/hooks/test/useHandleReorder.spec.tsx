@@ -21,10 +21,34 @@ describe('useHandleReorder', () => {
 
   beforeEach(() => {
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#ff0000',
+        height: 10,
+        name: 'A',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 10,
+        x: 0,
+        y: 0,
+      }),
     );
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'B', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#ff0000',
+        height: 10,
+        name: 'B',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 10,
+        x: 0,
+        y: 0,
+      }),
     );
     [idA, idB] = selectActivePage(store.getState()).rootOrder.slice(-2);
   });

@@ -6,13 +6,15 @@ import { TFrameNode, TRectangleNode, TSceneNode } from 'types/design/types';
 import { getFrameAtWorldPoint } from '../getFrameAtWorldPoint';
 
 const frame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
   fill: '#fff',
   height: 100,
   id: 'frame-1',
   name: 'Frame',
   parentId: null,
   rotation: 0,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  type: NodeType.frame,
   width: 100,
   x: 0,
   y: 0,

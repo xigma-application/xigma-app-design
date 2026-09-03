@@ -9,13 +9,15 @@ describe('cloneNodeWithOffset', () => {
   it('should shift the geometry of a box node by the offset', () => {
     // mock
     const node: TSceneNode = {
+      childIds: [],
+      clipContent: true,
       fill: '#ff0000',
       height: 20,
       id: 'n1',
       name: 'Frame',
       parentId: null,
       rotation: 0,
-      childIds: [], clipContent: true, type: NodeType.frame,
+      type: NodeType.frame,
       width: 20,
       x: 10,
       y: 10,
@@ -31,13 +33,15 @@ describe('cloneNodeWithOffset', () => {
   it('should not mutate the original node', () => {
     // mock
     const node: TSceneNode = {
+      childIds: [],
+      clipContent: true,
       fill: '#ff0000',
       height: 20,
       id: 'n1',
       name: 'Frame',
       parentId: null,
       rotation: 0,
-      childIds: [], clipContent: true, type: NodeType.frame,
+      type: NodeType.frame,
       width: 20,
       x: 10,
       y: 10,

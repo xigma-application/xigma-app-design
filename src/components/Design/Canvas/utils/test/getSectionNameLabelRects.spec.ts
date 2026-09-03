@@ -31,13 +31,15 @@ const buildSection = (overrides: Partial<TSceneNode> = {}): TSceneNode =>
 
 const buildFrame = (): TSceneNode =>
   ({
+    childIds: [],
+    clipContent: true,
     fill: '#ffffff',
     height: 100,
     id: 'frame-1',
     name: 'Frame 1',
     parentId: null,
     rotation: 0,
-    childIds: [], clipContent: true, type: NodeType.frame,
+    type: NodeType.frame,
     width: 200,
     x: 0,
     y: 0,

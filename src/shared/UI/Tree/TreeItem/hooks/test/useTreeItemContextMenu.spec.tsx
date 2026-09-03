@@ -30,7 +30,19 @@ describe('useTreeItemContextMenu', () => {
 
     [idA, idB] = ['A', 'B'].map((name) => {
       store.dispatch(
-        addNode({ fill: '#ff0000', height: 10, name, parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+        addNode({
+          childIds: [],
+          clipContent: true,
+          fill: '#ff0000',
+          height: 10,
+          name,
+          parentId: null,
+          rotation: 0,
+          type: NodeType.frame,
+          width: 10,
+          x: 0,
+          y: 0,
+        }),
       );
 
       return selectOrderedNodes(store.getState()).at(-1)!.id;

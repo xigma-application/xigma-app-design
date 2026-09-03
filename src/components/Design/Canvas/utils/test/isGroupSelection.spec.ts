@@ -9,13 +9,15 @@ const buildNode = (
   overrides: Partial<Exclude<TBoxSceneNode, TPathNode | TPolygonNode | TSectionNode | TStarNode | TMediaNode | TTextNode>>,
 ): TSceneNode =>
   ({
+    childIds: [],
+    clipContent: true,
     fill: '#ff0000',
     height: 10,
     id: 'node',
     name: 'Frame',
     parentId: null,
     rotation: 0,
-    childIds: [], clipContent: true, type: NodeType.frame,
+    type: NodeType.frame,
     width: 10,
     x: 0,
     y: 0,

@@ -6,13 +6,15 @@ import { TFrameNode, TSceneNode } from 'types/design/types';
 import { getFrameGuideLines } from '../getFrameGuideLines';
 
 const frame = (id: string, overrides: Partial<TFrameNode> = {}): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
   fill: '#ff0000',
   height: 100,
   id,
   name: id,
   parentId: null,
   rotation: 0,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  type: NodeType.frame,
   width: 200,
   x: 10,
   y: 20,

@@ -13,7 +13,19 @@ const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
 
 const addFrameNode = (x: number, y: number, size = 20): string => {
   store.dispatch(
-    addNode({ fill: '#ff0000', height: size, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: size, x, y }),
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ff0000',
+      height: size,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: size,
+      x,
+      y,
+    }),
   );
 
   return selectActivePage(store.getState()).rootOrder.at(-1) as string;

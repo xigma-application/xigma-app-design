@@ -18,10 +18,34 @@ describe('applyRotatedGroupChildResize', () => {
   it('should dispatch scaled changes for every child origin when the group resolves to a box node', () => {
     // mock
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 20, name: 'A', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#ff0000',
+        height: 20,
+        name: 'A',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 20,
+        x: 0,
+        y: 0,
+      }),
     );
     store.dispatch(
-      addNode({ fill: '#00ff00', height: 20, name: 'B', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x: 60, y: 0 }),
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#00ff00',
+        height: 20,
+        name: 'B',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 20,
+        x: 60,
+        y: 0,
+      }),
     );
 
     const childIds = selectActivePage(store.getState()).rootOrder.slice(-2);
@@ -51,12 +75,14 @@ describe('applyRotatedGroupChildResize', () => {
     // group's own box was already dispatched this frame (by resizeBoxNode, read below as newGroupBox)
     store.dispatch(
       addNode({
+        childIds: [],
+        clipContent: true,
         fill: '#ff0000',
         height: 40,
         name: 'A',
         parentId: null,
         rotation: 30,
-        childIds: [], clipContent: true, type: NodeType.frame,
+        type: NodeType.frame,
         width: 80,
         x: 708.0384757729337,
         y: 270,
@@ -64,12 +90,14 @@ describe('applyRotatedGroupChildResize', () => {
     );
     store.dispatch(
       addNode({
+        childIds: [],
+        clipContent: true,
         fill: '#00ff00',
         height: 40,
         name: 'B',
         parentId: null,
         rotation: 30,
-        childIds: [], clipContent: true, type: NodeType.frame,
+        type: NodeType.frame,
         width: 80,
         x: 811.9615242270663,
         y: 330,

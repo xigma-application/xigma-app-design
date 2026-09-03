@@ -6,13 +6,15 @@ import { TFrameNode } from 'types/design/types';
 import { getAdjacentFrameBounds } from '../getAdjacentFrameBounds';
 
 const buildFrame = (id: string, x: number): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
   fill: '#ffffff',
   height: 100,
   id,
   name: id,
   parentId: null,
   rotation: 0,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  type: NodeType.frame,
   width: 100,
   x,
   y: 0,

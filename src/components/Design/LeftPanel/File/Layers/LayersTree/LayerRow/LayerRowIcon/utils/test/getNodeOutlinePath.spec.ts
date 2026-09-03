@@ -183,13 +183,15 @@ describe('getNodeOutlinePath', () => {
   it('should return null for a frame node', () => {
     // mock
     const node: TFrameNode = {
+      childIds: [],
+      clipContent: true,
       fill: '#ff0000',
       height: 40,
       id: 'frame-1',
       name: 'Frame',
       parentId: null,
       rotation: 0,
-      childIds: [], clipContent: true, type: NodeType.frame,
+      type: NodeType.frame,
       width: 40,
       x: 0,
       y: 0,

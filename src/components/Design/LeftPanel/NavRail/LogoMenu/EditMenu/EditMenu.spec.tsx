@@ -44,7 +44,19 @@ const renderInMenu = (children: ReactNode): ReturnType<typeof render> => {
 
 const addFrameNode = (): string => {
   store.dispatch(
-    addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ff0000',
+      height: 20,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 20,
+      x: 0,
+      y: 0,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());

@@ -23,14 +23,38 @@ describe('usePasteToReplace', () => {
   it("should overwrite the selected node's content with the clipboard copy when called", () => {
     // mock
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'Source', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#ff0000',
+        height: 10,
+        name: 'Source',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 10,
+        x: 0,
+        y: 0,
+      }),
     );
     const [sourceId] = selectActivePage(store.getState()).rootOrder.slice(-1);
     const sourceNode = selectActivePage(store.getState()).nodes[sourceId] as TFrameNode;
     setClipboardNodes([{ ...sourceNode, height: 40 }], [sourceId]);
 
     store.dispatch(
-      addNode({ fill: '#0000ff', height: 10, name: 'Target', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 5, y: 5 }),
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#0000ff',
+        height: 10,
+        name: 'Target',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 10,
+        x: 5,
+        y: 5,
+      }),
     );
     const [targetId] = selectActivePage(store.getState()).rootOrder.slice(-1);
     store.dispatch(setSelection([targetId]));

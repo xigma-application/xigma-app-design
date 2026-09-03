@@ -8,13 +8,15 @@ import { TSectionNameLabelRect } from '../../getSectionNameLabelRects';
 import { isPointInNodeNameLabel } from '../isPointInNodeNameLabel';
 
 const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
   fill: '#ffffff',
   height: 50,
   id: 'frame-a',
   name: 'Frame 1',
   parentId: null,
   rotation: 0,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  type: NodeType.frame,
   width: 80,
   x: 0,
   y: 100,

@@ -25,10 +25,34 @@ describe('useViewMenuZoomToNextFrameClick', () => {
   it('should fit the next frame when called', () => {
     // mock — viewport centered inside the first frame (x: 0-100)
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 100, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 100, x: 0, y: 0 }),
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#ff0000',
+        height: 100,
+        name: 'Frame',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 100,
+        x: 0,
+        y: 0,
+      }),
     );
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 100, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 100, x: 300, y: 0 }),
+      addNode({
+        childIds: [],
+        clipContent: true,
+        fill: '#ff0000',
+        height: 100,
+        name: 'Frame',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.frame,
+        width: 100,
+        x: 300,
+        y: 0,
+      }),
     );
     store.dispatch(setViewport({ x: 450, y: 250, zoom: 1 }));
     const canvas = document.createElement('canvas');

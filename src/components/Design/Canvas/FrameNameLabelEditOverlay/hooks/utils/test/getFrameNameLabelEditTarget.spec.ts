@@ -27,13 +27,15 @@ const addFrame = (
 ): { id: string; name: string } => {
   store.dispatch(
     addNode({
+      childIds: [],
+      clipContent: true,
       fill: '#ffffff',
       height: 100,
       hidden: overrides.hidden,
       name: 'Frame',
       parentId: null,
       rotation: overrides.rotation ?? 0,
-      childIds: [], clipContent: true, type: NodeType.frame,
+      type: NodeType.frame,
       width: 200,
       x: 0,
       y: 0,

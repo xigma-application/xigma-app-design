@@ -14,13 +14,15 @@ describe('clipboard', () => {
   it('should return a snapshot of whatever was last set, independent of later mutation of the source object', () => {
     // mock
     const node: TSceneNode = {
+      childIds: [],
+      clipContent: true,
       fill: '#ff0000',
       height: 20,
       id: 'n1',
       name: 'Frame',
       parentId: null,
       rotation: 0,
-      childIds: [], clipContent: true, type: NodeType.frame,
+      type: NodeType.frame,
       width: 20,
       x: 0,
       y: 0,

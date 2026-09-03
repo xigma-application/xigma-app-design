@@ -36,7 +36,19 @@ const createCanvas = (): HTMLCanvasElement => {
 // name back rather than assuming "Frame 1"
 const addFrame = (): { id: string; name: string } => {
   store.dispatch(
-    addNode({ fill: '#ffffff', height: 100, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 200, x: 0, y: 0 }),
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ffffff',
+      height: 100,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: 200,
+      x: 0,
+      y: 0,
+    }),
   );
 
   const { nodes, rootOrder } = selectActivePage(store.getState());

@@ -13,12 +13,14 @@ import { getClipboardNodes, setClipboardNodes } from '../clipboard';
 const addFrameNode = (overrides: { x?: number; y?: number } = {}): string => {
   store.dispatch(
     addNode({
+      childIds: [],
+      clipContent: true,
       fill: '#ff0000',
       height: 20,
       name: 'Frame',
       parentId: null,
       rotation: 0,
-      childIds: [], clipContent: true, type: NodeType.frame,
+      type: NodeType.frame,
       width: 20,
       x: 0,
       y: 0,

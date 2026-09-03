@@ -24,6 +24,8 @@ describe('convertSectionToFrame', () => {
     const section = buildSection();
 
     expect(convertSectionToFrame(section)).toEqual({
+      childIds: [],
+      clipContent: true,
       fill: '#ff0000',
       height: 100,
       hidden: undefined,
@@ -33,7 +35,7 @@ describe('convertSectionToFrame', () => {
       name: 'Section',
       parentId: 'parent-1',
       rotation: 0,
-      childIds: [], clipContent: true, type: NodeType.frame,
+      type: NodeType.frame,
       width: 200,
       x: 10,
       y: 20,

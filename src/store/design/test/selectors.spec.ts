@@ -46,6 +46,8 @@ import { NodeType, ToolName } from 'types/design/enums';
 import { TGroupNode, TRectangleNode, TSceneNode } from 'types/design/types';
 
 const node: TSceneNode = {
+  childIds: [],
+  clipContent: true,
   fill: '#ff0000',
   guides: [{ axis: 'y', id: 'frame-guide', position: 5 }],
   height: 10,
@@ -53,7 +55,7 @@ const node: TSceneNode = {
   name: 'Frame 1',
   parentId: null,
   rotation: 0,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  type: NodeType.frame,
   width: 10,
   x: 0,
   y: 0,

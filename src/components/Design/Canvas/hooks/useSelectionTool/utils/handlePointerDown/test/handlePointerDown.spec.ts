@@ -61,12 +61,14 @@ const createMarqueeStartRef = (): RefObject<TPoint | null> => ({ current: null }
 const addFrameNode = (x: number, y: number, size = 20): string => {
   store.dispatch(
     addNode({
+      childIds: [],
+      clipContent: true,
       fill: '#ff0000',
       height: size,
       name: 'Frame',
       parentId: null,
       rotation: 0,
-      childIds: [], clipContent: true, type: NodeType.frame,
+      type: NodeType.frame,
       width: size,
       x,
       y,

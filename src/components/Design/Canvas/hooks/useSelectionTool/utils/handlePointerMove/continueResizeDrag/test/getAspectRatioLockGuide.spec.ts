@@ -10,7 +10,21 @@ import { NodeType } from 'types/design/enums';
 import { getAspectRatioLockGuide } from '../getAspectRatioLockGuide';
 
 const addFrameNode = (x: number, y: number, width: number, height: number, rotation = 0): string => {
-  store.dispatch(addNode({ fill: '#ff0000', height, name: 'Frame', parentId: null, rotation, childIds: [], clipContent: true, type: NodeType.frame, width, x, y }));
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ff0000',
+      height,
+      name: 'Frame',
+      parentId: null,
+      rotation,
+      type: NodeType.frame,
+      width,
+      x,
+      y,
+    }),
+  );
 
   const { rootOrder } = selectActivePage(store.getState());
 

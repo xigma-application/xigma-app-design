@@ -55,13 +55,13 @@ import { NodeType, ToolName } from 'types/design/enums';
 import { TFrameNode } from 'types/design/types';
 
 const frameNodePayload: Omit<TFrameNode, 'id'> = {
+  childIds: [],
+  clipContent: true,
   fill: '#ff0000',
   height: 100,
   name: 'Frame 1',
   parentId: null,
   rotation: 0,
-  childIds: [],
-  clipContent: true,
   type: NodeType.frame,
   width: 200,
   x: 0,
