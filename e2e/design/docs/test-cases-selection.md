@@ -390,3 +390,31 @@ Only #336 gets e2e coverage — it's the one case where the payoff is genuinely 
 render round-trip (the shortcut reordering the array, the render loop re-flattening it, and the
 overlap region repainting with a different fill). The rest are exact `store.getState()` assertions
 with no timing/rendering stakes, unit-only per the section below.
+
+## Frame nesting — click-through depth, Ctrl reach, and marquee
+
+A frame's body stays click-through only when its own direct parent isn't a frame — any frame nested
+inside another frame, at any depth, is instead a normal, directly clickable node (it's "just another
+parent"), while actual non-frame content sitting inside such a nested frame stays reachable only via
+Ctrl. Hover and marquee mirror the same rule as click. A nested frame (parent is a frame) also never
+renders its own name label — only the outermost frame, or one nested inside a section, keeps it. A
+Ctrl-held gesture that grabs a node falls back to drawing a marquee from the original point on its
+first move, instead of moving that node. All of this lives in `e2e/design/selection/frame-nested.spec.ts`.
+
+| #   | Scenario                                                                                                              | Unit |            E2E            |
+| --- | --------------------------------------------------------------------------------------------------------------------- | :--: | :-----------------------: |
+| 341 | A frame nested any number of levels deep is directly selectable by a plain click on its own body, without Control     |  ✅  | ✅ `frame-nested.spec.ts` |
+| 342 | A plain click on real (non-frame) content sitting inside a nested frame selects the frame, not the content            |  ✅  | ✅ `frame-nested.spec.ts` |
+| 343 | Ctrl+click on that same content reaches it directly, regardless of nesting depth                                      |  ✅  | ✅ `frame-nested.spec.ts` |
+| 344 | Hovering a nested frame's own body and hovering its content without Control resolve to the identical highlighted node |  ✅  | ✅ `frame-nested.spec.ts` |
+| 345 | Holding Control while hovering that same content highlights the content itself instead                                |  ✅  | ✅ `frame-nested.spec.ts` |
+| 346 | A frame nested directly inside another frame never renders its own name label                                         |  ✅  | ✅ `frame-nested.spec.ts` |
+| 347 | A frame nested inside a section (not a frame) keeps its label, fully interactive at its unmoved canvas position       |  ✅  | ✅ `frame-nested.spec.ts` |
+| 348 | A marquee that never fully encloses either ancestor frame still reaches and selects a frame nested two levels deep    |  ✅  | ✅ `frame-nested.spec.ts` |
+| 349 | A Ctrl-held gesture that grabs a nested frame draws a marquee from the original point on its first move, not a drag   |  ✅  | ✅ `frame-nested.spec.ts` |
+| 350 | Converting a Ctrl-drag into a marquee never moves the node that was originally grabbed                                |  ✅  | ✅ `frame-nested.spec.ts` |
+
+Every scenario here earns e2e coverage rather than staying unit-only: each one is precisely the kind
+of real-browser pointer-timing behavior a synthetic `PointerEvent` in the unit suite can paper over —
+sequential drag gestures, Ctrl/mouse-move interplay, and Layers-panel drag-and-drop reparenting all
+have to actually work together in a live render loop, not just in isolated function calls.

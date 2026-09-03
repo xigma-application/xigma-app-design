@@ -17,7 +17,7 @@ import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
-import { TGroupNode, TRectangleNode, TSceneNode } from 'types/design/types';
+import { TFrameNode, TGroupNode, TRectangleNode, TSceneNode } from 'types/design/types';
 
 const canvas = document.createElement('canvas');
 
@@ -42,6 +42,22 @@ const buildGroupNode = (overrides: Partial<TGroupNode> = {}): TGroupNode => ({
   parentId: null,
   rotation: 0,
   type: NodeType.group,
+  width: 10,
+  x: 0,
+  y: 0,
+  ...overrides,
+});
+
+const buildFrameNode = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
+  childIds: ['child-1'],
+  clipContent: true,
+  fill: '#ffffff',
+  height: 10,
+  id: 'frame-1',
+  name: 'My Frame',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.frame,
   width: 10,
   x: 0,
   y: 0,
@@ -221,6 +237,22 @@ describe('TreeItem', () => {
   it('should render a collapsed expand toggle, labeled "Expand layer", for a group node with children', () => {
     // before
     renderTreeItem(false, buildGroupNode());
+
+    // result
+    expect(screen.getByRole('button', { name: 'Expand layer' })).toBeInTheDocument();
+  });
+
+  it('should not render an expand toggle for a frame node with no children', () => {
+    // before
+    renderTreeItem(false, buildFrameNode({ childIds: [] }));
+
+    // result
+    expect(screen.queryByRole('button', { name: 'Expand layer' })).not.toBeInTheDocument();
+  });
+
+  it('should render a collapsed expand toggle, labeled "Expand layer", for a frame node with children', () => {
+    // before
+    renderTreeItem(false, buildFrameNode());
 
     // result
     expect(screen.getByRole('button', { name: 'Expand layer' })).toBeInTheDocument();

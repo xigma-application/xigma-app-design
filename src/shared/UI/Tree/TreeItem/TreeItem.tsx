@@ -18,11 +18,13 @@ import { useZoomToTreeItem } from './hooks/useZoomToTreeItem';
 // others
 import { TREE_ITEM_INDENT_PX } from '../constants';
 
+// store
+import { isContainerNode } from 'store/design/utils/nodeHierarchy/isContainerNode';
+
 // styles
 import styles from './tree-item.module.scss';
 
 // types
-import { NodeType } from 'types/design/enums';
 import { TRenderTreeItemMenu } from './types';
 import { TSceneNode } from 'types/design/types';
 import { TToggleExpand } from '../types';
@@ -53,10 +55,10 @@ export const TreeItem: FC<TTreeItemProps> = ({
   const handleSelect = useSelectTreeItem(node.id);
   const handleRename = useRenameTreeItem(node.id);
   const handleZoomToItem = useZoomToTreeItem(node.id);
+  const isExpandable = isContainerNode(node) && node.childIds.length > 0;
   const { handleStopPropagation, handleToggleHidden, handleToggleLocked } = useTreeItemActions(node.id);
   const { isEditing, isRenameRequested, onEditingChange, onRenameRequested } = useTreeItemNameEditing();
   const { anchorRef, isOpen, onContextMenu, onOpenChange } = useTreeItemContextMenu(node.id);
-  const isExpandable = node.type === NodeType.group && node.childIds.length > 0;
 
   return (
     <div aria-selected={isSelected} className={styles.TreeItem} onClick={handleSelect} onContextMenu={onContextMenu}>
