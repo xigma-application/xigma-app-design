@@ -47,6 +47,10 @@ describe('detectGridLayout', () => {
       ['d', null, 'f'],
       ['g', 'h', 'i'],
     ]);
+
+    // the middle row has no column-gap handle either side of its empty cell (1,1),
+    // only the two fully-populated rows (0 and 2) get one per boundary
+    expect(layout?.columnGaps).toHaveLength(4);
   });
 
   it('should reject a grid whose columns are misaligned beyond tolerance', () => {

@@ -68,13 +68,18 @@ const drawGridColumnGapFills = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
+  cells: (TSmartSelectionNode | null)[][],
   geometry: TGridGeometry,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  geometry.rowY.forEach((_, rowIndex) => {
+  cells.forEach((row, rowIndex) => {
     for (let column = 0; column < geometry.columnX.length - 1; column += 1) {
+      if (row[column] === null || row[column + 1] === null) {
+        continue;
+      }
+
       const before = getGridCellRect(geometry, rowIndex, column);
       const after = getGridCellRect(geometry, rowIndex, column + 1);
       const rect: TDraftRect = {
@@ -100,7 +105,7 @@ export const drawSmartSelectionGapFillPreview = (
   viewport: TViewport,
 ): void => {
   if (layout.type === 'grid' && axis === 'x') {
-    drawGridColumnGapFills(gl, program, buffer, layout.geometry, canvasWidth, canvasHeight, viewport);
+    drawGridColumnGapFills(gl, program, buffer, layout.cells, layout.geometry, canvasWidth, canvasHeight, viewport);
 
     return;
   }
