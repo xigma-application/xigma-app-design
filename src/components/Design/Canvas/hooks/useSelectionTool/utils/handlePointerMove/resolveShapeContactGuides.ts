@@ -1,4 +1,5 @@
 // store
+import { getIsDescendantOfMovedNodes } from 'store/design/utils/handleMoveNodes/getIsDescendantOfMovedNodes';
 import { selectNodes, selectSelectedNodes } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -36,9 +37,9 @@ export const resolveShapeContactGuides = (event: PointerEvent, canvasRefs: TCanv
     .filter(isEligibleNode);
 
   if (activeNodes.length > 0) {
-    const activeIds = new Set(activeNodes.map((node) => node.id));
+    const activeIds = activeNodes.map((node) => node.id);
     const candidates = Object.values(nodes)
-      .filter((node) => !activeIds.has(node.id) && isContactGuideEligibleNode(node))
+      .filter((node) => !getIsDescendantOfMovedNodes(node.id, activeIds, nodes) && isContactGuideEligibleNode(node))
       .map((node) => ({ bounds: getRotatedNodeBounds(node), id: node.id }));
     const guides = activeNodes.flatMap((activeNode) => getShapeContactGuides(getRotatedNodeBounds(activeNode), candidates));
 

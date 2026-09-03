@@ -19,6 +19,7 @@ import { getResizeAnchorPoint } from '../../../../../utils/getResizeAnchorPoint'
 import { getResizeAnchorSolver } from './getResizeAnchorSolver';
 import { getResizeOrScaleFactors } from './getResizeOrScaleFactors';
 import { getResizeQueryPoint } from './getResizeQueryPoint';
+import { maskSnapToActiveAxes } from './maskSnapToActiveAxes';
 import { screenToWorld } from '../../../../../utils/screenToWorld';
 
 export type TResizeDragFrame = {
@@ -47,9 +48,12 @@ export const getResizeDragFrame = (
   const viewport = selectViewport(store.getState());
   const rawPoint = screenToWorld(getPointerPosition(canvas, event), viewport);
   const queryPoint = getResizeQueryPoint(rawPoint, bounds, singleRotatableOrigin);
-  const snap = isSnappableSingleOrigin(singleRotatableOrigin)
+  const rawSnap = isSnappableSingleOrigin(singleRotatableOrigin)
     ? getPointAlignmentSnap(queryPoint, candidateShapes, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom)
     : { guide: null, point: queryPoint };
+  const affectsWidth = handle.includes('e') || handle.includes('w');
+  const affectsHeight = handle.includes('n') || handle.includes('s');
+  const snap = maskSnapToActiveAxes(rawSnap, queryPoint, affectsWidth, affectsHeight);
   const { anchors, scaleX, scaleY } = getResizeOrScaleFactors(isScaleTool, handle, bounds, snap.point, aspectRatio, event.shiftKey);
   const rotatedAnchorSolver = getResizeAnchorSolver(bounds, handle, scaleX, scaleY, singleRotatableOrigin);
   const isAspectLocked = isScaleTool || (getResizeAnchorPoint(handle, bounds) !== null && event.shiftKey);

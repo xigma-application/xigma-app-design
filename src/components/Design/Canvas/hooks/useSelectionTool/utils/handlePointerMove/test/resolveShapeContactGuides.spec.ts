@@ -1,5 +1,5 @@
 // store
-import { addNode, deleteNode, setSelection } from 'store/design/slice';
+import { addNode, deleteNode, moveNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -179,6 +179,27 @@ describe('resolveShapeContactGuides', () => {
       { x1: 100, x2: 100, y1: 0, y2: 100 },
       { x1: 100, x2: 100, y1: 20, y2: 80 },
     ]);
+  });
+
+  it('should not draw contact guides between a resized frame and its own children', () => {
+    // mock — a 200x200 frame with an 80x80 child; the child's bottom edge (y=100) would otherwise
+    // register a contact guide against the frame's own geometry while the frame is resized
+    const frameId = addRect(0, 0, 200, 200, { childIds: [], clipContent: true, type: NodeType.frame });
+    const childId = addRect(20, 20, 80, 80);
+
+    store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: frameId }));
+
+    const refs = canvasRefs();
+
+    // action — resize the frame
+    resolveShapeContactGuides(
+      pointerEvent(),
+      refs,
+      selectionRefs({ resizeDragRef: { current: { nodeOrigins: { [frameId]: {} } } } } as never),
+    );
+
+    // result — the frame's own child never produces a contact guide against it
+    expect(refs.transform.contactGuidesRef.current).toBeNull();
   });
 
   it('should not consider a rotated-off-grid shape', () => {

@@ -176,6 +176,31 @@ describe('continueResizeDrag', () => {
     });
   });
 
+  it('should not raise a cross-axis alignment guide from the pointer position during a single-axis resize', () => {
+    // mock — a bottom-edge ('s') resize only changes height, yet the pointer's x (5197) lands 3px
+    // short of the neighbour's left edge (5200); that must NOT produce a vertical guide/snap
+    const idA = addFrameNode(5000, 5400, 100, 50);
+
+    addFrameNode(5200, 8000, 40, 40);
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const resizeDragRef = createResizeDragRef({
+      aspectRatio: 2,
+      bounds: { height: 50, width: 100, x: 5000, y: 5400 },
+      candidateShapes: getCandidateShapes(selectActivePage(store.getState()).nodes, [idA]),
+      handle: 's',
+      nodeOrigins: { [idA]: { flip: null, height: 50, rotation: 0, width: 100, x: 5000, y: 5400 } },
+    });
+
+    // before
+    continueResizeDrag(canvas, pointerEvent(5197, 5600), store.dispatch, resizeDragRef, canvasRefs);
+
+    // result — width untouched (no x snap), and no guide at all
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ width: 100, x: 5000 });
+    expect(canvasRefs.transform.alignmentGuideRef.current).toBeNull();
+  });
+
   it('should leave the alignment guide null when a plain resize has nothing within tolerance', () => {
     // mock
     const idA = addFrameNode(6000, 6000, 100, 50);
