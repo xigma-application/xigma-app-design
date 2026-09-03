@@ -206,6 +206,28 @@ already had to route around via `remapClonedRootId`). `addNodes` + `setSelection
 copies) + the usual single-undo-step `beginGesture`/`endGesture` bracket, same as every other
 multi-dispatch paste/duplicate handler in this file.
 
+**The `ObjectMenu` (LogoMenu's other big menu, ~35 rows) got the same disabled-by-default → wire-what-
+already-exists treatment**, this time by directly reusing `useNodeMenuActions()` — the exact hook
+`NodeContextMenu` (the canvas right-click menu) already calls to get `onBringToFront`/`onFlatten`/
+`onFlipHorizontal`/`onFlipVertical`/`onGroupSelection`/`onOutlineStroke`/`onSendToBack`/
+`onUngroupSelection`/`onUseAsMask` — no new hook layer needed since `ObjectMenu` (like
+`NodeContextMenu`) never needs `TCanvasRefs`, every one of these dispatches off the plain
+`store.getState()` selection. Each of those 9 rows enables on the same coarse
+`selectSelectedIds().length > 0` gate as `EditMenu`'s Duplicate/Delete above (every underlying
+handler already self-guards past that — e.g. `handleFlattenSelection`/`handleOutlineStroke` no-op
+when nothing in the selection is actually flatten/outline-able, `handleUngroupSelection` no-ops
+when nothing selected is actually a group). The other ~26 rows (Frame selection, Wrap in new
+section, Convert to section/frame, Set as thumbnail, Add auto layout, Create component, Reset/
+Detach instance, Bring forward, Send backward, the three Rotate rows, Boolean groups' four
+operations, Show/Hide selection, Lock/Unlock selection, Hide other layers, Collapse layers, Remove
+fill/stroke, Swap fill and stroke, Remove interactions, Delete contents) stayed `disabled` — asked
+for directly (skip whatever has no existing implementation rather than build ~15 new algorithms in
+one pass) and confirmed by grepping `store/design/slice.ts`'s action list plus every handler this
+section and [[vector-network]]/[[masks]]/[[selection-and-manipulation]] already document: none of
+those exists anywhere yet. The four `MenuSub` rows (More layout options, Slots, Main component,
+Boolean groups) were already enabled pre-existing (they always were, regardless of their own
+children's disabled state) and weren't touched.
+
 **Text on Path can also attach to an existing eligible vector — or a plain shape it converts on the
 spot**, not just draw a fresh ellipse: `useDrawTextOnPathTool.ts`'s `pointerdown` hit-tests via
 `getNodeAtPoint`; `getEligibleVectorAtPoint.ts` arms an attach target (instead of starting a drag)

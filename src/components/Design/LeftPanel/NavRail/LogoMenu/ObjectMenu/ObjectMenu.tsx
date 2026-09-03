@@ -8,6 +8,9 @@ import MoreLayoutOptionsMenu from './MoreLayoutOptionsMenu/MoreLayoutOptionsMenu
 import SlotsMenu from './SlotsMenu/SlotsMenu';
 import { MenuCompound } from 'shared';
 
+// hooks
+import { useNodeMenuActions } from 'components/Design/Menu/hooks/useNodeMenuActions';
+
 // others
 import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
 import { LAYERS_COLLAPSE_ALL_ARIA_LABEL_KEY } from 'components/Design/LeftPanel/File/Layers/constants';
@@ -51,18 +54,41 @@ import {
   OBJECT_MENU_WRAP_IN_NEW_SECTION_KEY,
 } from './constants';
 
+// store
+import { selectSelectedIds } from 'store/design/selectors';
+import { useAppSelector } from 'store';
+
 const { MenuItem, MenuSeparator, MenuSub } = MenuCompound;
 
 const ObjectMenu: FC = () => {
   const { t } = useTranslation();
+  const hasSelection = useAppSelector(selectSelectedIds).length > 0;
+  const {
+    onBringToFront,
+    onFlatten,
+    onFlipHorizontal,
+    onFlipVertical,
+    onGroupSelection,
+    onOutlineStroke,
+    onSendToBack,
+    onUngroupSelection,
+    onUseAsMask,
+  } = useNodeMenuActions();
 
   return (
     <>
       <MenuItem disabled label={t(NODE_MENU_FRAME_SELECTION_KEY)} shortcut={KEYBOARD_SHORTCUTS.frameSelection.join('')} withCheck={false} />
-      <MenuItem disabled label={t(NODE_MENU_GROUP_SELECTION_KEY)} shortcut={KEYBOARD_SHORTCUTS.groupSelection.join('')} withCheck={false} />
       <MenuItem
-        disabled
+        disabled={!hasSelection}
+        label={t(NODE_MENU_GROUP_SELECTION_KEY)}
+        onClick={onGroupSelection}
+        shortcut={KEYBOARD_SHORTCUTS.groupSelection.join('')}
+        withCheck={false}
+      />
+      <MenuItem
+        disabled={!hasSelection}
         label={t(OBJECT_MENU_UNGROUP_SELECTION_KEY)}
+        onClick={onUngroupSelection}
         shortcut={KEYBOARD_SHORTCUTS.ungroupSelection.join('')}
         withCheck={false}
       />
@@ -76,7 +102,13 @@ const ObjectMenu: FC = () => {
       <MenuItem disabled label={t(OBJECT_MENU_CONVERT_TO_SECTION_KEY)} withCheck={false} />
       <MenuItem disabled label={t(OBJECT_MENU_CONVERT_TO_FRAME_KEY)} withCheck={false} />
       <MenuSeparator />
-      <MenuItem disabled label={t(NODE_MENU_USE_AS_MASK_KEY)} shortcut={KEYBOARD_SHORTCUTS.useAsMask.join('')} withCheck={false} />
+      <MenuItem
+        disabled={!hasSelection}
+        label={t(NODE_MENU_USE_AS_MASK_KEY)}
+        onClick={onUseAsMask}
+        shortcut={KEYBOARD_SHORTCUTS.useAsMask.join('')}
+        withCheck={false}
+      />
       <MenuItem disabled label={t(OBJECT_MENU_SET_AS_THUMBNAIL_KEY)} withCheck={false} />
       <MenuSeparator />
       <MenuItem disabled label={t(NODE_MENU_ADD_AUTO_LAYOUT_KEY)} shortcut={KEYBOARD_SHORTCUTS.addAutoLayout.join('')} withCheck={false} />
@@ -103,19 +135,55 @@ const ObjectMenu: FC = () => {
         <MainComponentMenu />
       </MenuSub>
       <MenuSeparator />
-      <MenuItem disabled label={t(NODE_MENU_BRING_TO_FRONT_KEY)} shortcut={KEYBOARD_SHORTCUTS.bringToFront.join('')} withCheck={false} />
+      <MenuItem
+        disabled={!hasSelection}
+        label={t(NODE_MENU_BRING_TO_FRONT_KEY)}
+        onClick={onBringToFront}
+        shortcut={KEYBOARD_SHORTCUTS.bringToFront.join('')}
+        withCheck={false}
+      />
       <MenuItem disabled label={t(OBJECT_MENU_BRING_FORWARD_KEY)} shortcut={KEYBOARD_SHORTCUTS.bringForward.join('')} withCheck={false} />
       <MenuItem disabled label={t(OBJECT_MENU_SEND_BACKWARD_KEY)} shortcut={KEYBOARD_SHORTCUTS.sendBackward.join('')} withCheck={false} />
-      <MenuItem disabled label={t(NODE_MENU_SEND_TO_BACK_KEY)} shortcut={KEYBOARD_SHORTCUTS.sendToBack.join('')} withCheck={false} />
+      <MenuItem
+        disabled={!hasSelection}
+        label={t(NODE_MENU_SEND_TO_BACK_KEY)}
+        onClick={onSendToBack}
+        shortcut={KEYBOARD_SHORTCUTS.sendToBack.join('')}
+        withCheck={false}
+      />
       <MenuSeparator />
-      <MenuItem disabled label={t(NODE_MENU_FLIP_HORIZONTAL_KEY)} shortcut={KEYBOARD_SHORTCUTS.flipHorizontal.join('')} withCheck={false} />
-      <MenuItem disabled label={t(NODE_MENU_FLIP_VERTICAL_KEY)} shortcut={KEYBOARD_SHORTCUTS.flipVertical.join('')} withCheck={false} />
+      <MenuItem
+        disabled={!hasSelection}
+        label={t(NODE_MENU_FLIP_HORIZONTAL_KEY)}
+        onClick={onFlipHorizontal}
+        shortcut={KEYBOARD_SHORTCUTS.flipHorizontal.join('')}
+        withCheck={false}
+      />
+      <MenuItem
+        disabled={!hasSelection}
+        label={t(NODE_MENU_FLIP_VERTICAL_KEY)}
+        onClick={onFlipVertical}
+        shortcut={KEYBOARD_SHORTCUTS.flipVertical.join('')}
+        withCheck={false}
+      />
       <MenuItem disabled label={t(OBJECT_MENU_ROTATE_180_KEY)} withCheck={false} />
       <MenuItem disabled label={t(OBJECT_MENU_ROTATE_90_LEFT_KEY)} withCheck={false} />
       <MenuItem disabled label={t(OBJECT_MENU_ROTATE_90_RIGHT_KEY)} withCheck={false} />
       <MenuSeparator />
-      <MenuItem disabled label={t(NODE_MENU_FLATTEN_KEY)} shortcut={KEYBOARD_SHORTCUTS.flatten.join('')} withCheck={false} />
-      <MenuItem disabled label={t(NODE_MENU_OUTLINE_STROKE_KEY)} shortcut={KEYBOARD_SHORTCUTS.outlineStroke.join('')} withCheck={false} />
+      <MenuItem
+        disabled={!hasSelection}
+        label={t(NODE_MENU_FLATTEN_KEY)}
+        onClick={onFlatten}
+        shortcut={KEYBOARD_SHORTCUTS.flatten.join('')}
+        withCheck={false}
+      />
+      <MenuItem
+        disabled={!hasSelection}
+        label={t(NODE_MENU_OUTLINE_STROKE_KEY)}
+        onClick={onOutlineStroke}
+        shortcut={KEYBOARD_SHORTCUTS.outlineStroke.join('')}
+        withCheck={false}
+      />
       <MenuSub label={t(OBJECT_MENU_BOOLEAN_GROUPS_KEY)}>
         <BooleanGroupsMenu />
       </MenuSub>
