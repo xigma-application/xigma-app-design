@@ -19,7 +19,7 @@ describe('useCopySelection', () => {
     // mock
     setClipboardNodes([], []);
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
     );
     const [idA] = selectActivePage(store.getState()).rootOrder.slice(-1);
     store.dispatch(setSelection([idA]));

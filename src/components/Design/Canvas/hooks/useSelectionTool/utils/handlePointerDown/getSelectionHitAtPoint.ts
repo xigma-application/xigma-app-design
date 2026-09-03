@@ -3,7 +3,6 @@ import { selectNodes, selectSelectedNodes, selectVectorEditingNodeIds } from 'st
 import { store } from 'store';
 
 // types
-import { NodeType } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 
@@ -11,6 +10,7 @@ import { TSceneNode, TViewport } from 'types/design/types';
 import { getGroupChildHitAtPoint } from './getGroupChildHitAtPoint';
 import { getNodeAtPoint } from '../../../../utils/getNodeAtPoint/getNodeAtPoint';
 import { isAncestorNode } from 'store/design/utils/nodeHierarchy/isAncestorNode';
+import { isContainerNode } from 'store/design/utils/nodeHierarchy/isContainerNode';
 import { isSelectionInsideGroup } from '../../../../utils/isSelectionInsideGroup';
 
 export const getSelectionHitAtPoint = (point: TPoint, orderedNodes: TSceneNode[], viewport: TViewport): TSceneNode | null => {
@@ -24,7 +24,7 @@ export const getSelectionHitAtPoint = (point: TPoint, orderedNodes: TSceneNode[]
     return selectedHit;
   }
 
-  if (hit && hit.type === NodeType.group) {
+  if (hit && isContainerNode(hit)) {
     const childHit = getGroupChildHitAtPoint(point, viewport);
 
     if (childHit && isSelectionInsideGroup(hit.id, selectedNodes, nodesById)) {

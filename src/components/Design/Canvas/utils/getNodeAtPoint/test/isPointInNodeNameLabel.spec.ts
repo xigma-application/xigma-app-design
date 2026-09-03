@@ -14,7 +14,7 @@ const buildFrame = (overrides: Partial<TFrameNode> = {}): TFrameNode => ({
   name: 'Frame 1',
   parentId: null,
   rotation: 0,
-  type: NodeType.frame,
+  childIds: [], clipContent: true, type: NodeType.frame,
   width: 80,
   x: 0,
   y: 100,

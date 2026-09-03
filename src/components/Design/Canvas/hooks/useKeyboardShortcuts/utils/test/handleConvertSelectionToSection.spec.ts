@@ -12,7 +12,7 @@ import { handleConvertSelectionToSection } from '../handleConvertSelectionToSect
 
 const addFrameNode = (): string => {
   store.dispatch(
-    addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 5, y: 5 }),
+    addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x: 5, y: 5 }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());

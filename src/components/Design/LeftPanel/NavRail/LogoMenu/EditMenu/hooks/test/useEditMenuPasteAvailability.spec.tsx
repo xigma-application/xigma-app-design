@@ -27,7 +27,7 @@ describe('useEditMenuPasteAvailability', () => {
   it('should return false when nothing is selected, even with a compatible clipboard', () => {
     // mock
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x: 0, y: 0 }),
     );
     const { rootOrder } = selectActivePage(store.getState());
     setClipboardNodes([selectActivePage(store.getState()).nodes[rootOrder[0]]], [rootOrder[0]]);
@@ -42,7 +42,7 @@ describe('useEditMenuPasteAvailability', () => {
   it('should return false when a target is selected but the clipboard is empty', () => {
     // mock
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x: 0, y: 0 }),
     );
     const { rootOrder } = selectActivePage(store.getState());
     store.dispatch(setSelection([rootOrder[0]]));
@@ -57,7 +57,7 @@ describe('useEditMenuPasteAvailability', () => {
   it('should return true when a target is selected and the clipboard holds a single compatible root', () => {
     // mock
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x: 0, y: 0 }),
     );
     const { rootOrder } = selectActivePage(store.getState());
     const nodeId = rootOrder[0];

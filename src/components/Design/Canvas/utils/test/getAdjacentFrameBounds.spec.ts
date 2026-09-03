@@ -12,7 +12,7 @@ const buildFrame = (id: string, x: number): TFrameNode => ({
   name: id,
   parentId: null,
   rotation: 0,
-  type: NodeType.frame,
+  childIds: [], clipContent: true, type: NodeType.frame,
   width: 100,
   x,
   y: 0,

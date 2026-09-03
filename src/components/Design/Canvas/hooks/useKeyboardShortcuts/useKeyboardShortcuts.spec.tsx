@@ -411,7 +411,7 @@ describe('useKeyboardShortcuts behaviors', () => {
 
     store.dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x: 0, y: 0 }),
     );
     store.dispatch(endHistoryGesture());
 
@@ -436,7 +436,7 @@ describe('useKeyboardShortcuts behaviors', () => {
 
     store.dispatch(beginHistoryGesture(EMPTY_VECTOR_SELECTION_SNAPSHOT));
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x: 0, y: 0 }),
     );
     store.dispatch(endHistoryGesture());
 
@@ -583,7 +583,7 @@ describe('useKeyboardShortcuts behaviors', () => {
 describe('useKeyboardShortcuts delete/backspace behaviors', () => {
   const addFrameNode = (): string => {
     realStore.dispatch(
-      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x: 0, y: 0 }),
     );
 
     const { rootOrder } = selectActivePage(realStore.getState());
@@ -637,7 +637,7 @@ describe('useKeyboardShortcuts delete/backspace behaviors', () => {
 describe('useKeyboardShortcuts selection-editing behaviors', () => {
   const addFrameNode = (x = 0, y = 0): string => {
     realStore.dispatch(
-      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x, y }),
+      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x, y }),
     );
 
     const { rootOrder } = selectActivePage(realStore.getState());
@@ -946,7 +946,7 @@ describe('useKeyboardShortcuts "Enter" behaviors', () => {
 
   const addFrameNode = (): string => {
     realStore.dispatch(
-      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x: 0, y: 0 }),
     );
 
     const { rootOrder } = selectActivePage(realStore.getState());
@@ -1085,7 +1085,7 @@ describe('useKeyboardShortcuts zoom behaviors', () => {
 
   const addFrameNode = (x = 0): string => {
     realStore.dispatch(
-      addNode({ fill: '#ff0000', height: 100, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 100, x, y: 0 }),
+      addNode({ fill: '#ff0000', height: 100, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 100, x, y: 0 }),
     );
 
     const { rootOrder } = selectActivePage(realStore.getState());

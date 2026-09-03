@@ -33,7 +33,7 @@ const addFrame = (
       name: 'Frame',
       parentId: null,
       rotation: overrides.rotation ?? 0,
-      type: NodeType.frame,
+      childIds: [], clipContent: true, type: NodeType.frame,
       width: 200,
       x: 0,
       y: 0,

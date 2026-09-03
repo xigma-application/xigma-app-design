@@ -16,7 +16,7 @@ import {
 import { RootState } from 'store';
 
 // types
-import { NodeType, ToolName } from 'types/design/enums';
+import { ToolName } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TPoint } from 'types/canvas';
 import { THoverResolverContext } from './types';
@@ -26,6 +26,7 @@ import { TViewport } from 'types/design/types';
 import { getResizeHandleAtPoint } from '../../../../utils/getResizeHandleAtPoint/getResizeHandleAtPoint';
 import { getVectorMultiSelectBoxForHover } from './getVectorMultiSelectBoxForHover';
 import { getVectorMultiSelectResizeHandle } from '../../../../utils/getVectorMultiSelectResizeHandle';
+import { isContainerNode } from 'store/design/utils/nodeHierarchy/isContainerNode';
 import { resolveCornerRadiusHandleHover } from './resolveCornerRadiusHandleHover';
 import { resolveEllipseArcHandleHover } from './resolveEllipseArcHandleHover';
 import { resolveEllipseArcRatioHandleHover } from './resolveEllipseArcRatioHandleHover';
@@ -71,7 +72,7 @@ export const resolveToolHover = (
     editingNodeId: selectEditingNodeId(state),
     editingTextBox,
     isControlPressed,
-    leafNodes: selectRenderOrderedNodes(state).filter((node) => node.type !== NodeType.group),
+    leafNodes: selectRenderOrderedNodes(state).filter((node) => !isContainerNode(node) || node.childIds.length === 0),
     nodesById: selectNodes(state),
     point,
     refs,

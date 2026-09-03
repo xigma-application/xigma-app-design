@@ -32,7 +32,7 @@ describe('getAllVectorVertexPositions', () => {
         name: 'Frame',
         parentId: null,
         rotation: 0,
-        type: NodeType.frame,
+        childIds: [], clipContent: true, type: NodeType.frame,
         width: 10,
         x: 0,
         y: 0,

@@ -1,4 +1,5 @@
 // types
+import { NodeType } from 'types/design/enums';
 import { TDesignState, TMoveNodesPayload } from '../../types';
 
 // utils
@@ -11,9 +12,11 @@ import { syncGroupBounds } from '../syncGroupBounds';
 
 export const handleMoveNodes = (state: TDesignState, { nodeIds, targetIndex, targetParentId }: TMoveNodesPayload): void => {
   const page = getActivePage(state);
+  const targetParent = targetParentId ? page.nodes[targetParentId] : null;
+  const isSectionIntoFrame = targetParent?.type === NodeType.frame && nodeIds.some((id) => page.nodes[id]?.type === NodeType.section);
   const isCycle = getIsDescendantOfMovedNodes(targetParentId, nodeIds, page.nodes);
 
-  if (!isCycle) {
+  if (!isCycle && !isSectionIntoFrame) {
     const sourceParentId = page.nodes[nodeIds[0]]?.parentId ?? null;
 
     removeNodesFromContainer(page, sourceParentId, nodeIds);

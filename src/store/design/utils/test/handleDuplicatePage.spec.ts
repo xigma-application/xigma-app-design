@@ -13,7 +13,7 @@ const frame = (id: string, parentId: string | null = null): TSceneNode => ({
   name: id,
   parentId,
   rotation: 0,
-  type: NodeType.frame,
+  childIds: [], clipContent: true, type: NodeType.frame,
   width: 10,
   x: 0,
   y: 0,

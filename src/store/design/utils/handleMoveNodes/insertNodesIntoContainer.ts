@@ -1,6 +1,8 @@
 // types
 import { TDesignPage } from '../../types';
-import { NodeType } from 'types/design/enums';
+
+// utils
+import { isContainerNode } from '../nodeHierarchy/isContainerNode';
 
 export const insertNodesIntoContainer = (
   page: TDesignPage,
@@ -11,7 +13,7 @@ export const insertNodesIntoContainer = (
   if (containerParentId) {
     const parent = page.nodes[containerParentId];
 
-    if (parent && parent.type === NodeType.group) {
+    if (parent && isContainerNode(parent)) {
       parent.childIds = [...parent.childIds.slice(0, targetIndex), ...nodeIds, ...parent.childIds.slice(targetIndex)];
     }
   } else {

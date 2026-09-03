@@ -154,7 +154,7 @@ describe('ViewMenu', () => {
     // action
     act(() => {
       store.dispatch(
-        addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+        addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x: 0, y: 0 }),
       );
       const { rootOrder } = selectActivePage(store.getState());
       store.dispatch(setSelection([rootOrder[rootOrder.length - 1]]));
@@ -212,7 +212,7 @@ describe('ViewMenu', () => {
   it('should fit all content when the Zoom to fit row is clicked with nothing selected', () => {
     // mock
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 100, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 100, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 100, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 100, x: 0, y: 0 }),
     );
 
     // before

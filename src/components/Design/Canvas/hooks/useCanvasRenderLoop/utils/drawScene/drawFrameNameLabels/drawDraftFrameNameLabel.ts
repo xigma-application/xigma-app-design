@@ -19,6 +19,8 @@ export const drawDraftFrameNameLabel = (context: TDrawSceneContext, refs: TCanva
 
   if (draftShape?.type === NodeType.frame) {
     const draftFrame: TFrameNode = {
+      childIds: [],
+      clipContent: true,
       fill: draftShape.fill,
       height: draftShape.height,
       id: '',

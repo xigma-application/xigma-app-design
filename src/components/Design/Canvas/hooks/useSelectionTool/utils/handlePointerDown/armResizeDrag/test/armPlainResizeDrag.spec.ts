@@ -32,7 +32,7 @@ const frame = (id: string, x: number, y: number, width: number, height: number):
   name: 'Frame',
   parentId: null,
   rotation: 0,
-  type: NodeType.frame,
+  childIds: [], clipContent: true, type: NodeType.frame,
   width,
   x,
   y,

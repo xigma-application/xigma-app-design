@@ -18,7 +18,7 @@ describe('appendLastCreatedNodeToSelection', () => {
     const store = createTestStore();
 
     store.dispatch(
-      addNode({ fill: '#FFFFFF', height: 100, name: 'Frame 1', parentId: null, rotation: 0, type: NodeType.frame, width: 100, x: 0, y: 0 }),
+      addNode({ fill: '#FFFFFF', height: 100, name: 'Frame 1', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 100, x: 0, y: 0 }),
     );
 
     // action
@@ -37,12 +37,12 @@ describe('appendLastCreatedNodeToSelection', () => {
     const store = createTestStore();
 
     store.dispatch(
-      addNode({ fill: '#FFFFFF', height: 100, name: 'Frame 1', parentId: null, rotation: 0, type: NodeType.frame, width: 100, x: 0, y: 0 }),
+      addNode({ fill: '#FFFFFF', height: 100, name: 'Frame 1', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 100, x: 0, y: 0 }),
     );
     appendLastCreatedNodeToSelection(store.dispatch, store);
 
     store.dispatch(
-      addNode({ fill: '#FFFFFF', height: 100, name: 'Frame 2', parentId: null, rotation: 0, type: NodeType.frame, width: 100, x: 0, y: 0 }),
+      addNode({ fill: '#FFFFFF', height: 100, name: 'Frame 2', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 100, x: 0, y: 0 }),
     );
 
     // action

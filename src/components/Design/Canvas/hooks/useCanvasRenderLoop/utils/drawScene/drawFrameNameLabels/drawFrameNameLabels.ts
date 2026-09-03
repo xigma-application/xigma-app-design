@@ -15,7 +15,7 @@ export const drawFrameNameLabels = (context: TDrawSceneContext, nodes: TSceneNod
   const editingNodeId = refs.frameName.editingLabelRef.current;
 
   nodes
-    .filter((node): node is TSceneNode & { type: NodeType.frame } => node.type === NodeType.frame && node.id !== editingNodeId)
+    .filter((node): node is TSceneNode & { childIds: [], clipContent: true, type: NodeType.frame } => node.type === NodeType.frame && node.id !== editingNodeId)
     .forEach((node) => {
       const fill = selectedIds.has(node.id) ? FRAME_NAME_LABEL_SELECTED_FILL : FRAME_NAME_LABEL_FILL;
 

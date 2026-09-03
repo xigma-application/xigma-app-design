@@ -32,7 +32,7 @@ const frameNode: TFrameNode = {
   name: 'Frame',
   parentId: null,
   rotation: 0,
-  type: NodeType.frame,
+  childIds: [], clipContent: true, type: NodeType.frame,
   width: 100,
   x: 1000,
   y: 1000,

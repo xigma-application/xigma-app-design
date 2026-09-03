@@ -71,6 +71,8 @@ export type TEllipseNode = TBaseNode & {
 };
 
 export type TFrameNode = TBaseNode & {
+  childIds: string[];
+  clipContent: boolean;
   fill: string;
   guides?: TGuide[];
   strokeColor?: string;

@@ -20,7 +20,7 @@ const addFrameNode = (overrides: { x?: number; y?: number } = {}): string => {
       name: 'Frame',
       parentId: null,
       rotation: 0,
-      type: NodeType.frame,
+      childIds: [], clipContent: true, type: NodeType.frame,
       width: 20,
       x: 5,
       y: 5,

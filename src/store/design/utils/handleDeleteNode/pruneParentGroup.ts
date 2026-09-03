@@ -5,17 +5,18 @@ import { TDesignState } from '../../types';
 // utils
 import { getActivePage } from '../getActivePage';
 import { handleDeleteNode } from './handleDeleteNode';
+import { isContainerNode } from '../nodeHierarchy/isContainerNode';
 import { syncGroupBounds } from '../syncGroupBounds';
 
 export const pruneParentGroup = (state: TDesignState, parentId: string | null, deletedChildId: string): void => {
   const parent = parentId ? getActivePage(state).nodes[parentId] : null;
 
-  if (parent && parent.type === NodeType.group) {
+  if (parent && isContainerNode(parent)) {
     parent.childIds = parent.childIds.filter((childId) => childId !== deletedChildId);
 
-    if (parent.childIds.length === 0) {
+    if (parent.type === NodeType.group && parent.childIds.length === 0) {
       handleDeleteNode(state, parent.id);
-    } else {
+    } else if (parent.type === NodeType.group) {
       syncGroupBounds(state, parent.id);
     }
   }

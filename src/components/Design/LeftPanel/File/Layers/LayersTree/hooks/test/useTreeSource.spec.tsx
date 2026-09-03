@@ -21,10 +21,10 @@ describe('useTreeSource', () => {
 
   beforeEach(() => {
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'Frame A', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 10, name: 'Frame A', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
     );
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'Frame B', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 10, name: 'Frame B', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
     );
     [idA, idB] = selectActivePage(store.getState()).rootOrder.slice(-2);
   });
@@ -66,13 +66,31 @@ describe('useTreeSource', () => {
     expect(result.current.getChildren(groupNode)?.map((node) => node.id)).toEqual([idB, idA]);
   });
 
-  it('should return undefined for a non-group node, since it has no expandable children', () => {
+  it('should return undefined for a plain leaf node, since it has no expandable children', () => {
+    // mock — a rectangle, unlike a frame, is never a container
+    store.dispatch(
+      addNode({ fill: '#ff0000', height: 10, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: 10, x: 0, y: 0 }),
+    );
+    const rectangleId = selectActivePage(store.getState()).rootOrder.at(-1) as string;
+
+    // before
+    const { result } = renderHook(() => useTreeSource(), { wrapper });
+    const node = selectActivePage(store.getState()).nodes[rectangleId];
+
+    // result
+    expect(result.current.getChildren(node)).toBeUndefined();
+
+    // cleanup
+    store.dispatch(deleteNode(rectangleId));
+  });
+
+  it('should return an empty array for an empty frame, since it is a container with no children yet', () => {
     // before
     const { result } = renderHook(() => useTreeSource(), { wrapper });
     const node = selectActivePage(store.getState()).nodes[idA];
 
     // result
-    expect(result.current.getChildren(node)).toBeUndefined();
+    expect(result.current.getChildren(node)).toEqual([]);
   });
 
   it('should hide an auto-drawn ellipse text-path node from the roots — it is a guide, not a layer', () => {

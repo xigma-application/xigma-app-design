@@ -71,7 +71,12 @@ export const useDrawShapeTool = (refs: TCanvasRefs, { fill, name, tool, type }: 
       const snap = getPointAlignmentSnap(rawPoint, candidateShapesRef.current, ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom);
       const rect = toDraftRectWithDefault(startRef.current, snap.point, DEFAULT_SHAPE_SIZE, true, viewport.zoom, event.shiftKey);
 
-      dispatch(addNode({ ...rect, fill, name, parentId: null, rotation: 0, type }));
+      if (type === NodeType.frame) {
+        dispatch(addNode({ ...rect, childIds: [], clipContent: true, fill, name, parentId: null, rotation: 0, type }));
+      } else {
+        dispatch(addNode({ ...rect, fill, name, parentId: null, rotation: 0, type }));
+      }
+
       selectLastCreatedNode(dispatch, appStore);
 
       startRef.current = null;

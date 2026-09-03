@@ -24,7 +24,7 @@ const buildNode = (
     name: 'Frame',
     parentId: null,
     rotation: 0,
-    type: NodeType.frame,
+    childIds: [], clipContent: true, type: NodeType.frame,
     width: 10,
     x: 0,
     y: 0,
@@ -37,7 +37,7 @@ const createDragStateRef = (): RefObject<TDragState | null> => ({ current: null 
 
 const addFrameNode = (x: number, y: number, size = 10): string => {
   store.dispatch(
-    addNode({ fill: '#ff0000', height: size, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: size, x, y }),
+    addNode({ fill: '#ff0000', height: size, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: size, x, y }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());

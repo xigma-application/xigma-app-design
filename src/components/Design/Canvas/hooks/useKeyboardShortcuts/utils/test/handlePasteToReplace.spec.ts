@@ -20,7 +20,7 @@ const addFrameNode = (overrides: { x?: number; y?: number } = {}): string => {
       name: 'Frame',
       parentId: null,
       rotation: 0,
-      type: NodeType.frame,
+      childIds: [], clipContent: true, type: NodeType.frame,
       width: 20,
       x: 5,
       y: 5,
@@ -99,7 +99,7 @@ describe('handlePasteToReplace', () => {
 
     // result — the group id now holds a frame, and its old children are gone
     const page = selectActivePage(store.getState());
-    expect(page.nodes[groupId]).toMatchObject({ id: groupId, type: NodeType.frame });
+    expect(page.nodes[groupId]).toMatchObject({ id: groupId, childIds: [], clipContent: true, type: NodeType.frame });
     oldGroup.childIds.forEach((childId) => expect(page.nodes[childId]).toBeUndefined());
 
     // result — deleting the group's last child must not also prune the group's own rootOrder slot out

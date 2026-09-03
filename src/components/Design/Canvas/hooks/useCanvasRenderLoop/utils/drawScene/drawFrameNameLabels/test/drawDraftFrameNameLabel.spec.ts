@@ -47,6 +47,8 @@ describe('drawDraftFrameNameLabel', () => {
       gl,
       imageContext,
       {
+        childIds: [],
+        clipContent: true,
         fill: '#ffffff',
         height: 100,
         id: '',

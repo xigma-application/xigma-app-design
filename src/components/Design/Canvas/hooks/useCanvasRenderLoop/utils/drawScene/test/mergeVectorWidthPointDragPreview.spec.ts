@@ -101,7 +101,7 @@ describe('mergeVectorWidthPointDragPreview', () => {
 
   it('should leave a non-vector node untouched even if its id matches the primary drag node', () => {
     // mock
-    const node = { ...buildVectorNode(), type: NodeType.frame } as unknown as TSceneNode;
+    const node = { ...buildVectorNode(), childIds: [], clipContent: true, type: NodeType.frame } as unknown as TSceneNode;
     const refs = createCanvasRefs();
 
     refs.vectorWidth.vectorWidthPointDragRef.current = {

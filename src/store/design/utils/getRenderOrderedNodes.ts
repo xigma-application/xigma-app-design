@@ -1,9 +1,11 @@
 // types
-import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
+// utils
+import { isContainerNode } from './nodeHierarchy/isContainerNode';
+
 const flattenNode = (node: TSceneNode, nodes: Record<string, TSceneNode>): TSceneNode[] =>
-  node.type === NodeType.group
+  isContainerNode(node)
     ? [node, ...node.childIds.flatMap((childId) => (nodes[childId] ? flattenNode(nodes[childId], nodes) : []))]
     : [node];
 

@@ -19,10 +19,10 @@ describe('useBringSelectionToFront', () => {
   it('should move the selected node to the front of its container when called', () => {
     // mock
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
     );
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'B', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 10, name: 'B', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
     );
     const [idA, idB] = selectActivePage(store.getState()).rootOrder.slice(-2);
     store.dispatch(setSelection([idA]));

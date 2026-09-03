@@ -1,5 +1,8 @@
 import { nanoid } from '@reduxjs/toolkit';
 
+// store
+import { isContainerNode } from 'store/design/utils/nodeHierarchy/isContainerNode';
+
 // types
 import { NodeType } from 'types/design/enums';
 import { TSceneNode, TTextNode } from 'types/design/types';
@@ -17,7 +20,7 @@ const remapClonedNode = (node: TSceneNode, nodeIdMap: Record<string, string>, of
 
   clone.parentId = clone.parentId ? (nodeIdMap[clone.parentId] ?? null) : null;
 
-  if (clone.type === NodeType.group) {
+  if (isContainerNode(clone)) {
     clone.childIds = clone.childIds.map((childId) => nodeIdMap[childId] ?? childId);
   } else if (clone.type === NodeType.text && clone.pathId) {
     clone.pathId = nodeIdMap[clone.pathId] ?? null;

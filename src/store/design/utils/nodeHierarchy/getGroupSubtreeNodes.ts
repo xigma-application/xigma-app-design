@@ -1,9 +1,11 @@
 // types
-import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
+// utils
+import { isContainerNode } from './isContainerNode';
+
 export const getGroupSubtreeNodes = (node: TSceneNode, nodesById: Record<string, TSceneNode>): TSceneNode[] => {
-  if (node.type !== NodeType.group) {
+  if (!isContainerNode(node)) {
     return [node];
   }
 

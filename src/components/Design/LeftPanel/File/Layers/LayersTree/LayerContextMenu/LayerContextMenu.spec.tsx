@@ -26,7 +26,7 @@ const menuNode: TFrameNode = {
   name: 'Node',
   parentId: null,
   rotation: 0,
-  type: NodeType.frame,
+  childIds: [], clipContent: true, type: NodeType.frame,
   width: 10,
   x: 0,
   y: 0,
@@ -52,10 +52,10 @@ describe('LayerContextMenu', () => {
     // mock
     const user = userEvent.setup();
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
     );
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'B', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 10, name: 'B', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
     );
     const [idA, idB] = selectActivePage(store.getState()).rootOrder.slice(-2);
     store.dispatch(setSelection([idA, idB]));
@@ -79,10 +79,10 @@ describe('LayerContextMenu', () => {
     // mock
     const user = userEvent.setup();
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
     );
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'B', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 10, name: 'B', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
     );
     const [idA, idB] = selectActivePage(store.getState()).rootOrder.slice(-2);
     store.dispatch(setSelection([idA, idB]));
@@ -113,7 +113,7 @@ describe('LayerContextMenu', () => {
     const user = userEvent.setup();
     setClipboardNodes([], []);
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
     );
     const [idA] = selectActivePage(store.getState()).rootOrder.slice(-1);
     store.dispatch(setSelection([idA]));
@@ -135,14 +135,14 @@ describe('LayerContextMenu', () => {
     // mock
     const user = userEvent.setup();
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'Source', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 10, name: 'Source', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
     );
     const [sourceId] = selectActivePage(store.getState()).rootOrder.slice(-1);
     const sourceNode = selectActivePage(store.getState()).nodes[sourceId] as TFrameNode;
     setClipboardNodes([{ ...sourceNode, height: 40 }], [sourceId]);
 
     store.dispatch(
-      addNode({ fill: '#0000ff', height: 10, name: 'Target', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 5, y: 5 }),
+      addNode({ fill: '#0000ff', height: 10, name: 'Target', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 5, y: 5 }),
     );
     const [targetId] = selectActivePage(store.getState()).rootOrder.slice(-1);
     store.dispatch(setSelection([targetId]));
@@ -167,7 +167,7 @@ describe('LayerContextMenu', () => {
     const firstPageId = selectActivePageId(store.getState());
 
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
     );
 
     const [idA] = selectActivePage(store.getState()).rootOrder.slice(-1);
@@ -203,7 +203,7 @@ describe('LayerContextMenu', () => {
     // mock
     const user = userEvent.setup();
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
     );
     const [frameId] = selectActivePage(store.getState()).rootOrder.slice(-1);
     const frameNode = selectActivePage(store.getState()).nodes[frameId];
@@ -239,7 +239,7 @@ describe('LayerContextMenu', () => {
     await user.click(screen.getByText('Convert to frame'));
 
     // result
-    expect(selectActivePage(store.getState()).nodes[sectionId]).toMatchObject({ id: sectionId, type: NodeType.frame });
+    expect(selectActivePage(store.getState()).nodes[sectionId]).toMatchObject({ id: sectionId, childIds: [], clipContent: true, type: NodeType.frame });
 
     // after
     store.dispatch(deleteNode(sectionId));

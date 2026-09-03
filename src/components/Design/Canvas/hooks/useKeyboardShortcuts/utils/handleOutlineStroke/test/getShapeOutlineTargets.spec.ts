@@ -72,7 +72,7 @@ describe('getShapeOutlineTargets', () => {
       name: 'Frame',
       parentId: null,
       rotation: 0,
-      type: NodeType.frame,
+      childIds: [], clipContent: true, type: NodeType.frame,
       width: 20,
       x: 0,
       y: 0,

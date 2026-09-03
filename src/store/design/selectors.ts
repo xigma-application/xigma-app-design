@@ -92,12 +92,12 @@ const selectRootOrder = createSelector([selectActivePage], (page): string[] => p
 
 export const selectOrderedNodes = createSelector([selectRootOrder, selectNodes], (rootOrder, nodes) => rootOrder.map((id) => nodes[id]));
 
-export const selectTopLevelFrameNodes = createSelector([selectOrderedNodes], (nodes): TFrameNode[] =>
-  nodes.filter((node): node is TFrameNode => node.type === NodeType.frame),
-);
-
 export const selectRenderOrderedNodes = createSelector([selectRootOrder, selectNodes], (rootOrder, nodes) =>
   getRenderOrderedNodes(rootOrder, nodes),
+);
+
+export const selectTopLevelFrameNodes = createSelector([selectRenderOrderedNodes], (nodes): TFrameNode[] =>
+  nodes.filter((node): node is TFrameNode => node.type === NodeType.frame),
 );
 
 export const selectMaskConnectorRoleById = createSelector([selectNodes], (nodes) => resolveMaskConnectorRoles(nodes));

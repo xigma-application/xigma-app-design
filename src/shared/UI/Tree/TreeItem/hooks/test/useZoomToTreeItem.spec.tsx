@@ -34,7 +34,7 @@ describe('useZoomToTreeItem', () => {
 
   beforeEach(() => {
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 10, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 10, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 10, x: 0, y: 0 }),
     );
     nodeId = Object.keys(selectNodes(store.getState())).at(-1) as string;
     store.dispatch(setViewport({ x: 0, y: 0, zoom: 1 }));

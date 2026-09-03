@@ -124,7 +124,7 @@ describe('getVectorWidthPointGroupDragTargets', () => {
   it('should skip a selected regulator whose node is no longer a vector node', () => {
     // mock — p2's node got converted to a different node type
     const node = buildNode({ widthProfile: { points: { p1: { id: 'p1', leftOffset: 4, position: 0.2, rightOffset: 4 } } } });
-    const otherNode = { ...buildNode({ id: 'node-2' }), type: NodeType.frame } as unknown as TSceneNode;
+    const otherNode = { ...buildNode({ id: 'node-2' }), childIds: [], clipContent: true, type: NodeType.frame } as unknown as TSceneNode;
     const nodes: Record<string, TSceneNode> = { 'node-1': node, 'node-2': otherNode };
     const currentSelection = [
       { nodeId: 'node-1', pointId: 'p1', side: 'point' as const },

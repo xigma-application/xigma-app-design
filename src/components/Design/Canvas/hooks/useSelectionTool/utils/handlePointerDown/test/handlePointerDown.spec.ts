@@ -66,7 +66,7 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
       name: 'Frame',
       parentId: null,
       rotation: 0,
-      type: NodeType.frame,
+      childIds: [], clipContent: true, type: NodeType.frame,
       width: size,
       x,
       y,

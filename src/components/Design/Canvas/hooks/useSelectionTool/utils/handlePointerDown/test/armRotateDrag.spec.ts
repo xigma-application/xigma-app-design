@@ -33,7 +33,7 @@ const frame = (id: string, x: number, y: number, width: number, height: number, 
   name: 'Frame',
   parentId: null,
   rotation,
-  type: NodeType.frame,
+  childIds: [], clipContent: true, type: NodeType.frame,
   width,
   x,
   y,
@@ -220,10 +220,10 @@ describe('armRotateDrag', () => {
 
     store.dispatch(setSelection([]));
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 20, name: 'A', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 20, name: 'A', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x: 0, y: 0 }),
     );
     store.dispatch(
-      addNode({ fill: '#00ff00', height: 20, name: 'B', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 80, y: 80 }),
+      addNode({ fill: '#00ff00', height: 20, name: 'B', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x: 80, y: 80 }),
     );
 
     const childIds = selectActivePage(store.getState()).rootOrder.slice(-2);

@@ -23,7 +23,7 @@ describe('createNudgeKeyMap', () => {
   it('should prevent the default browser behavior and nudge the selection by the given delta when triggered', () => {
     // mock
     store.dispatch(
-      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+      addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: 20, x: 0, y: 0 }),
     );
 
     const { rootOrder } = selectActivePage(store.getState());
