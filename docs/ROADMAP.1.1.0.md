@@ -96,6 +96,12 @@ uneven gaps, or folds a stray element into the group (dropping it into a grid's 
 extending the grid, or slotting it into the row/column wherever it fits best) — resizing it to
 match if needed.
 
+## Stage 16 — Scrollbar fixes
+
+Dragging the canvas scrollbar could fling the view wildly off, or leave the thumb stuck shrinking
+partway to the edge instead of reaching it. Both fixed — dragging now pans smoothly and stops
+exactly at the content's edge, with the thumb staying a steady size the whole time.
+
 ## Related
 
 [[canvas-rendering-pipeline]] — the render loop this app's tools plug into.
