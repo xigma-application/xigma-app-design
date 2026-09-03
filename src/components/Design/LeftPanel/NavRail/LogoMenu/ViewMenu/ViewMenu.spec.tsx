@@ -12,6 +12,9 @@ import { CanvasRefsContext } from 'components/App/core/CanvasRefsProvider/contex
 // hooks
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 
+// others
+import { ZOOM_ANIMATION_DURATION_MS } from 'components/Design/Canvas/constants';
+
 // store
 import { addNode, deleteNode, setSelection, setViewport, toggleAdditionalLabels, toggleRulers } from 'store/design/slice';
 import { selectActivePage, selectAreAdditionalLabelsVisible, selectAreRulersVisible, selectViewport } from 'store/design/selectors';
@@ -241,11 +244,16 @@ describe('ViewMenu', () => {
 
     // before
     renderInMenu(<ViewMenu />);
+    vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance'] });
 
     // action
     fireEvent.click(screen.getByText('Zoom to fit'));
+    vi.advanceTimersByTime(ZOOM_ANIMATION_DURATION_MS);
 
     // result
     expect(selectViewport(store.getState()).zoom).not.toBe(1);
+
+    // cleanup
+    vi.useRealTimers();
   });
 });

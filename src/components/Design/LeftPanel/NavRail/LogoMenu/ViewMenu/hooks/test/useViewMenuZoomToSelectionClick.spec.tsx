@@ -9,6 +9,9 @@ import { CanvasRefsContext } from 'components/App/core/CanvasRefsProvider/contex
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 import { useViewMenuZoomToSelectionClick } from '../useViewMenuZoomToSelectionClick';
 
+// others
+import { ZOOM_ANIMATION_DURATION_MS } from 'components/Design/Canvas/constants';
+
 // store
 import { addNode, deleteNode, setSelection, setViewport } from 'store/design/slice';
 import { selectActivePage, selectViewport } from 'store/design/selectors';
@@ -55,12 +58,17 @@ describe('useViewMenuZoomToSelectionClick', () => {
 
     // before
     const { result } = renderHook(() => useViewMenuZoomToSelectionClick(), { wrapper });
+    vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance'] });
 
     // action
     result.current();
+    vi.advanceTimersByTime(ZOOM_ANIMATION_DURATION_MS);
 
     // result
     expect(selectViewport(store.getState()).zoom).not.toBe(1);
+
+    // cleanup
+    vi.useRealTimers();
   });
 
   it('should do nothing when nothing is selected', () => {

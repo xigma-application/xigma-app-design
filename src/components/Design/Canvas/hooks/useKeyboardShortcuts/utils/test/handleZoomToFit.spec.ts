@@ -11,10 +11,14 @@ import { store } from 'store';
 import { NodeType } from 'types/design/enums';
 
 // utils
+import { animateViewport } from '../../../../utils/animateViewport';
 import { createCanvasRefs } from '../../../../hooks/useCanvasRefs/createCanvasRefs';
 import { getFitViewport } from '../../../../utils/getFitViewport';
+import { getRectCenter } from '../../../../utils/getRectCenter';
 import { getVisibleCanvasRect } from '../../../../utils/getVisibleCanvasRect';
 import { handleZoomToFit } from '../handleZoomToFit';
+
+vi.mock('../../../../utils/animateViewport', () => ({ animateViewport: vi.fn() }));
 
 const addFrameNode = (x: number, width: number): string => {
   store.dispatch(
@@ -42,6 +46,7 @@ describe('handleZoomToFit', () => {
   let canvas: HTMLCanvasElement;
 
   beforeEach(() => {
+    vi.mocked(animateViewport).mockClear();
     canvas = document.createElement('canvas');
     vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({ height: 600, width: 1000 } as DOMRect);
     selectActivePage(store.getState()).rootOrder.forEach((id) => store.dispatch(deleteNode(id)));
@@ -62,7 +67,7 @@ describe('handleZoomToFit', () => {
     handleZoomToFit(store.dispatch, refs);
 
     // result
-    expect(selectViewport(store.getState())).toEqual(expected);
+    expect(animateViewport).toHaveBeenCalledWith(store.dispatch, { x: 0, y: 0, zoom: 1 }, expected, getRectCenter(visibleRect));
     expect(selectDesignHintLabelKey(store.getState())).toBe(ZOOM_HINT_FIT_LABEL_KEY);
   });
 
@@ -79,7 +84,7 @@ describe('handleZoomToFit', () => {
     handleZoomToFit(store.dispatch, refs);
 
     // result
-    expect(selectViewport(store.getState())).toEqual(expected);
+    expect(animateViewport).toHaveBeenCalledWith(store.dispatch, { x: 0, y: 0, zoom: 1 }, expected, getRectCenter(visibleRect));
   });
 
   it('should account for the left and right panel widths when fitting', () => {
@@ -96,7 +101,7 @@ describe('handleZoomToFit', () => {
     handleZoomToFit(store.dispatch, refs);
 
     // result
-    expect(selectViewport(store.getState())).toEqual(expected);
+    expect(animateViewport).toHaveBeenCalledWith(store.dispatch, { x: 0, y: 0, zoom: 1 }, expected, getRectCenter(visibleRect));
   });
 
   it('should do nothing when there are no nodes at all', () => {
@@ -107,6 +112,7 @@ describe('handleZoomToFit', () => {
     handleZoomToFit(store.dispatch, refs);
 
     // result
+    expect(animateViewport).not.toHaveBeenCalled();
     expect(selectViewport(store.getState())).toEqual({ x: 0, y: 0, zoom: 1 });
     expect(selectDesignHintLabelKey(store.getState())).toBeNull();
   });
@@ -120,6 +126,7 @@ describe('handleZoomToFit', () => {
     handleZoomToFit(store.dispatch, refs);
 
     // result
+    expect(animateViewport).not.toHaveBeenCalled();
     expect(selectViewport(store.getState())).toEqual({ x: 0, y: 0, zoom: 1 });
   });
 });

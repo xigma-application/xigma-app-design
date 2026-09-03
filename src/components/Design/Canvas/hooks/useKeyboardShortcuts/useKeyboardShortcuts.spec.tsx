@@ -6,6 +6,9 @@ import { Provider } from 'react-redux';
 import { createCanvasRefs } from '../useCanvasRefs/createCanvasRefs';
 import { useKeyboardShortcuts } from './useKeyboardShortcuts';
 
+// others
+import { ZOOM_ANIMATION_DURATION_MS } from '../../constants';
+
 // store
 import designReducer, { addNode, deleteNode, setActiveTool, setSelection, setVectorEditingNodeIds, setViewport } from 'store/design/slice';
 import { beginHistoryGesture, endHistoryGesture, undo } from 'store/history/actions';
@@ -1218,15 +1221,20 @@ describe('useKeyboardShortcuts zoom behaviors', () => {
   it('should zoom to fit all nodes on "Shift+1" when nothing is selected', () => {
     // mock
     addFrameNode(0);
+    vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance'] });
 
     // before
     renderZoomShortcuts();
 
     // action
     fireEvent.keyDown(window, { code: 'Digit1', shiftKey: true });
+    vi.advanceTimersByTime(ZOOM_ANIMATION_DURATION_MS);
 
     // result
     expect(selectViewport(realStore.getState()).zoom).not.toBe(1);
+
+    // cleanup
+    vi.useRealTimers();
   });
 
   it('should zoom to the selection on "Shift+2"', () => {
@@ -1234,15 +1242,20 @@ describe('useKeyboardShortcuts zoom behaviors', () => {
     const idA = addFrameNode(0);
 
     realStore.dispatch(setSelection([idA]));
+    vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance'] });
 
     // before
     renderZoomShortcuts();
 
     // action
     fireEvent.keyDown(window, { code: 'Digit2', shiftKey: true });
+    vi.advanceTimersByTime(ZOOM_ANIMATION_DURATION_MS);
 
     // result
     expect(selectViewport(realStore.getState()).zoom).not.toBe(1);
+
+    // cleanup
+    vi.useRealTimers();
   });
 
   it('should zoom to the next frame on "N", wrapping and previous frame on "Shift+N"', () => {
