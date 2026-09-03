@@ -40,6 +40,8 @@ const selectCommentsRecord = createSelector([selectActivePage], (page): Record<s
 
 export const selectComments = createSelector([selectCommentsRecord], (comments) => Object.values(comments));
 
+export const selectDesignHintLabelKey = (state: RootState): string | null => state.design.designHintLabelKey;
+
 export const selectEditingNodeId = (state: RootState): string | null => state.design.editingNodeId;
 
 export const selectEditingSelectionChangedAt = (state: RootState): number => state.design.editingSelectionChangedAt;

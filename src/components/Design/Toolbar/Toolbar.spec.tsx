@@ -9,8 +9,11 @@ import Toolbar from './Toolbar';
 import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
 import { TooltipProvider } from 'shared';
 
+// others
+import { ZOOM_HINT_FIT_LABEL_KEY } from './DesignHint/constants';
+
 // store
-import { setActionsPanelOpen, setActiveTool, setMediaToolArmed, toggleUiHidden } from 'store/design/slice';
+import { setActionsPanelOpen, setActiveTool, setDesignHintLabelKey, setMediaToolArmed, toggleUiHidden } from 'store/design/slice';
 import { store } from 'store';
 
 // types
@@ -122,6 +125,28 @@ describe('Toolbar behaviors', () => {
     // cleanup
     store.dispatch(setActiveTool(ToolName.default));
     store.dispatch(setMediaToolArmed(false));
+  });
+
+  it('should not render the design hint when there is no hint to show', () => {
+    // before
+    renderToolbar();
+
+    // result
+    expect(screen.queryByText('Zoomed to fit')).not.toBeInTheDocument();
+  });
+
+  it('should render the design hint once a hint label key is set, e.g. after Zoom to fit', () => {
+    // action
+    store.dispatch(setDesignHintLabelKey(ZOOM_HINT_FIT_LABEL_KEY));
+
+    // before
+    renderToolbar();
+
+    // result
+    expect(screen.getByText('Zoomed to fit')).toBeInTheDocument();
+
+    // cleanup
+    store.dispatch(setDesignHintLabelKey(null));
   });
 
   it('should render nothing when the UI is hidden', () => {

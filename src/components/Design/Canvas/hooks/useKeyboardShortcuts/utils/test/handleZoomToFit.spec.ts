@@ -1,9 +1,10 @@
 // others
 import { ZOOM_FIT_PADDING_PX } from '../../../../constants';
+import { ZOOM_HINT_FIT_LABEL_KEY } from 'components/Design/Toolbar/DesignHint/constants';
 
 // store
-import { addNode, deleteNode, setSelection, setViewport } from 'store/design/slice';
-import { selectActivePage, selectViewport } from 'store/design/selectors';
+import { addNode, deleteNode, setDesignHintLabelKey, setSelection, setViewport } from 'store/design/slice';
+import { selectActivePage, selectDesignHintLabelKey, selectViewport } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -34,6 +35,7 @@ describe('handleZoomToFit', () => {
     selectActivePage(store.getState()).rootOrder.forEach((id) => store.dispatch(deleteNode(id)));
     store.dispatch(setSelection([]));
     store.dispatch(setViewport({ x: 0, y: 0, zoom: 1 }));
+    store.dispatch(setDesignHintLabelKey(null));
   });
 
   it('should fit all top-level nodes when nothing is selected', () => {
@@ -49,6 +51,7 @@ describe('handleZoomToFit', () => {
 
     // result
     expect(selectViewport(store.getState())).toEqual(expected);
+    expect(selectDesignHintLabelKey(store.getState())).toBe(ZOOM_HINT_FIT_LABEL_KEY);
   });
 
   it('should fit only the selected nodes when a selection is present', () => {
@@ -93,6 +96,7 @@ describe('handleZoomToFit', () => {
 
     // result
     expect(selectViewport(store.getState())).toEqual({ x: 0, y: 0, zoom: 1 });
+    expect(selectDesignHintLabelKey(store.getState())).toBeNull();
   });
 
   it('should do nothing when the canvas element ref is not mounted yet', () => {

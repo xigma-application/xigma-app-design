@@ -389,5 +389,7 @@
   "design.toolbar.vectorEditToolbar.tool.lasso": "Lasso",
   "design.toolbar.vectorEditToolbar.tool.paint": "Paint",
   "design.toolbar.vectorEditToolbar.tool.shapeBuilder": "Shape builder",
-  "design.toolbar.vectorEditToolbar.tool.variableWidth": "Variable width"
+  "design.toolbar.vectorEditToolbar.tool.variableWidth": "Variable width",
+  "design.toolbar.zoomHint.fit": "Zoomed to fit",
+  "design.toolbar.zoomHint.selection": "Zoomed to selection"
 }

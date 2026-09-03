@@ -1,0 +1,14 @@
+.DesignHint {
+  bottom: calc(100% + 10px);
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+
+  &__label {
+    font-family: Inter, sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    padding-left: var(--spacer-1);
+    padding-right: var(--spacer-1);
+  }
+}
