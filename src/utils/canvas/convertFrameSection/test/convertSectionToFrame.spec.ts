@@ -6,6 +6,7 @@ import { TSectionNode } from 'types/design/types';
 import { convertSectionToFrame } from '../convertSectionToFrame';
 
 const buildSection = (overrides: Partial<TSectionNode> = {}): TSectionNode => ({
+  childIds: [],
   fill: '#ff0000',
   height: 100,
   id: 'section-1',
@@ -46,5 +47,11 @@ describe('convertSectionToFrame', () => {
     const section = buildSection({ hidden: true, isMask: true, locked: true });
 
     expect(convertSectionToFrame(section)).toMatchObject({ hidden: true, isMask: true, locked: true });
+  });
+
+  it('should carry over the section’s children instead of discarding them', () => {
+    const section = buildSection({ childIds: ['a', 'b'] });
+
+    expect(convertSectionToFrame(section).childIds).toEqual(['a', 'b']);
   });
 });

@@ -48,6 +48,7 @@ describe('drawDraftSectionNameLabel', () => {
       buffer,
       imageContext,
       {
+        childIds: [],
         fill: '#444444',
         height: 100,
         id: '',

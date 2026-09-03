@@ -31,6 +31,9 @@ const frame = (
     y,
   }) as TSceneNode;
 
+const section = (id: string, x: number, y: number, width: number, height: number, childIds: string[] = []): TSceneNode =>
+  ({ childIds, fill: '#444', height, id, name: 'Section', parentId: null, rotation: 0, type: NodeType.section, width, x, y }) as TSceneNode;
+
 describe('getDragDropTargetFrame', () => {
   it('should return the frame under the pointer, anywhere inside its bounds', () => {
     const draggedNode = rect('a', 0, 0);
@@ -106,6 +109,37 @@ describe('getDragDropTargetFrame', () => {
 
     // (10, 10) is inside the unrotated rect but rotates out of the actual shape
     const result = getDragDropTargetFrame(['a'], { x: 10, y: 10 }, [draggedNode, rotatedFrame], nodesById);
+
+    expect(result).toBeNull();
+  });
+
+  it('should return a section under the pointer as a valid drop target, same as a frame', () => {
+    const draggedNode = rect('a', 0, 0);
+    const targetSection = section('s1', 100, 0, 200, 200);
+    const nodesById = { a: draggedNode, s1: targetSection };
+
+    const result = getDragDropTargetFrame(['a'], { x: 180, y: 90 }, [draggedNode, targetSection], nodesById);
+
+    expect(result).toBe('s1');
+  });
+
+  it('should skip a group under the pointer, since a group is not a canvas drop target', () => {
+    const draggedNode = rect('a', 0, 0);
+    const group = {
+      childIds: [],
+      height: 200,
+      id: 'g1',
+      name: 'Group',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.group,
+      width: 200,
+      x: 100,
+      y: 0,
+    } as TSceneNode;
+    const nodesById = { a: draggedNode, g1: group };
+
+    const result = getDragDropTargetFrame(['a'], { x: 180, y: 90 }, [draggedNode, group], nodesById);
 
     expect(result).toBeNull();
   });

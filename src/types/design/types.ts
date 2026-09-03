@@ -115,6 +115,7 @@ export type TRectangleNode = TBaseNode & {
 };
 
 export type TSectionNode = TBaseNode & {
+  childIds: string[];
   fill: string;
   type: NodeType.section;
 };

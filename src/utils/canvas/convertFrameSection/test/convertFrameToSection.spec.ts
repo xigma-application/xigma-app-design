@@ -26,6 +26,7 @@ describe('convertFrameToSection', () => {
     const frame = buildFrame();
 
     expect(convertFrameToSection(frame)).toEqual({
+      childIds: [],
       fill: '#ff0000',
       height: 100,
       hidden: undefined,
@@ -56,5 +57,11 @@ describe('convertFrameToSection', () => {
     expect(section).not.toHaveProperty('guides');
     expect(section).not.toHaveProperty('strokeColor');
     expect(section).not.toHaveProperty('strokeWidth');
+  });
+
+  it('should carry over the frame’s children instead of discarding them', () => {
+    const frame = buildFrame({ childIds: ['a', 'b'] });
+
+    expect(convertFrameToSection(frame).childIds).toEqual(['a', 'b']);
   });
 });

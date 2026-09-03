@@ -42,7 +42,18 @@ const addRect = (x: number, y: number): string => {
 
 const addSection = (x: number, y: number): string => {
   store.dispatch(
-    addNode({ fill: '#000', height: 20, name: 'Section', parentId: null, rotation: 0, type: NodeType.section, width: 20, x, y }),
+    addNode({
+      childIds: [],
+      fill: '#000',
+      height: 20,
+      name: 'Section',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.section,
+      width: 20,
+      x,
+      y,
+    }),
   );
 
   return selectActivePage(store.getState()).rootOrder.at(-1) as string;
@@ -105,6 +116,20 @@ describe('updateDragDropTarget', () => {
     expect(refs.transform.dropTargetFrameIdRef.current).toBe(frameId);
 
     spy.mockRestore();
+  });
+
+  it('should highlight a section under the pointer and reparent the dragged node into it, same as a frame', () => {
+    const sectionId = addSection(0, 0);
+    const rectId = addRect(500, 500);
+    const refs = canvasRefs();
+    const { rendered, byId } = nodesOf();
+
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 10, y: 10 }, rendered, byId, refs);
+
+    const page = selectActivePage(store.getState());
+    expect(refs.transform.dropTargetFrameIdRef.current).toBe(sectionId);
+    expect(page.nodes[rectId].parentId).toBe(sectionId);
+    expect((page.nodes[sectionId] as { childIds: string[] }).childIds).toContain(rectId);
   });
 
   it('should clear the ref and do nothing when the selection contains a section', () => {

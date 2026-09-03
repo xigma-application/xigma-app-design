@@ -18,6 +18,7 @@ import { getSectionNameLabelBadgeRect } from '../getSectionNameLabelBadgeRect';
 import { getTextWidth } from 'utils/canvas/text/getTextWidth';
 
 const buildSection = (overrides: Partial<TSectionNode> = {}): TSectionNode => ({
+  childIds: [],
   fill: '#444444',
   height: 100,
   id: 'section-1',

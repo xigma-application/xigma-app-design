@@ -28,6 +28,7 @@ const createTestStore = (): EnhancedStore<RootState> => configureStore({ reducer
 const addSection = (store: EnhancedStore<RootState>, overrides: { hidden?: boolean } = {}): { id: string; name: string } => {
   store.dispatch(
     addNode({
+      childIds: [],
       fill: '#444444',
       height: 100,
       hidden: overrides.hidden,

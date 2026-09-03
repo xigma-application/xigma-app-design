@@ -12,7 +12,18 @@ import { handleConvertSelectionToFrame } from '../handleConvertSelectionToFrame'
 
 const addSectionNode = (): string => {
   store.dispatch(
-    addNode({ fill: '#ff0000', height: 20, name: 'Section', parentId: null, rotation: 0, type: NodeType.section, width: 20, x: 5, y: 5 }),
+    addNode({
+      childIds: [],
+      fill: '#ff0000',
+      height: 20,
+      name: 'Section',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.section,
+      width: 20,
+      x: 5,
+      y: 5,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());

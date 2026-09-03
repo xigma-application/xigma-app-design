@@ -1,7 +1,7 @@
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../types';
-import { TFrameNode, TGroupNode, TVectorNode } from 'types/design/types';
+import { TFrameNode, TGroupNode, TSectionNode, TVectorNode } from 'types/design/types';
 
 // utils
 import { getActivePage } from '../getActivePage';
@@ -155,5 +155,32 @@ describe('handleReplaceNode', () => {
 
     // result
     expect(Object.keys(getActivePage(state).nodes)).toEqual([frameNode.id]);
+  });
+
+  it('should keep a child that the replacement node also claims, instead of deleting it (frame/section conversion)', () => {
+    // mock — a frame with one child, replaced by a section that carries the same child over
+    const child: TFrameNode = { ...frameNode, id: 'child-a', parentId: 'frame-1' };
+    const frame: TFrameNode = { ...frameNode, childIds: ['child-a'], id: 'frame-1' };
+    const state = buildState({ 'child-a': child, 'frame-1': frame });
+
+    const section: TSectionNode = {
+      childIds: ['child-a'],
+      fill: frame.fill,
+      height: frame.height,
+      id: 'frame-1',
+      name: frame.name,
+      parentId: null,
+      rotation: 0,
+      type: NodeType.section,
+      width: frame.width,
+      x: frame.x,
+      y: frame.y,
+    };
+
+    // before
+    handleReplaceNode(state, { id: 'frame-1', node: section });
+
+    // result — the child was not cascade-deleted since the new node still lists it
+    expect(getActivePage(state).nodes['child-a']).toBeDefined();
   });
 });

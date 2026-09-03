@@ -1,6 +1,16 @@
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import { TEllipseNode, TFrameNode, TGroupNode, TLineNode, TPolygonNode, TRectangleNode, TStarNode, TTextNode } from 'types/design/types';
+import {
+  TEllipseNode,
+  TFrameNode,
+  TGroupNode,
+  TLineNode,
+  TPolygonNode,
+  TRectangleNode,
+  TSectionNode,
+  TStarNode,
+  TTextNode,
+} from 'types/design/types';
 import { THoverResolverContext } from '../../types';
 
 // utils
@@ -781,5 +791,44 @@ describe('resolvePlainNodeHover', () => {
         }),
       ),
     ).toEqual({ className: null, cursor: '', nodeId: 'nested-child' });
+  });
+
+  const section: TSectionNode = {
+    childIds: ['section-frame'],
+    fill: '#444444',
+    height: 300,
+    id: 'section-1',
+    name: 'Section',
+    parentId: null,
+    rotation: 0,
+    type: NodeType.section,
+    width: 300,
+    x: 0,
+    y: 0,
+  };
+  const sectionFrame: TFrameNode = { ...frameWithChild, childIds: [], id: 'section-frame', parentId: 'section-1' };
+  const sectionRect: TRectangleNode = { ...rectangle, cornerRadius: 0, id: 'section-rect', parentId: 'section-1', x: 200, y: 20 };
+  const sectionNodesById = { 'section-1': section, 'section-frame': sectionFrame, 'section-rect': sectionRect };
+
+  it('should highlight a frame nested inside a section, not the section, when hovering its empty body', () => {
+    // a frame is never opaque, regardless of what non-frame container it sits inside
+    expect(
+      resolvePlainNodeHover(createContext({ leafNodes: [sectionFrame], nodesById: sectionNodesById, point: { x: 50, y: 50 } })),
+    ).toEqual({ className: null, cursor: '', nodeId: 'section-frame' });
+  });
+
+  it('should highlight the section itself, not its plain rectangle child, when hovering that child without Ctrl', () => {
+    // unlike a frame, a section is always opaque — a click there matches this hover
+    expect(
+      resolvePlainNodeHover(createContext({ leafNodes: [sectionRect], nodesById: sectionNodesById, point: { x: 210, y: 30 } })),
+    ).toEqual({ className: null, cursor: '', nodeId: 'section-1' });
+  });
+
+  it('should bypass the section and hit-test its rectangle child directly when Ctrl is held', () => {
+    expect(
+      resolvePlainNodeHover(
+        createContext({ isControlPressed: true, leafNodes: [sectionRect], nodesById: sectionNodesById, point: { x: 210, y: 30 } }),
+      ),
+    ).toEqual({ className: null, cursor: '', nodeId: 'section-rect' });
   });
 });

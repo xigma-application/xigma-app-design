@@ -1,8 +1,10 @@
 // others
 import { FRAME_DROP_TARGET_STROKE, FRAME_DROP_TARGET_STROKE_WIDTH_PX } from 'constant/canvas';
 
+// store
+import { isContainerNode } from 'store/design/utils/nodeHierarchy/isContainerNode';
+
 // types
-import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDrawSceneContext } from './types';
 import { TSceneNode } from 'types/design/types';
@@ -15,7 +17,7 @@ export const drawDropTargetFrameOutline = (context: TDrawSceneContext, refs: TCa
   const frameId = refs.transform.dropTargetFrameIdRef.current;
   const frame = frameId ? nodesById[frameId] : null;
 
-  if (frame && frame.type === NodeType.frame) {
+  if (frame && isContainerNode(frame)) {
     drawThickOutline(
       gl,
       program,

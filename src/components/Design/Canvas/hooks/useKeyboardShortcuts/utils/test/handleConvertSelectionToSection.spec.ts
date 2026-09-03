@@ -1,5 +1,5 @@
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, moveNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { undo } from 'store/history/actions';
 import { store } from 'store';
@@ -97,6 +97,24 @@ describe('handleConvertSelectionToSection', () => {
 
     // result
     expect(selectActivePage(store.getState()).nodes[rectangleId].type).toBe(NodeType.rectangle);
+  });
+
+  it('should keep the frame’s children in place instead of evicting them to root, since a section can hold children too', () => {
+    // mock
+    const frameId = addFrameNode();
+    const childId = addRectangleNode();
+    store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: frameId }));
+    store.dispatch(setSelection([frameId]));
+
+    // action
+    handleConvertSelectionToSection(store.dispatch);
+
+    // result
+    const page = selectActivePage(store.getState());
+
+    expect(page.nodes[frameId]).toMatchObject({ childIds: [childId], type: NodeType.section });
+    expect(page.nodes[childId].parentId).toBe(frameId);
+    expect(page.rootOrder).not.toContain(childId);
   });
 
   it('should be undoable as a single step even though it converts multiple frames', () => {

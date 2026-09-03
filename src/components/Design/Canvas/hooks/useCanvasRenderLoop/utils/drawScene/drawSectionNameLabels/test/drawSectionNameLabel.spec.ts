@@ -48,6 +48,7 @@ const BOUNDS = { maxX: 6, maxY: 9, minX: -6, minY: -9 };
 const BADGE = { height: 20, text: 'Section 1', width: 60, x: 10, y: -30 };
 
 const buildSection = (overrides: Partial<TSectionNode> = {}): TSectionNode => ({
+  childIds: [],
   fill: '#444444',
   height: 100,
   id: 'section-1',

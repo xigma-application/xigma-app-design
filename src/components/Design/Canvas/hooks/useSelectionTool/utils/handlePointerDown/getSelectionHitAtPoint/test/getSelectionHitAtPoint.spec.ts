@@ -422,4 +422,116 @@ describe('getSelectionHitAtPoint', () => {
       expect(hit?.id).toBe(deeperFrameId);
     });
   });
+
+  describe('a section that has children', () => {
+    const addSectionNode = (x: number, y: number, size = 400): string => {
+      store.dispatch(
+        addNode({
+          childIds: [],
+          fill: '#444444',
+          height: size,
+          name: 'Section',
+          parentId: null,
+          rotation: 0,
+          type: NodeType.section,
+          width: size,
+          x,
+          y,
+        }),
+      );
+
+      return selectActivePage(store.getState()).rootOrder.at(-1) as string;
+    };
+
+    const addRectNodeIn = (x: number, y: number, size: number): string => {
+      store.dispatch(
+        addNode({
+          fill: '#00ff00',
+          height: size,
+          name: 'Rectangle',
+          parentId: null,
+          rotation: 0,
+          type: NodeType.rectangle,
+          width: size,
+          x,
+          y,
+        }),
+      );
+
+      return selectActivePage(store.getState()).rootOrder.at(-1) as string;
+    };
+
+    const buildSectionWithChild = (): { childId: string; sectionId: string } => {
+      const sectionId = addSectionNode(30000, 30000, 400);
+      const childId = addRectNodeIn(30020, 30020, 40);
+
+      store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: sectionId }));
+      store.dispatch(setSelection([]));
+
+      return { childId, sectionId };
+    };
+
+    it('should select the section itself from a plain click on its empty body', () => {
+      const { sectionId } = buildSectionWithChild();
+
+      const hit = getSelectionHitAtPoint({ x: 30300, y: 30300 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit?.id).toBe(sectionId);
+    });
+
+    it('should select the section, not the child, from a plain click directly on the child when nothing is entered yet', () => {
+      const { childId, sectionId } = buildSectionWithChild();
+
+      const hit = getSelectionHitAtPoint({ x: 30035, y: 30035 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit?.id).toBe(sectionId);
+      expect(hit?.id).not.toBe(childId);
+    });
+
+    it('should keep the section selected, not drill into its child, on a repeat click while the section itself is selected', () => {
+      // mirrors group semantics: selecting the container itself does not "enter" it — only a
+      // descendant selection (e.g. via Ctrl+click) does, per the next test below
+      const { sectionId } = buildSectionWithChild();
+
+      store.dispatch(setSelection([sectionId]));
+      const hit = getSelectionHitAtPoint({ x: 30035, y: 30035 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit?.id).toBe(sectionId);
+    });
+
+    it('should drill to whatever sits under a new point once a descendant is already selected (already "entered")', () => {
+      const { childId: firstChildId, sectionId } = buildSectionWithChild();
+      const secondChildId = addRectNodeIn(30200, 30200, 40);
+
+      store.dispatch(moveNodes({ nodeIds: [secondChildId], targetIndex: 1, targetParentId: sectionId }));
+      store.dispatch(setSelection([firstChildId]));
+
+      // click lands on the second child, nowhere near the first — proves the drill isn't just
+      // "keep the same previously-selected child", but genuinely re-hit-tests inside the section
+      const hit = getSelectionHitAtPoint({ x: 30210, y: 30210 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit?.id).toBe(secondChildId);
+    });
+
+    it('should keep selecting an empty section from a plain click on its body, unchanged', () => {
+      const sectionId = addSectionNode(31000, 31000, 200);
+      store.dispatch(setSelection([]));
+
+      const hit = getSelectionHitAtPoint({ x: 31100, y: 31100 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit?.id).toBe(sectionId);
+    });
+
+    it('should select a frame nested inside a section directly on a plain click, since the section is not a frame ancestor', () => {
+      const sectionId = addSectionNode(32000, 32000, 400);
+      const frameId = addFrameNode(32020, 32020, 200);
+
+      store.dispatch(moveNodes({ nodeIds: [frameId], targetIndex: 0, targetParentId: sectionId }));
+      store.dispatch(setSelection([]));
+
+      const hit = getSelectionHitAtPoint({ x: 32190, y: 32190 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit?.id).toBe(frameId);
+    });
+  });
 });

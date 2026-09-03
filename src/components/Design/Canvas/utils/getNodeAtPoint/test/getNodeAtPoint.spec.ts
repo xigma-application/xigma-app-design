@@ -361,6 +361,7 @@ describe('getNodeAtPoint', () => {
   it('should hit a section through its floating name label the same way', () => {
     // mock
     const section: TSectionNode = {
+      childIds: [],
       fill: '#444444',
       height: 50,
       id: 'section-a',

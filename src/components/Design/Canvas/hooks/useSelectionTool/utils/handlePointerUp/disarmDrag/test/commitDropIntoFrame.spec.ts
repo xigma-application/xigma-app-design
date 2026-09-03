@@ -33,6 +33,27 @@ const addFrameNode = (x: number, y: number, size = 200): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
+const addSectionNode = (x: number, y: number, size = 200): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      fill: '#444',
+      height: size,
+      name: 'Section',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.section,
+      width: size,
+      x,
+      y,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
 const addRectNode = (x: number, y: number, size = 20): string => {
   store.dispatch(
     addNode({ fill: '#00ff00', height: size, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: size, x, y }),
@@ -93,6 +114,25 @@ describe('commitDropIntoFrame', () => {
     expect(page.nodes[rectId].parentId).toBeNull();
     expect(page.rootOrder).toContain(rectId);
     expect((page.nodes[frameId] as { childIds: string[] }).childIds).toEqual([]);
+  });
+
+  it('should reparent the dragged selection into a section under the drop-target ref, same as a frame', () => {
+    // mock
+    const sectionId = addSectionNode(0, 0);
+    const rectId = addRectNode(500, 500);
+
+    store.dispatch(setSelection([rectId]));
+
+    const canvasRefs = createCanvasRefs({ transform: { dropTargetFrameIdRef: { current: sectionId } } });
+
+    // action
+    commitDropIntoFrame(store.dispatch, dragState(true), canvasRefs);
+
+    // result
+    const page = selectActivePage(store.getState());
+    expect(page.nodes[rectId].parentId).toBe(sectionId);
+    expect((page.nodes[sectionId] as { childIds: string[] }).childIds).toEqual([rectId]);
+    expect(page.rootOrder).not.toContain(rectId);
   });
 
   it('should do nothing when the drag never moved', () => {

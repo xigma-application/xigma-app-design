@@ -6,6 +6,7 @@ import { TDesignState, TMoveNodesPayload } from '../../types';
 import { getActivePage } from '../getActivePage';
 import { getIsDescendantOfMovedNodes } from './getIsDescendantOfMovedNodes';
 import { insertNodesIntoContainer } from './insertNodesIntoContainer';
+import { isContainerNode } from '../nodeHierarchy/isContainerNode';
 import { pruneEmptySourceGroup } from './pruneEmptySourceGroup';
 import { removeNodesFromContainer } from '../removeNodesFromContainer';
 import { syncGroupBounds } from '../syncGroupBounds';
@@ -13,10 +14,11 @@ import { syncGroupBounds } from '../syncGroupBounds';
 export const handleMoveNodes = (state: TDesignState, { nodeIds, targetIndex, targetParentId }: TMoveNodesPayload): void => {
   const page = getActivePage(state);
   const targetParent = targetParentId ? page.nodes[targetParentId] : null;
-  const isSectionIntoFrame = targetParent?.type === NodeType.frame && nodeIds.some((id) => page.nodes[id]?.type === NodeType.section);
+  const isNestingSection =
+    targetParent !== null && isContainerNode(targetParent) && nodeIds.some((id) => page.nodes[id]?.type === NodeType.section);
   const isCycle = getIsDescendantOfMovedNodes(targetParentId, nodeIds, page.nodes);
 
-  if (!isCycle && !isSectionIntoFrame) {
+  if (!isCycle && !isNestingSection) {
     const sourceParentId = page.nodes[nodeIds[0]]?.parentId ?? null;
 
     removeNodesFromContainer(page, sourceParentId, nodeIds);

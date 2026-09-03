@@ -16,6 +16,7 @@ export const drawDraftSectionNameLabel = (context: TDrawSceneContext, refs: TCan
 
   if (draftShape?.type === NodeType.section) {
     const draftSection: TSectionNode = {
+      childIds: [],
       fill: draftShape.fill,
       height: draftShape.height,
       id: '',

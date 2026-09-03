@@ -36,7 +36,18 @@ const createCanvas = (): HTMLCanvasElement => {
 // the name back rather than assuming "Section 1"
 const addSection = (): { id: string; name: string } => {
   store.dispatch(
-    addNode({ fill: '#444444', height: 100, name: 'Section', parentId: null, rotation: 0, type: NodeType.section, width: 200, x: 0, y: 0 }),
+    addNode({
+      childIds: [],
+      fill: '#444444',
+      height: 100,
+      name: 'Section',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.section,
+      width: 200,
+      x: 0,
+      y: 0,
+    }),
   );
 
   const { nodes, rootOrder } = selectActivePage(store.getState());

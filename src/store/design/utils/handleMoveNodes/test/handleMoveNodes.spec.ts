@@ -1,7 +1,7 @@
 // types
 import { NodeType, ToolName } from 'types/design/enums';
 import { TDesignPage, TDesignState } from '../../../types';
-import { TGroupNode, TRectangleNode } from 'types/design/types';
+import { TFrameNode, TGroupNode, TRectangleNode, TSectionNode } from 'types/design/types';
 
 // utils
 import { getActivePage } from '../../getActivePage';
@@ -29,6 +29,37 @@ const buildGroup = (overrides: Partial<TGroupNode>): TGroupNode => ({
   parentId: null,
   rotation: 0,
   type: NodeType.group,
+  width: 10,
+  x: 0,
+  y: 0,
+  ...overrides,
+});
+
+const buildFrame = (overrides: Partial<TFrameNode>): TFrameNode => ({
+  childIds: [],
+  clipContent: true,
+  fill: '#fff',
+  height: 10,
+  id: 'frame-1',
+  name: 'Frame',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.frame,
+  width: 10,
+  x: 0,
+  y: 0,
+  ...overrides,
+});
+
+const buildSection = (overrides: Partial<TSectionNode>): TSectionNode => ({
+  childIds: [],
+  fill: '#fff',
+  height: 10,
+  id: 'section-1',
+  name: 'Section',
+  parentId: null,
+  rotation: 0,
+  type: NodeType.section,
   width: 10,
   x: 0,
   y: 0,
@@ -205,6 +236,70 @@ describe('handleMoveNodes', () => {
     // result — outer was never moved into its own descendant
     expect(getActivePage(state).rootOrder).toEqual(['outer']);
     expect(getActivePage(state).nodes.outer.parentId).toBeNull();
+  });
+
+  it('should reparent a top-level node into a section, removing it from rootOrder and appending it to childIds', () => {
+    // mock
+    const a = buildRect({ id: 'a' });
+    const section = buildSection({ childIds: ['b'], id: 'section-1' });
+    const b = buildRect({ id: 'b', parentId: 'section-1' });
+    const state = buildState({ nodes: { a, b, 'section-1': section }, rootOrder: ['a', 'section-1'] });
+
+    // action
+    handleMoveNodes(state, { nodeIds: ['a'], targetIndex: 1, targetParentId: 'section-1' });
+
+    // result
+    const page = getActivePage(state);
+    expect(page.rootOrder).toEqual(['section-1']);
+    expect((page.nodes['section-1'] as TSectionNode).childIds).toEqual(['b', 'a']);
+    expect(page.nodes.a.parentId).toBe('section-1');
+  });
+
+  it('should not move a section into a frame', () => {
+    // mock
+    const section = buildSection({ id: 'section-1' });
+    const frame = buildFrame({ id: 'frame-1' });
+    const state = buildState({ nodes: { 'frame-1': frame, 'section-1': section }, rootOrder: ['frame-1', 'section-1'] });
+
+    // action
+    handleMoveNodes(state, { nodeIds: ['section-1'], targetIndex: 0, targetParentId: 'frame-1' });
+
+    // result — nothing moved
+    const page = getActivePage(state);
+    expect(page.rootOrder).toEqual(['frame-1', 'section-1']);
+    expect(page.nodes['section-1'].parentId).toBeNull();
+    expect((page.nodes['frame-1'] as TFrameNode).childIds).toEqual([]);
+  });
+
+  it('should not move a section into another section', () => {
+    // mock
+    const outer = buildSection({ id: 'outer' });
+    const inner = buildSection({ id: 'inner' });
+    const state = buildState({ nodes: { inner, outer }, rootOrder: ['outer', 'inner'] });
+
+    // action
+    handleMoveNodes(state, { nodeIds: ['inner'], targetIndex: 0, targetParentId: 'outer' });
+
+    // result — nothing moved
+    const page = getActivePage(state);
+    expect(page.rootOrder).toEqual(['outer', 'inner']);
+    expect(page.nodes.inner.parentId).toBeNull();
+    expect((page.nodes.outer as TSectionNode).childIds).toEqual([]);
+  });
+
+  it('should not move a section into a group', () => {
+    // mock
+    const group = buildGroup({ id: 'group-1' });
+    const section = buildSection({ id: 'section-1' });
+    const state = buildState({ nodes: { 'group-1': group, 'section-1': section }, rootOrder: ['group-1', 'section-1'] });
+
+    // action
+    handleMoveNodes(state, { nodeIds: ['section-1'], targetIndex: 0, targetParentId: 'group-1' });
+
+    // result — nothing moved
+    const page = getActivePage(state);
+    expect(page.rootOrder).toEqual(['group-1', 'section-1']);
+    expect(page.nodes['section-1'].parentId).toBeNull();
   });
 
   it('should tolerate a moved id that no longer resolves to a node', () => {

@@ -3,6 +3,7 @@ import { NodeType } from 'types/design/enums';
 import { TFrameNode, TSectionNode } from 'types/design/types';
 
 export const convertFrameToSection = (node: TFrameNode): TSectionNode => ({
+  childIds: node.childIds,
   fill: node.fill,
   height: node.height,
   hidden: node.hidden,

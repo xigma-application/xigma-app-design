@@ -204,6 +204,7 @@ describe('getNodeOutlinePath', () => {
   it('should return null for a section node', () => {
     // mock
     const node: TSectionNode = {
+      childIds: [],
       fill: '#ff0000',
       height: 40,
       id: 'section-1',

@@ -3,12 +3,15 @@ import { getIsDescendantOfMovedNodes } from 'store/design/utils/handleMoveNodes/
 
 // types
 import { NodeType } from 'types/design/enums';
+import { TFrameNode, TSectionNode, TSceneNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
-import { TSceneNode } from 'types/design/types';
 
 // utils
 import { getUnrotatedQueryPoint } from 'components/Design/Canvas/utils/getUnrotatedQueryPoint';
 import { isPointInRect } from 'components/Design/Canvas/utils/isPointInRect';
+
+const isDropTargetContainer = (node: TSceneNode): node is TFrameNode | TSectionNode =>
+  node.type === NodeType.frame || node.type === NodeType.section;
 
 export const getDragDropTargetFrame = (
   movedNodeIds: string[],
@@ -19,7 +22,7 @@ export const getDragDropTargetFrame = (
   for (let index = renderOrderedNodes.length - 1; index >= 0; index -= 1) {
     const node = renderOrderedNodes[index];
 
-    if (node.type === NodeType.frame && !getIsDescendantOfMovedNodes(node.id, movedNodeIds, nodesById)) {
+    if (isDropTargetContainer(node) && !getIsDescendantOfMovedNodes(node.id, movedNodeIds, nodesById)) {
       const bounds = { height: node.height, width: node.width, x: node.x, y: node.y };
 
       if (isPointInRect(getUnrotatedQueryPoint(point, bounds, node.rotation), bounds)) {

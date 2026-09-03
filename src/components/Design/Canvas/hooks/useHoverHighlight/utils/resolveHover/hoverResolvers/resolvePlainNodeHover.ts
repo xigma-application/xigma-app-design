@@ -33,7 +33,10 @@ export const resolvePlainNodeHover = ({
   if (hit) {
     const ancestor = getTopLevelAncestor(hit, nodesById);
     const plainNodeId =
-      isControlPressed || isClickThroughFrame(ancestor, nodesById) || isSelectionInsideGroup(ancestor.id, selectedNodes, nodesById)
+      (hit.type === NodeType.frame && ancestor.type === NodeType.section) ||
+      isControlPressed ||
+      isClickThroughFrame(ancestor, nodesById) ||
+      isSelectionInsideGroup(ancestor.id, selectedNodes, nodesById)
         ? hit.id
         : ancestor.id;
 

@@ -84,6 +84,7 @@ describe('armDrag', () => {
     // result
     expect(dragStateRef.current).toEqual({
       candidateShapes: [],
+      ctrlMarqueeFallback: null,
       dispatchThrottle: { frameId: null, run: null },
       hasMoved: false,
       nodeOrigins: { [idA]: { x: 100, y: 100 } },
