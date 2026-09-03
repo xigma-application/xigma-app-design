@@ -4,6 +4,7 @@ import { useRef } from 'react';
 import {
   TCornerRadiusHandleHover,
   THoverRefs,
+  TSmartSelectionGapHoverState,
   TVectorCutSegmentHover,
   TVectorFaceHover,
   TVectorHandleHover,
@@ -21,6 +22,7 @@ export const useHoverRefs = (): THoverRefs => {
   const hoveredPolygonCornerRadiusHandleRef = useRef<string | null>(null);
   const hoveredPolygonVertexCountHandleRef = useRef<string | null>(null);
   const hoveredSegmentIdRef = useRef<string | null>(null);
+  const hoveredSmartSelectionGapRef = useRef<TSmartSelectionGapHoverState | null>(null);
   const hoveredStarCornerRadiusHandleRef = useRef<string | null>(null);
   const hoveredStarRatioHandleRef = useRef<string | null>(null);
   const hoveredStarVertexCountHandleRef = useRef<string | null>(null);
@@ -35,6 +37,7 @@ export const useHoverRefs = (): THoverRefs => {
   const hoveredVectorVertexIdRef = useRef<string | null>(null);
   const hoveredVectorWidthLabelRef = useRef<TVectorWidthPointHover | null>(null);
   const hoveredVectorWidthPointRef = useRef<TVectorWidthPointHover | null>(null);
+  const isSmartSelectionBoxHoveredRef = useRef(false);
   const hoverRefsRef = useRef<THoverRefs | null>(null);
 
   if (hoverRefsRef.current === null) {
@@ -47,6 +50,7 @@ export const useHoverRefs = (): THoverRefs => {
       hoveredPolygonCornerRadiusHandleRef,
       hoveredPolygonVertexCountHandleRef,
       hoveredSegmentIdRef,
+      hoveredSmartSelectionGapRef,
       hoveredStarCornerRadiusHandleRef,
       hoveredStarRatioHandleRef,
       hoveredStarVertexCountHandleRef,
@@ -61,6 +65,7 @@ export const useHoverRefs = (): THoverRefs => {
       hoveredVectorVertexIdRef,
       hoveredVectorWidthLabelRef,
       hoveredVectorWidthPointRef,
+      isSmartSelectionBoxHoveredRef,
     };
   }
 

@@ -37,6 +37,7 @@ export const useHoverHighlight = (refs: TCanvasRefs): void => {
     lastPointerClientPositionRef.current = null;
     refs.transform.distanceGuidesRef.current = null;
     refs.hover.hoveredSmartSelectionGapRef.current = null;
+    refs.hover.isSmartSelectionBoxHoveredRef.current = false;
     setHoverState(canvas, hoverRef, setClassName, activeTool === ToolName.comment ? 'comment' : null, '', null);
   };
 
@@ -66,6 +67,7 @@ export const useHoverHighlight = (refs: TCanvasRefs): void => {
         lastPointerClientPositionRef.current = null;
         refs.transform.distanceGuidesRef.current = null;
         refs.hover.hoveredSmartSelectionGapRef.current = null;
+        refs.hover.isSmartSelectionBoxHoveredRef.current = false;
         setHoverState(canvas, hoverRef, setClassName, null, '', null);
       };
     }

@@ -18,6 +18,7 @@ describe('useHoverRefs behaviors', () => {
       hoveredPolygonCornerRadiusHandleRef: { current: null },
       hoveredPolygonVertexCountHandleRef: { current: null },
       hoveredSegmentIdRef: { current: null },
+      hoveredSmartSelectionGapRef: { current: null },
       hoveredStarCornerRadiusHandleRef: { current: null },
       hoveredStarRatioHandleRef: { current: null },
       hoveredStarVertexCountHandleRef: { current: null },
@@ -32,6 +33,7 @@ describe('useHoverRefs behaviors', () => {
       hoveredVectorVertexIdRef: { current: null },
       hoveredVectorWidthLabelRef: { current: null },
       hoveredVectorWidthPointRef: { current: null },
+      isSmartSelectionBoxHoveredRef: { current: false },
     });
   });
 

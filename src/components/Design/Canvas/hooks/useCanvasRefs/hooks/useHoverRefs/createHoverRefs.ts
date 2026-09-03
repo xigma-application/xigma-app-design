@@ -10,6 +10,7 @@ export const createHoverRefs = (overrides: Partial<THoverRefs> = {}): THoverRefs
   hoveredPolygonCornerRadiusHandleRef: { current: null },
   hoveredPolygonVertexCountHandleRef: { current: null },
   hoveredSegmentIdRef: { current: null },
+  hoveredSmartSelectionGapRef: { current: null },
   hoveredStarCornerRadiusHandleRef: { current: null },
   hoveredStarRatioHandleRef: { current: null },
   hoveredStarVertexCountHandleRef: { current: null },
@@ -24,5 +25,6 @@ export const createHoverRefs = (overrides: Partial<THoverRefs> = {}): THoverRefs
   hoveredVectorVertexIdRef: { current: null },
   hoveredVectorWidthLabelRef: { current: null },
   hoveredVectorWidthPointRef: { current: null },
+  isSmartSelectionBoxHoveredRef: { current: false },
   ...overrides,
 });

@@ -157,6 +157,7 @@ describe('resolveSmartSelectionGapHover', () => {
 
     // result
     expect(refs.hover.hoveredSmartSelectionGapRef.current).toEqual({ axis: 'x', gapValue: 50, point: { x: 125, y: 50 } });
+    expect(refs.hover.isSmartSelectionBoxHoveredRef.current).toBe(true);
   });
 
   it('should clear the ref and return undefined when the point misses every gap handle', () => {
@@ -176,6 +177,40 @@ describe('resolveSmartSelectionGapHover', () => {
   it('should return undefined when the selection does not form a valid Smart Selection layout', () => {
     // result
     expect(resolveSmartSelectionGapHover(createContext({ point: { x: 50, y: 50 }, selectedNodes: [rowA] }))).toBeUndefined();
+  });
+
+  it('should mark the selection box as hovered while inside its bounds, even off any handle', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    resolveSmartSelectionGapHover(createContext({ point: { x: 10, y: 10 }, refs, selectedNodes: [rowA, rowB] }));
+
+    // result
+    expect(refs.hover.hoveredSmartSelectionGapRef.current).toBeNull();
+    expect(refs.hover.isSmartSelectionBoxHoveredRef.current).toBe(true);
+  });
+
+  it('should clear the selection box hover flag once the pointer leaves its bounds', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    resolveSmartSelectionGapHover(createContext({ point: { x: 900, y: 900 }, refs, selectedNodes: [rowA, rowB] }));
+
+    // result
+    expect(refs.hover.isSmartSelectionBoxHoveredRef.current).toBe(false);
+  });
+
+  it('should never mark the selection box as hovered when nothing is selected', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    resolveSmartSelectionGapHover(createContext({ point: { x: 0, y: 0 }, refs, selectedNodes: [] }));
+
+    // result
+    expect(refs.hover.isSmartSelectionBoxHoveredRef.current).toBe(false);
   });
 });
 

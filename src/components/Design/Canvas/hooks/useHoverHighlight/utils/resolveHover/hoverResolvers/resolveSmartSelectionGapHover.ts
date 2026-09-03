@@ -2,7 +2,11 @@
 import { THoverResolverContext, THoverResult } from '../types';
 
 // utils
+import { getSelectionBounds } from '../../../../../utils/getSelectionBounds';
 import { getSmartSelectionGapHandleAtPoint } from '../../../../../utils/getSmartSelectionGapHandleAtPoint';
+
+const isPointInsideBounds = (point: THoverResolverContext['point'], bounds: ReturnType<typeof getSelectionBounds>): boolean =>
+  point.x >= bounds.x && point.x <= bounds.x + bounds.width && point.y >= bounds.y && point.y <= bounds.y + bounds.height;
 
 export const resolveSmartSelectionGapHover = ({
   point,
@@ -11,6 +15,9 @@ export const resolveSmartSelectionGapHover = ({
   viewport,
 }: THoverResolverContext): THoverResult | undefined => {
   const hit = getSmartSelectionGapHandleAtPoint(point, selectedNodes, viewport);
+
+  refs.hover.isSmartSelectionBoxHoveredRef.current =
+    selectedNodes.length > 0 && isPointInsideBounds(point, getSelectionBounds(selectedNodes));
 
   if (hit) {
     refs.hover.hoveredSmartSelectionGapRef.current = { axis: hit.axis, gapValue: hit.gapValue, point };

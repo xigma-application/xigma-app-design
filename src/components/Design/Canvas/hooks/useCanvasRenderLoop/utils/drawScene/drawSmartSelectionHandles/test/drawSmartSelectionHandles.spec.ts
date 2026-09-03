@@ -64,11 +64,25 @@ describe('drawSmartSelectionHandles', () => {
     expect(drawSmartSelectionGapHoverLabelMock).toHaveBeenCalledTimes(1);
   });
 
-  it('should draw gap and swap handles for a valid row selection, without the fill preview while not dragging', () => {
+  it('should draw nothing while the pointer is outside the selection box, even for a valid layout', () => {
     drawSmartSelectionHandles(
       { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
       [rect('a', 0), rect('b', 100)],
       createCanvasRefs(),
+    );
+
+    expect(drawSmartSelectionGapHandlesMock).not.toHaveBeenCalled();
+    expect(drawSmartSelectionSwapHandlesMock).not.toHaveBeenCalled();
+    expect(drawSmartSelectionGapFillPreviewMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw gap and swap handles for a valid row selection once the pointer is inside the selection box, without the fill preview while not dragging', () => {
+    const refs = createCanvasRefs({ hover: { isSmartSelectionBoxHoveredRef: { current: true } } });
+
+    drawSmartSelectionHandles(
+      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
+      [rect('a', 0), rect('b', 100)],
+      refs,
     );
 
     expect(drawSmartSelectionGapHandlesMock).toHaveBeenCalledTimes(1);
@@ -76,7 +90,7 @@ describe('drawSmartSelectionHandles', () => {
     expect(drawSmartSelectionGapFillPreviewMock).not.toHaveBeenCalled();
   });
 
-  it('should draw the fill preview for every gap on the dragged axis while a gap drag is in progress', () => {
+  it('should draw the fill preview for every gap on the dragged axis while a gap drag is in progress, even if the box-hover ref was never set', () => {
     const refs = createCanvasRefs({
       smartSelection: {
         gapDragRef: {
@@ -106,5 +120,7 @@ describe('drawSmartSelectionHandles', () => {
 
     expect(drawSmartSelectionGapFillPreviewMock).toHaveBeenCalledTimes(1);
     expect(drawSmartSelectionGapFillPreviewMock.mock.calls[0][4]).toBe('x');
+    expect(drawSmartSelectionGapHandlesMock).toHaveBeenCalledTimes(1);
+    expect(drawSmartSelectionSwapHandlesMock).toHaveBeenCalledTimes(1);
   });
 });
