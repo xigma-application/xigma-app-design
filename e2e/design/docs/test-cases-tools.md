@@ -108,3 +108,21 @@ went, self-dismissing after 3s.
 `selectAreRulersVisible` before calling the handler; the e2e test only proves a real keystroke
 reaches the hint end to end in both directions and that it disappears on its own, the same division
 of labor as scenario 5 above.
+
+## Scrollbars
+
+Figma-style draggable scrollbars (`Canvas/ScrollbarsLayer/`) — a thin horizontal bar along the
+bottom edge (drags pan `viewport.x`) and a vertical one along the right edge (drags pan
+`viewport.y`), always visible regardless of the ruler toggle. Both bars stop at the true visible
+canvas edge (`getVisibleCanvasRect`, same panel-aware inset math as zoom-to-fit and the rulers), so
+a minimized/collapsed Left/RightPanel is treated as zero width, same as everywhere else that reads
+`leftPanelWidthRef`/`rightPanelWidthRef`. Thumb size/position (`getScrollbarThumb.ts`) and drag
+math (`useScrollbarDrag.ts`, reusing `applyPan.ts`) are exhaustively unit-tested with exact pixel
+expectations; the e2e tests only prove a real pointer drag on the real, correctly-positioned DOM
+thumb reaches `setViewport` and the canvas repaints — same division of labor as the Hand tool
+scenarios above.
+
+| #   | Scenario                                                                       | Unit |           E2E           |
+| --- | ------------------------------------------------------------------------------ | :--: | :---------------------: |
+| 345 | Dragging the horizontal scrollbar thumb pans the canvas (`viewport.x` changes) |  ✅  | ✅ `scrollbars.spec.ts` |
+| 346 | Dragging the vertical scrollbar thumb pans the canvas (`viewport.y` changes)   |  ✅  | ✅ `scrollbars.spec.ts` |

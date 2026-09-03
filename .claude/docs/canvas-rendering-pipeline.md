@@ -645,6 +645,53 @@ rulers" row, the View-menu "Rulers" item; a plain UI bool like `isUiHidden`, **n
   `HIGHLIGHT_TEXT_COLOR` (the guide-highlight coral, `RulersLayer/constants.ts`) stayed untouched
   for the same "accent colour, not chrome" reason as `GUIDE_STROKE` above.
 
+## 13. Scrollbars — a plain-DOM overlay, not canvas-drawn
+
+`Canvas/ScrollbarsLayer/` is a third overlay (after the WebGL scene and the 2D ruler canvas), but
+unlike either it's **plain absolutely-positioned `<div>`s**, not a canvas — a horizontal bar along
+the bottom edge (drags pan `viewport.x`) and a vertical one along the right edge (drags pan
+`viewport.y`), always rendered regardless of `areRulersVisible`. DOM was the right call here
+(unlike rotated ruler tick text, thumb size/position is just numbers) because it gets real,
+pixel-precise pointer hit-testing for free — no hand-rolled hit-test against a drawn rect the way
+guides/handles need.
+
+- `hooks/useScrollbarsRenderLoop.ts` is a **third independent `requestAnimationFrame` loop**, same
+  shape as `useRulerRenderLoop` and the WebGL one: reads `viewport` + `selectOrderedNodes` fresh
+  from `store.getState()` every frame (same "pans without a React re-render" reason), writes
+  `style.left/width` (horizontal) / `style.top/height` (vertical) directly onto plain DOM refs — no
+  React state, so a drag doesn't re-render the tree.
+- `utils/getScrollGeometry.ts` composes the pipeline: `getVisibleCanvasRect` (existing,
+  panel-inset-aware, shared with Zoom to Fit/Selection) → content world bounds
+  (`Canvas/utils/getSelectionBounds.ts` over all nodes, falling back to the visible rect itself in
+  world space when the page is empty, so the thumb fills the track rather than dividing by zero) →
+  `utils/getScrollRange.ts` (unions content-in-screen-space with the visible rect, so the thumb
+  never runs off-track even panned away from all content, plus a fixed
+  `SCROLLBAR_RANGE_PADDING_PX` margin for a bit of Figma-style over-scroll room).
+- `utils/getScrollbarThumb.ts` is the actual size/offset formula, axis-agnostic
+  (`trackLength, visibleOffset, visibleLength, rangeOffset, rangeLength) => {offset, size}`) —
+  called once per axis rather than duplicated top/left-style, since (unlike ruler tick painting)
+  there's no per-axis canvas-paint difference to justify two functions.
+- `hooks/useScrollbarDrag.ts` (one hook, called twice with `axis: 'x' | 'y'`) attaches
+  `pointerdown`/`pointermove`/`pointerup` straight to the thumb `<div>` itself (`setPointerCapture`,
+  same shape as `useHandTool`/`useCanvasDragPan`), re-deriving the same geometry fresh on every
+  move (the drag-delta-to-viewport-delta ratio genuinely changes as you pan, since the range is a
+  union that shifts) and dispatching `setViewport(applyPan(viewport, dx, 0 | 0, dy))` — reusing
+  `useCanvasPanZoom/utils/applyPan.ts` as-is; its sign convention already matched (dragging the
+  thumb right/down decreases `viewport.x`/`.y`, same as scrolling that direction).
+- **Panel-aware on both axes, not just the along-axis one.** `getVisibleCanvasRect` already handles
+  the horizontal bar's own length/offset correctly (its `x`/`width` bake in
+  `leftPanelWidthRef`/`rightPanelWidthRef`). But the **vertical** bar's cross-axis position — how
+  far its track sits from the true right edge of the screen — is a completely separate concern from
+  its along-axis length, and is easy to forget: caught live by the scrollbars e2e test (the
+  horizontal drag passed immediately, the vertical one silently no-opped — the track was rendering
+  at the literal `right: 0` screen edge, entirely underneath the opaque, higher-`z-index` RightPanel,
+  so the drag's pointer events landed on the panel instead). Fixed by also writing
+  `verticalTrack.style.right = px(layout.rightPanelWidthRef.current)` every frame in
+  `useScrollbarsRenderLoop`, mirroring what `visibleRect.x` already gives the horizontal track for
+  free. There is no equivalent gap for the horizontal bar's own cross-axis (`bottom: 0`) since
+  nothing panel-like sits along the canvas's bottom edge — the floating `Toolbar` is centered and
+  short enough (`bottom: 12px`) to clear the 10px-thick scrollbar strip without needing an inset.
+
 ## File index
 
 - Rulers (§12): `Canvas/RulersLayer/{RulersLayer.tsx,rulers-layer.module.scss,constants.ts}`,
@@ -654,6 +701,10 @@ rulers" row, the View-menu "Rulers" item; a plain UI bool like `isUiHidden`, **n
   `Design/hooks/useReportPanelWidth/useReportPanelWidth.ts` (called from `LeftPanel.tsx`/
   `RightPanel.tsx`), the `layout` domain (`Canvas/hooks/useCanvasRefs/hooks/useLayoutRefs/*.ts`,
   `TLayoutRefs` in `types/design/canvas/types.ts`)
+- Scrollbars (§13): `Canvas/ScrollbarsLayer/{ScrollbarsLayer.tsx,scrollbars-layer.module.scss,types.ts}`,
+  `.../hooks/{useScrollbarsRenderLoop,useScrollbarDrag}.ts`,
+  `.../utils/{getScrollGeometry,getScrollRange,getScrollbarThumb}.ts`, `Canvas/constants.ts`
+  `SCROLLBAR_THICKNESS_PX`/`MIN_SCROLLBAR_THUMB_PX`/`SCROLLBAR_RANGE_PADDING_PX`
 - Context/setup: `Canvas/Canvas.tsx`, `Canvas/constants.ts`,
   `Canvas/hooks/useCanvasRenderLoop/useCanvasRenderLoop.ts`,
   `Canvas/hooks/useCanvasResize/{useCanvasResize,utils/resizeCanvas}.ts`

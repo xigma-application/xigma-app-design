@@ -1,0 +1,156 @@
+import { renderHook } from '@testing-library/react';
+import { RefObject } from 'react';
+
+// hooks
+import { useScrollbarsRenderLoop } from '../useScrollbarsRenderLoop';
+
+// store
+import { selectOrderedNodes, selectViewport } from 'store/design/selectors';
+import { store } from 'store';
+
+// types
+import { TLayoutRefs } from 'types/design/canvas/types';
+import { TScrollbarElementRefs } from '../../types';
+
+// utils
+import { getScrollbarThumb } from '../../utils/getScrollbarThumb';
+import { getScrollGeometry } from '../../utils/getScrollGeometry';
+
+const createElements = (): TScrollbarElementRefs => ({
+  horizontalThumbRef: { current: document.createElement('div') },
+  horizontalTrackRef: { current: document.createElement('div') },
+  verticalThumbRef: { current: document.createElement('div') },
+  verticalTrackRef: { current: document.createElement('div') },
+});
+
+const createLayout = (leftPanelWidth = 0, rightPanelWidth = 0): TLayoutRefs => ({
+  leftPanelWidthRef: { current: leftPanelWidth },
+  rightPanelWidthRef: { current: rightPanelWidth },
+});
+
+const createCanvas = (width: number, height: number): HTMLCanvasElement => {
+  const canvas = document.createElement('canvas');
+
+  vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({ height, width } as DOMRect);
+
+  return canvas;
+};
+
+describe('useScrollbarsRenderLoop', () => {
+  let rafCallbacks: FrameRequestCallback[];
+
+  beforeEach(() => {
+    rafCallbacks = [];
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
+      rafCallbacks.push(cb);
+
+      return rafCallbacks.length;
+    });
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('should position both tracks and thumbs to match the computed scroll geometry on each frame', () => {
+    // mock
+    const canvas = createCanvas(800, 600);
+    const canvasRef: RefObject<HTMLCanvasElement | null> = { current: canvas };
+    const layout = createLayout(200, 100);
+    const elements = createElements();
+
+    // before — mount only schedules the first frame
+    renderHook(() => useScrollbarsRenderLoop(canvasRef, layout, elements));
+    expect(rafCallbacks).toHaveLength(1);
+
+    // action
+    rafCallbacks[rafCallbacks.length - 1](0);
+
+    // result — recompute the same geometry independently and compare against what got written
+    const state = store.getState();
+    const { range, visibleRect } = getScrollGeometry(
+      canvas.getBoundingClientRect(),
+      200,
+      100,
+      selectOrderedNodes(state),
+      selectViewport(state),
+    );
+    const horizontal = getScrollbarThumb(visibleRect.width, visibleRect.x, visibleRect.width, range.x, range.width);
+    const vertical = getScrollbarThumb(visibleRect.height, visibleRect.y, visibleRect.height, range.y, range.height);
+
+    expect(elements.horizontalTrackRef.current?.style.left).toBe(`${visibleRect.x}px`);
+    expect(elements.horizontalTrackRef.current?.style.width).toBe(`${visibleRect.width}px`);
+    expect(elements.horizontalThumbRef.current?.style.left).toBe(`${horizontal.offset}px`);
+    expect(elements.horizontalThumbRef.current?.style.width).toBe(`${horizontal.size}px`);
+    expect(elements.verticalTrackRef.current?.style.right).toBe('100px');
+    expect(elements.verticalTrackRef.current?.style.top).toBe(`${visibleRect.y}px`);
+    expect(elements.verticalTrackRef.current?.style.height).toBe(`${visibleRect.height}px`);
+    expect(elements.verticalThumbRef.current?.style.top).toBe(`${vertical.offset}px`);
+    expect(elements.verticalThumbRef.current?.style.height).toBe(`${vertical.size}px`);
+  });
+
+  it('should read the current panel widths on every frame, without needing a re-render', () => {
+    // mock
+    const canvas = createCanvas(800, 600);
+    const canvasRef: RefObject<HTMLCanvasElement | null> = { current: canvas };
+    const layout = createLayout(0, 0);
+    const elements = createElements();
+
+    // before
+    renderHook(() => useScrollbarsRenderLoop(canvasRef, layout, elements));
+    rafCallbacks[rafCallbacks.length - 1](0);
+    const initialLeft = elements.horizontalTrackRef.current?.style.left;
+    const initialRight = elements.verticalTrackRef.current?.style.right;
+
+    // action — the panels resize live, no re-render needed
+    layout.leftPanelWidthRef.current = 300;
+    layout.rightPanelWidthRef.current = 150;
+    rafCallbacks[rafCallbacks.length - 1](0);
+
+    // result
+    expect(initialLeft).toBe('0px');
+    expect(initialRight).toBe('0px');
+    expect(elements.horizontalTrackRef.current?.style.left).toBe('300px');
+    expect(elements.verticalTrackRef.current?.style.right).toBe('150px');
+  });
+
+  it('should keep scheduling frames until unmounted', () => {
+    // mock
+    const canvasRef: RefObject<HTMLCanvasElement | null> = { current: createCanvas(800, 600) };
+    const elements = createElements();
+
+    // before
+    const { unmount } = renderHook(() => useScrollbarsRenderLoop(canvasRef, createLayout(), elements));
+
+    // action
+    unmount();
+
+    // result
+    expect(cancelAnimationFrame).toHaveBeenCalledTimes(1);
+  });
+
+  it('should do nothing when the canvas ref is empty', () => {
+    // before
+    const canvasRef: RefObject<HTMLCanvasElement | null> = { current: null };
+
+    // result
+    expect(() => renderHook(() => useScrollbarsRenderLoop(canvasRef, createLayout(), createElements()))).not.toThrow();
+    expect(rafCallbacks).toHaveLength(0);
+  });
+
+  it('should skip a frame where a track or thumb element has not mounted yet', () => {
+    // mock
+    const canvasRef: RefObject<HTMLCanvasElement | null> = { current: createCanvas(800, 600) };
+    const elements = createElements();
+
+    elements.horizontalThumbRef.current = null;
+
+    // before
+    renderHook(() => useScrollbarsRenderLoop(canvasRef, createLayout(), elements));
+
+    // result
+    expect(() => rafCallbacks[rafCallbacks.length - 1](0)).not.toThrow();
+    expect(elements.horizontalTrackRef.current?.style.left).toBe('');
+  });
+});

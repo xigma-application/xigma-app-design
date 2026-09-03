@@ -7,6 +7,7 @@ import Comment from './Comment/Comment';
 import FrameNameLabelEditOverlay from './FrameNameLabelEditOverlay/FrameNameLabelEditOverlay';
 import GuideContextMenuPanel from './GuideContextMenuPanel/GuideContextMenuPanel';
 import RulersLayer from './RulersLayer/RulersLayer';
+import ScrollbarsLayer from './ScrollbarsLayer/ScrollbarsLayer';
 import SectionNameLabelEditOverlay from './SectionNameLabelEditOverlay/SectionNameLabelEditOverlay';
 import TextEditOverlay from './TextEditOverlay/TextEditOverlay';
 import VectorWidthLabelEditOverlay from './VectorWidthLabelEditOverlay/VectorWidthLabelEditOverlay';
@@ -101,6 +102,7 @@ const Canvas: FC = () => {
       <div className={styles.Canvas__texture} />
       <canvas className={cx(styles['Canvas__canvas-element'], cursor)} ref={refs.canvasRef} />
       <RulersLayer />
+      <ScrollbarsLayer />
       <GuideContextMenuPanel />
       <TextEditOverlay />
       <VectorWidthLabelEditOverlay />
