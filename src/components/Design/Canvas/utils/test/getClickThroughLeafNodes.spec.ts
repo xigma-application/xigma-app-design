@@ -37,6 +37,22 @@ const buildRect = (overrides: Partial<TSceneNode> = {}): TSceneNode =>
     ...overrides,
   }) as TSceneNode;
 
+const buildSection = (overrides: Partial<TSceneNode> = {}): TSceneNode =>
+  ({
+    childIds: [],
+    fill: '#444444',
+    height: 100,
+    id: 'section',
+    name: 'Section',
+    parentId: null,
+    rotation: 0,
+    type: NodeType.section,
+    width: 100,
+    x: 0,
+    y: 0,
+    ...overrides,
+  }) as TSceneNode;
+
 describe('getClickThroughLeafNodes', () => {
   it('should keep a plain node with no container ancestor', () => {
     const rect = buildRect();
@@ -80,5 +96,32 @@ describe('getClickThroughLeafNodes', () => {
     const nodesById = { [frame1.id]: frame1, [frame2.id]: frame2, [frame3.id]: frame3 };
 
     expect(getClickThroughLeafNodes([frame1, frame2, frame3], nodesById)).toEqual([frame2, frame3]);
+  });
+
+  it('should exclude a plain node sitting directly inside a section — a section is never click-through', () => {
+    const section = buildSection({ childIds: ['rect'] });
+    const rect = buildRect({ parentId: 'section' });
+    const nodesById = { [rect.id]: rect, [section.id]: section };
+
+    expect(getClickThroughLeafNodes([section, rect], nodesById)).toEqual([section]);
+  });
+
+  it('should keep a plain node reachable when it sits inside a click-through frame that is itself inside a section', () => {
+    const section = buildSection({ childIds: ['frame'] });
+    const frame = buildFrame({ childIds: ['rect'], parentId: 'section' });
+    const rect = buildRect({ parentId: 'frame' });
+    const nodesById = { [frame.id]: frame, [rect.id]: rect, [section.id]: section };
+
+    expect(getClickThroughLeafNodes([section, frame, rect], nodesById)).toEqual([section, rect]);
+  });
+
+  it('should still exclude a plain node behind an opaque (nested-in-frame) frame even inside a section', () => {
+    const section = buildSection({ childIds: ['outer'] });
+    const outer = buildFrame({ childIds: ['inner'], id: 'outer', parentId: 'section' });
+    const inner = buildFrame({ childIds: ['rect'], id: 'inner', parentId: 'outer' });
+    const rect = buildRect({ parentId: 'inner' });
+    const nodesById = { [inner.id]: inner, [outer.id]: outer, [rect.id]: rect, [section.id]: section };
+
+    expect(getClickThroughLeafNodes([section, outer, inner, rect], nodesById)).toEqual([section, inner]);
   });
 });

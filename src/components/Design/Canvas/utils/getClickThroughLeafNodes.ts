@@ -6,10 +6,10 @@ import { TSceneNode } from 'types/design/types';
 import { isClickThroughFrame } from 'store/design/utils/nodeHierarchy/isClickThroughFrame';
 import { isNestedFrame } from 'store/design/utils/nodeHierarchy/isNestedFrame';
 
-const getNearestFrameAncestor = (node: TSceneNode, nodesById: Record<string, TSceneNode>): TSceneNode | null => {
+const getNearestBoundaryAncestor = (node: TSceneNode, nodesById: Record<string, TSceneNode>): TSceneNode | null => {
   let current = node.parentId ? nodesById[node.parentId] : null;
 
-  while (current && current.type !== NodeType.frame) {
+  while (current && current.type !== NodeType.frame && current.type !== NodeType.section) {
     current = current.parentId ? nodesById[current.parentId] : null;
   }
 
@@ -17,8 +17,8 @@ const getNearestFrameAncestor = (node: TSceneNode, nodesById: Record<string, TSc
 };
 
 const isLeafReachable = (node: TSceneNode, nodesById: Record<string, TSceneNode>): boolean => {
-  const nearestFrame = getNearestFrameAncestor(node, nodesById);
-  return !nearestFrame || isClickThroughFrame(nearestFrame, nodesById);
+  const boundary = getNearestBoundaryAncestor(node, nodesById);
+  return !boundary || (boundary.type === NodeType.frame && isClickThroughFrame(boundary, nodesById));
 };
 
 export const getClickThroughLeafNodes = (renderOrderedNodes: TSceneNode[], nodesById: Record<string, TSceneNode>): TSceneNode[] =>

@@ -9,7 +9,7 @@ export const resolveContainerFrameDrillHit: TSelectionHitResolver = ({ hit, node
   if (hit && hit.type === NodeType.section) {
     const childHit = getClickThroughFrameChildHit(hit, point, viewport, nodesById);
 
-    if (childHit && childHit.type === NodeType.frame) {
+    if (childHit) {
       return { node: childHit };
     }
   }

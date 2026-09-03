@@ -533,5 +533,29 @@ describe('getSelectionHitAtPoint', () => {
 
       expect(hit?.id).toBe(frameId);
     });
+
+    it('should still reach a frame nested inside the section on a further click, even while the section itself is already selected', () => {
+      const sectionId = addSectionNode(33000, 33000, 400);
+      const frameId = addFrameNode(33020, 33020, 200);
+
+      store.dispatch(moveNodes({ nodeIds: [frameId], targetIndex: 0, targetParentId: sectionId }));
+      store.dispatch(setSelection([sectionId]));
+
+      const hit = getSelectionHitAtPoint({ x: 33190, y: 33190 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit?.id).toBe(frameId);
+    });
+
+    it('should not let an already-selected section leak plain (non-frame) content on a further click', () => {
+      const sectionId = addSectionNode(34000, 34000, 400);
+      const rectId = addRectNodeIn(34020, 34020, 40);
+
+      store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: sectionId }));
+      store.dispatch(setSelection([sectionId]));
+
+      const hit = getSelectionHitAtPoint({ x: 34035, y: 34035 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit?.id).toBe(sectionId);
+    });
   });
 });
