@@ -38,6 +38,17 @@ describe('useTheme behaviors', () => {
     expect(result.current.theme).toBe('dark');
   });
 
+  it('should read a previously stored system theme', () => {
+    // mock
+    localStorage.setItem(STORAGE_KEY, 'system');
+
+    // before
+    const { result } = renderHook(() => useTheme());
+
+    // result
+    expect(result.current.theme).toBe('system');
+  });
+
   it('should default to the OS light preference when nothing is stored', () => {
     // mock
     stubMatchMedia(true);
@@ -70,6 +81,18 @@ describe('useTheme behaviors', () => {
     // result
     expect(document.documentElement.dataset.theme).toBe('light');
     expect(localStorage.getItem(STORAGE_KEY)).toBe('light');
+  });
+
+  it('should sync a system theme choice to the document as-is, so no [data-theme="dark"/"light"] override matches and the CSS media query decides', () => {
+    // mock
+    localStorage.setItem(STORAGE_KEY, 'system');
+
+    // before
+    renderHook(() => useTheme());
+
+    // result
+    expect(document.documentElement.dataset.theme).toBe('system');
+    expect(localStorage.getItem(STORAGE_KEY)).toBe('system');
   });
 
   it('should toggle from dark to light', () => {

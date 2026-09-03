@@ -15,7 +15,7 @@ export type TUseTheme = {
 const getInitialTheme = (): Theme => {
   const stored = localStorage.getItem(STORAGE_KEY);
 
-  if (stored === 'light' || stored === 'dark') {
+  if (stored === 'light' || stored === 'dark' || stored === 'system') {
     return stored;
   }
 
