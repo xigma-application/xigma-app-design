@@ -13,13 +13,16 @@ import { CanvasRefsContext } from 'components/App/core/CanvasRefsProvider/contex
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 
 // store
-import { addNode, deleteNode } from 'store/design/slice';
+import { addNode, deleteNode, setSelection } from 'store/design/slice';
 import { undo } from 'store/history/actions';
 import { selectActivePage } from 'store/design/selectors';
 import { historyStack, store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
+
+// utils
+import { setClipboardNodes } from 'components/Design/Canvas/hooks/useKeyboardShortcuts/utils/clipboard';
 
 const renderInMenu = (children: ReactNode): ReturnType<typeof render> => {
   const canvas = document.createElement('canvas');
@@ -115,13 +118,103 @@ describe('EditMenu', () => {
   });
 
   it('should disable every other flat item but leave the Copy as and Select all with submenus enabled', () => {
-    // before
+    // before — this also runs before any selection is ever made in this file
     renderInMenu(<EditMenu />);
 
     // result
     expect(screen.getByText('Select all').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Paste over selection').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Paste to replace').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Duplicate').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Delete').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
     expect(screen.getByText('Copy as').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Select all with').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+  });
+
+  it('should enable Duplicate and Delete once something is selected, but keep the Paste rows disabled without a compatible clipboard', () => {
+    // before
+    setClipboardNodes([], []);
+    const nodeId = addFrameNode();
+    store.dispatch(setSelection([nodeId]));
+
+    renderInMenu(<EditMenu />);
+
+    // result
+    expect(screen.getByText('Duplicate').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Delete').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Paste over selection').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Paste to replace').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+  });
+
+  it('should duplicate the selected node when Duplicate is selected', () => {
+    // before
+    const nodeId = addFrameNode();
+    store.dispatch(setSelection([nodeId]));
+    const nodeCountBefore = Object.keys(selectActivePage(store.getState()).nodes).length;
+
+    renderInMenu(<EditMenu />);
+
+    // action
+    fireEvent.click(screen.getByText('Duplicate'));
+
+    // result
+    expect(Object.keys(selectActivePage(store.getState()).nodes)).toHaveLength(nodeCountBefore + 1);
+  });
+
+  it('should delete the selected node when Delete is selected', () => {
+    // before
+    const nodeId = addFrameNode();
+    store.dispatch(setSelection([nodeId]));
+
+    renderInMenu(<EditMenu />);
+
+    // action
+    fireEvent.click(screen.getByText('Delete'));
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[nodeId]).toBeUndefined();
+  });
+
+  it('should enable Paste over selection and Paste to replace once the clipboard can pair with the selection, and add a fresh copy without touching the target when Paste over selection is selected', () => {
+    // before
+    const sourceId = addFrameNode();
+    setClipboardNodes([selectActivePage(store.getState()).nodes[sourceId]], [sourceId]);
+
+    const targetId = addFrameNode();
+    store.dispatch(setSelection([targetId]));
+    const nodeCountBefore = Object.keys(selectActivePage(store.getState()).nodes).length;
+
+    renderInMenu(<EditMenu />);
+
+    // result
+    expect(screen.getByText('Paste over selection').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Paste to replace').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+
+    // action
+    fireEvent.click(screen.getByText('Paste over selection'));
+
+    // result — the target survives, a brand new node was added
+    expect(selectActivePage(store.getState()).nodes[targetId]).toBeDefined();
+    expect(Object.keys(selectActivePage(store.getState()).nodes)).toHaveLength(nodeCountBefore + 1);
+  });
+
+  it('should replace the selected target in place when Paste to replace is selected', () => {
+    // before
+    const sourceId = addFrameNode();
+    setClipboardNodes([selectActivePage(store.getState()).nodes[sourceId]], [sourceId]);
+
+    const targetId = addFrameNode();
+    store.dispatch(setSelection([targetId]));
+    const rootOrderBefore = selectActivePage(store.getState()).rootOrder;
+
+    renderInMenu(<EditMenu />);
+
+    // action
+    fireEvent.click(screen.getByText('Paste to replace'));
+
+    // result — same id and slot as the target, no new node added
+    expect(selectActivePage(store.getState()).nodes[targetId]).toBeDefined();
+    expect(selectActivePage(store.getState()).rootOrder).toEqual(rootOrderBefore);
   });
 
   it('should enable Undo and step the last change back when it is selected', () => {

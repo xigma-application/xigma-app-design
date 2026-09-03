@@ -167,6 +167,45 @@ logic; the offset-clone branch below only ever runs when nothing is selected or 
 up. `Shift+Cmd+R` (the always-replace menu/shortcut entry) is untouched — it calls
 `handlePasteToReplace` directly regardless of what plain paste would choose.
 
+**The Edit menu's Undo/Redo/Paste-over-selection/Paste-to-replace/Duplicate/Delete rows were all
+hardcoded `disabled` until asked to wire them up.** Undo/Redo's own availability plumbing is
+`design-store-architecture.md` §8's territory (`useHistoryAvailability.ts`,
+`createHistoryStack.ts`'s `subscribe`/`canUndo`/`canRedo`). The other four all read off
+`store/design/selectors.ts`'s `selectSelectedIds` (`useAppSelector`, reactive) — Duplicate/Delete
+enable on `selectedIds.length > 0` alone; Paste over selection/Paste to replace additionally need
+`useEditMenuPasteAvailability.ts`, which layers `canReplaceSelectionWithClipboard.ts` (the same
+predicate `handlePasteSelection`'s replace-on-paste branch above uses) on top of `getClipboardNodes()`
+— a plain module-level clipboard read, so unlike selection this half is **not** reactive (matches every
+other clipboard read in this file; nothing here has ever made the clipboard itself an external store to
+subscribe to, and a fresh read on every render — which selection changes already trigger — is enough
+in practice). Each of the four gets a thin `EditMenu/hooks/useEditMenu<Name>Click.ts` wrapper
+(`useCanvasRefsContext()` + `useAppDispatch()`, mirroring `useEditMenuUndoClick.ts`) around an
+**already-existing** handler — Duplicate/Delete call the same `handleDuplicateSelection.ts` /
+`handleDeleteSelection.ts` the `⌘D`/`⌫` keyboard shortcuts use, Paste to replace reuses
+`components/Design/Menu/hooks/usePasteToReplace.ts` verbatim (the same hook the right-click node
+menu's own "Paste to replace" row already used) — no new algorithm for either.
+
+**Paste over selection is the one genuinely new algorithm** — no prior implementation existed
+anywhere to reuse (its shortcut, `Shift+Cmd+V`, sat in `keys.ts` unwired). Chosen behavior: for every
+selected target pairable with the clipboard (same `canReplaceSelectionWithClipboard.ts` gate as
+replace), add a **fresh, independent copy** of the matching clipboard root positioned exactly at that
+target's `x`/`y` and nested into the target's own `parentId` — but, unlike Paste to replace, the
+target itself is left completely untouched; both nodes coexist afterward, and the new copies become
+the selection. `handlePasteOverSelection.ts` mirrors `handlePasteToReplace.ts`'s shape closely and
+now shares its iteration with it: the "for each selected target, resolve its paired clipboard root,
+skip non-box-scene-node pairs" loop was extracted out of `handlePasteToReplace.ts` into
+`forEachClipboardTargetPair.ts` so neither implementation duplicates it. Building the actual cloned
+subtree is `buildPasteOverNodes.ts`, a close sibling of `buildReplacementNodes.ts`
+(`cloneNodeSubtreeWithOffset` + `getGroupSubtreeNodes`, same offset-to-target-position math) — the
+one real difference is that it keeps the clone's own freshly-generated id instead of overwriting it
+with the target's id, and only patches the fresh root's `parentId` to match the target's (needed
+because a plain clone otherwise carries the clipboard node's *original* parent, mapped through
+`nodeIdMap` to `null` since ancestors were never part of the copied subtree — landing everything at
+page-root level regardless of where the target actually lives, exactly the bug `buildReplacementNodes`
+already had to route around via `remapClonedRootId`). `addNodes` + `setSelection` (selecting the new
+copies) + the usual single-undo-step `beginGesture`/`endGesture` bracket, same as every other
+multi-dispatch paste/duplicate handler in this file.
+
 **Text on Path can also attach to an existing eligible vector — or a plain shape it converts on the
 spot**, not just draw a fresh ellipse: `useDrawTextOnPathTool.ts`'s `pointerdown` hit-tests via
 `getNodeAtPoint`; `getEligibleVectorAtPoint.ts` arms an attach target (instead of starting a drag)
