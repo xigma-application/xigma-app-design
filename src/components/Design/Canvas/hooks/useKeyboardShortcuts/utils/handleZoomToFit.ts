@@ -4,7 +4,7 @@ import { ZOOM_HINT_FIT_LABEL_KEY } from 'components/Design/Toolbar/DesignHint/co
 
 // store
 import { setDesignHintLabelKey, setViewport } from 'store/design/slice';
-import { selectOrderedNodes, selectSelectedNodes } from 'store/design/selectors';
+import { selectOrderedNodes } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
@@ -19,9 +19,7 @@ export const handleZoomToFit = (dispatch: AppDispatch, refs: TCanvasRefs): void 
   const canvas = refs.canvasRef.current;
 
   if (canvas) {
-    const state = store.getState();
-    const selectedNodes = selectSelectedNodes(state);
-    const fitNodes = selectedNodes.length > 0 ? selectedNodes : selectOrderedNodes(state);
+    const fitNodes = selectOrderedNodes(store.getState());
 
     if (fitNodes.length > 0) {
       const visibleRect = getVisibleCanvasRect(

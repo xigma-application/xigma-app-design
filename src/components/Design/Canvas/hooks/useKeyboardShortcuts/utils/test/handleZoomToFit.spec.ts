@@ -54,14 +54,14 @@ describe('handleZoomToFit', () => {
     expect(selectDesignHintLabelKey(store.getState())).toBe(ZOOM_HINT_FIT_LABEL_KEY);
   });
 
-  it('should fit only the selected nodes when a selection is present', () => {
+  it('should fit every top-level node, ignoring the current selection', () => {
     // mock
     addFrameNode(0, 100);
     const selectedId = addFrameNode(300, 100);
     store.dispatch(setSelection([selectedId]));
     const refs = createCanvasRefs({ canvasRef: { current: canvas } });
     const visibleRect = getVisibleCanvasRect(canvas.getBoundingClientRect(), 0, 0);
-    const expected = getFitViewport({ height: 100, width: 100, x: 300, y: 0 }, visibleRect, ZOOM_FIT_PADDING_PX);
+    const expected = getFitViewport({ height: 100, width: 400, x: 0, y: 0 }, visibleRect, ZOOM_FIT_PADDING_PX);
 
     // action
     handleZoomToFit(store.dispatch, refs);

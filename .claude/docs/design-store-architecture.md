@@ -326,8 +326,8 @@ variant, both in `Canvas/utils/`:
   `ZOOM_STEP_PRESETS`), zoom-to-100%, and the percentage-preset menu (`ZoomToMenu`,
   `handleZoomToPercentage.ts`) — anchored on the panel-aware visible-rect center in every case.
 - `getFitViewport(bounds, visibleRect, paddingPx)` — solves for the zoom/pan that fits a world
-  rect into a screen rect. Used by zoom-to-fit (`handleZoomToFit.ts` — fits the selection when one
-  exists, else all top-level nodes), zoom-to-selection, and zoom-to-previous/next-frame
+  rect into a screen rect. Used by zoom-to-fit (`handleZoomToFit.ts` — always fits every top-level
+  node, regardless of the current selection), zoom-to-selection, and zoom-to-previous/next-frame
   (`handleZoomToAdjacentFrame.ts`, using `getAdjacentFrameBounds.ts` to pick the next/previous
   top-level `NodeType.frame` node, ordered left-to-right, wrapping, anchored off whichever frame
   currently contains — or is nearest to — the viewport center).

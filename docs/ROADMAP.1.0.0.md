@@ -149,8 +149,8 @@ into the bundle.
       `.claude/docs/vector-network.md` §65
 - [x] zoom in/out, zoom to 100%/fit/selection, zoom percentage presets, and jump to the next/previous
       frame — from the View menu and matching keyboard shortcuts (Cmd +/−/0, Shift+1/2, N/Shift+N).
-      Zoom to fit fits the current selection when there is one, otherwise everything, and always
-      avoids the open side panels
+      Zoom to fit always fits everything, regardless of selection, and always avoids the open side
+      panels
 
 ## Stage 11 — Undo / redo
 

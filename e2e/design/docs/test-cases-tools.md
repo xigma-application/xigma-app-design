@@ -63,14 +63,14 @@ precisely — no e2e needed per the standing rationale below.
 The View menu's Zoom section (Zoom in/out, Zoom to 100%, Zoom to fit, Zoom to selection, percentage
 presets, Zoom to previous/next frame) and its matching global keyboard shortcuts both dispatch
 `setViewport` through shared `handleZoom*.ts` utils — see `design-store-architecture.md` §6. Zoom to
-fit is "smart": it fits the current selection when one exists, otherwise it fits every top-level
-node, and both fit-based paths account for the current left/right panel widths via
-`getVisibleCanvasRect`.
+fit always fits every top-level node, regardless of the current selection (Zoom to Selection is the
+separate, selection-only variant); both fit-based paths account for the current left/right panel
+widths via `getVisibleCanvasRect`.
 
 | #   | Scenario                                                                                                                  | Unit |        E2E        |
 | --- | ------------------------------------------------------------------------------------------------------------------------- | :--: | :---------------: |
 | 1   | Ctrl/Cmd+= steps the zoom in, actually changing the rendered content                                                      |  ✅  | ✅ `zoom.spec.ts` |
-| 2   | Zoom to fit (Shift+1) fits only the current selection when one exists, and fits every top-level node once it's cleared    |  ✅  | ✅ `zoom.spec.ts` |
+| 2   | Zoom to fit (Shift+1) always fits every top-level node, ignoring whatever is currently selected                           |  ✅  | ✅ `zoom.spec.ts` |
 | 3   | Zoom in/out/100%/fit/selection, the percentage presets, and previous/next frame all compute the correct target viewport   |  ✅  |         —         |
 | 4   | The fit rect accounts for the current left/right panel widths, and each treats a hidden/minimized panel as zero width     |  ✅  |         —         |
 | 5   | Zoom to fit/selection shows a `DesignHint` snackbar above the toolbar (plain text, no value) that self-dismisses after 3s |  ✅  | ✅ `zoom.spec.ts` |
