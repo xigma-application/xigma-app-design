@@ -9,6 +9,7 @@ import { drawSmartSelectionHandles } from '../drawSmartSelectionHandles';
 const drawSmartSelectionGapFillPreviewMock = vi.fn();
 const drawSmartSelectionGapHandlesMock = vi.fn();
 const drawSmartSelectionGapHoverLabelMock = vi.fn();
+const drawSmartSelectionSuggestionIconMock = vi.fn();
 const drawSmartSelectionSwapHandlesMock = vi.fn();
 const drawSmartSelectionSwapShadowMock = vi.fn();
 
@@ -20,6 +21,9 @@ vi.mock('../drawSmartSelectionGapHandles', () => ({
 }));
 vi.mock('../drawSmartSelectionGapHoverLabel', () => ({
   drawSmartSelectionGapHoverLabel: (...args: unknown[]): void => drawSmartSelectionGapHoverLabelMock(...args),
+}));
+vi.mock('../drawSmartSelectionSuggestionIcon', () => ({
+  drawSmartSelectionSuggestionIcon: (...args: unknown[]): void => drawSmartSelectionSuggestionIconMock(...args),
 }));
 vi.mock('../drawSmartSelectionSwapHandles', () => ({
   drawSmartSelectionSwapHandles: (...args: unknown[]): void => drawSmartSelectionSwapHandlesMock(...args),
@@ -52,6 +56,7 @@ describe('drawSmartSelectionHandles', () => {
     drawSmartSelectionGapFillPreviewMock.mockClear();
     drawSmartSelectionGapHandlesMock.mockClear();
     drawSmartSelectionGapHoverLabelMock.mockClear();
+    drawSmartSelectionSuggestionIconMock.mockClear();
     drawSmartSelectionSwapHandlesMock.mockClear();
     drawSmartSelectionSwapShadowMock.mockClear();
   });
@@ -66,7 +71,45 @@ describe('drawSmartSelectionHandles', () => {
     expect(drawSmartSelectionGapHandlesMock).not.toHaveBeenCalled();
     expect(drawSmartSelectionSwapHandlesMock).not.toHaveBeenCalled();
     expect(drawSmartSelectionGapFillPreviewMock).not.toHaveBeenCalled();
+    expect(drawSmartSelectionSuggestionIconMock).not.toHaveBeenCalled();
     expect(drawSmartSelectionGapHoverLabelMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should draw the suggestion icon once the pointer is inside the box for a near-miss row', () => {
+    const refs = createCanvasRefs({ hover: { isSmartSelectionBoxHoveredRef: { current: true } } });
+
+    drawSmartSelectionHandles(
+      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
+      [rect('a', 0), rect('b', 90), rect('c', 230)],
+      refs,
+    );
+
+    expect(drawSmartSelectionSuggestionIconMock).toHaveBeenCalledTimes(1);
+    expect(drawSmartSelectionSuggestionIconMock.mock.calls[0][4]).toBe('x');
+    expect(drawSmartSelectionGapHandlesMock).not.toHaveBeenCalled();
+    expect(drawSmartSelectionSwapHandlesMock).not.toHaveBeenCalled();
+  });
+
+  it('should not draw the suggestion icon while the pointer is outside the box', () => {
+    drawSmartSelectionHandles(
+      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
+      [rect('a', 0), rect('b', 90), rect('c', 230)],
+      createCanvasRefs(),
+    );
+
+    expect(drawSmartSelectionSuggestionIconMock).not.toHaveBeenCalled();
+  });
+
+  it('should not draw the suggestion icon when a valid layout already exists', () => {
+    const refs = createCanvasRefs({ hover: { isSmartSelectionBoxHoveredRef: { current: true } } });
+
+    drawSmartSelectionHandles(
+      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
+      [rect('a', 0), rect('b', 100)],
+      refs,
+    );
+
+    expect(drawSmartSelectionSuggestionIconMock).not.toHaveBeenCalled();
   });
 
   it('should draw only the swap handles, in their bordered form, while the pointer is outside the selection box', () => {

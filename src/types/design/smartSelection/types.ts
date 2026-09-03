@@ -43,3 +43,20 @@ export type TSmartSelectionGridLayout = {
 };
 
 export type TSmartSelectionLayout = TSmartSelectionColumnLayout | TSmartSelectionGridLayout | TSmartSelectionRowLayout;
+
+export type TSmartSelectionEqualizeSuggestion = {
+  axis: 'x' | 'y';
+  gapValues: number[];
+  layout: TSmartSelectionColumnLayout | TSmartSelectionRowLayout;
+  type: 'equalize';
+};
+
+export type TSmartSelectionAppendSuggestion = {
+  axis: 'x' | 'y';
+  insertAt: 'end' | 'start';
+  layout: TSmartSelectionColumnLayout | TSmartSelectionRowLayout;
+  outlierId: string;
+  type: 'append';
+};
+
+export type TSmartSelectionSuggestion = TSmartSelectionAppendSuggestion | TSmartSelectionEqualizeSuggestion;

@@ -7,9 +7,12 @@ import { TSceneNode } from 'types/design/types';
 import { drawSmartSelectionGapFillPreview } from './drawSmartSelectionGapFillPreview';
 import { drawSmartSelectionGapHandles } from './drawSmartSelectionGapHandles';
 import { drawSmartSelectionGapHoverLabel } from './drawSmartSelectionGapHoverLabel';
+import { drawSmartSelectionSuggestionIcon } from './drawSmartSelectionSuggestionIcon';
 import { drawSmartSelectionSwapHandles } from './drawSmartSelectionSwapHandles';
 import { drawSmartSelectionSwapShadow } from './drawSmartSelectionSwapShadow';
 import { getSmartSelectionLayout } from '../../../../../utils/getSmartSelectionLayout/getSmartSelectionLayout';
+import { getSmartSelectionSuggestion } from '../../../../../utils/getSmartSelectionSuggestion';
+import { getSmartSelectionSuggestionIconRect } from '../../../../../utils/getSmartSelectionSuggestionIconRect';
 
 export const drawSmartSelectionHandles = (context: TDrawSceneContext, selectedNodes: TSceneNode[], refs: TCanvasRefs): void => {
   const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
@@ -42,6 +45,21 @@ export const drawSmartSelectionHandles = (context: TDrawSceneContext, selectedNo
       canvasHeight,
       viewport,
     );
+  } else if (!layout && isBoxActive) {
+    const suggestion = getSmartSelectionSuggestion(selectedNodes, viewport);
+
+    if (suggestion) {
+      drawSmartSelectionSuggestionIcon(
+        gl,
+        program,
+        buffer,
+        getSmartSelectionSuggestionIconRect(selectedNodes, viewport),
+        suggestion.axis,
+        canvasWidth,
+        canvasHeight,
+        viewport,
+      );
+    }
   }
 
   drawSmartSelectionGapHoverLabel(context, refs);

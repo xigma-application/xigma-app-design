@@ -16,6 +16,7 @@ import { armRotateOnPointerDown } from './armResolvers/armRotateOnPointerDown';
 import { armSelectedTextBoundsOnPointerDown } from './armResolvers/armSelectedTextBoundsOnPointerDown';
 import { armSelectedVectorBoundsOnPointerDown } from './armResolvers/armSelectedVectorBoundsOnPointerDown';
 import { armSmartSelectionGapOnPointerDown } from './armResolvers/armSmartSelectionGapOnPointerDown';
+import { armSmartSelectionSuggestionOnPointerDown } from './armResolvers/armSmartSelectionSuggestionOnPointerDown';
 import { armSmartSelectionSwapOnPointerDown } from './armResolvers/armSmartSelectionSwapOnPointerDown';
 import { armStarCornerRadiusOnPointerDown } from './armResolvers/armStarCornerRadiusOnPointerDown';
 import { armStarRatioOnPointerDown } from './armResolvers/armStarRatioOnPointerDown';
@@ -70,6 +71,7 @@ export const ARM_RESOLVERS = [
   armRotateOnPointerDown,
   armSmartSelectionSwapOnPointerDown,
   armSmartSelectionGapOnPointerDown,
+  armSmartSelectionSuggestionOnPointerDown,
   armLineEndpointOnPointerDown,
   armGroupChildToggleOnPointerDown,
   toggleSelectionOnPointerDown,
