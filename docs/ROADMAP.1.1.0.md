@@ -82,6 +82,20 @@ Select something, hold Alt, hover another shape — orange dashed lines with the
 the gap, like Figma. Now also works inside Vector Edit Mode: select a point, segment, or a few
 points at once, then Alt-hover another point, segment, or whole face to measure against it.
 
+## Stage 15 — Smart Selection
+
+Select two or more shapes that form a row, column, or grid, and the canvas recognizes it: gap
+handles let you drag the spacing between elements (hold Shift to snap to the nearest 10), and a
+small handle on each element lets you drag it onto another to swap places, with everything else
+reflowing live. Works with uneven grids too — some cells can be empty, and dragging an element
+into an empty cell just relocates it there.
+
+If a selection is close to but not quite a clean row/column/grid, a small icon appears in the
+corner of the selection while hovering it. Clicking it fixes things automatically: it evens out
+uneven gaps, or folds a stray element into the group (dropping it into a grid's empty cell,
+extending the grid, or slotting it into the row/column wherever it fits best) — resizing it to
+match if needed.
+
 ## Related
 
 [[canvas-rendering-pipeline]] — the render loop this app's tools plug into.
