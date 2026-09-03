@@ -12,9 +12,12 @@ export type THistorySnapshot = {
 
 export type THistoryStack = {
   beginGesture: (snapshot: THistorySnapshot) => void;
+  canRedo: () => boolean;
+  canUndo: () => boolean;
   endGesture: () => void;
   pushIfUndoable: (currentSnapshot: THistorySnapshot) => void;
   redo: (currentSnapshot: THistorySnapshot) => THistorySnapshot | null;
+  subscribe: (listener: () => void) => () => void;
   undo: (currentSnapshot: THistorySnapshot) => THistorySnapshot | null;
 };
 
@@ -24,10 +27,16 @@ export const createHistoryStack = (): THistoryStack => {
   let gestureOpen = false;
   let pendingSnapshot: THistorySnapshot | null = null;
   let snapshotPushedThisGesture = false;
+  const listeners = new Set<() => void>();
+
+  const emit = (): void => {
+    listeners.forEach((listener) => listener());
+  };
 
   const pushPast = (snapshot: THistorySnapshot): void => {
     past = [...past, snapshot].slice(-HISTORY_LIMIT);
     future = [];
+    emit();
   };
 
   return {
@@ -36,7 +45,8 @@ export const createHistoryStack = (): THistoryStack => {
       pendingSnapshot = snapshot;
       snapshotPushedThisGesture = false;
     },
-
+    canRedo: (): boolean => future.length > 0,
+    canUndo: (): boolean => past.length > 0,
     endGesture: (): void => {
       gestureOpen = false;
       pendingSnapshot = null;
@@ -55,11 +65,19 @@ export const createHistoryStack = (): THistoryStack => {
 
         future = future.slice(0, -1);
         past = [...past, currentSnapshot].slice(-HISTORY_LIMIT);
+        emit();
 
         return snapshot;
       }
 
       return null;
+    },
+    subscribe: (listener): (() => void) => {
+      listeners.add(listener);
+
+      return () => {
+        listeners.delete(listener);
+      };
     },
     undo: (currentSnapshot): THistorySnapshot | null => {
       if (past.length > 0) {
@@ -67,6 +85,7 @@ export const createHistoryStack = (): THistoryStack => {
 
         past = past.slice(0, -1);
         future = [...future, currentSnapshot].slice(-HISTORY_LIMIT);
+        emit();
 
         return snapshot;
       }

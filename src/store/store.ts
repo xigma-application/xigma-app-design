@@ -7,7 +7,7 @@ import { createHistoryMiddleware } from './history/historyMiddleware';
 
 export type RootState = { design: ReturnType<typeof designReducer> };
 
-const historyStack = createHistoryStack();
+export const historyStack = createHistoryStack();
 
 export const store = configureStore({
   middleware: (getDefaultMiddleware) =>

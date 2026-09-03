@@ -6,6 +6,11 @@ import CopyAsMenu from './CopyAsMenu/CopyAsMenu';
 import SelectAllWithMenu from './SelectAllWithMenu/SelectAllWithMenu';
 import { MenuCompound } from 'shared';
 
+// hooks
+import { useEditMenuRedoClick } from './hooks/useEditMenuRedoClick';
+import { useEditMenuUndoClick } from './hooks/useEditMenuUndoClick';
+import { useHistoryAvailability } from './hooks/useHistoryAvailability';
+
 // others
 import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
 import { NODE_MENU_PASTE_TO_REPLACE_KEY } from 'components/Design/Menu/constants';
@@ -35,11 +40,26 @@ const { MenuItem, MenuSeparator, MenuSub } = MenuCompound;
 
 const EditMenu: FC = () => {
   const { t } = useTranslation();
+  const { canRedo, canUndo } = useHistoryAvailability();
+  const handleUndoClick = useEditMenuUndoClick();
+  const handleRedoClick = useEditMenuRedoClick();
 
   return (
     <>
-      <MenuItem disabled label={t(EDIT_MENU_UNDO_KEY)} shortcut={KEYBOARD_SHORTCUTS.undo.join('')} withCheck={false} />
-      <MenuItem disabled label={t(EDIT_MENU_REDO_KEY)} shortcut={KEYBOARD_SHORTCUTS.redo.join('')} withCheck={false} />
+      <MenuItem
+        disabled={!canUndo}
+        label={t(EDIT_MENU_UNDO_KEY)}
+        onClick={handleUndoClick}
+        shortcut={KEYBOARD_SHORTCUTS.undo.join('')}
+        withCheck={false}
+      />
+      <MenuItem
+        disabled={!canRedo}
+        label={t(EDIT_MENU_REDO_KEY)}
+        onClick={handleRedoClick}
+        shortcut={KEYBOARD_SHORTCUTS.redo.join('')}
+        withCheck={false}
+      />
       <MenuSeparator />
       <MenuSub label={t(EDIT_MENU_COPY_AS_KEY)}>
         <CopyAsMenu />

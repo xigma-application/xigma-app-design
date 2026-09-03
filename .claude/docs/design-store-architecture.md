@@ -552,6 +552,25 @@ Two plain fields on `TDesignState` — `penActiveVertexId` (`string | null`) and
 against the restored snapshot instead, per the paragraph above); full detail in [[vector-network]] §4-5,
 §48.
 
+**Undo/Redo availability for UI (`canUndo`/`canRedo`) is exposed outside Redux, not as slice state** —
+`createHistoryStack.ts` gained `canUndo()`/`canRedo()` (`past.length > 0` / `future.length > 0`) plus a
+tiny pub-sub of its own: a `Set<() => void>` of `listeners`, `subscribe(listener)` returning an
+unsubscribe closure, and `emit()` called from every mutator that can change either flag (`pushPast`,
+`undo`, `redo` — **not** `beginGesture`/`endGesture`, which never touch `past`/`future` themselves).
+Deliberately *not* mirrored into a `history` slice + `RootState`: that was tried first and reverted —
+adding a required `history` field to `RootState` broke ~15 unrelated spec files across the codebase that
+hand-build minimal test stores as `{ design: TDesignState }` (`EnhancedStore<{ design: TDesignState }>`
+or a raw state literal cast to `RootState`), since none of them wired up the new reducer. Treating the
+stack as its own tiny external store side-steps that blast radius entirely: `store.ts` now `export`s the
+module-level `historyStack` singleton itself (previously module-private), and
+`EditMenu/hooks/useHistoryAvailability.ts` reads it via React's `useSyncExternalStore(historyStack.subscribe,
+historyStack.canUndo)` (one call per flag) — the first hook in this codebase built on
+`useSyncExternalStore` rather than `useAppSelector`. `EditMenu.tsx`'s Undo/Redo rows use that hook for
+`disabled` and dispatch through two thin click-hooks (`useEditMenuUndoClick`/`useEditMenuRedoClick`) that
+just call the existing `handleUndo`/`handleRedo` (shared with the `⌘Z`/`⇧⌘Z` keyboard shortcuts and the
+bottom-toolbar Actions panel's Undo entry) via `useCanvasRefsContext()` + `useAppDispatch()` — no new
+dispatch path, only a new read path for the enabled state.
+
 ## Related
 
 [[design-tool-architecture]] — the toolbar/canvas-hook layer that dispatches into this store.

@@ -24,6 +24,33 @@ describe('createHistoryStack', () => {
     expect(historyStack.undo(snapshot('current'))).toBeNull();
   });
 
+  it('should report canUndo and canRedo as false on a fresh stack', () => {
+    // before
+    const historyStack = createHistoryStack();
+
+    // result
+    expect(historyStack.canUndo()).toBe(false);
+    expect(historyStack.canRedo()).toBe(false);
+  });
+
+  it('should report canUndo once a snapshot is pushed and canRedo once one is undone', () => {
+    // before
+    const historyStack = createHistoryStack();
+
+    historyStack.pushIfUndoable(snapshot('a'));
+
+    // result — pushed but not yet undone
+    expect(historyStack.canUndo()).toBe(true);
+    expect(historyStack.canRedo()).toBe(false);
+
+    // action
+    historyStack.undo(snapshot('b'));
+
+    // result — undone, so redo is now possible and the past is empty again
+    expect(historyStack.canUndo()).toBe(false);
+    expect(historyStack.canRedo()).toBe(true);
+  });
+
   it('should return null from redo when nothing was ever undone', () => {
     // before
     const historyStack = createHistoryStack();
@@ -56,6 +83,47 @@ describe('createHistoryStack', () => {
 
     // result
     expect(historyStack.redo(snapshot('c'))).toBeNull();
+  });
+
+  it('should notify subscribers when a push, undo, or redo changes the stack', () => {
+    // before
+    const historyStack = createHistoryStack();
+    const listener = vi.fn();
+
+    historyStack.subscribe(listener);
+
+    // action
+    historyStack.pushIfUndoable(snapshot('a'));
+
+    // result
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    // action
+    historyStack.undo(snapshot('b'));
+
+    // result
+    expect(listener).toHaveBeenCalledTimes(2);
+
+    // action
+    historyStack.redo(snapshot('a'));
+
+    // result
+    expect(listener).toHaveBeenCalledTimes(3);
+  });
+
+  it('should stop notifying a subscriber once it unsubscribes', () => {
+    // before
+    const historyStack = createHistoryStack();
+    const listener = vi.fn();
+    const unsubscribe = historyStack.subscribe(listener);
+
+    unsubscribe();
+
+    // action
+    historyStack.pushIfUndoable(snapshot('a'));
+
+    // result
+    expect(listener).not.toHaveBeenCalled();
   });
 
   it('should push only the gesture-start snapshot once for every undoable action inside a gesture', () => {
