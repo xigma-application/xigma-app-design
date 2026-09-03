@@ -249,8 +249,10 @@ a "Place all" button. Clicking it places every picked file at once with no drag:
 (by pixel area) is centered on the panel-aware visible-canvas center
 (`placeAllArmedMedia.ts`/`getPlaceAllRects.ts`, reusing the same `getVisibleCanvasRect`/
 `getRectCenter`/`screenToWorld` chain the zoom-to-fit feature already established), and each
-remaining file cascades up-left off the previous one's top-left corner. The whole batch dispatches
-as one undo step and ends up selected together, then the tool reverts to default — same
+remaining file is sized at its own natural dimensions and positioned so its bottom-right corner
+lands exactly on the previous file's top-left corner — no gap, no fixed offset — cascading up-left
+one after another. The whole batch dispatches as one undo step and ends up selected together, then
+the tool reverts to default — same
 `beginHistoryGesture`/`appendLastCreatedNodeToSelection`/`endHistoryGesture` shape as the
 one-at-a-time flow above, just looped.
 

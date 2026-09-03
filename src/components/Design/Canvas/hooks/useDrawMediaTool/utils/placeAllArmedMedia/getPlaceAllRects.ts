@@ -1,6 +1,3 @@
-// others
-import { MEDIA_PLACE_ALL_CASCADE_OFFSET_PX } from '../../../../constants';
-
 // types
 import { TArmedMedia } from '../loadArmedMedia';
 import { TDraftRect, TPoint } from 'types/canvas';
@@ -27,8 +24,8 @@ export const getPlaceAllRects = (mediaList: TArmedMedia[], center: TPoint): TPla
         rect: roundRect({
           height: media.naturalHeight,
           width: media.naturalWidth,
-          x: previousRect.x - MEDIA_PLACE_ALL_CASCADE_OFFSET_PX,
-          y: previousRect.y - MEDIA_PLACE_ALL_CASCADE_OFFSET_PX,
+          x: previousRect.x - media.naturalWidth,
+          y: previousRect.y - media.naturalHeight,
         }),
       });
     });

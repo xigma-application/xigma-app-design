@@ -95,7 +95,8 @@ describe('placeAllArmedMedia', () => {
     const page = store.getState().design.pages[store.getState().design.activePageId];
 
     expect(page.nodes[secondToLastId]).toMatchObject({ height: 200, src: 'blob:big', width: 200, x: 400, y: 200 });
-    expect(page.nodes[lastId]).toMatchObject({ height: 50, src: 'blob:armed', width: 50, x: 368, y: 168 });
+    // the armed 50x50 media's bottom-right corner (400, 200) lands exactly on bigFile's top-left corner — no gap
+    expect(page.nodes[lastId]).toMatchObject({ height: 50, src: 'blob:armed', width: 50, x: 350, y: 150 });
     expect(selectSelectedIds(store.getState()).slice(selectedIdsBefore)).toEqual([secondToLastId, lastId]);
     expect(store.getState().design.activeTool).toBe(ToolName.default);
   });
