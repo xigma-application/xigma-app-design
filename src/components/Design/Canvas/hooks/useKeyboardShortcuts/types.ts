@@ -51,7 +51,9 @@ export type TStandardKeyboardShortcuts = {
   ungroup: TShortcut;
   useAsMask: TShortcut;
   zoomIn: TShortcut;
+  zoomInNumpad: TShortcut;
   zoomOut: TShortcut;
+  zoomOutNumpad: TShortcut;
   zoomTo100: TShortcut;
   zoomToFit: TShortcut;
   zoomToNextFrame: TShortcut;
