@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // @xigma
@@ -17,6 +17,10 @@ import VectorMenu from './VectorMenu/VectorMenu';
 import ViewMenu from './ViewMenu/ViewMenu';
 import WidgetsMenu from './WidgetsMenu/WidgetsMenu';
 import { Menu, MenuCompound } from 'shared';
+
+// hooks
+import { useLogoMenuActionsClick } from './hooks/useLogoMenuActionsClick';
+import { useLogoMenuCloseAutoFocus } from './hooks/useLogoMenuCloseAutoFocus';
 
 // others
 import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
@@ -47,9 +51,13 @@ const { MenuItem, MenuSeparator, MenuSub } = MenuCompound;
 const LogoMenu: FC = () => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const shouldSkipCloseAutoFocusRef = useRef(false);
+  const handleActionsClick = useLogoMenuActionsClick(shouldSkipCloseAutoFocusRef);
+  const handleCloseAutoFocus = useLogoMenuCloseAutoFocus(shouldSkipCloseAutoFocusRef);
 
   return (
     <Menu
+      onCloseAutoFocus={handleCloseAutoFocus}
       onOpenChange={setIsOpen}
       open={isOpen}
       trigger={<XigmaLogoShape />}
@@ -59,12 +67,12 @@ const LogoMenu: FC = () => {
       <MenuItem disabled label={t(LOGO_MENU_BACK_TO_FILES_KEY)} marginBottom withCheck={false} />
       <MenuSeparator />
       <MenuItem
-        disabled
         icon="Search"
         iconSize={24}
         label={t(LOGO_MENU_ACTIONS_KEY)}
         marginBottom
         marginTop
+        onClick={handleActionsClick}
         shortcut={KEYBOARD_SHORTCUTS.openActions.join('')}
         withCheck={false}
       />

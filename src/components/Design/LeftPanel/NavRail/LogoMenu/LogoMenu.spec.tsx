@@ -1,13 +1,43 @@
 import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { ReactElement } from 'react';
 
 // components
 import LogoMenu from './LogoMenu';
+import Toolbar from 'components/Design/Toolbar/Toolbar';
+
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+import { TooltipProvider } from 'shared';
+
+// store
+import { selectIsActionsPanelOpen } from 'store/design/selectors';
+import { setActionsPanelOpen } from 'store/design/slice';
+import { store } from 'store';
+
+const renderLogoMenu = (element: ReactElement): ReturnType<typeof render> => render(<Provider store={store}>{element}</Provider>);
+
+const renderLogoMenuWithToolbar = (): ReturnType<typeof render> =>
+  render(
+    <Provider store={store}>
+      <CanvasRefsProvider>
+        <TooltipProvider>
+          <LogoMenu />
+          <Toolbar />
+        </TooltipProvider>
+      </CanvasRefsProvider>
+    </Provider>,
+  );
 
 describe('LogoMenu', () => {
+  beforeEach(() => {
+    store.dispatch(setActionsPanelOpen(false));
+  });
+
   it('should render a closed “xigma” trigger button', () => {
     // before
-    render(<LogoMenu />);
+    renderLogoMenu(<LogoMenu />);
 
     // result
     const trigger = screen.getByRole('button', { name: 'xigma' });
@@ -19,7 +49,7 @@ describe('LogoMenu', () => {
     const user = userEvent.setup();
 
     // before
-    render(<LogoMenu />);
+    renderLogoMenu(<LogoMenu />);
     const trigger = screen.getByRole('button', { name: 'xigma' });
     await user.click(trigger);
 
@@ -44,12 +74,12 @@ describe('LogoMenu', () => {
     expect(screen.getByText('Help and account')).toBeInTheDocument();
   });
 
-  it('should disable the not-yet-implemented flat items but leave the expandable ones enabled', async () => {
+  it('should disable the not-yet-implemented flat items but leave the expandable ones and Actions enabled', async () => {
     // mock
     const user = userEvent.setup();
 
     // before
-    render(<LogoMenu />);
+    renderLogoMenu(<LogoMenu />);
     await user.click(screen.getByRole('button', { name: 'xigma' }));
 
     // result — disabled
@@ -63,5 +93,40 @@ describe('LogoMenu', () => {
     expect(screen.getByText('Widgets').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Preferences').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Help and account').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+
+    // result — Actions is unlocked
+    expect(screen.getByText('Actions...').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+  });
+
+  it('should open the Actions panel when the Actions row is clicked', async () => {
+    // mock
+    const user = userEvent.setup();
+
+    // before
+    renderLogoMenu(<LogoMenu />);
+    await user.click(screen.getByRole('button', { name: 'xigma' }));
+
+    // action
+    await user.click(screen.getByText('Actions...'));
+
+    // result
+    expect(selectIsActionsPanelOpen(store.getState())).toBe(true);
+  });
+
+  it('should keep the Actions panel open, not have it dismissed by the menu returning focus to its own trigger on close', async () => {
+    // mock
+    const user = userEvent.setup();
+
+    // before — Toolbar mounted alongside so the Actions panel's own real Popover/focus-outside
+    // detection is present, reproducing the race this test guards against
+    renderLogoMenuWithToolbar();
+    await user.click(screen.getByRole('button', { name: 'xigma' }));
+
+    // action
+    await user.click(screen.getByText('Actions...'));
+
+    // result
+    expect(await screen.findByPlaceholderText('Search')).toBeInTheDocument();
+    expect(selectIsActionsPanelOpen(store.getState())).toBe(true);
   });
 });
