@@ -840,4 +840,146 @@ describe('drawSceneNodes', () => {
       expect(rectDraws.length).toBeGreaterThanOrEqual(4);
     });
   });
+
+  describe('clipping frames', () => {
+    it('should render a clipping frame with children into two offscreen targets and composite them back', () => {
+      // mock
+      const gl = createGlMock();
+      const pool = createPoolStub();
+      const child = buildNode({ id: 'child', parentId: 'frame', type: NodeType.rectangle });
+      const frame = buildNode({ childIds: ['child'], clipContent: true, id: 'frame' });
+
+      // action
+      drawSceneNodes(
+        {
+          buffer: {} as WebGLBuffer,
+          canvasHeight: 100,
+          canvasWidth: 100,
+          gl,
+          imageContext: withPool(pool),
+          program: {} as WebGLProgram,
+          viewport: IDENTITY_VIEWPORT,
+        },
+        [frame, child],
+        ['frame'],
+        new Map(),
+        createCanvasRefs(),
+        { child, frame },
+      );
+
+      // result — one target for the child content, one for the frame-shaped alpha mask
+      expect(pool.acquire).toHaveBeenCalledTimes(2);
+      expect(pool.release).toHaveBeenCalledTimes(2);
+      expect(gl.useProgram).toHaveBeenCalledWith(IMAGE_CONTEXT.maskCompositeProgram);
+      // the frame's own background rect still paints directly (not clipped by its own mask)
+      expect(gl.bindFramebuffer).toHaveBeenLastCalledWith(gl.FRAMEBUFFER, null);
+    });
+
+    it('should skip the offscreen path for a frame with Clip content off, even with children', () => {
+      // mock
+      const gl = createGlMock();
+      const pool = createPoolStub();
+      const child = buildNode({ id: 'child', parentId: 'frame', type: NodeType.rectangle });
+      const frame = buildNode({ childIds: ['child'], clipContent: false, id: 'frame' });
+
+      // action
+      drawSceneNodes(
+        {
+          buffer: {} as WebGLBuffer,
+          canvasHeight: 100,
+          canvasWidth: 100,
+          gl,
+          imageContext: withPool(pool),
+          program: {} as WebGLProgram,
+          viewport: IDENTITY_VIEWPORT,
+        },
+        [frame, child],
+        [],
+        new Map(),
+        createCanvasRefs(),
+        { child, frame },
+      );
+
+      // result — flat paint path, both rects draw directly with no offscreen target
+      expect(pool.acquire).not.toHaveBeenCalled();
+      expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+    });
+
+    it('should skip the offscreen path for a childless clipping frame', () => {
+      // mock
+      const gl = createGlMock();
+      const pool = createPoolStub();
+      const frame = buildNode({ childIds: [], clipContent: true, id: 'frame' });
+
+      // action
+      drawSceneNodes(
+        {
+          buffer: {} as WebGLBuffer,
+          canvasHeight: 100,
+          canvasWidth: 100,
+          gl,
+          imageContext: withPool(pool),
+          program: {} as WebGLProgram,
+          viewport: IDENTITY_VIEWPORT,
+        },
+        [frame],
+        [],
+        new Map(),
+        createCanvasRefs(),
+        { frame },
+      );
+
+      // result
+      expect(pool.acquire).not.toHaveBeenCalled();
+      expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    });
+
+    it('should paint a non-clipping frame via plain child recursion when the offscreen path is triggered by another mask', () => {
+      // mock — an unrelated mask group elsewhere in the scene forces the recursive render path;
+      // this frame has Clip content off, so it must still fall through to a flat childIds recursion
+      const gl = createGlMock();
+      const pool = createPoolStub();
+      const maskContent = buildNode({ id: 'mask-content', parentId: 'mask-group' });
+      const mask = buildNode({ id: 'mask', isMask: true, parentId: 'mask-group' });
+      const maskGroup: TGroupNode = {
+        childIds: ['mask-content', 'mask'],
+        height: 10,
+        id: 'mask-group',
+        name: 'Mask group',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.group,
+        width: 10,
+        x: 0,
+        y: 0,
+      };
+      const child = buildNode({ id: 'frame-child', parentId: 'plain-frame', type: NodeType.rectangle });
+      const plainFrame = buildNode({ childIds: ['frame-child'], clipContent: false, id: 'plain-frame' });
+
+      // action
+      drawSceneNodes(
+        {
+          buffer: {} as WebGLBuffer,
+          canvasHeight: 100,
+          canvasWidth: 100,
+          gl,
+          imageContext: withPool(pool),
+          program: {} as WebGLProgram,
+          viewport: IDENTITY_VIEWPORT,
+        },
+        [maskGroup, maskContent, mask, plainFrame, child],
+        ['mask-group', 'plain-frame'],
+        new Map(),
+        createCanvasRefs(),
+        { child, mask, 'mask-content': maskContent, 'mask-group': maskGroup, 'plain-frame': plainFrame },
+      );
+
+      // result — the mask group still composites (2 targets), the plain frame paints its own
+      // rect plus recurses into its child directly, with no extra offscreen targets for it
+      expect(pool.acquire).toHaveBeenCalledTimes(2);
+      const rectDraws = (gl.drawArrays as unknown as { mock: { calls: unknown[][] } }).mock.calls.filter(([, , count]) => count === 6);
+      // mask-content, mask, plain-frame, frame-child (each a 6-vertex rect) + the composite quad
+      expect(rectDraws.length).toBeGreaterThanOrEqual(5);
+    });
+  });
 });

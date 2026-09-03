@@ -12,6 +12,7 @@ import {
   reorderPages,
   sendSelectionToBack,
   setSelection,
+  toggleFrameClipContent,
   toggleNodeHidden,
   toggleNodeLocked,
   toggleNodeMask,
@@ -225,6 +226,23 @@ describe('historyMiddleware', () => {
 
     // result
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[groupId]).toBeUndefined();
+  });
+
+  it('should undo toggling Clip content on a frame', () => {
+    // mock
+    const frameId = addFrameNode(0, 0);
+
+    // action
+    store.dispatch(toggleFrameClipContent(frameId));
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[frameId]).toMatchObject({ clipContent: false });
+
+    // action
+    store.dispatch(undo());
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[frameId]).toMatchObject({ clipContent: true });
   });
 
   it('should treat a page reorder as its own undo step', () => {

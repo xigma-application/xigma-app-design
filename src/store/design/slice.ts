@@ -59,6 +59,7 @@ import { handleSetVectorEditingNodeIds } from './utils/handleSetVectorEditingNod
 import { handleSetViewport } from './utils/handleSetViewport';
 import { handleStartTextEdit } from './utils/handleStartTextEdit';
 import { handleStopTextEdit } from './utils/handleStopTextEdit';
+import { handleToggleFrameClipContent } from './utils/handleToggleFrameClipContent/handleToggleFrameClipContent';
 import { handleToggleNodeHidden } from './utils/handleToggleNodeHidden';
 import { handleToggleNodeLocked } from './utils/handleToggleNodeLocked';
 import { handleToggleNodeMask } from './utils/handleToggleNodeMask/handleToggleNodeMask';
@@ -199,6 +200,7 @@ const designSlice = createSlice({
     toggleAdditionalLabels: (state) => {
       state.areAdditionalLabelsVisible = !state.areAdditionalLabelsVisible;
     },
+    toggleFrameClipContent: (state, action: PayloadAction<string>) => handleToggleFrameClipContent(state, action.payload),
     toggleNodeHidden: (state, action: PayloadAction<string>) => handleToggleNodeHidden(state, action.payload),
     toggleNodeLocked: (state, action: PayloadAction<string>) => handleToggleNodeLocked(state, action.payload),
     toggleNodeMask: (state, action: PayloadAction<string>) => handleToggleNodeMask(state, action.payload),
@@ -262,6 +264,7 @@ export const {
   stopTextEdit,
   toggleActionsPanelOpen,
   toggleAdditionalLabels,
+  toggleFrameClipContent,
   toggleNodeHidden,
   toggleNodeLocked,
   toggleNodeMask,

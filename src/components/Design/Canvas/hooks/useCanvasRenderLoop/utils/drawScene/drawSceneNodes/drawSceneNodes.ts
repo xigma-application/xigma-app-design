@@ -4,6 +4,7 @@ import { drawLeafNode } from '../drawLeafNode';
 import { renderIds } from './renderIds';
 
 // types
+import { NodeType } from 'types/design/enums';
 import { TCanvasRefs } from 'types/design/canvas/types';
 import { TDrawSceneContext } from '../types';
 import { TMaskRenderer } from './types';
@@ -21,7 +22,7 @@ export const drawSceneNodes = (
 ): void => {
   const paintLeaf = (node: TSceneNode): void => drawLeafNode(context, node, pathOutlineStyles, refs, nodesById, editingPathId);
 
-  if (!sceneNodes.some((node) => node.isMask)) {
+  if (!sceneNodes.some((node) => node.isMask || (node.type === NodeType.frame && node.clipContent && node.childIds.length > 0))) {
     sceneNodes.forEach(paintLeaf);
   } else {
     const { gl, imageContext } = context;

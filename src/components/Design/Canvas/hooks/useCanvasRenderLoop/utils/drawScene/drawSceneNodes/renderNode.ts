@@ -1,4 +1,5 @@
 // utils
+import { renderClippedFrame } from './renderClippedFrame';
 import { renderIds } from './renderIds';
 import { renderMaskGroup } from './renderMaskGroup';
 
@@ -18,6 +19,14 @@ export const renderNode = (renderer: TMaskRenderer, id: string, target: TRenderT
         renderIds(renderer, node.childIds, target);
       } else {
         renderMaskGroup(renderer, node, maskIndex, target);
+      }
+    } else if (node.type === NodeType.frame) {
+      renderer.paintLeaf(node);
+
+      if (node.clipContent && node.childIds.length > 0) {
+        renderClippedFrame(renderer, node, target);
+      } else {
+        renderIds(renderer, node.childIds, target);
       }
     } else {
       renderer.paintLeaf(node);
