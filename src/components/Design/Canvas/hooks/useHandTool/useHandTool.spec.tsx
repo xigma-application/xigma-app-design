@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react';
+import { act, fireEvent, renderHook } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { RefObject } from 'react';
 
@@ -215,6 +215,55 @@ describe('useHandTool behaviors', () => {
     expect(classNameRef.current).not.toBe('pressing');
 
     act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 999, 999));
+    });
+    expect(store.getState().design.pages[store.getState().design.activePageId].viewport).toEqual(DEFAULT_VIEWPORT);
+  });
+
+  it('should switch to the hand tool while Space is held, and pan the viewport', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    // before
+    const classNameRef = renderHandTool(canvasRef);
+
+    act(() => fireEvent.keyDown(window, { key: ' ' }));
+
+    // result
+    expect(classNameRef.current).toBe('hand');
+    expect(store.getState().design.activeTool).toBe(ToolName.hand);
+
+    // action
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
+      canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 40, 25));
+    });
+
+    // result
+    expect(store.getState().design.pages[store.getState().design.activePageId].viewport).toEqual({ x: 30, y: 15, zoom: 1 });
+  });
+
+  it('should restore the tool that was active before Space was pressed, once it is released', () => {
+    // mock
+    const canvasRef = createCanvasRef();
+
+    store.dispatch(setActiveTool(ToolName.frame));
+
+    // before
+    const classNameRef = renderHandTool(canvasRef);
+
+    act(() => fireEvent.keyDown(window, { key: ' ' }));
+    expect(store.getState().design.activeTool).toBe(ToolName.hand);
+
+    // action
+    act(() => fireEvent.keyUp(window, { key: ' ' }));
+
+    // result
+    expect(store.getState().design.activeTool).toBe(ToolName.frame);
+    expect(classNameRef.current).not.toBe('hand');
+
+    act(() => {
+      canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 10, 10));
       canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 999, 999));
     });
     expect(store.getState().design.pages[store.getState().design.activePageId].viewport).toEqual(DEFAULT_VIEWPORT);

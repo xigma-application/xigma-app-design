@@ -27,6 +27,7 @@ import slice, {
   setPaint,
   setPenActiveVertexId,
   setSelection,
+  setTemporaryActiveTool,
   setVectorEditingNodeIds,
   setViewport,
   startCommentDraft,
@@ -59,7 +60,9 @@ const frameNodePayload: Omit<TFrameNode, 'id'> = {
   name: 'Frame 1',
   parentId: null,
   rotation: 0,
-  childIds: [], clipContent: true, type: NodeType.frame,
+  childIds: [],
+  clipContent: true,
+  type: NodeType.frame,
   width: 200,
   x: 0,
   y: 0,
@@ -158,6 +161,19 @@ describe('design slice', () => {
 
     // result
     expect(state.lastMouseTool).toBe(ToolName.hand);
+  });
+
+  it('should set the active tool temporarily, without remembering it as the last tool of its group', () => {
+    // before
+    const withFrame = slice(undefined, setActiveTool(ToolName.frame));
+
+    // action
+    const state = slice(withFrame, setTemporaryActiveTool(ToolName.hand));
+
+    // result
+    expect(state.activeTool).toBe(ToolName.hand);
+    expect(state.lastMouseTool).toBe(ToolName.default);
+    expect(state.lastFrameTool).toBe(ToolName.frame);
   });
 
   it('should add a node with a generated id', () => {

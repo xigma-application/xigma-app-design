@@ -158,4 +158,39 @@ describe('MouseModes behaviors', () => {
     // result
     expect(screen.getByRole('radio', { name: ToolName.section })).not.toBeChecked();
   });
+
+  it('should keep showing the tool active before Space was pressed, ignoring a temporary switch to hand', () => {
+    // before
+    renderMouseModes();
+    act(() => store.dispatch(setActiveTool(ToolName.frame)));
+
+    // action — mirrors what useHandTool does while Space is held
+    act(() => {
+      fireEvent.keyDown(window, { key: ' ' });
+      store.dispatch(setActiveTool(ToolName.hand));
+    });
+
+    // result
+    expect(screen.getByRole('radio', { name: ToolName.frame })).toBeChecked();
+  });
+
+  it('should reflect the real active tool again once Space is released', () => {
+    // before
+    renderMouseModes();
+    act(() => store.dispatch(setActiveTool(ToolName.frame)));
+
+    act(() => {
+      fireEvent.keyDown(window, { key: ' ' });
+      store.dispatch(setActiveTool(ToolName.hand));
+    });
+
+    // action — mirrors useHandTool restoring the previous tool on release
+    act(() => {
+      fireEvent.keyUp(window, { key: ' ' });
+      store.dispatch(setActiveTool(ToolName.frame));
+    });
+
+    // result
+    expect(screen.getByRole('radio', { name: ToolName.frame })).toBeChecked();
+  });
 });

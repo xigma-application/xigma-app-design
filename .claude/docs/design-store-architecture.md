@@ -115,6 +115,7 @@ bodies delegate to `utils/handle<ReducerName>.ts`):
 | `groupNodes` | delegated → `handleGroupNodes/handleGroupNodes.ts` | id via `nanoid()` in `prepare`, same pattern as `addNode` — see `group-nodes.md` §2 |
 | `setActiveTool` | delegated → `handleSetActiveTool.ts` | `lastXTool` bucket switch — see below |
 | `setSelection` | inline (`state.selectedIds = action.payload`) | |
+| `setTemporaryActiveTool` | inline (`state.activeTool = action.payload`) | same field as `setActiveTool`, but skips the `lastXTool` switch entirely — used by `useHandTool`'s space-bar hold so the temporary switch to `hand` doesn't overwrite `lastMouseTool`/`lastFrameTool`/etc. for whatever tool was active before the hold |
 | `setViewport` | inline (`state.viewport = action.payload`) | |
 | `startCommentDraft` | inline (`state.commentDraftPosition = action.payload`) | |
 | `startTextEdit` | delegated → `handleStartTextEdit.ts` | seeds editing fields, selects all existing content |

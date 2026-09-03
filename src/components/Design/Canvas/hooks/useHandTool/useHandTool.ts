@@ -3,9 +3,12 @@ import { useEffect, useRef } from 'react';
 // core
 import { useClassNames } from '../../../core/ClassNamesProvider/hooks/useClassNames';
 
+// hooks
+import { useIsSpaceHeld } from './hooks/useIsSpaceHeld';
+
 // store
 import { selectActiveTool, selectViewport } from 'store/design/selectors';
-import { setViewport } from 'store/design/slice';
+import { setTemporaryActiveTool, setViewport } from 'store/design/slice';
 import { store, useAppDispatch, useAppSelector } from 'store';
 
 // types
@@ -21,9 +24,11 @@ import { getPointerPosition } from '../../utils/getPointerPosition';
 export const useHandTool = (refs: TCanvasRefs): void => {
   const { canvasRef } = refs;
   const activeTool = useAppSelector(selectActiveTool);
+  const isSpaceHeld = useIsSpaceHeld();
   const dispatch = useAppDispatch();
   const { setClassName } = useClassNames();
   const lastPointRef = useRef<TPoint | null>(null);
+  const toolBeforeSpaceRef = useRef<ToolName>(ToolName.default);
 
   const handlePointerDown = (canvas: HTMLCanvasElement, event: PointerEvent): void => {
     if (event.button === MouseButton.primary) {
@@ -50,6 +55,17 @@ export const useHandTool = (refs: TCanvasRefs): void => {
       setClassName('hand');
     }
   };
+
+  useEffect(() => {
+    if (isSpaceHeld) {
+      toolBeforeSpaceRef.current = selectActiveTool(store.getState());
+      dispatch(setTemporaryActiveTool(ToolName.hand));
+
+      return (): void => {
+        dispatch(setTemporaryActiveTool(toolBeforeSpaceRef.current));
+      };
+    }
+  }, [dispatch, isSpaceHeld]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

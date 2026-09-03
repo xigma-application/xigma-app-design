@@ -183,6 +183,9 @@ const designSlice = createSlice({
       state.penActiveVertexId = action.payload;
     },
     setSelection: (state, action: PayloadAction<string[]>) => handleSetSelection(state, action.payload),
+    setTemporaryActiveTool: (state, action: PayloadAction<ToolName>) => {
+      state.activeTool = action.payload;
+    },
     setVectorEditingNodeIds: (state, action: PayloadAction<string[]>) => handleSetVectorEditingNodeIds(state, action.payload),
     setViewport: (state, action: PayloadAction<TViewport>) => handleSetViewport(state, action.payload),
     startCommentDraft: (state, action: PayloadAction<TPoint>) => {
@@ -251,6 +254,7 @@ export const {
   setPaint,
   setPenActiveVertexId,
   setSelection,
+  setTemporaryActiveTool,
   setVectorEditingNodeIds,
   setViewport,
   startCommentDraft,

@@ -37,7 +37,11 @@ one (Arrow reused `useDrawLineTool` entirely, just with a different config).
 
 - `slice.ts` — the reducers (`addNode`, `updateNode`, `setActiveTool`, `setSelection`, ...). A new
   tool rarely needs a new reducer unless it introduces genuinely new state shape (Slice did, because
-  it's deliberately never persisted to `nodes`).
+  it's deliberately never persisted to `nodes`). `setTemporaryActiveTool` is a deliberate second
+  entry point into `state.activeTool`, sitting next to `setActiveTool`: a plain one-line assignment
+  with **no** `handleSetActiveTool` side effect, used by `useHandTool`'s space-bar hold (see §3's
+  toolbar note) so panning while Space is held doesn't corrupt `lastMouseTool`/`lastFrameTool`/etc.
+  for whatever tool was active before the hold.
 - `utils/handleSetActiveTool.ts` — a `switch` deciding which "last used" bucket a `ToolName` updates:
   `lastShapeTool` / `lastFrameTool` / `lastMouseTool` / `lastTextTool`. This is what makes a shared
   toolbar button "remember" which of its dropdown variants was picked last. **A new tool that shares
@@ -51,9 +55,14 @@ one (Arrow reused `useDrawLineTool` entirely, just with a different config).
 All of `MouseModes.tsx` and `ToolDropdown.tsx` are **fully generic** — they iterate
 `TOOLBAR_ORDER`/`TOOL_GROUP_ITEMS` and read `TOOL_ICON`/`TOOL_LABEL`/`TOOL_ICON_SIZE` by `ToolName`
 key. For wiring an ordinary new tool you should never need to edit either component file; only
-`constants.ts` (the one exception is Vector Edit Mode's own tool-switch handling — see
-`vector-network.md` §45 — which both components now route through via a handler-hook instead of
-dispatching `setActiveTool` inline; irrelevant unless the new tool needs its own decision there):
+`constants.ts` (two exceptions: Vector Edit Mode's own tool-switch handling — see `vector-network.md`
+§45 — which both components now route through via a handler-hook instead of dispatching
+`setActiveTool` inline; and `MouseModes.tsx`'s own `useIsSpaceHeld` read, which freezes the
+highlighted button on whatever tool was active *before* Space was pressed via a render-time ref
+— `activeTool` genuinely becomes `hand` for the hold (via `setTemporaryActiveTool`, see §2) so every
+other tool hook's own `activeTool === ...` gating switches off exactly like the real Hand tool, but
+the toolbar itself must keep showing the pre-hold tool as selected. Irrelevant unless the new tool
+needs its own decision there):
 
 - `TOOL_ICON: Record<ToolName, keyof typeof Icons>` — **exhaustive** `Record`, TS will refuse to
   compile until every `ToolName` has an entry.

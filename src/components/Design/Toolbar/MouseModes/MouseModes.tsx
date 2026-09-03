@@ -1,5 +1,5 @@
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
-import { FC } from 'react';
+import { FC, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // components
@@ -7,6 +7,7 @@ import ToolDropdown from './ToolDropdown/ToolDropdown';
 import { Icon, Tooltip } from 'shared';
 
 // hooks
+import { useIsSpaceHeld } from '../../Canvas/hooks/useHandTool/hooks/useIsSpaceHeld';
 import { useSelectTool } from './hooks/useSelectTool';
 
 // others
@@ -27,24 +28,34 @@ import { useAppSelector } from 'store';
 // styles
 import styles from './mouse-modes.module.scss';
 
+// types
+import { ToolName } from 'types/design/enums';
+
 // utils
 import { getGroupDisplayedTool } from '../utils/getGroupDisplayedTool';
 
 const MouseModes: FC = () => {
   const { t } = useTranslation();
   const activeTool = useAppSelector(selectActiveTool);
+  const isSpaceHeld = useIsSpaceHeld();
+  const toolBeforeSpaceRef = useRef<ToolName>(activeTool);
   const lastFrameTool = useAppSelector(selectLastFrameTool);
   const lastMouseTool = useAppSelector(selectLastMouseTool);
   const lastPenTool = useAppSelector(selectLastPenTool);
   const lastShapeTool = useAppSelector(selectLastShapeTool);
   const lastTextTool = useAppSelector(selectLastTextTool);
   const handleSelectTool = useSelectTool();
+  const displayedActiveTool = isSpaceHeld ? toolBeforeSpaceRef.current : activeTool;
+
+  if (!isSpaceHeld) {
+    toolBeforeSpaceRef.current = activeTool;
+  }
 
   return (
-    <ToggleGroupPrimitive.Root className={styles.MouseModes} onValueChange={handleSelectTool} type="single" value={activeTool}>
+    <ToggleGroupPrimitive.Root className={styles.MouseModes} onValueChange={handleSelectTool} type="single" value={displayedActiveTool}>
       {TOOLBAR_ORDER.map((name) => {
         const displayedTool = getGroupDisplayedTool(name, lastShapeTool, lastMouseTool, lastFrameTool, lastTextTool, lastPenTool);
-        const isActive = displayedTool === activeTool;
+        const isActive = displayedTool === displayedActiveTool;
         const shortcut = KEYBOARD_SHORTCUTS[displayedTool].join('');
 
         return (
