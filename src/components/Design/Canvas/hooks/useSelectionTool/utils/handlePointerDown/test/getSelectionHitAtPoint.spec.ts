@@ -1,5 +1,5 @@
 // store
-import { addNode, groupNodes, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
+import { addNode, groupNodes, moveNodes, setSelection, setVectorEditingNodeIds } from 'store/design/slice';
 import { selectActivePage, selectOrderedNodes } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -267,5 +267,79 @@ describe('getSelectionHitAtPoint', () => {
 
     // result
     expect(hit?.id).toBe(group3Id);
+  });
+
+  describe('a frame that has children', () => {
+    const addRectNode = (x: number, y: number, size: number): string => {
+      store.dispatch(
+        addNode({
+          fill: '#00ff00',
+          height: size,
+          name: 'Rectangle',
+          parentId: null,
+          rotation: 0,
+          type: NodeType.rectangle,
+          width: size,
+          x,
+          y,
+        }),
+      );
+
+      return selectActivePage(store.getState()).rootOrder.at(-1) as string;
+    };
+
+    const buildFrameWithChild = (): { childId: string; frameId: string } => {
+      const frameId = addFrameNode(20000, 20000, 400);
+      const childId = addRectNode(20020, 20020, 40);
+
+      store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: frameId }));
+      store.dispatch(setSelection([]));
+
+      return { childId, frameId };
+    };
+
+    it('should not select the frame from a plain click on its empty body — it selects nothing there', () => {
+      const { frameId } = buildFrameWithChild();
+
+      const hit = getSelectionHitAtPoint({ x: 20300, y: 20300 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit).toBeNull();
+      expect(hit?.id).not.toBe(frameId);
+    });
+
+    it('should select the child directly on the first click on that child', () => {
+      const { childId } = buildFrameWithChild();
+
+      const hit = getSelectionHitAtPoint({ x: 20035, y: 20035 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit?.id).toBe(childId);
+    });
+
+    it('should still select the frame from a click on its name label', () => {
+      const { frameId } = buildFrameWithChild();
+
+      // ~17px above the frame's top-left corner at zoom 1 — where the name label sits
+      const hit = getSelectionHitAtPoint({ x: 20008, y: 19990 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit?.id).toBe(frameId);
+    });
+
+    it('should still let a body click re-grab the frame while it is already selected', () => {
+      const { frameId } = buildFrameWithChild();
+
+      store.dispatch(setSelection([frameId]));
+      const hit = getSelectionHitAtPoint({ x: 20300, y: 20300 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit?.id).toBe(frameId);
+    });
+
+    it('should keep selecting an empty frame from a plain click on its body, unchanged', () => {
+      const frameId = addFrameNode(21000, 21000, 200);
+      store.dispatch(setSelection([]));
+
+      const hit = getSelectionHitAtPoint({ x: 21100, y: 21100 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit?.id).toBe(frameId);
+    });
   });
 });

@@ -65,6 +65,7 @@ describe('drawFrameNameLabels', () => {
       { buffer: {} as never, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
       [buildRectangle()],
       new Set(),
+      null,
       refsWith(null),
     );
 
@@ -80,6 +81,7 @@ describe('drawFrameNameLabels', () => {
       { buffer: {} as never, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
       [frame],
       new Set(),
+      null,
       refsWith(null),
     );
 
@@ -95,6 +97,7 @@ describe('drawFrameNameLabels', () => {
       { buffer: {} as never, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
       [frame],
       new Set([frame.id]),
+      null,
       refsWith(null),
     );
 
@@ -118,10 +121,35 @@ describe('drawFrameNameLabels', () => {
       { buffer: {} as never, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
       [frame],
       new Set(),
+      null,
       refsWith(frame.id),
     );
 
     // result
     expect(drawFrameNameLabelMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw a hovered (but unselected) frame’s label in the selection blue', () => {
+    // before
+    const frame = buildFrame();
+
+    drawFrameNameLabels(
+      { buffer: {} as never, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program: {} as never, viewport: IDENTITY_VIEWPORT },
+      [frame],
+      new Set(),
+      frame.id,
+      refsWith(null),
+    );
+
+    // result
+    expect(drawFrameNameLabelMock).toHaveBeenCalledWith(
+      gl,
+      imageContext,
+      frame,
+      FRAME_NAME_LABEL_SELECTED_FILL,
+      200,
+      150,
+      IDENTITY_VIEWPORT,
+    );
   });
 });

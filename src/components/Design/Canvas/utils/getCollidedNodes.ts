@@ -1,4 +1,5 @@
 // types
+import { NodeType } from 'types/design/enums';
 import { TDraftRect } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
@@ -16,8 +17,9 @@ export const getCollidedNodes = (nodes: TSceneNode[], area: TDraftRect, requireF
       const bounds = getRotatedNodeBounds(node);
       const nodeX2 = bounds.x + bounds.width;
       const nodeY2 = bounds.y + bounds.height;
+      const mustEncloseFully = requireFullyInside || (node.type === NodeType.frame && node.childIds.length > 0);
 
-      return requireFullyInside
+      return mustEncloseFully
         ? x1 <= bounds.x && x2 >= nodeX2 && y1 <= bounds.y && y2 >= nodeY2
         : !(nodeX2 < x1 || bounds.x > x2 || nodeY2 < y1 || bounds.y > y2);
     }

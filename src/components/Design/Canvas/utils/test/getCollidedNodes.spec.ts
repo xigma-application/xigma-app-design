@@ -97,6 +97,33 @@ describe('getCollidedNodes', () => {
     expect(getCollidedNodes([node], area, false)).toEqual([]);
   });
 
+  it('should require full enclosure for a frame that has children, even in touch mode', () => {
+    // mock — a frame with a child, only partially inside the area
+    const frame = buildNode({ childIds: ['child-1'], height: 20, width: 20, x: 10, y: 10 });
+    const area = { height: 10, width: 10, x: 0, y: 0 };
+
+    // result — touch mode would normally include it, but a frame-with-children needs full enclosure
+    expect(getCollidedNodes([frame], area, false)).toEqual([]);
+  });
+
+  it('should collide a fully-enclosed frame that has children', () => {
+    // mock
+    const frame = buildNode({ childIds: ['child-1'], height: 10, width: 10, x: 5, y: 5 });
+    const area = { height: 50, width: 50, x: 0, y: 0 };
+
+    // result
+    expect(getCollidedNodes([frame], area, false)).toEqual([frame]);
+  });
+
+  it('should still include a partially-overlapped empty frame in touch mode', () => {
+    // mock — no children, so the normal touch rule applies
+    const frame = buildNode({ childIds: [], height: 20, width: 20, x: 10, y: 10 });
+    const area = { height: 10, width: 10, x: 0, y: 0 };
+
+    // result
+    expect(getCollidedNodes([frame], area, false)).toEqual([frame]);
+  });
+
   it('should collide a line node using the bounding box derived from its endpoints', () => {
     // mock
     const line: TSceneNode = {

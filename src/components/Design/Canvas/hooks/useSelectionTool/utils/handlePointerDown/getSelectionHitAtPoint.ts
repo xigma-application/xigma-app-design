@@ -3,6 +3,7 @@ import { selectNodes, selectSelectedNodes, selectVectorEditingNodeIds } from 'st
 import { store } from 'store';
 
 // types
+import { NodeType } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
 
@@ -11,6 +12,7 @@ import { getGroupChildHitAtPoint } from './getGroupChildHitAtPoint';
 import { getNodeAtPoint } from '../../../../utils/getNodeAtPoint/getNodeAtPoint';
 import { isAncestorNode } from 'store/design/utils/nodeHierarchy/isAncestorNode';
 import { isContainerNode } from 'store/design/utils/nodeHierarchy/isContainerNode';
+import { isPointOnFrameNameLabel } from '../../../../utils/isPointOnFrameNameLabel';
 import { isSelectionInsideGroup } from '../../../../utils/isSelectionInsideGroup';
 
 export const getSelectionHitAtPoint = (point: TPoint, orderedNodes: TSceneNode[], viewport: TViewport): TSceneNode | null => {
@@ -22,6 +24,10 @@ export const getSelectionHitAtPoint = (point: TPoint, orderedNodes: TSceneNode[]
 
   if (selectedHit && (!hit || hit.id === selectedHit.id || isAncestorNode(hit.id, selectedHit, nodesById))) {
     return selectedHit;
+  }
+
+  if (hit && hit.type === NodeType.frame && hit.childIds.length > 0 && !isPointOnFrameNameLabel(point, hit, viewport.zoom)) {
+    return getGroupChildHitAtPoint(point, viewport);
   }
 
   if (hit && isContainerNode(hit)) {

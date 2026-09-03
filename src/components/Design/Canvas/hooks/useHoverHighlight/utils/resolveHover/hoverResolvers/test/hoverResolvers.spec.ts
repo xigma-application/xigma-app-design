@@ -1,6 +1,6 @@
 // types
 import { NodeType, ToolName } from 'types/design/enums';
-import { TEllipseNode, TGroupNode, TLineNode, TPolygonNode, TRectangleNode, TStarNode, TTextNode } from 'types/design/types';
+import { TEllipseNode, TFrameNode, TGroupNode, TLineNode, TPolygonNode, TRectangleNode, TStarNode, TTextNode } from 'types/design/types';
 import { THoverResolverContext } from '../../types';
 
 // utils
@@ -686,5 +686,57 @@ describe('resolvePlainNodeHover', () => {
         }),
       ),
     ).toEqual({ className: null, cursor: '', nodeId: 'group-child-a' });
+  });
+
+  const frameWithChild: TFrameNode = {
+    childIds: ['frame-child'],
+    clipContent: true,
+    fill: '#ffffff',
+    height: 300,
+    id: 'frame-1',
+    name: 'Frame',
+    parentId: null,
+    rotation: 0,
+    type: NodeType.frame,
+    width: 300,
+    x: 0,
+    y: 0,
+  };
+  const frameChild: TRectangleNode = { ...rectangle, cornerRadius: 0, id: 'frame-child', parentId: 'frame-1', x: 20, y: 20 };
+  const emptyFrame: TFrameNode = { ...frameWithChild, childIds: [], id: 'empty-frame' };
+
+  it('should highlight the child, not its parent frame, when hovering a child of a frame that has children', () => {
+    // result — a click there selects the child directly, so the hover must match
+    expect(
+      resolvePlainNodeHover(
+        createContext({
+          leafNodes: [frameChild],
+          nodesById: { 'frame-1': frameWithChild, 'frame-child': frameChild },
+          point: { x: 40, y: 40 },
+        }),
+      ),
+    ).toEqual({ className: null, cursor: '', nodeId: 'frame-child' });
+  });
+
+  it('should still highlight an empty frame itself when hovering its body', () => {
+    // result — an empty frame has no click-through behaviour
+    expect(
+      resolvePlainNodeHover(
+        createContext({ leafNodes: [emptyFrame], nodesById: { 'empty-frame': emptyFrame }, point: { x: 150, y: 150 } }),
+      ),
+    ).toEqual({ className: null, cursor: '', nodeId: 'empty-frame' });
+  });
+
+  it('should highlight the frame itself when hovering its name label, even though the body is click-through', () => {
+    // the label sits ~17px above the frame's top-left corner at zoom 1
+    expect(
+      resolvePlainNodeHover(
+        createContext({
+          leafNodes: [frameChild],
+          nodesById: { 'frame-1': frameWithChild, 'frame-child': frameChild },
+          point: { x: 6, y: -12 },
+        }),
+      ),
+    ).toEqual({ className: null, cursor: '', nodeId: 'frame-1' });
   });
 });
