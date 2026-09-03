@@ -113,16 +113,24 @@ of labor as scenario 5 above.
 
 Figma-style draggable scrollbars (`Canvas/ScrollbarsLayer/`) — a thin horizontal bar along the
 bottom edge (drags pan `viewport.x`) and a vertical one along the right edge (drags pan
-`viewport.y`), always visible regardless of the ruler toggle. Both bars stop at the true visible
-canvas edge (`getVisibleCanvasRect`, same panel-aware inset math as zoom-to-fit and the rulers), so
-a minimized/collapsed Left/RightPanel is treated as zero width, same as everywhere else that reads
-`leftPanelWidthRef`/`rightPanelWidthRef`. Thumb size/position (`getScrollbarThumb.ts`) and drag
-math (`useScrollbarDrag.ts`, reusing `applyPan.ts`) are exhaustively unit-tested with exact pixel
-expectations; the e2e tests only prove a real pointer drag on the real, correctly-positioned DOM
-thumb reaches `setViewport` and the canvas repaints — same division of labor as the Hand tool
-scenarios above.
+`viewport.y`), visible regardless of the ruler toggle but hidden entirely while the active page has
+no nodes (`ScrollbarsLayer.tsx` reads `selectOrderedNodes`, returns `null` when empty — mirrors
+`RulersLayer`'s own conditional-`null` shape, just gated on node count instead of the ruler
+toggle). Both bars stop at the true visible canvas edge (`getVisibleCanvasRect`, same panel-aware
+inset math as zoom-to-fit and the rulers), so a minimized/collapsed Left/RightPanel is treated as
+zero width, same as everywhere else that reads `leftPanelWidthRef`/`rightPanelWidthRef`. Thumb
+size/position (`getScrollbarThumb.ts`) and drag math (`useScrollbarDrag.ts`, reusing
+`applyPan.ts`) are exhaustively unit-tested with exact pixel expectations; the e2e tests only prove
+a real pointer drag on the real, correctly-positioned DOM thumb reaches `setViewport` and the
+canvas repaints — same division of labor as the Hand tool scenarios above.
 
-| #   | Scenario                                                                       | Unit |           E2E           |
-| --- | ------------------------------------------------------------------------------ | :--: | :---------------------: |
-| 345 | Dragging the horizontal scrollbar thumb pans the canvas (`viewport.x` changes) |  ✅  | ✅ `scrollbars.spec.ts` |
-| 346 | Dragging the vertical scrollbar thumb pans the canvas (`viewport.y` changes)   |  ✅  | ✅ `scrollbars.spec.ts` |
+| #   | Scenario                                                                              | Unit |           E2E           |
+| --- | ------------------------------------------------------------------------------------- | :--: | :---------------------: |
+| 345 | Dragging the horizontal scrollbar thumb pans the canvas (`viewport.x` changes)        |  ✅  | ✅ `scrollbars.spec.ts` |
+| 346 | Dragging the vertical scrollbar thumb pans the canvas (`viewport.y` changes)          |  ✅  | ✅ `scrollbars.spec.ts` |
+| 347 | Both scrollbars stay hidden while the page has no nodes, and appear once one is added |  ✅  |            —            |
+
+Scenario 347 is a pure conditional-render claim (`nodes.length > 0`) with no browser-timing stakes
+beyond what scenarios 345–346 already prove end to end (a real drag on a real, correctly-mounted
+thumb) — `ScrollbarsLayer.spec.tsx` already asserts both the empty and non-empty DOM shape
+precisely.

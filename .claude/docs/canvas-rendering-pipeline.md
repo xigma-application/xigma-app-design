@@ -650,10 +650,11 @@ rulers" row, the View-menu "Rulers" item; a plain UI bool like `isUiHidden`, **n
 `Canvas/ScrollbarsLayer/` is a third overlay (after the WebGL scene and the 2D ruler canvas), but
 unlike either it's **plain absolutely-positioned `<div>`s**, not a canvas — a horizontal bar along
 the bottom edge (drags pan `viewport.x`) and a vertical one along the right edge (drags pan
-`viewport.y`), always rendered regardless of `areRulersVisible`. DOM was the right call here
-(unlike rotated ruler tick text, thumb size/position is just numbers) because it gets real,
-pixel-precise pointer hit-testing for free — no hand-rolled hit-test against a drawn rect the way
-guides/handles need.
+`viewport.y`), rendered regardless of `areRulersVisible` but conditionally `null` (same shape as
+`RulersLayer` itself) while the active page's `selectOrderedNodes` is empty — an empty canvas has
+nothing to scroll to, so nothing to show. DOM was the right call here (unlike rotated ruler tick
+text, thumb size/position is just numbers) because it gets real, pixel-precise pointer hit-testing
+for free — no hand-rolled hit-test against a drawn rect the way guides/handles need.
 
 - `hooks/useScrollbarsRenderLoop.ts` is a **third independent `requestAnimationFrame` loop**, same
   shape as `useRulerRenderLoop` and the WebGL one: reads `viewport` + `selectOrderedNodes` fresh

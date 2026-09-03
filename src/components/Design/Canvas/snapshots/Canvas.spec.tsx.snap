@@ -13,24 +13,6 @@ exports[`Canvas snapshots > should render Canvas 1`] = `
       height="0"
       width="0"
     />
-    <div
-      class="_ScrollbarsLayer_765246"
-    >
-      <div
-        class="_ScrollbarsLayer__horizontal-track_765246"
-      >
-        <div
-          class="_ScrollbarsLayer__horizontal-thumb_765246"
-        />
-      </div>
-      <div
-        class="_ScrollbarsLayer__vertical-track_765246"
-      >
-        <div
-          class="_ScrollbarsLayer__vertical-thumb_765246"
-        />
-      </div>
-    </div>
   </div>
 </DocumentFragment>
 `;
