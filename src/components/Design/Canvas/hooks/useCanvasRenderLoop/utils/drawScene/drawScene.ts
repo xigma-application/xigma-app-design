@@ -13,6 +13,7 @@ import {
   selectPenActiveVertexId,
   selectRenderOrderedNodes,
   selectSelectedNodes,
+  selectSmartSelectionNodes,
   selectVectorEditingNodeIds,
   selectViewport,
 } from 'store/design/selectors';
@@ -107,6 +108,7 @@ export const drawScene = (
   const eraseAwareNodesById = getEraseAwareNodesById(nodesById, sceneNodes, vectorEditingNodeIds, activeTool);
   const allSelectedNodes = selectSelectedNodes(state);
   const selectedNodes = getVisibleSelectedNodes(allSelectedNodes, editingNodeId, refs);
+  const smartSelectionNodes = selectSmartSelectionNodes(state);
   const selectedIds = new Set(allSelectedNodes.map((node) => node.id));
   const hoveredNode = getVisibleHoveredNode(nodesById, hoveredNodeId, editingNodeId, refs);
   const valuesNodeByid = Object.values(nodesById);
@@ -135,7 +137,7 @@ export const drawScene = (
   drawHoverOutline(ctx, hoveredNode, vectorEditingNodeIds, nodesById);
   drawSelectionOutline(ctx, selectedNodes, vectorEditingNodeIds, nodesById, refs, pathId);
   drawSelectionSizeLabel(ctx, selectedNodes, vectorEditingNodeIds, refs, pathId);
-  drawSmartSelectionHandles(ctx, selectedNodes, refs);
+  drawSmartSelectionHandles(ctx, smartSelectionNodes, refs);
   drawFrameNameLabels(ctx, filteredNodes, selectedIds, hoveredNode?.id ?? null, refs);
   drawSectionNameLabels(ctx, filteredNodes, refs);
   drawCornerRadiusHandlesLayer(ctx, hoveredNode, selectedNodes, refs);

@@ -10,10 +10,10 @@ export const armSmartSelectionGapOnPointerDown = ({
   canvasRefs,
   event,
   point,
-  selectedNodes,
+  smartSelectionNodes,
   viewport,
 }: TArmContext): true | undefined => {
-  const hit = getSmartSelectionGapHandleAtPoint(point, selectedNodes, viewport);
+  const hit = getSmartSelectionGapHandleAtPoint(point, smartSelectionNodes, viewport);
 
   if (hit) {
     armSmartSelectionGapDrag(canvas, event, canvasRefs.smartSelection.gapDragRef, hit.layout, hit.axis, hit.gapIndex, hit.gapValue, point);

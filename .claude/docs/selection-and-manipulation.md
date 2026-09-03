@@ -1865,6 +1865,29 @@ plain-rect-drag tools.
   rect-lock alone was still enough to make the screenshots differ), and toggling Shift mid-drag
   toggles the lock live.
 
+## 30. Smart Selection handles target a lone selected group's children
+
+The full Smart Selection feature (the gap handles that resize the spacing between selected elements,
+the swap handles that reorder/relocate them, and the corner suggestion icon) lives in
+`Canvas/utils/getSmartSelectionLayout/` + `getSmartSelection*` siblings, is drawn by
+`drawScene/drawSmartSelectionHandles/`, and is armed by `armSmartSelectionSwap/Gap/SuggestionOnPointerDown`
+(before the plain hit/group arm resolvers). Its entry gate is `isEligibleForSmartSelection` —
+**2+ axis-aligned nodes**.
+
+That gate meant selecting a *group* whose children form a row/grid showed nothing: the selection is
+one node. Fixed by resolving the node set the handle system reads through one seam,
+`selectSmartSelectionNodes` (`store/design/selectors.ts` → `getSmartSelectionNodes`): a lone selected
+group is expanded to `getGroupLeafNodes`, anything else passes through unchanged. It is threaded to
+the three consumers as its own value — `drawScene` (`smartSelectionNodes` local), `TArmContext.smartSelectionNodes`,
+`THoverResolverContext.smartSelectionNodes` — never by overwriting `selectedNodes`, which the
+selection outline / size label / every other handle layer still needs as the real selection.
+
+No mutation-side work was needed: the gap/swap drags only ever `dispatch(updateNode(...))` per child,
+and the `updateNode` reducer already calls `syncGroupBounds(node.parentId)`, so the parent group's box
+follows its children live and Ctrl+Z reverts it in the same step. Tests:
+`getSmartSelectionNodes.spec.ts`, `e2e/design/selection/smart-selection-group.spec.ts` (gap grow +
+box resync + undo, swap reorder + box unchanged).
+
 ## Related
 
 [[design-tool-architecture]] — what happens *before* this: drawing the node in the first place.

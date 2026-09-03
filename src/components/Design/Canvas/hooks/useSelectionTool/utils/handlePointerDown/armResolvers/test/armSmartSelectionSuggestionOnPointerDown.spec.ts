@@ -13,7 +13,7 @@ vi.mock('../../applySmartSelectionSuggestion/applySmartSelectionSuggestion', () 
 
 const dispatch = vi.fn();
 const point = { x: 10, y: 20 };
-const selectedNodes = [] as never[];
+const smartSelectionNodes = [] as never[];
 const viewport = { x: 0, y: 0, zoom: 1 };
 
 describe('armSmartSelectionSuggestionOnPointerDown', () => {
@@ -29,7 +29,7 @@ describe('armSmartSelectionSuggestionOnPointerDown', () => {
     getSmartSelectionSuggestionIconAtPointMock.mockReturnValue({ rect: { height: 24, width: 24, x: 0, y: 0 }, suggestion });
 
     // before
-    const result = armSmartSelectionSuggestionOnPointerDown({ dispatch, point, selectedNodes, viewport } as never);
+    const result = armSmartSelectionSuggestionOnPointerDown({ dispatch, point, smartSelectionNodes, viewport } as never);
 
     // result
     expect(result).toBe(true);
@@ -41,7 +41,7 @@ describe('armSmartSelectionSuggestionOnPointerDown', () => {
     getSmartSelectionSuggestionIconAtPointMock.mockReturnValue(null);
 
     // before
-    const result = armSmartSelectionSuggestionOnPointerDown({ dispatch, point, selectedNodes, viewport } as never);
+    const result = armSmartSelectionSuggestionOnPointerDown({ dispatch, point, smartSelectionNodes, viewport } as never);
 
     // result
     expect(result).toBeUndefined();

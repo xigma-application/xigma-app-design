@@ -145,6 +145,7 @@ const createContext = (overrides: Partial<TArmContext> = {}): TArmContext => ({
   selectedNodes: [],
   selectionRefs: createSelectionToolRefs(),
   setClassName: vi.fn(),
+  smartSelectionNodes: [],
   viewport: IDENTITY_VIEWPORT,
   ...overrides,
 });

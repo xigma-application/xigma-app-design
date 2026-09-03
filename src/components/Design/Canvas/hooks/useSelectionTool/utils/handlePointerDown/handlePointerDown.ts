@@ -4,7 +4,14 @@ import { ARM_RESOLVERS } from './constants';
 // store
 import { beginHistoryGesture } from 'store/history/actions';
 import { getVectorSelectionSnapshot } from 'store/history/getVectorSelectionSnapshot';
-import { selectActiveTool, selectOrderedNodes, selectSelectedIds, selectSelectedNodes, selectViewport } from 'store/design/selectors';
+import {
+  selectActiveTool,
+  selectOrderedNodes,
+  selectSelectedIds,
+  selectSelectedNodes,
+  selectSmartSelectionNodes,
+  selectViewport,
+} from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
@@ -45,6 +52,7 @@ export const handlePointerDown = (
       selectedNodes,
       selectionRefs,
       setClassName,
+      smartSelectionNodes: selectSmartSelectionNodes(state),
       viewport,
     };
 

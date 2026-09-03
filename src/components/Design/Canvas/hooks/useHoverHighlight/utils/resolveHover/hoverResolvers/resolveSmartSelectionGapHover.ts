@@ -12,14 +12,14 @@ const isPointInsideBounds = (point: THoverResolverContext['point'], bounds: Retu
 export const resolveSmartSelectionGapHover = ({
   point,
   refs,
-  selectedNodes,
+  smartSelectionNodes,
   viewport,
 }: THoverResolverContext): THoverResult | undefined => {
-  const hit = getSmartSelectionGapHandleAtPoint(point, selectedNodes, viewport);
+  const hit = getSmartSelectionGapHandleAtPoint(point, smartSelectionNodes, viewport);
 
   refs.hover.isSmartSelectionBoxHoveredRef.current =
-    selectedNodes.length > 0 && isPointInsideBounds(point, getSelectionBounds(selectedNodes));
-  const swapHit = getSmartSelectionSwapHandleAtPoint(point, selectedNodes, viewport);
+    smartSelectionNodes.length > 0 && isPointInsideBounds(point, getSelectionBounds(smartSelectionNodes));
+  const swapHit = getSmartSelectionSwapHandleAtPoint(point, smartSelectionNodes, viewport);
   refs.hover.hoveredSmartSelectionSwapRef.current = swapHit ? { center: swapHit.center } : null;
 
   if (hit) {

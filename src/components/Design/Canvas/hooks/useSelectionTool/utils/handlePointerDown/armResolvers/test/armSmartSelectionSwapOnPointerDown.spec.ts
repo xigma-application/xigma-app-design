@@ -15,7 +15,7 @@ const canvas = {} as HTMLCanvasElement;
 const event = {} as PointerEvent;
 const canvasRefs = { smartSelection: { swapDragRef: { current: null } } };
 const point = { x: 10, y: 20 };
-const selectedNodes = [] as never[];
+const smartSelectionNodes = [] as never[];
 const viewport = { x: 0, y: 0, zoom: 1 };
 
 describe('armSmartSelectionSwapOnPointerDown', () => {
@@ -31,7 +31,7 @@ describe('armSmartSelectionSwapOnPointerDown', () => {
     getSmartSelectionSwapHandleAtPointMock.mockReturnValue({ center: { x: 25, y: 25 }, index: 2, layout });
 
     // before
-    const result = armSmartSelectionSwapOnPointerDown({ canvas, canvasRefs, event, point, selectedNodes, viewport } as never);
+    const result = armSmartSelectionSwapOnPointerDown({ canvas, canvasRefs, event, point, smartSelectionNodes, viewport } as never);
 
     // result
     expect(result).toBe(true);
@@ -43,7 +43,7 @@ describe('armSmartSelectionSwapOnPointerDown', () => {
     getSmartSelectionSwapHandleAtPointMock.mockReturnValue(null);
 
     // before
-    const result = armSmartSelectionSwapOnPointerDown({ canvas, canvasRefs, event, point, selectedNodes, viewport } as never);
+    const result = armSmartSelectionSwapOnPointerDown({ canvas, canvasRefs, event, point, smartSelectionNodes, viewport } as never);
 
     // result
     expect(result).toBeUndefined();

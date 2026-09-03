@@ -35,6 +35,7 @@ const createContext = (overrides: Partial<THoverResolverContext>): THoverResolve
   resizableSelectedNodes: [],
   resizeHandleHit: null,
   selectedNodes: [],
+  smartSelectionNodes: [],
   vectorMultiSelectBox: null,
   vectorMultiSelectResizeHandle: null,
   viewport: IDENTITY_VIEWPORT,
@@ -141,7 +142,7 @@ describe('resolveSmartSelectionGapHover', () => {
 
   it('should return a hover result with the move-x cursor class over a row gap handle', () => {
     // result
-    expect(resolveSmartSelectionGapHover(createContext({ point: { x: 125, y: 50 }, selectedNodes: [rowA, rowB] }))).toEqual({
+    expect(resolveSmartSelectionGapHover(createContext({ point: { x: 125, y: 50 }, smartSelectionNodes: [rowA, rowB] }))).toEqual({
       className: 'move-x',
       cursor: '',
       nodeId: null,
@@ -153,7 +154,7 @@ describe('resolveSmartSelectionGapHover', () => {
     const refs = createCanvasRefs();
 
     // before
-    resolveSmartSelectionGapHover(createContext({ point: { x: 125, y: 50 }, refs, selectedNodes: [rowA, rowB] }));
+    resolveSmartSelectionGapHover(createContext({ point: { x: 125, y: 50 }, refs, smartSelectionNodes: [rowA, rowB] }));
 
     // result
     expect(refs.hover.hoveredSmartSelectionGapRef.current).toEqual({ axis: 'x', gapValue: 50, point: { x: 125, y: 50 } });
@@ -167,7 +168,7 @@ describe('resolveSmartSelectionGapHover', () => {
     refs.hover.hoveredSmartSelectionGapRef.current = { axis: 'x', gapValue: 50, point: { x: 125, y: 50 } };
 
     // before
-    const result = resolveSmartSelectionGapHover(createContext({ point: { x: 900, y: 900 }, refs, selectedNodes: [rowA, rowB] }));
+    const result = resolveSmartSelectionGapHover(createContext({ point: { x: 900, y: 900 }, refs, smartSelectionNodes: [rowA, rowB] }));
 
     // result
     expect(result).toBeUndefined();
@@ -176,7 +177,7 @@ describe('resolveSmartSelectionGapHover', () => {
 
   it('should return undefined when the selection does not form a valid Smart Selection layout', () => {
     // result
-    expect(resolveSmartSelectionGapHover(createContext({ point: { x: 50, y: 50 }, selectedNodes: [rowA] }))).toBeUndefined();
+    expect(resolveSmartSelectionGapHover(createContext({ point: { x: 50, y: 50 }, smartSelectionNodes: [rowA] }))).toBeUndefined();
   });
 
   it('should mark the selection box as hovered while inside its bounds, even off any handle', () => {
@@ -184,7 +185,7 @@ describe('resolveSmartSelectionGapHover', () => {
     const refs = createCanvasRefs();
 
     // before
-    resolveSmartSelectionGapHover(createContext({ point: { x: 10, y: 10 }, refs, selectedNodes: [rowA, rowB] }));
+    resolveSmartSelectionGapHover(createContext({ point: { x: 10, y: 10 }, refs, smartSelectionNodes: [rowA, rowB] }));
 
     // result
     expect(refs.hover.hoveredSmartSelectionGapRef.current).toBeNull();
@@ -196,7 +197,7 @@ describe('resolveSmartSelectionGapHover', () => {
     const refs = createCanvasRefs();
 
     // before
-    resolveSmartSelectionGapHover(createContext({ point: { x: 900, y: 900 }, refs, selectedNodes: [rowA, rowB] }));
+    resolveSmartSelectionGapHover(createContext({ point: { x: 900, y: 900 }, refs, smartSelectionNodes: [rowA, rowB] }));
 
     // result
     expect(refs.hover.isSmartSelectionBoxHoveredRef.current).toBe(false);
@@ -207,7 +208,7 @@ describe('resolveSmartSelectionGapHover', () => {
     const refs = createCanvasRefs();
 
     // before
-    resolveSmartSelectionGapHover(createContext({ point: { x: 50, y: 50 }, refs, selectedNodes: [rowA, rowB] }));
+    resolveSmartSelectionGapHover(createContext({ point: { x: 50, y: 50 }, refs, smartSelectionNodes: [rowA, rowB] }));
 
     // result
     expect(refs.hover.hoveredSmartSelectionSwapRef.current).toEqual({ center: { x: 50, y: 50 } });
@@ -220,7 +221,7 @@ describe('resolveSmartSelectionGapHover', () => {
     refs.hover.hoveredSmartSelectionSwapRef.current = { center: { x: 50, y: 50 } };
 
     // before
-    resolveSmartSelectionGapHover(createContext({ point: { x: 125, y: 50 }, refs, selectedNodes: [rowA, rowB] }));
+    resolveSmartSelectionGapHover(createContext({ point: { x: 125, y: 50 }, refs, smartSelectionNodes: [rowA, rowB] }));
 
     // result
     expect(refs.hover.hoveredSmartSelectionSwapRef.current).toBeNull();
@@ -231,7 +232,7 @@ describe('resolveSmartSelectionGapHover', () => {
     const refs = createCanvasRefs();
 
     // before
-    resolveSmartSelectionGapHover(createContext({ point: { x: 0, y: 0 }, refs, selectedNodes: [] }));
+    resolveSmartSelectionGapHover(createContext({ point: { x: 0, y: 0 }, refs, smartSelectionNodes: [] }));
 
     // result
     expect(refs.hover.isSmartSelectionBoxHoveredRef.current).toBe(false);

@@ -5,8 +5,13 @@ import { TArmContext } from '../types';
 import { applySmartSelectionSuggestion } from '../applySmartSelectionSuggestion/applySmartSelectionSuggestion';
 import { getSmartSelectionSuggestionIconAtPoint } from '../../../../../utils/getSmartSelectionSuggestionIconAtPoint';
 
-export const armSmartSelectionSuggestionOnPointerDown = ({ dispatch, point, selectedNodes, viewport }: TArmContext): true | undefined => {
-  const hit = getSmartSelectionSuggestionIconAtPoint(point, selectedNodes, viewport);
+export const armSmartSelectionSuggestionOnPointerDown = ({
+  dispatch,
+  point,
+  smartSelectionNodes,
+  viewport,
+}: TArmContext): true | undefined => {
+  const hit = getSmartSelectionSuggestionIconAtPoint(point, smartSelectionNodes, viewport);
 
   if (hit) {
     applySmartSelectionSuggestion(dispatch, hit.suggestion);

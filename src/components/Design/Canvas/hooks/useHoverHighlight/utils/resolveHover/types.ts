@@ -23,6 +23,7 @@ export type THoverResolverContext = {
   resizableSelectedNodes: TSceneNode[];
   resizeHandleHit: { bounds: TDraftRect; handle: TResizeHandle; rotation: number } | null;
   selectedNodes: TSceneNode[];
+  smartSelectionNodes: TSceneNode[];
   vectorMultiSelectBox: TVectorMultiSelectBox | null;
   vectorMultiSelectResizeHandle: TResizeHandle | null;
   viewport: TViewport;

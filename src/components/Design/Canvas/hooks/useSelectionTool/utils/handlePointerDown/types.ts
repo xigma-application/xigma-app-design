@@ -21,5 +21,6 @@ export type TArmContext = {
   selectedNodes: TSceneNode[];
   selectionRefs: TSelectionToolRefs;
   setClassName: (className: string | null) => void;
+  smartSelectionNodes: TSceneNode[];
   viewport: TViewport;
 };

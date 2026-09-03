@@ -15,7 +15,7 @@ const canvas = {} as HTMLCanvasElement;
 const event = {} as PointerEvent;
 const canvasRefs = { smartSelection: { gapDragRef: { current: null } } };
 const point = { x: 10, y: 20 };
-const selectedNodes = [] as never[];
+const smartSelectionNodes = [] as never[];
 const viewport = { x: 0, y: 0, zoom: 1 };
 
 describe('armSmartSelectionGapOnPointerDown', () => {
@@ -32,7 +32,7 @@ describe('armSmartSelectionGapOnPointerDown', () => {
     getSmartSelectionGapHandleAtPointMock.mockReturnValue({ axis: 'x', gapIndex: 1, gapValue: 50, layout, midpoint });
 
     // before
-    const result = armSmartSelectionGapOnPointerDown({ canvas, canvasRefs, event, point, selectedNodes, viewport } as never);
+    const result = armSmartSelectionGapOnPointerDown({ canvas, canvasRefs, event, point, smartSelectionNodes, viewport } as never);
 
     // result
     expect(result).toBe(true);
@@ -53,7 +53,7 @@ describe('armSmartSelectionGapOnPointerDown', () => {
     getSmartSelectionGapHandleAtPointMock.mockReturnValue(null);
 
     // before
-    const result = armSmartSelectionGapOnPointerDown({ canvas, canvasRefs, event, point, selectedNodes, viewport } as never);
+    const result = armSmartSelectionGapOnPointerDown({ canvas, canvasRefs, event, point, smartSelectionNodes, viewport } as never);
 
     // result
     expect(result).toBeUndefined();

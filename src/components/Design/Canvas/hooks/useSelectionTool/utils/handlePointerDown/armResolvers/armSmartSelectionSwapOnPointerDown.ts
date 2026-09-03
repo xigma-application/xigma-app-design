@@ -10,10 +10,10 @@ export const armSmartSelectionSwapOnPointerDown = ({
   canvasRefs,
   event,
   point,
-  selectedNodes,
+  smartSelectionNodes,
   viewport,
 }: TArmContext): true | undefined => {
-  const hit = getSmartSelectionSwapHandleAtPoint(point, selectedNodes, viewport);
+  const hit = getSmartSelectionSwapHandleAtPoint(point, smartSelectionNodes, viewport);
 
   if (hit) {
     armSmartSelectionSwapDrag(canvas, event, canvasRefs.smartSelection.swapDragRef, hit.layout, hit.index, point);

@@ -11,6 +11,7 @@ import {
   selectNodes,
   selectRenderOrderedNodes,
   selectSelectedNodes,
+  selectSmartSelectionNodes,
   selectVectorEditingNodeIds,
 } from 'store/design/selectors';
 import { RootState } from 'store';
@@ -79,6 +80,7 @@ export const resolveToolHover = (
     resizableSelectedNodes,
     resizeHandleHit: getResizeHandleAtPoint(point, resizableSelectedNodes, viewport),
     selectedNodes,
+    smartSelectionNodes: selectSmartSelectionNodes(state),
     vectorMultiSelectBox,
     vectorMultiSelectResizeHandle:
       vectorMultiSelectBox && getVectorMultiSelectResizeHandle(point, vectorMultiSelectBox.bounds, viewport, vectorMultiSelectBox.rotation),
