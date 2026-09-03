@@ -33,7 +33,7 @@ describe('drawGuides', () => {
 
   it('should draw nothing when there are no guides and nothing is being dragged', () => {
     // before
-    drawGuides(context, [], {}, createCanvasRefs());
+    drawGuides(context, [], {}, createCanvasRefs(), true);
 
     // result
     expect(drawLineMock).not.toHaveBeenCalled();
@@ -45,7 +45,7 @@ describe('drawGuides', () => {
     const guideLines: TGuideLine[] = [{ axis: 'x', frameId: null, id: 'guide-1', span: null, worldPosition: 50 }];
 
     // before
-    drawGuides(context, guideLines, {}, createCanvasRefs());
+    drawGuides(context, guideLines, {}, createCanvasRefs(), true);
 
     // result
     expect(getGuideSegmentMock).toHaveBeenCalledWith(guideLines[0], 200, 150, IDENTITY_VIEWPORT);
@@ -64,7 +64,7 @@ describe('drawGuides', () => {
     });
 
     // before
-    drawGuides(context, guideLines, {}, refs);
+    drawGuides(context, guideLines, {}, refs, true);
 
     // result
     expect(getGuideStyleMock).toHaveBeenCalledWith(guideLines[0], false, 'hovered-id', 'selected-id');
@@ -81,7 +81,7 @@ describe('drawGuides', () => {
     getDraggingGuideLineMock.mockReturnValue(draggingLine);
 
     // before
-    drawGuides(context, guideLines, {}, refs);
+    drawGuides(context, guideLines, {}, refs, true);
 
     // result — only the live preview is drawn, never the stale committed line
     expect(drawLineMock).toHaveBeenCalledTimes(1);
@@ -99,10 +99,26 @@ describe('drawGuides', () => {
     getDraggingGuideLineMock.mockReturnValue(draggingLine);
 
     // before
-    drawGuides(context, [], {}, refs);
+    drawGuides(context, [], {}, refs, true);
 
     // result
     expect(drawLineMock).toHaveBeenCalledTimes(1);
     expect(getGuideStyleMock).toHaveBeenCalledWith(draggingLine, true, null, null);
+  });
+
+  it('should draw nothing at all when rulers are hidden, even with guides present and one being dragged', () => {
+    // mock
+    const guideLines: TGuideLine[] = [{ axis: 'x', frameId: null, id: 'guide-1', span: null, worldPosition: 50 }];
+    const refs = createCanvasRefs({
+      guides: { draggingGuideRef: { current: { axis: 'x', frameId: null, hasMoved: true, id: 'guide-1', position: 90 } } },
+    });
+
+    // before
+    drawGuides(context, guideLines, {}, refs, false);
+
+    // result
+    expect(drawLineMock).not.toHaveBeenCalled();
+    expect(getGuideSegmentMock).not.toHaveBeenCalled();
+    expect(getDraggingGuideLineMock).not.toHaveBeenCalled();
   });
 });

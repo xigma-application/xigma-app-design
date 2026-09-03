@@ -6,10 +6,10 @@ import { store } from 'store';
 import { TCanvasRefs } from 'types/design/canvas/types';
 
 // utils
-import { getGuideAtPoint } from './getGuideAtPoint';
-import { getGutterAxis } from './getGutterAxis';
-import { getPointerPosition } from '../../../utils/getPointerPosition';
-import { screenToWorld } from '../../../utils/screenToWorld';
+import { getGuideAtPoint } from '../getGuideAtPoint';
+import { getGutterAxis } from '../getGutterAxis';
+import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { screenToWorld } from '../../../../utils/screenToWorld';
 
 const CLASS_NAME_BY_AXIS = { x: 'move-x', y: 'move-y' } as const;
 

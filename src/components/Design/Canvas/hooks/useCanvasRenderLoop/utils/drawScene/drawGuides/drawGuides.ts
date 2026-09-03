@@ -15,20 +15,23 @@ export const drawGuides = (
   guideLines: TGuideLine[],
   nodesById: Record<string, TSceneNode>,
   refs: TCanvasRefs,
+  areRulersVisible: boolean,
 ): void => {
-  const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
-  const strokeWidth = 1 / viewport.zoom;
-  const dragging = refs.guides.draggingGuideRef.current;
-  const committedLines = dragging?.id ? guideLines.filter((guide) => guide.id !== dragging.id) : guideLines;
-  const lines = dragging ? [...committedLines, getDraggingGuideLine(dragging, nodesById)] : guideLines;
-  const activeId = dragging ? (dragging.id ?? '') : null;
-  const hoveredId = refs.guides.hoveredGuideRef.current?.id ?? null;
-  const selectedId = refs.guides.selectedGuideRef.current?.id ?? null;
+  if (areRulersVisible) {
+    const { buffer, canvasHeight, canvasWidth, gl, program, viewport } = context;
+    const strokeWidth = 1 / viewport.zoom;
+    const dragging = refs.guides.draggingGuideRef.current;
+    const committedLines = dragging?.id ? guideLines.filter((guide) => guide.id !== dragging.id) : guideLines;
+    const lines = dragging ? [...committedLines, getDraggingGuideLine(dragging, nodesById)] : guideLines;
+    const activeId = dragging ? (dragging.id ?? '') : null;
+    const hoveredId = refs.guides.hoveredGuideRef.current?.id ?? null;
+    const selectedId = refs.guides.selectedGuideRef.current?.id ?? null;
 
-  lines.forEach((guide) => {
-    const segment = getGuideSegment(guide, canvasWidth, canvasHeight, viewport);
-    const { alpha, color } = getGuideStyle(guide, guide.id === activeId, hoveredId, selectedId);
+    lines.forEach((guide) => {
+      const segment = getGuideSegment(guide, canvasWidth, canvasHeight, viewport);
+      const { alpha, color } = getGuideStyle(guide, guide.id === activeId, hoveredId, selectedId);
 
-    drawLine(gl, program, buffer, segment, color, strokeWidth, canvasWidth, canvasHeight, viewport, alpha);
-  });
+      drawLine(gl, program, buffer, segment, color, strokeWidth, canvasWidth, canvasHeight, viewport, alpha);
+    });
+  }
 };

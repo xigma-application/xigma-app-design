@@ -10,10 +10,10 @@ import { TCanvasRefs } from 'types/design/canvas/types';
 import { TGuideAxis } from 'types/design/guides/types';
 
 // utils
-import { getFrameAtWorldPoint } from '../../../utils/getFrameAtWorldPoint';
-import { getGutterAxis } from './getGutterAxis';
-import { getPointerPosition } from '../../../utils/getPointerPosition';
-import { screenToWorld } from '../../../utils/screenToWorld';
+import { getFrameAtWorldPoint } from '../../../../utils/getFrameAtWorldPoint';
+import { getGutterAxis } from '../getGutterAxis';
+import { getPointerPosition } from '../../../../utils/getPointerPosition';
+import { screenToWorld } from '../../../../utils/screenToWorld';
 
 const axisOrigin = (axis: TGuideAxis, node: { x: number; y: number } | null): number => (node ? (axis === 'x' ? node.x : node.y) : 0);
 

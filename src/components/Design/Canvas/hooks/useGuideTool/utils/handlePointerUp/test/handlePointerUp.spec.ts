@@ -10,7 +10,7 @@ import { TFrameNode } from 'types/design/types';
 import { TGuideDragState } from 'types/design/canvas/types';
 
 // utils
-import { createCanvasRefs } from '../../../useCanvasRefs/createCanvasRefs';
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { handlePointerUp } from '../handlePointerUp';
 
 const createCanvas = (): HTMLCanvasElement => {
@@ -131,7 +131,19 @@ describe('handlePointerUp', () => {
   it('should attach a new guide to the frame under the drop point, stored frame-relative', () => {
     // mock
     const frameId = store.dispatch(
-      addNode({ fill: '#fff', height: 400, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 400, x: 100, y: 100 }),
+      addNode({
+        fill: '#fff',
+        height: 400,
+        name: 'Frame',
+        parentId: null,
+        rotation: 0,
+        childIds: [],
+        clipContent: true,
+        type: NodeType.frame,
+        width: 400,
+        x: 100,
+        y: 100,
+      }),
     ).payload.id;
     const pageGuidesBefore = selectActivePage(store.getState()).guides;
     const canvas = createCanvas();
@@ -151,7 +163,19 @@ describe('handlePointerUp', () => {
   it('should store a y-axis frame guide relative to the frame’s top edge', () => {
     // mock
     const frameId = store.dispatch(
-      addNode({ fill: '#fff', height: 400, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 400, x: 100, y: 100 }),
+      addNode({
+        fill: '#fff',
+        height: 400,
+        name: 'Frame',
+        parentId: null,
+        rotation: 0,
+        childIds: [],
+        clipContent: true,
+        type: NodeType.frame,
+        width: 400,
+        x: 100,
+        y: 100,
+      }),
     ).payload.id;
     const canvas = createCanvas();
     const draggingGuideRef = { current: { axis: 'y', frameId: null, hasMoved: true, id: null, position: 250 } as TGuideDragState | null };
@@ -171,7 +195,19 @@ describe('handlePointerUp', () => {
   it('should commit the moved position of a frame guide frame-relative', () => {
     // mock
     const frameId = store.dispatch(
-      addNode({ fill: '#fff', height: 400, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 400, x: 100, y: 100 }),
+      addNode({
+        fill: '#fff',
+        height: 400,
+        name: 'Frame',
+        parentId: null,
+        rotation: 0,
+        childIds: [],
+        clipContent: true,
+        type: NodeType.frame,
+        width: 400,
+        x: 100,
+        y: 100,
+      }),
     ).payload.id;
     store.dispatch(addGuide({ axis: 'x', frameId, position: 50 }));
     const guideId = (selectActivePage(store.getState()).nodes[frameId] as TFrameNode).guides![0].id;

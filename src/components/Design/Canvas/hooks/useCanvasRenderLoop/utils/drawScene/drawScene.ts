@@ -2,6 +2,7 @@
 import {
   selectActiveTool,
   selectAllGuideLines,
+  selectAreRulersVisible,
   selectEditingNodeId,
   selectEditingSelectionChangedAt,
   selectEditingSelectionEnd,
@@ -91,6 +92,7 @@ export const drawScene = (
   const activeTool = selectActiveTool(state);
   const viewport = selectViewport(state);
   const { clientHeight, clientWidth } = canvas;
+  const areRulersVisible = selectAreRulersVisible(state);
   const editingNodeId = selectEditingNodeId(state);
   const editingTextBox = selectEditingTextBox(state);
   const guideLines = selectAllGuideLines(state);
@@ -170,5 +172,5 @@ export const drawScene = (
   drawDistanceGuides(ctx, refs);
   drawEqualSpacingGuides(ctx, refs);
   drawMatchedPairGuides(ctx, refs);
-  drawGuides(ctx, guideLines, nodesById, refs);
+  drawGuides(ctx, guideLines, nodesById, refs, areRulersVisible);
 };

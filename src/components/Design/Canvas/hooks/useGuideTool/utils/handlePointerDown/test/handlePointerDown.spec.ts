@@ -4,7 +4,7 @@ import { selectAreRulersVisible } from 'store/design/selectors';
 import { store } from 'store';
 
 // utils
-import { createCanvasRefs } from '../../../useCanvasRefs/createCanvasRefs';
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { handlePointerDown } from '../handlePointerDown';
 
 const createCanvas = (): HTMLCanvasElement => {
@@ -20,8 +20,13 @@ const pointerEvent = (x: number, y: number, button = 0): PointerEvent =>
   new PointerEvent('pointerdown', { button, clientX: x, clientY: y, pointerId: 1 });
 
 describe('handlePointerDown', () => {
+  const setSelectedGuide = vi.fn();
+  const setRulerMenu = vi.fn();
+
   beforeEach(() => {
     store.dispatch(setViewport({ x: 0, y: 0, zoom: 1 }));
+    setSelectedGuide.mockClear();
+    setRulerMenu.mockClear();
 
     if (!selectAreRulersVisible(store.getState())) {
       store.dispatch(toggleRulers());
@@ -36,12 +41,25 @@ describe('handlePointerDown', () => {
     const stopImmediatePropagationSpy = vi.spyOn(event, 'stopImmediatePropagation');
 
     // before
-    handlePointerDown(canvas, event, store.dispatch, refs);
+    handlePointerDown(canvas, event, store.dispatch, refs, setSelectedGuide, setRulerMenu);
 
     // result
     expect(refs.guides.draggingGuideRef.current).toEqual({ axis: 'y', frameId: null, hasMoved: false, id: null, position: 5 });
     expect(canvas.setPointerCapture).toHaveBeenCalledWith(1);
     expect(stopImmediatePropagationSpy).toHaveBeenCalled();
+  });
+
+  it('should clear the selected guide and ruler menu on every pointer down', () => {
+    // mock
+    const canvas = createCanvas();
+    const refs = createCanvasRefs();
+
+    // before
+    handlePointerDown(canvas, pointerEvent(300, 300), store.dispatch, refs, setSelectedGuide, setRulerMenu);
+
+    // result
+    expect(setSelectedGuide).toHaveBeenCalledWith(null);
+    expect(setRulerMenu).toHaveBeenCalledWith(null);
   });
 
   it('should arm a page guide drag-out from the left gutter', () => {
@@ -50,7 +68,7 @@ describe('handlePointerDown', () => {
     const refs = createCanvasRefs();
 
     // before
-    handlePointerDown(canvas, pointerEvent(5, 200), store.dispatch, refs);
+    handlePointerDown(canvas, pointerEvent(5, 200), store.dispatch, refs, setSelectedGuide, setRulerMenu);
 
     // result
     expect(refs.guides.draggingGuideRef.current).toEqual({ axis: 'x', frameId: null, hasMoved: false, id: null, position: 5 });
@@ -63,7 +81,7 @@ describe('handlePointerDown', () => {
     const refs = createCanvasRefs();
 
     // before — screen x 5 is inside the left gutter; world x = (5 - 20) / 2 = -7.5
-    handlePointerDown(canvas, pointerEvent(5, 200), store.dispatch, refs);
+    handlePointerDown(canvas, pointerEvent(5, 200), store.dispatch, refs, setSelectedGuide, setRulerMenu);
 
     // result
     expect(refs.guides.draggingGuideRef.current).toEqual({ axis: 'x', frameId: null, hasMoved: false, id: null, position: -7.5 });
@@ -75,13 +93,13 @@ describe('handlePointerDown', () => {
     const refs = createCanvasRefs({ layout: { leftPanelWidthRef: { current: 300 } } });
 
     // before — screen x 5 is now under LeftPanel, not the ruler; screen x 310 is inside it
-    handlePointerDown(canvas, pointerEvent(5, 200), store.dispatch, refs);
+    handlePointerDown(canvas, pointerEvent(5, 200), store.dispatch, refs, setSelectedGuide, setRulerMenu);
 
     // result
     expect(refs.guides.draggingGuideRef.current).toBeNull();
 
     // action
-    handlePointerDown(canvas, pointerEvent(310, 200), store.dispatch, refs);
+    handlePointerDown(canvas, pointerEvent(310, 200), store.dispatch, refs, setSelectedGuide, setRulerMenu);
 
     // result
     expect(refs.guides.draggingGuideRef.current).toEqual({ axis: 'x', frameId: null, hasMoved: false, id: null, position: 310 });
@@ -94,7 +112,7 @@ describe('handlePointerDown', () => {
     const refs = createCanvasRefs();
 
     // before
-    handlePointerDown(canvas, pointerEvent(5, 200), store.dispatch, refs);
+    handlePointerDown(canvas, pointerEvent(5, 200), store.dispatch, refs, setSelectedGuide, setRulerMenu);
 
     // result
     expect(refs.guides.draggingGuideRef.current).toBeNull();
@@ -108,7 +126,7 @@ describe('handlePointerDown', () => {
     const refs = createCanvasRefs();
 
     // before
-    handlePointerDown(canvas, pointerEvent(51, 200), store.dispatch, refs);
+    handlePointerDown(canvas, pointerEvent(51, 200), store.dispatch, refs, setSelectedGuide, setRulerMenu);
 
     // result
     expect(refs.guides.draggingGuideRef.current).toMatchObject({ axis: 'x', frameId: null, position: 50 });
@@ -122,7 +140,7 @@ describe('handlePointerDown', () => {
     const refs = createCanvasRefs();
 
     // before
-    handlePointerDown(canvas, pointerEvent(5, 200, 2), store.dispatch, refs);
+    handlePointerDown(canvas, pointerEvent(5, 200, 2), store.dispatch, refs, setSelectedGuide, setRulerMenu);
 
     // result
     expect(refs.guides.draggingGuideRef.current).toBeNull();
@@ -137,7 +155,7 @@ describe('handlePointerDown', () => {
     const stopImmediatePropagationSpy = vi.spyOn(event, 'stopImmediatePropagation');
 
     // before
-    handlePointerDown(canvas, event, store.dispatch, refs);
+    handlePointerDown(canvas, event, store.dispatch, refs, setSelectedGuide, setRulerMenu);
 
     // result
     expect(refs.guides.draggingGuideRef.current).toBeNull();

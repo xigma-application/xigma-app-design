@@ -17,9 +17,9 @@ import { TVirtualAnchor } from 'shared';
 
 // utils
 import { handleContextMenu } from './utils/handleContextMenu';
-import { handlePointerDown } from './utils/handlePointerDown';
-import { handlePointerMove } from './utils/handlePointerMove';
-import { handlePointerUp } from './utils/handlePointerUp';
+import { handlePointerDown } from './utils/handlePointerDown/handlePointerDown';
+import { handlePointerMove } from './utils/handlePointerMove/handlePointerMove';
+import { handlePointerUp } from './utils/handlePointerUp/handlePointerUp';
 
 export const useGuideTool = (refs: TCanvasRefs): TUseGuideTool => {
   const activeTool = useAppSelector(selectActiveTool);
@@ -30,24 +30,38 @@ export const useGuideTool = (refs: TCanvasRefs): TUseGuideTool => {
   const [rulerMenu, setRulerMenu] = useState<TRulerMenu | null>(null);
   const [selectedGuide, setSelectedGuide] = useState<TSelectedGuide | null>(null);
 
-  useEffect(() => {
-    refs.guides.selectedGuideRef.current = selectedGuide;
-  }, [selectedGuide, refs]);
-
   const openMenuAt = useCallback((point: TPoint): void => {
     anchorRef.current = { getBoundingClientRect: (): DOMRect => new DOMRect(point.x, point.y, 0, 0) };
     setTimeout(() => setIsMenuOpen(true), 0);
   }, []);
 
+  const onMenuOpenChange = useCallback((open: boolean): void => {
+    setIsMenuOpen(open);
+  }, []);
+
+  const removeAllGuides = useCallback((): void => {
+    if (rulerMenu) {
+      dispatch(deleteAllGuides({ axis: rulerMenu.axis }));
+      setRulerMenu(null);
+    }
+  }, [dispatch, rulerMenu]);
+
+  const removeSelectedGuide = useCallback((): void => {
+    if (selectedGuide) {
+      dispatch(deleteGuide({ frameId: selectedGuide.frameId, id: selectedGuide.id }));
+      setSelectedGuide(null);
+    }
+  }, [dispatch, selectedGuide]);
+
+  useEffect(() => {
+    refs.guides.selectedGuideRef.current = selectedGuide;
+  }, [selectedGuide, refs]);
+
   useEffect(() => {
     const canvas = refs.canvasRef.current;
 
     if (canvas && (activeTool === ToolName.default || activeTool === ToolName.scale)) {
-      const onPointerDown = (event: PointerEvent): void => {
-        setSelectedGuide(null);
-        setRulerMenu(null);
-        handlePointerDown(canvas, event, dispatch, refs);
-      };
+      const onPointerDown = (event: PointerEvent): void => handlePointerDown(canvas, event, dispatch, refs, setSelectedGuide, setRulerMenu);
       const onPointerMove = (event: PointerEvent): void => handlePointerMove(canvas, event, refs, setClassName);
       const onPointerUp = (event: PointerEvent): void => handlePointerUp(canvas, event, dispatch, refs);
       const onContextMenu = (event: MouseEvent): void => handleContextMenu(canvas, event, refs, openMenuAt, setRulerMenu, setSelectedGuide);
@@ -70,24 +84,6 @@ export const useGuideTool = (refs: TCanvasRefs): TUseGuideTool => {
       };
     }
   }, [activeTool, dispatch, openMenuAt, refs, setClassName]);
-
-  const onMenuOpenChange = useCallback((open: boolean): void => {
-    setIsMenuOpen(open);
-  }, []);
-
-  const removeAllGuides = useCallback((): void => {
-    if (rulerMenu) {
-      dispatch(deleteAllGuides({ axis: rulerMenu.axis }));
-      setRulerMenu(null);
-    }
-  }, [dispatch, rulerMenu]);
-
-  const removeSelectedGuide = useCallback((): void => {
-    if (selectedGuide) {
-      dispatch(deleteGuide({ frameId: selectedGuide.frameId, id: selectedGuide.id }));
-      setSelectedGuide(null);
-    }
-  }, [dispatch, selectedGuide]);
 
   return { anchorRef, isMenuOpen, onMenuOpenChange, removeAllGuides, removeSelectedGuide, rulerMenu, selectedGuide };
 };

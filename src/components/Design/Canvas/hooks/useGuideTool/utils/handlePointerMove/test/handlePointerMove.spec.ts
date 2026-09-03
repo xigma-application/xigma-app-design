@@ -4,7 +4,7 @@ import { selectAreRulersVisible } from 'store/design/selectors';
 import { store } from 'store';
 
 // utils
-import { createCanvasRefs } from '../../../useCanvasRefs/createCanvasRefs';
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { handlePointerMove } from '../handlePointerMove';
 
 const createCanvas = (): HTMLCanvasElement => {
