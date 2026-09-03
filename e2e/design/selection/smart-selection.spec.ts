@@ -61,6 +61,48 @@ test('dragging a Smart Selection gap handle grows the gap uniformly, keeps the f
   expect(afterUndo[idB]).toMatchObject({ x: nodeB.x, y: nodeB.y });
 });
 
+test('holding shift while dragging a Smart Selection gap handle snaps the gap to the nearest 10', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-smart-selection-gap-drag-shift-snap');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 300, 750, 350); // A
+  await designPage.drawRectangle(800, 300, 850, 350); // B
+  await designPage.click(720, 320, { shift: true }); // add A back to the selection alongside B
+
+  const before = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+
+    return { nodes: activePage.nodes, rootOrder: activePage.rootOrder };
+  });
+
+  const [idA, idB] = before.rootOrder;
+  const nodeA = before.nodes[idA] as { height: number; width: number; x: number; y: number };
+  const nodeB = before.nodes[idB] as { x: number; y: number };
+  const gapMidX = nodeA.x + nodeA.width + 25;
+  const gapMidY = nodeA.y + nodeA.height / 2;
+
+  await designPage.pointerDown(gapMidX, gapMidY);
+  await page.keyboard.down('Shift');
+  // pointer moves 17: raw gap = 50 + 2*17 = 84, which snaps to 80
+  await page.mouse.move(gapMidX + 17, gapMidY, { steps: 5 });
+  await page.keyboard.up('Shift');
+  await designPage.pointerUp();
+
+  const afterDrag = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].nodes;
+  });
+
+  expect(afterDrag[idA]).toMatchObject({ x: nodeA.x, y: nodeA.y });
+  expect(afterDrag[idB]).toMatchObject({ x: nodeB.x + 30, y: nodeB.y });
+});
+
 test('dragging a Smart Selection swap handle onto another block reorders the row with shift, and undoes in one step', async ({ page }) => {
   const designPage = new DesignPage(page);
 

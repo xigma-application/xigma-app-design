@@ -21,7 +21,8 @@ const createCanvas = (): HTMLCanvasElement => {
   return canvas;
 };
 
-const pointerEvent = (x: number, y: number): PointerEvent => new PointerEvent('pointermove', { clientX: x, clientY: y });
+const pointerEvent = (x: number, y: number, shiftKey = false): PointerEvent =>
+  new PointerEvent('pointermove', { clientX: x, clientY: y, shiftKey });
 
 const addRect = (x: number, y: number): string => {
   store.dispatch(
@@ -109,5 +110,34 @@ describe('continueSmartSelectionGapDrag', () => {
 
     // result — gap floors at 0, b sits flush against the anchor's right edge (0+50+0=50)
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idB]).toMatchObject({ x: 50, y: 0 });
+  });
+
+  it('should snap the gap to the nearest 10 while shift is held', () => {
+    // mock
+    const idB = addRect(100, 0);
+    const canvas = createCanvas();
+    const dragState: TSmartSelectionGapDragState = {
+      anchorPosition: 0,
+      anchorSize: 50,
+      axis: 'x',
+      badgeAnchor: { x: 75, y: 25 },
+      cascadeGroups: [{ nodeIds: [idB], originalPosition: 100, size: 50 }],
+      currentGapValue: 50,
+      dispatchThrottle: { frameId: null, run: null },
+      gapIndex: 0,
+      hasMoved: false,
+      nodeOrigins: { [idB]: { x: 100, y: 0 } },
+      originalGapValue: 50,
+      pointerStart: { x: 75, y: 25 },
+    };
+    const gapDragRef: RefObject<TSmartSelectionGapDragState | null> = { current: dragState };
+
+    // before — pointer moved 37 to the right with shift held: raw gap 50+2*37=124, snaps to 120
+    continueSmartSelectionGapDrag(canvas, pointerEvent(112, 25, true), store.dispatch, gapDragRef);
+    flushThrottledDispatch(dragState.dispatchThrottle);
+
+    // result — b moves to 0+50+120=170, not the unsnapped 174
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idB]).toMatchObject({ x: 170, y: 0 });
+    expect(dragState.currentGapValue).toBe(120);
   });
 });
