@@ -982,4 +982,66 @@ describe('drawSceneNodes', () => {
       expect(rectDraws.length).toBeGreaterThanOrEqual(5);
     });
   });
+
+  describe('sections', () => {
+    it('should paint a section and recurse into its children when the offscreen path is triggered by another mask', () => {
+      // mock — a mask group elsewhere forces the recursive render path; a section is not a leaf,
+      // so its children must still be drawn rather than swallowed
+      const gl = createGlMock();
+      const pool = createPoolStub();
+      const maskContent = buildNode({ id: 'mask-content', parentId: 'mask-group' });
+      const mask = buildNode({ id: 'mask', isMask: true, parentId: 'mask-group' });
+      const maskGroup: TGroupNode = {
+        childIds: ['mask-content', 'mask'],
+        height: 10,
+        id: 'mask-group',
+        name: 'Mask group',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.group,
+        width: 10,
+        x: 0,
+        y: 0,
+      };
+      const sectionChild = buildNode({ id: 'section-child', parentId: 'section', type: NodeType.rectangle });
+      const section: TSectionNode = {
+        childIds: ['section-child'],
+        fill: '#222222',
+        height: 40,
+        id: 'section',
+        name: 'Section 1',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.section,
+        width: 40,
+        x: 0,
+        y: 0,
+      };
+
+      // action
+      drawSceneNodes(
+        {
+          buffer: {} as WebGLBuffer,
+          canvasHeight: 100,
+          canvasWidth: 100,
+          gl,
+          imageContext: withPool(pool),
+          program: {} as WebGLProgram,
+          viewport: IDENTITY_VIEWPORT,
+        },
+        [maskGroup, maskContent, mask, section, sectionChild],
+        ['mask-group', 'section'],
+        new Map(),
+        createCanvasRefs(),
+        { mask, 'mask-content': maskContent, 'mask-group': maskGroup, section, 'section-child': sectionChild },
+      );
+
+      // result — the section adds no offscreen targets of its own, but its background rect and its
+      // nested child both draw
+      expect(pool.acquire).toHaveBeenCalledTimes(2);
+      const rectDraws = (gl.drawArrays as unknown as { mock: { calls: unknown[][] } }).mock.calls.filter(([, , count]) => count === 6);
+      // mask-content, mask, section, section-child (each a 6-vertex rect) + the composite quad
+      expect(rectDraws.length).toBeGreaterThanOrEqual(5);
+    });
+  });
 });

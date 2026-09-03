@@ -1,17 +1,14 @@
 // store
 import { getIsDescendantOfMovedNodes } from 'store/design/utils/handleMoveNodes/getIsDescendantOfMovedNodes';
+import { isDropTargetContainer } from 'store/design/utils/nodeHierarchy/isDropTargetContainer';
 
 // types
-import { NodeType } from 'types/design/enums';
-import { TFrameNode, TSectionNode, TSceneNode } from 'types/design/types';
+import { TSceneNode } from 'types/design/types';
 import { TPoint } from 'types/canvas';
 
 // utils
 import { getUnrotatedQueryPoint } from 'components/Design/Canvas/utils/getUnrotatedQueryPoint';
 import { isPointInRect } from 'components/Design/Canvas/utils/isPointInRect';
-
-const isDropTargetContainer = (node: TSceneNode): node is TFrameNode | TSectionNode =>
-  node.type === NodeType.frame || node.type === NodeType.section;
 
 export const getDragDropTargetFrame = (
   movedNodeIds: string[],

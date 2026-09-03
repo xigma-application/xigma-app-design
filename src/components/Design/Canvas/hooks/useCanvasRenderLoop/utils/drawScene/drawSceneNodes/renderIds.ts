@@ -1,5 +1,5 @@
 // utils
-import { renderNode } from './renderNode';
+import { renderNode } from './renderNode/renderNode';
 
 // types
 import { TMaskRenderer } from './types';

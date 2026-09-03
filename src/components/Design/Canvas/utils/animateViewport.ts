@@ -21,10 +21,6 @@ type TAnimationTarget = {
   worldTo: TPoint;
 };
 
-// the anchor is a fixed screen point (the visible canvas center) whose underlying world position is
-// interpolated in world space alongside zoom, instead of lerping viewport.x/y directly — since
-// viewport.x/y is a screen-space offset that depends on zoom, lerping it independently of zoom drifts
-// sideways before the zoom catches up, instead of panning and zooming toward the target together
 const getWorldPointAtAnchor = (viewport: TViewport, anchor: TPoint): TPoint => ({
   x: (anchor.x - viewport.x) / viewport.zoom,
   y: (anchor.y - viewport.y) / viewport.zoom,

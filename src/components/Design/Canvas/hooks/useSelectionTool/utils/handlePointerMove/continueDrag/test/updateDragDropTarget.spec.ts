@@ -59,6 +59,12 @@ const addSection = (x: number, y: number): string => {
   return selectActivePage(store.getState()).rootOrder.at(-1) as string;
 };
 
+const addGroup = (x: number, y: number): string => {
+  store.dispatch(addNode({ childIds: [], height: 20, name: 'Group', parentId: null, rotation: 0, type: NodeType.group, width: 20, x, y }));
+
+  return selectActivePage(store.getState()).rootOrder.at(-1) as string;
+};
+
 const nodesOf = (): { rendered: ReturnType<typeof selectRenderOrderedNodes>; byId: ReturnType<typeof selectActivePage>['nodes'] } => ({
   byId: selectActivePage(store.getState()).nodes,
   rendered: selectRenderOrderedNodes(store.getState()),
@@ -143,6 +149,24 @@ describe('updateDragDropTarget', () => {
 
     expect(refs.transform.dropTargetFrameIdRef.current).toBeNull();
     expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
+
+    spy.mockRestore();
+  });
+
+  it('should not eject a node out of its parent group when dragged over empty canvas — group membership is not a drag drop target', () => {
+    const groupId = addGroup(0, 0);
+    const rectId = addRect(10, 10);
+
+    store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: groupId }));
+
+    const refs = canvasRefs();
+    const { rendered, byId } = nodesOf();
+    const spy = vi.spyOn(store, 'dispatch');
+
+    updateDragDropTarget(store.dispatch, store.getState(), [byId[rectId]], { x: 900, y: 900 }, rendered, byId, refs);
+
+    expect(spy.mock.calls.some(([action]) => (action as { type: string }).type === moveNodes.type)).toBe(false);
+    expect(selectActivePage(store.getState()).nodes[rectId].parentId).toBe(groupId);
 
     spy.mockRestore();
   });

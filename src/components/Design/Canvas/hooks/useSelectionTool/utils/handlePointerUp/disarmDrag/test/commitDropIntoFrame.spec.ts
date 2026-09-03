@@ -1,5 +1,5 @@
 // store
-import { addNode, deleteNode, setSelection } from 'store/design/slice';
+import { addNode, deleteNode, moveNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -47,6 +47,16 @@ const addSectionNode = (x: number, y: number, size = 200): string => {
       x,
       y,
     }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addGroupNode = (x: number, y: number, size = 200): string => {
+  store.dispatch(
+    addNode({ childIds: [], height: size, name: 'Group', parentId: null, rotation: 0, type: NodeType.group, width: size, x, y }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());
@@ -132,6 +142,24 @@ describe('commitDropIntoFrame', () => {
     const page = selectActivePage(store.getState());
     expect(page.nodes[rectId].parentId).toBe(sectionId);
     expect((page.nodes[sectionId] as { childIds: string[] }).childIds).toEqual([rectId]);
+    expect(page.rootOrder).not.toContain(rectId);
+  });
+
+  it('should not eject a node out of its parent group when dropped over empty canvas — group membership is not a drag drop target', () => {
+    // mock — rect nested inside a group (e.g. a mask group), then dragged clear of every frame/section
+    const groupId = addGroupNode(0, 0);
+    const rectId = addRectNode(50, 50);
+
+    store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: groupId }));
+    store.dispatch(setSelection([rectId]));
+
+    // action — no drop-target ref set, so nothing frame/section-shaped is under the pointer
+    commitDropIntoFrame(store.dispatch, dragState(true), createCanvasRefs());
+
+    // result — the rect stays in the group
+    const page = selectActivePage(store.getState());
+    expect(page.nodes[rectId].parentId).toBe(groupId);
+    expect((page.nodes[groupId] as { childIds: string[] }).childIds).toEqual([rectId]);
     expect(page.rootOrder).not.toContain(rectId);
   });
 

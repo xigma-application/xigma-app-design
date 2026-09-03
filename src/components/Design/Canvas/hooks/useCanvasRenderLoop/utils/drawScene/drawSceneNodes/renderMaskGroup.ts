@@ -3,7 +3,7 @@ import { bindTarget } from './bindTarget';
 import { compositeMask } from '../compositeMask';
 import { renderIds } from './renderIds';
 import { renderIntoTarget } from './renderIntoTarget';
-import { renderNode } from './renderNode';
+import { renderNode } from './renderNode/renderNode';
 
 // types
 import { TGroupNode } from 'types/design/types';

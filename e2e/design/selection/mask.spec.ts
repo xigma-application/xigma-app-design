@@ -264,6 +264,50 @@ test('"Remove mask" restores full visibility while the group itself stays intact
   expect(isRed(await readPixelColor(page, 880, 480))).toBe(true);
 });
 
+test('a mask elsewhere in the scene must not blank out content nested inside a section — the recursive render path has to descend into sections too', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-mask-section-nested-content');
+  await expect(designPage.canvas).toBeVisible();
+
+  // a section with a single red rectangle nested inside it (nested via the store so the rectangle
+  // keeps its on-canvas position)
+  await designPage.drawSection(600, 200, 1050, 620);
+  await designPage.drawRectangle(700, 300, 820, 420);
+
+  await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { moveNodes, updateNode } = await import('/src/store/design/slice.ts');
+    const { activePageId, pages } = store.getState().design;
+    const [sectionId, rectId] = pages[activePageId].rootOrder;
+
+    store.dispatch(moveNodes({ nodeIds: [rectId], targetIndex: 0, targetParentId: sectionId }));
+    store.dispatch(updateNode({ changes: { fill: '#FF0000' }, id: rectId }));
+  });
+
+  await designPage.click(1500, 700); // deselect
+  await designPage.pointerMove(1500, 700);
+
+  // baseline: the nested rectangle renders
+  expect(isRed(await readPixelColor(page, 760, 360))).toBe(true);
+
+  // build an unrelated "Mask group" well clear of the section — this flips the whole scene onto
+  // the offscreen-compositing render path
+  await designPage.drawRectangle(1150, 300, 1350, 500);
+  await designPage.drawRectangle(1200, 340, 1300, 440);
+  await designPage.click(1170, 320, { shift: true });
+  await page.keyboard.press(USE_AS_MASK_SHORTCUT);
+
+  await designPage.click(1500, 700); // deselect
+  await designPage.pointerMove(1500, 700);
+
+  // the section's nested rectangle must still be there — before the fix the recursive path never
+  // descended into a section, so everything inside it vanished the moment a mask existed anywhere
+  expect(isRed(await readPixelColor(page, 760, 360))).toBe(true);
+});
+
 test('Control+Z undoes "Use as mask" as a single step, restoring the exact pre-mask state', async ({ page }) => {
   const designPage = new DesignPage(page);
 
