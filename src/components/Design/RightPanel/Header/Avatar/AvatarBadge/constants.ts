@@ -1,1 +1,1 @@
-export const AVATAR_LABEL = 'E';
+export const AVATAR_LABEL = 'X';

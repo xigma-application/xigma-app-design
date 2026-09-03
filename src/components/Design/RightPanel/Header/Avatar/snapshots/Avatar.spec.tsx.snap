@@ -13,7 +13,7 @@ exports[`Avatar snapshots > should render Avatar 1`] = `
     <span
       class="_AvatarBadge_0e47ca"
     >
-      E
+      X
     </span>
     <svg
       class="Icon"

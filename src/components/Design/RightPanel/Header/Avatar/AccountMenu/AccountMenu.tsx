@@ -20,11 +20,10 @@ const AccountMenu: FC = () => {
         <AvatarBadge />
         <span className={styles['AccountMenu__user-name']}>{CURRENT_USER_NAME}</span>
       </div>
-
       <div className={styles.AccountMenu__actions}>
         <Button className={styles.AccountMenu__spotlight}>{t(`${translationNameSpace}.spotlightMe`)}</Button>
         <Button ariaLabel={t(`${translationNameSpace}.audioChat`)}>
-          <Icon name="Headphones" size={16} />
+          <Icon name="Headphones" size={24} />
         </Button>
       </div>
     </div>

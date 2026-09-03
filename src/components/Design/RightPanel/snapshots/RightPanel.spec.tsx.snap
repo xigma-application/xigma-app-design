@@ -27,7 +27,7 @@ exports[`RightPanel snapshots > should render RightPanel 1`] = `
           <span
             class="_AvatarBadge_0e47ca"
           >
-            E
+            X
           </span>
           <svg
             class="Icon"

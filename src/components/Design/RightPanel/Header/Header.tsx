@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import Avatar from './Avatar/Avatar';
 import PresentShare from './PresentShare/PresentShare';
 import Tabs from 'shared/UITools/Tabs/Tabs';
+import ZoomMenu from './ZoomMenu/ZoomMenu';
 import { ButtonMenu, Icon } from 'shared';
 
 // others
@@ -35,6 +36,7 @@ const Header: FC = () => {
       <div className={styles.Header__navigation}>
         <Tabs activeTab={activeTab} setActiveTab={setActiveTab} tabs={VIEW_MODE_TABS} />
         <ButtonMenu
+          align="end"
           className={styles['Header__zoom-menu']}
           trigger={
             <span className={styles.Header__zoom}>
@@ -42,7 +44,9 @@ const Header: FC = () => {
             </span>
           }
           triggerAriaLabel={t(`${translationNameSpace}.zoomAriaLabel`)}
-        />
+        >
+          <ZoomMenu />
+        </ButtonMenu>
       </div>
     </div>
   );

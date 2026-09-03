@@ -17,6 +17,7 @@ const Avatar: FC = () => {
 
   return (
     <ButtonMenu
+      align="center"
       className={styles.Avatar}
       trigger={
         <>

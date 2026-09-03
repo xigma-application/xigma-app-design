@@ -365,6 +365,7 @@
   "design.rightPanel.header.tabDesign": "Design",
   "design.rightPanel.header.tabPrototype": "Prototype",
   "design.rightPanel.header.zoomAriaLabel": "Zoom",
+  "design.rightPanel.header.zoomMenu.inputAriaLabel": "Zoom percentage",
   "design.toolbar.actions": "Actions",
   "design.toolbar.actionsPanel.commonSettings": "Common settings",
   "design.toolbar.actionsPanel.recents": "Recents",

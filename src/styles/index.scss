@@ -45,3 +45,10 @@ body,
 body {
   font-family: fonts.$fontFamily;
 }
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}

@@ -377,6 +377,7 @@
   "design.rightPanel.header.tabDesign": "Projekt",
   "design.rightPanel.header.tabPrototype": "Prototyp",
   "design.rightPanel.header.zoomAriaLabel": "Powiększenie",
+  "design.rightPanel.header.zoomMenu.inputAriaLabel": "Procent powiększenia",
   "design.toolbar.actions": "Akcje",
   "design.toolbar.actionsPanel.commonSettings": "Popularne ustawienia",
   "design.toolbar.actionsPanel.recents": "Ostatnie",
