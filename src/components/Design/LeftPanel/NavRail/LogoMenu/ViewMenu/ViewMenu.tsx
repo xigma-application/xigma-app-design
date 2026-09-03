@@ -136,7 +136,7 @@ const ViewMenu: FC = () => {
         onClick={handleZoomToSelectionClick}
         shortcut={KEYBOARD_SHORTCUTS.zoomToSelection.join('')}
       />
-      <MenuSub label={t(VIEW_MENU_ZOOM_TO_PERCENTAGE_MENU_KEY)}>
+      <MenuSub label={t(VIEW_MENU_ZOOM_TO_PERCENTAGE_MENU_KEY)} withCheck>
         <ZoomToMenu />
       </MenuSub>
       <MenuSeparator />
