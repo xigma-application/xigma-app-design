@@ -34,7 +34,7 @@ describe('drawSmartSelectionSuggestionIcon', () => {
     drawSmartSelectionSuggestionRowGlyphMock.mockClear();
   });
 
-  it('should draw the rounded-square background then the row glyph for a row suggestion', () => {
+  it('should draw the rounded-square background then the vertical-bars glyph for a row suggestion', () => {
     drawSmartSelectionSuggestionIcon(gl, program, buffer, rect, 'row', 200, 200, IDENTITY_VIEWPORT);
 
     expect(drawRectMock).toHaveBeenCalledTimes(1);
@@ -43,16 +43,16 @@ describe('drawSmartSelectionSuggestionIcon', () => {
       cornerRadius: SMART_SELECTION_SUGGESTION_ICON_CORNER_RADIUS_PX,
       fill: SMART_SELECTION_SUGGESTION_ICON_FILL,
     });
-    expect(drawSmartSelectionSuggestionRowGlyphMock).toHaveBeenCalledTimes(1);
-    expect(drawSmartSelectionSuggestionColumnGlyphMock).not.toHaveBeenCalled();
+    expect(drawSmartSelectionSuggestionColumnGlyphMock).toHaveBeenCalledTimes(1);
+    expect(drawSmartSelectionSuggestionRowGlyphMock).not.toHaveBeenCalled();
     expect(drawSmartSelectionSuggestionGridGlyphMock).not.toHaveBeenCalled();
   });
 
-  it('should draw the column glyph for a column suggestion', () => {
+  it('should draw the horizontal-bars glyph for a column suggestion', () => {
     drawSmartSelectionSuggestionIcon(gl, program, buffer, rect, 'column', 200, 200, IDENTITY_VIEWPORT);
 
-    expect(drawSmartSelectionSuggestionColumnGlyphMock).toHaveBeenCalledTimes(1);
-    expect(drawSmartSelectionSuggestionRowGlyphMock).not.toHaveBeenCalled();
+    expect(drawSmartSelectionSuggestionRowGlyphMock).toHaveBeenCalledTimes(1);
+    expect(drawSmartSelectionSuggestionColumnGlyphMock).not.toHaveBeenCalled();
     expect(drawSmartSelectionSuggestionGridGlyphMock).not.toHaveBeenCalled();
   });
 

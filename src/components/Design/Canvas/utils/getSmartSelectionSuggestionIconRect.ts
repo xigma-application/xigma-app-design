@@ -13,5 +13,5 @@ export const getSmartSelectionSuggestionIconRect = (selectedNodes: TSceneNode[],
   const size = SMART_SELECTION_SUGGESTION_ICON_SIZE_PX / viewport.zoom;
   const margin = SMART_SELECTION_SUGGESTION_ICON_MARGIN_PX / viewport.zoom;
 
-  return { height: size, width: size, x: bounds.x + bounds.width + margin, y: bounds.y + bounds.height + margin };
+  return { height: size, width: size, x: bounds.x + bounds.width - size - margin, y: bounds.y + bounds.height - size - margin };
 };

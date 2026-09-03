@@ -20,7 +20,7 @@ describe('getSmartSelectionSuggestionIconAtPoint', () => {
   it('should hit when the point is inside the icon rect', () => {
     const nodes = [rect('a', 0, 0), rect('b', 90, 0), rect('c', 230, 0)];
 
-    const hit = getSmartSelectionSuggestionIconAtPoint({ x: 300, y: 70 }, nodes, VIEWPORT);
+    const hit = getSmartSelectionSuggestionIconAtPoint({ x: 260, y: 30 }, nodes, VIEWPORT);
 
     expect(hit?.suggestion.type).toBe('equalize');
   });

@@ -12,9 +12,9 @@ import { drawSmartSelectionSuggestionGridGlyph } from './drawSmartSelectionSugge
 import { drawSmartSelectionSuggestionRowGlyph } from './drawSmartSelectionSuggestionRowGlyph';
 
 const GLYPH_DRAWERS = {
-  column: drawSmartSelectionSuggestionColumnGlyph,
+  column: drawSmartSelectionSuggestionRowGlyph,
   grid: drawSmartSelectionSuggestionGridGlyph,
-  row: drawSmartSelectionSuggestionRowGlyph,
+  row: drawSmartSelectionSuggestionColumnGlyph,
 };
 
 export const drawSmartSelectionSuggestionIcon = (

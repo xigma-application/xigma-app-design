@@ -251,8 +251,8 @@ test('clicking the Smart Selection suggestion icon equalizes an aligned row with
 
   const [idA, idB, idC] = before.rootOrder;
 
-  // icon sits at the selection bbox's bottom-right (980, 350) + an 8px margin, 24px square
-  await designPage.pointerDown(1000, 370);
+  // icon sits inside the selection bbox, inset from its bottom-right corner (980, 350) by an 8px margin, 24px square
+  await designPage.pointerDown(960, 330);
   await designPage.pointerUp();
 
   const afterClick = await page.evaluate(async () => {
@@ -306,8 +306,8 @@ test('clicking the Smart Selection suggestion icon appends a spatial outlier to 
 
   const [idA, idB, idC, idD] = before.rootOrder;
 
-  // icon sits at the selection bbox's bottom-right (1150, 650) + an 8px margin, 24px square
-  await designPage.pointerDown(1170, 670);
+  // icon sits inside the selection bbox, inset from its bottom-right corner (1150, 650) by an 8px margin, 24px square
+  await designPage.pointerDown(1130, 630);
   await designPage.pointerUp();
 
   const afterClick = await page.evaluate(async () => {
@@ -364,8 +364,8 @@ test('clicking the Smart Selection suggestion icon equalizes a near-miss grid on
 
   const [idA, idB, idC, idD, idE, idF] = before.rootOrder;
 
-  // icon sits at the selection bbox's bottom-right (1000, 450) + an 8px margin, 24px square
-  await designPage.pointerDown(1020, 470);
+  // icon sits inside the selection bbox, inset from its bottom-right corner (1000, 450) by an 8px margin, 24px square
+  await designPage.pointerDown(980, 430);
   await designPage.pointerUp();
 
   const afterClick = await page.evaluate(async () => {
@@ -430,8 +430,8 @@ test('clicking the Smart Selection suggestion icon relocates and resizes a stray
   const [idA, , , , , idX] = before.rootOrder;
   const originalX = before.nodes[idX] as { height: number; width: number; x: number; y: number };
 
-  // icon sits at the selection bbox's bottom-right (1170, 660) + an 8px margin, 24px square
-  await designPage.pointerDown(1190, 680);
+  // icon sits inside the selection bbox, inset from its bottom-right corner (1170, 660) by an 8px margin, 24px square
+  await designPage.pointerDown(1150, 640);
   await designPage.pointerUp();
 
   const afterClick = await page.evaluate(async () => {
