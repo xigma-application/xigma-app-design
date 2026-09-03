@@ -12,14 +12,21 @@ import styles from './scrollbars-layer.module.scss';
 
 const ScrollbarsLayer: FC = () => {
   const { canvasRef, layout } = useCanvasRefsContext();
+  const horizontalDraggingRef = useRef(false);
   const horizontalThumbRef = useRef<HTMLDivElement | null>(null);
   const horizontalTrackRef = useRef<HTMLDivElement | null>(null);
+  const verticalDraggingRef = useRef(false);
   const verticalThumbRef = useRef<HTMLDivElement | null>(null);
   const verticalTrackRef = useRef<HTMLDivElement | null>(null);
 
-  useScrollbarsRenderLoop(canvasRef, layout, { horizontalThumbRef, horizontalTrackRef, verticalThumbRef, verticalTrackRef });
-  useScrollbarDrag('x', canvasRef, layout, horizontalThumbRef);
-  useScrollbarDrag('y', canvasRef, layout, verticalThumbRef);
+  useScrollbarsRenderLoop(
+    canvasRef,
+    layout,
+    { horizontalThumbRef, horizontalTrackRef, verticalThumbRef, verticalTrackRef },
+    { x: horizontalDraggingRef, y: verticalDraggingRef },
+  );
+  useScrollbarDrag('x', canvasRef, layout, horizontalThumbRef, horizontalDraggingRef);
+  useScrollbarDrag('y', canvasRef, layout, verticalThumbRef, verticalDraggingRef);
 
   return (
     <div className={styles.ScrollbarsLayer}>

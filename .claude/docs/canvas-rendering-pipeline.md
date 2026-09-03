@@ -661,9 +661,14 @@ need.
   centre with nothing off-screen). `getScrollGeometry` now also returns `overflow: { x, y }` —
   content bounds transformed to screen space (unpadded, unlike `range`), compared against
   `visibleRect` per axis with a 1px epsilon — and `useScrollbarsRenderLoop` writes
-  `track.style.display = overflow.<axis> ? '' : 'none'` each frame. Kept in the rAF loop (not a
-  reactive `useAppSelector(selectViewport)` re-render) for the same reason the positioning is:
-  overflow flips as you pan, and this app deliberately never re-renders React on a viewport change.
+  `track.style.display = overflow.<axis> || dragging.<axis>.current ? '' : 'none'` each frame. Kept
+  in the rAF loop (not a reactive `useAppSelector(selectViewport)` re-render) for the same reason the
+  positioning is: overflow flips as you pan, and this app deliberately never re-renders React on a
+  viewport change. The `dragging.<axis>` half is why the thumb doesn't vanish out from under the
+  cursor mid-drag: `useScrollbarDrag` flips a plain `RefObject<boolean>` (one per axis, owned by
+  `ScrollbarsLayer`, passed to both hooks) true on `pointerdown` / false on `pointerup` + effect
+  cleanup, so a bar you're actively holding stays shown even once the drag has pulled its content
+  fully back into view; it hides again on the first frame after release.
 - `hooks/useScrollbarsRenderLoop.ts` is a **third independent `requestAnimationFrame` loop**, same
   shape as `useRulerRenderLoop` and the WebGL one: reads `viewport` + `selectOrderedNodes` fresh
   from `store.getState()` every frame (same "pans without a React re-render" reason), writes

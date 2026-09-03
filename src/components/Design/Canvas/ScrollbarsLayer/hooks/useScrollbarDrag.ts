@@ -19,6 +19,7 @@ export const useScrollbarDrag = (
   canvasRef: RefObject<HTMLCanvasElement | null>,
   layout: TLayoutRefs,
   thumbRef: RefObject<HTMLDivElement | null>,
+  draggingRef: RefObject<boolean>,
 ): void => {
   const dispatch = useAppDispatch();
   const lastClientPosRef = useRef<number | null>(null);
@@ -26,6 +27,7 @@ export const useScrollbarDrag = (
   const handlePointerDown = (thumb: HTMLDivElement, event: PointerEvent): void => {
     if (event.button === MouseButton.primary) {
       lastClientPosRef.current = axis === 'x' ? event.clientX : event.clientY;
+      draggingRef.current = true;
       thumb.setPointerCapture(event.pointerId);
       event.stopPropagation();
     }
@@ -55,6 +57,7 @@ export const useScrollbarDrag = (
 
   const handlePointerUp = (thumb: HTMLDivElement, event: PointerEvent): void => {
     lastClientPosRef.current = null;
+    draggingRef.current = false;
     thumb.releasePointerCapture(event.pointerId);
   };
 
@@ -76,7 +79,8 @@ export const useScrollbarDrag = (
         thumb.removeEventListener('pointermove', onPointerMove);
         thumb.removeEventListener('pointerup', onPointerUp);
         lastClientPosRef.current = null;
+        draggingRef.current = false;
       };
     }
-  }, [axis, canvasRef, dispatch, layout, thumbRef]);
+  }, [axis, canvasRef, dispatch, draggingRef, layout, thumbRef]);
 };

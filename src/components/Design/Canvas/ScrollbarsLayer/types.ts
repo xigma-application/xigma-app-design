@@ -9,3 +9,8 @@ export type TScrollbarElementRefs = {
   verticalThumbRef: RefObject<HTMLDivElement | null>;
   verticalTrackRef: RefObject<HTMLDivElement | null>;
 };
+
+export type TScrollbarDragRefs = {
+  x: RefObject<boolean>;
+  y: RefObject<boolean>;
+};

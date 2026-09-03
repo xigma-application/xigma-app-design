@@ -83,3 +83,37 @@ test('dragging the vertical scrollbar thumb pans the canvas', async ({ page }) =
 
   expect(after.equals(before)).toBe(false);
 });
+
+test('the thumb stays under the cursor for the whole drag, even when the overflow it represents goes away mid-gesture', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-scrollbar-hold');
+  await expect(designPage.canvas).toBeVisible();
+
+  // a small frame, then pan it partly off the right edge — content fits the view but isn't all in it
+  await designPage.drawFrame(1000, 400, 1300, 500);
+  await designPage.click(1500, 700);
+  await designPage.panBy(500, 0);
+
+  const thumb = page.locator('[class*="horizontal-thumb"]');
+
+  await expect(thumb).toBeVisible();
+
+  const box = await thumb.boundingBox();
+
+  if (!box) {
+    throw new Error('horizontal scrollbar thumb bounding box unavailable');
+  }
+
+  // drag it far enough left that the frame is pulled fully back into view (overflow would clear) —
+  // but keep the button held and check the thumb is still there
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2 - 700, box.y + box.height / 2, { steps: 10 });
+
+  await expect(thumb).toBeVisible();
+
+  await page.mouse.up();
+});

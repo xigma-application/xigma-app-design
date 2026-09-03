@@ -50,8 +50,9 @@ const renderScrollbarDrag = (
   canvasRef: RefObject<HTMLCanvasElement | null>,
   layout: TLayoutRefs,
   thumbRef: RefObject<HTMLDivElement | null>,
+  draggingRef: RefObject<boolean> = { current: false },
 ): ReturnType<typeof renderHook> =>
-  renderHook(() => useScrollbarDrag(axis, canvasRef, layout, thumbRef), {
+  renderHook(() => useScrollbarDrag(axis, canvasRef, layout, thumbRef, draggingRef), {
     wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
   });
 
@@ -176,6 +177,47 @@ describe('useScrollbarDrag', () => {
     // result
     expect(selectViewport(store.getState())).toEqual(DEFAULT_VIEWPORT);
     expect(thumb.releasePointerCapture).toHaveBeenCalledWith(1);
+  });
+
+  it('should flag the drag as active for the whole gesture so the render loop keeps its bar visible', () => {
+    // mock
+    const canvas = createCanvas();
+    const thumb = createThumb();
+    const canvasRef: RefObject<HTMLCanvasElement | null> = { current: canvas };
+    const draggingRef: RefObject<boolean> = { current: false };
+
+    renderScrollbarDrag('x', canvasRef, createLayout(), { current: thumb }, draggingRef);
+
+    // action — press and hold
+    act(() => thumb.dispatchEvent(pointerEvent('pointerdown', 10, 0)));
+
+    // result
+    expect(draggingRef.current).toBe(true);
+
+    // action — release
+    act(() => thumb.dispatchEvent(pointerEvent('pointerup', 10, 0)));
+
+    // result
+    expect(draggingRef.current).toBe(false);
+  });
+
+  it('should clear the drag flag on unmount, even if the pointer was still down', () => {
+    // mock
+    const canvas = createCanvas();
+    const thumb = createThumb();
+    const canvasRef: RefObject<HTMLCanvasElement | null> = { current: canvas };
+    const draggingRef: RefObject<boolean> = { current: false };
+
+    const { unmount } = renderScrollbarDrag('x', canvasRef, createLayout(), { current: thumb }, draggingRef);
+
+    act(() => thumb.dispatchEvent(pointerEvent('pointerdown', 10, 0)));
+    expect(draggingRef.current).toBe(true);
+
+    // action
+    unmount();
+
+    // result
+    expect(draggingRef.current).toBe(false);
   });
 
   it('should ignore a pointer-move that was not preceded by a pointer-down', () => {

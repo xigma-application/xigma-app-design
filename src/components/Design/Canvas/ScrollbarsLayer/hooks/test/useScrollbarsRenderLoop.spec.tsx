@@ -12,7 +12,7 @@ import { store } from 'store';
 // types
 import { NodeType } from 'types/design/enums';
 import { TLayoutRefs } from 'types/design/canvas/types';
-import { TScrollbarElementRefs } from '../../types';
+import { TScrollbarDragRefs, TScrollbarElementRefs } from '../../types';
 
 // utils
 import { getScrollbarThumb } from '../../utils/getScrollbarThumb';
@@ -24,6 +24,8 @@ const createElements = (): TScrollbarElementRefs => ({
   verticalThumbRef: { current: document.createElement('div') },
   verticalTrackRef: { current: document.createElement('div') },
 });
+
+const createDragging = (x = false, y = false): TScrollbarDragRefs => ({ x: { current: x }, y: { current: y } });
 
 const createLayout = (leftPanelWidth = 0, rightPanelWidth = 0): TLayoutRefs => ({
   leftPanelWidthRef: { current: leftPanelWidth },
@@ -37,6 +39,13 @@ const createCanvas = (width: number, height: number): HTMLCanvasElement => {
 
   return canvas;
 };
+
+const renderLoop = (
+  canvasRef: RefObject<HTMLCanvasElement | null>,
+  layout: TLayoutRefs,
+  elements: TScrollbarElementRefs,
+  dragging: TScrollbarDragRefs = createDragging(),
+): ReturnType<typeof renderHook> => renderHook(() => useScrollbarsRenderLoop(canvasRef, layout, elements, dragging));
 
 describe('useScrollbarsRenderLoop', () => {
   let rafCallbacks: FrameRequestCallback[];
@@ -63,7 +72,7 @@ describe('useScrollbarsRenderLoop', () => {
     const elements = createElements();
 
     // before — mount only schedules the first frame
-    renderHook(() => useScrollbarsRenderLoop(canvasRef, layout, elements));
+    renderLoop(canvasRef, layout, elements);
     expect(rafCallbacks).toHaveLength(1);
 
     // action
@@ -98,7 +107,7 @@ describe('useScrollbarsRenderLoop', () => {
     const elements = createElements();
 
     // before
-    renderHook(() => useScrollbarsRenderLoop(canvasRef, createLayout(), elements));
+    renderLoop(canvasRef, createLayout(), elements);
     rafCallbacks[rafCallbacks.length - 1](0);
 
     // result
@@ -127,7 +136,7 @@ describe('useScrollbarsRenderLoop', () => {
     ).payload.id;
 
     // before
-    renderHook(() => useScrollbarsRenderLoop(canvasRef, createLayout(), elements));
+    renderLoop(canvasRef, createLayout(), elements);
     rafCallbacks[rafCallbacks.length - 1](0);
 
     // result
@@ -139,6 +148,20 @@ describe('useScrollbarsRenderLoop', () => {
     expect(selectActivePage(store.getState()).rootOrder).toEqual([]);
   });
 
+  it('should keep a track visible while its axis is being dragged, even with nothing overflowing', () => {
+    // mock — empty page (no overflow), but the horizontal drag is in progress
+    const canvasRef: RefObject<HTMLCanvasElement | null> = { current: createCanvas(800, 600) };
+    const elements = createElements();
+
+    // before
+    renderLoop(canvasRef, createLayout(), elements, createDragging(true, false));
+    rafCallbacks[rafCallbacks.length - 1](0);
+
+    // result — the grabbed bar stays put, the other one still hides
+    expect(elements.horizontalTrackRef.current?.style.display).toBe('');
+    expect(elements.verticalTrackRef.current?.style.display).toBe('none');
+  });
+
   it('should read the current panel widths on every frame, without needing a re-render', () => {
     // mock
     const canvas = createCanvas(800, 600);
@@ -147,7 +170,7 @@ describe('useScrollbarsRenderLoop', () => {
     const elements = createElements();
 
     // before
-    renderHook(() => useScrollbarsRenderLoop(canvasRef, layout, elements));
+    renderLoop(canvasRef, layout, elements);
     rafCallbacks[rafCallbacks.length - 1](0);
     const initialLeft = elements.horizontalTrackRef.current?.style.left;
     const initialRight = elements.verticalTrackRef.current?.style.right;
@@ -170,7 +193,7 @@ describe('useScrollbarsRenderLoop', () => {
     const elements = createElements();
 
     // before
-    const { unmount } = renderHook(() => useScrollbarsRenderLoop(canvasRef, createLayout(), elements));
+    const { unmount } = renderLoop(canvasRef, createLayout(), elements);
 
     // action
     unmount();
@@ -184,7 +207,7 @@ describe('useScrollbarsRenderLoop', () => {
     const canvasRef: RefObject<HTMLCanvasElement | null> = { current: null };
 
     // result
-    expect(() => renderHook(() => useScrollbarsRenderLoop(canvasRef, createLayout(), createElements()))).not.toThrow();
+    expect(() => renderLoop(canvasRef, createLayout(), createElements())).not.toThrow();
     expect(rafCallbacks).toHaveLength(0);
   });
 
@@ -196,7 +219,7 @@ describe('useScrollbarsRenderLoop', () => {
     elements.horizontalThumbRef.current = null;
 
     // before
-    renderHook(() => useScrollbarsRenderLoop(canvasRef, createLayout(), elements));
+    renderLoop(canvasRef, createLayout(), elements);
 
     // result
     expect(() => rafCallbacks[rafCallbacks.length - 1](0)).not.toThrow();

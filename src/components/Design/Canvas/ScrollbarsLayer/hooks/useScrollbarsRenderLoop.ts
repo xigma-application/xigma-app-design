@@ -6,7 +6,7 @@ import { store } from 'store';
 
 // types
 import { TLayoutRefs } from 'types/design/canvas/types';
-import { TScrollbarElementRefs } from '../types';
+import { TScrollbarDragRefs, TScrollbarElementRefs } from '../types';
 
 // utils
 import { getScrollbarThumb } from '../utils/getScrollbarThumb';
@@ -14,7 +14,12 @@ import { getScrollGeometry } from '../utils/getScrollGeometry';
 
 const px = (value: number): string => `${value}px`;
 
-const renderFrame = (canvas: HTMLCanvasElement, layout: TLayoutRefs, elements: TScrollbarElementRefs): void => {
+const renderFrame = (
+  canvas: HTMLCanvasElement,
+  layout: TLayoutRefs,
+  elements: TScrollbarElementRefs,
+  dragging: TScrollbarDragRefs,
+): void => {
   const { horizontalThumbRef, horizontalTrackRef, verticalThumbRef, verticalTrackRef } = elements;
   const horizontalTrack = horizontalTrackRef.current;
   const horizontalThumb = horizontalThumbRef.current;
@@ -33,13 +38,13 @@ const renderFrame = (canvas: HTMLCanvasElement, layout: TLayoutRefs, elements: T
     const horizontal = getScrollbarThumb(visibleRect.width, visibleRect.x, visibleRect.width, range.x, range.width);
     const vertical = getScrollbarThumb(visibleRect.height, visibleRect.y, visibleRect.height, range.y, range.height);
 
-    horizontalTrack.style.display = overflow.x ? '' : 'none';
+    horizontalTrack.style.display = overflow.x || dragging.x.current ? '' : 'none';
     horizontalTrack.style.left = px(visibleRect.x);
     horizontalTrack.style.width = px(visibleRect.width);
     horizontalThumb.style.left = px(horizontal.offset);
     horizontalThumb.style.width = px(horizontal.size);
 
-    verticalTrack.style.display = overflow.y ? '' : 'none';
+    verticalTrack.style.display = overflow.y || dragging.y.current ? '' : 'none';
     verticalTrack.style.right = px(layout.rightPanelWidthRef.current);
     verticalTrack.style.top = px(visibleRect.y);
     verticalTrack.style.height = px(visibleRect.height);
@@ -52,6 +57,7 @@ export const useScrollbarsRenderLoop = (
   canvasRef: RefObject<HTMLCanvasElement | null>,
   layout: TLayoutRefs,
   elements: TScrollbarElementRefs,
+  dragging: TScrollbarDragRefs,
 ): void => {
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -60,7 +66,7 @@ export const useScrollbarsRenderLoop = (
       const frameIdRef = { current: 0 };
 
       const tick = (): void => {
-        renderFrame(canvas, layout, elements);
+        renderFrame(canvas, layout, elements, dragging);
         frameIdRef.current = requestAnimationFrame(tick);
       };
 
@@ -68,5 +74,5 @@ export const useScrollbarsRenderLoop = (
 
       return (): void => cancelAnimationFrame(frameIdRef.current);
     }
-  }, [canvasRef, elements, layout]);
+  }, [canvasRef, dragging, elements, layout]);
 };

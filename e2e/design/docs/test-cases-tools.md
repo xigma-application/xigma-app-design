@@ -117,9 +117,13 @@ bottom edge (drags pan `viewport.x`) and a vertical one along the right edge (dr
 `useScrollbarsRenderLoop`: it shows only when its own axis actually overflows the visible area
 (`getScrollGeometry`'s `overflow: {x, y}` — content bounds in screen space vs. `visibleRect`, per
 axis). A rectangle dropped dead centre with nothing off-screen shows no bars; panning or zooming
-until content crosses an edge brings the relevant bar back. Both bars stop at the true visible
-canvas edge (`getVisibleCanvasRect`, same panel-aware inset math as zoom-to-fit and the rulers), so
-a minimized/collapsed Left/RightPanel is treated as zero width, same as everywhere else that reads
+until content crosses an edge brings the relevant bar back. The one exception: a bar you're
+**actively dragging** stays shown for the whole gesture even if the drag pulls its content fully
+back into view (`useScrollbarDrag` flips a per-axis boolean ref the render loop ORs into the
+`display` check), so the thumb never vanishes out from under the cursor mid-drag — it hides again on
+the first frame after release. Both bars stop at the true visible canvas edge
+(`getVisibleCanvasRect`, same panel-aware inset math as zoom-to-fit and the rulers), so a
+minimized/collapsed Left/RightPanel is treated as zero width, same as everywhere else that reads
 `leftPanelWidthRef`/`rightPanelWidthRef`. Thumb size/position (`getScrollbarThumb.ts`) and drag
 math (`useScrollbarDrag.ts`, reusing `applyPan.ts`) are exhaustively unit-tested with exact pixel
 expectations; the e2e tests only prove a real pointer drag on the real, correctly-positioned DOM
@@ -131,3 +135,4 @@ scenarios above.
 | 345 | Dragging the horizontal scrollbar thumb pans the canvas (`viewport.x` changes)                           |  ✅  | ✅ `scrollbars.spec.ts` |
 | 346 | Dragging the vertical scrollbar thumb pans the canvas (`viewport.y` changes)                             |  ✅  | ✅ `scrollbars.spec.ts` |
 | 347 | Both bars stay hidden while all content fits within the view; each reappears once its own axis overflows |  ✅  | ✅ `scrollbars.spec.ts` |
+| 348 | A bar being actively dragged stays visible through the whole gesture, even once its overflow clears      |  ✅  | ✅ `scrollbars.spec.ts` |
