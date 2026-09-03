@@ -19,7 +19,7 @@ describe('detectGridLayout', () => {
       ['a', 'b'],
       ['c', 'd'],
     ]);
-    expect(layout?.columnGaps.map((gap) => gap.value)).toEqual([50]);
+    expect(layout?.columnGaps.map((gap) => gap.value)).toEqual([50, 50]);
     expect(layout?.rowGaps.map((gap) => gap.value)).toEqual([50]);
   });
 

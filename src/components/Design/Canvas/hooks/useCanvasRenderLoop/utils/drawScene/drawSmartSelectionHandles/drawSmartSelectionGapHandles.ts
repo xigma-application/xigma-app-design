@@ -1,30 +1,26 @@
-// others
-import { SMART_SELECTION_GAP_HANDLE_FILL } from 'constant/canvas';
-
 // types
 import { TSmartSelectionGap, TSmartSelectionLayout } from 'types/design/smartSelection/types';
 import { TViewport } from 'types/design/types';
 
 // utils
-import { drawGapHandleBar, TGapHandleOrientation } from './drawGapHandleBar';
-import { drawLine } from 'utils/canvas/drawLine';
+import { drawGapHandleBar } from './drawGapHandleBar';
+import { getGridRowGapHandleBounds } from '../../../../../utils/getGridRowGapHandleBounds';
 
-const drawGap = (
+const drawRowGapHandle = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
   gap: TSmartSelectionGap,
-  orientation: TGapHandleOrientation,
-  drawSeparator: boolean,
+  firstColumnWidth: number,
+  lastColumnWidth: number,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  if (drawSeparator) {
-    drawLine(gl, program, buffer, gap.span, SMART_SELECTION_GAP_HANDLE_FILL, 1 / viewport.zoom, canvasWidth, canvasHeight, viewport);
-  }
+  const { end, midX, start } = getGridRowGapHandleBounds(gap, firstColumnWidth, lastColumnWidth);
+  const rowGapHandle: TSmartSelectionGap = { ...gap, midpoint: { x: midX, y: gap.midpoint.y } };
 
-  drawGapHandleBar(gl, program, buffer, gap, orientation, canvasWidth, canvasHeight, viewport);
+  drawGapHandleBar(gl, program, buffer, rowGapHandle, 'horizontal', canvasWidth, canvasHeight, viewport, end - start);
 };
 
 export const drawSmartSelectionGapHandles = (
@@ -37,11 +33,16 @@ export const drawSmartSelectionGapHandles = (
   viewport: TViewport,
 ): void => {
   if (layout.type === 'row') {
-    layout.gaps.forEach((gap) => drawGap(gl, program, buffer, gap, 'vertical', false, canvasWidth, canvasHeight, viewport));
+    layout.gaps.forEach((gap) => drawGapHandleBar(gl, program, buffer, gap, 'vertical', canvasWidth, canvasHeight, viewport));
   } else if (layout.type === 'column') {
-    layout.gaps.forEach((gap) => drawGap(gl, program, buffer, gap, 'horizontal', false, canvasWidth, canvasHeight, viewport));
+    layout.gaps.forEach((gap) => drawGapHandleBar(gl, program, buffer, gap, 'horizontal', canvasWidth, canvasHeight, viewport));
   } else {
-    layout.columnGaps.forEach((gap) => drawGap(gl, program, buffer, gap, 'vertical', true, canvasWidth, canvasHeight, viewport));
-    layout.rowGaps.forEach((gap) => drawGap(gl, program, buffer, gap, 'horizontal', true, canvasWidth, canvasHeight, viewport));
+    const firstColumnWidth = layout.cells[0][0].bounds.width;
+    const lastColumnWidth = layout.cells[0][layout.columnCount - 1].bounds.width;
+
+    layout.columnGaps.forEach((gap) => drawGapHandleBar(gl, program, buffer, gap, 'vertical', canvasWidth, canvasHeight, viewport));
+    layout.rowGaps.forEach((gap) =>
+      drawRowGapHandle(gl, program, buffer, gap, firstColumnWidth, lastColumnWidth, canvasWidth, canvasHeight, viewport),
+    );
   }
 };

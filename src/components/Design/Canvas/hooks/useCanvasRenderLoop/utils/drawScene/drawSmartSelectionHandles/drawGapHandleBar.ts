@@ -23,9 +23,12 @@ export const drawGapHandleBar = (
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
+  lengthWorldUnits?: number,
 ): void => {
-  const width = (orientation === 'vertical' ? SMART_SELECTION_GAP_HANDLE_WIDTH_PX : SMART_SELECTION_GAP_HANDLE_LENGTH_PX) / viewport.zoom;
-  const height = (orientation === 'vertical' ? SMART_SELECTION_GAP_HANDLE_LENGTH_PX : SMART_SELECTION_GAP_HANDLE_WIDTH_PX) / viewport.zoom;
+  const length = lengthWorldUnits ?? SMART_SELECTION_GAP_HANDLE_LENGTH_PX / viewport.zoom;
+  const thickness = SMART_SELECTION_GAP_HANDLE_WIDTH_PX / viewport.zoom;
+  const width = orientation === 'vertical' ? thickness : length;
+  const height = orientation === 'vertical' ? length : thickness;
 
   drawRect(
     gl,

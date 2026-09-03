@@ -7,6 +7,7 @@ import { TSceneNode, TViewport } from 'types/design/types';
 import { TSmartSelectionGap, TSmartSelectionLayout } from 'types/design/smartSelection/types';
 
 // utils
+import { getGridRowGapHandleBounds } from './getGridRowGapHandleBounds';
 import { getSmartSelectionLayout } from './getSmartSelectionLayout/getSmartSelectionLayout';
 
 export type TSmartSelectionGapHit = {
@@ -20,6 +21,26 @@ export type TSmartSelectionGapHit = {
 const findNearestGap = (point: TPoint, gaps: TSmartSelectionGap[], toleranceWorldUnits: number): TSmartSelectionGap | null =>
   gaps.find((gap) => Math.hypot(point.x - gap.midpoint.x, point.y - gap.midpoint.y) <= toleranceWorldUnits) ?? null;
 
+const findRowGapHandle = (
+  point: TPoint,
+  rowGaps: TSmartSelectionGap[],
+  firstColumnWidth: number,
+  lastColumnWidth: number,
+  toleranceWorldUnits: number,
+): { bounds: ReturnType<typeof getGridRowGapHandleBounds>; gap: TSmartSelectionGap } | null => {
+  for (const gap of rowGaps) {
+    const bounds = getGridRowGapHandleBounds(gap, firstColumnWidth, lastColumnWidth);
+    const isWithinHandleSpan = point.x >= bounds.start - toleranceWorldUnits && point.x <= bounds.end + toleranceWorldUnits;
+    const isWithinHandleThickness = Math.abs(point.y - gap.midpoint.y) <= toleranceWorldUnits;
+
+    if (isWithinHandleSpan && isWithinHandleThickness) {
+      return { bounds, gap };
+    }
+  }
+
+  return null;
+};
+
 export const getSmartSelectionGapHandleAtPoint = (
   point: TPoint,
   selectedNodes: TSceneNode[],
@@ -31,14 +52,23 @@ export const getSmartSelectionGapHandleAtPoint = (
   if (layout) {
     if (layout.type === 'grid') {
       const columnHit = findNearestGap(point, layout.columnGaps, tolerance);
-      const rowHit = findNearestGap(point, layout.rowGaps, tolerance);
 
       if (columnHit) {
         return { axis: 'x', gapIndex: columnHit.index, gapValue: columnHit.value, layout, midpoint: columnHit.midpoint };
       }
 
+      const firstColumnWidth = layout.cells[0][0].bounds.width;
+      const lastColumnWidth = layout.cells[0][layout.columnCount - 1].bounds.width;
+      const rowHit = findRowGapHandle(point, layout.rowGaps, firstColumnWidth, lastColumnWidth, tolerance);
+
       if (rowHit) {
-        return { axis: 'y', gapIndex: rowHit.index, gapValue: rowHit.value, layout, midpoint: rowHit.midpoint };
+        return {
+          axis: 'y',
+          gapIndex: rowHit.gap.index,
+          gapValue: rowHit.gap.value,
+          layout,
+          midpoint: { x: rowHit.bounds.midX, y: rowHit.gap.midpoint.y },
+        };
       }
     } else {
       const hit = findNearestGap(point, layout.gaps, tolerance);

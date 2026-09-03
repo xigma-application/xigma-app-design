@@ -30,7 +30,7 @@ export const detectGridLayout = (
       return {
         cells,
         columnCount: cells[0].length,
-        columnGaps: buildGridColumnGaps(cells[0], columnGapValues, extent),
+        columnGaps: buildGridColumnGaps(cells, columnGapValues, extent),
         rowCount: cells.length,
         rowGaps: buildGridRowGaps(firstColumn, rowGapValues, extent),
         type: 'grid',

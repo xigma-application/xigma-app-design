@@ -55,16 +55,38 @@ describe('getSmartSelectionGapHandleAtPoint', () => {
     rect('d', 100, 100, 80),
   ];
 
-  it("should hit a grid's column-gap handle with axis x", () => {
-    const hit = getSmartSelectionGapHandleAtPoint({ x: 75, y: 75 }, buildAsymmetricGrid(), VIEWPORT);
+  it("should hit a grid's column-gap handle in its own row, with axis x", () => {
+    const hitFirstRow = getSmartSelectionGapHandleAtPoint({ x: 75, y: 25 }, buildAsymmetricGrid(), VIEWPORT);
+    const hitSecondRow = getSmartSelectionGapHandleAtPoint({ x: 75, y: 125 }, buildAsymmetricGrid(), VIEWPORT);
 
-    expect(hit).toMatchObject({ axis: 'x', gapIndex: 0, gapValue: 50 });
+    expect(hitFirstRow).toMatchObject({ axis: 'x', gapIndex: 0, gapValue: 50 });
+    expect(hitSecondRow).toMatchObject({ axis: 'x', gapIndex: 0, gapValue: 50 });
+  });
+
+  it("should miss a grid's column-gap handle between its rows, where no per-row handle sits", () => {
+    // x=75 is the column-gap's own x, but y=75 sits between rows with no per-row handle there;
+    // x=140 stays clear of the row-gap's own widened hit area (which spans roughly [34, 122])
+    expect(getSmartSelectionGapHandleAtPoint({ x: 140, y: 75 }, buildAsymmetricGrid(), VIEWPORT)).toBeNull();
   });
 
   it("should hit a grid's row-gap handle with axis y", () => {
     const hit = getSmartSelectionGapHandleAtPoint({ x: 90, y: 75 }, buildAsymmetricGrid(), VIEWPORT);
 
     expect(hit).toMatchObject({ axis: 'y', gapIndex: 0, gapValue: 50 });
+  });
+
+  it("should hit a grid's row-gap handle anywhere along its full width, not just its centre", () => {
+    // span [0, 180], first column width 50, last column width 80: handle spans [40, 116]
+    const nearStart = getSmartSelectionGapHandleAtPoint({ x: 45, y: 75 }, buildAsymmetricGrid(), VIEWPORT);
+    const nearEnd = getSmartSelectionGapHandleAtPoint({ x: 110, y: 75 }, buildAsymmetricGrid(), VIEWPORT);
+
+    expect(nearStart).toMatchObject({ axis: 'y', gapIndex: 0, gapValue: 50, midpoint: { x: 78, y: 75 } });
+    expect(nearEnd).toMatchObject({ axis: 'y', gapIndex: 0, gapValue: 50, midpoint: { x: 78, y: 75 } });
+  });
+
+  it("should miss a grid's row-gap handle past either end of its actual width", () => {
+    expect(getSmartSelectionGapHandleAtPoint({ x: 20, y: 75 }, buildAsymmetricGrid(), VIEWPORT)).toBeNull();
+    expect(getSmartSelectionGapHandleAtPoint({ x: 130, y: 75 }, buildAsymmetricGrid(), VIEWPORT)).toBeNull();
   });
 
   it('should miss a grid when the point is far from every gap', () => {

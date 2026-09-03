@@ -75,4 +75,20 @@ describe('drawGapHandleBar', () => {
 
     expect(worldWidth).toBeCloseTo(SMART_SELECTION_GAP_HANDLE_WIDTH_PX / 4);
   });
+
+  it('should use the given length override instead of the default, for a horizontal bar', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawGapHandleBar(gl, program, buffer, gap, 'horizontal', 200, 200, IDENTITY_VIEWPORT, 300);
+
+    // result
+    const [[, vertices]] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+
+    expect(vertices[0]).toBeCloseTo(100 - 300 / 2);
+    expect(vertices[1]).toBeCloseTo(50 - SMART_SELECTION_GAP_HANDLE_WIDTH_PX / 2);
+  });
 });
