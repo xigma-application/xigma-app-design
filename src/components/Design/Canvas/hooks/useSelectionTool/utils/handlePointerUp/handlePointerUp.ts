@@ -20,6 +20,7 @@ import { disarmPolygonVertexCountDrag } from './disarmPolygonVertexCountDrag';
 import { disarmResizeDrag } from './disarmResizeDrag';
 import { disarmRotateDrag } from './disarmRotateDrag';
 import { disarmShapeContactGuides } from './disarmShapeContactGuides';
+import { disarmSmartSelectionGapDrag } from './disarmSmartSelectionGapDrag';
 import { disarmStarCornerRadiusDrag } from './disarmStarCornerRadiusDrag';
 import { disarmStarRatioDrag } from './disarmStarRatioDrag';
 import { disarmStarVertexCountDrag } from './disarmStarVertexCountDrag';
@@ -52,6 +53,7 @@ export const handlePointerUp = (
   disarmResizeDrag(canvas, event, dispatch, selectionRefs.resizeDragRef, canvasRefs);
   disarmRotateDrag(canvas, event, dispatch, canvasRefs.transform.rotateDragRef, canvasRefs);
   disarmCornerRadiusDrag(canvas, event, canvasRefs.cornerRadius.cornerRadiusDragRef);
+  disarmSmartSelectionGapDrag(canvas, event, canvasRefs.smartSelection.gapDragRef);
   disarmPolygonCornerRadiusDrag(canvas, event, canvasRefs.cornerRadius.polygonCornerRadiusDragRef);
   disarmStarCornerRadiusDrag(canvas, event, canvasRefs.cornerRadius.starCornerRadiusDragRef);
   disarmPolygonVertexCountDrag(canvas, event, canvasRefs.vertexCount.polygonVertexCountDragRef);

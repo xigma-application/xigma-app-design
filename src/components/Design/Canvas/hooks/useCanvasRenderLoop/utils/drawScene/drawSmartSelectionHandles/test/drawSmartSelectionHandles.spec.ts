@@ -3,13 +3,18 @@ import { NodeType } from 'types/design/enums';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { drawSmartSelectionHandles } from '../drawSmartSelectionHandles';
 
 const drawSmartSelectionGapHandlesMock = vi.fn();
+const drawSmartSelectionGapValueBadgeMock = vi.fn();
 const drawSmartSelectionSwapHandlesMock = vi.fn();
 
 vi.mock('../drawSmartSelectionGapHandles', () => ({
   drawSmartSelectionGapHandles: (...args: unknown[]): void => drawSmartSelectionGapHandlesMock(...args),
+}));
+vi.mock('../drawSmartSelectionGapValueBadge', () => ({
+  drawSmartSelectionGapValueBadge: (...args: unknown[]): void => drawSmartSelectionGapValueBadgeMock(...args),
 }));
 vi.mock('../drawSmartSelectionSwapHandles', () => ({
   drawSmartSelectionSwapHandles: (...args: unknown[]): void => drawSmartSelectionSwapHandlesMock(...args),
@@ -37,23 +42,28 @@ const rect = (id: string, x: number): TSceneNode =>
 describe('drawSmartSelectionHandles', () => {
   beforeEach(() => {
     drawSmartSelectionGapHandlesMock.mockClear();
+    drawSmartSelectionGapValueBadgeMock.mockClear();
     drawSmartSelectionSwapHandlesMock.mockClear();
   });
 
   it('should draw nothing when the selection does not form a valid layout', () => {
-    drawSmartSelectionHandles({ buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never, [
-      rect('a', 0),
-    ]);
+    drawSmartSelectionHandles(
+      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
+      [rect('a', 0)],
+      createCanvasRefs(),
+    );
 
     expect(drawSmartSelectionGapHandlesMock).not.toHaveBeenCalled();
     expect(drawSmartSelectionSwapHandlesMock).not.toHaveBeenCalled();
+    expect(drawSmartSelectionGapValueBadgeMock).toHaveBeenCalledTimes(1);
   });
 
   it('should draw gap and swap handles for a valid row selection', () => {
-    drawSmartSelectionHandles({ buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never, [
-      rect('a', 0),
-      rect('b', 100),
-    ]);
+    drawSmartSelectionHandles(
+      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
+      [rect('a', 0), rect('b', 100)],
+      createCanvasRefs(),
+    );
 
     expect(drawSmartSelectionGapHandlesMock).toHaveBeenCalledTimes(1);
     expect(drawSmartSelectionSwapHandlesMock).toHaveBeenCalledTimes(1);

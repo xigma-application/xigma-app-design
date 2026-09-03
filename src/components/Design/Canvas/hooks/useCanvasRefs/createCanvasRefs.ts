@@ -11,6 +11,7 @@ import { createPencilRefs } from './hooks/usePencilRefs/createPencilRefs';
 import { createSectionNameRefs } from './hooks/useSectionNameRefs/createSectionNameRefs';
 import { createShapeBuilderRefs } from './hooks/useShapeBuilderRefs/createShapeBuilderRefs';
 import { createSliceRefs } from './hooks/useSliceRefs/createSliceRefs';
+import { createSmartSelectionRefs } from './hooks/useSmartSelectionRefs/createSmartSelectionRefs';
 import { createStarRatioRefs } from './hooks/useStarRatioRefs/createStarRatioRefs';
 import { createTransformRefs } from './hooks/useTransformRefs/createTransformRefs';
 import { createVectorCutRefs } from './hooks/useVectorCutRefs/createVectorCutRefs';
@@ -42,6 +43,7 @@ export const createCanvasRefs = (overrides: TCanvasRefsOverrides = {}): TCanvasR
   sectionName: createSectionNameRefs(overrides.sectionName),
   shapeBuilder: createShapeBuilderRefs(overrides.shapeBuilder),
   slice: createSliceRefs(overrides.slice),
+  smartSelection: createSmartSelectionRefs(overrides.smartSelection),
   starRatio: createStarRatioRefs(overrides.starRatio),
   transform: createTransformRefs(overrides.transform),
   vectorCut: createVectorCutRefs(overrides.vectorCut),

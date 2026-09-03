@@ -13,10 +13,12 @@ import { TPaint } from 'types/design/paint/types';
 import { TPenDragOrigin } from 'components/Design/Canvas/hooks/useDrawPenTool/types';
 import { TShapeContactGuide } from 'components/Design/Canvas/utils/getShapeContactGuides';
 import {
+  TNodeOrigin,
   TPolygonVertexCountDragState,
   TRotateDragState,
   TStarRatioDragState,
   TStarVertexCountDragState,
+  TThrottledDispatchState,
   TVectorMultiDragState,
   TVectorMultiSelectResizeDragState,
   TVectorMultiSelectRotateDragState,
@@ -345,6 +347,30 @@ export type TSectionNameRefs = {
   editingLabelRef: RefObject<string | null>;
 };
 
+export type TSmartSelectionCascadeGroup = {
+  nodeIds: string[];
+  originalPosition: number;
+  size: number;
+};
+
+export type TSmartSelectionGapDragState = {
+  anchorPosition: number;
+  anchorSize: number;
+  axis: 'x' | 'y';
+  badgeAnchor: TPoint;
+  cascadeGroups: TSmartSelectionCascadeGroup[];
+  currentGapValue: number;
+  dispatchThrottle: TThrottledDispatchState;
+  hasMoved: boolean;
+  nodeOrigins: Record<string, TNodeOrigin>;
+  originalGapValue: number;
+  pointerStart: TPoint;
+};
+
+export type TSmartSelectionRefs = {
+  gapDragRef: RefObject<TSmartSelectionGapDragState | null>;
+};
+
 export type TCanvasRefs = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   colorSampleRequestRef: RefObject<TColorSampleRequest | null>;
@@ -361,6 +387,7 @@ export type TCanvasRefs = {
   sectionName: TSectionNameRefs;
   shapeBuilder: TShapeBuilderRefs;
   slice: TSliceRefs;
+  smartSelection: TSmartSelectionRefs;
   starRatio: TStarRatioRefs;
   transform: TTransformRefs;
   vectorCut: TVectorCutRefs;

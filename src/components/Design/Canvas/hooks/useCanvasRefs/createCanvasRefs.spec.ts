@@ -73,6 +73,7 @@ describe('createCanvasRefs behaviors', () => {
         vectorShapeBuilderPathRef: { current: null },
       },
       slice: { sliceRef: { current: null } },
+      smartSelection: { gapDragRef: { current: null } },
       starRatio: { starRatioDragRef: { current: null } },
       transform: {
         alignmentGuideRef: { current: null },

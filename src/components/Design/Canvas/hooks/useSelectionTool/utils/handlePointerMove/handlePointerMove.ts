@@ -18,6 +18,7 @@ import { continuePolygonCornerRadiusDrag } from './continuePolygonCornerRadiusDr
 import { continuePolygonVertexCountDrag } from './continuePolygonVertexCountDrag';
 import { continueResizeDrag } from './continueResizeDrag/continueResizeDrag';
 import { continueRotateDrag } from './continueRotateDrag/continueRotateDrag';
+import { continueSmartSelectionGapDrag } from './continueSmartSelectionGapDrag';
 import { continueStarCornerRadiusDrag } from './continueStarCornerRadiusDrag';
 import { continueStarRatioDrag } from './continueStarRatioDrag';
 import { continueStarVertexCountDrag } from './continueStarVertexCountDrag';
@@ -56,6 +57,7 @@ export const handlePointerMove = (
   continueResizeDrag(canvas, event, dispatch, selectionRefs.resizeDragRef, canvasRefs);
   continueRotateDrag(canvas, event, dispatch, canvasRefs.transform.rotateDragRef, canvasRefs);
   continueCornerRadiusDrag(canvas, event, dispatch, canvasRefs.cornerRadius.cornerRadiusDragRef);
+  continueSmartSelectionGapDrag(canvas, event, dispatch, canvasRefs.smartSelection.gapDragRef);
   continuePolygonCornerRadiusDrag(canvas, event, dispatch, canvasRefs.cornerRadius.polygonCornerRadiusDragRef);
   continueStarCornerRadiusDrag(canvas, event, dispatch, canvasRefs.cornerRadius.starCornerRadiusDragRef);
   continuePolygonVertexCountDrag(canvas, event, dispatch, canvasRefs.vertexCount.polygonVertexCountDragRef);

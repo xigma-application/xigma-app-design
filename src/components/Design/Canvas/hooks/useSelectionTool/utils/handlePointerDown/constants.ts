@@ -15,6 +15,7 @@ import { armResizeOnPointerDown } from './armResolvers/armResizeOnPointerDown';
 import { armRotateOnPointerDown } from './armResolvers/armRotateOnPointerDown';
 import { armSelectedTextBoundsOnPointerDown } from './armResolvers/armSelectedTextBoundsOnPointerDown';
 import { armSelectedVectorBoundsOnPointerDown } from './armResolvers/armSelectedVectorBoundsOnPointerDown';
+import { armSmartSelectionGapOnPointerDown } from './armResolvers/armSmartSelectionGapOnPointerDown';
 import { armStarCornerRadiusOnPointerDown } from './armResolvers/armStarCornerRadiusOnPointerDown';
 import { armStarRatioOnPointerDown } from './armResolvers/armStarRatioOnPointerDown';
 import { armStarVertexCountOnPointerDown } from './armResolvers/armStarVertexCountOnPointerDown';
@@ -66,6 +67,7 @@ export const ARM_RESOLVERS = [
   armPolygonCornerRadiusOnPointerDown,
   armStarCornerRadiusOnPointerDown,
   armRotateOnPointerDown,
+  armSmartSelectionGapOnPointerDown,
   armLineEndpointOnPointerDown,
   armGroupChildToggleOnPointerDown,
   toggleSelectionOnPointerDown,

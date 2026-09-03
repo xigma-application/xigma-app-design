@@ -132,7 +132,7 @@ export const drawScene = (
   drawHoverOutline(ctx, hoveredNode, vectorEditingNodeIds, nodesById);
   drawSelectionOutline(ctx, selectedNodes, vectorEditingNodeIds, nodesById, pathId);
   drawSelectionSizeLabel(ctx, selectedNodes, vectorEditingNodeIds, pathId);
-  drawSmartSelectionHandles(ctx, selectedNodes);
+  drawSmartSelectionHandles(ctx, selectedNodes, refs);
   drawFrameNameLabels(ctx, filteredNodes, selectedIds, refs);
   drawSectionNameLabels(ctx, filteredNodes, refs);
   drawCornerRadiusHandlesLayer(ctx, hoveredNode, selectedNodes, refs);

@@ -17,6 +17,7 @@ import { useLassoMarqueeRefs } from 'components/Design/Canvas/hooks/useCanvasRef
 import { useLayoutRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useLayoutRefs/useLayoutRefs';
 import { usePenRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/usePenRefs/usePenRefs';
 import { useSectionNameRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useSectionNameRefs/useSectionNameRefs';
+import { useSmartSelectionRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useSmartSelectionRefs/useSmartSelectionRefs';
 import { useTransformRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useTransformRefs/useTransformRefs';
 import { useShapeBuilderRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useShapeBuilderRefs/useShapeBuilderRefs';
 import { useVectorPaintRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/hooks/useVectorPaintRefs/useVectorPaintRefs';
@@ -47,6 +48,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
   const pencilRefs = usePencilRefs();
   const shapeBuilderRefs = useShapeBuilderRefs();
   const sliceRefs = useSliceRefs();
+  const smartSelectionRefs = useSmartSelectionRefs();
   const starRatioRefs = useStarRatioRefs();
   const vectorCutRefs = useVectorCutRefs();
   const vectorEditRefs = useVectorEditRefs();
@@ -77,6 +79,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       sectionName: sectionNameRefs,
       shapeBuilder: shapeBuilderRefs,
       slice: sliceRefs,
+      smartSelection: smartSelectionRefs,
       starRatio: starRatioRefs,
       transform: transformRefs,
       vectorCut: vectorCutRefs,
@@ -101,6 +104,7 @@ const CanvasRefsProvider: FC<TCanvasRefsProviderProps> = ({ children }) => {
       sectionNameRefs,
       shapeBuilderRefs,
       sliceRefs,
+      smartSelectionRefs,
       starRatioRefs,
       transformRefs,
       vectorCutRefs,

@@ -402,10 +402,10 @@ describe('handlePointerDown', () => {
     const marqueeStartRef = createMarqueeStartRef();
     const setClassName = vi.fn();
 
-    // before
+    // before - 330,310 is in the gap but clear of the Smart Selection gap handle at the midpoint (340,310)
     handlePointerDown(
       canvas,
-      pointerEvent(340, 310),
+      pointerEvent(330, 310),
       store.dispatch,
       createCanvasRefs({
         cornerRadius: {

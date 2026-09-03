@@ -356,10 +356,11 @@ describe('useSelectionTool behaviors', () => {
     // before
     renderSelectionTool(canvasRef);
 
-    // action - click in the gap between the two nodes (1140,710 is inside neither node)
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 1140, 710));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 1150, 720));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 1150, 720));
+    // action - click in the gap between the two nodes (1130,710 is inside neither node, and clear
+    // of the Smart Selection gap handle that now sits at the gap's exact midpoint, 1140,710)
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 1130, 710));
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 1140, 720));
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 1140, 720));
 
     // result
     const { nodes } = selectActivePage(store.getState());
@@ -382,9 +383,9 @@ describe('useSelectionTool behaviors', () => {
     // before
     renderSelectionTool(canvasRef);
 
-    // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 1240, 710));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 1240, 710));
+    // action - 1230,710 is in the gap but clear of the Smart Selection gap handle at the midpoint (1240,710)
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 1230, 710));
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 1230, 710));
 
     // result
     expect(selectSelectedIds(store.getState())).toEqual([]);
@@ -403,9 +404,11 @@ describe('useSelectionTool behaviors', () => {
     // before
     renderSelectionTool(canvasRef);
 
-    // action - click directly on the unselected node C, which sits inside A+B's shared bounds
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 1440, 710));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 1440, 710));
+    // action - click directly on the unselected node C, which sits inside A+B's shared bounds;
+    // 1432,710 (not C's centre, 1440) stays clear of the Smart Selection gap handle that now sits
+    // at A/B's own gap midpoint, which coincides with C's centre here
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 1432, 710));
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerup', 1432, 710));
 
     // result
     expect(selectSelectedIds(store.getState())).toEqual([idC]);
@@ -424,8 +427,9 @@ describe('useSelectionTool behaviors', () => {
     // before
     renderSelectionTool(canvasRef);
 
-    // action - press down on the unselected node in the gap, but do not release
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 1540, 710));
+    // action - press down on the unselected node in the gap, but do not release; 1532,710 stays
+    // clear of the Smart Selection gap handle at the A/B gap midpoint (1540,710)
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 1532, 710));
 
     // result - selection must stay untouched until pointerup decides
     expect(selectSelectedIds(store.getState())).toEqual([idA, idB]);
@@ -444,9 +448,10 @@ describe('useSelectionTool behaviors', () => {
     // before
     renderSelectionTool(canvasRef);
 
-    // action
-    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 1640, 710));
-    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 1650, 720));
+    // action - 1632,710 (not C's centre, 1640) stays clear of the Smart Selection gap handle that
+    // now sits at A/B's own gap midpoint, which coincides with C's centre here
+    canvasRef.current?.dispatchEvent(pointerEvent('pointerdown', 1632, 710));
+    canvasRef.current?.dispatchEvent(pointerEvent('pointermove', 1642, 720));
 
     // result - A and B (the actual selection) move together; C (the hit node) is untouched and unselected
     const { nodes } = selectActivePage(store.getState());
