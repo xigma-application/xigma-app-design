@@ -5,6 +5,9 @@ import { useTranslation } from 'react-i18next';
 import NewMenu from './NewMenu/NewMenu';
 import { MenuCompound } from 'shared';
 
+// hooks
+import { useFileMenuPlaceImageClick } from './hooks/useFileMenuPlaceImageClick';
+
 // others
 import { KEYBOARD_SHORTCUTS } from 'components/Design/keys';
 import {
@@ -23,6 +26,7 @@ const { MenuItem, MenuSeparator, MenuSub } = MenuCompound;
 
 const FileMenu: FC = () => {
   const { t } = useTranslation();
+  const handlePlaceImageClick = useFileMenuPlaceImageClick();
 
   return (
     <>
@@ -31,7 +35,12 @@ const FileMenu: FC = () => {
         <NewMenu />
       </MenuSub>
       <MenuSeparator />
-      <MenuItem disabled label={t(FILE_MENU_PLACE_IMAGE_KEY)} shortcut={KEYBOARD_SHORTCUTS.placeImage.join('')} withCheck={false} />
+      <MenuItem
+        label={t(FILE_MENU_PLACE_IMAGE_KEY)}
+        onClick={handlePlaceImageClick}
+        shortcut={KEYBOARD_SHORTCUTS.placeImage.join('')}
+        withCheck={false}
+      />
       <MenuSeparator />
       <MenuItem disabled label={t(FILE_MENU_SAVE_LOCAL_COPY_KEY)} withCheck={false} />
       <MenuItem
