@@ -4,19 +4,33 @@ import { Provider } from 'react-redux';
 // components
 import TreeItem, { TTreeItemProps } from './TreeItem';
 
+// core
+import { CanvasRefsContext } from 'components/App/core/CanvasRefsProvider/context';
+
+// hooks
+import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
+
 // store
-import { addNode, deleteNode, setSelection } from 'store/design/slice';
-import { selectNodes, selectSelectedIds } from 'store/design/selectors';
+import { addNode, deleteNode, setSelection, setViewport } from 'store/design/slice';
+import { selectNodes, selectSelectedIds, selectViewport } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
 import { NodeType } from 'types/design/enums';
 import { TGroupNode, TRectangleNode, TSceneNode } from 'types/design/types';
 
+const canvas = document.createElement('canvas');
+
+vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({ height: 600, width: 1000 } as DOMRect);
+
+const canvasRefs = createCanvasRefs({ canvasRef: { current: canvas } });
+
 const renderTreeItem = (isSelected: boolean, node: TSceneNode, extraProps: Partial<TTreeItemProps> = {}): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <TreeItem isSelected={isSelected} node={node} renderIcon={(): null => null} {...extraProps} />
+      <CanvasRefsContext.Provider value={canvasRefs}>
+        <TreeItem isSelected={isSelected} node={node} renderIcon={(): null => null} {...extraProps} />
+      </CanvasRefsContext.Provider>
     </Provider>,
   );
 
@@ -77,6 +91,21 @@ describe('TreeItem', () => {
     // result
     expect(renderIcon).toHaveBeenCalledWith(node);
     expect(screen.getByTestId('row-icon')).toBeInTheDocument();
+  });
+
+  it('should select the node and zoom the viewport to it when the icon is double-clicked', () => {
+    // mock
+    store.dispatch(setViewport({ x: 0, y: 0, zoom: 1 }));
+
+    // before
+    renderTreeItem(false, node, { renderIcon: () => <span data-testid="row-icon">icon</span> });
+
+    // action
+    fireEvent.doubleClick(screen.getByTestId('row-icon'));
+
+    // result
+    expect(selectSelectedIds(store.getState())).toEqual([node.id]);
+    expect(selectViewport(store.getState())).not.toEqual({ x: 0, y: 0, zoom: 1 });
   });
 
   it('should mark the row as selected when isSelected is true', () => {

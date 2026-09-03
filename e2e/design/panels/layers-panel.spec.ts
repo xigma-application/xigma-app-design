@@ -178,3 +178,28 @@ test('a layer name too long for the panel makes the Layers tree scroll horizonta
   await page.locator('[class*="Layers_"]').first().hover();
   await expect(page.locator('[class*="ScrollThumb--horizontal"]')).toBeVisible();
 });
+
+test('double-clicking a layer row icon selects it and zooms the canvas to it', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-layers-panel-icon-double-click-zoom');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 100, 740, 140); // A, row 0
+  await designPage.drawRectangle(1000, 400, 1040, 440); // B, row 1 — drawn last, far from A, auto-selected
+
+  const layersTree = page.locator('[class*="LayersTree"]').first();
+  const rows = layersTree.locator('[class*="Tree__row_"]');
+  const rowA = rows.nth(1);
+
+  await expect(rowA.locator('[aria-selected="true"]')).toHaveCount(0); // A starts unselected (B is)
+
+  const before = await designPage.canvas.screenshot();
+
+  await rowA.locator('[class*="TreeItem__icon"]').dblclick();
+
+  // selection moved from B to A, and the viewport actually changed (zoomed to fit A)
+  await expect(rowA.locator('[aria-selected="true"]')).toHaveCount(1);
+  const after = await designPage.canvas.screenshot();
+  expect(before.equals(after)).toBe(false);
+});

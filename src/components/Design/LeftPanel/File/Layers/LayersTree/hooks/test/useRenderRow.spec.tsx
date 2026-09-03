@@ -2,6 +2,9 @@ import { Provider } from 'react-redux';
 import { ReactNode } from 'react';
 import { render, renderHook, screen } from '@testing-library/react';
 
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+
 // hooks
 import { useRenderRow } from '../useRenderRow';
 
@@ -55,7 +58,11 @@ describe('useRenderRow', () => {
 
     // before
     const { result } = renderHook(() => useRenderRow(), { wrapper });
-    render(<Provider store={store}>{result.current(row, vi.fn())}</Provider>);
+    render(
+      <Provider store={store}>
+        <CanvasRefsProvider>{result.current(row, vi.fn())}</CanvasRefsProvider>
+      </Provider>,
+    );
 
     // result
     expect(screen.getByText('Frame A')).toBeInTheDocument();

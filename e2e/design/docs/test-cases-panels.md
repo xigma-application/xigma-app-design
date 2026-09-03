@@ -60,6 +60,7 @@ nesting yet) with a per-row lock and eye (visibility) toggle. Both are real docu
 | 335 | Toggling a node's locked or hidden state is its own undo step, independent of any other change                                                                                      |  ✅  |             —             |
 | 342 | Right-clicking a row that isn't currently selected replaces the selection with it, so the context menu that opens acts on the right-clicked node instead of a stale prior selection |  ✅  | ✅ `layers-panel.spec.ts` |
 | 343 | Right-clicking a row already part of a multi-selection leaves the whole selection intact, so bulk actions (Copy, Bring to front, ...) keep applying to every selected node          |  ✅  | ✅ `layers-panel.spec.ts` |
+| 344 | Double-clicking a row's icon selects that node and zooms the canvas to fit it (reuses the View menu's own Zoom to selection)                                                        |  ✅  | ✅ `layers-panel.spec.ts` |
 
 Scenarios 334-335 are plain synchronous dispatch-and-assert-on-`store.getState()` checks with no
 real timing/rendering stakes, so they're unit-only per the section below. 332-333 get e2e coverage
@@ -81,3 +82,10 @@ branches; the e2e versions prove the actual observable symptom via each row's ow
 DOM state and the real menu that opens, the same "real browser + rendering" category as #90/#341
 above. `move-to-page.spec.ts`'s own scenario no longer needs a throwaway left-click before the
 right-click for exactly this reason.
+
+#344: `useZoomToTreeItem.ts` (`shared/UI/Tree/TreeItem/hooks/`) wires `onDoubleClick` on the row's
+icon `span` — a separate DOM node from the name text's own `editOnDoubleClick` (rename), so there's
+no conflict. It dispatches `setSelection([id])` then calls the same `handleZoomToSelection` the View
+menu/Shift+2 shortcut already use (a plain reducer dispatch is synchronous, so the zoom sees the
+just-set selection). This makes `TreeItem` an unconditional `useCanvasRefsContext()` consumer, so
+every test mounting a real `TreeItem` needs a `CanvasRefsProvider` ancestor now.

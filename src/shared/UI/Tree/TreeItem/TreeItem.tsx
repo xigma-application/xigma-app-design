@@ -13,6 +13,7 @@ import { useSelectTreeItem } from './hooks/useSelectTreeItem/useSelectTreeItem';
 import { useTreeItemActions } from './hooks/useTreeItemActions';
 import { useTreeItemContextMenu } from './hooks/useTreeItemContextMenu';
 import { useTreeItemNameEditing } from './hooks/useTreeItemNameEditing';
+import { useZoomToTreeItem } from './hooks/useZoomToTreeItem';
 
 // others
 import { TREE_ITEM_INDENT_PX } from '../constants';
@@ -51,6 +52,7 @@ export const TreeItem: FC<TTreeItemProps> = ({
 }) => {
   const handleSelect = useSelectTreeItem(node.id);
   const handleRename = useRenameTreeItem(node.id);
+  const handleZoomToItem = useZoomToTreeItem(node.id);
   const { handleStopPropagation, handleToggleHidden, handleToggleLocked } = useTreeItemActions(node.id);
   const { isEditing, isRenameRequested, onEditingChange, onRenameRequested } = useTreeItemNameEditing();
   const { anchorRef, isOpen, onContextMenu, onOpenChange } = useTreeItemContextMenu(node.id);
@@ -63,7 +65,9 @@ export const TreeItem: FC<TTreeItemProps> = ({
         style={{ marginLeft: depth * TREE_ITEM_INDENT_PX }}
       >
         <TreeItemToggle isExpandable={isExpandable} isExpanded={isExpanded} onToggleExpand={onToggleExpand ?? noop} />
-        <span className={styles.TreeItem__icon}>{renderIcon(node)}</span>
+        <span className={styles.TreeItem__icon} onDoubleClick={handleZoomToItem}>
+          {renderIcon(node)}
+        </span>
         <EditableInput
           autoEdit={isRenameRequested}
           className={cx(styles.TreeItem__name, node.hidden && styles['TreeItem__name--hidden'])}

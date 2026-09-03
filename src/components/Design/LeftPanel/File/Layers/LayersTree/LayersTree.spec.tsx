@@ -4,6 +4,9 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 // components
 import LayersTree from './LayersTree';
 
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+
 // store
 import { addNode, deleteNode, groupNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
@@ -18,7 +21,9 @@ import { stubVirtualizerViewport } from 'test/stubVirtualizerViewport';
 const renderLayersTree = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <LayersTree />
+      <CanvasRefsProvider>
+        <LayersTree />
+      </CanvasRefsProvider>
     </Provider>,
   );
 

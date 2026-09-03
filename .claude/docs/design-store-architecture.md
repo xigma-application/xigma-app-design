@@ -343,6 +343,15 @@ so no separate minimized-state check is needed.
 `setViewport`, feeding a generic, reusable "momentary hint above the toolbar" mechanism — see the
 next section.
 
+`handleZoomToSelection` has a third call site beyond the View menu and its keyboard shortcut:
+`shared/UI/Tree/TreeItem/hooks/useZoomToTreeItem.ts` calls `dispatch(setSelection([id]))` followed
+by `handleZoomToSelection(dispatch, refs)` in the same handler — a plain reducer dispatch is
+synchronous, so `store.getState()` inside `handleZoomToSelection` already sees the just-selected
+node. Wired to `onDoubleClick` on a Layers-tree row's icon (`TreeItem.tsx`), so double-clicking a
+layer's icon selects it and zooms to it in one gesture. Since this makes `TreeItem` an unconditional
+`useCanvasRefsContext()` consumer, every test that mounts a real `TreeItem` (directly, or
+transitively via `LayersTree`/`Layers`/`useRenderRow`) now needs a `CanvasRefsProvider` ancestor.
+
 ### `designHintLabelKey` — a generic momentary-hint mechanism (not zoom-specific)
 
 `state.design.designHintLabelKey: string | null` holds an i18n key (or `null`). Any feature can

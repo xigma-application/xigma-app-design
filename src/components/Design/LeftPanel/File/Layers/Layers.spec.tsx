@@ -5,6 +5,9 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import Layers from './Layers';
 import { TooltipProvider } from 'shared';
 
+// core
+import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRefsProvider';
+
 // store
 import { addNode, deleteNode, groupNodes, setSelection } from 'store/design/slice';
 import { selectActivePage } from 'store/design/selectors';
@@ -19,9 +22,11 @@ import { stubVirtualizerViewport } from 'test/stubVirtualizerViewport';
 const renderLayers = (): ReturnType<typeof render> =>
   render(
     <Provider store={store}>
-      <TooltipProvider>
-        <Layers />
-      </TooltipProvider>
+      <CanvasRefsProvider>
+        <TooltipProvider>
+          <Layers />
+        </TooltipProvider>
+      </CanvasRefsProvider>
     </Provider>,
   );
 
