@@ -9,6 +9,7 @@ import { EditableInput } from 'shared';
 
 // hooks
 import { useFileNameMenu } from './hooks/useFileNameMenu';
+import { useFileNameRename } from './hooks/useFileNameRename';
 
 // others
 import { translationNameSpace } from '../constants';
@@ -22,17 +23,20 @@ import { THeaderProps } from './types';
 const Header: FC<THeaderProps> = ({ name, onRenameFile }) => {
   const { t } = useTranslation();
   const { isOpen, onOpenChange } = useFileNameMenu();
+  const { isRenameRequested, onEditingChange, onRename } = useFileNameRename();
 
   return (
     <div className={styles.Header}>
       <div className={styles.Header__top}>
         <EditableInput
-          action={<FileNameMenu onOpenChange={onOpenChange} open={isOpen} />}
+          action={<FileNameMenu onOpenChange={onOpenChange} onRename={onRename} open={isOpen} />}
           actionOpen={isOpen}
           ariaLabel={t(`${translationNameSpace}.renameAriaLabel`)}
+          autoEdit={isRenameRequested}
           className={styles.Header__name}
           onActionOpenChange={onOpenChange}
           onChange={onRenameFile}
+          onEditingChange={onEditingChange}
           value={name}
         />
         <MinimizeUiButton />

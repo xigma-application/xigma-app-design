@@ -1,5 +1,5 @@
 import userEvent from '@testing-library/user-event';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 // components
@@ -74,6 +74,19 @@ describe('Header behaviors', () => {
 
     // result
     expect(onRenameFile).toHaveBeenCalledWith('Screenshots');
+  });
+
+  it('should focus the editable field when Rename is clicked in the file menu', async () => {
+    // mock
+    const user = userEvent.setup();
+
+    // before
+    renderHeader({ name: 'Screenshots', onRenameFile: vi.fn() });
+    await user.click(screen.getByRole('button', { name: 'File menu' }));
+    await user.click(screen.getByText('Rename'));
+
+    // result
+    await waitFor(() => expect(screen.getByRole('textbox', { name: 'Rename file' })).toHaveFocus());
   });
 
   it('should render the menu and minimize UI buttons', () => {

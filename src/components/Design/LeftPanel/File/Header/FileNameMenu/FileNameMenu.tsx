@@ -26,10 +26,11 @@ const { MenuItem, MenuSeparator, MenuSub } = MenuCompound;
 
 export type TFileNameMenuProps = {
   onOpenChange: TFunc<[boolean]>;
+  onRename: TFunc;
   open: boolean;
 };
 
-const FileNameMenu: FC<TFileNameMenuProps> = ({ onOpenChange, open }) => {
+const FileNameMenu: FC<TFileNameMenuProps> = ({ onOpenChange, onRename, open }) => {
   const { t } = useTranslation();
 
   return (
@@ -54,7 +55,7 @@ const FileNameMenu: FC<TFileNameMenuProps> = ({ onOpenChange, open }) => {
       </MenuSub>
       <MenuSeparator />
       <MenuItem disabled label={t(FILE_MENU_DUPLICATE_KEY)} withCheck={false} />
-      <MenuItem disabled label={t(FILE_MENU_RENAME_KEY)} withCheck={false} />
+      <MenuItem label={t(FILE_MENU_RENAME_KEY)} onClick={onRename} withCheck={false} />
       <MenuItem disabled label={t(FILE_MENU_MOVE_FILE_KEY)} withCheck={false} />
       <MenuItem disabled label={t(FILE_MENU_MOVE_TO_TRASH_KEY)} withCheck={false} />
     </Menu>
