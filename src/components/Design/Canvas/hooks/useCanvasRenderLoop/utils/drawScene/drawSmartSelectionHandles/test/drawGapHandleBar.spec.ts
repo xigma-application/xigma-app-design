@@ -1,5 +1,9 @@
 // others
-import { SMART_SELECTION_GAP_HANDLE_LENGTH_PX, SMART_SELECTION_GAP_HANDLE_WIDTH_PX } from 'constant/canvas';
+import {
+  SMART_SELECTION_GAP_HANDLE_FILL_INSET_PX,
+  SMART_SELECTION_GAP_HANDLE_LENGTH_PX,
+  SMART_SELECTION_GAP_HANDLE_WIDTH_PX,
+} from 'constant/canvas';
 
 // utils
 import { drawGapHandleBar } from '../drawGapHandleBar';
@@ -34,14 +38,32 @@ describe('drawGapHandleBar', () => {
     // before
     drawGapHandleBar(gl, program, buffer, gap, 'vertical', 200, 200, IDENTITY_VIEWPORT);
 
-    // result
-    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    // result — one filled quad for the white background, one smaller filled quad for the pink centre
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
     expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 6);
 
     const [[, vertices]] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
 
     expect(vertices[0]).toBeCloseTo(100 - SMART_SELECTION_GAP_HANDLE_WIDTH_PX / 2);
     expect(vertices[1]).toBeCloseTo(50 - SMART_SELECTION_GAP_HANDLE_LENGTH_PX / 2);
+  });
+
+  it('should inset the pink fill quad from the white background quad by the fill inset on every side', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+
+    // before
+    drawGapHandleBar(gl, program, buffer, gap, 'vertical', 200, 200, IDENTITY_VIEWPORT);
+
+    // result — second bufferData call is the smaller fill quad, inset on both dimensions
+    const [, [, fillVertices]] = (gl.bufferData as ReturnType<typeof vi.fn>).mock.calls;
+    const fillWidth = SMART_SELECTION_GAP_HANDLE_WIDTH_PX - 2 * SMART_SELECTION_GAP_HANDLE_FILL_INSET_PX;
+    const fillLength = SMART_SELECTION_GAP_HANDLE_LENGTH_PX - 2 * SMART_SELECTION_GAP_HANDLE_FILL_INSET_PX;
+
+    expect(fillVertices[0]).toBeCloseTo(100 - fillWidth / 2);
+    expect(fillVertices[1]).toBeCloseTo(50 - fillLength / 2);
   });
 
   it('should draw a wide, short quad for a horizontal bar', () => {
