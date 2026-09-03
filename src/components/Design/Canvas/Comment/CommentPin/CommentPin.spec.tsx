@@ -32,7 +32,6 @@ const createTestStore = (viewport = { x: 0, y: 0, zoom: 1 }): EnhancedStore<{ de
         editingTextContent: '',
         isActionsPanelOpen: false,
         isMediaToolArmed: false,
-        designHintLabelKey: null,
         isUiHidden: false,
         isUiMinimized: false,
         lastFrameTool: ToolName.frame,

@@ -401,7 +401,5 @@
   "design.toolbar.vectorEditToolbar.tool.lasso": "Lasso",
   "design.toolbar.vectorEditToolbar.tool.paint": "Maluj",
   "design.toolbar.vectorEditToolbar.tool.shapeBuilder": "Kreator kształtów",
-  "design.toolbar.vectorEditToolbar.tool.variableWidth": "Zmienna szerokość",
-  "design.toolbar.zoomHint.fit": "Dopasowano widok",
-  "design.toolbar.zoomHint.selection": "Dopasowano do zaznaczenia"
+  "design.toolbar.vectorEditToolbar.tool.variableWidth": "Zmienna szerokość"
 }

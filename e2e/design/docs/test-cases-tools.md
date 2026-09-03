@@ -67,28 +67,15 @@ fit is "smart": it fits the current selection when one exists, otherwise it fits
 node, and both fit-based paths account for the current left/right panel widths via
 `getVisibleCanvasRect`.
 
-| #   | Scenario                                                                                                                  | Unit |        E2E        |
-| --- | ------------------------------------------------------------------------------------------------------------------------- | :--: | :---------------: |
-| 1   | Ctrl/Cmd+= steps the zoom in, actually changing the rendered content                                                      |  ✅  | ✅ `zoom.spec.ts` |
-| 2   | Zoom to fit (Shift+1) fits only the current selection when one exists, and fits every top-level node once it's cleared    |  ✅  | ✅ `zoom.spec.ts` |
-| 3   | Zoom in/out/100%/fit/selection, the percentage presets, and previous/next frame all compute the correct target viewport   |  ✅  |         —         |
-| 4   | The fit rect accounts for the current left/right panel widths, and each treats a hidden/minimized panel as zero width     |  ✅  |         —         |
-| 5   | Zoom to fit/selection shows a `DesignHint` snackbar above the toolbar (plain text, no value) that self-dismisses after 3s |  ✅  | ✅ `zoom.spec.ts` |
+| #   | Scenario                                                                                                                | Unit |        E2E        |
+| --- | ----------------------------------------------------------------------------------------------------------------------- | :--: | :---------------: |
+| 1   | Ctrl/Cmd+= steps the zoom in, actually changing the rendered content                                                    |  ✅  | ✅ `zoom.spec.ts` |
+| 2   | Zoom to fit (Shift+1) fits only the current selection when one exists, and fits every top-level node once it's cleared  |  ✅  | ✅ `zoom.spec.ts` |
+| 3   | Zoom in/out/100%/fit/selection, the percentage presets, and previous/next frame all compute the correct target viewport |  ✅  |         —         |
+| 4   | The fit rect accounts for the current left/right panel widths, and each treats a hidden/minimized panel as zero width   |  ✅  |         —         |
 
 Scenarios 3–4 are pure viewport-math claims (`getZoomToViewport`/`getFitViewport`/
 `getVisibleCanvasRect`/`getAdjacentFrameBounds`, all in `Canvas/utils/`) already asserted precisely
 in their own unit specs and in each `handleZoom*.spec.ts` — no browser-timing stakes beyond what
 scenarios 1–2 already prove end to end (a real keyboard shortcut actually reaching `setViewport`
 and repainting the canvas).
-
-Scenario 5: `handleZoomToFit`/`handleZoomToSelection` dispatch a generic `designHintLabelKey`
-(store/design) after computing the new viewport — a reusable "toast above the toolbar" mechanism,
-not zoom-specific, meant for any future momentary hint. It's rendered by
-`Toolbar/DesignHint/DesignHint.tsx`, which composes the generic `shared/UI/Snackbar` component; the
-3-second auto-hide itself lives in `Snackbar`'s own `useSnackbarAutoHide` hook
-(`autoHideAfterMs`/`onAutoHide` props), not duplicated per consumer — `Toolbar/MediaToolHint` stays
-persistent (no `autoHideAfterMs`) since its dismissal is user-driven (a close button), unlike
-`DesignHint`'s time-driven one. The auto-hide timing itself is covered precisely by
-`useSnackbarAutoHide.spec.ts`/`Snackbar.spec.tsx`/`DesignHint.spec.tsx` via fake timers; the e2e test
-only proves a real Zoom to fit keystroke reaches the hint end to end and that it's gone again after
-its real duration elapses.

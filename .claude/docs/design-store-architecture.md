@@ -339,30 +339,6 @@ it), so panel width must be subtracted explicitly. `refs.layout.leftPanelWidthRe
 `rightPanelWidthRef` already read `0` when a panel is hidden or minimized (`useReportPanelWidth`),
 so no separate minimized-state check is needed.
 
-`handleZoomToFit.ts`/`handleZoomToSelection.ts` also dispatch `setDesignHintLabelKey` alongside
-`setViewport`, feeding a generic, reusable "momentary hint above the toolbar" mechanism — see the
-next section.
-
-### `designHintLabelKey` — a generic momentary-hint mechanism (not zoom-specific)
-
-`state.design.designHintLabelKey: string | null` holds an i18n key (or `null`). Any feature can
-dispatch `setDesignHintLabelKey('some.translation.key')` to show a plain-text hint floating above
-the toolbar; it self-clears after a fixed duration, no per-feature timer needed. Currently zoom is
-the only producer (`ZOOM_HINT_FIT_LABEL_KEY`/`ZOOM_HINT_SELECTION_LABEL_KEY`,
-`Toolbar/DesignHint/constants.ts`), but the state field and the rendering component are deliberately
-generic — a future feature reuses the same `setDesignHintLabelKey` dispatch rather than growing a
-parallel mechanism.
-
-- `Toolbar/DesignHint/DesignHint.tsx` reads `selectDesignHintLabelKey`, renders nothing when `null`,
-  otherwise renders `t(labelKey)` inside `shared/UI/Snackbar`.
-- The 3-second auto-hide timer lives **inside `Snackbar` itself**
-  (`shared/UI/Snackbar/hooks/useSnackbarAutoHide.ts`), driven by two opt-in props —
-  `autoHideAfterMs` and `onAutoHide` — not duplicated in every consumer. `DesignHint` passes
-  `onAutoHide={() => dispatch(setDesignHintLabelKey(null))}`; `Toolbar/MediaToolHint` (the other
-  `Snackbar` consumer) omits both props and stays visible until its own close button is clicked,
-  since its dismissal is user-driven, not time-driven. Any future `Snackbar` consumer gets the same
-  choice for free.
-
 ## 7. Test conventions for this layer
 
 A recurring (not universally enforced) `buildState(overrides: Partial<TDesignState> = {}) => TDesignState`

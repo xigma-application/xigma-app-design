@@ -79,7 +79,6 @@ const initialState: TDesignState = {
   areAdditionalLabelsVisible: true,
   areRulersVisible: false,
   commentDraftPosition: null,
-  designHintLabelKey: null,
   editingNodeId: null,
   editingSelectionChangedAt: 0,
   editingSelectionEnd: 0,
@@ -170,9 +169,6 @@ const designSlice = createSlice({
       state.activePageId = action.payload;
     },
     setActiveTool: (state, action: PayloadAction<ToolName>) => handleSetActiveTool(state, action.payload),
-    setDesignHintLabelKey: (state, action: PayloadAction<string | null>) => {
-      state.designHintLabelKey = action.payload;
-    },
     setMediaToolArmed: (state, action: PayloadAction<boolean>) => {
       state.isMediaToolArmed = action.payload;
     },
@@ -246,7 +242,6 @@ export const {
   setActionsPanelOpen,
   setActivePage,
   setActiveTool,
-  setDesignHintLabelKey,
   setMediaToolArmed,
   setPaint,
   setPenActiveVertexId,

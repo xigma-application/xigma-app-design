@@ -76,7 +76,6 @@ const state = {
     editingTextContent: 'hello',
     isActionsPanelOpen: true,
     isMediaToolArmed: false,
-    designHintLabelKey: null,
     isUiHidden: false,
     isUiMinimized: true,
     lastFrameTool: ToolName.section,

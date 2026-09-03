@@ -34,7 +34,6 @@ const buildState = (nodes: Record<string, TSceneNode> = {}): TDesignState => ({
   editingTextContent: '',
   isActionsPanelOpen: false,
   isMediaToolArmed: false,
-  designHintLabelKey: null,
   isUiHidden: false,
   isUiMinimized: false,
   lastFrameTool: ToolName.frame,

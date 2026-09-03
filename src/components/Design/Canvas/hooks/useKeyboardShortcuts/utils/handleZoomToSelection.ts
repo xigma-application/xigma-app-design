@@ -1,9 +1,8 @@
 // others
 import { ZOOM_FIT_PADDING_PX } from '../../../constants';
-import { ZOOM_HINT_SELECTION_LABEL_KEY } from 'components/Design/Toolbar/DesignHint/constants';
 
 // store
-import { setDesignHintLabelKey, setViewport } from 'store/design/slice';
+import { setViewport } from 'store/design/slice';
 import { selectSelectedNodes } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
@@ -27,6 +26,5 @@ export const handleZoomToSelection = (dispatch: AppDispatch, refs: TCanvasRefs):
     );
 
     dispatch(setViewport(getFitViewport(getSelectionBounds(selectedNodes), visibleRect, ZOOM_FIT_PADDING_PX)));
-    dispatch(setDesignHintLabelKey(ZOOM_HINT_SELECTION_LABEL_KEY));
   }
 };

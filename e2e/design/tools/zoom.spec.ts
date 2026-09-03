@@ -43,16 +43,3 @@ test('zoom to fit is selection-aware: it fits the selection when one exists, and
 
   expect(fitSelection.equals(fitAll)).toBe(false);
 });
-
-test('zoom to fit shows a hint bar above the toolbar that disappears on its own', async ({ page }) => {
-  const designPage = new DesignPage(page);
-
-  await designPage.goto('e2e-test-zoom-to-fit-hint');
-  await expect(designPage.canvas).toBeVisible();
-
-  await designPage.drawFrame(700, 300, 760, 360);
-  await page.keyboard.press('Shift+1');
-
-  await expect(page.getByText('Zoomed to fit')).toBeVisible();
-  await expect(page.getByText('Zoomed to fit')).toBeHidden({ timeout: 4000 });
-});
