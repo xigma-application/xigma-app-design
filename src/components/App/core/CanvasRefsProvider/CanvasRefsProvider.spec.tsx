@@ -89,9 +89,13 @@ describe('CanvasRefsProvider behaviors', () => {
       starRatio: { starRatioDragRef: { current: null } },
       transform: {
         alignmentGuideRef: { current: null },
+        aspectRatioLockGuideRef: { current: null },
         contactGuidesRef: { current: null },
         distanceGuidesRef: { current: null },
         draggedNodeIdsRef: { current: null },
+        dropTargetFrameIdRef: { current: null },
+        equalSpacingGuidesRef: { current: null },
+        matchedPairGuidesRef: { current: null },
         resizedNodeIdsRef: { current: null },
         rotateDragRef: { current: null },
         rotatedNodeIdsRef: { current: null },

@@ -39,6 +39,7 @@ const createCanvasRefs = (): TCanvasRefs =>
     transform: {
       alignmentGuideRef: { current: null },
       draggedNodeIdsRef: { current: null },
+      dropTargetFrameIdRef: { current: null },
       equalSpacingGuidesRef: { current: null },
       matchedPairGuidesRef: { current: null },
     },
@@ -47,7 +48,19 @@ const createCanvasRefs = (): TCanvasRefs =>
 
 const addFrameNode = (x: number, y: number, size = 20): string => {
   store.dispatch(
-    addNode({ fill: '#ff0000', height: size, name: 'Frame', parentId: null, rotation: 0, childIds: [], clipContent: true, type: NodeType.frame, width: size, x, y }),
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ff0000',
+      height: size,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: size,
+      x,
+      y,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());
@@ -437,5 +450,51 @@ describe('continueDrag', () => {
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({
       vertices: { v1: { id: 'v1', x: 0, y: 0 }, v2: { id: 'v2', x: 100, y: 0 } },
     });
+  });
+
+  it('should populate the drop-target frame ref once the dragged selection lands over a frame', () => {
+    // mock — a 20x20 rect dragged so its centre lands inside a 300x300 frame
+    const rectId = addRectNode(0, 0, 20);
+    const frameId = addFrameNode(200, 0, 300);
+
+    store.dispatch(setSelection([rectId]));
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const dragStateRef = createDragStateRef({
+      hasMoved: false,
+      nodeOrigins: { [rectId]: { x: 0, y: 0 } },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+    });
+
+    // before
+    continueDrag(canvas, pointerEvent(300, 50), store.dispatch, dragStateRef, canvasRefs, setClassName);
+
+    // result
+    expect(canvasRefs.transform.dropTargetFrameIdRef.current).toBe(frameId);
+  });
+
+  it('should clear the drop-target frame ref once the dragged selection moves back over empty canvas', () => {
+    // mock
+    const rectId = addRectNode(0, 0, 20);
+    addFrameNode(2000, 2000, 300);
+
+    store.dispatch(setSelection([rectId]));
+
+    const canvas = createCanvas();
+    const canvasRefs = createCanvasRefs();
+    const dragStateRef = createDragStateRef({
+      hasMoved: false,
+      nodeOrigins: { [rectId]: { x: 0, y: 0 } },
+      pendingClickAction: null,
+      pointerStart: { x: 0, y: 0 },
+    });
+
+    // before — dragged far from the frame
+    continueDrag(canvas, pointerEvent(10, 10), store.dispatch, dragStateRef, canvasRefs, setClassName);
+
+    // result
+    expect(canvasRefs.transform.dropTargetFrameIdRef.current).toBeNull();
   });
 });

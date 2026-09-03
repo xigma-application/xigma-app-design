@@ -1,11 +1,12 @@
 import { RefObject } from 'react';
 
 // store
-import { setSelection } from 'store/design/slice';
+import { addNode, setSelection } from 'store/design/slice';
 import { store } from 'store';
-import { selectSelectedIds } from 'store/design/selectors';
+import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 
 // types
+import { NodeType } from 'types/design/enums';
 import { TDragState } from 'types/design/selectionTool/types';
 
 // utils
@@ -23,6 +24,47 @@ const createCanvas = (): HTMLCanvasElement => {
 const pointerEvent = (pointerId = 1): PointerEvent => new PointerEvent('pointerup', { pointerId });
 
 const createDragStateRef = (dragState: TDragState | null = null): RefObject<TDragState | null> => ({ current: dragState });
+
+const addFrameNode = (x: number, y: number, size = 200): string => {
+  store.dispatch(
+    addNode({
+      childIds: [],
+      clipContent: true,
+      fill: '#ff0000',
+      height: size,
+      name: 'Frame',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.frame,
+      width: size,
+      x,
+      y,
+    }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addRectNode = (x: number, y: number, size = 20): string => {
+  store.dispatch(
+    addNode({ fill: '#00ff00', height: size, name: 'Rectangle', parentId: null, rotation: 0, type: NodeType.rectangle, width: size, x, y }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const movedDragState = (): TDragState => ({
+  candidateShapes: [],
+  dispatchThrottle: { frameId: null, run: null },
+  hasMoved: true,
+  nodeOrigins: {},
+  pendingClickAction: null,
+  pointerStart: { x: 0, y: 0 },
+});
 
 describe('disarmDrag', () => {
   const setClassName = vi.fn();
@@ -107,5 +149,26 @@ describe('disarmDrag', () => {
     // result
     expect(selectSelectedIds(store.getState())).toEqual(['a', 'b']);
     expect(dragStateRef.current).toBeNull();
+  });
+
+  it('should reparent the dragged selection into the drop-target frame and clear the ref', () => {
+    // mock
+    const frameId = addFrameNode(0, 0);
+    const rectId = addRectNode(500, 500);
+
+    store.dispatch(setSelection([rectId]));
+
+    const canvas = createCanvas();
+    const dragStateRef = createDragStateRef(movedDragState());
+    const canvasRefs = createCanvasRefs({ transform: { dropTargetFrameIdRef: { current: frameId } } });
+
+    // before
+    disarmDrag(canvas, pointerEvent(), store.dispatch, dragStateRef, canvasRefs, setClassName);
+
+    // result
+    const page = selectActivePage(store.getState());
+    expect(page.nodes[rectId].parentId).toBe(frameId);
+    expect((page.nodes[frameId] as { childIds: string[] }).childIds).toEqual([rectId]);
+    expect(canvasRefs.transform.dropTargetFrameIdRef.current).toBeNull();
   });
 });

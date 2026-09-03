@@ -263,6 +263,7 @@ export type TTransformRefs = {
   contactGuidesRef: RefObject<TShapeContactGuide[] | null>;
   distanceGuidesRef: RefObject<TDistanceGuides | null>;
   draggedNodeIdsRef: RefObject<Set<string> | null>;
+  dropTargetFrameIdRef: RefObject<string | null>;
   equalSpacingGuidesRef: RefObject<TEqualSpacingGuides | null>;
   matchedPairGuidesRef: RefObject<TMatchedPairGuides | null>;
   resizedNodeIdsRef: RefObject<Set<string> | null>;

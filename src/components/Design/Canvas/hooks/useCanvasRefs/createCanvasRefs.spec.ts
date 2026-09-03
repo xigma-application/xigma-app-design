@@ -85,6 +85,7 @@ describe('createCanvasRefs behaviors', () => {
         contactGuidesRef: { current: null },
         distanceGuidesRef: { current: null },
         draggedNodeIdsRef: { current: null },
+        dropTargetFrameIdRef: { current: null },
         equalSpacingGuidesRef: { current: null },
         matchedPairGuidesRef: { current: null },
         resizedNodeIdsRef: { current: null },

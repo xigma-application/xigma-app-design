@@ -4,7 +4,7 @@ import { RefObject } from 'react';
 import { ALIGNMENT_SNAP_TOLERANCE_PX, EQUAL_SPACING_SNAP_TOLERANCE_PX, GRID_CELL_SIZE_MATCH_TOLERANCE_PX } from 'constant/canvas';
 
 // store
-import { selectNodes, selectViewport } from 'store/design/selectors';
+import { selectNodes, selectRenderOrderedNodes, selectSelectedNodes, selectViewport } from 'store/design/selectors';
 import { AppDispatch, store } from 'store';
 
 // types
@@ -17,6 +17,7 @@ import { getAxisLockedPoint } from 'components/Design/Canvas/utils/getAxisLocked
 import { getChainGapDragSnap } from './getChainGapDragSnap';
 import { getDominantAxis } from 'components/Design/Canvas/utils/getDominantAxis';
 import { getDragAlignmentSnap } from 'components/Design/Canvas/utils/getDragAlignmentSnap/getDragAlignmentSnap';
+import { getDragDropTargetFrame } from './getDragDropTargetFrame';
 import { getMatchedPairDragGuides } from './getMatchedPairDragGuides';
 import { getPointerPosition } from '../../../../../utils/getPointerPosition';
 import { initDraggedNodeIds } from './initDraggedNodeIds';
@@ -62,11 +63,14 @@ export const continueDrag = (
       GRID_CELL_SIZE_MATCH_TOLERANCE_PX / viewport.zoom,
       ALIGNMENT_SNAP_TOLERANCE_PX / viewport.zoom,
     );
+    const selectedNodes = selectSelectedNodes(state);
+    const renderOrderedNodes = selectRenderOrderedNodes(state);
 
     dragState.hasMoved = true;
     canvasRefs.transform.alignmentGuideRef.current = axisLock || matchedPairGuides ? null : guide;
     canvasRefs.transform.equalSpacingGuidesRef.current = axisLock || matchedPairGuides ? null : chainGapSnap.guides;
     canvasRefs.transform.matchedPairGuidesRef.current = axisLock ? null : matchedPairGuides;
+    canvasRefs.transform.dropTargetFrameIdRef.current = getDragDropTargetFrame(selectedNodes, deltaX, deltaY, renderOrderedNodes, nodes);
 
     setClassName(axisLock && AXIS_LOCK_CLASS_NAME[axisLock]);
     initDraggedNodeIds(canvasRefs, dragState);

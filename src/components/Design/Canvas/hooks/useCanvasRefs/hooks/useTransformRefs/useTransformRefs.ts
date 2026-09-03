@@ -15,6 +15,7 @@ export const useTransformRefs = (): TTransformRefs => {
   const contactGuidesRef = useRef<TShapeContactGuide[] | null>(null);
   const distanceGuidesRef = useRef<TDistanceGuides | null>(null);
   const draggedNodeIdsRef = useRef<Set<string> | null>(null);
+  const dropTargetFrameIdRef = useRef<string | null>(null);
   const equalSpacingGuidesRef = useRef<TEqualSpacingGuides | null>(null);
   const matchedPairGuidesRef = useRef<TMatchedPairGuides | null>(null);
   const resizedNodeIdsRef = useRef<Set<string> | null>(null);
@@ -29,6 +30,7 @@ export const useTransformRefs = (): TTransformRefs => {
       contactGuidesRef,
       distanceGuidesRef,
       draggedNodeIdsRef,
+      dropTargetFrameIdRef,
       equalSpacingGuidesRef,
       matchedPairGuidesRef,
       resizedNodeIdsRef,

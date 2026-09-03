@@ -30,6 +30,7 @@ import { drawDraftFrameNameLabel } from './drawFrameNameLabels/drawDraftFrameNam
 import { drawDistanceGuides } from './drawDistanceGuides/drawDistanceGuides';
 import { drawDraftSectionNameLabel } from './drawSectionNameLabels/drawDraftSectionNameLabel';
 import { drawDraftSizeLabel } from './drawDraftSizeLabel';
+import { drawDropTargetFrameOutline } from './drawDropTargetFrameOutline';
 import { drawEditingPathTextHandle } from './drawEditingPathTextHandle';
 import { drawEditingText } from './drawEditingText';
 import { drawEllipseArcHandleLayer } from './drawEllipseArcHandleLayer/drawEllipseArcHandleLayer';
@@ -152,6 +153,7 @@ export const drawScene = (
   drawEditingPathTextHandle(ctx, editingTextBox, editingPathNode);
   drawVectorEditAlignmentGuide(ctx, refs);
   drawTransformAlignmentGuide(ctx, refs);
+  drawDropTargetFrameOutline(ctx, refs, nodesById);
   drawAspectRatioLockGuide(ctx, refs);
   drawVectorLasso(ctx, refs);
   drawVectorShapeBuilderPath(ctx, refs);
