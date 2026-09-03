@@ -28,6 +28,7 @@ export const continueSmartSelectionGapDrag = (
     const draggedGapMidpointShiftPerGapUnit = dragState.gapIndex + 0.5;
     const newGap = Math.max(0, dragState.originalGapValue + pointerDelta / draggedGapMidpointShiftPerGapUnit);
 
+    dragState.badgeAnchor = worldPoint;
     dragState.currentGapValue = newGap;
     dispatchSmartSelectionGapUpdates(dispatch, dragState, newGap);
   }

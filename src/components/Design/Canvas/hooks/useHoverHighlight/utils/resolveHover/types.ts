@@ -1,7 +1,7 @@
 // types
 import { TDraftRect, TEditingTextBox, TPoint, TResizeHandle } from 'types/canvas';
 import { TSceneNode, TViewport } from 'types/design/types';
-import { TVectorMultiSelectBox } from 'types/design/canvas/types';
+import { TCanvasRefs, TVectorMultiSelectBox } from 'types/design/canvas/types';
 import { ToolName } from 'types/design/enums';
 
 export type THoverResult = {
@@ -19,6 +19,7 @@ export type THoverResolverContext = {
   leafNodes: TSceneNode[];
   nodesById: Record<string, TSceneNode>;
   point: TPoint;
+  refs: TCanvasRefs;
   resizableSelectedNodes: TSceneNode[];
   resizeHandleHit: { bounds: TDraftRect; handle: TResizeHandle; rotation: number } | null;
   selectedNodes: TSceneNode[];

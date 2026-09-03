@@ -36,6 +36,7 @@ export const useHoverHighlight = (refs: TCanvasRefs): void => {
   const handlePointerLeave = (canvas: HTMLCanvasElement): void => {
     lastPointerClientPositionRef.current = null;
     refs.transform.distanceGuidesRef.current = null;
+    refs.hover.hoveredSmartSelectionGapRef.current = null;
     setHoverState(canvas, hoverRef, setClassName, activeTool === ToolName.comment ? 'comment' : null, '', null);
   };
 
@@ -64,6 +65,7 @@ export const useHoverHighlight = (refs: TCanvasRefs): void => {
         window.removeEventListener('keyup', onModifierKeyUp);
         lastPointerClientPositionRef.current = null;
         refs.transform.distanceGuidesRef.current = null;
+        refs.hover.hoveredSmartSelectionGapRef.current = null;
         setHoverState(canvas, hoverRef, setClassName, null, '', null);
       };
     }

@@ -4,6 +4,7 @@ import { TEllipseNode, TGroupNode, TLineNode, TPolygonNode, TRectangleNode, TSta
 import { THoverResolverContext } from '../../types';
 
 // utils
+import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs';
 import { resolveCornerRadiusHover } from '../resolveCornerRadiusHover';
 import { resolveEditingTextHover } from '../resolveEditingTextHover';
 import { resolveEllipseArcHover } from '../resolveEllipseArcHover';
@@ -13,6 +14,7 @@ import { resolvePlainNodeHover } from '../resolvePlainNodeHover';
 import { resolvePolygonVertexHover } from '../resolvePolygonVertexHover';
 import { resolveResizeHover } from '../resolveResizeHover';
 import { resolveRotateHover } from '../resolveRotateHover';
+import { resolveSmartSelectionGapHover } from '../resolveSmartSelectionGapHover';
 import { resolveStarRatioHover } from '../resolveStarRatioHover';
 import { resolveStarVertexHover } from '../resolveStarVertexHover';
 import { resolveVectorMultiSelectResizeHover } from '../resolveVectorMultiSelectResizeHover';
@@ -29,6 +31,7 @@ const createContext = (overrides: Partial<THoverResolverContext>): THoverResolve
   leafNodes: [],
   nodesById: {},
   point: { x: 0, y: 0 },
+  refs: createCanvasRefs(),
   resizableSelectedNodes: [],
   resizeHandleHit: null,
   selectedNodes: [],
@@ -131,6 +134,50 @@ const rectangle: TRectangleNode = {
   x: 0,
   y: 0,
 };
+
+describe('resolveSmartSelectionGapHover', () => {
+  const rowA: TRectangleNode = { ...rectangle, id: 'row-a', x: 0, y: 0 };
+  const rowB: TRectangleNode = { ...rectangle, id: 'row-b', x: 150, y: 0 };
+
+  it('should return a hover result with the move-x cursor class over a row gap handle', () => {
+    // result
+    expect(resolveSmartSelectionGapHover(createContext({ point: { x: 125, y: 50 }, selectedNodes: [rowA, rowB] }))).toEqual({
+      className: 'move-x',
+      cursor: '',
+      nodeId: null,
+    });
+  });
+
+  it("should stash the hovered gap's axis, value and pointer position on the shared ref for the draw loop", () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    // before
+    resolveSmartSelectionGapHover(createContext({ point: { x: 125, y: 50 }, refs, selectedNodes: [rowA, rowB] }));
+
+    // result
+    expect(refs.hover.hoveredSmartSelectionGapRef.current).toEqual({ axis: 'x', gapValue: 50, point: { x: 125, y: 50 } });
+  });
+
+  it('should clear the ref and return undefined when the point misses every gap handle', () => {
+    // mock
+    const refs = createCanvasRefs();
+
+    refs.hover.hoveredSmartSelectionGapRef.current = { axis: 'x', gapValue: 50, point: { x: 125, y: 50 } };
+
+    // before
+    const result = resolveSmartSelectionGapHover(createContext({ point: { x: 900, y: 900 }, refs, selectedNodes: [rowA, rowB] }));
+
+    // result
+    expect(result).toBeUndefined();
+    expect(refs.hover.hoveredSmartSelectionGapRef.current).toBeNull();
+  });
+
+  it('should return undefined when the selection does not form a valid Smart Selection layout', () => {
+    // result
+    expect(resolveSmartSelectionGapHover(createContext({ point: { x: 50, y: 50 }, selectedNodes: [rowA] }))).toBeUndefined();
+  });
+});
 
 describe('resolveLineEndpointHover', () => {
   it('should return a hover result over a selected line endpoint', () => {

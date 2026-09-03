@@ -60,3 +60,34 @@ test('dragging a Smart Selection gap handle grows the gap uniformly, keeps the f
   expect(afterUndo[idA]).toMatchObject({ x: nodeA.x, y: nodeA.y });
   expect(afterUndo[idB]).toMatchObject({ x: nodeB.x, y: nodeB.y });
 });
+
+test('hovering a Smart Selection gap handle switches the cursor to move-x and back to default off it', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-smart-selection-gap-hover');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.drawRectangle(700, 300, 750, 350); // A — auto-selected on creation
+  await designPage.drawRectangle(800, 300, 850, 350); // B — auto-selected, replacing A's selection
+  await designPage.click(720, 320, { shift: true }); // add A back to the selection alongside B
+
+  const before = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+
+    return { nodes: activePage.nodes, rootOrder: activePage.rootOrder };
+  });
+
+  const [idA, idB] = before.rootOrder;
+  const nodeA = before.nodes[idA] as { height: number; width: number; x: number; y: number };
+  const nodeB = before.nodes[idB] as { height: number; width: number; x: number; y: number };
+  const gapMidX = (nodeA.x + nodeA.width + nodeB.x) / 2;
+  const gapMidY = nodeA.y + nodeA.height / 2;
+
+  await designPage.pointerMove(gapMidX, gapMidY);
+  await expect(designPage.canvas).toHaveClass(/move-x/);
+
+  await designPage.pointerMove(gapMidX, gapMidY + 200);
+  await expect(designPage.canvas).not.toHaveClass(/move-x/);
+});

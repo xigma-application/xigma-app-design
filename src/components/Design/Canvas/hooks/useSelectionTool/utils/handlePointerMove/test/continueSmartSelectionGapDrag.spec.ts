@@ -80,6 +80,7 @@ describe('continueSmartSelectionGapDrag', () => {
     // midpoint to track the pointer 1:1; b moves to 0+50+110=160
     expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idB]).toMatchObject({ x: 160, y: 0 });
     expect(dragState.hasMoved).toBe(true);
+    expect(dragState.badgeAnchor).toEqual({ x: 105, y: 25 });
   });
 
   it('should clamp the gap at 0 instead of going negative', () => {

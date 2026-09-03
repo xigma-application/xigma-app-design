@@ -44,7 +44,6 @@ describe('armSmartSelectionGapOnPointerDown', () => {
       'x',
       1,
       50,
-      midpoint,
       point,
     );
   });

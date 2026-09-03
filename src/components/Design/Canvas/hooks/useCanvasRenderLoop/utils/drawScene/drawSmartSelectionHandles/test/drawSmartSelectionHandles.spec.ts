@@ -7,14 +7,14 @@ import { createCanvasRefs } from '../../../../../useCanvasRefs/createCanvasRefs'
 import { drawSmartSelectionHandles } from '../drawSmartSelectionHandles';
 
 const drawSmartSelectionGapHandlesMock = vi.fn();
-const drawSmartSelectionGapValueBadgeMock = vi.fn();
+const drawSmartSelectionGapHoverLabelMock = vi.fn();
 const drawSmartSelectionSwapHandlesMock = vi.fn();
 
 vi.mock('../drawSmartSelectionGapHandles', () => ({
   drawSmartSelectionGapHandles: (...args: unknown[]): void => drawSmartSelectionGapHandlesMock(...args),
 }));
-vi.mock('../drawSmartSelectionGapValueBadge', () => ({
-  drawSmartSelectionGapValueBadge: (...args: unknown[]): void => drawSmartSelectionGapValueBadgeMock(...args),
+vi.mock('../drawSmartSelectionGapHoverLabel', () => ({
+  drawSmartSelectionGapHoverLabel: (...args: unknown[]): void => drawSmartSelectionGapHoverLabelMock(...args),
 }));
 vi.mock('../drawSmartSelectionSwapHandles', () => ({
   drawSmartSelectionSwapHandles: (...args: unknown[]): void => drawSmartSelectionSwapHandlesMock(...args),
@@ -42,7 +42,7 @@ const rect = (id: string, x: number): TSceneNode =>
 describe('drawSmartSelectionHandles', () => {
   beforeEach(() => {
     drawSmartSelectionGapHandlesMock.mockClear();
-    drawSmartSelectionGapValueBadgeMock.mockClear();
+    drawSmartSelectionGapHoverLabelMock.mockClear();
     drawSmartSelectionSwapHandlesMock.mockClear();
   });
 
@@ -55,7 +55,7 @@ describe('drawSmartSelectionHandles', () => {
 
     expect(drawSmartSelectionGapHandlesMock).not.toHaveBeenCalled();
     expect(drawSmartSelectionSwapHandlesMock).not.toHaveBeenCalled();
-    expect(drawSmartSelectionGapValueBadgeMock).toHaveBeenCalledTimes(1);
+    expect(drawSmartSelectionGapHoverLabelMock).toHaveBeenCalledTimes(1);
   });
 
   it('should draw gap and swap handles for a valid row selection', () => {

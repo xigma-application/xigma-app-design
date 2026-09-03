@@ -7,12 +7,14 @@ import { resolvePlainNodeHover } from './hoverResolvers/resolvePlainNodeHover';
 import { resolvePolygonVertexHover } from './hoverResolvers/resolvePolygonVertexHover';
 import { resolveResizeHover } from './hoverResolvers/resolveResizeHover';
 import { resolveRotateHover } from './hoverResolvers/resolveRotateHover';
+import { resolveSmartSelectionGapHover } from './hoverResolvers/resolveSmartSelectionGapHover';
 import { resolveStarRatioHover } from './hoverResolvers/resolveStarRatioHover';
 import { resolveStarVertexHover } from './hoverResolvers/resolveStarVertexHover';
 import { resolveVectorMultiSelectResizeHover } from './hoverResolvers/resolveVectorMultiSelectResizeHover';
 import { resolveVectorMultiSelectRotateHover } from './hoverResolvers/resolveVectorMultiSelectRotateHover';
 
 export const HOVER_RESOLVERS = [
+  resolveSmartSelectionGapHover,
   resolveLineEndpointHover,
   resolvePathOffsetHover,
   resolveEditingTextHover,

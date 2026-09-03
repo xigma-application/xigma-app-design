@@ -21,7 +21,6 @@ export const armSmartSelectionGapDrag = (
   axis: 'x' | 'y',
   gapIndex: number,
   originalGapValue: number,
-  midpoint: TPoint,
   pointerStart: TPoint,
 ): void => {
   const { anchorPosition, anchorSize, cascadeGroups } = getSmartSelectionCascadeGroups(layout, axis);
@@ -31,7 +30,7 @@ export const armSmartSelectionGapDrag = (
     anchorPosition,
     anchorSize,
     axis,
-    badgeAnchor: midpoint,
+    badgeAnchor: pointerStart,
     cascadeGroups,
     currentGapValue: originalGapValue,
     dispatchThrottle: { frameId: null, run: null },

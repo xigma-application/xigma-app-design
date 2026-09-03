@@ -6,6 +6,7 @@ import { NodeType } from 'types/design/enums';
 import { TBoxSceneNode, TSceneNode } from 'types/design/types';
 
 // utils
+import { createCanvasRefs } from '../../../../useCanvasRefs/createCanvasRefs';
 import { drawSelectionSizeLabel } from '../drawSelectionSizeLabel';
 
 const drawValueLabelMock = vi.fn();
@@ -42,7 +43,12 @@ describe('drawSelectionSizeLabel', () => {
 
   it('should draw nothing when there is no selection', () => {
     // before
-    drawSelectionSizeLabel({ buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT }, [], []);
+    drawSelectionSizeLabel(
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
+      [],
+      [],
+      createCanvasRefs(),
+    );
 
     // result
     expect(drawValueLabelMock).not.toHaveBeenCalled();
@@ -54,6 +60,7 @@ describe('drawSelectionSizeLabel', () => {
       { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       [buildNode()],
       ['node-1'],
+      createCanvasRefs(),
     );
 
     // result
@@ -66,7 +73,53 @@ describe('drawSelectionSizeLabel', () => {
       { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       [buildNode()],
       [],
+      createCanvasRefs(),
       'node-1',
+    );
+
+    // result
+    expect(drawValueLabelMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw nothing while hovering a Smart Selection gap handle, deferring to its own mouse-following label', () => {
+    // before
+    drawSelectionSizeLabel(
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
+      [buildNode()],
+      [],
+      createCanvasRefs({ hover: { hoveredSmartSelectionGapRef: { current: { axis: 'x', gapValue: 50, point: { x: 0, y: 0 } } } } }),
+    );
+
+    // result
+    expect(drawValueLabelMock).not.toHaveBeenCalled();
+  });
+
+  it('should draw nothing while dragging a Smart Selection gap handle', () => {
+    // before
+    drawSelectionSizeLabel(
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
+      [buildNode()],
+      [],
+      createCanvasRefs({
+        smartSelection: {
+          gapDragRef: {
+            current: {
+              anchorPosition: 0,
+              anchorSize: 50,
+              axis: 'x',
+              badgeAnchor: { x: 0, y: 0 },
+              cascadeGroups: [],
+              currentGapValue: 50,
+              dispatchThrottle: { frameId: null, run: null },
+              gapIndex: 0,
+              hasMoved: true,
+              nodeOrigins: {},
+              originalGapValue: 50,
+              pointerStart: { x: 0, y: 0 },
+            },
+          },
+        },
+      }),
     );
 
     // result
@@ -79,6 +132,7 @@ describe('drawSelectionSizeLabel', () => {
       { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       [buildNode()],
       [],
+      createCanvasRefs(),
     );
 
     // result
@@ -97,6 +151,7 @@ describe('drawSelectionSizeLabel', () => {
       { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       [buildNode({ rotation: 30 })],
       [],
+      createCanvasRefs(),
     );
 
     // result
@@ -124,6 +179,7 @@ describe('drawSelectionSizeLabel', () => {
       { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       [line],
       [],
+      createCanvasRefs(),
     );
 
     // result — anchored at the line's own midpoint, offset straight down by the same small
@@ -160,6 +216,7 @@ describe('drawSelectionSizeLabel', () => {
       { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       [line],
       [],
+      createCanvasRefs(),
     );
 
     // result
@@ -189,6 +246,7 @@ describe('drawSelectionSizeLabel', () => {
       { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       [line],
       [],
+      createCanvasRefs(),
     );
 
     // result — raw angle here is just over 90deg; the label must land near -90deg, not over 90deg
@@ -206,6 +264,7 @@ describe('drawSelectionSizeLabel', () => {
       { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
       nodes,
       [],
+      createCanvasRefs(),
     );
 
     // result — bounds span x:[0,400], y:[0,100]

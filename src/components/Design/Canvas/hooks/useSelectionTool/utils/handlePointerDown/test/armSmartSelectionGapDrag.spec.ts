@@ -41,7 +41,7 @@ describe('armSmartSelectionGapDrag', () => {
     };
 
     // before
-    armSmartSelectionGapDrag(canvas, pointerEvent(3), gapDragRef, layout, 'x', 0, 50, { x: 75, y: 25 }, { x: 75, y: 25 });
+    armSmartSelectionGapDrag(canvas, pointerEvent(3), gapDragRef, layout, 'x', 0, 50, { x: 75, y: 25 });
 
     // result
     expect(gapDragRef.current).toEqual({

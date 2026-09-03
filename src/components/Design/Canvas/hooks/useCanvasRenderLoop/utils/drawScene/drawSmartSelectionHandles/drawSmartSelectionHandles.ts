@@ -5,7 +5,7 @@ import { TSceneNode } from 'types/design/types';
 
 // utils
 import { drawSmartSelectionGapHandles } from './drawSmartSelectionGapHandles';
-import { drawSmartSelectionGapValueBadge } from './drawSmartSelectionGapValueBadge';
+import { drawSmartSelectionGapHoverLabel } from './drawSmartSelectionGapHoverLabel';
 import { drawSmartSelectionSwapHandles } from './drawSmartSelectionSwapHandles';
 import { getSmartSelectionLayout } from '../../../../../utils/getSmartSelectionLayout/getSmartSelectionLayout';
 
@@ -18,5 +18,5 @@ export const drawSmartSelectionHandles = (context: TDrawSceneContext, selectedNo
     drawSmartSelectionSwapHandles(gl, program, buffer, layout, canvasWidth, canvasHeight, viewport);
   }
 
-  drawSmartSelectionGapValueBadge(context, refs);
+  drawSmartSelectionGapHoverLabel(context, refs);
 };

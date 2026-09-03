@@ -74,6 +74,7 @@ export const resolveToolHover = (
     leafNodes: selectRenderOrderedNodes(state).filter((node) => node.type !== NodeType.group),
     nodesById: selectNodes(state),
     point,
+    refs,
     resizableSelectedNodes,
     resizeHandleHit: getResizeHandleAtPoint(point, resizableSelectedNodes, viewport),
     selectedNodes,
