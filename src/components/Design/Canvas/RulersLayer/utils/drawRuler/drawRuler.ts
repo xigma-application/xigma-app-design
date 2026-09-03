@@ -1,6 +1,6 @@
 // others
 import { RULER_BACKGROUND, RULER_FRAME_EXTENT_TICK_FILL, RULER_TEXT_FILL, RULER_TICK_STROKE } from 'constant/canvas';
-import { RULER_FONT, RULER_SIZE_PX } from '../../constants';
+import { RULER_FONT } from '../../constants';
 
 // types
 import { TViewport } from 'types/design/types';
@@ -8,18 +8,17 @@ import { THighlightedRulerGuide } from '../getHighlightedRulerGuide';
 import type { TRulerBand } from '../getRulerBands';
 
 // utils
-import { bandLabelFill } from './bandLabelFill';
 import { getHighlightedRulerTick, getRulerTicks } from '../getRulerTicks';
 import { getRulerStep } from '../getRulerStep';
-import { labelFade } from './labelFade';
 import { paintHighlightedLeftTick } from './paintHighlightedLeftTick';
 import { paintHighlightedTopTick } from './paintHighlightedTopTick';
 import { paintLeftBand } from './paintLeftBand';
 import { paintLeftBandEdges } from './paintLeftBandEdges';
-import { paintLeftTick } from './paintLeftTick';
+import { paintLeftTicks } from './paintLeftTicks';
+import { paintRulerBackground } from './paintRulerBackground';
 import { paintTopBand } from './paintTopBand';
 import { paintTopBandEdges } from './paintTopBandEdges';
-import { paintTopTick } from './paintTopTick';
+import { paintTopTicks } from './paintTopTicks';
 
 export type TDrawRulerParams = {
   background?: string;
@@ -55,13 +54,9 @@ export const drawRuler = (
     width,
   }: TDrawRulerParams,
 ): void => {
-  ctx.clearRect(0, 0, width, height);
-
   const rulerRight = width - rightInset;
 
-  ctx.fillStyle = background;
-  ctx.fillRect(leftInset, 0, rulerRight - leftInset, RULER_SIZE_PX);
-  ctx.fillRect(leftInset, 0, RULER_SIZE_PX, height);
+  paintRulerBackground(ctx, background, width, height, leftInset, rulerRight);
 
   if (topBand) {
     paintTopBand(ctx, topBand, leftInset, rulerRight);
@@ -82,26 +77,26 @@ export const drawRuler = (
   const leftGuideTick =
     highlightedGuide?.axis === 'y' ? getHighlightedRulerTick(highlightedGuide.worldPosition, viewport.y, viewport.zoom, origin.y) : null;
 
-  getRulerTicks(rulerRight, viewport.x, viewport.zoom, origin.x).forEach((tick) => {
-    const style = bandLabelFill(topBand, tick.screenPos, stepPx, textFill, frameExtentTickFill);
-    const guideFade = topGuideTick ? labelFade(Math.abs(tick.screenPos - topGuideTick.screenPos), stepPx) : 1;
-
-    if (style !== null && guideFade !== null) {
-      ctx.fillStyle = style.fill;
-      ctx.globalAlpha = style.alpha * guideFade;
-      paintTopTick(ctx, tick, leftInset);
-    }
-  });
-  getRulerTicks(height, viewport.y, viewport.zoom, origin.y).forEach((tick) => {
-    const style = bandLabelFill(leftBand, tick.screenPos, stepPx, textFill, frameExtentTickFill);
-    const guideFade = leftGuideTick ? labelFade(Math.abs(tick.screenPos - leftGuideTick.screenPos), stepPx) : 1;
-
-    if (style !== null && guideFade !== null) {
-      ctx.fillStyle = style.fill;
-      ctx.globalAlpha = style.alpha * guideFade;
-      paintLeftTick(ctx, tick, leftInset);
-    }
-  });
+  paintTopTicks(
+    ctx,
+    getRulerTicks(rulerRight, viewport.x, viewport.zoom, origin.x),
+    topBand,
+    topGuideTick,
+    leftInset,
+    stepPx,
+    textFill,
+    frameExtentTickFill,
+  );
+  paintLeftTicks(
+    ctx,
+    getRulerTicks(height, viewport.y, viewport.zoom, origin.y),
+    leftBand,
+    leftGuideTick,
+    leftInset,
+    stepPx,
+    textFill,
+    frameExtentTickFill,
+  );
 
   ctx.globalAlpha = 1;
 
