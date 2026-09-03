@@ -66,4 +66,12 @@ describe('bandLabelFill', () => {
     // result — 100px past the left edge fades the same as 100px before the right edge
     expect(bandLabelFill(frameBand(), 100, STEP_PX)?.alpha).toBeCloseTo(bandLabelFill(frameBand(), 900, STEP_PX)!.alpha);
   });
+
+  it('should use the given colors (e.g. the live theme colors) instead of the defaults when supplied', () => {
+    // result — no band: the regular color
+    expect(bandLabelFill(null, 300, STEP_PX, 'var(--text)', 'var(--in-band)')).toEqual({ alpha: 1, fill: 'var(--text)' });
+
+    // result — mid-band: the in-band color
+    expect(bandLabelFill(frameBand(), 500, STEP_PX, 'var(--text)', 'var(--in-band)')).toEqual({ alpha: 1, fill: 'var(--in-band)' });
+  });
 });

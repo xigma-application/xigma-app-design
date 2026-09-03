@@ -287,4 +287,38 @@ describe('drawRuler', () => {
     expect(drawnAt.find((entry) => entry.screenPos === 200)!.alpha).toBe(1); // far enough — untouched
     expect(ctx.globalAlpha).toBe(1); // reset once the ticks are done
   });
+
+  it('should paint the strip in the given background color and the ticks in the given stroke, instead of the defaults', () => {
+    // mock
+    const ctx = createFakeContext();
+    const fillAtRect: string[] = [];
+
+    ctx.fillRect.mockImplementation(() => fillAtRect.push(ctx.fillStyle));
+
+    // action
+    drawRuler(ctx as unknown as CanvasRenderingContext2D, params({ background: 'var(--bg)', tickStroke: 'var(--stroke)' }));
+
+    // result
+    expect(fillAtRect).toEqual(['var(--bg)', 'var(--bg)']);
+    expect(ctx.strokeStyle).toBe('var(--stroke)');
+  });
+
+  it('should color the tick labels with the given text colors instead of the defaults', () => {
+    // mock
+    const ctx = createFakeContext();
+    const fillAtTick: string[] = [];
+
+    paintTopTickMock.mockImplementation(() => fillAtTick.push(ctx.fillStyle));
+    const topBand = { edges: { fromLabel: '0', toLabel: '388' }, fill: '#333954', fromPx: 400, toPx: 800 };
+
+    // action
+    drawRuler(
+      ctx as unknown as CanvasRenderingContext2D,
+      params({ frameExtentTickFill: 'var(--in-band)', textFill: 'var(--text)', topBand, width: 1200 }),
+    );
+
+    // result
+    expect(fillAtTick).toContain('var(--text)'); // outside the band
+    expect(fillAtTick).toContain('var(--in-band)'); // inside the band
+  });
 });

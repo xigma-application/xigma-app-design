@@ -1,5 +1,5 @@
 // others
-import { RULER_BACKGROUND, RULER_TICK_STROKE } from 'constant/canvas';
+import { RULER_BACKGROUND, RULER_FRAME_EXTENT_TICK_FILL, RULER_TEXT_FILL, RULER_TICK_STROKE } from 'constant/canvas';
 import { RULER_FONT, RULER_SIZE_PX } from '../../constants';
 
 // types
@@ -22,12 +22,16 @@ import { paintTopBandEdges } from './paintTopBandEdges';
 import { paintTopTick } from './paintTopTick';
 
 export type TDrawRulerParams = {
+  background?: string;
+  frameExtentTickFill?: string;
   height: number;
   highlightedGuide: THighlightedRulerGuide | null;
   leftBand: TRulerBand | null;
   leftInset: number;
   origin: { x: number; y: number };
   rightInset: number;
+  textFill?: string;
+  tickStroke?: string;
   topBand: TRulerBand | null;
   viewport: TViewport;
   width: number;
@@ -35,13 +39,27 @@ export type TDrawRulerParams = {
 
 export const drawRuler = (
   ctx: CanvasRenderingContext2D,
-  { height, highlightedGuide, leftBand, leftInset, origin, rightInset, topBand, viewport, width }: TDrawRulerParams,
+  {
+    background = RULER_BACKGROUND,
+    frameExtentTickFill = RULER_FRAME_EXTENT_TICK_FILL,
+    height,
+    highlightedGuide,
+    leftBand,
+    leftInset,
+    origin,
+    rightInset,
+    textFill = RULER_TEXT_FILL,
+    tickStroke = RULER_TICK_STROKE,
+    topBand,
+    viewport,
+    width,
+  }: TDrawRulerParams,
 ): void => {
   ctx.clearRect(0, 0, width, height);
 
   const rulerRight = width - rightInset;
 
-  ctx.fillStyle = RULER_BACKGROUND;
+  ctx.fillStyle = background;
   ctx.fillRect(leftInset, 0, rulerRight - leftInset, RULER_SIZE_PX);
   ctx.fillRect(leftInset, 0, RULER_SIZE_PX, height);
 
@@ -56,7 +74,7 @@ export const drawRuler = (
   ctx.font = RULER_FONT;
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
-  ctx.strokeStyle = RULER_TICK_STROKE;
+  ctx.strokeStyle = tickStroke;
 
   const stepPx = getRulerStep(viewport.zoom) * viewport.zoom;
   const topGuideTick =
@@ -65,7 +83,7 @@ export const drawRuler = (
     highlightedGuide?.axis === 'y' ? getHighlightedRulerTick(highlightedGuide.worldPosition, viewport.y, viewport.zoom, origin.y) : null;
 
   getRulerTicks(rulerRight, viewport.x, viewport.zoom, origin.x).forEach((tick) => {
-    const style = bandLabelFill(topBand, tick.screenPos, stepPx);
+    const style = bandLabelFill(topBand, tick.screenPos, stepPx, textFill, frameExtentTickFill);
     const guideFade = topGuideTick ? labelFade(Math.abs(tick.screenPos - topGuideTick.screenPos), stepPx) : 1;
 
     if (style !== null && guideFade !== null) {
@@ -75,7 +93,7 @@ export const drawRuler = (
     }
   });
   getRulerTicks(height, viewport.y, viewport.zoom, origin.y).forEach((tick) => {
-    const style = bandLabelFill(leftBand, tick.screenPos, stepPx);
+    const style = bandLabelFill(leftBand, tick.screenPos, stepPx, textFill, frameExtentTickFill);
     const guideFade = leftGuideTick ? labelFade(Math.abs(tick.screenPos - leftGuideTick.screenPos), stepPx) : 1;
 
     if (style !== null && guideFade !== null) {

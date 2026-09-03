@@ -9,6 +9,7 @@ import { TGuideRefs } from 'types/design/canvas/types';
 
 // utils
 import { drawRuler } from '../utils/drawRuler/drawRuler';
+import { getCssVariable } from 'utils/canvas/getCssVariable';
 import { getHighlightedRulerGuide } from '../utils/getHighlightedRulerGuide';
 import { getRulerBands } from '../utils/getRulerBands';
 
@@ -21,16 +22,22 @@ const renderFrame = (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, i
   const dpr = window.devicePixelRatio || 1;
   const state = store.getState();
   const viewport = selectViewport(state);
-  const { leftBand, origin, topBand } = getRulerBands(selectSelectedNodes(state), viewport);
+  const textFill = getCssVariable('--color-neutral-2');
+  const frameExtentFill = getCssVariable('--color-selected');
+  const { leftBand, origin, topBand } = getRulerBands(selectSelectedNodes(state), viewport, frameExtentFill);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   drawRuler(ctx, {
+    background: getCssVariable('--color-neutral-4'),
+    frameExtentTickFill: textFill,
     height: canvas.clientHeight,
     highlightedGuide: getHighlightedRulerGuide(guides, selectAllGuideLines(state)),
     leftBand,
     leftInset: insetRefs.leftPanelWidthRef.current,
     origin,
     rightInset: insetRefs.rightPanelWidthRef.current,
+    textFill,
+    tickStroke: getCssVariable('--color-neutral-3'),
     topBand,
     viewport,
     width: canvas.clientWidth,

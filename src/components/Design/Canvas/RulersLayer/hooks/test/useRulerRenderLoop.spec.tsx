@@ -128,6 +128,25 @@ describe('useRulerRenderLoop', () => {
     expect(() => renderHook(() => useRulerRenderLoop(canvasRef, true, createInsetRefs(), createGuideRefs()))).not.toThrow();
   });
 
+  it('should resolve the live --color-neutral-4 theme variable and paint the ruler background with it', () => {
+    // mock
+    document.documentElement.style.setProperty('--color-neutral-4', 'rgb(1, 2, 3)');
+    const canvasRef: RefObject<HTMLCanvasElement | null> = { current: document.createElement('canvas') };
+    const capturedFillStyles: string[] = [];
+
+    fakeContext.fillRect.mockImplementation(() => capturedFillStyles.push((fakeContext as unknown as { fillStyle: string }).fillStyle));
+
+    // before
+    renderHook(() => useRulerRenderLoop(canvasRef, true, createInsetRefs(), createGuideRefs()));
+    rafCallbacks[rafCallbacks.length - 1](0);
+
+    // result — the two ruler-strip fills both used the resolved theme color, not the hardcoded default
+    expect(capturedFillStyles).toEqual(['rgb(1, 2, 3)', 'rgb(1, 2, 3)']);
+
+    // after
+    document.documentElement.style.removeProperty('--color-neutral-4');
+  });
+
   it('should fall back to a device pixel ratio of 1 when the browser reports none', () => {
     // mock
     vi.stubGlobal('devicePixelRatio', 0);

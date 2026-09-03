@@ -87,4 +87,15 @@ describe('getRulerBands', () => {
     expect(getRulerBands(nodes, IDENTITY).topBand?.fill).toBe(RULER_SELECTION_BAND_FILL);
     expect(getRulerBands(nodes, IDENTITY).topBand?.edges).toBeNull();
   });
+
+  it('should use the given frame-extent fill color (e.g. the live theme color) instead of the default when supplied', () => {
+    // mock
+    const nodes: TSceneNode[] = [frame()];
+
+    // action
+    const { topBand } = getRulerBands(nodes, IDENTITY, 'var(--resolved-theme-color)');
+
+    // result
+    expect(topBand?.fill).toBe('var(--resolved-theme-color)');
+  });
 });

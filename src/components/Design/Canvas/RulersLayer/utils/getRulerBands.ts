@@ -28,7 +28,11 @@ export type TRulerBands = {
   topBand: TRulerBand | null;
 };
 
-export const getRulerBands = (selectedNodes: TSceneNode[], viewport: TViewport): TRulerBands => {
+export const getRulerBands = (
+  selectedNodes: TSceneNode[],
+  viewport: TViewport,
+  frameExtentFill: string = RULER_FRAME_EXTENT_FILL,
+): TRulerBands => {
   if (selectedNodes.length === 0) {
     return { leftBand: null, origin: { x: 0, y: 0 }, topBand: null };
   }
@@ -36,7 +40,7 @@ export const getRulerBands = (selectedNodes: TSceneNode[], viewport: TViewport):
   const bounds = getSelectionBounds(selectedNodes);
   const single = selectedNodes.length === 1 ? selectedNodes[0] : null;
   const rebasedFrame = single?.type === NodeType.frame && single.rotation === 0 ? single : null;
-  const fill = rebasedFrame ? RULER_FRAME_EXTENT_FILL : RULER_SELECTION_BAND_FILL;
+  const fill = rebasedFrame ? frameExtentFill : RULER_SELECTION_BAND_FILL;
   const step = getRulerStep(viewport.zoom);
 
   return {

@@ -614,8 +614,36 @@ rulers" row, the View-menu "Rulers" item; a plain UI bool like `isUiHidden`, **n
   `--withRulers` BEM modifier (`selectAreRulersVisible`, `cx`) shifts it from `left/top: 12px` to
   `44px` so it clears the ruler strips, with `transition: top 80ms ease-out, left 80ms ease-out`
   on the base class so toggling rulers while minimized animates instead of jumping.
-- Colours (`RULER_BACKGROUND`/`RULER_TEXT_FILL`/`RULER_TICK_STROKE`) live in `constant/canvas.ts`;
-  sizes/fonts in `RulersLayer/constants.ts`.
+- **Rulers are theme-aware — the first (and so far only) canvas surface in this app that is.**
+  Everything else drawn on the WebGL/2D canvases (guides, handles, selection outlines) is still
+  hardcoded to fixed hex constants, deliberately: those are accent/semantic colours (the guide
+  orange-red `GUIDE_STROKE`, the aspect-ratio-lock blue that matches `--color-blue-1` exactly) that
+  Figma-style tools keep constant regardless of UI theme, so they were left untouched. Ruler chrome
+  (background/tick-line/label colours) is different — it's plain UI surface, not an accent — so it
+  needed to track `useTheme`'s Light/Dark/System choice like the rest of the app once that menu
+  became real. Canvas 2D's `fillStyle`/`strokeStyle` can't read `var(--color-*)` directly (unlike
+  `.module.scss` or a `colors.xxx` string in JSX — see [[xigma-theming]] — canvas needs an already-
+  resolved colour string), so a new `utils/canvas/getCssVariable.ts`
+  (`getComputedStyle(document.documentElement).getPropertyValue(name).trim()`) resolves the *live*
+  value at draw time. `useRulerRenderLoop.ts`'s `renderFrame` calls it 4 times per animation frame —
+  once each for `--color-neutral-4` (background), `--color-neutral-3` (tick stroke),
+  `--color-neutral-2` (label text, and reused for the in-band label colour — the two were already
+  near-identical hardcoded hex values), `--color-selected` (the highlighted frame-extent band, the
+  closest existing token to the old hardcoded navy) — and passes the four resolved strings down into
+  `getRulerBands`/`drawRuler`/`bandLabelFill` as new **optional** parameters, each still defaulting
+  to its original hardcoded `constant/canvas.ts` value (`RULER_BACKGROUND`/`RULER_TICK_STROKE`/
+  `RULER_TEXT_FILL`/`RULER_FRAME_EXTENT_FILL`/`RULER_FRAME_EXTENT_TICK_FILL`, all still exported
+  unchanged) when omitted. That default-param shape was deliberate, not just convenience: JSDOM's
+  `getComputedStyle` doesn't resolve custom properties from an actual loaded stylesheet the way a
+  real browser does, so every existing unit test — which construct `getRulerBands(nodes, viewport)`/
+  `drawRuler(ctx, params)` with no theme args at all — keeps working unchanged and still exercises
+  the real (dark-hardcoded) colours; only `useRulerRenderLoop.ts`'s own tests verify the resolve-and-
+  thread wiring, by setting `document.documentElement.style.setProperty('--color-neutral-4', ...)`
+  directly (which JSDOM *does* honor for inline custom properties) and checking the value reaching
+  `ctx.fillStyle` at `fillRect`-call time. `RULER_FRAME_EXTENT_EDGE_FILL`/`RULER_SELECTION_BAND_FILL`
+  (both blue-accent-derived, matching `blue-1`/`blue-2`'s identical-across-themes hex values) and
+  `HIGHLIGHT_TEXT_COLOR` (the guide-highlight coral, `RulersLayer/constants.ts`) stayed untouched
+  for the same "accent colour, not chrome" reason as `GUIDE_STROKE` above.
 
 ## File index
 
