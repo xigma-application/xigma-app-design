@@ -55,16 +55,25 @@ import {
 } from './constants';
 
 // store
-import { selectSelectedIds } from 'store/design/selectors';
+import { selectNodes, selectSelectedIds } from 'store/design/selectors';
 import { useAppSelector } from 'store';
+
+// types
+import { NodeType } from 'types/design/enums';
 
 const { MenuItem, MenuSeparator, MenuSub } = MenuCompound;
 
 const ObjectMenu: FC = () => {
   const { t } = useTranslation();
-  const hasSelection = useAppSelector(selectSelectedIds).length > 0;
+  const selectedIds = useAppSelector(selectSelectedIds);
+  const nodes = useAppSelector(selectNodes);
+  const hasSelection = selectedIds.length > 0;
+  const everySelectedIsFrame = hasSelection && selectedIds.every((id) => nodes[id]?.type === NodeType.frame);
+  const everySelectedIsSection = hasSelection && selectedIds.every((id) => nodes[id]?.type === NodeType.section);
   const {
     onBringToFront,
+    onConvertToFrame,
+    onConvertToSection,
     onFlatten,
     onFlipHorizontal,
     onFlipVertical,
@@ -99,8 +108,18 @@ const ObjectMenu: FC = () => {
         shortcut={KEYBOARD_SHORTCUTS.wrapInNewSection.join('')}
         withCheck={false}
       />
-      <MenuItem disabled label={t(OBJECT_MENU_CONVERT_TO_SECTION_KEY)} withCheck={false} />
-      <MenuItem disabled label={t(OBJECT_MENU_CONVERT_TO_FRAME_KEY)} withCheck={false} />
+      <MenuItem
+        disabled={!everySelectedIsFrame}
+        label={t(OBJECT_MENU_CONVERT_TO_SECTION_KEY)}
+        onClick={onConvertToSection}
+        withCheck={false}
+      />
+      <MenuItem
+        disabled={!everySelectedIsSection}
+        label={t(OBJECT_MENU_CONVERT_TO_FRAME_KEY)}
+        onClick={onConvertToFrame}
+        withCheck={false}
+      />
       <MenuSeparator />
       <MenuItem
         disabled={!hasSelection}

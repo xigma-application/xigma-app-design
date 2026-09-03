@@ -26,6 +26,8 @@ const LayerContextMenu: FC<TLayerContextMenuProps> = ({
 }) => {
   const {
     onBringToFront,
+    onConvertToFrame,
+    onConvertToSection,
     onCopy,
     onFlatten,
     onFlipHorizontal,
@@ -47,6 +49,8 @@ const LayerContextMenu: FC<TLayerContextMenuProps> = ({
       isOpen={isOpen}
       node={node}
       onBringToFront={onBringToFront}
+      onConvertToFrame={onConvertToFrame}
+      onConvertToSection={onConvertToSection}
       onCopy={onCopy}
       onFlatten={onFlatten}
       onFlipHorizontal={onFlipHorizontal}

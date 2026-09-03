@@ -216,17 +216,42 @@ already-exists treatment**, this time by directly reusing `useNodeMenuActions()`
 `selectSelectedIds().length > 0` gate as `EditMenu`'s Duplicate/Delete above (every underlying
 handler already self-guards past that — e.g. `handleFlattenSelection`/`handleOutlineStroke` no-op
 when nothing in the selection is actually flatten/outline-able, `handleUngroupSelection` no-ops
-when nothing selected is actually a group). The other ~26 rows (Frame selection, Wrap in new
-section, Convert to section/frame, Set as thumbnail, Add auto layout, Create component, Reset/
-Detach instance, Bring forward, Send backward, the three Rotate rows, Boolean groups' four
-operations, Show/Hide selection, Lock/Unlock selection, Hide other layers, Collapse layers, Remove
-fill/stroke, Swap fill and stroke, Remove interactions, Delete contents) stayed `disabled` — asked
-for directly (skip whatever has no existing implementation rather than build ~15 new algorithms in
-one pass) and confirmed by grepping `store/design/slice.ts`'s action list plus every handler this
-section and [[vector-network]]/[[masks]]/[[selection-and-manipulation]] already document: none of
-those exists anywhere yet. The four `MenuSub` rows (More layout options, Slots, Main component,
-Boolean groups) were already enabled pre-existing (they always were, regardless of their own
-children's disabled state) and weren't touched.
+when nothing selected is actually a group). The other ~24 rows (Frame selection, Wrap in new
+section, Set as thumbnail, Add auto layout, Create component, Reset/Detach instance, Bring forward,
+Send backward, the three Rotate rows, Boolean groups' four operations, Show/Hide selection,
+Lock/Unlock selection, Hide other layers, Collapse layers, Remove fill/stroke, Swap fill and stroke,
+Remove interactions, Delete contents) stayed `disabled` — asked for directly (skip whatever has no
+existing implementation rather than build ~15 new algorithms in one pass) and confirmed by grepping
+`store/design/slice.ts`'s action list plus every handler this section and
+[[vector-network]]/[[masks]]/[[selection-and-manipulation]] already document: none of those exists
+anywhere yet. The four `MenuSub` rows (More layout options, Slots, Main component, Boolean groups)
+were already enabled pre-existing (they always were, regardless of their own children's disabled
+state) and weren't touched.
+
+**Convert to section / Convert to frame is a genuinely new conversion, scoped deliberately narrow —
+frame↔section only, asked for directly, not the group→section path `NodeContextMenu`'s own
+pre-existing `(isFrame || isGroup)` render-guard on that row seems to have anticipated.** The two
+node shapes are close to identical (`TFrameNode` = `TBaseNode` + `fill` + optional
+`guides`/`strokeColor`/`strokeWidth`; `TSectionNode` = `TBaseNode` + `fill`, nothing else), so
+`utils/canvas/convertFrameSection/convertFrameToSection.ts` / `convertSectionToFrame.ts` are pure,
+fully-explicit field-by-field builders (no spread, matching `convertNodeToVector.ts`'s style) — id,
+position, size, rotation, name, parentId, hidden/locked/isMask carry over unchanged; frame→section
+drops the frame-only fields, section→frame simply omits them (matching a freshly-drawn frame, which
+also starts without `guides`). Wired through the same `beginGesture`/`replaceNode`-per-match/
+`endGesture` shape as every other selection-handler in this file:
+`handleConvertSelectionToSection.ts` / `handleConvertSelectionToFrame.ts` filter the selection down
+to the matching type first (self-guarding, so a mixed selection just silently converts the matching
+subset and leaves the rest alone) and no-op entirely when nothing matches. Reached from three
+places, all through **the same pair of `TNodeMenuActions` entries** — `onConvertToSection` /
+`onConvertToFrame`, thin `useConvertSelectionTo*.ts` hooks added to `useNodeMenuActions()` alongside
+the ones above: `NodeContextMenu.tsx`'s existing two rows lost their `disabled` (Convert to section
+now conditionally `disabled={!isFrame}` so it still shows, disabled, for a group — the render-guard
+itself stayed `isFrame || isGroup` on purpose, per the narrow scope; Convert to frame is
+unconditionally enabled since it only renders at all when `isSection`); `ObjectMenu.tsx` computes its
+own `everySelectedIsFrame`/`everySelectedIsSection` (`selectedIds.every(...)`, strict — asked for
+directly: a mixed frame+rectangle or frame+section selection leaves both rows disabled rather than
+converting a subset, unlike every other selection-wide row above) since it isn't gated by a single
+right-clicked node's type the way `NodeContextMenu` is.
 
 **Text on Path can also attach to an existing eligible vector — or a plain shape it converts on the
 spot**, not just draw a fresh ellipse: `useDrawTextOnPathTool.ts`'s `pointerdown` hit-tests via

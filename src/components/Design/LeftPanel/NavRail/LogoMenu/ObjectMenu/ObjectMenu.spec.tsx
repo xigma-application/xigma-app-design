@@ -5,6 +5,8 @@ import { fireEvent, render, screen } from '@testing-library/react';
 
 const {
   onBringToFront,
+  onConvertToFrame,
+  onConvertToSection,
   onFlatten,
   onFlipHorizontal,
   onFlipVertical,
@@ -15,6 +17,8 @@ const {
   onUseAsMask,
 } = vi.hoisted(() => ({
   onBringToFront: vi.fn(),
+  onConvertToFrame: vi.fn(),
+  onConvertToSection: vi.fn(),
   onFlatten: vi.fn(),
   onFlipHorizontal: vi.fn(),
   onFlipVertical: vi.fn(),
@@ -28,6 +32,8 @@ const {
 vi.mock('components/Design/Menu/hooks/useNodeMenuActions', () => ({
   useNodeMenuActions: (): Partial<TNodeMenuActions> => ({
     onBringToFront,
+    onConvertToFrame,
+    onConvertToSection,
     onFlatten,
     onFlipHorizontal,
     onFlipVertical,
@@ -65,6 +71,36 @@ const renderInMenu = (children: ReactNode): ReturnType<typeof render> =>
 const addFrameNode = (): string => {
   store.dispatch(
     addNode({ fill: '#ff0000', height: 20, name: 'Frame', parentId: null, rotation: 0, type: NodeType.frame, width: 20, x: 0, y: 0 }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addSectionNode = (): string => {
+  store.dispatch(
+    addNode({ fill: '#ff0000', height: 20, name: 'Section', parentId: null, rotation: 0, type: NodeType.section, width: 20, x: 0, y: 0 }),
+  );
+
+  const { rootOrder } = selectActivePage(store.getState());
+
+  return rootOrder[rootOrder.length - 1];
+};
+
+const addRectangleNode = (): string => {
+  store.dispatch(
+    addNode({
+      fill: '#ff0000',
+      height: 20,
+      name: 'Rectangle',
+      parentId: null,
+      rotation: 0,
+      type: NodeType.rectangle,
+      width: 20,
+      x: 0,
+      y: 0,
+    }),
   );
 
   const { rootOrder } = selectActivePage(store.getState());
@@ -141,8 +177,6 @@ describe('ObjectMenu', () => {
     [
       'Frame selection',
       'Wrap in new section',
-      'Convert to section',
-      'Convert to frame',
       'Set as thumbnail',
       'Add auto layout',
       'Create component',
@@ -170,6 +204,8 @@ describe('ObjectMenu', () => {
     [
       'Group selection',
       'Ungroup selection',
+      'Convert to section',
+      'Convert to frame',
       'Use as mask',
       'Bring to front',
       'Send to back',
@@ -197,6 +233,7 @@ describe('ObjectMenu', () => {
     const cases: [string, ReturnType<typeof vi.fn>][] = [
       ['Group selection', onGroupSelection],
       ['Ungroup selection', onUngroupSelection],
+      ['Convert to section', onConvertToSection],
       ['Use as mask', onUseAsMask],
       ['Bring to front', onBringToFront],
       ['Send to back', onSendToBack],
@@ -216,5 +253,48 @@ describe('ObjectMenu', () => {
       // result
       expect(handler).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('should enable Convert to frame and call onConvertToFrame when every selected node is a section', () => {
+    // before
+    const sectionId = addSectionNode();
+    store.dispatch(setSelection([sectionId]));
+
+    renderInMenu(<ObjectMenu />);
+
+    // result
+    expect(screen.getByText('Convert to frame').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Convert to section').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+
+    // action
+    fireEvent.click(screen.getByText('Convert to frame'));
+
+    // result
+    expect(onConvertToFrame).toHaveBeenCalledTimes(1);
+  });
+
+  it('should keep Convert to section and Convert to frame disabled for a mixed-type selection', () => {
+    // before — one frame, one section: neither conversion applies to the whole selection
+    const frameId = addFrameNode();
+    const sectionId = addSectionNode();
+    store.dispatch(setSelection([frameId, sectionId]));
+
+    renderInMenu(<ObjectMenu />);
+
+    // result
+    expect(screen.getByText('Convert to section').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+    expect(screen.getByText('Convert to frame').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
+  });
+
+  it('should keep Convert to section disabled when the selection also contains a non-frame node', () => {
+    // before
+    const frameId = addFrameNode();
+    const rectangleId = addRectangleNode();
+    store.dispatch(setSelection([frameId, rectangleId]));
+
+    renderInMenu(<ObjectMenu />);
+
+    // result
+    expect(screen.getByText('Convert to section').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
   });
 });

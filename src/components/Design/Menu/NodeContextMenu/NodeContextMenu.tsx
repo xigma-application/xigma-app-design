@@ -61,6 +61,8 @@ export type TNodeContextMenuProps = {
   isOpen: boolean;
   node: TSceneNode;
   onBringToFront: TFunc;
+  onConvertToFrame: TFunc;
+  onConvertToSection: TFunc;
   onCopy: TFunc;
   onFlatten: TFunc;
   onFlipHorizontal: TFunc;
@@ -85,6 +87,8 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
   isOpen,
   node,
   onBringToFront,
+  onConvertToFrame,
+  onConvertToSection,
   onCopy,
   onFlatten,
   onFlipHorizontal,
@@ -155,8 +159,10 @@ const NodeContextMenu: FC<TNodeContextMenuProps> = ({
         withCheck={false}
       />
       <MenuSeparator />
-      {(isFrame || isGroup) && <MenuItem disabled label={t(NODE_MENU_CONVERT_TO_SECTION_KEY)} withCheck={false} />}
-      {isSection && <MenuItem disabled label={t(NODE_MENU_CONVERT_TO_FRAME_KEY)} withCheck={false} />}
+      {(isFrame || isGroup) && (
+        <MenuItem disabled={!isFrame} label={t(NODE_MENU_CONVERT_TO_SECTION_KEY)} onClick={onConvertToSection} withCheck={false} />
+      )}
+      {isSection && <MenuItem label={t(NODE_MENU_CONVERT_TO_FRAME_KEY)} onClick={onConvertToFrame} withCheck={false} />}
       {!isSection && (
         <MenuItem
           label={t(NODE_MENU_GROUP_SELECTION_KEY)}

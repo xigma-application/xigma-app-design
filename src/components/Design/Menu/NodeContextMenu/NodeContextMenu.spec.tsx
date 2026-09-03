@@ -70,6 +70,8 @@ const renderNodeContextMenu = (props: Partial<TNodeContextMenuProps> = {}): Retu
       isOpen
       node={buildRectangleNode()}
       onBringToFront={vi.fn()}
+      onConvertToFrame={vi.fn()}
+      onConvertToSection={vi.fn()}
       onCopy={vi.fn()}
       onFlatten={vi.fn()}
       onFlipHorizontal={vi.fn()}
@@ -432,16 +434,52 @@ describe('NodeContextMenu', () => {
     expect(screen.queryByText('More layout options')).not.toBeInTheDocument();
   });
 
-  it('should show Convert to section, Ungroup (enabled) and More layout options for a group node, but not Set as thumbnail or Convert to frame', () => {
+  it('should show Convert to section (disabled — group is not a supported conversion yet), Ungroup (enabled) and More layout options for a group node, but not Set as thumbnail or Convert to frame', () => {
     // before
     renderNodeContextMenu({ node: buildGroupNode() });
 
     // result
-    expect(screen.getByText('Convert to section')).toBeInTheDocument();
+    expect(screen.getByText('Convert to section').closest('[role="menuitem"]')).toHaveAttribute('data-disabled');
     expect(screen.getByText('Ungroup').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('More layout options')).toBeInTheDocument();
     expect(screen.queryByText('Set as thumbnail')).not.toBeInTheDocument();
     expect(screen.queryByText('Convert to frame')).not.toBeInTheDocument();
+  });
+
+  it('should enable Convert to section for a frame node and call onConvertToSection on click', async () => {
+    // mock
+    const user = userEvent.setup();
+    const onConvertToSection = vi.fn();
+
+    // before
+    renderNodeContextMenu({ node: buildFrameNode(), onConvertToSection });
+
+    // result
+    expect(screen.getByText('Convert to section').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+
+    // action
+    await user.click(screen.getByText('Convert to section'));
+
+    // result
+    expect(onConvertToSection).toHaveBeenCalledTimes(1);
+  });
+
+  it('should enable Convert to frame for a section node and call onConvertToFrame on click', async () => {
+    // mock
+    const user = userEvent.setup();
+    const onConvertToFrame = vi.fn();
+
+    // before
+    renderNodeContextMenu({ node: buildSectionNode(), onConvertToFrame });
+
+    // result
+    expect(screen.getByText('Convert to frame').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+
+    // action
+    await user.click(screen.getByText('Convert to frame'));
+
+    // result
+    expect(onConvertToFrame).toHaveBeenCalledTimes(1);
   });
 
   it('should call onUngroupSelection on Ungroup click for a group node', async () => {

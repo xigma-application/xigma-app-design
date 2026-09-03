@@ -199,6 +199,52 @@ describe('LayerContextMenu', () => {
     vi.useRealTimers();
   });
 
+  it('should convert a frame into a section on Convert to section click', async () => {
+    // mock
+    const user = userEvent.setup();
+    store.dispatch(
+      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, type: NodeType.frame, width: 10, x: 0, y: 0 }),
+    );
+    const [frameId] = selectActivePage(store.getState()).rootOrder.slice(-1);
+    const frameNode = selectActivePage(store.getState()).nodes[frameId];
+    store.dispatch(setSelection([frameId]));
+
+    // before
+    renderLayerContextMenu(frameNode);
+
+    // action
+    await user.click(screen.getByText('Convert to section'));
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[frameId]).toMatchObject({ id: frameId, type: NodeType.section });
+
+    // after
+    store.dispatch(deleteNode(frameId));
+  });
+
+  it('should convert a section into a frame on Convert to frame click', async () => {
+    // mock
+    const user = userEvent.setup();
+    store.dispatch(
+      addNode({ fill: '#ff0000', height: 10, name: 'A', parentId: null, rotation: 0, type: NodeType.section, width: 10, x: 0, y: 0 }),
+    );
+    const [sectionId] = selectActivePage(store.getState()).rootOrder.slice(-1);
+    const sectionNode = selectActivePage(store.getState()).nodes[sectionId];
+    store.dispatch(setSelection([sectionId]));
+
+    // before
+    renderLayerContextMenu(sectionNode);
+
+    // action
+    await user.click(screen.getByText('Convert to frame'));
+
+    // result
+    expect(selectActivePage(store.getState()).nodes[sectionId]).toMatchObject({ id: sectionId, type: NodeType.frame });
+
+    // after
+    store.dispatch(deleteNode(sectionId));
+  });
+
   it('should replace a rectangle with its vector equivalent on Flatten click', async () => {
     // mock
     const user = userEvent.setup();

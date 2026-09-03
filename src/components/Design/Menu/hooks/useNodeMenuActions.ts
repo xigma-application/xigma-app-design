@@ -1,5 +1,7 @@
 // hooks
 import { useBringSelectionToFront } from './useBringSelectionToFront';
+import { useConvertSelectionToFrame } from './useConvertSelectionToFrame';
+import { useConvertSelectionToSection } from './useConvertSelectionToSection';
 import { useCopySelection } from './useCopySelection';
 import { useFlattenSelection } from './useFlattenSelection';
 import { useFlipSelection } from './useFlipSelection';
@@ -20,6 +22,8 @@ import { TDesignPage } from 'store/design/types';
 
 export type TNodeMenuActions = {
   onBringToFront: TFunc;
+  onConvertToFrame: TFunc;
+  onConvertToSection: TFunc;
   onCopy: TFunc;
   onFlatten: TFunc;
   onFlipHorizontal: TFunc;
@@ -39,6 +43,8 @@ export const useNodeMenuActions = (): TNodeMenuActions => {
   const pages = useAppSelector(selectPages);
   const otherPages = Object.values(pages).filter((page) => page.id !== activePageId);
   const onBringToFront = useBringSelectionToFront();
+  const onConvertToFrame = useConvertSelectionToFrame();
+  const onConvertToSection = useConvertSelectionToSection();
   const onCopy = useCopySelection();
   const onFlatten = useFlattenSelection();
   const onFlipSelection = useFlipSelection();
@@ -52,6 +58,8 @@ export const useNodeMenuActions = (): TNodeMenuActions => {
 
   return {
     onBringToFront,
+    onConvertToFrame,
+    onConvertToSection,
     onCopy,
     onFlatten,
     onFlipHorizontal: onFlipSelection.onFlipHorizontal,
