@@ -324,13 +324,22 @@ describe('getSelectionHitAtPoint', () => {
       expect(hit?.id).toBe(frameId);
     });
 
-    it('should still let a body click re-grab the frame while it is already selected', () => {
+    it('should still let a body click re-grab the frame while it is already selected, when no child sits under the pointer', () => {
       const { frameId } = buildFrameWithChild();
 
       store.dispatch(setSelection([frameId]));
       const hit = getSelectionHitAtPoint({ x: 20300, y: 20300 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
 
       expect(hit?.id).toBe(frameId);
+    });
+
+    it('should hand selection to the child clicked inside a frame that is itself currently selected', () => {
+      const { childId, frameId } = buildFrameWithChild();
+
+      store.dispatch(setSelection([frameId]));
+      const hit = getSelectionHitAtPoint({ x: 20035, y: 20035 }, selectOrderedNodes(store.getState()), IDENTITY_VIEWPORT);
+
+      expect(hit?.id).toBe(childId);
     });
 
     it('should keep selecting an empty frame from a plain click on its body, unchanged', () => {

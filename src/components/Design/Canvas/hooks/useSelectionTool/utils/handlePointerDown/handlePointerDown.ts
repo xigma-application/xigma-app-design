@@ -22,7 +22,7 @@ import { TSelectionToolRefs } from 'types/design/selectionTool/types';
 
 // utils
 import { getPointerPosition } from '../../../../utils/getPointerPosition';
-import { getSelectionHitAtPoint } from './getSelectionHitAtPoint';
+import { getSelectionHitAtPoint } from './getSelectionHitAtPoint/getSelectionHitAtPoint';
 import { screenToWorld } from '../../../../utils/screenToWorld';
 
 export const handlePointerDown = (
