@@ -42,9 +42,11 @@ test('dragging a Smart Selection gap handle grows the gap uniformly, keeps the f
     return pages[activePageId].nodes;
   });
 
-  // A (the anchor) stays put; B shifts right by exactly the gap growth
+  // A (the anchor) stays put; the handle sits at the gap's midpoint, which is anchored on one
+  // side only, so B must shift by 2x the pointer's own movement for the midpoint to track the
+  // pointer 1:1
   expect(afterDrag[idA]).toMatchObject({ x: nodeA.x, y: nodeA.y });
-  expect(afterDrag[idB]).toMatchObject({ x: nodeB.x + growBy, y: nodeB.y });
+  expect(afterDrag[idB]).toMatchObject({ x: nodeB.x + growBy * 2, y: nodeB.y });
 
   await page.keyboard.press('Control+z');
 

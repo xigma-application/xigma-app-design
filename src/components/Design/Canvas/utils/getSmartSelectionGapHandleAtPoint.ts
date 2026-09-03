@@ -11,6 +11,7 @@ import { getSmartSelectionLayout } from './getSmartSelectionLayout/getSmartSelec
 
 export type TSmartSelectionGapHit = {
   axis: 'x' | 'y';
+  gapIndex: number;
   gapValue: number;
   layout: TSmartSelectionLayout;
   midpoint: TPoint;
@@ -33,17 +34,17 @@ export const getSmartSelectionGapHandleAtPoint = (
       const rowHit = findNearestGap(point, layout.rowGaps, tolerance);
 
       if (columnHit) {
-        return { axis: 'x', gapValue: columnHit.value, layout, midpoint: columnHit.midpoint };
+        return { axis: 'x', gapIndex: columnHit.index, gapValue: columnHit.value, layout, midpoint: columnHit.midpoint };
       }
 
       if (rowHit) {
-        return { axis: 'y', gapValue: rowHit.value, layout, midpoint: rowHit.midpoint };
+        return { axis: 'y', gapIndex: rowHit.index, gapValue: rowHit.value, layout, midpoint: rowHit.midpoint };
       }
     } else {
       const hit = findNearestGap(point, layout.gaps, tolerance);
 
       if (hit) {
-        return { axis: layout.type === 'row' ? 'x' : 'y', gapValue: hit.value, layout, midpoint: hit.midpoint };
+        return { axis: layout.type === 'row' ? 'x' : 'y', gapIndex: hit.index, gapValue: hit.value, layout, midpoint: hit.midpoint };
       }
     }
   }

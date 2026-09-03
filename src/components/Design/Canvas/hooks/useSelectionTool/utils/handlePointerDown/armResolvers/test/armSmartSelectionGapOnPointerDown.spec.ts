@@ -29,7 +29,7 @@ describe('armSmartSelectionGapOnPointerDown', () => {
     const layout = { gaps: [], nodes: [], type: 'row' };
     const midpoint = { x: 75, y: 25 };
 
-    getSmartSelectionGapHandleAtPointMock.mockReturnValue({ axis: 'x', gapValue: 50, layout, midpoint });
+    getSmartSelectionGapHandleAtPointMock.mockReturnValue({ axis: 'x', gapIndex: 1, gapValue: 50, layout, midpoint });
 
     // before
     const result = armSmartSelectionGapOnPointerDown({ canvas, canvasRefs, event, point, selectedNodes, viewport } as never);
@@ -42,6 +42,7 @@ describe('armSmartSelectionGapOnPointerDown', () => {
       canvasRefs.smartSelection.gapDragRef,
       layout,
       'x',
+      1,
       50,
       midpoint,
       point,

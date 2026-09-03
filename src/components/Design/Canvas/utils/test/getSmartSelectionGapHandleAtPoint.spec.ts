@@ -20,7 +20,15 @@ describe('getSmartSelectionGapHandleAtPoint', () => {
 
     const hit = getSmartSelectionGapHandleAtPoint({ x: 75, y: 25 }, nodes, VIEWPORT);
 
-    expect(hit).toMatchObject({ axis: 'x', gapValue: 50 });
+    expect(hit).toMatchObject({ axis: 'x', gapIndex: 0, gapValue: 50 });
+  });
+
+  it("should report the hit gap's own index in a row of 3+ nodes", () => {
+    const nodes = [rect('a', 0, 0), rect('b', 100, 0), rect('c', 200, 0)];
+
+    const hit = getSmartSelectionGapHandleAtPoint({ x: 175, y: 25 }, nodes, VIEWPORT);
+
+    expect(hit).toMatchObject({ axis: 'x', gapIndex: 1, gapValue: 50 });
   });
 
   it("should hit a column's gap handle with axis y", () => {
@@ -28,7 +36,7 @@ describe('getSmartSelectionGapHandleAtPoint', () => {
 
     const hit = getSmartSelectionGapHandleAtPoint({ x: 25, y: 75 }, nodes, VIEWPORT);
 
-    expect(hit).toMatchObject({ axis: 'y', gapValue: 50 });
+    expect(hit).toMatchObject({ axis: 'y', gapIndex: 0, gapValue: 50 });
   });
 
   it('should miss when the point is far from every gap', () => {
@@ -50,13 +58,13 @@ describe('getSmartSelectionGapHandleAtPoint', () => {
   it("should hit a grid's column-gap handle with axis x", () => {
     const hit = getSmartSelectionGapHandleAtPoint({ x: 75, y: 75 }, buildAsymmetricGrid(), VIEWPORT);
 
-    expect(hit).toMatchObject({ axis: 'x', gapValue: 50 });
+    expect(hit).toMatchObject({ axis: 'x', gapIndex: 0, gapValue: 50 });
   });
 
   it("should hit a grid's row-gap handle with axis y", () => {
     const hit = getSmartSelectionGapHandleAtPoint({ x: 90, y: 75 }, buildAsymmetricGrid(), VIEWPORT);
 
-    expect(hit).toMatchObject({ axis: 'y', gapValue: 50 });
+    expect(hit).toMatchObject({ axis: 'y', gapIndex: 0, gapValue: 50 });
   });
 
   it('should miss a grid when the point is far from every gap', () => {

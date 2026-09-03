@@ -41,7 +41,7 @@ describe('armSmartSelectionGapDrag', () => {
     };
 
     // before
-    armSmartSelectionGapDrag(canvas, pointerEvent(3), gapDragRef, layout, 'x', 50, { x: 75, y: 25 }, { x: 75, y: 25 });
+    armSmartSelectionGapDrag(canvas, pointerEvent(3), gapDragRef, layout, 'x', 0, 50, { x: 75, y: 25 }, { x: 75, y: 25 });
 
     // result
     expect(gapDragRef.current).toEqual({
@@ -52,6 +52,7 @@ describe('armSmartSelectionGapDrag', () => {
       cascadeGroups: [{ nodeIds: [idB], originalPosition: 100, size: 50 }],
       currentGapValue: 50,
       dispatchThrottle: { frameId: null, run: null },
+      gapIndex: 0,
       hasMoved: false,
       nodeOrigins: { [idB]: { x: 100, y: 0 } },
       originalGapValue: 50,

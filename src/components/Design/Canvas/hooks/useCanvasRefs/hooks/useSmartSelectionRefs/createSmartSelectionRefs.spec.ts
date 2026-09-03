@@ -21,6 +21,7 @@ describe('createSmartSelectionRefs behaviors', () => {
         cascadeGroups: [],
         currentGapValue: 50,
         dispatchThrottle: { frameId: null, run: null },
+        gapIndex: 0,
         hasMoved: false,
         nodeOrigins: {},
         originalGapValue: 50,

@@ -24,8 +24,9 @@ export const continueSmartSelectionGapDrag = (
     dragState.hasMoved = true;
 
     const worldPoint = screenToWorld(getPointerPosition(canvas, event), selectViewport(store.getState()));
-    const delta = dragState.axis === 'x' ? worldPoint.x - dragState.pointerStart.x : worldPoint.y - dragState.pointerStart.y;
-    const newGap = Math.max(0, dragState.originalGapValue + delta);
+    const pointerDelta = dragState.axis === 'x' ? worldPoint.x - dragState.pointerStart.x : worldPoint.y - dragState.pointerStart.y;
+    const draggedGapMidpointShiftPerGapUnit = dragState.gapIndex + 0.5;
+    const newGap = Math.max(0, dragState.originalGapValue + pointerDelta / draggedGapMidpointShiftPerGapUnit);
 
     dragState.currentGapValue = newGap;
     dispatchSmartSelectionGapUpdates(dispatch, dragState, newGap);

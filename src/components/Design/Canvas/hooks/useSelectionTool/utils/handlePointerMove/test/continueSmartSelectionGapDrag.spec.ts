@@ -63,6 +63,7 @@ describe('continueSmartSelectionGapDrag', () => {
       cascadeGroups: [{ nodeIds: [idB], originalPosition: 100, size: 50 }],
       currentGapValue: 50,
       dispatchThrottle: { frameId: null, run: null },
+      gapIndex: 0,
       hasMoved: false,
       nodeOrigins: { [idB]: { x: 100, y: 0 } },
       originalGapValue: 50,
@@ -74,8 +75,10 @@ describe('continueSmartSelectionGapDrag', () => {
     continueSmartSelectionGapDrag(canvas, pointerEvent(105, 25), store.dispatch, gapDragRef);
     flushThrottledDispatch(dragState.dispatchThrottle);
 
-    // result — new gap = 80, b moves to 0+50+80=130
-    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idB]).toMatchObject({ x: 130, y: 0 });
+    // result — the handle's own midpoint only moves by half the gap growth (the anchor side is
+    // fixed, only b's side moves), so the gap must grow by 2x the pointer delta (60) for the
+    // midpoint to track the pointer 1:1; b moves to 0+50+110=160
+    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idB]).toMatchObject({ x: 160, y: 0 });
     expect(dragState.hasMoved).toBe(true);
   });
 
@@ -91,6 +94,7 @@ describe('continueSmartSelectionGapDrag', () => {
       cascadeGroups: [{ nodeIds: [idB], originalPosition: 100, size: 50 }],
       currentGapValue: 50,
       dispatchThrottle: { frameId: null, run: null },
+      gapIndex: 0,
       hasMoved: false,
       nodeOrigins: { [idB]: { x: 100, y: 0 } },
       originalGapValue: 50,

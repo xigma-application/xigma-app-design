@@ -66,6 +66,7 @@ describe('disarmSmartSelectionGapDrag', () => {
           store.dispatch({ payload: { changes: { x: 999 }, id: idB }, type: 'design/updateNode' });
         },
       },
+      gapIndex: 0,
       hasMoved: true,
       nodeOrigins: { [idB]: { x: 100, y: 0 } },
       originalGapValue: 50,

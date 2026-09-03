@@ -361,6 +361,7 @@ export type TSmartSelectionGapDragState = {
   cascadeGroups: TSmartSelectionCascadeGroup[];
   currentGapValue: number;
   dispatchThrottle: TThrottledDispatchState;
+  gapIndex: number;
   hasMoved: boolean;
   nodeOrigins: Record<string, TNodeOrigin>;
   originalGapValue: number;
