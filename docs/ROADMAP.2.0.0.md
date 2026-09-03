@@ -72,6 +72,16 @@ with nothing cached across calls.
       re-extracting and re-assembling from scratch on every Flatten/Outline-as-stroke call.
 - [ ] **Move extraction/assembly off the main thread** (Web Worker) — it currently blocks.
 
+## Stage 3 — Performance: large documents (many shapes)
+
+Goal: handle documents with tens of thousands of shapes as smoothly as Figma does. Today the app
+already slows down well before that — clicking, hovering, and rendering all check or draw every
+shape on the page, even the ones far outside the visible area, so everything gets slower the more
+shapes a document has. Not yet started (2026-09-03).
+
+- [ ] Skip shapes that are off-screen instead of drawing them every frame.
+- [ ] Speed up click/hover detection so it stays fast no matter how many shapes are on the page.
+
 ## Related
 
 [[canvas-vector-performance]] — full write-up of what's already done (cluster cache, spatial hash
