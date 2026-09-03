@@ -33,6 +33,7 @@ const buildState = (nodes: TDesignPage['nodes'], selectedIds: string[] = []): TD
   editingTextBox: null,
   editingTextContent: '',
   isActionsPanelOpen: false,
+  isMediaToolArmed: false,
   isUiHidden: false,
   isUiMinimized: false,
   lastFrameTool: ToolName.frame,

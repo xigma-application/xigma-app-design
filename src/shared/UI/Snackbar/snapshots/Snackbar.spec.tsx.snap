@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Snackbar snapshots > should render Snackbar 1`] = `
+<DocumentFragment>
+  <div
+    class="_Snackbar_b42af7"
+  >
+    Content
+  </div>
+</DocumentFragment>
+`;

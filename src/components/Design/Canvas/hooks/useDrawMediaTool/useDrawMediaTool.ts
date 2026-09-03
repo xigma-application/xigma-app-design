@@ -1,13 +1,12 @@
 import { useEffect, useRef } from 'react';
 
 // store
-import { setActiveTool, setSelection } from 'store/design/slice';
+import { setActiveTool, setMediaToolArmed, setSelection } from 'store/design/slice';
 import { selectActiveTool } from 'store/design/selectors';
 import { useAppDispatch, useAppSelector, useAppStore } from 'store';
 
 // types
 import { TCanvasRefs } from 'types/design/canvas/types';
-import { TArmedMedia } from './utils/loadArmedMedia';
 import { ToolName } from 'types/design/enums';
 import { TPoint } from 'types/canvas';
 
@@ -25,17 +24,16 @@ export type TMediaToolConfig = {
 export const useDrawMediaTool = (refs: TCanvasRefs, { name, tool }: TMediaToolConfig): void => {
   const { canvasRef, draftRef } = refs;
   const { aspectRatioLockGuideRef } = refs.transform;
+  const { armedRef, queueRef } = refs.media;
   const activeTool = useAppSelector(selectActiveTool);
   const dispatch = useAppDispatch();
   const appStore = useAppStore();
   const startRef = useRef<TPoint | null>(null);
-  const armedRef = useRef<TArmedMedia | null>(null);
-  const queueRef = useRef<File[]>([]);
 
   const handleFileChange = (event: Event): void => {
     dispatch(setSelection([]));
     queueRef.current = Array.from((event.target as HTMLInputElement).files ?? []);
-    armNextFile(canvasRef, armedRef, queueRef);
+    armNextFile(canvasRef, armedRef, queueRef, dispatch);
   };
 
   const handleFileCancel = (): void => {
@@ -87,6 +85,7 @@ export const useDrawMediaTool = (refs: TCanvasRefs, { name, tool }: TMediaToolCo
         draftRef.current = null;
         aspectRatioLockGuideRef.current = null;
         canvas.style.cursor = '';
+        dispatch(setMediaToolArmed(false));
       };
     }
   }, [activeTool, appStore, aspectRatioLockGuideRef, canvasRef, dispatch, draftRef, name, tool]);

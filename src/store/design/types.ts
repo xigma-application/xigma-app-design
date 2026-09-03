@@ -39,6 +39,7 @@ export type TDesignState = {
   editingTextBox: TEditingTextBox | null;
   editingTextContent: string;
   isActionsPanelOpen: boolean;
+  isMediaToolArmed: boolean;
   isUiHidden: boolean;
   isUiMinimized: boolean;
   lastFrameTool: ToolName;

@@ -362,6 +362,8 @@
   "design.toolbar.actionsPanel.suggestions": "Suggestions",
   "design.toolbar.actionsPanel.tabAll": "All",
   "design.toolbar.actionsPanel.tabPluginsWidgets": "Plugins & widgets",
+  "design.toolbar.mediaHint.clickOrDragToPlace": "Click or drag to place",
+  "design.toolbar.mediaHint.placeAll": "Place all",
   "design.toolbar.tool.arrow": "Arrow",
   "design.toolbar.tool.comment": "Comment",
   "design.toolbar.tool.default": "Move",

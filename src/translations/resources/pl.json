@@ -374,6 +374,8 @@
   "design.toolbar.actionsPanel.suggestions": "Sugestie",
   "design.toolbar.actionsPanel.tabAll": "Wszystko",
   "design.toolbar.actionsPanel.tabPluginsWidgets": "Wtyczki i widżety",
+  "design.toolbar.mediaHint.clickOrDragToPlace": "Kliknij lub przeciągnij, aby umieścić",
+  "design.toolbar.mediaHint.placeAll": "Umieść wszystkie",
   "design.toolbar.tool.arrow": "Strzałka",
   "design.toolbar.tool.comment": "Komentarz",
   "design.toolbar.tool.default": "Przesuń",

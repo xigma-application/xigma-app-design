@@ -43,3 +43,23 @@ test('places multiple picked files one after another, staying on the tool until 
   const afterSecond = await designPage.canvas.screenshot();
   expect(afterSecond.equals(afterFirst)).toBe(false);
 });
+
+test('Place all places every picked file at once and reverts to the default tool', async ({ page }) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-project-place-all');
+  await expect(designPage.canvas).toBeVisible();
+
+  await designPage.pickMediaFile([FIXTURE_PATH, SECOND_FIXTURE_PATH]);
+
+  const before = await designPage.canvas.screenshot();
+
+  await expect(page.getByText('Click or drag to place')).toBeVisible();
+  await designPage.placeAllMedia();
+
+  const defaultTool = designPage.toolRadio('default');
+  await expect(defaultTool).toHaveAttribute('aria-checked', 'true');
+
+  const after = await designPage.canvas.screenshot();
+  expect(after.equals(before)).toBe(false);
+});

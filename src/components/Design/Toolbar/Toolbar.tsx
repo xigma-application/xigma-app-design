@@ -4,6 +4,7 @@ import { FC } from 'react';
 // components
 import ActionsButton from './ActionsButton/ActionsButton';
 import ActionsPanel from './ActionsButton/ActionsPanel/ActionsPanel';
+import MediaToolHint from './MediaToolHint/MediaToolHint';
 import MouseModes from './MouseModes/MouseModes';
 import VectorEditToolbar from './VectorEditToolbar/VectorEditToolbar';
 
@@ -35,6 +36,7 @@ const Toolbar: FC = () => {
           <MouseModes />
           <ActionsButton />
           <VectorEditToolbar />
+          <MediaToolHint />
         </div>
       </PopoverPrimitive.Anchor>
       <ActionsPanel />

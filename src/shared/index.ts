@@ -16,6 +16,7 @@ export type { TTooltipProviderProps } from '@xigma/core';
 // components
 export * from './ScrollThumb/ScrollThumb';
 export * from './UI/Checkbox/Checkbox';
+export * from './UI/Snackbar/Snackbar';
 export * from './UI/Text/Text';
 export * from './UI/Tree/Tree';
 export * from './UI/Tree/TreeItem/TreeItem';

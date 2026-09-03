@@ -295,6 +295,10 @@ export class DesignPage {
     await this.click(x, y);
   }
 
+  async placeAllMedia(): Promise<void> {
+    await this.page.getByRole('button', { name: 'Place all' }).click();
+  }
+
   async dragMedia(x1: number, y1: number, x2: number, y2: number): Promise<void> {
     await this.pointerDown(x1, y1);
     await this.page.mouse.move(x2, y2, { steps: 5 });

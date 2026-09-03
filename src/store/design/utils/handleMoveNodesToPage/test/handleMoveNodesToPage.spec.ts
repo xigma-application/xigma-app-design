@@ -60,6 +60,7 @@ const buildState = (source: Partial<TDesignPage>, target: Partial<TDesignPage> =
   editingTextBox: null,
   editingTextContent: '',
   isActionsPanelOpen: false,
+  isMediaToolArmed: false,
   isUiHidden: false,
   isUiMinimized: false,
   lastFrameTool: ToolName.frame,

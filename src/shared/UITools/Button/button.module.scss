@@ -8,6 +8,7 @@
   color: var(--color-neutral-1);
   cursor: pointer;
   display: flex;
+  font-size: 11px;
   padding: 4px 8px;
 
   &:hover {
@@ -20,6 +21,10 @@
     &:hover {
       background-color: var(--color-blue-1);
     }
+  }
+
+  &--outline {
+    border: 1px solid var(--color-neutral-3);
   }
 
   &--disabled {

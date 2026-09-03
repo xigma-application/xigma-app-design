@@ -32,6 +32,7 @@ export const RESIZE_DEBOUNCE_MS = 500;
 export const DEFAULT_SHAPE_SIZE = 100;
 export const DUPLICATE_OFFSET = 10;
 export const MIN_DRAG_DISTANCE_PX = 2;
+export const MEDIA_PLACE_ALL_CASCADE_OFFSET_PX = 32;
 export const MIN_SHAPE_SIZE = 1;
 export const NUDGE_STEP = 1;
 export const NUDGE_STEP_LARGE = 10;

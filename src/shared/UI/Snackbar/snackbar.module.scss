@@ -1,0 +1,13 @@
+.Snackbar {
+  align-items: center;
+  background-color: var(--color-neutral-5);
+  border-radius: var(--radius-large);
+  box-shadow: var(--elevation-200-canvas);
+  box-sizing: border-box;
+  display: flex;
+  gap: var(--spacer-2);
+  height: 40px;
+  padding: var(--spacer-2);
+  touch-action: manipulation;
+  white-space: nowrap;
+}

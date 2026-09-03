@@ -54,7 +54,7 @@ export const handlePointerUp = (
     canvas.releasePointerCapture(event.pointerId);
 
     if (queueRef.current.length > 0) {
-      armNextFile(canvasRef, armedRef, queueRef);
+      armNextFile(canvasRef, armedRef, queueRef, dispatch);
     } else {
       armedRef.current = null;
       dispatch(setActiveTool(ToolName.default));

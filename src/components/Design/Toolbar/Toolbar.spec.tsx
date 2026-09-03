@@ -10,8 +10,11 @@ import CanvasRefsProvider from 'components/App/core/CanvasRefsProvider/CanvasRef
 import { TooltipProvider } from 'shared';
 
 // store
-import { setActionsPanelOpen, toggleUiHidden } from 'store/design/slice';
+import { setActionsPanelOpen, setActiveTool, setMediaToolArmed, toggleUiHidden } from 'store/design/slice';
 import { store } from 'store';
+
+// types
+import { ToolName } from 'types/design/enums';
 
 const renderToolbar = (): ReturnType<typeof render> =>
   render(
@@ -80,6 +83,45 @@ describe('Toolbar behaviors', () => {
 
     // result
     expect(store.getState().design.isActionsPanelOpen).toBe(false);
+  });
+
+  it('should not render the media tool hint when the media tool is inactive', () => {
+    // before
+    renderToolbar();
+
+    // result
+    expect(screen.queryByText('Click or drag to place')).not.toBeInTheDocument();
+  });
+
+  it('should not render the media tool hint while the media tool is active but nothing has been picked yet', () => {
+    // action
+    store.dispatch(setActiveTool(ToolName.media));
+
+    // before
+    renderToolbar();
+
+    // result
+    expect(screen.queryByText('Click or drag to place')).not.toBeInTheDocument();
+
+    // cleanup
+    store.dispatch(setActiveTool(ToolName.default));
+  });
+
+  it('should render the media tool hint once the user has picked media from the system', () => {
+    // action
+    store.dispatch(setActiveTool(ToolName.media));
+    store.dispatch(setMediaToolArmed(true));
+
+    // before
+    renderToolbar();
+
+    // result
+    expect(screen.getByText('Click or drag to place')).toBeInTheDocument();
+    expect(screen.getByText('Place all')).toBeInTheDocument();
+
+    // cleanup
+    store.dispatch(setActiveTool(ToolName.default));
+    store.dispatch(setMediaToolArmed(false));
   });
 
   it('should render nothing when the UI is hidden', () => {

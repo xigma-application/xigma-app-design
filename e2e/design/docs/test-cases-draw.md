@@ -242,6 +242,27 @@ centered rect and asserting pixel equality against the click result), but it fla
 with no code-side cause found and was removed rather than kept as permanent noise — the unit
 coverage above is exact and sufficient on its own.
 
+## "Place all" hint bar
+
+While the media tool is armed, a hint bar (`Toolbar/MediaToolHint/`) floats above the toolbar with
+a "Place all" button. Clicking it places every picked file at once with no drag: the largest file
+(by pixel area) is centered on the panel-aware visible-canvas center
+(`placeAllArmedMedia.ts`/`getPlaceAllRects.ts`, reusing the same `getVisibleCanvasRect`/
+`getRectCenter`/`screenToWorld` chain the zoom-to-fit feature already established), and each
+remaining file cascades up-left off the previous one's top-left corner. The whole batch dispatches
+as one undo step and ends up selected together, then the tool reverts to default — same
+`beginHistoryGesture`/`appendLastCreatedNodeToSelection`/`endHistoryGesture` shape as the
+one-at-a-time flow above, just looped.
+
+| #   | Scenario                                                                           | Unit |            E2E            |
+| --- | ---------------------------------------------------------------------------------- | :--: | :-----------------------: |
+| 111 | "Place all" places every picked file in one action and reverts to the default tool |  ✅  | ✅ `create-media.spec.ts` |
+
+The ranking/cascade math itself (`getPlaceAllRects.spec.ts`) and the dispatch sequence
+(`placeAllArmedMedia.spec.ts`) are covered exactly via direct function calls; the e2e test only
+proves the button is reachable and something visibly changed on the canvas, matching this file's
+usual division of labor between unit and e2e coverage.
+
 ## Text tool (Etap 6 + the create/edit slice of Etap 7)
 
 _(also touches `selection.spec.ts` / `hover.spec.ts` — see `docs/test-cases-selection.md`)_

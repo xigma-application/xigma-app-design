@@ -86,6 +86,7 @@ const initialState: TDesignState = {
   editingTextBox: null,
   editingTextContent: '',
   isActionsPanelOpen: false,
+  isMediaToolArmed: false,
   isUiHidden: false,
   isUiMinimized: false,
   lastFrameTool: DEFAULT_FRAME_TOOL,
@@ -168,6 +169,9 @@ const designSlice = createSlice({
       state.activePageId = action.payload;
     },
     setActiveTool: (state, action: PayloadAction<ToolName>) => handleSetActiveTool(state, action.payload),
+    setMediaToolArmed: (state, action: PayloadAction<boolean>) => {
+      state.isMediaToolArmed = action.payload;
+    },
     setPaint: (state, action: PayloadAction<TSolidPaint>) => {
       getActivePage(state).paint = action.payload;
     },
@@ -238,6 +242,7 @@ export const {
   setActionsPanelOpen,
   setActivePage,
   setActiveTool,
+  setMediaToolArmed,
   setPaint,
   setPenActiveVertexId,
   setSelection,

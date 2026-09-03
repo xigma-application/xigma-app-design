@@ -2,6 +2,7 @@ import { RefObject } from 'react';
 
 // types
 import { TAlignmentGuide } from 'components/Design/Canvas/utils/getGroupAlignmentGuide';
+import { TArmedMedia } from 'components/Design/Canvas/hooks/useDrawMediaTool/utils/loadArmedMedia';
 import { TAspectRatioLockGuide, TCornerRadiusHandle, TDraftRect, TPoint } from 'types/canvas';
 import { TDistanceGuides } from 'components/Design/Canvas/utils/getDistanceGuides/types';
 import { TEqualSpacingGuides, TMatchedPairGuides } from 'components/Design/Canvas/utils/getEqualSpacingGuides/types';
@@ -245,6 +246,7 @@ export type THoverRefs = {
   hoveredVectorVertexIdRef: RefObject<string | null>;
   hoveredVectorWidthLabelRef: RefObject<TVectorWidthPointHover | null>;
   hoveredVectorWidthPointRef: RefObject<TVectorWidthPointHover | null>;
+  isSmartSelectionBoxHoveredRef: RefObject<boolean>;
 };
 
 export type TVectorSnapshotsRefs = {
@@ -312,6 +314,11 @@ export type TLassoMarqueeRefs = {
 export type TLayoutRefs = {
   leftPanelWidthRef: RefObject<number>;
   rightPanelWidthRef: RefObject<number>;
+};
+
+export type TMediaRefs = {
+  armedRef: RefObject<TArmedMedia | null>;
+  queueRef: RefObject<File[]>;
 };
 
 export type TShapeBuilderRefs = {
@@ -390,6 +397,7 @@ export type TCanvasRefs = {
   hover: THoverRefs;
   lassoMarquee: TLassoMarqueeRefs;
   layout: TLayoutRefs;
+  media: TMediaRefs;
   pen: TPenRefs;
   pencil: TPencilRefs;
   sectionName: TSectionNameRefs;

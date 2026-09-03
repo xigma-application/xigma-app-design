@@ -27,6 +27,14 @@ describe('Button snapshots', () => {
     // result
     expect(asFragment()).toMatchSnapshot();
   });
+
+  it('should render Button in its outline variant', () => {
+    // before
+    const { asFragment } = render(<Button variant="outline">Click</Button>);
+
+    // result
+    expect(asFragment()).toMatchSnapshot();
+  });
 });
 
 describe('Button behaviors', () => {

@@ -54,6 +54,8 @@ export const selectEditingTextContent = (state: RootState): string => state.desi
 
 export const selectIsActionsPanelOpen = (state: RootState): boolean => state.design.isActionsPanelOpen;
 
+export const selectIsMediaToolArmed = (state: RootState): boolean => state.design.isMediaToolArmed;
+
 export const selectIsUiHidden = (state: RootState): boolean => state.design.isUiHidden;
 
 export const selectIsUiMinimized = (state: RootState): boolean => state.design.isUiMinimized;

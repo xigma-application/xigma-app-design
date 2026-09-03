@@ -1,8 +1,11 @@
-// utils
-import { armNextFile } from '../armNextFile';
+// store
+import { setMediaToolArmed } from 'store/design/slice';
 
 // types
 import { TArmedMedia } from '../loadArmedMedia';
+
+// utils
+import { armNextFile } from '../armNextFile';
 
 type TFakeImage = { naturalHeight: number; naturalWidth: number; onload: (() => void) | null; src: string };
 
@@ -38,12 +41,15 @@ describe('armNextFile', () => {
 
     canvas.style.cursor = 'previous-cursor';
 
+    const dispatch = vi.fn();
+
     // before
-    armNextFile(canvasRef, armedRef, queueRef);
+    armNextFile(canvasRef, armedRef, queueRef, dispatch);
 
     // result
     expect(armedRef.current).toBeNull();
     expect(canvas.style.cursor).toBe('');
+    expect(dispatch).not.toHaveBeenCalled();
   });
 
   it('should not crash resetting the cursor when the canvas ref is unavailable', () => {
@@ -53,7 +59,7 @@ describe('armNextFile', () => {
     const queueRef = { current: [] as File[] };
 
     // action / result
-    expect(() => armNextFile(canvasRef, armedRef, queueRef)).not.toThrow();
+    expect(() => armNextFile(canvasRef, armedRef, queueRef, vi.fn())).not.toThrow();
   });
 
   it('should arm the next file from the queue and set a composite cursor once it loads', async () => {
@@ -74,8 +80,10 @@ describe('armNextFile', () => {
     // silently no-ops the assignment, so swap in a plain mutable object to observe it directly
     Object.defineProperty(canvas, 'style', { configurable: true, value: { cursor: '' }, writable: true });
 
+    const dispatch = vi.fn();
+
     // before
-    armNextFile(canvasRef, armedRef, queueRef);
+    armNextFile(canvasRef, armedRef, queueRef, dispatch);
 
     // result — the single queued file is shifted off, leaving the queue empty
     expect(queueRef.current).toEqual([]);
@@ -90,6 +98,7 @@ describe('armNextFile', () => {
 
     // result
     expect(armedRef.current).toEqual({ naturalHeight: 100, naturalWidth: 200, src: 'blob:mock-url' });
+    expect(dispatch).toHaveBeenCalledWith(setMediaToolArmed(true));
 
     const [, crosshairImage, thumbnailImage] = getImages();
 
