@@ -11,8 +11,8 @@ test('toggling rulers with Shift+R shows a matching hint bar above the toolbar t
 
   await page.keyboard.press('Shift+R'); // rulers were hidden by default -> now shown
 
-  await expect(page.getByText('Rulers shown')).toBeVisible();
-  await expect(page.getByText('Rulers shown')).toBeHidden({ timeout: 4000 });
+  await expect(page.getByText('Rulers visible')).toBeVisible();
+  await expect(page.getByText('Rulers visible')).toBeHidden({ timeout: 4000 });
 
   await page.keyboard.press('Shift+R'); // now hides them again
 

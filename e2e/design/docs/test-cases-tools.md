@@ -97,7 +97,7 @@ its real duration elapses.
 
 Toggling the rulers (View menu, `Shift+R`, the Actions... panel, or the ruler right-click context
 menu's "Hide rulers") now goes through one shared `handleToggleRulers.ts`, which also shows the same
-`DesignHint` snackbar as zoom — "Rulers shown"/"Rulers hidden" depending on which way the toggle just
+`DesignHint` snackbar as zoom — "Rulers visible"/"Rulers hidden" depending on which way the toggle just
 went, self-dismissing after 3s.
 
 | #   | Scenario                                                                                         | Unit |         E2E         |
