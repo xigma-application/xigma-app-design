@@ -1,14 +1,14 @@
 // types
 import { TPoint } from 'types/canvas';
-import { TSmartSelectionLayout } from 'types/design/smartSelection/types';
+import { TSmartSelectionLayout, TSmartSelectionNode } from 'types/design/smartSelection/types';
 import { TViewport } from 'types/design/types';
 
 // utils
 import { drawSwapHandleDot } from './drawSwapHandleDot';
 import { drawSwapHandleRing } from './drawSwapHandleRing';
 
-const getSmartSelectionNodes = (layout: TSmartSelectionLayout): { bounds: { height: number; width: number; x: number; y: number } }[] =>
-  layout.type === 'grid' ? layout.cells.flat() : layout.nodes;
+const getSmartSelectionNodes = (layout: TSmartSelectionLayout): TSmartSelectionNode[] =>
+  layout.type === 'grid' ? layout.cells.flat().filter((cell): cell is TSmartSelectionNode => cell !== null) : layout.nodes;
 
 export const drawSmartSelectionSwapHandles = (
   gl: WebGL2RenderingContext,

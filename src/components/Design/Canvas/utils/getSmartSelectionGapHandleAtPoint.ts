@@ -52,14 +52,12 @@ export const getSmartSelectionGapHandleAtPoint = (
   if (layout) {
     if (layout.type === 'grid') {
       const columnHit = findNearestGap(point, layout.columnGaps, tolerance);
+      const { columnWidth } = layout.geometry;
+      const rowHit = findRowGapHandle(point, layout.rowGaps, columnWidth[0], columnWidth[columnWidth.length - 1], tolerance);
 
       if (columnHit) {
         return { axis: 'x', gapIndex: columnHit.index, gapValue: columnHit.value, layout, midpoint: columnHit.midpoint };
       }
-
-      const firstColumnWidth = layout.cells[0][0].bounds.width;
-      const lastColumnWidth = layout.cells[0][layout.columnCount - 1].bounds.width;
-      const rowHit = findRowGapHandle(point, layout.rowGaps, firstColumnWidth, lastColumnWidth, tolerance);
 
       if (rowHit) {
         return {

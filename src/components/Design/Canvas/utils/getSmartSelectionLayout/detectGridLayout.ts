@@ -7,6 +7,7 @@ import { buildGridColumnGaps } from './buildGridColumnGaps';
 import { buildGridRowGaps } from './buildGridRowGaps';
 import { getGridColumnGapValues } from './getGridColumnGapValues';
 import { getGridExtent } from './getGridExtent';
+import { getGridGeometry } from './getGridGeometry';
 import { getGridRowGapValues } from './getGridRowGapValues';
 import { groupIntoHorizontalBands } from './groupIntoHorizontalBands';
 import { groupIntoVerticalBands } from './groupIntoVerticalBands';
@@ -19,22 +20,26 @@ export const detectGridLayout = (
 ): TSmartSelectionGridLayout | null => {
   const cells = buildGridCells(nodes, groupIntoHorizontalBands(nodes), groupIntoVerticalBands(nodes));
 
-  if (cells && isGridAligned(cells, alignmentToleranceWorldUnits)) {
-    const columnGapValues = getGridColumnGapValues(cells, gapToleranceWorldUnits);
-    const rowGapValues = getGridRowGapValues(cells, gapToleranceWorldUnits);
+  if (cells) {
+    const geometry = getGridGeometry(cells);
 
-    if (columnGapValues && rowGapValues) {
-      const extent = getGridExtent(cells);
-      const firstColumn = cells.map((row) => row[0]);
+    if (isGridAligned(cells, geometry, alignmentToleranceWorldUnits)) {
+      const columnGapValues = getGridColumnGapValues(geometry, gapToleranceWorldUnits);
+      const rowGapValues = getGridRowGapValues(geometry, gapToleranceWorldUnits);
 
-      return {
-        cells,
-        columnCount: cells[0].length,
-        columnGaps: buildGridColumnGaps(cells, columnGapValues, extent),
-        rowCount: cells.length,
-        rowGaps: buildGridRowGaps(firstColumn, rowGapValues, extent),
-        type: 'grid',
-      };
+      if (columnGapValues && rowGapValues) {
+        const extent = getGridExtent(cells);
+
+        return {
+          cells,
+          columnCount: cells[0].length,
+          columnGaps: buildGridColumnGaps(geometry, columnGapValues, extent),
+          geometry,
+          rowCount: cells.length,
+          rowGaps: buildGridRowGaps(geometry, rowGapValues, extent),
+          type: 'grid',
+        };
+      }
     }
   }
 

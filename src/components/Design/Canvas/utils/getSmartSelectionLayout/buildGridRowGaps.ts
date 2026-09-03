@@ -1,14 +1,17 @@
 // types
-import { TSmartSelectionGap, TSmartSelectionNode } from 'types/design/smartSelection/types';
+import { TGridGeometry, TSmartSelectionGap } from 'types/design/smartSelection/types';
+
+// utils
+import { getGridCellRect } from './getGridCellRect';
 
 export const buildGridRowGaps = (
-  firstColumn: TSmartSelectionNode[],
+  geometry: TGridGeometry,
   values: number[],
   extent: { left: number; right: number },
 ): TSmartSelectionGap[] =>
   values.map((value, index) => {
-    const before = firstColumn[index].bounds;
-    const after = firstColumn[index + 1].bounds;
+    const before = getGridCellRect(geometry, index, 0);
+    const after = getGridCellRect(geometry, index + 1, 0);
     const midY = (before.y + before.height + after.y) / 2;
 
     return {

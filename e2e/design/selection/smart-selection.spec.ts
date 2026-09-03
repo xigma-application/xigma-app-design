@@ -120,6 +120,72 @@ test('dragging a Smart Selection swap handle onto another block reorders the row
   expect(afterUndo[idC]).toMatchObject({ x: nodeC.x, y: nodeA.y });
 });
 
+test('dragging a Smart Selection swap handle onto an empty grid cell relocates only that block, and undoes in one step', async ({
+  page,
+}) => {
+  const designPage = new DesignPage(page);
+
+  await designPage.goto('e2e-test-smart-selection-swap-hole');
+  await expect(designPage.canvas).toBeVisible();
+
+  // 3-column, 2-row grid (50px cells, 50px gaps) with the middle-bottom cell left empty
+  const spots = [
+    [700, 300],
+    [800, 300],
+    [900, 300],
+    [700, 400],
+    [900, 400],
+  ];
+
+  for (const [x, y] of spots) {
+    await designPage.drawRectangle(x, y, x + 50, y + 50);
+  }
+  for (const [x, y] of spots.slice(0, -1)) {
+    await designPage.click(x + 25, y + 25, { shift: true });
+  }
+
+  const before = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+    const activePage = pages[activePageId];
+
+    return { nodes: activePage.nodes, rootOrder: activePage.rootOrder };
+  });
+
+  const idA = before.rootOrder[0];
+  const others = before.rootOrder.slice(1);
+  const originals = Object.fromEntries(before.rootOrder.map((id) => [id, before.nodes[id] as { x: number; y: number }]));
+
+  // drag A's swap handle onto the empty centre cell (825, 425)
+  await designPage.pointerDown(725, 325);
+  await page.mouse.move(825, 425, { steps: 6 });
+  await designPage.pointerUp();
+
+  const afterDrag = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].nodes;
+  });
+
+  // A relocated into the hole; everyone else untouched
+  expect(afterDrag[idA]).toMatchObject({ x: 800, y: 400 });
+  for (const id of others) {
+    expect(afterDrag[id]).toMatchObject({ x: originals[id].x, y: originals[id].y });
+  }
+
+  await page.keyboard.press('Control+z');
+
+  const afterUndo = await page.evaluate(async () => {
+    const { store } = await import('/src/store/index.ts');
+    const { activePageId, pages } = store.getState().design;
+
+    return pages[activePageId].nodes;
+  });
+
+  expect(afterUndo[idA]).toMatchObject({ x: originals[idA].x, y: originals[idA].y });
+});
+
 test('hovering a Smart Selection gap handle switches the cursor to move-x and back to default off it', async ({ page }) => {
   const designPage = new DesignPage(page);
 

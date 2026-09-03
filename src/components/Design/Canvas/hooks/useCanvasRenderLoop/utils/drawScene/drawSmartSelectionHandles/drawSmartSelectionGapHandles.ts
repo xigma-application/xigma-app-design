@@ -37,8 +37,9 @@ export const drawSmartSelectionGapHandles = (
   } else if (layout.type === 'column') {
     layout.gaps.forEach((gap) => drawGapHandleBar(gl, program, buffer, gap, 'horizontal', canvasWidth, canvasHeight, viewport));
   } else {
-    const firstColumnWidth = layout.cells[0][0].bounds.width;
-    const lastColumnWidth = layout.cells[0][layout.columnCount - 1].bounds.width;
+    const { columnWidth } = layout.geometry;
+    const firstColumnWidth = columnWidth[0];
+    const lastColumnWidth = columnWidth[columnWidth.length - 1];
 
     layout.columnGaps.forEach((gap) => drawGapHandleBar(gl, program, buffer, gap, 'vertical', canvasWidth, canvasHeight, viewport));
     layout.rowGaps.forEach((gap) =>

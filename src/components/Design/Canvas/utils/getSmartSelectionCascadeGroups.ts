@@ -1,6 +1,9 @@
 // types
 import { TSmartSelectionCascadeGroup } from 'types/design/canvas/types';
-import { TSmartSelectionLayout, TSmartSelectionNode } from 'types/design/smartSelection/types';
+import { TGridGeometry, TSmartSelectionGridLayout, TSmartSelectionLayout, TSmartSelectionNode } from 'types/design/smartSelection/types';
+
+// utils
+import { getGridCellRect } from './getSmartSelectionLayout/getGridCellRect';
 
 export type TSmartSelectionCascadeSetup = {
   anchorPosition: number;
@@ -21,12 +24,19 @@ const buildFromNodes = (nodes: TSmartSelectionNode[], axis: 'x' | 'y'): TSmartSe
   };
 };
 
-const buildFromGridAxis = (cells: TSmartSelectionNode[][], crossCount: number, axis: 'x' | 'y'): TSmartSelectionCascadeSetup => {
+const buildFromGridAxis = (
+  cells: TSmartSelectionGridLayout['cells'],
+  geometry: TGridGeometry,
+  crossCount: number,
+  axis: 'x' | 'y',
+): TSmartSelectionCascadeSetup => {
   const sizeKey = getSizeKey(axis);
   const getGroupNodeIds = (index: number): string[] =>
-    axis === 'x' ? cells.map((row) => row[index].id) : cells[index].map((cell) => cell.id);
+    (axis === 'x' ? cells.map((row) => row[index]) : cells[index])
+      .filter((cell): cell is TSmartSelectionNode => cell !== null)
+      .map((cell) => cell.id);
   const getRepresentativeBounds = (index: number): TSmartSelectionNode['bounds'] =>
-    axis === 'x' ? cells[0][index].bounds : cells[index][0].bounds;
+    axis === 'x' ? getGridCellRect(geometry, 0, index) : getGridCellRect(geometry, index, 0);
   const anchorBounds = getRepresentativeBounds(0);
   const cascadeGroups: TSmartSelectionCascadeGroup[] = [];
 
@@ -41,7 +51,7 @@ const buildFromGridAxis = (cells: TSmartSelectionNode[][], crossCount: number, a
 
 export const getSmartSelectionCascadeGroups = (layout: TSmartSelectionLayout, axis: 'x' | 'y'): TSmartSelectionCascadeSetup => {
   if (layout.type === 'grid') {
-    return buildFromGridAxis(layout.cells, axis === 'x' ? layout.columnCount : layout.rowCount, axis);
+    return buildFromGridAxis(layout.cells, layout.geometry, axis === 'x' ? layout.columnCount : layout.rowCount, axis);
   }
 
   return buildFromNodes(layout.nodes, axis);

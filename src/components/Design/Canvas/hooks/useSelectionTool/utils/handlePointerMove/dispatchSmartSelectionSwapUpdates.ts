@@ -21,11 +21,13 @@ export const dispatchSmartSelectionSwapUpdates = (
     const positions = getReorderedSwapPositions(dragState.slots, dragState.fromIndex, dragState.targetIndex);
 
     dragState.slots.forEach(({ id, bounds }) => {
-      const isDragged = id === draggedId;
-      const deltaX = isDragged ? draggedDeltaX : (positions[id]?.x ?? bounds.x) - bounds.x;
-      const deltaY = isDragged ? draggedDeltaY : (positions[id]?.y ?? bounds.y) - bounds.y;
+      if (id !== null) {
+        const isDragged = id === draggedId;
+        const deltaX = isDragged ? draggedDeltaX : (positions[id]?.x ?? bounds.x) - bounds.x;
+        const deltaY = isDragged ? draggedDeltaY : (positions[id]?.y ?? bounds.y) - bounds.y;
 
-      dispatch(updateNode({ changes: getGeometryDeltaChanges(dragState.nodeOrigins[id], deltaX, deltaY), id }));
+        dispatch(updateNode({ changes: getGeometryDeltaChanges(dragState.nodeOrigins[id], deltaX, deltaY), id }));
+      }
     });
   });
 };

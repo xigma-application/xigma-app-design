@@ -28,10 +28,10 @@ export const getSmartSelectionSwapHandleAtPoint = (
     const slots = getSmartSelectionSwapSlots(layout);
 
     for (let index = 0; index < slots.length; index += 1) {
-      const { bounds } = slots[index];
+      const { bounds, id } = slots[index];
       const center = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
 
-      if (Math.hypot(point.x - center.x, point.y - center.y) <= tolerance) {
+      if (id !== null && Math.hypot(point.x - center.x, point.y - center.y) <= tolerance) {
         return { center, index, layout };
       }
     }

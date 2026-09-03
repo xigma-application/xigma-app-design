@@ -32,19 +32,23 @@ describe('drawSmartSelectionSwapHandles', () => {
     expect(drawSwapHandleRingMock).toHaveBeenCalledWith(gl, program, buffer, 20, 20, false, 200, 200, IDENTITY_VIEWPORT);
   });
 
-  it('should draw a ring per cell for a grid layout inside the active box', () => {
+  it('should draw a ring per real cell for a grid layout inside the active box, skipping empty cells', () => {
     const layout = {
-      cells: [[node('a', 0, 0), node('b', 100, 0)]],
+      cells: [
+        [node('a', 0, 0), node('b', 100, 0)],
+        [node('c', 0, 100), null],
+      ],
       columnCount: 2,
       columnGaps: [],
-      rowCount: 1,
+      geometry: { columnWidth: [40, 40], columnX: [0, 100], rowHeight: [40, 40], rowY: [0, 100] },
+      rowCount: 2,
       rowGaps: [],
       type: 'grid' as const,
     };
 
     drawSmartSelectionSwapHandles(gl, program, buffer, layout, true, null, 200, 200, IDENTITY_VIEWPORT);
 
-    expect(drawSwapHandleRingMock).toHaveBeenCalledTimes(2);
+    expect(drawSwapHandleRingMock).toHaveBeenCalledTimes(3);
   });
 
   it('should fill only the ring whose centre matches the hovered swap point', () => {

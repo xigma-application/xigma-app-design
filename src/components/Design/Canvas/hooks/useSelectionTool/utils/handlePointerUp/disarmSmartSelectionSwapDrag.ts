@@ -20,8 +20,9 @@ export const disarmSmartSelectionSwapDrag = (
   const dragState = swapDragRef.current;
 
   if (dragState) {
-    if (dragState.hasMoved) {
-      const draggedSlot = dragState.slots[dragState.fromIndex];
+    const draggedSlot = dragState.slots[dragState.fromIndex];
+
+    if (dragState.hasMoved && draggedSlot.id !== null) {
       const draggedTarget = getReorderedSwapPositions(dragState.slots, dragState.fromIndex, dragState.targetIndex)[draggedSlot.id];
 
       dispatchSmartSelectionSwapUpdates(

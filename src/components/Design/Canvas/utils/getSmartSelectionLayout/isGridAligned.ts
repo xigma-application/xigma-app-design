@@ -1,40 +1,25 @@
 // types
-import { TSmartSelectionNode } from 'types/design/smartSelection/types';
+import { TGridGeometry, TSmartSelectionNode } from 'types/design/smartSelection/types';
+
+// utils
+import { getGridCellRect } from './getGridCellRect';
 
 const isWithinTolerance = (a: number, b: number, toleranceWorldUnits: number): boolean => Math.abs(a - b) <= toleranceWorldUnits;
 
-export const isGridAligned = (cells: TSmartSelectionNode[][], toleranceWorldUnits: number): boolean => {
-  const columnCount = cells[0].length;
-
-  for (let columnIndex = 0; columnIndex < columnCount; columnIndex += 1) {
-    const first = cells[0][columnIndex].bounds;
-
-    for (let rowIndex = 1; rowIndex < cells.length; rowIndex += 1) {
-      const bounds = cells[rowIndex][columnIndex].bounds;
-
-      if (
-        !isWithinTolerance(bounds.x, first.x, toleranceWorldUnits) ||
-        !isWithinTolerance(bounds.width, first.width, toleranceWorldUnits)
-      ) {
-        return false;
+export const isGridAligned = (cells: (TSmartSelectionNode | null)[][], geometry: TGridGeometry, toleranceWorldUnits: number): boolean =>
+  cells.every((row, rowIndex) =>
+    row.every((cell, columnIndex) => {
+      if (cell === null) {
+        return true;
       }
-    }
-  }
 
-  for (let rowIndex = 0; rowIndex < cells.length; rowIndex += 1) {
-    const first = cells[rowIndex][0].bounds;
+      const expected = getGridCellRect(geometry, rowIndex, columnIndex);
 
-    for (let columnIndex = 1; columnIndex < columnCount; columnIndex += 1) {
-      const bounds = cells[rowIndex][columnIndex].bounds;
-
-      if (
-        !isWithinTolerance(bounds.y, first.y, toleranceWorldUnits) ||
-        !isWithinTolerance(bounds.height, first.height, toleranceWorldUnits)
-      ) {
-        return false;
-      }
-    }
-  }
-
-  return true;
-};
+      return (
+        isWithinTolerance(cell.bounds.x, expected.x, toleranceWorldUnits) &&
+        isWithinTolerance(cell.bounds.y, expected.y, toleranceWorldUnits) &&
+        isWithinTolerance(cell.bounds.width, expected.width, toleranceWorldUnits) &&
+        isWithinTolerance(cell.bounds.height, expected.height, toleranceWorldUnits)
+      );
+    }),
+  );

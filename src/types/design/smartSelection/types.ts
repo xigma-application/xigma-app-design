@@ -25,10 +25,18 @@ export type TSmartSelectionColumnLayout = {
   type: 'column';
 };
 
+export type TGridGeometry = {
+  columnWidth: number[];
+  columnX: number[];
+  rowHeight: number[];
+  rowY: number[];
+};
+
 export type TSmartSelectionGridLayout = {
-  cells: TSmartSelectionNode[][];
+  cells: (TSmartSelectionNode | null)[][];
   columnCount: number;
   columnGaps: TSmartSelectionGap[];
+  geometry: TGridGeometry;
   rowCount: number;
   rowGaps: TSmartSelectionGap[];
   type: 'grid';

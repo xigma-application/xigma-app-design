@@ -3,16 +3,17 @@ import { SMART_SELECTION_SWAP_HANDLE_FILL } from 'constant/canvas';
 
 // types
 import { TDraftRect } from 'types/canvas';
-import { TSmartSelectionGap, TSmartSelectionLayout, TSmartSelectionNode } from 'types/design/smartSelection/types';
+import { TGridGeometry, TSmartSelectionGap, TSmartSelectionLayout, TSmartSelectionNode } from 'types/design/smartSelection/types';
 import { TViewport } from 'types/design/types';
 
 // utils
 import { drawRect } from 'utils/canvas/drawRect/drawRect';
+import { getGridCellRect } from '../../../../../utils/getSmartSelectionLayout/getGridCellRect';
 
 const FILL_ALPHA = 0.3;
 
 const getLayoutExtent = (layout: TSmartSelectionLayout): TDraftRect => {
-  const nodes = layout.type === 'grid' ? layout.cells.flat() : layout.nodes;
+  const nodes = layout.type === 'grid' ? layout.cells.flat().filter((cell): cell is TSmartSelectionNode => cell !== null) : layout.nodes;
   const allBounds = nodes.map((node) => node.bounds);
   const left = Math.min(...allBounds.map((bounds) => bounds.x));
   const top = Math.min(...allBounds.map((bounds) => bounds.y));
@@ -67,15 +68,15 @@ const drawGridColumnGapFills = (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   buffer: WebGLBuffer,
-  cells: TSmartSelectionNode[][],
+  geometry: TGridGeometry,
   canvasWidth: number,
   canvasHeight: number,
   viewport: TViewport,
 ): void => {
-  cells.forEach((row) => {
-    for (let column = 0; column < row.length - 1; column += 1) {
-      const before = row[column].bounds;
-      const after = row[column + 1].bounds;
+  geometry.rowY.forEach((_, rowIndex) => {
+    for (let column = 0; column < geometry.columnX.length - 1; column += 1) {
+      const before = getGridCellRect(geometry, rowIndex, column);
+      const after = getGridCellRect(geometry, rowIndex, column + 1);
       const rect: TDraftRect = {
         height: before.height,
         width: after.x - (before.x + before.width),
@@ -99,7 +100,7 @@ export const drawSmartSelectionGapFillPreview = (
   viewport: TViewport,
 ): void => {
   if (layout.type === 'grid' && axis === 'x') {
-    drawGridColumnGapFills(gl, program, buffer, layout.cells, canvasWidth, canvasHeight, viewport);
+    drawGridColumnGapFills(gl, program, buffer, layout.geometry, canvasWidth, canvasHeight, viewport);
 
     return;
   }

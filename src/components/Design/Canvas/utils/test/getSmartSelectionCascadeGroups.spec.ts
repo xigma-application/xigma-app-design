@@ -38,6 +38,7 @@ describe('getSmartSelectionCascadeGroups', () => {
       ],
       columnCount: 2,
       columnGaps: [],
+      geometry: { columnWidth: [50, 50], columnX: [0, 100], rowHeight: [50, 50], rowY: [0, 100] },
       rowCount: 2,
       rowGaps: [],
       type: 'grid' as const,
@@ -58,6 +59,7 @@ describe('getSmartSelectionCascadeGroups', () => {
       ],
       columnCount: 2,
       columnGaps: [],
+      geometry: { columnWidth: [50, 50], columnX: [0, 100], rowHeight: [50, 50], rowY: [0, 100] },
       rowCount: 2,
       rowGaps: [],
       type: 'grid' as const,
@@ -68,5 +70,26 @@ describe('getSmartSelectionCascadeGroups', () => {
     expect(setup.anchorPosition).toBe(0);
     expect(setup.anchorSize).toBe(50);
     expect(setup.cascadeGroups).toEqual([{ nodeIds: ['c', 'd'], originalPosition: 100, size: 50 }]);
+  });
+
+  it('should skip empty cells when grouping a grid axis, and anchor off the grid geometry', () => {
+    const layout = {
+      cells: [
+        [node('a', 0, 0), node('b', 100, 0)],
+        [node('c', 0, 100), null],
+      ],
+      columnCount: 2,
+      columnGaps: [],
+      geometry: { columnWidth: [50, 50], columnX: [0, 100], rowHeight: [50, 50], rowY: [0, 100] },
+      rowCount: 2,
+      rowGaps: [],
+      type: 'grid' as const,
+    };
+
+    const setup = getSmartSelectionCascadeGroups(layout, 'x');
+
+    expect(setup.anchorPosition).toBe(0);
+    expect(setup.anchorSize).toBe(50);
+    expect(setup.cascadeGroups).toEqual([{ nodeIds: ['b'], originalPosition: 100, size: 50 }]);
   });
 });

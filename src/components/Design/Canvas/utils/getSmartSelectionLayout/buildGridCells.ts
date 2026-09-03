@@ -5,11 +5,16 @@ export const buildGridCells = (
   nodes: TSmartSelectionNode[],
   rows: TSmartSelectionNode[][],
   columns: TSmartSelectionNode[][],
-): TSmartSelectionNode[][] | null => {
-  if (rows.length >= 2 && columns.length >= 2 && rows.length * columns.length === nodes.length) {
+): (TSmartSelectionNode | null)[][] | null => {
+  if (
+    rows.length >= 2 &&
+    columns.length >= 2 &&
+    nodes.length >= rows.length + columns.length &&
+    nodes.length <= rows.length * columns.length
+  ) {
     const columnIndexById = new Map<string, number>();
     const rowIndexById = new Map<string, number>();
-    const cells: (TSmartSelectionNode | undefined)[][] = rows.map(() => new Array(columns.length).fill(undefined));
+    const cells: (TSmartSelectionNode | null)[][] = rows.map(() => new Array(columns.length).fill(null));
 
     rows.forEach((row, rowIndex) => row.forEach((node) => rowIndexById.set(node.id, rowIndex)));
     columns.forEach((column, columnIndex) => column.forEach((node) => columnIndexById.set(node.id, columnIndex)));
@@ -25,7 +30,7 @@ export const buildGridCells = (
       cells[rowIndex][columnIndex] = node;
     }
 
-    return cells as TSmartSelectionNode[][];
+    return cells;
   }
 
   return null;

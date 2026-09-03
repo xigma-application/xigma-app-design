@@ -28,7 +28,7 @@ export const armSmartSelectionSwapDrag = (
     fromIndex,
     hasMoved: false,
     nodeOrigins: getDragNodeOrigins(
-      slots.map((slot) => slot.id),
+      slots.map((slot) => slot.id).filter((id): id is string => id !== null),
       selectNodes(store.getState()),
     ),
     pointerStart,
