@@ -87,6 +87,7 @@ describe('design slice', () => {
       editingTextContent: '',
       isActionsPanelOpen: false,
       isMediaToolArmed: false,
+      designHintLabelKey: null,
       isUiHidden: false,
       isUiMinimized: false,
       lastFrameTool: ToolName.frame,

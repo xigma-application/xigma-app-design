@@ -19,6 +19,7 @@ const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   editingTextContent: 'Hi',
   isActionsPanelOpen: false,
   isMediaToolArmed: false,
+  designHintLabelKey: null,
   isUiHidden: false,
   isUiMinimized: false,
   lastFrameTool: ToolName.frame,

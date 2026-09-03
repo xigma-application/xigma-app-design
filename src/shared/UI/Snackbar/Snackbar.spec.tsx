@@ -33,4 +33,44 @@ describe('Snackbar behaviors', () => {
     // result
     expect(container.firstChild).toHaveClass('custom');
   });
+
+  it('should call onAutoHide once autoHideAfterMs has elapsed', () => {
+    // mock
+    vi.useFakeTimers();
+    const onAutoHide = vi.fn();
+
+    // before
+    render(
+      <Snackbar autoHideAfterMs={3000} onAutoHide={onAutoHide}>
+        Hello
+      </Snackbar>,
+    );
+
+    // action
+    vi.advanceTimersByTime(3000);
+
+    // result
+    expect(onAutoHide).toHaveBeenCalledTimes(1);
+
+    // cleanup
+    vi.useRealTimers();
+  });
+
+  it('should never auto-hide when autoHideAfterMs is not given', () => {
+    // mock
+    vi.useFakeTimers();
+    const onAutoHide = vi.fn();
+
+    // before
+    render(<Snackbar onAutoHide={onAutoHide}>Hello</Snackbar>);
+
+    // action
+    vi.advanceTimersByTime(10000);
+
+    // result
+    expect(onAutoHide).not.toHaveBeenCalled();
+
+    // cleanup
+    vi.useRealTimers();
+  });
 });

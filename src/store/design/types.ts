@@ -32,6 +32,7 @@ export type TDesignState = {
   areAdditionalLabelsVisible: boolean;
   areRulersVisible: boolean;
   commentDraftPosition: TPoint | null;
+  designHintLabelKey: string | null;
   editingNodeId: string | null;
   editingSelectionChangedAt: number;
   editingSelectionEnd: number;
