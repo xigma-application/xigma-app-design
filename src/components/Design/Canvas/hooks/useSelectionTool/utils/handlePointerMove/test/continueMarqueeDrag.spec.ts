@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 
 // store
-import { addNode, setSelection } from 'store/design/slice';
+import { addNode, deleteNode, moveNodes, setSelection } from 'store/design/slice';
 import { selectActivePage, selectSelectedIds } from 'store/design/selectors';
 import { store } from 'store';
 
@@ -50,6 +50,7 @@ const addFrameNode = (x: number, y: number, size = 20): string => {
 
 describe('continueMarqueeDrag', () => {
   beforeEach(() => {
+    selectActivePage(store.getState()).rootOrder.forEach((id) => store.dispatch(deleteNode(id)));
     store.dispatch(setSelection([]));
   });
 
@@ -94,5 +95,59 @@ describe('continueMarqueeDrag', () => {
 
     // result
     expect(selectSelectedIds(store.getState())).toEqual([]);
+  });
+
+  const addRectNode = (x: number, y: number, size: number): string => {
+    store.dispatch(
+      addNode({
+        fill: '#00ff00',
+        height: size,
+        name: 'Rectangle',
+        parentId: null,
+        rotation: 0,
+        type: NodeType.rectangle,
+        width: size,
+        x,
+        y,
+      }),
+    );
+
+    return selectActivePage(store.getState()).rootOrder.at(-1) as string;
+  };
+
+  const buildFrameWithChild = (): { childId: string; frameId: string } => {
+    const frameId = addFrameNode(0, 0, 400);
+    const childId = addRectNode(40, 40, 40);
+
+    store.dispatch(moveNodes({ nodeIds: [childId], targetIndex: 0, targetParentId: frameId }));
+    store.dispatch(setSelection([]));
+
+    return { childId, frameId };
+  };
+
+  it('should select the touched children of a frame the marquee only partially covers, not the frame', () => {
+    // mock
+    const { childId, frameId } = buildFrameWithChild();
+    const canvas = createCanvas();
+
+    // before — marquee from outside the frame, sweeping over the child but not enclosing the frame
+    continueMarqueeDrag(canvas, pointerEvent(100, 100), store.dispatch, createMarqueeStartRef({ x: -20, y: -20 }), createMarqueeRef());
+
+    // result
+    expect(selectSelectedIds(store.getState())).toEqual([childId]);
+    expect(selectSelectedIds(store.getState())).not.toContain(frameId);
+  });
+
+  it('should switch to the frame and drop its children once the marquee fully encloses the frame', () => {
+    // mock
+    const { childId, frameId } = buildFrameWithChild();
+    const canvas = createCanvas();
+
+    // before — marquee wraps the whole 400x400 frame
+    continueMarqueeDrag(canvas, pointerEvent(500, 500), store.dispatch, createMarqueeStartRef({ x: -20, y: -20 }), createMarqueeRef());
+
+    // result
+    expect(selectSelectedIds(store.getState())).toEqual([frameId]);
+    expect(selectSelectedIds(store.getState())).not.toContain(childId);
   });
 });
