@@ -38,6 +38,7 @@ const buildVectorNode = (overrides: Partial<TVectorNode> = {}): TVectorNode => (
 const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   activePageId: 'page-1',
   activeTool: ToolName.default,
+  areAdditionalLabelsVisible: true,
   areRulersVisible: false,
   commentDraftPosition: null,
   editingNodeId: null,

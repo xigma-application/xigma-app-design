@@ -8,6 +8,7 @@ import ZoomToMenu from './ZoomToMenu/ZoomToMenu';
 import { MenuCompound } from 'shared';
 
 // hooks
+import { useViewMenuAdditionalLabelsClick } from './hooks/useViewMenuAdditionalLabelsClick';
 import { useViewMenuRulersClick } from './hooks/useViewMenuRulersClick';
 import { useViewMenuZoomInClick } from './hooks/useViewMenuZoomInClick';
 import { useViewMenuZoomOutClick } from './hooks/useViewMenuZoomOutClick';
@@ -18,7 +19,13 @@ import { useViewMenuZoomToPreviousFrameClick } from './hooks/useViewMenuZoomToPr
 import { useViewMenuZoomToSelectionClick } from './hooks/useViewMenuZoomToSelectionClick';
 
 // store
-import { selectAreRulersVisible, selectSelectedIds, selectTopLevelFrameNodes, selectViewport } from 'store/design/selectors';
+import {
+  selectAreAdditionalLabelsVisible,
+  selectAreRulersVisible,
+  selectSelectedIds,
+  selectTopLevelFrameNodes,
+  selectViewport,
+} from 'store/design/selectors';
 import { useAppSelector } from 'store';
 
 // others
@@ -62,10 +69,12 @@ const { MenuItem, MenuSeparator, MenuSub } = MenuCompound;
 
 const ViewMenu: FC = () => {
   const { t } = useTranslation();
+  const areAdditionalLabelsVisible = useAppSelector(selectAreAdditionalLabelsVisible);
   const areRulersVisible = useAppSelector(selectAreRulersVisible);
   const viewport = useAppSelector(selectViewport);
   const selectedIds = useAppSelector(selectSelectedIds);
   const frameNodes = useAppSelector(selectTopLevelFrameNodes);
+  const handleAdditionalLabelsClick = useViewMenuAdditionalLabelsClick();
   const handleRulersClick = useViewMenuRulersClick();
   const handleZoomInClick = useViewMenuZoomInClick();
   const handleZoomOutClick = useViewMenuZoomOutClick();
@@ -97,7 +106,7 @@ const ViewMenu: FC = () => {
       <MenuItem disabled label={t(VIEW_MENU_FRAME_OUTLINES_KEY)} />
       <MenuItem disabled label={t(VIEW_MENU_MEMORY_USAGE_KEY)} />
       <MenuSeparator />
-      <MenuItem disabled label={t(VIEW_MENU_ADDITIONAL_LABELS_KEY)} selected />
+      <MenuItem label={t(VIEW_MENU_ADDITIONAL_LABELS_KEY)} onClick={handleAdditionalLabelsClick} selected={areAdditionalLabelsVisible} />
       <MenuItem disabled label={t(VIEW_MENU_MINIMIZE_UI_KEY)} shortcut={KEYBOARD_SHORTCUTS.toggleUiMinimized.join('')} />
       <MenuItem disabled label={t(VIEW_MENU_SHOW_HIDE_UI_KEY)} selected shortcut={KEYBOARD_SHORTCUTS.showHideUi.join('')} />
       <MenuItem disabled label={t(VIEW_MENU_MULTIPLAYER_CURSORS_KEY)} selected shortcut={KEYBOARD_SHORTCUTS.multiplayerCursors.join('')} />

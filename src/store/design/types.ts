@@ -29,6 +29,7 @@ export type TMaskConnectorInfo = TMaskConnectorLine[];
 export type TDesignState = {
   activePageId: string;
   activeTool: ToolName;
+  areAdditionalLabelsVisible: boolean;
   areRulersVisible: boolean;
   commentDraftPosition: TPoint | null;
   editingNodeId: string | null;

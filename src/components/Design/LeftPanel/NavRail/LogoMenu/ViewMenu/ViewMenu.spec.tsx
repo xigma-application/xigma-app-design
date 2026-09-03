@@ -13,8 +13,8 @@ import { CanvasRefsContext } from 'components/App/core/CanvasRefsProvider/contex
 import { createCanvasRefs } from 'components/Design/Canvas/hooks/useCanvasRefs/createCanvasRefs';
 
 // store
-import { addNode, deleteNode, setSelection, setViewport, toggleRulers } from 'store/design/slice';
-import { selectActivePage, selectAreRulersVisible, selectViewport } from 'store/design/selectors';
+import { addNode, deleteNode, setSelection, setViewport, toggleAdditionalLabels, toggleRulers } from 'store/design/slice';
+import { selectActivePage, selectAreAdditionalLabelsVisible, selectAreRulersVisible, selectViewport } from 'store/design/selectors';
 import { store } from 'store';
 
 // types
@@ -42,6 +42,10 @@ describe('ViewMenu', () => {
   beforeEach(() => {
     if (selectAreRulersVisible(store.getState())) {
       store.dispatch(toggleRulers());
+    }
+
+    if (!selectAreAdditionalLabelsVisible(store.getState())) {
+      store.dispatch(toggleAdditionalLabels());
     }
 
     selectActivePage(store.getState()).rootOrder.forEach((id) => store.dispatch(deleteNode(id)));
@@ -99,7 +103,7 @@ describe('ViewMenu', () => {
     expect(screen.getByText('🌐↓')).toBeInTheDocument();
   });
 
-  it('should keep the Outlines, Panels and Zoom to... submenus, the Rulers row, and the always-available zoom rows enabled while every other flat row stays disabled', () => {
+  it('should keep the Outlines, Panels and Zoom to... submenus, the Rulers/Additional labels rows, and the always-available zoom rows enabled while every other flat row stays disabled', () => {
     // before
     renderInMenu(<ViewMenu />);
 
@@ -109,6 +113,7 @@ describe('ViewMenu', () => {
     expect(screen.getByText('Panels').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Zoom to...').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Rulers').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
+    expect(screen.getByText('Additional labels').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Zoom in').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Zoom out').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
     expect(screen.getByText('Zoom to 100%').closest('[role="menuitem"]')).not.toHaveAttribute('data-disabled');
@@ -125,6 +130,18 @@ describe('ViewMenu', () => {
 
     // result
     expect(selectAreRulersVisible(store.getState())).toBe(true);
+  });
+
+  it('should default to visible and toggle off when the Additional labels row is selected', () => {
+    // before
+    renderInMenu(<ViewMenu />);
+    expect(selectAreAdditionalLabelsVisible(store.getState())).toBe(true);
+
+    // action
+    fireEvent.click(screen.getByText('Additional labels'));
+
+    // result
+    expect(selectAreAdditionalLabelsVisible(store.getState())).toBe(false);
   });
 
   it('should disable Zoom to selection when nothing is selected, and enable it once something is', () => {

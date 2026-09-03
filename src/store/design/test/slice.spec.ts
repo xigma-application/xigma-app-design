@@ -33,6 +33,7 @@ import slice, {
   startTextEdit,
   stopTextEdit,
   toggleActionsPanelOpen,
+  toggleAdditionalLabels,
   toggleNodeHidden,
   toggleNodeLocked,
   toggleNodeMask,
@@ -75,6 +76,7 @@ describe('design slice', () => {
     expect(state).toEqual({
       activePageId,
       activeTool: ToolName.default,
+      areAdditionalLabelsVisible: true,
       areRulersVisible: false,
       commentDraftPosition: null,
       editingNodeId: null,
@@ -626,6 +628,20 @@ describe('design slice', () => {
 
     // result
     expect(shown.isUiHidden).toBe(false);
+  });
+
+  it('should toggle the additional labels visibility flag, starting from its true default', () => {
+    // action
+    const hidden = slice(undefined, toggleAdditionalLabels());
+
+    // result
+    expect(hidden.areAdditionalLabelsVisible).toBe(false);
+
+    // action
+    const visibleAgain = slice(hidden, toggleAdditionalLabels());
+
+    // result
+    expect(visibleAgain.areAdditionalLabelsVisible).toBe(true);
   });
 
   it('should toggle the rulers visibility flag', () => {

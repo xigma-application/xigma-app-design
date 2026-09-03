@@ -76,6 +76,7 @@ const initialPageId = nanoid();
 const initialState: TDesignState = {
   activePageId: initialPageId,
   activeTool: DEFAULT_TOOL,
+  areAdditionalLabelsVisible: true,
   areRulersVisible: false,
   commentDraftPosition: null,
   editingNodeId: null,
@@ -184,6 +185,9 @@ const designSlice = createSlice({
     toggleActionsPanelOpen: (state) => {
       state.isActionsPanelOpen = !state.isActionsPanelOpen;
     },
+    toggleAdditionalLabels: (state) => {
+      state.areAdditionalLabelsVisible = !state.areAdditionalLabelsVisible;
+    },
     toggleNodeHidden: (state, action: PayloadAction<string>) => handleToggleNodeHidden(state, action.payload),
     toggleNodeLocked: (state, action: PayloadAction<string>) => handleToggleNodeLocked(state, action.payload),
     toggleNodeMask: (state, action: PayloadAction<string>) => handleToggleNodeMask(state, action.payload),
@@ -243,6 +247,7 @@ export const {
   startTextEdit,
   stopTextEdit,
   toggleActionsPanelOpen,
+  toggleAdditionalLabels,
   toggleNodeHidden,
   toggleNodeLocked,
   toggleNodeMask,

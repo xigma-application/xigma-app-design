@@ -35,6 +35,7 @@ const buildPage = (id: string, overrides: Partial<TDesignPage> = {}): TDesignPag
 const buildState = (pages: TDesignPage[], activePageId: string): TDesignState => ({
   activePageId,
   activeTool: ToolName.default,
+  areAdditionalLabelsVisible: true,
   areRulersVisible: false,
   commentDraftPosition: null,
   editingNodeId: null,

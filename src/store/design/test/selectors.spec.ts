@@ -4,6 +4,7 @@ import {
   selectActivePageId,
   selectActiveTool,
   selectAllGuideLines,
+  selectAreAdditionalLabelsVisible,
   selectAreRulersVisible,
   selectCommentDraftPosition,
   selectComments,
@@ -64,6 +65,7 @@ const state = {
   design: {
     activePageId: 'page-1',
     activeTool: ToolName.frame,
+    areAdditionalLabelsVisible: false,
     areRulersVisible: true,
     commentDraftPosition: { x: 1, y: 2 },
     editingNodeId: 'node-2',
@@ -118,6 +120,11 @@ describe('design selectors', () => {
   it('should select the active tool', () => {
     // result
     expect(selectActiveTool(state)).toBe(ToolName.frame);
+  });
+
+  it('should select the additional labels visibility flag', () => {
+    // result
+    expect(selectAreAdditionalLabelsVisible(state)).toBe(false);
   });
 
   it('should select the rulers visibility flag', () => {

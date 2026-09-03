@@ -9,6 +9,7 @@ import { handleUpdateCommentContent } from '../handleUpdateCommentContent';
 const buildState = (overrides: Partial<TDesignState> = {}): TDesignState => ({
   activePageId: 'page-1',
   activeTool: ToolName.comment,
+  areAdditionalLabelsVisible: true,
   areRulersVisible: false,
   commentDraftPosition: null,
   editingNodeId: null,

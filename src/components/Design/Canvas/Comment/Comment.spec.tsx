@@ -18,6 +18,7 @@ const createTestStore = (): EnhancedStore<{ design: TDesignState }> =>
       design: {
         activePageId: 'page-1',
         activeTool: ToolName.comment,
+        areAdditionalLabelsVisible: true,
         areRulersVisible: false,
         commentDraftPosition: null,
         editingNodeId: null,

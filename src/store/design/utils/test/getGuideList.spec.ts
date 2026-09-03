@@ -22,6 +22,7 @@ const frame = (id: string): TFrameNode => ({
 const buildState = (nodes: Record<string, TSceneNode> = {}): TDesignState => ({
   activePageId: 'page-1',
   activeTool: ToolName.default,
+  areAdditionalLabelsVisible: true,
   areRulersVisible: false,
   commentDraftPosition: null,
   editingNodeId: null,

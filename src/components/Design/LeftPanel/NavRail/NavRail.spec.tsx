@@ -1,15 +1,22 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { ReactElement } from 'react';
 
 // components
 import NavRail from './NavRail';
 
+// store
+import { store } from 'store';
+
 // types
 import { NavItemName } from './types';
+
+const renderNavRail = (element: ReactElement): ReturnType<typeof render> => render(<Provider store={store}>{element}</Provider>);
 
 describe('NavRail snapshots', () => {
   it('should render NavRail', () => {
     // before
-    const { asFragment } = render(<NavRail activeNavItem={NavItemName.file} onSelectNavItem={vi.fn()} />);
+    const { asFragment } = renderNavRail(<NavRail activeNavItem={NavItemName.file} onSelectNavItem={vi.fn()} />);
 
     // result
     expect(asFragment()).toMatchSnapshot();
@@ -19,7 +26,7 @@ describe('NavRail snapshots', () => {
 describe('NavRail behaviors', () => {
   it('should mark the given activeNavItem as checked', () => {
     // before
-    render(<NavRail activeNavItem={NavItemName.agents} onSelectNavItem={vi.fn()} />);
+    renderNavRail(<NavRail activeNavItem={NavItemName.agents} onSelectNavItem={vi.fn()} />);
 
     // result
     expect(screen.getByRole('radio', { name: NavItemName.agents })).toBeChecked();
@@ -31,7 +38,7 @@ describe('NavRail behaviors', () => {
     const onSelectNavItem = vi.fn();
 
     // before
-    render(<NavRail activeNavItem={NavItemName.file} onSelectNavItem={onSelectNavItem} />);
+    renderNavRail(<NavRail activeNavItem={NavItemName.file} onSelectNavItem={onSelectNavItem} />);
 
     // action
     fireEvent.click(screen.getByRole('radio', { name: NavItemName.tools }));
@@ -45,7 +52,7 @@ describe('NavRail behaviors', () => {
     const onSelectNavItem = vi.fn();
 
     // before
-    render(<NavRail activeNavItem={NavItemName.file} onSelectNavItem={onSelectNavItem} />);
+    renderNavRail(<NavRail activeNavItem={NavItemName.file} onSelectNavItem={onSelectNavItem} />);
 
     // action
     fireEvent.click(screen.getByRole('radio', { name: NavItemName.file }));
@@ -56,7 +63,7 @@ describe('NavRail behaviors', () => {
 
   it('should show each item’s translated label as visible text under its icon', () => {
     // before
-    render(<NavRail activeNavItem={NavItemName.file} onSelectNavItem={vi.fn()} />);
+    renderNavRail(<NavRail activeNavItem={NavItemName.file} onSelectNavItem={vi.fn()} />);
 
     // result
     expect(screen.getByText('File')).toBeInTheDocument();
@@ -68,7 +75,7 @@ describe('NavRail behaviors', () => {
 
   it('should render a clickable logo button', () => {
     // before
-    render(<NavRail activeNavItem={NavItemName.file} onSelectNavItem={vi.fn()} />);
+    renderNavRail(<NavRail activeNavItem={NavItemName.file} onSelectNavItem={vi.fn()} />);
 
     // result
     expect(screen.getByRole('button', { name: 'xigma' })).toBeInTheDocument();

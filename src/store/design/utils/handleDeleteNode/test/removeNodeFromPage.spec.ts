@@ -23,6 +23,7 @@ const rect = (id: string): TRectangleNode => ({
 const buildState = (page: Partial<TDesignPage>): TDesignState => ({
   activePageId: 'page-1',
   activeTool: ToolName.default,
+  areAdditionalLabelsVisible: true,
   areRulersVisible: false,
   commentDraftPosition: null,
   editingNodeId: null,
