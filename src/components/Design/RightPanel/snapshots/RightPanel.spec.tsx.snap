@@ -135,12 +135,12 @@ exports[`RightPanel snapshots > should render RightPanel 1`] = `
           aria-expanded="false"
           aria-haspopup="dialog"
           aria-label="Zoom"
-          class="_ButtonMenu_7516ba _Header__zoom-menu_5f03c0"
+          class="_ButtonMenu_7516ba _ZoomTrigger_a89b11"
           data-state="closed"
           type="button"
         >
           <span
-            class="_Header__zoom_5f03c0"
+            class="_ZoomTrigger__label_a89b11"
           >
             100%
             <svg

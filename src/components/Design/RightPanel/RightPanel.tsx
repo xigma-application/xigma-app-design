@@ -2,6 +2,7 @@ import { FC, useRef } from 'react';
 
 // components
 import Header from './Header/Header';
+import MinimizedHeader from './MinimizedHeader/MinimizedHeader';
 
 // core
 import { useCanvasRefsContext } from 'components/App/core/CanvasRefsProvider/hooks/useCanvasRefsContext';
@@ -31,8 +32,12 @@ const RightPanel: FC = () => {
 
   useReportPanelWidth(layout.rightPanelWidthRef, width, !isUiHidden && !isUiMinimized);
 
-  if (isUiHidden || isUiMinimized) {
+  if (isUiHidden) {
     return null;
+  }
+
+  if (isUiMinimized) {
+    return <MinimizedHeader />;
   }
 
   return (

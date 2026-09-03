@@ -119,13 +119,14 @@ describe('RightPanel behaviors', () => {
     expect(panel.style.width).toBe(`${RIGHT_PANEL_MAX_WIDTH}px`);
   });
 
-  it('should render nothing while the UI is minimized', () => {
+  it('should render the compact MinimizedHeader instead of the full panel while the UI is minimized', () => {
     // before
     store.dispatch(toggleUiMinimized());
     const { container } = renderRightPanel();
 
     // result
-    expect(container.firstChild).toBeNull();
+    expect(container.querySelector('[class*="RightPanel"]')).toBeNull();
+    expect(container.querySelector('[class*="MinimizedHeader"]')).not.toBeNull();
   });
 
   it('should render nothing while the UI is hidden', () => {
