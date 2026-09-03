@@ -39,7 +39,7 @@ test.describe('Shapes (not editing a vector node)', () => {
     expect(afterSelectAll.equals(baseline)).toBe(false); // shared group outline now spans both A and B
   });
 
-  test('Ctrl+C then Ctrl+V duplicates the selected shape, offset by (10,10), leaving the original untouched', async ({ page }) => {
+  test('Ctrl+C then Ctrl+V duplicates the copied shape, offset by (10,10), once nothing is selected', async ({ page }) => {
     const designPage = new DesignPage(page);
 
     await designPage.goto('e2e-test-copy-paste-select-all-shapes-copy-paste');
@@ -48,6 +48,7 @@ test.describe('Shapes (not editing a vector node)', () => {
     await designPage.drawRectangle(700, 100, 740, 140); // auto-selected on creation
 
     await page.keyboard.press('Control+c');
+    await designPage.click(1500, 700); // deselect — with nothing selected, paste can't replace, so it clones instead
     await page.keyboard.press('Control+v');
 
     // only the pasted copy (offset +10,+10) covers this point — the original rectangle spans
@@ -64,6 +65,27 @@ test.describe('Shapes (not editing a vector node)', () => {
     const withoutPaste = await designPage.canvas.screenshot();
 
     expect(withPaste.equals(withoutPaste)).toBe(false);
+  });
+
+  test('Ctrl+C then Ctrl+V replaces the still-selected shape in place instead of cloning it, matching Paste to replace', async ({
+    page,
+  }) => {
+    const designPage = new DesignPage(page);
+
+    await designPage.goto('e2e-test-copy-paste-select-all-shapes-paste-to-replace-selected');
+    await expect(designPage.canvas).toBeVisible();
+
+    await designPage.drawRectangle(700, 100, 740, 140); // auto-selected on creation
+    await designPage.pointerMove(neutral.x, neutral.y);
+    const baseline = await designPage.canvas.screenshot();
+
+    await page.keyboard.press('Control+c'); // node stays selected
+    await page.keyboard.press('Control+v');
+    await designPage.pointerMove(neutral.x, neutral.y);
+    const afterPaste = await designPage.canvas.screenshot();
+
+    // the rectangle was replaced with an identical copy of itself, in the same slot — no offset clone appeared
+    expect(afterPaste.equals(baseline)).toBe(true);
   });
 
   test('Ctrl+V with nothing ever copied on this page leaves the canvas unchanged', async ({ page }) => {
@@ -108,7 +130,9 @@ test.describe('Vector node selected as a whole (not editing it)', () => {
     expect(afterSelectAll.equals(baseline)).toBe(false); // group outline now spans the frame and the vector node
   });
 
-  test('Ctrl+C then Ctrl+V duplicates a selected (not editing) vector node, offset the same way as an ordinary shape', async ({ page }) => {
+  test('Ctrl+C then Ctrl+V duplicates a copied (not editing) vector node, offset the same way as an ordinary shape, once nothing is selected', async ({
+    page,
+  }) => {
     const designPage = new DesignPage(page);
 
     await designPage.goto('e2e-test-copy-paste-select-all-vector-node-copy-paste');
@@ -118,6 +142,7 @@ test.describe('Vector node selected as a whole (not editing it)', () => {
     await designPage.selectTool('default'); // exit edit mode — whole node stays selected
 
     await page.keyboard.press('Control+c');
+    await designPage.click(1500, 700); // deselect — with nothing selected, paste can't replace, so it clones instead
     await page.keyboard.press('Control+v');
 
     // the pasted copy's v1-v2 edge runs from (910,310) to (1060,310) — clicking off its own

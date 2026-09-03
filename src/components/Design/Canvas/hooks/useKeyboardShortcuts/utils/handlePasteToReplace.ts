@@ -12,6 +12,7 @@ import { EMPTY_VECTOR_SELECTION_SNAPSHOT } from 'store/history/constants';
 
 // utils
 import { buildReplacementNodes } from './buildReplacementNodes';
+import { canReplaceSelectionWithClipboard } from './canReplaceSelectionWithClipboard';
 import { getClipboardNodes } from './clipboard';
 import { isBoxSceneNode } from 'components/Design/Canvas/utils/isBoxSceneNode';
 
@@ -20,8 +21,7 @@ export const handlePasteToReplace = (dispatch: AppDispatch): void => {
   const { nodes } = selectActivePage(state);
   const selectedIds = selectSelectedIds(state);
   const clipboard = getClipboardNodes();
-  const canPairByIndex = clipboard.rootIds.length === selectedIds.length;
-  const canReplace = selectedIds.length > 0 && (clipboard.rootIds.length === 1 || canPairByIndex);
+  const canReplace = canReplaceSelectionWithClipboard(selectedIds, clipboard.rootIds);
 
   if (canReplace) {
     const clipboardNodesById: Record<string, TSceneNode> = Object.fromEntries(clipboard.nodes.map((node) => [node.id, node]));

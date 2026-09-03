@@ -184,6 +184,69 @@ describe('handlePasteSelection', () => {
     expect(Object.keys(store.getState().design.pages[store.getState().design.activePageId].nodes)).toHaveLength(nodeCountBeforePaste);
   });
 
+  it('should replace the selected target instead of adding an offset clone when a target is selected', () => {
+    // mock — the clipboard copy is a 40x40 frame at (0, 0); the target sits at (5, 5)
+    const sourceId = addFrameNode({ x: 0, y: 0 });
+    store.dispatch(setSelection([sourceId]));
+    handleCopySelection(createCanvasRefs());
+
+    const targetId = addFrameNode({ x: 5, y: 5 });
+    const rootOrderBefore = selectActivePage(store.getState()).rootOrder;
+    store.dispatch(setSelection([targetId]));
+
+    // action
+    handlePasteSelection(store.dispatch, createCanvasRefs());
+
+    // result — same id and slot as the target, no new node added
+    const page = selectActivePage(store.getState());
+    expect(page.nodes[targetId]).toMatchObject({ id: targetId, x: 5, y: 5 });
+    expect(page.rootOrder).toEqual(rootOrderBefore);
+    expect(selectSelectedIds(store.getState())).toEqual([targetId]);
+  });
+
+  it('should replace every selected target by pairing multiple clipboard roots with multiple selected targets', () => {
+    // mock
+    const clipA = addFrameNode({ x: 0, y: 0 });
+    const clipB = addFrameNode({ x: 0, y: 0 });
+    store.dispatch(setSelection([clipA, clipB]));
+    handleCopySelection(createCanvasRefs());
+
+    const targetA = addFrameNode({ x: 1, y: 1 });
+    const targetB = addFrameNode({ x: 2, y: 2 });
+    store.dispatch(setSelection([targetA, targetB]));
+
+    // action
+    handlePasteSelection(store.dispatch, createCanvasRefs());
+
+    // result — both targets replaced in place, nothing new added
+    const page = selectActivePage(store.getState());
+    expect(page.nodes[targetA]).toMatchObject({ x: 1, y: 1 });
+    expect(page.nodes[targetB]).toMatchObject({ x: 2, y: 2 });
+    expect(selectSelectedIds(store.getState())).toEqual([targetA, targetB]);
+  });
+
+  it('should fall back to an offset clone when the selection cannot be paired with the clipboard', () => {
+    // mock — 2 clipboard roots, 3 selected targets: neither one-for-all nor a 1:1 pairing
+    const clipA = addFrameNode({ x: 0, y: 0 });
+    const clipB = addFrameNode({ x: 0, y: 0 });
+    store.dispatch(setSelection([clipA, clipB]));
+    handleCopySelection(createCanvasRefs());
+
+    const targetA = addFrameNode({ x: 1, y: 1 });
+    const targetB = addFrameNode({ x: 2, y: 2 });
+    const targetC = addFrameNode({ x: 3, y: 3 });
+    store.dispatch(setSelection([targetA, targetB, targetC]));
+    const nodeCountBeforePaste = Object.keys(selectActivePage(store.getState()).nodes).length;
+
+    // action
+    handlePasteSelection(store.dispatch, createCanvasRefs());
+
+    // result — the targets are untouched and two fresh clones were added instead
+    const page = selectActivePage(store.getState());
+    expect(page.nodes[targetA]).toMatchObject({ x: 1, y: 1 });
+    expect(Object.keys(page.nodes)).toHaveLength(nodeCountBeforePaste + 2);
+  });
+
   it('should paste a copied vector fragment into the open vector node', () => {
     // mock
     const vectorId = addVectorNode();

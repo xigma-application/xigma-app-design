@@ -766,7 +766,7 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
     expect(orderOf(idA)).toBeLessThan(orderOf(idB));
   });
 
-  it('should copy the selected node on "Cmd+C" and paste a clone of it on "Cmd+V"', () => {
+  it('should copy the selected node on "Cmd+C" and replace it in place on "Cmd+V" since it is still selected', () => {
     // mock
     const idA = addFrameNode();
 
@@ -781,6 +781,32 @@ describe('useKeyboardShortcuts selection-editing behaviors', () => {
 
     // action
     fireEvent.keyDown(window, { code: 'KeyC', metaKey: true });
+    fireEvent.keyDown(window, { code: 'KeyV', metaKey: true });
+
+    // result — the still-selected node was replaced by its own clipboard copy, no new node added
+    expect(Object.keys(realStore.getState().design.pages[realStore.getState().design.activePageId].nodes)).toHaveLength(
+      nodeCountBeforePaste,
+    );
+    expect(selectSelectedIds(realStore.getState())).toEqual([idA]);
+  });
+
+  it('should copy the selected node on "Cmd+C" and paste a clone of it on "Cmd+V" once the selection is cleared', () => {
+    // mock
+    const idA = addFrameNode();
+
+    realStore.dispatch(setSelection([idA]));
+
+    // before
+    renderHook(() => useKeyboardShortcuts(createCanvasRefs()), {
+      wrapper: ({ children }) => <Provider store={realStore}>{children}</Provider>,
+    });
+
+    fireEvent.keyDown(window, { code: 'KeyC', metaKey: true });
+    realStore.dispatch(setSelection([]));
+
+    const nodeCountBeforePaste = Object.keys(realStore.getState().design.pages[realStore.getState().design.activePageId].nodes).length;
+
+    // action
     fireEvent.keyDown(window, { code: 'KeyV', metaKey: true });
 
     // result

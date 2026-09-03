@@ -155,6 +155,18 @@ delta switch, on `x`/`y` vs `x1..y2` vs `vertices`, now reused a third way for t
 One deliberate node-shape special-case: cloning a text-on-path node clears its `pathId` — leaving it
 attached would mean two text nodes both bound to (and repositioned by) the *same* original path.
 
+**Plain Cmd/Ctrl+V replaces the current selection instead of offset-cloning when the two can be
+paired** — asked for directly, so `handlePasteSelection.ts` no longer always offset-clones. Before
+building the clone it now checks `canReplaceSelectionWithClipboard.ts` (shared with `pasteToReplace`'s
+own `Shift+Cmd+R` menu action, `store/history/actions.ts`-adjacent §8 territory): true when
+`selectedIds.length > 0` and either the clipboard holds exactly one root (replace every selected target
+with an independent copy of it) or the clipboard root count matches the selection 1:1 (paired by index).
+When true, `handlePasteSelection` just delegates to the existing `handlePasteToReplace.ts` unchanged —
+same per-target `isBoxSceneNode` skip, same single-undo-step bracketing — rather than duplicating its
+logic; the offset-clone branch below only ever runs when nothing is selected or the counts don't line
+up. `Shift+Cmd+R` (the always-replace menu/shortcut entry) is untouched — it calls
+`handlePasteToReplace` directly regardless of what plain paste would choose.
+
 **Text on Path can also attach to an existing eligible vector — or a plain shape it converts on the
 spot**, not just draw a fresh ellipse: `useDrawTextOnPathTool.ts`'s `pointerdown` hit-tests via
 `getNodeAtPoint`; `getEligibleVectorAtPoint.ts` arms an attach target (instead of starting a drag)
