@@ -157,6 +157,39 @@ describe('drawSmartSelectionHandles', () => {
     expect(drawSmartSelectionSwapShadowMock.mock.calls[0][3]).toBe(swapDragState);
   });
 
+  it('should suppress the gap and swap handles while a swap drag is in progress, even with a still-valid layout', () => {
+    const refs = createCanvasRefs({
+      hover: { isSmartSelectionBoxHoveredRef: { current: true } },
+      smartSelection: {
+        swapDragRef: {
+          current: {
+            dispatchThrottle: { frameId: null, run: null },
+            fromIndex: 0,
+            hasMoved: true,
+            nodeOrigins: {},
+            pointerStart: { x: 0, y: 0 },
+            slots: [
+              { bounds: { height: 50, width: 50, x: 0, y: 0 }, id: 'a' },
+              { bounds: { height: 50, width: 50, x: 100, y: 0 }, id: 'b' },
+            ],
+            targetIndex: 1,
+          },
+        },
+      },
+    });
+
+    drawSmartSelectionHandles(
+      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
+      [rect('a', 0), rect('b', 100)],
+      refs,
+    );
+
+    expect(drawSmartSelectionSwapShadowMock).toHaveBeenCalledTimes(1);
+    expect(drawSmartSelectionGapHandlesMock).not.toHaveBeenCalled();
+    expect(drawSmartSelectionGapFillPreviewMock).not.toHaveBeenCalled();
+    expect(drawSmartSelectionSwapHandlesMock).not.toHaveBeenCalled();
+  });
+
   it('should not draw the swap shadow before the swap drag has moved', () => {
     const refs = createCanvasRefs({
       smartSelection: {

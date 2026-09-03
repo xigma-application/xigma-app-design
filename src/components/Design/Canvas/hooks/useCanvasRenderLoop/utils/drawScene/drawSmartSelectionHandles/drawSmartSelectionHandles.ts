@@ -22,7 +22,7 @@ export const drawSmartSelectionHandles = (context: TDrawSceneContext, selectedNo
     drawSmartSelectionSwapShadow(gl, program, buffer, swapDragState, canvasWidth, canvasHeight, viewport);
   }
 
-  if (layout) {
+  if (layout && !swapDragState) {
     if (dragState) {
       drawSmartSelectionGapFillPreview(gl, program, buffer, layout, dragState.axis, canvasWidth, canvasHeight, viewport);
     }
