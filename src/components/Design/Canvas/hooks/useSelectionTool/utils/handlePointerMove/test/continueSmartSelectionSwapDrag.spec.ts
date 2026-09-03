@@ -68,7 +68,7 @@ describe('continueSmartSelectionSwapDrag', () => {
     expect(nodes()).toEqual({});
   });
 
-  it('should retarget to the slot nearest the pointer and reorder the row with shift', () => {
+  it('should float the dragged block with the pointer and reflow the others into the freed slots', () => {
     // mock
     const idA = addRect(0, 0);
     const idB = addRect(100, 0);
@@ -77,11 +77,11 @@ describe('continueSmartSelectionSwapDrag', () => {
     const dragState = makeDragState(idA, idB, idC);
     const swapDragRef: RefObject<TSmartSelectionSwapDragState | null> = { current: dragState };
 
-    // before — pointer over the third slot centre (x 225)
+    // before — pointer over the third slot centre (x 225); pointerStart was x 25 -> delta 200
     continueSmartSelectionSwapDrag(canvas, pointerEvent(225, 25), store.dispatch, swapDragRef);
     flushThrottledDispatch(dragState.dispatchThrottle);
 
-    // result — targetIndex tracked to 2, layout reordered to [B, C, A]
+    // result — targetIndex tracked to 2; A follows the cursor, B/C slide into slots 0/1
     expect(dragState.targetIndex).toBe(2);
     expect(dragState.hasMoved).toBe(true);
     expect(nodes()[idA]).toMatchObject({ x: 200, y: 0 });
@@ -89,7 +89,7 @@ describe('continueSmartSelectionSwapDrag', () => {
     expect(nodes()[idC]).toMatchObject({ x: 100, y: 0 });
   });
 
-  it('should not dispatch again while the pointer stays over the same slot', () => {
+  it('should keep the dragged block glued to the pointer without reordering while it stays over its own slot', () => {
     // mock
     const idA = addRect(0, 0);
     const idB = addRect(100, 0);
@@ -98,14 +98,15 @@ describe('continueSmartSelectionSwapDrag', () => {
     const dragState = makeDragState(idA, idB, idC);
     const swapDragRef: RefObject<TSmartSelectionSwapDragState | null> = { current: dragState };
 
-    // before — two moves both nearest slot 0 (its own slot)
+    // before — two moves, both nearest slot 0; last pointer at x 20 -> delta -5
     continueSmartSelectionSwapDrag(canvas, pointerEvent(10, 25), store.dispatch, swapDragRef);
     continueSmartSelectionSwapDrag(canvas, pointerEvent(20, 25), store.dispatch, swapDragRef);
     flushThrottledDispatch(dragState.dispatchThrottle);
 
-    // result — never left slot 0, nothing moved
+    // result — never left slot 0; A tracks the pointer, B and C untouched
     expect(dragState.targetIndex).toBe(0);
-    expect(nodes()[idA]).toMatchObject({ x: 0, y: 0 });
+    expect(nodes()[idA]).toMatchObject({ x: -5, y: 0 });
+    expect(nodes()[idB]).toMatchObject({ x: 100, y: 0 });
     expect(nodes()[idC]).toMatchObject({ x: 200, y: 0 });
   });
 });

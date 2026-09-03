@@ -10,6 +10,7 @@ import { drawRectSizeLabel } from './drawRectSizeLabel';
 import { getNodeBounds } from '../../../../utils/getNodeBounds';
 import { getSelectionBounds } from '../../../../utils/getSelectionBounds';
 import { isSmartSelectionGapHandleActive } from '../../../../utils/isSmartSelectionGapHandleActive';
+import { isSmartSelectionSwapDragActive } from '../../../../utils/isSmartSelectionSwapDragActive';
 import { TSelectionSizeLabelRect } from './getSelectionSizeLabelPlacement';
 
 const getSingleNodeRotation = (node: TSceneNode): number => {
@@ -39,13 +40,11 @@ export const drawSelectionSizeLabel = (
   const nodes = selectedNodes.filter((node) => !vectorEditingNodeIds.includes(node.id) && node.id !== editingPathId);
   const [singleNode] = nodes;
 
-  if (isSmartSelectionGapHandleActive(refs)) {
-    return;
-  }
-
-  if (nodes.length === 1 && singleNode.type === NodeType.line) {
-    drawLineSizeLabel(context, singleNode.x1, singleNode.y1, singleNode.x2, singleNode.y2);
-  } else if (nodes.length > 0) {
-    drawRectSizeLabel(context, getSizeLabelRect(nodes));
+  if (!isSmartSelectionGapHandleActive(refs) && !isSmartSelectionSwapDragActive(refs)) {
+    if (nodes.length === 1 && singleNode.type === NodeType.line) {
+      drawLineSizeLabel(context, singleNode.x1, singleNode.y1, singleNode.x2, singleNode.y2);
+    } else if (nodes.length > 0) {
+      drawRectSizeLabel(context, getSizeLabelRect(nodes));
+    }
   }
 };

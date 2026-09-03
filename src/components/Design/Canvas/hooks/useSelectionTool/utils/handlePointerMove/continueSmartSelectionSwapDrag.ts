@@ -40,11 +40,13 @@ export const continueSmartSelectionSwapDrag = (
     dragState.hasMoved = true;
 
     const worldPoint = screenToWorld(getPointerPosition(canvas, event), selectViewport(store.getState()));
-    const targetIndex = getNearestSlotIndex(dragState.slots, worldPoint.x, worldPoint.y);
 
-    if (targetIndex !== dragState.targetIndex) {
-      dragState.targetIndex = targetIndex;
-      dispatchSmartSelectionSwapUpdates(dispatch, dragState);
-    }
+    dragState.targetIndex = getNearestSlotIndex(dragState.slots, worldPoint.x, worldPoint.y);
+    dispatchSmartSelectionSwapUpdates(
+      dispatch,
+      dragState,
+      worldPoint.x - dragState.pointerStart.x,
+      worldPoint.y - dragState.pointerStart.y,
+    );
   }
 };

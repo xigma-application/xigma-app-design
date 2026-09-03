@@ -126,6 +126,33 @@ describe('drawSelectionSizeLabel', () => {
     expect(drawValueLabelMock).not.toHaveBeenCalled();
   });
 
+  it('should draw nothing while dragging a Smart Selection swap handle', () => {
+    // before
+    drawSelectionSizeLabel(
+      { buffer, canvasHeight: 150, canvasWidth: 200, gl, imageContext, program, viewport: IDENTITY_VIEWPORT },
+      [buildNode()],
+      [],
+      createCanvasRefs({
+        smartSelection: {
+          swapDragRef: {
+            current: {
+              dispatchThrottle: { frameId: null, run: null },
+              fromIndex: 0,
+              hasMoved: true,
+              nodeOrigins: {},
+              pointerStart: { x: 0, y: 0 },
+              slots: [],
+              targetIndex: 0,
+            },
+          },
+        },
+      }),
+    );
+
+    // result
+    expect(drawValueLabelMock).not.toHaveBeenCalled();
+  });
+
   it('should draw a blue "W x H" badge below an unrotated single node', () => {
     // before
     drawSelectionSizeLabel(

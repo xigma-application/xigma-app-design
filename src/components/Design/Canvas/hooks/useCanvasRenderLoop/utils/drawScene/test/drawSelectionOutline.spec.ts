@@ -25,6 +25,7 @@ const createGlMock = (): WebGL2RenderingContext =>
   }) as unknown as WebGL2RenderingContext;
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
+const refs = { smartSelection: { swapDragRef: { current: null } } } as never;
 
 const buildNode = (
   overrides: Partial<Exclude<TBoxSceneNode, TPathNode | TPolygonNode | TSectionNode | TStarNode | TMediaNode | TTextNode>>,
@@ -56,6 +57,7 @@ describe('drawSelectionOutline', () => {
       [],
       [],
       {},
+      refs,
     );
 
     // result
@@ -75,6 +77,7 @@ describe('drawSelectionOutline', () => {
       nodes,
       [],
       {},
+      refs,
     );
 
     // result
@@ -96,6 +99,7 @@ describe('drawSelectionOutline', () => {
       nodes,
       [],
       {},
+      refs,
     );
 
     // result
@@ -117,6 +121,27 @@ describe('drawSelectionOutline', () => {
       nodes,
       ['a', 'b'],
       {},
+      refs,
+    );
+
+    // result
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+  });
+
+  it('should draw nothing while a Smart Selection swap drag is in progress', () => {
+    // mock
+    const gl = createGlMock();
+    const program = {} as WebGLProgram;
+    const buffer = {} as WebGLBuffer;
+    const nodes = [buildNode({ id: 'a', x: 0, y: 0 }), buildNode({ id: 'b', x: 40, y: 0 })];
+
+    // before
+    drawSelectionOutline(
+      { buffer, canvasHeight: 100, canvasWidth: 100, gl, imageContext: {} as never, program, viewport: IDENTITY_VIEWPORT },
+      nodes,
+      [],
+      {},
+      { smartSelection: { swapDragRef: { current: {} } } } as never,
     );
 
     // result
@@ -136,6 +161,7 @@ describe('drawSelectionOutline', () => {
       nodes,
       ['a'],
       {},
+      refs,
     );
 
     // result

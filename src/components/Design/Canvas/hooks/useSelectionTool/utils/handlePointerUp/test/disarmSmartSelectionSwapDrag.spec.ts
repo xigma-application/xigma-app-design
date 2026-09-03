@@ -32,6 +32,9 @@ const addRect = (x: number, y: number): string => {
   return rootOrder[rootOrder.length - 1];
 };
 
+const nodes = (): Record<string, { x: number; y: number }> =>
+  store.getState().design.pages[store.getState().design.activePageId].nodes as Record<string, { x: number; y: number }>;
+
 describe('disarmSmartSelectionSwapDrag', () => {
   beforeEach(() => {
     selectActivePage(store.getState()).rootOrder.forEach((id) => store.dispatch(deleteNode(id)));
@@ -43,25 +46,52 @@ describe('disarmSmartSelectionSwapDrag', () => {
     const swapDragRef: RefObject<TSmartSelectionSwapDragState | null> = { current: null };
 
     // before
-    disarmSmartSelectionSwapDrag(canvas, pointerEvent(), swapDragRef);
+    disarmSmartSelectionSwapDrag(canvas, pointerEvent(), store.dispatch, swapDragRef);
 
     // result
     expect(canvas.releasePointerCapture).not.toHaveBeenCalled();
   });
 
-  it('should flush any pending throttled dispatch, clear the ref and release pointer capture', () => {
-    // mock
-    const idA = addRect(0, 0);
+  it('should snap every block onto its reordered slot, clear the ref and release pointer capture', () => {
+    // mock — dragged block A left floating away from its slot, target is the third slot
+    const idA = addRect(320, 40);
+    const idB = addRect(100, 0);
+    const idC = addRect(200, 0);
     const canvas = createCanvas();
     const dragState: TSmartSelectionSwapDragState = {
-      dispatchThrottle: {
-        frameId: 1,
-        run: (): void => {
-          store.dispatch({ payload: { changes: { x: 999 }, id: idA }, type: 'design/updateNode' });
-        },
-      },
+      dispatchThrottle: { frameId: null, run: null },
       fromIndex: 0,
       hasMoved: true,
+      nodeOrigins: { [idA]: { x: 0, y: 0 }, [idB]: { x: 100, y: 0 }, [idC]: { x: 200, y: 0 } },
+      pointerStart: { x: 25, y: 25 },
+      slots: [
+        { bounds: { height: 50, width: 50, x: 0, y: 0 }, id: idA },
+        { bounds: { height: 50, width: 50, x: 100, y: 0 }, id: idB },
+        { bounds: { height: 50, width: 50, x: 200, y: 0 }, id: idC },
+      ],
+      targetIndex: 2,
+    };
+    const swapDragRef: RefObject<TSmartSelectionSwapDragState | null> = { current: dragState };
+
+    // before
+    disarmSmartSelectionSwapDrag(canvas, pointerEvent(2), store.dispatch, swapDragRef);
+
+    // result — [B, C, A] snapped onto the fixed slot origins
+    expect(nodes()[idA]).toMatchObject({ x: 200, y: 0 });
+    expect(nodes()[idB]).toMatchObject({ x: 0, y: 0 });
+    expect(nodes()[idC]).toMatchObject({ x: 100, y: 0 });
+    expect(swapDragRef.current).toBeNull();
+    expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
+  });
+
+  it('should not touch the nodes when the drag never moved', () => {
+    // mock
+    const idA = addRect(320, 40);
+    const canvas = createCanvas();
+    const dragState: TSmartSelectionSwapDragState = {
+      dispatchThrottle: { frameId: null, run: null },
+      fromIndex: 0,
+      hasMoved: false,
       nodeOrigins: { [idA]: { x: 0, y: 0 } },
       pointerStart: { x: 25, y: 25 },
       slots: [{ bounds: { height: 50, width: 50, x: 0, y: 0 }, id: idA }],
@@ -70,11 +100,10 @@ describe('disarmSmartSelectionSwapDrag', () => {
     const swapDragRef: RefObject<TSmartSelectionSwapDragState | null> = { current: dragState };
 
     // before
-    disarmSmartSelectionSwapDrag(canvas, pointerEvent(2), swapDragRef);
+    disarmSmartSelectionSwapDrag(canvas, pointerEvent(3), store.dispatch, swapDragRef);
 
-    // result — the pending run fired synchronously on flush
-    expect(store.getState().design.pages[store.getState().design.activePageId].nodes[idA]).toMatchObject({ x: 999 });
+    // result — position left exactly as it was
+    expect(nodes()[idA]).toMatchObject({ x: 320, y: 40 });
     expect(swapDragRef.current).toBeNull();
-    expect(canvas.releasePointerCapture).toHaveBeenCalledWith(2);
   });
 });

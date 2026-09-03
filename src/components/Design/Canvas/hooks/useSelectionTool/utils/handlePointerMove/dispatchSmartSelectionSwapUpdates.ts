@@ -10,14 +10,20 @@ import { getGeometryDeltaChanges } from 'components/Design/Canvas/utils/getGeome
 import { getReorderedSwapPositions } from 'components/Design/Canvas/utils/getReorderedSwapPositions';
 import { scheduleThrottledDispatch } from 'components/Design/Canvas/utils/scheduleThrottledDispatch';
 
-export const dispatchSmartSelectionSwapUpdates = (dispatch: AppDispatch, dragState: TSmartSelectionSwapDragState): void => {
+export const dispatchSmartSelectionSwapUpdates = (
+  dispatch: AppDispatch,
+  dragState: TSmartSelectionSwapDragState,
+  draggedDeltaX: number,
+  draggedDeltaY: number,
+): void => {
   scheduleThrottledDispatch(dragState.dispatchThrottle, () => {
+    const draggedId = dragState.slots[dragState.fromIndex].id;
     const positions = getReorderedSwapPositions(dragState.slots, dragState.fromIndex, dragState.targetIndex);
 
     dragState.slots.forEach(({ id, bounds }) => {
-      const target = positions[id];
-      const deltaX = (target ? target.x : bounds.x) - bounds.x;
-      const deltaY = (target ? target.y : bounds.y) - bounds.y;
+      const isDragged = id === draggedId;
+      const deltaX = isDragged ? draggedDeltaX : (positions[id]?.x ?? bounds.x) - bounds.x;
+      const deltaY = isDragged ? draggedDeltaY : (positions[id]?.y ?? bounds.y) - bounds.y;
 
       dispatch(updateNode({ changes: getGeometryDeltaChanges(dragState.nodeOrigins[id], deltaX, deltaY), id }));
     });

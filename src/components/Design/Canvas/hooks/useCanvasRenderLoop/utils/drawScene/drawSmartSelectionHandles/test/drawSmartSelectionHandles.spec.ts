@@ -10,6 +10,7 @@ const drawSmartSelectionGapFillPreviewMock = vi.fn();
 const drawSmartSelectionGapHandlesMock = vi.fn();
 const drawSmartSelectionGapHoverLabelMock = vi.fn();
 const drawSmartSelectionSwapHandlesMock = vi.fn();
+const drawSmartSelectionSwapShadowMock = vi.fn();
 
 vi.mock('../drawSmartSelectionGapFillPreview', () => ({
   drawSmartSelectionGapFillPreview: (...args: unknown[]): void => drawSmartSelectionGapFillPreviewMock(...args),
@@ -22,6 +23,9 @@ vi.mock('../drawSmartSelectionGapHoverLabel', () => ({
 }));
 vi.mock('../drawSmartSelectionSwapHandles', () => ({
   drawSmartSelectionSwapHandles: (...args: unknown[]): void => drawSmartSelectionSwapHandlesMock(...args),
+}));
+vi.mock('../drawSmartSelectionSwapShadow', () => ({
+  drawSmartSelectionSwapShadow: (...args: unknown[]): void => drawSmartSelectionSwapShadowMock(...args),
 }));
 
 const IDENTITY_VIEWPORT = { x: 0, y: 0, zoom: 1 };
@@ -49,6 +53,7 @@ describe('drawSmartSelectionHandles', () => {
     drawSmartSelectionGapHandlesMock.mockClear();
     drawSmartSelectionGapHoverLabelMock.mockClear();
     drawSmartSelectionSwapHandlesMock.mockClear();
+    drawSmartSelectionSwapShadowMock.mockClear();
   });
 
   it('should draw nothing when the selection does not form a valid layout', () => {
@@ -125,5 +130,56 @@ describe('drawSmartSelectionHandles', () => {
     expect(drawSmartSelectionGapHandlesMock).toHaveBeenCalledTimes(1);
     expect(drawSmartSelectionSwapHandlesMock).toHaveBeenCalledTimes(1);
     expect(drawSmartSelectionSwapHandlesMock.mock.calls[0][4]).toBe(true);
+  });
+
+  it('should draw the swap shadow outline while a swap drag that has moved is in progress, even without a valid live layout', () => {
+    const swapDragState = {
+      dispatchThrottle: { frameId: null, run: null },
+      fromIndex: 0,
+      hasMoved: true,
+      nodeOrigins: {},
+      pointerStart: { x: 0, y: 0 },
+      slots: [
+        { bounds: { height: 50, width: 50, x: 0, y: 0 }, id: 'a' },
+        { bounds: { height: 50, width: 50, x: 100, y: 0 }, id: 'b' },
+      ],
+      targetIndex: 1,
+    };
+    const refs = createCanvasRefs({ smartSelection: { swapDragRef: { current: swapDragState } } });
+
+    drawSmartSelectionHandles(
+      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
+      [rect('a', 0)],
+      refs,
+    );
+
+    expect(drawSmartSelectionSwapShadowMock).toHaveBeenCalledTimes(1);
+    expect(drawSmartSelectionSwapShadowMock.mock.calls[0][3]).toBe(swapDragState);
+  });
+
+  it('should not draw the swap shadow before the swap drag has moved', () => {
+    const refs = createCanvasRefs({
+      smartSelection: {
+        swapDragRef: {
+          current: {
+            dispatchThrottle: { frameId: null, run: null },
+            fromIndex: 0,
+            hasMoved: false,
+            nodeOrigins: {},
+            pointerStart: { x: 0, y: 0 },
+            slots: [{ bounds: { height: 50, width: 50, x: 0, y: 0 }, id: 'a' }],
+            targetIndex: 0,
+          },
+        },
+      },
+    });
+
+    drawSmartSelectionHandles(
+      { buffer, canvasHeight: 200, canvasWidth: 200, gl, program, viewport: IDENTITY_VIEWPORT } as never,
+      [rect('a', 0), rect('b', 100)],
+      refs,
+    );
+
+    expect(drawSmartSelectionSwapShadowMock).not.toHaveBeenCalled();
   });
 });
