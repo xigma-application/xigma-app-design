@@ -7,6 +7,7 @@ import { TPoint } from 'types/canvas';
 import { TSceneNode } from 'types/design/types';
 
 // utils
+import { getUnrotatedQueryPoint } from 'components/Design/Canvas/utils/getUnrotatedQueryPoint';
 import { isPointInRect } from 'components/Design/Canvas/utils/isPointInRect';
 
 export const getDragDropTargetFrame = (
@@ -18,13 +19,12 @@ export const getDragDropTargetFrame = (
   for (let index = renderOrderedNodes.length - 1; index >= 0; index -= 1) {
     const node = renderOrderedNodes[index];
 
-    if (
-      node.type === NodeType.frame &&
-      node.rotation === 0 &&
-      isPointInRect(point, { height: node.height, width: node.width, x: node.x, y: node.y }) &&
-      !getIsDescendantOfMovedNodes(node.id, movedNodeIds, nodesById)
-    ) {
-      return node.id;
+    if (node.type === NodeType.frame && !getIsDescendantOfMovedNodes(node.id, movedNodeIds, nodesById)) {
+      const bounds = { height: node.height, width: node.width, x: node.x, y: node.y };
+
+      if (isPointInRect(getUnrotatedQueryPoint(point, bounds, node.rotation), bounds)) {
+        return node.id;
+      }
     }
   }
 

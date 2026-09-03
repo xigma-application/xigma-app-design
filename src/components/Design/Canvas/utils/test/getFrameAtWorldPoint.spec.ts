@@ -60,12 +60,20 @@ describe('getFrameAtWorldPoint', () => {
     expect(getFrameAtWorldPoint({ x: 50, y: 50 }, nodes)).toBeNull();
   });
 
-  it('should ignore a rotated frame', () => {
-    // mock
-    const nodes: TSceneNode[] = [frame({ rotation: 15, x: 0, y: 0 })];
+  it('should return a rotated frame when the point falls inside its rotated bounds', () => {
+    // mock — a 200x100 frame rotated 90° around its center (100, 50) now spans y from -50 to 150
+    const nodes: TSceneNode[] = [frame({ height: 100, rotation: 90, width: 200, x: 0, y: 0 })];
 
-    // result
-    expect(getFrameAtWorldPoint({ x: 50, y: 50 }, nodes)).toBeNull();
+    // result — (100, 140) is outside the unrotated rect (y > 100) but inside the rotated one
+    expect(getFrameAtWorldPoint({ x: 100, y: 140 }, nodes)).toBe(nodes[0]);
+  });
+
+  it('should ignore a point that falls inside a rotated frame’s unrotated bounds but outside its actual rotated shape', () => {
+    // mock — same 200x100 frame rotated 90°
+    const nodes: TSceneNode[] = [frame({ height: 100, rotation: 90, width: 200, x: 0, y: 0 })];
+
+    // result — (10, 10) is inside the unrotated rect but rotates out of the actual shape
+    expect(getFrameAtWorldPoint({ x: 10, y: 10 }, nodes)).toBeNull();
   });
 
   it('should return the top-most frame when frames overlap', () => {

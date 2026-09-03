@@ -87,12 +87,25 @@ describe('getDragDropTargetFrame', () => {
     expect(result).toBeNull();
   });
 
-  it('should ignore rotated frames', () => {
+  it('should return a rotated frame when the pointer falls inside its rotated bounds', () => {
     const draggedNode = rect('a', 0, 0);
-    const rotatedFrame = frame('f1', 0, 0, 200, 200, { rotation: 20 });
+    // a 200x100 frame rotated 90° around its center (100, 50) now spans y from -50 to 150
+    const rotatedFrame = frame('f1', 0, 0, 200, 100, { rotation: 90 });
     const nodesById = { a: draggedNode, f1: rotatedFrame };
 
-    const result = getDragDropTargetFrame(['a'], { x: 100, y: 100 }, [draggedNode, rotatedFrame], nodesById);
+    // (100, 140) is outside the unrotated rect (y > 100) but inside the rotated one
+    const result = getDragDropTargetFrame(['a'], { x: 100, y: 140 }, [draggedNode, rotatedFrame], nodesById);
+
+    expect(result).toBe('f1');
+  });
+
+  it('should ignore a pointer inside a rotated frame’s unrotated bounds but outside its actual rotated shape', () => {
+    const draggedNode = rect('a', 0, 0);
+    const rotatedFrame = frame('f1', 0, 0, 200, 100, { rotation: 90 });
+    const nodesById = { a: draggedNode, f1: rotatedFrame };
+
+    // (10, 10) is inside the unrotated rect but rotates out of the actual shape
+    const result = getDragDropTargetFrame(['a'], { x: 10, y: 10 }, [draggedNode, rotatedFrame], nodesById);
 
     expect(result).toBeNull();
   });
